@@ -60,6 +60,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.core.impact.ImpactConfig
 import org.groundplatform.v2.web.domain.model.ImpactAttributionLevel
 import org.groundplatform.v2.web.domain.model.ImpactFormat
 import org.groundplatform.v2.web.domain.model.ImpactIndicator
@@ -95,8 +96,12 @@ internal fun SurveyImpactPane(
 }
 
 /**
- * The organization Impact tab: the organization's numbers across its surveys, filterable by survey
- * and country, its own indicators, and a PDF summary download.
+ * One organization's numbers on the Impact page: its members' full view (filterable by survey and
+ * country) or its published view (filterable by country only, since survey names aren't published),
+ * with a PDF summary download.
+ *
+ * @param banner shown under the title, e.g. what the organization publishes.
+ * @param headerActions extra buttons next to the download button.
  */
 @Composable
 internal fun OrganizationImpactPane(
@@ -106,28 +111,38 @@ internal fun OrganizationImpactPane(
   onCountryFilterChange: (String?) -> Unit,
   onDownload: () -> Unit,
   modifier: Modifier = Modifier,
+  title: String = "Impact",
+  subtitle: String =
+    "What your surveys' data adds up to, and how it was used. Plots mapped in more than one " +
+      "survey count once.",
+  banner: @Composable () -> Unit = {},
+  headerActions: @Composable () -> Unit = {},
 ) {
   ImpactPage(
-    title = "Impact",
-    subtitle =
-      "What your surveys' data adds up to, and how it was used. Plots mapped in more than one " +
-        "survey count once.",
+    title = title,
+    subtitle = subtitle,
     isLoading = isLoading,
     summary = state?.summary,
     onDownload = onDownload,
     modifier = modifier,
+    banner = banner,
+    headerActions = headerActions,
     filters = {
-      if (state != null) {
+      if (state != null && (state.surveys.isNotEmpty() || state.countries.size > 1)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-          DropdownSelector(
-            label = "Survey",
-            selectedText =
-              state.surveys.firstOrNull { it.id == state.filter.surveyId }?.title ?: ALL_SURVEYS,
-            options = listOf(null) + state.surveys.map { it.id },
-            optionText = { id -> state.surveys.firstOrNull { it.id == id }?.title ?: ALL_SURVEYS },
-            onSelect = onSurveyFilterChange,
-            modifier = Modifier.width(320.dp),
-          )
+          if (state.surveys.isNotEmpty()) {
+            DropdownSelector(
+              label = "Survey",
+              selectedText =
+                state.surveys.firstOrNull { it.id == state.filter.surveyId }?.title ?: ALL_SURVEYS,
+              options = listOf(null) + state.surveys.map { it.id },
+              optionText = { id ->
+                state.surveys.firstOrNull { it.id == id }?.title ?: ALL_SURVEYS
+              },
+              onSelect = onSurveyFilterChange,
+              modifier = Modifier.width(320.dp),
+            )
+          }
           DropdownSelector(
             label = "Country",
             selectedText =
@@ -147,9 +162,9 @@ internal fun OrganizationImpactPane(
 }
 
 /**
- * Platform-wide numbers for Managers of `"All users"`: main goal totals from global standard
- * fields, organization-suggested indicators kept separate, countries, and how many map areas are
- * kept private.
+ * Numbers across all of Collect One: main goal totals from global standard fields,
+ * organization-suggested indicators kept separate, countries, and how many map areas are kept
+ * private. Everyone sees the published view; Managers of `"All users"` see every standard field.
  */
 @Composable
 internal fun GlobalImpactPane(
@@ -157,17 +172,24 @@ internal fun GlobalImpactPane(
   isLoading: Boolean,
   onDownload: () -> Unit,
   modifier: Modifier = Modifier,
+  banner: @Composable () -> Unit = {},
 ) {
   ImpactPage(
-    title = "Platform impact",
+    title = "All of Collect One",
     subtitle =
-      "What everyone's data adds up to, from global standard fields only. Organizations that " +
-        "opted out aren't included, and small groups are kept private. Only Managers of All " +
-        "users see this.",
+      if (summary?.isPublished == false) {
+        "What everyone's data adds up to, from global standard fields only. Organizations that " +
+          "opted out aren't included, and small groups are kept private. As a Manager of All " +
+          "users you also see standard fields that aren't published."
+      } else {
+        "What everyone's data adds up to, from public global standard fields only. " +
+          "Organizations that opted out aren't included, and small groups are kept private."
+      },
     isLoading = isLoading,
     summary = summary,
     onDownload = onDownload,
     modifier = modifier,
+    banner = banner,
   )
 }
 
@@ -182,6 +204,8 @@ private fun ImpactPage(
   summary: ImpactSummary?,
   onDownload: () -> Unit,
   modifier: Modifier = Modifier,
+  banner: @Composable () -> Unit = {},
+  headerActions: @Composable () -> Unit = {},
   filters: @Composable () -> Unit = {},
 ) {
   Column(
@@ -200,15 +224,26 @@ private fun ImpactPage(
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
-      if (summary != null) {
-        Spacer(Modifier.width(16.dp))
-        OutlinedButton(onClick = onDownload) {
-          Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(18.dp))
-          Spacer(Modifier.width(8.dp))
-          Text("Download PDF summary")
+      Spacer(Modifier.width(16.dp))
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        headerActions()
+        if (summary != null && !summary.isBelowPublicationThreshold) {
+          OutlinedButton(onClick = onDownload) {
+            Icon(
+              Icons.Outlined.Download,
+              contentDescription = null,
+              modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.width(8.dp))
+            Text("Download PDF summary")
+          }
         }
       }
     }
+    Box(modifier = Modifier.widthIn(max = ImpactContentMaxWidth)) { banner() }
     filters()
     when {
       summary != null -> ImpactSummaryContent(summary)
@@ -233,13 +268,22 @@ internal fun ImpactSummaryContent(summary: ImpactSummary) {
     modifier = Modifier.widthIn(max = ImpactContentMaxWidth),
     verticalArrangement = Arrangement.spacedBy(28.dp),
   ) {
+    if (summary.isBelowPublicationThreshold) {
+      BelowThresholdCard()
+      return@Column
+    }
     if (summary.hints.isNotEmpty()) HintsCard(summary)
     Totals(summary)
     summary.goals.forEach { goal -> ImpactSection(goal.title) { IndicatorRow(goal.indicators) } }
     if (summary.ownIndicators.isNotEmpty()) {
       ImpactSection(
-        "Your indicators",
-        "Your organization's own standard fields. They stay in your dashboards.",
+        if (summary.isPublished) "Own indicators" else "Your indicators",
+        if (summary.isPublished) {
+          "The organization's own standard fields, published as totals."
+        } else {
+          "Your organization's own standard fields. Only those marked Public totals are " +
+            "published; the rest stay with your organization."
+        },
       ) {
         IndicatorRow(summary.ownIndicators)
       }
@@ -637,6 +681,31 @@ private fun GlobalPrivacy(summary: ImpactSummary) {
     }
   }
 }
+
+/** Shown instead of published numbers while an organization has too few map features. */
+@Composable
+private fun BelowThresholdCard() {
+  Surface(
+    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    shape = MaterialTheme.shapes.medium,
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      Icon(Icons.Outlined.Info, contentDescription = null)
+      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Not enough data to publish yet", style = MaterialTheme.typography.titleSmall)
+        Text(
+          "Numbers are published once there are at least $PUBLICATION_MIN_FEATURES map " +
+            "features, so small groups can't be singled out.",
+          style = MaterialTheme.typography.bodyMedium,
+        )
+      }
+    }
+  }
+}
+
+/** Mirrors `ImpactConfig.organizationPublicMinFeatures` for the explanation above. */
+internal val PUBLICATION_MIN_FEATURES = ImpactConfig().organizationPublicMinFeatures
 
 @Composable
 private fun HintsCard(summary: ImpactSummary) {

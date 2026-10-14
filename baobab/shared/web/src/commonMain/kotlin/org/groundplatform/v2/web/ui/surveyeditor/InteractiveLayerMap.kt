@@ -75,11 +75,16 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.domain.model.editor.EntityDataset
 import org.groundplatform.v2.app.domain.model.editor.GeometryKind
 import org.groundplatform.v2.app.domain.model.editor.LatLng
+import org.groundplatform.v2.app.domain.model.editor.SampleDesignConfig
 import org.groundplatform.v2.app.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.app.domain.model.editor.SubPlotMode
 import org.groundplatform.v2.app.domain.model.editor.formatFixed
 import org.groundplatform.v2.app.domain.model.editor.parseHexColor
 import org.groundplatform.v2.app.domain.model.formatHexColorCss
@@ -350,31 +355,14 @@ internal fun InteractiveLayerMapCard(
     remember(baseContent, backdropPolygons, colors.primary) {
       withBackdropPolygons(baseContent, backdropPolygons, colors.primary)
     }
-  // Sample points of the selected plot (or the first 25 plots when none is selected) go in a small
-  // overlay source so sub-plot layouts are visible immediately on the preview map.
+  // Sample points of the selected plot go in a small overlay source so its sub-plot layout is
+  // visible immediately on the preview map.
   val samplePoints =
-    remember(dataset.rows, selectedRow) {
-      if (selectedRow != null) {
-        val raw =
-          dataset.rows
-            .firstOrNull { it.key == selectedRow }
-            ?.values
-            ?.get(SamplePlotProperties.SAMPLES)
-            .orEmpty()
-        SamplePlotProperties.parseGeotrace(raw)
-      } else {
-        dataset.rows.take(25).flatMap { row ->
-          SamplePlotProperties.parseGeotrace(row.values[SamplePlotProperties.SAMPLES].orEmpty())
-        }
-      }
-    }
+    remember(dataset.rows, selectedRow) { selectedPlotSamples(dataset, selectedRow) }
+  val sampleRadiusM = dataset.generator?.let(::samplePointRadiusM) ?: DEFAULT_SAMPLE_RADIUS_M
   val content =
-    remember(withBackdrop, samplePoints, layerColor) {
-      withSamplePointsOverlay(
-        withBackdrop,
-        samplePoints,
-        layerColor,
-      )
+    remember(withBackdrop, samplePoints, layerColor, sampleRadiusM) {
+      withSamplePointsOverlay(withBackdrop, samplePoints, layerColor, sampleRadiusM)
     }
 
   ElevatedCard(
@@ -678,49 +666,91 @@ internal fun withBackdropPolygons(
 internal const val LAYER_EDITOR_SAMPLES_SOURCE = "layer-editor-samples"
 
 /**
+ * The sample points of plot [selectedRow] in [dataset], or none when no plot (or a plot that no
+ * longer exists) is selected. Other plots' sample points are never drawn.
+ */
+internal fun selectedPlotSamples(dataset: EntityDataset, selectedRow: String?): List<LatLng> {
+  if (selectedRow == null) return emptyList()
+  val row = dataset.rows.firstOrNull { it.key == selectedRow } ?: return emptyList()
+  return SamplePlotProperties.parseGeotrace(row.values[SamplePlotProperties.SAMPLES].orEmpty())
+}
+
+/**
  * [content] plus [samples] (the selected plot's sample points) drawn above everything else. Returns
  * [content] unchanged when there are none.
  *
- * Sample points are hollow rings, so interpreters can see the imagery inside each one: a ring in
+ * Sample points are hollow rings with a fixed size on the ground, [radiusM] meters, so they shrink
+ * when zooming out and grow when zooming in, like the plots around them. Each ring is a line in
  * [layerColor] over a slightly wider white halo, which keeps it legible on both dark and bright
- * imagery.
+ * imagery while interpreters can still see the imagery inside it.
  */
 internal fun withSamplePointsOverlay(
   content: MapContent,
   samples: List<LatLng>,
   layerColor: Color,
+  radiusM: Double = DEFAULT_SAMPLE_RADIUS_M,
 ): MapContent {
   if (samples.isEmpty()) return content
   val features = samples.mapIndexed { i, p ->
-    MapFeature(id = "sample-${i + 1}", geometry = Geometry.Point(p.toMapLatLng()))
+    MapFeature(
+      id = "sample-${i + 1}",
+      geometry = Geometry.Polygon(listOf(groundCircle(p, radiusM).map { it.toMapLatLng() })),
+    )
   }
   return content.copy(
     sources = content.sources + GeoJsonSource(LAYER_EDITOR_SAMPLES_SOURCE, features),
     layers =
       content.layers +
         listOf(
-          MapLayer.Circle(
+          MapLayer.Line(
             id = "layer-editor-samples-halo",
             sourceId = LAYER_EDITOR_SAMPLES_SOURCE,
-            color = StyleValue.Constant(Color.Transparent),
-            radius = StyleValue.Constant(SAMPLE_RING_RADIUS),
-            strokeColor = StyleValue.Constant(Color.White),
-            strokeWidth = 3.5.dp,
+            color = StyleValue.Constant(Color.White),
+            width = StyleValue.Constant(3.dp),
           ),
-          MapLayer.Circle(
+          MapLayer.Line(
             id = "layer-editor-samples",
             sourceId = LAYER_EDITOR_SAMPLES_SOURCE,
-            color = StyleValue.Constant(Color.Transparent),
-            radius = StyleValue.Constant(SAMPLE_RING_RADIUS + 1.dp),
-            strokeColor = StyleValue.Constant(layerColor),
-            strokeWidth = 1.5.dp,
+            color = StyleValue.Constant(layerColor),
+            width = StyleValue.Constant(1.5.dp),
           ),
         ),
   )
 }
 
-/** Inner radius of a sample point ring; the ring itself is drawn outside it. */
-private val SAMPLE_RING_RADIUS = 5.dp
+/** Ground radius of sample points when a layer has no sample design. */
+internal const val DEFAULT_SAMPLE_RADIUS_M = 2.0
+
+/**
+ * Ground radius in meters of the sample point rings of [config]'s plots: 15% of the plot's
+ * half-size, and for sample point grids no more than a quarter of the spacing between points, so
+ * neighboring rings never touch.
+ */
+internal fun samplePointRadiusM(config: SampleDesignConfig): Double {
+  val fromPlot = config.plotSizeM / 2 * 0.15
+  val radius =
+    if (config.subPlot == SubPlotMode.GRID) minOf(fromPlot, config.subPlotSpacingM / 4)
+    else fromPlot
+  return radius.takeIf { it.isFinite() && it > 0 }?.coerceAtLeast(MIN_SAMPLE_RADIUS_M)
+    ?: DEFAULT_SAMPLE_RADIUS_M
+}
+
+private const val MIN_SAMPLE_RADIUS_M = 0.25
+
+/** Vertices of each sample point ring; enough to look round at any zoom. */
+private const val SAMPLE_RING_VERTICES = 32
+
+private const val METERS_PER_DEGREE_LAT = 111_320.0
+
+/** A ring of [SAMPLE_RING_VERTICES] points [radiusM] meters on the ground around [center]. */
+internal fun groundCircle(center: LatLng, radiusM: Double): List<LatLng> {
+  val dLat = radiusM / METERS_PER_DEGREE_LAT
+  val dLng = dLat / cos(center.lat * PI / 180).coerceAtLeast(1e-6)
+  return List(SAMPLE_RING_VERTICES) { i ->
+    val a = 2 * PI * i / SAMPLE_RING_VERTICES
+    LatLng(center.lat + dLat * sin(a), center.lng + dLng * cos(a))
+  }
+}
 
 /**
  * These vertices as a map geometry of [kind], or the simplest geometry they can form while still

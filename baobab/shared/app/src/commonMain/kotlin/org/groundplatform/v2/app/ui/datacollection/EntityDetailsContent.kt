@@ -164,7 +164,7 @@ internal fun EntityLayerMarker(
 
 /**
  * Status chip for an entity's details: its `marker-symbol` and status text on a fill of its
- * `marker-color`.
+ * `marker-color`. Draws nothing when the entity has no workflow status.
  * - [compact]: a smaller chip (tighter padding, `labelSmall` text) for dense web surfaces such as
  *   the details card body and the data table. Mobile callers keep the default size.
  */
@@ -174,6 +174,7 @@ fun EntityStatusChip(
   modifier: Modifier = Modifier,
   compact: Boolean = false,
 ) {
+  if (!entity.hasWorkflowStatus) return
   val fill = Color(entity.markerColorHex)
   val content = contentColorOnMarker(fill)
   val textStyle =
@@ -197,15 +198,18 @@ fun EntityStatusChip(
       if (entity.hasMarkerSymbol) {
         Text(text = entity.markerSymbol, style = textStyle.copy(fontWeight = FontWeight.ExtraBold))
       }
-      Text(text = entity.workflowStatus, style = textStyle.copy(fontWeight = FontWeight.SemiBold))
+      if (entity.workflowStatus.isNotEmpty()) {
+        Text(text = entity.workflowStatus, style = textStyle.copy(fontWeight = FontWeight.SemiBold))
+      }
     }
   }
 }
 
 /**
  * Compact status balloon for list rows: a small circle filled with the entity's `marker-color`
- * holding its `marker-symbol` (an empty dot when it has none). The status text itself isn't shown;
- * list rows expose it through their tooltip and `stateDescription`.
+ * holding its `marker-symbol` (an empty dot when it has a `status` but no symbol). Draws nothing
+ * when the entity has no workflow status. The status text itself isn't shown; list rows expose it
+ * through their tooltip and `stateDescription`.
  */
 @Composable
 internal fun EntityStatusBalloon(
@@ -213,6 +217,7 @@ internal fun EntityStatusBalloon(
   modifier: Modifier = Modifier,
   size: Dp = 20.dp,
 ) {
+  if (!entity.hasWorkflowStatus) return
   val fill = Color(entity.markerColorHex)
   Box(
     modifier = modifier.size(size).background(fill, CircleShape),
@@ -232,8 +237,9 @@ internal fun EntityStatusBalloon(
 /**
  * One-line row for an entity record in the searchable list: layer marker (the entity's [layer]
  * color and icon, matching its map pin), label, and status balloon (`marker-symbol` on
- * `marker-color`). Hovering (web) or long-pressing (mobile) shows the status text in a tooltip. The
- * selected row is highlighted and scrolled into view, including when it was selected on the map.
+ * `marker-color`). Hovering (web) or long-pressing (mobile) shows the status text in a tooltip.
+ * Records without a workflow status show neither the balloon nor the tooltip. The selected row is
+ * highlighted and scrolled into view, including when it was selected on the map.
  *
  * When [compact] is `true` (the web dashboard's left-hand panel), the row is a dense
  * [compactHeight]-tall row indented by [compactStartIndent] so it lines up under its dataset header
@@ -255,12 +261,10 @@ internal fun EntityListRow(
   val bringIntoViewRequester = remember { BringIntoViewRequester() }
   LaunchedEffect(isSelected) { if (isSelected) bringIntoViewRequester.bringIntoView() }
 
-  TooltipBox(
-    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-    tooltip = { PlainTooltip { Text(entity.workflowStatus) } },
-    state = rememberTooltipState(),
-    modifier = modifier.bringIntoViewRequester(bringIntoViewRequester),
-  ) {
+  val statusText = entity.workflowStatus
+  val statusSemantics =
+    if (statusText.isNotEmpty()) Modifier.semantics { stateDescription = statusText } else Modifier
+  val rowContent: @Composable () -> Unit = {
     if (compact) {
       Row(
         modifier =
@@ -271,7 +275,7 @@ internal fun EntityListRow(
               if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
             )
             .clickable(onClick = onClick)
-            .semantics { stateDescription = entity.workflowStatus }
+            .then(statusSemantics)
             .padding(start = compactStartIndent, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -321,9 +325,25 @@ internal fun EntityListRow(
           Modifier.fillMaxWidth()
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
-            .semantics { stateDescription = entity.workflowStatus },
+            .then(statusSemantics),
       )
     }
+  }
+
+  val outerModifier = modifier.bringIntoViewRequester(bringIntoViewRequester)
+  if (statusText.isNotEmpty()) {
+    TooltipBox(
+      positionProvider =
+        TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+      tooltip = { PlainTooltip { Text(statusText) } },
+      state = rememberTooltipState(),
+      modifier = outerModifier,
+    ) {
+      rowContent()
+    }
+  } else {
+    // No workflow status: no tooltip (rather than an empty or default one).
+    Box(modifier = outerModifier) { rowContent() }
   }
 }
 

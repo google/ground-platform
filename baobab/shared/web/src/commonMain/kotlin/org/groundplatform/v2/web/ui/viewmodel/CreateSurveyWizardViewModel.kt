@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.app.domain.model.FormTemplate
 import org.groundplatform.v2.app.domain.model.LibraryPrograms
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
@@ -56,6 +57,7 @@ import org.groundplatform.v2.app.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDerivation
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorForm
+import org.groundplatform.v2.app.domain.model.editor.SurveyFormTemplates
 import org.groundplatform.v2.app.domain.model.editor.slugify
 import org.groundplatform.v2.app.domain.model.editor.toEditorDataset
 import org.groundplatform.v2.app.domain.model.geometryKind
@@ -109,6 +111,10 @@ interface CreateSurveyWizardActions {
 
   fun selectCollectionMode(mode: SurveyCollectionMode)
 
+  /**
+   * Selects or clears Purpose Pack [packId] (or "Other"); several purposes may be selected at once.
+   * Selecting a pack also selects the programs it offers.
+   */
   fun togglePurposePack(packId: String)
 
   fun updateOtherPurpose(text: String)
@@ -180,6 +186,8 @@ class CreateSurveyWizardViewModel(
     val collectorConsentRequired: Boolean = false,
     val collectorConsentText: String = "",
     val seededPurposeIds: Set<String> = emptySet(),
+    /** Keys of the Forms seeded from [seededPurposeIds]' templates (the primary Form first). */
+    val seededFormKeys: Set<String> = emptySet(),
     val appliedStartMethod: WizardStartMethod? = null,
     val appliedCopySourceId: String? = null,
     val appliedImportedXFormsFileName: String? = null,
@@ -258,6 +266,9 @@ class CreateSurveyWizardViewModel(
       showSurveyAreaValidationErrors = s.showSurveyAreaValidationErrors,
       validationAttemptCount = s.validationAttemptCount,
       mapFeatureSource = s.mapFeatureSource,
+      mapFeatureSourcePreselected =
+        s.userOverrodeMapFeatureSource ||
+          SurveyWizardRules.purposeMapFeatureSource(details.purposeIds) != null,
       eudrPlotsUnderFourHaConfirmed = s.eudrPlotsUnderFourHaConfirmed,
       collectorConsentRequired = s.collectorConsentRequired,
       collectorConsentText = s.collectorConsentText,
@@ -568,8 +579,9 @@ class CreateSurveyWizardViewModel(
   }
 
   /**
-   * Ensures the working draft has a single primary `MAP_LAYER` and a single starting `EditorForm`
-   * configured according to the selected Purpose Pack and [WizardMapFeatureSource].
+   * Ensures the working draft has a primary `MAP_LAYER` and a primary `EditorForm` configured
+   * according to the selected Purpose Packs and [WizardMapFeatureSource], plus one Form (with its
+   * own linked dataset) for each further template of the selected Purpose Packs.
    */
   private fun ensurePrimaryLayerAndForm() {
     val s = session.value
@@ -582,6 +594,7 @@ class CreateSurveyWizardViewModel(
         SurveyWizardRules.defaultCollectionMode(currentPurposeIds, s.mapFeatureSource)
       }
     val purposeSelectionChanged = currentPurposeIds.toSet() != s.seededPurposeIds
+    var seededFormKeys = s.seededFormKeys
 
     surveyEditor.replaceWorkingDraft({ current ->
       var datasets = current.datasets
@@ -596,11 +609,19 @@ class CreateSurveyWizardViewModel(
           eudrPlotsUnderFourHaConfirmed = s.eudrPlotsUnderFourHaConfirmed,
         )
 
-      // 1. Seed or replace the single starting Form when Purpose selection changes in FROM_SCRATCH.
+      // 1. When the Purpose selection changes in FROM_SCRATCH, replace the Forms seeded from the
+      // previous selection. The first template of the selected Purpose Packs becomes the primary
+      // Form (wired to the primary Map layer below); every other template gets its own Form and
+      // linked Map layer or Data table (step 3b). Forms the organizer added themselves are kept.
+      var extraTemplates = emptyList<FormTemplate>()
       if (purposeSelectionChanged && s.startMethod == WizardStartMethod.FROM_SCRATCH) {
         val nonOtherIds =
           current.details.purposeIds.filter { it != SurveyWizardRules.OTHER_PURPOSE_ID }
         val templates = library.templatesForPurposes(nonOtherIds)
+        val primaryEntry = forms.firstOrNull()
+        val staleKeys = s.seededFormKeys - setOfNotNull(primaryEntry?.key)
+        forms = forms.filterNot { it.key in staleKeys }
+        datasets = datasets.filterNot { d -> d.linkedFormKey?.let { it in staleKeys } == true }
         if (templates.isNotEmpty()) {
           val language = current.details.defaultLanguage.ifBlank { "en" }
           val primaryTemplate = templates.first()
@@ -609,41 +630,34 @@ class CreateSurveyWizardViewModel(
               .get(language)
               .ifBlank { primaryTemplate.form.title }
               .ifBlank { "Site assessment" }
-          val mergedQuestions = buildList {
-            val seenNames = mutableSetOf<String>()
-            templates.forEach { tmpl ->
-              tmpl.form.questions.forEach { q ->
-                if (seenNames.add(q.name)) {
-                  add(
-                    if (q.choiceDatasetId != null && datasets.none { it.id == q.choiceDatasetId }) {
-                      q.copy(
-                        choiceDatasetId = null,
-                        choiceSource =
-                          org.groundplatform.v2.app.domain.model.editor.ChoiceSource.MANUAL,
-                        allowAddEntity = false,
-                      )
-                    } else {
-                      q
-                    }
-                  )
-                }
+          val questions =
+            primaryTemplate.form.questions.map { q ->
+              if (q.choiceDatasetId != null && datasets.none { it.id == q.choiceDatasetId }) {
+                q.copy(
+                  choiceDatasetId = null,
+                  choiceSource = org.groundplatform.v2.app.domain.model.editor.ChoiceSource.MANUAL,
+                  allowAddEntity = false,
+                )
+              } else {
+                q
               }
             }
-          }
-          val existingFormKey = forms.firstOrNull()?.key ?: newKey("f")
+          val existingFormKey = primaryEntry?.key ?: newKey("f")
           val seededForm =
             primaryTemplate.form.copy(
-              formId = forms.firstOrNull()?.form?.formId ?: FormIds.newFormId(),
+              formId = primaryEntry?.form?.formId ?: FormIds.newFormId(),
               title = baseTitle,
-              questions = mergedQuestions,
+              questions = questions,
               saveTo = EditorSaveTo(),
             )
-          forms = listOf(SurveyEditorForm(existingFormKey, seededForm))
-          // Keep only the primary map layer when reseeding from scratch.
-          datasets = datasets.filter { it.kind == DatasetKind.MAP_LAYER }.take(1)
-        } else if (s.seededPurposeIds.isNotEmpty()) {
-          forms = emptyList()
-          datasets = datasets.filter { it.kind == DatasetKind.MAP_LAYER }.take(1)
+          forms = listOf(SurveyEditorForm(existingFormKey, seededForm)) + forms.drop(1)
+          extraTemplates = templates.drop(1)
+          seededFormKeys = setOf(existingFormKey)
+        } else {
+          if (primaryEntry != null && primaryEntry.key in s.seededFormKeys) {
+            forms = forms.drop(1)
+          }
+          seededFormKeys = emptySet()
         }
       }
 
@@ -773,6 +787,19 @@ class CreateSurveyWizardViewModel(
         forms = listOf(SurveyEditorForm(formKey, baseForm))
       }
 
+      // 3b. Add a Form, with its own linked Map layer or Data table, for every other template.
+      if (extraTemplates.isNotEmpty()) {
+        var seeded = current.copy(forms = forms, datasets = datasets, nextKeyId = nextId)
+        extraTemplates.forEach { template ->
+          val (next, formKey) = SurveyFormTemplates.addTemplate(seeded, template)
+          seeded = next
+          seededFormKeys = seededFormKeys + formKey
+        }
+        forms = seeded.forms
+        datasets = seeded.datasets
+        nextId = seeded.nextKeyId
+      }
+
       // 4. Synchronize form availability, geometry capture, and save_to wiring with activeLayer.
       val activeLayer = datasets.first { it.kind == DatasetKind.MAP_LAYER }
       val usesUpdateMode =
@@ -878,7 +905,9 @@ class CreateSurveyWizardViewModel(
     })
 
     if (purposeSelectionChanged) {
-      session.update { it.copy(seededPurposeIds = currentPurposeIds.toSet()) }
+      session.update {
+        it.copy(seededPurposeIds = currentPurposeIds.toSet(), seededFormKeys = seededFormKeys)
+      }
     }
   }
 
@@ -989,16 +1018,26 @@ class CreateSurveyWizardViewModel(
   }
 
   override fun togglePurposePack(packId: String) {
-    val currentIds = surveyEditor.uiState.value.draft.details.purposeIds
-    val alreadySelected = currentIds == listOf(packId)
-    val newPurposeIds = if (alreadySelected) emptyList() else listOf(packId)
-    val selectedPack =
-      if (!alreadySelected && packId != SurveyWizardRules.OTHER_PURPOSE_ID) {
-        uiState.value.library.purposePack(packId)
+    val details = surveyEditor.uiState.value.draft.details
+    val currentIds = details.purposeIds
+    val alreadySelected = packId in currentIds
+    val newPurposeIds = if (alreadySelected) currentIds - packId else currentIds + packId
+    val library = uiState.value.library
+    val toggledPackProgramIds =
+      if (packId != SurveyWizardRules.OTHER_PURPOSE_ID) {
+        library.purposePack(packId)?.programIds.orEmpty()
       } else {
-        null
+        emptyList()
       }
-    val newProgramIds = selectedPack?.programIds.orEmpty()
+    val newProgramIds =
+      if (alreadySelected) {
+        // Drop programs only the deselected pack offered; keep others and manually picked ones.
+        val stillOffered =
+          newPurposeIds.mapNotNull(library::purposePack).flatMap { it.programIds }.toSet()
+        details.programIds.filter { it !in toggledPackProgramIds || it in stillOffered }
+      } else {
+        (details.programIds + toggledPackProgramIds).distinct()
+      }
     surveyEditor.updateDetails {
       it.copy(
         purposeIds = newPurposeIds,

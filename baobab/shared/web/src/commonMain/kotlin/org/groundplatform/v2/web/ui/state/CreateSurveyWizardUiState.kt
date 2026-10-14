@@ -69,6 +69,12 @@ data class CreateSurveyWizardUiState(
   val showSurveyAreaValidationErrors: Boolean = false,
   val validationAttemptCount: Int = 0,
   val mapFeatureSource: WizardMapFeatureSource = WizardMapFeatureSource.FIELD_FREEFORM,
+  /**
+   * Whether [mapFeatureSource] was already decided before Step 4, by the selected Purpose Packs
+   * (e.g. LULC training data calls for sample plots) or by the collection mode the organizer
+   * picked, rather than being the fallback default. Step 4 then shows it collapsed.
+   */
+  val mapFeatureSourcePreselected: Boolean = false,
   val eudrPlotsUnderFourHaConfirmed: Boolean = false,
   val collectorConsentRequired: Boolean = false,
   val collectorConsentText: String = "",
@@ -136,7 +142,7 @@ data class CreateSurveyWizardUiState(
           if (!isPurposeInvalid) {
             null
           } else if (purposeIds.isEmpty()) {
-            "Select a purpose (or choose \"Other\" and describe your goal) to continue."
+            "Select at least one purpose (or choose \"Other\" and describe your goal) to continue."
           } else {
             "Please describe the purpose of this survey to continue."
           }

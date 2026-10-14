@@ -92,11 +92,13 @@ import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
 import org.groundplatform.v2.app.ui.common.platformEpochMillis
 import org.groundplatform.v2.core.sampling.SampleEstimate
+import org.groundplatform.v2.web.domain.model.editor.DataTableImportPlan
 import org.groundplatform.v2.web.domain.model.editor.MapLayerImportPlan
 import org.groundplatform.v2.web.domain.model.editor.SampleGenerationOutcome
 import org.groundplatform.v2.web.domain.model.editor.SampleGenerationProgress
 import org.groundplatform.v2.web.domain.model.editor.SamplingAreaResult
 import org.groundplatform.v2.web.domain.model.editor.SamplingAreas
+import org.groundplatform.v2.web.domain.model.editor.SuggestedGridSpacing
 import org.groundplatform.v2.web.domain.usecase.GenerateSamplePlotsUseCase
 import org.groundplatform.v2.web.domain.usecase.InviteCollaboratorUseCase
 import org.groundplatform.v2.web.domain.usecase.ManageLibraryUseCase
@@ -323,6 +325,9 @@ interface SurveyEditorActions : MapFeatureEditor, SurveyOutcomeActions {
 
   /** Creates a Map layer from [plan] and opens it. Returns its key. */
   fun importMapLayer(plan: MapLayerImportPlan): String
+
+  /** Creates a Data table from [plan] and opens it. Returns its key. */
+  fun importDataTable(plan: DataTableImportPlan): String
 
   // --- Sample plots ---
 
@@ -755,7 +760,8 @@ class SurveyEditorViewModel(
     val before = draft
     val openedBefore = opened
     val edits = Edits(before, current).apply(block)
-    val after = edits.toDraft()
+    val edited = edits.toDraft()
+    val after = if (edited == before) edited else SuggestedGridSpacing.applyTo(before, edited)
     if (
       after == before &&
         edits.section == current.section &&
@@ -812,7 +818,7 @@ class SurveyEditorViewModel(
     if (uiState.value.isReadOnly) return
     val before = draft
     val openedBefore = opened
-    val after = transform(before)
+    val after = SuggestedGridSpacing.applyTo(before, transform(before))
     session.update {
       it.copy(
         surveyId = data.value.surveyId,
@@ -1588,6 +1594,29 @@ class SurveyEditorViewModel(
     return datasetKey
   }
 
+  override fun importDataTable(plan: DataTableImportPlan): String {
+    var datasetKey = ""
+    edit {
+      val title = FormDatasetLinks.uniqueTitle(plan.name, datasets.map { it.displayName })
+      datasetKey = newKey("d")
+      val dataset =
+        EntityDataset(
+          key = datasetKey,
+          kind = DatasetKind.DATA_TABLE,
+          id = FormDatasetLinks.uniqueId(slugify(title), datasets.map { it.id }),
+          displayName = title,
+          geometryKind = GeometryKind.POINT,
+          keyProperty = plan.keyProperty,
+          labelProperty = plan.labelProperty,
+          properties = plan.properties,
+          rows = plan.rows.map { values -> EntityRow(newKey("r"), values, emptyList()) },
+        )
+      datasets = datasets + dataset
+      section = SurveyEditorSection.Dataset(datasetKey)
+    }
+    return datasetKey
+  }
+
   // --- Sample plots ---
 
   override fun addSamplePlotsLayer(): String {
@@ -1630,7 +1659,16 @@ class SurveyEditorViewModel(
   override fun updateSampleDesign(
     key: String,
     transform: (SampleDesignConfig) -> SampleDesignConfig,
-  ) = updateDataset(key) { d -> d.generator?.let { d.copy(generator = transform(it)) } ?: d }
+  ) =
+    updateDataset(key) { d ->
+      d.generator?.let { config ->
+        val next = transform(config)
+        // A spacing set by hand no longer follows the area's size.
+        val manualSpacing =
+          next.gridSpacingM != config.gridSpacingM && next.gridSpacingAuto == config.gridSpacingAuto
+        d.copy(generator = if (manualSpacing) next.copy(gridSpacingAuto = false) else next)
+      } ?: d
+    }
 
   override fun rerollSeed(key: String) =
     updateSampleDesign(key) { it.copy(seed = Random.nextLong(1, 1_000_000)) }

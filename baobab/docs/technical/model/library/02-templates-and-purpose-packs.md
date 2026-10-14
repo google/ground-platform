@@ -59,8 +59,18 @@ message FormTemplateDef {
 
 ## Purpose Packs (`PurposePackDef`)
 
-A Purpose Pack is one choice in the survey-creation step **"What will this data
-be used for?"**
+A Purpose Pack is one high-level choice in the survey-creation step **"What will
+this data be used for?"** Purpose titles describe the real-world monitoring or
+operational goal in plain language (for example, *Deforestation compliance*,
+*Ecosystem restoration*, *Forest carbon & conservation monitoring*, *Timber
+traceability*, *Protected area management*, *Community land & resource mapping*,
+*Producer registration & market access*, and *Land cover & crop mapping*), while
+individual regulations, registries, and standards are listed under **Reporting
+programs & frameworks** (`program_ids`, such as `eudr`, `uk_frc`, `ferm`,
+`gbf_target_2`, `gd_pame`, `mett`, `imet`, `smart`, `landmark`, `icca`, `vggt`,
+`redd_plus`, `tfff`, `art_trees`, `vcs`, `fsc`, `pefc`, `flegt`,
+`rainforest_alliance`, `fairtrade`, `agstack`, `fdap`, `fao_lccs`, `fao_fra`,
+and `open_foris`).
 
 ```protobuf
 message PurposePackDef {

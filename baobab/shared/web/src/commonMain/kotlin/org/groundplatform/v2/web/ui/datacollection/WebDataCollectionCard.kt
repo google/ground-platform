@@ -278,16 +278,18 @@ private fun WebEntityRefPicker(
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
-          GroundTonalBadge(
-            text = if (isEligible) candidate.mapStatusSummaryBadge else "Completed",
-            tone =
-              when {
-                !isEligible -> GroundBadgeTone.NEUTRAL
-                candidate.markerSymbol == "✓" -> GroundBadgeTone.PRIMARY
-                candidate.markerSymbol == "◐" -> GroundBadgeTone.TERTIARY
-                else -> GroundBadgeTone.WARNING
-              },
-          )
+          if (!isEligible || candidate.hasWorkflowStatus) {
+            GroundTonalBadge(
+              text = if (isEligible) candidate.mapStatusSummaryBadge else "Completed",
+              tone =
+                when {
+                  !isEligible -> GroundBadgeTone.NEUTRAL
+                  candidate.markerSymbol == "✓" -> GroundBadgeTone.PRIMARY
+                  candidate.markerSymbol == "◐" -> GroundBadgeTone.TERTIARY
+                  else -> GroundBadgeTone.WARNING
+                },
+            )
+          }
         }
       }
     }

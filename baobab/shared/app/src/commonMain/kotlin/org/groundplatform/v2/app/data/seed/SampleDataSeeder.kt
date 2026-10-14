@@ -45,7 +45,7 @@ class SampleDataSeeder(private val store: LocalStore) {
 
   companion object {
     /** Bump when the sample data changes shape, so existing stores are reseeded. */
-    const val SEED_VERSION: Int = 15
+    const val SEED_VERSION: Int = 16
 
     /** Survey opened by default on first launch. */
     const val DEFAULT_ACTIVE_SURVEY_ID: String = "survey-kenya-coffee"

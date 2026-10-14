@@ -16,12 +16,11 @@ package org.groundplatform.v2.web.ui.organization
 /**
  * Sections of the web organization page, in the order they appear in its left panel. Details,
  * Imagery, and the library tabs (Purposes, Dictionary, and Templates) are read-only for anyone who
- * isn't a Manager; Impact is shown only to Managers (Organizers).
+ * isn't a Manager. The organization's impact numbers are on the Impact page (`#impact/<id>`).
  */
 enum class OrganizationTab(val label: String) {
   DETAILS("Organization details"),
   SURVEYS("Surveys"),
-  IMPACT("Impact"),
   MEMBERS("Members"),
   IMAGERY_SOURCES("Imagery"),
   PURPOSES("Purposes"),

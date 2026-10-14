@@ -27,6 +27,30 @@ internal external fun isMapboxGlAvailable(): Boolean
 @JsFun("() => window.devicePixelRatio || 1") internal external fun devicePixelRatio(): Double
 
 /**
+ * CSS px per Compose px, measured on the canvas Compose draws into (the first non-Mapbox canvas in
+ * the `ComposeTarget` element or its shadow root), or 0 if it can't be found.
+ *
+ * Compose draws one Compose px per canvas pixel, and the canvas is usually `devicePixelRatio` times
+ * its CSS size, but not always: after the browser zoom or the screen changes, the two can disagree
+ * until Compose resizes its canvas. Measuring keeps the map aligned with what Compose actually
+ * drew.
+ */
+@JsFun(
+  """() => {
+    let canvas = window.__groundComposeCanvas;
+    if (!canvas || !canvas.isConnected) {
+      const target = document.getElementById('ComposeTarget') || document.body;
+      const root = target.shadowRoot || target;
+      canvas = root.querySelector('canvas:not(.mapboxgl-canvas)');
+      window.__groundComposeCanvas = canvas;
+    }
+    if (!canvas || !canvas.width) return 0;
+    return canvas.getBoundingClientRect().width / canvas.width;
+  }"""
+)
+internal external fun cssPxPerComposePx(): Double
+
+/**
  * Creates a display-only map in a fixed-position `div` below the Compose canvas. The outer element
  * clips to the visible part of the map's layout; the inner one is the full layout. [style] is a
  * style URL or style JSON (see [MapboxStyleSpec.style]).

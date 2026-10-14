@@ -132,17 +132,25 @@ data class GeospatialEntityItem(
 
   /**
    * Organizer-defined workflow status label stored in `properties["status"]` (updated via
-   * `save_to`), e.g., `"Pending"`, `"In progress"`, or `"Completed"`.
+   * `save_to`), e.g., `"Pending"`, `"In progress"`, or `"Completed"`. Falls back to the label of a
+   * canonical [markerSymbol] (`"○"`, `"◐"`, `"✓"`), or `""` when neither is defined.
    */
   val workflowStatus: String
     get() =
-      properties["status"]?.takeIf { it.isNotBlank() }
+      properties["status"]?.trim()?.takeIf { it.isNotEmpty() }
         ?: when (markerSymbol) {
           "✓" -> "Completed"
           "◐" -> "In progress"
           "○" -> "Pending"
-          else -> "Unmarked"
+          else -> ""
         }
+
+  /**
+   * True when this entity has a workflow status to show: a `marker-symbol` or a `status` label.
+   * Entities without one show no status chip, balloon, or badge rather than a default.
+   */
+  val hasWorkflowStatus: Boolean
+    get() = hasMarkerSymbol || workflowStatus.isNotEmpty()
 
   /**
    * True when `marker-symbol` (`"✓"`) or `status` (`"Completed"`) marks the final completed state.
@@ -165,10 +173,10 @@ data class GeospatialEntityItem(
 
   /**
    * Descriptive badge label combining `marker-symbol` and `status` (e.g. `"○ Pending"`, `"◐ In
-   * progress"`, or `"✓ Completed"`).
+   * progress"`, or `"✓ Completed"`), or `""` when the entity has no workflow status.
    */
   val mapStatusSummaryBadge: String
-    get() = if (markerSymbol.isNotEmpty()) "$markerSymbol $workflowStatus" else workflowStatus
+    get() = listOf(markerSymbol, workflowStatus).filter { it.isNotEmpty() }.joinToString(" ")
 }
 
 /**

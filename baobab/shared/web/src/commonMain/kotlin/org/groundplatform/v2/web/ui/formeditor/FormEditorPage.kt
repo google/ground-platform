@@ -215,6 +215,7 @@ import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.core.forms.ui.MobileFormRunner
+import org.groundplatform.v2.web.ui.common.DropdownFieldClickTarget
 import org.groundplatform.v2.web.ui.common.GrabPointerIcon
 import org.groundplatform.v2.web.ui.common.GrabbingPointerIcon
 import org.groundplatform.v2.web.ui.common.downloadTextFile
@@ -3028,18 +3029,28 @@ internal fun <T> DropdownSelector(
     onExpandedChange = { if (enabled) expanded = it },
     modifier = modifier.fillMaxWidth(),
   ) {
-    OutlinedTextField(
-      value = selectedText,
-      onValueChange = {},
-      readOnly = true,
-      enabled = enabled,
-      singleLine = true,
-      label = { Text(label) },
-      supportingText = supportingText?.let { text -> { Text(text) } },
-      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && enabled) },
-      modifier =
-        Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-    )
+    Box {
+      OutlinedTextField(
+        value = selectedText,
+        onValueChange = {},
+        readOnly = true,
+        enabled = enabled,
+        singleLine = true,
+        label = { Text(label) },
+        supportingText = supportingText?.let { text -> { Text(text) } },
+        trailingIcon = {
+          ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && enabled)
+        },
+        modifier =
+          Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+      )
+      // Opens the menu on the first click, even if the mouse moves slightly during it.
+      DropdownFieldClickTarget(
+        expanded = expanded && enabled,
+        onExpandedChange = { expanded = it },
+        enabled = enabled,
+      )
+    }
     ExposedDropdownMenu(
       expanded = expanded && enabled,
       onDismissRequest = { expanded = false },

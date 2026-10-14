@@ -130,24 +130,9 @@ class OrganizationPagesTest {
   }
 
   @Test
-  fun showsImpact_onlyForOrganizers() {
-    val actions =
-      object : org.groundplatform.v2.web.ui.viewmodel.ImpactActions {
-        override fun setOrganizationSurveyFilter(organizationId: String, surveyId: String?) {}
-
-        override fun setOrganizationCountryFilter(organizationId: String, countryCode: String?) {}
-
-        override fun downloadSurveySummary(surveyId: String) {}
-
-        override fun downloadOrganizationSummary(organizationId: String) {}
-
-        override fun downloadGlobalSummary() {}
-
-        override fun dismissMessage() {}
-      }
-    assertTrue(showsImpact(isManager = true, impactActions = actions))
-    assertFalse(showsImpact(isManager = false, impactActions = actions))
-    assertFalse(showsImpact(isManager = true, impactActions = null))
+  fun impact_isNoLongerAnOrganizationTab() {
+    // Every organization's numbers are published on the Impact page (`#impact/<id>`) instead.
+    assertFalse(OrganizationTab.entries.any { it.label == "Impact" })
   }
 
   @Test
@@ -219,6 +204,13 @@ class OrganizationPagesTest {
       WebPage.hashFor(WebPage.ORGANIZATION, "org-kfs"),
     )
     assertEquals("surveys", WebPage.hashFor(WebPage.WEB_SURVEYS, "x"))
+    // The Impact page may name the organization it shows.
+    assertEquals(WebPage.IMPACT, WebPage.fromHash("#impact"))
+    assertEquals(WebPage.IMPACT, WebPage.fromHash("#impact/org-kfs"))
+    assertEquals("org-kfs", WebPage.organizationIdFromHash("#impact/org-kfs"))
+    assertNull(WebPage.organizationIdFromHash("#impact"))
+    assertEquals("impact/org-kfs", WebPage.hashFor(WebPage.IMPACT, "org-kfs"))
+    assertEquals("impact", WebPage.hashFor(WebPage.IMPACT, null))
     assertEquals(
       WebPage.WEB_DASHBOARD,
       WebPage.fromHash("#dashboard"),

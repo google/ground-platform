@@ -56,11 +56,13 @@ internal object RecordPdfReports {
       title(entity.label)
       subtitle("${entity.singularTypeLabel} • ${entity.datasetName}")
       spacer(4f)
-      statusChip(
-        markerSymbol = entity.markerSymbol,
-        statusText = entity.workflowStatus,
-        statusColor = PdfColor.fromCss(entity.markerColorCss, PdfColor.fromArgb(entity.colorHex)),
-      )
+      if (entity.hasWorkflowStatus) {
+        statusChip(
+          markerSymbol = entity.markerSymbol,
+          statusText = entity.workflowStatus,
+          statusColor = PdfColor.fromCss(entity.markerColorCss, PdfColor.fromArgb(entity.colorHex)),
+        )
+      }
 
       sectionHeading("Details")
       field("Layer", entity.datasetName)

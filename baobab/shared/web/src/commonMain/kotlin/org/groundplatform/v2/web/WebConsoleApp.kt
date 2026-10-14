@@ -28,6 +28,7 @@ import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 import org.groundplatform.v2.web.ui.dashboard.WebDashboardPage
 import org.groundplatform.v2.web.ui.dashboard.WebSurveysPage
+import org.groundplatform.v2.web.ui.impact.ImpactDashboardPage
 import org.groundplatform.v2.web.ui.onboarding.WebSignInPage
 import org.groundplatform.v2.web.ui.organization.OrganizationPage
 import org.groundplatform.v2.web.ui.organization.OrganizationsPage
@@ -36,8 +37,9 @@ import org.groundplatform.v2.web.ui.wizard.CreateSurveyWizardPage
 
 /**
  * Root of the Ground 2.0 web console: the [WebSurveysPage] landing page (surveys the user can open,
- * grouped by organization), organizations, the [WebDashboardPage] (survey map and data tables), the
- * survey creation wizard, and the [SurveyEditorPage].
+ * grouped by organization), organizations, the [ImpactDashboardPage] (published impact numbers),
+ * the [WebDashboardPage] (survey map and data tables), the survey creation wizard, and the
+ * [SurveyEditorPage].
  *
  * [initialPage] and [initialOrganizationId] come from the URL hash (see [WebPage.fromHash]), and
  * [onHashChanged] receives the new hash on every page switch.
@@ -53,13 +55,16 @@ fun WebConsoleApp(
     when {
       initialPage == WebPage.ORGANIZATION && initialOrganizationId != null ->
         state.openOrganization(initialOrganizationId)
+      initialPage == WebPage.IMPACT -> state.openImpactDashboard(initialOrganizationId)
       initialPage == WebPage.CREATE_SURVEY &&
         state.createSurveyWizard.uiState.value.workingSurveyId.isBlank() ->
         state.openCreateSurveyWizard(initialOrganizationId)
       initialPage != null -> state.selectPage(initialPage)
     }
   }
-  state.onPageChanged = { page -> onHashChanged(WebPage.hashFor(page, state.openOrganizationId)) }
+  state.onPageChanged = { page ->
+    onHashChanged(WebPage.hashFor(page, state.hashOrganizationId(page)))
+  }
   val page = state.activePage
   // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay transparent
   // while the dashboard shows it.
@@ -98,6 +103,7 @@ internal fun WebConsolePages(web: WebAppState, page: WebPage) {
   when {
     !web.isSignedIn -> WebSignInPage(state = web, onSignIn = { web.signInWithGoogle() })
     resolvedPage == WebPage.ORGANIZATIONS -> OrganizationsPage(state = web, onSignOut = signOut)
+    resolvedPage == WebPage.IMPACT -> ImpactDashboardPage(state = web, onSignOut = signOut)
     resolvedPage == WebPage.ORGANIZATION ->
       OrganizationPage(
         state = web,

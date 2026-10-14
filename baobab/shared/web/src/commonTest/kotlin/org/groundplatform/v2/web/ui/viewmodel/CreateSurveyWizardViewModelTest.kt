@@ -115,7 +115,7 @@ class CreateSurveyWizardViewModelTest {
   }
 
   @Test
-  fun purposeSelection_isSingleSelect_andDrivesMapFeatureSourceAndPrimaryLayerDefaults() {
+  fun purposeSelection_isMultiSelect_andDrivesMapFeatureSourceAndPrimaryLayerDefaults() {
     val state = WebAppState()
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
@@ -129,9 +129,15 @@ class CreateSurveyWizardViewModelTest {
     assertEquals(listOf("lulc_training_data"), wizard.uiState.value.purposeIds)
     assertEquals(WizardMapFeatureSource.SAMPLE_PLOTS, wizard.uiState.value.mapFeatureSource)
 
-    // 2. Selecting Producer Registration replaces LULC (single-select) and switches to
-    // FIELD_FREEFORM + POINT.
+    // 2. Selecting Producer Registration adds it alongside LULC (multi-select).
     wizard.togglePurposePack("producer_registration")
+    assertEquals(
+      listOf("lulc_training_data", "producer_registration"),
+      wizard.uiState.value.purposeIds,
+    )
+
+    // 3. Deselecting LULC leaves Producer Registration, which switches to FIELD_FREEFORM + POINT.
+    wizard.togglePurposePack("lulc_training_data")
     assertEquals(listOf("producer_registration"), wizard.uiState.value.purposeIds)
     assertEquals(WizardMapFeatureSource.FIELD_FREEFORM, wizard.uiState.value.mapFeatureSource)
 
@@ -143,13 +149,14 @@ class CreateSurveyWizardViewModelTest {
     assertFalse(producerLayer.isGenerated)
     assertEquals(GeometryKind.POINT, producerLayer.geometryKind)
     val producerForm = assertNotNull(wizard.uiState.value.primaryForm)
-    assertEquals("Producer profile", producerForm.form.title)
+    assertEquals("Producer & farm registration", producerForm.form.title)
     assertEquals(SaveToMode.CREATE, producerForm.form.saveTo.mode)
     assertEquals(1, state.surveyEditor.uiState.value.forms.size)
 
-    // 3. Going back to Step 2 and switching to FERM Restoration updates the primary layer to
-    // POLYGON and replaces the single starting form.
+    // 4. Going back to Step 2 and swapping Producer Registration for FERM Restoration updates the
+    // primary layer to POLYGON and replaces the single starting form.
     wizard.selectStep(CreateSurveyWizardStep.MODE_AND_PURPOSE)
+    wizard.togglePurposePack("producer_registration")
     wizard.togglePurposePack("ferm_restoration")
     assertEquals(listOf("ferm_restoration"), wizard.uiState.value.purposeIds)
     wizard.selectStep(CreateSurveyWizardStep.MAP_FEATURES)
@@ -157,8 +164,128 @@ class CreateSurveyWizardViewModelTest {
     val fermLayer = assertNotNull(wizard.uiState.value.primaryMapLayer)
     assertEquals(GeometryKind.POLYGON, fermLayer.geometryKind)
     val fermForm = assertNotNull(wizard.uiState.value.primaryForm)
-    assertEquals("Restoration monitoring wave", fermForm.form.title)
+    assertEquals("Ecosystem restoration site check", fermForm.form.title)
     assertEquals(1, state.surveyEditor.uiState.value.forms.size)
+  }
+
+  @Test
+  fun purposeSelection_multiplePacks_mergeProgramsAndDropOnlyDeselectedPackPrograms() {
+    val state = WebAppState()
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
+    val wizard = state.createSurveyWizard
+    wizard.updateTitle("Multi-Purpose Survey")
+    wizard.nextStep() // MODE_AND_PURPOSE
+
+    val library = wizard.uiState.value.library
+    val eudrPrograms = library.purposePack("eudr_due_diligence")?.programIds.orEmpty()
+    val fermPrograms = library.purposePack("ferm_restoration")?.programIds.orEmpty()
+
+    wizard.togglePurposePack("eudr_due_diligence")
+    wizard.togglePurposePack("ferm_restoration")
+    assertEquals(
+      listOf("eudr_due_diligence", "ferm_restoration"),
+      wizard.uiState.value.purposeIds,
+    )
+    assertEquals(
+      (eudrPrograms + fermPrograms).distinct(),
+      state.surveyEditor.uiState.value.draft.details.programIds,
+    )
+    assertTrue(wizard.uiState.value.isPurposeValid)
+
+    wizard.togglePurposePack("eudr_due_diligence")
+    assertEquals(listOf("ferm_restoration"), wizard.uiState.value.purposeIds)
+    assertEquals(fermPrograms, state.surveyEditor.uiState.value.draft.details.programIds)
+  }
+
+  @Test
+  fun multiplePurposes_createOneFormPerTemplate_eachWithItsOwnDataset() {
+    val state = WebAppState()
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
+    val wizard = state.createSurveyWizard
+    wizard.updateTitle("Producers and Restoration")
+    wizard.nextStep() // MODE_AND_PURPOSE
+    wizard.togglePurposePack("producer_registration")
+    wizard.togglePurposePack("ferm_restoration")
+    wizard.nextStep() // SURVEY_AREA
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
+    wizard.nextStep() // MAP_FEATURES
+
+    val editor = state.surveyEditor.uiState.value
+    assertEquals(
+      listOf("Producer & farm registration", "Ecosystem restoration site check"),
+      editor.forms.map { it.form.title },
+    )
+    val primaryForm = editor.forms[0]
+    val fermForm = editor.forms[1]
+    // The primary Form stays wired to the primary Map layer; the other gets its own dataset.
+    assertEquals(primaryForm.key, wizard.uiState.value.primaryForm?.key)
+    val primaryLayer = assertNotNull(wizard.uiState.value.primaryMapLayer)
+    assertTrue(
+      editor.datasets.none { it.key != primaryLayer.key && it.linkedFormKey == primaryForm.key }
+    )
+    assertNotNull(editor.datasets.firstOrNull { it.linkedFormKey == fermForm.key })
+
+    // Deselecting FERM removes its Form and dataset, keeping the primary Form and Map layer.
+    wizard.selectStep(CreateSurveyWizardStep.MODE_AND_PURPOSE)
+    wizard.togglePurposePack("ferm_restoration")
+    wizard.selectStep(CreateSurveyWizardStep.MAP_FEATURES)
+    val afterDeselect = state.surveyEditor.uiState.value
+    assertEquals(listOf(primaryForm.key), afterDeselect.forms.map { it.key })
+    assertTrue(afterDeselect.datasets.none { it.linkedFormKey == fermForm.key })
+    assertEquals(primaryLayer.key, wizard.uiState.value.primaryMapLayer?.key)
+  }
+
+  @Test
+  fun purposeWithSeveralTemplates_createsSeveralForms_sharedTemplatesOnce() {
+    val state = WebAppState()
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
+    val wizard = state.createSurveyWizard
+    wizard.updateTitle("Coop Audit")
+    wizard.nextStep() // MODE_AND_PURPOSE
+    val coopPack =
+      wizard.uiState.value.sortedPurposePacks.first {
+        it.title.get("en") == "Coop annual certification audit"
+      }
+    assertEquals(2, coopPack.formTemplateIds.size)
+
+    // The coop pack and EUDR both include the EUDR plot registration template; it's added once.
+    wizard.togglePurposePack(coopPack.id)
+    wizard.togglePurposePack("eudr_due_diligence")
+    wizard.nextStep() // SURVEY_AREA
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
+    wizard.nextStep() // MAP_FEATURES
+
+    val forms = state.surveyEditor.uiState.value.forms
+    assertEquals(2, forms.size)
+    assertEquals("Coop member plot audit", forms[1].form.title)
+  }
+
+  @Test
+  fun changingPurposes_keepsFormsTheOrganizerAdded() {
+    val state = WebAppState()
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
+    val wizard = state.createSurveyWizard
+    wizard.updateTitle("Organizer Forms")
+    wizard.nextStep() // MODE_AND_PURPOSE
+    wizard.togglePurposePack("producer_registration")
+    wizard.togglePurposePack("ferm_restoration")
+    wizard.nextStep() // SURVEY_AREA
+    state.surveyEditor.setSurveyArea(SampleSurveyEditorData.kenyaSurveyArea())
+    wizard.nextStep() // MAP_FEATURES
+    wizard.nextStep() // FORM_QUESTIONS
+
+    val keysBefore = state.surveyEditor.uiState.value.forms.map { it.key }.toSet()
+    state.surveyEditor.addForm()
+    val addedKey = state.surveyEditor.uiState.value.forms.map { it.key }.first { it !in keysBefore }
+
+    wizard.selectStep(CreateSurveyWizardStep.MODE_AND_PURPOSE)
+    wizard.togglePurposePack("ferm_restoration")
+    wizard.selectStep(CreateSurveyWizardStep.FORM_QUESTIONS)
+
+    val forms = state.surveyEditor.uiState.value.forms
+    assertEquals(2, forms.size)
+    assertEquals("Producer & farm registration", forms[0].form.title)
+    assertEquals(addedKey, forms[1].key)
   }
 
   @Test

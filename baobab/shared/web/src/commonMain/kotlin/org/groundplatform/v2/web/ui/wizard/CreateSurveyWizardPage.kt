@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.web.ui.wizard
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -21,6 +22,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -43,15 +45,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AddLocationAlt
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.GridOn
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material.icons.outlined.Verified
@@ -72,6 +79,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -98,6 +106,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.app.domain.model.ImagerySource
 import org.groundplatform.v2.app.domain.model.Organization
+import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.EntityDataset
 import org.groundplatform.v2.app.domain.model.editor.EntityRow
 import org.groundplatform.v2.app.domain.model.editor.GeometryKind
@@ -126,12 +135,16 @@ import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.formeditor.FormEditorPage
 import org.groundplatform.v2.web.ui.formeditor.SectionLabel
 import org.groundplatform.v2.web.ui.state.CreateSurveyWizardUiState
+import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
+import org.groundplatform.v2.web.ui.surveyeditor.AddFormDialog
+import org.groundplatform.v2.web.ui.surveyeditor.EntityDatasetEditor
 import org.groundplatform.v2.web.ui.surveyeditor.GEOMETRY_FILE_ACCEPT
 import org.groundplatform.v2.web.ui.surveyeditor.InteractiveLayerMapCard
 import org.groundplatform.v2.web.ui.surveyeditor.IssueList
 import org.groundplatform.v2.web.ui.surveyeditor.LanguageSelectorSection
 import org.groundplatform.v2.web.ui.surveyeditor.MapLayerImportPreview
+import org.groundplatform.v2.web.ui.surveyeditor.NavItem
 import org.groundplatform.v2.web.ui.surveyeditor.SamplingDesignPanel
 import org.groundplatform.v2.web.ui.surveyeditor.SharingContent
 import org.groundplatform.v2.web.ui.surveyeditor.SurveyAreaSection
@@ -141,6 +154,13 @@ import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
 
 private val WizardContentMaxWidth = 860.dp
 private val WizardWideContentMaxWidth = 1160.dp
+
+/**
+ * Bounds of the height of the Map features step's map preview and of its settings, which scroll on
+ * their own; between them it follows the window's height.
+ */
+private val WizardMapPreviewMinHeight = 420.dp
+private val WizardMapPreviewMaxHeight = 900.dp
 
 /** Sentinel for the "None (personal survey)" option in the Organization selector. */
 private val NoOrganizationOption = Organization(id = "", name = "None (personal survey)")
@@ -200,6 +220,12 @@ fun CreateSurveyWizardPage(
     (navigationIcon: @Composable () -> Unit, context: @Composable () -> Unit) -> Unit,
 ) {
   var isConfirmingDiscard by remember { mutableStateOf(false) }
+  // Whether Step 4's "How are map features created?" choice shows all options (`true`) or a summary
+  // of the chosen one (`false`): collapsed once the organizer picks one, expanded by "Change", and
+  // until then collapsed only if the Purpose Packs or collection mode already decided it. Kept here
+  // so it survives moving between steps.
+  var mapFeatureSourceExpanded by
+    remember(uiState.workingSurveyId) { mutableStateOf<Boolean?>(null) }
 
   Column(modifier = modifier.fillMaxSize()) {
     header(
@@ -270,14 +296,26 @@ fun CreateSurveyWizardPage(
           }
         }
         CreateSurveyWizardStep.MAP_FEATURES ->
-          WizardStepContainer(maxWidth = WizardWideContentMaxWidth) {
-            MapFeaturesStepContent(
-              uiState = uiState,
-              actions = actions,
-              editorUiState = editorUiState,
-              editorActions = editorActions,
-              pickTextFile = pickTextFile,
-            )
+          BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // The map and its settings fill the step's visible height (less the container's
+            // padding), so once scrolled into view both fit on screen together.
+            val mapPreviewHeight =
+              (maxHeight - 64.dp).coerceIn(WizardMapPreviewMinHeight, WizardMapPreviewMaxHeight)
+            WizardStepContainer(maxWidth = WizardWideContentMaxWidth) {
+              MapFeaturesStepContent(
+                uiState = uiState,
+                actions = actions,
+                editorUiState = editorUiState,
+                editorActions = editorActions,
+                pickTextFile = pickTextFile,
+                sourceCollapsed =
+                  mapFeatureSourceExpanded?.not() ?: uiState.mapFeatureSourcePreselected,
+                onSourceCollapsedChange = { mapFeatureSourceExpanded = !it },
+                sourcePreselected =
+                  mapFeatureSourceExpanded == null && uiState.mapFeatureSourcePreselected,
+                mapPreviewHeight = mapPreviewHeight,
+              )
+            }
           }
         CreateSurveyWizardStep.FORM_QUESTIONS ->
           FormQuestionsStepContent(
@@ -555,6 +593,17 @@ private fun OverviewStepContent(
   var identityCardY by remember { mutableStateOf(0) }
   var startMethodCardY by remember { mutableStateOf(0) }
   val titleFocusRequester = remember { FocusRequester() }
+  // Set while the title holds the focus it was given when the step opened, so leaving the field
+  // without typing doesn't flag it as missing before the organizer has touched it.
+  var titleAutoFocused by remember { mutableStateOf(false) }
+
+  // Start typing the survey's name straight away when the designer opens on a new survey.
+  LaunchedEffect(Unit) {
+    if (uiState.title.isBlank()) {
+      titleAutoFocused = true
+      runCatching { titleFocusRequester.requestFocus() }.onFailure { titleAutoFocused = false }
+    }
+  }
 
   LaunchedEffect(uiState.validationAttemptCount) {
     if (uiState.validationAttemptCount > 0 && !uiState.canProceedFromCurrentStep) {
@@ -618,9 +667,10 @@ private fun OverviewStepContent(
         modifier =
           Modifier.fillMaxWidth().focusRequester(titleFocusRequester).onFocusChanged { focusState ->
             if (focusState.isFocused) {
-              titleHadFocus = true
-            } else if (titleHadFocus) {
-              titleBlurredAfterFocus = true
+              if (!titleAutoFocused) titleHadFocus = true
+            } else {
+              titleAutoFocused = false
+              if (titleHadFocus) titleBlurredAfterFocus = true
             }
           },
       )
@@ -866,7 +916,7 @@ private fun ModeAndPurposeStepContent(
       SectionLabel("What will this data be used for? *")
       Text(
         text =
-          "Select a purpose so Collect One can tailor your survey's map layer defaults, starting form, standard library concepts, data governance guardrails (such as EUDR or CARE sovereignty), and one-click export profiles. Choose \"Other\" if your goal isn't listed.",
+          "Select one or more purposes so Collect One can tailor your survey's map layer defaults, starting form, standard library concepts, data governance guardrails (such as EUDR or CARE sovereignty), and one-click export profiles. Choose \"Other\" if your goal isn't listed.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -880,7 +930,6 @@ private fun ModeAndPurposeStepContent(
         otherPurposeText = editorUiState.details.otherPurpose,
         onOtherPurposeTextChange = actions::updateOtherPurpose,
         isError = uiState.isPurposeInvalid,
-        singleSelect = true,
         onOtherInputPositioned = { otherInputY = it },
       )
 
@@ -1078,6 +1127,10 @@ private fun MapFeaturesStepContent(
   editorUiState: SurveyEditorUiState,
   editorActions: SurveyEditorActions,
   pickTextFile: TextFilePicker,
+  sourceCollapsed: Boolean,
+  onSourceCollapsedChange: (Boolean) -> Unit,
+  sourcePreselected: Boolean,
+  mapPreviewHeight: Dp,
 ) {
   val primaryLayer = uiState.primaryMapLayer
   val requiresEudrGuardrail =
@@ -1101,34 +1154,72 @@ private fun MapFeaturesStepContent(
   }
 
   ElevatedCard(
-    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+    modifier = Modifier.animateContentSize(),
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(20.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
       SectionLabel("How are map features created?")
-      Row(
-        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        WizardMapFeatureSource.entries.forEach { source ->
-          val icon =
-            when (source) {
-              WizardMapFeatureSource.FIELD_FREEFORM -> Icons.Outlined.AddLocationAlt
-              WizardMapFeatureSource.SAMPLE_PLOTS -> Icons.Outlined.GridOn
-              WizardMapFeatureSource.IMPORT_FILE -> Icons.Outlined.UploadFile
-            }
-          SelectableChoiceCard(
-            title = source.label,
-            description = source.description,
-            icon = icon,
-            tags = source.tags,
-            selected = uiState.mapFeatureSource == source,
-            onClick = { actions.selectMapFeatureSource(source) },
-            modifier = Modifier.weight(1f),
-            graphic = { MapFeatureSourceCardGraphic(source = source) },
+      fun iconOf(source: WizardMapFeatureSource) =
+        when (source) {
+          WizardMapFeatureSource.FIELD_FREEFORM -> Icons.Outlined.AddLocationAlt
+          WizardMapFeatureSource.SAMPLE_PLOTS -> Icons.Outlined.GridOn
+          WizardMapFeatureSource.IMPORT_FILE -> Icons.Outlined.UploadFile
+        }
+      if (sourceCollapsed) {
+        // Once chosen (or preselected), the choice collapses to a one-line summary so the
+        // configuration for it is right below; "Change" brings the cards back.
+        val source = uiState.mapFeatureSource
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          Icon(
+            iconOf(source),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp),
           )
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              source.label,
+              style = MaterialTheme.typography.titleSmall,
+              fontWeight = FontWeight.Bold,
+            )
+            Text(
+              if (sourcePreselected) {
+                "${source.description} Preselected for the purpose and collection mode you chose."
+              } else {
+                source.description
+              },
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          OutlinedButton(onClick = { onSourceCollapsedChange(false) }) { Text("Change") }
+        }
+      } else {
+        Row(
+          modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          WizardMapFeatureSource.entries.forEach { source ->
+            SelectableChoiceCard(
+              title = source.label,
+              description = source.description,
+              icon = iconOf(source),
+              tags = source.tags,
+              selected = uiState.mapFeatureSource == source,
+              onClick = {
+                actions.selectMapFeatureSource(source)
+                onSourceCollapsedChange(true)
+              },
+              modifier = Modifier.weight(1f),
+              graphic = { MapFeatureSourceCardGraphic(source = source) },
+            )
+          }
         }
       }
     }
@@ -1191,12 +1282,16 @@ private fun MapFeaturesStepContent(
           primaryLayer
         }
       }
+    // The map and its settings share a fixed height, and the settings scroll on their own (as in
+    // the
+    // survey editor), so the map stays in view while scrolling through long settings such as a
+    // sample design.
     Row(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth().height(mapPreviewHeight),
       horizontalArrangement = Arrangement.spacedBy(16.dp),
       verticalAlignment = Alignment.Top,
     ) {
-      Box(modifier = Modifier.weight(1f).height(520.dp)) {
+      Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
         key(uiState.mapFeatureSource, primaryLayer.geometryKind) {
           InteractiveLayerMapCard(
             editor = editorActions,
@@ -1214,12 +1309,12 @@ private fun MapFeaturesStepContent(
       }
 
       ElevatedCard(
-        modifier = Modifier.width(400.dp),
+        modifier = Modifier.width(400.dp).fillMaxHeight(),
         colors =
           CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
       ) {
         Column(
-          modifier = Modifier.fillMaxWidth().padding(20.dp),
+          modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
           verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           SectionLabel("Primary map layer settings")
@@ -1373,6 +1468,29 @@ private fun MapFeaturesStepContent(
       }
     }
   }
+
+  val otherDatasetCount = editorUiState.datasets.count { it.key != primaryLayer?.key }
+  if (otherDatasetCount > 0) {
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Icon(
+        Icons.Outlined.Info,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.size(18.dp),
+      )
+      Text(
+        text =
+          "This survey also has $otherDatasetCount more " +
+            "${if (otherDatasetCount == 1) "map layer or data table" else "map layers and data tables"}" +
+            ", linked to its other forms. You can review them in the next step.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
 }
 
 private fun seedPreviewFeaturesForFreeformLayer(
@@ -1439,7 +1557,7 @@ private fun seedPreviewFeaturesForFreeformLayer(
 }
 
 // ---------------------------------------------------------------------------------------------
-// Step 5: Form & questions
+// Step 5: Forms
 // ---------------------------------------------------------------------------------------------
 
 @Composable
@@ -1449,24 +1567,213 @@ private fun FormQuestionsStepContent(
   editorActions: SurveyEditorActions,
   isDarkTheme: Boolean,
 ) {
-  val primaryForm = uiState.primaryForm ?: editorUiState.forms.firstOrNull()
-  if (primaryForm == null) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      Button(onClick = { editorActions.addForm() }) { Text("Add form") }
+  val forms = editorUiState.forms
+  val primaryForm = uiState.primaryForm ?: forms.firstOrNull()
+  val section = editorUiState.section
+  val selectedDataset =
+    (section as? SurveyEditorSection.Dataset)?.let { s ->
+      editorUiState.datasets.firstOrNull { it.key == s.key }
     }
-  } else {
-    key(primaryForm.key) {
-      val formEditor = remember(primaryForm.key) { editorActions.formEditor(primaryForm.key) }
-      val formState by formEditor.uiState.collectAsState()
-      FormEditorPage(
-        uiState = formState,
-        actions = formEditor,
-        isDarkTheme = isDarkTheme,
-        modifier = Modifier.fillMaxSize(),
-        onCreateDataset = { editorActions.createDatasetForForm(primaryForm.key) },
-        onSaveToModeChange = { editorActions.setFormSaveToMode(primaryForm.key, it) },
+  val selectedForm =
+    if (selectedDataset != null) {
+      null
+    } else {
+      (section as? SurveyEditorSection.Form)?.let { s -> forms.firstOrNull { it.key == s.key } }
+        ?: primaryForm
+    }
+  // Progressive disclosure: a single Form and its Map layer need no outline; the outline appears
+  // once the survey has several Forms or datasets (for example from several purposes).
+  val hasSeveralParts = forms.size > 1 || editorUiState.datasets.size > 1
+  var showOutline by remember(hasSeveralParts) { mutableStateOf(hasSeveralParts) }
+  var showAddForm by remember { mutableStateOf(false) }
+  if (showAddForm) {
+    AddFormDialog(
+      actions = editorActions,
+      onDismiss = { showAddForm = false },
+      library = editorUiState.library,
+    )
+  }
+
+  Row(modifier = Modifier.fillMaxSize()) {
+    if (showOutline) {
+      WizardSurveyOutline(
+        editorUiState = editorUiState,
+        selectedFormKey = selectedForm?.key,
+        selectedDatasetKey = selectedDataset?.key,
+        onSelect = editorActions::select,
+        onAddForm = { showAddForm = true },
+        onCollapse = { showOutline = false },
+        modifier = Modifier.width(264.dp).fillMaxHeight(),
+      )
+      VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    }
+    Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+      if (!showOutline) {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          if (hasSeveralParts) {
+            TextButton(onClick = { showOutline = true }) {
+              Icon(
+                Icons.AutoMirrored.Outlined.List,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+              )
+              Spacer(Modifier.width(6.dp))
+              Text("Show all forms & layers")
+            }
+          } else {
+            TextButton(onClick = { showAddForm = true }) {
+              Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+              Spacer(Modifier.width(6.dp))
+              Text("Add another form")
+            }
+          }
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      }
+      Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+        when {
+          selectedDataset != null ->
+            key(selectedDataset.key) {
+              EntityDatasetEditor(editorUiState, editorActions, selectedDataset)
+            }
+          selectedForm != null ->
+            key(selectedForm.key) {
+              val formEditor =
+                remember(selectedForm.key) { editorActions.formEditor(selectedForm.key) }
+              val formState by formEditor.uiState.collectAsState()
+              FormEditorPage(
+                uiState = formState,
+                actions = formEditor,
+                isDarkTheme = isDarkTheme,
+                modifier = Modifier.fillMaxSize(),
+                onCreateDataset = { editorActions.createDatasetForForm(selectedForm.key) },
+                // The primary Form is wired to the primary Map layer, so only others can be
+                // deleted.
+                onDelete =
+                  if (selectedForm.key != primaryForm?.key) {
+                    { editorActions.deleteForm(selectedForm.key) }
+                  } else {
+                    null
+                  },
+                onSaveToModeChange = { editorActions.setFormSaveToMode(selectedForm.key, it) },
+                onOpenDataset = { id ->
+                  editorUiState.datasets
+                    .firstOrNull { it.id == id }
+                    ?.let { editorActions.select(SurveyEditorSection.Dataset(it.key)) }
+                },
+                onOpenForm = { formKey -> editorActions.select(SurveyEditorSection.Form(formKey)) },
+              )
+            }
+          else ->
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+              Button(onClick = { editorActions.addForm() }) { Text("Add form") }
+            }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Collapsible outline of the survey's Forms, Map layers, and Data tables for the Forms step, shown
+ * when the survey has more than one Form or dataset. Map layer and Data table groups only appear
+ * when they have entries, keeping the outline short.
+ */
+@Composable
+private fun WizardSurveyOutline(
+  editorUiState: SurveyEditorUiState,
+  selectedFormKey: String?,
+  selectedDatasetKey: String?,
+  onSelect: (SurveyEditorSection) -> Unit,
+  onAddForm: () -> Unit,
+  onCollapse: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
+    Column(
+      modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = "Forms",
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.Bold,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.weight(1f),
+        )
+        IconButton(onClick = onAddForm) {
+          Icon(Icons.Outlined.Add, contentDescription = "Add form")
+        }
+        IconButton(onClick = onCollapse) {
+          Icon(Icons.Outlined.ChevronLeft, contentDescription = "Hide forms & layers")
+        }
+      }
+      editorUiState.forms.forEach { entry ->
+        NavItem(
+          label = entry.form.title.ifBlank { "Untitled form" },
+          icon = Icons.Outlined.Description,
+          selected = entry.key == selectedFormKey,
+          onClick = { onSelect(SurveyEditorSection.Form(entry.key)) },
+          trailing = "${entry.form.questions.size}",
+          hasIssues = editorUiState.formIssues(entry).isNotEmpty(),
+        )
+      }
+      OutlineDatasetGroup(
+        title = DatasetKind.MAP_LAYER.plural,
+        datasets = editorUiState.mapLayers,
+        icon = Icons.Outlined.Layers,
+        editorUiState = editorUiState,
+        selectedDatasetKey = selectedDatasetKey,
+        onSelect = onSelect,
+      )
+      OutlineDatasetGroup(
+        title = DatasetKind.DATA_TABLE.plural,
+        datasets = editorUiState.dataTables,
+        icon = Icons.AutoMirrored.Outlined.List,
+        editorUiState = editorUiState,
+        selectedDatasetKey = selectedDatasetKey,
+        onSelect = onSelect,
       )
     }
+  }
+}
+
+@Composable
+private fun OutlineDatasetGroup(
+  title: String,
+  datasets: List<EntityDataset>,
+  icon: ImageVector,
+  editorUiState: SurveyEditorUiState,
+  selectedDatasetKey: String?,
+  onSelect: (SurveyEditorSection) -> Unit,
+) {
+  if (datasets.isEmpty()) return
+  HorizontalDivider(
+    modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
+    color = MaterialTheme.colorScheme.outlineVariant,
+  )
+  Text(
+    text = title,
+    style = MaterialTheme.typography.titleSmall,
+    fontWeight = FontWeight.Bold,
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier = Modifier.padding(start = 16.dp, top = 4.dp, bottom = 4.dp),
+  )
+  datasets.forEach { dataset ->
+    NavItem(
+      label = dataset.displayName.ifBlank { "Untitled" },
+      icon = icon,
+      selected = dataset.key == selectedDatasetKey,
+      onClick = { onSelect(SurveyEditorSection.Dataset(dataset.key)) },
+      hasIssues = editorUiState.datasetIssues(dataset).isNotEmpty(),
+    )
   }
 }
 

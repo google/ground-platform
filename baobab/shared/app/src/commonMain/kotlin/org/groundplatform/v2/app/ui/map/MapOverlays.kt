@@ -19,7 +19,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -147,13 +146,14 @@ internal fun SelectedClusterBalloonDetailCard(
         }
       }
 
-      if (cluster.siteSymbolGroups.isNotEmpty()) {
+      // Features without a marker symbol get no status chip; they're counted in the header total.
+      if (cluster.siteStatusChipGroups.isNotEmpty()) {
         Row(
           modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
           horizontalArrangement = Arrangement.spacedBy(8.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          cluster.siteSymbolGroups.forEach { group ->
+          cluster.siteStatusChipGroups.forEach { group ->
             val groupColor = Color(group.colorHex)
             Surface(
               shape = RoundedCornerShape(10.dp),
@@ -166,34 +166,19 @@ internal fun SelectedClusterBalloonDetailCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
               ) {
-                if (group.isNoSymbolGroup) {
-                  Box(
-                    modifier =
-                      Modifier.size(12.dp)
-                        .clip(CircleShape)
-                        .background(groupColor.copy(alpha = 0.28f))
-                        .border(1.5.dp, groupColor, CircleShape)
+                Box(
+                  modifier = Modifier.size(14.dp).clip(CircleShape).background(groupColor),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = group.markerSymbol,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.5.sp),
+                    color = clusterContentColorOnArgb(group.colorHex),
+                    fontWeight = FontWeight.ExtraBold,
                   )
-                } else {
-                  Box(
-                    modifier = Modifier.size(14.dp).clip(CircleShape).background(groupColor),
-                    contentAlignment = Alignment.Center,
-                  ) {
-                    Text(
-                      text = group.markerSymbol,
-                      style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.5.sp),
-                      color = clusterContentColorOnArgb(group.colorHex),
-                      fontWeight = FontWeight.ExtraBold,
-                    )
-                  }
                 }
                 Text(
-                  text =
-                    if (group.isNoSymbolGroup) {
-                      "Unmarked map feature: ${group.count}"
-                    } else {
-                      "${group.statusLabel}: ${group.count}"
-                    },
+                  text = "${group.statusLabel}: ${group.count}",
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.inverseOnSurface,
                   fontWeight = FontWeight.SemiBold,

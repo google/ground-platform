@@ -46,14 +46,17 @@ class LibraryRepositoryTest {
     val global = repo.getLibrary(Organization.ALL_USERS_ID)
     assertTrue(global.isGlobal)
     assertEquals(GlobalLibrarySeedData.library(), global)
-    assertTrue(global.concepts.size in 45..55, "about 50 global concepts")
+    assertTrue(global.concepts.size in 60..75, "about 67 global concepts")
     assertEquals(
       listOf(
         "producer_registration",
         "eudr_due_diligence",
         "ferm_restoration",
+        "protected_area_management",
+        "iplc_land_mapping",
         "lulc_training_data",
         "redd_plus_tfff",
+        "timber_traceability",
       ),
       global.purposePacks.map { it.id },
     )

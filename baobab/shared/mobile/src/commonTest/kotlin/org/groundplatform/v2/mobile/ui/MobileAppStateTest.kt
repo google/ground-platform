@@ -1339,7 +1339,8 @@ class MobileAppStateTest {
     assertEquals("layer-land-use-observations", createdEntity.layerId)
     assertEquals("primary_forest", createdEntity.properties["land_use"])
     assertEquals("Newly surveyed forest patch", createdEntity.properties["observer_note"])
-    assertEquals("Completed", createdEntity.properties["status"])
+    // The form's save_to sets no workflow status, so none is defaulted in.
+    assertFalse(createdEntity.hasWorkflowStatus)
 
     // Assert submission is attached to the new entity
     assertEquals(1, createdEntity.submissions.size)

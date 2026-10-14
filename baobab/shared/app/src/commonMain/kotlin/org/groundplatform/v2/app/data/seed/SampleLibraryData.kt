@@ -112,10 +112,13 @@ object SampleLibraryData {
             organizationId = KFS,
             title = LocalizedText.en("Coop annual certification audit"),
             description =
-              LocalizedText.en("EUDR plot registration plus the cooperative's own plot audit."),
+              LocalizedText.en(
+                "Deforestation compliance plot check plus the cooperative's own plot audit."
+              ),
             icon = "fact_check",
             formTemplateIds = listOf("eudr_plot_registration", audit.id),
             exportProfileIds = listOf("eudr_geojson"),
+            programIds = listOf("eudr", "rainforest_alliance", "fairtrade"),
             status = LibraryStatus.STABLE,
           )
         ),

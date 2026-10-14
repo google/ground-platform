@@ -67,6 +67,7 @@ import org.groundplatform.v2.app.domain.model.ConceptDataType
 import org.groundplatform.v2.app.domain.model.FormTemplate
 import org.groundplatform.v2.app.domain.model.ImpactPillar
 import org.groundplatform.v2.app.domain.model.LibraryConcept
+import org.groundplatform.v2.app.domain.model.LibraryPrograms
 import org.groundplatform.v2.app.domain.model.LibraryStatus
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
@@ -915,6 +916,11 @@ private fun PurposeRow(
     summary =
       listOfNotNull(
           templates.takeIf { it.isNotBlank() }?.let { "Templates: $it" },
+          pack.programIds
+            .takeIf { it.isNotEmpty() }
+            ?.let {
+              "Reporting programs & frameworks: ${it.joinToString { id -> LibraryPrograms.label(id) }}"
+            },
           pack.exportProfileIds.takeIf { it.isNotEmpty() }?.let { "Exports: ${it.joinToString()}" },
           pack.pillar?.label,
         )

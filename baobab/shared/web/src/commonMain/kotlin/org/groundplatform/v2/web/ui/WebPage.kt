@@ -25,7 +25,12 @@ enum class WebPage(val label: String, val hash: String) {
   /** The organizations the signed-in user belongs to, and listed ones they can ask to join. */
   ORGANIZATIONS("Organizations", "organizations"),
   /** One organization's surveys, members, and settings (`#organization/<id>`). */
-  ORGANIZATION("Organization", "organization");
+  ORGANIZATION("Organization", "organization"),
+  /**
+   * Published impact numbers of the organizations the signed-in user follows and of all of Collect
+   * One (`#impact`, or `#impact/<id>` to open one organization's numbers).
+   */
+  IMPACT("Impact", "impact");
 
   /** Whether this page shows one survey, and so needs an active survey to open. */
   val needsActiveSurvey: Boolean
@@ -44,16 +49,27 @@ enum class WebPage(val label: String, val hash: String) {
       return entries.firstOrNull { it.hash == h } ?: aliases[h]
     }
 
-    /** The organization ID in an `#organization/<id>` hash, or `null` for any other hash. */
+    /** Pages whose hash may name an organization (`#<page>/<id>`). */
+    private val organizationPages = setOf(ORGANIZATION, IMPACT)
+
+    /**
+     * The organization ID in an `#organization/<id>` or `#impact/<id>` hash, or `null` for any
+     * other hash.
+     */
     fun organizationIdFromHash(hash: String?): String? {
       val h = hash?.removePrefix("#") ?: return null
-      if (fromHash(h) != ORGANIZATION) return null
+      if (fromHash(h) !in organizationPages) return null
       return h.substringAfter('/', "").takeIf { it.isNotBlank() }
     }
 
-    /** The URL hash for [page], including the organization ID for the organization page. */
+    /**
+     * The URL hash for [page], including the organization ID for the organization and Impact pages.
+     */
     fun hashFor(page: WebPage, organizationId: String?): String =
-      if (page == ORGANIZATION && !organizationId.isNullOrBlank()) "${page.hash}/$organizationId"
-      else page.hash
+      if (page in organizationPages && !organizationId.isNullOrBlank()) {
+        "${page.hash}/$organizationId"
+      } else {
+        page.hash
+      }
   }
 }

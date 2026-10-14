@@ -16,6 +16,7 @@
 package org.groundplatform.v2.web.ui.state
 
 import org.groundplatform.v2.app.domain.model.Country
+import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.web.domain.model.ImpactSummary
 
@@ -35,20 +36,83 @@ data class OrganizationImpactUiState(
   val countries: List<Country> = emptyList(),
 )
 
+/** What the Impact page's content pane shows. */
+sealed interface ImpactDashboardFocus {
+  /** Headline numbers of every organization on the signed-in user's dashboard. */
+  data object Overview : ImpactDashboardFocus
+
+  /** Numbers across all of Collect One. */
+  data object Platform : ImpactDashboardFocus
+
+  /** One organization's numbers. */
+  data class OrganizationFocus(val organizationId: String) : ImpactDashboardFocus
+}
+
 /**
- * UI state of the Impact views: the survey Impact tab of the web dashboard, the organization Impact
- * tab, and the platform-wide view for `"All users"` Managers. Numbers are recomputed shortly after
- * the underlying data changes.
+ * An organization people can put on their Impact page, with the numbers it publishes. Every
+ * organization publishes anonymous totals; nobody outside it sees its submissions, map features, or
+ * answers.
+ */
+data class ImpactDashboardOrganization(
+  val organization: Organization,
+  /** Whether the signed-in user is a member, and so can also see its full numbers. */
+  val isMember: Boolean,
+  /** Whether the signed-in user is one of its Managers (Organizers). */
+  val isManager: Boolean,
+  /** Its published numbers, under its country filter. */
+  val published: OrganizationImpactUiState,
+) {
+  val id: String
+    get() = organization.id
+}
+
+/**
+ * The Impact page (`#impact`): published numbers of the organizations the signed-in user chose to
+ * follow, and of all of Collect One.
+ */
+data class ImpactDashboardUiState(
+  /**
+   * Organizations the signed-in user can add, by name: listed organizations plus the ones they
+   * belong to (unlisted organizations stay hidden from everyone else).
+   */
+  val available: List<ImpactDashboardOrganization> = emptyList(),
+  /** IDs of the organizations on the user's dashboard, in the order they were added. */
+  val selectedIds: List<String> = emptyList(),
+  val focus: ImpactDashboardFocus = ImpactDashboardFocus.Overview,
+  /**
+   * Whether members see the published view of their own organizations (what everyone else sees)
+   * instead of their full numbers.
+   */
+  val isPreviewingPublished: Boolean = false,
+) {
+  /** The organizations on the user's dashboard, in [selectedIds] order. */
+  val selected: List<ImpactDashboardOrganization>
+    get() = selectedIds.mapNotNull(::organization)
+
+  fun organization(id: String): ImpactDashboardOrganization? = available.firstOrNull { it.id == id }
+}
+
+/**
+ * UI state of the Impact views: the Impact page, the survey Impact pane, and the platform-wide
+ * view. Numbers are recomputed shortly after the underlying data changes.
  */
 data class ImpactUiState(
   /** Whether the first computation hasn't finished yet. */
   val isLoading: Boolean = true,
   /** Numbers of every survey, by survey ID. */
   val surveys: Map<String, ImpactSummary> = emptyMap(),
-  /** Numbers of every organization, by organization ID. */
+  /**
+   * Full numbers of the organizations the signed-in user belongs to, by organization ID. Everyone
+   * else sees an organization's published numbers ([ImpactDashboardOrganization.published]).
+   */
   val organizations: Map<String, OrganizationImpactUiState> = emptyMap(),
-  /** Platform-wide numbers, only for Managers of `"All users"`; `null` for everyone else. */
+  /**
+   * Platform-wide numbers: the full view for Managers of `"All users"`, the published view
+   * ([ImpactSummary.isPublished]) for everyone else.
+   */
   val global: ImpactSummary? = null,
+  /** The Impact page. */
+  val dashboard: ImpactDashboardUiState = ImpactDashboardUiState(),
   /** Message about a finished download, shown in a snackbar. */
   val message: String? = null,
 )

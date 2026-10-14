@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -43,6 +44,7 @@ import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -86,16 +88,13 @@ import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
 import org.groundplatform.v2.web.ui.dashboard.CreateSurveyDialog
 import org.groundplatform.v2.web.ui.dashboard.CreateSurveyRequest
-import org.groundplatform.v2.web.ui.dashboard.ImpactMessageSnackbar
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparator
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparatorWidth
 import org.groundplatform.v2.web.ui.dashboard.WebSurveyCard
 import org.groundplatform.v2.web.ui.dashboard.WebSurveysList
 import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.formeditor.SectionLabel
-import org.groundplatform.v2.web.ui.impact.GlobalImpactPane
-import org.groundplatform.v2.web.ui.impact.OrganizationImpactPane
-import org.groundplatform.v2.web.ui.state.ImpactUiState
+import org.groundplatform.v2.web.ui.impact.PUBLISHED_RULES
 import org.groundplatform.v2.web.ui.state.OrganizationLibraryUiState
 import org.groundplatform.v2.web.ui.state.OrganizationUiState
 import org.groundplatform.v2.web.ui.surveyeditor.AcceptInviteDialog
@@ -104,16 +103,15 @@ import org.groundplatform.v2.web.ui.surveyeditor.PaneScaffold
 import org.groundplatform.v2.web.ui.surveyeditor.PendingInviteLinkRow
 import org.groundplatform.v2.web.ui.surveyeditor.PersonRow
 import org.groundplatform.v2.web.ui.surveyeditor.ProfileAvatar
-import org.groundplatform.v2.web.ui.viewmodel.ImpactActions
 import org.groundplatform.v2.web.ui.viewmodel.OrganizationActions
 
 /**
  * One organization, laid out like the survey editor: a resizable left panel switches between
- * Organization details, Surveys, Impact (for Managers), Members, Imagery, and the library's
- * Purposes, Dictionary, and Templates, and the content pane shows the selected section. Members can
- * create surveys in it; Managers can also edit and delete the organization, invite people, approve
- * join requests, change roles, remove members, and edit its library. The last Manager can't be
- * demoted or removed.
+ * Organization details, Surveys, Members, Imagery, and the library's Purposes, Dictionary, and
+ * Templates, and the content pane shows the selected section. Its impact numbers, which every
+ * organization publishes, are on the Impact page ("View impact"). Members can create surveys in it;
+ * Managers can also edit and delete the organization, invite people, approve join requests, change
+ * roles, remove members, and edit its library. The last Manager can't be demoted or removed.
  */
 @Composable
 internal fun OrganizationPage(
@@ -127,13 +125,11 @@ internal fun OrganizationPage(
 ) {
   val uiState by state.organization.uiState.collectAsState()
   val dashboardState by state.dashboard.uiState.collectAsState()
-  val impactState by state.impact.uiState.collectAsState()
   Box(modifier = Modifier.fillMaxSize()) {
     OrganizationPage(
       uiState = uiState,
       actions = state.organization,
-      impactState = impactState,
-      impactActions = state.impact,
+      onOpenImpact = state::openImpactDashboard,
       sidePanelWidthDp = dashboardState.sidePanelWidthDp,
       onSidePanelWidthChange = state.dashboard::updateSidePanelWidth,
       onOpenSurvey = onOpenSurvey,
@@ -164,6 +160,13 @@ internal fun OrganizationPage(
             }
           },
           actions = {
+            if (organization != null) {
+              WebHeaderButton(
+                text = "View impact",
+                icon = Icons.Outlined.Insights,
+                onClick = { state.openImpactDashboard(organization.id) },
+              )
+            }
             // Nobody creates surveys in "All users": isMemberOf is false for it.
             if (organization != null && uiState.isMemberOf(organization)) {
               WebHeaderButton(
@@ -177,7 +180,6 @@ internal fun OrganizationPage(
         )
       },
     )
-    ImpactMessageSnackbar(state, modifier = Modifier.align(Alignment.BottomCenter))
   }
 }
 
@@ -214,6 +216,7 @@ private fun OrganizationHeaderContext(organization: Organization, surveyCount: I
  *
  * @param sidePanelWidthDp width of the left panel, shared with the dashboard and Survey editor.
  * @param header the page header; it receives the click handler of its "Create survey" button.
+ * @param onOpenImpact opens the Impact page on an organization's published numbers.
  */
 @Composable
 internal fun OrganizationPage(
@@ -226,8 +229,7 @@ internal fun OrganizationPage(
   surveyLibrary: (organizationId: String?) -> ResolvedLibrary,
   header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
   onOpenCreateSurveyWizard: ((organizationId: String?) -> Unit)? = null,
-  impactState: ImpactUiState = ImpactUiState(),
-  impactActions: ImpactActions? = null,
+  onOpenImpact: (organizationId: String) -> Unit = {},
 ) {
   val organization = uiState.openOrganization
   val isManager = organization != null && uiState.managesOrganization(organization)
@@ -258,7 +260,6 @@ internal fun OrganizationPage(
         surveyCount = uiState.surveyCountInOrganization(organization.id),
         library = uiState.library,
         isManager = isManager,
-        showsImpact = showsImpact(isManager, impactActions),
         selected = tab,
         onSelect = { tab = it },
         modifier = Modifier.width(sidePanelWidthDp.dp).fillMaxHeight(),
@@ -283,7 +284,7 @@ internal fun OrganizationPage(
                 },
             ) {
               NoticeSlot(uiState, actions)
-              DetailsPane(uiState, actions, organization, isManager)
+              DetailsPane(uiState, actions, organization, isManager, onOpenImpact)
             }
           OrganizationTab.SURVEYS ->
             PaneScaffold(
@@ -299,26 +300,6 @@ internal fun OrganizationPage(
             ) {
               NoticeSlot(uiState, actions)
               SurveysPane(uiState, organization, isMember, onOpenSurvey, triggerCreateSurvey)
-            }
-          OrganizationTab.IMPACT ->
-            if (organization.isSynthetic) {
-              GlobalImpactPane(
-                summary = impactState.global,
-                isLoading = impactState.isLoading,
-                onDownload = { impactActions?.downloadGlobalSummary() },
-              )
-            } else {
-              OrganizationImpactPane(
-                state = impactState.organizations[organization.id],
-                isLoading = impactState.isLoading,
-                onSurveyFilterChange = {
-                  impactActions?.setOrganizationSurveyFilter(organization.id, it)
-                },
-                onCountryFilterChange = {
-                  impactActions?.setOrganizationCountryFilter(organization.id, it)
-                },
-                onDownload = { impactActions?.downloadOrganizationSummary(organization.id) },
-              )
             }
           OrganizationTab.MEMBERS ->
             PaneScaffold(
@@ -428,7 +409,6 @@ private fun OrganizationNavigation(
   surveyCount: Int,
   library: OrganizationLibraryUiState,
   isManager: Boolean,
-  showsImpact: Boolean,
   selected: OrganizationTab,
   onSelect: (OrganizationTab) -> Unit,
   modifier: Modifier = Modifier,
@@ -453,14 +433,6 @@ private fun OrganizationNavigation(
         onClick = { onSelect(OrganizationTab.SURVEYS) },
         trailing = "$surveyCount",
       )
-      if (showsImpact) {
-        NavItem(
-          label = OrganizationTab.IMPACT.label,
-          icon = Icons.Outlined.Insights,
-          selected = selected == OrganizationTab.IMPACT,
-          onClick = { onSelect(OrganizationTab.IMPACT) },
-        )
-      }
       NavItem(
         label = OrganizationTab.MEMBERS.label,
         icon = Icons.Outlined.Group,
@@ -501,12 +473,6 @@ private fun OrganizationNavigation(
 }
 
 internal val OrganizationPaneMaxWidth = 760.dp
-
-/** Whether the Impact tab is shown: only to Organization Managers (Organizers). */
-internal fun showsImpact(
-  isManager: Boolean,
-  impactActions: ImpactActions?,
-): Boolean = impactActions != null && isManager
 
 @Composable
 private fun MissingOrganization(onBack: () -> Unit) {
@@ -837,6 +803,7 @@ private fun DetailsPane(
   actions: OrganizationActions,
   organization: Organization,
   isManager: Boolean,
+  onOpenImpact: (organizationId: String) -> Unit,
 ) {
   Column(
     modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth),
@@ -855,11 +822,59 @@ private fun DetailsPane(
       ReadOnlyDetailsCard(organization)
     }
     if (!organization.isSynthetic) {
+      PublishedNumbersCard(
+        organization = organization,
+        isManager = isManager,
+        onOpenImpact = { onOpenImpact(organization.id) },
+      )
       PlatformNumbersCard(
         organization = organization,
         isManager = isManager,
         onExcludeChange = { actions.setExcludeFromPlatformAggregates(organization.id, it) },
       )
+    }
+  }
+}
+
+/**
+ * What the organization publishes: anonymous totals from its surveys, which anyone signed in to
+ * Collect One can follow on the Impact page. Every organization publishes them; this card makes
+ * that clear to its members and links to what's published.
+ */
+@Composable
+private fun PublishedNumbersCard(
+  organization: Organization,
+  isManager: Boolean,
+  onOpenImpact: () -> Unit,
+) {
+  DetailsCard("Published impact numbers") {
+    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      Icon(
+        Icons.Outlined.Public,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+      )
+      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+          if (isManager) {
+            "As a Manager of ${organization.name}, you publish anonymous totals from its surveys"
+          } else {
+            "${organization.name} publishes anonymous totals from its surveys"
+          },
+          style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+          "Anyone signed in to Collect One can follow what your surveys add up to, like " +
+            "hectares mapped and how the data was used, on the Impact page. $PUBLISHED_RULES",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    }
+    OutlinedButton(onClick = onOpenImpact) {
+      Icon(Icons.Outlined.Insights, contentDescription = null, modifier = Modifier.size(18.dp))
+      Spacer(Modifier.width(8.dp))
+      Text("See what's published")
     }
   }
 }

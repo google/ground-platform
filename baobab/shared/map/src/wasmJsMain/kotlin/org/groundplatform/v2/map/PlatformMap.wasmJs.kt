@@ -130,6 +130,18 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
   private val layers = mutableMapOf<String, MapLayer>()
   private var lastBounds: List<Double>? = null
   private var destroyed = false
+  /** The last camera and Compose density jumped to, to re-apply when [cssPerPx] changes. */
+  private var lastCamera: CameraPosition? = null
+  private var lastDensity = 1f
+  /** The CSS px per Compose px the camera was last applied with. */
+  private var appliedCssPerPx = 0.0
+
+  /**
+   * CSS px per Compose px: measured on Compose's canvas (see [cssPxPerComposePx]), falling back to
+   * the usual `1 / devicePixelRatio` when it can't be measured.
+   */
+  private fun cssPerPx(): Double =
+    cssPxPerComposePx().takeIf { it.isFinite() && it > 0 } ?: (1.0 / devicePixelRatio())
 
   var coordinates: LayoutCoordinates? = null
 
@@ -239,12 +251,12 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
   /** Aligns the map's elements with [coordinates], clipped to what ancestors leave visible. */
   fun syncBounds() {
     if (destroyed) return
+    val px = cssPerPx()
     val coords = coordinates
     val bounds =
       if (coords == null || !coords.isAttached) {
         HIDDEN
       } else {
-        val px = 1.0 / devicePixelRatio()
         val position = coords.positionInWindow()
         val clip: Rect = coords.boundsInWindow()
         val visible = if (clip.width > 0f && clip.height > 0f) 1.0 else 0.0
@@ -260,6 +272,9 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
           coords.size.height * px,
         )
       }
+    // The scale changes without the camera moving when the browser zoom or screen changes, which
+    // would leave the map drawn at a different scale than the Compose overlays above it.
+    lastCamera?.let { camera -> if (px != appliedCssPerPx) jumpTo(camera, lastDensity) }
     if (bounds == lastBounds) return
     lastBounds = bounds
     mapboxSetBounds(
@@ -277,12 +292,16 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
   }
 
   /**
-   * Jumps the map to [camera]. When Compose's [density] differs from the page's device pixel ratio,
-   * a dp isn't a CSS px, so the zoom is offset to keep both at the same scale.
+   * Jumps the map to [camera]. When a dp (Compose's [density] Compose px) isn't one CSS px, the
+   * zoom is offset to keep the map and the Compose overlays at the same scale.
    */
   fun jumpTo(camera: CameraPosition, density: Float) {
     if (destroyed) return
-    val cssPxPerDp = density / devicePixelRatio()
+    lastCamera = camera
+    lastDensity = density
+    val cssPerPx = cssPerPx()
+    appliedCssPerPx = cssPerPx
+    val cssPxPerDp = density * cssPerPx
     mapboxJumpTo(
       host,
       camera.center.longitude,
@@ -299,7 +318,7 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
    */
   fun featureAt(xPx: Float, yPx: Float, content: MapContent, at: LatLng): MapEvent.FeatureTapped? {
     if (destroyed) return null
-    val scale = 1.0 / devicePixelRatio()
+    val scale = cssPerPx()
     val hit =
       mapboxQueryFeature(
         host,

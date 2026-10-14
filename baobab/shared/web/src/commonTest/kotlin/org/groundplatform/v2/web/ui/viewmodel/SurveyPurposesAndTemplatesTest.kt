@@ -204,7 +204,7 @@ class SurveyPurposesAndTemplatesTest {
     val draft = runNow { d.editorRepository.getDraft(id) }
     assertEquals(listOf("eudr_due_diligence"), draft.details.purposeIds)
     assertEquals(listOf("eudr"), draft.details.programIds)
-    assertEquals(listOf("EUDR plot registration"), draft.forms.map { it.form.title })
+    assertEquals(listOf("Deforestation compliance plot check"), draft.forms.map { it.form.title })
     assertTrue(draft.forms.single().form.questions.count { it.conceptLink != null } >= 5)
   }
 }

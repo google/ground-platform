@@ -206,6 +206,11 @@ data class ImpactConfig(
   val coarseCellLevel: Int = 7,
   /** Minimum features for a country aggregate to be published. */
   val countryMinFeatures: Int = 10,
+  /**
+   * Minimum features for an organization's published (public) numbers, or a country slice of them,
+   * to be shown to people outside the organization.
+   */
+  val organizationPublicMinFeatures: Int = 10,
   /** Surveys with no purposes and fewer features than this are test or exploratory surveys. */
   val exploratoryMaxFeatures: Int = 5,
   /**

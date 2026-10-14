@@ -175,6 +175,11 @@ enum class ImpactHint(val message: String) {
  * Impact numbers of one survey, organization, or the whole platform, grouped by goal and written in
  * plain language. Built from the shared aggregation job (`org.groundplatform.v2.core.impact`), so
  * the dashboards, the PDF summary, and the backend agree.
+ *
+ * A summary is either the full view its members see, or the **published** view ([isPublished])
+ * anyone signed in to Collect One sees on the Impact page: anonymous totals from `AGGREGATE_PUBLIC`
+ * standard fields only, with no diagnostics or setup hints, and nothing at all below the
+ * publication threshold ([isBelowPublicationThreshold]).
  */
 data class ImpactSummary(
   val scope: ImpactSummaryScope,
@@ -183,6 +188,8 @@ data class ImpactSummary(
   val features: ImpactFeatureTotals = ImpactFeatureTotals(),
   /** Distinct producers (by ID or name) on the map features, or `null` when none is linked. */
   val producerCount: Long? = null,
+  /** Standard field [producerCount] counts, or `null` when none is linked. */
+  val producerConceptId: String? = null,
   /** Indicators from global standard fields, grouped by goal. */
   val goals: List<ImpactGoalSection> = emptyList(),
   /** Indicators from the organization's own standard fields (survey and organization scope). */
@@ -200,6 +207,13 @@ data class ImpactSummary(
   val excludedOrganizationCount: Int = 0,
   val diagnostics: List<ImpactDiagnosticNote> = emptyList(),
   val hints: List<ImpactHint> = emptyList(),
+  /** Whether this is the published view anyone signed in can see, not the members' full view. */
+  val isPublished: Boolean = false,
+  /**
+   * Published view only: too few map features to publish anything yet, so every number is left out
+   * (see `ImpactConfig.organizationPublicMinFeatures`).
+   */
+  val isBelowPublicationThreshold: Boolean = false,
 ) {
   /** Whether there's nothing to show yet. */
   val isEmpty: Boolean
@@ -215,6 +229,9 @@ object ImpactGoals {
       "effective_protected_areas" to "Protected areas",
       "iplc_rights_and_tenure" to "Indigenous and community land rights",
       "legal_timber" to "Legal timber",
+      "forest_carbon_and_conservation" to "Forest carbon and conservation",
+      "smallholder_livelihoods" to "Smallholder livelihoods and market access",
+      "open_earth_data" to "Open land cover and crop reference data",
     )
 
   /** Title used for standard fields that don't contribute to a goal. */

@@ -31,6 +31,22 @@ concepts {
       key: "en"
       value: "Land cover class"
     }
+    values {
+      key: "fr"
+      value: "Classe de couverture terrestre"
+    }
+    values {
+      key: "es"
+      value: "Clase de cobertura terrestre"
+    }
+    values {
+      key: "vi"
+      value: "Lớp độ che phủ đất"
+    }
+    values {
+      key: "sw"
+      value: "Aina ya ufunikaji wa ardhi"
+    }
   }
   description {
     values {
@@ -107,6 +123,7 @@ concepts {
   aggregation: COUNT_BY_CODE
   privacy_class: AGGREGATE_PUBLIC
   goals: "deforestation_free_supply_chains"
+  goals: "open_earth_data"
   pillar: MITIGATION
   status: STABLE
 }
@@ -117,6 +134,22 @@ concepts {
     values {
       key: "en"
       value: "Canopy cover (%)"
+    }
+    values {
+      key: "fr"
+      value: "Couverture de la canopée (%)"
+    }
+    values {
+      key: "es"
+      value: "Cobertura de dosel (%)"
+    }
+    values {
+      key: "vi"
+      value: "Độ tàn che (%)"
+    }
+    values {
+      key: "sw"
+      value: "Ufunikaji wa matawi ya miti (%)"
     }
   }
   description {
@@ -141,6 +174,8 @@ concepts {
   unit: "%"
   aggregation: MEAN
   privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "open_earth_data"
   pillar: MITIGATION
   status: STABLE
 }
@@ -151,6 +186,22 @@ concepts {
     values {
       key: "en"
       value: "Tree height (m)"
+    }
+    values {
+      key: "fr"
+      value: "Hauteur des arbres (m)"
+    }
+    values {
+      key: "es"
+      value: "Altura de los árboles (m)"
+    }
+    values {
+      key: "vi"
+      value: "Chiều cao cây (m)"
+    }
+    values {
+      key: "sw"
+      value: "Urefu wa miti (m)"
     }
   }
   description {
@@ -163,6 +214,8 @@ concepts {
   unit: "m"
   aggregation: MEAN
   privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  pillar: MITIGATION
   status: STABLE
 }
 concepts {
@@ -173,11 +226,27 @@ concepts {
       key: "en"
       value: "Land use"
     }
+    values {
+      key: "fr"
+      value: "Utilisation des terres"
+    }
+    values {
+      key: "es"
+      value: "Uso de la tierra"
+    }
+    values {
+      key: "vi"
+      value: "Sử dụng đất"
+    }
+    values {
+      key: "sw"
+      value: "Matumizi ya ardhi"
+    }
   }
   description {
     values {
       key: "en"
-      value: "Main use of the land."
+      value: "Main socio-economic or ecological use of the land."
     }
   }
   data_type: TYPE_SELECT_ONE
@@ -188,6 +257,15 @@ concepts {
         values {
           key: "en"
           value: "Cropland"
+        }
+      }
+    }
+    items {
+      code: "agroforestry"
+      label {
+        values {
+          key: "en"
+          value: "Agroforestry / shaded tree crop"
         }
       }
     }
@@ -239,6 +317,477 @@ concepts {
   }
   aggregation: COUNT_BY_CODE
   privacy_class: AGGREGATE_PUBLIC
+  goals: "open_earth_data"
+  status: STABLE
+}
+concepts {
+  id: "lulc.crop_type"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Primary crop or tree commodity"
+    }
+    values {
+      key: "fr"
+      value: "Culture ou essence principale"
+    }
+    values {
+      key: "es"
+      value: "Cultivo o especie arbórea principal"
+    }
+    values {
+      key: "vi"
+      value: "Cây trồng chính"
+    }
+    values {
+      key: "sw"
+      value: "Zao kuu au mti"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Dominant perennial or annual crop observed on the plot, used to train and validate commodity land-cover models."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "commodity crop"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "tree crop"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "cocoa"
+      label {
+        values {
+          key: "en"
+          value: "Cocoa"
+        }
+      }
+    }
+    items {
+      code: "coffee"
+      label {
+        values {
+          key: "en"
+          value: "Coffee"
+        }
+      }
+    }
+    items {
+      code: "oil_palm"
+      label {
+        values {
+          key: "en"
+          value: "Oil palm"
+        }
+      }
+    }
+    items {
+      code: "rubber"
+      label {
+        values {
+          key: "en"
+          value: "Rubber"
+        }
+      }
+    }
+    items {
+      code: "cashew"
+      label {
+        values {
+          key: "en"
+          value: "Cashew"
+        }
+      }
+    }
+    items {
+      code: "tea"
+      label {
+        values {
+          key: "en"
+          value: "Tea"
+        }
+      }
+    }
+    items {
+      code: "annual_crops"
+      label {
+        values {
+          key: "en"
+          value: "Annual food crops"
+        }
+      }
+    }
+    items {
+      code: "none_natural"
+      label {
+        values {
+          key: "en"
+          value: "None (natural vegetation)"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other crop"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  goals: "open_earth_data"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.shade_tree_tier"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Shade canopy structure"
+    }
+    values {
+      key: "fr"
+      value: "Structure de la canopée d'ombrage"
+    }
+    values {
+      key: "es"
+      value: "Estructura del dosel de sombra"
+    }
+    values {
+      key: "vi"
+      value: "Cấu trúc tầng cây che bóng"
+    }
+    values {
+      key: "sw"
+      value: "Muundo wa miti ya kivuli"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Upper-stratum shade tree structure over perennial crops, distinguishing shaded agroforestry from natural forest and monocultures."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "shade trees"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "agroforestry canopy"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "multi_strata_native"
+      label {
+        values {
+          key: "en"
+          value: "Multi-strata with native remnant trees"
+        }
+      }
+    }
+    items {
+      code: "planted_shade"
+      label {
+        values {
+          key: "en"
+          value: "Planted shade or fruit trees"
+        }
+      }
+    }
+    items {
+      code: "unshaded_monoculture"
+      label {
+        values {
+          key: "en"
+          value: "Unshaded monoculture"
+        }
+      }
+    }
+    items {
+      code: "not_applicable"
+      label {
+        values {
+          key: "en"
+          value: "Not applicable (non-cropland)"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  goals: "open_earth_data"
+  pillar: ADAPTATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.forest_stratum"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Forest structure & stratum"
+    }
+    values {
+      key: "fr"
+      value: "Strate et structure forestière"
+    }
+    values {
+      key: "es"
+      value: "Estrato y estructura forestal"
+    }
+    values {
+      key: "vi"
+      value: "Trạng thái và cấu trúc rừng"
+    }
+    values {
+      key: "sw"
+      value: "Tabaka na muundo wa msitu"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Forest condition and successional stage for REDD+ and tropical forest monitoring."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "primary_intact"
+      label {
+        values {
+          key: "en"
+          value: "Primary intact forest"
+        }
+      }
+    }
+    items {
+      code: "secondary_regenerating"
+      label {
+        values {
+          key: "en"
+          value: "Secondary or regenerating forest"
+        }
+      }
+    }
+    items {
+      code: "degraded_forest"
+      label {
+        values {
+          key: "en"
+          value: "Degraded natural forest"
+        }
+      }
+    }
+    items {
+      code: "mangrove_peatland"
+      label {
+        values {
+          key: "en"
+          value: "Mangrove or peat swamp forest"
+        }
+      }
+    }
+    items {
+      code: "planted_forest"
+      label {
+        values {
+          key: "en"
+          value: "Planted forest or woodlot"
+        }
+      }
+    }
+    items {
+      code: "non_forest"
+      label {
+        values {
+          key: "en"
+          value: "Non-forest"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "effective_protected_areas"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.basal_area_m2_ha"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Basal area (m²/ha)"
+    }
+    values {
+      key: "fr"
+      value: "Surface terrière (m²/ha)"
+    }
+    values {
+      key: "es"
+      value: "Área basal (m²/ha)"
+    }
+    values {
+      key: "vi"
+      value: "Tiết diện ngang (m²/ha)"
+    }
+    values {
+      key: "sw"
+      value: "Eneo la shina (m²/ha)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Cross-sectional stem area at breast height per hectare, used to estimate stand biomass and carbon stock."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "stand density"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "biomass"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "carbon stock"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "m2/har"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.disturbance_driver"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Observed disturbance or degradation"
+    }
+    values {
+      key: "fr"
+      value: "Perturbation ou dégradation observée"
+    }
+    values {
+      key: "es"
+      value: "Perturbación o degradación observada"
+    }
+    values {
+      key: "vi"
+      value: "Tác nhân gây suy thoái rừng"
+    }
+    values {
+      key: "sw"
+      value: "Uharibifu au usumbufu ulioonekana"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Signs of canopy degradation or disturbance recorded in the sample plot."
+    }
+  }
+  data_type: TYPE_SELECT_MULTIPLE
+  code_list {
+    items {
+      code: "none"
+      label {
+        values {
+          key: "en"
+          value: "No disturbance observed"
+        }
+      }
+    }
+    items {
+      code: "selective_logging"
+      label {
+        values {
+          key: "en"
+          value: "Selective logging or timber extraction"
+        }
+      }
+    }
+    items {
+      code: "fire_burn"
+      label {
+        values {
+          key: "en"
+          value: "Fire or burn scars"
+        }
+      }
+    }
+    items {
+      code: "agricultural_clearing"
+      label {
+        values {
+          key: "en"
+          value: "Small-scale clearing or shifting cultivation"
+        }
+      }
+    }
+    items {
+      code: "grazing_browsing"
+      label {
+        values {
+          key: "en"
+          value: "Livestock grazing"
+        }
+      }
+    }
+    items {
+      code: "wind_drought_pest"
+      label {
+        values {
+          key: "en"
+          value: "Storm, drought, or pest dieback"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "effective_protected_areas"
+  pillar: MITIGATION
   status: STABLE
 }
 concepts {
@@ -249,11 +798,27 @@ concepts {
       key: "en"
       value: "Observation date"
     }
+    values {
+      key: "fr"
+      value: "Date d'observation"
+    }
+    values {
+      key: "es"
+      value: "Fecha de observación"
+    }
+    values {
+      key: "vi"
+      value: "Ngày quan sát"
+    }
+    values {
+      key: "sw"
+      value: "Tarehe ya uchunguzi"
+    }
   }
   description {
     values {
       key: "en"
-      value: "Date the land cover was observed."
+      value: "Date the land cover or sample plot was observed."
     }
   }
   data_type: TYPE_DATE
@@ -266,32 +831,40 @@ form_templates {
   title {
     values {
       key: "en"
-      value: "LULC ground-truth classification"
+      value: "Land cover & crop reference observation"
     }
     values {
       key: "fr"
-      value: "Classification de la couverture terrestre"
+      value: "Observation de référence de la couverture terrestre"
     }
     values {
       key: "es"
-      value: "Clasificación de cobertura del suelo"
+      value: "Observación de referencia de cobertura y cultivos"
+    }
+    values {
+      key: "vi"
+      value: "Quan sát thực địa độ che phủ đất và cây trồng"
+    }
+    values {
+      key: "sw"
+      value: "Uchunguzi wa marejeleo ya ufunikaji wa ardhi na mazao"
     }
   }
   description {
     values {
       key: "en"
-      value: "Visual or field plot classification of land cover, land use, canopy cover, and observation date."
+      value: "Visual or field plot classification of land cover class, land use, perennial crop type, shade canopy structure, and crown cover percentage."
     }
   }
   form {
     form_id: "lulc_ground_truth"
-    title: "LULC ground-truth classification"
+    title: "Land cover & crop reference observation"
     version: "1"
     model {
       primary_instance {
         record_schema {
           name: "data"
-          title: "LULC ground-truth classification"
+          title: "Land cover & crop reference observation"
           fields {
             name: "land_cover_class"
             type: TYPE_SELECT_ONE
@@ -301,12 +874,24 @@ form_templates {
             type: TYPE_SELECT_ONE
           }
           fields {
+            name: "crop_type"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "shade_tree_tier"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
             name: "canopy_cover_pct"
             type: TYPE_DOUBLE
           }
           fields {
             name: "observation_date"
             type: TYPE_DATE
+          }
+          fields {
+            name: "site_photo"
+            type: TYPE_BINARY
           }
         }
       }
@@ -476,6 +1061,32 @@ form_templates {
             key: "name"
             value {
               scalar_value {
+                string_value: "agroforestry"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Agroforestry / shaded tree crop"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "agroforestry"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
                 string_value: "grazing"
               }
             }
@@ -602,6 +1213,350 @@ form_templates {
           }
         }
       }
+      secondary_instances {
+        id: "crop_type"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cocoa"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Coffee"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Oil palm"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Rubber"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cashew"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cashew"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "cashew"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "tea"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Tea"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "tea"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "annual_crops"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Annual food crops"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "annual_crops"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "none_natural"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "None (natural vegetation)"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "none_natural"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other crop"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "shade_tree_tier"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "multi_strata_native"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Multi-strata with native remnant trees"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "multi_strata_native"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "planted_shade"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Planted shade or fruit trees"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "planted_shade"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "unshaded_monoculture"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Unshaded monoculture"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "unshaded_monoculture"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "not_applicable"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Not applicable (non-cropland)"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "not_applicable"
+              }
+            }
+          }
+        }
+      }
       bindings {
         field_path: "land_cover_class"
         type: TYPE_SELECT_ONE
@@ -615,10 +1570,29 @@ form_templates {
       bindings {
         field_path: "land_use"
         type: TYPE_SELECT_ONE
+        required_expression: "true()"
         foreign_attributes {
           namespace_uri: "http://groundplatform.org/xforms"
           qualified_name: "ground:concept"
           value: "lulc.land_use@1"
+        }
+      }
+      bindings {
+        field_path: "crop_type"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.crop_type@1"
+        }
+      }
+      bindings {
+        field_path: "shade_tree_tier"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.shade_tree_tier@1"
         }
       }
       bindings {
@@ -637,6 +1611,15 @@ form_templates {
           namespace_uri: "http://groundplatform.org/xforms"
           qualified_name: "ground:concept"
           value: "lulc.observation_date@1"
+        }
+      }
+      bindings {
+        field_path: "site_photo"
+        type: TYPE_BINARY
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.site_photo@1"
         }
       }
     }
@@ -673,6 +1656,36 @@ form_templates {
       }
       components {
         control {
+          field_ref: "crop_type"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Primary crop or tree commodity"
+          }
+          itemset {
+            instance_id: "crop_type"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "shade_tree_tier"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Shade canopy structure"
+          }
+          itemset {
+            instance_id: "shade_tree_tier"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
           field_ref: "canopy_cover_pct"
           type: CONTROL_INPUT
           label {
@@ -689,6 +1702,16 @@ form_templates {
           }
         }
       }
+      components {
+        control {
+          field_ref: "site_photo"
+          type: CONTROL_UPLOAD
+          label {
+            text: "Site photo"
+          }
+          media_type: "image/*"
+        }
+      }
     }
   }
   status: STABLE
@@ -698,34 +1721,46 @@ form_templates {
   title {
     values {
       key: "en"
-      value: "REDD+ & TFFF forest assessment"
+      value: "Forest inventory & disturbance plot"
     }
     values {
       key: "fr"
-      value: "Évaluation forestière REDD+ & TFFF"
+      value: "Parcelle d'inventaire forestier et de perturbation"
     }
     values {
       key: "es"
-      value: "Evaluación forestal REDD+ y TFFF"
+      value: "Parcela de inventario y perturbación forestal"
+    }
+    values {
+      key: "vi"
+      value: "Ô tiêu chuẩn kiểm kê và giám sát suy thoái rừng"
+    }
+    values {
+      key: "sw"
+      value: "Ploti ya hesabu ya msitu na uharibifu"
     }
   }
   description {
     values {
       key: "en"
-      value: "Forest cover, canopy structure, and observation records for REDD+ and Tropical Forest Forever Facility monitoring."
+      value: "Permanent sample plot or visual verification form capturing forest stratum, canopy cover, tree height, stand basal area, and degradation drivers."
     }
   }
   form {
     form_id: "redd_plus_forest_assessment"
-    title: "REDD+ & TFFF forest assessment"
+    title: "Forest inventory & disturbance plot"
     version: "1"
     model {
       primary_instance {
         record_schema {
           name: "data"
-          title: "REDD+ & TFFF forest assessment"
+          title: "Forest inventory & disturbance plot"
           fields {
             name: "land_cover_class"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "forest_stratum"
             type: TYPE_SELECT_ONE
           }
           fields {
@@ -735,6 +1770,14 @@ form_templates {
           fields {
             name: "tree_height_m"
             type: TYPE_DOUBLE
+          }
+          fields {
+            name: "basal_area_m2_ha"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "disturbance_driver"
+            type: TYPE_SELECT_MULTIPLE
           }
           fields {
             name: "observation_date"
@@ -879,6 +1922,324 @@ form_templates {
           }
         }
       }
+      secondary_instances {
+        id: "forest_stratum"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "primary_intact"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Primary intact forest"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "primary_intact"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "secondary_regenerating"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Secondary or regenerating forest"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "secondary_regenerating"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "degraded_forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Degraded natural forest"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "degraded_forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "mangrove_peatland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Mangrove or peat swamp forest"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "mangrove_peatland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "planted_forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Planted forest or woodlot"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "planted_forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "non_forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Non-forest"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "non_forest"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "disturbance_driver"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "none"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "No disturbance observed"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "none"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "selective_logging"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Selective logging or timber extraction"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "selective_logging"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "fire_burn"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Fire or burn scars"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "fire_burn"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "agricultural_clearing"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Small-scale clearing or shifting cultivation"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "agricultural_clearing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grazing_browsing"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Livestock grazing"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "grazing_browsing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wind_drought_pest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Storm, drought, or pest dieback"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "wind_drought_pest"
+              }
+            }
+          }
+        }
+      }
       bindings {
         field_path: "land_cover_class"
         type: TYPE_SELECT_ONE
@@ -887,6 +2248,16 @@ form_templates {
           namespace_uri: "http://groundplatform.org/xforms"
           qualified_name: "ground:concept"
           value: "lulc.land_cover_class@1"
+        }
+      }
+      bindings {
+        field_path: "forest_stratum"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.forest_stratum@1"
         }
       }
       bindings {
@@ -906,6 +2277,24 @@ form_templates {
           namespace_uri: "http://groundplatform.org/xforms"
           qualified_name: "ground:concept"
           value: "lulc.tree_height_m@1"
+        }
+      }
+      bindings {
+        field_path: "basal_area_m2_ha"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.basal_area_m2_ha@1"
+        }
+      }
+      bindings {
+        field_path: "disturbance_driver"
+        type: TYPE_SELECT_MULTIPLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "lulc.disturbance_driver@1"
         }
       }
       bindings {
@@ -945,6 +2334,21 @@ form_templates {
       }
       components {
         control {
+          field_ref: "forest_stratum"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Forest structure & stratum"
+          }
+          itemset {
+            instance_id: "forest_stratum"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
           field_ref: "canopy_cover_pct"
           type: CONTROL_INPUT
           label {
@@ -958,6 +2362,33 @@ form_templates {
           type: CONTROL_INPUT
           label {
             text: "Tree height (m)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "basal_area_m2_ha"
+          type: CONTROL_INPUT
+          label {
+            text: "Basal area (m²/ha)"
+          }
+          hint {
+            text: "Stand basal area in m²/ha."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "disturbance_driver"
+          type: CONTROL_SELECT_MULTIPLE
+          label {
+            text: "Observed disturbance or degradation"
+          }
+          itemset {
+            instance_id: "disturbance_driver"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
           }
         }
       }
@@ -989,26 +2420,39 @@ purpose_packs {
   title {
     values {
       key: "en"
-      value: "LULC training & validation data"
+      value: "Land cover & crop mapping"
     }
     values {
       key: "fr"
-      value: "Données d'entraînement et de validation LULC"
+      value: "Cartographie de la couverture terrestre et des cultures"
     }
     values {
       key: "es"
-      value: "Datos de entrenamiento y validación LULC"
+      value: "Mapeo de cobertura terrestre y cultivos"
+    }
+    values {
+      key: "vi"
+      value: "Lập bản đồ độ che phủ đất và cây trồng"
+    }
+    values {
+      key: "sw"
+      value: "Uchoraji ramani wa ufunikaji wa ardhi na mazao"
     }
   }
   description {
     values {
       key: "en"
-      value: "Classify sample plots or field sites with FAO-aligned land cover and land use labels for map training and accuracy assessment."
+      value: "Collect ground-truth observations and visual imagery classifications of land cover, perennial crops, and shade trees to train and validate remote-sensing models."
     }
   }
   icon: "layers"
   form_template_ids: "lulc_ground_truth"
+  program_ids: "fdap"
+  program_ids: "fao_lccs"
+  program_ids: "open_foris"
+  program_ids: "fao_fra"
   goals: "deforestation_free_supply_chains"
+  goals: "open_earth_data"
   pillar: MITIGATION
   status: STABLE
 }
@@ -1017,27 +2461,39 @@ purpose_packs {
   title {
     values {
       key: "en"
-      value: "REDD+ / TFFF forest monitoring"
+      value: "Forest carbon & conservation monitoring"
     }
     values {
       key: "fr"
-      value: "Suivi forestier REDD+ / TFFF"
+      value: "Suivi du carbone et de la conservation des forêts"
     }
     values {
       key: "es"
-      value: "Monitoreo forestal REDD+ / TFFF"
+      value: "Monitoreo de carbono y conservación forestal"
+    }
+    values {
+      key: "vi"
+      value: "Giám sát carbon và bảo tồn rừng"
+    }
+    values {
+      key: "sw"
+      value: "Ufuatiliaji wa kaboni na uhifadhi wa misitu"
     }
   }
   description {
     values {
       key: "en"
-      value: "Measure forest cover, canopy cover, and tree height for REDD+ MRV and Tropical Forest Forever Facility reporting."
+      value: "Measure forest sample plots, canopy cover, stand basal area, tree height, and degradation disturbances for carbon accounting and tropical forest conservation finance."
     }
   }
   icon: "public"
   form_template_ids: "redd_plus_forest_assessment"
   program_ids: "redd_plus"
   program_ids: "tfff"
+  program_ids: "art_trees"
+  program_ids: "vcs"
+  program_ids: "fao_fra"
+  goals: "forest_carbon_and_conservation"
   goals: "deforestation_free_supply_chains"
   goals: "effective_protected_areas"
   pillar: MITIGATION

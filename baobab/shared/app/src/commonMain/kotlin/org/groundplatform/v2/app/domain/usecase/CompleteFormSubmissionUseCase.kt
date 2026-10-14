@@ -288,16 +288,9 @@ class CompleteFormSubmissionUseCase(
           extractedFields.any { it.questionName.contains("perimeter") }
       val geomTypeLabel = if (isPolygonGeom) "Polygon" else "Point"
 
-      val createdStatus = saveToProps["status"] ?: "Completed"
-      val createdSymbol = saveToProps["marker-symbol"] ?: "✓"
-      val createdColor = saveToProps["marker-color"] ?: "#1E8E3E"
-      val entityProps =
-        saveToProps.toMutableMap().apply {
-          put("status", createdStatus)
-          put("marker-symbol", createdSymbol)
-          // Status color for the status chip; the map draws features in their layer's color.
-          put("marker-color", createdColor)
-        }
+      // Workflow status (`status`, `marker-symbol`, `marker-color`) comes only from the form's
+      // `save_to` bindings; entities created without them show no status rather than a default.
+      val entityProps = saveToProps.toMutableMap()
 
       val newEntity =
         GeospatialEntityItem(

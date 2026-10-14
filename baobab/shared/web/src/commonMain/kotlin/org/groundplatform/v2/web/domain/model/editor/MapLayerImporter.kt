@@ -120,7 +120,7 @@ object MapLayerImporter {
     return if (name == "geometry" || !FormEditorValidator.isValidName(name)) "${name}_" else name
   }
 
-  private fun uniqueName(base: String, taken: Collection<String>): String {
+  internal fun uniqueName(base: String, taken: Collection<String>): String {
     if (base !in taken) return base
     var n = 2
     while ("${base}_$n" in taken) n++

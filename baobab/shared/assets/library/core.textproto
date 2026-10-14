@@ -850,37 +850,303 @@ concepts {
   privacy_class: ORG_ONLY
   status: STABLE
 }
-form_templates {
-  id: "producer_profile"
-  title {
+concepts {
+  id: "core.cooperative_name"
+  version: 1
+  label {
     values {
       key: "en"
-      value: "Producer profile"
+      value: "Cooperative or producer group"
     }
     values {
       key: "fr"
-      value: "Profil du producteur"
+      value: "Coopérative ou groupement de producteurs"
     }
     values {
       key: "es"
-      value: "Perfil del productor"
+      value: "Cooperativa o grupo de productores"
+    }
+    values {
+      key: "vi"
+      value: "Hợp tác xã hoặc nhóm nông hộ"
+    }
+    values {
+      key: "sw"
+      value: "Chama cha ushirika au kikundi cha wazalishaji"
     }
   }
   description {
     values {
       key: "en"
-      value: "Registers a farmer or producer with their household details."
+      value: "Name of the cooperative, farmer society, or producer organization."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "cooperative"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "farmer group"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "association"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "coopérative"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "cooperativa"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  goals: "smallholder_livelihoods"
+  pillar: ADAPTATION
+  status: STABLE
+}
+concepts {
+  id: "core.certification_status"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Certification status"
+    }
+    values {
+      key: "fr"
+      value: "Statut de certification"
+    }
+    values {
+      key: "es"
+      value: "Estado de certificación"
+    }
+    values {
+      key: "vi"
+      value: "Tình trạng chứng nhận"
+    }
+    values {
+      key: "sw"
+      value: "Hali ya uthibitisho"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Whether the producer or plot is certified under a sustainability standard."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "certified"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "audit status"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "certificación"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "certified"
+      label {
+        values {
+          key: "en"
+          value: "Certified"
+        }
+        values {
+          key: "fr"
+          value: "Certifié"
+        }
+        values {
+          key: "es"
+          value: "Certificado"
+        }
+        values {
+          key: "vi"
+          value: "Đã chứng nhận"
+        }
+        values {
+          key: "sw"
+          value: "Imethibitishwa"
+        }
+      }
+    }
+    items {
+      code: "in_transition"
+      label {
+        values {
+          key: "en"
+          value: "In transition"
+        }
+        values {
+          key: "fr"
+          value: "En conversion"
+        }
+        values {
+          key: "es"
+          value: "En transición"
+        }
+        values {
+          key: "vi"
+          value: "Đang chuyển đổi"
+        }
+        values {
+          key: "sw"
+          value: "Katika mpito"
+        }
+      }
+    }
+    items {
+      code: "conventional"
+      label {
+        values {
+          key: "en"
+          value: "Conventional / uncertified"
+        }
+        values {
+          key: "fr"
+          value: "Conventionnel / non certifié"
+        }
+        values {
+          key: "es"
+          value: "Convencional / no certificado"
+        }
+        values {
+          key: "vi"
+          value: "Thông thường / chưa chứng nhận"
+        }
+        values {
+          key: "sw"
+          value: "Kawaida / haijathibitishwa"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "smallholder_livelihoods"
+  pillar: ADAPTATION
+  status: STABLE
+}
+concepts {
+  id: "core.annual_yield_kg"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Estimated annual yield (kg)"
+    }
+    values {
+      key: "fr"
+      value: "Rendement annuel estimé (kg)"
+    }
+    values {
+      key: "es"
+      value: "Rendimiento anual estimado (kg)"
+    }
+    values {
+      key: "vi"
+      value: "Sản lượng hàng năm ước tính (kg)"
+    }
+    values {
+      key: "sw"
+      value: "Mavuno ya mwaka yanayokadiriwa (kg)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Expected or harvested annual production volume from the farm or plot, in kilograms."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "harvest volume"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "production"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "producción anual"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "kg"
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "smallholder_livelihoods"
+  pillar: ADAPTATION
+  status: STABLE
+}
+form_templates {
+  id: "producer_profile"
+  title {
+    values {
+      key: "en"
+      value: "Producer & farm registration"
+    }
+    values {
+      key: "fr"
+      value: "Enregistrement du producteur et de l'exploitation"
+    }
+    values {
+      key: "es"
+      value: "Registro de productor y finca"
+    }
+    values {
+      key: "vi"
+      value: "Đăng ký nông hộ và trang trại"
+    }
+    values {
+      key: "sw"
+      value: "Usajili wa mzalishaji na shamba"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Registers a smallholder farmer with consent, cooperative membership, household details, certification status, and annual production."
     }
   }
   form {
     form_id: "producer_profile"
-    title: "Producer profile"
+    title: "Producer & farm registration"
     version: "1"
     model {
       primary_instance {
         record_schema {
           name: "data"
-          title: "Producer profile"
+          title: "Producer & farm registration"
           fields {
             name: "data_consent"
             type: TYPE_SELECT_ONE
@@ -891,6 +1157,10 @@ form_templates {
           }
           fields {
             name: "producer_id"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "cooperative_name"
             type: TYPE_STRING
           }
           fields {
@@ -908,6 +1178,14 @@ form_templates {
           fields {
             name: "admin_area"
             type: TYPE_STRING
+          }
+          fields {
+            name: "certification_status"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "annual_yield_kg"
+            type: TYPE_DOUBLE
           }
         }
       }
@@ -1073,6 +1351,87 @@ form_templates {
           }
         }
       }
+      secondary_instances {
+        id: "certification_status"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "certified"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Certified"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "certified"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "in_transition"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "In transition"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "in_transition"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "conventional"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Conventional / uncertified"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "conventional"
+              }
+            }
+          }
+        }
+      }
       bindings {
         field_path: "data_consent"
         type: TYPE_SELECT_ONE
@@ -1096,10 +1455,20 @@ form_templates {
       bindings {
         field_path: "producer_id"
         type: TYPE_STRING
+        required_expression: "true()"
         foreign_attributes {
           namespace_uri: "http://groundplatform.org/xforms"
           qualified_name: "ground:concept"
           value: "core.producer_id@1"
+        }
+      }
+      bindings {
+        field_path: "cooperative_name"
+        type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.cooperative_name@1"
         }
       }
       bindings {
@@ -1138,6 +1507,24 @@ form_templates {
           value: "core.admin_area@1"
         }
       }
+      bindings {
+        field_path: "certification_status"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.certification_status@1"
+        }
+      }
+      bindings {
+        field_path: "annual_yield_kg"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.annual_yield_kg@1"
+        }
+      }
     }
     view {
       components {
@@ -1170,6 +1557,21 @@ form_templates {
           type: CONTROL_INPUT
           label {
             text: "Producer ID"
+          }
+          hint {
+            text: "Cooperative member number or producer ID."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "cooperative_name"
+          type: CONTROL_INPUT
+          label {
+            text: "Cooperative or producer group"
+          }
+          hint {
+            text: "Cooperative, farmer society, or producer group."
           }
         }
       }
@@ -1215,6 +1617,33 @@ form_templates {
           }
         }
       }
+      components {
+        control {
+          field_ref: "certification_status"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Certification status"
+          }
+          itemset {
+            instance_id: "certification_status"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "annual_yield_kg"
+          type: CONTROL_INPUT
+          label {
+            text: "Estimated annual yield (kg)"
+          }
+          hint {
+            text: "Expected annual harvest in kilograms."
+          }
+        }
+      }
     }
   }
   status: STABLE
@@ -1224,24 +1653,38 @@ purpose_packs {
   title {
     values {
       key: "en"
-      value: "Producer registration"
+      value: "Producer registration & market access"
     }
     values {
       key: "fr"
-      value: "Enregistrement des producteurs"
+      value: "Enregistrement des producteurs et accès aux marchés"
     }
     values {
       key: "es"
-      value: "Registro de productores"
+      value: "Registro de productores y acceso a mercados"
+    }
+    values {
+      key: "vi"
+      value: "Đăng ký nông hộ và tiếp cận thị trường"
+    }
+    values {
+      key: "sw"
+      value: "Usajili wa wazalishaji na upatikanaji wa masoko"
     }
   }
   description {
     values {
       key: "en"
-      value: "Build a register of the farmers and producers you work with."
+      value: "Register smallholder farmers, cooperatives, household demographics, and harvest volumes to support cooperative services and certified market access."
     }
   }
   icon: "person_add"
   form_template_ids: "producer_profile"
+  program_ids: "rainforest_alliance"
+  program_ids: "fairtrade"
+  program_ids: "agstack"
+  program_ids: "organic"
+  goals: "smallholder_livelihoods"
+  pillar: ADAPTATION
   status: STABLE
 }

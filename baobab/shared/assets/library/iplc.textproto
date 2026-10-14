@@ -31,6 +31,22 @@ concepts {
       key: "en"
       value: "Community type"
     }
+    values {
+      key: "fr"
+      value: "Type de communauté"
+    }
+    values {
+      key: "es"
+      value: "Tipo de comunidad"
+    }
+    values {
+      key: "vi"
+      value: "Loại hình cộng đồng"
+    }
+    values {
+      key: "sw"
+      value: "Aina ya jamii"
+    }
   }
   description {
     values {
@@ -82,6 +98,22 @@ concepts {
       key: "en"
       value: "Community name"
     }
+    values {
+      key: "fr"
+      value: "Nom de la communauté"
+    }
+    values {
+      key: "es"
+      value: "Nombre de la comunidad"
+    }
+    values {
+      key: "vi"
+      value: "Tên cộng đồng"
+    }
+    values {
+      key: "sw"
+      value: "Jina la jamii"
+    }
   }
   description {
     values {
@@ -103,11 +135,27 @@ concepts {
       key: "en"
       value: "Land tenure type"
     }
+    values {
+      key: "fr"
+      value: "Type de régime foncier"
+    }
+    values {
+      key: "es"
+      value: "Tipo de tenencia de la tierra"
+    }
+    values {
+      key: "vi"
+      value: "Hình thức quyền sử dụng đất"
+    }
+    values {
+      key: "sw"
+      value: "Aina ya umiliki wa ardhi"
+    }
   }
   description {
     values {
       key: "en"
-      value: "How rights to the land are held."
+      value: "How rights to the land are held, aligned with FAO VGGT tenure categories."
     }
   }
   keywords {
@@ -177,12 +225,235 @@ concepts {
   status: STABLE
 }
 concepts {
+  id: "iplc.legal_recognition"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Legal recognition status"
+    }
+    values {
+      key: "fr"
+      value: "Statut de reconnaissance juridique"
+    }
+    values {
+      key: "es"
+      value: "Estado de reconocimiento legal"
+    }
+    values {
+      key: "vi"
+      value: "Tình trạng công nhận pháp lý"
+    }
+    values {
+      key: "sw"
+      value: "Hali ya utambuzi wa kisheria"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Statutory recognition status of the community's land claim, aligned with LandMark."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "formally_titled"
+      label {
+        values {
+          key: "en"
+          value: "Formally titled or gazetted"
+        }
+      }
+    }
+    items {
+      code: "customary_unrecognized"
+      label {
+        values {
+          key: "en"
+          value: "Held under customary law (not yet titled)"
+        }
+      }
+    }
+    items {
+      code: "in_progress"
+      label {
+        values {
+          key: "en"
+          value: "Claim or registration in progress"
+        }
+      }
+    }
+    items {
+      code: "contested"
+      label {
+        values {
+          key: "en"
+          value: "Contested or overlapping claim"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: ORG_ONLY
+  goals: "iplc_rights_and_tenure"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "iplc.governance_institution"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Community governance institution"
+    }
+    values {
+      key: "fr"
+      value: "Institution de gouvernance communautaire"
+    }
+    values {
+      key: "es"
+      value: "Institución de gobernanza comunitaria"
+    }
+    values {
+      key: "vi"
+      value: "Thiết chế quản trị cộng đồng"
+    }
+    values {
+      key: "sw"
+      value: "Taasisi ya utawala wa jamii"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Traditional council, elders' assembly, or community organization governing the territory."
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: SENSITIVE
+  goals: "iplc_rights_and_tenure"
+  status: STABLE
+}
+concepts {
+  id: "iplc.resource_use"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Customary resource use"
+    }
+    values {
+      key: "fr"
+      value: "Usages coutumiers des ressources"
+    }
+    values {
+      key: "es"
+      value: "Uso consuetudinario de recursos"
+    }
+    values {
+      key: "vi"
+      value: "Sử dụng tài nguyên theo phong tục"
+    }
+    values {
+      key: "sw"
+      value: "Matumizi ya asili ya rasilimali"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Traditional livelihood, stewardship, and cultural uses of the mapped territory."
+    }
+  }
+  data_type: TYPE_SELECT_MULTIPLE
+  code_list {
+    items {
+      code: "agroforestry_crops"
+      label {
+        values {
+          key: "en"
+          value: "Traditional agroforestry & rotational crops"
+        }
+      }
+    }
+    items {
+      code: "ntfp_harvesting"
+      label {
+        values {
+          key: "en"
+          value: "Non-timber forest products (NTFP) & medicinal plants"
+        }
+      }
+    }
+    items {
+      code: "pastoralism_grazing"
+      label {
+        values {
+          key: "en"
+          value: "Seasonal pastoralism & grazing"
+        }
+      }
+    }
+    items {
+      code: "artisanal_fishing"
+      label {
+        values {
+          key: "en"
+          value: "Artisanal fishing & wetland stewardship"
+        }
+      }
+    }
+    items {
+      code: "sacred_cultural_site"
+      label {
+        values {
+          key: "en"
+          value: "Sacred grove or cultural heritage site"
+        }
+      }
+    }
+    items {
+      code: "community_conservation"
+      label {
+        values {
+          key: "en"
+          value: "Community-conserved forest or wildlife corridor"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: ORG_ONLY
+  goals: "iplc_rights_and_tenure"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
   id: "iplc.fpic_consent"
   version: 1
   label {
     values {
       key: "en"
       value: "Free, prior and informed consent"
+    }
+    values {
+      key: "fr"
+      value: "Consentement libre, informé et préalable (CLIP)"
+    }
+    values {
+      key: "es"
+      value: "Consentimiento libre, previo e informado (CLPI)"
+    }
+    values {
+      key: "vi"
+      value: "Sự đồng thuận tự nguyện, trước và được thông tin đầy đủ (FPIC)"
+    }
+    values {
+      key: "sw"
+      value: "Ridhaa huru, ya awali na yenye taarifa (FPIC)"
     }
   }
   description {
@@ -247,6 +518,22 @@ concepts {
       key: "en"
       value: "Territory boundary"
     }
+    values {
+      key: "fr"
+      value: "Limite du territoire"
+    }
+    values {
+      key: "es"
+      value: "Límite del territorio"
+    }
+    values {
+      key: "vi"
+      value: "Ranh giới lãnh thổ cộng đồng"
+    }
+    values {
+      key: "sw"
+      value: "Mpaka wa eneo la jamii"
+    }
   }
   description {
     values {
@@ -269,6 +556,919 @@ concepts {
   data_type: TYPE_GEOSHAPE
   aggregation: COUNT_DISTINCT_FEATURES
   privacy_class: SENSITIVE
+  goals: "iplc_rights_and_tenure"
+  pillar: PROTECTION
+  status: STABLE
+}
+form_templates {
+  id: "community_land_mapping"
+  title {
+    values {
+      key: "en"
+      value: "Community land & resource mapping"
+    }
+    values {
+      key: "fr"
+      value: "Cartographie des terres et ressources communautaires"
+    }
+    values {
+      key: "es"
+      value: "Mapeo de tierras y recursos comunitarios"
+    }
+    values {
+      key: "vi"
+      value: "Lập bản đồ đất đai và tài nguyên cộng đồng"
+    }
+    values {
+      key: "sw"
+      value: "Uchoraji ramani wa ardhi na rasilimali za jamii"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Participatory mapping form capturing FPIC consent, community identity, customary governance, tenure recognition, resource use, and territory boundaries."
+    }
+  }
+  form {
+    form_id: "community_land_mapping"
+    title: "Community land & resource mapping"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Community land & resource mapping"
+          fields {
+            name: "fpic_consent"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "community_name"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "community_type"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "governance_institution"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "tenure_type"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "legal_recognition"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "resource_use"
+            type: TYPE_SELECT_MULTIPLE
+          }
+          fields {
+            name: "territory_boundary"
+            type: TYPE_GEOSHAPE
+          }
+          fields {
+            name: "area_ha"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "site_photo"
+            type: TYPE_BINARY
+          }
+        }
+      }
+      secondary_instances {
+        id: "fpic_consent"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "given"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Given"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "given"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "withheld"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Withheld"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "withheld"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "pending"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Pending"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "pending"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "community_type"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "indigenous_peoples"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Indigenous Peoples"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "indigenous_peoples"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "local_community"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Local community"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "local_community"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "tenure_type"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "customary"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Customary"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "customary"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "communal"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Communal"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "communal"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "private"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Private"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "private"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "public"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Public"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "public"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "legal_recognition"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "formally_titled"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Formally titled or gazetted"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "formally_titled"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "customary_unrecognized"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Held under customary law (not yet titled)"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "customary_unrecognized"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "in_progress"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Claim or registration in progress"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "in_progress"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "contested"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Contested or overlapping claim"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "contested"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "resource_use"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "agroforestry_crops"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Traditional agroforestry & rotational crops"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "agroforestry_crops"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "ntfp_harvesting"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Non-timber forest products (NTFP) & medicinal plants"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "ntfp_harvesting"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "pastoralism_grazing"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Seasonal pastoralism & grazing"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "pastoralism_grazing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "artisanal_fishing"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Artisanal fishing & wetland stewardship"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "artisanal_fishing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "sacred_cultural_site"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Sacred grove or cultural heritage site"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "sacred_cultural_site"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "community_conservation"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Community-conserved forest or wildlife corridor"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "community_conservation"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "fpic_consent"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "iplc.fpic_consent@1"
+        }
+      }
+      bindings {
+        field_path: "community_name"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "iplc.community_name@1"
+        }
+      }
+      bindings {
+        field_path: "community_type"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "iplc.community_type@1"
+        }
+      }
+      bindings {
+        field_path: "governance_institution"
+        type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "iplc.governance_institution@1"
+        }
+      }
+      bindings {
+        field_path: "tenure_type"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "iplc.tenure_type@1"
+        }
+      }
+      bindings {
+        field_path: "legal_recognition"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "iplc.legal_recognition@1"
+        }
+      }
+      bindings {
+        field_path: "resource_use"
+        type: TYPE_SELECT_MULTIPLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "iplc.resource_use@1"
+        }
+      }
+      bindings {
+        field_path: "territory_boundary"
+        type: TYPE_GEOSHAPE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "iplc.territory_boundary@1"
+        }
+      }
+      bindings {
+        field_path: "area_ha"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.area_ha@1"
+        }
+      }
+      bindings {
+        field_path: "site_photo"
+        type: TYPE_BINARY
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.site_photo@1"
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "fpic_consent"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Free, prior and informed consent"
+          }
+          hint {
+            text: "Confirm Free, Prior and Informed Consent before recording community data."
+          }
+          itemset {
+            instance_id: "fpic_consent"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "community_name"
+          type: CONTROL_INPUT
+          label {
+            text: "Community name"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "community_type"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Community type"
+          }
+          itemset {
+            instance_id: "community_type"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "governance_institution"
+          type: CONTROL_INPUT
+          label {
+            text: "Community governance institution"
+          }
+          hint {
+            text: "Traditional council, elders' assembly, or community association."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "tenure_type"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Land tenure type"
+          }
+          itemset {
+            instance_id: "tenure_type"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "legal_recognition"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Legal recognition status"
+          }
+          itemset {
+            instance_id: "legal_recognition"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "resource_use"
+          type: CONTROL_SELECT_MULTIPLE
+          label {
+            text: "Customary resource use"
+          }
+          itemset {
+            instance_id: "resource_use"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "territory_boundary"
+          type: CONTROL_INPUT
+          label {
+            text: "Territory boundary"
+          }
+          hint {
+            text: "Walk or trace the customary territory boundary with community representatives."
+          }
+          appearance: "placement-map"
+        }
+      }
+      components {
+        control {
+          field_ref: "area_ha"
+          type: CONTROL_INPUT
+          label {
+            text: "Area (ha)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "site_photo"
+          type: CONTROL_UPLOAD
+          label {
+            text: "Site photo"
+          }
+          media_type: "image/*"
+        }
+      }
+    }
+  }
+  status: STABLE
+}
+purpose_packs {
+  id: "iplc_land_mapping"
+  title {
+    values {
+      key: "en"
+      value: "Community land & resource mapping"
+    }
+    values {
+      key: "fr"
+      value: "Cartographie des terres et ressources communautaires"
+    }
+    values {
+      key: "es"
+      value: "Mapeo de tierras y recursos comunitarios"
+    }
+    values {
+      key: "vi"
+      value: "Lập bản đồ đất đai và tài nguyên cộng đồng"
+    }
+    values {
+      key: "sw"
+      value: "Uchoraji ramani wa ardhi na rasilimali za jamii"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Document customary and Indigenous territories, Free, Prior and Informed Consent (FPIC), tenure governance, and traditional resource stewardship."
+    }
+  }
+  icon: "groups"
+  form_template_ids: "community_land_mapping"
+  program_ids: "landmark"
+  program_ids: "icca"
+  program_ids: "vggt"
   goals: "iplc_rights_and_tenure"
   pillar: PROTECTION
   status: STABLE

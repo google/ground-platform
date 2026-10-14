@@ -35,6 +35,7 @@ import org.groundplatform.v2.map.LngLatBounds
 import org.groundplatform.v2.web.di.WebUseCases
 import org.groundplatform.v2.web.ui.dashboard.CreateSurveyRequest
 import org.groundplatform.v2.web.ui.state.CreateSurveyWizardEvent
+import org.groundplatform.v2.web.ui.state.ImpactDashboardFocus
 import org.groundplatform.v2.web.ui.state.OrganizationEvent
 import org.groundplatform.v2.web.ui.state.SurveyEditorEvent
 import org.groundplatform.v2.web.ui.viewmodel.CreateSurveyWizardViewModel
@@ -138,9 +139,9 @@ class WebAppState(
     )
 
   /**
-   * ViewModel of the Impact views: the web dashboard's survey Impact tab, the organization Impact
-   * tab, and the platform-wide view for Managers of "All users". Its panes observe
-   * [ImpactViewModel.uiState] directly.
+   * ViewModel of the Impact views: the Impact page (published numbers of the organizations the
+   * signed-in user follows, and of all of Collect One) and the survey Impact pane. Its panes
+   * observe [ImpactViewModel.uiState] directly.
    */
   val impact: ImpactViewModel =
     ImpactViewModel(
@@ -245,6 +246,36 @@ class WebAppState(
 
   /** Shows the list of organizations. */
   fun openOrganizations() = organization.openOrganizations()
+
+  // --- Impact (web `#impact` and `#impact/<id>` pages) ---
+
+  /**
+   * Opens the Impact page on [organizationId] (adding it to the signed-in user's dashboard), the
+   * platform-wide numbers for the synthetic `"All users"` organization, or the overview for `null`.
+   */
+  fun openImpactDashboard(organizationId: String? = null) {
+    impact.openDashboard(organizationId)
+    selectPage(WebPage.IMPACT)
+  }
+
+  /** Shows [focus] on the Impact page and updates the URL hash to match. */
+  fun focusImpactDashboard(focus: ImpactDashboardFocus) {
+    impact.focusDashboard(focus)
+    if (activePage == WebPage.IMPACT) onPageChanged?.invoke(WebPage.IMPACT)
+  }
+
+  /**
+   * The organization named in [page]'s URL hash: the open organization on the organization page,
+   * the organization shown on the Impact page, or `null`.
+   */
+  fun hashOrganizationId(page: WebPage): String? =
+    when (page) {
+      WebPage.ORGANIZATION -> openOrganizationId
+      WebPage.IMPACT ->
+        (impact.uiState.value.dashboard.focus as? ImpactDashboardFocus.OrganizationFocus)
+          ?.organizationId
+      else -> null
+    }
 
   /** Surveys that belong to [organizationId]. */
   fun surveysInOrganization(organizationId: String): List<SurveyPreviewItem> =

@@ -39,6 +39,14 @@ concepts {
       key: "es"
       value: "Tipo de intervención"
     }
+    values {
+      key: "vi"
+      value: "Loại hình can thiệp phục hồi"
+    }
+    values {
+      key: "sw"
+      value: "Aina ya uingiliaji wa urejeshaji"
+    }
   }
   description {
     values {
@@ -112,6 +120,15 @@ concepts {
       }
     }
     items {
+      code: "hydrological_rehabilitation"
+      label {
+        values {
+          key: "en"
+          value: "Hydrological or tidal rehabilitation"
+        }
+      }
+    }
+    items {
       code: "other"
       label {
         values {
@@ -142,6 +159,14 @@ concepts {
     values {
       key: "es"
       value: "Área en restauración (ha)"
+    }
+    values {
+      key: "vi"
+      value: "Diện tích phục hồi (ha)"
+    }
+    values {
+      key: "sw"
+      value: "Eneo linalorejeshwa (ha)"
     }
   }
   description {
@@ -186,6 +211,14 @@ concepts {
       key: "es"
       value: "Fecha de inicio"
     }
+    values {
+      key: "vi"
+      value: "Ngày bắt đầu phục hồi"
+    }
+    values {
+      key: "sw"
+      value: "Tarehe ya kuanza urejeshaji"
+    }
   }
   description {
     values {
@@ -215,11 +248,19 @@ concepts {
       key: "es"
       value: "Árboles plantados"
     }
+    values {
+      key: "vi"
+      value: "Số cây đã trồng"
+    }
+    values {
+      key: "sw"
+      value: "Miti iliyopandwa"
+    }
   }
   description {
     values {
       key: "en"
-      value: "Number of trees or seedlings planted."
+      value: "Number of trees, mangrove propagules, or seedlings planted."
     }
   }
   keywords {
@@ -262,6 +303,14 @@ concepts {
     values {
       key: "es"
       value: "Árboles sobrevivientes"
+    }
+    values {
+      key: "vi"
+      value: "Số cây sống sót"
+    }
+    values {
+      key: "sw"
+      value: "Miti inayoendelea kuishi"
     }
   }
   description {
@@ -311,6 +360,14 @@ concepts {
       key: "es"
       value: "Tasa de supervivencia (%)"
     }
+    values {
+      key: "vi"
+      value: "Tỷ lệ sống (%)"
+    }
+    values {
+      key: "sw"
+      value: "Kiwango cha kuishi (%)"
+    }
   }
   description {
     values {
@@ -341,11 +398,19 @@ concepts {
       key: "es"
       value: "Tipo de ecosistema"
     }
+    values {
+      key: "vi"
+      value: "Loại hệ sinh thái"
+    }
+    values {
+      key: "sw"
+      value: "Aina ya mfumo ikolojia"
+    }
   }
   description {
     values {
       key: "en"
-      value: "Ecosystem being restored."
+      value: "Broad ecosystem biome being restored, aligned with the IUCN Global Ecosystem Typology."
     }
   }
   data_type: TYPE_SELECT_ONE
@@ -396,6 +461,15 @@ concepts {
       }
     }
     items {
+      code: "coastal_marine"
+      label {
+        values {
+          key: "en"
+          value: "Coastal or marine"
+        }
+      }
+    }
+    items {
       code: "other"
       label {
         values {
@@ -410,40 +484,190 @@ concepts {
   goals: "ecosystem_restoration"
   status: STABLE
 }
-form_templates {
-  id: "ferm_monitoring_wave"
-  title {
+concepts {
+  id: "ferm.restoration_objective"
+  version: 1
+  label {
     values {
       key: "en"
-      value: "Restoration monitoring wave"
+      value: "Restoration objective"
     }
     values {
       key: "fr"
-      value: "Suivi de la restauration"
+      value: "Objectif de restauration"
     }
     values {
       key: "es"
-      value: "Monitoreo de restauración"
+      value: "Objetivo de restauración"
+    }
+    values {
+      key: "vi"
+      value: "Mục tiêu phục hồi"
+    }
+    values {
+      key: "sw"
+      value: "Lengo la urejeshaji"
     }
   }
   description {
     values {
       key: "en"
-      value: "Repeat visit recording restoration progress and tree survival."
+      value: "Primary ecological and social objectives of the restoration initiative."
+    }
+  }
+  data_type: TYPE_SELECT_MULTIPLE
+  code_list {
+    items {
+      code: "biodiversity_recovery"
+      label {
+        values {
+          key: "en"
+          value: "Biodiversity recovery"
+        }
+      }
+    }
+    items {
+      code: "climate_mitigation"
+      label {
+        values {
+          key: "en"
+          value: "Carbon sequestration & climate mitigation"
+        }
+      }
+    }
+    items {
+      code: "watershed_soil"
+      label {
+        values {
+          key: "en"
+          value: "Watershed & soil protection"
+        }
+      }
+    }
+    items {
+      code: "coastal_resilience"
+      label {
+        values {
+          key: "en"
+          value: "Coastal & storm protection"
+        }
+      }
+    }
+    items {
+      code: "community_livelihoods"
+      label {
+        values {
+          key: "en"
+          value: "Community livelihoods & agroforestry"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  pillar: ADAPTATION
+  status: STABLE
+}
+concepts {
+  id: "ferm.species_planted"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Planted species"
+    }
+    values {
+      key: "fr"
+      value: "Espèces plantées"
+    }
+    values {
+      key: "es"
+      value: "Especies plantadas"
+    }
+    values {
+      key: "vi"
+      value: "Loài cây trồng"
+    }
+    values {
+      key: "sw"
+      value: "Spishi zilizopandwa"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Scientific or common names of native or agroforestry species planted on the site."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "tree species"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "native species"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "ecosystem_restoration"
+  status: STABLE
+}
+form_templates {
+  id: "ferm_monitoring_wave"
+  title {
+    values {
+      key: "en"
+      value: "Ecosystem restoration site check"
+    }
+    values {
+      key: "fr"
+      value: "Suivi de site de restauration"
+    }
+    values {
+      key: "es"
+      value: "Monitoreo de sitio de restauración"
+    }
+    values {
+      key: "vi"
+      value: "Kiểm tra hiện trường phục hồi hệ sinh thái"
+    }
+    values {
+      key: "sw"
+      value: "Ukaguzi wa eneo la urejeshaji wa mfumo ikolojia"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Baseline or repeat field visit recording ecosystem type, restoration intervention, area under restoration, planted species, and seedling survival."
     }
   }
   form {
     form_id: "ferm_monitoring_wave"
-    title: "Restoration monitoring wave"
+    title: "Ecosystem restoration site check"
     version: "1"
     model {
       primary_instance {
         record_schema {
           name: "data"
-          title: "Restoration monitoring wave"
+          title: "Ecosystem restoration site check"
+          fields {
+            name: "ecosystem_type"
+            type: TYPE_SELECT_ONE
+          }
           fields {
             name: "intervention_type"
             type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "restoration_objective"
+            type: TYPE_SELECT_MULTIPLE
           }
           fields {
             name: "area_under_restoration_ha"
@@ -454,6 +678,10 @@ form_templates {
             type: TYPE_DATE
           }
           fields {
+            name: "species_planted"
+            type: TYPE_STRING
+          }
+          fields {
             name: "trees_planted"
             type: TYPE_INT32
           }
@@ -462,8 +690,197 @@ form_templates {
             type: TYPE_INT32
           }
           fields {
+            name: "survival_rate_pct"
+            type: TYPE_DOUBLE
+          }
+          fields {
             name: "site_photo"
             type: TYPE_BINARY
+          }
+        }
+      }
+      secondary_instances {
+        id: "ecosystem_type"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forest"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "mangrove"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Mangrove"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "mangrove"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grassland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Grassland or savanna"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "grassland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wetland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Wetland"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "wetland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cropland"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "coastal_marine"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Coastal or marine"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "coastal_marine"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
           }
         }
       }
@@ -604,6 +1021,32 @@ form_templates {
             key: "name"
             value {
               scalar_value {
+                string_value: "hydrological_rehabilitation"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Hydrological or tidal rehabilitation"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "hydrological_rehabilitation"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
                 string_value: "other"
               }
             }
@@ -626,6 +1069,149 @@ form_templates {
           }
         }
       }
+      secondary_instances {
+        id: "restoration_objective"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "biodiversity_recovery"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Biodiversity recovery"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "biodiversity_recovery"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "climate_mitigation"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Carbon sequestration & climate mitigation"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "climate_mitigation"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "watershed_soil"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Watershed & soil protection"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "watershed_soil"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "coastal_resilience"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Coastal & storm protection"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "coastal_resilience"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "community_livelihoods"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Community livelihoods & agroforestry"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "community_livelihoods"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "ecosystem_type"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.ecosystem_type@1"
+        }
+      }
       bindings {
         field_path: "intervention_type"
         type: TYPE_SELECT_ONE
@@ -637,8 +1223,18 @@ form_templates {
         }
       }
       bindings {
+        field_path: "restoration_objective"
+        type: TYPE_SELECT_MULTIPLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.restoration_objective@1"
+        }
+      }
+      bindings {
         field_path: "area_under_restoration_ha"
         type: TYPE_DOUBLE
+        required_expression: "true()"
         foreign_attributes {
           namespace_uri: "http://groundplatform.org/xforms"
           qualified_name: "ground:concept"
@@ -652,6 +1248,15 @@ form_templates {
           namespace_uri: "http://groundplatform.org/xforms"
           qualified_name: "ground:concept"
           value: "ferm.start_date@1"
+        }
+      }
+      bindings {
+        field_path: "species_planted"
+        type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.species_planted@1"
         }
       }
       bindings {
@@ -673,6 +1278,15 @@ form_templates {
         }
       }
       bindings {
+        field_path: "survival_rate_pct"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "ferm.survival_rate_pct@1"
+        }
+      }
+      bindings {
         field_path: "site_photo"
         type: TYPE_BINARY
         foreign_attributes {
@@ -685,6 +1299,21 @@ form_templates {
     view {
       components {
         control {
+          field_ref: "ecosystem_type"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Ecosystem type"
+          }
+          itemset {
+            instance_id: "ecosystem_type"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
           field_ref: "intervention_type"
           type: CONTROL_SELECT_ONE
           label {
@@ -692,6 +1321,21 @@ form_templates {
           }
           itemset {
             instance_id: "intervention_type"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "restoration_objective"
+          type: CONTROL_SELECT_MULTIPLE
+          label {
+            text: "Restoration objective"
+          }
+          itemset {
+            instance_id: "restoration_objective"
             value_ref: "name"
             label_ref: "label"
             nodeset_path: "/root/item"
@@ -718,6 +1362,18 @@ form_templates {
       }
       components {
         control {
+          field_ref: "species_planted"
+          type: CONTROL_INPUT
+          label {
+            text: "Planted species"
+          }
+          hint {
+            text: "Dominant native or agroforestry species planted."
+          }
+        }
+      }
+      components {
+        control {
           field_ref: "trees_planted"
           type: CONTROL_INPUT
           label {
@@ -731,6 +1387,18 @@ form_templates {
           type: CONTROL_INPUT
           label {
             text: "Trees surviving"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "survival_rate_pct"
+          type: CONTROL_INPUT
+          label {
+            text: "Survival rate (%)"
+          }
+          hint {
+            text: "Percentage of planted seedlings surviving (0–100%)."
           }
         }
       }
@@ -753,26 +1421,36 @@ purpose_packs {
   title {
     values {
       key: "en"
-      value: "Restoration (FERM)"
+      value: "Ecosystem restoration"
     }
     values {
       key: "fr"
-      value: "Restauration (FERM)"
+      value: "Restauration des écosystèmes"
     }
     values {
       key: "es"
-      value: "Restauración (FERM)"
+      value: "Restauración de ecosistemas"
+    }
+    values {
+      key: "vi"
+      value: "Phục hồi hệ sinh thái"
+    }
+    values {
+      key: "sw"
+      value: "Urejeshaji wa mifumo ikolojia"
     }
   }
   description {
     values {
       key: "en"
-      value: "Monitor ecosystem restoration with indicators aligned to the Framework for Ecosystem Restoration Monitoring."
+      value: "Track degraded terrestrial, inland water, mangrove, and coastal sites under restoration, intervention activities, planted species, and seedling survival."
     }
   }
   icon: "forest"
   form_template_ids: "ferm_monitoring_wave"
   program_ids: "ferm"
+  program_ids: "gbf_target_2"
+  program_ids: "bonn_challenge"
   goals: "ecosystem_restoration"
   pillar: MITIGATION
   status: STABLE

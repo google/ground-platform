@@ -93,7 +93,7 @@ class PurposePacksTest {
     val entry = draft.forms.single()
     val form = entry.form
     assertEquals("form_1", form.formId)
-    assertEquals("EUDR plot registration", form.title)
+    assertEquals("Deforestation compliance plot check", form.title)
     val commodity = form.questions.first { it.name == "commodity" }
     assertEquals(ConceptLink("eudr.commodity", 1), commodity.conceptLink)
     assertTrue(commodity.choices.isNotEmpty() && commodity.choices.all { it.code != null })
@@ -121,7 +121,11 @@ class PurposePacksTest {
     val coop = "org.$kfs.coop_certification_audit"
     val draft = f.create(kfs, listOf(coop, "eudr_due_diligence", "producer_registration"))
     assertEquals(
-      listOf("EUDR plot registration", "Coop member plot audit", "Producer profile"),
+      listOf(
+        "Deforestation compliance plot check",
+        "Coop member plot audit",
+        "Producer & farm registration",
+      ),
       draft.forms.map { it.form.title },
     )
     assertEquals(3, draft.forms.map { it.form.formId }.toSet().size)

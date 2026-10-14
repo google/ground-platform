@@ -156,9 +156,20 @@ data class MapFeatureCluster(
   val siteSymbolGroups: List<ClusterMarkerSymbolGroup>
     get() = groupClusterFeaturesByMarkerSymbol(entityFeatures)
 
-  /** Summary of map feature workflow states in this cluster (e.g. `"✓ 2 • ◐ 2 • ○ 1"`). */
+  /**
+   * [siteSymbolGroups] shown as status chips in the cluster balloon: the no-marker-symbol group is
+   * left out, since features without a workflow status show no status marker. They are still
+   * counted in the balloon header's total ([siteCount]).
+   */
+  val siteStatusChipGroups: List<ClusterMarkerSymbolGroup>
+    get() = siteSymbolGroups.filterNot { it.isNoSymbolGroup }
+
+  /**
+   * Summary of map feature workflow states in this cluster (e.g. `"✓ 2 • ◐ 2 • ○ 1"`), leaving out
+   * features without a marker symbol.
+   */
   val siteStatesSummaryLabel: String
-    get() = siteSymbolGroups.joinToString(" • ") { it.balloonSegmentLabel }
+    get() = siteStatusChipGroups.joinToString(" • ") { it.balloonSegmentLabel }
 
   /**
    * Map from `marker-symbol` (with `""` representing the no-marker-symbol group) to the count of
@@ -175,11 +186,13 @@ data class MapFeatureCluster(
   fun countForSymbol(symbol: String?): Int = countsByMarkerSymbol[symbol?.trim().orEmpty()] ?: 0
 
   /**
-   * Summary string of all marker symbol groups and their counts shown in the cluster balloon (e.g.
-   * `"✓ 2 • ◐ 2 • ○ 1 • No symbol 5"`).
+   * Summary string of the marker symbol groups and their counts shown in the cluster balloon (e.g.
+   * `"✓ 2 • ◐ 2 • ○ 1"`). Features without a marker symbol are left out; they are only reflected in
+   * [totalCount].
    */
   val balloonSummaryLabel: String
-    get() = symbolGroups.joinToString(" • ") { it.balloonSegmentLabel }
+    get() =
+      symbolGroups.filterNot { it.isNoSymbolGroup }.joinToString(" • ") { it.balloonSegmentLabel }
 }
 
 /**

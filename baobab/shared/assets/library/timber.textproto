@@ -31,6 +31,22 @@ concepts {
       key: "en"
       value: "Tree species"
     }
+    values {
+      key: "fr"
+      value: "Espèce d'arbre"
+    }
+    values {
+      key: "es"
+      value: "Especie arbórea"
+    }
+    values {
+      key: "vi"
+      value: "Loài cây gỗ"
+    }
+    values {
+      key: "sw"
+      value: "Spishi ya mti"
+    }
   }
   description {
     values {
@@ -70,11 +86,27 @@ concepts {
       key: "en"
       value: "Log ID"
     }
+    values {
+      key: "fr"
+      value: "Identifiant de la grume"
+    }
+    values {
+      key: "es"
+      value: "ID de la troza"
+    }
+    values {
+      key: "vi"
+      value: "Mã khúc gỗ"
+    }
+    values {
+      key: "sw"
+      value: "Kitambulisho cha gogo"
+    }
   }
   description {
     values {
       key: "en"
-      value: "Identifier marked on the log (tag or barcode)."
+      value: "Identifier marked on the log (tag, hammer stamp, or barcode)."
     }
   }
   keywords {
@@ -96,12 +128,134 @@ concepts {
   status: STABLE
 }
 concepts {
+  id: "timber.felling_permit_id"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Felling permit or concession ID"
+    }
+    values {
+      key: "fr"
+      value: "Numéro de permis de coupe ou concession"
+    }
+    values {
+      key: "es"
+      value: "ID de permiso de aprovechamiento o concesión"
+    }
+    values {
+      key: "vi"
+      value: "Số giấy phép khai thác gỗ"
+    }
+    values {
+      key: "sw"
+      value: "Nambari ya kibali cha uvunaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Legal harvesting permit, annual allowable cut certificate, or concession identifier."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "permit"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "concession"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "license"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  goals: "legal_timber"
+  status: STABLE
+}
+concepts {
+  id: "timber.stump_location"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Stump or felling point"
+    }
+    values {
+      key: "fr"
+      value: "Point d'abattage ou souche"
+    }
+    values {
+      key: "es"
+      value: "Ubicación del tocón o tala"
+    }
+    values {
+      key: "vi"
+      value: "Tọa độ gốc cây khai thác"
+    }
+    values {
+      key: "sw"
+      value: "Mahali pa kisiki au ukataji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "GPS coordinates of the felled tree stump, linking bucked logs back to their origin in the harvest unit."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "stump"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "felling coordinates"
+    }
+  }
+  data_type: TYPE_GEOPOINT
+  aggregation: COUNT_DISTINCT_FEATURES
+  privacy_class: ORG_ONLY
+  goals: "legal_timber"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
   id: "timber.volume_m3"
   version: 1
   label {
     values {
       key: "en"
       value: "Volume (m³)"
+    }
+    values {
+      key: "fr"
+      value: "Volume (m³)"
+    }
+    values {
+      key: "es"
+      value: "Volumen (m³)"
+    }
+    values {
+      key: "vi"
+      value: "Thể tích (m³)"
+    }
+    values {
+      key: "sw"
+      value: "Ujazo (m³)"
     }
   }
   description {
@@ -115,6 +269,7 @@ concepts {
   aggregation: SUM
   privacy_class: ORG_ONLY
   goals: "legal_timber"
+  pillar: MITIGATION
   status: STABLE
 }
 concepts {
@@ -125,11 +280,27 @@ concepts {
       key: "en"
       value: "Harvest unit"
     }
+    values {
+      key: "fr"
+      value: "Unité d'exploitation"
+    }
+    values {
+      key: "es"
+      value: "Unidad de aprovechamiento"
+    }
+    values {
+      key: "vi"
+      value: "Lô hoặc khoảnh khai thác"
+    }
+    values {
+      key: "sw"
+      value: "Kitengo cha uvunaji"
+    }
   }
   description {
     values {
       key: "en"
-      value: "Compartment or cutting block the timber comes from."
+      value: "Compartment, forest management unit, or cutting block the timber comes from."
     }
   }
   keywords {
@@ -164,11 +335,27 @@ concepts {
       key: "en"
       value: "Diameter (cm)"
     }
+    values {
+      key: "fr"
+      value: "Diamètre (cm)"
+    }
+    values {
+      key: "es"
+      value: "Diámetro (cm)"
+    }
+    values {
+      key: "vi"
+      value: "Đường kính (cm)"
+    }
+    values {
+      key: "sw"
+      value: "Kipenyo (cm)"
+    }
   }
   description {
     values {
       key: "en"
-      value: "Log or stem diameter, in centimeters."
+      value: "Log or stem diameter at breast height (DBH), in centimeters."
     }
   }
   keywords {
@@ -190,12 +377,66 @@ concepts {
   status: STABLE
 }
 concepts {
+  id: "timber.length_m"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Log length (m)"
+    }
+    values {
+      key: "fr"
+      value: "Longueur de la grume (m)"
+    }
+    values {
+      key: "es"
+      value: "Longitud de la troza (m)"
+    }
+    values {
+      key: "vi"
+      value: "Chiều dài khúc gỗ (m)"
+    }
+    values {
+      key: "sw"
+      value: "Urefu wa gogo (m)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Measured length of the bucked log section, in meters."
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "m"
+  aggregation: MEAN
+  privacy_class: ORG_ONLY
+  goals: "legal_timber"
+  status: STABLE
+}
+concepts {
   id: "timber.felling_date"
   version: 1
   label {
     values {
       key: "en"
       value: "Felling date"
+    }
+    values {
+      key: "fr"
+      value: "Date d'abattage"
+    }
+    values {
+      key: "es"
+      value: "Fecha de tala"
+    }
+    values {
+      key: "vi"
+      value: "Ngày khai thác"
+    }
+    values {
+      key: "sw"
+      value: "Tarehe ya ukataji"
     }
   }
   description {
@@ -208,5 +449,337 @@ concepts {
   aggregation: NONE
   privacy_class: ORG_ONLY
   goals: "legal_timber"
+  status: STABLE
+}
+form_templates {
+  id: "timber_harvest_felling"
+  title {
+    values {
+      key: "en"
+      value: "Timber harvest & chain-of-custody check"
+    }
+    values {
+      key: "fr"
+      value: "Contrôle d'abattage et chaîne de contrôle du bois"
+    }
+    values {
+      key: "es"
+      value: "Control de aprovechamiento y cadena de custodia"
+    }
+    values {
+      key: "vi"
+      value: "Kiểm tra khai thác và chuỗi hành trình sản phẩm gỗ"
+    }
+    values {
+      key: "sw"
+      value: "Ukaguzi wa uvunaji wa mbao na mnyororo wa ufuatiliaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Felling and log-registration form linking log barcodes, species, dimensions, and cubic volume to stump coordinates and harvesting permits."
+    }
+  }
+  form {
+    form_id: "timber_harvest_felling"
+    title: "Timber harvest & chain-of-custody check"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Timber harvest & chain-of-custody check"
+          fields {
+            name: "felling_date"
+            type: TYPE_DATE
+          }
+          fields {
+            name: "felling_permit_id"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "harvest_unit"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "stump_location"
+            type: TYPE_GEOPOINT
+          }
+          fields {
+            name: "species"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "log_id"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "diameter_cm"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "length_m"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "volume_m3"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "site_photo"
+            type: TYPE_BINARY
+          }
+        }
+      }
+      bindings {
+        field_path: "felling_date"
+        type: TYPE_DATE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.felling_date@1"
+        }
+      }
+      bindings {
+        field_path: "felling_permit_id"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.felling_permit_id@1"
+        }
+      }
+      bindings {
+        field_path: "harvest_unit"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.harvest_unit@1"
+        }
+      }
+      bindings {
+        field_path: "stump_location"
+        type: TYPE_GEOPOINT
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.stump_location@1"
+        }
+      }
+      bindings {
+        field_path: "species"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.species@1"
+        }
+      }
+      bindings {
+        field_path: "log_id"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.log_id@1"
+        }
+      }
+      bindings {
+        field_path: "diameter_cm"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.diameter_cm@1"
+        }
+      }
+      bindings {
+        field_path: "length_m"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.length_m@1"
+        }
+      }
+      bindings {
+        field_path: "volume_m3"
+        type: TYPE_DOUBLE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "timber.volume_m3@1"
+        }
+      }
+      bindings {
+        field_path: "site_photo"
+        type: TYPE_BINARY
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.site_photo@1"
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "felling_date"
+          type: CONTROL_INPUT
+          label {
+            text: "Felling date"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "felling_permit_id"
+          type: CONTROL_INPUT
+          label {
+            text: "Felling permit or concession ID"
+          }
+          hint {
+            text: "Harvesting permit, coupe license, or concession ID."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "harvest_unit"
+          type: CONTROL_INPUT
+          label {
+            text: "Harvest unit"
+          }
+          hint {
+            text: "Forest management unit, compartment, or cutting block."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "stump_location"
+          type: CONTROL_INPUT
+          label {
+            text: "Stump or felling point"
+          }
+          hint {
+            text: "Capture GPS coordinates at the felled stump."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "species"
+          type: CONTROL_INPUT
+          label {
+            text: "Tree species"
+          }
+          hint {
+            text: "Scientific or common name of the harvested tree species."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "log_id"
+          type: CONTROL_INPUT
+          label {
+            text: "Log ID"
+          }
+          hint {
+            text: "Barcode, hammer stamp, or physical tag number on the log."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "diameter_cm"
+          type: CONTROL_INPUT
+          label {
+            text: "Diameter (cm)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "length_m"
+          type: CONTROL_INPUT
+          label {
+            text: "Log length (m)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "volume_m3"
+          type: CONTROL_INPUT
+          label {
+            text: "Volume (m³)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "site_photo"
+          type: CONTROL_UPLOAD
+          label {
+            text: "Site photo"
+          }
+          media_type: "image/*"
+        }
+      }
+    }
+  }
+  status: STABLE
+}
+purpose_packs {
+  id: "timber_traceability"
+  title {
+    values {
+      key: "en"
+      value: "Timber traceability"
+    }
+    values {
+      key: "fr"
+      value: "Traçabilité du bois"
+    }
+    values {
+      key: "es"
+      value: "Trazabilidad de la madera"
+    }
+    values {
+      key: "vi"
+      value: "Truy xuất nguồn gốc gỗ"
+    }
+    values {
+      key: "sw"
+      value: "Ufuatiliaji wa mbao"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Record harvest compartments, felling permits, stump coordinates, tree species, log tags, and timber volumes for legal harvest and chain-of-custody verification."
+    }
+  }
+  icon: "carpenter"
+  form_template_ids: "timber_harvest_felling"
+  export_profile_ids: "eudr_geojson"
+  program_ids: "fsc"
+  program_ids: "pefc"
+  program_ids: "flegt"
+  program_ids: "eudr"
+  goals: "legal_timber"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
   status: STABLE
 }

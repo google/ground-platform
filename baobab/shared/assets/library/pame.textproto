@@ -31,11 +31,27 @@ concepts {
       key: "en"
       value: "Threat type"
     }
+    values {
+      key: "fr"
+      value: "Type de menace"
+    }
+    values {
+      key: "es"
+      value: "Tipo de amenaza"
+    }
+    values {
+      key: "vi"
+      value: "Loại mối đe dọa"
+    }
+    values {
+      key: "sw"
+      value: "Aina ya tishio"
+    }
   }
   description {
     values {
       key: "en"
-      value: "Threats to the protected area observed at the site."
+      value: "Direct pressures or threats observed at the site, aligned with the IUCN-CMP Direct Threats Classification."
     }
   }
   keywords {
@@ -113,6 +129,24 @@ concepts {
       }
     }
     items {
+      code: "invasive_species"
+      label {
+        values {
+          key: "en"
+          value: "Invasive species"
+        }
+      }
+    }
+    items {
+      code: "pollution"
+      label {
+        values {
+          key: "en"
+          value: "Pollution"
+        }
+      }
+    }
+    items {
       code: "other"
       label {
         values {
@@ -136,11 +170,27 @@ concepts {
       key: "en"
       value: "Threat severity"
     }
+    values {
+      key: "fr"
+      value: "Gravité de la menace"
+    }
+    values {
+      key: "es"
+      value: "Severidad de la amenaza"
+    }
+    values {
+      key: "vi"
+      value: "Mức độ nghiêm trọng"
+    }
+    values {
+      key: "sw"
+      value: "Ukali wa tishio"
+    }
   }
   description {
     values {
       key: "en"
-      value: "How severe the observed threat is."
+      value: "Intensity and scope of damage caused by the observed threat."
     }
   }
   data_type: TYPE_SELECT_ONE
@@ -180,12 +230,207 @@ concepts {
   status: STABLE
 }
 concepts {
+  id: "pame.management_zone"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Management zone"
+    }
+    values {
+      key: "fr"
+      value: "Zone de gestion"
+    }
+    values {
+      key: "es"
+      value: "Zona de manejo"
+    }
+    values {
+      key: "vi"
+      value: "Phân khu quản lý"
+    }
+    values {
+      key: "sw"
+      value: "Kanda ya usimamizi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Protected area or conservation zone where the observation was recorded."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "core_strict"
+      label {
+        values {
+          key: "en"
+          value: "Strict protection / core zone"
+        }
+      }
+    }
+    items {
+      code: "buffer_zone"
+      label {
+        values {
+          key: "en"
+          value: "Buffer zone"
+        }
+      }
+    }
+    items {
+      code: "ecological_restoration"
+      label {
+        values {
+          key: "en"
+          value: "Ecological restoration zone"
+        }
+      }
+    }
+    items {
+      code: "sustainable_use"
+      label {
+        values {
+          key: "en"
+          value: "Community / sustainable use zone"
+        }
+      }
+    }
+    items {
+      code: "wildlife_corridor"
+      label {
+        values {
+          key: "en"
+          value: "Wildlife corridor / OECM"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "effective_protected_areas"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
+  id: "pame.management_action"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Management response"
+    }
+    values {
+      key: "fr"
+      value: "Mesure de gestion prise"
+    }
+    values {
+      key: "es"
+      value: "Acción de manejo tomada"
+    }
+    values {
+      key: "vi"
+      value: "Biện pháp xử lý"
+    }
+    values {
+      key: "sw"
+      value: "Hatua ya usimamizi iliyochukuliwa"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Immediate management or enforcement action taken by the field team."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "observation_logged"
+      label {
+        values {
+          key: "en"
+          value: "Observation logged only"
+        }
+      }
+    }
+    items {
+      code: "snare_gear_removed"
+      label {
+        values {
+          key: "en"
+          value: "Snare or illegal gear removed"
+        }
+      }
+    }
+    items {
+      code: "warning_issued"
+      label {
+        values {
+          key: "en"
+          value: "Community warning or sensitization"
+        }
+      }
+    }
+    items {
+      code: "incident_escalated"
+      label {
+        values {
+          key: "en"
+          value: "Escalated to enforcement team"
+        }
+      }
+    }
+    items {
+      code: "fire_suppressed"
+      label {
+        values {
+          key: "en"
+          value: "Fire controlled or suppressed"
+        }
+      }
+    }
+    items {
+      code: "boundary_repaired"
+      label {
+        values {
+          key: "en"
+          value: "Boundary marker or fence repaired"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: ORG_ONLY
+  goals: "effective_protected_areas"
+  pillar: PROTECTION
+  status: STABLE
+}
+concepts {
   id: "pame.patrol_effort_km"
   version: 1
   label {
     values {
       key: "en"
       value: "Patrol effort (km)"
+    }
+    values {
+      key: "fr"
+      value: "Effort de patrouille (km)"
+    }
+    values {
+      key: "es"
+      value: "Esfuerzo de patrullaje (km)"
+    }
+    values {
+      key: "vi"
+      value: "Quãng đường tuần tra (km)"
+    }
+    values {
+      key: "sw"
+      value: "Umbali wa doria (km)"
     }
   }
   description {
@@ -222,6 +467,22 @@ concepts {
       key: "en"
       value: "Patrol date"
     }
+    values {
+      key: "fr"
+      value: "Date de patrouille"
+    }
+    values {
+      key: "es"
+      value: "Fecha de patrullaje"
+    }
+    values {
+      key: "vi"
+      value: "Ngày tuần tra"
+    }
+    values {
+      key: "sw"
+      value: "Tarehe ya doria"
+    }
   }
   description {
     values {
@@ -242,6 +503,22 @@ concepts {
     values {
       key: "en"
       value: "Rangers on patrol"
+    }
+    values {
+      key: "fr"
+      value: "Écogardes en patrouille"
+    }
+    values {
+      key: "es"
+      value: "Guardaparques en patrulla"
+    }
+    values {
+      key: "vi"
+      value: "Số kiểm lâm tuần tra"
+    }
+    values {
+      key: "sw"
+      value: "Askari wa wanyamapori kwenye doria"
     }
   }
   description {
@@ -277,6 +554,22 @@ concepts {
       key: "en"
       value: "Species observed"
     }
+    values {
+      key: "fr"
+      value: "Espèces observées"
+    }
+    values {
+      key: "es"
+      value: "Especies observadas"
+    }
+    values {
+      key: "vi"
+      value: "Loài quan sát được"
+    }
+    values {
+      key: "sw"
+      value: "Spishi zilizoonekana"
+    }
   }
   description {
     values {
@@ -300,5 +593,936 @@ concepts {
   aggregation: NONE
   privacy_class: SENSITIVE
   goals: "effective_protected_areas"
+  status: STABLE
+}
+form_templates {
+  id: "protected_area_patrol"
+  title {
+    values {
+      key: "en"
+      value: "Protected area patrol & threat check"
+    }
+    values {
+      key: "fr"
+      value: "Patrouille et évaluation des menaces"
+    }
+    values {
+      key: "es"
+      value: "Patrullaje y evaluación de amenazas"
+    }
+    values {
+      key: "vi"
+      value: "Tuần tra và đánh giá mối đe dọa khu bảo tồn"
+    }
+    values {
+      key: "sw"
+      value: "Doria na ukaguzi wa vitisho katika eneo lililohifadhiwa"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Logs ranger patrol effort, management zone, IUCN direct threat categories, threat severity, wildlife observations, and management response."
+    }
+  }
+  form {
+    form_id: "protected_area_patrol"
+    title: "Protected area patrol & threat check"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Protected area patrol & threat check"
+          fields {
+            name: "patrol_date"
+            type: TYPE_DATE
+          }
+          fields {
+            name: "management_zone"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "ranger_count"
+            type: TYPE_INT32
+          }
+          fields {
+            name: "patrol_effort_km"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "threat_type"
+            type: TYPE_SELECT_MULTIPLE
+          }
+          fields {
+            name: "threat_severity"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "management_action"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "species_observed"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "site_photo"
+            type: TYPE_BINARY
+          }
+        }
+      }
+      secondary_instances {
+        id: "management_zone"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "core_strict"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Strict protection / core zone"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "core_strict"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "buffer_zone"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Buffer zone"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "buffer_zone"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "ecological_restoration"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Ecological restoration zone"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "ecological_restoration"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "sustainable_use"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Community / sustainable use zone"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "sustainable_use"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wildlife_corridor"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Wildlife corridor / OECM"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "wildlife_corridor"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "threat_type"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "logging"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Logging"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "logging"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "poaching"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Poaching"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "poaching"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "fire"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Fire"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "fire"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "encroachment"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Encroachment"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "encroachment"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "mining"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Mining"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "mining"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grazing"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Grazing"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "grazing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "invasive_species"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Invasive species"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "invasive_species"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "pollution"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Pollution"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "pollution"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "threat_severity"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "low"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Low"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "low"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "medium"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Medium"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "medium"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "high"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "High"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "high"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "management_action"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "observation_logged"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Observation logged only"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "observation_logged"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "snare_gear_removed"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Snare or illegal gear removed"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "snare_gear_removed"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "warning_issued"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Community warning or sensitization"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "warning_issued"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "incident_escalated"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Escalated to enforcement team"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "incident_escalated"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "fire_suppressed"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Fire controlled or suppressed"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "fire_suppressed"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "boundary_repaired"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Boundary marker or fence repaired"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "boundary_repaired"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "patrol_date"
+        type: TYPE_DATE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "pame.patrol_date@1"
+        }
+      }
+      bindings {
+        field_path: "management_zone"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "pame.management_zone@1"
+        }
+      }
+      bindings {
+        field_path: "ranger_count"
+        type: TYPE_INT32
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "pame.ranger_count@1"
+        }
+      }
+      bindings {
+        field_path: "patrol_effort_km"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "pame.patrol_effort_km@1"
+        }
+      }
+      bindings {
+        field_path: "threat_type"
+        type: TYPE_SELECT_MULTIPLE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "pame.threat_type@1"
+        }
+      }
+      bindings {
+        field_path: "threat_severity"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "pame.threat_severity@1"
+        }
+      }
+      bindings {
+        field_path: "management_action"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "pame.management_action@1"
+        }
+      }
+      bindings {
+        field_path: "species_observed"
+        type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "pame.species_observed@1"
+        }
+      }
+      bindings {
+        field_path: "site_photo"
+        type: TYPE_BINARY
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "core.site_photo@1"
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "patrol_date"
+          type: CONTROL_INPUT
+          label {
+            text: "Patrol date"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "management_zone"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Management zone"
+          }
+          itemset {
+            instance_id: "management_zone"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "ranger_count"
+          type: CONTROL_INPUT
+          label {
+            text: "Rangers on patrol"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "patrol_effort_km"
+          type: CONTROL_INPUT
+          label {
+            text: "Patrol effort (km)"
+          }
+          hint {
+            text: "Distance patrolled in kilometers."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "threat_type"
+          type: CONTROL_SELECT_MULTIPLE
+          label {
+            text: "Threat type"
+          }
+          itemset {
+            instance_id: "threat_type"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "threat_severity"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Threat severity"
+          }
+          itemset {
+            instance_id: "threat_severity"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "management_action"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Management response"
+          }
+          itemset {
+            instance_id: "management_action"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "species_observed"
+          type: CONTROL_INPUT
+          label {
+            text: "Species observed"
+          }
+          hint {
+            text: "Key wildlife or indicator species observed."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "site_photo"
+          type: CONTROL_UPLOAD
+          label {
+            text: "Site photo"
+          }
+          media_type: "image/*"
+        }
+      }
+    }
+  }
+  status: STABLE
+}
+purpose_packs {
+  id: "protected_area_management"
+  title {
+    values {
+      key: "en"
+      value: "Protected area management"
+    }
+    values {
+      key: "fr"
+      value: "Gestion des aires protégées"
+    }
+    values {
+      key: "es"
+      value: "Gestión de áreas protegidas"
+    }
+    values {
+      key: "vi"
+      value: "Quản lý khu bảo tồn"
+    }
+    values {
+      key: "sw"
+      value: "Usimamizi wa maeneo yaliyohifadhiwa"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Log ranger patrols, verify deforestation or fire alerts, classify direct threats and severity, and record wildlife observations and management actions."
+    }
+  }
+  icon: "shield"
+  form_template_ids: "protected_area_patrol"
+  program_ids: "gd_pame"
+  program_ids: "mett"
+  program_ids: "imet"
+  program_ids: "smart"
+  program_ids: "gbf_target_3"
+  goals: "effective_protected_areas"
+  pillar: PROTECTION
   status: STABLE
 }

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -110,6 +111,11 @@ internal fun OrganizationsPage(
           }
         },
         actions = {
+          WebHeaderButton(
+            text = "Impact",
+            icon = Icons.Outlined.Insights,
+            onClick = { state.openImpactDashboard() },
+          )
           WebHeaderButton(
             text = "Create organization",
             icon = Icons.Outlined.Add,
@@ -450,8 +456,8 @@ private fun CreateOrganizationDialog(
           Column {
             Text("List in the directory", style = MaterialTheme.typography.bodyMedium)
             Text(
-              "Anyone can find the organization and ask to join. Unlisted organizations are " +
-                "invite-only.",
+              "Anyone can find the organization, ask to join, and follow its published impact " +
+                "numbers. Unlisted organizations are invite-only.",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -460,6 +466,13 @@ private fun CreateOrganizationDialog(
         Text(
           "You'll be its first Manager. Managers can edit the organization, manage members, and " +
             "manage all of its surveys.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+          "Every organization publishes anonymous totals from its surveys, like hectares mapped, " +
+            "for anyone signed in to Collect One. Submissions, map features, locations, and " +
+            "answers are never published.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

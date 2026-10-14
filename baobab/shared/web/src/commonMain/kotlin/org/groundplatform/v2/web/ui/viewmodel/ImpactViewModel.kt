@@ -24,13 +24,16 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.client.pdf.PdfExportClient
 import org.groundplatform.v2.app.client.pdf.PlatformPdfExportClient
+import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.model.Countries
 import org.groundplatform.v2.app.domain.model.ImpactEvent
 import org.groundplatform.v2.app.domain.model.Organization
@@ -48,6 +51,9 @@ import org.groundplatform.v2.web.domain.model.ImpactSummary
 import org.groundplatform.v2.web.domain.usecase.ComputeImpactUseCase
 import org.groundplatform.v2.web.domain.usecase.ImpactSnapshot
 import org.groundplatform.v2.web.domain.usecase.ImpactSurveySource
+import org.groundplatform.v2.web.ui.state.ImpactDashboardFocus
+import org.groundplatform.v2.web.ui.state.ImpactDashboardOrganization
+import org.groundplatform.v2.web.ui.state.ImpactDashboardUiState
 import org.groundplatform.v2.web.ui.state.ImpactFilter
 import org.groundplatform.v2.web.ui.state.ImpactUiState
 import org.groundplatform.v2.web.ui.state.OrganizationImpactUiState
@@ -68,15 +74,48 @@ interface ImpactActions {
   /** Downloads organization [organizationId]'s impact summary (with its filter) as a PDF. */
   fun downloadOrganizationSummary(organizationId: String)
 
-  /** Downloads the platform-wide impact summary as a PDF (Managers of `"All users"` only). */
+  /**
+   * Downloads organization [organizationId]'s published numbers (with its country filter) as a PDF.
+   */
+  fun downloadPublishedOrganizationSummary(organizationId: String)
+
+  /**
+   * Downloads the platform-wide impact summary as a PDF: the full one for Managers of `"All
+   * users"`, the published one for everyone else.
+   */
   fun downloadGlobalSummary()
 
   fun dismissMessage()
+
+  // --- Impact page ---
+
+  /** Puts organization [organizationId] on the signed-in user's Impact page, if they can add it. */
+  fun addToDashboard(organizationId: String)
+
+  /** Takes organization [organizationId] off the signed-in user's Impact page. */
+  fun removeFromDashboard(organizationId: String)
+
+  /**
+   * Replaces the organizations on the signed-in user's Impact page with [organizationIds] (in
+   * order), ignoring ones they can't add.
+   */
+  fun setDashboardOrganizations(organizationIds: List<String>)
+
+  /** Shows [focus] in the Impact page's content pane. */
+  fun focusDashboard(focus: ImpactDashboardFocus)
+
+  /** Switches members between their full numbers and the published view everyone else sees. */
+  fun setPreviewingPublished(isPreviewing: Boolean)
 }
 
 /**
- * ViewModel of the Impact views: the survey Impact tab of the web dashboard, the organization
- * Impact tab, and the platform-wide view for Managers of `"All users"`.
+ * ViewModel of the Impact views: the Impact page (`#impact`), the survey Impact pane, and the
+ * platform-wide view.
+ *
+ * Every organization publishes anonymous totals (see
+ * [ComputeImpactUseCase.publishedOrganizationSummary]) that anyone signed in can put on their
+ * Impact page; its members can also see its full numbers. Platform-wide numbers are published to
+ * everyone, in full to Managers of `"All users"`.
  *
  * Numbers come from [ComputeImpactUseCase] (the shared aggregation job) over every survey's map
  * features, editor draft, and outcome, every library, every organization, and the impact events.
@@ -150,16 +189,34 @@ class ImpactViewModel(
   private val filters = MutableStateFlow<Map<String, ImpactFilter>>(emptyMap())
   private val message = MutableStateFlow<String?>(null)
 
+  /** The Impact page's choices, kept apart per signed-in user. */
+  private data class DashboardChoices(
+    /** Organizations each user put on their Impact page, by lower-case email; absent = default. */
+    val selections: Map<String, List<String>> = emptyMap(),
+    val focus: ImpactDashboardFocus = ImpactDashboardFocus.Overview,
+    val isPreviewingPublished: Boolean = false,
+  )
+
+  private val dashboardChoices = MutableStateFlow(DashboardChoices())
+
+  private val authSession: StateFlow<AuthSession?> =
+    authRepository.observeSession().stateIn(scope, SharingStarted.Eagerly, null)
+
   val uiState: StateFlow<ImpactUiState> =
-    combine(snapshot, filters, authRepository.observeSession(), message) {
+    combine(snapshot, filters, authSession, dashboardChoices, message) {
         snapshot,
         filters,
         auth,
+        choices,
         message ->
         if (snapshot == null) return@combine ImpactUiState(message = message)
-        val email = auth.profile.email
-        val canSeeGlobal =
+        val email = auth?.profile?.email.orEmpty()
+        val isPlatformAdmin =
           snapshot.organizations.any { it.isSynthetic && email.isNotBlank() && it.isManager(email) }
+        val memberOrganizations =
+          snapshot.organizations.filter {
+            !it.isSynthetic && email.isNotBlank() && it.isMember(email)
+          }
         ImpactUiState(
           isLoading = false,
           surveys =
@@ -169,15 +226,32 @@ class ImpactViewModel(
               }
               .toMap(),
           organizations =
-            snapshot.organizations
-              .filterNot { it.isSynthetic }
+            memberOrganizations
               .mapNotNull { organization -> organizationState(snapshot, organization, filters) }
               .associateBy { it.summary.scopeId },
-          global = if (canSeeGlobal) computeImpact.globalSummary(snapshot) else null,
+          global =
+            if (isPlatformAdmin) computeImpact.globalSummary(snapshot)
+            else computeImpact.publishedGlobalSummary(snapshot),
+          dashboard = dashboardState(snapshot, filters, email, choices),
           message = message,
         )
       }
       .stateIn(scope, SharingStarted.Eagerly, ImpactUiState())
+
+  /** An [openDashboard] call made before the first computation finished. */
+  private data class PendingOpen(val organizationId: String?)
+
+  private var pendingOpen: PendingOpen? = null
+
+  init {
+    scope.launch {
+      uiState.first { !it.isLoading }
+      pendingOpen?.let { pending ->
+        pendingOpen = null
+        openDashboard(pending.organizationId)
+      }
+    }
+  }
 
   private fun organizationState(
     snapshot: ImpactSnapshot,
@@ -196,12 +270,75 @@ class ImpactViewModel(
       summary = summary,
       filter = filter,
       surveys = snapshot.surveys.filter { it.organizationId == organization.id },
-      countries =
-        computeImpact
-          .organizationCountries(snapshot, organization.id)
-          .mapNotNull(Countries::byCode),
+      countries = countries(snapshot, organization.id),
     )
   }
+
+  /** [organization]'s published numbers: no survey filter, only its country filter. */
+  private fun publishedState(
+    snapshot: ImpactSnapshot,
+    organization: Organization,
+    filters: Map<String, ImpactFilter>,
+  ): OrganizationImpactUiState? {
+    val filter = ImpactFilter(countryCode = filters[organization.id]?.countryCode)
+    val summary =
+      computeImpact.publishedOrganizationSummary(
+        snapshot,
+        organization.id,
+        countryCode = filter.countryCode,
+      ) ?: return null
+    return OrganizationImpactUiState(
+      summary = summary,
+      filter = filter,
+      countries = countries(snapshot, organization.id),
+    )
+  }
+
+  private fun countries(snapshot: ImpactSnapshot, organizationId: String) =
+    computeImpact.organizationCountries(snapshot, organizationId).mapNotNull(Countries::byCode)
+
+  private fun dashboardState(
+    snapshot: ImpactSnapshot,
+    filters: Map<String, ImpactFilter>,
+    email: String,
+    choices: DashboardChoices,
+  ): ImpactDashboardUiState {
+    val available =
+      availableOrganizations(snapshot.organizations, email).mapNotNull { organization ->
+        val published = publishedState(snapshot, organization, filters) ?: return@mapNotNull null
+        ImpactDashboardOrganization(
+          organization = organization,
+          isMember = organization.isMember(email),
+          isManager = organization.isManager(email),
+          published = published,
+        )
+      }
+    val availableIds = available.map { it.id }.toSet()
+    val selectedIds =
+      (choices.selections[email.lowercase()] ?: available.filter { it.isMember }.map { it.id })
+        .filter { it in availableIds }
+    val focus =
+      when (val focus = choices.focus) {
+        is ImpactDashboardFocus.OrganizationFocus ->
+          if (focus.organizationId in selectedIds) focus else ImpactDashboardFocus.Overview
+        else -> focus
+      }
+    return ImpactDashboardUiState(
+      available = available,
+      selectedIds = selectedIds,
+      focus = focus,
+      isPreviewingPublished = choices.isPreviewingPublished,
+    )
+  }
+
+  /**
+   * Organizations [email] can put on their Impact page, by name: listed ones plus the ones they
+   * belong to. The synthetic `"All users"` organization is the platform-wide view instead.
+   */
+  private fun availableOrganizations(organizations: List<Organization>, email: String) =
+    organizations
+      .filter { !it.isSynthetic && (it.isListed || (email.isNotBlank() && it.isMember(email))) }
+      .sortedBy { it.name.lowercase() }
 
   override fun setOrganizationSurveyFilter(organizationId: String, surveyId: String?) {
     filters.update {
@@ -225,6 +362,11 @@ class ImpactViewModel(
     save(state.summary, filterLabel(state))
   }
 
+  override fun downloadPublishedOrganizationSummary(organizationId: String) {
+    val state = uiState.value.dashboard.organization(organizationId)?.published ?: return
+    save(state.summary, filterLabel(state))
+  }
+
   override fun downloadGlobalSummary() {
     uiState.value.global?.let { save(it, filterLabel = null) }
   }
@@ -232,6 +374,61 @@ class ImpactViewModel(
   override fun dismissMessage() {
     message.value = null
   }
+
+  // --- Impact page ---
+
+  override fun addToDashboard(organizationId: String) {
+    val dashboard = uiState.value.dashboard
+    if (organizationId in dashboard.selectedIds) return
+    setDashboardOrganizations(dashboard.selectedIds + organizationId)
+  }
+
+  override fun removeFromDashboard(organizationId: String) {
+    setDashboardOrganizations(uiState.value.dashboard.selectedIds - organizationId)
+  }
+
+  override fun setDashboardOrganizations(organizationIds: List<String>) {
+    val email = signedInEmail() ?: return
+    val dashboard = uiState.value.dashboard
+    val ids = organizationIds.distinct().filter { dashboard.organization(it) != null }
+    dashboardChoices.update { it.copy(selections = it.selections + (email to ids)) }
+  }
+
+  override fun focusDashboard(focus: ImpactDashboardFocus) {
+    dashboardChoices.update { it.copy(focus = focus) }
+  }
+
+  override fun setPreviewingPublished(isPreviewing: Boolean) {
+    dashboardChoices.update { it.copy(isPreviewingPublished = isPreviewing) }
+  }
+
+  /**
+   * Opens the Impact page on [organizationId]: adds it to the signed-in user's dashboard (if they
+   * can add it) and shows it. `null` shows the overview; the synthetic `"All users"` organization
+   * shows the platform-wide numbers.
+   */
+  fun openDashboard(organizationId: String?) {
+    if (uiState.value.isLoading) {
+      // Opened from a link before the first computation: open it once the numbers are in.
+      pendingOpen = PendingOpen(organizationId)
+      return
+    }
+    val dashboard = uiState.value.dashboard
+    val focus =
+      when {
+        organizationId == null -> ImpactDashboardFocus.Overview
+        organizationId == Organization.ALL_USERS_ID -> ImpactDashboardFocus.Platform
+        dashboard.organization(organizationId) == null -> ImpactDashboardFocus.Overview
+        else -> {
+          addToDashboard(organizationId)
+          ImpactDashboardFocus.OrganizationFocus(organizationId)
+        }
+      }
+    focusDashboard(focus)
+  }
+
+  private fun signedInEmail(): String? =
+    authSession.value?.profile?.email?.takeIf { it.isNotBlank() }?.lowercase()
 
   private fun save(summary: ImpactSummary, filterLabel: String?) {
     val pdf =
@@ -251,10 +448,14 @@ class ImpactViewModel(
     return parts.joinToString(" · ").ifEmpty { null }
   }
 
-  /** Clears filters and messages (used by session resets). */
+  /**
+   * Clears filters, messages, and the Impact page's focus and preview (used by session resets).
+   * Each user's chosen organizations are kept.
+   */
   fun reset() {
     filters.value = emptyMap()
     message.value = null
+    dashboardChoices.update { DashboardChoices(selections = it.selections) }
   }
 
   companion object {

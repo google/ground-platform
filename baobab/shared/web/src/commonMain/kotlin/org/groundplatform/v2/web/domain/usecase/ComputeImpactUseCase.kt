@@ -26,6 +26,7 @@ import org.groundplatform.v2.app.domain.model.ImpactEventType
 import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
+import org.groundplatform.v2.app.domain.model.PrivacyClass
 import org.groundplatform.v2.app.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.app.domain.model.SurveyOutcomeKind
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
@@ -514,6 +515,76 @@ class ComputeImpactUseCase(
     )
   }
 
+  /**
+   * Organization [organizationId]'s **published** numbers: what anyone signed in to Collect One
+   * sees on the Impact page, optionally only for map features in country [countryCode]. Every
+   * organization publishes them. See [publish] for what's left out. `null` if the organization
+   * isn't in [snapshot] or is the synthetic `"All users"` organization.
+   */
+  fun publishedOrganizationSummary(
+    snapshot: ImpactSnapshot,
+    organizationId: String,
+    countryCode: String? = null,
+  ): ImpactSummary? {
+    if (snapshot.organizations.firstOrNull { it.id == organizationId }?.isSynthetic != false) {
+      return null
+    }
+    return organizationSummary(snapshot, organizationId, surveyId = null, countryCode = countryCode)
+      ?.let { publish(snapshot, it) }
+  }
+
+  /**
+   * Platform-wide numbers as published to everyone signed in: [globalSummary] limited to
+   * `AGGREGATE_PUBLIC` standard fields. Managers of `"All users"` see [globalSummary] itself.
+   */
+  fun publishedGlobalSummary(snapshot: ImpactSnapshot): ImpactSummary =
+    publish(snapshot, globalSummary(snapshot))
+
+  /**
+   * [summary] as published outside its organization: anonymous totals only.
+   * * Indicators (and the producer count) only from `AGGREGATE_PUBLIC` standard fields; `ORG_ONLY`
+   *   and `SENSITIVE` ones stay with the organization.
+   * * No diagnostics (they quote captured values) and no setup hints (they're for organizers).
+   * * For an organization, nothing but the title when it has fewer than
+   *   [ImpactConfig.organizationPublicMinFeatures] unique map features (in the filtered country, if
+   *   any). Platform-wide numbers are already thresholded by country and map area.
+   */
+  private fun publish(snapshot: ImpactSnapshot, summary: ImpactSummary): ImpactSummary {
+    if (
+      summary.scope == ImpactSummaryScope.ORGANIZATION &&
+        summary.features.uniqueCount < config.organizationPublicMinFeatures
+    ) {
+      return ImpactSummary(
+        scope = summary.scope,
+        scopeId = summary.scopeId,
+        title = summary.title,
+        isPublished = true,
+        isBelowPublicationThreshold = true,
+      )
+    }
+    fun isPublic(conceptId: String?) =
+      conceptId != null &&
+        snapshot.concepts[conceptId]?.privacyClass == PrivacyClass.AGGREGATE_PUBLIC
+    fun List<ImpactIndicator>.published() = filter { isPublic(it.conceptId) }
+    val isProducerPublic = isPublic(summary.producerConceptId)
+    return summary.copy(
+      producerCount = summary.producerCount.takeIf { isProducerPublic },
+      producerConceptId = summary.producerConceptId.takeIf { isProducerPublic },
+      goals =
+        summary.goals
+          .map { it.copy(indicators = it.indicators.published()) }
+          .filter { it.indicators.isNotEmpty() },
+      ownIndicators = summary.ownIndicators.published(),
+      suggestedIndicators =
+        summary.suggestedIndicators
+          .map { it.copy(indicators = it.indicators.published()) }
+          .filter { it.indicators.isNotEmpty() },
+      diagnostics = emptyList(),
+      hints = emptyList(),
+      isPublished = true,
+    )
+  }
+
   private fun summarize(
     scope: ImpactSummaryScope,
     scopeId: String,
@@ -554,6 +625,7 @@ class ComputeImpactUseCase(
         ),
       producerCount =
         rows.firstOrNull { it.metric == ImpactMetric.DISTINCT_VALUES }?.value?.roundToLong(),
+      producerConceptId = rows.firstOrNull { it.metric == ImpactMetric.DISTINCT_VALUES }?.conceptId,
       goals = goals,
       ownIndicators = own,
       activity =

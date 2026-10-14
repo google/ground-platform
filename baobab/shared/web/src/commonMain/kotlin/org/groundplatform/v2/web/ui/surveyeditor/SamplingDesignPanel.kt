@@ -36,6 +36,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +59,7 @@ import org.groundplatform.v2.app.domain.model.editor.SubPlotMode
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.editor.SurveyAreaGeometry
 import org.groundplatform.v2.web.domain.model.editor.SamplingAreaResult
+import org.groundplatform.v2.web.domain.model.editor.SuggestedGridSpacing
 import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
@@ -70,11 +72,11 @@ private const val MAX_CUSTOM_STRATA_SHOWN = 30
 
 /**
  * Sample design section of a generated Map layer's settings: area, method and its parameters
- * (progressive disclosure), plot shape, sample points, ordering and seed, a live estimate, and
- * Show / Update preview with progress and Cancel.
+ * (progressive disclosure), plot shape, sample points, ordering and seed, a live estimate, and Show
+ * / Update preview with progress and Cancel.
  *
- * Shared by the survey editor and the create-survey wizard. Previews only change the working
- * draft; out-of-date designs are regenerated and committed when the draft is saved or published.
+ * Shared by the survey editor and the create-survey wizard. Previews only change the working draft;
+ * out-of-date designs are regenerated and committed when the draft is saved or published.
  */
 internal fun sampleDesignActionLabel(hasGeneratedPlots: Boolean): String =
   if (hasGeneratedPlots) "Update preview" else "Show preview"
@@ -137,25 +139,26 @@ internal fun SamplingDesignPanel(
       )
     }
 
-    DropdownSelector(
+    ThumbnailSelector(
       label = "Method",
-      selectedText = config.method.label,
       options = SampleMethod.entries,
-      optionText = { it.label },
+      selected = config.method,
+      optionText = { it.cardLabel },
       onSelect = { m -> update { it.copy(method = m) } },
+      thumbnail = { m, colors -> drawSampleMethodThumbnail(m, colors) },
     )
     Text(
-      config.method.description,
+      "${config.method.label}: ${config.method.description}",
       style = MaterialTheme.typography.bodySmall,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     MethodParameters(uiState, actions, config, ::update)
 
-    DropdownSelector(
+    ThumbnailSelector(
       label = "Plot shape",
-      selectedText = config.plotShape.label,
       options = PlotShapeOption.entries,
-      optionText = { it.label },
+      selected = config.plotShape,
+      optionText = { it.cardLabel },
       onSelect = { s ->
         update {
           it.copy(
@@ -164,6 +167,7 @@ internal fun SamplingDesignPanel(
           )
         }
       },
+      thumbnail = { s, colors -> drawPlotShapeThumbnail(s, colors) },
     )
     val isPointPlot = config.plotShape == PlotShapeOption.POINT
     if (!isPointPlot) {
@@ -176,12 +180,13 @@ internal fun SamplingDesignPanel(
       )
     }
 
-    DropdownSelector(
+    ThumbnailSelector(
       label = "Sample points in each plot",
-      selectedText = if (isPointPlot) SubPlotMode.NONE.label else config.subPlot.label,
       options = SubPlotMode.entries,
-      optionText = { it.label },
+      selected = if (isPointPlot) SubPlotMode.NONE else config.subPlot,
+      optionText = { it.cardLabel },
       onSelect = { m -> update { it.copy(subPlot = m) } },
+      thumbnail = { m, colors -> drawSubPlotThumbnail(m, config.plotShape, colors) },
       enabled = !isPointPlot,
       supportingText =
         if (isPointPlot) "Sample points inside plots require square or circle plots." else null,
@@ -355,14 +360,30 @@ private fun MethodParameters(
     )
 
   when (config.method) {
-    SampleMethod.SYSTEMATIC_GRID ->
+    SampleMethod.SYSTEMATIC_GRID -> {
+      val suggested =
+        (actions.samplingArea(config) as? SamplingAreaResult.Ready)?.let {
+          SuggestedGridSpacing.forArea(it.area)
+        }
       DecimalField(
         label = "Grid spacing (m)",
         value = config.gridSpacingM,
         min = 1.0,
-        supportingText = "Distance between neighboring plot centers.",
+        supportingText =
+          if (config.gridSpacingAuto && suggested != null) {
+            "Distance between neighboring plot centers. Set from the area's size (about " +
+              "${SuggestedGridSpacing.TARGET_PLOTS} plots); larger areas get wider spacing."
+          } else {
+            "Distance between neighboring plot centers."
+          },
         onValue = { v -> update { it.copy(gridSpacingM = v) } },
       )
+      if (!config.gridSpacingAuto && suggested != null && suggested != config.gridSpacingM) {
+        TextButton(onClick = { update { it.copy(gridSpacingAuto = true) } }) {
+          Text("Match the area's size (${formatNumber(suggested)} m)")
+        }
+      }
+    }
     SampleMethod.SIMPLE_RANDOM -> {
       IntegerField(
         label = "Number of plots",

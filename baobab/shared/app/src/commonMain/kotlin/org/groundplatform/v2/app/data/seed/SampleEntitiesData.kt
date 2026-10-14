@@ -41,11 +41,6 @@ object SampleEntitiesData {
             colorHex = 0xFF2E7D32,
             properties =
               mapOf(
-                "status" to "Completed",
-                "marker-symbol" to "✓",
-                "marker-color" to "#1E8E3E",
-                "stroke" to "#1E8E3E",
-                "fill" to "#1E8E3E",
                 "land_use" to "primary_forest",
                 "observer_note" to "Closed-canopy indigenous montane forest stand.",
               ),
@@ -100,11 +95,6 @@ object SampleEntitiesData {
             colorHex = 0xFF2E7D32,
             properties =
               mapOf(
-                "status" to "Completed",
-                "marker-symbol" to "✓",
-                "marker-color" to "#1E8E3E",
-                "stroke" to "#1E8E3E",
-                "fill" to "#1E8E3E",
                 "land_use" to "agroforestry_shade",
                 "observer_note" to "Terraced shade coffee intercropped with Cordia & Grevillea.",
               ),
@@ -159,11 +149,6 @@ object SampleEntitiesData {
             colorHex = 0xFF2E7D32,
             properties =
               mapOf(
-                "status" to "Completed",
-                "marker-symbol" to "✓",
-                "marker-color" to "#1E8E3E",
-                "stroke" to "#1E8E3E",
-                "fill" to "#1E8E3E",
                 "land_use" to "wetland_riparian",
                 "observer_note" to "15m vegetated riparian buffer along Chania stream.",
               ),

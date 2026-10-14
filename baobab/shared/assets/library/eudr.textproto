@@ -51,7 +51,7 @@ concepts {
   description {
     values {
       key: "en"
-      value: "Relevant commodity produced on the plot, as listed in the EU Deforestation Regulation."
+      value: "Relevant agricultural or forest risk commodity produced on the plot."
     }
   }
   keywords {
@@ -742,6 +742,221 @@ concepts {
   status: STABLE
 }
 concepts {
+  id: "eudr.legal_land_use"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Legal land-use status"
+    }
+    values {
+      key: "fr"
+      value: "Statut légal d'utilisation des terres"
+    }
+    values {
+      key: "es"
+      value: "Estado legal de uso de la tierra"
+    }
+    values {
+      key: "vi"
+      value: "Tình trạng sử dụng đất hợp pháp"
+    }
+    values {
+      key: "sw"
+      value: "Hali halali ya matumizi ya ardhi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Evidence that the plot is cultivated in accordance with relevant local land-use and tenure legislation."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "legality"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "land title"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "legalidad"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "verified_legal"
+      label {
+        values {
+          key: "en"
+          value: "Verified legal title or use right"
+        }
+        values {
+          key: "fr"
+          value: "Titre ou droit d'usage légal vérifié"
+        }
+        values {
+          key: "es"
+          value: "Título o derecho de uso legal verificado"
+        }
+        values {
+          key: "vi"
+          value: "Có giấy chứng nhận quyền sử dụng đất hợp pháp"
+        }
+        values {
+          key: "sw"
+          value: "Hati au haki halali iliyothibitishwa"
+        }
+      }
+    }
+    items {
+      code: "customary_recognized"
+      label {
+        values {
+          key: "en"
+          value: "Recognized customary or cooperative right"
+        }
+        values {
+          key: "fr"
+          value: "Droit coutumier ou coopératif reconnu"
+        }
+        values {
+          key: "es"
+          value: "Derecho consuetudinario o cooperativo reconocido"
+        }
+        values {
+          key: "vi"
+          value: "Quyền canh tác truyền thống hoặc hợp tác xã được công nhận"
+        }
+        values {
+          key: "sw"
+          value: "Haki ya kimila au ya ushirika inayotambuliwa"
+        }
+      }
+    }
+    items {
+      code: "pending_verification"
+      label {
+        values {
+          key: "en"
+          value: "Pending verification"
+        }
+        values {
+          key: "fr"
+          value: "Vérification en attente"
+        }
+        values {
+          key: "es"
+          value: "Verificación pendiente"
+        }
+        values {
+          key: "vi"
+          value: "Đang chờ xác minh"
+        }
+        values {
+          key: "sw"
+          value: "Inasubiri uthibitisho"
+        }
+      }
+    }
+    items {
+      code: "non_compliant"
+      label {
+        values {
+          key: "en"
+          value: "No legal land-use evidence"
+        }
+        values {
+          key: "fr"
+          value: "Aucune preuve de légalité"
+        }
+        values {
+          key: "es"
+          value: "Sin evidencia legal de uso"
+        }
+        values {
+          key: "vi"
+          value: "Không có bằng chứng sử dụng đất hợp pháp"
+        }
+        values {
+          key: "sw"
+          value: "Hakuna ushahidi wa uhalali"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.scientific_name"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Scientific species name"
+    }
+    values {
+      key: "fr"
+      value: "Nom scientifique de l'espèce"
+    }
+    values {
+      key: "es"
+      value: "Nombre científico de la especie"
+    }
+    values {
+      key: "vi"
+      value: "Tên khoa học của loài"
+    }
+    values {
+      key: "sw"
+      value: "Jina la kisayansi la spishi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Botanical or scientific name of the crop or tree species produced on the plot (required for wood products)."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "botanical name"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "species"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "nombre científico"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
   id: "eudr.supplier_name"
   version: 1
   label {
@@ -801,32 +1016,40 @@ form_templates {
   title {
     values {
       key: "en"
-      value: "EUDR plot registration"
+      value: "Deforestation compliance plot check"
     }
     values {
       key: "fr"
-      value: "Enregistrement de parcelle RDUE"
+      value: "Vérification de parcelle zéro déforestation"
     }
     values {
       key: "es"
-      value: "Registro de parcela EUDR"
+      value: "Verificación de parcela libre de deforestación"
+    }
+    values {
+      key: "vi"
+      value: "Kiểm tra lô đất tuân thủ không gây mất rừng"
+    }
+    values {
+      key: "sw"
+      value: "Ukaguzi wa shamba la uzingatiaji wa kutokata misitu"
     }
   }
   description {
     values {
       key: "en"
-      value: "Records the geolocation and commodity of each production plot for due diligence."
+      value: "Records plot geolocation, commodity, producer ID, harvest period, deforestation-free status after 31 December 2020, and legal land-use evidence."
     }
   }
   form {
     form_id: "eudr_plot_registration"
-    title: "EUDR plot registration"
+    title: "Deforestation compliance plot check"
     version: "1"
     model {
       primary_instance {
         record_schema {
           name: "data"
-          title: "EUDR plot registration"
+          title: "Deforestation compliance plot check"
           fields {
             name: "commodity"
             type: TYPE_SELECT_ONE
@@ -853,6 +1076,10 @@ form_templates {
           }
           fields {
             name: "deforestation_free"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "legal_land_use"
             type: TYPE_SELECT_ONE
           }
         }
@@ -1178,6 +1405,113 @@ form_templates {
           }
         }
       }
+      secondary_instances {
+        id: "legal_land_use"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "verified_legal"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Verified legal title or use right"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "verified_legal"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "customary_recognized"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Recognized customary or cooperative right"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "customary_recognized"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "pending_verification"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Pending verification"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "pending_verification"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "non_compliant"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "No legal land-use evidence"
+              }
+            }
+          }
+          fields {
+            key: "ground_code"
+            value {
+              scalar_value {
+                string_value: "non_compliant"
+              }
+            }
+          }
+        }
+      }
       bindings {
         field_path: "commodity"
         type: TYPE_SELECT_ONE
@@ -1238,10 +1572,20 @@ form_templates {
       bindings {
         field_path: "deforestation_free"
         type: TYPE_SELECT_ONE
+        required_expression: "true()"
         foreign_attributes {
           namespace_uri: "http://groundplatform.org/xforms"
           qualified_name: "ground:concept"
           value: "eudr.deforestation_free@1"
+        }
+      }
+      bindings {
+        field_path: "legal_land_use"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://groundplatform.org/xforms"
+          qualified_name: "ground:concept"
+          value: "eudr.legal_land_use@1"
         }
       }
     }
@@ -1269,7 +1613,7 @@ form_templates {
             text: "Production place"
           }
           hint {
-            text: "Walk or draw the plot boundary."
+            text: "Walk or draw the plot boundary (polygons required for plots over 4 ha)."
           }
           appearance: "placement-map"
         }
@@ -1334,6 +1678,21 @@ form_templates {
           }
         }
       }
+      components {
+        control {
+          field_ref: "legal_land_use"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Legal land-use status"
+          }
+          itemset {
+            instance_id: "legal_land_use"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
     }
   }
   status: STABLE
@@ -1343,21 +1702,29 @@ purpose_packs {
   title {
     values {
       key: "en"
-      value: "EUDR due diligence"
+      value: "Deforestation compliance"
     }
     values {
       key: "fr"
-      value: "Diligence raisonnée RDUE"
+      value: "Conformité zéro déforestation"
     }
     values {
       key: "es"
-      value: "Diligencia debida EUDR"
+      value: "Cumplimiento de cero deforestación"
+    }
+    values {
+      key: "vi"
+      value: "Tuân thủ không gây mất rừng"
+    }
+    values {
+      key: "sw"
+      value: "Uzingatiaji wa kutokata misitu"
     }
   }
   description {
     values {
       key: "en"
-      value: "Collect plot geolocation and commodity data for EU Deforestation Regulation statements."
+      value: "Map production plots, verify zero-deforestation status after the cutoff date, and record legality and supply-chain traceability data."
     }
   }
   icon: "verified"
@@ -1365,6 +1732,8 @@ purpose_packs {
   export_profile_ids: "eudr_geojson"
   program_ids: "eudr"
   program_ids: "uk_frc"
+  program_ids: "rainforest_alliance"
+  program_ids: "fairtrade"
   goals: "deforestation_free_supply_chains"
   pillar: MITIGATION
   status: STABLE

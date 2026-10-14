@@ -17,6 +17,7 @@ package org.groundplatform.v2.web.domain.usecase
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -33,6 +34,7 @@ import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ImpactEvent
 import org.groundplatform.v2.app.domain.model.ImpactEventType
 import org.groundplatform.v2.app.domain.model.Organization
+import org.groundplatform.v2.app.domain.model.PrivacyClass
 import org.groundplatform.v2.app.domain.model.SurveyOutcome
 import org.groundplatform.v2.app.domain.model.SurveyOutcomeKind
 import org.groundplatform.v2.core.impact.ALL_USERS_ORGANIZATION_ID
@@ -181,6 +183,88 @@ class ComputeImpactUseCaseTest {
     assertEquals(
       mapOf(ImpactAttributionLevel.DATA_COLLECTED to 1L),
       global.attribution.distribution,
+    )
+  }
+
+  @Test
+  fun publishedOrganizationNumbers_keepOnlyAnonymousPublicTotals() {
+    val snapshot = snapshot()
+    val full = assertNotNull(compute.organizationSummary(snapshot, KFS))
+    val published = assertNotNull(compute.publishedOrganizationSummary(snapshot, KFS))
+
+    assertTrue(published.isPublished)
+    assertFalse(published.isBelowPublicationThreshold)
+    assertFalse(full.isPublished)
+    // Totals are the same as the members see.
+    assertEquals(full.features, published.features)
+    assertEquals(full.activity, published.activity)
+    assertEquals(full.outcomes, published.outcomes)
+    assertEquals(full.attribution, published.attribution)
+    // Public standard fields stay; organization-only and sensitive ones don't.
+    val own = published.ownIndicators.map { it.label }
+    assertEquals(listOf("Shade trees"), own)
+    assertTrue(full.ownIndicators.any { it.label == "Cherry delivered (kg)" })
+    assertTrue(
+      published.goals
+        .flatMap { it.indicators }
+        .all { snapshot.concepts[it.conceptId]?.privacyClass == PrivacyClass.AGGREGATE_PUBLIC }
+    )
+    assertTrue(published.goals.flatMap { it.indicators }.any { it.conceptId == "eudr.commodity" })
+    // Producer names are sensitive, so the producer count isn't published.
+    assertEquals(3L, full.producerCount)
+    assertNull(published.producerCount)
+    // Diagnostics quote captured values and hints are for organizers.
+    assertTrue(published.diagnostics.isEmpty())
+    assertTrue(published.hints.isEmpty())
+  }
+
+  @Test
+  fun publishedOrganizationNumbers_showNothingBelowTheThreshold() {
+    val snapshot = snapshot()
+
+    // The Mekong survey's five plots are too few to publish.
+    val mekong =
+      assertNotNull(
+        compute.publishedOrganizationSummary(
+          snapshot,
+          SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE,
+        )
+      )
+    assertTrue(mekong.isBelowPublicationThreshold)
+    assertEquals(0, mekong.features.mappedCount)
+    assertTrue(mekong.goals.isEmpty())
+    assertTrue(mekong.activity.isEmpty())
+    // So is a country slice with too few map features.
+    val elsewhere =
+      assertNotNull(compute.publishedOrganizationSummary(snapshot, KFS, countryCode = "VN"))
+    assertTrue(elsewhere.isBelowPublicationThreshold)
+    assertFalse(
+      assertNotNull(compute.publishedOrganizationSummary(snapshot, KFS, countryCode = "KE"))
+        .isBelowPublicationThreshold
+    )
+    // "All users" has no organization numbers of its own.
+    assertNull(compute.publishedOrganizationSummary(snapshot, Organization.ALL_USERS_ID))
+  }
+
+  @Test
+  fun publishedGlobalNumbers_leaveOutFieldsThatArentPublic() {
+    val snapshot = snapshot()
+    val full = compute.globalSummary(snapshot)
+    val published = compute.publishedGlobalSummary(snapshot)
+
+    assertTrue(published.isPublished)
+    assertFalse(published.isBelowPublicationThreshold)
+    assertEquals(full.features, published.features)
+    assertEquals(full.countries, published.countries)
+    assertTrue(
+      (published.goals.flatMap { it.indicators } +
+          published.suggestedIndicators.flatMap { it.indicators })
+        .all { snapshot.concepts[it.conceptId]?.privacyClass == PrivacyClass.AGGREGATE_PUBLIC }
+    )
+    // Shade trees are public, so the suggested indicator is still published.
+    assertEquals(
+      listOf("Shade trees"),
+      published.suggestedIndicators.single().indicators.map { it.label },
     )
   }
 

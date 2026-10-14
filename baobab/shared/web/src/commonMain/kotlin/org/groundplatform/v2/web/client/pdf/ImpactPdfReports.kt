@@ -59,9 +59,21 @@ object ImpactPdfReports {
       )
     with(layout) {
       title(summary.title)
-      subtitle(listOfNotNull("$scopeLabel impact summary", filterLabel).joinToString(" • "))
+      subtitle(
+        listOfNotNull(
+            "$scopeLabel impact summary",
+            "Published numbers".takeIf { summary.isPublished },
+            filterLabel,
+          )
+          .joinToString(" • ")
+      )
       paragraph(
-        "Plots mapped more than once (same GeoID) are counted once.",
+        "Plots mapped more than once (same GeoID) are counted once." +
+          if (summary.isPublished) {
+            " Published numbers are anonymous totals from public standard fields only."
+          } else {
+            ""
+          },
         size = 9f,
         color = PdfPalette.onSurfaceVariant,
       )
@@ -83,7 +95,7 @@ object ImpactPdfReports {
         goal.indicators.forEach { indicator(it) }
       }
       if (summary.ownIndicators.isNotEmpty()) {
-        sectionHeading("Your indicators")
+        sectionHeading(if (summary.isPublished) "Own indicators" else "Your indicators")
         summary.ownIndicators.forEach { indicator(it) }
       }
       if (summary.suggestedIndicators.isNotEmpty()) {

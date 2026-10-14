@@ -74,6 +74,11 @@ data class SampleDesignConfig(
   val method: SampleMethod = SampleMethod.SYSTEMATIC_GRID,
   val areaSource: SampleAreaSource = SampleAreaSource.SurveyArea,
   val gridSpacingM: Double = 500.0,
+  /**
+   * Whether [gridSpacingM] follows the size of the area (larger areas get wider spacing) instead of
+   * a value the organizer chose. Cleared when the spacing is changed by hand.
+   */
+  val gridSpacingAuto: Boolean = true,
   val count: Int = 50,
   val minDistanceM: Double = 0.0,
   val allocation: AllocationMode = AllocationMode.PROPORTIONAL,

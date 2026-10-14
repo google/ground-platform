@@ -14,17 +14,24 @@
 package org.groundplatform.v2.web.ui.surveyeditor
 
 import androidx.compose.ui.graphics.Color
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.app.domain.model.editor.GeometryKind
 import org.groundplatform.v2.app.domain.model.editor.LatLng
+import org.groundplatform.v2.app.domain.model.editor.SampleDesignConfig
+import org.groundplatform.v2.app.domain.model.editor.SamplePlotProperties
+import org.groundplatform.v2.app.domain.model.editor.SubPlotMode
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.editor.formatFixed
 import org.groundplatform.v2.app.domain.model.geometryKind
@@ -187,21 +194,63 @@ class LayerEditorGeometryTest {
   }
 
   @Test
-  fun samplePointsOverlay_drawsHollowRings() {
+  fun samplePointsOverlay_drawsHollowRingsSizedOnTheGround() {
     val samples = listOf(LatLng(-0.42, 36.95), LatLng(-0.421, 36.951))
-    val content = withSamplePointsOverlay(MapContent(), samples, Color.Red)
+    val content = withSamplePointsOverlay(MapContent(), samples, Color.Red, radiusM = 3.0)
 
-    val rings = content.layers.filterIsInstance<MapLayer.Circle>()
+    // Outlines only (no fill), so the imagery inside each ring stays visible.
+    assertTrue(content.layers.none { it is MapLayer.Fill || it is MapLayer.Circle })
+    val rings = content.layers.filterIsInstance<MapLayer.Line>()
     assertEquals(2, rings.size)
-    rings.forEach { ring ->
-      assertEquals(StyleValue.Constant(Color.Transparent), ring.color, "${ring.id} is filled")
+    assertEquals(StyleValue.Constant(Color.Red), rings.last().color)
+
+    // Each sample is a polygon whose vertices are 3 m from the sample on the ground, so it scales
+    // with the map instead of keeping a fixed size on screen.
+    val features = content.sources.single().features
+    assertEquals(samples.size, features.size)
+    val ring = assertIs<Geometry.Polygon>(features.first().geometry).rings.single()
+    val center = samples.first()
+    ring.forEach { v ->
+      val dy = (v.latitude - center.lat) * 111_320.0
+      val dx = (v.longitude - center.lng) * 111_320.0 * cos(center.lat * PI / 180)
+      assertClose(3.0, sqrt(dx * dx + dy * dy), eps = 1e-6)
     }
-    assertEquals(StyleValue.Constant(Color.Red), rings.last().strokeColor)
+  }
+
+  @Test
+  fun samplePointRadius_followsPlotSizeAndStaysClearOfNeighbors() {
+    val design = SampleDesignConfig(plotSizeM = 40.0, subPlot = SubPlotMode.CENTER)
+    assertEquals(3.0, samplePointRadiusM(design))
+    // A tight grid keeps rings at most a quarter of the spacing, so neighbors never touch.
+    assertEquals(
+      1.0,
+      samplePointRadiusM(design.copy(subPlot = SubPlotMode.GRID, subPlotSpacingM = 4.0)),
+    )
+    assertEquals(DEFAULT_SAMPLE_RADIUS_M, samplePointRadiusM(design.copy(plotSizeM = Double.NaN)))
   }
 
   @Test
   fun samplePointsOverlay_noSamples_returnsContentUnchanged() {
     val content = MapContent()
     assertEquals(content, withSamplePointsOverlay(content, emptyList(), Color.Red))
+  }
+
+  @Test
+  fun selectedPlotSamples_onlyReturnsTheSelectedPlotsSamples() {
+    val base = SurveyEditorSamples.shadePlots()
+    val plots =
+      base.copy(
+        rows =
+          base.rows.mapIndexed { i, row ->
+            row.copy(
+              values = row.values + (SamplePlotProperties.SAMPLES to "$i.0 1.0 0 0;$i.0 2.0 0 0")
+            )
+          }
+      )
+    val second = plots.rows[1].key
+
+    assertEquals(listOf(LatLng(1.0, 1.0), LatLng(1.0, 2.0)), selectedPlotSamples(plots, second))
+    assertTrue(selectedPlotSamples(plots, null).isEmpty(), "no plot selected")
+    assertTrue(selectedPlotSamples(plots, "missing").isEmpty(), "selected plot no longer exists")
   }
 }

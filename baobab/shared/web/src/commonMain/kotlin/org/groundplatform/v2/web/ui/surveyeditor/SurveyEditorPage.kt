@@ -768,12 +768,17 @@ private fun DatasetNavGroup(
   icon: ImageVector,
 ) {
   var showAddMapLayer by remember { mutableStateOf(false) }
+  var showAddDataTable by remember { mutableStateOf(false) }
   if (showAddMapLayer) AddMapLayerDialog(uiState, actions, onDismiss = { showAddMapLayer = false })
+  if (showAddDataTable) AddDataTableDialog(actions, onDismiss = { showAddDataTable = false })
   NavHeading(
     kind.plural,
     addDescription = "Add ${kind.singular.lowercase()}",
     onAdd = {
-      if (kind == DatasetKind.MAP_LAYER) showAddMapLayer = true else actions.addDataset(kind)
+      when (kind) {
+        DatasetKind.MAP_LAYER -> showAddMapLayer = true
+        DatasetKind.DATA_TABLE -> showAddDataTable = true
+      }
     },
   )
   if (datasets.isEmpty()) NavEmpty("No ${kind.plural.lowercase()} yet")
@@ -1290,7 +1295,7 @@ private fun PurposesSection(uiState: SurveyEditorUiState, actions: SurveyEditorA
       }
     }
     if (offeredPrograms.isNotEmpty()) {
-      Text("Programs", style = MaterialTheme.typography.labelLarge)
+      Text("Reporting programs & frameworks", style = MaterialTheme.typography.labelLarge)
       ProgramChips(
         programIds = offeredPrograms,
         selectedIds = details.programIds,

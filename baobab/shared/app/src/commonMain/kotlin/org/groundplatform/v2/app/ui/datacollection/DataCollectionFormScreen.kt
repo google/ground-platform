@@ -741,7 +741,10 @@ private fun EntityRefCandidateOptionCard(
           verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           Text(
-            text = "${candidate.markerSymbol} ${candidate.label}",
+            text =
+              listOf(candidate.markerSymbol, candidate.label)
+                .filter { it.isNotEmpty() }
+                .joinToString(" "),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             color =
@@ -754,15 +757,17 @@ private fun EntityRefCandidateOptionCard(
             overflow = TextOverflow.Ellipsis,
             softWrap = false,
           )
-          GroundTonalBadge(
-            text = candidate.mapStatusSummaryBadge,
-            tone =
-              when (candidate.markerSymbol) {
-                "✓" -> GroundBadgeTone.PRIMARY
-                "◐" -> GroundBadgeTone.TERTIARY
-                else -> GroundBadgeTone.WARNING
-              },
-          )
+          if (candidate.hasWorkflowStatus) {
+            GroundTonalBadge(
+              text = candidate.mapStatusSummaryBadge,
+              tone =
+                when (candidate.markerSymbol) {
+                  "✓" -> GroundBadgeTone.PRIMARY
+                  "◐" -> GroundBadgeTone.TERTIARY
+                  else -> GroundBadgeTone.WARNING
+                },
+            )
+          }
           SyncStatusIndicatorBadge(syncStatus = candidate.syncStatus)
         }
         GeoIdText(

@@ -50,8 +50,8 @@ enum class CreateSurveyWizardStep(
   ),
   FORM_QUESTIONS(
     stepNumber = 5,
-    label = "Form & questions",
-    subtitle = "Questionnaire, library concepts, and export mapping",
+    label = "Forms",
+    subtitle = "Questionnaires, library concepts, and export mapping",
   ),
   SHARING(
     stepNumber = 6,
@@ -164,6 +164,9 @@ object SurveyWizardRules {
       "producer_registration",
       "eudr_due_diligence",
       "ferm_restoration",
+      "protected_area_management",
+      "iplc_land_mapping",
+      "timber_traceability",
       "redd_plus_tfff",
       "lulc_training_data",
     )
@@ -174,6 +177,9 @@ object SurveyWizardRules {
       "redd_plus_tfff",
       "ferm_restoration",
       "eudr_due_diligence",
+      "protected_area_management",
+      "iplc_land_mapping",
+      "timber_traceability",
       "producer_registration",
     )
 
@@ -183,6 +189,9 @@ object SurveyWizardRules {
       "redd_plus_tfff",
       "ferm_restoration",
       "lulc_training_data",
+      "protected_area_management",
+      "iplc_land_mapping",
+      "timber_traceability",
       "producer_registration",
     )
 
@@ -214,10 +223,17 @@ object SurveyWizardRules {
    * Default [WizardMapFeatureSource] for the primary Map layer driven by the selected [purposeIds].
    */
   fun defaultMapFeatureSource(purposeIds: List<String>): WizardMapFeatureSource =
+    purposeMapFeatureSource(purposeIds) ?: WizardMapFeatureSource.FIELD_FREEFORM
+
+  /**
+   * The [WizardMapFeatureSource] the selected [purposeIds] call for, or `null` when none of them
+   * calls for a particular one (and [defaultMapFeatureSource] falls back to free-form collection).
+   */
+  fun purposeMapFeatureSource(purposeIds: List<String>): WizardMapFeatureSource? =
     when {
       "lulc_training_data" in purposeIds || "redd_plus_tfff" in purposeIds ->
         WizardMapFeatureSource.SAMPLE_PLOTS
-      else -> WizardMapFeatureSource.FIELD_FREEFORM
+      else -> null
     }
 
   /**
@@ -232,8 +248,11 @@ object SurveyWizardRules {
       requiresEudrPolygonGuardrail(purposeIds) && !eudrPlotsUnderFourHaConfirmed ->
         GeometryKind.POLYGON
       mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS -> GeometryKind.POLYGON
-      purposeIds.any { it == "ferm_restoration" || it.endsWith(".coop_certification_audit") } ->
-        GeometryKind.POLYGON
+      purposeIds.any {
+        it == "ferm_restoration" ||
+          it == "iplc_land_mapping" ||
+          it.endsWith(".coop_certification_audit")
+      } -> GeometryKind.POLYGON
       else -> GeometryKind.POINT
     }
 

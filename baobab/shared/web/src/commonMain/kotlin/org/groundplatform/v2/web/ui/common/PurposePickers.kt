@@ -29,15 +29,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.Carpenter
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.FactCheck
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Forest
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -114,6 +117,9 @@ fun purposePackIcon(name: String): ImageVector =
     "fact_check" -> Icons.Outlined.FactCheck
     "layers" -> Icons.Outlined.Layers
     "public" -> Icons.Outlined.Public
+    "shield" -> Icons.Outlined.Shield
+    "groups" -> Icons.Outlined.Groups
+    "carpenter" -> Icons.Outlined.Carpenter
     else -> Icons.Outlined.Flag
   }
 
@@ -135,13 +141,11 @@ fun PurposePackGrid(
   otherPurposeText: String = "",
   onOtherPurposeTextChange: ((String) -> Unit)? = null,
   isError: Boolean = false,
-  singleSelect: Boolean = false,
   onOtherInputPositioned: ((Int) -> Unit)? = null,
 ) {
   val otherSelected = SurveyWizardRules.OTHER_PURPOSE_ID in selectedIds
   val otherBlankError = isError && otherSelected && otherPurposeText.isBlank()
   val otherFocusRequester = remember { FocusRequester() }
-  val selectionRole = if (singleSelect) Role.RadioButton else Role.Checkbox
 
   LaunchedEffect(otherSelected, otherBlankError) {
     if (otherSelected && (otherPurposeText.isBlank() || otherBlankError)) {
@@ -156,11 +160,7 @@ fun PurposePackGrid(
     if (isError && selectedIds.isEmpty()) {
       ValidationErrorBanner(
         message =
-          if (singleSelect) {
-            "Select a purpose (or choose \"Other\" and describe your goal) to continue."
-          } else {
-            "Select at least one purpose (or choose \"Other\" and describe your goal) to continue."
-          }
+          "Select at least one purpose (or choose \"Other\" and describe your goal) to continue."
       )
     }
 
@@ -178,13 +178,11 @@ fun PurposePackGrid(
             else "Global",
           language = language,
           selected = pack.id in selectedIds,
-          role = selectionRole,
           onClick = { onToggle(pack.id) },
         )
       }
       OtherPurposeCard(
         selected = otherSelected,
-        role = selectionRole,
         onClick = { onToggle(SurveyWizardRules.OTHER_PURPOSE_ID) },
       )
     }

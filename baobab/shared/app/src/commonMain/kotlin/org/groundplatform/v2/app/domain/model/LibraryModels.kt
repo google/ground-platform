@@ -259,18 +259,41 @@ data class PurposePack(
 }
 
 /**
- * Programs a survey can report to (`SurveyDef.program_ids`), offered from its Purpose Packs'
- * [PurposePack.programIds].
+ * Reporting programs, regulations, and certification frameworks a survey can report to
+ * (`SurveyDef.program_ids`), offered from its Purpose Packs' [PurposePack.programIds].
  */
 object LibraryPrograms {
   private val LABELS =
     mapOf(
       "eudr" to "EU Deforestation Regulation (EUDR)",
       "uk_frc" to "UK Forest Risk Commodities",
+      "rainforest_alliance" to "Rainforest Alliance",
+      "fairtrade" to "Fairtrade",
+      "organic" to "Organic / IFOAM",
+      "agstack" to "AgStack Asset Registry",
       "ferm" to "Framework for Ecosystem Restoration Monitoring (FERM)",
+      "gbf_target_2" to "Kunming-Montreal GBF Target 2 (Restoration)",
+      "bonn_challenge" to "Bonn Challenge / AFR100",
+      "gd_pame" to "Global Database on Protected Area Management Effectiveness (GD-PAME)",
+      "mett" to "Management Effectiveness Tracking Tool (METT-4)",
+      "imet" to "Integrated Management Effectiveness Tool (IMET)",
+      "smart" to "Spatial Monitoring and Reporting Tool (SMART)",
+      "gbf_target_3" to "Kunming-Montreal GBF Target 3 (30x30)",
       "pame" to "Protected area management effectiveness",
-      "redd_plus" to "REDD+",
+      "landmark" to "LandMark Indigenous & Community Lands",
+      "icca" to "ICCA Registry (Territories of Life)",
+      "vggt" to "FAO Voluntary Guidelines on Responsible Governance of Tenure (VGGT)",
+      "fdap" to "Forest Data Partnership (FDaP)",
+      "fao_lccs" to "FAO Land Cover Classification System (LCCS)",
+      "fao_fra" to "FAO Global Forest Resources Assessment (FRA)",
+      "open_foris" to "Open Foris (Collect Earth / Arena)",
+      "redd_plus" to "REDD+ (UNFCCC)",
       "tfff" to "Tropical Forest Forever Facility (TFFF)",
+      "art_trees" to "ART-TREES",
+      "vcs" to "Verra Verified Carbon Standard (VCS)",
+      "fsc" to "Forest Stewardship Council (FSC)",
+      "pefc" to "Programme for the Endorsement of Forest Certification (PEFC)",
+      "flegt" to "EU FLEGT / VPA",
     )
 
   /** Display name of program [id], or [id] itself for programs without one. */

@@ -86,7 +86,8 @@ internal data class DashboardLayerSummary(
 /**
  * Summarizes the entity dataset [datasetId] in [entities]: its title, kind, total record count, and
  * the number of records per status (most common first; ties keep order of first appearance).
- * Returns `null` when the dataset has no records.
+ * Records without a workflow status aren't counted under any status. Returns `null` when the
+ * dataset has no records.
  */
 internal fun buildDashboardLayerSummary(
   entities: List<GeospatialEntityItem>,
@@ -106,6 +107,7 @@ internal fun buildDashboardLayerSummary(
     featureCount = datasetEntities.size,
     statusCounts =
       datasetEntities
+        .filter { it.hasWorkflowStatus }
         .groupBy { it.mapStatusSummaryBadge }
         .values
         .map { DashboardLayerStatusCount(example = it.first(), count = it.size) }
@@ -227,24 +229,27 @@ internal fun WebLayerDetailsCard(
           )
         }
 
-        Text(
-          text = "By status",
-          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-          color = MaterialTheme.colorScheme.primary,
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          summary.statusCounts.forEach { statusCount ->
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-              EntityStatusChip(entity = statusCount.example, compact = true)
-              Text(
-                text = "${statusCount.count}",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface,
-              )
+        if (summary.statusCounts.isNotEmpty()) {
+          Text(
+            text = "By status",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary,
+          )
+          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            summary.statusCounts.forEach { statusCount ->
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+              ) {
+                EntityStatusChip(entity = statusCount.example, compact = true)
+                Text(
+                  text = "${statusCount.count}",
+                  style =
+                    MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                  color = MaterialTheme.colorScheme.onSurface,
+                )
+              }
             }
           }
         }

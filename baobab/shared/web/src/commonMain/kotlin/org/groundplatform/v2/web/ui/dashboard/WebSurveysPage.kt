@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Search
@@ -112,6 +113,11 @@ internal fun WebSurveysPage(
           }
         },
         actions = {
+          WebHeaderButton(
+            text = "Impact",
+            icon = Icons.Outlined.Insights,
+            onClick = { state.openImpactDashboard() },
+          )
           WebHeaderButton(
             text = "Create survey",
             icon = Icons.Outlined.Add,

@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.web.ui.organization
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import org.groundplatform.v2.app.domain.model.Countries
 import org.groundplatform.v2.app.domain.model.OrganizationType
+import org.groundplatform.v2.web.ui.common.DropdownFieldClickTarget
 
 /** Text shown for an optional organization type or country that hasn't been set. */
 internal const val NOT_SPECIFIED = "Not specified"
@@ -58,16 +60,20 @@ internal fun OrganizationTypeDropdown(
     onExpandedChange = { expanded = it },
     modifier = modifier.fillMaxWidth(),
   ) {
-    OutlinedTextField(
-      value = organizationTypeText(type),
-      onValueChange = {},
-      readOnly = true,
-      singleLine = true,
-      label = { Text("Type") },
-      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-      modifier =
-        Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-    )
+    Box {
+      OutlinedTextField(
+        value = organizationTypeText(type),
+        onValueChange = {},
+        readOnly = true,
+        singleLine = true,
+        label = { Text("Type") },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        modifier =
+          Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+      )
+      // Opens the menu on the first click, even if the mouse moves slightly during it.
+      DropdownFieldClickTarget(expanded = expanded, onExpandedChange = { expanded = it })
+    }
     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
       (listOf(null) + OrganizationType.entries).forEach { option ->
         DropdownMenuItem(

@@ -16,10 +16,11 @@
 # Ground 2.0 Web Console Module
 
 `org.groundplatform.v2:web` contains the Ground 2.0 web console: its pages
-(surveys, organizations, dashboard, survey editor, form editor, survey creation
-wizard, and impact views), its state (`WebAppState`, with `WebPage` routing),
-and its root composable (`WebConsoleApp()`). It's built on the domain, data, and
-shared UI in [`../app/`](../app/), and hosted by [`../../webApp/`](../../webApp/).
+(surveys, organizations, the Impact page with organizations' published numbers,
+dashboard, survey editor, form editor, and survey creation wizard), its state
+(`WebAppState`, with `WebPage` routing), and its root composable
+(`WebConsoleApp()`). It's built on the domain, data, and shared UI in
+[`../app/`](../app/), and hosted by [`../../webApp/`](../../webApp/).
 
 The module targets WasmJS, plus JVM for the headless Compose UI tests. It has
 no Android target: nothing that builds for Android depends on it.

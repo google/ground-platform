@@ -80,7 +80,9 @@ records the organization-level opt-out described in the product doc. An
 opted-out organization's surveys are kept out of global, country, and grid cell
 aggregates and organization-suggested indicators; its own survey and
 organization dashboards are unaffected. Personal surveys (no organization)
-always count toward platform-wide aggregates.
+always count toward platform-wide aggregates. The opt-out doesn't affect an
+organization's published numbers (see [Privacy and Security](#privacy-and-security)),
+which every organization publishes.
 
 ## Architecture
 
@@ -399,8 +401,20 @@ redistribution of derived products.
     and organization-suggested indicators.
 *   **Auditability**: each run records inputs counts, skipped links, suppressed
     cells, and pipeline version, so any published number can be traced.
+*   **Published organization numbers**: every organization's `ORGANIZATION`
+    scope rows are published to everyone signed in (the web **Impact** page),
+    with no opt-out, under these rules: only `CONCEPT` rows of
+    `AGGREGATE_PUBLIC` concepts, a `DISTINCT_VALUES` row only when its concept
+    is `AGGREGATE_PUBLIC`, `FEATURES`, `EVENT`, `OUTCOME`, and `ATTRIBUTION`
+    rows as computed, no diagnostics, and nothing but the organization's
+    identity below `ImpactConfig.organizationPublicMinFeatures` (10) unique
+    features, applied again to any country slice. Platform-wide views published to
+    everyone likewise keep only `AGGREGATE_PUBLIC` concept rows. Unlisted
+    organizations' numbers are visible only to their members. Overlay results
+    for IPLC lands are not part of published numbers (see above).
 *   **Access**: aggregates inherit the read permissions of their scope
-    (survey ACL, organization membership, or public).
+    (survey ACL, organization membership, or public). Organization members read
+    all of their organization's rows; everyone else reads its published rows.
 
 ## Hosting Options
 
@@ -449,7 +463,8 @@ deployment once hosting, terms, and licenses are settled.
     dashboards.
 3.  Settle hosting, data processing terms, and licenses; enable overlays in
     the reference deployment.
-4.  Enable thresholded global and public views.
+4.  Enable thresholded global and public views, including published
+    organization numbers on the Impact page.
 
 ## Open Questions
 
@@ -459,7 +474,7 @@ deployment once hosting, terms, and licenses are settled.
     10 and 7 the right defaults for public views?
 *   **Opt-out vs opt-in**: should platform-wide aggregation default to on (with
     opt-out) or require opt-in for some organization types (e.g., IPLC
-    organizations)?
+    organizations)? Published organization numbers currently have no opt-out.
 *   **Licenses**: confirm terms for each reference layer, especially WDPA and
     IPLC datasets, and whether published aggregates are permitted.
 *   **Attribution score**: should the minimum feature count for "test survey"
