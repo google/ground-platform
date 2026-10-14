@@ -447,12 +447,14 @@ object SurveyMapContent {
             geometry.position,
             MarkerAnchor.TOP,
             DpOffset(0.dp, 6.dp),
+            collides = true,
           ) to SurveyMarker.PinLabel(label, color, selected, pending, status)
         } else {
           MapMarker(
             SurveyMapIds.entity(entity.id),
             at(entity.normalizedX, entity.normalizedY),
             MarkerAnchor.CENTER,
+            collides = true,
           ) to SurveyMarker.GeometryPill(label, color, selected, pending, status)
         }
     }

@@ -143,6 +143,11 @@ data class MapMarker(
   val anchor: MarkerAnchor = MarkerAnchor.BOTTOM,
   /** Shift applied after anchoring, e.g. to place a label chip just below a pin. */
   val offset: DpOffset = DpOffset.Zero,
+  /**
+   * Whether the marker hides while it overlaps another colliding marker drawn above it (later in
+   * [MapContent.markers]), e.g. feature labels, which then appear once zooming in separates them.
+   */
+  val collides: Boolean = false,
 )
 
 /** Which point of a marker's or icon's content sits on its position. */
