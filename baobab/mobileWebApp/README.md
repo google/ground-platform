@@ -21,11 +21,12 @@ testing and UX review without an Android or iOS build.
 
 ## Modes
 
--   **Workbench (default)**: The mobile app runs inside a simulated device. The
-    controls above it switch between phone and tablet, rotate the device, and
-    toggle dark theme and airplane mode.
--   **Full window (`?chrome=0`)**: The mobile app fills the browser window, for
-    testing in a phone's browser.
+-   **Workbench (desktop default, or `?chrome=1`)**: The mobile app runs inside
+    a simulated device. The controls beside it switch between phone and tablet,
+    rotate the device, and toggle dark theme and airplane mode.
+-   **Full window (mobile browser default, or `?chrome=0`)**: When opened on a
+    mobile browser (or with `?chrome=0` in the URL), the workbench chrome is
+    hidden and the mobile app fills the browser viewport like a native app.
 
 ## Structure
 

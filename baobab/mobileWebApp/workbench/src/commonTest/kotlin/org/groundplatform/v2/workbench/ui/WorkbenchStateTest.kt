@@ -373,4 +373,43 @@ class WorkbenchStateTest {
     assertEquals(ListFilterTab.ALL, mobile.listFilterTab)
     assertTrue(mobile.filteredListPlaces.isEmpty())
   }
+
+  @Test
+  fun shouldShowWorkbenchChrome_hidesOnMobileBrowsersAndRespectsUrlOverride() {
+    val desktopUa =
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+    val androidUa =
+      "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
+    val iphoneUa =
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+    val ipadDesktopClassUa =
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15"
+
+    // Desktop browser defaults to showing workbench chrome, even on a touchscreen laptop
+    assertTrue(shouldShowWorkbenchChrome(search = "", userAgent = desktopUa, maxTouchPoints = 0))
+    assertTrue(shouldShowWorkbenchChrome(search = "", userAgent = desktopUa, maxTouchPoints = 10))
+
+    // Mobile browsers default to hiding workbench chrome
+    assertFalse(shouldShowWorkbenchChrome(search = "", userAgent = androidUa, maxTouchPoints = 5))
+    assertFalse(shouldShowWorkbenchChrome(search = "", userAgent = iphoneUa, maxTouchPoints = 5))
+    assertFalse(
+      shouldShowWorkbenchChrome(search = "", userAgent = ipadDesktopClassUa, maxTouchPoints = 5)
+    )
+    assertFalse(
+      shouldShowWorkbenchChrome(
+        search = "",
+        userAgent = desktopUa,
+        maxTouchPoints = 1,
+        isCoarsePointerWithoutHover = true,
+      )
+    )
+
+    // Explicit ?chrome=0 / ?chrome=false hides chrome on desktop
+    assertFalse(shouldShowWorkbenchChrome(search = "?chrome=0", userAgent = desktopUa))
+    assertFalse(shouldShowWorkbenchChrome(search = "?foo=1&chrome=false", userAgent = desktopUa))
+
+    // Explicit ?chrome=1 / ?chrome=true forces chrome on mobile
+    assertTrue(shouldShowWorkbenchChrome(search = "?chrome=1", userAgent = androidUa))
+    assertTrue(shouldShowWorkbenchChrome(search = "?foo=1&chrome=true", userAgent = iphoneUa))
+  }
 }

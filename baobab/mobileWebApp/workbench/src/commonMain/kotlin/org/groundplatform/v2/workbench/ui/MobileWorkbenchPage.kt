@@ -33,10 +33,59 @@ import org.groundplatform.v2.mobile.GroundMobileApp
 import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
 
+private val CHROME_PARAM_REGEX =
+  Regex("""(?:^|[?&])chrome=([^&]*)(?:&|$)""", RegexOption.IGNORE_CASE)
+
+private val MOBILE_USER_AGENT_REGEX =
+  Regex(
+    """Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile""",
+    RegexOption.IGNORE_CASE,
+  )
+
+/**
+ * Returns `true` when the browser reports a mobile or tablet environment: a mobile user-agent
+ * token, iPadOS desktop-class Safari (`Macintosh` with multi-touch), or a coarse primary pointer
+ * without hover capability.
+ */
+fun isMobileBrowser(
+  userAgent: String,
+  maxTouchPoints: Int = 0,
+  isCoarsePointerWithoutHover: Boolean = false,
+): Boolean {
+  if (isCoarsePointerWithoutHover) return true
+  if (MOBILE_USER_AGENT_REGEX.containsMatchIn(userAgent)) return true
+  if (userAgent.contains("Macintosh", ignoreCase = true) && maxTouchPoints > 1) return true
+  return false
+}
+
+/**
+ * Resolves whether the workbench device frame and controls should be shown around the mobile app.
+ *
+ * - `?chrome=0` or `?chrome=false` explicitly hides the workbench chrome.
+ * - `?chrome=1` or `?chrome=true` explicitly shows the workbench chrome.
+ * - Otherwise, the workbench chrome is hidden automatically on mobile browsers and shown on desktop
+ *   browsers.
+ */
+fun shouldShowWorkbenchChrome(
+  search: String,
+  userAgent: String,
+  maxTouchPoints: Int = 0,
+  isCoarsePointerWithoutHover: Boolean = false,
+): Boolean {
+  val chromeParam = CHROME_PARAM_REGEX.find(search)?.groupValues?.get(1)?.lowercase()
+  return when (chromeParam) {
+    "0",
+    "false" -> false
+    "1",
+    "true" -> true
+    else -> !isMobileBrowser(userAgent, maxTouchPoints, isCoarsePointerWithoutHover)
+  }
+}
+
 /**
  * Root of the Wasm mobile build (`mobileWebApp`). With [showChrome], the mobile app runs inside the
- * workbench's simulated device ([MobileWorkbenchPage]); without it, the mobile app fills the
- * browser window, for testing in a phone's browser.
+ * workbench's simulated device ([MobileWorkbenchPage]); without it (on a mobile browser or with
+ * `?chrome=0`), the mobile app fills the browser window like a native app.
  */
 @Composable
 fun MobileWorkbenchApp(
