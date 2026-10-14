@@ -19,14 +19,23 @@ import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.groundplatform.v2.workbench.ui.MobileWorkbenchApp
+import org.groundplatform.v2.workbench.ui.shouldShowWorkbenchChrome
 
 /**
- * Mounts the mobile app. By default it runs inside the workbench's simulated device; with
- * `?chrome=0` in the URL it fills the window, for testing in a phone's browser.
+ * Mounts the mobile app. On desktop browsers (or with `?chrome=1` in the URL) it runs inside the
+ * workbench's simulated device; on mobile browsers (or with `?chrome=0` in the URL) the workbench
+ * chrome is hidden and the mobile app fills the window.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
   val container = document.getElementById("ComposeTarget") ?: document.body!!
-  val showChrome = !Regex("""(^|[?&])chrome=0(&|$)""").containsMatchIn(window.location.search)
+  val showChrome =
+    shouldShowWorkbenchChrome(
+      search = window.location.search,
+      userAgent = window.navigator.userAgent,
+      maxTouchPoints = window.navigator.maxTouchPoints,
+      isCoarsePointerWithoutHover =
+        window.matchMedia("(pointer: coarse) and (hover: none)").matches,
+    )
   ComposeViewport(container) { MobileWorkbenchApp(showChrome = showChrome) }
 }
