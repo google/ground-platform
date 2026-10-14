@@ -990,19 +990,7 @@ class FormEditorViewModel(
   override fun setChoiceColor(key: String, index: Int, colorHex: String?) {
     val color = colorHex?.uppercase()?.takeIf(ChoiceColors::isValidHex)
     if (colorHex != null && color == null) return
-    updateQuestion(key) { q ->
-      q.copy(
-        choices =
-          q.choices.mapIndexed { i, c ->
-            if (i == index) {
-              c.copy(colorHex = color, image = if (color != null) null else c.image)
-            } else {
-              // Selecting color for a choice removes images across the question
-              if (color != null) c.copy(image = null) else c
-            }
-          }
-      )
-    }
+    updateChoiceAt(key, index) { it.copy(colorHex = color) }
   }
 
   override fun setChoiceImage(key: String, index: Int, image: EditorChoiceImage?): Boolean {
@@ -1013,19 +1001,7 @@ class FormEditorViewModel(
       return false
     }
     if (form.find(key)?.choices?.getOrNull(index) == null) return false
-    updateQuestion(key) { q ->
-      q.copy(
-        choices =
-          q.choices.mapIndexed { i, c ->
-            if (i == index) {
-              c.copy(image = image, colorHex = if (image != null) null else c.colorHex)
-            } else {
-              // Selecting an image for a choice removes colors across the question
-              if (image != null) c.copy(colorHex = null) else c
-            }
-          }
-      )
-    }
+    updateChoiceAt(key, index) { it.copy(image = image) }
     return true
   }
 

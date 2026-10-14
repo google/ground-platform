@@ -219,4 +219,30 @@ class OnboardingViewModelTest {
     assertFalse(f.uiState.hasAcceptedTerms)
     assertEquals("", f.uiState.searchQuery)
   }
+
+  @Test
+  fun downloadSurvey_promptsForOfflineImagery_andConfirmOrSkipUpdatesState() {
+    val f = Fixture()
+    val remote = f.uiState.surveys.first { !it.isDownloaded }
+
+    f.viewModel.downloadSurvey(remote.id)
+    assertEquals(remote.id, f.uiState.pendingOfflineImagerySurveyId)
+    assertEquals(remote.id, f.uiState.pendingOfflineImagerySurvey?.id)
+
+    f.viewModel.confirmOfflineImageryDownload()
+    assertNull(f.uiState.pendingOfflineImagerySurveyId)
+    assertTrue(remote.id in f.uiState.offlineImageryDownloadedSurveyIds)
+    val imageryNotice = assertIs<OnboardingEvent.Notice>(f.lastEvent())
+    assertTrue(imageryNotice.message.contains("Downloaded offline imagery for \"${remote.title}\""))
+
+    f.viewModel.promptRemoveDownloadedSurvey(remote.id)
+    f.viewModel.confirmRemoveDownloadedSurvey()
+    assertFalse(remote.id in f.uiState.offlineImageryDownloadedSurveyIds)
+
+    f.viewModel.downloadSurvey(remote.id)
+    assertEquals(remote.id, f.uiState.pendingOfflineImagerySurveyId)
+    f.viewModel.skipOfflineImageryDownload()
+    assertNull(f.uiState.pendingOfflineImagerySurveyId)
+    assertFalse(remote.id in f.uiState.offlineImageryDownloadedSurveyIds)
+  }
 }

@@ -29,6 +29,8 @@ import org.groundplatform.v2.app.domain.model.editor.FormIds
 import org.groundplatform.v2.app.domain.model.editor.FormPreviewTarget
 import org.groundplatform.v2.app.domain.model.editor.SaveToRules
 import org.groundplatform.v2.app.domain.model.editor.SaveToValidator
+import org.groundplatform.v2.app.domain.model.editor.estimatedMinutes
+import org.groundplatform.v2.app.domain.model.editor.longestPathQuestionCount
 import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.web.domain.model.editor.SurveyEditorMutation
@@ -151,6 +153,21 @@ data class FormEditorUiState(
 
   val pathCount: Long
     get() = FormFlowGraph.countPaths(form)
+
+  /** Maximum number of question screens along any valid path from Start to Review & submit. */
+  val longestPathQuestionCount: Int
+    get() = FormFlowGraph.longestPathQuestionCount(form, flowEdges)
+
+  /** Estimated completion time in minutes (~2 min per question along the longest path). */
+  val estimatedCompletionMinutes: Int
+    get() = FormFlowGraph.estimatedMinutes(form, flowEdges)
+
+  /**
+   * Whether the longest path exceeds [FATIGUE_WARNING_QUESTION_THRESHOLD] questions (> 20 min
+   * estimated duration), indicating potential respondent fatigue.
+   */
+  val isFatigueWarning: Boolean
+    get() = longestPathQuestionCount > FATIGUE_WARNING_QUESTION_THRESHOLD
 
   /** Dataset a submission adds a feature to or updates, if any. */
   val saveTarget: EditorDataset?
@@ -290,5 +307,8 @@ data class FormEditorUiState(
 
     /** Widest the Form editor's right-hand properties panel can be dragged, in dp. */
     const val MAX_SIDE_PANEL_WIDTH_DP = 640f
+
+    /** Longest-path question count above which the fatigue warning triggers (> 10 questions). */
+    const val FATIGUE_WARNING_QUESTION_THRESHOLD = 10
   }
 }

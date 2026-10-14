@@ -16,10 +16,15 @@ package org.groundplatform.v2.web.ui.dashboard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.TableChart
@@ -29,18 +34,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,11 +55,11 @@ import org.groundplatform.v2.app.ui.viewmodel.DashboardActions
 import org.groundplatform.v2.web.ui.common.downloadTextFile
 
 /**
- * **Export** menu of a dashboard data table: CSV, GeoJSON (Map layers), and the export profiles the
- * survey's purposes enable (such as EUDR GeoJSON). A profile with unlinked fields lists them before
- * exporting; the export still runs. Every download is recorded as an export event.
+ * **Download** menu of a dashboard data table: CSV, GeoJSON (Map layers), and the export profiles
+ * the survey's purposes enable for datasets with linked fields (such as EUDR GeoJSON). A profile
+ * with unlinked fields lists them before exporting; the export still runs. Every download is
+ * recorded as an export event.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DashboardExportButton(
   table: DashboardDataTable,
@@ -78,15 +77,24 @@ internal fun DashboardExportButton(
   }
 
   Box {
-    TooltipBox(
-      positionProvider =
-        TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-      tooltip = { PlainTooltip { Text("Export") } },
-      state = rememberTooltipState(),
+    OutlinedButton(
+      onClick = { expanded = true },
+      modifier = Modifier.height(32.dp),
+      contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
     ) {
-      IconButton(onClick = { expanded = true }) {
-        Icon(imageVector = Icons.Outlined.Download, contentDescription = "Export")
-      }
+      Icon(
+        imageVector = Icons.Outlined.Download,
+        contentDescription = "Download",
+        modifier = Modifier.size(16.dp),
+      )
+      Spacer(Modifier.width(6.dp))
+      Text("Download", style = MaterialTheme.typography.labelMedium)
+      Spacer(Modifier.width(4.dp))
+      Icon(
+        imageVector = Icons.Outlined.ArrowDropDown,
+        contentDescription = null,
+        modifier = Modifier.size(16.dp),
+      )
     }
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
       DropdownMenuItem(
@@ -114,7 +122,7 @@ internal fun DashboardExportButton(
           },
         )
       }
-      val plans = options?.profilePlans.orEmpty()
+      val plans = options?.profilePlans.orEmpty().filter { plan -> plan.fields.any { it.isMapped } }
       if (plans.isNotEmpty()) {
         HorizontalDivider()
         plans.forEach { plan ->

@@ -82,6 +82,7 @@ import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
 import org.groundplatform.v2.web.domain.model.canChangeMember
 import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderButton
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
@@ -141,6 +142,7 @@ internal fun OrganizationPage(
         WebAppHeader(
           state = state,
           onSignOut = onSignOut,
+          onLogoClick = { state.selectPage(WebPage.WEB_SURVEYS) },
           navigationIcon = {
             IconButton(onClick = { state.organization.openOrganizations() }) {
               Icon(
@@ -269,7 +271,10 @@ internal fun OrganizationPage(
         onWidthChange = onSidePanelWidthChange,
         modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
       )
-      Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+      Surface(
+        modifier = Modifier.weight(1f).fillMaxHeight(),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+      ) {
         when (tab) {
           OrganizationTab.DETAILS ->
             PaneScaffold(

@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.AuthRepositoryImpl
+import org.groundplatform.v2.app.data.repository.LibraryRepositoryImpl
 import org.groundplatform.v2.app.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.app.data.repository.MutationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
@@ -376,5 +377,74 @@ class DashboardViewModelTest {
         pendingUploadEntityIds = emptySet(),
       ),
     )
+  }
+
+  @Test
+  fun dashboardTable_autoCollapsesSidePanelWhenExpanded_andRestoresItOnClose() {
+    val f = Fixture()
+    assertTrue(f.uiState.isSidePanelExpanded)
+
+    f.viewModel.updateDashboardTableExpanded(true)
+    assertTrue(f.uiState.isDashboardTableExpanded)
+    assertFalse(f.uiState.isSidePanelExpanded)
+
+    f.viewModel.updateDashboardTableExpanded(false)
+    assertFalse(f.uiState.isDashboardTableExpanded)
+    assertTrue(f.uiState.isSidePanelExpanded)
+
+    // When the side panel was already collapsed before opening the table, closing keeps it
+    // collapsed.
+    f.viewModel.collapseSidePanel()
+    assertFalse(f.uiState.isSidePanelExpanded)
+    f.viewModel.updateDashboardTableExpanded(true)
+    assertFalse(f.uiState.isSidePanelExpanded)
+    f.viewModel.updateDashboardTableExpanded(false)
+    assertFalse(f.uiState.isSidePanelExpanded)
+
+    // Manual side-panel toggles while the table is open are preserved when the table closes.
+    f.viewModel.expandSidePanel()
+    f.viewModel.updateDashboardTableExpanded(true)
+    assertFalse(f.uiState.isSidePanelExpanded)
+    f.viewModel.updateSidePanelExpanded(true)
+    assertTrue(f.uiState.isSidePanelExpanded)
+    f.viewModel.updateDashboardTableExpanded(false)
+    assertTrue(f.uiState.isSidePanelExpanded)
+  }
+
+  @Test
+  fun exportOptions_scopesProfilePlansOnlyToDatasetsWithMappedFields() {
+    val f = Fixture()
+    val viewModel =
+      DashboardViewModel(
+        surveyRepository = f.surveyRepository,
+        organizationRepository = OrganizationRepositoryImpl(f.store),
+        authRepository = AuthRepositoryImpl(),
+        mutationRepository = f.mutationRepository,
+        createSurveyUseCase =
+          CreateSurveyUseCase(f.surveyRepository, f.surveyEditorRepository, f.transactionRunner),
+        syncMutationsUseCase =
+          SyncMutationsUseCase(f.mutationRepository, f.surveyRepository, f.transactionRunner),
+        scope = f.scope,
+        libraryRepository = LibraryRepositoryImpl(f.store),
+        surveyEditorRepository = f.surveyEditorRepository,
+      )
+    val exportOptions = viewModel.uiState.value.exportOptions
+
+    // Coffee parcels link properties to EUDR concepts, so they receive the EUDR GeoJSON profile.
+    val parcels = assertNotNull(exportOptions["coffee_parcels"])
+    assertTrue(parcels.hasGeometry)
+    assertEquals(listOf("eudr_geojson"), parcels.profilePlans.map { it.profile.id })
+
+    // Other map layers in the same survey have no fields mapped to EUDR concepts, so they only
+    // offer plain GeoJSON and no extraneous EUDR GeoJSON profile.
+    val shadePlots = assertNotNull(exportOptions["shade_monitoring_plots"])
+    assertTrue(shadePlots.hasGeometry)
+    assertTrue(shadePlots.profilePlans.isEmpty())
+    assertNull(viewModel.exportWithProfile("shade_monitoring_plots", "eudr_geojson"))
+
+    val washingStations = assertNotNull(exportOptions["washing_stations"])
+    assertTrue(washingStations.hasGeometry)
+    assertTrue(washingStations.profilePlans.isEmpty())
+    assertNull(viewModel.exportWithProfile("washing_stations", "eudr_geojson"))
   }
 }

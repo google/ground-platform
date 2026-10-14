@@ -222,9 +222,9 @@ class SurveyEditorClickTest {
 
       // Change "Who can find this survey" -> switches policy to ANYONE_WITH_LINK.
       onNodeWithText("Who can find this survey").assertIsDisplayed()
-      onNodeWithText("Anyone in the survey directory").performClick()
+      onNodeWithText("Public (listed in the survey directory)").performClick()
       waitForIdle()
-      onNodeWithText("Only people with a link or QR code (unlisted)").performClick()
+      onNodeWithText("Unlisted (only people with a link or QR code)").performClick()
       waitForIdle()
       assertEquals(SharingPolicy.ANYONE_WITH_LINK, state.ui.sharing.policy)
 

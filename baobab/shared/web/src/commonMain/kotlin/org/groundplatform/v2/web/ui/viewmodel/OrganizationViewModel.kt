@@ -28,14 +28,18 @@ import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.domain.model.AuthProfile
 import org.groundplatform.v2.app.domain.model.CachedProfile
 import org.groundplatform.v2.app.domain.model.Countries
+import org.groundplatform.v2.app.domain.model.FormTemplate
 import org.groundplatform.v2.app.domain.model.ImagerySourceType
 import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.LibraryIds
+import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.app.domain.model.editor.EditorForm
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.app.domain.repository.AuthRepository
 import org.groundplatform.v2.app.domain.repository.LibraryRepository
 import org.groundplatform.v2.app.domain.repository.OrganizationRepository
@@ -184,6 +188,33 @@ interface OrganizationActions {
 
   /** Deletes a draft concept. Returns an error message (e.g. it isn't a draft), or `null`. */
   fun deleteConcept(organizationId: String, conceptId: String): String?
+
+  /**
+   * Creates a new form template in [organizationId]'s library with [title], [description], and
+   * optional initial [questions]. Returns a validation error message, or `null` when saved.
+   */
+  fun createTemplate(
+    organizationId: String,
+    title: String,
+    description: String = "",
+    questions: List<EditorQuestion> = emptyList(),
+  ): String? = null
+
+  /**
+   * Creates or updates [template] in its organization's library. Returns a validation error
+   * message, or `null` when saved.
+   */
+  fun saveTemplate(template: FormTemplate): String? = null
+
+  /**
+   * Replaces the questions of [templateId] in [organizationId]'s library. Returns a validation
+   * error message, or `null` when saved.
+   */
+  fun updateTemplateQuestions(
+    organizationId: String,
+    templateId: String,
+    questions: List<EditorQuestion>,
+  ): String? = null
 
   /** Renames a template. Returns a validation error message, or `null`. */
   fun renameTemplate(
@@ -647,6 +678,63 @@ class OrganizationViewModel(
       return it
     }
     scope.launch { manageLibraryUseCase.deleteConcept(organizationId, conceptId) }
+    return null
+  }
+
+  override fun createTemplate(
+    organizationId: String,
+    title: String,
+    description: String,
+    questions: List<EditorQuestion>,
+  ): String? {
+    (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
+      return it
+    }
+    val lib = library(organizationId)
+    val id = manageLibraryUseCase.newTemplateId(lib, title)
+    val trimmedTitle = title.trim()
+    val trimmedDesc = description.trim()
+    val template =
+      FormTemplate(
+        id = id,
+        organizationId = organizationId,
+        title = LocalizedText.en(trimmedTitle),
+        description = if (trimmedDesc.isEmpty()) LocalizedText() else LocalizedText.en(trimmedDesc),
+        form =
+          EditorForm(
+            formId = "form-${LibraryIds.nameFrom(trimmedTitle, "template")}",
+            title = trimmedTitle,
+            questions = questions,
+          ),
+      )
+    scope.launch { manageLibraryUseCase.saveTemplate(template) }
+    return null
+  }
+
+  override fun saveTemplate(template: FormTemplate): String? {
+    (libraryEditError(template.organizationId)
+        ?: manageLibraryUseCase.titleError(template.title.text))
+      ?.let {
+        return it
+      }
+    scope.launch { manageLibraryUseCase.saveTemplate(template) }
+    return null
+  }
+
+  override fun updateTemplateQuestions(
+    organizationId: String,
+    templateId: String,
+    questions: List<EditorQuestion>,
+  ): String? {
+    libraryEditError(organizationId)?.let {
+      return it
+    }
+    if (questions.any { it.label.isBlank() }) {
+      return "Enter a label for every question."
+    }
+    scope.launch {
+      manageLibraryUseCase.updateTemplateQuestions(organizationId, templateId, questions)
+    }
     return null
   }
 

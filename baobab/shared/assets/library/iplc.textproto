@@ -1416,7 +1416,7 @@ form_templates {
           field_ref: "area_ha"
           type: CONTROL_INPUT
           label {
-            text: "Area (ha)"
+            text: "Plot / parcel area (ha)"
           }
         }
       }

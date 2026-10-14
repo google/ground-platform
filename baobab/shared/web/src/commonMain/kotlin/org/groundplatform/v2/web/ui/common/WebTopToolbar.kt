@@ -54,6 +54,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -77,11 +79,13 @@ internal fun WebTopToolbar(
   state: WebAppState,
   onOpenSurveyEditor: () -> Unit = {},
   onSignOut: () -> Unit = { state.signOut() },
+  onLogoClick: (() -> Unit)? = { state.selectPage(WebPage.WEB_SURVEYS) },
   modifier: Modifier = Modifier,
 ) {
   WebAppHeader(
     state = state,
     onSignOut = onSignOut,
+    onLogoClick = onLogoClick,
     modifier = modifier,
     context = {
       Row(
@@ -144,7 +148,8 @@ internal fun WebSurveySwitcher(
       modifier =
         Modifier.clip(MaterialTheme.shapes.small)
           .clickable { isOpen = !isOpen }
-          .padding(horizontal = 6.dp, vertical = 2.dp),
+          .pointerHoverIcon(PointerIcon.Hand)
+          .padding(horizontal = 6.dp, vertical = 1.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -225,6 +230,7 @@ internal fun WebAppHeader(
   state: WebAppState,
   modifier: Modifier = Modifier,
   onSignOut: (() -> Unit)? = { state.signOut() },
+  onLogoClick: (() -> Unit)? = { state.selectPage(WebPage.WEB_SURVEYS) },
   showDebugTools: Boolean = true,
   navigationIcon: (@Composable () -> Unit)? = null,
   context: @Composable () -> Unit = {},
@@ -253,30 +259,45 @@ internal fun WebAppHeader(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         navigationIcon?.invoke()
-        CloudAcaciaLogo(modifier = Modifier.size(32.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-          Text(
-            text = "OPEN FORIS",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.sp,
-                lineHeight = 10.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.1.sp,
-              ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-          Text(
-            text = "Collect One",
-            style =
-              MaterialTheme.typography.titleMedium.copy(
-                fontFamily = brandFont,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 0.4.sp,
-                lineHeight = 20.sp,
-              ),
-            color = MaterialTheme.colorScheme.onSurface,
-          )
+        val brandModifier =
+          if (onLogoClick != null) {
+            Modifier.clip(MaterialTheme.shapes.small)
+              .clickable(onClick = onLogoClick)
+              .pointerHoverIcon(PointerIcon.Hand)
+              .padding(horizontal = 4.dp, vertical = 2.dp)
+          } else {
+            Modifier
+          }
+        Row(
+          modifier = brandModifier,
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          CloudAcaciaLogo(modifier = Modifier.size(32.dp))
+          Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            Text(
+              text = "OPEN FORIS",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 9.sp,
+                  lineHeight = 10.sp,
+                  fontWeight = FontWeight.Bold,
+                  letterSpacing = 1.1.sp,
+                ),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+              text = "Collect One",
+              style =
+                MaterialTheme.typography.titleMedium.copy(
+                  fontFamily = brandFont,
+                  fontWeight = FontWeight.ExtraBold,
+                  letterSpacing = 0.4.sp,
+                  lineHeight = 20.sp,
+                ),
+              color = MaterialTheme.colorScheme.onSurface,
+            )
+          }
         }
         VerticalDivider(
           modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
@@ -332,14 +353,14 @@ internal fun WebHeaderContext(
   titleTrailing: (@Composable RowScope.() -> Unit)? = null,
   supporting: @Composable RowScope.() -> Unit = {},
 ) {
-  Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+  Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
     Row(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleMedium.copy(lineHeight = 18.sp),
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onSurface,
         maxLines = 1,
@@ -361,7 +382,7 @@ internal fun WebHeaderContext(
 internal fun WebHeaderSupportingText(text: String, color: Color = Color.Unspecified) {
   Text(
     text = text,
-    style = MaterialTheme.typography.labelSmall,
+    style = MaterialTheme.typography.labelSmall.copy(lineHeight = 12.sp),
     color = color.takeOrElse { MaterialTheme.colorScheme.onSurfaceVariant },
     maxLines = 1,
     overflow = TextOverflow.Ellipsis,

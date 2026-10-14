@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -82,6 +83,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -106,8 +108,13 @@ import groundplatform.v2.forms.ControlType
 import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.FieldValue
 import groundplatform.v2.forms.GeoPoint
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.roundToInt
+import kotlin.math.sin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.groundplatform.v2.core.forms.media.MediaCapture
 import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FieldState
@@ -1739,6 +1746,7 @@ private fun GeoGeometryDrawingWidget(
   var panOffsetLat by remember(path) { mutableStateOf(0.0) }
   var panOffsetLon by remember(path) { mutableStateOf(0.0) }
   var zoomLevel by remember(path) { mutableStateOf(17.5f) }
+  var isWalking by remember(path) { mutableStateOf(false) }
   var undoGeometryHistory by remember(path) { mutableStateOf<List<List<GeoPoint>>>(emptyList()) }
   var redoGeometryHistory by remember(path) { mutableStateOf<List<List<GeoPoint>>>(emptyList()) }
 
@@ -1758,6 +1766,44 @@ private fun GeoGeometryDrawingWidget(
       controller.updateGeoShape(path, points)
     } else {
       controller.updateGeoTrace(path, points)
+    }
+  }
+
+  val latestExistingPoints by rememberUpdatedState(existingPoints)
+  LaunchedEffect(path, isWalking) {
+    if (!isWalking) return@LaunchedEffect
+    if (latestExistingPoints.isEmpty()) {
+      val initialPt =
+        GeoPoint(
+          latitude = roundGeoCoord6(liveGpsLat),
+          longitude = roundGeoCoord6(liveGpsLon),
+          altitude_meters = liveGpsAlt,
+          accuracy_meters = liveGpsAcc,
+        )
+      undoGeometryHistory = undoGeometryHistory + listOf(latestExistingPoints)
+      redoGeometryHistory = emptyList()
+      updateVertices(latestExistingPoints + initialPt)
+    }
+    var walkStep = latestExistingPoints.size
+    while (isActive && isWalking) {
+      delay(5_000L)
+      if (!isWalking) break
+      walkStep += 1
+      val angleRad = (walkStep * 45.0) * (PI / 180.0)
+      val stepDeltaLat = 0.00008 * sin(angleRad)
+      val stepDeltaLon = 0.00008 * cos(angleRad)
+      liveGpsLat = roundGeoCoord6(liveGpsLat + stepDeltaLat)
+      liveGpsLon = roundGeoCoord6(liveGpsLon + stepDeltaLon)
+      val nextPt =
+        GeoPoint(
+          latitude = liveGpsLat,
+          longitude = liveGpsLon,
+          altitude_meters = liveGpsAlt,
+          accuracy_meters = liveGpsAcc,
+        )
+      undoGeometryHistory = undoGeometryHistory + listOf(latestExistingPoints)
+      redoGeometryHistory = emptyList()
+      updateVertices(latestExistingPoints + nextPt)
     }
   }
 
@@ -1792,6 +1838,12 @@ private fun GeoGeometryDrawingWidget(
           text = "${existingPoints.size} vertices",
           tone = if (hasMinVertices) GroundBadgeTone.PRIMARY else GroundBadgeTone.WARNING,
         )
+        if (isWalking) {
+          GroundTonalBadge(
+            text = "Walking • Logging GPS waypoint every 5s (${existingPoints.size} pts)",
+            tone = GroundBadgeTone.WARNING,
+          )
+        }
       }
 
       // Interactive Map Viewport with Vertices, Lines, Polygon Fill, Crosshair & GPS Dot
@@ -2018,7 +2070,7 @@ private fun GeoGeometryDrawingWidget(
           color = Color(0xFF0A1F16).copy(alpha = 0.88f),
           border = BorderStroke(1.dp, Color(0xFF2D5944)),
         ) {
-          val textColor = if (isPanned) Color(0xFFFFE082) else Color(0xFFB7F1B9)
+          val textColor = if (isWalking || isPanned) Color(0xFFFFE082) else Color(0xFFB7F1B9)
           Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -2027,6 +2079,7 @@ private fun GeoGeometryDrawingWidget(
             Icon(
               imageVector =
                 when {
+                  isWalking -> Icons.Default.LocationOn
                   !panAllowed -> Icons.Default.Lock
                   isPanned -> Icons.Default.Place
                   else -> Icons.Default.LocationOn
@@ -2038,6 +2091,8 @@ private fun GeoGeometryDrawingWidget(
             Text(
               text =
                 when {
+                  isWalking ->
+                    "Walking • Logging GPS waypoint every 5s (${existingPoints.size} pts)"
                   !panAllowed -> "GPS stream only (Pan locked)"
                   isPanned -> "Panned • Crosshair active"
                   else -> "Centered on GPS (drag map to pan)"
@@ -2228,6 +2283,37 @@ private fun GeoGeometryDrawingWidget(
         }
       }
 
+      if (!panAllowed) {
+        Button(
+          onClick = { isWalking = !isWalking },
+          modifier = Modifier.fillMaxWidth(),
+          colors =
+            if (isWalking) {
+              ButtonDefaults.buttonColors(
+                containerColor = colors.error,
+                contentColor = colors.onError,
+              )
+            } else {
+              ButtonDefaults.buttonColors()
+            },
+          contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
+        ) {
+          Icon(
+            imageVector = if (isWalking) Icons.Default.Close else Icons.Default.LocationOn,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = if (isWalking) "Stop walking" else "Start walking",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+          )
+        }
+      }
+
       // Primary Controls Row: [Undo] [Redo] [Add point / Capture vertex] [Clear]
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -2265,42 +2351,76 @@ private fun GeoGeometryDrawingWidget(
           Icon(imageVector = RedoIcon, contentDescription = "Redo", modifier = Modifier.size(20.dp))
         }
 
-        Button(
-          onClick = {
-            val captureLat = if (isPanned) targetLat else liveGpsLat
-            val captureLon = if (isPanned) targetLon else liveGpsLon
-            val newPt =
-              GeoPoint(
-                latitude = captureLat,
-                longitude = captureLon,
-                altitude_meters = liveGpsAlt,
-                accuracy_meters = liveGpsAcc,
-              )
-            undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
-            redoGeometryHistory = emptyList()
-            updateVertices(existingPoints + newPt)
-          },
-          modifier = Modifier.weight(1f),
-          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        ) {
-          Icon(
-            imageVector = if (isPanned) Icons.Default.Place else Icons.Default.LocationOn,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-          )
-          Spacer(modifier = Modifier.width(6.dp))
-          Text(
-            text = triggerLabel,
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false,
-          )
+        if (panAllowed) {
+          Button(
+            onClick = {
+              val captureLat = if (isPanned) targetLat else liveGpsLat
+              val captureLon = if (isPanned) targetLon else liveGpsLon
+              val newPt =
+                GeoPoint(
+                  latitude = captureLat,
+                  longitude = captureLon,
+                  altitude_meters = liveGpsAlt,
+                  accuracy_meters = liveGpsAcc,
+                )
+              undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
+              redoGeometryHistory = emptyList()
+              updateVertices(existingPoints + newPt)
+            },
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+          ) {
+            Icon(
+              imageVector = if (isPanned) Icons.Default.Place else Icons.Default.LocationOn,
+              contentDescription = null,
+              modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+              text = triggerLabel,
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
+            )
+          }
+        } else {
+          OutlinedButton(
+            onClick = {
+              val newPt =
+                GeoPoint(
+                  latitude = liveGpsLat,
+                  longitude = liveGpsLon,
+                  altitude_meters = liveGpsAlt,
+                  accuracy_meters = liveGpsAcc,
+                )
+              undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
+              redoGeometryHistory = emptyList()
+              updateVertices(existingPoints + newPt)
+            },
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Default.LocationOn,
+              contentDescription = null,
+              modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+              text = "Add point",
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
+            )
+          }
         }
 
         if (existingPoints.isNotEmpty()) {
           OutlinedIconButton(
             onClick = {
+              isWalking = false
               undoGeometryHistory = undoGeometryHistory + listOf(existingPoints)
               redoGeometryHistory = emptyList()
               controller.clearField(path)
@@ -2318,7 +2438,11 @@ private fun GeoGeometryDrawingWidget(
       if (!panAllowed) {
         Text(
           text =
-            "Map panning is disabled for this question. Vertices are captured directly along your GPS path.",
+            if (isWalking) {
+              "Walking • Logging GPS waypoint every 5s (${existingPoints.size} pts). Tap \"Stop walking\" when finished."
+            } else {
+              "Map panning is disabled for this question. Tap \"Start walking\" to log GPS waypoints every 5s, or \"Add point\" to capture manually."
+            },
           style = MaterialTheme.typography.labelSmall.copy(color = colors.onSurfaceVariant),
         )
       }

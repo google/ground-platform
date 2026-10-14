@@ -71,8 +71,8 @@ enum class WizardStartMethod(val label: String, val description: String) {
     description = "Clone forms, map layer schemas, survey area, and purpose packs without data.",
   ),
   IMPORT_XFORMS(
-    label = "Import from file (XForms XML)",
-    description = "Upload an ODK XForms XML file and link its questions to library concepts.",
+    label = "Import from file",
+    description = "Import a form definition from ODK XForms (.xml) or Collect Earth (.cep).",
   ),
 }
 
@@ -290,4 +290,82 @@ object SurveyWizardRules {
   ): Boolean =
     organizationType == OrganizationType.IPLC_ORGANIZATION ||
       conceptIds.any { it.startsWith("iplc.") }
+
+  /**
+   * Returns true when [pack] is a regulatory compliance or supply-chain verification framework
+   * (such as EUDR due diligence, timber legality/traceability, or certification audits) rather than
+   * a general monitoring domain purpose.
+   */
+  fun isComplianceFrameworkPack(pack: PurposePack): Boolean =
+    pack.exportProfileIds.isNotEmpty() ||
+      pack.id == "eudr_due_diligence" ||
+      pack.id == "timber_traceability" ||
+      pack.id.endsWith(".coop_certification_audit")
+
+  /**
+   * Default Free, Prior and Informed Consent (FPIC) & CARE data sovereignty notice populated when
+   * applying CARE defaults in the wizard.
+   */
+  const val DEFAULT_FPIC_CONSENT_TEXT: String =
+    "Free, Prior and Informed Consent (FPIC): In accordance with the CARE Principles for " +
+      "Indigenous Data Governance and FAO guidelines on Indigenous Peoples and local " +
+      "communities' data sovereignty, data collected in this survey remains under community " +
+      "authority and control. Participation is voluntary, and contributors may review, " +
+      "restrict, or withdraw consent at any time."
+
+  /** Default 5-criterion CARE & FAO FPIC governance rubric shown in Step 6 (`Sharing`). */
+  val CARE_GOVERNANCE_CRITERIA: List<CareGovernanceCriterion> =
+    listOf(
+      CareGovernanceCriterion(
+        code = "C",
+        title = "Collective Benefit",
+        standard = "CARE & FAO Indigenous Data Policy",
+        description =
+          "Ecosystem and community indicators use shared library concepts for community-owned evidence.",
+        isSatisfied = true,
+      ),
+      CareGovernanceCriterion(
+        code = "A",
+        title = "Authority to Control",
+        standard = "CARE & FAO VGGT Tenure Governance",
+        description =
+          "Access is Restricted so community stewards control who can view or collect survey records.",
+        isSatisfied = true,
+      ),
+      CareGovernanceCriterion(
+        code = "R",
+        title = "Responsibility",
+        standard = "CARE Principles",
+        description =
+          "Peer visibility is limited to each contributor's own submissions plus survey organizers.",
+        isSatisfied = true,
+      ),
+      CareGovernanceCriterion(
+        code = "E",
+        title = "Ethics",
+        standard = "CARE Principles",
+        description = "Sensitive community data is protected from unapproved external aggregation.",
+        isSatisfied = true,
+      ),
+      CareGovernanceCriterion(
+        code = "FPIC",
+        title = "Free, Prior and Informed Consent",
+        standard = "FAO FPIC Manual",
+        description =
+          "Explicit collector/participant consent is required before recording field data.",
+        isSatisfied = true,
+      ),
+    )
 }
+
+/**
+ * One CARE Principle or FAO Indigenous Peoples' data governance & FPIC criterion displayed in the
+ * wizard's Sharing & data sovereignty step.
+ */
+data class CareGovernanceCriterion(
+  val code: String,
+  val title: String,
+  val standard: String,
+  val description: String,
+  val isSatisfied: Boolean,
+)

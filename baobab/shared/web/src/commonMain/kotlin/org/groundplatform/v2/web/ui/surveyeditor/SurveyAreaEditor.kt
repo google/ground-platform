@@ -305,7 +305,9 @@ internal fun SurveyAreaEditorDialog(
   pickTextFile: TextFilePicker = ::openPlatformTextFilePicker,
 ) {
   val editor = remember { SurveyAreaEditorState(current) }
-  val surveyCenter = current?.center ?: LatLng(-0.4198, 36.9512)
+  val activeArea = editor.drawnArea() ?: editor.uploadedArea() ?: current
+  val surveyCenter = activeArea?.center ?: LatLng(-0.4198, 36.9512)
+  val surveyZoom = activeArea?.zoom ?: 13.0
   val pending =
     when (editor.tab) {
       SurveyAreaEditorTab.SEARCH -> null
@@ -366,7 +368,7 @@ internal fun SurveyAreaEditorDialog(
                   onDismiss()
                 },
               )
-            SurveyAreaEditorTab.DRAW -> DrawTab(editor, surveyCenter, current?.zoom ?: 13.0)
+            SurveyAreaEditorTab.DRAW -> DrawTab(editor, surveyCenter, surveyZoom)
             SurveyAreaEditorTab.UPLOAD -> UploadTab(editor, pickTextFile)
           }
         }

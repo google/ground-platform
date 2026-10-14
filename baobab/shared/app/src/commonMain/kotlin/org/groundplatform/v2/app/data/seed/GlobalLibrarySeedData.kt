@@ -241,7 +241,13 @@ object GlobalLibrarySeedData {
     listOf(
       concept(
         "core.area_ha",
-        text("Area (ha)", "Superficie (ha)", "Superficie (ha)", "Diện tích (ha)", "Eneo (ha)"),
+        text(
+          "Plot / parcel area (ha)",
+          "Superficie (ha)",
+          "Superficie (ha)",
+          "Diện tích (ha)",
+          "Eneo (ha)",
+        ),
         ConceptDataType.DECIMAL,
         text("Area of the plot or site in hectares."),
         ConceptAggregation.SUM,
@@ -249,6 +255,7 @@ object GlobalLibrarySeedData {
         unit = "har",
         keywords =
           keywords(
+            "en" to "area",
             "en" to "size",
             "en" to "hectares",
             "fr" to "surface",
@@ -847,6 +854,30 @@ object GlobalLibrarySeedData {
         ConceptAggregation.NONE,
         PrivacyClass.SENSITIVE,
         keywords = keywords("en" to "vendor", "en" to "trader", "es" to "proveedor"),
+        references = listOf(EUDR_REGULATION),
+      ),
+      concept(
+        "eudr.plot_area_ha",
+        text(
+          "Production plot area (ha)",
+          "Surface de la parcelle de production (ha)",
+          "Área de la parcela de producción (ha)",
+          "Diện tích lô đất sản xuất (ha)",
+          "Eneo la shamba la uzalishaji (ha)",
+        ),
+        ConceptDataType.DECIMAL,
+        text("Area of the agricultural or forest commodity production plot in hectares."),
+        ConceptAggregation.SUM,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        unit = "har",
+        keywords =
+          keywords(
+            "en" to "plot area",
+            "en" to "hectares",
+            "es" to "hectáreas",
+          ),
+        goals = listOf(GOAL_DEFORESTATION_FREE),
+        pillar = ImpactPillar.MITIGATION,
         references = listOf(EUDR_REGULATION),
       ),
     )

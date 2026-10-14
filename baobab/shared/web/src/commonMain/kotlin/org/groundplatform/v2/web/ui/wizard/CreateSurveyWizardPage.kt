@@ -88,6 +88,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -111,17 +112,21 @@ import org.groundplatform.v2.app.domain.model.editor.EntityDataset
 import org.groundplatform.v2.app.domain.model.editor.EntityRow
 import org.groundplatform.v2.app.domain.model.editor.GeometryKind
 import org.groundplatform.v2.app.domain.model.editor.LatLng
+import org.groundplatform.v2.app.domain.model.editor.PeerDataVisibility
+import org.groundplatform.v2.app.domain.model.editor.SharingPolicy
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.ui.state.SurveyMapUiState
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
+import org.groundplatform.v2.web.domain.model.editor.CareGovernanceCriterion
 import org.groundplatform.v2.web.domain.model.editor.CreateSurveyWizardStep
 import org.groundplatform.v2.web.domain.model.editor.SurveyCollectionMode
 import org.groundplatform.v2.web.domain.model.editor.SurveyWizardRules
 import org.groundplatform.v2.web.domain.model.editor.WizardMapFeatureSource
 import org.groundplatform.v2.web.domain.model.editor.WizardStartMethod
 import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
 import org.groundplatform.v2.web.ui.common.ProgramChips
 import org.groundplatform.v2.web.ui.common.PurposePackGrid
 import org.groundplatform.v2.web.ui.common.TextFilePickResult
@@ -133,7 +138,6 @@ import org.groundplatform.v2.web.ui.common.WebHeaderSupportingText
 import org.groundplatform.v2.web.ui.common.openPlatformTextFilePicker
 import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.formeditor.FormEditorPage
-import org.groundplatform.v2.web.ui.formeditor.SectionLabel
 import org.groundplatform.v2.web.ui.state.CreateSurveyWizardUiState
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
@@ -148,9 +152,10 @@ import org.groundplatform.v2.web.ui.surveyeditor.NavItem
 import org.groundplatform.v2.web.ui.surveyeditor.SamplingDesignPanel
 import org.groundplatform.v2.web.ui.surveyeditor.SharingContent
 import org.groundplatform.v2.web.ui.surveyeditor.SurveyAreaSection
-import org.groundplatform.v2.web.ui.surveyeditor.XFORMS_FILE_ACCEPT
 import org.groundplatform.v2.web.ui.viewmodel.CreateSurveyWizardActions
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
+
+private const val WIZARD_IMPORT_FILE_ACCEPT = ".xml,.xhtml,.cep,.idm.xml,application/xml,text/xml"
 
 private val WizardContentMaxWidth = 860.dp
 private val WizardWideContentMaxWidth = 1160.dp
@@ -194,6 +199,10 @@ fun CreateSurveyWizardPage(
       WebAppHeader(
         state = state,
         onSignOut = onSignOut,
+        onLogoClick = {
+          state.createSurveyWizard.cancelWizard()
+          state.selectPage(WebPage.WEB_SURVEYS)
+        },
         showDebugTools = false,
         navigationIcon = navigationIcon,
         context = context,
@@ -239,18 +248,8 @@ fun CreateSurveyWizardPage(
         }
       },
       {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-          WebHeaderContext(title = uiState.title.ifBlank { "Create survey" }) {
-            uiState.selectedOrganization?.let { org -> WebHeaderSupportingText(org.name) }
-          }
-          WizardInlineStepper(
-            currentStep = uiState.currentStep,
-            canAdvanceFromCurrent = uiState.canProceedFromCurrentStep,
-            onSelectStep = actions::selectStep,
-          )
+        WebHeaderContext(title = uiState.title.ifBlank { "Create survey" }) {
+          uiState.selectedOrganization?.let { org -> WebHeaderSupportingText(org.name) }
         }
       },
     )
@@ -475,7 +474,7 @@ private fun WizardBottomBar(
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 10.dp),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween,
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         if (!isFirst) {
@@ -491,6 +490,16 @@ private fun WizardBottomBar(
         } else {
           TextButton(onClick = onCancelClick) { Text("Cancel") }
         }
+      }
+      Box(
+        modifier = Modifier.weight(1f),
+        contentAlignment = Alignment.Center,
+      ) {
+        WizardInlineStepper(
+          currentStep = uiState.currentStep,
+          canAdvanceFromCurrent = uiState.canProceedFromCurrentStep,
+          onSelectStep = actions::selectStep,
+        )
       }
       Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -570,6 +579,16 @@ private fun WizardStepContainer(
   }
 }
 
+@Composable
+private fun WizardSectionTitle(text: String) {
+  Text(
+    text = text,
+    style = MaterialTheme.typography.titleMedium,
+    fontWeight = FontWeight.SemiBold,
+    color = MaterialTheme.colorScheme.onSurface,
+  )
+}
+
 // ---------------------------------------------------------------------------------------------
 // Step 1: Overview
 // ---------------------------------------------------------------------------------------------
@@ -601,6 +620,8 @@ private fun OverviewStepContent(
   LaunchedEffect(Unit) {
     if (uiState.title.isBlank()) {
       titleAutoFocused = true
+      runCatching { titleFocusRequester.requestFocus() }
+      withFrameNanos {}
       runCatching { titleFocusRequester.requestFocus() }.onFailure { titleAutoFocused = false }
     }
   }
@@ -653,7 +674,7 @@ private fun OverviewStepContent(
       modifier = Modifier.fillMaxWidth().padding(20.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      SectionLabel("Survey identity")
+      WizardSectionTitle("Survey identity")
       if (showTitleError) {
         ValidationErrorBanner(message = "Enter a survey title to continue.")
       }
@@ -741,7 +762,7 @@ private fun OverviewStepContent(
       modifier = Modifier.fillMaxWidth().padding(20.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-      SectionLabel("How would you like to start?")
+      WizardSectionTitle("How would you like to start?")
       if (showStartMethodError) {
         uiState.currentStepValidationMessage?.let { msg -> ValidationErrorBanner(message = msg) }
       }
@@ -796,13 +817,18 @@ private fun OverviewStepContent(
           }
         }
         WizardStartMethod.IMPORT_XFORMS -> {
+          Text(
+            text = "Supported formats: ODK XForms (.xml), Collect Earth (.cep)",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
           Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
           ) {
             OutlinedButton(
               onClick = {
-                pickTextFile(XFORMS_FILE_ACCEPT) { result ->
+                pickTextFile(WIZARD_IMPORT_FILE_ACCEPT) { result ->
                   when (result) {
                     is TextFilePickResult.Picked ->
                       actions.importXFormsXml(result.fileName, result.text)
@@ -818,8 +844,8 @@ private fun OverviewStepContent(
               )
               Spacer(Modifier.width(6.dp))
               Text(
-                if (uiState.importedXForms != null) "Choose another XML file"
-                else "Choose XForms XML file"
+                if (uiState.importedXForms != null) "Choose another file (.xml, .cep)"
+                else "Choose file (.xml, .cep)"
               )
             }
             uiState.importedXForms?.let { imported ->
@@ -837,7 +863,7 @@ private fun OverviewStepContent(
                 )
               }
               IconButton(onClick = actions::clearImportedXForms) {
-                Icon(Icons.Outlined.Close, contentDescription = "Clear imported XML")
+                Icon(Icons.Outlined.Close, contentDescription = "Clear imported file")
               }
             }
           }
@@ -913,29 +939,64 @@ private fun ModeAndPurposeStepContent(
       modifier = Modifier.fillMaxWidth().padding(20.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-      SectionLabel("What will this data be used for? *")
+      val (compliancePacks, generalPacks) =
+        remember(uiState.sortedPurposePacks) {
+          uiState.sortedPurposePacks.partition(SurveyWizardRules::isComplianceFrameworkPack)
+        }
+      WizardSectionTitle("What will this data be used for? *")
       Text(
         text =
           "Select one or more purposes so Collect One can tailor your survey's map layer defaults, starting form, standard library concepts, data governance guardrails (such as EUDR or CARE sovereignty), and one-click export profiles. Choose \"Other\" if your goal isn't listed.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      PurposePackGrid(
-        packs = uiState.sortedPurposePacks,
-        library = uiState.library,
-        organizationName = uiState.selectedOrganization?.name,
-        language = editorUiState.details.defaultLanguage.ifBlank { "en" },
-        selectedIds = editorUiState.details.purposeIds,
-        onToggle = actions::togglePurposePack,
-        otherPurposeText = editorUiState.details.otherPurpose,
-        onOtherPurposeTextChange = actions::updateOtherPurpose,
-        isError = uiState.isPurposeInvalid,
-        onOtherInputPositioned = { otherInputY = it },
-      )
+      if (compliancePacks.isEmpty()) {
+        PurposePackGrid(
+          packs = generalPacks,
+          library = uiState.library,
+          organizationName = uiState.selectedOrganization?.name,
+          language = editorUiState.details.defaultLanguage.ifBlank { "en" },
+          selectedIds = editorUiState.details.purposeIds,
+          onToggle = actions::togglePurposePack,
+          otherPurposeText = editorUiState.details.otherPurpose,
+          onOtherPurposeTextChange = actions::updateOtherPurpose,
+          isError = uiState.isPurposeInvalid,
+          onOtherInputPositioned = { otherInputY = it },
+        )
+      } else {
+        PurposePackGrid(
+          packs = generalPacks,
+          library = uiState.library,
+          organizationName = uiState.selectedOrganization?.name,
+          language = editorUiState.details.defaultLanguage.ifBlank { "en" },
+          selectedIds = editorUiState.details.purposeIds,
+          onToggle = actions::togglePurposePack,
+        )
+        Spacer(Modifier.height(4.dp))
+        WizardSectionTitle("Compliance with deforestation & reporting regulations")
+        Text(
+          text =
+            "Select any supply-chain, legality, or certification frameworks this survey must satisfy (pre-configures required geolocation guardrails and one-click export profiles):",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        PurposePackGrid(
+          packs = compliancePacks,
+          library = uiState.library,
+          organizationName = uiState.selectedOrganization?.name,
+          language = editorUiState.details.defaultLanguage.ifBlank { "en" },
+          selectedIds = editorUiState.details.purposeIds,
+          onToggle = actions::togglePurposePack,
+          otherPurposeText = editorUiState.details.otherPurpose,
+          onOtherPurposeTextChange = actions::updateOtherPurpose,
+          isError = uiState.isPurposeInvalid,
+          onOtherInputPositioned = { otherInputY = it },
+        )
+      }
 
       if (uiState.offeredProgramIds.isNotEmpty()) {
         Spacer(Modifier.height(4.dp))
-        SectionLabel("Reporting programs & frameworks")
+        WizardSectionTitle("Reporting programs & frameworks")
         Text(
           text = "Tag this survey with the programs its data contributes to:",
           style = MaterialTheme.typography.bodySmall,
@@ -1032,11 +1093,11 @@ private fun SurveyAreaStepContent(
       modifier = Modifier.fillMaxWidth().padding(20.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      SectionLabel("Basemap & reference imagery")
+      WizardSectionTitle("Basemap & reference imagery")
       Text(
         text =
           if (uiState.collectionMode == SurveyCollectionMode.FIELD_SURVEY) {
-            "Choose which custom WMS / XYZ / GeoTIFF imagery layers are enabled alongside the default satellite basemap."
+            "Choose which satellite and reference imagery layers are enabled alongside the default satellite basemap."
           } else {
             "Select the high-resolution or temporal imagery layers (such as NICFI Planet or Sentinel-2 mosaics) that photo-interpreters will inspect when classifying plots."
           },
@@ -1095,22 +1156,24 @@ private fun ImagerySourceRow(
             fontWeight = FontWeight.SemiBold,
           )
           GroundTonalBadge(
-            text = source.type.label,
-            tone = GroundBadgeTone.PRIMARY,
-          )
-          GroundTonalBadge(
             text = sourceBadge,
             tone =
               if (sourceBadge == "All users") GroundBadgeTone.NEUTRAL else GroundBadgeTone.TERTIARY,
           )
         }
-        if (source.urlTemplate.isNotBlank()) {
-          Text(
-            text = source.urlTemplate,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
+        val addedBy =
+          if (sourceBadge == "All users") "Built-in platform imagery" else "Added by $sourceBadge"
+        val offlineNote =
+          if (source.allowOfflineDownload) {
+            "Available for offline field download and web mapping"
+          } else {
+            "Online satellite & reference imagery layer"
+          }
+        Text(
+          text = "$addedBy · $offlineNote",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
       }
     }
   }
@@ -1161,7 +1224,7 @@ private fun MapFeaturesStepContent(
       modifier = Modifier.fillMaxWidth().padding(20.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-      SectionLabel("How are map features created?")
+      WizardSectionTitle("How are map features created?")
       fun iconOf(source: WizardMapFeatureSource) =
         when (source) {
           WizardMapFeatureSource.FIELD_FREEFORM -> Icons.Outlined.AddLocationAlt
@@ -1317,7 +1380,7 @@ private fun MapFeaturesStepContent(
           modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
           verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-          SectionLabel("Primary map layer settings")
+          WizardSectionTitle("Primary map layer settings")
           OutlinedTextField(
             value = primaryLayer.displayName,
             onValueChange = actions::updatePrimaryLayerDisplayName,
@@ -1370,7 +1433,7 @@ private fun MapFeaturesStepContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
               ) {
-                SectionLabel("Statistical sample design & sub-plot points")
+                WizardSectionTitle("Statistical sample design & sub-plot points")
                 GroundTonalBadge(
                   text = "Collect Earth Online",
                   tone = GroundBadgeTone.PRIMARY,
@@ -1390,7 +1453,7 @@ private fun MapFeaturesStepContent(
             }
 
             WizardMapFeatureSource.IMPORT_FILE -> {
-              SectionLabel("Import map features from GeoJSON or KML")
+              WizardSectionTitle("Import map features from GeoJSON or KML")
               Text(
                 text =
                   "Upload existing farm boundaries, monitoring plots, or points of interest. Attributes in the file become Map layer properties.",
@@ -1832,7 +1895,7 @@ private fun SharingStepContent(
         }
         Text(
           text =
-            "Clicking Create survey opens the Survey Editor in Draft mode so you can review forms, map layers, and sharing before data collectors see it. When you're ready to go live, click the Draft status badge next to the survey name in the top banner (or under Survey details) and select Publish survey.",
+            "Clicking Create survey opens the survey on the main map in Draft mode so you can inspect your study area and layers or open the Survey editor before data collectors see it. When you're ready to go live, open the Survey editor, click the Draft status badge next to the survey name, and select Publish survey.",
           style = MaterialTheme.typography.bodySmall,
         )
       }
@@ -1868,7 +1931,7 @@ private fun SharingStepContent(
       }
       Text(
         text =
-          "How this survey's schema connects to your organization's impact rollup and one-click export profiles.",
+          "How this survey's schema connects to your organization's impact rollup, FAO/UN environmental indicators, and one-click export profiles.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -1898,6 +1961,12 @@ private fun SharingStepContent(
           GroundTonalBadge(
             text = "Programs: ${readiness.selectedProgramLabels.joinToString(", ")}",
             tone = GroundBadgeTone.NEUTRAL,
+          )
+        }
+        if (readiness.goalTitles.isNotEmpty()) {
+          GroundTonalBadge(
+            text = "Impact goals: ${readiness.goalTitles.joinToString(", ")}",
+            tone = GroundBadgeTone.PRIMARY,
           )
         }
       }
@@ -1945,46 +2014,176 @@ private fun SharingStepContent(
     }
   }
 
-  // CARE Principles & Data Sovereignty Banner
+  // CARE Principles & FAO Indigenous / Community Data Sovereignty Card
+  val careCriteria =
+    remember(
+      editorUiState.sharing.policy,
+      editorUiState.sharing.peerDataVisibility,
+      uiState.collectorConsentRequired,
+      uiState.collectorConsentText,
+      readiness.linkedConceptCount,
+      readiness.selectedPackTitles,
+    ) {
+      listOf(
+        CareGovernanceCriterion(
+          code = "C",
+          title = "Collective Benefit",
+          standard = "CARE & FAO Indigenous Data Policy",
+          description =
+            "Ecosystem and community indicators use shared library concepts for community-owned evidence.",
+          isSatisfied =
+            readiness.linkedConceptCount > 0 || readiness.selectedPackTitles.isNotEmpty(),
+        ),
+        CareGovernanceCriterion(
+          code = "A",
+          title = "Authority to Control",
+          standard = "CARE & FAO VGGT Tenure Governance",
+          description =
+            "Access is Restricted so community stewards control who can view or collect survey records.",
+          isSatisfied = editorUiState.sharing.policy == SharingPolicy.RESTRICTED,
+        ),
+        CareGovernanceCriterion(
+          code = "R",
+          title = "Responsibility",
+          standard = "CARE Principles",
+          description =
+            "Peer visibility is limited to each contributor's own submissions plus survey organizers.",
+          isSatisfied = editorUiState.sharing.peerDataVisibility == PeerDataVisibility.OWN_ONLY,
+        ),
+        CareGovernanceCriterion(
+          code = "E",
+          title = "Ethics & Aggregate Protection",
+          standard = "CARE Principles",
+          description =
+            "Individual tenure and household records are never exposed in public platform rollups.",
+          isSatisfied = true,
+        ),
+        CareGovernanceCriterion(
+          code = "FPIC",
+          title = "Free, Prior and Informed Consent",
+          standard = "FAO FPIC Operational Guidelines",
+          description =
+            "Data collectors must review and accept explicit community consent terms before collecting data.",
+          isSatisfied =
+            uiState.collectorConsentRequired && uiState.collectorConsentText.isNotBlank(),
+        ),
+      )
+    }
+
   Surface(
     color = MaterialTheme.colorScheme.secondaryContainer,
     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     shape = MaterialTheme.shapes.medium,
     modifier = Modifier.fillMaxWidth(),
   ) {
-    Row(
+    Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      Icon(Icons.Outlined.Shield, contentDescription = null, modifier = Modifier.size(22.dp))
-      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-          text = "CARE Principles & Indigenous / community data sovereignty",
-          style = MaterialTheme.typography.titleSmall,
-          fontWeight = FontWeight.Bold,
-        )
-        Text(
-          text =
-            if (readiness.careSovereigntyApplied) {
-              "Restricted access and 'Only their own submissions' peer visibility are active to protect community and tenure data."
-            } else {
-              "Working with Indigenous Peoples, local communities, or sensitive land-tenure data? Apply CARE sovereignty defaults (Restricted access + Collectors see only their own submissions)."
-            },
-          style = MaterialTheme.typography.bodySmall,
-        )
-        if (readiness.excludeFromPlatformAggregates) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        Icon(Icons.Outlined.Shield, contentDescription = null, modifier = Modifier.size(22.dp))
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+          Text(
+            text = "CARE Principles & Indigenous / community data sovereignty",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+          )
           Text(
             text =
-              "Note: ${uiState.selectedOrganization?.name} is excluded from platform-wide aggregate totals.",
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
+              if (readiness.careSovereigntyApplied) {
+                "Restricted access, 'Only their own submissions' peer visibility, and FAO Free, Prior and Informed Consent (FPIC) collector terms are active to protect community and tenure data."
+              } else {
+                "Working with Indigenous Peoples, local communities, or sensitive land-tenure data? Apply CARE & FAO FPIC sovereignty defaults (Restricted access + Collectors see only their own submissions + FPIC consent terms)."
+              },
+            style = MaterialTheme.typography.bodySmall,
           )
+          if (readiness.excludeFromPlatformAggregates) {
+            Text(
+              text =
+                "Note: ${uiState.selectedOrganization?.name} is excluded from platform-wide aggregate totals.",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.SemiBold,
+            )
+          }
+        }
+        if (readiness.careSovereigntyApplied) {
+          Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              Icon(
+                Icons.Outlined.Check,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+              )
+              Text(
+                text = "✓ CARE defaults applied",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+              )
+            }
+          }
+        } else {
+          OutlinedButton(onClick = actions::applyCareSovereigntyDefaults) {
+            Text("Apply CARE defaults")
+          }
         }
       }
-      if (!readiness.careSovereigntyApplied) {
-        OutlinedButton(onClick = actions::applyCareSovereigntyDefaults) {
-          Text("Apply CARE defaults")
+
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        careCriteria.forEach { criterion ->
+          Surface(
+            shape = RoundedCornerShape(8.dp),
+            color =
+              if (criterion.isSatisfied) {
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+              } else {
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+              },
+            contentColor = MaterialTheme.colorScheme.onSurface,
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              Icon(
+                imageVector =
+                  if (criterion.isSatisfied) Icons.Filled.CheckCircle else Icons.Outlined.Info,
+                contentDescription = null,
+                tint =
+                  if (criterion.isSatisfied) MaterialTheme.colorScheme.primary
+                  else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp),
+              )
+              Column {
+                Text(
+                  text = "${criterion.code} · ${criterion.title}",
+                  style = MaterialTheme.typography.labelMedium,
+                  fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                  text = criterion.standard,
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              }
+            }
+          }
         }
       }
     }
@@ -2003,7 +2202,7 @@ private fun SharingStepContent(
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Column(modifier = Modifier.weight(1f)) {
-          SectionLabel("Data collector consent & governance terms")
+          WizardSectionTitle("Data collector consent & governance terms")
           Text(
             text =
               "Require data collectors to review and accept custom Free, Prior and Informed Consent (FPIC) or project terms before opening the survey.",

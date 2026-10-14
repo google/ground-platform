@@ -208,7 +208,7 @@ class SurveyEditorLifecycleTest {
     val f = Fixture()
     assertEquals(SurveyLifecycleState.PUBLISHED, f.ui.lifecycleState)
     assertFalse(f.ui.isDraft)
-    assertEquals("Publish changes", f.ui.saveActionLabel)
+    assertEquals("Republish", f.ui.saveActionLabel)
 
     // Switch to DRAFT mode while holding a working edit: working edit is preserved.
     f.viewModel.updateDetails { it.copy(title = "Draft title in progress") }
@@ -226,7 +226,7 @@ class SurveyEditorLifecycleTest {
     f.viewModel.setLifecycleState(SurveyLifecycleState.PUBLISHED)
     assertEquals(SurveyLifecycleState.PUBLISHED, f.ui.lifecycleState)
     assertFalse(f.ui.isDraft)
-    assertEquals("Publish changes", f.ui.saveActionLabel)
+    assertEquals("Republish", f.ui.saveActionLabel)
     assertEquals("Draft title in progress", f.ui.details.title)
     assertFalse(f.ui.hasUnpublishedChanges)
   }

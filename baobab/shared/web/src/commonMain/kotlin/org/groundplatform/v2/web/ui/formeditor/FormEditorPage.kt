@@ -72,6 +72,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.FormatColorReset
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Layers
@@ -79,18 +80,20 @@ import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Pentagon
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.TableChart
+import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -111,6 +114,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SelectableDates
@@ -119,7 +123,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -175,9 +182,11 @@ import kotlin.math.cos
 import kotlin.math.sin
 import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
+import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.editor.ChoiceColors
 import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.app.domain.model.editor.DateRule
+import org.groundplatform.v2.app.domain.model.editor.EditorChoice
 import org.groundplatform.v2.app.domain.model.editor.EditorChoiceImage
 import org.groundplatform.v2.app.domain.model.editor.EditorDataset
 import org.groundplatform.v2.app.domain.model.editor.EditorForm
@@ -310,6 +319,13 @@ fun FormEditorPage(
             FormPreviewTarget.MOBILE -> FlowCanvasPanel(uiState, actions, Modifier.fillMaxSize())
             FormPreviewTarget.WEB -> WebLayoutCanvasPanel(uiState, actions, Modifier.fillMaxSize())
           }
+          CanvasStatusOverlay(
+            uiState = uiState,
+            actions = actions,
+            modifier =
+              Modifier.align(Alignment.BottomStart)
+                .padding(start = 20.dp, bottom = 24.dp, end = 220.dp),
+          )
           FloatingAddQuestionButton(
             onAdd = actions::addQuestion,
             modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 24.dp),
@@ -419,132 +435,209 @@ private fun FormEditorToolbar(
     color = MaterialTheme.colorScheme.surfaceContainer,
     tonalElevation = 1.dp,
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Column(modifier = Modifier.widthIn(max = 320.dp)) {
-        Text(
-          text = uiState.form.title.ifBlank { "Untitled form" },
-          style = MaterialTheme.typography.titleMedium,
-          fontWeight = FontWeight.Bold,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-          text = "Design questions, display logic, and flows.",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-      }
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = actions::undo, enabled = uiState.canUndo) {
-          Icon(Icons.AutoMirrored.Outlined.Undo, contentDescription = "Undo")
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+      val isCompact = maxWidth < 960.dp
+      val hasLinkedDatasetButton =
+        uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset != null
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Column(modifier = Modifier.widthIn(max = if (isCompact) 200.dp else 300.dp)) {
+          Text(
+            text = uiState.form.title.ifBlank { "Untitled form" },
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+          Text(
+            text = "Design questions, display logic, and flows.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
         }
-        IconButton(onClick = actions::redo, enabled = uiState.canRedo) {
-          Icon(Icons.AutoMirrored.Outlined.Redo, contentDescription = "Redo")
-        }
-      }
-      FilledTonalButton(onClick = actions::selectFormSettings) {
-        Icon(Icons.Outlined.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(6.dp))
-        Text("Form settings")
-      }
-      Spacer(Modifier.weight(1f))
-      if (uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset != null) {
-        FilledTonalButton(
-          onClick = {
-            if (onOpenDataset != null) onOpenDataset(linkedDataset.id)
-            else actions.selectFormSettings()
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          IconButton(onClick = actions::undo, enabled = uiState.canUndo) {
+            Icon(Icons.AutoMirrored.Outlined.Undo, contentDescription = "Undo")
           }
-        ) {
-          Icon(Icons.Outlined.Link, contentDescription = null, modifier = Modifier.size(18.dp))
-          Spacer(Modifier.width(6.dp))
-          Text("Linked to ${linkedDataset.displayName}")
+          IconButton(onClick = actions::redo, enabled = uiState.canRedo) {
+            Icon(Icons.AutoMirrored.Outlined.Redo, contentDescription = "Redo")
+          }
         }
-      } else if (onCreateDataset != null) {
-        OutlinedButton(onClick = onCreateDataset) {
-          Icon(Icons.Outlined.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
-          Spacer(Modifier.width(6.dp))
-          Text(if (uiState.form.hasGeometry) "Create map layer" else "Create data table")
+        if (!isCompact) {
+          FilledTonalButton(onClick = actions::selectFormSettings) {
+            Icon(
+              Icons.Outlined.Settings,
+              contentDescription = null,
+              modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text("Form settings", softWrap = false)
+          }
         }
-      }
-      Button(onClick = actions::startPreview) {
-        Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(6.dp))
-        Text("Preview")
-      }
-      Box {
-        IconButton(onClick = { overflowExpanded = true }) {
-          Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
+        Spacer(Modifier.weight(1f))
+        if (uiState.supportedLanguages.size > 1) {
+          FormLanguageSelector(uiState, actions)
         }
-        DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
-          DropdownMenuItem(
-            text = { Text("Download XForms XML") },
-            leadingIcon = {
-              Icon(
-                Icons.Outlined.Description,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-              )
-            },
-            onClick = {
-              overflowExpanded = false
-              val baseName =
-                slugify(uiState.form.title.ifBlank { uiState.form.formId }, fallback = "form")
-              downloadTextFile(
-                fileName = "$baseName.xml",
-                mimeType = "application/xml",
-                content = uiState.xformsXml,
-              )
-            },
-          )
-          val unavailable = uiState.saveAsTemplateUnavailableReason
-          DropdownMenuItem(
-            text = {
-              Column {
-                Text("Save as template…")
-                if (unavailable != null) {
-                  Text(
-                    unavailable,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.widthIn(max = 260.dp),
-                  )
-                }
+        if (!isCompact) {
+          if (hasLinkedDatasetButton && linkedDataset != null) {
+            FilledTonalButton(
+              onClick = {
+                if (onOpenDataset != null) onOpenDataset(linkedDataset.id)
+                else actions.selectFormSettings()
               }
-            },
-            leadingIcon = {
+            ) {
+              Icon(Icons.Outlined.Link, contentDescription = null, modifier = Modifier.size(18.dp))
+              Spacer(Modifier.width(6.dp))
+              Text("Linked to ${linkedDataset.displayName}", softWrap = false)
+            }
+          } else if (onCreateDataset != null) {
+            OutlinedButton(onClick = onCreateDataset) {
               Icon(
-                Icons.Outlined.BookmarkAdd,
+                Icons.Outlined.Layers,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
               )
-            },
-            enabled = unavailable == null,
-            onClick = {
-              overflowExpanded = false
-              savingTemplate = true
-            },
-          )
-          if (onDelete != null) {
+              Spacer(Modifier.width(6.dp))
+              Text(
+                if (uiState.form.hasGeometry) "Create map layer" else "Create data table",
+                softWrap = false,
+              )
+            }
+          }
+        }
+        PreviewTargetToggle(uiState, actions)
+        Button(onClick = actions::startPreview) {
+          Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(6.dp))
+          Text("Preview", softWrap = false)
+        }
+        Box {
+          IconButton(onClick = { overflowExpanded = true }) {
+            Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
+          }
+          DropdownMenu(
+            expanded = overflowExpanded,
+            onDismissRequest = { overflowExpanded = false },
+          ) {
+            if (isCompact) {
+              DropdownMenuItem(
+                text = { Text("Form settings") },
+                leadingIcon = {
+                  Icon(
+                    Icons.Outlined.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                  )
+                },
+                onClick = {
+                  overflowExpanded = false
+                  actions.selectFormSettings()
+                },
+              )
+              if (hasLinkedDatasetButton && linkedDataset != null) {
+                DropdownMenuItem(
+                  text = { Text("Linked to ${linkedDataset.displayName}") },
+                  leadingIcon = {
+                    Icon(
+                      Icons.Outlined.Link,
+                      contentDescription = null,
+                      modifier = Modifier.size(18.dp),
+                    )
+                  },
+                  onClick = {
+                    overflowExpanded = false
+                    if (onOpenDataset != null) onOpenDataset(linkedDataset.id)
+                    else actions.selectFormSettings()
+                  },
+                )
+              } else if (onCreateDataset != null) {
+                DropdownMenuItem(
+                  text = {
+                    Text(if (uiState.form.hasGeometry) "Create map layer" else "Create data table")
+                  },
+                  leadingIcon = {
+                    Icon(
+                      Icons.Outlined.Layers,
+                      contentDescription = null,
+                      modifier = Modifier.size(18.dp),
+                    )
+                  },
+                  onClick = {
+                    overflowExpanded = false
+                    onCreateDataset()
+                  },
+                )
+              }
+            }
             DropdownMenuItem(
-              text = { Text("Delete form", color = MaterialTheme.colorScheme.error) },
+              text = { Text("Download XForms XML") },
               leadingIcon = {
                 Icon(
-                  Icons.Outlined.Delete,
+                  Icons.Outlined.Description,
                   contentDescription = null,
-                  tint = MaterialTheme.colorScheme.error,
                   modifier = Modifier.size(18.dp),
                 )
               },
               onClick = {
                 overflowExpanded = false
-                confirmingDeleteForm = true
+                val baseName =
+                  slugify(uiState.form.title.ifBlank { uiState.form.formId }, fallback = "form")
+                downloadTextFile(
+                  fileName = "$baseName.xml",
+                  mimeType = "application/xml",
+                  content = uiState.xformsXml,
+                )
               },
             )
+            val unavailable = uiState.saveAsTemplateUnavailableReason
+            DropdownMenuItem(
+              text = {
+                Column {
+                  Text("Save as template…")
+                  if (unavailable != null) {
+                    Text(
+                      unavailable,
+                      style = MaterialTheme.typography.bodySmall,
+                      modifier = Modifier.widthIn(max = 260.dp),
+                    )
+                  }
+                }
+              },
+              leadingIcon = {
+                Icon(
+                  Icons.Outlined.BookmarkAdd,
+                  contentDescription = null,
+                  modifier = Modifier.size(18.dp),
+                )
+              },
+              enabled = unavailable == null,
+              onClick = {
+                overflowExpanded = false
+                savingTemplate = true
+              },
+            )
+            if (onDelete != null) {
+              DropdownMenuItem(
+                text = { Text("Delete form", color = MaterialTheme.colorScheme.error) },
+                leadingIcon = {
+                  Icon(
+                    Icons.Outlined.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(18.dp),
+                  )
+                },
+                onClick = {
+                  overflowExpanded = false
+                  confirmingDeleteForm = true
+                },
+              )
+            }
           }
         }
       }
@@ -662,7 +755,7 @@ internal fun AddQuestionMenu(
 // Flow canvas
 // ---------------------------------------------------------------------------------------------
 
-/** Precomputed Dp geometry for every flow slot (Start, questions, End). */
+/** Precomputed Dp geometry for every flow slot (Start, questions, Ghost card, End). */
 private class FlowLayout(questionCount: Int, edges: List<FlowEdge>) {
   val slotCount = questionCount + 2
   val endSlot = questionCount + 1
@@ -684,12 +777,20 @@ private class FlowLayout(questionCount: Int, edges: List<FlowEdge>) {
       else -> CardHeight
     }
 
-  private val xs: List<Dp> = buildList {
+  val ghostX: Dp
+  private val xs: List<Dp>
+
+  init {
+    val positions = ArrayList<Dp>(slotCount)
     var x = CanvasPadding
-    for (slot in 0 until slotCount) {
-      add(x)
+    for (slot in 0..questionCount) {
+      positions.add(x)
       x += width(slot) + SlotGap
     }
+    ghostX = x
+    x += CardWidth + SlotGap
+    positions.add(x)
+    xs = positions
   }
 
   fun x(slot: Int): Dp = xs[slot]
@@ -706,9 +807,7 @@ private fun FlowCanvasPanel(
   actions: FormEditorActions,
   modifier: Modifier = Modifier,
 ) {
-  val form = uiState.form
   val edges = uiState.flowEdges
-  val issues = uiState.issues
   val horizontalScroll = rememberScrollState()
   ElevatedCard(
     modifier = modifier,
@@ -719,53 +818,6 @@ private fun FlowCanvasPanel(
       ),
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-          text = "${form.questions.size} screens • ${uiState.pathCount} potential paths",
-          style = MaterialTheme.typography.titleSmall,
-          fontWeight = FontWeight.Bold,
-          softWrap = false,
-        )
-        if (issues.isNotEmpty()) {
-          AssistChip(
-            onClick = {
-              val firstKey = issues.first().questionKey
-              if (firstKey != null) actions.select(firstKey) else actions.selectForm()
-            },
-            label = {
-              Text(
-                "${issues.size} ${if (issues.size == 1) "issue" else "issues"}",
-                softWrap = false,
-              )
-            },
-            leadingIcon = {
-              Icon(
-                Icons.Outlined.Warning,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-              )
-            },
-            colors =
-              AssistChipDefaults.assistChipColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                labelColor = MaterialTheme.colorScheme.onErrorContainer,
-                leadingIconContentColor = MaterialTheme.colorScheme.onErrorContainer,
-              ),
-            border = null,
-          )
-        }
-        Spacer(Modifier.weight(1f))
-        FlowLegend()
-        if (uiState.supportedLanguages.size > 1) {
-          FormLanguageSelector(uiState, actions)
-        }
-        PreviewTargetToggle(uiState, actions)
-      }
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
       PlatformDisabledBanner(uiState, actions)
       UnavailablePreviewArea(uiState, actions, Modifier.weight(1f).fillMaxWidth()) {
         FlowCanvas(uiState, actions, edges, horizontalScroll, Modifier.fillMaxSize())
@@ -774,6 +826,130 @@ private fun FlowCanvasPanel(
         scrollState = horizontalScroll,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
       )
+    }
+  }
+}
+
+/**
+ * Floating bottom-left status and legend pill overlaid on the Form editor canvas (Mobile and Web).
+ * Surfaces screen/question & path count, estimated duration & fatigue warning badge with tooltip,
+ * validation issue count, and the flow edge legend.
+ */
+@Composable
+private fun CanvasStatusOverlay(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  modifier: Modifier = Modifier,
+) {
+  val colors = MaterialTheme.colorScheme
+  val form = uiState.form
+  val issues = uiState.issues
+  Surface(
+    modifier = modifier,
+    shape = RoundedCornerShape(24.dp),
+    color = colors.surfaceContainerHigh.copy(alpha = 0.94f),
+    contentColor = colors.onSurface,
+    tonalElevation = 3.dp,
+    shadowElevation = 4.dp,
+    border = BorderStroke(1.dp, colors.outlineVariant),
+  ) {
+    Row(
+      modifier =
+        Modifier.horizontalScroll(rememberScrollState())
+          .padding(horizontal = 14.dp, vertical = 8.dp),
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      val summaryText =
+        when (uiState.previewTarget) {
+          FormPreviewTarget.MOBILE ->
+            "${form.questions.size} screens • ${uiState.pathCount} potential paths"
+          FormPreviewTarget.WEB -> "${form.questions.size} questions • Web layout"
+        }
+      Text(
+        text = summaryText,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Bold,
+        softWrap = false,
+      )
+      DurationFatigueBadge(uiState = uiState)
+      if (issues.isNotEmpty()) {
+        Surface(
+          onClick = {
+            val firstKey = issues.first().questionKey
+            if (firstKey != null) actions.select(firstKey) else actions.selectForm()
+          },
+          shape = RoundedCornerShape(50),
+          color = colors.errorContainer,
+          contentColor = colors.onErrorContainer,
+          modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+        ) {
+          Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Icon(
+              Icons.Outlined.Warning,
+              contentDescription = null,
+              modifier = Modifier.size(14.dp),
+            )
+            Text(
+              text = "${issues.size} ${if (issues.size == 1) "issue" else "issues"}",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.SemiBold,
+              softWrap = false,
+            )
+          }
+        }
+      }
+      FlowLegend()
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DurationFatigueBadge(uiState: FormEditorUiState) {
+  val colors = MaterialTheme.colorScheme
+  val minutes = uiState.estimatedCompletionMinutes
+  val longestCount = uiState.longestPathQuestionCount
+  val isFatigue = uiState.isFatigueWarning
+  val questionNoun = if (longestCount == 1) "question" else "questions"
+  val tooltipText = buildString {
+    append("Estimated at ~2 min per question along the longest path ($longestCount $questionNoun).")
+    if (isFatigue) {
+      append(" Surveys over 10 questions (~20 min) may cause respondent fatigue.")
+    }
+  }
+  TooltipBox(
+    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+    tooltip = { PlainTooltip { Text(tooltipText) } },
+    state = rememberTooltipState(),
+  ) {
+    Surface(
+      shape = RoundedCornerShape(50),
+      color = if (isFatigue) colors.tertiaryContainer else colors.surfaceContainerHighest,
+      contentColor = if (isFatigue) colors.onTertiaryContainer else colors.onSurfaceVariant,
+      modifier = Modifier.semantics { contentDescription = tooltipText },
+    ) {
+      Row(
+        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Icon(
+          imageVector = if (isFatigue) Icons.Outlined.Warning else Icons.Outlined.Schedule,
+          contentDescription = null,
+          modifier = Modifier.size(14.dp),
+        )
+        Text(
+          text = if (isFatigue) "~$minutes min • Long survey" else "~$minutes min",
+          style = MaterialTheme.typography.labelSmall,
+          fontWeight = if (isFatigue) FontWeight.SemiBold else FontWeight.Medium,
+          softWrap = false,
+        )
+      }
     }
   }
 }
@@ -1086,18 +1262,21 @@ private fun FlowCanvas(
                 ),
           )
 
-          // Insertion affordance between question screens (hoverable),
-          // or permanent at the very end of questions (after last question)
-          val isLastQuestion = index == form.questions.lastIndex
+          // Hover-only insertion affordance between question screens
           AddQuestionAffordance(
             centerX = layout.x(slot) + layout.width(slot) + SlotGap / 2,
             centerY = layout.midY,
             atIndex = index + 1,
             onAdd = actions::addQuestion,
-            alwaysVisible = isLastQuestion,
+            alwaysVisible = false,
           )
         }
       }
+      GhostQuestionCard(
+        atIndex = form.questions.size,
+        onAdd = actions::addQuestion,
+        modifier = Modifier.offset(layout.ghostX, layout.cardTop),
+      )
       TerminalNode(
         text = "Review & submit",
         isSelected = uiState.isFormSelected,
@@ -1199,8 +1378,16 @@ private fun DrawScope.drawFlowEdge(
   if (edge.span == 1) {
     val start = Offset((layout.x(edge.from) + layout.width(edge.from)).toPx(), layout.midY.toPx())
     val end = Offset((layout.x(edge.to) - 2.dp).toPx(), layout.midY.toPx())
-    drawLine(color, start, end, strokeWidth = strokeWidth, pathEffect = dash)
-    drawArrowHead(tip = end, from = start, color = color)
+    if (edge.to == layout.endSlot) {
+      val ghostLeft = Offset((layout.ghostX - 2.dp).toPx(), layout.midY.toPx())
+      val ghostRight = Offset((layout.ghostX + CardWidth + 2.dp).toPx(), layout.midY.toPx())
+      drawLine(color, start, ghostLeft, strokeWidth = strokeWidth, pathEffect = dash)
+      drawLine(color, ghostRight, end, strokeWidth = strokeWidth, pathEffect = dash)
+      drawArrowHead(tip = end, from = ghostRight, color = color)
+    } else {
+      drawLine(color, start, end, strokeWidth = strokeWidth, pathEffect = dash)
+      drawArrowHead(tip = end, from = start, color = color)
+    }
   } else {
     val sx = (layout.x(edge.from) + layout.width(edge.from) - ArcInset).toPx()
     val sy = layout.top(edge.from).toPx()
@@ -1324,6 +1511,109 @@ private fun TerminalNode(
   }
 }
 
+/**
+ * Dashed "ghost" screen card at the end of the flow (before Review & submit) that lets authors
+ * append a new question screen directly on the canvas.
+ */
+@Composable
+internal fun GhostQuestionCard(
+  atIndex: Int,
+  onAdd: (EditorQuestionType, Int?) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  var isHovered by remember { mutableStateOf(false) }
+  var menuExpanded by remember { mutableStateOf(false) }
+  val colors = MaterialTheme.colorScheme
+  val highlighted = isHovered || menuExpanded
+  val borderColor = if (highlighted) colors.primary else colors.outlineVariant
+  val containerColor =
+    if (highlighted) colors.secondaryContainer.copy(alpha = 0.25f)
+    else colors.surfaceContainerLow.copy(alpha = 0.7f)
+
+  Box(
+    modifier =
+      modifier
+        .width(CardWidth)
+        .height(CardHeight)
+        .clip(MaterialTheme.shapes.medium)
+        .background(containerColor)
+        .pointerHoverIcon(PointerIcon.Hand)
+        .pointerInput(Unit) {
+          awaitPointerEventScope {
+            while (true) {
+              val event = awaitPointerEvent()
+              when (event.type) {
+                PointerEventType.Enter -> isHovered = true
+                PointerEventType.Exit -> isHovered = false
+              }
+            }
+          }
+        }
+        .clickable { menuExpanded = true }
+        .semantics { contentDescription = "Add a question at end of flow" },
+    contentAlignment = Alignment.Center,
+  ) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+      val strokePx = (if (highlighted) 2.dp else 1.5.dp).toPx()
+      val cornerPx = 12.dp.toPx()
+      drawRoundRect(
+        color = borderColor,
+        topLeft = Offset(strokePx / 2f, strokePx / 2f),
+        size =
+          androidx.compose.ui.geometry.Size(
+            size.width - strokePx,
+            size.height - strokePx,
+          ),
+        cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerPx, cornerPx),
+        style =
+          Stroke(
+            width = strokePx,
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f)),
+          ),
+      )
+    }
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.spacedBy(10.dp),
+      modifier = Modifier.padding(16.dp),
+    ) {
+      Surface(
+        shape = CircleShape,
+        color = if (highlighted) colors.primary else colors.secondaryContainer,
+        contentColor = if (highlighted) colors.onPrimary else colors.onSecondaryContainer,
+        modifier = Modifier.size(44.dp),
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          Icon(
+            Icons.Outlined.Add,
+            contentDescription = null,
+            modifier = Modifier.size(22.dp),
+          )
+        }
+      }
+      Text(
+        text = "Add a question",
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.SemiBold,
+        color = if (highlighted) colors.primary else colors.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+      )
+      Text(
+        text = "Click to append a screen before Review & submit",
+        style = MaterialTheme.typography.bodySmall,
+        color = colors.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+      )
+    }
+    AddQuestionMenu(
+      expanded = menuExpanded,
+      onDismiss = { menuExpanded = false },
+      onAdd = onAdd,
+      atIndex = atIndex,
+    )
+  }
+}
+
 @Composable
 private fun ScreenPreviewCard(
   index: Int,
@@ -1340,28 +1630,49 @@ private fun ScreenPreviewCard(
   modifier: Modifier = Modifier,
 ) {
   val colors = MaterialTheme.colorScheme
+  var isHovered by remember { mutableStateOf(false) }
+  val isHoverHighlighted = isHovered && !isSelected && !isDragged
   // Subtle selection using GroundTheme's muted secondary roles (the same treatment as selected
   // list rows elsewhere in the app) rather than the bright primaryContainer accent.
-  // Hovering the card body shows a pointer cursor (click to select), while hovering the drag
-  // handle icon shows an open-hand grab cursor (drag to reorder); active dragging switches the
-  // whole canvas to a closed-hand grabbing cursor.
+  // Hovering the card body highlights the entire card and shows a pointer cursor (click to select),
+  // while hovering the drag handle icon shows an open-hand grab cursor (drag to reorder); active
+  // dragging switches the whole canvas to a closed-hand grabbing cursor.
   OutlinedCard(
     onClick = onClick,
-    modifier = modifier.width(CardWidth).height(CardHeight).pointerHoverIcon(PointerIcon.Hand),
+    modifier =
+      modifier.width(CardWidth).height(CardHeight).pointerHoverIcon(PointerIcon.Hand).pointerInput(
+        Unit
+      ) {
+        awaitPointerEventScope {
+          while (true) {
+            val event = awaitPointerEvent()
+            when (event.type) {
+              PointerEventType.Enter -> isHovered = true
+              PointerEventType.Exit -> isHovered = false
+            }
+          }
+        }
+      },
     shape = MaterialTheme.shapes.medium,
     colors =
       CardDefaults.outlinedCardColors(
-        containerColor = if (isSelected) colors.secondaryContainer else colors.surface,
+        containerColor =
+          when {
+            isSelected -> colors.secondaryContainer
+            isHoverHighlighted -> colors.secondaryContainer.copy(alpha = 0.28f)
+            else -> colors.surface
+          },
         contentColor = if (isSelected) colors.onSecondaryContainer else colors.onSurface,
       ),
     border =
       BorderStroke(
-        width = if (isSelected || isDragged) 2.dp else 1.dp,
+        width = if (isSelected || isDragged || isHoverHighlighted) 2.dp else 1.dp,
         color =
           when {
             isDragged -> colors.outline
             hasIssues -> colors.error
             isSelected -> colors.secondary
+            isHoverHighlighted -> colors.primary.copy(alpha = 0.65f)
             else -> colors.outlineVariant
           },
       ),
@@ -1916,6 +2227,7 @@ private fun QuestionProperties(
       options = EditorQuestionType.entries,
       optionText = { it.label },
       optionIcon = { questionTypeIcon(it) },
+      selectedIcon = questionTypeIcon(question.type),
       onSelect = { actions.changeType(key, it) },
     )
 
@@ -2010,6 +2322,33 @@ private fun DecimalPlacesSelector(actions: FormEditorActions, question: EditorQu
   )
 }
 
+private fun geometryCaptureLabel(type: EditorQuestionType, capture: GeometryCapture): String =
+  when (capture) {
+    GeometryCapture.GPS_ONLY ->
+      when (type) {
+        EditorQuestionType.POLYGON -> "Walk boundary (GPS every 5s)"
+        EditorQuestionType.LINE -> "Walk path (GPS every 5s)"
+        else -> GeometryCapture.GPS_ONLY.label
+      }
+    GeometryCapture.GPS_OR_MAP -> GeometryCapture.GPS_OR_MAP.label
+  }
+
+private fun geometryCaptureDescription(
+  type: EditorQuestionType,
+  capture: GeometryCapture,
+): String =
+  when (capture) {
+    GeometryCapture.GPS_ONLY ->
+      when (type) {
+        EditorQuestionType.POLYGON ->
+          "Collectors walk the perimeter on site; GPS vertices are recorded every 5s."
+        EditorQuestionType.LINE ->
+          "Collectors walk the path on site; GPS vertices are recorded every 5s."
+        else -> GeometryCapture.GPS_ONLY.description
+      }
+    GeometryCapture.GPS_OR_MAP -> GeometryCapture.GPS_OR_MAP.description
+  }
+
 /**
  * **Capture** setting of a geometry question: GPS only, or GPS or draw on the map. Shows the chosen
  * mode's description and, when GPS only would leave the Form unanswerable in the web dashboard, the
@@ -2025,13 +2364,13 @@ private fun GeometryCaptureSelector(
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     DropdownSelector(
       label = "Capture",
-      selectedText = question.capture.label,
+      selectedText = geometryCaptureLabel(question.type, question.capture),
       options = GeometryCapture.entries,
-      optionText = { it.label },
+      optionText = { geometryCaptureLabel(question.type, it) },
       onSelect = { actions.updateCapture(question.key, it) },
     )
     Text(
-      text = question.capture.description,
+      text = geometryCaptureDescription(question.type, question.capture),
       style = MaterialTheme.typography.bodySmall,
       color = colors.onSurfaceVariant,
       modifier = Modifier.padding(horizontal = 16.dp),
@@ -2346,6 +2685,20 @@ private enum class ChoiceVisualOption(val label: String) {
   IMAGE("Images"),
 }
 
+private fun choiceSourceIcon(source: ChoiceSource): ImageVector =
+  when (source) {
+    ChoiceSource.MANUAL -> Icons.AutoMirrored.Outlined.List
+    ChoiceSource.MAP_LAYER -> Icons.Outlined.Layers
+    ChoiceSource.DATA_TABLE -> Icons.Outlined.TableChart
+  }
+
+private fun choiceVisualIcon(visual: ChoiceVisualOption): ImageVector =
+  when (visual) {
+    ChoiceVisualOption.NONE -> Icons.Outlined.TextFields
+    ChoiceVisualOption.COLOR -> Icons.Outlined.Palette
+    ChoiceVisualOption.IMAGE -> Icons.Outlined.Image
+  }
+
 @Composable
 private fun ChoicesEditor(
   uiState: FormEditorUiState,
@@ -2361,17 +2714,15 @@ private fun ChoicesEditor(
   var imageError by remember { mutableStateOf<String?>(null) }
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     SectionLabel("Choices")
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-      ChoiceSource.entries.forEachIndexed { index, source ->
-        SegmentedButton(
-          selected = effectiveSource == source,
-          onClick = { actions.setChoiceSource(key, source) },
-          shape =
-            SegmentedButtonDefaults.itemShape(index = index, count = ChoiceSource.entries.size),
-          label = { Text(source.label) },
-        )
-      }
-    }
+    DropdownSelector(
+      label = "Choices",
+      selectedText = effectiveSource.label,
+      options = ChoiceSource.entries,
+      optionText = { it.label },
+      optionIcon = ::choiceSourceIcon,
+      selectedIcon = choiceSourceIcon(effectiveSource),
+      onSelect = { actions.setChoiceSource(key, it) },
+    )
     when (effectiveSource) {
       ChoiceSource.MANUAL -> {
         val hasImages = question.choices.any { it.image != null }
@@ -2385,58 +2736,41 @@ private fun ChoicesEditor(
               else -> ChoiceVisualOption.NONE
             }
 
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-            text = "Visual style",
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.onSurfaceVariant,
-          )
-          SingleChoiceSegmentedButtonRow(modifier = Modifier.height(32.dp)) {
-            ChoiceVisualOption.entries.forEachIndexed { index, visual ->
-              SegmentedButton(
-                selected = currentVisual == visual,
-                onClick = {
-                  visualOverride = visual
-                  when (visual) {
-                    ChoiceVisualOption.NONE -> {
-                      actions.updateQuestion(key) { q ->
-                        q.copy(choices = q.choices.map { it.copy(colorHex = null, image = null) })
+        DropdownSelector(
+          label = "Visual style",
+          selectedText = currentVisual.label,
+          options = ChoiceVisualOption.entries,
+          optionText = { it.label },
+          optionIcon = ::choiceVisualIcon,
+          selectedIcon = choiceVisualIcon(currentVisual),
+          onSelect = { visual ->
+            visualOverride = visual
+            when (visual) {
+              ChoiceVisualOption.NONE -> {
+                actions.updateQuestion(key) { q ->
+                  q.copy(choices = q.choices.map { it.copy(colorHex = null, image = null) })
+                }
+              }
+              ChoiceVisualOption.COLOR -> {
+                actions.updateQuestion(key) { q ->
+                  q.copy(
+                    choices =
+                      q.choices.mapIndexed { idx, c ->
+                        val color =
+                          c.colorHex ?: ChoiceColors.palette[idx % ChoiceColors.palette.size].second
+                        c.copy(colorHex = color, image = null)
                       }
-                    }
-                    ChoiceVisualOption.COLOR -> {
-                      actions.updateQuestion(key) { q ->
-                        q.copy(
-                          choices =
-                            q.choices.mapIndexed { idx, c ->
-                              val color =
-                                c.colorHex
-                                  ?: ChoiceColors.palette[idx % ChoiceColors.palette.size].second
-                              c.copy(colorHex = color, image = null)
-                            }
-                        )
-                      }
-                    }
-                    ChoiceVisualOption.IMAGE -> {
-                      actions.updateQuestion(key) { q ->
-                        q.copy(choices = q.choices.map { it.copy(colorHex = null) })
-                      }
-                    }
-                  }
-                },
-                shape =
-                  SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = ChoiceVisualOption.entries.size,
-                  ),
-                label = { Text(visual.label, style = MaterialTheme.typography.labelSmall) },
-              )
+                  )
+                }
+              }
+              ChoiceVisualOption.IMAGE -> {
+                actions.updateQuestion(key) { q ->
+                  q.copy(choices = q.choices.map { it.copy(colorHex = null) })
+                }
+              }
             }
-          }
-        }
+          },
+        )
 
         // A linked question maps each choice to a value of the concept's code list.
         val concept = uiState.conceptOf(question)?.takeIf { it.codeList.isNotEmpty() }
@@ -2446,38 +2780,63 @@ private fun ChoicesEditor(
         val activeLangName = languageDisplayName(activeLang)
         question.choices.forEachIndexed { i, choice ->
           Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
           ) {
-            if (currentVisual == ChoiceVisualOption.COLOR) {
-              ChoiceColorButton(
-                colorHex = choice.colorHex,
-                onSelect = { actions.setChoiceColor(key, i, it) },
-              )
-            } else if (currentVisual == ChoiceVisualOption.IMAGE) {
-              ChoiceImageButton(
-                image = choice.image,
-                onPicked = { image ->
-                  imageError =
-                    if (actions.setChoiceImage(key, i, image)) null
-                    else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
-                },
-                onRemove = { actions.setChoiceImage(key, i, null) },
-                onError = { imageError = it },
-              )
+            Box(modifier = Modifier.padding(top = 12.dp)) {
+              when (currentVisual) {
+                ChoiceVisualOption.NONE ->
+                  ChoiceTextStyleIndicator(
+                    colorHex = choice.colorHex,
+                    onSelectColor = { hex ->
+                      visualOverride = ChoiceVisualOption.COLOR
+                      actions.setChoiceColor(key, i, hex)
+                    },
+                  )
+                ChoiceVisualOption.COLOR ->
+                  ChoiceColorButton(
+                    colorHex = choice.colorHex,
+                    onSelect = { actions.setChoiceColor(key, i, it) },
+                  )
+                ChoiceVisualOption.IMAGE ->
+                  ChoiceImageButton(
+                    image = choice.image,
+                    onPicked = { image ->
+                      imageError =
+                        if (actions.setChoiceImage(key, i, image)) null
+                        else "Choose an image file under ${EditorChoiceImage.MAX_BYTES / 1024} KB."
+                    },
+                    onRemove = { actions.setChoiceImage(key, i, null) },
+                    onError = { imageError = it },
+                  )
+              }
             }
-            OutlinedTextField(
-              value = choice.labelIn(activeLang, defaultLang),
-              onValueChange = { actions.updateChoiceLabel(key, i, it) },
-              label = { Text(if (isDefaultLang) "Label" else "Label ($activeLangName)") },
-              placeholder =
-                if (!isDefaultLang && choice.label.isNotBlank()) ({ Text(choice.label) }) else null,
-              singleLine = true,
+            Column(
               modifier = Modifier.weight(1f),
-            )
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              OutlinedTextField(
+                value = choice.labelIn(activeLang, defaultLang),
+                onValueChange = { actions.updateChoiceLabel(key, i, it) },
+                label = { Text(if (isDefaultLang) "Label" else "Label ($activeLangName)") },
+                placeholder =
+                  if (!isDefaultLang && choice.label.isNotBlank()) ({ Text(choice.label) })
+                  else null,
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+              )
+              if (concept != null) {
+                ChoiceConceptLinkChip(
+                  concept = concept,
+                  choice = choice,
+                  language = uiState.activeLanguage,
+                  onSelect = { actions.setChoiceCode(key, i, it) },
+                )
+              }
+            }
             IconButton(
               onClick = { actions.removeChoice(key, i) },
-              modifier = Modifier.size(32.dp),
+              modifier = Modifier.padding(top = 12.dp).size(32.dp),
             ) {
               Icon(
                 Icons.Outlined.Close,
@@ -2485,15 +2844,6 @@ private fun ChoicesEditor(
                 modifier = Modifier.size(18.dp),
               )
             }
-          }
-          if (concept != null) {
-            ChoiceCodeSelector(
-              concept = concept,
-              choice = choice,
-              language = uiState.activeLanguage,
-              onSelect = { actions.setChoiceCode(key, i, it) },
-              modifier = Modifier.padding(start = 72.dp, end = 36.dp),
-            )
           }
         }
         imageError?.let {
@@ -2704,6 +3054,173 @@ private fun AllowAddEntityControl(
   }
 }
 
+/**
+ * 32.dp leading indicator box for a choice in "Text only" visual style, showing a text icon and
+ * also supporting quick color swatch selection when clicked.
+ */
+@Composable
+private fun ChoiceTextStyleIndicator(
+  colorHex: String?,
+  onSelectColor: (String?) -> Unit,
+) {
+  var expanded by remember { mutableStateOf(false) }
+  val colors = MaterialTheme.colorScheme
+  Box {
+    Surface(
+      onClick = { expanded = true },
+      shape = MaterialTheme.shapes.extraSmall,
+      color = colors.surfaceContainerHigh,
+      border = BorderStroke(1.dp, colors.outlineVariant),
+      modifier =
+        Modifier.size(32.dp).semantics {
+          contentDescription =
+            "Choice color: ${ChoiceColors.nameOf(colorHex) ?: colorHex ?: "none"}"
+        },
+    ) {
+      Box(contentAlignment = Alignment.Center) {
+        Icon(
+          Icons.Outlined.TextFields,
+          contentDescription = null,
+          tint = colors.onSurfaceVariant,
+          modifier = Modifier.size(16.dp),
+        )
+      }
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      Text(
+        text = "Choice color",
+        style = MaterialTheme.typography.labelMedium,
+        color = colors.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+      )
+      ChoiceColors.palette.chunked(5).forEach { row ->
+        Row(
+          modifier = Modifier.padding(horizontal = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+          row.forEach { (name, hex) ->
+            IconButton(
+              onClick = {
+                onSelectColor(hex)
+                expanded = false
+              },
+              modifier = Modifier.size(36.dp),
+            ) {
+              ColorDot(
+                colorHex = hex,
+                contentDescription = name,
+                isSelected = hex.equals(colorHex, ignoreCase = true),
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Compact linked-concept chip rendered directly underneath each choice's label field when the
+ * parent select question is linked to a standard dictionary concept with a code list.
+ */
+@Composable
+private fun ChoiceConceptLinkChip(
+  concept: LibraryConcept,
+  choice: EditorChoice,
+  language: String,
+  onSelect: (String?) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  var expanded by remember { mutableStateOf(false) }
+  val colors = MaterialTheme.colorScheme
+  val matched = concept.codeList.firstOrNull { it.code == choice.code }
+  val isLinked = choice.code != null
+  val chipText =
+    when {
+      matched != null -> "${matched.label.get(language)} (${matched.code})"
+      choice.code != null -> "Code: ${choice.code}"
+      else -> "Link to standard choice…"
+    }
+
+  Box(modifier = modifier) {
+    Surface(
+      onClick = { expanded = true },
+      shape = RoundedCornerShape(8.dp),
+      color =
+        if (isLinked) colors.secondaryContainer.copy(alpha = 0.65f) else colors.surfaceContainerLow,
+      contentColor = if (isLinked) colors.onSecondaryContainer else colors.onSurfaceVariant,
+      border =
+        BorderStroke(
+          1.dp,
+          if (isLinked) colors.secondary.copy(alpha = 0.4f) else colors.outlineVariant,
+        ),
+      modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+    ) {
+      Row(
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Icon(
+          Icons.Outlined.Link,
+          contentDescription = null,
+          tint = if (isLinked) colors.primary else colors.onSurfaceVariant,
+          modifier = Modifier.size(14.dp),
+        )
+        Text(
+          text = chipText,
+          style = MaterialTheme.typography.labelSmall,
+          fontWeight = if (isLinked) FontWeight.Medium else FontWeight.Normal,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+        Icon(
+          Icons.Outlined.ExpandMore,
+          contentDescription = null,
+          modifier = Modifier.size(14.dp),
+        )
+      }
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      DropdownMenuItem(
+        text = { Text("Not linked") },
+        onClick = {
+          onSelect(null)
+          expanded = false
+        },
+      )
+      concept.codeList.forEach { item ->
+        val itemLabel = "${item.label.get(language)} (${item.code})"
+        val isSelected = item.code == choice.code
+        DropdownMenuItem(
+          text = { Text(itemLabel) },
+          leadingIcon = {
+            if (isSelected) {
+              Icon(
+                Icons.Outlined.Check,
+                contentDescription = null,
+                tint = colors.primary,
+                modifier = Modifier.size(16.dp),
+              )
+            } else {
+              Icon(
+                Icons.Outlined.Link,
+                contentDescription = null,
+                tint = colors.onSurfaceVariant,
+                modifier = Modifier.size(16.dp),
+              )
+            }
+          },
+          onClick = {
+            onSelect(item.code)
+            expanded = false
+          },
+        )
+      }
+    }
+  }
+}
+
 /** Color dot for a choice; opens a compact palette with a "No color" option. */
 @Composable
 private fun ChoiceColorButton(colorHex: String?, onSelect: (String?) -> Unit) {
@@ -2909,29 +3426,109 @@ private fun DisplayLogicEditor(
   val key = question.key
   val sources = form.eligibleRelevanceSources(key)
   val relevance = question.relevance
+  var showFirstQuestionNotice by
+    remember(key, sources.size, relevance != null) {
+      mutableStateOf(false)
+    }
+  val colors = MaterialTheme.colorScheme
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
     SectionLabel("Display logic")
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
       SegmentedButton(
-        selected = relevance == null,
-        onClick = { actions.disableRelevance(key) },
+        selected = relevance == null && !showFirstQuestionNotice,
+        onClick = {
+          showFirstQuestionNotice = false
+          actions.disableRelevance(key)
+        },
         shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
         label = { Text("Always show") },
       )
       SegmentedButton(
-        selected = relevance != null,
-        onClick = { if (relevance == null) actions.enableRelevance(key) },
-        enabled = sources.isNotEmpty() || relevance != null,
+        selected = relevance != null || showFirstQuestionNotice,
+        onClick = {
+          if (sources.isNotEmpty()) {
+            showFirstQuestionNotice = false
+            if (relevance == null) actions.enableRelevance(key)
+          } else if (relevance == null) {
+            showFirstQuestionNotice = true
+          }
+        },
         shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
         label = { Text("Show only if…") },
       )
     }
     if (sources.isEmpty() && relevance == null) {
-      Text(
-        text = "Display logic can depend on earlier questions. Move this question later to use it.",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
+      Surface(
+        color =
+          if (showFirstQuestionNotice) colors.secondaryContainer else colors.surfaceContainerHigh,
+        contentColor =
+          if (showFirstQuestionNotice) colors.onSecondaryContainer else colors.onSurfaceVariant,
+        shape = MaterialTheme.shapes.small,
+        border =
+          BorderStroke(
+            1.dp,
+            if (showFirstQuestionNotice) colors.secondary else colors.outlineVariant,
+          ),
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Column(
+          modifier = Modifier.padding(12.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+          ) {
+            Icon(
+              Icons.Outlined.Info,
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+            )
+            Text(
+              text = "First screen in the form",
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = FontWeight.Bold,
+            )
+          }
+          Text(
+            text =
+              "Display logic can depend on earlier questions. Move this question later or select a later question to configure conditional visibility.",
+            style = MaterialTheme.typography.bodySmall,
+          )
+          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (form.questions.size > 1) {
+              TextButton(
+                onClick = {
+                  showFirstQuestionNotice = false
+                  actions.select(form.questions[1].key)
+                },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+              ) {
+                Text("Select Question 2 →")
+              }
+              TextButton(
+                onClick = {
+                  showFirstQuestionNotice = false
+                  actions.moveQuestion(key, 1)
+                },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+              ) {
+                Text("Move question down")
+              }
+            } else {
+              TextButton(
+                onClick = {
+                  showFirstQuestionNotice = false
+                  actions.addQuestion(EditorQuestionType.TEXT, 1)
+                },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+              ) {
+                Text("Add Question 2")
+              }
+            }
+          }
+        }
+      }
     }
     if (relevance != null) {
       val source = form.find(relevance.sourceQuestionKey)
@@ -3020,6 +3617,7 @@ internal fun <T> DropdownSelector(
   optionIcon: ((T) -> ImageVector)? = null,
   enabled: Boolean = true,
   supportingText: String? = null,
+  selectedIcon: ImageVector? = null,
 ) {
   var expanded by remember { mutableStateOf(false) }
   // Standard M3 exposed dropdown: a read-only OutlinedTextField, so the label and value use the
@@ -3037,6 +3635,17 @@ internal fun <T> DropdownSelector(
         enabled = enabled,
         singleLine = true,
         label = { Text(label) },
+        leadingIcon =
+          selectedIcon?.let { icon ->
+            {
+              Icon(
+                icon,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.primary,
+              )
+            }
+          },
         supportingText = supportingText?.let { text -> { Text(text) } },
         trailingIcon = {
           ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && enabled)

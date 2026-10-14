@@ -316,4 +316,24 @@ class SurveyEditorViewModelTest {
     assertEquals(before, mutation.rewind(after))
     assertEquals(after, mutation.replay(before))
   }
+
+  @Test
+  fun saveActionLabel_isSaveDraftForDraftSurveys_andRepublishForPublishedSurveys() {
+    val f = Fixture()
+    assertEquals("Republish", f.uiState.saveActionLabel)
+    assertEquals(
+      "Save draft",
+      f.uiState
+        .copy(lifecycleState = org.groundplatform.v2.app.domain.model.SurveyLifecycleState.DRAFT)
+        .saveActionLabel,
+    )
+    assertEquals(
+      "Republish",
+      f.uiState
+        .copy(
+          lifecycleState = org.groundplatform.v2.app.domain.model.SurveyLifecycleState.PUBLISHED
+        )
+        .saveActionLabel,
+    )
+  }
 }

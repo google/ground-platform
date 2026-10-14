@@ -20,6 +20,7 @@ import org.groundplatform.v2.app.domain.model.LibraryStatus
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.app.domain.repository.LibraryRepository
 
 /**
@@ -159,13 +160,39 @@ class ManageLibraryUseCase(private val libraryRepository: LibraryRepository) {
   }
 
   /**
-   * Adds [template] (a new ID from [newTemplateId]) to its organization's library. Returns the
-   * stored library, or `null` if it couldn't be saved.
+   * Adds [template] (a new ID from [newTemplateId]) or updates an existing template with the same
+   * ID in its organization's library. Returns the stored library, or `null` if it couldn't be
+   * saved.
    */
   suspend fun saveTemplate(template: FormTemplate): OrganizationLibrary? =
     libraryRepository.updateLibrary(template.organizationId) { library ->
-      if (library.formTemplate(template.id) != null) library
-      else library.copy(formTemplates = library.formTemplates + template)
+      val existing = library.formTemplate(template.id)
+      if (existing == null) {
+        library.copy(formTemplates = library.formTemplates + template)
+      } else {
+        library.copy(
+          formTemplates = library.formTemplates.map { if (it.id == template.id) template else it }
+        )
+      }
+    }
+
+  /** Replaces the questions in [templateId]'s form within [organizationId]'s library. */
+  suspend fun updateTemplateQuestions(
+    organizationId: String,
+    templateId: String,
+    questions: List<EditorQuestion>,
+  ): OrganizationLibrary? =
+    libraryRepository.updateLibrary(organizationId) { library ->
+      library.copy(
+        formTemplates =
+          library.formTemplates.map { template ->
+            if (template.id == templateId) {
+              template.copy(form = template.form.copy(questions = questions))
+            } else {
+              template
+            }
+          }
+      )
     }
 
   /** Renames the template [templateId] and replaces its English description. */

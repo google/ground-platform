@@ -18,11 +18,13 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -100,6 +103,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -153,6 +158,7 @@ import org.groundplatform.v2.map.MapLayer
 import org.groundplatform.v2.map.StyleValue
 import org.groundplatform.v2.web.domain.model.editor.SurveyWizardRules
 import org.groundplatform.v2.web.ui.WebAppState
+import org.groundplatform.v2.web.ui.WebPage
 import org.groundplatform.v2.web.ui.common.ProgramChips
 import org.groundplatform.v2.web.ui.common.PurposePackGrid
 import org.groundplatform.v2.web.ui.common.SurveyOutcomeCard
@@ -187,11 +193,15 @@ fun SurveyEditorPage(
     actions = state.surveyEditor,
     isDarkTheme = isDarkTheme,
     modifier = modifier,
-    header = { navigationIcon, context, headerActions ->
+    header = { _, context, headerActions ->
       WebAppHeader(
         state = state,
-        onSignOut = null,
-        navigationIcon = navigationIcon,
+        onSignOut = { state.signOut() },
+        onLogoClick = {
+          state.surveyEditor.discardChanges()
+          state.selectPage(WebPage.WEB_SURVEYS)
+        },
+        navigationIcon = null,
         context = context,
         actions = {
           headerActions()
@@ -247,7 +257,10 @@ fun SurveyEditorPage(
         onWidthChange = actions::updateSidePanelWidth,
         modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
       )
-      Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+      Surface(
+        modifier = Modifier.weight(1f).fillMaxHeight(),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+      ) {
         when (val section = uiState.section) {
           SurveyEditorSection.Details -> SurveyDetailsPane(uiState, actions)
           SurveyEditorSection.Sharing -> SharingPane(uiState, actions)
@@ -316,15 +329,7 @@ private fun SurveyEditorTopBar(
   var isConfirmingDiscard by remember { mutableStateOf(false) }
 
   header(
-    {
-      IconButton(onClick = { if (hasChanges) isConfirmingDiscard = true else actions.close() }) {
-        Icon(
-          imageVector = Icons.Outlined.Close,
-          contentDescription = "Close survey editor",
-          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-    },
+    {},
     {
       WebHeaderContext(
         title = uiState.details.title.ifBlank { "Untitled survey" },
@@ -365,12 +370,16 @@ private fun SurveyEditorTopBar(
           Text("Reopen")
         }
       }
-      TextButton(onClick = { isConfirmingDiscard = true }, enabled = hasChanges) { Text("Discard") }
-      val canSaveOrPublish =
-        if (uiState.isDraft) !uiState.isReadOnly && issueCount == 0 && !uiState.isSaving
-        else uiState.canPublish
-      Button(onClick = actions::publish, enabled = canSaveOrPublish) {
-        Text(uiState.saveActionLabel)
+      if (!hasChanges) {
+        OutlinedButton(onClick = actions::close) { Text("Close") }
+      } else {
+        TextButton(onClick = { isConfirmingDiscard = true }) { Text("Discard") }
+        val canSaveOrPublish =
+          if (uiState.isDraft) !uiState.isReadOnly && issueCount == 0 && !uiState.isSaving
+          else uiState.canPublish
+        Button(onClick = actions::publish, enabled = canSaveOrPublish) {
+          Text(uiState.saveActionLabel)
+        }
       }
     },
   )
@@ -972,6 +981,7 @@ internal fun PaneScaffold(title: String, subtitle: String, content: @Composable 
   }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SurveyDetailsPane(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
   val details = uiState.details
@@ -981,7 +991,7 @@ private fun SurveyDetailsPane(uiState: SurveyEditorUiState, actions: SurveyEdito
   ) {
     Column(
       modifier = Modifier.widthIn(max = 760.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+      verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
       OutlinedTextField(
         value = details.title,
@@ -1020,7 +1030,10 @@ private fun SurveyDetailsPane(uiState: SurveyEditorUiState, actions: SurveyEdito
     }
 
     SectionLabel("Contents")
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    FlowRow(
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
       SummaryCard("Forms", uiState.forms.size) {
         uiState.forms.firstOrNull()?.let { actions.select(SurveyEditorSection.Form(it.key)) }
       }
@@ -1347,7 +1360,10 @@ internal fun LanguageSelectorSection(uiState: SurveyEditorUiState, actions: Surv
           InputChip(
             selected = isDefault,
             onClick = { actions.setDefaultLanguage(code) },
-            label = { Text(if (isDefault) "$displayName • Default" else displayName) },
+            label = {
+              Text(if (supported.size > 1 && isDefault) "$displayName • Default" else displayName)
+            },
+            modifier = Modifier.height(32.dp),
             trailingIcon = {
               if (supported.size > 1) {
                 IconButton(
@@ -1364,7 +1380,12 @@ internal fun LanguageSelectorSection(uiState: SurveyEditorUiState, actions: Surv
             },
           )
         }
-        OutlinedButton(onClick = { showPicker = true }, shape = RoundedCornerShape(8.dp)) {
+        OutlinedButton(
+          onClick = { showPicker = true },
+          shape = RoundedCornerShape(8.dp),
+          modifier = Modifier.height(32.dp),
+          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+        ) {
           Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
           Spacer(Modifier.width(6.dp))
           Text("Add language")
@@ -1372,8 +1393,8 @@ internal fun LanguageSelectorSection(uiState: SurveyEditorUiState, actions: Surv
       }
     }
 
-    // Default language selector
-    if (supported.isNotEmpty()) {
+    // Default language selector (only needed when more than one language is supported)
+    if (supported.size > 1) {
       val defaultLanguageObject = IsoLanguages.findByCode(defaultLang)
       val defaultLabel = defaultLanguageObject?.name ?: defaultLang.ifEmpty { "None selected" }
       Box(modifier = Modifier.widthIn(max = 380.dp)) {
@@ -1926,7 +1947,7 @@ internal fun SharingContent(
         modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        SectionLabel("General access")
+        SectionLabel("Data access & visibility")
         uiState.sharingIssues.forEach { issue ->
           Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -2146,9 +2167,9 @@ private fun GeneralAccessPermissionSliders(
       val directoryOptions = listOf(SharingPolicy.PUBLIC, SharingPolicy.ANYONE_WITH_LINK)
       val policyOptionLabel: (SharingPolicy) -> String = { policy ->
         if (policy == SharingPolicy.ANYONE_WITH_LINK) {
-          "Only people with a link or QR code (unlisted)"
+          "Unlisted (only people with a link or QR code)"
         } else {
-          "Anyone in the survey directory"
+          "Public (listed in the survey directory)"
         }
       }
       DropdownSelector(
@@ -2164,7 +2185,7 @@ private fun GeneralAccessPermissionSliders(
             "Unlisted: only people who have the direct link or scan the QR code below can find " +
               "and open this survey."
           } else {
-            "Listed: anyone browsing the public survey directory can discover and open this " +
+            "Public: anyone browsing the survey directory can discover and open this " +
               "survey, or use the direct link and QR code below."
           },
         style = MaterialTheme.typography.bodySmall,
@@ -2411,14 +2432,18 @@ private fun PermissionRangeSliderRow(
           val isSelected = index == selectedIndex
           val leftFilled = index > 0 && index <= selectedIndex
           val rightFilled = index < selectedIndex
+          val stopInteractionSource = remember { MutableInteractionSource() }
           Box(
             modifier =
               Modifier.weight(1f)
                 .fillMaxHeight()
                 .clickable(
+                  interactionSource = stopInteractionSource,
+                  indication = null,
                   role = Role.RadioButton,
                   onClick = { currentOnSelectStop(stop) },
                 )
+                .pointerHoverIcon(PointerIcon.Hand)
                 .semantics(mergeDescendants = true) {
                   contentDescription = "$title: ${stop.label}"
                 },
@@ -2463,15 +2488,23 @@ private fun PermissionRangeSliderRow(
             }
             Box(
               modifier =
-                Modifier.size(if (isSelected) 20.dp else 14.dp)
+                Modifier.size(28.dp)
                   .clip(CircleShape)
-                  .background(if (isFilled) activeColor else MaterialTheme.colorScheme.surface)
-                  .border(
-                    width = 2.dp,
-                    color = if (isFilled) activeColor else outlineColor,
-                    shape = CircleShape,
-                  )
-            )
+                  .indication(stopInteractionSource, LocalIndication.current),
+              contentAlignment = Alignment.Center,
+            ) {
+              Box(
+                modifier =
+                  Modifier.size(if (isSelected) 20.dp else 14.dp)
+                    .clip(CircleShape)
+                    .background(if (isFilled) activeColor else MaterialTheme.colorScheme.surface)
+                    .border(
+                      width = 2.dp,
+                      color = if (isFilled) activeColor else outlineColor,
+                      shape = CircleShape,
+                    )
+              )
+            }
           }
         }
       }

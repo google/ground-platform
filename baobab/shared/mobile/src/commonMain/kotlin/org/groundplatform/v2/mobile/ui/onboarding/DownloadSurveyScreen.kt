@@ -294,6 +294,7 @@ fun DownloadSurveyScreen(
               SurveyListItemCard(
                 survey = survey,
                 organizationName = uiState.organizationNames[survey.organizationId],
+                hasOfflineImagery = survey.id in uiState.offlineImageryDownloadedSurveyIds,
                 isDarkTheme = isDarkTheme,
                 onDownloadClick = { actions.downloadSurvey(survey.id) },
                 onToggleDownloadClick = { actions.promptRemoveDownloadedSurvey(survey.id) },
@@ -324,7 +325,57 @@ fun DownloadSurveyScreen(
     if (uiState.pendingRemovalSurveyId != null) {
       RemoveDownloadedSurveyConfirmationDialog(uiState, actions)
     }
+
+    if (uiState.pendingOfflineImagerySurveyId != null) {
+      DownloadOfflineImageryPromptDialog(uiState, actions)
+    }
   }
+}
+
+/**
+ * Prompt dialog shown after downloading a survey asking whether the collector also wants to
+ * download offline basemap imagery tiles for field use without internet connectivity.
+ */
+@Composable
+private fun DownloadOfflineImageryPromptDialog(
+  uiState: OnboardingUiState,
+  actions: OnboardingActions,
+) {
+  val survey = uiState.pendingOfflineImagerySurvey ?: return
+
+  GroundAlertDialogOverlay(
+    onDismissRequest = { actions.skipOfflineImageryDownload() },
+    icon = {
+      Icon(
+        imageVector = Icons.Outlined.Map,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+      )
+    },
+    title = {
+      Text(
+        text = "Download offline imagery?",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+    },
+    text = {
+      Text(
+        text =
+          "Would you like to download offline basemap imagery tiles for \"${survey.title}\" now so satellite reference layers are available in the field without internet connectivity?",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    },
+    confirmButton = {
+      Button(onClick = { actions.confirmOfflineImageryDownload() }) {
+        Text("Download imagery", fontWeight = FontWeight.Bold)
+      }
+    },
+    dismissButton = {
+      OutlinedButton(onClick = { actions.skipOfflineImageryDownload() }) { Text("Skip for now") }
+    },
+  )
 }
 
 /** Confirmation prompt dialog shown before removing a downloaded survey from the device. */
@@ -447,6 +498,7 @@ private fun SurveyListItemCard(
   onDownloadClick: () -> Unit,
   onToggleDownloadClick: () -> Unit,
   onOpenSurveyClick: () -> Unit,
+  hasOfflineImagery: Boolean = false,
 ) {
   val cardBg =
     if (survey.isDownloaded) {
@@ -565,6 +617,9 @@ private fun SurveyListItemCard(
             GroundTonalBadge(text = "Public data", tone = GroundBadgeTone.WARNING)
           } else if (survey.isPrivateSubmissions) {
             GroundTonalBadge(text = "Private submissions", tone = GroundBadgeTone.SECONDARY)
+          }
+          if (hasOfflineImagery) {
+            GroundTonalBadge(text = "Offline imagery", tone = GroundBadgeTone.PRIMARY)
           }
         }
 

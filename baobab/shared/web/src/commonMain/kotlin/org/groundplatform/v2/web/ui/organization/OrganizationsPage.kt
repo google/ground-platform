@@ -98,6 +98,7 @@ internal fun OrganizationsPage(
       WebAppHeader(
         state = state,
         onSignOut = onSignOut,
+        onLogoClick = { state.selectPage(WebPage.WEB_SURVEYS) },
         navigationIcon = {
           IconButton(onClick = { state.selectPage(WebPage.WEB_SURVEYS) }) {
             Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to surveys")

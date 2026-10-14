@@ -1011,6 +1011,64 @@ concepts {
   references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
   status: STABLE
 }
+concepts {
+  id: "eudr.plot_area_ha"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Production plot area (ha)"
+    }
+    values {
+      key: "fr"
+      value: "Surface de la parcelle de production (ha)"
+    }
+    values {
+      key: "es"
+      value: "Área de la parcela de producción (ha)"
+    }
+    values {
+      key: "vi"
+      value: "Diện tích lô đất sản xuất (ha)"
+    }
+    values {
+      key: "sw"
+      value: "Eneo la shamba la uzalishaji (ha)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Area of the agricultural or forest commodity production plot in hectares."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "plot area"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "hectares"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "hectáreas"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "har"
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
 form_templates {
   id: "eudr_plot_registration"
   title {
@@ -1623,7 +1681,7 @@ form_templates {
           field_ref: "area_ha"
           type: CONTROL_INPUT
           label {
-            text: "Area (ha)"
+            text: "Plot / parcel area (ha)"
           }
         }
       }

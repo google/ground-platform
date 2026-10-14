@@ -375,17 +375,23 @@ class FormEditorClickTest {
       waitForIdle()
       assertEquals(ChoiceSource.MANUAL, state.ui.form.find("q3")?.choiceSource)
 
-      onNodeWithText("Map layer").performScrollTo().performClick()
+      onNodeWithText("Manual list").performScrollTo().performClick()
+      waitForIdle()
+      onNodeWithText("Map layer").performClick()
       waitForIdle()
       assertEquals(ChoiceSource.MAP_LAYER, state.ui.form.find("q3")?.choiceSource)
       assertEquals("sample_plots", state.ui.form.find("q3")?.choiceDatasetId)
 
-      onNodeWithText("Data table").performScrollTo().performClick()
+      onAllNodesWithText("Map layer").onFirst().performScrollTo().performClick()
+      waitForIdle()
+      onNodeWithText("Data table").performClick()
       waitForIdle()
       assertEquals(ChoiceSource.DATA_TABLE, state.ui.form.find("q3")?.choiceSource)
       assertEquals("tree_species", state.ui.form.find("q3")?.choiceDatasetId)
 
-      onNodeWithText("Manual list").performScrollTo().performClick()
+      onAllNodesWithText("Data table").onFirst().performScrollTo().performClick()
+      waitForIdle()
+      onNodeWithText("Manual list").performClick()
       waitForIdle()
       assertEquals(ChoiceSource.MANUAL, state.ui.form.find("q3")?.choiceSource)
       assertEquals(null, state.ui.form.find("q3")?.choiceDatasetId)
@@ -438,7 +444,9 @@ class FormEditorClickTest {
       runOnIdle { state.select("q3") }
       waitForIdle()
 
-      onNodeWithText("Data table").performScrollTo().performClick()
+      onNodeWithText("Manual list").performScrollTo().performClick()
+      waitForIdle()
+      onNodeWithText("Data table").performClick()
       waitForIdle()
       assertEquals(false, state.ui.form.find("q3")?.allowAddEntity)
 

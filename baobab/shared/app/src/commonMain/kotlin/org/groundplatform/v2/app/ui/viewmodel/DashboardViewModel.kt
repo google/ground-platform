@@ -39,7 +39,9 @@ import org.groundplatform.v2.app.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.UploadStatusFilter
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
+import org.groundplatform.v2.app.domain.model.editor.EntityDataset
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.app.domain.model.editor.SurveyEditorForm
 import org.groundplatform.v2.app.domain.model.matchesUploadsFilters
 import org.groundplatform.v2.app.domain.model.newestFirst
 import org.groundplatform.v2.app.domain.model.outboxNewestFirst
@@ -55,6 +57,7 @@ import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.app.domain.usecase.CreateSurveyUseCase
 import org.groundplatform.v2.app.domain.usecase.ExportFile
 import org.groundplatform.v2.app.domain.usecase.ExportSurveyDataUseCase
+import org.groundplatform.v2.app.domain.usecase.ProfileExportPlan
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
 import org.groundplatform.v2.app.domain.usecase.SyncMutationsUseCase
@@ -130,9 +133,10 @@ interface DashboardActions {
   // --- Bottom data table ---
 
   /**
-   * Expands or collapses the bottom data table. Expanding collapses the details panel; collapsing
-   * re-expands it when a layer is selected here or a map feature or submission is selected
-   * elsewhere ([hasSelection]).
+   * Expands or collapses the bottom data table. Expanding collapses the left-hand side panel and
+   * the details panel; collapsing restores the left-hand side panel to its prior state and
+   * re-expands the details panel when a layer is selected here or a map feature or submission is
+   * selected elsewhere ([hasSelection]).
    */
   fun updateDashboardTableExpanded(expanded: Boolean, hasSelection: Boolean = false)
 
@@ -243,6 +247,7 @@ class DashboardViewModel(
   /** Session (non-persisted) state of the dashboard slice. */
   private data class Session(
     val isSidePanelExpanded: Boolean = true,
+    val sidePanelExpandedBeforeTable: Boolean? = null,
     val sidePanelWidthDp: Float = DashboardUiState.DEFAULT_SIDE_PANEL_WIDTH_DP,
     val isDetailsPanelExpanded: Boolean = true,
     val isDashboardTableExpanded: Boolean = false,
@@ -376,18 +381,40 @@ class DashboardViewModel(
             if (!isMap) {
               emptyList()
             } else {
-              profiles.map { profile ->
-                exportSurveyData.plan(
-                  profile = profile,
-                  dataset = dataset,
-                  forms = draft.forms,
-                  library = library,
-                  entities = data.content.entities,
-                  language = draft.details.defaultLanguage,
-                )
-              }
+              profiles
+                .map { profile ->
+                  exportSurveyData.plan(
+                    profile = profile,
+                    dataset = dataset,
+                    forms = draft.forms,
+                    library = library,
+                    entities = data.content.entities,
+                    language = draft.details.defaultLanguage,
+                  )
+                }
+                .filter { plan -> hasMappedProfileFields(plan, dataset, draft.forms) }
             },
         )
+    }
+  }
+
+  /**
+   * Whether [dataset] (or a form targeting it) links at least one field to a concept in [plan]'s
+   * export profile.
+   */
+  private fun hasMappedProfileFields(
+    plan: ProfileExportPlan,
+    dataset: EntityDataset,
+    forms: List<SurveyEditorForm>,
+  ): Boolean {
+    if (plan.fields.any { !it.isGeometry && it.isMapped }) return true
+    val profileConceptIds = plan.profile.fieldConcepts.values.toSet()
+    if (dataset.properties.any { it.conceptLink?.conceptId in profileConceptIds }) return true
+    val datasetForms = forms.filter { entry ->
+      dataset.linkedFormKey == entry.key || entry.form.saveTo.targetDatasetId == dataset.id
+    }
+    return datasetForms.any { entry ->
+      entry.form.questions.any { it.conceptLink?.conceptId in profileConceptIds }
     }
   }
 
@@ -479,6 +506,13 @@ class DashboardViewModel(
     scope.launch { surveyRepository.setActiveSurveyId(surveyId) }
     session.update {
       it.copy(
+        isSidePanelExpanded =
+          if (it.isDashboardTableExpanded) {
+            it.sidePanelExpandedBeforeTable ?: it.isSidePanelExpanded
+          } else {
+            it.isSidePanelExpanded
+          },
+        sidePanelExpandedBeforeTable = null,
         selectedLayerDatasetId = null,
         dashboardTableDatasetId = null,
         isDashboardTableExpanded = false,
@@ -524,7 +558,9 @@ class DashboardViewModel(
   // --- Left-hand side panel ---
 
   override fun toggleSidePanel() {
-    session.update { it.copy(isSidePanelExpanded = !it.isSidePanelExpanded) }
+    session.update {
+      it.copy(isSidePanelExpanded = !it.isSidePanelExpanded, sidePanelExpandedBeforeTable = null)
+    }
   }
 
   override fun expandSidePanel() = updateSidePanelExpanded(true)
@@ -532,7 +568,9 @@ class DashboardViewModel(
   override fun collapseSidePanel() = updateSidePanelExpanded(false)
 
   override fun updateSidePanelExpanded(expanded: Boolean) {
-    session.update { it.copy(isSidePanelExpanded = expanded) }
+    session.update {
+      it.copy(isSidePanelExpanded = expanded, sidePanelExpandedBeforeTable = null)
+    }
   }
 
   override fun updateSidePanelWidth(widthDp: Float) {
@@ -567,13 +605,30 @@ class DashboardViewModel(
   override fun updateDashboardTableExpanded(expanded: Boolean, hasSelection: Boolean) {
     session.update {
       val wasExpanded = it.isDashboardTableExpanded
+      val sidePanelExpanded =
+        when {
+          expanded && !wasExpanded -> false
+          !expanded && wasExpanded -> it.sidePanelExpandedBeforeTable ?: it.isSidePanelExpanded
+          else -> it.isSidePanelExpanded
+        }
+      val sidePanelExpandedBeforeTable =
+        when {
+          expanded && !wasExpanded -> it.isSidePanelExpanded
+          !expanded && wasExpanded -> null
+          else -> it.sidePanelExpandedBeforeTable
+        }
       val detailsExpanded =
         when {
           expanded && !wasExpanded -> false
           !expanded && wasExpanded && (hasSelection || it.selectedLayerDatasetId != null) -> true
           else -> it.isDetailsPanelExpanded
         }
-      it.copy(isDashboardTableExpanded = expanded, isDetailsPanelExpanded = detailsExpanded)
+      it.copy(
+        isSidePanelExpanded = sidePanelExpanded,
+        sidePanelExpandedBeforeTable = sidePanelExpandedBeforeTable,
+        isDashboardTableExpanded = expanded,
+        isDetailsPanelExpanded = detailsExpanded,
+      )
     }
   }
 

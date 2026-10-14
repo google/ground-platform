@@ -34,6 +34,7 @@ import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyThumbnailGenerator
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
+import org.groundplatform.v2.app.domain.model.editor.EditorChoice
 import org.groundplatform.v2.app.domain.model.editor.EditorForm
 import org.groundplatform.v2.app.domain.model.editor.EditorFormTemplates
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
@@ -243,6 +244,7 @@ class CreateSurveyWizardViewModel(
         library = library,
         selectedOrg = selectedOrg,
         language = details.defaultLanguage.ifBlank { "en" },
+        session = s,
       )
 
     return CreateSurveyWizardUiState(
@@ -289,6 +291,7 @@ class CreateSurveyWizardViewModel(
     library: org.groundplatform.v2.app.domain.usecase.ResolvedLibrary,
     selectedOrg: Organization?,
     language: String,
+    session: Session,
   ): WizardImpactReadiness {
     val purposeIds = draft.details.purposeIds
     val selectedPacks = purposeIds.mapNotNull(library::purposePack)
@@ -336,7 +339,10 @@ class CreateSurveyWizardViewModel(
     val careApplied =
       draft.sharing.policy == SharingPolicy.RESTRICTED &&
         draft.sharing.peerDataVisibility == PeerDataVisibility.OWN_ONLY &&
-        SurveyWizardRules.usesIplcCareDefaults(selectedOrg?.organizationType, linkedConceptIds)
+        (session.careDefaultsAppliedForOrgOrConcepts ||
+          session.collectorConsentRequired ||
+          draft.sharing.collectorConsentRequired ||
+          SurveyWizardRules.usesIplcCareDefaults(selectedOrg?.organizationType, linkedConceptIds))
 
     return WizardImpactReadiness(
       selectedPackTitles = packTitles,
@@ -924,13 +930,23 @@ class CreateSurveyWizardViewModel(
       }
     }
     if (SurveyWizardRules.usesIplcCareDefaults(org?.organizationType, conceptIds)) {
+      val nextConsentText =
+        session.value.collectorConsentText.ifBlank { SurveyWizardRules.DEFAULT_FPIC_CONSENT_TEXT }
       surveyEditor.updateSharing {
         it.copy(
           policy = SharingPolicy.RESTRICTED,
           peerDataVisibility = PeerDataVisibility.OWN_ONLY,
+          collectorConsentRequired = true,
+          collectorConsentText = nextConsentText,
         )
       }
-      session.update { it.copy(careDefaultsAppliedForOrgOrConcepts = true) }
+      session.update {
+        it.copy(
+          careDefaultsAppliedForOrgOrConcepts = true,
+          collectorConsentRequired = true,
+          collectorConsentText = nextConsentText,
+        )
+      }
     }
   }
 
@@ -969,18 +985,20 @@ class CreateSurveyWizardViewModel(
 
   override fun importXFormsXml(fileName: String, xmlText: String) {
     val fallbackTitle = fileName.substringBeforeLast('.').ifBlank { "Imported form" }
+    val availability = session.value.collectionMode.formAvailability
     val imported =
       FormImport.fromXml(
         xml = xmlText,
         fallbackTitle = fallbackTitle,
-        availability = session.value.collectionMode.formAvailability,
-      )
+        availability = availability,
+      ) ?: parseCollectEarthIdmXml(xmlText, fallbackTitle, availability)
     if (imported == null || imported.form.questions.isEmpty()) {
       session.update {
         it.copy(
           importedXFormsFileName = fileName,
           importedXForms = null,
-          importErrorMessage = "Could not parse any XForms questions from \"$fileName\".",
+          importErrorMessage =
+            "Could not parse any XForms or Collect Earth questions from \"$fileName\".",
         )
       }
     } else {
@@ -995,6 +1013,190 @@ class CreateSurveyWizardViewModel(
         surveyEditor.updateDetails { it.copy(title = imported.form.title) }
       }
     }
+  }
+
+  /**
+   * Adapts a Collect Earth / Open Foris Collect IDM XML definition (`<survey>` or `<idm>` root with
+   * `<schema>` and `<codeLists>`) into an [ImportedForm].
+   */
+  private fun parseCollectEarthIdmXml(
+    xml: String,
+    fallbackTitle: String,
+    availability: org.groundplatform.v2.app.domain.model.FormAvailability,
+  ): ImportedForm? {
+    val trimmed = xml.trim()
+    if (!trimmed.contains("<survey") && !trimmed.contains("<idm")) return null
+
+    val projectTitle =
+      Regex("""<project[^>]*>([^<]+)</project>""")
+        .find(trimmed)
+        ?.groupValues
+        ?.get(1)
+        ?.trim()
+        .orEmpty()
+        .ifBlank { fallbackTitle }
+
+    // Parse <list name="..."> items from <codeLists>
+    val codeLists = mutableMapOf<String, List<EditorChoice>>()
+    val listRegex = Regex("""<list\s+[^>]*name="([^"]+)"[^>]*>([\s\S]*?)</list>""")
+    val itemRegex = Regex("""<item[^>]*>([\s\S]*?)</item>""")
+    val codeRegex = Regex("""<code[^>]*>([^<]+)</code>""")
+    val labelRegex = Regex("""<label[^>]*>([^<]+)</label>""")
+    listRegex.findAll(trimmed).forEach { match ->
+      val listName = match.groupValues[1].trim()
+      val listBody = match.groupValues[2]
+      val choices =
+        itemRegex
+          .findAll(listBody)
+          .mapNotNull { itemMatch ->
+            val itemBody = itemMatch.groupValues[1]
+            val code = codeRegex.find(itemBody)?.groupValues?.get(1)?.trim().orEmpty()
+            val label = labelRegex.find(itemBody)?.groupValues?.get(1)?.trim().orEmpty()
+            if (code.isBlank() && label.isBlank()) null
+            else
+              EditorChoice(
+                value = code.ifBlank { label },
+                label = label.ifBlank { code },
+                code = code,
+              )
+          }
+          .toList()
+      if (choices.isNotEmpty()) {
+        codeLists[listName] = choices
+      }
+    }
+
+    val schemaBody =
+      Regex("""<schema[^>]*>([\s\S]*?)</schema>""").find(trimmed)?.groupValues?.get(1) ?: trimmed
+    val attrRegex =
+      Regex(
+        """<(text|number|code|boolean|date|coordinate|file)\s+([^>]*?)(?:/>|>([\s\S]*?)</\1>)"""
+      )
+    val nameAttrRegex = Regex("""\bname="([^"]+)"""")
+    val listAttrRegex = Regex("""\blist="([^"]+)"""")
+    val multipleAttrRegex = Regex("""\bmultiple="([^"]+)"""")
+    val requiredAttrRegex = Regex("""\brequired="([^"]+)"""")
+    val typeAttrRegex = Regex("""\btype="([^"]+)"""")
+    val descRegex = Regex("""<description[^>]*>([^<]+)</description>""")
+
+    val questions = mutableListOf<EditorQuestion>()
+    var keyIdx = 1
+    attrRegex.findAll(schemaBody).forEach { match ->
+      val tag = match.groupValues[1]
+      val attrs = match.groupValues[2]
+      val body = match.groupValues[3]
+      val name = nameAttrRegex.find(attrs)?.groupValues?.get(1)?.trim().orEmpty()
+      if (name.isBlank()) return@forEach
+      val label = labelRegex.find(body)?.groupValues?.get(1)?.trim().orEmpty().ifBlank { name }
+      val hint = descRegex.find(body)?.groupValues?.get(1)?.trim().orEmpty()
+      val required = requiredAttrRegex.find(attrs)?.groupValues?.get(1) == "true"
+      val key = "cep_${keyIdx++}_$name"
+      val q =
+        when (tag) {
+          "text" ->
+            EditorQuestion(
+              key = key,
+              name = name,
+              type = EditorQuestionType.TEXT,
+              label = label,
+              hint = hint,
+              required = required,
+            )
+          "number" -> {
+            val numType = typeAttrRegex.find(attrs)?.groupValues?.get(1).orEmpty()
+            EditorQuestion(
+              key = key,
+              name = name,
+              type = EditorQuestionType.NUMBER,
+              label = label,
+              hint = hint,
+              required = required,
+              decimalPlaces =
+                if (numType.equals("real", ignoreCase = true)) {
+                  EditorQuestion.DEFAULT_DECIMAL_PLACES
+                } else {
+                  0
+                },
+            )
+          }
+          "code" -> {
+            val listName = listAttrRegex.find(attrs)?.groupValues?.get(1).orEmpty()
+            val multiple = multipleAttrRegex.find(attrs)?.groupValues?.get(1) == "true"
+            val choices =
+              codeLists[listName]
+                ?: listOf(
+                  EditorChoice(value = "option_1", label = "Option 1", code = "1"),
+                  EditorChoice(value = "option_2", label = "Option 2", code = "2"),
+                )
+            EditorQuestion(
+              key = key,
+              name = name,
+              type =
+                if (multiple) EditorQuestionType.SELECT_MULTIPLE else EditorQuestionType.SELECT_ONE,
+              label = label,
+              hint = hint,
+              required = required,
+              choices = choices,
+            )
+          }
+          "boolean" ->
+            EditorQuestion(
+              key = key,
+              name = name,
+              type = EditorQuestionType.SELECT_ONE,
+              label = label,
+              hint = hint,
+              required = required,
+              choices =
+                listOf(
+                  EditorChoice(value = "yes", label = "Yes", code = "yes"),
+                  EditorChoice(value = "no", label = "No", code = "no"),
+                ),
+            )
+          "date" ->
+            EditorQuestion(
+              key = key,
+              name = name,
+              type = EditorQuestionType.DATE,
+              label = label,
+              hint = hint,
+              required = required,
+            )
+          "coordinate" ->
+            EditorQuestion(
+              key = key,
+              name = name,
+              type = EditorQuestionType.LOCATION,
+              label = label,
+              hint = hint,
+              required = required,
+            )
+          "file" ->
+            EditorQuestion(
+              key = key,
+              name = name,
+              type = EditorQuestionType.PHOTO,
+              label = label,
+              hint = hint,
+              required = required,
+            )
+          else -> null
+        }
+      if (q != null) questions.add(q)
+    }
+
+    if (questions.isEmpty()) return null
+    val formId = slugify(projectTitle).ifBlank { FormIds.newFormId() }
+    return ImportedForm(
+      form =
+        EditorForm(
+          formId = formId,
+          title = projectTitle,
+          questions = questions,
+          availability = availability,
+        ),
+      notes = listOf("Imported from Collect Earth (.cep / Open Foris IDM) schema."),
+    )
   }
 
   override fun clearImportedXForms() {
@@ -1248,24 +1450,34 @@ class CreateSurveyWizardViewModel(
   }
 
   override fun applyCareSovereigntyDefaults() {
+    val nextConsentText =
+      session.value.collectorConsentText.ifBlank { SurveyWizardRules.DEFAULT_FPIC_CONSENT_TEXT }
     surveyEditor.updateSharing {
       it.copy(
         policy = SharingPolicy.RESTRICTED,
         peerDataVisibility = PeerDataVisibility.OWN_ONLY,
+        collectorConsentRequired = true,
+        collectorConsentText = nextConsentText,
       )
     }
-    session.update { it.copy(careDefaultsAppliedForOrgOrConcepts = true) }
+    session.update {
+      it.copy(
+        careDefaultsAppliedForOrgOrConcepts = true,
+        collectorConsentRequired = true,
+        collectorConsentText = nextConsentText,
+      )
+    }
   }
 
   override fun openInSurveyEditor() {
-    commitAndOpenEditor()
+    commitAndOpenEditor(openDashboard = false)
   }
 
   override fun finishWizard() {
-    commitAndOpenEditor()
+    commitAndOpenEditor(openDashboard = true)
   }
 
-  private fun commitAndOpenEditor() {
+  private fun commitAndOpenEditor(openDashboard: Boolean) {
     scope.launch {
       applyOverviewStartMethodIfNeeded()
       ensurePrimaryLayerAndForm()
@@ -1298,7 +1510,11 @@ class CreateSurveyWizardViewModel(
           thumbnail = SurveyThumbnailGenerator.fromDraft(surveyId, savedDraft),
         )
       }
+      surveyRepository.setActiveSurveyId(surveyId)
       _events.tryEmit(CreateSurveyWizardEvent.OpenSurveyEditor(surveyId))
+      if (openDashboard) {
+        surveyEditor.close()
+      }
     }
   }
 

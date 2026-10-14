@@ -57,13 +57,21 @@ internal external fun cssPxPerComposePx(): Double
  */
 @JsFun(
   """(style, lng, lat, zoom, bearing, pitch) => {
+    let root = document.getElementById('GroundMapboxHosts');
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'GroundMapboxHosts';
+      root.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;z-index:1;';
+      document.body.appendChild(root);
+    }
+    const z = (window.__groundMapboxNextZ = (window.__groundMapboxNextZ || 0) + 1);
     const outer = document.createElement('div');
     outer.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;' +
-      'pointer-events:none;z-index:1;visibility:hidden;';
+      'pointer-events:none;z-index:' + z + ';visibility:hidden;';
     const inner = document.createElement('div');
     inner.style.cssText = 'position:absolute;left:0;top:0;width:1px;height:1px;';
     outer.appendChild(inner);
-    document.body.appendChild(outer);
+    root.appendChild(outer);
     const map = new window.mapboxgl.Map({
       container: inner, style: style.charAt(0) === '{' ? JSON.parse(style) : style,
       center: [lng, lat], zoom: zoom, bearing: bearing, pitch: pitch, interactive: false,
@@ -76,6 +84,9 @@ internal external fun cssPxPerComposePx(): Double
       host.waiters = [];
       waiters.forEach((resolve) => resolve(null));
     });
+    if (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) {
+      host.ready = true;
+    }
     map.on('error', (e) => console.warn('GroundMap:', e && e.error ? e.error.message : e));
     return host;
   }"""
@@ -90,6 +101,8 @@ internal external fun createMapboxHost(
 ): MapboxHost
 
 /** Resolves once the current style has loaded. */
+@JsFun("(h) => !!h.ready") internal external fun mapboxIsStyleReady(host: MapboxHost): Boolean
+
 @JsFun(
   """(h) => h.ready ? Promise.resolve(null) : new Promise((resolve) => h.waiters.push(resolve))"""
 )
@@ -119,11 +132,14 @@ internal external fun mapboxSetStyle(host: MapboxHost, style: String)
     o.visibility = visible ? 'visible' : 'hidden';
     o.left = cl + 'px'; o.top = ct + 'px'; o.width = cw + 'px'; o.height = ch + 'px';
     i.left = il + 'px'; i.top = it + 'px'; i.width = iw + 'px'; i.height = ih + 'px';
-    if (Math.abs(h.w - iw) > 0.5 || Math.abs(h.h - ih) > 0.5) {
+    if (iw >= 1 && ih >= 1 && (Math.abs(h.w - iw) > 0.05 || Math.abs(h.h - ih) > 0.05)) {
       h.w = iw; h.h = ih;
       const map = h.map;
       map.resize();
-      if (iw < 1 || ih < 1 || !map.style) return;
+      if (map.transform && typeof map.transform.resize === 'function') {
+        map.transform.resize(iw, ih);
+      }
+      if (!map.style) return;
       try {
         if (typeof map.redraw === 'function') {
           map.redraw();
@@ -152,8 +168,21 @@ internal external fun mapboxSetBounds(
 )
 
 @JsFun(
-  """(h, lng, lat, zoom, bearing, pitch) =>
-    h.map.jumpTo({ center: [lng, lat], zoom: zoom, bearing: bearing, pitch: pitch })"""
+  """(h, lng, lat, zoom, bearing, pitch) => {
+    const map = h.map;
+    map.jumpTo({ center: [lng, lat], zoom: zoom, bearing: bearing, pitch: pitch });
+    if (h.w < 1 || h.h < 1 || !map.style) return;
+    try {
+      if (typeof map.redraw === 'function') {
+        map.redraw();
+      } else if (typeof map._render === 'function') {
+        if (map._frame) { map._frame.cancel(); map._frame = null; }
+        map._render(performance.now());
+      }
+    } catch (e) {
+      map.triggerRepaint();
+    }
+  }"""
 )
 internal external fun mapboxJumpTo(
   host: MapboxHost,

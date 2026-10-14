@@ -70,7 +70,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Snackbar
@@ -78,9 +77,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -487,37 +484,35 @@ internal fun SidePanelSeparator(
 
   Box(
     modifier =
-      modifier
-        .background(
-          if (isActive) {
-            MaterialTheme.colorScheme.surfaceContainerHighest
-          } else {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-          }
-        )
-        .then(
-          if (enabled) {
-            Modifier.pointerHoverIcon(HorizontalResizePointerIcon)
-              .hoverable(interactionSource)
-              .draggable(
-                state = draggableState,
-                orientation = Orientation.Horizontal,
-                interactionSource = interactionSource,
-                onDragStarted = { unclampedWidthDp = currentWidthDp },
-              )
-              .semantics { contentDescription = "Resize side panel" }
-          } else {
-            Modifier
-          }
-        ),
+      modifier.then(
+        if (enabled) {
+          Modifier.pointerHoverIcon(HorizontalResizePointerIcon)
+            .hoverable(interactionSource)
+            .draggable(
+              state = draggableState,
+              orientation = Orientation.Horizontal,
+              interactionSource = interactionSource,
+              onDragStarted = { unclampedWidthDp = currentWidthDp },
+            )
+            .semantics { contentDescription = "Resize side panel" }
+        } else {
+          Modifier
+        }
+      ),
     contentAlignment = Alignment.Center,
   ) {
-    // The separator is the drag target, so the handle doesn't need its own 48 dp touch target
-    // (which would spill over the list and the map). It shares the interaction source to show its
-    // dragged state while resizing.
-    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-      VerticalDragHandle(interactionSource = interactionSource)
-    }
+    Box(
+      modifier =
+        Modifier.fillMaxHeight()
+          .width(if (isActive) 2.dp else 1.dp)
+          .background(
+            if (isActive) {
+              MaterialTheme.colorScheme.primary
+            } else {
+              MaterialTheme.colorScheme.outlineVariant
+            }
+          )
+    )
   }
 }
 

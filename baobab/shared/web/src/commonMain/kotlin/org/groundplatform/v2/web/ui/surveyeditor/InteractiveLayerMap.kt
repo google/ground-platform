@@ -355,10 +355,10 @@ internal fun InteractiveLayerMapCard(
     remember(baseContent, backdropPolygons, colors.primary) {
       withBackdropPolygons(baseContent, backdropPolygons, colors.primary)
     }
-  // Sample points of the selected plot go in a small overlay source so its sub-plot layout is
-  // visible immediately on the preview map.
+  // Sample points of generated plots (and any selected plot) go in an overlay source so sub-plot
+  // layouts are visible immediately on the preview map.
   val samplePoints =
-    remember(dataset.rows, selectedRow) { selectedPlotSamples(dataset, selectedRow) }
+    remember(dataset.rows, selectedRow) { visiblePlotSamples(dataset, selectedRow) }
   val sampleRadiusM = dataset.generator?.let(::samplePointRadiusM) ?: DEFAULT_SAMPLE_RADIUS_M
   val content =
     remember(withBackdrop, samplePoints, layerColor, sampleRadiusM) {
@@ -665,14 +665,47 @@ internal fun withBackdropPolygons(
 
 internal const val LAYER_EDITOR_SAMPLES_SOURCE = "layer-editor-samples"
 
+/** Maximum number of subplot sample point rings drawn at once on the preview map. */
+internal const val MAX_VISIBLE_PLOT_SAMPLES = 2_500
+
 /**
  * The sample points of plot [selectedRow] in [dataset], or none when no plot (or a plot that no
- * longer exists) is selected. Other plots' sample points are never drawn.
+ * longer exists) is selected.
  */
 internal fun selectedPlotSamples(dataset: EntityDataset, selectedRow: String?): List<LatLng> {
   if (selectedRow == null) return emptyList()
   val row = dataset.rows.firstOrNull { it.key == selectedRow } ?: return emptyList()
   return SamplePlotProperties.parseGeotrace(row.values[SamplePlotProperties.SAMPLES].orEmpty())
+}
+
+/**
+ * Sample points to draw on the preview map for [dataset]: includes [selectedRow]'s decoded sample
+ * points first when a plot is selected, and includes decoded sample points across [dataset]'s rows
+ * (capped at [maxSamples]) even when [selectedRow] is `null`.
+ */
+internal fun visiblePlotSamples(
+  dataset: EntityDataset,
+  selectedRow: String? = null,
+  maxSamples: Int = MAX_VISIBLE_PLOT_SAMPLES,
+): List<LatLng> {
+  if (dataset.rows.isEmpty() || maxSamples <= 0) return emptyList()
+  val result = ArrayList<LatLng>()
+  if (selectedRow != null) {
+    for (pt in selectedPlotSamples(dataset, selectedRow)) {
+      if (result.size >= maxSamples) return result
+      result.add(pt)
+    }
+  }
+  for (row in dataset.rows) {
+    if (row.key == selectedRow) continue
+    val raw = row.values[SamplePlotProperties.SAMPLES]
+    if (raw.isNullOrBlank()) continue
+    for (pt in SamplePlotProperties.parseGeotrace(raw)) {
+      if (result.size >= maxSamples) return result
+      result.add(pt)
+    }
+  }
+  return result
 }
 
 /**

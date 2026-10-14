@@ -94,6 +94,15 @@ interface OnboardingActions {
 
   fun dismissRemoveDownloadedSurvey()
 
+  /** Prompts the user to download offline basemap imagery for [surveyId]. */
+  fun promptOfflineImageryDownload(surveyId: String) {}
+
+  /** Downloads offline basemap imagery for the pending survey. */
+  fun confirmOfflineImageryDownload() {}
+
+  /** Skips downloading offline basemap imagery for the pending survey. */
+  fun skipOfflineImageryDownload() {}
+
   /** Downloads [surveyId] if needed, makes it active, and opens the Main Survey UI. */
   fun openSurvey(surveyId: String)
 }
@@ -119,6 +128,8 @@ class OnboardingViewModel(
     val isSignOutPromptOpen: Boolean = false,
     val searchQuery: String = "",
     val pendingRemovalSurveyId: String? = null,
+    val pendingOfflineImagerySurveyId: String? = null,
+    val offlineImageryDownloadedSurveyIds: Set<String> = emptySet(),
   )
 
   private val session = MutableStateFlow(Session())
@@ -168,6 +179,8 @@ class OnboardingViewModel(
       organizationNames = organizationNames,
       userOrganization = userOrganization,
       pendingRemovalSurveyId = session.pendingRemovalSurveyId,
+      pendingOfflineImagerySurveyId = session.pendingOfflineImagerySurveyId,
+      offlineImageryDownloadedSurveyIds = session.offlineImageryDownloadedSurveyIds,
     )
   }
 
@@ -274,6 +287,7 @@ class OnboardingViewModel(
     scope.launch {
       val survey =
         surveyRepository.setSurveyDownloaded(surveyId, downloaded = true) ?: return@launch
+      session.update { it.copy(pendingOfflineImagerySurveyId = surveyId) }
       emit(
         OnboardingEvent.Notice(
           "Downloaded \"${survey.title}\" (${survey.offlineSizeLabel}) for offline use."
@@ -293,7 +307,14 @@ class OnboardingViewModel(
 
   override fun confirmRemoveDownloadedSurvey() {
     val surveyId = session.value.pendingRemovalSurveyId ?: return
-    session.update { it.copy(pendingRemovalSurveyId = null) }
+    session.update {
+      it.copy(
+        pendingRemovalSurveyId = null,
+        pendingOfflineImagerySurveyId =
+          it.pendingOfflineImagerySurveyId?.takeUnless { id -> id == surveyId },
+        offlineImageryDownloadedSurveyIds = it.offlineImageryDownloadedSurveyIds - surveyId,
+      )
+    }
     scope.launch {
       val survey =
         surveyRepository.setSurveyDownloaded(surveyId, downloaded = false) ?: return@launch
@@ -303,6 +324,28 @@ class OnboardingViewModel(
 
   override fun dismissRemoveDownloadedSurvey() {
     session.update { it.copy(pendingRemovalSurveyId = null) }
+  }
+
+  override fun promptOfflineImageryDownload(surveyId: String) {
+    session.update { it.copy(pendingOfflineImagerySurveyId = surveyId) }
+  }
+
+  override fun confirmOfflineImageryDownload() {
+    val surveyId = session.value.pendingOfflineImagerySurveyId ?: return
+    val survey = uiState.value.surveys.firstOrNull { it.id == surveyId }
+    session.update {
+      it.copy(
+        pendingOfflineImagerySurveyId = null,
+        offlineImageryDownloadedSurveyIds = it.offlineImageryDownloadedSurveyIds + surveyId,
+      )
+    }
+    if (survey != null) {
+      emit(OnboardingEvent.Notice("Downloaded offline imagery for \"${survey.title}\"."))
+    }
+  }
+
+  override fun skipOfflineImageryDownload() {
+    session.update { it.copy(pendingOfflineImagerySurveyId = null) }
   }
 
   override fun openSurvey(surveyId: String) {

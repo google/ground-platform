@@ -112,6 +112,7 @@ internal fun ImpactDashboardPage(state: WebAppState, onSignOut: () -> Unit = { s
         WebAppHeader(
           state = state,
           onSignOut = onSignOut,
+          onLogoClick = { state.selectPage(WebPage.WEB_SURVEYS) },
           navigationIcon = {
             IconButton(onClick = { state.selectPage(WebPage.WEB_SURVEYS) }) {
               Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to surveys")
@@ -178,7 +179,10 @@ internal fun ImpactDashboardPage(
         onWidthChange = onSidePanelWidthChange,
         modifier = Modifier.width(SidePanelSeparatorWidth).fillMaxHeight(),
       )
-      Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+      Surface(
+        modifier = Modifier.weight(1f).fillMaxHeight(),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+      ) {
         when (val focus = dashboard.focus) {
           ImpactDashboardFocus.Overview ->
             ImpactOverviewPane(

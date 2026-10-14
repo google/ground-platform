@@ -124,7 +124,7 @@ data class SurveyEditorUiState(
    * Label of the primary header button that commits working changes and returns to the dashboard.
    */
   val saveActionLabel: String
-    get() = if (isDraft) "Save draft" else "Publish changes"
+    get() = if (isDraft) "Save draft" else "Republish"
 
   /** Why the survey can't be edited (e.g. "This survey is closed…"), or `null` if it can. */
   val readOnlyMessage: String?

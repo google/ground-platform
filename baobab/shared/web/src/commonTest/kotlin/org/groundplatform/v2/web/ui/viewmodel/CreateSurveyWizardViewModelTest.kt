@@ -18,9 +18,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.seed.GlobalLibrarySeedData
 import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
 import org.groundplatform.v2.app.domain.model.OrganizationType
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.model.editor.FormPreviewTarget
 import org.groundplatform.v2.app.domain.model.editor.GeometryCapture
 import org.groundplatform.v2.app.domain.model.editor.GeometryKind
@@ -327,6 +329,7 @@ class CreateSurveyWizardViewModelTest {
       )
     )
     assertFalse(SurveyWizardRules.usesIplcCareDefaults(OrganizationType.NGO, emptySet()))
+    assertEquals(5, SurveyWizardRules.CARE_GOVERNANCE_CRITERIA.size)
 
     val state = WebAppState()
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
@@ -337,6 +340,12 @@ class CreateSurveyWizardViewModelTest {
     val sharing = state.surveyEditor.uiState.value.sharing
     assertEquals(SharingPolicy.RESTRICTED, sharing.policy)
     assertEquals(PeerDataVisibility.OWN_ONLY, sharing.peerDataVisibility)
+    assertTrue(wizard.uiState.value.collectorConsentRequired)
+    assertEquals(
+      SurveyWizardRules.DEFAULT_FPIC_CONSENT_TEXT,
+      wizard.uiState.value.collectorConsentText,
+    )
+    assertTrue(wizard.uiState.value.impactReadiness.careSovereigntyApplied)
   }
 
   @Test
@@ -391,8 +400,9 @@ class CreateSurveyWizardViewModelTest {
       SurveyCollectionMode.BOTH.defaultGeometryCapture,
     )
 
+    // Clicking "Create survey" commits the draft and lands directly on the survey dashboard.
     wizard.finishWizard()
-    assertEquals(WebPage.SURVEY_EDITOR, state.activePage)
+    assertEquals(WebPage.WEB_DASHBOARD, state.activePage)
     assertEquals("Imported XForms Survey", state.surveyEditor.uiState.value.details.title)
     assertEquals(
       org.groundplatform.v2.app.domain.model.SurveyLifecycleState.DRAFT,
@@ -400,10 +410,75 @@ class CreateSurveyWizardViewModelTest {
     )
     assertTrue(state.surveyEditor.uiState.value.isDraft)
     assertEquals("Save draft", state.surveyEditor.uiState.value.saveActionLabel)
+  }
 
-    // Clicking "Save draft" (or "Publish changes") commits edits and transitions to WEB_DASHBOARD.
-    state.surveyEditor.publish()
-    assertEquals(WebPage.WEB_DASHBOARD, state.activePage)
+  @Test
+  fun importCollectEarthIdm_and_openInSurveyEditor_supportsCepSchemasAndEditorEscapeHatch() {
+    val state = WebAppState()
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
+    val wizard = state.createSurveyWizard
+
+    wizard.updateTitle("Imported Collect Earth Survey")
+    wizard.selectStartMethod(WizardStartMethod.IMPORT_XFORMS)
+
+    val cepIdmXml =
+      """
+      <survey xmlns="http://www.openforis.org/idml/3.0">
+        <project>Forest Assessment</project>
+        <codeLists>
+          <list name="land_use">
+            <items>
+              <item><code>forest</code><label>Forest</label></item>
+              <item><code>cropland</code><label>Cropland</label></item>
+            </items>
+          </list>
+        </codeLists>
+        <schema>
+          <entity name="plot">
+            <code name="land_use_category" list="land_use" required="true">
+              <label>Land use category</label>
+            </code>
+            <number name="canopy_cover_pct" type="real">
+              <label>Canopy cover (%)</label>
+            </number>
+          </entity>
+        </schema>
+      </survey>
+      """
+        .trimIndent()
+
+    wizard.importXFormsXml("forest_assessment.cep", cepIdmXml)
+    assertEquals(null, wizard.uiState.value.importErrorMessage)
+    assertTrue(wizard.uiState.value.canProceedFromCurrentStep)
+
+    // Escape hatch: "Open in advanced survey editor" commits the imported form and keeps activePage
+    // on SURVEY_EDITOR.
+    wizard.openInSurveyEditor()
+    assertEquals(WebPage.SURVEY_EDITOR, state.activePage)
+
+    val primaryForm = assertNotNull(wizard.uiState.value.primaryForm)
+    assertEquals("Forest Assessment", primaryForm.form.title)
+    assertTrue(
+      primaryForm.form.questions.any {
+        it.name == "land_use_category" && it.type == EditorQuestionType.SELECT_ONE
+      }
+    )
+    assertTrue(
+      primaryForm.form.questions.any {
+        it.name == "canopy_cover_pct" && it.type == EditorQuestionType.NUMBER
+      }
+    )
+  }
+
+  @Test
+  fun complianceFrameworkPack_partitionsRegulatoryPacksFromDomainPurposes() {
+    val complianceIds =
+      GlobalLibrarySeedData.library()
+        .purposePacks
+        .filter { SurveyWizardRules.isComplianceFrameworkPack(it) }
+        .map { it.id }
+        .toSet()
+    assertEquals(setOf("eudr_due_diligence", "timber_traceability"), complianceIds)
   }
 
   @Test

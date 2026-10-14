@@ -31,12 +31,15 @@ import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ConceptDataType
+import org.groundplatform.v2.app.domain.model.ConceptLink
 import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
 import org.groundplatform.v2.web.domain.model.OrganizationRelation
 import org.groundplatform.v2.web.domain.model.relationTo
@@ -596,5 +599,67 @@ class OrganizationViewModelTest {
     assertNull(f.viewModel.inviteMember(allUsers, "new@example.org", OrganizationRole.MANAGER))
     f.viewModel.setMemberRole(allUsers, f.me, OrganizationRole.MEMBER)
     assertTrue(f.uiState.notice!!.startsWith("Everyone is already a member"))
+  }
+
+  @Test
+  fun createTemplate_andUpdateTemplateQuestions_storeTemplateAndConceptLinks() {
+    val f = Fixture()
+    f.viewModel.openOrganization(f.kfs.id)
+
+    assertEquals("Enter a title.", f.viewModel.createTemplate(f.kfs.id, "  ", ""))
+    assertNull(f.viewModel.createTemplate(f.kfs.id, "Nursery Seedling Check", "Monthly count"))
+
+    val createdId = "org.org-kenya-forest-service.nursery_seedling_check"
+    val createdRow = f.uiState.library.formTemplates.firstOrNull { it.entry.id == createdId }
+    assertNotNull(createdRow)
+    assertEquals("Nursery Seedling Check", createdRow.entry.title.text)
+    assertEquals("Monthly count", createdRow.entry.description.text)
+
+    val questions =
+      listOf(
+        EditorQuestion(
+          key = "q_1",
+          name = "q_1",
+          label = "Shade tree count",
+          type = EditorQuestionType.NUMBER,
+          required = true,
+          conceptLink =
+            ConceptLink(
+              conceptId = "org.org-kenya-forest-service.shade_tree_count",
+              version = 1,
+            ),
+        ),
+        EditorQuestion(
+          key = "q_2",
+          name = "q_2",
+          label = "Inspector notes",
+          type = EditorQuestionType.TEXT,
+          required = false,
+        ),
+      )
+
+    assertNotNull(
+      f.viewModel.updateTemplateQuestions(
+        f.kfs.id,
+        createdId,
+        listOf(
+          EditorQuestion(
+            key = "q_blank",
+            name = "q_blank",
+            type = EditorQuestionType.TEXT,
+            label = "   ",
+          )
+        ),
+      )
+    )
+    assertNull(f.viewModel.updateTemplateQuestions(f.kfs.id, createdId, questions))
+
+    val updatedTemplate = f.uiState.library.formTemplates.first { it.entry.id == createdId }.entry
+    assertEquals(2, updatedTemplate.form.questions.size)
+    assertEquals(1, updatedTemplate.linkedQuestionCount)
+    assertEquals(
+      "org.org-kenya-forest-service.shade_tree_count",
+      updatedTemplate.form.questions.first().conceptLink?.conceptId,
+    )
   }
 }

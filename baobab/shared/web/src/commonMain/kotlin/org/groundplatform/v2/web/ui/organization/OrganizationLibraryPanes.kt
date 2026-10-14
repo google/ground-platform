@@ -32,6 +32,8 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
@@ -39,6 +41,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -73,6 +76,10 @@ import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.PrivacyClass
 import org.groundplatform.v2.app.domain.model.PurposePack
+import org.groundplatform.v2.app.domain.model.editor.ConceptLinking
+import org.groundplatform.v2.app.domain.model.editor.EditorChoice
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.state.LibraryEntryRow
 import org.groundplatform.v2.web.ui.state.OrganizationLibraryUiState
@@ -660,9 +667,24 @@ internal fun TemplatesPane(
   actions: OrganizationActions,
   organization: Organization,
 ) {
+  var creating by remember(organization.id) { mutableStateOf(false) }
   var renaming by remember(organization.id) { mutableStateOf<FormTemplate?>(null) }
+  var editingQuestions by remember(organization.id) { mutableStateOf<FormTemplate?>(null) }
   var deleting by remember(organization.id) { mutableStateOf<FormTemplate?>(null) }
 
+  if (creating) {
+    RenameEntryDialog(
+      title = "New template",
+      initialTitle = "",
+      initialDescription = "",
+      onSave = { title, description ->
+        actions.createTemplate(organization.id, title, description).also {
+          if (it == null) creating = false
+        }
+      },
+      onDismiss = { creating = false },
+    )
+  }
   renaming?.let { template ->
     RenameEntryDialog(
       title = "Rename template",
@@ -674,6 +696,22 @@ internal fun TemplatesPane(
         }
       },
       onDismiss = { renaming = null },
+    )
+  }
+  editingQuestions?.let { template ->
+    val availableConcepts =
+      remember(library.organizationConcepts, library.globalConcepts) {
+        (library.organizationConcepts + library.globalConcepts).map { it.entry }
+      }
+    TemplateQuestionsDialog(
+      template = template,
+      availableConcepts = availableConcepts,
+      onSave = { questions ->
+        actions.updateTemplateQuestions(template.organizationId, template.id, questions).also {
+          if (it == null) editingQuestions = null
+        }
+      },
+      onDismiss = { editingQuestions = null },
     )
   }
   deleting?.let { template ->
@@ -710,10 +748,18 @@ internal fun TemplatesPane(
             TemplateRow(
               row,
               onRename = { renaming = row.entry },
+              onEditQuestions = { editingQuestions = row.entry },
               onDelete = { deleting = row.entry },
             ) {
               actions.setGlobalEntryHidden(organization.id, row.entry.id, it)
             }
+          }
+        }
+        if (library.canEdit) {
+          OutlinedButton(onClick = { creating = true }) {
+            Icon(Icons.Outlined.Add, contentDescription = null)
+            Spacer(Modifier.width(6.dp))
+            Text("+ New template")
           }
         }
       }
@@ -743,10 +789,18 @@ internal fun TemplatesPane(
           TemplateRow(
             row,
             onRename = { renaming = row.entry },
+            onEditQuestions = { editingQuestions = row.entry },
             onDelete = { deleting = row.entry },
           ) {
             actions.setGlobalEntryHidden(organization.id, row.entry.id, it)
           }
+        }
+      }
+      if (library.isGlobalLibrary && library.canEdit) {
+        OutlinedButton(onClick = { creating = true }) {
+          Icon(Icons.Outlined.Add, contentDescription = null)
+          Spacer(Modifier.width(6.dp))
+          Text("+ New template")
         }
       }
     }
@@ -757,25 +811,369 @@ internal fun TemplatesPane(
 private fun TemplateRow(
   row: LibraryEntryRow<FormTemplate>,
   onRename: () -> Unit,
+  onEditQuestions: () -> Unit,
   onDelete: () -> Unit,
   onSetHidden: (Boolean) -> Unit,
 ) {
   val template = row.entry
   val questionCount = template.form.questions.size
   val linkedCount = template.linkedQuestionCount
-  EntryRowLayout(
-    title = template.title.text,
-    description = template.description.text,
-    badges = listOfNotNull("Hidden".takeIf { row.isHidden }, statusBadge(template.status)),
-    summary =
-      "$questionCount ${if (questionCount == 1) "question" else "questions"} · $linkedCount " +
-        "linked to concepts",
-    dimmed = row.isHidden,
-    row = row,
-    entryLabel = template.title.text,
-    onRename = onRename,
-    onDelete = onDelete,
-    onSetHidden = onSetHidden,
+  val badges = listOfNotNull("Hidden".takeIf { row.isHidden }, statusBadge(template.status))
+  val summary =
+    "$questionCount ${if (questionCount == 1) "question" else "questions"} · $linkedCount " +
+      "linked to concepts"
+
+  LibraryEntryCard {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      Row(verticalAlignment = Alignment.Top) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+          EntryTitleRow(title = template.title.text, badges = badges, dimmed = row.isHidden)
+          MonospaceId(template.id)
+          if (template.description.text.isNotBlank()) {
+            Text(template.description.text, style = MaterialTheme.typography.bodySmall)
+          }
+          Text(
+            summary,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+        if (row.canEdit) {
+          TextButton(onClick = onEditQuestions) {
+            Icon(Icons.Outlined.Edit, contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text("Edit questions")
+          }
+          IconButton(onClick = onRename) {
+            Icon(Icons.Outlined.Edit, contentDescription = "Rename ${template.title.text}")
+          }
+          IconButton(onClick = onDelete) {
+            Icon(Icons.Outlined.Delete, contentDescription = "Delete ${template.title.text}")
+          }
+        }
+        if (row.canHide) {
+          TextButton(onClick = { onSetHidden(!row.isHidden) }) {
+            Icon(
+              if (row.isHidden) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+              contentDescription = null,
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(if (row.isHidden) "Show" else "Hide")
+          }
+        }
+      }
+      if (template.form.questions.isNotEmpty()) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+          template.form.questions.forEachIndexed { idx, q ->
+            val conceptSuffix = q.conceptLink?.conceptId?.let { " · → $it" } ?: ""
+            val reqSuffix = if (q.required) " *" else ""
+            Text(
+              text = "${idx + 1}. ${q.label}$reqSuffix (${q.type.label}$conceptSuffix)",
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun TemplateQuestionsDialog(
+  template: FormTemplate,
+  availableConcepts: List<LibraryConcept>,
+  onSave: (List<EditorQuestion>) -> String?,
+  onDismiss: () -> Unit,
+) {
+  val questions =
+    remember(template.id) {
+      mutableStateListOf<EditorQuestion>().apply { addAll(template.form.questions) }
+    }
+  var error by remember { mutableStateOf<String?>(null) }
+
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = { Text("Edit questions — ${template.title.text}") },
+    text = {
+      Column(
+        modifier =
+          Modifier.fillMaxWidth().heightIn(max = 520.dp).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        if (error != null) {
+          Text(
+            text = error!!,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+          )
+        }
+        if (questions.isEmpty()) {
+          Text(
+            text = "No questions in this template yet. Click \"+ Add question\" below.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+        questions.forEachIndexed { index, question ->
+          key(question.key) {
+            OutlinedCard(
+              modifier = Modifier.fillMaxWidth(),
+              colors =
+                CardDefaults.outlinedCardColors(
+                  containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                ),
+            ) {
+              Column(
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+              ) {
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                  Text(
+                    text = "Question ${index + 1}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                  )
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                      onClick = {
+                        if (index > 0) {
+                          val prev = questions[index - 1]
+                          questions[index - 1] = question
+                          questions[index] = prev
+                        }
+                      },
+                      enabled = index > 0,
+                    ) {
+                      Icon(
+                        Icons.Outlined.KeyboardArrowUp,
+                        contentDescription = "Move question up",
+                      )
+                    }
+                    IconButton(
+                      onClick = {
+                        if (index < questions.lastIndex) {
+                          val next = questions[index + 1]
+                          questions[index + 1] = question
+                          questions[index] = next
+                        }
+                      },
+                      enabled = index < questions.lastIndex,
+                    ) {
+                      Icon(
+                        Icons.Outlined.KeyboardArrowDown,
+                        contentDescription = "Move question down",
+                      )
+                    }
+                    IconButton(onClick = { questions.removeAt(index) }) {
+                      Icon(Icons.Outlined.Delete, contentDescription = "Delete question")
+                    }
+                  }
+                }
+
+                OutlinedTextField(
+                  value = question.label,
+                  onValueChange = { newLabel ->
+                    error = null
+                    questions[index] = question.copy(label = newLabel)
+                  },
+                  label = { Text("Question label") },
+                  singleLine = true,
+                  modifier = Modifier.fillMaxWidth(),
+                )
+
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.spacedBy(12.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  Box(modifier = Modifier.weight(1f)) {
+                    DropdownSelector(
+                      label = "Question type",
+                      selectedText = question.type.label,
+                      options = EditorQuestionType.entries,
+                      optionText = { it.label },
+                      onSelect = { newType ->
+                        val defaultChoices =
+                          if (
+                            (newType == EditorQuestionType.SELECT_ONE ||
+                              newType == EditorQuestionType.SELECT_MULTIPLE) &&
+                              question.choices.isEmpty()
+                          ) {
+                            listOf(
+                              EditorChoice(
+                                value = "option_1",
+                                label = "Option 1",
+                                code = "option_1",
+                              ),
+                              EditorChoice(
+                                value = "option_2",
+                                label = "Option 2",
+                                code = "option_2",
+                              ),
+                            )
+                          } else {
+                            question.choices
+                          }
+                        questions[index] = question.copy(type = newType, choices = defaultChoices)
+                      },
+                    )
+                  }
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                      checked = question.required,
+                      onCheckedChange = { req ->
+                        questions[index] = question.copy(required = req)
+                      },
+                    )
+                    Text("Required", style = MaterialTheme.typography.bodySmall)
+                  }
+                }
+
+                // Concept link selector
+                val linkedConcept = availableConcepts.firstOrNull {
+                  it.id == question.conceptLink?.conceptId
+                }
+                DropdownSelector(
+                  label = "Linked dictionary concept",
+                  selectedText =
+                    if (linkedConcept == null) "None (unlinked)"
+                    else "${linkedConcept.label.text} (${linkedConcept.id})",
+                  options = listOf<LibraryConcept?>(null) + availableConcepts,
+                  optionText = { c ->
+                    if (c == null) "None (unlinked)" else "${c.label.text} (${c.id})"
+                  },
+                  onSelect = { selectedConcept ->
+                    questions[index] =
+                      if (selectedConcept == null) {
+                        question.copy(
+                          conceptLink = null,
+                          choices = question.choices.map { it.copy(code = null) },
+                        )
+                      } else {
+                        ConceptLinking.link(
+                          question = question,
+                          concept = selectedConcept,
+                          takenNames = questions.map { it.name }.toSet(),
+                          language = LocalizedText.DEFAULT_LANGUAGE,
+                        )
+                      }
+                  },
+                )
+
+                // Choices editor for select questions
+                if (
+                  question.type == EditorQuestionType.SELECT_ONE ||
+                    question.type == EditorQuestionType.SELECT_MULTIPLE
+                ) {
+                  Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                      text = "Choices",
+                      style = MaterialTheme.typography.labelSmall,
+                      fontWeight = FontWeight.SemiBold,
+                    )
+                    question.choices.forEachIndexed { choiceIdx, choice ->
+                      Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                      ) {
+                        OutlinedTextField(
+                          value = choice.code ?: choice.value,
+                          onValueChange = { newCode ->
+                            val updated = question.choices.toMutableList()
+                            updated[choiceIdx] =
+                              choice.copy(
+                                value = newCode.ifBlank { choice.value },
+                                code = newCode.ifBlank { null },
+                              )
+                            questions[index] = question.copy(choices = updated)
+                          },
+                          label = { Text("Code") },
+                          singleLine = true,
+                          modifier = Modifier.weight(0.4f),
+                        )
+                        OutlinedTextField(
+                          value = choice.label,
+                          onValueChange = { newLabel ->
+                            val updated = question.choices.toMutableList()
+                            updated[choiceIdx] = choice.copy(label = newLabel)
+                            questions[index] = question.copy(choices = updated)
+                          },
+                          label = { Text("Label") },
+                          singleLine = true,
+                          modifier = Modifier.weight(0.6f),
+                        )
+                        IconButton(
+                          onClick = {
+                            val updated = question.choices.toMutableList()
+                            updated.removeAt(choiceIdx)
+                            questions[index] = question.copy(choices = updated)
+                          }
+                        ) {
+                          Icon(Icons.Outlined.Close, contentDescription = "Remove choice")
+                        }
+                      }
+                    }
+                    TextButton(
+                      onClick = {
+                        val nextNum = question.choices.size + 1
+                        val updated =
+                          question.choices +
+                            EditorChoice(
+                              value = "option_$nextNum",
+                              label = "Option $nextNum",
+                              code = "option_$nextNum",
+                            )
+                        questions[index] = question.copy(choices = updated)
+                      }
+                    ) {
+                      Icon(Icons.Outlined.Add, contentDescription = null)
+                      Spacer(Modifier.width(4.dp))
+                      Text("Add choice")
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        OutlinedButton(
+          onClick = {
+            val nextNum = questions.size + 1
+            var candidateId = "q_$nextNum"
+            var suffix = nextNum
+            while (questions.any { it.key == candidateId }) {
+              suffix += 1
+              candidateId = "q_$suffix"
+            }
+            questions.add(
+              EditorQuestion(
+                key = candidateId,
+                name = candidateId,
+                label = "Question $nextNum",
+                type = EditorQuestionType.TEXT,
+              )
+            )
+          }
+        ) {
+          Icon(Icons.Outlined.Add, contentDescription = null)
+          Spacer(Modifier.width(6.dp))
+          Text("Add question")
+        }
+      }
+    },
+    confirmButton = {
+      Button(onClick = { error = onSave(questions.toList()) }) {
+        Text("Save questions")
+      }
+    },
+    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
   )
 }
 

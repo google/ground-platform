@@ -29,7 +29,7 @@ concepts {
   label {
     values {
       key: "en"
-      value: "Area (ha)"
+      value: "Plot / parcel area (ha)"
     }
     values {
       key: "fr"
@@ -52,6 +52,12 @@ concepts {
     values {
       key: "en"
       value: "Area of the plot or site in hectares."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "area"
     }
   }
   keywords {

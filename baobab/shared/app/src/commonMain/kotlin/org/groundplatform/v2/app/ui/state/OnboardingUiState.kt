@@ -45,9 +45,16 @@ data class OnboardingUiState(
   val userOrganization: String = profile.organizationName,
   /** ID of a downloaded survey whose offline copy is pending removal confirmation. */
   val pendingRemovalSurveyId: String? = null,
+  /** ID of a newly downloaded survey prompting the user to download offline basemap imagery. */
+  val pendingOfflineImagerySurveyId: String? = null,
+  /** Survey IDs for which offline basemap imagery tiles have been downloaded to this device. */
+  val offlineImageryDownloadedSurveyIds: Set<String> = emptySet(),
 ) {
   val isDownloadSurveyAccessedFromSurveyList: Boolean
     get() = entryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST
+
+  val pendingOfflineImagerySurvey: SurveyPreviewItem?
+    get() = surveys.firstOrNull { it.id == pendingOfflineImagerySurveyId }
 }
 
 /**
