@@ -201,6 +201,15 @@ class SurveyMapContentTest {
   }
 
   @Test
+  fun main_onlyFeatureLabelsHideOnCollision() {
+    val map = SurveyMapContent.main(state, showNavigation = true)
+    val (labels, others) = map.content.markers.partition { SurveyMapIds.entityIdOf(it.id) != null }
+    assertTrue(labels.isNotEmpty())
+    assertTrue(labels.all { it.collides })
+    assertTrue(others.none { it.collides })
+  }
+
+  @Test
   fun main_showsUserChipAndSelectedPlace() {
     val place = state.places.first()
     state.selectPlace(place.id)
