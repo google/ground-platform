@@ -20,7 +20,6 @@ import org.groundplatform.v2.app.domain.model.editor.EntityDataset
 import org.groundplatform.v2.app.domain.model.editor.ImportedForm
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorForm
-import org.groundplatform.v2.app.domain.usecase.ProfileExportPlan
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
 import org.groundplatform.v2.web.domain.model.editor.CreateSurveyWizardStep
 import org.groundplatform.v2.web.domain.model.editor.SurveyCollectionMode
@@ -29,20 +28,8 @@ import org.groundplatform.v2.web.domain.model.editor.WizardMapFeatureSource
 import org.groundplatform.v2.web.domain.model.editor.WizardStartMethod
 
 /** Live impact and export readiness summary displayed in Step 5 and Step 6 of the wizard. */
-data class WizardImpactReadiness(
-  val selectedPackTitles: List<String> = emptyList(),
-  val selectedProgramLabels: List<String> = emptyList(),
-  val linkedConceptCount: Int = 0,
-  val totalQuestionCount: Int = 0,
-  val goalTitles: List<String> = emptyList(),
-  val exportPlans: List<ProfileExportPlan> = emptyList(),
-  val careSovereigntyApplied: Boolean = false,
-  val excludeFromPlatformAggregates: Boolean = false,
-) {
-  /** Number of enabled export profiles whose required fields are 100% mapped. */
-  val readyExportProfileCount: Int
-    get() = exportPlans.count { it.unmappedFields.isEmpty() }
-}
+typealias WizardImpactReadiness =
+  org.groundplatform.v2.web.domain.model.editor.WizardImpactReadiness
 
 /**
  * Immutable UI state for the full-page 6-step Ground 2.0 Survey Creation Wizard

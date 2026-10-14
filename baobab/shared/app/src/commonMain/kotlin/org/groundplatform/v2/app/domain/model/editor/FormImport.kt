@@ -57,7 +57,10 @@ data class ImportedForm(
  * reported in [ImportedForm.notes].
  */
 object FormImport {
-  /** Imports [xml]. Returns `null` when the XML can't be parsed by the form engine. */
+  /**
+   * Imports [xml] as an ODK XForms definition or a Collect Earth / Open Foris IDM schema. Returns
+   * `null` when the XML cannot be parsed into any questions.
+   */
   fun fromXml(
     xml: String,
     formId: String = "",
@@ -68,17 +71,26 @@ object FormImport {
       try {
         XFormsXmlSerializer.deserializeFormDef(xml)
       } catch (e: Exception) {
-        return null
+        null
       }
     if (
-      formDef.view?.components.isNullOrEmpty() &&
-        formDef.model?.bindings.isNullOrEmpty() &&
-        formDef.title.isBlank()
+      formDef != null &&
+        (!formDef.view?.components.isNullOrEmpty() ||
+          !formDef.model?.bindings.isNullOrEmpty() ||
+          formDef.title.isNotBlank())
     ) {
-      return null
+      val resolvedFormId = formId.ifBlank { formDef.form_id.takeIf { it != "data" }.orEmpty() }
+      val imported = fromFormDef(formDef, resolvedFormId, fallbackTitle, availability)
+      if (imported.form.questions.isNotEmpty() || formDef.title.isNotBlank()) {
+        return imported
+      }
     }
-    val resolvedFormId = formId.ifBlank { formDef.form_id.takeIf { it != "data" }.orEmpty() }
-    return fromFormDef(formDef, resolvedFormId, fallbackTitle, availability)
+    return CollectEarthIdmParser.fromXml(
+      xml = xml,
+      formId = formId,
+      fallbackTitle = fallbackTitle,
+      availability = availability,
+    )
   }
 
   /** Imports [formDefinition] as a Form with ID [formId] (defaults to the form's ID). */

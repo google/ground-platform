@@ -149,6 +149,55 @@ class ExportSurveyDataUseCase(private val recordImpactEvent: RecordImpactEventUs
   }
 
   /**
+   * Builds and filters [ProfileExportPlan]s for [dataset] to only those [profiles] where at least
+   * one non-geometry field is linked on [dataset] or on a form targeting [dataset].
+   */
+  fun applicablePlans(
+    profiles: List<ExportProfile>,
+    dataset: EntityDataset,
+    forms: List<SurveyEditorForm>,
+    library: ResolvedLibrary,
+    entities: List<GeospatialEntityItem>,
+    language: String = "en",
+  ): List<ProfileExportPlan> =
+    if (dataset.kind != DatasetKind.MAP_LAYER) {
+      emptyList()
+    } else {
+      profiles
+        .map { profile ->
+          plan(
+            profile = profile,
+            dataset = dataset,
+            forms = forms,
+            library = library,
+            entities = entities,
+            language = language,
+          )
+        }
+        .filter { plan -> hasMappedFields(plan, dataset, forms) }
+    }
+
+  /**
+   * Whether [dataset] (or a form targeting it) links at least one field to a concept in [plan]'s
+   * export profile.
+   */
+  fun hasMappedFields(
+    plan: ProfileExportPlan,
+    dataset: EntityDataset,
+    forms: List<SurveyEditorForm>,
+  ): Boolean {
+    if (plan.fields.any { !it.isGeometry && it.isMapped }) return true
+    val profileConceptIds = plan.profile.fieldConcepts.values.toSet()
+    if (dataset.properties.any { it.conceptLink?.conceptId in profileConceptIds }) return true
+    val datasetForms = forms.filter { entry ->
+      dataset.linkedFormKey == entry.key || entry.form.saveTo.targetDatasetId == dataset.id
+    }
+    return datasetForms.any { entry ->
+      entry.form.questions.any { it.conceptLink?.conceptId in profileConceptIds }
+    }
+  }
+
+  /**
    * [plan]'s GeoJSON `FeatureCollection` of [entities] in [dataset]: WGS84 coordinates rounded to 6
    * decimal places, boundaries as polygons and point plots as points, with one property per mapped
    * profile field (select answers written as their standard codes).

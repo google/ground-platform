@@ -20,6 +20,7 @@ import org.groundplatform.v2.app.domain.model.editor.FormPreviewTarget
 import org.groundplatform.v2.app.domain.model.editor.GeometryCapture
 import org.groundplatform.v2.app.domain.model.editor.GeometryKind
 import org.groundplatform.v2.app.domain.model.editor.SaveToMode
+import org.groundplatform.v2.app.domain.usecase.ProfileExportPlan
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
 
 /** The 6 guided steps of the Open Foris Collect One Survey Creation Wizard. */
@@ -303,6 +304,14 @@ object SurveyWizardRules {
       pack.id.endsWith(".coop_certification_audit")
 
   /**
+   * Default collector consent statement populated when enabling general collector consent in the
+   * wizard without CARE sovereignty defaults.
+   */
+  const val DEFAULT_COLLECTOR_CONSENT_TEXT: String =
+    "I consent to share the field observations and geospatial data collected in this survey with " +
+      "the organizing institution under its data governance policy."
+
+  /**
    * Default Free, Prior and Informed Consent (FPIC) & CARE data sovereignty notice populated when
    * applying CARE defaults in the wizard.
    */
@@ -369,3 +378,19 @@ data class CareGovernanceCriterion(
   val description: String,
   val isSatisfied: Boolean,
 )
+
+/** Live impact and export readiness summary displayed in Step 5 and Step 6 of the wizard. */
+data class WizardImpactReadiness(
+  val selectedPackTitles: List<String> = emptyList(),
+  val selectedProgramLabels: List<String> = emptyList(),
+  val linkedConceptCount: Int = 0,
+  val totalQuestionCount: Int = 0,
+  val goalTitles: List<String> = emptyList(),
+  val exportPlans: List<ProfileExportPlan> = emptyList(),
+  val careSovereigntyApplied: Boolean = false,
+  val excludeFromPlatformAggregates: Boolean = false,
+) {
+  /** Number of enabled export profiles whose required fields are 100% mapped. */
+  val readyExportProfileCount: Int
+    get() = exportPlans.count { it.unmappedFields.isEmpty() }
+}

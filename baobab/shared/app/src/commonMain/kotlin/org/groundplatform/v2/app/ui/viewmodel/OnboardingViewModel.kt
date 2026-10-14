@@ -13,7 +13,6 @@
  */
 package org.groundplatform.v2.app.ui.viewmodel
 
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -27,37 +26,18 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.groundplatform.v2.app.client.places.PlacesGeocoder
-import org.groundplatform.v2.app.client.places.createPlacesHttpClient
-import org.groundplatform.v2.app.client.places.mapboxAccessToken
 import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyStats
-import org.groundplatform.v2.app.domain.model.SurveyThumbnailPlaceLabel
 import org.groundplatform.v2.app.domain.repository.AuthRepository
 import org.groundplatform.v2.app.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.app.domain.repository.OrganizationRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.app.ui.state.OnboardingEvent
 import org.groundplatform.v2.app.ui.state.OnboardingUiState
-import org.groundplatform.v2.map.LatLng
-
-/** Creates the HTTP client used to fetch survey map thumbnail tiles. */
-internal fun createThumbnailHttpClient(): HttpClient? = createPlacesHttpClient()
-
-/** Resolves the public Mapbox token (`pk.*`) for survey map thumbnails, if configured. */
-internal fun resolveMapboxPublicToken(): String? =
-  mapboxAccessToken()?.takeIf { it.startsWith("pk.") }
-
-/** Reverse-geocodes place labels around [center] for survey map thumbnails. */
-internal suspend fun reverseGeocodeThumbnailLabels(
-  center: LatLng,
-  limit: Int = 2,
-): List<SurveyThumbnailPlaceLabel> =
-  PlacesGeocoder().reverseGeocodePlaceLabels(center, limit = limit)
 
 /** User intents of the onboarding screens. Implemented by [OnboardingViewModel]. */
 interface OnboardingActions {
