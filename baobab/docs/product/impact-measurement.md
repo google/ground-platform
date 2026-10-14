@@ -195,7 +195,7 @@ The exact conditions, and how scores are counted platform-wide (only surveys wit
 *   **Sensitive locations**: blur or suppress patrol routes, protected area threat reports, and IPLC sacred sites in any public dashboard (poaching and land-grab risk). Apply k-anonymity thresholds to S2 cells.
 *   **Shared credit**: agree on counting rules with FAO and SIG up front, so institutional sustainability goals, FAO reporting, and funder digests use the same deduplicated numbers and nobody double-claims.
 
-## Recommended Short List for Ground 2.0
+## Recommended Short List for Open Foris Collect One
 
 1.  **Purpose Packs** at survey creation, mapped to pillars behind the scenes. This replaces "organizers tag MAP pillars".
 2.  **Organization libraries and the dictionary**: global and organization-level concepts, templates, and packs; dictionary-linked questions with label autocomplete; GeoID-deduplicated aggregation.

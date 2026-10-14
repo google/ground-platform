@@ -14,14 +14,14 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Terminology & Cross-Platform Parity
+# Open Foris Collect One Terminology & Cross-Platform Parity
 
 Authors: [Gino Miceli](https://github.com/gino-m) \
-Last modified: 2026-09-25
+Last modified: 2026-10-14
 
 ## Overview & Mental Model
 
-Ground 2.0 unifies offline-first field data collection with desk-based satellite visual classification (formerly Collect Earth Online) on top of the industry-standard **XForms / XLSForm** architecture. To make the platform intuitive across diverse user groups—conservation coordinators, agricultural extension agents, remote sensing analysts, and software developers—Ground 2.0 establishes a clean separation between **User-Facing Terminology** and **Internal Engine Primitives**:
+**Open Foris Collect One** (referred to as **Collect One** for short) is the natural evolution of **Open Foris Ground** and **Collect Earth Online (CEO)**—co-maintained by **FAO** and **SIG** with engineering and cloud/AI support from **Google**. It unifies offline-first mobile field data collection with desk-based satellite visual classification on top of the industry-standard **XForms / XLSForm** architecture. To make the platform intuitive across diverse user groups—conservation coordinators, agricultural extension agents, remote sensing analysts, and software developers—Collect One establishes a clean separation between **User-Facing Terminology** and **Internal Engine Primitives**:
 
 ```mermaid
 flowchart TD
@@ -63,9 +63,9 @@ flowchart TD
    * **"Data Collection Site" is completely retired**: Real-world geographical objects may be boundaries, rivers, assets, or sample plots—not all of which are "collection sites".
 2. **Sub-Plot Samples via Plot Properties & XForms Repeats**:
    * In statistical remote sensing (Collect Earth Online workflows), a campaign often evaluates **Plots** (e.g., 100m × 100m squares) containing a grid of **Sub-Plot Sample Points** (e.g., 25 internal points).
-   * Rather than introducing specialized "SubPlot" primitives or multiplying entity counts by 25× with a separate sample table, Ground 2.0 encodes pre-defined sample points on the plot entity (`samples` and `sample_ids` properties) and expands them in the interpretation form as an XForms `begin repeat` loop (`/data/sample`), where each repeat instance holds its own `sample_id`, `location`, and sample-level answers.
+   * Rather than introducing specialized "SubPlot" primitives or multiplying entity counts by 25× with a separate sample table, Collect One encodes pre-defined sample points on the plot entity (`samples` and `sample_ids` properties) and expands them in the interpretation form as an XForms `begin repeat` loop (`/data/sample`), where each repeat instance holds its own `sample_id`, `location`, and sample-level answers.
 3. **User-Defined Workflow Progression via `save_to`**:
-   * Ground 2.0 does **not** hardcode a fixed enum of entity lifecycle states.
+   * Collect One does **not** hardcode a fixed enum of entity lifecycle states.
    * Instead, surveys track progress dynamically by storing `simplestyle-spec` properties (`marker-symbol`, `marker-color`, `stroke`, `fill`) and custom status properties (e.g., `status = "Needs Field Validation"`) on the entity, updated via XForms `save_to` bindings upon form submission.
    * Typical field defaults: `○` (Pending) → `◐` (In Progress) → `✓` (Completed).
    * Typical desk-to-field defaults: `○` (Unanalyzed) → `✓` (Consensus Reached) → `!` (Flagged for Field Validation) → `?` (Disputed / Needs SME Review).
@@ -73,9 +73,9 @@ flowchart TD
 
 ## Cross-Platform Terminology Parity Matrix
 
-The following matrix maps Ground 2.0 terminology against industry-standard data collection tools, Open Foris Arena, and Collect Earth Online (CEO):
+The following matrix maps Open Foris Collect One terminology against industry-standard data collection tools, Open Foris Arena, and legacy Collect Earth Online (CEO) and Ground 1.0:
 
-| Concept | Ground 2.0 (User-Facing) | Collect Earth Online (CEO) | ODK Central / Collect | KoboToolbox | XLSForm Sheet / Syntax | ArcGIS Survey123 | Open Foris Arena | Ground 1.0 (Legacy) | Internal Proto Schema |
+| Concept | Open Foris Collect One (User-Facing) | Collect Earth Online (CEO) | ODK Central / Collect | KoboToolbox | XLSForm Sheet / Syntax | ArcGIS Survey123 | Open Foris Arena | Ground 1.0 (Legacy) | Internal Proto Schema |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Top-Level Project Container** | **Survey** | **Project** | **Project** | **Project** | *(Workbook)* | **Survey** | **Survey** | **Survey** | `groundplatform.v2.survey.SurveyDef` |
 | **Organizational Tenant** | **Organization** | **Institution** | *(Server Instance)* | *(Account / Team)* | *(N/A)* | **Organization (AGOL)** | *(N/A)* | *(N/A)* | `SurveyDef.organization_id` |
@@ -100,11 +100,11 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
 ## Detailed Clarifications of Common Misalignments
 
 ### "Survey" vs. "Project" vs. "Form"
-* **The Confusion**: In Collect Earth Online (CEO) and KoboToolbox, the root container is called a **Project**, and the questionnaire inside is called a **Survey**. In Ground 2.0 (and Open Foris Arena / ArcGIS Survey123), the root container is a **Survey**, and the questionnaire inside is a **Form** (`FormDef`).
-* **Resolution**: Ground 2.0 maintains **Survey** as the container and **Form** as the questionnaire. Migration tools and UI onboarding from CEO will explicitly label this: *"Import CEO Project as a Ground Survey"*, where CEO's "Survey Questions" become a Form within the survey.
+* **The Confusion**: In Collect Earth Online (CEO) and KoboToolbox, the root container is called a **Project**, and the questionnaire inside is called a **Survey**. In Open Foris Collect One (and Open Foris Arena / ArcGIS Survey123), the root container is a **Survey**, and the questionnaire inside is a **Form** (`FormDef`).
+* **Resolution**: Collect One maintains **Survey** as the container and **Form** as the questionnaire. Migration tools and UI onboarding from CEO will explicitly label this: *"Import CEO Project as a Collect One Survey"*, where CEO's "Survey Questions" become a Form within the survey.
 
 ### "Map layers" and "Data tables"
-* **The Confusion**: Ground 1.0 used "Data collection sites", and early 2.0 drafts used "Tables" or "Entities" interchangeably for both non-spatial rosters and map polygons.
+* **The Confusion**: Ground 1.0 used "Data collection sites", and early drafts used "Tables" or "Entities" interchangeably for both non-spatial rosters and map polygons.
 * **Resolution**:
   * We use **"Map layers"** consistently across both the Organizer Survey Designer and the Mobile UI. In the designer, **Map layers** configure map display and symbology, while **Data tables** manage non-spatial lookup registries.
   * In the mobile app's expandable search list, content is organized into three clean sections:
@@ -115,17 +115,17 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
 
 ### "Organization" vs. "Institution"
 * **The Confusion**: CEO groups projects under an **Institution** whose **Admins** control every project and whose **Members** can see them; there is no per-project access list. Ground 1.0 had no tenant at all, only per-survey sharing.
-* **Resolution**: Ground 2.0 calls the tenant an **Organization** and keeps per-survey sharing. A survey optionally *belongs to* an organization; it still has an **owner** and its own access list. Organization roles are **Manager** (CEO *Admin*: edits the organization, manages members, and inherits **Survey organizer** access to all of its surveys) and **Member** (CEO *Member*: sees the organization's surveys, can create new ones, and can collect data in surveys shared with **Anyone in the organization**). People join by invite link or by **requesting to join** a *listed* organization; there is no domain auto-join. UI copy says *"You stay the owner. Managers of ‹organization› can also edit this survey, manage sharing, and export data."* rather than implying a transfer of ownership.
+* **Resolution**: Collect One calls the tenant an **Organization** and keeps per-survey sharing. A survey optionally *belongs to* an organization; it still has an **owner** and its own access list. Organization roles are **Manager** (CEO *Admin*: edits the organization, manages members, and inherits **Survey organizer** access to all of its surveys) and **Member** (CEO *Member*: sees the organization's surveys, can create new ones, and can collect data in surveys shared with **Anyone in the organization**). People join by invite link or by **requesting to join** a *listed* organization; there is no domain auto-join. UI copy says *"You stay the owner. Managers of ‹organization› can also edit this survey, manage sharing, and export data."* rather than implying a transfer of ownership.
 
 ### Survey Area
-* Ground surveys use **"Survey Area"** everywhere to describe the geographic scope (place name and bounding coordinates, e.g. "Nandi County, Kenya"), ensuring collectors are not artificially boxed into hard polygon perimeters. The term **Area of Interest (AOI)** is reserved strictly for the mathematical polygon bounding the probabilistic sample design generator.
+* Collect One surveys use **"Survey Area"** everywhere to describe the geographic scope (place name and bounding coordinates, e.g. "Nandi County, Kenya"), ensuring collectors are not artificially boxed into hard polygon perimeters. The term **Area of Interest (AOI)** is reserved strictly for the mathematical polygon bounding the probabilistic sample design generator.
 
 ### Time Series & Imagery
 * Instead of proprietary branding like "Geo-Dash", the historical satellite and spectral index analysis panel is simply called **"Time Series & Imagery"**.
 
 ### Sub-Plot Samples: Plot `samples` Property & XForms Repeats
 * **The Confusion**: CEO uses a two-tier spatial hierarchy (Plot → Sample points) where fractional land cover (e.g. 70% Forest, 30% Agriculture) is calculated from sample points.
-* **Resolution**: Ground 2.0 avoids adding specialized "SubPlot" primitives to Protocol Buffers or creating a separate entity record for every sample point. Instead, the Sample Designer stores sub-plot coordinates in the plot entity's `samples` geotrace property (`SampleEncoding`), and the interpretation form expands them into an XForms `begin repeat` loop (`/data/sample`). The map renders and colors each repeat instance directly from `FormSession` using the currently focused question's `ChoiceItem.properties["color"]` swatch, while plot-level percentages are aggregated over `/data/sample`.
+* **Resolution**: Collect One avoids adding specialized "SubPlot" primitives to Protocol Buffers or creating a separate entity record for every sample point. Instead, the Sample Designer stores sub-plot coordinates in the plot entity's `samples` geotrace property (`SampleEncoding`), and the interpretation form expands them into an XForms `begin repeat` loop (`/data/sample`). The map renders and colors each repeat instance directly from `FormSession` using the currently focused question's `ChoiceItem.properties["color"]` swatch, while plot-level percentages are aggregated over `/data/sample`.
 
 ### Multi-Interpreter Disagreement vs. Offline Sync Conflict
 * **The Confusion**: Early concept briefs suggested reusing the "Conflict Review Queue" for photo-interpretation disagreement.
@@ -136,7 +136,7 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
 ### "Anyone" Access: "Who can view data" vs. "Who can collect data"
 * **The Confusion**: Using the word "Public" to describe both *who can participate in a survey* and *who can view the collected data* obscures whether a participant's submissions are private to the organizing team or visible to the world.
 * **Resolution**:
-  * Ground 2.0 presents **General access** as two Google Groups-style stepped permission sliders (**Who can view data** and **Who can collect data**) across four audience stops (**Contributors & organizers**, **Invited people**, **Anyone in your organization**, and **Anyone**), plus a **Hide from survey directory** option when open to **Anyone**:
+  * Collect One presents **General access** as two Google Groups-style stepped permission sliders (**Who can view data** and **Who can collect data**) across four audience stops (**Contributors & organizers**, **Invited people**, **Anyone in your organization**, and **Anyone**), plus a **Hide from survey directory** option when open to **Anyone**:
     * **Contributor identity privacy across all tiers**: Across all surveys, contributor names and email addresses on submissions are visible **only to survey organizers** (and to each contributor on their own submissions). Non-organizer viewers and data collectors see `"Participant (identity hidden)"` on other people's submissions.
     * **Private submissions** (**Who can view data** set to `Contributors & organizers`): Data collectors only see their own submissions. Survey organizers can view all submissions and contributor identities.
     * **Shared with invited people or organization** (**Who can view data** set to `Invited people` or `Anyone in your organization`): Invited people or organization members can view all map features, answers, and photos, while only survey organizers can view contributor identities.
@@ -144,7 +144,7 @@ The following matrix maps Ground 2.0 terminology against industry-standard data 
     * **Hide from survey directory**: Controls whether an `Anyone` survey is listed in the survey directory (`SharingPolicy.PUBLIC` when unchecked) or requires a link or QR code to access (`SharingPolicy.ANYONE_WITH_LINK` when checked). Unlisted and listed `Anyone` surveys behave identically with respect to data visibility, contributor anonymity, and informed consent.
 
 ### Survey Lifecycle States
-To align with both CEO and enterprise field governance, Ground 2.0 adopts a 5-stage lifecycle:
+To align with both CEO and enterprise field governance, Open Foris Collect One adopts a 5-stage lifecycle:
 1. **`DRAFT`**: Authoring, logic testing in live preview, not visible for field synchronization.
 2. **`PUBLISHED`**: Active and live for data collection (mobile sync and web interpretation).
 3. **`CLOSED`**: Data collection concluded; read-only; visible on active lists and reporting dashboards, but rejecting new submissions.

@@ -14,12 +14,15 @@
   limitations under the License.
 -->
 
-# groundplatform.org Website Outline
+# Open Foris Collect One Website Outline
 
 ## Global Navigation & Sitemap
 
-The website groundplatform.org serves as a lightweight, GitHub-driven, shared
-home for technical developers, survey organizers, and field data collectors:
+The website `groundplatform.org` serves as a lightweight, GitHub-driven, shared
+home for technical developers, survey organizers, remote-sensing interpreters,
+and field data collectors using **Open Foris Collect One**—the natural evolution
+of **Open Foris Ground** and **Collect Earth Online (CEO)** co-maintained by
+**FAO** and **SIG** in collaboration with **Google**:
 
 *   **Header Navigation**:
     *   **Features**: Direct link to XLSForm parity, Map-first, Offline
@@ -113,8 +116,9 @@ reader that dynamically renders files hosted directly in the GitHub repository:
 ## Community & Governance Page
 
 *   **Open Foris Governance Charter**: The operational guidelines and bylaws of
-    the joint Open Foris framework.
-*   **Steering Committee**: Introducing representation from the FAO, Google,
-    SERVIR, and regional SMEs.
+    the joint Open Foris framework uniting Ground and Collect Earth Online into
+    Open Foris Collect One.
+*   **Co-Maintenance & Steering Committee**: Introducing joint stewardship by
+    **FAO** and **SIG** alongside **Google**, **SERVIR**, and regional SMEs.
 *   **Get Involved**: Links to Google Groups mailing list, biweekly standup
     notes, and GitHub issues triaged for community contributions.

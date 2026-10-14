@@ -17,7 +17,7 @@
 # Collect Earth Online Integration
 
 Authors: [Gino Miceli](https://github.com/gino-m) \
-Last modified: 2026-09-24
+Last modified: 2026-10-14
 
 ## Overview
 
@@ -28,11 +28,20 @@ Environmental monitoring, national forest inventories, and deforestation supply-
 1. **Desk-Based Visual Interpretation ("From Above")**: Analysts inspect thousands of sample plots across high-resolution satellite imagery and historical vegetation time series in a desktop browser to classify land cover, land use, and forest disturbance at scale.
 2. **In-Situ Field Validation ("On the Ground")**: Field crews, forest rangers, and agricultural extension agents travel to targeted sites with mobile devices to verify what satellite imagery cannot resolve—such as understory crops beneath closed tree canopy, persistent cloud shadow, early-stage forest degradation, or tenure boundaries.
 
-Historically, **Collect Earth Online (CEO)** has served as the community standard for browser-based satellite visual interpretation, while **Ground** has served as the offline-first mobile tool for in-situ field data collection. Because the two tools operated as separate products with separate project setups and data formats, running a combined desk-and-field campaign required painful manual handoffs: exporting spreadsheets of ambiguous plots from CEO, cleaning and filtering them in desktop GIS software, creating a second survey in a mobile app, and manually reconciling two disconnected datasets weeks later.
+Historically, **Collect Earth Online (CEO)** has served as the community standard for browser-based satellite visual interpretation, while **Open Foris Ground** has served as the offline-first mobile tool for in-situ field data collection. Because the two tools operated as separate products with separate project setups and data formats, running a combined desk-and-field campaign required painful manual handoffs: exporting spreadsheets of ambiguous plots from CEO, cleaning and filtering them in desktop GIS software, creating a second survey in a mobile app, and manually reconciling two disconnected datasets weeks later.
 
-Rolling Collect Earth Online into **Ground 2.0** eliminates this divide. By bringing satellite visual interpretation and mobile field validation into a single workspace around shared survey sites, a plot flagged by a desk interpreter on a laptop in the morning can immediately appear as a high-priority validation target on a field ranger's offline phone that afternoon—closing the loop between satellite observation and ground truth.
+**Open Foris Collect One** (referred to as **Collect One** for short) is the natural evolution and convergence of **Open Foris Ground** and **Collect Earth Online (CEO)**—as well as the cloud- and mobile-native successor to legacy desktop **Collect Earth**. By merging satellite visual interpretation and mobile field validation into a single workspace around shared survey sites, a plot flagged by a desk interpreter on a laptop in the morning can immediately appear as a high-priority validation target on a field ranger's offline phone that afternoon—closing the loop between satellite observation and ground truth.
 
-> **Terminology & Parity**: See **[Terminology & Cross-Platform Parity](terminology.md)** for the complete mapping between Collect Earth Online (CEO) and Ground 2.0 concepts (e.g., CEO **Institution** → Ground **Organization**; CEO **Project** → Ground **Survey**; CEO **Survey Cards** → Ground **Form & Groups**; CEO **Plots & Samples** → Ground **Relational Map Layers / Data Tables**).
+### Why FAO, SIG, and Google Are Uniting Ground and Collect Earth Online
+
+* **Why FAO and SIG Are Joining Forces**:
+  * **Ending Disconnected Desk-to-Field Silos**: Previously, the **Food and Agriculture Organization of the United Nations (FAO)** (steward of Open Foris—Collect, Collect Earth, Arena, and Whisp—and UN custodian agency for FERM and Kunming-Montreal Global Biodiversity Framework Target 2 across 130+ country offices and 60+ UNFCCC REDD+ reporting nations) and **Spatial Informatics Group (SIG)** (lead developer and operator of Collect Earth Online in partnership with NASA/USGS SERVIR) maintained separate platforms for satellite interpretation and mobile field collection. Merging them eliminates the manual export-and-stitch tax for institutions that already run both tools.
+  * **Shared Standards, Joint Maintenance, and Legacy Migration**: Both platforms needed to modernize around the industry-standard **XForms / XLSForm** and **ODK Entities** data model, institutional **Organization** governance, and longitudinal monitoring. Rather than duplicating engineering across parallel form engines, web consoles, and sample designers, FAO and SIG are combining forces to co-maintain a single flagship platform under the Open Foris governance charter—while providing a seamless cloud-native home for over 60 countries transitioning off legacy desktop **Collect Earth** ahead of the June 2027 Google Earth Pro deprecation.
+* **Why Google Is Well-Positioned to Help**:
+  * **Cross-Platform Engineering & Low-Ceremony UX**: Having originally incubated Ground and transitioned it to Open Foris governance, Google contributes deep software engineering investment in a unified **Kotlin Multiplatform (KMP)** and **Compose Multiplatform** architecture spanning Android, iOS, and Web, paired with Material 3 **"Proportional Complexity"** UX, offline-first vector/raster caching, and cryptographically verifiable audit and compliance receipts.
+  * **Bridging Planetary Cloud Infrastructure & Geospatial AI with Ground Truth**: Google operates **Google Earth Engine**, **BigQuery**, and **AlphaEarth Foundations** (multi-modal geospatial embeddings and classification models). Because offline mobile field collection and multi-interpreter campaign management lie outside the product scope of standalone Google Earth and Earth Engine, Google is uniquely positioned to connect orbital cloud AI with Open Foris Collect One—routing scarce human desk and field attention to high-uncertainty plots (such as sub-canopy degradation or shade-grown agroforestry) and feeding verified ground truth back into global climate, biodiversity, and deforestation-free supply-chain models.
+
+> **Terminology & Parity**: See **[Terminology & Cross-Platform Parity](terminology.md)** for the complete mapping between Collect Earth Online (CEO) and Open Foris Collect One concepts (e.g., CEO **Institution** → Collect One **Organization**; CEO **Project** → Collect One **Survey**; CEO **Survey Cards** → Collect One **Form & Groups**; CEO **Plots & Samples** → Collect One **Relational Map Layers / Data Tables**).
 
 ### Primary Personas & Jobs-to-be-Done
 
@@ -45,7 +54,7 @@ Rolling Collect Earth Online into **Ground 2.0** eliminates this divide. By brin
 
 ## Collect Earth Online Capabilities: User Experience Inventory
 
-To ensure existing Collect Earth Online institutions and users can transition seamlessly to Ground 2.0, this section catalogs the complete set of user-facing capabilities available in [Collect Earth Online](https://www.collect.earth/ceo-guides/) today across the lifecycle of an interpretation campaign.
+To ensure existing Collect Earth Online institutions and users can transition seamlessly to Open Foris Collect One, this section catalogs the complete set of user-facing capabilities available in [Collect Earth Online](https://www.collect.earth/ceo-guides/) today across the lifecycle of an interpretation campaign.
 
 ```mermaid
 flowchart LR
@@ -150,11 +159,11 @@ For project supervisors, Collect Earth Online provides a comprehensive review an
 * **Side-by-Side Disagreement Inspection & Contributor Quarantine**: Supervisors can view a side-by-side breakdown of how each analyst labeled every sample point in a disputed plot. If an interpreter is found to be poorly calibrated or submitting low-effort labels, the administrator can **Ignore/Disable User Contributions**—excluding that user's labels from project statistics and final exports with a single toggle, while preserving their raw records for auditability.
 * **Two-Level Exports & Zenodo DOI Minting**: Organizers can export both a **Plot Summary CSV** (containing aggregated percentage cover per class, confidence scores, and interpretation duration) and a **Raw Sample CSV** (every individual sub-plot point and the exact imagery date used). When the campaign is complete, organizers can mint an official **Digital Object Identifier (DOI)** via built-in **Zenodo / DataCite** integration, packaging the dataset and automatically crediting all participating interpreters as data curators.
 
-## Integrating Collect Earth Online with Ground 2.0: The Unified User Experience
+## Integrating Collect Earth Online with Open Foris Ground: The Unified Collect One User Experience
 
-### How Visual Interpretation Fits Naturally into Ground 2.0
+### How Visual Interpretation Fits Naturally into Open Foris Collect One
 
-In Ground 2.0, visual interpretation is not a separate application bolted onto the side of field collection; both workflows share the same core building blocks:
+In Open Foris Collect One, visual interpretation is not a separate application bolted onto the side of field collection; both workflows share the same core building blocks:
 
 * **Sample Plots are Shared Survey Sites**: A campaign's sample plots live in a shared **Map features** table. Each plot has a location/boundary, reference attributes (such as stratum or region), and a live **Status** (for example: *Pending Desk Review* → *Flagged for Field Validation* → *Field Verified*).
 * **Desk and Field Questionnaires are Standard Forms**: A survey can include both a **Desk Visual Interpretation Form** (completed in the Web Console) and a **Field Validation Form** (completed in the Mobile App), both linked to the same sample plots.
@@ -162,13 +171,13 @@ In Ground 2.0, visual interpretation is not a separate application bolted onto t
 
 ### Base Case User Journey: Flagging Sample Plots During Visual Inspection for Field Validation
 
-The highest-value integration between Collect Earth Online and Ground 2.0 is the **Desk-to-Field Validation Loop**: allowing a photo-interpreter to flag an ambiguous sample plot during visual inspection so that a mobile field crew can physically visit and verify that exact location on the ground.
+The highest-value capability unlocked by uniting Collect Earth Online and Ground into Open Foris Collect One is the **Desk-to-Field Validation Loop**: allowing a photo-interpreter to flag an ambiguous sample plot during visual inspection so that a mobile field crew can physically visit and verify that exact location on the ground.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Desk as Desk Interpreter<br/>(Web Console)
-    participant Platform as Ground 2.0 Shared<br/>Plot Registry
+    participant Platform as Collect One Shared<br/>Plot Registry
     actor Field as Field Validator<br/>(Mobile App — Offline)
     actor Lead as Survey Supervisor<br/>(Web Console)
 
@@ -192,18 +201,18 @@ sequenceDiagram
 
 #### Step 1: Desk Visual Inspection & Non-Destructive Flagging (Web Console)
 
-1. A desk photo-interpreter logs into the Ground 2.0 Web Console and launches the **Visual Interpretation Workspace** for a national cocoa and forest monitoring survey.
+1. A desk photo-interpreter logs into the Collect One Web Console and launches the **Visual Interpretation Workspace** for a national cocoa and forest monitoring survey.
 2. On Plot #1042, the interpreter inspects high-resolution satellite imagery and the historical vegetation timeline. They see a dense upper tree canopy with faint linear clearing patterns underneath, making it impossible to tell from satellite imagery alone whether the plot is **natural secondary forest** or **shade-grown agroforestry cocoa**.
 3. Rather than guessing blindly—or throwing away their observations as required in standalone CEO—the interpreter:
    * Selects their best preliminary assessment (*Shade-Grown Cocoa*),
    * Slides their **Interpretation Confidence** to **35%**,
    * Toggles **Flag for Field Validation**, and types a brief instruction for the field team: *"Dense upper canopy obscures understory rows; please verify whether planted cocoa trees are present beneath canopy."*
-4. When the interpreter clicks **Save & Next Plot**, Ground 2.0 preserves their preliminary classification and confidence score, updates Plot #1042's status to **Needs Field Validation**, and changes its map pin to a high-visibility red alert marker (`!`).
+4. When the interpreter clicks **Save & Next Plot**, Collect One preserves their preliminary classification and confidence score, updates Plot #1042's status to **Needs Field Validation**, and changes its map pin to a high-visibility red alert marker (`!`).
 
 #### Step 2: Automatic Field Dispatch & Selective Offline Sync (Mobile App)
 
 1. A national campaign may contain 50,000 sample plots across the country, of which only 300 ambiguous plots are flagged for physical field visits.
-2. When a field ranger or extension agent opens the Ground 2.0 Mobile App before heading into the field, their **Field Validation** workflow is automatically filtered to display only plots whose status is **Needs Field Validation** within their operating region.
+2. When a field ranger or extension agent opens the Collect One Mobile App before heading into the field, their **Field Validation** workflow is automatically filtered to display only plots whose status is **Needs Field Validation** within their operating region.
 3. The ranger downloads offline basemap tiles for their district and heads into the field with zero manual spreadsheet imports or file transfers.
 
 #### Step 3: Context-Aware Ground-Truthing & Wayfinding Under Canopy (Mobile App)
@@ -213,7 +222,7 @@ sequenceDiagram
    > **Flagged for Field Validation (Desk Confidence: 35%)**
    > *Preliminary Desk Classification*: Shade-Grown Cocoa
    > *Interpreter Note*: "Dense upper canopy obscures understory rows; please verify whether planted cocoa trees are present beneath canopy."
-3. The ranger taps **Navigate to Site**, activating Ground 2.0's top-docked **Wayfinding HUD** (live compass bearing and straight-line distance) to hike directly to the plot center.
+3. The ranger taps **Navigate to Site**, activating Collect One's top-docked **Wayfinding HUD** (live compass bearing and straight-line distance) to hike directly to the plot center.
 4. Once inside the plot, the ranger launches the **Field Validation Form**, captures a high-accuracy GNSS perimeter walk under the canopy, takes four cardinal-direction reference photos of the understory and upper canopy, and records the verified ground-truth classification (*Shade-Grown Cocoa — Mature Understory*).
 
 #### Step 4: Closed-Loop Verification & Team Calibration (Web Console)
@@ -222,13 +231,13 @@ sequenceDiagram
 2. Plot #1042's status automatically transitions to **Field Verified**, and its map marker updates to a green checkmark (`✓`) across both mobile and web maps.
 3. Back in the Web Console, the QA/QC Supervisor—and the original desk interpreter—can open Plot #1042 to view the field ranger's understory photos alongside the satellite imagery and spectral charts. These field-verified plots can then be pinned to the campaign's **Learning Materials** or used as a **Source of Truth (SoT)** reference dataset to calibrate the entire photo-interpretation team on what shade-grown cocoa looks like from space.
 
-## Product & Workflow Deltas from the Current Ground 2.0 PRD
+## Product & Workflow Deltas from the Baseline PRD
 
-While the current Ground 2.0 Product Requirements Document ([`prd.md`](prd.md)) and Concept Brief ([`concept-brief.md`](concept-brief.md)) establish the foundation for rolling Collect Earth Online into Ground 2.0, a detailed comparison against Collect Earth Online's capabilities reveals **12 product and workflow deltas** that must be incorporated into the Ground 2.0 requirements to support real-world interpretation and desk-to-field campaigns.
+While the Open Foris Collect One Product Requirements Document ([`prd.md`](prd.md)) and Concept Brief ([`concept-brief.md`](concept-brief.md)) establish the foundation for uniting Collect Earth Online and Ground into Open Foris Collect One, a detailed comparison against Collect Earth Online's capabilities reveals **12 product and workflow deltas** that must be incorporated into the Collect One requirements to support real-world interpretation and desk-to-field campaigns.
 
 ### Summary of Product Deltas
 
-| # | Product Area | What Users Can Do in CEO Today | Current Ground 2.0 PRD Baseline | Product Requirement Delta for Ground 2.0 |
+| # | Product Area | What Users Can Do in CEO Today | Baseline PRD | Product Requirement Delta for Open Foris Collect One |
 | :---: | :--- | :--- | :--- | :--- |
 | **1** | **Within-Plot Sample Point Grids & Proportional Cover** | Analysts select and label multiple sub-plot sample points (e.g., 25 points inside a 100m plot) on the map; the system automatically calculates fractional land-cover percentages (e.g., 72% Forest, 28% Crop). | Sites are modeled as a single point, line, or polygon where a form submission applies to the site as a whole. No UI workflow is specified for multi-selecting sub-plot sample points on the map. | **Add Sub-Plot Sample Grid & Map Multi-Select UX**: Allow organizers to configure sub-plot point grids (gridded, random, center) or multi-feature drawing inside a plot, allow analysts to click/box-select subsets of points on the map to assign answers, and auto-calculate plot-level percentage rollups. |
 | **2** | **Non-Destructive Plot Flagging & Confidence Ratings** | Analysts can rate confidence (`0–100%`) OR flag a plot with a reason—but flagging a plot in CEO **deletes** all partial sample answers (`flagged` and `saved` are mutually exclusive). | Mentions that interpreters can flag ambiguous plots for review, but does not specify how flagged plots retain preliminary observations or hand off context to field teams. | **Require State-Preserving Plot Flagging**: Allow desk interpreters to save their preliminary classification AND confidence rating (`0–100%`) while flagging a plot for either **Supervisor Review** or **Mobile Field Validation**, surfacing the desk hypothesis and flag note on the mobile field card. |
@@ -254,32 +263,32 @@ In land-use and forest inventories, a sample plot (such as a half-hectare or one
   * When all sample points in the plot are labeled, the platform automatically computes the plot-level fractional cover percentages (e.g., *68% Closed Forest, 20% Shade Cocoa, 12% Bare Soil*) for downstream reporting and field comparison.
 
 #### Non-Destructive Plot Flagging & Confidence Handoff
-In Collect Earth Online today, if an interpreter spends three minutes analyzing a difficult plot and decides to flag it, the system erases all of their answers on that plot. When integrating with mobile field teams in Ground 2.0, throwing away the desk analyst's partial observations deprives the field crew of critical context.
+In Collect Earth Online today, if an interpreter spends three minutes analyzing a difficult plot and decides to flag it, the system erases all of their answers on that plot. When integrating with mobile field teams in Open Foris Collect One, throwing away the desk analyst's partial observations deprives the field crew of critical context.
 * **User Experience Requirement**:
   * Every visual interpretation form includes a built-in **Confidence Slider (`0–100%`)** and a **Flag Plot** action.
   * When flagging a plot, the interpreter selects the destination (**Flag for Supervisor / SME Review** vs. **Flag for Mobile Field Validation**) and provides a brief note explaining what is uncertain (e.g., *"Cloud shadow on northeast quadrant"* or *"Cannot distinguish coffee/cocoa understory from bush fallow"*).
   * Any preliminary answers entered by the interpreter are **saved alongside the flag**, and are displayed as a read-only summary banner on the supervisor's review screen and on the field ranger's mobile device.
 
 #### Multi-Interpreter Consensus vs. Offline Sync Conflict Resolution
-The current Ground 2.0 PRD proposes reusing the **Offline Sync Conflict Queue** to handle disagreement between multiple photo-interpreters. From a user's perspective, however, an offline sync conflict and a multi-interpreter QA/QC review are fundamentally different:
+The baseline PRD proposes reusing the **Offline Sync Conflict Queue** to handle disagreement between multiple photo-interpreters. From a user's perspective, however, an offline sync conflict and a multi-interpreter QA/QC review are fundamentally different:
 * An **Offline Sync Conflict** happens accidentally when two field rangers edit the same property of a site while disconnected, and is resolved by picking one edit (*Latest Timestamp Wins*).
 * A **Multi-Interpreter QA/QC Review** is an intentional statistical workflow where an organizer assigns 3 or 5 analysts to independently classify the same plot online so the platform can measure agreement and compute a consensus label. If *Latest Timestamp Wins* were applied, the 3rd interpreter's submission would simply overwrite the 1st and 2nd interpreters' work.
 * **User Experience Requirement**:
   * When a plot is configured for multi-interpreter overlap (e.g., 3 independent reviews required), each interpreter sees the plot in a clean, unanalyzed state so their judgment is not biased by prior analysts.
-  * Once the required number of independent interpretations is reached, Ground 2.0 automatically evaluates agreement:
+  * Once the required number of independent interpretations is reached, Collect One automatically evaluates agreement:
     * **Full Agreement**: The consensus classification is automatically promoted as the verified desk label for the plot.
     * **Disagreement Above Threshold**: The plot is automatically routed to the **Disagreement Review Queue** (for side-by-side supervisor adjudication) or—if configured by the organizer—automatically transitioned to **Needs Field Validation** so a mobile crew can settle the tie on the ground.
 
 #### Scaling to National Inventories with Selective Mobile Sync
 National remote-sensing campaigns operate at a vastly larger site count than purely mobile surveys: a national grid routinely contains **25,000 to 100,000 sample plots** interpreted by **50 to 300 analysts**, whereas mobile field teams may only physically visit **1% to 5%** of those plots (the ones flagged for ambiguity or selected for ground-truth calibration).
 * **User Experience Requirement**:
-  * Allow visual interpretation campaigns in Ground 2.0 to host up to **100,000+ sample plots** and **500+ collaborators** in the Web Console.
+  * Allow visual interpretation campaigns in Collect One to host up to **100,000+ sample plots** and **500+ collaborators** in the Web Console.
   * Ensure the Mobile App does **not** attempt to download all 100,000 desk plots to a ranger's phone; instead, mobile devices automatically sync only the plots assigned to field validation (e.g., plots marked *Needs Field Validation* within the ranger's geographic region), keeping offline mobile sync fast and lightweight.
 
 #### Inline Dockable Geo-Dash with One-Click Historical Imagery
 In Collect Earth Online, Geo-Dash opens as a separate pop-up browser window—which is frequently blocked by modern browsers and difficult to manage on single-monitor laptops.
 * **User Experience Requirement**:
-  * Integrate **Geo-Dash** directly into the Ground 2.0 Web Console as a collapsible, resizable **Time-Series & Degradation Drawer** (with an option to pop it out onto a second monitor if desired).
+  * Integrate **Geo-Dash** directly into the Collect One Web Console as a collapsible, resizable **Time-Series & Degradation Drawer** (with an option to pop it out onto a second monitor if desired).
   * Preserve CEO's signature **Interactive Forest Degradation workflow**: when an analyst clicks any point or disturbance dip on a multi-year vegetation or radar time-series chart (such as NDVI, EVI, or NDFI), the main map viewport immediately loads the corresponding historical satellite image from that exact month and year so the analyst can visually confirm the event.
 
 ## Recommended Rollout Phases for Users & Institutions

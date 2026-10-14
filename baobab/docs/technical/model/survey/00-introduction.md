@@ -16,7 +16,7 @@
 
 # Introduction
 
-The Ground 2.0 (`groundplatform.v2.survey` and `groundplatform.v2.data`) data
+The Open Foris Collect One (`groundplatform.v2.survey` and `groundplatform.v2.data`) data
 model specification defines the strongly typed Protocol Buffer (`proto3`)
 schemas governing survey administration, geospatial entity registries, access
 control lists (ACLs), tiered quotas, field data submissions, and append-only
@@ -30,11 +30,11 @@ While [ProtoForms](docs/model/forms/00-introduction.md)
 form submission records (`RecordInstance`) with full XForms round-trip
 compatibility, the `groundplatform.v2.survey` and `groundplatform.v2.data`
 packages provide the higher-level multi-form survey workspace, spatial indexing,
-and operational records that power Ground 2.0 web and mobile applications.
+and operational records that power Open Foris Collect One web and mobile applications.
 
 ## Package and File Architecture
 
-All Ground 2.0 schemas reside under `shared/protos/` and are organized into
+All Open Foris Collect One schemas reside under `shared/protos/` and are organized into
 modular `.proto` files under three packages: `groundplatform.v2.forms` (form
 definitions and records), `groundplatform.v2.survey` (survey definitions and
 metadata), and `groundplatform.v2.data` (user data records):

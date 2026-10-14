@@ -14,14 +14,14 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Architecture: Clean Architecture & MVVM in Kotlin Multiplatform
+# Open Foris Collect One Architecture: Clean Architecture & MVVM in Kotlin Multiplatform
 
-This document outlines how Ground 2.0 implements **Clean Architecture** and **Model-View-ViewModel (MVVM)** across Kotlin Multiplatform (KMP) and Compose Multiplatform (CMP). It establishes explicit layering boundaries, dependency rules, naming standards, and answers who can communicate directly with repositories and system/hardware service clients.
+This document outlines how Open Foris Collect One implements **Clean Architecture** and **Model-View-ViewModel (MVVM)** across Kotlin Multiplatform (KMP) and Compose Multiplatform (CMP). It establishes explicit layering boundaries, dependency rules, naming standards, and answers who can communicate directly with repositories and system/hardware service clients.
 
 
 ## Core Principles & Motivation
 
-Ground 2.0 is an offline-first, cross-platform geospatial data collection and monitoring platform targeting Android, iOS, and Web. Adopting Clean Architecture and MVVM provides critical engineering advantages:
+Open Foris Collect One is an offline-first, cross-platform geospatial data collection, satellite visual interpretation, and monitoring platform targeting Android, iOS, and Web. Adopting Clean Architecture and MVVM provides critical engineering advantages:
 
 1. **Strict Dependency Rule (Inward Dependencies)**: Dependencies point strictly inwards toward the core business domain. Inner layers know nothing about outer frameworks, databases, or UI toolkits.
 2. **Platform Agnosticism**: Core business logic (form evaluation, validation, survey models, offline sync coordination) lives in pure Kotlin Multiplatform (`commonMain`) with zero platform-specific imports.
@@ -34,8 +34,8 @@ Ground 2.0 is an offline-first, cross-platform geospatial data collection and mo
 - [Android Guide to App Architecture (Data Layer & Domain Layer)](https://developer.android.com/topic/architecture)
 - [Android Architecture Recommendations: Domain Layer & Use Cases](https://developer.android.com/topic/architecture/domain-layer)
 - [Android Architecture Recommendations: Data Layer](https://developer.android.com/topic/architecture/data-layer)
-- [Ground 2.0 Multiplatform Architecture (`shared/README.md`)](../../../shared/README.md)
-- [Ground 2.0 Shared Mobile Module (`shared/mobile/README.md`)](../../../shared/mobile/README.md)
+- [Open Foris Collect One Multiplatform Architecture (`shared/README.md`)](../../../shared/README.md)
+- [Open Foris Collect One Shared Mobile Module (`shared/mobile/README.md`)](../../../shared/mobile/README.md)
 
 
 ## High-Level Architectural Layers
@@ -240,7 +240,7 @@ flowchart TD
 
 ## Directory Structure & Module Placement
 
-Within Ground 2.0, clean layering is mapped across KMP modules. Each module
+Within Open Foris Collect One, clean layering is mapped across KMP modules. Each module
 keeps the same layer names (`domain/`, `data/`, `client/`, `di/`, `ui/`) for the
 code it owns; code lives in the lowest module that every user of it depends
 on, so each app's build includes only what it uses.
@@ -288,7 +288,7 @@ enforces these rules.
 
 ## Summary Checklist for Code Reviews
 
-When authoring or reviewing Kotlin code in Ground 2.0, verify against this checklist:
+When authoring or reviewing Kotlin code in Open Foris Collect One, verify against this checklist:
 
 - [ ] **Dependency Direction**: Do imports point inwards toward domain? No domain class imports classes from `data`, `ui`, `android.*`, or `platform.*`.
 - [ ] **Pure Domain Models**: Does the domain layer use pure Kotlin data classes? Platform-specific objects (`android.location.Location`, `CLLocation`) must never cross into domain or presentation.

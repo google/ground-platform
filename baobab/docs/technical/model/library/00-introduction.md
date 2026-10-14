@@ -16,7 +16,7 @@
 
 # Introduction
 
-The Ground 2.0 **library** (`groundplatform.v2.library`) defines reusable,
+The Open Foris Collect One **library** (`groundplatform.v2.library`) defines reusable,
 organization-owned building blocks for survey design and impact measurement:
 
 *   **Concepts** (the **dictionary**): standard field definitions with a

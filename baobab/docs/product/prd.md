@@ -17,24 +17,35 @@
 # Product Requirements
 
 Authors: [Gino Miceli](https://github.com/gino-m) \
-Last modified: 2026-10-09
+Last modified: 2026-10-14
 
 ## Overview
 
 ### Mission & Strategic Context
 
-The mission of **Open Foris Ground** is to democratize geospatial data collection for social and environmental impact. By removing technical barriers, centering workflows on the map, and interoperating natively with industry standards, Ground empowers local communities, smallholder cooperatives, researchers, and public institutions to advance sustainable land management, ecosystem restoration, and deforestation-free supply chains.
+The mission of **Open Foris Collect One** (referred to as **Collect One** for short) is to democratize geospatial data collection and satellite-to-field verification for social and environmental impact. By removing technical barriers, centering workflows on the map, and interoperating natively with industry standards, Collect One empowers local communities, smallholder cooperatives, researchers, and public institutions to advance sustainable land management, ecosystem restoration, and deforestation-free supply chains.
 
-Following its transition from a Google-incubated initiative to a community-governed open-source platform under Open Foris in version 1.0, **Ground 2.0 represents the platform's institutional maturation**. It evolves Ground from a lightweight field mapping tool into a comprehensive, enterprise-ready survey and monitoring platform capable of supporting national inventories and strict regulatory compliance regimes such as the European Union Deforestation Regulation (EUDR), FSC certification, and carbon verification standards:
+**Open Foris Collect One is the natural evolution and convergence of Open Foris Ground and Collect Earth Online (CEO)**—as well as the cloud- and mobile-native successor to legacy desktop **Collect Earth**. Co-maintained by the **Food and Agriculture Organization of the United Nations (FAO)** and **Spatial Informatics Group (SIG)** with cross-platform engineering, cloud infrastructure, and geospatial AI support from **Google**, Collect One merges browser-based satellite visual interpretation and offline-first mobile field data collection into a comprehensive, enterprise-ready survey and monitoring platform capable of supporting national inventories and strict regulatory compliance regimes such as the European Union Deforestation Regulation (EUDR), FSC certification, and carbon verification standards:
 
-*   **True Cross-Platform Reach (Web, Android, & iOS)**: Ground 2.0 introduces full feature parity across Android and iOS alongside an expanded Web Console—unlocking regions like Viet Nam, where over 70% of forest rangers and cooperative partners rely on iOS devices.
-*   **End-to-End Desk-to-Field Workflow**: By rolling **Collect Earth Online (CEO)** visual satellite interpretation directly into the Web Console, Ground 2.0 unites remote sensing assessment and offline-first ground verification within a single survey lifecycle.
-*   **Industry-Standard Forms & Longitudinal Monitoring**: Ground 2.0 adopts the industry-standard **XLSForm / XForms** model, adding support for hierarchical questionnaires, skip logic, repeating loops, and persistent **Map features** that can be revisited and updated across multiple monitoring waves.
+*   **True Cross-Platform Reach (Web, Android, & iOS)**: Open Foris Collect One introduces full feature parity across Android and iOS alongside an expanded Web Console—unlocking regions like Viet Nam, where over 70% of forest rangers and cooperative partners rely on iOS devices.
+*   **End-to-End Desk-to-Field Workflow**: By uniting **Collect Earth Online (CEO)** visual satellite interpretation and **Open Foris Ground** mobile field verification inside a single platform, Collect One connects remote sensing assessment and offline-first ground verification within one continuous survey lifecycle.
+*   **Industry-Standard Forms & Longitudinal Monitoring**: Collect One adopts the industry-standard **XLSForm / XForms** model, adding support for hierarchical questionnaires, skip logic, repeating loops, and persistent **Map features** that can be revisited and updated across multiple monitoring waves.
 *   **Institutional Trust & Traceability**: End-to-end versioning across surveys, forms, and records—backed by immutable audit trails and offline farmer receipt PDFs—ensures every observation and boundary adjustment is verifiable.
+
+### Why FAO, SIG, and Google Are Uniting Ground and Collect Earth Online
+
+1.  **One Continuous Loop from Orbit to Ground**:
+    *   Satellite observation from above and field verification on the ground are two halves of the same environmental monitoring workflow. **Collect Earth Online (CEO)** established the global standard for browser-based statistical sample design, multi-temporal satellite visual interpretation, and blind multi-interpreter QA/QC, while **Open Foris Ground** pioneered low-ceremony, map-first, offline-capable mobile field data collection and longitudinal site revisits.
+2.  **Why FAO and SIG Are Joining Forces**:
+    *   **Eliminating Disconnected Workflows**: Previously, **FAO** (steward of the Open Foris suite—Collect, Collect Earth, Arena, and Whisp—and UN custodian agency for FERM and Kunming-Montreal Global Biodiversity Framework Target 2 across 130+ country offices and 60+ UNFCCC REDD+ reporting nations) and **SIG** (lead developer and operator of Collect Earth Online in partnership with NASA/USGS SERVIR) maintained separate platforms for satellite interpretation and mobile fieldwork. Institutions had to manually export, convert, and reconcile separate project schemas, plot registries, and user permissions whenever desk analysts needed field teams to verify ambiguous or cloud- and canopy-occluded plots.
+    *   **Shared Standards, Co-Maintenance, and Legacy Migration**: Both platforms needed to modernize around the **XForms / XLSForm** and **ODK Entities** standard, institutional **Organization** governance, and longitudinal monitoring. Rather than duplicating engineering across parallel form engines, web consoles, and sample designers, FAO and SIG are merging Ground and Collect Earth Online into one unified platform co-maintained by both organizations under the Open Foris charter—while providing a seamless cloud-native home for over 60 countries transitioning off legacy desktop **Collect Earth** ahead of the June 2027 Google Earth Pro deprecation.
+3.  **Why Google Is Well-Positioned to Help**:
+    *   **Incubation Heritage, Cross-Platform Engineering, and Low-Ceremony UX**: Having originally incubated Ground and transitioned it to Open Foris governance, Google contributes deep software engineering expertise in a unified **Kotlin Multiplatform (KMP)** and **Compose Multiplatform** architecture spanning Android, iOS, and Web, paired with Material 3 **"Proportional Complexity"** UX (accessible to first-time smartphone users and GIS specialists alike), offline-first vector/raster caching, and cryptographically verifiable audit and compliance receipts.
+    *   **Bridging Planetary Cloud Infrastructure & Geospatial AI with Ground Truth**: Google operates **Google Earth Engine**, **BigQuery**, and **AlphaEarth Foundations** (multi-modal geospatial embeddings and land-cover classification models). Because offline mobile field collection and multi-interpreter campaign orchestration lie outside the scope of standalone Google Earth and Earth Engine, Google is uniquely positioned to connect orbital cloud AI with Open Foris Collect One—routing scarce human desk and field attention to high-uncertainty plots (such as sub-canopy degradation or shade-grown agroforestry) and feeding verified ground truth back into global climate, biodiversity, and deforestation-free supply-chain models.
 
 ### Foundational References
 
-*   **[XForms Integration & Entity-First Map Architecture](xforms-integration.md)**: Architectural specification for Ground 2.0's Entity-only map model, automatic 1-Form-to-1-Entity provisioning, `save_to` schema synchronization, and XLSForm/ODK Entities mappings.
+*   **[XForms Integration & Entity-First Map Architecture](xforms-integration.md)**: Architectural specification for Open Foris Collect One's Entity-only map model, automatic 1-Form-to-1-Entity provisioning, `save_to` schema synchronization, and XLSForm/ODK Entities mappings.
 *   **[Global Impact & Deployments](impacts.md)**: Case studies, field metrics, and partner pipelines across Ghana, Burundi, Kenya, and Viet Nam.
 *   **[Impact Measurement](impact-measurement.md)**: Proposed approach for measuring MAP impact with minimal field burden—Purpose Packs, semantic indicator tags, spatial overlays, outcome events, partner ledgers, and an attribution rubric.
 *   **[Open Foris Ground Community Charter](https://docs.google.com/document/d/1pjllfws_HMuHrDDbGokPZCATgok_8vxufkSmyVM4p_Q/edit#heading=h.14535shxk14t)**: Governance model, steering committee bylaws, and institutional partnership charter.
@@ -57,7 +68,7 @@ Following its transition from a Google-incubated initiative to a community-gover
 
 ## Platform Experience: Web Console vs. Mobile App
 
-Ground 2.0 pairs a browser-based **Web Console** for survey design, visual satellite interpretation, and data management with a rugged, offline-first **Mobile App** (Android & iOS) for field execution:
+Open Foris Collect One pairs a browser-based **Web Console** for survey design, visual satellite interpretation, and data management with a rugged, offline-first **Mobile App** (Android & iOS) for field execution:
 
 <!-- mdformat off -->
 
@@ -80,7 +91,7 @@ Ground 2.0 pairs a browser-based **Web Console** for survey design, visual satel
 
 ### Sites on the Map, Submissions in the Timeline
 
-To support both single-visit surveys and multi-year monitoring campaigns (such as tracking tree survival in Kenya or annual coffee audits in Burundi) without cluttering the user experience, Ground 2.0 renders **only Map features (Entities) on the map**, while preserving **Submissions as an immutable chronological timeline** attached to each site:
+To support both single-visit surveys and multi-year monitoring campaigns (such as tracking tree survival in Kenya or annual coffee audits in Burundi) without cluttering the user experience, Open Foris Collect One renders **only Map features (Entities) on the map**, while preserving **Submissions as an immutable chronological timeline** attached to each site:
 
 1.  **Map features (Entities on the Map)**:
     *   Every spatial feature rendered on the map represents a real-world subject—such as a farm plot, forest monitoring site, or water point—with a permanent identity and current attributes.
@@ -91,11 +102,11 @@ To support both single-visit surveys and multi-year monitoring campaigns (such a
     *   Additional forms in a survey can be linked to an existing site layer so tapping a site on the map opens its current status card, its full chronological submission timeline, and one-tap follow-up actions (`[ + Inspect Site ]`, `[ + Update Info ]`).
 3.  **User-Defined Workflow Progression via `save_to`**:
     *   As forms are submitted against a map feature over time (`1:N` longitudinal history), the feature's marker and boundary styling update dynamically via standard `simplestyle-spec` properties (`marker-symbol`, `marker-color`, `stroke`, `fill`) and custom status fields managed by form `save_to` actions.
-    *   *Configurable Template Defaults*: While Ground 2.0 does not hardcode an internal enum of workflow states, starter templates provide intuitive defaults:
+    *   *Configurable Template Defaults*: While Collect One does not hardcode an internal enum of workflow states, starter templates provide intuitive defaults:
         *   *Field Surveys*: `○` (Pending) → `◐` (In Progress) → `✓` (Completed).
         *   *Desk-to-Field Verification*: `○` (Unanalyzed) → `✓` (Consensus Reached) → `!` (Flagged for Field Validation) → `?` (Disputed / Needs SME Review).
 
-> **Cross-Platform Terminology & Parity**: See **[Terminology & Cross-Platform Parity](terminology.md)** for the complete master lexicon and parity matrix mapping Ground 2.0 across Collect Earth Online (CEO), ODK Central/Collect, KoboToolbox, XLSForm, ArcGIS Survey123, and Open Foris Arena.
+> **Cross-Platform Terminology & Parity**: See **[Terminology & Cross-Platform Parity](terminology.md)** for the complete master lexicon and parity matrix mapping Open Foris Collect One across Collect Earth Online (CEO), ODK Central/Collect, KoboToolbox, XLSForm, ArcGIS Survey123, and Open Foris Arena.
 
 
 ## Product Requirements
@@ -141,7 +152,7 @@ To support both single-visit surveys and multi-year monitoring campaigns (such a
 
 ### Visual Classification & Photo-Interpretation (Web Console)
 
-Ground 2.0 integrates **Collect Earth Online (CEO)** directly into the Web Console so institutions can run remote satellite interpretation and ground verification in a single project:
+Open Foris Collect One integrates **Collect Earth Online (CEO)** directly into the Web Console so institutions can run remote satellite interpretation and ground verification in a single project:
 
 *   **Sample Design Generation**:
     *   Built-in statistical sampling engine supporting systematic grid, simple random, stratified random, and cluster designs within uploaded regions of interest (Shapefile/GeoJSON), plus support for configurable sub-plot sample point grids (e.g., 3x3 points per plot) or importing externally generated sample designs.
@@ -230,7 +241,7 @@ Usage is governed at the organization and user level across two tiers *(see [Fut
 
 ## Not in Scope & Future Work
 
-To keep Ground 2.0 focused on cross-platform reliability, XLSForm compatibility, and visual classification parity, the following items are **out of scope for 2.0** and deferred to **[Future Work](future-work.md)**:
+To keep Open Foris Collect One focused on cross-platform reliability, XLSForm compatibility, and visual classification parity, the following items are **out of scope for the initial release** and deferred to **[Future Work](future-work.md)**:
 
 *   **Direct Database Streaming (P3)**: Live two-way sync with Google Sheets, BigQuery, or Earth Engine feature tables (use CSV/GeoJSON/Shapefile exports, webhooks, or REST APIs instead).
 *   **Custom Mobile Tile Services & Offline Drone Rasters (P3)**: Custom WMS/XYZ layers are supported in the Web Console for visual classification, while Mobile App offline basemaps standardize on built-in vector and satellite tiles (no sideloaded MBTiles, COGs, or UAV orthomosaics on mobile).

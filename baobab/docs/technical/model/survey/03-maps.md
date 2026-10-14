@@ -16,7 +16,7 @@
 
 # Maps, Layers, and Geometry Styling
 
-Ground 2.0 surveys configure map visualization (`MapConfig`), ordered map layer
+Open Foris Collect One surveys configure map visualization (`MapConfig`), ordered map layer
 stacks (`LayerDef`), and visual geometry styling (`GeometryStyle`) inside
 `SurveyDef.map_config`.
 

@@ -16,15 +16,17 @@
 
 # Future Work
 
-While Ground 2.0 establishes a robust foundation centered on XLSForm parity, a
-unified application core, and offline-first field mapping, several strategic
-initiatives may be considered for subsequent milestones:
+While Open Foris Collect One establishes a robust foundation centered on XLSForm
+parity, a unified application core, browser-based satellite visual
+interpretation, and offline-first field mapping, several strategic initiatives
+may be considered for subsequent milestones:
 
 ## Custom Offline Basemaps
 
-While Ground 2.0 exclusively supports downloading Mapbox vector and raster
-tiles, future milestones will expand mobile offline capabilities to support
-custom basemap sources and user-supplied offline imagery:
+While Open Foris Collect One initially supports downloading Mapbox vector and
+raster tiles on mobile, future milestones will expand mobile offline
+capabilities to support custom basemap sources and user-supplied offline
+imagery:
 
 *   **Third-Party Imagery & Tile Services**: Support for configuring and
     downloading offline tile packages from arbitrary tile servers (XYZ, TMS,
@@ -91,8 +93,8 @@ actionable operational intelligence without requiring external BI tools:
 
 ## QA/QC Controls for Entities and Submissions
 
-While Ground 2.0 establishes core data review capabilities, historical
-versioning, and immutable audit logging, operationalizing large-scale
+While Open Foris Collect One establishes core data review capabilities,
+historical versioning, and immutable audit logging, operationalizing large-scale
 verification for compliance frameworks (such as EUDR, FSC certifications, and
 carbon accounting) requires formal Quality Assurance and Quality Control (QA/QC)
 mechanisms. Future milestones will introduce dedicated review lifecycles,
@@ -191,10 +193,10 @@ resource quota, underpinned by a sustainable foundation-based financial model:
 
 ## Automated Task Assignment, Management, and Gamified Crowdsourcing
 
-Building upon Ground 2.0's preloaded geospatial entity registries, hierarchical
-submission models, and XLSForm-compliant engine, future iterations will
-introduce advanced task assignment, team routing, and gamification layers to
-support automated alerts and crowdsourced campaigns:
+Building upon Open Foris Collect One's preloaded geospatial entity registries,
+hierarchical submission models, and XLSForm-compliant engine, future iterations
+will introduce advanced task assignment, team routing, and gamification layers
+to support automated alerts and crowdsourced campaigns:
 
 ### Automated and Manual Task Assignment & Management
 
@@ -215,7 +217,7 @@ validation—into structured field workflows:
     surveys as follow-up encounters linked to preloaded alert entities,
     allowing mobile users to tap flagged map markers to launch pre-linked forms
     that dynamically pull in model certainty scores via `pulldata()` and update
-    entity `marker-symbol` / `marker-color` (`○` -> `◐` -> `✓`) via `save_to`.
+    entity `marker-symbol` / `marker-color` (`○` → `◐` → `✓`) via `save_to`.
 4.  **Web Console Triage & Mobile Task Queues**: Dedicated task management
     dashboards in the Web Console for batch assignment, visual status badging
     (*Pending*, *Assigned*, *Verified*), and conflict review, coupled with a
@@ -238,12 +240,12 @@ through engagement layers that integrate with task distribution:
 
 ## Autonomous Task Assignment & Collective Active Inference
 
-Ground V2 will evolve beyond a passive data collection utility into an
-intelligent, distributed sensor network. The next major architectural phase will
-introduce dynamic crowdsourcing driven by Active Inference models. By treating
-field users as a sensory periphery and the platform as a centralized generative
-model, Ground will autonomously optimize data collection to minimize spatial and
-environmental uncertainty (Epistemic Foraging).
+Open Foris Collect One will evolve beyond a passive data collection utility into
+an intelligent, distributed sensor network. The next major architectural phase
+will introduce dynamic crowdsourcing driven by Active Inference models. By
+treating field users as a sensory periphery and the platform as a centralized
+generative model, Collect One will autonomously optimize data collection to
+minimize spatial and environmental uncertainty (Epistemic Foraging).
 
 1.  **Epistemic Foraging & Uncertainty Mapping**
     *   **Objective**: Shift from manual task creation to autonomous,
@@ -253,15 +255,15 @@ environmental uncertainty (Epistemic Foraging).
         geographic coordinates or environmental strata with the highest
         statistical variance or epistemic uncertainty, generating heatmaps of
         where "ground truth" data is most needed.
-    *   **Technical Bridge**: Requires an architectural layer to pass Ground’s
-        spatial state to external cognitive inference engines (e.g.,
+    *   **Technical Bridge**: Requires an architectural layer to pass Collect
+        One's spatial state to external cognitive inference engines (e.g.,
         Python-based `pymdp` or PyMCP environments) to perform the uncertainty
         analysis.
 2.  **Dynamic Crowdsourced Task Assignment (The "Policy" Layer)**
     *   **Objective**: Route human data collectors to high-uncertainty zones
         efficiently.
     *   **Implementation**: Once the inference engine identifies high-value
-        sampling locations, the Ground V2 Task Assignment Engine will
+        sampling locations, the Collect One Task Assignment Engine will
         autonomously generate and dispatch data-collection policies (tasks) to
         mobile clients.
     *   **Mechanics**: Tasks will be dynamically queued based on user proximity,
@@ -272,30 +274,31 @@ environmental uncertainty (Epistemic Foraging).
     *   **Objective**: Feed physical-world observations back into the central
         generative model in near real-time.
     *   **Implementation**: Establish a translation pipeline that converts
-        standard Ground V2 ingestion payloads (GeoJSON, offline map syncs) into
-        the specific Observation Space matrices (O) required by discrete-state
-        or continuous POMDP (Partially Observable Markov Decision Process)
-        models.
+        standard Collect One ingestion payloads (GeoJSON, offline map syncs)
+        into the specific Observation Space matrices (O) required by
+        discrete-state or continuous POMDP (Partially Observable Markov Decision
+        Process) models.
     *   **Mechanics**: As crowdsourced users complete tasks and upload
         observations, the data acts as the sensory input that updates the
         central system's probabilistic belief state (world model), closing the
         inference loop.
 4.  **Data Schema & Engine Interoperability**
-    *   **Objective**: Ensure Ground's geospatial data architecture is natively
-        compatible with frontier cognitive AI frameworks.
+    *   **Objective**: Ensure Collect One's geospatial data architecture is
+        natively compatible with frontier cognitive AI frameworks.
     *   **Implementation**: Define standard adapter patterns for exporting
-        Ground datasets into tensor-ready formats.
+        Collect One datasets into tensor-ready formats.
     *   **Design Decision Required**: Determine the optimal spatial resolution
-        mapping—whether to discretize Ground's continuous vector/coordinate data
-        into grid-based bounding boxes (optimizing for discrete-state frameworks
-        like `pymdp`) or to support continuous spatial vectors directly.
+        mapping—whether to discretize Collect One's continuous vector/coordinate
+        data into grid-based bounding boxes (optimizing for discrete-state
+        frameworks like `pymdp`) or to support continuous spatial vectors
+        directly.
 
 ### Epistemic Foraging & EU Deforestation Regulation (EUDR) Compliance
 
-Ground V2 will evolve from a passive geospatial utility into an active,
-algorithmic sensing network. By integrating Active Inference, the platform will
-autonomously direct crowdsourced field data collection to resolve spatial
-uncertainty. This architecture is specifically designed to defend local
+Open Foris Collect One will evolve from a passive geospatial utility into an
+active, algorithmic sensing network. By integrating Active Inference, the
+platform will autonomously direct crowdsourced field data collection to resolve
+spatial uncertainty. This architecture is specifically designed to defend local
 communities against algorithmic exclusion ahead of the upcoming EUDR enforcement
 deadlines.
 

@@ -16,7 +16,7 @@
 
 # Local Data Store Design
 
-The local data store is the single source of truth of both Ground 2.0 clients. The UI reads
+The local data store is the single source of truth of both Open Foris Collect One clients. The UI reads
 everything from it and writes everything through it. This note covers how it
 works today and how a persistent backend and a sync engine plug in later.
 

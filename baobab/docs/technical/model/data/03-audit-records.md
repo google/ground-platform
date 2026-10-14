@@ -16,7 +16,7 @@
 
 # Audit Records and Provenance
 
-Ground 2.0 maintains two levels of audit tracking defined in
+Open Foris Collect One maintains two levels of audit tracking defined in
 `audit_record.proto`:
 
 1.  **`AuditInfo`**: Resource-level creation and modification timestamps and

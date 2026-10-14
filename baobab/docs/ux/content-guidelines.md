@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# Ground 2.0 UX Writing & Content Guidelines (`docs/ux/content-guidelines.md`)
+# Open Foris Collect One UX Writing & Content Guidelines
 
-These guidelines govern all user-facing copy, terminology, voice, tone, and content standards across the Ground 2.0 Organizer Web Console, Mobile App (Android & iOS), notifications, and user documentation.
+These guidelines govern all user-facing copy, terminology, voice, tone, and content standards across the **Open Foris Collect One** (referred to as **Collect One** for short) Organizer Web Console, Mobile App (Android & iOS), notifications, and user documentation.
 
 This guide is for UX writers, product designers, technical writers, and engineers writing strings, labels, instructions, dialogs, and messages.
 
@@ -41,7 +41,7 @@ While our voice never changes, our tone shifts depending on the user's emotional
 
 ## Domain Terminology & Glossary
 
-Ground 2.0 aligns with the modern XForms / XLSForm architecture and ODK Entities mental model. Always use standard Ground 2.0 terminology across user interfaces, user guides, button copy, and tooltips.
+Open Foris Collect One aligns with the modern XForms / XLSForm architecture and ODK Entities mental model. Always use standard Collect One terminology across user interfaces, user guides, button copy, and tooltips.
 
 ### Core Terminology
 
@@ -213,6 +213,6 @@ Ground is deployed globally across diverse cultures, languages, and technical ba
 
 ## Cross-Platform Parity Reference
 
-For a comprehensive cross-platform mapping of Ground 2.0 terminology to Collect Earth Online (CEO), ODK Central/Collect, KoboToolbox, XLSForm, ArcGIS Survey123, and Open Foris Arena, refer to:
+For a comprehensive cross-platform mapping of Open Foris Collect One terminology to Collect Earth Online (CEO), ODK Central/Collect, KoboToolbox, XLSForm, ArcGIS Survey123, and Open Foris Arena, refer to:
 * **[`docs/product/terminology.md`](../product/terminology.md)**: Master cross-platform terminology matrix and concept crosswalk.
 * **[`docs/product/prd.md`](../product/prd.md)**: Product requirements and platform specifications.
