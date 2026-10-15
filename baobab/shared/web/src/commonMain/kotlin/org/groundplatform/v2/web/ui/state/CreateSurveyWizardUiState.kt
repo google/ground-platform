@@ -16,6 +16,7 @@ package org.groundplatform.v2.web.ui.state
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.PurposePack
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.app.domain.model.editor.CollectEarthProjectImport
 import org.groundplatform.v2.app.domain.model.editor.EntityDataset
 import org.groundplatform.v2.app.domain.model.editor.ImportedForm
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
@@ -47,6 +48,8 @@ data class CreateSurveyWizardUiState(
   val copySourceSurveyId: String? = null,
   val importedXFormsFileName: String? = null,
   val importedXForms: ImportedForm? = null,
+  val importedCepProjects: List<CollectEarthProjectImport> = emptyList(),
+  val selectedCepProject: CollectEarthProjectImport? = null,
   val importErrorMessage: String? = null,
   val collectionMode: SurveyCollectionMode = SurveyCollectionMode.FIELD_SURVEY,
   val purposeIds: List<String> = emptyList(),

@@ -155,7 +155,7 @@ import org.groundplatform.v2.web.ui.surveyeditor.SurveyAreaSection
 import org.groundplatform.v2.web.ui.viewmodel.CreateSurveyWizardActions
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
 
-private const val WIZARD_IMPORT_FILE_ACCEPT = ".xml,.xhtml,.cep,.idm.xml,application/xml,text/xml"
+private const val WIZARD_IMPORT_FILE_ACCEPT = ".xml,.xhtml,.cep,.zip,.ced"
 
 private val WizardContentMaxWidth = 860.dp
 private val WizardWideContentMaxWidth = 1160.dp
@@ -818,7 +818,7 @@ private fun OverviewStepContent(
         }
         WizardStartMethod.IMPORT_XFORMS -> {
           Text(
-            text = "Supported formats: ODK XForms (.xml), Collect Earth (.cep)",
+            text = "Supported formats: ODK XForms (.xml), Collect Earth (.cep, .zip)",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -849,6 +849,11 @@ private fun OverviewStepContent(
               )
             }
             uiState.importedXForms?.let { imported ->
+              val plotCount = uiState.selectedCepProject?.plotDataset?.rows?.size ?: 0
+              val summaryPrefix = buildString {
+                append("${imported.form.questions.size} questions")
+                if (plotCount > 0) append(" · $plotCount sample plots")
+              }
               Column(modifier = Modifier.weight(1f)) {
                 Text(
                   text = "${uiState.importedXFormsFileName}: ${imported.form.title}",
@@ -856,8 +861,7 @@ private fun OverviewStepContent(
                   fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                  text =
-                    "${imported.form.questions.size} questions parsed · Ready to import into Step 5",
+                  text = "$summaryPrefix parsed · Ready to import into Step 5",
                   style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.primary,
                 )
@@ -866,6 +870,16 @@ private fun OverviewStepContent(
                 Icon(Icons.Outlined.Close, contentDescription = "Clear imported file")
               }
             }
+          }
+          if (uiState.importedCepProjects.size > 1) {
+            val selectedCep = uiState.selectedCepProject ?: uiState.importedCepProjects.first()
+            DropdownSelector(
+              label = "Collect Earth survey in archive (${uiState.importedCepProjects.size} found)",
+              selectedText = "${selectedCep.projectTitle} (${selectedCep.fileName})",
+              options = uiState.importedCepProjects,
+              optionText = { "${it.projectTitle} (${it.fileName})" },
+              onSelect = { actions.selectImportedCepProject(it.fileName) },
+            )
           }
           uiState.importErrorMessage?.let { errorMsg -> ValidationErrorBanner(message = errorMsg) }
         }

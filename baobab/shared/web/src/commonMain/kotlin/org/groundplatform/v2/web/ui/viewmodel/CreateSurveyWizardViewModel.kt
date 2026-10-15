@@ -32,6 +32,8 @@ import org.groundplatform.v2.app.domain.model.OrganizationLibrary
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyThumbnailGenerator
+import org.groundplatform.v2.app.domain.model.editor.CollectEarthIdmParser
+import org.groundplatform.v2.app.domain.model.editor.CollectEarthProjectImport
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.model.editor.EntityProperty
@@ -87,6 +89,8 @@ interface CreateSurveyWizardActions {
   fun selectCopySourceSurvey(surveyId: String?)
 
   fun importXFormsXml(fileName: String, xmlText: String)
+
+  fun selectImportedCepProject(fileName: String)
 
   fun clearImportedXForms()
 
@@ -162,6 +166,8 @@ class CreateSurveyWizardViewModel(
     val copySourceSurveyId: String? = null,
     val importedXFormsFileName: String? = null,
     val importedXForms: ImportedForm? = null,
+    val importedCepProjects: List<CollectEarthProjectImport> = emptyList(),
+    val selectedCepProject: CollectEarthProjectImport? = null,
     val importErrorMessage: String? = null,
     val collectionMode: SurveyCollectionMode = SurveyCollectionMode.FIELD_SURVEY,
     val mapFeatureSource: WizardMapFeatureSource = WizardMapFeatureSource.FIELD_FREEFORM,
@@ -244,6 +250,8 @@ class CreateSurveyWizardViewModel(
       copySourceSurveyId = s.copySourceSurveyId ?: existingSurveys.firstOrNull()?.id,
       importedXFormsFileName = s.importedXFormsFileName,
       importedXForms = s.importedXForms,
+      importedCepProjects = s.importedCepProjects,
+      selectedCepProject = s.selectedCepProject,
       importErrorMessage = s.importErrorMessage,
       collectionMode = s.collectionMode,
       purposeIds = details.purposeIds,
@@ -449,16 +457,22 @@ class CreateSurveyWizardViewModel(
       }
       WizardStartMethod.IMPORT_XFORMS -> {
         val imported = s.importedXForms
+        val selectedCep = s.selectedCepProject
         if (
           imported != null &&
             (s.appliedStartMethod != WizardStartMethod.IMPORT_XFORMS ||
               s.appliedImportedXFormsFileName != s.importedXFormsFileName)
         ) {
-          // Clear previously auto-seeded forms before importing the selected XForms file.
+          // Clear previously auto-seeded forms before importing the selected XForms or CEP file.
           surveyEditor.replaceWorkingDraft({ current ->
             current.copy(forms = emptyList(), datasets = emptyList())
           })
           val formKey = surveyEditor.importForm(imported)
+          selectedCep?.plotDataset?.let { plotDataset ->
+            surveyEditor.replaceWorkingDraft({ current ->
+              current.copy(datasets = listOf(plotDataset))
+            })
+          }
           surveyEditor.select(SurveyEditorSection.Form(formKey))
           session.update {
             it.copy(
@@ -557,8 +571,26 @@ class CreateSurveyWizardViewModel(
   }
 
   override fun importXFormsXml(fileName: String, xmlText: String) {
-    val fallbackTitle = fileName.substringBeforeLast('.').ifBlank { "Imported form" }
     val availability = session.value.collectionMode.formAvailability
+    val cepProjects =
+      CollectEarthIdmParser.parseProjects(
+        xml = xmlText,
+        fallbackFileName = fileName,
+        availability = availability,
+      )
+    if (cepProjects.isNotEmpty()) {
+      val firstProject = cepProjects.first()
+      session.update {
+        it.copy(
+          importedCepProjects = cepProjects,
+          selectedCepProject = firstProject,
+        )
+      }
+      applySelectedCepProject(firstProject)
+      return
+    }
+
+    val fallbackTitle = fileName.substringBeforeLast('.').ifBlank { "Imported form" }
     val imported =
       FormImport.fromXml(
         xml = xmlText,
@@ -570,21 +602,62 @@ class CreateSurveyWizardViewModel(
         it.copy(
           importedXFormsFileName = fileName,
           importedXForms = null,
+          importedCepProjects = emptyList(),
+          selectedCepProject = null,
           importErrorMessage =
             "Could not parse any XForms or Collect Earth questions from \"$fileName\".",
         )
       }
     } else {
+      val shouldUpdateTitle = surveyEditor.uiState.value.draft.details.title.isBlank()
       session.update {
         it.copy(
+          title = if (shouldUpdateTitle) imported.form.title else it.title,
           importedXFormsFileName = fileName,
           importedXForms = imported,
+          importedCepProjects = emptyList(),
+          selectedCepProject = null,
           importErrorMessage = null,
         )
       }
-      if (surveyEditor.uiState.value.draft.details.title.isBlank()) {
+      if (shouldUpdateTitle) {
         surveyEditor.updateDetails { it.copy(title = imported.form.title) }
       }
+    }
+  }
+
+  override fun selectImportedCepProject(fileName: String) {
+    val project =
+      session.value.importedCepProjects.firstOrNull { it.fileName == fileName } ?: return
+    applySelectedCepProject(project)
+  }
+
+  private fun applySelectedCepProject(project: CollectEarthProjectImport) {
+    val hasPlotGrid = project.plotDataset != null
+    session.update {
+      it.copy(
+        title = project.projectTitle,
+        importedXFormsFileName = project.fileName,
+        importedXForms = project.importedForm,
+        selectedCepProject = project,
+        importErrorMessage = null,
+        collectionMode =
+          if (hasPlotGrid) SurveyCollectionMode.VISUAL_CLASSIFICATION else it.collectionMode,
+        mapFeatureSource =
+          if (hasPlotGrid) WizardMapFeatureSource.IMPORT_FILE else it.mapFeatureSource,
+        isMapFeatureSourceOverridden = hasPlotGrid || it.isMapFeatureSourceOverridden,
+        isGeometryKindOverridden = hasPlotGrid || it.isGeometryKindOverridden,
+        appliedImportedXFormsFileName = null,
+      )
+    }
+    surveyEditor.updateDetails { current ->
+      current.copy(
+        title = project.projectTitle,
+        description = project.description.ifBlank { current.description },
+        defaultLanguage = project.languages.firstOrNull() ?: current.defaultLanguage,
+        supportedLanguages = project.languages.ifEmpty { current.supportedLanguages },
+        surveyArea = project.surveyArea ?: current.surveyArea,
+      )
     }
   }
 
@@ -593,6 +666,8 @@ class CreateSurveyWizardViewModel(
       it.copy(
         importedXFormsFileName = null,
         importedXForms = null,
+        importedCepProjects = emptyList(),
+        selectedCepProject = null,
         importErrorMessage = null,
       )
     }

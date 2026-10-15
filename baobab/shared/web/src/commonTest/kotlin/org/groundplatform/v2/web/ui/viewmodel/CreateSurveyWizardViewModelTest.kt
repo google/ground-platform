@@ -623,4 +623,104 @@ class CreateSurveyWizardViewModelTest {
     val surveyCard = assertNotNull(state.surveys.firstOrNull { it.id == workingId })
     assertEquals(savedLayer.rows.size, surveyCard.entityCount)
   }
+
+  @Test
+  fun importCollectEarthCepBundle_parsesQuestionsRelevancePlotsAndAllowsProjectSwitch() {
+    val state = WebAppState()
+    state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
+    val wizard = state.createSurveyWizard
+
+    wizard.selectStartMethod(WizardStartMethod.IMPORT_XFORMS)
+
+    val cepBundle =
+      """
+      <!--COLLECT_EARTH_FILE_NAME:umd_congo_deforestation.cep-->
+      <!--COLLECT_EARTH_PROPERTIES
+      distance_to_plot_boundaries=24
+      csv=grid/plotsCongo_10000_1.csv
+      -->
+      <!--COLLECT_EARTH_PLOT_CSV
+      "id","YCoordinate","XCoordinate","country","stratum"
+      "10","8.574875","13.597625","Cameroon","1"
+      "20","9.268375","13.228375","Cameroon","2"
+      -->
+      <survey xmlns="http://www.openforis.org/idml/3.0">
+        <project>Collect Earth - Forest Disturbance of the Congo Basin</project>
+        <description>Congo Basin study</description>
+        <language>en</language>
+        <language>fr</language>
+        <codeLists>
+          <list id="1016" name="years">
+            <items>
+              <item id="1017"><code>2000</code><label>2000</label></item>
+              <item id="1018"><code>2001</code><label>2001</label></item>
+            </items>
+          </list>
+        </codeLists>
+        <schema>
+          <entity id="1" name="plot">
+            <text id="2" name="id" required="true" key="true" type="short"><label>Id</label></text>
+            <date id="9" name="actively_saved_on" relevant="false()"><label>Saved on</label></date>
+            <text id="1002" name="country" collectearth:fromcsv="true"><label>Country</label></text>
+            <boolean id="1010" name="forest_loss" required="true"><label>Forest Loss</label></boolean>
+            <code id="1015" name="forest_loss_year" relevant="forest_loss" required="true" list="years">
+              <label>Forest Loss Year</label>
+            </code>
+          </entity>
+        </schema>
+      </survey>
+      <!--COLLECT_EARTH_PROJECT_SEPARATOR-->
+      <!--COLLECT_EARTH_FILE_NAME:umd_brazil_deforestation.cep-->
+      <!--COLLECT_EARTH_PROPERTIES
+      distance_to_plot_boundaries=24
+      csv=grid/plotsBazil_10000_1.csv
+      -->
+      <!--COLLECT_EARTH_PLOT_CSV
+      "id","YCoordinate","XCoordinate","state"
+      "10","-13.963375","-51.975625","Mato Grosso"
+      -->
+      <survey xmlns="http://www.openforis.org/idml/3.0">
+        <project>Forest Disturbance of the BLA</project>
+        <description>Brazilian Legal Amazon study</description>
+        <language>en</language>
+        <language>es</language>
+        <codeLists>
+          <list id="1043" name="forest_cover">
+            <items>
+              <item id="1045"><code>prim</code><label>Primary forest</label></item>
+            </items>
+          </list>
+        </codeLists>
+        <schema>
+          <entity id="1" name="plot">
+            <boolean id="1002" name="forest_loss" required="true"><label>Forest Loss</label></boolean>
+            <code id="1042" name="pre_disturbance_forest_cover" relevant="forest_loss" required="true" list="forest_cover">
+              <label>Pre-Disturbance Forest Cover</label>
+            </code>
+          </entity>
+        </schema>
+      </survey>
+      """
+        .trimIndent()
+
+    wizard.importXFormsXml("UMD_Brazil_Congo_surveys_and_data.cep.zip", cepBundle)
+
+    val uiAfterImport = wizard.uiState.value
+    assertEquals(2, uiAfterImport.importedCepProjects.size)
+    assertEquals(
+      "Collect Earth - Forest Disturbance of the Congo Basin",
+      uiAfterImport.title,
+    )
+    assertEquals(2, uiAfterImport.importedXForms?.form?.questions?.size)
+    val yearQuestion = uiAfterImport.importedXForms?.form?.questions?.get(1)
+    assertNotNull(yearQuestion?.relevance)
+    assertEquals("yes", yearQuestion?.relevance?.value)
+    assertEquals(2, uiAfterImport.selectedCepProject?.plotDataset?.rows?.size)
+    assertNotNull(uiAfterImport.surveyArea)
+
+    // Switch to the second Collect Earth project in the archive.
+    wizard.selectImportedCepProject("umd_brazil_deforestation.cep")
+    assertEquals("Forest Disturbance of the BLA", wizard.uiState.value.title)
+    assertEquals(1, wizard.uiState.value.selectedCepProject?.plotDataset?.rows?.size)
+  }
 }

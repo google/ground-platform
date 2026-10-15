@@ -54,8 +54,8 @@ import org.groundplatform.v2.web.ui.common.openPlatformTextFilePicker
 import org.groundplatform.v2.web.ui.state.FormLibraryContext
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
 
-/** File types offered by the XForms XML file picker. */
-internal const val XFORMS_FILE_ACCEPT = ".xml,application/xml,text/xml"
+/** File types offered by the XForms XML / Collect Earth file picker. */
+internal const val XFORMS_FILE_ACCEPT = ".xml,.xhtml,.cep,.zip,.ced"
 
 /** Body of the Add form dialog's template option. */
 internal const val FORM_TEMPLATES_BODY =
@@ -145,8 +145,8 @@ internal fun AddFormDialog(
         )
         AddOption(
           icon = Icons.Outlined.UploadFile,
-          title = "Import from XML",
-          body = "Create a form from an ODK XForms XML file.",
+          title = "Import from file",
+          body = "Create a form from an ODK XForms (.xml) or Collect Earth (.cep) file.",
           onClick = {
             message = null
             pickTextFile(XFORMS_FILE_ACCEPT) { result ->
