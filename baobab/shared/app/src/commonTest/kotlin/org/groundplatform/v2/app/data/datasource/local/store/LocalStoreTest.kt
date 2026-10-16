@@ -13,6 +13,14 @@
  */
 package org.groundplatform.v2.app.data.datasource.local.store
 
+import com.squareup.wire.ofEpochSecond
+import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.library.OrganizationLibraryRecord
+import groundplatform.v2.survey.Organization as OrganizationProto
+import groundplatform.v2.survey.SurveyDef
+import groundplatform.v2.survey.SurveyFieldPatch
+import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -253,6 +261,121 @@ abstract class LocalStoreContractTest {
       configs.keys,
     )
   }
+
+  @Test
+  fun outbox_isStoredInClientSeqOrder_andObservable() {
+    val store = createStore()
+    val first = pendingTitle(seq = 1, title = "A")
+    val second = pendingTitle(seq = 2, title = "B")
+    runNow { store.transaction { putOutbox(listOf(second, first)) } }
+
+    assertEquals(listOf(first, second), runNow { store.observeOutbox().first() })
+    assertEquals(listOf(first, second), runNow { store.transaction { outbox() } })
+  }
+
+  @Test
+  fun failedTransaction_leavesOutboxAndSyncStateUnchanged() {
+    val store = createStore()
+    assertFailsWith<IllegalStateException> {
+      runNow {
+        store.transaction {
+          putOutbox(listOf(pendingTitle(seq = 1, title = "A")))
+          putSyncState(SyncState(clientId = "c", nextClientSeq = 2))
+          error("abort")
+        }
+      }
+    }
+    assertEquals(emptyList(), runNow { store.transaction { outbox() } })
+    assertEquals(SyncState(), runNow { store.transaction { syncState() } })
+  }
+
+  @Test
+  fun bases_areStoredPerRecord_andForgottenWithNull() {
+    val store = createStore()
+    val survey = "s1"
+    val entity = EntityRecord(entity_id = "e1", survey_id = survey, revision = 3)
+    val submission = SubmissionRecord(submission_id = "sub1", survey_id = survey, revision = 2)
+    val org = OrganizationProto(organization_id = "o1", version = 4)
+    val library = OrganizationLibraryRecord(organization_id = "o1", version = 5)
+    val surveyBase = SurveyBase(saved = SurveyDef(survey_id = survey, title = "Saved"))
+    runNow {
+      store.transaction {
+        putSurveyBase(survey, surveyBase)
+        putEntityBase(survey, "e1", entity)
+        putSubmissionBase(survey, "sub1", submission)
+        putOrganizationBase("o1", org)
+        putLibraryBase("o1", library)
+      }
+    }
+    runNow {
+      store.transaction {
+        assertEquals(surveyBase, surveyBase(survey))
+        assertEquals(entity, entityBase(survey, "e1"))
+        assertEquals(mapOf("sub1" to submission), submissionBases(survey))
+        assertEquals(org, organizationBase("o1"))
+        assertEquals(library, libraryBase("o1"))
+        putEntityBase(survey, "e1", null)
+        putOrganizationBase("o1", null)
+      }
+    }
+    runNow {
+      store.transaction {
+        assertNull(entityBase(survey, "e1"))
+        assertNull(organizationBase("o1"))
+        assertEquals(library, libraryBase("o1"))
+      }
+    }
+  }
+
+  @Test
+  fun deleteSurvey_forgetsItsBases_butKeepsTheOutbox() {
+    val store = createStore()
+    val pending = pendingTitle(seq = 1, title = "A")
+    runNow {
+      store.transaction {
+        putSurveyBase("s1", SurveyBase(saved = SurveyDef(survey_id = "s1")))
+        putEntityBase("s1", "e1", EntityRecord(entity_id = "e1"))
+        putOutbox(listOf(pending))
+        deleteSurvey("s1")
+      }
+    }
+    runNow {
+      store.transaction {
+        assertNull(surveyBase("s1"))
+        assertEquals(emptyMap(), entityBases("s1"))
+        assertEquals(listOf(pending), outbox())
+      }
+    }
+  }
+
+  @Test
+  fun syncState_isStored_andClearedWithTheStore() {
+    val store = createStore()
+    val watermarks = SyncWatermarks(surveysWatermark = ofEpochSecond(1_770_000_100L, 0L))
+    runNow {
+      store.transaction {
+        updateSyncState { it.copy(clientId = "c1", nextClientSeq = 7, watermarks = watermarks) }
+      }
+    }
+    assertEquals(
+      SyncState(clientId = "c1", nextClientSeq = 7, watermarks = watermarks),
+      runNow { store.transaction { syncState() } },
+    )
+    runNow { store.clear() }
+    assertEquals(SyncState(), runNow { store.transaction { syncState() } })
+  }
+
+  private fun pendingTitle(seq: Long, title: String) =
+    PendingMutation(
+      mutationId = "m$seq",
+      clientSeq = seq,
+      target = MutationTarget.Survey("s1", workingCopy = true),
+      recordKey = "survey/s1",
+      payload =
+        MutationPayload.Survey(
+          SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = title))
+        ),
+    )
 }
 
 /** [LocalStoreContractTest] for [InMemoryLocalStore], plus its in-memory-only guarantees. */

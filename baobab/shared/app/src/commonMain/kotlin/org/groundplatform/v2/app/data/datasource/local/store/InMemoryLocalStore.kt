@@ -13,6 +13,10 @@
  */
 package org.groundplatform.v2.app.data.datasource.local.store
 
+import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.library.OrganizationLibraryRecord
+import groundplatform.v2.survey.Organization as OrganizationProto
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.currentCoroutineContext
@@ -105,6 +109,9 @@ class InMemoryLocalStore : LocalStore {
   override fun observeMutations(): Flow<List<MutationLogItem>> =
     state.map { it.mutations }.distinctUntilChanged { a, b -> a === b }
 
+  override fun observeOutbox(): Flow<List<PendingMutation>> =
+    state.map { it.outbox }.distinctUntilChanged { a, b -> a === b }
+
   override fun observeImpactEvents(): Flow<List<ImpactEvent>> =
     state.map { it.impactEvents }.distinctUntilChanged { a, b -> a === b }
 
@@ -160,6 +167,10 @@ class InMemoryLocalStore : LocalStore {
     val places: List<SurveyPlaceItem> = emptyList(),
     val offlineTilePackages: List<OfflineTilePackageItem> = emptyList(),
     val preferences: StoredPreferences = StoredPreferences(),
+    val outbox: List<PendingMutation> = emptyList(),
+    val organizationBases: Map<String, OrganizationProto> = emptyMap(),
+    val libraryBases: Map<String, OrganizationLibraryRecord> = emptyMap(),
+    val syncState: SyncState = SyncState(),
   )
 
   /**
@@ -175,6 +186,9 @@ class InMemoryLocalStore : LocalStore {
     val entitySubmissions: Map<String, List<SubmissionPreviewItem>> = emptyMap(),
     val standaloneSubmissions: List<SubmissionPreviewItem> = emptyList(),
     val submissionGeometries: List<SubmissionGeometryPolygon> = emptyList(),
+    val surveyBase: SurveyBase? = null,
+    val entityBases: Map<String, EntityRecord> = emptyMap(),
+    val submissionBases: Map<String, SubmissionRecord> = emptyMap(),
   ) {
     fun submissionCount(): Int =
       entitySubmissions.values.sumOf { it.size } + standaloneSubmissions.size
@@ -334,6 +348,83 @@ class InMemoryLocalStore : LocalStore {
 
     override fun putMutations(mutations: List<MutationLogItem>) {
       working = working.copy(mutations = mutations.toList())
+    }
+
+    override fun outbox(): List<PendingMutation> = working.outbox
+
+    override fun putOutbox(mutations: List<PendingMutation>) {
+      working = working.copy(outbox = mutations.sortedBy { it.clientSeq })
+    }
+
+    override fun surveyBase(surveyId: String): SurveyBase? = data(surveyId).surveyBase
+
+    override fun putSurveyBase(surveyId: String, base: SurveyBase?) =
+      editSurvey(surveyId) { it.copy(surveyBase = base) }
+
+    override fun entityBases(surveyId: String): Map<String, EntityRecord> =
+      data(surveyId).entityBases
+
+    override fun putEntityBase(surveyId: String, entityId: String, record: EntityRecord?) =
+      editSurvey(surveyId) { d ->
+        d.copy(
+          entityBases =
+            if (record == null) d.entityBases - entityId else d.entityBases + (entityId to record)
+        )
+      }
+
+    override fun submissionBases(surveyId: String): Map<String, SubmissionRecord> =
+      data(surveyId).submissionBases
+
+    override fun putSubmissionBase(
+      surveyId: String,
+      submissionId: String,
+      record: SubmissionRecord?,
+    ) =
+      editSurvey(surveyId) { d ->
+        d.copy(
+          submissionBases =
+            if (record == null) {
+              d.submissionBases - submissionId
+            } else {
+              d.submissionBases + (submissionId to record)
+            }
+        )
+      }
+
+    override fun organizationBase(organizationId: String): OrganizationProto? =
+      working.organizationBases[organizationId]
+
+    override fun putOrganizationBase(organizationId: String, record: OrganizationProto?) {
+      working =
+        working.copy(
+          organizationBases =
+            if (record == null) {
+              working.organizationBases - organizationId
+            } else {
+              working.organizationBases + (organizationId to record)
+            }
+        )
+    }
+
+    override fun libraryBase(organizationId: String): OrganizationLibraryRecord? =
+      working.libraryBases[organizationId]
+
+    override fun putLibraryBase(organizationId: String, record: OrganizationLibraryRecord?) {
+      working =
+        working.copy(
+          libraryBases =
+            if (record == null) {
+              working.libraryBases - organizationId
+            } else {
+              working.libraryBases + (organizationId to record)
+            }
+        )
+    }
+
+    override fun syncState(): SyncState = working.syncState
+
+    override fun putSyncState(state: SyncState) {
+      working = working.copy(syncState = state)
     }
 
     override fun places(): List<SurveyPlaceItem> = working.places

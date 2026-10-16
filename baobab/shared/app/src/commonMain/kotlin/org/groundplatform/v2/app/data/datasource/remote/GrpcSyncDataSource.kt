@@ -44,26 +44,13 @@ import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStoreTransaction
 import org.groundplatform.v2.app.data.datasource.local.store.StoredPreferences
+import org.groundplatform.v2.app.data.datasource.local.store.SyncWatermarks
 import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.app.domain.model.MutationLogItem
 import org.groundplatform.v2.app.domain.model.MutationOperationKind
 import org.groundplatform.v2.app.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.UserSettings
-
-/**
- * Per-resource server `commit_timestamp` watermarks tracked by [GrpcSyncDataSource] in accordance
- * with `docs/technical/sync-engine.md` ("Catch-Up Sync (Incremental Pull)" & "Bounded Delta
- * Streaming").
- */
-data class SyncWatermarks(
-  val organizationsWatermark: Instant? = null,
-  val librariesWatermark: Instant? = null,
-  val surveysWatermark: Instant? = null,
-  val entitiesWatermarkBySurvey: Map<String, Instant> = emptyMap(),
-  val submissionsWatermarkBySurvey: Map<String, Instant> = emptyMap(),
-  val impactEventsWatermark: Instant? = null,
-)
 
 /** The saved revision of a survey (with its ACL) and the organizer's working copy, if any. */
 private data class SurveyRevisions(val saved: GetSurveyResponse, val workingCopy: SurveyDef?)

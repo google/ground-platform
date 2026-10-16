@@ -13,6 +13,10 @@
  */
 package org.groundplatform.v2.app.data.datasource.local.store
 
+import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.library.OrganizationLibraryRecord
+import groundplatform.v2.survey.Organization as OrganizationProto
 import kotlinx.coroutines.flow.Flow
 import org.groundplatform.v2.app.domain.model.FormPreviewItem
 import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
@@ -87,6 +91,9 @@ interface LocalStore {
   /** Local mutation log (outbox and uploaded history) across all surveys. */
   fun observeMutations(): Flow<List<MutationLogItem>>
 
+  /** Pending mutations waiting to be sent or confirmed, in [PendingMutation.clientSeq] order. */
+  fun observeOutbox(): Flow<List<PendingMutation>>
+
   /** Impact events recorded on this device, oldest first. */
   fun observeImpactEvents(): Flow<List<ImpactEvent>>
 
@@ -133,7 +140,10 @@ interface LocalStoreTransaction {
     return updated
   }
 
-  /** Deletes the survey with [surveyId] and all of its survey-scoped data. */
+  /**
+   * Deletes the survey with [surveyId] and all of its survey-scoped data, including its server
+   * bases. Pending mutations are kept; the sync engine decides what happens to them.
+   */
   fun deleteSurvey(surveyId: String)
 
   fun surveyConfig(surveyId: String): SurveyConfig?
@@ -240,6 +250,62 @@ interface LocalStoreTransaction {
 
   /** Replaces the whole mutation log. */
   fun putMutations(mutations: List<MutationLogItem>)
+
+  // Outbox and server bases --------------------------------------------------------------------
+
+  /** Pending mutations in [PendingMutation.clientSeq] order. */
+  fun outbox(): List<PendingMutation>
+
+  /** Replaces the outbox. Entries are stored in [PendingMutation.clientSeq] order. */
+  fun putOutbox(mutations: List<PendingMutation>)
+
+  /** Last server copies of [surveyId]'s revisions and ACL, or `null` if never received. */
+  fun surveyBase(surveyId: String): SurveyBase?
+
+  /** Stores (or with `null`, forgets) the server copies of [surveyId]. */
+  fun putSurveyBase(surveyId: String, base: SurveyBase?)
+
+  /** Last server copies of the entities in [surveyId], keyed by entity ID. */
+  fun entityBases(surveyId: String): Map<String, EntityRecord>
+
+  fun entityBase(surveyId: String, entityId: String): EntityRecord? =
+    entityBases(surveyId)[entityId]
+
+  /** Stores (or with `null`, forgets) the server copy of one entity. */
+  fun putEntityBase(surveyId: String, entityId: String, record: EntityRecord?)
+
+  /** Last server copies of the submissions in [surveyId], keyed by submission ID. */
+  fun submissionBases(surveyId: String): Map<String, SubmissionRecord>
+
+  fun submissionBase(surveyId: String, submissionId: String): SubmissionRecord? =
+    submissionBases(surveyId)[submissionId]
+
+  /** Stores (or with `null`, forgets) the server copy of one submission. */
+  fun putSubmissionBase(surveyId: String, submissionId: String, record: SubmissionRecord?)
+
+  /** Last server copy of an organization, or `null` if never received. */
+  fun organizationBase(organizationId: String): OrganizationProto?
+
+  /** Stores (or with `null`, forgets) the server copy of an organization. */
+  fun putOrganizationBase(organizationId: String, record: OrganizationProto?)
+
+  /** Last server copy of an organization's library, or `null` if never received. */
+  fun libraryBase(organizationId: String): OrganizationLibraryRecord?
+
+  /** Stores (or with `null`, forgets) the server copy of an organization's library. */
+  fun putLibraryBase(organizationId: String, record: OrganizationLibraryRecord?)
+
+  // Sync state ----------------------------------------------------------------------------------
+
+  fun syncState(): SyncState
+
+  fun putSyncState(state: SyncState)
+
+  fun updateSyncState(transform: (SyncState) -> SyncState): SyncState {
+    val updated = transform(syncState())
+    putSyncState(updated)
+    return updated
+  }
 
   // Impact events -------------------------------------------------------------------------------
 
