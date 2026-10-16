@@ -79,13 +79,19 @@ the network directly.
 
 -   **Download**: Remote surveys, definitions, and records are written into
     the store in transactions. The UI updates through the existing `Flow`s.
--   **Upload**: Local edits are recorded as mutations in the store's outbox in
-    the same transaction as the edit. The engine drains the outbox and marks
-    mutations uploaded.
--   **Conflicts**: Stored records gain version metadata (for example a server
-    revision and a last-modified time). The engine compares versions when
-    applying remote changes and when uploading, and records the result in the
-    store.
+-   **Upload**: Local edits are recorded as fine-grained mutations in the
+    store's outbox in the same transaction as the edit. The engine drains the
+    outbox and removes mutations once the server confirms them.
+-   **Bases and rebase**: The store keeps the last server copy (base) of every
+    synced record as a proto (`SurveyDef`, `EntityRecord`, `SubmissionRecord`,
+    `Organization`, `OrganizationLibraryRecord`). When a newer copy arrives,
+    the engine replaces the base and re-applies pending mutations on top of it
+    with the shared patch functions in `shared/core`, then projects the result
+    into the domain collections the UI observes. See
+    [Rebase on Remote Changes](../sync-engine.md#rebase-on-remote-changes).
+-   **Sync state**: Stream watermarks, the install's `client_id`, and the next
+    `client_seq` are stored with the data and updated in the same
+    transactions, so they survive restarts on mobile.
 -   **Seed data**: Once real downloads exist, the seeder only runs in demo mode.
 
 ## Data Flow

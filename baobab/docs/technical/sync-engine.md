@@ -31,18 +31,31 @@ There are no unary `List*` duplicates of sync streams: catch-up always uses the 
 ## End-to-End System Flows
 
 ### The Offline Flow (User Disconnected)
-When the user modifies or writes data while the device is in airplane mode or lacks network access, the application uses local isolation containment. This flow applies to mobile; the Web Console requires a connection to write.
+Every local edit goes through the same path, online or offline, on mobile and on the web. The edit is never sent directly; it is queued and drained in the background.
 
-1. **Local Mutation Transaction:** The client application captures user intent (e.g., creating a record) and commits it immediately to the local cache database.
-2. **Sync Outbox Flagging:** The row is flagged locally with an outbox state metadata tag (e.g., `PENDING_SYNC = true`) and captures a local device timestamp.
-3. **Reactive UI Update:** The local query emitting the Kotlin `Flow` detects the write transaction immediately. The UI updates natively in milliseconds, offering a completely uninterrupted user experience.
-4. **Network Backoff Queueing:** The core sync engine queues a background worker task constrained by system connectivity filters.
+1. **Fine-Grained Mutation:** The client turns the user's intent into one or more field patches (`SurveyFieldPatch`, `EntityFieldPatch`, `SubmissionFieldPatch`, `OrganizationFieldPatch`, `LibraryFieldPatch`). Each patch sets or clears one key path, or upserts or removes one keyed collection item, so applying it twice gives the same result as applying it once.
+2. **Outbox Transaction:** In one local transaction, the client appends the mutation to the outbox and applies it to the local copy. Each mutation gets a `mutation_id` (UUID), the install's `client_id`, and the next `client_seq`.
+3. **Coalescing:** A queued (not yet sent) patch to the same key path as a newer patch is replaced by the newer one. Removing a collection item drops queued patches beneath it, and deleting a record that was created locally and never sent cancels both.
+4. **Reactive UI Update:** The local query emitting the Kotlin `Flow` detects the write transaction immediately, so the UI updates in milliseconds.
+5. **Background Drain:** The sync engine drains the outbox when connectivity allows, with exponential backoff on failures.
+
+### Rebase on Remote Changes
+For every synced record, the local store keeps the **base** (the last copy confirmed by the server) and the **pending** outbox mutations that target it. What the UI shows is the pending mutations applied on top of the base, using the same patch functions the server uses (`shared/core`, `org.groundplatform.v2.core.mutation`).
+
+When a delta stream or a `Mutate*` response delivers a newer copy of a record, the client, in one transaction:
+
+1. Replaces the base with the server copy (or marks it deleted for a tombstone).
+2. Drops pending mutations the server has confirmed (acknowledged by response or reported by `GetAppliedMutations`) and pending patches that no longer change anything.
+3. Re-applies the remaining pending mutations on top of the new base.
+4. Advances the stream's persisted watermark.
+
+If a record was deleted remotely, its pending patches are rejected and shown in the Uploads view, where the user can discard or retry them.
 
 ### The Online Flow (Re-establishing Connection & Catch-Up)
 When the device returns online or the application transitions from a suspended state to the foreground, a unified catch-up sequence initiates.
 
 1. **Watermark Extraction:** The shared synchronization engine queries the local database's sync tracking table to extract the high-water mark token for each sync scope: `last_synced_spanner_timestamp`.
-2. **Outbox Drain (Client to Server):** Before pulling updates, the client collects all records marked `PENDING_SYNC = true`. It ships these mutations to the backend over a gRPC call (`Mutate*`). The backend executes a high-speed write transaction in Cloud Spanner, which assigns a definitive `commit_timestamp` utilizing its atomic TrueTime engine.
+2. **Outbox Drain (Client to Server):** Before pulling updates, the client calls `GetAppliedMutations` and drops outbox mutations the server already applied (for example, when a response was lost). It then sends the remaining mutations in order, batching contiguous mutations for the same RPC target (`MutateData` per survey, `MutateSurvey` per survey and revision, `MutateOrganization` and `MutateLibrary` per organization), with at most one batch in flight per target. The backend executes a write transaction in Cloud Spanner, which assigns a definitive `commit_timestamp` utilizing its atomic TrueTime engine.
 3. **Delta Request (Server to Client):** The client initiates a delta gRPC stream request, sending its `last_synced_spanner_timestamp` to the server.
 4. **Cloud Spanner Index Evaluation:** The backend service executes a highly optimized index lookup against Spanner tables:
    ```sql
@@ -80,14 +93,21 @@ Survey definitions are large (forms, entity dataset schemas, translations), so t
 ### Web Client
 The Web Console is online-only and keeps no offline copy, so it uses the same RPCs with a different lifecycle:
 
-1. **In-memory store:** The web app holds an in-memory store scoped to what's on screen: the survey list while it's visible, and the active survey's definition, entities, and submissions while a survey is open. The store is discarded when the user leaves that view or reloads the page; there is no outbox, because writes require a connection.
+1. **In-memory store:** The web app holds an in-memory store scoped to what's on screen: the survey list while it's visible, and the active survey's definition, entities, and submissions while a survey is open. The store, including its outbox, is discarded when the user reloads the page. While the outbox has entries, the page asks for confirmation before unloading.
 2. **Survey list:** When the list becomes visible, the client runs `StreamSurveyOverviews` with no `since_timestamp` to load every overview, then [polls](#foreground-polling) from the resulting watermark until the user navigates away.
 3. **Active survey:** On opening a survey, the client calls `GetSurvey` (with `working_copy = true` in the Survey Editor when the overview reports `has_working_copy`), loads `StreamEntities` / `StreamSubmissions` for that `survey_id`, and then polls both from their watermarks.
 4. **Large surveys:** When a survey is too large to hold in memory, data tables and map overviews use the query RPCs (`ListSubmissions` / `ListEntities` with `filter`, `order_by`, and `page_token`; `ListEntityClusters` for overview zoom levels). To keep the visible page fresh, the client polls the matching stream starting from the query's `server_watermark` and applies changes to the rows it holds (or re-runs the query when a change affects sorting or paging).
-5. **Writes:** Mutations are sent directly with `Mutate*`, followed by an immediate poll to pick up the authoritative result. On failure, the UI reports the error instead of queueing the change.
+5. **Writes:** Edits use the same outbox as mobile: they're applied locally at once, sent with `Mutate*` in the background, retried on transient failures, and rebased when remote changes arrive. Permanent failures are reported in the Uploads view.
 6. **Tab lifecycle:** When the tab becomes hidden (`visibilitychange`), the client stops polling. When it becomes visible again, it polls immediately from its in-memory watermarks, catching up on anything it missed.
 
 Browsers reach the gRPC service through gRPC-Web, which supports the unary and server-streaming calls used here; client-streaming and bidirectional streaming aren't required.
+
+### Mutation Semantics
+* **Idempotent per mutation:** The server applies each `mutation_id` at most once. Replays are skipped and return the record's current state, so a stale retry can't overwrite newer writes. It also tracks the highest applied `client_seq` per `(client_id, scope)`, returned by `GetAppliedMutations`.
+* **Last writer wins per field:** Field patches always apply in server commit order. A data patch based on an older `base_revision` reports `AUTO_MERGED`.
+* **Guarded replacements:** Whole-record replacements (`upsert_*`) fail with `FAILED_PRECONDITION` when their `base_version` / `base_revision` is set and stale. The client then pulls, rebases, and retries.
+* **Error handling:** `UNAVAILABLE` and `DEADLINE_EXCEEDED` retry with backoff. `INVALID_ARGUMENT`, `PERMISSION_DENIED`, and `NOT_FOUND` reject the mutation, remove it from the local copy, and show it as failed in the Uploads view.
+* **Survey editor autosave:** Editor patches are queued as the organizer types, coalesced per key, and sent to the working copy after about 1.5 seconds without new edits.
 
 ## Kotlin Multiplatform Code Topology
 
@@ -155,4 +175,4 @@ Utilizes **BGTaskScheduler** for opportunistic background processing.
 | **Natural Stream Debouncing:** If 10,000 modifications hit a Spanner partition while the client is away, the client runs exactly one single pull transaction upon returning. | **Burst Backend Traffic:** If a significant event causes millions of users to launch the application concurrently, the backend will face massive concurrent catch-up query demands. |
 | **Perfect Chronological Ordering:** Leveraging Spanner's TrueTime engine ensures updates are processed in absolute linear sequence, eliminating race conditions common to pushed messaging channels. | **Chunking / Pagination Overhead Requirement:** If a client goes offline for weeks, data payloads must be systematically broken down into discrete index chunks to stay within background runtime execution boundaries. |
 | **Collaboration Without Open Connections:** Foreground polling reuses the catch-up stream and watermark, so ordering, resume, and tombstones work identically for offline catch-up and collaborative updates, and servers scale with request volume rather than connected users. | **Seconds of Staleness:** Collaborators see each other's changes after up to one polling interval (about 10 seconds in collaborative views), and idle polls add request volume. If that proves too slow, a lightweight change signal (for example, a per-survey "latest commit" document clients can watch) can trigger polls early without changing the RPCs. |
-| **One Sync RPC per Resource:** Clients never choose between equivalent `List` and `Stream` calls; query RPCs exist only where the server must filter, sort, page, or aggregate. | **Web Holds No Offline Copy:** The Web Console can't read or write while disconnected, and very large surveys must use paged queries plus polling rather than a full in-memory copy. |
+| **One Sync RPC per Resource:** Clients never choose between equivalent `List` and `Stream` calls; query RPCs exist only where the server must filter, sort, page, or aggregate. | **Web Holds No Offline Copy:** The Web Console's outbox is in memory, so edits queued during an outage are lost if the page is reloaded before they're sent, and very large surveys must use paged queries plus polling rather than a full in-memory copy. |
