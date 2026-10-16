@@ -21,3 +21,6 @@
 
 # Android SDK location and local API tokens (machine-specific, must not be committed)
 local.properties
+
+# Editor backup files (these can copy secrets such as local.properties)
+*~
