@@ -16,6 +16,7 @@ package org.groundplatform.v2.server.userdata
 import com.squareup.wire.Instant
 import groundplatform.v2.data.AcquirePlotLockRequest
 import groundplatform.v2.data.AcquirePlotLockResponse
+import groundplatform.v2.data.AppliedMutationWatermark
 import groundplatform.v2.data.AuditRecord
 import groundplatform.v2.data.ConflictResolutionStatus
 import groundplatform.v2.data.DataMutation
@@ -23,6 +24,8 @@ import groundplatform.v2.data.DataMutationResult
 import groundplatform.v2.data.DataServiceServer
 import groundplatform.v2.data.EntityCluster
 import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.GetAppliedMutationsRequest
+import groundplatform.v2.data.GetAppliedMutationsResponse
 import groundplatform.v2.data.GetEntityRequest
 import groundplatform.v2.data.GetEntityResponse
 import groundplatform.v2.data.GetImpactAggregatesRequest
@@ -134,7 +137,14 @@ import kotlinx.coroutines.channels.SendChannel
  *   and offset-based paging.
  * - Soft-delete tombstones (`is_deleted = true` or `state = DELETED`) emitted when `include_deleted
  *   = true`.
- * - Idempotent mutations (`mutation_id` deduplication) and 5-minute cooperative plot locks.
+ * - Idempotent mutations: each `mutation_id` is applied at most once (replays are skipped, so a
+ *   stale retry can't overwrite newer writes), and the highest applied `client_seq` per
+ *   `(client_id, scope)` is reported by `GetAppliedMutations`.
+ * - Last-writer-wins field patches. `base_revision` / `base_version` only guard whole-record
+ *   replacements (`upsert_*`), which fail with `FAILED_PRECONDITION` when stale; stale field
+ *   patches on data records report `AUTO_MERGED`.
+ * - Atomic `Mutate*` requests: a request that fails leaves no partial changes.
+ * - 5-minute cooperative plot locks.
  */
 class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   SurveyServiceServer, OrganizationServiceServer, LibraryServiceServer, DataServiceServer {
@@ -165,6 +175,71 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   private val plotLocksByEntityKey = linkedMapOf<String, PlotLock>()
   private val appliedMutationIds = LinkedHashSet<String>()
 
+  /** Highest applied `client_seq` keyed by `(client_id, scope)`. */
+  private val appliedClientSeqs = linkedMapOf<Pair<String, String>, AppliedMutationWatermark>()
+
+  /** Identity of one client mutation, used for deduplication and `client_seq` tracking. */
+  private data class MutationIdentity(
+    val mutationId: String,
+    val clientId: String,
+    val clientSeq: Long,
+  )
+
+  /** True when [identity] carries a `mutation_id` that has already been applied. */
+  private fun isDuplicate(identity: MutationIdentity): Boolean =
+    identity.mutationId.isNotBlank() && identity.mutationId in appliedMutationIds
+
+  /**
+   * The [mutations] that haven't been applied yet, dropping replays of earlier requests and repeats
+   * of a `mutation_id` within the same request.
+   */
+  private fun <T> newMutations(mutations: List<T>, identityOf: (T) -> MutationIdentity): List<T> {
+    val seen = HashSet<String>()
+    return mutations.filter { mutation ->
+      val identity = identityOf(mutation)
+      !isDuplicate(identity) && (identity.mutationId.isBlank() || seen.add(identity.mutationId))
+    }
+  }
+
+  /**
+   * Fails with `FAILED_PRECONDITION` (via [IllegalStateException]) when a whole-record replacement
+   * was based on a stale version. Unset base versions (`0` / blank) and new records always pass.
+   */
+  private fun checkBaseVersion(baseVersion: Long, currentVersion: Long?, what: String) {
+    if (baseVersion == 0L || currentVersion == null) return
+    check(baseVersion == currentVersion) {
+      "Stale base version for $what: based on $baseVersion, current is $currentVersion"
+    }
+  }
+
+  private fun checkBaseVersion(baseVersion: String, currentVersion: String?, what: String) {
+    if (baseVersion.isBlank() || currentVersion == null) return
+    check(baseVersion == currentVersion) {
+      "Stale base version for $what: based on $baseVersion, current is $currentVersion"
+    }
+  }
+
+  /**
+   * Records [identities] as applied in [scope] at [ts]. Call only after the request's changes are
+   * committed, so a failed request can be retried.
+   */
+  private fun recordApplied(scope: String, identities: List<MutationIdentity>, ts: Instant) {
+    for (identity in identities) {
+      if (identity.mutationId.isNotBlank()) appliedMutationIds += identity.mutationId
+      if (identity.clientId.isBlank() || identity.clientSeq <= 0L) continue
+      val key = identity.clientId to scope
+      val previous = appliedClientSeqs[key]
+      if (previous == null || identity.clientSeq > previous.client_seq) {
+        appliedClientSeqs[key] =
+          AppliedMutationWatermark(
+            scope = scope,
+            client_seq = identity.clientSeq,
+            commit_timestamp = ts,
+          )
+      }
+    }
+  }
+
   init {
     reset()
   }
@@ -184,6 +259,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     auditRecordsById.clear()
     plotLocksByEntityKey.clear()
     appliedMutationIds.clear()
+    appliedClientSeqs.clear()
 
     val timestamps = mutableListOf<Instant?>()
     seed.organizations.forEach {
@@ -320,13 +396,28 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   override suspend fun MutateOrganization(
     request: MutateOrganizationRequest
   ): MutateOrganizationResponse {
-    val ts = nextCommitTimestamp()
     val orgId = request.organization_id
-    var current: Organization =
-      organizationsById[orgId]
-        ?: Organization(organization_id = orgId, version = 0L, commit_timestamp = ts)
+    val existing = organizationsById[orgId]
+    val toApply =
+      newMutations(request.mutations) {
+        MutationIdentity(it.mutation_id, it.client_id, it.client_seq)
+      }
+    if (toApply.isEmpty()) {
+      return MutateOrganizationResponse(
+        organization_id = orgId,
+        organization = existing,
+        commit_timestamp = existing?.commit_timestamp ?: currentWatermark(),
+      )
+    }
+    if (toApply.any { it.upsert_organization != null }) {
+      checkBaseVersion(request.base_version, existing?.version, "organization $orgId")
+    }
 
-    for (mutation in request.mutations) {
+    val ts = nextCommitTimestamp()
+    var current: Organization =
+      existing ?: Organization(organization_id = orgId, version = 0L, commit_timestamp = ts)
+
+    for (mutation in toApply) {
       val up = mutation.upsert_organization
       val patch = mutation.update_field
       when {
@@ -354,6 +445,11 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
     current = current.copy(version = current.version + 1L, commit_timestamp = ts)
     organizationsById[current.organization_id] = current
+    recordApplied(
+      scope = "organizations/${current.organization_id}",
+      identities = toApply.map { MutationIdentity(it.mutation_id, it.client_id, it.client_seq) },
+      ts = ts,
+    )
     return MutateOrganizationResponse(
       organization_id = current.organization_id,
       organization = current,
@@ -520,9 +616,29 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   }
 
   override suspend fun MutateLibrary(request: MutateLibraryRequest): MutateLibraryResponse {
+    val existing = librariesByOrgId[request.organization_id]
+    val toApply =
+      newMutations(request.mutations) {
+        MutationIdentity(it.mutation_id, it.client_id, it.client_seq)
+      }
+    if (toApply.isEmpty()) {
+      return MutateLibraryResponse(
+        organization_id = request.organization_id,
+        library = existing,
+        commit_timestamp = existing?.commit_timestamp ?: currentWatermark(),
+      )
+    }
+    if (toApply.any { it.upsert_library != null }) {
+      checkBaseVersion(
+        request.base_version,
+        existing?.version,
+        "library ${request.organization_id}",
+      )
+    }
+
     val ts = nextCommitTimestamp()
     var current =
-      librariesByOrgId[request.organization_id]
+      existing
         ?: OrganizationLibraryRecord(
           organization_id = request.organization_id,
           bundle = LibraryBundle(),
@@ -531,7 +647,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
           commit_timestamp = ts,
         )
 
-    for (mutation in request.mutations) {
+    for (mutation in toApply) {
       val upLib = mutation.upsert_library
       val patch = mutation.update_field
       if (upLib != null) {
@@ -548,6 +664,11 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
     current = current.copy(version = current.version + 1L, commit_timestamp = ts)
     librariesByOrgId[request.organization_id] = current
+    recordApplied(
+      scope = "libraries/${request.organization_id}",
+      identities = toApply.map { MutationIdentity(it.mutation_id, it.client_id, it.client_seq) },
+      ts = ts,
+    )
     return MutateLibraryResponse(
       organization_id = request.organization_id,
       library = current,
@@ -641,8 +762,32 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     )
 
   override suspend fun MutateSurvey(request: MutateSurveyRequest): MutateSurveyResponse {
-    val ts = nextCommitTimestamp()
     val surveyId = request.survey_id
+    val toApply =
+      newMutations(request.mutations) {
+        MutationIdentity(it.mutation_id, it.client_id, it.client_seq)
+      }
+    if (toApply.isEmpty()) {
+      val existingSaved = surveysById[surveyId]
+      val existingWorkingCopy = surveyWorkingCopiesById[surveyId]
+      return MutateSurveyResponse(
+        survey_id = surveyId,
+        survey = if (request.working_copy) existingWorkingCopy ?: existingSaved else existingSaved,
+        acl = surveyAclsById[surveyId],
+        commit_timestamp = existingSaved?.commit_timestamp ?: currentWatermark(),
+      )
+    }
+    if (toApply.any { it.upsert_survey != null || it.upsert_acl != null }) {
+      val baseTarget =
+        if (request.working_copy) {
+          surveyWorkingCopiesById[surveyId] ?: surveysById[surveyId]
+        } else {
+          surveysById[surveyId]
+        }
+      checkBaseVersion(request.base_version, baseTarget?.version, "survey $surveyId")
+    }
+
+    val ts = nextCommitTimestamp()
     var saved =
       surveysById[surveyId]
         ?: SurveyDef(
@@ -661,7 +806,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       if (request.working_copy) workingCopy = def else saved = def
     }
 
-    for (mutation in request.mutations) {
+    for (mutation in toApply) {
       val upSurvey = mutation.upsert_survey
       val upAcl = mutation.upsert_acl
       val patchField = mutation.update_field
@@ -699,6 +844,11 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     } else {
       surveyWorkingCopiesById.remove(surveyId)
     }
+    recordApplied(
+      scope = "surveys/$surveyId",
+      identities = toApply.map { MutationIdentity(it.mutation_id, it.client_id, it.client_seq) },
+      ts = ts,
+    )
 
     return MutateSurveyResponse(
       survey_id = surveyId,
@@ -993,20 +1143,66 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     val results = mutableListOf<DataMutationResult>()
     var batchCommitTimestamp = currentWatermark()
     val surveyId = request.survey_id
-    val entityMap = entitiesBySurveyAndId.getOrPut(surveyId) { linkedMapOf() }
-    val subMap = submissionsBySurveyAndId.getOrPut(surveyId) { linkedMapOf() }
+    // Apply to copies and commit only once every mutation succeeded, so a failed request leaves no
+    // partial changes and can be retried as a whole.
+    val entityMap = LinkedHashMap(entitiesBySurveyAndId[surveyId].orEmpty())
+    val subMap = LinkedHashMap(submissionsBySurveyAndId[surveyId].orEmpty())
+    val applied = mutableListOf<MutationIdentity>()
+    val seenInRequest = HashSet<String>()
 
     for (mutation in request.mutations) {
+      val identity = MutationIdentity(mutation.mutation_id, mutation.client_id, mutation.client_seq)
+      val repeated = identity.mutationId.isNotBlank() && !seenInRequest.add(identity.mutationId)
+      if (isDuplicate(identity) || repeated) {
+        results += duplicateDataResult(mutation, entityMap, subMap)
+        continue
+      }
       val ts = nextCommitTimestamp()
       batchCommitTimestamp = ts
-      if (mutation.mutation_id.isNotBlank()) {
-        appliedMutationIds += mutation.mutation_id
-      }
       results += applyDataMutation(surveyId, mutation, entityMap, subMap, ts)
+      applied += identity
     }
 
+    if (applied.isNotEmpty()) {
+      entitiesBySurveyAndId[surveyId] = entityMap
+      submissionsBySurveyAndId[surveyId] = subMap
+      recordApplied(
+        scope = "surveys/$surveyId/data",
+        identities = applied,
+        ts = batchCommitTimestamp,
+      )
+    }
     return MutateDataResponse(results = results, commit_timestamp = batchCommitTimestamp)
   }
+
+  /** Result for a replayed `mutation_id`: the target record's current state, unchanged. */
+  private fun duplicateDataResult(
+    mutation: DataMutation,
+    entityMap: Map<String, EntityRecord>,
+    subMap: Map<String, SubmissionRecord>,
+  ): DataMutationResult {
+    val entity = mutation.entity_mutation?.let { entityMap[it.entity_id] }
+    val submission = mutation.submission_mutation?.let { subMap[it.submission_id] }
+    return DataMutationResult(
+      entity = entity,
+      submission = if (entity == null) submission else null,
+      conflict_status = ConflictResolutionStatus.CONFLICT_RESOLUTION_STATUS_CLEAN,
+      commit_timestamp = entity?.commit_timestamp ?: submission?.commit_timestamp,
+      duplicate = true,
+    )
+  }
+
+  /**
+   * Conflict status for a field patch based on [baseRevision] against the stored [currentRevision]:
+   * patches always apply (last writer wins), but report `AUTO_MERGED` when based on an older
+   * revision.
+   */
+  private fun patchConflictStatus(baseRevision: Long, currentRevision: Long) =
+    if (baseRevision in 1L until currentRevision) {
+      ConflictResolutionStatus.CONFLICT_RESOLUTION_STATUS_AUTO_MERGED
+    } else {
+      ConflictResolutionStatus.CONFLICT_RESOLUTION_STATUS_CLEAN
+    }
 
   private fun applyDataMutation(
     surveyId: String,
@@ -1029,6 +1225,13 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
             )
         val emUpsert = em.upsert
         val emUpdate = em.update
+        if (emUpsert != null) {
+          checkBaseVersion(
+            em.base_revision,
+            entityMap[em.entity_id]?.revision,
+            "entity ${em.entity_id}",
+          )
+        }
         val updated: EntityRecord =
           when {
             em.delete == true ->
@@ -1089,7 +1292,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
         entityMap[updated.entity_id] = updated
         DataMutationResult(
           entity = updated,
-          conflict_status = ConflictResolutionStatus.CONFLICT_RESOLUTION_STATUS_CLEAN,
+          conflict_status = patchConflictStatus(em.base_revision, existing.revision),
           commit_timestamp = ts,
         )
       }
@@ -1104,6 +1307,13 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
             )
         val smUpsert = sm.upsert
         val smUpdate = sm.update
+        if (smUpsert != null) {
+          checkBaseVersion(
+            sm.base_revision,
+            subMap[sm.submission_id]?.revision,
+            "submission ${sm.submission_id}",
+          )
+        }
         val updated: SubmissionRecord =
           when {
             sm.delete == true ->
@@ -1149,7 +1359,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
         subMap[updated.submission_id] = updated
         DataMutationResult(
           submission = updated,
-          conflict_status = ConflictResolutionStatus.CONFLICT_RESOLUTION_STATUS_CLEAN,
+          conflict_status = patchConflictStatus(sm.base_revision, existing.revision),
           commit_timestamp = ts,
         )
       }
@@ -1325,6 +1535,22 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     return ListMutationLogsResponse(
       mutation_logs = filtered,
       server_watermark = currentWatermark(),
+    )
+  }
+
+  override suspend fun GetAppliedMutations(
+    request: GetAppliedMutationsRequest
+  ): GetAppliedMutationsResponse {
+    require(request.client_id.isNotBlank()) { "client_id is required" }
+    val scopes = request.scopes.toSet()
+    return GetAppliedMutationsResponse(
+      watermarks =
+        appliedClientSeqs
+          .filterKeys { (clientId, scope) ->
+            clientId == request.client_id && (scopes.isEmpty() || scope in scopes)
+          }
+          .values
+          .toList()
     )
   }
 

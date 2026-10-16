@@ -124,10 +124,29 @@ message OrganizationMutation {
     // Permanently deletes the organization and unlinks its surveys to personal.
     bool delete_organization = 3;
   }
+
+  // Client-generated idempotency UUID from the offline outbox. The server
+  // applies each `mutation_id` at most once and skips replays.
+  string mutation_id = 4;
+
+  // Stable identifier of the client install that recorded the mutation.
+  string client_id = 5;
+
+  // Monotonically increasing sequence number of the mutation within
+  // `client_id` (`GetAppliedMutations`, scope
+  // `"organizations/<organization_id>"`).
+  int64 client_seq = 6;
+
+  // Client-side timestamp when the mutation was recorded.
+  google.protobuf.Timestamp client_timestamp = 7;
 }
 
 message MutateOrganizationRequest {
   string organization_id = 1;
+
+  // Expected `Organization.version` (optional). Field patches are applied
+  // last-writer-wins regardless; only `upsert_organization` fails with
+  // `FAILED_PRECONDITION` when it is set and stale.
   int64 base_version = 2;
   repeated OrganizationMutation mutations = 3;
 }

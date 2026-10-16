@@ -18,6 +18,8 @@ import groundplatform.v2.data.AcquirePlotLockResponse
 import groundplatform.v2.data.AuditRecord
 import groundplatform.v2.data.DataServiceServer
 import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.GetAppliedMutationsRequest
+import groundplatform.v2.data.GetAppliedMutationsResponse
 import groundplatform.v2.data.GetEntityRequest
 import groundplatform.v2.data.GetEntityResponse
 import groundplatform.v2.data.GetImpactAggregatesRequest
@@ -423,6 +425,16 @@ class RemoteDataService(private val transport: GrpcWebTransport) : DataServiceSe
       request,
       ListMutationLogsRequest.ADAPTER,
       ListMutationLogsResponse.ADAPTER,
+    )
+
+  override suspend fun GetAppliedMutations(
+    request: GetAppliedMutationsRequest
+  ): GetAppliedMutationsResponse =
+    transport.unary(
+      "/groundplatform.v2.data.DataService/GetAppliedMutations",
+      request,
+      GetAppliedMutationsRequest.ADAPTER,
+      GetAppliedMutationsResponse.ADAPTER,
     )
 }
 

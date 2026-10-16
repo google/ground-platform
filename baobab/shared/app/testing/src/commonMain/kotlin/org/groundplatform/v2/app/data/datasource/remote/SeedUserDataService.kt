@@ -20,6 +20,8 @@ import groundplatform.v2.data.AcquirePlotLockResponse
 import groundplatform.v2.data.AuditRecord
 import groundplatform.v2.data.DataServiceServer
 import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.GetAppliedMutationsRequest
+import groundplatform.v2.data.GetAppliedMutationsResponse
 import groundplatform.v2.data.GetEntityRequest
 import groundplatform.v2.data.GetEntityResponse
 import groundplatform.v2.data.GetImpactAggregatesRequest
@@ -373,6 +375,10 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
 
   override suspend fun ListMutationLogs(request: ListMutationLogsRequest) =
     ListMutationLogsResponse(mutation_logs = mutationLogs)
+
+  override suspend fun GetAppliedMutations(
+    request: GetAppliedMutationsRequest
+  ): GetAppliedMutationsResponse = GetAppliedMutationsResponse()
 
   private fun unsupported(): Nothing =
     throw UnsupportedOperationException(

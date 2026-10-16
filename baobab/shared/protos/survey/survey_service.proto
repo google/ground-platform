@@ -284,6 +284,20 @@ message SurveyMutation {
     // revision.
     bool discard_working_copy = 8;
   }
+
+  // Client-generated idempotency UUID from the offline outbox. The server
+  // applies each `mutation_id` at most once and skips replays.
+  string mutation_id = 9;
+
+  // Stable identifier of the client install that recorded the mutation.
+  string client_id = 10;
+
+  // Monotonically increasing sequence number of the mutation within
+  // `client_id` (`GetAppliedMutations`, scope `"surveys/<survey_id>"`).
+  int64 client_seq = 11;
+
+  // Client-side timestamp when the mutation was recorded.
+  google.protobuf.Timestamp client_timestamp = 12;
 }
 
 // Request to atomically and idempotently apply an ordered sequence of mutations
@@ -293,7 +307,9 @@ message MutateSurveyRequest {
   string survey_id = 1;
 
   // Expected base version for optimistic concurrency control on existing
-  // surveys (optional).
+  // surveys (optional). Field patches are applied last-writer-wins regardless
+  // of `base_version`; only whole-snapshot replacements (`upsert_survey`,
+  // `upsert_acl`) fail with `FAILED_PRECONDITION` when it is set and stale.
   string base_version = 2;
 
   // Ordered sequence of idempotent survey field, ACL, or hard-delete mutations

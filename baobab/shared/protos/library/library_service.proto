@@ -139,10 +139,28 @@ message LibraryMutation {
     LibraryFieldPatch update_field = 1;
     OrganizationLibraryRecord upsert_library = 2;
   }
+
+  // Client-generated idempotency UUID from the offline outbox. The server
+  // applies each `mutation_id` at most once and skips replays.
+  string mutation_id = 3;
+
+  // Stable identifier of the client install that recorded the mutation.
+  string client_id = 4;
+
+  // Monotonically increasing sequence number of the mutation within
+  // `client_id` (`GetAppliedMutations`, scope `"libraries/<organization_id>"`).
+  int64 client_seq = 5;
+
+  // Client-side timestamp when the mutation was recorded.
+  google.protobuf.Timestamp client_timestamp = 6;
 }
 
 message MutateLibraryRequest {
   string organization_id = 1;
+
+  // Expected `OrganizationLibraryRecord.version` (optional). Field patches are
+  // applied last-writer-wins regardless; only `upsert_library` fails with
+  // `FAILED_PRECONDITION` when it is set and stale.
   int64 base_version = 2;
   repeated LibraryMutation mutations = 3;
 }

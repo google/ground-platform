@@ -116,6 +116,12 @@ service DataService {
 
   // Lists mutation log items tracked for the unified Uploads queue.
   rpc ListMutationLogs(ListMutationLogsRequest) returns (ListMutationLogsResponse);
+
+  // Returns, for one client install (`client_id`), the highest `client_seq`
+  // applied in each mutation scope across all `Mutate*` RPCs. Clients call it
+  // before each poll and drop outbox mutations with `client_seq <=` the
+  // returned value, which confirms mutations whose response was lost.
+  rpc GetAppliedMutations(GetAppliedMutationsRequest) returns (GetAppliedMutationsResponse);
 }
 
 // Smart queue filter mode for CEO desk interpretation.
@@ -280,6 +286,10 @@ message EntityPatch {
 message EntityMutation {
   string dataset_id = 1;
   string entity_id = 2;
+  // Revision the client based this mutation on (0 when unknown or new).
+  // `update` patches are applied last-writer-wins and report `AUTO_MERGED`
+  // when it is stale; `upsert` fails with `FAILED_PRECONDITION` when it is
+  // non-zero and stale.
   int64 base_revision = 3;
 
   oneof operation {
@@ -312,6 +322,10 @@ message SubmissionPatch {
 message SubmissionMutation {
   string submission_id = 1;
   string form_id = 2;
+  // Revision the client based this mutation on (0 when unknown or new).
+  // `update` patches are applied last-writer-wins and report `AUTO_MERGED`
+  // when it is stale; `upsert` fails with `FAILED_PRECONDITION` when it is
+  // non-zero and stale.
   int64 base_revision = 3;
 
   oneof operation {
@@ -328,11 +342,20 @@ message DataMutation {
   }
 
   // Client-generated idempotency UUID (`MutationLogItem.id`) from the offline
-  // outbox.
+  // outbox. The server applies each `mutation_id` at most once; replays are
+  // skipped and return the record's current state.
   string mutation_id = 3;
 
   // Client-side timestamp when the mutation was recorded offline.
   google.protobuf.Timestamp client_timestamp = 4;
+
+  // Stable identifier of the client install that recorded the mutation.
+  string client_id = 5;
+
+  // Monotonically increasing sequence number of the mutation within
+  // `client_id`. The server tracks the highest applied value per scope
+  // (`GetAppliedMutations`, scope `"surveys/<survey_id>/data"`).
+  int64 client_seq = 6;
 }
 
 message MutateDataRequest {
@@ -342,7 +365,10 @@ message MutateDataRequest {
 
 enum ConflictResolutionStatus {
   CONFLICT_RESOLUTION_STATUS_UNSPECIFIED = 0;
+  // `base_revision` matched the stored revision (or was unset).
   CONFLICT_RESOLUTION_STATUS_CLEAN = 1;
+  // Field patches written against an older `base_revision` were applied
+  // last-writer-wins over the newer stored revision.
   CONFLICT_RESOLUTION_STATUS_AUTO_MERGED = 2;
   CONFLICT_RESOLUTION_STATUS_CONFLICT_RECORDED = 3;
 }
@@ -356,6 +382,10 @@ message DataMutationResult {
 
   ConflictResolutionStatus conflict_status = 4;
   google.protobuf.Timestamp commit_timestamp = 5;
+
+  // True when `mutation_id` had already been applied, so this request didn't
+  // change anything. The result carries the record's current state.
+  bool duplicate = 6;
 }
 
 message MutateDataResponse {
@@ -503,4 +533,30 @@ message ListMutationLogsRequest {
 message ListMutationLogsResponse {
   repeated MutationLogRecord mutation_logs = 1;
   google.protobuf.Timestamp server_watermark = 2;
+}
+
+// Request for the mutations the server has applied for one client install.
+message GetAppliedMutationsRequest {
+  // Client install identifier (`*Mutation.client_id`).
+  string client_id = 1;
+
+  // Optional scopes to return. Empty returns every scope with applied
+  // mutations for `client_id`. Scopes are `"surveys/<survey_id>"`
+  // (`MutateSurvey`), `"surveys/<survey_id>/data"` (`MutateData`),
+  // `"organizations/<organization_id>"` (`MutateOrganization`), and
+  // `"libraries/<organization_id>"` (`MutateLibrary`).
+  repeated string scopes = 2;
+}
+
+// Highest `client_seq` applied for a client in one mutation scope.
+message AppliedMutationWatermark {
+  string scope = 1;
+  int64 client_seq = 2;
+
+  // Server commit timestamp of the mutation that set `client_seq`.
+  google.protobuf.Timestamp commit_timestamp = 3;
+}
+
+message GetAppliedMutationsResponse {
+  repeated AppliedMutationWatermark watermarks = 1;
 }

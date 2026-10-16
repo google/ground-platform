@@ -18,6 +18,8 @@ import groundplatform.v2.data.AcquirePlotLockResponse
 import groundplatform.v2.data.AuditRecord
 import groundplatform.v2.data.DataServiceServer
 import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.GetAppliedMutationsRequest
+import groundplatform.v2.data.GetAppliedMutationsResponse
 import groundplatform.v2.data.GetEntityRequest
 import groundplatform.v2.data.GetEntityResponse
 import groundplatform.v2.data.GetImpactAggregatesRequest
@@ -244,4 +246,8 @@ class CollectOneGrpcClient(
 
   suspend fun listMutationLogs(request: ListMutationLogsRequest): ListMutationLogsResponse =
     dataService.ListMutationLogs(request)
+
+  suspend fun getAppliedMutations(
+    request: GetAppliedMutationsRequest
+  ): GetAppliedMutationsResponse = dataService.GetAppliedMutations(request)
 }
