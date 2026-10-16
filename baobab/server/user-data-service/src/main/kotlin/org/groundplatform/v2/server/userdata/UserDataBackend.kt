@@ -72,7 +72,6 @@ import groundplatform.v2.library.GetLibraryResponse
 import groundplatform.v2.library.GetResolvedLibraryRequest
 import groundplatform.v2.library.GetResolvedLibraryResponse
 import groundplatform.v2.library.LibraryBundle
-import groundplatform.v2.library.LibraryFieldPatch
 import groundplatform.v2.library.LibraryServiceServer
 import groundplatform.v2.library.MutateLibraryRequest
 import groundplatform.v2.library.MutateLibraryResponse
@@ -84,9 +83,7 @@ import groundplatform.v2.library.SearchConceptsResponse
 import groundplatform.v2.library.StreamLibrariesRequest
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AcceptSurveyInviteResponse
-import groundplatform.v2.survey.AccessRulesPatch
 import groundplatform.v2.survey.AclEntry
-import groundplatform.v2.survey.AclRolePatch
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetOrganizationResponse
 import groundplatform.v2.survey.GetSurveyAclRequest
@@ -97,14 +94,12 @@ import groundplatform.v2.survey.JoinOrganizationRequest
 import groundplatform.v2.survey.JoinOrganizationResponse
 import groundplatform.v2.survey.ListOrganizationsRequest
 import groundplatform.v2.survey.ListOrganizationsResponse
-import groundplatform.v2.survey.MapConfig
 import groundplatform.v2.survey.MembershipStatus
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateOrganizationResponse
 import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.MutateSurveyResponse
 import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationFieldPatch
 import groundplatform.v2.survey.OrganizationMember
 import groundplatform.v2.survey.OrganizationRole
 import groundplatform.v2.survey.OrganizationServiceServer
@@ -114,12 +109,15 @@ import groundplatform.v2.survey.StreamOrganizationsRequest
 import groundplatform.v2.survey.StreamSurveyOverviewsRequest
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyFieldPatch
 import groundplatform.v2.survey.SurveyOverview
 import groundplatform.v2.survey.SurveyServiceServer
 import groundplatform.v2.survey.SurveyState
 import groundplatform.v2.userdata.UserDataSeed
 import kotlinx.coroutines.channels.SendChannel
+import org.groundplatform.v2.core.mutation.DataPatches
+import org.groundplatform.v2.core.mutation.LibraryPatches
+import org.groundplatform.v2.core.mutation.OrganizationPatches
+import org.groundplatform.v2.core.mutation.SurveyPatches
 
 /**
  * In-memory implementation of the user data services ([SurveyServiceServer],
@@ -438,7 +436,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
             )
         }
         patch != null -> {
-          current = applyOrganizationFieldPatch(current, patch)
+          current = OrganizationPatches.applyField(current, patch)
         }
       }
     }
@@ -456,42 +454,6 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       commit_timestamp = ts,
     )
   }
-
-  private fun applyOrganizationFieldPatch(
-    org: Organization,
-    patch: OrganizationFieldPatch,
-  ): Organization =
-    when {
-      patch.key == "name" -> org.copy(name = patch.string_value.orEmpty())
-      patch.key == "description" -> org.copy(description = patch.string_value.orEmpty())
-      patch.key == "website_url" -> org.copy(website_url = patch.string_value.orEmpty())
-      patch.key == "logo_url" -> org.copy(logo_url = patch.string_value.orEmpty())
-      patch.key == "country_code" -> org.copy(country_code = patch.string_value.orEmpty())
-      patch.key == "listed" -> org.copy(listed = patch.bool_value ?: org.listed)
-      patch.key == "exclude_from_platform_aggregates" ->
-        org.copy(
-          exclude_from_platform_aggregates =
-            patch.bool_value ?: org.exclude_from_platform_aggregates
-        )
-      patch.key == "is_deleted" -> org.copy(is_deleted = patch.bool_value ?: org.is_deleted)
-      patch.key == "organization_type" ->
-        org.copy(organization_type = patch.organization_type_value ?: org.organization_type)
-      patch.key.startsWith("imagery_sources/") -> {
-        val sourceId = patch.key.removePrefix("imagery_sources/")
-        val without = org.imagery_sources.filterNot { it.imagery_source_id == sourceId }
-        val sourceVal = patch.imagery_source_value
-        val updated = if (sourceVal != null) without + sourceVal else without
-        org.copy(imagery_sources = updated)
-      }
-      patch.key.startsWith("members/") -> {
-        val email = patch.key.removePrefix("members/")
-        val without = org.members.filterNot { it.email.equals(email, ignoreCase = true) }
-        val memberVal = patch.member_value
-        val updated = if (memberVal != null) without + memberVal else without
-        org.copy(members = updated)
-      }
-      else -> org
-    }
 
   override suspend fun JoinOrganization(
     request: JoinOrganizationRequest
@@ -658,7 +620,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
             commit_timestamp = ts,
           )
       } else if (patch != null) {
-        current = applyLibraryFieldPatch(current, patch)
+        current = LibraryPatches.applyField(current, patch)
       }
     }
 
@@ -674,45 +636,6 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       library = current,
       commit_timestamp = ts,
     )
-  }
-
-  private fun applyLibraryFieldPatch(
-    record: OrganizationLibraryRecord,
-    patch: LibraryFieldPatch,
-  ): OrganizationLibraryRecord {
-    val bundle = record.bundle ?: LibraryBundle()
-    return when {
-      patch.key == "settings" -> record.copy(settings = patch.settings_value ?: record.settings)
-      patch.key.startsWith("concepts/") -> {
-        val id = patch.key.removePrefix("concepts/")
-        val without = bundle.concepts.filterNot { it.id == id }
-        val conceptVal = patch.concept_value
-        val updated = if (conceptVal != null) without + conceptVal else without
-        record.copy(bundle = bundle.copy(concepts = updated))
-      }
-      patch.key.startsWith("form_templates/") -> {
-        val id = patch.key.removePrefix("form_templates/")
-        val without = bundle.form_templates.filterNot { it.id == id }
-        val templateVal = patch.form_template_value
-        val updated = if (templateVal != null) without + templateVal else without
-        record.copy(bundle = bundle.copy(form_templates = updated))
-      }
-      patch.key.startsWith("purpose_packs/") -> {
-        val id = patch.key.removePrefix("purpose_packs/")
-        val without = bundle.purpose_packs.filterNot { it.id == id }
-        val packVal = patch.purpose_pack_value
-        val updated = if (packVal != null) without + packVal else without
-        record.copy(bundle = bundle.copy(purpose_packs = updated))
-      }
-      patch.key.startsWith("export_profiles/") -> {
-        val id = patch.key.removePrefix("export_profiles/")
-        val without = bundle.export_profiles.filterNot { it.id == id }
-        val profileVal = patch.export_profile_value
-        val updated = if (profileVal != null) without + profileVal else without
-        record.copy(bundle = bundle.copy(export_profiles = updated))
-      }
-      else -> record
-    }
   }
 
   // ---------------------------------------------------------------------------
@@ -828,9 +751,9 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
           }
         }
         mutation.discard_working_copy == true -> workingCopy = null
-        patchField != null -> setTarget(applySurveyFieldPatch(target(), patchField))
-        patchRole != null -> currentAcl = applyAclRolePatch(currentAcl, patchRole)
-        patchAccess != null -> currentAcl = applyAccessRulesPatch(currentAcl, patchAccess)
+        patchField != null -> setTarget(SurveyPatches.applyField(target(), patchField))
+        patchRole != null -> currentAcl = SurveyPatches.applyAclRole(currentAcl, patchRole)
+        patchAccess != null -> currentAcl = SurveyPatches.applyAccessRules(currentAcl, patchAccess)
       }
     }
 
@@ -885,102 +808,6 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       acl = updatedAcl,
       commit_timestamp = ts,
     )
-  }
-
-  private fun applySurveyFieldPatch(survey: SurveyDef, patch: SurveyFieldPatch): SurveyDef =
-    when {
-      patch.key == "title" -> survey.copy(title = patch.string_value.orEmpty())
-      patch.key == "description" -> survey.copy(description = patch.string_value.orEmpty())
-      patch.key == "organization_id" -> survey.copy(organization_id = patch.string_value.orEmpty())
-      patch.key == "owner_id" -> survey.copy(owner_id = patch.string_value.orEmpty())
-      patch.key == "default_language" ->
-        survey.copy(default_language = patch.string_value.orEmpty())
-      patch.key == "closed_at_iso" -> survey.copy(closed_at_iso = patch.string_value.orEmpty())
-      patch.key == "state" -> survey.copy(state = patch.state_value ?: survey.state)
-      patch.key == "closed_at" -> survey.copy(closed_at = patch.timestamp_value)
-      patch.key == "outcome" -> survey.copy(outcome = patch.outcome_value)
-      patch.key == "map_config" -> survey.copy(map_config = patch.map_config_value)
-      patch.key == "map_config/survey_area" -> {
-        val mc = survey.map_config ?: MapConfig()
-        survey.copy(map_config = mc.copy(survey_area = patch.survey_area_value))
-      }
-      patch.key == "supported_languages" ->
-        survey.copy(supported_languages = patch.string_list_value?.values.orEmpty())
-      patch.key == "purpose_ids" ->
-        survey.copy(purpose_ids = patch.string_list_value?.values.orEmpty())
-      patch.key == "program_ids" ->
-        survey.copy(program_ids = patch.string_list_value?.values.orEmpty())
-      patch.key.startsWith("forms/") -> {
-        val formId = patch.key.removePrefix("forms/")
-        val without = survey.forms.filterNot { it.form_id == formId }
-        val formVal = patch.form_value
-        val updated = if (formVal != null) without + formVal else without
-        survey.copy(forms = updated)
-      }
-      patch.key.startsWith("entity_datasets/") -> {
-        val dsId = patch.key.removePrefix("entity_datasets/")
-        val without = survey.entity_datasets.filterNot { it.id == dsId }
-        val dsVal = patch.entity_dataset_value
-        val updated = if (dsVal != null) without + dsVal else without
-        survey.copy(entity_datasets = updated)
-      }
-      patch.key.startsWith("map_config/layers/") -> {
-        val layerId = patch.key.removePrefix("map_config/layers/")
-        val mc = survey.map_config ?: MapConfig()
-        val without = mc.layers.filterNot { it.id == layerId }
-        val layerVal = patch.layer_value
-        val updated = if (layerVal != null) without + layerVal else without
-        survey.copy(map_config = mc.copy(layers = updated))
-      }
-      patch.key.startsWith("form_launch_configs/") -> {
-        val formId = patch.key.removePrefix("form_launch_configs/")
-        val without = survey.form_launch_configs.filterNot { it.form_id == formId }
-        val launchVal = patch.form_launch_config_value
-        val updated = if (launchVal != null) without + launchVal else without
-        survey.copy(form_launch_configs = updated)
-      }
-      patch.key.startsWith("form_concept_links/") -> {
-        val formId = patch.key.removePrefix("form_concept_links/")
-        val without = survey.form_concept_links.filterNot { it.form_id == formId }
-        val linksVal = patch.form_concept_links_value
-        val updated = if (linksVal != null) without + linksVal else without
-        survey.copy(form_concept_links = updated)
-      }
-      else -> survey
-    }
-
-  private fun applyAclRolePatch(acl: SurveyAcl, patch: AclRolePatch): SurveyAcl {
-    val target = patch.user_id
-    val without =
-      acl.entries.filterNot {
-        it.user_id == target || it.email.equals(target, ignoreCase = true)
-      }
-    val entryVal = patch.entry_value
-    val roleVal = patch.role
-    val updated =
-      when {
-        entryVal != null -> without + entryVal
-        roleVal != null -> without + AclEntry(user_id = target, email = target, role = roleVal)
-        else -> without
-      }
-    return acl.copy(entries = updated)
-  }
-
-  private fun applyAccessRulesPatch(acl: SurveyAcl, patch: AccessRulesPatch): SurveyAcl {
-    var updated = acl
-    if (patch.sharing_policy != SharingPolicy.SHARING_POLICY_UNSPECIFIED) {
-      updated = updated.copy(sharing_policy = patch.sharing_policy)
-    }
-    if (patch.peer_data_visibility != PeerDataVisibility.PEER_DATA_VISIBILITY_UNSPECIFIED) {
-      updated = updated.copy(peer_data_visibility = patch.peer_data_visibility)
-    }
-    patch.collector_consent_required?.let {
-      updated = updated.copy(collector_consent_required = it)
-    }
-    patch.collector_consent_text?.let { updated = updated.copy(collector_consent_text = it) }
-    patch.care_sovereignty_applied?.let { updated = updated.copy(care_sovereignty_applied = it) }
-    patch.owner_email?.let { updated = updated.copy(owner_email = it) }
-    return updated
   }
 
   // ---------------------------------------------------------------------------
@@ -1249,39 +1076,13 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
                 commit_timestamp = ts,
                 sync_status_key = "SYNCED",
               )
-            emUpdate != null -> {
-              var rec = existing
-              val props = LinkedHashMap(rec.properties)
-              for (p in emUpdate.patches) {
-                val propVal = p.property_value
-                when {
-                  p.key == "label" -> rec = rec.copy(label = p.label_value.orEmpty())
-                  p.key == "is_deleted" -> rec = rec.copy(is_deleted = p.bool_value ?: false)
-                  p.key == "geometry" ->
-                    rec =
-                      rec.copy(
-                        point = p.point_value,
-                        trace = p.trace_value,
-                        shape = p.shape_value,
-                      )
-                  p.key.startsWith("properties/") -> {
-                    val propKey = p.key.removePrefix("properties/")
-                    if (propVal != null) {
-                      props[propKey] = propVal
-                    } else {
-                      props.remove(propKey)
-                    }
-                  }
-                  propVal != null -> props[p.key] = propVal
-                }
-              }
-              rec.copy(
-                revision = existing.revision + 1L,
-                properties = props,
-                commit_timestamp = ts,
-                sync_status_key = "SYNCED",
-              )
-            }
+            emUpdate != null ->
+              DataPatches.applyEntity(existing, emUpdate)
+                .copy(
+                  revision = existing.revision + 1L,
+                  commit_timestamp = ts,
+                  sync_status_key = "SYNCED",
+                )
             else ->
               existing.copy(
                 revision = existing.revision + 1L,
@@ -1331,24 +1132,13 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
                 commit_timestamp = ts,
                 sync_status_key = "SYNCED",
               )
-            smUpdate != null -> {
-              var rec = existing
-              for (p in smUpdate.patches) {
-                when (p.key) {
-                  "entity_id" -> rec = rec.copy(entity_id = p.string_value.orEmpty())
-                  "form_version" -> rec = rec.copy(form_version = p.string_value.orEmpty())
-                  "is_deleted" -> rec = rec.copy(is_deleted = p.bool_value ?: false)
-                  "is_quarantined" -> rec = rec.copy(is_quarantined = p.bool_value ?: false)
-                  "review_status" ->
-                    rec = rec.copy(review_status = p.review_status_value ?: rec.review_status)
-                }
-              }
-              rec.copy(
-                revision = existing.revision + 1L,
-                commit_timestamp = ts,
-                sync_status_key = "SYNCED",
-              )
-            }
+            smUpdate != null ->
+              DataPatches.applySubmission(existing, smUpdate)
+                .copy(
+                  revision = existing.revision + 1L,
+                  commit_timestamp = ts,
+                  sync_status_key = "SYNCED",
+                )
             else ->
               existing.copy(
                 revision = existing.revision + 1L,
