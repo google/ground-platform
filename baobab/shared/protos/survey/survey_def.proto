@@ -113,8 +113,9 @@ message SurveyDef {
   // docs/technical/model/data/04-impact-events.md.
   SurveyOutcome outcome = 22;
 
-  // Authoritative server commit timestamp for stateless delta synchronization
-  // (`docs/technical/sync-engine.md`).
+  // Authoritative server commit timestamp of the last write. For display only:
+  // clients compare versions, not timestamps, to tell which copy is newer
+  // (`docs/technical/sync-engine.md`, "Sync Tokens").
   google.protobuf.Timestamp commit_timestamp = 23;
 
   // Timestamp when the survey was closed or archived.
@@ -159,6 +160,16 @@ message SurveyDef {
   // for the survey's primary form) so full XForms fidelity round-trips across
   // gRPC.
   map<string, string> xforms_xml_by_form_id = 35;
+
+  // Monotonic version of the whole survey record: the saved revision, the
+  // working copy, and the ACL share one counter, which the server increments on
+  // every write to any of them (`MutateSurvey`, `AcceptSurveyInvite`) and
+  // stamps on all three. Clients keep the copy with the higher
+  // `record_version` (`docs/technical/sync-engine.md`, "Sync Tokens");
+  // `commit_timestamp` is for display only. Unrelated to `version` and
+  // `saved_revision_number`, which identify the saved revision collectors use
+  // and don't change on working-copy edits.
+  int64 record_version = 36;
 }
 
 // Lightweight survey overview listed by `SurveyService.ListSurveyOverviews`
@@ -223,7 +234,8 @@ message SurveyOverview {
   // ISO-8601 string representation of `closed_at` when set.
   string closed_at_iso = 18;
 
-  // Authoritative server commit timestamp for delta sync.
+  // Later of the survey's and its ACL's commit timestamps. For display only;
+  // compare `record_version` to tell which copy is newer.
   google.protobuf.Timestamp commit_timestamp = 19;
 
   // Whether the survey has a working copy with unsaved edits. Clients only call
@@ -235,6 +247,11 @@ message SurveyOverview {
   PeerDataVisibility peer_data_visibility = 22;
   bool collector_consent_required = 23;
   string collector_consent_text = 24;
+
+  // The survey's `SurveyDef.record_version`. Changes whenever the overview or
+  // anything it summarizes (the saved revision, `has_working_copy`, access)
+  // changes, so clients can tell a newer overview from an older one.
+  int64 record_version = 25;
 }
 
 // The organizer's answer to "What happened with this data?" when a survey is

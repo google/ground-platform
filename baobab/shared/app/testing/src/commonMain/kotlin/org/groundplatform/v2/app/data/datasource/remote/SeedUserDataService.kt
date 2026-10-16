@@ -102,9 +102,9 @@ import org.groundplatform.v2.app.data.seed.UserDataSeedGenerator
  * `ListPlaces`). Other RPCs throw; their behavior is tested in `server/user-data-service`.
  *
  * Calls never suspend, so tests can run sync code inside `runDirect`. Tests simulate changes made
- * by other clients with [putEntity], [deleteEntity], and [removeEntity], limit page sizes with
- * [maxPageSize], expire every sync token with [invalidateSyncTokens], and inspect the `List*`
- * requests the client sent in [listRequests].
+ * by other clients with [putEntity], [deleteEntity], [removeEntity], [deleteLibrary], and
+ * [removeLibrary], limit page sizes with [maxPageSize], expire every sync token with
+ * [invalidateSyncTokens], and inspect the `List*` requests the client sent in [listRequests].
  *
  * Its sync tokens use a format of its own: like the real service's, they are opaque to clients.
  */
@@ -150,14 +150,22 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
       dataService = this,
     )
 
-  /** Adds or replaces an entity as if committed by another client, and returns its timestamp. */
+  /**
+   * Adds or replaces an entity as if committed by another client, and returns its timestamp. Like
+   * the real service, the write bumps the entity's `revision` past the stored one.
+   */
   fun putEntity(surveyId: String, entity: EntityRecord): Instant {
     val ts = nextTimestamp()
     updateSurvey(surveyId) { s ->
+      val previous = s.entities.firstOrNull { it.entity_id == entity.entity_id }
       s.copy(
         entities =
           s.entities.filterNot { it.entity_id == entity.entity_id } +
-            entity.copy(survey_id = surveyId, commit_timestamp = ts)
+            entity.copy(
+              survey_id = surveyId,
+              revision = (previous?.revision ?: 0L) + 1L,
+              commit_timestamp = ts,
+            )
       )
     }
     return ts
@@ -170,7 +178,11 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
       s.copy(
         entities =
           s.entities.map {
-            if (it.entity_id == entityId) it.copy(is_deleted = true, commit_timestamp = ts) else it
+            if (it.entity_id == entityId) {
+              it.copy(is_deleted = true, revision = it.revision + 1L, commit_timestamp = ts)
+            } else {
+              it
+            }
           }
       )
     }
@@ -185,6 +197,26 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
     updateSurvey(surveyId) { s ->
       s.copy(entities = s.entities.filterNot { it.entity_id == entityId })
     }
+  }
+
+  /** Soft-deletes an organization's library as if deleted by another client. */
+  fun deleteLibrary(organizationId: String): Instant {
+    val ts = nextTimestamp()
+    val index = libraries.indexOfFirst { it.organization_id == organizationId }
+    check(index >= 0) { "Unknown library $organizationId" }
+    libraries[index] =
+      libraries[index].let {
+        it.copy(is_deleted = true, version = it.version + 1L, commit_timestamp = ts)
+      }
+    return ts
+  }
+
+  /**
+   * Removes an organization's library without leaving a tombstone, as a server data reset would.
+   * Clients only notice through a full sync, so call [invalidateSyncTokens] too.
+   */
+  fun removeLibrary(organizationId: String) {
+    libraries.removeAll { it.organization_id == organizationId }
   }
 
   private fun nextTimestamp(): Instant = ofEpochSecond(++latestEpochSecond, 0L)

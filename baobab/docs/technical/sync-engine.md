@@ -40,7 +40,7 @@ A sync token is an opaque string. Clients store it and send it back unchanged; t
 * **Scope binding:** a token sent with different scope fields is rejected with `INVALID_ARGUMENT`.
 * **Invalidation:** when the server can't serve changes from a token (it's past the retention window, the data was reset, or the access model changed), it fails with `FAILED_PRECONDITION`. The client discards the token and runs a full sync for that scope, replacing its bases (records missing from the result are removed). Pending outbox mutations are kept and rebased onto the new bases.
 * **Storage:** clients persist one token per resource and scope (`ClientSyncState.sync_tokens`), and advance it only after applying a whole page in one local transaction.
-* **Record freshness (planned):** when the same record arrives from a `List*` page and a `Mutate*` response, clients currently keep the copy with the later `commit_timestamp`. The plan is to compare record versions (`revision` / `version`) instead, once every write bumps the version; plot lock changes and survey working copy edits don't yet. `commit_timestamp` then stays on records for display only.
+* **Record freshness:** when the same record arrives more than once (from a `List*` page, a `Mutate*` response, or a replay), clients keep the copy with the higher version and ignore copies with an equal or lower one, whatever their `commit_timestamp`. Every write to a synced record strictly increases its version: `revision` for entities and submissions (including deletes and plot lock changes), `version` for organizations and libraries (exactly one per request), and `record_version` for surveys, shared by the saved revision, the working copy, and the ACL and copied to `SurveyOverview`. A survey's `version` and `saved_revision_number` keep identifying the saved revision collectors use, so working copy edits don't change them. `commit_timestamp` stays on records for display only. Full syncs are the exception: their results replace the bases whatever the versions, since a server data reset can lower them.
 
 ## End-to-End System Flows
 
@@ -58,7 +58,7 @@ For every synced record, the local store keeps the **base** (the last copy confi
 
 When a delta page or a `Mutate*` response delivers a newer copy of a record, the client, in one transaction:
 
-1. Replaces the base with the server copy (or marks it deleted for a tombstone).
+1. Replaces the base with the server copy (or marks it deleted for a tombstone), unless the stored base already has the same or a higher version (see [Record freshness](#sync-tokens)).
 2. Drops pending mutations the server has confirmed (acknowledged by response or reported by `GetAppliedMutations`) and pending patches that no longer change anything.
 3. Re-applies the remaining pending mutations on top of the new base.
 4. Stores the response's `next_sync_token` once the whole page is applied.

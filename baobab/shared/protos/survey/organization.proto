@@ -77,14 +77,18 @@ message Organization {
   // docs/technical/backend/impact-aggregation.md.
   bool exclude_from_platform_aggregates = 12;
 
-  // Sequential version number incremented on each organization mutation.
+  // Version of the record, incremented by exactly one on every write to the
+  // organization (`MutateOrganization`, `JoinOrganization`). Clients keep the
+  // copy with the higher version; `MutateOrganizationRequest.base_version`
+  // refers to it.
   int64 version = 13;
 
   // Soft-deletion tombstone flag for delta synchronization.
   bool is_deleted = 14;
 
-  // Authoritative server commit timestamp for stateless delta synchronization
-  // (`docs/technical/sync-engine.md`).
+  // Authoritative server commit timestamp of the last write. For display only:
+  // clients compare versions, not timestamps, to tell which copy is newer
+  // (`docs/technical/sync-engine.md`, "Sync Tokens").
   google.protobuf.Timestamp commit_timestamp = 15;
 }
 

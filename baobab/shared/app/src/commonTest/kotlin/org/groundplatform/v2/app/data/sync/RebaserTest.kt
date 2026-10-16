@@ -22,6 +22,7 @@ import groundplatform.v2.data.EntityMutation
 import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.forms.TypedValue
+import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.Organization as OrganizationProto
 import groundplatform.v2.survey.OrganizationFieldPatch
 import groundplatform.v2.survey.OrganizationMutation
@@ -121,6 +122,128 @@ class RebaserTest {
   }
 
   @Test
+  fun higherRevision_wins_andLowerOrEqualIsIgnored_whateverTheCommitTimestamp() {
+    accept(entity("V5", 1_000).copy(revision = 5))
+
+    // A later commit timestamp doesn't make a copy newer; only the revision does.
+    accept(entity("Equal", 9_000).copy(revision = 5))
+    assertEquals("V5", view()!!.label)
+    accept(entity("Lower", 9_001).copy(revision = 4))
+    assertEquals("V5", view()!!.label)
+
+    // A higher revision wins even with an earlier commit timestamp.
+    accept(entity("V6", 500).copy(revision = 6))
+    assertEquals("V6", view()!!.label)
+  }
+
+  @Test
+  fun organizationAndLibrary_compareVersionsNotTimestamps() {
+    val org =
+      OrganizationProto(
+        organization_id = "o1",
+        name = "V2",
+        version = 2L,
+        commit_timestamp = ofEpochSecond(1_000L, 0L),
+      )
+    runNow {
+      store.transaction {
+        val rebaser = Rebaser(this)
+        rebaser.acceptOrganization(org)
+        rebaser.acceptOrganization(
+          org.copy(name = "Stale", version = 2L, commit_timestamp = ofEpochSecond(9_000L, 0L))
+        )
+        rebaser.acceptOrganization(
+          org.copy(name = "Older", version = 1L, commit_timestamp = ofEpochSecond(9_001L, 0L))
+        )
+      }
+    }
+    assertEquals("V2", runNow { store.transaction { organization("o1") } }!!.name)
+    runNow {
+      store.transaction {
+        Rebaser(this)
+          .acceptOrganization(
+            org.copy(name = "V3", version = 3L, commit_timestamp = ofEpochSecond(1L, 0L))
+          )
+      }
+    }
+    assertEquals("V3", runNow { store.transaction { organization("o1") } }!!.name)
+
+    val library =
+      OrganizationLibraryRecord(
+        organization_id = "o1",
+        version = 4L,
+        commit_timestamp = ofEpochSecond(1_000L, 0L),
+      )
+    runNow {
+      store.transaction {
+        val rebaser = Rebaser(this)
+        rebaser.acceptLibrary(library)
+        rebaser.acceptLibrary(
+          library.copy(
+            is_deleted = true,
+            version = 4L,
+            commit_timestamp = ofEpochSecond(9_000L, 0L),
+          )
+        )
+      }
+    }
+    assertEquals(false, runNow { store.transaction { libraryBase("o1") } }!!.is_deleted)
+  }
+
+  @Test
+  fun survey_comparesTheSharedRecordVersion() {
+    fun base(title: String, recordVersion: Long, seconds: Long) =
+      SurveyBase(
+        saved =
+          SurveyDef(
+            survey_id = SURVEY,
+            title = title,
+            record_version = recordVersion,
+            commit_timestamp = ofEpochSecond(seconds, 0L),
+          )
+      )
+    runNow { store.transaction { Rebaser(this).acceptSurvey(SURVEY, base("V3", 3, 1_000)) } }
+    runNow { store.transaction { Rebaser(this).acceptSurvey(SURVEY, base("Equal", 3, 9_000)) } }
+    runNow { store.transaction { Rebaser(this).acceptSurvey(SURVEY, base("Lower", 2, 9_001)) } }
+    assertEquals("V3", runNow { store.transaction { surveyBase(SURVEY) } }!!.saved!!.title)
+
+    // A working-copy edit bumps the shared version, so a base whose newest part is the working copy
+    // wins over the older saved revision.
+    val withWorkingCopy =
+      base("V3", 3, 1_000)
+        .copy(workingCopy = SurveyDef(survey_id = SURVEY, title = "Draft", record_version = 4))
+    runNow { store.transaction { Rebaser(this).acceptSurvey(SURVEY, withWorkingCopy) } }
+    assertEquals("Draft", runNow { store.transaction { surveyBase(SURVEY) } }!!.workingCopy!!.title)
+  }
+
+  @Test
+  fun libraryTombstone_removesTheLocalLibrary() {
+    val library = OrganizationLibraryRecord(organization_id = "o1", version = 1L)
+    runNow { store.transaction { Rebaser(this).acceptLibrary(library) } }
+    assertEquals(true, runNow { store.transaction { library("o1") } } != null)
+
+    runNow {
+      store.transaction {
+        Rebaser(this).acceptLibrary(library.copy(is_deleted = true, version = 2L))
+      }
+    }
+
+    assertNull(runNow { store.transaction { library("o1") } })
+  }
+
+  @Test
+  fun forgetLibrary_removesTheLocalLibrary() {
+    runNow {
+      store.transaction {
+        Rebaser(this).acceptLibrary(OrganizationLibraryRecord(organization_id = "o1", version = 1L))
+        Rebaser(this).forgetLibrary("o1")
+      }
+    }
+    assertNull(runNow { store.transaction { library("o1") } })
+    assertNull(runNow { store.transaction { libraryBase("o1") } })
+  }
+
+  @Test
   fun remoteDelete_rejectsPendingMutations_andRemovesTheRecord() {
     accept(entity("Server", 1_000))
     recordLabel("Mine")
@@ -140,6 +263,7 @@ class RebaserTest {
         organization_id = "o1",
         name = "Old",
         description = "D1",
+        version = 1L,
         commit_timestamp = ofEpochSecond(1_000L, 0L),
       )
     runNow { store.transaction { Rebaser(this).acceptOrganization(base) } }
@@ -163,7 +287,11 @@ class RebaserTest {
       store.transaction {
         Rebaser(this)
           .acceptOrganization(
-            base.copy(description = "D2", commit_timestamp = ofEpochSecond(1_001L, 0L))
+            base.copy(
+              description = "D2",
+              version = 2L,
+              commit_timestamp = ofEpochSecond(1_001L, 0L),
+            )
           )
       }
     }

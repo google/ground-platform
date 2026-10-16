@@ -81,7 +81,9 @@ message SubmissionRecord {
   // or geospatial entity. Empty for standalone submissions.
   string entity_id = 5;
 
-  // Sequential revision number for QA/QC and edits.
+  // Version of the record, incremented on every write to the submission,
+  // including deletes. Clients keep the copy with the higher revision;
+  // `SubmissionMutation.base_revision` refers to it.
   int64 revision = 6;
 
   // Provenance metadata including start/end timestamps, device ID, and audit
@@ -107,8 +109,9 @@ message SubmissionRecord {
   // Soft deletion status flag.
   bool is_deleted = 12;
 
-  // Authoritative server commit timestamp for stateless delta synchronization
-  // (`docs/technical/sync-engine.md`).
+  // Authoritative server commit timestamp of the last write. For display only:
+  // clients compare versions, not timestamps, to tell which copy is newer
+  // (`docs/technical/sync-engine.md`, "Sync Tokens").
   google.protobuf.Timestamp commit_timestamp = 13;
 
   // QA/QC review status assigned by a survey organizer.

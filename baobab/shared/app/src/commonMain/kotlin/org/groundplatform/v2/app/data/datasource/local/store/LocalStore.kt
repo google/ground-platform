@@ -190,6 +190,12 @@ interface LocalStoreTransaction {
   /** Inserts or replaces the library of [OrganizationLibrary.organizationId]. */
   fun putLibrary(library: OrganizationLibrary)
 
+  /**
+   * Deletes the library of [organizationId] (no-op when there is none). The organization and the
+   * library's server base are kept; use [putLibraryBase] to forget the base.
+   */
+  fun deleteLibrary(organizationId: String)
+
   // Forms ---------------------------------------------------------------------------------------
 
   fun forms(surveyId: String): List<FormPreviewItem>

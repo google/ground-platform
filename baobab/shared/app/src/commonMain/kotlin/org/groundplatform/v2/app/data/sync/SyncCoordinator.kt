@@ -44,7 +44,7 @@ data class SyncActivity(
  * Schedules the sync engine (`docs/technical/sync-engine.md`): one single-flight loop that drains
  * the outbox ([OutboxDrainer]) and then pulls remote changes
  * ([GrpcSyncDataSource.pullIncrementalCatchUp]), so the client's own writes come back with their
- * authoritative `commit_timestamp`.
+ * authoritative server versions.
  *
  * Syncs run when the outbox gets sendable mutations (after their debounce or backoff), when the
  * device comes back online, on [requestSync], and, while [setForeground] is on, on a polling timer

@@ -43,6 +43,7 @@ import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.data.seed.SampleSubmissionsData
 import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
 import org.groundplatform.v2.app.data.seed.SampleSurveysData
+import org.groundplatform.v2.app.domain.model.OrganizationLibrary
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
 
@@ -112,6 +113,20 @@ abstract class LocalStoreContractTest {
         )
       }
     }
+  }
+
+  @Test
+  fun deleteLibrary_removesOnlyThatLibrary() {
+    val store = createStore()
+    runNow {
+      store.transaction {
+        putLibrary(OrganizationLibrary("o1"))
+        putLibrary(OrganizationLibrary("o2"))
+        deleteLibrary("o1")
+        deleteLibrary("missing")
+      }
+    }
+    assertEquals(setOf("o2"), runNow { store.transaction { libraries().keys } })
   }
 
   @Test

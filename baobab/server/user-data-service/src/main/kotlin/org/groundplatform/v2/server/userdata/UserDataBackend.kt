@@ -131,6 +131,10 @@ import org.groundplatform.v2.core.mutation.SurveyPatches
  * Implements the server-side contract defined in `docs/technical/sync-engine.md`:
  * - Monotonically increasing authoritative `commit_timestamp` assigned to every initial record and
  *   every subsequent mutation.
+ * - Record versions that strictly increase on every write to a record, which clients compare to
+ *   tell which copy is newer: `revision` for entities and submissions (including deletes and plot
+ *   lock changes), `version` for organizations and libraries (one per request), and the survey's
+ *   shared `record_version` on its saved revision, working copy, ACL, and overview.
  * - Unary `List*` sync RPCs with query and delta modes selected by an opaque `sync_token`
  *   ([SyncLists]). Delta mode returns every record in scope committed after the token, ordered by
  *   `(commit_timestamp, id)` and including tombstones; query mode filters, sorts, and pages a
@@ -229,6 +233,17 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       "Stale base version for $what: based on $baseVersion, current is $currentVersion"
     }
   }
+
+  /**
+   * The next shared record version of survey [surveyId]: one more than the highest version on its
+   * saved revision, working copy, and ACL (`SurveyDef.record_version`).
+   */
+  private fun nextSurveyRecordVersion(surveyId: String): Long =
+    maxOf(
+      surveysById[surveyId]?.record_version ?: 0L,
+      surveyWorkingCopiesById[surveyId]?.record_version ?: 0L,
+      surveyAclsById[surveyId]?.record_version ?: 0L,
+    ) + 1L
 
   /**
    * Records [identities] as applied in [scope] at [ts]. Call only after the request's changes are
@@ -437,19 +452,14 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       val patch = mutation.update_field
       when {
         mutation.delete_organization == true -> {
-          current =
-            current.copy(
-              is_deleted = true,
-              version = current.version + 1L,
-              commit_timestamp = ts,
-            )
+          current = current.copy(is_deleted = true)
         }
         up != null -> {
+          // The server owns the version; it's bumped once for the whole request below.
           current =
             up.copy(
               organization_id = orgId.ifBlank { up.organization_id },
-              version = current.version + 1L,
-              commit_timestamp = ts,
+              version = current.version,
             )
         }
         patch != null -> {
@@ -458,7 +468,8 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       }
     }
 
-    current = current.copy(version = current.version + 1L, commit_timestamp = ts)
+    // Every write bumps the version by exactly one, however many mutations the request has.
+    current = current.copy(version = (existing?.version ?: 0L) + 1L, commit_timestamp = ts)
     organizationsById[current.organization_id] = current
     recordApplied(
       scope = "organizations/${current.organization_id}",
@@ -634,18 +645,15 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       val upLib = mutation.upsert_library
       val patch = mutation.update_field
       if (upLib != null) {
-        current =
-          upLib.copy(
-            organization_id = request.organization_id,
-            version = current.version + 1L,
-            commit_timestamp = ts,
-          )
+        // The server owns the version; it's bumped once for the whole request below.
+        current = upLib.copy(organization_id = request.organization_id, version = current.version)
       } else if (patch != null) {
         current = LibraryPatches.applyField(current, patch)
       }
     }
 
-    current = current.copy(version = current.version + 1L, commit_timestamp = ts)
+    // Every write bumps the version by exactly one, however many mutations the request has.
+    current = current.copy(version = (existing?.version ?: 0L) + 1L, commit_timestamp = ts)
     librariesByOrgId[request.organization_id] = current
     recordApplied(
       scope = "libraries/${request.organization_id}",
@@ -787,11 +795,14 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       }
     }
 
-    // Always stamp the saved revision so overview delta polls see working-copy and access changes.
-    saved = saved.copy(commit_timestamp = ts)
+    // Always stamp the saved revision so overview delta polls see working-copy and access changes,
+    // and bump the survey's shared record version on all of its parts.
+    val recordVersion = nextSurveyRecordVersion(surveyId)
+    saved = saved.copy(commit_timestamp = ts, record_version = recordVersion)
     surveysById[surveyId] = saved
-    surveyAclsById[surveyId] = currentAcl.copy(commit_timestamp = ts)
-    val finalWorkingCopy = workingCopy?.copy(commit_timestamp = ts)
+    surveyAclsById[surveyId] =
+      currentAcl.copy(commit_timestamp = ts, record_version = recordVersion)
+    val finalWorkingCopy = workingCopy?.copy(commit_timestamp = ts, record_version = recordVersion)
     if (finalWorkingCopy != null) {
       surveyWorkingCopiesById[surveyId] = finalWorkingCopy
     } else {
@@ -828,10 +839,16 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
           entry
         }
       }
-    val updatedAcl = acl.copy(entries = updatedEntries, commit_timestamp = ts)
+    val recordVersion = nextSurveyRecordVersion(request.survey_id)
+    val updatedAcl =
+      acl.copy(entries = updatedEntries, commit_timestamp = ts, record_version = recordVersion)
     surveyAclsById[request.survey_id] = updatedAcl
     surveysById[request.survey_id]?.let { s ->
-      surveysById[request.survey_id] = s.copy(commit_timestamp = ts)
+      surveysById[request.survey_id] = s.copy(commit_timestamp = ts, record_version = recordVersion)
+    }
+    surveyWorkingCopiesById[request.survey_id]?.let { wc ->
+      surveyWorkingCopiesById[request.survey_id] =
+        wc.copy(commit_timestamp = ts, record_version = recordVersion)
     }
     return AcceptSurveyInviteResponse(
       survey = surveysById[request.survey_id],
@@ -1191,7 +1208,8 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     plotLocksByEntityKey[key] = lock
     val updatedEntity =
       entitiesBySurveyAndId[request.survey_id]?.get(request.entity_id)?.let { ent ->
-        val withLock = ent.copy(active_lock = lock, commit_timestamp = ts)
+        val withLock =
+          ent.copy(active_lock = lock, revision = ent.revision + 1L, commit_timestamp = ts)
         entitiesBySurveyAndId[request.survey_id]!![request.entity_id] = withLock
         withLock
       }
@@ -1204,7 +1222,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     plotLocksByEntityKey.remove(key)
     entitiesBySurveyAndId[request.survey_id]?.get(request.entity_id)?.let { ent ->
       entitiesBySurveyAndId[request.survey_id]!![request.entity_id] =
-        ent.copy(active_lock = null, commit_timestamp = ts)
+        ent.copy(active_lock = null, revision = ent.revision + 1L, commit_timestamp = ts)
     }
     return ReleasePlotLockResponse(released = true)
   }
@@ -1412,6 +1430,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       commit_timestamp =
         listOfNotNull(surveyDef.commit_timestamp, acl?.commit_timestamp)
           .maxWithOrNull(instantComparator),
+      record_version = maxOf(surveyDef.record_version, acl?.record_version ?: 0L),
       has_working_copy = hasWorkingCopy,
       sharing_policy = acl?.sharing_policy ?: SharingPolicy.SHARING_POLICY_UNSPECIFIED,
       peer_data_visibility =

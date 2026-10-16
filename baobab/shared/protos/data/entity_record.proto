@@ -59,7 +59,9 @@ message EntityRecord {
   // Entity Dataset ID to which this entity belongs (`EntityDatasetDef.id`).
   string dataset_id = 2;
 
-  // Sequential revision number (increments with every edit).
+  // Version of the record, incremented on every write to the entity,
+  // including deletes and plot lock changes. Clients keep the copy with the
+  // higher revision; `EntityMutation.base_revision` refers to it.
   int64 revision = 3;
 
   // Human-readable entity label.
@@ -95,8 +97,9 @@ message EntityRecord {
   // Survey identifier (`SurveyDef.survey_id`) owning this entity.
   string survey_id = 13;
 
-  // Authoritative server commit timestamp for stateless delta synchronization
-  // (`docs/technical/sync-engine.md`).
+  // Authoritative server commit timestamp of the last write. For display only:
+  // clients compare versions, not timestamps, to tell which copy is newer
+  // (`docs/technical/sync-engine.md`, "Sync Tokens").
   google.protobuf.Timestamp commit_timestamp = 14;
 
   // Active 5-minute CEO desk interpretation lease, if currently locked.

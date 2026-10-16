@@ -175,6 +175,12 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
     raw.putLibrary(library)
   }
 
+  // `MutateLibrary` can't delete a library, so deleting one locally records no mutation.
+  override fun deleteLibrary(organizationId: String) {
+    touchLibrary(organizationId)
+    raw.deleteLibrary(organizationId)
+  }
+
   // Map features and submissions ------------------------------------------------------------------
 
   override fun upsertEntities(surveyId: String, entities: List<GeospatialEntityItem>) {

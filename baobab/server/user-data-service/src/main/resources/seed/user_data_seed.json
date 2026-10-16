@@ -9528,6 +9528,7 @@
         "thumbnailTheme": "SAVANNA",
         "entityCount": 3,
         "primaryFormId": "single_point_land_use",
+        "recordVersion": "1",
         "forms": [
           {
             "formId": "__primary_form__",
@@ -10193,7 +10194,8 @@
         "sharingPolicy": "PUBLIC",
         "peerDataVisibility": "ALL",
         "ownerEmail": "maya.lin@groundplatform.org",
-        "commitTimestamp": "2026-02-02T02:40:07Z"
+        "commitTimestamp": "2026-02-02T02:40:07Z",
+        "recordVersion": "1"
       },
       "entities": [
         {
@@ -10485,6 +10487,7 @@
         "thumbnailTheme": "RAINFOREST",
         "entityCount": 5,
         "primaryFormId": "sample_plots_forest_assessment",
+        "recordVersion": "1",
         "forms": [
           {
             "formId": "__primary_form__",
@@ -11859,7 +11862,8 @@
         "sharingPolicy": "RESTRICTED",
         "peerDataVisibility": "ALL",
         "ownerEmail": "maya.lin@groundplatform.org",
-        "commitTimestamp": "2026-02-02T02:40:14Z"
+        "commitTimestamp": "2026-02-02T02:40:14Z",
+        "recordVersion": "1"
       },
       "entities": [
         {
@@ -12365,6 +12369,7 @@
         "thumbnailTheme": "WATERSHED",
         "entityCount": 3,
         "primaryFormId": "commodity_perimeter_and_center",
+        "recordVersion": "1",
         "forms": [
           {
             "formId": "__primary_form__",
@@ -13490,7 +13495,8 @@
         "sharingPolicy": "ANYONE_WITH_LINK",
         "peerDataVisibility": "OWN_ONLY",
         "ownerEmail": "maya.lin@groundplatform.org",
-        "commitTimestamp": "2026-02-02T02:40:23Z"
+        "commitTimestamp": "2026-02-02T02:40:23Z",
+        "recordVersion": "1"
       },
       "entities": [
         {
@@ -13869,6 +13875,7 @@
         "thumbnailTheme": "COASTAL_DELTA",
         "entityCount": 6,
         "primaryFormId": "household_survey_past_individuals",
+        "recordVersion": "1",
         "forms": [
           {
             "formId": "__primary_form__",
@@ -15413,7 +15420,8 @@
         "sharingPolicy": "RESTRICTED",
         "peerDataVisibility": "ALL",
         "ownerEmail": "maya.lin@groundplatform.org",
-        "commitTimestamp": "2026-02-02T02:40:30Z"
+        "commitTimestamp": "2026-02-02T02:40:30Z",
+        "recordVersion": "1"
       },
       "entities": [
         {
@@ -16036,6 +16044,7 @@
         "thumbnailTheme": "HIGHLAND_AGRI",
         "entityCount": 5,
         "primaryFormId": "eudr_shade_survey",
+        "recordVersion": "1",
         "forms": [
           {
             "formId": "__primary_form__",
@@ -19540,6 +19549,7 @@
           "cachedOn": "2026-03-02"
         },
         "commitTimestamp": "2026-02-02T02:40:41Z",
+        "recordVersion": "1",
         "entries": [
           {
             "userId": "uid-field-lead",
@@ -19702,6 +19712,7 @@
         "thumbnailTheme": "HIGHLAND_AGRI",
         "entityCount": 5,
         "primaryFormId": "eudr_shade_survey",
+        "recordVersion": "1",
         "forms": [
           {
             "formId": "__primary_form__",
@@ -24033,6 +24044,7 @@
         "thumbnailTheme": "PEATLAND",
         "entityCount": 204,
         "primaryFormId": "eudr_shade_survey",
+        "recordVersion": "1",
         "forms": [
           {
             "formId": "__primary_form__",
@@ -27165,7 +27177,8 @@
           "avatarUrl": "avatar:6",
           "cachedOn": "2026-02-11"
         },
-        "commitTimestamp": "2026-02-02T02:40:56Z"
+        "commitTimestamp": "2026-02-02T02:40:56Z",
+        "recordVersion": "1"
       },
       "workingCopy": {
         "surveyId": "survey-serengeti-corridor",
@@ -27266,6 +27279,7 @@
         "thumbnailTheme": "PEATLAND",
         "entityCount": 204,
         "primaryFormId": "eudr_shade_survey",
+        "recordVersion": "1",
         "forms": [
           {
             "formId": "__primary_form__",

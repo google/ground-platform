@@ -173,4 +173,34 @@ class GrpcSyncDataSourceTest {
     sync.pullIncrementalCatchUp(store = store, surveyId = kenyaId)
     assertEquals(newToken, entityRequests().last().sync_token)
   }
+
+  @Test
+  fun deltaLibraryTombstone_removesTheLocalLibrary(): Unit = runDirect {
+    seed()
+    val orgId = store.transaction { libraries().keys.first { it != "org-all-users" } }
+
+    service.deleteLibrary(orgId)
+    sync.pullIncrementalCatchUp(store = store)
+
+    store.transaction {
+      assertNull(library(orgId))
+      assertTrue(libraryBase(orgId)!!.is_deleted)
+    }
+  }
+
+  @Test
+  fun libraryMissingFromAFullResync_isRemovedLocally(): Unit = runDirect {
+    seed()
+    val orgId = store.transaction { libraries().keys.first { it != "org-all-users" } }
+
+    service.removeLibrary(orgId)
+    service.invalidateSyncTokens()
+    sync.pullIncrementalCatchUp(store = store)
+
+    store.transaction {
+      assertNull(library(orgId))
+      assertNull(libraryBase(orgId))
+      assertNotNull(library("org-all-users"))
+    }
+  }
 }

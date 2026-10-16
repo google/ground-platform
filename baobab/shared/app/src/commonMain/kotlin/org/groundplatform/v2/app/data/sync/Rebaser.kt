@@ -15,7 +15,6 @@
  */
 package org.groundplatform.v2.app.data.sync
 
-import com.squareup.wire.Instant
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.OrganizationLibraryRecord
@@ -37,8 +36,9 @@ import org.groundplatform.v2.app.domain.model.SyncStatus
  * Keeps the local copy of synced records equal to their server base with pending outbox mutations
  * applied on top (`docs/technical/sync-engine.md`, "Rebase on Remote Changes"). Use it inside a
  * [LocalStoreTransaction]:
- * - `accept*` stores a server copy as the new base (unless the stored base is newer), rejects
- *   pending mutations for records deleted on the server, and rebases.
+ * - `accept*` stores a server copy as the new base (unless the stored base has the same or a higher
+ *   version: `revision`, `version`, or `record_version`; never `commit_timestamp`), rejects pending
+ *   mutations for records deleted on the server, and rebases.
  * - `rebase*` recomputes the local copy from the base and the pending mutations, projects it into
  *   the domain collections the UI observes, and drops queued mutations that no longer change
  *   anything.
@@ -61,11 +61,7 @@ class Rebaser(private val tx: LocalStoreTransaction) {
     val target = MutationTarget.Data(surveyId)
     for (record in entities) {
       if (
-        replace ||
-          isNewer(
-            record.commit_timestamp,
-            tx.entityBase(surveyId, record.entity_id)?.commit_timestamp,
-          )
+        replace || isNewer(record.revision, tx.entityBase(surveyId, record.entity_id)?.revision)
       ) {
         tx.putEntityBase(surveyId, record.entity_id, record)
       }
@@ -73,7 +69,7 @@ class Rebaser(private val tx: LocalStoreTransaction) {
     }
     for (record in submissions) {
       val stored = tx.submissionBase(surveyId, record.submission_id)
-      if (replace || isNewer(record.commit_timestamp, stored?.commit_timestamp)) {
+      if (replace || isNewer(record.revision, stored?.revision)) {
         tx.putSubmissionBase(surveyId, record.submission_id, record)
       }
       if (record.is_deleted) reject(target, submissionKey(record.submission_id), DELETED_ELSEWHERE)
@@ -115,7 +111,7 @@ class Rebaser(private val tx: LocalStoreTransaction) {
   /** Accepts a server copy of an organization and rebases it ([replace]: see [acceptData]). */
   fun acceptOrganization(record: OrganizationProto, replace: Boolean = false) {
     val id = record.organization_id
-    if (replace || isNewer(record.commit_timestamp, tx.organizationBase(id)?.commit_timestamp)) {
+    if (replace || isNewer(record.version, tx.organizationBase(id)?.version)) {
       tx.putOrganizationBase(id, record)
     }
     if (record.is_deleted)
@@ -145,23 +141,31 @@ class Rebaser(private val tx: LocalStoreTransaction) {
    */
   fun acceptLibrary(record: OrganizationLibraryRecord, replace: Boolean = false) {
     val id = record.organization_id
-    if (replace || isNewer(record.commit_timestamp, tx.libraryBase(id)?.commit_timestamp)) {
+    if (replace || isNewer(record.version, tx.libraryBase(id)?.version)) {
       tx.putLibraryBase(id, record)
     }
+    if (record.is_deleted) reject(MutationTarget.Library(id), libraryKey(id), DELETED_ELSEWHERE)
     rebaseLibrary(id)
   }
 
-  /** Recomputes the local copy of the library of [organizationId]. */
+  /**
+   * Recomputes the local copy of the library of [organizationId]. A library deleted on the server
+   * (a tombstone base) is removed unless pending mutations recreate it; a library without any base
+   * (never synced) is left as is when nothing pending produces it.
+   */
   fun rebaseLibrary(organizationId: String) {
+    val base = tx.libraryBase(organizationId)
     val folded =
       RecordFolds.library(
-        tx.libraryBase(organizationId),
+        base,
         organizationId,
         pending(MutationTarget.Library(organizationId), libraryKey(organizationId)),
       )
-    folded.value
-      ?.takeUnless { it.is_deleted }
-      ?.let { tx.putLibrary(GrpcProtoMapper.libraryFromProto(it)) }
+    val value = folded.value?.takeUnless { it.is_deleted }
+    when {
+      value != null -> tx.putLibrary(GrpcProtoMapper.libraryFromProto(value))
+      base?.is_deleted == true -> tx.deleteLibrary(organizationId)
+    }
     drop(folded.noOpMutationIds)
   }
 
@@ -183,8 +187,9 @@ class Rebaser(private val tx: LocalStoreTransaction) {
       return
     }
     val stored = tx.surveyBase(surveyId)
-    val newer = isNewer(base.saved?.commit_timestamp, stored?.saved?.commit_timestamp)
-    if (replace || stored == null || newer) tx.putSurveyBase(surveyId, base)
+    if (replace || isNewer(recordVersionOf(base), stored?.let(::recordVersionOf))) {
+      tx.putSurveyBase(surveyId, base)
+    }
     rebaseSurvey(surveyId, overview)
   }
 
@@ -245,12 +250,17 @@ class Rebaser(private val tx: LocalStoreTransaction) {
   }
 
   /**
-   * Forgets the server copy of an organization library. The local library stays until the
-   * organization itself is removed.
+   * Forgets the server copy of an organization library and rebases it, which removes the local
+   * library unless pending mutations still create it.
    */
   fun forgetLibrary(organizationId: String) {
     tx.putLibraryBase(organizationId, null)
-    rebaseLibrary(organizationId)
+    val pending = pending(MutationTarget.Library(organizationId), libraryKey(organizationId))
+    if (RecordFolds.library(null, organizationId, pending).value == null) {
+      tx.deleteLibrary(organizationId)
+    } else {
+      rebaseLibrary(organizationId)
+    }
   }
 
   /**
@@ -324,13 +334,26 @@ class Rebaser(private val tx: LocalStoreTransaction) {
 
     fun libraryKey(organizationId: String) = "library/$organizationId"
 
-    /** True when [incoming] isn't older than [stored] (unknown timestamps count as newer). */
-    internal fun isNewer(incoming: Instant?, stored: Instant?): Boolean {
-      if (incoming == null || stored == null) return true
-      return incoming.getEpochSecond() > stored.getEpochSecond() ||
-        (incoming.getEpochSecond() == stored.getEpochSecond() &&
-          incoming.getNano() >= stored.getNano())
-    }
+    /**
+     * True when a server copy with version [incoming] should replace the stored base with version
+     * [stored] (`docs/technical/sync-engine.md`, "Sync Tokens"): when there is no stored base, or
+     * the incoming version is higher. Copies with an equal or lower version are older or duplicate
+     * deliveries, whatever their `commit_timestamp`.
+     */
+    internal fun isNewer(incoming: Long, stored: Long?): Boolean =
+      stored == null || incoming > stored
+
+    /**
+     * The shared record version of a survey's base (`SurveyDef.record_version`): the highest one
+     * across its saved revision, working copy, and ACL, since a `MutateSurvey` response may only
+     * carry some of them.
+     */
+    fun recordVersionOf(base: SurveyBase): Long =
+      maxOf(
+        base.saved?.record_version ?: 0L,
+        base.workingCopy?.record_version ?: 0L,
+        base.acl?.record_version ?: 0L,
+      )
   }
 }
 

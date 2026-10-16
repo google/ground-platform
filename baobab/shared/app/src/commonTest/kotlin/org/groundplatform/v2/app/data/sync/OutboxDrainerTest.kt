@@ -38,6 +38,7 @@ import groundplatform.v2.survey.SurveyServiceServer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
 import org.groundplatform.v2.app.client.grpc.GrpcWebException
@@ -98,7 +99,8 @@ class OutboxDrainerTest {
         surveyRequests += request
         return MutateSurveyResponse(
           survey_id = request.survey_id,
-          survey = SurveyDef(survey_id = request.survey_id, title = "Server draft"),
+          survey =
+            SurveyDef(survey_id = request.survey_id, title = "Server draft", record_version = 2L),
         )
       }
     }
@@ -223,7 +225,10 @@ class OutboxDrainerTest {
   fun debouncedMutations_waitForTheirQuietPeriod() {
     runNow {
       store.transaction {
-        putSurveyBase(SURVEY, SurveyBase(saved = SurveyDef(survey_id = SURVEY, title = "Saved")))
+        putSurveyBase(
+          SURVEY,
+          SurveyBase(saved = SurveyDef(survey_id = SURVEY, title = "Saved", record_version = 1L)),
+        )
         recorder.record(
           this,
           MutationTarget.Survey(SURVEY, workingCopy = true),
@@ -249,6 +254,34 @@ class OutboxDrainerTest {
       "Server draft",
       runNow { store.transaction { surveyBase(SURVEY) } }!!.workingCopy?.title,
     )
+  }
+
+  @Test
+  fun surveyResponseOlderThanTheStoredBase_isIgnored() {
+    runNow {
+      store.transaction {
+        // A poll already stored a newer copy (record version 5) than the response will carry (2).
+        putSurveyBase(
+          SURVEY,
+          SurveyBase(saved = SurveyDef(survey_id = SURVEY, title = "Newer", record_version = 5L)),
+        )
+        recorder.record(
+          this,
+          MutationTarget.Survey(SURVEY, workingCopy = true),
+          Rebaser.surveyKey(SURVEY),
+          MutationPayload.Survey(
+            SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Draft"))
+          ),
+        )
+      }
+    }
+
+    runNow { drainer.drain() }
+
+    assertEquals(1, surveyRequests.size)
+    val base = runNow { store.transaction { surveyBase(SURVEY) } }!!
+    assertEquals("Newer", base.saved?.title)
+    assertNull(base.workingCopy)
   }
 
   private companion object {

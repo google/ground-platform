@@ -273,10 +273,19 @@ class OutboxDrainer(
             sm.delete_survey == true
         }
         val handler: (LocalStoreTransaction) -> Unit = { tx ->
-          val stored = tx.surveyBase(target.surveyId) ?: SurveyBase()
+          val storedBase = tx.surveyBase(target.surveyId)
+          val stored = storedBase ?: SurveyBase()
           val returned = response.survey
+          // A poll may already have stored a newer copy than this response (or this is a replay,
+          // which returns the current copy): keep the stored base then.
+          val responseVersion =
+            maxOf(returned?.record_version ?: 0L, response.acl?.record_version ?: 0L)
+          val isStale =
+            storedBase != null &&
+              !Rebaser.isNewer(responseVersion, Rebaser.recordVersionOf(storedBase))
           val updated =
             when {
+              isStale -> stored
               returned == null -> stored.copy(acl = response.acl ?: stored.acl)
               target.workingCopy && !endsWorkingCopy ->
                 stored.copy(workingCopy = returned, acl = response.acl ?: stored.acl)

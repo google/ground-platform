@@ -41,13 +41,16 @@ message OrganizationLibraryRecord {
   // Per-organization curation settings (such as hidden global entry IDs).
   OrganizationLibrarySettings settings = 3;
 
-  // Sequential version number incremented on each mutation.
+  // Version of the record, incremented by exactly one on every write to the
+  // library (`MutateLibrary`). Clients keep the copy with the higher version;
+  // `MutateLibraryRequest.base_version` refers to it.
   int64 version = 4;
 
   // Soft-deletion tombstone flag.
   bool is_deleted = 5;
 
-  // Authoritative server commit timestamp for stateless delta synchronization.
+  // Authoritative server commit timestamp of the last write. For display only;
+  // compare `version` to tell which copy is newer.
   google.protobuf.Timestamp commit_timestamp = 6;
 }
 

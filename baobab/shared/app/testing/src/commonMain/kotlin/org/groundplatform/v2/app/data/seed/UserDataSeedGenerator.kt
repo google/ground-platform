@@ -35,9 +35,10 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDerivation
  * Builds the sample [UserDataSeed] loaded by the user data service (`server/user-data-service`)
  * from the Kotlin sample data fixtures.
  *
- * Every record gets a distinct, increasing `commit_timestamp`, in the order organizations,
- * libraries, then each survey followed by its entities and submissions, then mutation logs.
- * `UserDataSeedSnapshotTest` keeps the checked-in snapshot identical to this output.
+ * Every record starts at version 1 (`revision`, `version`, or `record_version`) and gets a
+ * distinct, increasing `commit_timestamp`, in the order organizations, libraries, then each survey
+ * followed by its entities and submissions, then mutation logs. `UserDataSeedSnapshotTest` keeps
+ * the checked-in snapshot identical to this output.
  */
 object UserDataSeedGenerator {
   /** Server clock value before the first sample record. */
@@ -96,7 +97,7 @@ object UserDataSeedGenerator {
             else -> null
           }
 
-        val (surveyDef, acl) =
+        val (unversionedDef, unversionedAcl) =
           GrpcProtoMapper.surveyToProto(
             survey = survey,
             forms = forms,
@@ -108,6 +109,10 @@ object UserDataSeedGenerator {
               else emptyList(),
             commitTimestamp = nextCommitTimestamp(),
           )
+        // Every record starts at version 1 (entity and submission `revision`, organization and
+        // library `version`); the saved revision, working copy, and ACL share the survey's.
+        val surveyDef = unversionedDef.copy(record_version = 1L)
+        val acl = unversionedAcl.copy(record_version = 1L)
 
         val entityRecords = mutableListOf<groundplatform.v2.data.EntityRecord>()
         val submissions = linkedMapOf<String, SubmissionRecord>()

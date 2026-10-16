@@ -261,6 +261,11 @@ class InMemoryLocalStore : LocalStore {
       working = working.copy(libraries = working.libraries + (library.organizationId to library))
     }
 
+    override fun deleteLibrary(organizationId: String) {
+      if (organizationId !in working.libraries) return
+      working = working.copy(libraries = working.libraries - organizationId)
+    }
+
     override fun surveyConfig(surveyId: String): SurveyConfig? = data(surveyId).config
 
     override fun putSurveyConfig(surveyId: String, config: SurveyConfig) =

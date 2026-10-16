@@ -420,7 +420,8 @@ object GrpcProtoMapper {
 
   /**
    * Builds the catalog overview of [surveyDef]. Its `commit_timestamp` is the later of the survey's
-   * and [acl]'s, so access changes also reach `ListSurveyOverviews` delta polls.
+   * and [acl]'s, so access changes also reach `ListSurveyOverviews` delta polls, and its
+   * `record_version` is the higher of their record versions.
    */
   fun surveyOverviewFromDef(
     surveyDef: SurveyDef,
@@ -447,6 +448,7 @@ object GrpcProtoMapper {
       closed_at = surveyDef.closed_at,
       closed_at_iso = surveyDef.closed_at_iso,
       commit_timestamp = latestOf(surveyDef.commit_timestamp, acl?.commit_timestamp),
+      record_version = maxOf(surveyDef.record_version, acl?.record_version ?: 0L),
       has_working_copy = hasWorkingCopy,
       sharing_policy = acl?.sharing_policy ?: SharingPolicyProto.SHARING_POLICY_UNSPECIFIED,
       peer_data_visibility =
