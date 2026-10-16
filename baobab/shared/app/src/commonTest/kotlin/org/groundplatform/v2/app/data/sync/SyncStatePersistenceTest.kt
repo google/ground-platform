@@ -1,0 +1,121 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.groundplatform.v2.app.data.sync
+
+import com.squareup.wire.ofEpochSecond
+import groundplatform.v2.data.DataMutation
+import groundplatform.v2.data.EntityFieldPatch
+import groundplatform.v2.data.EntityMutation
+import groundplatform.v2.data.EntityPatch
+import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.survey.SurveyDef
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import org.groundplatform.v2.app.client.storage.SyncStateFile
+import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
+import org.groundplatform.v2.app.data.datasource.local.store.MutationPayload
+import org.groundplatform.v2.app.data.datasource.local.store.MutationTarget
+import org.groundplatform.v2.app.data.datasource.local.store.SurveyBase
+import org.groundplatform.v2.app.data.datasource.local.store.SyncWatermarks
+import org.groundplatform.v2.app.data.datasource.local.store.runNow
+
+/** Sync state survives restarts: offline edits are rebuilt on top of the saved bases. */
+class SyncStatePersistenceTest {
+  private class MemoryFile : SyncStateFile {
+    var bytes: ByteArray? = null
+
+    override fun read() = bytes
+
+    override fun write(bytes: ByteArray) {
+      this.bytes = bytes
+    }
+  }
+
+  private val file = MemoryFile()
+  private val scope = CoroutineScope(Dispatchers.Unconfined)
+
+  @Test
+  fun savedStateIsRestored_andPendingEditsAreReappliedToTheLocalCopy() {
+    val before = InMemoryLocalStore()
+    val watermarks = SyncWatermarks(surveysWatermark = ofEpochSecond(1_800_000_000L, 0L))
+    runNow {
+      before.transaction {
+        putSurveyBase("s1", SurveyBase(saved = SurveyDef(survey_id = "s1", title = "Survey")))
+        Rebaser(this)
+          .acceptData(
+            "s1",
+            listOf(
+              EntityRecord(entity_id = "e1", survey_id = "s1", label = "Server", revision = 2)
+            ),
+            emptyList(),
+          )
+        OutboxRecorder()
+          .record(
+            this,
+            MutationTarget.Data("s1"),
+            Rebaser.entityKey("e1"),
+            MutationPayload.Data(
+              DataMutation(
+                entity_mutation =
+                  EntityMutation(
+                    entity_id = "e1",
+                    update =
+                      EntityPatch(
+                        patches = listOf(EntityFieldPatch(key = "label", label_value = "Offline"))
+                      ),
+                  )
+              )
+            ),
+            baseRevision = 2,
+          )
+        updateSyncState { it.copy(watermarks = watermarks) }
+      }
+    }
+    runNow { SyncStatePersistence(before, file, scope).saveNow() }
+
+    val expectedOutbox = runNow { before.transaction { outbox() } }
+    val expectedState = runNow { before.transaction { syncState() } }
+    val after = InMemoryLocalStore()
+    assertTrue(runNow { SyncStatePersistence(after, file, scope).restore() })
+
+    runNow {
+      after.transaction {
+        assertEquals(expectedOutbox, outbox())
+        assertEquals(expectedState, syncState())
+        assertEquals("Server", entityBase("s1", "e1")?.label)
+        assertEquals("Offline", entity("s1", "e1")?.label)
+        assertEquals(listOf("s1"), surveys().map { it.id })
+        assertEquals("s1", preferences().activeSurveyId)
+      }
+    }
+  }
+
+  @Test
+  fun nothingSaved_restoreReturnsFalse() {
+    assertFalse(runNow { SyncStatePersistence(InMemoryLocalStore(), file, scope).restore() })
+  }
+
+  @Test
+  fun unreadableState_isIgnored() {
+    file.bytes = byteArrayOf(0x7f, 0x7f, 0x7f)
+
+    assertFalse(runNow { SyncStatePersistence(InMemoryLocalStore(), file, scope).restore() })
+  }
+}

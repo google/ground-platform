@@ -26,6 +26,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import java.io.File
+import org.groundplatform.v2.app.client.storage.SYNC_STATE_FILE_PROPERTY
 import org.groundplatform.v2.app.di.AppDataHolder
 import org.groundplatform.v2.app.di.requireUserDataServiceUrl
 import org.groundplatform.v2.app.ui.common.RequireUserDataService
@@ -45,6 +47,8 @@ class MainActivity : ComponentActivity() {
     if (userDataServiceUrl.isNotEmpty()) {
       System.setProperty("groundplatform.userDataServiceUrl", userDataServiceUrl)
     }
+    // Read by platformSyncStateFile(): offline edits and synced data survive restarts.
+    System.setProperty(SYNC_STATE_FILE_PROPERTY, File(filesDir, "sync_state.binpb").absolutePath)
     enableEdgeToEdge()
     setContent {
       RequireUserDataService { serviceUrl ->

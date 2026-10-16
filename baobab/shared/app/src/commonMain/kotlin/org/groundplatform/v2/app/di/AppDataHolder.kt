@@ -24,8 +24,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
@@ -34,6 +37,7 @@ import org.groundplatform.v2.app.client.grpc.GrpcWebTransport
 import org.groundplatform.v2.app.client.grpc.remoteUserDataGrpcClient
 import org.groundplatform.v2.app.client.lifecycle.guardUnsentChangesOnUnload
 import org.groundplatform.v2.app.client.lifecycle.observeAppForeground
+import org.groundplatform.v2.app.client.storage.platformSyncStateFile
 import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.OutboxState
@@ -56,6 +60,7 @@ import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.data.sync.OutboxDrainer
 import org.groundplatform.v2.app.data.sync.RecordingLocalStore
 import org.groundplatform.v2.app.data.sync.SyncCoordinator
+import org.groundplatform.v2.app.data.sync.SyncStatePersistence
 import org.groundplatform.v2.app.data.sync.WorkingCopyRecorder
 import org.groundplatform.v2.app.domain.model.MutationLogItem
 import org.groundplatform.v2.app.domain.model.OfflineTilePackageItem
@@ -239,6 +244,14 @@ class AppDataHolder(
   val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),
   val searchPlacesUseCase: SearchPlacesUseCase = SearchPlacesUseCase(),
 ) {
+  /**
+   * Keeps the sync state on the device between launches (mobile only; see [platformSyncStateFile]).
+   */
+  private val syncStatePersistence: SyncStatePersistence? by lazy {
+    if (syncCoordinator == null) null
+    else platformSyncStateFile()?.let { SyncStatePersistence(localStore, it, scope) }
+  }
+
   /** Disconnects the sync engine from platform lifecycle hooks, once started. */
   private var stopSyncLifecycle: (() -> Unit)? = null
 
@@ -265,9 +278,19 @@ class AppDataHolder(
       return
     }
     mutableUserDataSyncState.value = UserDataSyncState.Syncing
+    // Offline edits and the last synced data saved on the device replace the initial download;
+    // the sync engine then catches up from the saved watermarks.
+    val coordinator = syncCoordinator
+    if (coordinator != null && syncStatePersistence?.restore() == true) {
+      syncStatePersistence?.start()
+      startSyncEngine(coordinator)
+      mutableUserDataSyncState.value = UserDataSyncState.Synced
+      return
+    }
     mutableUserDataSyncState.value =
       try {
         sampleDataRepository.seedIfNeeded()
+        syncStatePersistence?.start()
         syncCoordinator?.let(::startSyncEngine)
         UserDataSyncState.Synced
       } catch (e: CancellationException) {
@@ -290,6 +313,14 @@ class AppDataHolder(
   private fun startSyncEngine(coordinator: SyncCoordinator) {
     coordinator.start()
     if (stopSyncLifecycle != null) return
+    // Each sync may store new bases and watermarks; save them.
+    syncStatePersistence?.let { persistence ->
+      coordinator.activity
+        .map { it.isSyncing }
+        .distinctUntilChanged()
+        .onEach { syncing -> if (!syncing) persistence.saveSoon() }
+        .launchIn(scope)
+    }
     val hasUnsentChanges =
       localStore
         .observeOutbox()

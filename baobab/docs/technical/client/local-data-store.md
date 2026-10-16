@@ -40,6 +40,22 @@ works today and how a persistent backend and a sync engine plug in later.
     organization by ID (`SurveyPreviewItem.organizationId`); deleting an
     organization clears that pointer on its surveys in the same transaction.
 
+## Sync State on the Device
+
+Mobile clients keep the sync engine's state between launches in one file
+(`ClientSyncState` in `shared/protos/userdata/client_sync_state.proto`): the
+outbox, the server bases, the install's `client_id` and next `client_seq`, and
+the stream watermarks. `SyncStatePersistence` saves it (debounced) whenever the
+outbox changes or a sync completes, and restores it on launch: it loads the
+bases and outbox, then rebuilds the domain collections by applying the pending
+mutations on top of the bases. The app opens offline with the last synced data
+and unsent edits, and catches up from the saved watermarks once online. The
+Android app keeps the file in its private files directory; the web keeps its
+outbox in memory by design.
+
+Device-only collections (places, offline tile packages, preferences, and the
+`Uploads` history) aren't part of the file; a persistent backend covers them.
+
 ## Persistent Backend
 
 Mobile needs a store that survives restarts and works offline. The chosen
