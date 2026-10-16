@@ -16,12 +16,14 @@ package org.groundplatform.v2.server.userdata
 import com.linecorp.armeria.server.Server
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.GetSurveyResponse
-import groundplatform.v2.survey.StreamSurveyOverviewsRequest
-import groundplatform.v2.survey.SurveyOverview
+import groundplatform.v2.survey.ListSurveyOverviewsRequest
+import groundplatform.v2.survey.ListSurveyOverviewsResponse
 import groundplatform.v2.survey.SurveyServiceServer
 import io.grpc.CallOptions
 import io.grpc.ManagedChannelBuilder
 import io.grpc.MethodDescriptor
+import io.grpc.Status
+import io.grpc.StatusRuntimeException
 import io.grpc.stub.ClientCalls
 import java.net.URI
 import java.net.http.HttpClient
@@ -32,6 +34,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,23 +57,48 @@ class UserDataServerTest {
   }
 
   @Test
-  fun grpcWeb_unaryAndServerStreaming() {
+  fun grpcWeb_unaryCalls_andSyncTokens() {
     val survey =
       grpcWeb(
           "/groundplatform.v2.survey.SurveyService/GetSurvey",
           GetSurveyRequest.ADAPTER.encode(GetSurveyRequest(survey_id = KENYA)),
         )
+        .messages
         .single()
         .let(GetSurveyResponse.ADAPTER::decode)
     assertEquals(KENYA, survey.survey?.survey_id)
 
-    val overviews =
+    val overviews = listOverviews(ListSurveyOverviewsRequest())
+    assertEquals(6, overviews.overviews.size)
+    val delta = listOverviews(ListSurveyOverviewsRequest(sync_token = overviews.next_sync_token))
+    assertTrue(delta.overviews.isEmpty())
+    assertTrue(delta.next_sync_token.isNotEmpty())
+  }
+
+  @Test
+  fun grpcWeb_reportsTokenErrorsAsGrpcStatuses() {
+    val malformed =
       grpcWeb(
-          "/groundplatform.v2.survey.SurveyService/StreamSurveyOverviews",
-          StreamSurveyOverviewsRequest.ADAPTER.encode(StreamSurveyOverviewsRequest()),
-        )
-        .map(SurveyOverview.ADAPTER::decode)
-    assertEquals(6, overviews.size)
+        LIST_SURVEY_OVERVIEWS,
+        ListSurveyOverviewsRequest.ADAPTER.encode(ListSurveyOverviewsRequest(sync_token = "bad")),
+      )
+    assertEquals(Status.Code.INVALID_ARGUMENT.value(), malformed.status)
+
+    // A token from another server process (another data epoch) can't be served.
+    val otherToken =
+      kotlinx.coroutines.runBlocking {
+        UserDataBackend(loadSeed(null))
+          .ListSurveyOverviews(ListSurveyOverviewsRequest())
+          .next_sync_token
+      }
+    val stale =
+      grpcWeb(
+        LIST_SURVEY_OVERVIEWS,
+        ListSurveyOverviewsRequest.ADAPTER.encode(
+          ListSurveyOverviewsRequest(sync_token = otherToken)
+        ),
+      )
+    assertEquals(Status.Code.FAILED_PRECONDITION.value(), stale.status)
   }
 
   @Test
@@ -96,6 +124,22 @@ class UserDataServerTest {
           GetSurveyRequest(survey_id = KENYA),
         ) as GetSurveyResponse
       assertEquals(KENYA, response.survey?.survey_id)
+
+      @Suppress("UNCHECKED_CAST")
+      val listOverviews =
+        definition
+          .getMethod("groundplatform.v2.survey.SurveyService/ListSurveyOverviews")
+          .methodDescriptor as MethodDescriptor<Any, Any>
+      val error =
+        assertFailsWith<StatusRuntimeException> {
+          ClientCalls.blockingUnaryCall(
+            channel,
+            listOverviews,
+            CallOptions.DEFAULT,
+            ListSurveyOverviewsRequest(sync_token = "bad"),
+          )
+        }
+      assertEquals(Status.Code.INVALID_ARGUMENT, error.status.code)
     } finally {
       channel.shutdownNow()
     }
@@ -112,8 +156,18 @@ class UserDataServerTest {
     assertEquals(200, response.statusCode())
   }
 
-  /** Sends one gRPC-Web request and returns the response messages after checking grpc-status. */
-  private fun grpcWeb(path: String, request: ByteArray): List<ByteArray> {
+  private fun listOverviews(request: ListSurveyOverviewsRequest): ListSurveyOverviewsResponse {
+    val response =
+      grpcWeb(LIST_SURVEY_OVERVIEWS, ListSurveyOverviewsRequest.ADAPTER.encode(request))
+    assertEquals(0, response.status)
+    return ListSurveyOverviewsResponse.ADAPTER.decode(response.messages.single())
+  }
+
+  /** Response messages and grpc-status (from the headers or the trailers) of a gRPC-Web call. */
+  private class GrpcWebResponse(val messages: List<ByteArray>, val status: Int?)
+
+  /** Sends one gRPC-Web request and returns its messages and status. */
+  private fun grpcWeb(path: String, request: ByteArray): GrpcWebResponse {
     val body = ByteBuffer.allocate(5 + request.size).put(0).putInt(request.size).put(request)
     val response =
       HttpClient.newHttpClient()
@@ -126,19 +180,34 @@ class UserDataServerTest {
           HttpResponse.BodyHandlers.ofByteArray(),
         )
     assertEquals(200, response.statusCode())
+    // A trailers-only response carries the status in its headers.
+    response.headers().firstValue("grpc-status").orElse(null)?.let { status ->
+      return GrpcWebResponse(emptyList(), status.toInt())
+    }
     val buffer = ByteBuffer.wrap(response.body())
     val messages = mutableListOf<ByteArray>()
-    var trailers = ""
+    var status: Int? = null
     while (buffer.hasRemaining()) {
       val flags = buffer.get().toInt()
       val payload = ByteArray(buffer.getInt()).also { buffer.get(it) }
-      if (flags and 0x80 != 0) trailers = payload.decodeToString() else messages += payload
+      if (flags and 0x80 != 0) {
+        status =
+          payload
+            .decodeToString()
+            .lines()
+            .firstOrNull { it.startsWith("grpc-status:") }
+            ?.substringAfter(':')
+            ?.trim()
+            ?.toInt()
+      } else {
+        messages += payload
+      }
     }
-    assertTrue("grpc-status:0" in trailers.replace(" ", ""), "trailers: $trailers")
-    return messages
+    return GrpcWebResponse(messages, status)
   }
 
   companion object {
     const val KENYA = "survey-kenya-coffee"
+    const val LIST_SURVEY_OVERVIEWS = "/groundplatform.v2.survey.SurveyService/ListSurveyOverviews"
   }
 }

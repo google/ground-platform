@@ -43,7 +43,7 @@ class SampleDataSeeder(
   suspend fun reset() {
     store.clear()
     val syncDataSource = syncDataSource ?: return
-    syncDataSource.resetWatermarks()
+    syncDataSource.resetSyncTokens()
     syncDataSource.seedStoreFromGrpc(
       store = store,
       defaultActiveSurveyId = DEFAULT_ACTIVE_SURVEY_ID,

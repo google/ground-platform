@@ -45,11 +45,11 @@ works today and how a persistent backend and a sync engine plug in later.
 Mobile clients keep the sync engine's state between launches in one file
 (`ClientSyncState` in `shared/protos/userdata/client_sync_state.proto`): the
 outbox, the server bases, the install's `client_id` and next `client_seq`, and
-the stream watermarks. `SyncStatePersistence` saves it (debounced) whenever the
+the opaque sync token of each `List*` scope. `SyncStatePersistence` saves it (debounced) whenever the
 outbox changes or a sync completes, and restores it on launch: it loads the
 bases and outbox, then rebuilds the domain collections by applying the pending
 mutations on top of the bases. The app opens offline with the last synced data
-and unsent edits, and catches up from the saved watermarks once online. The
+and unsent edits, and catches up from the saved sync tokens once online. The
 Android app keeps the file in its private files directory; the web keeps its
 outbox in memory by design.
 
@@ -105,7 +105,7 @@ the network directly.
     with the shared patch functions in `shared/core`, then projects the result
     into the domain collections the UI observes. See
     [Rebase on Remote Changes](../sync-engine.md#rebase-on-remote-changes).
--   **Sync state**: Stream watermarks, the install's `client_id`, and the next
+-   **Sync state**: Sync tokens, the install's `client_id`, and the next
     `client_seq` are stored with the data and updated in the same
     transactions, so they survive restarts on mobile.
 -   **Seed data**: Once real downloads exist, the seeder only runs in demo mode.

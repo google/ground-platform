@@ -33,7 +33,7 @@ import org.groundplatform.v2.app.data.datasource.local.store.MutationTarget
 import org.groundplatform.v2.app.data.seed.SampleDataSeeder
 
 /**
- * Keeps the sync engine's state (outbox, server bases, client identity, watermarks) on the device,
+ * Keeps the sync engine's state (outbox, server bases, client identity, sync tokens) on the device,
  * so edits made offline survive restarts and the app opens offline with the last synced data
  * (`docs/technical/client/local-data-store.md`).
  *
@@ -131,7 +131,7 @@ class SyncStatePersistence(
         .launchIn(scope)
   }
 
-  /** Asks for a save soon, e.g. after a sync stored new bases or watermarks. */
+  /** Asks for a save soon, e.g. after a sync stored new bases or sync tokens. */
   fun saveSoon() {
     saveRequests.tryEmit(Unit)
   }

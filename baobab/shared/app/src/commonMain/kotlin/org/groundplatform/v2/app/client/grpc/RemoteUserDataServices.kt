@@ -15,9 +15,7 @@ package org.groundplatform.v2.app.client.grpc
 
 import groundplatform.v2.data.AcquirePlotLockRequest
 import groundplatform.v2.data.AcquirePlotLockResponse
-import groundplatform.v2.data.AuditRecord
 import groundplatform.v2.data.DataServiceServer
-import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.GetAppliedMutationsRequest
 import groundplatform.v2.data.GetAppliedMutationsResponse
 import groundplatform.v2.data.GetEntityRequest
@@ -28,11 +26,14 @@ import groundplatform.v2.data.GetMediaDownloadUrlRequest
 import groundplatform.v2.data.GetMediaDownloadUrlResponse
 import groundplatform.v2.data.GetSubmissionRequest
 import groundplatform.v2.data.GetSubmissionResponse
-import groundplatform.v2.data.ImpactEvent
+import groundplatform.v2.data.ListAuditRecordsRequest
+import groundplatform.v2.data.ListAuditRecordsResponse
 import groundplatform.v2.data.ListEntitiesRequest
 import groundplatform.v2.data.ListEntitiesResponse
 import groundplatform.v2.data.ListEntityClustersRequest
 import groundplatform.v2.data.ListEntityClustersResponse
+import groundplatform.v2.data.ListImpactEventsRequest
+import groundplatform.v2.data.ListImpactEventsResponse
 import groundplatform.v2.data.ListMutationLogsRequest
 import groundplatform.v2.data.ListMutationLogsResponse
 import groundplatform.v2.data.ListPlacesRequest
@@ -47,22 +48,17 @@ import groundplatform.v2.data.RecordImpactEventsRequest
 import groundplatform.v2.data.RecordImpactEventsResponse
 import groundplatform.v2.data.ReleasePlotLockRequest
 import groundplatform.v2.data.ReleasePlotLockResponse
-import groundplatform.v2.data.StreamAuditRecordsRequest
-import groundplatform.v2.data.StreamEntitiesRequest
-import groundplatform.v2.data.StreamImpactEventsRequest
-import groundplatform.v2.data.StreamSubmissionsRequest
-import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.GetLibraryRequest
 import groundplatform.v2.library.GetLibraryResponse
 import groundplatform.v2.library.GetResolvedLibraryRequest
 import groundplatform.v2.library.GetResolvedLibraryResponse
 import groundplatform.v2.library.LibraryServiceServer
+import groundplatform.v2.library.ListLibrariesRequest
+import groundplatform.v2.library.ListLibrariesResponse
 import groundplatform.v2.library.MutateLibraryRequest
 import groundplatform.v2.library.MutateLibraryResponse
-import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.library.SearchConceptsRequest
 import groundplatform.v2.library.SearchConceptsResponse
-import groundplatform.v2.library.StreamLibrariesRequest
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AcceptSurveyInviteResponse
 import groundplatform.v2.survey.GetOrganizationRequest
@@ -75,21 +71,19 @@ import groundplatform.v2.survey.JoinOrganizationRequest
 import groundplatform.v2.survey.JoinOrganizationResponse
 import groundplatform.v2.survey.ListOrganizationsRequest
 import groundplatform.v2.survey.ListOrganizationsResponse
+import groundplatform.v2.survey.ListSurveyOverviewsRequest
+import groundplatform.v2.survey.ListSurveyOverviewsResponse
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateOrganizationResponse
 import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.MutateSurveyResponse
-import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationServiceServer
-import groundplatform.v2.survey.StreamOrganizationsRequest
-import groundplatform.v2.survey.StreamSurveyOverviewsRequest
-import groundplatform.v2.survey.SurveyOverview
+import groundplatform.v2.survey.SearchOrganizationsRequest
+import groundplatform.v2.survey.SearchOrganizationsResponse
 import groundplatform.v2.survey.SurveyServiceServer
-import kotlinx.coroutines.channels.SendChannel
 
 // Remote implementations of the Wire-generated user data service interfaces. Each method forwards
-// to
-// the method with the same name on the user data service (`server/user-data-service`).
+// to the method with the same name on the user data service (`server/user-data-service`).
 // `RemoteUserDataServicesTest` checks every path against the `@WireRpc` annotations.
 
 /**
@@ -97,16 +91,14 @@ import kotlinx.coroutines.channels.SendChannel
  * [GrpcWebTransport].
  */
 class RemoteSurveyService(private val transport: GrpcWebTransport) : SurveyServiceServer {
-  override suspend fun StreamSurveyOverviews(
-    request: StreamSurveyOverviewsRequest,
-    response: SendChannel<SurveyOverview>,
-  ) =
-    transport.serverStream(
-      "/groundplatform.v2.survey.SurveyService/StreamSurveyOverviews",
+  override suspend fun ListSurveyOverviews(
+    request: ListSurveyOverviewsRequest
+  ): ListSurveyOverviewsResponse =
+    transport.unary(
+      "/groundplatform.v2.survey.SurveyService/ListSurveyOverviews",
       request,
-      StreamSurveyOverviewsRequest.ADAPTER,
-      SurveyOverview.ADAPTER,
-      response,
+      ListSurveyOverviewsRequest.ADAPTER,
+      ListSurveyOverviewsResponse.ADAPTER,
     )
 
   override suspend fun GetSurvey(request: GetSurveyRequest): GetSurveyResponse =
@@ -158,6 +150,16 @@ class RemoteOrganizationService(private val transport: GrpcWebTransport) :
       GetOrganizationResponse.ADAPTER,
     )
 
+  override suspend fun SearchOrganizations(
+    request: SearchOrganizationsRequest
+  ): SearchOrganizationsResponse =
+    transport.unary(
+      "/groundplatform.v2.survey.OrganizationService/SearchOrganizations",
+      request,
+      SearchOrganizationsRequest.ADAPTER,
+      SearchOrganizationsResponse.ADAPTER,
+    )
+
   override suspend fun ListOrganizations(
     request: ListOrganizationsRequest
   ): ListOrganizationsResponse =
@@ -166,18 +168,6 @@ class RemoteOrganizationService(private val transport: GrpcWebTransport) :
       request,
       ListOrganizationsRequest.ADAPTER,
       ListOrganizationsResponse.ADAPTER,
-    )
-
-  override suspend fun StreamOrganizations(
-    request: StreamOrganizationsRequest,
-    response: SendChannel<Organization>,
-  ) =
-    transport.serverStream(
-      "/groundplatform.v2.survey.OrganizationService/StreamOrganizations",
-      request,
-      StreamOrganizationsRequest.ADAPTER,
-      Organization.ADAPTER,
-      response,
     )
 
   override suspend fun MutateOrganization(
@@ -224,16 +214,12 @@ class RemoteLibraryService(private val transport: GrpcWebTransport) : LibrarySer
       GetResolvedLibraryResponse.ADAPTER,
     )
 
-  override suspend fun StreamLibraries(
-    request: StreamLibrariesRequest,
-    response: SendChannel<OrganizationLibraryRecord>,
-  ) =
-    transport.serverStream(
-      "/groundplatform.v2.library.LibraryService/StreamLibraries",
+  override suspend fun ListLibraries(request: ListLibrariesRequest): ListLibrariesResponse =
+    transport.unary(
+      "/groundplatform.v2.library.LibraryService/ListLibraries",
       request,
-      StreamLibrariesRequest.ADAPTER,
-      OrganizationLibraryRecord.ADAPTER,
-      response,
+      ListLibrariesRequest.ADAPTER,
+      ListLibrariesResponse.ADAPTER,
     )
 
   override suspend fun SearchConcepts(request: SearchConceptsRequest): SearchConceptsResponse =
@@ -271,18 +257,6 @@ class RemoteDataService(private val transport: GrpcWebTransport) : DataServiceSe
       ListEntitiesResponse.ADAPTER,
     )
 
-  override suspend fun StreamEntities(
-    request: StreamEntitiesRequest,
-    response: SendChannel<EntityRecord>,
-  ) =
-    transport.serverStream(
-      "/groundplatform.v2.data.DataService/StreamEntities",
-      request,
-      StreamEntitiesRequest.ADAPTER,
-      EntityRecord.ADAPTER,
-      response,
-    )
-
   override suspend fun ListEntityClusters(
     request: ListEntityClustersRequest
   ): ListEntityClustersResponse =
@@ -307,18 +281,6 @@ class RemoteDataService(private val transport: GrpcWebTransport) : DataServiceSe
       request,
       ListSubmissionsRequest.ADAPTER,
       ListSubmissionsResponse.ADAPTER,
-    )
-
-  override suspend fun StreamSubmissions(
-    request: StreamSubmissionsRequest,
-    response: SendChannel<SubmissionRecord>,
-  ) =
-    transport.serverStream(
-      "/groundplatform.v2.data.DataService/StreamSubmissions",
-      request,
-      StreamSubmissionsRequest.ADAPTER,
-      SubmissionRecord.ADAPTER,
-      response,
     )
 
   override suspend fun MutateData(request: MutateDataRequest): MutateDataResponse =
@@ -375,16 +337,14 @@ class RemoteDataService(private val transport: GrpcWebTransport) : DataServiceSe
       RecordImpactEventsResponse.ADAPTER,
     )
 
-  override suspend fun StreamImpactEvents(
-    request: StreamImpactEventsRequest,
-    response: SendChannel<ImpactEvent>,
-  ) =
-    transport.serverStream(
-      "/groundplatform.v2.data.DataService/StreamImpactEvents",
+  override suspend fun ListImpactEvents(
+    request: ListImpactEventsRequest
+  ): ListImpactEventsResponse =
+    transport.unary(
+      "/groundplatform.v2.data.DataService/ListImpactEvents",
       request,
-      StreamImpactEventsRequest.ADAPTER,
-      ImpactEvent.ADAPTER,
-      response,
+      ListImpactEventsRequest.ADAPTER,
+      ListImpactEventsResponse.ADAPTER,
     )
 
   override suspend fun GetImpactAggregates(
@@ -397,16 +357,14 @@ class RemoteDataService(private val transport: GrpcWebTransport) : DataServiceSe
       GetImpactAggregatesResponse.ADAPTER,
     )
 
-  override suspend fun StreamAuditRecords(
-    request: StreamAuditRecordsRequest,
-    response: SendChannel<AuditRecord>,
-  ) =
-    transport.serverStream(
-      "/groundplatform.v2.data.DataService/StreamAuditRecords",
+  override suspend fun ListAuditRecords(
+    request: ListAuditRecordsRequest
+  ): ListAuditRecordsResponse =
+    transport.unary(
+      "/groundplatform.v2.data.DataService/ListAuditRecords",
       request,
-      StreamAuditRecordsRequest.ADAPTER,
-      AuditRecord.ADAPTER,
-      response,
+      ListAuditRecordsRequest.ADAPTER,
+      ListAuditRecordsResponse.ADAPTER,
     )
 
   override suspend fun ListPlaces(request: ListPlacesRequest): ListPlacesResponse =

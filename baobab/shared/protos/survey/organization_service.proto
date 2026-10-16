@@ -32,14 +32,26 @@ service OrganizationService {
 
   // Searches the public directory of listed organizations the caller may ask
   // to join. Organizations the caller belongs to are synced with
-  // `StreamOrganizations` instead.
-  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
+  // `ListOrganizations` instead.
+  rpc SearchOrganizations(SearchOrganizationsRequest) returns (SearchOrganizationsResponse);
 
-  // Delta sync for the caller's organizations. Streams organizations where
-  // `commit_timestamp > since_timestamp` (and `<= until_timestamp` when set)
-  // in strict `commit_timestamp ASC` order, including soft-deleted tombstones
-  // (`is_deleted = true`). Closes when caught up.
-  rpc StreamOrganizations(StreamOrganizationsRequest) returns (stream Organization);
+  // Lists the caller's organizations. Whether `sync_token` is set selects the
+  // mode (`docs/technical/sync-engine.md`, "List RPCs: Query and Delta
+  // Modes"):
+  //   - Query mode (`sync_token` unset): every organization except deleted
+  //     ones, paged with `page_size` / `page_token`. Every page reads the
+  //     snapshot pinned in `page_token`; the last page carries
+  //     `next_sync_token` at that snapshot.
+  //   - Delta mode (`sync_token` set): every organization changed after the
+  //     token, in commit order, including soft-deleted tombstones
+  //     (`is_deleted = true`). The last page carries `next_sync_token`.
+  //     `next_page_token` is itself a valid `sync_token`, so a client can
+  //     store it after applying a page.
+  // Delivery is at least once. Fails with `INVALID_ARGUMENT` when `sync_token`
+  // is malformed or was issued for another resource, and with
+  // `FAILED_PRECONDITION` when the server can no longer serve changes from
+  // `sync_token`; the client then discards it and runs a full sync.
+  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
 
   // Unified idempotent mutation RPC for creating, updating, or soft-deleting an
   // organization, its shared imagery sources, and its member roster.
@@ -59,7 +71,7 @@ message GetOrganizationResponse {
 }
 
 // Query over the public directory of listed organizations.
-message ListOrganizationsRequest {
+message SearchOrganizationsRequest {
   reserved 1 to 4;
   reserved "user_email", "include_deleted", "since_timestamp", "until_timestamp";
 
@@ -70,7 +82,7 @@ message ListOrganizationsRequest {
   string query = 7;
 }
 
-message ListOrganizationsResponse {
+message SearchOrganizationsResponse {
   repeated Organization organizations = 1;
   string next_page_token = 2;
 
@@ -78,16 +90,36 @@ message ListOrganizationsResponse {
   reserved "server_watermark";
 }
 
-message StreamOrganizationsRequest {
-  // Exclusive lower-bound server timestamp watermark (`commit_timestamp >
-  // since_timestamp`). Omit to stream the full initial dataset.
-  google.protobuf.Timestamp since_timestamp = 1;
+// Request to list the caller's organizations.
+message ListOrganizationsRequest {
+  // Field numbers of the former directory query (now `SearchOrganizations`)
+  // and of the removed timestamp-based sync stay reserved.
+  reserved 1 to 4, 7;
+  reserved "user_email", "include_deleted", "since_timestamp", "until_timestamp", "query";
 
-  // Optional inclusive upper-bound server timestamp watermark.
-  google.protobuf.Timestamp until_timestamp = 2;
+  // Maximum number of organizations to return. The server picks a default
+  // when unset and caps large values.
+  int32 page_size = 5;
 
-  // Whether to include soft-deleted organization tombstones.
-  bool include_deleted = 3;
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 6;
+
+  // Opaque `next_sync_token` from an earlier call. Selects delta mode.
+  string sync_token = 8;
+}
+
+// A page of the caller's organizations.
+message ListOrganizationsResponse {
+  repeated Organization organizations = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  reserved 3;
+  reserved "server_watermark";
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 4;
 }
 
 // Path-addressed field patch for `Organization`.

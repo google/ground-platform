@@ -13,7 +13,6 @@
  */
 package org.groundplatform.v2.app.data.datasource.local.store
 
-import com.squareup.wire.ofEpochSecond
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.OrganizationLibraryRecord
@@ -351,14 +350,14 @@ abstract class LocalStoreContractTest {
   @Test
   fun syncState_isStored_andClearedWithTheStore() {
     val store = createStore()
-    val watermarks = SyncWatermarks(surveysWatermark = ofEpochSecond(1_770_000_100L, 0L))
+    val syncTokens = SyncTokens(surveys = "surveys-token", entitiesBySurvey = mapOf("s1" to "e"))
     runNow {
       store.transaction {
-        updateSyncState { it.copy(clientId = "c1", nextClientSeq = 7, watermarks = watermarks) }
+        updateSyncState { it.copy(clientId = "c1", nextClientSeq = 7, syncTokens = syncTokens) }
       }
     }
     assertEquals(
-      SyncState(clientId = "c1", nextClientSeq = 7, watermarks = watermarks),
+      SyncState(clientId = "c1", nextClientSeq = 7, syncTokens = syncTokens),
       runNow { store.transaction { syncState() } },
     )
     runNow { store.clear() }

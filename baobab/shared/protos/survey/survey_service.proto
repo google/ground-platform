@@ -29,17 +29,29 @@ import "shared/protos/survey/survey_def.proto";
 // definitions, sub-resources (forms, entity datasets, map layers), collaborator
 // ACLs, and survey access policies.
 //
-// `StreamSurveyOverviews` syncs lightweight `SurveyOverview` records for the
+// `ListSurveyOverviews` syncs lightweight `SurveyOverview` records for the
 // survey list (`docs/technical/sync-engine.md`), while `GetSurvey` retrieves
 // the full `SurveyDef` for surveys the user opens or has downloaded for
 // offline use.
 service SurveyService {
-  // Delta sync for the overviews of surveys accessible to the caller. Streams
-  // `SurveyOverview` records where `commit_timestamp > since_timestamp` (and
-  // `<= until_timestamp` when set) in strict `commit_timestamp ASC` order,
-  // including tombstones (`state == DELETED`) and surveys the caller lost
-  // access to. Closes when caught up.
-  rpc StreamSurveyOverviews(StreamSurveyOverviewsRequest) returns (stream SurveyOverview);
+  // Lists the overviews of surveys accessible to the caller. Whether
+  // `sync_token` is set selects the mode (`docs/technical/sync-engine.md`,
+  // "List RPCs: Query and Delta Modes"):
+  //   - Query mode (`sync_token` unset): every overview in scope except
+  //     deleted surveys, paged with `page_size` / `page_token`. Every page
+  //     reads the snapshot pinned in `page_token`; the last page carries
+  //     `next_sync_token` for the scope at that snapshot.
+  //   - Delta mode (`sync_token` set): every overview in scope changed after
+  //     the token, in commit order, including tombstones (`state == DELETED`)
+  //     and surveys the caller lost access to. The last page carries
+  //     `next_sync_token`. `next_page_token` is itself a valid `sync_token`,
+  //     so a client can store it after applying a page.
+  // Delivery is at least once: an overview can appear in a query page and in
+  // the delta that follows. Fails with `INVALID_ARGUMENT` when `sync_token` is
+  // malformed or was issued for a different scope (`organization_id`), and
+  // with `FAILED_PRECONDITION` when the server can no longer serve changes
+  // from `sync_token`; the client then discards it and runs a full sync.
+  rpc ListSurveyOverviews(ListSurveyOverviewsRequest) returns (ListSurveyOverviewsResponse);
 
   // Retrieves the complete `SurveyDef` (including all forms, entity dataset
   // schemas, map configs, and translations) for a survey the user has
@@ -61,20 +73,33 @@ service SurveyService {
   rpc AcceptSurveyInvite(AcceptSurveyInviteRequest) returns (AcceptSurveyInviteResponse);
 }
 
-// Request to sync the overviews of surveys accessible to the caller.
-message StreamSurveyOverviewsRequest {
-  // Optional organization ID filter.
+// Request to list the overviews of surveys accessible to the caller.
+message ListSurveyOverviewsRequest {
+  // Scope: optional organization ID. Empty lists surveys across all of the
+  // caller's organizations and personal surveys.
   string organization_id = 1;
 
-  // Exclusive lower-bound server commit timestamp (`commit_timestamp >
-  // since_timestamp`). Omit to stream all overviews.
-  google.protobuf.Timestamp since_timestamp = 2;
+  // Maximum number of overviews to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 2;
 
-  // Optional inclusive upper-bound server commit timestamp.
-  google.protobuf.Timestamp until_timestamp = 3;
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 3;
 
-  // Whether to include tombstones for deleted surveys (`state == DELETED`).
-  bool include_deleted = 4;
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 4;
+}
+
+// A page of survey overviews.
+message ListSurveyOverviewsResponse {
+  repeated SurveyOverview overviews = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 3;
 }
 
 // Request to retrieve a single survey definition.

@@ -15,7 +15,6 @@
  */
 package org.groundplatform.v2.app.data.sync
 
-import com.squareup.wire.ofEpochSecond
 import groundplatform.v2.data.DataMutation
 import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
@@ -33,7 +32,7 @@ import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.MutationPayload
 import org.groundplatform.v2.app.data.datasource.local.store.MutationTarget
 import org.groundplatform.v2.app.data.datasource.local.store.SurveyBase
-import org.groundplatform.v2.app.data.datasource.local.store.SyncWatermarks
+import org.groundplatform.v2.app.data.datasource.local.store.SyncTokens
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 
 /** Sync state survives restarts: offline edits are rebuilt on top of the saved bases. */
@@ -54,7 +53,7 @@ class SyncStatePersistenceTest {
   @Test
   fun savedStateIsRestored_andPendingEditsAreReappliedToTheLocalCopy() {
     val before = InMemoryLocalStore()
-    val watermarks = SyncWatermarks(surveysWatermark = ofEpochSecond(1_800_000_000L, 0L))
+    val syncTokens = SyncTokens(surveys = "surveys-token", entitiesBySurvey = mapOf("s1" to "e"))
     runNow {
       before.transaction {
         putSurveyBase("s1", SurveyBase(saved = SurveyDef(survey_id = "s1", title = "Survey")))
@@ -85,7 +84,7 @@ class SyncStatePersistenceTest {
             ),
             baseRevision = 2,
           )
-        updateSyncState { it.copy(watermarks = watermarks) }
+        updateSyncState { it.copy(syncTokens = syncTokens) }
       }
     }
     runNow { SyncStatePersistence(before, file, scope).saveNow() }

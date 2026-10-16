@@ -36,10 +36,14 @@ import groundplatform.v2.data.GetSubmissionRequest
 import groundplatform.v2.data.GetSubmissionResponse
 import groundplatform.v2.data.ImpactAggregate
 import groundplatform.v2.data.ImpactEvent as ImpactEventProto
+import groundplatform.v2.data.ListAuditRecordsRequest
+import groundplatform.v2.data.ListAuditRecordsResponse
 import groundplatform.v2.data.ListEntitiesRequest
 import groundplatform.v2.data.ListEntitiesResponse
 import groundplatform.v2.data.ListEntityClustersRequest
 import groundplatform.v2.data.ListEntityClustersResponse
+import groundplatform.v2.data.ListImpactEventsRequest
+import groundplatform.v2.data.ListImpactEventsResponse
 import groundplatform.v2.data.ListMutationLogsRequest
 import groundplatform.v2.data.ListMutationLogsResponse
 import groundplatform.v2.data.ListPlacesRequest
@@ -53,14 +57,11 @@ import groundplatform.v2.data.PlaceRecord
 import groundplatform.v2.data.PlotLock
 import groundplatform.v2.data.PrepareMediaUploadRequest
 import groundplatform.v2.data.PrepareMediaUploadResponse
+import groundplatform.v2.data.QueueFilterMode
 import groundplatform.v2.data.RecordImpactEventsRequest
 import groundplatform.v2.data.RecordImpactEventsResponse
 import groundplatform.v2.data.ReleasePlotLockRequest
 import groundplatform.v2.data.ReleasePlotLockResponse
-import groundplatform.v2.data.StreamAuditRecordsRequest
-import groundplatform.v2.data.StreamEntitiesRequest
-import groundplatform.v2.data.StreamImpactEventsRequest
-import groundplatform.v2.data.StreamSubmissionsRequest
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.GeoPoint
@@ -73,6 +74,8 @@ import groundplatform.v2.library.GetResolvedLibraryRequest
 import groundplatform.v2.library.GetResolvedLibraryResponse
 import groundplatform.v2.library.LibraryBundle
 import groundplatform.v2.library.LibraryServiceServer
+import groundplatform.v2.library.ListLibrariesRequest
+import groundplatform.v2.library.ListLibrariesResponse
 import groundplatform.v2.library.MutateLibraryRequest
 import groundplatform.v2.library.MutateLibraryResponse
 import groundplatform.v2.library.OrganizationLibraryRecord
@@ -80,7 +83,6 @@ import groundplatform.v2.library.OrganizationLibrarySettings
 import groundplatform.v2.library.PurposePackDef
 import groundplatform.v2.library.SearchConceptsRequest
 import groundplatform.v2.library.SearchConceptsResponse
-import groundplatform.v2.library.StreamLibrariesRequest
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AcceptSurveyInviteResponse
 import groundplatform.v2.survey.AclEntry
@@ -94,6 +96,8 @@ import groundplatform.v2.survey.JoinOrganizationRequest
 import groundplatform.v2.survey.JoinOrganizationResponse
 import groundplatform.v2.survey.ListOrganizationsRequest
 import groundplatform.v2.survey.ListOrganizationsResponse
+import groundplatform.v2.survey.ListSurveyOverviewsRequest
+import groundplatform.v2.survey.ListSurveyOverviewsResponse
 import groundplatform.v2.survey.MembershipStatus
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateOrganizationResponse
@@ -104,16 +108,15 @@ import groundplatform.v2.survey.OrganizationMember
 import groundplatform.v2.survey.OrganizationRole
 import groundplatform.v2.survey.OrganizationServiceServer
 import groundplatform.v2.survey.PeerDataVisibility
+import groundplatform.v2.survey.SearchOrganizationsRequest
+import groundplatform.v2.survey.SearchOrganizationsResponse
 import groundplatform.v2.survey.SharingPolicy
-import groundplatform.v2.survey.StreamOrganizationsRequest
-import groundplatform.v2.survey.StreamSurveyOverviewsRequest
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyOverview
 import groundplatform.v2.survey.SurveyServiceServer
 import groundplatform.v2.survey.SurveyState
 import groundplatform.v2.userdata.UserDataSeed
-import kotlinx.coroutines.channels.SendChannel
 import org.groundplatform.v2.core.mutation.DataPatches
 import org.groundplatform.v2.core.mutation.LibraryPatches
 import org.groundplatform.v2.core.mutation.OrganizationPatches
@@ -128,13 +131,15 @@ import org.groundplatform.v2.core.mutation.SurveyPatches
  * Implements the server-side contract defined in `docs/technical/sync-engine.md`:
  * - Monotonically increasing authoritative `commit_timestamp` assigned to every initial record and
  *   every subsequent mutation.
- * - Bounded delta streams (`Stream*`) filtered by `commit_timestamp > since_timestamp` (and `<=
- *   until_timestamp` when set), ordered strictly by `commit_timestamp ASC`, and closed once caught
- *   up. Clients poll them while in the foreground.
- * - Query RPCs (`ListEntities`, `ListSubmissions`, `ListOrganizations`) with filtering, sorting,
- *   and offset-based paging.
- * - Soft-delete tombstones (`is_deleted = true` or `state = DELETED`) emitted when `include_deleted
- *   = true`.
+ * - Unary `List*` sync RPCs with query and delta modes selected by an opaque `sync_token`
+ *   ([SyncLists]). Delta mode returns every record in scope committed after the token, ordered by
+ *   `(commit_timestamp, id)` and including tombstones; query mode filters, sorts, and pages a
+ *   snapshot and ends with a `next_sync_token` for the scope. Tokens are bound to a random data
+ *   epoch chosen on construction and on [reset], so tokens from an earlier process (or from before
+ *   a reset) fail with `FAILED_PRECONDITION` and clients run a full sync.
+ * - `SearchOrganizations` directory queries with offset-based paging.
+ * - Soft-delete tombstones (`is_deleted = true` or `state = DELETED`), returned in delta mode and
+ *   in query mode only when `include_deleted = true`.
  * - Idempotent mutations: each `mutation_id` is applied at most once (replays are skipped, so a
  *   stale retry can't overwrite newer writes), and the highest applied `client_seq` per
  *   `(client_id, scope)` is reported by `GetAppliedMutations`.
@@ -157,6 +162,14 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
   /** Current highest committed server timestamp watermark. */
   fun currentWatermark(): Instant = Instant.ofEpochSecond(nextEpochSecond, 0L)
+
+  /**
+   * Random identifier of the current data. Sync tokens carry it, so tokens issued before a restart
+   * or [reset] (whose data may differ) are rejected with `FAILED_PRECONDITION`.
+   */
+  private var dataEpoch: String = newDataEpoch()
+
+  private val syncLists = SyncLists { dataEpoch }
 
   private val organizationsById = linkedMapOf<String, Organization>()
   private val librariesByOrgId = linkedMapOf<String, OrganizationLibraryRecord>()
@@ -244,6 +257,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
   /** Resets all state to [seed] and resumes the server clock after its latest commit timestamp. */
   fun reset() {
+    dataEpoch = newDataEpoch()
     organizationsById.clear()
     librariesByOrgId.clear()
     surveysById.clear()
@@ -292,22 +306,8 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   }
 
   // ---------------------------------------------------------------------------
-  // Timestamp comparison helpers (sync-engine.md)
+  // Timestamp comparison and paging helpers (sync-engine.md)
   // ---------------------------------------------------------------------------
-
-  private fun isWithinWindow(
-    commitTimestamp: Instant?,
-    sinceTimestamp: Instant?,
-    untilTimestamp: Instant? = null,
-  ): Boolean {
-    val ts = commitTimestamp ?: return true
-    if (sinceTimestamp != null && !isAfter(ts, sinceTimestamp)) return false
-    if (untilTimestamp != null && isAfter(ts, untilTimestamp)) return false
-    return true
-  }
-
-  private fun isAfter(a: Instant, b: Instant): Boolean =
-    if (a.epochSecond != b.epochSecond) a.epochSecond > b.epochSecond else a.nano > b.nano
 
   private val instantComparator =
     Comparator<Instant?> { a, b ->
@@ -320,26 +320,6 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       }
     }
 
-  /**
-   * Sends the records returned by [select] whose commit timestamp is after [since] (and not after
-   * [until]) in `commit_timestamp ASC` order, then returns so the stream closes.
-   */
-  private suspend fun <T> sendDeltas(
-    response: SendChannel<T>,
-    since: Instant?,
-    until: Instant?,
-    commitTimestamp: (T) -> Instant?,
-    select: () -> Collection<T>,
-  ) {
-    val batch =
-      select()
-        .filter { isWithinWindow(commitTimestamp(it), since, until) }
-        .sortedWith { a, b -> instantComparator.compare(commitTimestamp(a), commitTimestamp(b)) }
-    for (item in batch) {
-      response.send(item)
-    }
-  }
-
   /** Applies `page_size` / `page_token` offset paging to an already filtered and sorted list. */
   private fun <T> page(items: List<T>, pageSize: Int, pageToken: String): Pair<List<T>, String> {
     val offset = pageToken.toIntOrNull() ?: 0
@@ -347,6 +327,35 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     val end = minOf(offset + pageSize, items.size)
     val next = if (end < items.size) end.toString() else ""
     return items.subList(minOf(offset, items.size), end) to next
+  }
+
+  /** Query that matches [matches] in commit order (the default for full syncs). */
+  private fun <T> commitOrderQuery(
+    commitTimestamp: (T) -> Instant?,
+    matches: (T) -> Boolean = { true },
+  ) =
+    QuerySpec(
+      matches = matches,
+      sortKey = { record: T -> SyncLists.timestampSortKey(commitTimestamp(record)) },
+    )
+
+  /**
+   * Query sorted by `order_by`: [stringKeys] maps sortable field names to string sort keys;
+   * `commit_timestamp` (the default) is always supported. Unknown fields fall back to commit order.
+   */
+  private fun <T> orderedQuery(
+    orderBy: String,
+    commitTimestamp: (T) -> Instant?,
+    stringKeys: Map<String, (T) -> String>,
+    fingerprint: String,
+    matches: (T) -> Boolean,
+  ): QuerySpec<T> {
+    val parts = orderBy.trim().lowercase().split(Regex("\\s+")).filter { it.isNotEmpty() }
+    val field = parts.firstOrNull().orEmpty()
+    val descending = parts.getOrNull(1) == "desc"
+    val key: (T) -> String =
+      stringKeys[field] ?: { record -> SyncLists.timestampSortKey(commitTimestamp(record)) }
+    return QuerySpec(matches, key, descending, fingerprint)
   }
 
   // ---------------------------------------------------------------------------
@@ -360,9 +369,9 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     return GetOrganizationResponse(organization = org)
   }
 
-  override suspend fun ListOrganizations(
-    request: ListOrganizationsRequest
-  ): ListOrganizationsResponse {
+  override suspend fun SearchOrganizations(
+    request: SearchOrganizationsRequest
+  ): SearchOrganizationsResponse {
     val q = request.query.trim().lowercase()
     val matches =
       organizationsById.values
@@ -375,21 +384,29 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
         }
         .sortedBy { it.name.lowercase() }
     val (items, next) = page(matches, request.page_size, request.page_token)
-    return ListOrganizationsResponse(organizations = items, next_page_token = next)
+    return SearchOrganizationsResponse(organizations = items, next_page_token = next)
   }
 
-  override suspend fun StreamOrganizations(
-    request: StreamOrganizationsRequest,
-    response: SendChannel<Organization>,
-  ) =
-    sendDeltas(
-      response,
-      request.since_timestamp,
-      request.until_timestamp,
-      Organization::commit_timestamp,
-    ) {
-      organizationsById.values.filter { request.include_deleted || !it.is_deleted }
-    }
+  override suspend fun ListOrganizations(
+    request: ListOrganizationsRequest
+  ): ListOrganizationsResponse {
+    val page =
+      syncLists.list(
+        params = ListParams(request.page_size, request.page_token, request.sync_token),
+        scopeKey = "organizations",
+        records = organizationsById.values,
+        commitTimestamp = Organization::commit_timestamp,
+        id = Organization::organization_id,
+        query = commitOrderQuery(Organization::commit_timestamp) { !it.is_deleted },
+        queryFieldsSet = emptyList(),
+        watermark = currentWatermark(),
+      )
+    return ListOrganizationsResponse(
+      organizations = page.items,
+      next_page_token = page.nextPageToken,
+      next_sync_token = page.nextSyncToken,
+    )
+  }
 
   override suspend fun MutateOrganization(
     request: MutateOrganizationRequest
@@ -547,21 +564,25 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     )
   }
 
-  override suspend fun StreamLibraries(
-    request: StreamLibrariesRequest,
-    response: SendChannel<OrganizationLibraryRecord>,
-  ) =
-    sendDeltas(
-      response,
-      request.since_timestamp,
-      request.until_timestamp,
-      OrganizationLibraryRecord::commit_timestamp,
-    ) {
-      librariesByOrgId.values.filter { lib ->
-        (request.include_deleted || !lib.is_deleted) &&
-          (request.organization_id.isBlank() || lib.organization_id == request.organization_id)
-      }
-    }
+  override suspend fun ListLibraries(request: ListLibrariesRequest): ListLibrariesResponse {
+    val orgId = request.organization_id
+    val page =
+      syncLists.list(
+        params = ListParams(request.page_size, request.page_token, request.sync_token),
+        scopeKey = "libraries|organization_id=$orgId",
+        records = librariesByOrgId.values.filter { orgId.isBlank() || it.organization_id == orgId },
+        commitTimestamp = OrganizationLibraryRecord::commit_timestamp,
+        id = OrganizationLibraryRecord::organization_id,
+        query = commitOrderQuery(OrganizationLibraryRecord::commit_timestamp) { !it.is_deleted },
+        queryFieldsSet = emptyList(),
+        watermark = currentWatermark(),
+      )
+    return ListLibrariesResponse(
+      libraries = page.items,
+      next_page_token = page.nextPageToken,
+      next_sync_token = page.nextSyncToken,
+    )
+  }
 
   override suspend fun SearchConcepts(request: SearchConceptsRequest): SearchConceptsResponse {
     val resolved =
@@ -642,21 +663,13 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   // SurveyServiceServer
   // ---------------------------------------------------------------------------
 
-  override suspend fun StreamSurveyOverviews(
-    request: StreamSurveyOverviewsRequest,
-    response: SendChannel<SurveyOverview>,
-  ) =
-    sendDeltas(
-      response,
-      request.since_timestamp,
-      request.until_timestamp,
-      SurveyOverview::commit_timestamp,
-    ) {
+  override suspend fun ListSurveyOverviews(
+    request: ListSurveyOverviewsRequest
+  ): ListSurveyOverviewsResponse {
+    val orgId = request.organization_id
+    val overviews =
       surveysById.values
-        .filter { s ->
-          (request.include_deleted || s.state != SurveyState.DELETED) &&
-            (request.organization_id.isBlank() || s.organization_id == request.organization_id)
-        }
+        .filter { s -> orgId.isBlank() || s.organization_id == orgId }
         .map { s ->
           overviewOf(
             surveyDef = s,
@@ -664,7 +677,24 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
             hasWorkingCopy = surveyWorkingCopiesById.containsKey(s.survey_id),
           )
         }
-    }
+    val page =
+      syncLists.list(
+        params = ListParams(request.page_size, request.page_token, request.sync_token),
+        scopeKey = "surveys|organization_id=$orgId",
+        records = overviews,
+        commitTimestamp = SurveyOverview::commit_timestamp,
+        id = SurveyOverview::survey_id,
+        query =
+          commitOrderQuery(SurveyOverview::commit_timestamp) { it.state != SurveyState.DELETED },
+        queryFieldsSet = emptyList(),
+        watermark = currentWatermark(),
+      )
+    return ListSurveyOverviewsResponse(
+      overviews = page.items,
+      next_page_token = page.nextPageToken,
+      next_sync_token = page.nextSyncToken,
+    )
+  }
 
   override suspend fun GetSurvey(request: GetSurveyRequest): GetSurveyResponse {
     val saved = surveysById[request.survey_id]
@@ -757,7 +787,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       }
     }
 
-    // Always stamp the saved revision so overview streams see working-copy and access changes.
+    // Always stamp the saved revision so overview delta polls see working-copy and access changes.
     saved = saved.copy(commit_timestamp = ts)
     surveysById[surveyId] = saved
     surveyAclsById[surveyId] = currentAcl.copy(commit_timestamp = ts)
@@ -822,59 +852,51 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   }
 
   override suspend fun ListEntities(request: ListEntitiesRequest): ListEntitiesResponse {
-    val watermark = currentWatermark()
-    val matches =
-      entitiesBySurveyAndId[request.survey_id]
-        ?.values
-        .orEmpty()
-        .filter { e ->
-          (request.include_deleted || !e.is_deleted) &&
-            (request.dataset_id.isBlank() || e.dataset_id == request.dataset_id) &&
-            request.filter.all { (key, value) -> e.properties[key]?.string_value == value }
-        }
-        .let { list ->
-          when (request.order_by.trim().lowercase()) {
-            "label" -> list.sortedBy { it.label }
-            "label desc" -> list.sortedByDescending { it.label }
-            "commit_timestamp desc" ->
-              list.sortedWith { a, b ->
-                instantComparator.compare(b.commit_timestamp, a.commit_timestamp)
-              }
-            else ->
-              list.sortedWith { a, b ->
-                instantComparator.compare(a.commit_timestamp, b.commit_timestamp)
-              }
-          }
-        }
-    val (items, next) = page(matches, request.page_size, request.page_token)
+    val queryFieldsSet = buildList {
+      if (request.include_deleted) add("include_deleted")
+      if (request.bbox != null) add("bbox")
+      if (request.filter.isNotEmpty()) add("filter")
+      if (request.queue_filter_mode != QueueFilterMode.QUEUE_FILTER_MODE_UNSPECIFIED) {
+        add("queue_filter_mode")
+      }
+      if (request.order_by.isNotBlank()) add("order_by")
+    }
+    val query =
+      orderedQuery(
+        orderBy = request.order_by,
+        commitTimestamp = EntityRecord::commit_timestamp,
+        stringKeys = mapOf("label" to EntityRecord::label),
+        fingerprint =
+          "include_deleted=${request.include_deleted}|filter=${request.filter.toSortedMap()}|" +
+            "order_by=${request.order_by.trim().lowercase()}",
+      ) { e ->
+        (request.include_deleted || !e.is_deleted) &&
+          request.filter.all { (key, value) -> e.properties[key]?.string_value == value }
+      }
+    // `s2_cell_tokens` is part of the scope, but the in-memory backend doesn't index entities by
+    // S2 cell, so it doesn't narrow the results.
+    val page =
+      syncLists.list(
+        params = ListParams(request.page_size, request.page_token, request.sync_token),
+        scopeKey =
+          "entities|survey_id=${request.survey_id}|dataset_id=${request.dataset_id}|" +
+            "s2_cell_tokens=${request.s2_cell_tokens.sorted().joinToString(",")}",
+        records =
+          entitiesBySurveyAndId[request.survey_id]?.values.orEmpty().filter { e ->
+            request.dataset_id.isBlank() || e.dataset_id == request.dataset_id
+          },
+        commitTimestamp = EntityRecord::commit_timestamp,
+        id = EntityRecord::entity_id,
+        query = query,
+        queryFieldsSet = queryFieldsSet,
+        watermark = currentWatermark(),
+      )
     return ListEntitiesResponse(
-      entities = items,
-      next_page_token = next,
-      server_watermark = watermark,
+      entities = page.items,
+      next_page_token = page.nextPageToken,
+      next_sync_token = page.nextSyncToken,
     )
   }
-
-  override suspend fun StreamEntities(
-    request: StreamEntitiesRequest,
-    response: SendChannel<EntityRecord>,
-  ) =
-    sendDeltas(
-      response,
-      request.since_timestamp,
-      request.until_timestamp,
-      EntityRecord::commit_timestamp,
-    ) {
-      val source =
-        if (request.survey_id.isNotBlank()) {
-          entitiesBySurveyAndId[request.survey_id]?.values.orEmpty()
-        } else {
-          entitiesBySurveyAndId.values.flatMap { it.values }
-        }
-      source.filter { e ->
-        (request.include_deleted || !e.is_deleted) &&
-          (request.dataset_id.isBlank() || e.dataset_id == request.dataset_id)
-      }
-    }
 
   override suspend fun ListEntityClusters(
     request: ListEntityClustersRequest
@@ -904,67 +926,52 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   }
 
   override suspend fun ListSubmissions(request: ListSubmissionsRequest): ListSubmissionsResponse {
-    val watermark = currentWatermark()
-    val matches =
-      submissionsBySurveyAndId[request.survey_id]
-        ?.values
-        .orEmpty()
-        .filter { sub ->
-          (request.include_deleted || !sub.is_deleted) &&
-            (request.form_id.isBlank() || sub.form_id == request.form_id) &&
-            (request.entity_id.isBlank() || sub.entity_id == request.entity_id) &&
-            request.filter.all { (key, value) ->
-              when (key) {
-                "collector_email" -> sub.collector_email == value
-                "collector_name" -> sub.collector_name == value
-                else -> true
-              }
+    val queryFieldsSet = buildList {
+      if (request.include_deleted) add("include_deleted")
+      if (request.filter.isNotEmpty()) add("filter")
+      if (request.order_by.isNotBlank()) add("order_by")
+    }
+    val query =
+      orderedQuery(
+        orderBy = request.order_by,
+        commitTimestamp = SubmissionRecord::commit_timestamp,
+        stringKeys = mapOf("collector_name" to SubmissionRecord::collector_name),
+        fingerprint =
+          "include_deleted=${request.include_deleted}|filter=${request.filter.toSortedMap()}|" +
+            "order_by=${request.order_by.trim().lowercase()}",
+      ) { sub ->
+        (request.include_deleted || !sub.is_deleted) &&
+          request.filter.all { (key, value) ->
+            when (key) {
+              "collector_email" -> sub.collector_email == value
+              "collector_name" -> sub.collector_name == value
+              else -> true
             }
-        }
-        .let { list ->
-          when (request.order_by.trim().lowercase()) {
-            "collector_name" -> list.sortedBy { it.collector_name }
-            "collector_name desc" -> list.sortedByDescending { it.collector_name }
-            "commit_timestamp desc" ->
-              list.sortedWith { a, b ->
-                instantComparator.compare(b.commit_timestamp, a.commit_timestamp)
-              }
-            else ->
-              list.sortedWith { a, b ->
-                instantComparator.compare(a.commit_timestamp, b.commit_timestamp)
-              }
           }
-        }
-    val (items, next) = page(matches, request.page_size, request.page_token)
+      }
+    val page =
+      syncLists.list(
+        params = ListParams(request.page_size, request.page_token, request.sync_token),
+        scopeKey =
+          "submissions|survey_id=${request.survey_id}|form_id=${request.form_id}|" +
+            "entity_id=${request.entity_id}",
+        records =
+          submissionsBySurveyAndId[request.survey_id]?.values.orEmpty().filter { sub ->
+            (request.form_id.isBlank() || sub.form_id == request.form_id) &&
+              (request.entity_id.isBlank() || sub.entity_id == request.entity_id)
+          },
+        commitTimestamp = SubmissionRecord::commit_timestamp,
+        id = SubmissionRecord::submission_id,
+        query = query,
+        queryFieldsSet = queryFieldsSet,
+        watermark = currentWatermark(),
+      )
     return ListSubmissionsResponse(
-      submissions = items,
-      next_page_token = next,
-      server_watermark = watermark,
+      submissions = page.items,
+      next_page_token = page.nextPageToken,
+      next_sync_token = page.nextSyncToken,
     )
   }
-
-  override suspend fun StreamSubmissions(
-    request: StreamSubmissionsRequest,
-    response: SendChannel<SubmissionRecord>,
-  ) =
-    sendDeltas(
-      response,
-      request.since_timestamp,
-      request.until_timestamp,
-      SubmissionRecord::commit_timestamp,
-    ) {
-      val source =
-        if (request.survey_id.isNotBlank()) {
-          submissionsBySurveyAndId[request.survey_id]?.values.orEmpty()
-        } else {
-          submissionsBySurveyAndId.values.flatMap { it.values }
-        }
-      source.filter { sub ->
-        (request.include_deleted || !sub.is_deleted) &&
-          (request.form_id.isBlank() || sub.form_id == request.form_id) &&
-          (request.entity_id.isBlank() || sub.entity_id == request.entity_id)
-      }
-    }
 
   override suspend fun MutateData(request: MutateDataRequest): MutateDataResponse {
     val results = mutableListOf<DataMutationResult>()
@@ -1234,21 +1241,31 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     return RecordImpactEventsResponse(events = stampedEvents, commit_timestamp = ts)
   }
 
-  override suspend fun StreamImpactEvents(
-    request: StreamImpactEventsRequest,
-    response: SendChannel<ImpactEventProto>,
-  ) =
-    sendDeltas(
-      response,
-      request.since_timestamp,
-      request.until_timestamp,
-      ImpactEventProto::commit_timestamp,
-    ) {
-      impactEventsById.values.filter { ev ->
-        (request.survey_id.isBlank() || ev.survey_id == request.survey_id) &&
-          (request.organization_id.isBlank() || ev.organization_id == request.organization_id)
-      }
-    }
+  override suspend fun ListImpactEvents(
+    request: ListImpactEventsRequest
+  ): ListImpactEventsResponse {
+    val page =
+      syncLists.list(
+        params = ListParams(request.page_size, request.page_token, request.sync_token),
+        scopeKey =
+          "impact_events|survey_id=${request.survey_id}|organization_id=${request.organization_id}",
+        records =
+          impactEventsById.values.filter { ev ->
+            (request.survey_id.isBlank() || ev.survey_id == request.survey_id) &&
+              (request.organization_id.isBlank() || ev.organization_id == request.organization_id)
+          },
+        commitTimestamp = ImpactEventProto::commit_timestamp,
+        id = ImpactEventProto::event_id,
+        query = commitOrderQuery(ImpactEventProto::commit_timestamp),
+        queryFieldsSet = emptyList(),
+        watermark = currentWatermark(),
+      )
+    return ListImpactEventsResponse(
+      events = page.items,
+      next_page_token = page.nextPageToken,
+      next_sync_token = page.nextSyncToken,
+    )
+  }
 
   override suspend fun GetImpactAggregates(
     request: GetImpactAggregatesRequest
@@ -1286,21 +1303,30 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     )
   }
 
-  override suspend fun StreamAuditRecords(
-    request: StreamAuditRecordsRequest,
-    response: SendChannel<AuditRecord>,
-  ) =
-    sendDeltas(
-      response,
-      request.since_timestamp,
-      request.until_timestamp,
-      AuditRecord::commit_timestamp,
-    ) {
-      auditRecordsById.values.filter { a ->
-        (request.survey_id.isBlank() || a.survey_id == request.survey_id) &&
-          (request.target_id.isBlank() || a.target_id == request.target_id)
-      }
-    }
+  override suspend fun ListAuditRecords(
+    request: ListAuditRecordsRequest
+  ): ListAuditRecordsResponse {
+    val page =
+      syncLists.list(
+        params = ListParams(request.page_size, request.page_token, request.sync_token),
+        scopeKey = "audit_records|survey_id=${request.survey_id}|target_id=${request.target_id}",
+        records =
+          auditRecordsById.values.filter { a ->
+            (request.survey_id.isBlank() || a.survey_id == request.survey_id) &&
+              (request.target_id.isBlank() || a.target_id == request.target_id)
+          },
+        commitTimestamp = AuditRecord::commit_timestamp,
+        id = AuditRecord::audit_id,
+        query = commitOrderQuery(AuditRecord::commit_timestamp),
+        queryFieldsSet = emptyList(),
+        watermark = currentWatermark(),
+      )
+    return ListAuditRecordsResponse(
+      audit_records = page.items,
+      next_page_token = page.nextPageToken,
+      next_sync_token = page.nextSyncToken,
+    )
+  }
 
   override suspend fun ListPlaces(request: ListPlacesRequest): ListPlacesResponse {
     val q = request.query.trim().lowercase()
@@ -1318,13 +1344,24 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   override suspend fun ListMutationLogs(
     request: ListMutationLogsRequest
   ): ListMutationLogsResponse {
-    val filtered = mutationLogsList.filter {
-      (request.survey_id.isBlank() || it.survey_id == request.survey_id) &&
-        isWithinWindow(it.commit_timestamp, request.since_timestamp)
-    }
+    val page =
+      syncLists.list(
+        params = ListParams(request.page_size, request.page_token, request.sync_token),
+        scopeKey = "mutation_logs|survey_id=${request.survey_id}",
+        records =
+          mutationLogsList.filter {
+            request.survey_id.isBlank() || it.survey_id == request.survey_id
+          },
+        commitTimestamp = MutationLogRecord::commit_timestamp,
+        id = MutationLogRecord::id,
+        query = commitOrderQuery(MutationLogRecord::commit_timestamp),
+        queryFieldsSet = emptyList(),
+        watermark = currentWatermark(),
+      )
     return ListMutationLogsResponse(
-      mutation_logs = filtered,
-      server_watermark = currentWatermark(),
+      mutation_logs = page.items,
+      next_page_token = page.nextPageToken,
+      next_sync_token = page.nextSyncToken,
     )
   }
 
@@ -1346,7 +1383,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
   /**
    * Builds the catalog overview of [surveyDef]. Its `commit_timestamp` is the later of the survey's
-   * and [acl]'s, so access changes also reach `StreamSurveyOverviews` clients.
+   * and [acl]'s, so access changes also reach `ListSurveyOverviews` delta polls.
    */
   private fun overviewOf(
     surveyDef: SurveyDef,
@@ -1384,6 +1421,9 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     )
 
   companion object {
+    /** A new random data epoch for [dataEpoch]. */
+    private fun newDataEpoch(): String = java.util.UUID.randomUUID().toString()
+
     /** Server clock start when the seed has no timestamps. */
     const val INITIAL_EPOCH_SECOND: Long = 1_770_000_000L
 

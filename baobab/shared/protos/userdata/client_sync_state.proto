@@ -32,9 +32,9 @@ import "shared/protos/survey/survey_service.proto";
 // Sync state a mobile client keeps on the device between launches
 // (`docs/technical/client/local-data-store.md`): the outbox of pending
 // mutations, the last server copy (base) of each synced record, the install's
-// mutation identity, and the delta stream watermarks. The local copy the UI
-// shows is rebuilt from these on launch by applying the pending mutations on
-// top of the bases, so edits made offline survive restarts.
+// mutation identity, and the sync tokens of each `List*` scope. The local copy
+// the UI shows is rebuilt from these on launch by applying the pending
+// mutations on top of the bases, so edits made offline survive restarts.
 message ClientSyncState {
   repeated PendingMutationRecord outbox = 1;
   repeated SurveyBaseRecord survey_bases = 2;
@@ -49,7 +49,12 @@ message ClientSyncState {
   // The `client_seq` the next recorded mutation gets.
   int64 next_client_seq = 8;
 
-  SyncWatermarksRecord watermarks = 9;
+  // Former timestamp watermarks. State saved with them has no sync tokens, so
+  // the next sync is a full sync.
+  reserved 9;
+  reserved "watermarks";
+
+  SyncTokensRecord sync_tokens = 10;
 }
 
 // Last server copies of one survey's saved revision, working copy, and ACL.
@@ -60,14 +65,27 @@ message SurveyBaseRecord {
   groundplatform.v2.survey.SurveyAcl acl = 4;
 }
 
-// Delta stream watermarks (`since_timestamp` of each `Stream*` RPC).
-message SyncWatermarksRecord {
-  google.protobuf.Timestamp organizations = 1;
-  google.protobuf.Timestamp libraries = 2;
-  google.protobuf.Timestamp surveys = 3;
-  map<string, google.protobuf.Timestamp> entities_by_survey = 4;
-  map<string, google.protobuf.Timestamp> submissions_by_survey = 5;
-  google.protobuf.Timestamp impact_events = 6;
+// Opaque `next_sync_token` of each synced `List*` scope
+// (`docs/technical/sync-engine.md`, "Sync Tokens"). Empty means the scope
+// hasn't been synced yet, so its next sync is a full sync.
+message SyncTokensRecord {
+  // `ListOrganizations`.
+  string organizations = 1;
+
+  // `ListLibraries` (all organizations).
+  string libraries = 2;
+
+  // `ListSurveyOverviews` (all organizations).
+  string surveys = 3;
+
+  // `ListEntities`, keyed by `survey_id`.
+  map<string, string> entities_by_survey = 4;
+
+  // `ListSubmissions`, keyed by `survey_id`.
+  map<string, string> submissions_by_survey = 5;
+
+  // `ListImpactEvents` (all surveys).
+  string impact_events = 6;
 }
 
 // One outbox entry: a mutation waiting to be sent or confirmed.

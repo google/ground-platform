@@ -145,9 +145,13 @@ gcloud run deploy user-data-service \
     once the service is backed by a database.
 -   `--allow-unauthenticated` lets browsers call the service. Requests aren't
     authenticated yet; restrict access before storing real data.
--   Clients poll with short bounded streams rather than holding connections
-    open, so the default concurrency and request timeout are fine (see "Why
-    Polling Instead of Open Streams" in the sync doc).
+-   Clients poll with short unary `List*` calls (delta mode, with sync tokens)
+    rather than holding connections open, so the default concurrency and request
+    timeout are fine (see "Why Polling Instead of Open Streams" in the sync
+    doc).
+-   Sync tokens are bound to a random data epoch chosen when the service starts,
+    so after a restart (which reloads the seed) clients get
+    `FAILED_PRECONDITION` for their old tokens and run a full sync.
 
 The Dockerfile only packages the output of `./gradlew installDist`, because
 building `shared/core` needs the Android SDK.

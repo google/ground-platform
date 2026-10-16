@@ -18,7 +18,7 @@ package org.groundplatform.v2.app.data.sync
 import groundplatform.v2.userdata.ClientSyncState
 import groundplatform.v2.userdata.PendingMutationRecord
 import groundplatform.v2.userdata.SurveyBaseRecord
-import groundplatform.v2.userdata.SyncWatermarksRecord
+import groundplatform.v2.userdata.SyncTokensRecord
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStoreTransaction
 import org.groundplatform.v2.app.data.datasource.local.store.MutationPayload
 import org.groundplatform.v2.app.data.datasource.local.store.MutationTarget
@@ -26,10 +26,10 @@ import org.groundplatform.v2.app.data.datasource.local.store.OutboxState
 import org.groundplatform.v2.app.data.datasource.local.store.PendingMutation
 import org.groundplatform.v2.app.data.datasource.local.store.SurveyBase
 import org.groundplatform.v2.app.data.datasource.local.store.SyncState
-import org.groundplatform.v2.app.data.datasource.local.store.SyncWatermarks
+import org.groundplatform.v2.app.data.datasource.local.store.SyncTokens
 
 /**
- * Converts the store's sync state (outbox, server bases, client identity, watermarks) to and from
+ * Converts the store's sync state (outbox, server bases, client identity, sync tokens) to and from
  * [ClientSyncState], the proto mobile clients keep on the device between launches.
  */
 object ClientSyncStateCodec {
@@ -76,15 +76,15 @@ object ClientSyncStateCodec {
       library_bases = organizationIds.mapNotNull { tx.libraryBase(it) },
       client_id = state.clientId,
       next_client_seq = state.nextClientSeq,
-      watermarks =
-        state.watermarks.let { w ->
-          SyncWatermarksRecord(
-            organizations = w.organizationsWatermark,
-            libraries = w.librariesWatermark,
-            surveys = w.surveysWatermark,
-            entities_by_survey = w.entitiesWatermarkBySurvey,
-            submissions_by_survey = w.submissionsWatermarkBySurvey,
-            impact_events = w.impactEventsWatermark,
+      sync_tokens =
+        state.syncTokens.let { t ->
+          SyncTokensRecord(
+            organizations = t.organizations,
+            libraries = t.libraries,
+            surveys = t.surveys,
+            entities_by_survey = t.entitiesBySurvey,
+            submissions_by_survey = t.submissionsBySurvey,
+            impact_events = t.impactEvents,
           )
         },
     )
@@ -100,19 +100,20 @@ object ClientSyncStateCodec {
     saved.submission_bases.forEach { tx.putSubmissionBase(it.survey_id, it.submission_id, it) }
     saved.organization_bases.forEach { tx.putOrganizationBase(it.organization_id, it) }
     saved.library_bases.forEach { tx.putLibraryBase(it.organization_id, it) }
-    val w = saved.watermarks
+    // State saved before sync tokens existed has none, so every scope gets a full sync.
+    val t = saved.sync_tokens
     tx.putSyncState(
       SyncState(
         clientId = saved.client_id,
         nextClientSeq = saved.next_client_seq.coerceAtLeast(1L),
-        watermarks =
-          SyncWatermarks(
-            organizationsWatermark = w?.organizations,
-            librariesWatermark = w?.libraries,
-            surveysWatermark = w?.surveys,
-            entitiesWatermarkBySurvey = w?.entities_by_survey.orEmpty(),
-            submissionsWatermarkBySurvey = w?.submissions_by_survey.orEmpty(),
-            impactEventsWatermark = w?.impact_events,
+        syncTokens =
+          SyncTokens(
+            organizations = t?.organizations.orEmpty(),
+            libraries = t?.libraries.orEmpty(),
+            surveys = t?.surveys.orEmpty(),
+            entitiesBySurvey = t?.entities_by_survey.orEmpty(),
+            submissionsBySurvey = t?.submissions_by_survey.orEmpty(),
+            impactEvents = t?.impact_events.orEmpty(),
           ),
       )
     )

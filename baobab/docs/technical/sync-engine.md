@@ -12,21 +12,35 @@ The user interface layer (Jetpack Compose / SwiftUI / Compose for Web) **never**
 * **Mobile (Android, iOS)**: a persistent local database (Room / SQLDelight) that survives restarts and works offline.
 * **Web**: an in-memory store holding only what's on screen (see [Web Client](#web-client)). The browser keeps no offline copy.
 
-### Bounded Delta Synchronization
-Data synchronization relies on short-lived, **bounded gRPC streams**. The client sends its last known state (`since_timestamp`), the server streams every change committed after it in commit order, and the stream ends once the client is caught up. The same request serves every trigger: reconnecting, coming to the foreground, background sweeps, and [foreground polling](#foreground-polling). Persistent streaming connections are never held, in the foreground or the background.
+### Delta Synchronization With Sync Tokens
+Data synchronization uses short unary `List*` calls in **delta mode**. The client sends the opaque `sync_token` it received last, and the server returns every change committed after it, in commit order and paged. The last page carries a `next_sync_token` for the next call. The same request serves every trigger: reconnecting, coming to the foreground, background sweeps, and [foreground polling](#foreground-polling). No connection is held open between calls, in the foreground or the background.
 
 ### Stateless Cloud Backend
-The server application layer maintains no state tracking regarding client online/offline status, session tokens, or delta logs. The client provides its own temporal coordinate (`last_synced_spanner_timestamp`), allowing Cloud Spanner to calculate and stream mutations on demand via index-optimized time queries. Because every request is short and self-contained, any server instance can answer any request, which suits request-scaled hosting such as Cloud Run (see [Why Polling Instead of Open Streams](#why-polling-instead-of-open-streams)).
+The server application layer maintains no state tracking regarding client online/offline status, session tokens, or delta logs. The client provides its own position as an opaque [sync token](#sync-tokens), from which Cloud Spanner computes the changes on demand with index-optimized commit-time queries. Because every request is short and self-contained, any server instance can answer any request, which suits request-scaled hosting such as Cloud Run (see [Why Polling Instead of Open Streams](#why-polling-instead-of-open-streams)).
 
-### Sync RPCs vs. Query RPCs
-Every API call falls into one of two categories:
+### List RPCs: Query and Delta Modes
+Each synced resource has exactly one `List*` RPC: `ListSurveyOverviews`, `ListEntities`, `ListSubmissions`, `ListOrganizations`, `ListLibraries`, `ListImpactEvents`, and `ListAuditRecords`. Whether `sync_token` is set selects the mode:
 
-| Kind | Purpose | Examples | Who serves the UI |
+| Mode | Request | Response | Used for |
 | :--- | :--- | :--- | :--- |
-| **Sync** | "Send me everything in this scope that changed after T." One RPC per synced resource. | `StreamSurveyOverviews`, `StreamEntities`, `StreamSubmissions`, `StreamOrganizations`, `StreamLibraries`, `StreamImpactEvents`, `StreamAuditRecords` | The local store, reactively |
-| **Query** | Lookup, filtering, sorting, paging, or aggregation the client can't do from data it holds. | `GetSurvey`, `ListEntities`, `ListSubmissions`, `ListEntityClusters`, `GetImpactAggregates`, `ListOrganizations` (public directory), `SearchConcepts` | The response directly, or the local store after the client caches it |
+| **Query** (`sync_token` unset) | Scope fields (e.g. `survey_id`), optional `filter` / `order_by` / `query`, `page_size`, `page_token` | Matching records. Every page reads the same snapshot, pinned in `page_token`; the last page carries `next_sync_token` for the scope at that snapshot. | Initial and full syncs (a query with no filter), data tables, search |
+| **Delta** (`sync_token` set) | The same scope fields the token was issued for, `page_size`, `page_token` | Every record in scope changed after the token, in commit order, always including tombstones (deleted records and records the caller lost access to). The last page carries `next_sync_token`. | Catch-up and polling |
 
-There are no unary `List*` duplicates of sync streams: catch-up always uses the stream. Query responses that return records include a `server_watermark`; a client that wants to keep those results fresh polls the matching sync stream starting from `since_timestamp = server_watermark`.
+* **A full sync is a query with no filter.** Mobile runs one per scope, stores `next_sync_token`, and polls in delta mode from then on.
+* **Delta mode is scope-only.** `filter`, `order_by`, and `query` are rejected with `INVALID_ARGUMENT`, so a record can't silently leave a filtered result set. A client keeping a filtered table fresh polls the whole scope and applies the changes that affect the rows it holds.
+* **At least once.** A record can appear both in a query page and in the delta that follows (for example, when it changed after the snapshot). Applying a record is idempotent, so duplicates are harmless.
+* **Cheap when idle.** A poll with nothing new returns no records and a fresh `next_sync_token`.
+
+The remaining query RPCs cover lookups, search, and aggregation the client can't do from data it holds: `GetSurvey`, `ListEntityClusters`, `GetImpactAggregates`, `SearchConcepts`, and `SearchOrganizations` (the public directory of organizations the caller may ask to join; `ListOrganizations` lists the caller's own organizations).
+
+### Sync Tokens
+A sync token is an opaque string. Clients store it and send it back unchanged; they never parse, compare, or construct one, and never reason about server time.
+
+* **Contents (server-defined):** a format version, the scope it was issued for (resource and scope fields), the position in commit order (commit timestamp plus record ID as a tie-breaker), and the server's data epoch. The server can change the encoding, for example to Spanner change-stream offsets, without changing clients.
+* **Scope binding:** a token sent with different scope fields is rejected with `INVALID_ARGUMENT`.
+* **Invalidation:** when the server can't serve changes from a token (it's past the retention window, the data was reset, or the access model changed), it fails with `FAILED_PRECONDITION`. The client discards the token and runs a full sync for that scope, replacing its bases (records missing from the result are removed). Pending outbox mutations are kept and rebased onto the new bases.
+* **Storage:** clients persist one token per resource and scope (`ClientSyncState.sync_tokens`), and advance it only after applying a whole page in one local transaction.
+* **Record freshness (planned):** when the same record arrives from a `List*` page and a `Mutate*` response, clients currently keep the copy with the later `commit_timestamp`. The plan is to compare record versions (`revision` / `version`) instead, once every write bumps the version; plot lock changes and survey working copy edits don't yet. `commit_timestamp` then stays on records for display only.
 
 ## End-to-End System Flows
 
@@ -42,37 +56,37 @@ Every local edit goes through the same path, online or offline, on mobile and on
 ### Rebase on Remote Changes
 For every synced record, the local store keeps the **base** (the last copy confirmed by the server) and the **pending** outbox mutations that target it. What the UI shows is the pending mutations applied on top of the base, using the same patch functions the server uses (`shared/core`, `org.groundplatform.v2.core.mutation`).
 
-When a delta stream or a `Mutate*` response delivers a newer copy of a record, the client, in one transaction:
+When a delta page or a `Mutate*` response delivers a newer copy of a record, the client, in one transaction:
 
 1. Replaces the base with the server copy (or marks it deleted for a tombstone).
 2. Drops pending mutations the server has confirmed (acknowledged by response or reported by `GetAppliedMutations`) and pending patches that no longer change anything.
 3. Re-applies the remaining pending mutations on top of the new base.
-4. Advances the stream's persisted watermark.
+4. Stores the response's `next_sync_token` once the whole page is applied.
 
 If a record was deleted remotely, its pending patches are rejected and shown in the Uploads view, where the user can discard or retry them.
 
 ### The Online Flow (Re-establishing Connection & Catch-Up)
 When the device returns online or the application transitions from a suspended state to the foreground, a unified catch-up sequence initiates.
 
-1. **Watermark Extraction:** The shared synchronization engine queries the local database's sync tracking table to extract the high-water mark token for each sync scope: `last_synced_spanner_timestamp`.
+1. **Token Lookup:** The shared synchronization engine reads the stored sync token for each scope. A scope without a token gets a full sync (a query with no filter).
 2. **Outbox Drain (Client to Server):** Before pulling updates, the client calls `GetAppliedMutations` and drops outbox mutations the server already applied (for example, when a response was lost). It then sends the remaining mutations in order, batching contiguous mutations for the same RPC target (`MutateData` per survey, `MutateSurvey` per survey and revision, `MutateOrganization` and `MutateLibrary` per organization), with at most one batch in flight per target. The backend executes a write transaction in Cloud Spanner, which assigns a definitive `commit_timestamp` utilizing its atomic TrueTime engine.
-3. **Delta Request (Server to Client):** The client initiates a delta gRPC stream request, sending its `last_synced_spanner_timestamp` to the server.
-4. **Cloud Spanner Index Evaluation:** The backend service executes a highly optimized index lookup against Spanner tables:
+3. **Delta Request (Server to Client):** The client calls the scope's `List*` RPC with its sync token.
+4. **Cloud Spanner Index Evaluation:** The backend decodes the token and runs an index lookup on commit time, for example:
    ```sql
-   SELECT * FROM AppDataTables WHERE spanner_commit_timestamp > @lastClientSyncTime ORDER BY spanner_commit_timestamp ASC;
+   SELECT * FROM AppDataTables
+   WHERE scope = @scope AND (commit_ts, id) > (@tokenCommitTs, @tokenId)
+   ORDER BY commit_ts, id LIMIT @pageSize;
    ```
-5. **Draining and Advancing:** The server streams the rows back down the gRPC channel. For every row emitted, the shared core engine:
-   * Upserts the row into the local database table (or deletes it when the row is a tombstone, `is_deleted = true`).
-   * Updates the `last_synced_spanner_timestamp` to match the record's authoritative server timestamp.
-6. **Graceful Teardown:** Once the delta is exhausted, the server fires an `onCompleted()` signal, and the gRPC connection safely tears down, freeing mobile radio bands and saving battery power.
+5. **Applying Pages:** For every page, the shared core engine, in one local transaction, upserts each record (or deletes it for a tombstone, `is_deleted = true`), rebases pending mutations, and stores the cursor for the next page. The last page's `next_sync_token` becomes the scope's stored token.
+6. **Done:** Each call is a short unary request, so nothing stays open after the last page, which frees mobile radios and saves battery.
 
 ### Foreground Polling
 While the app is in the foreground and online, the client repeats the [Online Flow](#the-online-flow-re-establishing-connection--catch-up) on a timer for each active sync scope, so changes by other collaborators (submissions arriving, edits in the Survey Editor, plot locks) appear within seconds without holding a connection open.
 
 1. **Adaptive interval:** Poll about every 10 seconds while a collaborative view is visible (Survey Editor, live submissions table, CEO plot queue), and about every 60 seconds otherwise. Poll immediately after draining the outbox, so the client's own writes come back with their authoritative `commit_timestamp`.
-2. **Cheap when idle:** A poll with nothing new is a single index lookup that returns an empty stream. If servers later provide a suggested interval (for example, to slow clients down under load), clients use the longer of the two.
+2. **Cheap when idle:** A poll with nothing new is a single index lookup that returns no records. If servers later provide a suggested interval (for example, to slow clients down under load), clients use the longer of the two.
 3. **No overlap:** A scope never has two polls in flight. If a poll is still running when the timer fires, the next one waits for it to finish.
-4. **Stop and resume:** Polling stops when the app goes to the background, loses connectivity, or the scope is no longer on screen. The watermark already reflects the last applied record, so the next poll (or foreground catch-up) resumes without gaps.
+4. **Stop and resume:** Polling stops when the app goes to the background, loses connectivity, or the scope is no longer on screen. The stored sync token already reflects the last applied page, so the next poll (or foreground catch-up) resumes without gaps.
 5. **Backoff:** On errors, polling backs off exponentially (with jitter) up to the idle interval, then resumes the normal schedule after a successful poll.
 
 Plot locks (5-minute leases) and survey edits (guarded by `base_version` optimistic concurrency) tolerate this delay. If sub-second updates are ever needed, a lightweight change signal can tell clients *when* to poll without changing the RPCs (see the trade-offs below).
@@ -86,21 +100,21 @@ Holding a server stream open per foreground client (a "live tail") was considere
 
 ### Survey Downloads & Working Copies
 Survey definitions are large (forms, entity dataset schemas, translations), so they're synced in two tiers:
-* **Catalog:** `StreamSurveyOverviews` syncs a lightweight `SurveyOverview` for every survey the user can access (title, state, counts, thumbnail area, access summary, `version`, `has_working_copy`). Revoked access and deleted surveys arrive as tombstones.
-* **Full definition:** `GetSurvey` fetches the complete `SurveyDef` for a survey the user opens or downloads. When a downloaded survey's overview arrives with a new `version`, the client re-fetches it with `GetSurvey`. Entities and submissions for downloaded surveys sync with `StreamEntities` / `StreamSubmissions`, scoped by `survey_id`.
+* **Catalog:** `ListSurveyOverviews` syncs a lightweight `SurveyOverview` for every survey the user can access (title, state, counts, thumbnail area, access summary, `version`, `has_working_copy`). Revoked access and deleted surveys arrive as tombstones.
+* **Full definition:** `GetSurvey` fetches the complete `SurveyDef` for a survey the user opens or downloads. When a downloaded survey's overview arrives with a new `version`, the client re-fetches it with `GetSurvey`. Entities and submissions for downloaded surveys sync with `ListEntities` / `ListSubmissions`, scoped by `survey_id`.
 * **Working copy:** Organizers edit a working copy of the survey; collectors only ever see the latest saved revision. `GetSurvey` returns exactly one revision, selected by `oneof revision` (latest saved by default, a specific `saved_version`, or `working_copy`). Clients only request the working copy when the overview reports `has_working_copy`.
 
 ### Web Client
 The Web Console is online-only and keeps no offline copy, so it uses the same RPCs with a different lifecycle:
 
 1. **In-memory store:** The web app holds an in-memory store scoped to what's on screen: the survey list while it's visible, and the active survey's definition, entities, and submissions while a survey is open. The store, including its outbox, is discarded when the user reloads the page. While the outbox has entries, the page asks for confirmation before unloading.
-2. **Survey list:** When the list becomes visible, the client runs `StreamSurveyOverviews` with no `since_timestamp` to load every overview, then [polls](#foreground-polling) from the resulting watermark until the user navigates away.
-3. **Active survey:** On opening a survey, the client calls `GetSurvey` (with `working_copy = true` in the Survey Editor when the overview reports `has_working_copy`), loads `StreamEntities` / `StreamSubmissions` for that `survey_id`, and then polls both from their watermarks.
-4. **Large surveys:** When a survey is too large to hold in memory, data tables and map overviews use the query RPCs (`ListSubmissions` / `ListEntities` with `filter`, `order_by`, and `page_token`; `ListEntityClusters` for overview zoom levels). To keep the visible page fresh, the client polls the matching stream starting from the query's `server_watermark` and applies changes to the rows it holds (or re-runs the query when a change affects sorting or paging).
+2. **Survey list:** When the list becomes visible, the client runs `ListSurveyOverviews` in query mode to load every overview, then [polls](#foreground-polling) with the returned `next_sync_token` until the user navigates away.
+3. **Active survey:** On opening a survey, the client calls `GetSurvey` (with `working_copy = true` in the Survey Editor when the overview reports `has_working_copy`), loads `ListEntities` / `ListSubmissions` for that `survey_id`, and then polls both with their sync tokens.
+4. **Large surveys:** When a survey is too large to hold in memory, data tables and map overviews use the query RPCs (`ListSubmissions` / `ListEntities` with `filter`, `order_by`, and `page_token`; `ListEntityClusters` for overview zoom levels). To keep the visible page fresh, the client polls the scope in delta mode with the query's `next_sync_token` and applies changes to the rows it holds (or re-runs the query when a change affects sorting or paging).
 5. **Writes:** Edits use the same outbox as mobile: they're applied locally at once, sent with `Mutate*` in the background, retried on transient failures, and rebased when remote changes arrive. Permanent failures are reported in the Uploads view.
-6. **Tab lifecycle:** When the tab becomes hidden (`visibilitychange`), the client stops polling. When it becomes visible again, it polls immediately from its in-memory watermarks, catching up on anything it missed.
+6. **Tab lifecycle:** When the tab becomes hidden (`visibilitychange`), the client stops polling. When it becomes visible again, it polls immediately with its in-memory sync tokens, catching up on anything it missed.
 
-Browsers reach the gRPC service through gRPC-Web, which supports the unary and server-streaming calls used here; client-streaming and bidirectional streaming aren't required.
+Browsers reach the gRPC service through gRPC-Web. Every call the sync engine makes is unary, so no streaming support is required.
 
 ### Mutation Semantics
 * **Idempotent per mutation:** The server applies each `mutation_id` at most once. Replays are skipped and return the record's current state, so a stale retry can't overwrite newer writes. It also tracks the highest applied `client_seq` per `(client_id, scope)`, returned by `GetAppliedMutations`.
@@ -117,22 +131,26 @@ To enforce strict code reuse and maintain a single location for synchronization 
 All gRPC stubs, schema parsing, delta tracking, and transactional local operations are written once in the shared core. The same function serves catch-up, background sweeps, and foreground polling.
 
 ```kotlin
-class SpannerSyncEngine(
+class SyncEngine(
     private val localDb: AppDatabase,
-    private val spannerStub: SpannerSyncCoroutineStub
+    private val dataService: DataServiceClient
 ) {
-    suspend fun executeCatchUpSync(): SyncResult {
+    suspend fun executeCatchUpSync(surveyId: String): SyncResult {
         return try {
-            val lastSync = localDb.syncDao().getLastSyncedTimestamp() ?: 0L
-            val request = SyncRequest.newBuilder().setLastSyncTimestamp(lastSync).build()
-
-            // Process the bounded stream
-            spannerStub.catchUpDeltaStream(request).collect { deltaRecord ->
+            var syncToken = localDb.syncDao().getSyncToken(surveyId) // null: full sync
+            var pageToken = ""
+            do {
+                val page = dataService.ListEntities(
+                    ListEntitiesRequest(survey_id = surveyId, sync_token = syncToken.orEmpty(), page_token = pageToken)
+                )
                 localDb.withTransaction {
-                    localDb.dataDao().upsert(deltaRecord.toLocalEntity())
-                    localDb.syncDao().updateLastSyncedTimestamp(deltaRecord.spannerCommitTimestamp)
+                    page.entities.forEach { localDb.dataDao().upsert(it.toLocalEntity()) }
+                    if (page.next_sync_token.isNotEmpty()) {
+                        localDb.syncDao().setSyncToken(surveyId, page.next_sync_token)
+                    }
                 }
-            }
+                pageToken = page.next_page_token
+            } while (pageToken.isNotEmpty())
             SyncResult.Success
         } catch (e: Exception) {
             SyncResult.Failure(e)
@@ -165,14 +183,14 @@ Utilizes **BGTaskScheduler** for opportunistic background processing.
 
 #### Web Setup (`jsMain` / `wasmJsMain`)
 * There is no background sync. Loading and polling are started and stopped by the views that need them (survey list, active survey), as described in [Web Client](#web-client).
-* A `visibilitychange` listener stops polling when the tab is hidden and polls immediately from the in-memory watermarks when it's visible again.
+* A `visibilitychange` listener stops polling when the tab is hidden and polls immediately with the in-memory sync tokens when it's visible again.
 
 ## Key Architectural Trade-Offs
 
 | Advantage | Structural Limitation / Cost |
 | :--- | :--- |
 | **No Push Infrastructure Overhead:** Completely cuts out Firebase, APNs, push certs, and registration token management databases. | **Delayed Background Processing on iOS:** Updates while the app is closed depend on iOS device heuristics rather than structural timing intervals. |
-| **Natural Stream Debouncing:** If 10,000 modifications hit a Spanner partition while the client is away, the client runs exactly one single pull transaction upon returning. | **Burst Backend Traffic:** If a significant event causes millions of users to launch the application concurrently, the backend will face massive concurrent catch-up query demands. |
+| **Natural Delta Debouncing:** If 10,000 modifications hit a Spanner partition while the client is away, the client runs one paged catch-up upon returning. | **Burst Backend Traffic:** If a significant event causes millions of users to launch the application concurrently, the backend will face massive concurrent catch-up query demands. |
 | **Perfect Chronological Ordering:** Leveraging Spanner's TrueTime engine ensures updates are processed in absolute linear sequence, eliminating race conditions common to pushed messaging channels. | **Chunking / Pagination Overhead Requirement:** If a client goes offline for weeks, data payloads must be systematically broken down into discrete index chunks to stay within background runtime execution boundaries. |
-| **Collaboration Without Open Connections:** Foreground polling reuses the catch-up stream and watermark, so ordering, resume, and tombstones work identically for offline catch-up and collaborative updates, and servers scale with request volume rather than connected users. | **Seconds of Staleness:** Collaborators see each other's changes after up to one polling interval (about 10 seconds in collaborative views), and idle polls add request volume. If that proves too slow, a lightweight change signal (for example, a per-survey "latest commit" document clients can watch) can trigger polls early without changing the RPCs. |
-| **One Sync RPC per Resource:** Clients never choose between equivalent `List` and `Stream` calls; query RPCs exist only where the server must filter, sort, page, or aggregate. | **Web Holds No Offline Copy:** The Web Console's outbox is in memory, so edits queued during an outage are lost if the page is reloaded before they're sent, and very large surveys must use paged queries plus polling rather than a full in-memory copy. |
+| **Collaboration Without Open Connections:** Foreground polling reuses the catch-up call and sync token, so ordering, resume, and tombstones work identically for offline catch-up and collaborative updates, and servers scale with request volume rather than connected users. | **Seconds of Staleness:** Collaborators see each other's changes after up to one polling interval (about 10 seconds in collaborative views), and idle polls add request volume. If that proves too slow, a lightweight change signal (for example, a per-survey "latest commit" document clients can watch) can trigger polls early without changing the RPCs. |
+| **One List RPC per Resource:** Query and delta modes share one call, so a query's last page hands off to polling without a second RPC, and the opaque sync token lets the server change how it tracks positions without changing clients. | **Web Holds No Offline Copy:** The Web Console's outbox is in memory, so edits queued during an outage are lost if the page is reloaded before they're sent, and very large surveys must use paged queries plus polling rather than a full in-memory copy. |

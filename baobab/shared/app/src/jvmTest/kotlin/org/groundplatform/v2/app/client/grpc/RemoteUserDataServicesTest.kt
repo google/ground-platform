@@ -19,6 +19,7 @@ import groundplatform.v2.data.DataServiceServer
 import groundplatform.v2.library.LibraryServiceServer
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.GetSurveyResponse
+import groundplatform.v2.survey.ListSurveyOverviewsRequest
 import groundplatform.v2.survey.OrganizationServiceServer
 import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyServiceServer
@@ -35,8 +36,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -75,20 +74,12 @@ class RemoteUserDataServicesTest {
         @Suppress("UNCHECKED_CAST")
         responseAdapter = ProtoAdapter.get(rpc.responseAdapter) as ProtoAdapter<Any>
         val request = method.parameterTypes[0].getDeclaredConstructor().newInstance()
-        val function = method.kotlinFunction!!
-        if (method.parameterTypes.any { SendChannel::class.java.isAssignableFrom(it) }) {
-          val channel = Channel<Any>(Channel.UNLIMITED)
-          function.callSuspend(implementation, request, channel as SendChannel<Any>)
-          channel.close()
-          assertEquals(1, channel.toList().size, rpc.path)
-        } else {
-          function.callSuspend(implementation, request)
-        }
+        method.kotlinFunction!!.callSuspend(implementation, request)
         assertEquals(rpc.path, requestedPaths.last())
         rpcCount++
       }
     }
-    assertEquals(34, rpcCount)
+    assertEquals(32, rpcCount)
   }
 
   @Test
@@ -146,6 +137,24 @@ class RemoteUserDataServicesTest {
           .GetSurvey(GetSurveyRequest())
       }
     assertEquals(GrpcWebTransport.UNAUTHENTICATED, headerError.status)
+
+    // An expired sync token is reported as FAILED_PRECONDITION, so the sync engine can resync.
+    val expiredToken = MockEngine {
+      respond(
+        ByteArray(0),
+        headers =
+          headersOf(
+            HttpHeaders.ContentType to listOf("application/grpc-web+proto"),
+            "grpc-status" to listOf("9"),
+          ),
+      )
+    }
+    val expired =
+      assertFailsWith<GrpcWebException> {
+        RemoteSurveyService(GrpcWebTransport("http://test", HttpClient(expiredToken)))
+          .ListSurveyOverviews(ListSurveyOverviewsRequest(sync_token = "token"))
+      }
+    assertEquals(GrpcWebTransport.FAILED_PRECONDITION, expired.status)
   }
 
   @Test
@@ -169,10 +178,4 @@ class RemoteUserDataServicesTest {
 
   private fun OutgoingContent.toByteArray(): ByteArray =
     (this as OutgoingContent.ByteArrayContent).bytes()
-
-  private suspend fun <T> Channel<T>.toList(): List<T> {
-    val items = mutableListOf<T>()
-    for (item in this) items += item
-    return items
-  }
 }

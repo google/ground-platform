@@ -420,7 +420,7 @@ object GrpcProtoMapper {
 
   /**
    * Builds the catalog overview of [surveyDef]. Its `commit_timestamp` is the later of the survey's
-   * and [acl]'s, so access changes also reach `StreamSurveyOverviews` clients.
+   * and [acl]'s, so access changes also reach `ListSurveyOverviews` delta polls.
    */
   fun surveyOverviewFromDef(
     surveyDef: SurveyDef,

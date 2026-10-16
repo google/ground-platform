@@ -15,9 +15,7 @@ package org.groundplatform.v2.app.client.grpc
 
 import groundplatform.v2.data.AcquirePlotLockRequest
 import groundplatform.v2.data.AcquirePlotLockResponse
-import groundplatform.v2.data.AuditRecord
 import groundplatform.v2.data.DataServiceServer
-import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.GetAppliedMutationsRequest
 import groundplatform.v2.data.GetAppliedMutationsResponse
 import groundplatform.v2.data.GetEntityRequest
@@ -28,11 +26,14 @@ import groundplatform.v2.data.GetMediaDownloadUrlRequest
 import groundplatform.v2.data.GetMediaDownloadUrlResponse
 import groundplatform.v2.data.GetSubmissionRequest
 import groundplatform.v2.data.GetSubmissionResponse
-import groundplatform.v2.data.ImpactEvent
+import groundplatform.v2.data.ListAuditRecordsRequest
+import groundplatform.v2.data.ListAuditRecordsResponse
 import groundplatform.v2.data.ListEntitiesRequest
 import groundplatform.v2.data.ListEntitiesResponse
 import groundplatform.v2.data.ListEntityClustersRequest
 import groundplatform.v2.data.ListEntityClustersResponse
+import groundplatform.v2.data.ListImpactEventsRequest
+import groundplatform.v2.data.ListImpactEventsResponse
 import groundplatform.v2.data.ListMutationLogsRequest
 import groundplatform.v2.data.ListMutationLogsResponse
 import groundplatform.v2.data.ListPlacesRequest
@@ -47,22 +48,17 @@ import groundplatform.v2.data.RecordImpactEventsRequest
 import groundplatform.v2.data.RecordImpactEventsResponse
 import groundplatform.v2.data.ReleasePlotLockRequest
 import groundplatform.v2.data.ReleasePlotLockResponse
-import groundplatform.v2.data.StreamAuditRecordsRequest
-import groundplatform.v2.data.StreamEntitiesRequest
-import groundplatform.v2.data.StreamImpactEventsRequest
-import groundplatform.v2.data.StreamSubmissionsRequest
-import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.GetLibraryRequest
 import groundplatform.v2.library.GetLibraryResponse
 import groundplatform.v2.library.GetResolvedLibraryRequest
 import groundplatform.v2.library.GetResolvedLibraryResponse
 import groundplatform.v2.library.LibraryServiceServer
+import groundplatform.v2.library.ListLibrariesRequest
+import groundplatform.v2.library.ListLibrariesResponse
 import groundplatform.v2.library.MutateLibraryRequest
 import groundplatform.v2.library.MutateLibraryResponse
-import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.library.SearchConceptsRequest
 import groundplatform.v2.library.SearchConceptsResponse
-import groundplatform.v2.library.StreamLibrariesRequest
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AcceptSurveyInviteResponse
 import groundplatform.v2.survey.GetOrganizationRequest
@@ -75,28 +71,24 @@ import groundplatform.v2.survey.JoinOrganizationRequest
 import groundplatform.v2.survey.JoinOrganizationResponse
 import groundplatform.v2.survey.ListOrganizationsRequest
 import groundplatform.v2.survey.ListOrganizationsResponse
+import groundplatform.v2.survey.ListSurveyOverviewsRequest
+import groundplatform.v2.survey.ListSurveyOverviewsResponse
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateOrganizationResponse
 import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.MutateSurveyResponse
-import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationServiceServer
-import groundplatform.v2.survey.StreamOrganizationsRequest
-import groundplatform.v2.survey.StreamSurveyOverviewsRequest
-import groundplatform.v2.survey.SurveyOverview
+import groundplatform.v2.survey.SearchOrganizationsRequest
+import groundplatform.v2.survey.SearchOrganizationsResponse
 import groundplatform.v2.survey.SurveyServiceServer
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 /**
  * System & Framework gRPC client (`client/grpc/ *Client`) bridging the Wire-generated Kotlin gRPC
  * services ([SurveyServiceServer], [OrganizationServiceServer], [LibraryServiceServer], and
- * [DataServiceServer]) into suspending unary RPCs and cold reactive [Flow] server streams.
+ * [DataServiceServer]) into suspending unary RPCs.
  *
- * Delta streams (`Stream*`) are bounded, as described in `docs/technical/sync-engine.md`: each
- * returned [Flow] completes once the client is caught up. Foreground freshness comes from polling.
+ * Synced resources use the `List*` RPCs in query mode (full syncs) and delta mode (`sync_token`),
+ * as described in `docs/technical/sync-engine.md`. Foreground freshness comes from polling.
  */
 class CollectOneGrpcClient(
   val surveyService: SurveyServiceServer,
@@ -104,18 +96,6 @@ class CollectOneGrpcClient(
   val libraryService: LibraryServiceServer,
   val dataService: DataServiceServer,
 ) {
-  private fun <T> collectServerStream(block: suspend (SendChannel<T>) -> Unit): Flow<T> = flow {
-    val ch = Channel<T>(Channel.UNLIMITED)
-    try {
-      block(ch)
-    } finally {
-      ch.close()
-    }
-    for (item in ch) {
-      emit(item)
-    }
-  }
-
   // ---------------------------------------------------------------------------
   // OrganizationService RPCs
   // ---------------------------------------------------------------------------
@@ -123,13 +103,12 @@ class CollectOneGrpcClient(
   suspend fun getOrganization(request: GetOrganizationRequest): GetOrganizationResponse =
     organizationService.GetOrganization(request)
 
+  suspend fun searchOrganizations(
+    request: SearchOrganizationsRequest
+  ): SearchOrganizationsResponse = organizationService.SearchOrganizations(request)
+
   suspend fun listOrganizations(request: ListOrganizationsRequest): ListOrganizationsResponse =
     organizationService.ListOrganizations(request)
-
-  fun streamOrganizations(request: StreamOrganizationsRequest): Flow<Organization> =
-    collectServerStream { ch ->
-      organizationService.StreamOrganizations(request, ch)
-    }
 
   suspend fun mutateOrganization(request: MutateOrganizationRequest): MutateOrganizationResponse =
     organizationService.MutateOrganization(request)
@@ -147,10 +126,8 @@ class CollectOneGrpcClient(
   suspend fun getResolvedLibrary(request: GetResolvedLibraryRequest): GetResolvedLibraryResponse =
     libraryService.GetResolvedLibrary(request)
 
-  fun streamLibraries(request: StreamLibrariesRequest): Flow<OrganizationLibraryRecord> =
-    collectServerStream { ch ->
-      libraryService.StreamLibraries(request, ch)
-    }
+  suspend fun listLibraries(request: ListLibrariesRequest): ListLibrariesResponse =
+    libraryService.ListLibraries(request)
 
   suspend fun searchConcepts(request: SearchConceptsRequest): SearchConceptsResponse =
     libraryService.SearchConcepts(request)
@@ -162,10 +139,9 @@ class CollectOneGrpcClient(
   // SurveyService RPCs
   // ---------------------------------------------------------------------------
 
-  fun streamSurveyOverviews(request: StreamSurveyOverviewsRequest): Flow<SurveyOverview> =
-    collectServerStream { ch ->
-      surveyService.StreamSurveyOverviews(request, ch)
-    }
+  suspend fun listSurveyOverviews(
+    request: ListSurveyOverviewsRequest
+  ): ListSurveyOverviewsResponse = surveyService.ListSurveyOverviews(request)
 
   suspend fun getSurvey(request: GetSurveyRequest): GetSurveyResponse =
     surveyService.GetSurvey(request)
@@ -189,11 +165,6 @@ class CollectOneGrpcClient(
   suspend fun listEntities(request: ListEntitiesRequest): ListEntitiesResponse =
     dataService.ListEntities(request)
 
-  fun streamEntities(request: StreamEntitiesRequest): Flow<EntityRecord> =
-    collectServerStream { ch ->
-      dataService.StreamEntities(request, ch)
-    }
-
   suspend fun listEntityClusters(request: ListEntityClustersRequest): ListEntityClustersResponse =
     dataService.ListEntityClusters(request)
 
@@ -202,11 +173,6 @@ class CollectOneGrpcClient(
 
   suspend fun listSubmissions(request: ListSubmissionsRequest): ListSubmissionsResponse =
     dataService.ListSubmissions(request)
-
-  fun streamSubmissions(request: StreamSubmissionsRequest): Flow<SubmissionRecord> =
-    collectServerStream { ch ->
-      dataService.StreamSubmissions(request, ch)
-    }
 
   suspend fun mutateData(request: MutateDataRequest): MutateDataResponse =
     dataService.MutateData(request)
@@ -227,19 +193,15 @@ class CollectOneGrpcClient(
   suspend fun recordImpactEvents(request: RecordImpactEventsRequest): RecordImpactEventsResponse =
     dataService.RecordImpactEvents(request)
 
-  fun streamImpactEvents(request: StreamImpactEventsRequest): Flow<ImpactEvent> =
-    collectServerStream { ch ->
-      dataService.StreamImpactEvents(request, ch)
-    }
+  suspend fun listImpactEvents(request: ListImpactEventsRequest): ListImpactEventsResponse =
+    dataService.ListImpactEvents(request)
 
   suspend fun getImpactAggregates(
     request: GetImpactAggregatesRequest
   ): GetImpactAggregatesResponse = dataService.GetImpactAggregates(request)
 
-  fun streamAuditRecords(request: StreamAuditRecordsRequest): Flow<AuditRecord> =
-    collectServerStream { ch ->
-      dataService.StreamAuditRecords(request, ch)
-    }
+  suspend fun listAuditRecords(request: ListAuditRecordsRequest): ListAuditRecordsResponse =
+    dataService.ListAuditRecords(request)
 
   suspend fun listPlaces(request: ListPlacesRequest): ListPlacesResponse =
     dataService.ListPlaces(request)

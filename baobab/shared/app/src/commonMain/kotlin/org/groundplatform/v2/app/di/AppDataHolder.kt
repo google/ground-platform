@@ -279,7 +279,7 @@ class AppDataHolder(
     }
     mutableUserDataSyncState.value = UserDataSyncState.Syncing
     // Offline edits and the last synced data saved on the device replace the initial download;
-    // the sync engine then catches up from the saved watermarks.
+    // the sync engine then catches up from the saved sync tokens.
     val coordinator = syncCoordinator
     if (coordinator != null && syncStatePersistence?.restore() == true) {
       syncStatePersistence?.start()
@@ -313,7 +313,7 @@ class AppDataHolder(
   private fun startSyncEngine(coordinator: SyncCoordinator) {
     coordinator.start()
     if (stopSyncLifecycle != null) return
-    // Each sync may store new bases and watermarks; save them.
+    // Each sync may store new bases and sync tokens; save them.
     syncStatePersistence?.let { persistence ->
       coordinator.activity
         .map { it.isSyncing }

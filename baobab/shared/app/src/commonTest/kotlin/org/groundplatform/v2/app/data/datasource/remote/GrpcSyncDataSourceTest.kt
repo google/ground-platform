@@ -13,20 +13,31 @@
  */
 package org.groundplatform.v2.app.data.datasource.remote
 
+import groundplatform.v2.data.DataMutation
+import groundplatform.v2.data.EntityFieldPatch
+import groundplatform.v2.data.EntityMutation
+import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.ListEntitiesRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
+import org.groundplatform.v2.app.data.datasource.local.store.MutationPayload
+import org.groundplatform.v2.app.data.datasource.local.store.MutationTarget
 import org.groundplatform.v2.app.data.datasource.local.store.runDirect
 import org.groundplatform.v2.app.data.datasource.local.store.sampleSyncDataSource
 import org.groundplatform.v2.app.data.seed.SampleDataSeeder
+import org.groundplatform.v2.app.data.sync.OutboxRecorder
+import org.groundplatform.v2.app.data.sync.Rebaser
 
 /**
  * Client side of `docs/technical/sync-engine.md`: [GrpcSyncDataSource] seeds a store from the user
- * data service and applies later deltas (upserts and tombstones) by server watermark. The service
- * itself is tested in `server/user-data-service`.
+ * data service with full syncs and catches up with `List*` calls in delta mode, storing each
+ * scope's opaque sync token. The service itself is tested in `server/user-data-service`.
  */
 class GrpcSyncDataSourceTest {
   private val service = SeedUserDataService()
@@ -42,8 +53,11 @@ class GrpcSyncDataSourceTest {
     )
   }
 
+  private fun entityRequests(): List<ListEntitiesRequest> =
+    service.listRequests.filterIsInstance<ListEntitiesRequest>().filter { it.survey_id == kenyaId }
+
   @Test
-  fun incrementalCatchUp_appliesUpsertsAndSoftDeleteTombstones() = runDirect {
+  fun incrementalCatchUp_appliesUpsertsAndSoftDeleteTombstones(): Unit = runDirect {
     seed()
     val initialEntityCount = store.transaction { entityCount(kenyaId) }
     val firstEntityId = store.transaction { entities(kenyaId).first().id }
@@ -70,19 +84,93 @@ class GrpcSyncDataSourceTest {
   }
 
   @Test
-  fun catchUp_advancesTheWatermarkOnlyWhenNewRecordsArrive() = runDirect {
+  fun syncToken_isPersisted_andSentOnTheNextPoll() = runDirect {
     seed()
-    val seeded = sync.currentWatermarks().entitiesWatermarkBySurvey.getValue(kenyaId)
+    val seeded = sync.currentSyncTokens().entitiesBySurvey.getValue(kenyaId)
+    assertEquals(seeded, store.transaction { syncState().syncTokens.entitiesBySurvey[kenyaId] })
+    assertTrue(entityRequests().all { it.sync_token.isEmpty() }, "the seed is a full sync")
 
     sync.pullIncrementalCatchUp(store = store, surveyId = kenyaId)
-    assertEquals(seeded, sync.currentWatermarks().entitiesWatermarkBySurvey[kenyaId])
+    assertEquals(seeded, entityRequests().last().sync_token)
+    val afterIdlePoll = store.transaction { syncState().syncTokens.entitiesBySurvey[kenyaId] }
+    assertNotNull(afterIdlePoll)
 
-    val committed =
-      service.putEntity(
-        kenyaId,
-        EntityRecord(entity_id = "entity-new", dataset_id = "coffee_parcels"),
-      )
+    service.putEntity(
+      kenyaId,
+      EntityRecord(entity_id = "entity-new", dataset_id = "coffee_parcels"),
+    )
     sync.pullIncrementalCatchUp(store = store, surveyId = kenyaId)
-    assertEquals(committed, sync.currentWatermarks().entitiesWatermarkBySurvey[kenyaId])
+    assertEquals(afterIdlePoll, entityRequests().last().sync_token)
+    val advanced = store.transaction { syncState().syncTokens.entitiesBySurvey.getValue(kenyaId) }
+    assertNotEquals(afterIdlePoll, advanced)
+
+    sync.pullIncrementalCatchUp(store = store, surveyId = kenyaId)
+    assertEquals(advanced, entityRequests().last().sync_token)
+  }
+
+  @Test
+  fun catchUp_pagesThroughDeltas_andStoresTheTokenAfterEachPage() = runDirect {
+    seed()
+    service.maxPageSize = 2
+    val added = (1..5).map { "entity-paged-$it" }
+    added.forEach { service.putEntity(kenyaId, EntityRecord(entity_id = it, dataset_id = "d")) }
+    val requestsBefore = entityRequests().size
+
+    sync.pullIncrementalCatchUp(store = store, surveyId = kenyaId)
+
+    val pageRequests = entityRequests().drop(requestsBefore)
+    assertEquals(3, pageRequests.size)
+    // Every page of the sequence sends the stored token; later pages add the page token.
+    assertEquals(listOf(false, true, true), pageRequests.map { it.page_token.isNotEmpty() })
+    store.transaction { added.forEach { assertNotNull(entity(kenyaId, it), it) } }
+  }
+
+  @Test
+  fun expiredToken_fullResyncRemovesMissingRecords_andKeepsPendingMutations() = runDirect {
+    seed()
+    val (editedId, removedId) = store.transaction { entities(kenyaId).take(2).map { it.id } }
+    store.transaction {
+      OutboxRecorder()
+        .record(
+          this,
+          MutationTarget.Data(kenyaId),
+          Rebaser.entityKey(editedId),
+          MutationPayload.Data(
+            DataMutation(
+              entity_mutation =
+                EntityMutation(
+                  entity_id = editedId,
+                  update =
+                    EntityPatch(
+                      patches = listOf(EntityFieldPatch(key = "label", label_value = "Offline"))
+                    ),
+                )
+            )
+          ),
+        )
+    }
+    val pending = store.transaction { outbox() }
+    val oldToken = sync.currentSyncTokens().entitiesBySurvey.getValue(kenyaId)
+
+    // The server's data is reset: the entity disappears without a tombstone and old tokens expire.
+    service.removeEntity(kenyaId, removedId)
+    service.invalidateSyncTokens()
+    sync.pullIncrementalCatchUp(store = store, surveyId = kenyaId)
+
+    store.transaction {
+      assertNull(entity(kenyaId, removedId))
+      assertNull(entityBase(kenyaId, removedId))
+      assertEquals("Offline", entity(kenyaId, editedId)?.label)
+      assertEquals(pending, outbox())
+    }
+    // The client fell back to a full sync (a query without a token) and stored its new token.
+    assertEquals("", entityRequests().last().sync_token)
+    val newToken = sync.currentSyncTokens().entitiesBySurvey.getValue(kenyaId)
+    assertNotEquals(oldToken, newToken)
+    assertEquals(newToken, store.transaction { syncState().syncTokens.entitiesBySurvey[kenyaId] })
+
+    // Polling resumes in delta mode from the new token.
+    sync.pullIncrementalCatchUp(store = store, surveyId = kenyaId)
+    assertEquals(newToken, entityRequests().last().sync_token)
   }
 }

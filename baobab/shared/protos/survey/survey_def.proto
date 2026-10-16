@@ -161,7 +161,7 @@ message SurveyDef {
   map<string, string> xforms_xml_by_form_id = 35;
 }
 
-// Lightweight survey overview streamed by `SurveyService.StreamSurveyOverviews`
+// Lightweight survey overview listed by `SurveyService.ListSurveyOverviews`
 // for rendering the survey catalog and list cards without transferring full
 // form schemas, lookup tables, or working copies. A change in `version` tells
 // clients holding a downloaded copy to re-fetch it with `GetSurvey`.

@@ -30,37 +30,51 @@ import "shared/protos/forms/encrypted_submission.proto";
 import "shared/protos/forms/record_instance.proto";
 import "shared/protos/forms/types.proto";
 
-// Core gRPC service for reading, streaming, and atomically mutating
+// Core gRPC service for reading, syncing, and atomically mutating
 // `EntityRecord`, `SubmissionRecord`, plot locks, media attachments, impact
 // events, and audit logs.
 //
 // Follows `docs/technical/sync-engine.md`:
 //   - Outbox drain via `MutateData` and `RecordImpactEvents`, which assign
 //     authoritative monotonic server `commit_timestamp` values.
-//   - Delta sync streams (`StreamEntities`, `StreamSubmissions`,
-//     `StreamImpactEvents`, `StreamAuditRecords`) filtered by
-//     `commit_timestamp > since_timestamp` and ordered by
-//     `commit_timestamp ASC`. They close when caught up; clients poll them
-//     while in the foreground.
-//   - Query RPCs (`ListEntities`, `ListSubmissions`, `ListEntityClusters`,
-//     `GetImpactAggregates`) for server-side filtering, sorting, paging, and
-//     aggregation that clients can't do from a local copy (e.g., Web Console
-//     data tables over large surveys).
+//   - One unary `List*` RPC per synced resource (`ListEntities`,
+//     `ListSubmissions`, `ListImpactEvents`, `ListAuditRecords`) with two
+//     modes selected by `sync_token` ("List RPCs: Query and Delta Modes"):
+//       - Query mode (`sync_token` unset): scope fields plus optional
+//         query-only fields (filters, sort order), paged with `page_size` /
+//         `page_token`. Every page reads the snapshot pinned in `page_token`;
+//         the last page carries `next_sync_token` for the scope (scope fields
+//         only, not the filters) at that snapshot.
+//       - Delta mode (`sync_token` set): every record in scope changed after
+//         the token, ordered by commit time (record ID breaks ties), always
+//         including tombstones (`is_deleted == true`). The last page carries
+//         `next_sync_token`. Clients poll in delta mode while in the
+//         foreground. In delta mode, `next_page_token` is itself a valid
+//         `sync_token` for the scope, so a client can store it after applying
+//         a page and resume from it.
+//     Sync tokens are opaque: clients store them and send them back
+//     unchanged. Delivery is at least once, so a record can appear both in a
+//     query page and in the delta that follows. Errors:
+//       - `INVALID_ARGUMENT`: a malformed `sync_token` or `page_token`, a
+//         query-only field set in delta mode, or scope fields that differ from
+//         the ones the token was issued for.
+//       - `FAILED_PRECONDITION`: the server can no longer serve changes from
+//         `sync_token` (for example after a data reset). The client discards
+//         the token and runs a full sync (a query with no filter) for the
+//         scope.
+//   - Query RPCs (`ListEntityClusters`, `GetImpactAggregates`) for
+//     aggregation that clients can't do from a local copy.
 service DataService {
   // Retrieves a single entity record by ID.
   rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
 
-  // Queries entity records for a survey with server-side filtering, sorting,
-  // and paging. Pass `ListEntitiesResponse.server_watermark` as
-  // `since_timestamp` when polling `StreamEntities` to receive changes made
-  // after the query.
+  // Lists entity records for a survey in query or delta mode (see the service
+  // comment). Scope fields: `survey_id`, `dataset_id`, `s2_cell_tokens`.
+  // Query-only fields, rejected with `INVALID_ARGUMENT` in delta mode:
+  // `include_deleted`, `bbox`, `filter`, `queue_filter_mode`, `order_by`.
+  // `field_mask` only trims the returned records, so it is allowed in both
+  // modes.
   rpc ListEntities(ListEntitiesRequest) returns (ListEntitiesResponse);
-
-  // Delta sync. Streams `EntityRecord` items where `commit_timestamp >
-  // since_timestamp` (and `<= until_timestamp` when set) in strict
-  // `commit_timestamp ASC` order, including soft-deleted tombstones
-  // (`is_deleted == true`). Closes when caught up.
-  rpc StreamEntities(StreamEntitiesRequest) returns (stream EntityRecord);
 
   // Returns S2 cell spatial clusters for fast Web Console map rendering at
   // overview zoom levels.
@@ -69,16 +83,11 @@ service DataService {
   // Retrieves a single submission record by ID.
   rpc GetSubmission(GetSubmissionRequest) returns (GetSubmissionResponse);
 
-  // Queries submission records for a survey with server-side filtering,
-  // sorting, and paging. Pass `ListSubmissionsResponse.server_watermark` as
-  // `since_timestamp` when polling `StreamSubmissions` to receive changes
-  // made after the query.
+  // Lists submission records for a survey in query or delta mode (see the
+  // service comment). Scope fields: `survey_id`, `form_id`, `entity_id`.
+  // Query-only fields, rejected with `INVALID_ARGUMENT` in delta mode:
+  // `include_deleted`, `filter`, `order_by`.
   rpc ListSubmissions(ListSubmissionsRequest) returns (ListSubmissionsResponse);
-
-  // Delta sync. Streams `SubmissionRecord` items where `commit_timestamp >
-  // since_timestamp` in strict `commit_timestamp ASC` order. Closes when
-  // caught up.
-  rpc StreamSubmissions(StreamSubmissionsRequest) returns (stream SubmissionRecord);
 
   // Atomically and idempotently executes an ordered sequence of entity and
   // submission mutations (`update` and hard `delete`), returning the assigned
@@ -102,19 +111,25 @@ service DataService {
   // Records a batch of idempotent client-generated `ImpactEvent` signals.
   rpc RecordImpactEvents(RecordImpactEventsRequest) returns (RecordImpactEventsResponse);
 
-  // Delta sync for `ImpactEvent` records ordered by `commit_timestamp ASC`.
-  rpc StreamImpactEvents(StreamImpactEventsRequest) returns (stream ImpactEvent);
+  // Lists `ImpactEvent` records in query or delta mode (see the service
+  // comment). Scope fields: `survey_id`, `organization_id`. There are no
+  // query-only fields.
+  rpc ListImpactEvents(ListImpactEventsRequest) returns (ListImpactEventsResponse);
 
   // Retrieves pre-aggregated impact metrics (`ImpactAggregate`).
   rpc GetImpactAggregates(GetImpactAggregatesRequest) returns (GetImpactAggregatesResponse);
 
-  // Delta sync for `AuditRecord` entries ordered by `commit_timestamp ASC`.
-  rpc StreamAuditRecords(StreamAuditRecordsRequest) returns (stream AuditRecord);
+  // Lists `AuditRecord` entries in query or delta mode (see the service
+  // comment). Scope fields: `survey_id`, `target_id`. There are no query-only
+  // fields.
+  rpc ListAuditRecords(ListAuditRecordsRequest) returns (ListAuditRecordsResponse);
 
   // Lists searchable geographic places and landmarks for map place search.
   rpc ListPlaces(ListPlacesRequest) returns (ListPlacesResponse);
 
-  // Lists mutation log items tracked for the unified Uploads queue.
+  // Lists mutation log items tracked for the unified Uploads queue, in query
+  // or delta mode (see the service comment). Scope field: `survey_id`. There
+  // are no query-only fields.
   rpc ListMutationLogs(ListMutationLogsRequest) returns (ListMutationLogsResponse);
 
   // Returns, for one client install (`client_id`), the highest `client_seq`
@@ -137,7 +152,7 @@ enum QueueFilterMode {
 }
 
 // =============================================================================
-// Read & Stream Messages (Entities & Submissions)
+// Read & List Messages (Entities & Submissions)
 // =============================================================================
 
 message GetEntityRequest {
@@ -151,26 +166,48 @@ message GetEntityResponse {
 }
 
 message ListEntitiesRequest {
+  // Scope: the survey whose entities to list.
   string survey_id = 1;
+
+  // Scope: optional entity dataset.
   string dataset_id = 2;
+
+  // Maximum number of entities to return. The server picks a default when
+  // unset and caps large values.
   int32 page_size = 3;
+
+  // `next_page_token` from the previous page of the same call sequence.
   string page_token = 4;
+
+  // Query only: whether to include soft-deleted entities. Delta mode always
+  // includes tombstones.
   bool include_deleted = 5;
+
+  // Query only: optional bounding box.
   GeoBoundingBox bbox = 6;
+
+  // Query only: optional property filters.
   map<string, string> filter = 7;
+
+  // Optional fields to return. Allowed in both modes.
   repeated string field_mask = 8;
 
   reserved 9, 10;
   reserved "since_timestamp", "until_timestamp";
 
-  // Optional S2 cell token prefixes for selective spatial sync.
+  // Scope: optional S2 cell token prefixes for selective spatial sync.
   repeated string s2_cell_tokens = 11;
 
-  // Optional CEO smart queue filter mode.
+  // Query only: optional CEO smart queue filter mode.
   QueueFilterMode queue_filter_mode = 12;
 
-  // Optional sort order, e.g. `"label"` or `"commit_timestamp desc"`.
+  // Query only: optional sort order, e.g. `"label"` or
+  // `"commit_timestamp desc"`.
   string order_by = 13;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 14;
 }
 
 message GeoBoundingBox {
@@ -182,19 +219,16 @@ message GeoBoundingBox {
 
 message ListEntitiesResponse {
   repeated EntityRecord entities = 1;
+
+  // Token for the next page; empty on the last page.
   string next_page_token = 2;
 
-  // Server time the query ran at; use as `since_timestamp` for live updates.
-  google.protobuf.Timestamp server_watermark = 3;
-}
+  reserved 3;
+  reserved "server_watermark";
 
-message StreamEntitiesRequest {
-  string survey_id = 1;
-  string dataset_id = 2;
-  google.protobuf.Timestamp since_timestamp = 3;
-  google.protobuf.Timestamp until_timestamp = 4;
-  bool include_deleted = 5;
-  repeated string s2_cell_tokens = 6;
+  // Opaque token for the next delta call for the scope, set on the last page
+  // only.
+  string next_sync_token = 4;
 }
 
 message EntityCluster {
@@ -227,38 +261,54 @@ message GetSubmissionResponse {
 }
 
 message ListSubmissionsRequest {
+  // Scope: the survey whose submissions to list.
   string survey_id = 1;
+
+  // Scope: optional form.
   string form_id = 2;
+
+  // Scope: optional linked entity.
   string entity_id = 3;
+
+  // Maximum number of submissions to return. The server picks a default when
+  // unset and caps large values.
   int32 page_size = 4;
+
+  // `next_page_token` from the previous page of the same call sequence.
   string page_token = 5;
+
+  // Query only: whether to include soft-deleted submissions. Delta mode
+  // always includes tombstones.
   bool include_deleted = 6;
 
   reserved 7, 8;
   reserved "since_timestamp", "until_timestamp";
 
-  // Optional field filters (e.g., `"collector_email"`, `"review_status"`).
+  // Query only: optional field filters (e.g., `"collector_email"`,
+  // `"review_status"`).
   map<string, string> filter = 9;
 
-  // Optional sort order, e.g. `"collector_name"` or `"commit_timestamp desc"`.
+  // Query only: optional sort order, e.g. `"collector_name"` or
+  // `"commit_timestamp desc"`.
   string order_by = 10;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 11;
 }
 
 message ListSubmissionsResponse {
   repeated SubmissionRecord submissions = 1;
+
+  // Token for the next page; empty on the last page.
   string next_page_token = 2;
 
-  // Server time the query ran at; use as `since_timestamp` for live updates.
-  google.protobuf.Timestamp server_watermark = 3;
-}
+  reserved 3;
+  reserved "server_watermark";
 
-message StreamSubmissionsRequest {
-  string survey_id = 1;
-  string form_id = 2;
-  string entity_id = 3;
-  google.protobuf.Timestamp since_timestamp = 4;
-  google.protobuf.Timestamp until_timestamp = 5;
-  bool include_deleted = 6;
+  // Opaque token for the next delta call for the scope, set on the last page
+  // only.
+  string next_sync_token = 4;
 }
 
 // =============================================================================
@@ -453,11 +503,33 @@ message RecordImpactEventsResponse {
   google.protobuf.Timestamp commit_timestamp = 2;
 }
 
-message StreamImpactEventsRequest {
+message ListImpactEventsRequest {
+  // Scope: optional survey.
   string survey_id = 1;
+
+  // Scope: optional organization.
   string organization_id = 2;
-  google.protobuf.Timestamp since_timestamp = 3;
-  google.protobuf.Timestamp until_timestamp = 4;
+
+  // Maximum number of events to return. The server picks a default when unset
+  // and caps large values.
+  int32 page_size = 3;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 4;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 5;
+}
+
+message ListImpactEventsResponse {
+  repeated ImpactEvent events = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 3;
 }
 
 message GetImpactAggregatesRequest {
@@ -469,11 +541,33 @@ message GetImpactAggregatesResponse {
   repeated ImpactAggregate aggregates = 1;
 }
 
-message StreamAuditRecordsRequest {
+message ListAuditRecordsRequest {
+  // Scope: optional survey.
   string survey_id = 1;
+
+  // Scope: optional target record.
   string target_id = 2;
-  google.protobuf.Timestamp since_timestamp = 3;
-  google.protobuf.Timestamp until_timestamp = 4;
+
+  // Maximum number of records to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 3;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 4;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 5;
+}
+
+message ListAuditRecordsResponse {
+  repeated AuditRecord audit_records = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 3;
 }
 
 // Geographic place or landmark returned by the backend place catalog.
@@ -526,13 +620,35 @@ message MutationLogRecord {
 }
 
 message ListMutationLogsRequest {
+  // Scope: optional survey.
   string survey_id = 1;
-  google.protobuf.Timestamp since_timestamp = 2;
+
+  reserved 2;
+  reserved "since_timestamp";
+
+  // Maximum number of mutation logs to return. The server picks a default
+  // when unset and caps large values.
+  int32 page_size = 3;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 4;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 5;
 }
 
 message ListMutationLogsResponse {
   repeated MutationLogRecord mutation_logs = 1;
-  google.protobuf.Timestamp server_watermark = 2;
+
+  reserved 2;
+  reserved "server_watermark";
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 3;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 4;
 }
 
 // Request for the mutations the server has applied for one client install.

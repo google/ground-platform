@@ -21,13 +21,11 @@ import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.ImpactEvent
 import groundplatform.v2.data.ImpactEventType
 import groundplatform.v2.data.ListEntitiesRequest
+import groundplatform.v2.data.ListImpactEventsRequest
 import groundplatform.v2.data.ListSubmissionsRequest
 import groundplatform.v2.data.MutateDataRequest
 import groundplatform.v2.data.RecordImpactEventsRequest
 import groundplatform.v2.data.ReleasePlotLockRequest
-import groundplatform.v2.data.StreamEntitiesRequest
-import groundplatform.v2.data.StreamImpactEventsRequest
-import groundplatform.v2.data.StreamSubmissionsRequest
 import groundplatform.v2.data.SubmissionMutation
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.forms.DataType
@@ -35,45 +33,37 @@ import groundplatform.v2.forms.TypedValue
 import groundplatform.v2.library.ConceptDef
 import groundplatform.v2.library.LibraryFieldPatch
 import groundplatform.v2.library.LibraryMutation
+import groundplatform.v2.library.ListLibrariesRequest
 import groundplatform.v2.library.LocalizedText
 import groundplatform.v2.library.MutateLibraryRequest
-import groundplatform.v2.library.StreamLibrariesRequest
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.ListOrganizationsRequest
+import groundplatform.v2.survey.ListSurveyOverviewsRequest
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.OrganizationFieldPatch
 import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.StreamOrganizationsRequest
-import groundplatform.v2.survey.StreamSurveyOverviewsRequest
+import groundplatform.v2.survey.SearchOrganizationsRequest
 import groundplatform.v2.survey.SurveyFieldPatch
 import groundplatform.v2.survey.SurveyMutation
+import io.grpc.Status
+import io.grpc.StatusException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 
 /**
  * Behavior of [UserDataBackend] loaded with the bundled sample seed, following
- * `docs/technical/sync-engine.md`: bounded delta streams ordered by `commit_timestamp`, catch-up by
- * server timestamps, tombstones, working copies, queries, plot locks, and impact events.
+ * `docs/technical/sync-engine.md`: `List*` RPCs in query and delta modes with opaque sync tokens,
+ * tombstones, paging, working copies, queries, plot locks, and impact events.
  */
 class UserDataBackendTest {
   private val backend = UserDataBackend(loadSeed(null))
-
-  private suspend fun <T> collect(call: suspend (SendChannel<T>) -> Unit): List<T> {
-    val channel = Channel<T>(Channel.UNLIMITED)
-    call(channel)
-    channel.close()
-    val items = mutableListOf<T>()
-    for (item in channel) items += item
-    return items
-  }
 
   private fun isStrictlyIncreasing(timestamps: List<Instant?>): Boolean =
     timestamps.zipWithNext().all { (prev, curr) ->
@@ -91,16 +81,18 @@ class UserDataBackendTest {
   }
 
   @Test
-  fun streams_sendSeedDataInCommitTimestampOrder() = runBlocking {
-    val orgs = collect { backend.StreamOrganizations(StreamOrganizationsRequest(), it) }
-    assertEquals(4, orgs.size)
-    assertTrue(isStrictlyIncreasing(orgs.map { it.commit_timestamp }))
+  fun fullSyncs_returnSeedDataInCommitTimestampOrder() = runBlocking {
+    val orgs = backend.ListOrganizations(ListOrganizationsRequest())
+    assertEquals(4, orgs.organizations.size)
+    assertTrue(isStrictlyIncreasing(orgs.organizations.map { it.commit_timestamp }))
+    assertTrue(orgs.next_sync_token.isNotEmpty())
+    assertEquals("", orgs.next_page_token)
 
-    val libs = collect { backend.StreamLibraries(StreamLibrariesRequest(), it) }
+    val libs = backend.ListLibraries(ListLibrariesRequest()).libraries
     assertEquals(2, libs.size)
     assertTrue(isStrictlyIncreasing(libs.map { it.commit_timestamp }))
 
-    val overviews = collect { backend.StreamSurveyOverviews(StreamSurveyOverviewsRequest(), it) }
+    val overviews = backend.ListSurveyOverviews(ListSurveyOverviewsRequest()).overviews
     assertEquals(6, overviews.size)
     assertTrue(isStrictlyIncreasing(overviews.map { it.commit_timestamp }))
     assertTrue(overviews.single { it.survey_id == KENYA }.has_working_copy)
@@ -109,20 +101,23 @@ class UserDataBackendTest {
     assertNotNull(survey)
     assertTrue(survey.forms.isNotEmpty())
 
-    val entities = collect { backend.StreamEntities(StreamEntitiesRequest(survey_id = KENYA), it) }
+    val entities = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA)).entities
     assertEquals(5, entities.size)
     assertTrue(isStrictlyIncreasing(entities.map { it.commit_timestamp }))
 
-    val submissions = collect {
-      backend.StreamSubmissions(StreamSubmissionsRequest(survey_id = KENYA), it)
-    }
+    val submissions = backend.ListSubmissions(ListSubmissionsRequest(survey_id = KENYA)).submissions
     assertEquals(9, submissions.size)
     assertTrue(isStrictlyIncreasing(submissions.map { it.commit_timestamp }))
   }
 
   @Test
-  fun mutations_getIncreasingTimestamps_andCatchUpFiltersBySinceAndUntil() = runBlocking {
+  fun mutations_getIncreasingTimestamps_andDeltasReturnOnlyLaterChanges() = runBlocking {
     val initialWatermark = backend.currentWatermark()
+    val overviewToken = backend.ListSurveyOverviews(ListSurveyOverviewsRequest()).next_sync_token
+    val orgToken = backend.ListOrganizations(ListOrganizationsRequest()).next_sync_token
+    val entityToken = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA)).next_sync_token
+    val submissionToken =
+      backend.ListSubmissions(ListSubmissionsRequest(survey_id = KENYA)).next_sync_token
 
     val surveyMut =
       backend.MutateSurvey(
@@ -139,6 +134,7 @@ class UserDataBackendTest {
         )
       )
     val midWatermark = surveyMut.commit_timestamp!!
+    val orgTokenAtMid = backend.ListOrganizations(ListOrganizationsRequest()).next_sync_token
 
     val orgMut =
       backend.MutateOrganization(
@@ -153,7 +149,6 @@ class UserDataBackendTest {
             ),
         )
       )
-
     val libMut =
       backend.MutateLibrary(
         MutateLibraryRequest(
@@ -223,47 +218,234 @@ class UserDataBackendTest {
     assertTrue(dataMut.commit_timestamp!!.epochSecond > libMut.commit_timestamp!!.epochSecond)
 
     // Saving the working copy promotes the edited title and clears `has_working_copy`.
-    val overviews = collect {
-      backend.StreamSurveyOverviews(
-        StreamSurveyOverviewsRequest(since_timestamp = initialWatermark),
-        it,
-      )
-    }
+    val overviews =
+      backend.ListSurveyOverviews(ListSurveyOverviewsRequest(sync_token = overviewToken)).overviews
     assertEquals(listOf(KENYA), overviews.map { it.survey_id })
     assertEquals("Updated title", overviews.single().title)
     assertFalse(overviews.single().has_working_copy)
     assertNull(backend.GetSurvey(GetSurveyRequest(survey_id = KENYA, working_copy = true)).survey)
 
-    val orgsBeforeMid = collect {
-      backend.StreamOrganizations(
-        StreamOrganizationsRequest(
-          since_timestamp = initialWatermark,
-          until_timestamp = midWatermark,
-        ),
-        it,
-      )
-    }
-    assertTrue(orgsBeforeMid.isEmpty())
-    val orgsAfterMid = collect {
-      backend.StreamOrganizations(StreamOrganizationsRequest(since_timestamp = midWatermark), it)
-    }
-    assertEquals(listOf("Updated KFS"), orgsAfterMid.map { it.description })
+    val orgsFromStart =
+      backend.ListOrganizations(ListOrganizationsRequest(sync_token = orgToken)).organizations
+    assertEquals(listOf("Updated KFS"), orgsFromStart.map { it.description })
+    val orgsAfterMid =
+      backend.ListOrganizations(ListOrganizationsRequest(sync_token = orgTokenAtMid))
+    assertEquals(listOf("Updated KFS"), orgsAfterMid.organizations.map { it.description })
+    // Polling again with the returned token finds nothing new.
+    val idle =
+      backend.ListOrganizations(ListOrganizationsRequest(sync_token = orgsAfterMid.next_sync_token))
+    assertTrue(idle.organizations.isEmpty())
 
-    val newEntities = collect {
-      backend.StreamEntities(
-        StreamEntitiesRequest(survey_id = KENYA, since_timestamp = initialWatermark),
-        it,
+    val newEntities =
+      backend.ListEntities(ListEntitiesRequest(survey_id = KENYA, sync_token = entityToken))
+    assertEquals(listOf("entity-nyr-999"), newEntities.entities.map { it.entity_id })
+    val newSubmissions =
+      backend.ListSubmissions(
+        ListSubmissionsRequest(survey_id = KENYA, sync_token = submissionToken)
       )
-    }
-    assertEquals(listOf("entity-nyr-999"), newEntities.map { it.entity_id })
-    val newSubmissions = collect {
-      backend.StreamSubmissions(
-        StreamSubmissionsRequest(survey_id = KENYA, since_timestamp = initialWatermark),
-        it,
-      )
-    }
-    assertEquals(listOf("sub-nyr-999-1"), newSubmissions.map { it.submission_id })
+    assertEquals(listOf("sub-nyr-999-1"), newSubmissions.submissions.map { it.submission_id })
   }
+
+  @Test
+  fun delta_includesTombstones() = runBlocking {
+    val token = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA)).next_sync_token
+    backend.MutateData(
+      MutateDataRequest(
+        survey_id = KENYA,
+        mutations =
+          listOf(
+            DataMutation(
+              mutation_id = "mut-delete",
+              entity_mutation =
+                EntityMutation(
+                  entity_id = "entity-nyr-104",
+                  dataset_id = "coffee_parcels",
+                  delete = true,
+                ),
+            )
+          ),
+      )
+    )
+    val delta = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA, sync_token = token))
+    assertEquals(listOf("entity-nyr-104"), delta.entities.map { it.entity_id })
+    assertTrue(delta.entities.single().is_deleted)
+    // Query mode leaves deleted records out unless asked for them.
+    val query = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA))
+    assertTrue(query.entities.none { it.entity_id == "entity-nyr-104" })
+    val withDeleted =
+      backend.ListEntities(ListEntitiesRequest(survey_id = KENYA, include_deleted = true))
+    assertTrue(withDeleted.entities.any { it.entity_id == "entity-nyr-104" && it.is_deleted })
+  }
+
+  @Test
+  fun delta_pagesInCommitOrder_andPageTokensAreSyncTokens() = runBlocking {
+    val token = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA)).next_sync_token
+    val created = (1..5).map { i -> createEntity("entity-paged-$i") }
+    assertEquals(5, created.size)
+
+    val ids = mutableListOf<String>()
+    var pageToken = ""
+    var pages = 0
+    var nextSyncToken: String
+    do {
+      val page =
+        backend.ListEntities(
+          ListEntitiesRequest(
+            survey_id = KENYA,
+            sync_token = token,
+            page_token = pageToken,
+            page_size = 2,
+          )
+        )
+      ids += page.entities.map { it.entity_id }
+      pageToken = page.next_page_token
+      nextSyncToken = page.next_sync_token
+      pages++
+      // Exactly one of the two tokens is set on every page.
+      assertTrue(pageToken.isEmpty() != nextSyncToken.isEmpty())
+    } while (pageToken.isNotEmpty())
+    assertEquals(3, pages)
+    assertEquals((1..5).map { "entity-paged-$it" }, ids)
+
+    // An intermediate page token resumes like a sync token.
+    val firstPage =
+      backend.ListEntities(
+        ListEntitiesRequest(survey_id = KENYA, sync_token = token, page_size = 2)
+      )
+    val resumed =
+      backend.ListEntities(
+        ListEntitiesRequest(survey_id = KENYA, sync_token = firstPage.next_page_token)
+      )
+    assertEquals((3..5).map { "entity-paged-$it" }, resumed.entities.map { it.entity_id })
+
+    // Nothing new after the last page; the empty poll still returns a usable token.
+    val idle =
+      backend.ListEntities(ListEntitiesRequest(survey_id = KENYA, sync_token = nextSyncToken))
+    assertTrue(idle.entities.isEmpty())
+    assertTrue(idle.next_sync_token.isNotEmpty())
+    createEntity("entity-after-idle")
+    val later =
+      backend.ListEntities(
+        ListEntitiesRequest(survey_id = KENYA, sync_token = idle.next_sync_token)
+      )
+    assertEquals(listOf("entity-after-idle"), later.entities.map { it.entity_id })
+  }
+
+  @Test
+  fun query_pagesASnapshot_andItsSyncTokenCatchesLaterChanges() = runBlocking {
+    val first =
+      backend.ListEntities(
+        ListEntitiesRequest(survey_id = KENYA, order_by = "label", page_size = 2)
+      )
+    assertEquals(2, first.entities.size)
+    assertTrue(first.next_page_token.isNotEmpty())
+    assertEquals("", first.next_sync_token)
+
+    // A change between pages doesn't make the query skip records; it shows up in the delta.
+    createEntity("entity-between-pages")
+    val labels = first.entities.map { it.label }.toMutableList()
+    var pageToken = first.next_page_token
+    var syncToken = ""
+    while (pageToken.isNotEmpty()) {
+      val page =
+        backend.ListEntities(
+          ListEntitiesRequest(
+            survey_id = KENYA,
+            order_by = "label",
+            page_size = 2,
+            page_token = pageToken,
+          )
+        )
+      labels += page.entities.map { it.label }
+      pageToken = page.next_page_token
+      syncToken = page.next_sync_token
+    }
+    assertEquals(labels.sorted(), labels)
+    assertTrue(labels.size >= 5)
+
+    val delta = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA, sync_token = syncToken))
+    assertEquals(listOf("entity-between-pages"), delta.entities.map { it.entity_id })
+  }
+
+  @Test
+  fun delta_rejectsQueryFields_andScopeMismatches() = runBlocking {
+    val token = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA)).next_sync_token
+    val withOrder =
+      assertFailsWith<StatusException> {
+        backend.ListEntities(
+          ListEntitiesRequest(survey_id = KENYA, sync_token = token, order_by = "label")
+        )
+      }
+    assertEquals(Status.Code.INVALID_ARGUMENT, withOrder.status.code)
+    val withFilter =
+      assertFailsWith<StatusException> {
+        backend.ListSubmissions(
+          ListSubmissionsRequest(
+            survey_id = KENYA,
+            sync_token =
+              backend.ListSubmissions(ListSubmissionsRequest(survey_id = KENYA)).next_sync_token,
+            filter = mapOf("collector_name" to "x"),
+          )
+        )
+      }
+    assertEquals(Status.Code.INVALID_ARGUMENT, withFilter.status.code)
+
+    val otherSurvey =
+      assertFailsWith<StatusException> {
+        backend.ListEntities(ListEntitiesRequest(survey_id = "survey-other", sync_token = token))
+      }
+    assertEquals(Status.Code.INVALID_ARGUMENT, otherSurvey.status.code)
+    val otherResource =
+      assertFailsWith<StatusException> {
+        backend.ListSubmissions(ListSubmissionsRequest(survey_id = KENYA, sync_token = token))
+      }
+    assertEquals(Status.Code.INVALID_ARGUMENT, otherResource.status.code)
+    val malformed =
+      assertFailsWith<StatusException> {
+        backend.ListOrganizations(ListOrganizationsRequest(sync_token = "not a token"))
+      }
+    assertEquals(Status.Code.INVALID_ARGUMENT, malformed.status.code)
+  }
+
+  @Test
+  fun tokensFromAnotherBackendOrBeforeReset_failWithFailedPrecondition() = runBlocking {
+    val token = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA)).next_sync_token
+    val restarted = UserDataBackend(loadSeed(null))
+    val fromOtherProcess =
+      assertFailsWith<StatusException> {
+        restarted.ListEntities(ListEntitiesRequest(survey_id = KENYA, sync_token = token))
+      }
+    assertEquals(Status.Code.FAILED_PRECONDITION, fromOtherProcess.status.code)
+
+    val orgToken = backend.ListOrganizations(ListOrganizationsRequest()).next_sync_token
+    backend.reset()
+    val afterReset =
+      assertFailsWith<StatusException> {
+        backend.ListOrganizations(ListOrganizationsRequest(sync_token = orgToken))
+      }
+    assertEquals(Status.Code.FAILED_PRECONDITION, afterReset.status.code)
+  }
+
+  private suspend fun createEntity(id: String) =
+    backend
+      .MutateData(
+        MutateDataRequest(
+          survey_id = KENYA,
+          mutations =
+            listOf(
+              DataMutation(
+                mutation_id = "mut-$id",
+                entity_mutation =
+                  EntityMutation(
+                    entity_id = id,
+                    dataset_id = "coffee_parcels",
+                    upsert = EntityRecord(entity_id = id, label = "Plot $id"),
+                  ),
+              )
+            ),
+        )
+      )
+      .commit_timestamp
 
   @Test
   fun workingCopyMutations_leaveTheSavedRevisionUnchanged() = runBlocking {
@@ -290,8 +472,7 @@ class UserDataBackendTest {
         ListEntitiesRequest(survey_id = KENYA, order_by = "label", page_size = 2)
       )
     assertEquals(2, firstPage.entities.size)
-    assertEquals("2", firstPage.next_page_token)
-    assertNotNull(firstPage.server_watermark)
+    assertTrue(firstPage.next_page_token.isNotEmpty())
     val rest =
       backend.ListEntities(
         ListEntitiesRequest(
@@ -300,6 +481,7 @@ class UserDataBackendTest {
           page_token = firstPage.next_page_token,
         )
       )
+    assertTrue(rest.next_sync_token.isNotEmpty())
     val labels = (firstPage.entities + rest.entities).map { it.label }
     assertEquals(5, labels.size)
     assertEquals(labels.sorted(), labels)
@@ -311,7 +493,7 @@ class UserDataBackendTest {
     assertEquals(9, submissions.submissions.size)
     assertTrue(isStrictlyIncreasing(submissions.submissions.reversed().map { it.commit_timestamp }))
 
-    val directory = backend.ListOrganizations(ListOrganizationsRequest()).organizations
+    val directory = backend.SearchOrganizations(SearchOrganizationsRequest()).organizations
     assertTrue(directory.all { it.listed && !it.is_deleted })
   }
 
@@ -352,6 +534,7 @@ class UserDataBackendTest {
   @Test
   fun impactEvents_getServerCommitTimestamps() = runBlocking {
     val before = backend.currentWatermark()
+    val token = backend.ListImpactEvents(ListImpactEventsRequest()).next_sync_token
     val recorded =
       backend.RecordImpactEvents(
         RecordImpactEventsRequest(
@@ -367,10 +550,12 @@ class UserDataBackendTest {
         )
       )
     assertTrue(recorded.commit_timestamp!!.epochSecond > before.epochSecond)
-    val streamed = collect {
-      backend.StreamImpactEvents(StreamImpactEventsRequest(since_timestamp = before), it)
-    }
-    assertEquals(listOf("ev-export-1"), streamed.map { it.event_id })
+    assertEquals(
+      listOf("ev-export-1"),
+      backend.ListImpactEvents(ListImpactEventsRequest(sync_token = token)).events.map {
+        it.event_id
+      },
+    )
   }
 
   @Test

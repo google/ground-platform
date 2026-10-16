@@ -13,14 +13,13 @@
  */
 package org.groundplatform.v2.app.di
 
-import groundplatform.v2.survey.Organization
+import groundplatform.v2.survey.ListOrganizationsRequest
+import groundplatform.v2.survey.ListOrganizationsResponse
 import groundplatform.v2.survey.OrganizationServiceServer
-import groundplatform.v2.survey.StreamOrganizationsRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
-import kotlinx.coroutines.channels.SendChannel
 import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
 import org.groundplatform.v2.app.client.grpc.GrpcWebException
 import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
@@ -34,12 +33,11 @@ class UserDataSyncStateTest {
     OrganizationServiceServer by delegate {
     var isDown = true
 
-    override suspend fun StreamOrganizations(
-      request: StreamOrganizationsRequest,
-      response: SendChannel<Organization>,
-    ) {
+    override suspend fun ListOrganizations(
+      request: ListOrganizationsRequest
+    ): ListOrganizationsResponse {
       if (isDown) throw GrpcWebException(UNAVAILABLE, PATH, "connection refused")
-      delegate.StreamOrganizations(request, response)
+      return delegate.ListOrganizations(request)
     }
   }
 
@@ -85,6 +83,6 @@ class UserDataSyncStateTest {
 
   companion object {
     private const val UNAVAILABLE = 14
-    private const val PATH = "/groundplatform.v2.survey.OrganizationService/StreamOrganizations"
+    private const val PATH = "/groundplatform.v2.survey.OrganizationService/ListOrganizations"
   }
 }

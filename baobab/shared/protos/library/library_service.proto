@@ -51,7 +51,7 @@ message OrganizationLibraryRecord {
   google.protobuf.Timestamp commit_timestamp = 6;
 }
 
-// gRPC service for reading, resolving, streaming, searching, and curating
+// gRPC service for reading, resolving, syncing, searching, and curating
 // global (`"org-all-users"`) and organization-scoped libraries.
 service LibraryService {
   // Retrieves the raw `OrganizationLibraryRecord` for a single organization.
@@ -62,11 +62,23 @@ service LibraryService {
   // filtering out `OrganizationLibrarySettings.hidden_global_entry_ids`).
   rpc GetResolvedLibrary(GetResolvedLibraryRequest) returns (GetResolvedLibraryResponse);
 
-  // Delta sync (`docs/technical/sync-engine.md`). Streams
-  // `OrganizationLibraryRecord` items where `commit_timestamp >
-  // since_timestamp` in strict `commit_timestamp ASC` order. Closes when caught
-  // up.
-  rpc StreamLibraries(StreamLibrariesRequest) returns (stream OrganizationLibraryRecord);
+  // Lists organization libraries (`docs/technical/sync-engine.md`, "List
+  // RPCs: Query and Delta Modes"). Whether `sync_token` is set selects the
+  // mode:
+  //   - Query mode (`sync_token` unset): every library in scope except
+  //     deleted ones, paged with `page_size` / `page_token`. Every page reads
+  //     the snapshot pinned in `page_token`; the last page carries
+  //     `next_sync_token` for the scope at that snapshot.
+  //   - Delta mode (`sync_token` set): every library in scope changed after
+  //     the token, in commit order, including tombstones (`is_deleted =
+  //     true`). The last page carries `next_sync_token`. `next_page_token`
+  //     is itself a valid `sync_token`, so a client can store it after
+  //     applying a page.
+  // Delivery is at least once. Fails with `INVALID_ARGUMENT` when `sync_token`
+  // is malformed or was issued for a different scope (`organization_id`), and
+  // with `FAILED_PRECONDITION` when the server can no longer serve changes
+  // from `sync_token`; the client then discards it and runs a full sync.
+  rpc ListLibraries(ListLibrariesRequest) returns (ListLibrariesResponse);
 
   // Searches concepts across global and organization libraries by keyword,
   // standard code, or data type.
@@ -93,14 +105,31 @@ message GetResolvedLibraryResponse {
   OrganizationLibraryRecord resolved_library = 1;
 }
 
-message StreamLibrariesRequest {
+message ListLibrariesRequest {
+  // Scope: optional organization ID. Empty lists every library the caller can
+  // access, including the global `"org-all-users"` library.
   string organization_id = 1;
-  google.protobuf.Timestamp since_timestamp = 2;
 
-  // Optional inclusive upper bound.
-  google.protobuf.Timestamp until_timestamp = 3;
+  // Maximum number of libraries to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 2;
 
-  bool include_deleted = 4;
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 3;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 4;
+}
+
+message ListLibrariesResponse {
+  repeated OrganizationLibraryRecord libraries = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 3;
 }
 
 message SearchConceptsRequest {

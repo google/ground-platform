@@ -47,19 +47,25 @@ class Rebaser(private val tx: LocalStoreTransaction) {
 
   // Entities and submissions ----------------------------------------------------------------------
 
-  /** Accepts server copies of entities and submissions of [surveyId] and rebases them. */
+  /**
+   * Accepts server copies of entities and submissions of [surveyId] and rebases them. With
+   * [replace] (full syncs), the copies replace the stored bases even when those look newer, for
+   * example after the server's data was reset.
+   */
   fun acceptData(
     surveyId: String,
     entities: List<EntityRecord>,
     submissions: List<SubmissionRecord>,
+    replace: Boolean = false,
   ) {
     val target = MutationTarget.Data(surveyId)
     for (record in entities) {
       if (
-        isNewer(
-          record.commit_timestamp,
-          tx.entityBase(surveyId, record.entity_id)?.commit_timestamp,
-        )
+        replace ||
+          isNewer(
+            record.commit_timestamp,
+            tx.entityBase(surveyId, record.entity_id)?.commit_timestamp,
+          )
       ) {
         tx.putEntityBase(surveyId, record.entity_id, record)
       }
@@ -67,7 +73,7 @@ class Rebaser(private val tx: LocalStoreTransaction) {
     }
     for (record in submissions) {
       val stored = tx.submissionBase(surveyId, record.submission_id)
-      if (isNewer(record.commit_timestamp, stored?.commit_timestamp)) {
+      if (replace || isNewer(record.commit_timestamp, stored?.commit_timestamp)) {
         tx.putSubmissionBase(surveyId, record.submission_id, record)
       }
       if (record.is_deleted) reject(target, submissionKey(record.submission_id), DELETED_ELSEWHERE)
@@ -106,10 +112,10 @@ class Rebaser(private val tx: LocalStoreTransaction) {
 
   // Organizations and libraries -------------------------------------------------------------------
 
-  /** Accepts a server copy of an organization and rebases it. */
-  fun acceptOrganization(record: OrganizationProto) {
+  /** Accepts a server copy of an organization and rebases it ([replace]: see [acceptData]). */
+  fun acceptOrganization(record: OrganizationProto, replace: Boolean = false) {
     val id = record.organization_id
-    if (isNewer(record.commit_timestamp, tx.organizationBase(id)?.commit_timestamp)) {
+    if (replace || isNewer(record.commit_timestamp, tx.organizationBase(id)?.commit_timestamp)) {
       tx.putOrganizationBase(id, record)
     }
     if (record.is_deleted)
@@ -134,10 +140,12 @@ class Rebaser(private val tx: LocalStoreTransaction) {
     drop(folded.noOpMutationIds)
   }
 
-  /** Accepts a server copy of an organization library and rebases it. */
-  fun acceptLibrary(record: OrganizationLibraryRecord) {
+  /**
+   * Accepts a server copy of an organization library and rebases it ([replace]: see [acceptData]).
+   */
+  fun acceptLibrary(record: OrganizationLibraryRecord, replace: Boolean = false) {
     val id = record.organization_id
-    if (isNewer(record.commit_timestamp, tx.libraryBase(id)?.commit_timestamp)) {
+    if (replace || isNewer(record.commit_timestamp, tx.libraryBase(id)?.commit_timestamp)) {
       tx.putLibraryBase(id, record)
     }
     rebaseLibrary(id)
@@ -161,16 +169,22 @@ class Rebaser(private val tx: LocalStoreTransaction) {
 
   /**
    * Accepts server copies of a survey's revisions and ACL and rebases it. [overview] is the catalog
-   * entry the copies were fetched for, used for the survey list when nothing is pending.
+   * entry the copies were fetched for, used for the survey list when nothing is pending. [replace]:
+   * see [acceptData].
    */
-  fun acceptSurvey(surveyId: String, base: SurveyBase, overview: SurveyOverview? = null) {
+  fun acceptSurvey(
+    surveyId: String,
+    base: SurveyBase,
+    overview: SurveyOverview? = null,
+    replace: Boolean = false,
+  ) {
     if (overview?.state == SurveyState.DELETED) {
       acceptSurveyDeleted(surveyId)
       return
     }
     val stored = tx.surveyBase(surveyId)
     val newer = isNewer(base.saved?.commit_timestamp, stored?.saved?.commit_timestamp)
-    if (stored == null || newer) tx.putSurveyBase(surveyId, base)
+    if (replace || stored == null || newer) tx.putSurveyBase(surveyId, base)
     rebaseSurvey(surveyId, overview)
   }
 
@@ -201,6 +215,59 @@ class Rebaser(private val tx: LocalStoreTransaction) {
       tx.projectSurvey(surveyId, effective, overview.takeIf { nothingPending })
     }
     drop(folded.noOpMutationIds)
+  }
+
+  // Full syncs
+  // -------------------------------------------------------------------------------------
+
+  /*
+   * A full sync (after a sync token is invalidated, or for a scope without one) replaces the bases
+   * of its scope: records the client holds a base for but that are missing from the full result
+   * are forgotten. Pending mutations are kept and rebased onto what remains, so a record that only
+   * exists through pending mutations (for example, created offline) stays.
+   */
+
+  /** Forgets the server copies of entities and submissions of [surveyId] and rebases them. */
+  fun forgetData(
+    surveyId: String,
+    entityIds: Collection<String>,
+    submissionIds: Collection<String>,
+  ) {
+    entityIds.forEach { tx.putEntityBase(surveyId, it, null) }
+    submissionIds.forEach { tx.putSubmissionBase(surveyId, it, null) }
+    rebaseData(surveyId, entityIds, submissionIds)
+  }
+
+  /** Forgets the server copy of an organization and rebases it. */
+  fun forgetOrganization(organizationId: String) {
+    tx.putOrganizationBase(organizationId, null)
+    rebaseOrganization(organizationId)
+  }
+
+  /**
+   * Forgets the server copy of an organization library. The local library stays until the
+   * organization itself is removed.
+   */
+  fun forgetLibrary(organizationId: String) {
+    tx.putLibraryBase(organizationId, null)
+    rebaseLibrary(organizationId)
+  }
+
+  /**
+   * Forgets the server copies of a survey. The survey (with its data) is removed unless pending
+   * mutations still create it.
+   */
+  fun forgetSurvey(surveyId: String) {
+    tx.putSurveyBase(surveyId, null)
+    val pendingForSurvey =
+      tx.outbox().filter {
+        (it.target as? MutationTarget.Survey)?.surveyId == surveyId
+      }
+    if (RecordFolds.survey(null, surveyId, pendingForSurvey).value == null) {
+      tx.deleteSurvey(surveyId)
+    } else {
+      rebaseSurvey(surveyId)
+    }
   }
 
   // Outbox helpers --------------------------------------------------------------------------------

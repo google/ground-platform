@@ -28,8 +28,6 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.jvm.kotlinFunction
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 
 /**
@@ -37,8 +35,11 @@ import kotlinx.coroutines.launch
  * [ServerServiceDefinition].
  *
  * Each interface method carries a [WireRpc] annotation with its gRPC path and message adapters, so
- * the bindings are derived at startup instead of generated. Unary methods return their response;
- * server-streaming methods take a [SendChannel] and return once every response has been sent.
+ * the bindings are derived at startup instead of generated. Every RPC is unary: the sync engine
+ * polls `List*` RPCs instead of holding server streams open (`docs/technical/sync-engine.md`).
+ * Failures map to gRPC statuses: a thrown [StatusException] is sent as is,
+ * [IllegalArgumentException] becomes `INVALID_ARGUMENT`, and [IllegalStateException] becomes
+ * `FAILED_PRECONDITION`.
  */
 object WireGrpcBindings {
 
@@ -56,26 +57,19 @@ object WireGrpcBindings {
     val serviceName = rpcs.first().second.path.removePrefix("/").substringBefore('/')
     val builder = ServerServiceDefinition.builder(serviceName)
     for ((method, rpc) in rpcs) {
-      val streaming = method.parameterTypes.any { SendChannel::class.java.isAssignableFrom(it) }
+      require(method.parameterTypes.size == 2) {
+        "${method.name} isn't a unary RPC; only unary RPCs are supported"
+      }
       val descriptor =
         MethodDescriptor.newBuilder<Any, Any>()
-          .setType(
-            if (streaming) MethodDescriptor.MethodType.SERVER_STREAMING
-            else MethodDescriptor.MethodType.UNARY
-          )
+          .setType(MethodDescriptor.MethodType.UNARY)
           .setFullMethodName(rpc.path.removePrefix("/"))
           .setRequestMarshaller(WireMarshaller(adapter(rpc.requestAdapter)))
           .setResponseMarshaller(WireMarshaller(adapter(rpc.responseAdapter)))
           .build()
       val handler =
-        if (streaming) {
-          ServerCalls.asyncServerStreamingCall<Any, Any> { request, responses ->
-            scope.launch { serveStream(method, implementation, request, responses) }
-          }
-        } else {
-          ServerCalls.asyncUnaryCall<Any, Any> { request, responses ->
-            scope.launch { serveUnary(method, implementation, request, responses) }
-          }
+        ServerCalls.asyncUnaryCall<Any, Any> { request, responses ->
+          scope.launch { serveUnary(method, implementation, request, responses) }
         }
       builder.addMethod(descriptor, handler)
     }
@@ -91,26 +85,6 @@ object WireGrpcBindings {
     try {
       val response = checkNotNull(method.kotlinFunction).callSuspend(implementation, request)
       responses.onNext(checkNotNull(response) { "${method.name} returned null" })
-      responses.onCompleted()
-    } catch (e: CancellationException) {
-      throw e
-    } catch (e: Throwable) {
-      responses.onError(toStatusException(e))
-    }
-  }
-
-  private suspend fun serveStream(
-    method: Method,
-    implementation: Any,
-    request: Any,
-    responses: StreamObserver<Any>,
-  ) {
-    // Unlimited so the implementation never waits on the network while holding backend state.
-    val channel = Channel<Any>(Channel.UNLIMITED)
-    try {
-      checkNotNull(method.kotlinFunction).callSuspend(implementation, request, channel)
-      channel.close()
-      for (item in channel) responses.onNext(item)
       responses.onCompleted()
     } catch (e: CancellationException) {
       throw e

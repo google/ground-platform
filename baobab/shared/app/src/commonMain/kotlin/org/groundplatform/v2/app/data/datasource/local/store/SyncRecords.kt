@@ -26,8 +26,8 @@ import groundplatform.v2.survey.SurveyMutation
 /*
  * Sync bookkeeping kept in the [LocalStore] next to the data it describes (see
  * `docs/technical/sync-engine.md`, "Rebase on Remote Changes"): the outbox of pending mutations,
- * the last server copy (base) of each synced record, and the sync state (stream watermarks and
- * the install's mutation identity).
+ * the last server copy (base) of each synced record, and the sync state (sync tokens and the
+ * install's mutation identity).
  */
 
 /** The `Mutate*` RPC (and the record scope within it) that a [PendingMutation] is sent to. */
@@ -129,16 +129,23 @@ data class SurveyBase(
 )
 
 /**
- * Per-resource server `commit_timestamp` watermarks of the delta streams (`since_timestamp`), see
- * `docs/technical/sync-engine.md` ("Bounded Delta Synchronization").
+ * Opaque `next_sync_token` of each synced `List*` scope (`docs/technical/sync-engine.md`, "Sync
+ * Tokens"). Clients store tokens and send them back unchanged; they never parse or construct one.
+ * An empty token means the scope hasn't been synced, so its next sync is a full sync.
  */
-data class SyncWatermarks(
-  val organizationsWatermark: Instant? = null,
-  val librariesWatermark: Instant? = null,
-  val surveysWatermark: Instant? = null,
-  val entitiesWatermarkBySurvey: Map<String, Instant> = emptyMap(),
-  val submissionsWatermarkBySurvey: Map<String, Instant> = emptyMap(),
-  val impactEventsWatermark: Instant? = null,
+data class SyncTokens(
+  /** `ListOrganizations`. */
+  val organizations: String = "",
+  /** `ListLibraries` for every organization. */
+  val libraries: String = "",
+  /** `ListSurveyOverviews` for every organization. */
+  val surveys: String = "",
+  /** `ListEntities`, keyed by survey ID. */
+  val entitiesBySurvey: Map<String, String> = emptyMap(),
+  /** `ListSubmissions`, keyed by survey ID. */
+  val submissionsBySurvey: Map<String, String> = emptyMap(),
+  /** `ListImpactEvents` for every survey. */
+  val impactEvents: String = "",
 )
 
 /** Sync state stored with the data, so it's updated atomically with what it describes. */
@@ -147,5 +154,5 @@ data class SyncState(
   val clientId: String = "",
   /** The `client_seq` the next recorded mutation gets. */
   val nextClientSeq: Long = 1L,
-  val watermarks: SyncWatermarks = SyncWatermarks(),
+  val syncTokens: SyncTokens = SyncTokens(),
 )

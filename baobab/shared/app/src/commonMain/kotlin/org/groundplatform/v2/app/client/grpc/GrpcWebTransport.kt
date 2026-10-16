@@ -28,7 +28,6 @@ import io.ktor.http.isSuccess
 import io.ktor.utils.io.readByte
 import io.ktor.utils.io.readByteArray
 import io.ktor.utils.io.readInt
-import kotlinx.coroutines.channels.SendChannel
 
 /**
  * A call failed with a non-OK gRPC status (see `google.rpc.Code`); [description] is the server's
@@ -41,8 +40,10 @@ class GrpcWebException(val status: Int, val path: String, val description: Strin
  * Minimal gRPC-Web client (binary `application/grpc-web+proto` framing) over Ktor.
  *
  * Every platform uses gRPC-Web because browsers can't speak native gRPC; the user data service
- * accepts both on the same port. Supports the unary and server-streaming calls the sync engine
- * uses.
+ * accepts both on the same port. Every call the sync engine makes is unary
+ * (`docs/technical/sync-engine.md`, "Web Client"). Non-OK statuses throw [GrpcWebException], so
+ * callers can tell, for example, an expired sync token ([FAILED_PRECONDITION]) from an outage
+ * ([UNAVAILABLE]).
  */
 class GrpcWebTransport(baseUrl: String, private val httpClient: HttpClient = HttpClient()) {
   private val baseUrl = baseUrl.trimEnd('/')
@@ -60,20 +61,6 @@ class GrpcWebTransport(baseUrl: String, private val httpClient: HttpClient = Htt
       result = message
     }
     return result ?: throw GrpcWebException(INTERNAL, path, "no response")
-  }
-
-  /**
-   * Sends [request] to the server-streaming method at [path] and forwards each response to
-   * [responses]. Returns once the server ends the stream; doesn't close [responses].
-   */
-  suspend fun <S : Any, R : Any> serverStream(
-    path: String,
-    request: S,
-    requestAdapter: ProtoAdapter<S>,
-    responseAdapter: ProtoAdapter<R>,
-    responses: SendChannel<R>,
-  ) {
-    call(path, request, requestAdapter, responseAdapter) { responses.send(it) }
   }
 
   private suspend fun <S : Any, R : Any> call(
@@ -154,6 +141,8 @@ class GrpcWebTransport(baseUrl: String, private val httpClient: HttpClient = Htt
 
     const val OK = 0
     const val UNKNOWN = 2
+    const val INVALID_ARGUMENT = 3
+    const val FAILED_PRECONDITION = 9
     const val INTERNAL = 13
     const val UNAVAILABLE = 14
     const val UNIMPLEMENTED = 12
