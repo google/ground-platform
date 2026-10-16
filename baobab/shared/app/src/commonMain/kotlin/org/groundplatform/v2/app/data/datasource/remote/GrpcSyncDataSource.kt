@@ -44,12 +44,12 @@ import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStoreTransaction
 import org.groundplatform.v2.app.data.datasource.local.store.StoredPreferences
+import org.groundplatform.v2.app.data.datasource.local.store.SurveyBase
 import org.groundplatform.v2.app.data.datasource.local.store.SyncWatermarks
+import org.groundplatform.v2.app.data.sync.Rebaser
 import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.app.domain.model.MutationLogItem
 import org.groundplatform.v2.app.domain.model.MutationOperationKind
-import org.groundplatform.v2.app.domain.model.SubmissionGeometryPolygon
-import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.UserSettings
 
 /** The saved revision of a survey (with its ACL) and the organizer's working copy, if any. */
@@ -100,23 +100,8 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
     val placesResponse = grpcClient.listPlaces(ListPlacesRequest())
     val mutationLogsResponse = grpcClient.listMutationLogs(ListMutationLogsRequest())
 
-    store.transaction {
-      applySnapshotToTransaction(
-        orgDeltas = orgDeltas,
-        libDeltas = libDeltas,
-        fullSurveys = fullSurveys,
-        entityDeltas = entityDeltas,
-        submissionDeltas = submissionDeltas,
-        places = placesResponse.places.map(GrpcProtoMapper::placeFromProto),
-        mutationLogs =
-          mutationLogsResponse.mutation_logs.map(GrpcProtoMapper::mutationLogFromProto),
-        defaultActiveSurveyId = defaultActiveSurveyId,
-        seedVersion = seedVersion,
-      )
-    }
-
     // Advance watermarks to the highest commit_timestamp observed per stream.
-    watermarks =
+    val seeded =
       SyncWatermarks(
         organizationsWatermark = orgDeltas.lastOrNull()?.commit_timestamp,
         librariesWatermark = libDeltas.lastOrNull()?.commit_timestamp,
@@ -130,6 +115,22 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
             .groupBy { it.survey_id }
             .mapValues { (_, list) -> list.last().commit_timestamp!! },
       )
+    store.transaction {
+      applySnapshotToTransaction(
+        orgDeltas = orgDeltas,
+        libDeltas = libDeltas,
+        fullSurveys = fullSurveys,
+        entityDeltas = entityDeltas,
+        submissionDeltas = submissionDeltas,
+        places = placesResponse.places.map(GrpcProtoMapper::placeFromProto),
+        mutationLogs =
+          mutationLogsResponse.mutation_logs.map(GrpcProtoMapper::mutationLogFromProto),
+        defaultActiveSurveyId = defaultActiveSurveyId,
+        seedVersion = seedVersion,
+      )
+      updateSyncState { it.copy(watermarks = seeded) }
+    }
+    watermarks = seeded
   }
 
   /**
@@ -143,6 +144,7 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
     surveyId: String? = null,
     untilTimestamp: Instant? = null,
   ): SyncWatermarks {
+    watermarks = store.transaction { syncState().watermarks }
     val orgDeltas =
       grpcClient
         .streamOrganizations(
@@ -233,66 +235,35 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
         )
         .toList()
 
+    // Accept the deltas as new server bases and rebase pending mutations on top of them.
+    val overviewsById = surveyOverviews.associateBy { it.survey_id }
     store.transaction {
-      // Apply organization deltas
-      for (orgProto in orgDeltas) {
-        if (orgProto.is_deleted) {
-          deleteOrganization(orgProto.organization_id)
-        } else {
-          upsertOrganization(GrpcProtoMapper.organizationFromProto(orgProto))
-        }
-      }
-
-      // Apply library deltas
-      for (libProto in libDeltas) {
-        if (!libProto.is_deleted) {
-          putLibrary(GrpcProtoMapper.libraryFromProto(libProto))
-        }
-      }
-
-      // Apply entity & submission deltas per survey
+      val rebaser = Rebaser(this)
+      orgDeltas.forEach(rebaser::acceptOrganization)
+      libDeltas.forEach(rebaser::acceptLibrary)
       for (sid in (entityDeltasBySurvey.keys + subDeltasBySurvey.keys)) {
-        val entDeltas = entityDeltasBySurvey[sid].orEmpty()
-        val subDeltas = subDeltasBySurvey[sid].orEmpty()
-        applyEntityAndSubmissionDeltas(sid, entDeltas, subDeltas)
+        rebaser.acceptData(
+          sid,
+          entityDeltasBySurvey[sid].orEmpty(),
+          subDeltasBySurvey[sid].orEmpty(),
+        )
       }
-
-      // Apply survey overview & full survey updates
       for (overview in surveyOverviews) {
+        val sid = overview.survey_id
         if (overview.state == SurveyState.DELETED) {
-          deleteSurvey(overview.survey_id)
+          rebaser.acceptSurveyDeleted(sid)
         } else {
-          val sid = overview.survey_id
-          val fullResponse = fullSurveyResponsesById[sid]
-          val surveyDef = fullResponse?.saved?.survey ?: continue
-          val forms = GrpcProtoMapper.formsFromProto(surveyDef)
-          val mapLayers = GrpcProtoMapper.mapLayersFromProto(surveyDef)
-          val config = GrpcProtoMapper.surveyConfigFromProto(surveyDef)
-          val currentEntities = entities(sid)
-          val preview =
-            GrpcProtoMapper.surveyPreviewFromOverviewProto(
-              overview = overview,
-              mapLayers = mapLayers,
-              entities = currentEntities,
-            )
-          upsertSurvey(preview)
-          putForms(sid, forms)
-          putMapLayers(sid, mapLayers)
-          putSurveyConfig(sid, config)
-          if (fullResponse.workingCopy != null) {
-            putSurveyEditorDraft(
-              sid,
-              GrpcProtoMapper.surveyEditorDraftFromProto(
-                surveyDef = fullResponse.workingCopy,
-                acl = fullResponse.saved.acl,
-                surveyPreview = preview,
-                forms = forms,
-                config = config,
-                mapLayers = mapLayers,
-                entities = currentEntities,
-              ),
-            )
-          }
+          val fullResponse = fullSurveyResponsesById[sid] ?: continue
+          fullResponse.saved.survey ?: continue
+          rebaser.acceptSurvey(
+            sid,
+            SurveyBase(
+              saved = fullResponse.saved.survey,
+              workingCopy = fullResponse.workingCopy,
+              acl = fullResponse.saved.acl,
+            ),
+            overviewsById[sid],
+          )
         }
       }
 
@@ -305,9 +276,43 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
         }
         putImpactEvents(existingById.values.toList())
       }
+
+      updateSyncState {
+        it.copy(
+          watermarks =
+            advanced(
+              orgDeltas,
+              libDeltas,
+              surveyOverviews,
+              entityDeltasBySurvey,
+              subDeltasBySurvey,
+              impactDeltas,
+            )
+        )
+      }
     }
 
-    // Update watermarks
+    watermarks =
+      advanced(
+        orgDeltas,
+        libDeltas,
+        surveyOverviews,
+        entityDeltasBySurvey,
+        subDeltasBySurvey,
+        impactDeltas,
+      )
+    return watermarks
+  }
+
+  /** [watermarks] advanced to the last `commit_timestamp` of each stream's deltas. */
+  private fun advanced(
+    orgDeltas: List<Organization>,
+    libDeltas: List<OrganizationLibraryRecord>,
+    surveyOverviews: List<SurveyOverview>,
+    entityDeltasBySurvey: Map<String, List<EntityRecord>>,
+    subDeltasBySurvey: Map<String, List<SubmissionRecord>>,
+    impactDeltas: List<groundplatform.v2.data.ImpactEvent>,
+  ): SyncWatermarks {
     val updatedEntWatermarks = watermarks.entitiesWatermarkBySurvey.toMutableMap()
     entityDeltasBySurvey.forEach { (sid, list) ->
       list.lastOrNull()?.commit_timestamp?.let { updatedEntWatermarks[sid] = it }
@@ -316,21 +321,18 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
     subDeltasBySurvey.forEach { (sid, list) ->
       list.lastOrNull()?.commit_timestamp?.let { updatedSubWatermarks[sid] = it }
     }
-
-    watermarks =
-      watermarks.copy(
-        organizationsWatermark =
-          orgDeltas.lastOrNull()?.commit_timestamp ?: watermarks.organizationsWatermark,
-        librariesWatermark =
-          libDeltas.lastOrNull()?.commit_timestamp ?: watermarks.librariesWatermark,
-        surveysWatermark =
-          surveyOverviews.lastOrNull()?.commit_timestamp ?: watermarks.surveysWatermark,
-        entitiesWatermarkBySurvey = updatedEntWatermarks,
-        submissionsWatermarkBySurvey = updatedSubWatermarks,
-        impactEventsWatermark =
-          impactDeltas.lastOrNull()?.commit_timestamp ?: watermarks.impactEventsWatermark,
-      )
-    return watermarks
+    return watermarks.copy(
+      organizationsWatermark =
+        orgDeltas.lastOrNull()?.commit_timestamp ?: watermarks.organizationsWatermark,
+      librariesWatermark =
+        libDeltas.lastOrNull()?.commit_timestamp ?: watermarks.librariesWatermark,
+      surveysWatermark =
+        surveyOverviews.lastOrNull()?.commit_timestamp ?: watermarks.surveysWatermark,
+      entitiesWatermarkBySurvey = updatedEntWatermarks,
+      submissionsWatermarkBySurvey = updatedSubWatermarks,
+      impactEventsWatermark =
+        impactDeltas.lastOrNull()?.commit_timestamp ?: watermarks.impactEventsWatermark,
+    )
   }
 
   /**
@@ -455,61 +457,6 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
     )
   }
 
-  private fun LocalStoreTransaction.applyEntityAndSubmissionDeltas(
-    surveyId: String,
-    entDeltas: List<EntityRecord>,
-    subDeltas: List<SubmissionRecord>,
-  ) {
-    val existingEntities = entities(surveyId)
-    val existingStandalone = standaloneSubmissions(surveyId)
-    val existingGeoms = submissionGeometries(surveyId)
-
-    val allSubmissionsById = LinkedHashMap<String, SubmissionPreviewItem>()
-    existingEntities.flatMap { it.submissions }.forEach { allSubmissionsById[it.id] = it }
-    existingStandalone.forEach { allSubmissionsById[it.id] = it }
-
-    val allGeomsById = LinkedHashMap<String, SubmissionGeometryPolygon>()
-    existingGeoms.forEach { allGeomsById[it.id] = it }
-
-    for (subProto in subDeltas) {
-      if (subProto.is_deleted) {
-        allSubmissionsById.remove(subProto.submission_id)
-        val toRemoveGeoms =
-          allGeomsById.values.filter { it.submissionId == subProto.submission_id }.map { it.id }
-        toRemoveGeoms.forEach { allGeomsById.remove(it) }
-      } else {
-        allSubmissionsById[subProto.submission_id] = GrpcProtoMapper.submissionFromProto(subProto)
-        subProto.geometry_polygons.forEach { polyProto ->
-          val poly = GrpcProtoMapper.geometryPolygonFromProto(polyProto)
-          allGeomsById[poly.id] = poly
-        }
-      }
-    }
-
-    val linkedSubsByEntityId =
-      allSubmissionsById.values.filter { it.entityId.isNotBlank() }.groupBy { it.entityId }
-    val standaloneList = allSubmissionsById.values.filter { it.entityId.isBlank() }
-
-    val entityMap =
-      LinkedHashMap<String, org.groundplatform.v2.app.domain.model.GeospatialEntityItem>()
-    existingEntities.forEach { ent ->
-      entityMap[ent.id] = ent.copy(submissions = linkedSubsByEntityId[ent.id].orEmpty())
-    }
-
-    for (entProto in entDeltas) {
-      if (entProto.is_deleted) {
-        entityMap.remove(entProto.entity_id)
-      } else {
-        val subs = linkedSubsByEntityId[entProto.entity_id].orEmpty()
-        entityMap[entProto.entity_id] = GrpcProtoMapper.entityFromProto(entProto, subs)
-      }
-    }
-
-    putEntities(surveyId, entityMap.values.toList())
-    putStandaloneSubmissions(surveyId, standaloneList)
-    putSubmissionGeometries(surveyId, allGeomsById.values.toList())
-  }
-
   private fun LocalStoreTransaction.applySnapshotToTransaction(
     orgDeltas: List<Organization>,
     libDeltas: List<OrganizationLibraryRecord>,
@@ -521,8 +468,16 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
     defaultActiveSurveyId: String,
     seedVersion: Int,
   ) {
-    orgDeltas.forEach { upsertOrganization(GrpcProtoMapper.organizationFromProto(it)) }
-    libDeltas.forEach { putLibrary(GrpcProtoMapper.libraryFromProto(it)) }
+    orgDeltas.forEach {
+      putOrganizationBase(it.organization_id, it)
+      upsertOrganization(GrpcProtoMapper.organizationFromProto(it))
+    }
+    libDeltas.forEach {
+      putLibraryBase(it.organization_id, it)
+      putLibrary(GrpcProtoMapper.libraryFromProto(it))
+    }
+    entityDeltas.forEach { putEntityBase(it.survey_id, it.entity_id, it) }
+    submissionDeltas.forEach { putSubmissionBase(it.survey_id, it.submission_id, it) }
 
     val entitiesBySurvey = entityDeltas.groupBy { it.survey_id }
     val submissionsBySurvey = submissionDeltas.groupBy { it.survey_id }
@@ -531,6 +486,14 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
     for (fullSurvey in fullSurveys) {
       val surveyDef = fullSurvey.saved.survey ?: continue
       val surveyId = surveyDef.survey_id
+      putSurveyBase(
+        surveyId,
+        SurveyBase(
+          saved = surveyDef,
+          workingCopy = fullSurvey.workingCopy,
+          acl = fullSurvey.saved.acl,
+        ),
+      )
       val forms = GrpcProtoMapper.formsFromProto(surveyDef)
       val mapLayers = GrpcProtoMapper.mapLayersFromProto(surveyDef)
       val config = GrpcProtoMapper.surveyConfigFromProto(surveyDef)
