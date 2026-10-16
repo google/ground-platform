@@ -22,14 +22,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.wire.WireJsonAdapterFactory
 import groundplatform.v2.userdata.UserDataSeed
 
-/**
- * Reads and writes [UserDataSeed] as proto JSON, the format of the bundled sample seed.
- *
- * `google.type.Date` and `google.type.TimeOfDay` get explicit adapters: grpc-protobuf (needed by
- * Armeria) puts protobuf-java classes with the same names on the classpath, which confuses the
- * reflection behind [WireJsonAdapterFactory].
- */
-val userDataSeedJsonAdapter: JsonAdapter<UserDataSeed> =
+internal val protoJsonMoshi: Moshi =
   Moshi.Builder()
     .add(
       Date::class.java,
@@ -48,7 +41,16 @@ val userDataSeedJsonAdapter: JsonAdapter<UserDataSeed> =
     )
     .add(WireJsonAdapterFactory())
     .build()
-    .adapter(UserDataSeed::class.java)
+
+/**
+ * Reads and writes [UserDataSeed] as proto JSON, the format of the bundled sample seed.
+ *
+ * `google.type.Date` and `google.type.TimeOfDay` get explicit adapters: grpc-protobuf (needed by
+ * Armeria) puts protobuf-java classes with the same names on the classpath, which confuses the
+ * reflection behind [WireJsonAdapterFactory].
+ */
+val userDataSeedJsonAdapter: JsonAdapter<UserDataSeed> =
+  protoJsonMoshi.adapter(UserDataSeed::class.java)
 
 /**
  * Proto JSON adapter for a message made only of `int32` fields named [names]. Like Wire, it omits

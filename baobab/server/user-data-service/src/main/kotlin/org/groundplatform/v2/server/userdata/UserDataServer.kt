@@ -31,11 +31,16 @@ import kotlinx.coroutines.SupervisorJob
  * Builds the HTTP server for the user data service.
  *
  * One port serves native gRPC (HTTP/2, including cleartext h2c as used by Cloud Run) and gRPC-Web
- * (HTTP/1.1 or HTTP/2, for browsers), plus `GET /healthz`. CORS is open so the Web Console can call
- * the service from another origin; restrict it once authentication is in place.
+ * (HTTP/1.1 or HTTP/2, for browsers), plus `GET /healthz` and the RPC debug web UI at `GET /` and
+ * `GET /debug`. CORS is open so the Web Console can call the service from another origin; restrict
+ * it once authentication is in place.
  */
 object UserDataServer {
-  fun create(backend: UserDataBackend, port: Int): Server {
+  fun create(
+    backend: UserDataBackend,
+    port: Int,
+    rpcRecorder: RpcCallRecorder = RpcCallRecorder(),
+  ): Server {
     // The in-memory backend isn't thread-safe, so every RPC runs on one serialized dispatcher.
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
@@ -45,6 +50,7 @@ object UserDataServer {
         .addService(WireGrpcBindings.bind(OrganizationServiceServer::class.java, backend, scope))
         .addService(WireGrpcBindings.bind(LibraryServiceServer::class.java, backend, scope))
         .addService(WireGrpcBindings.bind(DataServiceServer::class.java, backend, scope))
+        .intercept(rpcRecorder.interceptor())
         .supportedSerializationFormats(
           GrpcSerializationFormats.PROTO,
           GrpcSerializationFormats.PROTO_WEB,
@@ -67,6 +73,11 @@ object UserDataServer {
       .http(port)
       .service(grpcService, cors)
       .service("/healthz", HealthCheckService.of())
+      .service("/", DebugWebService.indexService())
+      .service("/debug", DebugWebService.indexService())
+      .service("/debug/rpcs", DebugWebService.listRpcsService(rpcRecorder))
+      .service("/debug/rpcs/stream", DebugWebService.streamRpcsService(rpcRecorder))
+      .service("/debug/rpcs/clear", DebugWebService.clearRpcsService(rpcRecorder))
       .build()
   }
 }

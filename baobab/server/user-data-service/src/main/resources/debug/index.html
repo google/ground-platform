@@ -1,0 +1,1070 @@
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Collect One — RPC Inspector</title>
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0f1412;
+      --surface: #161d1a;
+      --surface-elevated: #1d2622;
+      --surface-hover: #232e29;
+      --surface-selected: #1e3528;
+      --border: #2a3630;
+      --text: #e6efe9;
+      --text-muted: #95a79c;
+      --accent: #52c478;
+      --accent-dim: rgba(82, 196, 120, 0.16);
+      --ok-bg: rgba(82, 196, 120, 0.16);
+      --ok-text: #6ee092;
+      --err-bg: rgba(244, 96, 96, 0.18);
+      --err-text: #ff8080;
+      --warn-bg: rgba(245, 185, 66, 0.18);
+      --warn-text: #f7c96e;
+      --delta-bg: rgba(100, 181, 246, 0.16);
+      --delta-text: #82c4f8;
+      --json-key: #82c4f8;
+      --json-string: #8ce0a6;
+      --json-number: #f7c96e;
+      --json-boolean: #d39bf8;
+      --mark-bg: rgba(247, 201, 110, 0.35);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f8f7;
+        --surface: #ffffff;
+        --surface-elevated: #eef3f0;
+        --surface-hover: #e6eee9;
+        --surface-selected: #d8ece0;
+        --border: #d2ddd6;
+        --text: #16211b;
+        --text-muted: #56695e;
+        --accent: #1f7a42;
+        --accent-dim: rgba(31, 122, 66, 0.12);
+        --ok-bg: rgba(31, 122, 66, 0.12);
+        --ok-text: #166534;
+        --err-bg: rgba(211, 47, 47, 0.12);
+        --err-text: #b91c1c;
+        --warn-bg: rgba(217, 119, 6, 0.14);
+        --warn-text: #92400e;
+        --delta-bg: rgba(2, 132, 199, 0.12);
+        --delta-text: #0369a1;
+        --json-key: #0550ae;
+        --json-string: #166534;
+        --json-number: #9a3412;
+        --json-boolean: #6b21a8;
+        --mark-bg: rgba(250, 204, 21, 0.55);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Top Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--ok-bg);
+      color: var(--ok-text);
+    }
+
+    .status-pill.paused {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+    }
+
+    .status-pill.disconnected {
+      background: var(--err-bg);
+      color: var(--err-text);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stats-label {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    button {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 11px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    button:hover {
+      background: var(--surface-hover);
+    }
+
+    button.active {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      border-color: var(--warn-text);
+    }
+
+    /* Filter Toolbar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1 1 260px;
+      min-width: 200px;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 28px 6px 10px;
+      font-size: 12.5px;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-shortcut {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    .chip-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .chip {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 4px 9px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .chip:hover {
+      color: var(--text);
+      background: var(--surface-hover);
+    }
+
+    .chip.selected {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    select {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .hidden-count-badge {
+      background: var(--surface-elevated);
+      color: var(--text-muted);
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+    }
+
+    /* Split Workspace */
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(420px, 46%) 1fr;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 960px) {
+      .workspace {
+        grid-template-columns: 1fr;
+        grid-template-rows: 45% 55%;
+      }
+    }
+
+    /* Left Pane: RPC Table */
+    .table-pane {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      z-index: 1;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.08s ease;
+    }
+
+    tbody tr:hover {
+      background: var(--surface-hover);
+    }
+
+    tbody tr.selected {
+      background: var(--surface-selected);
+    }
+
+    tbody td {
+      padding: 7px 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+      font-size: 12.5px;
+    }
+
+    .col-id { width: 46px; font-family: var(--font-mono); color: var(--text-muted); font-size: 11.5px; }
+    .col-time { width: 88px; font-family: var(--font-mono); color: var(--text-muted); font-size: 11.5px; }
+    .col-method { width: 38%; }
+    .col-summary { width: auto; color: var(--text-muted); font-size: 12px; }
+    .col-status { width: 86px; text-align: center; }
+    .col-duration { width: 68px; text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 11.5px; }
+
+    .service-tag {
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-right: 4px;
+    }
+
+    .method-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+    }
+
+    .badge-ok {
+      background: var(--ok-bg);
+      color: var(--ok-text);
+    }
+
+    .badge-err {
+      background: var(--err-bg);
+      color: var(--err-text);
+    }
+
+    .badge-delta {
+      background: var(--delta-bg);
+      color: var(--delta-text);
+      margin-left: 6px;
+      font-size: 10px;
+    }
+
+    .empty-state {
+      margin: auto;
+      text-align: center;
+      padding: 32px;
+      color: var(--text-muted);
+    }
+
+    /* Right Pane: Detail Inspector */
+    .detail-pane {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: var(--surface);
+    }
+
+    .detail-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .detail-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .detail-path {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .detail-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    .error-banner {
+      margin-top: 4px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--err-bg);
+      color: var(--err-text);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    .payload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 1200px) {
+      .payload-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+    }
+
+    .payload-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .payload-panel:last-child {
+      border-right: none;
+    }
+
+    .payload-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: var(--surface-elevated);
+      border-bottom: 1px solid var(--border);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .payload-pre {
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      flex: 1;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--bg);
+    }
+
+    .json-key { color: var(--json-key); }
+    .json-string { color: var(--json-string); }
+    .json-number { color: var(--json-number); }
+    .json-boolean { color: var(--json-boolean); }
+    mark {
+      background: var(--mark-bg);
+      color: inherit;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <span class="brand-icon">C1</span>
+        <span>Collect One RPC Inspector</span>
+        <span id="connectionPill" class="status-pill">● Live</span>
+      </div>
+      <div class="header-actions">
+        <span id="statsLabel" class="stats-label">0 RPCs</span>
+        <button id="pauseBtn" type="button" title="Pause or resume live stream (Space)">⏸ Pause</button>
+        <button id="clearBtn" type="button" title="Clear recorded RPC log">🗑 Clear</button>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <div class="search-box">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search method, survey_id, sync_token, mutation_id, or JSON payload…"
+          autocomplete="off"
+        />
+        <span class="search-shortcut">/</span>
+      </div>
+
+      <div id="serviceChips" class="chip-group" role="group" aria-label="Filter by service">
+        <button class="chip selected" data-service="ALL" type="button">All</button>
+        <button class="chip" data-service="SurveyService" type="button">Survey</button>
+        <button class="chip" data-service="DataService" type="button">Data</button>
+        <button class="chip" data-service="OrganizationService" type="button">Org</button>
+        <button class="chip" data-service="LibraryService" type="button">Library</button>
+      </div>
+
+      <select id="methodSelect" aria-label="Filter by RPC method">
+        <option value="ALL">All Methods</option>
+      </select>
+
+      <div id="statusChips" class="chip-group" role="group" aria-label="Filter by gRPC status">
+        <button class="chip selected" data-status="ALL" type="button">All Status</button>
+        <button class="chip" data-status="OK" type="button">OK</button>
+        <button class="chip" data-status="ERROR" type="button">Errors</button>
+      </div>
+
+      <label class="toggle-label" title="Hide List* delta polls with sync_token that returned 0 records">
+        <input id="hideEmptyPollsToggle" type="checkbox" checked />
+        <span>Hide empty delta polls</span>
+        <span id="hiddenPollsBadge" class="hidden-count-badge">0 hidden</span>
+      </label>
+    </section>
+
+    <main class="workspace">
+      <section class="table-pane">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-id">#</th>
+              <th class="col-time">Time</th>
+              <th class="col-method">Service / Method</th>
+              <th class="col-summary">Summary</th>
+              <th class="col-status">Status</th>
+              <th class="col-duration">Time</th>
+            </tr>
+          </thead>
+          <tbody id="rpcTableBody"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state">No matching RPC calls recorded yet.</div>
+      </section>
+
+      <section id="detailPane" class="detail-pane">
+        <div id="detailEmpty" class="empty-state">
+          Select an incoming RPC from the table to inspect its request and response Proto JSON payloads.
+        </div>
+        <div id="detailContent" style="display: none; flex-direction: column; height: 100%; min-height: 0;">
+          <div class="detail-header">
+            <div class="detail-title-row">
+              <span id="detailPath" class="detail-path"></span>
+              <span id="detailStatusBadge" class="badge"></span>
+            </div>
+            <div id="detailMeta" class="detail-meta"></div>
+            <div id="detailErrorBanner" class="error-banner" style="display: none;"></div>
+          </div>
+          <div class="payload-grid">
+            <div class="payload-panel">
+              <div class="payload-toolbar">
+                <span id="reqHeaderLabel">Request Proto JSON</span>
+                <button id="copyReqBtn" type="button">Copy JSON</button>
+              </div>
+              <pre id="reqJsonPre" class="payload-pre"></pre>
+            </div>
+            <div class="payload-panel">
+              <div class="payload-toolbar">
+                <span id="respHeaderLabel">Response Proto JSON</span>
+                <button id="copyRespBtn" type="button">Copy JSON</button>
+              </div>
+              <pre id="respJsonPre" class="payload-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const state = {
+        entries: [],
+        queuedWhilePaused: [],
+        paused: false,
+        connected: false,
+        serviceFilter: 'ALL',
+        methodFilter: 'ALL',
+        statusFilter: 'ALL',
+        hideEmptyPolls: true,
+        searchQuery: '',
+        selectedId: null,
+        knownMethods: new Set(),
+      };
+
+      const els = {
+        connectionPill: document.getElementById('connectionPill'),
+        statsLabel: document.getElementById('statsLabel'),
+        pauseBtn: document.getElementById('pauseBtn'),
+        clearBtn: document.getElementById('clearBtn'),
+        searchInput: document.getElementById('searchInput'),
+        serviceChips: document.getElementById('serviceChips'),
+        methodSelect: document.getElementById('methodSelect'),
+        statusChips: document.getElementById('statusChips'),
+        hideEmptyPollsToggle: document.getElementById('hideEmptyPollsToggle'),
+        hiddenPollsBadge: document.getElementById('hiddenPollsBadge'),
+        rpcTableBody: document.getElementById('rpcTableBody'),
+        emptyState: document.getElementById('emptyState'),
+        detailEmpty: document.getElementById('detailEmpty'),
+        detailContent: document.getElementById('detailContent'),
+        detailPath: document.getElementById('detailPath'),
+        detailStatusBadge: document.getElementById('detailStatusBadge'),
+        detailMeta: document.getElementById('detailMeta'),
+        detailErrorBanner: document.getElementById('detailErrorBanner'),
+        reqHeaderLabel: document.getElementById('reqHeaderLabel'),
+        respHeaderLabel: document.getElementById('respHeaderLabel'),
+        reqJsonPre: document.getElementById('reqJsonPre'),
+        respJsonPre: document.getElementById('respJsonPre'),
+        copyReqBtn: document.getElementById('copyReqBtn'),
+        copyRespBtn: document.getElementById('copyRespBtn'),
+      };
+
+      function formatTime(isoString) {
+        try {
+          const d = new Date(isoString);
+          if (isNaN(d.getTime())) return isoString;
+          const hh = String(d.getHours()).padStart(2, '0');
+          const mm = String(d.getMinutes()).padStart(2, '0');
+          const ss = String(d.getSeconds()).padStart(2, '0');
+          const ms = String(d.getMilliseconds()).padStart(3, '0');
+          return `${hh}:${mm}:${ss}.${ms}`;
+        } catch (_) {
+          return isoString;
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      }
+
+      function escapeRegExp(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      function highlightJson(jsonText, query) {
+        const escaped = escapeHtml(jsonText);
+        const colored = escaped.replace(
+          /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+          (match) => {
+            let cls = 'json-number';
+            if (/^"/.test(match)) {
+              cls = /:$/.test(match) ? 'json-key' : 'json-string';
+            } else if (/true|false|null/.test(match)) {
+              cls = 'json-boolean';
+            }
+            return `<span class="${cls}">${match}</span>`;
+          }
+        );
+        if (!query) return colored;
+        const pattern = new RegExp(`(${escapeRegExp(escapeHtml(query))})(?![^<]*>)`, 'gi');
+        return colored.replace(pattern, '<mark>$1</mark>');
+      }
+
+      function updateConnectionStatus() {
+        if (state.paused) {
+          const queued = state.queuedWhilePaused.length;
+          els.connectionPill.className = 'status-pill paused';
+          els.connectionPill.textContent = queued > 0 ? `⏸ Paused (+${queued} new)` : '⏸ Paused';
+          els.pauseBtn.classList.add('active');
+          els.pauseBtn.textContent = queued > 0 ? `▶ Resume (+${queued})` : '▶ Resume';
+        } else if (state.connected) {
+          els.connectionPill.className = 'status-pill';
+          els.connectionPill.textContent = '● Live';
+          els.pauseBtn.classList.remove('active');
+          els.pauseBtn.textContent = '⏸ Pause';
+        } else {
+          els.connectionPill.className = 'status-pill disconnected';
+          els.connectionPill.textContent = '○ Reconnecting…';
+          els.pauseBtn.classList.remove('active');
+          els.pauseBtn.textContent = '⏸ Pause';
+        }
+      }
+
+      function syncMethodDropdown() {
+        const methodsForService = new Set();
+        for (const e of state.entries) {
+          if (state.serviceFilter === 'ALL' || e.service === state.serviceFilter) {
+            methodsForService.add(e.method);
+          }
+        }
+        const sorted = Array.from(methodsForService).sort();
+        const prev = state.methodFilter;
+        els.methodSelect.innerHTML = '<option value="ALL">All Methods</option>';
+        for (const m of sorted) {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = m;
+          els.methodSelect.appendChild(opt);
+        }
+        if (sorted.includes(prev)) {
+          els.methodSelect.value = prev;
+        } else {
+          state.methodFilter = 'ALL';
+          els.methodSelect.value = 'ALL';
+        }
+      }
+
+      function matchesFilters(entry) {
+        if (state.serviceFilter !== 'ALL' && entry.service !== state.serviceFilter) {
+          return false;
+        }
+        if (state.methodFilter !== 'ALL' && entry.method !== state.methodFilter) {
+          return false;
+        }
+        if (state.statusFilter === 'OK' && entry.statusCode !== 0) {
+          return false;
+        }
+        if (state.statusFilter === 'ERROR' && entry.statusCode === 0) {
+          return false;
+        }
+        if (state.searchQuery) {
+          const q = state.searchQuery.toLowerCase();
+          const haystack = [
+            entry.service,
+            entry.method,
+            entry.fullPath,
+            entry.statusName,
+            entry.errorMessage || '',
+            entry.summary,
+            entry.requestJson,
+            entry.responseJson,
+          ].join('\n').toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
+        return true;
+      }
+
+      function getFilteredEntries() {
+        let hiddenEmptyPolls = 0;
+        const visible = [];
+        // Newest first for immediate triage
+        for (let i = state.entries.length - 1; i >= 0; i--) {
+          const e = state.entries[i];
+          if (!matchesFilters(e)) continue;
+          if (state.hideEmptyPolls && e.isEmptyDeltaPoll) {
+            hiddenEmptyPolls++;
+            continue;
+          }
+          visible.push(e);
+        }
+        return { visible, hiddenEmptyPolls };
+      }
+
+      function render() {
+        updateConnectionStatus();
+        const { visible, hiddenEmptyPolls } = getFilteredEntries();
+        els.hiddenPollsBadge.textContent = `${hiddenEmptyPolls} hidden`;
+        els.statsLabel.textContent = `Showing ${visible.length} of ${state.entries.length} RPCs`;
+
+        els.rpcTableBody.innerHTML = '';
+        if (visible.length === 0) {
+          els.emptyState.style.display = 'block';
+        } else {
+          els.emptyState.style.display = 'none';
+          if (state.selectedId === null || !visible.some((e) => e.id === state.selectedId)) {
+            state.selectedId = visible[0].id;
+          }
+          const fragment = document.createDocumentFragment();
+          for (const entry of visible) {
+            const tr = document.createElement('tr');
+            if (entry.id === state.selectedId) tr.classList.add('selected');
+            tr.dataset.id = entry.id;
+
+            const statusClass = entry.statusCode === 0 ? 'badge-ok' : 'badge-err';
+            const deltaBadge = entry.isDeltaPoll ? '<span class="badge badge-delta">DELTA</span>' : '';
+            const shortService = entry.service.replace(/Service$/, '');
+
+            tr.innerHTML = `
+              <td class="col-id">#${entry.id}</td>
+              <td class="col-time">${escapeHtml(formatTime(entry.timestamp))}</td>
+              <td class="col-method" title="${escapeHtml(entry.fullPath)}">
+                <span class="service-tag">${escapeHtml(shortService)}/</span><span class="method-name">${escapeHtml(entry.method)}</span>${deltaBadge}
+              </td>
+              <td class="col-summary" title="${escapeHtml(entry.summary)}">${escapeHtml(entry.summary)}</td>
+              <td class="col-status"><span class="badge ${statusClass}">${escapeHtml(entry.statusName)}</span></td>
+              <td class="col-duration">${entry.durationMs.toFixed(1)}ms</td>
+            `;
+            tr.addEventListener('click', () => {
+              state.selectedId = entry.id;
+              render();
+            });
+            fragment.appendChild(tr);
+          }
+          els.rpcTableBody.appendChild(fragment);
+        }
+
+        renderDetail(visible.find((e) => e.id === state.selectedId) || null);
+      }
+
+      function renderDetail(entry) {
+        if (!entry) {
+          els.detailEmpty.style.display = 'block';
+          els.detailContent.style.display = 'none';
+          return;
+        }
+        els.detailEmpty.style.display = 'none';
+        els.detailContent.style.display = 'flex';
+
+        els.detailPath.textContent = entry.fullPath;
+        els.detailStatusBadge.className = `badge ${entry.statusCode === 0 ? 'badge-ok' : 'badge-err'}`;
+        els.detailStatusBadge.textContent = `${entry.statusName} (${entry.statusCode})`;
+
+        els.detailMeta.innerHTML = `
+          <span><strong>Call:</strong> #${entry.id}</span>
+          <span><strong>Transport:</strong> ${escapeHtml(entry.transport)}</span>
+          <span><strong>Started:</strong> ${escapeHtml(entry.timestamp)}</span>
+          <span><strong>Duration:</strong> ${entry.durationMs.toFixed(2)} ms</span>
+          <span><strong>Mode:</strong> ${entry.isDeltaPoll ? (entry.isEmptyDeltaPoll ? 'Delta Poll (Empty)' : 'Delta Poll') : 'Standard'}</span>
+        `;
+
+        if (entry.errorMessage) {
+          els.detailErrorBanner.style.display = 'block';
+          els.detailErrorBanner.textContent = `${entry.statusName}: ${entry.errorMessage}`;
+        } else {
+          els.detailErrorBanner.style.display = 'none';
+        }
+
+        els.reqHeaderLabel.textContent = `Request Proto JSON (${entry.requestJson.length} B)`;
+        els.respHeaderLabel.textContent = `Response Proto JSON (${entry.responseJson.length} B)`;
+        els.reqJsonPre.innerHTML = highlightJson(entry.requestJson, state.searchQuery);
+        els.respJsonPre.innerHTML = highlightJson(entry.responseJson, state.searchQuery);
+      }
+
+      function addEntry(entry) {
+        if (state.entries.some((e) => e.id === entry.id)) return;
+        state.entries.push(entry);
+        if (state.entries.length > 500) {
+          state.entries.shift();
+        }
+        if (!state.knownMethods.has(entry.method)) {
+          state.knownMethods.add(entry.method);
+          syncMethodDropdown();
+        }
+      }
+
+      async function loadInitialSnapshot() {
+        try {
+          const res = await fetch('/debug/rpcs', { cache: 'no-store' });
+          if (!res.ok) return;
+          const list = await res.json();
+          for (const item of list) {
+            addEntry(item);
+          }
+          render();
+        } catch (err) {
+          console.error('Failed to load RPC snapshot:', err);
+        }
+      }
+
+      function connectEventStream() {
+        const es = new EventSource('/debug/rpcs/stream');
+        es.onopen = () => {
+          state.connected = true;
+          updateConnectionStatus();
+        };
+        es.onerror = () => {
+          state.connected = false;
+          updateConnectionStatus();
+        };
+        es.addEventListener('rpc', (ev) => {
+          try {
+            const entry = JSON.parse(ev.data);
+            if (state.paused) {
+              state.queuedWhilePaused.push(entry);
+              updateConnectionStatus();
+            } else {
+              addEntry(entry);
+              render();
+            }
+          } catch (err) {
+            console.error('Failed to parse SSE rpc event:', err);
+          }
+        });
+        es.addEventListener('clear', () => {
+          state.entries = [];
+          state.queuedWhilePaused = [];
+          state.selectedId = null;
+          state.knownMethods.clear();
+          syncMethodDropdown();
+          render();
+        });
+      }
+
+      // Event Listeners
+      els.pauseBtn.addEventListener('click', () => {
+        state.paused = !state.paused;
+        if (!state.paused && state.queuedWhilePaused.length > 0) {
+          for (const entry of state.queuedWhilePaused) {
+            addEntry(entry);
+          }
+          state.queuedWhilePaused = [];
+        }
+        render();
+      });
+
+      els.clearBtn.addEventListener('click', async () => {
+        await fetch('/debug/rpcs/clear', { method: 'POST' });
+        state.entries = [];
+        state.queuedWhilePaused = [];
+        state.selectedId = null;
+        render();
+      });
+
+      els.searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value.trim();
+        render();
+      });
+
+      els.serviceChips.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-service]');
+        if (!btn) return;
+        state.serviceFilter = btn.dataset.service;
+        for (const child of els.serviceChips.querySelectorAll('.chip')) {
+          child.classList.toggle('selected', child === btn);
+        }
+        syncMethodDropdown();
+        render();
+      });
+
+      els.methodSelect.addEventListener('change', (e) => {
+        state.methodFilter = e.target.value;
+        render();
+      });
+
+      els.statusChips.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-status]');
+        if (!btn) return;
+        state.statusFilter = btn.dataset.status;
+        for (const child of els.statusChips.querySelectorAll('.chip')) {
+          child.classList.toggle('selected', child === btn);
+        }
+        render();
+      });
+
+      els.hideEmptyPollsToggle.addEventListener('change', (e) => {
+        state.hideEmptyPolls = e.target.checked;
+        render();
+      });
+
+      function copyWithFeedback(button, getText) {
+        button.addEventListener('click', async () => {
+          const text = getText();
+          if (!text) return;
+          try {
+            await navigator.clipboard.writeText(text);
+            const original = button.textContent;
+            button.textContent = 'Copied!';
+            setTimeout(() => { button.textContent = original; }, 1200);
+          } catch (_) {}
+        });
+      }
+
+      copyWithFeedback(els.copyReqBtn, () => {
+        const entry = state.entries.find((e) => e.id === state.selectedId);
+        return entry ? entry.requestJson : '';
+      });
+
+      copyWithFeedback(els.copyRespBtn, () => {
+        const entry = state.entries.find((e) => e.id === state.selectedId);
+        return entry ? entry.responseJson : '';
+      });
+
+      window.addEventListener('keydown', (e) => {
+        const activeTag = document.activeElement ? document.activeElement.tagName : '';
+        const inInput = activeTag === 'INPUT' || activeTag === 'SELECT' || activeTag === 'TEXTAREA';
+        if (e.key === '/' && !inInput) {
+          e.preventDefault();
+          els.searchInput.focus();
+          els.searchInput.select();
+        } else if (e.key === 'Escape' && document.activeElement === els.searchInput) {
+          els.searchInput.value = '';
+          state.searchQuery = '';
+          els.searchInput.blur();
+          render();
+        } else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !inInput) {
+          const { visible } = getFilteredEntries();
+          if (visible.length === 0) return;
+          e.preventDefault();
+          const idx = visible.findIndex((item) => item.id === state.selectedId);
+          const nextIdx = e.key === 'ArrowDown'
+            ? Math.min(visible.length - 1, idx + 1)
+            : Math.max(0, idx - 1);
+          state.selectedId = visible[nextIdx].id;
+          render();
+        }
+      });
+
+      loadInitialSnapshot().then(connectEventStream);
+    })();
+  </script>
+</body>
+</html>

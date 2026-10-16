@@ -95,6 +95,22 @@ returns 200. If another process already uses the port (for example another dev
 server on 8080), start the service with `PORT=<free port>` and use that port in
 `USER_DATA_SERVICE_URL`.
 
+## RPC Debug Web UI
+
+Open `http://localhost:8080/` (or `http://localhost:8080/debug`) in a browser
+while the service is running to inspect live incoming gRPC and gRPC-Web calls:
+
+-   **Live stream & controls**: Streams incoming RPCs in real time over
+    Server-Sent Events (`/debug/rpcs/stream`), with controls to pause/resume
+    updates and clear the in-memory log (`POST /debug/rpcs/clear`).
+-   **Filtering & search**: Filter by service (`SurveyService`, `DataService`,
+    `OrganizationService`, `LibraryService`), method, gRPC status (`OK` vs.
+    errors), or full-text search across request and response Proto JSON
+    payloads.
+-   **Hide empty delta polls**: Enabled by default so background `List*` delta
+    polls that return zero changes don't flood the table while still showing a
+    count of hidden polls.
+
 ## Pointing Clients at the Service
 
 Each client needs the service's URL. Without one it doesn't start and shows
