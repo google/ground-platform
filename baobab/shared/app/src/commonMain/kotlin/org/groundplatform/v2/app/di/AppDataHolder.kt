@@ -43,11 +43,14 @@ import org.groundplatform.v2.app.data.repository.LocalStoreTransactionRunner
 import org.groundplatform.v2.app.data.repository.LocationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.MutationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
+import org.groundplatform.v2.app.data.repository.OutboxSyncRepositoryImpl
 import org.groundplatform.v2.app.data.repository.PlaceRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SampleDataRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SettingsRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
+import org.groundplatform.v2.app.data.sync.OutboxDrainer
+import org.groundplatform.v2.app.data.sync.SyncCoordinator
 import org.groundplatform.v2.app.domain.model.MutationLogItem
 import org.groundplatform.v2.app.domain.model.OfflineTilePackageItem
 import org.groundplatform.v2.app.domain.model.Organization
@@ -66,6 +69,7 @@ import org.groundplatform.v2.app.domain.repository.LocationRepository
 import org.groundplatform.v2.app.domain.repository.MediaCacheInfo
 import org.groundplatform.v2.app.domain.repository.MutationRepository
 import org.groundplatform.v2.app.domain.repository.OrganizationRepository
+import org.groundplatform.v2.app.domain.repository.OutboxSyncRepository
 import org.groundplatform.v2.app.domain.repository.PlaceRepository
 import org.groundplatform.v2.app.domain.repository.SampleDataRepository
 import org.groundplatform.v2.app.domain.repository.SettingsRepository
@@ -135,9 +139,35 @@ class AppDataHolder(
     remoteUserDataGrpcClient(GrpcWebTransport(it))
   },
   val grpcSyncDataSource: GrpcSyncDataSource? = grpcClient?.let(::GrpcSyncDataSource),
+  /**
+   * Whether local edits are queued in the outbox and synced continuously (drain, then pull). On by
+   * default when connected to a real service ([userDataServiceUrl]); tests that pass an in-memory
+   * [grpcClient] keep the simulated uploads unless they turn it on.
+   */
+  val enableSyncEngine: Boolean = userDataServiceUrl != null,
   val connectivityRepository: ConnectivityRepository = ConnectivityRepositoryImpl(),
+  /**
+   * Sync engine scheduler (outbox drain, then delta pull), when connected to the user data service.
+   * Started after the initial sync succeeds.
+   */
+  val syncCoordinator: SyncCoordinator? =
+    if (enableSyncEngine && grpcClient != null && grpcSyncDataSource != null) {
+      SyncCoordinator(
+        store = localStore,
+        syncDataSource = grpcSyncDataSource,
+        drainer = OutboxDrainer(localStore, grpcClient),
+        connectivity = connectivityRepository,
+        scope = scope,
+      )
+    } else {
+      null
+    },
+  val outboxSyncRepository: OutboxSyncRepository? = syncCoordinator?.let {
+    OutboxSyncRepositoryImpl(localStore, it)
+  },
   val surveyRepository: SurveyRepository = SurveyRepositoryImpl(localStore),
-  val mutationRepository: MutationRepository = MutationRepositoryImpl(localStore),
+  val mutationRepository: MutationRepository =
+    MutationRepositoryImpl(localStore, trackOutbox = syncCoordinator != null),
   val settingsRepository: SettingsRepository = SettingsRepositoryImpl(localStore),
   val placeRepository: PlaceRepository =
     PlaceRepositoryImpl(store = localStore, remoteDataSource = MapboxPlacesDataSource()),
@@ -178,6 +208,7 @@ class AppDataHolder(
       transactionRunner = transactionRunner,
       connectivityRepository = connectivityRepository,
       impactEventRepository = impactEventRepository,
+      outboxSyncRepository = outboxSyncRepository,
     ),
   val createSurveyUseCase: CreateSurveyUseCase =
     CreateSurveyUseCase(
@@ -218,6 +249,7 @@ class AppDataHolder(
     mutableUserDataSyncState.value =
       try {
         sampleDataRepository.seedIfNeeded()
+        syncCoordinator?.start()
         UserDataSyncState.Synced
       } catch (e: CancellationException) {
         throw e

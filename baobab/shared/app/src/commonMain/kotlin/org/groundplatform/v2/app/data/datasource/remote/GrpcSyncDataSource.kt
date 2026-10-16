@@ -14,20 +14,13 @@
 package org.groundplatform.v2.app.data.datasource.remote
 
 import com.squareup.wire.Instant
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.ListMutationLogsRequest
 import groundplatform.v2.data.ListPlacesRequest
-import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.data.MutateDataResponse
 import groundplatform.v2.data.RecordImpactEventsRequest
 import groundplatform.v2.data.StreamEntitiesRequest
 import groundplatform.v2.data.StreamImpactEventsRequest
 import groundplatform.v2.data.StreamSubmissionsRequest
-import groundplatform.v2.data.SubmissionMutation
-import groundplatform.v2.data.SubmissionPatch
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.library.StreamLibrariesRequest
@@ -49,7 +42,6 @@ import org.groundplatform.v2.app.data.datasource.local.store.SyncWatermarks
 import org.groundplatform.v2.app.data.sync.Rebaser
 import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.app.domain.model.MutationLogItem
-import org.groundplatform.v2.app.domain.model.MutationOperationKind
 import org.groundplatform.v2.app.domain.model.UserSettings
 
 /** The saved revision of a survey (with its ACL) and the organizer's working copy, if any. */
@@ -349,103 +341,6 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
         } else {
           null
         },
-    )
-  }
-
-  /**
-   * Pushes outbox mutations (`MutationLogItem`) to the gRPC backend via `MutateData` and returns
-   * the backend `MutateDataResponse` with the authoritative server `commit_timestamp`.
-   */
-  suspend fun pushOutboxMutations(
-    surveyId: String,
-    items: List<MutationLogItem>,
-  ): MutateDataResponse {
-    val protoMutations = items.map { item ->
-      when (item.operationKind) {
-        MutationOperationKind.CREATE_SUBMISSION ->
-          DataMutation(
-            mutation_id = item.id,
-            submission_mutation =
-              SubmissionMutation(
-                submission_id = item.submissionId ?: "sub-${item.id}",
-                form_id = "form-default",
-                base_revision = 0L,
-                upsert =
-                  SubmissionRecord(
-                    submission_id = item.submissionId ?: "sub-${item.id}",
-                    survey_id = surveyId,
-                    form_id = "form-default",
-                    entity_id = item.entityId,
-                    timestamp_label = item.operationTimestamp,
-                    collector_name = item.actorName,
-                  ),
-              ),
-          )
-        MutationOperationKind.UPDATE_SUBMISSION ->
-          DataMutation(
-            mutation_id = item.id,
-            submission_mutation =
-              SubmissionMutation(
-                submission_id = item.submissionId ?: "sub-${item.id}",
-                form_id = "form-default",
-                base_revision = 1L,
-                update = SubmissionPatch(),
-              ),
-          )
-        MutationOperationKind.DELETE_SUBMISSION ->
-          DataMutation(
-            mutation_id = item.id,
-            submission_mutation =
-              SubmissionMutation(
-                submission_id = item.submissionId ?: "sub-${item.id}",
-                form_id = "form-default",
-                base_revision = 1L,
-                delete = true,
-              ),
-          )
-        MutationOperationKind.CREATE_ENTITY ->
-          DataMutation(
-            mutation_id = item.id,
-            entity_mutation =
-              EntityMutation(
-                entity_id = item.entityId,
-                base_revision = 0L,
-                upsert =
-                  EntityRecord(
-                    entity_id = item.entityId,
-                    survey_id = surveyId,
-                    label = item.targetLabel,
-                  ),
-              ),
-          )
-        MutationOperationKind.UPDATE_ENTITY ->
-          DataMutation(
-            mutation_id = item.id,
-            entity_mutation =
-              EntityMutation(
-                entity_id = item.entityId,
-                base_revision = 1L,
-                update = EntityPatch(),
-              ),
-          )
-        MutationOperationKind.DELETE_ENTITY ->
-          DataMutation(
-            mutation_id = item.id,
-            entity_mutation =
-              EntityMutation(
-                entity_id = item.entityId,
-                base_revision = 1L,
-                delete = true,
-              ),
-          )
-        MutationOperationKind.UPLOAD_MEDIA -> DataMutation(mutation_id = item.id)
-      }
-    }
-    return grpcClient.mutateData(
-      MutateDataRequest(
-        survey_id = surveyId,
-        mutations = protoMutations,
-      )
     )
   }
 
