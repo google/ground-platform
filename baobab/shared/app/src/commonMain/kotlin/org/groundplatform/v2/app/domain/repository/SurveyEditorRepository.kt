@@ -50,4 +50,17 @@ interface SurveyEditorRepository {
     draft: SurveyEditorDraft,
     previous: SurveyEditorDraft? = null,
   )
+
+  /**
+   * Autosaves the organizer's in-progress [draft] of [surveyId] to the survey's working copy on the
+   * server, without publishing it: changes are queued per field and sent once the organizer pauses.
+   * Does nothing when the app isn't syncing with a server.
+   */
+  suspend fun autosaveDraft(surveyId: String, draft: SurveyEditorDraft) {}
+
+  /**
+   * Discards the working copy autosaved with [autosaveDraft], so the server's working copy matches
+   * the published survey again. Does nothing when nothing was autosaved.
+   */
+  suspend fun discardWorkingCopy(surveyId: String) {}
 }

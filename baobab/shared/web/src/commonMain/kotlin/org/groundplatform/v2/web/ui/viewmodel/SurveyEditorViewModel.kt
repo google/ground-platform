@@ -533,6 +533,18 @@ class SurveyEditorViewModel(
           }
         }
     }
+    // Autosave in-progress edits to the survey's working copy; the repository queues them per
+    // field and sends them once the organizer pauses.
+    scope.launch {
+      session
+        .map { it.surveyId to it.draft }
+        .distinctUntilChanged()
+        .collect { (surveyId, draft) ->
+          if (surveyId != null && draft != null && !uiState.value.isReadOnly) {
+            surveyEditorRepository.autosaveDraft(surveyId, draft)
+          }
+        }
+    }
   }
 
   /**
@@ -896,6 +908,10 @@ class SurveyEditorViewModel(
   }
 
   override fun discardChanges() {
+    val discardedSurveyId = session.value.surveyId.takeIf { session.value.draft != null }
+    if (discardedSurveyId != null) {
+      scope.launch { surveyEditorRepository.discardWorkingCopy(discardedSurveyId) }
+    }
     val live = data.value.liveDraft
     clearFormEditorUndoRedo()
     session.update { s ->

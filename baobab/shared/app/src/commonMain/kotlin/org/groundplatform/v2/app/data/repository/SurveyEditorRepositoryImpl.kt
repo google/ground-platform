@@ -13,12 +13,15 @@
  */
 package org.groundplatform.v2.app.data.repository
 
+import groundplatform.v2.survey.SurveyDef
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStoreTransaction
+import org.groundplatform.v2.app.data.datasource.remote.GrpcProtoMapper
+import org.groundplatform.v2.app.data.sync.WorkingCopyRecorder
 import org.groundplatform.v2.app.domain.model.FormPreviewItem
 import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.app.domain.model.MapLayerItem
@@ -43,6 +46,8 @@ import org.groundplatform.v2.app.domain.usecase.ResolveFormDefForLaunchUseCase
 class SurveyEditorRepositoryImpl(
   private val store: LocalStore,
   private val fallbackForms: ResolveFormDefForLaunchUseCase = ResolveFormDefForLaunchUseCase(),
+  /** Autosaves in-progress drafts to the server's working copy, when syncing with a server. */
+  private val workingCopyRecorder: WorkingCopyRecorder? = null,
 ) : SurveyEditorRepository {
   override suspend fun getDraft(surveyId: String): SurveyEditorDraft = store.transaction {
     currentDraft(surveyId)
@@ -70,43 +75,77 @@ class SurveyEditorRepositoryImpl(
       // before the first save, the current map features), so map features collected since then are
       // kept.
       val previous = previous ?: surveyEditorDraft(surveyId) ?: currentDraft(surveyId)
+      val published = publication(surveyId, draft, previous)
       putSurveyEditorDraft(surveyId, draft)
+      putSurveyConfig(surveyId, published.config)
+      putForms(surveyId, published.forms)
+      putMapLayers(surveyId, published.mapLayers)
+      putEntities(surveyId, published.entities)
+      published.survey?.let(::upsertSurvey)
+      // The published survey now holds the autosaved edits; drop the server's working copy.
+      workingCopyRecorder?.discard(surveyId)
+    }
+  }
 
-      // Publish each Form's FormDefinition; Forms removed from the draft lose theirs.
-      val config = surveyConfig(surveyId) ?: SurveyConfig()
-      val editorForms = draft.forms.associate { it.form.formId to draft.publishedForm(it) }
-      val removedIds =
-        (previous.forms.map { it.form.formId } + forms(surveyId).map { it.id }).toSet() -
-          editorForms.keys
-      // Survey-level concept links are authoritative; the published forms also carry them as
-      // `ground:concept` bind attributes.
-      putSurveyConfig(
-        surveyId,
-        config.copy(
-          formsById = config.formsById - removedIds + editorForms,
-          formConceptLinks = FormConceptLinkSync.toFormConceptLinks(draft.forms.map { it.form }),
-          purposeIds = draft.details.purposeIds,
-          programIds = draft.details.programIds,
-        ),
+  override suspend fun autosaveDraft(surveyId: String, draft: SurveyEditorDraft) {
+    val recorder = workingCopyRecorder ?: return
+    val (baseline, current) =
+      store.transaction {
+        val opened = surveyEditorDraft(surveyId) ?: currentDraft(surveyId)
+        workingCopyOf(surveyId, opened, opened) to workingCopyOf(surveyId, draft, opened)
+      }
+    if (current != null) recorder.autosave(surveyId, current, baseline)
+  }
+
+  override suspend fun discardWorkingCopy(surveyId: String) {
+    workingCopyRecorder?.discard(surveyId)
+  }
+
+  /** What publishing [draft] writes to the survey's runtime data. */
+  private data class Publication(
+    val config: SurveyConfig,
+    val forms: List<FormPreviewItem>,
+    val mapLayers: List<MapLayerItem>,
+    val entities: List<GeospatialEntityItem>,
+    val survey: SurveyPreviewItem?,
+  )
+
+  private fun LocalStoreTransaction.publication(
+    surveyId: String,
+    draft: SurveyEditorDraft,
+    previous: SurveyEditorDraft,
+  ): Publication {
+    // Publish each Form's FormDefinition; Forms removed from the draft lose theirs.
+    val config = surveyConfig(surveyId) ?: SurveyConfig()
+    val editorForms = draft.forms.associate { it.form.formId to draft.publishedForm(it) }
+    val removedIds =
+      (previous.forms.map { it.form.formId } + forms(surveyId).map { it.id }).toSet() -
+        editorForms.keys
+    // Survey-level concept links are authoritative; the published forms also carry them as
+    // `ground:concept` bind attributes.
+    val publishedConfig =
+      config.copy(
+        formsById = config.formsById - removedIds + editorForms,
+        formConceptLinks = FormConceptLinkSync.toFormConceptLinks(draft.forms.map { it.form }),
+        purposeIds = draft.details.purposeIds,
+        programIds = draft.details.programIds,
       )
 
-      // Project the draft onto the runtime collections the rest of the app reads.
-      val projected =
-        SurveyEditorProjection.project(
-          draft = draft,
-          previous = previous,
-          surveyId = surveyId,
-          forms = forms(surveyId),
-          mapLayers = mapLayers(surveyId),
-          entities = entities(surveyId),
-        )
-      putForms(surveyId, projected.forms)
-      putMapLayers(surveyId, projected.mapLayers)
-      putEntities(surveyId, projected.entities)
+    // Project the draft onto the runtime collections the rest of the app reads.
+    val projected =
+      SurveyEditorProjection.project(
+        draft = draft,
+        previous = previous,
+        surveyId = surveyId,
+        forms = forms(surveyId),
+        mapLayers = mapLayers(surveyId),
+        entities = entities(surveyId),
+      )
 
-      // The survey list owns the title, description, organization, sharing/consent summary, and
-      // satellite map thumbnail; copy edits there.
-      updateSurvey(surveyId) { item ->
+    // The survey list owns the title, description, organization, sharing/consent summary, and
+    // satellite map thumbnail; copy edits there.
+    val survey =
+      survey(surveyId)?.let { item ->
         item.copy(
           title = draft.details.title.ifBlank { item.title },
           description = draft.details.description.ifBlank { item.description },
@@ -125,7 +164,31 @@ class SurveyEditorRepositoryImpl(
             ),
         )
       }
-    }
+    return Publication(
+      publishedConfig,
+      projected.forms,
+      projected.mapLayers,
+      projected.entities,
+      survey,
+    )
+  }
+
+  /** The survey definition [draft] would publish, for autosaving to the working copy. */
+  private fun LocalStoreTransaction.workingCopyOf(
+    surveyId: String,
+    draft: SurveyEditorDraft,
+    previous: SurveyEditorDraft,
+  ): SurveyDef? {
+    val published = publication(surveyId, draft, previous)
+    val survey = published.survey ?: return null
+    return GrpcProtoMapper.surveyToProto(
+        survey = survey,
+        forms = published.forms,
+        mapLayers = published.mapLayers,
+        config = published.config,
+        editorDraft = draft,
+      )
+      .first
   }
 
   private fun LocalStoreTransaction.currentDraft(surveyId: String): SurveyEditorDraft =

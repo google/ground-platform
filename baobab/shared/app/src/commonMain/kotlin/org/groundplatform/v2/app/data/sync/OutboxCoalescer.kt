@@ -31,6 +31,7 @@ import org.groundplatform.v2.app.data.datasource.local.store.PendingMutation
  * - A whole-record operation (an upsert or delete of an entity, submission, organization, or
  *   library, or a full survey snapshot) replaces every queued field patch for the record.
  * - Deleting an entity or submission that was created locally and never sent cancels both.
+ * - Discarding a survey's working copy drops queued (unsent) working-copy patches.
  *
  * Mutations that are in flight, retrying, or rejected are never changed: the server may already
  * have applied them. Patches to different key paths commute, so appending the new mutation after
@@ -51,6 +52,13 @@ object OutboxCoalescer {
           forRecord.all { it.state == OutboxState.QUEUED } &&
           isDataUpsert(forRecord.first().payload)
       if (createdLocally) return outbox.filterNot(sameRecord)
+    }
+
+    if (isDiscardWorkingCopy(new.payload)) {
+      // Unsent working-copy edits would only be discarded again.
+      return outbox.filterNot {
+        queued(it) && it.target == new.target && isFieldPatch(it.payload)
+      } + new
     }
 
     if (isWholeRecord(new.payload)) {
@@ -154,6 +162,9 @@ object OutboxCoalescer {
       is MutationPayload.Library -> payload.mutation.upsert_library != null
       is MutationPayload.Data -> isDataUpsert(payload) || isDataDelete(payload)
     }
+
+  private fun isDiscardWorkingCopy(payload: MutationPayload): Boolean =
+    payload is MutationPayload.Survey && payload.mutation.discard_working_copy == true
 
   private fun isDataUpsert(payload: MutationPayload): Boolean =
     payload is MutationPayload.Data &&

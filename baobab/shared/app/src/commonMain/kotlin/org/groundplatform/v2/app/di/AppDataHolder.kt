@@ -50,7 +50,9 @@ import org.groundplatform.v2.app.data.repository.SettingsRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.data.sync.OutboxDrainer
+import org.groundplatform.v2.app.data.sync.RecordingLocalStore
 import org.groundplatform.v2.app.data.sync.SyncCoordinator
+import org.groundplatform.v2.app.data.sync.WorkingCopyRecorder
 import org.groundplatform.v2.app.domain.model.MutationLogItem
 import org.groundplatform.v2.app.domain.model.OfflineTilePackageItem
 import org.groundplatform.v2.app.domain.model.Organization
@@ -165,20 +167,30 @@ class AppDataHolder(
   val outboxSyncRepository: OutboxSyncRepository? = syncCoordinator?.let {
     OutboxSyncRepositoryImpl(localStore, it)
   },
-  val surveyRepository: SurveyRepository = SurveyRepositoryImpl(localStore),
+  /**
+   * The store repositories write user edits to. With the sync engine, a [RecordingLocalStore] that
+   * records each edit as fine-grained mutations in the outbox; otherwise [localStore] itself.
+   */
+  val editStore: LocalStore =
+    if (syncCoordinator != null) RecordingLocalStore(localStore) else localStore,
+  val surveyRepository: SurveyRepository = SurveyRepositoryImpl(editStore),
   val mutationRepository: MutationRepository =
     MutationRepositoryImpl(localStore, trackOutbox = syncCoordinator != null),
   val settingsRepository: SettingsRepository = SettingsRepositoryImpl(localStore),
   val placeRepository: PlaceRepository =
     PlaceRepositoryImpl(store = localStore, remoteDataSource = MapboxPlacesDataSource()),
-  val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(localStore),
-  val libraryRepository: LibraryRepository = LibraryRepositoryImpl(localStore),
+  val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(editStore),
+  val libraryRepository: LibraryRepository = LibraryRepositoryImpl(editStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
   val authRepository: AuthRepository = AuthRepositoryImpl(),
   val sampleDataRepository: SampleDataRepository =
     SampleDataRepositoryImpl(localStore, grpcSyncDataSource),
-  val surveyEditorRepository: SurveyEditorRepository = SurveyEditorRepositoryImpl(localStore),
-  val transactionRunner: TransactionRunner = LocalStoreTransactionRunner(localStore),
+  val surveyEditorRepository: SurveyEditorRepository =
+    SurveyEditorRepositoryImpl(
+      store = editStore,
+      workingCopyRecorder = syncCoordinator?.let { WorkingCopyRecorder(localStore) },
+    ),
+  val transactionRunner: TransactionRunner = LocalStoreTransactionRunner(editStore),
   val impactEventRepository: ImpactEventRepository = ImpactEventRepositoryImpl(localStore),
   val recordImpactEventUseCase: RecordImpactEventUseCase =
     RecordImpactEventUseCase(
