@@ -53,7 +53,9 @@ abstract class LocalStoreContractTest {
 
   /** Returns a new store filled with the sample data. */
   private fun seededStore(): LocalStore =
-    createStore().also { store -> runDirect { SampleDataSeeder(store).seedIfNeeded() } }
+    createStore().also { store ->
+      runDirect { SampleDataSeeder(store, sampleSyncDataSource()).seedIfNeeded() }
+    }
 
   @Test
   fun seeder_writesEverySurveysSampleDataExactly() {
@@ -127,7 +129,7 @@ abstract class LocalStoreContractTest {
   fun seedIfNeeded_doesNotOverwriteExistingData() {
     val store = seededStore()
     runNow { store.transaction { putMutations(emptyList()) } }
-    runNow { SampleDataSeeder(store).seedIfNeeded() }
+    runNow { SampleDataSeeder(store, sampleSyncDataSource()).seedIfNeeded() }
     assertTrue(runNow { store.transaction { mutations() } }.isEmpty())
   }
 
@@ -135,7 +137,7 @@ abstract class LocalStoreContractTest {
   fun reset_restoresSampleData() {
     val store = seededStore()
     runNow { store.transaction { putMutations(emptyList()) } }
-    runNow { SampleDataSeeder(store).reset() }
+    runNow { SampleDataSeeder(store, sampleSyncDataSource()).reset() }
     assertTrue(runNow { store.transaction { mutations() } }.isNotEmpty())
   }
 
@@ -220,7 +222,7 @@ abstract class LocalStoreContractTest {
         updatePreferences { it.copy(seedVersion = SampleDataSeeder.SEED_VERSION - 1) }
       }
     }
-    runNow { SampleDataSeeder(store).seedIfNeeded() }
+    runNow { SampleDataSeeder(store, sampleSyncDataSource()).seedIfNeeded() }
     assertTrue(runNow { store.transaction { mutations() } }.isNotEmpty())
   }
 

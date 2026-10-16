@@ -17,6 +17,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,6 +47,7 @@ import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
 import org.groundplatform.v2.app.ui.common.GoogleLogoIcon
 import org.groundplatform.v2.app.ui.common.GroundMissionGraphic
+import org.groundplatform.v2.app.ui.common.UserDataSyncErrorBanner
 import org.groundplatform.v2.app.ui.datacollection.DataCollectionFormScreen
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.core.forms.ui.resources.Res
@@ -66,6 +68,19 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 fun MobileScreenHost(state: MobileAppState) {
+  Box(modifier = Modifier.fillMaxSize()) {
+    MobileScreens(state)
+    val syncState by state.dataHolder.userDataSyncState.collectAsState()
+    UserDataSyncErrorBanner(
+      state = syncState,
+      onRetry = state.dataHolder::retryUserDataSync,
+      modifier = Modifier.align(Alignment.TopCenter),
+    )
+  }
+}
+
+@Composable
+private fun MobileScreens(state: MobileAppState) {
   val dataCollectionUiState = state.dataCollectionUiState
   if (
     dataCollectionUiState.isDataCollectionFormOpen &&

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.app.data.seed
+package org.groundplatform.v2.app.data.seed.backend
 
 import org.groundplatform.v2.app.domain.model.CachedProfile
 import org.groundplatform.v2.app.domain.model.ImagerySource
@@ -27,7 +27,7 @@ import org.groundplatform.v2.app.domain.model.OrganizationType
  * available across all surveys), plus [KENYA_FOREST_SERVICE], [MEKONG_MANGROVE_ALLIANCE], and the
  * listed [OPEN_FORIS_COMMUNITY].
  */
-object SampleOrganizationsData {
+object BackendStaticOrganizationsData {
   const val ALL_USERS = Organization.ALL_USERS_ID
   const val KENYA_FOREST_SERVICE = "org-kenya-forest-service"
   const val MEKONG_MANGROVE_ALLIANCE = "org-mekong-mangrove-alliance"

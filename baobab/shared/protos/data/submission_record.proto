@@ -18,9 +18,49 @@ syntax = "proto3";
 
 package groundplatform.v2.data;
 
+import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/forms/encrypted_submission.proto";
 import "shared/protos/forms/record_instance.proto";
+
+// Organizer QA/QC review status for a submission.
+enum ReviewStatus {
+  REVIEW_STATUS_UNSPECIFIED = 0;
+  REVIEW_STATUS_PENDING = 1;
+  REVIEW_STATUS_APPROVED = 2;
+  REVIEW_STATUS_FLAGGED = 3;
+  REVIEW_STATUS_REJECTED = 4;
+}
+
+// Denormalized question-and-answer summary entry for fast list/card display.
+message SubmissionFieldEntryDef {
+  string question_name = 1;
+  string question_label = 2;
+  string answer_value = 3;
+}
+
+// Polygon geometry overlay recorded as an answer to a geometry question inside
+// a form submission.
+message SubmissionGeometryPolygonDef {
+  string id = 1;
+  string submission_id = 2;
+  string entity_id = 3;
+  string layer_id = 4;
+  string form_id = 5;
+  string form_title = 6;
+  string field_path = 7;
+  string question_label = 8;
+  string short_map_badge = 9;
+  string collector_name = 10;
+  string timestamp_label = 11;
+  double area_hectares = 12;
+  int32 vertex_count = 13;
+  float normalized_x = 14;
+  float normalized_y = 15;
+  float width_fraction = 16;
+  float height_fraction = 17;
+  int64 color_hex = 18;
+}
 
 // A finalized, versioned submission transaction record.
 message SubmissionRecord {
@@ -38,7 +78,7 @@ message SubmissionRecord {
   string form_version = 4;
 
   // Linked entity ID if this submission was collected against a lookup table
-  // entity.
+  // or geospatial entity. Empty for standalone submissions.
   string entity_id = 5;
 
   // Sequential revision number for QA/QC and edits.
@@ -61,11 +101,56 @@ message SubmissionRecord {
     groundplatform.v2.forms.EncryptedSubmissionManifest encrypted_manifest = 10;
   }
 
-  // TODO: Implement hooks and APIs for data enrichment.
-
   // Audit metadata recording creation, collector identity, and sync timestamps.
   AuditInfo audit_info = 11;
 
   // Soft deletion status flag.
   bool is_deleted = 12;
+
+  // Authoritative server commit timestamp for stateless delta synchronization
+  // (`docs/technical/sync-engine.md`).
+  google.protobuf.Timestamp commit_timestamp = 13;
+
+  // QA/QC review status assigned by a survey organizer.
+  ReviewStatus review_status = 14;
+
+  // True when the contributor or submission is quarantined from consensus and
+  // exports.
+  bool is_quarantined = 15;
+
+  // Human-readable label of the linked entity (`entity_id`), if any.
+  string entity_label = 16;
+
+  // Human-readable title of the form (`form_id`).
+  string form_title = 17;
+
+  // Display name of the collector who recorded this submission.
+  string collector_name = 18;
+
+  // Email address of the collector who recorded this submission.
+  string collector_email = 19;
+
+  // Formatted display timestamp (e.g., "2026-09-24 14:22 UTC").
+  string timestamp_label = 20;
+
+  // Singular domain noun of the target entity (e.g., "Coffee Parcel").
+  string target_type_label = 21;
+
+  // Synchronization status key (`"SYNCED"`, `"UPLOADING"`, `"FAILED"`).
+  string sync_status_key = 22;
+
+  // Formatted coordinates label for standalone submissions.
+  string coordinates_label = 23;
+
+  // Optional normalized canvas X coordinate for standalone map pin preview.
+  optional float normalized_x = 24;
+
+  // Optional normalized canvas Y coordinate for standalone map pin preview.
+  optional float normalized_y = 25;
+
+  // Denormalized question-and-answer entries for preview cards and lists.
+  repeated SubmissionFieldEntryDef field_entries = 26;
+
+  // Polygon geometry overlays captured within this submission.
+  repeated SubmissionGeometryPolygonDef geometry_polygons = 27;
 }

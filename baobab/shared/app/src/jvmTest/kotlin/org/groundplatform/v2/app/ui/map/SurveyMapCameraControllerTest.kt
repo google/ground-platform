@@ -25,6 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.domain.model.editor.toLatLng
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.hasGeometry
@@ -42,7 +43,7 @@ class SurveyMapCameraControllerTest {
   @Test
   fun recenterMapOnUser_movesCameraBackToUserGpsAfterPanning() =
     runDesktopComposeUiTest(width = 400, height = 800) {
-      val state = AppSession()
+      val state = AppSession(sampleDataHolder())
       var controller: SurveyMapCameraController? = null
 
       setContent {
@@ -92,7 +93,7 @@ class SurveyMapCameraControllerTest {
   @Test
   fun recenterMapOnUser_cancelsActiveEntityFitAndRecentersOnGps() =
     runDesktopComposeUiTest(width = 400, height = 800) {
-      val state = AppSession()
+      val state = AppSession(sampleDataHolder())
       var controller: SurveyMapCameraController? = null
 
       setContent {
@@ -143,7 +144,7 @@ class SurveyMapCameraControllerTest {
   @Test
   fun updateUserGpsLocation_movesCameraWhileFollowingUser() =
     runDesktopComposeUiTest(width = 400, height = 800) {
-      val state = AppSession()
+      val state = AppSession(sampleDataHolder())
       var controller: SurveyMapCameraController? = null
 
       setContent {

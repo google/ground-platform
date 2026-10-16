@@ -18,6 +18,8 @@ syntax = "proto3";
 
 package groundplatform.v2.survey;
 
+import "google/protobuf/timestamp.proto";
+
 // Collaborator organizational roles within a survey or resource.
 enum Role {
   // Unspecified role.
@@ -36,9 +38,24 @@ enum Role {
   SURVEY_ORGANIZER = 3;
 }
 
+// Denormalized collaborator identity snapshot cached on ACL and organization
+// member entries so names and avatars render offline and without extra directory
+// lookups.
+message CachedProfile {
+  // Human-readable full name (e.g., "Amina Wanjiru").
+  string display_name = 1;
+
+  // Avatar URL or built-in avatar key (e.g., "avatar:3").
+  string avatar_url = 2;
+
+  // ISO-8601 date or timestamp when the profile snapshot was cached.
+  string cached_on = 3;
+}
+
 // Single collaborator entry in an Access Control List (ACL).
 message AclEntry {
-  // Unique identifier of the user (e.g., Firebase Auth UID).
+  // Unique identifier of the user (e.g., Firebase Auth UID). Empty for pending
+  // email invitations until the invitee signs in and accepts.
   string user_id = 1;
 
   // Assigned role governing permissions.
@@ -56,6 +73,16 @@ message AclEntry {
     ACCEPTED = 2;
   }
   InvitationStatus invitation_status = 3;
+
+  // Email address of the invited or active collaborator.
+  string email = 4;
+
+  // Secret token part of a pending invite link (`.../join/<token>`); cleared
+  // once accepted.
+  string invite_token = 5;
+
+  // Cached display profile of the collaborator once known.
+  CachedProfile profile = 6;
 }
 
 // Sharing policy controlling survey access outside explicit ACL invitations
@@ -115,6 +142,33 @@ message SurveyAcl {
   // Peer data visibility configuration controlling whether data collectors can
   // view submissions and entities collected by peers on the map.
   PeerDataVisibility peer_data_visibility = 4;
+
+  // Email address of the survey owner.
+  string owner_email = 5;
+
+  // Cached profile of the survey owner.
+  CachedProfile owner_profile = 6;
+
+  // Whether organizers enabled a custom informed consent step before data
+  // collection.
+  bool collector_consent_required = 7;
+
+  // Custom informed consent notice displayed before collecting data.
+  string collector_consent_text = 8;
+
+  // Whether CARE Principles for Indigenous Data Governance are applied to this
+  // survey.
+  bool care_sovereignty_applied = 9;
+
+  // Rotatable general invite link token when `sharing_policy` is
+  // `ANYONE_WITH_LINK`.
+  string general_invite_token = 10;
+
+  // Non-destructive QA/QC quarantine list of contributor user IDs or emails.
+  repeated string quarantined_user_ids = 11;
+
+  // Authoritative server commit timestamp for stateless delta synchronization.
+  google.protobuf.Timestamp commit_timestamp = 12;
 }
 
 // Resource quota tier applied to survey organizers and organizations.

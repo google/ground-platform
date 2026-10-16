@@ -19,7 +19,11 @@ import kotlin.coroutines.startCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.groundplatform.v2.app.data.seed.SampleDataSeeder
+import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
+import org.groundplatform.v2.app.data.datasource.remote.GrpcSyncDataSource
+import org.groundplatform.v2.app.data.datasource.remote.SeedUserDataService
+import org.groundplatform.v2.app.data.seed.writeSampleData
+import org.groundplatform.v2.app.di.AppDataHolder
 
 /** Runs [block] to completion on an immediate dispatcher, as the app does for store writes. */
 fun <T> runNow(block: suspend () -> T): T {
@@ -29,9 +33,21 @@ fun <T> runNow(block: suspend () -> T): T {
     .getOrThrow()
 }
 
-/** Returns an [InMemoryLocalStore] filled with the sample data. */
+/** Returns an [InMemoryLocalStore] filled with the sample data fixtures. */
 fun seededStore(): InMemoryLocalStore =
-  InMemoryLocalStore().also { store -> runDirect { SampleDataSeeder(store).seedIfNeeded() } }
+  InMemoryLocalStore().also { store -> runDirect { store.transaction { writeSampleData() } } }
+
+/**
+ * Returns an [AppDataHolder] over a [seededStore], synced from an in-memory [SeedUserDataService]
+ * (so resetting to sample data restores the fixtures, as with a real service).
+ */
+fun sampleDataHolder(): AppDataHolder =
+  AppDataHolder(localStore = seededStore(), grpcClient = SeedUserDataService().client())
+
+/** Returns a sync data source backed by an in-memory [SeedUserDataService]. */
+fun sampleSyncDataSource(
+  client: CollectOneGrpcClient = SeedUserDataService().client()
+): GrpcSyncDataSource = GrpcSyncDataSource(client)
 
 /**
  * Runs [block] synchronously without a dispatcher, so it also works when called from inside

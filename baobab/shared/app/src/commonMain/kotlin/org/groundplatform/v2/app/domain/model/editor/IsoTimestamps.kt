@@ -35,3 +35,31 @@ fun isoUtc(epochMillis: Long): String {
   val s = secondsOfDay % 60
   return "$year-${two(month)}-${two(day)}T${two(h)}:${two(m)}:${two(s)}Z"
 }
+
+/**
+ * Parses an ISO 8601 UTC timestamp (`2026-10-05T16:34:41Z`, optionally with fractional seconds, or
+ * a bare `2026-10-05` date) into epoch milliseconds, or `null` if it isn't one.
+ */
+fun epochMillisOfIsoUtc(iso: String): Long? {
+  val match = ISO_UTC.matchEntire(iso.trim()) ?: return null
+  val (y, mo, d) = match.destructured
+  val year = y.toLong()
+  val month = mo.toLong()
+  val day = d.toLong()
+  if (month !in 1..12 || day !in 1..31) return null
+  val hour = match.groupValues[4].toLongOrNull() ?: 0
+  val minute = match.groupValues[5].toLongOrNull() ?: 0
+  val second = match.groupValues[6].toLongOrNull() ?: 0
+  // Days-from-civil (H. Hinnant, public domain algorithm); the inverse of `isoUtc`.
+  val yy = if (month <= 2) year - 1 else year
+  val era = yy.floorDiv(400L)
+  val yoe = yy - era * 400
+  val mp = if (month > 2) month - 3 else month + 9
+  val doy = (153 * mp + 2) / 5 + day - 1
+  val doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
+  val days = era * 146_097 + doe - 719_468
+  return ((days * 24 + hour) * 60 + minute) * 60_000 + second * 1000
+}
+
+private val ISO_UTC =
+  Regex("""(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?Z)?""")

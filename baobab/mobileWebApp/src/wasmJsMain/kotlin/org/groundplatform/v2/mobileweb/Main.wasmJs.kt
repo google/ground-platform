@@ -14,11 +14,16 @@
  */
 package org.groundplatform.v2.mobileweb
 
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import kotlinx.browser.window
+import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.ui.common.RequireUserDataService
+import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.workbench.ui.MobileWorkbenchApp
+import org.groundplatform.v2.workbench.ui.WorkbenchState
 import org.groundplatform.v2.workbench.ui.shouldShowWorkbenchChrome
 
 /**
@@ -37,5 +42,18 @@ fun main() {
       isCoarsePointerWithoutHover =
         window.matchMedia("(pointer: coarse) and (hover: none)").matches,
     )
-  ComposeViewport(container) { MobileWorkbenchApp(showChrome = showChrome) }
+  ComposeViewport(container) {
+    // Without a configured user data service, shows setup instructions instead of the app.
+    RequireUserDataService { serviceUrl ->
+      MobileWorkbenchApp(
+        state =
+          remember {
+            WorkbenchState(
+              MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl))
+            )
+          },
+        showChrome = showChrome,
+      )
+    }
+  }
 }

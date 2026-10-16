@@ -14,118 +14,48 @@
 package org.groundplatform.v2.app.data.seed
 
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
-import org.groundplatform.v2.app.data.datasource.local.store.LocalStoreTransaction
-import org.groundplatform.v2.app.data.datasource.local.store.StoredPreferences
-import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
-import org.groundplatform.v2.app.domain.model.SurveyConfig
-import org.groundplatform.v2.app.domain.model.UserSettings
-import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDerivation
-import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
+import org.groundplatform.v2.app.data.datasource.remote.GrpcSyncDataSource
 
 /**
- * Fills a [LocalStore] with the sample data.
+ * Fills a [LocalStore] with the initial state of the user data service via [GrpcSyncDataSource].
  *
- * This is the only code allowed to read the hardcoded sample datasets (`Sample*Data`); the rest of
- * the app reads everything from the store. Data for every sample survey is written up front, so
- * switching surveys never reloads (and never discards edits).
+ * When no service is configured ([syncDataSource] is null), the store is left as is: the app starts
+ * empty, and tests seed stores directly from the fixtures in `app-testing`.
  */
-class SampleDataSeeder(private val store: LocalStore) {
-  /** Seeds the store unless it already holds the current sample data version. */
+class SampleDataSeeder(
+  private val store: LocalStore,
+  private val syncDataSource: GrpcSyncDataSource?,
+) {
+  /** Pulls the initial state unless the store already holds the current seed version. */
   suspend fun seedIfNeeded() {
-    store.transaction { if (preferences().seedVersion != SEED_VERSION) writeSampleData() }
-  }
-
-  /** Deletes everything in the store and writes the sample data again. */
-  suspend fun reset() {
-    store.transaction {
-      store.clear()
-      writeSampleData()
+    val syncDataSource = syncDataSource ?: return
+    val currentVersion = store.transaction { preferences().seedVersion }
+    if (currentVersion != SEED_VERSION) {
+      syncDataSource.seedStoreFromGrpc(
+        store = store,
+        defaultActiveSurveyId = DEFAULT_ACTIVE_SURVEY_ID,
+        seedVersion = SEED_VERSION,
+      )
     }
   }
 
+  /** Deletes everything in the store, then pulls the initial state again if a service is set. */
+  suspend fun reset() {
+    store.clear()
+    val syncDataSource = syncDataSource ?: return
+    syncDataSource.resetWatermarks()
+    syncDataSource.seedStoreFromGrpc(
+      store = store,
+      defaultActiveSurveyId = DEFAULT_ACTIVE_SURVEY_ID,
+      seedVersion = SEED_VERSION,
+    )
+  }
+
   companion object {
-    /** Bump when the sample data changes shape, so existing stores are reseeded. */
+    /** Bump when the seed data changes shape, so existing stores are reseeded. */
     const val SEED_VERSION: Int = 16
 
     /** Survey opened by default on first launch. */
     const val DEFAULT_ACTIVE_SURVEY_ID: String = "survey-kenya-coffee"
-
-    /** Writes all sample data inside an existing transaction. */
-    fun LocalStoreTransaction.writeSampleData() {
-      SampleOrganizationsData.defaultOrganizations().forEach { upsertOrganization(it) }
-      // The global library bootstraps the "All users" organization's library.
-      putLibrary(GlobalLibrarySeedData.library())
-      SampleLibraryData.defaultOrganizationLibraries().forEach { putLibrary(it) }
-      val surveys = SampleSurveysData.defaultSampleSurveys()
-      surveys.forEach { upsertSurvey(it) }
-      for (survey in surveys) {
-        val surveyId = survey.id
-        val forms = SampleSurveysData.formsForSurvey(surveyId)
-        putForms(surveyId, forms)
-        putMapLayers(surveyId, SampleMapLayersData.mapLayersForSurvey(surveyId))
-        putEntities(surveyId, SampleEntitiesData.entitiesForSurvey(surveyId))
-        putStandaloneSubmissions(
-          surveyId,
-          SampleSubmissionsData.standaloneSubmissionsForSurvey(surveyId),
-        )
-        putSubmissionGeometries(
-          surveyId,
-          SampleSubmissionsData.submissionGeometriesForSurvey(surveyId),
-        )
-        putSurveyConfig(
-          surveyId,
-          SurveyConfig(
-            primaryForm = SampleSurveysData.exampleFormForSurveyId(surveyId).formDefinition,
-            formsById =
-              forms.associate { it.id to SampleSurveysData.builtInFallbackFormForForm(it) },
-          ),
-        )
-      }
-      // Survey editor drafts are derived from the survey data above; only the two surveys with
-      // extras that cannot be derived (sharing people, survey area, Data tables) store one.
-      putSurveyEditorDraft(
-        DEFAULT_ACTIVE_SURVEY_ID,
-        SampleSurveyEditorData.kenyaCoffeeDraft(deriveEditorDraft(DEFAULT_ACTIVE_SURVEY_ID)),
-      )
-      putSurveyEditorDraft(
-        SampleSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID,
-        SampleSurveyEditorData.organizationSharedDraft(
-          deriveEditorDraft(SampleSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID)
-        ),
-      )
-      putMutations(SampleMutationsData.defaultMutations())
-      putPlaces(SamplePlacesData.defaultSurveyPlaces())
-      putOfflineTilePackages(SampleMapLayersData.defaultOfflineTilePackages())
-      putPreferences(
-        StoredPreferences(
-          activeSurveyId = DEFAULT_ACTIVE_SURVEY_ID,
-          userSettings =
-            UserSettings(
-              language = "en",
-              measurementUnits = MeasurementUnitSystem.METRIC,
-              shouldUploadPhotosOnWifiOnly = false,
-            ),
-          uploadedMediaCacheSizeLabel = "38.4 MB",
-          uploadedMediaFileCount = 27,
-          seedVersion = SEED_VERSION,
-        )
-      )
-    }
-
-    /** Derives the Survey editor draft for [surveyId] from the data already written. */
-    private fun LocalStoreTransaction.deriveEditorDraft(surveyId: String): SurveyEditorDraft {
-      val forms = SampleSurveysData.formsForSurvey(surveyId)
-      val formsById = forms.associate {
-        it.id to SampleSurveysData.builtInFallbackFormForForm(it)
-      }
-      return SurveyEditorDerivation.derive(
-        surveyId = surveyId,
-        survey = SampleSurveysData.defaultSampleSurveys().firstOrNull { it.id == surveyId },
-        forms = forms,
-        formDefinition = { formsById[it.id] },
-        mapLayers = SampleMapLayersData.mapLayersForSurvey(surveyId),
-        entities = SampleEntitiesData.entitiesForSurvey(surveyId),
-      )
-    }
   }
 }

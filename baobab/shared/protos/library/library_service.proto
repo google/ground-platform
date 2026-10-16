@@ -1,0 +1,154 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.library;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/protos/forms/types.proto";
+import "shared/protos/library/concept.proto";
+import "shared/protos/library/library_bundle.proto";
+import "shared/protos/library/library_settings.proto";
+import "shared/protos/library/purpose_pack.proto";
+import "shared/protos/library/template.proto";
+
+// Versioned, organization-scoped library record combining a `LibraryBundle`
+// (concepts, form templates, purpose packs, export profiles) with
+// `OrganizationLibrarySettings` and an authoritative server `commit_timestamp`
+// for delta synchronization (`docs/technical/sync-engine.md`).
+message OrganizationLibraryRecord {
+  // Owning organization ID (or `"org-all-users"` for the global library).
+  string organization_id = 1;
+
+  // Reusable library entries owned by this organization.
+  LibraryBundle bundle = 2;
+
+  // Per-organization curation settings (such as hidden global entry IDs).
+  OrganizationLibrarySettings settings = 3;
+
+  // Sequential version number incremented on each mutation.
+  int64 version = 4;
+
+  // Soft-deletion tombstone flag.
+  bool is_deleted = 5;
+
+  // Authoritative server commit timestamp for stateless delta synchronization.
+  google.protobuf.Timestamp commit_timestamp = 6;
+}
+
+// gRPC service for reading, resolving, streaming, searching, and curating
+// global (`"org-all-users"`) and organization-scoped libraries.
+service LibraryService {
+  // Retrieves the raw `OrganizationLibraryRecord` for a single organization.
+  rpc GetLibrary(GetLibraryRequest) returns (GetLibraryResponse);
+
+  // Retrieves the resolved `LibraryBundle` for an organization (merging the
+  // global `"org-all-users"` library with the organization's own entries and
+  // filtering out `OrganizationLibrarySettings.hidden_global_entry_ids`).
+  rpc GetResolvedLibrary(GetResolvedLibraryRequest) returns (GetResolvedLibraryResponse);
+
+  // Delta sync (`docs/technical/sync-engine.md`). Streams
+  // `OrganizationLibraryRecord` items where `commit_timestamp >
+  // since_timestamp` in strict `commit_timestamp ASC` order. Closes when caught
+  // up.
+  rpc StreamLibraries(StreamLibrariesRequest) returns (stream OrganizationLibraryRecord);
+
+  // Searches concepts across global and organization libraries by keyword,
+  // standard code, or data type.
+  rpc SearchConcepts(SearchConceptsRequest) returns (SearchConceptsResponse);
+
+  // Atomically applies fine-grained mutations to an organization's library
+  // entries and curation settings.
+  rpc MutateLibrary(MutateLibraryRequest) returns (MutateLibraryResponse);
+}
+
+message GetLibraryRequest {
+  string organization_id = 1;
+}
+
+message GetLibraryResponse {
+  OrganizationLibraryRecord library = 1;
+}
+
+message GetResolvedLibraryRequest {
+  string organization_id = 1;
+}
+
+message GetResolvedLibraryResponse {
+  OrganizationLibraryRecord resolved_library = 1;
+}
+
+message StreamLibrariesRequest {
+  string organization_id = 1;
+  google.protobuf.Timestamp since_timestamp = 2;
+
+  // Optional inclusive upper bound.
+  google.protobuf.Timestamp until_timestamp = 3;
+
+  bool include_deleted = 4;
+}
+
+message SearchConceptsRequest {
+  string organization_id = 1;
+  string query = 2;
+  groundplatform.v2.forms.DataType data_type = 3;
+}
+
+message SearchConceptsResponse {
+  repeated ConceptDef concepts = 1;
+}
+
+// Path-addressed field patch for `OrganizationLibraryRecord`.
+//
+// Supported `key` patterns:
+//   - `"concepts/<concept_id>"` (`concept_value` or `null_value`)
+//   - `"form_templates/<template_id>"` (`form_template_value` or `null_value`)
+//   - `"purpose_packs/<pack_id>"` (`purpose_pack_value` or `null_value`)
+//   - `"export_profiles/<profile_id>"` (`export_profile_value` or `null_value`)
+//   - `"settings"` (`settings_value`)
+message LibraryFieldPatch {
+  string key = 1;
+
+  oneof value {
+    google.protobuf.NullValue null_value = 2;
+    ConceptDef concept_value = 3;
+    FormTemplateDef form_template_value = 4;
+    PurposePackDef purpose_pack_value = 5;
+    ExportProfileDef export_profile_value = 6;
+    OrganizationLibrarySettings settings_value = 7;
+  }
+}
+
+message LibraryMutation {
+  oneof operation {
+    LibraryFieldPatch update_field = 1;
+    OrganizationLibraryRecord upsert_library = 2;
+  }
+}
+
+message MutateLibraryRequest {
+  string organization_id = 1;
+  int64 base_version = 2;
+  repeated LibraryMutation mutations = 3;
+}
+
+message MutateLibraryResponse {
+  string organization_id = 1;
+  OrganizationLibraryRecord library = 2;
+  google.protobuf.Timestamp commit_timestamp = 3;
+}

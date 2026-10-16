@@ -17,6 +17,7 @@ package org.groundplatform.v2.mobile.ui
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
 import org.groundplatform.v2.app.domain.model.UserSettings
@@ -38,7 +39,8 @@ class MobileLocalStoreTest {
 
   @Test
   fun submittedForm_survivesSwitchingSurveysAndBack() {
-    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
+    val state =
+      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
     assertEquals("survey-kenya-coffee", state.activeSurveyId)
     val before = state.entities.first { it.id == "entity-nyr-112" }.submissions.size
 
@@ -56,7 +58,8 @@ class MobileLocalStoreTest {
 
   @Test
   fun dataHolderAppData_mirrorsStoreData() {
-    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
+    val state =
+      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
     state.addEntities(count = 25)
     val appData = state.dataHolder.appData.value
     assertEquals(state.entities, appData.content.entities)
@@ -66,7 +69,8 @@ class MobileLocalStoreTest {
 
   @Test
   fun settings_areWrittenToTheStore() {
-    val state = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
+    val state =
+      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
     state.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
     state.updateSelectedLanguage("fr")
     state.updateUploadMediaOverUnmeteredConnectionOnly(true)
@@ -78,8 +82,10 @@ class MobileLocalStoreTest {
 
   @Test
   fun appStates_doNotShareData() {
-    val first = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
-    val second = MobileAppState(initialScreen = AppScreen.MAIN_SURVEY)
+    val first =
+      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+    val second =
+      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
     first.addEntities(count = 10)
     assertEquals(first.entities.size - 10, second.entities.size)
   }

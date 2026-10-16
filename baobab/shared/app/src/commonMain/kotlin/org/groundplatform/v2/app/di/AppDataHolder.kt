@@ -13,19 +13,27 @@
  */
 package org.groundplatform.v2.app.di
 
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
+import org.groundplatform.v2.app.client.grpc.GrpcWebException
+import org.groundplatform.v2.app.client.grpc.GrpcWebTransport
+import org.groundplatform.v2.app.client.grpc.remoteUserDataGrpcClient
 import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
+import org.groundplatform.v2.app.data.datasource.remote.GrpcSyncDataSource
 import org.groundplatform.v2.app.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.app.data.repository.AuthRepositoryImpl
 import org.groundplatform.v2.app.data.repository.ConnectivityRepositoryImpl
@@ -118,6 +126,15 @@ data class AppData(
 class AppDataHolder(
   val localStore: LocalStore = InMemoryLocalStore(),
   val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined),
+  /**
+   * Base URL of the user data service (`server/user-data-service`), e.g. `http://localhost:8080`.
+   * When null, nothing is synced and the store keeps whatever it holds (empty for a new store).
+   */
+  val userDataServiceUrl: String? = null,
+  val grpcClient: CollectOneGrpcClient? = userDataServiceUrl?.let {
+    remoteUserDataGrpcClient(GrpcWebTransport(it))
+  },
+  val grpcSyncDataSource: GrpcSyncDataSource? = grpcClient?.let(::GrpcSyncDataSource),
   val connectivityRepository: ConnectivityRepository = ConnectivityRepositoryImpl(),
   val surveyRepository: SurveyRepository = SurveyRepositoryImpl(localStore),
   val mutationRepository: MutationRepository = MutationRepositoryImpl(localStore),
@@ -128,7 +145,8 @@ class AppDataHolder(
   val libraryRepository: LibraryRepository = LibraryRepositoryImpl(localStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
   val authRepository: AuthRepository = AuthRepositoryImpl(),
-  val sampleDataRepository: SampleDataRepository = SampleDataRepositoryImpl(localStore),
+  val sampleDataRepository: SampleDataRepository =
+    SampleDataRepositoryImpl(localStore, grpcSyncDataSource),
   val surveyEditorRepository: SurveyEditorRepository = SurveyEditorRepositoryImpl(localStore),
   val transactionRunner: TransactionRunner = LocalStoreTransactionRunner(localStore),
   val impactEventRepository: ImpactEventRepository = ImpactEventRepositoryImpl(localStore),
@@ -174,8 +192,44 @@ class AppDataHolder(
   val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),
   val searchPlacesUseCase: SearchPlacesUseCase = SearchPlacesUseCase(),
 ) {
+  private val mutableUserDataSyncState =
+    MutableStateFlow(
+      if (grpcSyncDataSource == null) UserDataSyncState.NotConfigured else UserDataSyncState.Syncing
+    )
+
+  /** Progress of the initial sync from the user data service, for reporting failures. */
+  val userDataSyncState: StateFlow<UserDataSyncState> = mutableUserDataSyncState.asStateFlow()
+
   init {
-    launch { sampleDataRepository.seedIfNeeded() }
+    launch { syncFromUserDataService() }
+  }
+
+  /** Retries the initial sync after a [UserDataSyncState.Failed]. */
+  fun retryUserDataSync() {
+    launch { syncFromUserDataService() }
+  }
+
+  private suspend fun syncFromUserDataService() {
+    if (grpcSyncDataSource == null) {
+      sampleDataRepository.seedIfNeeded()
+      return
+    }
+    mutableUserDataSyncState.value = UserDataSyncState.Syncing
+    mutableUserDataSyncState.value =
+      try {
+        sampleDataRepository.seedIfNeeded()
+        UserDataSyncState.Synced
+      } catch (e: CancellationException) {
+        throw e
+      } catch (e: Exception) {
+        println("Couldn't sync from the user data service at $userDataServiceUrl: $e")
+        val message =
+          (e as? GrpcWebException)?.description
+            ?: e.message
+            ?: e::class.simpleName
+            ?: "Unknown error"
+        UserDataSyncState.Failed(serviceUrl = userDataServiceUrl, message = message)
+      }
   }
 
   /** Everything the UI reads from the local data store, kept current as the store changes. */

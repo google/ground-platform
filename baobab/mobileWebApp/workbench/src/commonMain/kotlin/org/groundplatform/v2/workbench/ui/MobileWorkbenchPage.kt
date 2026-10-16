@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.di.requireUserDataServiceUrl
 import org.groundplatform.v2.app.ui.common.DevicePreviewFrame
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.mobile.GroundMobileApp
@@ -89,7 +91,11 @@ fun shouldShowWorkbenchChrome(
  */
 @Composable
 fun MobileWorkbenchApp(
-  state: WorkbenchState = remember { WorkbenchState(MobileAppState()) },
+  state: WorkbenchState = remember {
+    WorkbenchState(
+      MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = requireUserDataServiceUrl()))
+    )
+  },
   showChrome: Boolean = true,
 ) {
   if (!showChrome) {

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.app.data.seed
+package org.groundplatform.v2.app.data.seed.backend
 
 import org.groundplatform.v2.app.domain.model.GeospatialEntityItem
 import org.groundplatform.v2.app.domain.model.SubmissionFieldEntry
@@ -19,7 +19,7 @@ import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.SyncStatus
 
 /** Hardcoded sample geospatial entities for the sample data. */
-object SampleEntitiesData {
+object BackendStaticEntitiesData {
   /** Returns the preloaded [GeospatialEntityItem] list for [surveyId]. */
   fun entitiesForSurvey(surveyId: String): List<GeospatialEntityItem> =
     when (surveyId) {

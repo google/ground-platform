@@ -19,6 +19,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.domain.model.BasemapType
 import org.groundplatform.v2.app.domain.model.relatedEntityForPropertyValue
 import org.groundplatform.v2.web.ui.WebAppState
@@ -26,7 +27,7 @@ import org.groundplatform.v2.web.ui.WebPage
 
 class WebDashboardPageTest {
 
-  private val state = WebAppState()
+  private val state = WebAppState(dataHolder = sampleDataHolder())
   private val entity = state.entities.first { it.submissions.isNotEmpty() }
   private val datasetEntities = state.entities.filter { it.datasetId == entity.datasetId }
 
@@ -106,7 +107,7 @@ class WebDashboardPageTest {
 
   @Test
   fun dashboardTable_staysCollapsedOnSelectionAndExpandsOnShowInTable() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     assertFalse(testState.isDashboardTableExpanded)
 
     testState.selectEntity(entity.id)
@@ -129,7 +130,7 @@ class WebDashboardPageTest {
 
   @Test
   fun recenterMapOnEntity_adjustsTargetScreenYForReducedViewport() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     testState.selectEntity(entity.id)
     assertEquals(entity.id, testState.selectedEntityId)
 
@@ -155,14 +156,14 @@ class WebDashboardPageTest {
 
   @Test
   fun sidePanel_startsExpandedByDefault() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     assertTrue(testState.isSidePanelExpanded)
     assertTrue(testState.isDashboardSidePanelExpanded)
   }
 
   @Test
   fun toggleSidePanel_togglesBetweenExpandedAndCollapsed() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     assertTrue(testState.isSidePanelExpanded)
 
     testState.toggleSidePanel()
@@ -176,7 +177,7 @@ class WebDashboardPageTest {
 
   @Test
   fun collapseAndExpandSidePanel_updatesStateExplicitly() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
 
     testState.collapseSidePanel()
     assertFalse(testState.isSidePanelExpanded)
@@ -205,7 +206,7 @@ class WebDashboardPageTest {
 
   @Test
   fun reset_resetsSidePanelToExpanded() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     testState.collapseSidePanel()
     assertFalse(testState.isSidePanelExpanded)
 
@@ -215,13 +216,13 @@ class WebDashboardPageTest {
 
   @Test
   fun signedInUserInitials_derivesTwoLetterInitialsCorrectly() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     assertEquals("ML", testState.signedInUserInitials)
   }
 
   @Test
   fun signOut_resetsAuthentication() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     testState.signInWithGoogle()
     assertTrue(testState.isSignedIn)
 
@@ -231,7 +232,7 @@ class WebDashboardPageTest {
 
   @Test
   fun layersSheet_togglesStateAndControlsBasemapAndLayerVisibility() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     assertFalse(testState.isLayersSheetOpen)
 
     testState.updateLayersSheetOpen(true)
@@ -258,7 +259,7 @@ class WebDashboardPageTest {
 
   @Test
   fun detailsPanel_startsExpandedByDefault() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     assertTrue(testState.isDetailsPanelExpanded)
     assertTrue(testState.isDashboardDetailsPanelExpanded)
     assertTrue(testState.isRightPanelExpanded)
@@ -266,7 +267,7 @@ class WebDashboardPageTest {
 
   @Test
   fun toggleDetailsPanel_togglesBetweenExpandedAndCollapsed() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     assertTrue(testState.isDetailsPanelExpanded)
 
     testState.toggleDetailsPanel()
@@ -304,7 +305,7 @@ class WebDashboardPageTest {
 
   @Test
   fun openingTable_collapsesDetailsPanel() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     testState.selectEntity(entity.id)
     assertTrue(testState.isDetailsPanelExpanded)
     assertFalse(testState.isDashboardTableExpanded)
@@ -326,7 +327,7 @@ class WebDashboardPageTest {
 
   @Test
   fun selectingEntityWhileTableIsOpen_keepsDetailsPanelCollapsed() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     testState.updateDashboardTableExpanded(true)
     assertTrue(testState.isDashboardTableExpanded)
     assertFalse(testState.isDetailsPanelExpanded)
@@ -342,7 +343,7 @@ class WebDashboardPageTest {
 
   @Test
   fun reset_resetsDetailsPanelToExpanded() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     testState.collapseDetailsPanel()
     assertFalse(testState.isDetailsPanelExpanded)
 
@@ -429,7 +430,7 @@ class WebDashboardPageTest {
 
   @Test
   fun selectLayer_isMutuallyExclusiveWithEntitySelection() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     testState.selectEntity(entity.id)
 
     testState.selectLayer(entity.datasetId)
@@ -445,7 +446,7 @@ class WebDashboardPageTest {
 
   @Test
   fun showSelectedLayerInTable_expandsTableOnLayerDataset() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     testState.selectLayer(entity.datasetId)
 
     testState.showSelectedLayerInTable()
@@ -459,7 +460,7 @@ class WebDashboardPageTest {
 
   @Test
   fun dataTables_titlesNeverIncludeInternalDatasetIdsAcrossAllSurveys() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     for (survey in testState.surveys) {
       testState.onboarding.openSurvey(survey.id)
       val tables =

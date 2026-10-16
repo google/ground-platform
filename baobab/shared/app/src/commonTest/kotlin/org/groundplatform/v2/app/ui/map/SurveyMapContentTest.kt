@@ -22,6 +22,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.domain.model.EntityGeometryKind
 import org.groundplatform.v2.app.domain.model.editor.toLatLng
 import org.groundplatform.v2.app.domain.model.formatHexColorCss
@@ -32,7 +33,7 @@ import org.groundplatform.v2.map.Geometry
 import org.groundplatform.v2.map.LatLng
 
 class SurveyMapContentTest {
-  private val state = AppSession()
+  private val state = AppSession(sampleDataHolder())
 
   private fun SurveyMap.entityFeatures() =
     content.sources.first { it.id == SurveyMapContent.ENTITY_SOURCE }.features

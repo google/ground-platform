@@ -16,6 +16,7 @@ package org.groundplatform.v2.web.ui.dashboard
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.ui.AppSession.Companion.DEFAULT_SIDE_PANEL_WIDTH_DP
 import org.groundplatform.v2.app.ui.AppSession.Companion.MAX_SIDE_PANEL_WIDTH_DP
 import org.groundplatform.v2.app.ui.AppSession.Companion.MIN_SIDE_PANEL_WIDTH_DP
@@ -31,12 +32,15 @@ class SidePanelWidthTest {
 
   @Test
   fun sidePanelWidth_startsAtDefault() {
-    assertEquals(DEFAULT_SIDE_PANEL_WIDTH_DP, WebAppState().sidePanelWidthDp)
+    assertEquals(
+      DEFAULT_SIDE_PANEL_WIDTH_DP,
+      WebAppState(dataHolder = sampleDataHolder()).sidePanelWidthDp,
+    )
   }
 
   @Test
   fun updateSidePanelWidth_acceptsWidthWithinBounds() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
 
     state.updateSidePanelWidth(420f)
 
@@ -45,7 +49,7 @@ class SidePanelWidthTest {
 
   @Test
   fun updateSidePanelWidth_clampsToBounds() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
 
     state.updateSidePanelWidth(MIN_SIDE_PANEL_WIDTH_DP - 100f)
     assertEquals(MIN_SIDE_PANEL_WIDTH_DP, state.sidePanelWidthDp)
@@ -56,7 +60,7 @@ class SidePanelWidthTest {
 
   @Test
   fun updateSidePanelWidth_ignoresNonFiniteValues() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.updateSidePanelWidth(400f)
 
     state.updateSidePanelWidth(Float.NaN)
@@ -67,7 +71,7 @@ class SidePanelWidthTest {
 
   @Test
   fun sidePanelWidth_isKeptWhileCollapsed() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.updateSidePanelWidth(480f)
 
     state.collapseSidePanel()
@@ -79,7 +83,7 @@ class SidePanelWidthTest {
 
   @Test
   fun reset_restoresDefaultWidth() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.updateSidePanelWidth(480f)
 
     state.reset()

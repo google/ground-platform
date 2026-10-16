@@ -14,12 +14,17 @@
 package org.groundplatform.v2.app.data.repository
 
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
+import org.groundplatform.v2.app.data.datasource.remote.GrpcSyncDataSource
 import org.groundplatform.v2.app.data.seed.SampleDataSeeder
 import org.groundplatform.v2.app.domain.repository.SampleDataRepository
 
-/** [SampleDataRepository] that seeds the [LocalStore] via [SampleDataSeeder]. */
-class SampleDataRepositoryImpl(store: LocalStore) : SampleDataRepository {
-  private val seeder = SampleDataSeeder(store)
+/**
+ * [SampleDataRepository] that seeds the [LocalStore] from the user data service via
+ * [SampleDataSeeder], or does nothing when no service is configured ([syncDataSource] is null).
+ */
+class SampleDataRepositoryImpl(store: LocalStore, syncDataSource: GrpcSyncDataSource?) :
+  SampleDataRepository {
+  private val seeder = SampleDataSeeder(store, syncDataSource)
 
   override suspend fun seedIfNeeded() = seeder.seedIfNeeded()
 

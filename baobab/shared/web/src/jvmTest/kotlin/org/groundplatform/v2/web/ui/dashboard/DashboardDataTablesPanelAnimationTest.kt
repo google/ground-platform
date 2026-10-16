@@ -22,6 +22,7 @@ import androidx.compose.ui.test.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertFalse
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.web.ui.WebAppState
 
 /**
@@ -35,7 +36,7 @@ class DashboardDataTablesPanelAnimationTest {
   @Test
   fun collapsingTable_keepsRowsComposedDuringCollapseAnimation() =
     runDesktopComposeUiTest(width = 1200, height = 600) {
-      val state = WebAppState()
+      val state = WebAppState(dataHolder = sampleDataHolder())
       state.updateDashboardTableExpanded(true)
       val firstRowLabel = state.entities.first().label
 

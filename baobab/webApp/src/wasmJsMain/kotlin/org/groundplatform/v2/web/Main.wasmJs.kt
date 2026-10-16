@@ -14,10 +14,14 @@
  */
 package org.groundplatform.v2.web
 
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import kotlinx.browser.window
+import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.ui.common.RequireUserDataService
+import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 
 /** Mounts the web console ([WebConsoleApp]) and keeps the page in sync with the URL hash. */
@@ -25,10 +29,15 @@ import org.groundplatform.v2.web.ui.WebPage
 fun main() {
   val container = document.getElementById("ComposeTarget") ?: document.body!!
   ComposeViewport(container) {
-    WebConsoleApp(
-      initialPage = WebPage.fromHash(window.location.hash),
-      initialOrganizationId = WebPage.organizationIdFromHash(window.location.hash),
-      onHashChanged = { window.location.hash = it },
-    )
+    // Without a configured user data service, shows setup instructions instead of the console.
+    RequireUserDataService { serviceUrl ->
+      WebConsoleApp(
+        state =
+          remember { WebAppState(dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl)) },
+        initialPage = WebPage.fromHash(window.location.hash),
+        initialOrganizationId = WebPage.organizationIdFromHash(window.location.hash),
+        onHashChanged = { window.location.hash = it },
+      )
+    }
   }
 }

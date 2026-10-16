@@ -11,14 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.app.data.seed
+package org.groundplatform.v2.app.data.seed.backend
 
 import org.groundplatform.v2.app.domain.model.MutationLogItem
 import org.groundplatform.v2.app.domain.model.MutationOperationKind
 import org.groundplatform.v2.app.domain.model.MutationSyncState
 
 /** Hardcoded sample mutation log records for the sample data. */
-object SampleMutationsData {
+object BackendStaticMutationsData {
   /**
    * Sample local mutations (`DataMutation` items) spanning `Pending`, `In progress`, `Uploaded`,
    * and `Failed`, ordered in reverse chronological order with user-friendly operation descriptions.

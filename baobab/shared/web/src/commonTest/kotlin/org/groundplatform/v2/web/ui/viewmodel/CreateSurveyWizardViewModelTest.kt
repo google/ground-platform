@@ -18,6 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.data.seed.GlobalLibrarySeedData
 import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
@@ -42,7 +43,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun openCreateSurveyWizard_navigatesToCreateSurveyPage_andStartsOnOverview() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
 
     assertEquals(WebPage.CREATE_SURVEY, state.activePage)
@@ -70,7 +71,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun modeAndPurpose_sortsPurposePacksByCollectionModeAffinity_andSeedsTemplates() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -118,7 +119,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun purposeSelection_isMultiSelect_andDrivesMapFeatureSourceAndPrimaryLayerDefaults() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -172,7 +173,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun purposeSelection_multiplePacks_mergeProgramsAndDropOnlyDeselectedPackPrograms() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     wizard.updateTitle("Multi-Purpose Survey")
@@ -201,7 +202,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun multiplePurposes_createOneFormPerTemplate_eachWithItsOwnDataset() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     wizard.updateTitle("Producers and Restoration")
@@ -239,7 +240,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun purposeWithSeveralTemplates_createsSeveralForms_sharedTemplatesOnce() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     wizard.updateTitle("Coop Audit")
@@ -264,7 +265,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun changingPurposes_keepsFormsTheOrganizerAdded() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     wizard.updateTitle("Organizer Forms")
@@ -292,7 +293,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun eudrPurposePack_enforcesPolygonGuardrail_andComputesExportReadiness() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -331,7 +332,7 @@ class CreateSurveyWizardViewModelTest {
     assertFalse(SurveyWizardRules.usesIplcCareDefaults(OrganizationType.NGO, emptySet()))
     assertEquals(5, SurveyWizardRules.CARE_GOVERNANCE_CRITERIA.size)
 
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     wizard.updateTitle("Community Forest Tenure Survey")
@@ -350,7 +351,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun startMethod_copyExisting_and_importXForms_populateDraft() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -414,7 +415,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun importCollectEarthIdm_and_openInSurveyEditor_supportsCepSchemasAndEditorEscapeHatch() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -483,7 +484,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun modeAndPurpose_requiresAtLeastOnePurpose_orNonBlankOtherPurpose() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -527,7 +528,7 @@ class CreateSurveyWizardViewModelTest {
   fun surveyArea_isRequiredInAllModes_andCannotBeSkipped() {
     assertTrue(SurveyCollectionMode.entries.all { it.surveyAreaRequired })
 
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 
@@ -573,7 +574,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun cancelWizard_discardsWorkingSurvey_andReturnsToPreviousPage() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     val initialSurveyIds = state.surveys.map { it.id }.toSet()
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
 
@@ -591,7 +592,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun samplePlots_deferredUntilPreviewClickedOrWizardSaved() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
     val workingId = wizard.uiState.value.workingSurveyId
@@ -626,7 +627,7 @@ class CreateSurveyWizardViewModelTest {
 
   @Test
   fun importCollectEarthCepBundle_parsesQuestionsRelevancePlotsAndAllowsProjectSwitch() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
     val wizard = state.createSurveyWizard
 

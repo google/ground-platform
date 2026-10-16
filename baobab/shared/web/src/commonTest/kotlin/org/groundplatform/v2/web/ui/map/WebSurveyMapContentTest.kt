@@ -18,6 +18,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.ui.map.SurveyMap
 import org.groundplatform.v2.app.ui.map.SurveyMapContent
 import org.groundplatform.v2.app.ui.map.SurveyMapIds
@@ -27,7 +28,7 @@ import org.groundplatform.v2.web.ui.viewmodel.ui
 
 /** The survey map's content after edits only the web console makes (layer styles, imagery). */
 class WebSurveyMapContentTest {
-  private val state = WebAppState()
+  private val state = WebAppState(dataHolder = sampleDataHolder())
 
   private fun SurveyMap.entityFeatures() =
     content.sources.first { it.id == SurveyMapContent.ENTITY_SOURCE }.features

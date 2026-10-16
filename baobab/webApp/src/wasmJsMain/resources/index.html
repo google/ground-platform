@@ -252,6 +252,8 @@
         if (window.mapboxgl && token) window.mapboxgl.accessToken = token;
       })();
     </script>
+    <!-- Sets window.GROUND_USER_DATA_SERVICE_URL from USER_DATA_SERVICE_URL at build time. -->
+    <script src="user-data-service-config.js"></script>
     <script src="media-capture-bridge.js"></script>
     <script src="pdf-export-bridge.js"></script>
     <script src="webApp.js"></script>

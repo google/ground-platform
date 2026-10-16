@@ -41,6 +41,8 @@ for **Ground 2.0**.
 ├── webApp/                      # Runnable Web Console app (Wasm)        -> depends on shared/web
 ├── mobileWebApp/                # Runnable mobile app for the browser (Wasm) -> depends on shared/mobile
 │   └── workbench/               # Simulated device, XForms editor & sample data tools around the mobile app
+├── server/
+│   └── user-data-service/       # gRPC user data service (Kotlin/JVM; native gRPC + gRPC-Web, Cloud Run)
 ├── devtools/
 │   └── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
 └── docs/                        # System architecture & Protocol Buffer data model specifications
@@ -110,6 +112,11 @@ for **Ground 2.0**.
     an Android or iOS build. The workbench lives in its `workbench/` library.
     The web console and the mobile app are independent Wasm apps, even when
     they're hosted on the same site.
+-   **[`server/user-data-service/`](server/user-data-service/)**: Kotlin/JVM
+    binary serving the Collect One survey, organization, library, and data
+    RPCs over native gRPC and gRPC-Web, loaded with sample data for now. The
+    web console and mobile apps sync from it; see its README for running it
+    locally and deploying it to Cloud Run.
 -   **[`devtools/formdebugger/`](devtools/formdebugger/)**: Single-page Compose
     Multiplatform Web application for interactive bidirectional editing of
     `FormDef` and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time

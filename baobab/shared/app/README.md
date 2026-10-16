@@ -100,13 +100,43 @@ and look the same on web and mobile.
     `[photo]`); other scripts render as `?`. Embedding a Unicode font (for
     example Noto Sans) is the next step.
 
+## User Data Service
+
+The app syncs `LocalStore` from the
+[user data service](../../server/user-data-service/README.md) through
+`GrpcSyncDataSource`, over gRPC-Web (`client/grpc/GrpcWebTransport.kt` and
+`RemoteUserDataServices.kt`) on every platform. `AppDataHolder` takes the
+service's base URL as `userDataServiceUrl`; when it's null, nothing is synced
+(tests seed stores directly). The app entry points wrap the app in
+`RequireUserDataService`, which shows setup instructions instead of starting
+when `platformUserDataServiceUrl()` (`di/UserDataServiceConfig.kt`) finds no
+URL. Sync failures appear in `AppDataHolder.userDataSyncState` and are shown
+with `UserDataSyncErrorBanner`, whose Retry calls `retryUserDataSync()`.
+The URL comes from:
+
+-   **WasmJS:** `window.GROUND_USER_DATA_SERVICE_URL` from
+    `user-data-service-config.js`. In development it's the page's own origin,
+    because the dev server proxies the service set by `USER_DATA_SERVICE_URL`;
+    production bundles bake in an absolute URL. It can't be set from the page
+    URL.
+-   **JVM:** the `groundplatform.userDataServiceUrl` system property or the
+    `USER_DATA_SERVICE_URL` environment variable.
+-   **Android:** the `groundplatform.userDataServiceUrl` system property, which
+    `androidApp` sets from its `USER_DATA_SERVICE_URL` build setting.
+
 ## Test Fixtures (`testing/`)
 
 The `:app-testing` subproject (`org.groundplatform.v2:app-testing`) contains
 fixtures shared by this module's tests and by the tests of modules built on it:
-seeded in-memory stores (`seededStore()`, `runNow`), survey and form editor
-samples, `DataCollectionFixture`, and `testScope()`.
+the sample data (`data/seed/Sample*Data`, `GlobalLibrarySeedData`), seeded
+in-memory stores (`seededStore()`, `sampleDataHolder()`, `runNow`), the
+read-only `SeedUserDataService` fake with `sampleSyncDataSource()`, survey and
+form editor samples, `DataCollectionFixture`, and `testScope()`.
 Depend on it from `commonTest` only.
+
+`UserDataSeedGenerator` builds the user data service's sample seed from the same
+fixtures. After changing them, rewrite the service's seed snapshot with
+`./gradlew jvmTest -PregenerateUserDataSeed`.
 
 ## Web Hosts
 

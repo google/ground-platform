@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
+import org.groundplatform.v2.app.data.datasource.local.store.sampleSyncDataSource
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.SampleDataRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
@@ -40,7 +41,7 @@ class WorkbenchViewModelTest {
     val store = seededStore()
     val scope = CoroutineScope(Dispatchers.Unconfined + Job())
     val surveyRepository = SurveyRepositoryImpl(store)
-    val sampleDataRepository = SampleDataRepositoryImpl(store)
+    val sampleDataRepository = SampleDataRepositoryImpl(store, sampleSyncDataSource())
     val viewModel =
       WorkbenchViewModel(
         surveyRepository = surveyRepository,

@@ -94,4 +94,7 @@ message AuditRecord {
 
   // Client application software version string.
   string client_version = 11;
+
+  // Authoritative server commit timestamp for stateless delta synchronization.
+  google.protobuf.Timestamp commit_timestamp = 12;
 }

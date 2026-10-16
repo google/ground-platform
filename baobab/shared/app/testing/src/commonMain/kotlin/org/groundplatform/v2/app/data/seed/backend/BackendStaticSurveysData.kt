@@ -11,8 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.app.data.seed
+package org.groundplatform.v2.app.data.seed.backend
 
+import org.groundplatform.v2.app.data.seed.SampleDataSeeder
 import org.groundplatform.v2.app.domain.model.FormPreviewItem
 import org.groundplatform.v2.app.domain.model.MapThumbnailTheme
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
@@ -25,7 +26,7 @@ import org.groundplatform.v2.core.forms.model.FormDefinition
 import org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm
 
 /** Hardcoded sample surveys, forms, and XForms presets for the sample data. */
-object SampleSurveysData {
+object BackendStaticSurveysData {
   private val resolveFormDef = ResolveFormDefForLaunchUseCase()
 
   fun builtInFallbackFormForForm(form: FormPreviewItem): FormDefinition =
@@ -131,19 +132,19 @@ object SampleSurveysData {
       .map { survey ->
         val surveyArea =
           if (survey.id == SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID) {
-            SampleSurveyEditorData.kenyaSurveyArea()
+            BackendStaticSurveyEditorData.kenyaSurveyArea()
           } else {
             null
           }
         survey.copy(
-          ownerEmail = SampleOrganizationsData.ownerEmailForSurvey(survey.id),
-          organizationId = SampleOrganizationsData.organizationIdForSurvey(survey.id),
+          ownerEmail = BackendStaticOrganizationsData.ownerEmailForSurvey(survey.id),
+          organizationId = BackendStaticOrganizationsData.organizationIdForSurvey(survey.id),
           thumbnail =
             SurveyThumbnailGenerator.fromRuntime(
               surveyId = survey.id,
               surveyArea = surveyArea,
-              mapLayers = SampleMapLayersData.mapLayersForSurvey(survey.id),
-              entities = SampleEntitiesData.entitiesForSurvey(survey.id),
+              mapLayers = BackendStaticMapLayersData.mapLayersForSurvey(survey.id),
+              entities = BackendStaticEntitiesData.entitiesForSurvey(survey.id),
             ),
         )
       }

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.app.data.seed
+package org.groundplatform.v2.app.data.seed.backend
 
 import org.groundplatform.v2.app.domain.model.ConceptAggregation
 import org.groundplatform.v2.app.domain.model.ConceptDataType
@@ -34,8 +34,8 @@ import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
  * Pack that combines it with the global EUDR template. The global library itself comes from
  * [GlobalLibrarySeedData].
  */
-object SampleLibraryData {
-  private const val KFS = SampleOrganizationsData.KENYA_FOREST_SERVICE
+object BackendStaticLibraryData {
+  private const val KFS = BackendStaticOrganizationsData.KENYA_FOREST_SERVICE
 
   private fun kfsId(name: String) = LibraryIds.organizationEntryId(KFS, name)
 

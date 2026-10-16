@@ -34,6 +34,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
 import org.groundplatform.v2.web.domain.model.editor.CreateSurveyWizardStep
@@ -47,7 +48,7 @@ class CreateSurveyWizardPageTest {
   @Test
   fun clickingCloseButtonPromptsConfirmationBeforeDiscardingSurvey() =
     runDesktopComposeUiTest(width = 1280, height = 900) {
-      val state = WebAppState()
+      val state = WebAppState(dataHolder = sampleDataHolder())
       state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
       val workingId = state.createSurveyWizard.uiState.value.workingSurveyId
 
@@ -85,7 +86,7 @@ class CreateSurveyWizardPageTest {
   @Test
   fun surveyTitleIsFocusedWhenTheDesignerOpens_withoutFlaggingItOnBlur() =
     runDesktopComposeUiTest(width = 1280, height = 900) {
-      val state = WebAppState()
+      val state = WebAppState(dataHolder = sampleDataHolder())
       state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
 
       setContent { MaterialTheme { CreateSurveyWizardPage(state = state) } }
@@ -104,7 +105,7 @@ class CreateSurveyWizardPageTest {
   @Test
   fun choosingHowMapFeaturesAreCreatedCollapsesTheChoice_untilChange() =
     runDesktopComposeUiTest(width = 1280, height = 1400) {
-      val state = WebAppState()
+      val state = WebAppState(dataHolder = sampleDataHolder())
       state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
       val wizard = state.createSurveyWizard
       wizard.updateTitle("Map features test")
@@ -140,7 +141,7 @@ class CreateSurveyWizardPageTest {
   @Test
   fun mapFeatureSourcePreselectedByThePurposeStartsCollapsed() =
     runDesktopComposeUiTest(width = 1280, height = 1400) {
-      val state = WebAppState()
+      val state = WebAppState(dataHolder = sampleDataHolder())
       state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
       val wizard = state.createSurveyWizard
       wizard.updateTitle("Map features test")
@@ -169,7 +170,7 @@ class CreateSurveyWizardPageTest {
   @Test
   fun mapStaysInViewWhileScrollingTheMapLayerSettings() =
     runDesktopComposeUiTest(width = 1280, height = 1000) {
-      val state = WebAppState()
+      val state = WebAppState(dataHolder = sampleDataHolder())
       state.openCreateSurveyWizard(SampleOrganizationsData.KENYA_FOREST_SERVICE)
       val wizard = state.createSurveyWizard
       wizard.updateTitle("Map features test")

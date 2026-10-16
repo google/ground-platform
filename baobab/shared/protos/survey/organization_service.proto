@@ -1,0 +1,152 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/protos/survey/organization.proto";
+
+// Multi-tenant Organization gRPC service supporting organization discovery,
+// delta sync (`docs/technical/sync-engine.md`), fine-grained path-addressed
+// mutations, and membership invitation / join-request workflows.
+service OrganizationService {
+  // Retrieves a single organization by ID (e.g., to preview an organization
+  // from an invite link before joining it).
+  rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse);
+
+  // Searches the public directory of listed organizations the caller may ask
+  // to join. Organizations the caller belongs to are synced with
+  // `StreamOrganizations` instead.
+  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
+
+  // Delta sync for the caller's organizations. Streams organizations where
+  // `commit_timestamp > since_timestamp` (and `<= until_timestamp` when set)
+  // in strict `commit_timestamp ASC` order, including soft-deleted tombstones
+  // (`is_deleted = true`). Closes when caught up.
+  rpc StreamOrganizations(StreamOrganizationsRequest) returns (stream Organization);
+
+  // Unified idempotent mutation RPC for creating, updating, or soft-deleting an
+  // organization, its shared imagery sources, and its member roster.
+  rpc MutateOrganization(MutateOrganizationRequest) returns (MutateOrganizationResponse);
+
+  // Requests membership in a listed organization or redeems an organization
+  // invite token.
+  rpc JoinOrganization(JoinOrganizationRequest) returns (JoinOrganizationResponse);
+}
+
+message GetOrganizationRequest {
+  string organization_id = 1;
+}
+
+message GetOrganizationResponse {
+  Organization organization = 1;
+}
+
+// Query over the public directory of listed organizations.
+message ListOrganizationsRequest {
+  reserved 1 to 4;
+  reserved "user_email", "include_deleted", "since_timestamp", "until_timestamp";
+
+  int32 page_size = 5;
+  string page_token = 6;
+
+  // Optional case-insensitive keyword matched against name and description.
+  string query = 7;
+}
+
+message ListOrganizationsResponse {
+  repeated Organization organizations = 1;
+  string next_page_token = 2;
+
+  reserved 3;
+  reserved "server_watermark";
+}
+
+message StreamOrganizationsRequest {
+  // Exclusive lower-bound server timestamp watermark (`commit_timestamp >
+  // since_timestamp`). Omit to stream the full initial dataset.
+  google.protobuf.Timestamp since_timestamp = 1;
+
+  // Optional inclusive upper-bound server timestamp watermark.
+  google.protobuf.Timestamp until_timestamp = 2;
+
+  // Whether to include soft-deleted organization tombstones.
+  bool include_deleted = 3;
+}
+
+// Path-addressed field patch for `Organization`.
+//
+// Supported `key` patterns:
+//   - `"name"`, `"description"`, `"website_url"`, `"logo_url"`,
+//     `"country_code"` (`string_value` or `null_value`)
+//   - `"listed"`, `"exclude_from_platform_aggregates"`, `"is_deleted"`
+//     (`bool_value`)
+//   - `"organization_type"` (`organization_type_value`)
+//   - `"imagery_sources/<imagery_source_id>"` (`imagery_source_value` or
+//     `null_value`)
+//   - `"members/<email>"` (`member_value` or `null_value`)
+message OrganizationFieldPatch {
+  string key = 1;
+
+  oneof value {
+    google.protobuf.NullValue null_value = 2;
+    string string_value = 3;
+    bool bool_value = 4;
+    OrganizationType organization_type_value = 5;
+    ImagerySource imagery_source_value = 6;
+    OrganizationMember member_value = 7;
+  }
+}
+
+message OrganizationMutation {
+  oneof operation {
+    OrganizationFieldPatch update_field = 1;
+
+    // Replaces the entire organization snapshot (or initializes a new one).
+    Organization upsert_organization = 2;
+
+    // Permanently deletes the organization and unlinks its surveys to personal.
+    bool delete_organization = 3;
+  }
+}
+
+message MutateOrganizationRequest {
+  string organization_id = 1;
+  int64 base_version = 2;
+  repeated OrganizationMutation mutations = 3;
+}
+
+message MutateOrganizationResponse {
+  string organization_id = 1;
+  Organization organization = 2;
+  google.protobuf.Timestamp commit_timestamp = 3;
+}
+
+message JoinOrganizationRequest {
+  string organization_id = 1;
+  string user_id = 2;
+  string email = 3;
+  string invite_token = 4;
+}
+
+message JoinOrganizationResponse {
+  Organization organization = 1;
+  OrganizationMember member = 2;
+  google.protobuf.Timestamp commit_timestamp = 3;
+}

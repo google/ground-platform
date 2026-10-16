@@ -20,9 +20,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.di.requireUserDataServiceUrl
+import org.groundplatform.v2.app.ui.common.UserDataSyncErrorBanner
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
@@ -46,7 +52,9 @@ import org.groundplatform.v2.web.ui.wizard.CreateSurveyWizardPage
  */
 @Composable
 fun WebConsoleApp(
-  state: WebAppState = remember { WebAppState() },
+  state: WebAppState = remember {
+    WebAppState(dataHolder = AppDataHolder(userDataServiceUrl = requireUserDataServiceUrl()))
+  },
   initialPage: WebPage? = null,
   initialOrganizationId: String? = null,
   onHashChanged: (String) -> Unit = {},
@@ -76,7 +84,15 @@ fun WebConsoleApp(
       color =
         if (isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerLowest,
     ) {
-      Box(modifier = Modifier.fillMaxSize()) { WebConsolePages(state, page) }
+      Box(modifier = Modifier.fillMaxSize()) {
+        WebConsolePages(state, page)
+        val syncState by state.dataHolder.userDataSyncState.collectAsState()
+        UserDataSyncErrorBanner(
+          state = syncState,
+          onRetry = state.dataHolder::retryUserDataSync,
+          modifier = Modifier.align(Alignment.TopCenter),
+        )
+      }
     }
   }
 }

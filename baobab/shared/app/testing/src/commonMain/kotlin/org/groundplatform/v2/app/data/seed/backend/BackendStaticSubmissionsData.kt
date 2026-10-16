@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.app.data.seed
+package org.groundplatform.v2.app.data.seed.backend
 
 import org.groundplatform.v2.app.domain.model.SubmissionFieldEntry
 import org.groundplatform.v2.app.domain.model.SubmissionGeometryPolygon
@@ -19,7 +19,7 @@ import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
 import org.groundplatform.v2.app.domain.model.SyncStatus
 
 /** Hardcoded sample standalone submissions and submission geometries for the sample data. */
-object SampleSubmissionsData {
+object BackendStaticSubmissionsData {
   /** Returns the preloaded standalone [SubmissionPreviewItem] list for [surveyId]. */
   fun standaloneSubmissionsForSurvey(surveyId: String): List<SubmissionPreviewItem> =
     when (surveyId) {

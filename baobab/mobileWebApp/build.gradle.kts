@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.Properties
+
 plugins {
   kotlin("multiplatform") version "2.4.20"
   id("org.jetbrains.compose") version "1.12.0"
@@ -111,6 +113,45 @@ tasks.withType<org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink>().confi
   }
 }
 
+// Base URL of the user data service (server/user-data-service), baked into production bundles as
+// `user-data-service-config.js`. Set `USER_DATA_SERVICE_URL` as a Gradle property
+// (`-PUSER_DATA_SERVICE_URL=...`), in the environment, or in `local.properties` (this directory's,
+// or `../local.properties`), in that order of precedence. It must be reachable from users' browsers
+// (HTTPS when the bundle is served over HTTPS). The dev server ignores this copy: it proxies the
+// service and points the app at its own origin (see
+// webpack.config.d/devServer.js). Empty: the app shows setup instructions instead of starting.
+val localProperties =
+  Properties().apply {
+    listOf(file("../local.properties"), file("local.properties"))
+      .filter { it.isFile }
+      .forEach { f -> f.inputStream().use(::load) }
+  }
+val userDataServiceUrl =
+  (providers.gradleProperty("USER_DATA_SERVICE_URL").orNull
+      ?: providers.environmentVariable("USER_DATA_SERVICE_URL").orNull
+      ?: localProperties.getProperty("USER_DATA_SERVICE_URL")
+      ?: "")
+    .trim()
+
+val generateUserDataServiceConfig by tasks.registering {
+  val url = userDataServiceUrl
+  val outputDir = layout.buildDirectory.dir("generated/userDataServiceConfig")
+  inputs.property("userDataServiceUrl", url)
+  outputs.dir(outputDir)
+  doLast {
+    val value = if (url.isEmpty()) "null" else groovy.json.JsonOutput.toJson(url)
+    outputDir
+      .get()
+      .file("user-data-service-config.js")
+      .asFile
+      .apply { parentFile.mkdirs() }
+      .writeText(
+        "// Generated from USER_DATA_SERVICE_URL by build.gradle.kts; do not edit.\n" +
+          "window.GROUND_USER_DATA_SERVICE_URL = $value;\n"
+      )
+  }
+}
+
 tasks.withType<ProcessResources>().configureEach {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   from(file("../shared/ui/src/commonMain/composeResources")) {
@@ -118,4 +159,5 @@ tasks.withType<ProcessResources>().configureEach {
   }
   // JS bridges loaded by index.html for the shared/app wasmJs actuals (PDF export, media capture).
   from(file("../shared/app/src/wasmJsMain/resources"))
+  from(generateUserDataServiceConfig)
 }

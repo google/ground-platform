@@ -61,6 +61,17 @@ val mapboxAccessToken =
       ?: "")
     .trim()
 
+// Base URL of the user data service (server/user-data-service) the app syncs from, e.g.
+// http://10.0.2.2:8080 for a service running on the emulator's host. A Gradle property or the
+// environment overrides local.properties. Empty: the app shows setup instructions instead of
+// starting.
+val userDataServiceUrl =
+  (providers.gradleProperty("USER_DATA_SERVICE_URL").orNull
+      ?: providers.environmentVariable("USER_DATA_SERVICE_URL").orNull
+      ?: localProperties.getProperty("USER_DATA_SERVICE_URL")
+      ?: "")
+    .trim()
+
 android {
   namespace = "org.groundplatform.v2.android"
   compileSdk = 35
@@ -71,9 +82,15 @@ android {
     versionCode = 1
     versionName = "1.0"
     resValue("string", "mapbox_access_token", mapboxAccessToken)
+    resValue("string", "user_data_service_url", userDataServiceUrl)
   }
   buildTypes {
+    debug {
+      // Lets debug builds reach a local user data service over plain HTTP.
+      manifestPlaceholders["usesCleartextTraffic"] = "true"
+    }
     release {
+      manifestPlaceholders["usesCleartextTraffic"] = "false"
       // Sign release bundles with the standard debug key, until there's a production keystore, so
       // the .aab can be
       // installed via bundletool or shared internally without a production keystore.

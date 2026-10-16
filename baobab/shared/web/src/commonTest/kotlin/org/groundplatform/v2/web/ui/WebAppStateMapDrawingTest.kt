@@ -20,6 +20,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.ui.map.SurveyMap
 import org.groundplatform.v2.app.ui.map.SurveyMapContent
 import org.groundplatform.v2.app.ui.map.SurveyMapIds
@@ -35,7 +36,7 @@ import org.groundplatform.v2.map.LatLng
 class WebAppStateMapDrawingTest {
   /** A web app whose forms launch with the all-field-types example XForms. */
   private fun webAppWithWorkbenchForms(): WebAppState =
-    WebAppState().also { web ->
+    WebAppState(dataHolder = sampleDataHolder()).also { web ->
       web.dataCollection.updateCustomFormDef(
         XFormsXmlSerializer.deserializeFormDef(WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml),
         isPreset = true,

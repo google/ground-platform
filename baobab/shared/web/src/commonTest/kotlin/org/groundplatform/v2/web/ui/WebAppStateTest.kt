@@ -19,6 +19,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.domain.model.EntityDetailsPane
 import org.groundplatform.v2.app.ui.map.SurveyMap
 import org.groundplatform.v2.app.ui.map.SurveyMapContent
@@ -29,7 +30,7 @@ class WebAppStateTest {
 
   @Test
   fun selectPage_updatesActivePageAndNotifiesListener() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     assertEquals(WebPage.WEB_SURVEYS, state.activePage)
 
     var notifiedPage: WebPage? = null
@@ -46,7 +47,7 @@ class WebAppStateTest {
 
   @Test
   fun webEntityDetailsTabs_openingSubmissionSelectsHistoryAndSwitchingTabsKeepsIt() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     val entity = state.entities.first { it.submissions.isNotEmpty() }
     val submission = entity.submissions.first()
     state.selectEntity(entity.id)
@@ -69,7 +70,7 @@ class WebAppStateTest {
 
   @Test
   fun focusWebFormQuestion_issuesRequestsWithIncreasingTokens_andClearsWithTheForm() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
     assertNull(state.webFormFocusRequest)
 

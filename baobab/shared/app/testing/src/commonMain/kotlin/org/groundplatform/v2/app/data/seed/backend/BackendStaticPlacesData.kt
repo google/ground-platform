@@ -11,12 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.app.data.seed
+package org.groundplatform.v2.app.data.seed.backend
 
 import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
 
 /** Hardcoded sample places gazetteer for the sample data. */
-object SamplePlacesData {
+object BackendStaticPlacesData {
   /** Alias for [defaultSurveyPlaces]. */
   fun defaultPlaces(): List<SurveyPlaceItem> = defaultSurveyPlaces()
 

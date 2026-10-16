@@ -14,38 +14,43 @@
  limitations under the License.
 -->
 
-# Sample Data & Seeding
+# Initial Data Seeding
 
-**TL;DR:** The `data/seed` package encapsulates all built-in sample datasets and `SampleDataSeeder`, which populates `LocalStore` on initial app launch or a reset to sample data.
+**TL;DR:** `SampleDataSeeder` fills `LocalStore` with the initial state of the
+[user data service](../../../../../../../../../../../server/user-data-service/README.md)
+on first launch, and again on a reset to sample data. The sample data itself
+no longer ships in the app.
 
 ## Scope & Purpose
 
-To make the mobile app and web console self-contained for UX evaluation and automated testing without requiring a live backend, `data/seed/` defines realistic initial datasets and seeding logic:
-
-- `GlobalLibrarySeedData`: Kotlin copy of the canonical global library seed files (`shared/assets/library/<vocabulary>.textproto`), loaded into the `"All users"` library; `GlobalLibrarySeedTest` (jvmTest) keeps the two identical. `SampleLibraryData` adds sample organization library entries.
-- `SampleDataSeeder`: Populates `LocalStore` atomically at startup (when empty or when `SEED_VERSION` advances) and on explicit user reset (`SampleDataRepository.reseed()`).
-- `SampleSurveysData`: Seed surveys, form metadata, and built-in XForms XML definitions.
-- `SampleMapLayersData`: Seed map layers and data tables per survey.
-- `SampleEntitiesData`: Seed geospatial entities, geometries, properties, and historical form submissions/records.
-- `SampleMutationsData`: Seed offline upload/mutation queue entries.
-- `SampleOrganizationsData`: Seed organizations (with sample types and countries), member rosters, and imagery sources.
-- `SurveyEditorSampleData`: Supplemental editor-only fixtures (collaborator rosters, sample design configurations, and survey area polygons) merged into derived drafts at seed time.
+- `SampleDataSeeder`: Pulls the service's state through `GrpcSyncDataSource`
+  when the store is empty or `SEED_VERSION` advances, and on an explicit reset
+  (`SampleDataRepository.resetToSampleData()`). With no service configured, it
+  leaves the store as is (the apps don't start without one; tests seed stores
+  directly).
+- The sample datasets (`Sample*Data`, `GlobalLibrarySeedData`,
+  `SurveyEditorSampleData`) are test fixtures in `shared/app/testing`, in this
+  same package. `UserDataSeedGenerator` turns them into the service's seed, and
+  `writeSampleData()` writes them straight into a store for tests.
 
 ## Role in the Overall Architecture
-
-`data/seed/` is an internal sub-component of the **Data** layer that writes initial state into `LocalStore`:
 
 ```
 SampleDataRepositoryImpl (data/repository/)
         ↓ invokes
 SampleDataSeeder (data/seed/)
-        ↓ reads fixtures & writes to
+        ↓ pulls through
+GrpcSyncDataSource (data/datasource/remote/) ← user data service
+        ↓ writes to
 LocalStore (data/datasource/local/store/)
 ```
 
-Once seeded, all application features read and mutate data exclusively through `LocalStore` via repositories—never by reading `Sample*Data` constants directly.
+Once seeded, all application features read and mutate data exclusively through
+`LocalStore` via repositories.
 
 ## Dependency Rules
 
-- **Inbound access**: Enforced by `SampleDataGuardrailTest`, **only** files inside `data/seed/` (and `SampleDataRepositoryImpl` / `AppDataHolder` referencing `SampleDataSeeder`) may reference `Sample*Data` or `SurveyEditorSamples`. UI components, ViewModels, Use Cases, and other Repositories are strictly forbidden from reading seed fixtures directly.
-- **Outbound dependencies**: Depends only on `domain/model/` and `data/datasource/local/store/`. Never imports `di/` or `ui/`.
+- **Inbound access**: Only `SampleDataRepositoryImpl` uses `SampleDataSeeder`;
+  `SEED_VERSION` and `DEFAULT_ACTIVE_SURVEY_ID` are also read by tests.
+- **Outbound dependencies**: Depends only on `data/datasource/local/store/` and
+  `data/datasource/remote/`. Never imports `di/` or `ui/`.

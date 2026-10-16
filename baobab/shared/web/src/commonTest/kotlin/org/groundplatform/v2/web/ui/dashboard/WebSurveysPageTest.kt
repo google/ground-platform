@@ -18,12 +18,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 
 class WebSurveysPageTest {
-  private val state = WebAppState()
+  private val state = WebAppState(dataHolder = sampleDataHolder())
   private val user = state.signedInUserEmail
   private val kfs = state.organization(SampleOrganizationsData.KENYA_FOREST_SERVICE)!!
   private val mekong = state.organization(SampleOrganizationsData.MEKONG_MANGROVE_ALLIANCE)!!
@@ -34,7 +35,7 @@ class WebSurveysPageTest {
     assertFalse(WebPage.WEB_SURVEYS.needsActiveSurvey)
     assertTrue(WebPage.WEB_DASHBOARD.needsActiveSurvey)
     assertTrue(WebPage.SURVEY_EDITOR.needsActiveSurvey)
-    assertEquals(WebPage.WEB_SURVEYS, WebAppState().activePage)
+    assertEquals(WebPage.WEB_SURVEYS, WebAppState(dataHolder = sampleDataHolder()).activePage)
   }
 
   @Test
@@ -107,7 +108,7 @@ class WebSurveysPageTest {
 
   @Test
   fun createSurvey_addsAnOwnedSurveyInTheChosenOrganizationAndOpensIt() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     val before = testState.surveys.size
     val id = testState.createSurvey(title = "Mangrove Nursery Audit", organizationId = kfs.id)
     assertEquals("survey-mangrove-nursery-audit", id)
@@ -132,7 +133,7 @@ class WebSurveysPageTest {
 
   @Test
   fun openSurveyOnWeb_switchesActiveSurveyWithoutDownloadingIt() {
-    val testState = WebAppState()
+    val testState = WebAppState(dataHolder = sampleDataHolder())
     val target = testState.surveys.first { it.id != testState.activeSurveyId }
     val wasDownloaded = target.isDownloaded
     testState.openSurveyOnWeb(target.id)

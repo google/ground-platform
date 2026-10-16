@@ -18,8 +18,38 @@ syntax = "proto3";
 
 package groundplatform.v2.data;
 
+import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/forms/types.proto";
+
+// Active 5-minute plot lease acquired by a desk interpreter in the Web Console.
+message PlotLock {
+  string entity_id = 1;
+  string locked_by_user_id = 2;
+  google.protobuf.Timestamp locked_at = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+// Multi-interpreter consensus and QA/QC rollup summary for an entity/plot.
+message QualityRollup {
+  int32 completed_reviews = 1;
+  int32 required_reviews = 2;
+  double agreement_score = 3;
+  bool has_disagreement = 4;
+}
+
+// Non-destructive offline property conflict recorded when a client mutates an
+// entity property against a stale `base_revision`.
+message EntityConflict {
+  string conflict_id = 1;
+  string field_key = 2;
+  int64 base_revision = 3;
+  int64 conflicting_revision = 4;
+  groundplatform.v2.forms.TypedValue incoming_value = 5;
+  string incoming_user_id = 6;
+  string source_submission_id = 7;
+  google.protobuf.Timestamp incoming_timestamp = 8;
+}
 
 // A persistent, versioned entity record within an Entity Dataset.
 message EntityRecord {
@@ -38,8 +68,7 @@ message EntityRecord {
   // Spatial geometry associated with this geospatial entity (if type is
   // GEOSPATIAL). Exposed to XForms / ProtoForms XPath expressions and
   // `entity_saveto` bindings under the reserved system property name
-  // `"geometry"`. Polygon vertex counts are limited by the per-tier
-  // `QuotaLimits.max_area_vertices` quota, not by a fixed schema rule.
+  // `"geometry"`.
   oneof geometry {
     groundplatform.v2.forms.GeoPoint point = 5;
     groundplatform.v2.forms.GeoTrace trace = 6;
@@ -59,12 +88,59 @@ message EntityRecord {
   bool is_deleted = 11;
 
   // S2 cell token (`S2CellId::ToToken`: hex cell ID with trailing zeros
-  // removed) of the level-13 cell
-  // (about 1 km²) containing the geometry's representative point: the point
-  // itself, the first vertex of a trace, or the vertex average of a shape's
-  // ring. Empty for entities without geometry. Written alongside every
-  // geometry change and indexed by the backend so bounding-box queries
-  // (`ListEntitiesRequest.bbox`) can be answered from a cell range scan on any
-  // key-value store. Servers recompute it rather than trusting clients.
+  // removed) of the level-13 cell containing the geometry's representative
+  // point.
   string s2_cell_token = 12;
+
+  // Survey identifier (`SurveyDef.survey_id`) owning this entity.
+  string survey_id = 13;
+
+  // Authoritative server commit timestamp for stateless delta synchronization
+  // (`docs/technical/sync-engine.md`).
+  google.protobuf.Timestamp commit_timestamp = 14;
+
+  // Active 5-minute CEO desk interpretation lease, if currently locked.
+  PlotLock active_lock = 15;
+
+  // Multi-interpreter consensus and QA/QC rollup summary.
+  QualityRollup quality_rollup = 16;
+
+  // Unresolved property-level offline edit conflicts awaiting organizer review.
+  repeated EntityConflict unresolved_conflicts = 17;
+
+  // Human-readable dataset display name (e.g., "Smallholder Coffee Parcels").
+  string dataset_name = 18;
+
+  // Map layer ID rendering this entity (e.g., "layer-coffee-parcels").
+  string layer_id = 19;
+
+  // AgStack GeoID or spatial asset hash identifier.
+  string geo_id = 20;
+
+  // Human-readable geometry kind label (e.g., "Polygon", "Point").
+  string geometry_type_label = 21;
+
+  // Computed or recorded area in hectares.
+  double area_hectares = 22;
+
+  // Computed or recorded perimeter in meters.
+  int32 perimeter_meters = 23;
+
+  // Formatted coordinate summary string (e.g., "0.4182°S, 36.9481°E").
+  string coordinates_label = 24;
+
+  // Normalized canvas X coordinate (`[0.0, 1.0]`) for map preview rendering.
+  float normalized_x = 25;
+
+  // Normalized canvas Y coordinate (`[0.0, 1.0]`) for map preview rendering.
+  float normalized_y = 26;
+
+  // Default ARGB color hex (`0xFFRRGGBB`) for map rendering.
+  int64 color_hex = 27;
+
+  // Singular domain noun for this entity (e.g., "Coffee Parcel").
+  string singular_type_label = 28;
+
+  // Synchronization status key (`"SYNCED"`, `"UPLOADING"`, `"FAILED"`).
+  string sync_status_key = 29;
 }

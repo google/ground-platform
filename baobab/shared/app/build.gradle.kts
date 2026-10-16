@@ -63,6 +63,7 @@ kotlin {
       }
     }
     val androidMain by getting { dependencies { implementation("io.ktor:ktor-client-cio:3.6.0") } }
+    val jvmMain by getting { dependencies { implementation("io.ktor:ktor-client-cio:3.6.0") } }
     val wasmJsMain by getting { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
     val commonTest by getting {
       dependencies {
@@ -73,6 +74,10 @@ kotlin {
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
+        implementation(kotlin("reflect"))
+        implementation("io.ktor:ktor-client-mock:3.6.0")
+        // Writes the user data service's proto JSON seed (see UserDataSeedSnapshotTest).
+        implementation("com.squareup.wire:wire-moshi-adapter:7.0.3")
         // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
         @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
         implementation(compose.uiTest)
@@ -84,10 +89,15 @@ kotlin {
 
 // `./gradlew jvmTest -PregenerateLibrarySeed` rewrites the global library seed files
 // (shared/assets/library/*.textproto) from the app's Kotlin copy; see GlobalLibrarySeedTest.
+// `./gradlew jvmTest -PregenerateUserDataSeed` rewrites the user data service's sample seed
+// (server/user-data-service/src/main/resources/seed/user_data_seed.json) from the fixtures in
+// app-testing; see UserDataSeedSnapshotTest.
 tasks.withType<Test>().configureEach {
-  if (project.hasProperty("regenerateLibrarySeed")) {
-    systemProperty("regenerateLibrarySeed", "true")
-    outputs.upToDateWhen { false }
+  for (flag in listOf("regenerateLibrarySeed", "regenerateUserDataSeed")) {
+    if (project.hasProperty(flag)) {
+      systemProperty(flag, "true")
+      outputs.upToDateWhen { false }
+    }
   }
 }
 

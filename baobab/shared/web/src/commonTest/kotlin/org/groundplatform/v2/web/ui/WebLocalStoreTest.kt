@@ -20,6 +20,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
 import org.groundplatform.v2.app.domain.model.ListFilterTab
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
@@ -34,7 +35,7 @@ import org.groundplatform.v2.web.ui.viewmodel.ui
 class WebLocalStoreTest {
   @Test
   fun surveyEditor_loadsSampleDraftFromStore() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     val editor = surveyEditorViewModel(state.activeSurveyEditorDraft)
     assertEquals(state.activeSurvey.title, editor.ui.details.title)
     // Forms and Map layers are derived from the survey data; Data tables come from the seed.
@@ -50,7 +51,7 @@ class WebLocalStoreTest {
     assertEquals(SampleSurveyEditorData.kenyaSharing(), editor.ui.sharing)
 
     // Surveys without a stored draft still open with their Forms and Map layers.
-    val other = WebAppState()
+    val other = WebAppState(dataHolder = sampleDataHolder())
     other.openSurveyOnWeb("survey-sample-plots-forest")
     val derived = surveyEditorViewModel(other.activeSurveyEditorDraft)
     assertEquals(other.activeSurvey.title, derived.ui.details.title)
@@ -61,7 +62,7 @@ class WebLocalStoreTest {
 
   @Test
   fun surveyEditor_editsAreSavedToStoreAndSurviveSurveySwitches() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     val initial = state.activeSurveyEditorDraft
     val editor = surveyEditorViewModel(initial)
     editor.updateDetails { it.copy(title = "Renamed survey") }
@@ -91,7 +92,7 @@ class WebLocalStoreTest {
 
   @Test
   fun webApp_staysOnlineWhenTheDeviceIsOffline() {
-    val state = WebAppState()
+    val state = WebAppState(dataHolder = sampleDataHolder())
     val entity =
       state.entities.first { e ->
         e.submissions.any { state.isSubmissionStoredOnDevice(it) } &&

@@ -19,6 +19,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.DeviceFormFactor
 import org.groundplatform.v2.app.domain.model.DeviceOrientation
@@ -36,7 +37,7 @@ class WorkbenchStateTest {
 
   @Test
   fun deviceFormFactor_togglesBetweenMobileAndTablet() {
-    val workbench = WorkbenchState(MobileAppState())
+    val workbench = WorkbenchState(MobileAppState(dataHolder = sampleDataHolder()))
     val state = workbench.mobile
 
     // Defaults to Mobile (404 × 764 dp)
@@ -57,7 +58,7 @@ class WorkbenchStateTest {
 
   @Test
   fun rotateDevice_rotatesMobileAndTabletBetweenPortraitAndLandscape() {
-    val workbench = WorkbenchState(MobileAppState())
+    val workbench = WorkbenchState(MobileAppState(dataHolder = sampleDataHolder()))
     val state = workbench.mobile
 
     // Mobile defaults to Portrait (404 × 764 dp)
@@ -103,7 +104,10 @@ class WorkbenchStateTest {
 
   @Test
   fun updateCustomXFormsXml_parsesValidAndInvalidXForms_andRefreshesActiveController() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
+    val workbench =
+      WorkbenchState(
+        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+      )
     val state = workbench.mobile
     assertEquals(null, workbench.xformsXmlError)
     assertTrue(state.customFormDef != null)
@@ -145,7 +149,10 @@ class WorkbenchStateTest {
 
   @Test
   fun selectWorkbenchExampleForm_swapsAndValidatesAllFiveExampleForms() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
+    val workbench =
+      WorkbenchState(
+        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+      )
     val state = workbench.mobile
     assertEquals(
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.ALL_FIELD_TYPES,
@@ -280,7 +287,10 @@ class WorkbenchStateTest {
 
   @Test
   fun geoPointStepInDataCollectionForm_showsMapAndSupportsCaptureLocationAndAddPointTriggers() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
+    val workbench =
+      WorkbenchState(
+        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+      )
     val state = workbench.mobile
     workbench.selectWorkbenchExampleForm(
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.SINGLE_POINT_LAND_USE,
@@ -309,7 +319,7 @@ class WorkbenchStateTest {
 
   @Test
   fun allFieldTypesForm_launchesWithPhotoVideoAndAudioQuestions() {
-    val workbench = WorkbenchState(MobileAppState())
+    val workbench = WorkbenchState(MobileAppState(dataHolder = sampleDataHolder()))
     val state = workbench.mobile
     workbench.selectWorkbenchExampleForm(
       WorkbenchExampleForm.ALL_FIELD_TYPES,
@@ -330,7 +340,7 @@ class WorkbenchStateTest {
 
   @Test
   fun updateActiveSurveyDetails_updatesActiveSurveyTitleAndDescription() {
-    val workbench = WorkbenchState(MobileAppState())
+    val workbench = WorkbenchState(MobileAppState(dataHolder = sampleDataHolder()))
     workbench.updateActiveSurveyDetails(
       title = "Updated Survey Title",
       description = "Updated survey description from the survey editor.",
@@ -345,7 +355,10 @@ class WorkbenchStateTest {
 
   @Test
   fun reset_reseedsSampleData() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
+    val workbench =
+      WorkbenchState(
+        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+      )
     val state = workbench.mobile
     val initialEntities = state.entities
     state.entities =
@@ -364,7 +377,10 @@ class WorkbenchStateTest {
 
   @Test
   fun airplaneMode_takesTheMobileAppOffline() {
-    val workbench = WorkbenchState(MobileAppState(initialScreen = AppScreen.MAIN_SURVEY))
+    val workbench =
+      WorkbenchState(
+        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+      )
     val mobile = workbench.mobile
 
     workbench.updateAirplaneMode(true)

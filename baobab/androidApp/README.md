@@ -64,6 +64,30 @@ MAPBOX_ACCESS_TOKEN=pk.your_mapbox_public_token_here
     project property
 -   `MAPBOX_ACCESS_TOKEN` environment variable
 
+## Connecting to the User Data Service
+
+The app loads surveys, organizations, and data from the
+[user data service](../server/user-data-service/README.md) and doesn't start
+without one: it shows setup instructions instead. Set the service URL at build
+time (first match wins):
+
+-   `-PUSER_DATA_SERVICE_URL=…` Gradle project property
+-   `USER_DATA_SERVICE_URL` environment variable
+-   `USER_DATA_SERVICE_URL` in `local.properties` (or `../local.properties`)
+
+For a service running on your machine (`./gradlew run` in
+`server/user-data-service/`), the Android emulator reaches the host at
+`10.0.2.2`:
+
+```properties
+USER_DATA_SERVICE_URL=http://10.0.2.2:8080
+```
+
+On a physical device, use your machine's LAN address, or forward the port with
+`adb reverse tcp:8080 tcp:8080` and use `http://localhost:8080`. Debug builds
+allow plain `http://` URLs; release builds require `https://`, such as a Cloud
+Run deployment.
+
 ## Building and Installing
 
 Run Gradle commands from `baobab/androidApp/`:

@@ -58,7 +58,60 @@ From `mobileWebApp/`, start the webpack dev server (port `8093` by default).
 
 Run the workbench tests with `./gradlew :workbench:jvmTest`.
 
+## Connecting to the User Data Service
+
+The mobile app loads surveys, organizations, and data from the
+[user data service](../server/user-data-service/README.md), and needs one to
+start. Start the service, then the app:
+
+```bash
+# In server/user-data-service/ (listens on http://localhost:8080):
+./gradlew run
+
+# In mobileWebApp/:
+./gradlew wasmJsBrowserDevelopmentRun
+```
+
+Tell the dev server where the service is with `USER_DATA_SERVICE_URL`, either in
+`local.properties` (`baobab/local.properties`, shared with `androidApp/`, or
+`mobileWebApp/local.properties`, which takes precedence) or in the environment when
+you start the dev server. Use an address the Cloudtop itself can reach, such as
+`localhost`:
+
+```properties
+USER_DATA_SERVICE_URL=http://localhost:8080
+```
+
+Or for a single run:
+
+```bash
+USER_DATA_SERVICE_URL=http://localhost:8080 ./gradlew wasmJsBrowserDevelopmentRun
+```
+
+The dev server proxies the service: the page sends its gRPC-Web calls to its
+own origin, and the dev server forwards them to `USER_DATA_SERVICE_URL`. So the
+browser never needs its own route to the service, and opening the app through
+port forwarding, the Cloudtop HTTPS proxy (`*.proxy.googlers.com`), or the
+Cloudtop's hostname all work the same, with no mixed-content or CORS issues.
+The dev server re-reads `local.properties` on every request, so a change takes
+effect on the next reload. The service can't be chosen from the page URL, so a
+link can't point the app at another backend.
+
+If no URL is configured, the app doesn't start: it shows setup instructions
+instead (and logs them to the browser console). If the service can't be
+reached, it shows an error banner with the cause and a Retry button, and the
+dev server logs the failed request.
+
+Production bundles (`wasmJsBrowserDistribution` and preview deploys) have no
+dev server, so the build bakes in the URL from `-PUSER_DATA_SERVICE_URL=…`, the
+environment, or `local.properties`, in that order. It must be reachable from
+users' browsers, and use HTTPS if the bundle is served over HTTPS.
+
 ## Deploying to a Firebase Hosting Preview Channel
+
+The deployed bundle uses the `USER_DATA_SERVICE_URL` set where it was built, so
+set it to a reachable service (for example a Cloud Run deployment) before
+deploying; without one, the preview shows setup instructions.
 
 ```bash
 # Build and update the default 'mobile-preview' preview channel (7-day expiration):

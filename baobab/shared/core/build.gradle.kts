@@ -60,7 +60,8 @@ kotlin {
           .builtBy("generateCommonMainProtos")
       )
       dependencies {
-        implementation("com.squareup.wire:wire-runtime:7.0.3")
+        api("com.squareup.wire:wire-runtime:7.0.3")
+        api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
       }
     }
@@ -106,6 +107,7 @@ wire {
     include("shared/protos/data/*.proto")
     include("shared/protos/survey/*.proto")
     include("shared/protos/library/*.proto")
+    include("shared/protos/userdata/*.proto")
   }
   sourcePath {
     srcJar("com.google.api.grpc:proto-google-common-protos:2.48.0")

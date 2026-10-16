@@ -11,14 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.groundplatform.v2.app.data.seed
+package org.groundplatform.v2.app.data.seed.backend
 
 import org.groundplatform.v2.app.domain.model.LayerSourceType
 import org.groundplatform.v2.app.domain.model.MapLayerItem
 import org.groundplatform.v2.app.domain.model.OfflineTilePackageItem
 
 /** Hardcoded sample map layers and offline tile packages for the sample data. */
-object SampleMapLayersData {
+object BackendStaticMapLayersData {
   /** Returns the preloaded [MapLayerItem] list for [surveyId]. */
   fun mapLayersForSurvey(surveyId: String): List<MapLayerItem> =
     when (surveyId) {

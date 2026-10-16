@@ -19,6 +19,7 @@ syntax = "proto3";
 package groundplatform.v2.survey;
 
 import "google/protobuf/timestamp.proto";
+import "shared/protos/survey/acl.proto";
 
 // Multi-tenant organization that surveys can optionally belong to
 // (`SurveyDef.organization_id`): a ministry, university lab, NGO, or community
@@ -32,7 +33,7 @@ import "google/protobuf/timestamp.proto";
 // any active Manager administers the organization, and the last Manager cannot
 // be demoted or removed.
 message Organization {
-  // Client-generated unique identifier (RFC 4122 v4 UUID).
+  // Client-generated unique identifier (RFC 4122 v4 UUID or canonical slug).
   string organization_id = 1;
 
   // Display name shown in survey lists, headers, and the directory.
@@ -75,6 +76,16 @@ message Organization {
   // organization-suggested indicators; its own dashboards are unaffected. See
   // docs/technical/backend/impact-aggregation.md.
   bool exclude_from_platform_aggregates = 12;
+
+  // Sequential version number incremented on each organization mutation.
+  int64 version = 13;
+
+  // Soft-deletion tombstone flag for delta synchronization.
+  bool is_deleted = 14;
+
+  // Authoritative server commit timestamp for stateless delta synchronization
+  // (`docs/technical/sync-engine.md`).
+  google.protobuf.Timestamp commit_timestamp = 15;
 }
 
 // Kind of organization, optionally set on an `Organization`'s profile.
@@ -182,4 +193,15 @@ message OrganizationMember {
 
   // Time the invite, request, or membership was last changed.
   google.protobuf.Timestamp updated_at = 5;
+
+  // Secret token part of a pending invite link (`.../org-join/<token>`);
+  // cleared once accepted.
+  string invite_token = 6;
+
+  // Cached display profile of the member once known.
+  CachedProfile profile = 7;
+
+  // Optional ISO-8601 timestamp string preserving exact formatting when
+  // round-tripping domain timestamps.
+  string updated_at_iso = 8;
 }

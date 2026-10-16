@@ -57,6 +57,12 @@ message ImpactEvent {
   // User ID (e.g., Firebase Auth UID) of the person whose action produced the
   // event. The only personal identifier an event may carry.
   string actor_user_id = 10;
+
+  // Authoritative server commit timestamp for stateless delta synchronization.
+  google.protobuf.Timestamp commit_timestamp = 11;
+
+  // Optional ISO-8601 string representation of `occurred_at`.
+  string occurred_at_iso = 12;
 }
 
 // Kind of "data was used" signal.

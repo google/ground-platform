@@ -26,6 +26,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.di.requireUserDataServiceUrl
+import org.groundplatform.v2.app.ui.common.RequireUserDataService
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
@@ -37,8 +40,20 @@ class MainActivity : ComponentActivity() {
     if (token.isNotEmpty()) {
       System.setProperty("ground.mapbox.accessToken", token)
     }
+    // Read by platformUserDataServiceUrl(); see USER_DATA_SERVICE_URL in build.gradle.kts.
+    val userDataServiceUrl = getString(R.string.user_data_service_url).trim()
+    if (userDataServiceUrl.isNotEmpty()) {
+      System.setProperty("groundplatform.userDataServiceUrl", userDataServiceUrl)
+    }
     enableEdgeToEdge()
-    setContent { MainActivityContent() }
+    setContent {
+      RequireUserDataService { serviceUrl ->
+        MainActivityContent(
+          state =
+            remember { MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl)) }
+        )
+      }
+    }
   }
 }
 
@@ -47,7 +62,11 @@ class MainActivity : ComponentActivity() {
  * ([MobileScreenHost]).
  */
 @Composable
-fun MainActivityContent(state: MobileAppState = remember { MobileAppState() }) {
+fun MainActivityContent(
+  state: MobileAppState = remember {
+    MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = requireUserDataServiceUrl()))
+  }
+) {
   BackHandler(enabled = state.canHandleBack) { state.handleBack() }
 
   GroundTheme(darkTheme = state.isDarkTheme) {

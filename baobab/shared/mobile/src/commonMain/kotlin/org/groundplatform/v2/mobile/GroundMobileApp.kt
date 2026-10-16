@@ -23,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import org.groundplatform.v2.app.di.AppDataHolder
+import org.groundplatform.v2.app.di.requireUserDataServiceUrl
 import org.groundplatform.v2.core.forms.ui.GroundTheme
 import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
@@ -36,7 +38,11 @@ import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
  * on web the Mapbox basemap renders behind the Compose canvas.
  */
 @Composable
-fun GroundMobileApp(state: MobileAppState = remember { MobileAppState() }) {
+fun GroundMobileApp(
+  state: MobileAppState = remember {
+    MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = requireUserDataServiceUrl()))
+  }
+) {
   GroundTheme(darkTheme = state.isDarkTheme) {
     Surface(
       modifier = Modifier.fillMaxSize(),
