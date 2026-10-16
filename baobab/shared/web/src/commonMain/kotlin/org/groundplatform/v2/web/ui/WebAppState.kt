@@ -176,6 +176,8 @@ class WebAppState(
   /** Switches the active page and notifies [onPageChanged]. */
   fun selectPage(page: WebPage) {
     activePage = page
+    // Poll for collaborators' changes more often while the survey editor or dashboard is open.
+    dataHolder.setCollaborativeView(page == WebPage.SURVEY_EDITOR || page == WebPage.WEB_DASHBOARD)
     onPageChanged?.invoke(page)
   }
 

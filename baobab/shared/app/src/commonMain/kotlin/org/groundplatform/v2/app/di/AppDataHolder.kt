@@ -25,14 +25,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
 import org.groundplatform.v2.app.client.grpc.GrpcWebException
 import org.groundplatform.v2.app.client.grpc.GrpcWebTransport
 import org.groundplatform.v2.app.client.grpc.remoteUserDataGrpcClient
+import org.groundplatform.v2.app.client.lifecycle.guardUnsentChangesOnUnload
+import org.groundplatform.v2.app.client.lifecycle.observeAppForeground
 import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
+import org.groundplatform.v2.app.data.datasource.local.store.OutboxState
 import org.groundplatform.v2.app.data.datasource.remote.GrpcSyncDataSource
 import org.groundplatform.v2.app.data.datasource.remote.MapboxPlacesDataSource
 import org.groundplatform.v2.app.data.repository.AuthRepositoryImpl
@@ -235,6 +239,9 @@ class AppDataHolder(
   val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),
   val searchPlacesUseCase: SearchPlacesUseCase = SearchPlacesUseCase(),
 ) {
+  /** Disconnects the sync engine from platform lifecycle hooks, once started. */
+  private var stopSyncLifecycle: (() -> Unit)? = null
+
   private val mutableUserDataSyncState =
     MutableStateFlow(
       if (grpcSyncDataSource == null) UserDataSyncState.NotConfigured else UserDataSyncState.Syncing
@@ -261,7 +268,7 @@ class AppDataHolder(
     mutableUserDataSyncState.value =
       try {
         sampleDataRepository.seedIfNeeded()
-        syncCoordinator?.start()
+        syncCoordinator?.let(::startSyncEngine)
         UserDataSyncState.Synced
       } catch (e: CancellationException) {
         throw e
@@ -274,6 +281,34 @@ class AppDataHolder(
             ?: "Unknown error"
         UserDataSyncState.Failed(serviceUrl = userDataServiceUrl, message = message)
       }
+  }
+
+  /**
+   * Starts [coordinator] and connects it to the platform: polling while the app is in the
+   * foreground, and (on the web) a leave-page confirmation while the outbox has unsent changes.
+   */
+  private fun startSyncEngine(coordinator: SyncCoordinator) {
+    coordinator.start()
+    if (stopSyncLifecycle != null) return
+    val hasUnsentChanges =
+      localStore
+        .observeOutbox()
+        .map { outbox -> outbox.any { it.state != OutboxState.REJECTED } }
+        .stateIn(scope, SharingStarted.Eagerly, false)
+    val stopForeground = observeAppForeground(coordinator::setForeground)
+    val stopGuard = guardUnsentChangesOnUnload { hasUnsentChanges.value }
+    stopSyncLifecycle = {
+      stopForeground()
+      stopGuard()
+    }
+  }
+
+  /**
+   * Whether a collaborative view (survey editor, live data table) is on screen; the sync engine
+   * polls more often while one is.
+   */
+  fun setCollaborativeView(isCollaborative: Boolean) {
+    syncCoordinator?.setCollaborativeView(isCollaborative)
   }
 
   /** Everything the UI reads from the local data store, kept current as the store changes. */
