@@ -74,12 +74,23 @@ export class SubmissionPanelComponent {
       .toArray();
   });
 
-  private submissionResource = rxResource({
-    params: () => ({
+  private readonly resourceParams = computed(
+    () => ({
       survey: this.activeSurvey(),
       loi: this.selectedLoi(),
       submissionId: this.submissionId(),
     }),
+    {
+      equal: (a, b) =>
+        a.survey === b.survey &&
+        a.submissionId === b.submissionId &&
+        a.loi?.id === b.loi?.id &&
+        a.loi?.jobId === b.loi?.jobId,
+    }
+  );
+
+  private submissionResource = rxResource({
+    params: this.resourceParams,
     stream: ({ params: { survey, loi, submissionId } }) =>
       survey && loi && submissionId
         ? this.submissionService.getSubmission$(survey, loi, submissionId)

@@ -29,11 +29,14 @@ import { StatusCodes } from 'http-status-codes';
 import { invokeCallbackAsync } from './handlers';
 import { SURVEY_ORGANIZER_ROLE } from './common/auth';
 import { getDatastore, resetDatastore } from './common/context';
+import * as broadcastModule from './common/broadcast';
 import { Firestore } from 'firebase-admin/firestore';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
+const LAST_LOI_ID = 'loi-last';
+
 const sv = registry.getFieldIds(Pb.Survey);
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const pr = registry.getFieldIds(Pb.LocationOfInterest.Property);
@@ -254,6 +257,7 @@ describe('importGeoJson()', () => {
   ];
 
   let insertLocationsOfInterestSpy: jasmine.Spy;
+  let broadcastSpy: jasmine.Spy;
 
   beforeEach(() => {
     mockFirestore = createMockFirestore();
@@ -262,7 +266,10 @@ describe('importGeoJson()', () => {
     insertLocationsOfInterestSpy = spyOn(
       db,
       'insertLocationsOfInterest'
-    ).and.returnValue(Promise.resolve());
+    ).and.returnValue(Promise.resolve(LAST_LOI_ID));
+    broadcastSpy = spyOn(broadcastModule, 'broadcastUpdate').and.returnValue(
+      Promise.resolve('')
+    );
   });
 
   afterEach(() => {
@@ -322,6 +329,30 @@ describe('importGeoJson()', () => {
       }
     })
   );
+
+  it('announces the imported batch with a single message', async () => {
+    mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+
+    await runImport(geoJsonWithPoint, clientTimeMillis);
+
+    expect(broadcastSpy).toHaveBeenCalledTimes(1);
+    const [update] = broadcastSpy.calls.mostRecent().args;
+    expect(update).toEqual({
+      type: 'loi',
+      surveyId,
+      loiId: LAST_LOI_ID,
+      deleted: false,
+    });
+  });
+
+  it('announces nothing when no LOI was imported', async () => {
+    mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+    insertLocationsOfInterestSpy.and.returnValue(Promise.resolve(null));
+
+    await runImport(geoJsonWithPoint, clientTimeMillis);
+
+    expect(broadcastSpy).not.toHaveBeenCalled();
+  });
 
   it('falls back to the server clock when no client timestamp is sent', async () => {
     mockFirestore.doc(`surveys/${surveyId}`).set(survey);

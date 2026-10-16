@@ -59,6 +59,20 @@ export class DraftSurveyService {
     return this.survey$.getValue();
   }
 
+  /**
+   * Returns the ids of the tasks of `jobId` whose type can no longer change:
+   * those in the last saved version of a published survey, which may already
+   * hold submissions that depend on the type.
+   */
+  getTypeLockedTaskIds(jobId: string): ReadonlySet<string> {
+    if (!this.originalSurvey || this.originalSurvey.state !== SurveyState.READY)
+      return new Set();
+
+    return new Set(
+      this.originalSurvey.getJob(jobId)?.tasks?.keySeq().toArray() ?? []
+    );
+  }
+
   getSurvey$(): Observable<Survey> {
     return this.survey$.asObservable();
   }
@@ -182,6 +196,7 @@ export class DraftSurveyService {
         .map(job => job.id)
     );
 
+    this.originalSurvey = currentSurvey;
     this.dirty = false;
   }
 }
