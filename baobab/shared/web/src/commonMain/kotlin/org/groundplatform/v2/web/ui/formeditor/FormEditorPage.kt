@@ -73,7 +73,6 @@ import androidx.compose.material.icons.outlined.DragIndicator
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
@@ -3411,6 +3410,28 @@ private fun ChoicesEditor(
               else -> ChoiceVisualOption.NONE
             }
 
+        // In the Color style every choice has a color, including ones added or imported later.
+        if (currentVisual == ChoiceVisualOption.COLOR) {
+          val missingColors = question.choices.count { it.colorHex == null }
+          LaunchedEffect(key, missingColors) {
+            if (missingColors > 0) {
+              actions.updateQuestion(key) { q ->
+                q.copy(
+                  choices =
+                    q.choices.mapIndexed { idx, c ->
+                      if (c.colorHex != null) c
+                      else
+                        c.copy(
+                          colorHex = ChoiceColors.palette[idx % ChoiceColors.palette.size].second,
+                          image = null,
+                        )
+                    }
+                )
+              }
+            }
+          }
+        }
+
         DropdownSelector(
           label = "Visual style",
           selectedText = currentVisual.label,
@@ -3530,14 +3551,7 @@ private fun ChoicesEditor(
           ) {
             Box(modifier = Modifier.padding(top = 12.dp)) {
               when (currentVisual) {
-                ChoiceVisualOption.NONE ->
-                  ChoiceTextStyleIndicator(
-                    colorHex = choice.colorHex,
-                    onSelectColor = { hex ->
-                      visualOverride = ChoiceVisualOption.COLOR
-                      actions.setChoiceColor(key, i, hex)
-                    },
-                  )
+                ChoiceVisualOption.NONE -> ChoiceTextStyleIndicator()
                 ChoiceVisualOption.COLOR ->
                   ChoiceColorButton(
                     colorHex = choice.colorHex,
@@ -3871,66 +3885,25 @@ private fun AllowAddEntityControl(
 }
 
 /**
- * 32.dp leading indicator box for a choice in "Text only" visual style, showing a text icon and
- * also supporting quick color swatch selection when clicked.
+ * Non-interactive marker shown beside each choice when the question's visual style is text only.
+ * Colors are picked only in the "Color" visual style.
  */
 @Composable
-private fun ChoiceTextStyleIndicator(
-  colorHex: String?,
-  onSelectColor: (String?) -> Unit,
-) {
-  var expanded by remember { mutableStateOf(false) }
+private fun ChoiceTextStyleIndicator() {
   val colors = MaterialTheme.colorScheme
-  Box {
-    Surface(
-      onClick = { expanded = true },
-      shape = MaterialTheme.shapes.extraSmall,
-      color = colors.surfaceContainerHigh,
-      border = BorderStroke(1.dp, colors.outlineVariant),
-      modifier =
-        Modifier.size(32.dp).semantics {
-          contentDescription =
-            "Choice color: ${ChoiceColors.nameOf(colorHex) ?: colorHex ?: "none"}"
-        },
-    ) {
-      Box(contentAlignment = Alignment.Center) {
-        Icon(
-          Icons.Outlined.TextFields,
-          contentDescription = null,
-          tint = colors.onSurfaceVariant,
-          modifier = Modifier.size(16.dp),
-        )
-      }
-    }
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-      Text(
-        text = "Choice color",
-        style = MaterialTheme.typography.labelMedium,
-        color = colors.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+  Surface(
+    shape = MaterialTheme.shapes.extraSmall,
+    color = colors.surfaceContainerHigh,
+    border = BorderStroke(1.dp, colors.outlineVariant),
+    modifier = Modifier.size(32.dp).semantics { contentDescription = "Text choice" },
+  ) {
+    Box(contentAlignment = Alignment.Center) {
+      Icon(
+        Icons.Outlined.TextFields,
+        contentDescription = null,
+        tint = colors.onSurfaceVariant,
+        modifier = Modifier.size(16.dp),
       )
-      ChoiceColors.palette.chunked(5).forEach { row ->
-        Row(
-          modifier = Modifier.padding(horizontal = 8.dp),
-          horizontalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-          row.forEach { (name, hex) ->
-            IconButton(
-              onClick = {
-                onSelectColor(hex)
-                expanded = false
-              },
-              modifier = Modifier.size(36.dp),
-            ) {
-              ColorDot(
-                colorHex = hex,
-                contentDescription = name,
-                isSelected = hex.equals(colorHex, ignoreCase = true),
-              )
-            }
-          }
-        }
-      }
     }
   }
 }
@@ -4037,9 +4010,9 @@ private fun ChoiceConceptLinkChip(
   }
 }
 
-/** Color dot for a choice; opens a compact palette with a "No color" option. */
+/** Color dot for a choice; opens a compact palette. Every choice has a color in this style. */
 @Composable
-private fun ChoiceColorButton(colorHex: String?, onSelect: (String?) -> Unit) {
+private fun ChoiceColorButton(colorHex: String?, onSelect: (String) -> Unit) {
   var expanded by remember { mutableStateOf(false) }
   val colors = MaterialTheme.colorScheme
   Box {
@@ -4078,15 +4051,6 @@ private fun ChoiceColorButton(colorHex: String?, onSelect: (String?) -> Unit) {
           }
         }
       }
-      DropdownMenuItem(
-        text = { Text("No color") },
-        leadingIcon = { Icon(Icons.Outlined.FormatColorReset, contentDescription = null) },
-        enabled = colorHex != null,
-        onClick = {
-          onSelect(null)
-          expanded = false
-        },
-      )
     }
   }
 }
