@@ -146,8 +146,23 @@ class FormEditorClickTest {
   @Test
   fun singleClickOnChoiceColorSwatchAppliesColor() = withEditor { state ->
     runOnIdle { state.select("q3") }
-    onAllNodesWithContentDescription("Choice color: none").onFirst().performClick()
     waitForIdle()
+
+    // In the "Text only" style, the choice's icon doesn't open a color palette.
+    onAllNodesWithContentDescription("Text choice").onFirst().performClick()
+    waitForIdle()
+    onAllNodesWithContentDescription("Blue").assertCountEquals(0)
+
+    // Switching to "Colors" gives every choice a color, and there's no "No color" option.
+    onNodeWithText("Text only").performScrollTo().performClick()
+    waitForIdle()
+    onNodeWithText("Colors").performClick()
+    waitForIdle()
+    assertTrue(state.ui.form.find("q3")!!.choices.all { it.colorHex != null })
+
+    onAllNodesWithContentDescription("Choice color: Orange").onFirst().performClick()
+    waitForIdle()
+    onNodeWithText("No color").assertDoesNotExist()
     onNodeWithContentDescription("Blue").performClick()
     waitForIdle()
     assertEquals("#2278CF", state.ui.form.find("q3")!!.choices[0].colorHex)
