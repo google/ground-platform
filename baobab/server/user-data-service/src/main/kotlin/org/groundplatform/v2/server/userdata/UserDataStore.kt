@@ -24,6 +24,7 @@ import groundplatform.v2.data.PlotLock
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.ConceptDef
 import groundplatform.v2.library.OrganizationLibraryRecord
+import groundplatform.v2.survey.CachedProfile
 import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
@@ -63,6 +64,20 @@ interface UserDataStore {
   /** Replaces all data with the initial data and starts a new [dataEpoch]. */
   fun reset()
 }
+
+/**
+ * A signed-in user. [accessEpoch] increases whenever the user's ACL entries or organization
+ * memberships change; survey overview and organization list tokens carry it.
+ */
+data class UserAccount(
+  val userId: String,
+  /** Normalized (trimmed, lowercased) email, or empty. */
+  val email: String = "",
+  val emailVerified: Boolean = false,
+  val profile: CachedProfile? = null,
+  val accessEpoch: Long = 0L,
+  val createTime: Instant? = null,
+)
 
 /** The value a [UserDataStore.write] block returned, and the transaction's commit timestamp. */
 data class Committed<T>(val value: T, val commitTimestamp: Instant)
@@ -161,6 +176,17 @@ interface UserDataReader {
 
   fun mutationLogs(): List<MutationLogRecord>
 
+  fun user(userId: String): UserAccount?
+
+  /** Users whose normalized email is [email]. */
+  fun usersByEmail(email: String): List<UserAccount>
+
+  /** Surveys with an ACL entry for normalized email [email]. */
+  fun surveyIdsWithAclEmail(email: String): List<String>
+
+  /** Organizations with a member (or invite) for normalized email [email]. */
+  fun organizationIdsWithMemberEmail(email: String): List<String>
+
   /** Highest applied `client_seq` per scope for [clientId]. */
   fun appliedWatermarks(clientId: String): List<AppliedMutationWatermark>
 }
@@ -204,6 +230,8 @@ interface UserDataWriter : UserDataReader {
   fun putPlotLock(surveyId: String, entityId: String, lock: PlotLock?)
 
   fun putImpactEvent(event: ImpactEvent)
+
+  fun putUser(user: UserAccount)
 
   /** Raises [clientId]'s `client_seq` watermark for [scope] to [clientSeq] (it never goes down). */
   fun recordApplied(scope: String, clientId: String, clientSeq: Long)

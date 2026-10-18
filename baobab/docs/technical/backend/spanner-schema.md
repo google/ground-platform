@@ -932,7 +932,12 @@ in these ways, to be closed in later steps:
   rather than full-text matching), as candidates the backend filters with its
   exact match, so both stores return the same results. `LibraryConcepts` keeps
   each concept's bundle position so resolved order matches `GetResolvedLibrary`.
-- There's no auth, `Users` table, or access epochs yet.
+- Authentication (`AUTH_MODE=firebase`, or a development mode), the `Users`
+  table, invite binding on verified emails, and `Users.AccessEpoch` in list
+  tokens are done. `UsersByEmail` isn't unique, since providers without an
+  email and re-created accounts can share one. Per-caller authorization (role
+  checks, `PERMISSION_DENIED`, caller-specific lists) and
+  `Surveys.DataAccessEpoch` come next.
 
 ## Open Questions
 

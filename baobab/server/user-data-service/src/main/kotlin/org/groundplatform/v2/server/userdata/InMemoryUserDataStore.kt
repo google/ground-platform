@@ -56,6 +56,7 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
   private val auditRecords = linkedMapOf<String, AuditRecord>()
   private val places = mutableListOf<PlaceRecord>()
   private val mutationLogs = mutableListOf<MutationLogRecord>()
+  private val users = linkedMapOf<String, UserAccount>()
   private val watermarks = linkedMapOf<Pair<String, String>, AppliedMutationWatermark>()
 
   init {
@@ -91,6 +92,7 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
     places.clear()
     mutationLogs.clear()
     watermarks.clear()
+    users.clear()
 
     val timestamps = mutableListOf<Instant?>()
     seed.organizations.forEach {
@@ -209,6 +211,20 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
 
     override fun mutationLogs() = mutationLogs.toList()
 
+    override fun user(userId: String) = users[userId]
+
+    override fun usersByEmail(email: String) = users.values.filter { it.email == email }
+
+    override fun surveyIdsWithAclEmail(email: String) =
+      acls.values
+        .filter { acl -> acl.entries.any { it.email.trim().lowercase() == email } }
+        .map { it.survey_id }
+
+    override fun organizationIdsWithMemberEmail(email: String) =
+      organizations.values
+        .filter { org -> org.members.any { it.email.trim().lowercase() == email } }
+        .map { it.organization_id }
+
     override fun appliedWatermarks(clientId: String) =
       watermarks.filterKeys { it.first == clientId }.values.toList()
   }
@@ -293,6 +309,10 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
 
     override fun putImpactEvent(event: ImpactEvent) {
       writes += { ts -> impactEvents[event.event_id] = event.copy(commit_timestamp = ts) }
+    }
+
+    override fun putUser(user: UserAccount) {
+      writes += { users[user.userId] = user }
     }
 
     override fun recordApplied(scope: String, clientId: String, clientSeq: Long) {

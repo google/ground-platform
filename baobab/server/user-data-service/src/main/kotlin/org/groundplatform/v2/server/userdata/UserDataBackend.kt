@@ -86,6 +86,7 @@ import groundplatform.v2.survey.AcceptSurveyInviteResponse
 import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
 import groundplatform.v2.survey.BatchGetSurveyOverviewsResponse
+import groundplatform.v2.survey.CachedProfile
 import groundplatform.v2.survey.CostUnitWeights
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetOrganizationResponse
@@ -252,6 +253,191 @@ class UserDataBackend(private val store: UserDataStore) :
   fun reset() = store.reset()
 
   /**
+   * Registers [caller] before its RPC: on its first call, or when its email, verification, or
+   * profile changed, upserts its [UserAccount]. For a verified email, it also binds ACL entries and
+   * organization invites addressed to that email to the caller's user ID, which changes the
+   * caller's access (so its access epoch increases).
+   */
+  suspend fun registerCaller(caller: Caller) {
+    val email = caller.normalizedEmail
+    val profile = CachedProfile(display_name = caller.displayName, avatar_url = caller.photoUrl)
+    val existing = store.read { it.user(caller.userId) }
+    if (
+      existing != null &&
+        existing.email == email &&
+        existing.emailVerified == caller.emailVerified &&
+        existing.profile == profile
+    ) {
+      return
+    }
+    store.write { tx ->
+      val access = AccessChanges()
+      if (caller.emailVerified && email.isNotEmpty()) tx.bindInvites(caller.userId, email, access)
+      val user =
+        (tx.user(caller.userId) ?: UserAccount(caller.userId, createTime = tx.now)).copy(
+          email = email,
+          emailVerified = caller.emailVerified,
+          profile = profile,
+        )
+      tx.applyAccessChanges(access, pending = user)
+    }
+  }
+
+  /** Sets [userId] on unbound ACL entries and organization invites addressed to [email]. */
+  private fun UserDataWriter.bindInvites(userId: String, email: String, access: AccessChanges) {
+    fun unbound(entryEmail: String, entryUserId: String) =
+      entryUserId.isBlank() && entryEmail.trim().lowercase() == email
+    for (surveyId in surveyIdsWithAclEmail(email)) {
+      val acl = acl(surveyId) ?: continue
+      if (acl.entries.none { unbound(it.email, it.user_id) }) continue
+      val entries =
+        acl.entries.map { if (unbound(it.email, it.user_id)) it.copy(user_id = userId) else it }
+      putAclWithRecordVersion(surveyId, acl.copy(entries = entries), access)
+    }
+    for (organizationId in organizationIdsWithMemberEmail(email)) {
+      val org = organization(organizationId) ?: continue
+      if (org.members.none { unbound(it.email, it.user_id) }) continue
+      val members =
+        org.members.map { if (unbound(it.email, it.user_id)) it.copy(user_id = userId) else it }
+      putOrganizationTracked(org.copy(members = members, version = org.version + 1L), access)
+    }
+  }
+
+  /** Users whose ACL entries or memberships a transaction changes, by user ID or email. */
+  private class AccessChanges {
+    val userIds = HashSet<String>()
+    val emails = HashSet<String>()
+
+    /**
+     * Records the principals whose grant differs between [before] and [after], each a list of (user
+     * ID, email, grant) triples.
+     */
+    fun record(
+      before: List<Triple<String, String, Any>>,
+      after: List<Triple<String, String, Any>>,
+    ) {
+      fun key(userId: String, email: String) = email.trim().lowercase().ifEmpty { "uid:$userId" }
+      val old = before.associateBy { key(it.first, it.second) }
+      val new = after.associateBy { key(it.first, it.second) }
+      for (k in old.keys + new.keys) {
+        val o = old[k]
+        val n = new[k]
+        if (o == n) continue
+        listOfNotNull(o, n).forEach { (userId, email) ->
+          if (userId.isNotBlank()) userIds += userId
+          if (email.isNotBlank()) emails += email.trim().lowercase()
+        }
+      }
+    }
+  }
+
+  /**
+   * Increases the access epoch of every user [changes] names, and writes [pending] (a user being
+   * registered in the same transaction).
+   */
+  private fun UserDataWriter.applyAccessChanges(
+    changes: AccessChanges,
+    pending: UserAccount? = null,
+  ) {
+    val affected = LinkedHashMap<String, UserAccount>()
+    fun current(user: UserAccount) = if (user.userId == pending?.userId) pending else user
+    changes.userIds.forEach { id ->
+      val user = if (id == pending?.userId) pending else user(id)
+      user?.let { affected[it.userId] = it }
+    }
+    changes.emails.forEach { email ->
+      usersByEmail(email).forEach { affected.putIfAbsent(it.userId, current(it)) }
+      if (pending != null && pending.email == email) affected.putIfAbsent(pending.userId, pending)
+    }
+    affected.values.forEach { putUser(it.copy(accessEpoch = it.accessEpoch + 1L)) }
+    if (pending != null && pending.userId !in affected) putUser(pending)
+  }
+
+  /** The single verified user with normalized email [email], if known. */
+  private fun UserDataReader.verifiedUserByEmail(email: String): UserAccount? =
+    email
+      .trim()
+      .lowercase()
+      .takeIf { it.isNotEmpty() }
+      ?.let { e -> usersByEmail(e).filter { it.emailVerified }.singleOrNull() }
+
+  /**
+   * Writes [updated], binding invites for known verified users and recording membership changes in
+   * [access]. Returns the written organization.
+   */
+  private fun UserDataWriter.putOrganizationTracked(
+    updated: Organization,
+    access: AccessChanges,
+  ): Organization {
+    val bound =
+      updated.copy(
+        members =
+          updated.members.map { m ->
+            if (m.user_id.isBlank())
+              verifiedUserByEmail(m.email)?.let { m.copy(user_id = it.userId) } ?: m
+            else m
+          }
+      )
+    val before = organization(updated.organization_id)?.members.orEmpty()
+    access.record(
+      before.map { Triple(it.user_id, it.email, it.role to it.status) },
+      bound.members.map { Triple(it.user_id, it.email, it.role to it.status) },
+    )
+    putOrganization(bound)
+    return bound
+  }
+
+  /** Like [putOrganizationTracked], for a survey's ACL entries. */
+  private fun UserDataWriter.putAclTracked(updated: SurveyAcl, access: AccessChanges): SurveyAcl {
+    val bound =
+      updated.copy(
+        entries =
+          updated.entries.map { e ->
+            if (e.user_id.isBlank())
+              verifiedUserByEmail(e.email)?.let { e.copy(user_id = it.userId) } ?: e
+            else e
+          }
+      )
+    val before = acl(updated.survey_id)?.entries.orEmpty()
+    access.record(
+      before.map { Triple(it.user_id, it.email, it.role) },
+      bound.entries.map { Triple(it.user_id, it.email, it.role) },
+    )
+    putAcl(bound)
+    return bound
+  }
+
+  /**
+   * Writes [acl] for survey [surveyId] with the survey's next shared record version, restamping its
+   * saved revision and working copy. Returns the written saved revision and ACL.
+   */
+  private fun UserDataWriter.putAclWithRecordVersion(
+    surveyId: String,
+    acl: SurveyAcl,
+    access: AccessChanges,
+  ): Pair<SurveyDef?, SurveyAcl> {
+    val recordVersion = nextSurveyRecordVersion(surveyId)
+    val written = putAclTracked(acl.copy(record_version = recordVersion), access)
+    val saved = survey(surveyId)?.copy(record_version = recordVersion)
+    saved?.let { putSurvey(it) }
+    workingCopy(surveyId)?.let { wc ->
+      putWorkingCopy(surveyId, wc.copy(record_version = recordVersion))
+    }
+    return saved to written
+  }
+
+  /** The caller's access epoch, carried by caller-dependent list tokens; empty without a caller. */
+  private fun UserDataReader.accessEpochOf(caller: Caller?): String =
+    caller?.let { user(it.userId)?.accessEpoch?.toString() }.orEmpty()
+
+  /**
+   * The user ID of the authenticated caller, which takes precedence over [requested] request
+   * fields; [requested] for the development fallback caller.
+   */
+  private suspend fun callerUserId(requested: String): String =
+    currentCaller()?.takeUnless { it.isDefault }?.userId ?: requested
+
+  /**
    * Purges surveys whose `trash_time` is strictly before [olderThan] (30 days ago in the daily
    * job): removes their data and replaces each with a permanent `DELETED` tombstone so downloaded
    * copies receive a tombstone on their next delta. Returns the IDs of the purged surveys.
@@ -366,6 +552,7 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun ListOrganizations(
     request: ListOrganizationsRequest
   ): ListOrganizationsResponse {
+    val caller = currentCaller()
     val page = store.read { r ->
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
@@ -376,6 +563,7 @@ class UserDataBackend(private val store: UserDataStore) :
         query = commitOrderQuery(Organization::commit_timestamp) { !it.is_deleted },
         queryFieldsSet = emptyList(),
         watermark = r.snapshotTimestamp,
+        accessEpoch = r.accessEpochOf(caller),
       )
     }
     return ListOrganizationsResponse(
@@ -427,7 +615,9 @@ class UserDataBackend(private val store: UserDataStore) :
       }
       // Every write bumps the version by exactly one, however many mutations the request has.
       current = current.copy(version = (stored?.version ?: 0L) + 1L)
-      tx.putOrganization(current)
+      val access = AccessChanges()
+      current = tx.putOrganizationTracked(current, access)
+      tx.applyAccessChanges(access)
       tx.recordApplied(
         scope = "organizations/${current.organization_id}",
         identities = toApply.map { MutationIdentity(it.client_id, it.client_seq) },
@@ -448,13 +638,14 @@ class UserDataBackend(private val store: UserDataStore) :
     if (store.read { it.organization(request.organization_id) } == null) {
       return JoinOrganizationResponse(organization = null, commit_timestamp = store.watermark())
     }
-    require(request.email.isNotBlank()) { "email is required" }
-    val email = request.email
+    val caller = currentCaller()?.takeUnless { it.isDefault }
+    val email = caller?.email?.takeIf { it.isNotBlank() } ?: request.email
+    require(email.isNotBlank()) { "email is required" }
     val status =
       if (request.invite_token.isNotBlank()) MembershipStatus.ACTIVE else MembershipStatus.REQUESTED
     val newMember =
       OrganizationMember(
-        user_id = request.user_id,
+        user_id = caller?.userId ?: request.user_id,
         email = email,
         role = OrganizationRole.MEMBER,
         status = status,
@@ -468,8 +659,10 @@ class UserDataBackend(private val store: UserDataStore) :
             current.members.filterNot { it.email.equals(email, ignoreCase = true) } + newMember,
           version = current.version + 1L,
         )
-      tx.putOrganization(updated)
-      updated
+      val access = AccessChanges()
+      val written = tx.putOrganizationTracked(updated, access)
+      tx.applyAccessChanges(access)
+      written
     }
     return JoinOrganizationResponse(
       organization = committed.value.copy(commit_timestamp = committed.commitTimestamp),
@@ -642,6 +835,7 @@ class UserDataBackend(private val store: UserDataStore) :
     request: ListSurveyOverviewsRequest
   ): ListSurveyOverviewsResponse {
     val orgId = request.organization_id
+    val caller = currentCaller()
     val page = store.read { r ->
       val overviews =
         r.surveys()
@@ -657,6 +851,7 @@ class UserDataBackend(private val store: UserDataStore) :
           commitOrderQuery(SurveyOverview::commit_timestamp) { it.state != SurveyState.DELETED },
         queryFieldsSet = emptyList(),
         watermark = r.snapshotTimestamp,
+        accessEpoch = r.accessEpochOf(caller),
       )
     }
     return ListSurveyOverviewsResponse(
@@ -1043,13 +1238,15 @@ class UserDataBackend(private val store: UserDataStore) :
       val finalWorkingCopy = workingCopy?.copy(record_version = recordVersion)
       tx.putSurvey(saved)
       if (savedRevisionChanged) tx.putSurveyRevision(saved)
-      tx.putAcl(acl)
+      val access = AccessChanges()
+      val writtenAcl = tx.putAclTracked(acl, access)
+      tx.applyAccessChanges(access)
       tx.putWorkingCopy(surveyId, finalWorkingCopy)
       tx.recordApplied(
         scope = "surveys/$surveyId",
         identities = toApply.map { MutationIdentity(it.client_id, it.client_seq) },
       )
-      Triple(saved, finalWorkingCopy, acl)
+      Triple(saved, finalWorkingCopy, writtenAcl)
     }
     val ts = committed.commitTimestamp
     val (saved, workingCopy, acl) = committed.value
@@ -1065,6 +1262,7 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun AcceptSurveyInvite(
     request: AcceptSurveyInviteRequest
   ): AcceptSurveyInviteResponse {
+    val userId = callerUserId(request.user_id)
     val committed = store.write { tx ->
       val acl = tx.acl(request.survey_id) ?: SurveyAcl(survey_id = request.survey_id)
       val updatedEntries =
@@ -1072,22 +1270,18 @@ class UserDataBackend(private val store: UserDataStore) :
           if (entry.invite_token == request.invite_token) {
             entry.copy(
               invitation_status = AclEntry.InvitationStatus.ACCEPTED,
-              user_id = request.user_id.ifBlank { entry.user_id },
+              user_id = userId.ifBlank { entry.user_id },
               profile = request.profile ?: entry.profile,
             )
           } else {
             entry
           }
         }
-      val recordVersion = tx.nextSurveyRecordVersion(request.survey_id)
-      val updatedAcl = acl.copy(entries = updatedEntries, record_version = recordVersion)
-      tx.putAcl(updatedAcl)
-      val saved = tx.survey(request.survey_id)?.copy(record_version = recordVersion)
-      saved?.let { tx.putSurvey(it) }
-      tx.workingCopy(request.survey_id)?.let { wc ->
-        tx.putWorkingCopy(request.survey_id, wc.copy(record_version = recordVersion))
-      }
-      saved to updatedAcl
+      val access = AccessChanges()
+      val written =
+        tx.putAclWithRecordVersion(request.survey_id, acl.copy(entries = updatedEntries), access)
+      tx.applyAccessChanges(access)
+      written
     }
     val ts = committed.commitTimestamp
     return AcceptSurveyInviteResponse(
@@ -1591,12 +1785,13 @@ class UserDataBackend(private val store: UserDataStore) :
   }
 
   override suspend fun AcquirePlotLock(request: AcquirePlotLockRequest): AcquirePlotLockResponse {
+    val userId = callerUserId(request.user_id)
     val committed = store.write { tx ->
       val existing = tx.plotLock(request.survey_id, request.entity_id)
       val nowSec = tx.now.epochSecond
       if (
         existing != null &&
-          existing.locked_by_user_id != request.user_id &&
+          existing.locked_by_user_id != userId &&
           (existing.expires_at?.epochSecond ?: 0L) > nowSec
       ) {
         return@write AcquirePlotLockResponse(
@@ -1607,7 +1802,7 @@ class UserDataBackend(private val store: UserDataStore) :
       val lock =
         PlotLock(
           entity_id = request.entity_id,
-          locked_by_user_id = request.user_id,
+          locked_by_user_id = userId,
           locked_at = tx.now,
           expires_at = Instant.ofEpochSecond(nowSec + 300L, 0L),
         )

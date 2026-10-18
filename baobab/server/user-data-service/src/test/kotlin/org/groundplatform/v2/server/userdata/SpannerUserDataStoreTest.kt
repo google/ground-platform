@@ -98,6 +98,11 @@ class SpannerRecordVersionTest : RecordVersionTest() {
 }
 
 @EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
+class SpannerAccessEpochTest : AccessEpochTest() {
+  override fun newBackend() = UserDataBackend(SpannerTestDatabase.store(loadSeed(null)))
+}
+
+@EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
 class SpannerSurveyTrashAndSharingTest : SurveyTrashAndSharingTest() {
   override fun newBackend() = UserDataBackend(SpannerTestDatabase.store(loadSeed(null)))
 }

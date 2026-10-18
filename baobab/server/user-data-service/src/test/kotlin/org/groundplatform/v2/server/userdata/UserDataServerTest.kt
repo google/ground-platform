@@ -146,6 +146,60 @@ class UserDataServerTest {
   }
 
   @Test
+  fun firebaseMode_rejectsCallsWithoutAToken() {
+    val firebaseServer =
+      UserDataServer.create(
+        UserDataBackend(loadSeed(null)),
+        port = 0,
+        authenticator = Authenticator.firebase("test-project"),
+      )
+    firebaseServer.start().join()
+    try {
+      val response =
+        grpcWeb(
+          "/groundplatform.v2.survey.SurveyService/GetSurvey",
+          GetSurveyRequest.ADAPTER.encode(GetSurveyRequest(survey_id = KENYA)),
+          base = "http://127.0.0.1:${firebaseServer.activeLocalPort()}",
+        )
+      assertEquals(Status.Code.UNAUTHENTICATED.value(), response.status)
+    } finally {
+      firebaseServer.stop().join()
+    }
+  }
+
+  @Test
+  fun devMode_registersTheUserNamedByHeaders() {
+    val backend = UserDataBackend(loadSeed(null))
+    val devServer = UserDataServer.create(backend, port = 0)
+    devServer.start().join()
+    try {
+      val response =
+        grpcWeb(
+          LIST_SURVEY_OVERVIEWS,
+          ListSurveyOverviewsRequest.ADAPTER.encode(ListSurveyOverviewsRequest()),
+          base = "http://127.0.0.1:${devServer.activeLocalPort()}",
+          headers =
+            mapOf(
+              Authenticator.DEV_USER_ID_HEADER to "uid-collector-two",
+              Authenticator.DEV_USER_EMAIL_HEADER to "collector.two@example.org",
+            ),
+        )
+      assertEquals(0, response.status)
+      val entry =
+        kotlinx.coroutines.runBlocking {
+          backend
+            .GetSurveyAcl(groundplatform.v2.survey.GetSurveyAclRequest(survey_id = KENYA))
+            .acl
+            ?.entries
+            ?.single { it.email == "collector.two@example.org" }
+        }
+      assertEquals("uid-collector-two", entry?.user_id)
+    } finally {
+      devServer.stop().join()
+    }
+  }
+
+  @Test
   fun healthCheck_isServing() {
     val response =
       HttpClient.newHttpClient()
@@ -167,14 +221,20 @@ class UserDataServerTest {
   private class GrpcWebResponse(val messages: List<ByteArray>, val status: Int?)
 
   /** Sends one gRPC-Web request and returns its messages and status. */
-  private fun grpcWeb(path: String, request: ByteArray): GrpcWebResponse {
+  private fun grpcWeb(
+    path: String,
+    request: ByteArray,
+    base: String = baseUrl,
+    headers: Map<String, String> = emptyMap(),
+  ): GrpcWebResponse {
     val body = ByteBuffer.allocate(5 + request.size).put(0).putInt(request.size).put(request)
     val response =
       HttpClient.newHttpClient()
         .send(
-          HttpRequest.newBuilder(URI(baseUrl + path))
+          HttpRequest.newBuilder(URI(base + path))
             .header("content-type", "application/grpc-web+proto")
             .header("x-grpc-web", "1")
+            .apply { headers.forEach { (name, value) -> header(name, value) } }
             .POST(HttpRequest.BodyPublishers.ofByteArray(body.array()))
             .build(),
           HttpResponse.BodyHandlers.ofByteArray(),

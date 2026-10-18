@@ -40,6 +40,7 @@ import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.ConceptDef
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.AclEntry
+import groundplatform.v2.survey.CachedProfile
 import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationMember
 import groundplatform.v2.survey.SharingPolicy
@@ -372,6 +373,56 @@ class SpannerUserDataStore(
 
     override fun mutationLogs(): List<MutationLogRecord> = seed.mutation_logs
 
+    override fun user(userId: String): UserAccount? =
+      users(Statement.newBuilder("$USER_COLUMNS WHERE UserId = @id").bind("id").to(userId).build())
+        .firstOrNull()
+
+    override fun usersByEmail(email: String): List<UserAccount> =
+      users(
+        Statement.newBuilder("$USER_COLUMNS WHERE EmailNormalized = @email")
+          .bind("email")
+          .to(email)
+          .build()
+      )
+
+    private fun users(statement: Statement): List<UserAccount> =
+      query(statement) { rs ->
+        UserAccount(
+          userId = rs.getString("UserId"),
+          email = if (rs.isNull("EmailNormalized")) "" else rs.getString("EmailNormalized"),
+          emailVerified = rs.getBoolean("EmailVerified"),
+          profile =
+            if (rs.isNull("Profile")) null
+            else CachedProfile.ADAPTER.decode(rs.getBytes("Profile").toByteArray()),
+          accessEpoch = rs.getLong("AccessEpoch"),
+          createTime = rs.getTimestamp("CreateTime").toInstant(),
+        )
+      }
+
+    override fun surveyIdsWithAclEmail(email: String): List<String> =
+      query(
+        Statement.newBuilder(
+            "SELECT DISTINCT SurveyId FROM SurveyAclEntries WHERE EmailNormalized = @email"
+          )
+          .bind("email")
+          .to(email)
+          .build()
+      ) {
+        it.getUuid("SurveyId").toString()
+      }
+
+    override fun organizationIdsWithMemberEmail(email: String): List<String> =
+      query(
+        Statement.newBuilder(
+            "SELECT DISTINCT OrganizationId FROM OrganizationMembers WHERE EmailNormalized = @email"
+          )
+          .bind("email")
+          .to(email)
+          .build()
+      ) {
+        it.getUuid("OrganizationId").toString()
+      }
+
     override fun appliedWatermarks(clientId: String): List<AppliedMutationWatermark> =
       ctx
         .executeQuery(
@@ -621,6 +672,32 @@ class SpannerUserDataStore(
           .build()
       )
 
+    override fun putUser(user: UserAccount) =
+      tx.buffer(
+        Mutation.newInsertOrUpdateBuilder("Users")
+          .set("UserId")
+          .to(user.userId)
+          .set("EmailNormalized")
+          .to(user.email.ifEmpty { null })
+          .set("EmailVerified")
+          .to(user.emailVerified)
+          .set("Profile")
+          .to(
+            user.profile?.let { proto(CachedProfile.ADAPTER, it, CACHED_PROFILE) }
+              ?: Value.protoMessage(null, CACHED_PROFILE)
+          )
+          .set("AccessEpoch")
+          .to(user.accessEpoch)
+          .set("CreateTime")
+          .to(
+            user.createTime?.let { Timestamp.ofTimeSecondsAndNanos(it.epochSecond, it.nano) }
+              ?: Timestamp.now()
+          )
+          .set("CommitTs")
+          .to(Value.COMMIT_TIMESTAMP)
+          .build()
+      )
+
     override fun recordApplied(scope: String, clientId: String, clientSeq: Long) {
       if (clientId.isBlank() || clientSeq <= 0L) return
       val previous = appliedWatermarks(clientId).firstOrNull { it.scope == scope }?.client_seq
@@ -816,6 +893,9 @@ class SpannerUserDataStore(
     private const val SURVEY_DEF = "groundplatform.v2.survey.SurveyDef"
     private const val SURVEY_ACL = "groundplatform.v2.survey.SurveyAcl"
     private const val ACL_ENTRY = "groundplatform.v2.survey.AclEntry"
+    private const val CACHED_PROFILE = "groundplatform.v2.survey.CachedProfile"
+    private const val USER_COLUMNS =
+      "SELECT UserId, EmailNormalized, EmailVerified, Profile, AccessEpoch, CreateTime FROM Users"
 
     private fun emailKey(email: String, userId: String): String =
       email.trim().lowercase().ifEmpty { userId.trim() }

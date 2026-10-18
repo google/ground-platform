@@ -37,6 +37,9 @@ const val SURVEY_TRASH_RETENTION_DAYS = 30L
  *   debug web UI at `/debug/spanner` browses it and records its operations.
  * - `USER_DATA_STORE`: `memory` (default) serves data from memory; `spanner` stores it in the
  *   Spanner database above, applying the schema and loading the seed into an empty database.
+ * - `AUTH_MODE`: `dev` (default) trusts `x-dev-user-*` headers and otherwise serves calls as the
+ *   sample user; `firebase` requires a Firebase Authentication ID token for project
+ *   `FIREBASE_PROJECT_ID` (default `gnd-dev`).
  */
 fun main() {
   val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
@@ -87,7 +90,23 @@ fun main() {
           TimeUnit.HOURS,
         )
       }
-  val server = UserDataServer.create(backend, port, spannerDebug = spannerDebug)
+  val authMode = System.getenv("AUTH_MODE")?.takeIf { it.isNotBlank() } ?: "dev"
+  val authenticator =
+    when (authMode) {
+      "dev" -> Authenticator.dev()
+      "firebase" ->
+        Authenticator.firebase(
+          System.getenv("FIREBASE_PROJECT_ID")?.takeIf { it.isNotBlank() } ?: "gnd-dev"
+        )
+      else -> error("Unknown AUTH_MODE \"$authMode\" (expected dev or firebase)")
+    }
+  val server =
+    UserDataServer.create(
+      backend,
+      port,
+      spannerDebug = spannerDebug,
+      authenticator = authenticator,
+    )
   Runtime.getRuntime()
     .addShutdownHook(
       Thread {
@@ -102,7 +121,7 @@ fun main() {
       "(${seed.surveys.size} surveys, ${seed.organizations.size} organizations)"
   )
   spannerDebug?.let { println("Spanner: ${it.connection.settings.description}") }
-  println("Store: ${store::class.simpleName}")
+  println("Store: ${store::class.simpleName}, auth: $authMode")
   server.blockUntilShutdown()
 }
 

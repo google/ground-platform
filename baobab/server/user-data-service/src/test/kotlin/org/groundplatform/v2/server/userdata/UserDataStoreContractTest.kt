@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.server.userdata
 
+import com.squareup.wire.Instant
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.ConceptDef
@@ -20,6 +21,7 @@ import groundplatform.v2.library.LibraryBundle
 import groundplatform.v2.library.LocalizedText
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.AclEntry
+import groundplatform.v2.survey.CachedProfile
 import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationMember
 import groundplatform.v2.survey.SharingPolicy
@@ -316,6 +318,49 @@ abstract class UserDataStoreContractTest {
       val tree = r.searchConcepts(listOf(GLOBAL_ORG, ORG), "tree")
       assertEquals("Height", tree.single { it.id == "a" }.label?.values?.get("en"))
       assertEquals(listOf("a", "b"), r.searchConcepts(listOf(GLOBAL_ORG), "").map { it.id })
+    }
+  }
+
+  @Test
+  fun users_canBeFoundByIdAndEmail() {
+    val ana =
+      UserAccount(
+        userId = "uid-ana",
+        email = "ana@example.org",
+        emailVerified = true,
+        profile = CachedProfile(display_name = "Ana"),
+        accessEpoch = 3L,
+        createTime = Instant.ofEpochSecond(1_700_000_000L, 0),
+      )
+    store.write { tx -> tx.putUser(ana) }
+    store.write { tx -> tx.putUser(ana.copy(accessEpoch = 4L)) }
+
+    store.read { r ->
+      assertEquals(ana.copy(accessEpoch = 4L), r.user("uid-ana"))
+      assertEquals(listOf("uid-ana"), r.usersByEmail("ana@example.org").map { it.userId })
+      assertNull(r.user("uid-nobody"))
+    }
+  }
+
+  @Test
+  fun invitesCanBeFoundByEmail() {
+    store.write { tx ->
+      tx.putOrganization(
+        Organization(
+          organization_id = ORG,
+          members = listOf(OrganizationMember(email = "Ana@Example.org")),
+        )
+      )
+      tx.putSurvey(SurveyDef(survey_id = SURVEY))
+      tx.putAcl(
+        SurveyAcl(survey_id = SURVEY, entries = listOf(AclEntry(email = "ana@example.org")))
+      )
+    }
+
+    store.read { r ->
+      assertEquals(listOf(SURVEY), r.surveyIdsWithAclEmail("ana@example.org"))
+      assertEquals(listOf(ORG), r.organizationIdsWithMemberEmail("ana@example.org"))
+      assertTrue(r.surveyIdsWithAclEmail("bob@example.org").isEmpty())
     }
   }
 

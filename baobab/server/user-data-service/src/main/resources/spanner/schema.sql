@@ -33,6 +33,7 @@ CREATE PROTO BUNDLE (
   groundplatform.v2.library.ConceptDef,
   groundplatform.v2.library.OrganizationLibraryRecord,
   groundplatform.v2.survey.AclEntry,
+  groundplatform.v2.survey.CachedProfile,
   groundplatform.v2.survey.MembershipStatus,
   groundplatform.v2.survey.Organization,
   groundplatform.v2.survey.OrganizationMember,
@@ -50,6 +51,20 @@ CREATE TABLE ServiceMetadata (
   Singleton BOOL NOT NULL,
   DataEpoch STRING(36) NOT NULL,
 ) PRIMARY KEY (Singleton);
+
+-- Signed-in users. AccessEpoch increases when the user's ACL entries or memberships change;
+-- survey overview and organization list tokens carry it.
+CREATE TABLE Users (
+  UserId STRING(128) NOT NULL,
+  EmailNormalized STRING(320),
+  EmailVerified BOOL NOT NULL,
+  Profile groundplatform.v2.survey.CachedProfile,
+  AccessEpoch INT64 NOT NULL,
+  CreateTime TIMESTAMP NOT NULL,
+  CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
+) PRIMARY KEY (UserId);
+
+CREATE NULL_FILTERED INDEX UsersByEmail ON Users(EmailNormalized);
 
 CREATE TABLE Organizations (
   OrganizationId UUID NOT NULL,

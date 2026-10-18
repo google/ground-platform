@@ -40,14 +40,21 @@ import kotlinx.coroutines.launch
  * Failures map to gRPC statuses: a thrown [StatusException] is sent as is,
  * [IllegalArgumentException] becomes `INVALID_ARGUMENT`, and [IllegalStateException] becomes
  * `FAILED_PRECONDITION`.
+ *
+ * The caller authenticated by [Authenticator.interceptor] is available to the implementation
+ * through [currentCaller], after [bind]'s `beforeCall` ran for it.
  */
 object WireGrpcBindings {
 
-  /** Binds every [WireRpc] method of [serviceInterface] to [implementation]. */
+  /**
+   * Binds every [WireRpc] method of [serviceInterface] to [implementation]. [beforeCall] runs
+   * before each RPC with its caller (for example to register the user).
+   */
   fun <T : Any> bind(
     serviceInterface: Class<T>,
     implementation: T,
     scope: CoroutineScope,
+    beforeCall: suspend (Caller?) -> Unit = {},
   ): ServerServiceDefinition {
     val rpcs =
       serviceInterface.methods
@@ -69,7 +76,10 @@ object WireGrpcBindings {
           .build()
       val handler =
         ServerCalls.asyncUnaryCall<Any, Any> { request, responses ->
-          scope.launch { serveUnary(method, implementation, request, responses) }
+          val caller = Authenticator.CALLER.get()
+          scope.launch(CallerElement(caller)) {
+            serveUnary(method, implementation, request, responses) { beforeCall(caller) }
+          }
         }
       builder.addMethod(descriptor, handler)
     }
@@ -81,8 +91,10 @@ object WireGrpcBindings {
     implementation: Any,
     request: Any,
     responses: StreamObserver<Any>,
+    beforeCall: suspend () -> Unit,
   ) {
     try {
+      beforeCall()
       val response = checkNotNull(method.kotlinFunction).callSuspend(implementation, request)
       responses.onNext(checkNotNull(response) { "${method.name} returned null" })
       responses.onCompleted()

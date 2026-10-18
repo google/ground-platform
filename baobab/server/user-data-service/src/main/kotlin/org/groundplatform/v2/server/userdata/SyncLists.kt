@@ -119,6 +119,7 @@ internal class SyncLists(private val epoch: () -> String) {
     query: QuerySpec<T>,
     queryFieldsSet: List<String>,
     watermark: Instant,
+    accessEpoch: String = "",
   ): ListPage<T> =
     list(
       params,
@@ -130,12 +131,16 @@ internal class SyncLists(private val epoch: () -> String) {
       query,
       queryFieldsSet,
       watermark,
+      accessEpoch,
     )
 
   /**
    * Like the other [list], for records the store finds itself: [changedAfter] returns up to `limit`
    * records committed after a position, in commit order (delta mode), and [queryRecords] returns
    * the records the query may match, at least those [QuerySpec.matches] accepts (query mode).
+   *
+   * Tokens also carry [accessEpoch] (the caller's access epoch for caller-dependent lists), so a
+   * token from before the caller's access changed fails with `FAILED_PRECONDITION`.
    */
   fun <T> list(
     params: ListParams,
@@ -147,19 +152,22 @@ internal class SyncLists(private val epoch: () -> String) {
     query: QuerySpec<T>,
     queryFieldsSet: List<String>,
     watermark: Instant,
+    accessEpoch: String = "",
   ): ListPage<T> {
+    val epoch = epoch() + accessEpoch.let { if (it.isEmpty()) "" else "/$it" }
     val pageSize = pageSizeOf(params.pageSize)
     if (params.syncToken.isNotBlank()) {
       if (queryFieldsSet.isNotEmpty()) {
         throw invalidArgument("Query-only fields aren't allowed with sync_token: $queryFieldsSet")
       }
-      val start = decodeSync(params.syncToken, scopeKey)
-      val from = if (params.pageToken.isBlank()) start else decodeSync(params.pageToken, scopeKey)
+      val start = decodeSync(params.syncToken, scopeKey, epoch)
+      val from =
+        if (params.pageToken.isBlank()) start else decodeSync(params.pageToken, scopeKey, epoch)
       // One extra record shows whether there's another page.
       val changed = changedAfter(from, pageSize + 1)
       val page = changed.take(pageSize)
       val last = page.lastOrNull()?.let { SyncPosition.of(commitTimestamp(it), id(it)) } ?: from
-      val token = encodeSync(scopeKey, last)
+      val token = encodeSync(scopeKey, last, epoch)
       return if (changed.size > page.size) {
         ListPage(page, nextPageToken = token, nextSyncToken = "")
       } else {
@@ -167,7 +175,7 @@ internal class SyncLists(private val epoch: () -> String) {
       }
     }
 
-    val cursor = params.pageToken.ifBlank { null }?.let { decodeQuery(it, scopeKey, query) }
+    val cursor = params.pageToken.ifBlank { null }?.let { decodeQuery(it, scopeKey, query, epoch) }
     val snapshot = cursor?.snapshot ?: SyncPosition.after(watermark)
     val order = queryOrder(query.descending)
     val matching =
@@ -183,14 +191,14 @@ internal class SyncLists(private val epoch: () -> String) {
       val (lastKey, lastRecord) = page.last()
       ListPage(
         page.map { it.second },
-        nextPageToken = encodeQuery(scopeKey, query, snapshot, lastKey, id(lastRecord)),
+        nextPageToken = encodeQuery(scopeKey, query, snapshot, lastKey, id(lastRecord), epoch),
         nextSyncToken = "",
       )
     } else {
       ListPage(
         page.map { it.second },
         nextPageToken = "",
-        nextSyncToken = encodeSync(scopeKey, snapshot),
+        nextSyncToken = encodeSync(scopeKey, snapshot, epoch),
       )
     }
   }
@@ -202,17 +210,18 @@ internal class SyncLists(private val epoch: () -> String) {
       if (descending) it.reversed() else it
     }
 
-  private fun encodeSync(scopeKey: String, position: SyncPosition): String =
+  private fun encodeSync(scopeKey: String, position: SyncPosition, epoch: String): String =
     encode(
       SYNC,
+      epoch,
       scopeKey,
       position.epochSecond.toString(),
       position.nano.toString(),
       position.recordId?.let { RECORD_PREFIX + it } ?: ALL_AT_TIMESTAMP,
     )
 
-  private fun decodeSync(token: String, scopeKey: String): SyncPosition {
-    val fields = decode(token, SYNC, scopeKey, fieldCount = 3)
+  private fun decodeSync(token: String, scopeKey: String, epoch: String): SyncPosition {
+    val fields = decode(token, SYNC, epoch, scopeKey, fieldCount = 3)
     val second = fields[0].toLongOrNull() ?: throw malformed()
     val nano = fields[1].toIntOrNull() ?: throw malformed()
     val recordId =
@@ -230,9 +239,11 @@ internal class SyncLists(private val epoch: () -> String) {
     snapshot: SyncPosition,
     sortKey: String,
     id: String,
+    epoch: String,
   ): String =
     encode(
       QUERY,
+      epoch,
       scopeKey,
       query.fingerprint,
       snapshot.epochSecond.toString(),
@@ -241,8 +252,13 @@ internal class SyncLists(private val epoch: () -> String) {
       id,
     )
 
-  private fun <T> decodeQuery(token: String, scopeKey: String, query: QuerySpec<T>): QueryCursor {
-    val fields = decode(token, QUERY, scopeKey, fieldCount = 5)
+  private fun <T> decodeQuery(
+    token: String,
+    scopeKey: String,
+    query: QuerySpec<T>,
+    epoch: String,
+  ): QueryCursor {
+    val fields = decode(token, QUERY, epoch, scopeKey, fieldCount = 5)
     if (fields[0] != query.fingerprint) {
       throw invalidArgument("page_token was issued for a different query")
     }
@@ -251,13 +267,19 @@ internal class SyncLists(private val epoch: () -> String) {
     return QueryCursor(SyncPosition(second, nano, null), sortKey = fields[3], id = fields[4])
   }
 
-  private fun encode(kind: String, scopeKey: String, vararg fields: String): String {
-    val text = (listOf(VERSION, kind, epoch(), scopeKey) + fields).joinToString(SEPARATOR)
+  private fun encode(kind: String, epoch: String, scopeKey: String, vararg fields: String): String {
+    val text = (listOf(VERSION, kind, epoch, scopeKey) + fields).joinToString(SEPARATOR)
     return Base64.getUrlEncoder().withoutPadding().encodeToString(text.encodeToByteArray())
   }
 
   /** Validates [token]'s header and returns its [fieldCount] kind-specific fields. */
-  private fun decode(token: String, kind: String, scopeKey: String, fieldCount: Int): List<String> {
+  private fun decode(
+    token: String,
+    kind: String,
+    epoch: String,
+    scopeKey: String,
+    fieldCount: Int,
+  ): List<String> {
     val text =
       try {
         Base64.getUrlDecoder().decode(token).decodeToString()
@@ -268,10 +290,11 @@ internal class SyncLists(private val epoch: () -> String) {
     if (fields.size != 4 + fieldCount || fields[0] != VERSION || fields[1] != kind) {
       throw malformed()
     }
-    if (fields[2] != epoch()) {
+    if (fields[2] != epoch) {
       throw StatusException(
         Status.FAILED_PRECONDITION.withDescription(
-          "Token is no longer valid (the server's data was reset); run a full sync"
+          "Token is no longer valid (the server's data was reset or your access changed); " +
+            "run a full sync"
         )
       )
     }

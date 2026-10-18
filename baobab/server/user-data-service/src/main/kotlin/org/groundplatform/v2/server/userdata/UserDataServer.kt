@@ -42,17 +42,23 @@ object UserDataServer {
     port: Int,
     rpcRecorder: RpcCallRecorder = RpcCallRecorder(),
     spannerDebug: SpannerDebug? = null,
+    authenticator: Authenticator = Authenticator.dev(),
   ): Server {
     // The in-memory backend isn't thread-safe, so every RPC runs on one serialized dispatcher.
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
+    fun <T : Any> bind(service: Class<T>) =
+      WireGrpcBindings.bind(service, service.cast(backend), scope) { caller ->
+        caller?.let { backend.registerCaller(it) }
+      }
     val grpcService =
       GrpcService.builder()
-        .addService(WireGrpcBindings.bind(SurveyServiceServer::class.java, backend, scope))
-        .addService(WireGrpcBindings.bind(OrganizationServiceServer::class.java, backend, scope))
-        .addService(WireGrpcBindings.bind(LibraryServiceServer::class.java, backend, scope))
-        .addService(WireGrpcBindings.bind(DataServiceServer::class.java, backend, scope))
+        .addService(bind(SurveyServiceServer::class.java))
+        .addService(bind(OrganizationServiceServer::class.java))
+        .addService(bind(LibraryServiceServer::class.java))
+        .addService(bind(DataServiceServer::class.java))
         .intercept(rpcRecorder.interceptor())
+        .intercept(authenticator.interceptor())
         .supportedSerializationFormats(
           GrpcSerializationFormats.PROTO,
           GrpcSerializationFormats.PROTO_WEB,
@@ -68,6 +74,9 @@ object UserDataServer {
           "x-user-agent",
           "grpc-timeout",
           "authorization",
+          Authenticator.DEV_USER_ID_HEADER,
+          Authenticator.DEV_USER_EMAIL_HEADER,
+          Authenticator.DEV_USER_NAME_HEADER,
         )
         .exposeHeaders("grpc-status", "grpc-message", "grpc-status-details-bin")
         .newDecorator()

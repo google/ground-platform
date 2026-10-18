@@ -105,6 +105,32 @@ returns 200. If another process already uses the port (for example another dev
 server on 8080), start the service with `PORT=<free port>` and use that port in
 `USER_DATA_SERVICE_URL`.
 
+## Authentication
+
+Every RPC runs as an authenticated caller, chosen by `AUTH_MODE`:
+
+-   **`dev` (default).** For local development only. Calls name a user with the
+    `x-dev-user-id`, `x-dev-user-email`, and optional `x-dev-user-name` headers
+    (the email counts as verified). Calls without them run as the sample
+    organizer, Maya Lin (`uid-maya-lin`), and keep request fields such as
+    `AcquirePlotLockRequest.user_id`, so the clients' fake sign-in keeps
+    working.
+-   **`firebase`.** Calls must send a Firebase Authentication ID token for the
+    project in `FIREBASE_PROJECT_ID` (default `gnd-dev`) as
+    `Authorization: Bearer <token>`; anonymous accounts are rejected. Calls
+    without a valid token fail with `UNAUTHENTICATED`.
+
+Before each RPC, the service registers the caller in its users (on the first
+call, or when the email or profile changed). For a verified email, it binds
+survey ACL entries and organization invites addressed to that email to the
+caller's user ID. The caller's user ID also replaces `user_id` request fields.
+
+Each user has an access epoch that increases whenever their ACL entries or
+memberships change (including invites bound at sign-in).
+`ListSurveyOverviews` and `ListOrganizations` tokens carry it, so a client
+whose access changed gets `FAILED_PRECONDITION` and runs a full sync. Access
+isn't enforced yet: any caller can read and write any survey.
+
 ## RPC Debug Web UI
 
 Open `http://localhost:8080/` (or `http://localhost:8080/debug`) in a browser
