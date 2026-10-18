@@ -940,7 +940,12 @@ in these ways, to be closed in later steps:
   lists, `OWN_ONLY` filtering) is done in the backend over whole collections,
   not through `SurveysByOwner`, `AclByUser`, and `MembersByUser` scans.
   Administrators are active managers of the all-users organization.
-  `Surveys.DataAccessEpoch` comes next.
+- There's no `Surveys.DataAccessEpoch`. Entity and submission tokens carry the
+  caller's effective visibility instead (all records, or only those created by
+  the caller under `OWN_ONLY`), so a `PeerDataVisibility` flip, a role change,
+  or another account's token fails with `FAILED_PRECONDITION` without writing
+  an epoch, and organizers' tokens survive flips that don't change what they
+  see.
 
 ## Open Questions
 

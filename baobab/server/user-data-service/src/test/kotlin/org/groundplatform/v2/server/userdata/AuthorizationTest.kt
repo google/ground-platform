@@ -68,170 +68,222 @@ open class AuthorizationTest {
       .toSet()
 
   @Test
-  fun surveyReads_requireARole_andOnlyOrganizersSeeCollaborators() = runBlocking {
-    assertDenied(OUTSIDER) { backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)) }
+  fun surveyReads_requireARole_andOnlyOrganizersSeeCollaborators() =
+    runBlocking<Unit> {
+      assertDenied(OUTSIDER) { backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)) }
 
-    val asCollector = asCaller(COLLECTOR) { backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)) }
-    assertEquals(KENYA, asCollector.survey?.survey_id)
-    assertTrue(asCollector.acl?.entries.orEmpty().isEmpty())
-    val asOrganizer =
-      asCaller(FIELD_LEAD) { backend.GetSurveyAcl(GetSurveyAclRequest(survey_id = KENYA)) }
-    assertTrue(asOrganizer.acl?.entries.orEmpty().isNotEmpty())
-  }
-
-  @Test
-  fun linkAndPublicSurveys_areReadable_butNotListed() = runBlocking {
-    asCaller(OUTSIDER) {
-      assertEquals(LINK, backend.GetSurvey(GetSurveyRequest(survey_id = LINK)).survey?.survey_id)
-      assertEquals(
-        PUBLIC,
-        backend.GetSurvey(GetSurveyRequest(survey_id = PUBLIC)).survey?.survey_id,
-      )
+      val asCollector =
+        asCaller(COLLECTOR) { backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)) }
+      assertEquals(KENYA, asCollector.survey?.survey_id)
+      assertTrue(asCollector.acl?.entries.orEmpty().isEmpty())
+      val asOrganizer =
+        asCaller(FIELD_LEAD) { backend.GetSurveyAcl(GetSurveyAclRequest(survey_id = KENYA)) }
+      assertTrue(asOrganizer.acl?.entries.orEmpty().isNotEmpty())
     }
 
-    assertTrue(listedSurveys(OUTSIDER).isEmpty())
-  }
-
   @Test
-  fun surveyLists_followOwnershipAclEntriesAndOrganizationSharing() = runBlocking {
-    assertEquals(setOf(KENYA), listedSurveys(COLLECTOR))
-    assertEquals(setOf(MEKONG), listedSurveys(MEKONG_MEMBER))
-    assertEquals(6, listedSurveys(ADMIN).size)
-  }
-
-  @Test
-  fun lostAccess_appearsAsATombstoneInTheDelta() = runBlocking {
-    val token =
-      asCaller(MEKONG_MEMBER) { backend.ListSurveyOverviews(ListSurveyOverviewsRequest()) }
-        .next_sync_token
-    asCaller(ADMIN) {
-      backend.MutateSurvey(
-        MutateSurveyRequest(
-          survey_id = MEKONG,
-          mutations =
-            listOf(
-              SurveyMutation(
-                update_access_rules =
-                  groundplatform.v2.survey.AccessRulesPatch(
-                    sharing_policy = groundplatform.v2.survey.SharingPolicy.RESTRICTED
-                  )
-              )
-            ),
-        )
-      )
-    }
-
-    val delta =
-      asCaller(MEKONG_MEMBER) {
-        backend.ListSurveyOverviews(ListSurveyOverviewsRequest(sync_token = token))
-      }
-    assertEquals(
-      listOf(MEKONG to SurveyState.DELETED),
-      delta.overviews.map { it.survey_id to it.state },
-    )
-    assertDenied(MEKONG_MEMBER) { backend.GetSurvey(GetSurveyRequest(survey_id = MEKONG)) }
-  }
-
-  @Test
-  fun organizationLists_showOnlyTheCallersOrganizations() = runBlocking {
-    val outsiderOrgs =
-      asCaller(OUTSIDER) { backend.ListOrganizations(ListOrganizationsRequest()) }.organizations
-    assertTrue(outsiderOrgs.isEmpty())
-    val collectorOrgs =
-      asCaller(COLLECTOR) { backend.ListOrganizations(ListOrganizationsRequest()) }.organizations
-    assertEquals(listOf(KENYA_FOREST_SERVICE), collectorOrgs.map { it.organization_id })
-  }
-
-  @Test
-  fun writes_requireTheRightRole() = runBlocking {
-    val retitle =
-      MutateSurveyRequest(
-        survey_id = KENYA,
-        mutations =
-          listOf(
-            SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Mine"))
-          ),
-      )
-    assertDenied(COLLECTOR) { backend.MutateSurvey(retitle) }
-    asCaller(FIELD_LEAD) { backend.MutateSurvey(retitle) }
-
-    assertDenied(VIEWER) { backend.MutateData(MutateDataRequest(KENYA, listOf(create("e-v")))) }
-    assertDenied(COLLECTOR) {
-      backend.MutateOrganization(
-        MutateOrganizationRequest(
-          organization_id = KENYA_FOREST_SERVICE,
-          mutations =
-            listOf(
-              OrganizationMutation(
-                update_field =
-                  groundplatform.v2.survey.OrganizationFieldPatch(
-                    key = "name",
-                    string_value = "Taken",
-                  )
-              )
-            ),
-        )
-      )
-    }
-  }
-
-  @Test
-  fun newRecords_areAttributedToTheCaller() = runBlocking {
-    val created =
-      asCaller(COLLECTOR) { backend.MutateData(MutateDataRequest(KENYA, listOf(create("e-c")))) }
-
-    assertEquals("uid-collector-one", created.results.single().entity?.audit_info?.created_by)
-  }
-
-  @Test
-  fun ownOnlyVisibility_limitsCollectorsToTheirOwnRecords() = runBlocking {
-    val seedEntity =
-      asCaller(ADMIN) { backend.ListEntities(ListEntitiesRequest(survey_id = LINK)) }
-        .entities
-        .first()
-    asCaller(OUTSIDER) {
-      backend.MutateData(MutateDataRequest(LINK, listOf(create("e-own"))))
-      val visible = backend.ListEntities(ListEntitiesRequest(survey_id = LINK)).entities
-      assertEquals(listOf(testId("e-own")), visible.map { it.entity_id })
-    }
-    assertDenied(OUTSIDER) {
-      backend.MutateData(
-        MutateDataRequest(
-          LINK,
-          listOf(
-            DataMutation(
-              client_id = "c-outsider",
-              client_seq = 2L,
-              entity_mutation =
-                EntityMutation(
-                  entity_id = seedEntity.entity_id,
-                  update =
-                    EntityPatch(
-                      patches = listOf(EntityFieldPatch(key = "label", label_value = "Mine"))
-                    ),
-                ),
-            )
-          ),
-        )
-      )
-    }
-    val all = asCaller(ADMIN) { backend.ListEntities(ListEntitiesRequest(survey_id = LINK)) }
-    assertTrue(all.entities.size > 1)
-  }
-
-  @Test
-  fun batchGet_reportsPermissionDeniedPerSurvey() = runBlocking {
-    val results =
+  fun linkAndPublicSurveys_areReadable_butNotListed() =
+    runBlocking<Unit> {
       asCaller(OUTSIDER) {
-          backend.BatchGetSurveyOverviews(
-            BatchGetSurveyOverviewsRequest(survey_ids = listOf(KENYA, LINK))
-          )
-        }
-        .results
+        assertEquals(LINK, backend.GetSurvey(GetSurveyRequest(survey_id = LINK)).survey?.survey_id)
+        assertEquals(
+          PUBLIC,
+          backend.GetSurvey(GetSurveyRequest(survey_id = PUBLIC)).survey?.survey_id,
+        )
+      }
 
-    assertEquals(Status.Code.PERMISSION_DENIED.value(), results[0].error_code)
-    assertEquals(LINK, results[1].overview?.survey_id)
-  }
+      assertTrue(listedSurveys(OUTSIDER).isEmpty())
+    }
+
+  @Test
+  fun surveyLists_followOwnershipAclEntriesAndOrganizationSharing() =
+    runBlocking<Unit> {
+      assertEquals(setOf(KENYA), listedSurveys(COLLECTOR))
+      assertEquals(setOf(MEKONG), listedSurveys(MEKONG_MEMBER))
+      assertEquals(6, listedSurveys(ADMIN).size)
+    }
+
+  @Test
+  fun lostAccess_appearsAsATombstoneInTheDelta() =
+    runBlocking<Unit> {
+      val token =
+        asCaller(MEKONG_MEMBER) { backend.ListSurveyOverviews(ListSurveyOverviewsRequest()) }
+          .next_sync_token
+      asCaller(ADMIN) {
+        backend.MutateSurvey(
+          MutateSurveyRequest(
+            survey_id = MEKONG,
+            mutations =
+              listOf(
+                SurveyMutation(
+                  update_access_rules =
+                    groundplatform.v2.survey.AccessRulesPatch(
+                      sharing_policy = groundplatform.v2.survey.SharingPolicy.RESTRICTED
+                    )
+                )
+              ),
+          )
+        )
+      }
+
+      val delta =
+        asCaller(MEKONG_MEMBER) {
+          backend.ListSurveyOverviews(ListSurveyOverviewsRequest(sync_token = token))
+        }
+      assertEquals(
+        listOf(MEKONG to SurveyState.DELETED),
+        delta.overviews.map { it.survey_id to it.state },
+      )
+      assertDenied(MEKONG_MEMBER) { backend.GetSurvey(GetSurveyRequest(survey_id = MEKONG)) }
+    }
+
+  @Test
+  fun organizationLists_showOnlyTheCallersOrganizations() =
+    runBlocking<Unit> {
+      val outsiderOrgs =
+        asCaller(OUTSIDER) { backend.ListOrganizations(ListOrganizationsRequest()) }.organizations
+      assertTrue(outsiderOrgs.isEmpty())
+      val collectorOrgs =
+        asCaller(COLLECTOR) { backend.ListOrganizations(ListOrganizationsRequest()) }.organizations
+      assertEquals(listOf(KENYA_FOREST_SERVICE), collectorOrgs.map { it.organization_id })
+    }
+
+  @Test
+  fun writes_requireTheRightRole() =
+    runBlocking<Unit> {
+      val retitle =
+        MutateSurveyRequest(
+          survey_id = KENYA,
+          mutations =
+            listOf(
+              SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Mine"))
+            ),
+        )
+      assertDenied(COLLECTOR) { backend.MutateSurvey(retitle) }
+      asCaller(FIELD_LEAD) { backend.MutateSurvey(retitle) }
+
+      assertDenied(VIEWER) { backend.MutateData(MutateDataRequest(KENYA, listOf(create("e-v")))) }
+      assertDenied(COLLECTOR) {
+        backend.MutateOrganization(
+          MutateOrganizationRequest(
+            organization_id = KENYA_FOREST_SERVICE,
+            mutations =
+              listOf(
+                OrganizationMutation(
+                  update_field =
+                    groundplatform.v2.survey.OrganizationFieldPatch(
+                      key = "name",
+                      string_value = "Taken",
+                    )
+                )
+              ),
+          )
+        )
+      }
+    }
+
+  @Test
+  fun newRecords_areAttributedToTheCaller() =
+    runBlocking<Unit> {
+      val created =
+        asCaller(COLLECTOR) { backend.MutateData(MutateDataRequest(KENYA, listOf(create("e-c")))) }
+
+      assertEquals("uid-collector-one", created.results.single().entity?.audit_info?.created_by)
+    }
+
+  @Test
+  fun ownOnlyVisibility_limitsCollectorsToTheirOwnRecords() =
+    runBlocking<Unit> {
+      val seedEntity =
+        asCaller(ADMIN) { backend.ListEntities(ListEntitiesRequest(survey_id = LINK)) }
+          .entities
+          .first()
+      asCaller(OUTSIDER) {
+        backend.MutateData(MutateDataRequest(LINK, listOf(create("e-own"))))
+        val visible = backend.ListEntities(ListEntitiesRequest(survey_id = LINK)).entities
+        assertEquals(listOf(testId("e-own")), visible.map { it.entity_id })
+      }
+      assertDenied(OUTSIDER) {
+        backend.MutateData(
+          MutateDataRequest(
+            LINK,
+            listOf(
+              DataMutation(
+                client_id = "c-outsider",
+                client_seq = 2L,
+                entity_mutation =
+                  EntityMutation(
+                    entity_id = seedEntity.entity_id,
+                    update =
+                      EntityPatch(
+                        patches = listOf(EntityFieldPatch(key = "label", label_value = "Mine"))
+                      ),
+                  ),
+              )
+            ),
+          )
+        )
+      }
+      val all = asCaller(ADMIN) { backend.ListEntities(ListEntitiesRequest(survey_id = LINK)) }
+      assertTrue(all.entities.size > 1)
+    }
+
+  @Test
+  fun peerDataVisibilityFlips_invalidateFilteredCollectorsDataTokens() =
+    runBlocking<Unit> {
+      val collectorToken =
+        asCaller(COLLECTOR) { backend.ListEntities(ListEntitiesRequest(survey_id = KENYA)) }
+          .next_sync_token
+      val organizerToken =
+        asCaller(FIELD_LEAD) { backend.ListEntities(ListEntitiesRequest(survey_id = KENYA)) }
+          .next_sync_token
+
+      asCaller(FIELD_LEAD) {
+        backend.MutateSurvey(
+          MutateSurveyRequest(
+            survey_id = KENYA,
+            mutations =
+              listOf(
+                SurveyMutation(
+                  update_access_rules =
+                    groundplatform.v2.survey.AccessRulesPatch(
+                      peer_data_visibility = groundplatform.v2.survey.PeerDataVisibility.OWN_ONLY
+                    )
+                )
+              ),
+          )
+        )
+      }
+
+      val error =
+        assertFailsWith<StatusException> {
+          asCaller(COLLECTOR) {
+            backend.ListEntities(
+              ListEntitiesRequest(survey_id = KENYA, sync_token = collectorToken)
+            )
+          }
+        }
+      assertEquals(Status.Code.FAILED_PRECONDITION, error.status.code)
+      // Organizers see every record either way, so their tokens stay valid.
+      asCaller(FIELD_LEAD) {
+        backend.ListEntities(ListEntitiesRequest(survey_id = KENYA, sync_token = organizerToken))
+      }
+    }
+
+  @Test
+  fun batchGet_reportsPermissionDeniedPerSurvey() =
+    runBlocking<Unit> {
+      val results =
+        asCaller(OUTSIDER) {
+            backend.BatchGetSurveyOverviews(
+              BatchGetSurveyOverviewsRequest(survey_ids = listOf(KENYA, LINK))
+            )
+          }
+          .results
+
+      assertEquals(Status.Code.PERMISSION_DENIED.value(), results[0].error_code)
+      assertEquals(LINK, results[1].overview?.survey_id)
+    }
 
   private fun create(name: String) =
     DataMutation(

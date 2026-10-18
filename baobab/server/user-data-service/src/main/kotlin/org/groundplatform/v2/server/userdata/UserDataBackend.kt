@@ -1451,13 +1451,20 @@ class UserDataBackend(private val store: UserDataStore) :
   // ---------------------------------------------------------------------------
 
   /**
-   * The caller's visibility rule for records of survey [surveyId] (all, or only its own under
-   * `OWN_ONLY`), after checking it can view the survey.
+   * Which records of a survey a caller sees: all, or only those it created (`OWN_ONLY` below
+   * organizer). [key] goes into entity and submission tokens, so a token issued under another
+   * visibility (after a `peer_data_visibility` flip, a role change, or for another user) fails with
+   * `FAILED_PRECONDITION` and the client runs a full sync of the survey.
    */
-  private fun Access.dataVisibility(surveyId: String): (String) -> Boolean {
+  private class DataVisibility(val key: String, private val ownerId: String?) {
+    operator fun invoke(createdBy: String): Boolean = ownerId == null || createdBy == ownerId
+  }
+
+  /** The caller's [DataVisibility] for survey [surveyId], after checking it can view the survey. */
+  private fun Access.dataVisibility(surveyId: String): DataVisibility {
     val role = requireSurvey(surveyId, Access.SurveyRole.VIEWER)
-    if (!seesOwnRecordsOnly(surveyId, role)) return { true }
-    return { createdBy -> createdBy == userId }
+    return if (seesOwnRecordsOnly(surveyId, role)) DataVisibility("own:$userId", userId)
+    else DataVisibility("all", null)
   }
 
   override suspend fun GetEntity(request: GetEntityRequest): GetEntityResponse {
@@ -1515,6 +1522,7 @@ class UserDataBackend(private val store: UserDataStore) :
         query = query,
         queryFieldsSet = queryFieldsSet,
         watermark = r.snapshotTimestamp,
+        accessEpoch = visible.key,
         visible = { visible(it.audit_info?.created_by.orEmpty()) },
       )
     }
@@ -1604,6 +1612,7 @@ class UserDataBackend(private val store: UserDataStore) :
         query = query,
         queryFieldsSet = queryFieldsSet,
         watermark = r.snapshotTimestamp,
+        accessEpoch = visible.key,
         visible = { visible(it.audit_info?.created_by.orEmpty()) },
       )
     }

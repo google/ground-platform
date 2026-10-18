@@ -148,7 +148,9 @@ and fail with `PERMISSION_DENIED` otherwise:
     returns a tombstone for a survey the caller can no longer list.
 -   **Data:** data collectors write records, attributed to them as
     `created_by`. Under `OWN_ONLY` peer data visibility, collectors only see
-    and change their own records.
+    and change their own records. Entity and submission tokens carry what the
+    caller sees (all records or only its own), so a visibility change makes
+    stale tokens fail with `FAILED_PRECONDITION`.
 -   **Organizations and libraries:** members see their organizations (managers
     and active members see all members); managers change them and their
     library. The global library is readable by everyone.
