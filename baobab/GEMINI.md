@@ -72,7 +72,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
   * [`shared/mobile/`](shared/mobile/): The mobile app (`commonMain`): screens, `MobileAppState`, and the `GroundMobileApp()` root shared by every mobile host. Targets Android/JVM and WasmJS; iOS is opt-in (`-Pground.ios=true`) until `shared/app` gets iOS targets.
   * **Module placement**: Put code in the lowest module every user of it depends on. Code only the web console uses belongs in `shared/web`, code only the mobile app uses in `shared/mobile` (or in [`mobileWebApp/workbench/`](mobileWebApp/workbench/) when only the workbench uses it), and only code both apps use in `shared/app`. The web console and the mobile app are independent Wasm apps and never import each other.
 * **Thin Platform Wrappers**: Keep [`androidApp/`](androidApp/), [`iosApp/`](iosApp/), [`webApp/`](webApp/), and [`mobileWebApp/`](mobileWebApp/) (the mobile app in the browser, for testing, with its device `workbench/` library) as thin platform entry points and host integrations. Do not duplicate business logic, state machines, validation, or shared UI components across platform targets; use `expect`/`actual` abstractions only where native OS capabilities are required.
-* **Developer Tools**: [`devtools/formdebugger/`](devtools/formdebugger/) is a standalone XForms / ProtoForms / XPath debugger. Keep developer tooling out of the shipped apps.
+* **Developer Tools**: [`devtools/launchpad/`](devtools/launchpad/) runs the local development launchpad. Keep developer tooling out of the shipped apps.
 
 ## User Interface: Material Design 3 & Compose Multiplatform
 

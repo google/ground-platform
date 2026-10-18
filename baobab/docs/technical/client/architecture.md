@@ -275,7 +275,7 @@ on, so each app's build includes only what it uses.
 ├── mobileWebApp/         # Wasm host of the mobile app in the browser, for testing
 │   └── workbench/        # Simulated device, XForms editor, and sample data tools around it
 └── devtools/
-    └── formdebugger/     # XForms / ProtoForms / XPath debugger
+    └── launchpad/        # Local dev launchpad for the server, web console, mobile app, and Spanner emulator
 ```
 
 Dependencies point from the hosts inwards: `webApp` → `shared/web` → `shared/app`;

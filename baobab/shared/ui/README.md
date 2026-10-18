@@ -47,11 +47,6 @@ and **Web (`js`, `wasmJs`)**.
     data types (`TYPE_STRING`, `TYPE_INT32`, `TYPE_INT64`, `TYPE_DOUBLE`,
     `TYPE_BOOLEAN`, `TYPE_DATE`, `TYPE_TIME`, `TYPE_DATETIME`, `TYPE_GEOPOINT`,
     `TYPE_GEOTRACE`, `TYPE_GEOSHAPE`).
--   **Embeddable Mobile Phone Preview
-    ([`MobilePhoneFrame`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/MobileFormRunner.kt))**:
-    Wraps `MobileFormRunner` in a mobile viewport frame (`400×720`) so web and
-    desktop applications (such as `devtools/formdebugger`) can execute mobile
-    forms inline with bidirectional live record synchronization.
 -   **Compact Web Layout
     ([`CompactFormRunner`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/CompactFormRunner.kt))**:
     Renders the same `FormWizardController` session as a vertical stack of

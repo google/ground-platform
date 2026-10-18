@@ -1586,7 +1586,7 @@ private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
 
 /**
  * Built-in interactive satellite/topographic Compose [Canvas] map used when
- * [LocalGeoPointMapViewport] is not provided (e.g. in `devtools/formdebugger` or unit previews).
+ * [LocalGeoPointMapViewport] is not provided (e.g. in unit previews).
  */
 @Composable
 private fun GeoPointFallbackCanvasMap(viewportState: GeoPointMapViewportState) {

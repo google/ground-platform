@@ -24,7 +24,7 @@ and **Web (`js`, `wasmJs`)**.
 It is designed around a **single-question-per-screen** mobile experience while
 remaining completely decoupled from platform-specific navigation frameworks so
 that the same components can be rendered full-screen on a mobile device or
-embedded inside web developer tools such as `devtools/formdebugger`.
+embedded inside web previews and the mobile workbench.
 
 
 ## Architectural Design
@@ -45,7 +45,7 @@ embedded inside web developer tools such as `devtools/formdebugger`.
 │     • Enforces per-screen required/constraint validation on Next           │
 │     • Bridges typed UI mutations (updateString, updateDate, etc.)          │
 │                                                                            │
-│  2. MobileFormRunner & MobilePhoneFrame                                    │
+│  2. MobileFormRunner                                                       │
 │     • Top App Bar (Title, Progress Bar, Language Switcher, Step Drawer)    │
 │     • Step Content Viewport (QuestionStep / FieldList / RepeatHub / Review)│
 │     • Bottom Navigation Bar (← Back, Step Counter, Next → / Submit ✓)      │
@@ -217,30 +217,7 @@ fun SurveyCollectionScreen(
 }
 ```
 
-### B. Embedded Phone Viewport in Web / Desktop Tools (`MobilePhoneFrame`)
-
-When embedding the mobile form runner inside a larger web or desktop layout
-(such as the ProtoForms Form Debugger's **`▶ RUN`** panel), wrap
-`MobileFormRunner` inside [`MobilePhoneFrame`](MobileFormRunner.kt):
-
-```kotlin
-import androidx.compose.runtime.Composable
-import org.groundplatform.v2.core.forms.ui.FormWizardController
-import org.groundplatform.v2.core.forms.ui.MobileFormRunner
-import org.groundplatform.v2.core.forms.ui.MobilePhoneFrame
-
-@Composable
-fun EmbeddedFormPreview(controller: FormWizardController, onClose: () -> Unit) {
-  MobilePhoneFrame(deviceLabel = "Mobile Form Runner (Single-Question View)") {
-    MobileFormRunner(
-      controller = controller,
-      onClose = onClose,
-    )
-  }
-}
-```
-
-### C. Programmatic Navigation & Custom Host Controls
+### B. Programmatic Navigation & Custom Host Controls
 
 Host applications can also drive or inspect `FormWizardController` directly:
 

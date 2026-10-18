@@ -181,9 +181,8 @@ fun extractSubmissionFieldsFromRecord(
  * Embedded Data Collection Form overlay rendered inside the mobile/tablet device frame when
  * [AppSession.isDataCollectionFormOpen] is `true`.
  *
- * Uses the same [MobileFormRunner] and [FormWizardController] components as
- * `devtools/formdebugger`, preceded by a compact context banner displaying the target Geospatial
- * Entity name, GeoID, and active form title.
+ * Uses [MobileFormRunner] and [FormWizardController], preceded by a compact context banner
+ * displaying the target Geospatial Entity name, GeoID, and active form title.
  *
  * When the form was launched from the bottom-centered FAB without a pre-selected entity and the
  * current wizard step requires an `entityref` (`[AppSession.isCurrentFormStepEntityRef]`), presents

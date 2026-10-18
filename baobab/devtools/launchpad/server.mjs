@@ -134,21 +134,6 @@ const SERVICE_DEFINITIONS = [
       { label: 'Browse data', view: 'spanner' },
       { label: 'REST API', path: ':9020/v1/projects', type: 'api' }
     ]
-  },
-  {
-    id: 'form-debugger',
-    name: 'Form debugger',
-    code: 'FORMS',
-    category: 'AUX',
-    role: 'XForms / ProtoForms / XPath debugging tool (devtools/formdebugger)',
-    port: 8090,
-    healthCheck: { type: 'http', path: '/', expectedStatus: 500, comparison: '<' },
-    cwdRel: 'devtools/formdebugger',
-    command: ['./gradlew', 'wasmJsBrowserDevelopmentRun', '--console=plain'],
-    readyRegex: /webpack \d+.*compiled/i,
-    endpoints: [
-      { label: 'Open', path: '/', type: 'route' }
-    ]
   }
 ];
 

@@ -493,7 +493,6 @@
     .log-tag.WEB { color: var(--ice); }
     .log-tag.MOBILE { color: var(--lavender); }
     .log-tag.SPANNER { color: var(--apricot); }
-    .log-tag.FORMS { color: var(--coral); }
     .log-msg { color: #d6d6e4; }
     .log-msg.err { color: var(--coral); }
 
@@ -601,7 +600,6 @@
             <button class="filter" data-filter="web-console" onclick="setLogFilter('web-console')">Web</button>
             <button class="filter" data-filter="mobile-app" onclick="setLogFilter('mobile-app')">Mobile</button>
             <button class="filter" data-filter="spanner-emulator" onclick="setLogFilter('spanner-emulator')">Spanner</button>
-            <button class="filter" data-filter="form-debugger" onclick="setLogFilter('form-debugger')">Forms</button>
           </div>
           <input id="logSearch" class="search push" type="text" placeholder="Filter text…" oninput="renderLogs()">
           <button id="followToggle" class="act restart" onclick="toggleFollow()" title="Keep the newest lines in view">Follow: on</button>

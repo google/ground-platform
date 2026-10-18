@@ -14,7 +14,6 @@
 package org.groundplatform.v2.core.forms.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +30,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -64,7 +62,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -1044,98 +1041,6 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
                 },
             )
           }
-        }
-      }
-    }
-  }
-}
-
-/**
- * Wraps a [MobileFormRunner] in a realistic mobile phone bezel for embedding inside web or desktop
- * debugging tools.
- */
-@Composable
-fun MobilePhoneFrame(
-  modifier: Modifier = Modifier,
-  deviceLabel: String = "Ground Mobile Form Runner (390×720)",
-  content: @Composable () -> Unit,
-) {
-  val colors = MaterialTheme.colorScheme
-  Column(
-    modifier = modifier,
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    Text(
-      text = deviceLabel,
-      style =
-        MaterialTheme.typography.labelMedium.copy(
-          fontWeight = FontWeight.SemiBold,
-          color = colors.onSurfaceVariant,
-        ),
-    )
-
-    // Outer Phone Bezel
-    Box(
-      modifier =
-        Modifier.width(400.dp)
-          .height(720.dp)
-          .clip(RoundedCornerShape(36.dp))
-          .background(colors.inverseSurface)
-          .padding(10.dp)
-    ) {
-      Column(
-        modifier =
-          Modifier.fillMaxSize().clip(MaterialTheme.shapes.extraLarge).background(colors.surface)
-      ) {
-        // Simulated Mobile Status Bar
-        Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .background(colors.surfaceContainerHigh)
-              .padding(horizontal = 18.dp, vertical = 6.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-            text = "09:41",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = colors.onSurface,
-              ),
-          )
-          // Camera notch pill
-          Box(
-            modifier =
-              Modifier.width(64.dp)
-                .height(10.dp)
-                .clip(CircleShape)
-                .background(colors.inverseSurface)
-          )
-          Text(
-            text = "5G • 100%",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = colors.onSurface,
-              ),
-          )
-        }
-
-        // Screen Content
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) { content() }
-
-        // Bottom Gesture Home Bar
-        Box(
-          modifier =
-            Modifier.fillMaxWidth().background(colors.surfaceContainer).padding(vertical = 6.dp),
-          contentAlignment = Alignment.Center,
-        ) {
-          Box(
-            modifier =
-              Modifier.width(110.dp).height(4.dp).clip(CircleShape).background(colors.outline)
-          )
         }
       }
     }

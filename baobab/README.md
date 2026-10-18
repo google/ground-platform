@@ -44,7 +44,7 @@ for **Ground 2.0**.
 ├── server/
 │   └── user-data-service/       # gRPC user data service (Kotlin/JVM; native gRPC + gRPC-Web, Cloud Run)
 ├── devtools/
-│   └── formdebugger/            # Interactive Compose Web workbench for XForms, ProtoForms & XPath
+│   └── launchpad/               # Browser page for starting, stopping & watching local services
 └── docs/                        # System architecture & Protocol Buffer data model specifications
 ```
 
@@ -78,8 +78,8 @@ for **Ground 2.0**.
     `org.groundplatform.v2.core.forms.ui`) targeting Web (`js` / `wasmJs`),
     Android/JVM (`jvm`), and iOS (`iosArm64` / `iosSimulatorArm64`). Provides
     shared Material 3 theming (`GroundTheme`) and the single-question-per-screen
-    form experience (`MobileFormRunner`, `MobilePhoneFrame`,
-    `FormWizardController`, `QuestionControlCard`, and `ControlWidget`).
+    form experience (`MobileFormRunner`, `FormWizardController`,
+    `QuestionControlCard`, and `ControlWidget`).
 -   **[`shared/app/`](shared/app/)**: Shared application module
     (`org.groundplatform.v2:app`) targeting Android/JVM and WasmJS. Contains the
     domain model, data layer, platform clients, and the UI state, ViewModels,
@@ -117,11 +117,9 @@ for **Ground 2.0**.
     RPCs over native gRPC and gRPC-Web, loaded with sample data for now. The
     web console and mobile apps sync from it; see its README for running it
     locally and deploying it to Cloud Run.
--   **[`devtools/formdebugger/`](devtools/formdebugger/)**: Single-page Compose
-    Multiplatform Web application for interactive bidirectional editing of
-    `FormDef` and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time
-    XPath expression evaluation, and an embedded mobile form runner (`▶ RUN`)
-    powered by `shared/ui`.
+-   **[`devtools/launchpad/`](devtools/launchpad/)**: Browser page for starting,
+    stopping, and watching the server, web console, and mobile app (plus the
+    Spanner emulator) during local development.
 -   **[`docs/`](docs/)**: Comprehensive architectural design and data model
     documentation.
 
@@ -197,9 +195,3 @@ From `shared/core/`:
 # Compile and check JS and WasmJS targets
 ./gradlew check compileKotlinJs compileKotlinWasmJs
 ```
-
-## Form Debugger Web App
-
-See [`devtools/formdebugger/README.md`](devtools/formdebugger/README.md) for
-instructions on running the local development web server, live-reload testing,
-and building production web bundles.

@@ -56,7 +56,6 @@ proxy URL; links to the other services follow whichever host you used).
 | Web console | 8092 | `webApp` | `./gradlew wasmJsBrowserDevelopmentRun` |
 | Mobile app | 8093 | `mobileWebApp` | `./gradlew wasmJsBrowserDevelopmentRun` |
 | Spanner emulator (optional) | 9010, 9020 | `.` | `scripts/spanner-emulator.sh` |
-| Form debugger (optional) | 8090 | `devtools/formdebugger` | `./gradlew wasmJsBrowserDevelopmentRun` |
 
 If the Spanner emulator is running when the server starts, the launchpad
 starts the server with `SPANNER_EMULATOR_HOST=localhost:9010`.
@@ -76,7 +75,7 @@ starts the server with `SPANNER_EMULATOR_HOST=localhost:9010`.
 The current page is kept in the URL (`#overview`, `#rpc`, `#spanner`,
 `#logs`), so reloading or bookmarking returns to it.
 
-The web console, mobile app, and form debugger always open in their own tabs,
+The web console and mobile app always open in their own tabs,
 from the links on their cards (marked ↗) or the **Web console ↗** and
 **Mobile app ↗** buttons in the left column.
 
@@ -119,4 +118,4 @@ The page uses this HTTP API, which you can also call directly:
 | `POST /api/config/sync-local-properties` | Sets `USER_DATA_SERVICE_URL`; body `{"url": "..."}` |
 
 Service IDs: `user-data-service`, `web-console`, `mobile-app`,
-`spanner-emulator`, `form-debugger`.
+`spanner-emulator`.
