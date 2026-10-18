@@ -54,16 +54,23 @@ data class OrganizationUiState(
   val openOrganization: Organization?
     get() = organization(openOrganizationId)
 
+  /**
+   * Whether the signed-in user is a platform administrator (i.e. Manager of the synthetic
+   * "All users" organization).
+   */
+  val isPlatformAdmin: Boolean
+    get() = organizations.any { it.id == Organization.ALL_USERS_ID && it.isManager(signedInUserEmail) }
+
   /** Organizations the signed-in user is an active member of. */
   val signedInUserOrganizations: List<Organization>
     get() = organizations.filter { it.isMember(signedInUserEmail) }
 
   /**
-   * Organizations the signed-in user belongs to (plus the synthetic `"All users"` organization),
-   * synthetic first, then the ones they manage, then by name.
+   * Organizations the signed-in user belongs to (excluding the synthetic `"All users"`
+   * organization), the ones they manage first, then by name.
    */
   val myOrganizations: List<Organization>
-    get() = organizations.organizationsOf(signedInUserEmail)
+    get() = organizations.filterNot { it.isSynthetic }.organizationsOf(signedInUserEmail)
 
   /** Listed organizations the signed-in user can ask to join, by name. */
   val discoverableOrganizations: List<Organization>
@@ -116,6 +123,9 @@ data class OrganizationUiState(
 sealed interface OrganizationEvent {
   /** The organization page for [organizationId] was requested; the shell shows that page. */
   data class OrganizationOpened(val organizationId: String) : OrganizationEvent
+
+  /** The platform admin panel was requested; the shell shows that page. */
+  data object AdminPanelOpened : OrganizationEvent
 
   /** The organizations directory was requested; the shell shows that page. */
   data object OrganizationsOpened : OrganizationEvent

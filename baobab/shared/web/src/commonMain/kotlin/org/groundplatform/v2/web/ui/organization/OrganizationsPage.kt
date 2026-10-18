@@ -33,6 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Insights
@@ -118,6 +119,13 @@ internal fun OrganizationsPage(
               modifier = Modifier.size(16.dp),
               strokeWidth = 2.dp,
               color = MaterialTheme.colorScheme.primary,
+            )
+          }
+          if (uiState.isPlatformAdmin) {
+            WebHeaderButton(
+              text = "Admin panel",
+              icon = Icons.Outlined.AdminPanelSettings,
+              onClick = { state.openAdminPanel() },
             )
           }
           WebHeaderButton(

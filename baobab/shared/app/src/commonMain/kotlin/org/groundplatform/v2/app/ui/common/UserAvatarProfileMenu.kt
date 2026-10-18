@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material3.ButtonDefaults
@@ -119,6 +120,7 @@ fun UserAvatarProfileMenu(
   contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
   borderColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
   onOpenOrganizations: (() -> Unit)? = null,
+  onOpenAdminPanel: (() -> Unit)? = null,
 ) {
   var isProfileOpen by remember { mutableStateOf(false) }
   val displayInitials = userInitials.ifBlank { "U" }
@@ -154,6 +156,13 @@ fun UserAvatarProfileMenu(
               openOrgs()
             }
           },
+        onOpenAdminPanel =
+          onOpenAdminPanel?.let { openAdmin ->
+            {
+              isProfileOpen = false
+              openAdmin()
+            }
+          },
         onSignOut = {
           isProfileOpen = false
           onSignOut()
@@ -177,6 +186,7 @@ fun UserProfileSidePanelOverlay(
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
   onOpenOrganizations: (() -> Unit)? = null,
+  onOpenAdminPanel: (() -> Unit)? = null,
 ) {
   Box(modifier = modifier.fillMaxSize()) {
     // Scrim backdrop
@@ -230,6 +240,13 @@ fun UserProfileSidePanelOverlay(
                 openOrgs()
               }
             },
+          onOpenAdminPanel =
+            onOpenAdminPanel?.let { openAdmin ->
+              {
+                onDismissRequest()
+                openAdmin()
+              }
+            },
           onSignOut = {
             onDismissRequest()
             onSignOut()
@@ -253,6 +270,7 @@ fun UserProfileCard(
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
   onOpenOrganizations: (() -> Unit)? = null,
+  onOpenAdminPanel: (() -> Unit)? = null,
 ) {
   Card(
     modifier = modifier.fillMaxWidth(),
@@ -332,6 +350,26 @@ fun UserProfileCard(
           Spacer(modifier = Modifier.width(8.dp))
           Text(
             text = "Manage organizations",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+          )
+        }
+      }
+
+      if (onOpenAdminPanel != null) {
+        OutlinedButton(
+          onClick = onOpenAdminPanel,
+          modifier = Modifier.fillMaxWidth().height(40.dp),
+          shape = MaterialTheme.shapes.small,
+          border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.AdminPanelSettings,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text(
+            text = "Admin panel",
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
           )
         }

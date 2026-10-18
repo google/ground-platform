@@ -472,5 +472,6 @@ internal fun WebUserAvatarProfileWidget(
     avatarSize = 36.dp,
     dropdownWidth = 320.dp,
     onOpenOrganizations = state::openOrganizations,
+    onOpenAdminPanel = if (state.isPlatformAdmin) state::openAdminPanel else null,
   )
 }

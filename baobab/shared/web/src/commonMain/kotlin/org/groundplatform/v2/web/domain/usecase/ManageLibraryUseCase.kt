@@ -20,6 +20,7 @@ import org.groundplatform.v2.app.domain.model.LibraryStatus
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
+import org.groundplatform.v2.app.domain.model.PurposePack
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.app.domain.repository.LibraryRepository
 
@@ -160,6 +161,43 @@ class ManageLibraryUseCase(private val libraryRepository: LibraryRepository) {
   }
 
   /**
+   * The ID of a new Purpose Pack titled [title] in [library]: `org.<organizationId>.<name>` (or
+   * `<name>` in the global library), with `_2`, `_3`, … added when a template or Purpose Pack
+   * already uses it.
+   */
+  fun newPurposePackId(library: OrganizationLibrary, title: String): String {
+    val name = LibraryIds.nameFrom(title, "purpose")
+    val taken = (library.formTemplates.map { it.id } + library.purposePacks.map { it.id }).toSet()
+    fun idFor(candidate: String) =
+      if (library.isGlobal) candidate
+      else LibraryIds.organizationEntryId(library.organizationId, candidate)
+    var candidate = name
+    var n = 2
+    while (
+      idFor(candidate) in taken ||
+        LibraryIds.entryIdError(idFor(candidate), library.organizationId) != null
+    ) {
+      candidate = "${name}_${n++}"
+    }
+    return idFor(candidate)
+  }
+
+  /**
+   * Adds or updates [pack] in its organization's library.
+   */
+  suspend fun savePurposePack(pack: PurposePack): OrganizationLibrary? =
+    libraryRepository.updateLibrary(pack.organizationId) { library ->
+      val existing = library.purposePack(pack.id)
+      if (existing == null) {
+        library.copy(purposePacks = library.purposePacks + pack)
+      } else {
+        library.copy(
+          purposePacks = library.purposePacks.map { if (it.id == pack.id) pack else it }
+        )
+      }
+    }
+
+  /**
    * Adds [template] (a new ID from [newTemplateId]) or updates an existing template with the same
    * ID in its organization's library. Returns the stored library, or `null` if it couldn't be
    * saved.
@@ -202,21 +240,73 @@ class ManageLibraryUseCase(private val libraryRepository: LibraryRepository) {
     title: String,
     description: String,
   ): OrganizationLibrary? =
+    updateTemplateDetails(organizationId, templateId, title, description)
+
+  /**
+   * Updates [templateId]'s title, description, and optionally syncs its associated Purpose Packs
+   * bidirectionally.
+   */
+  suspend fun updateTemplateDetails(
+    organizationId: String,
+    templateId: String,
+    title: String,
+    description: String,
+    purposePackIds: List<String>? = null,
+  ): OrganizationLibrary? =
     libraryRepository.updateLibrary(organizationId) { library ->
-      library.copy(
-        formTemplates =
-          library.formTemplates.map {
-            if (it.id == templateId) {
-              it.copy(
-                title = it.title.with(LocalizedText.DEFAULT_LANGUAGE, title.trim()),
-                description =
-                  it.description.with(LocalizedText.DEFAULT_LANGUAGE, description.trim()),
-              )
+      val updatedTemplates =
+        library.formTemplates.map {
+          if (it.id == templateId) {
+            it.copy(
+              title = it.title.with(LocalizedText.DEFAULT_LANGUAGE, title.trim()),
+              description =
+                it.description.with(LocalizedText.DEFAULT_LANGUAGE, description.trim()),
+            )
+          } else {
+            it
+          }
+        }
+      val updatedPacks =
+        if (purposePackIds != null) {
+          val packIdsSet = purposePackIds.toSet()
+          library.purposePacks.map { pack ->
+            val hasTemplate = templateId in pack.formTemplateIds
+            if (pack.id in packIdsSet && !hasTemplate) {
+              pack.copy(formTemplateIds = pack.formTemplateIds + templateId)
+            } else if (pack.id !in packIdsSet && hasTemplate) {
+              pack.copy(formTemplateIds = pack.formTemplateIds - templateId)
             } else {
-              it
+              pack
             }
           }
-      )
+        } else {
+          library.purposePacks
+        }
+      library.copy(formTemplates = updatedTemplates, purposePacks = updatedPacks)
+    }
+
+  /**
+   * Updates the Purpose Packs that include [templateId] in their [PurposePack.formTemplateIds].
+   */
+  suspend fun setTemplatePurposePacks(
+    organizationId: String,
+    templateId: String,
+    purposePackIds: List<String>,
+  ): OrganizationLibrary? =
+    libraryRepository.updateLibrary(organizationId) { library ->
+      val packIdsSet = purposePackIds.toSet()
+      val updatedPacks =
+        library.purposePacks.map { pack ->
+          val hasTemplate = templateId in pack.formTemplateIds
+          if (pack.id in packIdsSet && !hasTemplate) {
+            pack.copy(formTemplateIds = pack.formTemplateIds + templateId)
+          } else if (pack.id !in packIdsSet && hasTemplate) {
+            pack.copy(formTemplateIds = pack.formTemplateIds - templateId)
+          } else {
+            pack
+          }
+        }
+      library.copy(purposePacks = updatedPacks)
     }
 
   /** Deletes the template [templateId] and removes it from the library's Purpose Packs. */

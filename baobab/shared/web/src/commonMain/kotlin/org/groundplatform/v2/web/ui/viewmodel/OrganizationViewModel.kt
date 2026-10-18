@@ -31,13 +31,16 @@ import org.groundplatform.v2.app.domain.model.CachedProfile
 import org.groundplatform.v2.app.domain.model.Countries
 import org.groundplatform.v2.app.domain.model.FormTemplate
 import org.groundplatform.v2.app.domain.model.ImagerySourceType
+import org.groundplatform.v2.app.domain.model.ImpactPillar
 import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.LibraryIds
+import org.groundplatform.v2.app.domain.model.LibraryStatus
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
+import org.groundplatform.v2.app.domain.model.PurposePack
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.editor.EditorForm
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
@@ -65,6 +68,9 @@ interface OrganizationActions {
 
   /** Shows [organizationId] on the organization page. */
   fun openOrganization(organizationId: String)
+
+  /** Shows the platform admin panel. */
+  fun openAdminPanel()
 
   /** Shows the organizations directory. */
   fun openOrganizations()
@@ -192,13 +198,22 @@ interface OrganizationActions {
 
   /**
    * Creates a new form template in [organizationId]'s library with [title], [description], and
-   * optional initial [questions]. Returns a validation error message, or `null` when saved.
+   * optional initial [questions] and associated [purposePackIds]. Returns a validation error
+   * message, or `null` when saved.
    */
   fun createTemplate(
     organizationId: String,
     title: String,
     description: String = "",
     questions: List<EditorQuestion> = emptyList(),
+  ): String? = createTemplate(organizationId, title, description, questions, emptyList())
+
+  fun createTemplate(
+    organizationId: String,
+    title: String,
+    description: String = "",
+    questions: List<EditorQuestion> = emptyList(),
+    purposePackIds: List<String> = emptyList(),
   ): String? = null
 
   /**
@@ -217,6 +232,26 @@ interface OrganizationActions {
     questions: List<EditorQuestion>,
   ): String? = null
 
+  /**
+   * Updates template metadata and optionally synchronizes associated Purpose Packs bidirectionally.
+   */
+  fun updateTemplateDetails(
+    organizationId: String,
+    templateId: String,
+    title: String,
+    description: String,
+    purposePackIds: List<String>? = null,
+  ): String? = null
+
+  /**
+   * Sets the Purpose Packs associated with [templateId] in [organizationId].
+   */
+  fun setTemplatePurposePacks(
+    organizationId: String,
+    templateId: String,
+    purposePackIds: List<String>,
+  ) {}
+
   /** Renames a template. Returns a validation error message, or `null`. */
   fun renameTemplate(
     organizationId: String,
@@ -227,6 +262,34 @@ interface OrganizationActions {
 
   /** Deletes a template and removes it from the organization's Purpose Packs. */
   fun deleteTemplate(organizationId: String, templateId: String)
+
+  /**
+   * Creates a new Purpose Pack in [organizationId]'s library with [title], [description], [icon],
+   * [pillar], and associated [formTemplateIds]. Returns a validation error message, or `null`.
+   */
+  fun createPurposePack(
+    organizationId: String,
+    title: String,
+    description: String = "",
+    icon: String = "",
+    pillar: ImpactPillar? = null,
+    formTemplateIds: List<String> = emptyList(),
+  ): String? = null
+
+  /**
+   * Updates an existing Purpose Pack in [organizationId]'s library. Returns a validation error
+   * message, or `null`.
+   */
+  fun updatePurposePack(
+    organizationId: String,
+    packId: String,
+    title: String,
+    description: String = "",
+    icon: String = "",
+    pillar: ImpactPillar? = null,
+    status: LibraryStatus = LibraryStatus.STABLE,
+    formTemplateIds: List<String> = emptyList(),
+  ): String? = null
 
   /** Renames a Purpose Pack. Returns a validation error message, or `null`. */
   fun renamePurposePack(
@@ -421,7 +484,16 @@ class OrganizationViewModel(
 
   // --- Navigation & notices ---
 
+  override fun openAdminPanel() {
+    session.update { it.copy(openOrganizationId = Organization.ALL_USERS_ID, notice = null) }
+    _events.tryEmit(OrganizationEvent.AdminPanelOpened)
+  }
+
   override fun openOrganization(organizationId: String) {
+    if (organizationId == Organization.ALL_USERS_ID) {
+      openAdminPanel()
+      return
+    }
     session.update { it.copy(openOrganizationId = organizationId, notice = null) }
     _events.tryEmit(OrganizationEvent.OrganizationOpened(organizationId))
   }
@@ -699,6 +771,14 @@ class OrganizationViewModel(
     title: String,
     description: String,
     questions: List<EditorQuestion>,
+  ): String? = createTemplate(organizationId, title, description, questions, emptyList())
+
+  override fun createTemplate(
+    organizationId: String,
+    title: String,
+    description: String,
+    questions: List<EditorQuestion>,
+    purposePackIds: List<String>,
   ): String? {
     (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
       return it
@@ -720,7 +800,12 @@ class OrganizationViewModel(
             questions = questions,
           ),
       )
-    launchSaving { manageLibraryUseCase.saveTemplate(template) }
+    launchSaving {
+      manageLibraryUseCase.saveTemplate(template)
+      if (purposePackIds.isNotEmpty()) {
+        manageLibraryUseCase.setTemplatePurposePacks(organizationId, id, purposePackIds)
+      }
+    }
     return null
   }
 
@@ -751,6 +836,39 @@ class OrganizationViewModel(
     return null
   }
 
+  override fun updateTemplateDetails(
+    organizationId: String,
+    templateId: String,
+    title: String,
+    description: String,
+    purposePackIds: List<String>?,
+  ): String? {
+    (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
+      return it
+    }
+    launchSaving {
+      manageLibraryUseCase.updateTemplateDetails(
+        organizationId,
+        templateId,
+        title,
+        description,
+        purposePackIds,
+      )
+    }
+    return null
+  }
+
+  override fun setTemplatePurposePacks(
+    organizationId: String,
+    templateId: String,
+    purposePackIds: List<String>,
+  ) {
+    if (libraryEditError(organizationId) != null) return
+    launchSaving {
+      manageLibraryUseCase.setTemplatePurposePacks(organizationId, templateId, purposePackIds)
+    }
+  }
+
   override fun renameTemplate(
     organizationId: String,
     templateId: String,
@@ -769,6 +887,73 @@ class OrganizationViewModel(
   override fun deleteTemplate(organizationId: String, templateId: String) {
     if (libraryEditError(organizationId) != null) return
     launchSaving { manageLibraryUseCase.deleteTemplate(organizationId, templateId) }
+  }
+
+  override fun createPurposePack(
+    organizationId: String,
+    title: String,
+    description: String,
+    icon: String,
+    pillar: ImpactPillar?,
+    formTemplateIds: List<String>,
+  ): String? {
+    (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
+      return it
+    }
+    val lib = library(organizationId)
+    val id = manageLibraryUseCase.newPurposePackId(lib, title)
+    val trimmedTitle = title.trim()
+    val trimmedDesc = description.trim()
+    val pack =
+      PurposePack(
+        id = id,
+        organizationId = organizationId,
+        title = LocalizedText.en(trimmedTitle),
+        description = if (trimmedDesc.isEmpty()) LocalizedText() else LocalizedText.en(trimmedDesc),
+        icon = icon.trim(),
+        pillar = pillar,
+        status = LibraryStatus.STABLE,
+        formTemplateIds = formTemplateIds,
+      )
+    launchSaving { manageLibraryUseCase.savePurposePack(pack) }
+    return null
+  }
+
+  override fun updatePurposePack(
+    organizationId: String,
+    packId: String,
+    title: String,
+    description: String,
+    icon: String,
+    pillar: ImpactPillar?,
+    status: LibraryStatus,
+    formTemplateIds: List<String>,
+  ): String? {
+    (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
+      return it
+    }
+    val trimmedTitle = title.trim()
+    val trimmedDesc = description.trim()
+    val lib = library(organizationId)
+    val existing = lib.purposePack(packId)
+    val pack =
+      (existing
+          ?: PurposePack(
+            id = packId,
+            organizationId = organizationId,
+            title = LocalizedText.en(trimmedTitle),
+          ))
+        .copy(
+          title = LocalizedText.en(trimmedTitle),
+          description =
+            if (trimmedDesc.isEmpty()) LocalizedText() else LocalizedText.en(trimmedDesc),
+          icon = icon.trim(),
+          pillar = pillar,
+          status = status,
+          formTemplateIds = formTemplateIds,
+        )
+    launchSaving { manageLibraryUseCase.savePurposePack(pack) }
+    return null
   }
 
   override fun renamePurposePack(

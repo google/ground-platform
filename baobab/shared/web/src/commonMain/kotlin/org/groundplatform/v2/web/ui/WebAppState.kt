@@ -221,6 +221,7 @@ class WebAppState(
   private fun onOrganizationEvent(event: OrganizationEvent) {
     when (event) {
       is OrganizationEvent.OrganizationOpened -> selectPage(WebPage.ORGANIZATION)
+      OrganizationEvent.AdminPanelOpened -> selectPage(WebPage.ADMIN)
       OrganizationEvent.OrganizationsOpened -> selectPage(WebPage.ORGANIZATIONS)
       is OrganizationEvent.ImagerySourceRemoved ->
         if (isImagerySourceEnabled(event.sourceId)) surveyMap.toggleImagerySource(event.sourceId)
@@ -228,6 +229,10 @@ class WebAppState(
   }
 
   // --- Organizations (web `#organizations` and `#organization/<id>` pages) ---
+
+  /** Whether the signed-in user is a platform administrator. */
+  val isPlatformAdmin: Boolean
+    get() = organizationState.isPlatformAdmin
 
   /** ID of the organization shown on the web organization page, or `null`. */
   val openOrganizationId: String?
@@ -245,6 +250,12 @@ class WebAppState(
 
   /** Shows [organizationId] on the web organization page. */
   fun openOrganization(organizationId: String) = organization.openOrganization(organizationId)
+
+  /** Shows the platform admin panel. */
+  fun openAdminPanel() {
+    organization.openAdminPanel()
+    selectPage(WebPage.ADMIN)
+  }
 
   /** Shows the list of organizations. */
   fun openOrganizations() = organization.openOrganizations()
@@ -272,6 +283,7 @@ class WebAppState(
    */
   fun hashOrganizationId(page: WebPage): String? =
     when (page) {
+      WebPage.ADMIN -> null
       WebPage.ORGANIZATION -> openOrganizationId
       WebPage.IMPACT ->
         (impact.uiState.value.dashboard.focus as? ImpactDashboardFocus.OrganizationFocus)
