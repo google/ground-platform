@@ -3383,7 +3383,20 @@ private fun ChoicesEditor(
       optionText = { it.label },
       optionIcon = ::choiceSourceIcon,
       selectedIcon = choiceSourceIcon(effectiveSource),
-      onSelect = { actions.setChoiceSource(key, it) },
+      onSelect = { source ->
+        actions.setChoiceSource(key, source)
+        // With no map layers or data tables of that kind yet, go straight to creating one (the
+        // same "start empty or import" dialog as the survey editor).
+        if (source.isDataset && uiState.choiceDatasetsFor(source).isEmpty()) {
+          val kind =
+            if (source == ChoiceSource.MAP_LAYER) DatasetKind.MAP_LAYER else DatasetKind.DATA_TABLE
+          if (onCreateChoiceDataset != null) {
+            onCreateChoiceDataset(kind, key)
+          } else if (questionIndex >= 0) {
+            actions.createDatasetForChoiceQuestion(questionIndex, kind)
+          }
+        }
+      },
     )
     when (effectiveSource) {
       ChoiceSource.MANUAL -> {

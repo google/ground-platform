@@ -472,7 +472,8 @@ data class EditorQuestion(
 
   /**
    * Effective [ChoiceSource] for this question, inferring [ChoiceSource.MAP_LAYER] vs
-   * [ChoiceSource.DATA_TABLE] from [datasets] when [choiceDatasetId] is set.
+   * [ChoiceSource.DATA_TABLE] from [datasets] when [choiceDatasetId] is set, and keeping a dataset
+   * [choiceSource] that has no dataset chosen yet.
    */
   fun effectiveChoiceSource(datasets: List<EditorDataset> = emptyList()): ChoiceSource {
     val datasetId = choiceDatasetId
@@ -483,7 +484,9 @@ data class EditorQuestion(
       }
       return if (choiceSource.isDataset) choiceSource else ChoiceSource.MAP_LAYER
     }
-    return ChoiceSource.MANUAL
+    // A Map layer or Data table source with no dataset chosen yet (e.g. none exist, or creating one
+    // was cancelled) stays selected so the editor can offer to pick or create one.
+    return if (choiceSource.isDataset) choiceSource else ChoiceSource.MANUAL
   }
 
   /**
