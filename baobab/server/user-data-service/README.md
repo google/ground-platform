@@ -37,12 +37,16 @@ services will live next to it under `server/`.
     implements the RPCs' rules on top of a
     [`UserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/UserDataStore.kt),
     which reads and writes records in atomic transactions with
-    store-assigned commit timestamps. Today it's an
+    store-assigned commit timestamps. By default it's an
     [`InMemoryUserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/InMemoryUserDataStore.kt)
     loaded at startup from a `UserDataSeed`
     (`shared/protos/userdata/user_data_seed.proto`), so changes are lost on
-    restart and aren't shared between instances. A Spanner store will
-    implement the same interface (`UserDataStoreContractTest` checks both).
+    restart and aren't shared between instances. With `USER_DATA_STORE=spanner`
+    it's a
+    [`SpannerUserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/SpannerUserDataStore.kt)
+    (see [Spanner](#spanner-and-the-spanner-debug-web-ui)).
+    `UserDataStoreContractTest` checks both, and the backend tests also run on
+    the Spanner store.
 -   **Sample seed.** The bundled seed
     ([`src/main/resources/seed/user_data_seed.json`](src/main/resources/seed/))
     is generated from the Kotlin sample data fixtures in `shared/app/testing`.
@@ -124,8 +128,15 @@ emulator) or `SPANNER_INSTANCE_ID` (for Cloud Spanner) is set. The database is
 `SPANNER_PROJECT_ID` / `SPANNER_INSTANCE_ID` / `SPANNER_DATABASE_ID` (defaults
 `collect-one-dev` / `dev` / `user-data`). On the emulator, the instance and an
 empty database are created at startup. The schema is designed in
-[`docs/technical/backend/spanner-schema.md`](../../docs/technical/backend/spanner-schema.md);
-RPCs are still served from memory until the Spanner store lands.
+[`docs/technical/backend/spanner-schema.md`](../../docs/technical/backend/spanner-schema.md).
+
+RPCs are served from memory unless `USER_DATA_STORE=spanner` is also set. Then
+the service applies
+[`src/main/resources/spanner/schema.sql`](src/main/resources/spanner/schema.sql)
+at startup (with a proto bundle built from `shared/protos` by the
+`generateSpannerDescriptors` task) and, if the database was never loaded, loads
+the seed into it. Records are stored as `PROTO` columns, and record IDs must be
+UUIDs. Places and the mutation log examples are still served from the seed.
 
 Run the emulator (a pinned, checksum-verified release; Docker on non-Linux
 hosts) and start the service against it, from `baobab/`:
@@ -134,6 +145,8 @@ hosts) and start the service against it, from `baobab/`:
 scripts/spanner-emulator.sh &     # gRPC localhost:9010, REST localhost:9020
 cd server/user-data-service
 SPANNER_EMULATOR_HOST=localhost:9010 ./gradlew run
+# Or store the data in Spanner too:
+SPANNER_EMULATOR_HOST=localhost:9010 USER_DATA_STORE=spanner ./gradlew run
 ```
 
 Then open `http://localhost:8080/debug/spanner` (also linked from the RPC debug
@@ -154,8 +167,8 @@ UI):
 -   **Schema DDL**: The database's DDL statements.
 
 The emulator keeps data in memory, so restarting it wipes the database. Tests
-that need it (`SpannerDebugTest`) are skipped unless `SPANNER_EMULATOR_HOST` is
-set:
+that need it (`SpannerDebugTest` and the `Spanner*Test` store and backend tests)
+are skipped unless `SPANNER_EMULATOR_HOST` is set:
 
 ```bash
 SPANNER_EMULATOR_HOST=localhost:9010 ./gradlew test

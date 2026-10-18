@@ -61,4 +61,79 @@ application {
   applicationName = "user-data-service"
 }
 
+// Spanner proto bundle: a FileDescriptorSet of shared/protos (with their google/protobuf and
+// google/type imports), generated with protoc and packaged as the `spanner/descriptors.pb`
+// resource. SpannerSchema sends it with `CREATE PROTO BUNDLE` / `ALTER PROTO BUNDLE`.
+val protocVersion = "4.36.2"
+val protoc: Configuration by configurations.creating
+val protoIncludes: Configuration by configurations.creating { isTransitive = false }
+
+dependencies {
+  protoc("com.google.protobuf:protoc:$protocVersion:${protocClassifier()}@exe")
+  protoIncludes("com.google.protobuf:protobuf-java:$protocVersion")
+  protoIncludes("com.google.api.grpc:proto-google-common-protos:2.48.0")
+}
+
+fun protocClassifier(): String {
+  val os = System.getProperty("os.name").lowercase()
+  val arch =
+    if (System.getProperty("os.arch") in setOf("aarch64", "arm64")) "aarch_64" else "x86_64"
+  return when {
+    os.contains("mac") -> "osx-$arch"
+    os.contains("win") -> "windows-$arch"
+    else -> "linux-$arch"
+  }
+}
+
+val spannerProtosDir = layout.buildDirectory.dir("spannerProtos")
+val spannerResourcesDir = layout.buildDirectory.dir("generated/spannerResources")
+
+val stageSpannerProtos by
+  tasks.registering(Sync::class) {
+    from("../../shared/protos") { include("**/*.proto") }
+    into(spannerProtosDir.map { it.dir("src/shared/protos") })
+  }
+
+val extractSpannerProtoIncludes by
+  tasks.registering(Sync::class) {
+    from(protoIncludes.elements.map { files -> files.map { zipTree(it) } }) {
+      include("google/protobuf/*.proto", "google/type/*.proto")
+    }
+    into(spannerProtosDir.map { it.dir("include") })
+  }
+
+val generateSpannerDescriptors by
+  tasks.registering(Exec::class) {
+    dependsOn(stageSpannerProtos, extractSpannerProtoIncludes)
+    val sources = spannerProtosDir.map { it.dir("src") }
+    val includes = spannerProtosDir.map { it.dir("include") }
+    val output = spannerResourcesDir.map { it.file("spanner/descriptors.pb") }
+    inputs.files(protoc, stageSpannerProtos, extractSpannerProtoIncludes)
+    outputs.file(output)
+    doFirst {
+      val exe = protoc.singleFile.apply { setExecutable(true) }
+      output.get().asFile.parentFile.mkdirs()
+      val src = sources.get().asFile
+      val protos =
+        src
+          .walkTopDown()
+          .filter { it.extension == "proto" }
+          .map { it.relativeTo(src).path }
+          .sorted()
+      executable = exe.absolutePath
+      args(
+        listOf(
+          "-I${src.absolutePath}",
+          "-I${includes.get().asFile.absolutePath}",
+          "--include_imports",
+          "--descriptor_set_out=${output.get().asFile.absolutePath}",
+        ) + protos.toList()
+      )
+    }
+  }
+
+sourceSets.main { resources.srcDir(spannerResourcesDir) }
+
+tasks.processResources { dependsOn(generateSpannerDescriptors) }
+
 tasks.test { useJUnitPlatform() }

@@ -28,8 +28,9 @@ const val SAMPLE_SEED_RESOURCE = "/seed/user_data_seed.json"
  *   seed.
  * - `SPANNER_EMULATOR_HOST`, `SPANNER_PROJECT_ID`, `SPANNER_INSTANCE_ID`, `SPANNER_DATABASE_ID`:
  *   the Cloud Spanner database to connect to ([SpannerSettings.fromEnv]). When set, the Spanner
- *   debug web UI at `/debug/spanner` browses it and records its operations. Data is still served
- *   from memory until the Spanner store lands.
+ *   debug web UI at `/debug/spanner` browses it and records its operations.
+ * - `USER_DATA_STORE`: `memory` (default) serves data from memory; `spanner` stores it in the
+ *   Spanner database above, applying the schema and loading the seed into an empty database.
  */
 fun main() {
   val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
@@ -39,7 +40,19 @@ fun main() {
       val recorder = SpannerOperationRecorder()
       SpannerDebug(SpannerConnection.open(settings, recorder), recorder)
     }
-  val server = UserDataServer.create(UserDataBackend(seed), port, spannerDebug = spannerDebug)
+  val store =
+    when (val kind = System.getenv("USER_DATA_STORE")?.takeIf { it.isNotBlank() } ?: "memory") {
+      "memory" -> InMemoryUserDataStore(seed)
+      "spanner" -> {
+        val connection =
+          requireNotNull(spannerDebug?.connection) {
+            "USER_DATA_STORE=spanner needs SPANNER_EMULATOR_HOST or SPANNER_INSTANCE_ID"
+          }
+        spannerStore(connection, seed)
+      }
+      else -> error("Unknown USER_DATA_STORE \"$kind\" (expected memory or spanner)")
+    }
+  val server = UserDataServer.create(UserDataBackend(store), port, spannerDebug = spannerDebug)
   Runtime.getRuntime()
     .addShutdownHook(
       Thread {
@@ -53,7 +66,20 @@ fun main() {
       "(${seed.surveys.size} surveys, ${seed.organizations.size} organizations)"
   )
   spannerDebug?.let { println("Spanner: ${it.connection.settings.description}") }
+  println("Store: ${store::class.simpleName}")
   server.blockUntilShutdown()
+}
+
+/**
+ * Applies the schema to the database in [connection] and returns a store on it, loading [seed] if
+ * the database was never loaded. Store operations go through the traced client, so they show in the
+ * Spanner debug UI.
+ */
+fun spannerStore(connection: SpannerConnection, seed: UserDataSeed): SpannerUserDataStore {
+  SpannerSchema.apply(connection.databaseAdmin, connection.settings)
+  val store = SpannerUserDataStore(connection.databaseClient, seed)
+  if (store.dataEpoch == SpannerUserDataStore.NO_EPOCH) store.reset()
+  return store
 }
 
 /** Loads the seed at [path], or the bundled sample seed when [path] is null or blank. */

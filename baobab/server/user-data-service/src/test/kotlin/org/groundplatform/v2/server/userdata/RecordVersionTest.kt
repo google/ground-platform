@@ -52,8 +52,11 @@ import kotlinx.coroutines.runBlocking
  * Every write to a synced record strictly increases its version (`docs/technical/sync-engine.md`,
  * "Sync Tokens"), so clients can tell which copy is newer without comparing commit timestamps.
  */
-class RecordVersionTest {
-  private val backend = UserDataBackend(loadSeed(null))
+open class RecordVersionTest {
+  /** A backend loaded with the bundled sample seed; overridden to test other stores. */
+  protected open fun newBackend(): UserDataBackend = UserDataBackend(loadSeed(null))
+
+  private val backend by lazy { newBackend() }
 
   private suspend fun entityRevision() =
     backend.GetEntity(GetEntityRequest(survey_id = KENYA, entity_id = ENTITY)).entity!!.revision
@@ -203,11 +206,12 @@ class RecordVersionTest {
       backend
         .MutateOrganization(
           MutateOrganizationRequest(
-            organization_id = "org-new",
+            organization_id = testId("org-new"),
             mutations =
               listOf(
                 OrganizationMutation(
-                  upsert_organization = Organization(organization_id = "org-new", name = "New")
+                  upsert_organization =
+                    Organization(organization_id = testId("org-new"), name = "New")
                 )
               ),
           )

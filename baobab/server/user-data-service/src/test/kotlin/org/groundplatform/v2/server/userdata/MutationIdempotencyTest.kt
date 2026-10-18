@@ -50,8 +50,11 @@ import kotlinx.coroutines.runBlocking
  * `mutation_id` applies at most once, `client_seq` high-water marks per scope, last-writer-wins
  * field patches, `base_version` guards on whole-record replacements, and atomic requests.
  */
-class MutationIdempotencyTest {
-  private val backend = UserDataBackend(loadSeed(null))
+open class MutationIdempotencyTest {
+  /** A backend loaded with the bundled sample seed; overridden to test other stores. */
+  protected open fun newBackend(): UserDataBackend = UserDataBackend(loadSeed(null))
+
+  private val backend by lazy { newBackend() }
 
   private fun entityTitle(id: String, value: String, seq: Long, baseRevision: Long = 0L) =
     DataMutation(
@@ -329,8 +332,8 @@ class MutationIdempotencyTest {
     const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
     const val ORG = "00000013-31cc-5c95-90ea-379f624a5c72"
     const val DATASET = "coffee_parcels"
-    const val ENTITY = "entity-idempotency-1"
-    const val OTHER_ENTITY = "entity-idempotency-2"
+    val ENTITY = testId("entity-idempotency-1")
+    val OTHER_ENTITY = testId("entity-idempotency-2")
     const val CLIENT = "client-a"
   }
 }

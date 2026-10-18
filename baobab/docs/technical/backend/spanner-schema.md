@@ -18,7 +18,7 @@
 
 Authors: [Gino Miceli](https://github.com/gino-m) \
 Status: Draft for review \
-Last modified: 2026-10-17
+Last modified: 2026-10-18
 
 ## Summary
 
@@ -909,6 +909,27 @@ CREATE TABLE ClientMutationWatermarks (
 - **Deploy (later):** Terraform for a real instance, database, and IAM; Cloud
   Run with a service account; remove `--max-instances 1`. Until then, the
   service runs against the emulator.
+
+### Status
+
+The storage seam, proto changes, and ID hygiene are done. A first
+`SpannerUserDataStore` (`USER_DATA_STORE=spanner`) implements the store
+interface on a subset of this schema
+(`server/user-data-service/src/main/resources/spanner/schema.sql`), and the
+backend tests run against it on the emulator. It differs from the design above
+in these ways, to be closed in later steps:
+
+- The backend still reads whole collections and filters and pages in memory,
+  rather than querying the delta indexes.
+- Replay detection still records mutation IDs (an `AppliedMutations` table)
+  alongside the watermarks.
+- Organization members and survey ACL entries are still embedded in
+  `Organization` and `SurveyAcl`, without `OrganizationMembers` and
+  `SurveyAclEntries` rows. A survey's ACL is a `PROTO` column on `Surveys`
+  with its own commit timestamp.
+- The schema is applied whole to a new database, then only the proto bundle is
+  updated; there are no versioned migrations yet.
+- There's no auth, `Users` table, survey revisions, access epochs, or purge job.
 
 ## Open Questions
 

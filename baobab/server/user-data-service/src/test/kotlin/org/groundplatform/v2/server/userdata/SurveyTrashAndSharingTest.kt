@@ -44,8 +44,11 @@ import kotlinx.coroutines.runBlocking
  * Survey Trash, policy-based sharing (`sharing_role`), downloaded-survey lookups, the public survey
  * directory, and per-survey delta scopes (`docs/technical/backend/spanner-schema.md`).
  */
-class SurveyTrashAndSharingTest {
-  private val backend = UserDataBackend(loadSeed(null))
+open class SurveyTrashAndSharingTest {
+  /** A backend loaded with the bundled sample seed; overridden to test other stores. */
+  protected open fun newBackend(): UserDataBackend = UserDataBackend(loadSeed(null))
+
+  private val backend by lazy { newBackend() }
 
   private suspend fun mutateSurvey(vararg mutations: SurveyMutation) =
     backend.MutateSurvey(MutateSurveyRequest(survey_id = KENYA, mutations = mutations.toList()))
@@ -102,7 +105,7 @@ class SurveyTrashAndSharingTest {
                 mutation_id = "trash-upload-1",
                 submission_mutation =
                   SubmissionMutation(
-                    submission_id = "submission-recorded-before-trash",
+                    submission_id = testId("submission-recorded-before-trash"),
                     form_id = "form-1",
                     update =
                       SubmissionPatch(
