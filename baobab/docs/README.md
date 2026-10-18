@@ -61,6 +61,10 @@ open-source platform.
         Design for the impact aggregation job and the optional Earth Engine
         spatial overlay pipeline (deduplication, thresholds, attribution score,
         hosting options, and reference-layer licensing).
+    -   [`backend/spanner-schema.md`](technical/backend/spanner-schema.md):
+        Cloud Spanner schema for the user data service (PROTO columns,
+        client-generated UUID keys, gap-free sync tokens, permanent tombstones,
+        survey trash, policy-based sharing, and per-survey sync scope).
     -   [`client/architecture.md`](technical/client/architecture.md): Open Foris
         Collect One Kotlin Clean Architecture, MVVM pattern with Compose
         Multiplatform, dependency rules, and hardware/service client
