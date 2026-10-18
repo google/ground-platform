@@ -9,7 +9,7 @@ By prioritizing a **Best-Effort Pull-Based Model**, this architecture completely
 
 ### Single Source of Truth (SSOT)
 The user interface layer (Jetpack Compose / SwiftUI / Compose for Web) **never** communicates directly with the network layer or the remote Google Cloud Spanner database. A local store serves as the absolute SSOT, and the UI observes it continuously via native Kotlin `Flow`.
-* **Mobile (Android, iOS)**: a persistent local database (Room / SQLDelight) that survives restarts and works offline.
+* **Mobile (Android, iOS)**: a persistent local database (Room / SQLDelight) holding the surveys the user explicitly **downloaded**, which survives restarts and works offline (see [Survey Downloads & Working Copies](#survey-downloads--working-copies)).
 * **Web**: an in-memory store holding only what's on screen (see [Web Client](#web-client)). The browser keeps no offline copy.
 
 ### Delta Synchronization With Sync Tokens
@@ -27,19 +27,20 @@ Each synced resource has exactly one `List*` RPC: `ListSurveyOverviews`, `ListEn
 | **Delta** (`sync_token` set) | The same scope fields the token was issued for, `page_size`, `page_token` | Every record in scope changed after the token, in commit order, always including tombstones (deleted records and records the caller lost access to). The last page carries `next_sync_token`. | Catch-up and polling |
 
 * **A full sync is a query with no filter.** Mobile runs one per scope, stores `next_sync_token`, and polls in delta mode from then on.
+* **Data scopes are whole surveys.** `ListEntities` and `ListSubmissions` sync by `survey_id` only. Sub-survey filters (`dataset_id` and `s2_cell_tokens` for entities, `form_id` and `entity_id` for submissions) are query-only, so a downloaded survey always syncs completely. Quotas keep surveys small enough for a device (at most 10,000 predefined entities).
 * **Delta mode is scope-only.** `filter`, `order_by`, and `query` are rejected with `INVALID_ARGUMENT`, so a record can't silently leave a filtered result set. A client keeping a filtered table fresh polls the whole scope and applies the changes that affect the rows it holds.
 * **At least once.** A record can appear both in a query page and in the delta that follows (for example, when it changed after the snapshot). Applying a record is idempotent, so duplicates are harmless.
 * **Cheap when idle.** A poll with nothing new returns no records and a fresh `next_sync_token`.
 
-The remaining query RPCs cover lookups, search, and aggregation the client can't do from data it holds: `GetSurvey`, `ListEntityClusters`, `GetImpactAggregates`, `SearchConcepts`, and `SearchOrganizations` (the public directory of organizations the caller may ask to join; `ListOrganizations` lists the caller's own organizations).
+The remaining query RPCs cover lookups, search, and aggregation the client can't do from data it holds: `GetSurvey`, `BatchGetSurveyOverviews` (the current state of specific surveys, used for downloaded surveys), `ListEntityClusters`, `GetImpactAggregates`, `SearchConcepts`, `SearchOrganizations` (the public directory of organizations the caller may ask to join; `ListOrganizations` lists the caller's own organizations), and `SearchPublicSurveys` (the public directory of surveys).
 
 ### Sync Tokens
 A sync token is an opaque string. Clients store it and send it back unchanged; they never parse, compare, or construct one, and never reason about server time.
 
 * **Contents (server-defined):** a format version, the scope it was issued for (resource and scope fields), the position in commit order (commit timestamp plus record ID as a tie-breaker), and the server's data epoch. The server can change the encoding, for example to Spanner change-stream offsets, without changing clients.
 * **Scope binding:** a token sent with different scope fields is rejected with `INVALID_ARGUMENT`.
-* **Invalidation:** when the server can't serve changes from a token (it's past the retention window, the data was reset, or the access model changed), it fails with `FAILED_PRECONDITION`. The client discards the token and runs a full sync for that scope, replacing its bases (records missing from the result are removed). Pending outbox mutations are kept and rebased onto the new bases.
-* **Storage:** clients persist one token per resource and scope (`ClientSyncState.sync_tokens`), and advance it only after applying a whole page in one local transaction.
+* **Invalidation:** when the server can't serve changes from a token, it fails with `FAILED_PRECONDITION`: the data was reset, the caller's own access changed (survey list and organization tokens), or the survey's peer data visibility changed (entity and submission tokens). Deleted records keep permanent tombstones, so tokens never expire just because they're old, and a device that was offline for months catches up with a delta. The client discards the token and runs a full sync for that scope, replacing its bases (records missing from the result are removed). Pending outbox mutations are kept and rebased onto the new bases.
+* **Storage:** clients advance a token only after applying a whole page in one local transaction. Mobile persists the tokens of its downloaded surveys' data scopes (`ClientSyncState.sync_tokens`); survey list tokens live in memory while the list is open.
 * **Record freshness:** when the same record arrives more than once (from a `List*` page, a `Mutate*` response, or a replay), clients keep the copy with the higher version and ignore copies with an equal or lower one, whatever their `commit_timestamp`. Every write to a synced record strictly increases its version: `revision` for entities and submissions (including deletes and plot lock changes), `version` for organizations and libraries (exactly one per request), and `record_version` for surveys, shared by the saved revision, the working copy, and the ACL and copied to `SurveyOverview`. A survey's `version` and `saved_revision_number` keep identifying the saved revision collectors use, so working copy edits don't change them. `commit_timestamp` stays on records for display only. Full syncs are the exception: their results replace the bases whatever the versions, since a server data reset can lower them.
 
 ## End-to-End System Flows
@@ -68,9 +69,9 @@ If a record was deleted remotely, its pending patches are rejected and shown in 
 ### The Online Flow (Re-establishing Connection & Catch-Up)
 When the device returns online or the application transitions from a suspended state to the foreground, a unified catch-up sequence initiates.
 
-1. **Token Lookup:** The shared synchronization engine reads the stored sync token for each scope. A scope without a token gets a full sync (a query with no filter).
+1. **Token Lookup:** The shared synchronization engine reads the stored sync token for each scope (each downloaded survey's entities and submissions). A scope without a token gets a full sync (a query with no filter).
 2. **Outbox Drain (Client to Server):** Before pulling updates, the client calls `GetAppliedMutations` and drops outbox mutations the server already applied (for example, when a response was lost). It then sends the remaining mutations in order, batching contiguous mutations for the same RPC target (`MutateData` per survey, `MutateSurvey` per survey and revision, `MutateOrganization` and `MutateLibrary` per organization), with at most one batch in flight per target. The backend executes a write transaction in Cloud Spanner, which assigns a definitive `commit_timestamp` utilizing its atomic TrueTime engine.
-3. **Delta Request (Server to Client):** The client calls the scope's `List*` RPC with its sync token.
+3. **Delta Request (Server to Client):** The client calls the scope's `List*` RPC with its sync token, and `BatchGetSurveyOverviews` for its downloaded surveys (see [Survey Downloads & Working Copies](#survey-downloads--working-copies)).
 4. **Cloud Spanner Index Evaluation:** The backend decodes the token and runs an index lookup on commit time, for example:
    ```sql
    SELECT * FROM AppDataTables
@@ -81,7 +82,7 @@ When the device returns online or the application transitions from a suspended s
 6. **Done:** Each call is a short unary request, so nothing stays open after the last page, which frees mobile radios and saves battery.
 
 ### Foreground Polling
-While the app is in the foreground and online, the client repeats the [Online Flow](#the-online-flow-re-establishing-connection--catch-up) on a timer for each active sync scope, so changes by other collaborators (submissions arriving, edits in the Survey Editor, plot locks) appear within seconds without holding a connection open.
+While the app is in the foreground and online, the client repeats the [Online Flow](#the-online-flow-re-establishing-connection--catch-up) on a timer for each active sync scope (its downloaded surveys, plus the survey list while it's open), so changes by other collaborators (submissions arriving, edits in the Survey Editor, plot locks) appear within seconds without holding a connection open.
 
 1. **Adaptive interval:** Poll about every 10 seconds while a collaborative view is visible (Survey Editor, live submissions table, CEO plot queue), and about every 60 seconds otherwise. Poll immediately after draining the outbox, so the client's own writes come back with their authoritative `commit_timestamp`.
 2. **Cheap when idle:** A poll with nothing new is a single index lookup that returns no records. If servers later provide a suggested interval (for example, to slow clients down under load), clients use the longer of the two.
@@ -99,16 +100,24 @@ Holding a server stream open per foreground client (a "live tail") was considere
 * **Fan-out across instances:** a write handled by one instance would have to wake streams held by every other instance, which needs a broadcast layer (Spanner change streams consumed by each instance, or Pub/Sub). Polling reads the database directly, so no broadcast is needed.
 
 ### Survey Downloads & Working Copies
-Survey definitions are large (forms, entity dataset schemas, translations), so they're synced in two tiers:
-* **Catalog:** `ListSurveyOverviews` syncs a lightweight `SurveyOverview` for every survey the user can access (title, state, counts, thumbnail area, access summary, `version`, `has_working_copy`). Revoked access and deleted surveys arrive as tombstones.
-* **Full definition:** `GetSurvey` fetches the complete `SurveyDef` for a survey the user opens or downloads. When a downloaded survey's overview arrives with a new `version`, the client re-fetches it with `GetSurvey`. Entities and submissions for downloaded surveys sync with `ListEntities` / `ListSubmissions`, scoped by `survey_id`.
+Survey definitions are large (forms, entity dataset schemas, translations), and devices have limited space, so mobile only syncs surveys the user explicitly **downloads**. Sync splits into two independent parts:
+
+* **Survey list:** `ListSurveyOverviews` lists a lightweight `SurveyOverview` for every survey the user can access as the owner, through an ACL entry, or through `ORGANIZATION` sharing (title, state, counts, thumbnail area, access summary, `version`, `has_working_copy`). On mobile and on the web, the list runs a query when its page opens and [polls](#foreground-polling) in delta mode only while the page is visible; its tokens live in memory. Trashed and purged surveys, and surveys the caller lost access to, arrive as tombstones (`state == DELETED`). Surveys open to anyone with the link or the public aren't listed; clients reach them by ID (from the share URL) or through `SearchPublicSurveys`.
+* **Download:** Downloading a survey fetches its saved revision with `GetSurvey` and runs full syncs of `ListEntities` and `ListSubmissions` for its `survey_id`. From then on, the survey's data scopes sync in background sweeps and foreground polls, whether or not the survey list is open. Removing a download drops the survey's bases and tokens once its outbox has drained (or the user discards the pending edits).
+* **Survey-level state of downloaded surveys:** The survey list usually isn't open, so clients poll `BatchGetSurveyOverviews` with their downloaded surveys' IDs alongside the data scopes. It returns the caller's overview of each survey, or `NOT_FOUND` (purged) or `PERMISSION_DENIED` (lost access):
+  * A higher `version` means a new saved revision: the client re-fetches it with `GetSurvey`.
+  * `trash_time` set means the survey is in Trash: it disappears from the device's list, its pending uploads keep draining (the server accepts them, so field data survives a restore), and its local data is removed afterwards.
+  * `NOT_FOUND` or `PERMISSION_DENIED`: the survey is marked unavailable. Unsent edits stay in Uploads, where the user can retry them (they succeed if access returns) or download a PDF of the record.
+  * `ListEntities` and `ListSubmissions` return the same errors, so a client that misses the batch call still finds out.
 * **Working copy:** Organizers edit a working copy of the survey; collectors only ever see the latest saved revision. `GetSurvey` returns exactly one revision, selected by `oneof revision` (latest saved by default, a specific `saved_version`, or `working_copy`). Clients only request the working copy when the overview reports `has_working_copy`.
+
+Organizations and libraries aren't kept on mobile: forms are built in the online web console, and a download stores the few organization settings it needs offline (such as imagery sources). See [`backend/spanner-schema.md`](backend/spanner-schema.md) for how the server stores and serves all of this.
 
 ### Web Client
 The Web Console is online-only and keeps no offline copy, so it uses the same RPCs with a different lifecycle:
 
 1. **In-memory store:** The web app holds an in-memory store scoped to what's on screen: the survey list while it's visible, and the active survey's definition, entities, and submissions while a survey is open. The store, including its outbox, is discarded when the user reloads the page. While the outbox has entries, the page asks for confirmation before unloading.
-2. **Survey list:** When the list becomes visible, the client runs `ListSurveyOverviews` in query mode to load every overview, then [polls](#foreground-polling) with the returned `next_sync_token` until the user navigates away.
+2. **Survey list:** Same as on mobile: when the list becomes visible, the client runs `ListSurveyOverviews` in query mode to load every overview, then [polls](#foreground-polling) with the returned `next_sync_token` until the user navigates away.
 3. **Active survey:** On opening a survey, the client calls `GetSurvey` (with `working_copy = true` in the Survey Editor when the overview reports `has_working_copy`), loads `ListEntities` / `ListSubmissions` for that `survey_id`, and then polls both with their sync tokens.
 4. **Large surveys:** When a survey is too large to hold in memory, data tables and map overviews use the query RPCs (`ListSubmissions` / `ListEntities` with `filter`, `order_by`, and `page_token`; `ListEntityClusters` for overview zoom levels). To keep the visible page fresh, the client polls the scope in delta mode with the query's `next_sync_token` and applies changes to the rows it holds (or re-runs the query when a change affects sorting or paging).
 5. **Writes:** Edits use the same outbox as mobile: they're applied locally at once, sent with `Mutate*` in the background, retried on transient failures, and rebased when remote changes arrive. Permanent failures are reported in the Uploads view.
@@ -117,10 +126,10 @@ The Web Console is online-only and keeps no offline copy, so it uses the same RP
 Browsers reach the gRPC service through gRPC-Web. Every call the sync engine makes is unary, so no streaming support is required.
 
 ### Mutation Semantics
-* **Idempotent per mutation:** The server applies each `mutation_id` at most once. Replays are skipped and return the record's current state, so a stale retry can't overwrite newer writes. It also tracks the highest applied `client_seq` per `(client_id, scope)`, returned by `GetAppliedMutations`.
+* **Applied at most once:** The server tracks the highest applied `client_seq` per `(client_id, scope)` (returned by `GetAppliedMutations`). Because clients send each scope's mutations in `client_seq` order with one batch in flight, any mutation at or below that watermark is a replay: it's skipped and returns the record's current state, so a stale retry can't overwrite newer writes. Web clients keep their `client_id` in `localStorage` so reloads reuse it.
 * **Last writer wins per field:** Field patches always apply in server commit order. A data patch based on an older `base_revision` reports `AUTO_MERGED`.
 * **Guarded replacements:** Whole-record replacements (`upsert_*`) fail with `FAILED_PRECONDITION` when their `base_version` / `base_revision` is set and stale. The client then pulls, rebases, and retries.
-* **Error handling:** `UNAVAILABLE` and `DEADLINE_EXCEEDED` retry with backoff. `INVALID_ARGUMENT`, `PERMISSION_DENIED`, and `NOT_FOUND` reject the mutation, remove it from the local copy, and show it as failed in the Uploads view.
+* **Error handling:** `UNAVAILABLE` and `DEADLINE_EXCEEDED` retry with backoff. `INVALID_ARGUMENT`, `PERMISSION_DENIED`, and `NOT_FOUND` reject the mutation, remove it from the local copy, and show it as failed in the Uploads view, where the user can retry it or download a PDF of the record.
 * **Survey editor autosave:** Editor patches are queued as the organizer types, coalesced per key, and sent to the working copy after about 1.5 seconds without new edits.
 
 ## Kotlin Multiplatform Code Topology
