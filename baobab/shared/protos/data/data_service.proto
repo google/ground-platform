@@ -393,9 +393,9 @@ message DataMutation {
     SubmissionMutation submission_mutation = 2;
   }
 
-  // Client-generated idempotency UUID (`MutationLogItem.id`) from the offline
-  // outbox. The server applies each `mutation_id` at most once; replays are
-  // skipped and return the record's current state.
+  // Client-generated UUID (`MutationLogItem.id`) from the offline outbox,
+  // identifying the mutation in client logs. Replays are detected by
+  // `client_seq`, not by this ID.
   string mutation_id = 3;
 
   // Client-side timestamp when the mutation was recorded offline.
@@ -406,7 +406,9 @@ message DataMutation {
 
   // Monotonically increasing sequence number of the mutation within
   // `client_id`. The server tracks the highest applied value per scope
-  // (`GetAppliedMutations`, scope `"surveys/<survey_id>/data"`).
+  // (`GetAppliedMutations`, scope `"surveys/<survey_id>/data"`); a mutation at
+  // or below it is a replay, which is skipped and returns the record's current
+  // state.
   int64 client_seq = 6;
 }
 
@@ -435,8 +437,8 @@ message DataMutationResult {
   ConflictResolutionStatus conflict_status = 4;
   google.protobuf.Timestamp commit_timestamp = 5;
 
-  // True when `mutation_id` had already been applied, so this request didn't
-  // change anything. The result carries the record's current state.
+  // True when the mutation was a replay (its `client_seq` had already been
+  // applied), so this request didn't change anything. The result carries the record's current state.
   bool duplicate = 6;
 }
 

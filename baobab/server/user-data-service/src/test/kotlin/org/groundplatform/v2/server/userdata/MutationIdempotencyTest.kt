@@ -47,8 +47,8 @@ import kotlinx.coroutines.runBlocking
 
 /**
  * Idempotency and conflict semantics of the `Mutate*` RPCs that the client outbox relies on: each
- * `mutation_id` applies at most once, `client_seq` high-water marks per scope, last-writer-wins
- * field patches, `base_version` guards on whole-record replacements, and atomic requests.
+ * `client_seq` high-water marks per scope (at or below one is a replay), last-writer-wins field
+ * patches, `base_version` guards on whole-record replacements, and atomic requests.
  */
 open class MutationIdempotencyTest {
   /** A backend loaded with the bundled sample seed; overridden to test other stores. */
@@ -112,7 +112,24 @@ open class MutationIdempotencyTest {
   }
 
   @Test
-  fun repeatedMutationIdWithinOneRequest_appliesOnce() = runBlocking {
+  fun clientSeqAtOrBelowTheWatermark_isAReplay_evenWithANewMutationId() = runBlocking {
+    backend.MutateData(MutateDataRequest(KENYA, listOf(createEntity(ENTITY, seq = 1))))
+    backend.MutateData(MutateDataRequest(KENYA, listOf(entityTitle(ENTITY, "B", seq = 3))))
+
+    val older =
+      backend.MutateData(
+        MutateDataRequest(
+          KENYA,
+          listOf(entityTitle(ENTITY, "A", seq = 2).copy(mutation_id = "new")),
+        )
+      )
+
+    assertTrue(older.results.single().duplicate)
+    assertEquals("B", entity(ENTITY)?.label)
+  }
+
+  @Test
+  fun repeatedClientSeqWithinOneRequest_appliesOnce() = runBlocking {
     backend.MutateData(MutateDataRequest(KENYA, listOf(createEntity(ENTITY, seq = 1))))
     val before = entity(ENTITY)!!.revision
 

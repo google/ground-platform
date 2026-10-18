@@ -248,16 +248,6 @@ class SpannerUserDataStore(
 
     override fun mutationLogs(): List<MutationLogRecord> = seed.mutation_logs
 
-    override fun isMutationApplied(mutationId: String): Boolean =
-      ctx
-        .executeQuery(
-          Statement.newBuilder("SELECT 1 FROM AppliedMutations WHERE MutationId = @id")
-            .bind("id")
-            .to(mutationId)
-            .build()
-        )
-        .use { it.next() }
-
     override fun appliedWatermarks(clientId: String): List<AppliedMutationWatermark> =
       ctx
         .executeQuery(
@@ -449,22 +439,7 @@ class SpannerUserDataStore(
           .build()
       )
 
-    override fun recordApplied(
-      scope: String,
-      mutationIds: List<String>,
-      clientId: String,
-      clientSeq: Long,
-    ) {
-      for (id in mutationIds.filter { it.isNotBlank() }.distinct()) {
-        tx.buffer(
-          Mutation.newInsertOrUpdateBuilder("AppliedMutations")
-            .set("MutationId")
-            .to(id)
-            .set("CommitTs")
-            .to(Value.COMMIT_TIMESTAMP)
-            .build()
-        )
-      }
+    override fun recordApplied(scope: String, clientId: String, clientSeq: Long) {
       if (clientId.isBlank() || clientSeq <= 0L) return
       val previous = appliedWatermarks(clientId).firstOrNull { it.scope == scope }?.client_seq
       if (previous != null && previous >= clientSeq) return

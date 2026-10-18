@@ -157,8 +157,8 @@ message OrganizationMutation {
     bool delete_organization = 3;
   }
 
-  // Client-generated idempotency UUID from the offline outbox. The server
-  // applies each `mutation_id` at most once and skips replays.
+  // Client-generated UUID from the offline outbox, identifying the mutation in
+  // client logs. Replays are detected by `client_seq`, not by this ID.
   string mutation_id = 4;
 
   // Stable identifier of the client install that recorded the mutation.

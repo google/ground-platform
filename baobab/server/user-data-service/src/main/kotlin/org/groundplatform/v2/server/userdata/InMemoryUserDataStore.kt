@@ -53,7 +53,6 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
   private val auditRecords = linkedMapOf<String, AuditRecord>()
   private val places = mutableListOf<PlaceRecord>()
   private val mutationLogs = mutableListOf<MutationLogRecord>()
-  private val appliedMutationIds = LinkedHashSet<String>()
   private val watermarks = linkedMapOf<Pair<String, String>, AppliedMutationWatermark>()
 
   init {
@@ -87,7 +86,6 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
     auditRecords.clear()
     places.clear()
     mutationLogs.clear()
-    appliedMutationIds.clear()
     watermarks.clear()
 
     val timestamps = mutableListOf<Instant?>()
@@ -188,8 +186,6 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
 
     override fun mutationLogs() = mutationLogs.toList()
 
-    override fun isMutationApplied(mutationId: String) = mutationId in appliedMutationIds
-
     override fun appliedWatermarks(clientId: String) =
       watermarks.filterKeys { it.first == clientId }.values.toList()
   }
@@ -248,14 +244,8 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
       writes += { ts -> impactEvents[event.event_id] = event.copy(commit_timestamp = ts) }
     }
 
-    override fun recordApplied(
-      scope: String,
-      mutationIds: List<String>,
-      clientId: String,
-      clientSeq: Long,
-    ) {
+    override fun recordApplied(scope: String, clientId: String, clientSeq: Long) {
       writes += { ts ->
-        appliedMutationIds += mutationIds.filter { it.isNotBlank() }
         if (clientId.isNotBlank() && clientSeq > 0L) {
           val key = clientId to scope
           val previous = watermarks[key]
