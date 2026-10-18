@@ -140,6 +140,8 @@ import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.formeditor.FormEditorPage
 import org.groundplatform.v2.web.ui.state.CreateSurveyWizardUiState
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
+import org.groundplatform.v2.web.ui.surveyeditor.ChoiceDatasetCreationDialogs
+import org.groundplatform.v2.web.ui.surveyeditor.rememberChoiceDatasetCreationState
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 import org.groundplatform.v2.web.ui.surveyeditor.AddFormDialog
 import org.groundplatform.v2.web.ui.surveyeditor.EntityDatasetEditor
@@ -1662,6 +1664,8 @@ private fun FormQuestionsStepContent(
   val hasSeveralParts = forms.size > 1 || editorUiState.datasets.size > 1
   var showOutline by remember { mutableStateOf(false) }
   var showAddForm by remember { mutableStateOf(false) }
+  val choiceDatasetCreation = rememberChoiceDatasetCreationState()
+  ChoiceDatasetCreationDialogs(choiceDatasetCreation, editorUiState, editorActions)
   if (showAddForm) {
     AddFormDialog(
       actions = editorActions,
@@ -1741,6 +1745,9 @@ private fun FormQuestionsStepContent(
                     ?.let { editorActions.select(SurveyEditorSection.Dataset(it.key)) }
                 },
                 onOpenForm = { formKey -> editorActions.select(SurveyEditorSection.Form(formKey)) },
+                onCreateChoiceDataset = { kind, questionKey ->
+                  choiceDatasetCreation.request(selectedForm.key, questionKey, kind)
+                },
               )
             }
           else ->

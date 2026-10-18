@@ -37,6 +37,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.seed.FormEditorSamples
 import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
+import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.DateRule
 import org.groundplatform.v2.app.domain.model.editor.EditorDataset
 import org.groundplatform.v2.app.domain.model.editor.EditorDatasetRow
@@ -398,6 +399,37 @@ class FormEditorClickTest {
       waitForIdle()
       assertEquals(ChoiceSource.MANUAL, state.ui.form.find("q3")?.choiceSource)
       assertEquals(null, state.ui.form.find("q3")?.choiceDatasetId)
+    }
+
+  @Test
+  fun choosingDataTableWithNoneAvailableOpensCreateFlowAndKeepsDataTableSelected() =
+    runDesktopComposeUiTest(width = 1600, height = 1000) {
+      var createRequest: Pair<DatasetKind, String>? = null
+      val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit(), datasets = emptyList())
+      setContent {
+        MaterialTheme {
+          val uiState by state.uiState.collectAsState()
+          FormEditorPage(
+            uiState = uiState,
+            actions = state,
+            isDarkTheme = false,
+            onCreateChoiceDataset = { kind, questionKey -> createRequest = kind to questionKey },
+          )
+        }
+      }
+      runOnIdle { state.select("q3") }
+      waitForIdle()
+
+      onNodeWithText("Manual list").performScrollTo().performClick()
+      waitForIdle()
+      onNodeWithText("Data table").performClick()
+      waitForIdle()
+
+      // Opens the create flow instead of reverting to "Manual list".
+      assertEquals(DatasetKind.DATA_TABLE to "q3", createRequest)
+      assertEquals(ChoiceSource.DATA_TABLE, state.ui.choiceSourceFor(state.ui.form.find("q3")!!))
+      onNodeWithText("No data tables are available in this survey yet.").assertExists()
+      onAllNodesWithText("New data table").assertCountEquals(1)
     }
 
   @Test

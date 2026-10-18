@@ -256,87 +256,8 @@ fun SurveyEditorPage(
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp).widthIn(max = 760.dp),
       )
     }
-    var pendingChoiceCreation by remember {
-      mutableStateOf<Triple<String, String, DatasetKind>?>(null)
-    }
-    var editingChoiceDataset by remember {
-      mutableStateOf<Pair<Triple<String, String, DatasetKind>, String>?>(null)
-    }
-
-    val currentPending = pendingChoiceCreation
-    if (currentPending != null && editingChoiceDataset == null) {
-      val initialDatasetCount = remember(currentPending) { uiState.datasets.size }
-      when (currentPending.third) {
-        DatasetKind.MAP_LAYER -> {
-          AddMapLayerDialog(
-            uiState = uiState,
-            actions = actions,
-            onDismiss = {
-              if (uiState.datasets.size > initialDatasetCount) {
-                val newlyCreated = uiState.datasets.last()
-                editingChoiceDataset = currentPending to newlyCreated.key
-              }
-              pendingChoiceCreation = null
-            },
-          )
-        }
-        DatasetKind.DATA_TABLE -> {
-          AddDataTableDialog(
-            actions = actions,
-            onDismiss = {
-              if (uiState.datasets.size > initialDatasetCount) {
-                val newlyCreated = uiState.datasets.last()
-                editingChoiceDataset = currentPending to newlyCreated.key
-              }
-              pendingChoiceCreation = null
-            },
-          )
-        }
-      }
-    }
-
-    editingChoiceDataset?.let { (pending, datasetKey) ->
-      val dataset = uiState.datasets.firstOrNull { it.key == datasetKey }
-      if (dataset != null) {
-        AlertDialog(
-          onDismissRequest = {
-            val (formKey, questionKey, kind) = pending
-            val formEditor = actions.formEditor(formKey)
-            val choiceSrc =
-              if (kind == DatasetKind.MAP_LAYER) ChoiceSource.MAP_LAYER else ChoiceSource.DATA_TABLE
-            formEditor.setChoiceSource(questionKey, choiceSrc)
-            formEditor.setChoiceDataset(questionKey, dataset.id)
-            actions.select(SurveyEditorSection.Form(formKey))
-            editingChoiceDataset = null
-          },
-          title = null,
-          text = {
-            Box(modifier = Modifier.fillMaxWidth().height(650.dp)) {
-              EntityDatasetEditor(uiState, actions, dataset)
-            }
-          },
-          confirmButton = {
-            Button(
-              onClick = {
-                val (formKey, questionKey, kind) = pending
-                val formEditor = actions.formEditor(formKey)
-                val choiceSrc =
-                  if (kind == DatasetKind.MAP_LAYER) ChoiceSource.MAP_LAYER
-                  else ChoiceSource.DATA_TABLE
-                formEditor.setChoiceSource(questionKey, choiceSrc)
-                formEditor.setChoiceDataset(questionKey, dataset.id)
-                actions.select(SurveyEditorSection.Form(formKey))
-                editingChoiceDataset = null
-              }
-            ) {
-              Text("Done")
-            }
-          },
-          dismissButton = null,
-          modifier = Modifier.widthIn(min = 900.dp, max = 1200.dp),
-        )
-      }
-    }
+    val choiceDatasetCreation = rememberChoiceDatasetCreationState()
+    ChoiceDatasetCreationDialogs(choiceDatasetCreation, uiState, actions)
 
     if (isLoading && uiState.surveyId.isBlank()) {
       Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -385,7 +306,7 @@ fun SurveyEditorPage(
                     },
                     onOpenForm = { formKey -> actions.select(SurveyEditorSection.Form(formKey)) },
                     onCreateChoiceDataset = { kind, questionKey ->
-                      pendingChoiceCreation = Triple(entry.key, questionKey, kind)
+                      choiceDatasetCreation.request(entry.key, questionKey, kind)
                     },
                   )
                 }
