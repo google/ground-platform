@@ -72,11 +72,49 @@ if [[ ! -x "${install_dir}/gateway_main" ]]; then
   rm -f "${tmp}"
 fi
 
+# Fails early if a port is taken, typically by an emulator that's still running: the gateway would
+# otherwise report itself as running, then fail to bind and leave its emulator process behind.
+port_in_use() {
+  (exec 3<> "/dev/tcp/127.0.0.1/$1") 2> /dev/null
+}
+for port in "${GRPC_PORT}" "${REST_PORT}"; do
+  if port_in_use "${port}"; then
+    echo "error: port ${port} is already in use, probably by a Spanner emulator that's still running." >&2
+    if command -v ss > /dev/null 2>&1; then
+      ss -ltnpH "sport = :${port}" 2> /dev/null | sed 's/^/  /' >&2 || true
+    fi
+    echo "Use it as is (SPANNER_EMULATOR_HOST=localhost:${GRPC_PORT}), stop it with" >&2
+    echo "  pkill -f 'gateway_main --hostname localhost --grpc_port ${GRPC_PORT}'; pkill -f 'emulator_main --host_port localhost:${GRPC_PORT}'" >&2
+    echo "or pick other ports with SPANNER_EMULATOR_GRPC_PORT and SPANNER_EMULATOR_REST_PORT." >&2
+    exit 1
+  fi
+done
+
 echo "Spanner emulator ${EMULATOR_VERSION}: gRPC localhost:${GRPC_PORT}, REST localhost:${REST_PORT}" >&2
 cd "${install_dir}"
+# The gateway starts the emulator as a child process. Running both in their own process group and
+# stopping the group on exit means no emulator is left holding the port, even if the gateway fails
+# or this script is stopped.
+group=()
+if command -v setsid > /dev/null 2>&1; then
+  group=(setsid)
+fi
 # The release bundles the libstdc++ it was built against.
-LD_LIBRARY_PATH="${install_dir}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" exec ./gateway_main \
+LD_LIBRARY_PATH="${install_dir}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" "${group[@]}" ./gateway_main \
   --hostname localhost \
   --grpc_port "${GRPC_PORT}" \
   --http_port "${REST_PORT}" \
-  --copy_emulator_stdout=false
+  --copy_emulator_stdout=false &
+gateway_pid=$!
+stop_emulator() {
+  if [[ ${#group[@]} -gt 0 ]]; then
+    kill -TERM -- "-${gateway_pid}" 2> /dev/null || true
+  else
+    pkill -TERM -P "${gateway_pid}" 2> /dev/null || true
+    kill -TERM "${gateway_pid}" 2> /dev/null || true
+  fi
+}
+trap stop_emulator EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+wait "${gateway_pid}"
