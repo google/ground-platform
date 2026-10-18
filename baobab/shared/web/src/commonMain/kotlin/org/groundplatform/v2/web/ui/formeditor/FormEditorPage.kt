@@ -307,8 +307,6 @@ fun FormEditorPage(
       FormEditorToolbar(
         uiState = uiState,
         actions = actions,
-        linkedDataset = linkedDataset,
-        onOpenDataset = onOpenDataset,
         onCreateDataset =
           onCreateDataset.takeIf {
             uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset == null
@@ -416,8 +414,6 @@ private fun FloatingAddQuestionButton(
 private fun FormEditorToolbar(
   uiState: FormEditorUiState,
   actions: FormEditorActions,
-  linkedDataset: EditorDataset?,
-  onOpenDataset: ((String) -> Unit)?,
   onCreateDataset: (() -> Unit)?,
   onDelete: (() -> Unit)?,
 ) {
@@ -454,8 +450,6 @@ private fun FormEditorToolbar(
   ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
       val isCompact = maxWidth < 960.dp
-      val hasLinkedDatasetButton =
-        uiState.form.saveTo.mode == SaveToMode.CREATE && linkedDataset != null
       Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -500,19 +494,9 @@ private fun FormEditorToolbar(
         if (uiState.supportedLanguages.size > 1) {
           FormLanguageSelector(uiState, actions)
         }
+        // The linked map layer or data table is shown in Form settings, not here.
         if (!isCompact) {
-          if (hasLinkedDatasetButton && linkedDataset != null) {
-            FilledTonalButton(
-              onClick = {
-                if (onOpenDataset != null) onOpenDataset(linkedDataset.id)
-                else actions.selectFormSettings()
-              }
-            ) {
-              Icon(Icons.Outlined.Link, contentDescription = null, modifier = Modifier.size(18.dp))
-              Spacer(Modifier.width(6.dp))
-              Text("Linked to ${linkedDataset.displayName}", softWrap = false)
-            }
-          } else if (onCreateDataset != null) {
+          if (onCreateDataset != null) {
             OutlinedButton(onClick = onCreateDataset) {
               Icon(
                 Icons.Outlined.Layers,
@@ -556,23 +540,7 @@ private fun FormEditorToolbar(
                   actions.selectFormSettings()
                 },
               )
-              if (hasLinkedDatasetButton && linkedDataset != null) {
-                DropdownMenuItem(
-                  text = { Text("Linked to ${linkedDataset.displayName}") },
-                  leadingIcon = {
-                    Icon(
-                      Icons.Outlined.Link,
-                      contentDescription = null,
-                      modifier = Modifier.size(18.dp),
-                    )
-                  },
-                  onClick = {
-                    overflowExpanded = false
-                    if (onOpenDataset != null) onOpenDataset(linkedDataset.id)
-                    else actions.selectFormSettings()
-                  },
-                )
-              } else if (onCreateDataset != null) {
+              if (onCreateDataset != null) {
                 DropdownMenuItem(
                   text = {
                     Text(if (uiState.form.hasGeometry) "Create map layer" else "Create data table")
