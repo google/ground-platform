@@ -54,7 +54,7 @@ for (let i = 0; i < argv.length; i++) {
     if (!isNaN(p)) port = p;
   } else if (argv[i] === '--start-all') {
     startAllOnLaunch = true;
-  } else if (argv[i] === '--kill-existing') {
+  } else if (argv[i] === '--kill-existing' || argv[i] === '--kill-all') {
     killExistingOnLaunch = true;
   } else if (argv[i] === '--help' || argv[i] === '-h') {
     console.log(USAGE);

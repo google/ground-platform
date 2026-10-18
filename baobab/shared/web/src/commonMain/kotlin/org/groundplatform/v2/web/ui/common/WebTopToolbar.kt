@@ -284,8 +284,8 @@ fun WebSaveStatusIndicator(
  * - Brand section: Ground logo ([CloudAcaciaLogo]) and app name ("Ground")
  * - Page [context], typically a [WebHeaderContext]
  * - Page [actions]
- * - Compact language selector, unless [showLanguageSelector] is false (e.g. when the page shows
- *   its own, like the sign-in page)
+ * - Compact language selector, unless [showLanguageSelector] is false (e.g. when the page shows its
+ *   own, like the sign-in page)
  * - User profile: clickable avatar opening the user profile card with sign out, shown only when
  *   [onSignOut] is given
  */

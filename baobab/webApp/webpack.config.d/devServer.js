@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
+// Ktor's WasmJS client emits `(name) => import(name)` in `*.import-object.mjs`, which triggers a
+// benign Webpack "Critical dependency: the request of a dependency is an expression" warning.
+config.module = config.module || {};
+config.module.parser = Object.assign({}, config.module.parser, {
+  javascript: Object.assign(
+    {},
+    config.module.parser && config.module.parser.javascript,
+    { exprContextCritical: false }
+  ),
+});
+
+// Kotlin's WebpackLogClient routes all Webpack stdout lines except `<i> [...]` and
+// `webpack ... compiled ... in ...` through LogType.ERROR (stderr). Use the summary preset so
+// normal asset/module tables aren't emitted on stderr and styled as errors in the launchpad.
+config.stats = Object.assign(config.stats || {}, {
+  preset: 'summary',
+  timings: true,
+});
+
 // Bind webpack-dev-server to 0.0.0.0 and allow all host headers so the app
 // can be accessed both via localhost:8090 and via remote workstation URLs.
 if (config.devServer) {

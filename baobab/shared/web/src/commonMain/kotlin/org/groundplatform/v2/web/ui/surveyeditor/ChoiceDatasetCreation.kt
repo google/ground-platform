@@ -41,7 +41,9 @@ internal data class ChoiceDatasetRequest(
   val kind: DatasetKind,
 )
 
-/** State of [ChoiceDatasetCreationDialogs]: the request being handled and the dataset being edited. */
+/**
+ * State of [ChoiceDatasetCreationDialogs]: the request being handled and the dataset being edited.
+ */
 @Stable
 internal class ChoiceDatasetCreationState {
   var pending: ChoiceDatasetRequest? by mutableStateOf(null)

@@ -132,7 +132,6 @@ import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
 import org.groundplatform.v2.app.domain.model.QuotaTier
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
-import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.app.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.EntityDataset
