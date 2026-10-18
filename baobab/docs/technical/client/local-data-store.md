@@ -146,7 +146,7 @@ fresh on every page load; on mobile it will become the persistent offline store.
     the screen calls. Screens take `(uiState, actions)` and hold no state of
     their own.
     `OnboardingViewModel` (Sign In → Terms of Service → Download survey) reads
-    the account from `AuthRepository` (over `FakeAuthClient`) and the
+    the account from `AuthRepository` (over the platform's `AuthClient`) and the
     survey directory from `SurveyRepository` and `OrganizationRepository`, and
     publishes navigation and notices as `OnboardingEvent`s that the app shell
     applies. `SettingsViewModel` (Settings, Sign In language selector, Offline

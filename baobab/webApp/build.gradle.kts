@@ -152,6 +152,39 @@ val generateUserDataServiceConfig by tasks.registering {
   }
 }
 
+// Firebase web app config for sign-in (`firebase-auth-bridge.js`), baked in as
+// `firebase-config.js`. Set `FIREBASE_WEB_CONFIG` (the config object as JSON) as a Gradle property,
+// in the environment, or in `local.properties`, like USER_DATA_SERVICE_URL. Defaults to the
+// development project in `shared/app/src/wasmJsMain/firebase-web-config.json`. `none` turns
+// Firebase off: the app then uses fake sign-in and the user data service's development user.
+val firebaseWebConfig =
+  (providers.gradleProperty("FIREBASE_WEB_CONFIG").orNull
+      ?: providers.environmentVariable("FIREBASE_WEB_CONFIG").orNull
+      ?: localProperties.getProperty("FIREBASE_WEB_CONFIG")
+      ?: file("../shared/app/src/wasmJsMain/firebase-web-config.json").readText())
+    .trim()
+
+val generateFirebaseConfig by tasks.registering {
+  val config = firebaseWebConfig
+  val outputDir = layout.buildDirectory.dir("generated/firebaseConfig")
+  inputs.property("firebaseWebConfig", config)
+  outputs.dir(outputDir)
+  doLast {
+    val value =
+      if (config.isEmpty() || config == "none") "null"
+      else groovy.json.JsonOutput.toJson(groovy.json.JsonSlurper().parseText(config))
+    outputDir
+      .get()
+      .file("firebase-config.js")
+      .asFile
+      .apply { parentFile.mkdirs() }
+      .writeText(
+        "// Generated from FIREBASE_WEB_CONFIG by build.gradle.kts; do not edit.\n" +
+          "window.GROUND_FIREBASE_CONFIG = $value;\n"
+      )
+  }
+}
+
 tasks.withType<ProcessResources>().configureEach {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   from(file("../shared/ui/src/commonMain/composeResources")) {
@@ -160,4 +193,5 @@ tasks.withType<ProcessResources>().configureEach {
   // JS bridges loaded by index.html for the shared/app wasmJs actuals (PDF export, media capture).
   from(file("../shared/app/src/wasmJsMain/resources"))
   from(generateUserDataServiceConfig)
+  from(generateFirebaseConfig)
 }

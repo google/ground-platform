@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.app.ui.viewmodel
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +31,7 @@ import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
 import org.groundplatform.v2.app.domain.model.Organization
+import org.groundplatform.v2.app.domain.model.SignInException
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyStats
 import org.groundplatform.v2.app.domain.repository.AuthRepository
@@ -204,7 +206,18 @@ class OnboardingViewModel(
     session.update { it.copy(isSigningIn = true) }
     scope.launch {
       try {
-        authRepository.signInWithGoogle()
+        try {
+          authRepository.signInWithGoogle()
+        } catch (e: CancellationException) {
+          throw e
+        } catch (e: SignInException) {
+          // A sign-in window the user closed isn't an error.
+          if (!e.cancelled) emit(OnboardingEvent.Notice("Couldn't sign in: ${e.message}"))
+          return@launch
+        } catch (e: Exception) {
+          emit(OnboardingEvent.Notice("Couldn't sign in: ${e.message}"))
+          return@launch
+        }
         val next =
           if (session.value.hasAcceptedTerms) {
             session.update { it.copy(entryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS) }

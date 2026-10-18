@@ -19,21 +19,42 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import org.groundplatform.v2.app.client.auth.AuthClient
+import org.groundplatform.v2.app.client.auth.defaultAuthClient
 import org.groundplatform.v2.app.di.AppDataHolder
 import org.groundplatform.v2.app.ui.common.RequireUserDataService
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
 
-/** Mounts the web console ([WebConsoleApp]) and keeps the page in sync with the URL hash. */
+/**
+ * Mounts the web console ([WebConsoleApp]) and keeps the page in sync with the URL hash. Waits for
+ * the auth client to restore the signed-in session first, so signed-in users don't see the sign-in
+ * page flash.
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
   val container = document.getElementById("ComposeTarget") ?: document.body!!
+  val authClient = defaultAuthClient()
+  MainScope().launch {
+    authClient.awaitInitialState()
+    mount(container, authClient)
+  }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+private fun mount(container: org.w3c.dom.Element, authClient: AuthClient) {
   ComposeViewport(container) {
     // Without a configured user data service, shows setup instructions instead of the console.
     RequireUserDataService { serviceUrl ->
       WebConsoleApp(
         state =
-          remember { WebAppState(dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl)) },
+          remember {
+            WebAppState(
+              dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl, authClient = authClient)
+            )
+          },
         initialPage = WebPage.fromHash(window.location.hash),
         initialOrganizationId = WebPage.organizationIdFromHash(window.location.hash),
         onHashChanged = { window.location.hash = it },

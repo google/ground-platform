@@ -1,0 +1,58 @@
+/*
+ * Copyright 2026 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.groundplatform.v2.app.client.auth
+
+import kotlinx.coroutines.flow.StateFlow
+
+/**
+ * External auth service client (`client/auth/ *Client`): signs the user in and issues the ID tokens
+ * the user data service authenticates calls with (`Authorization: Bearer <token>`).
+ *
+ * [FirebaseWebAuthClient] signs in with Firebase Authentication in browsers; [FakeAuthClient]
+ * simulates sign-in where Firebase isn't configured (tests, and platforms not wired to Firebase
+ * yet), and its calls run as the user data service's development user.
+ */
+interface AuthClient {
+  /** The signed-in user, or null when signed out. */
+  val currentUser: StateFlow<AuthenticatedCollectorProfile?>
+
+  /** Signs in with a Google account; throws [AuthException] if sign-in fails. */
+  suspend fun signInWithGoogle(): AuthenticatedCollectorProfile
+
+  suspend fun signOut()
+
+  /**
+   * An ID token for the signed-in user, or null when signed out or when the client has no tokens
+   * ([FakeAuthClient]). [forceRefresh] fetches a new one even if the cached token hasn't expired.
+   */
+  suspend fun idToken(forceRefresh: Boolean = false): String?
+
+  /**
+   * Suspends until [currentUser] reflects the session restored at startup (for example from the
+   * browser's storage), so apps don't flash the sign-in screen for signed-in users.
+   */
+  suspend fun awaitInitialState() {}
+}
+
+/**
+ * Sign-in failed. [cancelled] is true when the user dismissed the sign-in window, which callers
+ * don't report as an error.
+ */
+class AuthException(message: String, val cancelled: Boolean = false) : Exception(message)
+
+/** The platform's auth client when one is configured (Firebase in browsers), otherwise null. */
+expect fun platformAuthClient(): AuthClient?
+
+/** [platformAuthClient], or a [FakeAuthClient] when the platform has none. */
+fun defaultAuthClient(): AuthClient = platformAuthClient() ?: FakeAuthClient()

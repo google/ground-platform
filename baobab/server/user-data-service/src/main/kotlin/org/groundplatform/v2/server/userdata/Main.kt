@@ -37,9 +37,11 @@ const val SURVEY_TRASH_RETENTION_DAYS = 30L
  *   debug web UI at `/debug/spanner` browses it and records its operations.
  * - `USER_DATA_STORE`: `memory` (default) serves data from memory; `spanner` stores it in the
  *   Spanner database above, applying the schema and loading the seed into an empty database.
- * - `AUTH_MODE`: `dev` (default) trusts `x-dev-user-*` headers and otherwise serves calls as the
- *   sample user; `firebase` requires a Firebase Authentication ID token for project
- *   `FIREBASE_PROJECT_ID` (default `gnd-dev`).
+ * - `AUTH_MODE`: `firebase` requires a Firebase Authentication ID token for project
+ *   `FIREBASE_PROJECT_ID` (default `gnd-dev`); `dev` (default) verifies the token when a call sends
+ *   one (signed-in users are administrators there), and otherwise trusts `x-dev-user-*` headers or
+ *   serves the call as the sample user.
+ * - `ADMIN_EMAILS`: comma-separated verified emails of administrators in `firebase` mode.
  */
 fun main() {
   val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
@@ -91,12 +93,21 @@ fun main() {
         )
       }
   val authMode = System.getenv("AUTH_MODE")?.takeIf { it.isNotBlank() } ?: "dev"
+  val firebaseProjectId =
+    System.getenv("FIREBASE_PROJECT_ID")?.takeIf { it.isNotBlank() } ?: "gnd-dev"
   val authenticator =
     when (authMode) {
-      "dev" -> Authenticator.dev()
+      "dev" -> Authenticator.dev(firebase = Authenticator.firebase(firebaseProjectId))
       "firebase" ->
         Authenticator.firebase(
-          System.getenv("FIREBASE_PROJECT_ID")?.takeIf { it.isNotBlank() } ?: "gnd-dev"
+          firebaseProjectId,
+          adminEmails =
+            System.getenv("ADMIN_EMAILS")
+              .orEmpty()
+              .split(',')
+              .map { it.trim().lowercase() }
+              .filter { it.isNotEmpty() }
+              .toSet(),
         )
       else -> error("Unknown AUTH_MODE \"$authMode\" (expected dev or firebase)")
     }

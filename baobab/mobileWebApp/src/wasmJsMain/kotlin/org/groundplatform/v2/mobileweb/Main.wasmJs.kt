@@ -19,6 +19,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import org.groundplatform.v2.app.client.auth.AuthClient
+import org.groundplatform.v2.app.client.auth.defaultAuthClient
 import org.groundplatform.v2.app.di.AppDataHolder
 import org.groundplatform.v2.app.ui.common.RequireUserDataService
 import org.groundplatform.v2.mobile.ui.MobileAppState
@@ -29,11 +33,21 @@ import org.groundplatform.v2.workbench.ui.shouldShowWorkbenchChrome
 /**
  * Mounts the mobile app. On desktop browsers (or with `?chrome=1` in the URL) it runs inside the
  * workbench's simulated device; on mobile browsers (or with `?chrome=0` in the URL) the workbench
- * chrome is hidden and the mobile app fills the window.
+ * chrome is hidden and the mobile app fills the window. Waits for the auth client to restore the
+ * signed-in session first.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
   val container = document.getElementById("ComposeTarget") ?: document.body!!
+  val authClient = defaultAuthClient()
+  MainScope().launch {
+    authClient.awaitInitialState()
+    mount(container, authClient)
+  }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+private fun mount(container: org.w3c.dom.Element, authClient: AuthClient) {
   val showChrome =
     shouldShowWorkbenchChrome(
       search = window.location.search,
@@ -49,7 +63,9 @@ fun main() {
         state =
           remember {
             WorkbenchState(
-              MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl))
+              MobileAppState(
+                dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl, authClient = authClient)
+              )
             )
           },
         showChrome = showChrome,

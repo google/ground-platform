@@ -109,16 +109,19 @@ server on 8080), start the service with `PORT=<free port>` and use that port in
 
 Every RPC runs as an authenticated caller, chosen by `AUTH_MODE`:
 
--   **`dev` (default).** For local development only. Calls name a user with the
-    `x-dev-user-id`, `x-dev-user-email`, and optional `x-dev-user-name` headers
-    (the email counts as verified). Calls without them run as the sample
-    organizer, Maya Lin (`uid-maya-lin`), and keep request fields such as
-    `AcquirePlotLockRequest.user_id`, so the clients' fake sign-in keeps
-    working.
+-   **`dev` (default).** For local development only. Calls that send a Firebase
+    ID token (the web apps once signed in) are verified as in `firebase` mode,
+    and those users are administrators, so they see all sample data.
+    Otherwise calls name a user with the `x-dev-user-id`, `x-dev-user-email`,
+    and optional `x-dev-user-name` headers (the email counts as verified), or
+    run as the sample organizer, Maya Lin (`uid-maya-lin`), keeping request
+    fields such as `AcquirePlotLockRequest.user_id`, so clients with fake
+    sign-in keep working.
 -   **`firebase`.** Calls must send a Firebase Authentication ID token for the
     project in `FIREBASE_PROJECT_ID` (default `gnd-dev`) as
     `Authorization: Bearer <token>`; anonymous accounts are rejected. Calls
-    without a valid token fail with `UNAUTHENTICATED`.
+    without a valid token fail with `UNAUTHENTICATED`. `ADMIN_EMAILS` names
+    administrators by verified email (comma-separated).
 
 Before each RPC, the service registers the caller in its users (on the first
 call, or when the email or profile changed). For a verified email, it binds
@@ -156,9 +159,9 @@ and fail with `PERMISSION_DENIED` otherwise:
     library. The global library is readable by everyone.
 -   **Reports:** impact events, aggregates, and audit records are limited to
     survey organizers and organization managers.
--   **Administrators** (active managers of the all-users organization, and the
-    `dev` fallback user) may do anything, so the development setup shows all
-    sample data.
+-   **Administrators** (active managers of the all-users organization,
+    `ADMIN_EMAILS`, and every caller in `dev` mode) may do anything, so the
+    development setup shows all sample data.
 
 ## RPC Debug Web UI
 

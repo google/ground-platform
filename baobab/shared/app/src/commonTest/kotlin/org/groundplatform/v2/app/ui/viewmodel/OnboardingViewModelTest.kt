@@ -25,8 +25,13 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.groundplatform.v2.app.data.datasource.device.FakeAuthDataSource
+import org.groundplatform.v2.app.client.auth.AuthClient
+import org.groundplatform.v2.app.client.auth.AuthException
+import org.groundplatform.v2.app.client.auth.AuthenticatedCollectorProfile
+import org.groundplatform.v2.app.client.auth.FakeAuthClient
+import org.groundplatform.v2.app.data.datasource.device.AuthDataSource
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.AuthRepositoryImpl
@@ -42,13 +47,13 @@ import org.groundplatform.v2.app.ui.state.OnboardingEvent
  * would not see its own state updates until the block ends.
  */
 class OnboardingViewModelTest {
-  private class Fixture {
+  private class Fixture(authClient: AuthClient = FakeAuthClient()) {
     val store = seededStore()
     val scope = CoroutineScope(Dispatchers.Unconfined + Job())
     val surveyRepository = SurveyRepositoryImpl(store)
     val viewModel =
       OnboardingViewModel(
-        authRepository = AuthRepositoryImpl(FakeAuthDataSource()),
+        authRepository = AuthRepositoryImpl(AuthDataSource(authClient)),
         surveyRepository = surveyRepository,
         organizationRepository = OrganizationRepositoryImpl(store),
         scope = scope,
@@ -90,6 +95,40 @@ class OnboardingViewModelTest {
     // Signing in again after accepting terms skips the Terms of Service screen.
     f.viewModel.signOut()
     assertFalse(f.uiState.isSignedIn)
+  }
+
+  /** An [AuthClient] whose sign-in always fails with [error]. */
+  private class FailingAuthClient(private val error: AuthException) : AuthClient {
+    override val currentUser = MutableStateFlow<AuthenticatedCollectorProfile?>(null)
+
+    override suspend fun signInWithGoogle(): AuthenticatedCollectorProfile = throw error
+
+    override suspend fun signOut() {}
+
+    override suspend fun idToken(forceRefresh: Boolean): String? = null
+  }
+
+  @Test
+  fun failedSignIn_staysSignedOut_andExplainsWhy() {
+    val f = Fixture(FailingAuthClient(AuthException("auth/network-request-failed: offline")))
+
+    f.viewModel.signInWithGoogle()
+
+    assertFalse(f.uiState.isSignedIn)
+    assertFalse(f.uiState.isSigningIn)
+    val notice = assertIs<OnboardingEvent.Notice>(f.lastEvent())
+    assertTrue("auth/network-request-failed" in notice.message, notice.message)
+  }
+
+  @Test
+  fun cancelledSignIn_isNotReported() {
+    val f = Fixture(FailingAuthClient(AuthException("auth/popup-closed-by-user", cancelled = true)))
+
+    f.viewModel.signInWithGoogle()
+
+    assertFalse(f.uiState.isSignedIn)
+    assertFalse(f.uiState.isSigningIn)
+    assertTrue(f.events.none { it is OnboardingEvent.Notice })
   }
 
   @Test

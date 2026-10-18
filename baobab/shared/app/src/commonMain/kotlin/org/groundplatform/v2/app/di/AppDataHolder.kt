@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.groundplatform.v2.app.client.auth.AuthClient
+import org.groundplatform.v2.app.client.auth.defaultAuthClient
 import org.groundplatform.v2.app.client.grpc.CollectOneGrpcClient
 import org.groundplatform.v2.app.client.grpc.GrpcWebException
 import org.groundplatform.v2.app.client.grpc.GrpcWebTransport
@@ -38,6 +40,7 @@ import org.groundplatform.v2.app.client.grpc.remoteUserDataGrpcClient
 import org.groundplatform.v2.app.client.lifecycle.guardUnsentChangesOnUnload
 import org.groundplatform.v2.app.client.lifecycle.observeAppForeground
 import org.groundplatform.v2.app.client.storage.platformSyncStateFile
+import org.groundplatform.v2.app.data.datasource.device.AuthDataSource
 import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.LocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.OutboxState
@@ -146,8 +149,13 @@ class AppDataHolder(
    * When null, nothing is synced and the store keeps whatever it holds (empty for a new store).
    */
   val userDataServiceUrl: String? = null,
+  /**
+   * Signs the user in and supplies the ID tokens user data service calls carry: Firebase in
+   * browsers when configured, otherwise a [org.groundplatform.v2.app.client.auth.FakeAuthClient].
+   */
+  val authClient: AuthClient = defaultAuthClient(),
   val grpcClient: CollectOneGrpcClient? = userDataServiceUrl?.let {
-    remoteUserDataGrpcClient(GrpcWebTransport(it))
+    remoteUserDataGrpcClient(GrpcWebTransport(it, authToken = authClient::idToken))
   },
   val grpcSyncDataSource: GrpcSyncDataSource? = grpcClient?.let(::GrpcSyncDataSource),
   /**
@@ -191,7 +199,7 @@ class AppDataHolder(
   val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(editStore),
   val libraryRepository: LibraryRepository = LibraryRepositoryImpl(editStore),
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
-  val authRepository: AuthRepository = AuthRepositoryImpl(),
+  val authRepository: AuthRepository = AuthRepositoryImpl(AuthDataSource(authClient, scope)),
   val sampleDataRepository: SampleDataRepository =
     SampleDataRepositoryImpl(localStore, grpcSyncDataSource),
   val surveyEditorRepository: SurveyEditorRepository =

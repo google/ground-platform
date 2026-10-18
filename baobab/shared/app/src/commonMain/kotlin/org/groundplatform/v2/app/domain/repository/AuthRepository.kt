@@ -24,7 +24,10 @@ interface AuthRepository {
 
   suspend fun getSession(): AuthSession
 
-  /** Signs in with Google and returns the authenticated profile. */
+  /**
+   * Signs in with Google and returns the authenticated profile; throws
+   * [org.groundplatform.v2.app.domain.model.SignInException] if sign-in fails or is cancelled.
+   */
   suspend fun signInWithGoogle(): AuthProfile
 
   suspend fun signOut()

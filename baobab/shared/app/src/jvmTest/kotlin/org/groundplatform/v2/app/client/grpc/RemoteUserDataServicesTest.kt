@@ -35,6 +35,7 @@ import kotlin.reflect.jvm.kotlinFunction
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 
@@ -101,6 +102,59 @@ class RemoteUserDataServicesTest {
     val service = RemoteSurveyService(GrpcWebTransport("http://test/", HttpClient(engine)))
     assertEquals(expected, service.GetSurvey(GetSurveyRequest(survey_id = "s1")))
   }
+
+  @Test
+  fun calls_carryTheIdToken_andRetryOnceWithARefreshedToken() =
+    runBlocking<Unit> {
+      val response = GetSurveyResponse(survey = SurveyDef(survey_id = "s1"))
+      val seen = mutableListOf<String?>()
+      val engine = MockEngine { request ->
+        val authorization = request.headers[HttpHeaders.Authorization]
+        seen += authorization
+        if (authorization == "Bearer stale") {
+          respond(
+            ByteArray(0),
+            headers =
+              headersOf(
+                HttpHeaders.ContentType to listOf("application/grpc-web+proto"),
+                "grpc-status" to listOf("16"),
+              ),
+          )
+        } else {
+          respond(
+            GrpcWebTransport.frame(GetSurveyResponse.ADAPTER.encode(response)) + trailerOk,
+            headers = grpcWebHeaders,
+          )
+        }
+      }
+      val transport =
+        GrpcWebTransport(
+          "http://test",
+          HttpClient(engine),
+          authToken = { forceRefresh: Boolean -> if (forceRefresh) "fresh" else "stale" },
+        )
+
+      val result: GetSurveyResponse = RemoteSurveyService(transport).GetSurvey(GetSurveyRequest())
+      assertEquals(response, result)
+      assertEquals<List<String?>>(listOf("Bearer stale", "Bearer fresh"), seen)
+    }
+
+  @Test
+  fun calls_withoutAToken_sendNoAuthorization() =
+    runBlocking<Unit> {
+      var authorization: String? = "unset"
+      val engine = MockEngine { request ->
+        authorization = request.headers[HttpHeaders.Authorization]
+        respond(
+          GrpcWebTransport.frame(GetSurveyResponse.ADAPTER.encode(GetSurveyResponse())) + trailerOk,
+          headers = grpcWebHeaders,
+        )
+      }
+
+      RemoteSurveyService(GrpcWebTransport("http://test", HttpClient(engine)))
+        .GetSurvey(GetSurveyRequest())
+      assertNull(authorization)
+    }
 
   @Test
   fun errorStatus_inTrailersOrHeaders_throws() = runBlocking {

@@ -32,6 +32,8 @@ import kotlin.coroutines.coroutineContext
  *
  * @property isDefault true for the development fallback user, when a `dev` mode call doesn't name a
  *   user. Request fields such as `user_id` still apply then, so fake clients keep working.
+ * @property isAdmin true for administrators named by the deployment (`ADMIN_EMAILS`, or every
+ *   signed-in user in `dev` mode); see [Access.isAdmin] for the others.
  */
 data class Caller(
   val userId: String,
@@ -40,6 +42,7 @@ data class Caller(
   val displayName: String = "",
   val photoUrl: String = "",
   val isDefault: Boolean = false,
+  val isAdmin: Boolean = false,
 ) {
   /** [email] trimmed and lowercased, as stored in `EmailNormalized` columns. */
   val normalizedEmail: String
@@ -79,12 +82,17 @@ fun interface Authenticator {
       )
 
     /**
-     * Development mode: trusts the `x-dev-user-*` headers, and falls back to [DEFAULT_DEV_CALLER]
-     * when they're absent. Never use it with real data.
+     * Development mode: a call with an `Authorization` header is authenticated by [firebase] (when
+     * set), so signed-in web apps run as their real user. Otherwise it trusts the `x-dev-user-*`
+     * headers, and falls back to [DEFAULT_DEV_CALLER] when they're absent. Never use it with real
+     * data.
      */
-    fun dev(): Authenticator = Authenticator { headers ->
+    fun dev(firebase: Authenticator? = null): Authenticator = Authenticator { headers ->
       val userId = headers.get(key(DEV_USER_ID_HEADER))?.trim().orEmpty()
-      if (userId.isEmpty()) {
+      if (firebase != null && headers.containsKey(key("authorization"))) {
+        // Development data is shared sample data, so signed-in developers see all of it.
+        firebase.authenticate(headers).copy(isAdmin = true)
+      } else if (userId.isEmpty()) {
         DEFAULT_DEV_CALLER
       } else {
         Caller(
@@ -98,27 +106,34 @@ fun interface Authenticator {
 
     /**
      * Verifies Firebase Authentication ID tokens (`Authorization: Bearer <token>`) issued for
-     * Firebase project [projectId], and rejects anonymous accounts.
+     * Firebase project [projectId], and rejects anonymous accounts. Users whose verified email is
+     * in [adminEmails] are administrators.
      */
-    fun firebase(projectId: String, verifier: TokenVerifier = firebaseVerifier(projectId)) =
-      Authenticator { headers ->
-        val authorization = headers.get(key("authorization")).orEmpty()
-        val token = authorization.removePrefix("Bearer ").trim()
-        if (!authorization.startsWith("Bearer ") || token.isEmpty()) {
-          throw unauthenticated("Sign in: missing Firebase ID token")
-        }
-        val payload =
-          try {
-            verifier.verify(token).payload
-          } catch (e: TokenVerifier.VerificationException) {
-            throw unauthenticated("Invalid Firebase ID token: ${e.message}")
-          } catch (e: IllegalArgumentException) {
-            throw unauthenticated("Malformed Firebase ID token")
-          } catch (e: java.io.IOException) {
-            throw unauthenticated("Malformed Firebase ID token")
-          }
-        callerOf(payload)
+    fun firebase(
+      projectId: String,
+      verifier: TokenVerifier = firebaseVerifier(projectId),
+      adminEmails: Set<String> = emptySet(),
+    ) = Authenticator { headers ->
+      val authorization = headers.get(key("authorization")).orEmpty()
+      val token = authorization.removePrefix("Bearer ").trim()
+      if (!authorization.startsWith("Bearer ") || token.isEmpty()) {
+        throw unauthenticated("Sign in: missing Firebase ID token")
       }
+      val payload =
+        try {
+          verifier.verify(token).payload
+        } catch (e: TokenVerifier.VerificationException) {
+          throw unauthenticated("Invalid Firebase ID token: ${e.message}")
+        } catch (e: IllegalArgumentException) {
+          throw unauthenticated("Malformed Firebase ID token")
+        } catch (e: java.io.IOException) {
+          throw unauthenticated("Malformed Firebase ID token")
+        }
+      callerOf(payload).let { caller ->
+        val admin = caller.emailVerified && caller.normalizedEmail in adminEmails
+        if (admin) caller.copy(isAdmin = true) else caller
+      }
+    }
 
     /** A verifier for Firebase ID tokens of [projectId], using Google's published keys. */
     fun firebaseVerifier(projectId: String): TokenVerifier =

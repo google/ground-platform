@@ -32,3 +32,9 @@ data class AuthProfile(val displayName: String, val email: String, val organizat
  * so screens that preview the account (sign-in button, sharing owner) have a name to show.
  */
 data class AuthSession(val isSignedIn: Boolean, val profile: AuthProfile)
+
+/**
+ * Signing in failed. [cancelled] is true when the user dismissed the sign-in window, which isn't
+ * reported as an error.
+ */
+class SignInException(message: String, val cancelled: Boolean = false) : Exception(message)

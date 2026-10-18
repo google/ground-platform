@@ -33,7 +33,8 @@ import org.groundplatform.v2.core.mutation.SurveyPatches
  * A survey role is the highest of: owner, the caller's ACL entry, the survey's sharing role when
  * its policy is `ORGANIZATION` and the caller is an active member of its organization, and the
  * sharing role when the policy is `PUBLIC` or `ANYONE_WITH_LINK`. Administrators (the development
- * fallback caller and active managers of the all-users organization) may do anything.
+ * fallback caller, callers the authenticator marks as admins, and active managers of the all-users
+ * organization) may do anything.
  *
  * A null caller (calls made directly on the backend, as in tests) is unrestricted.
  */
@@ -53,6 +54,7 @@ internal class Access(private val reader: UserDataReader, private val caller: Ca
   val isAdmin: Boolean by lazy {
     caller == null ||
       caller.isDefault ||
+      caller.isAdmin ||
       reader.organization(UserDataBackend.ALL_USERS_ORGANIZATION_ID)?.members.orEmpty().any {
         isCaller(it.user_id, it.email) &&
           it.status == MembershipStatus.ACTIVE &&

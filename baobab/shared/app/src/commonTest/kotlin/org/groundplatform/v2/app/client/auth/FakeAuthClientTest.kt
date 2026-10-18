@@ -13,14 +13,18 @@
  */
 package org.groundplatform.v2.app.client.auth
 
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.startCoroutine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class FakeAuthClientTest {
   @Test
-  fun signInWithGoogle_andSignOut_togglesSessionAndReturnsProfile() {
+  fun signInWithGoogle_andSignOut_togglesSessionAndReturnsProfile() = runAuthTest {
     val authClient = FakeAuthClient()
     assertFalse(authClient.isSignedIn())
 
@@ -29,7 +33,20 @@ class FakeAuthClientTest {
     assertEquals("Maya Lin", profile.displayName)
     assertEquals("maya.lin@groundplatform.org", profile.email)
 
+    assertEquals(profile, authClient.currentUser.value)
+    assertNull(authClient.idToken())
+
     authClient.signOut()
     assertFalse(authClient.isSignedIn())
+    assertNull(authClient.currentUser.value)
   }
+}
+
+/** Runs a test that calls suspending auth APIs; the fake never actually suspends. */
+private fun runAuthTest(block: suspend () -> Unit) {
+  var failure: Throwable? = null
+  block.startCoroutine(
+    Continuation(EmptyCoroutineContext) { result -> failure = result.exceptionOrNull() }
+  )
+  failure?.let { throw it }
 }

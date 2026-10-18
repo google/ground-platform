@@ -44,8 +44,15 @@ class GrpcWebException(val status: Int, val path: String, val description: Strin
  * (`docs/technical/sync-engine.md`, "Web Client"). Non-OK statuses throw [GrpcWebException], so
  * callers can tell, for example, an expired sync token ([FAILED_PRECONDITION]) from an outage
  * ([UNAVAILABLE]).
+ *
+ * Calls carry the signed-in user's ID token from [authToken] as `Authorization: Bearer <token>`
+ * when there is one. A call rejected as [UNAUTHENTICATED] is retried once with a refreshed token.
  */
-class GrpcWebTransport(baseUrl: String, private val httpClient: HttpClient = HttpClient()) {
+class GrpcWebTransport(
+  baseUrl: String,
+  private val httpClient: HttpClient = HttpClient(),
+  private val authToken: suspend (forceRefresh: Boolean) -> String? = { null },
+) {
   private val baseUrl = baseUrl.trimEnd('/')
 
   /** Sends [request] to the unary method at [path] and returns its single response. */
@@ -55,8 +62,25 @@ class GrpcWebTransport(baseUrl: String, private val httpClient: HttpClient = Htt
     requestAdapter: ProtoAdapter<S>,
     responseAdapter: ProtoAdapter<R>,
   ): R {
+    val token = authToken(false)
+    return try {
+      unaryWithToken(path, request, requestAdapter, responseAdapter, token)
+    } catch (e: GrpcWebException) {
+      // The token may have expired or been revoked since it was cached.
+      if (e.status != UNAUTHENTICATED || token == null) throw e
+      unaryWithToken(path, request, requestAdapter, responseAdapter, authToken(true))
+    }
+  }
+
+  private suspend fun <S : Any, R : Any> unaryWithToken(
+    path: String,
+    request: S,
+    requestAdapter: ProtoAdapter<S>,
+    responseAdapter: ProtoAdapter<R>,
+    token: String?,
+  ): R {
     var result: R? = null
-    call(path, request, requestAdapter, responseAdapter) { message ->
+    call(path, request, requestAdapter, responseAdapter, token) { message ->
       if (result != null) throw GrpcWebException(INTERNAL, path, "more than one response")
       result = message
     }
@@ -68,12 +92,14 @@ class GrpcWebTransport(baseUrl: String, private val httpClient: HttpClient = Htt
     request: S,
     requestAdapter: ProtoAdapter<S>,
     responseAdapter: ProtoAdapter<R>,
+    token: String?,
     onMessage: suspend (R) -> Unit,
   ) {
     httpClient
       .preparePost(baseUrl + path) {
         header("X-Grpc-Web", "1")
         header(HttpHeaders.Accept, GRPC_WEB_PROTO)
+        if (token != null) header(HttpHeaders.Authorization, "Bearer $token")
         setBody(ByteArrayContent(frame(requestAdapter.encode(request)), CONTENT_TYPE))
       }
       .execute { response -> readResponse(path, response, responseAdapter, onMessage) }

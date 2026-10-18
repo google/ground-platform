@@ -13,7 +13,11 @@
  */
 package org.groundplatform.v2.app.client.auth
 
-/** Authenticated collector profile returned by [FakeAuthClient]. */
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+/** The signed-in user's profile, as an [AuthClient] reports it. */
 data class AuthenticatedCollectorProfile(
   val displayName: String,
   val email: String,
@@ -21,36 +25,43 @@ data class AuthenticatedCollectorProfile(
 )
 
 /**
- * External service client (`client/auth/ *Client`) simulating OAuth / Google Sign-In authentication
- * until the clients sign in with a real account, per Sections 3 & 4 of
- * `docs/technical/client/architecture.md`.
+ * [AuthClient] simulating Google Sign-In, for tests and for platforms not wired to Firebase yet
+ * (`docs/technical/client/architecture.md`, sections 3 and 4). It has no ID tokens, so the user
+ * data service serves its calls as its development user (`AUTH_MODE=dev`).
  */
-class FakeAuthClient {
-  private var signedIn: Boolean = false
+class FakeAuthClient : AuthClient {
   private var profile: AuthenticatedCollectorProfile = DEFAULT_COLLECTOR_PROFILE
+  private val user = MutableStateFlow<AuthenticatedCollectorProfile?>(null)
 
-  fun isSignedIn(): Boolean = signedIn
+  override val currentUser: StateFlow<AuthenticatedCollectorProfile?> = user.asStateFlow()
+
+  fun isSignedIn(): Boolean = user.value != null
 
   fun currentProfile(): AuthenticatedCollectorProfile = profile
 
-  fun signInWithGoogle(
+  override suspend fun signInWithGoogle(): AuthenticatedCollectorProfile = signInAs()
+
+  /** Signs in as the given profile (the sample organizer by default). */
+  fun signInAs(
     displayName: String = DEFAULT_COLLECTOR_PROFILE.displayName,
     email: String = DEFAULT_COLLECTOR_PROFILE.email,
     organization: String = DEFAULT_COLLECTOR_PROFILE.organization,
   ): AuthenticatedCollectorProfile {
-    signedIn = true
     profile =
       AuthenticatedCollectorProfile(
         displayName = displayName,
         email = email,
         organization = organization,
       )
+    user.value = profile
     return profile
   }
 
-  fun signOut() {
-    signedIn = false
+  override suspend fun signOut() {
+    user.value = null
   }
+
+  override suspend fun idToken(forceRefresh: Boolean): String? = null
 
   companion object {
     val DEFAULT_COLLECTOR_PROFILE =

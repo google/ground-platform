@@ -24,7 +24,7 @@ Data sources handle single-responsibility I/O operations across three categories
 
 - `local/store/` (`LocalStore`, `InMemoryLocalStore`): The reactive in-memory persistence engine that acts as the single source of truth for surveys, forms, map layers, geospatial entities, submissions, mutations, organizations, organization libraries, auth state, and app settings. Supports atomic multi-collection writes via `LocalStore.Transaction`.
 - `local/LibraryProtoMapper`: Maps organization library domain models to and from their `groundplatform.v2.library` protos (`LibraryBundle`), for seed files, imports, exports, and sync.
-- `device/` (`DeviceLocationDataSource`, `FakeAuthDataSource`): Adapters that bridge device-level `client/location/` and `client/auth/` implementations into structured data operations.
+- `device/` (`DeviceLocationDataSource`, `AuthDataSource`): Adapters that bridge device-level `client/location/` and `client/auth/` implementations into structured data operations.
 - `remote/` (`MapboxPlacesDataSource`): Remote network data source for querying geocoding and place search endpoints.
 
 ## Role in the Overall Architecture

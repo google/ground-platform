@@ -67,6 +67,18 @@ class AuthenticationTest {
   }
 
   @Test
+  fun dev_verifiesTokensWhenCallsSendThem() {
+    val dev = Authenticator.dev(firebase = firebase)
+
+    val signedIn = dev.authenticate(bearer(token("email" to "ana@example.org")))
+    assertEquals("uid-ana", signedIn.userId)
+    assertTrue(signedIn.isAdmin)
+    assertEquals(Authenticator.DEFAULT_DEV_CALLER, dev.authenticate(Metadata()))
+    val error = assertFailsWith<StatusException> { dev.authenticate(bearer("not-a-token")) }
+    assertEquals(Status.Code.UNAUTHENTICATED, error.status.code)
+  }
+
+  @Test
   fun firebase_acceptsAValidToken() {
     val caller =
       firebase.authenticate(
@@ -84,6 +96,25 @@ class AuthenticationTest {
     assertEquals("ana@example.org", caller.email)
     assertTrue(caller.emailVerified)
     assertEquals("Ana", caller.displayName)
+  }
+
+  @Test
+  fun firebase_adminEmails_areAdministratorsOnceVerified() {
+    val withAdmins =
+      Authenticator.firebase(
+        PROJECT,
+        TokenVerifier.newBuilder()
+          .setIssuer("https://securetoken.google.com/$PROJECT")
+          .setAudience(PROJECT)
+          .setPublicKey(keys.public)
+          .build(),
+        adminEmails = setOf("ana@example.org"),
+      )
+
+    val verified = token("email" to "Ana@Example.org", "email_verified" to true)
+    val unverified = token("email" to "ana@example.org", "email_verified" to false)
+    assertTrue(withAdmins.authenticate(bearer(verified)).isAdmin)
+    assertFalse(withAdmins.authenticate(bearer(unverified)).isAdmin)
   }
 
   @Test
