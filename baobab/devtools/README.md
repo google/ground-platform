@@ -26,4 +26,8 @@ This directory contains standalone developer and inspection tools for Ground
     `JSON`) and `RecordInstance` (`XML` ↔ `textproto` / `JSON`), real-time XPath
     expression evaluation, and an embedded mobile form runner (`▶ RUN`) powered
     by [`../shared/ui/`](../shared/ui/).
+-   **[`launchpad/`](launchpad/)**: Browser page for starting, stopping, and
+    watching the server, web console, and mobile app (plus the Spanner emulator
+    and form debugger) during local development, with their logs and links to
+    each app.
 

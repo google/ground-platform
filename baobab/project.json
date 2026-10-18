@@ -26,6 +26,13 @@
         "commands": ["bash scripts/ktfmt.sh --fix", "bash scripts/buf-format.sh --fix"],
         "parallel": false
       }
+    },
+    "launchpad": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bash scripts/launchpad.sh"
+      }
     }
   }
 }
