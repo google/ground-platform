@@ -23,15 +23,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
@@ -170,7 +173,7 @@ internal fun OrganizationPage(
                 color = MaterialTheme.colorScheme.primary,
               )
             }
-            if (organization != null) {
+            if (organization != null && !organization.isSynthetic) {
               WebHeaderButton(
                 text = "View impact",
                 icon = Icons.Outlined.Insights,
@@ -200,22 +203,40 @@ private fun OrganizationHeaderContext(organization: Organization, surveyCount: I
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(10.dp),
   ) {
-    ProfileAvatar(nameOrEmail = organization.name, photoUrl = organization.logoUrl, size = 32.dp)
-    WebHeaderContext(title = organization.name) {
-      WebHeaderSupportingText(
-        if (organization.isSynthetic) "Synthetic organization" else "Organization",
-        color = MaterialTheme.colorScheme.primary,
-      )
-      WebHeaderSupportingText("·")
-      WebHeaderSupportingText(
-        if (organization.isSynthetic) {
-          val count = organization.imagerySources.size
-          "Shared across all surveys · $count imagery ${if (count == 1) "source" else "sources"}"
-        } else {
+    if (organization.isSynthetic) {
+      Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier.size(32.dp),
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          Icon(
+            imageVector = Icons.Outlined.AdminPanelSettings,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.size(20.dp),
+          )
+        }
+      }
+      WebHeaderContext(title = "Admin panel") {
+        WebHeaderSupportingText(
+          "Platform administration and global library",
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    } else {
+      ProfileAvatar(nameOrEmail = organization.name, photoUrl = organization.logoUrl, size = 32.dp)
+      WebHeaderContext(title = organization.name) {
+        WebHeaderSupportingText(
+          "Organization",
+          color = MaterialTheme.colorScheme.primary,
+        )
+        WebHeaderSupportingText("·")
+        WebHeaderSupportingText(
           "${organization.activeMembers.size} members · $surveyCount surveys" +
             if (!organization.isListed) " · Unlisted" else ""
-        }
-      )
+        )
+      }
     }
   }
 }
@@ -244,7 +265,9 @@ internal fun OrganizationPage(
   val organization = uiState.openOrganization
   val isManager = organization != null && uiState.managesOrganization(organization)
   val isMember = organization != null && uiState.isMemberOf(organization)
-  var tab by remember(organization?.id) { mutableStateOf(OrganizationTab.DETAILS) }
+  val defaultTab =
+    if (organization?.isSynthetic == true) OrganizationTab.MEMBERS else OrganizationTab.DETAILS
+  var tab by remember(organization?.id) { mutableStateOf(defaultTab) }
   var isCreatingSurvey by remember { mutableStateOf(false) }
 
   val triggerCreateSurvey: () -> Unit = {
@@ -316,10 +339,14 @@ internal fun OrganizationPage(
             }
           OrganizationTab.MEMBERS ->
             PaneScaffold(
-              title = "Members",
+              title = if (organization.isSynthetic) "Platform admins" else "Members",
               subtitle =
-                "People affiliated with ${organization.name}. Managers run the organization " +
-                  "and all of its surveys; Members can create surveys in it.",
+                if (organization.isSynthetic) {
+                  "Platform administrators who manage global imagery, purposes, templates, and dictionary concepts."
+                } else {
+                  "People affiliated with ${organization.name}. Managers run the organization " +
+                    "and all of its surveys; Members can create surveys in it."
+                },
             ) {
               NoticeSlot(uiState, actions)
               MembersPane(uiState, actions, organization, isManager)
@@ -433,22 +460,25 @@ private fun OrganizationNavigation(
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
       verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
+      if (!organization.isSynthetic) {
+        NavItem(
+          label = OrganizationTab.DETAILS.label,
+          icon = Icons.Outlined.Info,
+          selected = selected == OrganizationTab.DETAILS,
+          onClick = { onSelect(OrganizationTab.DETAILS) },
+        )
+        NavItem(
+          label = OrganizationTab.SURVEYS.label,
+          icon = Icons.Outlined.Map,
+          selected = selected == OrganizationTab.SURVEYS,
+          onClick = { onSelect(OrganizationTab.SURVEYS) },
+          trailing = "$surveyCount",
+        )
+      }
       NavItem(
-        label = OrganizationTab.DETAILS.label,
-        icon = Icons.Outlined.Info,
-        selected = selected == OrganizationTab.DETAILS,
-        onClick = { onSelect(OrganizationTab.DETAILS) },
-      )
-      NavItem(
-        label = OrganizationTab.SURVEYS.label,
-        icon = Icons.Outlined.Map,
-        selected = selected == OrganizationTab.SURVEYS,
-        onClick = { onSelect(OrganizationTab.SURVEYS) },
-        trailing = "$surveyCount",
-      )
-      NavItem(
-        label = OrganizationTab.MEMBERS.label,
-        icon = Icons.Outlined.Group,
+        label = if (organization.isSynthetic) "Platform admins" else OrganizationTab.MEMBERS.label,
+        icon =
+          if (organization.isSynthetic) Icons.Outlined.AdminPanelSettings else Icons.Outlined.Group,
         selected = selected == OrganizationTab.MEMBERS,
         onClick = { onSelect(OrganizationTab.MEMBERS) },
         trailing = "$memberCount",
@@ -460,6 +490,10 @@ private fun OrganizationNavigation(
         onClick = { onSelect(OrganizationTab.IMAGERY_SOURCES) },
         trailing = "${organization.imagerySources.size}",
       )
+      if (organization.isSynthetic) {
+        Spacer(Modifier.height(8.dp))
+        SectionLabel("Global library")
+      }
       NavItem(
         label = OrganizationTab.PURPOSES.label,
         icon = Icons.Outlined.Flag,
@@ -468,18 +502,18 @@ private fun OrganizationNavigation(
         trailing = "${library.purposePacks.size}",
       )
       NavItem(
-        label = OrganizationTab.DICTIONARY.label,
-        icon = Icons.Outlined.Book,
-        selected = selected == OrganizationTab.DICTIONARY,
-        onClick = { onSelect(OrganizationTab.DICTIONARY) },
-        trailing = "${library.totalConceptCount}",
-      )
-      NavItem(
         label = OrganizationTab.TEMPLATES.label,
         icon = Icons.Outlined.Description,
         selected = selected == OrganizationTab.TEMPLATES,
         onClick = { onSelect(OrganizationTab.TEMPLATES) },
         trailing = "${library.formTemplates.size}",
+      )
+      NavItem(
+        label = OrganizationTab.DICTIONARY.label,
+        icon = Icons.Outlined.Book,
+        selected = selected == OrganizationTab.DICTIONARY,
+        onClick = { onSelect(OrganizationTab.DICTIONARY) },
+        trailing = "${library.totalConceptCount}",
       )
     }
   }
@@ -640,12 +674,11 @@ private fun MembersPane(
       }
     }
 
-    MembersCard("Members") {
+    MembersCard(if (organization.isSynthetic) "Platform admins" else "Members") {
       if (isManager) InviteMemberRow(actions, organization)
       if (organization.isSynthetic) {
         Text(
-          "Everyone is a read-only member of ${organization.name}. Its Managers are the platform " +
-            "admins: they edit the global library and imagery sources.",
+          "Platform admins manage the global library, platform imagery sources, and platform settings.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

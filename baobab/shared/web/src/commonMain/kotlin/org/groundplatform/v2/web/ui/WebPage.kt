@@ -14,6 +14,8 @@
  */
 package org.groundplatform.v2.web.ui
 
+import org.groundplatform.v2.app.domain.model.Organization
+
 /** Top-level pages of the web app, addressable via the URL hash (e.g. `#dashboard`). */
 enum class WebPage(val label: String, val hash: String) {
   /** Web landing page: the surveys the signed-in user can open, grouped by organization. */
@@ -30,7 +32,9 @@ enum class WebPage(val label: String, val hash: String) {
    * Published impact numbers of the organizations the signed-in user follows and of all of Collect
    * One (`#impact`, or `#impact/<id>` to open one organization's numbers).
    */
-  IMPACT("Impact", "impact");
+  IMPACT("Impact", "impact"),
+  /** Platform administration and global library (`#admin`). */
+  ADMIN("Admin panel", "admin");
 
   /** Whether this page shows one survey, and so needs an active survey to open. */
   val needsActiveSurvey: Boolean
@@ -45,7 +49,15 @@ enum class WebPage(val label: String, val hash: String) {
      * `null` when the hash names no web page.
      */
     fun fromHash(hash: String?): WebPage? {
-      val h = hash?.removePrefix("#")?.substringBefore('/')
+      val raw = hash?.removePrefix("#") ?: return null
+      if (
+        raw == ADMIN.hash ||
+          raw == "organization/${Organization.ALL_USERS_ID}" ||
+          raw.startsWith("organization/${Organization.ALL_USERS_ID}/")
+      ) {
+        return ADMIN
+      }
+      val h = raw.substringBefore('/')
       return entries.firstOrNull { it.hash == h } ?: aliases[h]
     }
 
@@ -58,7 +70,9 @@ enum class WebPage(val label: String, val hash: String) {
      */
     fun organizationIdFromHash(hash: String?): String? {
       val h = hash?.removePrefix("#") ?: return null
-      if (fromHash(h) !in organizationPages) return null
+      val page = fromHash(h) ?: return null
+      if (page == ADMIN) return Organization.ALL_USERS_ID
+      if (page !in organizationPages) return null
       return h.substringAfter('/', "").takeIf { it.isNotBlank() }
     }
 
@@ -66,7 +80,9 @@ enum class WebPage(val label: String, val hash: String) {
      * The URL hash for [page], including the organization ID for the organization and Impact pages.
      */
     fun hashFor(page: WebPage, organizationId: String?): String =
-      if (page in organizationPages && !organizationId.isNullOrBlank()) {
+      if (page == ADMIN) {
+        ADMIN.hash
+      } else if (page in organizationPages && !organizationId.isNullOrBlank()) {
         "${page.hash}/$organizationId"
       } else {
         page.hash

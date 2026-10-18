@@ -33,7 +33,9 @@ import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.domain.model.ConceptDataType
 import org.groundplatform.v2.app.domain.model.ConceptLink
+import org.groundplatform.v2.app.domain.model.ImpactPillar
 import org.groundplatform.v2.app.domain.model.LibraryConcept
+import org.groundplatform.v2.app.domain.model.LibraryStatus
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
@@ -103,7 +105,8 @@ class OrganizationViewModelTest {
     assertNull(f.uiState.openOrganizationId)
     assertNull(f.uiState.openOrganization)
     assertNull(f.uiState.notice)
-    assertTrue(f.uiState.myOrganizations.first().isSynthetic)
+    assertTrue(f.uiState.myOrganizations.none { it.isSynthetic })
+    assertTrue(f.uiState.organizations.any { it.isSynthetic })
     assertTrue(f.uiState.myOrganizations.any { it.id == f.kfs.id })
     assertTrue(f.uiState.discoverableOrganizations.none { it.isMember(f.me) || it.isSynthetic })
     assertTrue(f.uiState.managesOrganization(f.kfs))
@@ -683,5 +686,121 @@ class OrganizationViewModelTest {
       "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count",
       updatedTemplate.form.questions.first().conceptLink?.conceptId,
     )
+  }
+
+  @Test
+  fun openAdminPanel_routesToAllUsersOrganization_andExcludesFromMyOrganizations() {
+    val f = Fixture()
+    assertTrue(f.uiState.isPlatformAdmin)
+    assertTrue(f.uiState.myOrganizations.none { it.id == Organization.ALL_USERS_ID })
+
+    f.viewModel.openAdminPanel()
+
+    assertEquals(Organization.ALL_USERS_ID, f.uiState.openOrganizationId)
+    assertEquals(OrganizationEvent.AdminPanelOpened, f.events.last())
+
+    // Calling openOrganization with ALL_USERS_ID normalizes to openAdminPanel
+    f.viewModel.openOrganization(Organization.ALL_USERS_ID)
+    assertEquals(Organization.ALL_USERS_ID, f.uiState.openOrganizationId)
+    assertEquals(OrganizationEvent.AdminPanelOpened, f.events.last())
+  }
+
+  @Test
+  fun createPurposePack_andUpdatePurposePack_updatesImpactPillarAndTemplateIds() {
+    val f = Fixture()
+    f.viewModel.openOrganization(f.kfs.id)
+
+    assertEquals("Enter a title.", f.viewModel.createPurposePack(f.kfs.id, "  "))
+    assertNull(
+      f.viewModel.createPurposePack(
+        organizationId = f.kfs.id,
+        title = "Biodiversity Monitoring",
+        description = "Species tracking",
+        icon = "forest",
+        pillar = ImpactPillar.MITIGATION,
+        formTemplateIds = listOf("tpl-1", "tpl-2"),
+      )
+    )
+
+    val packId = "org.${f.kfs.id}.biodiversity_monitoring"
+    val created = f.uiState.library.purposePacks.firstOrNull { it.entry.id == packId }
+    assertNotNull(created)
+    assertEquals("Biodiversity Monitoring", created.entry.title.text)
+    assertEquals("Species tracking", created.entry.description.text)
+    assertEquals(ImpactPillar.MITIGATION, created.entry.pillar)
+    assertEquals(listOf("tpl-1", "tpl-2"), created.entry.formTemplateIds)
+
+    assertNull(
+      f.viewModel.updatePurposePack(
+        organizationId = f.kfs.id,
+        packId = packId,
+        title = "Updated Biodiversity Monitoring",
+        description = "Updated description",
+        icon = "eco",
+        pillar = ImpactPillar.ADAPTATION,
+        status = LibraryStatus.STABLE,
+        formTemplateIds = listOf("tpl-1", "tpl-3"),
+      )
+    )
+
+    val updated = f.uiState.library.purposePacks.first { it.entry.id == packId }
+    assertEquals("Updated Biodiversity Monitoring", updated.entry.title.text)
+    assertEquals("Updated description", updated.entry.description.text)
+    assertEquals(ImpactPillar.ADAPTATION, updated.entry.pillar)
+    assertEquals(listOf("tpl-1", "tpl-3"), updated.entry.formTemplateIds)
+  }
+
+  @Test
+  fun updateTemplateDetails_andSetTemplatePurposePacks_synchronizesPurposePacksBidirectionally() {
+    val f = Fixture()
+    f.viewModel.openOrganization(f.kfs.id)
+
+    // Create a purpose pack
+    assertNull(
+      f.viewModel.createPurposePack(
+        organizationId = f.kfs.id,
+        title = "Tree Health",
+        description = "Health metrics",
+        icon = "spa",
+      )
+    )
+    val packId = "org.${f.kfs.id}.tree_health"
+
+    // Create a template associated with this pack
+    assertNull(
+      f.viewModel.createTemplate(
+        organizationId = f.kfs.id,
+        title = "Canopy Survey",
+        description = "Canopy coverage",
+        questions = emptyList(),
+        purposePackIds = listOf(packId),
+      )
+    )
+    val templateId = "org.${f.kfs.id}.canopy_survey"
+
+    // Verify pack now contains the template
+    val packWithTpl = f.uiState.library.purposePacks.first { it.entry.id == packId }
+    assertTrue(templateId in packWithTpl.entry.formTemplateIds)
+
+    // Update template details to disassociate from pack
+    assertNull(
+      f.viewModel.updateTemplateDetails(
+        organizationId = f.kfs.id,
+        templateId = templateId,
+        title = "Canopy Survey V2",
+        description = "Updated canopy coverage",
+        purposePackIds = emptyList(),
+      )
+    )
+
+    val updatedTemplate = f.uiState.library.formTemplates.first { it.entry.id == templateId }.entry
+    assertEquals("Canopy Survey V2", updatedTemplate.title.text)
+    val packWithoutTpl = f.uiState.library.purposePacks.first { it.entry.id == packId }
+    assertFalse(templateId in packWithoutTpl.entry.formTemplateIds)
+
+    // Re-associate via setTemplatePurposePacks
+    f.viewModel.setTemplatePurposePacks(f.kfs.id, templateId, listOf(packId))
+    val packReassociated = f.uiState.library.purposePacks.first { it.entry.id == packId }
+    assertTrue(templateId in packReassociated.entry.formTemplateIds)
   }
 }

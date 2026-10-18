@@ -61,6 +61,7 @@ fun WebConsoleApp(
 ) {
   LaunchedEffect(initialPage, initialOrganizationId) {
     when {
+      initialPage == WebPage.ADMIN -> state.openAdminPanel()
       initialPage == WebPage.ORGANIZATION && initialOrganizationId != null ->
         state.openOrganization(initialOrganizationId)
       initialPage == WebPage.IMPACT -> state.openImpactDashboard(initialOrganizationId)
@@ -120,7 +121,7 @@ internal fun WebConsolePages(web: WebAppState, page: WebPage) {
     !web.isSignedIn -> WebSignInPage(state = web, onSignIn = { web.signInWithGoogle() })
     resolvedPage == WebPage.ORGANIZATIONS -> OrganizationsPage(state = web, onSignOut = signOut)
     resolvedPage == WebPage.IMPACT -> ImpactDashboardPage(state = web, onSignOut = signOut)
-    resolvedPage == WebPage.ORGANIZATION ->
+    resolvedPage == WebPage.ADMIN || resolvedPage == WebPage.ORGANIZATION ->
       OrganizationPage(
         state = web,
         onOpenSurvey = { surveyId ->

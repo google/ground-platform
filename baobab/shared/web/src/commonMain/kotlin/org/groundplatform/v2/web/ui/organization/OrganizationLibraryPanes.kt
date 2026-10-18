@@ -13,6 +13,7 @@
  */
 package org.groundplatform.v2.web.ui.organization
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -661,34 +663,54 @@ internal fun TemplatesPane(
   organization: Organization,
 ) {
   var creating by remember(organization.id) { mutableStateOf(false) }
-  var renaming by remember(organization.id) { mutableStateOf<FormTemplate?>(null) }
+  var editingDetails by remember(organization.id) { mutableStateOf<FormTemplate?>(null) }
   var editingQuestions by remember(organization.id) { mutableStateOf<FormTemplate?>(null) }
   var deleting by remember(organization.id) { mutableStateOf<FormTemplate?>(null) }
+  val availablePurposes = remember(library.purposePacks) { library.purposePacks.map { it.entry } }
 
   if (creating) {
-    RenameEntryDialog(
+    TemplateDialog(
       title = "New template",
       initialTitle = "",
       initialDescription = "",
-      onSave = { title, description ->
-        actions.createTemplate(organization.id, title, description).also {
+      initialPurposePackIds = emptyList(),
+      availablePurposes = availablePurposes,
+      onSave = { title, description, purposePackIds ->
+        actions.createTemplate(
+          organizationId = organization.id,
+          title = title,
+          description = description,
+          questions = emptyList(),
+          purposePackIds = purposePackIds,
+        ).also {
           if (it == null) creating = false
         }
       },
       onDismiss = { creating = false },
     )
   }
-  renaming?.let { template ->
-    RenameEntryDialog(
-      title = "Rename template",
+  editingDetails?.let { template ->
+    val initialPurposePackIds = remember(library.purposePacks, template.id) {
+      library.purposePacks.map { it.entry }.filter { template.id in it.formTemplateIds }.map { it.id }
+    }
+    TemplateDialog(
+      title = "Edit template",
       initialTitle = template.title.text,
       initialDescription = template.description.text,
-      onSave = { title, description ->
-        actions.renameTemplate(template.organizationId, template.id, title, description).also {
-          if (it == null) renaming = null
+      initialPurposePackIds = initialPurposePackIds,
+      availablePurposes = availablePurposes,
+      onSave = { title, description, purposePackIds ->
+        actions.updateTemplateDetails(
+          organizationId = template.organizationId,
+          templateId = template.id,
+          title = title,
+          description = description,
+          purposePackIds = purposePackIds,
+        ).also {
+          if (it == null) editingDetails = null
         }
       },
-      onDismiss = { renaming = null },
+      onDismiss = { editingDetails = null },
     )
   }
   editingQuestions?.let { template ->
@@ -738,9 +760,13 @@ internal fun TemplatesPane(
         }
         own.forEach { row ->
           key(row.entry.id) {
+            val associatedPurposes = remember(library.purposePacks, row.entry.id) {
+              library.purposePacks.map { it.entry }.filter { row.entry.id in it.formTemplateIds }
+            }
             TemplateRow(
-              row,
-              onRename = { renaming = row.entry },
+              row = row,
+              associatedPurposes = associatedPurposes,
+              onEditDetails = { editingDetails = row.entry },
               onEditQuestions = { editingQuestions = row.entry },
               onDelete = { deleting = row.entry },
             ) {
@@ -779,9 +805,13 @@ internal fun TemplatesPane(
       }
       global.forEach { row ->
         key(row.entry.id) {
+          val associatedPurposes = remember(library.purposePacks, row.entry.id) {
+            library.purposePacks.map { it.entry }.filter { row.entry.id in it.formTemplateIds }
+          }
           TemplateRow(
-            row,
-            onRename = { renaming = row.entry },
+            row = row,
+            associatedPurposes = associatedPurposes,
+            onEditDetails = { editingDetails = row.entry },
             onEditQuestions = { editingQuestions = row.entry },
             onDelete = { deleting = row.entry },
           ) {
@@ -803,7 +833,8 @@ internal fun TemplatesPane(
 @Composable
 private fun TemplateRow(
   row: LibraryEntryRow<FormTemplate>,
-  onRename: () -> Unit,
+  associatedPurposes: List<PurposePack>,
+  onEditDetails: () -> Unit,
   onEditQuestions: () -> Unit,
   onDelete: () -> Unit,
   onSetHidden: (Boolean) -> Unit,
@@ -837,8 +868,8 @@ private fun TemplateRow(
             Spacer(Modifier.width(4.dp))
             Text("Edit questions")
           }
-          IconButton(onClick = onRename) {
-            Icon(Icons.Outlined.Edit, contentDescription = "Rename ${template.title.text}")
+          IconButton(onClick = onEditDetails) {
+            Icon(Icons.Outlined.Edit, contentDescription = "Edit ${template.title.text}")
           }
           IconButton(onClick = onDelete) {
             Icon(Icons.Outlined.Delete, contentDescription = "Delete ${template.title.text}")
@@ -852,6 +883,33 @@ private fun TemplateRow(
             )
             Spacer(Modifier.width(6.dp))
             Text(if (row.isHidden) "Show" else "Hide")
+          }
+        }
+      }
+      if (associatedPurposes.isNotEmpty()) {
+        FlowRow(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Text(
+            "Purposes:",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.align(Alignment.CenterVertically),
+          )
+          associatedPurposes.forEach { purpose ->
+            Surface(
+              shape = MaterialTheme.shapes.extraSmall,
+              color = MaterialTheme.colorScheme.tertiaryContainer,
+              contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+              modifier = Modifier.align(Alignment.CenterVertically),
+            ) {
+              Text(
+                purpose.title.text,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+              )
+            }
           }
         }
       }
@@ -883,22 +941,58 @@ internal fun PurposesPane(
   actions: OrganizationActions,
   organization: Organization,
 ) {
-  var renaming by remember(organization.id) { mutableStateOf<PurposePack?>(null) }
+  var creating by remember(organization.id) { mutableStateOf(false) }
+  var editing by remember(organization.id) { mutableStateOf<PurposePack?>(null) }
   var deleting by remember(organization.id) { mutableStateOf<PurposePack?>(null) }
   val hiddenTemplateIds =
     library.formTemplates.filter { it.isHidden }.mapTo(mutableSetOf()) { it.entry.id }
+  val availableTemplates = remember(library.formTemplates) { library.formTemplates.map { it.entry } }
 
-  renaming?.let { pack ->
-    RenameEntryDialog(
-      title = "Rename purpose",
-      initialTitle = pack.title.text,
-      initialDescription = pack.description.text,
-      onSave = { title, description ->
-        actions.renamePurposePack(pack.organizationId, pack.id, title, description).also {
-          if (it == null) renaming = null
+  if (creating) {
+    PurposeDialog(
+      title = "New purpose",
+      initialTitle = "",
+      initialDescription = "",
+      initialPillar = null,
+      initialTemplateIds = emptyList(),
+      availableTemplates = availableTemplates,
+      onSave = { title, description, pillar, templateIds ->
+        actions.createPurposePack(
+          organizationId = organization.id,
+          title = title,
+          description = description,
+          pillar = pillar,
+          formTemplateIds = templateIds,
+        ).also {
+          if (it == null) creating = false
         }
       },
-      onDismiss = { renaming = null },
+      onDismiss = { creating = false },
+    )
+  }
+  editing?.let { pack ->
+    PurposeDialog(
+      title = "Edit purpose",
+      initialTitle = pack.title.text,
+      initialDescription = pack.description.text,
+      initialPillar = pack.pillar,
+      initialTemplateIds = pack.formTemplateIds,
+      availableTemplates = availableTemplates,
+      onSave = { title, description, pillar, templateIds ->
+        actions.updatePurposePack(
+          organizationId = pack.organizationId,
+          packId = pack.id,
+          title = title,
+          description = description,
+          icon = pack.icon,
+          pillar = pillar,
+          status = pack.status,
+          formTemplateIds = templateIds,
+        ).also {
+          if (it == null) editing = null
+        }
+      },
+      onDismiss = { editing = null },
     )
   }
   deleting?.let { pack ->
@@ -934,11 +1028,18 @@ internal fun PurposesPane(
               row,
               library,
               hiddenTemplateIds,
-              { renaming = row.entry },
+              { editing = row.entry },
               { deleting = row.entry },
             ) {
               actions.setGlobalEntryHidden(organization.id, row.entry.id, it)
             }
+          }
+        }
+        if (library.canEdit) {
+          OutlinedButton(onClick = { creating = true }) {
+            Icon(Icons.Outlined.Add, contentDescription = null)
+            Spacer(Modifier.width(6.dp))
+            Text("+ New purpose")
           }
         }
       }
@@ -969,11 +1070,18 @@ internal fun PurposesPane(
             row,
             library,
             hiddenTemplateIds,
-            { renaming = row.entry },
+            { editing = row.entry },
             { deleting = row.entry },
           ) {
             actions.setGlobalEntryHidden(organization.id, row.entry.id, it)
           }
+        }
+      }
+      if (library.isGlobalLibrary && library.canEdit) {
+        OutlinedButton(onClick = { creating = true }) {
+          Icon(Icons.Outlined.Add, contentDescription = null)
+          Spacer(Modifier.width(6.dp))
+          Text("+ New purpose")
         }
       }
     }
@@ -985,45 +1093,73 @@ private fun PurposeRow(
   row: LibraryEntryRow<PurposePack>,
   library: OrganizationLibraryUiState,
   hiddenTemplateIds: Set<String>,
-  onRename: () -> Unit,
+  onEdit: () -> Unit,
   onDelete: () -> Unit,
   onSetHidden: (Boolean) -> Unit,
 ) {
   val pack = row.entry
-  // A global pack whose templates are all hidden is hidden too (see ResolveLibraryUseCase).
   val hiddenByTemplates =
     row.isGlobal &&
       !row.isHidden &&
       pack.formTemplateIds.isNotEmpty() &&
       pack.formTemplateIds.all { it in hiddenTemplateIds }
-  val templates = pack.formTemplateIds.joinToString { library.templateTitles[it] ?: it }
   EntryRowLayout(
     title = pack.title.text,
     description = pack.description.text,
     badges =
       listOfNotNull(
+        pack.pillar?.label,
         "Hidden".takeIf { row.isHidden },
         "Hidden with its templates".takeIf { hiddenByTemplates },
         statusBadge(pack.status),
       ),
     summary =
       listOfNotNull(
-          templates.takeIf { it.isNotBlank() }?.let { "Templates: $it" },
           pack.programIds
             .takeIf { it.isNotEmpty() }
             ?.let {
               "Reporting programs & frameworks: ${it.joinToString { id -> LibraryPrograms.label(id) }}"
             },
           pack.exportProfileIds.takeIf { it.isNotEmpty() }?.let { "Exports: ${it.joinToString()}" },
-          pack.pillar?.label,
         )
         .joinToString(" · "),
     dimmed = row.isHidden || hiddenByTemplates,
     row = row,
     entryLabel = pack.title.text,
-    onRename = onRename,
+    onRename = onEdit,
     onDelete = onDelete,
     onSetHidden = onSetHidden,
+    extraContent =
+      if (pack.formTemplateIds.isNotEmpty()) {
+        {
+          FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            Text(
+              "Templates:",
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.align(Alignment.CenterVertically),
+            )
+            pack.formTemplateIds.forEach { templateId ->
+              val templateTitle = library.templateTitles[templateId] ?: templateId
+              Surface(
+                shape = MaterialTheme.shapes.extraSmall,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.align(Alignment.CenterVertically),
+              ) {
+                Text(
+                  templateTitle,
+                  style = MaterialTheme.typography.labelSmall,
+                  modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+              }
+            }
+          }
+        }
+      } else null,
   )
 }
 
@@ -1048,43 +1184,47 @@ private fun EntryRowLayout(
   onRename: () -> Unit,
   onDelete: () -> Unit,
   onSetHidden: (Boolean) -> Unit,
+  extraContent: (@Composable () -> Unit)? = null,
 ) {
   LibraryEntryCard {
-    Row(verticalAlignment = Alignment.Top) {
-      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        EntryTitleRow(title = title, badges = badges, dimmed = dimmed)
-        if (id != null) {
-          MonospaceId(id)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      Row(verticalAlignment = Alignment.Top) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+          EntryTitleRow(title = title, badges = badges, dimmed = dimmed)
+          if (id != null) {
+            MonospaceId(id)
+          }
+          if (description.isNotBlank()) {
+            Text(description, style = MaterialTheme.typography.bodySmall)
+          }
+          if (summary.isNotBlank()) {
+            Text(
+              summary,
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
         }
-        if (description.isNotBlank()) {
-          Text(description, style = MaterialTheme.typography.bodySmall)
+        if (row.canEdit) {
+          IconButton(onClick = onRename) {
+            Icon(Icons.Outlined.Edit, contentDescription = "Edit $entryLabel")
+          }
+          IconButton(onClick = onDelete) {
+            Icon(Icons.Outlined.Delete, contentDescription = "Delete $entryLabel")
+          }
         }
-        if (summary.isNotBlank()) {
-          Text(
-            summary,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
+        if (row.canHide) {
+          TextButton(onClick = { onSetHidden(!row.isHidden) }) {
+            Icon(
+              if (row.isHidden) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+              contentDescription = null,
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(if (row.isHidden) "Show" else "Hide")
+          }
         }
       }
-      if (row.canEdit) {
-        IconButton(onClick = onRename) {
-          Icon(Icons.Outlined.Edit, contentDescription = "Rename $entryLabel")
-        }
-        IconButton(onClick = onDelete) {
-          Icon(Icons.Outlined.Delete, contentDescription = "Delete $entryLabel")
-        }
-      }
-      if (row.canHide) {
-        TextButton(onClick = { onSetHidden(!row.isHidden) }) {
-          Icon(
-            if (row.isHidden) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
-            contentDescription = null,
-          )
-          Spacer(Modifier.width(6.dp))
-          Text(if (row.isHidden) "Show" else "Hide")
-        }
-      }
+      extraContent?.invoke()
     }
   }
 }
@@ -1139,6 +1279,194 @@ private fun MonospaceId(id: String) {
     id,
     style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
     color = MaterialTheme.colorScheme.onSurfaceVariant,
+  )
+}
+
+/** Edits the English title, description, and associated purposes of a template. */
+@Composable
+private fun TemplateDialog(
+  title: String,
+  initialTitle: String,
+  initialDescription: String,
+  initialPurposePackIds: List<String>,
+  availablePurposes: List<PurposePack>,
+  onSave: (title: String, description: String, purposePackIds: List<String>) -> String?,
+  onDismiss: () -> Unit,
+) {
+  var entryTitle by remember { mutableStateOf(initialTitle) }
+  var description by remember { mutableStateOf(initialDescription) }
+  val selectedPurposes =
+    remember { mutableStateListOf<String>().apply { addAll(initialPurposePackIds) } }
+  var error by remember { mutableStateOf<String?>(null) }
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = { Text(title) },
+    text = {
+      Column(
+        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        OutlinedTextField(
+          value = entryTitle,
+          onValueChange = {
+            entryTitle = it
+            error = null
+          },
+          label = { Text("Title (English)") },
+          singleLine = true,
+          isError = error != null,
+          supportingText = error?.let { { Text(it) } },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+          value = description,
+          onValueChange = { description = it },
+          label = { Text("Description (English)") },
+          minLines = 2,
+          modifier = Modifier.fillMaxWidth(),
+        )
+        if (availablePurposes.isNotEmpty()) {
+          Text(
+            "Associated purposes",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+          )
+          Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            availablePurposes.forEach { purpose ->
+              val isChecked = purpose.id in selectedPurposes
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                  Modifier.fillMaxWidth()
+                    .clickable {
+                      if (isChecked) selectedPurposes.remove(purpose.id)
+                      else selectedPurposes.add(purpose.id)
+                    }
+                    .padding(vertical = 2.dp),
+              ) {
+                Checkbox(
+                  checked = isChecked,
+                  onCheckedChange = { checked ->
+                    if (checked) selectedPurposes.add(purpose.id)
+                    else selectedPurposes.remove(purpose.id)
+                  },
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(purpose.title.text, style = MaterialTheme.typography.bodyMedium)
+              }
+            }
+          }
+        }
+      }
+    },
+    confirmButton = {
+      Button(
+        onClick = { error = onSave(entryTitle, description, selectedPurposes.toList()) },
+        enabled = entryTitle.isNotBlank(),
+      ) {
+        Text("Save")
+      }
+    },
+    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+  )
+}
+
+/** Edits the title, description, MAP pillar, and associated form templates of a Purpose Pack. */
+@Composable
+private fun PurposeDialog(
+  title: String,
+  initialTitle: String,
+  initialDescription: String,
+  initialPillar: ImpactPillar?,
+  initialTemplateIds: List<String>,
+  availableTemplates: List<FormTemplate>,
+  onSave: (title: String, description: String, pillar: ImpactPillar?, templateIds: List<String>) -> String?,
+  onDismiss: () -> Unit,
+) {
+  var entryTitle by remember { mutableStateOf(initialTitle) }
+  var description by remember { mutableStateOf(initialDescription) }
+  var pillar by remember { mutableStateOf(initialPillar) }
+  val selectedTemplates =
+    remember { mutableStateListOf<String>().apply { addAll(initialTemplateIds) } }
+  var error by remember { mutableStateOf<String?>(null) }
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = { Text(title) },
+    text = {
+      Column(
+        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        OutlinedTextField(
+          value = entryTitle,
+          onValueChange = {
+            entryTitle = it
+            error = null
+          },
+          label = { Text("Title (English)") },
+          singleLine = true,
+          isError = error != null,
+          supportingText = error?.let { { Text(it) } },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+          value = description,
+          onValueChange = { description = it },
+          label = { Text("Description (English)") },
+          minLines = 2,
+          modifier = Modifier.fillMaxWidth(),
+        )
+        val pillarOptions = listOf<ImpactPillar?>(null) + ImpactPillar.entries
+        DropdownSelector(
+          label = "MAP Pillar",
+          selectedText = pillar?.label ?: "None",
+          options = pillarOptions,
+          optionText = { it?.label ?: "None" },
+          onSelect = { pillar = it },
+        )
+        if (availableTemplates.isNotEmpty()) {
+          Text(
+            "Associated templates",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+          )
+          Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            availableTemplates.forEach { template ->
+              val isChecked = template.id in selectedTemplates
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                  Modifier.fillMaxWidth()
+                    .clickable {
+                      if (isChecked) selectedTemplates.remove(template.id)
+                      else selectedTemplates.add(template.id)
+                    }
+                    .padding(vertical = 2.dp),
+              ) {
+                Checkbox(
+                  checked = isChecked,
+                  onCheckedChange = { checked ->
+                    if (checked) selectedTemplates.add(template.id)
+                    else selectedTemplates.remove(template.id)
+                  },
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(template.title.text, style = MaterialTheme.typography.bodyMedium)
+              }
+            }
+          }
+        }
+      }
+    },
+    confirmButton = {
+      Button(
+        onClick = { error = onSave(entryTitle, description, pillar, selectedTemplates.toList()) },
+        enabled = entryTitle.isNotBlank(),
+      ) {
+        Text("Save")
+      }
+    },
+    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
   )
 }
 
