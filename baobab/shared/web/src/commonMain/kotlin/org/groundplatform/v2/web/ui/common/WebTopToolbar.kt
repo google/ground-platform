@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
@@ -44,6 +45,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +62,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.flowOf
+import org.groundplatform.v2.app.di.UserDataSyncState
 import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
 import org.groundplatform.v2.app.ui.common.UserAvatarProfileMenu
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
@@ -308,11 +312,37 @@ internal fun WebAppHeader(
 
       Spacer(modifier = Modifier.width(16.dp))
 
+      val userDataSyncState by state.dataHolder.userDataSyncState.collectAsState()
+      val syncCoordinator = state.dataHolder.syncCoordinator
+      val syncActivity by
+        (syncCoordinator?.activity ?: flowOf(null)).collectAsState(initial = null)
+      val isSyncing =
+        userDataSyncState is UserDataSyncState.Syncing || syncActivity?.isSyncing == true
+
       // Right: page actions, divider, optional avatar and divider, and debug tools.
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
       ) {
+        if (isSyncing) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 4.dp),
+          ) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(14.dp),
+              strokeWidth = 2.dp,
+              color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+              text = "Syncing…",
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        }
+
         if (actions != null) {
           actions()
 

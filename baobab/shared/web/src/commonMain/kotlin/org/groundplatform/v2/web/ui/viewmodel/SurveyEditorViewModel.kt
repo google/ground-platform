@@ -1186,7 +1186,7 @@ class SurveyEditorViewModel(
 
   override fun togglePurpose(packId: String) = updateDetails { d ->
     d.copy(
-      purposeIds = if (packId in d.purposeIds) d.purposeIds - packId else d.purposeIds + packId
+      purposeIds = if (packId in d.purposeIds) emptyList() else listOf(packId)
     )
   }
 

@@ -103,6 +103,7 @@ class OnboardingViewModel(
 ) : OnboardingActions {
   private data class Session(
     val hasAcceptedTerms: Boolean = false,
+    val isSigningIn: Boolean = false,
     val termsCheckboxChecked: Boolean = true,
     val entryOrigin: DownloadSurveyEntryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS,
     val isSignOutPromptOpen: Boolean = false,
@@ -147,6 +148,7 @@ class OnboardingViewModel(
         .ifBlank { auth.profile.organizationName }
     return OnboardingUiState(
       isSignedIn = auth.isSignedIn,
+      isSigningIn = session.isSigningIn,
       profile = auth.profile,
       hasAcceptedTerms = session.hasAcceptedTerms,
       termsCheckboxChecked = session.termsCheckboxChecked,
@@ -194,17 +196,23 @@ class OnboardingViewModel(
       )
       return
     }
+    if (session.value.isSigningIn) return
+    session.update { it.copy(isSigningIn = true) }
     scope.launch {
-      authRepository.signInWithGoogle()
-      val next =
-        if (session.value.hasAcceptedTerms) {
-          session.update { it.copy(entryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS) }
-          AppScreen.DOWNLOAD_SURVEY
-        } else {
-          AppScreen.TERMS_OF_SERVICE
-        }
-      session.update { it.copy(isSignOutPromptOpen = false) }
-      emit(OnboardingEvent.ShowScreen(next))
+      try {
+        authRepository.signInWithGoogle()
+        val next =
+          if (session.value.hasAcceptedTerms) {
+            session.update { it.copy(entryOrigin = DownloadSurveyEntryOrigin.AFTER_TOS) }
+            AppScreen.DOWNLOAD_SURVEY
+          } else {
+            AppScreen.TERMS_OF_SERVICE
+          }
+        session.update { it.copy(isSignOutPromptOpen = false) }
+        emit(OnboardingEvent.ShowScreen(next))
+      } finally {
+        session.update { it.copy(isSigningIn = false) }
+      }
     }
   }
 

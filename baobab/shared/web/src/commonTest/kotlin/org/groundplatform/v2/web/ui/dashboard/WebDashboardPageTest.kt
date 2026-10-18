@@ -231,6 +231,15 @@ class WebDashboardPageTest {
   }
 
   @Test
+  fun languageSelector_updatesSettingsLanguageAndLocale() {
+    val testState = WebAppState(dataHolder = sampleDataHolder())
+    assertEquals("en", testState.settings.uiState.value.languageCode)
+    testState.settings.updateLanguage("es")
+    assertEquals("es", testState.settings.uiState.value.languageCode)
+    assertEquals("Español", testState.settings.uiState.value.selectedLanguageDisplayName)
+  }
+
+  @Test
   fun layersSheet_togglesStateAndControlsBasemapAndLayerVisibility() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
     assertFalse(testState.isLayersSheetOpen)

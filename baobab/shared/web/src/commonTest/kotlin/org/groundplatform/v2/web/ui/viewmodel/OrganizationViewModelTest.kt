@@ -113,6 +113,25 @@ class OrganizationViewModelTest {
       f.uiState.surveys.filter { it.organizationId == f.kfs.id },
       f.uiState.surveysInOrganization(f.kfs.id),
     )
+    assertFalse(f.uiState.isSaving)
+  }
+
+  @Test
+  fun isSaving_defaultsToFalse_andIsFalseAfterMutations() {
+    val f = Fixture()
+    assertFalse(f.uiState.isSaving)
+
+    f.viewModel.updateOrganizationDetails(
+      organizationId = f.kfs.id,
+      name = "Kenya Forest Service Updated",
+      description = f.kfs.description,
+      websiteUrl = f.kfs.websiteUrl,
+      isListed = f.kfs.isListed,
+      organizationType = f.kfs.organizationType,
+      countryCode = f.kfs.countryCode,
+    )
+    assertFalse(f.uiState.isSaving)
+    assertEquals("Kenya Forest Service Updated", f.kfs.name)
   }
 
   @Test

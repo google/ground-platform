@@ -14,6 +14,7 @@
 package org.groundplatform.v2.web.ui.viewmodel
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -283,6 +284,7 @@ class OrganizationViewModel(
     val openOrganizationId: String? = null,
     val notice: String? = null,
     val dictionaryQuery: String = "",
+    val isSaving: Boolean = false,
   )
 
   private val data: StateFlow<Data> =
@@ -330,7 +332,18 @@ class OrganizationViewModel(
       openOrganizationId = session.openOrganizationId,
       notice = session.notice,
       library = buildLibraryState(data, session),
+      isSaving = session.isSaving,
     )
+
+  private fun launchSaving(block: suspend () -> Unit): Job =
+    scope.launch {
+      session.update { it.copy(isSaving = true) }
+      try {
+        block()
+      } finally {
+        session.update { it.copy(isSaving = false) }
+      }
+    }
 
   /** Library tabs of the open organization: its own entries first, then global ones. */
   private fun buildLibraryState(data: Data, session: Session): OrganizationLibraryUiState {
@@ -440,7 +453,7 @@ class OrganizationViewModel(
         organizationType = organizationType,
         countryCode = countryCode,
       )
-    scope.launch {
+    launchSaving {
       if (createOrganizationUseCase(organization, signedInEmail, signedInProfile) == null) {
         val reason =
           if (CreateOrganizationUseCase.countryCodeError(organization.countryCode) != null) {
@@ -449,7 +462,7 @@ class OrganizationViewModel(
             ""
           }
         session.update { it.copy(notice = "Couldn't create \"${organization.name}\".$reason") }
-        return@launch
+        return@launchSaving
       }
       // Open it only once it's in the store, so the organization page never sees it missing.
       openOrganization(organization.id)
@@ -460,7 +473,7 @@ class OrganizationViewModel(
 
   /** Applies [transform] to the stored organization with [organizationId]. */
   fun updateOrganization(organizationId: String, transform: (Organization) -> Organization) {
-    scope.launch { organizationRepository.updateOrganization(organizationId, transform) }
+    launchSaving { organizationRepository.updateOrganization(organizationId, transform) }
   }
 
   override fun updateOrganizationDetails(
@@ -496,7 +509,7 @@ class OrganizationViewModel(
 
   override fun deleteOrganization(organizationId: String) {
     val name = organization(organizationId)?.name
-    scope.launch { organizationRepository.deleteOrganization(organizationId) }
+    launchSaving { organizationRepository.deleteOrganization(organizationId) }
     returnToOrganizations(notice = name?.let { "Deleted organization \"$it\"." })
   }
 
@@ -510,12 +523,12 @@ class OrganizationViewModel(
     inviteMemberUseCase.inviteError(organization(organizationId), email, role)?.let {
       return it
     }
-    scope.launch { inviteMemberUseCase(organizationId, email, role) }
+    launchSaving { inviteMemberUseCase(organizationId, email, role) }
     return null
   }
 
   override fun resetInviteLink(organizationId: String, email: String) {
-    scope.launch { inviteMemberUseCase.resetInviteLink(organizationId, email) }
+    launchSaving { inviteMemberUseCase.resetInviteLink(organizationId, email) }
   }
 
   override fun acceptInvite(
@@ -527,22 +540,22 @@ class OrganizationViewModel(
     inviteMemberUseCase.acceptError(displayName)?.let {
       return it
     }
-    scope.launch { inviteMemberUseCase.acceptInvite(organizationId, email, displayName, photoUrl) }
+    launchSaving { inviteMemberUseCase.acceptInvite(organizationId, email, displayName, photoUrl) }
     return null
   }
 
   override fun requestToJoin(organizationId: String) {
-    scope.launch {
+    launchSaving {
       organizationRepository.requestToJoin(organizationId, signedInEmail, signedInProfile)
     }
   }
 
   override fun approveRequest(organizationId: String, email: String) {
-    scope.launch { organizationRepository.approveRequest(organizationId, email) }
+    launchSaving { organizationRepository.approveRequest(organizationId, email) }
   }
 
   override fun setMemberRole(organizationId: String, email: String, role: OrganizationRole) {
-    scope.launch {
+    launchSaving {
       val updated = organizationRepository.setMemberRole(organizationId, email, role)
       if (updated == null) {
         val organization = organization(organizationId)
@@ -559,7 +572,7 @@ class OrganizationViewModel(
 
   override fun removeMember(organizationId: String, email: String) {
     val isSelf = email.equals(signedInEmail, ignoreCase = true)
-    scope.launch {
+    launchSaving {
       val updated = organizationRepository.removeMember(organizationId, email)
       if (updated == null) {
         session.update {
@@ -597,7 +610,7 @@ class OrganizationViewModel(
         type = type,
         allowOfflineDownload = allowOfflineDownload,
       )
-    scope.launch { manageImagerySourcesUseCase.add(organizationId, source) }
+    launchSaving { manageImagerySourcesUseCase.add(organizationId, source) }
     return null
   }
 
@@ -613,7 +626,7 @@ class OrganizationViewModel(
       ?.let {
         return it
       }
-    scope.launch {
+    launchSaving {
       manageImagerySourcesUseCase.update(
         organizationId,
         sourceId,
@@ -630,14 +643,14 @@ class OrganizationViewModel(
     sourceId: String,
     allowOfflineDownload: Boolean,
   ) {
-    scope.launch {
+    launchSaving {
       manageImagerySourcesUseCase.setOfflineAllowed(organizationId, sourceId, allowOfflineDownload)
     }
   }
 
   override fun removeImagerySource(organizationId: String, sourceId: String) {
     _events.tryEmit(OrganizationEvent.ImagerySourceRemoved(sourceId))
-    scope.launch { manageImagerySourcesUseCase.remove(organizationId, sourceId) }
+    launchSaving { manageImagerySourcesUseCase.remove(organizationId, sourceId) }
   }
 
   // --- Library ---
@@ -666,7 +679,7 @@ class OrganizationViewModel(
     manageLibraryUseCase.conceptError(concept, library(concept.organizationId), isNew)?.let {
       return it
     }
-    scope.launch { manageLibraryUseCase.saveConcept(concept) }
+    launchSaving { manageLibraryUseCase.saveConcept(concept) }
     return null
   }
 
@@ -677,7 +690,7 @@ class OrganizationViewModel(
     manageLibraryUseCase.deleteConceptError(library(organizationId), conceptId)?.let {
       return it
     }
-    scope.launch { manageLibraryUseCase.deleteConcept(organizationId, conceptId) }
+    launchSaving { manageLibraryUseCase.deleteConcept(organizationId, conceptId) }
     return null
   }
 
@@ -707,7 +720,7 @@ class OrganizationViewModel(
             questions = questions,
           ),
       )
-    scope.launch { manageLibraryUseCase.saveTemplate(template) }
+    launchSaving { manageLibraryUseCase.saveTemplate(template) }
     return null
   }
 
@@ -717,7 +730,7 @@ class OrganizationViewModel(
       ?.let {
         return it
       }
-    scope.launch { manageLibraryUseCase.saveTemplate(template) }
+    launchSaving { manageLibraryUseCase.saveTemplate(template) }
     return null
   }
 
@@ -732,7 +745,7 @@ class OrganizationViewModel(
     if (questions.any { it.label.isBlank() }) {
       return "Enter a label for every question."
     }
-    scope.launch {
+    launchSaving {
       manageLibraryUseCase.updateTemplateQuestions(organizationId, templateId, questions)
     }
     return null
@@ -747,7 +760,7 @@ class OrganizationViewModel(
     (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
       return it
     }
-    scope.launch {
+    launchSaving {
       manageLibraryUseCase.renameTemplate(organizationId, templateId, title, description)
     }
     return null
@@ -755,7 +768,7 @@ class OrganizationViewModel(
 
   override fun deleteTemplate(organizationId: String, templateId: String) {
     if (libraryEditError(organizationId) != null) return
-    scope.launch { manageLibraryUseCase.deleteTemplate(organizationId, templateId) }
+    launchSaving { manageLibraryUseCase.deleteTemplate(organizationId, templateId) }
   }
 
   override fun renamePurposePack(
@@ -767,7 +780,7 @@ class OrganizationViewModel(
     (libraryEditError(organizationId) ?: manageLibraryUseCase.titleError(title))?.let {
       return it
     }
-    scope.launch {
+    launchSaving {
       manageLibraryUseCase.renamePurposePack(organizationId, packId, title, description)
     }
     return null
@@ -775,7 +788,7 @@ class OrganizationViewModel(
 
   override fun deletePurposePack(organizationId: String, packId: String) {
     if (libraryEditError(organizationId) != null) return
-    scope.launch { manageLibraryUseCase.deletePurposePack(organizationId, packId) }
+    launchSaving { manageLibraryUseCase.deletePurposePack(organizationId, packId) }
   }
 
   override fun setGlobalEntryHidden(
@@ -784,7 +797,7 @@ class OrganizationViewModel(
     hidden: Boolean,
   ) {
     if (libraryEditError(organizationId) != null) return
-    scope.launch {
+    launchSaving {
       manageLibraryUseCase.setGlobalEntryHidden(organizationId, globalEntryId, hidden)
     }
   }

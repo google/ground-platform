@@ -50,6 +50,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -162,6 +163,13 @@ internal fun OrganizationPage(
             }
           },
           actions = {
+            if (uiState.isSaving) {
+              CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+                color = MaterialTheme.colorScheme.primary,
+              )
+            }
             if (organization != null) {
               WebHeaderButton(
                 text = "View impact",
@@ -815,7 +823,7 @@ private fun DetailsPane(
     verticalArrangement = Arrangement.spacedBy(20.dp),
   ) {
     if (isManager) {
-      EditableDetailsCard(actions, organization)
+      EditableDetailsCard(actions, organization, isSaving = uiState.isSaving)
       if (!organization.isSynthetic) {
         DangerZoneCard(
           actions = actions,
@@ -1278,7 +1286,11 @@ private fun AddImagerySourceCard(actions: OrganizationActions, organization: Org
 }
 
 @Composable
-private fun EditableDetailsCard(actions: OrganizationActions, organization: Organization) {
+private fun EditableDetailsCard(
+  actions: OrganizationActions,
+  organization: Organization,
+  isSaving: Boolean = false,
+) {
   var name by remember(organization.id, organization.name) { mutableStateOf(organization.name) }
   var description by
     remember(organization.id, organization.description) { mutableStateOf(organization.description) }
@@ -1361,8 +1373,16 @@ private fun EditableDetailsCard(actions: OrganizationActions, organization: Orga
             countryCode = countryCode,
           )
         },
-        enabled = isDirty && name.isNotBlank(),
+        enabled = isDirty && name.isNotBlank() && !isSaving,
       ) {
+        if (isSaving) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(16.dp),
+            strokeWidth = 2.dp,
+            color = MaterialTheme.colorScheme.onPrimary,
+          )
+          Spacer(Modifier.width(8.dp))
+        }
         Text("Save")
       }
       TextButton(

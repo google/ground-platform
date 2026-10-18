@@ -47,6 +47,8 @@ data class OrganizationUiState(
   val notice: String? = null,
   /** Library of the open organization (Dictionary, Templates, and Purposes tabs). */
   val library: OrganizationLibraryUiState = OrganizationLibraryUiState(),
+  /** Whether an in-flight organization or library remote mutation is in progress. */
+  val isSaving: Boolean = false,
 ) {
   /** The organization shown on the organization page, if it still exists. */
   val openOrganization: Organization?
