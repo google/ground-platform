@@ -120,6 +120,7 @@ internal class SyncLists(private val epoch: () -> String) {
     queryFieldsSet: List<String>,
     watermark: Instant,
     accessEpoch: String = "",
+    visible: (T) -> Boolean = { true },
   ): ListPage<T> =
     list(
       params,
@@ -132,6 +133,7 @@ internal class SyncLists(private val epoch: () -> String) {
       queryFieldsSet,
       watermark,
       accessEpoch,
+      visible,
     )
 
   /**
@@ -140,7 +142,9 @@ internal class SyncLists(private val epoch: () -> String) {
    * the records the query may match, at least those [QuerySpec.matches] accepts (query mode).
    *
    * Tokens also carry [accessEpoch] (the caller's access epoch for caller-dependent lists), so a
-   * token from before the caller's access changed fails with `FAILED_PRECONDITION`.
+   * token from before the caller's access changed fails with `FAILED_PRECONDITION`. Records
+   * [visible] rejects (for example other collectors' records) are left out of both modes; delta
+   * positions still advance past them.
    */
   fun <T> list(
     params: ListParams,
@@ -153,6 +157,7 @@ internal class SyncLists(private val epoch: () -> String) {
     queryFieldsSet: List<String>,
     watermark: Instant,
     accessEpoch: String = "",
+    visible: (T) -> Boolean = { true },
   ): ListPage<T> {
     val epoch = epoch() + accessEpoch.let { if (it.isEmpty()) "" else "/$it" }
     val pageSize = pageSizeOf(params.pageSize)
@@ -168,10 +173,11 @@ internal class SyncLists(private val epoch: () -> String) {
       val page = changed.take(pageSize)
       val last = page.lastOrNull()?.let { SyncPosition.of(commitTimestamp(it), id(it)) } ?: from
       val token = encodeSync(scopeKey, last, epoch)
+      val items = page.filter(visible)
       return if (changed.size > page.size) {
-        ListPage(page, nextPageToken = token, nextSyncToken = "")
+        ListPage(items, nextPageToken = token, nextSyncToken = "")
       } else {
-        ListPage(page, nextPageToken = "", nextSyncToken = token)
+        ListPage(items, nextPageToken = "", nextSyncToken = token)
       }
     }
 
@@ -180,7 +186,7 @@ internal class SyncLists(private val epoch: () -> String) {
     val order = queryOrder(query.descending)
     val matching =
       queryRecords()
-        .filter(query.matches)
+        .filter { query.matches(it) && visible(it) }
         .map { query.sortKey(it) to it }
         .sortedWith { a, b -> order.compare(a.first to id(a.second), b.first to id(b.second)) }
         .filter { (key, record) ->

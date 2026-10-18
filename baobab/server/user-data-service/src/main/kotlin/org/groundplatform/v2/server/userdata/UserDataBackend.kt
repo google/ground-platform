@@ -16,6 +16,7 @@ package org.groundplatform.v2.server.userdata
 import com.squareup.wire.Instant
 import groundplatform.v2.data.AcquirePlotLockRequest
 import groundplatform.v2.data.AcquirePlotLockResponse
+import groundplatform.v2.data.AuditInfo
 import groundplatform.v2.data.AuditRecord
 import groundplatform.v2.data.ConflictResolutionStatus
 import groundplatform.v2.data.DataMutation
@@ -524,10 +525,19 @@ class UserDataBackend(private val store: UserDataStore) :
   // ---------------------------------------------------------------------------
 
   override suspend fun GetOrganization(request: GetOrganizationRequest): GetOrganizationResponse {
-    val org =
-      store.read { it.organization(request.organization_id) }
-        ?: Organization(organization_id = request.organization_id)
-    return GetOrganizationResponse(organization = org)
+    val caller = currentCaller()
+    val org = store.read { r ->
+      val org = r.organization(request.organization_id) ?: return@read null
+      val access = Access(r, caller)
+      when {
+        access.belongsTo(org) -> access.viewOf(org)
+        org.listed && !org.is_deleted -> org.copy(members = emptyList())
+        else -> throw Access.denied("organization ${request.organization_id}")
+      }
+    }
+    return GetOrganizationResponse(
+      organization = org ?: Organization(organization_id = request.organization_id)
+    )
   }
 
   override suspend fun SearchOrganizations(
@@ -554,17 +564,21 @@ class UserDataBackend(private val store: UserDataStore) :
   ): ListOrganizationsResponse {
     val caller = currentCaller()
     val page = store.read { r ->
-      syncLists.list(
-        params = ListParams(request.page_size, request.page_token, request.sync_token),
-        scopeKey = "organizations",
-        records = r.organizations(),
-        commitTimestamp = Organization::commit_timestamp,
-        id = Organization::organization_id,
-        query = commitOrderQuery(Organization::commit_timestamp) { !it.is_deleted },
-        queryFieldsSet = emptyList(),
-        watermark = r.snapshotTimestamp,
-        accessEpoch = r.accessEpochOf(caller),
-      )
+      val access = Access(r, caller)
+      syncLists
+        .list(
+          params = ListParams(request.page_size, request.page_token, request.sync_token),
+          scopeKey = "organizations",
+          records = r.organizations(),
+          commitTimestamp = Organization::commit_timestamp,
+          id = Organization::organization_id,
+          query = commitOrderQuery(Organization::commit_timestamp) { !it.is_deleted },
+          queryFieldsSet = emptyList(),
+          watermark = r.snapshotTimestamp,
+          accessEpoch = r.accessEpochOf(caller),
+          visible = { access.belongsTo(it) },
+        )
+        .let { it.copy(items = it.items.map(access::viewOf)) }
     }
     return ListOrganizationsResponse(
       organizations = page.items,
@@ -577,9 +591,14 @@ class UserDataBackend(private val store: UserDataStore) :
     request: MutateOrganizationRequest
   ): MutateOrganizationResponse {
     val orgId = request.organization_id
+    val caller = currentCaller()
     val (existing, toApply) =
       store.read { r ->
-        r.organization(orgId) to
+        val org = r.organization(orgId)
+        if (org != null && !Access(r, caller).manages(org)) {
+          throw Access.denied("organization $orgId")
+        }
+        org to
           r.newMutations("organizations/$orgId", request.mutations) {
             MutationIdentity(it.client_id, it.client_seq)
           }
@@ -597,6 +616,9 @@ class UserDataBackend(private val store: UserDataStore) :
 
     val committed = store.write { tx ->
       val stored = tx.organization(orgId)
+      if (stored != null && !Access(tx, caller).manages(stored)) {
+        throw Access.denied("organization $orgId")
+      }
       var current: Organization = stored ?: Organization(organization_id = orgId, version = 0L)
       for (mutation in toApply) {
         val up = mutation.upsert_organization
@@ -675,7 +697,18 @@ class UserDataBackend(private val store: UserDataStore) :
   // LibraryServiceServer
   // ---------------------------------------------------------------------------
 
+  /** Fails with `PERMISSION_DENIED` unless the caller can read [organizationId]'s library. */
+  private suspend fun requireLibraryReader(organizationId: String) {
+    val caller = currentCaller()
+    store.read { r ->
+      if (!Access(r, caller).readsLibrary(organizationId)) {
+        throw Access.denied("library $organizationId")
+      }
+    }
+  }
+
   override suspend fun GetLibrary(request: GetLibraryRequest): GetLibraryResponse {
+    requireLibraryReader(request.organization_id)
     val record =
       store.read { it.library(request.organization_id) }
         ?: OrganizationLibraryRecord(
@@ -691,6 +724,7 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun GetResolvedLibrary(
     request: GetResolvedLibraryRequest
   ): GetResolvedLibraryResponse {
+    requireLibraryReader(request.organization_id)
     val (globalRecord, orgRecord) =
       store.read { r ->
         r.library(ALL_USERS_ORGANIZATION_ID) to
@@ -733,7 +767,9 @@ class UserDataBackend(private val store: UserDataStore) :
 
   override suspend fun ListLibraries(request: ListLibrariesRequest): ListLibrariesResponse {
     val orgId = request.organization_id
+    val caller = currentCaller()
     val page = store.read { r ->
+      val access = Access(r, caller)
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
         scopeKey = "libraries|organization_id=$orgId",
@@ -743,6 +779,8 @@ class UserDataBackend(private val store: UserDataStore) :
         query = commitOrderQuery(OrganizationLibraryRecord::commit_timestamp) { !it.is_deleted },
         queryFieldsSet = emptyList(),
         watermark = r.snapshotTimestamp,
+        accessEpoch = r.accessEpochOf(caller),
+        visible = { access.readsLibrary(it.organization_id) },
       )
     }
     return ListLibrariesResponse(
@@ -753,6 +791,7 @@ class UserDataBackend(private val store: UserDataStore) :
   }
 
   override suspend fun SearchConcepts(request: SearchConceptsRequest): SearchConceptsResponse {
+    requireLibraryReader(request.organization_id)
     val q = request.query.trim().lowercase()
     // The global library, overridden by the organization's (as in GetResolvedLibrary).
     val libraries =
@@ -773,8 +812,12 @@ class UserDataBackend(private val store: UserDataStore) :
 
   override suspend fun MutateLibrary(request: MutateLibraryRequest): MutateLibraryResponse {
     val orgId = request.organization_id
+    val caller = currentCaller()
     val (existing, toApply) =
       store.read { r ->
+        if (!Access(r, caller).manages(r.organization(orgId))) {
+          throw Access.denied("library $orgId")
+        }
         r.library(orgId) to
           r.newMutations("libraries/$orgId", request.mutations) {
             MutationIdentity(it.client_id, it.client_seq)
@@ -837,10 +880,24 @@ class UserDataBackend(private val store: UserDataStore) :
     val orgId = request.organization_id
     val caller = currentCaller()
     val page = store.read { r ->
+      val access = Access(r, caller)
+      // Surveys the caller can't list appear as tombstones, so a delta removes surveys whose
+      // sharing
+      // policy no longer grants access.
       val overviews =
         r.surveys()
           .filter { s -> orgId.isBlank() || s.organization_id == orgId }
-          .map { s -> r.overviewOf(s) }
+          .map { s ->
+            val overview = r.overviewOf(s)
+            if (access.listsSurvey(s, r.acl(s.survey_id))) overview
+            else
+              SurveyOverview(
+                survey_id = s.survey_id,
+                state = SurveyState.DELETED,
+                commit_timestamp = overview.commit_timestamp,
+                record_version = overview.record_version,
+              )
+          }
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
         scopeKey = "surveys|organization_id=$orgId",
@@ -861,7 +918,22 @@ class UserDataBackend(private val store: UserDataStore) :
     )
   }
 
-  override suspend fun GetSurvey(request: GetSurveyRequest): GetSurveyResponse = store.read { r ->
+  override suspend fun GetSurvey(request: GetSurveyRequest): GetSurveyResponse {
+    val caller = currentCaller()
+    return store.read { r -> r.getSurvey(request, Access(r, caller)) }
+  }
+
+  private fun UserDataReader.getSurvey(
+    request: GetSurveyRequest,
+    access: Access,
+  ): GetSurveyResponse {
+    val r = this
+    val role =
+      access.requireSurvey(
+        request.survey_id,
+        if (request.working_copy == true) Access.SurveyRole.SURVEY_ORGANIZER
+        else Access.SurveyRole.VIEWER,
+      )
     r.checkNotTrashed(request.survey_id)
     val saved = r.survey(request.survey_id)
     val requestedVersion = request.saved_version
@@ -871,13 +943,22 @@ class UserDataBackend(private val store: UserDataStore) :
         !requestedVersion.isNullOrBlank() -> r.surveyRevision(request.survey_id, requestedVersion)
         else -> saved
       }
-    GetSurveyResponse(survey = survey, acl = r.acl(request.survey_id))
+    return GetSurveyResponse(survey = survey, acl = r.acl(request.survey_id)?.visibleTo(role))
   }
 
-  override suspend fun GetSurveyAcl(request: GetSurveyAclRequest): GetSurveyAclResponse =
-    GetSurveyAclResponse(
-      acl = store.read { it.acl(request.survey_id) } ?: SurveyAcl(survey_id = request.survey_id)
-    )
+  override suspend fun GetSurveyAcl(request: GetSurveyAclRequest): GetSurveyAclResponse {
+    val caller = currentCaller()
+    return store.read { r ->
+      val role = Access(r, caller).requireSurvey(request.survey_id, Access.SurveyRole.VIEWER)
+      GetSurveyAclResponse(
+        acl = (r.acl(request.survey_id) ?: SurveyAcl(survey_id = request.survey_id)).visibleTo(role)
+      )
+    }
+  }
+
+  /** The ACL as a caller with [role] may see it: collaborator entries only for organizers. */
+  private fun SurveyAcl.visibleTo(role: Access.SurveyRole): SurveyAcl =
+    if (role.atLeast(Access.SurveyRole.SURVEY_ORGANIZER)) this else copy(entries = emptyList())
 
   private fun UserDataReader.resolveEffectiveQuota(
     survey: SurveyDef?,
@@ -1055,7 +1136,15 @@ class UserDataBackend(private val store: UserDataStore) :
 
   override suspend fun MutateSurvey(request: MutateSurveyRequest): MutateSurveyResponse {
     val surveyId = request.survey_id
+    val caller = currentCaller()
+    // Anyone signed in may create a survey; changing one takes an organizer.
+    fun UserDataReader.requireOrganizerIfExists() {
+      if (survey(surveyId) != null) {
+        Access(this, caller).requireSurvey(surveyId, Access.SurveyRole.SURVEY_ORGANIZER)
+      }
+    }
     val toApply = store.read { r ->
+      r.requireOrganizerIfExists()
       r.newMutations("surveys/$surveyId", request.mutations) {
         MutationIdentity(it.client_id, it.client_seq)
       }
@@ -1088,6 +1177,7 @@ class UserDataBackend(private val store: UserDataStore) :
           else tx.survey(surveyId)
         checkBaseVersion(request.base_version, baseTarget?.version, "survey $surveyId")
       }
+      tx.requireOrganizerIfExists()
       val isNewSurvey = tx.survey(surveyId) == null
       var saved =
         tx.survey(surveyId)
@@ -1133,6 +1223,12 @@ class UserDataBackend(private val store: UserDataStore) :
           patchAccess != null ->
             currentAcl = SurveyPatches.applyAccessRules(currentAcl, patchAccess)
         }
+      }
+
+      // A new survey belongs to its creator unless the request names an owner.
+      val creator = caller?.takeUnless { it.isDefault }
+      if (isNewSurvey && creator != null && saved.owner_id.isBlank()) {
+        saved = saved.copy(owner_id = creator.userId)
       }
 
       if (saved.state != SurveyState.DELETED) {
@@ -1297,17 +1393,24 @@ class UserDataBackend(private val store: UserDataStore) :
     require(request.survey_ids.size <= MAX_BATCH_SURVEY_IDS) {
       "At most $MAX_BATCH_SURVEY_IDS survey_ids per request"
     }
+    val caller = currentCaller()
     return store.read { r ->
+      val access = Access(r, caller)
       BatchGetSurveyOverviewsResponse(
         results =
           request.survey_ids.map { id ->
             val saved = r.survey(id)
-            if (saved == null) {
-              SurveyOverviewResult(survey_id = id, error_code = Status.Code.NOT_FOUND.value())
-            } else {
-              // The backend doesn't authenticate callers yet, so it never reports
-              // PERMISSION_DENIED.
-              SurveyOverviewResult(survey_id = id, overview = r.overviewOf(saved))
+            when {
+              saved == null ->
+                SurveyOverviewResult(survey_id = id, error_code = Status.Code.NOT_FOUND.value())
+              // A purged survey's tombstone tells every former holder it's gone.
+              saved.state != SurveyState.DELETED &&
+                access.surveyRole(saved, r.acl(id)) == Access.SurveyRole.NONE ->
+                SurveyOverviewResult(
+                  survey_id = id,
+                  error_code = Status.Code.PERMISSION_DENIED.value(),
+                )
+              else -> SurveyOverviewResult(survey_id = id, overview = r.overviewOf(saved))
             }
           }
       )
@@ -1347,10 +1450,25 @@ class UserDataBackend(private val store: UserDataStore) :
   // DataServiceServer
   // ---------------------------------------------------------------------------
 
+  /**
+   * The caller's visibility rule for records of survey [surveyId] (all, or only its own under
+   * `OWN_ONLY`), after checking it can view the survey.
+   */
+  private fun Access.dataVisibility(surveyId: String): (String) -> Boolean {
+    val role = requireSurvey(surveyId, Access.SurveyRole.VIEWER)
+    if (!seesOwnRecordsOnly(surveyId, role)) return { true }
+    return { createdBy -> createdBy == userId }
+  }
+
   override suspend fun GetEntity(request: GetEntityRequest): GetEntityResponse {
+    val caller = currentCaller()
     val entity =
-      store.read { it.entity(request.survey_id, request.entity_id) }
-        ?: EntityRecord(survey_id = request.survey_id, entity_id = request.entity_id)
+      store.read { r ->
+        val visible = Access(r, caller).dataVisibility(request.survey_id)
+        r.entity(request.survey_id, request.entity_id)?.takeIf {
+          visible(it.audit_info?.created_by.orEmpty())
+        }
+      } ?: EntityRecord(survey_id = request.survey_id, entity_id = request.entity_id)
     return GetEntityResponse(entity = entity)
   }
 
@@ -1381,7 +1499,9 @@ class UserDataBackend(private val store: UserDataStore) :
       }
     // `s2_cell_tokens` is a query-only filter, but the backend doesn't index entities by S2 cell
     // yet, so it doesn't narrow the results.
+    val caller = currentCaller()
     val page = store.read { r ->
+      val visible = Access(r, caller).dataVisibility(request.survey_id)
       r.checkNotTrashed(request.survey_id)
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
@@ -1395,6 +1515,7 @@ class UserDataBackend(private val store: UserDataStore) :
         query = query,
         queryFieldsSet = queryFieldsSet,
         watermark = r.snapshotTimestamp,
+        visible = { visible(it.audit_info?.created_by.orEmpty()) },
       )
     }
     return ListEntitiesResponse(
@@ -1407,8 +1528,12 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun ListEntityClusters(
     request: ListEntityClustersRequest
   ): ListEntityClustersResponse {
-    val entities = store.read {
-      it.entities(request.survey_id, request.dataset_id, includeDeleted = false)
+    val caller = currentCaller()
+    val entities = store.read { r ->
+      val visible = Access(r, caller).dataVisibility(request.survey_id)
+      r.entities(request.survey_id, request.dataset_id, includeDeleted = false).filter {
+        visible(it.audit_info?.created_by.orEmpty())
+      }
     }
     if (entities.isEmpty()) return ListEntityClustersResponse()
     val cluster =
@@ -1421,9 +1546,14 @@ class UserDataBackend(private val store: UserDataStore) :
   }
 
   override suspend fun GetSubmission(request: GetSubmissionRequest): GetSubmissionResponse {
+    val caller = currentCaller()
     val sub =
-      store.read { it.submission(request.survey_id, request.submission_id) }
-        ?: SubmissionRecord(survey_id = request.survey_id, submission_id = request.submission_id)
+      store.read { r ->
+        val visible = Access(r, caller).dataVisibility(request.survey_id)
+        r.submission(request.survey_id, request.submission_id)?.takeIf {
+          visible(it.audit_info?.created_by.orEmpty())
+        }
+      } ?: SubmissionRecord(survey_id = request.survey_id, submission_id = request.submission_id)
     return GetSubmissionResponse(submission = sub)
   }
 
@@ -1456,7 +1586,9 @@ class UserDataBackend(private val store: UserDataStore) :
             }
           }
       }
+    val caller = currentCaller()
     val page = store.read { r ->
+      val visible = Access(r, caller).dataVisibility(request.survey_id)
       r.checkNotTrashed(request.survey_id)
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
@@ -1472,6 +1604,7 @@ class UserDataBackend(private val store: UserDataStore) :
         query = query,
         queryFieldsSet = queryFieldsSet,
         watermark = r.snapshotTimestamp,
+        visible = { visible(it.audit_info?.created_by.orEmpty()) },
       )
     }
     return ListSubmissionsResponse(
@@ -1484,7 +1617,9 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun MutateData(request: MutateDataRequest): MutateDataResponse {
     val surveyId = request.survey_id
     val scope = "surveys/$surveyId/data"
+    val caller = currentCaller()
     val hasNew = store.read { r ->
+      Access(r, caller).requireSurvey(surveyId, Access.SurveyRole.DATA_COLLECTOR)
       val replays = ReplayFilter(r, scope)
       request.mutations.any { !replays.isReplay(MutationIdentity(it.client_id, it.client_seq)) }
     }
@@ -1506,13 +1641,39 @@ class UserDataBackend(private val store: UserDataStore) :
       val applied = mutableListOf<MutationIdentity>()
       val replays = ReplayFilter(tx, scope)
       val results = mutableListOf<Pair<DataMutationResult, Boolean>>()
+      val access = Access(tx, caller)
+      val role = access.requireSurvey(surveyId, Access.SurveyRole.DATA_COLLECTOR)
+      val ownRecordsOnly = access.seesOwnRecordsOnly(surveyId, role)
+      // New records are attributed to the authenticated caller.
+      val creator = caller?.takeUnless { it.isDefault }?.userId
       for (mutation in request.mutations) {
         val identity = MutationIdentity(mutation.client_id, mutation.client_seq)
         if (replays.isReplay(identity)) {
           results += tx.duplicateDataResult(surveyId, mutation, entities, submissions) to false
           continue
         }
-        results += tx.applyDataMutation(surveyId, mutation, entities, submissions) to true
+        val em = mutation.entity_mutation
+        val sm = mutation.submission_mutation
+        val existingCreator =
+          when {
+            em != null ->
+              (entities[em.entity_id] ?: tx.entity(surveyId, em.entity_id))?.let {
+                it.audit_info?.created_by.orEmpty()
+              }
+            sm != null ->
+              (submissions[sm.submission_id] ?: tx.submission(surveyId, sm.submission_id))?.let {
+                it.audit_info?.created_by.orEmpty()
+              }
+            else -> null
+          }
+        if (ownRecordsOnly && existingCreator != null && existingCreator != access.userId) {
+          throw Access.denied("records other collectors created in survey $surveyId")
+        }
+        var result = tx.applyDataMutation(surveyId, mutation, entities, submissions)
+        if (existingCreator == null && creator != null) {
+          result = attributeTo(creator, result, entities, submissions)
+        }
+        results += result to true
         applied += identity
       }
       entities.values.forEach(tx::putEntity)
@@ -1534,6 +1695,27 @@ class UserDataBackend(private val store: UserDataStore) :
         },
       commit_timestamp = ts,
     )
+  }
+
+  /** Sets `created_by` to [userId] on the record [result] created, in the result and buffers. */
+  private fun attributeTo(
+    userId: String,
+    result: DataMutationResult,
+    entities: LinkedHashMap<String, EntityRecord>,
+    submissions: LinkedHashMap<String, SubmissionRecord>,
+  ): DataMutationResult {
+    fun AuditInfo?.by() = (this ?: AuditInfo()).copy(created_by = userId)
+    result.entity?.let { e ->
+      val attributed = e.copy(audit_info = e.audit_info.by())
+      entities[e.entity_id] = attributed
+      return result.copy(entity = attributed)
+    }
+    result.submission?.let { sub ->
+      val attributed = sub.copy(audit_info = sub.audit_info.by())
+      submissions[sub.submission_id] = attributed
+      return result.copy(submission = attributed)
+    }
+    return result
   }
 
   /** Result for a replayed `mutation_id`: the target record's current state, unchanged. */
@@ -1663,6 +1845,7 @@ class UserDataBackend(private val store: UserDataStore) :
                 entity_id = existing.entity_id,
                 dataset_id = existing.dataset_id,
                 survey_id = surveyId,
+                audit_info = existing.audit_info,
                 revision = existing.revision + 1L,
                 is_deleted = true,
                 sync_status_key = "SYNCED",
@@ -1754,6 +1937,7 @@ class UserDataBackend(private val store: UserDataStore) :
                 form_id = existing.form_id,
                 survey_id = surveyId,
                 entity_id = existing.entity_id,
+                audit_info = existing.audit_info,
                 revision = existing.revision + 1L,
                 is_deleted = true,
                 sync_status_key = "SYNCED",
@@ -1784,7 +1968,14 @@ class UserDataBackend(private val store: UserDataStore) :
     }
   }
 
+  /** Fails with `PERMISSION_DENIED` unless the caller has at least [role] on [surveyId]. */
+  private suspend fun requireSurveyRole(surveyId: String, role: Access.SurveyRole) {
+    val caller = currentCaller()
+    store.read { r -> Access(r, caller).requireSurvey(surveyId, role) }
+  }
+
   override suspend fun AcquirePlotLock(request: AcquirePlotLockRequest): AcquirePlotLockResponse {
+    requireSurveyRole(request.survey_id, Access.SurveyRole.DATA_COLLECTOR)
     val userId = callerUserId(request.user_id)
     val committed = store.write { tx ->
       val existing = tx.plotLock(request.survey_id, request.entity_id)
@@ -1822,6 +2013,7 @@ class UserDataBackend(private val store: UserDataStore) :
   }
 
   override suspend fun ReleasePlotLock(request: ReleasePlotLockRequest): ReleasePlotLockResponse {
+    requireSurveyRole(request.survey_id, Access.SurveyRole.DATA_COLLECTOR)
     store.write { tx ->
       tx.putPlotLock(request.survey_id, request.entity_id, null)
       tx.entity(request.survey_id, request.entity_id)?.let { ent ->
@@ -1833,21 +2025,46 @@ class UserDataBackend(private val store: UserDataStore) :
 
   override suspend fun PrepareMediaUpload(
     request: PrepareMediaUploadRequest
-  ): PrepareMediaUploadResponse =
-    PrepareMediaUploadResponse(
+  ): PrepareMediaUploadResponse {
+    requireSurveyRole(request.survey_id, Access.SurveyRole.DATA_COLLECTOR)
+    return PrepareMediaUploadResponse(
       upload_url =
         "https://storage.collectone.groundplatform.org/upload/${request.survey_id}/${request.sha256_hash}",
       media_uri = "gs://collect-one-media/${request.survey_id}/${request.sha256_hash}",
       already_exists = false,
     )
+  }
 
   override suspend fun GetMediaDownloadUrl(
     request: GetMediaDownloadUrlRequest
-  ): GetMediaDownloadUrlResponse =
-    GetMediaDownloadUrlResponse(
+  ): GetMediaDownloadUrlResponse {
+    requireSurveyRole(request.survey_id, Access.SurveyRole.VIEWER)
+    return GetMediaDownloadUrlResponse(
       download_url =
         "https://storage.collectone.groundplatform.org/download/${request.survey_id}/${request.media_uri}"
     )
+  }
+
+  /**
+   * Whether the caller may see reports (impact events, audit records) about survey [surveyId] or
+   * organization [organizationId]: as an administrator, a survey organizer, or an organization
+   * manager. Memoized per ID for one request.
+   */
+  private class ReportAccess(private val reader: UserDataReader, private val access: Access) {
+    private val surveys = HashMap<String, Boolean>()
+    private val organizations = HashMap<String, Boolean>()
+
+    fun allows(surveyId: String, organizationId: String = ""): Boolean =
+      access.isAdmin ||
+        (surveyId.isNotBlank() &&
+          surveys.getOrPut(surveyId) {
+            access.surveyRole(surveyId).atLeast(Access.SurveyRole.SURVEY_ORGANIZER)
+          }) ||
+        (organizationId.isNotBlank() &&
+          organizations.getOrPut(organizationId) {
+            access.manages(reader.organization(organizationId))
+          })
+  }
 
   override suspend fun RecordImpactEvents(
     request: RecordImpactEventsRequest
@@ -1866,7 +2083,9 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun ListImpactEvents(
     request: ListImpactEventsRequest
   ): ListImpactEventsResponse {
+    val caller = currentCaller()
     val page = store.read { snapshot ->
+      val reports = ReportAccess(snapshot, Access(snapshot, caller))
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
         scopeKey =
@@ -1881,6 +2100,8 @@ class UserDataBackend(private val store: UserDataStore) :
         query = commitOrderQuery(ImpactEventProto::commit_timestamp),
         queryFieldsSet = emptyList(),
         watermark = snapshot.snapshotTimestamp,
+        accessEpoch = snapshot.accessEpochOf(caller),
+        visible = { reports.allows(it.survey_id, it.organization_id) },
       )
     }
     return ListImpactEventsResponse(
@@ -1893,9 +2114,13 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun GetImpactAggregates(
     request: GetImpactAggregatesRequest
   ): GetImpactAggregatesResponse {
+    val caller = currentCaller()
     val activeSurveys =
       store
-        .read { it.surveys() }
+        .read { r ->
+          val reports = ReportAccess(r, Access(r, caller))
+          r.surveys().filter { reports.allows(it.survey_id, it.organization_id) }
+        }
         .filter { s ->
           s.state != SurveyState.DELETED &&
             s.trash_time == null &&
@@ -1932,7 +2157,9 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun ListAuditRecords(
     request: ListAuditRecordsRequest
   ): ListAuditRecordsResponse {
+    val caller = currentCaller()
     val page = store.read { snapshot ->
+      val reports = ReportAccess(snapshot, Access(snapshot, caller))
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
         scopeKey = "audit_records|survey_id=${request.survey_id}|target_id=${request.target_id}",
@@ -1946,6 +2173,8 @@ class UserDataBackend(private val store: UserDataStore) :
         query = commitOrderQuery(AuditRecord::commit_timestamp),
         queryFieldsSet = emptyList(),
         watermark = snapshot.snapshotTimestamp,
+        accessEpoch = snapshot.accessEpochOf(caller),
+        visible = { reports.allows(it.survey_id) },
       )
     }
     return ListAuditRecordsResponse(

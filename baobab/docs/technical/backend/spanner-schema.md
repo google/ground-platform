@@ -935,9 +935,12 @@ in these ways, to be closed in later steps:
 - Authentication (`AUTH_MODE=firebase`, or a development mode), the `Users`
   table, invite binding on verified emails, and `Users.AccessEpoch` in list
   tokens are done. `UsersByEmail` isn't unique, since providers without an
-  email and re-created accounts can share one. Per-caller authorization (role
-  checks, `PERMISSION_DENIED`, caller-specific lists) and
-  `Surveys.DataAccessEpoch` come next.
+  email and re-created accounts can share one.
+- Per-caller authorization (role checks, `PERMISSION_DENIED`, caller-specific
+  lists, `OWN_ONLY` filtering) is done in the backend over whole collections,
+  not through `SurveysByOwner`, `AclByUser`, and `MembersByUser` scans.
+  Administrators are active managers of the all-users organization.
+  `Surveys.DataAccessEpoch` comes next.
 
 ## Open Questions
 

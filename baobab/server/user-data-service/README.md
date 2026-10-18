@@ -127,9 +127,36 @@ caller's user ID. The caller's user ID also replaces `user_id` request fields.
 
 Each user has an access epoch that increases whenever their ACL entries or
 memberships change (including invites bound at sign-in).
-`ListSurveyOverviews` and `ListOrganizations` tokens carry it, so a client
-whose access changed gets `FAILED_PRECONDITION` and runs a full sync. Access
-isn't enforced yet: any caller can read and write any survey.
+Caller-dependent list tokens (`ListSurveyOverviews`, `ListOrganizations`,
+`ListLibraries`, and the report lists) carry it, so a client whose access
+changed gets `FAILED_PRECONDITION` and runs a full sync.
+
+### Authorization
+
+RPCs check the caller's role (`Access.kt`, following
+[Sharing Policies and Access](../../docs/technical/backend/spanner-schema.md#sharing-policies-and-access))
+and fail with `PERMISSION_DENIED` otherwise:
+
+-   **Survey role:** the highest of owner, the caller's ACL entry, the sharing
+    role for `ORGANIZATION` surveys (active members of the survey's
+    organization), and the sharing role for `PUBLIC` and `ANYONE_WITH_LINK`
+    surveys.
+-   **Surveys:** viewers read the survey and its data; only organizers see ACL
+    entries, read working copies, and change surveys. Anyone signed in can
+    create a survey, which they then own. `ListSurveyOverviews` lists owned,
+    ACL, and organization-shared surveys (not link or public ones); a delta
+    returns a tombstone for a survey the caller can no longer list.
+-   **Data:** data collectors write records, attributed to them as
+    `created_by`. Under `OWN_ONLY` peer data visibility, collectors only see
+    and change their own records.
+-   **Organizations and libraries:** members see their organizations (managers
+    and active members see all members); managers change them and their
+    library. The global library is readable by everyone.
+-   **Reports:** impact events, aggregates, and audit records are limited to
+    survey organizers and organization managers.
+-   **Administrators** (active managers of the all-users organization, and the
+    `dev` fallback user) may do anything, so the development setup shows all
+    sample data.
 
 ## RPC Debug Web UI
 
