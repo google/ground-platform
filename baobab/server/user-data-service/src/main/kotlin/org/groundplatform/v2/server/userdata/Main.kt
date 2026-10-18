@@ -13,11 +13,17 @@
  */
 package org.groundplatform.v2.server.userdata
 
+import com.squareup.wire.Instant
 import groundplatform.v2.userdata.UserDataSeed
 import java.io.File
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /** Classpath location of the sample seed generated from the app's test fixtures. */
 const val SAMPLE_SEED_RESOURCE = "/seed/user_data_seed.json"
+
+/** How long a trashed survey stays restorable before the daily purge job removes its data. */
+const val SURVEY_TRASH_RETENTION_DAYS = 30L
 
 /**
  * Starts the user data service.
@@ -52,10 +58,34 @@ fun main() {
       }
       else -> error("Unknown USER_DATA_STORE \"$kind\" (expected memory or spanner)")
     }
-  val server = UserDataServer.create(UserDataBackend(store), port, spannerDebug = spannerDebug)
+  val backend = UserDataBackend(store)
+  val purgeScheduler =
+    Executors.newSingleThreadScheduledExecutor { r ->
+        Thread(r, "survey-trash-purge").apply { isDaemon = true }
+      }
+      .apply {
+        scheduleAtFixedRate(
+          {
+            runCatching {
+              val cutoff =
+                Instant.ofEpochSecond(
+                  backend.currentWatermark().epochSecond -
+                    TimeUnit.DAYS.toSeconds(SURVEY_TRASH_RETENTION_DAYS),
+                  0,
+                )
+              backend.purgeTrashedSurveys(cutoff)
+            }
+          },
+          1,
+          24,
+          TimeUnit.HOURS,
+        )
+      }
+  val server = UserDataServer.create(backend, port, spannerDebug = spannerDebug)
   Runtime.getRuntime()
     .addShutdownHook(
       Thread {
+        purgeScheduler.shutdownNow()
         server.stop().join()
         spannerDebug?.connection?.close()
       }

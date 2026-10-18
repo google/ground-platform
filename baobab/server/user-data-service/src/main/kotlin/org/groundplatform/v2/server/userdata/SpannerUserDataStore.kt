@@ -129,6 +129,9 @@ class SpannerUserDataStore(
     for (surveySeed in seed.surveys) {
       val survey = surveySeed.survey ?: continue
       mutations += surveyRow(survey, survey.commit_timestamp, surveySeed.acl)
+      if (survey.saved_revision_number > 0L) {
+        mutations += revisionRow(survey, survey.commit_timestamp)
+      }
       surveySeed.acl?.let { acl ->
         acl.entries.forEach { mutations += aclEntryRow(survey.survey_id, it, acl.commit_timestamp) }
       }
@@ -188,6 +191,22 @@ class SpannerUserDataStore(
       one("SELECT SavedDef AS Record, CommitTs FROM Surveys WHERE SurveyId = @id", surveyId) {
         decode(SurveyDef.ADAPTER, it).copy(commit_timestamp = it.commitTs())
       }
+
+    override fun surveyRevision(surveyId: String, version: String): SurveyDef? {
+      val fromHistory =
+        bindIds(
+            "SELECT Def AS Record, CommitTs FROM SurveyRevisions " +
+              "WHERE SurveyId = @id AND Version = @version LIMIT 1",
+            arrayOf(surveyId),
+          ) {
+            bind("version").to(version)
+          }
+          ?.let {
+            query(it) { rs -> decode(SurveyDef.ADAPTER, rs).copy(commit_timestamp = rs.commitTs()) }
+          }
+          ?.firstOrNull()
+      return fromHistory ?: survey(surveyId)?.takeIf { it.version == version }
+    }
 
     override fun surveys() =
       all("SELECT SavedDef AS Record, CommitTs FROM Surveys") {
@@ -407,9 +426,50 @@ class SpannerUserDataStore(
     private val pendingSurveys = linkedMapOf<String, SurveyDef>()
     private val pendingAcls = linkedMapOf<String, SurveyAcl>()
 
+    private val wasNewSurvey = HashSet<String>()
+
     override fun putSurvey(survey: SurveyDef) {
-      uuid(survey.survey_id)
-      pendingSurveys[survey.survey_id] = survey
+      val id = survey.survey_id
+      uuid(id)
+      if (id !in pendingSurveys && survey(id) == null) wasNewSurvey += id
+      pendingSurveys[id] = survey
+    }
+
+    override fun putSurveyRevision(survey: SurveyDef) = tx.buffer(revisionRow(survey, null))
+
+    override fun purgeSurvey(tombstone: SurveyDef) {
+      val id = uuid(tombstone.survey_id)
+      val prefix = KeySet.prefixRange(Key.of(id))
+      for (child in
+        listOf(
+          "SurveyWorkingCopies",
+          "SurveyRevisions",
+          "SurveyAclEntries",
+          "PlotLocks",
+          "Entities",
+          "Submissions",
+          "AuditRecords",
+        )) {
+        tx.buffer(Mutation.delete(child, prefix))
+      }
+      pendingSurveys.remove(tombstone.survey_id)
+      pendingAcls.remove(tombstone.survey_id)
+      tx.buffer(
+        Mutation.newInsertOrUpdateBuilder("Surveys")
+          .set("SurveyId")
+          .to(id)
+          .set("SavedDef")
+          .to(proto(SurveyDef.ADAPTER, tombstone.copy(commit_timestamp = null), SURVEY_DEF))
+          .set("AclRules")
+          .to(Value.protoMessage(null, SURVEY_ACL))
+          .set("AclCommitTs")
+          .to(Value.timestamp(null))
+          .set("PurgedAt")
+          .to(Value.COMMIT_TIMESTAMP)
+          .set("CommitTs")
+          .to(Value.COMMIT_TIMESTAMP)
+          .build()
+      )
     }
 
     override fun putWorkingCopy(surveyId: String, workingCopy: SurveyDef?) {
@@ -426,7 +486,12 @@ class SpannerUserDataStore(
     }
 
     fun flush() {
-      for ((id, survey) in pendingSurveys) tx.buffer(surveyRow(survey, null, pendingAcls[id]))
+      for ((id, survey) in pendingSurveys) {
+        tx.buffer(surveyRow(survey, null, pendingAcls[id]))
+        if (id in wasNewSurvey && survey.saved_revision_number > 0L) {
+          tx.buffer(revisionRow(survey, null))
+        }
+      }
       for ((id, acl) in pendingAcls) {
         if (id !in pendingSurveys) tx.buffer(aclUpdate(acl))
         tx.buffer(Mutation.delete("SurveyAclEntries", KeySet.prefixRange(Key.of(uuid(id)))))
@@ -589,6 +654,18 @@ class SpannerUserDataStore(
       .to(emailKey(entry.email, entry.user_id))
       .set("Record")
       .to(proto(AclEntry.ADAPTER, entry, ACL_ENTRY))
+      .set("CommitTs")
+      .to(commitTimestampValue(commitTs))
+      .build()
+
+  private fun revisionRow(survey: SurveyDef, commitTs: Instant?): Mutation =
+    Mutation.newInsertOrUpdateBuilder("SurveyRevisions")
+      .set("SurveyId")
+      .to(uuid(survey.survey_id))
+      .set("RevisionNumber")
+      .to(survey.saved_revision_number.coerceAtLeast(1L))
+      .set("Def")
+      .to(proto(SurveyDef.ADAPTER, survey.copy(commit_timestamp = null), SURVEY_DEF))
       .set("CommitTs")
       .to(commitTimestampValue(commitTs))
       .build()

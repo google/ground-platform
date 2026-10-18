@@ -927,7 +927,7 @@ in these ways, to be closed in later steps:
 - `SpannerSchema` adds new bundled proto types, tables, and indexes to an
   existing database, and updates changed proto descriptors, rather than running
   numbered migration files.
-- There's no auth, `Users` table, survey revisions, access epochs, or purge job.
+- There's no auth, `Users` table, or access epochs yet.
 
 ## Open Questions
 

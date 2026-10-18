@@ -227,6 +227,75 @@ open class SurveyTrashAndSharingTest {
     assertTrue(inDataset.all { it.dataset_id == DATASET })
   }
 
+  @Test
+  fun saveWorkingCopy_recordsImmutableRevisions_servedBySavedVersion() = runBlocking {
+    val v1 = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)).survey!!
+    backend.MutateSurvey(
+      MutateSurveyRequest(
+        survey_id = KENYA,
+        working_copy = true,
+        mutations =
+          listOf(
+            SurveyMutation(
+              update_field =
+                groundplatform.v2.survey.SurveyFieldPatch(
+                  key = "title",
+                  string_value = "Kenya v2",
+                )
+            )
+          ),
+      )
+    )
+    backend.MutateSurvey(
+      MutateSurveyRequest(
+        survey_id = KENYA,
+        mutations = listOf(SurveyMutation(save_working_copy = true)),
+      )
+    )
+
+    assertEquals("Kenya v2", backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)).survey?.title)
+    assertEquals(
+      v1.title,
+      backend
+        .GetSurvey(GetSurveyRequest(survey_id = KENYA, saved_version = v1.version))
+        .survey
+        ?.title,
+    )
+    assertEquals(
+      "Kenya v2",
+      backend.GetSurvey(GetSurveyRequest(survey_id = KENYA, saved_version = "2")).survey?.title,
+    )
+  }
+
+  @Test
+  fun purgeTrashedSurveys_removesData_andLeavesADeletedTombstone() = runBlocking {
+    backend.MutateSurvey(
+      MutateSurveyRequest(
+        survey_id = KENYA,
+        mutations = listOf(SurveyMutation(trash_survey = true)),
+      )
+    )
+    val trashedAt = batchGet(KENYA).results.single().overview!!.trash_time!!
+    // Not yet past the cutoff: untouched.
+    assertTrue(backend.purgeTrashedSurveys(olderThan = trashedAt).isEmpty())
+
+    val token = backend.ListSurveyOverviews(ListSurveyOverviewsRequest()).next_sync_token
+    val purged =
+      backend.purgeTrashedSurveys(
+        olderThan = com.squareup.wire.Instant.ofEpochSecond(trashedAt.epochSecond + 1L, 0)
+      )
+    assertEquals(listOf(KENYA), purged)
+
+    val overview = batchGet(KENYA).results.single().overview!!
+    assertEquals(SurveyState.DELETED, overview.state)
+    assertEquals("", overview.title)
+    assertNull(overview.trash_time)
+    val delta =
+      backend.ListSurveyOverviews(ListSurveyOverviewsRequest(sync_token = token)).overviews
+    assertEquals(listOf(KENYA), delta.map { it.survey_id })
+    assertEquals(SurveyState.DELETED, delta.single().state)
+  }
+
   companion object {
     const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
     const val DATASET = "coffee_parcels"

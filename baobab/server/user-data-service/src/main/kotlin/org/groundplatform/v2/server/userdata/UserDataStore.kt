@@ -82,8 +82,11 @@ interface UserDataReader {
 
   fun libraries(): List<OrganizationLibraryRecord>
 
-  /** A survey's saved revision. */
+  /** A survey's latest saved revision. */
   fun survey(surveyId: String): SurveyDef?
+
+  /** The saved revision of a survey whose `version` is [version], including earlier revisions. */
+  fun surveyRevision(surveyId: String, version: String): SurveyDef?
 
   /** Every survey's saved revision. */
   fun surveys(): List<SurveyDef>
@@ -159,6 +162,15 @@ interface UserDataWriter : UserDataReader {
   fun putLibrary(library: OrganizationLibraryRecord)
 
   fun putSurvey(survey: SurveyDef)
+
+  /** Appends [survey] as an immutable saved revision (`saved_revision_number` / `version`). */
+  fun putSurveyRevision(survey: SurveyDef)
+
+  /**
+   * Purges a trashed survey: removes its working copy, revisions, ACL, entities, plot locks,
+   * submissions, and audit records, and replaces its saved definition with [tombstone].
+   */
+  fun purgeSurvey(tombstone: SurveyDef)
 
   /** Stores [survey]'s working copy, or removes it when [workingCopy] is null. */
   fun putWorkingCopy(surveyId: String, workingCopy: SurveyDef?)

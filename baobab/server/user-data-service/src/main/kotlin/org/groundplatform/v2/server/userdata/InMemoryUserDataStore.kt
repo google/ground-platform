@@ -44,6 +44,7 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
   private val organizations = linkedMapOf<String, Organization>()
   private val libraries = linkedMapOf<String, OrganizationLibraryRecord>()
   private val surveys = linkedMapOf<String, SurveyDef>()
+  private val surveyRevisions = linkedMapOf<Pair<String, String>, SurveyDef>()
   private val workingCopies = linkedMapOf<String, SurveyDef>()
   private val acls = linkedMapOf<String, SurveyAcl>()
   private val entities = linkedMapOf<String, LinkedHashMap<String, EntityRecord>>()
@@ -77,6 +78,7 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
     organizations.clear()
     libraries.clear()
     surveys.clear()
+    surveyRevisions.clear()
     workingCopies.clear()
     acls.clear()
     entities.clear()
@@ -101,6 +103,7 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
       val survey = surveySeed.survey ?: continue
       val surveyId = survey.survey_id
       surveys[surveyId] = survey
+      if (survey.version.isNotBlank()) surveyRevisions[surveyId to survey.version] = survey
       surveySeed.acl?.let { acls[surveyId] = it }
       surveySeed.working_copy?.let { workingCopies[surveyId] = it }
       entities[surveyId] = surveySeed.entities.associateByTo(LinkedHashMap()) { it.entity_id }
@@ -131,6 +134,9 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
     override fun libraries() = libraries.values.toList()
 
     override fun survey(surveyId: String) = surveys[surveyId]
+
+    override fun surveyRevision(surveyId: String, version: String) =
+      surveyRevisions[surveyId to version] ?: surveys[surveyId]?.takeIf { it.version == version }
 
     override fun surveys() = surveys.values.toList()
 
@@ -205,7 +211,35 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
     }
 
     override fun putSurvey(survey: SurveyDef) {
-      writes += { ts -> surveys[survey.survey_id] = survey.copy(commit_timestamp = ts) }
+      writes += { ts ->
+        val stamped = survey.copy(commit_timestamp = ts)
+        surveys[survey.survey_id] = stamped
+        if (
+          stamped.version.isNotBlank() && (survey.survey_id to stamped.version) !in surveyRevisions
+        ) {
+          surveyRevisions[survey.survey_id to stamped.version] = stamped
+        }
+      }
+    }
+
+    override fun putSurveyRevision(survey: SurveyDef) {
+      writes += { ts ->
+        surveyRevisions[survey.survey_id to survey.version] = survey.copy(commit_timestamp = ts)
+      }
+    }
+
+    override fun purgeSurvey(tombstone: SurveyDef) {
+      val id = tombstone.survey_id
+      writes += { ts ->
+        surveys[id] = tombstone.copy(commit_timestamp = ts)
+        surveyRevisions.keys.removeAll { it.first == id }
+        workingCopies.remove(id)
+        acls.remove(id)
+        entities.remove(id)
+        submissions.remove(id)
+        plotLocks.keys.removeAll { it.first == id }
+        auditRecords.values.removeAll { it.survey_id == id }
+      }
     }
 
     override fun putWorkingCopy(surveyId: String, workingCopy: SurveyDef?) {

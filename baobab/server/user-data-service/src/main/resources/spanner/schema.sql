@@ -94,6 +94,7 @@ CREATE TABLE Surveys (
   State groundplatform.v2.survey.SurveyState AS (SavedDef.state) STORED,
   SharingPolicy groundplatform.v2.survey.SharingPolicy AS (AclRules.sharing_policy) STORED,
   PeerDataVisibility groundplatform.v2.survey.PeerDataVisibility AS (AclRules.peer_data_visibility) STORED,
+  PurgedAt TIMESTAMP OPTIONS (allow_commit_timestamp = true),
   CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (SurveyId);
 
@@ -105,6 +106,16 @@ CREATE TABLE SurveyWorkingCopies (
   Def groundplatform.v2.survey.SurveyDef NOT NULL,
   CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (SurveyId),
+  INTERLEAVE IN PARENT Surveys ON DELETE CASCADE;
+
+-- Immutable snapshot appended on save_working_copy; serves GetSurvey(saved_version).
+CREATE TABLE SurveyRevisions (
+  SurveyId UUID NOT NULL,
+  RevisionNumber INT64 NOT NULL,
+  Def groundplatform.v2.survey.SurveyDef NOT NULL,
+  Version STRING(64) AS (Def.version) STORED,
+  CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
+) PRIMARY KEY (SurveyId, RevisionNumber DESC),
   INTERLEAVE IN PARENT Surveys ON DELETE CASCADE;
 
 CREATE TABLE SurveyAclEntries (

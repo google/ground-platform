@@ -251,6 +251,35 @@ class UserDataBackend(private val store: UserDataStore) :
   /** Resets all state to the store's initial data and starts a new data epoch. */
   fun reset() = store.reset()
 
+  /**
+   * Purges surveys whose `trash_time` is strictly before [olderThan] (30 days ago in the daily
+   * job): removes their data and replaces each with a permanent `DELETED` tombstone so downloaded
+   * copies receive a tombstone on their next delta. Returns the IDs of the purged surveys.
+   */
+  fun purgeTrashedSurveys(olderThan: Instant): List<String> =
+    store
+      .write { tx ->
+        tx
+          .surveys()
+          .filter { s ->
+            val trashedAt = s.trash_time
+            s.state != SurveyState.DELETED && trashedAt != null && trashedAt < olderThan
+          }
+          .map { s ->
+            tx.purgeSurvey(
+              SurveyDef(
+                survey_id = s.survey_id,
+                organization_id = s.organization_id,
+                owner_id = s.owner_id,
+                state = SurveyState.DELETED,
+                record_version = tx.nextSurveyRecordVersion(s.survey_id),
+              )
+            )
+            s.survey_id
+          }
+      }
+      .value
+
   // ---------------------------------------------------------------------------
   // Timestamp comparison and paging helpers (sync-engine.md)
   // ---------------------------------------------------------------------------
@@ -639,8 +668,7 @@ class UserDataBackend(private val store: UserDataStore) :
     val survey =
       when {
         request.working_copy == true -> r.workingCopy(request.survey_id)
-        // The static backend only keeps the latest saved revision.
-        requestedVersion != null -> saved?.takeIf { it.version == requestedVersion }
+        !requestedVersion.isNullOrBlank() -> r.surveyRevision(request.survey_id, requestedVersion)
         else -> saved
       }
     GetSurveyResponse(survey = survey, acl = r.acl(request.survey_id))
@@ -870,6 +898,7 @@ class UserDataBackend(private val store: UserDataStore) :
           )
       var workingCopy = tx.workingCopy(surveyId)
       var currentAcl = tx.acl(surveyId) ?: SurveyAcl(survey_id = surveyId)
+      var savedRevisionChanged = false
 
       // Field and snapshot mutations apply to the revision selected by `request.working_copy`.
       fun target(): SurveyDef = if (request.working_copy) workingCopy ?: saved else saved
@@ -895,6 +924,7 @@ class UserDataBackend(private val store: UserDataStore) :
               val number = saved.saved_revision_number + 1L
               saved = toSave.copy(saved_revision_number = number, version = number.toString())
               workingCopy = null
+              savedRevisionChanged = true
             }
           }
           mutation.discard_working_copy == true -> workingCopy = null
@@ -1007,6 +1037,7 @@ class UserDataBackend(private val store: UserDataStore) :
       val acl = currentAcl.copy(record_version = recordVersion)
       val finalWorkingCopy = workingCopy?.copy(record_version = recordVersion)
       tx.putSurvey(saved)
+      if (savedRevisionChanged) tx.putSurveyRevision(saved)
       tx.putAcl(acl)
       tx.putWorkingCopy(surveyId, finalWorkingCopy)
       tx.recordApplied(
@@ -1105,9 +1136,12 @@ class UserDataBackend(private val store: UserDataStore) :
     return SearchPublicSurveysResponse(overviews = items, next_page_token = nextPageToken)
   }
 
-  /** Fails with `FAILED_PRECONDITION` when survey [surveyId] is in Trash. */
+  /** Fails with `FAILED_PRECONDITION` when survey [surveyId] is in Trash or was purged. */
   private fun UserDataReader.checkNotTrashed(surveyId: String) {
-    check(survey(surveyId)?.trash_time == null) { "Survey $surveyId is in Trash" }
+    val s = survey(surveyId)
+    check(s?.trash_time == null && s?.state != SurveyState.DELETED) {
+      "Survey $surveyId is in Trash"
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1425,7 +1459,15 @@ class UserDataBackend(private val store: UserDataStore) :
         }
         val updated: EntityRecord =
           when {
-            em.delete == true -> existing.copy(revision = existing.revision + 1L, is_deleted = true)
+            em.delete == true ->
+              EntityRecord(
+                entity_id = existing.entity_id,
+                dataset_id = existing.dataset_id,
+                survey_id = surveyId,
+                revision = existing.revision + 1L,
+                is_deleted = true,
+                sync_status_key = "SYNCED",
+              )
             emUpsert != null ->
               emUpsert.copy(
                 entity_id = em.entity_id.ifBlank { emUpsert.entity_id },
@@ -1507,7 +1549,16 @@ class UserDataBackend(private val store: UserDataStore) :
         }
         val updated: SubmissionRecord =
           when {
-            sm.delete == true -> existing.copy(revision = existing.revision + 1L, is_deleted = true)
+            sm.delete == true ->
+              SubmissionRecord(
+                submission_id = existing.submission_id,
+                form_id = existing.form_id,
+                survey_id = surveyId,
+                entity_id = existing.entity_id,
+                revision = existing.revision + 1L,
+                is_deleted = true,
+                sync_status_key = "SYNCED",
+              )
             smUpsert != null ->
               smUpsert.copy(
                 submission_id = sm.submission_id.ifBlank { smUpsert.submission_id },
