@@ -30,8 +30,13 @@ From `baobab/`:
 ```bash
 bash scripts/launchpad.sh              # http://localhost:8099
 bash scripts/launchpad.sh --port 9000  # Another port (or PORT=9000)
-nx run baobab:launchpad                # Through Nx
+bash scripts/launchpad.sh --start-all  # Also start the server and both clients
+nx run baobab:launchpad                # Through Nx (add -- --start-all to pass flags)
 ```
+
+`--start-all` does what **Start all** does as soon as the launchpad is up:
+it starts the server, web console, and mobile app, skipping any that are
+already running. Their logs appear on the Logs page.
 
 Then open `http://localhost:8099` (or your workstation's hostname or HTTPS
 proxy URL; links to the other services follow whichever host you used).

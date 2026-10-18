@@ -27,7 +27,14 @@ const __dirname = path.dirname(__filename);
 const BAOBAB_ROOT = path.resolve(__dirname, '../../');
 
 // Command line argument and port parsing
+const USAGE = `Usage: launchpad.sh [--port <port>] [--start-all]
+
+  --port <port>  Port for the launchpad page (default 8099, or $PORT).
+  --start-all    Start the server, web console, and mobile app when the
+                 launchpad starts, skipping any that are already running.`;
+
 let port = 8099;
+let startAllOnLaunch = false;
 if (process.env.PORT) {
   const p = parseInt(process.env.PORT, 10);
   if (!isNaN(p)) port = p;
@@ -41,6 +48,14 @@ for (let i = 0; i < argv.length; i++) {
   } else if (argv[i].startsWith('--port=')) {
     const p = parseInt(argv[i].split('=')[1], 10);
     if (!isNaN(p)) port = p;
+  } else if (argv[i] === '--start-all') {
+    startAllOnLaunch = true;
+  } else if (argv[i] === '--help' || argv[i] === '-h') {
+    console.log(USAGE);
+    process.exit(0);
+  } else {
+    console.error(`Unknown argument: ${argv[i]}\n\n${USAGE}`);
+    process.exit(2);
   }
 }
 
@@ -653,6 +668,21 @@ async function stopService(id) {
   return { success: true, message: `Stop initiated for ${service.name}` };
 }
 
+const CORE_SERVICE_IDS = ['user-data-service', 'web-console', 'mobile-app'];
+
+/** Starts the server, web console, and mobile app, skipping any already running. */
+async function startCore() {
+  const results = {};
+  for (const id of CORE_SERVICE_IDS) {
+    try {
+      results[id] = await startService(id);
+    } catch (err) {
+      results[id] = { success: false, message: err.message };
+    }
+  }
+  return results;
+}
+
 async function restartService(id, options = {}) {
   const service = serviceStates.get(id);
   if (!service) throw new Error(`Unknown service: ${id}`);
@@ -834,15 +864,7 @@ const server = http.createServer(async (req, res) => {
 
     // 7. Fleet Operations
     if (pathname === '/api/fleet/start-core' && method === 'POST') {
-      const coreIds = ['user-data-service', 'web-console', 'mobile-app'];
-      const results = {};
-      for (const cid of coreIds) {
-        try {
-          results[cid] = await startService(cid);
-        } catch (err) {
-          results[cid] = { success: false, message: err.message };
-        }
-      }
+      const results = await startCore();
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, results }));
       return;
@@ -883,7 +905,16 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(port, '0.0.0.0', () => {
+server.listen(port, '0.0.0.0', async () => {
   console.log(`Collect One dev launchpad running at http://localhost:${port}`);
   console.log(`Monitoring ${serviceStates.size} services in ${BAOBAB_ROOT}`);
+
+  if (startAllOnLaunch) {
+    // Probe first so services that are already running are skipped and the server picks up a
+    // running Spanner emulator.
+    await probeAllServices();
+    for (const [id, result] of Object.entries(await startCore())) {
+      console.log(`--start-all: ${id}: ${result.message}`);
+    }
+  }
 });
