@@ -43,7 +43,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -852,7 +851,8 @@ private fun CompactRepeatHub(
       ) {
         Column(modifier = Modifier.weight(1f)) {
           GroundTonalBadge(
-            text = "Repeated section • ${group.instances.size} ${if (group.instances.size == 1) "entry" else "entries"}",
+            text =
+              "Repeated section • ${group.instances.size} ${if (group.instances.size == 1) "entry" else "entries"}",
             tone = GroundBadgeTone.PRIMARY,
           )
           Spacer(modifier = Modifier.height(4.dp))
@@ -893,8 +893,7 @@ private fun CompactRepeatHub(
             summary?.title?.ifBlank { "$label #${instance.repeatIndex}" }
               ?: "$label #${instance.repeatIndex}"
           val preview =
-            summary?.previewText?.ifBlank { "Tap to fill out details" }
-              ?: "Tap to fill out details"
+            summary?.previewText?.ifBlank { "Tap to fill out details" } ?: "Tap to fill out details"
 
           OutlinedCard(
             onClick = {
@@ -906,7 +905,8 @@ private fun CompactRepeatHub(
             },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
-            colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLowest),
+            colors =
+              CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLowest),
           ) {
             Row(
               modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
@@ -929,7 +929,8 @@ private fun CompactRepeatHub(
                   ) {
                     Text(
                       text = "#${instance.repeatIndex}",
-                      style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      style =
+                        MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                     )
                   }
                 }
@@ -944,7 +945,8 @@ private fun CompactRepeatHub(
                   )
                   Text(
                     text = preview,
-                    style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+                    style =
+                      MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                   )

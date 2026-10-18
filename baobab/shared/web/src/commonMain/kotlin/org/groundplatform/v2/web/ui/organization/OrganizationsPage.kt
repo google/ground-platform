@@ -93,9 +93,11 @@ internal fun OrganizationsPage(
   onSignOut: () -> Unit = { state.signOut() },
 ) {
   val uiState by state.organization.uiState.collectAsState()
+  val hasCompletedInitialSync by state.dataHolder.hasCompletedInitialSync.collectAsState()
   OrganizationsPage(
     uiState = uiState,
     actions = state.organization,
+    isLoading = !hasCompletedInitialSync && uiState.organizations.isEmpty(),
     header = { onCreateOrganizationClick ->
       WebAppHeader(
         state = state,
@@ -114,13 +116,6 @@ internal fun OrganizationsPage(
           }
         },
         actions = {
-          if (uiState.isSaving) {
-            CircularProgressIndicator(
-              modifier = Modifier.size(16.dp),
-              strokeWidth = 2.dp,
-              color = MaterialTheme.colorScheme.primary,
-            )
-          }
           if (uiState.isPlatformAdmin) {
             WebHeaderButton(
               text = "Admin panel",
@@ -157,6 +152,7 @@ internal fun OrganizationsPage(
   uiState: OrganizationUiState,
   actions: OrganizationActions,
   header: @Composable (onCreateOrganizationClick: () -> Unit) -> Unit,
+  isLoading: Boolean = false,
 ) {
   var query by remember { mutableStateOf("") }
   var isCreating by remember { mutableStateOf(false) }
@@ -197,27 +193,36 @@ internal fun OrganizationsPage(
           modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
         )
 
-        OrganizationSection(
-          title = "Your organizations",
-          emptyText =
-            if (query.isBlank()) {
-              "You don't belong to any organization yet. Create one, or ask to join one below."
-            } else {
-              "None of your organizations match your search."
-            },
-          organizations = mine,
-          uiState = uiState,
-          actions = actions,
-        )
-        OrganizationSection(
-          title = "Other organizations",
-          emptyText =
-            if (query.isBlank()) "No other listed organizations."
-            else "No other organizations match your search.",
-          organizations = others,
-          uiState = uiState,
-          actions = actions,
-        )
+        if (isLoading && uiState.organizations.isEmpty()) {
+          Box(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            CircularProgressIndicator()
+          }
+        } else {
+          OrganizationSection(
+            title = "Your organizations",
+            emptyText =
+              if (query.isBlank()) {
+                "You don't belong to any organization yet. Create one, or ask to join one below."
+              } else {
+                "None of your organizations match your search."
+              },
+            organizations = mine,
+            uiState = uiState,
+            actions = actions,
+          )
+          OrganizationSection(
+            title = "Other organizations",
+            emptyText =
+              if (query.isBlank()) "No other listed organizations."
+              else "No other organizations match your search.",
+            organizations = others,
+            uiState = uiState,
+            actions = actions,
+          )
+        }
       }
     }
   }

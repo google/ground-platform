@@ -38,6 +38,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CloudDone
+import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Menu
@@ -48,8 +51,11 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -65,6 +71,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -77,6 +86,7 @@ import org.groundplatform.v2.app.domain.model.BasemapType
 import org.groundplatform.v2.app.domain.model.MainDrawerSubView
 import org.groundplatform.v2.app.domain.model.NavigationTargetKind
 import org.groundplatform.v2.app.domain.model.StraightLineNavigationState
+import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.model.geometryKind
 import org.groundplatform.v2.app.domain.model.hasGeometry
 import org.groundplatform.v2.app.domain.model.maxFramingZoom
@@ -291,6 +301,11 @@ internal fun MobileMapSearchBar(state: MobileAppState, modifier: Modifier = Modi
         }
       }
 
+      MobileUploadStatusButton(
+        state = state,
+        modifier = Modifier.padding(end = 4.dp),
+      )
+
       UserAvatarButton(
         userName = state.signedInUserName,
         userInitials = state.signedInUserInitials,
@@ -298,6 +313,120 @@ internal fun MobileMapSearchBar(state: MobileAppState, modifier: Modifier = Modi
         avatarSize = 32.dp,
         modifier = Modifier.padding(start = 2.dp),
       )
+    }
+  }
+}
+
+/**
+ * Single subtle upload status icon button (Google apps style: Drive/Docs/Photos). Muted cloud-done
+ * when fully synced, primary cloud-upload when uploading, error cloud-off when failed. Clicking
+ * opens a popup showing upload statistics and a retry button for failed uploads.
+ */
+@Composable
+internal fun MobileUploadStatusButton(
+  state: MobileAppState,
+  modifier: Modifier = Modifier,
+) {
+  val uploadingCount = state.uploadingEntityCount + state.uploadingSubmissionCount
+  val failedCount = state.failedEntityCount + state.failedSubmissionCount
+  val syncedCount = state.syncedEntityCount + state.syncedSubmissionCount
+  var showDetails by remember { mutableStateOf(false) }
+
+  val (icon, tint, desc) =
+    when {
+      failedCount > 0 ->
+        Triple(
+          Icons.Outlined.CloudOff,
+          MaterialTheme.colorScheme.error,
+          "$failedCount failed to upload",
+        )
+      uploadingCount > 0 ->
+        Triple(
+          Icons.Outlined.CloudUpload,
+          MaterialTheme.colorScheme.primary,
+          "Uploading $uploadingCount items",
+        )
+      else ->
+        Triple(
+          Icons.Outlined.CloudDone,
+          MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+          "All changes saved",
+        )
+    }
+
+  Box(modifier = modifier) {
+    IconButton(
+      onClick = { showDetails = true },
+      modifier = Modifier.size(36.dp),
+    ) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+      ) {
+        Icon(
+          imageVector = icon,
+          contentDescription = desc,
+          tint = tint,
+          modifier = Modifier.size(18.dp),
+        )
+        if (failedCount > 0 || uploadingCount > 0) {
+          val count = if (failedCount > 0) failedCount else uploadingCount
+          Text(
+            text = "$count",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = tint,
+          )
+        }
+      }
+    }
+
+    if (showDetails) {
+      DropdownMenu(
+        expanded = showDetails,
+        onDismissRequest = { showDetails = false },
+      ) {
+        DropdownMenuItem(
+          text = {
+            Column(modifier = Modifier.padding(4.dp)) {
+              Text(
+                text = desc,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+              )
+              Spacer(Modifier.height(4.dp))
+              Text(
+                text = "$syncedCount synced • $uploadingCount uploading • $failedCount failed",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+              Spacer(Modifier.height(2.dp))
+              Text(
+                text = if (uploadingCount > 0) "Syncing now…" else "Last synced: Just now",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+              if (failedCount > 0) {
+                Spacer(Modifier.height(8.dp))
+                FilledTonalButton(
+                  onClick = {
+                    showDetails = false
+                    state.entities
+                      .filter { it.syncStatus == SyncStatus.FAILED }
+                      .forEach { state.cycleEntitySyncStatus(it.id) }
+                    state.allSubmissions
+                      .filter { it.syncStatus == SyncStatus.FAILED }
+                      .forEach { state.cycleSubmissionSyncStatus(it.id) }
+                  },
+                  modifier = Modifier.fillMaxWidth(),
+                ) {
+                  Text("Retry failed uploads", style = MaterialTheme.typography.labelSmall)
+                }
+              }
+            }
+          },
+          onClick = {},
+        )
+      }
     }
   }
 }

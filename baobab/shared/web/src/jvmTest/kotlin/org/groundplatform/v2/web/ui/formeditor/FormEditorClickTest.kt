@@ -40,6 +40,8 @@ import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.app.domain.model.editor.DateRule
 import org.groundplatform.v2.app.domain.model.editor.EditorDataset
 import org.groundplatform.v2.app.domain.model.editor.EditorDatasetRow
+import org.groundplatform.v2.app.domain.model.editor.EditorForm
+import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.model.editor.friendlyDate
 import org.groundplatform.v2.web.ui.viewmodel.FormEditorViewModel
@@ -51,11 +53,12 @@ import org.groundplatform.v2.web.ui.viewmodel.ui
 class FormEditorClickTest {
 
   private fun withEditor(
+    form: EditorForm = FormEditorSamples.shadeTreeVisit(),
     datasets: List<EditorDataset> = emptyList(),
     block: androidx.compose.ui.test.ComposeUiTest.(FormEditorViewModel) -> Unit,
   ) =
     runDesktopComposeUiTest(width = 1600, height = 1000) {
-      val state = formEditorViewModel(FormEditorSamples.shadeTreeVisit(), datasets = datasets)
+      val state = formEditorViewModel(form, datasets = datasets)
       setContent {
         MaterialTheme {
           val uiState by state.uiState.collectAsState()
@@ -716,5 +719,94 @@ class FormEditorClickTest {
     onNodeWithText("Mobile").performClick()
     waitForIdle()
     onNodeWithText("${initialCount + 1} screens •", substring = true).assertExists()
+  }
+
+  @Test
+  fun singleClickOnGhostQuestionCardAppendsQuestion() =
+    withEditor(
+      form =
+        EditorForm(
+          formId = "f_ghost_test",
+          title = "Ghost Card Test Form",
+          questions =
+            listOf(
+              EditorQuestion(
+                key = "q1",
+                name = "q1",
+                type = EditorQuestionType.TEXT,
+                label = "First question",
+              )
+            ),
+        )
+    ) { state ->
+      val initialCount = state.ui.form.questions.size
+      onNodeWithContentDescription("Add a question at end of flow").performClick()
+      waitForIdle()
+      onAllNodesWithText("Number").onLast().performClick()
+      waitForIdle()
+      assertEquals(initialCount + 1, state.ui.form.questions.size)
+      assertEquals(EditorQuestionType.NUMBER, state.ui.form.questions.last().type)
+    }
+
+  @Test
+  fun addQuestionMenuOffersSectionAndCreatesSectionContainer() =
+    withEditor(
+      form =
+        EditorForm(
+          formId = "f_section_test",
+          title = "Section Test Form",
+          questions =
+            listOf(
+              EditorQuestion(
+                key = "q1",
+                name = "q1",
+                type = EditorQuestionType.TEXT,
+                label = "First question",
+              )
+            ),
+        )
+    ) { state ->
+      val initialCount = state.ui.form.questions.size
+      val initialSections = state.ui.form.sections.size
+      onNodeWithText("Add question").performClick()
+      waitForIdle()
+      onAllNodesWithText("Section").onLast().performClick()
+      waitForIdle()
+      // Section starts empty without auto-added dummy questions
+      assertEquals(initialCount, state.ui.form.questions.size)
+      assertEquals(initialSections + 1, state.ui.form.sections.size)
+      val newSection = state.ui.form.sections.last()
+      assertEquals(newSection.id, state.ui.selectedSectionId)
+      onNodeWithText("Group of questions in the form flow").assertExists()
+      onNodeWithText("Section title").assertExists()
+
+      // Inner ghost card is rendered inside the empty section container, and clicking it adds
+      // question with sectionId set
+      onNodeWithContentDescription("Add question inside ${newSection.title.ifBlank { "section" }}")
+        .assertExists()
+        .performClick()
+      waitForIdle()
+      onAllNodesWithText("Number").onLast().performClick()
+      waitForIdle()
+      assertEquals(initialCount + 1, state.ui.form.questions.size)
+      val addedQuestion = state.ui.form.questions.last()
+      assertEquals(newSection.id, addedQuestion.sectionId)
+    }
+
+  @Test
+  fun singleClickOnSectionContainerSelectsSectionProperties() = withEditor { state ->
+    var secId = ""
+    runOnIdle {
+      secId = state.addSection("Farm Details", repeatable = true)
+      state.setQuestionSection("q1", secId)
+      state.select("q2")
+    }
+    waitForIdle()
+    assertEquals(null, state.ui.selectedSectionId)
+    onAllNodesWithText("Repeated section: Farm Details", substring = true).onFirst().performClick()
+    waitForIdle()
+    assertEquals(secId, state.ui.selectedSectionId)
+    onAllNodesWithText("Repeated section").onFirst().assertExists()
+    onNodeWithText("Collectors can add multiple entries.").assertExists()
   }
 }

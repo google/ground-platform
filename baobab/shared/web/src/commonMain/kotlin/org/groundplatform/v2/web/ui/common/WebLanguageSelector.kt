@@ -16,7 +16,6 @@ package org.groundplatform.v2.web.ui.common
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,14 +25,9 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -83,78 +77,6 @@ fun WebLanguageSelector(
       )
     }
     DropdownMenu(
-      expanded = expanded,
-      onDismissRequest = { expanded = false },
-    ) {
-      LANGUAGE_OPTIONS.forEach { option ->
-        val selected = option.code == currentLanguageCode
-        DropdownMenuItem(
-          text = {
-            Text(
-              text = option.label,
-              fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            )
-          },
-          leadingIcon = {
-            if (selected) {
-              Icon(
-                Icons.Outlined.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp),
-              )
-            } else {
-              Spacer(Modifier.size(18.dp))
-            }
-          },
-          onClick = {
-            onLanguageChange(option.code)
-            expanded = false
-          },
-        )
-      }
-    }
-  }
-}
-
-/** Full-width form language selector matching Ground style, suitable for cards and onboarding. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun WebSignInLanguageSelector(
-  currentLanguageCode: String,
-  onLanguageChange: (String) -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  var expanded by remember { mutableStateOf(false) }
-  val currentOption =
-    LANGUAGE_OPTIONS.firstOrNull { it.code == currentLanguageCode } ?: LANGUAGE_OPTIONS.first()
-
-  ExposedDropdownMenuBox(
-    expanded = expanded,
-    onExpandedChange = { expanded = it },
-    modifier = modifier,
-  ) {
-    Box {
-      OutlinedTextField(
-        value = currentOption.label,
-        onValueChange = {},
-        readOnly = true,
-        singleLine = true,
-        label = { Text("Language") },
-        leadingIcon = {
-          Icon(
-            Icons.Outlined.Language,
-            contentDescription = "Language",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        },
-        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-        modifier =
-          Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-      )
-      DropdownFieldClickTarget(expanded = expanded, onExpandedChange = { expanded = it })
-    }
-    ExposedDropdownMenu(
       expanded = expanded,
       onDismissRequest = { expanded = false },
     ) {

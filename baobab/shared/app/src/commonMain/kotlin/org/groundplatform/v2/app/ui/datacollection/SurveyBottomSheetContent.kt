@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -55,6 +54,8 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -77,7 +78,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
@@ -1251,9 +1251,10 @@ fun SubmissionFullDetailsCard(
 }
 
 /**
- * Material Design 3 status badge indicating whether a map feature (`GeospatialEntityItem`) or form
+ * Material Design 3 status icon indicating whether a map feature (`GeospatialEntityItem`) or form
  * submission (`SubmissionPreviewItem`) is [SyncStatus.UPLOADING], [SyncStatus.SYNCED], or
- * [SyncStatus.FAILED].
+ * [SyncStatus.FAILED]. Modeled after Google apps (Drive/Docs/Photos): small subtle icon with tap
+ * popup.
  */
 @Composable
 internal fun SyncStatusIndicatorBadge(
@@ -1263,76 +1264,100 @@ internal fun SyncStatusIndicatorBadge(
   isHighlighted: Boolean = false,
   onClick: (() -> Unit)? = null,
 ) {
-  val (icon, containerColor, contentColor, borderColor) =
+  var showPopup by remember { mutableStateOf(false) }
+
+  val (icon, tint, desc) =
     when (syncStatus) {
       SyncStatus.UPLOADING ->
-        SyncStatusVisualSpec(
-          icon = Icons.Outlined.CloudUpload,
-          containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-          contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-          borderColor =
-            MaterialTheme.colorScheme.tertiary.copy(alpha = if (isHighlighted) 0.9f else 0.35f),
+        Triple(
+          Icons.Outlined.CloudUpload,
+          MaterialTheme.colorScheme.primary,
+          "Uploading changes",
         )
       SyncStatus.SYNCED ->
-        SyncStatusVisualSpec(
-          icon = Icons.Outlined.CloudDone,
-          containerColor = MaterialTheme.colorScheme.primaryContainer,
-          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-          borderColor =
-            MaterialTheme.colorScheme.primary.copy(alpha = if (isHighlighted) 0.9f else 0.35f),
+        Triple(
+          Icons.Outlined.CloudDone,
+          MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+          "All changes saved",
         )
       SyncStatus.FAILED ->
-        SyncStatusVisualSpec(
-          icon = Icons.Outlined.CloudOff,
-          containerColor = MaterialTheme.colorScheme.errorContainer,
-          contentColor = MaterialTheme.colorScheme.onErrorContainer,
-          borderColor =
-            MaterialTheme.colorScheme.error.copy(alpha = if (isHighlighted) 0.95f else 0.50f),
+        Triple(
+          Icons.Outlined.CloudOff,
+          MaterialTheme.colorScheme.error,
+          "Upload failed — tap to retry",
         )
     }
 
-  val clickModifier =
-    if (onClick != null) {
-      Modifier.clickable(onClick = onClick)
-    } else {
-      Modifier
+  Box(modifier = modifier) {
+    Surface(
+      shape = CircleShape,
+      color =
+        if (isHighlighted) {
+          when (syncStatus) {
+            SyncStatus.UPLOADING -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            SyncStatus.SYNCED -> MaterialTheme.colorScheme.surfaceContainerHigh
+            SyncStatus.FAILED -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
+          }
+        } else {
+          Color.Transparent
+        },
+      contentColor = tint,
+      modifier =
+        Modifier.clip(CircleShape).clickable {
+          if (onClick != null) {
+            onClick()
+          } else {
+            showPopup = true
+          }
+        },
+    ) {
+      Row(
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Icon(
+          imageVector = icon,
+          contentDescription = desc,
+          tint = tint,
+          modifier = Modifier.size(16.dp),
+        )
+        if (countSuffix != null) {
+          Text(
+            text = countSuffix,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = tint,
+          )
+        }
+      }
     }
 
-  Surface(
-    modifier = modifier.then(clickModifier),
-    shape = RoundedCornerShape(6.dp),
-    color = containerColor,
-    contentColor = contentColor,
-    border = BorderStroke(if (isHighlighted) 1.5.dp else 1.dp, borderColor),
-  ) {
-    Row(
-      modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Icon(
-        imageVector = icon,
-        contentDescription = syncStatus.description,
-        tint = contentColor,
-        modifier = Modifier.size(12.dp),
-      )
-      Text(
-        text =
-          if (countSuffix != null) {
-            "${syncStatus.label} $countSuffix"
-          } else {
-            syncStatus.label
+    if (showPopup) {
+      DropdownMenu(
+        expanded = showPopup,
+        onDismissRequest = { showPopup = false },
+      ) {
+        DropdownMenuItem(
+          text = {
+            Column(modifier = Modifier.padding(4.dp)) {
+              Text(
+                text = desc,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+              )
+              Text(
+                text = syncStatus.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
           },
-        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-        color = contentColor,
-      )
+          onClick = {
+            showPopup = false
+            onClick?.invoke()
+          },
+        )
+      }
     }
   }
 }
-
-private data class SyncStatusVisualSpec(
-  val icon: ImageVector,
-  val containerColor: Color,
-  val contentColor: Color,
-  val borderColor: Color,
-)

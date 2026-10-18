@@ -138,6 +138,8 @@ internal fun OrganizationPage(
 ) {
   val uiState by state.organization.uiState.collectAsState()
   val dashboardState by state.dashboard.uiState.collectAsState()
+  val hasCompletedInitialSync by state.dataHolder.hasCompletedInitialSync.collectAsState()
+  val isLoading = !hasCompletedInitialSync
   Box(modifier = Modifier.fillMaxSize()) {
     OrganizationPage(
       uiState = uiState,
@@ -149,6 +151,7 @@ internal fun OrganizationPage(
       onCreateSurvey = onCreateSurvey,
       onOpenCreateSurveyWizard = onOpenCreateSurveyWizard,
       surveyLibrary = dashboardState::surveyLibrary,
+      isLoading = isLoading,
       header = { onCreateSurveyClick ->
         val organization = uiState.openOrganization
         WebAppHeader(
@@ -174,13 +177,6 @@ internal fun OrganizationPage(
             }
           },
           actions = {
-            if (uiState.isSaving) {
-              CircularProgressIndicator(
-                modifier = Modifier.size(16.dp),
-                strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.primary,
-              )
-            }
             if (organization != null && !organization.isSynthetic) {
               WebHeaderButton(
                 text = "View impact",
@@ -269,6 +265,7 @@ internal fun OrganizationPage(
   header: @Composable (onCreateSurveyClick: () -> Unit) -> Unit,
   onOpenCreateSurveyWizard: ((organizationId: String?) -> Unit)? = null,
   onOpenImpact: (organizationId: String) -> Unit = {},
+  isLoading: Boolean = false,
 ) {
   val organization = uiState.openOrganization
   val isManager = organization != null && uiState.managesOrganization(organization)
@@ -291,7 +288,13 @@ internal fun OrganizationPage(
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
     if (organization == null) {
-      MissingOrganization(onBack = actions::openOrganizations)
+      if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+          CircularProgressIndicator()
+        }
+      } else {
+        MissingOrganization(onBack = actions::openOrganizations)
+      }
       return@Column
     }
 
@@ -343,7 +346,14 @@ internal fun OrganizationPage(
                 },
             ) {
               NoticeSlot(uiState, actions)
-              SurveysPane(uiState, organization, isMember, onOpenSurvey, triggerCreateSurvey)
+              SurveysPane(
+                uiState,
+                organization,
+                isMember,
+                onOpenSurvey,
+                triggerCreateSurvey,
+                isLoading,
+              )
             }
           OrganizationTab.MEMBERS ->
             PaneScaffold(
@@ -390,7 +400,7 @@ internal fun OrganizationPage(
                 },
             ) {
               NoticeSlot(uiState, actions)
-              PurposesPane(uiState.library, actions, organization)
+              PurposesPane(uiState.library, actions, organization, isLoading)
             }
           OrganizationTab.DICTIONARY ->
             PaneScaffold(
@@ -405,7 +415,7 @@ internal fun OrganizationPage(
                 },
             ) {
               NoticeSlot(uiState, actions)
-              DictionaryPane(uiState.library, actions, organization)
+              DictionaryPane(uiState.library, actions, organization, isLoading)
             }
           OrganizationTab.TEMPLATES ->
             PaneScaffold(
@@ -419,7 +429,7 @@ internal fun OrganizationPage(
                 },
             ) {
               NoticeSlot(uiState, actions)
-              TemplatesPane(uiState.library, actions, organization)
+              TemplatesPane(uiState.library, actions, organization, isLoading)
             }
           OrganizationTab.COST_CONTROLS ->
             PaneScaffold(
@@ -444,7 +454,7 @@ internal fun OrganizationPage(
                 "Live cost accounting, resource usage rollups, and budget compliance breakdown across organizations, surveys, and users.",
             ) {
               NoticeSlot(uiState, actions)
-              CostTrackingPane(uiState)
+              CostTrackingPane(uiState, isLoading)
             }
         }
       }
@@ -608,9 +618,16 @@ private fun SurveysPane(
   isMember: Boolean,
   onOpenSurvey: (String) -> Unit,
   onCreateSurvey: () -> Unit,
+  isLoading: Boolean = false,
 ) {
   val surveys = uiState.surveysInOrganization(organization.id)
   if (surveys.isEmpty()) {
+    if (isLoading) {
+      Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+      }
+      return
+    }
     Text(
       if (isMember) "No surveys yet. Create the first one for ${organization.name}."
       else "No surveys yet.",
@@ -1989,7 +2006,13 @@ private fun CostControlsPane(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun CostTrackingPane(uiState: OrganizationUiState) {
+private fun CostTrackingPane(uiState: OrganizationUiState, isLoading: Boolean = false) {
+  if (isLoading && uiState.surveys.isEmpty()) {
+    Box(modifier = Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) {
+      CircularProgressIndicator()
+    }
+    return
+  }
   val report =
     remember(uiState.surveys, uiState.organizations) {
       CostTrackingCalculator.calculatePlatformReport(

@@ -292,17 +292,25 @@ class FormWizardController(
           step.controls.firstOrNull { matchesPath(it.canonicalPath, canonicalPath) }
         else -> null
       }
-    val title = control?.label?.text?.takeIf { it.isNotBlank() } ?: step?.title?.takeIf { it.isNotBlank() }
+    val title =
+      control?.label?.text?.takeIf { it.isNotBlank() } ?: step?.title?.takeIf { it.isNotBlank() }
     if (title != null && title != "This question") return title
 
     val leaf = canonicalPath.trim().substringAfterLast('/')
-    val componentControl = collectAllControls(formState.rootComponents).firstOrNull {
-      matchesPath(it.canonicalPath, canonicalPath) || it.controlDef.field_ref == leaf
-    }
+    val componentControl =
+      collectAllControls(formState.rootComponents).firstOrNull {
+        matchesPath(it.canonicalPath, canonicalPath) || it.controlDef.field_ref == leaf
+      }
     return componentControl?.label?.text?.takeIf { it.isNotBlank() }
-      ?: formState.formDef.view?.components?.mapNotNull { it.control }?.firstOrNull {
-        it.field_ref == leaf || it.field_ref == canonicalPath
-      }?.label?.text?.takeIf { it.isNotBlank() }
+      ?: formState.formDef.view
+        ?.components
+        ?.mapNotNull { it.control }
+        ?.firstOrNull {
+          it.field_ref == leaf || it.field_ref == canonicalPath
+        }
+        ?.label
+        ?.text
+        ?.takeIf { it.isNotBlank() }
       ?: "This question"
   }
 
@@ -330,8 +338,8 @@ class FormWizardController(
   )
 
   /**
-   * Evaluates cascading filter metadata for [control] if it declares [ControlDef.parent_question_key].
-   * Returns `null` if the control is not cascading.
+   * Evaluates cascading filter metadata for [control] if it declares
+   * [ControlDef.parent_question_key]. Returns `null` if the control is not cascading.
    */
   fun parentQuestionInfoFor(control: ComponentState.ControlState): ParentQuestionInfo? {
     val parentRef = control.controlDef.parent_question_key.trim()
@@ -339,17 +347,20 @@ class FormWizardController(
 
     val fieldState = formState.findFieldState(parentRef)
     val parentPath = fieldState?.canonicalPath ?: parentRef
-    val parentLabel = questionTitleFor(parentPath).let {
-      if (it == "This question") parentRef.substringAfterLast('/') else it
-    }
+    val parentLabel =
+      questionTitleFor(parentPath).let {
+        if (it == "This question") parentRef.substringAfterLast('/') else it
+      }
 
     val stringVal = fieldState?.value?.scalar_value?.string_value?.trim()
     val listVal = fieldState?.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
-    val selectedValues = when {
-      !listVal.isNullOrEmpty() -> listVal.filter { it.isNotBlank() }
-      !stringVal.isNullOrBlank() -> stringVal.split(' ').map { it.trim() }.filter { it.isNotBlank() }
-      else -> emptyList()
-    }
+    val selectedValues =
+      when {
+        !listVal.isNullOrEmpty() -> listVal.filter { it.isNotBlank() }
+        !stringVal.isNullOrBlank() ->
+          stringVal.split(' ').map { it.trim() }.filter { it.isNotBlank() }
+        else -> emptyList()
+      }
 
     return ParentQuestionInfo(
       path = parentPath,
@@ -359,7 +370,9 @@ class FormWizardController(
     )
   }
 
-  private fun collectAllControls(components: List<ComponentState>): List<ComponentState.ControlState> {
+  private fun collectAllControls(
+    components: List<ComponentState>
+  ): List<ComponentState.ControlState> {
     val result = mutableListOf<ComponentState.ControlState>()
     fun walk(list: List<ComponentState>) {
       for (item in list) {
@@ -386,19 +399,22 @@ class FormWizardController(
     val leafName = changedPath.substringAfterLast('/')
     val parentField = formState.findFieldState(changedPath)
     val parentStringVal = parentField?.value?.scalar_value?.string_value?.trim()
-    val parentListVal = parentField?.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
-    val parentValues = when {
-      !parentListVal.isNullOrEmpty() -> parentListVal.filter { it.isNotBlank() }.toSet()
-      !parentStringVal.isNullOrBlank() ->
-        parentStringVal.split(' ').map { it.trim() }.filter { it.isNotBlank() }.toSet()
-      else -> emptySet()
-    }
+    val parentListVal =
+      parentField?.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
+    val parentValues =
+      when {
+        !parentListVal.isNullOrEmpty() -> parentListVal.filter { it.isNotBlank() }.toSet()
+        !parentStringVal.isNullOrBlank() ->
+          parentStringVal.split(' ').map { it.trim() }.filter { it.isNotBlank() }.toSet()
+        else -> emptySet()
+      }
 
     val allControls = collectAllControls(formState.rootComponents)
     for (child in allControls) {
       val childParentRef = child.controlDef.parent_question_key.trim()
       if (childParentRef.isBlank()) continue
-      if (childParentRef != changedPath &&
+      if (
+        childParentRef != changedPath &&
           childParentRef != leafName &&
           !changedPath.endsWith("/$childParentRef") &&
           !childParentRef.endsWith("/$leafName")
@@ -428,11 +444,10 @@ class FormWizardController(
             pruneCascadingChildAnswers(child.canonicalPath, visited)
           }
         } else if (!childList.isNullOrEmpty()) {
-          val validValues =
-            childList.filter { valVal ->
-              val opt = child.options.firstOrNull { it.value == valVal }
-              opt == null || opt.parentValue.isBlank() || opt.parentValue in parentValues
-            }
+          val validValues = childList.filter { valVal ->
+            val opt = child.options.firstOrNull { it.value == valVal }
+            opt == null || opt.parentValue.isBlank() || opt.parentValue in parentValues
+          }
           if (validValues.size != childList.size) {
             if (validValues.isEmpty()) {
               session.clearField(child.canonicalPath)
@@ -637,10 +652,9 @@ class FormWizardController(
 
   /** Navigates directly to the [FormWizardStep.RepeatHubStep] for repeat group [repeatPath]. */
   fun openRepeatHub(repeatPath: String) {
-    val targetIdx =
-      steps.indexOfFirst {
-        it is FormWizardStep.RepeatHubStep && it.repeatGroup.canonicalPath == repeatPath
-      }
+    val targetIdx = steps.indexOfFirst {
+      it is FormWizardStep.RepeatHubStep && it.repeatGroup.canonicalPath == repeatPath
+    }
     if (targetIdx >= 0) {
       jumpToStep(targetIdx)
     }
@@ -778,30 +792,29 @@ class FormWizardController(
                 )
               }
 
-              val summaries =
-                relevantInstances.map { instance ->
-                  val dynamicLabel = instance.label?.text?.trim()
-                  val instTitle =
-                    if (!dynamicLabel.isNullOrBlank() && dynamicLabel != repeatTitle) {
-                      dynamicLabel
-                    } else {
-                      "$repeatTitle #${instance.repeatIndex}"
-                    }
-                  val controls = collectRelevantControls(instance.children)
-                  val answeredValues = controls.mapNotNull { formatControlPreview(it) }
-                  val preview =
-                    when {
-                      answeredValues.isEmpty() -> "Tap to fill out details"
-                      else -> answeredValues.take(3).joinToString(" • ")
-                    }
-                  RepeatInstanceSummary(
-                    repeatIndex = instance.repeatIndex,
-                    title = instTitle,
-                    previewText = preview,
-                    instancePath = instance.canonicalPath,
-                    answeredCount = answeredValues.size,
-                  )
-                }
+              val summaries = relevantInstances.map { instance ->
+                val dynamicLabel = instance.label?.text?.trim()
+                val instTitle =
+                  if (!dynamicLabel.isNullOrBlank() && dynamicLabel != repeatTitle) {
+                    dynamicLabel
+                  } else {
+                    "$repeatTitle #${instance.repeatIndex}"
+                  }
+                val controls = collectRelevantControls(instance.children)
+                val answeredValues = controls.mapNotNull { formatControlPreview(it) }
+                val preview =
+                  when {
+                    answeredValues.isEmpty() -> "Tap to fill out details"
+                    else -> answeredValues.take(3).joinToString(" • ")
+                  }
+                RepeatInstanceSummary(
+                  repeatIndex = instance.repeatIndex,
+                  title = instTitle,
+                  previewText = preview,
+                  instancePath = instance.canonicalPath,
+                  answeredCount = answeredValues.size,
+                )
+              }
 
               // Always provide a RepeatHubStep if the user can add/remove instances or if 0
               // instances exist

@@ -72,7 +72,6 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.groundplatform.v2.core.forms.model.ComponentState
 import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.model.ValidationStatus
 
@@ -567,7 +566,8 @@ private fun RepeatHubScreenContent(
       ) {
         Column(modifier = Modifier.weight(1f)) {
           GroundTonalBadge(
-            text = "Repeated section • ${repeatGroup.instances.size} ${if (repeatGroup.instances.size == 1) "entry" else "entries"}",
+            text =
+              "Repeated section • ${repeatGroup.instances.size} ${if (repeatGroup.instances.size == 1) "entry" else "entries"}",
             tone = GroundBadgeTone.PRIMARY,
           )
           Spacer(modifier = Modifier.height(4.dp))
@@ -615,8 +615,7 @@ private fun RepeatHubScreenContent(
             summary?.title?.ifBlank { "$groupLabel #${instance.repeatIndex}" }
               ?: "$groupLabel #${instance.repeatIndex}"
           val preview =
-            summary?.previewText?.ifBlank { "Tap to fill out details" }
-              ?: "Tap to fill out details"
+            summary?.previewText?.ifBlank { "Tap to fill out details" } ?: "Tap to fill out details"
 
           OutlinedCard(
             onClick = {
@@ -651,7 +650,8 @@ private fun RepeatHubScreenContent(
                   ) {
                     Text(
                       text = "#${instance.repeatIndex}",
-                      style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      style =
+                        MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                     )
                   }
                 }
@@ -666,7 +666,8 @@ private fun RepeatHubScreenContent(
                   )
                   Text(
                     text = preview,
-                    style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+                    style =
+                      MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                   )
@@ -695,7 +696,10 @@ private fun RepeatHubScreenContent(
                 if (repeatGroup.canRemoveInstance) {
                   TextButton(
                     onClick = {
-                      controller.removeRepeatInstance(repeatGroup.canonicalPath, instance.repeatIndex)
+                      controller.removeRepeatInstance(
+                        repeatGroup.canonicalPath,
+                        instance.repeatIndex,
+                      )
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),

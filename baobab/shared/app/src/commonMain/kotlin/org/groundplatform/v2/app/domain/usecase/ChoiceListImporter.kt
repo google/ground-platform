@@ -22,6 +22,16 @@ import org.groundplatform.v2.app.domain.model.editor.slugify
  */
 object ChoiceListImporter {
 
+  private val LIST_NAME_HEADER_NAMES =
+    setOf(
+      "list_name",
+      "listname",
+      "list",
+      "choice_list",
+      "choices_list",
+      "choices",
+      "list_id",
+    )
   private val VALUE_HEADER_NAMES =
     setOf("value", "name", "code", "id", "val", "choice_value", "item_name")
   private val LABEL_HEADER_NAMES =
@@ -36,7 +46,10 @@ object ChoiceListImporter {
       "parent_id",
       "cascade",
       "filter",
+      "filter_value",
       "parentvalue",
+      "parent_choice",
+      "category",
     )
 
   /**
@@ -45,9 +58,10 @@ object ChoiceListImporter {
    * Formats supported:
    * - 1 column (text or single CSV column): each row is a label, value is auto-slugified.
    * - 2 columns: column 0 is value, column 1 is label.
-   * - 3+ columns: column 0 is parentValue, column 1 is value, column 2 is label (unless a header specifies roles).
-   * - Optional header rows matching standard column names (e.g. `value,label`, `parent,value,label`,
-   *   `name,label`, `cascade,value,label`).
+   * - 3+ columns: column 0 is parentValue, column 1 is value, column 2 is label (unless a header
+   *   specifies roles).
+   * - Optional header rows matching standard column names (e.g. `value,label`,
+   *   `parent,value,label`, `name,label`, `cascade,value,label`).
    */
   fun parseChoices(content: String, fileName: String = ""): List<EditorChoice> {
     val trimmedContent = content.trim()
@@ -80,6 +94,20 @@ object ChoiceListImporter {
         when {
           colCount <= 1 -> Quadruple(parsedRows, -1, 0, -1)
           colCount == 2 -> Quadruple(parsedRows, 0, 1, -1)
+          colCount == 3 -> {
+            // Check if column 0 has identical value across all rows (indicates XLSForm list_name,
+            // not a parent)
+            val firstColValues =
+              parsedRows.mapNotNull { it.getOrNull(0)?.trim() }.filter { it.isNotEmpty() }
+            val isConstantListColumn =
+              firstColValues.size > 1 && firstColValues.distinct().size == 1
+            if (isConstantListColumn) {
+              // Ignore column 0 (list_name), map column 1 -> value, column 2 -> label
+              Quadruple(parsedRows, 1, 2, -1)
+            } else {
+              Quadruple(parsedRows, 1, 2, 0) // parentValue, value, label
+            }
+          }
           else -> Quadruple(parsedRows, 1, 2, 0) // parentValue, value, label
         }
       }
@@ -117,29 +145,38 @@ object ChoiceListImporter {
     var valIdx = -1
     var lblIdx = -1
     var parentIdx = -1
+    var listNameIdx = -1
 
     for ((index, col) in row.withIndex()) {
       val clean = col.trim().lowercase().replace(" ", "_").replace("-", "_")
       when {
+        clean in LIST_NAME_HEADER_NAMES && listNameIdx == -1 -> listNameIdx = index
         clean in VALUE_HEADER_NAMES && valIdx == -1 -> valIdx = index
         clean in LABEL_HEADER_NAMES && lblIdx == -1 -> lblIdx = index
         clean in PARENT_HEADER_NAMES && parentIdx == -1 -> parentIdx = index
       }
     }
 
-    // A valid header must match at least label or value
-    if (valIdx != -1 || lblIdx != -1) {
-      val effectiveLabel = if (lblIdx != -1) lblIdx else valIdx
-      val effectiveVal = if (valIdx != -1) valIdx else -1
+    // A valid header must match at least label or value, or list_name with another column
+    if (valIdx != -1 || lblIdx != -1 || (listNameIdx != -1 && row.size >= 2)) {
+      val effectiveLabel =
+        when {
+          lblIdx != -1 -> lblIdx
+          valIdx != -1 -> valIdx
+          else -> if (listNameIdx == 0) 1 else 0
+        }
+      val effectiveVal =
+        when {
+          valIdx != -1 -> valIdx
+          else -> -1
+        }
       return Triple(effectiveVal, effectiveLabel, parentIdx)
     }
 
     return null
   }
 
-  /**
-   * Splits a CSV string into logical lines, preserving embedded newlines inside quoted fields.
-   */
+  /** Splits a CSV string into logical lines, preserving embedded newlines inside quoted fields. */
   private fun splitCsvLines(content: String): List<String> {
     val lines = mutableListOf<String>()
     val currentLine = StringBuilder()
@@ -176,9 +213,7 @@ object ChoiceListImporter {
     return lines
   }
 
-  /**
-   * Parses a single row into cells, taking quotes into account.
-   */
+  /** Parses a single row into cells, taking quotes into account. */
   private fun parseDelimitedRow(line: String, delimiter: Char): List<String> {
     val cells = mutableListOf<String>()
     val currentCell = StringBuilder()

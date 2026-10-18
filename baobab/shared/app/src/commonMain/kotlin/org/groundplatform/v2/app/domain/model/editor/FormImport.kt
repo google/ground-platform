@@ -159,17 +159,17 @@ object FormImport {
 
     fun run(formId: String, fallbackTitle: String, availability: FormAvailability): ImportedForm {
       walk(formDef.view?.components.orEmpty(), enclosing = "", enclosingRelevance = null)
-      val resolved =
-        questions.map { q ->
-          val parentKey =
-            if (q.parentQuestionKey.isNotBlank()) {
-              questions.firstOrNull { it.key == q.parentQuestionKey || it.name == q.parentQuestionKey }?.key
-                ?: q.parentQuestionKey
-            } else {
-              ""
-            }
-          q.copy(relevance = relevanceOf(q), parentQuestionKey = parentKey)
-        }
+      val resolved = questions.map { q ->
+        val parentKey =
+          if (q.parentQuestionKey.isNotBlank()) {
+            questions
+              .firstOrNull { it.key == q.parentQuestionKey || it.name == q.parentQuestionKey }
+              ?.key ?: q.parentQuestionKey
+          } else {
+            ""
+          }
+        q.copy(relevance = relevanceOf(q), parentQuestionKey = parentKey)
+      }
       val entity = model?.entities?.firstOrNull()
       val isUpdate = entity != null && entity.update_condition.isNotBlank()
       val statusEnabled = bindings.containsKey(SaveToRules.STATUS_FIELD)
@@ -221,10 +221,9 @@ object FormImport {
           availability
         }
       val effectiveFormId = formId.ifBlank { FormIds.newFormId() }
-      val resolvedSections =
-        sections.map { sec ->
-          sec.copy(relevance = relevanceOfSection(sec))
-        }
+      val resolvedSections = sections.map { sec ->
+        sec.copy(relevance = relevanceOfSection(sec))
+      }
       val form =
         EditorForm(
           formId = effectiveFormId,
@@ -259,7 +258,9 @@ object FormImport {
       currentSectionId: String = "",
     ) {
       components.forEach { component ->
-        component.control?.let { importControl(it, enclosing, enclosingRelevance, currentSectionId) }
+        component.control?.let {
+          importControl(it, enclosing, enclosingRelevance, currentSectionId)
+        }
         component.group?.let { group ->
           val groupPath = join(enclosing, group.field_ref)
           val groupRel = bindings[groupPath]?.relevant_expression?.trim().orEmpty()
@@ -971,8 +972,7 @@ object FormImport {
               EditorChoiceImage(mimeType = media.mimeType, base64 = media.base64)
             }
           }
-          val parentVal =
-            rowField(row, "parent_value") ?: rowField(row, "parent") ?: ""
+          val parentVal = rowField(row, "parent_value") ?: rowField(row, "parent") ?: ""
           EditorChoice(
             value = value,
             label = label,
