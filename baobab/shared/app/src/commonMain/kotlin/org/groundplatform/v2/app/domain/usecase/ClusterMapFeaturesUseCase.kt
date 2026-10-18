@@ -91,11 +91,12 @@ class ClusterMapFeaturesUseCase {
     // 1. For large datasets (>64 features), pre-aggregate points into a fine sub-radius spatial
     // hash grid (cell <= 0.25 * radiusNormalized) so points within the same micro-cell are
     // combined in O(N) time without introducing coarse grid-boundary artifacts.
+    val sortedFeatures = features.sortedBy { it.id }
     val fineCell = (radiusNormalized * 0.25f).coerceAtLeast(0.02f)
     var working: MutableList<WorkingCluster> =
-      if (features.size > 64) {
+      if (sortedFeatures.size > 64) {
         val buckets = LinkedHashMap<Long, WorkingCluster>()
-        for (feat in features) {
+        for (feat in sortedFeatures) {
           val gx = floor(feat.normalizedX / fineCell).toInt()
           val gy = floor(feat.normalizedY / fineCell).toInt()
           val key = (gx.toLong() shl 32) or (gy.toLong() and 0xFFFFFFFFL)
@@ -123,9 +124,14 @@ class ClusterMapFeaturesUseCase {
               )
           }
         }
-        buckets.values.toMutableList()
+        buckets.values
+          .sortedWith(
+            compareByDescending<WorkingCluster> { it.members.size }
+              .thenBy { it.members.minOf { m -> m.id } }
+          )
+          .toMutableList()
       } else {
-        features
+        sortedFeatures
           .map { feat ->
             WorkingCluster(
               members = mutableListOf(feat),
@@ -162,9 +168,7 @@ class ClusterMapFeaturesUseCase {
       // Pass A: Density-seeded sphere-of-influence clustering (prevents centroid-drift chaining).
       working.sortWith(
         compareByDescending<WorkingCluster> { it.members.size }
-          .thenBy { (it.cy * 100f).toInt() }
-          .thenBy { (it.cx * 100f).toInt() }
-          .thenBy { it.members.first().id }
+          .thenBy { it.members.minOf { m -> m.id } }
       )
       val absorbed = BooleanArray(working.size)
       val seeded = ArrayList<WorkingCluster>(working.size)
@@ -207,12 +211,23 @@ class ClusterMapFeaturesUseCase {
             if (dx > rx || dy > ry) continue
             val metric = hypot(dx / rx, dy / ry)
             if (metric <= 1.0f && metric < bestMetric) {
-              val combinedSpanX = maxOf(ci.maxX, cj.maxX) - minOf(ci.minX, cj.minX)
-              val combinedSpanY = maxOf(ci.maxY, cj.maxY) - minOf(ci.minY, cj.minY)
+              val combinedMinX = minOf(ci.minX, cj.minX)
+              val combinedMaxX = maxOf(ci.maxX, cj.maxX)
+              val combinedMinY = minOf(ci.minY, cj.minY)
+              val combinedMaxY = maxOf(ci.maxY, cj.maxY)
+              val combinedSpanX = combinedMaxX - combinedMinX
+              val combinedSpanY = combinedMaxY - combinedMinY
               if (combinedSpanX <= maxSpanX && combinedSpanY <= maxSpanY) {
-                bestMetric = metric
-                bestI = i
-                bestJ = j
+                val totalMembers = ci.members.size + cj.members.size
+                val combinedCx = (ci.sumX + cj.sumX) / totalMembers
+                val combinedCy = (ci.sumY + cj.sumY) / totalMembers
+                val maxDevX = maxOf(abs(combinedMinX - combinedCx), abs(combinedMaxX - combinedCx))
+                val maxDevY = maxOf(abs(combinedMinY - combinedCy), abs(combinedMaxY - combinedCy))
+                if (maxDevX <= rx && maxDevY <= ry && hypot(maxDevX / rx, maxDevY / ry) <= 1.0f) {
+                  bestMetric = metric
+                  bestI = i
+                  bestJ = j
+                }
               }
             }
           }
@@ -227,13 +242,16 @@ class ClusterMapFeaturesUseCase {
     }
 
     return working
-      .sortedWith(compareBy<WorkingCluster> { (it.cy * 10f).toInt() }.thenBy { it.cx })
+      .sortedWith(
+        compareByDescending<WorkingCluster> { it.members.size }
+          .thenBy { it.members.minOf { m -> m.id } }
+      )
       .mapIndexed { index, cluster ->
         MapFeatureCluster(
           id = "cluster-${index + 1}",
           normalizedX = cluster.cx,
           normalizedY = cluster.cy,
-          features = cluster.members,
+          features = cluster.members.sortedBy { it.id },
           symbolGroups = groupClusterFeaturesByMarkerSymbol(cluster.members),
           minNormalizedX = cluster.minX,
           maxNormalizedX = cluster.maxX,
@@ -242,6 +260,13 @@ class ClusterMapFeaturesUseCase {
         )
       }
   }
+
+  /**
+   * Helper computing the expansion zoom delta at which [cluster] splits or disaggregates into
+   * individual features.
+   */
+  fun expansionZoomDelta(cluster: MapFeatureCluster, currentZoomDelta: Float): Float =
+    cluster.expansionZoomDelta(currentZoomDelta)
 
   fun computeScaleBarSpec(activeSurveyId: String, mapZoomDelta: Float): MapScaleBarSpec {
     val (baseZoom, latitudeDeg) =

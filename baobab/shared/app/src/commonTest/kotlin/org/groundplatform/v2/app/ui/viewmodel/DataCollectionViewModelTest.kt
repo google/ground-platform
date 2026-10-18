@@ -23,6 +23,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.client.pdf.PdfExportResult
 import org.groundplatform.v2.app.data.datasource.local.store.runNow
+import org.groundplatform.v2.app.domain.model.FormPreviewItem
 import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
 import org.groundplatform.v2.app.domain.model.SyncStatus
 import org.groundplatform.v2.app.domain.model.editor.PeerDataVisibility
@@ -164,6 +165,45 @@ class DataCollectionViewModelTest {
       ),
       f.events,
     )
+  }
+
+  @Test
+  fun formsForEntity_onWebOnlyReturnsFormsWithEntitySelectQuestion() {
+    val f = DataCollectionFixture()
+    val entity = f.uiState.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
+    val withEntitySelect =
+      FormPreviewItem(
+        id = "form-with-select",
+        title = "Form With Select",
+        description = "",
+        version = "1",
+        targetDatasetId = entity.datasetId,
+        targetDatasetName = entity.datasetName,
+        questionCount = 3,
+        ctaLabel = "Collect",
+        availability = org.groundplatform.v2.app.domain.model.FormAvailability.BOTH,
+        hasEntitySelectQuestion = true,
+      )
+    val withoutEntitySelect =
+      FormPreviewItem(
+        id = "form-without-select",
+        title = "Form Without Select",
+        description = "",
+        version = "1",
+        targetDatasetId = entity.datasetId,
+        targetDatasetName = entity.datasetName,
+        questionCount = 3,
+        ctaLabel = "Collect",
+        availability = org.groundplatform.v2.app.domain.model.FormAvailability.BOTH,
+        hasEntitySelectQuestion = false,
+      )
+    val state = f.uiState.copy(forms = listOf(withEntitySelect, withoutEntitySelect))
+
+    val webForms = state.formsForEntity(entity, onWeb = true)
+    assertEquals(listOf(withEntitySelect), webForms)
+
+    val mobileForms = state.formsForEntity(entity, onWeb = false)
+    assertEquals(listOf(withEntitySelect, withoutEntitySelect), mobileForms)
   }
 
   @Test

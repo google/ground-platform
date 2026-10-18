@@ -99,6 +99,29 @@ class LaunchFormUseCaseTest {
     assertFalse(LaunchFormUseCase.isEntityRefStep(null))
     assertFalse(LaunchFormUseCase.isGeometryStep(null))
   }
+
+  @Test
+  fun launchForm_startsWithEmptyUserFields() {
+    val controller =
+      useCase(customFormDef = null, form = entityForm, includeEntityRefStep = false)
+    assertTrue(
+      controller.stringAt("/data/commodity_type").isNullOrEmpty(),
+      "Commodity type should not be prefilled with sample choice",
+    )
+    assertTrue(
+      controller.stringAt("/data/certification_schemes").isNullOrEmpty(),
+      "Certification schemes should not be prefilled with sample choices",
+    )
+    assertTrue(
+      controller.stringAt("/data/collector_observation").isNullOrEmpty(),
+      "Observation should not be prefilled with sample text",
+    )
+    val metricVal = controller.formState.fieldStates["/data/canopy_or_parcel_metric"]?.value?.scalar_value?.int32_value
+    assertTrue(
+      metricVal == null || metricVal == 0,
+      "Metric should not be prefilled with sample value",
+    )
+  }
 }
 
 /** The string answer at [path], or `null` when the Form lacks the question or it is empty. */

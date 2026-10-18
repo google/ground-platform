@@ -193,7 +193,32 @@ data class MapFeatureCluster(
   val balloonSummaryLabel: String
     get() =
       symbolGroups.filterNot { it.isNoSymbolGroup }.joinToString(" • ") { it.balloonSegmentLabel }
+
+  /**
+   * Calculates the target zoom delta at which the cluster's member span exceeds the cluster radius,
+   * guaranteeing that the cluster splits into sub-clusters or dissolves into individual features
+   * (advancing by at least `+1.25f` from [currentZoomDelta]).
+   */
+  fun expansionZoomDelta(currentZoomDelta: Float): Float {
+    val spanX = spanNormalizedX
+    val spanY = spanNormalizedY
+    val maxEffectiveSpan = maxOf(spanX / 1.25f, spanY)
+    val calculatedZoom =
+      if (maxEffectiveSpan > 0.001f) {
+        val targetRadius = maxEffectiveSpan * 0.5f
+        val zoomIncrease =
+          -kotlin.math.log2((targetRadius / 0.215f).toDouble()).toFloat()
+        val zoom = -2.35f + zoomIncrease
+        zoom.coerceAtMost(-2.35f + 0.15f)
+      } else {
+        -2.35f + 0.15f
+      }
+    return maxOf(currentZoomDelta + 1.25f, calculatedZoom)
+  }
 }
+
+/** Convenience typealias for [MapFeatureCluster]. */
+typealias MapClusterItem = MapFeatureCluster
 
 /**
  * Normalizes map features into [MapClusterFeatureItem]s for clustering. Geospatial entities carry
