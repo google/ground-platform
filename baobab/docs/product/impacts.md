@@ -60,6 +60,21 @@ cooperative societies:
     total plots.
 *   **Meteitei Set Kobor FCS**: Mapped **400 out of 700** total plots.
 
+## Nigeria
+
+During a 2025 stakeholder meeting involving the governments of multiple
+Nigerian states (Ondo, Ekiti, Abia, Cross River) as well as representatives from
+GIZ, TRACE and FAO GEF7, the Government of Ondo State decided to do geolocation
+with Open Foris Ground (with technical support from FAO GEF 7). The aim has been
+to geolocate cocoa & oil palm plots and identify farmers, issue temporary
+permits, and provide tree seedlings for agroforestry.
+
+*   **Area**: Forest Reserves and Protected Areas in Ondo
+*   **Progress**: 14,600+ polygons geolocated as of Sept. 2026
+*   **Outlook**: 6,000 – 7,000 more plots by the end of 2026
+
+More use of Ground in Ekiti state is on the horizon.
+
 ## Viet Nam EUDR Pilots
 
 To meet strict EUDR regulatory requirements, active Training of Trainers (ToT)
