@@ -363,7 +363,7 @@ fun MobileFormRunner(
             }
           }
           is FormWizardStep.RepeatHubStep -> {
-            RepeatHubScreenContent(repeatGroup = currentStep.repeatGroup, controller = controller)
+            RepeatHubScreenContent(step = currentStep, controller = controller)
           }
           is FormWizardStep.SummaryStep -> {
             FormSummaryScreenContent(controller = controller)
@@ -470,10 +470,29 @@ private fun BreadcrumbBar(
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Text(
-            text = "Repeat #${repeatContext.repeatIndex} of ${repeatContext.totalInstances}",
-            style = MaterialTheme.typography.labelSmall.copy(color = colors.onSecondaryContainer),
+            text = "Entry #${repeatContext.repeatIndex} of ${repeatContext.totalInstances}",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Medium,
+                color = colors.onSecondaryContainer,
+              ),
           )
-          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            FilledTonalButton(
+              onClick = { controller.openRepeatHub(repeatContext.repeatGroupPath) },
+              contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+            ) {
+              Text(
+                text = "All entries",
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+              )
+            }
             if (repeatContext.canAddInstance) {
               FilledTonalButton(
                 onClick = { controller.addRepeatInstanceAndOpen(repeatContext.repeatGroupPath) },
@@ -523,10 +542,11 @@ private fun BreadcrumbBar(
 
 @Composable
 private fun RepeatHubScreenContent(
-  repeatGroup: ComponentState.RepeatGroupState,
+  step: FormWizardStep.RepeatHubStep,
   controller: FormWizardController,
 ) {
   val colors = MaterialTheme.colorScheme
+  val repeatGroup = step.repeatGroup
   val groupLabel =
     repeatGroup.label?.text?.takeIf { it.isNotBlank() }
       ?: repeatGroup.canonicalPath.substringAfterLast('/')
@@ -546,8 +566,13 @@ private fun RepeatHubScreenContent(
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Column(modifier = Modifier.weight(1f)) {
+          GroundTonalBadge(
+            text = "Repeated section • ${repeatGroup.instances.size} ${if (repeatGroup.instances.size == 1) "entry" else "entries"}",
+            tone = GroundBadgeTone.PRIMARY,
+          )
+          Spacer(modifier = Modifier.height(4.dp))
           Text(
-            text = "Repeat group: $groupLabel",
+            text = groupLabel,
             style =
               MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
@@ -555,7 +580,7 @@ private fun RepeatHubScreenContent(
               ),
           )
           Text(
-            text = "${repeatGroup.instances.size} instance(s) recorded",
+            text = "Add one or more '$groupLabel' entries below.",
             style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
           )
         }
@@ -585,13 +610,14 @@ private fun RepeatHubScreenContent(
         }
       } else {
         repeatGroup.instances.forEach { instance ->
-          val dynamicLabel = instance.label?.text?.trim()
+          val summary = step.summaries.firstOrNull { it.repeatIndex == instance.repeatIndex }
           val instTitle =
-            if (!dynamicLabel.isNullOrBlank() && dynamicLabel != groupLabel) {
-              dynamicLabel
-            } else {
-              "$groupLabel #${instance.repeatIndex}"
-            }
+            summary?.title?.ifBlank { "$groupLabel #${instance.repeatIndex}" }
+              ?: "$groupLabel #${instance.repeatIndex}"
+          val preview =
+            summary?.previewText?.ifBlank { "Tap to fill out details" }
+              ?: "Tap to fill out details"
+
           OutlinedCard(
             onClick = {
               val stepIdx =
@@ -609,29 +635,77 @@ private fun RepeatHubScreenContent(
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              Text(
-                text = instTitle,
-                style =
-                  MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.onSurface,
-                  ),
+              Row(
                 modifier = Modifier.weight(1f),
-              )
-              if (repeatGroup.canRemoveInstance) {
-                TextButton(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Surface(
+                  shape = CircleShape,
+                  color = colors.secondaryContainer,
+                  contentColor = colors.onSecondaryContainer,
+                ) {
+                  Box(
+                    modifier = Modifier.size(32.dp),
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    Text(
+                      text = "#${instance.repeatIndex}",
+                      style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    )
+                  }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                  Text(
+                    text = instTitle,
+                    style =
+                      MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onSurface,
+                      ),
+                  )
+                  Text(
+                    text = preview,
+                    style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                  )
+                }
+              }
+              Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                OutlinedButton(
                   onClick = {
-                    controller.removeRepeatInstance(repeatGroup.canonicalPath, instance.repeatIndex)
+                    val stepIdx =
+                      controller.steps.indexOfFirst {
+                        it.repeatContext?.instancePath == instance.canonicalPath
+                      }
+                    if (stepIdx >= 0) controller.jumpToStep(stepIdx)
                   },
-                  colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
+                  contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                 ) {
                   Text(
-                    "Remove",
+                    "Edit",
                     style = MaterialTheme.typography.labelSmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    softWrap = false,
                   )
+                }
+                if (repeatGroup.canRemoveInstance) {
+                  TextButton(
+                    onClick = {
+                      controller.removeRepeatInstance(repeatGroup.canonicalPath, instance.repeatIndex)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                  ) {
+                    Text(
+                      "Delete",
+                      style = MaterialTheme.typography.labelSmall,
+                      maxLines = 1,
+                    )
+                  }
                 }
               }
             }
@@ -651,7 +725,7 @@ private fun RepeatHubScreenContent(
           )
           Spacer(modifier = Modifier.width(6.dp))
           Text(
-            "Add another $groupLabel",
+            "+ Add $groupLabel entry",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             softWrap = false,

@@ -267,4 +267,94 @@ class FormEditorViewModelTest {
       scope.cancel()
     }
   }
+
+  @Test
+  fun sections_addUpdateDeleteAndAssignQuestions() {
+    val q1 = EditorQuestion(key = "q1", name = "species", label = "Species", type = EditorQuestionType.TEXT)
+    val q2 = EditorQuestion(key = "q2", name = "height", label = "Height", type = EditorQuestionType.NUMBER)
+    val formFlow =
+      MutableStateFlow(
+        EditorForm(formId = "sec_test", title = "Sec Test", questions = listOf(q1, q2))
+      )
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+    try {
+      val vm =
+        FormEditorViewModel(
+          formFlow = formFlow,
+          datasetsFlow = MutableStateFlow(emptyList()),
+          updateForm = { transform -> formFlow.value = transform(formFlow.value) },
+          scope = scope,
+        )
+
+      // Add section
+      val secId = vm.addSection("Trees", repeatable = true)
+      assertEquals(1, vm.uiState.value.form.sections.size)
+      val sec = vm.uiState.value.form.sections[0]
+      assertEquals(secId, sec.id)
+      assertEquals("Trees", sec.title)
+      assertTrue(sec.repeatable)
+
+      // Assign questions to section
+      vm.setQuestionSection(0, secId)
+      vm.setQuestionSection("q2", secId)
+      assertEquals(secId, vm.uiState.value.form.questions[0].sectionId)
+      assertEquals(secId, vm.uiState.value.form.questions[1].sectionId)
+
+      // Update section
+      vm.updateSection(secId) { it.copy(repeatCountExpression = "5") }
+      assertEquals("5", vm.uiState.value.form.sections[0].repeatCountExpression)
+
+      // Delete section -> unassigns questions
+      vm.deleteSection(secId)
+      assertEquals(0, vm.uiState.value.form.sections.size)
+      assertEquals("", vm.uiState.value.form.questions[0].sectionId)
+      assertEquals("", vm.uiState.value.form.questions[1].sectionId)
+    } finally {
+      scope.cancel()
+    }
+  }
+
+  @Test
+  fun flowLayout_positionsConditionalQuestionsOnBranchLanes() {
+    val q1 =
+      EditorQuestion(
+        key = "q1",
+        name = "has_trees",
+        label = "Has trees?",
+        type = EditorQuestionType.SELECT_ONE,
+      )
+    val q2 =
+      EditorQuestion(
+        key = "q2",
+        name = "species",
+        label = "Species",
+        type = EditorQuestionType.TEXT,
+        relevance = EditorRelevance("q1", RelevanceOperator.EQUALS, "yes"),
+      )
+    val q3 =
+      EditorQuestion(
+        key = "q3",
+        name = "notes",
+        label = "Notes",
+        type = EditorQuestionType.TEXT,
+      )
+    val form = EditorForm(formId = "f", title = "F", questions = listOf(q1, q2, q3))
+    val edges = FormFlowGraph.edges(form)
+
+    val layout =
+      org.groundplatform.v2.web.ui.formeditor.FlowLayout(form.questions.size, edges, form)
+    // q1 is unconditional: slot 1, row 0
+    assertEquals(0, layout.slotRow(1))
+    // q2 is conditional on q1: slot 2, branches to row > 0
+    assertTrue(layout.slotRow(2) > 0)
+    // q3 is unconditional: slot 3, on main trunk row 0
+    assertEquals(0, layout.slotRow(3))
+
+    // Layout exposes slotPosition, slotX, slotY, totalWidth, totalHeight
+    val pos = layout.slotPosition(1)
+    assertEquals(layout.slotX(1), pos.x)
+    assertEquals(layout.slotY(1), pos.y)
+    assertTrue(layout.totalWidth > layout.slotX(layout.endSlot))
+    assertTrue(layout.totalHeight > layout.slotY(2))
+  }
 }

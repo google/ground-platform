@@ -619,7 +619,33 @@ fun CompactQuestionCard(
       ) {
         CompactStatusIcon(status = status)
         Column(modifier = Modifier.weight(1f)) {
-          if (step.breadcrumbs.isNotEmpty() && step.repeatContext != null) {
+          if (step.repeatContext != null) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              Text(
+                text =
+                  "${step.repeatContext.repeatGroupLabel} • Entry #${step.repeatContext.repeatIndex} of ${step.repeatContext.totalInstances}",
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+              Text(
+                text = "All entries",
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.primary,
+                  ),
+                modifier =
+                  Modifier.clickable {
+                    controller.openRepeatHub(step.repeatContext.repeatGroupPath)
+                  },
+              )
+            }
+          } else if (step.breadcrumbs.isNotEmpty()) {
             Text(
               text = step.breadcrumbs.last(),
               style = MaterialTheme.typography.labelSmall,
@@ -815,48 +841,175 @@ private fun CompactRepeatHub(
     color = colors.surfaceContainer,
     contentColor = colors.onSurface,
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = label,
-          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-          color = colors.onSurface,
-        )
-        Text(
-          text = "${group.instances.size} ${if (group.instances.size == 1) "entry" else "entries"}",
-          style = MaterialTheme.typography.labelSmall,
-          color = colors.onSurfaceVariant,
-        )
-      }
-      if (group.canRemoveInstance && group.instances.isNotEmpty()) {
-        TextButton(
-          onClick = {
-            controller.removeRepeatInstance(group.canonicalPath, group.instances.last().repeatIndex)
-          },
-          enabled = !readOnly,
-          colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
-          contentPadding = PaddingValues(horizontal = 10.dp),
-        ) {
-          Text("Remove last", style = MaterialTheme.typography.labelSmall, softWrap = false)
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          GroundTonalBadge(
+            text = "Repeated section • ${group.instances.size} ${if (group.instances.size == 1) "entry" else "entries"}",
+            tone = GroundBadgeTone.PRIMARY,
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = label,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            color = colors.onSurface,
+          )
+          Text(
+            text = "Add one or more '$label' entries below.",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+          )
         }
       }
+
+      if (group.instances.isEmpty()) {
+        Surface(
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.small,
+          color = colors.surfaceContainerLow,
+        ) {
+          Box(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = "No repeat entries added yet.",
+              style = MaterialTheme.typography.bodySmall,
+              color = colors.onSurfaceVariant,
+            )
+          }
+        }
+      } else {
+        group.instances.forEach { instance ->
+          val summary = step.summaries.firstOrNull { it.repeatIndex == instance.repeatIndex }
+          val instTitle =
+            summary?.title?.ifBlank { "$label #${instance.repeatIndex}" }
+              ?: "$label #${instance.repeatIndex}"
+          val preview =
+            summary?.previewText?.ifBlank { "Tap to fill out details" }
+              ?: "Tap to fill out details"
+
+          OutlinedCard(
+            onClick = {
+              val stepIdx =
+                controller.steps.indexOfFirst {
+                  it.repeatContext?.instancePath == instance.canonicalPath
+                }
+              if (stepIdx >= 0) controller.jumpToStep(stepIdx)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
+            colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLowest),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Surface(
+                  shape = CircleShape,
+                  color = colors.secondaryContainer,
+                  contentColor = colors.onSecondaryContainer,
+                ) {
+                  Box(
+                    modifier = Modifier.size(26.dp),
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    Text(
+                      text = "#${instance.repeatIndex}",
+                      style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    )
+                  }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                  Text(
+                    text = instTitle,
+                    style =
+                      MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onSurface,
+                      ),
+                  )
+                  Text(
+                    text = preview,
+                    style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                  )
+                }
+              }
+              Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                OutlinedButton(
+                  onClick = {
+                    val stepIdx =
+                      controller.steps.indexOfFirst {
+                        it.repeatContext?.instancePath == instance.canonicalPath
+                      }
+                    if (stepIdx >= 0) controller.jumpToStep(stepIdx)
+                  },
+                  contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                ) {
+                  Text(
+                    "Edit",
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                  )
+                }
+                if (group.canRemoveInstance && !readOnly) {
+                  TextButton(
+                    onClick = {
+                      controller.removeRepeatInstance(group.canonicalPath, instance.repeatIndex)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                  ) {
+                    Text(
+                      "Delete",
+                      style = MaterialTheme.typography.labelSmall,
+                      maxLines = 1,
+                    )
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
       if (group.canAddInstance) {
-        FilledTonalButton(
+        Button(
           onClick = { controller.addRepeatInstanceAndOpen(group.canonicalPath) },
           enabled = !readOnly,
-          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+          modifier = Modifier.fillMaxWidth(),
         ) {
           Icon(
             imageVector = Icons.Default.Add,
             contentDescription = null,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier.size(16.dp),
           )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text("Add", style = MaterialTheme.typography.labelSmall, softWrap = false)
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            "+ Add $label entry",
+            style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+          )
         }
       }
     }
