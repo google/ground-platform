@@ -924,12 +924,9 @@ in these ways, to be closed in later steps:
   dataset or form and by `IsDeleted` in SQL. Query-mode sorting and paging, and
   the other `List*` RPCs (organizations, libraries, survey overviews, impact
   events, audit records), still work on whole collections in memory.
-- Organization members and survey ACL entries are still embedded in
-  `Organization` and `SurveyAcl`, without `OrganizationMembers` and
-  `SurveyAclEntries` rows. A survey's ACL is a `PROTO` column on `Surveys`
-  with its own commit timestamp.
-- The schema is applied whole to a new database, then only the proto bundle is
-  updated; there are no versioned migrations yet.
+- `SpannerSchema` adds new bundled proto types, tables, and indexes to an
+  existing database, and updates changed proto descriptors, rather than running
+  numbered migration files.
 - There's no auth, `Users` table, survey revisions, access epochs, or purge job.
 
 ## Open Questions

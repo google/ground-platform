@@ -15,7 +15,10 @@ package org.groundplatform.v2.server.userdata
 
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.Organization
+import groundplatform.v2.survey.OrganizationMember
+import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -213,6 +216,40 @@ abstract class UserDataStoreContractTest {
         listOf(ENTITY, ENTITY_B),
         r.submissionsChangedAfter(SURVEY, SyncPosition(0L, 0, null), 10).map { it.submission_id },
       )
+    }
+  }
+
+  @Test
+  fun organizationMembers_andAclEntries_canBeUpdatedAndRemoved() {
+    val org =
+      Organization(
+        organization_id = ORG,
+        members =
+          listOf(
+            OrganizationMember(email = "alice@example.org"),
+            OrganizationMember(email = "bob@example.org"),
+          ),
+      )
+    val acl =
+      SurveyAcl(
+        survey_id = SURVEY,
+        entries =
+          listOf(AclEntry(email = "alice@example.org"), AclEntry(email = "bob@example.org")),
+      )
+    store.write { tx ->
+      tx.putOrganization(org)
+      tx.putSurvey(SurveyDef(survey_id = SURVEY))
+      tx.putAcl(acl)
+    }
+    store.write { tx ->
+      tx.putOrganization(org.copy(members = listOf(OrganizationMember(email = "bob@example.org"))))
+      tx.putAcl(acl.copy(entries = listOf(AclEntry(email = "alice@example.org"))))
+    }
+
+    store.read { r ->
+      assertEquals(listOf("bob@example.org"), r.organization(ORG)?.members?.map { it.email })
+      assertEquals(listOf("bob@example.org"), r.organizations().single().members.map { it.email })
+      assertEquals(listOf("alice@example.org"), r.acl(SURVEY)?.entries?.map { it.email })
     }
   }
 

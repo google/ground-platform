@@ -18,9 +18,6 @@
 -- indexes on are STORED generated columns. CommitTs is the commit timestamp of
 -- a row's last write and overrides the proto's commit_timestamp on read.
 --
--- Not yet split out of their records (planned): organization members
--- (OrganizationMembers) and survey ACL entries (SurveyAclEntries).
---
 -- Statements end with ";" on its own line end. Applied by SpannerSchema.
 
 CREATE PROTO BUNDLE (
@@ -33,8 +30,13 @@ CREATE PROTO BUNDLE (
   groundplatform.v2.data.ReviewStatus,
   groundplatform.v2.data.SubmissionRecord,
   groundplatform.v2.library.OrganizationLibraryRecord,
+  groundplatform.v2.survey.AclEntry,
+  groundplatform.v2.survey.MembershipStatus,
   groundplatform.v2.survey.Organization,
+  groundplatform.v2.survey.OrganizationMember,
+  groundplatform.v2.survey.OrganizationRole,
   groundplatform.v2.survey.PeerDataVisibility,
+  groundplatform.v2.survey.Role,
   groundplatform.v2.survey.SharingPolicy,
   groundplatform.v2.survey.SurveyAcl,
   groundplatform.v2.survey.SurveyDef,
@@ -55,6 +57,24 @@ CREATE TABLE Organizations (
   IsDeleted BOOL AS (Record.is_deleted) STORED,
   CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (OrganizationId);
+
+CREATE TABLE OrganizationMembers (
+  OrganizationId UUID NOT NULL,
+  EmailNormalized STRING(320) NOT NULL,
+  Record groundplatform.v2.survey.OrganizationMember NOT NULL,
+  UserId STRING(128) AS (NULLIF(Record.user_id, '')) STORED,
+  Role groundplatform.v2.survey.OrganizationRole AS (Record.role) STORED,
+  Status groundplatform.v2.survey.MembershipStatus AS (Record.status) STORED,
+  InviteToken STRING(64) AS (NULLIF(Record.invite_token, '')) STORED,
+  CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
+) PRIMARY KEY (OrganizationId, EmailNormalized),
+  INTERLEAVE IN PARENT Organizations ON DELETE CASCADE;
+
+CREATE NULL_FILTERED INDEX MembersByUser ON OrganizationMembers(UserId) STORING (Status, Role);
+
+CREATE INDEX MembersByEmail ON OrganizationMembers(EmailNormalized);
+
+CREATE UNIQUE NULL_FILTERED INDEX MembersByInvite ON OrganizationMembers(InviteToken);
 
 CREATE TABLE OrganizationLibraries (
   OrganizationId UUID NOT NULL,
@@ -86,6 +106,23 @@ CREATE TABLE SurveyWorkingCopies (
   CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (SurveyId),
   INTERLEAVE IN PARENT Surveys ON DELETE CASCADE;
+
+CREATE TABLE SurveyAclEntries (
+  SurveyId UUID NOT NULL,
+  EmailNormalized STRING(320) NOT NULL,
+  Record groundplatform.v2.survey.AclEntry NOT NULL,
+  UserId STRING(128) AS (NULLIF(Record.user_id, '')) STORED,
+  Role groundplatform.v2.survey.Role AS (Record.role) STORED,
+  InviteToken STRING(64) AS (NULLIF(Record.invite_token, '')) STORED,
+  CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
+) PRIMARY KEY (SurveyId, EmailNormalized),
+  INTERLEAVE IN PARENT Surveys ON DELETE CASCADE;
+
+CREATE NULL_FILTERED INDEX AclByUser ON SurveyAclEntries(UserId) STORING (Role);
+
+CREATE INDEX AclByEmail ON SurveyAclEntries(EmailNormalized);
+
+CREATE UNIQUE NULL_FILTERED INDEX AclByInvite ON SurveyAclEntries(InviteToken);
 
 CREATE TABLE Entities (
   SurveyId UUID NOT NULL,
