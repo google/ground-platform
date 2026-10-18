@@ -57,20 +57,33 @@ object SpannerSchema {
 
   /**
    * Creates the schema in an empty database, or updates an existing database with any new bundled
-   * proto types, updated proto descriptors, and newly added tables and indexes.
+   * proto types, updated proto descriptors, and newly added tables, columns, and indexes. Changes
+   * to existing columns or indexes aren't applied.
    */
   fun apply(admin: DatabaseAdminClient, settings: SpannerSettings) {
     val existing = admin.getDatabaseDdlResponse(settings.instanceId, settings.databaseId)
-    val statementsToRun =
-      if (existing.statementsList.none { it.startsWith("CREATE TABLE Surveys") }) {
-        statements
-      } else {
-        upgradeStatements(existing.statementsList, existing.protoDescriptors.toByteArray())
-      }
-    if (statementsToRun.isEmpty()) return
     val database =
       admin.newDatabaseBuilder(settings.database).setProtoDescriptors(descriptors).build()
-    admin.updateDatabaseDdl(database, statementsToRun, null).get()
+    if (existing.statementsList.none { it.startsWith("CREATE TABLE Surveys") }) {
+      admin.updateDatabaseDdl(database, statements, null).get()
+      return
+    }
+    val upgrade =
+      upgradeStatements(existing.statementsList, existing.protoDescriptors.toByteArray())
+    if (upgrade.isEmpty()) return
+    if (settings.emulatorHost != null && upgrade.any { it.startsWith("ALTER PROTO BUNDLE") }) {
+      // The emulator breaks existing generated columns when the proto bundle changes. Its data is
+      // in memory and disposable, so recreate the database; the store then loads the seed.
+      System.err.println(
+        "Spanner emulator: the proto bundle changed; recreating database " +
+          "${settings.databaseId} with the current schema (its data is reset)."
+      )
+      admin.dropDatabase(settings.instanceId, settings.databaseId)
+      admin.createDatabase(settings.instanceId, settings.databaseId, emptyList()).get()
+      admin.updateDatabaseDdl(database, statements, null).get()
+      return
+    }
+    admin.updateDatabaseDdl(database, upgrade, null).get()
   }
 
   private fun upgradeStatements(
@@ -81,27 +94,52 @@ object SpannerSchema {
       existingStatements.firstOrNull { it.startsWith("CREATE PROTO BUNDLE") }?.let(::bundleTypesIn)
         ?: emptyList()
     val addedTypes = protoBundleTypes - existingBundle.toSet()
-    val updatedTypes = existingBundle.intersect(protoBundleTypes.toSet())
-    val bundleChanged =
-      addedTypes.isNotEmpty() || bundleTypes(existingDescriptors) != bundleTypes(descriptors)
-    if (bundleChanged) {
+    val existingTypeDescriptors = bundleTypes(existingDescriptors)
+    val wantedTypeDescriptors = bundleTypes(descriptors)
+    val changedTypes = existingBundle.filter {
+      it in wantedTypeDescriptors && existingTypeDescriptors[it] != wantedTypeDescriptors[it]
+    }
+    if (addedTypes.isNotEmpty() || changedTypes.isNotEmpty()) {
       add(
         buildString {
           append("ALTER PROTO BUNDLE")
           if (addedTypes.isNotEmpty()) append(" INSERT (${addedTypes.joinToString()})")
-          if (updatedTypes.isNotEmpty()) append(" UPDATE (${updatedTypes.joinToString()})")
+          if (changedTypes.isNotEmpty()) append(" UPDATE (${changedTypes.joinToString()})")
         }
       )
     }
     val existingNames = existingStatements.mapNotNull(::objectName).toSet()
+    val existingColumns =
+      existingStatements
+        .filter { it.startsWith("CREATE TABLE") }
+        .associate {
+          objectName(it) to columnDefinitions(it).keys
+        }
     for (statement in statements) {
       val name = objectName(statement) ?: continue
-      if (name !in existingNames) add(statement)
+      if (name !in existingNames) {
+        add(statement)
+      } else if (statement.startsWith("CREATE TABLE")) {
+        val present = existingColumns[name].orEmpty()
+        for ((column, definition) in columnDefinitions(statement)) {
+          if (column !in present) add("ALTER TABLE $name ADD COLUMN $definition")
+        }
+      }
     }
   }
 
+  /** Column name → definition of a `CREATE TABLE` statement, one column per line. */
+  private fun columnDefinitions(statement: String): Map<String, String> =
+    statement
+      .substringAfter("(")
+      .substringBeforeLast(") PRIMARY KEY")
+      .lines()
+      .map { it.trim().removeSuffix(",").trim() }
+      .filter { it.isNotEmpty() && !it.startsWith("CONSTRAINT") }
+      .associateBy { it.substringBefore(" ") }
+
   private fun objectName(statement: String): String? =
-    Regex("^CREATE (?:(?:UNIQUE )?(?:NULL_FILTERED )?INDEX|TABLE) (\\w+)")
+    Regex("^CREATE (?:(?:UNIQUE )?(?:NULL_FILTERED )?(?:SEARCH )?INDEX|TABLE) (\\w+)")
       .find(statement)
       ?.groupValues
       ?.get(1)
@@ -111,6 +149,7 @@ object SpannerSchema {
    * bundle needs, so sets are compared by type rather than byte for byte.
    */
   private fun bundleTypes(descriptorSet: ByteArray): Map<String, Message> {
+    if (descriptorSet.isEmpty()) return emptyMap()
     val types = mutableMapOf<String, Message>()
     fun addMessage(prefix: String, message: DescriptorProto) {
       val name = "$prefix.${message.name}"

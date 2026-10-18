@@ -37,10 +37,12 @@ import groundplatform.v2.data.MutationLogRecord
 import groundplatform.v2.data.PlaceRecord
 import groundplatform.v2.data.PlotLock
 import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.library.ConceptDef
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationMember
+import groundplatform.v2.survey.SharingPolicy
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.userdata.UserDataSeed
@@ -125,7 +127,10 @@ class SpannerUserDataStore(
       mutations += organizationRow(org, org.commit_timestamp)
       org.members.forEach { mutations += memberRow(org.organization_id, it, org.commit_timestamp) }
     }
-    seed.libraries.forEach { mutations += libraryRow(it, it.commit_timestamp) }
+    for (library in seed.libraries) {
+      mutations += libraryRow(library, library.commit_timestamp)
+      mutations += conceptRows(library)
+    }
     for (surveySeed in seed.surveys) {
       val survey = surveySeed.survey ?: continue
       mutations += surveyRow(survey, survey.commit_timestamp, surveySeed.acl)
@@ -154,19 +159,89 @@ class SpannerUserDataStore(
           .copy(members = members(organizationId), commit_timestamp = it.commitTs())
       }
 
-    override fun organizations(): List<Organization> {
+    override fun organizations(): List<Organization> =
+      withMembers(Statement.of("SELECT Record, CommitTs FROM Organizations"))
+
+    override fun searchOrganizations(query: String): List<Organization> {
+      val sql = buildString {
+        append("SELECT Record, CommitTs FROM Organizations ")
+        append("WHERE IFNULL(Listed, FALSE) AND NOT IFNULL(IsDeleted, FALSE)")
+        if (query.isNotBlank()) append(" AND SEARCH_SUBSTRING(SearchTokens, @q)")
+      }
+      val statement = Statement.newBuilder(sql)
+      if (query.isNotBlank()) statement.bind("q").to(query.trim())
+      return withMembers(statement.build())
+    }
+
+    /** Organizations read by [statement] (`Record`, `CommitTs`), with their members attached. */
+    private fun withMembers(statement: Statement): List<Organization> {
+      val orgs =
+        query(statement) {
+          decode(Organization.ADAPTER, it).copy(commit_timestamp = it.commitTs())
+        }
+      if (orgs.isEmpty()) return orgs
       val membersByOrg =
-        query(Statement.of("SELECT OrganizationId, Record FROM OrganizationMembers")) {
+        query(
+            Statement.newBuilder(
+                "SELECT OrganizationId, Record FROM OrganizationMembers " +
+                  "WHERE CAST(OrganizationId AS STRING) IN UNNEST(@ids)"
+              )
+              .bind("ids")
+              .toStringArray(orgs.map { it.organization_id })
+              .build()
+          ) {
             it.getUuid("OrganizationId").toString() to decode(OrganizationMember.ADAPTER, it)
           }
           .groupBy({ it.first }, { it.second })
-      return all("SELECT Record, CommitTs FROM Organizations") {
-        val org = decode(Organization.ADAPTER, it)
-        org.copy(
-          members = membersByOrg[org.organization_id].orEmpty(),
-          commit_timestamp = it.commitTs(),
-        )
+      return orgs.map { it.copy(members = membersByOrg[it.organization_id].orEmpty()) }
+    }
+
+    override fun searchPublicSurveys(query: String): List<SurveyDef> {
+      val sql = buildString {
+        append("SELECT SavedDef AS Record, CommitTs FROM Surveys ")
+        append("WHERE CAST(SharingPolicy AS INT64) = @policy")
+        if (query.isNotBlank()) append(" AND SEARCH_SUBSTRING(SearchTokens, @q)")
       }
+      val statement =
+        Statement.newBuilder(sql).bind("policy").to(SharingPolicy.PUBLIC.value.toLong())
+      if (query.isNotBlank()) statement.bind("q").to(query.trim())
+      return query(statement.build()) {
+        decode(SurveyDef.ADAPTER, it).copy(commit_timestamp = it.commitTs())
+      }
+    }
+
+    override fun searchConcepts(organizationIds: List<String>, query: String): List<ConceptDef> {
+      val orgs = organizationIds.distinct().filter { uuidOrNull(it) != null }
+      if (orgs.isEmpty()) return emptyList()
+      val sql = buildString {
+        append("SELECT OrganizationId, Position, Concept AS Record FROM LibraryConcepts ")
+        append("WHERE CAST(OrganizationId AS STRING) IN UNNEST(@orgs)")
+        if (query.isNotBlank()) {
+          // Every library's version of a matching concept, so an override that doesn't match
+          // still replaces the concept it overrides.
+          append(" AND ConceptId IN (SELECT ConceptId FROM LibraryConcepts ")
+          append("WHERE CAST(OrganizationId AS STRING) IN UNNEST(@orgs) ")
+          append("AND SEARCH_SUBSTRING(SearchTokens, @q))")
+        }
+      }
+      val statement = Statement.newBuilder(sql).bind("orgs").toStringArray(orgs)
+      if (query.isNotBlank()) statement.bind("q").to(query.trim())
+      val rows =
+        query(statement.build()) {
+          Triple(
+            it.getUuid("OrganizationId").toString(),
+            it.getLong("Position"),
+            decode(ConceptDef.ADAPTER, it),
+          )
+        }
+      val resolved = LinkedHashMap<String, ConceptDef>()
+      for (org in orgs) {
+        rows
+          .filter { it.first == org }
+          .sortedBy { it.second }
+          .forEach { resolved[it.third.id] = it.third }
+      }
+      return resolved.values.toList()
     }
 
     private fun members(organizationId: String): List<OrganizationMember> =
@@ -418,8 +493,12 @@ class SpannerUserDataStore(
       organization.members.forEach { tx.buffer(memberRow(organization.organization_id, it, null)) }
     }
 
-    override fun putLibrary(library: OrganizationLibraryRecord) =
+    override fun putLibrary(library: OrganizationLibraryRecord) {
+      val id = uuid(library.organization_id)
       tx.buffer(libraryRow(library, null))
+      tx.buffer(Mutation.delete("LibraryConcepts", KeySet.prefixRange(Key.of(id))))
+      conceptRows(library).forEach(tx::buffer)
+    }
 
     // A survey and its ACL share a row; a new row must be written with its definition, so writes
     // to both are merged into one mutation when the block ends ([flush]).
@@ -603,6 +682,23 @@ class SpannerUserDataStore(
       .to(commitTimestampValue(commitTs))
       .build()
 
+  /** One `LibraryConcepts` row per concept in [library]'s bundle, with its search text. */
+  private fun conceptRows(library: OrganizationLibraryRecord): List<Mutation> =
+    library.bundle?.concepts.orEmpty().mapIndexed { position, concept ->
+      Mutation.newInsertOrUpdateBuilder("LibraryConcepts")
+        .set("OrganizationId")
+        .to(uuid(library.organization_id))
+        .set("ConceptId")
+        .to(concept.id)
+        .set("Concept")
+        .to(proto(ConceptDef.ADAPTER, concept, CONCEPT))
+        .set("Position")
+        .to(position.toLong())
+        .set("SearchText")
+        .to((listOf(concept.id) + concept.label?.values?.values.orEmpty()).joinToString(" "))
+        .build()
+    }
+
   /** Writes [survey], and [acl] if set (seed loads pass the seed's ACL commit timestamp). */
   private fun surveyRow(survey: SurveyDef, commitTs: Instant?, acl: SurveyAcl? = null): Mutation {
     val builder =
@@ -716,6 +812,7 @@ class SpannerUserDataStore(
     private const val ORGANIZATION = "groundplatform.v2.survey.Organization"
     private const val ORGANIZATION_MEMBER = "groundplatform.v2.survey.OrganizationMember"
     private const val LIBRARY = "groundplatform.v2.library.OrganizationLibraryRecord"
+    private const val CONCEPT = "groundplatform.v2.library.ConceptDef"
     private const val SURVEY_DEF = "groundplatform.v2.survey.SurveyDef"
     private const val SURVEY_ACL = "groundplatform.v2.survey.SurveyAcl"
     private const val ACL_ENTRY = "groundplatform.v2.survey.AclEntry"

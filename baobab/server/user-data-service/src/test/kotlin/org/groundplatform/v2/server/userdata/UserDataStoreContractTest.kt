@@ -15,9 +15,14 @@ package org.groundplatform.v2.server.userdata
 
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.library.ConceptDef
+import groundplatform.v2.library.LibraryBundle
+import groundplatform.v2.library.LocalizedText
+import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationMember
+import groundplatform.v2.survey.SharingPolicy
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
 import kotlin.test.Test
@@ -254,6 +259,67 @@ abstract class UserDataStoreContractTest {
   }
 
   @Test
+  fun searchOrganizations_returnsMatches_amongListedLiveOrganizations() {
+    store.write { tx ->
+      tx.putOrganization(Organization(organization_id = ORG, name = "Kenya Forest", listed = true))
+      tx.putOrganization(
+        Organization(organization_id = OTHER_ORG, name = "Kenya Hidden", listed = false)
+      )
+    }
+
+    store.read { r ->
+      assertEquals(listOf(ORG), r.searchOrganizations("FOREST").map { it.organization_id })
+      assertEquals(listOf(ORG), r.searchOrganizations("").map { it.organization_id })
+    }
+  }
+
+  @Test
+  fun searchPublicSurveys_returnsMatches_amongPublicSurveys() {
+    store.write { tx ->
+      tx.putSurvey(SurveyDef(survey_id = SURVEY, title = "Coffee plots"))
+      tx.putAcl(SurveyAcl(survey_id = SURVEY, sharing_policy = SharingPolicy.PUBLIC))
+      tx.putSurvey(SurveyDef(survey_id = OTHER_SURVEY, title = "Coffee secrets"))
+    }
+
+    store.read { r ->
+      assertEquals(listOf(SURVEY), r.searchPublicSurveys("offee").map { it.survey_id })
+    }
+  }
+
+  @Test
+  fun searchConcepts_resolvesOverridesByConceptId() {
+    fun concept(id: String, label: String) =
+      ConceptDef(id = id, label = LocalizedText(values = mapOf("en" to label)))
+    store.write { tx ->
+      tx.putOrganization(Organization(organization_id = GLOBAL_ORG))
+      tx.putOrganization(Organization(organization_id = ORG))
+      tx.putLibrary(
+        OrganizationLibraryRecord(
+          organization_id = GLOBAL_ORG,
+          bundle =
+            LibraryBundle(concepts = listOf(concept("a", "Tree height"), concept("b", "Age"))),
+        )
+      )
+      tx.putLibrary(
+        OrganizationLibraryRecord(
+          organization_id = ORG,
+          bundle = LibraryBundle(concepts = listOf(concept("c", "Canopy"), concept("a", "Height"))),
+        )
+      )
+    }
+
+    store.read { r ->
+      val all = r.searchConcepts(listOf(GLOBAL_ORG, ORG), "")
+      assertEquals(listOf("a", "b", "c"), all.map { it.id })
+      assertEquals("Height", all.first().label?.values?.get("en"))
+      // The global label matches, but the organization's override replaces it.
+      val tree = r.searchConcepts(listOf(GLOBAL_ORG, ORG), "tree")
+      assertEquals("Height", tree.single { it.id == "a" }.label?.values?.get("en"))
+      assertEquals(listOf("a", "b"), r.searchConcepts(listOf(GLOBAL_ORG), "").map { it.id })
+    }
+  }
+
+  @Test
   fun recordApplied_onlyRaisesWatermarks() {
     store.write { it.recordApplied(SCOPE, CLIENT, clientSeq = 5L) }
     store.write { it.recordApplied(SCOPE, CLIENT, clientSeq = 3L) }
@@ -279,6 +345,8 @@ abstract class UserDataStoreContractTest {
 
   companion object {
     const val ORG = "00000000-0000-4000-8000-0000000000a1"
+    const val OTHER_ORG = "00000000-0000-4000-8000-0000000000a2"
+    const val GLOBAL_ORG = "00000000-0000-4000-8000-000000000001"
     const val SURVEY = "00000000-0000-4000-8000-0000000000b1"
     const val OTHER_SURVEY = "00000000-0000-4000-8000-0000000000b2"
     const val ENTITY = "00000000-0000-4000-8000-0000000000c1"

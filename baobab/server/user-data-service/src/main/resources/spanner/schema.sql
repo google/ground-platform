@@ -29,6 +29,8 @@ CREATE PROTO BUNDLE (
   groundplatform.v2.data.PlotLock,
   groundplatform.v2.data.ReviewStatus,
   groundplatform.v2.data.SubmissionRecord,
+  groundplatform.v2.forms.DataType,
+  groundplatform.v2.library.ConceptDef,
   groundplatform.v2.library.OrganizationLibraryRecord,
   groundplatform.v2.survey.AclEntry,
   groundplatform.v2.survey.MembershipStatus,
@@ -55,8 +57,12 @@ CREATE TABLE Organizations (
   Name STRING(MAX) AS (Record.name) STORED,
   Listed BOOL AS (Record.listed) STORED,
   IsDeleted BOOL AS (Record.is_deleted) STORED,
+  SearchTokens TOKENLIST AS (TOKENIZE_SUBSTRING(CONCAT(IFNULL(Record.name, ''), ' ', IFNULL(Record.description, '')))) HIDDEN,
   CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (OrganizationId);
+
+-- SearchOrganizations: case-insensitive substring search on name and description.
+CREATE SEARCH INDEX OrganizationsSearch ON Organizations(SearchTokens) STORING (Listed, IsDeleted);
 
 CREATE TABLE OrganizationMembers (
   OrganizationId UUID NOT NULL,
@@ -83,6 +89,21 @@ CREATE TABLE OrganizationLibraries (
 ) PRIMARY KEY (OrganizationId),
   INTERLEAVE IN PARENT Organizations ON DELETE CASCADE;
 
+-- Concepts fanned out from each library's bundle in the same transaction, for SearchConcepts.
+-- Position is the concept's index in its bundle, so resolved order matches the bundle order.
+CREATE TABLE LibraryConcepts (
+  OrganizationId UUID NOT NULL,
+  ConceptId STRING(256) NOT NULL,
+  Concept groundplatform.v2.library.ConceptDef NOT NULL,
+  Position INT64 NOT NULL,
+  DataType groundplatform.v2.forms.DataType AS (Concept.data_type) STORED,
+  SearchText STRING(MAX) NOT NULL,
+  SearchTokens TOKENLIST AS (TOKENIZE_SUBSTRING(SearchText)) HIDDEN,
+) PRIMARY KEY (OrganizationId, ConceptId),
+  INTERLEAVE IN PARENT OrganizationLibraries ON DELETE CASCADE;
+
+CREATE SEARCH INDEX LibraryConceptsSearch ON LibraryConcepts(SearchTokens) STORING (DataType);
+
 CREATE TABLE Surveys (
   SurveyId UUID NOT NULL,
   SavedDef groundplatform.v2.survey.SurveyDef NOT NULL,
@@ -95,8 +116,12 @@ CREATE TABLE Surveys (
   SharingPolicy groundplatform.v2.survey.SharingPolicy AS (AclRules.sharing_policy) STORED,
   PeerDataVisibility groundplatform.v2.survey.PeerDataVisibility AS (AclRules.peer_data_visibility) STORED,
   PurgedAt TIMESTAMP OPTIONS (allow_commit_timestamp = true),
+  SearchTokens TOKENLIST AS (TOKENIZE_SUBSTRING(CONCAT(IFNULL(SavedDef.title, ''), ' ', IFNULL(SavedDef.description, '')))) HIDDEN,
   CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (SurveyId);
+
+-- SearchPublicSurveys: case-insensitive substring search on title and description.
+CREATE SEARCH INDEX SurveysSearch ON Surveys(SearchTokens) STORING (SharingPolicy, State);
 
 CREATE NULL_FILTERED INDEX SurveysByOrganization ON Surveys(OrganizationId, CommitTs)
   STORING (SharingPolicy, State, OwnerId);

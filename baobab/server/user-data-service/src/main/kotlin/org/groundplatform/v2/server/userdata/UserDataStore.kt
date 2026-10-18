@@ -22,6 +22,7 @@ import groundplatform.v2.data.MutationLogRecord
 import groundplatform.v2.data.PlaceRecord
 import groundplatform.v2.data.PlotLock
 import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.library.ConceptDef
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.SurveyAcl
@@ -81,6 +82,24 @@ interface UserDataReader {
   fun library(organizationId: String): OrganizationLibraryRecord?
 
   fun libraries(): List<OrganizationLibraryRecord>
+
+  /*
+   * Search candidates. Each returns at least every record whose searched text contains [query]
+   * (case-insensitive) and may return more, so callers apply the exact match. A blank query
+   * matches everything.
+   */
+
+  /** Listed, live organizations that may match [query] on name or description. */
+  fun searchOrganizations(query: String): List<Organization>
+
+  /** Surveys whose sharing policy is `PUBLIC` that may match [query] on title or description. */
+  fun searchPublicSurveys(query: String): List<SurveyDef>
+
+  /**
+   * Concepts of the libraries of [organizationIds] that may match [query] on ID or label, resolved
+   * by concept ID: a later organization's concept replaces an earlier one's, keeping its position.
+   */
+  fun searchConcepts(organizationIds: List<String>, query: String): List<ConceptDef>
 
   /** A survey's latest saved revision. */
   fun survey(surveyId: String): SurveyDef?

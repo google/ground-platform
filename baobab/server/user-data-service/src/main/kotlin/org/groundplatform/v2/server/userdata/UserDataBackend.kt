@@ -350,7 +350,7 @@ class UserDataBackend(private val store: UserDataStore) :
     val q = request.query.trim().lowercase()
     val matches =
       store
-        .read { it.organizations() }
+        .read { it.searchOrganizations(q) }
         .filter { org ->
           org.listed &&
             !org.is_deleted &&
@@ -560,16 +560,21 @@ class UserDataBackend(private val store: UserDataStore) :
   }
 
   override suspend fun SearchConcepts(request: SearchConceptsRequest): SearchConceptsResponse {
-    val resolved =
-      GetResolvedLibrary(GetResolvedLibraryRequest(organization_id = request.organization_id))
     val q = request.query.trim().lowercase()
+    // The global library, overridden by the organization's (as in GetResolvedLibrary).
+    val libraries =
+      listOf(ALL_USERS_ORGANIZATION_ID) +
+        listOfNotNull(request.organization_id.takeIf { it.isNotBlank() })
     val matches =
-      resolved.resolved_library?.bundle?.concepts.orEmpty().filter { c ->
-        (request.data_type == DataType.DATA_TYPE_UNSPECIFIED || c.data_type == request.data_type) &&
-          (q.isEmpty() ||
-            c.id.lowercase().contains(q) ||
-            c.label?.values?.values?.any { it.lowercase().contains(q) } == true)
-      }
+      store
+        .read { it.searchConcepts(libraries, q) }
+        .filter { c ->
+          (request.data_type == DataType.DATA_TYPE_UNSPECIFIED ||
+            c.data_type == request.data_type) &&
+            (q.isEmpty() ||
+              c.id.lowercase().contains(q) ||
+              c.label?.values?.values?.any { it.lowercase().contains(q) } == true)
+        }
     return SearchConceptsResponse(concepts = matches)
   }
 
@@ -1120,7 +1125,7 @@ class UserDataBackend(private val store: UserDataStore) :
   ): SearchPublicSurveysResponse {
     val q = request.query.trim().lowercase()
     val matching = store.read { r ->
-      r.surveys()
+      r.searchPublicSurveys(q)
         .filter { s ->
           r.acl(s.survey_id)?.sharing_policy == SharingPolicy.PUBLIC &&
             s.trash_time == null &&

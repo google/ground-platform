@@ -924,9 +924,14 @@ in these ways, to be closed in later steps:
   dataset or form and by `IsDeleted` in SQL. Query-mode sorting and paging, and
   the other `List*` RPCs (organizations, libraries, survey overviews, impact
   events, audit records), still work on whole collections in memory.
-- `SpannerSchema` adds new bundled proto types, tables, and indexes to an
-  existing database, and updates changed proto descriptors, rather than running
-  numbered migration files.
+- `SpannerSchema` adds new bundled proto types, tables, columns, and indexes to
+  an existing database, and updates changed proto descriptors, rather than
+  running numbered migration files. It doesn't change existing columns or
+  indexes.
+- The search indexes use `TOKENIZE_SUBSTRING` and `SEARCH_SUBSTRING` (substring
+  rather than full-text matching), as candidates the backend filters with its
+  exact match, so both stores return the same results. `LibraryConcepts` keeps
+  each concept's bundle position so resolved order matches `GetResolvedLibrary`.
 - There's no auth, `Users` table, or access epochs yet.
 
 ## Open Questions

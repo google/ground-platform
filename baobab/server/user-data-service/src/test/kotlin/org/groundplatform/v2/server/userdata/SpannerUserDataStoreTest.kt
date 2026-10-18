@@ -22,6 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 
@@ -52,6 +53,21 @@ class SpannerUserDataStoreTest : UserDataStoreContractTest() {
     SpannerTestDatabase.applySchema()
 
     assertEquals("Kept", store.read { it.survey(SURVEY)?.title })
+  }
+
+  @Test
+  fun applyingTheSchema_addsMissingColumnsAndIndexes() {
+    SpannerTestDatabase.store()
+    SpannerTestDatabase.updateDdl(
+      "DROP SEARCH INDEX SurveysSearch",
+      "ALTER TABLE Surveys DROP COLUMN SearchTokens",
+    )
+
+    SpannerTestDatabase.applySchema()
+
+    val ddl = SpannerTestDatabase.ddl()
+    assertTrue(ddl.any { it.startsWith("CREATE SEARCH INDEX SurveysSearch") })
+    assertTrue(ddl.single { it.startsWith("CREATE TABLE Surveys ") }.contains("SearchTokens"))
   }
 
   @Test
@@ -114,6 +130,19 @@ object SpannerTestDatabase {
   }
 
   fun applySchema() = SpannerSchema.apply(connection.databaseAdmin, connection.settings)
+
+  fun updateDdl(vararg statements: String) {
+    val settings = connection.settings
+    connection.databaseAdmin
+      .updateDatabaseDdl(settings.instanceId, settings.databaseId, statements.toList(), null)
+      .get()
+  }
+
+  fun ddl(): List<String> =
+    connection.databaseAdmin.getDatabaseDdl(
+      connection.settings.instanceId,
+      connection.settings.databaseId,
+    )
 
   /** A store reset to [seed]. Skips the calling test unless the emulator is configured. */
   fun store(seed: UserDataSeed = UserDataSeed()): SpannerUserDataStore {

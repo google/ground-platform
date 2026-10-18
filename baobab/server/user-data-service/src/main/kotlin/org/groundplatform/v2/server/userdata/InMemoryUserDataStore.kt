@@ -22,8 +22,10 @@ import groundplatform.v2.data.MutationLogRecord
 import groundplatform.v2.data.PlaceRecord
 import groundplatform.v2.data.PlotLock
 import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.library.ConceptDef
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.Organization
+import groundplatform.v2.survey.SharingPolicy
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.userdata.UserDataSeed
@@ -132,6 +134,21 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
     override fun library(organizationId: String) = libraries[organizationId]
 
     override fun libraries() = libraries.values.toList()
+
+    // Search candidates are every record passing the non-text filters; callers match the text.
+    override fun searchOrganizations(query: String) =
+      organizations.values.filter { it.listed && !it.is_deleted }
+
+    override fun searchPublicSurveys(query: String) =
+      surveys.values.filter { acls[it.survey_id]?.sharing_policy == SharingPolicy.PUBLIC }
+
+    override fun searchConcepts(organizationIds: List<String>, query: String): List<ConceptDef> {
+      val resolved = LinkedHashMap<String, ConceptDef>()
+      for (id in organizationIds.distinct()) {
+        libraries[id]?.bundle?.concepts?.forEach { resolved[it.id] = it }
+      }
+      return resolved.values.toList()
+    }
 
     override fun survey(surveyId: String) = surveys[surveyId]
 

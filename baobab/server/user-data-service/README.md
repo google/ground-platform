@@ -138,6 +138,11 @@ at startup (with a proto bundle built from `shared/protos` by the
 the seed into it. Records are stored as `PROTO` columns, and record IDs must be
 UUIDs. Places and the mutation log examples are still served from the seed.
 
+On an existing database, startup adds new tables, columns, indexes, and proto
+types. The emulator can't change the proto bundle without breaking existing
+generated columns, so when the protos or bundled types change it recreates the
+database instead (its data is reset to the seed).
+
 Run the emulator (a pinned, checksum-verified release; Docker on non-Linux
 hosts) and start the service against it, from `baobab/`:
 

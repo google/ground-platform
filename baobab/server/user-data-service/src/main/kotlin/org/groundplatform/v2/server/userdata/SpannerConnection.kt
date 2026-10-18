@@ -97,8 +97,14 @@ private constructor(
     /**
      * Connects to the database in [settings], recording [databaseClient] operations in [recorder].
      * On the emulator, creates the instance and an empty database first if they don't exist.
+     * [prepare] runs with the admin client before any database client opens sessions, for schema
+     * changes that may recreate the database.
      */
-    fun open(settings: SpannerSettings, recorder: SpannerOperationRecorder): SpannerConnection {
+    fun open(
+      settings: SpannerSettings,
+      recorder: SpannerOperationRecorder,
+      prepare: (DatabaseAdminClient) -> Unit = {},
+    ): SpannerConnection {
       SpannerOptions.enableOpenTelemetryTraces()
       val traced =
         optionsFor(settings)
@@ -109,6 +115,7 @@ private constructor(
           .service
       val plain = optionsFor(settings).build().service
       if (settings.emulatorHost != null) ensureEmulatorDatabase(plain, settings)
+      prepare(plain.databaseAdminClient)
       return SpannerConnection(settings, traced, plain)
     }
 
