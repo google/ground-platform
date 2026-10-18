@@ -15,6 +15,7 @@ package org.groundplatform.v2.app.domain.model.editor
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -452,5 +453,85 @@ class FormImportRoundTripTest {
       )
     val roundTripped = roundTrip(withVisualChoices)
     assertSameQuestions(withVisualChoices, roundTripped)
+  }
+
+  @Test
+  fun formSections_singletonAndRepeated_surviveTheRoundTrip() {
+    val qRoot =
+      EditorQuestion(
+        key = "q_has_trees",
+        name = "has_trees",
+        label = "Are there trees on site?",
+        type = EditorQuestionType.SELECT_ONE,
+        choices = listOf(EditorChoice("yes", "Yes"), EditorChoice("no", "No")),
+      )
+    val qPlotDetails =
+      EditorQuestion(
+        key = "q_plot_name",
+        name = "plot_name",
+        label = "Plot name",
+        type = EditorQuestionType.TEXT,
+        sectionId = "sec_plot",
+      )
+    val qTreeSpecies =
+      EditorQuestion(
+        key = "q_tree_species",
+        name = "tree_species",
+        label = "Tree species",
+        type = EditorQuestionType.TEXT,
+        sectionId = "sec_trees",
+      )
+    val qTreeHeight =
+      EditorQuestion(
+        key = "q_tree_height",
+        name = "tree_height",
+        label = "Tree height (m)",
+        type = EditorQuestionType.NUMBER,
+        sectionId = "sec_trees",
+      )
+    val secPlot =
+      EditorSection(
+        id = "sec_plot",
+        title = "Plot details",
+        repeatable = false,
+      )
+    val secTrees =
+      EditorSection(
+        id = "sec_trees",
+        title = "Trees",
+        repeatable = true,
+        repeatCountExpression = "3",
+        relevance = EditorRelevance(qRoot.key, RelevanceOperator.EQUALS, "yes"),
+      )
+    val form =
+      EditorForm(
+        formId = "section_test_form",
+        title = "Section Test Form",
+        questions = listOf(qRoot, qPlotDetails, qTreeSpecies, qTreeHeight),
+        sections = listOf(secPlot, secTrees),
+      )
+
+    val actual = roundTrip(form)
+    assertEquals(form.title, actual.title)
+    assertEquals(4, actual.questions.size)
+    assertEquals(2, actual.sections.size)
+
+    val importedSecPlot = assertNotNull(actual.sections.find { it.id == "sec_plot" })
+    assertEquals("Plot details", importedSecPlot.title)
+    assertFalse(importedSecPlot.repeatable)
+
+    val importedSecTrees = assertNotNull(actual.sections.find { it.id == "sec_trees" })
+    assertEquals("Trees", importedSecTrees.title)
+    assertTrue(importedSecTrees.repeatable)
+    assertEquals("3", importedSecTrees.repeatCountExpression)
+    assertNotNull(importedSecTrees.relevance)
+    val expectedSourceKey = actual.questions.find { it.name == "has_trees" }?.key
+    assertEquals(expectedSourceKey, importedSecTrees.relevance?.sourceQuestionKey)
+    assertEquals(RelevanceOperator.EQUALS, importedSecTrees.relevance?.operator)
+    assertEquals("yes", importedSecTrees.relevance?.value)
+
+    assertEquals("sec_plot", actual.questions.find { it.name == "plot_name" }?.sectionId)
+    assertEquals("sec_trees", actual.questions.find { it.name == "tree_species" }?.sectionId)
+    assertEquals("sec_trees", actual.questions.find { it.name == "tree_height" }?.sectionId)
   }
 }

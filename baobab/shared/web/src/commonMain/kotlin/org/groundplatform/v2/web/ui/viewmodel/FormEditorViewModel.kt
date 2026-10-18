@@ -41,6 +41,7 @@ import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.model.editor.EditorRelevance
 import org.groundplatform.v2.app.domain.model.editor.EditorSaveTo
+import org.groundplatform.v2.app.domain.model.editor.EditorSection
 import org.groundplatform.v2.app.domain.model.editor.EditorStatusBadge
 import org.groundplatform.v2.app.domain.model.editor.EditorStatusConfig
 import org.groundplatform.v2.app.domain.model.editor.EditorStatusRule
@@ -265,6 +266,21 @@ interface FormEditorActions {
     importedChoices: List<EditorChoice>,
     append: Boolean = false,
   )
+
+  // --- Form Sections (Singleton & Repeated Groups) ---
+
+  /** Adds a new section to the form and returns its unique ID. */
+  fun addSection(title: String = "Section", repeatable: Boolean = false): String
+
+  /** Updates section [sectionId] with [transform]. */
+  fun updateSection(sectionId: String, transform: (EditorSection) -> EditorSection)
+
+  /** Deletes section [sectionId], removing it from the form and unassigning its questions. */
+  fun deleteSection(sectionId: String)
+
+  /** Assigns question at [questionIndex] (or [key]) to section [sectionId] (or clears it if blank). */
+  fun setQuestionSection(questionIndex: Int, sectionId: String)
+  fun setQuestionSection(key: String, sectionId: String)
 
   // --- Save-to logic ---
 
@@ -1127,6 +1143,57 @@ class FormEditorViewModel(
                 }
               q.copy(choices = newChoices)
             } else q
+          }
+      )
+    }
+  }
+
+  override fun addSection(title: String, repeatable: Boolean): String {
+    val existingIds = formFlow.value.sections.map { it.id }.toSet()
+    var counter = formFlow.value.sections.size + 1
+    var newId = "section_$counter"
+    while (newId in existingIds) {
+      counter++
+      newId = "section_$counter"
+    }
+    val newSection = EditorSection(id = newId, title = title, repeatable = repeatable)
+    mutateForm { form ->
+      form.copy(sections = form.sections + newSection)
+    }
+    return newId
+  }
+
+  override fun updateSection(sectionId: String, transform: (EditorSection) -> EditorSection) {
+    mutateForm { form ->
+      form.copy(
+        sections = form.sections.map { if (it.id == sectionId) transform(it) else it }
+      )
+    }
+  }
+
+  override fun deleteSection(sectionId: String) {
+    mutateForm { form ->
+      form.copy(
+        sections = form.sections.filterNot { it.id == sectionId },
+        questions =
+          form.questions.map { q ->
+            if (q.sectionId == sectionId) q.copy(sectionId = "") else q
+          },
+      )
+    }
+  }
+
+  override fun setQuestionSection(questionIndex: Int, sectionId: String) {
+    val targetKey = formFlow.value.questions.getOrNull(questionIndex)?.key ?: return
+    setQuestionSection(targetKey, sectionId)
+  }
+
+  override fun setQuestionSection(key: String, sectionId: String) {
+    mutateForm { form ->
+      form.copy(
+        questions =
+          form.questions.map { q ->
+            if (q.key == key) q.copy(sectionId = sectionId) else q
           }
       )
     }

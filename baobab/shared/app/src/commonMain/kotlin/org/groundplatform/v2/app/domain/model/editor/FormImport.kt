@@ -150,6 +150,7 @@ object FormImport {
     }
     private val notes = mutableListOf<String>()
     private val questions = mutableListOf<EditorQuestion>()
+    private val sections = mutableListOf<EditorSection>()
     private val keyByPath = mutableMapOf<String, String>()
     private val pathByKey = mutableMapOf<String, String>()
     private val usedNames = mutableSetOf<String>()
@@ -220,6 +221,10 @@ object FormImport {
           availability
         }
       val effectiveFormId = formId.ifBlank { FormIds.newFormId() }
+      val resolvedSections =
+        sections.map { sec ->
+          sec.copy(relevance = relevanceOfSection(sec))
+        }
       val form =
         EditorForm(
           formId = effectiveFormId,
@@ -235,6 +240,7 @@ object FormImport {
               status = EditorStatusConfig(enabled = statusEnabled),
             ),
           availability = effectiveAvailability,
+          sections = resolvedSections,
         )
       return ImportedForm(
         form = form,
@@ -250,32 +256,66 @@ object FormImport {
       components: List<ViewComponent>,
       enclosing: String,
       enclosingRelevance: RelevanceContext?,
+      currentSectionId: String = "",
     ) {
       components.forEach { component ->
-        component.control?.let { importControl(it, enclosing, enclosingRelevance) }
+        component.control?.let { importControl(it, enclosing, enclosingRelevance, currentSectionId) }
         component.group?.let { group ->
           val groupPath = join(enclosing, group.field_ref)
           val groupRel = bindings[groupPath]?.relevant_expression?.trim().orEmpty()
+          val sectionId =
+            group.field_ref.trim().removePrefix("/").substringAfterLast('/').ifEmpty {
+              "section_${sections.size + 1}"
+            }
+          val sectionTitle = text(group.label) ?: sectionId
+          val sec =
+            EditorSection(
+              id = sectionId,
+              title = sectionTitle,
+              repeatable = false,
+              relevance = null,
+            )
+          sections += sec
+          if (groupRel.isNotEmpty() && !isTrue(groupRel)) {
+            relevanceByKey[sectionId] = groupRel
+            relevanceContextByKey[sectionId] = groupPath
+          }
           val nextRel =
             if (groupRel.isNotEmpty() && !isTrue(groupRel)) {
               RelevanceContext(groupRel, groupPath)
             } else {
               enclosingRelevance
             }
-          walk(group.components, groupPath, nextRel)
+          walk(group.components, groupPath, nextRel, currentSectionId = sectionId)
         }
         component.repeat?.let { repeat ->
-          notes +=
-            "Repeat \"${text(repeat.label) ?: repeat.field_ref}\" was imported as plain questions."
           val repeatPath = join(enclosing, repeat.field_ref)
           val repeatRel = bindings[repeatPath]?.relevant_expression?.trim().orEmpty()
+          val sectionId =
+            repeat.field_ref.trim().removePrefix("/").substringAfterLast('/').ifEmpty {
+              "repeat_${sections.size + 1}"
+            }
+          val sectionTitle = text(repeat.label) ?: sectionId
+          val sec =
+            EditorSection(
+              id = sectionId,
+              title = sectionTitle,
+              repeatable = true,
+              repeatCountExpression = repeat.count_expression,
+              relevance = null,
+            )
+          sections += sec
+          if (repeatRel.isNotEmpty() && !isTrue(repeatRel)) {
+            relevanceByKey[sectionId] = repeatRel
+            relevanceContextByKey[sectionId] = repeatPath
+          }
           val nextRel =
             if (repeatRel.isNotEmpty() && !isTrue(repeatRel)) {
               RelevanceContext(repeatRel, repeatPath)
             } else {
               enclosingRelevance
             }
-          walk(repeat.components, repeatPath, nextRel)
+          walk(repeat.components, repeatPath, nextRel, currentSectionId = sectionId)
         }
       }
     }
@@ -293,6 +333,7 @@ object FormImport {
       control: ControlDef,
       enclosing: String,
       enclosingRelevance: RelevanceContext?,
+      currentSectionId: String = "",
     ) {
       val path = join(enclosing, control.field_ref)
       if (path.isEmpty()) {
@@ -353,7 +394,7 @@ object FormImport {
           relevanceByKey[key] = ownRelevant
           relevanceContextByKey[key] = path
         }
-        enclosingRelevance != null -> {
+        enclosingRelevance != null && currentSectionId.isEmpty() -> {
           relevanceByKey[key] = enclosingRelevance.expression
           relevanceContextByKey[key] = enclosingRelevance.contextPath
         }
@@ -401,6 +442,7 @@ object FormImport {
           labelTranslations = translations(control.label),
           hintTranslations = translations(control.hint),
           parentQuestionKey = control.parent_question_key.orEmpty(),
+          sectionId = currentSectionId,
         )
       keyByPath[path] = key
       pathByKey[key] = path
@@ -685,16 +727,19 @@ object FormImport {
         ?: ""
     }
 
-    private fun relevanceOf(question: EditorQuestion): EditorRelevance? {
-      val rawExpression = relevanceByKey[question.key] ?: return null
+    private fun parseRelevance(
+      key: String,
+      maxIndex: Int,
+      labelForNote: String,
+    ): EditorRelevance? {
+      val rawExpression = relevanceByKey[key] ?: return null
       val expression = stripOuterParens(rawExpression)
-      val contextPath = relevanceContextByKey[question.key] ?: pathByKey[question.key].orEmpty()
-      val index = questions.indexOfFirst { it.key == question.key }
+      val contextPath = relevanceContextByKey[key] ?: pathByKey[key].orEmpty()
       fun source(rawRef: String): EditorQuestion? {
         val resolvedPath = resolvePath(rawRef, contextPath) ?: return null
-        val key = keyByPath[resolvedPath] ?: return null
-        val sourceIndex = questions.indexOfFirst { it.key == key }
-        return if (sourceIndex in 0 until index) questions[sourceIndex] else null
+        val srcKey = keyByPath[resolvedPath] ?: return null
+        val sourceIndex = questions.indexOfFirst { it.key == srcKey }
+        return if (sourceIndex in 0 until maxIndex) questions[sourceIndex] else null
       }
       fun mapSelected(src: EditorQuestion, literal: String, negated: Boolean): EditorRelevance? {
         val value = unquote(literal)
@@ -780,9 +825,20 @@ object FormImport {
           }
       if (relevance == null) {
         notes +=
-          "Display logic \"$rawExpression\" on \"${question.label}\" isn't supported by the editor."
+          "Display logic \"$rawExpression\" on \"$labelForNote\" isn't supported by the editor."
       }
       return relevance
+    }
+
+    private fun relevanceOf(question: EditorQuestion): EditorRelevance? {
+      val index = questions.indexOfFirst { it.key == question.key }
+      return parseRelevance(question.key, index, question.label)
+    }
+
+    private fun relevanceOfSection(section: EditorSection): EditorRelevance? {
+      val firstQuestionIndex = questions.indexOfFirst { it.sectionId == section.id }
+      val maxIndex = if (firstQuestionIndex >= 0) firstQuestionIndex else questions.size
+      return parseRelevance(section.id, maxIndex, section.title)
     }
 
     private fun resolvePath(rawRef: String, contextPath: String): String? {

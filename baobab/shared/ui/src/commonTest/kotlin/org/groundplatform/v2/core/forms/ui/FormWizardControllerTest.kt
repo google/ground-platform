@@ -487,6 +487,35 @@ class FormWizardControllerTest {
   }
 
   @Test
+  fun repeatHub_buildsPreviewSummaries_andSupportsOpenRepeatHubNavigation() {
+    val formDef = WorkbenchExampleForm.ALL_FIELD_TYPES.formDefinition.proto
+    val controller = FormWizardController(formDef = formDef)
+
+    // Populate instance 1
+    controller.updateString("/data/sampled_trees[1]/tree_tag", "Oak-42")
+    controller.updateDouble("/data/sampled_trees[1]/stem_dbh_cm", 45.0)
+
+    // Add instance 2 and populate
+    controller.addRepeatInstanceAndOpen("/data/sampled_trees")
+    controller.updateString("/data/sampled_trees[2]/tree_tag", "Pine-17")
+
+    // Open repeat hub via controller
+    controller.openRepeatHub("/data/sampled_trees")
+    val current = controller.currentStep
+    assertTrue(current is FormWizardStep.RepeatHubStep)
+    assertEquals("/data/sampled_trees", current.repeatGroup.canonicalPath)
+    assertEquals(2, current.summaries.size)
+
+    val summary1 = current.summaries[0]
+    assertEquals(1, summary1.repeatIndex)
+    assertTrue(summary1.previewText.contains("Oak-42") || summary1.previewText.contains("45"))
+
+    val summary2 = current.summaries[1]
+    assertEquals(2, summary2.repeatIndex)
+    assertTrue(summary2.previewText.contains("Pine-17"))
+  }
+
+  @Test
   fun cascadingSelects_evaluatesParentInfoAndPrunesInvalidChildAnswers() {
     val cascadeXml =
       """

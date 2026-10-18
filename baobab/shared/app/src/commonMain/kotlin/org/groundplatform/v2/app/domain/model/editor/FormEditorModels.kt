@@ -26,6 +26,7 @@ import groundplatform.v2.forms.EventType
 import groundplatform.v2.forms.FieldBinding
 import groundplatform.v2.forms.FieldDefinition
 import groundplatform.v2.forms.FormDef
+import groundplatform.v2.forms.GroupDef
 import groundplatform.v2.forms.ItemsetDef
 import groundplatform.v2.forms.LabelDef
 import groundplatform.v2.forms.LanguageTranslation
@@ -34,6 +35,7 @@ import groundplatform.v2.forms.MediaRef
 import groundplatform.v2.forms.ModelDef
 import groundplatform.v2.forms.PrimaryInstance
 import groundplatform.v2.forms.RecordSchema
+import groundplatform.v2.forms.RepeatDef
 import groundplatform.v2.forms.SecondaryInstance
 import groundplatform.v2.forms.TranslationCatalog
 import groundplatform.v2.forms.ViewComponent
@@ -304,6 +306,18 @@ data class EditorRelevance(
 )
 
 /**
+ * A section (group) of questions in the editor, either a singleton group or repeated group.
+ * Group-level [relevance] applies conditionally to all questions in the section.
+ */
+data class EditorSection(
+  val id: String,
+  val title: String,
+  val repeatable: Boolean = false,
+  val repeatCountExpression: String = "",
+  val relevance: EditorRelevance? = null,
+)
+
+/**
  * Where a [EditorQuestionType.SELECT_ONE] or [EditorQuestionType.SELECT_MULTIPLE] question gets its
  * options: a manual list of [EditorChoice]s, a survey Map layer, or a survey Data table.
  */
@@ -373,6 +387,8 @@ data class EditorQuestion(
   val hintTranslations: Map<String, String> = emptyMap(),
   /** Key of the parent choice question this question's choices depend on (cascading select). */
   val parentQuestionKey: String = "",
+  /** ID of the [EditorSection] this question belongs to, or empty string if not in a section. */
+  val sectionId: String = "",
 ) {
   /**
    * Returns the raw label authored for [language], or [label] when [language] is blank or matches
@@ -537,7 +553,11 @@ data class EditorForm(
    * fall back to [title] via [effectiveCtaLabel].
    */
   val ctaLabel: String = "",
+  /** Sections (groups of questions) configured in this form. */
+  val sections: List<EditorSection> = emptyList(),
 ) {
+  fun section(sectionId: String): EditorSection? = sections.firstOrNull { it.id == sectionId }
+
   /** Label shown on buttons that start data collection for this Form. */
   val effectiveCtaLabel: String
     get() = ctaLabel.trim().ifEmpty { title }
@@ -810,11 +830,15 @@ object FormEditorValidator {
 /** Generates ODK-compatible XForms XML from an [EditorForm]. */
 object EditorXFormsGenerator {
 
-  /** Returns the XPath `relevant` expression for [question], or `null` if always shown. */
-  fun relevantExpression(form: EditorForm, question: EditorQuestion): String? {
-    val relevance = question.relevance ?: return null
+  /** Returns the XPath `relevant` expression for [relevance], or `null` if always shown. */
+  fun relevantExpression(
+    form: EditorForm,
+    relevance: EditorRelevance?,
+    targetQuestionIndex: Int = Int.MAX_VALUE,
+  ): String? {
+    if (relevance == null) return null
     val sourceIndex = form.indexOf(relevance.sourceQuestionKey)
-    if (sourceIndex < 0 || sourceIndex >= form.indexOf(question.key)) return null
+    if (sourceIndex < 0 || sourceIndex >= targetQuestionIndex) return null
     val source = form.questions[sourceIndex]
     val ref = "/data/${source.name}"
     val literal =
@@ -828,11 +852,14 @@ object EditorXFormsGenerator {
       RelevanceOperator.NOT_EQUALS -> "$ref != $literal"
       RelevanceOperator.GREATER_THAN -> "$ref > $literal"
       RelevanceOperator.LESS_THAN -> "$ref < $literal"
-      // ODK XForms spec, "XPath functions": selected(space-delimited-list, value).
       RelevanceOperator.INCLUDES -> "selected($ref, $literal)"
       RelevanceOperator.IS_ANSWERED -> "string-length($ref) > 0"
     }
   }
+
+  /** Returns the XPath `relevant` expression for [question], or `null` if always shown. */
+  fun relevantExpression(form: EditorForm, question: EditorQuestion): String? =
+    relevantExpression(form, question.relevance, form.indexOf(question.key))
 
   /** Media file name referenced by [choice]'s image, unique within the Form. */
   fun choiceImageFileName(question: EditorQuestion, choice: EditorChoice): String? =
@@ -1106,8 +1133,30 @@ object EditorXFormsGenerator {
           FieldDefinition(name = SaveToRules.TARGET_ENTITY_FIELD, type = DataType.TYPE_SELECT_ONE)
         )
       }
-      form.questions.forEach { question ->
-        add(FieldDefinition(name = question.name, type = dataTypeOf(question)))
+      val processedSectionIds = mutableSetOf<String>()
+      var i = 0
+      while (i < form.questions.size) {
+        val q = form.questions[i]
+        val section = form.section(q.sectionId)
+        if (section == null) {
+          add(FieldDefinition(name = q.name, type = dataTypeOf(q)))
+          i++
+        } else if (processedSectionIds.add(section.id)) {
+          val sectionQuestions = form.questions.filter { it.sectionId == section.id }
+          val childFields =
+            sectionQuestions.map { FieldDefinition(name = it.name, type = dataTypeOf(it)) }
+          add(
+            FieldDefinition(
+              name = section.id,
+              type = DataType.TYPE_MESSAGE,
+              is_repeated = section.repeatable,
+              fields = childFields,
+            )
+          )
+          i++
+        } else {
+          i++
+        }
       }
       if (entity?.hasStatus == true) {
         add(FieldDefinition(name = SaveToRules.STATUS_FIELD, type = DataType.TYPE_STRING))
@@ -1174,7 +1223,22 @@ object EditorXFormsGenerator {
           )
         )
       }
+      form.sections.forEach { section ->
+        if (section.relevance != null) {
+          val relExpr = relevantExpression(form, section.relevance).orEmpty()
+          add(
+            FieldBinding(
+              field_path = "/data/${section.id}",
+              type = DataType.TYPE_MESSAGE,
+              relevant_expression = relExpr,
+            )
+          )
+        }
+      }
       form.questions.forEach { question ->
+        val section = form.section(question.sectionId)
+        val fieldPath =
+          if (section != null) "/data/${section.id}/${question.name}" else question.name
         val constraintExpr =
           if (!question.type.isReadOnly) {
             ValidationRules.constraintExpression(question.type, question.validation).orEmpty()
@@ -1189,7 +1253,7 @@ object EditorXFormsGenerator {
           }
         add(
           FieldBinding(
-            field_path = question.name,
+            field_path = fieldPath,
             type = dataTypeOf(question),
             required_expression =
               if (question.required && !question.type.isReadOnly) "true()" else "",
@@ -1256,12 +1320,68 @@ object EditorXFormsGenerator {
       if (entity?.selectsTarget == true) {
         add(ViewComponent(control = buildTargetPickerControl(entity.target)))
       }
-      form.questions.forEach { question ->
-        add(
-          ViewComponent(
-            control = buildQuestionControl(question, hasMultiLanguageTranslations, form = form)
+      var i = 0
+      while (i < form.questions.size) {
+        val q = form.questions[i]
+        val section = form.section(q.sectionId)
+        if (section == null) {
+          add(
+            ViewComponent(
+              control =
+                buildQuestionControl(
+                  q,
+                  hasMultiLanguageTranslations,
+                  form = form,
+                  section = null,
+                )
+            )
           )
-        )
+          i++
+        } else {
+          val sectionQuestions = mutableListOf<EditorQuestion>()
+          while (i < form.questions.size && form.questions[i].sectionId == section.id) {
+            sectionQuestions.add(form.questions[i])
+            i++
+          }
+          val childComponents =
+            sectionQuestions.map { childQ ->
+              ViewComponent(
+                control =
+                  buildQuestionControl(
+                    childQ,
+                    hasMultiLanguageTranslations,
+                    form = form,
+                    section = section,
+                  )
+              )
+            }
+          if (section.repeatable) {
+            add(
+              ViewComponent(
+                repeat =
+                  RepeatDef(
+                    field_ref = "/data/${section.id}",
+                    label = LabelDef(text = section.title),
+                    count_expression = section.repeatCountExpression,
+                    no_add_remove = false,
+                    components = childComponents,
+                  )
+              )
+            )
+          } else {
+            add(
+              ViewComponent(
+                group =
+                  GroupDef(
+                    field_ref = "/data/${section.id}",
+                    label = LabelDef(text = section.title),
+                    appearance = "field-list",
+                    components = childComponents,
+                  )
+              )
+            )
+          }
+        }
       }
     }
 
@@ -1480,6 +1600,7 @@ object EditorXFormsGenerator {
     question: EditorQuestion,
     hasMultiLanguageTranslations: Boolean = false,
     form: EditorForm? = null,
+    section: EditorSection? = null,
   ): ControlDef {
     val type = question.type
     val choiceDatasetId =
@@ -1529,8 +1650,9 @@ object EditorXFormsGenerator {
     val hasHint =
       question.hint.isNotBlank() ||
         (hasMultiLanguageTranslations && question.hintTranslations.any { it.value.isNotBlank() })
+    val fieldRef = if (section != null) "/data/${section.id}/${question.name}" else question.name
     return ControlDef(
-      field_ref = question.name,
+      field_ref = fieldRef,
       type = controlTypeOf(type),
       label =
         if (hasMultiLanguageTranslations) {

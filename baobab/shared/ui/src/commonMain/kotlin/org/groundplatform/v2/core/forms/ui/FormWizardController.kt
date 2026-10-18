@@ -52,6 +52,17 @@ data class RepeatStepContext(
   val canRemoveInstance: Boolean,
 )
 
+/**
+ * Human-readable preview summary of a single repeat instance for repeat hubs and overview screens.
+ */
+data class RepeatInstanceSummary(
+  val repeatIndex: Int,
+  val title: String,
+  val previewText: String,
+  val instancePath: String,
+  val answeredCount: Int = 0,
+)
+
 /** Represents a single navigable screen in the mobile one-question-at-a-time form runner. */
 sealed interface FormWizardStep {
   /** Stable identifier used to preserve user position when dynamic steps are recomputed. */
@@ -97,6 +108,7 @@ sealed interface FormWizardStep {
     override val breadcrumbs: List<String>,
     override val repeatContext: RepeatStepContext?,
     val repeatGroup: ComponentState.RepeatGroupState,
+    val summaries: List<RepeatInstanceSummary> = emptyList(),
   ) : FormWizardStep
 
   /**
@@ -623,6 +635,17 @@ class FormWizardController(
     session.removeRepeatInstance(repeatPath, repeatIndex)
   }
 
+  /** Navigates directly to the [FormWizardStep.RepeatHubStep] for repeat group [repeatPath]. */
+  fun openRepeatHub(repeatPath: String) {
+    val targetIdx =
+      steps.indexOfFirst {
+        it is FormWizardStep.RepeatHubStep && it.repeatGroup.canonicalPath == repeatPath
+      }
+    if (targetIdx >= 0) {
+      jumpToStep(targetIdx)
+    }
+  }
+
   /** Switches active translation language. */
   fun setLanguage(language: String) {
     session.setLanguage(language)
@@ -755,6 +778,31 @@ class FormWizardController(
                 )
               }
 
+              val summaries =
+                relevantInstances.map { instance ->
+                  val dynamicLabel = instance.label?.text?.trim()
+                  val instTitle =
+                    if (!dynamicLabel.isNullOrBlank() && dynamicLabel != repeatTitle) {
+                      dynamicLabel
+                    } else {
+                      "$repeatTitle #${instance.repeatIndex}"
+                    }
+                  val controls = collectRelevantControls(instance.children)
+                  val answeredValues = controls.mapNotNull { formatControlPreview(it) }
+                  val preview =
+                    when {
+                      answeredValues.isEmpty() -> "Tap to fill out details"
+                      else -> answeredValues.take(3).joinToString(" • ")
+                    }
+                  RepeatInstanceSummary(
+                    repeatIndex = instance.repeatIndex,
+                    title = instTitle,
+                    previewText = preview,
+                    instancePath = instance.canonicalPath,
+                    answeredCount = answeredValues.size,
+                  )
+                }
+
               // Always provide a RepeatHubStep if the user can add/remove instances or if 0
               // instances exist
               if (
@@ -769,6 +817,7 @@ class FormWizardController(
                     breadcrumbs = breadcrumbs,
                     repeatContext = repeatContext,
                     repeatGroup = component,
+                    summaries = summaries,
                   )
                 )
               }
@@ -784,6 +833,43 @@ class FormWizardController(
       )
       result.add(FormWizardStep.SummaryStep())
       return result
+    }
+
+    fun formatControlPreview(control: ComponentState.ControlState): String? {
+      val value = control.fieldState.value ?: return null
+      val scalar = value.scalar_value
+      if (scalar != null) {
+        val str = scalar.string_value?.trim()
+        if (!str.isNullOrBlank()) {
+          val matchingOpt = control.options.firstOrNull { it.value == str }
+          return matchingOpt?.label?.text?.ifBlank { str } ?: str
+        }
+        if (scalar.int32_value != null) return scalar.int32_value.toString()
+        if (scalar.int64_value != null) return scalar.int64_value.toString()
+        val d = scalar.double_value
+        if (d != null) {
+          return if (d % 1.0 == 0.0) d.toLong().toString() else d.toString()
+        }
+        val b = scalar.bool_value
+        if (b != null) return if (b) "Yes" else "No"
+        val date = scalar.date_value
+        if (date != null && (date.year != 0 || date.month != 0 || date.day != 0)) {
+          return "${date.year}-${date.month.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}"
+        }
+        if (scalar.geopoint_value != null) return "Location recorded"
+        if (scalar.geotrace_value != null) return "Trace recorded"
+        if (scalar.geoshape_value != null) return "Shape recorded"
+      }
+      val list = value.list_value
+      if (list != null && list.values.isNotEmpty()) {
+        val labels =
+          list.values.mapNotNull { item ->
+            val v = item.string_value ?: return@mapNotNull null
+            control.options.firstOrNull { it.value == v }?.label?.text?.ifBlank { v } ?: v
+          }
+        if (labels.isNotEmpty()) return labels.joinToString(", ")
+      }
+      return null
     }
 
     private fun collectRelevantControls(
