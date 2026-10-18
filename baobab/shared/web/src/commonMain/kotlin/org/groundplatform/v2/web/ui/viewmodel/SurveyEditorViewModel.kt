@@ -278,6 +278,18 @@ interface SurveyEditorActions : MapFeatureEditor, SurveyOutcomeActions {
   fun createDatasetForForm(formKey: String, kind: DatasetKind? = null, open: Boolean = true)
 
   /**
+   * Creates a new Map layer or Data table of [kind] and automatically binds question at
+   * [questionIndex] of the currently open Form to it, keeping the user in the Form editor.
+   */
+  fun createDatasetForChoiceQuestion(questionIndex: Int, kind: DatasetKind)
+
+  /**
+   * Creates a new Map layer or Data table of [kind] and automatically binds question at
+   * [questionIndex] of Form [formKey] to it, keeping the user in the Form editor.
+   */
+  fun createDatasetForChoiceQuestion(formKey: String, questionIndex: Int, kind: DatasetKind)
+
+  /**
    * Creates a new Form backed by and linked to [datasetKey]. When [open] is true, the new Form is
    * selected in the Survey editor.
    */
@@ -765,6 +777,53 @@ class SurveyEditorViewModel(
       datasets = remainingDatasets + dataset
       if (open) section = SurveyEditorSection.Dataset(dataset.key)
     }
+
+    /**
+     * Creates a dataset of [kind] and binds question [questionIndex] of Form [formKey] to it,
+     * keeping the user on the form editor.
+     */
+    fun createDatasetForChoiceQuestion(
+      formKey: String,
+      questionIndex: Int,
+      kind: DatasetKind,
+    ) {
+      val form = form(formKey)?.form ?: return
+      if (questionIndex !in form.questions.indices) return
+      val datasetKey = newKey("d")
+      val title =
+        FormDatasetLinks.uniqueTitle(
+          "New ${kind.singular.lowercase()}",
+          datasets.map { it.displayName },
+        )
+      val dataset =
+        EntityDataset(
+          key = datasetKey,
+          kind = kind,
+          id = FormDatasetLinks.uniqueId(slugify(title), datasets.map { it.id }),
+          displayName = title,
+          geometryKind = GeometryKind.POINT,
+          keyProperty = "id",
+          labelProperty = "name",
+          properties =
+            listOf(
+              EntityProperty("id", "ID", PropertyType.TEXT, required = true),
+              EntityProperty("name", "Name", PropertyType.TEXT),
+            ),
+        )
+      datasets = datasets + dataset
+      val newChoiceSource =
+        if (kind == DatasetKind.MAP_LAYER) ChoiceSource.MAP_LAYER else ChoiceSource.DATA_TABLE
+      updateForm(formKey) { f ->
+        f.copy(
+          questions =
+            f.questions.mapIndexed { idx, q ->
+              if (idx == questionIndex) {
+                q.copy(choiceSource = newChoiceSource, choiceDatasetId = dataset.id)
+              } else q
+            }
+        )
+      }
+    }
   }
 
   /**
@@ -1020,6 +1079,9 @@ class SurveyEditorViewModel(
             currentSurveyDraft = { draft },
             applySurveyDraft = ::applyFormUndoRedoDraft,
             isSurveyReadOnly = { uiState.value.isReadOnly },
+            createDatasetForChoiceQuestionCallback = { qIdx, kind ->
+              createDatasetForChoiceQuestion(formKey, qIdx, kind)
+            },
           )
         viewModel to job
       }
@@ -1387,6 +1449,20 @@ class SurveyEditorViewModel(
 
   override fun createDatasetForForm(formKey: String, kind: DatasetKind?, open: Boolean) =
     editForForm(formKey) { createDatasetForForm(formKey, kind, open) }
+
+  override fun createDatasetForChoiceQuestion(
+    formKey: String,
+    questionIndex: Int,
+    kind: DatasetKind,
+  ) = editForForm(formKey) { createDatasetForChoiceQuestion(formKey, questionIndex, kind) }
+
+  override fun createDatasetForChoiceQuestion(questionIndex: Int, kind: DatasetKind) {
+    val currentFormKey =
+      (session.value.section as? SurveyEditorSection.Form)?.key
+        ?: draft.forms.firstOrNull()?.key
+        ?: return
+    createDatasetForChoiceQuestion(currentFormKey, questionIndex, kind)
+  }
 
   override fun createFormForDataset(datasetKey: String, open: Boolean) {
     val activeFormKey =

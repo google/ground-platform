@@ -22,6 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
+import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.EditorChoice
 import org.groundplatform.v2.app.domain.model.editor.EditorForm
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
@@ -125,6 +127,142 @@ class FormEditorViewModelTest {
       assertEquals(11, vm.uiState.value.longestPathQuestionCount)
       assertEquals(22, vm.uiState.value.estimatedCompletionMinutes)
       assertTrue(vm.uiState.value.isFatigueWarning)
+    } finally {
+      scope.cancel()
+    }
+  }
+
+  @Test
+  fun createDatasetForChoiceQuestion_updatesQuestionBindingAndDatasetKind() {
+    val q1 =
+      EditorQuestion(
+        key = "q1",
+        name = "tree_species",
+        type = EditorQuestionType.SELECT_ONE,
+        label = "Tree Species",
+      )
+    val formFlow =
+      MutableStateFlow(
+        EditorForm(formId = "species_form", title = "Species", questions = listOf(q1))
+      )
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+    try {
+      val vm =
+        FormEditorViewModel(
+          formFlow = formFlow,
+          datasetsFlow = MutableStateFlow(emptyList()),
+          updateForm = { transform -> formFlow.value = transform(formFlow.value) },
+          scope = scope,
+        )
+
+      vm.createDatasetForChoiceQuestion(0, DatasetKind.MAP_LAYER)
+      val updatedQ = vm.uiState.value.form.questions[0]
+      assertEquals(ChoiceSource.MAP_LAYER, updatedQ.choiceSource)
+      assertEquals("new_dataset", updatedQ.choiceDatasetId)
+
+      vm.createDatasetForChoiceQuestion("q1", DatasetKind.DATA_TABLE)
+      val updatedQ2 = vm.uiState.value.form.questions[0]
+      assertEquals(ChoiceSource.DATA_TABLE, updatedQ2.choiceSource)
+      assertEquals("new_dataset", updatedQ2.choiceDatasetId)
+    } finally {
+      scope.cancel()
+    }
+  }
+
+  @Test
+  fun cascadingSelects_updatesParentQuestionKeyAndChoiceParentValue() {
+    val q1 =
+      EditorQuestion(
+        key = "country",
+        name = "country",
+        type = EditorQuestionType.SELECT_ONE,
+        label = "Country",
+        choices = listOf(EditorChoice("us", "United States"), EditorChoice("ca", "Canada")),
+      )
+    val q2 =
+      EditorQuestion(
+        key = "region",
+        name = "region",
+        type = EditorQuestionType.SELECT_ONE,
+        label = "Region",
+        choices =
+          listOf(
+            EditorChoice("ca_state", "California"),
+            EditorChoice("on_prov", "Ontario"),
+          ),
+      )
+    val formFlow =
+      MutableStateFlow(
+        EditorForm(formId = "geo_form", title = "Geography", questions = listOf(q1, q2))
+      )
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+    try {
+      val vm =
+        FormEditorViewModel(
+          formFlow = formFlow,
+          datasetsFlow = MutableStateFlow(emptyList()),
+          updateForm = { transform -> formFlow.value = transform(formFlow.value) },
+          scope = scope,
+        )
+
+      // Set parent question key
+      vm.updateQuestionParentKey(1, "country")
+      assertEquals("country", vm.uiState.value.form.questions[1].parentQuestionKey)
+
+      // Set choice parent value by index
+      vm.updateChoiceParentValue(1, 0, "us")
+      assertEquals("us", vm.uiState.value.form.questions[1].choices[0].parentValue)
+
+      // Set choice parent value by key
+      vm.updateChoiceParentValue("region", 1, "ca")
+      assertEquals("ca", vm.uiState.value.form.questions[1].choices[1].parentValue)
+    } finally {
+      scope.cancel()
+    }
+  }
+
+  @Test
+  fun importQuestionChoices_replacesAndAppendsChoices() {
+    val q1 =
+      EditorQuestion(
+        key = "q1",
+        name = "items",
+        type = EditorQuestionType.SELECT_ONE,
+        label = "Items",
+        choices = listOf(EditorChoice("item_1", "Item 1")),
+      )
+    val formFlow =
+      MutableStateFlow(
+        EditorForm(formId = "import_form", title = "Import", questions = listOf(q1))
+      )
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+    try {
+      val vm =
+        FormEditorViewModel(
+          formFlow = formFlow,
+          datasetsFlow = MutableStateFlow(emptyList()),
+          updateForm = { transform -> formFlow.value = transform(formFlow.value) },
+          scope = scope,
+        )
+
+      val importedChoices =
+        listOf(
+          EditorChoice("apple", "Apple", parentValue = "fruit"),
+          EditorChoice("carrot", "Carrot", parentValue = "vegetable"),
+        )
+
+      // Append = false -> Replaces choices
+      vm.importQuestionChoices(0, importedChoices, append = false)
+      assertEquals(2, vm.uiState.value.form.questions[0].choices.size)
+      assertEquals("apple", vm.uiState.value.form.questions[0].choices[0].value)
+      assertEquals("fruit", vm.uiState.value.form.questions[0].choices[0].parentValue)
+      assertEquals("carrot", vm.uiState.value.form.questions[0].choices[1].value)
+
+      // Append = true -> Appends choices
+      val additionalChoices = listOf(EditorChoice("banana", "Banana", parentValue = "fruit"))
+      vm.importQuestionChoices("q1", additionalChoices, append = true)
+      assertEquals(3, vm.uiState.value.form.questions[0].choices.size)
+      assertEquals("banana", vm.uiState.value.form.questions[0].choices[2].value)
     } finally {
       scope.cancel()
     }

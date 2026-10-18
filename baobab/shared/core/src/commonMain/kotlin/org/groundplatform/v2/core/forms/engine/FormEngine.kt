@@ -1568,7 +1568,16 @@ object FormEngine {
       val label =
         resolveLabel(item.label, compiled, controlContext, activeLanguage)
           ?: ResolvedLabel(text = item.value_)
-      ResolvedChoiceOption(value = item.value_, label = label, properties = item.properties)
+      val parentVal =
+        item.parent_value.ifEmpty {
+          item.properties["parent_value"] ?: item.properties["parent"] ?: ""
+        }
+      ResolvedChoiceOption(
+        value = item.value_,
+        label = label,
+        properties = item.properties,
+        parentValue = parentVal,
+      )
     }
   }
 

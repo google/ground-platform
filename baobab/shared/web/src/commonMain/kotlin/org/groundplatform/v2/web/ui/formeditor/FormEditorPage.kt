@@ -185,6 +185,7 @@ import org.groundplatform.v2.app.domain.model.DeviceOrientation
 import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.editor.ChoiceColors
 import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
+import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.DateRule
 import org.groundplatform.v2.app.domain.model.editor.EditorChoice
 import org.groundplatform.v2.app.domain.model.editor.EditorChoiceImage
@@ -212,8 +213,10 @@ import org.groundplatform.v2.app.domain.model.editor.isoDateToUtcMillis
 import org.groundplatform.v2.app.domain.model.editor.slugify
 import org.groundplatform.v2.app.domain.model.editor.utcMillisToIsoDate
 import org.groundplatform.v2.app.domain.model.hasGeometry
+import org.groundplatform.v2.app.domain.usecase.ChoiceListImporter
 import org.groundplatform.v2.app.ui.common.DevicePreviewFrame
 import org.groundplatform.v2.app.ui.common.DragAxis
+import org.groundplatform.v2.app.ui.common.GroundFilterChip
 import org.groundplatform.v2.app.ui.common.PlatformPickResult
 import org.groundplatform.v2.app.ui.common.awaitDragPastSlop
 import org.groundplatform.v2.app.ui.common.dragSlopFor
@@ -227,7 +230,9 @@ import org.groundplatform.v2.core.forms.ui.MobileFormRunner
 import org.groundplatform.v2.web.ui.common.DropdownFieldClickTarget
 import org.groundplatform.v2.web.ui.common.GrabPointerIcon
 import org.groundplatform.v2.web.ui.common.GrabbingPointerIcon
+import org.groundplatform.v2.web.ui.common.TextFilePickResult
 import org.groundplatform.v2.web.ui.common.downloadTextFile
+import org.groundplatform.v2.web.ui.common.openPlatformTextFilePicker
 import org.groundplatform.v2.web.ui.common.showPlatformGrabCursor
 import org.groundplatform.v2.web.ui.common.showPlatformGrabbingCursor
 import org.groundplatform.v2.web.ui.dashboard.SidePanelSeparator
@@ -2711,9 +2716,78 @@ private fun ChoicesEditor(
   val key = question.key
   val colors = MaterialTheme.colorScheme
   val effectiveSource = uiState.choiceSourceFor(question)
+  val questionIndex = uiState.form.questions.indexOfFirst { it.key == question.key }
   var imageError by remember { mutableStateOf<String?>(null) }
+  var importDialogChoices by remember(key) { mutableStateOf<List<EditorChoice>?>(null) }
+
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    SectionLabel("Choices")
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      SectionLabel("Choices")
+      if (effectiveSource == ChoiceSource.MANUAL) {
+        TextButton(
+          onClick = {
+            openPlatformTextFilePicker(".csv,.tsv,.txt,text/csv,text/plain") { result ->
+              if (result is TextFilePickResult.Picked) {
+                val parsed = ChoiceListImporter.parseChoices(result.text, result.fileName)
+                if (parsed.isNotEmpty()) {
+                  if (question.choices.isEmpty()) {
+                    actions.importQuestionChoices(key, parsed, append = false)
+                  } else {
+                    importDialogChoices = parsed
+                  }
+                }
+              }
+            }
+          }
+        ) {
+          Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(16.dp))
+          Spacer(Modifier.width(4.dp))
+          Text("Import (.csv / .txt)")
+        }
+      }
+    }
+
+    importDialogChoices?.let { imported ->
+      AlertDialog(
+        onDismissRequest = { importDialogChoices = null },
+        title = { Text("Import choices") },
+        text = {
+          Text(
+            "Found ${imported.size} choices in file. Would you like to replace your current choices (${question.choices.size}) or append to them?"
+          )
+        },
+        confirmButton = {
+          Button(
+            onClick = {
+              actions.importQuestionChoices(key, imported, append = false)
+              importDialogChoices = null
+            }
+          ) {
+            Text("Replace")
+          }
+        },
+        dismissButton = {
+          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { importDialogChoices = null }) {
+              Text("Cancel")
+            }
+            FilledTonalButton(
+              onClick = {
+                actions.importQuestionChoices(key, imported, append = true)
+                importDialogChoices = null
+              }
+            ) {
+              Text("Append")
+            }
+          }
+        },
+      )
+    }
+
     DropdownSelector(
       label = "Choices",
       selectedText = effectiveSource.label,
@@ -2772,13 +2846,83 @@ private fun ChoicesEditor(
           },
         )
 
+        val precedingChoiceQuestions =
+          if (questionIndex > 0) {
+            uiState.form.questions.take(questionIndex).filter { it.type.hasChoices }
+          } else {
+            emptyList()
+          }
+
+        var parentChoiceFilter by remember(key, question.parentQuestionKey) {
+          mutableStateOf<String?>(null)
+        }
+
+        val selectedParent =
+          precedingChoiceQuestions.firstOrNull {
+            it.key == question.parentQuestionKey || it.name == question.parentQuestionKey
+          }
+
+        if (precedingChoiceQuestions.isNotEmpty()) {
+          DropdownSelector(
+            label = "Cascading filter (parent question)",
+            selectedText = selectedParent?.label?.ifBlank { selectedParent.name } ?: "None",
+            options = listOf(null) + precedingChoiceQuestions,
+            optionText = { it?.label?.ifBlank { it.name } ?: "None" },
+            onSelect = { selected ->
+              actions.updateQuestionParentKey(key, selected?.key ?: "")
+              parentChoiceFilter = null
+            },
+          )
+        }
+
+        if (selectedParent != null) {
+          val parentChoices = selectedParent.resolvedChoices(uiState.datasets)
+          if (parentChoices.isNotEmpty()) {
+            Row(
+              modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text = "Filter:",
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.onSurfaceVariant,
+              )
+              GroundFilterChip(
+                selected = parentChoiceFilter == null,
+                onClick = { parentChoiceFilter = null },
+                label = { Text("All") },
+              )
+              parentChoices.forEach { pChoice ->
+                GroundFilterChip(
+                  selected = parentChoiceFilter == pChoice.value,
+                  onClick = {
+                    parentChoiceFilter =
+                      if (parentChoiceFilter == pChoice.value) null else pChoice.value
+                  },
+                  label = { Text(pChoice.label.ifBlank { pChoice.value }) },
+                )
+              }
+            }
+          }
+        }
+
         // A linked question maps each choice to a value of the concept's code list.
         val concept = uiState.conceptOf(question)?.takeIf { it.codeList.isNotEmpty() }
         val activeLang = uiState.activeLanguage
         val defaultLang = uiState.defaultLanguage
         val isDefaultLang = uiState.isDefaultLanguageSelected
         val activeLangName = languageDisplayName(activeLang)
-        question.choices.forEachIndexed { i, choice ->
+
+        val indexedChoices = question.choices.mapIndexed { idx, c -> idx to c }
+        val visibleChoices =
+          if (selectedParent != null && parentChoiceFilter != null) {
+            indexedChoices.filter { (_, c) -> c.parentValue == parentChoiceFilter }
+          } else {
+            indexedChoices
+          }
+
+        visibleChoices.forEach { (i, choice) ->
           Row(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -2825,6 +2969,32 @@ private fun ChoicesEditor(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
               )
+              if (selectedParent != null) {
+                val parentChoices = selectedParent.resolvedChoices(uiState.datasets)
+                if (parentChoices.isNotEmpty()) {
+                  DropdownSelector(
+                    label = "Parent choice (${selectedParent.label.ifBlank { selectedParent.name }})",
+                    selectedText =
+                      parentChoices.firstOrNull { it.value == choice.parentValue }?.label
+                        ?: choice.parentValue.ifBlank { "Any (unfiltered)" },
+                    options = listOf(null) + parentChoices,
+                    optionText = { it?.label ?: "Any (unfiltered)" },
+                    onSelect = { selected ->
+                      actions.updateChoiceParentValue(key, i, selected?.value ?: "")
+                    },
+                  )
+                } else {
+                  OutlinedTextField(
+                    value = choice.parentValue,
+                    onValueChange = { actions.updateChoiceParentValue(key, i, it) },
+                    label = {
+                      Text("Parent value (${selectedParent.label.ifBlank { selectedParent.name }})")
+                    },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                  )
+                }
+              }
               if (concept != null) {
                 ChoiceConceptLinkChip(
                   concept = concept,
@@ -2856,6 +3026,10 @@ private fun ChoicesEditor(
         TextButton(
           onClick = {
             actions.addChoice(key)
+            val assignedParentVal = parentChoiceFilter
+            if (assignedParentVal != null) {
+              actions.updateChoiceParentValue(key, question.choices.size, assignedParentVal)
+            }
             if (currentVisual == ChoiceVisualOption.COLOR) {
               actions.updateQuestion(key) { q ->
                 val lastIdx = q.choices.lastIndex
@@ -2890,25 +3064,61 @@ private fun ChoicesEditor(
           }
         val pluralKind =
           if (effectiveSource == ChoiceSource.MAP_LAYER) "map layers" else "data tables"
+        val singularKind =
+          if (effectiveSource == ChoiceSource.MAP_LAYER) "map layer" else "data table"
+        val targetKind =
+          if (effectiveSource == ChoiceSource.MAP_LAYER) DatasetKind.MAP_LAYER
+          else DatasetKind.DATA_TABLE
+
         if (availableDatasets.isEmpty() && question.choiceDatasetId.isNullOrBlank()) {
           Text(
             text = "No $pluralKind are available in this survey yet.",
             style = MaterialTheme.typography.bodySmall,
             color = colors.onSurfaceVariant,
           )
+          OutlinedButton(
+            onClick = {
+              if (questionIndex >= 0) {
+                actions.createDatasetForChoiceQuestion(questionIndex, targetKind)
+              }
+            },
+          ) {
+            Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(4.dp))
+            Text("New $singularKind")
+          }
         } else {
-          if (availableDatasets.isNotEmpty()) {
-            DropdownSelector(
-              label = effectiveSource.label,
-              selectedText =
-                selectedDataset?.displayName
-                  ?: question.choiceDatasetId?.takeIf { it.isNotBlank() }
-                  ?: "Choose",
-              options = availableDatasets,
-              optionText = { it.displayName },
-              optionIcon = ::datasetIcon,
-              onSelect = { actions.setChoiceDataset(key, it.id) },
-            )
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            if (availableDatasets.isNotEmpty()) {
+              Box(modifier = Modifier.weight(1f)) {
+                DropdownSelector(
+                  label = effectiveSource.label,
+                  selectedText =
+                    selectedDataset?.displayName
+                      ?: question.choiceDatasetId?.takeIf { it.isNotBlank() }
+                      ?: "Choose",
+                  options = availableDatasets,
+                  optionText = { it.displayName },
+                  optionIcon = ::datasetIcon,
+                  onSelect = { actions.setChoiceDataset(key, it.id) },
+                )
+              }
+            }
+            OutlinedButton(
+              onClick = {
+                if (questionIndex >= 0) {
+                  actions.createDatasetForChoiceQuestion(questionIndex, targetKind)
+                }
+              },
+            ) {
+              Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+              Spacer(Modifier.width(4.dp))
+              Text("New $singularKind")
+            }
           }
           if (selectedDataset != null) {
             val count = selectedDataset.rows.size

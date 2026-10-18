@@ -126,6 +126,12 @@ interface CreateSurveyWizardActions {
 
   fun applyCareSovereigntyDefaults()
 
+  /**
+   * Creates a new Map layer or Data table of [kind] and automatically binds question at
+   * [questionIndex] of the wizard's primary Form to it.
+   */
+  fun createDatasetForChoiceQuestion(questionIndex: Int, kind: DatasetKind)
+
   fun openInSurveyEditor()
 
   fun finishWizard()
@@ -1014,6 +1020,10 @@ class CreateSurveyWizardViewModel(
         surveyEditor.close()
       }
     }
+  }
+
+  override fun createDatasetForChoiceQuestion(questionIndex: Int, kind: DatasetKind) {
+    surveyEditor.createDatasetForChoiceQuestion(questionIndex, kind)
   }
 
   override fun cancelWizard() {

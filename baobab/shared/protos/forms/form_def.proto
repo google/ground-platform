@@ -521,6 +521,9 @@ message ChoiceItem {
   // Optional custom properties attached to this choice option for cascading
   // filters.
   map<string, string> properties = 3;
+
+  // Optional parent choice value unlocking this option in a cascading select.
+  string parent_value = 4;
 }
 
 // Dynamic choice itemset query populating options from a SecondaryInstance
@@ -655,6 +658,10 @@ message ControlDef {
   // Geospatial capture parameters (when bound to a GEOPOINT, GEOTRACE, or
   // GEOSHAPE field).
   GeoConfig geo_config = 13;
+
+  // Optional parent question key/name whose selection controls this question's
+  // choice options (cascading select).
+  string parent_question_key = 14;
 }
 
 // Logical and visual grouping of related form components.

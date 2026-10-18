@@ -13,14 +13,21 @@
  */
 package org.groundplatform.v2.core.forms.ui
 
+import groundplatform.v2.forms.ChoiceItem
+import groundplatform.v2.forms.ControlDef
+import groundplatform.v2.forms.ControlType
 import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.FieldValue
+import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.GeoPoint
+import groundplatform.v2.forms.LabelDef
 import groundplatform.v2.forms.TypedValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
@@ -476,6 +483,141 @@ class FormWizardControllerTest {
         ?.value
         ?.scalar_value
         ?.double_value,
+    )
+  }
+
+  @Test
+  fun cascadingSelects_evaluatesParentInfoAndPrunesInvalidChildAnswers() {
+    val cascadeXml =
+      """
+      <h:html xmlns="http://www.w3.org/2002/xforms"
+              xmlns:h="http://www.w3.org/1999/xhtml">
+        <h:head>
+          <h:title>Cascade Test</h:title>
+          <model>
+            <instance>
+              <data id="cascade_test">
+                <country/>
+                <region/>
+              </data>
+            </instance>
+            <bind nodeset="/data/country" type="string"/>
+            <bind nodeset="/data/region" type="string"/>
+          </model>
+        </h:head>
+        <h:body>
+          <select1 ref="/data/country">
+            <label>Country</label>
+            <item><label>Kenya</label><value>kenya</value></item>
+            <item><label>Uganda</label><value>uganda</value></item>
+          </select1>
+          <select1 ref="/data/region">
+            <label>Region</label>
+            <item><label>Nairobi</label><value>nairobi</value></item>
+            <item><label>Mombasa</label><value>mombasa</value></item>
+            <item><label>Kampala</label><value>kampala</value></item>
+            <item><label>All</label><value>all_region</value></item>
+          </select1>
+        </h:body>
+      </h:html>
+      """
+        .trimIndent()
+    val baseDef = XFormsXmlSerializer.deserializeFormDef(cascadeXml)
+    val updatedComponents =
+      baseDef.view!!.components.map { comp ->
+        val ctrl = comp.control ?: return@map comp
+        if (ctrl.field_ref == "region") {
+          comp.copy(
+            control =
+              ctrl.copy(
+                parent_question_key = "country",
+                choices =
+                  ctrl.choices.map { choice ->
+                    when (choice.value_) {
+                      "nairobi", "mombasa" -> choice.copy(parent_value = "kenya")
+                      "kampala" -> choice.copy(parent_value = "uganda")
+                      else -> choice
+                    }
+                  },
+              )
+          )
+        } else comp
+      }
+    val formDef = baseDef.copy(view = baseDef.view!!.copy(components = updatedComponents))
+    val controller = FormWizardController(formDef = formDef)
+    val regionStep =
+      controller.steps.filterIsInstance<FormWizardStep.QuestionStep>().first {
+        it.control.canonicalPath == "/data/region"
+      }
+
+    // Initially parent is unanswered:
+    val initialInfo = controller.parentQuestionInfoFor(regionStep.control)
+    assertNotNull(initialInfo)
+    assertFalse(initialInfo.isAnswered)
+    assertEquals("Country", initialInfo.label)
+
+    // Answer country = "kenya":
+    controller.updateString("/data/country", "kenya")
+    val kenyaInfo = controller.parentQuestionInfoFor(regionStep.control)
+    assertNotNull(kenyaInfo)
+    assertTrue(kenyaInfo.isAnswered)
+    assertEquals(listOf("kenya"), kenyaInfo.selectedValues)
+
+    // Answer region = "nairobi":
+    controller.updateString("/data/region", "nairobi")
+    assertEquals(
+      "nairobi",
+      controller.formState.findFieldState("/data/region")?.value?.scalar_value?.string_value,
+    )
+
+    // Change country to "uganda" -> "nairobi" is invalid for uganda, so region must be cleared:
+    controller.updateString("/data/country", "uganda")
+    val ugandaInfo = controller.parentQuestionInfoFor(regionStep.control)
+    assertNotNull(ugandaInfo)
+    assertTrue(ugandaInfo.isAnswered)
+    assertEquals(listOf("uganda"), ugandaInfo.selectedValues)
+    assertTrue(
+      controller.formState
+        .findFieldState("/data/region")
+        ?.value
+        ?.scalar_value
+        ?.string_value
+        .isNullOrBlank()
+    )
+
+    // Answer region = "kampala" (valid for uganda):
+    controller.updateString("/data/region", "kampala")
+    assertEquals(
+      "kampala",
+      controller.formState.findFieldState("/data/region")?.value?.scalar_value?.string_value,
+    )
+
+    // Clear country -> region must be cleared because parent is unanswered:
+    controller.clearField("/data/country")
+    val clearedInfo = controller.parentQuestionInfoFor(regionStep.control)
+    assertNotNull(clearedInfo)
+    assertFalse(clearedInfo.isAnswered)
+    assertTrue(
+      controller.formState
+        .findFieldState("/data/region")
+        ?.value
+        ?.scalar_value
+        ?.string_value
+        .isNullOrBlank()
+    )
+
+    // Set choice with empty parent_value ("all_region"):
+    controller.updateString("/data/country", "kenya")
+    controller.updateString("/data/region", "all_region")
+    assertEquals(
+      "all_region",
+      controller.formState.findFieldState("/data/region")?.value?.scalar_value?.string_value,
+    )
+    // Switch to uganda: "all_region" has empty parent_value, so it stays valid!
+    controller.updateString("/data/country", "uganda")
+    assertEquals(
+      "all_region",
+      controller.formState.findFieldState("/data/region")?.value?.scalar_value?.string_value,
     )
   }
 }
