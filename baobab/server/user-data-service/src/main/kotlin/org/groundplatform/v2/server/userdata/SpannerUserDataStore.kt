@@ -196,10 +196,11 @@ class SpannerUserDataStore(
         decode(EntityRecord.ADAPTER, it).copy(commit_timestamp = it.commitTs())
       }
 
-    override fun entities(surveyId: String) =
-      all("SELECT Record, CommitTs FROM Entities WHERE SurveyId = @id", surveyId) {
-        decode(EntityRecord.ADAPTER, it).copy(commit_timestamp = it.commitTs())
-      }
+    override fun entities(surveyId: String, datasetId: String, includeDeleted: Boolean) =
+      narrowed("Entities", "DatasetId", surveyId, datasetId, includeDeleted, ::entityOf)
+
+    override fun entitiesChangedAfter(surveyId: String, after: SyncPosition, limit: Int) =
+      changedAfter("Entities", "EntityId", "EntitiesDelta", surveyId, after, limit, ::entityOf)
 
     override fun submission(surveyId: String, submissionId: String) =
       one(
@@ -210,10 +211,19 @@ class SpannerUserDataStore(
         decode(SubmissionRecord.ADAPTER, it).copy(commit_timestamp = it.commitTs())
       }
 
-    override fun submissions(surveyId: String) =
-      all("SELECT Record, CommitTs FROM Submissions WHERE SurveyId = @id", surveyId) {
-        decode(SubmissionRecord.ADAPTER, it).copy(commit_timestamp = it.commitTs())
-      }
+    override fun submissions(surveyId: String, formId: String, includeDeleted: Boolean) =
+      narrowed("Submissions", "FormId", surveyId, formId, includeDeleted, ::submissionOf)
+
+    override fun submissionsChangedAfter(surveyId: String, after: SyncPosition, limit: Int) =
+      changedAfter(
+        "Submissions",
+        "SubmissionId",
+        "SubmissionsDelta",
+        surveyId,
+        after,
+        limit,
+        ::submissionOf,
+      )
 
     override fun plotLock(surveyId: String, entityId: String) =
       one(
@@ -273,6 +283,63 @@ class SpannerUserDataStore(
           }
         }
 
+    private fun entityOf(rs: ResultSet) =
+      decode(EntityRecord.ADAPTER, rs).copy(commit_timestamp = rs.commitTs())
+
+    private fun submissionOf(rs: ResultSet) =
+      decode(SubmissionRecord.ADAPTER, rs).copy(commit_timestamp = rs.commitTs())
+
+    /**
+     * Rows of a survey's [table] filtered on the generated columns: [keyColumn] equal to [key] when
+     * it isn't blank, and `IsDeleted` false unless [includeDeleted].
+     */
+    private fun <T> narrowed(
+      table: String,
+      keyColumn: String,
+      surveyId: String,
+      key: String,
+      includeDeleted: Boolean,
+      decode: (ResultSet) -> T,
+    ): List<T> {
+      val sql = buildString {
+        append("SELECT Record, CommitTs FROM $table WHERE SurveyId = @id")
+        if (key.isNotBlank()) append(" AND $keyColumn = @key")
+        if (!includeDeleted) append(" AND NOT IFNULL(IsDeleted, FALSE)")
+      }
+      val statement = bindIds(sql, arrayOf(surveyId)) { if (key.isNotBlank()) bind("key").to(key) }
+      return statement?.let { query(it, decode) }.orEmpty()
+    }
+
+    /**
+     * Up to [limit] rows of a survey's [table] after [after] in commit order, read through the
+     * [index] on `(SurveyId, CommitTs, <idColumn>)`. A UUID's string form orders like the UUID, so
+     * the position's ID compares as a string.
+     */
+    private fun <T> changedAfter(
+      table: String,
+      idColumn: String,
+      index: String,
+      surveyId: String,
+      after: SyncPosition,
+      limit: Int,
+      decode: (ResultSet) -> T,
+    ): List<T> {
+      val sql =
+        "SELECT Record, CommitTs FROM $table@{FORCE_INDEX=$index} WHERE SurveyId = @id AND " +
+          "(CommitTs > @ts OR (CommitTs = @ts AND CAST($idColumn AS STRING) > @afterId)) " +
+          "ORDER BY CommitTs, $idColumn LIMIT @limit"
+      val statement =
+        bindIds(sql, arrayOf(surveyId)) {
+          bind("ts").to(Timestamp.ofTimeSecondsAndNanos(after.epochSecond, after.nano))
+          bind("afterId").to(after.recordId)
+          bind("limit").to(limit.toLong())
+        }
+      return statement?.let { query(it, decode) }.orEmpty()
+    }
+
+    private fun <T> query(statement: Statement, decode: (ResultSet) -> T): List<T> =
+      ctx.executeQuery(statement).use { rs -> buildList { while (rs.next()) add(decode(rs)) } }
+
     /** The single row matching [sql] with `@id` / `@id2` bound to UUID [ids], decoded. */
     private fun <T> one(sql: String, vararg ids: String, decode: (ResultSet) -> T): T? {
       val statement = bindIds(sql, ids) ?: return null
@@ -287,12 +354,17 @@ class SpannerUserDataStore(
     }
 
     /** [sql] with its ID parameters bound, or null when an ID isn't a UUID (so nothing matches). */
-    private fun bindIds(sql: String, ids: Array<out String>): Statement? {
+    private fun bindIds(
+      sql: String,
+      ids: Array<out String>,
+      bindOthers: Statement.Builder.() -> Unit = {},
+    ): Statement? {
       val builder = Statement.newBuilder(sql)
       ids.forEachIndexed { index, id ->
         val uuid = uuidOrNull(id) ?: return null
         builder.bind(if (index == 0) "id" else "id${index + 1}").to(uuid)
       }
+      builder.bindOthers()
       return builder.build()
     }
   }

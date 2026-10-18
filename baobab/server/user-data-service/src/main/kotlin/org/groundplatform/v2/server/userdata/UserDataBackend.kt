@@ -880,7 +880,10 @@ class UserDataBackend(private val store: UserDataStore) :
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
         scopeKey = "entities|survey_id=${request.survey_id}",
-        records = r.entities(request.survey_id),
+        changedAfter = { after, limit -> r.entitiesChangedAfter(request.survey_id, after, limit) },
+        queryRecords = {
+          r.entities(request.survey_id, request.dataset_id, request.include_deleted)
+        },
         commitTimestamp = EntityRecord::commit_timestamp,
         id = EntityRecord::entity_id,
         query = query,
@@ -898,12 +901,9 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun ListEntityClusters(
     request: ListEntityClustersRequest
   ): ListEntityClustersResponse {
-    val entities =
-      store
-        .read { it.entities(request.survey_id) }
-        .filter {
-          !it.is_deleted && (request.dataset_id.isBlank() || it.dataset_id == request.dataset_id)
-        }
+    val entities = store.read {
+      it.entities(request.survey_id, request.dataset_id, includeDeleted = false)
+    }
     if (entities.isEmpty()) return ListEntityClustersResponse()
     val cluster =
       EntityCluster(
@@ -955,7 +955,12 @@ class UserDataBackend(private val store: UserDataStore) :
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
         scopeKey = "submissions|survey_id=${request.survey_id}",
-        records = r.submissions(request.survey_id),
+        changedAfter = { after, limit ->
+          r.submissionsChangedAfter(request.survey_id, after, limit)
+        },
+        queryRecords = {
+          r.submissions(request.survey_id, request.form_id, request.include_deleted)
+        },
         commitTimestamp = SubmissionRecord::commit_timestamp,
         id = SubmissionRecord::submission_id,
         query = query,
@@ -1279,7 +1284,7 @@ class UserDataBackend(private val store: UserDataStore) :
     var totalEntities = 0L
     var totalAreaHa = 0.0
     for (s in activeSurveys) {
-      val ents = store.read { it.entities(s.survey_id) }.filter { !it.is_deleted }
+      val ents = store.read { it.entities(s.survey_id, includeDeleted = false) }
       totalEntities += ents.size
       totalAreaHa += ents.sumOf { it.area_hectares }
     }

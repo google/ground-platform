@@ -142,12 +142,41 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
 
     override fun entity(surveyId: String, entityId: String) = entities[surveyId]?.get(entityId)
 
-    override fun entities(surveyId: String) = entities[surveyId]?.values?.toList().orEmpty()
+    override fun entities(surveyId: String, datasetId: String, includeDeleted: Boolean) =
+      entities[surveyId]
+        ?.values
+        ?.filter {
+          (datasetId.isBlank() || it.dataset_id == datasetId) && (includeDeleted || !it.is_deleted)
+        }
+        .orEmpty()
+
+    override fun entitiesChangedAfter(surveyId: String, after: SyncPosition, limit: Int) =
+      entities[surveyId]
+        ?.values
+        ?.changedAfter(after, limit, EntityRecord::commit_timestamp, EntityRecord::entity_id)
+        .orEmpty()
 
     override fun submission(surveyId: String, submissionId: String) =
       submissions[surveyId]?.get(submissionId)
 
-    override fun submissions(surveyId: String) = submissions[surveyId]?.values?.toList().orEmpty()
+    override fun submissions(surveyId: String, formId: String, includeDeleted: Boolean) =
+      submissions[surveyId]
+        ?.values
+        ?.filter {
+          (formId.isBlank() || it.form_id == formId) && (includeDeleted || !it.is_deleted)
+        }
+        .orEmpty()
+
+    override fun submissionsChangedAfter(surveyId: String, after: SyncPosition, limit: Int) =
+      submissions[surveyId]
+        ?.values
+        ?.changedAfter(
+          after,
+          limit,
+          SubmissionRecord::commit_timestamp,
+          SubmissionRecord::submission_id,
+        )
+        .orEmpty()
 
     override fun plotLock(surveyId: String, entityId: String) = plotLocks[surveyId to entityId]
 

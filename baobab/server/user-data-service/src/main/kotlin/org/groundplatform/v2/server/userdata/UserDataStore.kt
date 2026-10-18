@@ -94,11 +94,40 @@ interface UserDataReader {
 
   fun entity(surveyId: String, entityId: String): EntityRecord?
 
-  fun entities(surveyId: String): List<EntityRecord>
+  /**
+   * A survey's entities, only those in dataset [datasetId] when it isn't blank, and only live ones
+   * unless [includeDeleted].
+   */
+  fun entities(
+    surveyId: String,
+    datasetId: String = "",
+    includeDeleted: Boolean = true,
+  ): List<EntityRecord>
+
+  /**
+   * Up to [limit] of a survey's entities (including tombstones) committed after [after], in commit
+   * order: by commit timestamp, then entity ID.
+   */
+  fun entitiesChangedAfter(surveyId: String, after: SyncPosition, limit: Int): List<EntityRecord>
 
   fun submission(surveyId: String, submissionId: String): SubmissionRecord?
 
-  fun submissions(surveyId: String): List<SubmissionRecord>
+  /**
+   * A survey's submissions, only those for form [formId] when it isn't blank, and only live ones
+   * unless [includeDeleted].
+   */
+  fun submissions(
+    surveyId: String,
+    formId: String = "",
+    includeDeleted: Boolean = true,
+  ): List<SubmissionRecord>
+
+  /** Like [entitiesChangedAfter], for submissions. */
+  fun submissionsChangedAfter(
+    surveyId: String,
+    after: SyncPosition,
+    limit: Int,
+  ): List<SubmissionRecord>
 
   fun plotLock(surveyId: String, entityId: String): PlotLock?
 

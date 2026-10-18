@@ -919,8 +919,11 @@ interface on a subset of this schema
 backend tests run against it on the emulator. It differs from the design above
 in these ways, to be closed in later steps:
 
-- The backend still reads whole collections and filters and pages in memory,
-  rather than querying the delta indexes.
+- Delta-mode `ListEntities` and `ListSubmissions` read through the
+  `EntitiesDelta` and `SubmissionsDelta` indexes, and query mode narrows by
+  dataset or form and by `IsDeleted` in SQL. Query-mode sorting and paging, and
+  the other `List*` RPCs (organizations, libraries, survey overviews, impact
+  events, audit records), still work on whole collections in memory.
 - Replay detection still records mutation IDs (an `AppliedMutations` table)
   alongside the watermarks.
 - Organization members and survey ACL entries are still embedded in

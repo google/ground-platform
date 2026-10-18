@@ -35,7 +35,7 @@ import java.util.Base64
 /**
  * Position in commit order. Records are delivered after it when `(commit_timestamp, id)` is later.
  */
-internal data class SyncPosition(
+data class SyncPosition(
   val epochSecond: Long,
   val nano: Int,
   /** ID of the last record delivered at this timestamp; `null` when all of them were. */
@@ -61,6 +61,23 @@ internal data class SyncPosition(
       SyncPosition(timestamp?.epochSecond ?: 0L, timestamp?.nano ?: 0, id)
   }
 }
+
+/**
+ * Up to [limit] of these records committed after [after], in commit order (`commit_timestamp`, then
+ * ID).
+ */
+fun <T> Collection<T>.changedAfter(
+  after: SyncPosition,
+  limit: Int,
+  commitTimestamp: (T) -> Instant?,
+  id: (T) -> String,
+): List<T> = filter {
+  after.isBefore(commitTimestamp(it), id(it))
+}
+  .sortedWith(
+    compareBy({ commitTimestamp(it)?.epochSecond ?: 0L }, { commitTimestamp(it)?.nano ?: 0 }, id)
+  )
+  .take(limit)
 
 /** Paging and mode fields shared by every `List*` sync request. */
 internal data class ListParams(val pageSize: Int, val pageToken: String, val syncToken: String)
@@ -102,6 +119,34 @@ internal class SyncLists(private val epoch: () -> String) {
     query: QuerySpec<T>,
     queryFieldsSet: List<String>,
     watermark: Instant,
+  ): ListPage<T> =
+    list(
+      params,
+      scopeKey,
+      changedAfter = { after, limit -> records.changedAfter(after, limit, commitTimestamp, id) },
+      queryRecords = { records },
+      commitTimestamp,
+      id,
+      query,
+      queryFieldsSet,
+      watermark,
+    )
+
+  /**
+   * Like the other [list], for records the store finds itself: [changedAfter] returns up to `limit`
+   * records committed after a position, in commit order (delta mode), and [queryRecords] returns
+   * the records the query may match, at least those [QuerySpec.matches] accepts (query mode).
+   */
+  fun <T> list(
+    params: ListParams,
+    scopeKey: String,
+    changedAfter: (after: SyncPosition, limit: Int) -> List<T>,
+    queryRecords: () -> Collection<T>,
+    commitTimestamp: (T) -> Instant?,
+    id: (T) -> String,
+    query: QuerySpec<T>,
+    queryFieldsSet: List<String>,
+    watermark: Instant,
   ): ListPage<T> {
     val pageSize = pageSizeOf(params.pageSize)
     if (params.syncToken.isNotBlank()) {
@@ -110,10 +155,8 @@ internal class SyncLists(private val epoch: () -> String) {
       }
       val start = decodeSync(params.syncToken, scopeKey)
       val from = if (params.pageToken.isBlank()) start else decodeSync(params.pageToken, scopeKey)
-      val changed =
-        records
-          .filter { from.isBefore(commitTimestamp(it), id(it)) }
-          .sortedWith(commitOrder(commitTimestamp, id))
+      // One extra record shows whether there's another page.
+      val changed = changedAfter(from, pageSize + 1)
       val page = changed.take(pageSize)
       val last = page.lastOrNull()?.let { SyncPosition.of(commitTimestamp(it), id(it)) } ?: from
       val token = encodeSync(scopeKey, last)
@@ -128,7 +171,7 @@ internal class SyncLists(private val epoch: () -> String) {
     val snapshot = cursor?.snapshot ?: SyncPosition.after(watermark)
     val order = queryOrder(query.descending)
     val matching =
-      records
+      queryRecords()
         .filter(query.matches)
         .map { query.sortKey(it) to it }
         .sortedWith { a, b -> order.compare(a.first to id(a.second), b.first to id(b.second)) }
@@ -153,13 +196,6 @@ internal class SyncLists(private val epoch: () -> String) {
   }
 
   private data class QueryCursor(val snapshot: SyncPosition, val sortKey: String, val id: String)
-
-  private fun <T> commitOrder(commitTimestamp: (T) -> Instant?, id: (T) -> String) =
-    compareBy<T>(
-      { commitTimestamp(it)?.epochSecond ?: 0L },
-      { commitTimestamp(it)?.nano ?: 0 },
-      { id(it) },
-    )
 
   private fun queryOrder(descending: Boolean) =
     compareBy<Pair<String, String>>({ it.first }, { it.second }).let {

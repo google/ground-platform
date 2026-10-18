@@ -14,6 +14,7 @@
 package org.groundplatform.v2.server.userdata
 
 import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.SurveyDef
 import kotlin.test.Test
@@ -133,6 +134,89 @@ abstract class UserDataStoreContractTest {
   }
 
   @Test
+  fun entitiesChangedAfter_pagesInCommitOrder_fromAPosition() {
+    createSurveys(SURVEY)
+    val first = store.write { tx ->
+      tx.putEntity(EntityRecord(survey_id = SURVEY, entity_id = ENTITY_B))
+      tx.putEntity(EntityRecord(survey_id = SURVEY, entity_id = ENTITY))
+    }
+    val second = store.write {
+      it.putEntity(EntityRecord(survey_id = SURVEY, entity_id = ENTITY_C))
+    }
+    val start = SyncPosition(0L, 0, null)
+
+    store.read { r ->
+      // Same commit timestamp: ordered by ID.
+      assertEquals(
+        listOf(ENTITY, ENTITY_B),
+        r.entitiesChangedAfter(SURVEY, start, limit = 2).map { it.entity_id },
+      )
+      val afterFirst = SyncPosition.of(first.commitTimestamp, ENTITY)
+      assertEquals(
+        listOf(ENTITY_B, ENTITY_C),
+        r.entitiesChangedAfter(SURVEY, afterFirst, limit = 10).map { it.entity_id },
+      )
+      assertEquals(
+        listOf(ENTITY_C),
+        r.entitiesChangedAfter(SURVEY, SyncPosition.after(first.commitTimestamp), limit = 10).map {
+          it.entity_id
+        },
+      )
+      assertTrue(
+        r.entitiesChangedAfter(SURVEY, SyncPosition.after(second.commitTimestamp), 10).isEmpty()
+      )
+      assertTrue(r.entitiesChangedAfter(OTHER_SURVEY, start, 10).isEmpty())
+    }
+  }
+
+  @Test
+  fun entitiesAndSubmissions_canBeNarrowed() {
+    createSurveys(SURVEY)
+    store.write { tx ->
+      tx.putEntity(EntityRecord(survey_id = SURVEY, entity_id = ENTITY, dataset_id = "plots"))
+      tx.putEntity(
+        EntityRecord(
+          survey_id = SURVEY,
+          entity_id = ENTITY_B,
+          dataset_id = "plots",
+          is_deleted = true,
+        )
+      )
+      tx.putEntity(EntityRecord(survey_id = SURVEY, entity_id = ENTITY_C, dataset_id = "wells"))
+      tx.putSubmission(SubmissionRecord(survey_id = SURVEY, submission_id = ENTITY, form_id = "a"))
+      tx.putSubmission(
+        SubmissionRecord(
+          survey_id = SURVEY,
+          submission_id = ENTITY_B,
+          form_id = "b",
+          is_deleted = true,
+        )
+      )
+    }
+
+    store.read { r ->
+      assertEquals(3, r.entities(SURVEY).size)
+      assertEquals(
+        setOf(ENTITY, ENTITY_B),
+        r.entities(SURVEY, "plots").map { it.entity_id }.toSet(),
+      )
+      assertEquals(
+        listOf(ENTITY),
+        r.entities(SURVEY, "plots", includeDeleted = false).map { it.entity_id },
+      )
+      assertEquals(listOf(ENTITY_B), r.submissions(SURVEY, "b").map { it.submission_id })
+      assertEquals(
+        listOf(ENTITY),
+        r.submissions(SURVEY, includeDeleted = false).map { it.submission_id },
+      )
+      assertEquals(
+        listOf(ENTITY, ENTITY_B),
+        r.submissionsChangedAfter(SURVEY, SyncPosition(0L, 0, null), 10).map { it.submission_id },
+      )
+    }
+  }
+
+  @Test
   fun recordApplied_tracksMutationIds_andOnlyRaisesWatermarks() {
     store.write { it.recordApplied(SCOPE, listOf("m-1"), CLIENT, clientSeq = 5L) }
     store.write { it.recordApplied(SCOPE, listOf("m-2"), CLIENT, clientSeq = 3L) }
@@ -162,6 +246,8 @@ abstract class UserDataStoreContractTest {
     const val SURVEY = "00000000-0000-4000-8000-0000000000b1"
     const val OTHER_SURVEY = "00000000-0000-4000-8000-0000000000b2"
     const val ENTITY = "00000000-0000-4000-8000-0000000000c1"
+    const val ENTITY_B = "00000000-0000-4000-8000-0000000000c2"
+    const val ENTITY_C = "00000000-0000-4000-8000-0000000000c3"
     const val CLIENT = "00000000-0000-4000-8000-0000000000d1"
     const val SCOPE = "surveys/$SURVEY/data"
   }
