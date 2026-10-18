@@ -14,11 +14,19 @@
 package org.groundplatform.v2.web.ui.common
 
 /** The JVM target backs unit tests only, which inject file contents instead of picking files. */
-internal actual val isPlatformTextFilePickerAvailable: Boolean = false
+internal actual val isPlatformTextFilePickerAvailable: Boolean = true
+
+var jvmTextFilePickerOverride: ((accept: String, onResult: (TextFilePickResult) -> Unit) -> Unit)? =
+  null
 
 actual fun openPlatformTextFilePicker(
   accept: String,
   onResult: (TextFilePickResult) -> Unit,
 ) {
-  onResult(TextFilePickResult.Failed("Uploading files isn't available here."))
+  val override = jvmTextFilePickerOverride
+  if (override != null) {
+    override(accept, onResult)
+  } else {
+    onResult(TextFilePickResult.Failed("Uploading files isn't available here."))
+  }
 }

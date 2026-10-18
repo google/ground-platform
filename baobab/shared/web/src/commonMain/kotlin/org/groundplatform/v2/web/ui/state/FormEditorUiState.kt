@@ -56,6 +56,8 @@ data class FormEditorUiState(
   // --- Session ---
   /** Selected question, or `null` when the Form itself is selected (Form properties). */
   val selectedKey: String? = null,
+  /** Selected section ID, or `null` when not editing section properties. */
+  val selectedSectionId: String? = null,
   /**
    * Language tag currently being edited and previewed in the Form editor, or `null` to follow the
    * survey's default language ([defaultLanguage]).
@@ -137,16 +139,19 @@ data class FormEditorUiState(
   val selectedQuestion: EditorQuestion?
     get() = form.find(selectedKey)
 
+  val selectedSection: org.groundplatform.v2.app.domain.model.editor.EditorSection?
+    get() = selectedSectionId?.let { form.section(it) }
+
   val selectedIndex: Int
     get() = selectedKey?.let { form.indexOf(it) } ?: -1
 
-  /** Whether the Form itself (rather than a question) is selected. */
+  /** Whether the Form itself (rather than a question or section) is selected. */
   val isFormSelected: Boolean
-    get() = selectedQuestion == null
+    get() = selectedQuestion == null && selectedSection == null
 
-  /** Whether the properties panel shows Form settings rather than a question. */
+  /** Whether the properties panel shows Form settings rather than a question or section. */
   val isFormSettingsSelected: Boolean
-    get() = selectedQuestion == null
+    get() = selectedQuestion == null && selectedSection == null
 
   val flowEdges: List<FlowEdge>
     get() = FormFlowGraph.edges(form)

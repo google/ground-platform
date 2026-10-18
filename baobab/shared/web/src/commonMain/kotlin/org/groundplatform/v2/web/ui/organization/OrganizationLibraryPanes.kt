@@ -41,6 +41,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -94,6 +95,7 @@ internal fun DictionaryPane(
   library: OrganizationLibraryUiState,
   actions: OrganizationActions,
   organization: Organization,
+  isLoading: Boolean = false,
 ) {
   var editing by remember(organization.id) { mutableStateOf<LibraryConcept?>(null) }
   var creating by remember(organization.id) { mutableStateOf(false) }
@@ -176,6 +178,7 @@ internal fun DictionaryPane(
           },
         onEdit = { editing = it },
         onDelete = { concept -> deleteError = actions.deleteConcept(organization.id, concept.id) },
+        isLoading = isLoading,
       )
       if (library.canEdit) {
         OutlinedButton(onClick = { creating = true }) {
@@ -200,6 +203,7 @@ internal fun DictionaryPane(
             else "No global concepts yet.",
           onEdit = { editing = it },
           onDelete = {},
+          isLoading = isLoading,
         )
       }
     }
@@ -212,8 +216,18 @@ private fun ConceptRows(
   emptyText: String,
   onEdit: (LibraryConcept) -> Unit,
   onDelete: (LibraryConcept) -> Unit,
+  isLoading: Boolean = false,
 ) {
   if (rows.isEmpty()) {
+    if (isLoading) {
+      Box(
+        modifier = Modifier.fillMaxWidth().padding(24.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        CircularProgressIndicator()
+      }
+      return
+    }
     Text(
       emptyText,
       style = MaterialTheme.typography.bodyMedium,
@@ -661,6 +675,7 @@ internal fun TemplatesPane(
   library: OrganizationLibraryUiState,
   actions: OrganizationActions,
   organization: Organization,
+  isLoading: Boolean = false,
 ) {
   var creating by remember(organization.id) { mutableStateOf(false) }
   var editingDetails by remember(organization.id) { mutableStateOf<FormTemplate?>(null) }
@@ -760,11 +775,20 @@ internal fun TemplatesPane(
     if (!library.isGlobalLibrary) {
       DetailsCard("${organization.name} templates") {
         if (own.isEmpty()) {
-          Text(
-            "No templates yet. Templates saved from this organization's forms appear here.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
+          if (isLoading) {
+            Box(
+              modifier = Modifier.fillMaxWidth().padding(24.dp),
+              contentAlignment = Alignment.Center,
+            ) {
+              CircularProgressIndicator()
+            }
+          } else {
+            Text(
+              "No templates yet. Templates saved from this organization's forms appear here.",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
         }
         own.forEach { row ->
           key(row.entry.id) {
@@ -806,11 +830,20 @@ internal fun TemplatesPane(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       if (global.isEmpty()) {
-        Text(
-          "No global templates yet.",
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (isLoading) {
+          Box(
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            CircularProgressIndicator()
+          }
+        } else {
+          Text(
+            "No global templates yet.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
       global.forEach { row ->
         key(row.entry.id) {
@@ -950,6 +983,7 @@ internal fun PurposesPane(
   library: OrganizationLibraryUiState,
   actions: OrganizationActions,
   organization: Organization,
+  isLoading: Boolean = false,
 ) {
   var creating by remember(organization.id) { mutableStateOf(false) }
   var editing by remember(organization.id) { mutableStateOf<PurposePack?>(null) }
@@ -1031,11 +1065,20 @@ internal fun PurposesPane(
     if (!library.isGlobalLibrary) {
       DetailsCard("${organization.name} purposes") {
         if (own.isEmpty()) {
-          Text(
-            "No purposes yet.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
+          if (isLoading) {
+            Box(
+              modifier = Modifier.fillMaxWidth().padding(24.dp),
+              contentAlignment = Alignment.Center,
+            ) {
+              CircularProgressIndicator()
+            }
+          } else {
+            Text(
+              "No purposes yet.",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
         }
         own.forEach { row ->
           key(row.entry.id) {
@@ -1073,11 +1116,20 @@ internal fun PurposesPane(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       if (global.isEmpty()) {
-        Text(
-          "No global purposes yet.",
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (isLoading) {
+          Box(
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            CircularProgressIndicator()
+          }
+        } else {
+          Text(
+            "No global purposes yet.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
       global.forEach { row ->
         key(row.entry.id) {
@@ -1398,7 +1450,10 @@ private fun PurposeDialog(
   availableTemplates: List<FormTemplate>,
   onSave:
     (
-      title: String, description: String, pillar: ImpactPillar?, templateIds: List<String>,
+      title: String,
+      description: String,
+      pillar: ImpactPillar?,
+      templateIds: List<String>,
     ) -> String?,
   onDismiss: () -> Unit,
 ) {

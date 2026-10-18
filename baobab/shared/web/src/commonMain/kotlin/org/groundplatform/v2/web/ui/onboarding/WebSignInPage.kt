@@ -48,7 +48,6 @@ import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
 import org.groundplatform.v2.web.ui.common.WebLanguageSelector
-import org.groundplatform.v2.web.ui.common.WebSignInLanguageSelector
 
 /**
  * Sign-in gate for the web app, shown in place of any web page while the user is signed out.
@@ -118,11 +117,6 @@ internal fun WebSignInPage(state: WebAppState, onSignIn: () -> Unit) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-          )
-          WebSignInLanguageSelector(
-            currentLanguageCode = settingsUiState.languageCode,
-            onLanguageChange = state.settings::updateLanguage,
-            modifier = Modifier.fillMaxWidth(),
           )
           OutlinedButton(
             onClick = onSignIn,

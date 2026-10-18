@@ -468,7 +468,7 @@ data class EditorQuestion(
    * Whether this question pulls its choices from a Map layer or Data table rather than [choices].
    */
   val usesDatasetChoices: Boolean
-    get() = choiceSource.isDataset || choiceDatasetId != null
+    get() = !choiceDatasetId.isNullOrBlank()
 
   /**
    * Effective [ChoiceSource] for this question, inferring [ChoiceSource.MAP_LAYER] vs
@@ -476,14 +476,14 @@ data class EditorQuestion(
    */
   fun effectiveChoiceSource(datasets: List<EditorDataset> = emptyList()): ChoiceSource {
     val datasetId = choiceDatasetId
-    if (datasetId != null) {
+    if (!datasetId.isNullOrBlank()) {
       val dataset = datasets.firstOrNull { it.id == datasetId }
       if (dataset != null) {
         return if (dataset.isMapLayer) ChoiceSource.MAP_LAYER else ChoiceSource.DATA_TABLE
       }
       return if (choiceSource.isDataset) choiceSource else ChoiceSource.MAP_LAYER
     }
-    return choiceSource
+    return ChoiceSource.MANUAL
   }
 
   /**
@@ -1143,8 +1143,9 @@ object EditorXFormsGenerator {
           i++
         } else if (processedSectionIds.add(section.id)) {
           val sectionQuestions = form.questions.filter { it.sectionId == section.id }
-          val childFields =
-            sectionQuestions.map { FieldDefinition(name = it.name, type = dataTypeOf(it)) }
+          val childFields = sectionQuestions.map {
+            FieldDefinition(name = it.name, type = dataTypeOf(it))
+          }
           add(
             FieldDefinition(
               name = section.id,
@@ -1343,18 +1344,17 @@ object EditorXFormsGenerator {
             sectionQuestions.add(form.questions[i])
             i++
           }
-          val childComponents =
-            sectionQuestions.map { childQ ->
-              ViewComponent(
-                control =
-                  buildQuestionControl(
-                    childQ,
-                    hasMultiLanguageTranslations,
-                    form = form,
-                    section = section,
-                  )
-              )
-            }
+          val childComponents = sectionQuestions.map { childQ ->
+            ViewComponent(
+              control =
+                buildQuestionControl(
+                  childQ,
+                  hasMultiLanguageTranslations,
+                  form = form,
+                  section = section,
+                )
+            )
+          }
           if (section.repeatable) {
             add(
               ViewComponent(

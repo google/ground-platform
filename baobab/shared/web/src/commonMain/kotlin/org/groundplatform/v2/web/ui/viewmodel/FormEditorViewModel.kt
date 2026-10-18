@@ -140,6 +140,8 @@ interface FormEditorActions {
    */
   fun addQuestion(type: EditorQuestionType, atIndex: Int? = null)
 
+  fun addQuestion(type: EditorQuestionType, atIndex: Int?, sectionId: String?)
+
   /** Inserts a copy of [key] right after it and selects the copy. */
   fun duplicateQuestion(key: String)
 
@@ -153,8 +155,8 @@ interface FormEditorActions {
   /** Moves [key] by [delta] positions (negative = earlier). */
   fun moveQuestion(key: String, delta: Int)
 
-  /** Moves [key] so it lands at [targetIndex]. */
-  fun moveQuestionTo(key: String, targetIndex: Int)
+  /** Moves [key] so it lands at [targetIndex], optionally assigning to [targetSectionId]. */
+  fun moveQuestionTo(key: String, targetIndex: Int, targetSectionId: String? = null)
 
   fun updateQuestion(key: String, transform: (EditorQuestion) -> EditorQuestion)
 
@@ -236,6 +238,7 @@ interface FormEditorActions {
    * [questionIndex] (or [key]) to it, keeping the user in the Form editor.
    */
   fun createDatasetForChoiceQuestion(questionIndex: Int, kind: DatasetKind)
+
   fun createDatasetForChoiceQuestion(key: String, kind: DatasetKind)
 
   /**
@@ -243,6 +246,7 @@ interface FormEditorActions {
    * question can then be filtered based on the answer selected in the parent question.
    */
   fun updateQuestionParentKey(questionIndex: Int, parentQuestionKey: String)
+
   fun updateQuestionParentKey(key: String, parentQuestionKey: String)
 
   /**
@@ -250,6 +254,7 @@ interface FormEditorActions {
    * question [questionIndex] (or [key]) to be shown.
    */
   fun updateChoiceParentValue(questionIndex: Int, choiceIndex: Int, parentValue: String)
+
   fun updateChoiceParentValue(key: String, choiceIndex: Int, parentValue: String)
 
   /**
@@ -261,6 +266,7 @@ interface FormEditorActions {
     importedChoices: List<EditorChoice>,
     append: Boolean = false,
   )
+
   fun importQuestionChoices(
     key: String,
     importedChoices: List<EditorChoice>,
@@ -268,6 +274,9 @@ interface FormEditorActions {
   )
 
   // --- Form Sections (Singleton & Repeated Groups) ---
+
+  /** Selects section [sectionId] for properties editing, or deselects when `null`. */
+  fun selectSection(sectionId: String?)
 
   /** Adds a new section to the form and returns its unique ID. */
   fun addSection(title: String = "Section", repeatable: Boolean = false): String
@@ -278,8 +287,11 @@ interface FormEditorActions {
   /** Deletes section [sectionId], removing it from the form and unassigning its questions. */
   fun deleteSection(sectionId: String)
 
-  /** Assigns question at [questionIndex] (or [key]) to section [sectionId] (or clears it if blank). */
+  /**
+   * Assigns question at [questionIndex] (or [key]) to section [sectionId] (or clears it if blank).
+   */
   fun setQuestionSection(questionIndex: Int, sectionId: String)
+
   fun setQuestionSection(key: String, sectionId: String)
 
   // --- Save-to logic ---
@@ -444,11 +456,13 @@ class FormEditorViewModel(
   /** Whether the enclosing survey is read-only (closed or archived). */
   private val isSurveyReadOnly: () -> Boolean = { false },
   private val createDatasetForChoiceQuestionCallback:
-    ((questionIndex: Int, kind: DatasetKind) -> Unit)? = null,
+    ((questionIndex: Int, kind: DatasetKind) -> Unit)? =
+    null,
 ) : FormEditorActions {
   /** Session (non-persisted) state of the Form editor. */
   private data class Session(
     val selectedKey: String?,
+    val selectedSectionId: String? = null,
     val selectedLanguage: String? = null,
     val previewTarget: FormPreviewTarget = FormPreviewTarget.MOBILE,
     val previewController: FormWizardController? = null,
@@ -476,6 +490,7 @@ class FormEditorViewModel(
           form = form,
           datasets = datasets,
           selectedKey = session.selectedKey,
+          selectedSectionId = session.selectedSectionId,
           selectedLanguage = session.selectedLanguage,
           previewTarget = session.previewTarget,
           previewController = session.previewController,
@@ -659,11 +674,20 @@ class FormEditorViewModel(
   // --- Selection & panels ---
 
   override fun select(key: String?) {
-    session.update { it.copy(selectedKey = key?.takeIf { k -> form.indexOf(k) >= 0 }) }
+    session.update {
+      it.copy(
+        selectedKey = key?.takeIf { k -> form.indexOf(k) >= 0 },
+        selectedSectionId = null,
+      )
+    }
   }
 
   override fun selectForm() {
-    session.update { it.copy(selectedKey = null) }
+    session.update { it.copy(selectedKey = null, selectedSectionId = null) }
+  }
+
+  override fun selectSection(sectionId: String?) {
+    session.update { it.copy(selectedSectionId = sectionId, selectedKey = null) }
   }
 
   override fun selectFormSettings() = selectForm()
@@ -733,7 +757,18 @@ class FormEditorViewModel(
   // --- Questions ---
 
   override fun addQuestion(type: EditorQuestionType, atIndex: Int?) {
+    addQuestion(type, atIndex, sectionId = null)
+  }
+
+  override fun addQuestion(type: EditorQuestionType, atIndex: Int?, sectionId: String?) {
     val key = newKey()
+    val targetSectionId =
+      sectionId
+        ?: (if (atIndex != null && atIndex in form.questions.indices)
+          form.questions[atIndex].sectionId
+        else if (atIndex != null && atIndex > 0 && atIndex - 1 in form.questions.indices)
+          form.questions[atIndex - 1].sectionId
+        else "")
     val question =
       EditorQuestion(
         key = key,
@@ -744,6 +779,7 @@ class FormEditorViewModel(
           else "New ${type.label.lowercase()} question",
         choices = if (type.hasChoices) defaultChoices() else emptyList(),
         decimalPlaces = if (type.isNumeric) EditorQuestion.DEFAULT_DECIMAL_PLACES else 0,
+        sectionId = targetSectionId,
       )
     val insertAt =
       when {
@@ -791,15 +827,79 @@ class FormEditorViewModel(
     mutateForm { form ->
       val list = form.questions.toMutableList()
       val item = list.removeAt(index)
-      list.add(target, item)
+      val targetNeighborSectionId =
+        when {
+          target > 0 && delta > 0 -> list[target - 1].sectionId
+          target < list.size && delta < 0 -> list[target].sectionId
+          target > 0 -> list[target - 1].sectionId
+          target < list.size -> list[target].sectionId
+          else -> ""
+        }
+      val updatedItem = item.copy(sectionId = targetNeighborSectionId)
+      list.add(target, updatedItem)
       form.copy(questions = list)
     }
   }
 
-  override fun moveQuestionTo(key: String, targetIndex: Int) {
-    val index = form.indexOf(key)
-    if (index < 0) return
-    moveQuestion(key, targetIndex.coerceIn(0, form.questions.lastIndex) - index)
+  override fun moveQuestionTo(key: String, targetIndex: Int, targetSectionId: String?) {
+    val fromIndex = form.indexOf(key)
+    if (fromIndex < 0) return
+    mutateForm { form ->
+      val list = form.questions.toMutableList()
+      val item = list.removeAt(fromIndex)
+
+      val newSectionId =
+        when {
+          targetSectionId != null -> targetSectionId
+          else -> {
+            val target = targetIndex.coerceIn(0, list.size)
+            when {
+              target > 0 -> list[target - 1].sectionId
+              target < list.size -> list[target].sectionId
+              else -> item.sectionId
+            }
+          }
+        }
+
+      val finalIndex =
+        if (newSectionId.isNotEmpty()) {
+          val sectionIndices = list.indices.filter { list[it].sectionId == newSectionId }
+          if (sectionIndices.isNotEmpty()) {
+            val minIdx = sectionIndices.first()
+            val maxIdx = sectionIndices.last() + 1
+            targetIndex.coerceIn(minIdx, maxIdx)
+          } else {
+            targetIndex.coerceIn(0, list.size)
+          }
+        } else {
+          val clampedTarget = targetIndex.coerceIn(0, list.size)
+          if (clampedTarget in list.indices) {
+            val neighborSecId = list[clampedTarget].sectionId
+            if (neighborSecId.isNotEmpty()) {
+              val secIndices = list.indices.filter { list[it].sectionId == neighborSecId }
+              val firstIdx = secIndices.first()
+              val lastIdx = secIndices.last()
+              if (clampedTarget > firstIdx && clampedTarget <= lastIdx) {
+                if (clampedTarget - firstIdx <= lastIdx + 1 - clampedTarget) {
+                  firstIdx
+                } else {
+                  lastIdx + 1
+                }
+              } else {
+                clampedTarget
+              }
+            } else {
+              clampedTarget
+            }
+          } else {
+            clampedTarget
+          }
+        }
+
+      val updatedItem = item.copy(sectionId = newSectionId)
+      list.add(finalIndex.coerceIn(0, list.size), updatedItem)
+      form.copy(questions = list)
+    }
   }
 
   override fun updateQuestion(key: String, transform: (EditorQuestion) -> EditorQuestion) =
@@ -936,7 +1036,7 @@ class FormEditorViewModel(
               .filter { it.isMapLayer == wantMapLayer }
               .ifEmpty { datasets.filter { it.isMapLayer == wantMapLayer } }
           val currentId = q.choiceDatasetId?.takeIf { id -> candidates.any { it.id == id } }
-          val nextId = currentId ?: candidates.firstOrNull()?.id.orEmpty()
+          val nextId = currentId ?: candidates.firstOrNull()?.id
           val nextDataset = candidates.firstOrNull { it.id == nextId }
           val keepAllowAdd =
             q.allowAddEntity &&
@@ -1134,8 +1234,13 @@ class FormEditorViewModel(
         questions =
           form.questions.map { q ->
             if (q.key == key) {
+              val isPlaceholderChoices =
+                q.choices.size == 2 &&
+                  q.choices[0].value == "option_1" &&
+                  q.choices[1].value == "option_2"
+              val shouldAppend = append && !isPlaceholderChoices
               val newChoices =
-                if (append) {
+                if (shouldAppend) {
                   val existingValues = q.choices.map { it.value }.toSet()
                   q.choices + importedChoices.filterNot { it.value in existingValues }
                 } else {
@@ -1165,9 +1270,7 @@ class FormEditorViewModel(
 
   override fun updateSection(sectionId: String, transform: (EditorSection) -> EditorSection) {
     mutateForm { form ->
-      form.copy(
-        sections = form.sections.map { if (it.id == sectionId) transform(it) else it }
-      )
+      form.copy(sections = form.sections.map { if (it.id == sectionId) transform(it) else it })
     }
   }
 

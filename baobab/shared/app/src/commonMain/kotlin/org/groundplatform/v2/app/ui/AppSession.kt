@@ -127,6 +127,7 @@ open class AppSession(
       organizationRepository = dataHolder.organizationRepository,
       scope = dataHolder.scope,
       connectivityRepository = dataHolder.connectivityRepository,
+      hasCompletedInitialSync = dataHolder.hasCompletedInitialSync,
     )
 
   protected var onboardingState by mutableStateOf(onboarding.uiState.value)

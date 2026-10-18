@@ -65,6 +65,7 @@ import androidx.compose.material.icons.outlined.ExpandContent
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.TableRows
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -338,6 +339,8 @@ internal fun WebDashboardPage(
   val activeQrEntity = state.dataCollectionUiState.activeQrCodeEntity
   val activePdfSheet = state.dataCollectionUiState.activeSharedPdfSheet
   val isSidePanelExpanded = uiState.isSidePanelExpanded
+  val hasCompletedInitialSync by state.dataHolder.hasCompletedInitialSync.collectAsState()
+  val isLoading = !hasCompletedInitialSync && uiState.entities.isEmpty()
   // One animated fraction scales the user-chosen width, so collapsing, expanding, and dragging all
   // drive the same layout and the panel's contents keep their full width while sliding.
   val expandedFraction by
@@ -574,6 +577,8 @@ private fun DashboardMapArea(
   val isFormOpen = dataCollectionUiState.isDataCollectionFormOpen
   val isTableExpanded = uiState.isDashboardTableExpanded
   val hasTables = uiState.entities.isNotEmpty()
+  val hasCompletedInitialSync by state.dataHolder.hasCompletedInitialSync.collectAsState()
+  val isLoading = !hasCompletedInitialSync && uiState.entities.isEmpty()
   var lastFramedSelectionEpoch by remember { mutableStateOf(-1L) }
   val mapCamera =
     rememberSurveyMapCamera(uiState = state.surveyMapUiState, actions = state.surveyMap)
@@ -794,6 +799,7 @@ private fun DashboardMapArea(
           hasSelection = hasSelection,
           onRowClick = { row -> state.selectEntity(row.id) },
           expandedTableHeight = expandedTableHeight,
+          isLoading = isLoading,
         )
       }
     }
@@ -881,6 +887,8 @@ internal fun DashboardDataTablesPanel(
 ) {
   val uiState by state.dashboard.uiState.collectAsState()
   val dataCollectionUiState = state.dataCollectionUiState
+  val hasCompletedInitialSync by state.dataHolder.hasCompletedInitialSync.collectAsState()
+  val isLoading = !hasCompletedInitialSync && uiState.entities.isEmpty()
   DashboardDataTablesPanel(
     uiState = uiState,
     actions = state.dashboard,
@@ -888,6 +896,7 @@ internal fun DashboardDataTablesPanel(
     hasSelection = dataCollectionUiState.hasSelectedRecord,
     onRowClick = { row -> state.selectEntity(row.id) },
     expandedTableHeight = expandedTableHeight,
+    isLoading = isLoading,
     modifier = modifier,
   )
 }
@@ -907,6 +916,7 @@ internal fun DashboardDataTablesPanel(
   hasSelection: Boolean,
   onRowClick: (DashboardDataTableRow) -> Unit,
   expandedTableHeight: Dp,
+  isLoading: Boolean = false,
   modifier: Modifier = Modifier,
 ) {
   val allEntities = uiState.entities
@@ -1006,6 +1016,7 @@ internal fun DashboardDataTablesPanel(
             DashboardDataTableView(
               table = table,
               onRowClick = onRowClick,
+              isLoading = isLoading,
               modifier = Modifier.fillMaxWidth().weight(1f),
             )
           }
@@ -1025,6 +1036,7 @@ internal fun DashboardDataTablesPanel(
 private fun DashboardDataTableView(
   table: DashboardDataTable,
   onRowClick: (DashboardDataTableRow) -> Unit,
+  isLoading: Boolean = false,
   modifier: Modifier = Modifier,
 ) {
   val columnWidths =
@@ -1071,12 +1083,21 @@ private fun DashboardDataTableView(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         if (table.rows.isEmpty()) {
-          Text(
-            text = "No rows yet.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(16.dp),
-          )
+          if (isLoading) {
+            Box(
+              modifier = Modifier.fillMaxWidth().padding(24.dp),
+              contentAlignment = Alignment.Center,
+            ) {
+              CircularProgressIndicator()
+            }
+          } else {
+            Text(
+              text = "No rows yet.",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.padding(16.dp),
+            )
+          }
         }
 
         LazyColumn(state = listState, modifier = Modifier.fillMaxWidth().weight(1f)) {

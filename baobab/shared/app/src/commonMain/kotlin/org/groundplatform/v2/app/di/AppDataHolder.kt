@@ -263,6 +263,34 @@ class AppDataHolder(
   /** Progress of the initial sync from the user data service, for reporting failures. */
   val userDataSyncState: StateFlow<UserDataSyncState> = mutableUserDataSyncState.asStateFlow()
 
+  private val mutableHasCompletedInitialSync = MutableStateFlow(grpcSyncDataSource == null)
+
+  /**
+   * Whether the initial sync has finished (either successfully or with a failure). True ensures UI
+   * spinners only appear on the first load when data is empty, not during periodic background
+   * refreshes.
+   */
+  val hasCompletedInitialSync: StateFlow<Boolean> = mutableHasCompletedInitialSync.asStateFlow()
+
+  /**
+   * Whether the sync engine is actively draining unsent local mutations from the outbox. False
+   * during background polling when the outbox has no pending mutations.
+   */
+  val isDrainingOutbox: StateFlow<Boolean> =
+    if (syncCoordinator == null) {
+      MutableStateFlow(false)
+    } else {
+      combine(
+          syncCoordinator.activity.map { it.isSyncing },
+          localStore.observeOutbox().map { outbox ->
+            outbox.count { it.state != OutboxState.REJECTED }
+          },
+        ) { isSyncing, pendingCount ->
+          isSyncing && pendingCount > 0
+        }
+        .stateIn(scope, SharingStarted.Eagerly, false)
+    }
+
   init {
     launch { syncFromUserDataService() }
   }
@@ -275,6 +303,7 @@ class AppDataHolder(
   private suspend fun syncFromUserDataService() {
     if (grpcSyncDataSource == null) {
       sampleDataRepository.seedIfNeeded()
+      mutableHasCompletedInitialSync.value = true
       return
     }
     mutableUserDataSyncState.value = UserDataSyncState.Syncing
@@ -285,6 +314,7 @@ class AppDataHolder(
       syncStatePersistence?.start()
       startSyncEngine(coordinator)
       mutableUserDataSyncState.value = UserDataSyncState.Synced
+      mutableHasCompletedInitialSync.value = true
       return
     }
     mutableUserDataSyncState.value =
@@ -292,6 +322,7 @@ class AppDataHolder(
         sampleDataRepository.seedIfNeeded()
         syncStatePersistence?.start()
         syncCoordinator?.let(::startSyncEngine)
+        mutableHasCompletedInitialSync.value = true
         UserDataSyncState.Synced
       } catch (e: CancellationException) {
         throw e
@@ -302,6 +333,7 @@ class AppDataHolder(
             ?: e.message
             ?: e::class.simpleName
             ?: "Unknown error"
+        mutableHasCompletedInitialSync.value = true
         UserDataSyncState.Failed(serviceUrl = userDataServiceUrl, message = message)
       }
   }

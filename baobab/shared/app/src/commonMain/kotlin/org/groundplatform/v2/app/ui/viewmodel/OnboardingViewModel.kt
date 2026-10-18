@@ -100,6 +100,7 @@ class OnboardingViewModel(
   private val organizationRepository: OrganizationRepository,
   private val scope: CoroutineScope,
   private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
+  private val hasCompletedInitialSync: StateFlow<Boolean> = MutableStateFlow(true),
 ) : OnboardingActions {
   private data class Session(
     val hasAcceptedTerms: Boolean = false,
@@ -129,6 +130,7 @@ class OnboardingViewModel(
         authRepository.observeSession(),
         surveyRepository.observeSurveys(),
         organizationRepository.observeOrganizations(),
+        hasCompletedInitialSync,
         session,
         ::buildUiState,
       )
@@ -138,6 +140,7 @@ class OnboardingViewModel(
     auth: AuthSession,
     surveys: List<SurveyPreviewItem>,
     organizations: List<Organization>,
+    initialSyncDone: Boolean,
     session: Session,
   ): OnboardingUiState {
     val organizationNames = organizations.associate { it.id to it.name }
@@ -155,6 +158,7 @@ class OnboardingViewModel(
       entryOrigin = session.entryOrigin,
       isSignOutPromptOpen = session.isSignOutPromptOpen,
       searchQuery = session.searchQuery,
+      isLoadingSurveys = !initialSyncDone && surveys.isEmpty(),
       surveys = surveys,
       filteredSurveys = filterSurveys(surveys, session.searchQuery, organizationNames),
       downloadedSurveyCount = surveys.count { it.isDownloaded },

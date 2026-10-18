@@ -13,21 +13,15 @@
  */
 package org.groundplatform.v2.core.forms.ui
 
-import groundplatform.v2.forms.ChoiceItem
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.ControlType
 import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.LabelDef
 import groundplatform.v2.forms.TypedValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.core.forms.model.FinalizationResult
 import org.groundplatform.v2.core.forms.serialization.XFormsXmlSerializer
@@ -563,7 +557,8 @@ class FormWizardControllerTest {
                 choices =
                   ctrl.choices.map { choice ->
                     when (choice.value_) {
-                      "nairobi", "mombasa" -> choice.copy(parent_value = "kenya")
+                      "nairobi",
+                      "mombasa" -> choice.copy(parent_value = "kenya")
                       "kampala" -> choice.copy(parent_value = "uganda")
                       else -> choice
                     }

@@ -2465,9 +2465,10 @@ private fun SelectOneWidget(
   var addedOptions by remember(path) { mutableStateOf<List<ResolvedChoiceOption>>(emptyList()) }
   val allOptions = control.options + addedOptions
 
-  val parentInfo = remember(control, controller.formState) {
-    controller.parentQuestionInfoFor(control)
-  }
+  val parentInfo =
+    remember(control, controller.formState) {
+      controller.parentQuestionInfoFor(control)
+    }
   if (parentInfo != null && !parentInfo.isAnswered) {
     Text(
       text = "Select an answer for '${parentInfo.label}' first",
@@ -2752,9 +2753,10 @@ private fun SelectMultipleWidget(
   var addedOptions by remember(path) { mutableStateOf<List<ResolvedChoiceOption>>(emptyList()) }
   val allOptions = control.options + addedOptions
 
-  val parentInfo = remember(control, controller.formState) {
-    controller.parentQuestionInfoFor(control)
-  }
+  val parentInfo =
+    remember(control, controller.formState) {
+      controller.parentQuestionInfoFor(control)
+    }
   if (parentInfo != null && !parentInfo.isAnswered) {
     Text(
       text = "Select an answer for '${parentInfo.label}' first",

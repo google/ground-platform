@@ -15,7 +15,6 @@ package org.groundplatform.v2.app.domain.usecase
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class ChoiceListImporterTest {
 
@@ -171,5 +170,68 @@ class ChoiceListImporterTest {
     assertEquals("red", choices[0].value)
     assertEquals("red_2", choices[1].value)
     assertEquals("red_3", choices[2].value)
+  }
+
+  @Test
+  fun parseChoices_xlsFormChoicesHeader_ignoresListNameColumn() {
+    val content =
+      """
+      list_name,name,label
+      tree_species,oak,Oak Tree
+      tree_species,pine,Pine Tree
+      """
+        .trimIndent()
+
+    val choices = ChoiceListImporter.parseChoices(content, "choices.csv")
+    assertEquals(2, choices.size)
+    assertEquals("oak", choices[0].value)
+    assertEquals("Oak Tree", choices[0].label)
+    assertEquals("", choices[0].parentValue)
+
+    assertEquals("pine", choices[1].value)
+    assertEquals("Pine Tree", choices[1].label)
+    assertEquals("", choices[1].parentValue)
+  }
+
+  @Test
+  fun parseChoices_threeColumnWithoutHeader_constantFirstColumnTreatedAsListName() {
+    val content =
+      """
+      crops,wheat,Wheat
+      crops,corn,Corn
+      crops,rice,Rice
+      """
+        .trimIndent()
+
+    val choices = ChoiceListImporter.parseChoices(content, "crops.csv")
+    assertEquals(3, choices.size)
+    assertEquals("wheat", choices[0].value)
+    assertEquals("Wheat", choices[0].label)
+    assertEquals("", choices[0].parentValue)
+
+    assertEquals("corn", choices[1].value)
+    assertEquals("Corn", choices[1].label)
+    assertEquals("", choices[1].parentValue)
+  }
+
+  @Test
+  fun parseChoices_explicitFilterHeader_mapsParentCorrectly() {
+    val content =
+      """
+      filter,name,label
+      asia,japan,Japan
+      europe,france,France
+      """
+        .trimIndent()
+
+    val choices = ChoiceListImporter.parseChoices(content, "countries.csv")
+    assertEquals(2, choices.size)
+    assertEquals("japan", choices[0].value)
+    assertEquals("Japan", choices[0].label)
+    assertEquals("asia", choices[0].parentValue)
+
+    assertEquals("france", choices[1].value)
+    assertEquals("France", choices[1].label)
+    assertEquals("europe", choices[1].parentValue)
   }
 }

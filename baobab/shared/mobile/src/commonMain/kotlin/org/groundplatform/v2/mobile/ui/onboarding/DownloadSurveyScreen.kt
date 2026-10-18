@@ -45,6 +45,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -255,30 +256,36 @@ fun DownloadSurveyScreen(
             modifier = Modifier.fillMaxSize().padding(32.dp),
             contentAlignment = Alignment.Center,
           ) {
-            Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(8.dp),
+            if (
+              uiState.isLoadingSurveys && uiState.surveys.isEmpty() && uiState.searchQuery.isBlank()
             ) {
-              Icon(
-                imageVector = Icons.Outlined.Map,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(36.dp),
-              )
-              Text(
-                text = "No surveys match \"${uiState.searchQuery}\"",
-                style = MaterialTheme.typography.titleSmall,
-                color = onSurfaceColor,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-              )
-              Text(
-                text =
-                  "Try searching by another survey title, keyword, or location (e.g. Brazil, Kenya, Vietnam).",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-              )
+              CircularProgressIndicator()
+            } else {
+              Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Outlined.Map,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.size(36.dp),
+                )
+                Text(
+                  text = "No surveys match \"${uiState.searchQuery}\"",
+                  style = MaterialTheme.typography.titleSmall,
+                  color = onSurfaceColor,
+                  fontWeight = FontWeight.Bold,
+                  textAlign = TextAlign.Center,
+                )
+                Text(
+                  text =
+                    "Try searching by another survey title, keyword, or location (e.g. Brazil, Kenya, Vietnam).",
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  textAlign = TextAlign.Center,
+                )
+              }
             }
           }
         } else {

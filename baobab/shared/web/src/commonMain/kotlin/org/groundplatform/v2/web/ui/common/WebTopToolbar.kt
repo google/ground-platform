@@ -45,6 +45,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,8 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.flowOf
-import org.groundplatform.v2.app.di.UserDataSyncState
+import kotlinx.coroutines.delay
 import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
 import org.groundplatform.v2.app.ui.common.UserAvatarProfileMenu
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
@@ -218,6 +218,65 @@ internal fun WebSurveySwitcher(
 }
 
 /**
+ * Small status indicator displaying "Saving…" with a 14dp spinner during saving activity, and
+ * "Saved" with a check icon briefly (2.5s) upon completion.
+ */
+@Composable
+fun WebSaveStatusIndicator(
+  isSaving: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  var showSaved by remember { mutableStateOf(false) }
+  var wasSaving by remember { mutableStateOf(false) }
+
+  LaunchedEffect(isSaving) {
+    if (wasSaving && !isSaving) {
+      showSaved = true
+      delay(2500)
+      showSaved = false
+    }
+    wasSaving = isSaving
+  }
+
+  if (isSaving) {
+    Row(
+      modifier = modifier.padding(horizontal = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      CircularProgressIndicator(
+        modifier = Modifier.size(14.dp),
+        strokeWidth = 2.dp,
+        color = MaterialTheme.colorScheme.primary,
+      )
+      Text(
+        text = "Saving…",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  } else if (showSaved) {
+    Row(
+      modifier = modifier.padding(horizontal = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Check,
+        contentDescription = null,
+        modifier = Modifier.size(14.dp),
+        tint = MaterialTheme.colorScheme.primary,
+      )
+      Text(
+        text = "Saved",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
+}
+
+/**
  * Header shared by every page of the Ground 2.0 Web application.
  *
  * Displays, left to right:
@@ -241,6 +300,10 @@ internal fun WebAppHeader(
   actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
   val brandFont = LocalGroundBrandFontFamily.current
+  val surveyEditorUiState by state.surveyEditor.uiState.collectAsState()
+  val orgUiState by state.organization.uiState.collectAsState()
+  val isDrainingOutbox by state.dataHolder.isDrainingOutbox.collectAsState()
+  val isSaving = surveyEditorUiState.isSaving || orgUiState.isSaving || isDrainingOutbox
 
   Surface(
     modifier = modifier.fillMaxWidth(),
@@ -312,35 +375,12 @@ internal fun WebAppHeader(
 
       Spacer(modifier = Modifier.width(16.dp))
 
-      val userDataSyncState by state.dataHolder.userDataSyncState.collectAsState()
-      val syncCoordinator = state.dataHolder.syncCoordinator
-      val syncActivity by (syncCoordinator?.activity ?: flowOf(null)).collectAsState(initial = null)
-      val isSyncing =
-        userDataSyncState is UserDataSyncState.Syncing || syncActivity?.isSyncing == true
-
       // Right: page actions, divider, optional avatar and divider, and debug tools.
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        if (isSyncing) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.padding(horizontal = 4.dp),
-          ) {
-            CircularProgressIndicator(
-              modifier = Modifier.size(14.dp),
-              strokeWidth = 2.dp,
-              color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-              text = "Syncing…",
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-        }
+        WebSaveStatusIndicator(isSaving = isSaving)
 
         if (actions != null) {
           actions()

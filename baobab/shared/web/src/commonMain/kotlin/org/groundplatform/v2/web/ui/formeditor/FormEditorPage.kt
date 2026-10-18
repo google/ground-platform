@@ -27,7 +27,9 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -171,6 +173,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -196,7 +199,6 @@ import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.model.editor.EditorRelevance
 import org.groundplatform.v2.app.domain.model.editor.EditorSection
 import org.groundplatform.v2.app.domain.model.editor.EditorValidation
-import androidx.compose.ui.unit.DpOffset
 import org.groundplatform.v2.app.domain.model.editor.FlowEdge
 import org.groundplatform.v2.app.domain.model.editor.FlowEdgeKind
 import org.groundplatform.v2.app.domain.model.editor.FormEditorValidator
@@ -275,6 +277,7 @@ fun FormEditorPage(
   onUnlinkDataset: ((String) -> Unit)? = null,
   onCreateFormForDataset: ((String) -> Unit)? = null,
   onOpenForm: ((String) -> Unit)? = null,
+  onCreateChoiceDataset: ((kind: DatasetKind, questionKey: String) -> Unit)? = null,
 ) {
   val linkedDataset = uiState.datasets.firstOrNull { it.isLinkedToThisForm }
   Box(
@@ -335,6 +338,10 @@ fun FormEditorPage(
           )
           FloatingAddQuestionButton(
             onAdd = actions::addQuestion,
+            onAddSection = { _ ->
+              val secId = actions.addSection("Section", repeatable = false)
+              actions.selectSection(secId)
+            },
             modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 24.dp),
           )
         }
@@ -359,6 +366,7 @@ fun FormEditorPage(
           onUnlinkDataset = onUnlinkDataset,
           onCreateFormForDataset = onCreateFormForDataset,
           onOpenForm = onOpenForm,
+          onCreateChoiceDataset = onCreateChoiceDataset,
           modifier = Modifier.width(uiState.sidePanelWidthDp.dp).fillMaxHeight(),
         )
       }
@@ -374,6 +382,7 @@ fun FormEditorPage(
 @Composable
 private fun FloatingAddQuestionButton(
   onAdd: (EditorQuestionType, Int?) -> Unit,
+  onAddSection: ((Int?) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
   var addingQuestion by remember { mutableStateOf(false) }
@@ -398,6 +407,7 @@ private fun FloatingAddQuestionButton(
       expanded = addingQuestion,
       onDismiss = { addingQuestion = false },
       onAdd = onAdd,
+      onAddSection = onAddSection,
     )
   }
 }
@@ -735,6 +745,7 @@ internal fun AddQuestionMenu(
   onDismiss: () -> Unit,
   onAdd: (EditorQuestionType, Int?) -> Unit,
   atIndex: Int? = null,
+  onAddSection: ((Int?) -> Unit)? = null,
 ) {
   DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
     EditorQuestionType.entries.forEach { type ->
@@ -750,6 +761,25 @@ internal fun AddQuestionMenu(
         },
         onClick = {
           onAdd(type, atIndex)
+          onDismiss()
+        },
+        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+      )
+    }
+    if (onAddSection != null) {
+      HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+      DropdownMenuItem(
+        text = { Text("Section") },
+        leadingIcon = {
+          Icon(
+            Icons.Outlined.Layers,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = MaterialTheme.colorScheme.secondary,
+          )
+        },
+        onClick = {
+          onAddSection(atIndex)
           onDismiss()
         },
         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
@@ -790,6 +820,8 @@ class FlowLayout(
 
   private val slotCol = mutableMapOf<Int, Int>()
   private val slotRow = mutableMapOf<Int, Int>()
+  private val sectionGhostCol = mutableMapOf<String, Int>()
+  private val sectionGhostRow = mutableMapOf<String, Int>()
 
   val ghostCol: Int
   val endCol: Int
@@ -803,12 +835,16 @@ class FlowLayout(
     val branchRows = mutableMapOf<String, Int>()
     var nextBranchRow = 1
     val lastColInRow = mutableMapOf<Int, Int>()
+    val seenSections = mutableSetOf<String>()
 
     for (qIdx in 0 until questionCount) {
       val slot = qIdx + 1
       val question = form?.questions?.getOrNull(qIdx)
+      val sectionId = question?.sectionId.orEmpty()
       val section = question?.let { form?.section(it.sectionId) }
       val relevance = question?.relevance ?: section?.relevance
+
+      if (sectionId.isNotBlank()) seenSections += sectionId
 
       if (relevance == null || form == null) {
         // Main trunk: row 0, advance column
@@ -832,19 +868,63 @@ class FlowLayout(
         lastColInRow[branchRow] = col
         trunkCol = maxOf(trunkCol, col)
       }
+
+      if (sectionId.isNotBlank()) {
+        val nextQ = form?.questions?.getOrNull(qIdx + 1)
+        if (nextQ == null || nextQ.sectionId != sectionId) {
+          val currentRow = slotRow[slot] ?: 0
+          if (currentRow == 0) {
+            trunkCol++
+            sectionGhostCol[sectionId] = trunkCol
+            sectionGhostRow[sectionId] = 0
+            lastColInRow[0] = trunkCol
+          } else {
+            val prevCol = lastColInRow[currentRow] ?: trunkCol
+            val gCol = prevCol + 1
+            sectionGhostCol[sectionId] = gCol
+            sectionGhostRow[sectionId] = currentRow
+            lastColInRow[currentRow] = gCol
+            trunkCol = maxOf(trunkCol, gCol)
+          }
+        }
+      }
     }
 
-    val maxQuestionsCol = slotCol.values.maxOrNull() ?: trunkCol
+    form?.sections?.forEach { sec ->
+      if (sec.id !in seenSections) {
+        trunkCol++
+        sectionGhostCol[sec.id] = trunkCol
+        sectionGhostRow[sec.id] = 0
+        lastColInRow[0] = trunkCol
+      }
+    }
+
+    val maxQuestionsCol =
+      maxOf(
+        slotCol.values.maxOrNull() ?: trunkCol,
+        sectionGhostCol.values.maxOrNull() ?: trunkCol,
+      )
     ghostCol = maxOf(trunkCol + 1, maxQuestionsCol + 1)
     endCol = ghostCol + 1
 
     slotCol[endSlot] = endCol
     slotRow[endSlot] = 0
 
-    maxRow = slotRow.values.maxOrNull() ?: 0
+    maxRow =
+      maxOf(
+        slotRow.values.maxOrNull() ?: 0,
+        sectionGhostRow.values.maxOrNull() ?: 0,
+      )
   }
 
+  fun hasSectionGhost(sectionId: String): Boolean = sectionGhostCol.containsKey(sectionId)
+
+  fun sectionGhostX(sectionId: String): Dp = colX(sectionGhostCol[sectionId] ?: 0)
+
+  fun sectionGhostY(sectionId: String): Dp = rowY(sectionGhostRow[sectionId] ?: 0)
+
   fun slotCol(slot: Int): Int = slotCol[slot] ?: 0
+
   fun slotRow(slot: Int): Int = slotRow[slot] ?: 0
 
   private fun colX(col: Int): Dp =
@@ -855,13 +935,17 @@ class FlowLayout(
     }
 
   val BranchGap: Dp = 48.dp
+
   private fun rowY(row: Int): Dp = cardTop + (CardHeight + BranchGap) * row
 
   fun slotX(slot: Int): Dp = colX(slotCol(slot))
+
   fun slotY(slot: Int): Dp = rowY(slotRow(slot)) + (CardHeight - height(slot)) / 2
 
   fun x(slot: Int): Dp = slotX(slot)
+
   fun top(slot: Int): Dp = slotY(slot)
+
   fun slotPosition(slot: Int): DpOffset = DpOffset(slotX(slot), slotY(slot))
 
   val ghostX: Dp = colX(ghostCol)
@@ -1188,6 +1272,46 @@ private fun FlowCanvas(
   val edgeZonePx = with(density) { 56.dp.toPx() }
   val edgeAlpha by animateFloatAsState(if (drag.isDragging) 0.15f else 1f)
   val verticalScroll = rememberScrollState()
+
+  val draggingSlot =
+    remember(drag.draggingKey, form) {
+      val idx = form.indexOf(drag.draggingKey ?: "")
+      if (idx >= 0) FormFlowGraph.questionSlot(idx) else -1
+    }
+  val draggingSlotLeftPx =
+    if (draggingSlot >= 0) with(density) { layout.x(draggingSlot).toPx() } else 0f
+  val draggedCenterXDp =
+    with(density) { (draggingSlotLeftPx + drag.offset + cardWidthPx / 2).toDp() }
+
+  val hoveredSectionId: String? =
+    if (drag.isDragging) {
+      val targetQ = form.questions.getOrNull(drag.targetIndex)
+      val sectionAtTarget = targetQ?.sectionId?.takeIf { it.isNotEmpty() }
+      val sectionByFrame =
+        form.sections
+          .firstOrNull { section ->
+            val sectionQuestions = form.questions.filter { it.sectionId == section.id }
+            val slots = sectionQuestions.map { FormFlowGraph.questionSlot(form.indexOf(it.key)) }
+            val hasGhost = layout.hasSectionGhost(section.id)
+            if (sectionQuestions.isEmpty() && !hasGhost) return@firstOrNull false
+            val minX =
+              minOf(
+                slots.minOfOrNull { layout.slotX(it) }
+                  ?: (if (hasGhost) layout.sectionGhostX(section.id) else layout.totalWidth),
+                if (hasGhost) layout.sectionGhostX(section.id) else layout.totalWidth,
+              ) - 16.dp
+            val maxX =
+              maxOf(
+                slots.maxOfOrNull { layout.slotX(it) + layout.width(it) } ?: 0.dp,
+                if (hasGhost) layout.sectionGhostX(section.id) + CardWidth else 0.dp,
+              ) + 16.dp
+            draggedCenterXDp in minX..maxX
+          }
+          ?.id
+      sectionByFrame ?: sectionAtTarget
+    } else {
+      null
+    }
   Box(
     modifier =
       modifier
@@ -1265,26 +1389,54 @@ private fun FlowCanvas(
       // Section visual grouping frames
       form.sections.forEach { section ->
         val sectionQuestions = form.questions.filter { it.sectionId == section.id }
-        if (sectionQuestions.isNotEmpty()) {
-          val slots = sectionQuestions.map { FormFlowGraph.questionSlot(form.indexOf(it.key)) }
-          val minX = slots.minOf { layout.slotX(it) } - 14.dp
-          val minY = slots.minOf { layout.slotY(it) } - 36.dp
-          val maxX = slots.maxOf { layout.slotX(it) + layout.width(it) } + 14.dp
-          val maxY = slots.maxOf { layout.slotY(it) + layout.height(it) } + 14.dp
+        val slots = sectionQuestions.map { FormFlowGraph.questionSlot(form.indexOf(it.key)) }
+        val hasGhost = layout.hasSectionGhost(section.id)
+        val isSectionHovered = hoveredSectionId == section.id
+        val isSectionSelected = uiState.selectedSectionId == section.id
+
+        if (sectionQuestions.isNotEmpty() || hasGhost) {
+          val minX =
+            minOf(
+              slots.minOfOrNull { layout.slotX(it) }
+                ?: (if (hasGhost) layout.sectionGhostX(section.id) else layout.totalWidth),
+              if (hasGhost) layout.sectionGhostX(section.id) else layout.totalWidth,
+            ) - 16.dp
+          val minY =
+            minOf(
+              slots.minOfOrNull { layout.slotY(it) }
+                ?: (if (hasGhost) layout.sectionGhostY(section.id) else layout.totalHeight),
+              if (hasGhost) layout.sectionGhostY(section.id) else layout.totalHeight,
+            ) - 40.dp
+          val maxX =
+            maxOf(
+              slots.maxOfOrNull { layout.slotX(it) + layout.width(it) } ?: 0.dp,
+              if (hasGhost) layout.sectionGhostX(section.id) + CardWidth else 0.dp,
+            ) + 16.dp
+          val maxY =
+            maxOf(
+              slots.maxOfOrNull { layout.slotY(it) + layout.height(it) } ?: 0.dp,
+              if (hasGhost) layout.sectionGhostY(section.id) + CardHeight else 0.dp,
+            ) + 16.dp
           val frameWidth = maxX - minX
           val frameHeight = maxY - minY
           Surface(
+            onClick = { actions.selectSection(section.id) },
             modifier = Modifier.offset(minX, minY).width(frameWidth).height(frameHeight),
-            shape = RoundedCornerShape(16.dp),
-            color = colors.surfaceContainerLow.copy(alpha = 0.45f),
+            shape = RoundedCornerShape(20.dp),
+            color =
+              if (isSectionHovered) colors.primaryContainer.copy(alpha = 0.28f)
+              else if (isSectionSelected) colors.primaryContainer.copy(alpha = 0.12f)
+              else colors.surfaceContainerLow.copy(alpha = 0.45f),
             border =
               BorderStroke(
-                1.5.dp,
-                if (section.repeatable) colors.primary.copy(alpha = 0.6f)
+                if (isSectionHovered || isSectionSelected) 2.5.dp else 1.5.dp,
+                if (isSectionHovered) colors.primary
+                else if (isSectionSelected) colors.primary
+                else if (section.repeatable) colors.primary.copy(alpha = 0.6f)
                 else colors.outlineVariant.copy(alpha = 0.8f),
               ),
           ) {
-            Box(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 8.dp)) {
+            Box(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 10.dp)) {
               Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1292,11 +1444,12 @@ private fun FlowCanvas(
               ) {
                 GroundTonalBadge(
                   text =
-                    if (section.repeatable) "Repeated section: ${section.title}"
-                    else "Section: ${section.title}",
+                    if (section.repeatable)
+                      "Repeated section: ${section.title.ifBlank { "Untitled" }}"
+                    else "Section: ${section.title.ifBlank { "Untitled" }}",
                   tone =
-                    if (section.repeatable) GroundBadgeTone.PRIMARY
-                    else GroundBadgeTone.SECONDARY,
+                    if (section.repeatable) GroundBadgeTone.PRIMARY else GroundBadgeTone.SECONDARY,
+                  modifier = Modifier.clickable { actions.selectSection(section.id) },
                 )
                 if (section.relevance != null) {
                   GroundTonalBadge(text = "Conditional", tone = GroundBadgeTone.TERTIARY)
@@ -1311,38 +1464,59 @@ private fun FlowCanvas(
               }
             }
           }
-        }
-      }
 
-      // Condition pills on conditional flow edges
-      edges.filter { it.kind == FlowEdgeKind.CONDITIONAL }.forEach { edge ->
-        val targetQ = form.questions.getOrNull(edge.to - 1)
-        val section = targetQ?.let { form.section(it.sectionId) }
-        val relevance = targetQ?.relevance ?: section?.relevance
-        if (relevance != null) {
-          val pillText =
-            if (relevance.value.isNotBlank()) "${relevance.operator.label} '${relevance.value}'"
-            else relevance.operator.label
-          val pillX =
-            (layout.slotX(edge.from) + layout.width(edge.from) + layout.slotX(edge.to)) / 2 - 32.dp
-          val pillY =
-            (layout.slotY(edge.from) + layout.slotY(edge.to)) / 2 + (CardHeight / 2) - 12.dp
-          Surface(
-            modifier = Modifier.offset(pillX, pillY),
-            shape = RoundedCornerShape(12.dp),
-            color = colors.surfaceContainerHighest,
-            border = BorderStroke(1.dp, colors.primary.copy(alpha = 0.7f)),
-            shadowElevation = 2.dp,
-          ) {
-            Text(
-              text = pillText,
-              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-              color = colors.primary,
-              modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+          if (hasGhost) {
+            val lastIdx =
+              if (sectionQuestions.isNotEmpty()) form.indexOf(sectionQuestions.last().key)
+              else form.questions.size - 1
+            GhostQuestionCard(
+              atIndex = lastIdx + 1,
+              onAdd = { type, idx -> actions.addQuestion(type, idx, sectionId = section.id) },
+              title = "Add to ${section.title.ifBlank { "section" }}",
+              subtitle = "Append question in this section",
+              contentDescription = "Add question inside ${section.title.ifBlank { "section" }}",
+              modifier =
+                Modifier.offset(
+                  layout.sectionGhostX(section.id),
+                  layout.sectionGhostY(section.id),
+                ),
             )
           }
         }
       }
+
+      // Condition pills on conditional flow edges
+      edges
+        .filter { it.kind == FlowEdgeKind.CONDITIONAL }
+        .forEach { edge ->
+          val targetQ = form.questions.getOrNull(edge.to - 1)
+          val section = targetQ?.let { form.section(it.sectionId) }
+          val relevance = targetQ?.relevance ?: section?.relevance
+          if (relevance != null) {
+            val pillText =
+              if (relevance.value.isNotBlank()) "${relevance.operator.label} '${relevance.value}'"
+              else relevance.operator.label
+            val pillX =
+              (layout.slotX(edge.from) + layout.width(edge.from) + layout.slotX(edge.to)) / 2 -
+                32.dp
+            val pillY =
+              (layout.slotY(edge.from) + layout.slotY(edge.to)) / 2 + (CardHeight / 2) - 12.dp
+            Surface(
+              modifier = Modifier.offset(pillX, pillY),
+              shape = RoundedCornerShape(12.dp),
+              color = colors.surfaceContainerHighest,
+              border = BorderStroke(1.dp, colors.primary.copy(alpha = 0.7f)),
+              shadowElevation = 2.dp,
+            ) {
+              Text(
+                text = pillText,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.primary,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+              )
+            }
+          }
+        }
 
       LaunchButtonNode(
         text = form.effectiveCtaLabel.ifBlank { "Untitled form" },
@@ -1351,12 +1525,18 @@ private fun FlowCanvas(
         onClick = actions::selectForm,
       )
 
+      val handleAddSection: (Int?) -> Unit = { _ ->
+        val secId = actions.addSection("Section", repeatable = false)
+        actions.selectSection(secId)
+      }
+
       // Hoverable "+" between Start and Q1 (or Q0)
       AddQuestionAffordance(
         centerX = layout.x(0) + layout.width(0) + SlotGap / 2,
         centerY = layout.midY,
         atIndex = 0,
         onAdd = actions::addQuestion,
+        onAddSection = handleAddSection,
         alwaysVisible = false,
       )
 
@@ -1400,7 +1580,7 @@ private fun FlowCanvas(
                   pitchPx = pitchPx,
                   axis = DragAxis.HORIZONTAL,
                   onMove = { key, to ->
-                    actions.moveQuestionTo(key, to)
+                    actions.moveQuestionTo(key, to, targetSectionId = hoveredSectionId ?: "")
                     actions.select(key)
                   },
                   autoScroll = {
@@ -1423,6 +1603,7 @@ private fun FlowCanvas(
             centerY = layout.midY,
             atIndex = index + 1,
             onAdd = actions::addQuestion,
+            onAddSection = handleAddSection,
             alwaysVisible = false,
           )
         }
@@ -1430,8 +1611,38 @@ private fun FlowCanvas(
       GhostQuestionCard(
         atIndex = form.questions.size,
         onAdd = actions::addQuestion,
+        onAddSection = handleAddSection,
         modifier = Modifier.offset(layout.ghostX, layout.cardTop),
       )
+
+      // Drop indicator between question cards while dragging
+      if (
+        drag.isDragging && drag.targetIndex in 0..form.questions.size && form.questions.isNotEmpty()
+      ) {
+        val dropSlot =
+          if (drag.targetIndex < form.questions.size) {
+            FormFlowGraph.questionSlot(drag.targetIndex)
+          } else {
+            FormFlowGraph.questionSlot(form.questions.size - 1)
+          }
+        val dropIndicatorX =
+          if (drag.targetIndex < form.questions.size) {
+            layout.x(dropSlot) - SlotGap / 2
+          } else {
+            layout.x(dropSlot) + CardWidth + SlotGap / 2
+          }
+        Surface(
+          modifier =
+            Modifier.offset(dropIndicatorX - 2.dp, layout.cardTop)
+              .width(4.dp)
+              .height(CardHeight)
+              .zIndex(10f),
+          color = colors.primary,
+          shape = RoundedCornerShape(2.dp),
+          shadowElevation = 4.dp,
+        ) {}
+      }
+
       TerminalNode(
         text = "Review & submit",
         isSelected = uiState.isFormSelected,
@@ -1461,9 +1672,11 @@ private fun AddQuestionAffordance(
   atIndex: Int,
   onAdd: (EditorQuestionType, Int?) -> Unit,
   alwaysVisible: Boolean = false,
+  onAddSection: ((Int?) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
-  var isHovered by remember { mutableStateOf(false) }
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
   var menuExpanded by remember { mutableStateOf(false) }
   val colors = MaterialTheme.colorScheme
 
@@ -1476,17 +1689,7 @@ private fun AddQuestionAffordance(
       modifier
         .offset(x = centerX - slotWidth / 2, y = centerY - slotHeight / 2)
         .size(slotWidth, slotHeight)
-        .pointerInput(Unit) {
-          awaitPointerEventScope {
-            while (true) {
-              val event = awaitPointerEvent()
-              when (event.type) {
-                PointerEventType.Enter -> isHovered = true
-                PointerEventType.Exit -> isHovered = false
-              }
-            }
-          }
-        },
+        .hoverable(interactionSource),
     contentAlignment = Alignment.Center,
   ) {
     // The button is always composed and hit-testable, only transparent until hovered. Touch input
@@ -1517,6 +1720,7 @@ private fun AddQuestionAffordance(
       onDismiss = { menuExpanded = false },
       onAdd = onAdd,
       atIndex = atIndex,
+      onAddSection = onAddSection,
     )
   }
 }
@@ -1690,16 +1894,21 @@ private fun TerminalNode(
 }
 
 /**
- * Dashed "ghost" screen card at the end of the flow (before Review & submit) that lets authors
- * append a new question screen directly on the canvas.
+ * Dashed "ghost" screen card at the end of the flow (before Review & submit) or inside a section
+ * container that lets authors append a new question screen directly on the canvas.
  */
 @Composable
 internal fun GhostQuestionCard(
   atIndex: Int,
   onAdd: (EditorQuestionType, Int?) -> Unit,
   modifier: Modifier = Modifier,
+  title: String = "Add a question",
+  subtitle: String = "Click to append a screen before Review & submit",
+  contentDescription: String = "Add a question at end of flow",
+  onAddSection: ((Int?) -> Unit)? = null,
 ) {
-  var isHovered by remember { mutableStateOf(false) }
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
   var menuExpanded by remember { mutableStateOf(false) }
   val colors = MaterialTheme.colorScheme
   val highlighted = isHovered || menuExpanded
@@ -1716,19 +1925,13 @@ internal fun GhostQuestionCard(
         .clip(MaterialTheme.shapes.medium)
         .background(containerColor)
         .pointerHoverIcon(PointerIcon.Hand)
-        .pointerInput(Unit) {
-          awaitPointerEventScope {
-            while (true) {
-              val event = awaitPointerEvent()
-              when (event.type) {
-                PointerEventType.Enter -> isHovered = true
-                PointerEventType.Exit -> isHovered = false
-              }
-            }
-          }
-        }
-        .clickable { menuExpanded = true }
-        .semantics { contentDescription = "Add a question at end of flow" },
+        .hoverable(interactionSource)
+        .clickable(
+          interactionSource = interactionSource,
+          indication = null,
+          onClick = { menuExpanded = true },
+        )
+        .semantics { this.contentDescription = contentDescription },
     contentAlignment = Alignment.Center,
   ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -1770,14 +1973,14 @@ internal fun GhostQuestionCard(
         }
       }
       Text(
-        text = "Add a question",
+        text = title,
         style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.SemiBold,
         color = if (highlighted) colors.primary else colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
       )
       Text(
-        text = "Click to append a screen before Review & submit",
+        text = subtitle,
         style = MaterialTheme.typography.bodySmall,
         color = colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
@@ -1788,6 +1991,7 @@ internal fun GhostQuestionCard(
       onDismiss = { menuExpanded = false },
       onAdd = onAdd,
       atIndex = atIndex,
+      onAddSection = onAddSection,
     )
   }
 }
@@ -1873,7 +2077,8 @@ private fun ScreenPreviewCard(
           modifier = Modifier.size(16.dp).pointerHoverIcon(GrabPointerIcon),
         )
         GroundTonalBadge(text = "Q${index + 1}", tone = GroundBadgeTone.NEUTRAL)
-        val section = if (question.sectionId.isNotBlank()) form.section(question.sectionId) else null
+        val section =
+          if (question.sectionId.isNotBlank()) form.section(question.sectionId) else null
         if (section != null) {
           GroundTonalBadge(
             text = if (section.repeatable) "↻ ${section.title}" else "▤ ${section.title}",
@@ -2253,6 +2458,7 @@ private fun QuestionPropertiesPanel(
   onUnlinkDataset: ((String) -> Unit)? = null,
   onCreateFormForDataset: ((String) -> Unit)? = null,
   onOpenForm: ((String) -> Unit)? = null,
+  onCreateChoiceDataset: ((kind: DatasetKind, questionKey: String) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
   ElevatedCard(
@@ -2261,7 +2467,16 @@ private fun QuestionPropertiesPanel(
     colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
   ) {
     val question = uiState.selectedQuestion
+    val selectedSection = uiState.selectedSection
     if (question == null) {
+      if (selectedSection != null) {
+        SectionProperties(
+          uiState = uiState,
+          actions = actions,
+          section = selectedSection,
+        )
+        return@ElevatedCard
+      }
       FormProperties(
         uiState = uiState,
         actions = actions,
@@ -2280,6 +2495,7 @@ private fun QuestionPropertiesPanel(
         onOpenDataset = onOpenDataset,
         onCreateFormForDataset = onCreateFormForDataset,
         onOpenForm = onOpenForm,
+        onCreateChoiceDataset = onCreateChoiceDataset,
       )
     }
   }
@@ -2293,6 +2509,7 @@ private fun QuestionProperties(
   onOpenDataset: ((String) -> Unit)? = null,
   onCreateFormForDataset: ((String) -> Unit)? = null,
   onOpenForm: ((String) -> Unit)? = null,
+  onCreateChoiceDataset: ((kind: DatasetKind, questionKey: String) -> Unit)? = null,
 ) {
   val form = uiState.form
   val index = uiState.selectedIndex
@@ -2467,6 +2684,7 @@ private fun QuestionProperties(
         onOpenDataset = onOpenDataset,
         onCreateFormForDataset = onCreateFormForDataset,
         onOpenForm = onOpenForm,
+        onCreateChoiceDataset = onCreateChoiceDataset,
       )
     }
 
@@ -2474,241 +2692,216 @@ private fun QuestionProperties(
     DisplayLogicEditor(uiState, actions, question)
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-    SectionGroupEditor(uiState, actions, question)
-
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     AdvancedSection(uiState, actions, question)
   }
 }
 
 /**
- * Editor for assigning a question to an [EditorSection] (singleton group or repeated group)
- * and configuring the section's title, repeatability, count expression, and conditional relevance.
+ * Editor for configuring a selected [EditorSection]'s title, repeatability, count expression, and
+ * conditional relevance.
  */
 @Composable
-private fun SectionGroupEditor(
+private fun SectionProperties(
   uiState: FormEditorUiState,
   actions: FormEditorActions,
-  question: EditorQuestion,
+  section: EditorSection,
 ) {
   val form = uiState.form
-  val key = question.key
   val colors = MaterialTheme.colorScheme
-  val currentSection = form.section(question.sectionId)
-
-  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    SectionLabel("Section / Group")
-
-    val noneOption = "(No section)"
-    val newOption = "+ Create new section..."
-    val options =
-      listOf(noneOption) +
-        form.sections.map { it.title.ifBlank { it.id } } +
-        listOf(newOption)
-    val selectedText = currentSection?.title?.ifBlank { currentSection.id } ?: noneOption
-
-    DropdownSelector(
-      label = "Section",
-      selectedText = selectedText,
-      options = options,
-      optionText = { it },
-      onSelect = { picked ->
-        when (picked) {
-          noneOption -> actions.setQuestionSection(key, "")
-          newOption -> {
-            val newId = actions.addSection(title = "Section", repeatable = false)
-            actions.setQuestionSection(key, newId)
-          }
-          else -> {
-            val matching = form.sections.firstOrNull { (it.title.ifBlank { it.id }) == picked }
-            if (matching != null) {
-              actions.setQuestionSection(key, matching.id)
-            }
-          }
+  Column(
+    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+    verticalArrangement = Arrangement.spacedBy(16.dp),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = if (section.repeatable) "Repeated section" else "Section",
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.Bold,
+        )
+        Text(
+          text = "Group of questions in the form flow",
+          style = MaterialTheme.typography.bodySmall,
+          color = colors.onSurfaceVariant,
+        )
+      }
+      Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        IconButton(onClick = { actions.deleteSection(section.id) }) {
+          Icon(
+            Icons.Outlined.Delete,
+            contentDescription = "Delete section",
+            tint = colors.error,
+          )
         }
+        IconButton(onClick = { actions.selectSection(null) }) {
+          Icon(Icons.Outlined.Close, contentDescription = "Close properties")
+        }
+      }
+    }
+
+    HorizontalDivider(color = colors.outlineVariant)
+
+    OutlinedTextField(
+      value = section.title,
+      onValueChange = { newTitle ->
+        actions.updateSection(section.id) { it.copy(title = newTitle) }
       },
+      label = { Text("Section title") },
+      singleLine = true,
+      modifier = Modifier.fillMaxWidth(),
     )
 
-    if (currentSection != null) {
-      Surface(
-        shape = MaterialTheme.shapes.small,
-        color = colors.surfaceContainer,
-        modifier = Modifier.fillMaxWidth(),
-      ) {
-        Column(
-          modifier = Modifier.fillMaxWidth().padding(12.dp),
-          verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-          OutlinedTextField(
-            value = currentSection.title,
-            onValueChange = { newTitle ->
-              actions.updateSection(currentSection.id) { it.copy(title = newTitle) }
-            },
-            label = { Text("Section title") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-          )
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = if (section.repeatable) "Repeated section" else "Single section",
+          style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+        )
+        Text(
+          text =
+            if (section.repeatable) "Collectors can add multiple entries."
+            else "Questions are visually and logically grouped.",
+          style = MaterialTheme.typography.bodySmall,
+          color = colors.onSurfaceVariant,
+        )
+      }
+      Switch(
+        checked = section.repeatable,
+        onCheckedChange = { isRep ->
+          actions.updateSection(section.id) { it.copy(repeatable = isRep) }
+        },
+      )
+    }
 
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-          ) {
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = if (currentSection.repeatable) "Repeated section" else "Single section",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-              )
-              Text(
-                text =
-                  if (currentSection.repeatable) "Collectors can add multiple entries."
-                  else "Questions are visually and logically grouped.",
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.onSurfaceVariant,
-              )
+    if (section.repeatable) {
+      OutlinedTextField(
+        value = section.repeatCountExpression,
+        onValueChange = { expr ->
+          actions.updateSection(section.id) { it.copy(repeatCountExpression = expr) }
+        },
+        label = { Text("Repeat count (optional expression)") },
+        placeholder = { Text("e.g. 3 or /data/number_of_plots") },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+      )
+    }
+
+    HorizontalDivider(color = colors.outlineVariant)
+
+    // Section Relevance (Group condition)
+    val eligibleSources = form.questions.filter { it.sectionId != section.id }
+    val relevance = section.relevance
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = "Section condition",
+          style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+        )
+        Text(
+          text =
+            if (relevance != null) "Section only shown when condition met."
+            else "Section is always shown.",
+          style = MaterialTheme.typography.bodySmall,
+          color = colors.onSurfaceVariant,
+        )
+      }
+      Switch(
+        checked = relevance != null,
+        onCheckedChange = { enabled ->
+          if (enabled) {
+            val firstSource = eligibleSources.firstOrNull()
+            if (firstSource != null) {
+              val op = RelevanceOperator.availableFor(firstSource.type).first()
+              val defaultVal =
+                firstSource.resolvedChoices(uiState.datasets).firstOrNull()?.value.orEmpty()
+              actions.updateSection(section.id) {
+                it.copy(
+                  relevance =
+                    EditorRelevance(
+                      sourceQuestionKey = firstSource.key,
+                      operator = op,
+                      value = defaultVal,
+                    )
+                )
+              }
             }
-            Switch(
-              checked = currentSection.repeatable,
-              onCheckedChange = { isRep ->
-                actions.updateSection(currentSection.id) { it.copy(repeatable = isRep) }
+          } else {
+            actions.updateSection(section.id) { it.copy(relevance = null) }
+          }
+        },
+      )
+    }
+
+    if (relevance != null && eligibleSources.isNotEmpty()) {
+      val sourceQ = form.questions.firstOrNull { it.key == relevance.sourceQuestionKey }
+      DropdownSelector(
+        label = "Depends on question",
+        selectedText = sourceQ?.label?.ifBlank { sourceQ.name } ?: "(missing)",
+        options = eligibleSources,
+        optionText = { it.label.ifBlank { it.name } },
+        onSelect = { picked ->
+          val op =
+            relevance.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
+              ?: RelevanceOperator.availableFor(picked.type).first()
+          actions.updateSection(section.id) {
+            it.copy(relevance = EditorRelevance(picked.key, op, relevance.value))
+          }
+        },
+      )
+      if (sourceQ != null) {
+        DropdownSelector(
+          label = "Condition",
+          selectedText = relevance.operator.label,
+          options = RelevanceOperator.availableFor(sourceQ.type),
+          optionText = { it.label },
+          onSelect = { op ->
+            actions.updateSection(section.id) {
+              it.copy(relevance = relevance.copy(operator = op))
+            }
+          },
+        )
+        if (relevance.operator.needsValue) {
+          val choices = sourceQ.resolvedChoices(uiState.datasets)
+          if (choices.isNotEmpty()) {
+            DropdownSelector(
+              label = "Value",
+              selectedText =
+                choices
+                  .firstOrNull { it.value == relevance.value }
+                  ?.label
+                  ?.ifBlank { relevance.value } ?: relevance.value.ifBlank { "(select value)" },
+              options = choices,
+              optionText = { it.label.ifBlank { it.value } },
+              onSelect = { choice ->
+                actions.updateSection(section.id) {
+                  it.copy(relevance = relevance.copy(value = choice.value))
+                }
               },
             )
-          }
-
-          if (currentSection.repeatable) {
+          } else {
             OutlinedTextField(
-              value = currentSection.repeatCountExpression,
-              onValueChange = { expr ->
-                actions.updateSection(currentSection.id) { it.copy(repeatCountExpression = expr) }
+              value = relevance.value,
+              onValueChange = { v ->
+                actions.updateSection(section.id) {
+                  it.copy(relevance = relevance.copy(value = v))
+                }
               },
-              label = { Text("Repeat count (optional expression)") },
-              placeholder = { Text("e.g. 3 or /data/number_of_plots") },
+              label = { Text("Value") },
               singleLine = true,
               modifier = Modifier.fillMaxWidth(),
             )
-          }
-
-          // Section Relevance (Group condition)
-          val eligibleSources = form.questions.filter { it.sectionId != currentSection.id }
-          val relevance = currentSection.relevance
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-          ) {
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = "Section condition",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-              )
-              Text(
-                text =
-                  if (relevance != null) "Section only shown when condition met."
-                  else "Section is always shown.",
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.onSurfaceVariant,
-              )
-            }
-            Switch(
-              checked = relevance != null,
-              onCheckedChange = { enabled ->
-                if (enabled) {
-                  val firstSource = eligibleSources.firstOrNull()
-                  if (firstSource != null) {
-                    val op = RelevanceOperator.availableFor(firstSource.type).first()
-                    val defaultVal =
-                      firstSource.resolvedChoices(uiState.datasets).firstOrNull()?.value.orEmpty()
-                    actions.updateSection(currentSection.id) {
-                      it.copy(relevance = EditorRelevance(firstSource.key, op, defaultVal))
-                    }
-                  }
-                } else {
-                  actions.updateSection(currentSection.id) { it.copy(relevance = null) }
-                }
-              },
-            )
-          }
-
-          if (relevance != null && eligibleSources.isNotEmpty()) {
-            val sourceQ = form.questions.firstOrNull { it.key == relevance.sourceQuestionKey }
-            DropdownSelector(
-              label = "Depends on question",
-              selectedText = sourceQ?.label?.ifBlank { sourceQ.name } ?: "(missing)",
-              options = eligibleSources,
-              optionText = { it.label.ifBlank { it.name } },
-              onSelect = { picked ->
-                val op =
-                  relevance.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
-                    ?: RelevanceOperator.availableFor(picked.type).first()
-                actions.updateSection(currentSection.id) {
-                  it.copy(relevance = EditorRelevance(picked.key, op, relevance.value))
-                }
-              },
-            )
-            if (sourceQ != null) {
-              DropdownSelector(
-                label = "Condition",
-                selectedText = relevance.operator.label,
-                options = RelevanceOperator.availableFor(sourceQ.type),
-                optionText = { it.label },
-                onSelect = { op ->
-                  actions.updateSection(currentSection.id) {
-                    it.copy(relevance = relevance.copy(operator = op))
-                  }
-                },
-              )
-              if (relevance.operator.needsValue) {
-                val choices = sourceQ.resolvedChoices(uiState.datasets)
-                if (choices.isNotEmpty()) {
-                  DropdownSelector(
-                    label = "Value",
-                    selectedText =
-                      choices
-                        .firstOrNull { it.value == relevance.value }
-                        ?.label
-                        ?.ifBlank { relevance.value }
-                        ?: relevance.value.ifBlank { "(select value)" },
-                    options = choices,
-                    optionText = { it.label.ifBlank { it.value } },
-                    onSelect = { choice ->
-                      actions.updateSection(currentSection.id) {
-                        it.copy(relevance = relevance.copy(value = choice.value))
-                      }
-                    },
-                  )
-                } else {
-                  OutlinedTextField(
-                    value = relevance.value,
-                    onValueChange = { v ->
-                      actions.updateSection(currentSection.id) {
-                        it.copy(relevance = relevance.copy(value = v))
-                      }
-                    },
-                    label = { Text("Value") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                  )
-                }
-              }
-            }
-          }
-
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            OutlinedButton(
-              onClick = { actions.setQuestionSection(key, "") },
-              modifier = Modifier.weight(1f),
-            ) {
-              Text("Remove from section", style = MaterialTheme.typography.labelSmall)
-            }
-            TextButton(
-              onClick = { actions.deleteSection(currentSection.id) },
-              colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
-            ) {
-              Text("Delete section", style = MaterialTheme.typography.labelSmall)
-            }
           }
         }
       }
@@ -3130,6 +3323,7 @@ private fun ChoicesEditor(
   onOpenDataset: ((String) -> Unit)? = null,
   onCreateFormForDataset: ((String) -> Unit)? = null,
   onOpenForm: ((String) -> Unit)? = null,
+  onCreateChoiceDataset: ((kind: DatasetKind, questionKey: String) -> Unit)? = null,
 ) {
   val key = question.key
   val colors = MaterialTheme.colorScheme
@@ -3152,7 +3346,11 @@ private fun ChoicesEditor(
               if (result is TextFilePickResult.Picked) {
                 val parsed = ChoiceListImporter.parseChoices(result.text, result.fileName)
                 if (parsed.isNotEmpty()) {
-                  if (question.choices.isEmpty()) {
+                  val isPlaceholder =
+                    question.choices.size == 2 &&
+                      question.choices[0].value == "option_1" &&
+                      question.choices[1].value == "option_2"
+                  if (question.choices.isEmpty() || isPlaceholder) {
                     actions.importQuestionChoices(key, parsed, append = false)
                   } else {
                     importDialogChoices = parsed
@@ -3162,7 +3360,11 @@ private fun ChoicesEditor(
             }
           }
         ) {
-          Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(16.dp))
+          Icon(
+            Icons.Outlined.Description,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+          )
           Spacer(Modifier.width(4.dp))
           Text("Import (.csv / .txt)")
         }
@@ -3271,14 +3473,14 @@ private fun ChoicesEditor(
             emptyList()
           }
 
-        var parentChoiceFilter by remember(key, question.parentQuestionKey) {
-          mutableStateOf<String?>(null)
-        }
-
-        val selectedParent =
-          precedingChoiceQuestions.firstOrNull {
-            it.key == question.parentQuestionKey || it.name == question.parentQuestionKey
+        var parentChoiceFilter by
+          remember(key, question.parentQuestionKey) {
+            mutableStateOf<String?>(null)
           }
+
+        val selectedParent = precedingChoiceQuestions.firstOrNull {
+          it.key == question.parentQuestionKey || it.name == question.parentQuestionKey
+        }
 
         if (precedingChoiceQuestions.isNotEmpty()) {
           DropdownSelector(
@@ -3391,7 +3593,8 @@ private fun ChoicesEditor(
                 val parentChoices = selectedParent.resolvedChoices(uiState.datasets)
                 if (parentChoices.isNotEmpty()) {
                   DropdownSelector(
-                    label = "Parent choice (${selectedParent.label.ifBlank { selectedParent.name }})",
+                    label =
+                      "Parent choice (${selectedParent.label.ifBlank { selectedParent.name }})",
                     selectedText =
                       parentChoices.firstOrNull { it.value == choice.parentValue }?.label
                         ?: choice.parentValue.ifBlank { "Any (unfiltered)" },
@@ -3496,10 +3699,12 @@ private fun ChoicesEditor(
           )
           OutlinedButton(
             onClick = {
-              if (questionIndex >= 0) {
+              if (onCreateChoiceDataset != null) {
+                onCreateChoiceDataset(targetKind, key)
+              } else if (questionIndex >= 0) {
                 actions.createDatasetForChoiceQuestion(questionIndex, targetKind)
               }
-            },
+            }
           ) {
             Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(4.dp))
@@ -3528,10 +3733,12 @@ private fun ChoicesEditor(
             }
             OutlinedButton(
               onClick = {
-                if (questionIndex >= 0) {
+                if (onCreateChoiceDataset != null) {
+                  onCreateChoiceDataset(targetKind, key)
+                } else if (questionIndex >= 0) {
                   actions.createDatasetForChoiceQuestion(questionIndex, targetKind)
                 }
-              },
+              }
             ) {
               Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
               Spacer(Modifier.width(4.dp))

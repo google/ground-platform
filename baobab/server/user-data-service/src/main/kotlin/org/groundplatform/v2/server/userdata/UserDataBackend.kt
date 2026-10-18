@@ -962,7 +962,6 @@ class UserDataBackend(private val store: UserDataStore) :
             )
           }
         }
-
         if (limits.max_acl_users > 0 && currentAcl.entries.size > limits.max_acl_users) {
           throw StatusException(
             Status.RESOURCE_EXHAUSTED.withDescription(

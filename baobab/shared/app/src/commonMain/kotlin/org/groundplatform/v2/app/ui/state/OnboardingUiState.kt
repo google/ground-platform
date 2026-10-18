@@ -33,6 +33,8 @@ data class OnboardingUiState(
   /** True while the "going back will sign you out" confirmation is open. */
   val isSignOutPromptOpen: Boolean = false,
   val searchQuery: String = "",
+  /** True while the initial sync is in flight and [surveys] is still empty. */
+  val isLoadingSurveys: Boolean = false,
   /** All surveys shared with the user, in store order. */
   val surveys: List<SurveyPreviewItem> = emptyList(),
   /** [surveys] matching [searchQuery] by title, description, location, or organization. */

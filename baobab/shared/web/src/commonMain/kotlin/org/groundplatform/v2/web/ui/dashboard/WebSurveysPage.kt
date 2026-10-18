@@ -37,6 +37,7 @@ import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -94,6 +95,7 @@ internal fun WebSurveysPage(
 ) {
   val uiState by state.dashboard.uiState.collectAsState()
   val outcomePrompt by state.surveyOutcomePrompt.uiState.collectAsState()
+  val hasCompletedInitialSync by state.dataHolder.hasCompletedInitialSync.collectAsState()
   WebSurveysPage(
     uiState = uiState,
     onOpenSurvey = onOpenSurvey,
@@ -101,6 +103,7 @@ internal fun WebSurveysPage(
     onOpenCreateSurveyWizard = onOpenCreateSurveyWizard,
     outcomePrompt = outcomePrompt,
     outcomeActions = state.surveyOutcomePrompt,
+    isLoading = !hasCompletedInitialSync && uiState.surveys.isEmpty(),
     header = { onCreateSurveyClick ->
       WebAppHeader(
         state = state,
@@ -148,6 +151,7 @@ internal fun WebSurveysPage(
   onOpenCreateSurveyWizard: (() -> Unit)? = null,
   outcomePrompt: SurveyOutcomePromptUiState = SurveyOutcomePromptUiState(),
   outcomeActions: SurveyOutcomePromptActions? = null,
+  isLoading: Boolean = false,
 ) {
   var filter by remember { mutableStateOf<SurveyListFilter>(SurveyListFilter.All) }
   var query by remember { mutableStateOf("") }
@@ -186,7 +190,16 @@ internal fun WebSurveysPage(
         )
 
         if (sections.isEmpty()) {
-          EmptySurveysMessage(hasQuery = query.isNotBlank())
+          if (isLoading) {
+            Box(
+              modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+              contentAlignment = Alignment.Center,
+            ) {
+              CircularProgressIndicator()
+            }
+          } else {
+            EmptySurveysMessage(hasQuery = query.isNotBlank())
+          }
         }
 
         sections.forEach { section ->
