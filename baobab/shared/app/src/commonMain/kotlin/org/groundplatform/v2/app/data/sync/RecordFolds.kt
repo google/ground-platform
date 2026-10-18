@@ -216,10 +216,12 @@ object RecordFolds {
       val role = sm.update_acl_role
       val access = sm.update_access_rules
       when {
-        sm.delete_survey == true -> {
-          saved = saved?.copy(state = SurveyState.DELETED)
+        // Locally, a trashed survey disappears at once, as it does from the server's survey list.
+        sm.trash_survey == true -> {
+          saved = saved?.copy(state = SurveyState.DELETED, trash_time = m.clientTimestamp)
           workingCopy = null
         }
+        sm.restore_survey == true -> saved = saved?.copy(trash_time = null)
         upSurvey != null -> setTarget(upSurvey.copy(survey_id = surveyId))
         upAcl != null -> acl = upAcl.copy(survey_id = surveyId)
         sm.save_working_copy == true ->

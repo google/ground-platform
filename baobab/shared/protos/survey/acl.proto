@@ -95,18 +95,19 @@ enum SharingPolicy {
   // List (ACL) can open and access the survey.
   RESTRICTED = 1;
 
-  // Anyone with the link: Anyone who possesses the survey URL link or scans
-  // its QR code can access the survey and collect data without being on the
-  // ACL.
+  // Anyone with the link: Any signed-in user who has the survey's URL (for
+  // example from its QR code) can access the survey with `sharing_role`
+  // without being on the ACL. The URL contains `survey_id`, so knowing the ID
+  // is the link.
   ANYONE_WITH_LINK = 2;
 
-  // Public: Discoverable in the public directory; anyone can open and
-  // collect data.
+  // Public: Discoverable in the public directory (`SearchPublicSurveys`); any
+  // signed-in user can access the survey with `sharing_role`.
   PUBLIC = 3;
 
   // Anyone in the organization: Every active member of the survey's
-  // organization (`SurveyDef.organization_id`) can open the survey and
-  // collect data without being on the ACL. Invalid for surveys with no
+  // organization (`SurveyDef.organization_id`) can access the survey with
+  // `sharing_role` without being on the ACL. Invalid for surveys with no
   // organization. Organization managers can manage the survey under every
   // policy (see `organization.proto`).
   ORGANIZATION = 4;
@@ -160,9 +161,10 @@ message SurveyAcl {
   // survey.
   bool care_sovereignty_applied = 9;
 
-  // Rotatable general invite link token when `sharing_policy` is
-  // `ANYONE_WITH_LINK`.
-  string general_invite_token = 10;
+  // Deprecated: unused. Under `ANYONE_WITH_LINK`, the share link is the
+  // survey's URL, so knowing `survey_id` grants access; there's no separate
+  // link token.
+  string general_invite_token = 10 [deprecated = true];
 
   // Non-destructive QA/QC quarantine list of contributor user IDs or emails.
   repeated string quarantined_user_ids = 11;
@@ -174,6 +176,12 @@ message SurveyAcl {
   // The survey's `SurveyDef.record_version`, shared with the saved revision and
   // the working copy and incremented on every write to any of them.
   int64 record_version = 13;
+
+  // What people with access through `sharing_policy` (organization members,
+  // anyone with the link, or anyone) can do: `VIEWER` or `DATA_COLLECTOR`.
+  // `ROLE_UNSPECIFIED` means `DATA_COLLECTOR`. Never `SURVEY_ORGANIZER`:
+  // organizers must be named in `entries`. Doesn't apply to `RESTRICTED`.
+  Role sharing_role = 14;
 }
 
 // Resource quota tier applied to survey organizers and organizations.

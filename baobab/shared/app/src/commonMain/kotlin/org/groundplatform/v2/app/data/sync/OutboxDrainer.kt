@@ -268,9 +268,7 @@ class OutboxDrainer(
           )
         val endsWorkingCopy = batch.any {
           val sm = (it.payload as MutationPayload.Survey).mutation
-          sm.save_working_copy == true ||
-            sm.discard_working_copy == true ||
-            sm.delete_survey == true
+          sm.save_working_copy == true || sm.discard_working_copy == true
         }
         val handler: (LocalStoreTransaction) -> Unit = { tx ->
           val storedBase = tx.surveyBase(target.surveyId)

@@ -69,9 +69,10 @@ service DataService {
   rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
 
   // Lists entity records for a survey in query or delta mode (see the service
-  // comment). Scope fields: `survey_id`, `dataset_id`, `s2_cell_tokens`.
-  // Query-only fields, rejected with `INVALID_ARGUMENT` in delta mode:
-  // `include_deleted`, `bbox`, `filter`, `queue_filter_mode`, `order_by`.
+  // comment). Scope field: `survey_id`; delta sync always covers the whole
+  // survey. Query-only fields, rejected with `INVALID_ARGUMENT` in delta mode:
+  // `dataset_id`, `s2_cell_tokens`, `include_deleted`, `bbox`, `filter`,
+  // `queue_filter_mode`, `order_by`.
   // `field_mask` only trims the returned records, so it is allowed in both
   // modes.
   rpc ListEntities(ListEntitiesRequest) returns (ListEntitiesResponse);
@@ -84,9 +85,9 @@ service DataService {
   rpc GetSubmission(GetSubmissionRequest) returns (GetSubmissionResponse);
 
   // Lists submission records for a survey in query or delta mode (see the
-  // service comment). Scope fields: `survey_id`, `form_id`, `entity_id`.
-  // Query-only fields, rejected with `INVALID_ARGUMENT` in delta mode:
-  // `include_deleted`, `filter`, `order_by`.
+  // service comment). Scope field: `survey_id`; delta sync always covers the
+  // whole survey. Query-only fields, rejected with `INVALID_ARGUMENT` in delta
+  // mode: `form_id`, `entity_id`, `include_deleted`, `filter`, `order_by`.
   rpc ListSubmissions(ListSubmissionsRequest) returns (ListSubmissionsResponse);
 
   // Atomically and idempotently executes an ordered sequence of entity and
@@ -169,7 +170,7 @@ message ListEntitiesRequest {
   // Scope: the survey whose entities to list.
   string survey_id = 1;
 
-  // Scope: optional entity dataset.
+  // Query only: optional entity dataset.
   string dataset_id = 2;
 
   // Maximum number of entities to return. The server picks a default when
@@ -195,7 +196,8 @@ message ListEntitiesRequest {
   reserved 9, 10;
   reserved "since_timestamp", "until_timestamp";
 
-  // Scope: optional S2 cell token prefixes for selective spatial sync.
+  // Query only: optional S2 cell token prefixes (for example, the map
+  // viewport). Delta sync always covers the whole survey.
   repeated string s2_cell_tokens = 11;
 
   // Query only: optional CEO smart queue filter mode.
@@ -264,10 +266,10 @@ message ListSubmissionsRequest {
   // Scope: the survey whose submissions to list.
   string survey_id = 1;
 
-  // Scope: optional form.
+  // Query only: optional form.
   string form_id = 2;
 
-  // Scope: optional linked entity.
+  // Query only: optional linked entity.
   string entity_id = 3;
 
   // Maximum number of submissions to return. The server picks a default when

@@ -61,6 +61,8 @@ import groundplatform.v2.library.SearchConceptsRequest
 import groundplatform.v2.library.SearchConceptsResponse
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AcceptSurveyInviteResponse
+import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
+import groundplatform.v2.survey.BatchGetSurveyOverviewsResponse
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetOrganizationResponse
 import groundplatform.v2.survey.GetSurveyAclRequest
@@ -80,6 +82,8 @@ import groundplatform.v2.survey.MutateSurveyResponse
 import groundplatform.v2.survey.OrganizationServiceServer
 import groundplatform.v2.survey.SearchOrganizationsRequest
 import groundplatform.v2.survey.SearchOrganizationsResponse
+import groundplatform.v2.survey.SearchPublicSurveysRequest
+import groundplatform.v2.survey.SearchPublicSurveysResponse
 import groundplatform.v2.survey.SurveyServiceServer
 
 // Remote implementations of the Wire-generated user data service interfaces. Each method forwards
@@ -133,6 +137,26 @@ class RemoteSurveyService(private val transport: GrpcWebTransport) : SurveyServi
       request,
       AcceptSurveyInviteRequest.ADAPTER,
       AcceptSurveyInviteResponse.ADAPTER,
+    )
+
+  override suspend fun BatchGetSurveyOverviews(
+    request: BatchGetSurveyOverviewsRequest
+  ): BatchGetSurveyOverviewsResponse =
+    transport.unary(
+      "/groundplatform.v2.survey.SurveyService/BatchGetSurveyOverviews",
+      request,
+      BatchGetSurveyOverviewsRequest.ADAPTER,
+      BatchGetSurveyOverviewsResponse.ADAPTER,
+    )
+
+  override suspend fun SearchPublicSurveys(
+    request: SearchPublicSurveysRequest
+  ): SearchPublicSurveysResponse =
+    transport.unary(
+      "/groundplatform.v2.survey.SurveyService/SearchPublicSurveys",
+      request,
+      SearchPublicSurveysRequest.ADAPTER,
+      SearchPublicSurveysResponse.ADAPTER,
     )
 }
 

@@ -146,7 +146,8 @@ idempotent mutations within one atomic transaction:
 
 -   **`SurveyService.MutateSurvey(MutateSurveyRequest)`**: Executes a list of
     `SurveyMutation` steps (`update_field`, `update_acl_role`,
-    `update_access_rules`, or `delete_survey`) against `survey_id`. Because
+    `update_access_rules`, `trash_survey`, `restore_survey`, …) against
+    `survey_id`. Because
     mutations run sequentially in one transaction, a single request can
     initialize a new survey (`"title"`, `"description"`, `"state"`), add an
     `EntityDatasetDef` (`"entity_datasets/plots"`), add a `FormDef`
@@ -176,20 +177,21 @@ entries using a key-value `oneof`:
     user ACL role (`AclRolePatch.null_value`), acting as an idempotent no-op if
     the key is already absent.
 
-### Soft Delete vs. Hard Delete
+### Deleting Surveys, Entities, and Submissions
 
--   **Soft Delete (via `update`)**: Soft deletion preserves the record for audit
-    history and conflict recovery and is performed via a standard key-value
-    `update` mutation:
-    -   **Survey**: `SurveyFieldPatch` with `key = "state"` and
-        `state_value = DELETED`.
-    -   **Entity / Submission**: `EntityFieldPatch` or `SubmissionFieldPatch`
-        with `key = "is_deleted"` and `bool_value = true` (and can be restored
-        by updating `bool_value = false`).
--   **Hard Delete (via `delete`)**: Setting `delete_survey = true` (in
-    `SurveyMutation`) or `delete = true` (in `EntityMutation` /
-    `SubmissionMutation`) permanently purges the resource from storage (acting
-    as an idempotent no-op if the target UUID has already been purged).
+-   **Surveys (Trash)**: `trash_survey = true` (in `SurveyMutation`) moves a
+    survey to Trash by setting `SurveyDef.trash_time`; `restore_survey = true`
+    brings it back. Trashed surveys disappear from survey lists and stop
+    syncing, and the server purges them 30 days after `trash_time`. Clients
+    can't hard-delete surveys, and `SurveyState.DELETED` is only a server
+    tombstone marker on `SurveyOverview`.
+-   **Entities and submissions (soft delete via `update`)**: `EntityFieldPatch`
+    or `SubmissionFieldPatch` with `key = "is_deleted"` and `bool_value = true`
+    (restored by setting `bool_value = false`).
+-   **Entities and submissions (delete)**: `delete = true` (in
+    `EntityMutation` / `SubmissionMutation`) removes the record's data, keeping
+    a permanent tombstone so delta syncs report the deletion (an idempotent
+    no-op if the record is already deleted).
 
 
 ## Code Generation

@@ -79,7 +79,7 @@ class RemoteUserDataServicesTest {
         rpcCount++
       }
     }
-    assertEquals(32, rpcCount)
+    assertEquals(34, rpcCount)
   }
 
   @Test

@@ -170,6 +170,12 @@ message SurveyDef {
   // `saved_revision_number`, which identify the saved revision collectors use
   // and don't change on working-copy edits.
   int64 record_version = 36;
+
+  // When the survey was moved to Trash (`SurveyMutation.trash_survey`); unset
+  // when it isn't trashed. Trashed surveys disappear from survey lists and
+  // stop syncing until restored, and are purged automatically 30 days after
+  // this time. Independent of `state`, which a restore leaves unchanged.
+  google.protobuf.Timestamp trash_time = 37;
 }
 
 // Lightweight survey overview listed by `SurveyService.ListSurveyOverviews`
@@ -252,6 +258,14 @@ message SurveyOverview {
   // anything it summarizes (the saved revision, `has_working_copy`, access)
   // changes, so clients can tell a newer overview from an older one.
   int64 record_version = 25;
+
+  // The survey's `SurveyDef.trash_time`; set when the survey is in Trash.
+  google.protobuf.Timestamp trash_time = 26;
+
+  // What people with access through `sharing_policy` can do (copied from
+  // `SurveyAcl.sharing_role`, with `ROLE_UNSPECIFIED` resolved to
+  // `DATA_COLLECTOR`). Clients hide data collection for `VIEWER`.
+  Role sharing_role = 27;
 }
 
 // The organizer's answer to "What happened with this data?" when a survey is
@@ -398,7 +412,10 @@ enum SurveyState {
   // Retired survey no longer active for new field data collection.
   ARCHIVED = 4;
 
-  // Deleted survey, removed from user interfaces.
+  // Server-only tombstone marker on `SurveyOverview.state`: the survey was
+  // trashed or purged, or the caller lost access, so clients remove it.
+  // Clients never set it; they move surveys to Trash with
+  // `SurveyMutation.trash_survey`.
   DELETED = 5;
 }
 

@@ -34,16 +34,22 @@ import "shared/protos/survey/survey_def.proto";
 // the full `SurveyDef` for surveys the user opens or has downloaded for
 // offline use.
 service SurveyService {
-  // Lists the overviews of surveys accessible to the caller. Whether
-  // `sync_token` is set selects the mode (`docs/technical/sync-engine.md`,
-  // "List RPCs: Query and Delta Modes"):
+  // Lists the overviews of surveys the caller can access as the owner,
+  // through an ACL entry, or through `ORGANIZATION` sharing. Surveys the
+  // caller can open only through `ANYONE_WITH_LINK` or `PUBLIC` sharing aren't
+  // listed; clients reach them by ID (`BatchGetSurveyOverviews`, `GetSurvey`)
+  // or find public ones with `SearchPublicSurveys`. Whether `sync_token` is
+  // set selects the mode (`docs/technical/sync-engine.md`, "List RPCs: Query
+  // and Delta Modes"):
   //   - Query mode (`sync_token` unset): every overview in scope except
-  //     deleted surveys, paged with `page_size` / `page_token`. Every page
+  //     trashed and deleted surveys, paged with `page_size` / `page_token`.
+  //     Every page
   //     reads the snapshot pinned in `page_token`; the last page carries
   //     `next_sync_token` for the scope at that snapshot.
   //   - Delta mode (`sync_token` set): every overview in scope changed after
   //     the token, in commit order, including tombstones (`state == DELETED`)
-  //     and surveys the caller lost access to. The last page carries
+  //     for surveys that were trashed or purged and surveys the caller lost
+  //     access to. The last page carries
   //     `next_sync_token`. `next_page_token` is itself a valid `sync_token`,
   //     so a client can store it after applying a page.
   // Delivery is at least once: an overview can appear in a query page and in
@@ -63,14 +69,27 @@ service SurveyService {
   rpc GetSurveyAcl(GetSurveyAclRequest) returns (GetSurveyAclResponse);
 
   // Atomically and idempotently applies an ordered batch of mutations to
-  // initialize or update survey fields/sub-resources (including soft-deleting
-  // via `state = DELETED`), configure ACLs/access rules, save or discard the
-  // working copy, or permanently hard-delete a survey.
+  // initialize or update survey fields/sub-resources, configure ACLs/access
+  // rules, save or discard the working copy, or move a survey to Trash and
+  // restore it. Surveys are never hard-deleted by clients; trashed surveys are
+  // purged by the server after the retention period.
   rpc MutateSurvey(MutateSurveyRequest) returns (MutateSurveyResponse);
 
-  // Redeems an email or shareable link invite token, binding the caller's
-  // authenticated `user_id` to the corresponding `AclEntry`.
+  // Redeems an email invite token from an `AclEntry` the organizer created,
+  // binding the caller's authenticated `user_id` to it. Only organizers add or
+  // remove ACL entries; link and public sharing never create them.
   rpc AcceptSurveyInvite(AcceptSurveyInviteRequest) returns (AcceptSurveyInviteResponse);
+
+  // Returns the caller's current view of specific surveys, typically the ones
+  // downloaded on a device, so clients learn about new saved revisions, Trash,
+  // purges, and lost access without the survey list being open. Stateless:
+  // one result per requested ID, in request order.
+  rpc BatchGetSurveyOverviews(BatchGetSurveyOverviewsRequest) returns (BatchGetSurveyOverviewsResponse);
+
+  // Searches the public directory of surveys with `sharing_policy = PUBLIC`
+  // by keyword (title and description). Trashed and deleted surveys are
+  // excluded.
+  rpc SearchPublicSurveys(SearchPublicSurveysRequest) returns (SearchPublicSurveysResponse);
 }
 
 // Request to list the overviews of surveys accessible to the caller.
@@ -274,6 +293,12 @@ message AccessRulesPatch {
 
   // Optional update to `owner_email`.
   optional string owner_email = 6;
+
+  // If non-unspecified, updates `SurveyAcl.sharing_role`: what people who
+  // have access through `sharing_policy` can do (`VIEWER` or
+  // `DATA_COLLECTOR`). `SURVEY_ORGANIZER` is rejected with
+  // `INVALID_ARGUMENT`; organizers must be named on the ACL.
+  Role sharing_role = 7;
 }
 
 // A single idempotent mutation step within a batched `MutateSurveyRequest`.
@@ -291,8 +316,15 @@ message SurveyMutation {
     // rules.
     AccessRulesPatch update_access_rules = 3;
 
-    // When true, permanently hard-deletes and purges the survey.
-    bool delete_survey = 4;
+    // Moves the survey to Trash (sets `SurveyDef.trash_time`). Trashed surveys
+    // disappear from every user's survey list and stop syncing; they can be
+    // restored with `restore_survey` until they are purged automatically
+    // after the retention period (30 days). Doesn't change `SurveyDef.state`.
+    bool trash_survey = 13;
+
+    // Restores a trashed survey (clears `SurveyDef.trash_time`). A no-op when
+    // the survey isn't in Trash.
+    bool restore_survey = 14;
 
     // Replaces the entire `SurveyDef` snapshot (or the working copy when
     // `MutateSurveyRequest.working_copy` is true).
@@ -323,6 +355,10 @@ message SurveyMutation {
 
   // Client-side timestamp when the mutation was recorded.
   google.protobuf.Timestamp client_timestamp = 12;
+
+  // Former hard delete. Surveys are moved to Trash (`trash_survey`) instead.
+  reserved 4;
+  reserved "delete_survey";
 }
 
 // Request to atomically and idempotently apply an ordered sequence of mutations
@@ -337,8 +373,8 @@ message MutateSurveyRequest {
   // `upsert_acl`) fail with `FAILED_PRECONDITION` when it is set and stale.
   string base_version = 2;
 
-  // Ordered sequence of idempotent survey field, ACL, or hard-delete mutations
-  // to execute atomically.
+  // Ordered sequence of idempotent survey field, ACL, access rule, trash, or
+  // working copy mutations to execute atomically.
   repeated SurveyMutation mutations = 3;
 
   // When true, applies `mutations` to the organizer's working copy instead of
@@ -353,8 +389,7 @@ message MutateSurveyResponse {
 
   // The mutated revision (the working copy when
   // `MutateSurveyRequest.working_copy` is true, otherwise the saved revision),
-  // with incremented `version` and `commit_timestamp`. Unset if hard-deleted
-  // via `delete_survey`.
+  // with incremented `version` and `commit_timestamp`.
   SurveyDef survey = 2;
 
   // Resulting ACL and access rules for the survey.
@@ -379,4 +414,55 @@ message AcceptSurveyInviteResponse {
   SurveyDef survey = 1;
   SurveyAcl acl = 2;
   google.protobuf.Timestamp commit_timestamp = 3;
+}
+
+// Request for the caller's current view of specific surveys.
+message BatchGetSurveyOverviewsRequest {
+  // Survey IDs to look up (`SurveyDef.survey_id`). The server caps the number
+  // of IDs per request and fails with `INVALID_ARGUMENT` above it.
+  repeated string survey_ids = 1;
+}
+
+// The caller's view of one requested survey.
+message SurveyOverviewResult {
+  // The requested survey ID.
+  string survey_id = 1;
+
+  oneof result {
+    // The caller's overview of the survey. `trash_time` is set when the
+    // survey is in Trash.
+    SurveyOverview overview = 2;
+
+    // Why the overview isn't available: `NOT_FOUND` when the survey doesn't
+    // exist or was purged, `PERMISSION_DENIED` when the caller has no access.
+    // Values are `google.rpc.Code` numbers.
+    int32 error_code = 3;
+  }
+}
+
+// Response with one result per requested survey, in request order.
+message BatchGetSurveyOverviewsResponse {
+  repeated SurveyOverviewResult results = 1;
+}
+
+// Query over the public directory of surveys.
+message SearchPublicSurveysRequest {
+  // Case-insensitive keyword matched against survey title and description.
+  // Empty lists every public survey.
+  string query = 1;
+
+  // Maximum number of overviews to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 2;
+
+  // `next_page_token` from the previous page of the same query.
+  string page_token = 3;
+}
+
+// A page of public survey overviews.
+message SearchPublicSurveysResponse {
+  repeated SurveyOverview overviews = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
 }

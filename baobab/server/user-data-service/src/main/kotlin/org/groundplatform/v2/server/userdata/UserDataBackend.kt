@@ -86,6 +86,8 @@ import groundplatform.v2.library.SearchConceptsResponse
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AcceptSurveyInviteResponse
 import groundplatform.v2.survey.AclEntry
+import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
+import groundplatform.v2.survey.BatchGetSurveyOverviewsResponse
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetOrganizationResponse
 import groundplatform.v2.survey.GetSurveyAclRequest
@@ -108,15 +110,20 @@ import groundplatform.v2.survey.OrganizationMember
 import groundplatform.v2.survey.OrganizationRole
 import groundplatform.v2.survey.OrganizationServiceServer
 import groundplatform.v2.survey.PeerDataVisibility
+import groundplatform.v2.survey.Role
 import groundplatform.v2.survey.SearchOrganizationsRequest
 import groundplatform.v2.survey.SearchOrganizationsResponse
+import groundplatform.v2.survey.SearchPublicSurveysRequest
+import groundplatform.v2.survey.SearchPublicSurveysResponse
 import groundplatform.v2.survey.SharingPolicy
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyOverview
+import groundplatform.v2.survey.SurveyOverviewResult
 import groundplatform.v2.survey.SurveyServiceServer
 import groundplatform.v2.survey.SurveyState
 import groundplatform.v2.userdata.UserDataSeed
+import io.grpc.Status
 import org.groundplatform.v2.core.mutation.DataPatches
 import org.groundplatform.v2.core.mutation.LibraryPatches
 import org.groundplatform.v2.core.mutation.OrganizationPatches
@@ -705,6 +712,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
   }
 
   override suspend fun GetSurvey(request: GetSurveyRequest): GetSurveyResponse {
+    checkNotTrashed(request.survey_id)
     val saved = surveysById[request.survey_id]
     val requestedVersion = request.saved_version
     val survey =
@@ -737,6 +745,14 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
         acl = surveyAclsById[surveyId],
         commit_timestamp = existingSaved?.commit_timestamp ?: currentWatermark(),
       )
+    }
+    require(
+      toApply.none {
+        it.update_access_rules?.sharing_role == Role.SURVEY_ORGANIZER ||
+          it.upsert_acl?.sharing_role == Role.SURVEY_ORGANIZER
+      }
+    ) {
+      "sharing_role can't be SURVEY_ORGANIZER; organizers must be named on the ACL"
     }
     if (toApply.any { it.upsert_survey != null || it.upsert_acl != null }) {
       val baseTarget =
@@ -774,10 +790,9 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       val patchRole = mutation.update_acl_role
       val patchAccess = mutation.update_access_rules
       when {
-        mutation.delete_survey == true -> {
-          saved = saved.copy(state = SurveyState.DELETED)
-          workingCopy = null
-        }
+        mutation.trash_survey == true ->
+          if (saved.trash_time == null) saved = saved.copy(trash_time = ts)
+        mutation.restore_survey == true -> saved = saved.copy(trash_time = null)
         upSurvey != null -> setTarget(upSurvey.copy(survey_id = surveyId))
         upAcl != null -> currentAcl = upAcl.copy(survey_id = surveyId)
         mutation.save_working_copy == true -> {
@@ -857,6 +872,66 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     )
   }
 
+  override suspend fun BatchGetSurveyOverviews(
+    request: BatchGetSurveyOverviewsRequest
+  ): BatchGetSurveyOverviewsResponse {
+    require(request.survey_ids.size <= MAX_BATCH_SURVEY_IDS) {
+      "At most $MAX_BATCH_SURVEY_IDS survey_ids per request"
+    }
+    return BatchGetSurveyOverviewsResponse(
+      results =
+        request.survey_ids.map { id ->
+          val saved = surveysById[id]
+          if (saved == null) {
+            SurveyOverviewResult(survey_id = id, error_code = Status.Code.NOT_FOUND.value())
+          } else {
+            // The in-memory backend doesn't authenticate callers, so it never reports
+            // PERMISSION_DENIED.
+            SurveyOverviewResult(
+              survey_id = id,
+              overview =
+                overviewOf(
+                  surveyDef = saved,
+                  acl = surveyAclsById[id],
+                  hasWorkingCopy = surveyWorkingCopiesById.containsKey(id),
+                ),
+            )
+          }
+        }
+    )
+  }
+
+  override suspend fun SearchPublicSurveys(
+    request: SearchPublicSurveysRequest
+  ): SearchPublicSurveysResponse {
+    val q = request.query.trim().lowercase()
+    val matching =
+      surveysById.values
+        .filter { s ->
+          surveyAclsById[s.survey_id]?.sharing_policy == SharingPolicy.PUBLIC &&
+            s.trash_time == null &&
+            s.state != SurveyState.DELETED &&
+            (q.isEmpty() ||
+              s.title.lowercase().contains(q) ||
+              s.description.lowercase().contains(q))
+        }
+        .sortedBy { it.survey_id }
+        .map { s ->
+          overviewOf(
+            surveyDef = s,
+            acl = surveyAclsById[s.survey_id],
+            hasWorkingCopy = surveyWorkingCopiesById.containsKey(s.survey_id),
+          )
+        }
+    val (items, nextPageToken) = page(matching, request.page_size, request.page_token)
+    return SearchPublicSurveysResponse(overviews = items, next_page_token = nextPageToken)
+  }
+
+  /** Fails with `FAILED_PRECONDITION` when survey [surveyId] is in Trash. */
+  private fun checkNotTrashed(surveyId: String) {
+    check(surveysById[surveyId]?.trash_time == null) { "Survey $surveyId is in Trash" }
+  }
+
   // ---------------------------------------------------------------------------
   // DataServiceServer
   // ---------------------------------------------------------------------------
@@ -870,6 +945,8 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
   override suspend fun ListEntities(request: ListEntitiesRequest): ListEntitiesResponse {
     val queryFieldsSet = buildList {
+      if (request.dataset_id.isNotBlank()) add("dataset_id")
+      if (request.s2_cell_tokens.isNotEmpty()) add("s2_cell_tokens")
       if (request.include_deleted) add("include_deleted")
       if (request.bbox != null) add("bbox")
       if (request.filter.isNotEmpty()) add("filter")
@@ -884,24 +961,21 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
         commitTimestamp = EntityRecord::commit_timestamp,
         stringKeys = mapOf("label" to EntityRecord::label),
         fingerprint =
-          "include_deleted=${request.include_deleted}|filter=${request.filter.toSortedMap()}|" +
-            "order_by=${request.order_by.trim().lowercase()}",
+          "dataset_id=${request.dataset_id}|include_deleted=${request.include_deleted}|" +
+            "filter=${request.filter.toSortedMap()}|order_by=${request.order_by.trim().lowercase()}",
       ) { e ->
-        (request.include_deleted || !e.is_deleted) &&
+        (request.dataset_id.isBlank() || e.dataset_id == request.dataset_id) &&
+          (request.include_deleted || !e.is_deleted) &&
           request.filter.all { (key, value) -> e.properties[key]?.string_value == value }
       }
-    // `s2_cell_tokens` is part of the scope, but the in-memory backend doesn't index entities by
+    checkNotTrashed(request.survey_id)
+    // `s2_cell_tokens` is a query-only filter, but the in-memory backend doesn't index entities by
     // S2 cell, so it doesn't narrow the results.
     val page =
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
-        scopeKey =
-          "entities|survey_id=${request.survey_id}|dataset_id=${request.dataset_id}|" +
-            "s2_cell_tokens=${request.s2_cell_tokens.sorted().joinToString(",")}",
-        records =
-          entitiesBySurveyAndId[request.survey_id]?.values.orEmpty().filter { e ->
-            request.dataset_id.isBlank() || e.dataset_id == request.dataset_id
-          },
+        scopeKey = "entities|survey_id=${request.survey_id}",
+        records = entitiesBySurveyAndId[request.survey_id]?.values.orEmpty(),
         commitTimestamp = EntityRecord::commit_timestamp,
         id = EntityRecord::entity_id,
         query = query,
@@ -944,6 +1018,8 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
   override suspend fun ListSubmissions(request: ListSubmissionsRequest): ListSubmissionsResponse {
     val queryFieldsSet = buildList {
+      if (request.form_id.isNotBlank()) add("form_id")
+      if (request.entity_id.isNotBlank()) add("entity_id")
       if (request.include_deleted) add("include_deleted")
       if (request.filter.isNotEmpty()) add("filter")
       if (request.order_by.isNotBlank()) add("order_by")
@@ -954,10 +1030,13 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
         commitTimestamp = SubmissionRecord::commit_timestamp,
         stringKeys = mapOf("collector_name" to SubmissionRecord::collector_name),
         fingerprint =
-          "include_deleted=${request.include_deleted}|filter=${request.filter.toSortedMap()}|" +
+          "form_id=${request.form_id}|entity_id=${request.entity_id}|" +
+            "include_deleted=${request.include_deleted}|filter=${request.filter.toSortedMap()}|" +
             "order_by=${request.order_by.trim().lowercase()}",
       ) { sub ->
-        (request.include_deleted || !sub.is_deleted) &&
+        (request.form_id.isBlank() || sub.form_id == request.form_id) &&
+          (request.entity_id.isBlank() || sub.entity_id == request.entity_id) &&
+          (request.include_deleted || !sub.is_deleted) &&
           request.filter.all { (key, value) ->
             when (key) {
               "collector_email" -> sub.collector_email == value
@@ -966,17 +1045,12 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
             }
           }
       }
+    checkNotTrashed(request.survey_id)
     val page =
       syncLists.list(
         params = ListParams(request.page_size, request.page_token, request.sync_token),
-        scopeKey =
-          "submissions|survey_id=${request.survey_id}|form_id=${request.form_id}|" +
-            "entity_id=${request.entity_id}",
-        records =
-          submissionsBySurveyAndId[request.survey_id]?.values.orEmpty().filter { sub ->
-            (request.form_id.isBlank() || sub.form_id == request.form_id) &&
-              (request.entity_id.isBlank() || sub.entity_id == request.entity_id)
-          },
+        scopeKey = "submissions|survey_id=${request.survey_id}",
+        records = submissionsBySurveyAndId[request.survey_id]?.values.orEmpty(),
         commitTimestamp = SubmissionRecord::commit_timestamp,
         id = SubmissionRecord::submission_id,
         query = query,
@@ -1291,6 +1365,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     val activeSurveys =
       surveysById.values.filter { s ->
         s.state != SurveyState.DELETED &&
+          s.trash_time == null &&
           (request.survey_id.isBlank() || s.survey_id == request.survey_id) &&
           (request.organization_id.isBlank() || s.organization_id == request.organization_id)
       }
@@ -1401,7 +1476,8 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
   /**
    * Builds the catalog overview of [surveyDef]. Its `commit_timestamp` is the later of the survey's
-   * and [acl]'s, so access changes also reach `ListSurveyOverviews` delta polls.
+   * and [acl]'s, so access changes also reach `ListSurveyOverviews` delta polls. A trashed survey's
+   * overview is a tombstone (`state == DELETED`) carrying `trash_time`, so lists drop it.
    */
   private fun overviewOf(
     surveyDef: SurveyDef,
@@ -1414,7 +1490,8 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
       description = surveyDef.description,
       organization_id = surveyDef.organization_id,
       owner_id = surveyDef.owner_id,
-      state = surveyDef.state,
+      state = if (surveyDef.trash_time != null) SurveyState.DELETED else surveyDef.state,
+      trash_time = surveyDef.trash_time,
       version = surveyDef.version,
       saved_revision_number = surveyDef.saved_revision_number,
       location_label = surveyDef.location_label,
@@ -1437,6 +1514,8 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
         acl?.peer_data_visibility ?: PeerDataVisibility.PEER_DATA_VISIBILITY_UNSPECIFIED,
       collector_consent_required = acl?.collector_consent_required ?: false,
       collector_consent_text = acl?.collector_consent_text.orEmpty(),
+      sharing_role =
+        acl?.sharing_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR,
     )
 
   companion object {
@@ -1445,6 +1524,9 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
 
     /** Server clock start when the seed has no timestamps. */
     const val INITIAL_EPOCH_SECOND: Long = 1_770_000_000L
+
+    /** Largest number of IDs served by one `BatchGetSurveyOverviews` request. */
+    const val MAX_BATCH_SURVEY_IDS: Int = 100
 
     /** Organization whose library is the global library shared by all users. */
     const val ALL_USERS_ORGANIZATION_ID: String = "org-all-users"

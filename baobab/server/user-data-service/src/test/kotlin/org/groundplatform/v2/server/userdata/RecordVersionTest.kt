@@ -32,6 +32,7 @@ import groundplatform.v2.library.MutateLibraryRequest
 import groundplatform.v2.library.OrganizationLibrarySettings
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AccessRulesPatch
+import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.JoinOrganizationRequest
@@ -321,10 +322,17 @@ class RecordVersionTest {
     backend.MutateSurvey(
       MutateSurveyRequest(
         survey_id = KENYA,
-        mutations = listOf(SurveyMutation(delete_survey = true)),
+        mutations = listOf(SurveyMutation(trash_survey = true)),
       )
     )
-    assertEquals(startVersion + 6, saved().survey!!.record_version, "delete")
+    val trashed =
+      backend
+        .BatchGetSurveyOverviews(BatchGetSurveyOverviewsRequest(survey_ids = listOf(KENYA)))
+        .results
+        .single()
+        .overview!!
+    assertEquals(startVersion + 6, trashed.record_version, "trash")
+    assertEquals(start.survey!!.saved_revision_number + 1, trashed.saved_revision_number)
   }
 
   companion object {

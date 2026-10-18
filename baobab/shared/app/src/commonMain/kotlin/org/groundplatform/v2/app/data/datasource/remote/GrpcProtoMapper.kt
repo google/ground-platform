@@ -119,6 +119,7 @@ import org.groundplatform.v2.app.domain.model.editor.isoUtc
 import org.groundplatform.v2.app.domain.model.formatHexColorCss
 import org.groundplatform.v2.app.domain.model.parseHexColorOrDefault
 import org.groundplatform.v2.core.forms.model.FormDefinition
+import org.groundplatform.v2.core.mutation.SurveyPatches
 
 /**
  * Bidirectional mapper between Wire-generated gRPC Protocol Buffer messages (`groundplatform.v2.*`)
@@ -434,7 +435,9 @@ object GrpcProtoMapper {
       description = surveyDef.description,
       organization_id = surveyDef.organization_id,
       owner_id = surveyDef.owner_id,
-      state = surveyDef.state,
+      // A trashed survey's overview is a tombstone, matching the server's survey list.
+      state = if (surveyDef.trash_time != null) SurveyState.DELETED else surveyDef.state,
+      trash_time = surveyDef.trash_time,
       version = surveyDef.version,
       saved_revision_number = surveyDef.saved_revision_number,
       location_label = surveyDef.location_label,
@@ -455,6 +458,8 @@ object GrpcProtoMapper {
         acl?.peer_data_visibility ?: PeerDataVisibilityProto.PEER_DATA_VISIBILITY_UNSPECIFIED,
       collector_consent_required = acl?.collector_consent_required ?: false,
       collector_consent_text = acl?.collector_consent_text.orEmpty(),
+      sharing_role =
+        acl?.sharing_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR,
     )
 
   private fun latestOf(a: Instant?, b: Instant?): Instant? =

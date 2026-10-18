@@ -67,6 +67,8 @@ import groundplatform.v2.library.SearchConceptsRequest
 import groundplatform.v2.library.SearchConceptsResponse
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AcceptSurveyInviteResponse
+import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
+import groundplatform.v2.survey.BatchGetSurveyOverviewsResponse
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetOrganizationResponse
 import groundplatform.v2.survey.GetSurveyAclRequest
@@ -86,7 +88,11 @@ import groundplatform.v2.survey.MutateSurveyResponse
 import groundplatform.v2.survey.OrganizationServiceServer
 import groundplatform.v2.survey.SearchOrganizationsRequest
 import groundplatform.v2.survey.SearchOrganizationsResponse
+import groundplatform.v2.survey.SearchPublicSurveysRequest
+import groundplatform.v2.survey.SearchPublicSurveysResponse
+import groundplatform.v2.survey.SharingPolicy
 import groundplatform.v2.survey.SurveyOverview
+import groundplatform.v2.survey.SurveyOverviewResult
 import groundplatform.v2.survey.SurveyServiceServer
 import groundplatform.v2.survey.SurveyState
 import groundplatform.v2.userdata.SurveySeed
@@ -333,6 +339,39 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
     request: AcceptSurveyInviteRequest
   ): AcceptSurveyInviteResponse = unsupported()
 
+  override suspend fun BatchGetSurveyOverviews(
+    request: BatchGetSurveyOverviewsRequest
+  ): BatchGetSurveyOverviewsResponse =
+    BatchGetSurveyOverviewsResponse(
+      results =
+        request.survey_ids.map { id ->
+          val seed = surveys[id]
+          if (seed?.survey == null) {
+            SurveyOverviewResult(survey_id = id, error_code = NOT_FOUND_CODE)
+          } else {
+            SurveyOverviewResult(survey_id = id, overview = overviewOf(seed))
+          }
+        }
+    )
+
+  override suspend fun SearchPublicSurveys(
+    request: SearchPublicSurveysRequest
+  ): SearchPublicSurveysResponse {
+    val q = request.query.trim().lowercase()
+    return SearchPublicSurveysResponse(
+      overviews =
+        surveys.values
+          .filter { it.survey != null && it.acl?.sharing_policy == SharingPolicy.PUBLIC }
+          .map(::overviewOf)
+          .filter {
+            it.state != SurveyState.DELETED &&
+              (q.isEmpty() ||
+                it.title.lowercase().contains(q) ||
+                it.description.lowercase().contains(q))
+          }
+    )
+  }
+
   // OrganizationService
 
   override suspend fun GetOrganization(request: GetOrganizationRequest) =
@@ -422,17 +461,17 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
     listRequests += request
     val page =
       list(
-        scope = "entities/${request.survey_id}/${request.dataset_id}",
-        records =
-          surveys[request.survey_id]?.entities.orEmpty().filter {
-            request.dataset_id.isBlank() || it.dataset_id == request.dataset_id
-          },
+        scope = "entities/${request.survey_id}",
+        records = surveys[request.survey_id]?.entities.orEmpty(),
         timestamp = EntityRecord::commit_timestamp,
         id = EntityRecord::entity_id,
         pageSize = request.page_size,
         pageToken = request.page_token,
         syncToken = request.sync_token,
-        inQuery = { request.include_deleted || !it.is_deleted },
+        inQuery = {
+          (request.dataset_id.isBlank() || it.dataset_id == request.dataset_id) &&
+            (request.include_deleted || !it.is_deleted)
+        },
       )
     return ListEntitiesResponse(
       entities = page.records,
@@ -457,18 +496,18 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
     listRequests += request
     val page =
       list(
-        scope = "submissions/${request.survey_id}/${request.form_id}/${request.entity_id}",
-        records =
-          surveys[request.survey_id]?.submissions.orEmpty().filter {
-            (request.form_id.isBlank() || it.form_id == request.form_id) &&
-              (request.entity_id.isBlank() || it.entity_id == request.entity_id)
-          },
+        scope = "submissions/${request.survey_id}",
+        records = surveys[request.survey_id]?.submissions.orEmpty(),
         timestamp = SubmissionRecord::commit_timestamp,
         id = SubmissionRecord::submission_id,
         pageSize = request.page_size,
         pageToken = request.page_token,
         syncToken = request.sync_token,
-        inQuery = { request.include_deleted || !it.is_deleted },
+        inQuery = {
+          (request.form_id.isBlank() || it.form_id == request.form_id) &&
+            (request.entity_id.isBlank() || it.entity_id == request.entity_id) &&
+            (request.include_deleted || !it.is_deleted)
+        },
       )
     return ListSubmissionsResponse(
       submissions = page.records,
@@ -566,5 +605,8 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
     const val DELTA = "D"
     const val QUERY = "Q"
     const val ALL = "*"
+
+    /** `google.rpc.Code.NOT_FOUND`. */
+    const val NOT_FOUND_CODE = 5
   }
 }

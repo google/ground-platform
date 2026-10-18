@@ -349,7 +349,7 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
         record(SurveyMutation(upsert_survey = after!!.def))
         record(SurveyMutation(upsert_acl = after.acl))
       }
-      after == null -> record(SurveyMutation(delete_survey = true))
+      after == null -> record(SurveyMutation(trash_survey = true))
       else -> {
         MutationDiffs.survey(before.def, after.def.withLayerVisibilityFrom(before.def)).forEach {
           record(SurveyMutation(update_field = it))
