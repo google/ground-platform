@@ -26,4 +26,6 @@ enum class OrganizationTab(val label: String) {
   PURPOSES("Purposes"),
   DICTIONARY("Dictionary"),
   TEMPLATES("Templates"),
+  COST_CONTROLS("Cost controls"),
+  COST_TRACKING("Cost tracking"),
 }

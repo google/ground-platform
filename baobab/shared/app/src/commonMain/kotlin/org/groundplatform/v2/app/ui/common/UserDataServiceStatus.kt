@@ -126,9 +126,7 @@ fun UserDataSyncErrorBanner(
   }
 }
 
-/**
- * Shows an inline loading spinner when data is synchronizing with the remote user data service.
- */
+/** Shows an inline loading spinner when data is synchronizing with the remote user data service. */
 @Composable
 fun UserDataSyncSpinner(
   state: UserDataSyncState,

@@ -94,6 +94,8 @@ data class SurveyPreviewItem(
   val collectorConsentRequired: Boolean = false,
   /** Custom consent text displayed before collecting data when configured. */
   val collectorConsentText: String = "",
+  /** Survey-level quota limits and budget overrides (`SurveyDef.quota_limits`). */
+  val quotaLimits: QuotaLimitsConfig = QuotaLimitsConfig(),
 ) {
   /** Whether the survey is in draft mode and not yet published for field collection. */
   val isDraft: Boolean

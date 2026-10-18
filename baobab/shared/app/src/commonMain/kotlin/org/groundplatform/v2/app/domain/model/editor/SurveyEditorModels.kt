@@ -16,6 +16,7 @@ package org.groundplatform.v2.app.domain.model.editor
 import org.groundplatform.v2.app.domain.model.CachedProfile
 import org.groundplatform.v2.app.domain.model.ConceptLink
 import org.groundplatform.v2.app.domain.model.InvitationStatus
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
 import org.groundplatform.v2.app.domain.model.geometryKind
 
 /**
@@ -64,6 +65,7 @@ data class SurveyDetails(
   val otherPurpose: String = "",
   /** Programs the survey reports to (`SurveyDef.program_ids`), e.g. `"eudr"`. */
   val programIds: List<String> = emptyList(),
+  val quotaLimits: QuotaLimitsConfig = QuotaLimitsConfig(),
 )
 
 /** Collaborator roles (mirrors `groundplatform.v2.survey.Role`). */

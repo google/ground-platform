@@ -255,6 +255,34 @@ class DataCollectionViewModelTest {
   }
 
   @Test
+  fun completeActiveFormSubmission_whenQuotaExceeded_emitsNoticeAndDoesNotSave() {
+    val f = DataCollectionFixture()
+    val activeId = runNow { f.surveyRepository.getActiveSurveyId() }
+    runNow {
+      f.surveyRepository.updateSurvey(activeId) { survey ->
+        survey.copy(quotaLimits = survey.quotaLimits.copy(maxSubmissionsPerEntityPerUser = 1))
+      }
+    }
+    f.viewModel.launchFormFromFab("form-eudr-baseline")
+    f.viewModel.selectEntityRefForActiveForm("00000008-15d0-51f2-84eb-a72dfea5a747")
+    val controller = assertNotNull(f.uiState.activeFormWizardController)
+    f.clearEvents()
+
+    f.viewModel.completeActiveFormSubmission(controller.formState.recordInstance)
+    assertFalse(f.uiState.isDataCollectionFormOpen)
+
+    f.viewModel.launchFormFromFab("form-eudr-baseline")
+    f.viewModel.selectEntityRefForActiveForm("00000008-15d0-51f2-84eb-a72dfea5a747")
+    val controller2 = assertNotNull(f.uiState.activeFormWizardController)
+    f.clearEvents()
+
+    f.viewModel.completeActiveFormSubmission(controller2.formState.recordInstance)
+    val notice = f.events.filterIsInstance<DataCollectionEvent.Notice>().firstOrNull()
+    assertNotNull(notice)
+    assertTrue(notice.message.contains("reaching the limit of 1"))
+  }
+
+  @Test
   fun completeStandaloneSubmission_selectsTheNewSubmission() {
     val f = DataCollectionFixture()
     val before = f.uiState.standaloneSubmissions.size

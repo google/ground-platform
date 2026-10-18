@@ -26,6 +26,8 @@ import org.groundplatform.v2.app.data.datasource.local.store.runNow
 import org.groundplatform.v2.app.data.datasource.local.store.seededStore
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.data.seed.SurveyEditorSamples
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
+import org.groundplatform.v2.app.domain.model.QuotaTier
 import org.groundplatform.v2.app.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
@@ -335,5 +337,25 @@ class SurveyEditorViewModelTest {
         )
         .saveActionLabel,
     )
+  }
+
+  @Test
+  fun updateQuotaLimits_updatesDraftDetails() {
+    val f = Fixture()
+    val limits = QuotaLimitsConfig(tier = QuotaTier.BASIC, monthlyBudgetUsd = 50.0)
+    f.viewModel.updateQuotaLimits { limits }
+    assertEquals(QuotaTier.BASIC, f.uiState.details.quotaLimits.tier)
+    assertEquals(50.0, f.uiState.details.quotaLimits.monthlyBudgetUsd)
+  }
+
+  @Test
+  fun publish_whenSurveyDesignExceedsQuota_abortsAndSetsNotice() {
+    val f = Fixture()
+    f.viewModel.updateQuotaLimits { it.copy(maxFormsPerSurvey = 1) }
+    f.viewModel.addForm()
+    f.viewModel.publish()
+    assertNotNull(f.uiState.organizationNotice)
+    assertTrue(f.uiState.organizationNotice!!.contains("exceeding the limit of 1"))
+    assertFalse(f.events.any { it is SurveyEditorEvent.Published })
   }
 }

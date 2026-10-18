@@ -35,6 +35,7 @@ import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.library.OrganizationLibrarySettings
 import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.CachedProfile as CachedProfileProto
+import groundplatform.v2.survey.CostUnitWeights as CostUnitWeightsProto
 import groundplatform.v2.survey.DataTableRow
 import groundplatform.v2.survey.EntityDatasetDef
 import groundplatform.v2.survey.EntityPropertyDefinition
@@ -54,6 +55,8 @@ import groundplatform.v2.survey.OrganizationMember as OrganizationMemberProto
 import groundplatform.v2.survey.OrganizationRole as OrganizationRoleProto
 import groundplatform.v2.survey.OrganizationType as OrganizationTypeProto
 import groundplatform.v2.survey.PeerDataVisibility as PeerDataVisibilityProto
+import groundplatform.v2.survey.QuotaLimits as QuotaLimitsProto
+import groundplatform.v2.survey.QuotaTier as QuotaTierProto
 import groundplatform.v2.survey.Role
 import groundplatform.v2.survey.SharingPolicy as SharingPolicyProto
 import groundplatform.v2.survey.SurveyAcl
@@ -65,6 +68,7 @@ import groundplatform.v2.survey.SurveyState
 import org.groundplatform.v2.app.data.datasource.local.LibraryProtoMapper
 import org.groundplatform.v2.app.domain.model.CachedProfile
 import org.groundplatform.v2.app.domain.model.ConceptLink
+import org.groundplatform.v2.app.domain.model.CostUnitWeights
 import org.groundplatform.v2.app.domain.model.EffortComparison
 import org.groundplatform.v2.app.domain.model.FormAvailability
 import org.groundplatform.v2.app.domain.model.FormPreviewItem
@@ -87,6 +91,8 @@ import org.groundplatform.v2.app.domain.model.OrganizationLibrary
 import org.groundplatform.v2.app.domain.model.OrganizationMember
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
+import org.groundplatform.v2.app.domain.model.QuotaTier
 import org.groundplatform.v2.app.domain.model.SubmissionFieldEntry
 import org.groundplatform.v2.app.domain.model.SubmissionGeometryPolygon
 import org.groundplatform.v2.app.domain.model.SubmissionPreviewItem
@@ -162,6 +168,7 @@ object GrpcProtoMapper {
         },
       country_code = org.countryCode.orEmpty(),
       exclude_from_platform_aggregates = org.excludeFromPlatformAggregates,
+      quota_limits = quotaLimitsToProto(org.quotaLimits),
       version = version,
       is_deleted = isDeleted,
       commit_timestamp = commitTimestamp,
@@ -193,6 +200,7 @@ object GrpcProtoMapper {
       countryCode = proto.country_code.takeIf { it.isNotBlank() },
       excludeFromPlatformAggregates = proto.exclude_from_platform_aggregates,
       isSynthetic = isSynthetic,
+      quotaLimits = quotaLimitsFromProto(proto.quota_limits),
     )
   }
 
@@ -268,6 +276,82 @@ object GrpcProtoMapper {
       photoUrl = proto.avatar_url.takeIf { it.isNotBlank() },
       cachedOn = proto.cached_on,
     )
+
+  // ---------------------------------------------------------------------------
+  // QuotaLimits & CostUnitWeights ↔ QuotaLimitsProto & CostUnitWeightsProto
+  // ---------------------------------------------------------------------------
+
+  fun costUnitWeightsToProto(weights: CostUnitWeights): CostUnitWeightsProto =
+    CostUnitWeightsProto(
+      usd_per_survey_month = weights.usdPerSurveyMonth,
+      usd_per_thousand_entities = weights.usdPerThousandEntities,
+      usd_per_thousand_submissions = weights.usdPerThousandSubmissions,
+      usd_per_photo = weights.usdPerPhoto,
+      usd_per_thousand_generated_plots = weights.usdPerThousandGeneratedPlots,
+    )
+
+  fun costUnitWeightsFromProto(proto: CostUnitWeightsProto?): CostUnitWeights {
+    if (proto == null) return CostUnitWeights()
+    return CostUnitWeights(
+      usdPerSurveyMonth = proto.usd_per_survey_month,
+      usdPerThousandEntities = proto.usd_per_thousand_entities,
+      usdPerThousandSubmissions = proto.usd_per_thousand_submissions,
+      usdPerPhoto = proto.usd_per_photo,
+      usdPerThousandGeneratedPlots = proto.usd_per_thousand_generated_plots,
+    )
+  }
+
+  fun quotaTierToProto(tier: QuotaTier): QuotaTierProto =
+    when (tier) {
+      QuotaTier.BASIC -> QuotaTierProto.BASIC
+      QuotaTier.SPONSORED -> QuotaTierProto.SPONSORED
+      QuotaTier.UNSPECIFIED -> QuotaTierProto.QUOTA_TIER_UNSPECIFIED
+    }
+
+  fun quotaTierFromProto(proto: QuotaTierProto?): QuotaTier =
+    when (proto) {
+      QuotaTierProto.BASIC -> QuotaTier.BASIC
+      QuotaTierProto.SPONSORED -> QuotaTier.SPONSORED
+      else -> QuotaTier.UNSPECIFIED
+    }
+
+  fun quotaLimitsToProto(limits: QuotaLimitsConfig): QuotaLimitsProto =
+    QuotaLimitsProto(
+      tier = quotaTierToProto(limits.tier),
+      max_surveys_per_owner = limits.maxSurveysPerOwner,
+      max_forms_per_survey = limits.maxFormsPerSurvey,
+      max_questions_per_form = limits.maxQuestionsPerForm,
+      max_photo_questions_per_form = limits.maxPhotoQuestionsPerForm,
+      max_predefined_entities = limits.maxPredefinedEntities,
+      max_acl_users = limits.maxAclUsers,
+      max_surveys_per_user = limits.maxSurveysPerUser,
+      max_adhoc_entities_per_user = limits.maxAdhocEntitiesPerUser,
+      max_submissions_per_entity_per_user = limits.maxSubmissionsPerEntityPerUser,
+      max_generated_entities = limits.maxGeneratedEntities,
+      max_area_vertices = limits.maxAreaVertices,
+      monthly_budget_usd = limits.monthlyBudgetUsd,
+      cost_unit_weights = costUnitWeightsToProto(limits.costUnitWeights),
+    )
+
+  fun quotaLimitsFromProto(proto: QuotaLimitsProto?): QuotaLimitsConfig {
+    if (proto == null) return QuotaLimitsConfig()
+    return QuotaLimitsConfig(
+      tier = quotaTierFromProto(proto.tier),
+      maxSurveysPerOwner = proto.max_surveys_per_owner,
+      maxFormsPerSurvey = proto.max_forms_per_survey,
+      maxQuestionsPerForm = proto.max_questions_per_form,
+      maxPhotoQuestionsPerForm = proto.max_photo_questions_per_form,
+      maxPredefinedEntities = proto.max_predefined_entities,
+      maxAclUsers = proto.max_acl_users,
+      maxSurveysPerUser = proto.max_surveys_per_user,
+      maxAdhocEntitiesPerUser = proto.max_adhoc_entities_per_user,
+      maxSubmissionsPerEntityPerUser = proto.max_submissions_per_entity_per_user,
+      maxGeneratedEntities = proto.max_generated_entities,
+      maxAreaVertices = proto.max_area_vertices,
+      monthlyBudgetUsd = proto.monthly_budget_usd,
+      costUnitWeights = costUnitWeightsFromProto(proto.cost_unit_weights),
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // OrganizationLibrary ↔ OrganizationLibraryRecord
@@ -399,6 +483,7 @@ object GrpcProtoMapper {
         entity_count = survey.entityCount,
         other_purpose = editorDraft?.details?.otherPurpose.orEmpty(),
         primary_form_id = config?.primaryForm?.proto?.form_id.orEmpty(),
+        quota_limits = quotaLimitsToProto(editorDraft?.details?.quotaLimits ?: survey.quotaLimits),
       )
 
     val sharing = editorDraft?.sharing
@@ -461,6 +546,7 @@ object GrpcProtoMapper {
       collector_consent_text = acl?.collector_consent_text.orEmpty(),
       sharing_role =
         acl?.sharing_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR,
+      quota_limits = surveyDef.quota_limits,
     )
 
   private fun latestOf(a: Instant?, b: Instant?): Instant? =
@@ -514,6 +600,7 @@ object GrpcProtoMapper {
       peerDataVisibility = peerDataVisibilityFromProto(overview.peer_data_visibility),
       collectorConsentRequired = overview.collector_consent_required,
       collectorConsentText = overview.collector_consent_text,
+      quotaLimits = quotaLimitsFromProto(overview.quota_limits),
     )
   }
 
@@ -568,20 +655,19 @@ object GrpcProtoMapper {
         "primary_respondent_id",
       )
     if (formDef.model?.bindings.orEmpty().any { it.field_path in entityRefPaths }) return true
-    fun checkComponents(components: List<ViewComponent>): Boolean =
-      components.any { comp ->
-        val ctrl = comp.control
-        val grp = comp.group
-        val rep = comp.repeat
-        when {
-          ctrl != null ->
-            ctrl.field_ref in entityRefPaths ||
-              ctrl.appearance.split(Regex("\\s+")).contains("map-select")
-          grp != null -> checkComponents(grp.components)
-          rep != null -> checkComponents(rep.components)
-          else -> false
-        }
+    fun checkComponents(components: List<ViewComponent>): Boolean = components.any { comp ->
+      val ctrl = comp.control
+      val grp = comp.group
+      val rep = comp.repeat
+      when {
+        ctrl != null ->
+          ctrl.field_ref in entityRefPaths ||
+            ctrl.appearance.split(Regex("\\s+")).contains("map-select")
+        grp != null -> checkComponents(grp.components)
+        rep != null -> checkComponents(rep.components)
+        else -> false
       }
+    }
     return checkComponents(formDef.view?.components.orEmpty())
   }
 
@@ -695,6 +781,7 @@ object GrpcProtoMapper {
           purposeIds = surveyDef.purpose_ids,
           otherPurpose = surveyDef.other_purpose,
           programIds = surveyDef.program_ids,
+          quotaLimits = quotaLimitsFromProto(surveyDef.quota_limits),
         ),
       datasets = mergedMapDatasets + tabularDatasets,
       sharing = sharing,

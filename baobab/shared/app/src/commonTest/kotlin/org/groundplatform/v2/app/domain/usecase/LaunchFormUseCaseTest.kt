@@ -102,8 +102,7 @@ class LaunchFormUseCaseTest {
 
   @Test
   fun launchForm_startsWithEmptyUserFields() {
-    val controller =
-      useCase(customFormDef = null, form = entityForm, includeEntityRefStep = false)
+    val controller = useCase(customFormDef = null, form = entityForm, includeEntityRefStep = false)
     assertTrue(
       controller.stringAt("/data/commodity_type").isNullOrEmpty(),
       "Commodity type should not be prefilled with sample choice",
@@ -116,7 +115,11 @@ class LaunchFormUseCaseTest {
       controller.stringAt("/data/collector_observation").isNullOrEmpty(),
       "Observation should not be prefilled with sample text",
     )
-    val metricVal = controller.formState.fieldStates["/data/canopy_or_parcel_metric"]?.value?.scalar_value?.int32_value
+    val metricVal =
+      controller.formState.fieldStates["/data/canopy_or_parcel_metric"]
+        ?.value
+        ?.scalar_value
+        ?.int32_value
     assertTrue(
       metricVal == null || metricVal == 0,
       "Metric should not be prefilled with sample value",

@@ -206,8 +206,7 @@ data class MapFeatureCluster(
     val calculatedZoom =
       if (maxEffectiveSpan > 0.001f) {
         val targetRadius = maxEffectiveSpan * 0.5f
-        val zoomIncrease =
-          -kotlin.math.log2((targetRadius / 0.215f).toDouble()).toFloat()
+        val zoomIncrease = -kotlin.math.log2((targetRadius / 0.215f).toDouble()).toFloat()
         val zoom = -2.35f + zoomIncrease
         zoom.coerceAtMost(-2.35f + 0.15f)
       } else {

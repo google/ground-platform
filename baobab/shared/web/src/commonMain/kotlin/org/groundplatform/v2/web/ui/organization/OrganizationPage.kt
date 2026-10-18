@@ -48,6 +48,7 @@ import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -78,12 +79,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.groundplatform.v2.app.domain.model.CostTrackingCalculator
 import org.groundplatform.v2.app.domain.model.ImagerySource
 import org.groundplatform.v2.app.domain.model.ImagerySourceType
 import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRole
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
+import org.groundplatform.v2.app.domain.model.QuotaTier
+import org.groundplatform.v2.app.domain.model.formatUsdAmount
 import org.groundplatform.v2.app.domain.usecase.ResolvedLibrary
+import org.groundplatform.v2.app.ui.common.GroundFilterChip
+import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
+import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
 import org.groundplatform.v2.web.domain.model.canChangeMember
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.WebPage
@@ -413,6 +421,31 @@ internal fun OrganizationPage(
               NoticeSlot(uiState, actions)
               TemplatesPane(uiState.library, actions, organization)
             }
+          OrganizationTab.COST_CONTROLS ->
+            PaneScaffold(
+              title =
+                if (organization.isSynthetic) "Global cost controls & quotas" else "Cost controls",
+              subtitle =
+                if (organization.isSynthetic) {
+                  "Platform-wide default quota limits and unit cost weights applied to organizations and surveys."
+                } else if (isManager) {
+                  "Budget caps and quota limits for ${organization.name}. Configure tier presets or fine-grained resource limits."
+                } else {
+                  "Budget caps and quota limits for ${organization.name}. Ask an organization manager to adjust these limits."
+                },
+            ) {
+              NoticeSlot(uiState, actions)
+              CostControlsPane(organization, isManager, actions)
+            }
+          OrganizationTab.COST_TRACKING ->
+            PaneScaffold(
+              title = "Platform cost tracking",
+              subtitle =
+                "Live cost accounting, resource usage rollups, and budget compliance breakdown across organizations, surveys, and users.",
+            ) {
+              NoticeSlot(uiState, actions)
+              CostTrackingPane(uiState)
+            }
         }
       }
     }
@@ -515,6 +548,31 @@ private fun OrganizationNavigation(
         onClick = { onSelect(OrganizationTab.DICTIONARY) },
         trailing = "${library.totalConceptCount}",
       )
+      if (organization.isSynthetic) {
+        Spacer(Modifier.height(8.dp))
+        SectionLabel("Cost & quotas")
+        NavItem(
+          label = OrganizationTab.COST_CONTROLS.label,
+          icon = Icons.Outlined.Tune,
+          selected = selected == OrganizationTab.COST_CONTROLS,
+          onClick = { onSelect(OrganizationTab.COST_CONTROLS) },
+        )
+        NavItem(
+          label = OrganizationTab.COST_TRACKING.label,
+          icon = Icons.Outlined.Insights,
+          selected = selected == OrganizationTab.COST_TRACKING,
+          onClick = { onSelect(OrganizationTab.COST_TRACKING) },
+        )
+      } else if (isManager) {
+        Spacer(Modifier.height(8.dp))
+        SectionLabel("Governance")
+        NavItem(
+          label = OrganizationTab.COST_CONTROLS.label,
+          icon = Icons.Outlined.Tune,
+          selected = selected == OrganizationTab.COST_CONTROLS,
+          onClick = { onSelect(OrganizationTab.COST_CONTROLS) },
+        )
+      }
     }
   }
 }
@@ -1537,6 +1595,642 @@ internal fun DetailsCard(title: String, content: @Composable () -> Unit) {
     Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
       SectionLabel(title)
       content()
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Cost Controls & Quotas
+// ---------------------------------------------------------------------------------------------
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CostControlsPane(
+  organization: Organization,
+  isManager: Boolean,
+  actions: OrganizationActions,
+) {
+  var limits by
+    remember(organization.id, organization.quotaLimits) {
+      mutableStateOf(organization.quotaLimits)
+    }
+  var isSaved by remember { mutableStateOf(false) }
+
+  Column(
+    modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth).padding(vertical = 12.dp),
+    verticalArrangement = Arrangement.spacedBy(20.dp),
+  ) {
+    ElevatedCard(
+      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      Column(
+        modifier = Modifier.fillMaxWidth().padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        SectionLabel("Quota tier preset")
+        Text(
+          "Apply standard service tier defaults or customize individual resource quotas below.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          if (!organization.isSynthetic) {
+            GroundFilterChip(
+              selected = limits.tier == QuotaTier.UNSPECIFIED,
+              onClick = {
+                if (isManager) limits = limits.copy(tier = QuotaTier.UNSPECIFIED)
+              },
+              label = { Text("Inherit Global") },
+            )
+          }
+          GroundFilterChip(
+            selected = limits.tier == QuotaTier.BASIC,
+            onClick = {
+              if (isManager) {
+                limits = QuotaLimitsConfig.BASIC.copy(monthlyBudgetUsd = limits.monthlyBudgetUsd)
+              }
+            },
+            label = { Text("Basic Tier") },
+          )
+          GroundFilterChip(
+            selected = limits.tier == QuotaTier.SPONSORED,
+            onClick = {
+              if (isManager) {
+                limits =
+                  QuotaLimitsConfig.SPONSORED.copy(monthlyBudgetUsd = limits.monthlyBudgetUsd)
+              }
+            },
+            label = { Text("Sponsored Tier") },
+          )
+        }
+      }
+    }
+
+    ElevatedCard(
+      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      Column(
+        modifier = Modifier.fillMaxWidth().padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        SectionLabel("Monthly budget cap")
+        Text(
+          "Hard limit in USD for estimated survey and data collection costs. Enter 0 for unlimited budget.",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedTextField(
+          value = if (limits.monthlyBudgetUsd <= 0.0) "" else limits.monthlyBudgetUsd.toString(),
+          onValueChange = { str ->
+            if (isManager) {
+              val parsed = str.toDoubleOrNull() ?: 0.0
+              limits = limits.copy(monthlyBudgetUsd = parsed)
+            }
+          },
+          label = { Text("Monthly budget cap ($ USD)") },
+          placeholder = { Text("0.00 (Unlimited)") },
+          singleLine = true,
+          enabled = isManager,
+          modifier = Modifier.fillMaxWidth(),
+        )
+      }
+    }
+
+    ElevatedCard(
+      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      Column(
+        modifier = Modifier.fillMaxWidth().padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        SectionLabel("Survey & form limits")
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          OutlinedTextField(
+            value = limits.maxSurveysPerOwner.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxSurveysPerOwner = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max surveys / owner") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+          OutlinedTextField(
+            value = limits.maxFormsPerSurvey.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxFormsPerSurvey = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max forms / survey") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+        }
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          OutlinedTextField(
+            value = limits.maxQuestionsPerForm.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxQuestionsPerForm = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max questions / form") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+          OutlinedTextField(
+            value = limits.maxPhotoQuestionsPerForm.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxPhotoQuestionsPerForm = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max photo questions / form") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+        }
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          OutlinedTextField(
+            value = limits.maxPredefinedEntities.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxPredefinedEntities = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max predefined entities") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+          OutlinedTextField(
+            value = limits.maxGeneratedEntities.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxGeneratedEntities = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max sample plots") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+        }
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          OutlinedTextField(
+            value = limits.maxAreaVertices.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxAreaVertices = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max boundary vertices") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+          OutlinedTextField(
+            value = limits.maxAclUsers.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxAclUsers = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max ACL collaborators") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+        }
+      }
+    }
+
+    ElevatedCard(
+      colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      Column(
+        modifier = Modifier.fillMaxWidth().padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        SectionLabel("Collector & submission limits")
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          OutlinedTextField(
+            value = limits.maxSurveysPerUser.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxSurveysPerUser = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max active surveys / user") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+          OutlinedTextField(
+            value = limits.maxAdhocEntitiesPerUser.toString(),
+            onValueChange = { str ->
+              if (isManager) limits = limits.copy(maxAdhocEntitiesPerUser = str.toIntOrNull() ?: 0)
+            },
+            label = { Text("Max ad-hoc features / user") },
+            singleLine = true,
+            enabled = isManager,
+            modifier = Modifier.weight(1f),
+          )
+        }
+        OutlinedTextField(
+          value = limits.maxSubmissionsPerEntityPerUser.toString(),
+          onValueChange = { str ->
+            if (isManager) {
+              limits = limits.copy(maxSubmissionsPerEntityPerUser = str.toIntOrNull() ?: 0)
+            }
+          },
+          label = { Text("Max submissions / feature / user") },
+          singleLine = true,
+          enabled = isManager,
+          modifier = Modifier.fillMaxWidth(),
+        )
+      }
+    }
+
+    if (organization.isSynthetic) {
+      ElevatedCard(
+        colors =
+          CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(20.dp),
+          verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+          SectionLabel("Platform unit cost weights ($ USD)")
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+          ) {
+            OutlinedTextField(
+              value = limits.costUnitWeights.usdPerSurveyMonth.toString(),
+              onValueChange = { str ->
+                if (isManager) {
+                  limits =
+                    limits.copy(
+                      costUnitWeights =
+                        limits.costUnitWeights.copy(usdPerSurveyMonth = str.toDoubleOrNull() ?: 0.0)
+                    )
+                }
+              },
+              label = { Text("USD / survey / month") },
+              singleLine = true,
+              enabled = isManager,
+              modifier = Modifier.weight(1f),
+            )
+            OutlinedTextField(
+              value = limits.costUnitWeights.usdPerThousandEntities.toString(),
+              onValueChange = { str ->
+                if (isManager) {
+                  limits =
+                    limits.copy(
+                      costUnitWeights =
+                        limits.costUnitWeights.copy(
+                          usdPerThousandEntities = str.toDoubleOrNull() ?: 0.0
+                        )
+                    )
+                }
+              },
+              label = { Text("USD / 1k entities") },
+              singleLine = true,
+              enabled = isManager,
+              modifier = Modifier.weight(1f),
+            )
+          }
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+          ) {
+            OutlinedTextField(
+              value = limits.costUnitWeights.usdPerThousandSubmissions.toString(),
+              onValueChange = { str ->
+                if (isManager) {
+                  limits =
+                    limits.copy(
+                      costUnitWeights =
+                        limits.costUnitWeights.copy(
+                          usdPerThousandSubmissions = str.toDoubleOrNull() ?: 0.0
+                        )
+                    )
+                }
+              },
+              label = { Text("USD / 1k submissions") },
+              singleLine = true,
+              enabled = isManager,
+              modifier = Modifier.weight(1f),
+            )
+            OutlinedTextField(
+              value = limits.costUnitWeights.usdPerPhoto.toString(),
+              onValueChange = { str ->
+                if (isManager) {
+                  limits =
+                    limits.copy(
+                      costUnitWeights =
+                        limits.costUnitWeights.copy(usdPerPhoto = str.toDoubleOrNull() ?: 0.0)
+                    )
+                }
+              },
+              label = { Text("USD / photo") },
+              singleLine = true,
+              enabled = isManager,
+              modifier = Modifier.weight(1f),
+            )
+          }
+        }
+      }
+    }
+
+    if (isManager) {
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Button(
+          onClick = {
+            actions.updateOrganizationQuotaLimits(organization.id, limits)
+            isSaved = true
+          }
+        ) {
+          Icon(Icons.Outlined.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+          Spacer(Modifier.width(6.dp))
+          Text("Save cost controls")
+        }
+        if (isSaved) {
+          Text(
+            "Cost controls saved.",
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.bodyMedium,
+          )
+        }
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Cost Tracking
+// ---------------------------------------------------------------------------------------------
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CostTrackingPane(uiState: OrganizationUiState) {
+  val report =
+    remember(uiState.surveys, uiState.organizations) {
+      CostTrackingCalculator.calculatePlatformReport(
+        organizations = uiState.organizations,
+        surveys = uiState.surveys,
+      )
+    }
+  val budgetViolations =
+    remember(report) {
+      report.organizations
+        .filter { it.isBudgetExceeded }
+        .map {
+          "${it.organizationName} exceeds monthly budget (${formatUsdAmount(it.estimatedMonthlyUsd)} > ${formatUsdAmount(it.monthlyBudgetUsd)})"
+        } +
+        report.surveys
+          .filter { it.isBudgetExceeded }
+          .map {
+            "${it.surveyTitle} exceeds monthly budget (${formatUsdAmount(it.estimatedMonthlyUsd)} > ${formatUsdAmount(it.monthlyBudgetUsd)})"
+          }
+    }
+  var selectedTab by remember { mutableStateOf(0) }
+
+  Column(
+    modifier = Modifier.widthIn(max = OrganizationPaneMaxWidth).padding(vertical = 12.dp),
+    verticalArrangement = Arrangement.spacedBy(20.dp),
+  ) {
+    FlowRow(
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      CostSummaryCard(
+        label = "Total estimated cost",
+        value = "${formatUsdAmount(report.totalEstimatedMonthlyUsd)} / mo",
+      )
+      CostSummaryCard(label = "Tracked surveys", value = "${report.totalSurveysCount}")
+      CostSummaryCard(label = "Total entities", value = "${report.totalEntitiesCount}")
+      CostSummaryCard(label = "Submissions", value = "${report.totalSubmissionsCount}")
+      CostSummaryCard(label = "Photos recorded", value = "${report.totalPhotosCount}")
+    }
+
+    if (budgetViolations.isNotEmpty()) {
+      ElevatedCard(
+        colors =
+          CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+          ),
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Column(
+          modifier = Modifier.padding(16.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          Text(
+            "Budget alerts (${budgetViolations.size})",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+          )
+          budgetViolations.forEach { alert ->
+            Text(
+              "• $alert",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+          }
+        }
+      }
+    }
+
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      GroundFilterChip(
+        selected = selectedTab == 0,
+        onClick = { selectedTab = 0 },
+        label = { Text("By Organization (${report.organizations.size})") },
+      )
+      GroundFilterChip(
+        selected = selectedTab == 1,
+        onClick = { selectedTab = 1 },
+        label = { Text("By Survey (${report.surveys.size})") },
+      )
+      GroundFilterChip(
+        selected = selectedTab == 2,
+        onClick = { selectedTab = 2 },
+        label = { Text("By Collector (${report.users.size})") },
+      )
+    }
+
+    when (selectedTab) {
+      0 -> {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          report.organizations.forEach { item ->
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+              Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+              ) {
+                Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Text(
+                    item.organizationName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                  )
+                  Text(
+                    "${item.surveyCount} surveys · ${item.predefinedEntityCount + item.generatedEntityCount} entities · ${item.submissionCount} submissions · ${item.photoCount} photos",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                  if (item.monthlyBudgetUsd > 0.0) {
+                    Text(
+                      "Budget cap: ${formatUsdAmount(item.monthlyBudgetUsd)} / mo",
+                      style = MaterialTheme.typography.labelSmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                  }
+                }
+                Column(
+                  horizontalAlignment = Alignment.End,
+                  verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Text(
+                    formatUsdAmount(item.estimatedMonthlyUsd),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                  )
+                  if (item.isBudgetExceeded) {
+                    GroundTonalBadge(text = "Exceeded budget", tone = GroundBadgeTone.ERROR)
+                  } else {
+                    GroundTonalBadge(text = "Within budget", tone = GroundBadgeTone.NEUTRAL)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      1 -> {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          report.surveys.forEach { item ->
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+              Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+              ) {
+                Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Text(
+                    item.surveyTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                  )
+                  Text(
+                    "${item.predefinedEntityCount} predefined · ${item.generatedEntityCount} generated · ${item.submissionCount} submissions · ${item.photoCount} photos",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                  if (item.monthlyBudgetUsd > 0.0) {
+                    Text(
+                      "Budget cap: ${formatUsdAmount(item.monthlyBudgetUsd)} / mo",
+                      style = MaterialTheme.typography.labelSmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                  }
+                }
+                Column(
+                  horizontalAlignment = Alignment.End,
+                  verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Text(
+                    formatUsdAmount(item.estimatedMonthlyUsd),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                  )
+                  if (item.isBudgetExceeded) {
+                    GroundTonalBadge(text = "Exceeded budget", tone = GroundBadgeTone.ERROR)
+                  } else {
+                    GroundTonalBadge(text = "Within budget", tone = GroundBadgeTone.NEUTRAL)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      2 -> {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          report.users.forEach { item ->
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+              Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+              ) {
+                Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Text(
+                    item.userEmail,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                  )
+                  Text(
+                    "Active in ${item.activeSurveyCount} surveys · ${item.submissionCount} submissions · ${item.photoCount} photos",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                }
+                Text(
+                  formatUsdAmount(item.estimatedMonthlyUsd),
+                  style = MaterialTheme.typography.titleMedium,
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.primary,
+                )
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun CostSummaryCard(label: String, value: String) {
+  OutlinedCard(modifier = Modifier.width(180.dp)) {
+    Column(modifier = Modifier.padding(16.dp)) {
+      Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+      Text(
+        label,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
   }
 }

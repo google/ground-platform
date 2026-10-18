@@ -90,6 +90,10 @@ message Organization {
   // clients compare versions, not timestamps, to tell which copy is newer
   // (`docs/technical/sync-engine.md`, "Sync Tokens").
   google.protobuf.Timestamp commit_timestamp = 15;
+
+  // Tiered quota limits and monthly budget cap configured for this organization.
+  // Overrides global defaults on the synthetic "All users" organization.
+  groundplatform.v2.survey.QuotaLimits quota_limits = 16;
 }
 
 // Kind of organization, optionally set on an `Organization`'s profile.

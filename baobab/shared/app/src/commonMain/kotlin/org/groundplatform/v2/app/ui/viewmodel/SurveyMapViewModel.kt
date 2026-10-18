@@ -14,7 +14,6 @@
 package org.groundplatform.v2.app.ui.viewmodel
 
 import kotlin.math.abs
-import kotlin.math.hypot
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow

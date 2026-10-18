@@ -244,4 +244,28 @@ message QuotaLimits {
   // geometries. This per-tier quota replaces the former fixed 50-vertex
   // schema rule so that uploaded country boundaries fit (Sponsored: 50,000).
   int32 max_area_vertices = 12;
+
+  // Optional monthly USD budget cap (0 means no explicit cap / inherit).
+  double monthly_budget_usd = 13;
+
+  // Custom unit cost weights for resource usage calculation.
+  CostUnitWeights cost_unit_weights = 14;
+}
+
+// Unit cost weights used to estimate monthly infrastructure and operational costs.
+message CostUnitWeights {
+  // Estimated base USD cost per survey per month.
+  double usd_per_survey_month = 1;
+
+  // Estimated USD cost per 1,000 predefined or ad-hoc entities.
+  double usd_per_thousand_entities = 2;
+
+  // Estimated USD cost per 1,000 form submissions.
+  double usd_per_thousand_submissions = 3;
+
+  // Estimated USD cost per photo attachment stored and served.
+  double usd_per_photo = 4;
+
+  // Estimated USD cost per 1,000 generated sample plots.
+  double usd_per_thousand_generated_plots = 5;
 }

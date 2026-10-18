@@ -159,8 +159,7 @@ fun PurposePackGrid(
   ) {
     if (isError && selectedIds.isEmpty()) {
       ValidationErrorBanner(
-        message =
-          "Select a purpose (or choose \"Other\" and describe your goal) to continue."
+        message = "Select a purpose (or choose \"Other\" and describe your goal) to continue."
       )
     }
 

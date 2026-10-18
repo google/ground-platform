@@ -55,11 +55,13 @@ data class OrganizationUiState(
     get() = organization(openOrganizationId)
 
   /**
-   * Whether the signed-in user is a platform administrator (i.e. Manager of the synthetic
-   * "All users" organization).
+   * Whether the signed-in user is a platform administrator (i.e. Manager of the synthetic "All
+   * users" organization).
    */
   val isPlatformAdmin: Boolean
-    get() = organizations.any { it.id == Organization.ALL_USERS_ID && it.isManager(signedInUserEmail) }
+    get() = organizations.any {
+      it.id == Organization.ALL_USERS_ID && it.isManager(signedInUserEmail)
+    }
 
   /** Organizations the signed-in user is an active member of. */
   val signedInUserOrganizations: List<Organization>

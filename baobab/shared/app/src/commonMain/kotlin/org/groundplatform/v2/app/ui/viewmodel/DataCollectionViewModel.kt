@@ -41,6 +41,8 @@ import org.groundplatform.v2.app.domain.model.ImpactCoverage
 import org.groundplatform.v2.app.domain.model.ImpactEventType
 import org.groundplatform.v2.app.domain.model.MainSurveyViewMode
 import org.groundplatform.v2.app.domain.model.MeasurementUnitSystem
+import org.groundplatform.v2.app.domain.model.QuotaAndCostEnforcer
+import org.groundplatform.v2.app.domain.model.QuotaCheckResult
 import org.groundplatform.v2.app.domain.model.SharedPdfSheetState
 import org.groundplatform.v2.app.domain.model.SurveyMapAnchor
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
@@ -670,6 +672,34 @@ class DataCollectionViewModel(
     val location = locationRepository.getLocationSnapshot()
     val profile = data.value.profile
     val unitSystem = data.value.unitSystem
+    val activeSurvey = data.value.surveys.firstOrNull { it.id == data.value.activeSurveyId }
+
+    if (activeSurvey != null) {
+      val isNewAdhoc =
+        current.wasFormLaunchedWithoutEntity && current.activeDataCollectionEntityId == null
+      val entity =
+        current.activeDataCollectionEntityId?.let { id ->
+          data.value.content.entities.firstOrNull { it.id == id }
+        }
+      val userSubmissionsForEntity =
+        entity?.submissions?.count {
+          it.collectorEmail.equals(profile.email, ignoreCase = true)
+        } ?: 0
+      val userAdhocEntities = data.value.content.entities.count { it.isFieldCreated }
+      val check =
+        QuotaAndCostEnforcer.checkCanCollectSubmission(
+          userEmail = profile.email,
+          survey = activeSurvey,
+          isNewAdhocEntity = isNewAdhoc,
+          userSubmissionsForEntityCount = userSubmissionsForEntity,
+          userAdhocEntitiesCount = userAdhocEntities,
+        )
+      if (check is QuotaCheckResult.Exceeded) {
+        scope.launch { emit(DataCollectionEvent.Notice(check.reason)) }
+        return
+      }
+    }
+
     scope.launch {
       val result =
         completeFormSubmission(

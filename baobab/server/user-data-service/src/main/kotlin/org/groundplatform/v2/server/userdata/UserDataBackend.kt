@@ -86,6 +86,7 @@ import groundplatform.v2.survey.AcceptSurveyInviteResponse
 import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
 import groundplatform.v2.survey.BatchGetSurveyOverviewsResponse
+import groundplatform.v2.survey.CostUnitWeights
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetOrganizationResponse
 import groundplatform.v2.survey.GetSurveyAclRequest
@@ -108,6 +109,8 @@ import groundplatform.v2.survey.OrganizationMember
 import groundplatform.v2.survey.OrganizationRole
 import groundplatform.v2.survey.OrganizationServiceServer
 import groundplatform.v2.survey.PeerDataVisibility
+import groundplatform.v2.survey.QuotaLimits
+import groundplatform.v2.survey.QuotaTier
 import groundplatform.v2.survey.Role
 import groundplatform.v2.survey.SearchOrganizationsRequest
 import groundplatform.v2.survey.SearchOrganizationsResponse
@@ -122,6 +125,7 @@ import groundplatform.v2.survey.SurveyServiceServer
 import groundplatform.v2.survey.SurveyState
 import groundplatform.v2.userdata.UserDataSeed
 import io.grpc.Status
+import io.grpc.StatusException
 import org.groundplatform.v2.core.mutation.DataPatches
 import org.groundplatform.v2.core.mutation.LibraryPatches
 import org.groundplatform.v2.core.mutation.OrganizationPatches
@@ -647,6 +651,180 @@ class UserDataBackend(private val store: UserDataStore) :
       acl = store.read { it.acl(request.survey_id) } ?: SurveyAcl(survey_id = request.survey_id)
     )
 
+  private fun UserDataReader.resolveEffectiveQuota(
+    survey: SurveyDef?,
+    organizationId: String?,
+  ): QuotaLimits {
+    val global = organization(ALL_USERS_ORGANIZATION_ID)?.quota_limits
+    val org = organizationId?.takeIf { it.isNotBlank() }?.let { organization(it)?.quota_limits }
+    val s = survey?.quota_limits
+
+    val effectiveTier =
+      when {
+        s?.tier != null && s.tier != QuotaTier.QUOTA_TIER_UNSPECIFIED -> s.tier
+        org?.tier != null && org.tier != QuotaTier.QUOTA_TIER_UNSPECIFIED -> org.tier
+        organizationId?.isNotBlank() == true -> QuotaTier.SPONSORED
+        global?.tier != null && global.tier != QuotaTier.QUOTA_TIER_UNSPECIFIED -> global.tier
+        else -> QuotaTier.BASIC
+      }
+
+    val isSponsored = effectiveTier == QuotaTier.SPONSORED
+    val defaultMaxSurveysPerOwner = if (isSponsored) 100 else 5
+    val defaultMaxFormsPerSurvey = if (isSponsored) 10 else 5
+    val defaultMaxQuestionsPerForm = if (isSponsored) 50 else 10
+    val defaultMaxPhotoQuestionsPerForm = if (isSponsored) 10 else 1
+    val defaultMaxPredefinedEntities = if (isSponsored) 10_000 else 1_000
+    val defaultMaxAclUsers = if (isSponsored) 50 else 10
+    val defaultMaxSurveysPerUser = if (isSponsored) 100 else 5
+    val defaultMaxAdhocEntitiesPerUser = if (isSponsored) 200 else 100
+    val defaultMaxSubmissionsPerEntityPerUser = if (isSponsored) 50 else 10
+    val defaultMaxGeneratedEntities = if (isSponsored) 100_000 else 10_000
+    val defaultMaxAreaVertices = if (isSponsored) 50_000 else 5_000
+
+    fun resolveInt(sVal: Int?, orgVal: Int?, gVal: Int?, default: Int): Int =
+      when {
+        sVal != null && sVal > 0 -> sVal
+        orgVal != null && orgVal > 0 -> orgVal
+        gVal != null && gVal > 0 -> gVal
+        else -> default
+      }
+
+    fun resolveDouble(sVal: Double?, orgVal: Double?, gVal: Double?, default: Double): Double =
+      when {
+        sVal != null && sVal > 0.0 -> sVal
+        orgVal != null && orgVal > 0.0 -> orgVal
+        gVal != null && gVal > 0.0 -> gVal
+        else -> default
+      }
+
+    val gWeights = global?.cost_unit_weights
+    val orgWeights = org?.cost_unit_weights
+    val sWeights = s?.cost_unit_weights
+
+    val effectiveWeights =
+      CostUnitWeights(
+        usd_per_survey_month =
+          resolveDouble(
+            sWeights?.usd_per_survey_month,
+            orgWeights?.usd_per_survey_month,
+            gWeights?.usd_per_survey_month,
+            0.50,
+          ),
+        usd_per_thousand_entities =
+          resolveDouble(
+            sWeights?.usd_per_thousand_entities,
+            orgWeights?.usd_per_thousand_entities,
+            gWeights?.usd_per_thousand_entities,
+            0.10,
+          ),
+        usd_per_thousand_submissions =
+          resolveDouble(
+            sWeights?.usd_per_thousand_submissions,
+            orgWeights?.usd_per_thousand_submissions,
+            gWeights?.usd_per_thousand_submissions,
+            0.25,
+          ),
+        usd_per_photo =
+          resolveDouble(
+            sWeights?.usd_per_photo,
+            orgWeights?.usd_per_photo,
+            gWeights?.usd_per_photo,
+            0.01,
+          ),
+        usd_per_thousand_generated_plots =
+          resolveDouble(
+            sWeights?.usd_per_thousand_generated_plots,
+            orgWeights?.usd_per_thousand_generated_plots,
+            gWeights?.usd_per_thousand_generated_plots,
+            0.05,
+          ),
+      )
+
+    return QuotaLimits(
+      tier = effectiveTier,
+      max_surveys_per_owner =
+        resolveInt(
+          s?.max_surveys_per_owner,
+          org?.max_surveys_per_owner,
+          global?.max_surveys_per_owner,
+          defaultMaxSurveysPerOwner,
+        ),
+      max_forms_per_survey =
+        resolveInt(
+          s?.max_forms_per_survey,
+          org?.max_forms_per_survey,
+          global?.max_forms_per_survey,
+          defaultMaxFormsPerSurvey,
+        ),
+      max_questions_per_form =
+        resolveInt(
+          s?.max_questions_per_form,
+          org?.max_questions_per_form,
+          global?.max_questions_per_form,
+          defaultMaxQuestionsPerForm,
+        ),
+      max_photo_questions_per_form =
+        resolveInt(
+          s?.max_photo_questions_per_form,
+          org?.max_photo_questions_per_form,
+          global?.max_photo_questions_per_form,
+          defaultMaxPhotoQuestionsPerForm,
+        ),
+      max_predefined_entities =
+        resolveInt(
+          s?.max_predefined_entities,
+          org?.max_predefined_entities,
+          global?.max_predefined_entities,
+          defaultMaxPredefinedEntities,
+        ),
+      max_acl_users =
+        resolveInt(s?.max_acl_users, org?.max_acl_users, global?.max_acl_users, defaultMaxAclUsers),
+      max_surveys_per_user =
+        resolveInt(
+          s?.max_surveys_per_user,
+          org?.max_surveys_per_user,
+          global?.max_surveys_per_user,
+          defaultMaxSurveysPerUser,
+        ),
+      max_adhoc_entities_per_user =
+        resolveInt(
+          s?.max_adhoc_entities_per_user,
+          org?.max_adhoc_entities_per_user,
+          global?.max_adhoc_entities_per_user,
+          defaultMaxAdhocEntitiesPerUser,
+        ),
+      max_submissions_per_entity_per_user =
+        resolveInt(
+          s?.max_submissions_per_entity_per_user,
+          org?.max_submissions_per_entity_per_user,
+          global?.max_submissions_per_entity_per_user,
+          defaultMaxSubmissionsPerEntityPerUser,
+        ),
+      max_generated_entities =
+        resolveInt(
+          s?.max_generated_entities,
+          org?.max_generated_entities,
+          global?.max_generated_entities,
+          defaultMaxGeneratedEntities,
+        ),
+      max_area_vertices =
+        resolveInt(
+          s?.max_area_vertices,
+          org?.max_area_vertices,
+          global?.max_area_vertices,
+          defaultMaxAreaVertices,
+        ),
+      monthly_budget_usd =
+        resolveDouble(
+          s?.monthly_budget_usd,
+          org?.monthly_budget_usd,
+          global?.monthly_budget_usd,
+          0.0,
+        ),
+      cost_unit_weights = effectiveWeights,
+    )
+  }
+
   override suspend fun MutateSurvey(request: MutateSurveyRequest): MutateSurveyResponse {
     val surveyId = request.survey_id
     val toApply = store.read { r ->
@@ -682,6 +860,7 @@ class UserDataBackend(private val store: UserDataStore) :
           else tx.survey(surveyId)
         checkBaseVersion(request.base_version, baseTarget?.version, "survey $surveyId")
       }
+      val isNewSurvey = tx.survey(surveyId) == null
       var saved =
         tx.survey(surveyId)
           ?: SurveyDef(
@@ -723,6 +902,102 @@ class UserDataBackend(private val store: UserDataStore) :
           patchRole != null -> currentAcl = SurveyPatches.applyAclRole(currentAcl, patchRole)
           patchAccess != null ->
             currentAcl = SurveyPatches.applyAccessRules(currentAcl, patchAccess)
+        }
+      }
+
+      if (saved.state != SurveyState.DELETED) {
+        val limits = tx.resolveEffectiveQuota(target(), target().organization_id)
+
+        if (isNewSurvey) {
+          val owner = target().owner_id.ifBlank { currentAcl.owner_email }
+          if (owner.isNotBlank() && limits.max_surveys_per_owner > 0) {
+            val ownerSurveys =
+              tx.surveys().count {
+                it.survey_id != surveyId &&
+                  it.state != SurveyState.DELETED &&
+                  (it.owner_id == owner)
+              }
+            if (ownerSurveys >= limits.max_surveys_per_owner) {
+              throw StatusException(
+                Status.RESOURCE_EXHAUSTED.withDescription(
+                  "Survey quota exceeded: maximum surveys per owner reached (${limits.max_surveys_per_owner})"
+                )
+              )
+            }
+          }
+        }
+
+        if (limits.max_forms_per_survey > 0 && target().forms.size > limits.max_forms_per_survey) {
+          throw StatusException(
+            Status.RESOURCE_EXHAUSTED.withDescription(
+              "Form quota exceeded: survey has ${target().forms.size} forms, exceeding maximum of ${limits.max_forms_per_survey}"
+            )
+          )
+        }
+
+        for (form in target().forms) {
+          val questionsCount = form.model?.bindings?.size ?: form.view?.components?.size ?: 0
+          if (limits.max_questions_per_form > 0 && questionsCount > limits.max_questions_per_form) {
+            throw StatusException(
+              Status.RESOURCE_EXHAUSTED.withDescription(
+                "Question quota exceeded: form \"${form.form_id}\" has $questionsCount questions, exceeding maximum of ${limits.max_questions_per_form}"
+              )
+            )
+          }
+          val photoQuestions =
+            form.model?.bindings?.count {
+              it.type == groundplatform.v2.forms.DataType.TYPE_BINARY ||
+                it.field_path.lowercase().contains("photo") ||
+                it.field_path.lowercase().contains("picture") ||
+                it.field_path.lowercase().contains("image")
+            } ?: 0
+          if (
+            limits.max_photo_questions_per_form > 0 &&
+              photoQuestions > limits.max_photo_questions_per_form
+          ) {
+            throw StatusException(
+              Status.RESOURCE_EXHAUSTED.withDescription(
+                "Photo question quota exceeded: form \"${form.form_id}\" has $photoQuestions photo questions, exceeding maximum of ${limits.max_photo_questions_per_form}"
+              )
+            )
+          }
+        }
+
+        if (limits.max_acl_users > 0 && currentAcl.entries.size > limits.max_acl_users) {
+          throw StatusException(
+            Status.RESOURCE_EXHAUSTED.withDescription(
+              "ACL quota exceeded: survey has ${currentAcl.entries.size} collaborators, exceeding maximum of ${limits.max_acl_users}"
+            )
+          )
+        }
+
+        val surveyArea = target().map_config?.survey_area
+        if (surveyArea != null && limits.max_area_vertices > 0) {
+          val totalVertices = surveyArea.parts.sumOf { it.points.size }
+          if (totalVertices > limits.max_area_vertices) {
+            throw StatusException(
+              Status.RESOURCE_EXHAUSTED.withDescription(
+                "Survey area vertex quota exceeded: survey area has $totalVertices vertices, exceeding maximum of ${limits.max_area_vertices}"
+              )
+            )
+          }
+        }
+
+        if (limits.monthly_budget_usd > 0.0) {
+          val entities = tx.entities(surveyId).filter { !it.is_deleted }
+          val submissions = tx.submissions(surveyId).filter { !it.is_deleted }
+          val weights = limits.cost_unit_weights ?: CostUnitWeights()
+          val estimatedCost =
+            weights.usd_per_survey_month +
+              (entities.size / 1000.0) * weights.usd_per_thousand_entities +
+              (submissions.size / 1000.0) * weights.usd_per_thousand_submissions
+          if (estimatedCost > limits.monthly_budget_usd) {
+            throw StatusException(
+              Status.RESOURCE_EXHAUSTED.withDescription(
+                "Monthly budget cap exceeded: estimated monthly cost exceeds budget limit of $${limits.monthly_budget_usd}"
+              )
+            )
+          }
         }
       }
 
@@ -1092,6 +1367,62 @@ class UserDataBackend(private val store: UserDataStore) :
         val emUpdate = em.update
         if (emUpsert != null) {
           checkBaseVersion(em.base_revision, stored?.revision, "entity ${em.entity_id}")
+          if (existing.revision == 0L) {
+            val s = survey(surveyId)
+            val limits = resolveEffectiveQuota(s, s?.organization_id)
+            if (emUpsert.is_field_created) {
+              val userId = emUpsert.audit_info?.created_by.orEmpty()
+              val allEntities = entities(surveyId).associateBy { it.entity_id } + entities
+              val userAdhoc =
+                allEntities.values.count {
+                  !it.is_deleted &&
+                    it.is_field_created &&
+                    (userId.isBlank() || it.audit_info?.created_by == userId)
+                }
+              if (
+                limits.max_adhoc_entities_per_user > 0 &&
+                  userAdhoc >= limits.max_adhoc_entities_per_user
+              ) {
+                throw StatusException(
+                  Status.RESOURCE_EXHAUSTED.withDescription(
+                    "Ad-hoc entity quota exceeded: maximum ad-hoc entities per user reached (${limits.max_adhoc_entities_per_user})"
+                  )
+                )
+              }
+            } else {
+              val allEntities = entities(surveyId).associateBy { it.entity_id } + entities
+              val predefined = allEntities.values.count { !it.is_deleted && !it.is_field_created }
+              if (
+                limits.max_predefined_entities > 0 && predefined >= limits.max_predefined_entities
+              ) {
+                throw StatusException(
+                  Status.RESOURCE_EXHAUSTED.withDescription(
+                    "Predefined entity quota exceeded: maximum predefined entities reached (${limits.max_predefined_entities})"
+                  )
+                )
+              }
+            }
+
+            if (limits.monthly_budget_usd > 0.0) {
+              val allEntities = entities(surveyId).associateBy { it.entity_id } + entities
+              val allSubmissions =
+                submissions(surveyId).associateBy { it.submission_id } + submissions
+              val entitiesCount = allEntities.values.count { !it.is_deleted } + 1
+              val subCount = allSubmissions.values.count { !it.is_deleted }
+              val weights = limits.cost_unit_weights ?: CostUnitWeights()
+              val estimated =
+                weights.usd_per_survey_month +
+                  (entitiesCount / 1000.0) * weights.usd_per_thousand_entities +
+                  (subCount / 1000.0) * weights.usd_per_thousand_submissions
+              if (estimated > limits.monthly_budget_usd) {
+                throw StatusException(
+                  Status.RESOURCE_EXHAUSTED.withDescription(
+                    "Monthly budget cap exceeded: operation would exceed budget limit of $${limits.monthly_budget_usd}"
+                  )
+                )
+              }
+            }
+          }
         }
         val updated: EntityRecord =
           when {
@@ -1129,6 +1460,51 @@ class UserDataBackend(private val store: UserDataStore) :
         val smUpdate = sm.update
         if (smUpsert != null) {
           checkBaseVersion(sm.base_revision, stored?.revision, "submission ${sm.submission_id}")
+          if (existing.revision == 0L) {
+            val s = survey(surveyId)
+            val limits = resolveEffectiveQuota(s, s?.organization_id)
+            if (smUpsert.entity_id.isNotBlank()) {
+              val userId = smUpsert.audit_info?.created_by.orEmpty()
+              val allSubmissions =
+                submissions(surveyId).associateBy { it.submission_id } + submissions
+              val countForEntityAndUser =
+                allSubmissions.values.count {
+                  !it.is_deleted &&
+                    it.entity_id == smUpsert.entity_id &&
+                    (userId.isBlank() || it.audit_info?.created_by == userId)
+                }
+              if (
+                limits.max_submissions_per_entity_per_user > 0 &&
+                  countForEntityAndUser >= limits.max_submissions_per_entity_per_user
+              ) {
+                throw StatusException(
+                  Status.RESOURCE_EXHAUSTED.withDescription(
+                    "Submission quota exceeded: maximum submissions per entity per user reached (${limits.max_submissions_per_entity_per_user})"
+                  )
+                )
+              }
+            }
+
+            if (limits.monthly_budget_usd > 0.0) {
+              val allEntities = entities(surveyId).associateBy { it.entity_id } + entities
+              val allSubmissions =
+                submissions(surveyId).associateBy { it.submission_id } + submissions
+              val entitiesCount = allEntities.values.count { !it.is_deleted }
+              val subCount = allSubmissions.values.count { !it.is_deleted } + 1
+              val weights = limits.cost_unit_weights ?: CostUnitWeights()
+              val estimated =
+                weights.usd_per_survey_month +
+                  (entitiesCount / 1000.0) * weights.usd_per_thousand_entities +
+                  (subCount / 1000.0) * weights.usd_per_thousand_submissions
+              if (estimated > limits.monthly_budget_usd) {
+                throw StatusException(
+                  Status.RESOURCE_EXHAUSTED.withDescription(
+                    "Monthly budget cap exceeded: operation would exceed budget limit of $${limits.monthly_budget_usd}"
+                  )
+                )
+              }
+            }
+          }
         }
         val updated: SubmissionRecord =
           when {

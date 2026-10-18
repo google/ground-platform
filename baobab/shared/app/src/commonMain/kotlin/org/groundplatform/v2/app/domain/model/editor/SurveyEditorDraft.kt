@@ -58,6 +58,7 @@ data class SurveyEditorDraft(
             title = survey.title,
             description = survey.description,
             organizationId = survey.organizationId,
+            quotaLimits = if (stored != null) stored.details.quotaLimits else survey.quotaLimits,
           ),
         sharing =
           if (inheritSharingFromSurvey) {

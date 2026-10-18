@@ -18,11 +18,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.groundplatform.v2.app.data.datasource.local.store.runDirect
 import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
 import org.groundplatform.v2.app.data.seed.GlobalLibrarySeedData
 import org.groundplatform.v2.app.data.seed.SampleOrganizationsData
 import org.groundplatform.v2.app.data.seed.SampleSurveyEditorData
+import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationType
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.model.editor.FormPreviewTarget
 import org.groundplatform.v2.app.domain.model.editor.GeometryCapture
@@ -713,5 +716,24 @@ class CreateSurveyWizardViewModelTest {
     wizard.selectImportedCepProject("umd_brazil_deforestation.cep")
     assertEquals("Forest Disturbance of the BLA", wizard.uiState.value.title)
     assertEquals(1, wizard.uiState.value.selectedCepProject?.plotDataset?.rows?.size)
+  }
+
+  @Test
+  fun finishWizard_whenSurveyCreationLimitExceeded_abortsAndShowsErrorMessage() {
+    val dataHolder = sampleDataHolder()
+    runDirect {
+      dataHolder.organizationRepository.updateOrganization(Organization.ALL_USERS_ID) { org ->
+        val currentLimits = org.quotaLimits ?: QuotaLimitsConfig.BASIC
+        org.copy(quotaLimits = currentLimits.copy(maxSurveysPerOwner = 1))
+      }
+    }
+    val state = WebAppState(dataHolder = dataHolder)
+    state.openCreateSurveyWizard(null)
+    val wizard = state.createSurveyWizard
+    wizard.updateTitle("Survey Exceeding Limits")
+    wizard.finishWizard()
+    val ui = wizard.uiState.value
+    assertNotNull(ui.importErrorMessage)
+    assertTrue(ui.importErrorMessage!!.contains("Maximum surveys per owner limit reached"))
   }
 }

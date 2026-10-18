@@ -43,6 +43,8 @@ data class GeospatialEntityItem(
       else -> datasetName.removeSuffix("s").ifBlank { "Location" }
     },
   val syncStatus: SyncStatus = deriveEntitySyncStatus(submissions),
+  val isFieldCreated: Boolean = false,
+  val isGenerated: Boolean = false,
 ) {
   val isUploading: Boolean
     get() = syncStatus == SyncStatus.UPLOADING

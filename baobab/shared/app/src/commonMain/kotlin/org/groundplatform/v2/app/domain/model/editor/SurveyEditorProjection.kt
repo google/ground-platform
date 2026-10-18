@@ -70,10 +70,11 @@ object SurveyEditorProjection {
       val existing = existingById[form.formId]
       val updates = form.saveTo.mode == SaveToMode.UPDATE && target != null
       val hasEntitySelect =
-        (form.saveTo.idSource == EntityIdSource.QUESTION && !form.saveTo.idQuestionKey.isNullOrBlank()) ||
+        (form.saveTo.idSource == EntityIdSource.QUESTION &&
+          !form.saveTo.idQuestionKey.isNullOrBlank()) ||
           form.questions.any { q ->
-            (q.choiceSource == ChoiceSource.MAP_LAYER && (q.choiceDatasetId == target?.id || target == null)) ||
-              q.name == "target_entity"
+            (q.choiceSource == ChoiceSource.MAP_LAYER &&
+              (q.choiceDatasetId == target?.id || target == null)) || q.name == "target_entity"
           } ||
           existing?.hasEntitySelectQuestion == true
       FormPreviewItem(
