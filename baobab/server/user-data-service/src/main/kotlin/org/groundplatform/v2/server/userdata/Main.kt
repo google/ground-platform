@@ -26,17 +26,33 @@ const val SAMPLE_SEED_RESOURCE = "/seed/user_data_seed.json"
  * - `PORT`: port to listen on (default 8080; set by Cloud Run).
  * - `USER_DATA_SEED`: path to a `UserDataSeed` in proto JSON to load instead of the bundled sample
  *   seed.
+ * - `SPANNER_EMULATOR_HOST`, `SPANNER_PROJECT_ID`, `SPANNER_INSTANCE_ID`, `SPANNER_DATABASE_ID`:
+ *   the Cloud Spanner database to connect to ([SpannerSettings.fromEnv]). When set, the Spanner
+ *   debug web UI at `/debug/spanner` browses it and records its operations. Data is still served
+ *   from memory until the Spanner store lands.
  */
 fun main() {
   val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
   val seed = loadSeed(System.getenv("USER_DATA_SEED"))
-  val server = UserDataServer.create(UserDataBackend(seed), port)
-  Runtime.getRuntime().addShutdownHook(Thread { server.stop().join() })
+  val spannerDebug =
+    SpannerSettings.fromEnv()?.let { settings ->
+      val recorder = SpannerOperationRecorder()
+      SpannerDebug(SpannerConnection.open(settings, recorder), recorder)
+    }
+  val server = UserDataServer.create(UserDataBackend(seed), port, spannerDebug = spannerDebug)
+  Runtime.getRuntime()
+    .addShutdownHook(
+      Thread {
+        server.stop().join()
+        spannerDebug?.connection?.close()
+      }
+    )
   server.start().join()
   println(
     "User data service listening on port ${server.activeLocalPort()} " +
       "(${seed.surveys.size} surveys, ${seed.organizations.size} organizations)"
   )
+  spannerDebug?.let { println("Spanner: ${it.connection.settings.description}") }
   server.blockUntilShutdown()
 }
 

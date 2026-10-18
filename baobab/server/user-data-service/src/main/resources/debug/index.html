@@ -161,6 +161,21 @@
       gap: 10px;
     }
 
+    a.nav-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-elevated);
+    }
+
+    a.nav-link:hover {
+      background: var(--surface-hover);
+    }
+
     .stats-label {
       color: var(--text-muted);
       font-size: 12px;
@@ -551,6 +566,7 @@
         <span id="statsLabel" class="stats-label">0 RPCs</span>
         <button id="pauseBtn" type="button" title="Pause or resume live stream (Space)">⏸ Pause</button>
         <button id="clearBtn" type="button" title="Clear recorded RPC log">🗑 Clear</button>
+        <a class="nav-link" href="/debug/spanner" title="Browse Spanner tables and database operations">Spanner Inspector ↗</a>
       </div>
     </header>
 

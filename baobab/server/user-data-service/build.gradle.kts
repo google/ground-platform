@@ -38,6 +38,12 @@ dependencies {
   // Reads the proto JSON seed (same Wire version as protoforms).
   implementation("com.squareup.wire:wire-moshi-adapter:7.0.3")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+  // Cloud Spanner (the emulator in development) and the Spanner debug web UI, which records the
+  // client's OpenTelemetry spans to show database operations.
+  implementation(platform("com.google.cloud:libraries-bom:26.90.0"))
+  implementation("com.google.cloud:google-cloud-spanner")
+  implementation(platform("io.opentelemetry:opentelemetry-bom:1.67.0"))
+  implementation("io.opentelemetry:opentelemetry-sdk")
   runtimeOnly("org.slf4j:slf4j-simple:2.0.17")
   constraints {
     // Armeria's JSON support generates classes with Byte Buddy; older versions fail on JDKs newer

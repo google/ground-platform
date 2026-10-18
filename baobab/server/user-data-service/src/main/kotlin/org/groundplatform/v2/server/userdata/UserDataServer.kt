@@ -31,15 +31,17 @@ import kotlinx.coroutines.SupervisorJob
  * Builds the HTTP server for the user data service.
  *
  * One port serves native gRPC (HTTP/2, including cleartext h2c as used by Cloud Run) and gRPC-Web
- * (HTTP/1.1 or HTTP/2, for browsers), plus `GET /healthz` and the RPC debug web UI at `GET /` and
- * `GET /debug`. CORS is open so the Web Console can call the service from another origin; restrict
- * it once authentication is in place.
+ * (HTTP/1.1 or HTTP/2, for browsers), plus `GET /healthz`, the RPC debug web UI at `GET /` and `GET
+ * /debug`, and the Spanner debug web UI at `GET /debug/spanner` ([SpannerDebugWebService]). CORS is
+ * open so the Web Console can call the service from another origin; restrict it once authentication
+ * is in place.
  */
 object UserDataServer {
   fun create(
     backend: UserDataBackend,
     port: Int,
     rpcRecorder: RpcCallRecorder = RpcCallRecorder(),
+    spannerDebug: SpannerDebug? = null,
   ): Server {
     // The in-memory backend isn't thread-safe, so every RPC runs on one serialized dispatcher.
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -69,15 +71,17 @@ object UserDataServer {
         )
         .exposeHeaders("grpc-status", "grpc-message", "grpc-status-details-bin")
         .newDecorator()
-    return Server.builder()
-      .http(port)
-      .service(grpcService, cors)
-      .service("/healthz", HealthCheckService.of())
-      .service("/", DebugWebService.indexService())
-      .service("/debug", DebugWebService.indexService())
-      .service("/debug/rpcs", DebugWebService.listRpcsService(rpcRecorder))
-      .service("/debug/rpcs/stream", DebugWebService.streamRpcsService(rpcRecorder))
-      .service("/debug/rpcs/clear", DebugWebService.clearRpcsService(rpcRecorder))
-      .build()
+    val server =
+      Server.builder()
+        .http(port)
+        .service(grpcService, cors)
+        .service("/healthz", HealthCheckService.of())
+        .service("/", DebugWebService.indexService())
+        .service("/debug", DebugWebService.indexService())
+        .service("/debug/rpcs", DebugWebService.listRpcsService(rpcRecorder))
+        .service("/debug/rpcs/stream", DebugWebService.streamRpcsService(rpcRecorder))
+        .service("/debug/rpcs/clear", DebugWebService.clearRpcsService(rpcRecorder))
+    SpannerDebugWebService.register(server, spannerDebug)
+    return server.build()
   }
 }

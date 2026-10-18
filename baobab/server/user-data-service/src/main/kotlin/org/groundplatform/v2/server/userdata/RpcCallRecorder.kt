@@ -13,12 +13,7 @@
  */
 package org.groundplatform.v2.server.userdata
 
-import com.linecorp.armeria.common.HttpData
 import com.linecorp.armeria.common.HttpResponse
-import com.linecorp.armeria.common.HttpResponseWriter
-import com.linecorp.armeria.common.HttpStatus
-import com.linecorp.armeria.common.MediaType
-import com.linecorp.armeria.common.ResponseHeaders
 import com.linecorp.armeria.server.ServiceRequestContext
 import com.squareup.moshi.JsonWriter
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall
@@ -32,7 +27,6 @@ import io.grpc.Status
 import java.time.Instant
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.roundToLong
@@ -65,7 +59,7 @@ data class RpcLogEntry(
 class RpcCallRecorder(private val maxEntries: Int = DEFAULT_MAX_ENTRIES) {
   private val nextId = AtomicLong(1L)
   private val entries = ConcurrentLinkedDeque<RpcLogEntry>()
-  private val subscribers = CopyOnWriteArraySet<HttpResponseWriter>()
+  private val sse = SseBroadcaster()
 
   /** Returns all currently retained RPC entries in chronological order (oldest to newest). */
   fun snapshot(): List<RpcLogEntry> = entries.toList()
@@ -86,20 +80,7 @@ class RpcCallRecorder(private val maxEntries: Int = DEFAULT_MAX_ENTRIES) {
   }
 
   /** Opens an SSE [HttpResponse] stream that receives live `rpc` and `clear` events. */
-  fun openEventStream(): HttpResponse {
-    val writer = HttpResponse.streaming()
-    writer.write(
-      ResponseHeaders.builder(HttpStatus.OK)
-        .contentType(MediaType.EVENT_STREAM)
-        .add("cache-control", "no-store")
-        .add("x-accel-buffering", "no")
-        .build()
-    )
-    writer.write(HttpData.ofUtf8(": connected\n\n"))
-    subscribers.add(writer)
-    writer.whenComplete().handle { _, _ -> subscribers.remove(writer) }
-    return writer
-  }
+  fun openEventStream(): HttpResponse = sse.openEventStream()
 
   /** Returns a gRPC [ServerInterceptor] that captures request/response messages and status. */
   fun interceptor(): ServerInterceptor =
@@ -163,15 +144,7 @@ class RpcCallRecorder(private val maxEntries: Int = DEFAULT_MAX_ENTRIES) {
       }
     }
 
-  private fun broadcastSse(event: String, data: String) {
-    val frame = "event: $event\ndata: ${data.replace("\n", "\ndata: ")}\n\n"
-    val httpData = HttpData.ofUtf8(frame)
-    for (subscriber in subscribers) {
-      if (!subscriber.tryWrite(httpData)) {
-        subscribers.remove(subscriber)
-      }
-    }
-  }
+  private fun broadcastSse(event: String, data: String) = sse.broadcast(event, data)
 
   companion object {
     const val DEFAULT_MAX_ENTRIES = 500

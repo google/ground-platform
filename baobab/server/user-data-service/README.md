@@ -111,6 +111,50 @@ while the service is running to inspect live incoming gRPC and gRPC-Web calls:
     polls that return zero changes don't flood the table while still showing a
     count of hidden polls.
 
+## Spanner and the Spanner Debug Web UI
+
+The service connects to Cloud Spanner when `SPANNER_EMULATOR_HOST` (for the
+emulator) or `SPANNER_INSTANCE_ID` (for Cloud Spanner) is set. The database is
+`SPANNER_PROJECT_ID` / `SPANNER_INSTANCE_ID` / `SPANNER_DATABASE_ID` (defaults
+`collect-one-dev` / `dev` / `user-data`). On the emulator, the instance and an
+empty database are created at startup. The schema is designed in
+[`docs/technical/backend/spanner-schema.md`](../../docs/technical/backend/spanner-schema.md);
+RPCs are still served from memory until the Spanner store lands.
+
+Run the emulator (a pinned, checksum-verified release; Docker on non-Linux
+hosts) and start the service against it, from `baobab/`:
+
+```bash
+scripts/spanner-emulator.sh &     # gRPC localhost:9010, REST localhost:9020
+cd server/user-data-service
+SPANNER_EMULATOR_HOST=localhost:9010 ./gradlew run
+```
+
+Then open `http://localhost:8080/debug/spanner` (also linked from the RPC debug
+UI):
+
+-   **Tables**: Every table, nested under its interleaving parent, with row
+    counts. Selecting one shows its columns (types, generated columns), primary
+    key, indexes, and deletion policy, and pages through its rows in key order.
+    Click a cell to inspect it: `PROTO` columns are decoded with the generated
+    Wire classes and shown as Proto JSON, and `ENUM` values by name.
+-   **Operations**: A live log of everything the service's Spanner client does
+    (transactions, queries, reads, DML, commits), recorded from the client's
+    OpenTelemetry spans, with SQL text, durations, status, attributes, events,
+    and the other operations in the same trace. The UI's own table browsing
+    isn't recorded.
+-   **SQL**: Runs read-only SQL in a single-use read-only transaction; these
+    queries appear in Operations.
+-   **Schema DDL**: The database's DDL statements.
+
+The emulator keeps data in memory, so restarting it wipes the database. Tests
+that need it (`SpannerDebugTest`) are skipped unless `SPANNER_EMULATOR_HOST` is
+set:
+
+```bash
+SPANNER_EMULATOR_HOST=localhost:9010 ./gradlew test
+```
+
 ## Pointing Clients at the Service
 
 Each client needs the service's URL. Without one it doesn't start and shows
