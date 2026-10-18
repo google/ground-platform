@@ -217,12 +217,11 @@ abstract class UserDataStoreContractTest {
   }
 
   @Test
-  fun recordApplied_tracksMutationIds_andOnlyRaisesWatermarks() {
-    store.write { it.recordApplied(SCOPE, listOf("m-1"), CLIENT, clientSeq = 5L) }
-    store.write { it.recordApplied(SCOPE, listOf("m-2"), CLIENT, clientSeq = 3L) }
+  fun recordApplied_onlyRaisesWatermarks() {
+    store.write { it.recordApplied(SCOPE, CLIENT, clientSeq = 5L) }
+    store.write { it.recordApplied(SCOPE, CLIENT, clientSeq = 3L) }
 
     store.read { r ->
-      assertTrue(r.isMutationApplied("m-1") && r.isMutationApplied("m-2"))
       val watermark = r.appliedWatermarks(CLIENT).single()
       assertEquals(SCOPE, watermark.scope)
       assertEquals(5L, watermark.client_seq)

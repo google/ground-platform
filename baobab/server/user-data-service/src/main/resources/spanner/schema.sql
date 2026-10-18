@@ -144,14 +144,7 @@ CREATE TABLE ImpactEvents (
 
 CREATE NULL_FILTERED INDEX ImpactBySurvey ON ImpactEvents(SurveyId, CommitTs, EventId);
 
--- Replay detection. AppliedMutations keeps mutation_id-only replays working until
--- the backend relies on ClientMutationWatermarks alone.
-CREATE TABLE AppliedMutations (
-  MutationId STRING(64) NOT NULL,
-  CommitTs TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
-) PRIMARY KEY (MutationId),
-  ROW DELETION POLICY (OLDER_THAN(CommitTs, INTERVAL 365 DAY));
-
+-- Replay detection: the highest applied client_seq per client and scope.
 CREATE TABLE ClientMutationWatermarks (
   ClientId STRING(64) NOT NULL,
   Scope STRING(128) NOT NULL,

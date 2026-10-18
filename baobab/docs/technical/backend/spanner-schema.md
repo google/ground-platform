@@ -924,8 +924,6 @@ in these ways, to be closed in later steps:
   dataset or form and by `IsDeleted` in SQL. Query-mode sorting and paging, and
   the other `List*` RPCs (organizations, libraries, survey overviews, impact
   events, audit records), still work on whole collections in memory.
-- Replay detection still records mutation IDs (an `AppliedMutations` table)
-  alongside the watermarks.
 - Organization members and survey ACL entries are still embedded in
   `Organization` and `SurveyAcl`, without `OrganizationMembers` and
   `SurveyAclEntries` rows. A survey's ACL is a `PROTO` column on `Surveys`

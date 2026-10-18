@@ -139,9 +139,6 @@ interface UserDataReader {
 
   fun mutationLogs(): List<MutationLogRecord>
 
-  /** Whether a mutation with [mutationId] was applied. */
-  fun isMutationApplied(mutationId: String): Boolean
-
   /** Highest applied `client_seq` per scope for [clientId]. */
   fun appliedWatermarks(clientId: String): List<AppliedMutationWatermark>
 }
@@ -177,9 +174,6 @@ interface UserDataWriter : UserDataReader {
 
   fun putImpactEvent(event: ImpactEvent)
 
-  /**
-   * Records that mutations [mutationIds] were applied in [scope] and raises [clientId]'s
-   * `client_seq` watermark for [scope] to [clientSeq] (it never goes down).
-   */
-  fun recordApplied(scope: String, mutationIds: List<String>, clientId: String, clientSeq: Long)
+  /** Raises [clientId]'s `client_seq` watermark for [scope] to [clientSeq] (it never goes down). */
+  fun recordApplied(scope: String, clientId: String, clientSeq: Long)
 }

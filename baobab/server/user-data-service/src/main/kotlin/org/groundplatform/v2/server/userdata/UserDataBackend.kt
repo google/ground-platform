@@ -149,9 +149,10 @@ import org.groundplatform.v2.core.mutation.SurveyPatches
  * - `SearchOrganizations` directory queries with offset-based paging.
  * - Soft-delete tombstones (`is_deleted = true` or `state = DELETED`), returned in delta mode and
  *   in query mode only when `include_deleted = true`.
- * - Idempotent mutations: each `mutation_id` is applied at most once (replays are skipped, so a
- *   stale retry can't overwrite newer writes), and the highest applied `client_seq` per
- *   `(client_id, scope)` is reported by `GetAppliedMutations`.
+ * - Idempotent mutations: the highest applied `client_seq` per `(client_id, scope)` is stored with
+ *   the changes and reported by `GetAppliedMutations`. A mutation at or below it is a replay and is
+ *   skipped, so a stale retry can't overwrite newer writes. Clients send a scope's mutations in
+ *   `client_seq` order; mutations without a `client_id` aren't deduplicated.
  * - Last-writer-wins field patches. `base_revision` / `base_version` only guard whole-record
  *   replacements (`upsert_*`), which fail with `FAILED_PRECONDITION` when stale; stale field
  *   patches on data records report `AUTO_MERGED`.
@@ -169,30 +170,38 @@ class UserDataBackend(private val store: UserDataStore) :
   /** Current highest committed server timestamp watermark. */
   fun currentWatermark(): Instant = store.watermark()
 
-  /** Identity of one client mutation, used for deduplication and `client_seq` tracking. */
-  private data class MutationIdentity(
-    val mutationId: String,
-    val clientId: String,
-    val clientSeq: Long,
-  )
-
-  /** True when [identity] carries a `mutation_id` that has already been applied. */
-  private fun UserDataReader.isDuplicate(identity: MutationIdentity): Boolean =
-    identity.mutationId.isNotBlank() && isMutationApplied(identity.mutationId)
+  /** Identity of one client mutation, used for replay detection and `client_seq` tracking. */
+  private data class MutationIdentity(val clientId: String, val clientSeq: Long)
 
   /**
-   * The [mutations] that haven't been applied yet, dropping replays of earlier requests and repeats
-   * of a `mutation_id` within the same request.
+   * Recognizes replays in [scope]: a mutation is one when its `client_seq` is at or below its
+   * client's watermark, or below a mutation earlier in the same request.
    */
+  private class ReplayFilter(private val reader: UserDataReader, private val scope: String) {
+    private val highest = HashMap<String, Long>()
+
+    /** Whether [identity] is a replay. If it isn't, it raises its client's watermark here. */
+    fun isReplay(identity: MutationIdentity): Boolean {
+      if (identity.clientId.isBlank() || identity.clientSeq <= 0L) return false
+      val watermark =
+        highest.getOrPut(identity.clientId) {
+          reader.appliedWatermarks(identity.clientId).firstOrNull { it.scope == scope }?.client_seq
+            ?: 0L
+        }
+      if (identity.clientSeq <= watermark) return true
+      highest[identity.clientId] = identity.clientSeq
+      return false
+    }
+  }
+
+  /** The [mutations] that aren't replays in [scope]. */
   private fun <T> UserDataReader.newMutations(
+    scope: String,
     mutations: List<T>,
     identityOf: (T) -> MutationIdentity,
   ): List<T> {
-    val seen = HashSet<String>()
-    return mutations.filter { mutation ->
-      val identity = identityOf(mutation)
-      !isDuplicate(identity) && (identity.mutationId.isBlank() || seen.add(identity.mutationId))
-    }
+    val replays = ReplayFilter(this, scope)
+    return mutations.filterNot { replays.isReplay(identityOf(it)) }
   }
 
   /**
@@ -229,20 +238,10 @@ class UserDataBackend(private val store: UserDataStore) :
    * so a failed request can be retried.
    */
   private fun UserDataWriter.recordApplied(scope: String, identities: List<MutationIdentity>) {
-    val mutationIds = identities.map { it.mutationId }
-    val byClient = identities.filter { it.clientId.isNotBlank() }.groupBy { it.clientId }
-    if (byClient.isEmpty()) {
-      recordApplied(scope, mutationIds, clientId = "", clientSeq = 0L)
-      return
-    }
-    byClient.entries.forEachIndexed { index, (clientId, ids) ->
-      recordApplied(
-        scope,
-        if (index == 0) mutationIds else emptyList(),
-        clientId,
-        ids.maxOf { it.clientSeq },
-      )
-    }
+    identities
+      .filter { it.clientId.isNotBlank() && it.clientSeq > 0L }
+      .groupBy { it.clientId }
+      .forEach { (clientId, ids) -> recordApplied(scope, clientId, ids.maxOf { it.clientSeq }) }
   }
 
   /** Resets all state to the store's initial data and starts a new data epoch. */
@@ -360,8 +359,8 @@ class UserDataBackend(private val store: UserDataStore) :
     val (existing, toApply) =
       store.read { r ->
         r.organization(orgId) to
-          r.newMutations(request.mutations) {
-            MutationIdentity(it.mutation_id, it.client_id, it.client_seq)
+          r.newMutations("organizations/$orgId", request.mutations) {
+            MutationIdentity(it.client_id, it.client_seq)
           }
       }
     if (toApply.isEmpty()) {
@@ -398,7 +397,7 @@ class UserDataBackend(private val store: UserDataStore) :
       tx.putOrganization(current)
       tx.recordApplied(
         scope = "organizations/${current.organization_id}",
-        identities = toApply.map { MutationIdentity(it.mutation_id, it.client_id, it.client_seq) },
+        identities = toApply.map { MutationIdentity(it.client_id, it.client_seq) },
       )
       current
     }
@@ -546,8 +545,8 @@ class UserDataBackend(private val store: UserDataStore) :
     val (existing, toApply) =
       store.read { r ->
         r.library(orgId) to
-          r.newMutations(request.mutations) {
-            MutationIdentity(it.mutation_id, it.client_id, it.client_seq)
+          r.newMutations("libraries/$orgId", request.mutations) {
+            MutationIdentity(it.client_id, it.client_seq)
           }
       }
     if (toApply.isEmpty()) {
@@ -586,7 +585,7 @@ class UserDataBackend(private val store: UserDataStore) :
       tx.putLibrary(current)
       tx.recordApplied(
         scope = "libraries/$orgId",
-        identities = toApply.map { MutationIdentity(it.mutation_id, it.client_id, it.client_seq) },
+        identities = toApply.map { MutationIdentity(it.client_id, it.client_seq) },
       )
       current
     }
@@ -651,8 +650,8 @@ class UserDataBackend(private val store: UserDataStore) :
   override suspend fun MutateSurvey(request: MutateSurveyRequest): MutateSurveyResponse {
     val surveyId = request.survey_id
     val toApply = store.read { r ->
-      r.newMutations(request.mutations) {
-        MutationIdentity(it.mutation_id, it.client_id, it.client_seq)
+      r.newMutations("surveys/$surveyId", request.mutations) {
+        MutationIdentity(it.client_id, it.client_seq)
       }
     }
     if (toApply.isEmpty()) {
@@ -738,7 +737,7 @@ class UserDataBackend(private val store: UserDataStore) :
       tx.putWorkingCopy(surveyId, finalWorkingCopy)
       tx.recordApplied(
         scope = "surveys/$surveyId",
-        identities = toApply.map { MutationIdentity(it.mutation_id, it.client_id, it.client_seq) },
+        identities = toApply.map { MutationIdentity(it.client_id, it.client_seq) },
       )
       Triple(saved, finalWorkingCopy, acl)
     }
@@ -977,12 +976,10 @@ class UserDataBackend(private val store: UserDataStore) :
 
   override suspend fun MutateData(request: MutateDataRequest): MutateDataResponse {
     val surveyId = request.survey_id
+    val scope = "surveys/$surveyId/data"
     val hasNew = store.read { r ->
-      val seen = HashSet<String>()
-      request.mutations.any { m ->
-        val identity = MutationIdentity(m.mutation_id, m.client_id, m.client_seq)
-        !r.isDuplicate(identity) && (identity.mutationId.isBlank() || seen.add(identity.mutationId))
-      }
+      val replays = ReplayFilter(r, scope)
+      request.mutations.any { !replays.isReplay(MutationIdentity(it.client_id, it.client_seq)) }
     }
     if (!hasNew) {
       // Every mutation is a replay: report the records' current state without writing.
@@ -1000,13 +997,11 @@ class UserDataBackend(private val store: UserDataStore) :
       val entities = LinkedHashMap<String, EntityRecord>()
       val submissions = LinkedHashMap<String, SubmissionRecord>()
       val applied = mutableListOf<MutationIdentity>()
-      val seenInRequest = HashSet<String>()
+      val replays = ReplayFilter(tx, scope)
       val results = mutableListOf<Pair<DataMutationResult, Boolean>>()
       for (mutation in request.mutations) {
-        val identity =
-          MutationIdentity(mutation.mutation_id, mutation.client_id, mutation.client_seq)
-        val repeated = identity.mutationId.isNotBlank() && !seenInRequest.add(identity.mutationId)
-        if (tx.isDuplicate(identity) || repeated) {
+        val identity = MutationIdentity(mutation.client_id, mutation.client_seq)
+        if (replays.isReplay(identity)) {
           results += tx.duplicateDataResult(surveyId, mutation, entities, submissions) to false
           continue
         }
@@ -1015,7 +1010,7 @@ class UserDataBackend(private val store: UserDataStore) :
       }
       entities.values.forEach(tx::putEntity)
       submissions.values.forEach(tx::putSubmission)
-      tx.recordApplied(scope = "surveys/$surveyId/data", identities = applied)
+      tx.recordApplied(scope, identities = applied)
       results
     }
     val ts = committed.commitTimestamp
