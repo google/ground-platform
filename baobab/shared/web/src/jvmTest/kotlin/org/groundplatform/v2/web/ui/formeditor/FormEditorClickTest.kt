@@ -506,11 +506,10 @@ class FormEditorClickTest {
         }
       }
       waitForIdle()
-      // Toolbar shows "Linked to Coffee parcels" instead of "Create map layer".
+      // The toolbar shows neither "Create map layer" nor a "Linked to" chip; the link is shown in
+      // Form settings.
       onNodeWithText("Create map layer").assertDoesNotExist()
-      onAllNodesWithText("Linked to Coffee parcels").onFirst().performClick()
-      waitForIdle()
-      assertEquals("coffee_parcels", openedDatasetId)
+      onAllNodesWithText("Linked to Coffee parcels").assertCountEquals(0)
 
       // Form properties shows the linked card with "Edit map layer" and "Unlink map layer".
       runOnIdle { state.selectFormSettings() }
