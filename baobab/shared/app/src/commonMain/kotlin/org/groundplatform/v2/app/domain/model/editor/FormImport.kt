@@ -158,7 +158,17 @@ object FormImport {
 
     fun run(formId: String, fallbackTitle: String, availability: FormAvailability): ImportedForm {
       walk(formDef.view?.components.orEmpty(), enclosing = "", enclosingRelevance = null)
-      val resolved = questions.map { it.copy(relevance = relevanceOf(it)) }
+      val resolved =
+        questions.map { q ->
+          val parentKey =
+            if (q.parentQuestionKey.isNotBlank()) {
+              questions.firstOrNull { it.key == q.parentQuestionKey || it.name == q.parentQuestionKey }?.key
+                ?: q.parentQuestionKey
+            } else {
+              ""
+            }
+          q.copy(relevance = relevanceOf(q), parentQuestionKey = parentKey)
+        }
       val entity = model?.entities?.firstOrNull()
       val isUpdate = entity != null && entity.update_condition.isNotBlank()
       val statusEnabled = bindings.containsKey(SaveToRules.STATUS_FIELD)
@@ -301,12 +311,17 @@ object FormImport {
       val appearance = control.appearance.split(' ').map { it.trim() }.filter { it.isNotEmpty() }
       var choices =
         control.choices.map { choice ->
+          val parentVal =
+            choice.parent_value.ifEmpty {
+              choice.properties["parent_value"] ?: choice.properties["parent"] ?: ""
+            }
           EditorChoice(
             value = choice.value_,
             label = text(choice.label) ?: choice.value_,
             colorHex = choice.properties[EditorXFormsGenerator.CHOICE_COLOR_COLUMN],
             code = choice.properties[EditorXFormsGenerator.CHOICE_CODE_COLUMN],
             labelTranslations = translations(choice.label),
+            parentValue = parentVal,
           )
         }
       var choiceDatasetId: String? = null
@@ -385,6 +400,7 @@ object FormImport {
           foreignAttributes = foreignAttributes,
           labelTranslations = translations(control.label),
           hintTranslations = translations(control.hint),
+          parentQuestionKey = control.parent_question_key.orEmpty(),
         )
       keyByPath[path] = key
       pathByKey[key] = path
@@ -899,6 +915,8 @@ object FormImport {
               EditorChoiceImage(mimeType = media.mimeType, base64 = media.base64)
             }
           }
+          val parentVal =
+            rowField(row, "parent_value") ?: rowField(row, "parent") ?: ""
           EditorChoice(
             value = value,
             label = label,
@@ -906,6 +924,7 @@ object FormImport {
             image = choiceImage,
             code = rowField(row, EditorXFormsGenerator.CHOICE_CODE_COLUMN),
             labelTranslations = translationsForTextId(itextId),
+            parentValue = parentVal,
           )
         }
         .toList()

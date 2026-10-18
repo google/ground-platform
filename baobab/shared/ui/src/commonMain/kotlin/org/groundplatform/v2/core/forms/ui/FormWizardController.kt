@@ -277,19 +277,162 @@ class FormWizardController(
       when (step) {
         is FormWizardStep.QuestionStep -> step.control
         is FormWizardStep.FieldListGroupStep ->
-          step.controls.firstOrNull { it.canonicalPath == canonicalPath }
+          step.controls.firstOrNull { matchesPath(it.canonicalPath, canonicalPath) }
         else -> null
       }
-    return control?.label?.text?.takeIf { it.isNotBlank() } ?: step?.title ?: "This question"
+    val title = control?.label?.text?.takeIf { it.isNotBlank() } ?: step?.title?.takeIf { it.isNotBlank() }
+    if (title != null && title != "This question") return title
+
+    val leaf = canonicalPath.trim().substringAfterLast('/')
+    val componentControl = collectAllControls(formState.rootComponents).firstOrNull {
+      matchesPath(it.canonicalPath, canonicalPath) || it.controlDef.field_ref == leaf
+    }
+    return componentControl?.label?.text?.takeIf { it.isNotBlank() }
+      ?: formState.formDef.view?.components?.mapNotNull { it.control }?.firstOrNull {
+        it.field_ref == leaf || it.field_ref == canonicalPath
+      }?.label?.text?.takeIf { it.isNotBlank() }
+      ?: "This question"
   }
 
   private fun stepContainsField(step: FormWizardStep, canonicalPath: String): Boolean =
     when (step) {
-      is FormWizardStep.QuestionStep -> step.control.canonicalPath == canonicalPath
+      is FormWizardStep.QuestionStep -> matchesPath(step.control.canonicalPath, canonicalPath)
       is FormWizardStep.FieldListGroupStep ->
-        step.controls.any { it.canonicalPath == canonicalPath }
+        step.controls.any { matchesPath(it.canonicalPath, canonicalPath) }
       else -> false
     }
+
+  private fun matchesPath(fullPath: String, target: String): Boolean {
+    val cleanTarget = target.trim()
+    val cleanFull = fullPath.trim()
+    return cleanFull == cleanTarget ||
+      cleanFull.substringAfterLast('/') == cleanTarget ||
+      cleanTarget.substringAfterLast('/') == cleanFull.substringAfterLast('/')
+  }
+
+  data class ParentQuestionInfo(
+    val path: String,
+    val label: String,
+    val selectedValues: List<String>,
+    val isAnswered: Boolean,
+  )
+
+  /**
+   * Evaluates cascading filter metadata for [control] if it declares [ControlDef.parent_question_key].
+   * Returns `null` if the control is not cascading.
+   */
+  fun parentQuestionInfoFor(control: ComponentState.ControlState): ParentQuestionInfo? {
+    val parentRef = control.controlDef.parent_question_key.trim()
+    if (parentRef.isBlank()) return null
+
+    val fieldState = formState.findFieldState(parentRef)
+    val parentPath = fieldState?.canonicalPath ?: parentRef
+    val parentLabel = questionTitleFor(parentPath).let {
+      if (it == "This question") parentRef.substringAfterLast('/') else it
+    }
+
+    val stringVal = fieldState?.value?.scalar_value?.string_value?.trim()
+    val listVal = fieldState?.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
+    val selectedValues = when {
+      !listVal.isNullOrEmpty() -> listVal.filter { it.isNotBlank() }
+      !stringVal.isNullOrBlank() -> stringVal.split(' ').map { it.trim() }.filter { it.isNotBlank() }
+      else -> emptyList()
+    }
+
+    return ParentQuestionInfo(
+      path = parentPath,
+      label = parentLabel,
+      selectedValues = selectedValues,
+      isAnswered = selectedValues.isNotEmpty(),
+    )
+  }
+
+  private fun collectAllControls(components: List<ComponentState>): List<ComponentState.ControlState> {
+    val result = mutableListOf<ComponentState.ControlState>()
+    fun walk(list: List<ComponentState>) {
+      for (item in list) {
+        when (item) {
+          is ComponentState.ControlState -> result.add(item)
+          is ComponentState.GroupState -> walk(item.children)
+          is ComponentState.RepeatGroupState -> {
+            // Repeat instances are dynamic
+          }
+        }
+      }
+    }
+    walk(components)
+    return result
+  }
+
+  private fun pruneCascadingChildAnswers(
+    changedPath: String,
+    visited: MutableSet<String> = mutableSetOf(),
+  ) {
+    if (changedPath in visited) return
+    visited.add(changedPath)
+
+    val leafName = changedPath.substringAfterLast('/')
+    val parentField = formState.findFieldState(changedPath)
+    val parentStringVal = parentField?.value?.scalar_value?.string_value?.trim()
+    val parentListVal = parentField?.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
+    val parentValues = when {
+      !parentListVal.isNullOrEmpty() -> parentListVal.filter { it.isNotBlank() }.toSet()
+      !parentStringVal.isNullOrBlank() ->
+        parentStringVal.split(' ').map { it.trim() }.filter { it.isNotBlank() }.toSet()
+      else -> emptySet()
+    }
+
+    val allControls = collectAllControls(formState.rootComponents)
+    for (child in allControls) {
+      val childParentRef = child.controlDef.parent_question_key.trim()
+      if (childParentRef.isBlank()) continue
+      if (childParentRef != changedPath &&
+          childParentRef != leafName &&
+          !changedPath.endsWith("/$childParentRef") &&
+          !childParentRef.endsWith("/$leafName")
+      ) {
+        continue
+      }
+
+      val childField = formState.findFieldState(child.canonicalPath) ?: continue
+      val childString = childField.value?.scalar_value?.string_value?.trim()
+      val childList = childField.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
+
+      if (parentValues.isEmpty()) {
+        val hasChildValue = !childString.isNullOrBlank() || !childList.isNullOrEmpty()
+        if (hasChildValue) {
+          session.clearField(child.canonicalPath)
+          pruneCascadingChildAnswers(child.canonicalPath, visited)
+        }
+      } else {
+        if (!childString.isNullOrBlank()) {
+          val selectedOption = child.options.firstOrNull { it.value == childString }
+          val isInvalid =
+            selectedOption != null &&
+              selectedOption.parentValue.isNotBlank() &&
+              selectedOption.parentValue !in parentValues
+          if (isInvalid) {
+            session.clearField(child.canonicalPath)
+            pruneCascadingChildAnswers(child.canonicalPath, visited)
+          }
+        } else if (!childList.isNullOrEmpty()) {
+          val validValues =
+            childList.filter { valVal ->
+              val opt = child.options.firstOrNull { it.value == valVal }
+              opt == null || opt.parentValue.isBlank() || opt.parentValue in parentValues
+            }
+          if (validValues.size != childList.size) {
+            if (validValues.isEmpty()) {
+              session.clearField(child.canonicalPath)
+            } else {
+              session.updateMultiSelect(child.canonicalPath, validValues)
+            }
+            pruneCascadingChildAnswers(child.canonicalPath, visited)
+          }
+        }
+      }
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Field & Repeat Mutation Actions
@@ -303,6 +446,7 @@ class FormWizardController(
     } else {
       session.updateString(path, value)
     }
+    pruneCascadingChildAnswers(path)
   }
 
   fun updateInt(path: String, value: Int?) {
@@ -413,12 +557,14 @@ class FormWizardController(
     } else {
       session.updateMultiSelect(path, selectedValues)
     }
+    pruneCascadingChildAnswers(path)
   }
 
   fun clearField(path: String) {
     showCurrentStepValidationWarning = false
     submissionResult = null
     session.clearField(path)
+    pruneCascadingChildAnswers(path)
   }
 
   /**

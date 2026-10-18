@@ -2465,7 +2465,26 @@ private fun SelectOneWidget(
   var addedOptions by remember(path) { mutableStateOf<List<ResolvedChoiceOption>>(emptyList()) }
   val allOptions = control.options + addedOptions
 
-  if (allOptions.isEmpty() && !allowAddEntity) {
+  val parentInfo = remember(control, controller.formState) {
+    controller.parentQuestionInfoFor(control)
+  }
+  if (parentInfo != null && !parentInfo.isAnswered) {
+    Text(
+      text = "Select an answer for '${parentInfo.label}' first",
+      style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+    )
+    return
+  }
+
+  val parentValues = parentInfo?.selectedValues?.toSet()
+  val candidateOptions =
+    if (parentValues != null) {
+      allOptions.filter { it.parentValue.isBlank() || it.parentValue in parentValues }
+    } else {
+      allOptions
+    }
+
+  if (candidateOptions.isEmpty() && !allowAddEntity) {
     Text(
       text = "(No selectable options match the current filter)",
       style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
@@ -2474,14 +2493,14 @@ private fun SelectOneWidget(
   }
 
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    if (allOptions.isEmpty()) {
+    if (candidateOptions.isEmpty()) {
       Text(
         text = "(No selectable options match the current filter)",
         style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
       )
     } else if (isLikert) {
       LikertScaleColumn(
-        options = allOptions,
+        options = candidateOptions,
         selectedValue = selectedValue,
         onSelect = { value ->
           controller.updateString(path, value)
@@ -2489,7 +2508,7 @@ private fun SelectOneWidget(
         },
       )
     } else {
-      allOptions.forEach { option ->
+      candidateOptions.forEach { option ->
         val isSelected = selectedValue == option.value
         ChoiceCardRow(
           option = option,
@@ -2504,7 +2523,7 @@ private fun SelectOneWidget(
     }
     if (allowAddEntity) {
       AddInlineEntitySection(
-        existingValues = allOptions.map { it.value }.toSet(),
+        existingValues = candidateOptions.map { it.value }.toSet(),
         onAdd = { added ->
           addedOptions = addedOptions + added
           controller.updateString(path, added.value)
@@ -2733,7 +2752,26 @@ private fun SelectMultipleWidget(
   var addedOptions by remember(path) { mutableStateOf<List<ResolvedChoiceOption>>(emptyList()) }
   val allOptions = control.options + addedOptions
 
-  if (allOptions.isEmpty() && !allowAddEntity) {
+  val parentInfo = remember(control, controller.formState) {
+    controller.parentQuestionInfoFor(control)
+  }
+  if (parentInfo != null && !parentInfo.isAnswered) {
+    Text(
+      text = "Select an answer for '${parentInfo.label}' first",
+      style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+    )
+    return
+  }
+
+  val parentValues = parentInfo?.selectedValues?.toSet()
+  val candidateOptions =
+    if (parentValues != null) {
+      allOptions.filter { it.parentValue.isBlank() || it.parentValue in parentValues }
+    } else {
+      allOptions
+    }
+
+  if (candidateOptions.isEmpty() && !allowAddEntity) {
     Text(
       text = "(No selectable options match the current filter)",
       style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
@@ -2742,13 +2780,13 @@ private fun SelectMultipleWidget(
   }
 
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    if (allOptions.isEmpty()) {
+    if (candidateOptions.isEmpty()) {
       Text(
         text = "(No selectable options match the current filter)",
         style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
       )
     }
-    allOptions.forEach { option ->
+    candidateOptions.forEach { option ->
       val isSelected = option.value in selectedValues
       ChoiceCardRow(
         option = option,
@@ -2767,7 +2805,7 @@ private fun SelectMultipleWidget(
     }
     if (allowAddEntity) {
       AddInlineEntitySection(
-        existingValues = allOptions.map { it.value }.toSet(),
+        existingValues = candidateOptions.map { it.value }.toSet(),
         onAdd = { added ->
           addedOptions = addedOptions + added
           controller.updateMultiSelect(path, selectedValues + added.value)

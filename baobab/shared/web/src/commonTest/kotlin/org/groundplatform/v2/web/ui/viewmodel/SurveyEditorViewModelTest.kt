@@ -28,6 +28,7 @@ import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.data.seed.SurveyEditorSamples
 import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
 import org.groundplatform.v2.app.domain.model.QuotaTier
+import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.app.domain.model.editor.CollaboratorRole
 import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
@@ -357,5 +358,39 @@ class SurveyEditorViewModelTest {
     assertNotNull(f.uiState.organizationNotice)
     assertTrue(f.uiState.organizationNotice!!.contains("exceeding the limit of 1"))
     assertFalse(f.events.any { it is SurveyEditorEvent.Published })
+  }
+
+  @Test
+  fun createDatasetForChoiceQuestion_createsDatasetAndBindsToFormQuestionWithoutLeavingForm() {
+    val f = Fixture()
+    f.viewModel.addForm()
+    val formKey = (f.uiState.section as SurveyEditorSection.Form).key
+    val editor = f.viewModel.formEditor(formKey)
+    editor.addQuestion(EditorQuestionType.SELECT_ONE)
+    val qIndex = editor.ui.form.questions.lastIndex
+
+    // Create Map Layer dataset for question
+    val initialDatasetCount = f.uiState.datasets.size
+    f.viewModel.createDatasetForChoiceQuestion(formKey, qIndex, DatasetKind.MAP_LAYER)
+    assertEquals(initialDatasetCount + 1, f.uiState.datasets.size)
+    val createdMapLayer = f.uiState.datasets.last()
+    assertEquals(DatasetKind.MAP_LAYER, createdMapLayer.kind)
+    val updatedForm = f.uiState.form(formKey)!!.form
+    val choiceQuestion = updatedForm.questions[qIndex]
+    assertEquals(ChoiceSource.MAP_LAYER, choiceQuestion.choiceSource)
+    assertEquals(createdMapLayer.id, choiceQuestion.choiceDatasetId)
+    // Verify user is still on the Form section, not navigated away to Dataset
+    assertEquals(SurveyEditorSection.Form(formKey), f.uiState.section)
+
+    // Call from FormEditorViewModel delegate
+    editor.createDatasetForChoiceQuestion(qIndex, DatasetKind.DATA_TABLE)
+    assertEquals(initialDatasetCount + 2, f.uiState.datasets.size)
+    val createdDataTable = f.uiState.datasets.last()
+    assertEquals(DatasetKind.DATA_TABLE, createdDataTable.kind)
+    val updatedForm2 = f.uiState.form(formKey)!!.form
+    val choiceQuestion2 = updatedForm2.questions[qIndex]
+    assertEquals(ChoiceSource.DATA_TABLE, choiceQuestion2.choiceSource)
+    assertEquals(createdDataTable.id, choiceQuestion2.choiceDatasetId)
+    assertEquals(SurveyEditorSection.Form(formKey), f.uiState.section)
   }
 }

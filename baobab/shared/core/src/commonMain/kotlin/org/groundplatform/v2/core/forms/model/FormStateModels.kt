@@ -286,6 +286,8 @@ data class ResolvedChoiceOption(
   val label: ResolvedLabel,
   /** Custom key-value properties attached to this choice item or secondary instance row. */
   val properties: Map<String, String> = emptyMap(),
+  /** Optional parent choice value unlocking this option in a cascading select. */
+  val parentValue: String = properties["parent_value"] ?: properties["parent"] ?: "",
 )
 
 /** Evaluated external Android/iOS/Web intent configuration with XPath parameters resolved. */

@@ -169,6 +169,7 @@ data class EditorChoice(
   val code: String? = null,
   /** Translations of [label] keyed by language code (excluding the survey's default language). */
   val labelTranslations: Map<String, String> = emptyMap(),
+  val parentValue: String = "",
 ) {
   /**
    * Returns the raw label authored for [language], or [label] when [language] is blank or matches
@@ -370,6 +371,8 @@ data class EditorQuestion(
   val labelTranslations: Map<String, String> = emptyMap(),
   /** Translations of [hint] keyed by language code (excluding the survey's default language). */
   val hintTranslations: Map<String, String> = emptyMap(),
+  /** Key of the parent choice question this question's choices depend on (cascading select). */
+  val parentQuestionKey: String = "",
 ) {
   /**
    * Returns the raw label authored for [language], or [label] when [language] is blank or matches
@@ -1151,6 +1154,9 @@ object EditorXFormsGenerator {
               }
               choice.colorHex?.let { color -> put(CHOICE_COLOR_COLUMN, color) }
               choice.code?.let { code -> put(CHOICE_CODE_COLUMN, code) }
+              if (choice.parentValue.isNotBlank()) {
+                put("parent_value", choice.parentValue)
+              }
             }
             secondaryInstanceRow(cols)
           }
@@ -1251,7 +1257,11 @@ object EditorXFormsGenerator {
         add(ViewComponent(control = buildTargetPickerControl(entity.target)))
       }
       form.questions.forEach { question ->
-        add(ViewComponent(control = buildQuestionControl(question, hasMultiLanguageTranslations)))
+        add(
+          ViewComponent(
+            control = buildQuestionControl(question, hasMultiLanguageTranslations, form = form)
+          )
+        )
       }
     }
 
@@ -1469,6 +1479,7 @@ object EditorXFormsGenerator {
   private fun buildQuestionControl(
     question: EditorQuestion,
     hasMultiLanguageTranslations: Boolean = false,
+    form: EditorForm? = null,
   ): ControlDef {
     val type = question.type
     val choiceDatasetId =
@@ -1506,6 +1517,10 @@ object EditorXFormsGenerator {
               } else {
                 LabelDef(text = choice.label)
               },
+            parent_value = choice.parentValue,
+            properties =
+              if (choice.parentValue.isNotBlank()) mapOf("parent_value" to choice.parentValue)
+              else emptyMap(),
           )
         }
       } else {
@@ -1535,6 +1550,13 @@ object EditorXFormsGenerator {
       media_type = type.mediaType,
       choices = choices,
       itemset = itemset,
+      parent_question_key =
+        if (question.parentQuestionKey.isNotBlank()) {
+          form?.questions?.firstOrNull { it.key == question.parentQuestionKey }?.name
+            ?: question.parentQuestionKey
+        } else {
+          ""
+        },
     )
   }
 

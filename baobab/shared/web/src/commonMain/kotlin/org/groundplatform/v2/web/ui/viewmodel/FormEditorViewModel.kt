@@ -31,6 +31,7 @@ import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.editor.ChoiceColors
 import org.groundplatform.v2.app.domain.model.editor.ChoiceSource
 import org.groundplatform.v2.app.domain.model.editor.ConceptLinking
+import org.groundplatform.v2.app.domain.model.editor.DatasetKind
 import org.groundplatform.v2.app.domain.model.editor.EditorChoice
 import org.groundplatform.v2.app.domain.model.editor.EditorChoiceImage
 import org.groundplatform.v2.app.domain.model.editor.EditorDataset
@@ -229,6 +230,42 @@ interface FormEditorActions {
    */
   fun setChoiceImage(key: String, index: Int, image: EditorChoiceImage?): Boolean
 
+  /**
+   * Creates a new Map layer or Data table of [kind] and automatically binds question at
+   * [questionIndex] (or [key]) to it, keeping the user in the Form editor.
+   */
+  fun createDatasetForChoiceQuestion(questionIndex: Int, kind: DatasetKind)
+  fun createDatasetForChoiceQuestion(key: String, kind: DatasetKind)
+
+  /**
+   * Sets the cascading parent question for question [questionIndex] (or [key]). Choices in this
+   * question can then be filtered based on the answer selected in the parent question.
+   */
+  fun updateQuestionParentKey(questionIndex: Int, parentQuestionKey: String)
+  fun updateQuestionParentKey(key: String, parentQuestionKey: String)
+
+  /**
+   * Sets the parent value that must be selected in the parent question for choice [choiceIndex] of
+   * question [questionIndex] (or [key]) to be shown.
+   */
+  fun updateChoiceParentValue(questionIndex: Int, choiceIndex: Int, parentValue: String)
+  fun updateChoiceParentValue(key: String, choiceIndex: Int, parentValue: String)
+
+  /**
+   * Replaces (or with [append], adds) the choices of question [questionIndex] (or [key]) with
+   * [importedChoices].
+   */
+  fun importQuestionChoices(
+    questionIndex: Int,
+    importedChoices: List<EditorChoice>,
+    append: Boolean = false,
+  )
+  fun importQuestionChoices(
+    key: String,
+    importedChoices: List<EditorChoice>,
+    append: Boolean = false,
+  )
+
   // --- Save-to logic ---
 
   /**
@@ -390,6 +427,8 @@ class FormEditorViewModel(
   private val applySurveyDraft: ((SurveyEditorDraft) -> Unit)? = null,
   /** Whether the enclosing survey is read-only (closed or archived). */
   private val isSurveyReadOnly: () -> Boolean = { false },
+  private val createDatasetForChoiceQuestionCallback:
+    ((questionIndex: Int, kind: DatasetKind) -> Unit)? = null,
 ) : FormEditorActions {
   /** Session (non-persisted) state of the Form editor. */
   private data class Session(
@@ -1003,6 +1042,94 @@ class FormEditorViewModel(
     if (form.find(key)?.choices?.getOrNull(index) == null) return false
     updateChoiceAt(key, index) { it.copy(image = image) }
     return true
+  }
+
+  override fun createDatasetForChoiceQuestion(questionIndex: Int, kind: DatasetKind) {
+    if (createDatasetForChoiceQuestionCallback != null) {
+      createDatasetForChoiceQuestionCallback.invoke(questionIndex, kind)
+    } else {
+      mutateForm { form ->
+        form.copy(
+          questions =
+            form.questions.mapIndexed { idx, q ->
+              if (idx == questionIndex) {
+                q.copy(
+                  choiceSource =
+                    if (kind == DatasetKind.MAP_LAYER) ChoiceSource.MAP_LAYER
+                    else ChoiceSource.DATA_TABLE,
+                  choiceDatasetId = "new_dataset",
+                )
+              } else q
+            }
+        )
+      }
+    }
+  }
+
+  override fun createDatasetForChoiceQuestion(key: String, kind: DatasetKind) {
+    val idx = formFlow.value.questions.indexOfFirst { it.key == key }
+    if (idx >= 0) {
+      createDatasetForChoiceQuestion(idx, kind)
+    }
+  }
+
+  override fun updateQuestionParentKey(questionIndex: Int, parentQuestionKey: String) {
+    val targetKey = formFlow.value.questions.getOrNull(questionIndex)?.key ?: return
+    updateQuestionParentKey(targetKey, parentQuestionKey)
+  }
+
+  override fun updateQuestionParentKey(key: String, parentQuestionKey: String) {
+    mutateForm { form ->
+      form.copy(
+        questions =
+          form.questions.map { q ->
+            if (q.key == key) q.copy(parentQuestionKey = parentQuestionKey) else q
+          }
+      )
+    }
+  }
+
+  override fun updateChoiceParentValue(questionIndex: Int, choiceIndex: Int, parentValue: String) {
+    val targetKey = formFlow.value.questions.getOrNull(questionIndex)?.key ?: return
+    updateChoiceParentValue(targetKey, choiceIndex, parentValue)
+  }
+
+  override fun updateChoiceParentValue(key: String, choiceIndex: Int, parentValue: String) {
+    updateChoiceAt(key, choiceIndex) { it.copy(parentValue = parentValue) }
+  }
+
+  override fun importQuestionChoices(
+    questionIndex: Int,
+    importedChoices: List<EditorChoice>,
+    append: Boolean,
+  ) {
+    val targetKey = formFlow.value.questions.getOrNull(questionIndex)?.key ?: return
+    importQuestionChoices(targetKey, importedChoices, append)
+  }
+
+  override fun importQuestionChoices(
+    key: String,
+    importedChoices: List<EditorChoice>,
+    append: Boolean,
+  ) {
+    if (importedChoices.isEmpty()) return
+    mutateForm { form ->
+      form.copy(
+        questions =
+          form.questions.map { q ->
+            if (q.key == key) {
+              val newChoices =
+                if (append) {
+                  val existingValues = q.choices.map { it.value }.toSet()
+                  q.choices + importedChoices.filterNot { it.value in existingValues }
+                } else {
+                  importedChoices
+                }
+              q.copy(choices = newChoices)
+            } else q
+          }
+      )
+    }
   }
 
   private fun updateChoiceAt(key: String, index: Int, transform: (EditorChoice) -> EditorChoice) =
