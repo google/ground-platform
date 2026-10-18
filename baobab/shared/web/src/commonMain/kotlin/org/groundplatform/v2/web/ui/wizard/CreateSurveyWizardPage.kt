@@ -203,7 +203,6 @@ fun CreateSurveyWizardPage(
           state.createSurveyWizard.cancelWizard()
           state.selectPage(WebPage.WEB_SURVEYS)
         },
-        showDebugTools = false,
         navigationIcon = navigationIcon,
         context = context,
         actions = null,
