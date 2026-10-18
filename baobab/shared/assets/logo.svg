@@ -15,10 +15,11 @@
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
   <!--
-    Ground 2.0 3-Tone World Lens Badge App Icon (Variant 1C-4 — "Windswept Savanna & Tapered-Wingtip Base")
-    - Tone 1 (Deep Woodland Primary): #153B1E
-    - Tone 2 (InversePrimary Soft Sage Sky): #9CD49F
-    - Tone 3 (Soft Savanna Sun-Amber): #FFE082
+    Ground 2.0 World Lens Badge App Icon (Variant 1C-4 — "Windswept Savanna & Tapered-Wingtip Base")
+    - Outer World Lens Ring (Slate-Blue): #2C536E
+    - Inner Green Sky Lens & Horizon Accent Line (Savanna Sage-Chartreuse): #AEC66B
+    - Sun Disc (Soft Savanna Sun-Amber): #FFE082
+    - Tree & Base Arch Silhouette (Deep Forest-Slate): #14261E
   -->
   <defs>
     <clipPath id="ground-1c4-above-ground" clipPathUnits="userSpaceOnUse">
@@ -30,23 +31,23 @@
   </defs>
 
   <g clip-path="url(#ground-1c4-above-ground)">
-    <!-- 1. Tone 1 (#153B1E): Outer World Lens Ring (cx=256, cy=256, r=236, 20px border around r=216 lens) -->
+    <!-- 1. Outer World Lens Ring (#2C536E, cx=256, cy=256, r=236, 20px border around r=216 lens) -->
     <path
       d="M103.37 436 A236 236 0 1 1 408.63 436 Z"
-      fill="#153B1E"
+      fill="#2C536E"
     />
 
     <g clip-path="url(#ground-1c4-lens-clip)">
-      <!-- 2. Tone 2 (#9CD49F): Soft Sage Sky Lens (cx=256, cy=256, r=216) -->
+      <!-- 2. Inner Green Sky Lens (#AEC66B, cx=256, cy=256, r=216) -->
       <path
         d="M128.02 430 A216 216 0 1 1 383.98 430 Z"
-        fill="#9CD49F"
+        fill="#AEC66B"
       />
 
-      <!-- 3. Tone 3 (#FFE082): Soft Savanna Sun-Amber Disc (cx=256, cy=288, r=142) -->
+      <!-- 3. Soft Savanna Sun-Amber Disc (#FFE082, cx=256, cy=288, r=142) -->
       <circle cx="256" cy="288" r="142" fill="#FFE082" />
 
-      <!-- 4. Tone 1 (#153B1E): Windswept Umbrella Acacia Upper Crown -->
+      <!-- 4. Silhouette (#14261E): Windswept Umbrella Acacia Upper Crown -->
       <path
         d="M94 186
            C88 168, 120 122, 180 126
@@ -55,10 +56,10 @@
            C434 186, 420 194, 394 192
            C330 184, 206 186, 124 194
            C104 196, 96 194, 94 186 Z"
-        fill="#153B1E"
+        fill="#14261E"
       />
 
-      <!-- 5. Tone 1 (#153B1E): Windswept Lower-Left Cloud Bough -->
+      <!-- 5. Silhouette (#14261E): Windswept Lower-Left Cloud Bough -->
       <path
         d="M68 260
            C64 242, 92 212, 136 216
@@ -66,10 +67,10 @@
            C222 264, 206 272, 184 270
            C152 266, 116 268, 88 272
            C74 274, 70 268, 68 260 Z"
-        fill="#153B1E"
+        fill="#14261E"
       />
 
-      <!-- 6. Tone 1 (#153B1E): Windswept S-Curve Trunk & Crescent Left Branch -->
+      <!-- 6. Silhouette (#14261E): Windswept S-Curve Trunk & Crescent Left Branch -->
       <path
         d="M200 412
            C222 376, 235 340, 240 308
@@ -81,12 +82,12 @@
            C282 218, 273 256, 271 298
            C269 340, 278 376, 300 412
            Z"
-        fill="#153B1E"
+        fill="#14261E"
       />
     </g>
   </g>
 
-  <!-- 7. Tone 1 (#153B1E): Tapered-Wingtip Wide Savanna Base Arch (x=16..496) -->
+  <!-- 7. Silhouette (#14261E): Tapered-Wingtip Wide Savanna Base Arch (x=16..496) -->
   <path
     d="M16 458
        C16 442, 156 384, 256 382
@@ -94,14 +95,14 @@
        C496 464, 472 468, 436 462
        C340 444, 172 448, 76 468
        C40 474, 16 470, 16 458 Z"
-    fill="#153B1E"
+    fill="#14261E"
   />
 
-  <!-- 8. Tone 2 (#9CD49F): Tapered Horizontal Sage Accent Line -->
+  <!-- 8. Inner Green Tone (#AEC66B): Tapered Horizontal Accent Line -->
   <path
     d="M96 446
        C186 408, 322 404, 412 438
        C322 420, 188 424, 96 446 Z"
-    fill="#9CD49F"
+    fill="#AEC66B"
   />
 </svg>

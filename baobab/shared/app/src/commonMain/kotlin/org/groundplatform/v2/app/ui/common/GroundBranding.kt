@@ -41,8 +41,8 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
 
 /**
- * Renders the Ground 2.0 3-Tone World Lens Badge "Windswept Savanna & Tapered-Wingtip Base" vector
- * logo (`shared/assets/logo.svg` • Variant 1C-4 • `viewBox="0 0 512 512"`).
+ * Renders the Ground 2.0 World Lens Badge "Windswept Savanna & Tapered-Wingtip Base" vector logo
+ * (`shared/assets/logo.svg` • Variant 1C-4 • `viewBox="0 0 512 512"`).
  */
 @Composable
 fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
@@ -51,9 +51,10 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
     fun sx(x: Float) = x * s
     fun sy(y: Float) = y * s
 
-    val deepWoodland = Color(0xFF153B1E)
-    val softSageSky = Color(0xFF9CD49F)
+    val outerLensRing = Color(0xFF2C536E)
+    val innerSageSky = Color(0xFFAEC66B)
     val savannaSunAmber = Color(0xFFFFE082)
+    val darkSilhouette = Color(0xFF14261E)
 
     val aboveGroundClipPath =
       Path().apply {
@@ -77,29 +78,29 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
       }
 
     clipPath(aboveGroundClipPath) {
-      // 1. Tone 1 (#153B1E): Outer World Lens Ring (cx=256, cy=256, r=236)
+      // 1. Outer World Lens Ring (#2C536E, cx=256, cy=256, r=236)
       drawCircle(
-        color = deepWoodland,
+        color = outerLensRing,
         radius = sx(236f),
         center = Offset(sx(256f), sy(256f)),
       )
 
       clipPath(lensClipPath) {
-        // 2. Tone 2 (#9CD49F): Soft Sage Sky Lens (cx=256, cy=256, r=216)
+        // 2. Inner Green Sky Lens (#AEC66B, cx=256, cy=256, r=216)
         drawCircle(
-          color = softSageSky,
+          color = innerSageSky,
           radius = sx(216f),
           center = Offset(sx(256f), sy(256f)),
         )
 
-        // 3. Tone 3 (#FFE082): Soft Savanna Sun-Amber Disc (cx=256, cy=288, r=142)
+        // 3. Soft Savanna Sun-Amber Disc (#FFE082, cx=256, cy=288, r=142)
         drawCircle(
           color = savannaSunAmber,
           radius = sx(142f),
           center = Offset(sx(256f), sy(288f)),
         )
 
-        // 4. Tone 1 (#153B1E): Windswept Umbrella Acacia Upper Crown
+        // 4. Silhouette (#14261E): Windswept Umbrella Acacia Upper Crown
         val upperCrownPath =
           Path().apply {
             moveTo(sx(94f), sy(186f))
@@ -111,9 +112,9 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
             cubicTo(sx(104f), sy(196f), sx(96f), sy(194f), sx(94f), sy(186f))
             close()
           }
-        drawPath(path = upperCrownPath, color = deepWoodland)
+        drawPath(path = upperCrownPath, color = darkSilhouette)
 
-        // 5. Tone 1 (#153B1E): Windswept Lower-Left Cloud Bough
+        // 5. Silhouette (#14261E): Windswept Lower-Left Cloud Bough
         val lowerLeftBoughPath =
           Path().apply {
             moveTo(sx(68f), sy(260f))
@@ -124,9 +125,9 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
             cubicTo(sx(74f), sy(274f), sx(70f), sy(268f), sx(68f), sy(260f))
             close()
           }
-        drawPath(path = lowerLeftBoughPath, color = deepWoodland)
+        drawPath(path = lowerLeftBoughPath, color = darkSilhouette)
 
-        // 6. Tone 1 (#153B1E): Windswept S-Curve Trunk & Crescent Left Branch
+        // 6. Silhouette (#14261E): Windswept S-Curve Trunk & Crescent Left Branch
         val trunkPath =
           Path().apply {
             moveTo(sx(200f), sy(412f))
@@ -140,11 +141,11 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
             cubicTo(sx(269f), sy(340f), sx(278f), sy(376f), sx(300f), sy(412f))
             close()
           }
-        drawPath(path = trunkPath, color = deepWoodland)
+        drawPath(path = trunkPath, color = darkSilhouette)
       }
     }
 
-    // 7. Tone 1 (#153B1E): Tapered-Wingtip Wide Savanna Base Arch (x=16..496)
+    // 7. Silhouette (#14261E): Tapered-Wingtip Wide Savanna Base Arch (x=16..496)
     val baseArchPath =
       Path().apply {
         moveTo(sx(16f), sy(458f))
@@ -155,9 +156,9 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
         cubicTo(sx(40f), sy(474f), sx(16f), sy(470f), sx(16f), sy(458f))
         close()
       }
-    drawPath(path = baseArchPath, color = deepWoodland)
+    drawPath(path = baseArchPath, color = darkSilhouette)
 
-    // 8. Tone 2 (#9CD49F): Tapered Horizontal Sage Accent Line
+    // 8. Inner Green Tone (#AEC66B): Tapered Horizontal Accent Line
     val horizonAccentPath =
       Path().apply {
         moveTo(sx(96f), sy(446f))
@@ -165,7 +166,7 @@ fun CloudAcaciaLogo(modifier: Modifier = Modifier) {
         cubicTo(sx(322f), sy(420f), sx(188f), sy(424f), sx(96f), sy(446f))
         close()
       }
-    drawPath(path = horizonAccentPath, color = softSageSky)
+    drawPath(path = horizonAccentPath, color = innerSageSky)
   }
 }
 
