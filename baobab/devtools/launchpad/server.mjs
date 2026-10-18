@@ -27,14 +27,18 @@ const __dirname = path.dirname(__filename);
 const BAOBAB_ROOT = path.resolve(__dirname, '../../');
 
 // Command line argument and port parsing
-const USAGE = `Usage: launchpad.sh [--port <port>] [--start-all]
+const USAGE = `Usage: launchpad.sh [--port <port>] [--start-all] [--kill-existing]
 
-  --port <port>  Port for the launchpad page (default 8099, or $PORT).
-  --start-all    Start the server, web console, and mobile app when the
-                 launchpad starts, skipping any that are already running.`;
+  --port <port>    Port for the launchpad page (default 8099, or $PORT).
+  --start-all      Start the server, web console, and mobile app when the
+                   launchpad starts, skipping any that are already running.
+  --kill-existing  Before starting, stop any launchpad already using the port
+                   and every service that's already running (wherever it was
+                   started). With --start-all, gives a fresh start.`;
 
 let port = 8099;
 let startAllOnLaunch = false;
+let killExistingOnLaunch = false;
 if (process.env.PORT) {
   const p = parseInt(process.env.PORT, 10);
   if (!isNaN(p)) port = p;
@@ -50,6 +54,8 @@ for (let i = 0; i < argv.length; i++) {
     if (!isNaN(p)) port = p;
   } else if (argv[i] === '--start-all') {
     startAllOnLaunch = true;
+  } else if (argv[i] === '--kill-existing') {
+    killExistingOnLaunch = true;
   } else if (argv[i] === '--help' || argv[i] === '-h') {
     console.log(USAGE);
     process.exit(0);
@@ -450,7 +456,9 @@ async function probeAllServices() {
         s.state = healthy ? 'ONLINE' : 'STARTING';
       } else {
         s.managed = false;
-        s.state = healthy ? 'ONLINE' : 'ONLINE';
+        // Started elsewhere: the port can open before the app is ready (e.g. webpack still
+        // compiling), so it's only running once its health check passes.
+        s.state = healthy ? 'ONLINE' : 'STARTING';
       }
     } else {
       // Port is closed
@@ -683,6 +691,56 @@ async function startCore() {
   return results;
 }
 
+/** Waits until nothing listens on [ports], up to [timeoutMs]. Returns whether they were released. */
+async function waitForPortsReleased(ports, timeoutMs = 7000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const open = await Promise.all(ports.map((p) => checkTcpPort(p)));
+    if (!open.some(Boolean)) return true;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  return false;
+}
+
+/** Sends SIGTERM to whatever listens on [targetPort], then SIGKILL if it's still there after 2.5s. */
+async function killPortListener(targetPort) {
+  const pid = await findPidForPort(targetPort);
+  if (!pid || pid === process.pid) return null;
+  try {
+    process.kill(pid, 'SIGTERM');
+  } catch (_) {}
+  if (!(await waitForPortsReleased([targetPort], 2500))) {
+    try {
+      process.kill(pid, 'SIGKILL');
+    } catch (_) {}
+    await waitForPortsReleased([targetPort], 2000);
+  }
+  return pid;
+}
+
+/**
+ * For --kill-existing: stops a launchpad already listening on [launchpadPort], then every service
+ * that's running (including ones started elsewhere), and waits for their ports to be released.
+ */
+async function killExisting(launchpadPort) {
+  const launchpadPid = await killPortListener(launchpadPort);
+  if (launchpadPid) {
+    console.log(`--kill-existing: stopped the launchpad on port ${launchpadPort} (PID ${launchpadPid})`);
+  }
+  await probeAllServices();
+  for (const [id, service] of serviceStates.entries()) {
+    const ports = [service.port, ...(service.auxPort ? [service.auxPort] : [])];
+    const open = await Promise.all(ports.map((p) => checkTcpPort(p)));
+    if (!open.some(Boolean)) continue;
+    await stopService(id);
+    const released = await waitForPortsReleased(ports);
+    console.log(
+      `--kill-existing: ${id}: ${released ? 'stopped' : `still listening on ${ports.join(', ')}`}`
+    );
+  }
+  await probeAllServices();
+}
+
 async function restartService(id, options = {}) {
   const service = serviceStates.get(id);
   if (!service) throw new Error(`Unknown service: ${id}`);
@@ -690,12 +748,7 @@ async function restartService(id, options = {}) {
   await stopService(id);
 
   // Poll until target port is fully released (up to 7 seconds)
-  const deadline = Date.now() + 7000;
-  while (Date.now() < deadline) {
-    const portOpen = await checkTcpPort(service.port);
-    if (!portOpen) break;
-    await new Promise((r) => setTimeout(r, 200));
-  }
+  await waitForPortsReleased([service.port]);
 
   return await startService(id, options);
 }
@@ -905,8 +958,29 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+if (killExistingOnLaunch) {
+  // Frees the launchpad port and the service ports before listening, so this launchpad starts the
+  // services itself and captures their logs.
+  await killExisting(port);
+}
+
+/**
+ * Fully qualified host and domain name of this machine (e.g. `name.c.googlers.com`), from
+ * `hostname -f`, falling back to `os.hostname()` when that fails or returns a bare name.
+ */
+function fullyQualifiedHostname() {
+  return new Promise((resolve) => {
+    execFile('hostname', ['-f'], { timeout: 2000 }, (err, stdout) => {
+      const fqdn = !err && stdout ? stdout.trim() : '';
+      resolve(fqdn.includes('.') ? fqdn : os.hostname());
+    });
+  });
+}
+
 server.listen(port, '0.0.0.0', async () => {
-  console.log(`Collect One dev launchpad running at http://localhost:${port}`);
+  const host = await fullyQualifiedHostname();
+  console.log(`Collect One dev launchpad running at http://${host}:${port}`);
+  console.log(`  (also http://localhost:${port} on this machine)`);
   console.log(`Monitoring ${serviceStates.size} services in ${BAOBAB_ROOT}`);
 
   if (startAllOnLaunch) {
