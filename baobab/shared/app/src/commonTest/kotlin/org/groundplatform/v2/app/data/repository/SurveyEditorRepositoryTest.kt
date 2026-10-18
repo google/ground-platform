@@ -39,7 +39,7 @@ class SurveyEditorRepositoryTest {
 
   @Test
   fun getDraft_derivesFormsForSurveysWithoutAStoredDraft() {
-    val surveyId = "survey-household-past-individuals"
+    val surveyId = "00000032-8d62-5717-8074-f4917e0cd76d"
     assertNull(runNow { store.transaction { surveyEditorDraft(surveyId) } })
     val draft = draft(surveyId)
     val forms = runNow { store.transaction { forms(surveyId) } }
@@ -50,7 +50,7 @@ class SurveyEditorRepositoryTest {
 
   @Test
   fun saveDraft_projectsLayerStyleAndRowEditsOntoTheSurvey() {
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     val initial = draft(surveyId)
     val entitiesBefore = runNow { store.transaction { entities(surveyId) } }
     val dataset = initial.datasets.first { it.kind == DatasetKind.MAP_LAYER }
@@ -135,7 +135,7 @@ class SurveyEditorRepositoryTest {
 
   @Test
   fun saveDraft_keepsMapFeaturesAddedSinceTheDraftWasOpened() {
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     val opened = draft(surveyId)
     val template = runNow { store.transaction { entities(surveyId) } }.first()
     val added = template.copy(id = "entity-added-in-field", label = "Collected in the field")
@@ -149,7 +149,7 @@ class SurveyEditorRepositoryTest {
 
   @Test
   fun saveDraft_removesFormsDroppedFromTheDraft() {
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     val opened = draft(surveyId)
     val dropped = opened.forms.last()
     runNow { repository.saveDraft(surveyId, opened.copy(forms = opened.forms.dropLast(1))) }
@@ -161,7 +161,7 @@ class SurveyEditorRepositoryTest {
 
   @Test
   fun saveDraft_writesSurveyLevelConceptLinks_andPublishesGroundConcept() {
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     val opened = draft(surveyId)
     val entry = opened.forms.first()
     val question = entry.form.questions.first()
@@ -207,7 +207,7 @@ class SurveyEditorRepositoryTest {
 
   @Test
   fun getDraft_appliesSurveyLevelConceptLinksToDerivedForms() {
-    val surveyId = "survey-household-past-individuals"
+    val surveyId = "00000032-8d62-5717-8074-f4917e0cd76d"
     val derived = draft(surveyId)
     val form = derived.forms.first().form
     val question = form.questions.first()
@@ -240,7 +240,7 @@ class SurveyEditorRepositoryTest {
 
   @Test
   fun purposes_arePublishedToTheConfig_andDerivedBack() {
-    val surveyId = "survey-household-past-individuals"
+    val surveyId = "00000032-8d62-5717-8074-f4917e0cd76d"
     val opened = draft(surveyId)
     val withPurposes =
       opened.copy(
@@ -261,7 +261,7 @@ class SurveyEditorRepositoryTest {
 
   @Test
   fun saveDraft_projectsCustomAndDefaultFormCtaLabels() {
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     val opened = draft(surveyId)
     val firstForm = opened.forms[0].form
     val secondForm = opened.forms[1].form

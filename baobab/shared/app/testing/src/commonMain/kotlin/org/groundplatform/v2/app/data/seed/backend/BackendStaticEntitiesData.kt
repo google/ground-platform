@@ -23,10 +23,10 @@ object BackendStaticEntitiesData {
   /** Returns the preloaded [GeospatialEntityItem] list for [surveyId]. */
   fun entitiesForSurvey(surveyId: String): List<GeospatialEntityItem> =
     when (surveyId) {
-      "survey-single-point-land-use" ->
+      "00000036-1a1c-5c51-997f-28b67d813aa3" ->
         listOf(
           GeospatialEntityItem(
-            id = "ent-splu-01",
+            id = "00000004-36ce-5fff-b07c-6224a74c6258",
             label = "Primary Forest • -0.4182°, 36.9491°",
             datasetId = "land_use_observations",
             datasetName = "Land Use Observations",
@@ -47,8 +47,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-splu-01",
-                  entityId = "ent-splu-01",
+                  id = "0000002a-d6b0-55b4-be22-99d4f83950b9",
+                  entityId = "00000004-36ce-5fff-b07c-6224a74c6258",
                   entityLabel = "Primary Forest • -0.4182°, 36.9491°",
                   formId = "form-single-point-land-use",
                   formTitle = "Simple Point & Land Use Observation",
@@ -80,7 +80,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "ent-splu-02",
+            id = "00000005-1b8a-5b6c-a70f-2ad85e5e50fd",
             label = "Agroforestry • -0.4209°, 36.9524°",
             datasetId = "land_use_observations",
             datasetName = "Land Use Observations",
@@ -101,8 +101,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-splu-02",
-                  entityId = "ent-splu-02",
+                  id = "0000002b-918d-55c7-ba85-a63c4a250379",
+                  entityId = "00000005-1b8a-5b6c-a70f-2ad85e5e50fd",
                   entityLabel = "Agroforestry • -0.4209°, 36.9524°",
                   formId = "form-single-point-land-use",
                   formTitle = "Simple Point & Land Use Observation",
@@ -134,7 +134,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "ent-splu-03",
+            id = "00000006-4ef1-5ef5-a180-ebabd6f0f7a8",
             label = "Wetland Riparian • -0.4168°, 36.9538°",
             datasetId = "land_use_observations",
             datasetName = "Land Use Observations",
@@ -155,8 +155,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-splu-03",
-                  entityId = "ent-splu-03",
+                  id = "0000002c-0423-586f-937e-81d7e9a92b77",
+                  entityId = "00000006-4ef1-5ef5-a180-ebabd6f0f7a8",
                   entityLabel = "Wetland Riparian • -0.4168°, 36.9538°",
                   formId = "form-single-point-land-use",
                   formTitle = "Simple Point & Land Use Observation",
@@ -188,10 +188,10 @@ object BackendStaticEntitiesData {
               ),
           ),
         )
-      "survey-commodity-perimeter-center" ->
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
         listOf(
           GeospatialEntityItem(
-            id = "ent-eudr-0419",
+            id = "00000001-fd33-53c6-bdc2-e3760ec30cdb",
             label = "Cocoa • EUDR-GH-0419",
             datasetId = "commodity_plots",
             datasetName = "Commodity Plots",
@@ -219,8 +219,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-eudr-gh-0419",
-                  entityId = "ent-eudr-0419",
+                  id = "0000001b-1ba0-5775-b6cd-033a11d861d4",
+                  entityId = "00000001-fd33-53c6-bdc2-e3760ec30cdb",
                   entityLabel = "Cocoa • EUDR-GH-0419",
                   formId = "form-commodity-perimeter-center",
                   formTitle = "Commodity Plot Perimeter & Center Mapping",
@@ -269,7 +269,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "ent-eudr-0422",
+            id = "00000002-4805-5b4b-9807-85db6e524462",
             label = "Coffee • EUDR-GH-0422",
             datasetId = "commodity_plots",
             datasetName = "Commodity Plots",
@@ -296,8 +296,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-eudr-gh-0422",
-                  entityId = "ent-eudr-0422",
+                  id = "0000001c-e7b4-5cb1-84e0-5f506f6afc8b",
+                  entityId = "00000002-4805-5b4b-9807-85db6e524462",
                   entityLabel = "Coffee • EUDR-GH-0422",
                   formId = "form-commodity-perimeter-center",
                   formTitle = "Commodity Plot Perimeter & Center Mapping",
@@ -339,7 +339,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "ent-eudr-0428",
+            id = "00000003-1a57-598a-80a0-e238b897e00a",
             label = "Rubber • EUDR-GH-0428",
             datasetId = "commodity_plots",
             datasetName = "Commodity Plots",
@@ -365,8 +365,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-eudr-gh-0428",
-                  entityId = "ent-eudr-0428",
+                  id = "0000001d-f3d9-53c0-ba3f-9b2f49e8e5cc",
+                  entityId = "00000003-1a57-598a-80a0-e238b897e00a",
                   entityLabel = "Rubber • EUDR-GH-0428",
                   formId = "form-commodity-perimeter-center",
                   formTitle = "Commodity Plot Perimeter & Center Mapping",
@@ -404,10 +404,10 @@ object BackendStaticEntitiesData {
               ),
           ),
         )
-      "survey-sample-plots-forest" ->
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
         listOf(
           GeospatialEntityItem(
-            id = "plot_sp01",
+            id = "00000016-cc1f-5125-8841-166ab5b5f68f",
             label = "Plot SP-01 • Upper Montane Buffer",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
@@ -435,8 +435,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-sp01-assess-2026",
-                  entityId = "plot_sp01",
+                  id = "00000027-ca75-5659-b125-262308b7375c",
+                  entityId = "00000016-cc1f-5125-8841-166ab5b5f68f",
                   entityLabel = "Plot SP-01 • Upper Montane Buffer",
                   formId = "form-sample-plots-forest",
                   formTitle = "Sample Plot Entity & Forest Stand Assessment",
@@ -451,7 +451,8 @@ object BackendStaticEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "sample_plot_entity",
                         questionLabel = "Select Predefined Sample Plot Entity",
-                        answerValue = "plot_sp01 (Plot SP-01 • Upper Montane Buffer)",
+                        answerValue =
+                          "00000016-cc1f-5125-8841-166ab5b5f68f (Plot SP-01 • Upper Montane Buffer)",
                       ),
                       SubmissionFieldEntry(
                         questionName = "selected_plot_stratum",
@@ -493,7 +494,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "plot_sp02",
+            id = "00000017-d1a0-51d3-a686-e6ca450c23b2",
             label = "Plot SP-02 • Riparian Gallery Transect",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
@@ -521,8 +522,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-sp02-assess-2026",
-                  entityId = "plot_sp02",
+                  id = "00000028-86de-51b6-9d99-71dad6fafd8c",
+                  entityId = "00000017-d1a0-51d3-a686-e6ca450c23b2",
                   entityLabel = "Plot SP-02 • Riparian Gallery Transect",
                   formId = "form-sample-plots-forest",
                   formTitle = "Sample Plot Entity & Forest Stand Assessment",
@@ -537,7 +538,8 @@ object BackendStaticEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "sample_plot_entity",
                         questionLabel = "Select Predefined Sample Plot Entity",
-                        answerValue = "plot_sp02 (Plot SP-02 • Riparian Gallery Transect)",
+                        answerValue =
+                          "00000017-d1a0-51d3-a686-e6ca450c23b2 (Plot SP-02 • Riparian Gallery Transect)",
                       ),
                       SubmissionFieldEntry(
                         questionName = "canopy_photo",
@@ -569,7 +571,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "plot_sp03",
+            id = "00000018-4d16-5ab7-a57d-7dae5949cb7a",
             label = "Plot SP-03 • Shade Agroforestry Core",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
@@ -597,8 +599,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-sp03-assess-2026",
-                  entityId = "plot_sp03",
+                  id = "00000029-4808-5225-9de5-551d5afe8ffc",
+                  entityId = "00000018-4d16-5ab7-a57d-7dae5949cb7a",
                   entityLabel = "Plot SP-03 • Shade Agroforestry Core",
                   formId = "form-sample-plots-forest",
                   formTitle = "Sample Plot Entity & Forest Stand Assessment",
@@ -613,7 +615,8 @@ object BackendStaticEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "sample_plot_entity",
                         questionLabel = "Select Predefined Sample Plot Entity",
-                        answerValue = "plot_sp03 (Plot SP-03 • Shade Agroforestry Core)",
+                        answerValue =
+                          "00000018-4d16-5ab7-a57d-7dae5949cb7a (Plot SP-03 • Shade Agroforestry Core)",
                       ),
                       SubmissionFieldEntry(
                         questionName = "canopy_photo",
@@ -640,7 +643,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "plot_sp04",
+            id = "00000019-882d-5830-a254-1fe5abf727e3",
             label = "Plot SP-04 • Community Forest Edge",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
@@ -668,7 +671,7 @@ object BackendStaticEntitiesData {
             submissions = emptyList(),
           ),
           GeospatialEntityItem(
-            id = "plot_sp05",
+            id = "0000001a-f05a-503e-9697-12c420a33cdb",
             label = "Plot SP-05 • Ridge Benchmark Control",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
@@ -696,10 +699,10 @@ object BackendStaticEntitiesData {
             submissions = emptyList(),
           ),
         )
-      "survey-household-past-individuals" ->
+      "00000032-8d62-5717-8074-f4917e0cd76d" ->
         listOf(
           GeospatialEntityItem(
-            id = "ind_101",
+            id = "0000000c-a9ae-59f6-ac51-7f5a8777598f",
             label = "IND-101 • Amina Wanjiku (HH-KAK-014, Head)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
@@ -719,7 +722,7 @@ object BackendStaticEntitiesData {
                 "marker-color" to "#1E8E3E",
                 "stroke" to "#6A1B9A",
                 "fill" to "#6A1B9A",
-                "individual_id" to "ind_101",
+                "individual_id" to "0000000c-a9ae-59f6-ac51-7f5a8777598f",
                 "household_code" to "HH-KAK-014",
                 "relationship" to "Household Head",
                 "baseline_age_2022" to "44",
@@ -728,8 +731,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-ind101-wave4",
-                  entityId = "ind_101",
+                  id = "0000001e-d0b8-5510-ba2f-626c8db19409",
+                  entityId = "0000000c-a9ae-59f6-ac51-7f5a8777598f",
                   entityLabel = "IND-101 • Amina Wanjiku (HH-KAK-014, Head)",
                   formId = "form-household-past-individuals",
                   formTitle = "Household Follow-Up Survey (Past Individuals)",
@@ -744,7 +747,8 @@ object BackendStaticEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "primary_respondent_id",
                         questionLabel = "Select Preloaded Past Individual",
-                        answerValue = "ind_101 (IND-101 • Amina Wanjiku)",
+                        answerValue =
+                          "0000000c-a9ae-59f6-ac51-7f5a8777598f (IND-101 • Amina Wanjiku)",
                       ),
                       SubmissionFieldEntry(
                         questionName = "residency_status",
@@ -771,7 +775,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "ind_102",
+            id = "0000000d-2972-591c-b23d-4918d3e3b7b1",
             label = "IND-102 • Samuel Ochieng (HH-KAK-014, Spouse)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
@@ -791,7 +795,7 @@ object BackendStaticEntitiesData {
                 "marker-color" to "#1E8E3E",
                 "stroke" to "#6A1B9A",
                 "fill" to "#6A1B9A",
-                "individual_id" to "ind_102",
+                "individual_id" to "0000000d-2972-591c-b23d-4918d3e3b7b1",
                 "household_code" to "HH-KAK-014",
                 "relationship" to "Spouse",
                 "baseline_age_2022" to "47",
@@ -800,8 +804,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-ind102-wave4",
-                  entityId = "ind_102",
+                  id = "0000001f-fb14-5f59-8a88-7663b04cf6ac",
+                  entityId = "0000000d-2972-591c-b23d-4918d3e3b7b1",
                   entityLabel = "IND-102 • Samuel Ochieng (HH-KAK-014, Spouse)",
                   formId = "form-household-past-individuals",
                   formTitle = "Household Follow-Up Survey (Past Individuals)",
@@ -816,7 +820,8 @@ object BackendStaticEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "primary_respondent_id",
                         questionLabel = "Select Preloaded Past Individual",
-                        answerValue = "ind_102 (IND-102 • Samuel Ochieng)",
+                        answerValue =
+                          "0000000d-2972-591c-b23d-4918d3e3b7b1 (IND-102 • Samuel Ochieng)",
                       ),
                       SubmissionFieldEntry(
                         questionName = "residency_status",
@@ -833,7 +838,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "ind_103",
+            id = "0000000e-95ee-5695-ad0b-54576e8d7785",
             label = "IND-103 • Grace Atieno (HH-KAK-022, Head)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
@@ -853,7 +858,7 @@ object BackendStaticEntitiesData {
                 "marker-color" to "#1E8E3E",
                 "stroke" to "#6A1B9A",
                 "fill" to "#6A1B9A",
-                "individual_id" to "ind_103",
+                "individual_id" to "0000000e-95ee-5695-ad0b-54576e8d7785",
                 "household_code" to "HH-KAK-022",
                 "relationship" to "Household Head",
                 "baseline_age_2022" to "38",
@@ -862,8 +867,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-ind103-wave4",
-                  entityId = "ind_103",
+                  id = "00000020-efff-56da-8ad2-db47db9476d9",
+                  entityId = "0000000e-95ee-5695-ad0b-54576e8d7785",
                   entityLabel = "IND-103 • Grace Atieno (HH-KAK-022, Head)",
                   formId = "form-household-past-individuals",
                   formTitle = "Household Follow-Up Survey (Past Individuals)",
@@ -878,7 +883,8 @@ object BackendStaticEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "primary_respondent_id",
                         questionLabel = "Select Preloaded Past Individual",
-                        answerValue = "ind_103 (IND-103 • Grace Atieno)",
+                        answerValue =
+                          "0000000e-95ee-5695-ad0b-54576e8d7785 (IND-103 • Grace Atieno)",
                       ),
                       SubmissionFieldEntry(
                         questionName = "residency_status",
@@ -895,7 +901,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "ind_104",
+            id = "0000000f-23a2-50ad-b0e8-98639587eba4",
             label = "IND-104 • David Barasa (HH-KAK-014, Child)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
@@ -915,7 +921,7 @@ object BackendStaticEntitiesData {
                 "marker-color" to "#F9AB00",
                 "stroke" to "#F9AB00",
                 "fill" to "#F9AB00",
-                "individual_id" to "ind_104",
+                "individual_id" to "0000000f-23a2-50ad-b0e8-98639587eba4",
                 "household_code" to "HH-KAK-014",
                 "relationship" to "Adult Child",
                 "baseline_age_2022" to "19",
@@ -924,8 +930,8 @@ object BackendStaticEntitiesData {
             submissions =
               listOf(
                 SubmissionPreviewItem(
-                  id = "sub-ind104-wave4",
-                  entityId = "ind_104",
+                  id = "00000021-10bd-5b6d-9ba9-c448895f329c",
+                  entityId = "0000000f-23a2-50ad-b0e8-98639587eba4",
                   entityLabel = "IND-104 • David Barasa (HH-KAK-014, Child)",
                   formId = "form-household-past-individuals",
                   formTitle = "Household Follow-Up Survey (Past Individuals)",
@@ -940,7 +946,8 @@ object BackendStaticEntitiesData {
                       SubmissionFieldEntry(
                         questionName = "primary_respondent_id",
                         questionLabel = "Select Preloaded Past Individual",
-                        answerValue = "ind_104 (IND-104 • David Barasa)",
+                        answerValue =
+                          "0000000f-23a2-50ad-b0e8-98639587eba4 (IND-104 • David Barasa)",
                       ),
                       SubmissionFieldEntry(
                         questionName = "residency_status",
@@ -957,7 +964,7 @@ object BackendStaticEntitiesData {
               ),
           ),
           GeospatialEntityItem(
-            id = "ind_105",
+            id = "00000010-1195-5b30-ab83-7939d81cd71f",
             label = "IND-105 • Esther Nekesa (HH-KAK-031, Head)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
@@ -977,7 +984,7 @@ object BackendStaticEntitiesData {
                 "marker-color" to "#E65100",
                 "stroke" to "#E65100",
                 "fill" to "#E65100",
-                "individual_id" to "ind_105",
+                "individual_id" to "00000010-1195-5b30-ab83-7939d81cd71f",
                 "household_code" to "HH-KAK-031",
                 "relationship" to "Household Head",
                 "baseline_age_2022" to "61",
@@ -986,7 +993,7 @@ object BackendStaticEntitiesData {
             submissions = emptyList(),
           ),
           GeospatialEntityItem(
-            id = "ind_106",
+            id = "00000011-d6fa-5a2d-8848-5419c62a0359",
             label = "IND-106 • Peter Wafula (HH-KAK-039, Head)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
@@ -1006,7 +1013,7 @@ object BackendStaticEntitiesData {
                 "marker-color" to "#E65100",
                 "stroke" to "#E65100",
                 "fill" to "#E65100",
-                "individual_id" to "ind_106",
+                "individual_id" to "00000011-d6fa-5a2d-8848-5419c62a0359",
                 "household_code" to "HH-KAK-039",
                 "relationship" to "Household Head",
                 "baseline_age_2022" to "52",
@@ -1021,18 +1028,18 @@ object BackendStaticEntitiesData {
   /**
    * Sample Geospatial Entities (`EntityRecord`s) across **Polygon**, **LineString**, and **Point**
    * geometries showcasing the 3-stage `simplestyle-spec` marker progression driven by `save_to`:
-   * - Stage 1 (`"○"` Empty Circle, `#E65100` Orange): `entity-nyr-112` (Pending baseline, 0
-   *   submissions)
-   * - Stage 2 (`"◐"` Half-Filled Circle, `#F9AB00` Amber): `entity-nyr-108` & `entity-station-01`
-   *   (In progress, 1st stage recorded)
-   * - Stage 3 (`"✓"` Checkmark, `#1E8E3E` Green / `#1565C0` Blue): `entity-nyr-104` &
-   *   `entity-shade-201` (Completed)
+   * - Stage 1 (`"○"` Empty Circle, `#E65100` Orange): `00000009-1699-51bb-b7a3-f90a60bedd4d`
+   *   (Pending baseline, 0 submissions)
+   * - Stage 2 (`"◐"` Half-Filled Circle, `#F9AB00` Amber): `00000008-15d0-51f2-84eb-a72dfea5a747` &
+   *   `0000000b-7633-5116-9d6d-50581002d8cf` (In progress, 1st stage recorded)
+   * - Stage 3 (`"✓"` Checkmark, `#1E8E3E` Green / `#1565C0` Blue):
+   *   `00000007-640e-5ed7-9874-4d6b6717f21d` & `0000000a-56d7-5c1d-9457-7457267120a3` (Completed)
    */
   fun defaultGeospatialEntities(): List<GeospatialEntityItem> =
     listOf(
       // 1. Stage 3 — Completed Polygon Entity ("✓" Checkmark marker)
       GeospatialEntityItem(
-        id = "entity-nyr-104",
+        id = "00000007-640e-5ed7-9874-4d6b6717f21d",
         label = "Plot NYR-104 • Kamau Family Parcel",
         datasetId = "coffee_parcels",
         datasetName = "Smallholder Coffee Parcels",
@@ -1054,7 +1061,7 @@ object BackendStaticEntitiesData {
             "fill" to "#1E8E3E",
             "Farmer / Owner" to "Josephat Kamau",
             "Cooperative" to "Othaya Farmers Co-op",
-            "Washing Station" to "entity-station-01",
+            "Washing Station" to "0000000b-7633-5116-9d6d-50581002d8cf",
             "Primary Cultivar" to "SL28 & Ruiru 11",
             "Elevation" to "1,820 m",
             "Commodity" to "Coffee",
@@ -1065,8 +1072,8 @@ object BackendStaticEntitiesData {
         submissions =
           listOf(
             SubmissionPreviewItem(
-              id = "sub-nyr-104-baseline",
-              entityId = "entity-nyr-104",
+              id = "00000022-c99b-5e7e-b810-c506ebf06f19",
+              entityId = "00000007-640e-5ed7-9874-4d6b6717f21d",
               entityLabel = "Plot NYR-104 • Kamau Family Parcel",
               formId = "form-eudr-baseline",
               formTitle = "EUDR Parcel Baseline Registration",
@@ -1113,7 +1120,7 @@ object BackendStaticEntitiesData {
       ),
       // 2. Stage 3 — Completed LineString Entity ("✓" Checkmark marker on a Transect Line!)
       GeospatialEntityItem(
-        id = "entity-shade-201",
+        id = "0000000a-56d7-5c1d-9457-7457267120a3",
         label = "Transect SHD-201 • Chinga North Agroforestry",
         datasetId = "shade_monitoring_plots",
         datasetName = "Shade Tree Monitoring Plots",
@@ -1134,7 +1141,7 @@ object BackendStaticEntitiesData {
             "stroke" to "#1565C0",
             "fill" to "#1565C0",
             "Community Group" to "Chinga Restoration CFA",
-            "Adjacent Parcel" to "entity-nyr-104",
+            "Adjacent Parcel" to "00000007-640e-5ed7-9874-4d6b6717f21d",
             "Target survival rate" to "85%",
             "Planting Cohort" to "2025 Long Rains",
             "Elevation" to "1,865 m",
@@ -1142,8 +1149,8 @@ object BackendStaticEntitiesData {
         submissions =
           listOf(
             SubmissionPreviewItem(
-              id = "sub-shade-201-wave3",
-              entityId = "entity-shade-201",
+              id = "00000026-cca2-5594-b83f-02266f40048e",
+              entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
               entityLabel = "Transect SHD-201 • Chinga North Agroforestry",
               formId = "form-shade-canopy-audit",
               formTitle = "Seasonal Shade Tree & Canopy Audit",
@@ -1183,8 +1190,8 @@ object BackendStaticEntitiesData {
                 ),
             ),
             SubmissionPreviewItem(
-              id = "sub-shade-201-wave2",
-              entityId = "entity-shade-201",
+              id = "00000025-7bc5-5b86-839c-a76cee54cc81",
+              entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
               entityLabel = "Transect SHD-201 • Chinga North Agroforestry",
               formId = "form-shade-canopy-audit",
               formTitle = "Seasonal Shade Tree & Canopy Audit",
@@ -1214,8 +1221,8 @@ object BackendStaticEntitiesData {
                 ),
             ),
             SubmissionPreviewItem(
-              id = "sub-shade-201-wave1",
-              entityId = "entity-shade-201",
+              id = "00000024-19de-50f6-ba66-f4b110edf69d",
+              entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
               entityLabel = "Transect SHD-201 • Chinga North Agroforestry",
               formId = "form-deforestation-alert",
               formTitle = "GLAD Canopy Disturbance Alert Verification",
@@ -1244,7 +1251,7 @@ object BackendStaticEntitiesData {
       // 3. Stage 2 — Half-Filled Circle Polygon Entity ("◐" In progress after household
       // interview, awaiting EUDR verification)
       GeospatialEntityItem(
-        id = "entity-nyr-108",
+        id = "00000008-15d0-51f2-84eb-a72dfea5a747",
         label = "Plot NYR-108 • Njeri Cooperative Block B",
         datasetId = "coffee_parcels",
         datasetName = "Smallholder Coffee Parcels",
@@ -1266,7 +1273,7 @@ object BackendStaticEntitiesData {
             "fill" to "#F9AB00",
             "Farmer / Owner" to "Beatrice Njeri",
             "Cooperative" to "Othaya Farmers Co-op",
-            "Washing Station" to "entity-station-01",
+            "Washing Station" to "0000000b-7633-5116-9d6d-50581002d8cf",
             "Primary Cultivar" to "Batian & SL34",
             "Elevation" to "1,795 m",
             "Commodity" to "Coffee",
@@ -1277,8 +1284,8 @@ object BackendStaticEntitiesData {
         submissions =
           listOf(
             SubmissionPreviewItem(
-              id = "sub-nyr-108-baseline",
-              entityId = "entity-nyr-108",
+              id = "00000023-36c6-5f07-a7a8-5922ec72bed0",
+              entityId = "00000008-15d0-51f2-84eb-a72dfea5a747",
               entityLabel = "Plot NYR-108 • Njeri Cooperative Block B",
               formId = "form-household-interview",
               formTitle = "Smallholder Household Socio-Economic Survey",
@@ -1317,7 +1324,7 @@ object BackendStaticEntitiesData {
       // 4. Stage 1 — Initialized Empty Circle Polygon Entity ("○" Pending baseline, 0
       // submissions)
       GeospatialEntityItem(
-        id = "entity-nyr-112",
+        id = "00000009-1699-51bb-b7a3-f90a60bedd4d",
         label = "Plot NYR-112 • Kariuki Hillside Parcel",
         datasetId = "coffee_parcels",
         datasetName = "Smallholder Coffee Parcels",
@@ -1339,7 +1346,7 @@ object BackendStaticEntitiesData {
             "fill" to "#E65100",
             "Farmer / Owner" to "Daniel Kariuki",
             "Cooperative" to "Othaya Farmers Co-op",
-            "Washing Station" to "entity-station-01",
+            "Washing Station" to "0000000b-7633-5116-9d6d-50581002d8cf",
             "Primary Cultivar" to "SL28 & Batian",
             "Elevation" to "1,845 m",
             "Commodity" to "Coffee",
@@ -1352,7 +1359,7 @@ object BackendStaticEntitiesData {
       ),
       // 5. Stage 2 — Half-Filled Circle Point Entity ("◐" Cooperative Washing Station)
       GeospatialEntityItem(
-        id = "entity-station-01",
+        id = "0000000b-7633-5116-9d6d-50581002d8cf",
         label = "Station WSH-01 • Gura River Wet Mill",
         datasetId = "washing_stations",
         datasetName = "Cooperative Washing Stations",
@@ -1379,8 +1386,8 @@ object BackendStaticEntitiesData {
         submissions =
           listOf(
             SubmissionPreviewItem(
-              id = "sub-wsh-01-sep",
-              entityId = "entity-station-01",
+              id = "00000030-ca50-56e0-8458-9c5728954d52",
+              entityId = "0000000b-7633-5116-9d6d-50581002d8cf",
               entityLabel = "Station WSH-01 • Gura River Wet Mill",
               formId = "form-water-quality",
               formTitle = "Washing Station Effluent & Water Check",
@@ -1410,8 +1417,8 @@ object BackendStaticEntitiesData {
                 ),
             ),
             SubmissionPreviewItem(
-              id = "sub-wsh-01-aug",
-              entityId = "entity-station-01",
+              id = "0000002f-ac7c-58b4-add0-71d03269fda7",
+              entityId = "0000000b-7633-5116-9d6d-50581002d8cf",
               entityLabel = "Station WSH-01 • Gura River Wet Mill",
               formId = "form-water-quality",
               formTitle = "Washing Station Effluent & Water Check",

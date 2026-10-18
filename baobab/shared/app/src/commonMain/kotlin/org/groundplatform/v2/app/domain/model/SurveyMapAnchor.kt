@@ -44,21 +44,22 @@ data class SurveyMapAnchor(val center: LatLng, val zoom: Double, val label: Stri
     /** Degrees of latitude covered by the normalized `[0, 1]` survey height. */
     const val SPAN_LATITUDE = 0.018
 
-    const val DEFAULT_SURVEY_ID = "survey-kenya-coffee"
+    const val DEFAULT_SURVEY_ID = "00000033-6b50-51cd-ac94-baea2ea06d65"
 
     private val anchors: Map<String, SurveyMapAnchor> =
       mapOf(
-        "survey-single-point-land-use" to
+        "00000036-1a1c-5c51-997f-28b67d813aa3" to
           anchor(-0.4188, 36.9498, 15.3, "Nyeri Land Use 0.42°S, 36.95°E"),
-        "survey-sample-plots-forest" to
+        "00000034-c088-5ab9-8b98-e6bccb3dca71" to
           anchor(-0.4192, 36.9506, 15.4, "Aberdare Sample Plots 0.42°S, 36.95°E"),
-        "survey-commodity-perimeter-center" to
+        "00000031-ffc6-5c8e-934c-d14ec07533ad" to
           anchor(-0.4195, 36.9510, 15.3, "Mt. Kenya EUDR Plots 0.42°S, 36.95°E"),
-        "survey-household-past-individuals" to
+        "00000032-8d62-5717-8074-f4917e0cd76d" to
           anchor(-0.4190, 36.9502, 15.3, "Nyeri Household Panel 0.42°S, 36.95°E"),
         DEFAULT_SURVEY_ID to anchor(-0.4198, 36.9512, 15.3, "Nyeri 0.42°S, 36.95°E"),
         "survey-amazon-canopy" to anchor(-3.4653, -62.2159, 15.0, "Pará 3.46°S, 62.21°W"),
-        "survey-serengeti-corridor" to anchor(-2.3333, 34.8328, 14.8, "Serengeti 2.33°S, 34.83°E"),
+        "00000035-caf4-571e-b907-f506f92666ab" to
+          anchor(-2.3333, 34.8328, 14.8, "Serengeti 2.33°S, 34.83°E"),
         "survey-mekong-mangroves" to anchor(9.8249, 106.3422, 15.0, "Cần Thơ 9.82°N, 106.34°E"),
         "survey-andean-watershed" to anchor(-13.532, -71.9675, 15.1, "Cusco 13.53°S, 71.97°W"),
         "survey-borneo-peatland" to anchor(-2.2136, 113.9213, 14.9, "Kalteng 2.21°S, 113.92°E"),

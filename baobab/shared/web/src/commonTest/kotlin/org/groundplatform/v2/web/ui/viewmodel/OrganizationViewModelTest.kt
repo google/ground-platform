@@ -17,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -133,7 +134,6 @@ class OrganizationViewModelTest {
     val f = Fixture()
     val before = f.uiState.organizations.size
     val id = f.viewModel.createOrganization("  Mangrove Watch ", " Coastal monitoring ", false)
-    assertEquals("org-mangrove-watch", id)
     val created = f.organization(id)
     assertEquals(before + 1, f.uiState.organizations.size)
     assertEquals("Mangrove Watch", created.name)
@@ -147,8 +147,8 @@ class OrganizationViewModelTest {
     f.viewModel.dismissNotice()
     assertNull(f.uiState.notice)
 
-    // A second organization with the same name gets a numeric suffix.
-    assertEquals("org-mangrove-watch-2", f.viewModel.createOrganization("Mangrove Watch", "", true))
+    // A second organization with the same name gets its own random ID.
+    assertNotEquals(id, f.viewModel.createOrganization("Mangrove Watch", "", true))
   }
 
   @Test
@@ -430,7 +430,7 @@ class OrganizationViewModelTest {
     assertNull(f.viewModel.addImagerySource(orgId, " Topo ", " $url ", allowOfflineDownload = true))
     val added = f.kfs.imagerySources.last()
     assertEquals(before + 1, f.kfs.imagerySources.size)
-    assertEquals("imagery-kenya-forest-service-topo", added.id)
+    assertEquals("imagery-${f.kfs.id}-topo", added.id)
     assertEquals("Topo", added.name)
     assertEquals(url, added.urlTemplate)
     assertTrue(added.allowOfflineDownload)
@@ -473,8 +473,8 @@ class OrganizationViewModelTest {
     assertTrue(library.canEdit)
     assertEquals(
       listOf(
-        "org.org-kenya-forest-service.cherry_delivery_kg",
-        "org.org-kenya-forest-service.shade_tree_count",
+        "org.00000013-31cc-5c95-90ea-379f624a5c72.cherry_delivery_kg",
+        "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count",
       ),
       library.organizationConcepts.map { it.entry.id },
     )
@@ -486,7 +486,7 @@ class OrganizationViewModelTest {
     val globalTemplate = library.formTemplates.first { it.isGlobal }
     assertTrue(globalTemplate.canHide && !globalTemplate.canEdit && !globalTemplate.isHidden)
     assertEquals(
-      "org.org-kenya-forest-service.coop_member_plot_audit",
+      "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_member_plot_audit",
       library.formTemplates.first().entry.id,
     )
     assertEquals(
@@ -530,7 +530,7 @@ class OrganizationViewModelTest {
     assertTrue(f.uiState.library.concepts.size < f.uiState.library.totalConceptCount)
     f.viewModel.setDictionaryQuery("coffee cherry")
     assertEquals(
-      "org.org-kenya-forest-service.cherry_delivery_kg",
+      "org.00000013-31cc-5c95-90ea-379f624a5c72.cherry_delivery_kg",
       f.uiState.library.concepts.first().entry.id,
     )
     f.viewModel.setDictionaryQuery("")
@@ -542,7 +542,7 @@ class OrganizationViewModelTest {
     val f = Fixture()
     f.viewModel.openOrganization(f.kfs.id)
     val id = f.uiState.library.newConceptId(f.uiState.library.suggestedName("Drying days"))
-    assertEquals("org.org-kenya-forest-service.drying_days", id)
+    assertEquals("org.00000013-31cc-5c95-90ea-379f624a5c72.drying_days", id)
     val concept =
       LibraryConcept(id, f.kfs.id, LocalizedText.en("Drying days"), ConceptDataType.INTEGER)
     assertNotNull(f.viewModel.saveConcept(concept.copy(label = LocalizedText()), isNew = true))
@@ -551,7 +551,10 @@ class OrganizationViewModelTest {
     assertTrue(f.uiState.library.organizationConcepts.any { it.entry.id == id })
 
     assertNotNull(
-      f.viewModel.deleteConcept(f.kfs.id, "org.org-kenya-forest-service.cherry_delivery_kg")
+      f.viewModel.deleteConcept(
+        f.kfs.id,
+        "org.00000013-31cc-5c95-90ea-379f624a5c72.cherry_delivery_kg",
+      )
     )
     assertNull(f.viewModel.deleteConcept(f.kfs.id, id))
     assertTrue(f.uiState.library.organizationConcepts.none { it.entry.id == id })
@@ -574,8 +577,8 @@ class OrganizationViewModelTest {
   @Test
   fun renameAndDelete_organizationTemplatesAndPacks() {
     val f = Fixture()
-    val templateId = "org.org-kenya-forest-service.coop_member_plot_audit"
-    val packId = "org.org-kenya-forest-service.coop_certification_audit"
+    val templateId = "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_member_plot_audit"
+    val packId = "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_certification_audit"
     f.viewModel.openOrganization(f.kfs.id)
     assertEquals("Enter a title.", f.viewModel.renameTemplate(f.kfs.id, templateId, " ", ""))
     assertNull(f.viewModel.renameTemplate(f.kfs.id, templateId, "Plot audit", ""))
@@ -609,7 +612,7 @@ class OrganizationViewModelTest {
     assertEquals("Enter a title.", f.viewModel.createTemplate(f.kfs.id, "  ", ""))
     assertNull(f.viewModel.createTemplate(f.kfs.id, "Nursery Seedling Check", "Monthly count"))
 
-    val createdId = "org.org-kenya-forest-service.nursery_seedling_check"
+    val createdId = "org.00000013-31cc-5c95-90ea-379f624a5c72.nursery_seedling_check"
     val createdRow = f.uiState.library.formTemplates.firstOrNull { it.entry.id == createdId }
     assertNotNull(createdRow)
     assertEquals("Nursery Seedling Check", createdRow.entry.title.text)
@@ -625,7 +628,7 @@ class OrganizationViewModelTest {
           required = true,
           conceptLink =
             ConceptLink(
-              conceptId = "org.org-kenya-forest-service.shade_tree_count",
+              conceptId = "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count",
               version = 1,
             ),
         ),
@@ -658,7 +661,7 @@ class OrganizationViewModelTest {
     assertEquals(2, updatedTemplate.form.questions.size)
     assertEquals(1, updatedTemplate.linkedQuestionCount)
     assertEquals(
-      "org.org-kenya-forest-service.shade_tree_count",
+      "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count",
       updatedTemplate.form.questions.first().conceptLink?.conceptId,
     )
   }

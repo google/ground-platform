@@ -139,22 +139,26 @@ class WorkbenchViewModelTest {
     assertTrue(
       f.events.contains(
         WorkbenchEvent.ExampleSurveySelected(
-          surveyId = "survey-sample-plots-forest",
+          surveyId = "00000034-c088-5ab9-8b98-e6bccb3dca71",
           launchImmediately = true,
         )
       )
     )
 
     // Switch active survey in repository, then reset default XForms XML
-    runNow { f.surveyRepository.setActiveSurveyId("survey-sample-plots-forest") }
-    f.viewModel.onSurveyActivated("survey-sample-plots-forest")
+    runNow { f.surveyRepository.setActiveSurveyId("00000034-c088-5ab9-8b98-e6bccb3dca71") }
+    f.viewModel.onSurveyActivated("00000034-c088-5ab9-8b98-e6bccb3dca71")
     assertEquals(
       WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
       f.uiState.selectedWorkbenchExampleForm,
     )
 
     f.viewModel.resetDefaultXFormsXml()
-    assertTrue(f.events.contains(WorkbenchEvent.DefaultSurveyRestored("survey-kenya-coffee")))
+    assertTrue(
+      f.events.contains(
+        WorkbenchEvent.DefaultSurveyRestored("00000033-6b50-51cd-ac94-baea2ea06d65")
+      )
+    )
     assertEquals(WorkbenchExampleForm.ALL_FIELD_TYPES, f.uiState.selectedWorkbenchExampleForm)
     assertEquals(DEFAULT_WORKBENCH_XFORMS_XML, f.uiState.customXFormsXml)
   }

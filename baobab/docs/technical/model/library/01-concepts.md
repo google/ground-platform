@@ -46,7 +46,7 @@ message ConceptDef {
   // increment the version; a change in meaning requires a new ID.
   int32 version = 2;
 
-  // Owning library ("org-all-users" for global concepts). Omitted in global
+  // Owning library (the reserved "All users" organization for global concepts). Omitted in global
   // seed files, where it is implied.
   string organization_id = 3;
 

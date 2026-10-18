@@ -30,17 +30,21 @@ import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 
 class CreateSurveyUseCaseTest {
   @Test
-  fun uniqueSurveyId_slugifiesTheTitle_andAddsANumericSuffixWhenTaken() {
-    assertEquals(
-      "survey-mangrove-nursery-audit",
-      CreateSurveyUseCase.uniqueSurveyId("Mangrove Nursery Audit", emptySet()),
-    )
-    assertEquals("survey-r-d-2026", CreateSurveyUseCase.uniqueSurveyId("  R&D (2026) ", emptySet()))
-    assertEquals("survey-survey", CreateSurveyUseCase.uniqueSurveyId("!!!", emptySet()))
-    assertEquals(
-      "survey-plots-3",
-      CreateSurveyUseCase.uniqueSurveyId("Plots", setOf("survey-plots", "survey-plots-2")),
-    )
+  fun newSurvey_getsANewRandomUuid_whateverTheTitle() {
+    val store = seededStore()
+    val useCase =
+      CreateSurveyUseCase(
+        SurveyRepositoryImpl(store),
+        SurveyEditorRepositoryImpl(store),
+        LocalStoreTransactionRunner(store),
+      )
+
+    val first = useCase.newSurvey("Plots", emptyList(), null, "maya@example.org")
+    val second = useCase.newSurvey("Plots", listOf(first), null, "maya@example.org")
+
+    assertTrue(UUID.matches(first.id), first.id)
+    assertTrue(UUID.matches(second.id), second.id)
+    assertTrue(first.id != second.id)
   }
 
   @Test
@@ -60,7 +64,7 @@ class CreateSurveyUseCaseTest {
       .first { it.id == SampleOrganizationsData.KENYA_FOREST_SERVICE }
 
     val inOrg = useCase.newSurvey("Mangrove Nursery Audit", existing, kfs, "maya@example.org")
-    assertEquals("survey-mangrove-nursery-audit", inOrg.id)
+    assertTrue(UUID.matches(inOrg.id), inOrg.id)
     assertEquals(kfs.id, inOrg.organizationId)
     assertEquals(kfs.name, inOrg.location)
     assertEquals("maya@example.org", inOrg.ownerEmail)
@@ -106,5 +110,10 @@ class CreateSurveyUseCaseTest {
     assertEquals(kfs.id, draft.details.organizationId)
     assertEquals("maya@example.org", draft.sharing.ownerEmail)
     assertEquals("Maya Lin", draft.sharing.ownerProfile?.displayName)
+  }
+
+  private companion object {
+    /** A version 4 UUID in canonical lowercase form. */
+    val UUID = Regex("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
   }
 }

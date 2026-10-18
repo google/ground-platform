@@ -44,7 +44,7 @@ class ManageLibraryUseCaseTest {
     val useCase = ManageLibraryUseCase(libraries)
   }
 
-  private fun newConcept(id: String = "org.org-kenya-forest-service.drying_days") =
+  private fun newConcept(id: String = "org.00000013-31cc-5c95-90ea-379f624a5c72.drying_days") =
     LibraryConcept(
       id = id,
       organizationId = kfs,
@@ -67,7 +67,7 @@ class ManageLibraryUseCaseTest {
   @Test
   fun conceptId_usesTheLibrarysIdFormat() {
     val useCase = Fixture().useCase
-    assertEquals("org.org-kenya-forest-service.x", useCase.conceptId(kfs, " x "))
+    assertEquals("org.00000013-31cc-5c95-90ea-379f624a5c72.x", useCase.conceptId(kfs, " x "))
     assertEquals("eudr.x", useCase.conceptId(global, "x", vocabulary = "eudr"))
   }
 
@@ -152,7 +152,9 @@ class ManageLibraryUseCaseTest {
     )
     // Drafts can still change.
     val draft =
-      f.libraries.getLibrary(kfs).concept("org.org-kenya-forest-service.shade_tree_count")!!
+      f.libraries
+        .getLibrary(kfs)
+        .concept("org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count")!!
     assertEquals(LibraryStatus.DRAFT, draft.status)
     assertNull(
       f.useCase.conceptError(
@@ -167,8 +169,8 @@ class ManageLibraryUseCaseTest {
   fun deleteConcept_onlyDeletesDrafts() = runNow {
     val f = Fixture()
     val library = f.libraries.getLibrary(kfs)
-    val stableId = "org.org-kenya-forest-service.cherry_delivery_kg"
-    val draftId = "org.org-kenya-forest-service.shade_tree_count"
+    val stableId = "org.00000013-31cc-5c95-90ea-379f624a5c72.cherry_delivery_kg"
+    val draftId = "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count"
     assertNotNull(f.useCase.deleteConceptError(library, stableId))
     assertNull(f.useCase.deleteConceptError(library, draftId))
     f.useCase.deleteConcept(kfs, stableId)
@@ -181,8 +183,8 @@ class ManageLibraryUseCaseTest {
   @Test
   fun templatesAndPacks_canBeRenamedAndDeleted() = runNow {
     val f = Fixture()
-    val templateId = "org.org-kenya-forest-service.coop_member_plot_audit"
-    val packId = "org.org-kenya-forest-service.coop_certification_audit"
+    val templateId = "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_member_plot_audit"
+    val packId = "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_certification_audit"
     assertEquals("Enter a title.", f.useCase.titleError(" "))
     f.useCase.renameTemplate(kfs, templateId, " Plot audit ", "New description")
     val renamed = f.libraries.getLibrary(kfs).formTemplate(templateId)!!
@@ -220,7 +222,7 @@ class ManageLibraryUseCaseTest {
     assertNull(
       f.useCase.setGlobalEntryHidden(
         kfs,
-        "org.org-kenya-forest-service.coop_certification_audit",
+        "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_certification_audit",
         true,
       )
     )

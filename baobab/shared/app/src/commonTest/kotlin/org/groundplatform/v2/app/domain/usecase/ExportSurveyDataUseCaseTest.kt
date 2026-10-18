@@ -223,7 +223,9 @@ class ExportSurveyDataUseCaseTest {
         entity("p2", geoId = "G1", area = 2.0),
         entity("p3", area = 1.0),
       )
-    runNow { exporting.recordExport("survey-kenya-coffee", shared, "eudr_geojson") }
+    runNow {
+      exporting.recordExport("00000033-6b50-51cd-ac94-baea2ea06d65", shared, "eudr_geojson")
+    }
     val event = runNow { events.getEvents() }.single()
     assertEquals(ImpactEventType.EXPORT, event.type)
     assertEquals("eudr_geojson", event.exportProfileId)

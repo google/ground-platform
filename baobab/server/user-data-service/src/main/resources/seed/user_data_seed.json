@@ -1,7 +1,7 @@
 {
   "organizations": [
     {
-      "organizationId": "org-all-users",
+      "organizationId": "00000000-0000-4000-8000-000000000001",
       "name": "All users",
       "description": "Synthetic platform-wide organization providing shared imagery sources and the global library to every Collect One user across all surveys.",
       "logoUrl": "avatar:2",
@@ -32,7 +32,7 @@
       ]
     },
     {
-      "organizationId": "org-kenya-forest-service",
+      "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
       "name": "Kenya Forest Service",
       "description": "National forest monitoring, agroforestry extension, and EUDR traceability programs across Kenya's highland counties.",
       "websiteUrl": "https://www.kenyaforestservice.org",
@@ -115,7 +115,7 @@
       ]
     },
     {
-      "organizationId": "org-mekong-mangrove-alliance",
+      "organizationId": "00000014-1894-5118-9a64-566bbe3875bf",
       "name": "Mekong Delta Mangrove Alliance",
       "description": "Coalition of provincial agencies and NGOs restoring intertidal mangrove belts in the Mekong Delta.",
       "websiteUrl": "https://example.org/mekong-mangroves",
@@ -171,7 +171,7 @@
       ]
     },
     {
-      "organizationId": "org-open-foris-community",
+      "organizationId": "00000015-d5d3-5e48-aea5-de421811bc13",
       "name": "Open Foris Community",
       "description": "Open community of practice sharing survey templates and methods for forest and land monitoring.",
       "websiteUrl": "https://openforis.org",
@@ -199,13 +199,13 @@
   ],
   "libraries": [
     {
-      "organizationId": "org-all-users",
+      "organizationId": "00000000-0000-4000-8000-000000000001",
       "bundle": {
         "concepts": [
           {
             "id": "core.area_ha",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Plot / parcel area (ha)",
@@ -271,7 +271,7 @@
           {
             "id": "core.geoid",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "GeoID",
@@ -311,7 +311,7 @@
           {
             "id": "core.producer_id",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Producer ID",
@@ -351,7 +351,7 @@
           {
             "id": "core.producer_name",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Producer name",
@@ -406,7 +406,7 @@
           {
             "id": "core.country",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Country",
@@ -446,7 +446,7 @@
           {
             "id": "core.admin_area",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Administrative area",
@@ -521,7 +521,7 @@
           {
             "id": "core.producer_gender",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Producer gender",
@@ -613,7 +613,7 @@
           {
             "id": "core.household_size",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Household size",
@@ -653,7 +653,7 @@
           {
             "id": "core.collection_date",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Collection date",
@@ -688,7 +688,7 @@
           {
             "id": "core.site_photo",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Site photo",
@@ -728,7 +728,7 @@
           {
             "id": "core.data_consent",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Consent to data collection",
@@ -796,7 +796,7 @@
           {
             "id": "core.cooperative_name",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Cooperative or producer group",
@@ -850,7 +850,7 @@
           {
             "id": "core.certification_status",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Certification status",
@@ -934,7 +934,7 @@
           {
             "id": "core.annual_yield_kg",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Estimated annual yield (kg)",
@@ -979,7 +979,7 @@
           {
             "id": "eudr.commodity",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Commodity",
@@ -1162,7 +1162,7 @@
           {
             "id": "eudr.production_place",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Production place",
@@ -1244,7 +1244,7 @@
           {
             "id": "eudr.harvest_date_range",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Harvest date range",
@@ -1290,7 +1290,7 @@
           {
             "id": "eudr.plot_over_4ha",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Plot larger than 4 ha",
@@ -1347,7 +1347,7 @@
           {
             "id": "eudr.quantity_kg",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Quantity (kg)",
@@ -1399,7 +1399,7 @@
           {
             "id": "eudr.deforestation_free",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Deforestation-free",
@@ -1469,7 +1469,7 @@
           {
             "id": "eudr.legal_land_use",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Legal land-use status",
@@ -1568,7 +1568,7 @@
           {
             "id": "eudr.scientific_name",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Scientific species name",
@@ -1614,7 +1614,7 @@
           {
             "id": "eudr.supplier_name",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Supplier name",
@@ -1657,7 +1657,7 @@
           {
             "id": "eudr.plot_area_ha",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Production plot area (ha)",
@@ -1705,7 +1705,7 @@
           {
             "id": "ferm.intervention_type",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Restoration intervention",
@@ -1809,7 +1809,7 @@
           {
             "id": "ferm.area_under_restoration_ha",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Area under restoration (ha)",
@@ -1849,7 +1849,7 @@
           {
             "id": "ferm.start_date",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Restoration start date",
@@ -1875,7 +1875,7 @@
           {
             "id": "ferm.trees_planted",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Trees planted",
@@ -1919,7 +1919,7 @@
           {
             "id": "ferm.trees_surviving",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Trees surviving",
@@ -1963,7 +1963,7 @@
           {
             "id": "ferm.survival_rate_pct",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Survival rate (%)",
@@ -1990,7 +1990,7 @@
           {
             "id": "ferm.ecosystem_type",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Ecosystem type",
@@ -2076,7 +2076,7 @@
           {
             "id": "ferm.restoration_objective",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Restoration objective",
@@ -2147,7 +2147,7 @@
           {
             "id": "ferm.species_planted",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Planted species",
@@ -2185,7 +2185,7 @@
           {
             "id": "pame.threat_type",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Threat type",
@@ -2305,7 +2305,7 @@
           {
             "id": "pame.threat_severity",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Threat severity",
@@ -2360,7 +2360,7 @@
           {
             "id": "pame.management_zone",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Management zone",
@@ -2431,7 +2431,7 @@
           {
             "id": "pame.management_action",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Management response",
@@ -2510,7 +2510,7 @@
           {
             "id": "pame.patrol_effort_km",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Patrol effort (km)",
@@ -2550,7 +2550,7 @@
           {
             "id": "pame.patrol_date",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Patrol date",
@@ -2576,7 +2576,7 @@
           {
             "id": "pame.ranger_count",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Rangers on patrol",
@@ -2615,7 +2615,7 @@
           {
             "id": "pame.species_observed",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Species observed",
@@ -2653,7 +2653,7 @@
           {
             "id": "iplc.community_type",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Community type",
@@ -2708,7 +2708,7 @@
           {
             "id": "iplc.community_name",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Community name",
@@ -2734,7 +2734,7 @@
           {
             "id": "iplc.tenure_type",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Land tenure type",
@@ -2817,7 +2817,7 @@
           {
             "id": "iplc.legal_recognition",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Legal recognition status",
@@ -2880,7 +2880,7 @@
           {
             "id": "iplc.governance_institution",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Community governance institution",
@@ -2906,7 +2906,7 @@
           {
             "id": "iplc.resource_use",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Customary resource use",
@@ -2985,7 +2985,7 @@
           {
             "id": "iplc.fpic_consent",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Free, prior and informed consent",
@@ -3052,7 +3052,7 @@
           {
             "id": "iplc.territory_boundary",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Territory boundary",
@@ -3091,7 +3091,7 @@
           {
             "id": "lulc.land_cover_class",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Land cover class",
@@ -3180,7 +3180,7 @@
           {
             "id": "lulc.canopy_cover_pct",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Canopy cover (%)",
@@ -3221,7 +3221,7 @@
           {
             "id": "lulc.tree_height_m",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Tree height (m)",
@@ -3249,7 +3249,7 @@
           {
             "id": "lulc.land_use",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Land use",
@@ -3335,7 +3335,7 @@
           {
             "id": "lulc.crop_type",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Primary crop or tree commodity",
@@ -3451,7 +3451,7 @@
           {
             "id": "lulc.shade_tree_tier",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Shade canopy structure",
@@ -3527,7 +3527,7 @@
           {
             "id": "lulc.forest_stratum",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Forest structure & stratum",
@@ -3607,7 +3607,7 @@
           {
             "id": "lulc.basal_area_m2_ha",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Basal area (m²/ha)",
@@ -3652,7 +3652,7 @@
           {
             "id": "lulc.disturbance_driver",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Observed disturbance or degradation",
@@ -3732,7 +3732,7 @@
           {
             "id": "lulc.observation_date",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Observation date",
@@ -3755,7 +3755,7 @@
           {
             "id": "timber.species",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Tree species",
@@ -3798,7 +3798,7 @@
           {
             "id": "timber.log_id",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Log ID",
@@ -3836,7 +3836,7 @@
           {
             "id": "timber.felling_permit_id",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Felling permit or concession ID",
@@ -3879,7 +3879,7 @@
           {
             "id": "timber.stump_location",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Stump or felling point",
@@ -3919,7 +3919,7 @@
           {
             "id": "timber.volume_m3",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Volume (m³)",
@@ -3947,7 +3947,7 @@
           {
             "id": "timber.harvest_unit",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Harvest unit",
@@ -3990,7 +3990,7 @@
           {
             "id": "timber.diameter_cm",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Diameter (cm)",
@@ -4026,7 +4026,7 @@
           {
             "id": "timber.length_m",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Log length (m)",
@@ -4053,7 +4053,7 @@
           {
             "id": "timber.felling_date",
             "version": 1,
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "label": {
               "values": {
                 "en": "Felling date",
@@ -4080,7 +4080,7 @@
         "formTemplates": [
           {
             "id": "producer_profile",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Producer & farm registration",
@@ -4578,7 +4578,7 @@
           },
           {
             "id": "eudr_plot_registration",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Deforestation compliance plot check",
@@ -5171,7 +5171,7 @@
           },
           {
             "id": "ferm_monitoring_wave",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Ecosystem restoration site check",
@@ -5857,7 +5857,7 @@
           },
           {
             "id": "protected_area_patrol",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Protected area patrol & threat check",
@@ -6607,7 +6607,7 @@
           },
           {
             "id": "community_land_mapping",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Community land & resource mapping",
@@ -7359,7 +7359,7 @@
           },
           {
             "id": "lulc_ground_truth",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Land cover & crop reference observation",
@@ -8091,7 +8091,7 @@
           },
           {
             "id": "redd_plus_forest_assessment",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Forest inventory & disturbance plot",
@@ -8688,7 +8688,7 @@
           },
           {
             "id": "timber_harvest_felling",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Timber harvest & chain-of-custody check",
@@ -8993,7 +8993,7 @@
         "purposePacks": [
           {
             "id": "producer_registration",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Producer registration & market access",
@@ -9026,7 +9026,7 @@
           },
           {
             "id": "eudr_due_diligence",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Deforestation compliance",
@@ -9062,7 +9062,7 @@
           },
           {
             "id": "ferm_restoration",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Ecosystem restoration",
@@ -9094,7 +9094,7 @@
           },
           {
             "id": "protected_area_management",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Protected area management",
@@ -9128,7 +9128,7 @@
           },
           {
             "id": "iplc_land_mapping",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Community land & resource mapping",
@@ -9160,7 +9160,7 @@
           },
           {
             "id": "lulc_training_data",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Land cover & crop mapping",
@@ -9194,7 +9194,7 @@
           },
           {
             "id": "redd_plus_tfff",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Forest carbon & conservation monitoring",
@@ -9230,7 +9230,7 @@
           },
           {
             "id": "timber_traceability",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "Timber traceability",
@@ -9269,7 +9269,7 @@
         "exportProfiles": [
           {
             "id": "eudr_geojson",
-            "organizationId": "org-all-users",
+            "organizationId": "00000000-0000-4000-8000-000000000001",
             "title": {
               "values": {
                 "en": "EUDR GeoJSON"
@@ -9288,19 +9288,19 @@
         ]
       },
       "settings": {
-        "organizationId": "org-all-users"
+        "organizationId": "00000000-0000-4000-8000-000000000001"
       },
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:05Z"
     },
     {
-      "organizationId": "org-kenya-forest-service",
+      "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
       "bundle": {
         "concepts": [
           {
-            "id": "org.org-kenya-forest-service.cherry_delivery_kg",
+            "id": "org.00000013-31cc-5c95-90ea-379f624a5c72.cherry_delivery_kg",
             "version": 1,
-            "organizationId": "org-kenya-forest-service",
+            "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
             "label": {
               "values": {
                 "en": "Cherry delivered (kg)",
@@ -9331,9 +9331,9 @@
             ]
           },
           {
-            "id": "org.org-kenya-forest-service.shade_tree_count",
+            "id": "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count",
             "version": 1,
-            "organizationId": "org-kenya-forest-service",
+            "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
             "label": {
               "values": {
                 "en": "Shade trees"
@@ -9368,8 +9368,8 @@
         ],
         "formTemplates": [
           {
-            "id": "org.org-kenya-forest-service.coop_member_plot_audit",
-            "organizationId": "org-kenya-forest-service",
+            "id": "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_member_plot_audit",
+            "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
             "title": {
               "values": {
                 "en": "Coop member plot audit"
@@ -9409,7 +9409,7 @@
                       {
                         "namespaceUri": "http://groundplatform.org/xforms",
                         "qualifiedName": "ground:concept",
-                        "value": "org.org-kenya-forest-service.cherry_delivery_kg@1"
+                        "value": "org.00000013-31cc-5c95-90ea-379f624a5c72.cherry_delivery_kg@1"
                       }
                     ]
                   },
@@ -9420,7 +9420,7 @@
                       {
                         "namespaceUri": "http://groundplatform.org/xforms",
                         "qualifiedName": "ground:concept",
-                        "value": "org.org-kenya-forest-service.shade_tree_count@1"
+                        "value": "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count@1"
                       }
                     ]
                   }
@@ -9454,8 +9454,8 @@
         ],
         "purposePacks": [
           {
-            "id": "org.org-kenya-forest-service.coop_certification_audit",
-            "organizationId": "org-kenya-forest-service",
+            "id": "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_certification_audit",
+            "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
             "title": {
               "values": {
                 "en": "Coop annual certification audit"
@@ -9470,7 +9470,7 @@
             "status": "STABLE",
             "formTemplateIds": [
               "eudr_plot_registration",
-              "org.org-kenya-forest-service.coop_member_plot_audit"
+              "org.00000013-31cc-5c95-90ea-379f624a5c72.coop_member_plot_audit"
             ],
             "exportProfileIds": [
               "eudr_geojson"
@@ -9484,7 +9484,7 @@
         ]
       },
       "settings": {
-        "organizationId": "org-kenya-forest-service"
+        "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72"
       },
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:06Z"
@@ -9493,10 +9493,10 @@
   "surveys": [
     {
       "survey": {
-        "surveyId": "survey-single-point-land-use",
+        "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
         "title": "Simple Point & Land Use Survey",
         "description": "Single GPS point (map pan allowed, <= 10m accuracy required) and land-use classification. Forms auto-create land_use_observations entities via save_to.",
-        "organizationId": "org-kenya-forest-service",
+        "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
         "ownerId": "maya.lin@groundplatform.org",
         "state": "PUBLISHED",
         "version": "2026092401",
@@ -10190,7 +10190,7 @@
         ]
       },
       "acl": {
-        "surveyId": "survey-single-point-land-use",
+        "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
         "sharingPolicy": "PUBLIC",
         "peerDataVisibility": "ALL",
         "ownerEmail": "maya.lin@groundplatform.org",
@@ -10199,11 +10199,11 @@
       },
       "entities": [
         {
-          "entityId": "ent-splu-01",
+          "entityId": "00000004-36ce-5fff-b07c-6224a74c6258",
           "datasetId": "land_use_observations",
           "revision": "1",
           "label": "Primary Forest • -0.4182°, 36.9491°",
-          "surveyId": "survey-single-point-land-use",
+          "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
           "commitTimestamp": "2026-02-02T02:40:08Z",
           "datasetName": "Land Use Observations",
           "layerId": "layer-land-use-observations",
@@ -10227,11 +10227,11 @@
           }
         },
         {
-          "entityId": "ent-splu-02",
+          "entityId": "00000005-1b8a-5b6c-a70f-2ad85e5e50fd",
           "datasetId": "land_use_observations",
           "revision": "1",
           "label": "Agroforestry • -0.4209°, 36.9524°",
-          "surveyId": "survey-single-point-land-use",
+          "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
           "commitTimestamp": "2026-02-02T02:40:10Z",
           "datasetName": "Land Use Observations",
           "layerId": "layer-land-use-observations",
@@ -10255,11 +10255,11 @@
           }
         },
         {
-          "entityId": "ent-splu-03",
+          "entityId": "00000006-4ef1-5ef5-a180-ebabd6f0f7a8",
           "datasetId": "land_use_observations",
           "revision": "1",
           "label": "Wetland Riparian • -0.4168°, 36.9538°",
-          "surveyId": "survey-single-point-land-use",
+          "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
           "commitTimestamp": "2026-02-02T02:40:12Z",
           "datasetName": "Land Use Observations",
           "layerId": "layer-land-use-observations",
@@ -10285,11 +10285,11 @@
       ],
       "submissions": [
         {
-          "submissionId": "sub-splu-01",
-          "surveyId": "survey-single-point-land-use",
+          "submissionId": "0000002a-d6b0-55b4-be22-99d4f83950b9",
+          "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
           "formId": "form-single-point-land-use",
           "formVersion": "2026092401",
-          "entityId": "ent-splu-01",
+          "entityId": "00000004-36ce-5fff-b07c-6224a74c6258",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:09Z",
           "entityLabel": "Primary Forest • -0.4182°, 36.9491°",
@@ -10320,7 +10320,7 @@
           "geometryPolygons": [
             {
               "id": "geom-splu-01",
-              "submissionId": "sub-splu-01",
+              "submissionId": "0000002a-d6b0-55b4-be22-99d4f83950b9",
               "layerId": "layer-form-single-point-land-use",
               "formId": "form-single-point-land-use",
               "formTitle": "Simple Point & Land Use Observation",
@@ -10340,11 +10340,11 @@
           ]
         },
         {
-          "submissionId": "sub-splu-02",
-          "surveyId": "survey-single-point-land-use",
+          "submissionId": "0000002b-918d-55c7-ba85-a63c4a250379",
+          "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
           "formId": "form-single-point-land-use",
           "formVersion": "2026092401",
-          "entityId": "ent-splu-02",
+          "entityId": "00000005-1b8a-5b6c-a70f-2ad85e5e50fd",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:11Z",
           "entityLabel": "Agroforestry • -0.4209°, 36.9524°",
@@ -10375,7 +10375,7 @@
           "geometryPolygons": [
             {
               "id": "geom-splu-02",
-              "submissionId": "sub-splu-02",
+              "submissionId": "0000002b-918d-55c7-ba85-a63c4a250379",
               "layerId": "layer-form-single-point-land-use",
               "formId": "form-single-point-land-use",
               "formTitle": "Simple Point & Land Use Observation",
@@ -10395,11 +10395,11 @@
           ]
         },
         {
-          "submissionId": "sub-splu-03",
-          "surveyId": "survey-single-point-land-use",
+          "submissionId": "0000002c-0423-586f-937e-81d7e9a92b77",
+          "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
           "formId": "form-single-point-land-use",
           "formVersion": "2026092401",
-          "entityId": "ent-splu-03",
+          "entityId": "00000006-4ef1-5ef5-a180-ebabd6f0f7a8",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:13Z",
           "entityLabel": "Wetland Riparian • -0.4168°, 36.9538°",
@@ -10430,7 +10430,7 @@
           "geometryPolygons": [
             {
               "id": "geom-splu-03",
-              "submissionId": "sub-splu-03",
+              "submissionId": "0000002c-0423-586f-937e-81d7e9a92b77",
               "layerId": "layer-form-single-point-land-use",
               "formId": "form-single-point-land-use",
               "formTitle": "Simple Point & Land Use Observation",
@@ -10453,7 +10453,7 @@
     },
     {
       "survey": {
-        "surveyId": "survey-sample-plots-forest",
+        "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
         "title": "Sample Plot Forest Assessment Survey",
         "description": "Predefined permanent sample plot entities (SP-01 to SP-05) with forest stand assessment form: selecting the sample plot entity, taking a canopy photo, canopy cover %, and basal area.",
         "ownerId": "maya.lin@groundplatform.org",
@@ -10550,7 +10550,7 @@
                   "fields": {
                     "sample_plot_entity": {
                       "scalarValue": {
-                        "stringValue": "plot_sp01"
+                        "stringValue": "00000016-cc1f-5125-8841-166ab5b5f68f"
                       }
                     },
                     "canopy_photo": {
@@ -10643,7 +10643,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp01"
+                            "stringValue": "00000016-cc1f-5125-8841-166ab5b5f68f"
                           }
                         },
                         "label": {
@@ -10667,7 +10667,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp02"
+                            "stringValue": "00000017-d1a0-51d3-a686-e6ca450c23b2"
                           }
                         },
                         "label": {
@@ -10691,7 +10691,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp03"
+                            "stringValue": "00000018-4d16-5ab7-a57d-7dae5949cb7a"
                           }
                         },
                         "label": {
@@ -10715,7 +10715,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp04"
+                            "stringValue": "00000019-882d-5830-a254-1fe5abf727e3"
                           }
                         },
                         "label": {
@@ -10739,7 +10739,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp05"
+                            "stringValue": "0000001a-f05a-503e-9697-12c420a33cdb"
                           }
                         },
                         "label": {
@@ -11224,7 +11224,7 @@
                   "fields": {
                     "sample_plot_entity": {
                       "scalarValue": {
-                        "stringValue": "plot_sp01"
+                        "stringValue": "00000016-cc1f-5125-8841-166ab5b5f68f"
                       }
                     },
                     "canopy_photo": {
@@ -11317,7 +11317,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp01"
+                            "stringValue": "00000016-cc1f-5125-8841-166ab5b5f68f"
                           }
                         },
                         "label": {
@@ -11341,7 +11341,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp02"
+                            "stringValue": "00000017-d1a0-51d3-a686-e6ca450c23b2"
                           }
                         },
                         "label": {
@@ -11365,7 +11365,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp03"
+                            "stringValue": "00000018-4d16-5ab7-a57d-7dae5949cb7a"
                           }
                         },
                         "label": {
@@ -11389,7 +11389,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp04"
+                            "stringValue": "00000019-882d-5830-a254-1fe5abf727e3"
                           }
                         },
                         "label": {
@@ -11413,7 +11413,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "plot_sp05"
+                            "stringValue": "0000001a-f05a-503e-9697-12c420a33cdb"
                           }
                         },
                         "label": {
@@ -11858,7 +11858,7 @@
         ]
       },
       "acl": {
-        "surveyId": "survey-sample-plots-forest",
+        "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
         "sharingPolicy": "RESTRICTED",
         "peerDataVisibility": "ALL",
         "ownerEmail": "maya.lin@groundplatform.org",
@@ -11867,11 +11867,11 @@
       },
       "entities": [
         {
-          "entityId": "plot_sp01",
+          "entityId": "00000016-cc1f-5125-8841-166ab5b5f68f",
           "datasetId": "sample_plots",
           "revision": "1",
           "label": "Plot SP-01 • Upper Montane Buffer",
-          "surveyId": "survey-sample-plots-forest",
+          "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
           "commitTimestamp": "2026-02-02T02:40:15Z",
           "datasetName": "Permanent Forest Sample Plots",
           "layerId": "layer-sample-plots",
@@ -11916,11 +11916,11 @@
           }
         },
         {
-          "entityId": "plot_sp02",
+          "entityId": "00000017-d1a0-51d3-a686-e6ca450c23b2",
           "datasetId": "sample_plots",
           "revision": "1",
           "label": "Plot SP-02 • Riparian Gallery Transect",
-          "surveyId": "survey-sample-plots-forest",
+          "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
           "commitTimestamp": "2026-02-02T02:40:17Z",
           "datasetName": "Permanent Forest Sample Plots",
           "layerId": "layer-sample-plots",
@@ -11965,11 +11965,11 @@
           }
         },
         {
-          "entityId": "plot_sp03",
+          "entityId": "00000018-4d16-5ab7-a57d-7dae5949cb7a",
           "datasetId": "sample_plots",
           "revision": "1",
           "label": "Plot SP-03 • Shade Agroforestry Core",
-          "surveyId": "survey-sample-plots-forest",
+          "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
           "commitTimestamp": "2026-02-02T02:40:19Z",
           "datasetName": "Permanent Forest Sample Plots",
           "layerId": "layer-sample-plots",
@@ -12014,11 +12014,11 @@
           }
         },
         {
-          "entityId": "plot_sp04",
+          "entityId": "00000019-882d-5830-a254-1fe5abf727e3",
           "datasetId": "sample_plots",
           "revision": "1",
           "label": "Plot SP-04 • Community Forest Edge",
-          "surveyId": "survey-sample-plots-forest",
+          "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
           "commitTimestamp": "2026-02-02T02:40:21Z",
           "datasetName": "Permanent Forest Sample Plots",
           "layerId": "layer-sample-plots",
@@ -12063,11 +12063,11 @@
           }
         },
         {
-          "entityId": "plot_sp05",
+          "entityId": "0000001a-f05a-503e-9697-12c420a33cdb",
           "datasetId": "sample_plots",
           "revision": "1",
           "label": "Plot SP-05 • Ridge Benchmark Control",
-          "surveyId": "survey-sample-plots-forest",
+          "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
           "commitTimestamp": "2026-02-02T02:40:22Z",
           "datasetName": "Permanent Forest Sample Plots",
           "layerId": "layer-sample-plots",
@@ -12114,11 +12114,11 @@
       ],
       "submissions": [
         {
-          "submissionId": "sub-sp01-assess-2026",
-          "surveyId": "survey-sample-plots-forest",
+          "submissionId": "00000027-ca75-5659-b125-262308b7375c",
+          "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
           "formId": "form-sample-plots-forest",
           "formVersion": "2026092401",
-          "entityId": "plot_sp01",
+          "entityId": "00000016-cc1f-5125-8841-166ab5b5f68f",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:16Z",
           "entityLabel": "Plot SP-01 • Upper Montane Buffer",
@@ -12133,7 +12133,7 @@
             {
               "questionName": "sample_plot_entity",
               "questionLabel": "Select Predefined Sample Plot Entity",
-              "answerValue": "plot_sp01 (Plot SP-01 • Upper Montane Buffer)"
+              "answerValue": "00000016-cc1f-5125-8841-166ab5b5f68f (Plot SP-01 • Upper Montane Buffer)"
             },
             {
               "questionName": "selected_plot_stratum",
@@ -12174,8 +12174,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sp-01",
-              "submissionId": "sub-sp01-assess-2026",
-              "entityId": "plot_sp01",
+              "submissionId": "00000027-ca75-5659-b125-262308b7375c",
+              "entityId": "00000016-cc1f-5125-8841-166ab5b5f68f",
               "layerId": "layer-form-sample-plots-forest",
               "formId": "form-sample-plots-forest",
               "formTitle": "Sample Plot Entity & Forest Stand Assessment",
@@ -12195,11 +12195,11 @@
           ]
         },
         {
-          "submissionId": "sub-sp02-assess-2026",
-          "surveyId": "survey-sample-plots-forest",
+          "submissionId": "00000028-86de-51b6-9d99-71dad6fafd8c",
+          "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
           "formId": "form-sample-plots-forest",
           "formVersion": "2026092401",
-          "entityId": "plot_sp02",
+          "entityId": "00000017-d1a0-51d3-a686-e6ca450c23b2",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:18Z",
           "entityLabel": "Plot SP-02 • Riparian Gallery Transect",
@@ -12214,7 +12214,7 @@
             {
               "questionName": "sample_plot_entity",
               "questionLabel": "Select Predefined Sample Plot Entity",
-              "answerValue": "plot_sp02 (Plot SP-02 • Riparian Gallery Transect)"
+              "answerValue": "00000017-d1a0-51d3-a686-e6ca450c23b2 (Plot SP-02 • Riparian Gallery Transect)"
             },
             {
               "questionName": "canopy_photo",
@@ -12245,8 +12245,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sp-02",
-              "submissionId": "sub-sp02-assess-2026",
-              "entityId": "plot_sp02",
+              "submissionId": "00000028-86de-51b6-9d99-71dad6fafd8c",
+              "entityId": "00000017-d1a0-51d3-a686-e6ca450c23b2",
               "layerId": "layer-form-sample-plots-forest",
               "formId": "form-sample-plots-forest",
               "formTitle": "Sample Plot Entity & Forest Stand Assessment",
@@ -12266,11 +12266,11 @@
           ]
         },
         {
-          "submissionId": "sub-sp03-assess-2026",
-          "surveyId": "survey-sample-plots-forest",
+          "submissionId": "00000029-4808-5225-9de5-551d5afe8ffc",
+          "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
           "formId": "form-sample-plots-forest",
           "formVersion": "2026092401",
-          "entityId": "plot_sp03",
+          "entityId": "00000018-4d16-5ab7-a57d-7dae5949cb7a",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:20Z",
           "entityLabel": "Plot SP-03 • Shade Agroforestry Core",
@@ -12285,7 +12285,7 @@
             {
               "questionName": "sample_plot_entity",
               "questionLabel": "Select Predefined Sample Plot Entity",
-              "answerValue": "plot_sp03 (Plot SP-03 • Shade Agroforestry Core)"
+              "answerValue": "00000018-4d16-5ab7-a57d-7dae5949cb7a (Plot SP-03 • Shade Agroforestry Core)"
             },
             {
               "questionName": "canopy_photo",
@@ -12311,8 +12311,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sp-03",
-              "submissionId": "sub-sp03-assess-2026",
-              "entityId": "plot_sp03",
+              "submissionId": "00000029-4808-5225-9de5-551d5afe8ffc",
+              "entityId": "00000018-4d16-5ab7-a57d-7dae5949cb7a",
               "layerId": "layer-form-sample-plots-forest",
               "formId": "form-sample-plots-forest",
               "formTitle": "Sample Plot Entity & Forest Stand Assessment",
@@ -12335,7 +12335,7 @@
     },
     {
       "survey": {
-        "surveyId": "survey-commodity-perimeter-center",
+        "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
         "title": "Commodity Plot Perimeter & Center Mapping (EUDR)",
         "description": "Walk forest-risk commodity plot boundary (GPS override / manual pan allowed while walking) and capture the plot center point. Forms auto-create commodity_plots entities via save_to.",
         "ownerId": "maya.lin@groundplatform.org",
@@ -13491,7 +13491,7 @@
         ]
       },
       "acl": {
-        "surveyId": "survey-commodity-perimeter-center",
+        "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
         "sharingPolicy": "ANYONE_WITH_LINK",
         "peerDataVisibility": "OWN_ONLY",
         "ownerEmail": "maya.lin@groundplatform.org",
@@ -13500,11 +13500,11 @@
       },
       "entities": [
         {
-          "entityId": "ent-eudr-0419",
+          "entityId": "00000001-fd33-53c6-bdc2-e3760ec30cdb",
           "datasetId": "commodity_plots",
           "revision": "1",
           "label": "Cocoa • EUDR-GH-0419",
-          "surveyId": "survey-commodity-perimeter-center",
+          "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
           "commitTimestamp": "2026-02-02T02:40:24Z",
           "datasetName": "Commodity Plots",
           "layerId": "layer-commodity-plots",
@@ -13549,11 +13549,11 @@
           }
         },
         {
-          "entityId": "ent-eudr-0422",
+          "entityId": "00000002-4805-5b4b-9807-85db6e524462",
           "datasetId": "commodity_plots",
           "revision": "1",
           "label": "Coffee • EUDR-GH-0422",
-          "surveyId": "survey-commodity-perimeter-center",
+          "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
           "commitTimestamp": "2026-02-02T02:40:26Z",
           "datasetName": "Commodity Plots",
           "layerId": "layer-commodity-plots",
@@ -13595,11 +13595,11 @@
           }
         },
         {
-          "entityId": "ent-eudr-0428",
+          "entityId": "00000003-1a57-598a-80a0-e238b897e00a",
           "datasetId": "commodity_plots",
           "revision": "1",
           "label": "Rubber • EUDR-GH-0428",
-          "surveyId": "survey-commodity-perimeter-center",
+          "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
           "commitTimestamp": "2026-02-02T02:40:28Z",
           "datasetName": "Commodity Plots",
           "layerId": "layer-commodity-plots",
@@ -13640,11 +13640,11 @@
       ],
       "submissions": [
         {
-          "submissionId": "sub-eudr-gh-0419",
-          "surveyId": "survey-commodity-perimeter-center",
+          "submissionId": "0000001b-1ba0-5775-b6cd-033a11d861d4",
+          "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
           "formId": "form-commodity-perimeter-center",
           "formVersion": "2026092401",
-          "entityId": "ent-eudr-0419",
+          "entityId": "00000001-fd33-53c6-bdc2-e3760ec30cdb",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:25Z",
           "entityLabel": "Cocoa • EUDR-GH-0419",
@@ -13690,7 +13690,7 @@
           "geometryPolygons": [
             {
               "id": "geom-eudr-0419",
-              "submissionId": "sub-eudr-gh-0419",
+              "submissionId": "0000001b-1ba0-5775-b6cd-033a11d861d4",
               "layerId": "layer-form-commodity-perimeter",
               "formId": "form-commodity-perimeter-center",
               "formTitle": "Commodity Plot Perimeter & Center Mapping",
@@ -13710,11 +13710,11 @@
           ]
         },
         {
-          "submissionId": "sub-eudr-gh-0422",
-          "surveyId": "survey-commodity-perimeter-center",
+          "submissionId": "0000001c-e7b4-5cb1-84e0-5f506f6afc8b",
+          "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
           "formId": "form-commodity-perimeter-center",
           "formVersion": "2026092401",
-          "entityId": "ent-eudr-0422",
+          "entityId": "00000002-4805-5b4b-9807-85db6e524462",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:27Z",
           "entityLabel": "Coffee • EUDR-GH-0422",
@@ -13755,7 +13755,7 @@
           "geometryPolygons": [
             {
               "id": "geom-eudr-0422",
-              "submissionId": "sub-eudr-gh-0422",
+              "submissionId": "0000001c-e7b4-5cb1-84e0-5f506f6afc8b",
               "layerId": "layer-form-commodity-perimeter",
               "formId": "form-commodity-perimeter-center",
               "formTitle": "Commodity Plot Perimeter & Center Mapping",
@@ -13775,11 +13775,11 @@
           ]
         },
         {
-          "submissionId": "sub-eudr-gh-0428",
-          "surveyId": "survey-commodity-perimeter-center",
+          "submissionId": "0000001d-f3d9-53c0-ba3f-9b2f49e8e5cc",
+          "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
           "formId": "form-commodity-perimeter-center",
           "formVersion": "2026092401",
-          "entityId": "ent-eudr-0428",
+          "entityId": "00000003-1a57-598a-80a0-e238b897e00a",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:29Z",
           "entityLabel": "Rubber • EUDR-GH-0428",
@@ -13815,7 +13815,7 @@
           "geometryPolygons": [
             {
               "id": "geom-eudr-0428",
-              "submissionId": "sub-eudr-gh-0428",
+              "submissionId": "0000001d-f3d9-53c0-ba3f-9b2f49e8e5cc",
               "layerId": "layer-form-commodity-perimeter",
               "formId": "form-commodity-perimeter-center",
               "formTitle": "Commodity Plot Perimeter & Center Mapping",
@@ -13838,10 +13838,10 @@
     },
     {
       "survey": {
-        "surveyId": "survey-household-past-individuals",
+        "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
         "title": "Household Panel Survey (Past Individuals)",
         "description": "Household longitudinal survey using a preloaded roster of past household individuals (IND-101 to IND-106) for residency reconciliation, occupation updates, and new member enrollment.",
-        "organizationId": "org-kenya-forest-service",
+        "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
         "ownerId": "maya.lin@groundplatform.org",
         "state": "CLOSED",
         "version": "2026092401",
@@ -13938,20 +13938,20 @@
                   "fields": {
                     "primary_respondent_id": {
                       "scalarValue": {
-                        "stringValue": "ind_101"
+                        "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
                       }
                     },
                     "returning_individuals_present": {
                       "listValue": {
                         "values": [
                           {
-                            "stringValue": "ind_101"
+                            "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
                           },
                           {
-                            "stringValue": "ind_102"
+                            "stringValue": "0000000d-2972-591c-b23d-4918d3e3b7b1"
                           },
                           {
-                            "stringValue": "ind_104"
+                            "stringValue": "0000000f-23a2-50ad-b0e8-98639587eba4"
                           }
                         ]
                       }
@@ -14043,7 +14043,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_101"
+                            "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
                           }
                         },
                         "label": {
@@ -14072,7 +14072,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_102"
+                            "stringValue": "0000000d-2972-591c-b23d-4918d3e3b7b1"
                           }
                         },
                         "label": {
@@ -14101,7 +14101,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_103"
+                            "stringValue": "0000000e-95ee-5695-ad0b-54576e8d7785"
                           }
                         },
                         "label": {
@@ -14130,7 +14130,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_104"
+                            "stringValue": "0000000f-23a2-50ad-b0e8-98639587eba4"
                           }
                         },
                         "label": {
@@ -14159,7 +14159,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_105"
+                            "stringValue": "00000010-1195-5b30-ab83-7939d81cd71f"
                           }
                         },
                         "label": {
@@ -14188,7 +14188,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_106"
+                            "stringValue": "00000011-d6fa-5a2d-8848-5419c62a0359"
                           }
                         },
                         "label": {
@@ -14697,20 +14697,20 @@
                   "fields": {
                     "primary_respondent_id": {
                       "scalarValue": {
-                        "stringValue": "ind_101"
+                        "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
                       }
                     },
                     "returning_individuals_present": {
                       "listValue": {
                         "values": [
                           {
-                            "stringValue": "ind_101"
+                            "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
                           },
                           {
-                            "stringValue": "ind_102"
+                            "stringValue": "0000000d-2972-591c-b23d-4918d3e3b7b1"
                           },
                           {
-                            "stringValue": "ind_104"
+                            "stringValue": "0000000f-23a2-50ad-b0e8-98639587eba4"
                           }
                         ]
                       }
@@ -14802,7 +14802,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_101"
+                            "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
                           }
                         },
                         "label": {
@@ -14831,7 +14831,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_102"
+                            "stringValue": "0000000d-2972-591c-b23d-4918d3e3b7b1"
                           }
                         },
                         "label": {
@@ -14860,7 +14860,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_103"
+                            "stringValue": "0000000e-95ee-5695-ad0b-54576e8d7785"
                           }
                         },
                         "label": {
@@ -14889,7 +14889,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_104"
+                            "stringValue": "0000000f-23a2-50ad-b0e8-98639587eba4"
                           }
                         },
                         "label": {
@@ -14918,7 +14918,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_105"
+                            "stringValue": "00000010-1195-5b30-ab83-7939d81cd71f"
                           }
                         },
                         "label": {
@@ -14947,7 +14947,7 @@
                       "fields": {
                         "name": {
                           "scalarValue": {
-                            "stringValue": "ind_106"
+                            "stringValue": "00000011-d6fa-5a2d-8848-5419c62a0359"
                           }
                         },
                         "label": {
@@ -15416,7 +15416,7 @@
         ]
       },
       "acl": {
-        "surveyId": "survey-household-past-individuals",
+        "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
         "sharingPolicy": "RESTRICTED",
         "peerDataVisibility": "ALL",
         "ownerEmail": "maya.lin@groundplatform.org",
@@ -15425,11 +15425,11 @@
       },
       "entities": [
         {
-          "entityId": "ind_101",
+          "entityId": "0000000c-a9ae-59f6-ac51-7f5a8777598f",
           "datasetId": "past_individuals",
           "revision": "1",
           "label": "IND-101 • Amina Wanjiku (HH-KAK-014, Head)",
-          "surveyId": "survey-household-past-individuals",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "commitTimestamp": "2026-02-02T02:40:31Z",
           "datasetName": "Preloaded Past Household Individuals",
           "layerId": "layer-past-individuals",
@@ -15458,7 +15458,7 @@
               "stringValue": "#6A1B9A"
             },
             "individual_id": {
-              "stringValue": "ind_101"
+              "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
             },
             "household_code": {
               "stringValue": "HH-KAK-014"
@@ -15475,11 +15475,11 @@
           }
         },
         {
-          "entityId": "ind_102",
+          "entityId": "0000000d-2972-591c-b23d-4918d3e3b7b1",
           "datasetId": "past_individuals",
           "revision": "1",
           "label": "IND-102 • Samuel Ochieng (HH-KAK-014, Spouse)",
-          "surveyId": "survey-household-past-individuals",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "commitTimestamp": "2026-02-02T02:40:33Z",
           "datasetName": "Preloaded Past Household Individuals",
           "layerId": "layer-past-individuals",
@@ -15508,7 +15508,7 @@
               "stringValue": "#6A1B9A"
             },
             "individual_id": {
-              "stringValue": "ind_102"
+              "stringValue": "0000000d-2972-591c-b23d-4918d3e3b7b1"
             },
             "household_code": {
               "stringValue": "HH-KAK-014"
@@ -15525,11 +15525,11 @@
           }
         },
         {
-          "entityId": "ind_103",
+          "entityId": "0000000e-95ee-5695-ad0b-54576e8d7785",
           "datasetId": "past_individuals",
           "revision": "1",
           "label": "IND-103 • Grace Atieno (HH-KAK-022, Head)",
-          "surveyId": "survey-household-past-individuals",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "commitTimestamp": "2026-02-02T02:40:35Z",
           "datasetName": "Preloaded Past Household Individuals",
           "layerId": "layer-past-individuals",
@@ -15558,7 +15558,7 @@
               "stringValue": "#6A1B9A"
             },
             "individual_id": {
-              "stringValue": "ind_103"
+              "stringValue": "0000000e-95ee-5695-ad0b-54576e8d7785"
             },
             "household_code": {
               "stringValue": "HH-KAK-022"
@@ -15575,11 +15575,11 @@
           }
         },
         {
-          "entityId": "ind_104",
+          "entityId": "0000000f-23a2-50ad-b0e8-98639587eba4",
           "datasetId": "past_individuals",
           "revision": "1",
           "label": "IND-104 • David Barasa (HH-KAK-014, Child)",
-          "surveyId": "survey-household-past-individuals",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "commitTimestamp": "2026-02-02T02:40:37Z",
           "datasetName": "Preloaded Past Household Individuals",
           "layerId": "layer-past-individuals",
@@ -15608,7 +15608,7 @@
               "stringValue": "#F9AB00"
             },
             "individual_id": {
-              "stringValue": "ind_104"
+              "stringValue": "0000000f-23a2-50ad-b0e8-98639587eba4"
             },
             "household_code": {
               "stringValue": "HH-KAK-014"
@@ -15625,11 +15625,11 @@
           }
         },
         {
-          "entityId": "ind_105",
+          "entityId": "00000010-1195-5b30-ab83-7939d81cd71f",
           "datasetId": "past_individuals",
           "revision": "1",
           "label": "IND-105 • Esther Nekesa (HH-KAK-031, Head)",
-          "surveyId": "survey-household-past-individuals",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "commitTimestamp": "2026-02-02T02:40:39Z",
           "datasetName": "Preloaded Past Household Individuals",
           "layerId": "layer-past-individuals",
@@ -15658,7 +15658,7 @@
               "stringValue": "#E65100"
             },
             "individual_id": {
-              "stringValue": "ind_105"
+              "stringValue": "00000010-1195-5b30-ab83-7939d81cd71f"
             },
             "household_code": {
               "stringValue": "HH-KAK-031"
@@ -15675,11 +15675,11 @@
           }
         },
         {
-          "entityId": "ind_106",
+          "entityId": "00000011-d6fa-5a2d-8848-5419c62a0359",
           "datasetId": "past_individuals",
           "revision": "1",
           "label": "IND-106 • Peter Wafula (HH-KAK-039, Head)",
-          "surveyId": "survey-household-past-individuals",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "commitTimestamp": "2026-02-02T02:40:40Z",
           "datasetName": "Preloaded Past Household Individuals",
           "layerId": "layer-past-individuals",
@@ -15708,7 +15708,7 @@
               "stringValue": "#E65100"
             },
             "individual_id": {
-              "stringValue": "ind_106"
+              "stringValue": "00000011-d6fa-5a2d-8848-5419c62a0359"
             },
             "household_code": {
               "stringValue": "HH-KAK-039"
@@ -15727,11 +15727,11 @@
       ],
       "submissions": [
         {
-          "submissionId": "sub-ind101-wave4",
-          "surveyId": "survey-household-past-individuals",
+          "submissionId": "0000001e-d0b8-5510-ba2f-626c8db19409",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "formId": "form-household-past-individuals",
           "formVersion": "2026092401",
-          "entityId": "ind_101",
+          "entityId": "0000000c-a9ae-59f6-ac51-7f5a8777598f",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:32Z",
           "entityLabel": "IND-101 • Amina Wanjiku (HH-KAK-014, Head)",
@@ -15746,7 +15746,7 @@
             {
               "questionName": "primary_respondent_id",
               "questionLabel": "Select Preloaded Past Individual",
-              "answerValue": "ind_101 (IND-101 • Amina Wanjiku)"
+              "answerValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f (IND-101 • Amina Wanjiku)"
             },
             {
               "questionName": "residency_status",
@@ -15772,8 +15772,8 @@
           "geometryPolygons": [
             {
               "id": "geom-ind-101",
-              "submissionId": "sub-ind101-wave4",
-              "entityId": "ind_101",
+              "submissionId": "0000001e-d0b8-5510-ba2f-626c8db19409",
+              "entityId": "0000000c-a9ae-59f6-ac51-7f5a8777598f",
               "layerId": "layer-form-household-survey",
               "formId": "form-household-past-individuals",
               "formTitle": "Household Follow-Up Survey (Past Individuals)",
@@ -15793,11 +15793,11 @@
           ]
         },
         {
-          "submissionId": "sub-ind102-wave4",
-          "surveyId": "survey-household-past-individuals",
+          "submissionId": "0000001f-fb14-5f59-8a88-7663b04cf6ac",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "formId": "form-household-past-individuals",
           "formVersion": "2026092401",
-          "entityId": "ind_102",
+          "entityId": "0000000d-2972-591c-b23d-4918d3e3b7b1",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:34Z",
           "entityLabel": "IND-102 • Samuel Ochieng (HH-KAK-014, Spouse)",
@@ -15812,7 +15812,7 @@
             {
               "questionName": "primary_respondent_id",
               "questionLabel": "Select Preloaded Past Individual",
-              "answerValue": "ind_102 (IND-102 • Samuel Ochieng)"
+              "answerValue": "0000000d-2972-591c-b23d-4918d3e3b7b1 (IND-102 • Samuel Ochieng)"
             },
             {
               "questionName": "residency_status",
@@ -15827,11 +15827,11 @@
           ]
         },
         {
-          "submissionId": "sub-ind103-wave4",
-          "surveyId": "survey-household-past-individuals",
+          "submissionId": "00000020-efff-56da-8ad2-db47db9476d9",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "formId": "form-household-past-individuals",
           "formVersion": "2026092401",
-          "entityId": "ind_103",
+          "entityId": "0000000e-95ee-5695-ad0b-54576e8d7785",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:36Z",
           "entityLabel": "IND-103 • Grace Atieno (HH-KAK-022, Head)",
@@ -15846,7 +15846,7 @@
             {
               "questionName": "primary_respondent_id",
               "questionLabel": "Select Preloaded Past Individual",
-              "answerValue": "ind_103 (IND-103 • Grace Atieno)"
+              "answerValue": "0000000e-95ee-5695-ad0b-54576e8d7785 (IND-103 • Grace Atieno)"
             },
             {
               "questionName": "residency_status",
@@ -15862,8 +15862,8 @@
           "geometryPolygons": [
             {
               "id": "geom-ind-103",
-              "submissionId": "sub-ind103-wave4",
-              "entityId": "ind_103",
+              "submissionId": "00000020-efff-56da-8ad2-db47db9476d9",
+              "entityId": "0000000e-95ee-5695-ad0b-54576e8d7785",
               "layerId": "layer-form-household-survey",
               "formId": "form-household-past-individuals",
               "formTitle": "Household Follow-Up Survey (Past Individuals)",
@@ -15883,11 +15883,11 @@
           ]
         },
         {
-          "submissionId": "sub-ind104-wave4",
-          "surveyId": "survey-household-past-individuals",
+          "submissionId": "00000021-10bd-5b6d-9ba9-c448895f329c",
+          "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
           "formId": "form-household-past-individuals",
           "formVersion": "2026092401",
-          "entityId": "ind_104",
+          "entityId": "0000000f-23a2-50ad-b0e8-98639587eba4",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:38Z",
           "entityLabel": "IND-104 • David Barasa (HH-KAK-014, Child)",
@@ -15902,7 +15902,7 @@
             {
               "questionName": "primary_respondent_id",
               "questionLabel": "Select Preloaded Past Individual",
-              "answerValue": "ind_104 (IND-104 • David Barasa)"
+              "answerValue": "0000000f-23a2-50ad-b0e8-98639587eba4 (IND-104 • David Barasa)"
             },
             {
               "questionName": "residency_status",
@@ -15920,10 +15920,10 @@
     },
     {
       "survey": {
-        "surveyId": "survey-kenya-coffee",
+        "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
         "title": "All Form Field Types Showcase (Kenya Coffee)",
         "description": "EUDR traceability polygon mapping, shade-tree biodiversity inventory, and all 20+ XForms field types showcase for cooperative coffee growers.",
-        "organizationId": "org-kenya-forest-service",
+        "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
         "ownerId": "organizer@example.org",
         "state": "PUBLISHED",
         "version": "v2026.09.1",
@@ -19171,7 +19171,7 @@
                 "type": "TYPE_INT32",
                 "label": "Shade trees",
                 "conceptRef": {
-                  "conceptId": "org.org-kenya-forest-service.shade_tree_count",
+                  "conceptId": "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count",
                   "version": 1
                 }
               },
@@ -19180,21 +19180,21 @@
                 "type": "TYPE_STRING",
                 "label": "Cherry delivered (kg)",
                 "conceptRef": {
-                  "conceptId": "org.org-kenya-forest-service.cherry_delivery_kg",
+                  "conceptId": "org.00000013-31cc-5c95-90ea-379f624a5c72.cherry_delivery_kg",
                   "version": 1
                 }
               }
             ],
             "rows": [
               {
-                "rowKey": "entity-nyr-104",
+                "rowKey": "00000007-640e-5ed7-9874-4d6b6717f21d",
                 "values": {
-                  "id": "entity-nyr-104",
+                  "id": "00000007-640e-5ed7-9874-4d6b6717f21d",
                   "label": "Plot NYR-104 • Kamau Family Parcel",
                   "status": "Completed",
                   "farmer_owner": "Josephat Kamau",
                   "Cooperative": "Othaya Farmers Co-op",
-                  "washing_station": "entity-station-01",
+                  "washing_station": "0000000b-7633-5116-9d6d-50581002d8cf",
                   "primary_cultivar": "SL28 & Ruiru 11",
                   "Elevation": "1,820 m",
                   "Commodity": "Coffee",
@@ -19222,14 +19222,14 @@
                 ]
               },
               {
-                "rowKey": "entity-nyr-108",
+                "rowKey": "00000008-15d0-51f2-84eb-a72dfea5a747",
                 "values": {
-                  "id": "entity-nyr-108",
+                  "id": "00000008-15d0-51f2-84eb-a72dfea5a747",
                   "label": "Plot NYR-108 • Njeri Cooperative Block B",
                   "status": "In progress",
                   "farmer_owner": "Beatrice Njeri",
                   "Cooperative": "Othaya Farmers Co-op",
-                  "washing_station": "entity-station-01",
+                  "washing_station": "0000000b-7633-5116-9d6d-50581002d8cf",
                   "primary_cultivar": "Batian & SL34",
                   "Elevation": "1,795 m",
                   "Commodity": "Coffee",
@@ -19257,14 +19257,14 @@
                 ]
               },
               {
-                "rowKey": "entity-nyr-112",
+                "rowKey": "00000009-1699-51bb-b7a3-f90a60bedd4d",
                 "values": {
-                  "id": "entity-nyr-112",
+                  "id": "00000009-1699-51bb-b7a3-f90a60bedd4d",
                   "label": "Plot NYR-112 • Kariuki Hillside Parcel",
                   "status": "Pending",
                   "farmer_owner": "Daniel Kariuki",
                   "Cooperative": "Othaya Farmers Co-op",
-                  "washing_station": "entity-station-01",
+                  "washing_station": "0000000b-7633-5116-9d6d-50581002d8cf",
                   "primary_cultivar": "SL28 & Batian",
                   "Elevation": "1,845 m",
                   "Commodity": "Coffee",
@@ -19539,7 +19539,7 @@
         ]
       },
       "acl": {
-        "surveyId": "survey-kenya-coffee",
+        "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
         "sharingPolicy": "RESTRICTED",
         "peerDataVisibility": "ALL",
         "ownerEmail": "organizer@example.org",
@@ -19588,10 +19588,10 @@
         ]
       },
       "workingCopy": {
-        "surveyId": "survey-kenya-coffee",
+        "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
         "title": "All Form Field Types Showcase (Kenya Coffee)",
         "description": "EUDR traceability polygon mapping, shade-tree biodiversity inventory, and all 20+ XForms field types showcase for cooperative coffee growers.",
-        "organizationId": "org-kenya-forest-service",
+        "organizationId": "00000013-31cc-5c95-90ea-379f624a5c72",
         "ownerId": "organizer@example.org",
         "state": "PUBLISHED",
         "version": "v2026.09.1",
@@ -22839,7 +22839,7 @@
                 "type": "TYPE_INT32",
                 "label": "Shade trees",
                 "conceptRef": {
-                  "conceptId": "org.org-kenya-forest-service.shade_tree_count",
+                  "conceptId": "org.00000013-31cc-5c95-90ea-379f624a5c72.shade_tree_count",
                   "version": 1
                 }
               },
@@ -22848,21 +22848,21 @@
                 "type": "TYPE_STRING",
                 "label": "Cherry delivered (kg)",
                 "conceptRef": {
-                  "conceptId": "org.org-kenya-forest-service.cherry_delivery_kg",
+                  "conceptId": "org.00000013-31cc-5c95-90ea-379f624a5c72.cherry_delivery_kg",
                   "version": 1
                 }
               }
             ],
             "rows": [
               {
-                "rowKey": "entity-nyr-104",
+                "rowKey": "00000007-640e-5ed7-9874-4d6b6717f21d",
                 "values": {
-                  "id": "entity-nyr-104",
+                  "id": "00000007-640e-5ed7-9874-4d6b6717f21d",
                   "label": "Plot NYR-104 • Kamau Family Parcel",
                   "status": "Completed",
                   "farmer_owner": "Josephat Kamau",
                   "Cooperative": "Othaya Farmers Co-op",
-                  "washing_station": "entity-station-01",
+                  "washing_station": "0000000b-7633-5116-9d6d-50581002d8cf",
                   "primary_cultivar": "SL28 & Ruiru 11",
                   "Elevation": "1,820 m",
                   "Commodity": "Coffee",
@@ -22890,14 +22890,14 @@
                 ]
               },
               {
-                "rowKey": "entity-nyr-108",
+                "rowKey": "00000008-15d0-51f2-84eb-a72dfea5a747",
                 "values": {
-                  "id": "entity-nyr-108",
+                  "id": "00000008-15d0-51f2-84eb-a72dfea5a747",
                   "label": "Plot NYR-108 • Njeri Cooperative Block B",
                   "status": "In progress",
                   "farmer_owner": "Beatrice Njeri",
                   "Cooperative": "Othaya Farmers Co-op",
-                  "washing_station": "entity-station-01",
+                  "washing_station": "0000000b-7633-5116-9d6d-50581002d8cf",
                   "primary_cultivar": "Batian & SL34",
                   "Elevation": "1,795 m",
                   "Commodity": "Coffee",
@@ -22925,14 +22925,14 @@
                 ]
               },
               {
-                "rowKey": "entity-nyr-112",
+                "rowKey": "00000009-1699-51bb-b7a3-f90a60bedd4d",
                 "values": {
-                  "id": "entity-nyr-112",
+                  "id": "00000009-1699-51bb-b7a3-f90a60bedd4d",
                   "label": "Plot NYR-112 • Kariuki Hillside Parcel",
                   "status": "Pending",
                   "farmer_owner": "Daniel Kariuki",
                   "Cooperative": "Othaya Farmers Co-op",
-                  "washing_station": "entity-station-01",
+                  "washing_station": "0000000b-7633-5116-9d6d-50581002d8cf",
                   "primary_cultivar": "SL28 & Batian",
                   "Elevation": "1,845 m",
                   "Commodity": "Coffee",
@@ -23208,11 +23208,11 @@
       },
       "entities": [
         {
-          "entityId": "entity-nyr-104",
+          "entityId": "00000007-640e-5ed7-9874-4d6b6717f21d",
           "datasetId": "coffee_parcels",
           "revision": "1",
           "label": "Plot NYR-104 • Kamau Family Parcel",
-          "surveyId": "survey-kenya-coffee",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "commitTimestamp": "2026-02-02T02:40:42Z",
           "datasetName": "Smallholder Coffee Parcels",
           "layerId": "layer-coffee-parcels",
@@ -23249,7 +23249,7 @@
               "stringValue": "Othaya Farmers Co-op"
             },
             "Washing Station": {
-              "stringValue": "entity-station-01"
+              "stringValue": "0000000b-7633-5116-9d6d-50581002d8cf"
             },
             "Primary Cultivar": {
               "stringValue": "SL28 & Ruiru 11"
@@ -23272,11 +23272,11 @@
           }
         },
         {
-          "entityId": "entity-shade-201",
+          "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
           "datasetId": "shade_monitoring_plots",
           "revision": "1",
           "label": "Transect SHD-201 • Chinga North Agroforestry",
-          "surveyId": "survey-kenya-coffee",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "commitTimestamp": "2026-02-02T02:40:44Z",
           "datasetName": "Shade Tree Monitoring Plots",
           "layerId": "layer-shade-transects",
@@ -23310,7 +23310,7 @@
               "stringValue": "Chinga Restoration CFA"
             },
             "Adjacent Parcel": {
-              "stringValue": "entity-nyr-104"
+              "stringValue": "00000007-640e-5ed7-9874-4d6b6717f21d"
             },
             "Target survival rate": {
               "stringValue": "85%"
@@ -23324,11 +23324,11 @@
           }
         },
         {
-          "entityId": "entity-nyr-108",
+          "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
           "datasetId": "coffee_parcels",
           "revision": "1",
           "label": "Plot NYR-108 • Njeri Cooperative Block B",
-          "surveyId": "survey-kenya-coffee",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "commitTimestamp": "2026-02-02T02:40:48Z",
           "datasetName": "Smallholder Coffee Parcels",
           "layerId": "layer-coffee-parcels",
@@ -23365,7 +23365,7 @@
               "stringValue": "Othaya Farmers Co-op"
             },
             "Washing Station": {
-              "stringValue": "entity-station-01"
+              "stringValue": "0000000b-7633-5116-9d6d-50581002d8cf"
             },
             "Primary Cultivar": {
               "stringValue": "Batian & SL34"
@@ -23388,11 +23388,11 @@
           }
         },
         {
-          "entityId": "entity-nyr-112",
+          "entityId": "00000009-1699-51bb-b7a3-f90a60bedd4d",
           "datasetId": "coffee_parcels",
           "revision": "1",
           "label": "Plot NYR-112 • Kariuki Hillside Parcel",
-          "surveyId": "survey-kenya-coffee",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "commitTimestamp": "2026-02-02T02:40:50Z",
           "datasetName": "Smallholder Coffee Parcels",
           "layerId": "layer-coffee-parcels",
@@ -23429,7 +23429,7 @@
               "stringValue": "Othaya Farmers Co-op"
             },
             "Washing Station": {
-              "stringValue": "entity-station-01"
+              "stringValue": "0000000b-7633-5116-9d6d-50581002d8cf"
             },
             "Primary Cultivar": {
               "stringValue": "SL28 & Batian"
@@ -23452,11 +23452,11 @@
           }
         },
         {
-          "entityId": "entity-station-01",
+          "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
           "datasetId": "washing_stations",
           "revision": "1",
           "label": "Station WSH-01 • Gura River Wet Mill",
-          "surveyId": "survey-kenya-coffee",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "commitTimestamp": "2026-02-02T02:40:51Z",
           "datasetName": "Cooperative Washing Stations",
           "layerId": "layer-water-points",
@@ -23500,11 +23500,11 @@
       ],
       "submissions": [
         {
-          "submissionId": "sub-nyr-104-baseline",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "00000022-c99b-5e7e-b810-c506ebf06f19",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-eudr-baseline",
           "formVersion": "v2026.09.1",
-          "entityId": "entity-nyr-104",
+          "entityId": "00000007-640e-5ed7-9874-4d6b6717f21d",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:43Z",
           "entityLabel": "Plot NYR-104 • Kamau Family Parcel",
@@ -23549,8 +23549,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-nyr-104",
-              "submissionId": "sub-nyr-104-baseline",
-              "entityId": "entity-nyr-104",
+              "submissionId": "00000022-c99b-5e7e-b810-c506ebf06f19",
+              "entityId": "00000007-640e-5ed7-9874-4d6b6717f21d",
               "layerId": "layer-form-walked-perimeter",
               "formId": "form-eudr-baseline",
               "formTitle": "EUDR Parcel Baseline Registration",
@@ -23570,11 +23570,11 @@
           ]
         },
         {
-          "submissionId": "sub-shade-201-wave3",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "00000026-cca2-5594-b83f-02266f40048e",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-shade-canopy-audit",
           "formVersion": "v2026.09.2",
-          "entityId": "entity-shade-201",
+          "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:45Z",
           "entityLabel": "Transect SHD-201 • Chinga North Agroforestry",
@@ -23614,8 +23614,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-shade-201-w3",
-              "submissionId": "sub-shade-201-wave3",
-              "entityId": "entity-shade-201",
+              "submissionId": "00000026-cca2-5594-b83f-02266f40048e",
+              "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
               "layerId": "layer-form-canopy-subzone",
               "formId": "form-shade-canopy-audit",
               "formTitle": "Seasonal Shade Tree & Canopy Audit",
@@ -23635,11 +23635,11 @@
           ]
         },
         {
-          "submissionId": "sub-shade-201-wave2",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "00000025-7bc5-5b86-839c-a76cee54cc81",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-shade-canopy-audit",
           "formVersion": "v2026.06.0",
-          "entityId": "entity-shade-201",
+          "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:46Z",
           "entityLabel": "Transect SHD-201 • Chinga North Agroforestry",
@@ -23668,11 +23668,11 @@
           ]
         },
         {
-          "submissionId": "sub-shade-201-wave1",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "00000024-19de-50f6-ba66-f4b110edf69d",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-deforestation-alert",
           "formVersion": "v2026.03.1",
-          "entityId": "entity-shade-201",
+          "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:47Z",
           "entityLabel": "Transect SHD-201 • Chinga North Agroforestry",
@@ -23696,11 +23696,11 @@
           ]
         },
         {
-          "submissionId": "sub-nyr-108-baseline",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "00000023-36c6-5f07-a7a8-5922ec72bed0",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-household-interview",
           "formVersion": "v2026.09.1",
-          "entityId": "entity-nyr-108",
+          "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:49Z",
           "entityLabel": "Plot NYR-108 • Njeri Cooperative Block B",
@@ -23735,8 +23735,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-nyr-108",
-              "submissionId": "sub-nyr-108-baseline",
-              "entityId": "entity-nyr-108",
+              "submissionId": "00000023-36c6-5f07-a7a8-5922ec72bed0",
+              "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
               "layerId": "layer-form-walked-perimeter",
               "formId": "form-eudr-baseline",
               "formTitle": "EUDR Parcel Baseline Registration",
@@ -23756,11 +23756,11 @@
           ]
         },
         {
-          "submissionId": "sub-wsh-01-sep",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "00000030-ca50-56e0-8458-9c5728954d52",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-water-quality",
           "formVersion": "v2026.08.4",
-          "entityId": "entity-station-01",
+          "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:52Z",
           "entityLabel": "Station WSH-01 • Gura River Wet Mill",
@@ -23790,8 +23790,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-wsh-01-sep",
-              "submissionId": "sub-wsh-01-sep",
-              "entityId": "entity-station-01",
+              "submissionId": "00000030-ca50-56e0-8458-9c5728954d52",
+              "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
               "layerId": "layer-form-riparian-buffer",
               "formId": "form-water-quality",
               "formTitle": "Washing Station Effluent & Water Check",
@@ -23811,11 +23811,11 @@
           ]
         },
         {
-          "submissionId": "sub-wsh-01-aug",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "0000002f-ac7c-58b4-add0-71d03269fda7",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-water-quality",
           "formVersion": "v2026.08.4",
-          "entityId": "entity-station-01",
+          "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:53Z",
           "entityLabel": "Station WSH-01 • Gura River Wet Mill",
@@ -23839,8 +23839,8 @@
           ]
         },
         {
-          "submissionId": "sub-standalone-pest-01",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "0000002e-4118-5239-bcc9-78dda11063f5",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-pest-disease-sighting",
           "formVersion": "v2026.09.1",
           "revision": "1",
@@ -23884,7 +23884,7 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-standalone-pest-01",
-              "submissionId": "sub-standalone-pest-01",
+              "submissionId": "0000002e-4118-5239-bcc9-78dda11063f5",
               "layerId": "layer-form-pest-sighting-zone",
               "formId": "form-pest-disease-sighting",
               "formTitle": "Opportunistic Berry Borer & Rust Sighting",
@@ -23904,8 +23904,8 @@
           ]
         },
         {
-          "submissionId": "sub-standalone-erosion-02",
-          "surveyId": "survey-kenya-coffee",
+          "submissionId": "0000002d-a881-53e1-90c1-b3e3ad027756",
+          "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
           "formId": "form-pest-disease-sighting",
           "formVersion": "v2026.09.1",
           "revision": "1",
@@ -23946,10 +23946,10 @@
     },
     {
       "survey": {
-        "surveyId": "survey-serengeti-corridor",
+        "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
         "title": "Mekong Delta Mangrove Restoration",
         "description": "Coastal shoreline erosion monitoring and sapling survival rate audits across intertidal restoration zones.",
-        "organizationId": "org-mekong-mangrove-alliance",
+        "organizationId": "00000014-1894-5118-9a64-566bbe3875bf",
         "ownerId": "linh.tran@example.org",
         "state": "PUBLISHED",
         "version": "v2026.09.1",
@@ -27168,7 +27168,7 @@
         ]
       },
       "acl": {
-        "surveyId": "survey-serengeti-corridor",
+        "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
         "sharingPolicy": "ORGANIZATION",
         "peerDataVisibility": "ALL",
         "ownerEmail": "linh.tran@example.org",
@@ -27181,10 +27181,10 @@
         "recordVersion": "1"
       },
       "workingCopy": {
-        "surveyId": "survey-serengeti-corridor",
+        "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
         "title": "Mekong Delta Mangrove Restoration",
         "description": "Coastal shoreline erosion monitoring and sapling survival rate audits across intertidal restoration zones.",
-        "organizationId": "org-mekong-mangrove-alliance",
+        "organizationId": "00000014-1894-5118-9a64-566bbe3875bf",
         "ownerId": "linh.tran@example.org",
         "state": "PUBLISHED",
         "version": "v2026.09.1",
@@ -30404,11 +30404,11 @@
       },
       "entities": [
         {
-          "entityId": "entity-nyr-104",
+          "entityId": "00000007-640e-5ed7-9874-4d6b6717f21d",
           "datasetId": "coffee_parcels",
           "revision": "1",
           "label": "Plot NYR-104 • Kamau Family Parcel",
-          "surveyId": "survey-serengeti-corridor",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "commitTimestamp": "2026-02-02T02:40:57Z",
           "datasetName": "Smallholder Coffee Parcels",
           "layerId": "layer-coffee-parcels",
@@ -30445,7 +30445,7 @@
               "stringValue": "Othaya Farmers Co-op"
             },
             "Washing Station": {
-              "stringValue": "entity-station-01"
+              "stringValue": "0000000b-7633-5116-9d6d-50581002d8cf"
             },
             "Primary Cultivar": {
               "stringValue": "SL28 & Ruiru 11"
@@ -30468,11 +30468,11 @@
           }
         },
         {
-          "entityId": "entity-shade-201",
+          "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
           "datasetId": "shade_monitoring_plots",
           "revision": "1",
           "label": "Transect SHD-201 • Chinga North Agroforestry",
-          "surveyId": "survey-serengeti-corridor",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "commitTimestamp": "2026-02-02T02:40:59Z",
           "datasetName": "Shade Tree Monitoring Plots",
           "layerId": "layer-shade-transects",
@@ -30506,7 +30506,7 @@
               "stringValue": "Chinga Restoration CFA"
             },
             "Adjacent Parcel": {
-              "stringValue": "entity-nyr-104"
+              "stringValue": "00000007-640e-5ed7-9874-4d6b6717f21d"
             },
             "Target survival rate": {
               "stringValue": "85%"
@@ -30520,11 +30520,11 @@
           }
         },
         {
-          "entityId": "entity-nyr-108",
+          "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
           "datasetId": "coffee_parcels",
           "revision": "1",
           "label": "Plot NYR-108 • Njeri Cooperative Block B",
-          "surveyId": "survey-serengeti-corridor",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "commitTimestamp": "2026-02-02T02:41:03Z",
           "datasetName": "Smallholder Coffee Parcels",
           "layerId": "layer-coffee-parcels",
@@ -30561,7 +30561,7 @@
               "stringValue": "Othaya Farmers Co-op"
             },
             "Washing Station": {
-              "stringValue": "entity-station-01"
+              "stringValue": "0000000b-7633-5116-9d6d-50581002d8cf"
             },
             "Primary Cultivar": {
               "stringValue": "Batian & SL34"
@@ -30584,11 +30584,11 @@
           }
         },
         {
-          "entityId": "entity-nyr-112",
+          "entityId": "00000009-1699-51bb-b7a3-f90a60bedd4d",
           "datasetId": "coffee_parcels",
           "revision": "1",
           "label": "Plot NYR-112 • Kariuki Hillside Parcel",
-          "surveyId": "survey-serengeti-corridor",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "commitTimestamp": "2026-02-02T02:41:05Z",
           "datasetName": "Smallholder Coffee Parcels",
           "layerId": "layer-coffee-parcels",
@@ -30625,7 +30625,7 @@
               "stringValue": "Othaya Farmers Co-op"
             },
             "Washing Station": {
-              "stringValue": "entity-station-01"
+              "stringValue": "0000000b-7633-5116-9d6d-50581002d8cf"
             },
             "Primary Cultivar": {
               "stringValue": "SL28 & Batian"
@@ -30648,11 +30648,11 @@
           }
         },
         {
-          "entityId": "entity-station-01",
+          "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
           "datasetId": "washing_stations",
           "revision": "1",
           "label": "Station WSH-01 • Gura River Wet Mill",
-          "surveyId": "survey-serengeti-corridor",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "commitTimestamp": "2026-02-02T02:41:06Z",
           "datasetName": "Cooperative Washing Stations",
           "layerId": "layer-water-points",
@@ -30696,11 +30696,11 @@
       ],
       "submissions": [
         {
-          "submissionId": "sub-nyr-104-baseline",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "00000022-c99b-5e7e-b810-c506ebf06f19",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-eudr-baseline",
           "formVersion": "v2026.09.1",
-          "entityId": "entity-nyr-104",
+          "entityId": "00000007-640e-5ed7-9874-4d6b6717f21d",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:40:58Z",
           "entityLabel": "Plot NYR-104 • Kamau Family Parcel",
@@ -30745,8 +30745,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-nyr-104",
-              "submissionId": "sub-nyr-104-baseline",
-              "entityId": "entity-nyr-104",
+              "submissionId": "00000022-c99b-5e7e-b810-c506ebf06f19",
+              "entityId": "00000007-640e-5ed7-9874-4d6b6717f21d",
               "layerId": "layer-form-walked-perimeter",
               "formId": "form-eudr-baseline",
               "formTitle": "EUDR Parcel Baseline Registration",
@@ -30766,11 +30766,11 @@
           ]
         },
         {
-          "submissionId": "sub-shade-201-wave3",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "00000026-cca2-5594-b83f-02266f40048e",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-shade-canopy-audit",
           "formVersion": "v2026.09.2",
-          "entityId": "entity-shade-201",
+          "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:41:00Z",
           "entityLabel": "Transect SHD-201 • Chinga North Agroforestry",
@@ -30810,8 +30810,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-shade-201-w3",
-              "submissionId": "sub-shade-201-wave3",
-              "entityId": "entity-shade-201",
+              "submissionId": "00000026-cca2-5594-b83f-02266f40048e",
+              "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
               "layerId": "layer-form-canopy-subzone",
               "formId": "form-shade-canopy-audit",
               "formTitle": "Seasonal Shade Tree & Canopy Audit",
@@ -30831,11 +30831,11 @@
           ]
         },
         {
-          "submissionId": "sub-shade-201-wave2",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "00000025-7bc5-5b86-839c-a76cee54cc81",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-shade-canopy-audit",
           "formVersion": "v2026.06.0",
-          "entityId": "entity-shade-201",
+          "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:41:01Z",
           "entityLabel": "Transect SHD-201 • Chinga North Agroforestry",
@@ -30864,11 +30864,11 @@
           ]
         },
         {
-          "submissionId": "sub-shade-201-wave1",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "00000024-19de-50f6-ba66-f4b110edf69d",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-deforestation-alert",
           "formVersion": "v2026.03.1",
-          "entityId": "entity-shade-201",
+          "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:41:02Z",
           "entityLabel": "Transect SHD-201 • Chinga North Agroforestry",
@@ -30892,11 +30892,11 @@
           ]
         },
         {
-          "submissionId": "sub-nyr-108-baseline",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "00000023-36c6-5f07-a7a8-5922ec72bed0",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-household-interview",
           "formVersion": "v2026.09.1",
-          "entityId": "entity-nyr-108",
+          "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:41:04Z",
           "entityLabel": "Plot NYR-108 • Njeri Cooperative Block B",
@@ -30931,8 +30931,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-nyr-108",
-              "submissionId": "sub-nyr-108-baseline",
-              "entityId": "entity-nyr-108",
+              "submissionId": "00000023-36c6-5f07-a7a8-5922ec72bed0",
+              "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
               "layerId": "layer-form-walked-perimeter",
               "formId": "form-eudr-baseline",
               "formTitle": "EUDR Parcel Baseline Registration",
@@ -30952,11 +30952,11 @@
           ]
         },
         {
-          "submissionId": "sub-wsh-01-sep",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "00000030-ca50-56e0-8458-9c5728954d52",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-water-quality",
           "formVersion": "v2026.08.4",
-          "entityId": "entity-station-01",
+          "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:41:07Z",
           "entityLabel": "Station WSH-01 • Gura River Wet Mill",
@@ -30986,8 +30986,8 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-wsh-01-sep",
-              "submissionId": "sub-wsh-01-sep",
-              "entityId": "entity-station-01",
+              "submissionId": "00000030-ca50-56e0-8458-9c5728954d52",
+              "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
               "layerId": "layer-form-riparian-buffer",
               "formId": "form-water-quality",
               "formTitle": "Washing Station Effluent & Water Check",
@@ -31007,11 +31007,11 @@
           ]
         },
         {
-          "submissionId": "sub-wsh-01-aug",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "0000002f-ac7c-58b4-add0-71d03269fda7",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-water-quality",
           "formVersion": "v2026.08.4",
-          "entityId": "entity-station-01",
+          "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
           "revision": "1",
           "commitTimestamp": "2026-02-02T02:41:08Z",
           "entityLabel": "Station WSH-01 • Gura River Wet Mill",
@@ -31035,8 +31035,8 @@
           ]
         },
         {
-          "submissionId": "sub-standalone-pest-01",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "0000002e-4118-5239-bcc9-78dda11063f5",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-pest-disease-sighting",
           "formVersion": "v2026.09.1",
           "revision": "1",
@@ -31080,7 +31080,7 @@
           "geometryPolygons": [
             {
               "id": "geom-sub-standalone-pest-01",
-              "submissionId": "sub-standalone-pest-01",
+              "submissionId": "0000002e-4118-5239-bcc9-78dda11063f5",
               "layerId": "layer-form-pest-sighting-zone",
               "formId": "form-pest-disease-sighting",
               "formTitle": "Opportunistic Berry Borer & Rust Sighting",
@@ -31100,8 +31100,8 @@
           ]
         },
         {
-          "submissionId": "sub-standalone-erosion-02",
-          "surveyId": "survey-serengeti-corridor",
+          "submissionId": "0000002d-a881-53e1-90c1-b3e3ad027756",
+          "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
           "formId": "form-pest-disease-sighting",
           "formVersion": "v2026.09.1",
           "revision": "1",
@@ -31279,12 +31279,12 @@
   "mutationLogs": [
     {
       "id": "mut-outbox-04",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "CREATE_SUBMISSION",
       "title": "Seasonal Shade Tree & Canopy Audit",
       "targetLabel": "Transect SHD-201 • Chinga North Agroforestry",
-      "entityId": "entity-shade-201",
-      "submissionId": "sub-shade-201-wave3",
+      "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
+      "submissionId": "00000026-cca2-5594-b83f-02266f40048e",
       "actorName": "Maya Lin",
       "stateKey": "UPLOADING",
       "stateDetail": "Uploading (74%)",
@@ -31295,11 +31295,11 @@
     },
     {
       "id": "mut-outbox-03",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "UPDATE_SUBMISSION",
       "title": "Smallholder Household Socio-Economic Survey",
       "targetLabel": "Plot NYR-108 • Njeri Cooperative Block B",
-      "entityId": "entity-nyr-108",
+      "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
       "actorName": "Maya Lin",
       "stateKey": "RETRYING",
       "stateDetail": "Retrying over weak signal",
@@ -31310,11 +31310,11 @@
     },
     {
       "id": "mut-outbox-02",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "UPDATE_ENTITY",
       "title": "Marked parcel as In progress",
       "targetLabel": "Plot NYR-108 • Njeri Cooperative Block B",
-      "entityId": "entity-nyr-108",
+      "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
       "actorName": "Maya Lin",
       "stateKey": "QUEUED",
       "stateDetail": "Waiting for network connection",
@@ -31325,11 +31325,11 @@
     },
     {
       "id": "mut-outbox-01",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "DELETE_SUBMISSION",
       "title": "Duplicate Parcel Baseline Draft",
       "targetLabel": "Plot NYR-112 • Kariuki Hillside Parcel",
-      "entityId": "entity-nyr-112",
+      "entityId": "00000009-1699-51bb-b7a3-f90a60bedd4d",
       "actorName": "Maya Lin",
       "stateKey": "FAILED",
       "stateDetail": "Connection timed out — tap Retry",
@@ -31340,12 +31340,12 @@
     },
     {
       "id": "mut-uploaded-05",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "CREATE_SUBMISSION",
       "title": "Washing Station Effluent & Water Check",
       "targetLabel": "Station WSH-01 • Gura River Wet Mill",
-      "entityId": "entity-station-01",
-      "submissionId": "sub-wsh-01-sep",
+      "entityId": "0000000b-7633-5116-9d6d-50581002d8cf",
+      "submissionId": "00000030-ca50-56e0-8458-9c5728954d52",
       "actorName": "Maya Lin",
       "stateKey": "UPLOADED",
       "stateDetail": "Uploaded",
@@ -31357,12 +31357,12 @@
     },
     {
       "id": "mut-uploaded-04",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "UPDATE_ENTITY",
       "title": "Marked parcel as Completed",
       "targetLabel": "Plot NYR-104 • Kamau Family Parcel",
-      "entityId": "entity-nyr-104",
-      "submissionId": "sub-nyr-104-baseline",
+      "entityId": "00000007-640e-5ed7-9874-4d6b6717f21d",
+      "submissionId": "00000022-c99b-5e7e-b810-c506ebf06f19",
       "actorName": "Maya Lin",
       "stateKey": "UPLOADED",
       "stateDetail": "Uploaded",
@@ -31374,12 +31374,12 @@
     },
     {
       "id": "mut-uploaded-03",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "CREATE_SUBMISSION",
       "title": "EUDR Parcel Baseline Registration",
       "targetLabel": "Plot NYR-104 • Kamau Family Parcel",
-      "entityId": "entity-nyr-104",
-      "submissionId": "sub-nyr-104-baseline",
+      "entityId": "00000007-640e-5ed7-9874-4d6b6717f21d",
+      "submissionId": "00000022-c99b-5e7e-b810-c506ebf06f19",
       "actorName": "Maya Lin",
       "stateKey": "UPLOADED",
       "stateDetail": "Uploaded",
@@ -31391,11 +31391,11 @@
     },
     {
       "id": "mut-uploaded-02",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "UPDATE_SUBMISSION",
       "title": "Smallholder Household Socio-Economic Survey",
       "targetLabel": "Plot NYR-108 • Njeri Cooperative Block B",
-      "entityId": "entity-nyr-108",
+      "entityId": "00000008-15d0-51f2-84eb-a72dfea5a747",
       "actorName": "Maya Lin",
       "stateKey": "UPLOADED",
       "stateDetail": "Uploaded",
@@ -31407,12 +31407,12 @@
     },
     {
       "id": "mut-uploaded-01",
-      "surveyId": "survey-kenya-coffee",
+      "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
       "operationKindKey": "CREATE_SUBMISSION",
       "title": "Seasonal Shade Tree & Canopy Audit",
       "targetLabel": "Transect SHD-201 • Chinga North Agroforestry",
-      "entityId": "entity-shade-201",
-      "submissionId": "sub-shade-201-wave3",
+      "entityId": "0000000a-56d7-5c1d-9457-7457267120a3",
+      "submissionId": "00000026-cca2-5594-b83f-02266f40048e",
       "actorName": "Maya Lin",
       "stateKey": "UPLOADED",
       "stateDetail": "Uploaded",

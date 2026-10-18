@@ -13,6 +13,8 @@
  */
 package org.groundplatform.v2.app.domain.model
 
+import org.groundplatform.v2.core.impact.ALL_USERS_ORGANIZATION_ID
+
 /**
  * Role of a person in an [Organization] (the Ground 2.0 counterpart of a Collect Earth Online
  * institution affiliation).
@@ -201,6 +203,6 @@ data class Organization(
 
   companion object {
     /** Stable ID of the synthetic `"All users"` organization. */
-    const val ALL_USERS_ID = "org-all-users"
+    const val ALL_USERS_ID = ALL_USERS_ORGANIZATION_ID
   }
 }

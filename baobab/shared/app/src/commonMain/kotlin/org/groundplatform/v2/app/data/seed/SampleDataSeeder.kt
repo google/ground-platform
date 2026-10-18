@@ -56,6 +56,6 @@ class SampleDataSeeder(
     const val SEED_VERSION: Int = 16
 
     /** Survey opened by default on first launch. */
-    const val DEFAULT_ACTIVE_SURVEY_ID: String = "survey-kenya-coffee"
+    const val DEFAULT_ACTIVE_SURVEY_ID: String = "00000033-6b50-51cd-ac94-baea2ea06d65"
   }
 }

@@ -56,7 +56,10 @@ class WebAppStateMapDrawingTest {
     state.addWebMapDrawingVertex(LatLng(-1.29, 36.82))
     assertNull(state.webMapDraftGeometry)
 
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    state.launchFormForEntity(
+      entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
+      formId = "form-shade-canopy-audit",
+    )
     val controller = assertNotNull(state.activeFormWizardController)
     val path = "/data/plot_center_gps"
     assertTrue(controller.formState.fieldStates.containsKey(path))
@@ -88,7 +91,10 @@ class WebAppStateMapDrawingTest {
   @Test
   fun webMapDrawing_polygonCollectsVertices_rendersDraftOverlay_andRoutesAroundSelection() {
     val state = webAppWithWorkbenchForms()
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    state.launchFormForEntity(
+      entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
+      formId = "form-shade-canopy-audit",
+    )
     val controller = assertNotNull(state.activeFormWizardController)
     val path = "/data/plot_boundary"
     val host = state.webMapDrawing
@@ -164,7 +170,10 @@ class WebAppStateMapDrawingTest {
     assertTrue(state.webFormGeometries.isEmpty())
 
     // The sample form opens with a point, a line, and a polygon already answered.
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    state.launchFormForEntity(
+      entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
+      formId = "form-shade-canopy-audit",
+    )
     val controller = assertNotNull(state.activeFormWizardController)
     val byPath = state.webFormGeometries.associateBy { it.path }
     val point = assertNotNull(byPath["/data/plot_center_gps"])
@@ -236,7 +245,10 @@ class WebAppStateMapDrawingTest {
     host.frameGeometry("/data/plot_boundary", MapDrawingKind.POLYGON)
     assertNull(state.webMapFramingRequest)
 
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    state.launchFormForEntity(
+      entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
+      formId = "form-shade-canopy-audit",
+    )
     val controller = assertNotNull(state.activeFormWizardController)
     val polygonVertices =
       mapDrawingVertices(

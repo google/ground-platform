@@ -116,7 +116,7 @@ class SurveyOutcomePromptViewModelTest {
   @Test
   fun surveysClosedFromTheEditor_joinTheBadgeAfter90Days() {
     val f = Fixture()
-    val surveyId = "survey-single-point-land-use"
+    val surveyId = "00000036-1a1c-5c51-997f-28b67d813aa3"
     f.lifecycle.nowMillis = closedAtMillis
     runNow { f.lifecycle.lifecycle.setState(surveyId, SurveyLifecycleState.ARCHIVED) }
 

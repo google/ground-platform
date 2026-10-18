@@ -29,9 +29,9 @@ import org.groundplatform.v2.app.domain.model.OrganizationType
  */
 object BackendStaticOrganizationsData {
   const val ALL_USERS = Organization.ALL_USERS_ID
-  const val KENYA_FOREST_SERVICE = "org-kenya-forest-service"
-  const val MEKONG_MANGROVE_ALLIANCE = "org-mekong-mangrove-alliance"
-  const val OPEN_FORIS_COMMUNITY = "org-open-foris-community"
+  const val KENYA_FOREST_SERVICE = "00000013-31cc-5c95-90ea-379f624a5c72"
+  const val MEKONG_MANGROVE_ALLIANCE = "00000014-1894-5118-9a64-566bbe3875bf"
+  const val OPEN_FORIS_COMMUNITY = "00000015-d5d3-5e48-aea5-de421811bc13"
 
   /** Email of the sample signed-in user. */
   const val SIGNED_IN_EMAIL = "maya.lin@groundplatform.org"
@@ -210,18 +210,18 @@ object BackendStaticOrganizationsData {
    */
   fun organizationIdForSurvey(surveyId: String): String? =
     when (surveyId) {
-      "survey-kenya-coffee",
-      "survey-single-point-land-use",
-      "survey-household-past-individuals" -> KENYA_FOREST_SERVICE
-      "survey-serengeti-corridor" -> MEKONG_MANGROVE_ALLIANCE
+      "00000033-6b50-51cd-ac94-baea2ea06d65",
+      "00000036-1a1c-5c51-997f-28b67d813aa3",
+      "00000032-8d62-5717-8074-f4917e0cd76d" -> KENYA_FOREST_SERVICE
+      "00000035-caf4-571e-b907-f506f92666ab" -> MEKONG_MANGROVE_ALLIANCE
       else -> null
     }
 
   /** Owner of each sample survey. */
   fun ownerEmailForSurvey(surveyId: String): String =
     when (surveyId) {
-      "survey-kenya-coffee" -> "organizer@example.org"
-      "survey-serengeti-corridor" -> "linh.tran@example.org"
+      "00000033-6b50-51cd-ac94-baea2ea06d65" -> "organizer@example.org"
+      "00000035-caf4-571e-b907-f506f92666ab" -> "linh.tran@example.org"
       else -> SIGNED_IN_EMAIL
     }
 }

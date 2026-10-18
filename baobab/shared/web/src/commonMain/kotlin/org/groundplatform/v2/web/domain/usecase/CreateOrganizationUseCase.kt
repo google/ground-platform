@@ -18,6 +18,7 @@ import org.groundplatform.v2.app.domain.model.Countries
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationType
 import org.groundplatform.v2.app.domain.repository.OrganizationRepository
+import org.groundplatform.v2.core.ids.RecordIds
 
 /**
  * Creates an organization managed by the signed-in user.
@@ -27,11 +28,16 @@ import org.groundplatform.v2.app.domain.repository.OrganizationRepository
  * fields (type and ISO 3166-1 alpha-2 country code) are stored as given; an unknown country code is
  * refused (see [countryCodeError]).
  */
-class CreateOrganizationUseCase(private val organizationRepository: OrganizationRepository) {
+class CreateOrganizationUseCase(
+  private val organizationRepository: OrganizationRepository,
+  /** IDs of new organizations (random UUIDs). */
+  private val newOrganizationId: () -> String = RecordIds::newId,
+) {
   /**
    * A new listed-or-unlisted organization named [name] (or `"Untitled organization"` when blank)
-   * with an ID unique among [existingOrganizations] and a placeholder logo that cycles through the
-   * placeholder avatars. [countryCode] is trimmed and upper-cased; blank means not specified.
+   * with a new random ID and a placeholder logo that cycles through the placeholder avatars (picked
+   * from the size of [existingOrganizations]). [countryCode] is trimmed and upper-cased; blank
+   * means not specified.
    */
   fun newOrganization(
     name: String,
@@ -43,7 +49,7 @@ class CreateOrganizationUseCase(private val organizationRepository: Organization
   ): Organization {
     val trimmedName = name.trim().ifBlank { DEFAULT_NAME }
     return Organization(
-      id = uniqueOrganizationId(trimmedName, existingOrganizations.map { it.id }.toSet()),
+      id = newOrganizationId(),
       name = trimmedName,
       description = description.trim(),
       isListed = isListed,
@@ -85,21 +91,5 @@ class CreateOrganizationUseCase(private val organizationRepository: Organization
 
     /** Number of placeholder `avatar:<n>` images new organizations cycle through. */
     private const val AVATAR_COUNT = 9
-
-    /** An organization ID derived from [name] (`org-<slug>`), made unique among [takenIds]. */
-    fun uniqueOrganizationId(name: String, takenIds: Set<String>): String {
-      val slug =
-        name
-          .lowercase()
-          .replace(Regex("[^a-z0-9]+"), "-")
-          .trim('-')
-          .ifBlank { "organization" }
-          .take(40)
-      val base = "org-$slug"
-      if (base !in takenIds) return base
-      var n = 2
-      while ("$base-$n" in takenIds) n++
-      return "$base-$n"
-    }
   }
 }

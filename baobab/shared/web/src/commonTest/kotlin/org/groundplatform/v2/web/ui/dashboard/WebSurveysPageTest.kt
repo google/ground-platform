@@ -16,6 +16,7 @@ package org.groundplatform.v2.web.ui.dashboard
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.groundplatform.v2.app.data.datasource.local.store.sampleDataHolder
@@ -56,16 +57,24 @@ class WebSurveysPageTest {
     fun label(id: String) =
       WebSurveysList.accessLabel(surveys.first { it.id == id }, organizations, user)
     // Maya owns this personal survey.
-    assertEquals(SurveyAccessLabel.OWNER, label("survey-sample-plots-forest"))
+    assertEquals(SurveyAccessLabel.OWNER, label("00000034-c088-5ab9-8b98-e6bccb3dca71"))
     // Owned by someone else in an organization she manages.
-    assertEquals(SurveyAccessLabel.ORGANIZATION_MANAGER, label("survey-kenya-coffee"))
+    assertEquals(
+      SurveyAccessLabel.ORGANIZATION_MANAGER,
+      label("00000033-6b50-51cd-ac94-baea2ea06d65"),
+    )
     // Owned by someone else in an organization she's a member of.
-    assertEquals(SurveyAccessLabel.ORGANIZATION_MEMBER, label("survey-serengeti-corridor"))
+    assertEquals(
+      SurveyAccessLabel.ORGANIZATION_MEMBER,
+      label("00000035-caf4-571e-b907-f506f92666ab"),
+    )
     // Ownership wins over organization role.
-    assertEquals(SurveyAccessLabel.OWNER, label("survey-single-point-land-use"))
+    assertEquals(SurveyAccessLabel.OWNER, label("00000036-1a1c-5c51-997f-28b67d813aa3"))
     // Neither owner nor member: shared explicitly.
     val stranger =
-      surveys.first { it.id == "survey-kenya-coffee" }.copy(organizationId = "org-unknown")
+      surveys
+        .first { it.id == "00000033-6b50-51cd-ac94-baea2ea06d65" }
+        .copy(organizationId = "org-unknown")
     assertEquals(
       SurveyAccessLabel.SHARED,
       WebSurveysList.accessLabel(stranger, organizations, user),
@@ -88,7 +97,7 @@ class WebSurveysPageTest {
     // Free text matches the organization name too.
     val byOrgName =
       WebSurveysList.filter(surveys, organizations, user, SurveyListFilter.All, "mekong")
-    assertEquals(listOf("survey-serengeti-corridor"), byOrgName.map { it.id })
+    assertEquals(listOf("00000035-caf4-571e-b907-f506f92666ab"), byOrgName.map { it.id })
     assertTrue(
       WebSurveysList.filter(surveys, organizations, user, SurveyListFilter.All, "zzz").isEmpty()
     )
@@ -111,7 +120,6 @@ class WebSurveysPageTest {
     val testState = WebAppState(dataHolder = sampleDataHolder())
     val before = testState.surveys.size
     val id = testState.createSurvey(title = "Mangrove Nursery Audit", organizationId = kfs.id)
-    assertEquals("survey-mangrove-nursery-audit", id)
     assertEquals(before + 1, testState.surveys.size)
     val created = testState.surveys.last()
     assertEquals(id, created.id)
@@ -121,11 +129,8 @@ class WebSurveysPageTest {
     assertEquals(id, testState.activeSurveyId)
     assertEquals(kfs.id, testState.activeSurveyEditorDraft.details.organizationId)
     assertEquals(user, testState.activeSurveyEditorDraft.sharing.ownerEmail)
-    // A second survey with the same title gets a unique ID; a blank title gets a default.
-    assertEquals(
-      "survey-mangrove-nursery-audit-2",
-      testState.createSurvey("Mangrove Nursery Audit"),
-    )
+    // A second survey with the same title gets its own random ID; a blank title gets a default.
+    assertNotEquals(id, testState.createSurvey("Mangrove Nursery Audit"))
     val personal = testState.createSurvey("   ")
     assertEquals("Untitled survey", testState.surveys.first { it.id == personal }.title)
     assertNull(testState.surveys.first { it.id == personal }.organizationId)

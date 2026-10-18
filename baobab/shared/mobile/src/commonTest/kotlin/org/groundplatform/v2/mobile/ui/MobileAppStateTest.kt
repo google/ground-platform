@@ -120,7 +120,9 @@ class MobileAppStateTest {
     // Search by organization name (Kenya Forest Service runs three sample surveys)
     state.updateSearchQuery("Forest Service")
     assertEquals(3, state.filteredSurveys.size)
-    assertTrue(state.filteredSurveys.all { it.organizationId == "org-kenya-forest-service" })
+    assertTrue(
+      state.filteredSurveys.all { it.organizationId == "00000013-31cc-5c95-90ea-379f624a5c72" }
+    )
 
     // Search by another location
     state.updateSearchQuery("Brazil")
@@ -139,11 +141,11 @@ class MobileAppStateTest {
     assertEquals(null, state.selectedEntityId)
     assertEquals(null, state.selectedEntity)
 
-    state.openSurvey("survey-kenya-coffee")
+    state.openSurvey("00000033-6b50-51cd-ac94-baea2ea06d65")
 
     assertEquals(AppScreen.MAIN_SURVEY, state.currentScreen)
     assertEquals(MainSurveyViewMode.MAP, state.mainViewMode)
-    assertEquals("survey-kenya-coffee", state.activeSurvey.id)
+    assertEquals("00000033-6b50-51cd-ac94-baea2ea06d65", state.activeSurvey.id)
     assertEquals(null, state.selectedEntityId)
     assertEquals(null, state.selectedEntity)
     assertFalse(state.isEntityBottomSheetExpanded)
@@ -156,8 +158,8 @@ class MobileAppStateTest {
     assertEquals(5, state.visibleMapEntities.size)
     assertEquals(null, state.selectedEntityId)
 
-    state.selectEntity("entity-nyr-104")
-    assertEquals("entity-nyr-104", state.selectedEntityId)
+    state.selectEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", state.selectedEntityId)
 
     // Hide the "Smallholder Coffee Parcels" layer (`layer-coffee-parcels`)
     state.toggleLayerVisibility("layer-coffee-parcels")
@@ -176,8 +178,9 @@ class MobileAppStateTest {
     val state =
       MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
 
-    // 1. Stage 1 (Initialized Empty Circle "○") Polygon entity: `entity-nyr-112`
-    val nyr112 = state.entities.first { it.id == "entity-nyr-112" }
+    // 1. Stage 1 (Initialized Empty Circle "○") Polygon entity:
+    // `00000009-1699-51bb-b7a3-f90a60bedd4d`
+    val nyr112 = state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
     assertEquals("Polygon", nyr112.geometryTypeLabel)
     assertEquals("○", nyr112.markerSymbol)
     assertEquals("#E65100", nyr112.markerColorCss)
@@ -185,8 +188,8 @@ class MobileAppStateTest {
     assertEquals("○ Pending", nyr112.mapStatusSummaryBadge)
     assertEquals(0, nyr112.submissions.size)
 
-    // 2. Stage 2 (Half-Filled Circle "◐") Polygon entity: `entity-nyr-108`
-    val nyr108 = state.entities.first { it.id == "entity-nyr-108" }
+    // 2. Stage 2 (Half-Filled Circle "◐") Polygon entity: `00000008-15d0-51f2-84eb-a72dfea5a747`
+    val nyr108 = state.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }
     assertEquals("Polygon", nyr108.geometryTypeLabel)
     assertEquals("◐", nyr108.markerSymbol)
     assertEquals("#F9AB00", nyr108.markerColorCss)
@@ -194,8 +197,8 @@ class MobileAppStateTest {
     assertEquals("◐ In progress", nyr108.mapStatusSummaryBadge)
     assertEquals(1, nyr108.submissions.size)
 
-    // 3. Stage 3 (Completed Checkmark "✓") Polygon entity: `entity-nyr-104`
-    state.selectEntity("entity-nyr-104")
+    // 3. Stage 3 (Completed Checkmark "✓") Polygon entity: `00000007-640e-5ed7-9874-4d6b6717f21d`
+    state.selectEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
     val nyr104 = state.selectedEntity!!
     assertEquals("Polygon", nyr104.geometryTypeLabel)
     assertEquals("✓", nyr104.markerSymbol)
@@ -205,21 +208,22 @@ class MobileAppStateTest {
     assertEquals(1, nyr104.submissions.size)
     assertEquals("Maya Lin", nyr104.submissions.first().collectorName)
 
-    // 4. LineString entity (`entity-shade-201`) and Point entity (`entity-station-01`)
-    state.selectEntity("entity-shade-201")
+    // 4. LineString entity (`0000000a-56d7-5c1d-9457-7457267120a3`) and Point entity
+    // (`0000000b-7633-5116-9d6d-50581002d8cf`)
+    state.selectEntity("0000000a-56d7-5c1d-9457-7457267120a3")
     val shade201 = state.selectedEntity!!
     assertEquals("LineString", shade201.geometryTypeLabel)
     assertEquals("✓", shade201.markerSymbol)
     assertEquals(3, shade201.submissions.size)
     assertEquals(null, state.selectedSubmission)
 
-    val station01 = state.entities.first { it.id == "entity-station-01" }
+    val station01 = state.entities.first { it.id == "0000000b-7633-5116-9d6d-50581002d8cf" }
     assertEquals("Point", station01.geometryTypeLabel)
     assertEquals("◐", station01.markerSymbol)
     assertEquals(2, station01.submissions.size)
 
     // Click a specific submission in the unified 1:N list to view its full submission details
-    state.selectSubmissionDetail("sub-shade-201-wave3")
+    state.selectSubmissionDetail("00000026-cca2-5594-b83f-02266f40048e")
     val detail = state.selectedSubmission!!
     assertEquals("Maya Lin", detail.collectorName)
     assertEquals("2026-09-19 08:45 UTC", detail.timestamp)
@@ -232,7 +236,7 @@ class MobileAppStateTest {
       MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
 
     // All forms linked to an entity dataset follow 1:N cardinality and remain enabled
-    val nyr104 = state.entities.first { it.id == "entity-nyr-104" }
+    val nyr104 = state.entities.first { it.id == "00000007-640e-5ed7-9874-4d6b6717f21d" }
     val nyr104Forms = state.formsForEntity(nyr104)
     assertEquals(2, nyr104Forms.size)
     assertEquals(
@@ -241,26 +245,33 @@ class MobileAppStateTest {
     )
     assertTrue(nyr104Forms.all { state.isFormButtonEnabled(nyr104, it) })
 
-    // Verify 3-stage marker progression on `entity-nyr-112`: ○ (Pending) -> ◐ (In progress) -> ✓
+    // Verify 3-stage marker progression on `00000009-1699-51bb-b7a3-f90a60bedd4d`: ○ (Pending) -> ◐
+    // (In progress) -> ✓
     // (Completed)
-    val initial112 = state.entities.first { it.id == "entity-nyr-112" }
+    val initial112 = state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
     assertEquals("○", initial112.markerSymbol)
     assertEquals("#E65100", initial112.markerColorCss)
     assertEquals("Pending", initial112.workflowStatus)
 
     // 1st submission transitions marker-symbol from "○" to "◐" (half-filled circle)
-    state.launchFormForEntity(entityId = "entity-nyr-112", formId = "form-household-interview")
+    state.launchFormForEntity(
+      entityId = "00000009-1699-51bb-b7a3-f90a60bedd4d",
+      formId = "form-household-interview",
+    )
     state.completeActiveFormSubmission()
-    val stage2Entity = state.entities.first { it.id == "entity-nyr-112" }
+    val stage2Entity = state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
     assertEquals("◐", stage2Entity.markerSymbol)
     assertEquals("#F9AB00", stage2Entity.markerColorCss)
     assertEquals("In progress", stage2Entity.workflowStatus)
     assertEquals(1, stage2Entity.submissions.size)
 
     // 2nd submission transitions marker-symbol from "◐" to "✓" (checkmark)
-    state.launchFormForEntity(entityId = "entity-nyr-112", formId = "form-eudr-baseline")
+    state.launchFormForEntity(
+      entityId = "00000009-1699-51bb-b7a3-f90a60bedd4d",
+      formId = "form-eudr-baseline",
+    )
     state.completeActiveFormSubmission()
-    val stage3Entity = state.entities.first { it.id == "entity-nyr-112" }
+    val stage3Entity = state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
     assertEquals("✓", stage3Entity.markerSymbol)
     assertEquals("#1E8E3E", stage3Entity.markerColorCss)
     assertEquals("Completed", stage3Entity.workflowStatus)
@@ -295,7 +306,7 @@ class MobileAppStateTest {
     assertEquals(AppScreen.DOWNLOAD_SURVEY, state.currentScreen)
 
     // Sign out returns to SIGN_IN
-    state.openSurvey("survey-kenya-coffee")
+    state.openSurvey("00000033-6b50-51cd-ac94-baea2ea06d65")
     state.drawerSignOut()
     assertEquals(AppScreen.SIGN_IN, state.currentScreen)
     assertFalse(state.isSignedIn)
@@ -311,20 +322,23 @@ class MobileAppStateTest {
     assertEquals("±2.1 m", state.gnssStatusChipLabel)
 
     // Open QR Code modal for geospatial entity
-    state.openEntityQrCode("entity-nyr-104")
-    assertEquals("entity-nyr-104", state.activeQrCodeEntity?.id)
+    state.openEntityQrCode("00000007-640e-5ed7-9874-4d6b6717f21d")
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", state.activeQrCodeEntity?.id)
     state.closeEntityQrCode()
     assertEquals(null, state.activeQrCodeEntity)
 
     // Share PDF for geospatial entity
-    state.shareEntityPdf("entity-nyr-104")
+    state.shareEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
     assertTrue(state.activeSharedPdfSheet?.pdfFileName?.contains("S2-10c4a89e2f") == true)
     state.closeSharePdfSheet()
     assertEquals(null, state.activeSharedPdfSheet)
 
     // Share PDF for submission
-    state.shareSubmissionPdf("sub-nyr-104-baseline")
-    assertTrue(state.activeSharedPdfSheet?.pdfFileName?.contains("sub-nyr-104-baseline") == true)
+    state.shareSubmissionPdf("00000022-c99b-5e7e-b810-c506ebf06f19")
+    assertTrue(
+      state.activeSharedPdfSheet?.pdfFileName?.contains("00000022-c99b-5e7e-b810-c506ebf06f19") ==
+        true
+    )
     state.closeSharePdfSheet()
     assertEquals(null, state.activeSharedPdfSheet)
   }
@@ -345,8 +359,8 @@ class MobileAppStateTest {
 
     // Selecting a submission geometry resolves its parent entity and submission
     state.selectSubmissionGeometry("geom-sub-shade-201-w3")
-    assertEquals("entity-shade-201", state.selectedEntity?.id)
-    assertEquals("sub-shade-201-wave3", state.selectedSubmission?.id)
+    assertEquals("0000000a-56d7-5c1d-9457-7457267120a3", state.selectedEntity?.id)
+    assertEquals("00000026-cca2-5594-b83f-02266f40048e", state.selectedSubmission?.id)
 
     // Select between Map (NORMAL) vs Satellite basemap and toggle offline basemap visibility
     assertEquals("Map", BasemapType.NORMAL.label)
@@ -439,8 +453,8 @@ class MobileAppStateTest {
     assertFalse(state.isEntityBottomSheetExpanded)
 
     // Selecting an entity opens the bottom sheet in collapsed (compact peek bar) state by default
-    state.selectEntity("entity-nyr-104")
-    assertEquals("entity-nyr-104", state.selectedEntityId)
+    state.selectEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", state.selectedEntityId)
     assertFalse(state.isEntityBottomSheetExpanded)
 
     // Toggling expands the bottom sheet
@@ -450,11 +464,11 @@ class MobileAppStateTest {
     // Explicit collapse returns to peek state without deselecting the entity
     state.updateEntityBottomSheetExpanded(false)
     assertFalse(state.isEntityBottomSheetExpanded)
-    assertEquals("entity-nyr-104", state.selectedEntityId)
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", state.selectedEntityId)
 
     // Selecting an entity opens the bottom sheet in collapsed/peek state so the map stays visible
-    state.selectEntity("entity-shade-201")
-    assertEquals("entity-shade-201", state.selectedEntityId)
+    state.selectEntity("0000000a-56d7-5c1d-9457-7457267120a3")
+    assertEquals("0000000a-56d7-5c1d-9457-7457267120a3", state.selectedEntityId)
     assertFalse(state.isEntityBottomSheetExpanded)
 
     // Swiping up expands the bottom sheet to full screen
@@ -603,11 +617,11 @@ class MobileAppStateTest {
     assertEquals(null, state.activeNavigation)
 
     // 1. Start straight-line navigation to a Geospatial Entity
-    state.startNavigationToEntity("entity-nyr-104")
+    state.startNavigationToEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
     val entityNav = assertNotNull(state.activeNavigation)
     assertEquals(NavigationTargetKind.ENTITY, entityNav.targetKind)
-    assertEquals("entity-nyr-104", entityNav.targetId)
-    assertTrue(state.isNavigatingToEntity("entity-nyr-104"))
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", entityNav.targetId)
+    assertTrue(state.isNavigatingToEntity("00000007-640e-5ed7-9874-4d6b6717f21d"))
     assertFalse(state.isNavigatingToSubmission("sub-nyr-104-a"))
     assertTrue(entityNav.vector.distanceMeters > 0)
     assertTrue(entityNav.vector.bearingDegrees in 0..359)
@@ -644,20 +658,22 @@ class MobileAppStateTest {
     assertEquals(0, arrivedNav.vector.estimatedWalkMinutes)
 
     // 3. Switch straight-line navigation to a Form Submission
-    state.startNavigationToSubmission("sub-shade-201-wave3")
+    state.startNavigationToSubmission("00000026-cca2-5594-b83f-02266f40048e")
     val subNav = assertNotNull(state.activeNavigation)
     assertEquals(NavigationTargetKind.SUBMISSION, subNav.targetKind)
-    assertEquals("sub-shade-201-wave3", subNav.targetId)
-    assertTrue(state.isNavigatingToSubmission("sub-shade-201-wave3"))
-    assertFalse(state.isNavigatingToEntity("entity-nyr-104"))
-    assertNotNull(state.formattedWayfindingBadgeForSubmission("sub-shade-201-wave3"))
+    assertEquals("00000026-cca2-5594-b83f-02266f40048e", subNav.targetId)
+    assertTrue(state.isNavigatingToSubmission("00000026-cca2-5594-b83f-02266f40048e"))
+    assertFalse(state.isNavigatingToEntity("00000007-640e-5ed7-9874-4d6b6717f21d"))
+    assertNotNull(
+      state.formattedWayfindingBadgeForSubmission("00000026-cca2-5594-b83f-02266f40048e")
+    )
 
     assertTrue(
       "navigation-line" in SurveyMapContent.main(state, showNavigation = true).overlayIds()
     )
 
     // 4. Toggle / Stop straight-line navigation
-    state.toggleNavigationToSubmission("sub-shade-201-wave3")
+    state.toggleNavigationToSubmission("00000026-cca2-5594-b83f-02266f40048e")
     assertEquals(null, state.activeNavigation)
     val stoppedMap = SurveyMapContent.main(state, showNavigation = true)
     assertFalse("navigation-line" in stoppedMap.overlayIds())
@@ -665,7 +681,9 @@ class MobileAppStateTest {
 
     // 5. Verify distance/wayfinding badge is computed ONLY for geometry fields in a submission
     val wave3Sub =
-      assertNotNull(state.allSubmissions.firstOrNull { it.id == "sub-shade-201-wave3" })
+      assertNotNull(
+        state.allSubmissions.firstOrNull { it.id == "00000026-cca2-5594-b83f-02266f40048e" }
+      )
     val geomField =
       assertNotNull(
         wave3Sub.fields.firstOrNull { it.questionName == "audit/canopy_sample_polygon" }
@@ -717,7 +735,7 @@ class MobileAppStateTest {
     // (SWITCH_SURVEYS)
     state.signInWithGoogle()
     state.acceptTermsOfService()
-    state.openSurvey("survey-kenya-coffee")
+    state.openSurvey("00000033-6b50-51cd-ac94-baea2ea06d65")
     state.drawerSwitchSurveys()
     assertEquals(AppScreen.MAIN_SURVEY, state.currentScreen)
     assertEquals(MainDrawerSubView.SWITCH_SURVEYS, state.activeDrawerSubView)
@@ -783,7 +801,7 @@ class MobileAppStateTest {
     assertTrue(state.groupedFilteredListSubmissions.isEmpty())
 
     // 2. Entity bottom sheet submission list groups submissions by form and uses form title
-    val shade201 = state.entities.first { it.id == "entity-shade-201" }
+    val shade201 = state.entities.first { it.id == "0000000a-56d7-5c1d-9457-7457267120a3" }
     val shadeGroups = state.groupedSubmissionsForEntity(shade201)
     assertEquals(2, shadeGroups.size)
     assertEquals(
@@ -811,7 +829,7 @@ class MobileAppStateTest {
     // When a survey has no geospatial entities, map layers section in the Layers sheet is hidden
     val noEntityState =
       MobileAppState(dataHolder = sampleDataHolder()).apply {
-        openSurvey("survey-single-point-land-use")
+        openSurvey("00000036-1a1c-5c51-997f-28b67d813aa3")
         entities = emptyList()
       }
     assertTrue(noEntityState.entities.isEmpty())
@@ -819,7 +837,7 @@ class MobileAppStateTest {
     assertTrue(noEntityState.entityDatasetLayers.isEmpty())
 
     // 4. Shared submission PDF sheet uses the form title instead of 'Form Submission PDF'
-    state.shareSubmissionPdf("sub-nyr-104-baseline")
+    state.shareSubmissionPdf("00000022-c99b-5e7e-b810-c506ebf06f19")
     val pdfSheet = assertNotNull(state.activeSharedPdfSheet)
     assertTrue(pdfSheet.title.contains("EUDR Parcel Baseline Registration"))
     assertFalse(pdfSheet.title.contains("form", ignoreCase = true))
@@ -844,7 +862,7 @@ class MobileAppStateTest {
     assertEquals(1, state.forms.count { !it.requiresEntity })
 
     // 2. Launching a form from the FAB (with no entity pre-selected from the map)
-    val initialNyr108 = state.entities.first { it.id == "entity-nyr-108" }
+    val initialNyr108 = state.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }
     val initialNyr108Subs = initialNyr108.submissions.size
     assertEquals(1, initialNyr108Subs)
     assertEquals("◐", initialNyr108.markerSymbol)
@@ -873,19 +891,27 @@ class MobileAppStateTest {
     assertEquals(MainSurveyViewMode.LIST, state.entityRefSelectorViewMode)
     assertEquals(3, state.filteredEntityRefCandidates.size)
     assertEquals(
-      listOf("entity-nyr-104", "entity-nyr-108", "entity-nyr-112"),
+      listOf(
+        "00000007-640e-5ed7-9874-4d6b6717f21d",
+        "00000008-15d0-51f2-84eb-a72dfea5a747",
+        "00000009-1699-51bb-b7a3-f90a60bedd4d",
+      ),
       state.eligibleEntitiesForActiveForm.map { it.id },
     )
 
     state.updateEntityRefSearchQuery("108")
     assertEquals(1, state.filteredEntityRefCandidates.size)
-    assertEquals("entity-nyr-108", state.filteredEntityRefCandidates.first().id)
+    assertEquals(
+      "00000008-15d0-51f2-84eb-a72dfea5a747",
+      state.filteredEntityRefCandidates.first().id,
+    )
     state.clearEntityRefSearchQuery()
 
-    // 4. Select the entity ("entity-nyr-108") at the entityref step and advance to data questions
-    state.selectEntityRefForActiveForm("entity-nyr-108")
-    assertEquals("entity-nyr-108", state.activeDataCollectionEntityId)
-    assertEquals("entity-nyr-108", state.selectedEntityId)
+    // 4. Select the entity ("00000008-15d0-51f2-84eb-a72dfea5a747") at the entityref step and
+    // advance to data questions
+    state.selectEntityRefForActiveForm("00000008-15d0-51f2-84eb-a72dfea5a747")
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", state.activeDataCollectionEntityId)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", state.selectedEntityId)
 
     val advanceResult = controller.nextStep()
     assertTrue(advanceResult)
@@ -893,14 +919,14 @@ class MobileAppStateTest {
     assertFalse(state.isCurrentFormStepEntityRef)
 
     // 5. Complete form submission and verify it is attached to the selected entity
-    // ("entity-nyr-108")
+    // ("00000008-15d0-51f2-84eb-a72dfea5a747")
     // and advances its marker-symbol from "◐" (In progress) to "✓" (Completed)
     state.completeActiveFormSubmission(controller.formState.recordInstance)
     assertFalse(state.isDataCollectionFormOpen)
     assertFalse(state.wasFormLaunchedWithoutEntity)
-    val updatedNyr108 = state.entities.first { it.id == "entity-nyr-108" }
+    val updatedNyr108 = state.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }
     assertEquals(initialNyr108Subs + 1, updatedNyr108.submissions.size)
-    assertEquals("entity-nyr-108", updatedNyr108.submissions.first().entityId)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", updatedNyr108.submissions.first().entityId)
     assertEquals("✓", updatedNyr108.markerSymbol)
     assertEquals("Completed", updatedNyr108.workflowStatus)
     assertEquals(SyncStatus.UPLOADING, updatedNyr108.submissions.first().syncStatus)
@@ -917,10 +943,10 @@ class MobileAppStateTest {
     val form = assertNotNull(state.activeDataCollectionForm)
     val epochBefore = state.entityRefFramingEpoch
 
-    state.selectEntityRefForActiveForm("entity-nyr-108")
+    state.selectEntityRefForActiveForm("00000008-15d0-51f2-84eb-a72dfea5a747")
 
     // The camera target moves onto the picked map feature and stops following GPS.
-    val entity = state.entities.first { it.id == "entity-nyr-108" }
+    val entity = state.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }
     assertTrue(entity.hasGeometry)
     assertEquals(epochBefore + 1, state.entityRefFramingEpoch)
     assertFalse(state.isCameraFollowingUser)
@@ -930,7 +956,7 @@ class MobileAppStateTest {
     assertEquals(lng, camera.center.longitude, 1e-4)
 
     // Picking the same map feature again frames it again.
-    state.selectEntityRefForActiveForm("entity-nyr-108")
+    state.selectEntityRefForActiveForm("00000008-15d0-51f2-84eb-a72dfea5a747")
     assertEquals(epochBefore + 2, state.entityRefFramingEpoch)
 
     // A map feature from another data table is rejected and leaves the camera where it was.
@@ -938,7 +964,7 @@ class MobileAppStateTest {
     if (other != null) {
       state.selectEntityRefForActiveForm(other.id)
       assertEquals(epochBefore + 2, state.entityRefFramingEpoch)
-      assertEquals("entity-nyr-108", state.activeDataCollectionEntityId)
+      assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", state.activeDataCollectionEntityId)
       assertEquals(camera.center, state.desiredMapCamera().center)
     }
   }
@@ -950,38 +976,40 @@ class MobileAppStateTest {
 
     // 1. Verify default sample standalone submissions exist without attached entities
     assertEquals(2, state.standaloneSubmissions.size)
-    val pestSub = state.standaloneSubmissions.first { it.id == "sub-standalone-pest-01" }
-    val erosionSub = state.standaloneSubmissions.first { it.id == "sub-standalone-erosion-02" }
+    val pestSub =
+      state.standaloneSubmissions.first { it.id == "0000002e-4118-5239-bcc9-78dda11063f5" }
+    val erosionSub =
+      state.standaloneSubmissions.first { it.id == "0000002d-a881-53e1-90c1-b3e3ad027756" }
     assertFalse(pestSub.hasAttachedEntity)
     assertFalse(erosionSub.hasAttachedEntity)
     assertEquals("", pestSub.entityId)
     assertEquals("", pestSub.entityLabel)
     assertEquals("Standalone Field Log", pestSub.targetTypeLabel)
-    assertTrue(state.allSubmissions.any { it.id == "sub-standalone-pest-01" })
-    assertTrue(state.allSubmissions.any { it.id == "sub-standalone-erosion-02" })
+    assertTrue(state.allSubmissions.any { it.id == "0000002e-4118-5239-bcc9-78dda11063f5" })
+    assertTrue(state.allSubmissions.any { it.id == "0000002d-a881-53e1-90c1-b3e3ad027756" })
 
     // 2. Selecting a standalone submission opens its details directly with selectedEntity == null
-    state.selectSubmissionDetail("sub-standalone-pest-01")
+    state.selectSubmissionDetail("0000002e-4118-5239-bcc9-78dda11063f5")
     assertEquals(null, state.selectedEntityId)
     assertEquals(null, state.selectedEntity)
-    assertEquals("sub-standalone-pest-01", state.selectedSubmission?.id)
+    assertEquals("0000002e-4118-5239-bcc9-78dda11063f5", state.selectedSubmission?.id)
 
     // 3. Clicking the standalone submission's dotted polygon on the map selects it with no parent
     // entity
-    state.selectEntity("entity-nyr-104")
-    assertEquals("entity-nyr-104", state.selectedEntityId)
+    state.selectEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", state.selectedEntityId)
     state.selectSubmissionGeometry("geom-sub-standalone-pest-01")
     assertEquals(null, state.selectedEntityId)
-    assertEquals("sub-standalone-pest-01", state.selectedSubmission?.id)
+    assertEquals("0000002e-4118-5239-bcc9-78dda11063f5", state.selectedSubmission?.id)
 
     // 4. Straight-line navigation works for both polygon-backed and point-backed standalone
     // submissions
-    state.startNavigationToSubmission("sub-standalone-erosion-02")
+    state.startNavigationToSubmission("0000002d-a881-53e1-90c1-b3e3ad027756")
     val nav = assertNotNull(state.activeNavigation)
     assertEquals(NavigationTargetKind.SUBMISSION, nav.targetKind)
-    assertEquals("sub-standalone-erosion-02", nav.targetId)
+    assertEquals("0000002d-a881-53e1-90c1-b3e3ad027756", nav.targetId)
     assertEquals(null, state.selectedEntityId)
-    assertEquals("sub-standalone-erosion-02", state.selectedSubmissionId)
+    assertEquals("0000002d-a881-53e1-90c1-b3e3ad027756", state.selectedSubmissionId)
     state.stopNavigation()
 
     // 5. Launching the standalone form (`!form.requiresEntity`) from the FAB skips entityref step
@@ -1106,8 +1134,8 @@ class MobileAppStateTest {
 
     // Selecting an entity from the bottom sheet list replaces the list with the entity's details
     // and lowers the sheet to its peek height so the map can frame the entity above it
-    state.selectEntityFromList("entity-nyr-104")
-    assertEquals("entity-nyr-104", state.selectedEntityId)
+    state.selectEntityFromList("00000007-640e-5ed7-9874-4d6b6717f21d")
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", state.selectedEntityId)
     assertFalse(state.isEntityBottomSheetExpanded)
     assertEquals(EntityDetailsPane.PROPERTIES, state.entityDetailsPane)
 
@@ -1339,7 +1367,7 @@ class MobileAppStateTest {
   @Test
   fun completeActiveFormSubmission_createsNewEntityFromSaveTo() {
     val state = MobileAppState(dataHolder = sampleDataHolder())
-    state.openSurvey("survey-single-point-land-use")
+    state.openSurvey("00000036-1a1c-5c51-997f-28b67d813aa3")
     val initialEntityCount = state.entities.size
     assertEquals(3, initialEntityCount)
 
@@ -1424,7 +1452,7 @@ class MobileAppStateTest {
   fun promptRemoveDownloadedSurvey_requiresConfirmationBeforeRemoval() {
     val state =
       MobileAppState(initialScreen = AppScreen.DOWNLOAD_SURVEY, dataHolder = sampleDataHolder())
-    val targetId = "survey-kenya-coffee"
+    val targetId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     assertTrue(state.surveys.first { it.id == targetId }.isDownloaded)
 
     // User clicks Downloaded button -> triggers prompt confirmation
@@ -1451,7 +1479,7 @@ class MobileAppStateTest {
   fun promptRemoveDownloadedSurvey_downloadsImmediatelyIfNotAlreadyDownloaded() {
     val state =
       MobileAppState(initialScreen = AppScreen.DOWNLOAD_SURVEY, dataHolder = sampleDataHolder())
-    val targetId = "survey-serengeti-corridor"
+    val targetId = "00000035-caf4-571e-b907-f506f92666ab"
     assertFalse(state.surveys.first { it.id == targetId }.isDownloaded)
 
     // Prompting on a non-downloaded survey downloads directly without warning
@@ -1644,13 +1672,14 @@ class MobileAppStateTest {
   fun contributorIdentities_alwaysHiddenFromNonOrganizersAcrossAllSharingPolicies() {
     val state =
       MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
-    val entity = state.entities.first { it.id == "entity-shade-201" }
+    val entity = state.entities.first { it.id == "0000000a-56d7-5c1d-9457-7457267120a3" }
     val mayaSubmission =
       entity.submissions.first { it.collectorEmail == "maya.lin@groundplatform.org" }
     val samuelSubmission =
       entity.submissions.first { it.collectorEmail == "s.kariuki@kenyaforestry.org" }
 
-    // 1. Default signed-in user (Maya Lin) is a survey organizer on survey-kenya-coffee:
+    // 1. Default signed-in user (Maya Lin) is a survey organizer on
+    // 00000033-6b50-51cd-ac94-baea2ea06d65:
     //    organizers always see full contributor names and emails.
     assertFalse(state.shouldHideContributorIdentity(mayaSubmission))
     assertFalse(state.shouldHideContributorIdentity(samuelSubmission))
@@ -1661,10 +1690,11 @@ class MobileAppStateTest {
       state.displayCollectorAttribution(samuelSubmission),
     )
 
-    // 2. Switch to survey-serengeti-corridor, where Maya Lin is a regular organization MEMBER
+    // 2. Switch to 00000035-caf4-571e-b907-f506f92666ab, where Maya Lin is a regular organization
+    // MEMBER
     //    (not an organizer): Maya sees her own name with "(You)", while Samuel's identity is
     // hidden.
-    state.openSurvey("survey-serengeti-corridor")
+    state.openSurvey("00000035-caf4-571e-b907-f506f92666ab")
     assertFalse(state.shouldHideContributorIdentity(mayaSubmission))
     assertTrue(state.shouldHideContributorIdentity(samuelSubmission))
     assertEquals("Maya Lin (You)", state.displayCollectorName(mayaSubmission))

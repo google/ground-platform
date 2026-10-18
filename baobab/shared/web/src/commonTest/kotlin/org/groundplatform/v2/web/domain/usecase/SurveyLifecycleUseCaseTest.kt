@@ -28,7 +28,7 @@ import org.groundplatform.v2.app.domain.model.SurveyOutcomeKind
 import org.groundplatform.v2.app.domain.model.editor.isoUtc
 
 class SurveyLifecycleUseCaseTest {
-  private val surveyId = "survey-single-point-land-use"
+  private val surveyId = "00000036-1a1c-5c51-997f-28b67d813aa3"
 
   @Test
   fun close_setsClosedTime_andRecordsSurveyClosedWithCoverage() {

@@ -55,7 +55,7 @@ class SurveyThumbnailTest {
       )
     }
 
-    val kenya = surveys.first { it.id == "survey-kenya-coffee" }
+    val kenya = surveys.first { it.id == "00000033-6b50-51cd-ac94-baea2ea06d65" }
     assertEquals("Othaya Sub-County, Nyeri", kenya.thumbnail.areaName)
     assertTrue(kenya.thumbnail.placeLabels.any { it.name.contains("Othaya", ignoreCase = true) })
     assertEquals(5, kenya.thumbnail.features.size)
@@ -69,7 +69,7 @@ class SurveyThumbnailTest {
     val store = seededStore()
     val surveyRepo = SurveyRepositoryImpl(store)
     val editorRepo = SurveyEditorRepositoryImpl(store)
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
 
     val draft = runNow { editorRepo.getDraft(surveyId) }
     val customArea =
@@ -127,7 +127,10 @@ class SurveyThumbnailTest {
 
   @Test
   fun coveringTiles_computesValidWebMercatorTileGridAndUrls() {
-    val kenya = SampleSurveysData.defaultSampleSurveys().first { it.id == "survey-kenya-coffee" }
+    val kenya =
+      SampleSurveysData.defaultSampleSurveys().first {
+        it.id == "00000033-6b50-51cd-ac94-baea2ea06d65"
+      }
     val tiles =
       WebMercatorThumbnailProjection.coveringTiles(
         bounds = kenya.thumbnail.bounds,

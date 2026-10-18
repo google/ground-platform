@@ -188,10 +188,11 @@ class ClusterMapFeaturesUseCaseTest {
 
   @Test
   fun computeScaleBarSpec_formatsMetricDistanceForSurvey() {
-    val scaleBar = useCase.computeScaleBarSpec("survey-kenya-coffee", 0f)
+    val scaleBar = useCase.computeScaleBarSpec("00000033-6b50-51cd-ac94-baea2ea06d65", 0f)
     assertTrue(scaleBar.label.endsWith("m"))
 
-    val regionalScaleBar = useCase.computeScaleBarSpec("survey-kenya-coffee", -6.0f)
+    val regionalScaleBar =
+      useCase.computeScaleBarSpec("00000033-6b50-51cd-ac94-baea2ea06d65", -6.0f)
     assertTrue(regionalScaleBar.label.endsWith("km"))
     assertTrue(regionalScaleBar.distanceMeters > scaleBar.distanceMeters)
   }

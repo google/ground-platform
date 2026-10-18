@@ -23,21 +23,21 @@ object BackendStaticSubmissionsData {
   /** Returns the preloaded standalone [SubmissionPreviewItem] list for [surveyId]. */
   fun standaloneSubmissionsForSurvey(surveyId: String): List<SubmissionPreviewItem> =
     when (surveyId) {
-      "survey-single-point-land-use" -> emptyList()
-      "survey-commodity-perimeter-center" -> emptyList()
-      "survey-sample-plots-forest" -> emptyList()
-      "survey-household-past-individuals" -> emptyList()
+      "00000036-1a1c-5c51-997f-28b67d813aa3" -> emptyList()
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" -> emptyList()
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" -> emptyList()
+      "00000032-8d62-5717-8074-f4917e0cd76d" -> emptyList()
       else -> defaultStandaloneSubmissions()
     }
 
   /** Returns the preloaded [SubmissionGeometryPolygon] list for [surveyId]. */
   fun submissionGeometriesForSurvey(surveyId: String): List<SubmissionGeometryPolygon> =
     when (surveyId) {
-      "survey-single-point-land-use" ->
+      "00000036-1a1c-5c51-997f-28b67d813aa3" ->
         listOf(
           SubmissionGeometryPolygon(
             id = "geom-splu-01",
-            submissionId = "sub-splu-01",
+            submissionId = "0000002a-d6b0-55b4-be22-99d4f83950b9",
             entityId = "",
             layerId = "layer-form-single-point-land-use",
             formId = "form-single-point-land-use",
@@ -57,7 +57,7 @@ object BackendStaticSubmissionsData {
           ),
           SubmissionGeometryPolygon(
             id = "geom-splu-02",
-            submissionId = "sub-splu-02",
+            submissionId = "0000002b-918d-55c7-ba85-a63c4a250379",
             entityId = "",
             layerId = "layer-form-single-point-land-use",
             formId = "form-single-point-land-use",
@@ -77,7 +77,7 @@ object BackendStaticSubmissionsData {
           ),
           SubmissionGeometryPolygon(
             id = "geom-splu-03",
-            submissionId = "sub-splu-03",
+            submissionId = "0000002c-0423-586f-937e-81d7e9a92b77",
             entityId = "",
             layerId = "layer-form-single-point-land-use",
             formId = "form-single-point-land-use",
@@ -96,12 +96,12 @@ object BackendStaticSubmissionsData {
             colorHex = 0xFF0277BD,
           ),
         )
-      "survey-sample-plots-forest" ->
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
         listOf(
           SubmissionGeometryPolygon(
             id = "geom-sp-01",
-            submissionId = "sub-sp01-assess-2026",
-            entityId = "plot_sp01",
+            submissionId = "00000027-ca75-5659-b125-262308b7375c",
+            entityId = "00000016-cc1f-5125-8841-166ab5b5f68f",
             layerId = "layer-form-sample-plots-forest",
             formId = "form-sample-plots-forest",
             formTitle = "Sample Plot Entity & Forest Stand Assessment",
@@ -120,8 +120,8 @@ object BackendStaticSubmissionsData {
           ),
           SubmissionGeometryPolygon(
             id = "geom-sp-02",
-            submissionId = "sub-sp02-assess-2026",
-            entityId = "plot_sp02",
+            submissionId = "00000028-86de-51b6-9d99-71dad6fafd8c",
+            entityId = "00000017-d1a0-51d3-a686-e6ca450c23b2",
             layerId = "layer-form-sample-plots-forest",
             formId = "form-sample-plots-forest",
             formTitle = "Sample Plot Entity & Forest Stand Assessment",
@@ -140,8 +140,8 @@ object BackendStaticSubmissionsData {
           ),
           SubmissionGeometryPolygon(
             id = "geom-sp-03",
-            submissionId = "sub-sp03-assess-2026",
-            entityId = "plot_sp03",
+            submissionId = "00000029-4808-5225-9de5-551d5afe8ffc",
+            entityId = "00000018-4d16-5ab7-a57d-7dae5949cb7a",
             layerId = "layer-form-sample-plots-forest",
             formId = "form-sample-plots-forest",
             formTitle = "Sample Plot Entity & Forest Stand Assessment",
@@ -159,11 +159,11 @@ object BackendStaticSubmissionsData {
             colorHex = 0xFF00897B,
           ),
         )
-      "survey-commodity-perimeter-center" ->
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
         listOf(
           SubmissionGeometryPolygon(
             id = "geom-eudr-0419",
-            submissionId = "sub-eudr-gh-0419",
+            submissionId = "0000001b-1ba0-5775-b6cd-033a11d861d4",
             entityId = "",
             layerId = "layer-form-commodity-perimeter",
             formId = "form-commodity-perimeter-center",
@@ -183,7 +183,7 @@ object BackendStaticSubmissionsData {
           ),
           SubmissionGeometryPolygon(
             id = "geom-eudr-0422",
-            submissionId = "sub-eudr-gh-0422",
+            submissionId = "0000001c-e7b4-5cb1-84e0-5f506f6afc8b",
             entityId = "",
             layerId = "layer-form-commodity-perimeter",
             formId = "form-commodity-perimeter-center",
@@ -203,7 +203,7 @@ object BackendStaticSubmissionsData {
           ),
           SubmissionGeometryPolygon(
             id = "geom-eudr-0428",
-            submissionId = "sub-eudr-gh-0428",
+            submissionId = "0000001d-f3d9-53c0-ba3f-9b2f49e8e5cc",
             entityId = "",
             layerId = "layer-form-commodity-perimeter",
             formId = "form-commodity-perimeter-center",
@@ -222,12 +222,12 @@ object BackendStaticSubmissionsData {
             colorHex = 0xFF6A1B9A,
           ),
         )
-      "survey-household-past-individuals" ->
+      "00000032-8d62-5717-8074-f4917e0cd76d" ->
         listOf(
           SubmissionGeometryPolygon(
             id = "geom-ind-101",
-            submissionId = "sub-ind101-wave4",
-            entityId = "ind_101",
+            submissionId = "0000001e-d0b8-5510-ba2f-626c8db19409",
+            entityId = "0000000c-a9ae-59f6-ac51-7f5a8777598f",
             layerId = "layer-form-household-survey",
             formId = "form-household-past-individuals",
             formTitle = "Household Follow-Up Survey (Past Individuals)",
@@ -246,8 +246,8 @@ object BackendStaticSubmissionsData {
           ),
           SubmissionGeometryPolygon(
             id = "geom-ind-103",
-            submissionId = "sub-ind103-wave4",
-            entityId = "ind_103",
+            submissionId = "00000020-efff-56da-8ad2-db47db9476d9",
+            entityId = "0000000e-95ee-5695-ad0b-54576e8d7785",
             layerId = "layer-form-household-survey",
             formId = "form-household-past-individuals",
             formTitle = "Household Follow-Up Survey (Past Individuals)",
@@ -278,8 +278,8 @@ object BackendStaticSubmissionsData {
     listOf(
       SubmissionGeometryPolygon(
         id = "geom-sub-nyr-104",
-        submissionId = "sub-nyr-104-baseline",
-        entityId = "entity-nyr-104",
+        submissionId = "00000022-c99b-5e7e-b810-c506ebf06f19",
+        entityId = "00000007-640e-5ed7-9874-4d6b6717f21d",
         layerId = "layer-form-walked-perimeter",
         formId = "form-eudr-baseline",
         formTitle = "EUDR Parcel Baseline Registration",
@@ -298,8 +298,8 @@ object BackendStaticSubmissionsData {
       ),
       SubmissionGeometryPolygon(
         id = "geom-sub-nyr-108",
-        submissionId = "sub-nyr-108-baseline",
-        entityId = "entity-nyr-108",
+        submissionId = "00000023-36c6-5f07-a7a8-5922ec72bed0",
+        entityId = "00000008-15d0-51f2-84eb-a72dfea5a747",
         layerId = "layer-form-walked-perimeter",
         formId = "form-eudr-baseline",
         formTitle = "EUDR Parcel Baseline Registration",
@@ -318,8 +318,8 @@ object BackendStaticSubmissionsData {
       ),
       SubmissionGeometryPolygon(
         id = "geom-sub-shade-201-w3",
-        submissionId = "sub-shade-201-wave3",
-        entityId = "entity-shade-201",
+        submissionId = "00000026-cca2-5594-b83f-02266f40048e",
+        entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
         layerId = "layer-form-canopy-subzone",
         formId = "form-shade-canopy-audit",
         formTitle = "Seasonal Shade Tree & Canopy Audit",
@@ -338,8 +338,8 @@ object BackendStaticSubmissionsData {
       ),
       SubmissionGeometryPolygon(
         id = "geom-sub-wsh-01-sep",
-        submissionId = "sub-wsh-01-sep",
-        entityId = "entity-station-01",
+        submissionId = "00000030-ca50-56e0-8458-9c5728954d52",
+        entityId = "0000000b-7633-5116-9d6d-50581002d8cf",
         layerId = "layer-form-riparian-buffer",
         formId = "form-water-quality",
         formTitle = "Washing Station Effluent & Water Check",
@@ -358,7 +358,7 @@ object BackendStaticSubmissionsData {
       ),
       SubmissionGeometryPolygon(
         id = "geom-sub-standalone-pest-01",
-        submissionId = "sub-standalone-pest-01",
+        submissionId = "0000002e-4118-5239-bcc9-78dda11063f5",
         entityId = "",
         layerId = "layer-form-pest-sighting-zone",
         formId = "form-pest-disease-sighting",
@@ -385,7 +385,7 @@ object BackendStaticSubmissionsData {
   fun defaultStandaloneSubmissions(): List<SubmissionPreviewItem> =
     listOf(
       SubmissionPreviewItem(
-        id = "sub-standalone-pest-01",
+        id = "0000002e-4118-5239-bcc9-78dda11063f5",
         entityId = "",
         entityLabel = "",
         formId = "form-pest-disease-sighting",
@@ -429,7 +429,7 @@ object BackendStaticSubmissionsData {
           ),
       ),
       SubmissionPreviewItem(
-        id = "sub-standalone-erosion-02",
+        id = "0000002d-a881-53e1-90c1-b3e3ad027756",
         entityId = "",
         entityLabel = "",
         formId = "form-pest-disease-sighting",

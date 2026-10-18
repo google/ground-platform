@@ -17,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -255,8 +256,8 @@ class DashboardViewModelTest {
     assertEquals(entityId, f.uiState.uploadsEntityFilter?.id)
     assertEquals(expected, f.uiState.filteredUploadMutations.size)
     assertEquals(expected, f.uiState.uploadCountForEntity(entityId))
-    assertTrue(f.uiState.pendingUploadEntityIds.contains("entity-nyr-108"))
-    assertEquals(2, f.uiState.pendingUploadCountForEntity("entity-nyr-108"))
+    assertTrue(f.uiState.pendingUploadEntityIds.contains("00000008-15d0-51f2-84eb-a72dfea5a747"))
+    assertEquals(2, f.uiState.pendingUploadCountForEntity("00000008-15d0-51f2-84eb-a72dfea5a747"))
 
     f.viewModel.clearUploadsEntityFilter()
     assertEquals(9, f.uiState.filteredUploadMutations.size)
@@ -317,7 +318,6 @@ class DashboardViewModelTest {
     val kfs = assertNotNull(f.uiState.organization(SampleOrganizationsData.KENYA_FOREST_SERVICE))
 
     val id = f.viewModel.createSurvey("Mangrove Nursery Audit", kfs.id)
-    assertEquals("survey-mangrove-nursery-audit", id)
     assertEquals(before + 1, f.uiState.surveys.size)
     val created = f.uiState.surveys.last()
     assertEquals(id, created.id)
@@ -334,10 +334,8 @@ class DashboardViewModelTest {
       f.events.last(),
     )
 
-    assertEquals(
-      "survey-mangrove-nursery-audit-2",
-      f.viewModel.createSurvey("Mangrove Nursery Audit"),
-    )
+    // A second survey with the same title gets its own random ID.
+    assertNotEquals(id, f.viewModel.createSurvey("Mangrove Nursery Audit"))
     val personal = f.viewModel.createSurvey("   ")
     assertEquals(
       CreateSurveyUseCase.DEFAULT_TITLE,

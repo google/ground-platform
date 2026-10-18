@@ -28,6 +28,7 @@ import org.groundplatform.v2.app.domain.repository.LibraryRepository
 import org.groundplatform.v2.app.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.app.domain.repository.TransactionRunner
+import org.groundplatform.v2.core.ids.RecordIds
 
 /**
  * Creates a new survey owned by the signed-in user, optionally in an organization, and makes it the
@@ -46,10 +47,13 @@ class CreateSurveyUseCase(
   private val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
   /** Form IDs for Forms copied from templates. */
   private val newFormId: () -> String = FormIds::newFormId,
+  /** IDs of new surveys (random UUIDs). */
+  private val newSurveyId: () -> String = RecordIds::newId,
 ) {
   /**
    * A new survey titled [title] (or `"Untitled survey"` when blank) owned by [ownerEmail] in
-   * [organization] (or personal when `null`), with an ID unique among [existingSurveys].
+   * [organization] (or personal when `null`), with a new random ID. [existingSurveys] picks the
+   * thumbnail theme.
    */
   fun newSurvey(
     title: String,
@@ -58,7 +62,7 @@ class CreateSurveyUseCase(
     ownerEmail: String,
   ): SurveyPreviewItem {
     val trimmedTitle = title.trim().ifBlank { DEFAULT_TITLE }
-    val id = uniqueSurveyId(trimmedTitle, existingSurveys.map { it.id }.toSet())
+    val id = newSurveyId()
     return SurveyPreviewItem(
       id = id,
       title = trimmedTitle,
@@ -140,22 +144,5 @@ class CreateSurveyUseCase(
 
   companion object {
     const val DEFAULT_TITLE = "Untitled survey"
-
-    /** A survey ID derived from [title] (`survey-<slug>`), made unique among [takenIds]. */
-    fun uniqueSurveyId(title: String, takenIds: Set<String>): String {
-      val slug =
-        title
-          .lowercase()
-          .map { if (it.isLetterOrDigit()) it else '-' }
-          .joinToString("")
-          .trim('-')
-          .replace(Regex("-+"), "-")
-          .ifBlank { "survey" }
-      val base = "survey-$slug"
-      if (base !in takenIds) return base
-      var n = 2
-      while ("$base-$n" in takenIds) n++
-      return "$base-$n"
-    }
   }
 }

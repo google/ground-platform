@@ -78,9 +78,12 @@ class LaunchFormUseCaseTest {
     val controller =
       useCase(customFormDef = null, form = entityForm, candidateEntities = candidates)
     val before = controller.formState.fieldStates.keys
-    useCase.prepopulateEntityReference(controller, "entity-nyr-104")
+    useCase.prepopulateEntityReference(controller, "00000007-640e-5ed7-9874-4d6b6717f21d")
     assertEquals(before, controller.formState.fieldStates.keys)
-    assertEquals("entity-nyr-104", controller.stringAt(LaunchFormUseCase.ENTITY_REF_FIELD_PATH))
+    assertEquals(
+      "00000007-640e-5ed7-9874-4d6b6717f21d",
+      controller.stringAt(LaunchFormUseCase.ENTITY_REF_FIELD_PATH),
+    )
   }
 
   @Test

@@ -41,7 +41,7 @@ import org.groundplatform.v2.app.domain.model.editor.SurveyEditorDraft
  */
 object BackendStaticSurveyEditorData {
   /** ID of the sample survey shared with everyone in its organization. */
-  const val ORGANIZATION_SHARED_SURVEY_ID: String = "survey-serengeti-corridor"
+  const val ORGANIZATION_SHARED_SURVEY_ID: String = "00000035-caf4-571e-b907-f506f92666ab"
 
   /** The seeded draft for the Kenya coffee survey: [derived] plus the extras below. */
   fun kenyaCoffeeDraft(derived: SurveyEditorDraft): SurveyEditorDraft =

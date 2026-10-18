@@ -13,8 +13,6 @@
  */
 package org.groundplatform.v2.app.domain.usecase
 
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import org.groundplatform.v2.app.domain.model.ImpactCoverage
 import org.groundplatform.v2.app.domain.model.ImpactEvent
 import org.groundplatform.v2.app.domain.model.ImpactEventType
@@ -23,6 +21,7 @@ import org.groundplatform.v2.app.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.app.domain.repository.ImpactEventRepository
 import org.groundplatform.v2.app.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
+import org.groundplatform.v2.core.ids.RecordIds
 
 /**
  * Records a "data was used" [ImpactEvent] for a survey (see
@@ -32,7 +31,6 @@ import org.groundplatform.v2.app.domain.repository.SurveyRepository
  * Events are stored on the device first. Online, they upload right away; offline, they wait and
  * upload with the other pending changes ([SyncMutationsUseCase]).
  */
-@OptIn(ExperimentalUuidApi::class)
 class RecordImpactEventUseCase(
   private val impactEventRepository: ImpactEventRepository,
   private val surveyRepository: SurveyRepository,
@@ -40,7 +38,7 @@ class RecordImpactEventUseCase(
   private val authRepository: AuthRepository,
   private val connectivityRepository: ConnectivityRepository,
   private val now: () -> String,
-  private val newId: () -> String = { "impact-" + Uuid.random().toString() },
+  private val newId: () -> String = RecordIds::newId,
 ) {
   suspend operator fun invoke(
     type: ImpactEventType,

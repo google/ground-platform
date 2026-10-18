@@ -43,23 +43,23 @@ This design builds on [sync-engine.md](../sync-engine.md),
 
 ## Decisions
 
-| Topic                        | Decision                                                                                                                                                                                                                                                           |
-| :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Auth identity                | **Firebase Auth**. `UserId` is the Firebase `uid`.                                                                                                                                                                                                                 |
-| Environment                  | **Cloud Spanner emulator for now.** No region or instance sizing yet. The schema is region-agnostic, and deployment choices are deferred until a real instance is needed.                                                                                          |
-| Survey deletion              | **No hard deletes.** Deleting moves a survey to **Trash**. It can be restored for 30 days, then it's purged automatically. The proto changes accordingly.                                                                                                          |
-| Record storage               | **`PROTO` columns** with generated columns.                                                                                                                                                                                                                        |
-| Replay detection             | **Watermark only**: `ClientMutationWatermarks`. No mutation log, no `AppliedMutations`.                                                                                                                                                                            |
-| Share links                  | **The link is the survey URL**, `https://<host>/s/<survey_id>`, which opens in any browser (and in the app through App Links / Universal Links when installed). No separate link token or header: under `ANYONE_WITH_LINK`, knowing the survey's UUID is the link. |
-| IDs                          | **Every ID is a UUID** (surveys, organizations including the global one, entities, submissions, datasets, forms, concepts, events, clients). Clients generate v4 or v5 IDs offline.                                                                                |
-| Tombstones                   | **Permanent.** Deleted records keep a minimal row (keys, revision, `is_deleted`, `CommitTs`); their payload is pruned. Sync tokens never expire because tombstones are gone.                                                                                       |
-| Upload watermarks            | **One-year TTL since last write**, and the web app keeps its `client_id` in `localStorage`.                                                                                                                                                                        |
-| Failed uploads               | **Retry** or **Download PDF** in Uploads; no data export.                                                                                                                                                                                                          |
-| Orgs and libraries on mobile | **Not on mobile.** Downloads store only the organization settings they need, such as imagery sources.                                                                                                                                                              |
-| Sharing role                 | **`SurveyAcl.sharing_role`** (`VIEWER` / `DATA_COLLECTOR`, default collector) for everyone with access through `sharing_policy`.                                                                                                                                   |
-| Accounts                     | **Signed-in Firebase accounts required** for every RPC, including public and link surveys; no anonymous users. Email/password sign-up is enabled for participants without Google accounts.                                                                         |
-| ACL ownership                | **Only organizers add or remove ACL entries.** `PUBLIC` and `ANYONE_WITH_LINK` grant access by policy, checked on every request, and never create ACL rows.                                                                                                        |
-| Mobile sync scope            | **Explicit Download, per-survey scope.** Only downloaded surveys sync, each in full (definition, entities, submissions); no area or dataset sub-scopes. The survey list syncs only while its page is open.                                                         |
+| Topic                        | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :--------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth identity                | **Firebase Auth**. `UserId` is the Firebase `uid`.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Environment                  | **Cloud Spanner emulator for now.** No region or instance sizing yet. The schema is region-agnostic, and deployment choices are deferred until a real instance is needed.                                                                                                                                                                                                                                                                                               |
+| Survey deletion              | **No hard deletes.** Deleting moves a survey to **Trash**. It can be restored for 30 days, then it's purged automatically. The proto changes accordingly.                                                                                                                                                                                                                                                                                                               |
+| Record storage               | **`PROTO` columns** with generated columns.                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Replay detection             | **Watermark only**: `ClientMutationWatermarks`. No mutation log, no `AppliedMutations`.                                                                                                                                                                                                                                                                                                                                                                                 |
+| Share links                  | **The link is the survey URL**, `https://<host>/s/<survey_id>`, which opens in any browser (and in the app through App Links / Universal Links when installed). No separate link token or header: under `ANYONE_WITH_LINK`, knowing the survey's UUID is the link.                                                                                                                                                                                                      |
+| IDs                          | **Every record ID is a UUID**: surveys, organizations (the global one has the reserved ID `00000000-0000-4000-8000-000000000001`), entities, submissions, impact events, and clients. Clients generate v4 (or v5) IDs offline. Dataset, form, and library entry IDs stay human-readable keys inside their survey or library, because XLSForm/ODK reference datasets and forms by name and library IDs are namespaced (`eudr.commodity`, `org.<organizationId>.<name>`). |
+| Tombstones                   | **Permanent.** Deleted records keep a minimal row (keys, revision, `is_deleted`, `CommitTs`); their payload is pruned. Sync tokens never expire because tombstones are gone.                                                                                                                                                                                                                                                                                            |
+| Upload watermarks            | **One-year TTL since last write**, and the web app keeps its `client_id` in `localStorage`.                                                                                                                                                                                                                                                                                                                                                                             |
+| Failed uploads               | **Retry** or **Download PDF** in Uploads; no data export.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Orgs and libraries on mobile | **Not on mobile.** Downloads store only the organization settings they need, such as imagery sources.                                                                                                                                                                                                                                                                                                                                                                   |
+| Sharing role                 | **`SurveyAcl.sharing_role`** (`VIEWER` / `DATA_COLLECTOR`, default collector) for everyone with access through `sharing_policy`.                                                                                                                                                                                                                                                                                                                                        |
+| Accounts                     | **Signed-in Firebase accounts required** for every RPC, including public and link surveys; no anonymous users. Email/password sign-up is enabled for participants without Google accounts.                                                                                                                                                                                                                                                                              |
+| ACL ownership                | **Only organizers add or remove ACL entries.** `PUBLIC` and `ANYONE_WITH_LINK` grant access by policy, checked on every request, and never create ACL rows.                                                                                                                                                                                                                                                                                                             |
+| Mobile sync scope            | **Explicit Download, per-survey scope.** Only downloaded surveys sync, each in full (definition, entities, submissions); no area or dataset sub-scopes. The survey list syncs only while its page is open.                                                                                                                                                                                                                                                              |
 
 ## Requirements From the Existing Contract
 
@@ -609,7 +609,7 @@ CREATE TABLE OrganizationLibraries (
 -- Fanned out from the library Record in the same transaction, for SearchConcepts.
 CREATE TABLE LibraryConcepts (
   OrganizationId   UUID NOT NULL,
-  ConceptId        UUID NOT NULL,
+  ConceptId        STRING(256) NOT NULL,       -- namespaced library ID, e.g. org.<uuid>.cherry_kg
   Concept          groundplatform.v2.library.ConceptDef NOT NULL,
   DataType         groundplatform.v2.forms.DataType AS (Concept.data_type) STORED,
   Status           groundplatform.v2.library.LibraryStatus AS (Concept.status) STORED,
@@ -684,7 +684,7 @@ CREATE TABLE Entities (
   SurveyId        UUID NOT NULL,
   EntityId        UUID NOT NULL,
   Record          groundplatform.v2.data.EntityRecord NOT NULL,   -- incl. revision, active_lock
-  DatasetId       UUID AS (CAST(Record.dataset_id AS UUID)) STORED,
+  DatasetId       STRING(128) AS (Record.dataset_id) STORED,   -- ODK entity list name
   IsDeleted       BOOL AS (Record.is_deleted) STORED,
   CreatedBy       STRING(128) AS (Record.audit_info.created_by) STORED,   -- OWN_ONLY filtering
   Label           STRING(MAX) AS (Record.label) STORED,
@@ -708,7 +708,7 @@ CREATE TABLE Submissions (
   SurveyId         UUID NOT NULL,
   SubmissionId     UUID NOT NULL,
   Record           groundplatform.v2.data.SubmissionRecord NOT NULL,   -- media referenced by URI
-  FormId           UUID AS (CAST(Record.form_id AS UUID)) STORED,
+  FormId           STRING(128) AS (Record.form_id) STORED,
   EntityId         UUID AS (CAST(NULLIF(Record.entity_id, '') AS UUID)) STORED,
   IsDeleted        BOOL AS (Record.is_deleted) STORED,
   CreatedBy        STRING(128) AS (Record.audit_info.created_by) STORED,
@@ -865,12 +865,10 @@ CREATE TABLE ClientMutationWatermarks (
     DML (the only remaining deletion policy). Tests run it with an injected
     clock. It stays off in production.
 
-- **Seed and fixtures:** Every ID becomes a UUID. Today's sample IDs
-  (`org-all-users`, `ent-eudr-0419`, `coffee_parcels`, …) are placeholders;
-  regenerate the fixtures in `shared/app/testing` with UUIDs. The global
-  organization gets a fixed, reserved UUID constant in `shared/core`. XForms
-  `form_id` settings imported from XLSForm can stay as a separate display or
-  interop attribute; the key is the UUID.
+- **Seed and fixtures:** Sample record IDs are deterministic version 5 UUIDs
+  derived from the former readable IDs, and the global organization uses the
+  reserved `ALL_USERS_ORGANIZATION_ID` from `shared/core`. Clients create new
+  records with `RecordIds.newId()`.
 
 ## Implementation Plan
 
@@ -892,7 +890,8 @@ CREATE TABLE ClientMutationWatermarks (
   binding invites to verified emails.
 - **ID hygiene:** Add a shared UUID validator and normalizer in `shared/core`,
   used by both clients and server. Migrate fixtures and the seed to UUIDs, and
-  replace `org-all-users` with the reserved global-organization UUID.
+  replace `org-all-users` with the reserved global-organization UUID
+  (`00000000-0000-4000-8000-000000000001`).
 - **Schema and build:** Add the `protoc` descriptor-set step, versioned DDL
   migrations (proto bundle first), an emulator-backed test base, and seed
   loading from `UserDataSeed`.

@@ -41,19 +41,29 @@ class MobileLocalStoreTest {
   fun submittedForm_survivesSwitchingSurveysAndBack() {
     val state =
       MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
-    assertEquals("survey-kenya-coffee", state.activeSurveyId)
-    val before = state.entities.first { it.id == "entity-nyr-112" }.submissions.size
+    assertEquals("00000033-6b50-51cd-ac94-baea2ea06d65", state.activeSurveyId)
+    val before =
+      state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }.submissions.size
 
-    state.launchFormForEntity(entityId = "entity-nyr-112", formId = "form-household-interview")
+    state.launchFormForEntity(
+      entityId = "00000009-1699-51bb-b7a3-f90a60bedd4d",
+      formId = "form-household-interview",
+    )
     state.completeActiveFormSubmission()
-    assertEquals(before + 1, state.entities.first { it.id == "entity-nyr-112" }.submissions.size)
+    assertEquals(
+      before + 1,
+      state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }.submissions.size,
+    )
 
-    state.openSurvey("survey-sample-plots-forest")
-    assertEquals("survey-sample-plots-forest", state.activeSurveyId)
-    assertTrue(state.entities.none { it.id == "entity-nyr-112" })
+    state.openSurvey("00000034-c088-5ab9-8b98-e6bccb3dca71")
+    assertEquals("00000034-c088-5ab9-8b98-e6bccb3dca71", state.activeSurveyId)
+    assertTrue(state.entities.none { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" })
 
-    state.openSurvey("survey-kenya-coffee")
-    assertEquals(before + 1, state.entities.first { it.id == "entity-nyr-112" }.submissions.size)
+    state.openSurvey("00000033-6b50-51cd-ac94-baea2ea06d65")
+    assertEquals(
+      before + 1,
+      state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }.submissions.size,
+    )
   }
 
   @Test

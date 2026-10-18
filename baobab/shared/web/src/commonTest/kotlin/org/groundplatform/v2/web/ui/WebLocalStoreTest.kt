@@ -52,7 +52,7 @@ class WebLocalStoreTest {
 
     // Surveys without a stored draft still open with their Forms and Map layers.
     val other = WebAppState(dataHolder = sampleDataHolder())
-    other.openSurveyOnWeb("survey-sample-plots-forest")
+    other.openSurveyOnWeb("00000034-c088-5ab9-8b98-e6bccb3dca71")
     val derived = surveyEditorViewModel(other.activeSurveyEditorDraft)
     assertEquals(other.activeSurvey.title, derived.ui.details.title)
     assertEquals(other.forms.map { it.id }, derived.ui.draft.forms.map { it.form.formId })
@@ -68,7 +68,7 @@ class WebLocalStoreTest {
     editor.updateDetails { it.copy(title = "Renamed survey") }
     editor.addDataset(DatasetKind.DATA_TABLE)
     editor.addForm()
-    state.saveSurveyEditorDraft("survey-kenya-coffee", editor.ui.draft)
+    state.saveSurveyEditorDraft("00000033-6b50-51cd-ac94-baea2ea06d65", editor.ui.draft)
 
     // The title is shown in the survey list; generated FormDefinitions are published to the survey
     // config.
@@ -81,8 +81,8 @@ class WebLocalStoreTest {
     // New Forms add rows to their linked Data table by default.
     assertEquals("1", publishedForm?.proto?.model?.entities?.firstOrNull()?.create_condition)
 
-    state.openSurveyOnWeb("survey-sample-plots-forest")
-    state.openSurveyOnWeb("survey-kenya-coffee")
+    state.openSurveyOnWeb("00000034-c088-5ab9-8b98-e6bccb3dca71")
+    state.openSurveyOnWeb("00000033-6b50-51cd-ac94-baea2ea06d65")
     val reopened = surveyEditorViewModel(state.activeSurveyEditorDraft)
     assertEquals(editor.ui.draft, reopened.ui.draft)
 

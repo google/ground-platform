@@ -27,7 +27,7 @@ class ImpactEventRepositoryImplTest {
     ImpactEvent(
       id = id,
       type = ImpactEventType.RECEIPT_GENERATED,
-      surveyId = "survey-kenya-coffee",
+      surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65",
       organizationId = null,
       occurredAt = "2026-10-01T09:00:00Z",
       actorUserId = "collector@example.org",

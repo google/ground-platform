@@ -54,7 +54,7 @@ class DataCollectionReceiptEventsTest {
   fun shareEntityPdf_recordsOneReceiptGenerated_forTheActiveSurveyAndFeature() {
     val f = DataCollectionFixture()
     val surveyId = f.uiState.activeSurveyId
-    val entity = f.uiState.entities.first { it.id == "entity-nyr-104" }
+    val entity = f.uiState.entities.first { it.id == "00000007-640e-5ed7-9874-4d6b6717f21d" }
 
     f.viewModel.shareEntityPdf(entity.id)
     // Reading state and previewing the open sheet record nothing more.
@@ -82,7 +82,7 @@ class DataCollectionReceiptEventsTest {
   @Test
   fun shareActivePdf_recordsReceiptShared_onlyWhenSharedOrSaved() {
     val f = DataCollectionFixture()
-    f.viewModel.shareEntityPdf("entity-nyr-104")
+    f.viewModel.shareEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
 
     f.pdfExportClient.nextShareResult = PdfExportResult.FAILED
     f.viewModel.shareActivePdf()
@@ -99,7 +99,7 @@ class DataCollectionReceiptEventsTest {
     assertEquals(generated.areaHa, shared.areaHa)
 
     // Saving from the system share sheet counts as sharing too.
-    f.viewModel.shareEntityPdf("entity-nyr-104")
+    f.viewModel.shareEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
     f.pdfExportClient.nextShareResult = PdfExportResult.SAVED
     f.viewModel.shareActivePdf()
     assertEquals(2, f.recorded(ImpactEventType.RECEIPT_SHARED).size)
@@ -108,7 +108,8 @@ class DataCollectionReceiptEventsTest {
   @Test
   fun saveActivePdf_recordsReceiptShared_forTheSubmissionsFeature() {
     val f = DataCollectionFixture()
-    val submission = f.uiState.allSubmissions.first { it.id == "sub-shade-201-wave3" }
+    val submission =
+      f.uiState.allSubmissions.first { it.id == "00000026-cca2-5594-b83f-02266f40048e" }
     val entity = f.uiState.entities.first { it.id == submission.entityId }
 
     f.viewModel.shareSubmissionPdf(submission.id)
@@ -127,8 +128,8 @@ class DataCollectionReceiptEventsTest {
   @Test
   fun downloads_recordReceiptGeneratedAndShared_andUnknownRecordsNothing() {
     val f = DataCollectionFixture()
-    f.viewModel.downloadEntityPdf("entity-nyr-104")
-    f.viewModel.downloadSubmissionPdf("sub-shade-201-wave3")
+    f.viewModel.downloadEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
+    f.viewModel.downloadSubmissionPdf("00000026-cca2-5594-b83f-02266f40048e")
     f.viewModel.downloadEntityPdf("missing")
     f.viewModel.shareSubmissionPdf("missing")
 
@@ -139,7 +140,7 @@ class DataCollectionReceiptEventsTest {
   @Test
   fun closingTheSheet_forgetsTheReceipt() {
     val f = DataCollectionFixture()
-    f.viewModel.shareEntityPdf("entity-nyr-104")
+    f.viewModel.shareEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
     f.viewModel.closeSharePdfSheet()
     f.viewModel.saveActivePdf()
     f.viewModel.shareActivePdf()
@@ -153,7 +154,7 @@ class DataCollectionReceiptEventsTest {
     val surveyId = f.uiState.activeSurveyId
     f.connectivity.setOnline(false)
 
-    f.viewModel.downloadEntityPdf("entity-nyr-104")
+    f.viewModel.downloadEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
     assertEquals(2, f.recorded.size)
     assertTrue(f.recorded.none { it.isUploaded }, "Recorded offline, events wait on the device")
 
@@ -175,7 +176,7 @@ class DataCollectionReceiptEventsTest {
   fun offlineReceipts_uploadEvenWhenTheOutboxIsEmpty() {
     val f = DataCollectionFixture()
     f.connectivity.setOnline(false)
-    f.viewModel.shareEntityPdf("entity-nyr-104")
+    f.viewModel.shareEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
     f.connectivity.setOnline(true)
 
     // A survey with no mutations: only the queued activity record uploads.
@@ -211,7 +212,7 @@ class DataCollectionReceiptEventsTest {
     assertEquals(0, dashboard.uiState.value.pendingActivityRecordCount)
 
     f.connectivity.setOnline(false)
-    f.viewModel.downloadEntityPdf("entity-nyr-104")
+    f.viewModel.downloadEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
     assertEquals(2, dashboard.uiState.value.pendingActivityRecordCount)
 
     f.connectivity.setOnline(true)

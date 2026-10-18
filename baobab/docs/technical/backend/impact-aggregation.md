@@ -133,7 +133,7 @@ are written atomically per scope so dashboards never read a partial run.
     survey and concept in run diagnostics (`UNKNOWN`, `DEPRECATED`,
     `NOT_IN_LIBRARY`). Values a feature carries for concepts its survey doesn't
     link are ignored.
-3.  Classify each concept: **global** (owned by `org-all-users`) or
+3.  Classify each concept: **global** (owned by the reserved "All users" organization) or
     **organization**; note suggested goals on organization concepts.
 
 ### GeoID Deduplication

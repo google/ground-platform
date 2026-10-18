@@ -36,7 +36,7 @@ class ImpactPdfReportsTest {
   private val summary =
     ImpactSummary(
       scope = ImpactSummaryScope.ORGANIZATION,
-      scopeId = "org-kenya-forest-service",
+      scopeId = "00000013-31cc-5c95-90ea-379f624a5c72",
       title = "Kenya Forest Service",
       features = ImpactFeatureTotals(uniqueCount = 14, areaHa = 9.82, mappedCount = 15),
       producerCount = 3,

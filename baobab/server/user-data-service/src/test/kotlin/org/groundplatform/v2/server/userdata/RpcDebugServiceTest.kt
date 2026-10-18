@@ -180,7 +180,7 @@ class RpcDebugServiceTest {
   }
 
   companion object {
-    private const val KENYA = "survey-kenya-coffee"
+    private const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
     private const val LIST_SURVEY_OVERVIEWS =
       "/groundplatform.v2.survey.SurveyService/ListSurveyOverviews"
   }

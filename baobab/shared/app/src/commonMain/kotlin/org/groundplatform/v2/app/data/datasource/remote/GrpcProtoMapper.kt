@@ -477,7 +477,7 @@ object GrpcProtoMapper {
     entities: List<GeospatialEntityItem> = emptyList(),
   ): SurveyPreviewItem {
     val surveyArea =
-      if (overview.survey_id == "survey-kenya-coffee") {
+      if (overview.survey_id == "00000033-6b50-51cd-ac94-baea2ea06d65") {
         overview.survey_area?.let(::surveyAreaFromProto)
       } else {
         null

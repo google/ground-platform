@@ -198,13 +198,16 @@ class SurveyMapViewModelTest {
     assertFalse(f.uiState.isCameraFollowingUser)
 
     f.viewModel.updateLayersSheetOpen(true)
-    f.viewModel.selectEntity("entity-nyr-104")
-    assertEquals("entity-nyr-104", f.uiState.selectedEntityId)
-    assertEquals("entity-nyr-104", f.uiState.selectedEntity?.id)
+    f.viewModel.selectEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", f.uiState.selectedEntityId)
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", f.uiState.selectedEntity?.id)
     assertEquals(1L, f.uiState.entitySelectionEpoch)
     assertNull(f.uiState.selectedPlace)
     assertFalse(f.uiState.isLayersSheetOpen)
-    assertEquals(SurveyMapEvent.EntitySelected("entity-nyr-104"), f.events.last())
+    assertEquals(
+      SurveyMapEvent.EntitySelected("00000007-640e-5ed7-9874-4d6b6717f21d"),
+      f.events.last(),
+    )
 
     f.viewModel.toggleEntityBottomSheetExpanded()
     assertTrue(f.uiState.isEntityBottomSheetExpanded)
@@ -219,7 +222,7 @@ class SurveyMapViewModelTest {
   @Test
   fun hidingTheSelectedFeaturesLayer_clearsSelection_andPersistsVisibility() {
     val f = Fixture()
-    f.viewModel.selectEntity("entity-nyr-104")
+    f.viewModel.selectEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
     f.viewModel.toggleLayerVisibility("layer-coffee-parcels")
 
     assertNull(f.uiState.selectedEntityId)
@@ -237,13 +240,13 @@ class SurveyMapViewModelTest {
   fun navigationToEntity_startsStopsAndStepsTheUser() {
     val f = Fixture()
     f.viewModel.panMap(0.2f, 0.2f)
-    f.viewModel.startNavigationToEntity("entity-nyr-104")
+    f.viewModel.startNavigationToEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
 
     val nav = assertNotNull(f.uiState.activeNavigation)
     assertEquals(NavigationTargetKind.ENTITY, nav.targetKind)
-    assertEquals("entity-nyr-104", nav.targetId)
-    assertTrue(f.uiState.isNavigatingToEntity("entity-nyr-104"))
-    assertEquals("entity-nyr-104", f.uiState.selectedEntityId)
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", nav.targetId)
+    assertTrue(f.uiState.isNavigatingToEntity("00000007-640e-5ed7-9874-4d6b6717f21d"))
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", f.uiState.selectedEntityId)
     assertTrue(f.uiState.isCameraFollowingUser)
     val started = assertIs<SurveyMapEvent.NavigationStarted>(f.events.last())
     assertNull(started.submissionId)
@@ -254,7 +257,7 @@ class SurveyMapViewModelTest {
     val after = assertNotNull(f.uiState.activeNavigation)
     assertTrue(after.vector.distanceMeters < distanceBefore)
 
-    f.viewModel.toggleNavigationToEntity("entity-nyr-104")
+    f.viewModel.toggleNavigationToEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
     assertNull(f.uiState.activeNavigation)
     assertNull(f.uiState.navigationTargetKind)
     assertEquals(SurveyMapEvent.NavigationStopped, f.events.last())
@@ -283,7 +286,7 @@ class SurveyMapViewModelTest {
     f.viewModel.panMap(0.1f, 0.1f)
     f.viewModel.zoomOutMap()
     f.viewModel.toggleBasemapType()
-    f.viewModel.selectEntity("entity-nyr-104")
+    f.viewModel.selectEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
 
     f.viewModel.reset()
 

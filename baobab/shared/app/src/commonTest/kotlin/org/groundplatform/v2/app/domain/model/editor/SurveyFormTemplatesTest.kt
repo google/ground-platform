@@ -24,7 +24,7 @@ import org.groundplatform.v2.app.domain.model.Organization
 
 /** Copying templates into surveys and saving survey Forms as templates. */
 class SurveyFormTemplatesTest {
-  private val kfs = "org-kenya-forest-service"
+  private val kfs = "00000013-31cc-5c95-90ea-379f624a5c72"
 
   private val template =
     FormTemplate(

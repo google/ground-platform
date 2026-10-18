@@ -28,26 +28,15 @@ import org.groundplatform.v2.app.domain.model.OrganizationType
 
 class CreateOrganizationUseCaseTest {
   @Test
-  fun uniqueOrganizationId_slugifiesTheName_andAddsANumericSuffixWhenTaken() {
-    assertEquals(
-      "org-kenya-forest-service",
-      CreateOrganizationUseCase.uniqueOrganizationId("Kenya Forest Service", emptySet()),
-    )
-    assertEquals(
-      "org-r-d-2026",
-      CreateOrganizationUseCase.uniqueOrganizationId("  R&D (2026) ", emptySet()),
-    )
-    assertEquals(
-      "org-organization",
-      CreateOrganizationUseCase.uniqueOrganizationId("!!!", emptySet()),
-    )
-    assertEquals(
-      "org-labs-3",
-      CreateOrganizationUseCase.uniqueOrganizationId("Labs", setOf("org-labs", "org-labs-2")),
-    )
-    assertTrue(
-      CreateOrganizationUseCase.uniqueOrganizationId("x".repeat(80), emptySet()).length <= 44
-    )
+  fun newOrganization_getsANewRandomUuid_whateverTheName() {
+    val useCase = CreateOrganizationUseCase(OrganizationRepositoryImpl(seededStore()))
+
+    val first = useCase.newOrganization("Labs", "", true, emptyList())
+    val second = useCase.newOrganization("Labs", "", true, listOf(first))
+
+    val uuid = Regex("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+    assertTrue(uuid.matches(first.id), first.id)
+    assertTrue(first.id != second.id)
   }
 
   @Test
@@ -56,7 +45,6 @@ class CreateOrganizationUseCaseTest {
     val existing = List(10) { Organization(id = "org-$it", name = "Org $it") }
 
     val org = useCase.newOrganization("  Mangrove Watch ", " Coastal ", false, existing)
-    assertEquals("org-mangrove-watch", org.id)
     assertEquals("Mangrove Watch", org.name)
     assertEquals("Coastal", org.description)
     assertFalse(org.isListed)
@@ -65,7 +53,6 @@ class CreateOrganizationUseCaseTest {
 
     val untitled = useCase.newOrganization("   ", "", true, existing + org)
     assertEquals(CreateOrganizationUseCase.DEFAULT_NAME, untitled.name)
-    assertEquals("org-untitled-organization", untitled.id)
     assertEquals("avatar:2", untitled.logoUrl)
   }
 

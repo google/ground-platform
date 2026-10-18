@@ -113,7 +113,10 @@ class WorkbenchStateTest {
     assertTrue(state.customFormDef != null)
 
     // Launch form runner first
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    state.launchFormForEntity(
+      entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
+      formId = "form-shade-canopy-audit",
+    )
     assertTrue(state.isDataCollectionFormOpen)
 
     // 1. Update with valid Baobab Biometrics XForms XML -> refreshes open FormWizardController
@@ -165,7 +168,7 @@ class WorkbenchStateTest {
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.SINGLE_POINT_LAND_USE,
       launchImmediately = true,
     )
-    assertEquals("survey-single-point-land-use", state.activeSurveyId)
+    assertEquals("00000036-1a1c-5c51-997f-28b67d813aa3", state.activeSurveyId)
     assertEquals(3, state.entities.size)
     assertEquals(0, state.standaloneSubmissions.size)
     assertEquals(3, state.allSubmissions.size)
@@ -191,9 +194,9 @@ class WorkbenchStateTest {
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
       launchImmediately = true,
     )
-    assertEquals("survey-sample-plots-forest", state.activeSurveyId)
+    assertEquals("00000034-c088-5ab9-8b98-e6bccb3dca71", state.activeSurveyId)
     assertEquals(5, state.entities.size)
-    assertEquals("plot_sp01", state.entities.first().id)
+    assertEquals("00000016-cc1f-5125-8841-166ab5b5f68f", state.entities.first().id)
     assertEquals(3, state.allSubmissions.size)
     assertEquals(3, state.submissionGeometries.size)
     assertEquals(1, state.forms.size)
@@ -204,7 +207,9 @@ class WorkbenchStateTest {
     assertTrue(
       samplePlotsFormDef.model?.secondary_instances?.any { sec ->
         sec.id == "sample_plots" &&
-          sec.rows.any { row -> row.fields["name"]?.scalar_value?.string_value == "plot_sp01" }
+          sec.rows.any { row ->
+            row.fields["name"]?.scalar_value?.string_value == "00000016-cc1f-5125-8841-166ab5b5f68f"
+          }
       } == true
     )
     val plotSelectCtrl =
@@ -214,7 +219,7 @@ class WorkbenchStateTest {
         .map { it.control }
         .first { it.canonicalPath == "/data/sample_plot_entity" }
     assertEquals(5, plotSelectCtrl.options.size)
-    assertEquals("plot_sp01", plotSelectCtrl.options.first().value)
+    assertEquals("00000016-cc1f-5125-8841-166ab5b5f68f", plotSelectCtrl.options.first().value)
 
     // 3. Commodity Plot Perimeter (walk + pan override) & Plot Center (no pan, <= 5m GPS accuracy,
     // 3 entities via save_to, 0 standalone submissions)
@@ -222,7 +227,7 @@ class WorkbenchStateTest {
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER,
       launchImmediately = true,
     )
-    assertEquals("survey-commodity-perimeter-center", state.activeSurveyId)
+    assertEquals("00000031-ffc6-5c8e-934c-d14ec07533ad", state.activeSurveyId)
     assertEquals(3, state.entities.size)
     assertEquals(0, state.standaloneSubmissions.size)
     assertEquals(3, state.allSubmissions.size)
@@ -252,9 +257,9 @@ class WorkbenchStateTest {
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS,
       launchImmediately = true,
     )
-    assertEquals("survey-household-past-individuals", state.activeSurveyId)
+    assertEquals("00000032-8d62-5717-8074-f4917e0cd76d", state.activeSurveyId)
     assertEquals(6, state.entities.size)
-    assertEquals("ind_101", state.entities.first().id)
+    assertEquals("0000000c-a9ae-59f6-ac51-7f5a8777598f", state.entities.first().id)
     assertEquals(4, state.allSubmissions.size)
     assertEquals(2, state.submissionGeometries.size)
     assertEquals(1, state.forms.size)
@@ -269,14 +274,14 @@ class WorkbenchStateTest {
         .map { it.control }
         .first { it.canonicalPath == "/data/primary_respondent_id" }
     assertEquals(6, respondentSelectCtrl.options.size)
-    assertEquals("ind_101", respondentSelectCtrl.options.first().value)
+    assertEquals("0000000c-a9ae-59f6-ac51-7f5a8777598f", respondentSelectCtrl.options.first().value)
 
     // 5. All Form Field Types Showcase ("EUDR & Shade-Tree Field Survey", 5 entities, 6 forms)
     workbench.selectWorkbenchExampleForm(
       org.groundplatform.v2.core.forms.ui.WorkbenchExampleForm.ALL_FIELD_TYPES,
       launchImmediately = true,
     )
-    assertEquals("survey-kenya-coffee", state.activeSurveyId)
+    assertEquals("00000033-6b50-51cd-ac94-baea2ea06d65", state.activeSurveyId)
     assertEquals(5, state.entities.size)
     assertEquals(6, state.forms.size)
     assertEquals(null, workbench.xformsXmlError)
@@ -370,7 +375,7 @@ class WorkbenchStateTest {
     assertEquals(initialEntities.size + 10, state.entities.size)
 
     workbench.resetSampleData()
-    assertEquals("survey-kenya-coffee", state.activeSurveyId)
+    assertEquals("00000033-6b50-51cd-ac94-baea2ea06d65", state.activeSurveyId)
     assertEquals(initialEntities, state.entities)
     assertTrue(state.mutations.any { it.isOutbox })
   }

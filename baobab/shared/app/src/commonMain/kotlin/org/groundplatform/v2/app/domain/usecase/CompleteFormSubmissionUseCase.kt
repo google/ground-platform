@@ -35,6 +35,7 @@ import org.groundplatform.v2.core.forms.model.FormState
 import org.groundplatform.v2.core.forms.ui.FormWizardController
 import org.groundplatform.v2.core.forms.ui.FormWizardStep
 import org.groundplatform.v2.core.forms.ui.formatFieldValueForDisplay
+import org.groundplatform.v2.core.ids.RecordIds
 
 /** Outcome of finalizing an active form submission via [CompleteFormSubmissionUseCase]. */
 data class FormSubmissionCompletionResult(
@@ -59,6 +60,8 @@ class CompleteFormSubmissionUseCase(
   private val transactionRunner: TransactionRunner,
   private val resolveFormDefForLaunchUseCase: ResolveFormDefForLaunchUseCase =
     ResolveFormDefForLaunchUseCase(),
+  /** IDs of new map features and submissions (random UUIDs). */
+  private val newId: () -> String = RecordIds::newId,
 ) {
   /**
    * Records the submission and queues its upload in one atomic change to the local data store.
@@ -227,9 +230,11 @@ class CompleteFormSubmissionUseCase(
         createEntityState?.dataset?.takeIf { it.isNotBlank() }
           ?: form.targetDatasetId.ifBlank { "locations" }
       val targetDatasetName = form.targetDatasetName.ifBlank { targetDataset.replace('_', ' ') }
-      val newEntId =
-        createEntityState?.entityId?.takeIf { it.isNotBlank() }
-          ?: "ent-${targetDataset.take(4)}-${(entities.size + 1).toString().padStart(2, '0')}"
+      val newEntId = createEntityState?.entityId?.takeIf { it.isNotBlank() } ?: newId()
+      // Human-readable reference shown on the feature, e.g. `ENT-PLOT-03`; the ID is a UUID.
+      val newGeoId =
+        "ent-${targetDataset.take(4)}-${(entities.size + 1).toString().padStart(2, '0')}"
+          .uppercase()
       val labelCandidate =
         createEntityState?.label?.takeIf { it.isNotBlank() }
           ?: saveToProps["farmer_parcel_code"]
@@ -246,7 +251,7 @@ class CompleteFormSubmissionUseCase(
           if (subCategory != null) "$labelCandidate • $subCategory" else labelCandidate
         }
 
-      val newSubId = "sub-$newEntId-${form.id}-${entities.size + 1}"
+      val newSubId = newId()
       val newSubmission =
         SubmissionPreviewItem(
           id = newSubId,
@@ -299,7 +304,7 @@ class CompleteFormSubmissionUseCase(
           datasetId = targetDataset,
           datasetName = targetDatasetName,
           layerId = layerId,
-          geoId = newEntId.uppercase(),
+          geoId = newGeoId,
           geometryTypeLabel = geomTypeLabel,
           areaHectares = if (isPolygonGeom) 1.2 else 0.05,
           perimeterMeters = if (isPolygonGeom) 480 else 25,
@@ -376,7 +381,7 @@ class CompleteFormSubmissionUseCase(
 
     // 2. Handle standalone ("Log Only") form submissions without an attached entity
     if (entityId == null && !form.requiresEntity) {
-      val newSubId = "sub-standalone-${form.id}-${standaloneSubmissions.size + 1}"
+      val newSubId = newId()
       val newStandaloneSubmission =
         SubmissionPreviewItem(
           id = newSubId,
@@ -432,7 +437,7 @@ class CompleteFormSubmissionUseCase(
     // 3. Update existing entity with submission and merged save_to properties
     val resolvedEntityId = entityId ?: return null
     val entity = entities.firstOrNull { it.id == resolvedEntityId } ?: return null
-    val newSubId = "sub-${entity.id}-${form.id}-${entity.submissions.size + 1}"
+    val newSubId = newId()
     val newSubmission =
       SubmissionPreviewItem(
         id = newSubId,

@@ -72,7 +72,7 @@ class LibraryRepositoryTest {
   fun updateLibrary_storesValidChanges_perOrganization() = runNow {
     val store = seededStore()
     val repo = LibraryRepositoryImpl(store)
-    val id = "org.org-mekong-mangrove-alliance.seedling_count"
+    val id = "org.00000014-1894-5118-9a64-566bbe3875bf.seedling_count"
     val updated =
       repo.updateLibrary(mekong) { it.copy(concepts = it.concepts + concept(id, mekong)) }
     assertNotNull(updated)
@@ -91,13 +91,15 @@ class LibraryRepositoryTest {
     // Another organization's prefix.
     assertNull(
       repo.updateLibrary(kfs) {
-        it.copy(concepts = it.concepts + concept("org.org-mekong-mangrove-alliance.x", kfs))
+        it.copy(concepts = it.concepts + concept("org.00000014-1894-5118-9a64-566bbe3875bf.x", kfs))
       }
     )
     // Owned by someone else.
     assertNull(
       repo.updateLibrary(kfs) {
-        it.copy(concepts = it.concepts + concept("org.org-kenya-forest-service.x", mekong))
+        it.copy(
+          concepts = it.concepts + concept("org.00000013-31cc-5c95-90ea-379f624a5c72.x", mekong)
+        )
       }
     )
     assertNull(repo.updateLibrary("org-missing") { it })
@@ -115,7 +117,9 @@ class LibraryRepositoryTest {
     repo.observeLibrary(kfs).onEach { seen += it.concepts.size }.launchIn(scope)
     runNow {
       repo.updateLibrary(kfs) {
-        it.copy(concepts = it.concepts + concept("org.org-kenya-forest-service.new_one", kfs))
+        it.copy(
+          concepts = it.concepts + concept("org.00000013-31cc-5c95-90ea-379f624a5c72.new_one", kfs)
+        )
       }
     }
     runNow { organizations.deleteOrganization(kfs) }

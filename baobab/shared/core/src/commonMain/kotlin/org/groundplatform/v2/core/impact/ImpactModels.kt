@@ -22,8 +22,11 @@ package org.groundplatform.v2.core.impact
  * clients (the web console computes them on demand), and dashboards match across environments.
  */
 
-/** ID of the `"All users"` organization, which owns the global library. */
-const val ALL_USERS_ORGANIZATION_ID = "org-all-users"
+/**
+ * Reserved ID of the synthetic `"All users"` organization, which owns the global library. Like
+ * every record ID it's a UUID; this one is fixed so every deployment and client agrees on it.
+ */
+const val ALL_USERS_ORGANIZATION_ID = "00000000-0000-4000-8000-000000000001"
 
 /** How a concept's values are aggregated (`groundplatform.v2.library.Concept.Aggregation`). */
 enum class ImpactAggregation {

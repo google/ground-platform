@@ -226,7 +226,7 @@ enum class WorkbenchExampleForm(
           <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">
             <instance>
               <data id="sample_plots_forest_assessment" version="2026092401">
-                <sample_plot_entity>plot_sp01</sample_plot_entity>
+                <sample_plot_entity>00000016-cc1f-5125-8841-166ab5b5f68f</sample_plot_entity>
                 <selected_plot_stratum/>
                 <selected_plot_elevation/>
                 <canopy_photo>hemispherical_canopy_sp01.jpg</canopy_photo>
@@ -246,31 +246,31 @@ enum class WorkbenchExampleForm(
             <instance id="sample_plots" src="jr://file-csv/sample_plots.csv">
               <root>
                 <item>
-                  <name>plot_sp01</name>
+                  <name>00000016-cc1f-5125-8841-166ab5b5f68f</name>
                   <label>Plot SP-01 • Upper Montane Buffer (-1.2889, 36.8194)</label>
                   <stratum>Montane Moist Indigenous Forest</stratum>
                   <elevation_m>1840m</elevation_m>
                 </item>
                 <item>
-                  <name>plot_sp02</name>
+                  <name>00000017-d1a0-51d3-a686-e6ca450c23b2</name>
                   <label>Plot SP-02 • Riparian Gallery Transect (-1.2934, 36.8248)</label>
                   <stratum>Riparian Corridor Restoration</stratum>
                   <elevation_m>1715m</elevation_m>
                 </item>
                 <item>
-                  <name>plot_sp03</name>
+                  <name>00000018-4d16-5ab7-a57d-7dae5949cb7a</name>
                   <label>Plot SP-03 • Shade Agroforestry Core (-1.2961, 36.8172)</label>
                   <stratum>Multi-Strata Shade Coffee</stratum>
                   <elevation_m>1690m</elevation_m>
                 </item>
                 <item>
-                  <name>plot_sp04</name>
+                  <name>00000019-882d-5830-a254-1fe5abf727e3</name>
                   <label>Plot SP-04 • Community Forest Edge (-1.2855, 36.8271)</label>
                   <stratum>Secondary Enrichment Planting</stratum>
                   <elevation_m>1795m</elevation_m>
                 </item>
                 <item>
-                  <name>plot_sp05</name>
+                  <name>0000001a-f05a-503e-9697-12c420a33cdb</name>
                   <label>Plot SP-05 • Ridge Benchmark Control (-1.2908, 36.8130)</label>
                   <stratum>Intact Reference Stand</stratum>
                   <elevation_m>1910m</elevation_m>
@@ -444,7 +444,7 @@ enum class WorkbenchExampleForm(
     sampleInstanceXml =
       """
       <data id="sample_plots_forest_assessment">
-        <sample_plot_entity>plot_sp01</sample_plot_entity>
+        <sample_plot_entity>00000016-cc1f-5125-8841-166ab5b5f68f</sample_plot_entity>
         <canopy_photo>hemispherical_canopy_sp01.jpg</canopy_photo>
         <canopy_stratum>canopy</canopy_stratum>
         <canopy_cover_pct>75</canopy_cover_pct>
@@ -692,11 +692,11 @@ enum class WorkbenchExampleForm(
           <model orx:xforms-version="1.0.0">
             <instance>
               <data id="household_survey_past_individuals" version="2026092401">
-                <primary_respondent_id>ind_101</primary_respondent_id>
+                <primary_respondent_id>0000000c-a9ae-59f6-ac51-7f5a8777598f</primary_respondent_id>
                 <preloaded_household_code/>
                 <preloaded_baseline_role/>
                 <preloaded_baseline_year/>
-                <returning_individuals_present>ind_101 ind_102 ind_104</returning_individuals_present>
+                <returning_individuals_present>0000000c-a9ae-59f6-ac51-7f5a8777598f 0000000d-2972-591c-b23d-4918d3e3b7b1 0000000f-23a2-50ad-b0e8-98639587eba4</returning_individuals_present>
                 <respondent_residency_status>resident_full_time</respondent_residency_status>
                 <current_household_size>5</current_household_size>
                 <new_individuals_joined_count>1</new_individuals_joined_count>
@@ -711,42 +711,42 @@ enum class WorkbenchExampleForm(
             <instance id="past_individuals" src="jr://file-csv/past_individuals.csv">
               <root>
                 <item>
-                  <name>ind_101</name>
+                  <name>0000000c-a9ae-59f6-ac51-7f5a8777598f</name>
                   <label>Amina Wanjiku (ID: IND-101 • Age 44 • HH-KAK-014)</label>
                   <household_code>HH-KAK-014 (Kakamega East)</household_code>
                   <baseline_role>Household Head &amp; Lead Agroforester</baseline_role>
                   <baseline_year>2023 Wave 1</baseline_year>
                 </item>
                 <item>
-                  <name>ind_102</name>
+                  <name>0000000d-2972-591c-b23d-4918d3e3b7b1</name>
                   <label>Samuel Ochieng (ID: IND-102 • Age 47 • HH-KAK-014)</label>
                   <household_code>HH-KAK-014 (Kakamega East)</household_code>
                   <baseline_role>Spouse / Co-Manager</baseline_role>
                   <baseline_year>2023 Wave 1</baseline_year>
                 </item>
                 <item>
-                  <name>ind_103</name>
+                  <name>0000000e-95ee-5695-ad0b-54576e8d7785</name>
                   <label>Grace Atieno (ID: IND-103 • Age 29 • HH-KAK-022)</label>
                   <household_code>HH-KAK-022 (Shinyalu Ridge)</household_code>
                   <baseline_role>Primary Respondent / Nursery Operator</baseline_role>
                   <baseline_year>2023 Wave 1</baseline_year>
                 </item>
                 <item>
-                  <name>ind_104</name>
+                  <name>0000000f-23a2-50ad-b0e8-98639587eba4</name>
                   <label>David Barasa (ID: IND-104 • Age 21 • HH-KAK-014)</label>
                   <household_code>HH-KAK-014 (Kakamega East)</household_code>
                   <baseline_role>Adult Child / Pruning Crew</baseline_role>
                   <baseline_year>2024 Wave 2</baseline_year>
                 </item>
                 <item>
-                  <name>ind_105</name>
+                  <name>00000010-1195-5b30-ab83-7939d81cd71f</name>
                   <label>Esther Nekesa (ID: IND-105 • Age 61 • HH-KAK-031)</label>
                   <household_code>HH-KAK-031 (Ikolomani South)</household_code>
                   <baseline_role>Elder / Seed Guardian</baseline_role>
                   <baseline_year>2022 Baseline</baseline_year>
                 </item>
                 <item>
-                  <name>ind_106</name>
+                  <name>00000011-d6fa-5a2d-8848-5419c62a0359</name>
                   <label>Peter Wafula (ID: IND-106 • Age 35 • HH-KAK-039)</label>
                   <household_code>HH-KAK-039 (Lurambi North)</household_code>
                   <baseline_role>Household Head / Cooperative Treasurer</baseline_role>
@@ -945,8 +945,8 @@ enum class WorkbenchExampleForm(
     sampleInstanceXml =
       """
       <data id="household_survey_past_individuals">
-        <primary_respondent_id>ind_101</primary_respondent_id>
-        <returning_individuals_present>ind_101 ind_102 ind_104</returning_individuals_present>
+        <primary_respondent_id>0000000c-a9ae-59f6-ac51-7f5a8777598f</primary_respondent_id>
+        <returning_individuals_present>0000000c-a9ae-59f6-ac51-7f5a8777598f 0000000d-2972-591c-b23d-4918d3e3b7b1 0000000f-23a2-50ad-b0e8-98639587eba4</returning_individuals_present>
         <respondent_residency_status>resident_full_time</respondent_residency_status>
         <current_household_size>5</current_household_size>
         <new_individuals_joined_count>1</new_individuals_joined_count>

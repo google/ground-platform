@@ -1529,6 +1529,7 @@ class UserDataBackend(private val seed: UserDataSeed = UserDataSeed()) :
     const val MAX_BATCH_SURVEY_IDS: Int = 100
 
     /** Organization whose library is the global library shared by all users. */
-    const val ALL_USERS_ORGANIZATION_ID: String = "org-all-users"
+    const val ALL_USERS_ORGANIZATION_ID: String =
+      org.groundplatform.v2.core.impact.ALL_USERS_ORGANIZATION_ID
   }
 }

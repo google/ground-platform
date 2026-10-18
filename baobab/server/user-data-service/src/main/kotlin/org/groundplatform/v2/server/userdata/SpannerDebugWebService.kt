@@ -163,7 +163,9 @@ object SpannerDebugWebService {
     method: HttpMethod = HttpMethod.GET,
     handle:
       (
-        debug: SpannerDebug, ctx: com.linecorp.armeria.server.ServiceRequestContext, body: String,
+        debug: SpannerDebug,
+        ctx: com.linecorp.armeria.server.ServiceRequestContext,
+        body: String,
       ) -> Any?,
   ): HttpService = HttpService { ctx, req ->
     if (req.method() != method) return@HttpService HttpResponse.of(HttpStatus.METHOD_NOT_ALLOWED)

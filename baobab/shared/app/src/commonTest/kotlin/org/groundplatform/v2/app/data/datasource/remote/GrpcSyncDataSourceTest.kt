@@ -177,7 +177,9 @@ class GrpcSyncDataSourceTest {
   @Test
   fun deltaLibraryTombstone_removesTheLocalLibrary(): Unit = runDirect {
     seed()
-    val orgId = store.transaction { libraries().keys.first { it != "org-all-users" } }
+    val orgId = store.transaction {
+      libraries().keys.first { it != "00000000-0000-4000-8000-000000000001" }
+    }
 
     service.deleteLibrary(orgId)
     sync.pullIncrementalCatchUp(store = store)
@@ -191,7 +193,9 @@ class GrpcSyncDataSourceTest {
   @Test
   fun libraryMissingFromAFullResync_isRemovedLocally(): Unit = runDirect {
     seed()
-    val orgId = store.transaction { libraries().keys.first { it != "org-all-users" } }
+    val orgId = store.transaction {
+      libraries().keys.first { it != "00000000-0000-4000-8000-000000000001" }
+    }
 
     service.removeLibrary(orgId)
     service.invalidateSyncTokens()
@@ -200,7 +204,7 @@ class GrpcSyncDataSourceTest {
     store.transaction {
       assertNull(library(orgId))
       assertNull(libraryBase(orgId))
-      assertNotNull(library("org-all-users"))
+      assertNotNull(library("00000000-0000-4000-8000-000000000001"))
     }
   }
 }

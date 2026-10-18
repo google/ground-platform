@@ -40,7 +40,7 @@ class WorkbenchMobileStateTest {
         MobileAppState(initialScreen = AppScreen.DOWNLOAD_SURVEY, dataHolder = sampleDataHolder())
       )
     val state = workbench.mobile
-    val targetId = "survey-serengeti-corridor"
+    val targetId = "00000035-caf4-571e-b907-f506f92666ab"
     assertFalse(state.surveys.first { it.id == targetId }.isDownloaded)
 
     state.downloadSurvey(targetId)
@@ -69,9 +69,18 @@ class WorkbenchMobileStateTest {
     assertEquals("Map features", ListFilterTab.ENTITIES.label)
     assertEquals("Map features", state.activeEntitiesTabLabel)
     assertEquals("map features", state.activeEntitiesCountNoun)
-    assertEquals("Coffee Parcel", state.entitySingularTypeLabel("entity-nyr-104"))
-    assertEquals("Shade Tree Monitoring Plot", state.entitySingularTypeLabel("entity-shade-201"))
-    assertEquals("Cooperative Washing Station", state.entitySingularTypeLabel("entity-station-01"))
+    assertEquals(
+      "Coffee Parcel",
+      state.entitySingularTypeLabel("00000007-640e-5ed7-9874-4d6b6717f21d"),
+    )
+    assertEquals(
+      "Shade Tree Monitoring Plot",
+      state.entitySingularTypeLabel("0000000a-56d7-5c1d-9457-7457267120a3"),
+    )
+    assertEquals(
+      "Cooperative Washing Station",
+      state.entitySingularTypeLabel("0000000b-7633-5116-9d6d-50581002d8cf"),
+    )
 
     // When filtered down to a single visible entity dataset layer, dynamic domain naming activates
     state.toggleLayerVisibility("layer-shade-transects")
@@ -227,16 +236,20 @@ class WorkbenchMobileStateTest {
           MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
         )
         .mobile
-    val initialShadeSubs = state.entities.first { it.id == "entity-shade-201" }.submissions.size
+    val initialShadeSubs =
+      state.entities.first { it.id == "0000000a-56d7-5c1d-9457-7457267120a3" }.submissions.size
     assertEquals(3, initialShadeSubs)
     assertFalse(state.isDataCollectionFormOpen)
     assertEquals(null, state.activeFormWizardController)
 
-    // Launch form on 1:N entity `entity-shade-201`
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    // Launch form on 1:N entity `0000000a-56d7-5c1d-9457-7457267120a3`
+    state.launchFormForEntity(
+      entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
+      formId = "form-shade-canopy-audit",
+    )
 
     assertTrue(state.isDataCollectionFormOpen)
-    assertEquals("entity-shade-201", state.activeDataCollectionEntityId)
+    assertEquals("0000000a-56d7-5c1d-9457-7457267120a3", state.activeDataCollectionEntityId)
     assertEquals("form-shade-canopy-audit", state.activeDataCollectionFormId)
     val controller = state.activeFormWizardController!!
     assertEquals("EUDR & Shade-Tree Field Survey", controller.formState.formDef.title)
@@ -251,7 +264,7 @@ class WorkbenchMobileStateTest {
     // Form runner closes and the entity's submissions list grows by 1 with the answered fields
     assertFalse(state.isDataCollectionFormOpen)
     assertEquals(null, state.activeFormWizardController)
-    val updatedEntity = state.entities.first { it.id == "entity-shade-201" }
+    val updatedEntity = state.entities.first { it.id == "0000000a-56d7-5c1d-9457-7457267120a3" }
     assertEquals(4, updatedEntity.submissions.size)
     val latestSubmission = updatedEntity.submissions.first()
     assertEquals("EUDR & Shade-Tree Field Survey", latestSubmission.formTitle)
@@ -279,11 +292,11 @@ class WorkbenchMobileStateTest {
     state.setMainSurveyViewMode(MainSurveyViewMode.LIST)
 
     // 1. Default entities cover Uploading, Synced, and Failed states
-    val nyr104 = state.entities.first { it.id == "entity-nyr-104" }
-    val shade201 = state.entities.first { it.id == "entity-shade-201" }
-    val nyr108 = state.entities.first { it.id == "entity-nyr-108" }
-    val nyr112 = state.entities.first { it.id == "entity-nyr-112" }
-    val station01 = state.entities.first { it.id == "entity-station-01" }
+    val nyr104 = state.entities.first { it.id == "00000007-640e-5ed7-9874-4d6b6717f21d" }
+    val shade201 = state.entities.first { it.id == "0000000a-56d7-5c1d-9457-7457267120a3" }
+    val nyr108 = state.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }
+    val nyr112 = state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
+    val station01 = state.entities.first { it.id == "0000000b-7633-5116-9d6d-50581002d8cf" }
 
     assertEquals(SyncStatus.SYNCED, nyr104.syncStatus)
     assertTrue(nyr104.isSynced)
@@ -299,10 +312,12 @@ class WorkbenchMobileStateTest {
     assertEquals(2, state.failedEntityCount)
 
     // 2. Default submissions cover Uploading, Synced, and Failed states
-    val subNyr104 = state.allSubmissions.first { it.id == "sub-nyr-104-baseline" }
-    val subShadeWave3 = state.allSubmissions.first { it.id == "sub-shade-201-wave3" }
-    val subShadeWave2 = state.allSubmissions.first { it.id == "sub-shade-201-wave2" }
-    val subWshSep = state.allSubmissions.first { it.id == "sub-wsh-01-sep" }
+    val subNyr104 = state.allSubmissions.first { it.id == "00000022-c99b-5e7e-b810-c506ebf06f19" }
+    val subShadeWave3 =
+      state.allSubmissions.first { it.id == "00000026-cca2-5594-b83f-02266f40048e" }
+    val subShadeWave2 =
+      state.allSubmissions.first { it.id == "00000025-7bc5-5b86-839c-a76cee54cc81" }
+    val subWshSep = state.allSubmissions.first { it.id == "00000030-ca50-56e0-8458-9c5728954d52" }
 
     assertEquals(SyncStatus.SYNCED, subNyr104.syncStatus)
     assertTrue(subNyr104.isSynced)
@@ -330,18 +345,21 @@ class WorkbenchMobileStateTest {
 
     state.updateListSearchQuery("Synced")
     assertEquals(1, state.filteredListEntities.size)
-    assertEquals("entity-nyr-104", state.filteredListEntities.first().id)
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", state.filteredListEntities.first().id)
     assertTrue(state.filteredListSubmissions.isEmpty())
     state.clearListSearchQuery()
 
     // 4. Cycling / updating submission and entity sync statuses updates parent entity aggregate
     // state
-    state.cycleSubmissionSyncStatus("sub-shade-201-wave3")
+    state.cycleSubmissionSyncStatus("00000026-cca2-5594-b83f-02266f40048e")
     assertEquals(
       SyncStatus.SYNCED,
-      state.allSubmissions.first { it.id == "sub-shade-201-wave3" }.syncStatus,
+      state.allSubmissions.first { it.id == "00000026-cca2-5594-b83f-02266f40048e" }.syncStatus,
     )
-    assertEquals(SyncStatus.SYNCED, state.entities.first { it.id == "entity-shade-201" }.syncStatus)
+    assertEquals(
+      SyncStatus.SYNCED,
+      state.entities.first { it.id == "0000000a-56d7-5c1d-9457-7457267120a3" }.syncStatus,
+    )
 
     // 5. Syncing all Outbox mutations transitions remaining Uploading/Failed items to Synced
     state.syncAllOutboxMutations()
@@ -373,8 +391,9 @@ class WorkbenchMobileStateTest {
     assertTrue(offline.size < entity.submissions.size)
     assertTrue(offline.all { state.isSubmissionStoredOnDevice(it) })
 
-    // Other collectors' submissions (e.g. Samuel Kariuki on entity-nyr-108) require connectivity
-    val nyr108 = state.entities.first { it.id == "entity-nyr-108" }
+    // Other collectors' submissions (e.g. Samuel Kariuki on 00000008-15d0-51f2-84eb-a72dfea5a747)
+    // require connectivity
+    val nyr108 = state.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }
     assertTrue(state.availableGroupedSubmissionsForEntity(nyr108).isEmpty())
   }
 
@@ -416,7 +435,10 @@ class WorkbenchMobileStateTest {
           MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
         )
         .mobile
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    state.launchFormForEntity(
+      entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
+      formId = "form-shade-canopy-audit",
+    )
     val controller = assertNotNull(state.activeFormWizardController)
 
     // Edit Repeat #1 answers and add Repeat #2
@@ -429,7 +451,7 @@ class WorkbenchMobileStateTest {
 
     state.completeActiveFormSubmission()
 
-    val updatedPlot = state.entities.first { it.id == "entity-shade-201" }
+    val updatedPlot = state.entities.first { it.id == "0000000a-56d7-5c1d-9457-7457267120a3" }
     val latestSubmission = updatedPlot.submissions.first()
 
     // Ensure no group/repeat container nodes were emitted as "(Unanswered)"

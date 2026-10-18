@@ -158,10 +158,10 @@ class UserDataBackendTest {
               LibraryMutation(
                 update_field =
                   LibraryFieldPatch(
-                    key = "concepts/org.org-kenya-forest-service.soil_ph",
+                    key = "concepts/org.00000013-31cc-5c95-90ea-379f624a5c72.soil_ph",
                     concept_value =
                       ConceptDef(
-                        id = "org.org-kenya-forest-service.soil_ph",
+                        id = "org.00000013-31cc-5c95-90ea-379f624a5c72.soil_ph",
                         label = LocalizedText(values = mapOf("en" to "Soil pH")),
                         data_type = DataType.TYPE_DOUBLE,
                       ),
@@ -258,7 +258,7 @@ class UserDataBackendTest {
               mutation_id = "mut-delete",
               entity_mutation =
                 EntityMutation(
-                  entity_id = "entity-nyr-104",
+                  entity_id = "00000007-640e-5ed7-9874-4d6b6717f21d",
                   dataset_id = "coffee_parcels",
                   delete = true,
                 ),
@@ -267,14 +267,21 @@ class UserDataBackendTest {
       )
     )
     val delta = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA, sync_token = token))
-    assertEquals(listOf("entity-nyr-104"), delta.entities.map { it.entity_id })
+    assertEquals(
+      listOf("00000007-640e-5ed7-9874-4d6b6717f21d"),
+      delta.entities.map { it.entity_id },
+    )
     assertTrue(delta.entities.single().is_deleted)
     // Query mode leaves deleted records out unless asked for them.
     val query = backend.ListEntities(ListEntitiesRequest(survey_id = KENYA))
-    assertTrue(query.entities.none { it.entity_id == "entity-nyr-104" })
+    assertTrue(query.entities.none { it.entity_id == "00000007-640e-5ed7-9874-4d6b6717f21d" })
     val withDeleted =
       backend.ListEntities(ListEntitiesRequest(survey_id = KENYA, include_deleted = true))
-    assertTrue(withDeleted.entities.any { it.entity_id == "entity-nyr-104" && it.is_deleted })
+    assertTrue(
+      withDeleted.entities.any {
+        it.entity_id == "00000007-640e-5ed7-9874-4d6b6717f21d" && it.is_deleted
+      }
+    )
   }
 
   @Test
@@ -503,7 +510,7 @@ class UserDataBackendTest {
       AcquirePlotLockRequest(
         survey_id = KENYA,
         dataset_id = "coffee_parcels",
-        entity_id = "entity-nyr-104",
+        entity_id = "00000007-640e-5ed7-9874-4d6b6717f21d",
         user_id = user,
       )
     assertEquals(
@@ -520,7 +527,7 @@ class UserDataBackendTest {
         ReleasePlotLockRequest(
           survey_id = KENYA,
           dataset_id = "coffee_parcels",
-          entity_id = "entity-nyr-104",
+          entity_id = "00000007-640e-5ed7-9874-4d6b6717f21d",
           user_id = "uid-collector-one",
         )
       )
@@ -575,7 +582,7 @@ class UserDataBackendTest {
   }
 
   companion object {
-    const val KENYA = "survey-kenya-coffee"
-    const val KENYA_FOREST_SERVICE = "org-kenya-forest-service"
+    const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
+    const val KENYA_FOREST_SERVICE = "00000013-31cc-5c95-90ea-379f624a5c72"
   }
 }

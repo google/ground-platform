@@ -36,7 +36,7 @@ product rationale.
 ## Organization Libraries
 
 Every [`Organization`](../survey/00-introduction.md) owns a library. The
-synthetic **"All users"** organization (`org-all-users`) owns the **global
+synthetic **"All users"** organization (reserved ID `00000000-0000-4000-8000-000000000001`) owns the **global
 library**, which applies to every survey on the deployment. This mirrors how
 platform-wide imagery sources are already held by "All users" and combined with
 organization-specific sources.

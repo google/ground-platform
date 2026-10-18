@@ -71,7 +71,10 @@ class WebAppStateTest {
   @Test
   fun focusWebFormQuestion_issuesRequestsWithIncreasingTokens_andClearsWithTheForm() {
     val state = WebAppState(dataHolder = sampleDataHolder())
-    state.launchFormForEntity(entityId = "entity-shade-201", formId = "form-shade-canopy-audit")
+    state.launchFormForEntity(
+      entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
+      formId = "form-shade-canopy-audit",
+    )
     assertNull(state.webFormFocusRequest)
 
     state.focusWebFormQuestion("/data/plot_boundary")

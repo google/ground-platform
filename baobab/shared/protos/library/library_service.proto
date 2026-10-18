@@ -32,7 +32,8 @@ import "shared/protos/library/template.proto";
 // `OrganizationLibrarySettings` and an authoritative server `commit_timestamp`
 // for delta synchronization (`docs/technical/sync-engine.md`).
 message OrganizationLibraryRecord {
-  // Owning organization ID (or `"org-all-users"` for the global library).
+  // Owning organization ID (the reserved "All users" organization
+  // `00000000-0000-4000-8000-000000000001` for the global library).
   string organization_id = 1;
 
   // Reusable library entries owned by this organization.
@@ -55,13 +56,13 @@ message OrganizationLibraryRecord {
 }
 
 // gRPC service for reading, resolving, syncing, searching, and curating
-// global (`"org-all-users"`) and organization-scoped libraries.
+// global ("All users" organization) and organization-scoped libraries.
 service LibraryService {
   // Retrieves the raw `OrganizationLibraryRecord` for a single organization.
   rpc GetLibrary(GetLibraryRequest) returns (GetLibraryResponse);
 
   // Retrieves the resolved `LibraryBundle` for an organization (merging the
-  // global `"org-all-users"` library with the organization's own entries and
+  // global ("All users") library with the organization's own entries and
   // filtering out `OrganizationLibrarySettings.hidden_global_entry_ids`).
   rpc GetResolvedLibrary(GetResolvedLibraryRequest) returns (GetResolvedLibraryResponse);
 
@@ -110,7 +111,7 @@ message GetResolvedLibraryResponse {
 
 message ListLibrariesRequest {
   // Scope: optional organization ID. Empty lists every library the caller can
-  // access, including the global `"org-all-users"` library.
+  // access, including the global ("All users") library.
   string organization_id = 1;
 
   // Maximum number of libraries to return. The server picks a default when

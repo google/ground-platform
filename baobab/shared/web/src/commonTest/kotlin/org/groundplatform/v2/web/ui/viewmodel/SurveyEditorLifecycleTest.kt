@@ -40,7 +40,7 @@ import org.groundplatform.v2.web.ui.surveyeditor.lifecycleActionOptions
 
 /** Closing, archiving, and reopening a survey from the Survey editor, and the outcome card. */
 class SurveyEditorLifecycleTest {
-  private class Fixture(activeSurveyId: String = "survey-single-point-land-use") {
+  private class Fixture(activeSurveyId: String = "00000036-1a1c-5c51-997f-28b67d813aa3") {
     val lifecycle = SurveyLifecycleFixture()
     val store = lifecycle.store
     val scope = testScope()

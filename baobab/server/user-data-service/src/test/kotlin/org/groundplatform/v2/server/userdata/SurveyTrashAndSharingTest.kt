@@ -225,7 +225,7 @@ class SurveyTrashAndSharingTest {
   }
 
   companion object {
-    const val KENYA = "survey-kenya-coffee"
+    const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
     const val DATASET = "coffee_parcels"
   }
 }

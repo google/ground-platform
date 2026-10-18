@@ -336,9 +336,9 @@ class RecordVersionTest {
   }
 
   companion object {
-    const val KENYA = "survey-kenya-coffee"
-    const val ENTITY = "entity-nyr-104"
+    const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
+    const val ENTITY = "00000007-640e-5ed7-9874-4d6b6717f21d"
     const val DATASET = "coffee_parcels"
-    const val ORG = "org-kenya-forest-service"
+    const val ORG = "00000013-31cc-5c95-90ea-379f624a5c72"
   }
 }

@@ -73,14 +73,14 @@ class SurveyEditorDerivationTest {
 
   @Test
   fun householdPanelSurvey_hasItsForm() {
-    val draft = derive("survey-household-past-individuals")
+    val draft = derive("00000032-8d62-5717-8074-f4917e0cd76d")
     val form = draft.forms.single { it.form.formId == "form-household-past-individuals" }
     assertTrue(form.form.questions.isNotEmpty())
   }
 
   @Test
   fun mapLayerRows_mirrorTheMapFeatures() {
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     val draft = derive(surveyId)
     val entities = SampleEntitiesData.entitiesForSurvey(surveyId)
     for (layer in SampleMapLayersData.mapLayersForSurvey(surveyId)) {
@@ -98,7 +98,7 @@ class SurveyEditorDerivationTest {
 
   @Test
   fun refresh_keepsStoredRowsAndFollowsRuntimeChanges() {
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     val layers = SampleMapLayersData.mapLayersForSurvey(surveyId)
     val entities = SampleEntitiesData.entitiesForSurvey(surveyId)
     val stored = derive(surveyId)
@@ -126,7 +126,7 @@ class SurveyEditorDerivationTest {
 
   @Test
   fun refresh_keepsDataTablesUntouched() {
-    val surveyId = "survey-kenya-coffee"
+    val surveyId = "00000033-6b50-51cd-ac94-baea2ea06d65"
     val stored =
       derive(surveyId).let { it.copy(datasets = it.datasets + SurveyEditorSamples.farmers()) }
     val refreshed =

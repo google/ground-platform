@@ -126,7 +126,8 @@ class ComputeImpactUseCaseTest {
 
   @Test
   fun surveyWithoutPurposesOrLinks_explainsHowToGetNumbers() {
-    val summary = assertNotNull(compute.surveySummary(snapshot(), "survey-sample-plots-forest"))
+    val summary =
+      assertNotNull(compute.surveySummary(snapshot(), "00000034-c088-5ab9-8b98-e6bccb3dca71"))
 
     assertEquals(listOf(ImpactHint.PICK_PURPOSE, ImpactHint.LINK_FIELDS), summary.hints)
     assertEquals(ImpactAttributionLevel.DATA_COLLECTED, summary.attribution.level)
@@ -353,7 +354,7 @@ class ComputeImpactUseCaseTest {
   }
 
   private companion object {
-    const val KENYA = "survey-kenya-coffee"
+    const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
     const val KFS = SampleOrganizationsData.KENYA_FOREST_SERVICE
   }
 }

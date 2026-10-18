@@ -101,7 +101,7 @@ sealed interface WorkbenchEvent {
 
   /**
    * The user clicked "Reset Default" while on another survey; open [surveyId]
-   * (`survey-kenya-coffee`) before restoring the default XForms XML.
+   * (`00000033-6b50-51cd-ac94-baea2ea06d65`) before restoring the default XForms XML.
    */
   data class DefaultSurveyRestored(val surveyId: String) : WorkbenchEvent
 

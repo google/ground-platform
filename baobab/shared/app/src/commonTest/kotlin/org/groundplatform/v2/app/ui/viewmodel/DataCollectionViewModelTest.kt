@@ -73,7 +73,11 @@ class DataCollectionViewModelTest {
     assertEquals(MainSurveyViewMode.LIST, f.uiState.entityRefSelectorViewMode)
     assertTrue(f.uiState.isCurrentFormStepEntityRef)
     assertEquals(
-      listOf("entity-nyr-104", "entity-nyr-108", "entity-nyr-112"),
+      listOf(
+        "00000007-640e-5ed7-9874-4d6b6717f21d",
+        "00000008-15d0-51f2-84eb-a72dfea5a747",
+        "00000009-1699-51bb-b7a3-f90a60bedd4d",
+      ),
       f.uiState.eligibleEntitiesForActiveForm.map { it.id },
     )
     assertTrue(f.events.contains(DataCollectionEvent.FormOpened))
@@ -87,7 +91,10 @@ class DataCollectionViewModelTest {
     assertEquals(3, f.uiState.filteredEntityRefCandidates.size)
 
     f.viewModel.updateEntityRefSearchQuery("108")
-    assertEquals(listOf("entity-nyr-108"), f.uiState.filteredEntityRefCandidates.map { it.id })
+    assertEquals(
+      listOf("00000008-15d0-51f2-84eb-a72dfea5a747"),
+      f.uiState.filteredEntityRefCandidates.map { it.id },
+    )
 
     f.viewModel.clearEntityRefSearchQuery()
     assertEquals("", f.uiState.entityRefSearchQuery)
@@ -103,15 +110,21 @@ class DataCollectionViewModelTest {
     val epochBefore = f.uiState.entityRefFramingEpoch
     f.clearEvents()
 
-    f.viewModel.selectEntityRefForActiveForm("entity-nyr-108")
+    f.viewModel.selectEntityRefForActiveForm("00000008-15d0-51f2-84eb-a72dfea5a747")
 
-    assertEquals("entity-nyr-108", f.uiState.activeDataCollectionEntityId)
-    assertEquals("entity-nyr-108", f.uiState.selectedEntityId)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", f.uiState.activeDataCollectionEntityId)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", f.uiState.selectedEntityId)
     assertEquals(epochBefore + 1, f.uiState.entityRefFramingEpoch)
-    assertEquals("entity-nyr-108", controller.stringAt(LaunchFormUseCase.ENTITY_REF_FIELD_PATH))
-    assertEquals(DataCollectionEvent.EntityHighlighted("entity-nyr-108"), f.events[0])
+    assertEquals(
+      "00000008-15d0-51f2-84eb-a72dfea5a747",
+      controller.stringAt(LaunchFormUseCase.ENTITY_REF_FIELD_PATH),
+    )
+    assertEquals(
+      DataCollectionEvent.EntityHighlighted("00000008-15d0-51f2-84eb-a72dfea5a747"),
+      f.events[0],
+    )
     val recentered = assertIs<DataCollectionEvent.MapRecenteredOnEntity>(f.events[1])
-    assertEquals("entity-nyr-108", recentered.entity.id)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", recentered.entity.id)
     assertTrue(controller.nextStep())
     assertFalse(f.uiState.isCurrentFormStepEntityRef)
 
@@ -120,7 +133,7 @@ class DataCollectionViewModelTest {
     val other = f.uiState.entities.first { it.datasetId != form.targetDatasetId }
     f.clearEvents()
     f.viewModel.selectEntityRefForActiveForm(other.id)
-    assertEquals("entity-nyr-108", f.uiState.activeDataCollectionEntityId)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", f.uiState.activeDataCollectionEntityId)
     assertEquals(epochBefore + 1, f.uiState.entityRefFramingEpoch)
     assertTrue(f.events.isEmpty())
   }
@@ -128,21 +141,24 @@ class DataCollectionViewModelTest {
   @Test
   fun launchFormForEntity_prepopulatesReference_selectsEntity_andOpensForm() {
     val f = DataCollectionFixture()
-    f.viewModel.launchFormForEntity("entity-nyr-112", "form-eudr-baseline")
+    f.viewModel.launchFormForEntity("00000009-1699-51bb-b7a3-f90a60bedd4d", "form-eudr-baseline")
 
     assertTrue(f.uiState.isDataCollectionFormOpen)
     assertFalse(f.uiState.wasFormLaunchedWithoutEntity)
-    assertEquals("entity-nyr-112", f.uiState.activeDataCollectionEntityId)
-    assertEquals("entity-nyr-112", f.uiState.selectedEntityId)
+    assertEquals("00000009-1699-51bb-b7a3-f90a60bedd4d", f.uiState.activeDataCollectionEntityId)
+    assertEquals("00000009-1699-51bb-b7a3-f90a60bedd4d", f.uiState.selectedEntityId)
     assertEquals("form-eudr-baseline", f.uiState.activeDataCollectionFormId)
     assertFalse(f.uiState.isCurrentFormStepEntityRef)
     val controller = assertNotNull(f.uiState.activeFormWizardController)
     if (LaunchFormUseCase.ENTITY_REF_FIELD_PATH in controller.formState.fieldStates) {
-      assertEquals("entity-nyr-112", controller.stringAt(LaunchFormUseCase.ENTITY_REF_FIELD_PATH))
+      assertEquals(
+        "00000009-1699-51bb-b7a3-f90a60bedd4d",
+        controller.stringAt(LaunchFormUseCase.ENTITY_REF_FIELD_PATH),
+      )
     }
     assertEquals(
       listOf(
-        DataCollectionEvent.EntityHighlighted("entity-nyr-112"),
+        DataCollectionEvent.EntityHighlighted("00000009-1699-51bb-b7a3-f90a60bedd4d"),
         DataCollectionEvent.LayersSheetClosed,
         DataCollectionEvent.FormOpened,
       ),
@@ -153,7 +169,7 @@ class DataCollectionViewModelTest {
   @Test
   fun launchFormForEntity_ignoresFormsOfAnotherDataset() {
     val f = DataCollectionFixture()
-    val entity = f.uiState.entities.first { it.id == "entity-nyr-112" }
+    val entity = f.uiState.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
     val foreignForm =
       f.uiState.forms.first { it.requiresEntity && it.targetDatasetId != entity.datasetId }
     f.viewModel.launchFormForEntity(entity.id, foreignForm.id)
@@ -164,21 +180,22 @@ class DataCollectionViewModelTest {
   @Test
   fun closeActiveFormRunner_clearsFormState_butKeepsSelection() {
     val f = DataCollectionFixture()
-    f.viewModel.launchFormForEntity("entity-nyr-112", "form-eudr-baseline")
+    f.viewModel.launchFormForEntity("00000009-1699-51bb-b7a3-f90a60bedd4d", "form-eudr-baseline")
     f.viewModel.closeActiveFormRunner()
     assertFalse(f.uiState.isDataCollectionFormOpen)
     assertNull(f.uiState.activeDataCollectionEntityId)
     assertNull(f.uiState.activeDataCollectionFormId)
     assertFalse(f.uiState.wasFormLaunchedWithoutEntity)
-    assertEquals("entity-nyr-112", f.uiState.selectedEntityId)
+    assertEquals("00000009-1699-51bb-b7a3-f90a60bedd4d", f.uiState.selectedEntityId)
   }
 
   @Test
   fun completeActiveFormSubmission_recordsSubmission_closesForm_andNotifies() {
     val f = DataCollectionFixture()
-    val before = f.uiState.entities.first { it.id == "entity-nyr-108" }.submissions.size
+    val before =
+      f.uiState.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }.submissions.size
     f.viewModel.launchFormFromFab("form-eudr-baseline")
-    f.viewModel.selectEntityRefForActiveForm("entity-nyr-108")
+    f.viewModel.selectEntityRefForActiveForm("00000008-15d0-51f2-84eb-a72dfea5a747")
     val controller = assertNotNull(f.uiState.activeFormWizardController)
     f.clearEvents()
 
@@ -186,11 +203,14 @@ class DataCollectionViewModelTest {
 
     assertFalse(f.uiState.isDataCollectionFormOpen)
     assertFalse(f.uiState.wasFormLaunchedWithoutEntity)
-    assertEquals("entity-nyr-108", f.uiState.selectedEntityId)
-    val after = f.uiState.entities.first { it.id == "entity-nyr-108" }
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", f.uiState.selectedEntityId)
+    val after = f.uiState.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }
     assertEquals(before + 1, after.submissions.size)
     assertEquals(SyncStatus.UPLOADING, after.submissions.first().syncStatus)
-    assertEquals(DataCollectionEvent.EntityHighlighted("entity-nyr-108"), f.events[0])
+    assertEquals(
+      DataCollectionEvent.EntityHighlighted("00000008-15d0-51f2-84eb-a72dfea5a747"),
+      f.events[0],
+    )
     assertIs<DataCollectionEvent.Notice>(f.events[1])
   }
 
@@ -214,22 +234,25 @@ class DataCollectionViewModelTest {
   @Test
   fun selectSubmissionDetail_ofAnotherFeature_framesIt_andSwitchesTable() {
     val f = DataCollectionFixture()
-    f.viewModel.onEntitySelected("entity-nyr-104")
-    val target = f.uiState.entities.first { it.id == "entity-nyr-108" }
+    f.viewModel.onEntitySelected("00000007-640e-5ed7-9874-4d6b6717f21d")
+    val target = f.uiState.entities.first { it.id == "00000008-15d0-51f2-84eb-a72dfea5a747" }
     val submission = target.submissions.first()
     f.clearEvents()
 
     f.viewModel.selectSubmissionDetail(submission.id)
 
     assertEquals(submission.id, f.uiState.selectedSubmissionId)
-    assertEquals("entity-nyr-108", f.uiState.selectedEntityId)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", f.uiState.selectedEntityId)
     assertEquals(submission, f.uiState.selectedSubmission)
     assertTrue(f.uiState.hasSelectedRecord)
     assertEquals(
       listOf(
         DataCollectionEvent.EntityBottomSheetExpanded(true),
         DataCollectionEvent.SubmissionOpened(target.datasetId),
-        DataCollectionEvent.EntityHighlighted("entity-nyr-108", frameAgain = true),
+        DataCollectionEvent.EntityHighlighted(
+          "00000008-15d0-51f2-84eb-a72dfea5a747",
+          frameAgain = true,
+        ),
       ),
       f.events,
     )
@@ -241,7 +264,10 @@ class DataCollectionViewModelTest {
       listOf(
         DataCollectionEvent.EntityBottomSheetExpanded(true),
         DataCollectionEvent.SubmissionOpened(null),
-        DataCollectionEvent.EntityHighlighted("entity-nyr-108", frameAgain = false),
+        DataCollectionEvent.EntityHighlighted(
+          "00000008-15d0-51f2-84eb-a72dfea5a747",
+          frameAgain = false,
+        ),
       ),
       f.events,
     )
@@ -249,7 +275,7 @@ class DataCollectionViewModelTest {
     f.clearEvents()
     f.viewModel.selectSubmissionDetail(null)
     assertNull(f.uiState.selectedSubmissionId)
-    assertEquals("entity-nyr-108", f.uiState.selectedEntityId)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", f.uiState.selectedEntityId)
     assertTrue(f.events.isEmpty())
   }
 
@@ -274,9 +300,13 @@ class DataCollectionViewModelTest {
   @Test
   fun returnToBottomSheetList_clearsSelection_andShowsList() {
     val f = DataCollectionFixture()
-    f.viewModel.onEntitySelected("entity-nyr-104")
+    f.viewModel.onEntitySelected("00000007-640e-5ed7-9874-4d6b6717f21d")
     f.viewModel.selectSubmissionDetail(
-      f.uiState.entities.first { it.id == "entity-nyr-104" }.submissions.first().id
+      f.uiState.entities
+        .first { it.id == "00000007-640e-5ed7-9874-4d6b6717f21d" }
+        .submissions
+        .first()
+        .id
     )
     f.clearEvents()
 
@@ -299,12 +329,12 @@ class DataCollectionViewModelTest {
   @Test
   fun showEntityProperties_closesSubmission_butKeepsFeature() {
     val f = DataCollectionFixture()
-    val entity = f.uiState.entities.first { it.id == "entity-nyr-104" }
+    val entity = f.uiState.entities.first { it.id == "00000007-640e-5ed7-9874-4d6b6717f21d" }
     f.viewModel.selectSubmissionDetail(entity.submissions.first().id)
     f.clearEvents()
     f.viewModel.showEntityProperties()
     assertNull(f.uiState.selectedSubmissionId)
-    assertEquals("entity-nyr-104", f.uiState.selectedEntityId)
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", f.uiState.selectedEntityId)
     assertEquals(
       listOf<DataCollectionEvent>(DataCollectionEvent.DetailsReturnedToProperties),
       f.events,
@@ -315,16 +345,20 @@ class DataCollectionViewModelTest {
   fun mapSelections_flowIn_withoutEvents() {
     val f = DataCollectionFixture()
     f.viewModel.selectSubmissionDetail(
-      f.uiState.entities.first { it.id == "entity-nyr-104" }.submissions.first().id
+      f.uiState.entities
+        .first { it.id == "00000007-640e-5ed7-9874-4d6b6717f21d" }
+        .submissions
+        .first()
+        .id
     )
     f.clearEvents()
 
-    f.viewModel.onEntitySelected("entity-nyr-112")
-    assertEquals("entity-nyr-112", f.uiState.selectedEntityId)
+    f.viewModel.onEntitySelected("00000009-1699-51bb-b7a3-f90a60bedd4d")
+    assertEquals("00000009-1699-51bb-b7a3-f90a60bedd4d", f.uiState.selectedEntityId)
     assertNull(f.uiState.selectedSubmissionId)
 
-    f.viewModel.onNavigationStarted("entity-nyr-108", "sub-x")
-    assertEquals("entity-nyr-108", f.uiState.selectedEntityId)
+    f.viewModel.onNavigationStarted("00000008-15d0-51f2-84eb-a72dfea5a747", "sub-x")
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", f.uiState.selectedEntityId)
     assertEquals("sub-x", f.uiState.selectedSubmissionId)
 
     f.viewModel.onEntitySelected(null)
@@ -335,7 +369,7 @@ class DataCollectionViewModelTest {
   @Test
   fun onSurveyActivated_dropsSelectionFormAndSheet() {
     val f = DataCollectionFixture()
-    f.viewModel.launchFormForEntity("entity-nyr-112", "form-eudr-baseline")
+    f.viewModel.launchFormForEntity("00000009-1699-51bb-b7a3-f90a60bedd4d", "form-eudr-baseline")
     f.viewModel.openAvailableFormsSheet()
     f.clearEvents()
 
@@ -360,8 +394,8 @@ class DataCollectionViewModelTest {
     val formDef =
       XFormsXmlSerializer.deserializeFormDef(WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml)
     f.viewModel.updateCustomFormDef(formDef, isPreset = true)
-    f.viewModel.launchFormForEntity("entity-nyr-112", "form-eudr-baseline")
-    f.viewModel.openEntityQrCode("entity-nyr-112")
+    f.viewModel.launchFormForEntity("00000009-1699-51bb-b7a3-f90a60bedd4d", "form-eudr-baseline")
+    f.viewModel.openEntityQrCode("00000009-1699-51bb-b7a3-f90a60bedd4d")
     f.viewModel.reset()
     assertFalse(f.uiState.isDataCollectionFormOpen)
     assertNull(f.uiState.activeQrCodeEntityId)
@@ -373,7 +407,7 @@ class DataCollectionViewModelTest {
   fun updateCustomFormDef_relaunchesOpenForm_keepingPickedFeature() {
     val f = DataCollectionFixture()
     f.viewModel.launchFormFromFab("form-eudr-baseline")
-    f.viewModel.selectEntityRefForActiveForm("entity-nyr-108")
+    f.viewModel.selectEntityRefForActiveForm("00000008-15d0-51f2-84eb-a72dfea5a747")
     val before = assertNotNull(f.uiState.activeFormWizardController)
 
     f.viewModel.updateCustomFormDef(null, isPreset = false)
@@ -381,7 +415,7 @@ class DataCollectionViewModelTest {
     val after = assertNotNull(f.uiState.activeFormWizardController)
     assertTrue(before !== after)
     assertNull(f.uiState.customFormDef)
-    assertEquals("entity-nyr-108", f.uiState.activeDataCollectionEntityId)
+    assertEquals("00000008-15d0-51f2-84eb-a72dfea5a747", f.uiState.activeDataCollectionEntityId)
     assertTrue(f.uiState.isCurrentFormStepEntityRef)
 
     // While the workbench XML is invalid the open form is left alone.
@@ -445,8 +479,8 @@ class DataCollectionViewModelTest {
   @Test
   fun qrCodeDialog_opensAndCloses() {
     val f = DataCollectionFixture()
-    f.viewModel.openEntityQrCode("entity-nyr-104")
-    assertEquals("entity-nyr-104", f.uiState.activeQrCodeEntity?.id)
+    f.viewModel.openEntityQrCode("00000007-640e-5ed7-9874-4d6b6717f21d")
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", f.uiState.activeQrCodeEntity?.id)
     f.viewModel.closeEntityQrCode()
     assertNull(f.uiState.activeQrCodeEntity)
   }
@@ -454,9 +488,9 @@ class DataCollectionViewModelTest {
   @Test
   fun shareEntityPdf_opensSheet_andSharingClosesIt() {
     val f = DataCollectionFixture()
-    f.viewModel.shareEntityPdf("entity-nyr-104")
+    f.viewModel.shareEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
     val sheet = assertNotNull(f.uiState.activeSharedPdfSheet)
-    assertEquals("entity-nyr-104", sheet.targetId)
+    assertEquals("00000007-640e-5ed7-9874-4d6b6717f21d", sheet.targetId)
     assertTrue(sheet.pdfFileName.endsWith(".pdf"))
 
     f.viewModel.previewActivePdf()
@@ -472,7 +506,7 @@ class DataCollectionViewModelTest {
   fun shareActivePdf_reportsSavedFailedAndCancelled() {
     val f = DataCollectionFixture()
     f.pdfExportClient.nextShareResult = PdfExportResult.FAILED
-    f.viewModel.shareEntityPdf("entity-nyr-104")
+    f.viewModel.shareEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
     val fileName = assertNotNull(f.uiState.activeSharedPdfSheet).pdfFileName
     f.viewModel.shareActivePdf()
     assertNotNull(f.uiState.activeSharedPdfSheet)
@@ -493,16 +527,16 @@ class DataCollectionViewModelTest {
   @Test
   fun saveActivePdf_andDownloads_saveThroughTheClient() {
     val f = DataCollectionFixture()
-    f.viewModel.shareSubmissionPdf("sub-shade-201-wave3")
+    f.viewModel.shareSubmissionPdf("00000026-cca2-5594-b83f-02266f40048e")
     val sheet = assertNotNull(f.uiState.activeSharedPdfSheet)
-    assertEquals("sub-shade-201-wave3", sheet.targetId)
+    assertEquals("00000026-cca2-5594-b83f-02266f40048e", sheet.targetId)
     f.viewModel.saveActivePdf()
     assertEquals(listOf(sheet.pdfFileName), f.pdfExportClient.saved)
     assertNull(f.uiState.activeSharedPdfSheet)
     assertTrue(assertNotNull(f.uiState.pdfExportMessage).startsWith("Saved ${sheet.pdfFileName}"))
 
-    f.viewModel.downloadEntityPdf("entity-nyr-104")
-    f.viewModel.downloadSubmissionPdf("sub-shade-201-wave3")
+    f.viewModel.downloadEntityPdf("00000007-640e-5ed7-9874-4d6b6717f21d")
+    f.viewModel.downloadSubmissionPdf("00000026-cca2-5594-b83f-02266f40048e")
     assertEquals(3, f.pdfExportClient.saved.size)
     assertNull(f.uiState.activeSharedPdfSheet)
 
@@ -520,8 +554,9 @@ class DataCollectionViewModelTest {
   @Test
   fun publicDataSurvey_requiresConsentOncePerSurvey_beforeLaunchingForm() {
     val f = DataCollectionFixture()
-    // Seeded "survey-single-point-land-use" is PUBLIC with PeerDataVisibility.ALL (Public data).
-    runNow { f.surveyRepository.setActiveSurveyId("survey-single-point-land-use") }
+    // Seeded "00000036-1a1c-5c51-997f-28b67d813aa3" is PUBLIC with PeerDataVisibility.ALL (Public
+    // data).
+    runNow { f.surveyRepository.setActiveSurveyId("00000036-1a1c-5c51-997f-28b67d813aa3") }
     f.viewModel.onSurveyActivated()
     assertTrue(f.uiState.isActiveSurveyPublicData)
     assertFalse(f.uiState.isActiveSurveyPrivateSubmissions)
@@ -532,7 +567,7 @@ class DataCollectionViewModelTest {
     // Form does not open yet; informed consent prompt is presented.
     assertFalse(f.uiState.isDataCollectionFormOpen)
     val prompt = assertNotNull(f.uiState.pendingCollectorConsent)
-    assertEquals("survey-single-point-land-use", prompt.surveyId)
+    assertEquals("00000036-1a1c-5c51-997f-28b67d813aa3", prompt.surveyId)
     assertTrue(prompt.isPublicData)
 
     // Dismissing cancels the launch without opening the form.
@@ -557,9 +592,9 @@ class DataCollectionViewModelTest {
   @Test
   fun privateSubmissionsSurvey_opensFormDirectlyWithoutConsentPrompt() {
     val f = DataCollectionFixture()
-    // Seeded "survey-commodity-perimeter-center" is ANYONE_WITH_LINK + OWN_ONLY (Private
+    // Seeded "00000031-ffc6-5c8e-934c-d14ec07533ad" is ANYONE_WITH_LINK + OWN_ONLY (Private
     // submissions).
-    runNow { f.surveyRepository.setActiveSurveyId("survey-commodity-perimeter-center") }
+    runNow { f.surveyRepository.setActiveSurveyId("00000031-ffc6-5c8e-934c-d14ec07533ad") }
     f.viewModel.onSurveyActivated()
     assertFalse(f.uiState.isActiveSurveyPublicData)
     assertTrue(f.uiState.isActiveSurveyPrivateSubmissions)
@@ -585,7 +620,7 @@ class DataCollectionViewModelTest {
       }
     }
 
-    val entity = f.uiState.entities.first { it.id == "entity-nyr-112" }
+    val entity = f.uiState.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
     f.viewModel.launchFormForEntity(entity.id, "form-eudr-baseline")
     assertFalse(f.uiState.isDataCollectionFormOpen)
     val prompt = assertNotNull(f.uiState.pendingCollectorConsent)

@@ -215,7 +215,7 @@ abstract class LocalStoreContractTest {
     runNow {
       store.transaction {
         deleteEntity(kenya, entities(kenya).first().id)
-        updatePreferences { it.copy(activeSurveyId = "survey-sample-plots-forest") }
+        updatePreferences { it.copy(activeSurveyId = "00000034-c088-5ab9-8b98-e6bccb3dca71") }
         updatePreferences { it.copy(activeSurveyId = kenya) }
       }
     }
@@ -251,7 +251,7 @@ abstract class LocalStoreContractTest {
   @Test
   fun surveyEditorDraft_isStoredPerSurveyAndObservable() {
     val store = seededStore()
-    val forest = "survey-sample-plots-forest"
+    val forest = "00000034-c088-5ab9-8b98-e6bccb3dca71"
     val draft = SurveyEditorDraft.blank(forest, title = "Forest plots")
     assertNull(runNow { store.transaction { surveyEditorDraft(forest) } })
     runNow { store.transaction { putSurveyEditorDraft(forest, draft) } }
@@ -419,7 +419,7 @@ class LocalStoreTest : LocalStoreContractTest() {
         activeEntityCount.value,
       )
 
-      val forest = "survey-sample-plots-forest"
+      val forest = "00000034-c088-5ab9-8b98-e6bccb3dca71"
       runNow { store.transaction { updatePreferences { it.copy(activeSurveyId = forest) } } }
       assertEquals(
         SampleEntitiesData.entitiesForSurvey(forest).size,

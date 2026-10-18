@@ -39,7 +39,7 @@ object BackendStaticSurveysData {
    * owned by a person and optionally belongs to an organization ([SampleOrganizationsData]).
    */
   /** The sample survey that's already closed (its outcome question is due). */
-  const val CLOSED_SURVEY_ID = "survey-household-past-individuals"
+  const val CLOSED_SURVEY_ID = "00000032-8d62-5717-8074-f4917e0cd76d"
 
   /** When [CLOSED_SURVEY_ID] was closed: more than 90 days before the sample data's dates. */
   const val CLOSED_SURVEY_CLOSED_AT = "2026-05-29T14:00:00Z"
@@ -47,7 +47,7 @@ object BackendStaticSurveysData {
   fun defaultSampleSurveys(): List<SurveyPreviewItem> =
     listOf(
         SurveyPreviewItem(
-          id = "survey-single-point-land-use",
+          id = "00000036-1a1c-5c51-997f-28b67d813aa3",
           title = "Simple Point & Land Use Survey",
           description =
             "Single GPS point (map pan allowed, <= 10m accuracy required) and land-use classification. Forms auto-create land_use_observations entities via save_to.",
@@ -61,7 +61,7 @@ object BackendStaticSurveysData {
           peerDataVisibility = PeerDataVisibility.ALL,
         ),
         SurveyPreviewItem(
-          id = "survey-sample-plots-forest",
+          id = "00000034-c088-5ab9-8b98-e6bccb3dca71",
           title = "Sample Plot Forest Assessment Survey",
           description =
             "Predefined permanent sample plot entities (SP-01 to SP-05) with forest stand assessment form: selecting the sample plot entity, taking a canopy photo, canopy cover %, and basal area.",
@@ -73,7 +73,7 @@ object BackendStaticSurveysData {
           entityCount = 5,
         ),
         SurveyPreviewItem(
-          id = "survey-commodity-perimeter-center",
+          id = "00000031-ffc6-5c8e-934c-d14ec07533ad",
           title = "Commodity Plot Perimeter & Center Mapping (EUDR)",
           description =
             "Walk forest-risk commodity plot boundary (GPS override / manual pan allowed while walking) and capture the plot center point. Forms auto-create commodity_plots entities via save_to.",
@@ -87,7 +87,7 @@ object BackendStaticSurveysData {
           peerDataVisibility = PeerDataVisibility.OWN_ONLY,
         ),
         SurveyPreviewItem(
-          id = "survey-household-past-individuals",
+          id = "00000032-8d62-5717-8074-f4917e0cd76d",
           title = "Household Panel Survey (Past Individuals)",
           description =
             "Household longitudinal survey using a preloaded roster of past household individuals (IND-101 to IND-106) for residency reconciliation, occupation updates, and new member enrollment.",
@@ -103,7 +103,7 @@ object BackendStaticSurveysData {
           closedAt = CLOSED_SURVEY_CLOSED_AT,
         ),
         SurveyPreviewItem(
-          id = "survey-kenya-coffee",
+          id = "00000033-6b50-51cd-ac94-baea2ea06d65",
           title = "All Form Field Types Showcase (Kenya Coffee)",
           description =
             "EUDR traceability polygon mapping, shade-tree biodiversity inventory, and all 20+ XForms field types showcase for cooperative coffee growers.",
@@ -115,7 +115,7 @@ object BackendStaticSurveysData {
           entityCount = 5,
         ),
         SurveyPreviewItem(
-          id = "survey-serengeti-corridor",
+          id = "00000035-caf4-571e-b907-f506f92666ab",
           title = "Mekong Delta Mangrove Restoration",
           description =
             "Coastal shoreline erosion monitoring and sapling survival rate audits across intertidal restoration zones.",
@@ -152,47 +152,49 @@ object BackendStaticSurveysData {
   /** Maps a [WorkbenchExampleForm] to its canonical Example Survey ID. */
   fun surveyIdForExampleForm(example: WorkbenchExampleForm): String =
     when (example) {
-      WorkbenchExampleForm.SINGLE_POINT_LAND_USE -> "survey-single-point-land-use"
-      WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT -> "survey-sample-plots-forest"
-      WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER -> "survey-commodity-perimeter-center"
-      WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS -> "survey-household-past-individuals"
-      WorkbenchExampleForm.ALL_FIELD_TYPES -> "survey-kenya-coffee"
+      WorkbenchExampleForm.SINGLE_POINT_LAND_USE -> "00000036-1a1c-5c51-997f-28b67d813aa3"
+      WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT -> "00000034-c088-5ab9-8b98-e6bccb3dca71"
+      WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER -> "00000031-ffc6-5c8e-934c-d14ec07533ad"
+      WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS ->
+        "00000032-8d62-5717-8074-f4917e0cd76d"
+      WorkbenchExampleForm.ALL_FIELD_TYPES -> "00000033-6b50-51cd-ac94-baea2ea06d65"
     }
 
   /** Maps an Example Survey ID to its corresponding [WorkbenchExampleForm]. */
   fun exampleFormForSurveyId(surveyId: String): WorkbenchExampleForm =
     when (surveyId) {
-      "survey-single-point-land-use" -> WorkbenchExampleForm.SINGLE_POINT_LAND_USE
-      "survey-sample-plots-forest" -> WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT
-      "survey-commodity-perimeter-center" -> WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER
-      "survey-household-past-individuals" -> WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS
+      "00000036-1a1c-5c51-997f-28b67d813aa3" -> WorkbenchExampleForm.SINGLE_POINT_LAND_USE
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" -> WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" -> WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER
+      "00000032-8d62-5717-8074-f4917e0cd76d" ->
+        WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS
       else -> WorkbenchExampleForm.ALL_FIELD_TYPES
     }
 
   /** Returns the preloaded entity count for [surveyId] without allocating entity lists. */
   fun preloadedEntityCountForSurvey(surveyId: String): Int =
     when (surveyId) {
-      "survey-single-point-land-use" -> 3
-      "survey-sample-plots-forest" -> 5
-      "survey-commodity-perimeter-center" -> 3
-      "survey-household-past-individuals" -> 6
+      "00000036-1a1c-5c51-997f-28b67d813aa3" -> 3
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" -> 5
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" -> 3
+      "00000032-8d62-5717-8074-f4917e0cd76d" -> 6
       else -> 5
     }
 
   /** Returns the preloaded submission count for [surveyId] without allocating submission lists. */
   fun preloadedSubmissionCountForSurvey(surveyId: String): Int =
     when (surveyId) {
-      "survey-single-point-land-use" -> 3
-      "survey-sample-plots-forest" -> 3
-      "survey-commodity-perimeter-center" -> 3
-      "survey-household-past-individuals" -> 4
+      "00000036-1a1c-5c51-997f-28b67d813aa3" -> 3
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" -> 3
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" -> 3
+      "00000032-8d62-5717-8074-f4917e0cd76d" -> 4
       else -> 9
     }
 
   /** Returns the preloaded [FormPreviewItem] list for [surveyId]. */
   fun formsForSurvey(surveyId: String): List<FormPreviewItem> =
     when (surveyId) {
-      "survey-single-point-land-use" ->
+      "00000036-1a1c-5c51-997f-28b67d813aa3" ->
         listOf(
           FormPreviewItem(
             id = "form-single-point-land-use",
@@ -207,7 +209,7 @@ object BackendStaticSurveysData {
             requiresEntity = false,
           )
         )
-      "survey-sample-plots-forest" ->
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
         listOf(
           FormPreviewItem(
             id = "form-sample-plots-forest",
@@ -221,7 +223,7 @@ object BackendStaticSurveysData {
             ctaLabel = "Assess Forest Sample Plot",
           )
         )
-      "survey-commodity-perimeter-center" ->
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
         listOf(
           FormPreviewItem(
             id = "form-commodity-perimeter-center",
@@ -236,7 +238,7 @@ object BackendStaticSurveysData {
             requiresEntity = false,
           )
         )
-      "survey-household-past-individuals" ->
+      "00000032-8d62-5717-8074-f4917e0cd76d" ->
         listOf(
           FormPreviewItem(
             id = "form-household-past-individuals",

@@ -22,7 +22,7 @@ object BackendStaticMapLayersData {
   /** Returns the preloaded [MapLayerItem] list for [surveyId]. */
   fun mapLayersForSurvey(surveyId: String): List<MapLayerItem> =
     when (surveyId) {
-      "survey-single-point-land-use" ->
+      "00000036-1a1c-5c51-997f-28b67d813aa3" ->
         listOf(
           MapLayerItem(
             id = "layer-land-use-observations",
@@ -38,7 +38,7 @@ object BackendStaticMapLayersData {
             iconName = "landscape",
           )
         )
-      "survey-sample-plots-forest" ->
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
         listOf(
           MapLayerItem(
             id = "layer-sample-plots",
@@ -54,7 +54,7 @@ object BackendStaticMapLayersData {
             iconName = "forest",
           )
         )
-      "survey-commodity-perimeter-center" ->
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
         listOf(
           MapLayerItem(
             id = "layer-commodity-plots",
@@ -70,7 +70,7 @@ object BackendStaticMapLayersData {
             iconName = "agriculture",
           )
         )
-      "survey-household-past-individuals" ->
+      "00000032-8d62-5717-8074-f4917e0cd76d" ->
         listOf(
           MapLayerItem(
             id = "layer-past-individuals",

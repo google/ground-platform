@@ -80,7 +80,9 @@ class RecordImpactEventUseCaseTest {
   @Test
   fun kenyaCoffeeReceipt_carriesItsOrganizationAndPurposePack() {
     val f = Fixture()
-    val event = runNow { f.record(ImpactEventType.RECEIPT_GENERATED, "survey-kenya-coffee") }
+    val event = runNow {
+      f.record(ImpactEventType.RECEIPT_GENERATED, "00000033-6b50-51cd-ac94-baea2ea06d65")
+    }
     assertTrue(event.organizationId != null)
     assertEquals(listOf("eudr_due_diligence"), event.purposeIds)
     assertEquals(0, event.featureCount)
@@ -99,11 +101,15 @@ class RecordImpactEventUseCaseTest {
   @Test
   fun online_marksTheEventUploaded_offline_queuesIt() {
     val f = Fixture()
-    val online = runNow { f.record(ImpactEventType.RECEIPT_SHARED, "survey-kenya-coffee") }
+    val online = runNow {
+      f.record(ImpactEventType.RECEIPT_SHARED, "00000033-6b50-51cd-ac94-baea2ea06d65")
+    }
     assertTrue(online.isUploaded)
 
     f.connectivity.setOnline(false)
-    val offline = runNow { f.record(ImpactEventType.RECEIPT_SHARED, "survey-kenya-coffee") }
+    val offline = runNow {
+      f.record(ImpactEventType.RECEIPT_SHARED, "00000033-6b50-51cd-ac94-baea2ea06d65")
+    }
     assertFalse(offline.isUploaded)
     assertEquals(
       listOf(true, false),

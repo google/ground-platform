@@ -631,7 +631,7 @@ class DataCollectionViewModel(
       current.formsForEntity(entity).firstOrNull { current.isFormButtonEnabled(entity, it) }
     val currentEntity =
       current.selectedEntity
-        ?: entities.firstOrNull { it.id == "entity-shade-201" }
+        ?: entities.firstOrNull { it.id == "0000000a-56d7-5c1d-9457-7457267120a3" }
         ?: entities.firstOrNull()
     if (currentEntity != null) {
       enabledFormOn(currentEntity)?.let { form ->

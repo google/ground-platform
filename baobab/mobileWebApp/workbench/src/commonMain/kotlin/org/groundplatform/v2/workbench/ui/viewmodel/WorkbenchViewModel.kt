@@ -336,8 +336,8 @@ class WorkbenchViewModel(
   }
 
   override fun resetDefaultXFormsXml() {
-    if (ui.activeSurveyId != "survey-kenya-coffee") {
-      emit(WorkbenchEvent.DefaultSurveyRestored("survey-kenya-coffee"))
+    if (ui.activeSurveyId != "00000033-6b50-51cd-ac94-baea2ea06d65") {
+      emit(WorkbenchEvent.DefaultSurveyRestored("00000033-6b50-51cd-ac94-baea2ea06d65"))
     }
     updateCustomXFormsXml(DEFAULT_WORKBENCH_XFORMS_XML)
     session.update { it.copy(selectedWorkbenchExampleForm = WorkbenchExampleForm.ALL_FIELD_TYPES) }

@@ -326,8 +326,8 @@ class MutationIdempotencyTest {
   }
 
   private companion object {
-    const val KENYA = "survey-kenya-coffee"
-    const val ORG = "org-kenya-forest-service"
+    const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
+    const val ORG = "00000013-31cc-5c95-90ea-379f624a5c72"
     const val DATASET = "coffee_parcels"
     const val ENTITY = "entity-idempotency-1"
     const val OTHER_ENTITY = "entity-idempotency-2"
