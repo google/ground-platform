@@ -1,162 +1,197 @@
 <!--
   Copyright 2026 The Ground Authors.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
+  Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
 
       https://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
+  distributed under the License is distributed on an 'AS IS' BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
 
-# Ground
+# Ground 2.0
 
-[![Open Source Helpers](https://www.codetriage.com/google/ground-platform/badges/users.svg)](https://www.codetriage.com/google/ground-platform)
+This directory contains the Kotlin Multiplatform (KMP) and Compose Multiplatform
+(CMP) shared modules, Protocol Buffer data models, platform applications
+(`androidApp`, `iosApp`, `webApp`, `mobileWebApp`), developer tools, and technical documentation
+for **Ground 2.0**.
 
-Ground is a map-first data collection platform which seamlessly connects the offline world with cloud-based storage and computation. It addresses the needs of non-technical local community members, smallholder farmers, and professionals and researchers working in the areas of climate, sustainability, and humanitarian aid. It consists of a web app for survey management, and an Android app for offline data collection backed by Firebase.
+## Directory Structure
 
-**Note:** Ground is not an officially supported product; it is being developed and maintained on a best-effort basis.
-
-## About this repository
-
-This repo contains Ground's hosted components and related docs:
-
-| Directory                | Component                                                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| [baobab/](baobab/)       | _Ground 2.0 (experimental)_, KMP/CMP shared libraries, proto schemas, and mobile/web apps                     |
-| [docs/](docs/)           | _Public documentation_, including Ground homepage                                                             |
-| [firestore/](firestore/) | _Firestore config_ defining Firebase rules and other database settings                                        |
-| [functions/](functions/) | _Firebase Cloud Functions_, used to sync with Google Sheets and import/export data to/from other data sources |
-| [lib/](lib/)             | _Ground TypeScript libs_, used by both `web` and `functions`                                                  |
-| [proto/](proto/)         | _Ground data model_, shared between web and mobile apps and used to infer the structure of data in Firestore  |
-| [storage/](storage/)     | _Firebase Storage config_ for offline imagery and user photo storage                                          |
-| [web/](web/)             | _Ground web console_ used to set up and manage surveys, and to view, edit, and analyze collected data online  |
-
-## Contributing guidelines
-
-Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our submission process, coding rules and more.
-
-## Quick start
-
-### One time setup
-
-1. Install [nvm](https://github.com/nvm-sh/nvm)
-2. Install and use Node.js **22**:
-
-```bash
-nvm install 22
-nvm use 22
+```text
+├── shared/                      # All shared multiplatform schemas & modules
+│   ├── protos/                  # Protocol Buffer (.proto) schemas (forms, survey, data)
+│   ├── core/                    # Pure KMP runtime library (Android/JVM, iOS, JS, WasmJS)
+│   ├── ui/                      # Shared Compose theme & form runner widgets (Android/JVM, iOS, JS, WasmJS)
+│   ├── map/                     # Shared map rendering (Mapbox) & geometry
+│   ├── app/                     # Shared domain, data, clients & UI for the mobile and web apps (Android/JVM, WasmJS)
+│   ├── web/                     # Web console pages, state & WebConsoleApp() root (JVM for tests, WasmJS)
+│   └── mobile/                  # Mobile app screens, state & GroundMobileApp() root (Android/JVM, WasmJS; iOS opt-in)
+│       └── src/commonMain/.../mobile/
+│           ├── data/            # Local SQLite/Room persistence, offline queues & tile cache
+│           ├── services/        # Offline sync engine, GPS/geotrace tracking & media management
+│           └── ui/              # Mobile screens, ViewModels & navigation
+├── androidApp/                  # Runnable Android app wrapper (APK/AAB) -> depends on shared/mobile
+├── iosApp/                      # Runnable iOS Xcode app wrapper (IPA)   -> embeds shared/mobile
+├── webApp/                      # Runnable Web Console app (Wasm)        -> depends on shared/web
+├── mobileWebApp/                # Runnable mobile app for the browser (Wasm) -> depends on shared/mobile
+│   └── workbench/               # Simulated device, XForms editor & sample data tools around the mobile app
+├── server/
+│   └── userDataService/       # gRPC user data service (Kotlin/JVM; native gRPC + gRPC-Web, Cloud Run)
+├── devtools/
+│   └── launchpad/               # Browser page for starting, stopping & watching local services
+└── docs/                        # System architecture & Protocol Buffer data model specifications
 ```
 
-3. Install [Firebase CLI](https://firebase.google.com/docs/cli) and [Nx](https://nx.dev):
+### Shared Modules ([`shared/`](shared/))
+
+-   **[`shared/protos/`](shared/protos/)**: Protocol Buffer (`proto3`) schema
+    definitions for forms (`FormDef`, `RecordInstance`, `RecordSchema`,
+    `FieldBinding`), survey configurations (`SurveyDef`, `AclEntry`), and
+    entity/submission/audit records.
+-   **[`shared/core/`](shared/core/)**: Pure Kotlin Multiplatform runtime
+    library (`org.groundplatform.v2:protoforms`) targeting JVM/Android, iOS, JS
+    (IR), and WasmJS:
+    -   **XForms XML, TextProto & JSON Serialization**
+        (`org.groundplatform.v2.core.forms.serialization`): Bidirectional
+        conversion between XForms XML (`<h:html>` and `<data>`),
+        `groundplatform.v2.forms` Protocol Buffer messages, Protocol Buffer Text
+        Format (`textproto`), and Canonical Proto3 JSON (`ProtoJsonSerializer`).
+    -   **XPath 1.0 + XForms Engine**
+        (`org.groundplatform.v2.core.forms.xpath`): Full AST compiler and
+        evaluator for XForms expressions against strongly-typed
+        `RecordInstance` and `FormDef` models.
+    -   **Dynamic Form State Model & Evaluation Engine**
+        (`org.groundplatform.v2.core.forms.engine` &
+        `org.groundplatform.v2.core.forms.model`): Immutable runtime UI state
+        model (`FormState`, `ComponentState`) and reactive 5-stage evaluation
+        engine (`FormEngine`, `FormSession`, `CompiledForm`) for dynamic
+        repeats, calculations, relevance, constraints, cascading `itemset`s,
+        translations, and XForms Entities.
+-   **[`shared/ui/`](shared/ui/)**: Compose Multiplatform UI library
+    (`org.groundplatform.v2:protoforms-ui`, package
+    `org.groundplatform.v2.core.forms.ui`) targeting Web (`js` / `wasmJs`),
+    Android/JVM (`jvm`), and iOS (`iosArm64` / `iosSimulatorArm64`). Provides
+    shared Material 3 theming (`GroundTheme`) and the single-question-per-screen
+    form experience (`MobileFormRunner`, `FormWizardController`,
+    `QuestionControlCard`, and `ControlWidget`).
+-   **[`shared/app/`](shared/app/)**: Shared application module
+    (`org.groundplatform.v2:app`) targeting Android/JVM and WasmJS. Contains the
+    domain model, data layer, platform clients, and the UI state, ViewModels,
+    and components that the mobile app and the web console share. Test
+    fixtures for it and its dependents are in `shared/app/testing/`
+    (`org.groundplatform.v2:app-testing`).
+-   **[`shared/mobile/`](shared/mobile/)**: Shared Mobile application module
+    (`org.groundplatform.v2:mobile`) targeting Android/JVM and WasmJS, with iOS
+    opt-in (`-Pground.ios=true`) until `shared/app` gets iOS targets.
+    Contains mobile-specific local persistence (`data/`), domain services such
+    as offline sync and GPS tracking (`services/`), and mobile Compose screens &
+    ViewModels (`ui/`) shared identically by `androidApp` and `iosApp`. Exports
+    the `GroundMobile` XCFramework for Xcode.
+
+### Platform Applications & Tools
+
+-   **[`androidApp/`](androidApp/)**: Thin Android application entry point that
+    hosts `GroundMobileApp()` from `shared/mobile`.
+-   **[`iosApp/`](iosApp/)**: Thin Xcode / SwiftUI application entry point that
+    embeds `GroundMobile.framework` from `shared/mobile`.
+-   **[`shared/web/`](shared/web/)**: Web console module
+    (`org.groundplatform.v2:web`): the console's pages, `WebAppState`, and the
+    `WebConsoleApp()` root, built on `shared/app`.
+-   **[`webApp/`](webApp/)**: Ground 2.0 Web Console application (`wasmJs`) for
+    survey administration, map management, and data exploration. A thin host
+    for `WebConsoleApp()` from `shared/web`.
+-   **[`mobileWebApp/`](mobileWebApp/)**: The mobile app (`GroundMobileApp()`)
+    running in the browser with Kotlin/Wasm, inside a simulated device
+    workbench by default or full-window with `?chrome=0`, for testing without
+    an Android or iOS build. The workbench lives in its `workbench/` library.
+    The web console and the mobile app are independent Wasm apps, even when
+    they're hosted on the same site.
+-   **[`server/userDataService/`](server/userDataService/)**: Kotlin/JVM
+    binary serving the Collect One survey, organization, library, and data
+    RPCs over native gRPC and gRPC-Web, loaded with sample data for now. The
+    web console and mobile apps sync from it; see its README for running it
+    locally and deploying it to Cloud Run.
+-   **[`devtools/launchpad/`](devtools/launchpad/)**: Browser page for starting,
+    stopping, and watching the server, web console, and mobile app (plus the
+    Spanner emulator) during local development.
+-   **[`docs/`](docs/)**: Comprehensive architectural design and data model
+    documentation.
+
+## Mental Model & Terminology Mapping to XForms
+
+### The Core Mental Model
+
+-   **Tables = Current State (Persistent Master Data)**: Flat, stateful master
+    datasets (`EntityDatasetDef` / `EntityRecord`) where each row represents a
+    real-world object (site, plot, asset, or participant).
+-   **Forms = Transactions / Events (Encounter Logs)**: Questionnaires
+    (`FormDef`) filled out in the field. Completed submissions
+    (`SubmissionRecord` / `RecordInstance`) are immutable event records
+    preserving GPS, timestamps, and raw inputs.
+
+### For Survey Organizers / Form Designers: Forms & Tables
+
+Organizers define how a form interacts with master tables using standard XLSForm
+syntax:
+
+-   **Populate a Table (Create Record)**:
+    -   *XForms Concept*: Form configured to create a new entity.
+    -   *XLSForm Mapping*:
+        -   `entities` sheet: `list_name` specified, `create_condition`
+            (optional).
+        -   `survey` sheet: Target fields use the `save_to` column to populate
+            table attributes.
+-   **Update a Table (Update Record)**:
+    -   *XForms Concept*: Form configured to update an existing entity.
+    -   *XLSForm Mapping*:
+        -   `survey` sheet: Select question using
+            `select_one_from_file <table_name>.csv`.
+        -   `entities` sheet: `entity_id` set to the selected entity's ID.
+        -   `survey` sheet: Updated fields mapped to table attributes via
+            `save_to`.
+-   **Reference a Table (Lookup / Read-Only)**:
+    -   *XForms Concept*: Consuming an Entity List or external dataset without
+        writing back.
+    -   *XLSForm Mapping*:
+        -   `survey` sheet: `select_one_from_file <table_name>.csv` used for
+            choices/filtering, or pre-filling read-only `calculate` / `note`
+            fields with `instance('<table_name>')/root/item[...]`. No `save_to`
+            mapping.
+-   **Log Only (Standard Survey)**:
+    -   *XForms Concept*: Traditional standalone XForm.
+    -   *XLSForm Mapping*: Standard `survey` and `choices` sheets only. No
+        `entities` sheet.
+
+### For Data Collectors (Map UI & Field Workflow)
+
+The map layer drawer displays geospatial entity layers rather than nesting
+layers under form menus:
+
+-   **Map features**:
+    -   *XForms Concept*: Geospatial Entity Lists (spatial master tables)
+        attached to the survey.
+    -   *Field Interaction*: Represents the target locations/features on the
+        map. Tapping a site pin opens its current status, submission history,
+        and launches available actions (e.g., `[ + Inspect Site ]`, `[ + Update
+        Info ]`).
+    -   *Why*: Avoids duplicating the layer across multiple forms that interact
+        with the same site, enabling a natural "site-first" workflow without
+        cluttering the map with raw form submission geometries.
+
+## Running Core Library Tests
+
+From `shared/core/`:
 
 ```bash
-npm install -g firebase-tools nx pnpm
+# Run JVM unit and round-trip tests
+./gradlew jvmTest
+
+# Compile and check JS and WasmJS targets
+./gradlew check compileKotlinJs compileKotlinWasmJs
 ```
-
-### Build and run locally
-
-4. Install dependencies:
-
-```bash
-pnpm install
-```
-
-5. Build and start local Firebase emulator and Angular dev server:
-
-```bash
-nx start
-```
-
-6. Once started, the app will be available at http://localhost:4200. For development, and testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000. Changes to the web app in `web/` and to the Cloud Functions in `functions/` are automatically rebuilt and reloaded on save.
-
-**Note**: The local build variant doesn't require API keys to run, but warnings related to missing Maps API keys will appear in the console. Authentication is also disabled.
-
-The local emulator is preloaded with a demo survey. Run `nx export` to save the updated demo data to the local filesystem for use on the next run.
-
-## Running the web app locally using dev Firebase
-
-By default `nx start` runs the web app against a local Firebase emulator (see
-[Build and run locally](#build-and-run-locally)). Sometimes it's useful to run
-the web app locally against the **live dev backend** instead — for example to
-reproduce an issue with real data, or to test against Cloud Functions and
-Firestore rules as actually deployed. The dev backend is the
-[`ground-dev-sig`](https://console.firebase.google.com/project/ground-dev-sig)
-Firebase project.
-
-To serve the local web app against dev:
-
-```bash
-nx run web:serve:staging
-```
-
-Once started, the app is available at http://localhost:4200 and connects to the
-live `ground-dev-sig` Firestore, Authentication, and Cloud Functions instead of
-the local emulator. Changes to the web app in `web/` are still rebuilt and
-reloaded on save, but the backend is remote — the Firebase Emulator Suite UI at
-http://localhost:4000 is not used in this mode.
-
-**Prerequisites:**
-
-- Install dependencies first with `pnpm install` (see
-  [One time setup](#one-time-setup)).
-- Unlike the local emulator, this mode has real authentication enabled. To sign
-  in and access surveys you need a Google account that has been added to the
-  `ground-dev-sig` passlist. Ask a member of the core maintainers team to grant
-  access if needed.
-
-> **Note on naming:** the Angular build configuration is named `staging`, but it
-> points at the dev project `ground-dev-sig`
-> ([`environment.staging.ts`](web/src/environments/environment.staging.ts)), so
-> `nx run web:serve:staging` serves against dev.
-
-## Deploy
-
-To build and deploy to staging, first sign into Firebase with:
-
-```bash
-npx firebase login
-```
-
-You can then deploy to prod with:
-
-```bash
-nx run deploy:staging
-```
-
-To deploy to your own production Firebase:
-
-1. Override `firebaseConfig` in [environment.production.ts](web/src/environments/environment.production.ts) with your Firebase project config.
-2. Update the project ID placeholder in [package.json](package.json).
-3. Run `nx run deploy:production`.
-
-### Next steps
-
-For instructions on how to deploy to your own production Firebase project, see the [Ground Developer's Guide](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide).
-
-## Common commands
-
-All commands use [Nx](https://nx.dev) and [pnpm](https://pnpm.io). Run them from the repo root.
-
-| Command | Description |
-| ------- | ----------- |
-| `nx start` | Build and start the local Firebase emulator and Angular dev server |
-| `nx run root:build` | Build all packages |
-| `nx run root:test` | Run all tests |
-| `nx run root:lint` | Lint all packages |
-| `nx run web:serve` | Serve the web app only (no emulator) |
-| `nx run web:serve:staging` | Serve the local web app against the live dev backend (`ground-dev-sig`) |
-| `nx run web:test` | Run web tests |
-| `nx run web:extract-i18n` | Extract i18n messages from the web app |
-| `nx run functions:test` | Run Cloud Functions tests |
-| `nx run functions:emulate` | Start the Firebase emulator for functions only |
-| `nx run functions:logs` | Tail Cloud Functions logs |
-| `nx run functions:shell` | Open an interactive Cloud Functions shell |
-| `nx run root:export:local` | Save current emulator data to disk for use on next run |
-| `nx run root:deploy:staging` | Build and deploy all to staging |
-| `nx run root:deploy:production` | Build and deploy all to production |

@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<!--
+  Copyright 2026 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collect One Dev Launchpad</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22 fill=%22none%22%3E%3Cdefs%3E%3CclipPath id=%22g%22%3E%3Cpath d=%22M0 0L512 0L512 436C340 398 172 402 0 444Z%22/%3E%3C/clipPath%3E%3CclipPath id=%22l%22%3E%3Ccircle cx=%22256%22 cy=%22256%22 r=%22216%22/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path=%22url%28%23g%29%22%3E%3Cpath d=%22M103.37 436A236 236 0 1 1 408.63 436Z%22 fill=%22%232C536E%22/%3E%3Cg clip-path=%22url%28%23l%29%22%3E%3Cpath d=%22M128.02 430A216 216 0 1 1 383.98 430Z%22 fill=%22%23AEC66B%22/%3E%3Ccircle cx=%22256%22 cy=%22288%22 r=%22142%22 fill=%22%23FFE082%22/%3E%3Cpath d=%22M94 186C88 168 120 122 180 126C208 94 272 90 310 122C354 110 416 134 430 174C434 186 420 194 394 192C330 184 206 186 124 194C104 196 96 194 94 186Z%22 fill=%22%2314261E%22/%3E%3Cpath d=%22M68 260C64 242 92 212 136 216C172 208 210 226 218 250C222 264 206 272 184 270C152 266 116 268 88 272C74 274 70 268 68 260Z%22 fill=%22%2314261E%22/%3E%3Cpath d=%22M200 412C222 376 235 340 240 308C200 302 164 288 138 264L154 264C178 280 212 286 246 286C254 250 266 214 278 182L296 182C282 218 273 256 271 298C269 340 278 376 300 412Z%22 fill=%22%2314261E%22/%3E%3C/g%3E%3C/g%3E%3Cpath d=%22M16 458C16 442 156 384 256 382C356 380 496 434 496 450C496 464 472 468 436 462C340 444 172 448 76 468C40 474 16 470 16 458Z%22 fill=%22%2314261E%22/%3E%3Cpath d=%22M96 446C186 408 322 404 412 438C322 420 188 424 96 446Z%22 fill=%22%23AEC66B%22/%3E%3C/svg%3E" />
+  <!-- Antonio (SIL Open Font License) is the condensed face closest to LCARS; falls back offline. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      --gold: #FF9900;
+      --apricot: #FFCC99;
+      --coral: #FF9966;
+      --lavender: #CC99CC;
+      --periwinkle: #9999FF;
+      --ice: #99CCFF;
+      --green: #33CC99;
+      --red: #FF5555;
+      --dim: #8a8aa8;
+      --panel: #0b0b12;
+      --panel-line: #1e1e2c;
+
+      --column: 200px;     /* Width of the left LCARS column. */
+      --bar: 26px;         /* Thickness of the top and bottom horizontal bars. */
+      --gap: 5px;          /* Black gap between LCARS blocks. */
+      --inner: 34px;       /* Radius of the concave inner corners. */
+
+      --font: 'Antonio', 'Ubuntu Condensed', 'Arial Narrow', sans-serif;
+      --mono: ui-monospace, 'DejaVu Sans Mono', Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      background: #000;
+      color: var(--apricot);
+      font-family: var(--font);
+      font-size: 16px;
+      letter-spacing: 0.04em;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 10px 12px;
+      gap: var(--gap);
+    }
+
+    button { font: inherit; letter-spacing: inherit; border: none; cursor: pointer; color: #000; }
+    button:disabled { cursor: default; opacity: 0.35; }
+    a { color: inherit; }
+
+    .caps { text-transform: uppercase; }
+
+    /* Frame: top elbow + bar, left column, bottom elbow + bar. */
+
+    .frame-top, .frame-bottom {
+      display: flex;
+      gap: var(--gap);
+      flex-shrink: 0;
+    }
+
+    .frame-top { align-items: flex-start; }
+    .frame-bottom { align-items: flex-end; }
+
+    .elbow {
+      position: relative;
+      width: calc(var(--column) + var(--inner));
+      flex-shrink: 0;
+      background: var(--gold);
+    }
+
+    .elbow::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      width: var(--inner);
+      background: #000;
+    }
+
+    .elbow-top {
+      height: 64px;
+      border-top-left-radius: 56px;
+    }
+
+    .elbow-top::after {
+      top: var(--bar);
+      bottom: 0;
+      border-top-left-radius: var(--inner);
+    }
+
+    .elbow-bottom {
+      height: 52px;
+      background: var(--periwinkle);
+      border-bottom-left-radius: 46px;
+    }
+
+    .elbow-bottom::after {
+      top: 0;
+      bottom: var(--bar);
+      border-bottom-left-radius: var(--inner);
+    }
+
+    .elbow-label {
+      position: absolute;
+      left: 22px;
+      bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+    }
+
+    .elbow-top .elbow-label { bottom: 8px; }
+    .elbow-bottom .elbow-label { top: 8px; bottom: auto; }
+
+    .bar {
+      height: var(--bar);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #000;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .bar.grow { flex: 1; }
+    .bar.end { border-radius: 0 calc(var(--bar) / 2) calc(var(--bar) / 2) 0; }
+    /* The bar right after an elbow continues it without a gap. */
+    .elbow + .bar { margin-left: calc(-1 * var(--gap)); }
+
+    .title {
+      height: var(--bar);
+      display: flex;
+      align-items: center;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--gold);
+      white-space: nowrap;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .bar-pill {
+      height: var(--bar);
+      border-radius: calc(var(--bar) / 2);
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    #overallStatus { background: var(--dim); }
+    #overallStatus.ok { background: var(--green); }
+    #overallStatus.busy { background: var(--gold); animation: blink 1.4s infinite; }
+    #overallStatus.bad { background: var(--red); animation: blink 0.9s infinite; }
+    #overallStatus.idle { background: var(--lavender); }
+
+    @keyframes blink { 50% { opacity: 0.5; } }
+
+    /* Middle: left column + content. */
+
+    .middle {
+      flex: 1;
+      display: flex;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .column {
+      width: var(--column);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      min-height: 0;
+    }
+
+    .block {
+      min-height: 46px;
+      padding: 0 14px 6px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      font-size: 17px;
+      font-weight: 600;
+      text-transform: uppercase;
+      text-align: right;
+      color: #000;
+      flex-shrink: 0;
+      transition: filter 0.12s ease;
+    }
+
+    button.block:not(:disabled):hover { filter: brightness(1.2); }
+    button.block:not(:disabled):active { filter: brightness(0.9); }
+
+    .block .num {
+      font-size: 12px;
+      margin-right: auto;
+      align-self: flex-end;
+      opacity: 0.7;
+    }
+
+    .nav { background: var(--periwinkle); }
+    .nav:nth-child(even) { background: var(--lavender); }
+    .nav.active { background: var(--gold); }
+
+    .spacer { flex: 1; min-height: 12px; background: #7a5a3c; }
+    .spacer.small { flex: 0 0 18px; min-height: 18px; background: #8a4f3a; }
+
+    .link-block { background: var(--ice); min-height: 40px; }
+    .start-block { background: var(--green); min-height: 40px; }
+    .stop-block { background: var(--red); min-height: 40px; }
+
+    .column-label {
+      font-size: 12px;
+      color: var(--dim);
+      text-align: right;
+      padding: 4px 14px 0;
+      text-transform: uppercase;
+    }
+
+    .content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .view { display: none; flex: 1; flex-direction: column; min-height: 0; }
+    .view.active { display: flex; }
+
+    /* Overview. */
+
+    .overview { overflow-y: auto; padding: 4px 4px 12px 0; display: flex; flex-direction: column; gap: 14px; }
+
+    .strip {
+      display: flex;
+      align-items: stretch;
+      gap: var(--gap);
+      flex-shrink: 0;
+    }
+
+    .strip-cell {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4px 16px;
+      background: var(--panel);
+      border-left: 6px solid var(--lavender);
+    }
+
+    .strip-cell:first-child { border-radius: 14px 0 0 14px; border-left-color: var(--gold); }
+    .strip-cell.grow { flex: 1; min-width: 0; }
+
+    .strip-label { font-size: 12px; color: var(--dim); text-transform: uppercase; }
+    .strip-value { font-size: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .strip-value.mono { font-family: var(--mono); font-size: 14px; letter-spacing: 0; }
+
+    .strip-action {
+      padding: 0 18px;
+      background: var(--apricot);
+      border-radius: 0 18px 18px 0;
+      font-size: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .strip-action:hover { filter: brightness(1.15); }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--lavender);
+      text-transform: uppercase;
+    }
+
+    .section-label::after { content: ''; flex: 1; height: 3px; background: var(--lavender); border-radius: 2px; }
+
+    .grid { display: grid; gap: 14px; }
+    .grid.core { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .grid.aux { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+    /* Service card: LCARS bracket on the left shows the state colour. */
+
+    .card {
+      --state: var(--dim);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 14px 12px 18px;
+      background: var(--panel);
+      border-left: 12px solid var(--state);
+      border-radius: 22px 6px 6px 22px;
+      min-width: 0;
+    }
+
+    .card.online { --state: var(--green); }
+    .card.starting { --state: var(--gold); }
+    .card.fault { --state: var(--red); }
+
+    .card-head { display: flex; align-items: baseline; gap: 10px; }
+    .card-name { font-size: 22px; font-weight: 700; text-transform: uppercase; color: var(--apricot); }
+    .card-port { font-family: var(--mono); font-size: 13px; color: var(--dim); letter-spacing: 0; }
+
+    .badge {
+      margin-left: auto;
+      align-self: center;
+      padding: 2px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #000;
+      background: var(--state);
+      white-space: nowrap;
+    }
+
+    .card.starting .badge, .card.fault .badge { animation: blink 1.2s infinite; }
+    .card.offline .badge { background: #2a2a3a; color: var(--dim); }
+
+    .card-role {
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      letter-spacing: 0;
+      color: #c9c2d6;
+      line-height: 1.35;
+    }
+
+    .card-stats {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0;
+      color: var(--ice);
+    }
+
+    .card-stats .sep { color: #444460; padding: 0 2px; }
+    .card-stats .stat { white-space: nowrap; }
+    .card-stats .external { color: var(--gold); cursor: help; }
+
+    .card-note {
+      font-family: system-ui, sans-serif;
+      font-size: 12px;
+      letter-spacing: 0;
+      color: var(--gold);
+    }
+
+    .card-note.mono { font-family: var(--mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .card-links { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .link {
+      padding: 2px 10px;
+      border: 1px solid #3a3a55;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--ice);
+      font-size: 13px;
+      text-decoration: none;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .link:not(.disabled):not(:disabled):hover { background: var(--ice); color: #000; border-color: var(--ice); }
+    .link.disabled, .link:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+    .card-actions { display: flex; gap: 6px; margin-top: auto; }
+
+    .act {
+      height: 28px;
+      padding: 0 16px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .act:not(:disabled):hover { filter: brightness(1.15); }
+    .act.start { background: var(--green); }
+    .act.stop { background: var(--red); }
+    .act.restart { background: var(--lavender); }
+    .act.logs { background: var(--periwinkle); margin-left: auto; }
+
+    /* Embedded server pages and logs. */
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 0 8px;
+      flex-shrink: 0;
+    }
+
+    .toolbar-title { font-size: 20px; font-weight: 700; color: var(--gold); text-transform: uppercase; }
+    .toolbar-sub { font-family: var(--mono); font-size: 12px; color: var(--dim); letter-spacing: 0; }
+    .toolbar .push { margin-left: auto; }
+
+    .frame {
+      flex: 1;
+      width: 100%;
+      border: none;
+      border-radius: 6px 6px 6px 22px;
+      background: #fff;
+    }
+
+    .filters { display: flex; gap: 4px; }
+
+    .filter {
+      height: 26px;
+      padding: 0 12px;
+      border-radius: 13px;
+      background: #2a2a3a;
+      color: var(--dim);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .filter.active { background: var(--gold); color: #000; }
+
+    .search {
+      height: 26px;
+      width: 180px;
+      padding: 0 10px;
+      border-radius: 13px;
+      border: 1px solid #3a3a55;
+      background: var(--panel);
+      color: var(--apricot);
+      font-family: var(--mono);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .search:focus { border-color: var(--gold); }
+
+    .notice {
+      display: none;
+      margin-bottom: 8px;
+      padding: 6px 12px;
+      border-left: 6px solid var(--gold);
+      border-radius: 4px;
+      background: #1e1806;
+      color: var(--gold);
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      letter-spacing: 0;
+    }
+
+    .log-output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 12px;
+      background: #050508;
+      border-left: 6px solid var(--lavender);
+      border-radius: 4px 4px 4px 18px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0;
+      line-height: 1.5;
+    }
+
+    .log-empty { color: var(--dim); font-family: system-ui, sans-serif; padding: 8px 0; }
+    .log-line { display: flex; gap: 10px; white-space: pre-wrap; word-break: break-all; }
+    .log-ts { color: #555570; flex-shrink: 0; }
+    .log-tag { flex-shrink: 0; width: 64px; font-weight: 700; }
+    .log-tag.SERVER { color: var(--gold); }
+    .log-tag.WEB { color: var(--ice); }
+    .log-tag.MOBILE { color: var(--lavender); }
+    .log-tag.SPANNER { color: var(--apricot); }
+    .log-msg { color: #d6d6e4; }
+    .log-msg.err { color: var(--coral); }
+
+    #soundToggle { background: var(--periwinkle); cursor: pointer; }
+    #soundToggle.on { background: var(--green); }
+  </style>
+</head>
+<body>
+
+  <!-- Top elbow and bar -->
+  <header class="frame-top">
+    <div class="elbow elbow-top"><span class="elbow-label caps">Launchpad</span></div>
+    <div class="bar grow" style="background: var(--gold);"></div>
+    <div class="title caps">Collect One Dev</div>
+    <div class="bar" style="background: var(--lavender); width: 36px;"></div>
+    <div id="overallStatus" class="bar-pill caps" title="Status of the server and both clients">Checking…</div>
+    <div id="clock" class="bar-pill" style="background: var(--apricot);" title="Local time">--:--</div>
+  </header>
+
+  <div class="middle">
+    <!-- Left column -->
+    <nav class="column">
+      <button class="block nav active" data-view="overview" onclick="switchView('overview')" title="Start, stop, and monitor every service">
+        <span class="num">01</span>Overview
+      </button>
+      <button class="block nav" data-view="rpc" onclick="switchView('rpc')" title="Live gRPC calls to the server (:8080/debug)">
+        <span class="num">02</span>RPC inspector
+      </button>
+      <button class="block nav" data-view="spanner" onclick="switchView('spanner')" title="Browse Spanner tables and queries (:8080/debug/spanner)">
+        <span class="num">03</span>Spanner data
+      </button>
+      <button class="block nav" data-view="logs" onclick="switchView('logs')" title="Output of services started from the launchpad">
+        <span class="num">04</span>Logs
+      </button>
+
+      <div class="spacer"></div>
+
+      <div class="column-label">Open in new tab</div>
+      <button id="openWebConsole" class="block link-block" data-requires="web-console" onclick="openServiceTab(8092, '#surveys')" title="Web console (:8092)">Web console ↗</button>
+      <button id="openMobileApp" class="block link-block" data-requires="mobile-app" onclick="openServiceTab(8093, '?chrome=1')" title="Mobile app in a simulated device (:8093)">Mobile app ↗</button>
+
+      <div class="spacer small"></div>
+
+      <button id="startAllButton" class="block start-block" onclick="startCore()" title="Start the server, web console, and mobile app (skips any already running)">Start all</button>
+      <button id="stopAllButton" class="block stop-block" onclick="stopAll()" title="Stop every running service, including ones started outside the launchpad">Stop all</button>
+    </nav>
+
+    <main class="content">
+      <!-- Overview -->
+      <section id="view-overview" class="view active">
+        <div class="overview">
+          <div class="strip">
+            <div class="strip-cell">
+              <span class="strip-label">Running</span>
+              <span id="runningCount" class="strip-value">–</span>
+            </div>
+            <div class="strip-cell">
+              <span class="strip-label">Memory</span>
+              <span id="totalMemory" class="strip-value">–</span>
+            </div>
+            <div class="strip-cell grow" title="USER_DATA_SERVICE_URL in local.properties: where the web console and mobile app dev servers send gRPC calls">
+              <span class="strip-label">Clients talk to server at</span>
+              <span id="serverUrl" class="strip-value mono">–</span>
+            </div>
+            <button class="strip-action" onclick="changeServerUrl()" title="Change USER_DATA_SERVICE_URL in local.properties">Change</button>
+          </div>
+
+          <div class="section-label">Server and clients</div>
+          <div id="coreGrid" class="grid core"></div>
+
+          <div class="section-label">Optional tools</div>
+          <div id="auxGrid" class="grid aux"></div>
+        </div>
+      </section>
+
+      <!-- RPC inspector (server debug page) -->
+      <section id="view-rpc" class="view">
+        <div class="toolbar">
+          <span class="toolbar-title">RPC inspector</span>
+          <span class="toolbar-sub">Live calls to the server · :8080/debug</span>
+          <button class="act restart push" onclick="reloadFrame('rpcFrame')">Reload</button>
+          <button class="act logs" style="margin-left: 0;" data-requires="user-data-service" onclick="openServiceTab(8080, '/debug')">New tab ↗</button>
+        </div>
+        <iframe id="rpcFrame" class="frame" src="about:blank" title="RPC inspector"></iframe>
+      </section>
+
+      <!-- Spanner data (server debug page) -->
+      <section id="view-spanner" class="view">
+        <div class="toolbar">
+          <span class="toolbar-title">Spanner data</span>
+          <span class="toolbar-sub">Tables and queries · :8080/debug/spanner</span>
+          <button class="act restart push" onclick="reloadFrame('spannerFrame')">Reload</button>
+          <button class="act logs" style="margin-left: 0;" data-requires="user-data-service" onclick="openServiceTab(8080, '/debug/spanner')">New tab ↗</button>
+        </div>
+        <iframe id="spannerFrame" class="frame" src="about:blank" title="Spanner data"></iframe>
+      </section>
+
+      <!-- Logs -->
+      <section id="view-logs" class="view">
+        <div class="toolbar">
+          <span class="toolbar-title">Logs</span>
+          <div class="filters">
+            <button class="filter active" data-filter="all" onclick="setLogFilter('all')">All</button>
+            <button class="filter" data-filter="user-data-service" onclick="setLogFilter('user-data-service')">Server</button>
+            <button class="filter" data-filter="web-console" onclick="setLogFilter('web-console')">Web</button>
+            <button class="filter" data-filter="mobile-app" onclick="setLogFilter('mobile-app')">Mobile</button>
+            <button class="filter" data-filter="spanner-emulator" onclick="setLogFilter('spanner-emulator')">Spanner</button>
+          </div>
+          <input id="logSearch" class="search push" type="text" placeholder="Filter text…" oninput="renderLogs()">
+          <button id="followToggle" class="act restart" onclick="toggleFollow()" title="Keep the newest lines in view">Follow: on</button>
+          <button class="act stop" onclick="clearLogs()">Clear</button>
+        </div>
+        <div id="externalNotice" class="notice"></div>
+        <div id="logOutput" class="log-output"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Bottom elbow and bar -->
+  <footer class="frame-bottom">
+    <div class="elbow elbow-bottom"><span id="hostLabel" class="elbow-label caps"></span></div>
+    <div class="bar grow" style="background: var(--periwinkle);"></div>
+    <div class="bar" style="background: var(--lavender); width: 60px;"></div>
+    <button id="soundToggle" class="bar end caps" onclick="toggleSound()" title="Play LCARS beeps on clicks">Sound: off</button>
+  </footer>
+
+  <script>
+    // ---------------------------------------------------------------
+    // Sound: LCARS-style beeps synthesized with the Web Audio API.
+    // ---------------------------------------------------------------
+    const sound = {
+      enabled: false,
+      ctx: null,
+      tone(steps, duration) {
+        if (!this.enabled) return;
+        if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        steps.forEach(([freq, at]) => osc.frequency.setValueAtTime(freq, now + at));
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain).connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      },
+      click() { this.tone([[784, 0], [1046, 0.04]], 0.1); },
+      up() { this.tone([[523, 0], [659, 0.05], [880, 0.1]], 0.16); },
+      down() { this.tone([[880, 0], [659, 0.05], [440, 0.1]], 0.16); }
+    };
+
+    function toggleSound() {
+      sound.enabled = !sound.enabled;
+      const btn = document.getElementById('soundToggle');
+      btn.textContent = sound.enabled ? 'Sound: on' : 'Sound: off';
+      btn.classList.toggle('on', sound.enabled);
+      sound.click();
+    }
+
+    // ---------------------------------------------------------------
+    // URLs: use the base URL configured in the launchpad
+    // (USER_DATA_SERVICE_URL in local.properties) when set, falling back to
+    // whatever host the launchpad was opened on, including port-prefixed
+    // proxy hosts (e.g. 8099-host.proxy.example.com).
+    // ---------------------------------------------------------------
+    function baseLocation() {
+      const configured = lastStatus?.localProperties?.userDataServiceUrl?.trim();
+      if (configured) {
+        try {
+          return new URL(configured.includes('://') ? configured : `http://${configured}`);
+        } catch (_) {}
+      }
+      return window.location;
+    }
+
+    function resolveServiceUrl(port, pathAndHash = '') {
+      const loc = baseLocation();
+      const proxyMatch = loc.hostname.match(/^(\d+)-(.*\..*)$/);
+      if (proxyMatch) {
+        const portSuffix = loc.port ? `:${loc.port}` : '';
+        return `${loc.protocol}//${port}-${proxyMatch[2]}${portSuffix}${pathAndHash}`;
+      }
+      return `${loc.protocol}//${loc.hostname}:${port}${pathAndHash}`;
+    }
+
+    function openServiceTab(port, pathAndHash = '') {
+      sound.click();
+      window.open(resolveServiceUrl(port, pathAndHash), '_blank');
+    }
+
+    function reloadFrame(id) {
+      sound.click();
+      const frame = document.getElementById(id);
+      try {
+        frame.contentWindow.location.reload();
+      } catch (_) {
+        frame.src = frame.src;
+      }
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ---------------------------------------------------------------
+    // Clock.
+    // ---------------------------------------------------------------
+    function updateClock() {
+      document.getElementById('clock').textContent =
+        new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(updateClock, 10000);
+    updateClock();
+
+    // ---------------------------------------------------------------
+    // Views. The current view is kept in the URL hash so reloads keep it.
+    // ---------------------------------------------------------------
+    const VIEWS = ['overview', 'rpc', 'spanner', 'logs'];
+    const FRAME_PATHS = { rpc: ['rpcFrame', '/debug'], spanner: ['spannerFrame', '/debug/spanner'] };
+    let currentView = 'overview';
+
+    function switchView(view, { silent = false } = {}) {
+      if (!VIEWS.includes(view)) view = 'overview';
+      if (!silent) sound.click();
+      currentView = view;
+      if (location.hash !== `#${view}`) history.replaceState(null, '', `#${view}`);
+
+      document.querySelectorAll('.nav').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
+      document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === `view-${view}`));
+
+      const framePath = FRAME_PATHS[view];
+      if (framePath) {
+        const frame = document.getElementById(framePath[0]);
+        if (frame.src === 'about:blank' || !frame.src) frame.src = resolveServiceUrl(8080, framePath[1]);
+      }
+      if (view === 'logs') renderLogs();
+    }
+
+    window.addEventListener('hashchange', () => switchView(location.hash.slice(1), { silent: true }));
+
+    // ---------------------------------------------------------------
+    // Logs.
+    // ---------------------------------------------------------------
+    const logs = [];
+    let logFilter = 'all';
+    let follow = true;
+
+    function appendLog(entry) {
+      logs.push(entry);
+      if (logs.length > 2500) logs.shift();
+      if (currentView === 'logs') renderLogs();
+    }
+
+    function setLogFilter(filter) {
+      sound.click();
+      logFilter = filter;
+      document.querySelectorAll('.filter').forEach((b) => b.classList.toggle('active', b.dataset.filter === filter));
+      renderLogs();
+    }
+
+    function toggleFollow() {
+      sound.click();
+      follow = !follow;
+      document.getElementById('followToggle').textContent = follow ? 'Follow: on' : 'Follow: off';
+      if (follow) renderLogs();
+    }
+
+    function renderLogs() {
+      const output = document.getElementById('logOutput');
+      const query = document.getElementById('logSearch').value.toLowerCase();
+      const visible = logs.filter((l) =>
+        (logFilter === 'all' || l.serviceId === logFilter) && (!query || l.text.toLowerCase().includes(query)));
+
+      if (!visible.length) {
+        output.innerHTML = `<div class="log-empty">${logs.length
+          ? 'No lines match the current filter.'
+          : 'No output yet. Logs appear here for services started or restarted from the launchpad.'}</div>`;
+        return;
+      }
+
+      output.innerHTML = visible.map((l) => {
+        const time = new Date(l.timestamp).toLocaleTimeString([], { hour12: false });
+        return `<div class="log-line"><span class="log-ts">${time}</span>` +
+          `<span class="log-tag ${l.serviceCode}">${l.serviceCode}</span>` +
+          `<span class="log-msg ${l.stream === 'stderr' ? 'err' : ''}">${escapeHtml(l.text)}</span></div>`;
+      }).join('');
+      if (follow) output.scrollTop = output.scrollHeight;
+    }
+
+    async function clearLogs() {
+      sound.click();
+      logs.length = 0;
+      renderLogs();
+      try { await fetch('/api/logs/all/clear', { method: 'POST' }); } catch (_) {}
+    }
+
+    function showLogsFor(serviceId) {
+      switchView('logs');
+      setLogFilter(serviceId);
+    }
+
+    // ---------------------------------------------------------------
+    // Status.
+    // ---------------------------------------------------------------
+    const CORE_IDS = ['user-data-service', 'web-console', 'mobile-app'];
+    let lastStatus = null;
+
+    // Actions clicked but not yet reflected in the status (service ID -> {action, until}), so their
+    // buttons are disabled right away instead of after the next status update.
+    const pendingActions = new Map();
+    let startAllPendingUntil = 0;
+    const PENDING_TIMEOUT_MS = 10000;
+
+    function pendingActionFor(id) {
+      const pending = pendingActions.get(id);
+      if (pending && pending.until > Date.now()) return pending.action;
+      pendingActions.delete(id);
+      return null;
+    }
+
+    /** Clears pending actions once the status shows their effect. */
+    function settlePendingActions(services) {
+      for (const s of services) {
+        const action = pendingActionFor(s.id);
+        if (!action) continue;
+        const started = s.state === 'STARTING' || s.state === 'ONLINE';
+        if ((action === 'start' && started) || (action === 'stop' && !started)) {
+          pendingActions.delete(s.id);
+        }
+        // A restart stops first, so wait for it to be starting or running again.
+        if (action === 'restart' && s.state === 'STARTING') pendingActions.delete(s.id);
+      }
+    }
+
+    function isRunning(s) {
+      return s && s.state === 'ONLINE';
+    }
+
+    function formatUptime(seconds) {
+      if (!seconds) return '';
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      if (h > 0) return `${h}h ${m}m`;
+      if (m > 0) return `${m}m ${seconds % 60}s`;
+      return `${seconds}s`;
+    }
+
+    function updateUi(status) {
+      lastStatus = status;
+      const services = Object.values(status.services);
+      const core = services.filter((s) => CORE_IDS.includes(s.id));
+      const names = (list) => list.map((s) => s.name).join(', ');
+
+      // Overall status of the server and both clients.
+      const faulted = core.filter((s) => s.state === 'FAULT');
+      const starting = core.filter((s) => s.state === 'STARTING');
+      const running = core.filter((s) => s.state === 'ONLINE');
+      let text, cls;
+      if (faulted.length) [text, cls] = [`Crashed: ${names(faulted)}`, 'bad'];
+      else if (starting.length) [text, cls] = [`Starting: ${names(starting)}`, 'busy'];
+      else if (running.length === core.length) [text, cls] = ['Server + clients running', 'ok'];
+      else if (running.length) [text, cls] = [`${running.length} of ${core.length} running`, 'idle'];
+      else [text, cls] = ['All stopped', 'idle'];
+      const pill = document.getElementById('overallStatus');
+      pill.textContent = text;
+      pill.className = `bar-pill caps ${cls}`;
+
+      // Summary strip.
+      const online = services.filter((s) => s.state === 'ONLINE');
+      document.getElementById('runningCount').textContent = `${online.length} of ${services.length}`;
+      document.getElementById('totalMemory').textContent =
+        `${online.reduce((sum, s) => sum + (s.rssMb || 0), 0).toLocaleString()} MB`;
+      document.getElementById('serverUrl').textContent = status.localProperties.userDataServiceUrl || 'Not set';
+      document.getElementById('hostLabel').textContent = status.host.hostname.split('.')[0];
+
+      // Notice on the Logs page for services whose output can't be captured.
+      const external = online.filter((s) => !s.managed);
+      const notice = document.getElementById('externalNotice');
+      notice.style.display = external.length ? 'block' : 'none';
+      notice.textContent = external.length
+        ? `${names(external)} ${external.length === 1 ? 'was' : 'were'} started outside the launchpad, so ` +
+          `${external.length === 1 ? 'its' : 'their'} output isn't shown here. ` +
+          'Click Restart on the service in Overview to run it from the launchpad and capture its logs.'
+        : '';
+
+      settlePendingActions(services);
+      updateFleetButtons(status);
+
+      for (const [view, [frameId, framePath]] of Object.entries(FRAME_PATHS)) {
+        const frame = document.getElementById(frameId);
+        if (!frame) continue;
+        const targetUrl = resolveServiceUrl(8080, framePath);
+        if ((view === currentView || (frame.src && frame.src !== 'about:blank')) && frame.src !== targetUrl) {
+          frame.src = targetUrl;
+        }
+      }
+
+      renderCards('coreGrid', services.filter((s) => s.category === 'CORE'));
+      renderCards('auxGrid', services.filter((s) => s.category !== 'CORE'));
+    }
+
+    /**
+     * Start all is disabled while any core service is starting (or a Start all is in flight) and
+     * when they're all running; Stop all when nothing is running or starting. App links stay
+     * disabled until their service has finished starting.
+     */
+    function updateFleetButtons(status) {
+      const services = Object.values(status.services);
+      const core = services.filter((s) => CORE_IDS.includes(s.id));
+      if (startAllPendingUntil && (core.some((s) => s.state === 'STARTING') || core.every(isRunning))) {
+        startAllPendingUntil = 0;
+      }
+      const startAllPending = startAllPendingUntil > Date.now();
+      const anyStarting = core.some((s) => s.state === 'STARTING' || pendingActionFor(s.id) === 'start');
+      const startAll = document.getElementById('startAllButton');
+      startAll.disabled = startAllPending || anyStarting || core.every(isRunning);
+      startAll.textContent = startAllPending || anyStarting ? 'Starting…' : 'Start all';
+
+      const anyActive = services.some((s) => s.state === 'ONLINE' || s.state === 'STARTING');
+      document.getElementById('stopAllButton').disabled = !anyActive;
+
+      for (const el of document.querySelectorAll('[data-requires]')) {
+        const s = status.services[el.dataset.requires];
+        if (el.dataset.title === undefined) el.dataset.title = el.title;
+        el.disabled = !isRunning(s);
+        el.title = isRunning(s)
+          ? el.dataset.title
+          : `${s ? s.name : 'The service'} ${s && s.state === 'STARTING' ? "hasn't finished starting" : "isn't running"}`;
+      }
+    }
+
+    function renderCard(s) {
+      const state = { ONLINE: 'online', STARTING: 'starting', FAULT: 'fault' }[s.state] || 'offline';
+      const badge = { online: 'Running', starting: 'Starting', fault: 'Crashed', offline: 'Stopped' }[state];
+      const active = state === 'online' || state === 'starting';
+      const port = `:${s.port}${s.auxPort ? ` / :${s.auxPort}` : ''}`;
+
+      let detail = '';
+      if (state === 'online') {
+        const parts = [
+          s.pid && `PID ${s.pid}`,
+          s.uptimeSeconds && `up ${formatUptime(s.uptimeSeconds)}`,
+          s.rssMb && `${s.rssMb} MB`,
+          `${(s.cpuPercent || 0).toFixed(1)}% CPU`,
+          !s.managed && '<span class="external" title="Started outside the launchpad, so its logs aren\'t captured. Restart it here to capture them.">started elsewhere</span>'
+        ].filter(Boolean).map((p) => `<span class="stat">${p}</span>`);
+        detail = `<div class="card-stats">${parts.join(' <span class="sep">·</span> ')}</div>`;
+      } else if (state === 'starting') {
+        detail = `<div class="card-note mono">${escapeHtml(s.lastLogLine || s.compilePhase || 'Starting…')}</div>`;
+      } else if (state === 'fault') {
+        detail = `<div class="card-note mono">${escapeHtml(s.lastLogLine || 'Exited with an error.')}</div>`;
+      }
+
+      const running = state === 'online';
+      const notReady = `${escapeHtml(s.name)} ${state === 'starting' ? "hasn't finished starting" : "isn't running"}`;
+      const links = (s.endpoints || []).map((ep) => {
+        if (ep.view) {
+          return running
+            ? `<button class="link" onclick="switchView('${ep.view}')" title="Show ${escapeHtml(ep.label)} in the launchpad">${escapeHtml(ep.label)}</button>`
+            : `<button class="link" disabled title="${notReady}">${escapeHtml(ep.label)}</button>`;
+        }
+        const [linkPort, path] = ep.path.startsWith(':')
+          ? [parseInt(ep.path.slice(1), 10), ep.path.replace(/^:\d+/, '')]
+          : [s.port, ep.path];
+        const url = resolveServiceUrl(linkPort, path);
+        return running
+          ? `<a class="link" href="${escapeHtml(url)}" target="_blank" title="${escapeHtml(url)}">${escapeHtml(ep.label)} ↗</a>`
+          : `<span class="link disabled" aria-disabled="true" title="${notReady}">${escapeHtml(ep.label)} ↗</span>`;
+      }).join('');
+
+      // Start is disabled while starting or running (or a start is in flight); Stop while not
+      // running or starting (or a stop is in flight). Stop stays enabled while starting to abort it.
+      const pending = pendingActionFor(s.id);
+      const startDisabled = active || pending === 'start' || pending === 'restart';
+      const stopDisabled = !active || pending === 'stop';
+      const startLabel = state === 'starting' || pending === 'start' ? 'Starting…' : 'Start';
+      const toggle = `
+            <button class="act start" onclick="serviceAction('${s.id}', 'start')" ${startDisabled ? 'disabled' : ''} title="Start ${s.name}">${startLabel}</button>
+            <button class="act stop" onclick="serviceAction('${s.id}', 'stop')" ${stopDisabled ? 'disabled' : ''} title="${active ? `Stop ${s.name}` : `${s.name} isn't running`}">Stop</button>`;
+
+      return `
+        <div class="card ${state}">
+          <div class="card-head">
+            <span class="card-name">${s.name}</span>
+            <span class="card-port">${port}</span>
+            <span class="badge">${badge}</span>
+          </div>
+          <div class="card-role">${escapeHtml(s.role)}</div>
+          ${detail}
+          ${links ? `<div class="card-links">${links}</div>` : ''}
+          <div class="card-actions">
+            ${toggle}
+            <button class="act restart" onclick="serviceAction('${s.id}', 'restart')" ${active && !pending ? '' : 'disabled'} title="Stop and start ${s.name} from the launchpad, capturing its logs">Restart</button>
+            <button class="act logs" onclick="showLogsFor('${s.id}')" title="Show only ${s.name} on the Logs page">Logs</button>
+          </div>
+        </div>`;
+    }
+
+    function renderCards(gridId, services) {
+      const grid = document.getElementById(gridId);
+      const html = services.map(renderCard).join('');
+      // Only touch the DOM when something changed, so hovers and tooltips don't flicker.
+      if (grid.dataset.rendered !== html) {
+        grid.innerHTML = html;
+        grid.dataset.rendered = html;
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Actions.
+    // ---------------------------------------------------------------
+    async function post(path, body) {
+      try {
+        const res = await fetch(path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body || {})
+        });
+        return await res.json();
+      } catch (err) {
+        console.error(path, err);
+        return null;
+      }
+    }
+
+    function rerender() {
+      if (lastStatus) updateUi(lastStatus);
+    }
+
+    function serviceAction(id, action) {
+      if (pendingActionFor(id)) return null;
+      action === 'stop' ? sound.down() : sound.up();
+      pendingActions.set(id, { action, until: Date.now() + PENDING_TIMEOUT_MS });
+      rerender();
+      return post(`/api/service/${id}/${action}`).finally(rerender);
+    }
+
+    function startCore() {
+      if (startAllPendingUntil > Date.now()) return null;
+      sound.up();
+      startAllPendingUntil = Date.now() + PENDING_TIMEOUT_MS;
+      for (const id of CORE_IDS) {
+        const s = lastStatus?.services?.[id];
+        if (s && s.state !== 'ONLINE' && s.state !== 'STARTING') {
+          pendingActions.set(id, { action: 'start', until: startAllPendingUntil });
+        }
+      }
+      rerender();
+      return post('/api/fleet/start-core').finally(rerender);
+    }
+
+    function stopAll() {
+      sound.down();
+      for (const s of Object.values(lastStatus?.services || {})) {
+        if (s.state === 'ONLINE' || s.state === 'STARTING') {
+          pendingActions.set(s.id, { action: 'stop', until: Date.now() + PENDING_TIMEOUT_MS });
+        }
+      }
+      rerender();
+      return post('/api/fleet/stop-all').finally(rerender);
+    }
+
+    async function changeServerUrl() {
+      sound.click();
+      const current = lastStatus?.localProperties?.userDataServiceUrl || 'http://localhost:8080';
+      const url = prompt(
+        'Server URL for the web console and mobile app dev servers to proxy to\n' +
+          '(USER_DATA_SERVICE_URL in local.properties; takes effect on the next page reload):',
+        current
+      );
+      if (url !== null && url.trim()) await post('/api/config/sync-local-properties', { url: url.trim() });
+    }
+
+    // ---------------------------------------------------------------
+    // Live updates.
+    // ---------------------------------------------------------------
+    function connectEvents() {
+      const events = new EventSource('/api/events');
+      events.addEventListener('status', (e) => updateUi(JSON.parse(e.data)));
+      events.addEventListener('log', (e) => appendLog(JSON.parse(e.data)));
+      events.onerror = () => {
+        events.close();
+        const pill = document.getElementById('overallStatus');
+        pill.textContent = 'Launchpad unreachable';
+        pill.className = 'bar-pill caps bad';
+        setTimeout(connectEvents, 3000);
+      };
+    }
+
+    async function boot() {
+      switchView(location.hash.slice(1) || 'overview', { silent: true });
+      try {
+        const [status, logData] = await Promise.all([
+          fetch('/api/status').then((r) => r.json()),
+          fetch('/api/logs?limit=500').then((r) => r.json())
+        ]);
+        updateUi(status);
+        logs.push(...(logData.logs || []));
+        renderLogs();
+      } catch (_) {}
+      connectEvents();
+    }
+
+    boot();
+  </script>
+</body>
+</html>
