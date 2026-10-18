@@ -142,19 +142,18 @@ class SurveyMapViewModelTest {
   }
 
   @Test
-  fun selectCluster_emitsEvent_andSelectingAgainZoomsIntoIt() {
+  fun selectCluster_emitsEvent_andSingleClickZoomsIntoAndCentersCluster() {
     val f = Fixture()
     repeat(5) { f.viewModel.zoomOutMap() }
+    val initialZoom = f.uiState.mapZoomDelta
+    assertEquals(-3.75f, initialZoom)
     val cluster = f.uiState.mapFeatureClusters.first()
 
     f.viewModel.selectCluster(cluster.id)
-    assertEquals(cluster.id, f.uiState.selectedClusterId)
     assertEquals(SurveyMapEvent.ClusterSelected(cluster), f.events.last())
-
-    val zoomBefore = f.uiState.mapZoomDelta
-    f.viewModel.selectCluster(cluster.id)
-    assertEquals(zoomBefore + 0.75f, f.uiState.mapZoomDelta)
+    assertTrue(f.uiState.mapZoomDelta >= initialZoom + 1.25f)
     assertEquals(LocationLockState.PANNED, f.uiState.locationLockState)
+    assertFalse(f.uiState.isCameraFollowingUser)
 
     f.viewModel.selectCluster(null)
     assertNull(f.uiState.selectedClusterId)

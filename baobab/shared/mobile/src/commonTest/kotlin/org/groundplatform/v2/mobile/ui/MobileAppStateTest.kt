@@ -1294,31 +1294,25 @@ class MobileAppStateTest {
     assertEquals(listOf("✓", "◐", "○"), allCluster.siteSymbolGroups.map { it.markerSymbol })
     assertEquals("✓ 2 • ◐ 2 • ○ 1", allCluster.siteStatesSummaryLabel)
 
-    // 6. Selecting the cluster balloon and building the survey map
+    // 6. Selecting the cluster balloon immediately zooms and centers to expand it
     state.selectCluster(allCluster.id)
-    assertEquals(allCluster.id, state.selectedClusterId)
-    assertEquals(allCluster.id, state.selectedCluster?.id)
     assertEquals("5 map features", state.activeSurveyNotice)
+    assertTrue(state.mapZoomDelta >= -2.5f)
+    assertTrue(state.isMapClusteringActive)
+    assertTrue(state.mapFeatureClusters.size > 1)
+    assertEquals(5, state.mapFeatureClusters.sumOf { it.totalCount })
+    assertNull(state.selectedClusterId)
 
     val clusteredMap = SurveyMapContent.main(state, showNavigation = true)
-    val balloon =
-      clusteredMap.markers[SurveyMapIds.cluster(allCluster.id)] as SurveyMarker.ClusterBalloon
-    assertTrue(balloon.selected)
-    assertEquals("5 map features", balloon.header)
-    assertEquals(5, balloon.chips.sumOf { it.count })
     // When clustering is active, individual entities are omitted from the map
     assertTrue(clusteredMap.entityFeatures().isEmpty())
     assertTrue(clusteredMap.markers.keys.none { SurveyMapIds.entityIdOf(it) != null })
 
-    // 7. Zooming into the cluster steps zoom back in, and resetting zoom exits clustering and
-    // restores individual features
-    state.zoomIntoCluster(allCluster.id)
-    assertEquals(-3.0f, state.mapZoomDelta)
-    assertTrue(state.isMapClusteringActive)
+    // 7. Resetting zoom exits clustering and restores individual features
     state.resetMapZoom()
     assertEquals(0f, state.mapZoomDelta)
     assertFalse(state.isMapClusteringActive)
-    assertEquals(null, state.selectedClusterId)
+    assertNull(state.selectedClusterId)
     val unclusteredMap = SurveyMapContent.main(state, showNavigation = true)
     assertTrue(unclusteredMap.markers.keys.none { SurveyMapIds.clusterIdOf(it) != null })
     assertTrue(unclusteredMap.entityFeatures().isNotEmpty())

@@ -207,6 +207,7 @@ object BackendStaticSurveysData {
             questionCount = 3,
             ctaLabel = "Collect Point & Land Use",
             requiresEntity = false,
+            hasEntitySelectQuestion = false,
           )
         )
       "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
@@ -221,6 +222,7 @@ object BackendStaticSurveysData {
             targetDatasetName = "Permanent Forest Sample Plots",
             questionCount = 9,
             ctaLabel = "Assess Forest Sample Plot",
+            hasEntitySelectQuestion = true,
           )
         )
       "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
@@ -236,6 +238,7 @@ object BackendStaticSurveysData {
             questionCount = 6,
             ctaLabel = "Map Plot Perimeter & Center",
             requiresEntity = false,
+            hasEntitySelectQuestion = false,
           )
         )
       "00000032-8d62-5717-8074-f4917e0cd76d" ->
@@ -250,6 +253,7 @@ object BackendStaticSurveysData {
             targetDatasetName = "Preloaded Past Household Individuals",
             questionCount = 11,
             ctaLabel = "Conduct Household Follow-Up",
+            hasEntitySelectQuestion = true,
           )
         )
       else -> defaultForms()
@@ -271,6 +275,7 @@ object BackendStaticSurveysData {
         targetDatasetName = "Smallholder Coffee Parcels",
         questionCount = 8,
         ctaLabel = "Register baseline parcel",
+        hasEntitySelectQuestion = true,
       ),
       FormPreviewItem(
         id = "form-household-interview",
@@ -282,6 +287,7 @@ object BackendStaticSurveysData {
         targetDatasetName = "Smallholder Coffee Parcels",
         questionCount = 6,
         ctaLabel = "Interview household",
+        hasEntitySelectQuestion = true,
       ),
       FormPreviewItem(
         id = "form-shade-canopy-audit",
@@ -293,6 +299,7 @@ object BackendStaticSurveysData {
         targetDatasetName = "Shade Tree Monitoring Plots",
         questionCount = 11,
         ctaLabel = "Record canopy audit",
+        hasEntitySelectQuestion = true,
       ),
       FormPreviewItem(
         id = "form-deforestation-alert",
@@ -304,6 +311,7 @@ object BackendStaticSurveysData {
         targetDatasetName = "Shade Tree Monitoring Plots",
         questionCount = 5,
         ctaLabel = "Validate alert",
+        hasEntitySelectQuestion = true,
       ),
       FormPreviewItem(
         id = "form-water-quality",
@@ -315,6 +323,7 @@ object BackendStaticSurveysData {
         targetDatasetName = "Cooperative Washing Stations",
         questionCount = 6,
         ctaLabel = "Inspect water effluent",
+        hasEntitySelectQuestion = true,
       ),
       FormPreviewItem(
         id = "form-pest-disease-sighting",
@@ -326,6 +335,7 @@ object BackendStaticSurveysData {
         targetDatasetName = "",
         questionCount = 5,
         ctaLabel = "Log field sighting",
+        hasEntitySelectQuestion = false,
       ),
     )
 }

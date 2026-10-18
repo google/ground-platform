@@ -684,18 +684,15 @@ class SurveyMapViewModel(
       session.update { it.copy(selectedClusterId = null) }
       return
     }
-    if (session.value.selectedClusterId == clusterId) {
+    val current = data.value
+    val before = session.value
+    val target = clustersFor(current, before).firstOrNull { it.id == clusterId }
+    if (target != null) {
+      _events.tryEmit(SurveyMapEvent.ClusterSelected(target))
       zoomIntoCluster(clusterId)
-      return
+    } else {
+      session.update { it.copy(selectedClusterId = null) }
     }
-    val target = clustersFor(data.value, session.value).firstOrNull { it.id == clusterId }
-    session.update {
-      it.copy(
-        selectedClusterId = clusterId,
-        selectedEntityId = if (target != null) null else it.selectedEntityId,
-      )
-    }
-    if (target != null) _events.tryEmit(SurveyMapEvent.ClusterSelected(target))
   }
 
   override fun zoomIntoCluster(clusterId: String) {
@@ -703,14 +700,23 @@ class SurveyMapViewModel(
     val before = session.value
     val target = clustersFor(current, before).firstOrNull { it.id == clusterId }
     var next = before
-    if (target != null) next = next.pannedTo(target.normalizedX, target.normalizedY)
-    next = next.zoomedTo(next.mapZoomDelta + 0.75f, STEP_ZOOM_RANGE)
-    val refreshed =
-      clustersFor(current, next).firstOrNull {
-        target != null &&
-          hypot(it.normalizedX - target.normalizedX, it.normalizedY - target.normalizedY) < 0.08f
-      }
-    session.value = next.copy(selectedClusterId = refreshed?.id)
+    if (target != null) {
+      next = next.pannedTo(target.normalizedX, target.normalizedY)
+      val targetZoom = target.expansionZoomDelta(before.mapZoomDelta)
+      next = next.zoomedTo(targetZoom, STEP_ZOOM_RANGE)
+      val refreshed =
+        clustersFor(current, next).firstOrNull {
+          it.id == target.id && it.totalCount == target.totalCount
+        }
+      session.value =
+        next.copy(
+          selectedClusterId = refreshed?.id,
+          selectedEntityId = null,
+        )
+    } else {
+      next = next.zoomedTo(next.mapZoomDelta + 0.75f, STEP_ZOOM_RANGE)
+      session.value = next.copy(selectedClusterId = null)
+    }
   }
 
   override fun selectPlace(place: SurveyPlaceItem) {

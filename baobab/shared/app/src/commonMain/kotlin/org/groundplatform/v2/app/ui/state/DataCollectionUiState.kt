@@ -199,7 +199,11 @@ data class DataCollectionUiState(
    * platform: the web dashboard when [onWeb], otherwise the mobile app.
    */
   fun formsForEntity(entity: GeospatialEntityItem, onWeb: Boolean = false): List<FormPreviewItem> =
-    (if (onWeb) webForms else mobileForms).filter { it.targetDatasetId == entity.datasetId }
+    if (onWeb) {
+      webForms.filter { it.targetDatasetId == entity.datasetId && it.hasEntitySelectQuestion }
+    } else {
+      mobileForms.filter { it.targetDatasetId == entity.datasetId }
+    }
 
   /**
    * Whether the organizer-defined action button for [form] is enabled on [entity]. Because all

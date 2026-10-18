@@ -196,4 +196,96 @@ class ClusterMapFeaturesUseCaseTest {
     assertTrue(regionalScaleBar.label.endsWith("km"))
     assertTrue(regionalScaleBar.distanceMeters > scaleBar.distanceMeters)
   }
+
+  @Test
+  fun expansionZoomDelta_returnsZoomDeltaSufficientToSplitOrUncluster() {
+    val features =
+      listOf(
+        MapClusterFeatureItem(
+          id = "f1",
+          kind = MapFeatureKind.ENTITY,
+          label = "Plot 1",
+          colorHex = 0xFF1E8E3EL,
+          colorCss = "#1E8E3E",
+          markerSymbol = "✓",
+          normalizedX = 0.20f,
+          normalizedY = 0.20f,
+        ),
+        MapClusterFeatureItem(
+          id = "f2",
+          kind = MapFeatureKind.ENTITY,
+          label = "Plot 2",
+          colorHex = 0xFF1E8E3EL,
+          colorCss = "#1E8E3E",
+          markerSymbol = "✓",
+          normalizedX = 0.35f,
+          normalizedY = 0.30f,
+        ),
+      )
+    val cluster = useCase(features, radiusNormalized = 0.30f).first()
+    assertEquals(0.20f, cluster.minNormalizedX, 1e-4f)
+    assertEquals(0.35f, cluster.maxNormalizedX, 1e-4f)
+    assertEquals(0.20f, cluster.minNormalizedY, 1e-4f)
+    assertEquals(0.30f, cluster.maxNormalizedY, 1e-4f)
+
+    val currentZoomDelta = -3.75f
+    val expansionZoom = cluster.expansionZoomDelta(currentZoomDelta)
+    assertTrue(expansionZoom >= currentZoomDelta + 1.25f)
+
+    // Coincident points advance past clustering onset to dissolve into individual features
+    val coincident =
+      listOf(
+        MapClusterFeatureItem(
+          id = "c1",
+          kind = MapFeatureKind.ENTITY,
+          label = "Point 1",
+          colorHex = 0xFF1E8E3EL,
+          colorCss = "#1E8E3E",
+          markerSymbol = "✓",
+          normalizedX = 0.20f,
+          normalizedY = 0.20f,
+        ),
+        MapClusterFeatureItem(
+          id = "c2",
+          kind = MapFeatureKind.ENTITY,
+          label = "Point 2",
+          colorHex = 0xFF1E8E3EL,
+          colorCss = "#1E8E3E",
+          markerSymbol = "✓",
+          normalizedX = 0.20f,
+          normalizedY = 0.20f,
+        ),
+      )
+    val coincidentCluster = useCase(coincident, radiusNormalized = 0.30f).first()
+    val unclusterZoom = coincidentCluster.expansionZoomDelta(-3.0f)
+    assertTrue(unclusterZoom >= ClusterMapFeaturesUseCase.CLUSTERING_ZOOM_DELTA + 0.15f)
+  }
+
+  @Test
+  fun invoke_isDeterministicRegardlessOfInputOrder() {
+    val features = (1..20).map { i ->
+      MapClusterFeatureItem(
+        id = "f-$i",
+        kind = MapFeatureKind.ENTITY,
+        label = "Plot $i",
+        colorHex = 0xFF1E8E3EL,
+        colorCss = "#1E8E3E",
+        markerSymbol = "✓",
+        normalizedX = (i % 5) * 0.05f,
+        normalizedY = (i / 5) * 0.05f,
+      )
+    }
+    val clustersForward = useCase(features, radiusNormalized = 0.12f)
+    val clustersReversed = useCase(features.reversed(), radiusNormalized = 0.12f)
+    val clustersShuffled = useCase(features.shuffled(), radiusNormalized = 0.12f)
+
+    assertEquals(clustersForward.size, clustersReversed.size)
+    assertEquals(clustersForward.size, clustersShuffled.size)
+    for (i in clustersForward.indices) {
+      assertEquals(clustersForward[i].id, clustersReversed[i].id)
+      assertEquals(clustersForward[i].id, clustersShuffled[i].id)
+      assertEquals(clustersForward[i].features.map { it.id }, clustersReversed[i].features.map { it.id })
+      assertEquals(clustersForward[i].features.map { it.id }, clustersShuffled[i].features.map { it.id })
+    }
+  }
 }

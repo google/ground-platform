@@ -17223,26 +17223,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Register baseline parcel)"
                       }
-                    },
-                    "commodity_type": {
-                      "scalarValue": {
-                        "stringValue": "coffee"
-                      }
-                    },
-                    "certification_schemes": {
-                      "scalarValue": {
-                        "stringValue": "rainforest_alliance organic_eu"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -17574,26 +17554,6 @@
                     "organizer_action_cta": {
                       "scalarValue": {
                         "stringValue": "Verified in field (Interview household)"
-                      }
-                    },
-                    "clean_cooking_energy": {
-                      "scalarValue": {
-                        "stringValue": "improved_cookstove"
-                      }
-                    },
-                    "primary_livelihood_sources": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_cocoa beekeeping"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
                       }
                     }
                   }
@@ -17927,26 +17887,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Record canopy audit)"
                       }
-                    },
-                    "canopy_stratum": {
-                      "scalarValue": {
-                        "stringValue": "emergent"
-                      }
-                    },
-                    "soil_moisture_class": {
-                      "scalarValue": {
-                        "stringValue": "moist_well_drained"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -18257,26 +18197,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Validate alert)"
                       }
-                    },
-                    "alert_cause": {
-                      "scalarValue": {
-                        "stringValue": "pruning"
-                      }
-                    },
-                    "disturbance_indicators": {
-                      "scalarValue": {
-                        "stringValue": "none"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -18583,21 +18503,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Inspect water effluent)"
                       }
-                    },
-                    "effluent_treatment": {
-                      "scalarValue": {
-                        "stringValue": "vetiver_wetland"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -18813,26 +18718,6 @@
                     "organizer_action_cta": {
                       "scalarValue": {
                         "stringValue": "Verified in field (Log field sighting)"
-                      }
-                    },
-                    "pest_or_disease": {
-                      "scalarValue": {
-                        "stringValue": "berry_borer"
-                      }
-                    },
-                    "land_use": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_shade"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
                       }
                     }
                   }
@@ -20891,26 +20776,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Register baseline parcel)"
                       }
-                    },
-                    "commodity_type": {
-                      "scalarValue": {
-                        "stringValue": "coffee"
-                      }
-                    },
-                    "certification_schemes": {
-                      "scalarValue": {
-                        "stringValue": "rainforest_alliance organic_eu"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -21242,26 +21107,6 @@
                     "organizer_action_cta": {
                       "scalarValue": {
                         "stringValue": "Verified in field (Interview household)"
-                      }
-                    },
-                    "clean_cooking_energy": {
-                      "scalarValue": {
-                        "stringValue": "improved_cookstove"
-                      }
-                    },
-                    "primary_livelihood_sources": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_cocoa beekeeping"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
                       }
                     }
                   }
@@ -21595,26 +21440,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Record canopy audit)"
                       }
-                    },
-                    "canopy_stratum": {
-                      "scalarValue": {
-                        "stringValue": "emergent"
-                      }
-                    },
-                    "soil_moisture_class": {
-                      "scalarValue": {
-                        "stringValue": "moist_well_drained"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -21925,26 +21750,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Validate alert)"
                       }
-                    },
-                    "alert_cause": {
-                      "scalarValue": {
-                        "stringValue": "pruning"
-                      }
-                    },
-                    "disturbance_indicators": {
-                      "scalarValue": {
-                        "stringValue": "none"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -22251,21 +22056,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Inspect water effluent)"
                       }
-                    },
-                    "effluent_treatment": {
-                      "scalarValue": {
-                        "stringValue": "vetiver_wetland"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -22481,26 +22271,6 @@
                     "organizer_action_cta": {
                       "scalarValue": {
                         "stringValue": "Verified in field (Log field sighting)"
-                      }
-                    },
-                    "pest_or_disease": {
-                      "scalarValue": {
-                        "stringValue": "berry_borer"
-                      }
-                    },
-                    "land_use": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_shade"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
                       }
                     }
                   }
@@ -25223,26 +24993,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Register baseline parcel)"
                       }
-                    },
-                    "commodity_type": {
-                      "scalarValue": {
-                        "stringValue": "coffee"
-                      }
-                    },
-                    "certification_schemes": {
-                      "scalarValue": {
-                        "stringValue": "rainforest_alliance organic_eu"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -25574,26 +25324,6 @@
                     "organizer_action_cta": {
                       "scalarValue": {
                         "stringValue": "Verified in field (Interview household)"
-                      }
-                    },
-                    "clean_cooking_energy": {
-                      "scalarValue": {
-                        "stringValue": "improved_cookstove"
-                      }
-                    },
-                    "primary_livelihood_sources": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_cocoa beekeeping"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
                       }
                     }
                   }
@@ -25927,26 +25657,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Record canopy audit)"
                       }
-                    },
-                    "canopy_stratum": {
-                      "scalarValue": {
-                        "stringValue": "emergent"
-                      }
-                    },
-                    "soil_moisture_class": {
-                      "scalarValue": {
-                        "stringValue": "moist_well_drained"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -26257,26 +25967,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Validate alert)"
                       }
-                    },
-                    "alert_cause": {
-                      "scalarValue": {
-                        "stringValue": "pruning"
-                      }
-                    },
-                    "disturbance_indicators": {
-                      "scalarValue": {
-                        "stringValue": "none"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -26583,21 +26273,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Inspect water effluent)"
                       }
-                    },
-                    "effluent_treatment": {
-                      "scalarValue": {
-                        "stringValue": "vetiver_wetland"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -26813,26 +26488,6 @@
                     "organizer_action_cta": {
                       "scalarValue": {
                         "stringValue": "Verified in field (Log field sighting)"
-                      }
-                    },
-                    "pest_or_disease": {
-                      "scalarValue": {
-                        "stringValue": "berry_borer"
-                      }
-                    },
-                    "land_use": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_shade"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
                       }
                     }
                   }
@@ -28458,26 +28113,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Register baseline parcel)"
                       }
-                    },
-                    "commodity_type": {
-                      "scalarValue": {
-                        "stringValue": "coffee"
-                      }
-                    },
-                    "certification_schemes": {
-                      "scalarValue": {
-                        "stringValue": "rainforest_alliance organic_eu"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -28809,26 +28444,6 @@
                     "organizer_action_cta": {
                       "scalarValue": {
                         "stringValue": "Verified in field (Interview household)"
-                      }
-                    },
-                    "clean_cooking_energy": {
-                      "scalarValue": {
-                        "stringValue": "improved_cookstove"
-                      }
-                    },
-                    "primary_livelihood_sources": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_cocoa beekeeping"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
                       }
                     }
                   }
@@ -29162,26 +28777,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Record canopy audit)"
                       }
-                    },
-                    "canopy_stratum": {
-                      "scalarValue": {
-                        "stringValue": "emergent"
-                      }
-                    },
-                    "soil_moisture_class": {
-                      "scalarValue": {
-                        "stringValue": "moist_well_drained"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -29492,26 +29087,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Validate alert)"
                       }
-                    },
-                    "alert_cause": {
-                      "scalarValue": {
-                        "stringValue": "pruning"
-                      }
-                    },
-                    "disturbance_indicators": {
-                      "scalarValue": {
-                        "stringValue": "none"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -29818,21 +29393,6 @@
                       "scalarValue": {
                         "stringValue": "Verified in field (Inspect water effluent)"
                       }
-                    },
-                    "effluent_treatment": {
-                      "scalarValue": {
-                        "stringValue": "vetiver_wetland"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
-                      }
                     }
                   }
                 }
@@ -30048,26 +29608,6 @@
                     "organizer_action_cta": {
                       "scalarValue": {
                         "stringValue": "Verified in field (Log field sighting)"
-                      }
-                    },
-                    "pest_or_disease": {
-                      "scalarValue": {
-                        "stringValue": "berry_borer"
-                      }
-                    },
-                    "land_use": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_shade"
-                      }
-                    },
-                    "collector_observation": {
-                      "scalarValue": {
-                        "stringValue": "Field verification complete"
-                      }
-                    },
-                    "canopy_or_parcel_metric": {
-                      "scalarValue": {
-                        "int32Value": 94
                       }
                     }
                   }

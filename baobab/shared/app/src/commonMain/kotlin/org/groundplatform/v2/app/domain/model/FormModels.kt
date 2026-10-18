@@ -59,6 +59,8 @@ data class FormPreviewItem(
   val requiresEntity: Boolean = targetDatasetId.isNotBlank(),
   /** Platforms the Form can be collected on. */
   val availability: FormAvailability = FormAvailability.BOTH,
+  /** Whether the Form contains an entity selection question targeting the dataset. */
+  val hasEntitySelectQuestion: Boolean = false,
 ) {
 
   /**

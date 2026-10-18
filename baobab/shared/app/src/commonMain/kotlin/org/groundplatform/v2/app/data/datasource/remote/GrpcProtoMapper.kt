@@ -29,6 +29,7 @@ import groundplatform.v2.forms.GeoPoint
 import groundplatform.v2.forms.GeoShape
 import groundplatform.v2.forms.LabelDef
 import groundplatform.v2.forms.TypedValue
+import groundplatform.v2.forms.ViewComponent
 import groundplatform.v2.library.ConceptRef
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.library.OrganizationLibrarySettings
@@ -531,8 +532,13 @@ object GrpcProtoMapper {
       entities = entities,
     )
 
-  fun formsFromProto(surveyDef: SurveyDef): List<FormPreviewItem> =
-    surveyDef.form_launch_configs.map { lc ->
+  fun formsFromProto(surveyDef: SurveyDef): List<FormPreviewItem> {
+    val formsById = surveyDef.forms.associateBy { it.form_id }
+    return surveyDef.form_launch_configs.map { lc ->
+      val formDef = formsById[lc.form_id]
+      val hasEntitySelect =
+        (formDef != null && hasEntitySelectQuestionInFormDef(formDef)) ||
+          (lc.requires_entity && lc.target_entity_dataset_id.isNotBlank())
       FormPreviewItem(
         id = lc.form_id,
         title = lc.title,
@@ -544,8 +550,40 @@ object GrpcProtoMapper {
         ctaLabel = lc.cta_label?.text.orEmpty(),
         requiresEntity = lc.requires_entity,
         availability = formAvailabilityFromProto(lc.availability),
+        hasEntitySelectQuestion = hasEntitySelect,
       )
     }
+  }
+
+  private fun hasEntitySelectQuestionInFormDef(formDef: FormDef): Boolean {
+    val entityRefPaths =
+      setOf(
+        "/data/target_entity",
+        "target_entity",
+        "/data/sample_plot_entity",
+        "sample_plot_entity",
+        "/data/past_individual_id",
+        "past_individual_id",
+        "/data/primary_respondent_id",
+        "primary_respondent_id",
+      )
+    if (formDef.model?.bindings.orEmpty().any { it.field_path in entityRefPaths }) return true
+    fun checkComponents(components: List<ViewComponent>): Boolean =
+      components.any { comp ->
+        val ctrl = comp.control
+        val grp = comp.group
+        val rep = comp.repeat
+        when {
+          ctrl != null ->
+            ctrl.field_ref in entityRefPaths ||
+              ctrl.appearance.split(Regex("\\s+")).contains("map-select")
+          grp != null -> checkComponents(grp.components)
+          rep != null -> checkComponents(rep.components)
+          else -> false
+        }
+      }
+    return checkComponents(formDef.view?.components.orEmpty())
+  }
 
   fun mapLayersFromProto(surveyDef: SurveyDef): List<MapLayerItem> =
     surveyDef.map_config?.layers?.map(::mapLayerFromProto).orEmpty()

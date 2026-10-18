@@ -83,7 +83,7 @@ class ResolveFormDefForLaunchUseCase {
     val label: String,
     val hint: String,
     val isMultiSelect: Boolean,
-    val defaultValue: String,
+    val defaultValue: String = "",
     val options: List<ChoiceOptionSpec>,
   )
 
@@ -96,7 +96,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Primary Regulated Commodity Crop",
             hint = "Select the EUDR Annex I commodity produced on this parcel.",
             isMultiSelect = false,
-            defaultValue = "coffee",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -124,7 +124,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Active Sustainability Certifications",
             hint = "Select all sustainability standards verified for this parcel.",
             isMultiSelect = true,
-            defaultValue = "rainforest_alliance organic_eu",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -161,7 +161,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Primary Household Cooking Fuel / Stove Type",
             hint = "Select the main stove technology used by the household.",
             isMultiSelect = false,
-            defaultValue = "improved_cookstove",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -189,7 +189,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Household Livelihood & Income Sources",
             hint = "Select all income sources contributing to the household.",
             isMultiSelect = true,
-            defaultValue = "agroforestry_cocoa beekeeping",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -226,7 +226,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Dominant Shade Canopy Stratum",
             hint = "Select the vertical canopy stratum of the audited shade stand.",
             isMultiSelect = false,
-            defaultValue = "emergent",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -254,7 +254,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Topsoil Moisture Regime",
             hint = "Assess soil moisture beneath the leaf-litter layer.",
             isMultiSelect = false,
-            defaultValue = "moist_well_drained",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -285,7 +285,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Verified Canopy Disturbance Cause",
             hint = "Select the primary ground-truthed driver of the GLAD alert.",
             isMultiSelect = false,
-            defaultValue = "pruning",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -313,7 +313,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Observed Forest Disturbance Signs",
             hint = "Select all disturbance indicators observed within the alert footprint.",
             isMultiSelect = true,
-            defaultValue = "none",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -344,7 +344,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Active Effluent Treatment Stage",
             hint = "Select the primary wastewater treatment system operating today.",
             isMultiSelect = false,
-            defaultValue = "vetiver_wetland",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -375,7 +375,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Observed Pest or Disease Category",
             hint = "Select the primary biological observation at this point.",
             isMultiSelect = false,
-            defaultValue = "berry_borer",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -403,7 +403,7 @@ class ResolveFormDefForLaunchUseCase {
             label = "Surrounding Land Cover Type",
             hint = "Select the land cover class immediately surrounding the sighting.",
             isMultiSelect = false,
-            defaultValue = "agroforestry_shade",
+            defaultValue = "",
             options =
               listOf(
                 ChoiceOptionSpec(
@@ -443,17 +443,12 @@ class ResolveFormDefForLaunchUseCase {
     }
     val safeFormId = form.id.replace('-', '_')
     val ctaDefault = "Verified in field (${form.ctaLabel})"
-    val observationDefault = "Field verification complete"
-    val metricDefault = 94
     val choiceQuestions = choiceQuestionsForForm(form.id)
     val choiceFields = choiceQuestions.map { q ->
       FieldDefinition(
         name = q.name,
         type = if (q.isMultiSelect) DataType.TYPE_SELECT_MULTIPLE else DataType.TYPE_SELECT_ONE,
       )
-    }
-    val choiceDefaults = choiceQuestions.associate { q ->
-      q.name to FieldValue(scalar_value = TypedValue(string_value = q.defaultValue))
     }
     val choiceBindings = choiceQuestions.map { q ->
       FieldBinding(
@@ -568,16 +563,7 @@ class ResolveFormDefForLaunchUseCase {
                           ),
                         "organizer_action_cta" to
                           FieldValue(scalar_value = TypedValue(string_value = ctaDefault)),
-                      ) +
-                        choiceDefaults +
-                        mapOf(
-                          "collector_observation" to
-                            FieldValue(
-                              scalar_value = TypedValue(string_value = observationDefault)
-                            ),
-                          "canopy_or_parcel_metric" to
-                            FieldValue(scalar_value = TypedValue(int32_value = metricDefault)),
-                        )
+                      )
                   ),
               ),
             secondary_instances = secondaryInstances,
