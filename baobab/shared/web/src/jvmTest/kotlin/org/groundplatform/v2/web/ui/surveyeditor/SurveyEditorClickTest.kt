@@ -115,7 +115,7 @@ class SurveyEditorClickTest {
 
     onNodeWithText("Empty form").assertIsDisplayed()
     onNodeWithText("From template…").assertIsDisplayed()
-    onNodeWithText("Import from XML").assertIsDisplayed()
+    onNodeWithText("Import from file").assertIsDisplayed()
 
     onNodeWithText("Empty form").performClick()
     waitForIdle()
@@ -158,7 +158,7 @@ class SurveyEditorClickTest {
       }
 
       onNodeWithText("From template…").assertIsDisplayed()
-      onNodeWithText("Import from XML").performClick()
+      onNodeWithText("Import from file").performClick()
       waitForIdle()
 
       onNodeWithText("Import tree_survey.xml").assertIsDisplayed()
