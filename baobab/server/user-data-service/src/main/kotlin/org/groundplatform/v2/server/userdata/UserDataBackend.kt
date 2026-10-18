@@ -427,9 +427,16 @@ class UserDataBackend(private val store: UserDataStore) :
     return saved to written
   }
 
-  /** The caller's access epoch, carried by caller-dependent list tokens; empty without a caller. */
-  private fun UserDataReader.accessEpochOf(caller: Caller?): String =
-    caller?.let { user(it.userId)?.accessEpoch?.toString() }.orEmpty()
+  /**
+   * The caller's access epoch, carried by caller-dependent list tokens, plus whether the
+   * authenticator made it an administrator (so switching a simulated role resyncs); empty without a
+   * caller.
+   */
+  private fun UserDataReader.accessEpochOf(caller: Caller?): String {
+    caller ?: return ""
+    val epoch = user(caller.userId)?.accessEpoch?.toString().orEmpty()
+    return if (caller.isAdmin) "$epoch+admin" else epoch
+  }
 
   /**
    * The user ID of the authenticated caller, which takes precedence over [requested] request

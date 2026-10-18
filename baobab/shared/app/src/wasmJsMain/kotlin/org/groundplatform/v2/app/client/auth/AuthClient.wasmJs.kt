@@ -51,6 +51,17 @@ private external fun signOutJs(callback: (JsString?) -> Unit)
 )
 private external fun idTokenJs(force: Boolean, callback: (JsString?, JsString?) -> Unit)
 
+@JsFun("() => typeof window !== 'undefined' && window.GROUND_DEV_SIGN_IN === true")
+private external fun isDevSignInJs(): Boolean
+
+@JsFun("() => window.GroundFirebaseAuthBridge.devRole()") private external fun devRoleJs(): JsString
+
+@JsFun("(role) => window.GroundFirebaseAuthBridge.setDevRole(role)")
+private external fun setDevRoleJs(role: JsString)
+
+/** `window.GROUND_DEV_SIGN_IN`, set by `firebase-config.js` from DEV_SIGN_IN at build time. */
+actual fun platformDevSignIn(): Boolean = isDevSignInJs()
+
 /** Firebase Authentication when the page configures it (`firebase-config.js`), otherwise null. */
 actual fun platformAuthClient(): AuthClient? =
   if (isFirebaseConfigured()) FirebaseWebAuthClient() else null
@@ -58,7 +69,8 @@ actual fun platformAuthClient(): AuthClient? =
 /**
  * [AuthClient] backed by the Firebase JS SDK through `firebase-auth-bridge.js`: signs in with a
  * Google account in a popup, restores the session the SDK persists in the browser, and returns the
- * user's Firebase ID token, which the user data service verifies.
+ * user's Firebase ID token, which the user data service verifies. In development builds calls also
+ * send the simulated [DevRole], remembered in the browser.
  */
 class FirebaseWebAuthClient : AuthClient {
   private val user = MutableStateFlow<AuthenticatedCollectorProfile?>(null)
@@ -78,6 +90,19 @@ class FirebaseWebAuthClient : AuthClient {
   }
 
   override suspend fun awaitInitialState() = restored.await()
+
+  override val supportsDevRoles: Boolean = isDevSignInJs()
+
+  override val usesRealAccounts: Boolean
+    get() = true
+
+  override val devRole: DevRole
+    get() = if (devRoleJs().toString() == DevRole.USER.header) DevRole.USER else DevRole.ADMIN
+
+  override fun setDevRole(role: DevRole) = setDevRoleJs(role.header.toJsString())
+
+  override fun requestHeaders(): Map<String, String> =
+    if (supportsDevRoles) mapOf(DEV_ROLE_HEADER to devRole.header) else emptyMap()
 
   override suspend fun signInWithGoogle(): AuthenticatedCollectorProfile {
     val json = suspendCancellableCoroutine { continuation ->

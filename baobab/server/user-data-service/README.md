@@ -111,7 +111,10 @@ Every RPC runs as an authenticated caller, chosen by `AUTH_MODE`:
 
 -   **`dev` (default).** For local development only. Calls that send a Firebase
     ID token (the web apps once signed in) are verified as in `firebase` mode,
-    and those users are administrators, so they see all sample data.
+    and those users are administrators, so they see all sample data, unless
+    the call sends `x-dev-role: user` to simulate a regular user (the web apps'
+    development sign-in dialog does). `x-dev-role: admin` makes a user named
+    by the `x-dev-user-*` headers an administrator.
     Otherwise calls name a user with the `x-dev-user-id`, `x-dev-user-email`,
     and optional `x-dev-user-name` headers (the email counts as verified), or
     run as the sample organizer, Maya Lin (`uid-maya-lin`), keeping request

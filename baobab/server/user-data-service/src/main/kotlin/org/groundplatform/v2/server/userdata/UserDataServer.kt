@@ -77,6 +77,7 @@ object UserDataServer {
           Authenticator.DEV_USER_ID_HEADER,
           Authenticator.DEV_USER_EMAIL_HEADER,
           Authenticator.DEV_USER_NAME_HEADER,
+          Authenticator.DEV_ROLE_HEADER,
         )
         .exposeHeaders("grpc-status", "grpc-message", "grpc-status-details-bin")
         .newDecorator()

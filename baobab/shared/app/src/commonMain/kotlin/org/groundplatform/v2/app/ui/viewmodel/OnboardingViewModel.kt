@@ -32,18 +32,29 @@ import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.SignInException
+import org.groundplatform.v2.app.domain.model.SimulatedRole
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyStats
 import org.groundplatform.v2.app.domain.repository.AuthRepository
 import org.groundplatform.v2.app.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.app.domain.repository.OrganizationRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
+import org.groundplatform.v2.app.ui.state.DevSignInUiState
 import org.groundplatform.v2.app.ui.state.OnboardingEvent
 import org.groundplatform.v2.app.ui.state.OnboardingUiState
 
 /** User intents of the onboarding screens. Implemented by [OnboardingViewModel]. */
 interface OnboardingActions {
+  /** Signs in; in development builds, opens the development sign-in dialog first. */
   fun signInWithGoogle()
+
+  /** Picks the role the development sign-in dialog will sign in as. */
+  fun selectSimulatedRole(role: SimulatedRole) {}
+
+  /** Closes the development sign-in dialog and signs in with the selected role. */
+  fun confirmDevSignIn() {}
+
+  fun dismissDevSignIn() {}
 
   fun setTermsChecked(checked: Boolean)
 
@@ -114,6 +125,7 @@ class OnboardingViewModel(
     val pendingRemovalSurveyId: String? = null,
     val pendingOfflineImagerySurveyId: String? = null,
     val offlineImageryDownloadedSurveyIds: Set<String> = emptySet(),
+    val devSignIn: DevSignInUiState? = null,
   )
 
   private val session = MutableStateFlow(Session())
@@ -169,6 +181,7 @@ class OnboardingViewModel(
       pendingRemovalSurveyId = session.pendingRemovalSurveyId,
       pendingOfflineImagerySurveyId = session.pendingOfflineImagerySurveyId,
       offlineImageryDownloadedSurveyIds = session.offlineImageryDownloadedSurveyIds,
+      devSignIn = session.devSignIn,
     )
   }
 
@@ -203,11 +216,35 @@ class OnboardingViewModel(
       return
     }
     if (session.value.isSigningIn) return
+    val mode = authRepository.signInMode()
+    if (mode.simulatesRoles) {
+      session.update { it.copy(devSignIn = DevSignInUiState(mode.lastRole, mode.usesRealAccounts)) }
+      return
+    }
+    startSignIn(role = null)
+  }
+
+  override fun selectSimulatedRole(role: SimulatedRole) {
+    session.update { s -> s.copy(devSignIn = s.devSignIn?.copy(selectedRole = role)) }
+  }
+
+  override fun confirmDevSignIn() {
+    val dialog = session.value.devSignIn ?: return
+    session.update { it.copy(devSignIn = null) }
+    startSignIn(dialog.selectedRole)
+  }
+
+  override fun dismissDevSignIn() {
+    session.update { it.copy(devSignIn = null) }
+  }
+
+  private fun startSignIn(role: SimulatedRole?) {
+    if (session.value.isSigningIn) return
     session.update { it.copy(isSigningIn = true) }
     scope.launch {
       try {
         try {
-          authRepository.signInWithGoogle()
+          authRepository.signInWithGoogle(role)
         } catch (e: CancellationException) {
           throw e
         } catch (e: SignInException) {

@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
+import org.groundplatform.v2.app.ui.common.DevSignInDialog
 import org.groundplatform.v2.app.ui.common.GoogleLogoIcon
 import org.groundplatform.v2.app.ui.common.GroundMissionGraphic
 import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
@@ -58,6 +59,14 @@ internal fun WebSignInPage(state: WebAppState, onSignIn: () -> Unit) {
   val brandFont = LocalGroundBrandFontFamily.current
   val onboardingUiState by state.onboarding.uiState.collectAsState()
   val settingsUiState by state.settings.uiState.collectAsState()
+  onboardingUiState.devSignIn?.let { dialog ->
+    DevSignInDialog(
+      state = dialog,
+      onSelectRole = state.onboarding::selectSimulatedRole,
+      onConfirm = state.onboarding::confirmDevSignIn,
+      onDismiss = state.onboarding::dismissDevSignIn,
+    )
+  }
 
   Column(modifier = Modifier.fillMaxSize()) {
     WebAppHeader(

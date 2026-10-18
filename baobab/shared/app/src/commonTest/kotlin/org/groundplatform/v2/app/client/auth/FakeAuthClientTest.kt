@@ -42,6 +42,40 @@ class FakeAuthClientTest {
   }
 }
 
+class FakeAuthClientDevRoleTest {
+  @Test
+  fun devRoles_signInAsTheirPersonas_andNameThemInHeaders() = runAuthTest {
+    val client = FakeAuthClient(supportsDevRoles = true)
+    client.setDevRole(DevRole.USER)
+
+    assertEquals("Ima User", client.signInWithGoogle().displayName)
+    assertEquals(
+      mapOf(
+        "x-dev-user-id" to "uid-ima-user",
+        "x-dev-user-email" to "ima.user@example.org",
+        "x-dev-user-name" to "Ima User",
+        "x-dev-role" to "user",
+      ),
+      client.requestHeaders(),
+    )
+
+    client.signOut()
+    assertTrue(client.requestHeaders().isEmpty())
+    client.setDevRole(DevRole.ADMIN)
+    assertEquals("Adam Admin", client.signInWithGoogle().displayName)
+    assertEquals("uid-adam-admin", client.requestHeaders()["x-dev-user-id"])
+    assertEquals("admin", client.requestHeaders()["x-dev-role"])
+  }
+
+  @Test
+  fun withoutDevRoles_signsInAsTheDevelopmentUser_withoutHeaders() = runAuthTest {
+    val client = FakeAuthClient()
+
+    assertEquals("Maya Lin", client.signInWithGoogle().displayName)
+    assertTrue(client.requestHeaders().isEmpty())
+  }
+}
+
 /** Runs a test that calls suspending auth APIs; the fake never actually suspends. */
 private fun runAuthTest(block: suspend () -> Unit) {
   var failure: Throwable? = null

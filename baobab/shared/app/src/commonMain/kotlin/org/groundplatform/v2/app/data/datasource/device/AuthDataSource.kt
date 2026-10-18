@@ -23,10 +23,13 @@ import kotlinx.coroutines.flow.stateIn
 import org.groundplatform.v2.app.client.auth.AuthClient
 import org.groundplatform.v2.app.client.auth.AuthException
 import org.groundplatform.v2.app.client.auth.AuthenticatedCollectorProfile
+import org.groundplatform.v2.app.client.auth.DevRole
 import org.groundplatform.v2.app.client.auth.FakeAuthClient
 import org.groundplatform.v2.app.domain.model.AuthProfile
 import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.model.SignInException
+import org.groundplatform.v2.app.domain.model.SignInMode
+import org.groundplatform.v2.app.domain.model.SimulatedRole
 
 /**
  * Device data source wrapping the [AuthClient]: the only code that talks to it. Maps the client's
@@ -46,14 +49,31 @@ class AuthDataSource(
       .map(::sessionOf)
       .stateIn(scope, SharingStarted.Eagerly, sessionOf(client.currentUser.value))
 
-  suspend fun signInWithGoogle(): AuthProfile =
+  /** Signs in, first setting the simulated [role] when the client supports development roles. */
+  suspend fun signInWithGoogle(role: SimulatedRole? = null): AuthProfile =
     try {
+      if (role != null && client.supportsDevRoles) client.setDevRole(role.toDevRole())
       client.signInWithGoogle().toDomain()
     } catch (e: AuthException) {
       throw SignInException(e.message ?: "Sign-in failed", cancelled = e.cancelled)
     }
 
   suspend fun signOut() = client.signOut()
+
+  fun signInMode(): SignInMode =
+    SignInMode(
+      simulatesRoles = client.supportsDevRoles,
+      usesRealAccounts = client.usesRealAccounts,
+      lastRole =
+        if (client.devRole == DevRole.USER) SimulatedRole.REGULAR_USER
+        else SimulatedRole.ADMINISTRATOR,
+    )
+
+  private fun SimulatedRole.toDevRole() =
+    when (this) {
+      SimulatedRole.ADMINISTRATOR -> DevRole.ADMIN
+      SimulatedRole.REGULAR_USER -> DevRole.USER
+    }
 
   private fun sessionOf(user: AuthenticatedCollectorProfile?): AuthSession {
     val profile = user?.toDomain()?.also { lastProfile = it } ?: lastProfile

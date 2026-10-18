@@ -155,7 +155,9 @@ class AppDataHolder(
    */
   val authClient: AuthClient = defaultAuthClient(),
   val grpcClient: CollectOneGrpcClient? = userDataServiceUrl?.let {
-    remoteUserDataGrpcClient(GrpcWebTransport(it, authToken = authClient::idToken))
+    remoteUserDataGrpcClient(
+      GrpcWebTransport(it, authToken = authClient::idToken, headers = authClient::requestHeaders)
+    )
   },
   val grpcSyncDataSource: GrpcSyncDataSource? = grpcClient?.let(::GrpcSyncDataSource),
   /**

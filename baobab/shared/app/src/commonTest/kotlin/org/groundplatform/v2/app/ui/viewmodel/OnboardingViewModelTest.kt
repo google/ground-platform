@@ -20,6 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ import org.groundplatform.v2.app.data.repository.OrganizationRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
+import org.groundplatform.v2.app.domain.model.SimulatedRole
 import org.groundplatform.v2.app.ui.state.OnboardingEvent
 
 /**
@@ -118,6 +120,35 @@ class OnboardingViewModelTest {
     assertFalse(f.uiState.isSigningIn)
     val notice = assertIs<OnboardingEvent.Notice>(f.lastEvent())
     assertTrue("auth/network-request-failed" in notice.message, notice.message)
+  }
+
+  @Test
+  fun devBuilds_askWhichRoleToSimulate_beforeSigningIn() {
+    val client = FakeAuthClient(supportsDevRoles = true)
+    val f = Fixture(client)
+
+    f.viewModel.signInWithGoogle()
+    assertFalse(f.uiState.isSignedIn)
+    val dialog = assertNotNull(f.uiState.devSignIn)
+    assertEquals(SimulatedRole.ADMINISTRATOR, dialog.selectedRole)
+    assertFalse(dialog.usesRealAccounts)
+
+    f.viewModel.selectSimulatedRole(SimulatedRole.REGULAR_USER)
+    assertEquals(SimulatedRole.REGULAR_USER, f.uiState.devSignIn?.selectedRole)
+    f.viewModel.confirmDevSignIn()
+
+    assertNull(f.uiState.devSignIn)
+    assertTrue(f.uiState.isSignedIn)
+    assertEquals("ima.user@example.org", f.uiState.profile.email)
+    assertEquals("user", client.requestHeaders()["x-dev-role"])
+
+    // The next sign-in preselects the role used last.
+    f.viewModel.signOut()
+    f.viewModel.signInWithGoogle()
+    assertEquals(SimulatedRole.REGULAR_USER, f.uiState.devSignIn?.selectedRole)
+    f.viewModel.dismissDevSignIn()
+    assertNull(f.uiState.devSignIn)
+    assertFalse(f.uiState.isSignedIn)
   }
 
   @Test

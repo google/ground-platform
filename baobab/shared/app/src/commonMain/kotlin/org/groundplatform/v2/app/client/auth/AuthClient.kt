@@ -43,7 +43,43 @@ interface AuthClient {
    * browser's storage), so apps don't flash the sign-in screen for signed-in users.
    */
   suspend fun awaitInitialState() {}
+
+  /**
+   * True in development builds, where sign-in simulates a [DevRole] against a user data service in
+   * development mode (`AUTH_MODE=dev`).
+   */
+  val supportsDevRoles: Boolean
+    get() = false
+
+  /** True when signing in uses a real account (Firebase) rather than a sample one. */
+  val usesRealAccounts: Boolean
+    get() = false
+
+  /** The role calls simulate, when [supportsDevRoles]; it persists where the platform allows. */
+  val devRole: DevRole
+    get() = DevRole.ADMIN
+
+  /** Sets the role the next sign-in and calls simulate, when [supportsDevRoles]. */
+  fun setDevRole(role: DevRole) {}
+
+  /** Headers every user data service call sends besides the ID token (development roles). */
+  fun requestHeaders(): Map<String, String> = emptyMap()
 }
+
+/**
+ * Role a development sign-in simulates. [header] is the user data service's `x-dev-role` value
+ * ([DEV_ROLE_HEADER]).
+ */
+enum class DevRole(val header: String) {
+  /** An administrator, who sees and may change all (sample) data. */
+  ADMIN("admin"),
+
+  /** A regular user, with access only through ownership, invitations, and sharing. */
+  USER("user"),
+}
+
+/** Header carrying the [DevRole] a call simulates (`AUTH_MODE=dev` only). */
+const val DEV_ROLE_HEADER = "x-dev-role"
 
 /**
  * Sign-in failed. [cancelled] is true when the user dismissed the sign-in window, which callers
@@ -54,5 +90,9 @@ class AuthException(message: String, val cancelled: Boolean = false) : Exception
 /** The platform's auth client when one is configured (Firebase in browsers), otherwise null. */
 expect fun platformAuthClient(): AuthClient?
 
+/** Whether this build offers development sign-in with a simulated [DevRole]. */
+expect fun platformDevSignIn(): Boolean
+
 /** [platformAuthClient], or a [FakeAuthClient] when the platform has none. */
-fun defaultAuthClient(): AuthClient = platformAuthClient() ?: FakeAuthClient()
+fun defaultAuthClient(): AuthClient =
+  platformAuthClient() ?: FakeAuthClient(supportsDevRoles = platformDevSignIn())

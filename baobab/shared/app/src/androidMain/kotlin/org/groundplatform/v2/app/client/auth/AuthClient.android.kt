@@ -15,3 +15,6 @@ package org.groundplatform.v2.app.client.auth
 
 /** Firebase isn't wired up on this platform yet, so it uses [FakeAuthClient]. */
 actual fun platformAuthClient(): AuthClient? = null
+
+/** Development sign-in with simulated roles is offered in the web apps only for now. */
+actual fun platformDevSignIn(): Boolean = false

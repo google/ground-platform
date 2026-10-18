@@ -58,9 +58,31 @@ window.GroundFirebaseAuthBridge = (function () {
     return (error.code ? error.code + ': ' : '') + (error.message || String(error));
   }
 
+  const DEV_ROLE_KEY = 'GROUND_DEV_ROLE';
+
   return {
     isConfigured() {
       return config() !== null;
+    },
+
+    /** Whether this build offers development sign-in (`window.GROUND_DEV_SIGN_IN`). */
+    isDevSignIn() {
+      return window.GROUND_DEV_SIGN_IN === true;
+    },
+
+    /** The development role (`admin` or `user`) remembered on this device, or `admin`. */
+    devRole() {
+      try {
+        return window.localStorage.getItem(DEV_ROLE_KEY) === 'user' ? 'user' : 'admin';
+      } catch (e) {
+        return 'admin';
+      }
+    },
+
+    setDevRole(role) {
+      try {
+        window.localStorage.setItem(DEV_ROLE_KEY, role);
+      } catch (e) {}
     },
 
     /**

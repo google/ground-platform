@@ -16,6 +16,7 @@ package org.groundplatform.v2.app.ui.state
 import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.AuthProfile
 import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
+import org.groundplatform.v2.app.domain.model.SimulatedRole
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 
 /**
@@ -52,6 +53,8 @@ data class OnboardingUiState(
   val pendingOfflineImagerySurveyId: String? = null,
   /** Survey IDs for which offline basemap imagery tiles have been downloaded to this device. */
   val offlineImageryDownloadedSurveyIds: Set<String> = emptySet(),
+  /** The development sign-in dialog, while it's open (development builds only). */
+  val devSignIn: DevSignInUiState? = null,
 ) {
   val isDownloadSurveyAccessedFromSurveyList: Boolean
     get() = entryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST
@@ -59,6 +62,16 @@ data class OnboardingUiState(
   val pendingOfflineImagerySurvey: SurveyPreviewItem?
     get() = surveys.firstOrNull { it.id == pendingOfflineImagerySurveyId }
 }
+
+/**
+ * The development sign-in dialog: explains simulated sign-in and picks the [SimulatedRole] to sign
+ * in as.
+ */
+data class DevSignInUiState(
+  val selectedRole: SimulatedRole,
+  /** True when sign-in uses the developer's Google account; false for sample users. */
+  val usesRealAccounts: Boolean,
+)
 
 /**
  * One-off outcomes of onboarding actions that the app shell acts on (navigation and transient

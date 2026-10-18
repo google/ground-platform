@@ -79,6 +79,26 @@ class AuthenticationTest {
   }
 
   @Test
+  fun dev_roleHeader_simulatesAnAdministratorOrARegularUser() {
+    val dev = Authenticator.dev(firebase = firebase)
+    val token = token("email" to "ana@example.org")
+
+    assertFalse(
+      dev.authenticate(bearer(token).also { it.put(roleKey, "user") }).isAdmin,
+      "Signed-in developers simulating a regular user aren't administrators",
+    )
+    val named =
+      headers(
+        Authenticator.DEV_USER_ID_HEADER to "uid-collector-one",
+        Authenticator.DEV_ROLE_HEADER to "admin",
+      )
+    assertTrue(dev.authenticate(named).isAdmin)
+    assertFalse(
+      dev.authenticate(headers(Authenticator.DEV_USER_ID_HEADER to "uid-collector-one")).isAdmin
+    )
+  }
+
+  @Test
   fun firebase_acceptsAValidToken() {
     val caller =
       firebase.authenticate(
@@ -170,5 +190,7 @@ class AuthenticationTest {
 
   companion object {
     const val PROJECT = "test-project"
+    private val roleKey =
+      Metadata.Key.of(Authenticator.DEV_ROLE_HEADER, Metadata.ASCII_STRING_MARSHALLER)
   }
 }

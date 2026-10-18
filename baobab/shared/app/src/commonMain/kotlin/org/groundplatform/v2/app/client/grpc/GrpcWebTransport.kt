@@ -46,12 +46,14 @@ class GrpcWebException(val status: Int, val path: String, val description: Strin
  * ([UNAVAILABLE]).
  *
  * Calls carry the signed-in user's ID token from [authToken] as `Authorization: Bearer <token>`
- * when there is one. A call rejected as [UNAUTHENTICATED] is retried once with a refreshed token.
+ * when there is one, plus any [headers] (for example a simulated development role). A call rejected
+ * as [UNAUTHENTICATED] is retried once with a refreshed token.
  */
 class GrpcWebTransport(
   baseUrl: String,
   private val httpClient: HttpClient = HttpClient(),
   private val authToken: suspend (forceRefresh: Boolean) -> String? = { null },
+  private val headers: () -> Map<String, String> = { emptyMap() },
 ) {
   private val baseUrl = baseUrl.trimEnd('/')
 
@@ -99,6 +101,7 @@ class GrpcWebTransport(
       .preparePost(baseUrl + path) {
         header("X-Grpc-Web", "1")
         header(HttpHeaders.Accept, GRPC_WEB_PROTO)
+        headers().forEach { (name, value) -> header(name, value) }
         if (token != null) header(HttpHeaders.Authorization, "Bearer $token")
         setBody(ByteArrayContent(frame(requestAdapter.encode(request)), CONTENT_TYPE))
       }

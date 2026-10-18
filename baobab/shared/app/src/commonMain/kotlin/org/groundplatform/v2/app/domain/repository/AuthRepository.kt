@@ -16,6 +16,8 @@ package org.groundplatform.v2.app.domain.repository
 import kotlinx.coroutines.flow.Flow
 import org.groundplatform.v2.app.domain.model.AuthProfile
 import org.groundplatform.v2.app.domain.model.AuthSession
+import org.groundplatform.v2.app.domain.model.SignInMode
+import org.groundplatform.v2.app.domain.model.SimulatedRole
 
 /** The signed-in account. Backed by the platform's auth client through a device data source. */
 interface AuthRepository {
@@ -25,10 +27,14 @@ interface AuthRepository {
   suspend fun getSession(): AuthSession
 
   /**
-   * Signs in with Google and returns the authenticated profile; throws
+   * Signs in with Google and returns the authenticated profile, simulating [role] in development
+   * builds ([SignInMode.simulatesRoles]); throws
    * [org.groundplatform.v2.app.domain.model.SignInException] if sign-in fails or is cancelled.
    */
-  suspend fun signInWithGoogle(): AuthProfile
+  suspend fun signInWithGoogle(role: SimulatedRole? = null): AuthProfile
+
+  /** How this build signs in: whether it simulates roles, and with which kind of account. */
+  fun signInMode(): SignInMode
 
   suspend fun signOut()
 }

@@ -38,3 +38,22 @@ data class AuthSession(val isSignedIn: Boolean, val profile: AuthProfile)
  * reported as an error.
  */
 class SignInException(message: String, val cancelled: Boolean = false) : Exception(message)
+
+/** The app role a development sign-in simulates against a user data service in development mode. */
+enum class SimulatedRole {
+  /** Sees and may change all sample data. */
+  ADMINISTRATOR,
+
+  /** Has access only through ownership, invitations, organization membership, and sharing. */
+  REGULAR_USER,
+}
+
+/** How this build signs users in, for the development sign-in dialog. */
+data class SignInMode(
+  /** True in development builds, where sign-in asks which [SimulatedRole] to use. */
+  val simulatesRoles: Boolean,
+  /** True when signing in uses a real Google account rather than a sample user. */
+  val usesRealAccounts: Boolean,
+  /** The role the last development sign-in simulated (preselected next time). */
+  val lastRole: SimulatedRole,
+)

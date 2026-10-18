@@ -155,6 +155,14 @@ object BackendStaticSurveyEditorData {
             userId = "uid-collector-one",
             profile = CachedProfile("Grace Njeri", "avatar:5", "2026-03-06"),
           ),
+          // The regular user of the web apps' development sign-in with fake accounts.
+          Collaborator(
+            "ima.user@example.org",
+            CollaboratorRole.DATA_COLLECTOR,
+            InvitationStatus.ACCEPTED,
+            userId = "uid-ima-user",
+            profile = CachedProfile("Ima User", "avatar:3", "2026-03-08"),
+          ),
           Collaborator(
             "collector.two@example.org",
             CollaboratorRole.DATA_COLLECTOR,

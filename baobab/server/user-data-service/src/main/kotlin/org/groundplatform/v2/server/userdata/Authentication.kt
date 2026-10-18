@@ -71,6 +71,12 @@ fun interface Authenticator {
     const val DEV_USER_EMAIL_HEADER = "x-dev-user-email"
     const val DEV_USER_NAME_HEADER = "x-dev-user-name"
 
+    /**
+     * Role a `dev` mode call simulates: `admin` (an administrator, who may do anything) or `user`
+     * (access only through ownership, ACL entries, memberships, and sharing).
+     */
+    const val DEV_ROLE_HEADER = "x-dev-role"
+
     /** Development fallback user: the sample organizer the fake clients sign in as. */
     val DEFAULT_DEV_CALLER =
       Caller(
@@ -83,15 +89,18 @@ fun interface Authenticator {
 
     /**
      * Development mode: a call with an `Authorization` header is authenticated by [firebase] (when
-     * set), so signed-in web apps run as their real user. Otherwise it trusts the `x-dev-user-*`
-     * headers, and falls back to [DEFAULT_DEV_CALLER] when they're absent. Never use it with real
-     * data.
+     * set), so signed-in web apps run as their real user, as an administrator unless
+     * [DEV_ROLE_HEADER] is `user`. With `x-dev-user-*` headers, [DEV_ROLE_HEADER] `admin` makes the
+     * named user an administrator. Otherwise it trusts the `x-dev-user-*` headers, and falls back
+     * to [DEFAULT_DEV_CALLER] when they're absent. Never use it with real data.
      */
     fun dev(firebase: Authenticator? = null): Authenticator = Authenticator { headers ->
       val userId = headers.get(key(DEV_USER_ID_HEADER))?.trim().orEmpty()
+      val role = headers.get(key(DEV_ROLE_HEADER))?.trim()?.lowercase()
       if (firebase != null && headers.containsKey(key("authorization"))) {
-        // Development data is shared sample data, so signed-in developers see all of it.
-        firebase.authenticate(headers).copy(isAdmin = true)
+        // Development data is shared sample data, so signed-in developers see all of it unless
+        // they simulate a regular user.
+        firebase.authenticate(headers).copy(isAdmin = role != "user")
       } else if (userId.isEmpty()) {
         DEFAULT_DEV_CALLER
       } else {
@@ -100,6 +109,7 @@ fun interface Authenticator {
           email = headers.get(key(DEV_USER_EMAIL_HEADER)).orEmpty(),
           emailVerified = true,
           displayName = headers.get(key(DEV_USER_NAME_HEADER)).orEmpty(),
+          isAdmin = role == "admin",
         )
       }
     }

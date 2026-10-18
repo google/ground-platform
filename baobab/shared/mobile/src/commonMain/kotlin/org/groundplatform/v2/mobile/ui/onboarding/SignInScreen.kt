@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.ui.common.CloudAcaciaLogo
+import org.groundplatform.v2.app.ui.common.DevSignInDialog
 import org.groundplatform.v2.app.ui.common.GoogleLogoIcon
 import org.groundplatform.v2.app.ui.common.GroundMissionGraphic
 import org.groundplatform.v2.app.ui.common.UserDataSyncErrorBanner
@@ -94,7 +95,7 @@ private fun MobileScreens(state: MobileAppState) {
   val onboardingUiState by onboarding.uiState.collectAsState()
   val settingsUiState by state.settings.uiState.collectAsState()
   when (state.currentScreen) {
-    AppScreen.SIGN_IN ->
+    AppScreen.SIGN_IN -> {
       SignInScreen(
         onSignIn = onboarding::signInWithGoogle,
         languageSelector = {
@@ -105,6 +106,15 @@ private fun MobileScreens(state: MobileAppState) {
         },
         isSigningIn = onboardingUiState.isSigningIn,
       )
+      onboardingUiState.devSignIn?.let { dialog ->
+        DevSignInDialog(
+          state = dialog,
+          onSelectRole = onboarding::selectSimulatedRole,
+          onConfirm = onboarding::confirmDevSignIn,
+          onDismiss = onboarding::dismissDevSignIn,
+        )
+      }
+    }
     AppScreen.TERMS_OF_SERVICE ->
       TermsOfServiceScreen(
         uiState = onboardingUiState,

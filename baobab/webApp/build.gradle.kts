@@ -164,8 +164,21 @@ val firebaseWebConfig =
       ?: file("../shared/app/src/wasmJsMain/firebase-web-config.json").readText())
     .trim()
 
+// Development sign-in (`DEV_SIGN_IN`, default true): before signing in, the app asks which role to
+// simulate (administrator or regular user) against a user data service in AUTH_MODE=dev. Set it to
+// false for builds served to real users.
+val devSignIn =
+  (providers.gradleProperty("DEV_SIGN_IN").orNull
+      ?: providers.environmentVariable("DEV_SIGN_IN").orNull
+      ?: localProperties.getProperty("DEV_SIGN_IN")
+      ?: "true")
+    .trim()
+    .toBoolean()
+
 val generateFirebaseConfig by tasks.registering {
   val config = firebaseWebConfig
+  val devSignInEnabled = devSignIn
+  inputs.property("devSignIn", devSignInEnabled)
   val outputDir = layout.buildDirectory.dir("generated/firebaseConfig")
   inputs.property("firebaseWebConfig", config)
   outputs.dir(outputDir)
@@ -179,8 +192,9 @@ val generateFirebaseConfig by tasks.registering {
       .asFile
       .apply { parentFile.mkdirs() }
       .writeText(
-        "// Generated from FIREBASE_WEB_CONFIG by build.gradle.kts; do not edit.\n" +
-          "window.GROUND_FIREBASE_CONFIG = $value;\n"
+        "// Generated from FIREBASE_WEB_CONFIG and DEV_SIGN_IN by build.gradle.kts; do not edit.\n" +
+          "window.GROUND_FIREBASE_CONFIG = $value;\n" +
+          "window.GROUND_DEV_SIGN_IN = $devSignInEnabled;\n"
       )
   }
 }

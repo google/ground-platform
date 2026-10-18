@@ -107,6 +107,17 @@
           }
         },
         {
+          "userId": "uid-ima-user",
+          "email": "ima.user@example.org",
+          "role": "MEMBER",
+          "status": "ACTIVE",
+          "profile": {
+            "displayName": "Ima User",
+            "avatarUrl": "avatar:3",
+            "cachedOn": "2026-02-10"
+          }
+        },
+        {
           "email": "james.otieno@example.org",
           "role": "MEMBER",
           "status": "REQUESTED",
@@ -19537,6 +19548,17 @@
               "displayName": "Grace Njeri",
               "avatarUrl": "avatar:5",
               "cachedOn": "2026-03-06"
+            }
+          },
+          {
+            "userId": "uid-ima-user",
+            "role": "DATA_COLLECTOR",
+            "invitationStatus": "ACCEPTED",
+            "email": "ima.user@example.org",
+            "profile": {
+              "displayName": "Ima User",
+              "avatarUrl": "avatar:3",
+              "cachedOn": "2026-03-08"
             }
           },
           {

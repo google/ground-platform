@@ -37,6 +37,8 @@ import org.groundplatform.v2.app.domain.model.AuthProfile
 import org.groundplatform.v2.app.domain.model.AuthSession
 import org.groundplatform.v2.app.domain.model.ImpactEvent
 import org.groundplatform.v2.app.domain.model.ImpactEventType
+import org.groundplatform.v2.app.domain.model.SignInMode
+import org.groundplatform.v2.app.domain.model.SimulatedRole
 import org.groundplatform.v2.app.domain.repository.AuthRepository
 import org.groundplatform.v2.app.testing.testScope
 import org.groundplatform.v2.app.ui.viewmodel.RecordingPdfExportClient
@@ -77,7 +79,14 @@ class ImpactViewModelTest {
 
     override suspend fun getSession(): AuthSession = session.value
 
-    override suspend fun signInWithGoogle(): AuthProfile = session.value.profile
+    override suspend fun signInWithGoogle(role: SimulatedRole?): AuthProfile = session.value.profile
+
+    override fun signInMode() =
+      SignInMode(
+        simulatesRoles = false,
+        usesRealAccounts = false,
+        lastRole = SimulatedRole.ADMINISTRATOR,
+      )
 
     override suspend fun signOut() {}
   }

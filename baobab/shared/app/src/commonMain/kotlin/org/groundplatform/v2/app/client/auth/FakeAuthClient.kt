@@ -27,9 +27,11 @@ data class AuthenticatedCollectorProfile(
 /**
  * [AuthClient] simulating Google Sign-In, for tests and for platforms not wired to Firebase yet
  * (`docs/technical/client/architecture.md`, sections 3 and 4). It has no ID tokens, so the user
- * data service serves its calls as its development user (`AUTH_MODE=dev`).
+ * data service (`AUTH_MODE=dev`) serves its calls as a sample user: the development user (Maya Lin,
+ * an administrator) by default, or, when [supportsDevRoles], [ADMIN_PERSONA] for [DevRole.ADMIN]
+ * and [USER_PERSONA] for [DevRole.USER], named by `x-dev-user-*` headers.
  */
-class FakeAuthClient : AuthClient {
+class FakeAuthClient(override val supportsDevRoles: Boolean = false) : AuthClient {
   private var profile: AuthenticatedCollectorProfile = DEFAULT_COLLECTOR_PROFILE
   private val user = MutableStateFlow<AuthenticatedCollectorProfile?>(null)
 
@@ -39,7 +41,40 @@ class FakeAuthClient : AuthClient {
 
   fun currentProfile(): AuthenticatedCollectorProfile = profile
 
-  override suspend fun signInWithGoogle(): AuthenticatedCollectorProfile = signInAs()
+  override var devRole: DevRole = DevRole.ADMIN
+    private set
+
+  override fun setDevRole(role: DevRole) {
+    devRole = role
+  }
+
+  /** The sample user the current [devRole] signs in as, when [supportsDevRoles]. */
+  private val persona: Persona?
+    get() =
+      when {
+        !supportsDevRoles -> null
+        devRole == DevRole.USER -> USER_PERSONA
+        else -> ADMIN_PERSONA
+      }
+
+  override suspend fun signInWithGoogle(): AuthenticatedCollectorProfile {
+    val p = persona?.profile ?: DEFAULT_COLLECTOR_PROFILE
+    return signInAs(p.displayName, p.email, p.organization)
+  }
+
+  override fun requestHeaders(): Map<String, String> {
+    val p = persona ?: return emptyMap()
+    if (!isSignedIn()) return emptyMap()
+    return mapOf(
+      "x-dev-user-id" to p.userId,
+      "x-dev-user-email" to p.profile.email,
+      "x-dev-user-name" to p.profile.displayName,
+      DEV_ROLE_HEADER to devRole.header,
+    )
+  }
+
+  /** A sample user of development sign-in, identified to the service by [userId]. */
+  data class Persona(val userId: String, val profile: AuthenticatedCollectorProfile)
 
   /** Signs in as the given profile (the sample organizer by default). */
   fun signInAs(
@@ -69,6 +104,33 @@ class FakeAuthClient : AuthClient {
         displayName = "Maya Lin",
         email = "maya.lin@groundplatform.org",
         organization = "Open Foris • East Africa Field Team",
+      )
+
+    /** Administrator a [DevRole.ADMIN] development sign-in uses. */
+    val ADMIN_PERSONA =
+      Persona(
+        userId = "uid-adam-admin",
+        profile =
+          AuthenticatedCollectorProfile(
+            displayName = "Adam Admin",
+            email = "adam.admin@example.org",
+            organization = "Platform administrator",
+          ),
+      )
+
+    /**
+     * Regular user a [DevRole.USER] development sign-in uses: a data collector on the Kenya sample
+     * survey and a member of the Kenya Forest Service sample organization.
+     */
+    val USER_PERSONA =
+      Persona(
+        userId = "uid-ima-user",
+        profile =
+          AuthenticatedCollectorProfile(
+            displayName = "Ima User",
+            email = "ima.user@example.org",
+            organization = "Kenya Forest Service",
+          ),
       )
   }
 }

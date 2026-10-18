@@ -127,6 +127,16 @@ default). To work without Firebase, set `FIREBASE_WEB_CONFIG=none`: the app
 then uses fake sign-in, and the service serves its calls as its development
 user.
 
+Development builds (`DEV_SIGN_IN`, default `true`) open a **Development
+sign-in** dialog before signing in. It explains how the simulated sign-in
+works and asks which app role to simulate against a service in
+`AUTH_MODE=dev`: **Administrator** (all sample data) or **Regular user**
+(access only through ownership, invitations, organizations, and sharing). With
+Firebase you sign in with your own account and the role is sent as
+`x-dev-role`; with fake sign-in you sign in as Adam Admin (administrator) or
+Ima User (a sample data collector in the Kenya Forest Service). The choice is remembered on the
+device. Set `DEV_SIGN_IN=false` for builds served to real users.
+
 ## Deploying to a Firebase Hosting Preview Channel
 
 The deployed bundle uses the `USER_DATA_SERVICE_URL` set where it was built, so

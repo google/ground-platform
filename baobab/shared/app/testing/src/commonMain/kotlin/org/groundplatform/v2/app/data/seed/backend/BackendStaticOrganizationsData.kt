@@ -121,6 +121,13 @@ object BackendStaticOrganizationsData {
               profile = CachedProfile("Grace Njeri", "avatar:5", "2026-02-02"),
               userId = "uid-collector-one",
             ),
+            // The regular user of the web apps' development sign-in with fake accounts.
+            OrganizationMember(
+              email = "ima.user@example.org",
+              role = OrganizationRole.MEMBER,
+              profile = CachedProfile("Ima User", "avatar:3", "2026-02-10"),
+              userId = "uid-ima-user",
+            ),
             OrganizationMember(
               email = "james.otieno@example.org",
               role = OrganizationRole.MEMBER,
