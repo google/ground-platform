@@ -676,23 +676,29 @@ internal fun TemplatesPane(
       initialPurposePackIds = emptyList(),
       availablePurposes = availablePurposes,
       onSave = { title, description, purposePackIds ->
-        actions.createTemplate(
-          organizationId = organization.id,
-          title = title,
-          description = description,
-          questions = emptyList(),
-          purposePackIds = purposePackIds,
-        ).also {
-          if (it == null) creating = false
-        }
+        actions
+          .createTemplate(
+            organizationId = organization.id,
+            title = title,
+            description = description,
+            questions = emptyList(),
+            purposePackIds = purposePackIds,
+          )
+          .also {
+            if (it == null) creating = false
+          }
       },
       onDismiss = { creating = false },
     )
   }
   editingDetails?.let { template ->
-    val initialPurposePackIds = remember(library.purposePacks, template.id) {
-      library.purposePacks.map { it.entry }.filter { template.id in it.formTemplateIds }.map { it.id }
-    }
+    val initialPurposePackIds =
+      remember(library.purposePacks, template.id) {
+        library.purposePacks
+          .map { it.entry }
+          .filter { template.id in it.formTemplateIds }
+          .map { it.id }
+      }
     TemplateDialog(
       title = "Edit template",
       initialTitle = template.title.text,
@@ -700,15 +706,17 @@ internal fun TemplatesPane(
       initialPurposePackIds = initialPurposePackIds,
       availablePurposes = availablePurposes,
       onSave = { title, description, purposePackIds ->
-        actions.updateTemplateDetails(
-          organizationId = template.organizationId,
-          templateId = template.id,
-          title = title,
-          description = description,
-          purposePackIds = purposePackIds,
-        ).also {
-          if (it == null) editingDetails = null
-        }
+        actions
+          .updateTemplateDetails(
+            organizationId = template.organizationId,
+            templateId = template.id,
+            title = title,
+            description = description,
+            purposePackIds = purposePackIds,
+          )
+          .also {
+            if (it == null) editingDetails = null
+          }
       },
       onDismiss = { editingDetails = null },
     )
@@ -760,9 +768,10 @@ internal fun TemplatesPane(
         }
         own.forEach { row ->
           key(row.entry.id) {
-            val associatedPurposes = remember(library.purposePacks, row.entry.id) {
-              library.purposePacks.map { it.entry }.filter { row.entry.id in it.formTemplateIds }
-            }
+            val associatedPurposes =
+              remember(library.purposePacks, row.entry.id) {
+                library.purposePacks.map { it.entry }.filter { row.entry.id in it.formTemplateIds }
+              }
             TemplateRow(
               row = row,
               associatedPurposes = associatedPurposes,
@@ -805,9 +814,10 @@ internal fun TemplatesPane(
       }
       global.forEach { row ->
         key(row.entry.id) {
-          val associatedPurposes = remember(library.purposePacks, row.entry.id) {
-            library.purposePacks.map { it.entry }.filter { row.entry.id in it.formTemplateIds }
-          }
+          val associatedPurposes =
+            remember(library.purposePacks, row.entry.id) {
+              library.purposePacks.map { it.entry }.filter { row.entry.id in it.formTemplateIds }
+            }
           TemplateRow(
             row = row,
             associatedPurposes = associatedPurposes,
@@ -946,7 +956,8 @@ internal fun PurposesPane(
   var deleting by remember(organization.id) { mutableStateOf<PurposePack?>(null) }
   val hiddenTemplateIds =
     library.formTemplates.filter { it.isHidden }.mapTo(mutableSetOf()) { it.entry.id }
-  val availableTemplates = remember(library.formTemplates) { library.formTemplates.map { it.entry } }
+  val availableTemplates =
+    remember(library.formTemplates) { library.formTemplates.map { it.entry } }
 
   if (creating) {
     PurposeDialog(
@@ -957,15 +968,17 @@ internal fun PurposesPane(
       initialTemplateIds = emptyList(),
       availableTemplates = availableTemplates,
       onSave = { title, description, pillar, templateIds ->
-        actions.createPurposePack(
-          organizationId = organization.id,
-          title = title,
-          description = description,
-          pillar = pillar,
-          formTemplateIds = templateIds,
-        ).also {
-          if (it == null) creating = false
-        }
+        actions
+          .createPurposePack(
+            organizationId = organization.id,
+            title = title,
+            description = description,
+            pillar = pillar,
+            formTemplateIds = templateIds,
+          )
+          .also {
+            if (it == null) creating = false
+          }
       },
       onDismiss = { creating = false },
     )
@@ -979,18 +992,20 @@ internal fun PurposesPane(
       initialTemplateIds = pack.formTemplateIds,
       availableTemplates = availableTemplates,
       onSave = { title, description, pillar, templateIds ->
-        actions.updatePurposePack(
-          organizationId = pack.organizationId,
-          packId = pack.id,
-          title = title,
-          description = description,
-          icon = pack.icon,
-          pillar = pillar,
-          status = pack.status,
-          formTemplateIds = templateIds,
-        ).also {
-          if (it == null) editing = null
-        }
+        actions
+          .updatePurposePack(
+            organizationId = pack.organizationId,
+            packId = pack.id,
+            title = title,
+            description = description,
+            icon = pack.icon,
+            pillar = pillar,
+            status = pack.status,
+            formTemplateIds = templateIds,
+          )
+          .also {
+            if (it == null) editing = null
+          }
       },
       onDismiss = { editing = null },
     )
@@ -1295,8 +1310,9 @@ private fun TemplateDialog(
 ) {
   var entryTitle by remember { mutableStateOf(initialTitle) }
   var description by remember { mutableStateOf(initialDescription) }
-  val selectedPurposes =
-    remember { mutableStateListOf<String>().apply { addAll(initialPurposePackIds) } }
+  val selectedPurposes = remember {
+    mutableStateListOf<String>().apply { addAll(initialPurposePackIds) }
+  }
   var error by remember { mutableStateOf<String?>(null) }
   AlertDialog(
     onDismissRequest = onDismiss,
@@ -1380,14 +1396,18 @@ private fun PurposeDialog(
   initialPillar: ImpactPillar?,
   initialTemplateIds: List<String>,
   availableTemplates: List<FormTemplate>,
-  onSave: (title: String, description: String, pillar: ImpactPillar?, templateIds: List<String>) -> String?,
+  onSave:
+    (
+      title: String, description: String, pillar: ImpactPillar?, templateIds: List<String>,
+    ) -> String?,
   onDismiss: () -> Unit,
 ) {
   var entryTitle by remember { mutableStateOf(initialTitle) }
   var description by remember { mutableStateOf(initialDescription) }
   var pillar by remember { mutableStateOf(initialPillar) }
-  val selectedTemplates =
-    remember { mutableStateListOf<String>().apply { addAll(initialTemplateIds) } }
+  val selectedTemplates = remember {
+    mutableStateListOf<String>().apply { addAll(initialTemplateIds) }
+  }
   var error by remember { mutableStateOf<String?>(null) }
   AlertDialog(
     onDismissRequest = onDismiss,

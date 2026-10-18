@@ -128,6 +128,8 @@ import org.groundplatform.v2.app.domain.model.InvitationStatus
 import org.groundplatform.v2.app.domain.model.InviteLinks
 import org.groundplatform.v2.app.domain.model.LibraryPrograms
 import org.groundplatform.v2.app.domain.model.Organization
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
+import org.groundplatform.v2.app.domain.model.QuotaTier
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
 import org.groundplatform.v2.app.domain.model.editor.CollaboratorRole
@@ -140,7 +142,10 @@ import org.groundplatform.v2.app.domain.model.editor.SharingSettings
 import org.groundplatform.v2.app.domain.model.editor.SurveyArea
 import org.groundplatform.v2.app.domain.model.editor.SurveyAreaGeometry
 import org.groundplatform.v2.app.domain.model.editor.surveyUrl
+import org.groundplatform.v2.app.domain.model.estimateMonthlyUsd
+import org.groundplatform.v2.app.domain.model.formatUsdAmount
 import org.groundplatform.v2.app.ui.common.DragAxis
+import org.groundplatform.v2.app.ui.common.GroundFilterChip
 import org.groundplatform.v2.app.ui.map.SurveyBasemaps
 import org.groundplatform.v2.core.forms.ui.GroundBadgeTone
 import org.groundplatform.v2.core.forms.ui.GroundTonalBadge
@@ -1028,6 +1033,7 @@ private fun SurveyDetailsPane(uiState: SurveyEditorUiState, actions: SurveyEdito
       )
       SurveyStatusSection(uiState = uiState, actions = actions)
       OrganizationSection(uiState = uiState, actions = actions)
+      CostAndQuotaSection(uiState = uiState, actions = actions)
       PurposesSection(uiState = uiState, actions = actions)
       LanguageSelectorSection(uiState = uiState, actions = actions)
       SurveyAreaSection(
@@ -1252,6 +1258,214 @@ private fun OrganizationSection(uiState: SurveyEditorUiState, actions: SurveyEdi
 }
 
 /**
+ * Configures survey-level quota overrides and monthly budget caps, with live readout of estimated
+ * monthly cost.
+ */
+@Composable
+private fun CostAndQuotaSection(uiState: SurveyEditorUiState, actions: SurveyEditorActions) {
+  val details = uiState.details
+  val limits = details.quotaLimits
+  var expanded by remember { mutableStateOf(false) }
+
+  val predefinedEntitiesCount = uiState.datasets.filter { !it.isGenerated }.sumOf { it.rows.size }
+  val generatedEntitiesCount = uiState.datasets.filter { it.isGenerated }.sumOf { it.rows.size }
+  val formCount = uiState.forms.size
+  val questionCount = uiState.forms.sumOf { it.form.questions.size }
+  val estimatedMonthlyCost =
+    estimateMonthlyUsd(
+      weights = limits.costUnitWeights,
+      predefinedEntityCount = predefinedEntitiesCount,
+      generatedEntityCount = generatedEntitiesCount,
+    )
+
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Text(
+      "Cost & quota controls",
+      style = MaterialTheme.typography.titleSmall,
+      fontWeight = FontWeight.SemiBold,
+    )
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+      Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+              "Estimated monthly cost",
+              style = MaterialTheme.typography.titleMedium,
+              fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+              "$formCount forms · $questionCount questions · $predefinedEntitiesCount predefined · $generatedEntitiesCount sample plots",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          Text(
+            formatUsdAmount(estimatedMonthlyCost),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+          )
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            "Tier override:",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+          )
+          GroundFilterChip(
+            selected = limits.tier == QuotaTier.UNSPECIFIED,
+            onClick = { actions.updateQuotaLimits { it.copy(tier = QuotaTier.UNSPECIFIED) } },
+            label = { Text("Inherit") },
+          )
+          GroundFilterChip(
+            selected = limits.tier == QuotaTier.BASIC,
+            onClick = {
+              actions.updateQuotaLimits {
+                QuotaLimitsConfig.BASIC.copy(monthlyBudgetUsd = it.monthlyBudgetUsd)
+              }
+            },
+            label = { Text("Basic") },
+          )
+          GroundFilterChip(
+            selected = limits.tier == QuotaTier.SPONSORED,
+            onClick = {
+              actions.updateQuotaLimits {
+                QuotaLimitsConfig.SPONSORED.copy(monthlyBudgetUsd = it.monthlyBudgetUsd)
+              }
+            },
+            label = { Text("Sponsored") },
+          )
+        }
+
+        OutlinedTextField(
+          value = if (limits.monthlyBudgetUsd <= 0.0) "" else limits.monthlyBudgetUsd.toString(),
+          onValueChange = { str ->
+            val parsed = str.toDoubleOrNull() ?: 0.0
+            actions.updateQuotaLimits { it.copy(monthlyBudgetUsd = parsed) }
+          },
+          label = { Text("Survey monthly budget cap ($ USD)") },
+          placeholder = { Text("0.00 (Unlimited)") },
+          singleLine = true,
+          modifier = Modifier.fillMaxWidth(),
+        )
+
+        TextButton(onClick = { expanded = !expanded }) {
+          Text(
+            if (expanded) "Hide fine-grained resource limits"
+            else "Customize fine-grained resource limits"
+          )
+        }
+
+        if (expanded) {
+          Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+              OutlinedTextField(
+                value = limits.maxFormsPerSurvey.toString(),
+                onValueChange = { str ->
+                  actions.updateQuotaLimits { it.copy(maxFormsPerSurvey = str.toIntOrNull() ?: 0) }
+                },
+                label = { Text("Max forms") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+              )
+              OutlinedTextField(
+                value = limits.maxQuestionsPerForm.toString(),
+                onValueChange = { str ->
+                  actions.updateQuotaLimits {
+                    it.copy(maxQuestionsPerForm = str.toIntOrNull() ?: 0)
+                  }
+                },
+                label = { Text("Max questions / form") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+              )
+            }
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+              OutlinedTextField(
+                value = limits.maxPhotoQuestionsPerForm.toString(),
+                onValueChange = { str ->
+                  actions.updateQuotaLimits {
+                    it.copy(maxPhotoQuestionsPerForm = str.toIntOrNull() ?: 0)
+                  }
+                },
+                label = { Text("Max photo questions / form") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+              )
+              OutlinedTextField(
+                value = limits.maxPredefinedEntities.toString(),
+                onValueChange = { str ->
+                  actions.updateQuotaLimits {
+                    it.copy(maxPredefinedEntities = str.toIntOrNull() ?: 0)
+                  }
+                },
+                label = { Text("Max predefined entities") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+              )
+            }
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+              OutlinedTextField(
+                value = limits.maxGeneratedEntities.toString(),
+                onValueChange = { str ->
+                  actions.updateQuotaLimits {
+                    it.copy(maxGeneratedEntities = str.toIntOrNull() ?: 0)
+                  }
+                },
+                label = { Text("Max sample plots") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+              )
+              OutlinedTextField(
+                value = limits.maxAreaVertices.toString(),
+                onValueChange = { str ->
+                  actions.updateQuotaLimits { it.copy(maxAreaVertices = str.toIntOrNull() ?: 0) }
+                },
+                label = { Text("Max area vertices") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+              )
+            }
+            OutlinedTextField(
+              value = limits.maxAclUsers.toString(),
+              onValueChange = { str ->
+                actions.updateQuotaLimits { it.copy(maxAclUsers = str.toIntOrNull() ?: 0) }
+              },
+              label = { Text("Max ACL collaborators") },
+              singleLine = true,
+              modifier = Modifier.fillMaxWidth(),
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
  * The survey's purposes and programs (`SurveyDef.purpose_ids` / `program_ids`), chosen at creation
  * and editable here with the same cards and chips. Changing them doesn't add or remove Forms.
  */
@@ -1268,7 +1482,11 @@ private fun PurposesSection(uiState: SurveyEditorUiState, actions: SurveyEditorA
   val offeredPrograms =
     LibraryPrograms.offeredFor(packs.filter { it.id in details.purposeIds }, details.programIds)
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    Text("Primary purpose", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+    Text(
+      "Primary purpose",
+      style = MaterialTheme.typography.titleSmall,
+      fontWeight = FontWeight.SemiBold,
+    )
     Text(
       "What this survey's data will be used for. Standard fields of the purpose are suggested " +
         "first when you write questions. Changing the purpose doesn't add or remove forms.",

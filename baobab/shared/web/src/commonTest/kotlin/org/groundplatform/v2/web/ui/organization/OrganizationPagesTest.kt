@@ -125,8 +125,10 @@ class OrganizationPagesTest {
     // The library tabs follow Imagery.
     assertEquals(
       listOf(OrganizationTab.PURPOSES, OrganizationTab.DICTIONARY, OrganizationTab.TEMPLATES),
-      OrganizationTab.entries.dropWhile { it != OrganizationTab.IMAGERY_SOURCES }.drop(1),
+      OrganizationTab.entries.dropWhile { it != OrganizationTab.IMAGERY_SOURCES }.drop(1).take(3),
     )
+    assertTrue(OrganizationTab.COST_CONTROLS in OrganizationTab.entries)
+    assertTrue(OrganizationTab.COST_TRACKING in OrganizationTab.entries)
   }
 
   @Test

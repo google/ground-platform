@@ -246,8 +246,7 @@ fun SignInScreen(
           }
           Text(
             text =
-              if (isSigningIn) "Signing in…"
-              else stringResource(Res.string.sign_in_with_google),
+              if (isSigningIn) "Signing in…" else stringResource(Res.string.sign_in_with_google),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold,

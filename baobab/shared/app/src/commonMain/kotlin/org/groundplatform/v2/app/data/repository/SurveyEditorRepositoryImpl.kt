@@ -155,6 +155,7 @@ class SurveyEditorRepositoryImpl(
           collectorConsentRequired = draft.sharing.collectorConsentRequired,
           collectorConsentText = draft.sharing.collectorConsentText,
           entityCount = projected.entities.size,
+          quotaLimits = draft.details.quotaLimits,
           thumbnail =
             SurveyThumbnailGenerator.fromDraftAndRuntime(
               surveyId = surveyId,

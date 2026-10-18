@@ -41,6 +41,8 @@ import org.groundplatform.v2.app.domain.model.MembershipStatus
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
+import org.groundplatform.v2.app.domain.model.QuotaTier
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestionType
 import org.groundplatform.v2.app.domain.usecase.ResolveLibraryUseCase
@@ -135,6 +137,25 @@ class OrganizationViewModelTest {
     )
     assertFalse(f.uiState.isSaving)
     assertEquals("Kenya Forest Service Updated", f.kfs.name)
+  }
+
+  @Test
+  fun updateOrganizationQuotaLimits_persistsChanges() {
+    val f = Fixture()
+    val orgId = SampleOrganizationsData.KENYA_FOREST_SERVICE
+    val customLimits =
+      QuotaLimitsConfig(
+        tier = QuotaTier.SPONSORED,
+        monthlyBudgetUsd = 250.0,
+        maxSurveysPerOwner = 15,
+        maxFormsPerSurvey = 12,
+      )
+    f.viewModel.updateOrganizationQuotaLimits(orgId, customLimits)
+    val updated = f.organization(orgId)
+    assertEquals(QuotaTier.SPONSORED, updated.quotaLimits.tier)
+    assertEquals(250.0, updated.quotaLimits.monthlyBudgetUsd)
+    assertEquals(15, updated.quotaLimits.maxSurveysPerOwner)
+    assertEquals(12, updated.quotaLimits.maxFormsPerSurvey)
   }
 
   @Test

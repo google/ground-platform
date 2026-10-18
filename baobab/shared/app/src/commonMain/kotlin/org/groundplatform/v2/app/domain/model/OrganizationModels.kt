@@ -154,6 +154,7 @@ data class Organization(
    * and imagery sources, and get no access to other organizations' surveys.
    */
   val isSynthetic: Boolean = false,
+  val quotaLimits: QuotaLimitsConfig = QuotaLimitsConfig(),
 ) {
   val activeMembers: List<OrganizationMember>
     get() = members.filter { it.isActive }

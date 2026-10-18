@@ -1882,6 +1882,10 @@ private fun SharingStepContent(
     )
   }
 
+  uiState.importErrorMessage?.let { errorMsg ->
+    ValidationErrorBanner(message = errorMsg)
+  }
+
   // Draft Mode & How to Publish Notice
   Surface(
     color = MaterialTheme.colorScheme.tertiaryContainer,

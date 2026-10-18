@@ -117,9 +117,7 @@ fun WebLanguageSelector(
   }
 }
 
-/**
- * Full-width form language selector matching Ground style, suitable for cards and onboarding.
- */
+/** Full-width form language selector matching Ground style, suitable for cards and onboarding. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WebSignInLanguageSelector(

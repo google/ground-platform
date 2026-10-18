@@ -29,6 +29,8 @@ import kotlinx.coroutines.launch
 import org.groundplatform.v2.app.domain.model.LibraryPrograms
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
+import org.groundplatform.v2.app.domain.model.QuotaAndCostEnforcer
+import org.groundplatform.v2.app.domain.model.QuotaCheckResult
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyThumbnailGenerator
@@ -706,7 +708,8 @@ class CreateSurveyWizardViewModel(
         }
         .toSet()
     val newProgramIds =
-      (details.programIds.filterNot { it in previousPackProgramIds } + toggledPackProgramIds).distinct()
+      (details.programIds.filterNot { it in previousPackProgramIds } + toggledPackProgramIds)
+        .distinct()
     surveyEditor.updateDetails {
       it.copy(
         purposeIds = newPurposeIds,
@@ -949,12 +952,40 @@ class CreateSurveyWizardViewModel(
       applyOverviewStartMethodIfNeeded()
       ensurePrimaryLayerAndForm()
       val draft = surveyEditor.uiState.value.draft
-      val finalTitle = draft.details.title.trim().ifBlank { CreateSurveyUseCase.DEFAULT_TITLE }
-      val finalDesc = draft.details.description.trim()
       val finalOrgId = draft.details.organizationId
       val finalOrg = finalOrgId?.let { id ->
         surveyEditor.uiState.value.organizations.firstOrNull { it.id == id }
       }
+      val globalLimits =
+        surveyEditor.uiState.value.organizations.firstOrNull { it.isSynthetic }?.quotaLimits
+      val existingSurveys = surveyRepository.observeSurveys().first()
+      val createCheck =
+        QuotaAndCostEnforcer.checkCanCreateSurvey(
+          ownerEmail = surveyEditor.uiState.value.signedInUserEmail,
+          organizationId = finalOrgId,
+          existingSurveys = existingSurveys,
+          globalLimits = globalLimits,
+          organization = finalOrg,
+          excludeSurveyId = session.value.workingSurveyId,
+        )
+      if (createCheck is QuotaCheckResult.Exceeded) {
+        session.update { it.copy(importErrorMessage = createCheck.reason) }
+        return@launch
+      }
+
+      val designCheck =
+        QuotaAndCostEnforcer.checkSurveyDesign(
+          draft = draft,
+          organization = finalOrg,
+          globalLimits = globalLimits,
+        )
+      if (designCheck is QuotaCheckResult.Exceeded) {
+        session.update { it.copy(importErrorMessage = designCheck.reason) }
+        return@launch
+      }
+
+      val finalTitle = draft.details.title.trim().ifBlank { CreateSurveyUseCase.DEFAULT_TITLE }
+      val finalDesc = draft.details.description.trim()
       val finalLocation =
         draft.details.surveyArea?.name?.ifBlank { null } ?: finalOrg?.name ?: "No survey area yet"
 

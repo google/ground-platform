@@ -29,6 +29,7 @@ import groundplatform.v2.data.ReleasePlotLockRequest
 import groundplatform.v2.data.SubmissionMutation
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.forms.DataType
+import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.TypedValue
 import groundplatform.v2.library.ConceptDef
 import groundplatform.v2.library.LibraryFieldPatch
@@ -36,6 +37,7 @@ import groundplatform.v2.library.LibraryMutation
 import groundplatform.v2.library.ListLibrariesRequest
 import groundplatform.v2.library.LocalizedText
 import groundplatform.v2.library.MutateLibraryRequest
+import groundplatform.v2.survey.CostUnitWeights
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.ListOrganizationsRequest
 import groundplatform.v2.survey.ListSurveyOverviewsRequest
@@ -43,7 +45,9 @@ import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.OrganizationFieldPatch
 import groundplatform.v2.survey.OrganizationMutation
+import groundplatform.v2.survey.QuotaLimits
 import groundplatform.v2.survey.SearchOrganizationsRequest
+import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyFieldPatch
 import groundplatform.v2.survey.SurveyMutation
 import io.grpc.Status
@@ -585,6 +589,140 @@ open class UserDataBackendTest {
     backend.reset()
     val title = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)).survey?.title
     assertTrue(title != "Changed")
+  }
+
+  @Test
+  fun surveyMutation_exceedingFormLimit_throwsResourceExhausted() = runBlocking {
+    val exception =
+      assertFailsWith<StatusException> {
+        backend.MutateSurvey(
+          MutateSurveyRequest(
+            survey_id = testId("new-survey-1"),
+            mutations =
+              listOf(
+                SurveyMutation(
+                  upsert_survey =
+                    SurveyDef(
+                      survey_id = testId("new-survey-1"),
+                      title = "Exceeded Forms Survey",
+                      quota_limits = QuotaLimits(max_forms_per_survey = 2),
+                      forms =
+                        listOf(
+                          FormDef(form_id = "f1"),
+                          FormDef(form_id = "f2"),
+                          FormDef(form_id = "f3"),
+                        ),
+                    )
+                )
+              ),
+          )
+        )
+      }
+    assertEquals(Status.Code.RESOURCE_EXHAUSTED, exception.status.code)
+    assertTrue(exception.message!!.contains("Form quota exceeded"))
+  }
+
+  @Test
+  fun surveyMutation_exceedingBudgetCap_throwsResourceExhausted() = runBlocking {
+    val exception =
+      assertFailsWith<StatusException> {
+        backend.MutateSurvey(
+          MutateSurveyRequest(
+            survey_id = testId("new-survey-budget"),
+            mutations =
+              listOf(
+                SurveyMutation(
+                  upsert_survey =
+                    SurveyDef(
+                      survey_id = testId("new-survey-budget"),
+                      title = "Budget Exceeded Survey",
+                      quota_limits =
+                        QuotaLimits(
+                          monthly_budget_usd = 0.50,
+                          cost_unit_weights = CostUnitWeights(usd_per_survey_month = 5.0),
+                        ),
+                    )
+                )
+              ),
+          )
+        )
+      }
+    assertEquals(Status.Code.RESOURCE_EXHAUSTED, exception.status.code)
+    assertTrue(exception.message!!.contains("Monthly budget cap exceeded"))
+  }
+
+  @Test
+  fun dataMutation_exceedingSubmissionsPerEntity_throwsResourceExhausted() = runBlocking {
+    val initial = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)).survey!!
+    backend.MutateSurvey(
+      MutateSurveyRequest(
+        survey_id = KENYA,
+        mutations =
+          listOf(
+            SurveyMutation(
+              upsert_survey =
+                initial.copy(quota_limits = QuotaLimits(max_submissions_per_entity_per_user = 1))
+            )
+          ),
+      )
+    )
+
+    val targetEntity = testId("entity-nyr-104")
+    // First submission for targetEntity by collector-test
+    backend.MutateData(
+      MutateDataRequest(
+        survey_id = KENYA,
+        mutations =
+          listOf(
+            DataMutation(
+              mutation_id = "sub-mut-1",
+              submission_mutation =
+                SubmissionMutation(
+                  submission_id = testId("sub-test-1"),
+                  form_id = "form-eudr-baseline",
+                  upsert =
+                    SubmissionRecord(
+                      submission_id = testId("sub-test-1"),
+                      form_id = "form-eudr-baseline",
+                      entity_id = targetEntity,
+                      audit_info = groundplatform.v2.data.AuditInfo(created_by = "collector-test"),
+                    ),
+                ),
+            )
+          ),
+      )
+    )
+
+    // Second submission by collector-test for same entity should fail
+    val exception =
+      assertFailsWith<StatusException> {
+        backend.MutateData(
+          MutateDataRequest(
+            survey_id = KENYA,
+            mutations =
+              listOf(
+                DataMutation(
+                  mutation_id = "sub-mut-2",
+                  submission_mutation =
+                    SubmissionMutation(
+                      submission_id = testId("sub-test-2"),
+                      form_id = "form-eudr-baseline",
+                      upsert =
+                        SubmissionRecord(
+                          submission_id = testId("sub-test-2"),
+                          form_id = "form-eudr-baseline",
+                          entity_id = targetEntity,
+                          audit_info =
+                            groundplatform.v2.data.AuditInfo(created_by = "collector-test"),
+                        ),
+                    ),
+                )
+              ),
+          )
+        )
+      }
+    assertEquals(Status.Code.RESOURCE_EXHAUSTED, exception.status.code)
+    assertTrue(exception.message!!.contains("Submission quota exceeded"))
   }
 
   companion object {

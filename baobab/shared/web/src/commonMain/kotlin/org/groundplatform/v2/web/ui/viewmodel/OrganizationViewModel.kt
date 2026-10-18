@@ -41,6 +41,7 @@ import org.groundplatform.v2.app.domain.model.OrganizationLibrary
 import org.groundplatform.v2.app.domain.model.OrganizationRole
 import org.groundplatform.v2.app.domain.model.OrganizationType
 import org.groundplatform.v2.app.domain.model.PurposePack
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.editor.EditorForm
 import org.groundplatform.v2.app.domain.model.editor.EditorQuestion
@@ -113,6 +114,9 @@ interface OrganizationActions {
    * for the synthetic `"All users"` organization.
    */
   fun setExcludeFromPlatformAggregates(organizationId: String, exclude: Boolean)
+
+  /** Updates fine-grained cost and quota limits for [organizationId]. */
+  fun updateOrganizationQuotaLimits(organizationId: String, limits: QuotaLimitsConfig)
 
   /** Deletes the organization; its surveys become personal surveys. Returns to the directory. */
   fun deleteOrganization(organizationId: String)
@@ -243,9 +247,7 @@ interface OrganizationActions {
     purposePackIds: List<String>? = null,
   ): String? = null
 
-  /**
-   * Sets the Purpose Packs associated with [templateId] in [organizationId].
-   */
+  /** Sets the Purpose Packs associated with [templateId] in [organizationId]. */
   fun setTemplatePurposePacks(
     organizationId: String,
     templateId: String,
@@ -398,15 +400,14 @@ class OrganizationViewModel(
       isSaving = session.isSaving,
     )
 
-  private fun launchSaving(block: suspend () -> Unit): Job =
-    scope.launch {
-      session.update { it.copy(isSaving = true) }
-      try {
-        block()
-      } finally {
-        session.update { it.copy(isSaving = false) }
-      }
+  private fun launchSaving(block: suspend () -> Unit): Job = scope.launch {
+    session.update { it.copy(isSaving = true) }
+    try {
+      block()
+    } finally {
+      session.update { it.copy(isSaving = false) }
     }
+  }
 
   /** Library tabs of the open organization: its own entries first, then global ones. */
   private fun buildLibraryState(data: Data, session: Session): OrganizationLibraryUiState {
@@ -577,6 +578,10 @@ class OrganizationViewModel(
     val organization = organization(organizationId) ?: return
     if (organization.isSynthetic || !organization.isManager(signedInEmail)) return
     updateOrganization(organizationId) { it.copy(excludeFromPlatformAggregates = exclude) }
+  }
+
+  override fun updateOrganizationQuotaLimits(organizationId: String, limits: QuotaLimitsConfig) {
+    updateOrganization(organizationId) { it.copy(quotaLimits = limits) }
   }
 
   override fun deleteOrganization(organizationId: String) {

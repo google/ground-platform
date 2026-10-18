@@ -506,7 +506,10 @@ class WebDashboardPageTest {
     val testState = WebAppState(dataHolder = sampleDataHolder())
     val ent = testState.entities.first()
     val webForms = testState.formsForEntity(ent, onWeb = true)
-    assertTrue(webForms.isNotEmpty(), "Expected at least one seeded form targeting ${ent.datasetId}")
+    assertTrue(
+      webForms.isNotEmpty(),
+      "Expected at least one seeded form targeting ${ent.datasetId}",
+    )
     assertTrue(
       webForms.all { it.hasEntitySelectQuestion },
       "All web forms for selected entity must have hasEntitySelectQuestion == true",

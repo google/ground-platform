@@ -39,6 +39,9 @@ import org.groundplatform.v2.app.domain.model.LibraryConcept
 import org.groundplatform.v2.app.domain.model.LocalizedText
 import org.groundplatform.v2.app.domain.model.Organization
 import org.groundplatform.v2.app.domain.model.OrganizationLibrary
+import org.groundplatform.v2.app.domain.model.QuotaAndCostEnforcer
+import org.groundplatform.v2.app.domain.model.QuotaCheckResult
+import org.groundplatform.v2.app.domain.model.QuotaLimitsConfig
 import org.groundplatform.v2.app.domain.model.SurveyLifecycleState
 import org.groundplatform.v2.app.domain.model.SurveyOutcomeKind
 import org.groundplatform.v2.app.domain.model.SurveyPlaceItem
@@ -164,6 +167,9 @@ interface SurveyEditorActions : MapFeatureEditor, SurveyOutcomeActions {
   // --- Survey details ---
 
   fun updateDetails(transform: (SurveyDetails) -> SurveyDetails)
+
+  /** Updates fine-grained quota limits and budget constraints for this survey. */
+  fun updateQuotaLimits(transform: (QuotaLimitsConfig) -> QuotaLimitsConfig)
 
   /**
    * Adds a language to the supported languages list if not already present. If the default language
@@ -883,6 +889,23 @@ class SurveyEditorViewModel(
 
   override fun publish() {
     if (session.value.isSaving || uiState.value.isReadOnly) return
+    val currentDraft = draft
+    val org =
+      currentDraft.details.organizationId?.let { id ->
+        data.value.organizations.firstOrNull { it.id == id }
+      }
+    val globalLimits = data.value.organizations.firstOrNull { it.isSynthetic }?.quotaLimits
+    val check =
+      QuotaAndCostEnforcer.checkSurveyDesign(
+        draft = currentDraft,
+        organization = org,
+        globalLimits = globalLimits,
+      )
+    if (check is QuotaCheckResult.Exceeded) {
+      session.update { it.copy(organizationNotice = check.reason, isSaving = false) }
+      return
+    }
+
     val surveyId = data.value.surveyId
     val previous = opened
     session.update { it.copy(isSaving = true) }
@@ -1017,6 +1040,10 @@ class SurveyEditorViewModel(
 
   override fun updateDetails(transform: (SurveyDetails) -> SurveyDetails) = edit {
     details = transform(details)
+  }
+
+  override fun updateQuotaLimits(transform: (QuotaLimitsConfig) -> QuotaLimitsConfig) {
+    updateDetails { it.copy(quotaLimits = transform(it.quotaLimits)) }
   }
 
   override fun addSupportedLanguage(code: String) {
@@ -1185,9 +1212,7 @@ class SurveyEditorViewModel(
   }
 
   override fun togglePurpose(packId: String) = updateDetails { d ->
-    d.copy(
-      purposeIds = if (packId in d.purposeIds) emptyList() else listOf(packId)
-    )
+    d.copy(purposeIds = if (packId in d.purposeIds) emptyList() else listOf(packId))
   }
 
   override fun updateOtherPurpose(text: String) = updateDetails { d -> d.copy(otherPurpose = text) }

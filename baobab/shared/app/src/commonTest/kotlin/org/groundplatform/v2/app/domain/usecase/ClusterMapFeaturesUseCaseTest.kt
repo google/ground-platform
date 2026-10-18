@@ -263,18 +263,19 @@ class ClusterMapFeaturesUseCaseTest {
 
   @Test
   fun invoke_isDeterministicRegardlessOfInputOrder() {
-    val features = (1..20).map { i ->
-      MapClusterFeatureItem(
-        id = "f-$i",
-        kind = MapFeatureKind.ENTITY,
-        label = "Plot $i",
-        colorHex = 0xFF1E8E3EL,
-        colorCss = "#1E8E3E",
-        markerSymbol = "✓",
-        normalizedX = (i % 5) * 0.05f,
-        normalizedY = (i / 5) * 0.05f,
-      )
-    }
+    val features =
+      (1..20).map { i ->
+        MapClusterFeatureItem(
+          id = "f-$i",
+          kind = MapFeatureKind.ENTITY,
+          label = "Plot $i",
+          colorHex = 0xFF1E8E3EL,
+          colorCss = "#1E8E3E",
+          markerSymbol = "✓",
+          normalizedX = (i % 5) * 0.05f,
+          normalizedY = (i / 5) * 0.05f,
+        )
+      }
     val clustersForward = useCase(features, radiusNormalized = 0.12f)
     val clustersReversed = useCase(features.reversed(), radiusNormalized = 0.12f)
     val clustersShuffled = useCase(features.shuffled(), radiusNormalized = 0.12f)
@@ -284,8 +285,14 @@ class ClusterMapFeaturesUseCaseTest {
     for (i in clustersForward.indices) {
       assertEquals(clustersForward[i].id, clustersReversed[i].id)
       assertEquals(clustersForward[i].id, clustersShuffled[i].id)
-      assertEquals(clustersForward[i].features.map { it.id }, clustersReversed[i].features.map { it.id })
-      assertEquals(clustersForward[i].features.map { it.id }, clustersShuffled[i].features.map { it.id })
+      assertEquals(
+        clustersForward[i].features.map { it.id },
+        clustersReversed[i].features.map { it.id },
+      )
+      assertEquals(
+        clustersForward[i].features.map { it.id },
+        clustersShuffled[i].features.map { it.id },
+      )
     }
   }
 }

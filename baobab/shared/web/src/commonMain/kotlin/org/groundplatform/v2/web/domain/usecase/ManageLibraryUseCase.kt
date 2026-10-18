@@ -182,18 +182,14 @@ class ManageLibraryUseCase(private val libraryRepository: LibraryRepository) {
     return idFor(candidate)
   }
 
-  /**
-   * Adds or updates [pack] in its organization's library.
-   */
+  /** Adds or updates [pack] in its organization's library. */
   suspend fun savePurposePack(pack: PurposePack): OrganizationLibrary? =
     libraryRepository.updateLibrary(pack.organizationId) { library ->
       val existing = library.purposePack(pack.id)
       if (existing == null) {
         library.copy(purposePacks = library.purposePacks + pack)
       } else {
-        library.copy(
-          purposePacks = library.purposePacks.map { if (it.id == pack.id) pack else it }
-        )
+        library.copy(purposePacks = library.purposePacks.map { if (it.id == pack.id) pack else it })
       }
     }
 
@@ -239,8 +235,7 @@ class ManageLibraryUseCase(private val libraryRepository: LibraryRepository) {
     templateId: String,
     title: String,
     description: String,
-  ): OrganizationLibrary? =
-    updateTemplateDetails(organizationId, templateId, title, description)
+  ): OrganizationLibrary? = updateTemplateDetails(organizationId, templateId, title, description)
 
   /**
    * Updates [templateId]'s title, description, and optionally syncs its associated Purpose Packs
@@ -259,8 +254,7 @@ class ManageLibraryUseCase(private val libraryRepository: LibraryRepository) {
           if (it.id == templateId) {
             it.copy(
               title = it.title.with(LocalizedText.DEFAULT_LANGUAGE, title.trim()),
-              description =
-                it.description.with(LocalizedText.DEFAULT_LANGUAGE, description.trim()),
+              description = it.description.with(LocalizedText.DEFAULT_LANGUAGE, description.trim()),
             )
           } else {
             it
@@ -285,9 +279,7 @@ class ManageLibraryUseCase(private val libraryRepository: LibraryRepository) {
       library.copy(formTemplates = updatedTemplates, purposePacks = updatedPacks)
     }
 
-  /**
-   * Updates the Purpose Packs that include [templateId] in their [PurposePack.formTemplateIds].
-   */
+  /** Updates the Purpose Packs that include [templateId] in their [PurposePack.formTemplateIds]. */
   suspend fun setTemplatePurposePacks(
     organizationId: String,
     templateId: String,

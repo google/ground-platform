@@ -314,8 +314,7 @@ internal fun WebAppHeader(
 
       val userDataSyncState by state.dataHolder.userDataSyncState.collectAsState()
       val syncCoordinator = state.dataHolder.syncCoordinator
-      val syncActivity by
-        (syncCoordinator?.activity ?: flowOf(null)).collectAsState(initial = null)
+      val syncActivity by (syncCoordinator?.activity ?: flowOf(null)).collectAsState(initial = null)
       val isSyncing =
         userDataSyncState is UserDataSyncState.Syncing || syncActivity?.isSyncing == true
 

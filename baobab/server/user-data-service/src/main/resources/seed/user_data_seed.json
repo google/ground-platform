@@ -8,6 +8,15 @@
       "createdAt": "2025-01-01T00:00:00Z",
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:01Z",
+      "quotaLimits": {
+        "costUnitWeights": {
+          "usdPerSurveyMonth": 0.5,
+          "usdPerThousandEntities": 0.1,
+          "usdPerThousandSubmissions": 0.25,
+          "usdPerPhoto": 0.01,
+          "usdPerThousandGeneratedPlots": 0.05
+        }
+      },
       "members": [
         {
           "userId": "uid-maya-lin",
@@ -43,6 +52,15 @@
       "countryCode": "KE",
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:02Z",
+      "quotaLimits": {
+        "costUnitWeights": {
+          "usdPerSurveyMonth": 0.5,
+          "usdPerThousandEntities": 0.1,
+          "usdPerThousandSubmissions": 0.25,
+          "usdPerPhoto": 0.01,
+          "usdPerThousandGeneratedPlots": 0.05
+        }
+      },
       "members": [
         {
           "userId": "uid-maya-lin",
@@ -126,6 +144,15 @@
       "countryCode": "VN",
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:03Z",
+      "quotaLimits": {
+        "costUnitWeights": {
+          "usdPerSurveyMonth": 0.5,
+          "usdPerThousandEntities": 0.1,
+          "usdPerThousandSubmissions": 0.25,
+          "usdPerPhoto": 0.01,
+          "usdPerThousandGeneratedPlots": 0.05
+        }
+      },
       "members": [
         {
           "userId": "uid-linh-tran",
@@ -182,6 +209,15 @@
       "excludeFromPlatformAggregates": true,
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:04Z",
+      "quotaLimits": {
+        "costUnitWeights": {
+          "usdPerSurveyMonth": 0.5,
+          "usdPerThousandEntities": 0.1,
+          "usdPerThousandSubmissions": 0.25,
+          "usdPerPhoto": 0.01,
+          "usdPerThousandGeneratedPlots": 0.05
+        }
+      },
       "members": [
         {
           "userId": "uid-community",
@@ -9529,6 +9565,15 @@
         "entityCount": 3,
         "primaryFormId": "single_point_land_use",
         "recordVersion": "1",
+        "quotaLimits": {
+          "costUnitWeights": {
+            "usdPerSurveyMonth": 0.5,
+            "usdPerThousandEntities": 0.1,
+            "usdPerThousandSubmissions": 0.25,
+            "usdPerPhoto": 0.01,
+            "usdPerThousandGeneratedPlots": 0.05
+          }
+        },
         "forms": [
           {
             "formId": "__primary_form__",
@@ -10488,6 +10533,15 @@
         "entityCount": 5,
         "primaryFormId": "sample_plots_forest_assessment",
         "recordVersion": "1",
+        "quotaLimits": {
+          "costUnitWeights": {
+            "usdPerSurveyMonth": 0.5,
+            "usdPerThousandEntities": 0.1,
+            "usdPerThousandSubmissions": 0.25,
+            "usdPerPhoto": 0.01,
+            "usdPerThousandGeneratedPlots": 0.05
+          }
+        },
         "forms": [
           {
             "formId": "__primary_form__",
@@ -12370,6 +12424,15 @@
         "entityCount": 3,
         "primaryFormId": "commodity_perimeter_and_center",
         "recordVersion": "1",
+        "quotaLimits": {
+          "costUnitWeights": {
+            "usdPerSurveyMonth": 0.5,
+            "usdPerThousandEntities": 0.1,
+            "usdPerThousandSubmissions": 0.25,
+            "usdPerPhoto": 0.01,
+            "usdPerThousandGeneratedPlots": 0.05
+          }
+        },
         "forms": [
           {
             "formId": "__primary_form__",
@@ -13876,6 +13939,15 @@
         "entityCount": 6,
         "primaryFormId": "household_survey_past_individuals",
         "recordVersion": "1",
+        "quotaLimits": {
+          "costUnitWeights": {
+            "usdPerSurveyMonth": 0.5,
+            "usdPerThousandEntities": 0.1,
+            "usdPerThousandSubmissions": 0.25,
+            "usdPerPhoto": 0.01,
+            "usdPerThousandGeneratedPlots": 0.05
+          }
+        },
         "forms": [
           {
             "formId": "__primary_form__",
@@ -16045,6 +16117,15 @@
         "entityCount": 5,
         "primaryFormId": "eudr_shade_survey",
         "recordVersion": "1",
+        "quotaLimits": {
+          "costUnitWeights": {
+            "usdPerSurveyMonth": 0.5,
+            "usdPerThousandEntities": 0.1,
+            "usdPerThousandSubmissions": 0.25,
+            "usdPerPhoto": 0.01,
+            "usdPerThousandGeneratedPlots": 0.05
+          }
+        },
         "forms": [
           {
             "formId": "__primary_form__",
@@ -19598,6 +19679,15 @@
         "entityCount": 5,
         "primaryFormId": "eudr_shade_survey",
         "recordVersion": "1",
+        "quotaLimits": {
+          "costUnitWeights": {
+            "usdPerSurveyMonth": 0.5,
+            "usdPerThousandEntities": 0.1,
+            "usdPerThousandSubmissions": 0.25,
+            "usdPerPhoto": 0.01,
+            "usdPerThousandGeneratedPlots": 0.05
+          }
+        },
         "forms": [
           {
             "formId": "__primary_form__",
@@ -23815,6 +23905,15 @@
         "entityCount": 204,
         "primaryFormId": "eudr_shade_survey",
         "recordVersion": "1",
+        "quotaLimits": {
+          "costUnitWeights": {
+            "usdPerSurveyMonth": 0.5,
+            "usdPerThousandEntities": 0.1,
+            "usdPerThousandSubmissions": 0.25,
+            "usdPerPhoto": 0.01,
+            "usdPerThousandGeneratedPlots": 0.05
+          }
+        },
         "forms": [
           {
             "formId": "__primary_form__",
@@ -26935,6 +27034,15 @@
         "entityCount": 204,
         "primaryFormId": "eudr_shade_survey",
         "recordVersion": "1",
+        "quotaLimits": {
+          "costUnitWeights": {
+            "usdPerSurveyMonth": 0.5,
+            "usdPerThousandEntities": 0.1,
+            "usdPerThousandSubmissions": 0.25,
+            "usdPerPhoto": 0.01,
+            "usdPerThousandGeneratedPlots": 0.05
+          }
+        },
         "forms": [
           {
             "formId": "__primary_form__",

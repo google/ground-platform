@@ -176,6 +176,10 @@ message SurveyDef {
   // stop syncing until restored, and are purged automatically 30 days after
   // this time. Independent of `state`, which a restore leaves unchanged.
   google.protobuf.Timestamp trash_time = 37;
+
+  // Tiered quota limits and monthly budget cap configured for this survey.
+  // Overrides organization and global defaults.
+  QuotaLimits quota_limits = 38;
 }
 
 // Lightweight survey overview listed by `SurveyService.ListSurveyOverviews`
@@ -266,6 +270,9 @@ message SurveyOverview {
   // `SurveyAcl.sharing_role`, with `ROLE_UNSPECIFIED` resolved to
   // `DATA_COLLECTOR`). Clients hide data collection for `VIEWER`.
   Role sharing_role = 27;
+
+  // Tiered quota limits and budget overrides for this survey.
+  QuotaLimits quota_limits = 28;
 }
 
 // The organizer's answer to "What happened with this data?" when a survey is
