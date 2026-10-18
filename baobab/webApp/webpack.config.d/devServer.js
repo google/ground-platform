@@ -43,11 +43,13 @@ if (config.devServer) {
   // request so edits take effect on the next page load. Production bundles have no dev server and
   // call the URL baked in at build time instead (see build.gradle.kts).
   const fs = require('fs');
+  const os = require('os');
   const readUserDataServiceUrl = () => {
     if (process.env.USER_DATA_SERVICE_URL) return process.env.USER_DATA_SERVICE_URL;
     let url = null;
-    // baobab/local.properties, then this app's own local.properties, which takes precedence.
+    // ~/.gradle/gradle.properties, baobab/local.properties, then this app's own local.properties.
     for (const file of [
+      path.join(os.homedir(), '.gradle/gradle.properties'),
       path.resolve(__dirname, '../../../../../local.properties'),
       path.resolve(__dirname, '../../../../local.properties'),
     ]) {
