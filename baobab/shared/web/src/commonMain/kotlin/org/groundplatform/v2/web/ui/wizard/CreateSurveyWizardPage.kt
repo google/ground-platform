@@ -960,7 +960,7 @@ private fun ModeAndPurposeStepContent(
       WizardSectionTitle("What will this data be used for? *")
       Text(
         text =
-          "Select one or more purposes so Collect One can tailor your survey's map layer defaults, starting form, standard library concepts, data governance guardrails (such as EUDR or CARE sovereignty), and one-click export profiles. Choose \"Other\" if your goal isn't listed.",
+          "Select the primary purpose so Collect One can tailor your survey's map layer defaults, starting form, standard library concepts, data governance guardrails (such as EUDR or CARE sovereignty), and one-click export profiles. Choose \"Other\" if your goal isn't listed.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -990,7 +990,7 @@ private fun ModeAndPurposeStepContent(
         WizardSectionTitle("Compliance with deforestation & reporting regulations")
         Text(
           text =
-            "Select any supply-chain, legality, or certification frameworks this survey must satisfy (pre-configures required geolocation guardrails and one-click export profiles):",
+            "Select a supply-chain, legality, or certification framework if this survey must satisfy one (pre-configures required geolocation guardrails and one-click export profiles):",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -1658,10 +1658,10 @@ private fun FormQuestionsStepContent(
       (section as? SurveyEditorSection.Form)?.let { s -> forms.firstOrNull { it.key == s.key } }
         ?: primaryForm
     }
-  // Progressive disclosure: a single Form and its Map layer need no outline; the outline appears
-  // once the survey has several Forms or datasets (for example from several purposes).
+  // Progressive disclosure: the outline panel is collapsed by default and can be toggled open
+  // when the survey has several Forms or datasets.
   val hasSeveralParts = forms.size > 1 || editorUiState.datasets.size > 1
-  var showOutline by remember(hasSeveralParts) { mutableStateOf(hasSeveralParts) }
+  var showOutline by remember { mutableStateOf(false) }
   var showAddForm by remember { mutableStateOf(false) }
   if (showAddForm) {
     AddFormDialog(

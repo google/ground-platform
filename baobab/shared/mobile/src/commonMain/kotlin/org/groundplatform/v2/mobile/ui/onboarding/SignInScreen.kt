@@ -31,6 +31,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -102,6 +103,7 @@ private fun MobileScreens(state: MobileAppState) {
             onLanguageChange = state.settings::updateLanguage,
           )
         },
+        isSigningIn = onboardingUiState.isSigningIn,
       )
     AppScreen.TERMS_OF_SERVICE ->
       TermsOfServiceScreen(
@@ -127,6 +129,7 @@ fun SignInScreen(
   onSignIn: () -> Unit,
   /** Language selector shown above the sign-in button. */
   languageSelector: @Composable () -> Unit = {},
+  isSigningIn: Boolean = false,
 ) {
   val surfaceColor = MaterialTheme.colorScheme.surface
   val brandFont = LocalGroundBrandFontFamily.current
@@ -218,6 +221,7 @@ fun SignInScreen(
 
       OutlinedButton(
         onClick = onSignIn,
+        enabled = !isSigningIn,
         modifier = Modifier.fillMaxWidth().height(52.dp),
         shape = MaterialTheme.shapes.extraLarge,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -231,9 +235,19 @@ fun SignInScreen(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-          GoogleLogoIcon(size = 20.dp)
+          if (isSigningIn) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(20.dp),
+              strokeWidth = 2.dp,
+              color = MaterialTheme.colorScheme.primary,
+            )
+          } else {
+            GoogleLogoIcon(size = 20.dp)
+          }
           Text(
-            text = stringResource(Res.string.sign_in_with_google),
+            text =
+              if (isSigningIn) "Signing in…"
+              else stringResource(Res.string.sign_in_with_google),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold,

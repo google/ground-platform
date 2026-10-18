@@ -71,6 +71,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -376,8 +377,16 @@ private fun SurveyEditorTopBar(
         TextButton(onClick = { isConfirmingDiscard = true }) { Text("Discard") }
         val canSaveOrPublish =
           if (uiState.isDraft) !uiState.isReadOnly && issueCount == 0 && !uiState.isSaving
-          else uiState.canPublish
+          else uiState.canPublish && !uiState.isSaving
         Button(onClick = actions::publish, enabled = canSaveOrPublish) {
+          if (uiState.isSaving) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(16.dp),
+              strokeWidth = 2.dp,
+              color = MaterialTheme.colorScheme.onPrimary,
+            )
+            Spacer(Modifier.width(8.dp))
+          }
           Text(uiState.saveActionLabel)
         }
       }
@@ -1259,10 +1268,10 @@ private fun PurposesSection(uiState: SurveyEditorUiState, actions: SurveyEditorA
   val offeredPrograms =
     LibraryPrograms.offeredFor(packs.filter { it.id in details.purposeIds }, details.programIds)
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    Text("Purposes", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+    Text("Primary purpose", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
     Text(
-      "What this survey's data will be used for. Standard fields of its purposes are suggested " +
-        "first when you write questions. Changing purposes doesn't add or remove forms.",
+      "What this survey's data will be used for. Standard fields of the purpose are suggested " +
+        "first when you write questions. Changing the purpose doesn't add or remove forms.",
       style = MaterialTheme.typography.bodySmall,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

@@ -139,7 +139,7 @@ fun MobileWorkbenchPage(
   ) {
     DevicePreviewFrame(
       deviceTitle =
-        "Open Foris Collect One ${workbench.deviceFormFactor.label} UI • ${mobile.currentScreen.title}",
+        "Collect One ${workbench.deviceFormFactor.label} UI • ${mobile.currentScreen.title}",
       isDarkTheme = mobile.isDarkTheme,
       isScreenTransparent = isMapShowing,
       formFactor = workbench.deviceFormFactor,

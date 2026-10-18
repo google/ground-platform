@@ -66,10 +66,12 @@ class SurveyPurposesAndTemplatesTest {
   @Test
   fun togglePurposeAndProgram_editTheDetails_andPublishToTheSurveyConfig() {
     editor.togglePurpose("ferm_restoration")
-    assertEquals(listOf("eudr_due_diligence", "ferm_restoration"), editor.ui.details.purposeIds)
-    editor.togglePurpose("eudr_due_diligence")
     assertEquals(listOf("ferm_restoration"), editor.ui.details.purposeIds)
     assertFalse("eudr.commodity" in editor.ui.library.purposeConceptIds)
+    editor.togglePurpose("ferm_restoration")
+    assertEquals(emptyList(), editor.ui.details.purposeIds)
+    editor.togglePurpose("ferm_restoration")
+    assertEquals(listOf("ferm_restoration"), editor.ui.details.purposeIds)
     editor.updateOtherPurpose("Watershed monitoring")
     assertEquals("Watershed monitoring", editor.ui.details.otherPurpose)
     editor.toggleProgram("ferm")

@@ -69,9 +69,11 @@ class OnboardingViewModelTest {
   fun signIn_thenAcceptTerms_navigatesToDownloadSurvey() {
     val f = Fixture()
     assertFalse(f.uiState.isSignedIn)
+    assertFalse(f.uiState.isSigningIn)
 
     f.viewModel.signInWithGoogle()
     assertTrue(f.uiState.isSignedIn)
+    assertFalse(f.uiState.isSigningIn)
     assertTrue(f.uiState.profile.email.isNotBlank())
     assertEquals("ML", f.uiState.profile.initials)
     assertTrue(f.uiState.userOrganization.isNotBlank())

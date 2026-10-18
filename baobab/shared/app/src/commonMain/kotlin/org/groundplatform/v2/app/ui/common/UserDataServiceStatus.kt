@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -122,4 +124,20 @@ fun UserDataSyncErrorBanner(
       TextButton(onClick = onRetry) { Text("Retry") }
     }
   }
+}
+
+/**
+ * Shows an inline loading spinner when data is synchronizing with the remote user data service.
+ */
+@Composable
+fun UserDataSyncSpinner(
+  state: UserDataSyncState,
+  modifier: Modifier = Modifier,
+) {
+  if (state !is UserDataSyncState.Syncing) return
+  CircularProgressIndicator(
+    modifier = modifier.size(14.dp),
+    strokeWidth = 2.dp,
+    color = MaterialTheme.colorScheme.primary,
+  )
 }

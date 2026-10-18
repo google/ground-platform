@@ -25,12 +25,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +47,8 @@ import org.groundplatform.v2.core.forms.ui.LocalGroundBrandFontFamily
 import org.groundplatform.v2.web.ui.WebAppState
 import org.groundplatform.v2.web.ui.common.WebAppHeader
 import org.groundplatform.v2.web.ui.common.WebHeaderContext
+import org.groundplatform.v2.web.ui.common.WebLanguageSelector
+import org.groundplatform.v2.web.ui.common.WebSignInLanguageSelector
 
 /**
  * Sign-in gate for the web app, shown in place of any web page while the user is signed out.
@@ -52,12 +57,20 @@ import org.groundplatform.v2.web.ui.common.WebHeaderContext
 @Composable
 internal fun WebSignInPage(state: WebAppState, onSignIn: () -> Unit) {
   val brandFont = LocalGroundBrandFontFamily.current
+  val onboardingUiState by state.onboarding.uiState.collectAsState()
+  val settingsUiState by state.settings.uiState.collectAsState()
 
   Column(modifier = Modifier.fillMaxSize()) {
     WebAppHeader(
       state = state,
       onSignOut = null,
       context = { WebHeaderContext(title = "Sign in") },
+      actions = {
+        WebLanguageSelector(
+          currentLanguageCode = settingsUiState.languageCode,
+          onLanguageChange = state.settings::updateLanguage,
+        )
+      },
     )
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -106,8 +119,14 @@ internal fun WebSignInPage(state: WebAppState, onSignIn: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
           )
+          WebSignInLanguageSelector(
+            currentLanguageCode = settingsUiState.languageCode,
+            onLanguageChange = state.settings::updateLanguage,
+            modifier = Modifier.fillMaxWidth(),
+          )
           OutlinedButton(
             onClick = onSignIn,
+            enabled = !onboardingUiState.isSigningIn,
             modifier = Modifier.fillMaxWidth().height(48.dp),
             shape = MaterialTheme.shapes.extraLarge,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -121,9 +140,17 @@ internal fun WebSignInPage(state: WebAppState, onSignIn: () -> Unit) {
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-              GoogleLogoIcon(size = 20.dp)
+              if (onboardingUiState.isSigningIn) {
+                CircularProgressIndicator(
+                  modifier = Modifier.size(20.dp),
+                  strokeWidth = 2.dp,
+                  color = MaterialTheme.colorScheme.primary,
+                )
+              } else {
+                GoogleLogoIcon(size = 20.dp)
+              }
               Text(
-                text = "Sign in with Google",
+                text = if (onboardingUiState.isSigningIn) "Signing in…" else "Sign in with Google",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
               )

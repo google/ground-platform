@@ -687,23 +687,26 @@ class CreateSurveyWizardViewModel(
     val details = surveyEditor.uiState.value.draft.details
     val currentIds = details.purposeIds
     val alreadySelected = packId in currentIds
-    val newPurposeIds = if (alreadySelected) currentIds - packId else currentIds + packId
+    val newPurposeIds = if (alreadySelected) emptyList() else listOf(packId)
     val library = uiState.value.library
     val toggledPackProgramIds =
-      if (packId != SurveyWizardRules.OTHER_PURPOSE_ID) {
+      if (packId != SurveyWizardRules.OTHER_PURPOSE_ID && !alreadySelected) {
         library.purposePack(packId)?.programIds.orEmpty()
       } else {
         emptyList()
       }
+    val previousPackProgramIds =
+      currentIds
+        .flatMap { id ->
+          if (id != SurveyWizardRules.OTHER_PURPOSE_ID) {
+            library.purposePack(id)?.programIds.orEmpty()
+          } else {
+            emptyList()
+          }
+        }
+        .toSet()
     val newProgramIds =
-      if (alreadySelected) {
-        // Drop programs only the deselected pack offered; keep others and manually picked ones.
-        val stillOffered =
-          newPurposeIds.mapNotNull(library::purposePack).flatMap { it.programIds }.toSet()
-        details.programIds.filter { it !in toggledPackProgramIds || it in stillOffered }
-      } else {
-        (details.programIds + toggledPackProgramIds).distinct()
-      }
+      (details.programIds.filterNot { it in previousPackProgramIds } + toggledPackProgramIds).distinct()
     surveyEditor.updateDetails {
       it.copy(
         purposeIds = newPurposeIds,

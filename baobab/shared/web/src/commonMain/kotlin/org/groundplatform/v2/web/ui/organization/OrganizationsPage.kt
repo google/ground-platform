@@ -41,6 +41,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -112,6 +113,13 @@ internal fun OrganizationsPage(
           }
         },
         actions = {
+          if (uiState.isSaving) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(16.dp),
+              strokeWidth = 2.dp,
+              color = MaterialTheme.colorScheme.primary,
+            )
+          }
           WebHeaderButton(
             text = "Impact",
             icon = Icons.Outlined.Insights,
@@ -213,6 +221,7 @@ internal fun OrganizationsPage(
         actions.createOrganization(name, description, isListed, type, countryCode)
       },
       onDismiss = { isCreating = false },
+      isSaving = uiState.isSaving,
     )
   }
 }
@@ -424,6 +433,7 @@ private fun CreateOrganizationDialog(
       countryCode: String?,
     ) -> Unit,
   onDismiss: () -> Unit,
+  isSaving: Boolean = false,
 ) {
   var name by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
@@ -482,8 +492,16 @@ private fun CreateOrganizationDialog(
     confirmButton = {
       Button(
         onClick = { onCreate(name, description, isListed, type, countryCode) },
-        enabled = name.isNotBlank(),
+        enabled = name.isNotBlank() && !isSaving,
       ) {
+        if (isSaving) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(16.dp),
+            strokeWidth = 2.dp,
+            color = MaterialTheme.colorScheme.onPrimary,
+          )
+          Spacer(Modifier.width(8.dp))
+        }
         Text("Create")
       }
     },

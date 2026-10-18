@@ -24,6 +24,7 @@ import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
  */
 data class OnboardingUiState(
   val isSignedIn: Boolean = false,
+  val isSigningIn: Boolean = false,
   val profile: AuthProfile = AuthProfile("", "", ""),
   val hasAcceptedTerms: Boolean = false,
   val termsCheckboxChecked: Boolean = true,

@@ -168,7 +168,7 @@ internal fun CreateSurveyDialog(
             verticalArrangement = Arrangement.spacedBy(16.dp),
           ) {
             Text(
-              "Choose any that apply. We'll add their forms, with standard fields, so your data " +
+              "Select the primary purpose for this survey. We'll add its forms, with standard fields, so your data " +
                 "can be compared and reported. You can change this later in Survey details.",
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -180,7 +180,7 @@ internal fun CreateSurveyDialog(
               language = LocalizedText.DEFAULT_LANGUAGE,
               selectedIds = validPurposeIds,
               onToggle = { id ->
-                purposeIds = if (id in purposeIds) purposeIds - id else purposeIds + id
+                purposeIds = if (id in purposeIds) emptyList() else listOf(id)
               },
             )
             if (offeredPrograms.isNotEmpty()) {
