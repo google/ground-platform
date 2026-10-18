@@ -38,7 +38,9 @@ import groundplatform.v2.data.PlaceRecord
 import groundplatform.v2.data.PlotLock
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.OrganizationLibraryRecord
+import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.Organization
+import groundplatform.v2.survey.OrganizationMember
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.userdata.UserDataSeed
@@ -119,11 +121,17 @@ class SpannerUserDataStore(
           .build()
     )
     val mutations = mutableListOf<Mutation>()
-    seed.organizations.forEach { mutations += organizationRow(it, it.commit_timestamp) }
+    for (org in seed.organizations) {
+      mutations += organizationRow(org, org.commit_timestamp)
+      org.members.forEach { mutations += memberRow(org.organization_id, it, org.commit_timestamp) }
+    }
     seed.libraries.forEach { mutations += libraryRow(it, it.commit_timestamp) }
     for (surveySeed in seed.surveys) {
       val survey = surveySeed.survey ?: continue
       mutations += surveyRow(survey, survey.commit_timestamp, surveySeed.acl)
+      surveySeed.acl?.let { acl ->
+        acl.entries.forEach { mutations += aclEntryRow(survey.survey_id, it, acl.commit_timestamp) }
+      }
       surveySeed.working_copy?.let {
         mutations += workingCopyRow(survey.survey_id, it, it.commit_timestamp)
       }
@@ -139,12 +147,28 @@ class SpannerUserDataStore(
   ) : UserDataReader {
     override fun organization(organizationId: String) =
       one("SELECT Record, CommitTs FROM Organizations WHERE OrganizationId = @id", organizationId) {
-        decode(Organization.ADAPTER, it).copy(commit_timestamp = it.commitTs())
+        decode(Organization.ADAPTER, it)
+          .copy(members = members(organizationId), commit_timestamp = it.commitTs())
       }
 
-    override fun organizations() =
-      all("SELECT Record, CommitTs FROM Organizations") {
-        decode(Organization.ADAPTER, it).copy(commit_timestamp = it.commitTs())
+    override fun organizations(): List<Organization> {
+      val membersByOrg =
+        query(Statement.of("SELECT OrganizationId, Record FROM OrganizationMembers")) {
+            it.getUuid("OrganizationId").toString() to decode(OrganizationMember.ADAPTER, it)
+          }
+          .groupBy({ it.first }, { it.second })
+      return all("SELECT Record, CommitTs FROM Organizations") {
+        val org = decode(Organization.ADAPTER, it)
+        org.copy(
+          members = membersByOrg[org.organization_id].orEmpty(),
+          commit_timestamp = it.commitTs(),
+        )
+      }
+    }
+
+    private fun members(organizationId: String): List<OrganizationMember> =
+      all("SELECT Record FROM OrganizationMembers WHERE OrganizationId = @id", organizationId) {
+        decode(OrganizationMember.ADAPTER, it)
       }
 
     override fun library(organizationId: String) =
@@ -184,7 +208,13 @@ class SpannerUserDataStore(
           "WHERE SurveyId = @id AND AclRules IS NOT NULL",
         surveyId,
       ) {
-        decode(SurveyAcl.ADAPTER, it).copy(commit_timestamp = it.commitTs())
+        decode(SurveyAcl.ADAPTER, it)
+          .copy(entries = aclEntries(surveyId), commit_timestamp = it.commitTs())
+      }
+
+    private fun aclEntries(surveyId: String): List<AclEntry> =
+      all("SELECT Record FROM SurveyAclEntries WHERE SurveyId = @id", surveyId) {
+        decode(AclEntry.ADAPTER, it)
       }
 
     override fun entity(surveyId: String, entityId: String) =
@@ -362,8 +392,12 @@ class SpannerUserDataStore(
   private inner class Writer(private val tx: TransactionContext, override val now: Instant) :
     Reader(tx, now), UserDataWriter {
 
-    override fun putOrganization(organization: Organization) =
+    override fun putOrganization(organization: Organization) {
+      val id = uuid(organization.organization_id)
       tx.buffer(organizationRow(organization, null))
+      tx.buffer(Mutation.delete("OrganizationMembers", KeySet.prefixRange(Key.of(id))))
+      organization.members.forEach { tx.buffer(memberRow(organization.organization_id, it, null)) }
+    }
 
     override fun putLibrary(library: OrganizationLibraryRecord) =
       tx.buffer(libraryRow(library, null))
@@ -393,7 +427,11 @@ class SpannerUserDataStore(
 
     fun flush() {
       for ((id, survey) in pendingSurveys) tx.buffer(surveyRow(survey, null, pendingAcls[id]))
-      for ((id, acl) in pendingAcls) if (id !in pendingSurveys) tx.buffer(aclUpdate(acl))
+      for ((id, acl) in pendingAcls) {
+        if (id !in pendingSurveys) tx.buffer(aclUpdate(acl))
+        tx.buffer(Mutation.delete("SurveyAclEntries", KeySet.prefixRange(Key.of(uuid(id)))))
+        acl.entries.forEach { tx.buffer(aclEntryRow(id, it, null)) }
+      }
       pendingSurveys.clear()
       pendingAcls.clear()
     }
@@ -463,7 +501,29 @@ class SpannerUserDataStore(
       .set("OrganizationId")
       .to(uuid(org.organization_id))
       .set("Record")
-      .to(proto(Organization.ADAPTER, org.copy(commit_timestamp = null), ORGANIZATION))
+      .to(
+        proto(
+          Organization.ADAPTER,
+          org.copy(members = emptyList(), commit_timestamp = null),
+          ORGANIZATION,
+        )
+      )
+      .set("CommitTs")
+      .to(commitTimestampValue(commitTs))
+      .build()
+
+  private fun memberRow(
+    organizationId: String,
+    member: OrganizationMember,
+    commitTs: Instant?,
+  ): Mutation =
+    Mutation.newInsertOrUpdateBuilder("OrganizationMembers")
+      .set("OrganizationId")
+      .to(uuid(organizationId))
+      .set("EmailNormalized")
+      .to(emailKey(member.email, member.user_id))
+      .set("Record")
+      .to(proto(OrganizationMember.ADAPTER, member, ORGANIZATION_MEMBER))
       .set("CommitTs")
       .to(commitTimestampValue(commitTs))
       .build()
@@ -491,7 +551,13 @@ class SpannerUserDataStore(
     if (acl != null) {
       builder
         .set("AclRules")
-        .to(proto(SurveyAcl.ADAPTER, acl.copy(commit_timestamp = null), SURVEY_ACL))
+        .to(
+          proto(
+            SurveyAcl.ADAPTER,
+            acl.copy(entries = emptyList(), commit_timestamp = null),
+            SURVEY_ACL,
+          )
+        )
         .set("AclCommitTs")
         .to(commitTimestampValue(if (commitTs == null) null else acl.commit_timestamp))
     }
@@ -504,9 +570,27 @@ class SpannerUserDataStore(
       .set("SurveyId")
       .to(uuid(acl.survey_id))
       .set("AclRules")
-      .to(proto(SurveyAcl.ADAPTER, acl.copy(commit_timestamp = null), SURVEY_ACL))
+      .to(
+        proto(
+          SurveyAcl.ADAPTER,
+          acl.copy(entries = emptyList(), commit_timestamp = null),
+          SURVEY_ACL,
+        )
+      )
       .set("AclCommitTs")
       .to(Value.COMMIT_TIMESTAMP)
+      .build()
+
+  private fun aclEntryRow(surveyId: String, entry: AclEntry, commitTs: Instant?): Mutation =
+    Mutation.newInsertOrUpdateBuilder("SurveyAclEntries")
+      .set("SurveyId")
+      .to(uuid(surveyId))
+      .set("EmailNormalized")
+      .to(emailKey(entry.email, entry.user_id))
+      .set("Record")
+      .to(proto(AclEntry.ADAPTER, entry, ACL_ENTRY))
+      .set("CommitTs")
+      .to(commitTimestampValue(commitTs))
       .build()
 
   private fun workingCopyRow(surveyId: String, def: SurveyDef, commitTs: Instant?): Mutation =
@@ -553,9 +637,15 @@ class SpannerUserDataStore(
 
     private const val SEED_BATCH_SIZE = 200
     private const val ORGANIZATION = "groundplatform.v2.survey.Organization"
+    private const val ORGANIZATION_MEMBER = "groundplatform.v2.survey.OrganizationMember"
     private const val LIBRARY = "groundplatform.v2.library.OrganizationLibraryRecord"
     private const val SURVEY_DEF = "groundplatform.v2.survey.SurveyDef"
     private const val SURVEY_ACL = "groundplatform.v2.survey.SurveyAcl"
+    private const val ACL_ENTRY = "groundplatform.v2.survey.AclEntry"
+
+    private fun emailKey(email: String, userId: String): String =
+      email.trim().lowercase().ifEmpty { userId.trim() }
+
     private const val ENTITY = "groundplatform.v2.data.EntityRecord"
     private const val SUBMISSION = "groundplatform.v2.data.SubmissionRecord"
 
