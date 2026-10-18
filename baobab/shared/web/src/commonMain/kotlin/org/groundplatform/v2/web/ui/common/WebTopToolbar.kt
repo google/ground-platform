@@ -284,9 +284,10 @@ fun WebSaveStatusIndicator(
  * - Brand section: Ground logo ([CloudAcaciaLogo]) and app name ("Ground")
  * - Page [context], typically a [WebHeaderContext]
  * - Page [actions]
+ * - Compact language selector, unless [showLanguageSelector] is false (e.g. when the page shows
+ *   its own, like the sign-in page)
  * - User profile: clickable avatar opening the user profile card with sign out, shown only when
  *   [onSignOut] is given
- * - Debug tools
  */
 @Composable
 internal fun WebAppHeader(
@@ -294,7 +295,7 @@ internal fun WebAppHeader(
   modifier: Modifier = Modifier,
   onSignOut: (() -> Unit)? = { state.signOut() },
   onLogoClick: (() -> Unit)? = { state.selectPage(WebPage.WEB_SURVEYS) },
-  showDebugTools: Boolean = true,
+  showLanguageSelector: Boolean = true,
   navigationIcon: (@Composable () -> Unit)? = null,
   context: @Composable () -> Unit = {},
   actions: (@Composable RowScope.() -> Unit)? = null,
@@ -304,6 +305,7 @@ internal fun WebAppHeader(
   val orgUiState by state.organization.uiState.collectAsState()
   val isDrainingOutbox by state.dataHolder.isDrainingOutbox.collectAsState()
   val isSaving = surveyEditorUiState.isSaving || orgUiState.isSaving || isDrainingOutbox
+  val settingsUiState by state.settings.uiState.collectAsState()
 
   Surface(
     modifier = modifier.fillMaxWidth(),
@@ -375,7 +377,7 @@ internal fun WebAppHeader(
 
       Spacer(modifier = Modifier.width(16.dp))
 
-      // Right: page actions, divider, optional avatar and divider, and debug tools.
+      // Right: save status, page actions, divider, language selector, and optional avatar.
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -385,27 +387,23 @@ internal fun WebAppHeader(
         if (actions != null) {
           actions()
 
-          if (onSignOut != null || showDebugTools) {
+          if (onSignOut != null || showLanguageSelector) {
             VerticalDivider(
               modifier = Modifier.height(24.dp),
               color = MaterialTheme.colorScheme.outlineVariant,
             )
           }
+        }
+
+        if (showLanguageSelector) {
+          WebCompactLanguageSelector(
+            currentLanguageCode = settingsUiState.languageCode,
+            onLanguageChange = state.settings::updateLanguage,
+          )
         }
 
         if (onSignOut != null) {
           WebUserAvatarProfileWidget(state = state, onSignOut = onSignOut)
-
-          if (showDebugTools) {
-            VerticalDivider(
-              modifier = Modifier.height(24.dp),
-              color = MaterialTheme.colorScheme.outlineVariant,
-            )
-          }
-        }
-
-        if (showDebugTools) {
-          DebugToolsButton(state = state)
         }
       }
     }

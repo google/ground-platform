@@ -63,6 +63,7 @@ internal fun WebSignInPage(state: WebAppState, onSignIn: () -> Unit) {
     WebAppHeader(
       state = state,
       onSignOut = null,
+      showLanguageSelector = false,
       context = { WebHeaderContext(title = "Sign in") },
       actions = {
         WebLanguageSelector(
