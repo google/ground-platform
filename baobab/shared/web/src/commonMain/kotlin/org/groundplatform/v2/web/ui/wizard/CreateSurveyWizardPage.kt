@@ -140,10 +140,9 @@ import org.groundplatform.v2.web.ui.formeditor.DropdownSelector
 import org.groundplatform.v2.web.ui.formeditor.FormEditorPage
 import org.groundplatform.v2.web.ui.state.CreateSurveyWizardUiState
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
-import org.groundplatform.v2.web.ui.surveyeditor.ChoiceDatasetCreationDialogs
-import org.groundplatform.v2.web.ui.surveyeditor.rememberChoiceDatasetCreationState
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 import org.groundplatform.v2.web.ui.surveyeditor.AddFormDialog
+import org.groundplatform.v2.web.ui.surveyeditor.ChoiceDatasetCreationDialogs
 import org.groundplatform.v2.web.ui.surveyeditor.EntityDatasetEditor
 import org.groundplatform.v2.web.ui.surveyeditor.GEOMETRY_FILE_ACCEPT
 import org.groundplatform.v2.web.ui.surveyeditor.InteractiveLayerMapCard
@@ -154,6 +153,7 @@ import org.groundplatform.v2.web.ui.surveyeditor.NavItem
 import org.groundplatform.v2.web.ui.surveyeditor.SamplingDesignPanel
 import org.groundplatform.v2.web.ui.surveyeditor.SharingContent
 import org.groundplatform.v2.web.ui.surveyeditor.SurveyAreaSection
+import org.groundplatform.v2.web.ui.surveyeditor.rememberChoiceDatasetCreationState
 import org.groundplatform.v2.web.ui.viewmodel.CreateSurveyWizardActions
 import org.groundplatform.v2.web.ui.viewmodel.SurveyEditorActions
 

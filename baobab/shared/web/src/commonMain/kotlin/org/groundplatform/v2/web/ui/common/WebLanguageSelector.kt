@@ -66,7 +66,11 @@ fun WebLanguageSelector(
       modifier = Modifier.height(36.dp),
       contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
     ) {
-      Icon(Icons.Outlined.Language, contentDescription = "Language", modifier = Modifier.size(16.dp))
+      Icon(
+        Icons.Outlined.Language,
+        contentDescription = "Language",
+        modifier = Modifier.size(16.dp),
+      )
       Spacer(Modifier.width(6.dp))
       Text(text = currentOption.label, style = MaterialTheme.typography.labelMedium)
       Spacer(Modifier.width(4.dp))
@@ -83,8 +87,7 @@ fun WebLanguageSelector(
 
 /**
  * Minimal language selector for the header of every signed-in page: a borderless globe icon with
- * the current language code (e.g. "EN") that opens the same language menu as
- * [WebLanguageSelector].
+ * the current language code (e.g. "EN") that opens the same language menu as [WebLanguageSelector].
  */
 @Composable
 fun WebCompactLanguageSelector(
