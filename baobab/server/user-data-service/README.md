@@ -33,10 +33,16 @@ services will live next to it under `server/`.
     `shared/core`; [`WireGrpcBindings`](src/main/kotlin/org/groundplatform/v2/server/userdata/WireGrpcBindings.kt)
     turns their `@WireRpc` annotations into grpc-java service definitions at
     startup.
--   **In-memory state.** [`UserDataBackend`](src/main/kotlin/org/groundplatform/v2/server/userdata/UserDataBackend.kt)
-    holds all data in memory, loaded at startup from a `UserDataSeed`
-    (`shared/protos/userdata/user_data_seed.proto`). Changes are lost on
-    restart and aren't shared between instances.
+-   **Backend and store.** [`UserDataBackend`](src/main/kotlin/org/groundplatform/v2/server/userdata/UserDataBackend.kt)
+    implements the RPCs' rules on top of a
+    [`UserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/UserDataStore.kt),
+    which reads and writes records in atomic transactions with
+    store-assigned commit timestamps. Today it's an
+    [`InMemoryUserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/InMemoryUserDataStore.kt)
+    loaded at startup from a `UserDataSeed`
+    (`shared/protos/userdata/user_data_seed.proto`), so changes are lost on
+    restart and aren't shared between instances. A Spanner store will
+    implement the same interface (`UserDataStoreContractTest` checks both).
 -   **Sample seed.** The bundled seed
     ([`src/main/resources/seed/user_data_seed.json`](src/main/resources/seed/))
     is generated from the Kotlin sample data fixtures in `shared/app/testing`.
