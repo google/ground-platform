@@ -225,6 +225,25 @@ open class AccessEpochTest {
       assertTrue(other != entityId)
     }
 
+  @Test
+  fun switchingCallers_invalidatesPreviousCallersSyncTokens() =
+    runBlocking<Unit> {
+      val defaultToken =
+        asCaller(Authenticator.DEFAULT_DEV_CALLER) {
+            backend.ListSurveyOverviews(ListSurveyOverviewsRequest())
+          }
+          .next_sync_token
+      val collector = caller("uid-ima-user", "ima.user@example.org")
+
+      val error =
+        assertFailsWith<StatusException> {
+          asCaller(collector) {
+            backend.ListSurveyOverviews(ListSurveyOverviewsRequest(sync_token = defaultToken))
+          }
+        }
+      assertEquals(Status.Code.FAILED_PRECONDITION, error.status.code)
+    }
+
   private fun caller(userId: String, email: String, verified: Boolean = true) =
     Caller(userId = userId, email = email, emailVerified = verified)
 

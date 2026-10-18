@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -363,6 +364,12 @@ class AppDataHolder(
         .onEach { syncing -> if (!syncing) persistence.saveSoon() }
         .launchIn(scope)
     }
+    // Signing in or switching the simulated development role changes what the server returns.
+    authClient.currentUser
+      .drop(1)
+      .distinctUntilChanged()
+      .onEach { if (it != null) coordinator.requestSync() }
+      .launchIn(scope)
     val hasUnsentChanges =
       localStore
         .observeOutbox()

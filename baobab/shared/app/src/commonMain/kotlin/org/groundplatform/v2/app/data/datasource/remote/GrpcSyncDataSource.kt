@@ -418,7 +418,7 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
 
   /**
    * Fetches the latest saved revision of a survey and, only when [overview] reports unsaved edits
-   * (`has_working_copy`), the organizer's working copy.
+   * (`has_working_copy`), the organizer's working copy (when the caller is allowed to read it).
    */
   private suspend fun fetchSurveyRevisions(overview: SurveyOverview): SurveyRevisions {
     val surveyId = overview.survey_id
@@ -426,7 +426,12 @@ class GrpcSyncDataSource(val grpcClient: CollectOneGrpcClient) {
       saved = grpcClient.getSurvey(GetSurveyRequest(survey_id = surveyId)),
       workingCopy =
         if (overview.has_working_copy) {
-          grpcClient.getSurvey(GetSurveyRequest(survey_id = surveyId, working_copy = true)).survey
+          try {
+            grpcClient.getSurvey(GetSurveyRequest(survey_id = surveyId, working_copy = true)).survey
+          } catch (e: GrpcWebException) {
+            if (e.status != GrpcWebTransport.PERMISSION_DENIED) throw e
+            null
+          }
         } else {
           null
         },

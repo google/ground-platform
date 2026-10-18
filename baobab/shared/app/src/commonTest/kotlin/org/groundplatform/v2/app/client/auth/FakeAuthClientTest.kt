@@ -74,6 +74,24 @@ class FakeAuthClientDevRoleTest {
     assertEquals("Maya Lin", client.signInWithGoogle().displayName)
     assertTrue(client.requestHeaders().isEmpty())
   }
+
+  @Test
+  fun initialDevRole_andRoleChangeCallback_persistSelectedRole() = runAuthTest {
+    var savedRole: DevRole? = null
+    val client =
+      FakeAuthClient(
+        supportsDevRoles = true,
+        initialDevRole = DevRole.USER,
+        onDevRoleChanged = { savedRole = it },
+      )
+
+    assertEquals(DevRole.USER, client.devRole)
+    assertEquals("Ima User", client.signInWithGoogle().displayName)
+
+    client.setDevRole(DevRole.ADMIN)
+    assertEquals(DevRole.ADMIN, savedRole)
+    assertEquals("Adam Admin", client.signInWithGoogle().displayName)
+  }
 }
 
 /** Runs a test that calls suspending auth APIs; the fake never actually suspends. */

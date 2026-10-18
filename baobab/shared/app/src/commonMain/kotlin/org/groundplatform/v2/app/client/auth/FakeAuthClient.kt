@@ -31,7 +31,11 @@ data class AuthenticatedCollectorProfile(
  * an administrator) by default, or, when [supportsDevRoles], [ADMIN_PERSONA] for [DevRole.ADMIN]
  * and [USER_PERSONA] for [DevRole.USER], named by `x-dev-user-*` headers.
  */
-class FakeAuthClient(override val supportsDevRoles: Boolean = false) : AuthClient {
+class FakeAuthClient(
+  override val supportsDevRoles: Boolean = false,
+  initialDevRole: DevRole = DevRole.ADMIN,
+  private val onDevRoleChanged: (DevRole) -> Unit = {},
+) : AuthClient {
   private var profile: AuthenticatedCollectorProfile = DEFAULT_COLLECTOR_PROFILE
   private val user = MutableStateFlow<AuthenticatedCollectorProfile?>(null)
 
@@ -41,11 +45,12 @@ class FakeAuthClient(override val supportsDevRoles: Boolean = false) : AuthClien
 
   fun currentProfile(): AuthenticatedCollectorProfile = profile
 
-  override var devRole: DevRole = DevRole.ADMIN
+  override var devRole: DevRole = initialDevRole
     private set
 
   override fun setDevRole(role: DevRole) {
     devRole = role
+    onDevRoleChanged(role)
   }
 
   /** The sample user the current [devRole] signs in as, when [supportsDevRoles]. */

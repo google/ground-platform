@@ -656,11 +656,23 @@
     }
 
     // ---------------------------------------------------------------
-    // URLs: follow whatever host the launchpad was opened on, including
-    // port-prefixed proxy hosts (e.g. 8099-host.proxy.example.com).
+    // URLs: use the base URL configured in the launchpad
+    // (USER_DATA_SERVICE_URL in local.properties) when set, falling back to
+    // whatever host the launchpad was opened on, including port-prefixed
+    // proxy hosts (e.g. 8099-host.proxy.example.com).
     // ---------------------------------------------------------------
+    function baseLocation() {
+      const configured = lastStatus?.localProperties?.userDataServiceUrl?.trim();
+      if (configured) {
+        try {
+          return new URL(configured.includes('://') ? configured : `http://${configured}`);
+        } catch (_) {}
+      }
+      return window.location;
+    }
+
     function resolveServiceUrl(port, pathAndHash = '') {
-      const loc = window.location;
+      const loc = baseLocation();
       const proxyMatch = loc.hostname.match(/^(\d+)-(.*\..*)$/);
       if (proxyMatch) {
         const portSuffix = loc.port ? `:${loc.port}` : '';
@@ -871,6 +883,15 @@
 
       settlePendingActions(services);
       updateFleetButtons(status);
+
+      for (const [view, [frameId, framePath]] of Object.entries(FRAME_PATHS)) {
+        const frame = document.getElementById(frameId);
+        if (!frame) continue;
+        const targetUrl = resolveServiceUrl(8080, framePath);
+        if ((view === currentView || (frame.src && frame.src !== 'about:blank')) && frame.src !== targetUrl) {
+          frame.src = targetUrl;
+        }
+      }
 
       renderCards('coreGrid', services.filter((s) => s.category === 'CORE'));
       renderCards('auxGrid', services.filter((s) => s.category !== 'CORE'));

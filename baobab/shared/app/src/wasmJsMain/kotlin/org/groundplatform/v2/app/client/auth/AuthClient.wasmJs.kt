@@ -62,9 +62,23 @@ private external fun setDevRoleJs(role: JsString)
 /** `window.GROUND_DEV_SIGN_IN`, set by `firebase-config.js` from DEV_SIGN_IN at build time. */
 actual fun platformDevSignIn(): Boolean = isDevSignInJs()
 
-/** Firebase Authentication when the page configures it (`firebase-config.js`), otherwise null. */
+/**
+ * Development sign-in (`window.GROUND_DEV_SIGN_IN`) uses [FakeAuthClient]'s sample personas (`Adam
+ * Admin` and `Ima User`) without opening a Google OAuth popup, remembering the selected role in the
+ * browser. Production builds use [FirebaseWebAuthClient] when `firebase-config.js` configures it.
+ */
 actual fun platformAuthClient(): AuthClient? =
-  if (isFirebaseConfigured()) FirebaseWebAuthClient() else null
+  when {
+    isDevSignInJs() ->
+      FakeAuthClient(
+        supportsDevRoles = true,
+        initialDevRole =
+          if (devRoleJs().toString() == DevRole.USER.header) DevRole.USER else DevRole.ADMIN,
+        onDevRoleChanged = { setDevRoleJs(it.header.toJsString()) },
+      )
+    isFirebaseConfigured() -> FirebaseWebAuthClient()
+    else -> null
+  }
 
 /**
  * [AuthClient] backed by the Firebase JS SDK through `firebase-auth-bridge.js`: signs in with a
