@@ -573,9 +573,9 @@
       <section id="view-rpc" class="view">
         <div class="toolbar">
           <span class="toolbar-title">RPC inspector</span>
-          <span class="toolbar-sub">Live calls to the server · :8080/debug</span>
+          <span class="toolbar-sub" data-server-path="/debug">Live calls to the server · /debug</span>
           <button class="act restart push" onclick="reloadFrame('rpcFrame')">Reload</button>
-          <button class="act logs" style="margin-left: 0;" data-requires="user-data-service" onclick="openServiceTab(8080, '/debug')">New tab ↗</button>
+          <button class="act logs" style="margin-left: 0;" data-requires="user-data-service" onclick="openServerPage('/debug')">New tab ↗</button>
         </div>
         <iframe id="rpcFrame" class="frame" src="about:blank" title="RPC inspector"></iframe>
       </section>
@@ -584,9 +584,9 @@
       <section id="view-spanner" class="view">
         <div class="toolbar">
           <span class="toolbar-title">Spanner data</span>
-          <span class="toolbar-sub">Tables and queries · :8080/debug/spanner</span>
+          <span class="toolbar-sub" data-server-path="/debug/spanner">Tables and queries · /debug/spanner</span>
           <button class="act restart push" onclick="reloadFrame('spannerFrame')">Reload</button>
-          <button class="act logs" style="margin-left: 0;" data-requires="user-data-service" onclick="openServiceTab(8080, '/debug/spanner')">New tab ↗</button>
+          <button class="act logs" style="margin-left: 0;" data-requires="user-data-service" onclick="openServerPage('/debug/spanner')">New tab ↗</button>
         </div>
         <iframe id="spannerFrame" class="frame" src="about:blank" title="Spanner data"></iframe>
       </section>
@@ -689,6 +689,21 @@
       return `${loc.protocol}//${loc.hostname}:${port}${pathAndHash}`;
     }
 
+    /**
+     * URL of the server's page at [path] through the launchpad, which forwards /debug/... to the
+     * server the clients talk to (see proxyToServer in server.mjs). Loading it from the
+     * launchpad's own origin keeps the browser from blocking an http:// server inside an https://
+     * launchpad page as mixed content.
+     */
+    function serverPageUrl(path) {
+      return new URL(path, window.location.href).href;
+    }
+
+    function openServerPage(path) {
+      sound.click();
+      window.open(serverPageUrl(path), '_blank');
+    }
+
     function openServiceTab(port, pathAndHash = '') {
       sound.click();
       window.open(resolveServiceUrl(port, pathAndHash), '_blank');
@@ -737,7 +752,7 @@
       const framePath = FRAME_PATHS[view];
       if (framePath) {
         const frame = document.getElementById(framePath[0]);
-        if (frame.src === 'about:blank' || !frame.src) frame.src = resolveServiceUrl(SERVER_PORT, framePath[1]);
+        if (frame.src === 'about:blank' || !frame.src) frame.src = serverPageUrl(framePath[1]);
       }
       if (view === 'logs') renderLogs();
     }
@@ -877,6 +892,11 @@
       document.getElementById('totalMemory').textContent =
         `${online.reduce((sum, s) => sum + (s.rssMb || 0), 0).toLocaleString()} MB`;
       document.getElementById('serverUrl').textContent = status.localProperties.userDataServiceUrl || 'Not set';
+      const serverBase = configuredServerBase() || 'http://localhost:8080';
+      for (const el of document.querySelectorAll('[data-server-path]')) {
+        const label = el.textContent.split(' · ')[0];
+        el.textContent = `${label} · ${serverBase}${el.dataset.serverPath}`;
+      }
       document.getElementById('hostLabel').textContent = status.host.hostname.split('.')[0];
 
       // Notice on the Logs page for services whose output can't be captured.
@@ -895,7 +915,7 @@
       for (const [view, [frameId, framePath]] of Object.entries(FRAME_PATHS)) {
         const frame = document.getElementById(frameId);
         if (!frame) continue;
-        const targetUrl = new URL(resolveServiceUrl(SERVER_PORT, framePath)).href;
+        const targetUrl = serverPageUrl(framePath);
         if ((view === currentView || (frame.src && frame.src !== 'about:blank')) && frame.src !== targetUrl) {
           frame.src = targetUrl;
         }

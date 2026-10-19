@@ -83,9 +83,11 @@ waits for it to finish.
   **Restart**, and **Logs**, which opens the Logs page filtered to that
   service.
 - **RPC inspector** and **Spanner data**: The server's debug pages
-  (`/debug` and `/debug/spanner`), shown inside the launchpad. They load from
-  the server URL below (**Clients talk to server at**), or from port 8080 on
-  the launchpad's host when it isn't set.
+  (`/debug` and `/debug/spanner`), shown inside the launchpad. The launchpad
+  forwards `/debug/...` on its own address to the server URL below (**Clients
+  talk to server at**, or `http://localhost:8080` when it isn't set), so the
+  pages load even when the launchpad is opened over HTTPS and the server URL is
+  plain HTTP, which browsers would otherwise block as mixed content.
 - **Logs**: All captured output, filterable by service and text.
 
 The current page is kept in the URL (`#overview`, `#rpc`, `#spanner`,
