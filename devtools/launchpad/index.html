@@ -656,15 +656,30 @@
     }
 
     // ---------------------------------------------------------------
-    // URLs: a service's port and path on whatever host the launchpad was
-    // opened on, including port-prefixed proxy hosts
-    // (e.g. 8099-host.proxy.example.com). USER_DATA_SERVICE_URL in
-    // local.properties is where the app dev servers send gRPC calls, so it
-    // isn't used here: it may name a host or scheme the browser can't reach
-    // from this page (e.g. an http:// URL inside an https:// proxy page,
-    // which the browser blocks in frames).
+    // URLs: the server's pages (RPC inspector, Spanner data, health check)
+    // are on the server the clients talk to (USER_DATA_SERVICE_URL in
+    // local.properties, shown as "Clients talk to server at"), keeping only
+    // the path given here. Other services, and the server when no URL is
+    // set, use their port on whatever host the launchpad was opened on,
+    // including port-prefixed proxy hosts (e.g. 8099-host.proxy.example.com).
     // ---------------------------------------------------------------
+    const SERVER_PORT = 8080;
+
+    /** The configured server URL without a trailing slash, or null if unset or invalid. */
+    function configuredServerBase() {
+      const configured = lastStatus?.localProperties?.userDataServiceUrl?.trim();
+      if (!configured) return null;
+      try {
+        const url = new URL(configured.includes('://') ? configured : `http://${configured}`);
+        return `${url.origin}${url.pathname.replace(/\/+$/, '')}`;
+      } catch (_) {
+        return null;
+      }
+    }
+
     function resolveServiceUrl(port, pathAndHash = '') {
+      const serverBase = port === SERVER_PORT ? configuredServerBase() : null;
+      if (serverBase) return `${serverBase}${pathAndHash}`;
       const loc = window.location;
       const proxyMatch = loc.hostname.match(/^(\d+)-(.*\..*)$/);
       if (proxyMatch) {
@@ -722,7 +737,7 @@
       const framePath = FRAME_PATHS[view];
       if (framePath) {
         const frame = document.getElementById(framePath[0]);
-        if (frame.src === 'about:blank' || !frame.src) frame.src = resolveServiceUrl(8080, framePath[1]);
+        if (frame.src === 'about:blank' || !frame.src) frame.src = resolveServiceUrl(SERVER_PORT, framePath[1]);
       }
       if (view === 'logs') renderLogs();
     }
@@ -880,7 +895,7 @@
       for (const [view, [frameId, framePath]] of Object.entries(FRAME_PATHS)) {
         const frame = document.getElementById(frameId);
         if (!frame) continue;
-        const targetUrl = resolveServiceUrl(8080, framePath);
+        const targetUrl = new URL(resolveServiceUrl(SERVER_PORT, framePath)).href;
         if ((view === currentView || (frame.src && frame.src !== 'about:blank')) && frame.src !== targetUrl) {
           frame.src = targetUrl;
         }

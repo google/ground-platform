@@ -71,7 +71,9 @@ restarts the server so the **Spanner data** page can browse it.
   **Restart**, and **Logs**, which opens the Logs page filtered to that
   service.
 - **RPC inspector** and **Spanner data**: The server's debug pages
-  (`:8080/debug` and `:8080/debug/spanner`), shown inside the launchpad.
+  (`/debug` and `/debug/spanner`), shown inside the launchpad. They load from
+  the server URL below (**Clients talk to server at**), or from port 8080 on
+  the launchpad's host when it isn't set.
 - **Logs**: All captured output, filterable by service and text.
 
 The current page is kept in the URL (`#overview`, `#rpc`, `#spanner`,
