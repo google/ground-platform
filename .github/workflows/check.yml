@@ -40,6 +40,47 @@ jobs:
         if: ${{ !cancelled() }}
         run: bash scripts/buf-format.sh --check
 
+  server:
+    name: server tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      # The Gradle build downloads its own JDK 21 toolchain; this JDK only runs Gradle. The runner
+      # image provides the Android SDK (ANDROID_HOME) that shared/core needs.
+      - name: Set up JDK
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Cache the Spanner emulator
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ground/spanner-emulator
+          key: spanner-emulator-${{ runner.os }}-${{ hashFiles('scripts/spanner-emulator.sh') }}
+
+      - name: Run unit tests (in-memory fake store)
+        working-directory: server/userDataService
+        run: ./gradlew test --console=plain
+
+      # Starts its own Spanner emulator from scripts/spanner-emulator.sh.
+      - name: Run Spanner tests
+        if: ${{ !cancelled() }}
+        working-directory: server/userDataService
+        run: ./gradlew spannerTest --console=plain
+
+      - name: Upload test reports
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: server-test-reports
+          path: server/userDataService/build/reports/tests
+
   e2e:
     name: e2e
     runs-on: ubuntu-latest
@@ -56,6 +97,14 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+          cache: gradle
+
+      # The tests' user data service stores its data in a Spanner emulator that Playwright starts.
+      - name: Cache the Spanner emulator
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ground/spanner-emulator
+          key: spanner-emulator-${{ runner.os }}-${{ hashFiles('scripts/spanner-emulator.sh') }}
 
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0

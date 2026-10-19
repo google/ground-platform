@@ -121,6 +121,9 @@ isn't set, on one it starts from `scripts/spanner-emulator.sh` on free ports and
 stops afterwards. These tests use their own instance and databases, so they
 don't touch a development database on the same emulator.
 
+CI ([`.github/workflows/check.yml`](../../.github/workflows/check.yml)) runs both
+on every pull request.
+
 On startup it prints `User data service listening on port 8080 (6 surveys, 4
 organizations)`. Check it with `curl http://localhost:8080/healthz`, which
 returns 200. If another process already uses the port (for example another dev
