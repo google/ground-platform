@@ -1,0 +1,203 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/protos/survey/organization.proto";
+
+// Multi-tenant Organization gRPC service supporting organization discovery,
+// delta sync (`docs/technical/sync-engine.md`), fine-grained path-addressed
+// mutations, and membership invitation / join-request workflows.
+service OrganizationService {
+  // Retrieves a single organization by ID (e.g., to preview an organization
+  // from an invite link before joining it).
+  rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse);
+
+  // Searches the public directory of listed organizations the caller may ask
+  // to join. Organizations the caller belongs to are synced with
+  // `ListOrganizations` instead.
+  rpc SearchOrganizations(SearchOrganizationsRequest) returns (SearchOrganizationsResponse);
+
+  // Lists the caller's organizations. Whether `sync_token` is set selects the
+  // mode (`docs/technical/sync-engine.md`, "List RPCs: Query and Delta
+  // Modes"):
+  //   - Query mode (`sync_token` unset): every organization except deleted
+  //     ones, paged with `page_size` / `page_token`. Every page reads the
+  //     snapshot pinned in `page_token`; the last page carries
+  //     `next_sync_token` at that snapshot.
+  //   - Delta mode (`sync_token` set): every organization changed after the
+  //     token, in commit order, including soft-deleted tombstones
+  //     (`is_deleted = true`). The last page carries `next_sync_token`.
+  //     `next_page_token` is itself a valid `sync_token`, so a client can
+  //     store it after applying a page.
+  // Delivery is at least once. Fails with `INVALID_ARGUMENT` when `sync_token`
+  // is malformed or was issued for another resource, and with
+  // `FAILED_PRECONDITION` when the server can no longer serve changes from
+  // `sync_token`; the client then discards it and runs a full sync.
+  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
+
+  // Unified idempotent mutation RPC for creating, updating, or soft-deleting an
+  // organization, its shared imagery sources, and its member roster.
+  rpc MutateOrganization(MutateOrganizationRequest) returns (MutateOrganizationResponse);
+
+  // Requests membership in a listed organization or redeems an organization
+  // invite token.
+  rpc JoinOrganization(JoinOrganizationRequest) returns (JoinOrganizationResponse);
+}
+
+message GetOrganizationRequest {
+  string organization_id = 1;
+}
+
+message GetOrganizationResponse {
+  Organization organization = 1;
+}
+
+// Query over the public directory of listed organizations.
+message SearchOrganizationsRequest {
+  reserved 1 to 4;
+  reserved "user_email", "include_deleted", "since_timestamp", "until_timestamp";
+
+  int32 page_size = 5;
+  string page_token = 6;
+
+  // Optional case-insensitive keyword matched against name and description.
+  string query = 7;
+}
+
+message SearchOrganizationsResponse {
+  repeated Organization organizations = 1;
+  string next_page_token = 2;
+
+  reserved 3;
+  reserved "server_watermark";
+}
+
+// Request to list the caller's organizations.
+message ListOrganizationsRequest {
+  // Field numbers of the former directory query (now `SearchOrganizations`)
+  // and of the removed timestamp-based sync stay reserved.
+  reserved 1 to 4, 7;
+  reserved "user_email", "include_deleted", "since_timestamp", "until_timestamp", "query";
+
+  // Maximum number of organizations to return. The server picks a default
+  // when unset and caps large values.
+  int32 page_size = 5;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 6;
+
+  // Opaque `next_sync_token` from an earlier call. Selects delta mode.
+  string sync_token = 8;
+}
+
+// A page of the caller's organizations.
+message ListOrganizationsResponse {
+  repeated Organization organizations = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  reserved 3;
+  reserved "server_watermark";
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 4;
+}
+
+// Path-addressed field patch for `Organization`.
+//
+// Supported `key` patterns:
+//   - `"name"`, `"description"`, `"website_url"`, `"logo_url"`,
+//     `"country_code"` (`string_value` or `null_value`)
+//   - `"listed"`, `"exclude_from_platform_aggregates"`, `"is_deleted"`
+//     (`bool_value`)
+//   - `"organization_type"` (`organization_type_value`)
+//   - `"imagery_sources/<imagery_source_id>"` (`imagery_source_value` or
+//     `null_value`)
+//   - `"members/<email>"` (`member_value` or `null_value`)
+message OrganizationFieldPatch {
+  string key = 1;
+
+  oneof value {
+    google.protobuf.NullValue null_value = 2;
+    string string_value = 3;
+    bool bool_value = 4;
+    OrganizationType organization_type_value = 5;
+    ImagerySource imagery_source_value = 6;
+    OrganizationMember member_value = 7;
+  }
+}
+
+message OrganizationMutation {
+  oneof operation {
+    OrganizationFieldPatch update_field = 1;
+
+    // Replaces the entire organization snapshot (or initializes a new one).
+    Organization upsert_organization = 2;
+
+    // Permanently deletes the organization and unlinks its surveys to personal.
+    bool delete_organization = 3;
+  }
+
+  // Client-generated UUID from the offline outbox, identifying the mutation in
+  // client logs. Replays are detected by `client_seq`, not by this ID.
+  string mutation_id = 4;
+
+  // Stable identifier of the client install that recorded the mutation.
+  string client_id = 5;
+
+  // Monotonically increasing sequence number of the mutation within
+  // `client_id` (`GetAppliedMutations`, scope
+  // `"organizations/<organization_id>"`).
+  int64 client_seq = 6;
+
+  // Client-side timestamp when the mutation was recorded.
+  google.protobuf.Timestamp client_timestamp = 7;
+}
+
+message MutateOrganizationRequest {
+  string organization_id = 1;
+
+  // Expected `Organization.version` (optional). Field patches are applied
+  // last-writer-wins regardless; only `upsert_organization` fails with
+  // `FAILED_PRECONDITION` when it is set and stale.
+  int64 base_version = 2;
+  repeated OrganizationMutation mutations = 3;
+}
+
+message MutateOrganizationResponse {
+  string organization_id = 1;
+  Organization organization = 2;
+  google.protobuf.Timestamp commit_timestamp = 3;
+}
+
+message JoinOrganizationRequest {
+  string organization_id = 1;
+  string user_id = 2;
+  string email = 3;
+  string invite_token = 4;
+}
+
+message JoinOrganizationResponse {
+  Organization organization = 1;
+  OrganizationMember member = 2;
+  google.protobuf.Timestamp commit_timestamp = 3;
+}

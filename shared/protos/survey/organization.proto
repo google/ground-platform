@@ -1,0 +1,215 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+import "google/protobuf/timestamp.proto";
+import "shared/protos/survey/acl.proto";
+
+// Multi-tenant organization that surveys can optionally belong to
+// (`SurveyDef.organization_id`): a ministry, university lab, NGO, or community
+// of practice. The Collect One counterpart of a Collect Earth Online
+// institution.
+//
+// Organizations are a convenience and governance layer on top of per-survey
+// ACLs (`SurveyAcl`): a survey keeps its owner and explicit collaborators, and
+// additionally every active `MANAGER` of its organization has
+// `SURVEY_ORGANIZER` access to it. There is no separate organization owner;
+// any active Manager administers the organization, and the last Manager cannot
+// be demoted or removed.
+message Organization {
+  // Client-generated unique identifier (RFC 4122 v4 UUID or canonical slug).
+  string organization_id = 1;
+
+  // Display name shown in survey lists, headers, and the directory.
+  string name = 2;
+
+  // Short description shown in the directory and on the organization page.
+  string description = 3;
+
+  // Public website.
+  string website_url = 4;
+
+  // Logo image URL.
+  string logo_url = 5;
+
+  // Whether the organization appears in the directory, where any signed-in
+  // user can ask to join. Unlisted organizations are reachable by invite only.
+  bool listed = 6;
+
+  // Memberships, including pending invites and join requests.
+  repeated OrganizationMember members = 7;
+
+  // Creation time.
+  google.protobuf.Timestamp created_at = 8;
+
+  // Custom imagery sources configured for this organization (or the synthetic
+  // "All users" organization) that may be toggled in the basemap layers dialog.
+  repeated ImagerySource imagery_sources = 9;
+
+  // Kind of organization, shown on the organization page and in the
+  // directory. Unset for the synthetic "All users" organization.
+  OrganizationType organization_type = 10;
+
+  // Country the organization is based in, as an ISO 3166-1 alpha-2 code in
+  // upper case (e.g., `KE` for Kenya). Empty when not specified, and always
+  // empty for the synthetic "All users" organization.
+  string country_code = 11;
+
+  // Whether the organization opted out of platform-wide impact aggregation.
+  // Its data is kept out of global, country, and grid cell aggregates and
+  // organization-suggested indicators; its own dashboards are unaffected. See
+  // docs/technical/backend/impact-aggregation.md.
+  bool exclude_from_platform_aggregates = 12;
+
+  // Version of the record, incremented by exactly one on every write to the
+  // organization (`MutateOrganization`, `JoinOrganization`). Clients keep the
+  // copy with the higher version; `MutateOrganizationRequest.base_version`
+  // refers to it.
+  int64 version = 13;
+
+  // Soft-deletion tombstone flag for delta synchronization.
+  bool is_deleted = 14;
+
+  // Authoritative server commit timestamp of the last write. For display only:
+  // clients compare versions, not timestamps, to tell which copy is newer
+  // (`docs/technical/sync-engine.md`, "Sync Tokens").
+  google.protobuf.Timestamp commit_timestamp = 15;
+
+  // Tiered quota limits and monthly budget cap configured for this organization.
+  // Overrides global defaults on the synthetic "All users" organization.
+  groundplatform.v2.survey.QuotaLimits quota_limits = 16;
+}
+
+// Kind of organization, optionally set on an `Organization`'s profile.
+enum OrganizationType {
+  // Not specified.
+  ORGANIZATION_TYPE_UNSPECIFIED = 0;
+
+  // National or subnational government agency or ministry.
+  GOVERNMENT_AGENCY = 1;
+
+  // Producer or community cooperative.
+  COOPERATIVE = 2;
+
+  // Indigenous Peoples' or local community (IPLC) organization.
+  IPLC_ORGANIZATION = 3;
+
+  // Non-governmental or nonprofit organization.
+  NGO = 4;
+
+  // Private company.
+  COMPANY = 5;
+
+  // University, research institute, or other research institution.
+  RESEARCH = 6;
+
+  // Any other kind of organization.
+  OTHER = 7;
+}
+
+// Kind of imagery source an organization can configure.
+enum ImagerySourceType {
+  // Unspecified imagery source type.
+  IMAGERY_SOURCE_TYPE_UNSPECIFIED = 0;
+
+  // Web Mercator XYZ raster tile URL template (e.g.,
+  // `https://tile.opentopomap.org/{z}/{x}/{y}.png`).
+  XYZ_TILES = 1;
+}
+
+// A custom imagery layer configured on an `Organization`.
+message ImagerySource {
+  // Client-generated unique identifier.
+  string imagery_source_id = 1;
+
+  // Display name shown in the organization editor and basemap layers dialog.
+  string name = 2;
+
+  // Kind of imagery source.
+  ImagerySourceType type = 3;
+
+  // XYZ tile URL template containing `{z}`, `{x}`, and `{y}` placeholders.
+  string url_template = 4;
+
+  // Whether collectors on mobile are permitted to download tiles from this
+  // source for offline field use.
+  bool allow_offline_download = 5;
+}
+
+// Role of a person in an organization.
+enum OrganizationRole {
+  // Unspecified role.
+  ORGANIZATION_ROLE_UNSPECIFIED = 0;
+
+  // Member: Listed as affiliated, can see the organization's surveys in their
+  // survey list, open surveys shared with `SharingPolicy.ORGANIZATION`, and
+  // create new surveys in the organization (becoming their owner).
+  MEMBER = 1;
+
+  // Manager: Can edit the organization, manage members and join requests, and
+  // has `SURVEY_ORGANIZER` access to every survey in the organization.
+  MANAGER = 2;
+}
+
+// Lifecycle of one person's membership in an organization.
+enum MembershipStatus {
+  // Unspecified status.
+  MEMBERSHIP_STATUS_UNSPECIFIED = 0;
+
+  // A Manager sent an invite link; waiting for the person to accept it.
+  INVITED = 1;
+
+  // The person asked to join a listed organization; waiting for a Manager to
+  // approve.
+  REQUESTED = 2;
+
+  // Full member with the given role.
+  ACTIVE = 3;
+}
+
+// One person's membership in an organization. Mirrors `AclEntry`, with the
+// addition of join requests.
+message OrganizationMember {
+  // Unique identifier of the user (e.g., Firebase Auth UID). Empty for invites
+  // that have not been accepted yet; the invite is matched by email instead.
+  string user_id = 1;
+
+  // Email address the invite was sent to, or that the join request came from.
+  string email = 2;
+
+  // Role once (or if) the membership is active.
+  OrganizationRole role = 3;
+
+  // Whether the person is invited, has requested to join, or is active.
+  MembershipStatus status = 4;
+
+  // Time the invite, request, or membership was last changed.
+  google.protobuf.Timestamp updated_at = 5;
+
+  // Secret token part of a pending invite link (`.../org-join/<token>`);
+  // cleared once accepted.
+  string invite_token = 6;
+
+  // Cached display profile of the member once known.
+  CachedProfile profile = 7;
+
+  // Optional ISO-8601 timestamp string preserving exact formatting when
+  // round-tripping domain timestamps.
+  string updated_at_iso = 8;
+}

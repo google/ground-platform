@@ -1,0 +1,878 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/protos/data/audit_record.proto";
+import "shared/protos/forms/form_def.proto";
+import "shared/protos/forms/types.proto";
+import "shared/protos/library/concept.proto";
+import "shared/protos/survey/acl.proto";
+
+// Top-level Collect One Survey Definition.
+//
+// A Survey is the root organizational container in Collect One, grouping
+// together one or more hierarchical Form definitions, preloaded entity
+// registries, and export configurations.
+message SurveyDef {
+  // Globally unique identifier for this survey definition (RFC 4122 v4 UUID).
+  string survey_id = 1;
+
+  // Human-readable survey title displayed in the Web Console and Mobile App.
+  string title = 2;
+
+  // Detailed description of the survey's goals and scope (Guardrail: max 255
+  // characters).
+  string description = 3;
+
+  // Multi-tenant organization identifier governing ownership, billing, and
+  // pooled quotas (`Organization.organization_id` in `organization.proto`).
+  // Empty for a personal survey. Managers of the organization have
+  // `SURVEY_ORGANIZER` access to the survey in addition to its ACL.
+  string organization_id = 4;
+
+  // User ID (e.g., Firebase Auth UID) of the primary survey owner/creator.
+  string owner_id = 5;
+
+  // Current lifecycle state of this survey definition.
+  SurveyState state = 6;
+
+  // Sequential version release string (e.g., "2026091401" or "1.0.0").
+  // Published versions are preserved as immutable snapshots.
+  string version = 7;
+
+  // Hierarchical ProtoForms form definitions contained within this survey.
+  repeated groundplatform.v2.forms.FormDef forms = 8;
+
+  reserved 9, 10;
+  reserved "sharing_policy", "peer_data_visibility";
+
+  // Preloaded and field-created Entity Datasets (tabular registries and
+  // geospatial entity lists).
+  repeated EntityDatasetDef entity_datasets = 11;
+
+  // Map visualization, default viewport, and ordered layer stack settings.
+  MapConfig map_config = 12;
+
+  // Default language locale code (e.g., "en", "vi", "fr", "es").
+  string default_language = 13;
+
+  // List of supported language locale codes configured for this survey.
+  repeated string supported_languages = 14;
+
+  // Audit metadata recording survey creation and modification provenance.
+  groundplatform.v2.data.AuditInfo audit_info = 15;
+
+  // Typed extension payloads for custom, vendor, or experimental survey-level
+  // metadata.
+  repeated google.protobuf.Any custom_extensions = 16;
+
+  // Multi-lingual translation catalog for survey-level UI strings (such as
+  // form launch CTAs, survey title/description, map layer labels, and entity
+  // dataset titles).
+  groundplatform.v2.forms.TranslationCatalog translations = 17;
+
+  // Survey-specific launch and CTA configurations for forms in `forms`.
+  repeated FormLaunchConfig form_launch_configs = 18;
+
+  // Purpose Packs selected for this survey ("What will this data be used
+  // for?"): global pack IDs (e.g., "eudr_due_diligence") or organization pack
+  // IDs ("org.<organization_id>.<name>"). Editable in Survey details; see
+  // docs/technical/model/library/02-templates-and-purpose-packs.md.
+  repeated string purpose_ids = 19;
+
+  // Programs the survey reports to (e.g., "eudr", "uk_frc"), offered from the
+  // selected Purpose Packs' `program_ids`.
+  repeated string program_ids = 20;
+
+  // Dictionary concept linked to each form question, per form. Authoritative
+  // inside Ground: on export each link is also written as a `ground:concept`
+  // foreign attribute on the question's binding (see
+  // docs/technical/model/library/01-concepts.md).
+  repeated FormConceptLinks form_concept_links = 21;
+
+  // What happened with the survey's data, asked once when it's closed or
+  // archived ("What happened with this data?"). Unset until answered; see
+  // docs/technical/model/data/04-impact-events.md.
+  SurveyOutcome outcome = 22;
+
+  // Authoritative server commit timestamp of the last write. For display only:
+  // clients compare versions, not timestamps, to tell which copy is newer
+  // (`docs/technical/sync-engine.md`, "Sync Tokens").
+  google.protobuf.Timestamp commit_timestamp = 23;
+
+  // Timestamp when the survey was closed or archived.
+  google.protobuf.Timestamp closed_at = 24;
+
+  // ISO-8601 string representation of `closed_at` when set.
+  string closed_at_iso = 25;
+
+  // Sequential number of the latest saved revision, incremented each time the
+  // working copy is saved (`SurveyMutation.save_working_copy`).
+  int64 saved_revision_number = 26;
+
+  // Geographic location summary label shown in the survey catalog (e.g.,
+  // "Nyeri County, Kenya").
+  string location_label = 27;
+
+  // Formatted coordinate summary shown in the survey catalog (e.g.,
+  // "0.42°S, 36.95°E").
+  string coordinates_label = 28;
+
+  // Estimated offline package size label (e.g., "18.4 MB").
+  string offline_size_label = 29;
+
+  // Whether the survey package is marked as downloaded for offline use by
+  // default. Mobile clients add such surveys to a new install's downloaded set;
+  // which surveys a device has downloaded is never stored on the server.
+  bool is_downloaded = 30;
+
+  // Visual map thumbnail theme name (e.g., "HIGHLAND_AGRI", "SAVANNA").
+  string thumbnail_theme = 31;
+
+  // Precomputed or catalog entity count for summary display.
+  int32 entity_count = 32;
+
+  // Free-text description when "other" is selected in `purpose_ids`.
+  string other_purpose = 33;
+
+  // Primary form ID used by the form runner when launching the survey's default
+  // form.
+  string primary_form_id = 34;
+
+  // Serialized XForms XML definitions keyed by form ID (including `"__primary__"`
+  // for the survey's primary form) so full XForms fidelity round-trips across
+  // gRPC.
+  map<string, string> xforms_xml_by_form_id = 35;
+
+  // Monotonic version of the whole survey record: the saved revision, the
+  // working copy, and the ACL share one counter, which the server increments on
+  // every write to any of them (`MutateSurvey`, `AcceptSurveyInvite`) and
+  // stamps on all three. Clients keep the copy with the higher
+  // `record_version` (`docs/technical/sync-engine.md`, "Sync Tokens");
+  // `commit_timestamp` is for display only. Unrelated to `version` and
+  // `saved_revision_number`, which identify the saved revision collectors use
+  // and don't change on working-copy edits.
+  int64 record_version = 36;
+
+  // When the survey was moved to Trash (`SurveyMutation.trash_survey`); unset
+  // when it isn't trashed. Trashed surveys disappear from survey lists and
+  // stop syncing until restored, and are purged automatically 30 days after
+  // this time. Independent of `state`, which a restore leaves unchanged.
+  google.protobuf.Timestamp trash_time = 37;
+
+  // Tiered quota limits and monthly budget cap configured for this survey.
+  // Overrides organization and global defaults.
+  QuotaLimits quota_limits = 38;
+}
+
+// Lightweight survey overview listed by `SurveyService.ListSurveyOverviews`
+// for rendering the survey catalog and list cards without transferring full
+// form schemas, lookup tables, or working copies. A change in `version` tells
+// clients holding a downloaded copy to re-fetch it with `GetSurvey`.
+message SurveyOverview {
+  // Globally unique identifier for this survey (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Human-readable survey title.
+  string title = 2;
+
+  // Detailed description of the survey's goals and scope.
+  string description = 3;
+
+  // Multi-tenant organization identifier (`Organization.organization_id`), or
+  // empty for a personal survey.
+  string organization_id = 4;
+
+  // User ID or email of the primary survey owner/creator.
+  string owner_id = 5;
+
+  // Current lifecycle state of this survey.
+  SurveyState state = 6;
+
+  // Latest version string.
+  string version = 7;
+
+  // Sequential number of the latest saved revision.
+  int64 saved_revision_number = 8;
+
+  // Geographic location summary label shown in the survey catalog (e.g.,
+  // "Nyeri County, Kenya").
+  string location_label = 9;
+
+  // Formatted coordinate summary shown in the survey catalog (e.g.,
+  // "0.42°S, 36.95°E").
+  string coordinates_label = 10;
+
+  // Estimated offline package size label (e.g., "18.4 MB").
+  string offline_size_label = 11;
+
+  // Copied from `SurveyDef.is_downloaded`: whether the survey is marked as
+  // downloaded for offline use by default.
+  bool is_downloaded = 12;
+
+  // Visual map thumbnail theme name (e.g., "HIGHLAND_AGRI", "SAVANNA").
+  string thumbnail_theme = 13;
+
+  // Precomputed or catalog entity count for summary display.
+  int32 entity_count = 14;
+
+  // Survey area boundary used to render the catalog card thumbnail.
+  SurveyArea survey_area = 15;
+
+  // Optional organizer answer to "What happened with this data?" when closed.
+  SurveyOutcome outcome = 16;
+
+  // Timestamp when the survey was closed or archived.
+  google.protobuf.Timestamp closed_at = 17;
+
+  // ISO-8601 string representation of `closed_at` when set.
+  string closed_at_iso = 18;
+
+  // Later of the survey's and its ACL's commit timestamps. For display only;
+  // compare `record_version` to tell which copy is newer.
+  google.protobuf.Timestamp commit_timestamp = 19;
+
+  // Whether the survey has a working copy with unsaved edits. Clients only call
+  // `GetSurvey` with `working_copy = true` when this is set.
+  bool has_working_copy = 20;
+
+  // Access summary shown on catalog cards (copied from `SurveyAcl`).
+  SharingPolicy sharing_policy = 21;
+  PeerDataVisibility peer_data_visibility = 22;
+  bool collector_consent_required = 23;
+  string collector_consent_text = 24;
+
+  // The survey's `SurveyDef.record_version`. Changes whenever the overview or
+  // anything it summarizes (the saved revision, `has_working_copy`, access)
+  // changes, so clients can tell a newer overview from an older one.
+  int64 record_version = 25;
+
+  // The survey's `SurveyDef.trash_time`; set when the survey is in Trash.
+  google.protobuf.Timestamp trash_time = 26;
+
+  // What people with access through `sharing_policy` can do (copied from
+  // `SurveyAcl.sharing_role`, with `ROLE_UNSPECIFIED` resolved to
+  // `DATA_COLLECTOR`). Clients hide data collection for `VIEWER`.
+  Role sharing_role = 27;
+
+  // Tiered quota limits and budget overrides for this survey.
+  QuotaLimits quota_limits = 28;
+}
+
+// The organizer's answer to "What happened with this data?" when a survey is
+// closed or archived. Optional and never required to close a survey.
+message SurveyOutcome {
+  // A use of the survey's data.
+  enum Outcome {
+    // Unspecified outcome.
+    OUTCOME_UNSPECIFIED = 0;
+
+    // Submitted in an EU Deforestation Regulation due diligence statement.
+    SUBMITTED_EUDR_DDS = 1;
+
+    // Reported to the Framework for Ecosystem Restoration Monitoring.
+    REPORTED_FERM = 2;
+
+    // Used for land titling or tenure recognition.
+    LAND_TITLING = 3;
+
+    // Shared with buyers.
+    SHARED_WITH_BUYERS = 4;
+
+    // Used to train or validate a model (e.g., a land cover map).
+    TRAINED_OR_VALIDATED_MODEL = 5;
+
+    // Used for protected area management.
+    PROTECTED_AREA_MANAGEMENT = 6;
+
+    // Not used yet; the organizer may be asked again later.
+    NOT_YET = 7;
+  }
+
+  // Time and cost compared with the organization's previous method.
+  enum EffortComparison {
+    // Not answered.
+    EFFORT_COMPARISON_UNSPECIFIED = 0;
+
+    LESS = 1;
+    SAME = 2;
+    MORE = 3;
+  }
+
+  repeated Outcome outcomes = 1;
+
+  // Optional answer to "Compared with your previous method, this took less,
+  // the same, or more time and cost."
+  EffortComparison effort_comparison = 2;
+
+  google.protobuf.Timestamp answered_at = 3;
+
+  // User ID or email of the person who answered.
+  string answered_by = 4;
+
+  // Optional ISO-8601 string representation of `answered_at`.
+  string answered_at_iso = 5;
+}
+
+// Dictionary concepts linked to the questions of one form.
+message FormConceptLinks {
+  string form_id = 1;
+
+  // Field path (e.g., "/data/commodity") to concept.
+  map<string, groundplatform.v2.library.ConceptRef> field_concepts = 2;
+}
+
+// Platforms where collectors are permitted to open and submit a form. When
+// `FormLaunchConfig.availability` is unset, the form is available on all
+// platforms.
+message FormAvailability {
+  // Whether the form can be opened and submitted in the Web Console.
+  bool web = 1;
+
+  // Whether the form can be opened and submitted in the mobile app.
+  bool mobile = 2;
+}
+
+// Configures how a form is surfaced and launched by data collectors in the
+// survey UI.
+//
+// Decouples survey-level workflow entry points and multilingual CTA labels
+// from the portable, XForms-compatible `FormDef` schema.
+message FormLaunchConfig {
+  // Target form identifier (`FormDef.form_id`).
+  string form_id = 1;
+
+  // Multilingual label for the call-to-action (CTA) button used to start
+  // collecting data for this form (e.g., "Register Plot", "Record Harvest").
+  // Supports inline text (`LabelDef.text`) and localized catalog lookups
+  // (`LabelDef.text_id` referencing `SurveyDef.translations`).
+  // Falls back to `FormDef.title` if unset.
+  groundplatform.v2.forms.LabelDef cta_label = 2;
+
+  // Optional Material Symbols or vector icon identifier displayed on the CTA
+  // button (e.g., "add_location_alt", "forest").
+  string cta_icon = 3;
+
+  // Optional Entity Dataset identifier (`EntityDatasetDef.id`). When set,
+  // surfaces this CTA on the detail card / bottom sheet of entities in the
+  // specified dataset (pre-linking the new submission to the selected entity)
+  // rather than as a standalone top-level map action.
+  string target_entity_dataset_id = 4;
+
+  // Platforms where the form can be opened. Unset means all platforms.
+  FormAvailability availability = 5;
+
+  // Human-readable form title for catalog/list previews.
+  string title = 6;
+
+  // Human-readable form description for catalog/list previews.
+  string description = 7;
+
+  // Form version string.
+  string version = 8;
+
+  // Human-readable display name of `target_entity_dataset_id`.
+  string target_dataset_name = 9;
+
+  // Number of questions in the form.
+  int32 question_count = 10;
+
+  // Whether collecting this form requires selecting or creating an entity.
+  bool requires_entity = 11;
+
+  // Stable editor key (e.g., "f1") when authored in the Survey Editor.
+  string editor_key = 12;
+}
+
+// Lifecycle state of a Survey definition.
+enum SurveyState {
+  // Unspecified lifecycle state.
+  SURVEY_STATE_UNSPECIFIED = 0;
+
+  // Staged in draft mode for creation, refinement, and testing without
+  // affecting ongoing field operations.
+  DRAFT = 1;
+
+  // Published release active for mobile synchronization and field/desk
+  // data collection.
+  PUBLISHED = 2;
+
+  // Closed survey: collection ended; submissions and entities are read-only.
+  CLOSED = 3;
+
+  // Retired survey no longer active for new field data collection.
+  ARCHIVED = 4;
+
+  // Server-only tombstone marker on `SurveyOverview.state`: the survey was
+  // trashed or purged, or the caller lost access, so clients remove it.
+  // Clients never set it; they move surveys to Trash with
+  // `SurveyMutation.trash_survey`.
+  DELETED = 5;
+}
+
+// Entity classification for preloaded and field-created Entity Datasets.
+enum EntityType {
+  // Unspecified entity type.
+  ENTITY_TYPE_UNSPECIFIED = 0;
+
+  // Relational, non-spatial records (e.g., registries of farmers, cooperative
+  // member rosters, species taxonomies). Queried using select_one_from_file and
+  // offline pulldata().
+  TABULAR = 1;
+
+  // Relational records tied to spatial geometries (points, polylines,
+  // polygons). Rendered directly on the web and mobile map as interactive
+  // vector features with searchable attribute cards.
+  GEOSPATIAL = 2;
+}
+
+// A single row inside a tabular or geospatial dataset definition (used for
+// embedded lookup tables such as `farmers` or `tree_species` and editor drafts).
+message DataTableRow {
+  // Stable row key (e.g., "r1").
+  string row_key = 1;
+
+  // Column key-value pairs for the row.
+  map<string, string> values = 2;
+
+  // Optional geometry vertices for map-layer rows in editor drafts.
+  repeated groundplatform.v2.forms.GeoPoint geometry = 3;
+}
+
+// Definition of an Entity Dataset (tabular registry or geospatial entity
+// list).
+//
+// In XForms / ProtoForms XPath expressions (`instance('<id>')/root/item[...]`) and
+// entity bindings (`entity_saveto`), every entity automatically exposes the
+// following reserved system properties:
+//   - "name" / "__id": Entity UUID (`EntityRecord.entity_id`)
+//   - "label": Human-readable label (`EntityRecord.label`)
+//   - "__version": Revision number (`EntityRecord.revision`)
+//   - "geometry": Spatial feature geometry (`EntityRecord.geometry`, for
+//   GEOSPATIAL datasets)
+message EntityDatasetDef {
+  // Unique dataset identifier (e.g., "cooperatives", "plots", "trees").
+  string id = 1;
+
+  // Human-readable title or display name.
+  string display_name = 2;
+
+  // Detailed description of the entity dataset.
+  string description = 3;
+
+  // Classification: TABULAR (non-spatial) or GEOSPATIAL (spatial vector
+  // features).
+  EntityType type = 4;
+
+  // Property uniquely identifying each entity in external CSV/GeoJSON imports
+  // (e.g., "id" or "name").
+  string key_property = 5;
+
+  // Property used as the human-readable display label in selection lists and
+  // attribute cards.
+  string label_property = 6;
+
+  // Whether field enumerators are permitted to register new entities ad-hoc on
+  // mobile.
+  bool field_creation_enabled = 7;
+
+  // Schema definitions for entity properties.
+  repeated EntityPropertyDefinition properties = 8;
+
+  // Expected spatial geometry type for GEOSPATIAL datasets (TYPE_GEOPOINT,
+  // TYPE_GEOTRACE, or TYPE_GEOSHAPE). Exposed to XPath/ProtoForms under the
+  // reserved "geometry" property.
+  groundplatform.v2.forms.DataType geometry_type = 9;
+
+  // Provenance of the dataset's entities: how they were produced. Entities are
+  // always stored as ordinary `EntityRecord`s with real geometry; the generator
+  // is recorded so the dataset can be audited, and regenerated while no
+  // submissions reference it. Unset for datasets edited by hand.
+  oneof generator {
+    // Entities are sample plots produced by the sampling engine.
+    SamplingDesign sampling = 10;
+
+    // Entities were imported from an uploaded file.
+    ImportProvenance imported = 11;
+  }
+
+  // Stable editor key (e.g., "d1", "d3") used in the Survey Editor.
+  string editor_key = 12;
+
+  // Optional form key linked to this dataset in the Survey Editor.
+  string linked_form_key = 13;
+
+  // Default layer styling when this dataset is rendered as a map layer.
+  GeometryStyle default_style = 14;
+
+  // Whether this dataset layer is visible by default on the map.
+  bool visible_by_default = 15;
+
+  // Inline rows for lookup data tables (`type == TABULAR`) and editor drafts.
+  repeated DataTableRow rows = 16;
+}
+
+// Reproducible description of a statistical sample design whose output (one
+// entity per plot) populates a GEOSPATIAL Entity Dataset.
+message SamplingDesign {
+  // Method used to place plots.
+  enum Method {
+    // Unspecified method.
+    METHOD_UNSPECIFIED = 0;
+
+    // Regular grid with `spacing_m` between plot centers and a seeded random
+    // origin offset, clipped to the area.
+    SYSTEMATIC_GRID = 1;
+
+    // `count` plots placed uniformly at random, at least `min_distance_m`
+    // apart.
+    SIMPLE_RANDOM = 2;
+
+    // `count` plots split across strata by `allocation`, then placed at random
+    // within each stratum.
+    STRATIFIED_RANDOM = 3;
+
+    // `count` cluster centers placed at random, each holding a square pattern
+    // of `cluster_plots_per_side` × `cluster_plots_per_side` plots spaced
+    // `cluster_plot_spacing_m` apart; plots outside the area are dropped.
+    CLUSTER = 4;
+  }
+
+  // How plots are split across strata in STRATIFIED_RANDOM designs.
+  enum Allocation {
+    // Unspecified allocation (treated as PROPORTIONAL).
+    ALLOCATION_UNSPECIFIED = 0;
+
+    // The same number of plots in every stratum.
+    EQUAL = 1;
+
+    // Plot counts proportional to stratum area.
+    PROPORTIONAL = 2;
+
+    // Explicit counts per stratum from `custom_counts`.
+    CUSTOM = 3;
+  }
+
+  // Geometry of each plot.
+  enum PlotShape {
+    // Unspecified shape (treated as SQUARE).
+    PLOT_SHAPE_UNSPECIFIED = 0;
+
+    // Axis-aligned square of side `plot_size_m`.
+    SQUARE = 1;
+
+    // Circle of diameter `plot_size_m`, stored as a 24-vertex polygon.
+    CIRCLE = 2;
+
+    // Plot center only; the entity geometry is a `GeoPoint`.
+    POINT = 3;
+  }
+
+  // Polygon dataset whose features define the strata.
+  message StrataLayerRef {
+    // Strata dataset identifier (`EntityDatasetDef.id`).
+    string entity_dataset_id = 1;
+
+    // Property of the strata features holding the stratum identifier. Several
+    // features sharing a value form one stratum with several parts.
+    string stratum_property = 2;
+  }
+
+  // Method used to place plots.
+  Method method = 1;
+
+  // Area plots are drawn from.
+  oneof area_ref {
+    // Use the survey area (`MapConfig.survey_area`); all parts form a single
+    // unnamed stratum.
+    bool survey_area = 2;
+
+    // Use the features of a polygon dataset as strata.
+    StrataLayerRef strata_layer = 3;
+  }
+
+  // Distance between plot centers in meters (SYSTEMATIC_GRID).
+  double spacing_m = 4;
+
+  // Number of plots (SIMPLE_RANDOM, STRATIFIED_RANDOM) or clusters (CLUSTER).
+  int32 count = 5;
+
+  // Minimum distance between plot centers (or cluster centers) in meters; 0
+  // disables the check.
+  double min_distance_m = 6;
+
+  // Allocation across strata (STRATIFIED_RANDOM).
+  Allocation allocation = 7;
+
+  // Plot count per stratum identifier when `allocation` is CUSTOM; strata not
+  // listed get no plots.
+  map<string, int32> custom_counts = 8;
+
+  // Plots per side of each cluster's square pattern (CLUSTER).
+  int32 cluster_plots_per_side = 9;
+
+  // Distance between plots within a cluster in meters (CLUSTER).
+  double cluster_plot_spacing_m = 10;
+
+  // Geometry of each plot.
+  PlotShape plot_shape = 11;
+
+  // Square side or circle diameter in meters.
+  double plot_size_m = 12;
+
+  // Whether `sample_order` is shuffled (seeded Fisher–Yates) so interpreters
+  // don't visit neighboring plots in sequence.
+  bool shuffle = 13;
+
+  // Seed of the deterministic random number generator.
+  int64 seed = 14;
+
+  // Version of the generation algorithms that produced the plots. The same
+  // inputs, seed and engine version always produce identical plots on every
+  // platform.
+  int32 engine_version = 15;
+
+  // Placement of sample points inside each plot.
+  SubPlotDesign sub_plot = 16;
+
+  // When the plots were generated.
+  google.protobuf.Timestamp generated_at = 17;
+
+  // Opaque hash of the inputs (survey area or strata geometry, plus every
+  // field above except `generated_at`, `input_hash` and `feature_count`).
+  // A mismatch with the current inputs marks the design as stale.
+  string input_hash = 18;
+
+  // Number of plots produced.
+  int64 feature_count = 19;
+}
+
+// Placement of sub-plot sample points inside each generated plot.
+message SubPlotDesign {
+  // How sample points are placed.
+  enum Mode {
+    // Unspecified mode (treated as NONE).
+    MODE_UNSPECIFIED = 0;
+
+    // No sample points.
+    NONE = 1;
+
+    // A single sample point at the plot center.
+    CENTER = 2;
+
+    // A `grid_n` × `grid_n` grid centered in the plot, `spacing_m` apart, in
+    // reading order (north to south, west to east).
+    GRID = 3;
+
+    // `count` points placed uniformly at random inside the plot boundary,
+    // seeded per plot from the design seed and "plot_id".
+    RANDOM = 4;
+
+    // Interpreters draw their own sample geometries of the
+    // `allowed_geometry_types`.
+    USER_DRAWN = 5;
+  }
+
+  // How sample points are placed.
+  Mode mode = 1;
+
+  // Grid size per side (GRID).
+  int32 grid_n = 2;
+
+  // Number of random points (RANDOM).
+  int32 count = 3;
+
+  // Distance between grid points in meters (GRID).
+  double spacing_m = 4;
+
+  // Geometry types interpreters may draw (USER_DRAWN): TYPE_GEOPOINT,
+  // TYPE_GEOTRACE or TYPE_GEOSHAPE.
+  repeated groundplatform.v2.forms.DataType allowed_geometry_types = 5;
+}
+
+// Provenance of entities imported from an uploaded file.
+message ImportProvenance {
+  // Name of the uploaded file (e.g. "plots.geojson").
+  string file_name = 1;
+
+  // File format: "geojson", "kml" or "csv".
+  string format = 2;
+
+  // When the file was imported.
+  google.protobuf.Timestamp imported_at = 3;
+
+  // Opaque hash of the file contents.
+  string input_hash = 4;
+
+  // Number of entities imported.
+  int64 feature_count = 5;
+}
+
+// Schema definition for an individual property in an Entity Dataset.
+message EntityPropertyDefinition {
+  // Property name matching CSV column header or GeoJSON property key
+  // (Guardrail: max 255 characters).
+  string name = 1;
+
+  // Data type of this property.
+  groundplatform.v2.forms.DataType type = 2;
+
+  // Human-readable property label.
+  string label = 3;
+
+  // Whether this property is mandatory during field entity registration.
+  bool required = 4;
+
+  // Dictionary concept of this property, copied from the linked question that
+  // saves to it (`FieldBinding.entity_saveto`), so aggregation can read the
+  // current state of map features.
+  groundplatform.v2.library.ConceptRef concept_ref = 5;
+}
+
+// Visual styling attributes for map layers, form geometries, and geospatial
+// entities.
+message GeometryStyle {
+  // Hex color code (e.g., "#4285F4") for marker pins, polylines, and polygon
+  // perimeters.
+  string color = 1;
+
+  // Material or custom vector icon identifier for point markers.
+  string icon = 2;
+
+  // Stroke width in pixels for line traces and polygon boundaries.
+  double stroke_width = 3;
+
+  // Fill opacity (between 0.0 transparent and 1.0 opaque) for closed polygons.
+  double fill_opacity = 4;
+}
+
+// Pre-cached vector/raster offline basemap tile package definition.
+message OfflineTilePackageDef {
+  string id = 1;
+  string region_name = 2;
+  string tile_type_label = 3;
+  string zoom_range_label = 4;
+  string size_label = 5;
+  bool is_downloaded = 6;
+}
+
+// Map visualization, default viewport, and layer stack configuration for the
+// survey.
+message MapConfig {
+  // Default initial map center coordinate. When unset, clients derive it from
+  // the bounding box of `survey_area`; an explicit value overrides it.
+  groundplatform.v2.forms.GeoPoint initial_center = 1;
+
+  // Default initial map zoom level. When unset, clients fit the bounding box
+  // of `survey_area`; an explicit value overrides it.
+  double initial_zoom = 2;
+
+  // Ordered stack of visual layers rendered on the survey map (bottom-to-top
+  // z-order).
+  repeated LayerDef layers = 3;
+
+  // Geographic extent of the survey: the default area for sample designs,
+  // the initial camera, and the mobile offline download area.
+  SurveyArea survey_area = 4;
+
+  // Available offline basemap tile packages for field use.
+  repeated OfflineTilePackageDef offline_tile_packages = 5;
+}
+
+// Geographic extent of a survey, made of one or more polygon parts (e.g. a
+// mainland and its islands).
+//
+// Each part is a single closed ring (`GeoShape`). Holes are not supported:
+// importers drop interior rings with a visible warning. Parts should not
+// overlap. Vertex counts are bounded by the `QuotaLimits.max_area_vertices`
+// quota rather than by a schema rule, so country-scale boundaries fit.
+message SurveyArea {
+  // Human-readable name (e.g. a place name or the uploaded file name).
+  string name = 1;
+
+  // Polygon parts, each a closed ring.
+  repeated groundplatform.v2.forms.GeoShape parts = 2;
+
+  // How the area was defined: "search", "drawn" or "uploaded:<filename>".
+  string source = 3;
+
+  // Explicit center point of the survey area.
+  groundplatform.v2.forms.GeoPoint center = 4;
+
+  // Explicit camera zoom level for framing the survey area.
+  double zoom = 5;
+}
+
+// Definition of a visual map layer in the survey map view.
+//
+// Layers decouple data schemas (`FormDef`, `EntityDatasetDef`) from map
+// presentation, ordering, visibility, and styling.
+message LayerDef {
+  // Unique identifier for this map layer within the survey.
+  string id = 1;
+
+  // Human-readable display label shown in the map legend and layer switcher.
+  string label = 2;
+
+  // Whether this layer is toggled visible on the map by default.
+  bool visible_by_default = 3;
+
+  // Baseline visual styling rules for vector geometries rendered in this
+  // layer. For Entity Dataset layers (`entity_dataset_id`), per-entity
+  // `simplestyle-spec` properties (`marker-color`, `stroke`, `fill`, etc. in
+  // `EntityRecord.properties`) override this default style.
+  GeometryStyle default_style = 4;
+
+  // Data source backing this map layer.
+  oneof source {
+    // ID of a GEOSPATIAL Entity Dataset (`EntityDatasetDef.id`).
+    string entity_dataset_id = 5;
+
+    // Specific geometry question field within a form (`FormDef`).
+    FormGeometrySource form_geometry = 6;
+  }
+
+  // Human-readable description of the data source backing this layer.
+  string source_description = 7;
+
+  // Human-readable geometry type label (e.g., "Polygon", "Point").
+  string geometry_type_label = 8;
+
+  // Singular domain noun for features in this layer (e.g., "parcel", "plot").
+  string singular_item_label = 9;
+
+  // Plural domain noun for features in this layer (e.g., "parcels", "plots").
+  string plural_item_label = 10;
+
+  // Optional form title when linked to a form geometry source.
+  string form_title = 11;
+}
+
+// Identifies a specific geometry question within a form to render as a map
+// layer.
+message FormGeometrySource {
+  // ID of the form containing the geometry question (`FormDef.form_id`).
+  string form_id = 1;
+
+  // Field path of the geometry question within the form (e.g.,
+  // "plot/boundary").
+  string field_path = 2;
+}

@@ -1,0 +1,271 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.survey;
+
+import "google/protobuf/timestamp.proto";
+
+// Collaborator organizational roles within a survey or resource.
+enum Role {
+  // Unspecified role.
+  ROLE_UNSPECIFIED = 0;
+
+  // Viewer: Read-only access enabling map navigation, entity inspection, and
+  // submission viewing while hiding/disabling collection and editing actions.
+  VIEWER = 1;
+
+  // Data Collector: Field enumerator or desk photo-interpreter authorized to
+  // collect submissions and register ad-hoc geospatial entities.
+  DATA_COLLECTOR = 2;
+
+  // Survey Organizer: Project supervisor/manager authorized to edit forms,
+  // manage ACLs, publish schemas, review conflicts, and export data.
+  SURVEY_ORGANIZER = 3;
+}
+
+// Denormalized collaborator identity snapshot cached on ACL and organization
+// member entries so names and avatars render offline and without extra directory
+// lookups.
+message CachedProfile {
+  // Human-readable full name (e.g., "Amina Wanjiru").
+  string display_name = 1;
+
+  // Avatar URL or built-in avatar key (e.g., "avatar:3").
+  string avatar_url = 2;
+
+  // ISO-8601 date or timestamp when the profile snapshot was cached.
+  string cached_on = 3;
+}
+
+// Single collaborator entry in an Access Control List (ACL).
+message AclEntry {
+  // Unique identifier of the user (e.g., Firebase Auth UID). Empty for pending
+  // email invitations until the invitee signs in and accepts.
+  string user_id = 1;
+
+  // Assigned role governing permissions.
+  Role role = 2;
+
+  // Invitation status for the collaborator.
+  enum InvitationStatus {
+    // Unspecified status.
+    INVITATION_STATUS_UNSPECIFIED = 0;
+
+    // Invitation dispatched; awaiting recipient acceptance.
+    PENDING = 1;
+
+    // Invitation accepted; survey populated in user's library.
+    ACCEPTED = 2;
+  }
+  InvitationStatus invitation_status = 3;
+
+  // Email address of the invited or active collaborator.
+  string email = 4;
+
+  // Secret token part of a pending invite link (`.../join/<token>`); cleared
+  // once accepted.
+  string invite_token = 5;
+
+  // Cached display profile of the collaborator once known.
+  CachedProfile profile = 6;
+}
+
+// Sharing policy controlling survey access outside explicit ACL invitations
+// (mirroring the Google Docs / Google Drive sharing model).
+enum SharingPolicy {
+  // Unspecified sharing policy.
+  SHARING_POLICY_UNSPECIFIED = 0;
+
+  // Restricted: Only users explicitly added to the survey Access Control
+  // List (ACL) can open and access the survey.
+  RESTRICTED = 1;
+
+  // Anyone with the link: Any signed-in user who has the survey's URL (for
+  // example from its QR code) can access the survey with `sharing_role`
+  // without being on the ACL. The URL contains `survey_id`, so knowing the ID
+  // is the link.
+  ANYONE_WITH_LINK = 2;
+
+  // Public: Discoverable in the public directory (`SearchPublicSurveys`); any
+  // signed-in user can access the survey with `sharing_role`.
+  PUBLIC = 3;
+
+  // Anyone in the organization: Every active member of the survey's
+  // organization (`SurveyDef.organization_id`) can access the survey with
+  // `sharing_role` without being on the ACL. Invalid for surveys with no
+  // organization. Organization managers can manage the survey under every
+  // policy (see `organization.proto`).
+  ORGANIZATION = 4;
+}
+
+// Peer data visibility controls for mobile field collectors.
+enum PeerDataVisibility {
+  // Unspecified visibility.
+  PEER_DATA_VISIBILITY_UNSPECIFIED = 0;
+
+  // Field collectors can view entities and submissions collected by all peers
+  // on the map to coordinate coverage and prevent duplicate registrations.
+  ALL = 1;
+
+  // Field collectors can only view their own collected submissions and entities
+  // to preserve respondent confidentiality.
+  OWN_ONLY = 2;
+}
+
+// Access Control List (ACL) and access rules governing collaborator permissions
+// and general visibility for a survey.
+message SurveyAcl {
+  // Unique identifier of the survey.
+  string survey_id = 1;
+
+  // Collaborator Access Control List entries.
+  repeated AclEntry entries = 2;
+
+  // Sharing policy controlling general access to the survey (Restricted,
+  // Anyone in the organization, Anyone with Link / QR Code, Public).
+  SharingPolicy sharing_policy = 3;
+
+  // Peer data visibility configuration controlling whether data collectors can
+  // view submissions and entities collected by peers on the map.
+  PeerDataVisibility peer_data_visibility = 4;
+
+  // Email address of the survey owner.
+  string owner_email = 5;
+
+  // Cached profile of the survey owner.
+  CachedProfile owner_profile = 6;
+
+  // Whether organizers enabled a custom informed consent step before data
+  // collection.
+  bool collector_consent_required = 7;
+
+  // Custom informed consent notice displayed before collecting data.
+  string collector_consent_text = 8;
+
+  // Whether CARE Principles for Indigenous Data Governance are applied to this
+  // survey.
+  bool care_sovereignty_applied = 9;
+
+  // Deprecated: unused. Under `ANYONE_WITH_LINK`, the share link is the
+  // survey's URL, so knowing `survey_id` grants access; there's no separate
+  // link token.
+  string general_invite_token = 10 [deprecated = true];
+
+  // Non-destructive QA/QC quarantine list of contributor user IDs or emails.
+  repeated string quarantined_user_ids = 11;
+
+  // Authoritative server commit timestamp for stateless delta synchronization.
+  // For display only; compare `record_version` to tell which copy is newer.
+  google.protobuf.Timestamp commit_timestamp = 12;
+
+  // The survey's `SurveyDef.record_version`, shared with the saved revision and
+  // the working copy and incremented on every write to any of them.
+  int64 record_version = 13;
+
+  // What people with access through `sharing_policy` (organization members,
+  // anyone with the link, or anyone) can do: `VIEWER` or `DATA_COLLECTOR`.
+  // `ROLE_UNSPECIFIED` means `DATA_COLLECTOR`. Never `SURVEY_ORGANIZER`:
+  // organizers must be named in `entries`. Doesn't apply to `RESTRICTED`.
+  Role sharing_role = 14;
+}
+
+// Resource quota tier applied to survey organizers and organizations.
+enum QuotaTier {
+  // Unspecified quota tier.
+  QUOTA_TIER_UNSPECIFIED = 0;
+
+  // Basic Tier: Default tier for free and community usage.
+  BASIC = 1;
+
+  // Sponsored Tier: Expanded capacity for verified non-profits and partner
+  // institutions.
+  SPONSORED = 2;
+}
+
+// Tiered quota limits and resource constraints governing survey creation,
+// collaborator access, and operational field collection.
+message QuotaLimits {
+  // Tier classification: Basic Tier (default) or Sponsored Tier.
+  QuotaTier tier = 1;
+
+  // --- Tiered Survey Organizer Limits (Administrative scopes) ---
+
+  // Maximum surveys an owner can create (Basic: 5, Sponsored: 100).
+  int32 max_surveys_per_owner = 2;
+
+  // Maximum forms allowed per survey (Basic: 5, Sponsored: 10).
+  int32 max_forms_per_survey = 3;
+
+  // Maximum questions/tasks per form (Basic: 10, Sponsored: 50).
+  int32 max_questions_per_form = 4;
+
+  // Maximum photo questions per form (Basic: 1, Sponsored: 10).
+  int32 max_photo_questions_per_form = 5;
+
+  // Maximum predefined geospatial entities (Basic: 1,000, Sponsored: 10,000).
+  int32 max_predefined_entities = 6;
+
+  // Maximum users in the Access Control List (Basic: 10, Sponsored: 50).
+  int32 max_acl_users = 7;
+
+  // --- Tiered Data Collection Limits (Operational / field scopes) ---
+
+  // Maximum surveys a field collector can join (Basic: 5, Sponsored: 100).
+  int32 max_surveys_per_user = 8;
+
+  // Maximum ad-hoc / field-created entities per user (Basic: 100, Sponsored:
+  // 200).
+  int32 max_adhoc_entities_per_user = 9;
+
+  // Maximum submissions per predefined entity per user (Basic: 10, Sponsored:
+  // 50).
+  int32 max_submissions_per_entity_per_user = 10;
+
+  // Maximum entities a sample design may generate into one dataset (Sponsored:
+  // 100,000). Counted separately from `max_predefined_entities`.
+  int32 max_generated_entities = 11;
+
+  // Maximum vertices per polygon ring, for survey area parts and entity
+  // geometries. This per-tier quota replaces the former fixed 50-vertex
+  // schema rule so that uploaded country boundaries fit (Sponsored: 50,000).
+  int32 max_area_vertices = 12;
+
+  // Optional monthly USD budget cap (0 means no explicit cap / inherit).
+  double monthly_budget_usd = 13;
+
+  // Custom unit cost weights for resource usage calculation.
+  CostUnitWeights cost_unit_weights = 14;
+}
+
+// Unit cost weights used to estimate monthly infrastructure and operational costs.
+message CostUnitWeights {
+  // Estimated base USD cost per survey per month.
+  double usd_per_survey_month = 1;
+
+  // Estimated USD cost per 1,000 predefined or ad-hoc entities.
+  double usd_per_thousand_entities = 2;
+
+  // Estimated USD cost per 1,000 form submissions.
+  double usd_per_thousand_submissions = 3;
+
+  // Estimated USD cost per photo attachment stored and served.
+  double usd_per_photo = 4;
+
+  // Estimated USD cost per 1,000 generated sample plots.
+  double usd_per_thousand_generated_plots = 5;
+}
