@@ -30,13 +30,14 @@ From the repository root:
 ```bash
 bash scripts/launchpad.sh              # http://localhost:8099
 bash scripts/launchpad.sh --port 9000  # Another port (or PORT=9000)
-bash scripts/launchpad.sh --start-all  # Also start the server and both clients
+bash scripts/launchpad.sh --start-all  # Also start the emulator, server, and both clients
 bash scripts/launchpad.sh --kill-existing --start-all  # Fresh start: stop what's running first
 ```
 
 `--start-all` does what **Start all** does as soon as the launchpad is up:
-it starts the server, web console, and mobile app, skipping any that are
-already running. Their logs appear on the Logs page.
+it starts the Spanner emulator (waiting for it, so the server connects to it),
+then the server, web console, and mobile app, skipping any that are already
+running. Their logs appear on the Logs page.
 
 `--kill-existing` first stops a launchpad already using the launchpad port and
 every service that's running, wherever it was started (another workspace, a
@@ -57,7 +58,9 @@ proxy URL; links to the other services follow whichever host you used).
 | Spanner emulator (optional) | 9010, 9020 | `.` | `scripts/spanner-emulator.sh` |
 
 If the Spanner emulator is running when the server starts, the launchpad
-starts the server with `SPANNER_EMULATOR_HOST=localhost:9010`.
+starts the server with `SPANNER_EMULATOR_HOST=localhost:9010`. If you start the
+emulator after the launchpad started the server without it, the launchpad
+restarts the server so the **Spanner data** page can browse it.
 
 ## Pages
 
@@ -112,7 +115,7 @@ The page uses this HTTP API, which you can also call directly:
 | `POST /api/service/<id>/start` | Starts a service |
 | `POST /api/service/<id>/stop` | Stops a service |
 | `POST /api/service/<id>/restart` | Restarts a service from the launchpad |
-| `POST /api/fleet/start-core` | Starts the server, web console, and mobile app |
+| `POST /api/fleet/start-core` | Starts the Spanner emulator, server, web console, and mobile app |
 | `POST /api/fleet/stop-all` | Stops every service |
 | `POST /api/config/sync-local-properties` | Sets `USER_DATA_SERVICE_URL`; body `{"url": "..."}` |
 

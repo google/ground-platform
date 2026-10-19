@@ -537,7 +537,7 @@
 
       <div class="spacer small"></div>
 
-      <button id="startAllButton" class="block start-block" onclick="startCore()" title="Start the server, web console, and mobile app (skips any already running)">Start all</button>
+      <button id="startAllButton" class="block start-block" onclick="startCore()" title="Start the Spanner emulator, server, web console, and mobile app (skips any already running)">Start all</button>
       <button id="stopAllButton" class="block stop-block" onclick="stopAll()" title="Stop every running service, including ones started outside the launchpad">Stop all</button>
     </nav>
 
@@ -656,23 +656,16 @@
     }
 
     // ---------------------------------------------------------------
-    // URLs: use the base URL configured in the launchpad
-    // (USER_DATA_SERVICE_URL in local.properties) when set, falling back to
-    // whatever host the launchpad was opened on, including port-prefixed
-    // proxy hosts (e.g. 8099-host.proxy.example.com).
+    // URLs: a service's port and path on whatever host the launchpad was
+    // opened on, including port-prefixed proxy hosts
+    // (e.g. 8099-host.proxy.example.com). USER_DATA_SERVICE_URL in
+    // local.properties is where the app dev servers send gRPC calls, so it
+    // isn't used here: it may name a host or scheme the browser can't reach
+    // from this page (e.g. an http:// URL inside an https:// proxy page,
+    // which the browser blocks in frames).
     // ---------------------------------------------------------------
-    function baseLocation() {
-      const configured = lastStatus?.localProperties?.userDataServiceUrl?.trim();
-      if (configured) {
-        try {
-          return new URL(configured.includes('://') ? configured : `http://${configured}`);
-        } catch (_) {}
-      }
-      return window.location;
-    }
-
     function resolveServiceUrl(port, pathAndHash = '') {
-      const loc = baseLocation();
+      const loc = window.location;
       const proxyMatch = loc.hostname.match(/^(\d+)-(.*\..*)$/);
       if (proxyMatch) {
         const portSuffix = loc.port ? `:${loc.port}` : '';

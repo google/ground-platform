@@ -30,8 +30,9 @@ const REPO_ROOT = path.resolve(__dirname, '../../');
 const USAGE = `Usage: launchpad.sh [--port <port>] [--start-all] [--kill-existing]
 
   --port <port>    Port for the launchpad page (default 8099, or $PORT).
-  --start-all      Start the server, web console, and mobile app when the
-                   launchpad starts, skipping any that are already running.
+  --start-all      Start the Spanner emulator, server, web console, and mobile
+                   app when the launchpad starts, skipping any that are already
+                   running.
   --kill-existing  Before starting, stop any launchpad already using the port
                    and every service that's already running (wherever it was
                    started). With --start-all, gives a fresh start.`;
@@ -468,7 +469,40 @@ async function probeAllServices() {
     }
   }
 
+  restartServerForSpannerIfNeeded();
   broadcastStatus();
+}
+
+let spannerRestartInFlight = false;
+
+/**
+ * The server only connects to Spanner if SPANNER_EMULATOR_HOST is set when it starts, so when the
+ * emulator comes up after the launchpad started the server without it, restarts the server so its
+ * Spanner data page works. Servers started elsewhere are left alone.
+ */
+function restartServerForSpannerIfNeeded() {
+  const emulator = serviceStates.get('spanner-emulator');
+  const server = serviceStates.get('user-data-service');
+  if (spannerRestartInFlight || emulator.state !== 'ONLINE') return;
+  if (!server.child || server.state !== 'ONLINE' || server.usesSpanner) return;
+  spannerRestartInFlight = true;
+  checkTcpPort(9010).then((grpcOpen) => {
+    // The REST port can open first; the server needs the gRPC one.
+    if (!grpcOpen) {
+      spannerRestartInFlight = false;
+      return;
+    }
+    appendLog(
+      server,
+      '[LAUNCHPAD] Spanner emulator started, so restarting the server to connect to it',
+      'stdout'
+    );
+    restartService('user-data-service')
+      .catch((err) => appendLog(server, `[LAUNCHPAD ERROR] Restart failed: ${err.message}`, 'stderr'))
+      .finally(() => {
+        spannerRestartInFlight = false;
+      });
+  });
 }
 
 // Start probing periodically
@@ -498,8 +532,8 @@ async function startService(id, options = {}) {
 
   // Spanner configuration for User Data Service
   if (id === 'user-data-service') {
-    const spannerService = serviceStates.get('spanner-emulator');
-    const isSpannerActive = spannerService && spannerService.state === 'ONLINE';
+    // Checks the port rather than the emulator's last probed state, which can lag behind.
+    const isSpannerActive = await checkTcpPort(9010);
     if (options.useSpanner || isSpannerActive) {
       childEnv.SPANNER_EMULATOR_HOST = 'localhost:9010';
       appendLog(
@@ -508,6 +542,7 @@ async function startService(id, options = {}) {
         'stdout'
       );
     }
+    service.usesSpanner = Boolean(childEnv.SPANNER_EMULATOR_HOST || childEnv.SPANNER_INSTANCE_ID);
   }
 
   // Ensure Node path and user bin in PATH
@@ -663,9 +698,27 @@ async function stopService(id) {
 
 const CORE_SERVICE_IDS = ['user-data-service', 'web-console', 'mobile-app'];
 
-/** Starts the server, web console, and mobile app, skipping any already running. */
+/** How long Start all waits for the Spanner emulator (which may download first) before the server. */
+const SPANNER_START_TIMEOUT_MS = 90000;
+
+/**
+ * Starts the Spanner emulator, waiting for it so the server starts against it, then the server,
+ * web console, and mobile app, skipping any already running. If the emulator doesn't come up, the
+ * server still starts, serving data from memory.
+ */
 async function startCore() {
   const results = {};
+  try {
+    const emulator = serviceStates.get('spanner-emulator');
+    results['spanner-emulator'] = await startService('spanner-emulator');
+    // Stops waiting early if the emulator exits (e.g. no Docker on this platform).
+    const ready = await waitForTcpPort(9010, SPANNER_START_TIMEOUT_MS, () => !emulator.child);
+    if (!ready) {
+      results['spanner-emulator'].message += ", but it isn't accepting connections";
+    }
+  } catch (err) {
+    results['spanner-emulator'] = { success: false, message: err.message };
+  }
   for (const id of CORE_SERVICE_IDS) {
     try {
       results[id] = await startService(id);
@@ -674,6 +727,20 @@ async function startCore() {
     }
   }
   return results;
+}
+
+/**
+ * Waits until something listens on [targetPort], up to [timeoutMs] or until [giveUp] returns true.
+ * Returns whether something listens.
+ */
+async function waitForTcpPort(targetPort, timeoutMs, giveUp = () => false) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await checkTcpPort(targetPort)) return true;
+    if (giveUp()) return false;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  return false;
 }
 
 /** Waits until nothing listens on [ports], up to [timeoutMs]. Returns whether they were released. */
