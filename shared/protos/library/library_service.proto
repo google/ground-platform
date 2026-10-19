@@ -1,0 +1,205 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.library;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/protos/forms/types.proto";
+import "shared/protos/library/concept.proto";
+import "shared/protos/library/library_bundle.proto";
+import "shared/protos/library/library_settings.proto";
+import "shared/protos/library/purpose_pack.proto";
+import "shared/protos/library/template.proto";
+
+// Versioned, organization-scoped library record combining a `LibraryBundle`
+// (concepts, form templates, purpose packs, export profiles) with
+// `OrganizationLibrarySettings` and an authoritative server `commit_timestamp`
+// for delta synchronization (`docs/technical/sync-engine.md`).
+message OrganizationLibraryRecord {
+  // Owning organization ID (the reserved "All users" organization
+  // `00000000-0000-4000-8000-000000000001` for the global library).
+  string organization_id = 1;
+
+  // Reusable library entries owned by this organization.
+  LibraryBundle bundle = 2;
+
+  // Per-organization curation settings (such as hidden global entry IDs).
+  OrganizationLibrarySettings settings = 3;
+
+  // Version of the record, incremented by exactly one on every write to the
+  // library (`MutateLibrary`). Clients keep the copy with the higher version;
+  // `MutateLibraryRequest.base_version` refers to it.
+  int64 version = 4;
+
+  // Soft-deletion tombstone flag.
+  bool is_deleted = 5;
+
+  // Authoritative server commit timestamp of the last write. For display only;
+  // compare `version` to tell which copy is newer.
+  google.protobuf.Timestamp commit_timestamp = 6;
+}
+
+// gRPC service for reading, resolving, syncing, searching, and curating
+// global ("All users" organization) and organization-scoped libraries.
+service LibraryService {
+  // Retrieves the raw `OrganizationLibraryRecord` for a single organization.
+  rpc GetLibrary(GetLibraryRequest) returns (GetLibraryResponse);
+
+  // Retrieves the resolved `LibraryBundle` for an organization (merging the
+  // global ("All users") library with the organization's own entries and
+  // filtering out `OrganizationLibrarySettings.hidden_global_entry_ids`).
+  rpc GetResolvedLibrary(GetResolvedLibraryRequest) returns (GetResolvedLibraryResponse);
+
+  // Lists organization libraries (`docs/technical/sync-engine.md`, "List
+  // RPCs: Query and Delta Modes"). Whether `sync_token` is set selects the
+  // mode:
+  //   - Query mode (`sync_token` unset): every library in scope except
+  //     deleted ones, paged with `page_size` / `page_token`. Every page reads
+  //     the snapshot pinned in `page_token`; the last page carries
+  //     `next_sync_token` for the scope at that snapshot.
+  //   - Delta mode (`sync_token` set): every library in scope changed after
+  //     the token, in commit order, including tombstones (`is_deleted =
+  //     true`). The last page carries `next_sync_token`. `next_page_token`
+  //     is itself a valid `sync_token`, so a client can store it after
+  //     applying a page.
+  // Delivery is at least once. Fails with `INVALID_ARGUMENT` when `sync_token`
+  // is malformed or was issued for a different scope (`organization_id`), and
+  // with `FAILED_PRECONDITION` when the server can no longer serve changes
+  // from `sync_token`; the client then discards it and runs a full sync.
+  rpc ListLibraries(ListLibrariesRequest) returns (ListLibrariesResponse);
+
+  // Searches concepts across global and organization libraries by keyword,
+  // standard code, or data type.
+  rpc SearchConcepts(SearchConceptsRequest) returns (SearchConceptsResponse);
+
+  // Atomically applies fine-grained mutations to an organization's library
+  // entries and curation settings.
+  rpc MutateLibrary(MutateLibraryRequest) returns (MutateLibraryResponse);
+}
+
+message GetLibraryRequest {
+  string organization_id = 1;
+}
+
+message GetLibraryResponse {
+  OrganizationLibraryRecord library = 1;
+}
+
+message GetResolvedLibraryRequest {
+  string organization_id = 1;
+}
+
+message GetResolvedLibraryResponse {
+  OrganizationLibraryRecord resolved_library = 1;
+}
+
+message ListLibrariesRequest {
+  // Scope: optional organization ID. Empty lists every library the caller can
+  // access, including the global ("All users") library.
+  string organization_id = 1;
+
+  // Maximum number of libraries to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 2;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 3;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 4;
+}
+
+message ListLibrariesResponse {
+  repeated OrganizationLibraryRecord libraries = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 3;
+}
+
+message SearchConceptsRequest {
+  string organization_id = 1;
+  string query = 2;
+  groundplatform.v2.forms.DataType data_type = 3;
+}
+
+message SearchConceptsResponse {
+  repeated ConceptDef concepts = 1;
+}
+
+// Path-addressed field patch for `OrganizationLibraryRecord`.
+//
+// Supported `key` patterns:
+//   - `"concepts/<concept_id>"` (`concept_value` or `null_value`)
+//   - `"form_templates/<template_id>"` (`form_template_value` or `null_value`)
+//   - `"purpose_packs/<pack_id>"` (`purpose_pack_value` or `null_value`)
+//   - `"export_profiles/<profile_id>"` (`export_profile_value` or `null_value`)
+//   - `"settings"` (`settings_value`)
+message LibraryFieldPatch {
+  string key = 1;
+
+  oneof value {
+    google.protobuf.NullValue null_value = 2;
+    ConceptDef concept_value = 3;
+    FormTemplateDef form_template_value = 4;
+    PurposePackDef purpose_pack_value = 5;
+    ExportProfileDef export_profile_value = 6;
+    OrganizationLibrarySettings settings_value = 7;
+  }
+}
+
+message LibraryMutation {
+  oneof operation {
+    LibraryFieldPatch update_field = 1;
+    OrganizationLibraryRecord upsert_library = 2;
+  }
+
+  // Client-generated UUID from the offline outbox, identifying the mutation in
+  // client logs. Replays are detected by `client_seq`, not by this ID.
+  string mutation_id = 3;
+
+  // Stable identifier of the client install that recorded the mutation.
+  string client_id = 4;
+
+  // Monotonically increasing sequence number of the mutation within
+  // `client_id` (`GetAppliedMutations`, scope `"libraries/<organization_id>"`).
+  int64 client_seq = 5;
+
+  // Client-side timestamp when the mutation was recorded.
+  google.protobuf.Timestamp client_timestamp = 6;
+}
+
+message MutateLibraryRequest {
+  string organization_id = 1;
+
+  // Expected `OrganizationLibraryRecord.version` (optional). Field patches are
+  // applied last-writer-wins regardless; only `upsert_library` fails with
+  // `FAILED_PRECONDITION` when it is set and stale.
+  int64 base_version = 2;
+  repeated LibraryMutation mutations = 3;
+}
+
+message MutateLibraryResponse {
+  string organization_id = 1;
+  OrganizationLibraryRecord library = 2;
+  google.protobuf.Timestamp commit_timestamp = 3;
+}

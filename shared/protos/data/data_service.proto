@@ -1,0 +1,682 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.data;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/protos/data/audit_record.proto";
+import "shared/protos/data/entity_record.proto";
+import "shared/protos/data/impact_aggregate.proto";
+import "shared/protos/data/impact_event.proto";
+import "shared/protos/data/submission_record.proto";
+import "shared/protos/forms/audit_log.proto";
+import "shared/protos/forms/encrypted_submission.proto";
+import "shared/protos/forms/record_instance.proto";
+import "shared/protos/forms/types.proto";
+
+// Core gRPC service for reading, syncing, and atomically mutating
+// `EntityRecord`, `SubmissionRecord`, plot locks, media attachments, impact
+// events, and audit logs.
+//
+// Follows `docs/technical/sync-engine.md`:
+//   - Outbox drain via `MutateData` and `RecordImpactEvents`, which assign
+//     authoritative monotonic server `commit_timestamp` values.
+//   - One unary `List*` RPC per synced resource (`ListEntities`,
+//     `ListSubmissions`, `ListImpactEvents`, `ListAuditRecords`) with two
+//     modes selected by `sync_token` ("List RPCs: Query and Delta Modes"):
+//       - Query mode (`sync_token` unset): scope fields plus optional
+//         query-only fields (filters, sort order), paged with `page_size` /
+//         `page_token`. Every page reads the snapshot pinned in `page_token`;
+//         the last page carries `next_sync_token` for the scope (scope fields
+//         only, not the filters) at that snapshot.
+//       - Delta mode (`sync_token` set): every record in scope changed after
+//         the token, ordered by commit time (record ID breaks ties), always
+//         including tombstones (`is_deleted == true`). The last page carries
+//         `next_sync_token`. Clients poll in delta mode while in the
+//         foreground. In delta mode, `next_page_token` is itself a valid
+//         `sync_token` for the scope, so a client can store it after applying
+//         a page and resume from it.
+//     Sync tokens are opaque: clients store them and send them back
+//     unchanged. Delivery is at least once, so a record can appear both in a
+//     query page and in the delta that follows. Errors:
+//       - `INVALID_ARGUMENT`: a malformed `sync_token` or `page_token`, a
+//         query-only field set in delta mode, or scope fields that differ from
+//         the ones the token was issued for.
+//       - `FAILED_PRECONDITION`: the server can no longer serve changes from
+//         `sync_token` (for example after a data reset). The client discards
+//         the token and runs a full sync (a query with no filter) for the
+//         scope.
+//   - Query RPCs (`ListEntityClusters`, `GetImpactAggregates`) for
+//     aggregation that clients can't do from a local copy.
+service DataService {
+  // Retrieves a single entity record by ID.
+  rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
+
+  // Lists entity records for a survey in query or delta mode (see the service
+  // comment). Scope field: `survey_id`; delta sync always covers the whole
+  // survey. Query-only fields, rejected with `INVALID_ARGUMENT` in delta mode:
+  // `dataset_id`, `s2_cell_tokens`, `include_deleted`, `bbox`, `filter`,
+  // `queue_filter_mode`, `order_by`.
+  // `field_mask` only trims the returned records, so it is allowed in both
+  // modes.
+  rpc ListEntities(ListEntitiesRequest) returns (ListEntitiesResponse);
+
+  // Returns S2 cell spatial clusters for fast Web Console map rendering at
+  // overview zoom levels.
+  rpc ListEntityClusters(ListEntityClustersRequest) returns (ListEntityClustersResponse);
+
+  // Retrieves a single submission record by ID.
+  rpc GetSubmission(GetSubmissionRequest) returns (GetSubmissionResponse);
+
+  // Lists submission records for a survey in query or delta mode (see the
+  // service comment). Scope field: `survey_id`; delta sync always covers the
+  // whole survey. Query-only fields, rejected with `INVALID_ARGUMENT` in delta
+  // mode: `form_id`, `entity_id`, `include_deleted`, `filter`, `order_by`.
+  rpc ListSubmissions(ListSubmissionsRequest) returns (ListSubmissionsResponse);
+
+  // Atomically and idempotently executes an ordered sequence of entity and
+  // submission mutations (`update` and hard `delete`), returning the assigned
+  // server `commit_timestamp`.
+  rpc MutateData(MutateDataRequest) returns (MutateDataResponse);
+
+  // Acquires or renews a 5-minute collaborative plot lock for CEO desk
+  // interpretation.
+  rpc AcquirePlotLock(AcquirePlotLockRequest) returns (AcquirePlotLockResponse);
+
+  // Releases an active collaborative plot lock.
+  rpc ReleasePlotLock(ReleasePlotLockRequest) returns (ReleasePlotLockResponse);
+
+  // Prepares a content-addressed (`sha256_hash`) signed upload URL for binary
+  // media attachments.
+  rpc PrepareMediaUpload(PrepareMediaUploadRequest) returns (PrepareMediaUploadResponse);
+
+  // Resolves a signed download URL for a media attachment.
+  rpc GetMediaDownloadUrl(GetMediaDownloadUrlRequest) returns (GetMediaDownloadUrlResponse);
+
+  // Records a batch of idempotent client-generated `ImpactEvent` signals.
+  rpc RecordImpactEvents(RecordImpactEventsRequest) returns (RecordImpactEventsResponse);
+
+  // Lists `ImpactEvent` records in query or delta mode (see the service
+  // comment). Scope fields: `survey_id`, `organization_id`. There are no
+  // query-only fields.
+  rpc ListImpactEvents(ListImpactEventsRequest) returns (ListImpactEventsResponse);
+
+  // Retrieves pre-aggregated impact metrics (`ImpactAggregate`).
+  rpc GetImpactAggregates(GetImpactAggregatesRequest) returns (GetImpactAggregatesResponse);
+
+  // Lists `AuditRecord` entries in query or delta mode (see the service
+  // comment). Scope fields: `survey_id`, `target_id`. There are no query-only
+  // fields.
+  rpc ListAuditRecords(ListAuditRecordsRequest) returns (ListAuditRecordsResponse);
+
+  // Lists searchable geographic places and landmarks for map place search.
+  rpc ListPlaces(ListPlacesRequest) returns (ListPlacesResponse);
+
+  // Lists mutation log items tracked for the unified Uploads queue, in query
+  // or delta mode (see the service comment). Scope field: `survey_id`. There
+  // are no query-only fields.
+  rpc ListMutationLogs(ListMutationLogsRequest) returns (ListMutationLogsResponse);
+
+  // Returns, for one client install (`client_id`), the highest `client_seq`
+  // applied in each mutation scope across all `Mutate*` RPCs. Clients call it
+  // before each poll and drop outbox mutations with `client_seq <=` the
+  // returned value, which confirms mutations whose response was lost.
+  rpc GetAppliedMutations(GetAppliedMutationsRequest) returns (GetAppliedMutationsResponse);
+}
+
+// Smart queue filter mode for CEO desk interpretation.
+enum QueueFilterMode {
+  QUEUE_FILTER_MODE_UNSPECIFIED = 0;
+  QUEUE_FILTER_MODE_ALL = 1;
+  QUEUE_FILTER_MODE_UNANALYZED = 2;
+  QUEUE_FILTER_MODE_ANALYZED_BY_ME = 3;
+  QUEUE_FILTER_MODE_FLAGGED = 4;
+  QUEUE_FILTER_MODE_LOW_CONFIDENCE = 5;
+  QUEUE_FILTER_MODE_HIGH_DISAGREEMENT = 6;
+  QUEUE_FILTER_MODE_HAS_CONFLICT = 7;
+}
+
+// =============================================================================
+// Read & List Messages (Entities & Submissions)
+// =============================================================================
+
+message GetEntityRequest {
+  string survey_id = 1;
+  string dataset_id = 2;
+  string entity_id = 3;
+}
+
+message GetEntityResponse {
+  EntityRecord entity = 1;
+}
+
+message ListEntitiesRequest {
+  // Scope: the survey whose entities to list.
+  string survey_id = 1;
+
+  // Query only: optional entity dataset.
+  string dataset_id = 2;
+
+  // Maximum number of entities to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 3;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 4;
+
+  // Query only: whether to include soft-deleted entities. Delta mode always
+  // includes tombstones.
+  bool include_deleted = 5;
+
+  // Query only: optional bounding box.
+  GeoBoundingBox bbox = 6;
+
+  // Query only: optional property filters.
+  map<string, string> filter = 7;
+
+  // Optional fields to return. Allowed in both modes.
+  repeated string field_mask = 8;
+
+  reserved 9, 10;
+  reserved "since_timestamp", "until_timestamp";
+
+  // Query only: optional S2 cell token prefixes (for example, the map
+  // viewport). Delta sync always covers the whole survey.
+  repeated string s2_cell_tokens = 11;
+
+  // Query only: optional CEO smart queue filter mode.
+  QueueFilterMode queue_filter_mode = 12;
+
+  // Query only: optional sort order, e.g. `"label"` or
+  // `"commit_timestamp desc"`.
+  string order_by = 13;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 14;
+}
+
+message GeoBoundingBox {
+  double min_latitude = 1;
+  double min_longitude = 2;
+  double max_latitude = 3;
+  double max_longitude = 4;
+}
+
+message ListEntitiesResponse {
+  repeated EntityRecord entities = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  reserved 3;
+  reserved "server_watermark";
+
+  // Opaque token for the next delta call for the scope, set on the last page
+  // only.
+  string next_sync_token = 4;
+}
+
+message EntityCluster {
+  string s2_cell_token = 1;
+  groundplatform.v2.forms.GeoPoint centroid = 2;
+  int32 total_count = 3;
+  int32 completed_count = 4;
+  int32 in_progress_count = 5;
+  int32 pending_count = 6;
+}
+
+message ListEntityClustersRequest {
+  string survey_id = 1;
+  string dataset_id = 2;
+  GeoBoundingBox bbox = 3;
+  int32 s2_level = 4;
+}
+
+message ListEntityClustersResponse {
+  repeated EntityCluster clusters = 1;
+}
+
+message GetSubmissionRequest {
+  string survey_id = 1;
+  string submission_id = 2;
+}
+
+message GetSubmissionResponse {
+  SubmissionRecord submission = 1;
+}
+
+message ListSubmissionsRequest {
+  // Scope: the survey whose submissions to list.
+  string survey_id = 1;
+
+  // Query only: optional form.
+  string form_id = 2;
+
+  // Query only: optional linked entity.
+  string entity_id = 3;
+
+  // Maximum number of submissions to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 4;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 5;
+
+  // Query only: whether to include soft-deleted submissions. Delta mode
+  // always includes tombstones.
+  bool include_deleted = 6;
+
+  reserved 7, 8;
+  reserved "since_timestamp", "until_timestamp";
+
+  // Query only: optional field filters (e.g., `"collector_email"`,
+  // `"review_status"`).
+  map<string, string> filter = 9;
+
+  // Query only: optional sort order, e.g. `"collector_name"` or
+  // `"commit_timestamp desc"`.
+  string order_by = 10;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 11;
+}
+
+message ListSubmissionsResponse {
+  repeated SubmissionRecord submissions = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  reserved 3;
+  reserved "server_watermark";
+
+  // Opaque token for the next delta call for the scope, set on the last page
+  // only.
+  string next_sync_token = 4;
+}
+
+// =============================================================================
+// Batched Idempotent Mutation Messages (MutateData)
+// =============================================================================
+
+message EntityFieldPatch {
+  string key = 1;
+
+  oneof value {
+    google.protobuf.NullValue null_value = 2;
+    groundplatform.v2.forms.TypedValue property_value = 3;
+    string label_value = 4;
+    bool bool_value = 5;
+    groundplatform.v2.forms.GeoPoint point_value = 6;
+    groundplatform.v2.forms.GeoTrace trace_value = 7;
+    groundplatform.v2.forms.GeoShape shape_value = 8;
+  }
+}
+
+message EntityPatch {
+  repeated EntityFieldPatch patches = 1;
+}
+
+message EntityMutation {
+  string dataset_id = 1;
+  string entity_id = 2;
+  // Revision the client based this mutation on (0 when unknown or new).
+  // `update` patches are applied last-writer-wins and report `AUTO_MERGED`
+  // when it is stale; `upsert` fails with `FAILED_PRECONDITION` when it is
+  // non-zero and stale.
+  int64 base_revision = 3;
+
+  oneof operation {
+    EntityPatch update = 4;
+    bool delete = 5;
+    EntityRecord upsert = 6;
+  }
+}
+
+message SubmissionFieldPatch {
+  string key = 1;
+
+  oneof value {
+    google.protobuf.NullValue null_value = 2;
+    groundplatform.v2.forms.FieldValue field_value = 3;
+    bool bool_value = 4;
+    string string_value = 5;
+    groundplatform.v2.forms.RecordMetadata metadata_value = 6;
+    groundplatform.v2.forms.AuditLog audit_log_value = 7;
+    bytes bytes_value = 8;
+    groundplatform.v2.forms.EncryptedSubmissionManifest encrypted_manifest_value = 9;
+    ReviewStatus review_status_value = 10;
+  }
+}
+
+message SubmissionPatch {
+  repeated SubmissionFieldPatch patches = 1;
+}
+
+message SubmissionMutation {
+  string submission_id = 1;
+  string form_id = 2;
+  // Revision the client based this mutation on (0 when unknown or new).
+  // `update` patches are applied last-writer-wins and report `AUTO_MERGED`
+  // when it is stale; `upsert` fails with `FAILED_PRECONDITION` when it is
+  // non-zero and stale.
+  int64 base_revision = 3;
+
+  oneof operation {
+    SubmissionPatch update = 4;
+    bool delete = 5;
+    SubmissionRecord upsert = 6;
+  }
+}
+
+message DataMutation {
+  oneof target {
+    EntityMutation entity_mutation = 1;
+    SubmissionMutation submission_mutation = 2;
+  }
+
+  // Client-generated UUID (`MutationLogItem.id`) from the offline outbox,
+  // identifying the mutation in client logs. Replays are detected by
+  // `client_seq`, not by this ID.
+  string mutation_id = 3;
+
+  // Client-side timestamp when the mutation was recorded offline.
+  google.protobuf.Timestamp client_timestamp = 4;
+
+  // Stable identifier of the client install that recorded the mutation.
+  string client_id = 5;
+
+  // Monotonically increasing sequence number of the mutation within
+  // `client_id`. The server tracks the highest applied value per scope
+  // (`GetAppliedMutations`, scope `"surveys/<survey_id>/data"`); a mutation at
+  // or below it is a replay, which is skipped and returns the record's current
+  // state.
+  int64 client_seq = 6;
+}
+
+message MutateDataRequest {
+  string survey_id = 1;
+  repeated DataMutation mutations = 2;
+}
+
+enum ConflictResolutionStatus {
+  CONFLICT_RESOLUTION_STATUS_UNSPECIFIED = 0;
+  // `base_revision` matched the stored revision (or was unset).
+  CONFLICT_RESOLUTION_STATUS_CLEAN = 1;
+  // Field patches written against an older `base_revision` were applied
+  // last-writer-wins over the newer stored revision.
+  CONFLICT_RESOLUTION_STATUS_AUTO_MERGED = 2;
+  CONFLICT_RESOLUTION_STATUS_CONFLICT_RECORDED = 3;
+}
+
+message DataMutationResult {
+  oneof result {
+    EntityRecord entity = 1;
+    SubmissionRecord submission = 2;
+    string deleted_id = 3;
+  }
+
+  ConflictResolutionStatus conflict_status = 4;
+  google.protobuf.Timestamp commit_timestamp = 5;
+
+  // True when the mutation was a replay (its `client_seq` had already been
+  // applied), so this request didn't change anything. The result carries the record's current state.
+  bool duplicate = 6;
+}
+
+message MutateDataResponse {
+  repeated DataMutationResult results = 1;
+  google.protobuf.Timestamp commit_timestamp = 2;
+}
+
+// =============================================================================
+// Collaborative Plot Locking, Media, Impact, Audit & Places Messages
+// =============================================================================
+
+message AcquirePlotLockRequest {
+  string survey_id = 1;
+  string dataset_id = 2;
+  string entity_id = 3;
+  string user_id = 4;
+  QueueFilterMode queue_filter_mode = 5;
+}
+
+message AcquirePlotLockResponse {
+  EntityRecord entity = 1;
+  PlotLock lock = 2;
+}
+
+message ReleasePlotLockRequest {
+  string survey_id = 1;
+  string dataset_id = 2;
+  string entity_id = 3;
+  string user_id = 4;
+}
+
+message ReleasePlotLockResponse {
+  bool released = 1;
+}
+
+message PrepareMediaUploadRequest {
+  string survey_id = 1;
+  string submission_id = 2;
+  string sha256_hash = 3;
+  string mime_type = 4;
+  int64 byte_size = 5;
+}
+
+message PrepareMediaUploadResponse {
+  string upload_url = 1;
+  string media_uri = 2;
+  bool already_exists = 3;
+}
+
+message GetMediaDownloadUrlRequest {
+  string survey_id = 1;
+  string media_uri = 2;
+}
+
+message GetMediaDownloadUrlResponse {
+  string download_url = 1;
+}
+
+message RecordImpactEventsRequest {
+  repeated ImpactEvent events = 1;
+}
+
+message RecordImpactEventsResponse {
+  repeated ImpactEvent events = 1;
+  google.protobuf.Timestamp commit_timestamp = 2;
+}
+
+message ListImpactEventsRequest {
+  // Scope: optional survey.
+  string survey_id = 1;
+
+  // Scope: optional organization.
+  string organization_id = 2;
+
+  // Maximum number of events to return. The server picks a default when unset
+  // and caps large values.
+  int32 page_size = 3;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 4;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 5;
+}
+
+message ListImpactEventsResponse {
+  repeated ImpactEvent events = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 3;
+}
+
+message GetImpactAggregatesRequest {
+  string organization_id = 1;
+  string survey_id = 2;
+}
+
+message GetImpactAggregatesResponse {
+  repeated ImpactAggregate aggregates = 1;
+}
+
+message ListAuditRecordsRequest {
+  // Scope: optional survey.
+  string survey_id = 1;
+
+  // Scope: optional target record.
+  string target_id = 2;
+
+  // Maximum number of records to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 3;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 4;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 5;
+}
+
+message ListAuditRecordsResponse {
+  repeated AuditRecord audit_records = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 3;
+}
+
+// Geographic place or landmark returned by the backend place catalog.
+message PlaceRecord {
+  string id = 1;
+  string name = 2;
+  string category_label = 3;
+  string region_subtitle = 4;
+  string coordinates_label = 5;
+  float normalized_x = 6;
+  float normalized_y = 7;
+  float zoom_delta = 8;
+  double longitude = 9;
+  double latitude = 10;
+  optional double bbox_min_lng = 11;
+  optional double bbox_min_lat = 12;
+  optional double bbox_max_lng = 13;
+  optional double bbox_max_lat = 14;
+  float target_zoom = 15;
+  string mapbox_place_id = 16;
+  string source_label = 17;
+}
+
+message ListPlacesRequest {
+  string survey_id = 1;
+  string query = 2;
+}
+
+message ListPlacesResponse {
+  repeated PlaceRecord places = 1;
+}
+
+// Mutation log entry for seeding and inspecting the unified Uploads queue.
+message MutationLogRecord {
+  string id = 1;
+  string survey_id = 2;
+  string operation_kind_key = 3;
+  string title = 4;
+  string target_label = 5;
+  string entity_id = 6;
+  optional string submission_id = 7;
+  string actor_name = 8;
+  string state_key = 9;
+  string state_detail = 10;
+  string operation_timestamp = 11;
+  optional string started_timestamp = 12;
+  optional string completed_timestamp = 13;
+  string payload_summary = 14;
+  google.protobuf.Timestamp commit_timestamp = 15;
+}
+
+message ListMutationLogsRequest {
+  // Scope: optional survey.
+  string survey_id = 1;
+
+  reserved 2;
+  reserved "since_timestamp";
+
+  // Maximum number of mutation logs to return. The server picks a default
+  // when unset and caps large values.
+  int32 page_size = 3;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 4;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 5;
+}
+
+message ListMutationLogsResponse {
+  repeated MutationLogRecord mutation_logs = 1;
+
+  reserved 2;
+  reserved "server_watermark";
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 3;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 4;
+}
+
+// Request for the mutations the server has applied for one client install.
+message GetAppliedMutationsRequest {
+  // Client install identifier (`*Mutation.client_id`).
+  string client_id = 1;
+
+  // Optional scopes to return. Empty returns every scope with applied
+  // mutations for `client_id`. Scopes are `"surveys/<survey_id>"`
+  // (`MutateSurvey`), `"surveys/<survey_id>/data"` (`MutateData`),
+  // `"organizations/<organization_id>"` (`MutateOrganization`), and
+  // `"libraries/<organization_id>"` (`MutateLibrary`).
+  repeated string scopes = 2;
+}
+
+// Highest `client_seq` applied for a client in one mutation scope.
+message AppliedMutationWatermark {
+  string scope = 1;
+  int64 client_seq = 2;
+
+  // Server commit timestamp of the mutation that set `client_seq`.
+  google.protobuf.Timestamp commit_timestamp = 3;
+}
+
+message GetAppliedMutationsResponse {
+  repeated AppliedMutationWatermark watermarks = 1;
+}
