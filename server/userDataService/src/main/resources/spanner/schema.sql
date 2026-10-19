@@ -127,6 +127,7 @@ CREATE TABLE Surveys (
   AclCommitTs TIMESTAMP OPTIONS (allow_commit_timestamp = true),
   OrganizationId UUID AS (CAST(NULLIF(SavedDef.organization_id, '') AS UUID)) STORED,
   OwnerId STRING(MAX) AS (SavedDef.owner_id) STORED,
+  OwnerEmail STRING(320) AS (LOWER(AclRules.owner_email)) STORED,
   State groundplatform.v2.survey.SurveyState AS (SavedDef.state) STORED,
   SharingPolicy groundplatform.v2.survey.SharingPolicy AS (AclRules.sharing_policy) STORED,
   PeerDataVisibility groundplatform.v2.survey.PeerDataVisibility AS (AclRules.peer_data_visibility) STORED,
@@ -140,6 +141,11 @@ CREATE SEARCH INDEX SurveysSearch ON Surveys(SearchTokens) STORING (SharingPolic
 
 CREATE NULL_FILTERED INDEX SurveysByOrganization ON Surveys(OrganizationId, CommitTs)
   STORING (SharingPolicy, State, OwnerId);
+
+-- A caller's own surveys, for survey lists and the per-owner survey quota.
+CREATE INDEX SurveysByOwner ON Surveys(OwnerId);
+
+CREATE NULL_FILTERED INDEX SurveysByOwnerEmail ON Surveys(OwnerEmail);
 
 CREATE TABLE SurveyWorkingCopies (
   SurveyId UUID NOT NULL,

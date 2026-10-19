@@ -922,8 +922,18 @@ in these ways, to be closed in later steps:
 - Delta-mode `ListEntities` and `ListSubmissions` read through the
   `EntitiesDelta` and `SubmissionsDelta` indexes, and query mode narrows by
   dataset or form and by `IsDeleted` in SQL. Query-mode sorting and paging, and
-  the other `List*` RPCs (organizations, libraries, survey overviews, impact
-  events, audit records), still work on whole collections in memory.
+  libraries, impact events, and audit records, still work on whole collections
+  in memory.
+- `ListSurveyOverviews` and `ListOrganizations` read only the caller's
+  candidates: owned surveys (`SurveysByOwner`, plus `SurveysByOwnerEmail` on
+  the ACL's owner email), surveys reached through `AclByUser` and `AclByEmail`,
+  and the surveys of the caller's organizations (`MembersByUser` /
+  `MembersByEmail`, then `SurveysByOrganization`). The backend then pages them
+  in memory. Administrators still read every survey and organization. A survey
+  purged while the caller had access only through its ACL leaves an open list
+  without a tombstone, which the next fresh query corrects. The per-owner survey
+  quota counts through `SurveysByOwner`; the daily trash purge still scans all
+  surveys (there's no `SurveysByTrashTime` yet).
 - `SpannerSchema` adds new bundled proto types, tables, columns, and indexes to
   an existing database, and updates changed proto descriptors, rather than
   running numbered migration files. It doesn't change existing columns or
@@ -937,9 +947,9 @@ in these ways, to be closed in later steps:
   tokens are done. `UsersByEmail` isn't unique, since providers without an
   email and re-created accounts can share one.
 - Per-caller authorization (role checks, `PERMISSION_DENIED`, caller-specific
-  lists, `OWN_ONLY` filtering) is done in the backend over whole collections,
-  not through `SurveysByOwner`, `AclByUser`, and `MembersByUser` scans.
-  Administrators are active managers of the all-users organization.
+  lists, `OWN_ONLY` filtering) is done in the backend, on the candidates above
+  for survey and organization lists. Administrators are active managers of the
+  all-users organization.
 - There's no `Surveys.DataAccessEpoch`. Entity and submission tokens carry the
   caller's effective visibility instead (all records, or only those created by
   the caller under `OWN_ONLY`), so a `PeerDataVisibility` flip, a role change,

@@ -365,6 +365,42 @@ abstract class UserDataStoreContractTest {
   }
 
   @Test
+  fun surveyListCandidates_areFoundByOwnerAclUserMembershipAndOrganization() {
+    store.write { tx ->
+      tx.putOrganization(
+        Organization(
+          organization_id = ORG,
+          members = listOf(OrganizationMember(email = "ana@example.org", user_id = "uid-ana")),
+        )
+      )
+      tx.putSurvey(SurveyDef(survey_id = SURVEY, owner_id = "uid-ana"))
+      tx.putSurvey(SurveyDef(survey_id = OTHER_SURVEY, organization_id = ORG))
+      tx.putAcl(
+        SurveyAcl(
+          survey_id = OTHER_SURVEY,
+          owner_email = "Bob@Example.org",
+          entries = listOf(AclEntry(email = "ana@example.org", user_id = "uid-ana")),
+        )
+      )
+    }
+
+    store.read { r ->
+      assertEquals(listOf(SURVEY), r.surveysOwnedBy("uid-ana", "").map { it.survey_id })
+      // The ACL's owner email counts as ownership, compared in lowercase.
+      assertEquals(
+        listOf(OTHER_SURVEY),
+        r.surveysOwnedBy("", "bob@example.org").map { it.survey_id },
+      )
+      assertTrue(r.surveysOwnedBy("", "").isEmpty())
+      assertEquals(listOf(OTHER_SURVEY), r.surveyIdsWithAclUser("uid-ana"))
+      assertEquals(listOf(ORG), r.organizationIdsWithMemberUser("uid-ana"))
+      assertTrue(r.organizationIdsWithMemberUser("uid-bob").isEmpty())
+      assertEquals(listOf(OTHER_SURVEY), r.surveysInOrganization(ORG).map { it.survey_id })
+      assertTrue(r.surveysInOrganization(OTHER_ORG).isEmpty())
+    }
+  }
+
+  @Test
   fun recordApplied_onlyRaisesWatermarks() {
     store.write { it.recordApplied(SCOPE, CLIENT, clientSeq = 5L) }
     store.write { it.recordApplied(SCOPE, CLIENT, clientSeq = 3L) }

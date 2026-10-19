@@ -225,6 +225,28 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
         .filter { org -> org.members.any { it.email.trim().lowercase() == email } }
         .map { it.organization_id }
 
+    override fun surveysOwnedBy(userId: String, email: String) =
+      surveys.values.filter { s ->
+        (userId.isNotBlank() && s.owner_id == userId) ||
+          (email.isNotBlank() &&
+            (s.owner_id == email || acls[s.survey_id]?.owner_email?.trim()?.lowercase() == email))
+      }
+
+    override fun surveyIdsWithAclUser(userId: String) =
+      if (userId.isBlank()) emptyList()
+      else
+        acls.values.filter { acl -> acl.entries.any { it.user_id == userId } }.map { it.survey_id }
+
+    override fun organizationIdsWithMemberUser(userId: String) =
+      if (userId.isBlank()) emptyList()
+      else
+        organizations.values
+          .filter { org -> org.members.any { it.user_id == userId } }
+          .map { it.organization_id }
+
+    override fun surveysInOrganization(organizationId: String) =
+      surveys.values.filter { it.organization_id == organizationId }
+
     override fun appliedWatermarks(clientId: String) =
       watermarks.filterKeys { it.first == clientId }.values.toList()
   }

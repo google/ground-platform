@@ -577,7 +577,7 @@ class UserDataBackend(private val store: UserDataStore) :
         .list(
           params = ListParams(request.page_size, request.page_token, request.sync_token),
           scopeKey = "organizations",
-          records = r.organizations(),
+          records = r.organizationCandidates(access, caller),
           commitTimestamp = Organization::commit_timestamp,
           id = Organization::organization_id,
           query = commitOrderQuery(Organization::commit_timestamp) { !it.is_deleted },
@@ -893,7 +893,7 @@ class UserDataBackend(private val store: UserDataStore) :
       // sharing
       // policy no longer grants access.
       val overviews =
-        r.surveys()
+        r.listCandidates(access, caller)
           .filter { s -> orgId.isBlank() || s.organization_id == orgId }
           .map { s ->
             val overview = r.overviewOf(s)
@@ -925,6 +925,50 @@ class UserDataBackend(private val store: UserDataStore) :
       next_sync_token = page.nextSyncToken,
     )
   }
+
+  /**
+   * Surveys that may belong in [caller]'s survey list, read through the per-user indexes: owned, on
+   * the ACL (by user ID or verified email), or in an organization the caller belongs to.
+   * Administrators get every survey. [Access.listsSurvey] then decides between an overview and a
+   * tombstone (for example, after an organization survey stops being shared with members).
+   *
+   * Surveys the caller lost access to through other changes (ACL entries removed, organizations
+   * left) aren't candidates any more; those changes bump the caller's access epoch instead, which
+   * invalidates the caller's list tokens (`docs/technical/backend/spanner-schema.md`, "Access
+   * Changes").
+   */
+  private fun UserDataReader.listCandidates(access: Access, caller: Caller?): List<SurveyDef> {
+    if (caller == null || access.isAdmin) return surveys()
+    val email = if (caller.emailVerified) caller.normalizedEmail else ""
+    val candidates = LinkedHashMap<String, SurveyDef>()
+    surveysOwnedBy(caller.userId, email).forEach { candidates[it.survey_id] = it }
+    val aclSurveyIds =
+      surveyIdsWithAclUser(caller.userId) +
+        (if (email.isBlank()) emptyList() else surveyIdsWithAclEmail(email))
+    for (id in aclSurveyIds.distinct()) {
+      if (id !in candidates) survey(id)?.let { candidates[id] = it }
+    }
+    for (organizationId in memberOrganizationIds(caller, email)) {
+      surveysInOrganization(organizationId).forEach { candidates.putIfAbsent(it.survey_id, it) }
+    }
+    return candidates.values.toList()
+  }
+
+  /** Organizations that may belong in [caller]'s organization list (all for administrators). */
+  private fun UserDataReader.organizationCandidates(
+    access: Access,
+    caller: Caller?,
+  ): List<Organization> {
+    if (caller == null || access.isAdmin) return organizations()
+    val email = if (caller.emailVerified) caller.normalizedEmail else ""
+    return memberOrganizationIds(caller, email).mapNotNull(::organization)
+  }
+
+  /** Organizations with a membership (or invitation) for [caller]'s user ID or verified [email]. */
+  private fun UserDataReader.memberOrganizationIds(caller: Caller, email: String): List<String> =
+    (organizationIdsWithMemberUser(caller.userId) +
+        (if (email.isBlank()) emptyList() else organizationIdsWithMemberEmail(email)))
+      .distinct()
 
   override suspend fun GetSurvey(request: GetSurveyRequest): GetSurveyResponse {
     val caller = currentCaller()
@@ -1246,10 +1290,8 @@ class UserDataBackend(private val store: UserDataStore) :
           val owner = target().owner_id.ifBlank { currentAcl.owner_email }
           if (owner.isNotBlank() && limits.max_surveys_per_owner > 0) {
             val ownerSurveys =
-              tx.surveys().count {
-                it.survey_id != surveyId &&
-                  it.state != SurveyState.DELETED &&
-                  (it.owner_id == owner)
+              tx.surveysOwnedBy(userId = owner, email = "").count {
+                it.survey_id != surveyId && it.state != SurveyState.DELETED
               }
             if (ownerSurveys >= limits.max_surveys_per_owner) {
               throw StatusException(
