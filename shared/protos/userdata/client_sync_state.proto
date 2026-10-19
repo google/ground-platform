@@ -1,0 +1,137 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package groundplatform.v2.userdata;
+
+import "google/protobuf/timestamp.proto";
+import "shared/protos/data/data_service.proto";
+import "shared/protos/data/entity_record.proto";
+import "shared/protos/data/submission_record.proto";
+import "shared/protos/library/library_service.proto";
+import "shared/protos/survey/acl.proto";
+import "shared/protos/survey/organization.proto";
+import "shared/protos/survey/organization_service.proto";
+import "shared/protos/survey/survey_def.proto";
+import "shared/protos/survey/survey_service.proto";
+
+// Sync state a mobile client keeps on the device between launches
+// (`docs/technical/client/local-data-store.md`): the outbox of pending
+// mutations, the last server copy (base) of each synced record, the install's
+// mutation identity, and the sync tokens of each `List*` scope. The local copy
+// the UI shows is rebuilt from these on launch by applying the pending
+// mutations on top of the bases, so edits made offline survive restarts.
+message ClientSyncState {
+  repeated PendingMutationRecord outbox = 1;
+  repeated SurveyBaseRecord survey_bases = 2;
+  repeated groundplatform.v2.data.EntityRecord entity_bases = 3;
+  repeated groundplatform.v2.data.SubmissionRecord submission_bases = 4;
+  repeated groundplatform.v2.survey.Organization organization_bases = 5;
+  repeated groundplatform.v2.library.OrganizationLibraryRecord library_bases = 6;
+
+  // Stable identifier of this install (`*Mutation.client_id`).
+  string client_id = 7;
+
+  // The `client_seq` the next recorded mutation gets.
+  int64 next_client_seq = 8;
+
+  // Former timestamp watermarks. State saved with them has no sync tokens, so
+  // the next sync is a full sync.
+  reserved 9;
+  reserved "watermarks";
+
+  SyncTokensRecord sync_tokens = 10;
+
+  // Surveys the user downloaded to this device (`SurveyDef.survey_id`). Mobile
+  // syncs the definitions, entities, and submissions of these surveys only
+  // (`docs/technical/sync-engine.md`, "Survey Downloads & Working Copies").
+  repeated string downloaded_survey_ids = 11;
+}
+
+// Last server copies of one survey's saved revision, working copy, and ACL.
+message SurveyBaseRecord {
+  string survey_id = 1;
+  groundplatform.v2.survey.SurveyDef saved = 2;
+  groundplatform.v2.survey.SurveyDef working_copy = 3;
+  groundplatform.v2.survey.SurveyAcl acl = 4;
+}
+
+// Opaque `next_sync_token` of each synced `List*` scope
+// (`docs/technical/sync-engine.md`, "Sync Tokens"). Empty means the scope
+// hasn't been synced yet, so its next sync is a full sync.
+message SyncTokensRecord {
+  // `ListOrganizations`.
+  string organizations = 1;
+
+  // `ListLibraries` (all organizations).
+  string libraries = 2;
+
+  // `ListSurveyOverviews` (all organizations).
+  string surveys = 3;
+
+  // `ListEntities`, keyed by `survey_id`.
+  map<string, string> entities_by_survey = 4;
+
+  // `ListSubmissions`, keyed by `survey_id`.
+  map<string, string> submissions_by_survey = 5;
+
+  // `ListImpactEvents` (all surveys).
+  string impact_events = 6;
+}
+
+// One outbox entry: a mutation waiting to be sent or confirmed.
+message PendingMutationRecord {
+  // Lifecycle of the entry in the outbox.
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    QUEUED = 1;
+    IN_FLIGHT = 2;
+    RETRYING = 3;
+    REJECTED = 4;
+  }
+
+  string mutation_id = 1;
+  int64 client_seq = 2;
+
+  // Record the mutation changes, e.g. `"entity/<id>"`.
+  string record_key = 3;
+
+  // The RPC target and wire mutation, without identity fields.
+  oneof payload {
+    // `MutateSurvey` for `scope_id` (a survey ID).
+    groundplatform.v2.survey.SurveyMutation survey_mutation = 4;
+    // `MutateData` for `scope_id` (a survey ID).
+    groundplatform.v2.data.DataMutation data_mutation = 5;
+    // `MutateOrganization` for `scope_id` (an organization ID).
+    groundplatform.v2.survey.OrganizationMutation organization_mutation = 6;
+    // `MutateLibrary` for `scope_id` (an organization ID).
+    groundplatform.v2.library.LibraryMutation library_mutation = 7;
+  }
+
+  // Survey or organization ID the target RPC is scoped to.
+  string scope_id = 8;
+
+  // For `survey_mutation`: sent to the working copy.
+  bool working_copy = 9;
+
+  int64 base_revision = 10;
+  google.protobuf.Timestamp client_timestamp = 11;
+  State state = 12;
+  int32 attempts = 13;
+  string last_error = 14;
+  google.protobuf.Timestamp not_before = 15;
+}
