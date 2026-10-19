@@ -82,6 +82,8 @@ import groundplatform.v2.survey.MutateSurveyResponse
 import groundplatform.v2.survey.OrganizationServiceServer
 import groundplatform.v2.survey.SearchOrganizationsRequest
 import groundplatform.v2.survey.SearchOrganizationsResponse
+import groundplatform.v2.survey.SearchPublicSurveysRequest
+import groundplatform.v2.survey.SearchPublicSurveysResponse
 import groundplatform.v2.survey.SurveyServiceServer
 
 /**
@@ -148,6 +150,10 @@ class CollectOneGrpcClient(
   suspend fun batchGetSurveyOverviews(
     request: BatchGetSurveyOverviewsRequest
   ): BatchGetSurveyOverviewsResponse = surveyService.BatchGetSurveyOverviews(request)
+
+  suspend fun searchPublicSurveys(
+    request: SearchPublicSurveysRequest
+  ): SearchPublicSurveysResponse = surveyService.SearchPublicSurveys(request)
 
   suspend fun getSurvey(request: GetSurveyRequest): GetSurveyResponse =
     surveyService.GetSurvey(request)

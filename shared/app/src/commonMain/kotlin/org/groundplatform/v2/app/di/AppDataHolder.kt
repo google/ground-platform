@@ -59,6 +59,7 @@ import org.groundplatform.v2.app.data.repository.OutboxSyncRepositoryImpl
 import org.groundplatform.v2.app.data.repository.PlaceRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SampleDataRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SettingsRepositoryImpl
+import org.groundplatform.v2.app.data.repository.SurveyDirectoryRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.data.sync.OutboxDrainer
@@ -89,6 +90,7 @@ import org.groundplatform.v2.app.domain.repository.PlaceRepository
 import org.groundplatform.v2.app.domain.repository.SampleDataRepository
 import org.groundplatform.v2.app.domain.repository.SettingsRepository
 import org.groundplatform.v2.app.domain.repository.SurveyContent
+import org.groundplatform.v2.app.domain.repository.SurveyDirectoryRepository
 import org.groundplatform.v2.app.domain.repository.SurveyEditorRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.app.domain.repository.TransactionRunner
@@ -208,6 +210,10 @@ class AppDataHolder(
     PlaceRepositoryImpl(store = localStore, remoteDataSource = MapboxPlacesDataSource()),
   val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(editStore),
   val libraryRepository: LibraryRepository = LibraryRepositoryImpl(editStore),
+  /** Finds public and link-shared surveys to download; null without a user data service. */
+  val surveyDirectoryRepository: SurveyDirectoryRepository? = grpcClient?.let {
+    SurveyDirectoryRepositoryImpl(localStore, it)
+  },
   val locationRepository: LocationRepository = LocationRepositoryImpl(),
   val authRepository: AuthRepository = AuthRepositoryImpl(AuthDataSource(authClient, scope)),
   val sampleDataRepository: SampleDataRepository =

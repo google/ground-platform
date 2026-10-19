@@ -30,6 +30,7 @@ import org.groundplatform.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.groundplatform.v2.app.data.datasource.local.store.MutationPayload
 import org.groundplatform.v2.app.data.datasource.local.store.MutationTarget
 import org.groundplatform.v2.app.data.datasource.local.store.runDirect
+import org.groundplatform.v2.app.data.repository.SurveyDirectoryRepositoryImpl
 import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.data.seed.SampleDataSeeder
 import org.groundplatform.v2.app.data.sync.ClientSyncStateCodec
@@ -232,6 +233,38 @@ class DownloadedSurveySyncTest {
       assertEquals("Shared with me", survey(otherId)?.title)
       assertNull(surveyBase(otherId))
     }
+  }
+
+  @Test
+  fun surveyFoundByLink_isDownloadedEvenThoughTheListDoesNotIncludeIt(): Unit = runDirect {
+    seed()
+    val otherId = notDownloadedId()
+    // The device has never listed the survey (for example, it's shared with anyone with the link).
+    store.transaction { deleteSurvey(otherId) }
+    val directory = SurveyDirectoryRepositoryImpl(store, service.client())
+
+    val found = assertNotNull(directory.lookUpSurvey(otherId))
+    directory.downloadSurvey(found)
+    store.transaction {
+      assertTrue(survey(otherId)!!.isDownloaded)
+      assertNull(surveyBase(otherId))
+    }
+    pull()
+
+    assertTrue(otherId in downloaded())
+    store.transaction {
+      assertNotNull(surveyBase(otherId))
+      assertTrue(survey(otherId)!!.isDownloaded)
+      assertTrue(otherId in syncState().syncTokens.entitiesBySurvey)
+    }
+    // Nothing was queued for upload: the downloaded set is device-local.
+    assertTrue(store.transaction { outbox() }.isEmpty())
+  }
+
+  @Test
+  fun lookUpSurvey_returnsNullForASurveyThatDoesNotExist(): Unit = runDirect {
+    val directory = SurveyDirectoryRepositoryImpl(store, service.client())
+    assertNull(directory.lookUpSurvey("99999999-9999-4999-8999-999999999999"))
   }
 
   @Test
