@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Dotfiles and dot-directories are local tool state (IDE settings, caches, sync
+# snapshots) unless listed here.
+.*
+!.gitignore
+!.github/
+
 **/build/
 **/.gradle/
 **/.kotlin/
