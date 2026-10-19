@@ -1097,7 +1097,7 @@ if (killExistingOnLaunch) {
 }
 
 /**
- * Fully qualified host and domain name of this machine (e.g. `name.c.googlers.com`), from
+ * Fully qualified host and domain name of this machine (e.g. `name.example.com`), from
  * `hostname -f`, falling back to `os.hostname()` when that fails or returns a bare name.
  */
 function fullyQualifiedHostname() {

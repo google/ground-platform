@@ -255,8 +255,8 @@ banner with a Retry button. There's no default URL.
 
 `local.properties` at the repository root is read by the web console, the browser-hosted mobile
 app, and the Android app, so one line points all of them at the same service.
-The web dev servers proxy the service from the Cloudtop, so for them use an
-address the Cloudtop reaches, such as `localhost`; the browser only talks to
+The web dev servers proxy the service from their own machine, so for them use an
+address that machine reaches, such as `localhost`; the browser only talks to
 the dev server:
 
 ```properties

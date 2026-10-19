@@ -64,7 +64,7 @@ start. Start the service, then the console:
 Tell the dev server where the service is with `USER_DATA_SERVICE_URL`, either in
 `local.properties` (`local.properties` in the repository root, shared with `androidApp/`, or
 `webApp/local.properties`, which takes precedence) or in the environment when
-you start the dev server. Use an address the Cloudtop itself can reach, such as
+you start the dev server. Use an address the dev server's machine can reach, such as
 `localhost`:
 
 ```properties
@@ -80,8 +80,8 @@ USER_DATA_SERVICE_URL=http://localhost:8080 ./gradlew wasmJsBrowserDevelopmentRu
 The dev server proxies the service: the page sends its gRPC-Web calls to its
 own origin, and the dev server forwards them to `USER_DATA_SERVICE_URL`. So the
 browser never needs its own route to the service, and opening the console through
-port forwarding, the Cloudtop HTTPS proxy (`*.proxy.googlers.com`), or the
-Cloudtop's hostname all work the same, with no mixed-content or CORS issues.
+port forwarding, an HTTPS reverse proxy, or the development machine's hostname
+all work the same, with no mixed-content or CORS issues.
 The dev server re-reads `local.properties` on every request, so a change takes
 effect on the next reload. The service can't be chosen from the page URL, so a
 link can't point the console at another backend.

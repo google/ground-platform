@@ -56,7 +56,7 @@ if (config.devServer) {
   config.devServer.static = staticList;
 
   // The dev server proxies the user data service, so the page calls its own origin and never
-  // needs a route to the service: this works through port forwarding, the Cloudtop HTTPS proxy, or
+  // needs a route to the service: this works through port forwarding, an HTTPS reverse proxy, or
   // a hostname alike, without mixed-content or CORS issues. The target is USER_DATA_SERVICE_URL from
   // the environment the dev server was started with, else from local.properties, re-read on every
   // request so edits take effect on the next page load. Production bundles have no dev server and
