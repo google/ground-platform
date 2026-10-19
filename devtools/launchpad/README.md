@@ -62,6 +62,12 @@ starts the server with `SPANNER_EMULATOR_HOST=localhost:9010`. If you start the
 emulator after the launchpad started the server without it, the launchpad
 restarts the server so the **Spanner data** page can browse it.
 
+The server, web console, and mobile app are separate Gradle builds that all
+include the `shared/` builds, so building two at once makes them overwrite each
+other's `shared/*/build` outputs mid-compile. The launchpad builds them one at a
+time: a service started while another is building shows **Starting** and
+waits for it to finish.
+
 ## Pages
 
 - **Overview**: A card per service. The coloured bracket on its left and the

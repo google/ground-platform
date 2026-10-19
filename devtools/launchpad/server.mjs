@@ -77,6 +77,7 @@ const SERVICE_DEFINITIONS = [
     port: 8080,
     healthCheck: { type: 'http', path: '/healthz', expectedStatus: 200 },
     cwdRel: 'server/userDataService',
+    sharesGradleBuild: true,
     command: ['./gradlew', 'run', '--console=plain'],
     readyRegex: /User data service listening on port/i,
     endpoints: [
@@ -94,6 +95,7 @@ const SERVICE_DEFINITIONS = [
     port: 8092,
     healthCheck: { type: 'http', path: '/', expectedStatus: 500, comparison: '<' },
     cwdRel: 'webApp',
+    sharesGradleBuild: true,
     command: ['./gradlew', 'wasmJsBrowserDevelopmentRun', '--console=plain'],
     readyRegex: /webpack \d+.*compiled/i,
     endpoints: [
@@ -112,6 +114,7 @@ const SERVICE_DEFINITIONS = [
     port: 8093,
     healthCheck: { type: 'http', path: '/', expectedStatus: 500, comparison: '<' },
     cwdRel: 'mobileWebApp',
+    sharesGradleBuild: true,
     command: ['./gradlew', 'wasmJsBrowserDevelopmentRun', '--console=plain'],
     readyRegex: /webpack \d+.*compiled/i,
     endpoints: [
@@ -399,6 +402,9 @@ async function probeAllServices() {
   });
 
   for (const [id, s] of serviceStates.entries()) {
+    // Not spawned yet, waiting for another service's Gradle build (waitForSharedGradleBuilds).
+    if (s.waitingForBuild) continue;
+
     let portOpen = false;
     let healthy = false;
 
@@ -440,6 +446,7 @@ async function probeAllServices() {
       if (s.child) {
         s.managed = true;
         s.state = healthy ? 'ONLINE' : 'STARTING';
+        if (healthy) s.buildFinished = true;
       } else {
         s.managed = false;
         // Started elsewhere: the port can open before the app is ready (e.g. webpack still
@@ -511,6 +518,60 @@ setInterval(probeAllServices, 1500);
 probeAllServices();
 
 // Process Lifecycle Management
+
+/** Longest a service waits for another's Gradle build before building anyway. */
+const SHARED_GRADLE_BUILD_TIMEOUT_MS = 20 * 60 * 1000;
+
+/**
+ * Whether [s] is running (or about to run) a Gradle build that writes into shared/: from its start
+ * until it logs that it's ready or passes its health check (buildFinished), or exits.
+ */
+function isBuildingShared(s) {
+  return s.sharesGradleBuild && (s.gradleBuildClaimed || (s.child && !s.buildFinished));
+}
+
+/**
+ * The server, web console, and mobile app are separate Gradle builds that each include the
+ * shared/ builds, so building two at once makes them write the same shared/<module>/build outputs
+ * while the other reads them (e.g. NoSuchFileException for a klib's linkdata). Waits until no other
+ * such service is building, then claims the build for [service], until it spawns. Returns false if
+ * the start was canceled by stopping the service while it waited.
+ */
+async function waitForSharedGradleBuilds(service) {
+  const other = () =>
+    [...serviceStates.values()].find((s) => s !== service && isBuildingShared(s));
+  const deadline = Date.now() + SHARED_GRADLE_BUILD_TIMEOUT_MS;
+  let waitingFor = other();
+  if (waitingFor) {
+    service.waitingForBuild = true;
+    service.cancelBuildWait = false;
+    service.state = 'STARTING';
+    service.lastExitCode = null;
+    while (waitingFor && Date.now() < deadline && !service.cancelBuildWait) {
+      const note = `Waiting for ${waitingFor.name} to finish building (they share Gradle outputs)`;
+      if (service.compilePhase !== note) {
+        service.compilePhase = note;
+        service.lastLogLine = note;
+        appendLog(service, `[LAUNCHPAD] ${note}`, 'stdout');
+        broadcastStatus();
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+      waitingFor = other();
+    }
+    service.waitingForBuild = false;
+    if (service.cancelBuildWait) {
+      service.cancelBuildWait = false;
+      service.state = 'OFFLINE';
+      service.compilePhase = '';
+      service.lastLogLine = '';
+      broadcastStatus();
+      return false;
+    }
+  }
+  // Claimed synchronously with the last check, so a concurrent start waits for this one.
+  service.gradleBuildClaimed = true;
+  return true;
+}
 async function startService(id, options = {}) {
   const service = serviceStates.get(id);
   if (!service) throw new Error(`Unknown service: ${id}`);
@@ -551,6 +612,10 @@ async function startService(id, options = {}) {
     childEnv.PATH = `${userBin}:${childEnv.PATH}`;
   }
 
+  if (service.sharesGradleBuild && !(await waitForSharedGradleBuilds(service))) {
+    return { success: false, message: `Start of ${service.name} canceled` };
+  }
+
   let child;
   try {
     child = spawn(service.command[0], service.command.slice(1), {
@@ -560,12 +625,15 @@ async function startService(id, options = {}) {
       stdio: ['ignore', 'pipe', 'pipe']
     });
   } catch (err) {
+    service.gradleBuildClaimed = false;
     service.state = 'FAULT';
     appendLog(service, `[LAUNCHPAD ERROR] Failed to spawn: ${err.message}`, 'stderr');
     broadcastStatus();
     return { success: false, message: err.message };
   }
 
+  service.gradleBuildClaimed = false;
+  service.buildFinished = false;
   service.child = child;
   service.pid = child.pid;
   service.managed = true;
@@ -597,6 +665,7 @@ async function startService(id, options = {}) {
       }
 
       if (service.readyRegex && service.readyRegex.test(clean)) {
+        service.buildFinished = true;
         service.state = 'ONLINE';
         service.compilePhase = 'Ready';
         broadcastStatus();
@@ -650,6 +719,12 @@ async function stopService(id) {
   if (!service) throw new Error(`Unknown service: ${id}`);
 
   appendLog(service, `[LAUNCHPAD] Stopping service ${service.name}...`, 'stdout');
+
+  if (service.waitingForBuild) {
+    // Not spawned yet: waitForSharedGradleBuilds gives up and marks it stopped.
+    service.cancelBuildWait = true;
+    return { success: true, message: `Canceled start of ${service.name}` };
+  }
 
   // 1. If managed child process, kill process group
   if (service.child && service.child.pid) {
