@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ This design builds on [sync-engine.md](../sync-engine.md),
 [survey_service.proto](../../../shared/protos/survey/survey_service.proto),
 [organization_service.proto](../../../shared/protos/survey/organization_service.proto),
 [library_service.proto](../../../shared/protos/library/library_service.proto),
-[UserDataBackend.kt](../../../server/userDataService/src/main/kotlin/org/groundplatform/v2/server/userdata/UserDataBackend.kt),
-[SyncLists.kt](../../../server/userDataService/src/main/kotlin/org/groundplatform/v2/server/userdata/SyncLists.kt).
+[UserDataBackend.kt](../../../server/userDataService/src/main/kotlin/org/openforis/collectone/v2/server/userdata/UserDataBackend.kt),
+[SyncLists.kt](../../../server/userDataService/src/main/kotlin/org/openforis/collectone/v2/server/userdata/SyncLists.kt).
 
 ## Decisions
 
@@ -71,7 +71,7 @@ This design builds on [sync-engine.md](../sync-engine.md),
 | Tombstones for deleted records; lost access detected                                                                | Soft-deleted entity and submission rows with a TTL, per-user `AccessEpoch` for list tokens, and `BatchGetSurveyOverviews` for downloaded surveys |
 | Each mutation applied at most once; highest applied `client_seq` per `(client_id, scope)` for `GetAppliedMutations` | One `ClientMutationWatermarks` row per client and scope, updated in the same transaction as the mutation                                         |
 | Strictly increasing versions (`revision`, `version`, `record_version`)                                              | Proto fields incremented inside each read-write transaction                                                                                      |
-| Last-writer-wins field patches using the shared `org.groundplatform.v2.core.mutation` functions                     | Read the proto, apply the patches, write it back, all in one read-write transaction (no patch logic in SQL)                                      |
+| Last-writer-wins field patches using the shared `org.openforis.collectone.v2.core.mutation` functions                     | Read the proto, apply the patches, write it back, all in one read-write transaction (no patch logic in SQL)                                      |
 | `FAILED_PRECONDITION` when a token can't be served                                                                  | Data epoch and per-user / per-survey access epochs, carried in the token; tombstones are permanent, so tokens never expire                       |
 | Stateless, any instance serves any request (Cloud Run)                                                              | No in-process state; drop `--max-instances 1`                                                                                                    |
 

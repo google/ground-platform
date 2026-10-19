@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ hash (`#surveys`, `#dashboard`, `#survey-editor`, `#create-survey`,
 
 ## Architecture
 
--   [`../shared/web/`](../shared/web/) (`org.groundplatform.v2:web`): the web
+-   [`../shared/web/`](../shared/web/) (`org.openforis.collectone.v2:web`): the web
     console's pages, state (`WebAppState`), and root (`WebConsoleApp()`).
--   [`../shared/app/`](../shared/app/) (`org.groundplatform.v2:app`): the
+-   [`../shared/app/`](../shared/app/) (`org.openforis.collectone.v2:app`): the
     domain, data, and UI shared with the mobile app. Its JS bridges
     (`pdf-export-bridge.js`, `media-capture-bridge.js`) are copied into this
     bundle and loaded by `index.html`.

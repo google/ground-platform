@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -21,7 +21,7 @@ plugins {
   id("com.ncorti.ktfmt.gradle")
 }
 
-group = "org.groundplatform.v2"
+group = "org.openforis.collectone.v2"
 
 version = "2.0.0-SNAPSHOT"
 
@@ -43,7 +43,7 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT")
+        api("org.openforis.collectone.v2:mobile:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -55,7 +55,7 @@ kotlin {
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation("org.groundplatform.v2:app-testing:2.0.0-SNAPSHOT")
+        implementation("org.openforis.collectone.v2:app-testing:2.0.0-SNAPSHOT")
       }
     }
     val jvmTest by getting {

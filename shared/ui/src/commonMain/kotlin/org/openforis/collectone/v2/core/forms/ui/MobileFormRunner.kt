@@ -1,0 +1,1093 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.openforis.collectone.v2.core.forms.ui
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import org.openforis.collectone.v2.core.forms.model.FinalizationResult
+import org.openforis.collectone.v2.core.forms.model.ValidationStatus
+
+/**
+ * Reusable Compose Multiplatform mobile form runner displaying a single question screen at a time
+ * with Material 3 `TopAppBar`, progress indicator, repeat group management, language `FilterChip`s,
+ * and final submission review.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MobileFormRunner(
+  controller: FormWizardController,
+  modifier: Modifier = Modifier,
+  onClose: (() -> Unit)? = null,
+  onSubmitted: ((FinalizationResult.Success) -> Unit)? = null,
+) {
+  val state = controller.formState
+  val currentStep = controller.currentStep
+  val stepIndex = controller.currentStepIndex
+  val totalSteps = controller.totalSteps.coerceAtLeast(1)
+  val progress = (stepIndex + 1).toFloat() / totalSteps.toFloat()
+  val formTitle =
+    state.formDef.title.takeIf { it.isNotBlank() }
+      ?: state.formDef.form_id.takeIf { it.isNotBlank() }
+      ?: "Survey form"
+  val colors = MaterialTheme.colorScheme
+  // The top bar is a saturated `primary` surface, so everything drawn on it is tinted from
+  // `onPrimary` rather than the default surface roles. Deriving the de-emphasized variants by
+  // alpha (instead of naming more palette entries) keeps the title / subtitle / tonal-button
+  // hierarchy intact under both the light and dark schemes.
+  val onAppBar = colors.onPrimary
+  val onAppBarSecondary = colors.onPrimary.copy(alpha = 0.80f)
+  val appBarTonalContainer = colors.onPrimary.copy(alpha = 0.16f)
+  val appBarTrack = colors.onPrimary.copy(alpha = 0.24f)
+
+  Scaffold(
+    modifier = modifier.fillMaxSize(),
+    containerColor = colors.surfaceContainerLow,
+    topBar = {
+      Surface(color = colors.primary, contentColor = onAppBar, tonalElevation = 2.dp) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+          TopAppBar(
+            title = {
+              Column {
+                Text(
+                  text = formTitle,
+                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                  color = onAppBar,
+                )
+                Text(
+                  text =
+                    if (currentStep is FormWizardStep.SummaryStep) {
+                      "Review & finalize (${controller.totalQuestionSteps} questions)"
+                    } else {
+                      "Step ${stepIndex + 1} of $totalSteps"
+                    },
+                  style = MaterialTheme.typography.labelSmall,
+                  color = onAppBarSecondary,
+                )
+              }
+            },
+            actions = {
+              FilledTonalButton(
+                onClick = { controller.isOverviewOpen = !controller.isOverviewOpen },
+                colors =
+                  ButtonDefaults.filledTonalButtonColors(
+                    containerColor = appBarTonalContainer,
+                    contentColor = onAppBar,
+                  ),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+              ) {
+                if (!controller.isOverviewOpen) {
+                  Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                  )
+                  Spacer(modifier = Modifier.width(6.dp))
+                }
+                Text(
+                  text = if (controller.isOverviewOpen) "Close list" else "Steps ($totalSteps)",
+                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
+                )
+              }
+              if (onClose != null) {
+                Spacer(modifier = Modifier.width(4.dp))
+                IconButton(
+                  onClick = onClose,
+                  colors = IconButtonDefaults.iconButtonColors(contentColor = onAppBar),
+                ) {
+                  Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close form",
+                  )
+                }
+              }
+            },
+            colors =
+              TopAppBarDefaults.topAppBarColors(
+                containerColor = colors.primary,
+                titleContentColor = onAppBar,
+                actionIconContentColor = onAppBar,
+              ),
+          )
+
+          // Multi-lingual Language Selector (if form defines multiple translations)
+          if (state.availableLanguages.size > 1) {
+            Row(
+              modifier =
+                Modifier.fillMaxWidth()
+                  .horizontalScroll(rememberScrollState())
+                  .padding(horizontal = 16.dp, vertical = 4.dp),
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Icon(
+                imageVector = LanguageIcon,
+                contentDescription = "Language",
+                tint = onAppBarSecondary,
+                modifier = Modifier.size(18.dp),
+              )
+              state.availableLanguages.forEach { lang ->
+                val isActive = lang == state.activeLanguage
+                FilterChip(
+                  selected = isActive,
+                  onClick = { controller.setLanguage(lang) },
+                  colors =
+                    androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                      containerColor = appBarTonalContainer,
+                      labelColor = onAppBar,
+                      // Selected chips invert: the on-color becomes the fill, so the label has to
+                      // switch back to the bar's own color to stay legible.
+                      selectedContainerColor = onAppBar,
+                      selectedLabelColor = colors.primary,
+                    ),
+                  label = {
+                    Text(
+                      text = lang,
+                      style = MaterialTheme.typography.labelSmall,
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                      softWrap = false,
+                    )
+                  },
+                )
+              }
+            }
+          }
+
+          LinearProgressIndicator(
+            progress = { progress.coerceIn(0f, 1f) },
+            modifier = Modifier.fillMaxWidth().height(5.dp),
+            color = onAppBar,
+            trackColor = appBarTrack,
+          )
+        }
+      }
+    },
+    bottomBar = {
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = colors.surfaceContainer,
+        contentColor = colors.onSurface,
+        tonalElevation = 3.dp,
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          OutlinedButton(
+            onClick = { controller.previousStep() },
+            enabled = controller.canGoBack,
+          ) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("Back", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+          }
+
+          Text(
+            text = "${stepIndex + 1} / $totalSteps",
+            style =
+              MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = colors.onSurfaceVariant,
+              ),
+          )
+
+          if (currentStep is FormWizardStep.SummaryStep) {
+            Button(
+              onClick = {
+                val res = controller.finalizeForm()
+                if (res is FinalizationResult.Success) {
+                  onSubmitted?.invoke(res)
+                }
+              }
+            ) {
+              Text("Submit", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+            }
+          } else {
+            val isLastQuestionBeforeSummary = stepIndex == totalSteps - 2
+            Row(
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              if (controller.isCurrentStepOptional) {
+                OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
+                  Text("Skip", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+                }
+              }
+
+              Button(
+                onClick = { controller.nextStep(enforceValidation = true) },
+                enabled = !controller.isCurrentStepWaitingForLocationCapture,
+              ) {
+                Text(
+                  if (isLastQuestionBeforeSummary) "Review" else "Next",
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                  imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                  contentDescription = null,
+                  modifier = Modifier.size(16.dp),
+                )
+              }
+            }
+          }
+        }
+      }
+    },
+  ) { innerPadding ->
+    if (controller.isOverviewOpen) {
+      StepOverviewPanel(
+        controller = controller,
+        modifier = Modifier.fillMaxSize().padding(innerPadding),
+      )
+    } else {
+      Column(
+        modifier =
+          Modifier.fillMaxSize()
+            .padding(innerPadding)
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        // Enclosing Group / Repeat Breadcrumb Banner
+        if (currentStep.breadcrumbs.isNotEmpty()) {
+          BreadcrumbBar(
+            breadcrumbs = currentStep.breadcrumbs,
+            repeatContext = currentStep.repeatContext,
+            controller = controller,
+          )
+        }
+
+        when (currentStep) {
+          is FormWizardStep.QuestionStep -> {
+            QuestionControlCard(
+              control = currentStep.control,
+              controller = controller,
+              showValidationErrors = controller.showCurrentStepValidationWarning,
+            )
+          }
+          is FormWizardStep.FieldListGroupStep -> {
+            Text(
+              text = currentStep.title,
+              style =
+                MaterialTheme.typography.titleMedium.copy(
+                  fontWeight = FontWeight.Bold,
+                  color = colors.primary,
+                ),
+            )
+            currentStep.controls.forEach { control ->
+              QuestionControlCard(
+                control = control,
+                controller = controller,
+                showValidationErrors = controller.showCurrentStepValidationWarning,
+              )
+            }
+          }
+          is FormWizardStep.RepeatHubStep -> {
+            RepeatHubScreenContent(step = currentStep, controller = controller)
+          }
+          is FormWizardStep.SummaryStep -> {
+            FormSummaryScreenContent(controller = controller)
+          }
+        }
+
+        // Validation blocker notice when user pressed Next on an invalid question
+        if (
+          controller.showCurrentStepValidationWarning &&
+            (controller.currentStepErrors.isNotEmpty() ||
+              controller.isCurrentStepWaitingForLocationCapture) &&
+            currentStep !is FormWizardStep.SummaryStep
+        ) {
+          Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors =
+              CardDefaults.cardColors(
+                containerColor = colors.errorContainer,
+                contentColor = colors.onErrorContainer,
+              ),
+            shape = MaterialTheme.shapes.medium,
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth().padding(12.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text =
+                  stepValidationBlockerMessage(
+                    isWaitingForLocationCapture = controller.isCurrentStepWaitingForLocationCapture,
+                    isStepOptional = controller.isCurrentStepOptional,
+                  ),
+                style =
+                  MaterialTheme.typography.bodySmall.copy(
+                    color = colors.onErrorContainer,
+                    fontWeight = FontWeight.Medium,
+                  ),
+                modifier = Modifier.weight(1f),
+              )
+              if (controller.isCurrentStepOptional) {
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedButton(
+                  onClick = { controller.nextStep(enforceValidation = false) },
+                  colors =
+                    ButtonDefaults.outlinedButtonColors(contentColor = colors.onErrorContainer),
+                  border = BorderStroke(1.dp, colors.onErrorContainer.copy(alpha = 0.5f)),
+                ) {
+                  Text(
+                    "Skip",
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                  )
+                  Spacer(modifier = Modifier.width(4.dp))
+                  Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun BreadcrumbBar(
+  breadcrumbs: List<String>,
+  repeatContext: RepeatStepContext?,
+  controller: FormWizardController,
+) {
+  val colors = MaterialTheme.colorScheme
+  Card(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.cardColors(
+        containerColor = colors.secondaryContainer,
+        contentColor = colors.onSecondaryContainer,
+      ),
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Text(
+        text = breadcrumbs.joinToString("  ›  "),
+        style =
+          MaterialTheme.typography.labelMedium.copy(
+            fontWeight = FontWeight.SemiBold,
+            color = colors.onSecondaryContainer,
+          ),
+      )
+      if (repeatContext != null) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = "Entry #${repeatContext.repeatIndex} of ${repeatContext.totalInstances}",
+            style =
+              MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Medium,
+                color = colors.onSecondaryContainer,
+              ),
+          )
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            FilledTonalButton(
+              onClick = { controller.openRepeatHub(repeatContext.repeatGroupPath) },
+              contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+            ) {
+              Text(
+                text = "All entries",
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+              )
+            }
+            if (repeatContext.canAddInstance) {
+              FilledTonalButton(
+                onClick = { controller.addRepeatInstanceAndOpen(repeatContext.repeatGroupPath) },
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Add,
+                  contentDescription = null,
+                  modifier = Modifier.size(14.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                  text = "Add ${repeatContext.repeatGroupLabel}",
+                  style = MaterialTheme.typography.labelSmall,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
+                )
+              }
+            }
+            if (repeatContext.canRemoveInstance) {
+              OutlinedButton(
+                onClick = {
+                  controller.removeRepeatInstance(
+                    repeatContext.repeatGroupPath,
+                    repeatContext.repeatIndex,
+                  )
+                },
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.error),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+              ) {
+                Text(
+                  text = "Delete #${repeatContext.repeatIndex}",
+                  style = MaterialTheme.typography.labelSmall,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                  softWrap = false,
+                )
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun RepeatHubScreenContent(
+  step: FormWizardStep.RepeatHubStep,
+  controller: FormWizardController,
+) {
+  val colors = MaterialTheme.colorScheme
+  val repeatGroup = step.repeatGroup
+  val groupLabel =
+    repeatGroup.label?.text?.takeIf { it.isNotBlank() }
+      ?: repeatGroup.canonicalPath.substringAfterLast('/')
+
+  ElevatedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.large,
+    colors = CardDefaults.elevatedCardColors(containerColor = colors.surfaceContainerLowest),
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          GroundTonalBadge(
+            text =
+              "Repeated section • ${repeatGroup.instances.size} ${if (repeatGroup.instances.size == 1) "entry" else "entries"}",
+            tone = GroundBadgeTone.PRIMARY,
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = groupLabel,
+            style =
+              MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = colors.onSurface,
+              ),
+          )
+          Text(
+            text = "Add one or more '$groupLabel' entries below.",
+            style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+          )
+        }
+        if (repeatGroup.targetCount != null) {
+          GroundTonalBadge(
+            text = "${repeatGroup.targetCount} required",
+            tone = GroundBadgeTone.TERTIARY,
+          )
+        }
+      }
+
+      if (repeatGroup.instances.isEmpty()) {
+        Surface(
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          color = colors.surfaceContainer,
+        ) {
+          Box(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = "No repeat entries added yet.",
+              style = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurfaceVariant),
+            )
+          }
+        }
+      } else {
+        repeatGroup.instances.forEach { instance ->
+          val summary = step.summaries.firstOrNull { it.repeatIndex == instance.repeatIndex }
+          val instTitle =
+            summary?.title?.ifBlank { "$groupLabel #${instance.repeatIndex}" }
+              ?: "$groupLabel #${instance.repeatIndex}"
+          val preview =
+            summary?.previewText?.ifBlank { "Tap to fill out details" } ?: "Tap to fill out details"
+
+          OutlinedCard(
+            onClick = {
+              val stepIdx =
+                controller.steps.indexOfFirst {
+                  it.repeatContext?.instancePath == instance.canonicalPath
+                }
+              if (stepIdx >= 0) controller.jumpToStep(stepIdx)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLow),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Surface(
+                  shape = CircleShape,
+                  color = colors.secondaryContainer,
+                  contentColor = colors.onSecondaryContainer,
+                ) {
+                  Box(
+                    modifier = Modifier.size(32.dp),
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    Text(
+                      text = "#${instance.repeatIndex}",
+                      style =
+                        MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    )
+                  }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                  Text(
+                    text = instTitle,
+                    style =
+                      MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onSurface,
+                      ),
+                  )
+                  Text(
+                    text = preview,
+                    style =
+                      MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                  )
+                }
+              }
+              Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                OutlinedButton(
+                  onClick = {
+                    val stepIdx =
+                      controller.steps.indexOfFirst {
+                        it.repeatContext?.instancePath == instance.canonicalPath
+                      }
+                    if (stepIdx >= 0) controller.jumpToStep(stepIdx)
+                  },
+                  contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                ) {
+                  Text(
+                    "Edit",
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                  )
+                }
+                if (repeatGroup.canRemoveInstance) {
+                  TextButton(
+                    onClick = {
+                      controller.removeRepeatInstance(
+                        repeatGroup.canonicalPath,
+                        instance.repeatIndex,
+                      )
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                  ) {
+                    Text(
+                      "Delete",
+                      style = MaterialTheme.typography.labelSmall,
+                      maxLines = 1,
+                    )
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (repeatGroup.canAddInstance) {
+        Button(
+          onClick = { controller.addRepeatInstanceAndOpen(repeatGroup.canonicalPath) },
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            "+ Add $groupLabel entry",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun FormSummaryScreenContent(controller: FormWizardController) {
+  val colors = MaterialTheme.colorScheme
+  val state = controller.formState
+  val questionSteps = controller.steps.filterIsInstance<FormWizardStep.QuestionStep>()
+  val subResult = controller.submissionResult
+
+  ElevatedCard(
+    modifier = Modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.large,
+    colors = CardDefaults.elevatedCardColors(containerColor = colors.surfaceContainerLowest),
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = "Review answers",
+            style =
+              MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = colors.onSurface,
+              ),
+          )
+          Text(
+            text = "Tap any question below to jump back and edit its response.",
+            style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+          )
+        }
+        GroundTonalBadge(
+          text =
+            if (state.isValid) {
+              "✓ Ready to submit"
+            } else {
+              "${state.validationErrors.size} issue(s)"
+            },
+          tone = if (state.isValid) GroundBadgeTone.PRIMARY else GroundBadgeTone.ERROR,
+        )
+      }
+
+      // Submission Result Feedback Banner
+      if (subResult != null) {
+        when (subResult) {
+          is FinalizationResult.Success -> {
+            Card(
+              modifier = Modifier.fillMaxWidth(),
+              shape = MaterialTheme.shapes.medium,
+              colors =
+                CardDefaults.cardColors(
+                  containerColor = colors.primaryContainer,
+                  contentColor = colors.onPrimaryContainer,
+                ),
+            ) {
+              Column(
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                Text(
+                  text = "✓ Form finalized successfully",
+                  style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                      fontWeight = FontWeight.Bold,
+                      color = colors.onPrimaryContainer,
+                    ),
+                )
+              }
+            }
+          }
+          is FinalizationResult.ValidationFailure -> {
+            Card(
+              modifier = Modifier.fillMaxWidth(),
+              shape = MaterialTheme.shapes.medium,
+              colors =
+                CardDefaults.cardColors(
+                  containerColor = colors.errorContainer,
+                  contentColor = colors.onErrorContainer,
+                ),
+            ) {
+              Column(
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                Text(
+                  text = "⚠ Cannot submit: ${subResult.errors.size} validation error(s):",
+                  style =
+                    MaterialTheme.typography.bodySmall.copy(
+                      fontWeight = FontWeight.Bold,
+                      color = colors.onErrorContainer,
+                    ),
+                )
+                subResult.errors.forEach { err ->
+                  Text(
+                    text = "• ${controller.questionTitleFor(err.fieldPath)}: ${err.message}",
+                    style =
+                      MaterialTheme.typography.labelSmall.copy(color = colors.onErrorContainer),
+                    modifier = Modifier.clickable { controller.jumpToField(err.fieldPath) },
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // All Relevant Questions Summary List
+      questionSteps.forEach { qStep ->
+        val control = qStep.control
+        val fieldState = control.fieldState
+        val isInvalid = fieldState.validationStatus is ValidationStatus.Invalid
+        OutlinedCard(
+          onClick = { controller.jumpToField(control.canonicalPath) },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor = if (isInvalid) colors.errorContainer else colors.surfaceContainerLow,
+              contentColor = if (isInvalid) colors.onErrorContainer else colors.onSurface,
+            ),
+          border =
+            BorderStroke(
+              width = 1.dp,
+              color = if (isInvalid) colors.error else colors.outlineVariant,
+            ),
+        ) {
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Column(modifier = Modifier.weight(1f)) {
+              if (qStep.breadcrumbs.isNotEmpty()) {
+                Text(
+                  text = qStep.breadcrumbs.joinToString(" › "),
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      color =
+                        if (isInvalid) colors.onErrorContainer.copy(alpha = 0.85f)
+                        else colors.onSurfaceVariant
+                    ),
+                )
+              }
+              Text(
+                text = qStep.title,
+                style =
+                  MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isInvalid) colors.onErrorContainer else colors.onSurface,
+                  ),
+              )
+              Text(
+                text = formatFieldValueForDisplay(fieldState.value, fieldState.dataType),
+                style =
+                  MaterialTheme.typography.bodySmall.copy(
+                    color =
+                      when {
+                        isInvalid -> colors.onErrorContainer.copy(alpha = 0.85f)
+                        fieldState.isEmpty -> colors.onSurfaceVariant
+                        else -> colors.primary
+                      }
+                  ),
+              )
+            }
+            GroundTonalBadge(
+              text = if (isInvalid) "Invalid" else "Edit",
+              tone = if (isInvalid) GroundBadgeTone.ERROR else GroundBadgeTone.PRIMARY,
+            )
+          }
+        }
+      }
+
+      // Entities Preview (if declared)
+      if (state.entityStates.isNotEmpty()) {
+        HorizontalDivider(color = colors.outlineVariant)
+        Text(
+          text = "Updated records (${state.entityStates.size})",
+          style =
+            MaterialTheme.typography.labelLarge.copy(
+              fontWeight = FontWeight.Bold,
+              color = colors.onSurface,
+            ),
+        )
+        state.entityStates.forEach { entity ->
+          OutlinedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors =
+              CardDefaults.outlinedCardColors(
+                containerColor = colors.secondaryContainer,
+                contentColor = colors.onSecondaryContainer,
+              ),
+          ) {
+            Column(
+              modifier = Modifier.fillMaxWidth().padding(12.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Text(
+                text = entity.label.ifBlank { entity.dataset },
+                style =
+                  MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onSecondaryContainer,
+                  ),
+              )
+              val actionLabel =
+                when {
+                  entity.shouldCreate -> "New record"
+                  entity.shouldUpdate -> "Updated record"
+                  else -> "Unchanged record"
+                }
+              Text(
+                text = "$actionLabel in ${entity.dataset}",
+                style =
+                  MaterialTheme.typography.labelSmall.copy(color = colors.onSecondaryContainer),
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifier = Modifier) {
+  val colors = MaterialTheme.colorScheme
+  Column(
+    modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    Text(
+      text = "All form steps (${controller.totalSteps})",
+      style =
+        MaterialTheme.typography.titleMedium.copy(
+          fontWeight = FontWeight.Bold,
+          color = colors.onSurface,
+        ),
+    )
+    controller.steps.forEachIndexed { idx, step ->
+      val isCurrent = idx == controller.currentStepIndex
+      OutlinedCard(
+        onClick = { controller.jumpToStep(idx) },
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors =
+          CardDefaults.outlinedCardColors(
+            containerColor =
+              if (isCurrent) colors.primaryContainer else colors.surfaceContainerLowest,
+            contentColor = if (isCurrent) colors.onPrimaryContainer else colors.onSurface,
+          ),
+        border =
+          BorderStroke(
+            width = if (isCurrent) 2.dp else 1.dp,
+            color = if (isCurrent) colors.primary else colors.outlineVariant,
+          ),
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Column(modifier = Modifier.weight(1f)) {
+            if (step.breadcrumbs.isNotEmpty()) {
+              Text(
+                text = step.breadcrumbs.joinToString(" › "),
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    color = if (isCurrent) colors.onPrimaryContainer else colors.onSurfaceVariant
+                  ),
+              )
+            }
+            Text(
+              text = "${idx + 1}. ${step.title}",
+              style =
+                MaterialTheme.typography.bodyMedium.copy(
+                  fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                  color = if (isCurrent) colors.onPrimaryContainer else colors.onSurface,
+                ),
+            )
+          }
+          if (step is FormWizardStep.QuestionStep) {
+            val fs = step.control.fieldState
+            val isInvalid = fs.validationStatus is ValidationStatus.Invalid
+            GroundTonalBadge(
+              text =
+                when {
+                  isInvalid -> "!"
+                  !fs.isEmpty -> "✓"
+                  fs.isRequired -> "*"
+                  else -> "•"
+                },
+              tone =
+                when {
+                  isInvalid -> GroundBadgeTone.ERROR
+                  !fs.isEmpty -> GroundBadgeTone.PRIMARY
+                  else -> GroundBadgeTone.NEUTRAL
+                },
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+private val LanguageIcon: ImageVector by lazy {
+  ImageVector.Builder(
+      name = "Ground.Language",
+      defaultWidth = 24.dp,
+      defaultHeight = 24.dp,
+      viewportWidth = 24f,
+      viewportHeight = 24f,
+    )
+    .addPath(
+      pathData =
+        PathParser()
+          .parsePathString(
+            "M11.99,2C6.47,2 2,6.48 2,12s4.47,10 9.99,10C17.52,22 22,17.52 22,12S17.52,2 11.99,2z" +
+              "M18.92,8h-2.95c-0.32,-1.25 -0.78,-2.45 -1.38,-3.56 1.84,0.63 3.37,1.91 4.33,3.56z" +
+              "M12,4.04c0.83,1.2 1.48,2.53 1.91,3.96h-3.82c0.43,-1.43 1.08,-2.76 1.91,-3.96z" +
+              "M4.26,14C4.1,13.36 4,12.69 4,12s0.1,-1.36 0.26,-2h3.38c-0.08,0.66 -0.14,1.32 -0.14,2" +
+              " 0,0.68 0.06,1.34 0.14,2H4.26zM5.08,16h2.95c0.32,1.25 0.78,2.45 1.38,3.56" +
+              " -1.84,-0.63 -3.37,-1.9 -4.33,-3.56zM8.03,8H5.08c0.96,-1.66 2.49,-2.93 4.33,-3.56" +
+              "C8.81,5.55 8.35,6.75 8.03,8zM12,19.96c-0.83,-1.2 -1.48,-2.53 -1.91,-3.96h3.82" +
+              "c-0.43,1.43 -1.08,2.76 -1.91,3.96zM14.34,14H9.66c-0.09,-0.66 -0.16,-1.32 -0.16,-2" +
+              " 0,-0.68 0.07,-1.35 0.16,-2h4.68c0.09,0.65 0.16,1.32 0.16,2 0,0.68 -0.07,1.34 -0.16,2z" +
+              "M14.59,19.56c0.6,-1.11 1.06,-2.31 1.38,-3.56h2.95c-0.96,1.65 -2.49,2.93 -4.33,3.56z" +
+              "M16.36,14c0.08,-0.66 0.14,-1.32 0.14,-2 0,-0.68 -0.06,-1.34 -0.14,-2h3.38" +
+              "c0.16,0.64 0.26,1.31 0.26,2s-0.1,1.36 -0.26,2h-3.38z"
+          )
+          .toNodes(),
+      fill = SolidColor(Color.Black),
+    )
+    .build()
+}
+
+/**
+ * Message displayed in the validation blocker banner when the collector taps Next on an incomplete
+ * or invalid step. Only optional steps mention skipping.
+ */
+internal fun stepValidationBlockerMessage(
+  isWaitingForLocationCapture: Boolean,
+  isStepOptional: Boolean,
+): String =
+  when {
+    isWaitingForLocationCapture -> "Please capture a location or drop a pin before proceeding."
+    isStepOptional -> "Please resolve validation errors above or skip to continue."
+    else -> "Please resolve validation errors above to continue."
+  }

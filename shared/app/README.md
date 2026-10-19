@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 # Collect One Shared App Module
 
-`org.groundplatform.v2:app` holds the code that the mobile app and the web
+`org.openforis.collectone.v2:app` holds the code that the mobile app and the web
 console share: the domain model, the data layer, device and network clients,
 and the UI pieces both apps use. It targets Android, JVM, and WasmJS. iOS
 targets will be added when iOS work resumes.
@@ -29,7 +29,7 @@ what it uses. The exceptions are the data layer (one local store shared by
 both apps, which only this module may import) and the small hooks the
 workbench sets on any session (`SampleDataRepository`, `SyncStatusSimulator`).
 
-## Package Structure (`org.groundplatform.v2.app`)
+## Package Structure (`org.openforis.collectone.v2.app`)
 
 -   **`domain/`**: Domain models, repository interfaces, and use cases. Pure
     Kotlin with no Compose, data, or platform imports.
@@ -126,7 +126,7 @@ The URL comes from:
 
 ## Test Fixtures (`testing/`)
 
-The `:app-testing` subproject (`org.groundplatform.v2:app-testing`) contains
+The `:app-testing` subproject (`org.openforis.collectone.v2:app-testing`) contains
 fixtures shared by this module's tests and by the tests of modules built on it:
 the sample data (`data/seed/Sample*Data`, `GlobalLibrarySeedData`), seeded
 in-memory stores (`seededStore()`, `sampleDataHolder()`, `runNow`), the
@@ -162,6 +162,6 @@ from the Kotlin copy with `./gradlew jvmTest -PregenerateLibrarySeed`.
 
 ## Dependencies
 
--   [`../core/`](../core/) (`org.groundplatform.v2:protoforms`)
--   [`../ui/`](../ui/) (`org.groundplatform.v2:protoforms-ui`)
--   [`../map/`](../map/) (`org.groundplatform.v2:map`)
+-   [`../core/`](../core/) (`org.openforis.collectone.v2:protoforms`)
+-   [`../ui/`](../ui/) (`org.openforis.collectone.v2:protoforms-ui`)
+-   [`../map/`](../map/) (`org.openforis.collectone.v2:map`)

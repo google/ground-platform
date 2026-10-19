@@ -1,0 +1,247 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.openforis.collectone.v2.app.domain.model
+
+/** Category of a feature rendered on the survey map that participates in zoomed-out clustering. */
+enum class MapFeatureKind {
+  ENTITY,
+  SUBMISSION_GEOMETRY,
+}
+
+/**
+ * Unified map feature representation (either a [GeospatialEntityItem] or a
+ * [SubmissionGeometryPolygon]) used for spatial clustering when the map is zoomed out.
+ */
+data class MapClusterFeatureItem(
+  val id: String,
+  val kind: MapFeatureKind,
+  val label: String,
+  val markerSymbol: String,
+  val colorHex: Long,
+  val colorCss: String,
+  val normalizedX: Float,
+  val normalizedY: Float,
+  val entityId: String = "",
+  val submissionId: String? = null,
+) {
+  /** True when this map feature has a non-blank `marker-symbol` (`"○"`, `"◐"`, `"✓"`, etc.). */
+  val hasMarkerSymbol: Boolean
+    get() = markerSymbol.isNotBlank()
+}
+
+/**
+ * Represents a group of clustered map features sharing the same `marker-symbol` (including the `"no
+ * marker symbol"` group where [markerSymbol] is `""`) inside a [MapFeatureCluster] balloon.
+ */
+data class ClusterMarkerSymbolGroup(
+  val markerSymbol: String,
+  val count: Int,
+  val colorHex: Long,
+  val colorCss: String,
+  val statusLabel: String,
+  val features: List<MapClusterFeatureItem>,
+) {
+  /** True when this group represents map features that have no marker symbol (`""`). */
+  val isNoSymbolGroup: Boolean
+    get() = markerSymbol.isBlank()
+
+  /**
+   * Formatted segment displayed in the cluster balloon (e.g. `"✓ 2"`, `"◐ 2"`, `"○ 1"`, or `"No
+   * symbol 5"`).
+   */
+  val balloonSegmentLabel: String
+    get() = if (isNoSymbolGroup) "No symbol $count" else "$markerSymbol $count"
+}
+
+/**
+ * Groups [features] inside a cluster by `marker-symbol` (including `""` for features with no marker
+ * symbol as one group), returning ordered [ClusterMarkerSymbolGroup] entries with their counts.
+ */
+fun groupClusterFeaturesByMarkerSymbol(
+  features: List<MapClusterFeatureItem>
+): List<ClusterMarkerSymbolGroup> {
+  if (features.isEmpty()) return emptyList()
+  val grouped = features.groupBy { it.markerSymbol.trim() }
+  val canonicalOrder = listOf("✓", "◐", "○")
+  val customSymbols = grouped.keys.filter { it.isNotEmpty() && it !in canonicalOrder }.sorted()
+  val orderedKeys = buildList {
+    canonicalOrder.forEach { sym -> if (sym in grouped) add(sym) }
+    addAll(customSymbols)
+    if ("" in grouped) add("")
+  }
+
+  return orderedKeys.map { symbol ->
+    val members = grouped[symbol].orEmpty()
+    val (defaultColorHex, statusLabel) =
+      when (symbol) {
+        "✓" -> 0xFF1E8E3EL to "Completed"
+        "◐" -> 0xFFF9AB00L to "In progress"
+        "○" -> 0xFFE65100L to "Pending"
+        "" -> (members.firstOrNull()?.colorHex ?: 0xFF66BB6AL) to "No marker symbol"
+        else -> (members.firstOrNull()?.colorHex ?: 0xFF2E7D32L) to "Symbol $symbol"
+      }
+    ClusterMarkerSymbolGroup(
+      markerSymbol = symbol,
+      count = members.size,
+      colorHex = defaultColorHex,
+      colorCss = formatHexColorCss(defaultColorHex),
+      statusLabel = statusLabel,
+      features = members,
+    )
+  }
+}
+
+/**
+ * Spatial cluster of map features formed when the map is zoomed out, grouping member features by
+ * `marker-symbol` (including no marker symbol as one group) and exposing the count of each for the
+ * cluster balloon.
+ */
+data class MapFeatureCluster(
+  val id: String,
+  val normalizedX: Float,
+  val normalizedY: Float,
+  val features: List<MapClusterFeatureItem>,
+  val symbolGroups: List<ClusterMarkerSymbolGroup>,
+  val minNormalizedX: Float = normalizedX,
+  val maxNormalizedX: Float = normalizedX,
+  val minNormalizedY: Float = normalizedY,
+  val maxNormalizedY: Float = normalizedY,
+) {
+  /** Total number of map features in this cluster across all marker symbol groups. */
+  val totalCount: Int
+    get() = features.size
+
+  /** Horizontal span of member features in normalized survey coordinates. */
+  val spanNormalizedX: Float
+    get() = (maxNormalizedX - minNormalizedX).coerceAtLeast(0f)
+
+  /** Vertical span of member features in normalized survey coordinates. */
+  val spanNormalizedY: Float
+    get() = (maxNormalizedY - minNormalizedY).coerceAtLeast(0f)
+
+  /**
+   * Diagonal spatial extent (`hypot(spanNormalizedX, spanNormalizedY)`) covered by this cluster.
+   */
+  val diameterNormalized: Float
+    get() = kotlin.math.hypot(spanNormalizedX, spanNormalizedY)
+
+  /** Map feature (`MapFeatureKind.ENTITY`) features in this cluster. */
+  val entityFeatures: List<MapClusterFeatureItem>
+    get() = features.filter { it.kind == MapFeatureKind.ENTITY }
+
+  /** Form submission geometry (`MapFeatureKind.SUBMISSION_GEOMETRY`) features in this cluster. */
+  val submissionGeometryFeatures: List<MapClusterFeatureItem>
+    get() = features.filter { it.kind == MapFeatureKind.SUBMISSION_GEOMETRY }
+
+  /** Count of map features (`MapFeatureKind.ENTITY`) in this cluster. */
+  val siteCount: Int
+    get() = entityFeatures.size
+
+  /** Count of form submission geometries (`MapFeatureKind.SUBMISSION_GEOMETRY`) in this cluster. */
+  val submissionGeometryCount: Int
+    get() = submissionGeometryFeatures.size
+
+  /** Marker-symbol groups for **map features** (`MapFeatureKind.ENTITY`) only. */
+  val siteSymbolGroups: List<ClusterMarkerSymbolGroup>
+    get() = groupClusterFeaturesByMarkerSymbol(entityFeatures)
+
+  /**
+   * [siteSymbolGroups] shown as status chips in the cluster balloon: the no-marker-symbol group is
+   * left out, since features without a workflow status show no status marker. They are still
+   * counted in the balloon header's total ([siteCount]).
+   */
+  val siteStatusChipGroups: List<ClusterMarkerSymbolGroup>
+    get() = siteSymbolGroups.filterNot { it.isNoSymbolGroup }
+
+  /**
+   * Summary of map feature workflow states in this cluster (e.g. `"✓ 2 • ◐ 2 • ○ 1"`), leaving out
+   * features without a marker symbol.
+   */
+  val siteStatesSummaryLabel: String
+    get() = siteStatusChipGroups.joinToString(" • ") { it.balloonSegmentLabel }
+
+  /**
+   * Map from `marker-symbol` (with `""` representing the no-marker-symbol group) to the count of
+   * features in that group within this cluster.
+   */
+  val countsByMarkerSymbol: Map<String, Int>
+    get() = symbolGroups.associate { it.markerSymbol to it.count }
+
+  /** Count of features in this cluster that have no marker symbol (`markerSymbol == ""`). */
+  val noMarkerSymbolCount: Int
+    get() = countsByMarkerSymbol[""] ?: 0
+
+  /** Returns the count of features in this cluster for [symbol] (`""` or `null` for no symbol). */
+  fun countForSymbol(symbol: String?): Int = countsByMarkerSymbol[symbol?.trim().orEmpty()] ?: 0
+
+  /**
+   * Summary string of the marker symbol groups and their counts shown in the cluster balloon (e.g.
+   * `"✓ 2 • ◐ 2 • ○ 1"`). Features without a marker symbol are left out; they are only reflected in
+   * [totalCount].
+   */
+  val balloonSummaryLabel: String
+    get() =
+      symbolGroups.filterNot { it.isNoSymbolGroup }.joinToString(" • ") { it.balloonSegmentLabel }
+
+  /**
+   * Calculates the target zoom delta at which the cluster's member span exceeds the cluster radius,
+   * guaranteeing that the cluster splits into sub-clusters or dissolves into individual features
+   * (advancing by at least `+1.25f` from [currentZoomDelta]).
+   */
+  fun expansionZoomDelta(currentZoomDelta: Float): Float {
+    val spanX = spanNormalizedX
+    val spanY = spanNormalizedY
+    val maxEffectiveSpan = maxOf(spanX / 1.25f, spanY)
+    val calculatedZoom =
+      if (maxEffectiveSpan > 0.001f) {
+        val targetRadius = maxEffectiveSpan * 0.5f
+        val zoomIncrease = -kotlin.math.log2((targetRadius / 0.215f).toDouble()).toFloat()
+        val zoom = -2.35f + zoomIncrease
+        zoom.coerceAtMost(-2.35f + 0.15f)
+      } else {
+        -2.35f + 0.15f
+      }
+    return maxOf(currentZoomDelta + 1.25f, calculatedZoom)
+  }
+}
+
+/** Convenience typealias for [MapFeatureCluster]. */
+typealias MapClusterItem = MapFeatureCluster
+
+/**
+ * Normalizes map features into [MapClusterFeatureItem]s for clustering. Geospatial entities carry
+ * their `simplestyle-spec` `marker-symbol` (`"✓"`, `"◐"`, `"○"`, or `""` if none is set).
+ */
+fun List<GeospatialEntityItem>.toClusterFeatures(): List<MapClusterFeatureItem> = map { ent ->
+  MapClusterFeatureItem(
+    id = ent.id,
+    kind = MapFeatureKind.ENTITY,
+    label = ent.label.substringBefore(" •"),
+    markerSymbol = ent.rawMarkerSymbol,
+    colorHex = ent.markerColorHex,
+    colorCss = ent.markerColorCss,
+    normalizedX = ent.normalizedX,
+    normalizedY = ent.normalizedY,
+    entityId = ent.id,
+  )
+}
+
+/**
+ * Formats the count of map features in a cluster using the active lowercase plural domain noun
+ * [pluralCountNoun] (e.g. `"5 map features"`, `"1 map feature"`, or `"5 coffee parcels"`).
+ */
+fun formatClusterSitesCountLabel(siteCount: Int, pluralCountNoun: String): String {
+  val noun = if (siteCount == 1) pluralCountNoun.removeSuffix("s") else pluralCountNoun
+  return "$siteCount $noun"
+}

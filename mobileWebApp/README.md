@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ testing and UX review without an Android or iOS build.
 
 ## Structure
 
--   **`workbench/`** (`org.groundplatform.v2:workbench`): A library with the
+-   **`workbench/`** (`org.openforis.collectone.v2:workbench`): A library with the
     workbench: `WorkbenchState`, the simulated device page
     (`MobileWorkbenchPage`), the root
     `MobileWorkbenchApp()`, XForms presets, and the simulation and reset tools

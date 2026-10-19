@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Placeholder Android application build script wrapping `org.groundplatform.v2:mobile`.
+// Placeholder Android application build script wrapping `org.openforis.collectone.v2:mobile`.
 import java.util.Properties
 
 plugins {
@@ -21,7 +21,7 @@ plugins {
   id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
 }
 
-group = "org.groundplatform.v2.android"
+group = "org.openforis.collectone.v2.android"
 
 version = "2.0.0-SNAPSHOT"
 
@@ -36,7 +36,7 @@ kotlin {
     }
     val commonMain by getting {
       dependencies {
-        implementation("org.groundplatform.v2:mobile:2.0.0-SNAPSHOT")
+        implementation("org.openforis.collectone.v2:mobile:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -73,10 +73,10 @@ val userDataServiceUrl =
     .trim()
 
 android {
-  namespace = "org.groundplatform.v2.android"
+  namespace = "org.openforis.collectone.v2.android"
   compileSdk = 35
   defaultConfig {
-    applicationId = "org.groundplatform.v2.android"
+    applicationId = "org.openforis.collectone.v2.android"
     minSdk = 24
     targetSdk = 35
     versionCode = 1

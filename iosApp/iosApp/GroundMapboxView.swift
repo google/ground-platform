@@ -1,4 +1,4 @@
-// Copyright 2026 The Ground Authors.
+// Copyright 2026 The Collect One Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import MapboxMaps
 import UIKit
 import os
 
-private let log = Logger(subsystem: "org.groundplatform.v2", category: "GroundMap")
+private let log = Logger(subsystem: "org.openforis.collectone.v2", category: "GroundMap")
 
 /// Creates the Mapbox maps behind `GroundMap` (shared/map). Registered in `iOSApp`.
 ///

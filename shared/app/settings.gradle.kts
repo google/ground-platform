@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -38,7 +38,7 @@ dependencyResolutionManagement {
 rootProject.name = "app"
 
 // Test fixtures (sample stores, editor samples, fakes) shared by this module's tests and by the
-// tests of the modules built on it. Published as `org.groundplatform.v2:app-testing`.
+// tests of the modules built on it. Published as `org.openforis.collectone.v2:app-testing`.
 include(":app-testing")
 
 project(":app-testing").projectDir = file("testing")

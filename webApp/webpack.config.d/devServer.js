@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ if (config.devServer) {
       : [];
   staticList.push({
     directory: sharedUiComposeResources,
-    publicPath: '/composeResources/org.groundplatform.v2.core.forms.ui.resources',
+    publicPath: '/composeResources/org.openforis.collectone.v2.core.forms.ui.resources',
   });
   config.devServer.static = staticList;
 

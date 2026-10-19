@@ -1,0 +1,1650 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.openforis.collectone.v2.core.forms.engine
+
+import groundplatform.v2.forms.ActionDef
+import groundplatform.v2.forms.ActionType
+import groundplatform.v2.forms.ControlDef
+import groundplatform.v2.forms.ControlType
+import groundplatform.v2.forms.DataType
+import groundplatform.v2.forms.EntityDeclaration
+import groundplatform.v2.forms.EntityPropertyMapping
+import groundplatform.v2.forms.EntitySyncMetadata
+import groundplatform.v2.forms.EventType
+import groundplatform.v2.forms.FieldBinding
+import groundplatform.v2.forms.FieldDefinition
+import groundplatform.v2.forms.FormDef
+import groundplatform.v2.forms.GroupDef
+import groundplatform.v2.forms.IntentConfig
+import groundplatform.v2.forms.ItemsetDef
+import groundplatform.v2.forms.LabelDef
+import groundplatform.v2.forms.LanguageTranslation
+import groundplatform.v2.forms.LocalizedString
+import groundplatform.v2.forms.MediaRef
+import groundplatform.v2.forms.ModelDef
+import groundplatform.v2.forms.OutputFragment
+import groundplatform.v2.forms.PreloadType
+import groundplatform.v2.forms.PrimaryInstance
+import groundplatform.v2.forms.RangeConfig
+import groundplatform.v2.forms.RecordSchema
+import groundplatform.v2.forms.RepeatDef
+import groundplatform.v2.forms.SecondaryInstance
+import groundplatform.v2.forms.TranslationCatalog
+import groundplatform.v2.forms.TypedValue
+import groundplatform.v2.forms.ViewComponent
+import groundplatform.v2.forms.ViewDef
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import org.openforis.collectone.v2.core.forms.buildRecordNode
+import org.openforis.collectone.v2.core.forms.model.ComponentState
+import org.openforis.collectone.v2.core.forms.model.FinalizationResult
+import org.openforis.collectone.v2.core.forms.model.PlatformEffectRequest
+import org.openforis.collectone.v2.core.forms.model.ValidationErrorKind
+import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
+
+class FormEngineUnitTest {
+
+  @Test
+  fun initialize_evaluatesPreloadsDefaultsAndFirstLoadActions() {
+    val formDef =
+      FormDef(
+        form_id = "household_survey",
+        version = "2026091801",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "household",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "country", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "device_id", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "session_role", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "initialized_flag", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "initial_gps", type = DataType.TYPE_GEOPOINT),
+                      ),
+                  ),
+                default_values = buildRecordNode { string("country", "Kenya") },
+              ),
+            bindings =
+              listOf(
+                FieldBinding(
+                  field_path = "device_id",
+                  type = DataType.TYPE_STRING,
+                  preload = PreloadType.PRELOAD_PROPERTY,
+                  preload_param = "deviceid",
+                ),
+                FieldBinding(
+                  field_path = "session_role",
+                  type = DataType.TYPE_STRING,
+                  preload = PreloadType.PRELOAD_CONTEXT,
+                  preload_param = "role",
+                ),
+              ),
+            actions =
+              listOf(
+                ActionDef(
+                  events = listOf(EventType.EVENT_INSTANCE_FIRST_LOAD),
+                  type = ActionType.ACTION_SET_VALUE,
+                  target_field = "initialized_flag",
+                  value_expression = "concat('init-', /household/country)",
+                ),
+                ActionDef(
+                  events = listOf(EventType.EVENT_INSTANCE_FIRST_LOAD),
+                  type = ActionType.ACTION_SET_GEOPOINT,
+                  target_field = "initial_gps",
+                ),
+              ),
+          ),
+      )
+
+    val env =
+      FormEnvironment(
+        clockEpochMillis = { 1789689600000L },
+        uuidGenerator = { "11111111-2222-4333-8444-555555555555" },
+        deviceProperties = mapOf("deviceid" to "pixel-9-pro"),
+        contextParams = mapOf("role" to "supervisor"),
+      )
+
+    val state = FormEngine.initialize(formDef, environment = env)
+
+    assertEquals(
+      "uuid:11111111-2222-4333-8444-555555555555",
+      state.recordInstance.metadata?.instance_id,
+    )
+    assertEquals("pixel-9-pro", state.recordInstance.metadata?.device_id)
+    assertEquals("Kenya", state.findFieldState("country")?.value?.scalar_value?.string_value)
+    assertEquals(
+      "pixel-9-pro",
+      state.findFieldState("device_id")?.value?.scalar_value?.string_value,
+    )
+    assertEquals(
+      "supervisor",
+      state.findFieldState("session_role")?.value?.scalar_value?.string_value,
+    )
+    assertEquals(
+      "init-Kenya",
+      state.findFieldState("initialized_flag")?.value?.scalar_value?.string_value,
+    )
+    assertEquals(
+      listOf(PlatformEffectRequest.SetGeopointRequest("/household/initial_gps")),
+      state.pendingRequests,
+    )
+  }
+
+  @Test
+  fun topologicalCalculations_evaluatesOutOfOrderDependenciesAndOnce() {
+    // Declare `total` BEFORE `tax` and `subtotal` to verify topological DAG sorting
+    val formDef =
+      FormDef(
+        form_id = "invoice_form",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "total", type = DataType.TYPE_DOUBLE),
+                        FieldDefinition(name = "tax", type = DataType.TYPE_DOUBLE),
+                        FieldDefinition(name = "subtotal", type = DataType.TYPE_DOUBLE),
+                        FieldDefinition(name = "qty", type = DataType.TYPE_INT32),
+                        FieldDefinition(name = "price", type = DataType.TYPE_DOUBLE),
+                        FieldDefinition(name = "initial_code", type = DataType.TYPE_STRING),
+                      ),
+                  ),
+                default_values =
+                  buildRecordNode {
+                    int32("qty", 4)
+                    double("price", 25.0)
+                  },
+              ),
+            bindings =
+              listOf(
+                FieldBinding(
+                  field_path = "total",
+                  type = DataType.TYPE_DOUBLE,
+                  calculate_expression = "/data/subtotal + /data/tax",
+                ),
+                FieldBinding(
+                  field_path = "tax",
+                  type = DataType.TYPE_DOUBLE,
+                  calculate_expression = "/data/subtotal * 0.10",
+                ),
+                FieldBinding(
+                  field_path = "subtotal",
+                  type = DataType.TYPE_DOUBLE,
+                  calculate_expression = "/data/qty * /data/price",
+                ),
+                FieldBinding(
+                  field_path = "initial_code",
+                  type = DataType.TYPE_STRING,
+                  calculate_expression = "once(concat('CODE-', /data/qty))",
+                ),
+              ),
+          ),
+      )
+
+    val session = FormSession(formDef)
+    assertEquals(100.0, session.state.findFieldState("subtotal")?.value?.scalar_value?.double_value)
+    assertEquals(10.0, session.state.findFieldState("tax")?.value?.scalar_value?.double_value)
+    assertEquals(110.0, session.state.findFieldState("total")?.value?.scalar_value?.double_value)
+    assertEquals(
+      "CODE-4",
+      session.state.findFieldState("initial_code")?.value?.scalar_value?.string_value,
+    )
+
+    // Update qty to 10 -> subtotal (250), tax (25), total (275) update, but once() retains "CODE-4"
+    session.updateInt("qty", 10)
+    assertEquals(250.0, session.state.findFieldState("subtotal")?.value?.scalar_value?.double_value)
+    assertEquals(25.0, session.state.findFieldState("tax")?.value?.scalar_value?.double_value)
+    assertEquals(275.0, session.state.findFieldState("total")?.value?.scalar_value?.double_value)
+    assertEquals(
+      "CODE-4",
+      session.state.findFieldState("initial_code")?.value?.scalar_value?.string_value,
+    )
+
+    // User edits a `once(...)` field: because `once()` returns the context node's current value
+    // when non-empty, the user's input is preserved across subsequent recalculations, whereas a
+    // plain `calculate` field ("calculate wins" in ODK/XForms) always recomputes its formula.
+    session.updateString("initial_code", "USER-OVERRIDE")
+    session.updateInt("qty", 6)
+    assertEquals(
+      "USER-OVERRIDE",
+      session.state.findFieldState("initial_code")?.value?.scalar_value?.string_value,
+    )
+    assertEquals(150.0, session.state.findFieldState("subtotal")?.value?.scalar_value?.double_value)
+  }
+
+  @Test
+  fun relevancyMasking_prunesNonRelevantFromEffectiveRecordAndRestoresOnToggle() {
+    val formDef =
+      FormDef(
+        form_id = "relevancy_test",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "has_farm", type = DataType.TYPE_STRING),
+                        FieldDefinition(
+                          name = "farm_details",
+                          type = DataType.TYPE_MESSAGE,
+                          fields =
+                            listOf(
+                              FieldDefinition(name = "acres", type = DataType.TYPE_DOUBLE),
+                              FieldDefinition(name = "crop", type = DataType.TYPE_STRING),
+                            ),
+                        ),
+                      ),
+                  ),
+                default_values =
+                  buildRecordNode {
+                    string("has_farm", "yes")
+                    group("farm_details") {
+                      double("acres", 12.5)
+                      string("crop", "coffee")
+                    }
+                  },
+              ),
+            bindings =
+              listOf(
+                FieldBinding(
+                  field_path = "farm_details",
+                  type = DataType.TYPE_MESSAGE,
+                  relevant_expression = "/data/has_farm = 'yes'",
+                ),
+                FieldBinding(field_path = "farm_details/acres", type = DataType.TYPE_DOUBLE),
+                FieldBinding(field_path = "farm_details/crop", type = DataType.TYPE_STRING),
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control = ControlDef(field_ref = "has_farm", type = ControlType.CONTROL_INPUT)
+                ),
+                ViewComponent(
+                  group =
+                    GroupDef(
+                      field_ref = "farm_details",
+                      components =
+                        listOf(
+                          ViewComponent(
+                            control =
+                              ControlDef(
+                                field_ref = "farm_details/acres",
+                                type = ControlType.CONTROL_INPUT,
+                              )
+                          )
+                        ),
+                    )
+                ),
+              )
+          ),
+      )
+
+    val session = FormSession(formDef)
+    assertTrue(session.state.findFieldState("farm_details/acres")?.isRelevant == true)
+    assertEquals(
+      12.5,
+      session.state.findFieldState("farm_details/acres")?.value?.scalar_value?.double_value,
+    )
+
+    // Toggle has_farm to "no" -> farm_details and its children become non-relevant and are pruned
+    session.updateString("has_farm", "no")
+    assertFalse(session.state.findFieldState("farm_details")?.isRelevant ?: true)
+    assertFalse(session.state.findFieldState("farm_details/acres")?.isRelevant ?: true)
+    assertNull(session.state.findFieldState("farm_details/acres")?.value)
+    assertNull(session.state.recordInstance.data_?.fields?.get("farm_details"))
+
+    // Toggle has_farm back to "yes" -> previously entered 12.5 acres is non-destructively restored!
+    session.updateString("has_farm", "yes")
+    assertTrue(session.state.findFieldState("farm_details/acres")?.isRelevant == true)
+    assertEquals(
+      12.5,
+      session.state.findFieldState("farm_details/acres")?.value?.scalar_value?.double_value,
+    )
+  }
+
+  @Test
+  fun validationAndFinalization_checksRequiredConstraintAndRangeRules() {
+    val formDef =
+      FormDef(
+        form_id = "validation_test",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "name", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "age", type = DataType.TYPE_INT32),
+                        FieldDefinition(name = "score", type = DataType.TYPE_DOUBLE),
+                      ),
+                  )
+              ),
+            bindings =
+              listOf(
+                FieldBinding(
+                  field_path = "name",
+                  type = DataType.TYPE_STRING,
+                  required_expression = "true()",
+                  required_message = "Respondent name is mandatory",
+                ),
+                FieldBinding(
+                  field_path = "age",
+                  type = DataType.TYPE_INT32,
+                  constraint_expression = ". >= 18 and . <= 120",
+                  constraint_message = "Age must be at least 18",
+                ),
+                FieldBinding(field_path = "score", type = DataType.TYPE_DOUBLE),
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control =
+                    ControlDef(
+                      field_ref = "score",
+                      type = ControlType.CONTROL_RANGE,
+                      range_config = RangeConfig(start = 0.0, end = 10.0, step = 1.0),
+                    )
+                )
+              )
+          ),
+      )
+
+    val session = FormSession(formDef)
+    // Initially `name` is empty -> REQUIRED_MISSING, while `age` is empty so constraint is NOT
+    // violated
+    assertFalse(session.state.isValid)
+    assertEquals(1, session.state.validationErrors.size)
+    assertEquals(ValidationErrorKind.REQUIRED_MISSING, session.state.validationErrors.first().kind)
+    assertEquals("Respondent name is mandatory", session.state.validationErrors.first().message)
+
+    // Set invalid age (14) and out-of-range score (15.0)
+    session.updateString("name", "Amina")
+    session.updateInt("age", 14)
+    session.updateDouble("score", 15.0)
+
+    assertFalse(session.state.isValid)
+    assertEquals(2, session.state.validationErrors.size)
+    assertTrue(
+      session.state.validationErrors.any {
+        it.kind == ValidationErrorKind.CONSTRAINT_VIOLATED &&
+          it.message == "Age must be at least 18"
+      }
+    )
+    assertTrue(
+      session.state.validationErrors.any { it.kind == ValidationErrorKind.RANGE_OUT_OF_BOUNDS }
+    )
+
+    val failedFinalization = session.finalize()
+    assertIs<FinalizationResult.ValidationFailure>(failedFinalization)
+
+    // Fix age and score -> form becomes valid and finalizes cleanly with end_time populated
+    session.updateInt("age", 28)
+    session.updateDouble("score", 8.0)
+    assertTrue(session.state.isValid)
+
+    val success = session.finalize()
+    assertIs<FinalizationResult.Success>(success)
+    assertNotNull(success.recordInstance.metadata?.end_time)
+  }
+
+  @Test
+  fun repeatsAndDynamicCount_reconcilesRepeatInstancesAndFiresNewRepeatActions() {
+    val formDef =
+      FormDef(
+        form_id = "repeat_test",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "base_age", type = DataType.TYPE_INT32),
+                        FieldDefinition(name = "hh_size", type = DataType.TYPE_INT32),
+                        FieldDefinition(
+                          name = "person",
+                          type = DataType.TYPE_MESSAGE,
+                          is_repeated = true,
+                          fields =
+                            listOf(
+                              FieldDefinition(name = "age", type = DataType.TYPE_INT32),
+                              FieldDefinition(name = "label_idx", type = DataType.TYPE_INT32),
+                            ),
+                        ),
+                      ),
+                  ),
+                default_values =
+                  buildRecordNode {
+                    int32("base_age", 20)
+                    int32("hh_size", 2)
+                  },
+              ),
+            bindings =
+              listOf(
+                FieldBinding(field_path = "base_age", type = DataType.TYPE_INT32),
+                FieldBinding(field_path = "hh_size", type = DataType.TYPE_INT32),
+                FieldBinding(
+                  field_path = "person/label_idx",
+                  type = DataType.TYPE_INT32,
+                  calculate_expression = "position(..)",
+                ),
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  repeat =
+                    RepeatDef(
+                      field_ref = "person",
+                      count_expression = "/data/hh_size",
+                      label =
+                        LabelDef(
+                          text = "Member #{0}",
+                          outputs =
+                            listOf(
+                              OutputFragment(
+                                placeholder_id = "0",
+                                value_expression = "position(..)",
+                              )
+                            ),
+                        ),
+                      components =
+                        listOf(
+                          ViewComponent(
+                            control =
+                              ControlDef(
+                                field_ref = "person/age",
+                                type = ControlType.CONTROL_INPUT,
+                                actions =
+                                  listOf(
+                                    ActionDef(
+                                      events = listOf(EventType.EVENT_REPEAT_INSERT),
+                                      type = ActionType.ACTION_SET_VALUE,
+                                      target_field = "person/age",
+                                      value_expression = "/data/base_age + position(..)",
+                                    )
+                                  ),
+                              )
+                          )
+                        ),
+                    )
+                )
+              )
+          ),
+      )
+
+    val session = FormSession(formDef)
+    val repeatGroup =
+      session.state.rootComponents.filterIsInstance<ComponentState.RepeatGroupState>().single()
+    assertEquals(2, repeatGroup.instances.size)
+    assertEquals("Member #1", repeatGroup.instances[0].label?.text)
+    assertEquals("Member #2", repeatGroup.instances[1].label?.text)
+    assertEquals(
+      21,
+      session.state.findFieldState("/data/person[1]/age")?.value?.scalar_value?.int32_value,
+    )
+    assertEquals(
+      22,
+      session.state.findFieldState("/data/person[2]/age")?.value?.scalar_value?.int32_value,
+    )
+
+    // Increase hh_size to 3 -> 3rd repeat instance automatically added and initialized via
+    // EVENT_REPEAT_INSERT
+    session.updateInt("hh_size", 3)
+    val updatedRepeatGroup =
+      session.state.rootComponents.filterIsInstance<ComponentState.RepeatGroupState>().single()
+    assertEquals(3, updatedRepeatGroup.instances.size)
+    assertEquals(
+      23,
+      session.state.findFieldState("/data/person[3]/age")?.value?.scalar_value?.int32_value,
+    )
+    assertEquals(
+      3,
+      session.state.findFieldState("/data/person[3]/label_idx")?.value?.scalar_value?.int32_value,
+    )
+  }
+
+  @Test
+  fun cascadingItemsetTranslationsAndEntities_resolvesDynamicOptionsAndEntityState() {
+    val formDef =
+      FormDef(
+        form_id = "cascading_entity_form",
+        default_language = "English",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "country", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "city", type = DataType.TYPE_SELECT_ONE),
+                        FieldDefinition(name = "tree_id", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "species", type = DataType.TYPE_STRING),
+                      ),
+                  ),
+                default_values =
+                  buildRecordNode {
+                    string("country", "KE")
+                    string("tree_id", "uuid:9999")
+                    string("species", "Baobab")
+                  },
+              ),
+            secondary_instances =
+              listOf(
+                SecondaryInstance(
+                  id = "cities",
+                  rows =
+                    listOf(
+                      org.openforis.collectone.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "nairobi",
+                        "country" to "KE",
+                        "label" to "Nairobi",
+                      ),
+                      org.openforis.collectone.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "mombasa",
+                        "country" to "KE",
+                        "label" to "Mombasa",
+                      ),
+                      org.openforis.collectone.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "dar",
+                        "country" to "TZ",
+                        "label" to "Dar es Salaam",
+                      ),
+                    ),
+                )
+              ),
+            translations =
+              TranslationCatalog(
+                languages =
+                  listOf(
+                    LanguageTranslation(
+                      language = "English",
+                      is_default = true,
+                      strings =
+                        mapOf(
+                          "city_q" to
+                            LocalizedString(
+                              value_ = "Select city in {country}",
+                              short_value = "City",
+                              guidance_value = "Ask the respondent for their primary municipality",
+                              media = MediaRef(image_uri = "jr://images/city_en.png"),
+                            )
+                        ),
+                    ),
+                    LanguageTranslation(
+                      language = "Swahili",
+                      strings =
+                        mapOf(
+                          "city_q" to
+                            LocalizedString(
+                              value_ = "Chagua mji katika {country}",
+                              short_value = "Mji",
+                            )
+                        ),
+                    ),
+                  )
+              ),
+            bindings =
+              listOf(
+                FieldBinding(field_path = "country", type = DataType.TYPE_STRING),
+                FieldBinding(field_path = "city", type = DataType.TYPE_SELECT_ONE),
+                FieldBinding(
+                  field_path = "species",
+                  type = DataType.TYPE_STRING,
+                  entity_saveto = "species_name",
+                ),
+              ),
+            entities =
+              listOf(
+                EntityDeclaration(
+                  dataset = "trees",
+                  entity_id_expression = "/data/tree_id",
+                  label_expression = "concat(/data/species, ' (', /data/city, ')')",
+                  create_condition = "true()",
+                  sync_metadata =
+                    EntitySyncMetadata(
+                      base_version_expression = "1",
+                      trunk_version_expression = "1",
+                      branch_id_expression = "'branch-abc'",
+                    ),
+                  property_mappings =
+                    listOf(
+                      EntityPropertyMapping(
+                        entity_property = "municipality",
+                        source_field_path = "city",
+                      )
+                    ),
+                )
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control =
+                    ControlDef(
+                      field_ref = "city",
+                      type = ControlType.CONTROL_SELECT_ONE,
+                      label =
+                        LabelDef(
+                          text_id = "city_q",
+                          outputs =
+                            listOf(
+                              OutputFragment(
+                                placeholder_id = "country",
+                                value_expression = "/data/country",
+                              )
+                            ),
+                        ),
+                      itemset =
+                        ItemsetDef(
+                          instance_id = "cities",
+                          nodeset_filter = "country = current()/../country",
+                          value_ref = "name",
+                          label_ref = "label",
+                        ),
+                    )
+                )
+              )
+          ),
+      )
+
+    val session = FormSession(formDef)
+    val cityControl =
+      session.state.rootComponents.filterIsInstance<ComponentState.ControlState>().single()
+
+    // Verify localized label with OutputFragment interpolation
+    assertEquals("Select city in KE", cityControl.label?.text)
+    assertEquals("City", cityControl.label?.shortText)
+    assertEquals("jr://images/city_en.png", cityControl.label?.media?.image_uri)
+
+    // Verify cascading itemset filtered by country = KE
+    assertEquals(listOf("nairobi", "mombasa"), cityControl.options.map { it.value })
+
+    // Switch language to Swahili -> label updates dynamically
+    session.setLanguage("Swahili")
+    val swahiliControl =
+      session.state.rootComponents.filterIsInstance<ComponentState.ControlState>().single()
+    assertEquals("Chagua mji katika KE", swahiliControl.label?.text)
+
+    // Change country to TZ -> cascading options update to ["dar"]
+    session.updateString("country", "TZ")
+    val tzControl =
+      session.state.rootComponents.filterIsInstance<ComponentState.ControlState>().single()
+    assertEquals(listOf("dar"), tzControl.options.map { it.value })
+
+    // Select city "dar" -> EntityState updates label and mapped properties
+    session.updateString("city", "dar")
+    val entityState = session.state.entityStates.single()
+    assertEquals("trees", entityState.dataset)
+    assertTrue(entityState.shouldCreate)
+    assertEquals("uuid:9999", entityState.entityId)
+    assertEquals("Baobab (dar)", entityState.label)
+    assertEquals(1, entityState.baseVersion)
+    assertEquals("branch-abc", entityState.branchId)
+    assertEquals("Baobab", entityState.properties["species_name"]?.string_value)
+    assertEquals("dar", entityState.properties["municipality"]?.string_value)
+  }
+
+  @Test
+  fun valueChangedActionsIntentsAndManualRepeats_executesSideEffectsAndUpdatesRecord() {
+    val formDef =
+      FormDef(
+        form_id = "actions_and_intents_form",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "note", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "note_status", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "edit_gps", type = DataType.TYPE_GEOPOINT),
+                        FieldDefinition(name = "pulse_rate", type = DataType.TYPE_INT32),
+                        FieldDefinition(
+                          name = "sample",
+                          type = DataType.TYPE_MESSAGE,
+                          is_repeated = true,
+                          fields =
+                            listOf(FieldDefinition(name = "code", type = DataType.TYPE_STRING)),
+                        ),
+                      ),
+                  )
+              ),
+            bindings =
+              listOf(
+                FieldBinding(field_path = "note", type = DataType.TYPE_STRING),
+                FieldBinding(field_path = "note_status", type = DataType.TYPE_STRING),
+                FieldBinding(field_path = "pulse_rate", type = DataType.TYPE_INT32),
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control =
+                    ControlDef(
+                      field_ref = "note",
+                      type = ControlType.CONTROL_INPUT,
+                      intent =
+                        groundplatform.v2.forms.IntentConfig(
+                          intent_uri = "org.opendatakit.sensors.OXIMETER",
+                          parameters = mapOf("subject_note" to "/data/note"),
+                          response_mappings = mapOf("bpm" to "pulse_rate"),
+                        ),
+                      actions =
+                        listOf(
+                          ActionDef(
+                            events = listOf(EventType.EVENT_VALUE_CHANGED),
+                            type = ActionType.ACTION_SET_VALUE,
+                            target_field = "note_status",
+                            literal_value = TypedValue(string_value = "edited"),
+                          ),
+                          ActionDef(
+                            events = listOf(EventType.EVENT_VALUE_CHANGED),
+                            type = ActionType.ACTION_SET_GEOPOINT,
+                            target_field = "edit_gps",
+                          ),
+                        ),
+                    )
+                ),
+                ViewComponent(
+                  repeat =
+                    RepeatDef(
+                      field_ref = "sample",
+                      components =
+                        listOf(
+                          ViewComponent(
+                            control =
+                              ControlDef(
+                                field_ref = "sample/code",
+                                type = ControlType.CONTROL_INPUT,
+                              )
+                          )
+                        ),
+                    )
+                ),
+              )
+          ),
+      )
+
+    val session = FormSession(formDef)
+    assertNull(session.state.findFieldState("note_status")?.value)
+
+    // Edit `note` -> triggers EVENT_VALUE_CHANGED actions (`note_status` = "edited" +
+    // SetGeopointRequest)
+    session.updateString("note", "Patient resting")
+    assertEquals(
+      "edited",
+      session.state.findFieldState("note_status")?.value?.scalar_value?.string_value,
+    )
+    assertEquals(
+      listOf(PlatformEffectRequest.SetGeopointRequest("/data/edit_gps")),
+      session.state.pendingRequests,
+    )
+
+    // Verify resolved IntentConfig parameters
+    val noteControl =
+      session.state.rootComponents.filterIsInstance<ComponentState.ControlState>().first()
+    assertEquals("Patient resting", noteControl.resolvedIntent?.parameters?.get("subject_note"))
+
+    // Apply external intent response -> populates `pulse_rate` = 72
+    val afterIntent =
+      FormEngine.applyIntentResponse(
+        state = session.state,
+        contextCanonicalPath = "/data/note",
+        responseMappings = noteControl.resolvedIntent!!.responseMappings,
+        intentResults = mapOf("bpm" to TypedValue(int32_value = 72)),
+      )
+    assertEquals(72, afterIntent.findFieldState("pulse_rate")?.value?.scalar_value?.int32_value)
+
+    // Add two manual repeat instances and remove the first
+    session.addRepeatInstance("sample")
+    session.updateString("/data/sample[1]/code", "S-100")
+    session.addRepeatInstance("sample")
+    session.updateString("/data/sample[2]/code", "S-200")
+
+    val repeatState =
+      session.state.rootComponents.filterIsInstance<ComponentState.RepeatGroupState>().single()
+    assertTrue(repeatState.canAddInstance)
+    assertTrue(repeatState.canRemoveInstance)
+    assertEquals(2, repeatState.instances.size)
+
+    session.removeRepeatInstance("sample", 1)
+    val afterRemoveRepeat =
+      session.state.rootComponents.filterIsInstance<ComponentState.RepeatGroupState>().single()
+    assertEquals(1, afterRemoveRepeat.instances.size)
+    assertEquals(
+      "S-200",
+      session.state.findFieldState("/data/sample[1]/code")?.value?.scalar_value?.string_value,
+    )
+  }
+
+  @Test
+  fun compile_throwsOnCircularCalculateDependency() {
+    // `a` depends on `b` and `b` depends on `a`, so no valid evaluation order exists. The previous
+    // implementation silently picked an arbitrary order, producing values that depended on which
+    // binding happened to be declared first.
+    val formDef = formDefWithCalculates("a" to "../b + 1", "b" to "../a + 1")
+
+    val failure = assertFailsWith<CyclicDependencyException> { FormEngine.compile(formDef) }
+    assertEquals(listOf("a", "b"), failure.paths)
+    assertTrue(failure.message!!.contains("Circular dependency"), failure.message!!)
+  }
+
+  @Test
+  fun compile_throwsOnLongerDependencyCycle() {
+    val formDef = formDefWithCalculates("a" to "../c + 1", "b" to "../a + 1", "c" to "../b + 1")
+
+    val failure = assertFailsWith<CyclicDependencyException> { FormEngine.compile(formDef) }
+    assertEquals(listOf("a", "b", "c"), failure.paths)
+  }
+
+  @Test
+  fun compile_acceptsAcyclicDependencyChain() {
+    // Declared in reverse dependency order to confirm the topological sort still reorders them.
+    val formDef = formDefWithCalculates("c" to "../b + 1", "b" to "../a + 1", "a" to null)
+
+    val compiled = FormEngine.compile(formDef)
+    assertEquals(
+      listOf("a", "b", "c"),
+      compiled.topologicalBindings.map { it.relativePath },
+      "Bindings should be ordered so each field is evaluated after its dependencies",
+    )
+  }
+
+  @Test
+  fun evaluate_resolvesRelevanceThatDependsOnACalculatedValue() {
+    // Within a single pass the engine evaluates relevance (stage 2) *before* calculations
+    // (stage 3), so on the first pass `total` is still 0 and `bonus` looks non-relevant. The
+    // surrounding convergence loop must re-evaluate relevance after `total` is computed,
+    // otherwise `bonus` would stay hidden and never receive its calculated value.
+    val formDef =
+      FormDef(
+        form_id = "convergence_form",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "qty", type = DataType.TYPE_INT32),
+                        FieldDefinition(name = "total", type = DataType.TYPE_INT32),
+                        FieldDefinition(name = "bonus", type = DataType.TYPE_INT32),
+                      ),
+                  ),
+                default_values = buildRecordNode { int32("qty", 6) },
+              ),
+            bindings =
+              listOf(
+                FieldBinding(field_path = "qty", type = DataType.TYPE_INT32),
+                FieldBinding(
+                  field_path = "total",
+                  type = DataType.TYPE_INT32,
+                  calculate_expression = "/data/qty * 2",
+                ),
+                FieldBinding(
+                  field_path = "bonus",
+                  type = DataType.TYPE_INT32,
+                  relevant_expression = "/data/total > 10",
+                  calculate_expression = "/data/total + 100",
+                ),
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control = ControlDef(field_ref = "qty", type = ControlType.CONTROL_INPUT)
+                ),
+                ViewComponent(
+                  control = ControlDef(field_ref = "total", type = ControlType.CONTROL_INPUT)
+                ),
+                ViewComponent(
+                  control = ControlDef(field_ref = "bonus", type = ControlType.CONTROL_INPUT)
+                ),
+              )
+          ),
+      )
+
+    val session = FormSession(formDef)
+
+    assertEquals(12, session.state.findFieldState("total")?.value?.scalar_value?.int32_value)
+    val bonus = session.state.findFieldState("bonus")
+    assertTrue(bonus?.isRelevant == true, "bonus should become relevant once total is calculated")
+    assertEquals(112, bonus.value?.scalar_value?.int32_value)
+
+    // Drive `total` below the threshold and confirm relevance converges back off.
+    session.updateInt("qty", 1)
+    assertEquals(2, session.state.findFieldState("total")?.value?.scalar_value?.int32_value)
+    assertTrue(session.state.findFieldState("bonus")?.isRelevant != true)
+  }
+
+  @Test
+  fun validate_reportsCircularDependencyAsDataInsteadOfThrowing() {
+    // compile() fails fast on a cycle, which is correct for the runtime but leaves an authoring
+    // tool unable to even open the form to fix it. validate() hands back the offending paths.
+    val formDef = formDefWithCalculates("a" to "../b + 1", "b" to "../a + 1")
+
+    val result = FormEngine.validate(formDef)
+
+    assertFalse(result.isValid)
+    val problem = assertIs<FormValidationProblem.CircularDependency>(result.problems.single())
+    assertEquals(listOf("a", "b"), problem.fieldPaths)
+    assertTrue(problem.message.contains("Circular dependency"), problem.message)
+  }
+
+  @Test
+  fun validate_returnsValidForAcyclicForm() {
+    val formDef = formDefWithCalculates("c" to "../b + 1", "b" to "../a + 1", "a" to null)
+
+    val result = FormEngine.validate(formDef)
+
+    assertTrue(result.isValid, "Expected no problems, got ${result.problems}")
+  }
+
+  @Test
+  fun validate_reportsMalformedExpressionAsDataInsteadOfThrowing() {
+    // Expressions are parsed eagerly while indexing bindings, so a syntax error would otherwise
+    // escape validate() as an exception.
+    val formDef = formDefWithCalculates("a" to "1 +")
+
+    val result = FormEngine.validate(formDef)
+
+    assertFalse(result.isValid)
+    assertIs<FormValidationProblem.InvalidExpression>(result.problems.single())
+  }
+
+  @Test
+  fun evaluate_flagsStateThatDidNotConverge() {
+    // Each level of "relevance depends on a calculated value" costs one extra pass, because
+    // relevance (stage 2) is evaluated before calculations (stage 3) within a pass. A chain
+    // deeper than MAX_CONVERGENCE_PASSES therefore runs out of passes with work still pending.
+    // Without a diagnostic this is indistinguishable from a form that simply settled early.
+    val session = FormSession(chainedRelevanceFormDef(depth = 6))
+
+    assertTrue(
+      session.state.didNotConverge,
+      "A dependency chain deeper than the pass limit should be reported as non-convergent",
+    )
+    // The tail of the chain never got its calculated value, which is exactly why callers need to
+    // be told rather than silently shown a half-evaluated form.
+    assertNull(session.state.findFieldState("c6")?.value?.scalar_value?.int32_value)
+  }
+
+  @Test
+  fun evaluate_doesNotFlagConvergenceForAShallowChain() {
+    // Control: the flag must not be permanently on. A chain the loop can settle is not flagged.
+    val session = FormSession(chainedRelevanceFormDef(depth = 2))
+
+    assertFalse(session.state.didNotConverge)
+    assertEquals(3, session.state.findFieldState("c2")?.value?.scalar_value?.int32_value)
+  }
+
+  /**
+   * Builds a form with a `seed` of 1 followed by [depth] fields `c1..cN`, where each `cN` both
+   * calculates from and takes its relevance from its predecessor. Resolving each link requires a
+   * separate convergence pass.
+   */
+  private fun chainedRelevanceFormDef(depth: Int): FormDef {
+    val names = (1..depth).map { "c$it" }
+    fun predecessorOf(index: Int) = if (index == 0) "seed" else names[index - 1]
+    return FormDef(
+      form_id = "convergence_chain_form",
+      model =
+        ModelDef(
+          primary_instance =
+            PrimaryInstance(
+              record_schema =
+                RecordSchema(
+                  name = "data",
+                  fields =
+                    (listOf("seed") + names).map {
+                      FieldDefinition(name = it, type = DataType.TYPE_INT32)
+                    },
+                ),
+              default_values = buildRecordNode { int32("seed", 1) },
+            ),
+          bindings =
+            listOf(FieldBinding(field_path = "seed", type = DataType.TYPE_INT32)) +
+              names.mapIndexed { i, name ->
+                FieldBinding(
+                  field_path = name,
+                  type = DataType.TYPE_INT32,
+                  relevant_expression = "/data/${predecessorOf(i)} > 0",
+                  calculate_expression = "/data/${predecessorOf(i)} + 1",
+                )
+              },
+        ),
+      view =
+        ViewDef(
+          components =
+            (listOf("seed") + names).map {
+              ViewComponent(control = ControlDef(field_ref = it, type = ControlType.CONTROL_INPUT))
+            }
+        ),
+    )
+  }
+
+  /** Builds a minimal flat int32 form where each named field carries an optional `calculate`. */
+  private fun formDefWithCalculates(vararg fields: Pair<String, String?>): FormDef =
+    FormDef(
+      form_id = "cycle_form",
+      model =
+        ModelDef(
+          primary_instance =
+            PrimaryInstance(
+              record_schema =
+                RecordSchema(
+                  name = "data",
+                  fields =
+                    fields.map { (name, _) ->
+                      FieldDefinition(name = name, type = DataType.TYPE_INT32)
+                    },
+                )
+            ),
+          bindings =
+            fields.map { (name, calculate) ->
+              FieldBinding(
+                field_path = name,
+                type = DataType.TYPE_INT32,
+                calculate_expression = calculate ?: "",
+              )
+            },
+        ),
+    )
+
+  @Test
+  fun testDynamicReadonlyAndGroupInheritedReadonly() {
+    val formDef =
+      FormDef(
+        form_id = "readonly_form",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "lock_mode", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "dynamic_field", type = DataType.TYPE_STRING),
+                        FieldDefinition(
+                          name = "locked_group",
+                          type = DataType.TYPE_MESSAGE,
+                          fields =
+                            listOf(
+                              FieldDefinition(name = "child_input", type = DataType.TYPE_STRING)
+                            ),
+                        ),
+                      ),
+                  ),
+                default_values = buildRecordNode { string("lock_mode", "open") },
+              ),
+            bindings =
+              listOf(
+                FieldBinding(field_path = "lock_mode", type = DataType.TYPE_STRING),
+                FieldBinding(
+                  field_path = "dynamic_field",
+                  type = DataType.TYPE_STRING,
+                  read_only_expression = "/data/lock_mode = 'locked'",
+                ),
+                FieldBinding(
+                  field_path = "locked_group",
+                  type = DataType.TYPE_MESSAGE,
+                  read_only = true,
+                ),
+                FieldBinding(field_path = "locked_group/child_input", type = DataType.TYPE_STRING),
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control = ControlDef(field_ref = "lock_mode", type = ControlType.CONTROL_INPUT)
+                ),
+                ViewComponent(
+                  control =
+                    ControlDef(field_ref = "dynamic_field", type = ControlType.CONTROL_INPUT)
+                ),
+                ViewComponent(
+                  group =
+                    GroupDef(
+                      field_ref = "locked_group",
+                      components =
+                        listOf(
+                          ViewComponent(
+                            control =
+                              ControlDef(
+                                field_ref = "child_input",
+                                type = ControlType.CONTROL_INPUT,
+                              )
+                          )
+                        ),
+                    )
+                ),
+              )
+          ),
+      )
+
+    val session = FormSession(formDef)
+    assertFalse(session.state.findFieldState("dynamic_field")?.isReadOnly == true)
+    assertTrue(session.state.findFieldState("locked_group/child_input")?.isReadOnly == true)
+
+    val groupState = session.state.rootComponents[2] as ComponentState.GroupState
+    val childControl = groupState.children.first() as ComponentState.ControlState
+    assertTrue(childControl.fieldState.isReadOnly)
+
+    session.updateString("lock_mode", "locked")
+    assertTrue(session.state.findFieldState("dynamic_field")?.isReadOnly == true)
+  }
+
+  @Test
+  fun testConventionItextConstraintAndRequiredMessagesAndItemsetMedia() {
+    val formDef =
+      FormDef(
+        form_id = "itext_msg_form",
+        default_language = "English",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "age", type = DataType.TYPE_INT32),
+                        FieldDefinition(name = "species", type = DataType.TYPE_SELECT_ONE),
+                      ),
+                  )
+              ),
+            secondary_instances =
+              listOf(
+                SecondaryInstance(
+                  id = "trees",
+                  rows =
+                    listOf(
+                      org.openforis.collectone.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "oak",
+                        "itextId" to "oak_id",
+                      ),
+                      org.openforis.collectone.v2.core.forms.model.secondaryInstanceRow(
+                        "name" to "pine",
+                        "itextId" to "pine_id",
+                      ),
+                    ),
+                )
+              ),
+            bindings =
+              listOf(
+                FieldBinding(
+                  field_path = "age",
+                  type = DataType.TYPE_INT32,
+                  required_expression = "true()",
+                  constraint_expression = ". >= 18",
+                ),
+                FieldBinding(field_path = "species", type = DataType.TYPE_SELECT_ONE),
+              ),
+            translations =
+              TranslationCatalog(
+                languages =
+                  listOf(
+                    LanguageTranslation(
+                      language = "English",
+                      is_default = true,
+                      strings =
+                        mapOf(
+                          "/data/age:jr:requiredMsg" to
+                            LocalizedString(value_ = "Age is mandatory"),
+                          "/data/age:jr:constraintMsg" to
+                            LocalizedString(value_ = "Must be 18 or older"),
+                          "oak_id" to
+                            LocalizedString(
+                              value_ = "White Oak",
+                              short_value = "Oak",
+                              guidance_value = "Look for rounded lobes",
+                              media = MediaRef(image_uri = "jr://images/oak.png"),
+                            ),
+                          "pine_id" to LocalizedString(value_ = "Eastern Pine"),
+                        ),
+                    )
+                  )
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control = ControlDef(field_ref = "age", type = ControlType.CONTROL_INPUT)
+                ),
+                ViewComponent(
+                  control =
+                    ControlDef(
+                      field_ref = "species",
+                      type = ControlType.CONTROL_SELECT_ONE,
+                      itemset =
+                        ItemsetDef(
+                          instance_id = "trees",
+                          value_ref = "name",
+                          label_ref = "itextId",
+                        ),
+                    )
+                ),
+              )
+          ),
+      )
+
+    val session = FormSession(formDef)
+    assertEquals("Age is mandatory", session.state.validationErrors.first().message)
+
+    val speciesControl = session.state.rootComponents[1] as ComponentState.ControlState
+    val oakOption = speciesControl.options.first { it.value == "oak" }
+    assertEquals("White Oak", oakOption.label.text)
+    assertEquals("Oak", oakOption.label.shortText)
+    assertEquals("Look for rounded lobes", oakOption.label.guidanceText)
+    assertEquals("jr://images/oak.png", oakOption.label.media?.image_uri)
+
+    session.updateInt("age", 12)
+    assertEquals("Must be 18 or older", session.state.validationErrors.first().message)
+  }
+
+  @Test
+  fun testVariadicDistanceGeoJsonSecondaryInstanceAndChoiceNameOnItemset() {
+    val geoJson =
+      """
+      {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": "station_a",
+            "geometry": { "type": "Point", "coordinates": [-122.3321, 47.6062, 15] },
+            "properties": { "title": "Seattle Station", "zone": "north" }
+          },
+          {
+            "type": "Feature",
+            "id": "station_b",
+            "geometry": { "type": "Point", "coordinates": [-122.6765, 45.5231] },
+            "properties": { "title": "Portland Station", "zone": "south" }
+          }
+        ]
+      }
+      """
+        .trimIndent()
+
+    val formDef =
+      FormDef(
+        form_id = "geo_itemset_form",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "station", type = DataType.TYPE_SELECT_ONE),
+                        FieldDefinition(name = "station_label", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "station_geom", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "p1", type = DataType.TYPE_GEOPOINT),
+                        FieldDefinition(name = "p2", type = DataType.TYPE_GEOPOINT),
+                        FieldDefinition(name = "p3", type = DataType.TYPE_GEOPOINT),
+                        FieldDefinition(name = "leg_dist", type = DataType.TYPE_DOUBLE),
+                      ),
+                  ),
+                default_values = buildRecordNode { string("station", "station_a") },
+              ),
+            secondary_instances =
+              listOf(SecondaryInstance(id = "stations", uri = "jr://file/stations.geojson")),
+            bindings =
+              listOf(
+                FieldBinding(field_path = "station", type = DataType.TYPE_SELECT_ONE),
+                FieldBinding(
+                  field_path = "station_label",
+                  type = DataType.TYPE_STRING,
+                  calculate_expression = "jr:choice-name( /data/station , ' /data/station ')",
+                ),
+                FieldBinding(
+                  field_path = "station_geom",
+                  type = DataType.TYPE_STRING,
+                  calculate_expression =
+                    "instance('stations')/root/item[id = /data/station]/geometry",
+                ),
+                FieldBinding(field_path = "p1", type = DataType.TYPE_GEOPOINT),
+                FieldBinding(field_path = "p2", type = DataType.TYPE_GEOPOINT),
+                FieldBinding(field_path = "p3", type = DataType.TYPE_GEOPOINT),
+                FieldBinding(
+                  field_path = "leg_dist",
+                  type = DataType.TYPE_DOUBLE,
+                  calculate_expression = "distance(/data/p1, /data/p2, /data/p3)",
+                ),
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control =
+                    ControlDef(
+                      field_ref = "station",
+                      type = ControlType.CONTROL_SELECT_ONE,
+                      itemset =
+                        ItemsetDef(
+                          instance_id = "stations",
+                          value_ref = "id",
+                          label_ref = "title",
+                        ),
+                    )
+                )
+              )
+          ),
+      )
+
+    val session =
+      FormSession(
+        formDef,
+        environment =
+          FormEnvironment(
+            secondaryInstanceProvider =
+              org.openforis.collectone.v2.core.forms.xpath.InMemorySecondaryInstanceProvider
+                .fromGeoJson(mapOf("stations" to geoJson))
+          ),
+      )
+    session.updateGeoPoint("p1", 0.0, 0.0)
+    session.updateGeoPoint("p2", 0.0, 1.0)
+    session.updateGeoPoint("p3", 1.0, 1.0)
+    assertEquals(
+      "Seattle Station",
+      session.state.findFieldState("station_label")?.value?.scalar_value?.string_value,
+    )
+    assertEquals(
+      "47.6062 -122.3321 15 0",
+      session.state.findFieldState("station_geom")?.value?.scalar_value?.string_value,
+    )
+    val legDist = session.state.findFieldState("leg_dist")?.value?.scalar_value?.double_value ?: 0.0
+    assertTrue(legDist > 200_000.0, "Expected 2-segment distance > 200km, got $legDist")
+  }
+
+  @Test
+  fun testRepeatLevelActionsCurrentRepeatCountLastSavedAndLocationProvider() {
+    val formDef =
+      FormDef(
+        form_id = "repeat_actions_form",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "count", type = DataType.TYPE_INT32),
+                        FieldDefinition(name = "prev_item", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "bg_gps", type = DataType.TYPE_GEOPOINT),
+                        FieldDefinition(
+                          name = "rep",
+                          type = DataType.TYPE_MESSAGE,
+                          is_repeated = true,
+                          fields =
+                            listOf(FieldDefinition(name = "seq_num", type = DataType.TYPE_INT32)),
+                        ),
+                      ),
+                  ),
+                default_values = buildRecordNode { int32("count", 2) },
+              ),
+            secondary_instances =
+              listOf(
+                SecondaryInstance(
+                  id = "last-saved",
+                  uri = "jr://instance/last-saved",
+                  root_name = "data",
+                  rows =
+                    listOf(
+                      org.openforis.collectone.v2.core.forms.model.secondaryInstanceRow(
+                        "item" to "CarriedOver"
+                      )
+                    ),
+                )
+              ),
+            bindings =
+              listOf(
+                FieldBinding(field_path = "count", type = DataType.TYPE_INT32),
+                FieldBinding(
+                  field_path = "prev_item",
+                  type = DataType.TYPE_STRING,
+                  calculate_expression = "instance('last-saved')/data/item",
+                ),
+                FieldBinding(field_path = "bg_gps", type = DataType.TYPE_GEOPOINT),
+                FieldBinding(field_path = "rep/seq_num", type = DataType.TYPE_INT32),
+              ),
+            actions =
+              listOf(
+                ActionDef(
+                  events = listOf(EventType.EVENT_INSTANCE_FIRST_LOAD),
+                  type = ActionType.ACTION_SET_GEOPOINT,
+                  target_field = "bg_gps",
+                )
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  repeat =
+                    RepeatDef(
+                      field_ref = "rep",
+                      count_expression = "current()/../count",
+                      actions =
+                        listOf(
+                          ActionDef(
+                            events = listOf(EventType.EVENT_REPEAT_INSERT),
+                            type = ActionType.ACTION_SET_VALUE,
+                            target_field = "rep/seq_num",
+                            value_expression = "position(..)",
+                          )
+                        ),
+                      components =
+                        listOf(
+                          ViewComponent(
+                            control =
+                              ControlDef(field_ref = "seq_num", type = ControlType.CONTROL_INPUT)
+                          )
+                        ),
+                    )
+                )
+              )
+          ),
+      )
+
+    val env =
+      FormEnvironment(
+        locationProvider = {
+          groundplatform.v2.forms.GeoPoint(
+            latitude = 37.422,
+            longitude = -122.084,
+            altitude_meters = 12.0,
+            accuracy_meters = 4.5,
+          )
+        }
+      )
+    val session = FormSession(formDef, environment = env)
+
+    // Verify single-record XML secondary instance (`instance('last-saved')/data/item`)
+    assertEquals(
+      "CarriedOver",
+      session.state.findFieldState("prev_item")?.value?.scalar_value?.string_value,
+    )
+
+    // Verify synchronous locationProvider populated bg_gps on odk-instance-first-load
+    val gpsVal = session.state.findFieldState("bg_gps")?.value?.scalar_value?.geopoint_value
+    assertNotNull(gpsVal)
+    assertEquals(37.422, gpsVal.latitude)
+    assertEquals(-122.084, gpsVal.longitude)
+
+    // Verify jr:count="current()/../count" created 2 repeat instances and fired repeat-level
+    // odk-new-repeat actions
+    val repeatGroup = session.state.rootComponents.first() as ComponentState.RepeatGroupState
+    assertEquals(2, repeatGroup.instances.size)
+    assertEquals(
+      1,
+      session.state.findFieldState("/data/rep[1]/seq_num")?.value?.scalar_value?.int32_value,
+    )
+    assertEquals(
+      2,
+      session.state.findFieldState("/data/rep[2]/seq_num")?.value?.scalar_value?.int32_value,
+    )
+  }
+
+  @Test
+  fun repeatInstanceOneAndTwoControls_bindToEvaluatedFieldStateAndPreserveBlankInitialRepeat() {
+    val xml =
+      """
+      <h:html xmlns="http://www.w3.org/2002/xforms"
+              xmlns:h="http://www.w3.org/1999/xhtml"
+              xmlns:jr="http://openrosa.org/javarosa">
+        <h:head>
+          <h:title>Repeat Group Saving Test</h:title>
+          <model>
+            <instance>
+              <data id="repeat_save_test">
+                <trees jr:template="">
+                  <species/>
+                  <dbh_cm/>
+                </trees>
+                <trees>
+                  <species/>
+                  <dbh_cm/>
+                </trees>
+              </data>
+            </instance>
+            <bind nodeset="/data/trees/species" type="select1" required="true()"/>
+            <bind nodeset="/data/trees/dbh_cm" type="decimal"/>
+          </model>
+        </h:head>
+        <h:body>
+          <group ref="/data/trees">
+            <label>Sampled Tree</label>
+            <repeat nodeset="/data/trees">
+              <select1 ref="/data/trees/species">
+                <label>Species</label>
+                <item><label>Cordia</label><value>cordia</value></item>
+                <item><label>Grevillea</label><value>grevillea</value></item>
+              </select1>
+              <input ref="/data/trees/dbh_cm">
+                <label>DBH (cm)</label>
+              </input>
+            </repeat>
+          </group>
+        </h:body>
+      </h:html>
+      """
+        .trimIndent()
+
+    val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
+    val session = FormSession(formDef)
+
+    // Non-template blank initial repeat instance in XML must be preserved as instance #1
+    val repeatGroup0 = session.state.rootComponents.first() as ComponentState.RepeatGroupState
+    assertEquals(1, repeatGroup0.instances.size)
+    val inst1Controls0 =
+      repeatGroup0.instances[0].children.filterIsInstance<ComponentState.ControlState>()
+    assertEquals("/data/trees[1]/species", inst1Controls0[0].canonicalPath)
+    assertEquals("/data/trees[1]/dbh_cm", inst1Controls0[1].canonicalPath)
+    assertTrue(inst1Controls0[0].fieldState.isRequired)
+
+    // Update Repeat #1 fields via their control canonicalPaths and verify ControlState.fieldState
+    // reflects the saved answers
+    session.updateString(inst1Controls0[0].canonicalPath, "cordia")
+    session.updateDouble(inst1Controls0[1].canonicalPath, 28.5)
+
+    // Add Repeat #2 and populate its answers
+    session.addRepeatInstance("/data/trees")
+    val repeatGroup1 = session.state.rootComponents.first() as ComponentState.RepeatGroupState
+    assertEquals(2, repeatGroup1.instances.size)
+    val inst2Controls =
+      repeatGroup1.instances[1].children.filterIsInstance<ComponentState.ControlState>()
+    assertEquals("/data/trees[2]/species", inst2Controls[0].canonicalPath)
+    assertEquals("/data/trees[2]/dbh_cm", inst2Controls[1].canonicalPath)
+    session.updateString(inst2Controls[0].canonicalPath, "grevillea")
+    session.updateDouble(inst2Controls[1].canonicalPath, 41.0)
+
+    val finalRepeat = session.state.rootComponents.first() as ComponentState.RepeatGroupState
+    val finalInst1 =
+      finalRepeat.instances[0].children.filterIsInstance<ComponentState.ControlState>()
+    val finalInst2 =
+      finalRepeat.instances[1].children.filterIsInstance<ComponentState.ControlState>()
+
+    assertEquals("cordia", finalInst1[0].fieldState.value?.scalar_value?.string_value)
+    assertFalse(finalInst1[0].fieldState.isEmpty)
+    assertEquals(28.5, finalInst1[1].fieldState.value?.scalar_value?.double_value)
+    assertFalse(finalInst1[1].fieldState.isEmpty)
+
+    assertEquals("grevillea", finalInst2[0].fieldState.value?.scalar_value?.string_value)
+    assertFalse(finalInst2[0].fieldState.isEmpty)
+    assertEquals(41.0, finalInst2[1].fieldState.value?.scalar_value?.double_value)
+    assertFalse(finalInst2[1].fieldState.isEmpty)
+  }
+}

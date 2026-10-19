@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ that `androidApp` and [`../iosApp/`](../iosApp/) deliver consistent behavior.
 -   **`src/androidMain/AndroidManifest.xml`**: Android application manifest,
     permissions (`INTERNET`), theme (`Theme.Material.Light.NoActionBar`), and
     adaptive launcher icon configuration.
--   **`src/androidMain/kotlin/org/groundplatform/v2/android/MainActivity.kt`**:
+-   **`src/androidMain/kotlin/org/openforis/collectone/v2/android/MainActivity.kt`**:
     Android `ComponentActivity` that enables edge-to-edge rendering, wires
     system back navigation, and mounts `MobileScreenHost` inside `GroundTheme`.
 -   **`src/androidMain/res/`**: Collect One Cloud-Acacia adaptive launcher icon

@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -21,7 +21,7 @@ plugins {
   id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
-group = "org.groundplatform.v2.mobileweb"
+group = "org.openforis.collectone.v2.mobileweb"
 
 version = "2.0.0-SNAPSHOT"
 
@@ -202,7 +202,7 @@ val generateFirebaseConfig by tasks.registering {
 tasks.withType<ProcessResources>().configureEach {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   from(file("../shared/ui/src/commonMain/composeResources")) {
-    into("composeResources/org.groundplatform.v2.core.forms.ui.resources")
+    into("composeResources/org.openforis.collectone.v2.core.forms.ui.resources")
   }
   // JS bridges loaded by index.html for the shared/app wasmJs actuals (PDF export, media capture).
   from(file("../shared/app/src/wasmJsMain/resources"))

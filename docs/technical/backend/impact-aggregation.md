@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -437,7 +437,7 @@ deployment once hosting, terms, and licenses are settled.
 *   Aggregation rules, deduplication, scope rules, thresholding, and the
     attribution score are implemented as pure Kotlin Multiplatform functions in
     `shared/core` (`ImpactAggregator.run` in
-    `org.groundplatform.v2.core.impact`), used by both the backend job (JVM)
+    `org.openforis.collectone.v2.core.impact`), used by both the backend job (JVM)
     and the web console, so dashboards match across environments. A run is
     deterministic (same input, same rows in the same order) and runs in
     O(n log n) in the number of features, so clients can recompute on every

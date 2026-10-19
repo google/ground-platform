@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-// Test fixtures for `org.groundplatform.v2:app`: seeded in-memory stores, survey and form editor
+// Test fixtures for `org.openforis.collectone.v2:app`: seeded in-memory stores, survey and form
+// editor
 // samples, and recording fakes. Depend on this from `commonTest` only.
 plugins {
   kotlin("multiplatform")
@@ -21,7 +22,7 @@ plugins {
   id("com.ncorti.ktfmt.gradle")
 }
 
-group = "org.groundplatform.v2"
+group = "org.openforis.collectone.v2"
 
 version = "2.0.0-SNAPSHOT"
 
@@ -48,7 +49,7 @@ kotlin {
 }
 
 android {
-  namespace = "org.groundplatform.v2.app.testing"
+  namespace = "org.openforis.collectone.v2.app.testing"
   compileSdk = 35
   defaultConfig { minSdk = 24 }
   compileOptions {

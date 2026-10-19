@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
   limitations under the License.
 -->
 
-# ProtoForms Compose Multiplatform Form UI (`org.groundplatform.v2:protoforms-ui`)
+# ProtoForms Compose Multiplatform Form UI (`org.openforis.collectone.v2:protoforms-ui`)
 
 A reusable **Compose Multiplatform** UI library
-([`org.groundplatform.v2.core.forms.ui`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md))
+([`org.openforis.collectone.v2.core.forms.ui`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/README.md))
 for rendering and executing ProtoForms / XForms definitions one question at
 a time across **Android (`jvm`)**, **iOS (`iosArm64`, `iosSimulatorArm64`)**,
 and **Web (`js`, `wasmJs`)**.
@@ -26,10 +26,10 @@ and **Web (`js`, `wasmJs`)**.
 ## Overview
 
 `protoforms-ui` builds directly on top of the pure KMP `FormEngine` and
-`FormSession` in `org.groundplatform.v2:protoforms`:
+`FormSession` in `org.openforis.collectone.v2:protoforms`:
 
 -   **Single-Question-Per-Screen Mobile Navigation
-    ([`FormWizardController`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/FormWizardController.kt))**:
+    ([`FormWizardController`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/FormWizardController.kt))**:
     Automatically flattens hierarchical `FormState.rootComponents` into an
     ordered sequence of relevant mobile screens (`QuestionStep`,
     `FieldListGroupStep` for `appearance="field-list"`, `RepeatHubStep` for
@@ -40,7 +40,7 @@ and **Web (`js`, `wasmJs`)**.
     `relevant` expressions, `jr:count` repeat counts, cascading `itemset`
     options, or `<output>` label interpolations.
 -   **Reusable Multiplatform Control Widgets
-    ([`QuestionControlCard` & `ControlWidget`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/ControlWidgets.kt))**:
+    ([`QuestionControlCard` & `ControlWidget`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/ControlWidgets.kt))**:
     Provides mobile-optimized Material 3 widgets for all ProtoForms control
     types (`CONTROL_INPUT`, `CONTROL_SELECT_ONE`, `CONTROL_SELECT_MULTIPLE`,
     `CONTROL_RANGE`, `CONTROL_RANK`, `CONTROL_UPLOAD`, `CONTROL_TRIGGER`) and
@@ -48,7 +48,7 @@ and **Web (`js`, `wasmJs`)**.
     `TYPE_BOOLEAN`, `TYPE_DATE`, `TYPE_TIME`, `TYPE_DATETIME`, `TYPE_GEOPOINT`,
     `TYPE_GEOTRACE`, `TYPE_GEOSHAPE`).
 -   **Compact Web Layout
-    ([`CompactFormRunner`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/CompactFormRunner.kt))**:
+    ([`CompactFormRunner`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/CompactFormRunner.kt))**:
     Renders the same `FormWizardController` session as a vertical stack of
     collapsible question cards (`CompactQuestionCard`) that fits a web side
     panel. Each card shows a status icon (answered ✓, skipped ⊘, pending ○, or
@@ -65,7 +65,7 @@ and **Web (`js`, `wasmJs`)**.
     form data. Geometry questions (`geopoint`, `geotrace`, `geoshape`) take
     their input through `CompactGeometryInput`: `Device` keeps the mobile GPS
     widgets, while `MapDrawing` renders a "draw on the map" request
-    ([`CompactMapDrawing.kt`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/CompactMapDrawing.kt))
+    ([`CompactMapDrawing.kt`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/CompactMapDrawing.kt))
     with **Draw on map** / **Done** / **Undo** / **Clear** actions; the host
     implements `CompactMapDrawingHost` to route its map clicks into the
     question with `addMapDrawingVertex` (a point is placed by one click, lines
@@ -81,7 +81,7 @@ and **Web (`js`, `wasmJs`)**.
     new token re-fires the same path (the web dashboard uses this when one of
     the form's geometries is clicked on the map).
 -   **Form Density
-    ([`FormDensity` / `LocalFormDensity`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/FormDensity.kt))**:
+    ([`FormDensity` / `LocalFormDensity`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/FormDensity.kt))**:
     A composition local that tells the shared widgets which layout hosts them.
     The mobile runner uses the default `COMFORTABLE` density; `CompactFormRunner`
     provides `COMPACT` around its whole stack (interactive and read-only alike,
@@ -91,16 +91,16 @@ and **Web (`js`, `wasmJs`)**.
     `+ step` buttons) and keep just the text field or slider
     (`showNumericSteppers`), and free-text fields (string, integer,
     decimal, date, time) use the slightly shorter `GroundOutlinedTextField`
-    ([`GroundOutlinedTextField.kt`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/GroundOutlinedTextField.kt):
+    ([`GroundOutlinedTextField.kt`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/GroundOutlinedTextField.kt):
     `bodyMedium` text, ~48 dp minimum height instead of Material's 56 dp, a
     plain `OutlinedTextField` on mobile). Every other widget, card and chrome
     dimension is identical in both densities.
 -   **Media Capture Questions
-    ([`MediaCaptureWidget`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/MediaCaptureWidgets.kt))**:
+    ([`MediaCaptureWidget`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/MediaCaptureWidgets.kt))**:
     Photo, video, and audio questions (`<upload mediatype="image/*|video/*|audio/*">`)
     render one card on mobile and in the compact web layout. Capture is
     delegated to the host's `LocalMediaCaptureHandler`
-    ([`MediaCaptureHost.kt`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/MediaCaptureHost.kt));
+    ([`MediaCaptureHost.kt`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/MediaCaptureHost.kt));
     the default `SimulatedMediaCaptureHandler` answers with placeholder
     media so forms stay answerable in tests and previews. The organizer's
     source mode is explicit in the UI: a question with the ODK `new` /
@@ -116,7 +116,7 @@ and **Web (`js`, `wasmJs`)**.
     never silently served by a file picker.
 
 See the detailed package design and API reference in
-[`src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/README.md).
+[`src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/README.md`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/README.md).
 
 
 ## Quick Start
@@ -126,8 +126,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.RecordInstance
-import org.groundplatform.v2.core.forms.ui.FormWizardController
-import org.groundplatform.v2.core.forms.ui.MobileFormRunner
+import org.openforis.collectone.v2.core.forms.ui.FormWizardController
+import org.openforis.collectone.v2.core.forms.ui.MobileFormRunner
 
 @Composable
 fun SurveyScreen(

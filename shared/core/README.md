@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 # Collect One Core Runtime Library (`shared/core`)
 
-`org.groundplatform.v2:protoforms` is the pure Kotlin Multiplatform (KMP) domain
+`org.openforis.collectone.v2:protoforms` is the pure Kotlin Multiplatform (KMP) domain
 and form runtime library for Collect One. It has **no UI or Compose
 dependencies** and compiles to **Android/JVM (`jvm`)**, **iOS (`iosArm64`,
 `iosSimulatorArm64`, `iosX64`)**, **WebAssembly (`wasmJs`)**, and **JavaScript
@@ -24,23 +24,23 @@ dependencies** and compiles to **Android/JVM (`jvm`)**, **iOS (`iosArm64`,
 
 ## Key Packages
 
--   **[`org.groundplatform.v2.core.forms.serialization`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/serialization/README.md)**:
+-   **[`org.openforis.collectone.v2.core.forms.serialization`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/serialization/README.md)**:
     Bidirectional lossless conversion between XForms XML (`<h:html>` and
     `<data>`), `groundplatform.v2.forms` Protocol Buffer messages (`FormDef`,
     `RecordInstance`), Protocol Buffer Text Format (`textproto`), and Canonical
     Proto3 JSON (`ProtoJsonSerializer`).
--   **[`org.groundplatform.v2.core.forms.xpath`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/xpath/README.md)**:
+-   **[`org.openforis.collectone.v2.core.forms.xpath`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/xpath/README.md)**:
     Full XPath 1.0 + XForms AST lexer, parser, dependency analyzer, and
     evaluator operating directly against `RecordInstance` and `FormDef` models.
--   **[`org.groundplatform.v2.core.forms.engine`](src/commonMain/kotlin/org/groundplatform/v2/core/forms/engine/README.md)**
-    & **`org.groundplatform.v2.core.forms.model`**: Immutable runtime state
+-   **[`org.openforis.collectone.v2.core.forms.engine`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/engine/README.md)**
+    & **`org.openforis.collectone.v2.core.forms.model`**: Immutable runtime state
     models (`FormState`, `ComponentState`) and the 5-stage reactive evaluation
     pipeline (`FormEngine`, `FormSession`, `CompiledForm`) supporting dynamic
     repeats, calculations, relevance, constraints, cascading `itemset`s,
     multilingual translations, and XForms Entities.
--   **[`org.groundplatform.v2.core.geo.geoid`](src/commonMain/kotlin/org/groundplatform/v2/core/geo/geoid/README.md)**:
+-   **[`org.openforis.collectone.v2.core.geo.geoid`](src/commonMain/kotlin/org/openforis/collectone/v2/core/geo/geoid/README.md)**:
     Offline, bit-exact computation of AgStack Asset Registry GeoIDs (SHA-256 of S2 cell tokens),
-    backed by a minimal pure-Kotlin S2 port in `org.groundplatform.v2.core.geo.s2`.
+    backed by a minimal pure-Kotlin S2 port in `org.openforis.collectone.v2.core.geo.s2`.
 
 ## Building and Running Tests
 

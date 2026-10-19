@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 # Collect One Shared Mobile Module
 
-`org.groundplatform.v2:mobile` contains the Collect One mobile app: its screens,
+`org.openforis.collectone.v2:mobile` contains the Collect One mobile app: its screens,
 state (`MobileAppState`), and root composable (`GroundMobileApp()`), built on
 the domain, data, and shared UI in [`../app/`](../app/). Every mobile host runs
 the same `GroundMobileApp()`: `androidApp`, `iosApp`, and the Wasm mobile build
@@ -99,7 +99,7 @@ targets of its own.
         (Metric/Imperial units, in-app language locale switcher, device storage chart, and
         uploaded media cache eviction), **Terms of Service**, and **Sign out**.
 
-## Internal Package Structure (`org.groundplatform.v2.mobile`)
+## Internal Package Structure (`org.openforis.collectone.v2.mobile`)
 
 -   **`data/`**: Mobile-only local persistence (SQLite/Room local database,
     offline submission queue, local entity & survey cache, offline map tile
@@ -119,5 +119,5 @@ targets of its own.
 
 ## Dependencies
 
--   [`../core/`](../core/) (`org.groundplatform.v2:protoforms`)
--   [`../ui/`](../ui/) (`org.groundplatform.v2:protoforms-ui`)
+-   [`../core/`](../core/) (`org.openforis.collectone.v2:protoforms`)
+-   [`../ui/`](../ui/) (`org.openforis.collectone.v2:protoforms-ui`)

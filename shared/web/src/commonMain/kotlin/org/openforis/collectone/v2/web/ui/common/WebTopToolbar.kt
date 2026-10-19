@@ -1,0 +1,514 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.openforis.collectone.v2.web.ui.common
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import org.openforis.collectone.v2.app.ui.common.CloudAcaciaLogo
+import org.openforis.collectone.v2.app.ui.common.UserAvatarProfileMenu
+import org.openforis.collectone.v2.core.forms.ui.LocalGroundBrandFontFamily
+import org.openforis.collectone.v2.web.ui.WebAppState
+import org.openforis.collectone.v2.web.ui.WebPage
+import org.openforis.collectone.v2.web.ui.dashboard.WebSurveysList
+import org.openforis.collectone.v2.web.ui.datacollection.WebCollectDataMenuButton
+import org.openforis.collectone.v2.web.ui.surveyeditor.SurveyStatusBadgeMenu
+
+/**
+ * Top navigation and context toolbar for the Collect One Web dashboard: the shared [WebAppHeader]
+ * showing the active survey (a [WebSurveySwitcher] dropdown) with its organization and location,
+ * and "Manage survey" and "Collect data" ([WebCollectDataMenuButton]) actions.
+ */
+@Composable
+internal fun WebTopToolbar(
+  state: WebAppState,
+  onOpenSurveyEditor: () -> Unit = {},
+  onSignOut: () -> Unit = { state.signOut() },
+  onLogoClick: (() -> Unit)? = { state.selectPage(WebPage.WEB_SURVEYS) },
+  modifier: Modifier = Modifier,
+) {
+  WebAppHeader(
+    state = state,
+    onSignOut = onSignOut,
+    onLogoClick = onLogoClick,
+    modifier = modifier,
+    context = {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        WebSurveySwitcher(state = state) {
+          state.activeSurveyOrganization?.let { organization ->
+            WebHeaderSupportingText(organization.name, color = MaterialTheme.colorScheme.primary)
+            WebHeaderSupportingText("·")
+          }
+          Icon(
+            imageVector = Icons.Outlined.LocationOn,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(12.dp),
+          )
+          WebHeaderSupportingText(state.activeSurvey.location)
+        }
+        SurveyStatusBadgeMenu(
+          lifecycleState = state.activeSurvey.state,
+          canManageSurvey = state.canManageActiveSurvey,
+          hasUnpublishedChanges = state.surveyEditor.uiState.value.hasUnpublishedChanges,
+          onSelectState = state.surveyEditor::setLifecycleState,
+        )
+      }
+    },
+    actions = {
+      if (state.canManageActiveSurvey) {
+        WebHeaderButton(
+          text = "Manage survey",
+          icon = Icons.Outlined.Edit,
+          onClick = onOpenSurveyEditor,
+        )
+      }
+      // Closed and archived surveys don't collect data.
+      if (!state.activeSurvey.isClosed) {
+        WebCollectDataMenuButton(
+          uiState = state.dataCollectionUiState,
+          actions = state.dataCollection,
+        )
+      }
+    },
+  )
+}
+
+/**
+ * Header context for survey pages: the active survey's title with a dropdown arrow. Clicking it
+ * lists the other surveys the user can open, grouped by organization, and a link to the full
+ * surveys page.
+ */
+@Composable
+internal fun WebSurveySwitcher(
+  state: WebAppState,
+  supporting: @Composable RowScope.() -> Unit = {},
+) {
+  var isOpen by remember { mutableStateOf(false) }
+  Box {
+    Row(
+      modifier =
+        Modifier.clip(MaterialTheme.shapes.small)
+          .clickable { isOpen = !isOpen }
+          .pointerHoverIcon(PointerIcon.Hand)
+          .padding(horizontal = 6.dp, vertical = 1.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+      WebHeaderContext(title = state.activeSurvey.title, supporting = supporting)
+      Icon(
+        imageVector = Icons.Outlined.ArrowDropDown,
+        contentDescription = "Switch survey",
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+    DropdownMenu(
+      expanded = isOpen,
+      onDismissRequest = { isOpen = false },
+      modifier = Modifier.width(360.dp),
+    ) {
+      val sections = WebSurveysList.sections(state.surveys, state.organizations)
+      sections.forEach { section ->
+        Text(
+          text = section.title,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+        )
+        section.surveys.forEach { survey ->
+          val isActive = survey.id == state.activeSurveyId
+          DropdownMenuItem(
+            text = {
+              Text(
+                text = survey.title,
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            },
+            leadingIcon = {
+              Icon(
+                imageVector = if (isActive) Icons.Outlined.Check else Icons.Outlined.Map,
+                contentDescription = null,
+                tint =
+                  if (isActive) MaterialTheme.colorScheme.primary
+                  else MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            },
+            onClick = {
+              isOpen = false
+              if (!isActive) state.openSurveyOnWeb(survey.id)
+            },
+          )
+        }
+      }
+      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+      DropdownMenuItem(
+        text = { Text("All surveys…") },
+        leadingIcon = { Icon(Icons.AutoMirrored.Outlined.List, contentDescription = null) },
+        onClick = {
+          isOpen = false
+          state.selectPage(WebPage.WEB_SURVEYS)
+        },
+      )
+    }
+  }
+}
+
+/**
+ * Small status indicator displaying "Saving…" with a 14dp spinner during saving activity, and
+ * "Saved" with a check icon briefly (2.5s) upon completion.
+ */
+@Composable
+fun WebSaveStatusIndicator(
+  isSaving: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  var showSaved by remember { mutableStateOf(false) }
+  var wasSaving by remember { mutableStateOf(false) }
+
+  LaunchedEffect(isSaving) {
+    if (wasSaving && !isSaving) {
+      showSaved = true
+      delay(2500)
+      showSaved = false
+    }
+    wasSaving = isSaving
+  }
+
+  if (isSaving) {
+    Row(
+      modifier = modifier.padding(horizontal = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      CircularProgressIndicator(
+        modifier = Modifier.size(14.dp),
+        strokeWidth = 2.dp,
+        color = MaterialTheme.colorScheme.primary,
+      )
+      Text(
+        text = "Saving…",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  } else if (showSaved) {
+    Row(
+      modifier = modifier.padding(horizontal = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Check,
+        contentDescription = null,
+        modifier = Modifier.size(14.dp),
+        tint = MaterialTheme.colorScheme.primary,
+      )
+      Text(
+        text = "Saved",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
+}
+
+/**
+ * Header shared by every page of the Collect One Web application.
+ *
+ * Displays, left to right:
+ * - An optional [navigationIcon] (e.g. a Close button)
+ * - Brand section: Ground logo ([CloudAcaciaLogo]) and app name ("Ground")
+ * - Page [context], typically a [WebHeaderContext]
+ * - Page [actions]
+ * - Compact language selector, unless [showLanguageSelector] is false (e.g. when the page shows its
+ *   own, like the sign-in page)
+ * - User profile: clickable avatar opening the user profile card with sign out, shown only when
+ *   [onSignOut] is given
+ */
+@Composable
+internal fun WebAppHeader(
+  state: WebAppState,
+  modifier: Modifier = Modifier,
+  onSignOut: (() -> Unit)? = { state.signOut() },
+  onLogoClick: (() -> Unit)? = { state.selectPage(WebPage.WEB_SURVEYS) },
+  showLanguageSelector: Boolean = true,
+  navigationIcon: (@Composable () -> Unit)? = null,
+  context: @Composable () -> Unit = {},
+  actions: (@Composable RowScope.() -> Unit)? = null,
+) {
+  val brandFont = LocalGroundBrandFontFamily.current
+  val surveyEditorUiState by state.surveyEditor.uiState.collectAsState()
+  val orgUiState by state.organization.uiState.collectAsState()
+  val isDrainingOutbox by state.dataHolder.isDrainingOutbox.collectAsState()
+  val isSaving = surveyEditorUiState.isSaving || orgUiState.isSaving || isDrainingOutbox
+  val settingsUiState by state.settings.uiState.collectAsState()
+
+  Surface(
+    modifier = modifier.fillMaxWidth(),
+    color = MaterialTheme.colorScheme.surface,
+    tonalElevation = 2.dp,
+    shadowElevation = 1.dp,
+  ) {
+    Row(
+      modifier =
+        Modifier.fillMaxWidth()
+          .height(60.dp)
+          .padding(start = if (navigationIcon != null) 4.dp else 16.dp, end = 16.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      // Left: optional navigation icon, logo, app name, divider, and page context.
+      Row(
+        modifier = Modifier.weight(1f, fill = false),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        navigationIcon?.invoke()
+        val brandModifier =
+          if (onLogoClick != null) {
+            Modifier.clip(MaterialTheme.shapes.small)
+              .clickable(onClick = onLogoClick)
+              .pointerHoverIcon(PointerIcon.Hand)
+              .padding(horizontal = 4.dp, vertical = 2.dp)
+          } else {
+            Modifier
+          }
+        Row(
+          modifier = brandModifier,
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          CloudAcaciaLogo(modifier = Modifier.size(32.dp))
+          Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            Text(
+              text = "OPEN FORIS",
+              style =
+                MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 9.sp,
+                  lineHeight = 10.sp,
+                  fontWeight = FontWeight.Bold,
+                  letterSpacing = 1.1.sp,
+                ),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+              text = "Collect One",
+              style =
+                MaterialTheme.typography.titleMedium.copy(
+                  fontFamily = brandFont,
+                  fontWeight = FontWeight.ExtraBold,
+                  letterSpacing = 0.4.sp,
+                  lineHeight = 20.sp,
+                ),
+              color = MaterialTheme.colorScheme.onSurface,
+            )
+          }
+        }
+        VerticalDivider(
+          modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
+          color = MaterialTheme.colorScheme.outlineVariant,
+        )
+        context()
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      // Right: save status, page actions, divider, language selector, and optional avatar.
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        WebSaveStatusIndicator(isSaving = isSaving)
+
+        if (actions != null) {
+          actions()
+
+          if (onSignOut != null || showLanguageSelector) {
+            VerticalDivider(
+              modifier = Modifier.height(24.dp),
+              color = MaterialTheme.colorScheme.outlineVariant,
+            )
+          }
+        }
+
+        if (showLanguageSelector) {
+          WebCompactLanguageSelector(
+            currentLanguageCode = settingsUiState.languageCode,
+            onLanguageChange = state.settings::updateLanguage,
+          )
+        }
+
+        if (onSignOut != null) {
+          WebUserAvatarProfileWidget(state = state, onSignOut = onSignOut)
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Page context for [WebAppHeader]: a [title] (and optional [titleTrailing] badge) above a row of
+ * [supporting] content.
+ */
+@Composable
+internal fun WebHeaderContext(
+  title: String,
+  titleTrailing: (@Composable RowScope.() -> Unit)? = null,
+  supporting: @Composable RowScope.() -> Unit = {},
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium.copy(lineHeight = 18.sp),
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f, fill = false),
+      )
+      titleTrailing?.invoke(this)
+    }
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      content = supporting,
+    )
+  }
+}
+
+/** Small secondary text for the supporting row of a [WebHeaderContext]. */
+@Composable
+internal fun WebHeaderSupportingText(text: String, color: Color = Color.Unspecified) {
+  Text(
+    text = text,
+    style = MaterialTheme.typography.labelSmall.copy(lineHeight = 12.sp),
+    color = color.takeOrElse { MaterialTheme.colorScheme.onSurfaceVariant },
+    maxLines = 1,
+    overflow = TextOverflow.Ellipsis,
+  )
+}
+
+/** Compact icon-and-label button for [WebAppHeader] actions; outlined, or filled tonal. */
+@Composable
+internal fun WebHeaderButton(
+  text: String,
+  icon: ImageVector,
+  onClick: () -> Unit,
+  tonal: Boolean = false,
+) {
+  val padding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+  val content: @Composable RowScope.() -> Unit = {
+    Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(16.dp))
+    Spacer(modifier = Modifier.width(6.dp))
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelMedium,
+      fontWeight = FontWeight.SemiBold,
+      maxLines = 1,
+    )
+  }
+  if (tonal) {
+    FilledTonalButton(
+      onClick = onClick,
+      contentPadding = padding,
+      modifier = Modifier.height(36.dp),
+      content = content,
+    )
+  } else {
+    OutlinedButton(
+      onClick = onClick,
+      contentPadding = padding,
+      modifier = Modifier.height(36.dp),
+      content = content,
+    )
+  }
+}
+
+/** Clickable user avatar icon that anchors and toggles the standard user profile card popup. */
+@Composable
+internal fun WebUserAvatarProfileWidget(
+  state: WebAppState,
+  onSignOut: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  UserAvatarProfileMenu(
+    userName = state.signedInUserName,
+    userEmail = state.signedInUserEmail,
+    userInitials = state.signedInUserInitials,
+    organization = state.signedInOrganization,
+    onSignOut = onSignOut,
+    modifier = modifier,
+    avatarSize = 36.dp,
+    dropdownWidth = 320.dp,
+    onOpenOrganizations = state::openOrganizations,
+    onOpenAdminPanel = if (state.isPlatformAdmin) state::openAdminPanel else null,
+  )
+}

@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 
 # Collect One Web Console Module
 
-`org.groundplatform.v2:web` contains the Collect One web console: its pages
+`org.openforis.collectone.v2:web` contains the Collect One web console: its pages
 (surveys, organizations, the Impact page with organizations' published numbers,
 dashboard, survey editor, form editor, and survey creation wizard), its state
 (`WebAppState`, with `WebPage` routing), and its root composable
@@ -28,7 +28,7 @@ no Android target: nothing that builds for Android depends on it.
 The pages and their behavior are described in
 [`docs/technical/client/web-console.md`](../../docs/technical/client/web-console.md).
 
-## Package Structure (`org.groundplatform.v2.web`)
+## Package Structure (`org.openforis.collectone.v2.web`)
 
 -   **`WebConsoleApp.kt`**: `WebConsoleApp()` (theme, URL hash routing) and
     `WebConsolePages()` (the page switch).
@@ -70,5 +70,5 @@ The `:web-testing` subproject holds test fixtures for this module's tests
 
 ## Dependencies
 
--   [`../app/`](../app/) (`org.groundplatform.v2:app`)
+-   [`../app/`](../app/) (`org.openforis.collectone.v2:app`)
 -   [`../core/`](../core/), [`../ui/`](../ui/), and [`../map/`](../map/)

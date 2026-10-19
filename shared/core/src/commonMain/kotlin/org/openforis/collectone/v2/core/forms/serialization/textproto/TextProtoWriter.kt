@@ -1,0 +1,116 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.openforis.collectone.v2.core.forms.serialization.textproto
+
+import okio.ByteString
+
+/** Pretty-printer for Protocol Buffer Text Format (`textproto` / `txtpb`). */
+internal class TextProtoWriter(private val indentStep: String = "  ") {
+
+  fun writeMessage(message: TextProtoMessage): String {
+    val sb = StringBuilder()
+    writeFields(message.fields, sb, currentIndent = "")
+    return sb.toString().trimEnd() + (if (sb.isNotEmpty()) "\n" else "")
+  }
+
+  private fun writeFields(fields: List<TextProtoField>, sb: StringBuilder, currentIndent: String) {
+    for (field in fields) {
+      writeField(field, sb, currentIndent)
+    }
+  }
+
+  private fun writeField(field: TextProtoField, sb: StringBuilder, currentIndent: String) {
+    when (val v = field.value) {
+      is TextProtoValue.MessageVal -> {
+        sb.append(currentIndent).append(field.name).append(" {\n")
+        writeFields(v.message.fields, sb, currentIndent + indentStep)
+        sb.append(currentIndent).append("}\n")
+      }
+      is TextProtoValue.ListVal -> {
+        for (elem in v.elements) {
+          writeField(TextProtoField(field.name, elem), sb, currentIndent)
+        }
+      }
+      is TextProtoValue.StringVal -> {
+        sb
+          .append(currentIndent)
+          .append(field.name)
+          .append(": \"")
+          .append(escapeString(v.value))
+          .append("\"\n")
+      }
+      is TextProtoValue.BytesVal -> {
+        sb
+          .append(currentIndent)
+          .append(field.name)
+          .append(": \"")
+          .append(escapeBytes(v.value))
+          .append("\"\n")
+      }
+      is TextProtoValue.NumberVal -> {
+        sb.append(currentIndent).append(field.name).append(": ").append(v.raw).append("\n")
+      }
+      is TextProtoValue.IdentifierVal -> {
+        sb.append(currentIndent).append(field.name).append(": ").append(v.name).append("\n")
+      }
+    }
+  }
+
+  companion object {
+    fun escapeString(str: String): String = buildString {
+      for (c in str) {
+        when (c) {
+          '\\' -> append("\\\\")
+          '"' -> append("\\\"")
+          '\n' -> append("\\n")
+          '\r' -> append("\\r")
+          '\t' -> append("\\t")
+          else -> append(c)
+        }
+      }
+    }
+
+    /**
+     * Escapes arbitrary bytes for a textproto `bytes` field.
+     *
+     * Printable ASCII is emitted verbatim so common payloads stay readable; every other byte
+     * becomes a `\xNN` escape. Decoding the bytes as UTF-8 would replace invalid sequences with
+     * `U+FFFD` and silently corrupt the payload.
+     */
+    fun escapeBytes(bytes: ByteString): String = buildString {
+      for (b in bytes.toByteArray()) {
+        when (val code = b.toInt() and 0xFF) {
+          '\\'.code -> append("\\\\")
+          '"'.code -> append("\\\"")
+          '\n'.code -> append("\\n")
+          '\r'.code -> append("\\r")
+          '\t'.code -> append("\\t")
+          in 0x20..0x7E -> append(code.toChar())
+          else -> {
+            append("\\x")
+            append(code.toString(16).padStart(2, '0').uppercase())
+          }
+        }
+      }
+    }
+
+    fun formatDouble(d: Double): String {
+      if (d.isNaN()) return "nan"
+      if (d == Double.POSITIVE_INFINITY) return "inf"
+      if (d == Double.NEGATIVE_INFINITY) return "-inf"
+      val str = d.toString()
+      return if (str.endsWith(".0")) str.dropLast(2) + ".0" else str
+    }
+  }
+}

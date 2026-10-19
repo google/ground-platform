@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -38,7 +38,7 @@ dependencyResolutionManagement {
 rootProject.name = "mobileWebApp"
 
 // The workbench (device preview chrome, XForms presets, and simulation tools) is a library, kept
-// apart from the Wasm host. Published as `org.groundplatform.v2:workbench`.
+// apart from the Wasm host. Published as `org.openforis.collectone.v2:workbench`.
 include(":workbench")
 
 includeBuild("../shared/core")

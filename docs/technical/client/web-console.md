@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 
 The pages of the Open Foris Collect One web console ([`shared/web`](../../../shared/web/),
 hosted by [`webApp`](../../../webApp/)). Paths in this document are relative to
-`shared/web/src/commonMain/kotlin/org/groundplatform/v2/web/` for web-only code
-and to `shared/app/src/commonMain/kotlin/org/groundplatform/v2/app/` for code
+`shared/web/src/commonMain/kotlin/org/openforis/collectone/v2/web/` for web-only code
+and to `shared/app/src/commonMain/kotlin/org/openforis/collectone/v2/app/` for code
 both apps share (map, data collection, domain, and clients).
 
 ## Web Surveys Page (`#surveys`)
@@ -162,7 +162,7 @@ the files from the Kotlin copy.
 ## Impact Views
 
 What survey data adds up to, computed in the browser by the shared impact
-aggregation job (`shared/core` `org.groundplatform.v2.core.impact`, see
+aggregation job (`shared/core` `org.openforis.collectone.v2.core.impact`, see
 `docs/technical/backend/impact-aggregation.md`), so the web console and the
 backend agree. `ComputeImpactUseCase` (`domain/usecase/`) maps every survey's
 map features, editor draft (layer columns and form questions linked to

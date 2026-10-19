@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -18,7 +18,7 @@ plugins {
   id("com.android.library") version "8.5.2"
 }
 
-group = "org.groundplatform.v2"
+group = "org.openforis.collectone.v2"
 
 version = "2.0.0-SNAPSHOT"
 
@@ -70,7 +70,7 @@ kotlin {
 }
 
 android {
-  namespace = "org.groundplatform.v2.map"
+  namespace = "org.openforis.collectone.v2.map"
   compileSdk = 35
   defaultConfig { minSdk = 24 }
   compileOptions {

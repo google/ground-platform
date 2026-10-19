@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ the network directly.
 
 All app data lives in a local data store, the single source of truth
 (`shared/app`'s `data/datasource/local/store/`; paths below are relative to
-`shared/app/src/commonMain/kotlin/org/groundplatform/v2/app/` unless noted). On web it is an in-memory cache that starts
+`shared/app/src/commonMain/kotlin/org/openforis/collectone/v2/app/` unless noted). On web it is an in-memory cache that starts
 fresh on every page load; on mobile it will become the persistent offline store.
 
 -   **Reads**: `LocalStore` exposes a `Flow` per collection (surveys, forms, map

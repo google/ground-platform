@@ -55,7 +55,7 @@ Every local edit goes through the same path, online or offline, on mobile and on
 5. **Background Drain:** The sync engine drains the outbox when connectivity allows, with exponential backoff on failures.
 
 ### Rebase on Remote Changes
-For every synced record, the local store keeps the **base** (the last copy confirmed by the server) and the **pending** outbox mutations that target it. What the UI shows is the pending mutations applied on top of the base, using the same patch functions the server uses (`shared/core`, `org.groundplatform.v2.core.mutation`).
+For every synced record, the local store keeps the **base** (the last copy confirmed by the server) and the **pending** outbox mutations that target it. What the UI shows is the pending mutations applied on top of the base, using the same patch functions the server uses (`shared/core`, `org.openforis.collectone.v2.core.mutation`).
 
 When a delta page or a `Mutate*` response delivers a newer copy of a record, the client, in one transaction:
 

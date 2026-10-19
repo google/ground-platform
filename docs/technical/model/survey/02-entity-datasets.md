@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ message EntityDatasetDef {
 
 *   **`sampling`**: the entities are sample plots produced by the
     deterministic sampling engine in `shared/core`
-    (`org.groundplatform.v2.core.sampling`).
+    (`org.openforis.collectone.v2.core.sampling`).
 *   **`imported`**: the entities came from an uploaded file (`file_name`,
     `format`, `imported_at`, `input_hash`, `feature_count`).
 

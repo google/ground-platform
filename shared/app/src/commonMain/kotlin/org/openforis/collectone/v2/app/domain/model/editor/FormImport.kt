@@ -1,0 +1,1066 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.openforis.collectone.v2.app.domain.model.editor
+
+import groundplatform.v2.forms.ControlDef
+import groundplatform.v2.forms.ControlType
+import groundplatform.v2.forms.DataType
+import groundplatform.v2.forms.FieldBinding
+import groundplatform.v2.forms.FormDef
+import groundplatform.v2.forms.ItemsetDef
+import groundplatform.v2.forms.LabelDef
+import groundplatform.v2.forms.MediaRef
+import groundplatform.v2.forms.RecordNode
+import groundplatform.v2.forms.ViewComponent
+import org.openforis.collectone.v2.app.domain.model.FormAvailability
+import org.openforis.collectone.v2.core.forms.model.FormDefinition
+import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
+import org.openforis.collectone.v2.core.forms.ui.ChoiceImageRegistry
+
+/**
+ * A Form imported into the editor from its XForms definition.
+ *
+ * @property form the editable Form. Every control of the XForms becomes a question; controls the
+ *   editor has no exact type for are mapped to the closest type and listed in [notes].
+ * @property createDatasetId dataset new submissions are added to (`<entities:entity create="1">`),
+ *   or `null`. The Survey editor links the matching Map layer or Data table to the Form.
+ * @property idMatchColumn for Forms that update a feature identified by a question's answer, the
+ *   column of the dataset list the answer is matched against (`name`, `label`, or a property); the
+ *   Survey editor resolves it to a dataset property once the dataset is known.
+ * @property notes what the import could not reproduce exactly, for logging or display.
+ */
+data class ImportedForm(
+  val form: EditorForm,
+  val createDatasetId: String? = null,
+  val idMatchColumn: String? = null,
+  val notes: List<String> = emptyList(),
+)
+
+/**
+ * Imports XForms definitions (parsed by the shared form engine into a `FormDef`) into
+ * [EditorForm]s, the inverse of [EditorXFormsGenerator]. Forms the generator wrote round-trip with
+ * the same questions, in the same order, with the same names, labels, types, and choices.
+ *
+ * Groups and repeats are flattened into plain questions; range, rank, trigger, boolean, time, and
+ * date-time controls map to the closest editor type. Nothing is dropped silently: every mismatch is
+ * reported in [ImportedForm.notes].
+ */
+object FormImport {
+  /**
+   * Imports [xml] as an ODK XForms definition or a Collect Earth / Open Foris IDM schema. Returns
+   * `null` when the XML cannot be parsed into any questions.
+   */
+  fun fromXml(
+    xml: String,
+    formId: String = "",
+    fallbackTitle: String = "",
+    availability: FormAvailability = FormAvailability.MOBILE,
+  ): ImportedForm? {
+    val formDef =
+      try {
+        XFormsXmlSerializer.deserializeFormDef(xml)
+      } catch (e: Exception) {
+        null
+      }
+    if (
+      formDef != null &&
+        (!formDef.view?.components.isNullOrEmpty() ||
+          !formDef.model?.bindings.isNullOrEmpty() ||
+          formDef.title.isNotBlank())
+    ) {
+      val resolvedFormId = formId.ifBlank { formDef.form_id.takeIf { it != "data" }.orEmpty() }
+      val imported = fromFormDef(formDef, resolvedFormId, fallbackTitle, availability)
+      if (imported.form.questions.isNotEmpty() || formDef.title.isNotBlank()) {
+        return imported
+      }
+    }
+    return CollectEarthIdmParser.fromXml(
+      xml = xml,
+      formId = formId,
+      fallbackTitle = fallbackTitle,
+      availability = availability,
+    )
+  }
+
+  /** Imports [formDefinition] as a Form with ID [formId] (defaults to the form's ID). */
+  fun fromFormDefinition(
+    formDefinition: FormDefinition,
+    formId: String = formDefinition.id,
+    fallbackTitle: String = "",
+    availability: FormAvailability = FormAvailability.MOBILE,
+  ): ImportedForm? {
+    val formDef = formDefinition.proto
+    if (
+      formDef.view?.components.isNullOrEmpty() &&
+        formDef.model?.bindings.isNullOrEmpty() &&
+        formDef.title.isBlank()
+    ) {
+      return null
+    }
+    val resolvedFormId = formId.ifBlank { formDef.form_id.takeIf { it != "data" }.orEmpty() }
+    return fromFormDef(formDef, resolvedFormId, fallbackTitle, availability)
+  }
+
+  /** Imports [formDef] as a Form with ID [formId] (defaults to the XForms form ID). */
+  fun fromFormDef(
+    formDef: FormDef,
+    formId: String = formDef.form_id,
+    fallbackTitle: String = "",
+    availability: FormAvailability = FormAvailability.MOBILE,
+  ): ImportedForm = Importer(formDef).run(formId, fallbackTitle, availability)
+
+  private class Importer(private val formDef: FormDef) {
+    private val model = formDef.model
+    private val rootName: String =
+      model?.primary_instance?.record_schema?.name?.ifBlank { "data" } ?: "data"
+    private val bindings: Map<String, FieldBinding> =
+      model?.bindings.orEmpty().associateBy { it.field_path }
+    private val instances = model?.secondary_instances.orEmpty().associateBy { it.id }
+    private val orderedLanguages =
+      model?.translations?.languages.orEmpty().let { languages ->
+        languages.filter { it.is_default } + languages.filterNot { it.is_default }
+      }
+    private val nonDefaultLanguages = orderedLanguages.drop(1)
+    private val strings: Map<String, String> = buildMap {
+      // Later languages don't override the default one.
+      orderedLanguages.forEach { lang ->
+        lang.strings.forEach { (id, text) -> if (id !in this) put(id, text.value_) }
+      }
+    }
+    private val mediaByTextId: Map<String, MediaRef> = buildMap {
+      orderedLanguages.forEach { lang ->
+        lang.strings.forEach { (id, text) ->
+          val media = text.media
+          if (id !in this && media != null && media.image_uri.isNotBlank()) {
+            put(id, media)
+          }
+        }
+      }
+    }
+    private val notes = mutableListOf<String>()
+    private val questions = mutableListOf<EditorQuestion>()
+    private val sections = mutableListOf<EditorSection>()
+    private val keyByPath = mutableMapOf<String, String>()
+    private val pathByKey = mutableMapOf<String, String>()
+    private val usedNames = mutableSetOf<String>()
+    private val relevanceByKey = mutableMapOf<String, String>()
+    private val relevanceContextByKey = mutableMapOf<String, String>()
+
+    fun run(formId: String, fallbackTitle: String, availability: FormAvailability): ImportedForm {
+      walk(formDef.view?.components.orEmpty(), enclosing = "", enclosingRelevance = null)
+      val resolved = questions.map { q ->
+        val parentKey =
+          if (q.parentQuestionKey.isNotBlank()) {
+            questions
+              .firstOrNull { it.key == q.parentQuestionKey || it.name == q.parentQuestionKey }
+              ?.key ?: q.parentQuestionKey
+          } else {
+            ""
+          }
+        q.copy(relevance = relevanceOf(q), parentQuestionKey = parentKey)
+      }
+      val entity = model?.entities?.firstOrNull()
+      val isUpdate = entity != null && entity.update_condition.isNotBlank()
+      val statusEnabled = bindings.containsKey(SaveToRules.STATUS_FIELD)
+      if (statusEnabled) notes += "Status marker rules were reset to the default rules."
+      var idMatchColumn: String? = null
+      var idSource = EntityIdSource.SELECTED_FEATURE
+      var idQuestionKey: String? = null
+      if (isUpdate) {
+        val idExpr = entity.entity_id_expression.trim()
+        val byQuestion = ID_BY_QUESTION.matchEntire(idExpr)
+        val direct = REF.matchEntire(idExpr)
+        val byQuestionPath = byQuestion?.let { resolvePath(it.groupValues[3], "") }
+        val directPath = direct?.let { resolvePath(it.groupValues[1], "") }
+        when {
+          idExpr.contains(SaveToRules.TARGET_ENTITY_FIELD) -> Unit
+          byQuestion != null && byQuestionPath != null && keyByPath.containsKey(byQuestionPath) -> {
+            idSource = EntityIdSource.QUESTION
+            idQuestionKey = keyByPath[byQuestionPath]
+            idMatchColumn = byQuestion.groupValues[2]
+          }
+          directPath != null && keyByPath.containsKey(directPath) -> {
+            idSource = EntityIdSource.QUESTION
+            idQuestionKey = keyByPath[directPath]
+            idMatchColumn = "name"
+          }
+          else ->
+            notes +=
+              "Feature ID expression \"$idExpr\" isn't supported; using the selected feature."
+        }
+      }
+      val mappings =
+        if (isUpdate) {
+          bindings.values
+            .filter {
+              it.entity_saveto.isNotBlank() && it.entity_saveto !in SaveToRules.STATUS_PROPERTIES
+            }
+            .mapNotNull { binding ->
+              keyByPath[binding.field_path]?.let { EditorFieldMapping(it, binding.entity_saveto) }
+            }
+        } else {
+          emptyList()
+        }
+      // GPS-only geometry questions can't be answered on web, so such Forms are mobile only.
+      val effectiveAvailability =
+        if (availability.includesWeb && resolved.any { it.isWebIncompatible }) {
+          notes += "Form has GPS-only questions; made available on mobile only."
+          if (availability.includesMobile) FormAvailability.MOBILE else FormAvailability.NONE
+        } else {
+          availability
+        }
+      val effectiveFormId = formId.ifBlank { FormIds.newFormId() }
+      val resolvedSections = sections.map { sec ->
+        sec.copy(relevance = relevanceOfSection(sec))
+      }
+      val form =
+        EditorForm(
+          formId = effectiveFormId,
+          title = formDef.title.ifBlank { fallbackTitle }.ifBlank { effectiveFormId },
+          questions = resolved,
+          saveTo =
+            EditorSaveTo(
+              mode = if (isUpdate) SaveToMode.UPDATE else SaveToMode.CREATE,
+              targetDatasetId = if (isUpdate) entity.dataset.ifBlank { null } else null,
+              idSource = idSource,
+              idQuestionKey = idQuestionKey,
+              mappings = mappings,
+              status = EditorStatusConfig(enabled = statusEnabled),
+            ),
+          availability = effectiveAvailability,
+          sections = resolvedSections,
+        )
+      return ImportedForm(
+        form = form,
+        createDatasetId = if (!isUpdate) entity?.dataset?.ifBlank { null } else null,
+        idMatchColumn = idMatchColumn,
+        notes = notes.toList(),
+      )
+    }
+
+    private data class RelevanceContext(val expression: String, val contextPath: String)
+
+    private fun walk(
+      components: List<ViewComponent>,
+      enclosing: String,
+      enclosingRelevance: RelevanceContext?,
+      currentSectionId: String = "",
+    ) {
+      components.forEach { component ->
+        component.control?.let {
+          importControl(it, enclosing, enclosingRelevance, currentSectionId)
+        }
+        component.group?.let { group ->
+          val groupPath = join(enclosing, group.field_ref)
+          val groupRel = bindings[groupPath]?.relevant_expression?.trim().orEmpty()
+          val sectionId =
+            group.field_ref.trim().removePrefix("/").substringAfterLast('/').ifEmpty {
+              "section_${sections.size + 1}"
+            }
+          val sectionTitle = text(group.label) ?: sectionId
+          val sec =
+            EditorSection(
+              id = sectionId,
+              title = sectionTitle,
+              repeatable = false,
+              relevance = null,
+            )
+          sections += sec
+          if (groupRel.isNotEmpty() && !isTrue(groupRel)) {
+            relevanceByKey[sectionId] = groupRel
+            relevanceContextByKey[sectionId] = groupPath
+          }
+          val nextRel =
+            if (groupRel.isNotEmpty() && !isTrue(groupRel)) {
+              RelevanceContext(groupRel, groupPath)
+            } else {
+              enclosingRelevance
+            }
+          walk(group.components, groupPath, nextRel, currentSectionId = sectionId)
+        }
+        component.repeat?.let { repeat ->
+          val repeatPath = join(enclosing, repeat.field_ref)
+          val repeatRel = bindings[repeatPath]?.relevant_expression?.trim().orEmpty()
+          val sectionId =
+            repeat.field_ref.trim().removePrefix("/").substringAfterLast('/').ifEmpty {
+              "repeat_${sections.size + 1}"
+            }
+          val sectionTitle = text(repeat.label) ?: sectionId
+          val sec =
+            EditorSection(
+              id = sectionId,
+              title = sectionTitle,
+              repeatable = true,
+              repeatCountExpression = repeat.count_expression,
+              relevance = null,
+            )
+          sections += sec
+          if (repeatRel.isNotEmpty() && !isTrue(repeatRel)) {
+            relevanceByKey[sectionId] = repeatRel
+            relevanceContextByKey[sectionId] = repeatPath
+          }
+          val nextRel =
+            if (repeatRel.isNotEmpty() && !isTrue(repeatRel)) {
+              RelevanceContext(repeatRel, repeatPath)
+            } else {
+              enclosingRelevance
+            }
+          walk(repeat.components, repeatPath, nextRel, currentSectionId = sectionId)
+        }
+      }
+    }
+
+    private fun join(enclosing: String, ref: String): String {
+      val clean = ref.trim().removePrefix("/")
+      return when {
+        clean.isEmpty() -> enclosing
+        enclosing.isEmpty() || clean.startsWith("$enclosing/") -> clean
+        else -> "$enclosing/$clean"
+      }
+    }
+
+    private fun importControl(
+      control: ControlDef,
+      enclosing: String,
+      enclosingRelevance: RelevanceContext?,
+      currentSectionId: String = "",
+    ) {
+      val path = join(enclosing, control.field_ref)
+      if (path.isEmpty()) {
+        notes += "A control without a field reference was skipped."
+        return
+      }
+      val rawName = path.substringAfterLast('/')
+      if (rawName == SaveToRules.TARGET_ENTITY_FIELD) {
+        // The feature picker is regenerated from the Form's save-to logic.
+        return
+      }
+      val binding = bindings[path]
+      val label = text(control.label)
+      val name = uniqueName(rawName, path)
+      val key = "q${questions.size + 1}"
+      val appearance = control.appearance.split(' ').map { it.trim() }.filter { it.isNotEmpty() }
+      var choices =
+        control.choices.map { choice ->
+          val parentVal =
+            choice.parent_value.ifEmpty {
+              choice.properties["parent_value"] ?: choice.properties["parent"] ?: ""
+            }
+          EditorChoice(
+            value = choice.value_,
+            label = text(choice.label) ?: choice.value_,
+            colorHex = choice.properties[EditorXFormsGenerator.CHOICE_COLOR_COLUMN],
+            code = choice.properties[EditorXFormsGenerator.CHOICE_CODE_COLUMN],
+            labelTranslations = translations(choice.label),
+            parentValue = parentVal,
+          )
+        }
+      var choiceDatasetId: String? = null
+      if (choices.isEmpty()) {
+        control.itemset?.let { itemset ->
+          choices = choicesFromInstance(itemset)
+          val instance = instances[itemset.instance_id]
+          if (itemset.instance_id.isNotBlank() && (instance == null || instance.uri.isNotBlank())) {
+            choiceDatasetId = itemset.instance_id
+          }
+        }
+      }
+      var type = typeOf(control, binding, appearance, label ?: name)
+      if (type.hasChoices && choices.isEmpty() && choiceDatasetId == null) {
+        when {
+          control.type == ControlType.CONTROL_TRIGGER -> choices = listOf(EditorChoice("OK", "OK"))
+          binding?.type == DataType.TYPE_BOOLEAN ->
+            choices = listOf(EditorChoice("yes", "Yes"), EditorChoice("no", "No"))
+          else -> {
+            notes +=
+              "\"${label ?: name}\" picks from a list the editor can't read; imported as Text."
+            type = EditorQuestionType.TEXT
+          }
+        }
+      }
+      val ownRelevant = binding?.relevant_expression.orEmpty().trim()
+      when {
+        ownRelevant.isNotEmpty() && !isTrue(ownRelevant) -> {
+          relevanceByKey[key] = ownRelevant
+          relevanceContextByKey[key] = path
+        }
+        enclosingRelevance != null && currentSectionId.isEmpty() -> {
+          relevanceByKey[key] = enclosingRelevance.expression
+          relevanceContextByKey[key] = enclosingRelevance.contextPath
+        }
+      }
+      val validation = validationOf(type, binding, path, label ?: name)
+      val decimalPlaces =
+        if (type == EditorQuestionType.NUMBER && binding?.type == DataType.TYPE_DOUBLE) {
+          EditorQuestion.DEFAULT_DECIMAL_PLACES
+        } else {
+          0
+        }
+      // `ground:concept` becomes the question's concept link (checked against the survey's library
+      // later); other foreign attributes are kept as they are.
+      val (conceptLink, foreignAttributes) = ConceptLinkAttributes.fromBinding(binding)
+      questions +=
+        EditorQuestion(
+          key = key,
+          name = name,
+          type = type,
+          label = label ?: name,
+          hint = text(control.hint).orEmpty(),
+          required = isTrue(binding?.required_expression),
+          choices = if (type.hasChoices) choices else emptyList(),
+          choiceDatasetId = if (type.hasChoices) choiceDatasetId else null,
+          allowAddEntity =
+            type.hasChoices &&
+              choiceDatasetId != null &&
+              EditorXFormsGenerator.ADD_ENTITY_APPEARANCE in appearance,
+          validation = validation,
+          decimalPlaces = decimalPlaces,
+          capture =
+            if (type.isGeometry && GeometryCapture.GPS_OR_MAP.appearance in appearance) {
+              GeometryCapture.GPS_OR_MAP
+            } else {
+              GeometryCapture.GPS_ONLY
+            },
+          mediaSource =
+            if (type.isMedia && MediaSource.CAPTURE_ONLY.appearance in appearance) {
+              MediaSource.CAPTURE_ONLY
+            } else {
+              MediaSource.CAPTURE_OR_UPLOAD
+            },
+          conceptLink = conceptLink,
+          foreignAttributes = foreignAttributes,
+          labelTranslations = translations(control.label),
+          hintTranslations = translations(control.hint),
+          parentQuestionKey = control.parent_question_key.orEmpty(),
+          sectionId = currentSectionId,
+        )
+      keyByPath[path] = key
+      pathByKey[key] = path
+    }
+
+    private fun uniqueName(rawName: String, path: String): String {
+      var name =
+        if (FormEditorValidator.isValidName(rawName)) rawName else slugify(rawName, "question")
+      if (name in usedNames) {
+        val parent = path.substringBeforeLast('/', "").substringAfterLast('/')
+        val prefixed = if (parent.isNotEmpty()) slugify("${parent}_$name") else name
+        name = prefixed
+        var n = 2
+        while (name in usedNames) name = "${prefixed}_${n++}"
+        notes += "Question \"$rawName\" was renamed to \"$name\" to keep names unique."
+      }
+      usedNames += name
+      return name
+    }
+
+    private fun typeOf(
+      control: ControlDef,
+      binding: FieldBinding?,
+      appearance: List<String>,
+      label: String,
+    ): EditorQuestionType {
+      val dataType = binding?.type ?: DataType.DATA_TYPE_UNSPECIFIED
+      return when (control.type) {
+        ControlType.CONTROL_SELECT_ONE -> EditorQuestionType.SELECT_ONE
+        ControlType.CONTROL_SELECT_MULTIPLE -> EditorQuestionType.SELECT_MULTIPLE
+        ControlType.CONTROL_RANK -> {
+          notes += "\"$label\" ranks its choices; imported as Select multiple."
+          EditorQuestionType.SELECT_MULTIPLE
+        }
+        ControlType.CONTROL_UPLOAD -> {
+          val media = control.media_type.lowercase()
+          when {
+            media.startsWith("video") -> EditorQuestionType.VIDEO
+            media.startsWith("audio") -> EditorQuestionType.AUDIO
+            media.startsWith("image") -> EditorQuestionType.PHOTO
+            else -> {
+              notes += "\"$label\" uploads \"${control.media_type}\"; imported as Photo."
+              EditorQuestionType.PHOTO
+            }
+          }
+        }
+        ControlType.CONTROL_RANGE -> {
+          notes += "\"$label\" is a range slider; imported as a number."
+          EditorQuestionType.NUMBER
+        }
+        ControlType.CONTROL_TRIGGER -> {
+          notes += "\"$label\" is an acknowledgement; imported as Select one."
+          EditorQuestionType.SELECT_ONE
+        }
+        else ->
+          when (dataType) {
+            DataType.TYPE_INT32,
+            DataType.TYPE_INT64,
+            DataType.TYPE_DOUBLE -> EditorQuestionType.NUMBER
+            DataType.TYPE_DATE -> EditorQuestionType.DATE
+            DataType.TYPE_TIME,
+            DataType.TYPE_DATETIME -> {
+              notes += "\"$label\" asks for a time; imported as Date."
+              EditorQuestionType.DATE
+            }
+            DataType.TYPE_GEOPOINT -> EditorQuestionType.LOCATION
+            DataType.TYPE_GEOTRACE -> EditorQuestionType.LINE
+            DataType.TYPE_GEOSHAPE -> EditorQuestionType.POLYGON
+            DataType.TYPE_BINARY -> EditorQuestionType.PHOTO
+            DataType.TYPE_BOOLEAN -> {
+              notes += "\"$label\" is a yes / no value; imported as Select one."
+              EditorQuestionType.SELECT_ONE
+            }
+            DataType.TYPE_SELECT_ONE -> EditorQuestionType.SELECT_ONE
+            DataType.TYPE_SELECT_MULTIPLE -> EditorQuestionType.SELECT_MULTIPLE
+            else ->
+              when {
+                binding?.read_only == true -> EditorQuestionType.NOTE
+                EditorQuestionType.LONG_TEXT.appearance in appearance ->
+                  EditorQuestionType.LONG_TEXT
+                else -> EditorQuestionType.TEXT
+              }
+          }
+      }
+    }
+
+    /**
+     * Imports numeric range, text length/pattern, date, or selection count constraints; unsupported
+     * constraints are reported in [notes].
+     */
+    private fun validationOf(
+      type: EditorQuestionType,
+      binding: FieldBinding?,
+      path: String,
+      label: String,
+    ): EditorValidation? {
+      val constraint = stripOuterParens(binding?.constraint_expression.orEmpty())
+      if (binding == null || constraint.isEmpty()) return null
+      val message = constraintMessage(binding, path)
+      val clauses =
+        constraint.split(AND_SPLIT).map { stripOuterParens(it) }.filter { it.isNotEmpty() }
+      when (ValidationKind.of(type)) {
+        ValidationKind.NUMBER_RANGE -> {
+          var min = ""
+          var max = ""
+          var recognized = true
+          clauses.forEach { part ->
+            val m = BOUND.matchEntire(part)
+            val rev = if (m == null) REVERSED_BOUND.matchEntire(part) else null
+            when {
+              m != null ->
+                when (m.groupValues[1]) {
+                  ">=",
+                  ">" -> min = m.groupValues[2]
+                  "<=",
+                  "<" -> max = m.groupValues[2]
+                  "=" -> {
+                    min = m.groupValues[2]
+                    max = m.groupValues[2]
+                  }
+                  else -> recognized = false
+                }
+              rev != null ->
+                when (rev.groupValues[2]) {
+                  "<=",
+                  "<" -> min = rev.groupValues[1]
+                  ">=",
+                  ">" -> max = rev.groupValues[1]
+                  "=" -> {
+                    min = rev.groupValues[1]
+                    max = rev.groupValues[1]
+                  }
+                  else -> recognized = false
+                }
+              else -> recognized = false
+            }
+          }
+          if (recognized && (min.isNotEmpty() || max.isNotEmpty())) {
+            return EditorValidation(min = min, max = max, message = message)
+          }
+        }
+        ValidationKind.TEXT -> {
+          var min = ""
+          var max = ""
+          var pattern: TextPattern? = null
+          var customPattern = ""
+          var recognized = true
+          clauses.forEach { part ->
+            val lenMatch = STRING_LENGTH_BOUND.matchEntire(part)
+            val regexMatch = if (lenMatch == null) REGEX_CALL.matchEntire(part) else null
+            when {
+              lenMatch != null -> {
+                val op = lenMatch.groupValues[1]
+                val n = lenMatch.groupValues[2].toIntOrNull()
+                if (n == null) {
+                  recognized = false
+                } else {
+                  when (op) {
+                    ">=" -> min = n.toString()
+                    ">" -> min = (n + 1).toString()
+                    "<=" -> max = n.toString()
+                    "<" -> if (n > 0) max = (n - 1).toString() else recognized = false
+                    "=" -> {
+                      min = n.toString()
+                      max = n.toString()
+                    }
+                    else -> recognized = false
+                  }
+                }
+              }
+              regexMatch != null -> {
+                val rawRegex = unquote(regexMatch.groupValues[1])
+                val preset = TextPattern.entries.firstOrNull { it.regex == rawRegex }
+                if (preset != null) {
+                  pattern = preset
+                  customPattern = ""
+                } else {
+                  pattern = TextPattern.CUSTOM
+                  customPattern = rawRegex
+                }
+              }
+              else -> recognized = false
+            }
+          }
+          if (recognized && (min.isNotEmpty() || max.isNotEmpty() || pattern != null)) {
+            return EditorValidation(
+              min = min,
+              max = max,
+              pattern = pattern,
+              customPattern = customPattern,
+              message = message,
+            )
+          }
+        }
+        ValidationKind.DATE -> {
+          if (clauses.size == 1 && DATE_TODAY.matches(clauses[0])) {
+            val op = DATE_TODAY.matchEntire(clauses[0])!!.groupValues[1]
+            val rule =
+              when (op) {
+                "<=",
+                "<" -> DateRule.NOT_IN_FUTURE
+                ">=",
+                ">" -> DateRule.NOT_IN_PAST
+                else -> null
+              }
+            if (rule != null) {
+              return EditorValidation(dateRule = rule, message = message)
+            }
+          }
+          var min = ""
+          var max = ""
+          var recognized = true
+          clauses.forEach { part ->
+            val m = DATE_BOUND.matchEntire(part)
+            val iso = m?.let { unquote(it.groupValues[2]) }
+            when {
+              m == null || iso == null || !ValidationRules.isValidDate(iso) -> recognized = false
+              m.groupValues[1] == ">=" || m.groupValues[1] == ">" -> min = iso
+              m.groupValues[1] == "<=" || m.groupValues[1] == "<" -> max = iso
+              m.groupValues[1] == "=" -> {
+                min = iso
+                max = iso
+              }
+              else -> recognized = false
+            }
+          }
+          if (recognized && (min.isNotEmpty() || max.isNotEmpty())) {
+            return EditorValidation(
+              min = min,
+              max = max,
+              dateRule = DateRule.BETWEEN,
+              message = message,
+            )
+          }
+        }
+        ValidationKind.SELECTION_COUNT -> {
+          var min = ""
+          var max = ""
+          var recognized = true
+          clauses.forEach { part ->
+            val m = COUNT_SELECTED_BOUND.matchEntire(part)
+            val n = m?.groupValues?.get(2)?.toIntOrNull()
+            if (m == null || n == null) {
+              recognized = false
+            } else {
+              when (m.groupValues[1]) {
+                ">=" -> min = n.toString()
+                ">" -> min = (n + 1).toString()
+                "<=" -> max = n.toString()
+                "<" -> if (n > 0) max = (n - 1).toString() else recognized = false
+                "=" -> {
+                  min = n.toString()
+                  max = n.toString()
+                }
+                else -> recognized = false
+              }
+            }
+          }
+          if (recognized && (min.isNotEmpty() || max.isNotEmpty())) {
+            return EditorValidation(min = min, max = max, message = message)
+          }
+        }
+        null -> Unit
+      }
+      notes += "Constraint \"$constraint\" on \"$label\" isn't supported by the editor."
+      return null
+    }
+
+    private fun constraintMessage(binding: FieldBinding, path: String): String {
+      val raw = binding.constraint_message.trim()
+      if (raw.isNotEmpty()) {
+        val itextMatch = JR_ITEXT.matchEntire(raw)
+        if (itextMatch != null) {
+          val id = unquote(itextMatch.groupValues[1])
+          return strings[id]?.trim() ?: raw
+        }
+        return raw
+      }
+      return strings["/$rootName/$path:jr:constraintMsg"]?.trim()
+        ?: strings["/data/$path:jr:constraintMsg"]?.trim()
+        ?: strings["$path:jr:constraintMsg"]?.trim()
+        ?: ""
+    }
+
+    private fun parseRelevance(
+      key: String,
+      maxIndex: Int,
+      labelForNote: String,
+    ): EditorRelevance? {
+      val rawExpression = relevanceByKey[key] ?: return null
+      val expression = stripOuterParens(rawExpression)
+      val contextPath = relevanceContextByKey[key] ?: pathByKey[key].orEmpty()
+      fun source(rawRef: String): EditorQuestion? {
+        val resolvedPath = resolvePath(rawRef, contextPath) ?: return null
+        val srcKey = keyByPath[resolvedPath] ?: return null
+        val sourceIndex = questions.indexOfFirst { it.key == srcKey }
+        return if (sourceIndex in 0 until maxIndex) questions[sourceIndex] else null
+      }
+      fun mapSelected(src: EditorQuestion, literal: String, negated: Boolean): EditorRelevance? {
+        val value = unquote(literal)
+        val available = RelevanceOperator.availableFor(src.type)
+        if (value.isEmpty()) {
+          val op = if (negated) RelevanceOperator.IS_ANSWERED else RelevanceOperator.EQUALS
+          return if (op in available) EditorRelevance(src.key, op, "") else null
+        }
+        val op =
+          if (negated) {
+            if (RelevanceOperator.NOT_EQUALS in available) RelevanceOperator.NOT_EQUALS else null
+          } else {
+            when {
+              src.type == EditorQuestionType.SELECT_MULTIPLE &&
+                RelevanceOperator.INCLUDES in available -> RelevanceOperator.INCLUDES
+              RelevanceOperator.EQUALS in available -> RelevanceOperator.EQUALS
+              RelevanceOperator.INCLUDES in available -> RelevanceOperator.INCLUDES
+              else -> null
+            }
+          }
+        return op?.let { EditorRelevance(src.key, it, value) }
+      }
+      fun mapComparison(src: EditorQuestion, opToken: String, literal: String): EditorRelevance? {
+        val value = unquote(literal)
+        val available = RelevanceOperator.availableFor(src.type)
+        if (value.isEmpty() && opToken == "!=") {
+          return if (RelevanceOperator.IS_ANSWERED in available) {
+            EditorRelevance(src.key, RelevanceOperator.IS_ANSWERED)
+          } else {
+            null
+          }
+        }
+        val operator =
+          when (opToken) {
+            "=" -> RelevanceOperator.EQUALS
+            "!=" -> RelevanceOperator.NOT_EQUALS
+            ">",
+            ">=" -> RelevanceOperator.GREATER_THAN
+            "<",
+            "<=" -> RelevanceOperator.LESS_THAN
+            else -> return null
+          }
+        return if (operator in available) EditorRelevance(src.key, operator, value) else null
+      }
+      val relevance =
+        NOT_SELECTED.matchEntire(expression)?.let { m ->
+          source(m.groupValues[1])?.let { mapSelected(it, m.groupValues[2], negated = true) }
+        }
+          ?: SELECTED.matchEntire(expression)?.let { m ->
+            source(m.groupValues[1])?.let { mapSelected(it, m.groupValues[2], negated = false) }
+          }
+          ?: ANSWERED.matchEntire(expression)?.let { m ->
+            source(m.groupValues[1])?.let { src ->
+              if (RelevanceOperator.IS_ANSWERED in RelevanceOperator.availableFor(src.type)) {
+                EditorRelevance(src.key, RelevanceOperator.IS_ANSWERED)
+              } else {
+                null
+              }
+            }
+          }
+          ?: COUNT_SELECTED_ANSWERED.matchEntire(expression)?.let { m ->
+            source(m.groupValues[1])?.let { src ->
+              if (RelevanceOperator.IS_ANSWERED in RelevanceOperator.availableFor(src.type)) {
+                EditorRelevance(src.key, RelevanceOperator.IS_ANSWERED)
+              } else {
+                null
+              }
+            }
+          }
+          ?: COMPARISON.matchEntire(expression)?.let { m ->
+            val lhs = m.groupValues[1].trim()
+            val op = m.groupValues[2]
+            val rhs = m.groupValues[3].trim()
+            source(lhs)?.let { mapComparison(it, op, rhs) }
+              ?: source(rhs)?.let { mapComparison(it, flipOperator(op), lhs) }
+          }
+          ?: source(expression)?.let { src ->
+            if (RelevanceOperator.IS_ANSWERED in RelevanceOperator.availableFor(src.type)) {
+              EditorRelevance(src.key, RelevanceOperator.IS_ANSWERED)
+            } else {
+              null
+            }
+          }
+      if (relevance == null) {
+        notes +=
+          "Display logic \"$rawExpression\" on \"$labelForNote\" isn't supported by the editor."
+      }
+      return relevance
+    }
+
+    private fun relevanceOf(question: EditorQuestion): EditorRelevance? {
+      val index = questions.indexOfFirst { it.key == question.key }
+      return parseRelevance(question.key, index, question.label)
+    }
+
+    private fun relevanceOfSection(section: EditorSection): EditorRelevance? {
+      val firstQuestionIndex = questions.indexOfFirst { it.sectionId == section.id }
+      val maxIndex = if (firstQuestionIndex >= 0) firstQuestionIndex else questions.size
+      return parseRelevance(section.id, maxIndex, section.title)
+    }
+
+    private fun resolvePath(rawRef: String, contextPath: String): String? {
+      var ref = stripOuterParens(rawRef)
+      if (ref.isEmpty()) return null
+      if (ref.startsWith("'") || ref.startsWith("\"")) return null
+      if (ref.startsWith("\${") && ref.endsWith("}")) {
+        val varName = ref.substring(2, ref.length - 1).trim()
+        return resolveByShortName(varName, contextPath)
+      }
+      if (ref.startsWith("current()/")) {
+        ref = ref.removePrefix("current()/")
+      } else if (ref == "current()") {
+        ref = "."
+      }
+      val resolved =
+        if (ref.startsWith("/")) {
+          val trimmed = ref.removePrefix("/")
+          when {
+            trimmed.startsWith("$rootName/") -> trimmed.removePrefix("$rootName/")
+            trimmed.startsWith("data/") -> trimmed.removePrefix("data/")
+            else -> trimmed
+          }
+        } else if (ref.startsWith("$rootName/") && !keyByPath.containsKey(join(contextPath, ref))) {
+          ref.removePrefix("$rootName/")
+        } else if (ref.startsWith("data/") && !keyByPath.containsKey(join(contextPath, ref))) {
+          ref.removePrefix("data/")
+        } else {
+          val baseSegments = contextPath.split('/').filter { it.isNotEmpty() }.toMutableList()
+          val relSegments = ref.split('/').filter { it.isNotEmpty() }
+          // In XForms `<bind nodeset="foo" relevant="../bar"/>`, `..` steps to the parent of `foo`.
+          if (relSegments.firstOrNull() == ".." || relSegments.firstOrNull() == ".") {
+            if (baseSegments.isNotEmpty()) baseSegments.removeAt(baseSegments.lastIndex)
+          }
+          for (seg in relSegments) {
+            when (seg) {
+              "." -> Unit
+              ".." -> if (baseSegments.isNotEmpty()) baseSegments.removeAt(baseSegments.lastIndex)
+              else -> baseSegments.add(seg)
+            }
+          }
+          baseSegments.joinToString("/")
+        }
+      if (keyByPath.containsKey(resolved)) return resolved
+      return resolveByShortName(resolved, contextPath)
+    }
+
+    private fun resolveByShortName(name: String, contextPath: String): String? {
+      if (keyByPath.containsKey(name)) return name
+      val parent = contextPath.substringBeforeLast('/', "")
+      if (parent.isNotEmpty()) {
+        val sibling = "$parent/$name"
+        if (keyByPath.containsKey(sibling)) return sibling
+      }
+      val suffixMatches = keyByPath.keys.filter { it.endsWith("/$name") }
+      return suffixMatches.singleOrNull()
+    }
+
+    private fun stripOuterParens(expr: String): String {
+      var s = expr.trim()
+      while (s.length >= 2 && s.first() == '(' && s.last() == ')') {
+        var depth = 0
+        var inSingle = false
+        var inDouble = false
+        var wrapsAll = true
+        for (i in 0 until s.length - 1) {
+          val c = s[i]
+          when {
+            c == '\'' && !inDouble -> inSingle = !inSingle
+            c == '"' && !inSingle -> inDouble = !inDouble
+            !inSingle && !inDouble -> {
+              if (c == '(') depth++
+              else if (c == ')') {
+                depth--
+                if (depth == 0) {
+                  wrapsAll = false
+                  break
+                }
+              }
+            }
+          }
+        }
+        if (wrapsAll && depth == 1) {
+          s = s.substring(1, s.length - 1).trim()
+        } else {
+          break
+        }
+      }
+      return s
+    }
+
+    private fun flipOperator(op: String): String =
+      when (op) {
+        ">" -> "<"
+        ">=" -> "<="
+        "<" -> ">"
+        "<=" -> ">="
+        else -> op
+      }
+
+    private fun choicesFromInstance(itemset: ItemsetDef): List<EditorChoice> {
+      val rows = instances[itemset.instance_id]?.rows.orEmpty()
+      if (rows.isEmpty()) return emptyList()
+      val valueTag = itemset.value_ref.trim().ifEmpty { "name" }
+      val rawLabelRef = itemset.label_ref.trim().ifEmpty { "label" }
+      val itextColumnMatch = JR_ITEXT.matchEntire(rawLabelRef)
+      val itextColumn = itextColumnMatch?.let { unquote(it.groupValues[1]) }
+      val labelTag = itextColumn ?: rawLabelRef
+      return rows
+        .mapNotNull { row ->
+          val value = rowField(row, valueTag) ?: rowField(row, "name") ?: return@mapNotNull null
+          val itextId =
+            if (itextColumn != null) {
+              rowField(row, itextColumn)
+            } else {
+              rowField(row, "itextId")
+            }
+          val label =
+            if (itextColumn != null) {
+              itextId?.let { strings[it] ?: it } ?: rowField(row, "label") ?: value
+            } else {
+              rowField(row, labelTag)
+                ?: rowField(row, "label")
+                ?: itextId?.let { strings[it] }
+                ?: value
+            }
+          val imageUri = itextId?.let { mediaByTextId[it]?.image_uri }?.takeIf { it.isNotBlank() }
+          val choiceImage = imageUri?.let { uri ->
+            ChoiceImageRegistry.lookup(uri)?.let { media ->
+              EditorChoiceImage(mimeType = media.mimeType, base64 = media.base64)
+            }
+          }
+          val parentVal = rowField(row, "parent_value") ?: rowField(row, "parent") ?: ""
+          EditorChoice(
+            value = value,
+            label = label,
+            colorHex = rowField(row, EditorXFormsGenerator.CHOICE_COLOR_COLUMN),
+            image = choiceImage,
+            code = rowField(row, EditorXFormsGenerator.CHOICE_CODE_COLUMN),
+            labelTranslations = translationsForTextId(itextId),
+            parentValue = parentVal,
+          )
+        }
+        .toList()
+    }
+
+    private fun rowField(row: RecordNode, name: String): String? =
+      row.fields[name]?.scalar_value?.string_value?.trim()?.takeIf { it.isNotEmpty() }
+
+    private fun text(label: LabelDef?): String? {
+      if (label == null) return null
+      val direct = label.text.trim()
+      if (direct.isNotEmpty()) return direct
+      return label.text_id.takeIf { it.isNotEmpty() }?.let { strings[it] }?.trim()?.ifEmpty { null }
+    }
+
+    private fun translations(label: LabelDef?): Map<String, String> =
+      translationsForTextId(label?.text_id)
+
+    private fun translationsForTextId(textId: String?): Map<String, String> {
+      val id = textId?.trim()?.takeIf { it.isNotEmpty() } ?: return emptyMap()
+      if (nonDefaultLanguages.isEmpty()) return emptyMap()
+      return buildMap {
+        nonDefaultLanguages.forEach { lang ->
+          val translated = lang.strings[id]?.value_?.trim()?.takeIf { it.isNotEmpty() }
+          if (translated != null) {
+            val tag = normalizeLanguageTag(lang.language)
+            if (tag.isNotEmpty() && tag !in this) {
+              put(tag, translated)
+            }
+          }
+        }
+      }
+    }
+
+    private fun normalizeLanguageTag(raw: String): String {
+      val trimmed = raw.trim()
+      val match = PARENTHESIZED_LANG_CODE.matchEntire(trimmed)
+      return match?.groupValues?.get(1) ?: trimmed
+    }
+
+    private fun isTrue(expression: String?): Boolean =
+      when (expression?.trim()?.lowercase()) {
+        "true()",
+        "true",
+        "1" -> true
+        else -> false
+      }
+
+    private fun unquote(literal: String): String {
+      val v = literal.trim()
+      return if (
+        v.length >= 2 && (v.first() == '\'' || v.first() == '"') && v.last() == v.first()
+      ) {
+        v.substring(1, v.length - 1)
+      } else {
+        v
+      }
+    }
+
+    private companion object {
+      val REF = Regex("""^/?([A-Za-z_][A-Za-z0-9_.\-/]*)$""")
+      val COMPARISON = Regex("""^(.+?)\s*(!=|>=|<=|=|>|<)\s*(.+)$""")
+      val SELECTED = Regex("""^selected\(\s*([^,]+?)\s*,\s*(.+?)\s*\)$""")
+      val NOT_SELECTED = Regex("""^not\(\s*selected\(\s*([^,]+?)\s*,\s*(.+?)\s*\)\s*\)$""")
+      val ANSWERED = Regex("""^string-length\(\s*(.+?)\s*\)\s*(?:>|!=)\s*0$""")
+      val COUNT_SELECTED_ANSWERED = Regex("""^count-selected\(\s*(.+?)\s*\)\s*(?:>|!=)\s*0$""")
+      val AND_SPLIT = Regex("""\s+and\s+""")
+      val BOUND = Regex("""^\.\s*(>=|<=|>|<|=)\s*(-?(?:\d+(?:\.\d*)?|\.\d+))$""")
+      val REVERSED_BOUND = Regex("""^(-?(?:\d+(?:\.\d*)?|\.\d+))\s*(>=|<=|>|<|=)\s*\.$""")
+      val STRING_LENGTH_BOUND = Regex("""^string-length\(\s*\.\s*\)\s*(>=|<=|>|<|=)\s*(\d+)$""")
+      val REGEX_CALL = Regex("""^regex\(\s*\.\s*,\s*(.+?)\s*\)$""")
+      val DATE_TODAY = Regex("""^\.\s*(<=|<|>=|>)\s*today\(\s*\)$""")
+      val DATE_BOUND = Regex("""^\.\s*(>=|<=|>|<|=)\s*date\(\s*(.+?)\s*\)$""")
+      val COUNT_SELECTED_BOUND = Regex("""^count-selected\(\s*\.\s*\)\s*(>=|<=|>|<|=)\s*(\d+)$""")
+      val JR_ITEXT = Regex("""^jr:itext\(\s*(.+?)\s*\)$""")
+      val PARENTHESIZED_LANG_CODE = Regex("""^.*\(([A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*)\)$""")
+      val ID_BY_QUESTION =
+        Regex(
+          """^instance\('([^']+)'\)/root/item\[([A-Za-z_][A-Za-z0-9_.\-]*)\s*=\s*([^\]]+)\]/name$"""
+        )
+    }
+  }
+}

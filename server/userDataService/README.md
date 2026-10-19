@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -30,15 +30,15 @@ services will live next to it under `server/`.
     `$PORT`, plus `GET /healthz`. The apps use gRPC-Web on every platform
     (`GrpcWebTransport` in `shared/app`).
 -   **No extra code generation.** Wire generates the `*Server` interfaces in
-    `shared/core`; [`WireGrpcBindings`](src/main/kotlin/org/groundplatform/v2/server/userdata/WireGrpcBindings.kt)
+    `shared/core`; [`WireGrpcBindings`](src/main/kotlin/org/openforis/collectone/v2/server/userdata/WireGrpcBindings.kt)
     turns their `@WireRpc` annotations into grpc-java service definitions at
     startup.
--   **Backend and store.** [`UserDataBackend`](src/main/kotlin/org/groundplatform/v2/server/userdata/UserDataBackend.kt)
+-   **Backend and store.** [`UserDataBackend`](src/main/kotlin/org/openforis/collectone/v2/server/userdata/UserDataBackend.kt)
     implements the RPCs' rules on top of a
-    [`UserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/UserDataStore.kt),
+    [`UserDataStore`](src/main/kotlin/org/openforis/collectone/v2/server/userdata/UserDataStore.kt),
     which reads and writes records in atomic transactions with
     store-assigned commit timestamps: a
-    [`SpannerUserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/SpannerUserDataStore.kt)
+    [`SpannerUserDataStore`](src/main/kotlin/org/openforis/collectone/v2/server/userdata/SpannerUserDataStore.kt)
     on Cloud Spanner, or the Spanner emulator in development and tests (see
     [Spanner](#spanner-and-the-spanner-debug-web-ui)). An empty database is
     loaded with a `UserDataSeed` (`shared/protos/userdata/user_data_seed.proto`).

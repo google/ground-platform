@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ These rules govern all AI-assisted research, design, and code changes within Col
 * **New Source Files**: Every newly created source, build, schema, script, or documentation file **must** begin with the standard Apache 2.0 license header using the **current calendar year**:
   ```kotlin
   /*
-   * Copyright 2026 The Ground Authors.
+   * Copyright 2026 The Collect One Authors.
    *
    * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
    * in compliance with the License. You may obtain a copy of the License at
@@ -80,7 +80,7 @@ These rules govern all AI-assisted research, design, and code changes within Col
 * **Material Design 3 (M3)**: All user interfaces across mobile and web must follow **Material Design 3** guidelines (`androidx.compose.material3.*`).
 * **Unmodified Compose Multiplatform**: Use standard **Compose Multiplatform** and Material 3 components out-of-the-box with minimal or no custom structural/behavioral modifications. Prefer standard M3 building blocks (`Scaffold`, `TopAppBar`, `Card`, `OutlinedTextField`, `Button`, `FilterChip`, `ModalBottomSheet`, etc.) over bespoke custom-drawn widgets.
 * **Global Theming Over Per-Component Styling**:
-  * Always wrap UI surfaces in [`GroundTheme`](shared/ui/src/commonMain/kotlin/org/groundplatform/v2/core/forms/ui/GroundTheme.kt) and reference semantic tokens from `MaterialTheme.colorScheme`, `MaterialTheme.typography`, and `MaterialTheme.shapes`.
+  * Always wrap UI surfaces in [`GroundTheme`](shared/ui/src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/GroundTheme.kt) and reference semantic tokens from `MaterialTheme.colorScheme`, `MaterialTheme.typography`, and `MaterialTheme.shapes`.
   * **Prefer global theme definitions** over specifying ad-hoc colors (`Color(0x...)`), custom typography styles, or visual overrides on individual components. When a visual change is needed across components, update the centralized theme in `shared/ui/` rather than passing inline style overrides to individual composables.
 
 ## ProtoForms Schema & XForms Compatibility Boundary
@@ -100,7 +100,7 @@ ProtoForms ([`shared/protos/forms/`](shared/protos/forms/), package `groundplatf
 * **Interoperate with real implementations.** The bar is that a form authored in XLSForm, served by **ODK Central**, and filled in **ODK Collect** or **Enketo** round-trips through ProtoForms without losing information or changing meaning. Where the W3C spec and what **JavaRosa** actually does diverge, **match the real-world behavior** and leave a comment explaining the divergence and citing both sources.
 * **Widely-implemented extensions belong in ProtoForms.** Constructs in the `jr:` / `odk:` namespaces, and ODK Entities, are part of the interoperable surface even though they are not in W3C XForms. Representing them here is correct.
 * **Ground-specific constructs stay out.** Anything meaningful only to Ground — map layer configuration, survey ACLs, sync bookkeeping, UI preferences, launch behavior — belongs in [`shared/protos/survey/`](shared/protos/survey/) (`SurveyDef`, `FormLaunchConfig`, `MapConfig`), [`shared/protos/data/`](shared/protos/data/) (`SubmissionRecord`, `EntityRecord`, `AuditRecord`), or application-level KMP models. The test to apply is **not** "is this in the W3C spec?" but **"would another XForms tool understand this, or is it only meaningful to Ground?"**
-* **Round-trip fidelity is the acceptance criterion.** New schema surface needs a round-trip test in [`shared/core/src/commonTest/.../serialization/`](shared/core/src/commonTest/kotlin/org/groundplatform/v2/core/forms/serialization/) proving XML → proto → XML preserves the construct. Unrecognized attributes and elements should be preserved rather than dropped.
+* **Round-trip fidelity is the acceptance criterion.** New schema surface needs a round-trip test in [`shared/core/src/commonTest/.../serialization/`](shared/core/src/commonTest/kotlin/org/openforis/collectone/v2/core/forms/serialization/) proving XML → proto → XML preserves the construct. Unrecognized attributes and elements should be preserved rather than dropped.
 * **Cite the spec in code.** When implementing spec-defined behavior, reference the specific section in a comment (e.g. `// XPath 1.0 section 4.4: ties round toward positive infinity`) so the next reader can check the implementation against the source.
 
 ## Code Formatting (`ktformat` & `buf`)

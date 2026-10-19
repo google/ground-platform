@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ representative point:
 
 The token is the hex cell ID with trailing zeros removed (`S2CellId::ToToken`).
 `shared/core` computes it with `s2CellToken(lat, lng)` in
-`org.groundplatform.v2.core.geo.s2`. Writers set it alongside every geometry
+`org.openforis.collectone.v2.core.geo.s2`. Writers set it alongside every geometry
 change, and servers recompute it rather than trusting clients. Because S2 cell
 IDs order cells along a space-filling curve, the backend can answer
 bounding-box queries (`ListEntitiesRequest.bbox`) with cell-range scans on any

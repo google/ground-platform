@@ -194,7 +194,7 @@
 					"-framework",
 					"GroundMobile",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.groundplatform.v2.iosApp;
+				PRODUCT_BUNDLE_IDENTIFIER = org.openforis.collectone.v2.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -226,7 +226,7 @@
 					"-framework",
 					"GroundMobile",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.groundplatform.v2.iosApp;
+				PRODUCT_BUNDLE_IDENTIFIER = org.openforis.collectone.v2.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

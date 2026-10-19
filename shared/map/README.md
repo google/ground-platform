@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ A Compose Multiplatform map for Android, iOS, WasmJS, and JVM. Apps describe
 what to draw as immutable data, and a thin per-platform renderer draws it
 with that platform's native map SDK.
 
-Artifact: `org.groundplatform.v2:map`. This module has no knowledge of
+Artifact: `org.openforis.collectone.v2:map`. This module has no knowledge of
 surveys, forms, or entities. Apps convert their domain state into
 `MapContent`.
 

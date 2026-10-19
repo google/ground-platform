@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -251,7 +251,7 @@ on, so each app's build includes only what it uses.
 │   ├── core/             # Pure KMP runtime: XForms/XPath evaluator, reactive FormEngine, sampling, impact
 │   ├── ui/               # Shared CMP theme (GroundTheme), question cards, form wizard
 │   ├── map/              # Shared map rendering (Mapbox) and geometry
-│   ├── app/              # Code both clients use (org.groundplatform.v2.app)
+│   ├── app/              # Code both clients use (org.openforis.collectone.v2.app)
 │   │   ├── domain/       # Use cases, domain models, repository contracts
 │   │   │   ├── model/
 │   │   │   ├── repository/

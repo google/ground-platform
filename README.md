@@ -1,5 +1,5 @@
 <!--
-  Copyright 2026 The Ground Authors.
+  Copyright 2026 The Collect One Authors.
 
   Licensed under the Apache License, Version 2.0 (the 'License');
   you may not use this file except in compliance with the License.
@@ -56,39 +56,39 @@ for **Collect One**.
     `FieldBinding`), survey configurations (`SurveyDef`, `AclEntry`), and
     entity/submission/audit records.
 -   **[`shared/core/`](shared/core/)**: Pure Kotlin Multiplatform runtime
-    library (`org.groundplatform.v2:protoforms`) targeting JVM/Android, iOS, JS
+    library (`org.openforis.collectone.v2:protoforms`) targeting JVM/Android, iOS, JS
     (IR), and WasmJS:
     -   **XForms XML, TextProto & JSON Serialization**
-        (`org.groundplatform.v2.core.forms.serialization`): Bidirectional
+        (`org.openforis.collectone.v2.core.forms.serialization`): Bidirectional
         conversion between XForms XML (`<h:html>` and `<data>`),
         `groundplatform.v2.forms` Protocol Buffer messages, Protocol Buffer Text
         Format (`textproto`), and Canonical Proto3 JSON (`ProtoJsonSerializer`).
     -   **XPath 1.0 + XForms Engine**
-        (`org.groundplatform.v2.core.forms.xpath`): Full AST compiler and
+        (`org.openforis.collectone.v2.core.forms.xpath`): Full AST compiler and
         evaluator for XForms expressions against strongly-typed
         `RecordInstance` and `FormDef` models.
     -   **Dynamic Form State Model & Evaluation Engine**
-        (`org.groundplatform.v2.core.forms.engine` &
-        `org.groundplatform.v2.core.forms.model`): Immutable runtime UI state
+        (`org.openforis.collectone.v2.core.forms.engine` &
+        `org.openforis.collectone.v2.core.forms.model`): Immutable runtime UI state
         model (`FormState`, `ComponentState`) and reactive 5-stage evaluation
         engine (`FormEngine`, `FormSession`, `CompiledForm`) for dynamic
         repeats, calculations, relevance, constraints, cascading `itemset`s,
         translations, and XForms Entities.
 -   **[`shared/ui/`](shared/ui/)**: Compose Multiplatform UI library
-    (`org.groundplatform.v2:protoforms-ui`, package
-    `org.groundplatform.v2.core.forms.ui`) targeting Web (`js` / `wasmJs`),
+    (`org.openforis.collectone.v2:protoforms-ui`, package
+    `org.openforis.collectone.v2.core.forms.ui`) targeting Web (`js` / `wasmJs`),
     Android/JVM (`jvm`), and iOS (`iosArm64` / `iosSimulatorArm64`). Provides
     shared Material 3 theming (`GroundTheme`) and the single-question-per-screen
     form experience (`MobileFormRunner`, `FormWizardController`,
     `QuestionControlCard`, and `ControlWidget`).
 -   **[`shared/app/`](shared/app/)**: Shared application module
-    (`org.groundplatform.v2:app`) targeting Android/JVM and WasmJS. Contains the
+    (`org.openforis.collectone.v2:app`) targeting Android/JVM and WasmJS. Contains the
     domain model, data layer, platform clients, and the UI state, ViewModels,
     and components that the mobile app and the web console share. Test
     fixtures for it and its dependents are in `shared/app/testing/`
-    (`org.groundplatform.v2:app-testing`).
+    (`org.openforis.collectone.v2:app-testing`).
 -   **[`shared/mobile/`](shared/mobile/)**: Shared Mobile application module
-    (`org.groundplatform.v2:mobile`) targeting Android/JVM and WasmJS, with iOS
+    (`org.openforis.collectone.v2:mobile`) targeting Android/JVM and WasmJS, with iOS
     opt-in (`-Pground.ios=true`) until `shared/app` gets iOS targets.
     Contains mobile-specific local persistence (`data/`), domain services such
     as offline sync and GPS tracking (`services/`), and mobile Compose screens &
@@ -102,7 +102,7 @@ for **Collect One**.
 -   **[`iosApp/`](iosApp/)**: Thin Xcode / SwiftUI application entry point that
     embeds `GroundMobile.framework` from `shared/mobile`.
 -   **[`shared/web/`](shared/web/)**: Web console module
-    (`org.groundplatform.v2:web`): the console's pages, `WebAppState`, and the
+    (`org.openforis.collectone.v2:web`): the console's pages, `WebAppState`, and the
     `WebConsoleApp()` root, built on `shared/app`.
 -   **[`webApp/`](webApp/)**: Collect One Web Console application (`wasmJs`) for
     survey administration, map management, and data exploration. A thin host

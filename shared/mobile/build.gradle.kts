@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@ plugins {
   id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
-group = "org.groundplatform.v2"
+group = "org.openforis.collectone.v2"
 
 version = "2.0.0-SNAPSHOT"
 
@@ -53,7 +53,7 @@ kotlin {
         baseName = "GroundMobile"
         isStatic = true
         // iosApp implements GroundMap's Mapbox view (MapboxIosView) in Swift.
-        export("org.groundplatform.v2:map:2.0.0-SNAPSHOT")
+        export("org.openforis.collectone.v2:map:2.0.0-SNAPSHOT")
       }
     }
   }
@@ -61,9 +61,9 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
-        api("org.groundplatform.v2:protoforms-ui:2.0.0-SNAPSHOT")
-        api("org.groundplatform.v2:app:2.0.0-SNAPSHOT")
+        api("org.openforis.collectone.v2:protoforms:2.0.0-SNAPSHOT")
+        api("org.openforis.collectone.v2:protoforms-ui:2.0.0-SNAPSHOT")
+        api("org.openforis.collectone.v2:app:2.0.0-SNAPSHOT")
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -74,12 +74,12 @@ kotlin {
       }
     }
     if (iosEnabled) {
-      iosMain.dependencies { api("org.groundplatform.v2:map:2.0.0-SNAPSHOT") }
+      iosMain.dependencies { api("org.openforis.collectone.v2:map:2.0.0-SNAPSHOT") }
     }
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation("org.groundplatform.v2:app-testing:2.0.0-SNAPSHOT")
+        implementation("org.openforis.collectone.v2:app-testing:2.0.0-SNAPSHOT")
       }
     }
     val jvmTest by getting {
@@ -95,7 +95,7 @@ kotlin {
 }
 
 android {
-  namespace = "org.groundplatform.v2.mobile"
+  namespace = "org.openforis.collectone.v2.mobile"
   compileSdk = 35
   defaultConfig { minSdk = 24 }
   compileOptions {

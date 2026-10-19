@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 The Ground Authors.
+ * Copyright 2026 The Collect One Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -21,7 +21,7 @@ plugins {
   id("com.ncorti.ktfmt.gradle") version "0.27.0"
 }
 
-group = "org.groundplatform.v2"
+group = "org.openforis.collectone.v2"
 
 version = "2.0.0-SNAPSHOT"
 
@@ -30,7 +30,7 @@ ktfmt { googleStyle() }
 kotlin { jvmToolchain(21) }
 
 dependencies {
-  implementation("org.groundplatform.v2:protoforms:2.0.0-SNAPSHOT")
+  implementation("org.openforis.collectone.v2:protoforms:2.0.0-SNAPSHOT")
   implementation(platform("com.linecorp.armeria:armeria-bom:1.42.0"))
   implementation("com.linecorp.armeria:armeria")
   implementation("com.linecorp.armeria:armeria-grpc")
@@ -57,7 +57,7 @@ dependencies {
 }
 
 application {
-  mainClass.set("org.groundplatform.v2.server.userdata.MainKt")
+  mainClass.set("org.openforis.collectone.v2.server.userdata.MainKt")
   applicationName = "user-data-service"
 }
 
