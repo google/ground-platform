@@ -690,13 +690,11 @@
     }
 
     /**
-     * URL of the server's page at [path] through the launchpad, which forwards /debug/... to the
-     * server the clients talk to (see proxyToServer in server.mjs). Loading it from the
-     * launchpad's own origin keeps the browser from blocking an http:// server inside an https://
-     * launchpad page as mixed content.
+     * URL of the server's page at [path] on the server the clients talk to (USER_DATA_SERVICE_URL,
+     * shown as "Clients talk to server at"), e.g. http://host.example.com:8080/debug/spanner.
      */
     function serverPageUrl(path) {
-      return new URL(path, window.location.href).href;
+      return resolveServiceUrl(SERVER_PORT, path);
     }
 
     function openServerPage(path) {
@@ -752,7 +750,8 @@
       const framePath = FRAME_PATHS[view];
       if (framePath) {
         const frame = document.getElementById(framePath[0]);
-        if (frame.src === 'about:blank' || !frame.src) frame.src = serverPageUrl(framePath[1]);
+        // Before the first status arrives, the server URL isn't known yet; updateUi loads it then.
+        if (lastStatus && (frame.src === 'about:blank' || !frame.src)) frame.src = serverPageUrl(framePath[1]);
       }
       if (view === 'logs') renderLogs();
     }

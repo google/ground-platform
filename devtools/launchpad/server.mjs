@@ -14,7 +14,6 @@
  */
 
 import http from 'node:http';
-import https from 'node:https';
 import { spawn, execFile } from 'node:child_process';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -910,59 +909,6 @@ function readJsonBody(req) {
 }
 
 // HTTP Server
-
-/** The server the clients talk to (USER_DATA_SERVICE_URL in local.properties), as a URL. */
-function serverBaseUrl() {
-  const configured = (cachedLocalProps.userDataServiceUrl || '').trim() || 'http://localhost:8080';
-  try {
-    return new URL(configured.includes('://') ? configured : `http://${configured}`);
-  } catch (_) {
-    return new URL('http://localhost:8080');
-  }
-}
-
-/**
- * Forwards [req] to the same path on the server the clients talk to, streaming the response (the
- * debug pages use server-sent events). The launchpad shows the server's debug pages (/debug,
- * /debug/spanner) in frames through this, so they share the launchpad page's origin: loading the
- * server directly fails when the launchpad is opened over HTTPS (e.g. through a proxy) and the
- * server URL is plain HTTP, which browsers block as mixed content. The debug pages call their APIs
- * with absolute /debug/... paths, so those come through here too.
- */
-function proxyToServer(req, res) {
-  const base = serverBaseUrl();
-  const target = new URL(req.url, base);
-  const basePath = base.pathname.replace(/\/+$/, '');
-  if (basePath) target.pathname = `${basePath}${target.pathname}`;
-  const headers = { ...req.headers, host: target.host };
-  // Drops the browser's origin so the server treats these as its own pages' requests.
-  delete headers.origin;
-  delete headers.referer;
-  const client = target.protocol === 'https:' ? https : http;
-  const upstream = client.request(target, { method: req.method, headers }, (upstreamRes) => {
-    res.writeHead(upstreamRes.statusCode || 502, upstreamRes.headers);
-    upstreamRes.pipe(res);
-  });
-  upstream.on('error', (err) => {
-    if (res.headersSent) {
-      res.destroy();
-      return;
-    }
-    res.writeHead(502, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(
-      `<p style="font-family: sans-serif">Couldn't reach the server at ${escapeHtmlText(base.href)} ` +
-        `(${escapeHtmlText(err.message)}). Is it running? The launchpad uses USER_DATA_SERVICE_URL ` +
-        `from local.properties.</p>`
-    );
-  });
-  // Stops streaming from the server when the frame goes away.
-  res.on('close', () => upstream.destroy());
-  req.pipe(upstream);
-}
-
-function escapeHtmlText(text) {
-  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
 const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
@@ -976,11 +922,6 @@ const server = http.createServer(async (req, res) => {
   if (method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
-    return;
-  }
-
-  if (pathname === '/debug' || pathname.startsWith('/debug/')) {
-    proxyToServer(req, res);
     return;
   }
 
