@@ -115,7 +115,8 @@ Survey definitions are large (forms, entity dataset schemas, translations), and 
 
 * The downloaded set is device-local: it's stored with the sync state (`ClientSyncState.downloaded_survey_ids`) and never sent to the server. A new install starts with the surveys marked as downloaded by default (`SurveyOverview.is_downloaded`).
 * Surveys that aren't downloaded are listed from their overviews, without `GetSurvey`, `ListEntities`, or `ListSubmissions`. Downloading one triggers a sync that fetches it; removing a download drops its definition, data, and tokens once the survey has no outbox entries.
-* Not yet implemented: the survey list is caught up on every sync rather than only while it's visible; surveys that return `NOT_FOUND` or `PERMISSION_DENIED` stop syncing but aren't marked unavailable in the UI; a trashed survey with pending uploads stays listed until they drain; organizations and libraries are still synced on mobile.
+* The survey list (the Download survey screen) is caught up only while it's open, polling at the collaborative interval; closing it discards its token. Surveys that return `NOT_FOUND` or `PERMISSION_DENIED` are marked **Unavailable** and stop syncing. Libraries aren't synced on mobile.
+* Not yet implemented: a trashed survey with pending uploads stays listed until they drain; organizations are still synced on mobile, since the app shows organization names and imagery from them.
 
 Organizations and libraries aren't kept on mobile: forms are built in the online web console, and a download stores the few organization settings it needs offline (such as imagery sources). See [`backend/spanner-schema.md`](backend/spanner-schema.md) for how the server stores and serves all of this.
 

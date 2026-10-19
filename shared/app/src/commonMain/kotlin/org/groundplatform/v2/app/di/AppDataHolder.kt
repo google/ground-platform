@@ -406,6 +406,14 @@ class AppDataHolder(
     syncCoordinator?.setCollaborativeView(isCollaborative)
   }
 
+  /**
+   * Whether the mobile survey list is on screen. With [syncDownloadedSurveysOnly], the list of
+   * surveys the user can download is only kept current while it is.
+   */
+  fun setSurveyListOpen(isOpen: Boolean) {
+    syncCoordinator?.setSurveyListOpen(isOpen)
+  }
+
   /** Everything the UI reads from the local data store, kept current as the store changes. */
   val appData: StateFlow<AppData> =
     combine(

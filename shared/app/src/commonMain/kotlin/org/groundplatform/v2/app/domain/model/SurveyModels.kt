@@ -96,6 +96,11 @@ data class SurveyPreviewItem(
   val collectorConsentText: String = "",
   /** Survey-level quota limits and budget overrides (`SurveyDef.quota_limits`). */
   val quotaLimits: QuotaLimitsConfig = QuotaLimitsConfig(),
+  /**
+   * Whether this downloaded survey can no longer be synced: it was deleted, or the user lost
+   * access. Its local copy and unsent changes stay on the device.
+   */
+  val isUnavailable: Boolean = false,
 ) {
   /** Whether the survey is in draft mode and not yet published for field collection. */
   val isDraft: Boolean

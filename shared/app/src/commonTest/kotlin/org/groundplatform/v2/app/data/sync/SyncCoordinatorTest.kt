@@ -126,4 +126,14 @@ class SyncCoordinatorTest {
     assertNull(coordinator.activity.value.lastError)
     scope.cancel()
   }
+
+  @Test
+  fun openSurveyList_pollsAtTheCollaborativeInterval() {
+    assertEquals(SyncCoordinator.IDLE_POLL_MS, coordinator.pollIntervalMillis())
+    coordinator.setSurveyListOpen(true)
+    assertEquals(SyncCoordinator.COLLABORATIVE_POLL_MS, coordinator.pollIntervalMillis())
+    coordinator.setSurveyListOpen(false)
+    assertEquals(SyncCoordinator.IDLE_POLL_MS, coordinator.pollIntervalMillis())
+    scope.cancel()
+  }
 }

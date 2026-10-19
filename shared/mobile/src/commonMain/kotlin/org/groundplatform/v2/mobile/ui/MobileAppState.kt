@@ -56,8 +56,19 @@ class MobileAppState(
   settings: SettingsViewModel = createSettingsViewModel(dataHolder),
 ) : AppSession(dataHolder, settings) {
 
-  var currentScreen by mutableStateOf(initialScreen)
-    private set
+  private var screen by mutableStateOf(initialScreen)
+
+  /** The visible screen. The list of surveys to download is kept current only while it's shown. */
+  var currentScreen: AppScreen
+    get() = screen
+    private set(value) {
+      screen = value
+      dataHolder.setSurveyListOpen(value == AppScreen.DOWNLOAD_SURVEY)
+    }
+
+  init {
+    dataHolder.setSurveyListOpen(initialScreen == AppScreen.DOWNLOAD_SURVEY)
+  }
 
   var mainViewMode by mutableStateOf(MainSurveyViewMode.MAP)
     private set

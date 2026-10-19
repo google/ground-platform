@@ -620,7 +620,9 @@ private fun SurveyListItemCard(
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
-          if (survey.isPublicData) {
+          if (survey.isUnavailable) {
+            GroundTonalBadge(text = "Unavailable", tone = GroundBadgeTone.ERROR)
+          } else if (survey.isPublicData) {
             GroundTonalBadge(text = "Public data", tone = GroundBadgeTone.WARNING)
           } else if (survey.isPrivateSubmissions) {
             GroundTonalBadge(text = "Private submissions", tone = GroundBadgeTone.SECONDARY)

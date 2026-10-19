@@ -82,13 +82,15 @@ private typealias PageApplier<T> = suspend (List<T>) -> (LocalStoreTransaction.(
  * With [downloadedSurveysOnly] (mobile), only the surveys in the device's downloaded set
  * ([org.groundplatform.v2.app.data.datasource.local.store.SyncState.downloadedSurveyIds]) are kept
  * offline (`docs/technical/sync-engine.md`, "Survey Downloads & Working Copies"):
- * - `ListSurveyOverviews` only fills the survey list. Its token lives in memory, so each launch
- *   starts with a full query, and other surveys are listed from their overviews without fetching
- *   their definitions or data.
+ * - `ListSurveyOverviews` only fills the survey list, and is caught up only while the list is open
+ *   ([setSurveyListOpen]). Its token lives in memory, so each open starts with a full query. Other
+ *   surveys are listed from their overviews without fetching their definitions or data.
+ * - Organization libraries aren't synced: only the web console's survey editor uses them.
  * - Downloaded surveys are refreshed with `BatchGetSurveyOverviews`, so link-shared and public
  *   surveys the list doesn't include stay current too. A newer `record_version` fetches the survey
  *   again; a trashed survey leaves the downloaded set; one the caller can no longer read (or that
- *   was purged) keeps its local copy and pending uploads but stops syncing.
+ *   was purged) is marked unavailable and keeps its local copy and pending uploads, but stops
+ *   syncing until it's available again.
  * - Entities and submissions are synced for downloaded surveys only.
  * - A survey that leaves the downloaded set keeps its local copy until its pending uploads have
  *   drained; then its definition, data, and tokens are dropped, and it's removed from the list
@@ -109,6 +111,21 @@ class GrpcSyncDataSource(
    * first full query.
    */
   private var catalogIds: Set<String>? = null
+
+  /**
+   * Whether the survey list is on screen, with [downloadedSurveysOnly]; see [setSurveyListOpen].
+   */
+  private var surveyListOpen = false
+
+  /**
+   * Tells a data source with [downloadedSurveysOnly] whether the survey list is on screen. Syncs
+   * catch up the list only while it's open; closing it discards the list's token, so the next open
+   * starts with a fresh query.
+   */
+  fun setSurveyListOpen(open: Boolean) {
+    surveyListOpen = open
+    if (!open) catalogToken = ""
+  }
 
   /** Sync tokens after the last applied page. */
   fun currentSyncTokens(): SyncTokens = syncTokens
@@ -137,7 +154,9 @@ class GrpcSyncDataSource(
   ) {
     resetSyncTokens()
     val organizations = fullList { organizationsPage(syncToken = "", pageToken = it) }
-    val libraries = fullList { librariesPage(syncToken = "", pageToken = it) }
+    val libraries =
+      if (downloadedSurveysOnly) FullList(emptyList(), syncToken = "")
+      else fullList { librariesPage(syncToken = "", pageToken = it) }
     val overviews = fullList { overviewsPage(syncToken = "", pageToken = it) }
     val live = overviews.records.filter { it.state != SurveyState.DELETED }
     val downloaded = live.filter { it.is_downloaded }.map { it.survey_id }.toSet()
@@ -208,27 +227,30 @@ class GrpcSyncDataSource(
         }
       },
     )
-    syncScope(
-      store = store,
-      token = { it.libraries },
-      withToken = { tokens, token -> tokens.copy(libraries = token) },
-      fetch = ::librariesPage,
-      applyDelta = { records -> { records.forEach(Rebaser(this)::acceptLibrary) } },
-      applyFull = { records ->
-        {
-          val rebaser = Rebaser(this)
-          records.forEach { rebaser.acceptLibrary(it, replace = true) }
-          val listed = records.map { it.organization_id }.toSet()
-          libraries()
-            .keys
-            .filter { it !in listed && libraryBase(it) != null }
-            .forEach(rebaser::forgetLibrary)
-        }
-      },
-    )
+    // Mobile doesn't keep libraries: only the web console's survey editor uses them.
+    if (!downloadedSurveysOnly) {
+      syncScope(
+        store = store,
+        token = { it.libraries },
+        withToken = { tokens, token -> tokens.copy(libraries = token) },
+        fetch = ::librariesPage,
+        applyDelta = { records -> { records.forEach(Rebaser(this)::acceptLibrary) } },
+        applyFull = { records ->
+          {
+            val rebaser = Rebaser(this)
+            records.forEach { rebaser.acceptLibrary(it, replace = true) }
+            val listed = records.map { it.organization_id }.toSet()
+            libraries()
+              .keys
+              .filter { it !in listed && libraryBase(it) != null }
+              .forEach(rebaser::forgetLibrary)
+          }
+        },
+      )
+    }
     val targetSurveyIds =
       if (downloadedSurveysOnly) {
-        syncCatalog(store)
+        if (surveyListOpen) syncCatalog(store)
         val available = refreshDownloadedSurveys(store)
         if (surveyId != null) listOf(surveyId).filter { it in available } else available.toList()
       } else {
@@ -242,6 +264,7 @@ class GrpcSyncDataSource(
         // Lost access or purged since `BatchGetSurveyOverviews`: keep the local copy and retry
         // later.
         if (!downloadedSurveysOnly || e.status !in UNAVAILABLE_SURVEY_STATUSES) throw e
+        store.transaction { updateSurvey(sid) { it.copy(isUnavailable = true) } }
       }
     }
     if (downloadedSurveysOnly) removeUndownloadedSurveys(store)
@@ -384,6 +407,7 @@ class GrpcSyncDataSource(
   private suspend fun refreshDownloadedSurveys(store: LocalStore): Set<String> {
     val downloaded = store.transaction { syncState().downloadedSurveyIds }
     val available = mutableSetOf<String>()
+    val trashed = mutableSetOf<String>()
     for (chunk in downloaded.chunked(MAX_BATCH_SURVEY_IDS)) {
       val results =
         grpcClient
@@ -405,13 +429,18 @@ class GrpcSyncDataSource(
         val rebaser = Rebaser(this)
         for (result in results) {
           val sid = result.survey_id
-          // `NOT_FOUND` or `PERMISSION_DENIED`: keep the local copy and pending uploads.
-          val overview = result.overview ?: continue
+          val overview = result.overview
+          if (overview == null) {
+            // `NOT_FOUND` or `PERMISSION_DENIED`: keep the local copy and pending uploads.
+            updateSurvey(sid) { it.copy(isUnavailable = true) }
+            continue
+          }
           if (overview.isTrashedOrDeleted()) {
             // Pending uploads keep draining (the server accepts them, so field data survives a
             // restore); the local copy is removed afterwards.
             updateSyncState { it.copy(downloadedSurveyIds = it.downloadedSurveyIds - sid) }
             updateSurvey(sid) { it.copy(isDownloaded = false) }
+            trashed += sid
             continue
           }
           available += sid
@@ -434,21 +463,25 @@ class GrpcSyncDataSource(
         }
       }
     }
+    // The survey list doesn't include trashed surveys either, whether or not it's open.
+    catalogIds = catalogIds?.minus(trashed)
     return available
   }
 
   /**
    * Drops the local copy of every survey that isn't downloaded and has no pending mutations: its
-   * definition, data, and sync tokens. Surveys the survey list no longer includes are removed.
+   * definition, data, and sync tokens. Surveys the survey list's last query or delta didn't include
+   * are removed.
    */
   private suspend fun removeUndownloadedSurveys(store: LocalStore) {
-    val listed = catalogIds ?: return
+    // Before the survey list's first query, keep the list entries and drop only local copies.
+    val listed = catalogIds
     store.transaction {
       val downloaded = syncState().downloadedSurveyIds
       val pending = surveysWithPendingMutations()
       for (sid in surveys().map { it.id }) {
         if (sid in downloaded || sid in pending) continue
-        if (sid !in listed) {
+        if (listed != null && sid !in listed) {
           deleteSurvey(sid)
           forgetDataTokens(sid)
           continue

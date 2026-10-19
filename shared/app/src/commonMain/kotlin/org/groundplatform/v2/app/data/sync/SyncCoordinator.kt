@@ -63,14 +63,19 @@ class SyncCoordinator(
   private val triggers = Channel<Unit>(Channel.CONFLATED)
   private val foreground = MutableStateFlow(false)
   private val collaborative = MutableStateFlow(false)
+  private val surveyListOpen = MutableStateFlow(false)
   private val mutableActivity = MutableStateFlow(SyncActivity())
   private var jobs: List<Job> = emptyList()
 
   /** Current sync activity. */
   val activity: StateFlow<SyncActivity> = mutableActivity.asStateFlow()
 
-  /** Poll interval for the current view: shorter while a collaborative view is visible. */
-  fun pollIntervalMillis(): Long = if (collaborative.value) COLLABORATIVE_POLL_MS else IDLE_POLL_MS
+  /**
+   * Poll interval for the current view: shorter while a collaborative view or the survey list is
+   * visible.
+   */
+  fun pollIntervalMillis(): Long =
+    if (collaborative.value || surveyListOpen.value) COLLABORATIVE_POLL_MS else IDLE_POLL_MS
 
   /** Starts the sync loop, outbox watcher, connectivity watcher, and foreground polling. */
   fun start() {
@@ -107,6 +112,17 @@ class SyncCoordinator(
   /** Whether a collaborative view (survey editor, live data table) is visible. */
   fun setCollaborativeView(isCollaborative: Boolean) {
     collaborative.value = isCollaborative
+  }
+
+  /**
+   * Whether the survey list is visible. With a data source that syncs only downloaded surveys, the
+   * list is caught up only while it's open, starting with a sync as soon as it opens.
+   */
+  fun setSurveyListOpen(isOpen: Boolean) {
+    val wasOpen = surveyListOpen.value
+    surveyListOpen.value = isOpen
+    syncDataSource.setSurveyListOpen(isOpen)
+    if (isOpen && !wasOpen) requestSync()
   }
 
   /** Drains the outbox and pulls remote changes now, unless offline. Single-flight. */

@@ -1370,6 +1370,9 @@ internal fun SwitchDownloadedSurveysSubScreen(state: MobileAppState) {
               if (isActive) {
                 GroundTonalBadge(text = "ACTIVE", tone = GroundBadgeTone.PRIMARY)
               }
+              if (survey.isUnavailable) {
+                GroundTonalBadge(text = "Unavailable", tone = GroundBadgeTone.ERROR)
+              }
             }
             Text(
               text =

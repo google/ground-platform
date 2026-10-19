@@ -18,6 +18,7 @@ import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
 import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.ListEntitiesRequest
+import groundplatform.v2.library.ListLibrariesRequest
 import groundplatform.v2.survey.ListSurveyOverviewsRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -64,6 +65,9 @@ class DownloadedSurveySyncTest {
   private fun notDownloadedId(): String = runDirect {
     store.transaction { surveys().first { !it.isDownloaded }.id }
   }
+
+  private fun listRequests(): List<ListSurveyOverviewsRequest> =
+    service.listRequests.filterIsInstance<ListSurveyOverviewsRequest>()
 
   private fun entityRequests(surveyId: String): List<ListEntitiesRequest> =
     service.listRequests.filterIsInstance<ListEntitiesRequest>().filter { it.survey_id == surveyId }
@@ -187,9 +191,56 @@ class DownloadedSurveySyncTest {
 
     assertEquals("Renamed survey", store.transaction { survey(kenyaId)?.title })
     assertEquals("Renamed survey", store.transaction { surveyBase(kenyaId)?.saved?.title })
-    // The survey list was caught up in delta mode.
-    val listRequest = service.listRequests.filterIsInstance<ListSurveyOverviewsRequest>().single()
-    assertTrue(listRequest.sync_token.isNotEmpty())
+    // The survey list is closed, so it wasn't queried.
+    assertTrue(listRequests().isEmpty())
+  }
+
+  @Test
+  fun surveyList_isCaughtUpOnlyWhileOpen_andStartsWithAFreshQueryOnEachOpen(): Unit = runDirect {
+    seed()
+    service.listRequests.clear()
+
+    pull()
+    assertTrue(listRequests().isEmpty())
+
+    sync.setSurveyListOpen(true)
+    pull()
+    pull()
+    assertEquals(2, listRequests().size)
+    assertTrue(listRequests().last().sync_token.isNotEmpty())
+
+    sync.setSurveyListOpen(false)
+    pull()
+    sync.setSurveyListOpen(true)
+    pull()
+    assertEquals(3, listRequests().size)
+    assertEquals("", listRequests().last().sync_token)
+  }
+
+  @Test
+  fun newSurveyInTheOpenList_isListedWithoutItsDefinition(): Unit = runDirect {
+    seed()
+    val otherId = notDownloadedId()
+    store.transaction { deleteSurvey(otherId) }
+
+    sync.setSurveyListOpen(true)
+    service.listRequests.clear()
+    service.retitleSurvey(otherId, "Shared with me")
+    pull()
+
+    store.transaction {
+      assertEquals("Shared with me", survey(otherId)?.title)
+      assertNull(surveyBase(otherId))
+    }
+  }
+
+  @Test
+  fun librariesAreNotSynced(): Unit = runDirect {
+    seed()
+    pull()
+
+    assertTrue(service.listRequests.filterIsInstance<ListLibrariesRequest>().isEmpty())
+    assertTrue(store.transaction { libraries() }.isEmpty())
   }
 
   @Test
@@ -236,6 +287,7 @@ class DownloadedSurveySyncTest {
     assertTrue(kenyaId in downloaded())
     assertTrue(entityRequests(kenyaId).isEmpty())
     store.transaction {
+      assertTrue(survey(kenyaId)!!.isUnavailable)
       assertNotNull(surveyBase(kenyaId))
       assertEquals(entityCount, entityCount(kenyaId))
     }
