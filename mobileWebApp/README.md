@@ -113,9 +113,9 @@ The app signs in with Firebase Authentication (Google accounts) and sends the
 user's Firebase ID token with every user data service call. The Firebase
 project comes from `FIREBASE_WEB_CONFIG` (the Firebase web app config object
 as JSON), set like `USER_DATA_SERVICE_URL`: as a Gradle property, in the
-environment, or in `local.properties`. It defaults to the development project
-in
-[`shared/app/src/wasmJsMain/firebase-web-config.json`](../shared/app/src/wasmJsMain/firebase-web-config.json).
+environment, or in `local.properties`. No Firebase config is checked in;
+keep yours outside the repository, for example in `~/.gradle/gradle.properties`
+as a single line `FIREBASE_WEB_CONFIG={"apiKey":"…","authDomain":"…",…}`.
 The Firebase JS SDK is loaded from Google's CDN when the page starts
 (`firebase-auth-bridge.js`), and the session persists across reloads.
 
@@ -123,8 +123,8 @@ Run the user data service with `AUTH_MODE=dev` (the default), which verifies
 the token and treats signed-in users as administrators, or with
 `AUTH_MODE=firebase` for the same project. Pages must be served from a domain
 the Firebase project authorizes for sign-in (`localhost` is authorized by
-default). To work without Firebase, set `FIREBASE_WEB_CONFIG=none`: the app
-then uses fake sign-in, and the service serves its calls as its development
+default). Without `FIREBASE_WEB_CONFIG` (or with `none`), the app
+uses fake sign-in, and the service serves its calls as its development
 user.
 
 Development builds (`DEV_SIGN_IN`, default `true`) open a **Development

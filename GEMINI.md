@@ -34,7 +34,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
 
 * **Strictly Open Source**: Ground 2.0 is a fully public, open-source project released under the Apache 2.0 License.
 * **No Proprietary Content**: Never include proprietary code, algorithms, internal libraries, confidential information, internal URLs/identifiers (e.g., internal shortlinks, internal bug IDs, employee LDAPs/handles, or internal endpoints), API keys/secrets, or non-public datasets in submitted code, comments, tests, or assets.
-  * **Exception — Public Firebase Web Client Config**: [`shared/app/src/wasmJsMain/firebase-web-config.json`](shared/app/src/wasmJsMain/firebase-web-config.json) (`gnd-dev`) is intentionally checked in for zero-config local web development. Per [official Firebase API key guidance](https://firebase.google.com/docs/projects/api-keys), Firebase client API keys are public project/app identifiers rather than secrets; this key is strictly restricted by API allowlist (Firebase Auth / Installations / App Check only—excluding Maps, Gemini, Firestore, and all other GCP APIs) and HTTP referrer allowlist. Never check in service account private keys, OAuth client secrets, or unrestricted/non-Firebase GCP API keys.
+  * **Firebase and other client configs**: This includes Firebase web app configs and their API keys. Builds read them from `FIREBASE_WEB_CONFIG` (a Gradle property, environment variable, or `local.properties`), kept outside the repository.
 * **Public Dependencies & Assets Only**: Use only publicly available, open-source libraries, standard specifications (XForms, XLSForm, GeoJSON, Protobuf), and public-domain/openly licensed test fixtures and assets.
 
 ## License Headers (`Apache 2.0`)

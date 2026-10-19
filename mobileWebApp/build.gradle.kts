@@ -154,14 +154,14 @@ val generateUserDataServiceConfig by tasks.registering {
 
 // Firebase web app config for sign-in (`firebase-auth-bridge.js`), baked in as
 // `firebase-config.js`. Set `FIREBASE_WEB_CONFIG` (the config object as JSON) as a Gradle property,
-// in the environment, or in `local.properties`, like USER_DATA_SERVICE_URL. Defaults to the
-// development project in `shared/app/src/wasmJsMain/firebase-web-config.json`. `none` turns
-// Firebase off: the app then uses fake sign-in and the user data service's development user.
+// in the environment, or in `local.properties`, like USER_DATA_SERVICE_URL. No config is checked
+// in: unset (or `none`) turns Firebase off, and the app then uses fake sign-in and the user data
+// service's development user.
 val firebaseWebConfig =
   (providers.gradleProperty("FIREBASE_WEB_CONFIG").orNull
       ?: providers.environmentVariable("FIREBASE_WEB_CONFIG").orNull
       ?: localProperties.getProperty("FIREBASE_WEB_CONFIG")
-      ?: file("../shared/app/src/wasmJsMain/firebase-web-config.json").readText())
+      ?: "none")
     .trim()
 
 // Development sign-in (`DEV_SIGN_IN`, default true): before signing in, the app asks which role to
