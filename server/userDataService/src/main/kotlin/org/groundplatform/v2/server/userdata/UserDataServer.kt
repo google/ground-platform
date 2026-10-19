@@ -35,6 +35,9 @@ import kotlinx.coroutines.SupervisorJob
  * /debug`, and the Spanner debug web UI at `GET /debug/spanner` ([SpannerDebugWebService]). CORS is
  * open so the Web Console can call the service from another origin; restrict it once authentication
  * is in place.
+ *
+ * With [dataResetEnabled] (development only), `POST /debug/reset` also restores the store's initial
+ * data, as tests that change data need between runs.
  */
 object UserDataServer {
   fun create(
@@ -43,6 +46,7 @@ object UserDataServer {
     rpcRecorder: RpcCallRecorder = RpcCallRecorder(),
     spannerDebug: SpannerDebug? = null,
     authenticator: Authenticator = Authenticator.dev(),
+    dataResetEnabled: Boolean = false,
   ): Server {
     // The in-memory backend isn't thread-safe, so every RPC runs on one serialized dispatcher.
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -91,6 +95,9 @@ object UserDataServer {
         .service("/debug/rpcs", DebugWebService.listRpcsService(rpcRecorder))
         .service("/debug/rpcs/stream", DebugWebService.streamRpcsService(rpcRecorder))
         .service("/debug/rpcs/clear", DebugWebService.clearRpcsService(rpcRecorder))
+    if (dataResetEnabled) {
+      server.service("/debug/reset", DebugWebService.resetService(backend, rpcRecorder, scope))
+    }
     SpannerDebugWebService.register(server, spannerDebug)
     return server.build()
   }

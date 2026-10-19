@@ -42,6 +42,8 @@ const val SURVEY_TRASH_RETENTION_DAYS = 30L
  *   one (signed-in users are administrators there), and otherwise trusts `x-dev-user-*` headers or
  *   serves the call as the sample user.
  * - `ADMIN_EMAILS`: comma-separated verified emails of administrators in `firebase` mode.
+ *
+ * In `dev` mode, `POST /debug/reset` restores the initial data (see [UserDataServer.create]).
  */
 fun main() {
   val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
@@ -117,6 +119,7 @@ fun main() {
       port,
       spannerDebug = spannerDebug,
       authenticator = authenticator,
+      dataResetEnabled = authMode == "dev",
     )
   Runtime.getRuntime()
     .addShutdownHook(

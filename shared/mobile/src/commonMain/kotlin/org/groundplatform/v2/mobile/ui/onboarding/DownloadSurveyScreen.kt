@@ -69,6 +69,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -146,13 +152,20 @@ fun DownloadSurveyScreen(
       },
       containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
-      Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+      Column(
+        modifier =
+          Modifier.fillMaxSize().padding(innerPadding).semantics { isTraversalGroup = true }
+      ) {
         // Search Bar for filtering by survey name or location
         Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
           OutlinedTextField(
             value = uiState.searchQuery,
             onValueChange = { actions.updateSearchQuery(it) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+              Modifier.fillMaxWidth().semantics {
+                contentDescription = "Search surveys"
+                traversalIndex = 0f
+              },
             singleLine = true,
             placeholder = {
               Text(
@@ -164,7 +177,7 @@ fun DownloadSurveyScreen(
             leadingIcon = {
               Icon(
                 imageVector = Icons.Outlined.Search,
-                contentDescription = "Search",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp),
               )
@@ -296,11 +309,15 @@ fun DownloadSurveyScreen(
             modifier =
               Modifier.weight(1f)
                 .fillMaxWidth()
+                .semantics {
+                  isTraversalGroup = true
+                  traversalIndex = 1f
+                }
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 14.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
           ) {
-            filtered.forEach { survey ->
+            filtered.forEachIndexed { index, survey ->
               SurveyListItemCard(
                 survey = survey,
                 organizationName = uiState.organizationNames[survey.organizationId],
@@ -309,6 +326,7 @@ fun DownloadSurveyScreen(
                 onDownloadClick = { actions.downloadSurvey(survey.id) },
                 onToggleDownloadClick = { actions.promptRemoveDownloadedSurvey(survey.id) },
                 onOpenSurveyClick = { actions.openSurvey(survey.id) },
+                traversalIndex = index.toFloat(),
               )
             }
             if (uiState.directoryResults.isNotEmpty()) {
@@ -531,6 +549,7 @@ private fun SurveyListItemCard(
   onToggleDownloadClick: () -> Unit,
   onOpenSurveyClick: () -> Unit,
   hasOfflineImagery: Boolean = false,
+  traversalIndex: Float = 0f,
 ) {
   val cardBg =
     if (survey.isDownloaded) {
@@ -547,7 +566,12 @@ private fun SurveyListItemCard(
 
   OutlinedCard(
     onClick = onOpenSurveyClick,
-    modifier = Modifier.fillMaxWidth(),
+    modifier =
+      Modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+        role = Role.Button
+        contentDescription = survey.title
+        this.traversalIndex = traversalIndex
+      },
     shape = MaterialTheme.shapes.large,
     colors = CardDefaults.outlinedCardColors(containerColor = cardBg),
     border = BorderStroke(width = if (survey.isDownloaded) 1.5.dp else 1.dp, color = borderColor),
@@ -605,7 +629,7 @@ private fun SurveyListItemCard(
             ) {
               Icon(
                 imageVector = Icons.Outlined.Groups,
-                contentDescription = "Organization",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(12.dp),
               )
@@ -681,12 +705,20 @@ private fun SurveyListItemCard(
                   softWrap = false,
                 )
               },
-              modifier = Modifier.height(30.dp),
+              modifier =
+                Modifier.height(30.dp).semantics(mergeDescendants = true) {
+                  role = Role.Button
+                  contentDescription = "Downloaded ${survey.title}"
+                },
             )
 
             FilledTonalButton(
               onClick = onOpenSurveyClick,
-              modifier = Modifier.height(30.dp),
+              modifier =
+                Modifier.height(30.dp).semantics(mergeDescendants = true) {
+                  role = Role.Button
+                  contentDescription = "Open ${survey.title}"
+                },
               contentPadding = ButtonDefaults.TextButtonContentPadding,
             ) {
               Text(
@@ -708,7 +740,11 @@ private fun SurveyListItemCard(
         } else {
           Button(
             onClick = onDownloadClick,
-            modifier = Modifier.height(32.dp),
+            modifier =
+              Modifier.height(32.dp).semantics(mergeDescendants = true) {
+                role = Role.Button
+                contentDescription = "Download ${survey.title}"
+              },
             contentPadding = ButtonDefaults.TextButtonContentPadding,
           ) {
             Icon(

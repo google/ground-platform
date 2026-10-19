@@ -73,7 +73,7 @@ class PlacesGeocoder(
       } ?: emptyList()
     } catch (e: CancellationException) {
       throw e
-    } catch (_: Exception) {
+    } catch (_: Throwable) {
       emptyList()
     }
   }
@@ -114,7 +114,7 @@ class PlacesGeocoder(
       } ?: emptyList()
     } catch (e: CancellationException) {
       throw e
-    } catch (_: Exception) {
+    } catch (_: Throwable) {
       emptyList()
     }
   }

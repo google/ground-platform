@@ -1,0 +1,20 @@
+{
+  "name": "@groundplatform/e2e-tests",
+  "private": true,
+  "description": "Golden-screenshot integration tests of the Collect One web console and mobile app against a local user data service.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "playwright install chromium-headless-shell",
+    "build": "node harness/build-apps.mjs",
+    "test": "node harness/build-apps.mjs && playwright test",
+    "test:update": "node harness/build-apps.mjs && playwright test --update-snapshots",
+    "report": "playwright show-report build/report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

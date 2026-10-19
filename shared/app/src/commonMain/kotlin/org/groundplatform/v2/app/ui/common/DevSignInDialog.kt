@@ -29,6 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.groundplatform.v2.app.domain.model.SimulatedRole
@@ -62,7 +66,10 @@ fun DevSignInDialog(
             },
           style = MaterialTheme.typography.bodyMedium,
         )
-        Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(
+          Modifier.selectableGroup().semantics { isTraversalGroup = true },
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
           RoleOption(
             title = "Administrator",
             description =
@@ -73,6 +80,7 @@ fun DevSignInDialog(
               },
             selected = state.selectedRole == SimulatedRole.ADMINISTRATOR,
             onSelect = { onSelectRole(SimulatedRole.ADMINISTRATOR) },
+            traversalIndex = 0f,
           )
           RoleOption(
             title = "Regular user",
@@ -86,6 +94,7 @@ fun DevSignInDialog(
               },
             selected = state.selectedRole == SimulatedRole.REGULAR_USER,
             onSelect = { onSelectRole(SimulatedRole.REGULAR_USER) },
+            traversalIndex = 1f,
           )
         }
         Text(
@@ -108,11 +117,16 @@ private fun RoleOption(
   description: String,
   selected: Boolean,
   onSelect: () -> Unit,
+  traversalIndex: Float = 0f,
 ) {
   Row(
     modifier =
       Modifier.fillMaxWidth()
         .selectable(selected = selected, onClick = onSelect, role = Role.RadioButton)
+        .semantics(mergeDescendants = true) {
+          contentDescription = title
+          this.traversalIndex = traversalIndex
+        }
         .padding(vertical = 4.dp),
     verticalAlignment = Alignment.Top,
   ) {

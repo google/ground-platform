@@ -39,3 +39,46 @@ jobs:
       - name: Check proto formatting (buf)
         if: ${{ !cancelled() }}
         run: bash scripts/buf-format.sh --check
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      # The Gradle builds download their own JDK 21 toolchain; this JDK only runs Gradle. The runner
+      # image provides the Android SDK (ANDROID_HOME) that shared/core needs.
+      - name: Set up JDK
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2eTests/package-lock.json
+
+      - name: Install Playwright
+        working-directory: e2eTests
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium-headless-shell
+
+      - name: Run golden-screenshot tests
+        working-directory: e2eTests
+        run: npm test
+
+      - name: Upload test report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-report
+          path: |
+            e2eTests/build/report
+            e2eTests/build/test-results

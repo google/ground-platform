@@ -13,7 +13,6 @@
  */
 package org.groundplatform.v2.mobile.ui.onboarding
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -46,6 +46,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -99,12 +105,21 @@ fun TermsOfServiceScreen(
         shadowElevation = 4.dp,
       ) {
         Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+          modifier =
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp).semantics {
+              isTraversalGroup = true
+              traversalIndex = 2f
+            },
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           OutlinedButton(
             onClick = { actions.declineTermsOfService() },
-            modifier = Modifier.weight(0.42f),
+            modifier =
+              Modifier.weight(0.42f).semantics(mergeDescendants = true) {
+                role = Role.Button
+                contentDescription = "Decline"
+                traversalIndex = 0f
+              },
             shape = MaterialTheme.shapes.medium,
           ) {
             Text("Decline")
@@ -112,7 +127,12 @@ fun TermsOfServiceScreen(
           Button(
             onClick = { actions.acceptTermsOfService() },
             enabled = uiState.termsCheckboxChecked,
-            modifier = Modifier.weight(0.58f),
+            modifier =
+              Modifier.weight(0.58f).semantics(mergeDescendants = true) {
+                role = Role.Button
+                contentDescription = "Agree & continue"
+                traversalIndex = 1f
+              },
             shape = MaterialTheme.shapes.medium,
           ) {
             Text(
@@ -190,13 +210,21 @@ fun TermsOfServiceScreen(
         modifier =
           Modifier.fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
-            .clickable { actions.setTermsChecked(!uiState.termsCheckboxChecked) }
+            .toggleable(
+              value = uiState.termsCheckboxChecked,
+              role = Role.Checkbox,
+              onValueChange = { actions.setTermsChecked(it) },
+            )
+            .semantics(mergeDescendants = true) {
+              contentDescription = "I have read and agree to the Collect One Terms of Service."
+              traversalIndex = 1f
+            }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Checkbox(
           checked = uiState.termsCheckboxChecked,
-          onCheckedChange = { actions.setTermsChecked(it) },
+          onCheckedChange = null,
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
@@ -211,7 +239,10 @@ fun TermsOfServiceScreen(
 
 @Composable
 private fun TermsSectionItem(number: String, title: String, body: String) {
-  Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+  Column(
+    modifier = Modifier.semantics(mergeDescendants = true) {},
+    verticalArrangement = Arrangement.spacedBy(4.dp),
+  ) {
     Text(
       text = "$number. $title",
       style = MaterialTheme.typography.titleSmall,

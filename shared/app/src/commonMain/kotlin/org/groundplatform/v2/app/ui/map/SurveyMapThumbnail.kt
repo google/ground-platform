@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -106,7 +107,7 @@ private object SurveyThumbnailTileCache {
       }
     } catch (e: CancellationException) {
       throw e
-    } catch (_: Exception) {
+    } catch (_: Throwable) {
       null
     }
   }
@@ -204,6 +205,7 @@ fun SurveyMapThumbnail(
     modifier =
       modifier
         .size(80.dp)
+        .clearAndSetSemantics {}
         .clip(MaterialTheme.shapes.medium)
         .background(Color(0xFF142E21))
         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)

@@ -22,6 +22,7 @@
 **/.gradle/
 **/.kotlin/
 **/kotlin-js-store/
+**/node_modules/
 **/gradle-wrapper.jar
 *.aab
 *.apk

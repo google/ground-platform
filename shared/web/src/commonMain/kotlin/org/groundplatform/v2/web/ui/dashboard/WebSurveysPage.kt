@@ -54,6 +54,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -178,7 +185,8 @@ internal fun WebSurveysPage(
         modifier =
           Modifier.widthIn(max = PageMaxWidth)
             .align(Alignment.TopCenter)
-            .padding(horizontal = 32.dp, vertical = 24.dp),
+            .padding(horizontal = 32.dp, vertical = 24.dp)
+            .semantics { isTraversalGroup = true },
         verticalArrangement = Arrangement.spacedBy(24.dp),
       ) {
         SurveysToolbar(
@@ -202,7 +210,7 @@ internal fun WebSurveysPage(
           }
         }
 
-        sections.forEach { section ->
+        sections.forEachIndexed { index, section ->
           SurveySection(
             section = section,
             userEmail = userEmail,
@@ -212,6 +220,7 @@ internal fun WebSurveysPage(
             outcomePromptSurveyIds =
               if (outcomeActions != null) outcomePrompt.dueSurveyIds else emptySet(),
             onOutcomePromptClick = { surveyId -> outcomeActions?.openOutcomeCard(surveyId) },
+            traversalIndex = (index + 1).toFloat(),
           )
         }
       }
@@ -242,7 +251,14 @@ private fun SurveysToolbar(
   selected: SurveyListFilter,
   onSelect: (SurveyListFilter) -> Unit,
 ) {
-  Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+  Column(
+    modifier =
+      Modifier.semantics {
+        isTraversalGroup = true
+        traversalIndex = 0f
+      },
+    verticalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
     OutlinedTextField(
       value = query,
       onValueChange = onQueryChange,
@@ -259,14 +275,24 @@ private fun SurveysToolbar(
             }
           },
       singleLine = true,
-      modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
+      modifier =
+        Modifier.widthIn(max = 560.dp).fillMaxWidth().semantics {
+          contentDescription = "Search surveys"
+          traversalIndex = 0f
+        },
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      chips.forEach { chip ->
+      chips.forEachIndexed { index, chip ->
         GroundFilterChip(
           selected = chip == selected,
           onClick = { onSelect(chip) },
           label = { Text(chip.label) },
+          modifier =
+            Modifier.semantics(mergeDescendants = true) {
+              role = Role.Button
+              contentDescription = chip.label
+              traversalIndex = (index + 1).toFloat()
+            },
           leadingIcon =
             (chip as? SurveyListFilter.InOrganization)?.let { org ->
               {
@@ -304,14 +330,22 @@ private fun SurveySection(
   onOpenSurvey: (String) -> Unit,
   outcomePromptSurveyIds: Set<String>,
   onOutcomePromptClick: (String) -> Unit,
+  traversalIndex: Float = 0f,
 ) {
-  Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+  Column(
+    modifier =
+      Modifier.semantics {
+        isTraversalGroup = true
+        this.traversalIndex = traversalIndex
+      },
+    verticalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
     SectionHeading(section = section, userEmail = userEmail)
     FlowRow(
       horizontalArrangement = Arrangement.spacedBy(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      section.surveys.forEach { survey ->
+      section.surveys.forEachIndexed { index, survey ->
         WebSurveyCard(
           survey = survey,
           access = WebSurveysList.accessLabel(survey, organizations, userEmail),
@@ -319,6 +353,7 @@ private fun SurveySection(
           onClick = { onOpenSurvey(survey.id) },
           showOutcomePrompt = survey.id in outcomePromptSurveyIds,
           onOutcomePromptClick = { onOutcomePromptClick(survey.id) },
+          traversalIndex = (index + 1).toFloat(),
         )
       }
     }
@@ -329,6 +364,11 @@ private fun SurveySection(
 private fun SectionHeading(section: SurveyListSection, userEmail: String) {
   val organization = section.organization
   Row(
+    modifier =
+      Modifier.semantics(mergeDescendants = true) {
+        heading()
+        traversalIndex = 0f
+      },
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(10.dp),
   ) {
@@ -382,10 +422,16 @@ internal fun WebSurveyCard(
   onClick: () -> Unit,
   showOutcomePrompt: Boolean = false,
   onOutcomePromptClick: () -> Unit = {},
+  traversalIndex: Float = 0f,
 ) {
   OutlinedCard(
     onClick = onClick,
-    modifier = Modifier.width(SurveyCardWidth),
+    modifier =
+      Modifier.width(SurveyCardWidth).semantics(mergeDescendants = true) {
+        role = Role.Button
+        contentDescription = survey.title
+        this.traversalIndex = traversalIndex
+      },
     shape = MaterialTheme.shapes.large,
     colors =
       CardDefaults.outlinedCardColors(
@@ -502,6 +548,11 @@ internal fun WebSurveyCard(
 private fun OutcomePromptBadge(onClick: () -> Unit) {
   Surface(
     onClick = onClick,
+    modifier =
+      Modifier.semantics(mergeDescendants = true) {
+        role = Role.Button
+        contentDescription = OUTCOME_PROMPT_LABEL
+      },
     shape = MaterialTheme.shapes.small,
     color = MaterialTheme.colorScheme.tertiaryContainer,
     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,

@@ -20,6 +20,8 @@ import com.linecorp.armeria.common.HttpStatus
 import com.linecorp.armeria.common.MediaType
 import com.linecorp.armeria.common.ResponseHeaders
 import com.linecorp.armeria.server.HttpService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.future.future
 import org.groundplatform.v2.server.userdata.RpcCallRecorder.Companion.toJsonArrayString
 
 /**
@@ -28,6 +30,8 @@ import org.groundplatform.v2.server.userdata.RpcCallRecorder.Companion.toJsonArr
  * - `GET /debug/rpcs`: Snapshot of recorded RPC entries in JSON.
  * - `GET /debug/rpcs/stream`: Server-Sent Events stream of live RPC completions.
  * - `POST /debug/rpcs/clear`: Clears the in-memory RPC log.
+ * - `POST /debug/reset`: Restores the store's initial data and clears the RPC log (development
+ *   only; see [UserDataServer.create]).
  */
 object DebugWebService {
   private const val INDEX_RESOURCE = "/debug/index.html"
@@ -78,6 +82,36 @@ object DebugWebService {
         .add("cache-control", "no-store")
         .build(),
       HttpData.ofUtf8("""{"cleared":true}"""),
+    )
+  }
+
+  /**
+   * Restores [backend]'s initial data and clears [recorder] when called via `POST`. The reset runs
+   * in [scope], the dispatcher that serializes RPCs, so it never interleaves with one.
+   */
+  fun resetService(
+    backend: UserDataBackend,
+    recorder: RpcCallRecorder,
+    scope: CoroutineScope,
+  ): HttpService = HttpService { _, req ->
+    if (req.method() != HttpMethod.POST) {
+      return@HttpService HttpResponse.of(HttpStatus.METHOD_NOT_ALLOWED)
+    }
+    HttpResponse.of(
+      scope
+        .future {
+          backend.reset()
+          recorder.clear()
+        }
+        .thenApply {
+          HttpResponse.of(
+            ResponseHeaders.builder(HttpStatus.OK)
+              .contentType(MediaType.JSON_UTF_8)
+              .add("cache-control", "no-store")
+              .build(),
+            HttpData.ofUtf8("""{"reset":true}"""),
+          )
+        }
     )
   }
 }

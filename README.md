@@ -45,6 +45,7 @@ for **Collect One**.
 │   └── userDataService/       # gRPC user data service (Kotlin/JVM; native gRPC + gRPC-Web, Cloud Run)
 ├── devtools/
 │   └── launchpad/               # Browser page for starting, stopping & watching local services
+├── e2eTests/                    # Golden-screenshot tests of the web console & mobile app (Playwright)
 └── docs/                        # System architecture & Protocol Buffer data model specifications
 ```
 
@@ -120,6 +121,9 @@ for **Collect One**.
 -   **[`devtools/launchpad/`](devtools/launchpad/)**: Browser page for starting,
     stopping, and watching the server, web console, and mobile app (plus the
     Spanner emulator) during local development.
+-   **[`e2eTests/`](e2eTests/)**: Golden-screenshot integration tests that drive
+    the production builds of the web console and the mobile app in headless
+    Chromium against a local user data service.
 -   **[`docs/`](docs/)**: Comprehensive architectural design and data model
     documentation.
 
