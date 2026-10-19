@@ -65,7 +65,13 @@ class SyncStatePersistence(
         println("Ignoring unreadable sync state: $e")
         return false
       }
-    if (saved.survey_bases.isEmpty() && saved.outbox.isEmpty()) return false
+    if (
+      saved.survey_bases.isEmpty() &&
+        saved.outbox.isEmpty() &&
+        saved.downloaded_survey_ids.isEmpty()
+    ) {
+      return false
+    }
     store.transaction {
       ClientSyncStateCodec.restore(this, saved)
       val rebaser = Rebaser(this)

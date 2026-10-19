@@ -87,6 +87,7 @@ object ClientSyncStateCodec {
             impact_events = t.impactEvents,
           )
         },
+      downloaded_survey_ids = state.downloadedSurveyIds.toList(),
     )
   }
 
@@ -115,6 +116,7 @@ object ClientSyncStateCodec {
             submissionsBySurvey = t?.submissions_by_survey.orEmpty(),
             impactEvents = t?.impact_events.orEmpty(),
           ),
+        downloadedSurveyIds = saved.downloaded_survey_ids.toSet(),
       )
     )
   }

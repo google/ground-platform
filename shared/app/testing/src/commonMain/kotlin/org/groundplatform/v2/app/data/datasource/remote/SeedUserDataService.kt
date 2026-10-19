@@ -91,6 +91,7 @@ import groundplatform.v2.survey.SearchOrganizationsResponse
 import groundplatform.v2.survey.SearchPublicSurveysRequest
 import groundplatform.v2.survey.SearchPublicSurveysResponse
 import groundplatform.v2.survey.SharingPolicy
+import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyOverview
 import groundplatform.v2.survey.SurveyOverviewResult
 import groundplatform.v2.survey.SurveyServiceServer
@@ -223,6 +224,40 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
    */
   fun removeLibrary(organizationId: String) {
     libraries.removeAll { it.organization_id == organizationId }
+  }
+
+  /** Saves a new title for a survey as if saved by its organizer, and returns its timestamp. */
+  fun retitleSurvey(surveyId: String, title: String): Instant =
+    reviseSurvey(surveyId) { s, _ ->
+      s.copy(title = title)
+    }
+
+  /** Moves a survey to Trash as if trashed by its organizer, and returns its timestamp. */
+  fun trashSurvey(surveyId: String): Instant =
+    reviseSurvey(surveyId) { s, ts ->
+      s.copy(trash_time = ts)
+    }
+
+  /** Removes a survey without a tombstone, as purging it from Trash would. */
+  fun purgeSurvey(surveyId: String) {
+    checkNotNull(surveys.remove(surveyId)) { "Unknown survey $surveyId" }
+  }
+
+  /** Revises a survey's saved revision, bumping its `record_version` like the real service. */
+  private fun reviseSurvey(surveyId: String, revise: (SurveyDef, Instant) -> SurveyDef): Instant {
+    val ts = nextTimestamp()
+    updateSurvey(surveyId) { s ->
+      val survey = s.survey!!
+      s.copy(
+        survey =
+          revise(survey, ts)
+            .copy(
+              commit_timestamp = ts,
+              record_version = maxOf(survey.record_version, s.acl?.record_version ?: 0L) + 1L,
+            )
+      )
+    }
+    return ts
   }
 
   private fun nextTimestamp(): Instant = ofEpochSecond(++latestEpochSecond, 0L)

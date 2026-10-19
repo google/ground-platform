@@ -140,7 +140,8 @@ message SurveyDef {
   string offline_size_label = 29;
 
   // Whether the survey package is marked as downloaded for offline use by
-  // default.
+  // default. Mobile clients add such surveys to a new install's downloaded set;
+  // which surveys a device has downloaded is never stored on the server.
   bool is_downloaded = 30;
 
   // Visual map thumbnail theme name (e.g., "HIGHLAND_AGRI", "SAVANNA").
@@ -223,7 +224,8 @@ message SurveyOverview {
   // Estimated offline package size label (e.g., "18.4 MB").
   string offline_size_label = 11;
 
-  // Whether the survey package is marked as downloaded for offline use.
+  // Copied from `SurveyDef.is_downloaded`: whether the survey is marked as
+  // downloaded for offline use by default.
   bool is_downloaded = 12;
 
   // Visual map thumbnail theme name (e.g., "HIGHLAND_AGRI", "SAVANNA").

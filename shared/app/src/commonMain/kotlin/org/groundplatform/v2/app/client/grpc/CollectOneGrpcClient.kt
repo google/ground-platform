@@ -61,6 +61,8 @@ import groundplatform.v2.library.SearchConceptsRequest
 import groundplatform.v2.library.SearchConceptsResponse
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
 import groundplatform.v2.survey.AcceptSurveyInviteResponse
+import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
+import groundplatform.v2.survey.BatchGetSurveyOverviewsResponse
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetOrganizationResponse
 import groundplatform.v2.survey.GetSurveyAclRequest
@@ -142,6 +144,10 @@ class CollectOneGrpcClient(
   suspend fun listSurveyOverviews(
     request: ListSurveyOverviewsRequest
   ): ListSurveyOverviewsResponse = surveyService.ListSurveyOverviews(request)
+
+  suspend fun batchGetSurveyOverviews(
+    request: BatchGetSurveyOverviewsRequest
+  ): BatchGetSurveyOverviewsResponse = surveyService.BatchGetSurveyOverviews(request)
 
   suspend fun getSurvey(request: GetSurveyRequest): GetSurveyResponse =
     surveyService.GetSurvey(request)

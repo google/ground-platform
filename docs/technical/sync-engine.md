@@ -111,6 +111,12 @@ Survey definitions are large (forms, entity dataset schemas, translations), and 
   * `ListEntities` and `ListSubmissions` return the same errors, so a client that misses the batch call still finds out.
 * **Working copy:** Organizers edit a working copy of the survey; collectors only ever see the latest saved revision. `GetSurvey` returns exactly one revision, selected by `oneof revision` (latest saved by default, a specific `saved_version`, or `working_copy`). Clients only request the working copy when the overview reports `has_working_copy`.
 
+**Current client implementation** (`GrpcSyncDataSource` with `downloadedSurveysOnly`, enabled by the mobile hosts):
+
+* The downloaded set is device-local: it's stored with the sync state (`ClientSyncState.downloaded_survey_ids`) and never sent to the server. A new install starts with the surveys marked as downloaded by default (`SurveyOverview.is_downloaded`).
+* Surveys that aren't downloaded are listed from their overviews, without `GetSurvey`, `ListEntities`, or `ListSubmissions`. Downloading one triggers a sync that fetches it; removing a download drops its definition, data, and tokens once the survey has no outbox entries.
+* Not yet implemented: the survey list is caught up on every sync rather than only while it's visible; surveys that return `NOT_FOUND` or `PERMISSION_DENIED` stop syncing but aren't marked unavailable in the UI; a trashed survey with pending uploads stays listed until they drain; organizations and libraries are still synced on mobile.
+
 Organizations and libraries aren't kept on mobile: forms are built in the online web console, and a download stores the few organization settings it needs offline (such as imagery sources). See [`backend/spanner-schema.md`](backend/spanner-schema.md) for how the server stores and serves all of this.
 
 ### Web Client

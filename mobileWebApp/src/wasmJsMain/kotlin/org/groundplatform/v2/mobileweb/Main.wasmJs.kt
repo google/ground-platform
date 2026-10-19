@@ -64,7 +64,12 @@ private fun mount(container: org.w3c.dom.Element, authClient: AuthClient) {
           remember {
             WorkbenchState(
               MobileAppState(
-                dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl, authClient = authClient)
+                dataHolder =
+                  AppDataHolder(
+                    userDataServiceUrl = serviceUrl,
+                    authClient = authClient,
+                    syncDownloadedSurveysOnly = true,
+                  )
               )
             )
           },

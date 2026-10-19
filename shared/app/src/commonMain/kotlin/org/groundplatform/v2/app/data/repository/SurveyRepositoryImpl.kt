@@ -95,10 +95,23 @@ class SurveyRepositoryImpl(private val store: LocalStore) : SurveyRepository {
     store.transaction { deleteSurvey(surveyId) }
   }
 
+  /**
+   * Adds the survey to (or removes it from) the device's downloaded set and updates its list entry.
+   * The device-local flag is never sent to the server; with the sync engine, the next sync fetches
+   * the survey's definition and data, or drops them once its pending uploads have drained.
+   */
   override suspend fun setSurveyDownloaded(
     surveyId: String,
     downloaded: Boolean,
-  ): SurveyPreviewItem? = updateSurvey(surveyId) { it.copy(isDownloaded = downloaded) }
+  ): SurveyPreviewItem? = store.transaction {
+    updateSyncState {
+      it.copy(
+        downloadedSurveyIds =
+          if (downloaded) it.downloadedSurveyIds + surveyId else it.downloadedSurveyIds - surveyId
+      )
+    }
+    updateSurvey(surveyId) { it.copy(isDownloaded = downloaded) }
+  }
 
   override suspend fun setSurveyState(
     surveyId: String,

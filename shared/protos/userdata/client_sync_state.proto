@@ -55,6 +55,11 @@ message ClientSyncState {
   reserved "watermarks";
 
   SyncTokensRecord sync_tokens = 10;
+
+  // Surveys the user downloaded to this device (`SurveyDef.survey_id`). Mobile
+  // syncs the definitions, entities, and submissions of these surveys only
+  // (`docs/technical/sync-engine.md`, "Survey Downloads & Working Copies").
+  repeated string downloaded_survey_ids = 11;
 }
 
 // Last server copies of one survey's saved revision, working copy, and ACL.

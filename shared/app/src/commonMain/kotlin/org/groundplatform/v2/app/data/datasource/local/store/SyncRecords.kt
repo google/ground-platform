@@ -155,4 +155,10 @@ data class SyncState(
   /** The `client_seq` the next recorded mutation gets. */
   val nextClientSeq: Long = 1L,
   val syncTokens: SyncTokens = SyncTokens(),
+  /**
+   * Surveys the user downloaded to this device. Clients that sync only downloaded surveys (mobile)
+   * keep the definitions and data of these surveys; it also drives
+   * [org.groundplatform.v2.app.domain.model.SurveyPreviewItem.isDownloaded].
+   */
+  val downloadedSurveyIds: Set<String> = emptySet(),
 )

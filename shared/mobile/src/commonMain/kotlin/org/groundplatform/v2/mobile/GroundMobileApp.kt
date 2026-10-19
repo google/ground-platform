@@ -40,7 +40,13 @@ import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
 @Composable
 fun GroundMobileApp(
   state: MobileAppState = remember {
-    MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = requireUserDataServiceUrl()))
+    MobileAppState(
+      dataHolder =
+        AppDataHolder(
+          userDataServiceUrl = requireUserDataServiceUrl(),
+          syncDownloadedSurveysOnly = true,
+        )
+    )
   }
 ) {
   GroundTheme(darkTheme = state.isDarkTheme) {

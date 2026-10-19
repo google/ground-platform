@@ -171,6 +171,7 @@ class GrpcWebTransport(
     const val OK = 0
     const val UNKNOWN = 2
     const val INVALID_ARGUMENT = 3
+    const val NOT_FOUND = 5
     const val FAILED_PRECONDITION = 9
     const val INTERNAL = 13
     const val UNAVAILABLE = 14

@@ -93,7 +93,13 @@ fun shouldShowWorkbenchChrome(
 fun MobileWorkbenchApp(
   state: WorkbenchState = remember {
     WorkbenchState(
-      MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = requireUserDataServiceUrl()))
+      MobileAppState(
+        dataHolder =
+          AppDataHolder(
+            userDataServiceUrl = requireUserDataServiceUrl(),
+            syncDownloadedSurveysOnly = true,
+          )
+      )
     )
   },
   showChrome: Boolean = true,

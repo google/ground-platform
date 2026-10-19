@@ -160,7 +160,14 @@ class AppDataHolder(
       GrpcWebTransport(it, authToken = authClient::idToken, headers = authClient::requestHeaders)
     )
   },
-  val grpcSyncDataSource: GrpcSyncDataSource? = grpcClient?.let(::GrpcSyncDataSource),
+  /**
+   * Whether to keep only the surveys the user downloaded offline (the mobile app), instead of every
+   * survey the user can list (the web console). See [GrpcSyncDataSource.downloadedSurveysOnly].
+   */
+  val syncDownloadedSurveysOnly: Boolean = false,
+  val grpcSyncDataSource: GrpcSyncDataSource? = grpcClient?.let {
+    GrpcSyncDataSource(it, downloadedSurveysOnly = syncDownloadedSurveysOnly)
+  },
   /**
    * Whether local edits are queued in the outbox and synced continuously (drain, then pull). On by
    * default when connected to a real service ([userDataServiceUrl]); tests that pass an in-memory
@@ -369,6 +376,14 @@ class AppDataHolder(
       .drop(1)
       .distinctUntilChanged()
       .onEach { if (it != null) coordinator.requestSync() }
+      .launchIn(scope)
+    // Downloading a survey (or removing a download) fetches (or drops) its definition and data.
+    localStore
+      .observeSurveys()
+      .map { surveys -> surveys.filter { it.isDownloaded }.map { it.id }.toSet() }
+      .distinctUntilChanged()
+      .drop(1)
+      .onEach { coordinator.requestSync() }
       .launchIn(scope)
     val hasUnsentChanges =
       localStore

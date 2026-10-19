@@ -54,7 +54,12 @@ class MainActivity : ComponentActivity() {
       RequireUserDataService { serviceUrl ->
         MainActivityContent(
           state =
-            remember { MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl)) }
+            remember {
+              MobileAppState(
+                dataHolder =
+                  AppDataHolder(userDataServiceUrl = serviceUrl, syncDownloadedSurveysOnly = true)
+              )
+            }
         )
       }
     }
@@ -68,7 +73,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainActivityContent(
   state: MobileAppState = remember {
-    MobileAppState(dataHolder = AppDataHolder(userDataServiceUrl = requireUserDataServiceUrl()))
+    MobileAppState(
+      dataHolder =
+        AppDataHolder(
+          userDataServiceUrl = requireUserDataServiceUrl(),
+          syncDownloadedSurveysOnly = true,
+        )
+    )
   }
 ) {
   BackHandler(enabled = state.canHandleBack) { state.handleBack() }

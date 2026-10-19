@@ -429,21 +429,23 @@ internal fun LocalStoreTransaction.projectSurvey(
   val mapLayers = GrpcProtoMapper.mapLayersFromProto(surveyDef)
   val config = GrpcProtoMapper.surveyConfigFromProto(surveyDef)
   val currentEntities = entities(surveyId)
+  val isDownloaded = surveyId in syncState().downloadedSurveyIds
   val preview =
     if (overview != null) {
-      GrpcProtoMapper.surveyPreviewFromOverviewProto(
-        overview = overview,
-        mapLayers = mapLayers,
-        entities = currentEntities,
-      )
-    } else {
-      GrpcProtoMapper.surveyPreviewFromProto(
-        surveyDef = surveyDef,
-        acl = effective.acl,
-        mapLayers = mapLayers,
-        entities = currentEntities,
-      )
-    }
+        GrpcProtoMapper.surveyPreviewFromOverviewProto(
+          overview = overview,
+          mapLayers = mapLayers,
+          entities = currentEntities,
+        )
+      } else {
+        GrpcProtoMapper.surveyPreviewFromProto(
+          surveyDef = surveyDef,
+          acl = effective.acl,
+          mapLayers = mapLayers,
+          entities = currentEntities,
+        )
+      }
+      .copy(isDownloaded = isDownloaded)
   upsertSurvey(preview)
   putForms(surveyId, forms)
   putMapLayers(surveyId, mapLayers)
