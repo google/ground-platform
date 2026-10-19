@@ -125,7 +125,6 @@ import groundplatform.v2.survey.SurveyOverview
 import groundplatform.v2.survey.SurveyOverviewResult
 import groundplatform.v2.survey.SurveyServiceServer
 import groundplatform.v2.survey.SurveyState
-import groundplatform.v2.userdata.UserDataSeed
 import io.grpc.Status
 import io.grpc.StatusException
 import org.groundplatform.v2.core.mutation.DataPatches
@@ -136,8 +135,7 @@ import org.groundplatform.v2.core.mutation.SurveyPatches
 /**
  * The user data services ([SurveyServiceServer], [OrganizationServiceServer],
  * [LibraryServiceServer], and [DataServiceServer]) over a [UserDataStore]. The backend owns the
- * business rules; the store reads and writes records atomically. [InMemoryUserDataStore], built
- * from a [UserDataSeed], keeps state in this process only, so deploy a single instance with it.
+ * business rules; the store ([SpannerUserDataStore]) reads and writes records atomically.
  *
  * Implements the server-side contract defined in `docs/technical/sync-engine.md`:
  * - Monotonically increasing authoritative `commit_timestamp` assigned to every initial record and
@@ -150,8 +148,8 @@ import org.groundplatform.v2.core.mutation.SurveyPatches
  *   ([SyncLists]). Delta mode returns every record in scope committed after the token, ordered by
  *   `(commit_timestamp, id)` and including tombstones; query mode filters, sorts, and pages a
  *   snapshot and ends with a `next_sync_token` for the scope. Tokens are bound to the store's data
- *   epoch ([UserDataStore.dataEpoch]), so tokens from before a reset (or from another in-memory
- *   process) fail with `FAILED_PRECONDITION` and clients run a full sync.
+ *   epoch ([UserDataStore.dataEpoch]), so tokens from before a reset fail with
+ *   `FAILED_PRECONDITION` and clients run a full sync.
  * - `SearchOrganizations` directory queries with offset-based paging.
  * - Soft-delete tombstones (`is_deleted = true` or `state = DELETED`), returned in delta mode and
  *   in query mode only when `include_deleted = true`.
@@ -167,9 +165,6 @@ import org.groundplatform.v2.core.mutation.SurveyPatches
  */
 class UserDataBackend(private val store: UserDataStore) :
   SurveyServiceServer, OrganizationServiceServer, LibraryServiceServer, DataServiceServer {
-
-  /** A backend over an [InMemoryUserDataStore] initialized from [seed]. */
-  constructor(seed: UserDataSeed = UserDataSeed()) : this(InMemoryUserDataStore(seed))
 
   private val syncLists = SyncLists { store.dataEpoch }
 
@@ -1785,9 +1780,7 @@ class UserDataBackend(private val store: UserDataStore) :
     submissions: Map<String, SubmissionRecord>,
   ): DataMutationResult {
     val entity =
-      mutation.entity_mutation?.let {
-        entities[it.entity_id] ?: entity(surveyId, it.entity_id)
-      }
+      mutation.entity_mutation?.let { entities[it.entity_id] ?: entity(surveyId, it.entity_id) }
     val submission =
       mutation.submission_mutation?.let {
         submissions[it.submission_id] ?: submission(surveyId, it.submission_id)
@@ -2251,9 +2244,7 @@ class UserDataBackend(private val store: UserDataStore) :
       } else {
         store
           .read { it.places() }
-          .filter {
-            it.name.lowercase().contains(q) || it.region_subtitle.lowercase().contains(q)
-          }
+          .filter { it.name.lowercase().contains(q) || it.region_subtitle.lowercase().contains(q) }
       }
     return ListPlacesResponse(places = filtered)
   }

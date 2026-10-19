@@ -52,28 +52,32 @@ npx playwright test --ui                        # Interactive runner: pick tests
 npx playwright test --debug -g "sign-in page"   # Steps through one test in the Playwright Inspector
 ```
 
-Each run starts its own user data service and bundle server, and stops them when it ends.
+Each run starts its own Spanner emulator, user data service, and bundle server, and stops them when
+it ends.
 
-To try the apps by hand with the exact setup the tests use, start both servers yourself, from this
-directory, in two terminals:
+To try the apps by hand with the exact setup the tests use, start the servers yourself, from this
+directory, in three terminals:
 
 ```bash
-# Terminal 1: the user data service, with its sample data
-PORT=18180 USER_DATA_STORE=memory AUTH_MODE=dev \
+# Terminal 1: the Spanner emulator that stores the service's data
+SPANNER_EMULATOR_GRPC_PORT=18110 SPANNER_EMULATOR_REST_PORT=18120 bash ../scripts/spanner-emulator.sh
+
+# Terminal 2: the user data service, which loads its sample data into the emulator
+PORT=18180 SPANNER_EMULATOR_HOST=localhost:18110 AUTH_MODE=dev \
   ../server/userDataService/build/install/user-data-service/bin/user-data-service
 
-# Terminal 2: the web console and the mobile app bundles
+# Terminal 3: the web console and the mobile app bundles
 node harness/serve-apps.mjs
 ```
 
-On Windows (PowerShell), start the service with
-`$env:PORT=18180; $env:USER_DATA_STORE="memory"; $env:AUTH_MODE="dev"; ..\server\userDataService\build\install\user-data-service\bin\user-data-service.bat`.
+The emulator script needs Bash, and Docker on platforms other than Linux x86_64.
 
 Then open the web console at <http://127.0.0.1:18192/> and the mobile app at
 <http://127.0.0.1:18193/?chrome=0> (leave out `?chrome=0` to see it in the workbench's simulated
-device). Stop both servers before running the tests, which need the same ports. Set
-`E2E_USER_DATA_SERVICE_PORT`, `E2E_WEB_CONSOLE_PORT`, or `E2E_MOBILE_APP_PORT` to use other ports
-(for the service, set `PORT` to the same value).
+device). Stop the servers before running the tests, which need the same ports. Set
+`E2E_USER_DATA_SERVICE_PORT`, `E2E_WEB_CONSOLE_PORT`, `E2E_MOBILE_APP_PORT`,
+`E2E_SPANNER_EMULATOR_PORT`, or `E2E_SPANNER_EMULATOR_REST_PORT` to use other ports (and the
+matching variables above when starting the servers yourself).
 
 ## Updating goldens
 
@@ -94,10 +98,11 @@ Goldens are in [`goldens/`](goldens/), one directory per test file.
   generated config scripts: one points the apps at the test's user data service, and the other
   turns Firebase and the development sign-in dialog off, so signing in uses the service's
   development user.
-- **Real service.** Playwright starts the user data service binary with its bundled sample data
-  (`USER_DATA_STORE=memory`, `AUTH_MODE=dev`) on its own port, so the tests can run alongside the
-  launchpad. Before each test, [`tests/fixtures.ts`](tests/fixtures.ts) calls `POST /debug/reset`
-  to restore the in-memory store to its initial seed state.
+- **Real service.** Playwright starts a Spanner emulator and the user data service binary
+  (`AUTH_MODE=dev`) on their own ports, so the tests can run alongside the launchpad. The service
+  loads its bundled sample data into the emulator. Before each test,
+  [`tests/fixtures.ts`](tests/fixtures.ts) calls `POST /debug/reset` to restore the database to
+  that initial state.
 - **Same pixels everywhere.** Compose draws text with the fonts bundled in the app (Skia compiled
   to Wasm), and Chromium renders WebGL with its bundled software renderer (SwiftShader), so the
   goldens don't depend on the machine's fonts or GPU. The tests block every request that isn't to

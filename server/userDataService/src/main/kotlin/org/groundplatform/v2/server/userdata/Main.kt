@@ -30,13 +30,13 @@ const val SURVEY_TRASH_RETENTION_DAYS = 30L
  *
  * Environment variables:
  * - `PORT`: port to listen on (default 8080; set by Cloud Run).
- * - `USER_DATA_SEED`: path to a `UserDataSeed` in proto JSON to load instead of the bundled sample
- *   seed.
- * - `SPANNER_EMULATOR_HOST`, `SPANNER_PROJECT_ID`, `SPANNER_INSTANCE_ID`, `SPANNER_DATABASE_ID`:
- *   the Cloud Spanner database to connect to ([SpannerSettings.fromEnv]). When set, the Spanner
- *   debug web UI at `/debug/spanner` browses it and records its operations.
- * - `USER_DATA_STORE`: `memory` (default) serves data from memory; `spanner` stores it in the
- *   Spanner database above, applying the schema and loading the seed into an empty database.
+ * - `SPANNER_EMULATOR_HOST`, `SPANNER_PROJECT_ID`, `SPANNER_INSTANCE_ID`, `SPANNER_DATABASE_ID`
+ *   (required: `SPANNER_EMULATOR_HOST` or `SPANNER_INSTANCE_ID`): the Cloud Spanner database that
+ *   stores the data ([SpannerSettings.fromEnv]). The service applies the schema at startup and
+ *   loads the seed into an empty database. The Spanner debug web UI at `/debug/spanner` browses it
+ *   and records its operations.
+ * - `USER_DATA_SEED`: path to a `UserDataSeed` in proto JSON to load into an empty database (and on
+ *   `POST /debug/reset`) instead of the bundled sample seed.
  * - `AUTH_MODE`: `firebase` requires a Firebase Authentication ID token for project
  *   `FIREBASE_PROJECT_ID` (default `gnd-dev`); `dev` (default) verifies the token when a call sends
  *   one (signed-in users are administrators there), and otherwise trusts `x-dev-user-*` headers or
@@ -48,29 +48,16 @@ const val SURVEY_TRASH_RETENTION_DAYS = 30L
 fun main() {
   val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
   val seed = loadSeed(System.getenv("USER_DATA_SEED"))
-  val storeKind = System.getenv("USER_DATA_STORE")?.takeIf { it.isNotBlank() } ?: "memory"
-  require(storeKind == "memory" || storeKind == "spanner") {
-    "Unknown USER_DATA_STORE \"$storeKind\" (expected memory or spanner)"
-  }
-  val spannerDebug =
-    SpannerSettings.fromEnv()?.let { settings ->
-      val recorder = SpannerOperationRecorder()
-      val connection =
-        SpannerConnection.open(settings, recorder) { admin ->
-          if (storeKind == "spanner") SpannerSchema.apply(admin, settings)
-        }
-      SpannerDebug(connection, recorder)
+  val settings =
+    requireNotNull(SpannerSettings.fromEnv()) {
+      "The user data service stores its data in Cloud Spanner: set SPANNER_EMULATOR_HOST (e.g. " +
+        "localhost:9010, after starting scripts/spanner-emulator.sh) or SPANNER_INSTANCE_ID"
     }
-  val store =
-    if (storeKind == "memory") {
-      InMemoryUserDataStore(seed)
-    } else {
-      val connection =
-        requireNotNull(spannerDebug?.connection) {
-          "USER_DATA_STORE=spanner needs SPANNER_EMULATOR_HOST or SPANNER_INSTANCE_ID"
-        }
-      spannerStore(connection, seed)
-    }
+  val recorder = SpannerOperationRecorder()
+  val connection =
+    SpannerConnection.open(settings, recorder) { admin -> SpannerSchema.apply(admin, settings) }
+  val spannerDebug = SpannerDebug(connection, recorder)
+  val store = spannerStore(connection, seed)
   val backend = UserDataBackend(store)
   val purgeScheduler =
     Executors.newSingleThreadScheduledExecutor { r ->
@@ -126,7 +113,7 @@ fun main() {
       Thread {
         purgeScheduler.shutdownNow()
         server.stop().join()
-        spannerDebug?.connection?.close()
+        connection.close()
       }
     )
   server.start().join()
@@ -134,8 +121,8 @@ fun main() {
     "User data service listening on port ${server.activeLocalPort()} " +
       "(${seed.surveys.size} surveys, ${seed.organizations.size} organizations)"
   )
-  spannerDebug?.let { println("Spanner: ${it.connection.settings.description}") }
-  println("Store: ${store::class.simpleName}, auth: $authMode")
+  println("Spanner: ${settings.description}")
+  println("Auth: $authMode")
   server.blockUntilShutdown()
 }
 

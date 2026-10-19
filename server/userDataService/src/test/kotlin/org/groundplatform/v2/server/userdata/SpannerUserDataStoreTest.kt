@@ -16,22 +16,15 @@ package org.groundplatform.v2.server.userdata
 import com.google.cloud.spanner.SpannerException
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.userdata.UserDataSeed
-import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Assumptions.assumeTrue
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
+import org.junit.jupiter.api.Tag
 
-/**
- * Runs the [UserDataStoreContractTest] against [SpannerUserDataStore] on the Spanner emulator.
- * Skipped unless `SPANNER_EMULATOR_HOST` is set (for example by running
- * `scripts/spanner-emulator.sh`).
- */
-@EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
+/** Runs the [UserDataStoreContractTest] against [SpannerUserDataStore] on the Spanner emulator. */
+@Tag(SPANNER_TAG)
 class SpannerUserDataStoreTest : UserDataStoreContractTest() {
   override fun newStore(): UserDataStore = SpannerTestDatabase.store()
 
@@ -82,81 +75,32 @@ class SpannerUserDataStoreTest : UserDataStoreContractTest() {
 }
 
 /** The backend tests, on a Spanner store loaded with the bundled sample seed. */
-@EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
+@Tag(SPANNER_TAG)
 class SpannerUserDataBackendTest : UserDataBackendTest() {
-  override fun newBackend() = UserDataBackend(SpannerTestDatabase.store(loadSeed(null)))
+  override fun newBackend() = SpannerTestDatabase.sampleBackend()
 }
 
-@EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
+@Tag(SPANNER_TAG)
 class SpannerMutationIdempotencyTest : MutationIdempotencyTest() {
-  override fun newBackend() = UserDataBackend(SpannerTestDatabase.store(loadSeed(null)))
+  override fun newBackend() = SpannerTestDatabase.sampleBackend()
 }
 
-@EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
+@Tag(SPANNER_TAG)
 class SpannerRecordVersionTest : RecordVersionTest() {
-  override fun newBackend() = UserDataBackend(SpannerTestDatabase.store(loadSeed(null)))
+  override fun newBackend() = SpannerTestDatabase.sampleBackend()
 }
 
-@EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
+@Tag(SPANNER_TAG)
 class SpannerAuthorizationTest : AuthorizationTest() {
-  override fun newBackend() = UserDataBackend(SpannerTestDatabase.store(loadSeed(null)))
+  override fun newBackend() = SpannerTestDatabase.sampleBackend()
 }
 
-@EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
+@Tag(SPANNER_TAG)
 class SpannerAccessEpochTest : AccessEpochTest() {
-  override fun newBackend() = UserDataBackend(SpannerTestDatabase.store(loadSeed(null)))
+  override fun newBackend() = SpannerTestDatabase.sampleBackend()
 }
 
-@EnabledIfEnvironmentVariable(named = "SPANNER_EMULATOR_HOST", matches = ".+")
+@Tag(SPANNER_TAG)
 class SpannerSurveyTrashAndSharingTest : SurveyTrashAndSharingTest() {
-  override fun newBackend() = UserDataBackend(SpannerTestDatabase.store(loadSeed(null)))
-}
-
-/**
- * One emulator database with the schema applied, shared by the Spanner tests (which reset it) and
- * dropped when the test JVM exits.
- */
-object SpannerTestDatabase {
-  private val emulatorHost: String? = System.getenv("SPANNER_EMULATOR_HOST")
-
-  private val connection: SpannerConnection by lazy {
-    val settings =
-      SpannerSettings(
-        projectId = "test-project",
-        instanceId = "test-instance",
-        databaseId = "store-" + UUID.randomUUID().toString().take(8),
-        emulatorHost = emulatorHost,
-      )
-    val connection = SpannerConnection.open(settings, SpannerOperationRecorder())
-    SpannerSchema.apply(connection.databaseAdmin, settings)
-    Runtime.getRuntime()
-      .addShutdownHook(
-        Thread {
-          connection.databaseAdmin.dropDatabase(settings.instanceId, settings.databaseId)
-          connection.close()
-        }
-      )
-    connection
-  }
-
-  fun applySchema() = SpannerSchema.apply(connection.databaseAdmin, connection.settings)
-
-  fun updateDdl(vararg statements: String) {
-    val settings = connection.settings
-    connection.databaseAdmin
-      .updateDatabaseDdl(settings.instanceId, settings.databaseId, statements.toList(), null)
-      .get()
-  }
-
-  fun ddl(): List<String> =
-    connection.databaseAdmin.getDatabaseDdl(
-      connection.settings.instanceId,
-      connection.settings.databaseId,
-    )
-
-  /** A store reset to [seed]. Skips the calling test unless the emulator is configured. */
-  fun store(seed: UserDataSeed = UserDataSeed()): SpannerUserDataStore {
-    assumeTrue(!emulatorHost.isNullOrBlank(), "Set SPANNER_EMULATOR_HOST to run")
-    return SpannerUserDataStore(connection.databaseClient, seed).also { it.reset() }
-  }
+  override fun newBackend() = SpannerTestDatabase.sampleBackend()
 }

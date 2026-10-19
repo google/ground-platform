@@ -127,7 +127,7 @@ const SERVICE_DEFINITIONS = [
     name: 'Spanner emulator',
     code: 'SPANNER',
     category: 'AUX',
-    role: 'Local Cloud Spanner database (gRPC :9010, REST :9020). The server stores its data here if it is running when the server starts',
+    role: 'Local Cloud Spanner database (gRPC :9010, REST :9020) where the server stores its data. Starting the server starts it',
     port: 9010,
     auxPort: 9020,
     healthCheck: { type: 'tcp', port: 9010, fallbackPort: 9020 },
@@ -402,8 +402,8 @@ async function probeAllServices() {
   });
 
   for (const [id, s] of serviceStates.entries()) {
-    // Not spawned yet, waiting for another service's Gradle build (waitForSharedGradleBuilds).
-    if (s.waitingForBuild) continue;
+    // Not spawned yet: waiting for the Spanner emulator or another service's Gradle build.
+    if (s.waitingToSpawn) continue;
 
     let portOpen = false;
     let healthy = false;
@@ -483,15 +483,16 @@ async function probeAllServices() {
 let spannerRestartInFlight = false;
 
 /**
- * The server only connects to Spanner if SPANNER_EMULATOR_HOST is set when it starts, so when the
- * emulator comes up after the launchpad started the server without it, restarts the server so it
- * stores its data there. Servers started elsewhere are left alone.
+ * The emulator keeps its data in memory, so when it restarts under a server the launchpad started,
+ * the server's database is gone. Restarts the server then, which creates the database again and
+ * loads the sample data. Servers started elsewhere are left alone.
  */
 function restartServerForSpannerIfNeeded() {
   const emulator = serviceStates.get('spanner-emulator');
   const server = serviceStates.get('user-data-service');
-  if (spannerRestartInFlight || emulator.state !== 'ONLINE') return;
-  if (!server.child || server.state !== 'ONLINE' || server.usesSpanner) return;
+  if (spannerRestartInFlight || emulator.state !== 'ONLINE' || !emulator.pid) return;
+  if (!server.child || server.state !== 'ONLINE' || !server.emulatorPidAtStart) return;
+  if (emulator.pid === server.emulatorPidAtStart) return;
   spannerRestartInFlight = true;
   checkTcpPort(9010).then((grpcOpen) => {
     // The REST port can open first; the server needs the gRPC one.
@@ -501,7 +502,7 @@ function restartServerForSpannerIfNeeded() {
     }
     appendLog(
       server,
-      '[LAUNCHPAD] Spanner emulator started, so restarting the server to connect to it',
+      '[LAUNCHPAD] Spanner emulator restarted, so restarting the server to set up its database again',
       'stdout'
     );
     restartService('user-data-service')
@@ -543,11 +544,11 @@ async function waitForSharedGradleBuilds(service) {
   const deadline = Date.now() + SHARED_GRADLE_BUILD_TIMEOUT_MS;
   let waitingFor = other();
   if (waitingFor) {
-    service.waitingForBuild = true;
-    service.cancelBuildWait = false;
+    service.waitingToSpawn = true;
+    service.cancelStartWait = false;
     service.state = 'STARTING';
     service.lastExitCode = null;
-    while (waitingFor && Date.now() < deadline && !service.cancelBuildWait) {
+    while (waitingFor && Date.now() < deadline && !service.cancelStartWait) {
       const note = `Waiting for ${waitingFor.name} to finish building (they share Gradle outputs)`;
       if (service.compilePhase !== note) {
         service.compilePhase = note;
@@ -558,9 +559,9 @@ async function waitForSharedGradleBuilds(service) {
       await new Promise((r) => setTimeout(r, 1000));
       waitingFor = other();
     }
-    service.waitingForBuild = false;
-    if (service.cancelBuildWait) {
-      service.cancelBuildWait = false;
+    service.waitingToSpawn = false;
+    if (service.cancelStartWait) {
+      service.cancelStartWait = false;
       service.state = 'OFFLINE';
       service.compilePhase = '';
       service.lastLogLine = '';
@@ -591,24 +592,26 @@ async function startService(id, options = {}) {
 
   const childEnv = { ...process.env };
 
-  // Spanner configuration for User Data Service
-  if (id === 'user-data-service') {
-    // Checks the port rather than the emulator's last probed state, which can lag behind.
-    const isSpannerActive = await checkTcpPort(9010);
-    if (options.useSpanner || isSpannerActive) {
-      childEnv.SPANNER_EMULATOR_HOST = 'localhost:9010';
-      // Stores the server's data in the emulator (loading the sample data into an empty
-      // database), so the app reads what the Spanner data page shows. USER_DATA_STORE=memory
-      // in the launchpad's environment keeps data in memory instead.
-      childEnv.USER_DATA_STORE = childEnv.USER_DATA_STORE || 'spanner';
-      appendLog(
-        service,
-        `[LAUNCHPAD] Spanner emulator is running, so starting the server with ` +
-          `SPANNER_EMULATOR_HOST=localhost:9010 USER_DATA_STORE=${childEnv.USER_DATA_STORE}`,
-        'stdout'
-      );
+  // The server stores its data in Spanner: the local emulator, unless the launchpad's environment
+  // names another database (SPANNER_EMULATOR_HOST or SPANNER_INSTANCE_ID).
+  service.emulatorPidAtStart = null;
+  if (id === 'user-data-service' && !childEnv.SPANNER_EMULATOR_HOST && !childEnv.SPANNER_INSTANCE_ID) {
+    const spanner = await ensureSpannerEmulator(service);
+    if (spanner === 'canceled') {
+      return { success: false, message: `Start of ${service.name} canceled` };
     }
-    service.usesSpanner = Boolean(childEnv.SPANNER_EMULATOR_HOST || childEnv.SPANNER_INSTANCE_ID);
+    if (!spanner) {
+      const message = "The Spanner emulator isn't accepting connections, so the server can't start";
+      service.state = 'FAULT';
+      service.compilePhase = '';
+      service.lastLogLine = message;
+      appendLog(service, `[LAUNCHPAD ERROR] ${message} (see the Spanner emulator's logs)`, 'stderr');
+      broadcastStatus();
+      return { success: false, message };
+    }
+    childEnv.SPANNER_EMULATOR_HOST = 'localhost:9010';
+    service.emulatorPidAtStart = await findPidForPort(9010);
+    appendLog(service, '[LAUNCHPAD] Starting the server with SPANNER_EMULATOR_HOST=localhost:9010', 'stdout');
   }
 
   // Ensure Node path and user bin in PATH
@@ -725,9 +728,9 @@ async function stopService(id) {
 
   appendLog(service, `[LAUNCHPAD] Stopping service ${service.name}...`, 'stdout');
 
-  if (service.waitingForBuild) {
-    // Not spawned yet: waitForSharedGradleBuilds gives up and marks it stopped.
-    service.cancelBuildWait = true;
+  if (service.waitingToSpawn) {
+    // Not spawned yet: its wait (for the emulator or a Gradle build) gives up and marks it stopped.
+    service.cancelStartWait = true;
     return { success: true, message: `Canceled start of ${service.name}` };
   }
 
@@ -778,27 +781,53 @@ async function stopService(id) {
 
 const CORE_SERVICE_IDS = ['user-data-service', 'web-console', 'mobile-app'];
 
-/** How long Start all waits for the Spanner emulator (which may download first) before the server. */
+/** How long the server waits for the Spanner emulator (which may download first) to start. */
 const SPANNER_START_TIMEOUT_MS = 90000;
 
 /**
- * Starts the Spanner emulator, waiting for it so the server starts against it, then the server,
- * web console, and mobile app, skipping any already running. If the emulator doesn't come up, the
- * server still starts, serving data from memory.
+ * Starts the Spanner emulator for [server] unless it's already accepting connections, and waits
+ * for it. Returns whether it is, or 'canceled' if [server] was stopped while it waited.
+ */
+async function ensureSpannerEmulator(server) {
+  if (await checkTcpPort(9010)) return true;
+  const emulator = serviceStates.get('spanner-emulator');
+  server.waitingToSpawn = true;
+  server.cancelStartWait = false;
+  server.state = 'STARTING';
+  server.lastExitCode = null;
+  const note = 'Waiting for the Spanner emulator to start';
+  server.compilePhase = note;
+  server.lastLogLine = note;
+  appendLog(server, `[LAUNCHPAD] ${note}`, 'stdout');
+  broadcastStatus();
+  try {
+    await startService('spanner-emulator');
+    // Stops waiting early if the emulator exits (e.g. no Docker on this platform).
+    const ready = await waitForTcpPort(
+      9010,
+      SPANNER_START_TIMEOUT_MS,
+      () => server.cancelStartWait || (!emulator.child && emulator.state !== 'STARTING')
+    );
+    if (server.cancelStartWait) {
+      server.cancelStartWait = false;
+      server.state = 'OFFLINE';
+      server.compilePhase = '';
+      server.lastLogLine = '';
+      broadcastStatus();
+      return 'canceled';
+    }
+    return ready;
+  } finally {
+    server.waitingToSpawn = false;
+  }
+}
+
+/**
+ * Starts the server (which starts the Spanner emulator first), web console, and mobile app,
+ * skipping any already running.
  */
 async function startCore() {
   const results = {};
-  try {
-    const emulator = serviceStates.get('spanner-emulator');
-    results['spanner-emulator'] = await startService('spanner-emulator');
-    // Stops waiting early if the emulator exits (e.g. no Docker on this platform).
-    const ready = await waitForTcpPort(9010, SPANNER_START_TIMEOUT_MS, () => !emulator.child);
-    if (!ready) {
-      results['spanner-emulator'].message += ", but it isn't accepting connections";
-    }
-  } catch (err) {
-    results['spanner-emulator'] = { success: false, message: err.message };
-  }
   for (const id of CORE_SERVICE_IDS) {
     try {
       results[id] = await startService(id);

@@ -37,7 +37,7 @@ class DebugResetTest {
   private fun start(dataResetEnabled: Boolean) {
     server =
       UserDataServer.create(
-        UserDataBackend(loadSeed(null)),
+        sampleBackend(),
         port = 0,
         rpcRecorder = recorder,
         dataResetEnabled = dataResetEnabled,

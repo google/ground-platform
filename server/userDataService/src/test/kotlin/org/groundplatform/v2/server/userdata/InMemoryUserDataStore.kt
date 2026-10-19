@@ -31,11 +31,13 @@ import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.userdata.UserDataSeed
 
 /**
- * [UserDataStore] that keeps everything in memory, initialized from [seed]. State lives in this
- * instance only: it isn't shared between server instances and is lost on restart.
+ * Test fake [UserDataStore] that keeps everything in memory, initialized from [seed], so unit tests
+ * run without Spanner. [UserDataStoreContractTest] checks that it behaves like
+ * [SpannerUserDataStore], the service's store.
  *
  * Commit timestamps come from a logical clock that advances one second per write, starting after
- * the latest timestamp in [seed]. Not thread-safe: callers serialize access (see [UserDataServer]).
+ * the latest timestamp in [seed]. Not thread-safe: callers serialize access, as [UserDataServer]
+ * does.
  */
 class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : UserDataStore {
   private var epochSecond: Long = INITIAL_EPOCH_SECOND

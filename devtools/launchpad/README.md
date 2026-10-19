@@ -35,9 +35,8 @@ bash scripts/launchpad.sh --kill-existing --start-all  # Fresh start: stop what'
 ```
 
 `--start-all` does what **Start all** does as soon as the launchpad is up:
-it starts the Spanner emulator (waiting for it, so the server connects to it),
-then the server, web console, and mobile app, skipping any that are already
-running. Their logs appear on the Logs page.
+it starts the server (which starts the Spanner emulator first), web console,
+and mobile app, skipping any that are already running. Their logs appear on the Logs page.
 
 `--kill-existing` first stops a launchpad already using the launchpad port and
 every service that's running, wherever it was started (another workspace, a
@@ -55,18 +54,16 @@ proxy URL; links to the other services follow whichever host you used).
 | Server (user data service) | 8080 | `server/userDataService` | `./gradlew run` |
 | Web console | 8092 | `webApp` | `./gradlew wasmJsBrowserDevelopmentRun` |
 | Mobile app | 8093 | `mobileWebApp` | `./gradlew wasmJsBrowserDevelopmentRun` |
-| Spanner emulator (optional) | 9010, 9020 | `.` | `scripts/spanner-emulator.sh` |
+| Spanner emulator | 9010, 9020 | `.` | `scripts/spanner-emulator.sh` |
 
-If the Spanner emulator is running when the server starts, the launchpad
-starts the server with `SPANNER_EMULATOR_HOST=localhost:9010` and
-`USER_DATA_STORE=spanner`, so the server stores its data in the emulator
-(loading the sample data into the empty database) and the **Spanner data** page
-shows what the apps read. The emulator keeps data in memory, so restarting it
-starts over from the sample data; restarting only the server keeps it. Set
-`USER_DATA_STORE=memory` when starting the launchpad to keep the server's data
-in memory instead. Without the emulator, the server serves data from memory. If
-you start the emulator after the launchpad started the server without it, the
-launchpad restarts the server to use it.
+The server stores its data in Spanner. Starting the server starts the Spanner
+emulator first if it isn't running, then runs the server with
+`SPANNER_EMULATOR_HOST=localhost:9010`; the server loads the sample data into
+the empty database, and the **Spanner data** page shows what the apps read. The
+emulator keeps data in memory, so restarting it starts over from the sample
+data (the launchpad restarts the server to set up the database again);
+restarting only the server keeps it. To use another database, set
+`SPANNER_EMULATOR_HOST` or `SPANNER_INSTANCE_ID` when starting the launchpad.
 
 The server, web console, and mobile app are separate Gradle builds that all
 include the `shared/` builds, so building two at once makes them overwrite each
@@ -129,7 +126,7 @@ The page uses this HTTP API, which you can also call directly:
 | `POST /api/service/<id>/start` | Starts a service |
 | `POST /api/service/<id>/stop` | Stops a service |
 | `POST /api/service/<id>/restart` | Restarts a service from the launchpad |
-| `POST /api/fleet/start-core` | Starts the Spanner emulator, server, web console, and mobile app |
+| `POST /api/fleet/start-core` | Starts the server (and the Spanner emulator it needs), web console, and mobile app |
 | `POST /api/fleet/stop-all` | Stops every service |
 | `POST /api/config/sync-local-properties` | Sets `USER_DATA_SERVICE_URL`; body `{"url": "..."}` |
 

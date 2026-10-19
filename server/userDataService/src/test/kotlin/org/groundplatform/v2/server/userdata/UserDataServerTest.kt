@@ -47,7 +47,7 @@ class UserDataServerTest {
 
   @BeforeTest
   fun start() {
-    server = UserDataServer.create(UserDataBackend(loadSeed(null)), port = 0)
+    server = UserDataServer.create(sampleBackend(), port = 0)
     server.start().join()
   }
 
@@ -87,9 +87,7 @@ class UserDataServerTest {
     // A token from another server process (another data epoch) can't be served.
     val otherToken =
       kotlinx.coroutines.runBlocking {
-        UserDataBackend(loadSeed(null))
-          .ListSurveyOverviews(ListSurveyOverviewsRequest())
-          .next_sync_token
+        sampleBackend().ListSurveyOverviews(ListSurveyOverviewsRequest()).next_sync_token
       }
     val stale =
       grpcWeb(
@@ -106,7 +104,7 @@ class UserDataServerTest {
     val definition =
       WireGrpcBindings.bind(
         SurveyServiceServer::class.java,
-        UserDataBackend(),
+        sampleBackend(),
         CoroutineScope(Dispatchers.Default),
       )
     @Suppress("UNCHECKED_CAST")
@@ -149,7 +147,7 @@ class UserDataServerTest {
   fun firebaseMode_rejectsCallsWithoutAToken() {
     val firebaseServer =
       UserDataServer.create(
-        UserDataBackend(loadSeed(null)),
+        sampleBackend(),
         port = 0,
         authenticator = Authenticator.firebase("test-project"),
       )
@@ -169,7 +167,7 @@ class UserDataServerTest {
 
   @Test
   fun devMode_registersTheUserNamedByHeaders() {
-    val backend = UserDataBackend(loadSeed(null))
+    val backend = sampleBackend()
     val devServer = UserDataServer.create(backend, port = 0)
     devServer.start().join()
     try {

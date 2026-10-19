@@ -44,7 +44,7 @@ import groundplatform.v2.survey.SurveyDef
 interface UserDataStore {
   /**
    * Random identifier of the current data. Sync tokens carry it, so tokens issued before the data
-   * was reset (or by another in-memory process) are rejected and clients run a full sync.
+   * was reset are rejected and clients run a full sync.
    */
   val dataEpoch: String
 

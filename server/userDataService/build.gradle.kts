@@ -136,4 +136,17 @@ sourceSets.main { resources.srcDir(spannerResourcesDir) }
 
 tasks.processResources { dependsOn(generateSpannerDescriptors) }
 
-tasks.test { useJUnitPlatform() }
+// Unit tests run on an in-memory fake store. Tests tagged `spanner` need the Spanner emulator, and
+// run with `./gradlew spannerTest`: on the emulator at SPANNER_EMULATOR_HOST, or on one the tests
+// start from scripts/spanner-emulator.sh.
+tasks.test { useJUnitPlatform { excludeTags("spanner") } }
+
+val spannerTest by
+  tasks.registering(Test::class) {
+    description = "Runs the tests that need the Spanner emulator."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform { includeTags("spanner") }
+    shouldRunAfter(tasks.test)
+  }

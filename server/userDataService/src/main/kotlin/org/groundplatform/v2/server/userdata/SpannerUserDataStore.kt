@@ -111,7 +111,7 @@ class SpannerUserDataStore(
 
   /**
    * Deletes all data and loads [seed], keeping the seed's commit timestamps (Spanner accepts past
-   * timestamps in commit timestamp columns) so delta sync order matches the in-memory store.
+   * timestamps in commit timestamp columns) so delta sync keeps the seed's order.
    */
   override fun reset() {
     client.write(
@@ -177,9 +177,7 @@ class SpannerUserDataStore(
     /** Organizations read by [statement] (`Record`, `CommitTs`), with their members attached. */
     private fun withMembers(statement: Statement): List<Organization> {
       val orgs =
-        query(statement) {
-          decode(Organization.ADAPTER, it).copy(commit_timestamp = it.commitTs())
-        }
+        query(statement) { decode(Organization.ADAPTER, it).copy(commit_timestamp = it.commitTs()) }
       if (orgs.isEmpty()) return orgs
       val membersByOrg =
         query(

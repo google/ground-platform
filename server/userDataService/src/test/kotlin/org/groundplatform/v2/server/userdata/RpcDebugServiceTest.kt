@@ -41,8 +41,7 @@ class RpcDebugServiceTest {
   @BeforeTest
   fun start() {
     recorder = RpcCallRecorder()
-    server =
-      UserDataServer.create(UserDataBackend(loadSeed(null)), port = 0, rpcRecorder = recorder)
+    server = UserDataServer.create(sampleBackend(), port = 0, rpcRecorder = recorder)
     server.start().join()
   }
 

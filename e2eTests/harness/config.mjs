@@ -14,8 +14,9 @@
  */
 
 // Paths and ports shared by the harness scripts and playwright.config.ts. Ports avoid the
-// development defaults (8080, 8092, 8093), so the tests can run while the launchpad is up; set
-// E2E_USER_DATA_SERVICE_PORT, E2E_WEB_CONSOLE_PORT, or E2E_MOBILE_APP_PORT to move them.
+// development defaults (8080, 8092, 8093, 9010, 9020), so the tests can run while the launchpad is
+// up; set E2E_USER_DATA_SERVICE_PORT, E2E_WEB_CONSOLE_PORT, E2E_MOBILE_APP_PORT,
+// E2E_SPANNER_EMULATOR_PORT, or E2E_SPANNER_EMULATOR_REST_PORT to move them.
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,6 +27,11 @@ const port = (name, fallback) => Number(process.env[name] || fallback);
 
 export const USER_DATA_SERVICE_PORT = port('E2E_USER_DATA_SERVICE_PORT', 18180);
 export const USER_DATA_SERVICE_URL = `http://127.0.0.1:${USER_DATA_SERVICE_PORT}`;
+
+/** The Spanner emulator that stores the user data service's data (gRPC and REST ports). */
+export const SPANNER_EMULATOR_PORT = port('E2E_SPANNER_EMULATOR_PORT', 18110);
+export const SPANNER_EMULATOR_REST_PORT = port('E2E_SPANNER_EMULATOR_REST_PORT', 18120);
+export const SPANNER_EMULATOR_SCRIPT = path.join(REPO_ROOT, 'scripts/spanner-emulator.sh');
 
 const isWindows = process.platform === 'win32';
 

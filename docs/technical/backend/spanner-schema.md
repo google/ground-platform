@@ -912,9 +912,9 @@ CREATE TABLE ClientMutationWatermarks (
 
 ### Status
 
-The storage seam, proto changes, and ID hygiene are done. A first
-`SpannerUserDataStore` (`USER_DATA_STORE=spanner`) implements the store
-interface on a subset of this schema
+The storage seam, proto changes, and ID hygiene are done.
+`SpannerUserDataStore`, the service's only store (the in-memory store is now a
+test fake), implements the store interface on a subset of this schema
 (`server/userDataService/src/main/resources/spanner/schema.sql`), and the
 backend tests run against it on the emulator. It differs from the design above
 in these ways, to be closed in later steps:

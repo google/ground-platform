@@ -52,7 +52,7 @@ import kotlinx.coroutines.runBlocking
  */
 open class MutationIdempotencyTest {
   /** A backend loaded with the bundled sample seed; overridden to test other stores. */
-  protected open fun newBackend(): UserDataBackend = UserDataBackend(loadSeed(null))
+  protected open fun newBackend(): UserDataBackend = sampleBackend()
 
   private val backend by lazy { newBackend() }
 

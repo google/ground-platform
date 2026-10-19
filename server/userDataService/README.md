@@ -37,19 +37,18 @@ services will live next to it under `server/`.
     implements the RPCs' rules on top of a
     [`UserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/UserDataStore.kt),
     which reads and writes records in atomic transactions with
-    store-assigned commit timestamps. By default it's an
-    [`InMemoryUserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/InMemoryUserDataStore.kt)
-    loaded at startup from a `UserDataSeed`
-    (`shared/protos/userdata/user_data_seed.proto`), so changes are lost on
-    restart and aren't shared between instances. With `USER_DATA_STORE=spanner`
-    it's a
+    store-assigned commit timestamps: a
     [`SpannerUserDataStore`](src/main/kotlin/org/groundplatform/v2/server/userdata/SpannerUserDataStore.kt)
-    (see [Spanner](#spanner-and-the-spanner-debug-web-ui)).
-    `UserDataStoreContractTest` checks both, and the backend tests also run on
-    the Spanner store.
+    on Cloud Spanner, or the Spanner emulator in development and tests (see
+    [Spanner](#spanner-and-the-spanner-debug-web-ui)). An empty database is
+    loaded with a `UserDataSeed` (`shared/protos/userdata/user_data_seed.proto`).
+    Unit tests use an in-memory fake store (`InMemoryUserDataStore`, under
+    `src/test`); `UserDataStoreContractTest` checks that it behaves like the
+    Spanner store, and the backend tests also run on Spanner.
 -   **Sample seed.** The bundled seed
-    ([`src/main/resources/seed/user_data_seed.json`](src/main/resources/seed/))
-    is generated from the Kotlin sample data fixtures in `shared/app/testing`.
+    ([`src/main/resources/seed/user_data_seed.json`](src/main/resources/seed/)),
+    the initial data of an empty database and of `POST /debug/reset`, is
+    generated from the Kotlin sample data fixtures in `shared/app/testing`.
     After changing the fixtures, regenerate it from `shared/app/` with
     `./gradlew jvmTest -PregenerateUserDataSeed`; `UserDataSeedSnapshotTest`
     fails while it's out of date.
@@ -82,13 +81,21 @@ services will live next to it under `server/`.
 
 ## Running Locally
 
-From this directory:
+The service stores its data in Spanner, so start the Spanner emulator first (a
+pinned, checksum-verified release; Docker on non-Linux hosts), from the
+repository root:
 
 ```bash
+scripts/spanner-emulator.sh &     # gRPC localhost:9010, REST localhost:9020
+```
+
+Then, from this directory:
+
+```bash
+export SPANNER_EMULATOR_HOST=localhost:9010
 ./gradlew run                     # Listens on http://localhost:8080
 PORT=9090 ./gradlew run           # Another port
-USER_DATA_SEED=/path/to/seed.json ./gradlew run   # Another seed
-./gradlew test                    # Unit and end-to-end tests
+USER_DATA_SEED=/path/to/seed.json ./gradlew run   # Another seed for an empty database
 ```
 
 Or build the distribution once and start the binary directly, which starts
@@ -96,8 +103,23 @@ faster than `./gradlew run`:
 
 ```bash
 ./gradlew installDist
-PORT=8080 build/install/user-data-service/bin/user-data-service
+PORT=8080 SPANNER_EMULATOR_HOST=localhost:9010 build/install/user-data-service/bin/user-data-service
 ```
+
+The [development launchpad](../../devtools/launchpad/README.md) starts the
+emulator and the service together.
+
+Tests:
+
+```bash
+./gradlew test          # Unit and end-to-end tests, on the in-memory fake store
+./gradlew spannerTest   # Tests that need Spanner (the store, the backend on Spanner, the debug UI)
+```
+
+`spannerTest` runs on the emulator at `SPANNER_EMULATOR_HOST`, or, when that
+isn't set, on one it starts from `scripts/spanner-emulator.sh` on free ports and
+stops afterwards. These tests use their own instance and databases, so they
+don't touch a development database on the same emulator.
 
 On startup it prints `User data service listening on port 8080 (6 surveys, 4
 organizations)`. Check it with `curl http://localhost:8080/healthz`, which
@@ -184,15 +206,15 @@ while the service is running to inspect live incoming gRPC and gRPC-Web calls:
 
 ## Spanner and the Spanner Debug Web UI
 
-The service connects to Cloud Spanner when `SPANNER_EMULATOR_HOST` (for the
-emulator) or `SPANNER_INSTANCE_ID` (for Cloud Spanner) is set. The database is
+The service stores its data in Cloud Spanner and doesn't start unless
+`SPANNER_EMULATOR_HOST` (for the emulator) or `SPANNER_INSTANCE_ID` (for Cloud
+Spanner) is set. The database is
 `SPANNER_PROJECT_ID` / `SPANNER_INSTANCE_ID` / `SPANNER_DATABASE_ID` (defaults
 `collect-one-dev` / `dev` / `user-data`). On the emulator, the instance and an
 empty database are created at startup. The schema is designed in
 [`docs/technical/backend/spanner-schema.md`](../../docs/technical/backend/spanner-schema.md).
 
-RPCs are served from memory unless `USER_DATA_STORE=spanner` is also set. Then
-the service applies
+At startup the service applies
 [`src/main/resources/spanner/schema.sql`](src/main/resources/spanner/schema.sql)
 at startup (with a proto bundle built from `shared/protos` by the
 `generateSpannerDescriptors` task) and, if the database was never loaded, loads
@@ -204,19 +226,8 @@ types. The emulator can't change the proto bundle without breaking existing
 generated columns, so when the protos or bundled types change it recreates the
 database instead (its data is reset to the seed).
 
-Run the emulator (a pinned, checksum-verified release; Docker on non-Linux
-hosts) and start the service against it, from the repository root:
-
-```bash
-scripts/spanner-emulator.sh &     # gRPC localhost:9010, REST localhost:9020
-cd server/userDataService
-SPANNER_EMULATOR_HOST=localhost:9010 ./gradlew run
-# Or store the data in Spanner too:
-SPANNER_EMULATOR_HOST=localhost:9010 USER_DATA_STORE=spanner ./gradlew run
-```
-
-Then open `http://localhost:8080/debug/spanner` (also linked from the RPC debug
-UI):
+With the service running (see [Running Locally](#running-locally)), open
+`http://localhost:8080/debug/spanner` (also linked from the RPC debug UI):
 
 -   **Tables**: Every table, nested under its interleaving parent, with row
     counts. Selecting one shows its columns (types, generated columns), primary
@@ -232,13 +243,8 @@ UI):
     queries appear in Operations.
 -   **Schema DDL**: The database's DDL statements.
 
-The emulator keeps data in memory, so restarting it wipes the database. Tests
-that need it (`SpannerDebugTest` and the `Spanner*Test` store and backend tests)
-are skipped unless `SPANNER_EMULATOR_HOST` is set:
-
-```bash
-SPANNER_EMULATOR_HOST=localhost:9010 ./gradlew test
-```
+The emulator keeps data in memory, so restarting it wipes the database; the
+service loads the seed again when it next starts.
 
 ## Pointing Clients at the Service
 
@@ -281,22 +287,25 @@ gcloud run deploy user-data-service \
   --region <region> \
   --use-http2 \
   --max-instances 1 \
+  --set-env-vars SPANNER_PROJECT_ID=<project>,SPANNER_INSTANCE_ID=<instance>,SPANNER_DATABASE_ID=<database> \
   --allow-unauthenticated
 ```
 
 -   `--use-http2` sends HTTP/2 to the container end to end, which native gRPC
     needs. gRPC-Web from browsers works either way.
--   `--max-instances 1` keeps a single copy of the in-memory state; remove it
-    once the service is backed by a database.
+-   `--set-env-vars` names the Cloud Spanner database, which the service's
+    account needs access to.
+-   `--max-instances 1` keeps a single instance until running several against
+    one database has been verified.
 -   `--allow-unauthenticated` lets browsers call the service. Requests aren't
     authenticated yet; restrict access before storing real data.
 -   Clients poll with short unary `List*` calls (delta mode, with sync tokens)
     rather than holding connections open, so the default concurrency and request
     timeout are fine (see "Why Polling Instead of Open Streams" in the sync
     doc).
--   Sync tokens are bound to a random data epoch chosen when the service starts,
-    so after a restart (which reloads the seed) clients get
-    `FAILED_PRECONDITION` for their old tokens and run a full sync.
+-   Sync tokens are bound to the database's data epoch, which changes when the
+    data is reset, so clients then get `FAILED_PRECONDITION` for their old
+    tokens and run a full sync.
 
 The Dockerfile only packages the output of `./gradlew installDist`, because
 building `shared/core` needs the Android SDK.

@@ -29,27 +29,23 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Assumptions.assumeTrue
+import org.junit.jupiter.api.Tag
 
-/**
- * End-to-end test of the Spanner debug UI's backend against the Spanner emulator. Skipped unless
- * `SPANNER_EMULATOR_HOST` is set (for example by running `scripts/spanner-emulator.sh`).
- */
+/** End-to-end test of the Spanner debug UI's backend against the Spanner emulator. */
+@Tag(SPANNER_TAG)
 class SpannerDebugTest {
-  private val emulatorHost: String? = System.getenv("SPANNER_EMULATOR_HOST")
   private lateinit var debug: SpannerDebug
   private lateinit var server: Server
   private val http = HttpClient.newHttpClient()
 
   @BeforeTest
   fun setUp() {
-    assumeTrue(!emulatorHost.isNullOrBlank(), "Set SPANNER_EMULATOR_HOST to run")
     val settings =
       SpannerSettings(
         projectId = "test-project",
         instanceId = "test-instance",
         databaseId = "debug-" + UUID.randomUUID().toString().take(8),
-        emulatorHost = emulatorHost,
+        emulatorHost = TestSpannerEmulator.host,
       )
     val recorder = SpannerOperationRecorder()
     debug = SpannerDebug(SpannerConnection.open(settings, recorder), recorder)
@@ -97,7 +93,7 @@ class SpannerDebugTest {
             .build()
         }
     )
-    server = UserDataServer.create(UserDataBackend(), port = 0, spannerDebug = debug)
+    server = UserDataServer.create(sampleBackend(), port = 0, spannerDebug = debug)
     server.start().join()
   }
 

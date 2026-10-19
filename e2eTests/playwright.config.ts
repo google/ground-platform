@@ -16,6 +16,9 @@
 import { defineConfig } from '@playwright/test';
 import {
   APPS,
+  SPANNER_EMULATOR_PORT,
+  SPANNER_EMULATOR_REST_PORT,
+  SPANNER_EMULATOR_SCRIPT,
   USER_DATA_SERVICE_BINARY,
   USER_DATA_SERVICE_PORT,
   USER_DATA_SERVICE_URL,
@@ -63,18 +66,34 @@ export default defineConfig({
       use: { baseURL: appUrl('mobileApp'), viewport: { width: 412, height: 915 }, hasTouch: true },
     },
   ],
+  // Started in order: the service needs the emulator.
   webServer: [
+    {
+      name: 'spannerEmulator',
+      command: `bash "${SPANNER_EMULATOR_SCRIPT}"`,
+      port: SPANNER_EMULATOR_PORT,
+      env: {
+        SPANNER_EMULATOR_GRPC_PORT: String(SPANNER_EMULATOR_PORT),
+        SPANNER_EMULATOR_REST_PORT: String(SPANNER_EMULATOR_REST_PORT),
+      },
+      reuseExistingServer: false,
+      // The first run downloads the emulator.
+      timeout: 300_000,
+      // SIGTERM lets the script stop the emulator, which runs in its own process group.
+      gracefulShutdown: { signal: 'SIGTERM', timeout: 10_000 },
+    },
     {
       name: 'userDataService',
       command: `"${USER_DATA_SERVICE_BINARY}"`,
       url: `${USER_DATA_SERVICE_URL}/healthz`,
       env: {
         PORT: String(USER_DATA_SERVICE_PORT),
-        USER_DATA_STORE: 'memory',
+        SPANNER_EMULATOR_HOST: `localhost:${SPANNER_EMULATOR_PORT}`,
         AUTH_MODE: 'dev',
       },
       reuseExistingServer: false,
-      timeout: 60_000,
+      // Applies the Spanner schema and loads the sample data before it serves.
+      timeout: 120_000,
     },
     {
       name: 'apps',

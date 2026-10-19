@@ -48,7 +48,7 @@ object UserDataServer {
     authenticator: Authenticator = Authenticator.dev(),
     dataResetEnabled: Boolean = false,
   ): Server {
-    // The in-memory backend isn't thread-safe, so every RPC runs on one serialized dispatcher.
+    // The backend isn't thread-safe, so every RPC runs on one serialized dispatcher.
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
     fun <T : Any> bind(service: Class<T>) =
