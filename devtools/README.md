@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Developer Tools (`devtools/`)
+# Collect One Developer Tools (`devtools/`)
 
 This directory contains standalone developer and inspection tools for Ground
 2.0.

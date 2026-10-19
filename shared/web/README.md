@@ -13,9 +13,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-# Ground 2.0 Web Console Module
+# Collect One Web Console Module
 
-`org.groundplatform.v2:web` contains the Ground 2.0 web console: its pages
+`org.groundplatform.v2:web` contains the Collect One web console: its pages
 (surveys, organizations, the Impact page with organizations' published numbers,
 dashboard, survey editor, form editor, and survey creation wizard), its state
 (`WebAppState`, with `WebPage` routing), and its root composable

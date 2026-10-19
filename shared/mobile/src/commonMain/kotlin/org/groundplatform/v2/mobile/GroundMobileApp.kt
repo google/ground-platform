@@ -30,7 +30,7 @@ import org.groundplatform.v2.mobile.ui.MobileAppState
 import org.groundplatform.v2.mobile.ui.onboarding.MobileScreenHost
 
 /**
- * Root of the Ground 2.0 mobile app, shared by every mobile host (`androidApp`, `iosApp`, and the
+ * Root of the Collect One mobile app, shared by every mobile host (`androidApp`, `iosApp`, and the
  * Wasm mobile build): `Sign In` → `Terms of Service` → `Download survey` → `Main Survey UI`.
  *
  * Hosts wire the system Back gesture to [MobileAppState.canHandleBack] and

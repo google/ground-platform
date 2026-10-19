@@ -13,7 +13,7 @@
  */
 package org.groundplatform.v2.app.domain.model
 
-/** Screens in the Ground 2.0 Mobile UI onboarding and survey workflow. */
+/** Screens in the Collect One Mobile UI onboarding and survey workflow. */
 enum class AppScreen(val title: String, val subtitle: String) {
   SIGN_IN(title = "Sign In", subtitle = "Google authentication entry point"),
   TERMS_OF_SERVICE(

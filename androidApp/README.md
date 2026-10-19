@@ -14,10 +14,10 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Android Application
+# Collect One Android Application
 
 This directory is the runnable Android application entry point (`APK` / `AAB`)
-for Ground 2.0.
+for Collect One.
 
 ## Architecture
 
@@ -35,7 +35,7 @@ that `androidApp` and [`../iosApp/`](../iosApp/) deliver consistent behavior.
 -   **`src/androidMain/kotlin/org/groundplatform/v2/android/MainActivity.kt`**:
     Android `ComponentActivity` that enables edge-to-edge rendering, wires
     system back navigation, and mounts `MobileScreenHost` inside `GroundTheme`.
--   **`src/androidMain/res/`**: Ground 2.0 Cloud-Acacia adaptive launcher icon
+-   **`src/androidMain/res/`**: Collect One Cloud-Acacia adaptive launcher icon
     vector drawables and mipmap resources.
 
 ## Configuring the Mapbox Access Token

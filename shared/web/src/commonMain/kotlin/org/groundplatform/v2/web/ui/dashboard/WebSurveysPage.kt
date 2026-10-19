@@ -80,7 +80,7 @@ private val SurveyCardWidth = 320.dp
 private val PageMaxWidth = 1240.dp
 
 /**
- * Landing page of the Ground 2.0 web app: every survey the signed-in user can open, grouped by
+ * Landing page of the Collect One web app: every survey the signed-in user can open, grouped by
  * organization, with search and filter chips (`All`, `My surveys`, one per organization). Selecting
  * a card opens the survey in the dashboard; "Create survey" opens a new survey in the Survey
  * editor.

@@ -74,7 +74,7 @@ import org.groundplatform.v2.web.ui.datacollection.WebCollectDataMenuButton
 import org.groundplatform.v2.web.ui.surveyeditor.SurveyStatusBadgeMenu
 
 /**
- * Top navigation and context toolbar for the Ground 2.0 Web dashboard: the shared [WebAppHeader]
+ * Top navigation and context toolbar for the Collect One Web dashboard: the shared [WebAppHeader]
  * showing the active survey (a [WebSurveySwitcher] dropdown) with its organization and location,
  * and "Manage survey" and "Collect data" ([WebCollectDataMenuButton]) actions.
  */
@@ -277,7 +277,7 @@ fun WebSaveStatusIndicator(
 }
 
 /**
- * Header shared by every page of the Ground 2.0 Web application.
+ * Header shared by every page of the Collect One Web application.
  *
  * Displays, left to right:
  * - An optional [navigationIcon] (e.g. a Close button)

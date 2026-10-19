@@ -14,14 +14,14 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Agent Rules & Guidelines
+# Collect One Agent Rules & Guidelines
 
-These rules govern all AI-assisted research, design, and code changes within Ground 2.0. Follow them strictly when creating or modifying files in this directory and its subdirectories.
+These rules govern all AI-assisted research, design, and code changes within Collect One. Follow them strictly when creating or modifying files in this directory and its subdirectories.
 
 ## Project Design & Architectural Reference
 
 * **Primary Source of Truth**: Refer to [`docs/product/prd.md`](docs/product/prd.md) (and supporting specifications under [`docs/product/`](docs/product/) and [`docs/architecture.md`](docs/architecture.md)) for project-specific product requirements, domain terminology, and system architecture.
-* **UX & Content Guidelines**: Follow the Ground 2.0 terminology, UX writing rules, and core mental model defined in [`docs/ux/content-guidelines.md`](docs/ux/content-guidelines.md) and [`docs/product/terminology.md`](docs/product/terminology.md). Strictly use Ground 2.0 / XForms & XLSForm-aligned terminology across all UI copy, comments, and code:
+* **UX & Content Guidelines**: Follow the Collect One terminology, UX writing rules, and core mental model defined in [`docs/ux/content-guidelines.md`](docs/ux/content-guidelines.md) and [`docs/product/terminology.md`](docs/product/terminology.md). Strictly use Collect One / XForms & XLSForm-aligned terminology across all UI copy, comments, and code:
   * **Survey** (`SurveyDef`): Top-level organizational and ACL container.
   * **Forms** (`FormDef`): Questionnaires / encounter logs (replaces Ground 1.0 "Job").
   * **Data tables / Map layers** (`EntityDatasetDef`): Persistent master data / spatial datasets (replaces Ground 1.0 "Site").
@@ -32,7 +32,7 @@ These rules govern all AI-assisted research, design, and code changes within Gro
 
 ## Open-Source Purity & Confidentiality
 
-* **Strictly Open Source**: Ground 2.0 is a fully public, open-source project released under the Apache 2.0 License.
+* **Strictly Open Source**: Collect One is a fully public, open-source project released under the Apache 2.0 License.
 * **No Proprietary Content**: Never include proprietary code, algorithms, internal libraries, confidential information, internal URLs/identifiers (e.g., internal shortlinks, internal bug IDs, employee LDAPs/handles, or internal endpoints), API keys/secrets, or non-public datasets in submitted code, comments, tests, or assets.
   * **Firebase and other client configs**: This includes Firebase web app configs and their API keys. Builds read them from `FIREBASE_WEB_CONFIG` (a Gradle property, environment variable, or `local.properties`), kept outside the repository.
 * **Public Dependencies & Assets Only**: Use only publicly available, open-source libraries, standard specifications (XForms, XLSForm, GeoJSON, Protobuf), and public-domain/openly licensed test fixtures and assets.

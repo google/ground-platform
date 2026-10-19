@@ -42,10 +42,10 @@ import org.groundplatform.v2.web.ui.surveyeditor.SurveyEditorPage
 import org.groundplatform.v2.web.ui.wizard.CreateSurveyWizardPage
 
 /**
- * Root of the Ground 2.0 web console: the [WebSurveysPage] landing page (surveys the user can open,
- * grouped by organization), organizations, the [ImpactDashboardPage] (published impact numbers),
- * the [WebDashboardPage] (survey map and data tables), the survey creation wizard, and the
- * [SurveyEditorPage].
+ * Root of the Collect One web console: the [WebSurveysPage] landing page (surveys the user can
+ * open, grouped by organization), organizations, the [ImpactDashboardPage] (published impact
+ * numbers), the [WebDashboardPage] (survey map and data tables), the survey creation wizard, and
+ * the [SurveyEditorPage].
  *
  * [initialPage] and [initialOrganizationId] come from the URL hash (see [WebPage.fromHash]), and
  * [onHashChanged] receives the new hash on every page switch.

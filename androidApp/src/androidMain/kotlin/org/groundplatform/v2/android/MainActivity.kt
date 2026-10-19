@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Android launcher entry point hosting the full-screen Ground 2.0 mobile app UI
+ * Android launcher entry point hosting the full-screen Collect One mobile app UI
  * ([MobileScreenHost]).
  */
 @Composable

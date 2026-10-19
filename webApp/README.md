@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Web Console
+# Collect One Web Console
 
-`webApp` is the runnable Ground 2.0 web console (Kotlin/Wasm): survey
+`webApp` is the runnable Collect One web console (Kotlin/Wasm): survey
 administration, organizations, survey and form authoring, map layers, and the
 survey dashboard. It's a thin host: `Main.wasmJs.kt` mounts `WebConsoleApp()`
 from [`../shared/web/`](../shared/web/) and keeps the page in sync with the URL

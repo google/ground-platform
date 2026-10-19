@@ -33,7 +33,7 @@ typealias WizardImpactReadiness =
   org.groundplatform.v2.web.domain.model.editor.WizardImpactReadiness
 
 /**
- * Immutable UI state for the full-page 6-step Ground 2.0 Survey Creation Wizard
+ * Immutable UI state for the full-page 6-step Collect One Survey Creation Wizard
  * (`CreateSurveyWizardPage`).
  */
 data class CreateSurveyWizardUiState(

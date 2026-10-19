@@ -14,15 +14,15 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Protocol Buffer Schemas (`shared/protos/`)
+# Collect One Protocol Buffer Schemas (`shared/protos/`)
 
 This directory houses the canonical Protocol Buffer (`proto3`) schema and gRPC
-service definitions shared across Ground 2.0 mobile, web, and backend
+service definitions shared across Collect One mobile, web, and backend
 components.
 
 ## Core Mental Model & Package Mapping
 
-Ground 2.0's protocol buffer schemas directly model the XForms & Entities
+Collect One's protocol buffer schemas directly model the XForms & Entities
 distinction between stateful master tables and immutable encounter logs:
 
 -   **Data tables / Map layers = Current State (Persistent Master Data)**: Defined
@@ -111,7 +111,7 @@ distinction between stateful master tables and immutable encounter logs:
 
 ## gRPC Backend Services (`SurveyService` & `DataService`)
 
-Ground 2.0 separates control-plane survey configuration (`SurveyService`) from
+Collect One separates control-plane survey configuration (`SurveyService`) from
 high-volume field data synchronization (`DataService`). Because mobile clients
 download the complete `SurveyDef` and entity datasets to operate **100%
 offline**, both services expose read/list RPCs paired with a **single idempotent

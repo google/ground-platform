@@ -16,7 +16,7 @@ package org.groundplatform.v2.app.domain.model
 import org.groundplatform.v2.core.impact.ALL_USERS_ORGANIZATION_ID
 
 /**
- * Role of a person in an [Organization] (the Ground 2.0 counterpart of a Collect Earth Online
+ * Role of a person in an [Organization] (the Collect One counterpart of a Collect Earth Online
  * institution affiliation).
  */
 enum class OrganizationRole(val label: String, val description: String) {

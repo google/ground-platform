@@ -16,7 +16,7 @@
 
 # System & Framework Clients Layer
 
-**TL;DR:** The `client` package houses thin platform-specific (`expect` / `actual`) wrappers and external service clients at the outermost boundary of the Ground 2.0 clients' Clean Architecture.
+**TL;DR:** The `client` package houses thin platform-specific (`expect` / `actual`) wrappers and external service clients at the outermost boundary of the Collect One clients' Clean Architecture.
 
 ## Scope & Purpose
 

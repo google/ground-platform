@@ -26,9 +26,9 @@ import "shared/protos/forms/types.proto";
 import "shared/protos/library/concept.proto";
 import "shared/protos/survey/acl.proto";
 
-// Top-level Ground 2.0 Survey Definition.
+// Top-level Collect One Survey Definition.
 //
-// A Survey is the root organizational container in Ground 2.0, grouping
+// A Survey is the root organizational container in Collect One, grouping
 // together one or more hierarchical Form definitions, preloaded entity
 // registries, and export configurations.
 message SurveyDef {

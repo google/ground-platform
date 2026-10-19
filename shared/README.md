@@ -14,11 +14,11 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Shared Multiplatform Modules (`shared/`)
+# Collect One Shared Multiplatform Modules (`shared/`)
 
 This directory contains all shared Protocol Buffer schemas and Kotlin
 Multiplatform (KMP) / Compose Multiplatform (CMP) modules used across the
-Ground 2.0 platform applications (`androidApp`, `iosApp`, `webApp`, and
+Collect One platform applications (`androidApp`, `iosApp`, `webApp`, and
 `mobileWebApp`).
 
 ## Submodules

@@ -14,10 +14,10 @@
   limitations under the License.
 -->
 
-# Ground 2.0 iOS Application (`iosApp`)
+# Collect One iOS Application (`iosApp`)
 
 This directory is the runnable iOS application entry point (`Xcode` project) for
-Ground 2.0.
+Collect One.
 
 ## Architecture
 

@@ -41,7 +41,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
 
 /**
- * Renders the Ground 2.0 World Lens Badge "Windswept Savanna & Tapered-Wingtip Base" vector logo
+ * Renders the Collect One World Lens Badge "Windswept Savanna & Tapered-Wingtip Base" vector logo
  * (`shared/assets/logo.svg` • Variant 1C-4 • `viewBox="0 0 512 512"`).
  */
 @Composable

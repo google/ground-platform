@@ -175,7 +175,7 @@ private val NoOrganizationOption = Organization(id = "", name = "None (personal 
 /**
  * Full-page 6-step Survey Creation Wizard (`#create-survey`) combining Ground 1.0's field survey
  * wizard and Collect Earth Online's visual classification & sample design wizard, aligned with
- * Ground 2.0's `SurveyEditorPage` and the MAP Impact Measurement framework.
+ * Collect One's `SurveyEditorPage` and the MAP Impact Measurement framework.
  */
 @Composable
 fun CreateSurveyWizardPage(
@@ -2252,7 +2252,7 @@ private fun SharingStepContent(
     }
   }
 
-  // Standard Ground 2.0 SharingContent (without PaneScaffold's nested verticalScroll)
+  // Standard Collect One SharingContent (without PaneScaffold's nested verticalScroll)
   SharingContent(
     uiState = editorUiState,
     actions = editorActions,

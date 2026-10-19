@@ -68,7 +68,7 @@ import org.groundplatform.v2.web.ui.state.CreateSurveyWizardUiState
 import org.groundplatform.v2.web.ui.state.SurveyEditorSection
 import org.groundplatform.v2.web.ui.state.SurveyEditorUiState
 
-/** User intents for the 6-step Ground 2.0 Survey Creation Wizard. */
+/** User intents for the 6-step Collect One Survey Creation Wizard. */
 interface CreateSurveyWizardActions {
   fun startWizard(defaultOrganizationId: String? = null)
 
@@ -140,9 +140,9 @@ interface CreateSurveyWizardActions {
 }
 
 /**
- * Coordinates the 6-step Ground 2.0 Survey Creation Wizard (`CreateSurveyWizardPage`) and keeps its
- * working survey synchronized with [SurveyEditorViewModel] so the embedded Survey area, Sampling
- * design, Form editor, and Sharing components operate on the live draft.
+ * Coordinates the 6-step Collect One Survey Creation Wizard (`CreateSurveyWizardPage`) and keeps
+ * its working survey synchronized with [SurveyEditorViewModel] so the embedded Survey area,
+ * Sampling design, Form editor, and Sharing components operate on the live draft.
  */
 class CreateSurveyWizardViewModel(
   private val surveyRepository: SurveyRepository,

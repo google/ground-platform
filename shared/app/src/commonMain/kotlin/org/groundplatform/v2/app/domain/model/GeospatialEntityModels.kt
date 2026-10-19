@@ -16,7 +16,7 @@ package org.groundplatform.v2.app.domain.model
 import kotlin.math.roundToInt
 
 /**
- * Represents a Ground 2.0 Geospatial Entity (`EntityRecord` in an `EntityDatasetDef` with
+ * Represents a Collect One Geospatial Entity (`EntityRecord` in an `EntityDatasetDef` with
  * `EntityType.GEOSPATIAL`) displayed on the map and in the searchable list view.
  */
 data class GeospatialEntityItem(

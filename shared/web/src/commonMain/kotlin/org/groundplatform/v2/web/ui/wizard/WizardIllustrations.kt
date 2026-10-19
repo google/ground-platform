@@ -41,7 +41,7 @@ import org.groundplatform.v2.web.domain.model.editor.WizardMapFeatureSource
 /**
  * Panoramic hero illustration for Step 1 (`Overview`) of the Survey Creation Wizard.
  *
- * Depicts the end-to-end Ground 2.0 workflow: a sunlit savanna and agroforestry valley with a
+ * Depicts the end-to-end Collect One workflow: a sunlit savanna and agroforestry valley with a
  * dashed survey area boundary, a statistical sample plot grid, field verification pins, and a
  * structured survey form card.
  */

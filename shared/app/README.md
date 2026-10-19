@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Shared App Module
+# Collect One Shared App Module
 
 `org.groundplatform.v2:app` holds the code that the mobile app and the web
 console share: the domain model, the data layer, device and network clients,

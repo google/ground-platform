@@ -14,12 +14,12 @@
   limitations under the License.
 -->
 
-# Ground 2.0
+# Collect One
 
 This directory contains the Kotlin Multiplatform (KMP) and Compose Multiplatform
 (CMP) shared modules, Protocol Buffer data models, platform applications
 (`androidApp`, `iosApp`, `webApp`, `mobileWebApp`), developer tools, and technical documentation
-for **Ground 2.0**.
+for **Collect One**.
 
 ## Directory Structure
 
@@ -103,7 +103,7 @@ for **Ground 2.0**.
 -   **[`shared/web/`](shared/web/)**: Web console module
     (`org.groundplatform.v2:web`): the console's pages, `WebAppState`, and the
     `WebConsoleApp()` root, built on `shared/app`.
--   **[`webApp/`](webApp/)**: Ground 2.0 Web Console application (`wasmJs`) for
+-   **[`webApp/`](webApp/)**: Collect One Web Console application (`wasmJs`) for
     survey administration, map management, and data exploration. A thin host
     for `WebConsoleApp()` from `shared/web`.
 -   **[`mobileWebApp/`](mobileWebApp/)**: The mobile app (`GroundMobileApp()`)

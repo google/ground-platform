@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Shared Mobile Module
+# Collect One Shared Mobile Module
 
-`org.groundplatform.v2:mobile` contains the Ground 2.0 mobile app: its screens,
+`org.groundplatform.v2:mobile` contains the Collect One mobile app: its screens,
 state (`MobileAppState`), and root composable (`GroundMobileApp()`), built on
 the domain, data, and shared UI in [`../app/`](../app/). Every mobile host runs
 the same `GroundMobileApp()`: `androidApp`, `iosApp`, and the Wasm mobile build

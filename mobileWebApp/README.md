@@ -13,9 +13,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-# Ground 2.0 Mobile App for the Web
+# Collect One Mobile App for the Web
 
-`mobileWebApp` runs the Ground 2.0 mobile app (`GroundMobileApp()` from
+`mobileWebApp` runs the Collect One mobile app (`GroundMobileApp()` from
 [`../shared/mobile/`](../shared/mobile/)) in the browser with Kotlin/Wasm, for
 testing and UX review without an Android or iOS build.
 

@@ -239,7 +239,7 @@ val LocalGroundBrandFontFamily = compositionLocalOf<FontFamily> { FontFamily.Def
 
 /**
  * Google Sans Flex font family (`400`..`800`) used across all brand, heading, title, body, and
- * label typography roles in Ground 2.0.
+ * label typography roles in Collect One.
  */
 @Composable
 fun groundFontFamily(): FontFamily =
@@ -261,7 +261,7 @@ fun groundFontFamily(): FontFamily =
 @Composable fun groundBodyFontFamily(): FontFamily = groundFontFamily()
 
 /**
- * Returns the Ground 2.0 Material Design 3 15-role [Typography] scale unified on **Google Sans
+ * Returns the Collect One Material Design 3 15-role [Typography] scale unified on **Google Sans
  * Flex** ([groundFontFamily]).
  */
 @Composable
@@ -466,7 +466,7 @@ fun GroundAlertDialogOverlay(
 }
 
 /**
- * Shared Ground 2.0 Material 3 theme for Mobile and Web surfaces unified on **Google Sans Flex**
+ * Shared Collect One Material 3 theme for Mobile and Web surfaces unified on **Google Sans Flex**
  * ([groundFontFamily]) across all brand, heading, title, body, and label typography roles.
  */
 @Composable

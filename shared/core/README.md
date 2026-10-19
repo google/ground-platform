@@ -14,10 +14,10 @@
   limitations under the License.
 -->
 
-# Ground 2.0 Core Runtime Library (`shared/core`)
+# Collect One Core Runtime Library (`shared/core`)
 
 `org.groundplatform.v2:protoforms` is the pure Kotlin Multiplatform (KMP) domain
-and form runtime library for Ground 2.0. It has **no UI or Compose
+and form runtime library for Collect One. It has **no UI or Compose
 dependencies** and compiles to **Android/JVM (`jvm`)**, **iOS (`iosArm64`,
 `iosSimulatorArm64`, `iosX64`)**, **WebAssembly (`wasmJs`)**, and **JavaScript
 (`js`)**.

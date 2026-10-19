@@ -20,7 +20,7 @@
 
 ## Scope & Purpose
 
-Domain models represent the canonical Ground 2.0 vocabulary (Surveys, Forms, Map layers, Data tables, Geospatial entities, Records/Submissions, Mutations, Organizations, and Settings):
+Domain models represent the canonical Collect One vocabulary (Surveys, Forms, Map layers, Data tables, Geospatial entities, Records/Submissions, Mutations, Organizations, and Settings):
 
 - **Core Runtime Models**:
   - `SurveyModels.kt`: `SurveyPreviewItem`, `SurveyConfig`, `SurveyContent`, and survey access/sync states.

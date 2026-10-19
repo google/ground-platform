@@ -23,7 +23,7 @@ import "shared/protos/survey/acl.proto";
 
 // Multi-tenant organization that surveys can optionally belong to
 // (`SurveyDef.organization_id`): a ministry, university lab, NGO, or community
-// of practice. The Ground 2.0 counterpart of a Collect Earth Online
+// of practice. The Collect One counterpart of a Collect Earth Online
 // institution.
 //
 // Organizations are a convenience and governance layer on top of per-survey
