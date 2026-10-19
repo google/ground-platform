@@ -187,6 +187,21 @@ interface UserDataReader {
   /** Organizations with a member (or invite) for normalized email [email]. */
   fun organizationIdsWithMemberEmail(email: String): List<String>
 
+  /**
+   * Saved revisions of the surveys owned by user [userId] or normalized email [email]
+   * (`SurveyDef.owner_id`, or the ACL's `owner_email`). Blank arguments match nothing.
+   */
+  fun surveysOwnedBy(userId: String, email: String): List<SurveyDef>
+
+  /** Surveys with an ACL entry bound to user [userId]. */
+  fun surveyIdsWithAclUser(userId: String): List<String>
+
+  /** Organizations with a member bound to user [userId]. */
+  fun organizationIdsWithMemberUser(userId: String): List<String>
+
+  /** Saved revisions of the surveys that belong to organization [organizationId]. */
+  fun surveysInOrganization(organizationId: String): List<SurveyDef>
+
   /** Highest applied `client_seq` per scope for [clientId]. */
   fun appliedWatermarks(clientId: String): List<AppliedMutationWatermark>
 }

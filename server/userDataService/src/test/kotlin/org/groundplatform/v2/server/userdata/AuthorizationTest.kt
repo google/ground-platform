@@ -138,6 +138,35 @@ open class AuthorizationTest {
     }
 
   @Test
+  fun surveyListDeltas_leaveOutSurveysTheCallerNeverHad() =
+    runBlocking<Unit> {
+      val token =
+        asCaller(COLLECTOR) { backend.ListSurveyOverviews(ListSurveyOverviewsRequest()) }
+          .next_sync_token
+      asCaller(ADMIN) {
+        backend.MutateSurvey(
+          MutateSurveyRequest(
+            survey_id = MEKONG,
+            mutations =
+              listOf(
+                SurveyMutation(
+                  update_field = SurveyFieldPatch(key = "title", string_value = "Renamed")
+                )
+              ),
+          )
+        )
+      }
+
+      val delta =
+        asCaller(COLLECTOR) {
+          backend.ListSurveyOverviews(ListSurveyOverviewsRequest(sync_token = token))
+        }
+      // Survey lists read only the caller's candidate surveys, so another survey's change doesn't
+      // even show up as a tombstone.
+      assertTrue(delta.overviews.none { it.survey_id == MEKONG })
+    }
+
+  @Test
   fun organizationLists_showOnlyTheCallersOrganizations() =
     runBlocking<Unit> {
       val outsiderOrgs =

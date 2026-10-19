@@ -423,6 +423,65 @@ class SpannerUserDataStore(
         it.getUuid("OrganizationId").toString()
       }
 
+    override fun surveysOwnedBy(userId: String, email: String): List<SurveyDef> {
+      val owners = listOf(userId, email).filter { it.isNotBlank() }.distinct()
+      if (owners.isEmpty()) return emptyList()
+      // Two equality lookups, one through each index (`SurveysByOwner`, `SurveysByOwnerEmail`).
+      val byOwnerId =
+        surveysWhere(
+          Statement.newBuilder("$SURVEY_COLUMNS WHERE OwnerId IN UNNEST(@owners)")
+            .bind("owners")
+            .toStringArray(owners)
+            .build()
+        )
+      val byOwnerEmail =
+        if (email.isBlank()) emptyList()
+        else
+          surveysWhere(
+            Statement.newBuilder("$SURVEY_COLUMNS WHERE OwnerEmail = @email")
+              .bind("email")
+              .to(email)
+              .build()
+          )
+      return (byOwnerId + byOwnerEmail).distinctBy { it.survey_id }
+    }
+
+    override fun surveyIdsWithAclUser(userId: String): List<String> =
+      if (userId.isBlank()) emptyList()
+      else
+        query(
+          Statement.newBuilder(
+              "SELECT DISTINCT SurveyId FROM SurveyAclEntries WHERE UserId = @user"
+            )
+            .bind("user")
+            .to(userId)
+            .build()
+        ) {
+          it.getUuid("SurveyId").toString()
+        }
+
+    override fun organizationIdsWithMemberUser(userId: String): List<String> =
+      if (userId.isBlank()) emptyList()
+      else
+        query(
+          Statement.newBuilder(
+              "SELECT DISTINCT OrganizationId FROM OrganizationMembers WHERE UserId = @user"
+            )
+            .bind("user")
+            .to(userId)
+            .build()
+        ) {
+          it.getUuid("OrganizationId").toString()
+        }
+
+    override fun surveysInOrganization(organizationId: String): List<SurveyDef> =
+      all("$SURVEY_COLUMNS WHERE OrganizationId = @id", organizationId) {
+        decode(SurveyDef.ADAPTER, it).copy(commit_timestamp = it.commitTs())
+      }
+
+    private fun surveysWhere(statement: Statement): List<SurveyDef> =
+      query(statement) { decode(SurveyDef.ADAPTER, it).copy(commit_timestamp = it.commitTs()) }
+
     override fun appliedWatermarks(clientId: String): List<AppliedMutationWatermark> =
       ctx
         .executeQuery(
@@ -894,6 +953,7 @@ class SpannerUserDataStore(
     private const val SURVEY_ACL = "groundplatform.v2.survey.SurveyAcl"
     private const val ACL_ENTRY = "groundplatform.v2.survey.AclEntry"
     private const val CACHED_PROFILE = "groundplatform.v2.survey.CachedProfile"
+    private const val SURVEY_COLUMNS = "SELECT SavedDef AS Record, CommitTs FROM Surveys"
     private const val USER_COLUMNS =
       "SELECT UserId, EmailNormalized, EmailVerified, Profile, AccessEpoch, CreateTime FROM Users"
 
