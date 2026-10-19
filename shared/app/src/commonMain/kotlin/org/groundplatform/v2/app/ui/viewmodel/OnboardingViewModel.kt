@@ -15,7 +15,9 @@ package org.groundplatform.v2.app.ui.viewmodel
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,9 +37,11 @@ import org.groundplatform.v2.app.domain.model.SignInException
 import org.groundplatform.v2.app.domain.model.SimulatedRole
 import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
 import org.groundplatform.v2.app.domain.model.SurveyStats
+import org.groundplatform.v2.app.domain.model.editor.SurveyAccess
 import org.groundplatform.v2.app.domain.repository.AuthRepository
 import org.groundplatform.v2.app.domain.repository.ConnectivityRepository
 import org.groundplatform.v2.app.domain.repository.OrganizationRepository
+import org.groundplatform.v2.app.domain.repository.SurveyDirectoryRepository
 import org.groundplatform.v2.app.domain.repository.SurveyRepository
 import org.groundplatform.v2.app.ui.state.DevSignInUiState
 import org.groundplatform.v2.app.ui.state.OnboardingEvent
@@ -79,6 +83,12 @@ interface OnboardingActions {
   fun downloadSurvey(surveyId: String)
 
   /**
+   * Downloads [surveyId] from [OnboardingUiState.directoryResults] (a public or link-shared survey
+   * the survey list doesn't include).
+   */
+  fun downloadDirectorySurvey(surveyId: String) {}
+
+  /**
    * Asks before removing [surveyId]'s offline copy; downloads it instead if it isn't downloaded.
    */
   fun promptRemoveDownloadedSurvey(surveyId: String)
@@ -114,6 +124,10 @@ class OnboardingViewModel(
   private val scope: CoroutineScope,
   private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
   private val hasCompletedInitialSync: StateFlow<Boolean> = MutableStateFlow(true),
+  /** Finds public and link-shared surveys; null when not connected to the user data service. */
+  private val surveyDirectoryRepository: SurveyDirectoryRepository? = null,
+  /** How long [updateSearchQuery] waits for typing to pause before looking up surveys. */
+  private val directorySearchDelayMillis: Long = 400L,
 ) : OnboardingActions {
   private data class Session(
     val hasAcceptedTerms: Boolean = false,
@@ -126,7 +140,11 @@ class OnboardingViewModel(
     val pendingOfflineImagerySurveyId: String? = null,
     val offlineImageryDownloadedSurveyIds: Set<String> = emptySet(),
     val devSignIn: DevSignInUiState? = null,
+    val directoryResults: List<SurveyPreviewItem> = emptyList(),
+    val isSearchingDirectory: Boolean = false,
   )
+
+  private var directorySearch: Job? = null
 
   private val session = MutableStateFlow(Session())
 
@@ -182,6 +200,14 @@ class OnboardingViewModel(
       pendingOfflineImagerySurveyId = session.pendingOfflineImagerySurveyId,
       offlineImageryDownloadedSurveyIds = session.offlineImageryDownloadedSurveyIds,
       devSignIn = session.devSignIn,
+      directoryResults =
+        surveys
+          .map { it.id }
+          .toSet()
+          .let { listed ->
+            session.directoryResults.filter { it.id !in listed }
+          },
+      isSearchingDirectory = session.isSearchingDirectory,
     )
   }
 
@@ -313,6 +339,55 @@ class OnboardingViewModel(
 
   override fun updateSearchQuery(query: String) {
     session.update { it.copy(searchQuery = query) }
+    searchDirectory(query)
+  }
+
+  /**
+   * Looks up surveys the survey list doesn't include once typing pauses: the survey a share link or
+   * survey ID points to, or public surveys matching [query].
+   */
+  private fun searchDirectory(query: String) {
+    directorySearch?.cancel()
+    val directory = surveyDirectoryRepository
+    val trimmed = query.trim()
+    if (directory == null || trimmed.length < MIN_DIRECTORY_QUERY_LENGTH) {
+      session.update { it.copy(directoryResults = emptyList(), isSearchingDirectory = false) }
+      return
+    }
+    directorySearch = scope.launch {
+      delay(directorySearchDelayMillis)
+      if (!connectivityRepository.isOnline()) return@launch
+      session.update { it.copy(isSearchingDirectory = true) }
+      val results =
+        try {
+          val linkedId = SurveyAccess.surveyIdFromLink(trimmed)
+          if (linkedId != null) listOfNotNull(directory.lookUpSurvey(linkedId))
+          else directory.searchPublicSurveys(trimmed)
+        } catch (e: CancellationException) {
+          throw e
+        } catch (e: Exception) {
+          emptyList()
+        }
+      session.update { it.copy(directoryResults = results, isSearchingDirectory = false) }
+    }
+  }
+
+  override fun downloadDirectorySurvey(surveyId: String) {
+    val survey = session.value.directoryResults.firstOrNull { it.id == surveyId } ?: return
+    val directory = surveyDirectoryRepository ?: return
+    if (!connectivityRepository.isOnline()) {
+      emit(
+        OnboardingEvent.Notice(
+          "Cannot download survey while offline. Connect to the internet and try again."
+        )
+      )
+      return
+    }
+    scope.launch {
+      directory.downloadSurvey(survey)
+      session.update { it.copy(pendingOfflineImagerySurveyId = surveyId) }
+      emit(OnboardingEvent.Notice("Downloading \"${survey.title}\" for offline use."))
+    }
   }
 
   override fun clearSearchQuery() = updateSearchQuery("")
@@ -425,6 +500,9 @@ class OnboardingViewModel(
   }
 
   private companion object {
+    /** Shortest query that looks up public surveys. */
+    const val MIN_DIRECTORY_QUERY_LENGTH = 2
+
     fun filterSurveys(
       surveys: List<SurveyPreviewItem>,
       query: String,

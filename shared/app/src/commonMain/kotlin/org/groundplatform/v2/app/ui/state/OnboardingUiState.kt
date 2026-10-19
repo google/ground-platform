@@ -55,6 +55,13 @@ data class OnboardingUiState(
   val offlineImageryDownloadedSurveyIds: Set<String> = emptySet(),
   /** The development sign-in dialog, while it's open (development builds only). */
   val devSignIn: DevSignInUiState? = null,
+  /**
+   * Surveys matching [searchQuery] that [surveys] doesn't include: public surveys, or the survey a
+   * pasted share link points to.
+   */
+  val directoryResults: List<SurveyPreviewItem> = emptyList(),
+  /** True while [directoryResults] are being looked up. */
+  val isSearchingDirectory: Boolean = false,
 ) {
   val isDownloadSurveyAccessedFromSurveyList: Boolean
     get() = entryOrigin == DownloadSurveyEntryOrigin.SURVEY_LIST

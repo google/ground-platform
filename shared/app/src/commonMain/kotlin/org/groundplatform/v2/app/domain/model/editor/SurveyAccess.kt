@@ -35,6 +35,21 @@ object SurveyAccess {
   fun surveyUrl(surveyId: String): String = "$SURVEY_BASE_URL${surveyId.ifBlank { "draft" }}"
 
   /**
+   * The survey ID in [text] when it is a survey link ([surveyUrl], from any host, optionally with a
+   * query or fragment) or a bare survey ID (a UUID), or `null` otherwise.
+   */
+  fun surveyIdFromLink(text: String): String? {
+    val trimmed = text.trim()
+    val path = trimmed.substringBefore('?').substringBefore('#').trimEnd('/')
+    val candidate =
+      if ("/surveys/" in path) path.substringAfterLast("/surveys/") else path.takeIf { '/' !in it }
+    return candidate?.takeIf { SURVEY_ID.matches(it) }
+  }
+
+  private val SURVEY_ID =
+    Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
+
+  /**
    * The strongest role [email] has in a survey with [sharing] that belongs to [organization] (or
    * `null` for a personal survey), or `null` if they can't open it at all.
    */

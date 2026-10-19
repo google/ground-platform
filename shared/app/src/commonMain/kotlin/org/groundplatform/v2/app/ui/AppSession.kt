@@ -128,6 +128,7 @@ open class AppSession(
       scope = dataHolder.scope,
       connectivityRepository = dataHolder.connectivityRepository,
       hasCompletedInitialSync = dataHolder.hasCompletedInitialSync,
+      surveyDirectoryRepository = dataHolder.surveyDirectoryRepository,
     )
 
   protected var onboardingState by mutableStateOf(onboarding.uiState.value)

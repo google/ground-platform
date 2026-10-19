@@ -156,7 +156,7 @@ fun DownloadSurveyScreen(
             singleLine = true,
             placeholder = {
               Text(
-                text = "Search by name, location, or organization...",
+                text = "Search by name or location, or paste a survey link",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
               )
@@ -251,7 +251,7 @@ fun DownloadSurveyScreen(
         }
 
         // Survey Items List
-        if (filtered.isEmpty()) {
+        if (filtered.isEmpty() && uiState.directoryResults.isEmpty()) {
           Box(
             modifier = Modifier.fillMaxSize().padding(32.dp),
             contentAlignment = Alignment.Center,
@@ -280,11 +280,14 @@ fun DownloadSurveyScreen(
                 )
                 Text(
                   text =
-                    "Try searching by another survey title, keyword, or location (e.g. Brazil, Kenya, Vietnam).",
+                    "Try searching by another survey title, keyword, or location (e.g. Brazil, Kenya, Vietnam), or paste a survey link.",
                   style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center,
                 )
+                if (uiState.isSearchingDirectory) {
+                  CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                }
               }
             }
           }
@@ -307,6 +310,28 @@ fun DownloadSurveyScreen(
                 onToggleDownloadClick = { actions.promptRemoveDownloadedSurvey(survey.id) },
                 onOpenSurveyClick = { actions.openSurvey(survey.id) },
               )
+            }
+            if (uiState.directoryResults.isNotEmpty()) {
+              Text(
+                text = "Public and link-shared surveys (${uiState.directoryResults.size})",
+                style =
+                  MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    letterSpacing = 0.6.sp,
+                  ),
+                modifier = Modifier.padding(start = 2.dp, top = 8.dp),
+              )
+              uiState.directoryResults.forEach { survey ->
+                SurveyListItemCard(
+                  survey = survey,
+                  organizationName = uiState.organizationNames[survey.organizationId],
+                  isDarkTheme = isDarkTheme,
+                  onDownloadClick = { actions.downloadDirectorySurvey(survey.id) },
+                  onToggleDownloadClick = { actions.downloadDirectorySurvey(survey.id) },
+                  onOpenSurveyClick = { actions.downloadDirectorySurvey(survey.id) },
+                )
+              }
             }
             Spacer(modifier = Modifier.height(12.dp))
           }

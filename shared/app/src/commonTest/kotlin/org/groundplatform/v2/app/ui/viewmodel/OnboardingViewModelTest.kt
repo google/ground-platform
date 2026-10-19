@@ -41,6 +41,9 @@ import org.groundplatform.v2.app.data.repository.SurveyRepositoryImpl
 import org.groundplatform.v2.app.domain.model.AppScreen
 import org.groundplatform.v2.app.domain.model.DownloadSurveyEntryOrigin
 import org.groundplatform.v2.app.domain.model.SimulatedRole
+import org.groundplatform.v2.app.domain.model.SurveyPreviewItem
+import org.groundplatform.v2.app.domain.model.editor.SurveyAccess
+import org.groundplatform.v2.app.domain.repository.SurveyDirectoryRepository
 import org.groundplatform.v2.app.ui.state.OnboardingEvent
 
 /**
@@ -49,7 +52,44 @@ import org.groundplatform.v2.app.ui.state.OnboardingEvent
  * would not see its own state updates until the block ends.
  */
 class OnboardingViewModelTest {
-  private class Fixture(authClient: AuthClient = FakeAuthClient()) {
+  /** A directory with one public survey and one survey only reachable by its share link. */
+  private class FakeDirectory(
+    private val otherPublicSurveys: List<SurveyPreviewItem> = emptyList()
+  ) : SurveyDirectoryRepository {
+    val publicSurvey =
+      preview(id = "11111111-1111-4111-8111-111111111111", title = "Public mangroves")
+    val linkedSurvey = preview(id = "22222222-2222-4222-8222-222222222222", title = "Linked plots")
+    val downloaded = mutableListOf<SurveyPreviewItem>()
+
+    override suspend fun searchPublicSurveys(query: String) =
+      (listOf(publicSurvey) + otherPublicSurveys).filter {
+        it.title.contains(query, ignoreCase = true)
+      }
+
+    override suspend fun lookUpSurvey(surveyId: String) =
+      listOf(publicSurvey, linkedSurvey).firstOrNull { it.id == surveyId }
+
+    override suspend fun downloadSurvey(survey: SurveyPreviewItem) {
+      downloaded += survey
+    }
+
+    private fun preview(id: String, title: String) =
+      SurveyPreviewItem(
+        id = id,
+        title = title,
+        description = "",
+        location = "",
+        coordinatesLabel = "",
+        offlineSizeLabel = "",
+        isDownloaded = false,
+        entityCount = 0,
+      )
+  }
+
+  private class Fixture(
+    authClient: AuthClient = FakeAuthClient(),
+    directory: SurveyDirectoryRepository? = null,
+  ) {
     val store = seededStore()
     val scope = CoroutineScope(Dispatchers.Unconfined + Job())
     val surveyRepository = SurveyRepositoryImpl(store)
@@ -59,6 +99,8 @@ class OnboardingViewModelTest {
         surveyRepository = surveyRepository,
         organizationRepository = OrganizationRepositoryImpl(store),
         scope = scope,
+        surveyDirectoryRepository = directory,
+        directorySearchDelayMillis = 0L,
       )
     val events = mutableListOf<OnboardingEvent>()
 
@@ -316,5 +358,38 @@ class OnboardingViewModelTest {
     f.viewModel.skipOfflineImageryDownload()
     assertNull(f.uiState.pendingOfflineImagerySurveyId)
     assertFalse(remote.id in f.uiState.offlineImageryDownloadedSurveyIds)
+  }
+
+  @Test
+  fun searchQuery_findsPublicSurveysTheListDoesNotInclude() {
+    val directory = FakeDirectory()
+    val f = Fixture(directory = directory)
+
+    f.viewModel.updateSearchQuery("mangroves")
+    assertEquals(listOf(directory.publicSurvey), f.uiState.directoryResults)
+
+    f.viewModel.clearSearchQuery()
+    assertTrue(f.uiState.directoryResults.isEmpty())
+  }
+
+  @Test
+  fun pastedShareLink_findsTheLinkedSurvey_andDownloadsIt() {
+    val directory = FakeDirectory()
+    val f = Fixture(directory = directory)
+
+    f.viewModel.updateSearchQuery(SurveyAccess.surveyUrl(directory.linkedSurvey.id))
+    assertEquals(listOf(directory.linkedSurvey), f.uiState.directoryResults)
+
+    f.viewModel.downloadDirectorySurvey(directory.linkedSurvey.id)
+    assertEquals(listOf(directory.linkedSurvey), directory.downloaded)
+  }
+
+  @Test
+  fun directoryResults_leaveOutSurveysAlreadyListed() {
+    val listed = Fixture().uiState.surveys.first()
+    val f = Fixture(directory = FakeDirectory(otherPublicSurveys = listOf(listed)))
+
+    f.viewModel.updateSearchQuery(listed.title)
+    assertTrue(f.uiState.directoryResults.none { it.id == listed.id })
   }
 }
