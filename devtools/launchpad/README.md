@@ -58,9 +58,15 @@ proxy URL; links to the other services follow whichever host you used).
 | Spanner emulator (optional) | 9010, 9020 | `.` | `scripts/spanner-emulator.sh` |
 
 If the Spanner emulator is running when the server starts, the launchpad
-starts the server with `SPANNER_EMULATOR_HOST=localhost:9010`. If you start the
-emulator after the launchpad started the server without it, the launchpad
-restarts the server so the **Spanner data** page can browse it.
+starts the server with `SPANNER_EMULATOR_HOST=localhost:9010` and
+`USER_DATA_STORE=spanner`, so the server stores its data in the emulator
+(loading the sample data into the empty database) and the **Spanner data** page
+shows what the apps read. The emulator keeps data in memory, so restarting it
+starts over from the sample data; restarting only the server keeps it. Set
+`USER_DATA_STORE=memory` when starting the launchpad to keep the server's data
+in memory instead. Without the emulator, the server serves data from memory. If
+you start the emulator after the launchpad started the server without it, the
+launchpad restarts the server to use it.
 
 The server, web console, and mobile app are separate Gradle builds that all
 include the `shared/` builds, so building two at once makes them overwrite each

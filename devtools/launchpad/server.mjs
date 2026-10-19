@@ -127,7 +127,7 @@ const SERVICE_DEFINITIONS = [
     name: 'Spanner emulator',
     code: 'SPANNER',
     category: 'AUX',
-    role: 'Local Cloud Spanner database (gRPC :9010, REST :9020). The server uses it if running when the server starts',
+    role: 'Local Cloud Spanner database (gRPC :9010, REST :9020). The server stores its data here if it is running when the server starts',
     port: 9010,
     auxPort: 9020,
     healthCheck: { type: 'tcp', port: 9010, fallbackPort: 9020 },
@@ -484,8 +484,8 @@ let spannerRestartInFlight = false;
 
 /**
  * The server only connects to Spanner if SPANNER_EMULATOR_HOST is set when it starts, so when the
- * emulator comes up after the launchpad started the server without it, restarts the server so its
- * Spanner data page works. Servers started elsewhere are left alone.
+ * emulator comes up after the launchpad started the server without it, restarts the server so it
+ * stores its data there. Servers started elsewhere are left alone.
  */
 function restartServerForSpannerIfNeeded() {
   const emulator = serviceStates.get('spanner-emulator');
@@ -597,9 +597,14 @@ async function startService(id, options = {}) {
     const isSpannerActive = await checkTcpPort(9010);
     if (options.useSpanner || isSpannerActive) {
       childEnv.SPANNER_EMULATOR_HOST = 'localhost:9010';
+      // Stores the server's data in the emulator (loading the sample data into an empty
+      // database), so the app reads what the Spanner data page shows. USER_DATA_STORE=memory
+      // in the launchpad's environment keeps data in memory instead.
+      childEnv.USER_DATA_STORE = childEnv.USER_DATA_STORE || 'spanner';
       appendLog(
         service,
-        `[LAUNCHPAD] Spanner emulator is running, so starting the server with SPANNER_EMULATOR_HOST=localhost:9010`,
+        `[LAUNCHPAD] Spanner emulator is running, so starting the server with ` +
+          `SPANNER_EMULATOR_HOST=localhost:9010 USER_DATA_STORE=${childEnv.USER_DATA_STORE}`,
         'stdout'
       );
     }
