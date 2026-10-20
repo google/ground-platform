@@ -35,8 +35,8 @@ message RecordMetadata {
   // Timestamp when the form entry was completed and finalized.
   google.protobuf.Timestamp end_time = 3;
 
-  // Timestamp or date representing the day the form was completed.
-  google.protobuf.Timestamp today = 4;
+  // Date representing the day the form was completed.
+  google.type.Date today = 4;
 
   // Unique hardware identifier, Android ID, or install UUID of the client
   // device.
