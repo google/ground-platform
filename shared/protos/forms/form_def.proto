@@ -384,13 +384,13 @@ message EntityDeclaration {
   repeated EntityPropertyMapping property_mappings = 7;
 }
 
-// Destination endpoint, transmission policies, and cryptographic parameters
-// for sending finalized form records.
+// Destination endpoint and transmission policies for sending finalized form
+// records.
 //
 // Clients and form editors are expected to preserve all submission metadata
-// (including base64_rsa_public_key) for round-trip compatibility with XForms,
-// even if the client relies on transport-layer security (TLS/HTTPS or
-// gRPC) rather than payload encryption.
+// (including base64_rsa_public_key) for round-trip compatibility with XForms.
+// Collect One does not encrypt submission payloads; it relies on
+// transport-layer security (TLS/HTTPS or gRPC).
 message SubmissionConfig {
   // Optional custom endpoint URL or gRPC service address to send submissions
   // to.
@@ -399,8 +399,8 @@ message SubmissionConfig {
   // Transmission method (e.g., "POST", "GRPC").
   string method = 2;
 
-  // Base64-encoded RSA public key required to enable asymmetric payload
-  // encryption.
+  // XForms `base64RsaPublicKey` submission attribute. Preserved for round-trip
+  // fidelity only; Collect One does not encrypt submissions with it.
   string base64_rsa_public_key = 3;
 
   // If true, finalized records are queued and transmitted automatically upon
@@ -445,7 +445,7 @@ message ModelDef {
   // parameters.
   RecordMetadata metadata = 7;
 
-  // Destination endpoints, transmission policies, and encryption keys.
+  // Destination endpoints and transmission policies.
   SubmissionConfig submission = 8;
 
   // Typed extension payloads for custom, vendor, or experimental model
