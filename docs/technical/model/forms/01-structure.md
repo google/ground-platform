@@ -120,6 +120,18 @@ model {
         name: "years_active"
         type: TYPE_INT32
       }
+      fields {
+        name: "meta"
+        type: TYPE_MESSAGE
+        fields {
+          name: "instanceID"
+          type: TYPE_STRING
+        }
+        fields {
+          name: "instanceName"
+          type: TYPE_STRING
+        }
+      }
     }
   }
 
@@ -186,4 +198,4 @@ Within this unified schema:
 *   External applications and intents are declared with typed `intent` controls
     and bindings.
 *   Multi-lingual dictionaries are encapsulated inside `model.translations` (see
-    [Languages](#languages)).
+    [Languages](09-translations.md)).

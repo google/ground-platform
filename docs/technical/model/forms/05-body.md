@@ -24,8 +24,8 @@ selection choices.
 view {
   components {
     control {
-      field_path: "given_name"
-      control_type: INPUT
+      field_ref: "given_name"
+      type: CONTROL_INPUT
       label {
         text: "Enter given name:"
       }
@@ -33,8 +33,8 @@ view {
   }
   components {
     control {
-      field_path: "family_name"
-      control_type: INPUT
+      field_ref: "family_name"
+      type: CONTROL_INPUT
       label {
         text: "Enter family name:"
       }
@@ -42,8 +42,8 @@ view {
   }
   components {
     control {
-      field_path: "years_active"
-      control_type: INPUT
+      field_ref: "years_active"
+      type: CONTROL_INPUT
       label {
         text: "Years active:"
       }
@@ -78,9 +78,9 @@ UI components are organized recursively via `ComponentDef`:
 | --------- | ------------ | ----------------------------------------------- |
 | `control` | `ControlDef` | Individual input widget tied to a `field_path`. |
 | `group`   | `GroupDef`   | Visual container grouping related controls or   |
-:           :              : sub-groups (see [Groups](#groups)).             :
+:           :              : sub-groups (see [Groups](06-groups.md)).       :
 | `repeat`  | `RepeatDef`  | Dynamic repeating section (see                  |
-:           :              : [Repeats](#repeats)).                           :
+:           :              : [Repeats](07-repeats.md)).                     :
 
 ## Control Fields
 
@@ -88,10 +88,10 @@ Within each `ControlDef`:
 
 | Field           | Type                  | Description                      |
 | --------------- | --------------------- | -------------------------------- |
-| `field_path`    | `string`              | Target field path within the     |
+| `field_ref`     | `string`              | Target field path within the     |
 :                 :                       : record schema.                   :
-| `control_type`  | `ControlType`         | Widget type (`INPUT`,            |
-:                 :                       : `SELECT_ONE`, etc.).             :
+| `type`          | `ControlType`         | Widget type (`CONTROL_INPUT`,    |
+:                 :                       : `CONTROL_SELECT_ONE`, etc.).     :
 | `label`         | `LocalizedString`     | Primary prompt text, optionally  |
 :                 :                       : localized.                       :
 | `hint`          | `LocalizedString`     | Secondary guidance text,         |
@@ -103,7 +103,7 @@ Within each `ControlDef`:
 :                 :                       : selection or ranking.            :
 | `itemset`       | `ItemSetDef`          | Dynamic selection choices        |
 :                 :                       : populated via a [Secondary       :
-:                 :                       : Instance](#secondary-instances). :
+:                 :                       : Instance](03-instances.md#secondary-instances). :
 | `range_config`  | `RangeConfig`         | Bounds and tick configuration    |
 :                 :                       : for `RANGE` controls.            :
 | `upload_config` | `UploadConfig`        | Media type and file filter rules |
@@ -232,5 +232,4 @@ standard XForms bindings and appearances:
 The visual styling and layout of form controls and groups are customized using
 the `appearance` string. Standard XLSForm appearance keywords (such as
 `compact`, `quick`, `minimal`, `table-list`, `bearing`, `image-map`) are fully
-supported. Appearance attributes can also invoke
-[external applications](#declaring-external-application).
+supported. Appearance attributes can also invoke external applications.

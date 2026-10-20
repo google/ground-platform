@@ -111,7 +111,7 @@ data {
 Any value specified in `default_values` acts as the initial default value. When
 rendered, the corresponding form control displays this default value to the
 user. Default values for binary media fields hold
-[file endpoint URIs](#file-endpoints).
+[file endpoint URIs](11-uri.md#file-endpoints).
 
 ### Form-Level Attributes
 
@@ -136,7 +136,7 @@ Every primary instance includes a metadata block for tracking:
 *   `instance_id`: Globally unique identifier (UUID) for this submission record.
 *   `instance_name`: Computed human-readable label for the record.
 *   `audit`: Client audit log reference.
-*   `entity`: Entity create/update declarations (see [Entities](#entities)).
+*   `entity`: Entity create/update declarations (see [Entities](18-entities.md)).
 
 
 ## Secondary Instances
@@ -149,7 +149,7 @@ expressions via `instance('id')` (for example,
 
 An internal secondary instance is embedded directly within
 `FormDef.model.secondary_instances`. Each entry stores key-value row maps and
-may reference [translated strings](#languages) or [media](#media) identifiers.
+may reference [translated strings](09-translations.md) or [media](10-media.md) identifiers.
 
 The snippet below defines two embedded lookup tables (`regions` and `districts`)
 in Protocol Buffer text format:

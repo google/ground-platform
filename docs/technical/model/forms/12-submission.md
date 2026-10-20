@@ -121,4 +121,4 @@ attached media files, and encapsulates the symmetric key using the public RSA
 key in an `EncryptedSubmissionManifest`.
 
 Full details on encryption protocols and manifest schemas can be found in the
-[Encryption](#encryption) section.
+[Encryption](16-encryption.md) section.

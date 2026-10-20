@@ -162,4 +162,4 @@ model {
 
 Multi-media attachments (images, audio prompts, and video clips) can also be
 localized per language by attaching `MediaRef` directly inside
-`LocalizedString`, as described in the [Media](#media) section.
+`LocalizedString`, as described in the [Media](10-media.md) section.
