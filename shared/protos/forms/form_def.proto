@@ -91,7 +91,7 @@ message RecordSchema {
   string sms_prefix = 4;
 
   // Delimiter character separating tags and values in compact SMS/text
-  // representations (defaults to single space ' ' if unset).
+  // representations (defaults to single space ' ' if empty).
   string sms_delimiter = 5;
 }
 
@@ -324,13 +324,15 @@ message ActionDef {
   // Path to the destination field where the action result will be written.
   string target_field = 3;
 
-  // Expression evaluated dynamically to compute the value assigned to
-  // target_field.
-  string value_expression = 4;
+  oneof value_source {
+    // Expression evaluated dynamically to compute the value assigned to
+    // target_field.
+    string value_expression = 4;
 
-  // Static literal constant assigned to target_field when value_expression is
-  // not used.
-  TypedValue literal_value = 5;
+    // Static literal constant assigned to target_field when value_expression is
+    // not used.
+    TypedValue literal_value = 5;
+  }
 }
 
 // Offline synchronization and optimistic concurrency metadata for an entity.

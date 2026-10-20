@@ -228,7 +228,7 @@ object TextProtoSerializer {
       addEnum("type", msg.type.name)
     }
     addString("target_field", msg.target_field)
-    addString("value_expression", msg.value_expression)
+    msg.value_expression?.let { addString("value_expression", it) }
     msg.literal_value?.let { addMessage("literal_value", encodeTypedValue(it)) }
   }
 
@@ -650,15 +650,18 @@ object TextProtoSerializer {
       video_uri = node.getString("video_uri"),
     )
 
-  private fun decodeActionDef(node: TextProtoMessage): ActionDef =
-    ActionDef(
+  private fun decodeActionDef(node: TextProtoMessage): ActionDef {
+    val literal = node.getMessageOrNull("literal_value")?.let { decodeTypedValue(it) }
+    val valueExpr = if (literal != null) null else node.getStringOrNull("value_expression")
+    return ActionDef(
       events =
         node.getIdentifiers("events").map { parseEnum(it, EventType.EVENT_TYPE_UNSPECIFIED) },
       type = parseEnum(node.getIdentifierOrNull("type"), ActionType.ACTION_TYPE_UNSPECIFIED),
       target_field = node.getString("target_field"),
-      value_expression = node.getString("value_expression"),
-      literal_value = node.getMessageOrNull("literal_value")?.let { decodeTypedValue(it) },
+      value_expression = valueExpr,
+      literal_value = literal,
     )
+  }
 
   private fun decodeEntityDeclaration(node: TextProtoMessage): EntityDeclaration =
     EntityDeclaration(

@@ -316,7 +316,9 @@ object ProtoJsonSerializer {
         addEnum("type", msg.type.name)
       }
       addString("target_field", msg.target_field)
-      addString("value_expression", msg.value_expression)
+      if (msg.value_expression != null) {
+        addString("value_expression", msg.value_expression)
+      }
       msg.literal_value?.let {
         encodeTypedValueElement(it, snake)?.let { el -> addElement("literal_value", el) }
       }
@@ -778,15 +780,18 @@ object ProtoJsonSerializer {
       video_uri = obj.getProtoString("video_uri"),
     )
 
-  private fun decodeActionDef(obj: JsonObject): ActionDef =
-    ActionDef(
+  private fun decodeActionDef(obj: JsonObject): ActionDef {
+    val literal = obj.getProtoElement("literal_value")?.let { decodeTypedValueElement(it) }
+    val valueExpr = if (literal != null) null else obj.getProtoStringOrNull("value_expression")
+    return ActionDef(
       events =
         obj.getProtoStrings("events").map { parseEnum(it, EventType.EVENT_TYPE_UNSPECIFIED) },
       type = parseEnum(obj.getProtoStringOrNull("type"), ActionType.ACTION_TYPE_UNSPECIFIED),
       target_field = obj.getProtoString("target_field"),
-      value_expression = obj.getProtoString("value_expression"),
-      literal_value = obj.getProtoElement("literal_value")?.let { decodeTypedValueElement(it) },
+      value_expression = valueExpr,
+      literal_value = literal,
     )
+  }
 
   private fun decodeEntityDeclaration(obj: JsonObject): EntityDeclaration =
     EntityDeclaration(

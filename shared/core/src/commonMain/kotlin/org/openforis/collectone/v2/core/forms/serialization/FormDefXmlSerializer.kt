@@ -483,11 +483,12 @@ internal object FormDefXmlSerializer {
   private fun buildActionElement(action: ActionDef, rootName: String): XmlElement {
     val eventStr = action.events.mapNotNull { mapEventTypeToString(it) }.joinToString(" ")
     val cleanTarget = action.target_field.removePrefix("/")
+    val valueExpr = action.value_expression
     val attrs = buildMap {
       if (eventStr.isNotEmpty()) put("event", eventStr)
       put("ref", "/$rootName/$cleanTarget")
-      if (action.type != ActionType.ACTION_SET_GEOPOINT && action.value_expression.isNotEmpty()) {
-        put("value", action.value_expression)
+      if (action.type != ActionType.ACTION_SET_GEOPOINT && !valueExpr.isNullOrEmpty()) {
+        put("value", valueExpr)
       }
     }
 
@@ -495,7 +496,7 @@ internal object FormDefXmlSerializer {
       ActionType.ACTION_SET_GEOPOINT -> XmlElement(name = "odk:setgeopoint", attributes = attrs)
       else -> {
         val children =
-          if (action.value_expression.isEmpty() && action.literal_value != null) {
+          if (valueExpr.isNullOrEmpty() && action.literal_value != null) {
             listOf(XmlText(formatTypedValue(action.literal_value)))
           } else {
             emptyList()

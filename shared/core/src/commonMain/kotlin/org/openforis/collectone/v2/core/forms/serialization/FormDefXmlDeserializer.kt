@@ -515,7 +515,7 @@ internal object FormDefXmlDeserializer {
           events = events,
           type = ActionType.ACTION_SET_VALUE,
           target_field = targetField,
-          value_expression = valueExpr,
+          value_expression = if (literal != null) null else valueExpr.ifEmpty { null },
           literal_value = literal,
         )
       }

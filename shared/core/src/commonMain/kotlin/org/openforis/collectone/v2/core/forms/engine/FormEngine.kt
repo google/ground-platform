@@ -820,10 +820,11 @@ object FormEngine {
           }
         }
         action.type == ActionType.ACTION_SET_VALUE ||
-          action.value_expression.isNotEmpty() ||
+          !action.value_expression.isNullOrEmpty() ||
           action.literal_value != null -> {
+          val exprStr = action.value_expression
           val newFv: FieldValue? =
-            if (action.value_expression.isNotEmpty()) {
+            if (!exprStr.isNullOrEmpty()) {
               val tempRecord =
                 RecordInstance(
                   form_id = compiled.formDef.form_id,
@@ -840,7 +841,7 @@ object FormEngine {
                   environment = environment,
                   contextCanonicalPath = targetCanonical,
                 )
-              val expr = compiled.compileExpression(action.value_expression)
+              val expr = compiled.compileExpression(exprStr)
               expr?.evaluateFieldValue(evalCtx, targetType)
             } else if (action.literal_value != null) {
               FieldValue(scalar_value = action.literal_value)
