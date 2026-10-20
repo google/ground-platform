@@ -151,7 +151,7 @@ The [client audit logs](../technical/model/forms/17-client-audit-logs.md) and su
 *   **UNFCCC REDD+ / FRA**: countries citing CEO or Ground in FREL/FRL, BTR, or FRA Remote Sensing Survey submissions (desk review, done each year).
 *   **GD-PAME**: PAME assessments filed through the Ground PAME pack, and the protected area they cover.
 *   **ML pipelines**: reference samples used in Forest Data Partnership commodity models or national LULC maps, plus the accuracy gain from adding Ground samples.
-*   **Funding**: letters of agreement and grants that name Ground (e.g., the $100,000 DRSRS Kenya LoA). Count the funding and the hectares those agreements fund.
+*   **Funding**: letters of agreement and grants that name Ground (e.g., the DRSRS Kenya LoA). Count the funding and the hectares those agreements fund.
 *   **Capacity**: training → activation funnel. Share of trainees whose organization creates its own survey within 90 days (in Nandi County, Kenya, 4 trained coordinators led cooperatives to map 2,000+ additional plots independently, about 60% coverage).
 
 ## From Outcomes to MAP Impact

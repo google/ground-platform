@@ -110,7 +110,7 @@ features is reflected in a rapidly expanding institutional pipeline:
 
 *   **DRSRS Kenya**: A planned coffee georeferencing campaign led by the
     Directorate of Resource Surveys and Remote Sensing (DRSRS) is backed by a
-    finalized **$100,000 Letter of Agreement (LoA)**.
+    finalized **Letter of Agreement (LoA)**.
 *   **Sierra Leone**: The Produce and Monitoring Board (SL/PMB), in
     collaboration with the European Forest Institute (EFI), is planning a pilot
     mapping cocoa plots, building on an initial trial that collected 150 points.
