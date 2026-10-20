@@ -51,7 +51,7 @@ message EncryptedSubmissionManifest {
 
   // Ephemeral 256-bit AES symmetric key encrypted with the recipient's RSA
   // public key.
-  bytes base64_encrypted_key = 4;
+  bytes encrypted_key = 4;
 
   // Encrypted primary ProtoForms record payload envelope.
   EncryptedFile primary_record = 5;
@@ -62,5 +62,5 @@ message EncryptedSubmissionManifest {
 
   // Cryptographic digital signature (RSA-SHA256) verifying manifest
   // authenticity and integrity.
-  bytes base64_encrypted_signature = 7;
+  bytes encrypted_signature = 7;
 }
