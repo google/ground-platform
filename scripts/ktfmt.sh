@@ -81,7 +81,7 @@ while IFS= read -r -d '' f; do
   files+=("${f}")
 done < <(
   find . \
-    \( -name build -o -name .gradle -o -name .kotlin -o -name node_modules -o -name kotlin-js-store \) -prune \
+    \( -name .git -o -name build -o -name .gradle -o -name .kotlin -o -name node_modules -o -name kotlin-js-store \) -prune \
     -o -type f \( -name '*.kt' -o -name '*.kts' \) -print0 | sort -z
 )
 

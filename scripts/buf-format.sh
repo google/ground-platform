@@ -76,6 +76,10 @@ if [[ ! -x "${buf}" ]] || [[ "$(sha256 "${buf}")" != "${sha}" ]]; then
 fi
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ ! -d "${repo_root}/shared/protos" ]]; then
+  echo "Directory shared/protos does not exist. Skipping buf format." >&2
+  exit 0
+fi
 cd "${repo_root}/shared/protos"
 
 if [[ "${mode}" == "fix" ]]; then
