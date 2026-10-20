@@ -42,14 +42,16 @@ message RecordMetadata {
   // device.
   string device_id = 5;
 
-  // International Mobile Subscriber Identity (IMSI) of the client SIM, if
-  // available.
+  // International Mobile Subscriber Identity (IMSI) of the client SIM.
+  // Note: Highly restricted or unavailable on modern mobile OSs (e.g., Android 10+, iOS).
   string subscriber_id = 6;
 
-  // SIM card serial number (ICCID) of the client device, if available.
+  // SIM card serial number (ICCID) of the client device.
+  // Note: Highly restricted or unavailable on modern mobile OSs (e.g., Android 10+, iOS).
   string sim_serial = 7;
 
-  // Phone number of the client device, if available.
+  // Phone number of the client device.
+  // Note: Restricted or unavailable on modern mobile OSs without explicit user consent/permissions.
   string phone_number = 8;
 
   // Relative filename or URI pointing to the attached audit log file (e.g.,
