@@ -687,7 +687,7 @@ object FormEngine {
       currentMeta = currentMeta.copy(start_time = currentInstant)
     }
     if (isFirstLoad && currentMeta.today == null) {
-      currentMeta = currentMeta.copy(today = currentInstant)
+      currentMeta = currentMeta.copy(today = currentDate)
     }
     if (isFinalize) {
       currentMeta = currentMeta.copy(end_time = currentInstant)

@@ -493,7 +493,7 @@ object ProtoJsonSerializer {
       addString("instance_id", msg.instance_id)
       msg.start_time?.let { addStringAlways("start_time", formatRfc3339Timestamp(it)) }
       msg.end_time?.let { addStringAlways("end_time", formatRfc3339Timestamp(it)) }
-      msg.today?.let { addStringAlways("today", formatRfc3339Timestamp(it)) }
+      msg.today?.let { addStringAlways("today", TemporalUtils.formatDate(it)) }
       addString("device_id", msg.device_id)
       addString("subscriber_id", msg.subscriber_id)
       addString("sim_serial", msg.sim_serial)
@@ -963,7 +963,7 @@ object ProtoJsonSerializer {
       instance_id = obj.getProtoString("instance_id"),
       start_time = obj.getProtoTimestamp("start_time"),
       end_time = obj.getProtoTimestamp("end_time"),
-      today = obj.getProtoTimestamp("today"),
+      today = obj.getProtoDate("today"),
       device_id = obj.getProtoString("device_id"),
       subscriber_id = obj.getProtoString("subscriber_id"),
       sim_serial = obj.getProtoString("sim_serial"),

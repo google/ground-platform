@@ -149,7 +149,7 @@ internal object RecordInstanceXmlSerializer {
           instance_id = instanceId,
           start_time = startTimeStr.takeIf { it.isNotEmpty() }?.let { parseIsoInstant(it) },
           end_time = endTimeStr.takeIf { it.isNotEmpty() }?.let { parseIsoInstant(it) },
-          today = todayStr.takeIf { it.isNotEmpty() }?.let { parseIsoInstantOrDate(it) },
+          today = todayStr.takeIf { it.isNotEmpty() }?.let { parseDate(it) },
           device_id = deviceId,
           subscriber_id = subscriberId,
           sim_serial = simSerial,
@@ -408,7 +408,7 @@ internal object RecordInstanceXmlSerializer {
           }
           meta.start_time?.let { add(textElement("timeStart", formatIsoInstant(it))) }
           meta.end_time?.let { add(textElement("timeEnd", formatIsoInstant(it))) }
-          meta.today?.let { add(textElement("today", formatIsoInstant(it))) }
+          meta.today?.let { add(textElement("today", formatDate(it))) }
           if (meta.device_id.isNotEmpty()) {
             add(textElement("deviceID", meta.device_id))
           }

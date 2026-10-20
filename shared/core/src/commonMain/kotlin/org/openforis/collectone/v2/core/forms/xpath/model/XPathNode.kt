@@ -285,7 +285,7 @@ sealed interface XPathNode {
       }
       metadata.start_time?.let { fields.add("timeStart" to TypedValue(timestamp_value = it)) }
       metadata.end_time?.let { fields.add("timeEnd" to TypedValue(timestamp_value = it)) }
-      metadata.today?.let { fields.add("today" to TypedValue(timestamp_value = it)) }
+      metadata.today?.let { fields.add("today" to TypedValue(date_value = it)) }
       if (metadata.device_id.isNotEmpty()) {
         fields.add("deviceID" to TypedValue(string_value = metadata.device_id))
       }

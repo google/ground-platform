@@ -13,6 +13,7 @@
  */
 package org.openforis.collectone.v2.core.forms.engine
 
+import com.google.type.Date
 import com.squareup.wire.Instant
 import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.FieldDefinition
@@ -369,7 +370,7 @@ internal object RecordMutator {
       "timeEnd",
       "end_time" ->
         metadata.end_time?.let { FieldValue(scalar_value = TypedValue(timestamp_value = it)) }
-      "today" -> metadata.today?.let { FieldValue(scalar_value = TypedValue(timestamp_value = it)) }
+      "today" -> metadata.today?.let { FieldValue(scalar_value = TypedValue(date_value = it)) }
       "deviceID",
       "device_id" ->
         metadata.device_id
@@ -443,6 +444,12 @@ internal object RecordMutator {
           TemporalUtils.epochDaysToInstant(TemporalUtils.dateToEpochDays(it))
         }
         ?: TemporalUtils.tryParseToEpochDays(strVal)?.let { TemporalUtils.epochDaysToInstant(it) }
+    val dateVal: Date? =
+      fv?.scalar_value?.date_value
+        ?: fv?.scalar_value?.timestamp_value?.let {
+          TemporalUtils.epochDaysToDate(TemporalUtils.timestampToEpochDays(it).toLong())
+        }
+        ?: TemporalUtils.tryParseDate(strVal)
 
     return when (fieldName) {
       "instanceID",
@@ -451,7 +458,7 @@ internal object RecordMutator {
       "start_time" -> meta.copy(start_time = tsVal)
       "timeEnd",
       "end_time" -> meta.copy(end_time = tsVal)
-      "today" -> meta.copy(today = tsVal)
+      "today" -> meta.copy(today = dateVal)
       "deviceID",
       "device_id" -> meta.copy(device_id = strVal)
       "subscriberID",

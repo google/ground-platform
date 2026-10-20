@@ -410,7 +410,7 @@ object TextProtoSerializer {
     addString("instance_id", msg.instance_id)
     msg.start_time?.let { addMessage("start_time", encodeInstant(it)) }
     msg.end_time?.let { addMessage("end_time", encodeInstant(it)) }
-    msg.today?.let { addMessage("today", encodeInstant(it)) }
+    msg.today?.let { addMessage("today", encodeDate(it)) }
     addString("device_id", msg.device_id)
     addString("subscriber_id", msg.subscriber_id)
     addString("sim_serial", msg.sim_serial)
@@ -826,7 +826,7 @@ object TextProtoSerializer {
       instance_id = node.getString("instance_id"),
       start_time = node.getMessageOrNull("start_time")?.let { decodeInstant(it) },
       end_time = node.getMessageOrNull("end_time")?.let { decodeInstant(it) },
-      today = node.getMessageOrNull("today")?.let { decodeInstant(it) },
+      today = node.getMessageOrNull("today")?.let { decodeDate(it) },
       device_id = node.getString("device_id"),
       subscriber_id = node.getString("subscriber_id"),
       sim_serial = node.getString("sim_serial"),
