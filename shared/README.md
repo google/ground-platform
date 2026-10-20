@@ -50,7 +50,7 @@ Collect One platform applications (`androidApp`, `iosApp`, `webApp`, and
                     │                  │
      ┌──────────────┴──────┐    ┌──────┴───────────────┐
      │    shared/mobile    │    │        webApp        │
-     │ (Android, iOS, Wasm)│
+     │ (Android, iOS, Wasm)│    │  (Web Wasm/JS ONLY)  │
      │  • data/            │    └──────────────────────┘
      │  • services/        │
      │  • ui/              │
