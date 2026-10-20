@@ -50,11 +50,11 @@ model {
       nested_fields {
         fields {
           name: "name"
-          type: STRING
+          type: TYPE_STRING
         }
         fields {
           name: "relationship"
-          type: STRING
+          type: TYPE_STRING
           default_value: "spouse"
         }
       }
