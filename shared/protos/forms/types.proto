@@ -90,11 +90,11 @@ message GeoPoint {
   double longitude = 2;
 
   // Altitude/elevation in meters above the WGS 84 reference ellipsoid.
-  double altitude_meters = 3;
+  optional double altitude_meters = 3;
 
   // Estimated 1-sigma horizontal accuracy radius in meters. Smaller values
   // indicate higher precision.
-  double accuracy_meters = 4;
+  optional double accuracy_meters = 4;
 }
 
 // An ordered sequence of two or more geographic points forming an open polyline
