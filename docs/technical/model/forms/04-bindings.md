@@ -19,7 +19,7 @@
 A `FieldBinding` message specifies the validation rules, data types,
 calculations, and behavior associated with a field in the primary record. A
 binding connects a field path in the record with its operational logic and
-(optionally) its presentation in the [View](#view).
+(optionally) its presentation in the [View](05-body.md).
 
 The following snippet illustrates `FieldBinding` definitions in Protocol Buffer
 text format:
@@ -176,7 +176,7 @@ The following fields are supported on `FieldBinding`:
 | `entity_save_to`     | `string`          | Target Entity property name |
 :                      :                   : when publishing to an       :
 :                      :                   : Entity Dataset (see         :
-:                      :                   : [Entities](#entities)).     :
+:                      :                   : [Entities](18-entities.md)).     :
 | `foreign_attributes` | `repeated         | `<bind>` attributes in      |
 :                      : ForeignAttribute` : namespaces ProtoForms       :
 :                      :                   : doesn't model (e.g.,        :
@@ -244,7 +244,7 @@ ProtoForms `DataType` | Protocol Buffer Representation | Description
 `GEOSHAPE`            | `GeoShape` message             | Closed polygon of 3 or more GeoPoints where first point equals last point.
 `BINARY`              | `string` / `FileReference`     | Filename or URI pointing to media attachment (image, audio, video).
 `BARCODE`             | `string`                       | Barcode or QR code payload.
-`INTENT`              | `string`                       | Action descriptor targeting [external applications](#declaring-external-application).
+`INTENT`              | `string`                       | Action descriptor targeting external applications.
 
 ## XPath Expressions and Path Addressing
 
@@ -641,4 +641,4 @@ message AuditConfig {
     readings.
 *   `track_changes`: When `true`, all answer edits record `old_value` and
     `new_value` in the audit trail. (See
-    [Client Audit Logs](#client-audit-logs)).
+    [Client Audit Logs](17-client-audit-logs.md)).
