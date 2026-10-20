@@ -26,7 +26,6 @@ import "shared/protos/data/impact_aggregate.proto";
 import "shared/protos/data/impact_event.proto";
 import "shared/protos/data/submission_record.proto";
 import "shared/protos/forms/audit_log.proto";
-import "shared/protos/forms/encrypted_submission.proto";
 import "shared/protos/forms/record_instance.proto";
 import "shared/protos/forms/types.proto";
 
@@ -362,7 +361,6 @@ message SubmissionFieldPatch {
     groundplatform.v2.forms.RecordMetadata metadata_value = 6;
     groundplatform.v2.forms.AuditLog audit_log_value = 7;
     bytes bytes_value = 8;
-    groundplatform.v2.forms.EncryptedSubmissionManifest encrypted_manifest_value = 9;
     ReviewStatus review_status_value = 10;
   }
 }
