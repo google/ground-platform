@@ -625,10 +625,12 @@ object ProtoJsonSerializer {
         formatDoublePrimitive(msg.latitude),
         formatDoublePrimitive(msg.longitude),
       )
-    if (msg.altitude_meters != 0.0 || msg.accuracy_meters != 0.0) {
-      elements.add(formatDoublePrimitive(msg.altitude_meters))
-      if (msg.accuracy_meters != 0.0) {
-        elements.add(formatDoublePrimitive(msg.accuracy_meters))
+    val alt = msg.altitude_meters ?: 0.0
+    val acc = msg.accuracy_meters ?: 0.0
+    if (alt != 0.0 || acc != 0.0) {
+      elements.add(formatDoublePrimitive(alt))
+      if (acc != 0.0) {
+        elements.add(formatDoublePrimitive(acc))
       }
     }
     return JsonArray(elements)
@@ -1330,13 +1332,14 @@ object ProtoJsonSerializer {
     }
 
   private fun decodeGeoPointArray(arr: JsonArray): GeoPoint {
-    fun JsonElement?.asDouble(): Double =
-      (this as? JsonPrimitive)?.let { it.doubleOrNull ?: it.content.toDoubleOrNull() } ?: 0.0
+    fun JsonElement?.asDoubleOrNull(): Double? =
+      (this as? JsonPrimitive)?.let { it.doubleOrNull ?: it.content.toDoubleOrNull() }
+    fun JsonElement?.asDouble(): Double = asDoubleOrNull() ?: 0.0
     return GeoPoint(
       latitude = arr.getOrNull(0).asDouble(),
       longitude = arr.getOrNull(1).asDouble(),
-      altitude_meters = arr.getOrNull(2).asDouble(),
-      accuracy_meters = arr.getOrNull(3).asDouble(),
+      altitude_meters = arr.getOrNull(2).asDoubleOrNull(),
+      accuracy_meters = arr.getOrNull(3).asDoubleOrNull(),
     )
   }
 
@@ -1344,8 +1347,8 @@ object ProtoJsonSerializer {
     GeoPoint(
       latitude = obj.getProtoDouble("latitude"),
       longitude = obj.getProtoDouble("longitude"),
-      altitude_meters = obj.getProtoDouble("altitude_meters"),
-      accuracy_meters = obj.getProtoDouble("accuracy_meters"),
+      altitude_meters = obj.getProtoDoubleOrNull("altitude_meters"),
+      accuracy_meters = obj.getProtoDoubleOrNull("accuracy_meters"),
     )
 
   private fun decodeGeoTraceElement(el: JsonElement): GeoTrace? =

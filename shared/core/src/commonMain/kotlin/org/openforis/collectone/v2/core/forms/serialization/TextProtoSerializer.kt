@@ -511,8 +511,8 @@ object TextProtoSerializer {
   private fun encodeGeoPoint(msg: GeoPoint): TextProtoMessage = buildMessage {
     addDoubleAlways("latitude", msg.latitude)
     addDoubleAlways("longitude", msg.longitude)
-    addDouble("altitude_meters", msg.altitude_meters)
-    addDouble("accuracy_meters", msg.accuracy_meters)
+    msg.altitude_meters?.let { addDouble("altitude_meters", it) }
+    msg.accuracy_meters?.let { addDouble("accuracy_meters", it) }
   }
 
   private fun encodeGeoTrace(msg: GeoTrace): TextProtoMessage = buildMessage {
@@ -922,8 +922,8 @@ object TextProtoSerializer {
     GeoPoint(
       latitude = node.getDouble("latitude"),
       longitude = node.getDouble("longitude"),
-      altitude_meters = node.getDouble("altitude_meters"),
-      accuracy_meters = node.getDouble("accuracy_meters"),
+      altitude_meters = node.getDoubleOrNull("altitude_meters"),
+      accuracy_meters = node.getDoubleOrNull("accuracy_meters"),
     )
 
   private fun decodeGeoTrace(node: TextProtoMessage): GeoTrace =

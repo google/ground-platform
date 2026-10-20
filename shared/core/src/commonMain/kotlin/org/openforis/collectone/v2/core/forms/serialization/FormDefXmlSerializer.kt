@@ -821,7 +821,7 @@ internal object FormDefXmlSerializer {
     }
 
   internal fun formatGeoPoint(gp: GeoPoint): String =
-    "${formatDouble(gp.latitude)} ${formatDouble(gp.longitude)} ${formatDouble(gp.altitude_meters)} ${formatDouble(gp.accuracy_meters)}"
+    "${formatDouble(gp.latitude)} ${formatDouble(gp.longitude)} ${formatDouble(gp.altitude_meters ?: 0.0)} ${formatDouble(gp.accuracy_meters ?: 0.0)}"
 
   internal fun formatDouble(value: Double): String {
     val asLong = value.toLong()

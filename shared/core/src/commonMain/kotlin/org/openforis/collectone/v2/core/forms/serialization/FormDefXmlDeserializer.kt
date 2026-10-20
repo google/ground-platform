@@ -1347,8 +1347,8 @@ internal object FormDefXmlDeserializer {
     if (parts.size < 2) return null
     val lat = parts[0].toDoubleOrNull() ?: return null
     val lon = parts[1].toDoubleOrNull() ?: return null
-    val alt = if (parts.size >= 3) parts[2].toDoubleOrNull() ?: 0.0 else 0.0
-    val acc = if (parts.size >= 4) parts[3].toDoubleOrNull() ?: 0.0 else 0.0
+    val alt = if (parts.size >= 3) parts[2].toDoubleOrNull() else null
+    val acc = if (parts.size >= 4) parts[3].toDoubleOrNull() else null
     return GeoPoint(latitude = lat, longitude = lon, altitude_meters = alt, accuracy_meters = acc)
   }
 

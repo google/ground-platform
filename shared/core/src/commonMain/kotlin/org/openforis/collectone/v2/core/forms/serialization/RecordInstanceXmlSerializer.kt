@@ -526,7 +526,7 @@ internal object RecordInstanceXmlSerializer {
   // --- Geospatial Formatting & Parsing ---
 
   private fun formatGeoPoint(pt: GeoPoint): String =
-    "${formatDouble(pt.latitude)} ${formatDouble(pt.longitude)} ${formatDouble(pt.altitude_meters)} ${formatDouble(pt.accuracy_meters)}"
+    "${formatDouble(pt.latitude)} ${formatDouble(pt.longitude)} ${formatDouble(pt.altitude_meters ?: 0.0)} ${formatDouble(pt.accuracy_meters ?: 0.0)}"
 
   private fun parseGeoPoint(text: String): GeoPoint = tryParseGeoPoint(text) ?: GeoPoint()
 
@@ -540,8 +540,8 @@ internal object RecordInstanceXmlSerializer {
     if (lat < -90.0 || lat > 90.0 || lon < -180.0 || lon > 180.0) {
       return null
     }
-    val alt = if (parts.size >= 3) parts[2].toDoubleOrNull() ?: 0.0 else 0.0
-    val acc = if (parts.size >= 4) parts[3].toDoubleOrNull() ?: 0.0 else 0.0
+    val alt = if (parts.size >= 3) parts[2].toDoubleOrNull() else null
+    val acc = if (parts.size >= 4) parts[3].toDoubleOrNull() else null
     return GeoPoint(latitude = lat, longitude = lon, altitude_meters = alt, accuracy_meters = acc)
   }
 

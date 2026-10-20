@@ -408,7 +408,7 @@ sealed interface XPathValue {
     }
 
     fun formatGeoPoint(pt: GeoPoint): String =
-      "${formatXPathNumber(pt.latitude)} ${formatXPathNumber(pt.longitude)} ${formatXPathNumber(pt.altitude_meters)} ${formatXPathNumber(pt.accuracy_meters)}"
+      "${formatXPathNumber(pt.latitude)} ${formatXPathNumber(pt.longitude)} ${formatXPathNumber(pt.altitude_meters ?: 0.0)} ${formatXPathNumber(pt.accuracy_meters ?: 0.0)}"
 
     fun parseGeoPointString(str: String): GeoPoint? {
       val tokens = str.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
