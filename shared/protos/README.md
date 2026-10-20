@@ -62,8 +62,6 @@ distinction between stateful master tables and immutable encounter logs:
         geospatial coordinates, and multilingual `TranslationCatalog`).
     -   `audit_log.proto`: Client telemetry and question-level interaction audit
         events.
-    -   `encrypted_submission.proto`: Asymmetric envelope encryption manifests
-        for end-to-end encrypted submissions.
 -   **[`survey/`](survey/)** (`groundplatform.v2.survey`):
     -   `survey_def.proto`: `SurveyDef` root container, `FormLaunchConfig`,
         `EntityDatasetDef`, and `MapConfig` layer definitions.
