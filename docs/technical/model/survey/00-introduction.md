@@ -61,8 +61,8 @@ metadata), and `groundplatform.v2.data` (user data records):
 *   **`data/submission_record.proto`** (`groundplatform.v2.data`): Defines
     `SubmissionRecord`, representing a finalized, versioned form submission
     transaction linked to a survey, form, and optional entity, embedding either
-    a reflection-free `groundplatform.v2.forms.RecordInstance`, raw protobuf
-    bytes, or an `groundplatform.v2.forms.EncryptedSubmissionManifest`.
+    a reflection-free `groundplatform.v2.forms.RecordInstance` or raw protobuf
+    bytes.
 *   **`data/audit_record.proto`** (`groundplatform.v2.data`): Defines
     `AuditRecord`, `FieldDelta`, and `AuditInfo` for platform-wide append-only
     mutation auditing and resource provenance tracking.
@@ -78,9 +78,9 @@ metadata), and `groundplatform.v2.data` (user data records):
     immutable user identifiers (such as Firebase Auth UIDs) rather than mutable
     email addresses.
 3.  **Reflection-Free Runtime Compatibility**: Operational submission records
-    directly embed `groundplatform.v2.forms.RecordInstance` (or encrypted
-    manifests) so mobile, web, and server runtimes can process data without
-    dynamic schema compilation or protobuf reflection.
+    directly embed `groundplatform.v2.forms.RecordInstance` so mobile, web, and
+    server runtimes can process data without dynamic schema compilation or
+    protobuf reflection.
 4.  **Built-in Spatial & Environmental Traceability**: First-class support for
     local GeoID generation and automated compliance reporting (e.g., EUDR
     deforestation regulations).

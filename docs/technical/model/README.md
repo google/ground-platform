@@ -91,7 +91,7 @@ flowchart TD
 - **[Groups](forms/06-groups.md)** & **[Repeats](forms/07-repeats.md)**: `GroupDef` and `RepeatDef` containers.
 - **[Events & Actions](forms/08-events.md)**: `ActionDef` and lifecycle `EventType` triggers.
 - **[Translations](forms/09-translations.md)**, **[Media](forms/10-media.md)**, & **[URIs](forms/11-uri.md)**: `TranslationCatalog`, `LocalizedString`, `MediaRef`, and `jr://` URIs.
-- **[Submission Configuration](forms/12-submission.md)** & **[Encryption](forms/16-encryption.md)**: `SubmissionConfig` and `EncryptedSubmissionManifest`.
+- **[Submission Configuration](forms/12-submission.md)**: `SubmissionConfig`.
 - **[Compact Representation](forms/14-compact-representation.md)**: Compact SMS/text serialization.
 - **[Client Audit Logs](forms/17-client-audit-logs.md)**: Question-level interaction telemetry (`AuditConfig`, `AuditLog`).
 - **[Entities](forms/18-entities.md)**: `EntityDeclaration`, `EntityPropertyMapping`, and `EntitySyncMetadata`.

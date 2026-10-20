@@ -23,17 +23,13 @@ target `EntityRecord`.
 
 ## Payload Variants (`oneof payload`)
 
-To support both reflection-free runtime inspection and end-to-end encrypted
-XForms workflows, `SubmissionRecord` defines a `oneof payload` supporting three
-representations:
+To support reflection-free runtime inspection as well as opaque transport,
+`SubmissionRecord` defines a `oneof payload` supporting two representations:
 
 1.  **`groundplatform.v2.forms.RecordInstance record`**: A code-generated
     hierarchical data tree (`RecordNode`, `FieldValue`, `TypedValue`) that
     mobile, web, and server runtimes can traverse without protobuf reflection.
-2.  **`bytes raw_payload`**: Raw unencrypted protobuf primary record bytes.
-3.  **`groundplatform.v2.forms.EncryptedSubmissionManifest
-    encrypted_manifest`**: An asymmetrically encrypted submission manifest
-    envelope.
+2.  **`bytes raw_payload`**: Serialized protobuf primary record bytes.
 
 ```protobuf
 message SubmissionRecord {
@@ -48,7 +44,6 @@ message SubmissionRecord {
   oneof payload {
     groundplatform.v2.forms.RecordInstance record = 8;
     bytes raw_payload = 9;
-    groundplatform.v2.forms.EncryptedSubmissionManifest encrypted_manifest = 10;
   }
 
   AuditInfo audit_info = 11;

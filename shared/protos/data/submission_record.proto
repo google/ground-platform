@@ -20,7 +20,6 @@ package groundplatform.v2.data;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
-import "shared/protos/forms/encrypted_submission.proto";
 import "shared/protos/forms/record_instance.proto";
 
 // Organizer QA/QC review status for a submission.
@@ -90,17 +89,14 @@ message SubmissionRecord {
   // file URI.
   groundplatform.v2.forms.RecordMetadata metadata = 7;
 
-  // Populated form submission record instance or encrypted submission manifest.
+  // Populated form submission record instance or its serialized bytes.
   oneof payload {
     // Populated form submission record instance containing all captured field
     // answers, nested groups, repeat items, and client session data.
     groundplatform.v2.forms.RecordInstance record = 8;
 
-    // Unencrypted protobuf primary record payload bytes.
+    // Serialized protobuf primary record payload bytes.
     bytes raw_payload = 9;
-
-    // Asymmetrically encrypted submission manifest envelope.
-    groundplatform.v2.forms.EncryptedSubmissionManifest encrypted_manifest = 10;
   }
 
   // Audit metadata recording creation, collector identity, and sync timestamps.

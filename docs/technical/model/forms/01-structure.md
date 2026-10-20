@@ -34,8 +34,7 @@ two principal sub-messages:
         upon submission.
     *   **`metadata`**: Standard form metadata header configuration, preloads,
         and audit parameters.
-    *   **`submission`**: Submission endpoint, encryption key, and transmission
-        policies.
+    *   **`submission`**: Submission endpoint and transmission policies.
 *   **`view`** (`ViewDef`):
     *   Contains the display hierarchy and form controls (*inputs, selects,
         ranges, uploads, triggers, rankings, groups, and repeats*) required to
@@ -78,11 +77,9 @@ graph TD
     RecordInstance["RecordInstance (Submission Payload)"]
     RecordData["data (RecordNode)"]
     AuditLog["audit_log (AuditLog)"]
-    EncryptedManifest["EncryptedSubmissionManifest (Optional)"]
 
     RecordInstance --> RecordData
     RecordInstance --> AuditLog
-    RecordInstance -.->|"encrypted via SubmissionConfig"| EncryptedManifest
   end
 
   FormDef --> ModelDef

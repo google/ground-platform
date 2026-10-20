@@ -59,9 +59,9 @@ ProtoForms is designed to maintain lossless round-trip compatibility with XForms
 loading, editing, and saving form definitions and records:
 
 *   **Clients are expected to preserve all metadata even if they do not support
-    all features of the XForms specification.** For example, a client that
-    relies on secure wire transport (TLS/HTTPS or gRPC) rather than payload
-    encryption, or a client that does not support SMS submission, must still
+    all features of the XForms specification.** For example, Collect One does
+    not encrypt submission payloads and does not support SMS submission, but
+    must still
     preserve `SubmissionConfig.base64_rsa_public_key`, SMS
     prefixes/delimiters/tags, preload parameters, and custom extension payloads
     (`custom_extensions`) when reading and writing form definitions.
