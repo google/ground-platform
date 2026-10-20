@@ -52,7 +52,7 @@ message EncryptedSubmissionManifest {
   string instance_id = 3;
 
   // Ephemeral 256-bit AES symmetric key encrypted with the recipient's RSA public key.
-  bytes base64_encrypted_key = 4;
+  bytes encrypted_key = 4;
 
   // Encrypted primary ProtoForms record payload (or reference to uploaded encrypted binary).
   EncryptedFile primary_record = 5;
@@ -61,7 +61,7 @@ message EncryptedSubmissionManifest {
   repeated EncryptedFile media_attachments = 6;
 
   // Cryptographic signature verifying manifest integrity and non-tampering.
-  bytes base64_encrypted_signature = 7;
+  bytes encrypted_signature = 7;
 }
 
 message EncryptedFile {
@@ -85,7 +85,7 @@ message EncryptedFile {
 form_id: "myform"
 version: "2026090901"
 instance_id: "uuid:5b9cf8d1-106f-4004-844f-c072d76762ed"
-base64_encrypted_key: "sHXUut13/res3S3uJkwgfhABOc74aXGnCTxTcRTplS9k..."
+encrypted_key: "sHXUut13/res3S3uJkwgfhABOc74aXGnCTxTcRTplS9k..."
 primary_record {
   filename: "submission.pb.enc"
   content_type: "application/x-protobuf"
@@ -98,7 +98,7 @@ media_attachments {
   filename: "myaudio.mp3.enc"
   content_type: "audio/mp3"
 }
-base64_encrypted_signature: "OU7rbZl0uFy7xv/HnSl1juVrdf2fQpzcfjwetgl+wse..."
+encrypted_signature: "OU7rbZl0uFy7xv/HnSl1juVrdf2fQpzcfjwetgl+wse..."
 ```
 
 ## Cryptographic Algorithms
@@ -132,7 +132,7 @@ transit:
 concatenate lines separated by newline ("\n"):
   - form_id
   - version
-  - base64_encrypted_key
+  - encrypted_key
   - instance_id
   - for every media attachment and primary record in sequence:
       filename + "::" + hex_md5(unencrypted_bytes)
