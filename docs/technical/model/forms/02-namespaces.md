@@ -31,8 +31,6 @@ entity:
 *   `record_instance.proto`: Defines `RecordInstance` (the root submission
     record message), `RecordMetadata`, and the reflection-free hierarchical data
     nodes (`RecordNode`, `RecordNodeList`, `FieldValue`, `TypedValueList`).
-*   `encrypted_submission.proto`: Defines `EncryptedSubmissionManifest` and
-    `EncryptedFile` envelopes for end-to-end encrypted submissions.
 *   `audit_log.proto`: Defines `AuditLog`, `AuditEvent`, and `AuditConfig` for
     data collector interaction telemetry and location breadcrumbs.
 *   `types.proto`: Defines shared primitive data types (`DataType`), geospatial

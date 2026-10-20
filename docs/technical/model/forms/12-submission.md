@@ -17,12 +17,12 @@
 # Submission
 
 The `SubmissionConfig` message inside `ModelDef` instructs the client runtime
-how to handle, encrypt, and dispatch finalized form records.
+how to handle and dispatch finalized form records.
 
 > **Note on Client Compatibility:** Clients and form editors are expected to
-> preserve all submission metadata—including `base64_rsa_public_key`—for
-> round-trip compatibility with XForms, even if the client relies on secure
-> wire transport (TLS/HTTPS or gRPC) rather than payload-level encryption.
+> preserve all submission metadata, including `base64_rsa_public_key`, for
+> round-trip compatibility with XForms. Collect One does not encrypt submission
+> payloads; it relies on secure wire transport (TLS/HTTPS or gRPC).
 
 ## `SubmissionConfig` Message Definition
 
@@ -34,7 +34,7 @@ message SubmissionConfig {
   // Transmission method (e.g., "POST", "GRPC").
   string method = 2;
 
-  // Base64-encoded RSA public key required to enable asymmetric payload encryption.
+  // XForms base64RsaPublicKey attribute, preserved for round-trip fidelity only.
   string base64_rsa_public_key = 3;
 
   // If true, finalized records are queued and transmitted automatically upon network connectivity.
@@ -58,11 +58,10 @@ message SubmissionConfig {
 | `method`                | `method`              | HTTP method (`POST`) or    |
 :                         :                       : protocol identifier        :
 :                         :                       : (`GRPC`).                  :
-| `base64_rsa_public_key` | `base64RsaPublicKey`  | Base64 RSA public key for  |
-:                         :                       : asymmetric key             :
-:                         :                       : encapsulation. Enabling    :
-:                         :                       : this encrypts all records  :
-:                         :                       : and media.                 :
+| `base64_rsa_public_key` | `base64RsaPublicKey`  | Base64 RSA public key.     |
+:                         :                       : Preserved for round-trip   :
+:                         :                       : fidelity; Collect One does :
+:                         :                       : not encrypt submissions.   :
 | `auto_send`             | `orx:auto-send`       | Boolean flag to            |
 :                         :                       : automatically send         :
 :                         :                       : finalized records when an  :
@@ -111,14 +110,3 @@ model {
 }
 ```
 
-## Encryption
-
-ProtoForms supports end-to-end asymmetric encryption to ensure records remain
-confidential in transit and at rest on intermediary servers. When
-`base64_rsa_public_key` is configured, the client generates a unique symmetric
-key (AES-256) per submission, encrypts the serialized protobuf record and
-attached media files, and encapsulates the symmetric key using the public RSA
-key in an `EncryptedSubmissionManifest`.
-
-Full details on encryption protocols and manifest schemas can be found in the
-[Encryption](16-encryption.md) section.
