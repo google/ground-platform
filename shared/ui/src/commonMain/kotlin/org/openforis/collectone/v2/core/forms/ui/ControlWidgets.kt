@@ -927,7 +927,8 @@ fun formatGeoPointCoordinates(latitude: Double, longitude: Double): String {
 }
 
 /** Formats horizontal GPS accuracy in meters (e.g. `"±3.2 m"`). */
-fun formatGeoPointAccuracy(accuracyMeters: Double): String {
+fun formatGeoPointAccuracy(accuracyMeters: Double?): String {
+  if (accuracyMeters == null) return "±? m"
   val tenths = (accuracyMeters * 10.0).roundToInt() / 10.0
   return "±$tenths m"
 }

@@ -40,6 +40,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: bash scripts/buf-format.sh --check
 
+      - name: Check license headers
+        if: ${{ !cancelled() }}
+        run: bash scripts/license-check.sh --check
+
   server:
     name: server tests
     runs-on: ubuntu-latest

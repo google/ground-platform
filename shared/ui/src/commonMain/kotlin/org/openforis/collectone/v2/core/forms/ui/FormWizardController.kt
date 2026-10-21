@@ -536,8 +536,8 @@ class FormWizardController(
     path: String,
     latitude: Double,
     longitude: Double,
-    altitudeMeters: Double = 0.0,
-    accuracyMeters: Double = 3.5,
+    altitudeMeters: Double? = null,
+    accuracyMeters: Double? = 3.5,
   ) {
     showCurrentStepValidationWarning = false
     submissionResult = null

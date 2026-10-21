@@ -105,8 +105,8 @@ class FormSession(
     path: String,
     latitude: Double,
     longitude: Double,
-    altitudeMeters: Double = 0.0,
-    accuracyMeters: Double = 0.0,
+    altitudeMeters: Double? = null,
+    accuracyMeters: Double? = null,
   ): FormState =
     updateField(
       path,
