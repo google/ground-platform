@@ -50,6 +50,9 @@ message PurposePackDef {
 
   LibraryStatus status = 11;
   groundplatform.v2.data.AuditInfo audit_info = 12;
+
+  // Display order of this purpose pack within the library (0-based).
+  int32 sort_order = 13;
 }
 
 // A named export with a fixed output schema. Using a profile records an impact
@@ -70,4 +73,7 @@ message ExportProfileDef {
   map<string, string> field_concepts = 5;
 
   LibraryStatus status = 6;
+
+  // Display order of this export profile within the library (0-based).
+  int32 sort_order = 7;
 }

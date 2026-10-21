@@ -43,4 +43,7 @@ message FormTemplateDef {
 
   LibraryStatus status = 7;
   groundplatform.v2.data.AuditInfo audit_info = 8;
+
+  // Display order of this template within the library (0-based).
+  int32 sort_order = 9;
 }
