@@ -17,17 +17,19 @@ package org.openforis.collectone.v2.app.data.sync
 
 import com.squareup.wire.ofEpochSecond
 import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
+import groundplatform.v2.forms.ControlDef
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.survey.AclRolePatch
-import groundplatform.v2.survey.OrganizationFieldPatch
+import groundplatform.v2.forms.ViewComponent
+import groundplatform.v2.forms.ViewDef
+import groundplatform.v2.survey.AclEntry
+import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationMutation
 import groundplatform.v2.survey.Role
-import groundplatform.v2.survey.SurveyFieldPatch
+import groundplatform.v2.survey.SurveyAcl
+import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -60,14 +62,50 @@ class OutboxCoalescerTest {
       editor,
       "survey/s1",
       MutationPayload.Survey(
-        SurveyMutation(
-          update_field =
-            if (key.startsWith("forms/") && value != null) {
-              SurveyFieldPatch(key = key, form_value = FormDef(form_id = key, title = value))
+        when {
+          key == "title" ->
+            if (value != null) SurveyMutation(upsert = SurveyDef(title = value))
+            else SurveyMutation(delete = SurveyDef(title = "x"))
+          key == "description" ->
+            if (value != null) SurveyMutation(upsert = SurveyDef(description = value))
+            else SurveyMutation(delete = SurveyDef(description = "x"))
+          key.startsWith("forms/") && "/controls/" in key -> {
+            val formId = key.removePrefix("forms/").substringBefore("/controls/")
+            val controlId = key.substringAfter("/controls/")
+            SurveyMutation(
+              upsert =
+                SurveyDef(
+                  forms =
+                    listOf(
+                      FormDef(
+                        form_id = formId,
+                        view =
+                          ViewDef(
+                            components =
+                              listOf(
+                                ViewComponent(
+                                  id = controlId,
+                                  control = ControlDef(field_ref = value.orEmpty()),
+                                )
+                              )
+                          ),
+                      )
+                    )
+                )
+            )
+          }
+          key.startsWith("forms/") -> {
+            val formId = key.removePrefix("forms/")
+            if (value != null) {
+              SurveyMutation(
+                upsert = SurveyDef(forms = listOf(FormDef(form_id = formId, title = value)))
+              )
             } else {
-              SurveyFieldPatch(key = key, string_value = value)
+              SurveyMutation(delete = SurveyDef(forms = listOf(FormDef(form_id = formId))))
             }
-        )
+          }
+          else -> SurveyMutation()
+        }
       ),
       state,
     )
@@ -81,12 +119,15 @@ class OutboxCoalescerTest {
           entity_mutation =
             EntityMutation(
               entity_id = entityId,
-              update =
-                EntityPatch(
-                  patches =
-                    patches.map { (k, v) ->
-                      EntityFieldPatch(key = k, property_value = TypedValue(string_value = v))
-                    }
+              upsert =
+                EntityRecord(
+                  label = patches.firstOrNull { it.first == "label" }?.second.orEmpty(),
+                  properties =
+                    patches
+                      .filter { it.first.startsWith("properties/") }
+                      .associate { (k, v) ->
+                        k.removePrefix("properties/") to TypedValue(string_value = v)
+                      },
                 ),
             )
         )
@@ -111,7 +152,13 @@ class OutboxCoalescerTest {
       data,
       "entity/$entityId",
       MutationPayload.Data(
-        DataMutation(entity_mutation = EntityMutation(entity_id = entityId, delete = true))
+        DataMutation(
+          entity_mutation =
+            EntityMutation(
+              entity_id = entityId,
+              delete = EntityRecord(entity_id = entityId, is_deleted = true),
+            )
+        )
       ),
     )
 
@@ -165,8 +212,8 @@ class OutboxCoalescerTest {
     val outbox = emptyList<PendingMutation>().enqueue(first, second)
 
     assertEquals(2, outbox.size)
-    val remaining = (outbox[0].payload as MutationPayload.Data).mutation.entity_mutation!!.update!!
-    assertEquals(listOf("properties/owner"), remaining.patches.map { it.key })
+    val remaining = (outbox[0].payload as MutationPayload.Data).mutation.entity_mutation!!.upsert!!
+    assertEquals(setOf("owner"), remaining.properties.keys)
     assertEquals(second, outbox[1])
   }
 
@@ -205,7 +252,9 @@ class OutboxCoalescerTest {
         editor,
         "survey/s1",
         MutationPayload.Survey(
-          SurveyMutation(update_acl_role = AclRolePatch(user_id = user, role = role))
+          SurveyMutation(
+            acl_upsert = SurveyAcl(entries = listOf(AclEntry(email = user, role = role)))
+          )
         ),
       )
     val a1 = role("a@example.org", Role.VIEWER)
@@ -222,11 +271,7 @@ class OutboxCoalescerTest {
       pending(
         target,
         "organization/o1",
-        MutationPayload.Organization(
-          OrganizationMutation(
-            update_field = OrganizationFieldPatch(key = "name", string_value = "N")
-          )
-        ),
+        MutationPayload.Organization(OrganizationMutation(upsert = Organization(name = "N"))),
       )
     val delete =
       pending(
@@ -247,9 +292,7 @@ class OutboxRecorderTest {
   private val recorder = OutboxRecorder(clock = { now }, newId = { "id${++ids}" })
 
   private fun title(value: String) =
-    MutationPayload.Survey(
-      SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = value))
-    )
+    MutationPayload.Survey(SurveyMutation(upsert = SurveyDef(title = value)))
 
   @Test
   fun record_assignsClientIdOnce_andIncreasingClientSeq() = runNow {
@@ -261,9 +304,7 @@ class OutboxRecorderTest {
         this,
         target,
         "survey/s1",
-        MutationPayload.Survey(
-          SurveyMutation(update_field = SurveyFieldPatch(key = "description", string_value = "D"))
-        ),
+        MutationPayload.Survey(SurveyMutation(upsert = SurveyDef(description = "D"))),
       )
     }
 
@@ -316,7 +357,13 @@ class OutboxRecorderTest {
         target,
         "entity/e1",
         MutationPayload.Data(
-          DataMutation(entity_mutation = EntityMutation(entity_id = "e1", delete = true))
+          DataMutation(
+            entity_mutation =
+              EntityMutation(
+                entity_id = "e1",
+                delete = EntityRecord(entity_id = "e1", is_deleted = true),
+              )
+          )
         ),
       )
     }

@@ -32,22 +32,22 @@ import groundplatform.v2.forms.DataType
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.TypedValue
 import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.LibraryFieldPatch
+import groundplatform.v2.library.LibraryBundle
 import groundplatform.v2.library.LibraryMutation
 import groundplatform.v2.library.ListLibrariesRequest
 import groundplatform.v2.library.LocalizedText
 import groundplatform.v2.library.MutateLibraryRequest
+import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.ListOrganizationsRequest
 import groundplatform.v2.survey.ListSurveyOverviewsRequest
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateSurveyRequest
-import groundplatform.v2.survey.OrganizationFieldPatch
+import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationMutation
 import groundplatform.v2.survey.QuotaLimits
 import groundplatform.v2.survey.SearchOrganizationsRequest
 import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyFieldPatch
 import groundplatform.v2.survey.SurveyMutation
 import io.grpc.Status
 import io.grpc.StatusException
@@ -132,9 +132,7 @@ open class UserDataBackendTest {
           working_copy = true,
           mutations =
             listOf(
-              SurveyMutation(
-                update_field = SurveyFieldPatch(key = "title", string_value = "Updated title")
-              ),
+              SurveyMutation(upsert = SurveyDef(title = "Updated title")),
               SurveyMutation(save_working_copy = true),
             ),
         )
@@ -147,12 +145,7 @@ open class UserDataBackendTest {
         MutateOrganizationRequest(
           organization_id = KENYA_FOREST_SERVICE,
           mutations =
-            listOf(
-              OrganizationMutation(
-                update_field =
-                  OrganizationFieldPatch(key = "description", string_value = "Updated KFS")
-              )
-            ),
+            listOf(OrganizationMutation(upsert = Organization(description = "Updated KFS"))),
         )
       )
     val libMut =
@@ -162,15 +155,19 @@ open class UserDataBackendTest {
           mutations =
             listOf(
               LibraryMutation(
-                update_field =
-                  LibraryFieldPatch(
-                    key = "concepts/org.00000013-31cc-5c95-90ea-379f624a5c72.soil_ph",
-                    concept_value =
-                      ConceptDef(
-                        id = "org.00000013-31cc-5c95-90ea-379f624a5c72.soil_ph",
-                        label = LocalizedText(values = mapOf("en" to "Soil pH")),
-                        data_type = DataType.TYPE_DOUBLE,
-                      ),
+                upsert =
+                  OrganizationLibraryRecord(
+                    bundle =
+                      LibraryBundle(
+                        concepts =
+                          listOf(
+                            ConceptDef(
+                              id = "org.00000013-31cc-5c95-90ea-379f624a5c72.soil_ph",
+                              label = LocalizedText(values = mapOf("en" to "Soil pH")),
+                              data_type = DataType.TYPE_DOUBLE,
+                            )
+                          )
+                      )
                   )
               )
             ),
@@ -275,7 +272,7 @@ open class UserDataBackendTest {
                 EntityMutation(
                   entity_id = "00000007-640e-5ed7-9874-4d6b6717f21d",
                   dataset_id = "coffee_parcels",
-                  delete = true,
+                  delete = EntityRecord(is_deleted = true),
                 ),
             )
           ),
@@ -475,10 +472,7 @@ open class UserDataBackendTest {
       MutateSurveyRequest(
         survey_id = KENYA,
         working_copy = true,
-        mutations =
-          listOf(
-            SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Draft"))
-          ),
+        mutations = listOf(SurveyMutation(upsert = SurveyDef(title = "Draft"))),
       )
     )
     val saved = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)).survey!!
@@ -588,10 +582,7 @@ open class UserDataBackendTest {
     backend.MutateSurvey(
       MutateSurveyRequest(
         survey_id = KENYA,
-        mutations =
-          listOf(
-            SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Changed"))
-          ),
+        mutations = listOf(SurveyMutation(upsert = SurveyDef(title = "Changed"))),
       )
     )
     backend.reset()
@@ -609,7 +600,7 @@ open class UserDataBackendTest {
             mutations =
               listOf(
                 SurveyMutation(
-                  upsert_survey =
+                  upsert =
                     SurveyDef(
                       survey_id = testId("new-survey-1"),
                       title = "Exceeded Forms Survey",
@@ -640,7 +631,7 @@ open class UserDataBackendTest {
             mutations =
               listOf(
                 SurveyMutation(
-                  upsert_survey =
+                  upsert =
                     SurveyDef(
                       survey_id = testId("new-survey-budget"),
                       title = "Budget Exceeded Survey",
@@ -664,7 +655,7 @@ open class UserDataBackendTest {
         mutations =
           listOf(
             SurveyMutation(
-              upsert_survey =
+              upsert =
                 initial.copy(quota_limits = QuotaLimits(max_submissions_per_entity_per_user = 1))
             )
           ),

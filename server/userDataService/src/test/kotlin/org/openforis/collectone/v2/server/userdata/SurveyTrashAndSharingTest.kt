@@ -17,10 +17,8 @@ import groundplatform.v2.data.DataMutation
 import groundplatform.v2.data.ListEntitiesRequest
 import groundplatform.v2.data.ListSubmissionsRequest
 import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.data.SubmissionFieldPatch
 import groundplatform.v2.data.SubmissionMutation
-import groundplatform.v2.data.SubmissionPatch
-import groundplatform.v2.survey.AccessRulesPatch
+import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.ListSurveyOverviewsRequest
@@ -28,6 +26,8 @@ import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.Role
 import groundplatform.v2.survey.SearchPublicSurveysRequest
 import groundplatform.v2.survey.SharingPolicy
+import groundplatform.v2.survey.SurveyAcl
+import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyMutation
 import groundplatform.v2.survey.SurveyState
 import io.grpc.Status
@@ -107,11 +107,7 @@ open class SurveyTrashAndSharingTest {
                   SubmissionMutation(
                     submission_id = testId("submission-recorded-before-trash"),
                     form_id = "form-1",
-                    update =
-                      SubmissionPatch(
-                        patches =
-                          listOf(SubmissionFieldPatch(key = "is_deleted", bool_value = false))
-                      ),
+                    upsert = SubmissionRecord(form_version = "1"),
                   ),
               )
             ),
@@ -152,7 +148,7 @@ open class SurveyTrashAndSharingTest {
   fun sharingRole_defaultsToDataCollector_andCanBeViewer(): Unit = runBlocking {
     assertEquals(Role.DATA_COLLECTOR, batchGet(KENYA).results.single().overview!!.default_role)
 
-    mutateSurvey(SurveyMutation(update_access_rules = AccessRulesPatch(default_role = Role.VIEWER)))
+    mutateSurvey(SurveyMutation(acl_upsert = SurveyAcl(default_role = Role.VIEWER)))
 
     assertEquals(Role.VIEWER, batchGet(KENYA).results.single().overview!!.default_role)
   }
@@ -160,17 +156,13 @@ open class SurveyTrashAndSharingTest {
   @Test
   fun sharingRole_rejectsSurveyOrganizer(): Unit = runBlocking {
     assertFailsWith<IllegalArgumentException> {
-      mutateSurvey(
-        SurveyMutation(update_access_rules = AccessRulesPatch(default_role = Role.SURVEY_ORGANIZER))
-      )
+      mutateSurvey(SurveyMutation(acl_upsert = SurveyAcl(default_role = Role.SURVEY_ORGANIZER)))
     }
   }
 
   @Test
   fun searchPublicSurveys_listsOnlyPublicSurveys_thatArentTrashed(): Unit = runBlocking {
-    mutateSurvey(
-      SurveyMutation(update_access_rules = AccessRulesPatch(sharing_policy = SharingPolicy.PUBLIC))
-    )
+    mutateSurvey(SurveyMutation(acl_upsert = SurveyAcl(sharing_policy = SharingPolicy.PUBLIC)))
     val title = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)).survey!!.title
 
     val found =
@@ -234,16 +226,7 @@ open class SurveyTrashAndSharingTest {
       MutateSurveyRequest(
         survey_id = KENYA,
         working_copy = true,
-        mutations =
-          listOf(
-            SurveyMutation(
-              update_field =
-                groundplatform.v2.survey.SurveyFieldPatch(
-                  key = "title",
-                  string_value = "Kenya v2",
-                )
-            )
-          ),
+        mutations = listOf(SurveyMutation(upsert = SurveyDef(title = "Kenya v2"))),
       )
     )
     backend.MutateSurvey(

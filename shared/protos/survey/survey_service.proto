@@ -18,10 +18,7 @@ syntax = "proto3";
 
 package groundplatform.v2.survey;
 
-import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
-import "shared/protos/forms/form_def.proto";
-import "shared/protos/forms/types.proto";
 import "shared/protos/survey/acl.proto";
 import "shared/protos/survey/survey_def.proto";
 
@@ -168,182 +165,36 @@ message GetSurveyAclResponse {
   SurveyAcl acl = 1;
 }
 
-// Repeated string list wrapper for path-addressed list patches (e.g.,
-// `"supported_languages"`, `"purpose_ids"`, `"program_ids"`, `"forms_order"`).
-message StringListValue {
-  repeated string values = 1;
-}
-
-// Key-value mutation entry for setting, updating, or deleting a field or
-// keyed sub-resource within a `SurveyDef`.
-message SurveyFieldPatch {
-  // Target field name or collection item path within `SurveyDef` (e.g.,
-  // `"title"`, `"description"`, `"organization_id"`, `"owner_id"`, `"state"`,
-  // `"closed_at"`, `"default_language"`, `"supported_languages"`,
-  // `"purpose_ids"`, `"program_ids"`, `"outcome"`, `"forms/<form_id>"`,
-  // `"forms/<form_id>/controls/<control_id>"`,
-  // `"entity_datasets/<dataset_id>"`,
-  // `"entity_datasets/<dataset_id>/properties/<prop_name>"`,
-  // `"map_config"`, `"map_config/survey_area"`,
-  // `"map_config/layers/<layer_id>"`, `"form_launch_configs/<form_id>"`,
-  // `"form_concept_links/<form_id>"`, `"translations"`).
-  string key = 1;
-
-  // New value to assign, or `null_value` to delete/clear the target key.
-  oneof value {
-    // Deletes the collection item or clears the field identified by `key`
-    // (idempotent no-op if already unset/absent).
-    google.protobuf.NullValue null_value = 2;
-
-    // Scalar string value.
-    string string_value = 3;
-
-    // Lifecycle state transition (for `"state"`, including `DELETED` for
-    // soft-delete).
-    SurveyState state_value = 4;
-
-    // Full map configuration replacement (for `"map_config"`).
-    MapConfig map_config_value = 5;
-
-    // Map layer definition to add or update (for
-    // `"map_config/layers/<layer_id>"`).
-    LayerDef layer_value = 6;
-
-    // Form definition to add or update (for `"forms/<form_id>"`).
-    groundplatform.v2.forms.FormDef form_value = 7;
-
-    // Form launch configuration to add or update (for
-    // `"form_launch_configs/<form_id>"`).
-    FormLaunchConfig form_launch_config_value = 8;
-
-    // Entity dataset schema to add or update (for
-    // `"entity_datasets/<dataset_id>"`).
-    EntityDatasetDef entity_dataset_value = 9;
-
-    // Translation catalog to set or update (for `"translations"`).
-    groundplatform.v2.forms.TranslationCatalog translations_value = 10;
-
-    // Boolean value (e.g., `"is_downloaded"`).
-    bool bool_value = 11;
-
-    // Timestamp value (e.g., `"closed_at"`).
-    google.protobuf.Timestamp timestamp_value = 12;
-
-    // String list value (e.g., `"supported_languages"`, `"purpose_ids"`,
-    // `"program_ids"`, `"forms_order"`, `"entity_datasets_order"`).
-    StringListValue string_list_value = 13;
-
-    // Survey outcome value (for `"outcome"`).
-    SurveyOutcome outcome_value = 14;
-
-    // Survey area boundary value (for `"map_config/survey_area"`).
-    SurveyArea survey_area_value = 15;
-
-    // Form concept links value (for `"form_concept_links/<form_id>"`).
-    FormConceptLinks form_concept_links_value = 16;
-
-    // Single entity dataset property definition (for
-    // `"entity_datasets/<dataset_id>/properties/<prop_name>"`).
-    EntityPropertyDefinition entity_property_value = 17;
-
-    // Sampling design generator for a dataset (for
-    // `"entity_datasets/<dataset_id>/sampling"`).
-    SamplingDesign sampling_design_value = 18;
-  }
-}
-
-// Key-value mutation entry for granting, updating, or revoking a user's role on
-// a survey.
-message AclRolePatch {
-  // Target user identifier (`AclEntry.user_id` or `AclEntry.email`).
-  string user_id = 1;
-
-  // Role assignment, full `AclEntry`, or `null_value` to revoke access.
-  oneof value {
-    // Revokes the user's explicit ACL entry on this survey (idempotent no-op
-    // if already absent).
-    google.protobuf.NullValue null_value = 2;
-
-    // Grants or updates the user's collaborator role (`VIEWER`,
-    // `DATA_COLLECTOR`, or `SURVEY_ORGANIZER`).
-    Role role = 3;
-
-    // Upserts a complete `AclEntry` including email, invite token, and cached
-    // profile.
-    AclEntry entry_value = 4;
-  }
-}
-
-// Mutation updating survey-wide access rules (`SharingPolicy`,
-// `PeerDataVisibility`, collector consent, and CARE sovereignty).
-message AccessRulesPatch {
-  // If non-unspecified, updates the survey's general sharing policy
-  // (`RESTRICTED`, `ORGANIZATION`, `ANYONE_WITH_LINK`, `PUBLIC`).
-  SharingPolicy sharing_policy = 1;
-
-  // If non-unspecified, updates peer data visibility for field collectors
-  // (`ALL`, `OWN_ONLY`).
-  PeerDataVisibility peer_data_visibility = 2;
-
-  // Optional update to `collector_consent_required`.
-  optional bool collector_consent_required = 3;
-
-  // Optional update to `collector_consent_text`.
-  optional string collector_consent_text = 4;
-
-  // Optional update to `care_sovereignty_applied`.
-  optional bool care_sovereignty_applied = 5;
-
-  // Optional update to primary owner user ID (`SurveyAcl.owner_id`).
-  optional string owner_id = 6;
-
-  // If non-unspecified, updates `SurveyAcl.default_role`: what people who
-  // have access through `sharing_policy` can do (`VIEWER` or
-  // `DATA_COLLECTOR`). `SURVEY_ORGANIZER` is rejected with
-  // `INVALID_ARGUMENT`; organizers must be named on the ACL.
-  Role default_role = 7;
-}
-
 // A single idempotent mutation step within a batched `MutateSurveyRequest`.
+//
+// Carries sparse instances of `SurveyDef` (`upsert` / `delete`) and/or
+// `SurveyAcl` (`acl_upsert` / `acl_delete`), or a lifecycle operation
+// (`trash_survey`, `restore_survey`, `save_working_copy`,
+// `discard_working_copy`). For each target (`SurveyDef` and `SurveyAcl`), the
+// structural `delete` mask is applied first (where any non-default scalar/list
+// or leaf item clears/removes that target) followed by recursively merging
+// `upsert`.
 message SurveyMutation {
-  oneof operation {
-    // Initializes (if the survey does not yet exist) or updates a specific
-    // field or keyed sub-resource within `SurveyDef`.
-    SurveyFieldPatch update_field = 1;
+  reserved 1, 2, 3, 4;
+  reserved "update_field", "update_acl_role", "update_access_rules", "delete_survey";
 
-    // Grants, updates, or revokes (`null_value`) a single user's role on the
-    // survey ACL.
-    AclRolePatch update_acl_role = 2;
+  // Sparse `SurveyDef` fields and keyed sub-resources (`forms`,
+  // `entity_datasets`, `form_launch_configs`, `form_concept_links`,
+  // `map_config`, `translations`, etc.) to create or update on the target
+  // revision (the working copy when `MutateSurveyRequest.working_copy` is true,
+  // otherwise the saved revision).
+  SurveyDef upsert = 5;
 
-    // Updates the survey's `SharingPolicy`, `PeerDataVisibility`, and consent
-    // rules.
-    AccessRulesPatch update_access_rules = 3;
+  // Sparse `SurveyAcl` fields and collaborator `entries` to create or update.
+  SurveyAcl acl_upsert = 6;
 
-    // Moves the survey to Trash (sets `SurveyDef.trash_time`). Trashed surveys
-    // disappear from every user's survey list and stop syncing; they can be
-    // restored with `restore_survey` until they are purged automatically
-    // after the retention period (30 days). Doesn't change `SurveyDef.state`.
-    bool trash_survey = 13;
+  // Saves the working copy as the new saved revision and increments
+  // `saved_revision_number`. Doesn't change `SurveyDef.state`.
+  bool save_working_copy = 7;
 
-    // Restores a trashed survey (clears `SurveyDef.trash_time`). A no-op when
-    // the survey isn't in Trash.
-    bool restore_survey = 14;
-
-    // Replaces the entire `SurveyDef` snapshot (or the working copy when
-    // `MutateSurveyRequest.working_copy` is true).
-    SurveyDef upsert_survey = 5;
-
-    // Replaces the entire `SurveyAcl` snapshot.
-    SurveyAcl upsert_acl = 6;
-
-    // Saves the working copy as the new saved revision and increments
-    // `saved_revision_number`. Doesn't change `SurveyDef.state`.
-    bool save_working_copy = 7;
-
-    // Discards unsaved edits, resetting the working copy to the latest saved
-    // revision.
-    bool discard_working_copy = 8;
-  }
+  // Discards unsaved edits, resetting the working copy to the latest saved
+  // revision.
+  bool discard_working_copy = 8;
 
   // Client-generated UUID from the offline outbox, identifying the mutation in
   // client logs. Replays are detected by `client_seq`, not by this ID.
@@ -359,9 +210,28 @@ message SurveyMutation {
   // Client-side timestamp when the mutation was recorded.
   google.protobuf.Timestamp client_timestamp = 12;
 
-  // Former hard delete. Surveys are moved to Trash (`trash_survey`) instead.
-  reserved 4;
-  reserved "delete_survey";
+  // Moves the survey to Trash (sets `SurveyDef.trash_time`). Trashed surveys
+  // disappear from every user's survey list and stop syncing; they can be
+  // restored with `restore_survey` until they are purged automatically
+  // after the retention period (30 days). Doesn't change `SurveyDef.state`.
+  bool trash_survey = 13;
+
+  // Restores a trashed survey (clears `SurveyDef.trash_time`). A no-op when
+  // the survey isn't in Trash.
+  bool restore_survey = 14;
+
+  // Structural deletion mask for `SurveyDef`: any non-default scalar or
+  // repeated value list clears that field to default/empty, and any keyed item
+  // (`FormDef`, `EntityDatasetDef`, `LayerDef`, etc.) with only its ID set
+  // removes that item (or recurses into its child fields if child fields are
+  // populated).
+  SurveyDef delete = 15;
+
+  // Structural deletion mask for `SurveyAcl`: any non-default scalar or
+  // `quarantined_user_ids` clears that field, and any `AclEntry` in `entries`
+  // with only its `id` / `user_id` / `email` set revokes that collaborator
+  // entry.
+  SurveyAcl acl_delete = 16;
 }
 
 // Request to atomically and idempotently apply an ordered sequence of mutations
@@ -371,9 +241,8 @@ message MutateSurveyRequest {
   string survey_id = 1;
 
   // Expected base version for optimistic concurrency control on existing
-  // surveys (optional). Field patches are applied last-writer-wins regardless
-  // of `base_version`; only whole-snapshot replacements (`upsert_survey`,
-  // `upsert_acl`) fail with `FAILED_PRECONDITION` when it is set and stale.
+  // surveys (optional). When set and stale against the target revision's
+  // `version`, the request fails with `FAILED_PRECONDITION`.
   string base_version = 2;
 
   // Ordered sequence of idempotent survey field, ACL, access rule, trash, or

@@ -25,9 +25,9 @@ import org.openforis.collectone.v2.app.data.datasource.local.store.MutationTarge
 /**
  * Autosaves the survey editor's in-progress drafts to the server's working copy
  * (`docs/technical/sync-engine.md`, "Survey editor autosave"): each call diffs the draft against
- * the last autosaved one and queues one working-copy patch per changed key, debounced so they're
- * sent once the organizer pauses. Queued patches to the same key coalesce, so typing produces one
- * patch per field.
+ * the last autosaved one and queues one working-copy sparse mutation per changed field or item,
+ * debounced so they're sent once the organizer pauses. Queued mutations to the same field or item
+ * coalesce, so typing produces one mutation per field.
  */
 class WorkingCopyRecorder(
   /**
@@ -61,12 +61,12 @@ class WorkingCopyRecorder(
   ) {
     val before = lastAutosaved[surveyId] ?: baseline
     if (before != null) {
-      MutationDiffs.survey(before, after).forEach { patch ->
+      MutationDiffs.survey(before, after).forEach { mutation ->
         recorder.record(
           tx,
           MutationTarget.Survey(surveyId, workingCopy = true),
           Rebaser.surveyKey(surveyId),
-          MutationPayload.Survey(SurveyMutation(update_field = patch)),
+          MutationPayload.Survey(mutation),
           debounceMillis = debounceMillis,
         )
       }

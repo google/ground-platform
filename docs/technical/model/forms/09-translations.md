@@ -41,6 +41,12 @@ message LanguageTranslation {
 
   // Map of text ID to localized text and media variants.
   map<string, LocalizedString> strings = 3;
+
+  // Stable identifier for sparse mutation upserts and deletions (defaults to `language`).
+  string id = 4;
+
+  // Display sort order in the language selector.
+  int32 sort_order = 5;
 }
 
 message LocalizedString {

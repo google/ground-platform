@@ -75,6 +75,12 @@ message FormLaunchConfig {
   // Optional: Binds this CTA to the bottom sheet of entities in the specified
   // Entity Dataset (`EntityDatasetDef.id`), pre-linking new submissions.
   string target_entity_dataset_id = 4;
+
+  // Stable identifier for sparse mutation upserts and deletions (defaults to `form_id`).
+  string id = 5;
+
+  // Display sort order of this launch CTA button.
+  int32 sort_order = 6;
 }
 ```
 

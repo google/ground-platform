@@ -17,25 +17,22 @@ package org.openforis.collectone.v2.server.userdata
 
 import groundplatform.v2.data.ConflictResolutionStatus
 import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.GetAppliedMutationsRequest
 import groundplatform.v2.data.GetEntityRequest
 import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.library.LibraryFieldPatch
 import groundplatform.v2.library.LibraryMutation
 import groundplatform.v2.library.MutateLibraryRequest
+import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.library.OrganizationLibrarySettings
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationFieldPatch
 import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.SurveyFieldPatch
+import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -66,8 +63,7 @@ open class MutationIdempotencyTest {
           entity_id = id,
           dataset_id = DATASET,
           base_revision = baseRevision,
-          update =
-            EntityPatch(patches = listOf(EntityFieldPatch(key = "label", label_value = value))),
+          upsert = EntityRecord(label = value),
         ),
     )
 
@@ -204,7 +200,7 @@ open class MutationIdempotencyTest {
               mutation_id = "s-2",
               client_id = CLIENT,
               client_seq = 2,
-              update_field = SurveyFieldPatch(key = "title", string_value = "Draft"),
+              upsert = SurveyDef(title = "Draft"),
             )
           ),
       )
@@ -218,7 +214,7 @@ open class MutationIdempotencyTest {
               mutation_id = "o-4",
               client_id = CLIENT,
               client_seq = 4,
-              update_field = OrganizationFieldPatch(key = "description", string_value = "D"),
+              upsert = Organization(description = "D"),
             )
           ),
       )
@@ -232,10 +228,9 @@ open class MutationIdempotencyTest {
               mutation_id = "l-5",
               client_id = CLIENT,
               client_seq = 5,
-              update_field =
-                LibraryFieldPatch(
-                  key = "settings",
-                  settings_value = OrganizationLibrarySettings(organization_id = ORG),
+              upsert =
+                OrganizationLibraryRecord(
+                  settings = OrganizationLibrarySettings(organization_id = ORG)
                 ),
             )
           ),
@@ -272,7 +267,7 @@ open class MutationIdempotencyTest {
         mutation_id = "s-1",
         client_id = CLIENT,
         client_seq = 1,
-        update_field = SurveyFieldPatch(key = "title", string_value = "Mine"),
+        upsert = SurveyDef(title = "Mine"),
       )
     val first =
       backend.MutateSurvey(
@@ -282,10 +277,7 @@ open class MutationIdempotencyTest {
       MutateSurveyRequest(
         survey_id = KENYA,
         working_copy = true,
-        mutations =
-          listOf(
-            SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Theirs"))
-          ),
+        mutations = listOf(SurveyMutation(upsert = SurveyDef(title = "Theirs"))),
       )
     )
 
@@ -311,12 +303,7 @@ open class MutationIdempotencyTest {
     backend.MutateOrganization(
       MutateOrganizationRequest(
         organization_id = ORG,
-        mutations =
-          listOf(
-            OrganizationMutation(
-              update_field = OrganizationFieldPatch(key = "description", string_value = "Newer")
-            )
-          ),
+        mutations = listOf(OrganizationMutation(upsert = Organization(description = "Newer"))),
       )
     )
     assertTrue(staleVersion > 0L)
@@ -326,8 +313,7 @@ open class MutationIdempotencyTest {
         MutateOrganizationRequest(
           organization_id = ORG,
           base_version = staleVersion,
-          mutations =
-            listOf(OrganizationMutation(upsert_organization = Organization(organization_id = ORG))),
+          mutations = listOf(OrganizationMutation(upsert = Organization(organization_id = ORG))),
         )
       )
     }
@@ -337,12 +323,7 @@ open class MutationIdempotencyTest {
         MutateOrganizationRequest(
           organization_id = ORG,
           base_version = staleVersion,
-          mutations =
-            listOf(
-              OrganizationMutation(
-                update_field = OrganizationFieldPatch(key = "name", string_value = "Renamed")
-              )
-            ),
+          mutations = listOf(OrganizationMutation(upsert = Organization(name = "Renamed"))),
         )
       )
     assertEquals("Renamed", patched.organization?.name)

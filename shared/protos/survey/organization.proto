@@ -145,6 +145,9 @@ message ImagerySource {
     // Web Mercator XYZ raster tile source.
     XyzTileSource xyz_tiles = 3;
   }
+
+  // Display order of this imagery source in the basemap layers list (0-based).
+  int32 sort_order = 4;
 }
 
 // Role of a person in an organization.
@@ -203,4 +206,11 @@ message OrganizationMember {
 
   // Cached display profile of the member once known.
   CachedProfile profile = 7;
+
+  // Stable identifier for sparse mutation addressing (defaults to `user_id` or
+  // normalized `email` when unset).
+  string id = 8;
+
+  // Display order of this member in the organization roster (0-based).
+  int32 sort_order = 9;
 }

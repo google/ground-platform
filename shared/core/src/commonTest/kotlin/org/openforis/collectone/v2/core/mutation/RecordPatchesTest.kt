@@ -15,89 +15,123 @@
  */
 package org.openforis.collectone.v2.core.mutation
 
-import groundplatform.v2.data.EntityFieldPatch
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.SubmissionFieldPatch
-import groundplatform.v2.data.SubmissionPatch
 import groundplatform.v2.data.SubmissionRecord
+import groundplatform.v2.forms.ControlDef
 import groundplatform.v2.forms.FormDef
 import groundplatform.v2.forms.TypedValue
+import groundplatform.v2.forms.ViewComponent
+import groundplatform.v2.forms.ViewDef
 import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.LibraryFieldPatch
+import groundplatform.v2.library.LibraryBundle
+import groundplatform.v2.library.LocalizedText
 import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.AclRolePatch
+import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.LayerDef
+import groundplatform.v2.survey.MapConfig
 import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationFieldPatch
 import groundplatform.v2.survey.OrganizationMember
 import groundplatform.v2.survey.Role
-import groundplatform.v2.survey.StringListValue
 import groundplatform.v2.survey.SurveyAcl
 import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyFieldPatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Semantics of the shared field patches, including the property the client outbox relies on:
- * applying a patch twice gives the same record as applying it once, so pending mutations can be
- * re-applied on top of a server copy that may already include them.
- *
- * Wire maps `google.protobuf.NullValue` to `Nothing?`, so Kotlin clients clear a key by leaving the
- * `value` oneof unset; the patches treat that the same as `null_value`.
+ * Semantics of sparse-proto mutations (`upsert` + structural `delete` mask), including the
+ * idempotency property the client outbox relies on: applying a `(upsert, delete)` pair twice gives
+ * the same record as applying it once, so pending mutations can be re-applied on top of a server
+ * copy that may already include them.
  */
 class RecordPatchesTest {
   private val survey =
     SurveyDef(
       survey_id = "s1",
       title = "Old",
+      description = "Keep?",
       forms =
-        listOf(FormDef(form_id = "f1", title = "One"), FormDef(form_id = "f2", title = "Two")),
+        listOf(
+          FormDef(
+            form_id = "f1",
+            title = "One",
+            view =
+              ViewDef(
+                components =
+                  listOf(ViewComponent(id = "c1", control = ControlDef(field_ref = "/data/a")))
+              ),
+          ),
+          FormDef(form_id = "f2", title = "Two"),
+        ),
     )
 
-  private val surveyPatches =
+  private val surveyMutations: List<Pair<SurveyDef?, SurveyDef?>> =
     listOf(
-      SurveyFieldPatch(key = "title", string_value = "New"),
-      SurveyFieldPatch(key = "description"),
-      SurveyFieldPatch(
-        key = "supported_languages",
-        string_list_value = StringListValue(values = listOf("en", "sw")),
-      ),
-      SurveyFieldPatch(key = "forms/f1", form_value = FormDef(form_id = "f1", title = "Uno")),
-      SurveyFieldPatch(key = "forms/f2"),
-      SurveyFieldPatch(key = "map_config/layers/l1", layer_value = LayerDef(id = "l1")),
-      SurveyFieldPatch(key = "unknown_key", string_value = "ignored"),
+      SurveyDef(title = "New") to null,
+      null to SurveyDef(description = "x"),
+      SurveyDef(supported_languages = listOf("en", "sw")) to null,
+      SurveyDef(forms = listOf(FormDef(form_id = "f1", title = "Uno"))) to null,
+      null to SurveyDef(forms = listOf(FormDef(form_id = "f2"))),
+      SurveyDef(map_config = MapConfig(layers = listOf(LayerDef(id = "l1")))) to null,
     )
 
   @Test
   fun surveyPatches_areIdempotent() {
-    for (patch in surveyPatches) {
-      val once = SurveyPatches.applyField(survey, patch)
-      assertEquals(once, SurveyPatches.applyField(once, patch), patch.key)
+    for ((upsert, delete) in surveyMutations) {
+      val once = SurveyPatches.apply(survey, upsert, delete)
+      assertEquals(once, SurveyPatches.apply(once, upsert, delete))
     }
   }
 
   @Test
   fun surveyPatches_setClearAndUpsertKeyedItems() {
-    val result = surveyPatches.fold(survey, SurveyPatches::applyField)
+    val result =
+      surveyMutations.fold(survey) { acc, (upsert, delete) ->
+        SurveyPatches.apply(acc, upsert, delete)
+      }
 
     assertEquals("New", result.title)
     assertEquals("", result.description)
     assertEquals(listOf("en", "sw"), result.supported_languages)
-    assertEquals(listOf(FormDef(form_id = "f1", title = "Uno")), result.forms)
+    assertEquals(
+      listOf(
+        FormDef(
+          form_id = "f1",
+          title = "Uno",
+          view =
+            ViewDef(
+              components =
+                listOf(ViewComponent(id = "c1", control = ControlDef(field_ref = "/data/a")))
+            ),
+        )
+      ),
+      result.forms,
+    )
     assertEquals(listOf("l1"), result.map_config?.layers?.map { it.id })
   }
 
   @Test
-  fun aclRolePatch_grantsAndRevokes_idempotently() {
-    val grant = AclRolePatch(user_id = "a@example.org", role = Role.DATA_COLLECTOR)
-    val revoke = AclRolePatch(user_id = "a@example.org")
-    val granted = SurveyPatches.applyAclRole(SurveyAcl(survey_id = "s1"), grant)
+  fun surveyPatches_branchDeleteClearsNestedFieldsWithoutDroppingParentItem() {
+    val deleteFormTitleOnly = SurveyDef(forms = listOf(FormDef(form_id = "f1", title = "x")))
+    val result = SurveyPatches.apply(survey, upsert = null, delete = deleteFormTitleOnly)
 
-    assertEquals(granted, SurveyPatches.applyAclRole(granted, grant))
+    assertEquals(2, result.forms.size)
+    assertEquals("", result.forms.first { it.form_id == "f1" }.title)
+    assertEquals(
+      listOf(ViewComponent(id = "c1", control = ControlDef(field_ref = "/data/a"))),
+      result.forms.first { it.form_id == "f1" }.view?.components,
+    )
+  }
+
+  @Test
+  fun aclPatch_grantsAndRevokes_idempotently() {
+    val grant =
+      SurveyAcl(entries = listOf(AclEntry(email = "a@example.org", role = Role.DATA_COLLECTOR)))
+    val revoke = SurveyAcl(entries = listOf(AclEntry(email = "a@example.org")))
+    val granted = SurveyPatches.applyAcl(SurveyAcl(survey_id = "s1"), upsert = grant)
+
+    assertEquals(granted, SurveyPatches.applyAcl(granted, upsert = grant))
     assertEquals(Role.DATA_COLLECTOR, granted.entries.single().role)
-    assertEquals(emptyList(), SurveyPatches.applyAclRole(granted, revoke).entries)
+    assertEquals(emptyList(), SurveyPatches.applyAcl(granted, delete = revoke).entries)
   }
 
   @Test
@@ -107,71 +141,64 @@ class RecordPatchesTest {
         organization_id = "o1",
         members = listOf(OrganizationMember(email = "A@Example.org")),
       )
-    val patches =
+    val upserts =
       listOf(
-        OrganizationFieldPatch(key = "name", string_value = "Org"),
-        OrganizationFieldPatch(key = "listed", bool_value = true),
-        OrganizationFieldPatch(
-          key = "members/a@example.org",
-          member_value = OrganizationMember(email = "a@example.org", user_id = "u1"),
-        ),
+        Organization(name = "Org"),
+        Organization(listed = true),
+        Organization(members = listOf(OrganizationMember(email = "a@example.org", user_id = "u1"))),
       )
-    for (patch in patches) {
-      val once = OrganizationPatches.applyField(org, patch)
-      assertEquals(once, OrganizationPatches.applyField(once, patch), patch.key)
+    for (upsert in upserts) {
+      val once = OrganizationPatches.apply(org, upsert = upsert)
+      assertEquals(once, OrganizationPatches.apply(once, upsert = upsert))
     }
-    val result = patches.fold(org, OrganizationPatches::applyField)
+    val result = upserts.fold(org) { acc, u -> OrganizationPatches.apply(acc, upsert = u) }
     assertEquals("u1", result.members.single().user_id)
   }
 
   @Test
   fun libraryPatches_upsertAndRemoveConcepts_idempotently() {
-    val upsert = LibraryFieldPatch(key = "concepts/c1", concept_value = ConceptDef(id = "c1"))
-    val remove = LibraryFieldPatch(key = "concepts/c1")
-    val added = LibraryPatches.applyField(OrganizationLibraryRecord(organization_id = "o1"), upsert)
+    val upsert =
+      OrganizationLibraryRecord(
+        bundle =
+          LibraryBundle(
+            concepts =
+              listOf(ConceptDef(id = "c1", label = LocalizedText(values = mapOf("en" to "Tree"))))
+          )
+      )
+    val remove =
+      OrganizationLibraryRecord(bundle = LibraryBundle(concepts = listOf(ConceptDef(id = "c1"))))
+    val added =
+      LibraryPatches.apply(OrganizationLibraryRecord(organization_id = "o1"), upsert = upsert)
 
-    assertEquals(added, LibraryPatches.applyField(added, upsert))
+    assertEquals(added, LibraryPatches.apply(added, upsert = upsert))
     assertEquals(listOf("c1"), added.bundle?.concepts?.map { it.id })
-    assertEquals(emptyList(), LibraryPatches.applyField(added, remove).bundle?.concepts)
+    assertEquals(emptyList(), LibraryPatches.apply(added, delete = remove).bundle?.concepts)
   }
 
   @Test
   fun entityPatch_setsAndClearsProperties_idempotently() {
     val record =
       EntityRecord(entity_id = "e1", properties = mapOf("old" to TypedValue(string_value = "x")))
-    val patch =
-      EntityPatch(
-        patches =
-          listOf(
-            EntityFieldPatch(key = "label", label_value = "Plot 1"),
-            EntityFieldPatch(
-              key = "properties/crop",
-              property_value = TypedValue(string_value = "coffee"),
-            ),
-            EntityFieldPatch(key = "properties/old"),
-          )
+    val upsert =
+      EntityRecord(
+        label = "Plot 1",
+        properties = mapOf("crop" to TypedValue(string_value = "coffee")),
       )
+    val delete = EntityRecord(properties = mapOf("old" to TypedValue()))
 
-    val once = DataPatches.applyEntity(record, patch)
+    val once = DataPatches.applyEntity(record, upsert = upsert, delete = delete)
 
-    assertEquals(once, DataPatches.applyEntity(once, patch))
+    assertEquals(once, DataPatches.applyEntity(once, upsert = upsert, delete = delete))
     assertEquals("Plot 1", once.label)
     assertEquals(mapOf("crop" to TypedValue(string_value = "coffee")), once.properties)
   }
 
   @Test
   fun submissionPatch_isIdempotent() {
-    val patch =
-      SubmissionPatch(
-        patches =
-          listOf(
-            SubmissionFieldPatch(key = "entity_id", string_value = "e1"),
-            SubmissionFieldPatch(key = "is_quarantined", bool_value = true),
-          )
-      )
-    val once = DataPatches.applySubmission(SubmissionRecord(submission_id = "sub1"), patch)
+    val upsert = SubmissionRecord(entity_id = "e1", is_quarantined = true)
+    val once = DataPatches.applySubmission(SubmissionRecord(submission_id = "sub1"), upsert)
 
-    assertEquals(once, DataPatches.applySubmission(once, patch))
+    assertEquals(once, DataPatches.applySubmission(once, upsert))
     assertEquals("e1", once.entity_id)
     assertEquals(true, once.is_quarantined)
   }

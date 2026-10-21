@@ -14,9 +14,7 @@
 package org.openforis.collectone.v2.server.userdata
 
 import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.ListEntitiesRequest
 import groundplatform.v2.data.MutateDataRequest
@@ -27,8 +25,10 @@ import groundplatform.v2.survey.ListOrganizationsRequest
 import groundplatform.v2.survey.ListSurveyOverviewsRequest
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateSurveyRequest
+import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.SurveyFieldPatch
+import groundplatform.v2.survey.SurveyAcl
+import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyMutation
 import groundplatform.v2.survey.SurveyState
 import io.grpc.Status
@@ -116,10 +116,8 @@ open class AuthorizationTest {
             mutations =
               listOf(
                 SurveyMutation(
-                  update_access_rules =
-                    groundplatform.v2.survey.AccessRulesPatch(
-                      sharing_policy = groundplatform.v2.survey.SharingPolicy.RESTRICTED
-                    )
+                  acl_upsert =
+                    SurveyAcl(sharing_policy = groundplatform.v2.survey.SharingPolicy.RESTRICTED)
                 )
               ),
           )
@@ -147,12 +145,7 @@ open class AuthorizationTest {
         backend.MutateSurvey(
           MutateSurveyRequest(
             survey_id = MEKONG,
-            mutations =
-              listOf(
-                SurveyMutation(
-                  update_field = SurveyFieldPatch(key = "title", string_value = "Renamed")
-                )
-              ),
+            mutations = listOf(SurveyMutation(upsert = SurveyDef(title = "Renamed"))),
           )
         )
       }
@@ -183,10 +176,7 @@ open class AuthorizationTest {
       val retitle =
         MutateSurveyRequest(
           survey_id = KENYA,
-          mutations =
-            listOf(
-              SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Mine"))
-            ),
+          mutations = listOf(SurveyMutation(upsert = SurveyDef(title = "Mine"))),
         )
       assertDenied(COLLECTOR) { backend.MutateSurvey(retitle) }
       asCaller(FIELD_LEAD) { backend.MutateSurvey(retitle) }
@@ -196,16 +186,7 @@ open class AuthorizationTest {
         backend.MutateOrganization(
           MutateOrganizationRequest(
             organization_id = KENYA_FOREST_SERVICE,
-            mutations =
-              listOf(
-                OrganizationMutation(
-                  update_field =
-                    groundplatform.v2.survey.OrganizationFieldPatch(
-                      key = "name",
-                      string_value = "Taken",
-                    )
-                )
-              ),
+            mutations = listOf(OrganizationMutation(upsert = Organization(name = "Taken"))),
           )
         )
       }
@@ -243,10 +224,7 @@ open class AuthorizationTest {
                 entity_mutation =
                   EntityMutation(
                     entity_id = seedEntity.entity_id,
-                    update =
-                      EntityPatch(
-                        patches = listOf(EntityFieldPatch(key = "label", label_value = "Mine"))
-                      ),
+                    upsert = EntityRecord(label = "Mine"),
                   ),
               )
             ),
@@ -274,8 +252,8 @@ open class AuthorizationTest {
             mutations =
               listOf(
                 SurveyMutation(
-                  update_access_rules =
-                    groundplatform.v2.survey.AccessRulesPatch(
+                  acl_upsert =
+                    SurveyAcl(
                       peer_data_visibility = groundplatform.v2.survey.PeerDataVisibility.OWN_ONLY
                     )
                 )

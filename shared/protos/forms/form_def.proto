@@ -72,6 +72,13 @@ message FieldDefinition {
   // Optional fully qualified protobuf message type name for custom compiled
   // schemas.
   string type_name = 5;
+
+  // Stable identifier for sparse mutation addressing (defaults to `name` when
+  // unset).
+  string id = 6;
+
+  // Display/schema order of this field within its parent container (0-based).
+  int32 sort_order = 7;
 }
 
 // Dynamic schema defining the structure, fields, and text-serialization
@@ -136,6 +143,9 @@ message SecondaryInstance {
 
   // Structured inline rows embedded directly within the form definition.
   repeated RecordNode rows = 6;
+
+  // Display order of this secondary instance within `ModelDef` (0-based).
+  int32 sort_order = 7;
 }
 
 // Binding rule attaching data types, validation logic, reactive calculations,
@@ -208,6 +218,10 @@ message FieldBinding {
   // (e.g., `ground:concept`, or another tool's extension), preserved so they
   // round-trip through XForms and XLSForm (`bind::<prefix>:<name>` columns).
   repeated ForeignAttribute foreign_attributes = 17;
+
+  // Stable identifier for sparse mutation addressing (defaults to `field_path`
+  // when unset).
+  string id = 18;
 }
 
 // An XML attribute in a namespace ProtoForms doesn't model, preserved as
@@ -220,6 +234,10 @@ message ForeignAttribute {
   string qualified_name = 2;
 
   string value = 3;
+
+  // Stable identifier for sparse mutation addressing (defaults to
+  // `qualified_name` when unset).
+  string id = 4;
 }
 
 // Media attachment references for prompt images, audio clips, and instructional
@@ -270,6 +288,9 @@ message LanguageTranslation {
   // Translation table mapping text identifier keys (text_id) to localized
   // string definitions.
   map<string, LocalizedString> strings = 3;
+
+  // Display order of this language in the translation catalog (0-based).
+  int32 sort_order = 4;
 }
 
 // Multi-lingual catalog containing all language translation dictionaries for
@@ -333,6 +354,12 @@ message ActionDef {
     // not used.
     TypedValue literal_value = 5;
   }
+
+  // Stable identifier for sparse mutation addressing.
+  string id = 6;
+
+  // Execution/declaration order of this action (0-based).
+  int32 sort_order = 7;
 }
 
 // Offline synchronization and optimistic concurrency metadata for an entity.
@@ -356,6 +383,10 @@ message EntityPropertyMapping {
 
   // Source field path in the form primary instance.
   string source_field_path = 2;
+
+  // Stable identifier for sparse mutation addressing (defaults to
+  // `entity_property` when unset).
+  string id = 3;
 }
 
 // Configuration declaring how a form submission creates or updates an entity
@@ -384,6 +415,10 @@ message EntityDeclaration {
 
   // Explicit mappings transferring form fields to entity dataset properties.
   repeated EntityPropertyMapping property_mappings = 7;
+
+  // Stable identifier for sparse mutation addressing (defaults to `dataset`
+  // when unset).
+  string id = 8;
 }
 
 // Destination endpoint and transmission policies for sending finalized form
@@ -494,6 +529,10 @@ message OutputFragment {
   // Expression evaluated at runtime whose formatted string result replaces the
   // placeholder.
   string value_expression = 2;
+
+  // Stable identifier for sparse mutation addressing (defaults to
+  // `placeholder_id` when unset).
+  string id = 3;
 }
 
 // Question or group label/hint text supporting static strings, multi-lingual
@@ -526,6 +565,14 @@ message ChoiceItem {
 
   // Optional parent choice value unlocking this option in a cascading select.
   string parent_value = 4;
+
+  // Stable identifier for sparse mutation addressing (defaults to `value` when
+  // unset).
+  string id = 5;
+
+  // Display order of this choice item within its parent selection list
+  // (0-based).
+  int32 sort_order = 6;
 }
 
 // Dynamic choice itemset query populating options from a SecondaryInstance
@@ -730,6 +777,13 @@ message ViewComponent {
     // Repeatable section container.
     RepeatDef repeat = 3;
   }
+
+  // Stable identifier for sparse mutation addressing (defaults to the nested
+  // component's `field_ref` when unset).
+  string id = 4;
+
+  // Display order of this component within its parent container (0-based).
+  int32 sort_order = 5;
 }
 
 // Complete user interface presentation definition for a form.
@@ -768,4 +822,7 @@ message FormDef {
   // metadata. Clients are expected to preserve all metadata and extension
   // payloads even if they do not support all features of the XForms specification.
   repeated google.protobuf.Any custom_extensions = 7;
+
+  // Display order of this form within its parent survey (0-based).
+  int32 sort_order = 8;
 }

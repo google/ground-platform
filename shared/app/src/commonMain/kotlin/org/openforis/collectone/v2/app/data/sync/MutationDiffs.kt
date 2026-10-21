@@ -15,76 +15,179 @@
  */
 package org.openforis.collectone.v2.app.data.sync
 
-import groundplatform.v2.data.EntityFieldPatch
+import com.squareup.wire.ofEpochSecond
 import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.SubmissionFieldPatch
+import groundplatform.v2.data.ReviewStatus
 import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.LibraryFieldPatch
+import groundplatform.v2.forms.FormDef
+import groundplatform.v2.forms.GeoPoint
+import groundplatform.v2.forms.TypedValue
+import groundplatform.v2.library.ConceptDef
+import groundplatform.v2.library.ExportProfileDef
+import groundplatform.v2.library.FormTemplateDef
+import groundplatform.v2.library.LibraryBundle
+import groundplatform.v2.library.LibraryMutation
 import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.AccessRulesPatch
-import groundplatform.v2.survey.AclRolePatch
+import groundplatform.v2.library.OrganizationLibrarySettings
+import groundplatform.v2.library.PurposePackDef
+import groundplatform.v2.survey.AclEntry
+import groundplatform.v2.survey.EntityDatasetDef
+import groundplatform.v2.survey.FormConceptLinks
+import groundplatform.v2.survey.FormLaunchConfig
+import groundplatform.v2.survey.ImagerySource
+import groundplatform.v2.survey.LayerDef
+import groundplatform.v2.survey.MapConfig
+import groundplatform.v2.survey.OfflineTilePackageDef
 import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationFieldPatch
-import groundplatform.v2.survey.StringListValue
+import groundplatform.v2.survey.OrganizationMember
+import groundplatform.v2.survey.OrganizationMutation
+import groundplatform.v2.survey.OrganizationType
+import groundplatform.v2.survey.PeerDataVisibility
+import groundplatform.v2.survey.SharingPolicy
 import groundplatform.v2.survey.SurveyAcl
+import groundplatform.v2.survey.SurveyArea
 import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyFieldPatch
+import groundplatform.v2.survey.SurveyMutation
+import groundplatform.v2.survey.SurveyOutcome
+import groundplatform.v2.survey.SurveyState
+import org.openforis.collectone.v2.core.mutation.MutationKeys
+
+/** A sparse `(upsert, delete)` pair describing a change to a domain proto [T]. */
+data class SparseDiff<T>(val upsert: T? = null, val delete: T? = null) {
+  val isEmpty: Boolean
+    get() = upsert == null && delete == null
+}
 
 /**
- * Turns a record's old and new proto values into the fine-grained field patches that transform one
- * into the other, using the key paths of the `Mutate*` RPCs. Server bookkeeping (revisions,
- * versions, commit timestamps, sync status) is ignored. Keyed collection items are compared one by
- * one, so editing one form, member, or concept produces one patch.
+ * Turns a record's old and new proto values into the fine-grained sparse `upsert` and `delete`
+ * masks that transform one into the other. Server bookkeeping (revisions, versions, commit
+ * timestamps, sync status) is ignored. Keyed collection items are compared one by one, so editing
+ * one form, member, or concept produces one sparse mutation.
  *
- * Applying the returned patches to `old` with the shared patch functions reproduces `new` for every
- * field the RPCs can patch; `requiresUpsert` reports changes outside those fields.
+ * Applying the returned mutations to `old` with the shared functions in `RecordPatches` reproduces
+ * `new` for every field the RPCs can mutate; `requiresUpsert` reports changes outside those fields.
  */
 object MutationDiffs {
-  /** Field patches for an entity, and whether other fields changed too. */
-  data class EntityDiff(val patches: List<EntityFieldPatch>, val requiresUpsert: Boolean)
+  /** Sparse diff for an entity, and whether other fields changed too. */
+  data class EntityDiff(val diff: SparseDiff<EntityRecord>, val requiresUpsert: Boolean) {
+    val isEmpty: Boolean
+      get() = diff.isEmpty && !requiresUpsert
+  }
 
   fun entity(old: EntityRecord, new: EntityRecord): EntityDiff {
-    val patches = mutableListOf<EntityFieldPatch>()
-    if (old.label != new.label) patches += EntityFieldPatch(key = "label", label_value = new.label)
-    if (old.point != new.point || old.trace != new.trace || old.shape != new.shape) {
-      patches +=
-        EntityFieldPatch(
-          key = "geometry",
-          point_value = new.point,
-          trace_value = new.trace?.takeIf { new.point == null },
-          shape_value = new.shape?.takeIf { new.point == null && new.trace == null },
-        )
+    var up = EntityRecord()
+    var del = EntityRecord()
+    var hasUp = false
+    var hasDel = false
+
+    if (old.label != new.label) {
+      if (new.label.isEmpty()) {
+        del = del.copy(label = old.label)
+        hasDel = true
+      } else {
+        up = up.copy(label = new.label)
+        hasUp = true
+      }
     }
+    if (old.point != new.point || old.trace != new.trace || old.shape != new.shape) {
+      when {
+        new.point != null -> {
+          up = up.copy(point = new.point)
+          hasUp = true
+        }
+        new.trace != null -> {
+          up = up.copy(trace = new.trace)
+          hasUp = true
+        }
+        new.shape != null -> {
+          up = up.copy(shape = new.shape)
+          hasUp = true
+        }
+        else -> {
+          del =
+            del.copy(
+              point = old.point ?: GeoPoint(),
+              trace = old.trace?.takeIf { old.point == null },
+              shape = old.shape?.takeIf { old.point == null && old.trace == null },
+            )
+          hasDel = true
+        }
+      }
+    }
+    val upProps = LinkedHashMap<String, TypedValue>()
+    val delProps = LinkedHashMap<String, TypedValue>()
     for (key in (old.properties.keys + new.properties.keys).distinct()) {
       val value = new.properties[key]
       if (old.properties[key] != value) {
-        patches += EntityFieldPatch(key = "properties/$key", property_value = value)
+        if (value != null) upProps[key] = value else delProps[key] = TypedValue()
       }
     }
+    if (upProps.isNotEmpty()) {
+      up = up.copy(properties = upProps)
+      hasUp = true
+    }
+    if (delProps.isNotEmpty()) {
+      del = del.copy(properties = delProps)
+      hasDel = true
+    }
+
     val patchable = { r: EntityRecord ->
       normalize(r)
         .copy(label = "", point = null, trace = null, shape = null, properties = emptyMap())
     }
-    return EntityDiff(patches, patchable(old) != patchable(new))
+    return EntityDiff(
+      SparseDiff(upsert = up.takeIf { hasUp }, delete = del.takeIf { hasDel }),
+      patchable(old) != patchable(new),
+    )
   }
 
-  /** Field patches for a submission, and whether other fields changed too. */
-  data class SubmissionDiff(val patches: List<SubmissionFieldPatch>, val requiresUpsert: Boolean)
+  /** Sparse diff for a submission, and whether other fields changed too. */
+  data class SubmissionDiff(val diff: SparseDiff<SubmissionRecord>, val requiresUpsert: Boolean) {
+    val isEmpty: Boolean
+      get() = diff.isEmpty && !requiresUpsert
+  }
 
   fun submission(old: SubmissionRecord, new: SubmissionRecord): SubmissionDiff {
-    val patches = mutableListOf<SubmissionFieldPatch>()
+    var up = SubmissionRecord()
+    var del = SubmissionRecord()
+    var hasUp = false
+    var hasDel = false
+
     if (old.entity_id != new.entity_id) {
-      patches += SubmissionFieldPatch(key = "entity_id", string_value = new.entity_id)
+      if (new.entity_id.isEmpty()) {
+        del = del.copy(entity_id = old.entity_id)
+        hasDel = true
+      } else {
+        up = up.copy(entity_id = new.entity_id)
+        hasUp = true
+      }
     }
     if (old.form_version != new.form_version) {
-      patches += SubmissionFieldPatch(key = "form_version", string_value = new.form_version)
+      if (new.form_version.isEmpty()) {
+        del = del.copy(form_version = old.form_version)
+        hasDel = true
+      } else {
+        up = up.copy(form_version = new.form_version)
+        hasUp = true
+      }
     }
     if (old.is_quarantined != new.is_quarantined) {
-      patches += SubmissionFieldPatch(key = "is_quarantined", bool_value = new.is_quarantined)
+      if (new.is_quarantined) {
+        up = up.copy(is_quarantined = true)
+        hasUp = true
+      } else {
+        del = del.copy(is_quarantined = true)
+        hasDel = true
+      }
     }
     if (old.review_status != new.review_status) {
-      patches +=
-        SubmissionFieldPatch(key = "review_status", review_status_value = new.review_status)
+      if (new.review_status == ReviewStatus.REVIEW_STATUS_UNSPECIFIED) {
+        del = del.copy(review_status = old.review_status)
+        hasDel = true
+      } else {
+        up = up.copy(review_status = new.review_status)
+        hasUp = true
+      }
     }
     val patchable = { r: SubmissionRecord ->
       normalize(r)
@@ -95,46 +198,57 @@ object MutationDiffs {
           review_status = SubmissionRecord().review_status,
         )
     }
-    return SubmissionDiff(patches, patchable(old) != patchable(new))
+    return SubmissionDiff(
+      SparseDiff(upsert = up.takeIf { hasUp }, delete = del.takeIf { hasDel }),
+      patchable(old) != patchable(new),
+    )
   }
 
-  /** Field patches for an organization, and whether other fields changed too. */
+  /** Sparse mutations for an organization, and whether other fields changed too. */
   data class OrganizationDiff(
-    val patches: List<OrganizationFieldPatch>,
+    val mutations: List<OrganizationMutation>,
     val requiresUpsert: Boolean,
   )
 
   fun organization(old: Organization, new: Organization): OrganizationDiff {
-    val patches = mutableListOf<OrganizationFieldPatch>()
-    fun string(key: String, a: String, b: String) {
-      if (a != b) patches += OrganizationFieldPatch(key = key, string_value = b)
+    val mutations = mutableListOf<OrganizationMutation>()
+    fun emit(upsert: Organization? = null, delete: Organization? = null) {
+      mutations += OrganizationMutation(upsert = upsert, delete = delete)
     }
-    fun bool(key: String, a: Boolean, b: Boolean) {
-      if (a != b) patches += OrganizationFieldPatch(key = key, bool_value = b)
+    fun string(a: String, b: String, build: (String) -> Organization) {
+      if (a != b) {
+        if (b.isEmpty()) emit(delete = build(a)) else emit(upsert = build(b))
+      }
     }
-    string("name", old.name, new.name)
-    string("description", old.description, new.description)
-    string("website_url", old.website_url, new.website_url)
-    string("logo_url", old.logo_url, new.logo_url)
-    string("country_code", old.country_code, new.country_code)
-    bool("listed", old.listed, new.listed)
-    bool(
-      "exclude_from_platform_aggregates",
-      old.exclude_from_platform_aggregates,
-      new.exclude_from_platform_aggregates,
-    )
+    fun bool(a: Boolean, b: Boolean, build: (Boolean) -> Organization) {
+      if (a != b) {
+        if (b) emit(upsert = build(true)) else emit(delete = build(true))
+      }
+    }
+    string(old.name, new.name) { Organization(name = it) }
+    string(old.description, new.description) { Organization(description = it) }
+    string(old.website_url, new.website_url) { Organization(website_url = it) }
+    string(old.logo_url, new.logo_url) { Organization(logo_url = it) }
+    string(old.country_code, new.country_code) { Organization(country_code = it) }
+    bool(old.listed, new.listed) { Organization(listed = it) }
+    bool(old.exclude_from_platform_aggregates, new.exclude_from_platform_aggregates) {
+      Organization(exclude_from_platform_aggregates = it)
+    }
     if (old.organization_type != new.organization_type) {
-      patches +=
-        OrganizationFieldPatch(
-          key = "organization_type",
-          organization_type_value = new.organization_type,
-        )
+      if (new.organization_type == OrganizationType.ORGANIZATION_TYPE_UNSPECIFIED) {
+        emit(delete = Organization(organization_type = old.organization_type))
+      } else {
+        emit(upsert = Organization(organization_type = new.organization_type))
+      }
     }
-    keyed(old.imagery_sources, new.imagery_sources, { it.imagery_source_id }) { id, value ->
-      patches += OrganizationFieldPatch(key = "imagery_sources/$id", imagery_source_value = value)
+    keyed(old.imagery_sources, new.imagery_sources, { it.imagery_source_id }) { id, v ->
+      if (v != null) emit(upsert = Organization(imagery_sources = listOf(v)))
+      else
+        emit(delete = Organization(imagery_sources = listOf(ImagerySource(imagery_source_id = id))))
     }
-    keyed(old.members, new.members, { it.email.lowercase() }) { email, value ->
-      patches += OrganizationFieldPatch(key = "members/$email", member_value = value)
+    keyed(old.members, new.members, { MutationKeys.memberKey(it) }) { email, v ->
+      if (v != null) emit(upsert = Organization(members = listOf(v)))
+      else emit(delete = Organization(members = listOf(OrganizationMember(email = email))))
     }
     val patchable = { o: Organization ->
       o.copy(
@@ -153,123 +267,280 @@ object MutationDiffs {
         commit_timestamp = null,
       )
     }
-    return OrganizationDiff(patches, patchable(old) != patchable(new))
+    return OrganizationDiff(mutations, patchable(old) != patchable(new))
   }
 
-  /** Field patches for an organization library. */
+  /** Sparse mutations for an organization library. */
   fun library(
     old: OrganizationLibraryRecord,
     new: OrganizationLibraryRecord,
-  ): List<LibraryFieldPatch> {
-    val patches = mutableListOf<LibraryFieldPatch>()
+  ): List<LibraryMutation> {
+    val mutations = mutableListOf<LibraryMutation>()
+    fun emit(upsert: OrganizationLibraryRecord? = null, delete: OrganizationLibraryRecord? = null) {
+      mutations += LibraryMutation(upsert = upsert, delete = delete)
+    }
     if (old.settings != new.settings) {
-      patches += LibraryFieldPatch(key = "settings", settings_value = new.settings)
+      val s = new.settings
+      if (s == null || s == OrganizationLibrarySettings()) {
+        emit(delete = OrganizationLibraryRecord(settings = OrganizationLibrarySettings()))
+      } else {
+        emit(upsert = OrganizationLibraryRecord(settings = s))
+      }
     }
     val a = old.bundle
     val b = new.bundle
     keyed(a?.concepts.orEmpty(), b?.concepts.orEmpty(), { it.id }) { id, v ->
-      patches += LibraryFieldPatch(key = "concepts/$id", concept_value = v)
-    }
-    keyed(a?.form_templates.orEmpty(), b?.form_templates.orEmpty(), { it.id }) { id, v ->
-      patches += LibraryFieldPatch(key = "form_templates/$id", form_template_value = v)
-    }
-    keyed(a?.purpose_packs.orEmpty(), b?.purpose_packs.orEmpty(), { it.id }) { id, v ->
-      patches += LibraryFieldPatch(key = "purpose_packs/$id", purpose_pack_value = v)
-    }
-    keyed(a?.export_profiles.orEmpty(), b?.export_profiles.orEmpty(), { it.id }) { id, v ->
-      patches += LibraryFieldPatch(key = "export_profiles/$id", export_profile_value = v)
-    }
-    return patches
-  }
-
-  /** Field patches for a survey definition (saved revision or working copy). */
-  fun survey(old: SurveyDef, new: SurveyDef): List<SurveyFieldPatch> {
-    val patches = mutableListOf<SurveyFieldPatch>()
-    fun string(key: String, a: String, b: String) {
-      if (a != b) patches += SurveyFieldPatch(key = key, string_value = b)
-    }
-    fun strings(key: String, a: List<String>, b: List<String>) {
-      if (a != b) {
-        patches += SurveyFieldPatch(key = key, string_list_value = StringListValue(values = b))
+      if (v != null) {
+        emit(upsert = OrganizationLibraryRecord(bundle = LibraryBundle(concepts = listOf(v))))
+      } else {
+        emit(
+          delete =
+            OrganizationLibraryRecord(
+              bundle = LibraryBundle(concepts = listOf(ConceptDef(id = id)))
+            )
+        )
       }
     }
-    string("title", old.title, new.title)
-    string("description", old.description, new.description)
-    string("organization_id", old.organization_id, new.organization_id)
-    string("owner_id", old.owner_id, new.owner_id)
-    string("default_language", old.default_language, new.default_language)
-    string("closed_at_iso", old.closed_at_iso, new.closed_at_iso)
-    if (old.state != new.state) patches += SurveyFieldPatch(key = "state", state_value = new.state)
+    keyed(a?.form_templates.orEmpty(), b?.form_templates.orEmpty(), { it.id }) { id, v ->
+      if (v != null) {
+        emit(upsert = OrganizationLibraryRecord(bundle = LibraryBundle(form_templates = listOf(v))))
+      } else {
+        emit(
+          delete =
+            OrganizationLibraryRecord(
+              bundle = LibraryBundle(form_templates = listOf(FormTemplateDef(id = id)))
+            )
+        )
+      }
+    }
+    keyed(a?.purpose_packs.orEmpty(), b?.purpose_packs.orEmpty(), { it.id }) { id, v ->
+      if (v != null) {
+        emit(upsert = OrganizationLibraryRecord(bundle = LibraryBundle(purpose_packs = listOf(v))))
+      } else {
+        emit(
+          delete =
+            OrganizationLibraryRecord(
+              bundle = LibraryBundle(purpose_packs = listOf(PurposePackDef(id = id)))
+            )
+        )
+      }
+    }
+    keyed(a?.export_profiles.orEmpty(), b?.export_profiles.orEmpty(), { it.id }) { id, v ->
+      if (v != null) {
+        emit(
+          upsert = OrganizationLibraryRecord(bundle = LibraryBundle(export_profiles = listOf(v)))
+        )
+      } else {
+        emit(
+          delete =
+            OrganizationLibraryRecord(
+              bundle = LibraryBundle(export_profiles = listOf(ExportProfileDef(id = id)))
+            )
+        )
+      }
+    }
+    return mutations
+  }
+
+  /** Sparse mutations for a survey definition (saved revision or working copy). */
+  fun survey(old: SurveyDef, new: SurveyDef): List<SurveyMutation> {
+    val mutations = mutableListOf<SurveyMutation>()
+    fun emit(upsert: SurveyDef? = null, delete: SurveyDef? = null) {
+      mutations += SurveyMutation(upsert = upsert, delete = delete)
+    }
+    fun string(a: String, b: String, build: (String) -> SurveyDef) {
+      if (a != b) {
+        if (b.isEmpty()) emit(delete = build(a)) else emit(upsert = build(b))
+      }
+    }
+    fun strings(a: List<String>, b: List<String>, build: (List<String>) -> SurveyDef) {
+      if (a != b) {
+        if (b.isEmpty()) emit(delete = build(a)) else emit(upsert = build(b))
+      }
+    }
+    string(old.title, new.title) { SurveyDef(title = it) }
+    string(old.description, new.description) { SurveyDef(description = it) }
+    string(old.organization_id, new.organization_id) { SurveyDef(organization_id = it) }
+    string(old.owner_id, new.owner_id) { SurveyDef(owner_id = it) }
+    string(old.default_language, new.default_language) { SurveyDef(default_language = it) }
+    string(old.closed_at_iso, new.closed_at_iso) { SurveyDef(closed_at_iso = it) }
+    if (old.state != new.state) {
+      if (new.state == SurveyState.SURVEY_STATE_UNSPECIFIED) {
+        emit(delete = SurveyDef(state = old.state))
+      } else {
+        emit(upsert = SurveyDef(state = new.state))
+      }
+    }
     if (old.closed_at != new.closed_at) {
-      patches += SurveyFieldPatch(key = "closed_at", timestamp_value = new.closed_at)
+      if (new.closed_at == null) {
+        emit(delete = SurveyDef(closed_at = old.closed_at ?: ofEpochSecond(1L, 0L)))
+      } else {
+        emit(upsert = SurveyDef(closed_at = new.closed_at))
+      }
     }
     if (old.outcome != new.outcome) {
-      patches += SurveyFieldPatch(key = "outcome", outcome_value = new.outcome)
+      if (new.outcome == null || new.outcome == SurveyOutcome()) {
+        emit(delete = SurveyDef(outcome = SurveyOutcome()))
+      } else {
+        emit(upsert = SurveyDef(outcome = new.outcome))
+      }
     }
-    strings("supported_languages", old.supported_languages, new.supported_languages)
-    strings("purpose_ids", old.purpose_ids, new.purpose_ids)
-    strings("program_ids", old.program_ids, new.program_ids)
+    strings(old.supported_languages, new.supported_languages) {
+      SurveyDef(supported_languages = it)
+    }
+    strings(old.purpose_ids, new.purpose_ids) { SurveyDef(purpose_ids = it) }
+    strings(old.program_ids, new.program_ids) { SurveyDef(program_ids = it) }
     keyed(old.forms, new.forms, { it.form_id }) { id, v ->
-      patches += SurveyFieldPatch(key = "forms/$id", form_value = v)
+      if (v != null) emit(upsert = SurveyDef(forms = listOf(v)))
+      else emit(delete = SurveyDef(forms = listOf(FormDef(form_id = id))))
     }
     keyed(old.entity_datasets, new.entity_datasets, { it.id }) { id, v ->
-      patches += SurveyFieldPatch(key = "entity_datasets/$id", entity_dataset_value = v)
+      if (v != null) emit(upsert = SurveyDef(entity_datasets = listOf(v)))
+      else emit(delete = SurveyDef(entity_datasets = listOf(EntityDatasetDef(id = id))))
     }
     keyed(old.form_launch_configs, new.form_launch_configs, { it.form_id }) { id, v ->
-      patches += SurveyFieldPatch(key = "form_launch_configs/$id", form_launch_config_value = v)
+      if (v != null) emit(upsert = SurveyDef(form_launch_configs = listOf(v)))
+      else emit(delete = SurveyDef(form_launch_configs = listOf(FormLaunchConfig(form_id = id))))
     }
     keyed(old.form_concept_links, new.form_concept_links, { it.form_id }) { id, v ->
-      patches += SurveyFieldPatch(key = "form_concept_links/$id", form_concept_links_value = v)
+      if (v != null) emit(upsert = SurveyDef(form_concept_links = listOf(v)))
+      else emit(delete = SurveyDef(form_concept_links = listOf(FormConceptLinks(form_id = id))))
     }
     val oldMap = old.map_config
     val newMap = new.map_config
     if (oldMap != newMap) {
-      val withoutLayersAndArea = { m: groundplatform.v2.survey.MapConfig? ->
-        m?.copy(layers = emptyList(), survey_area = null)
-      }
-      if (withoutLayersAndArea(oldMap) != withoutLayersAndArea(newMap)) {
-        patches += SurveyFieldPatch(key = "map_config", map_config_value = newMap)
+      if (newMap == null) {
+        emit(delete = SurveyDef(map_config = MapConfig()))
       } else {
-        if (oldMap?.survey_area != newMap?.survey_area) {
-          patches +=
-            SurveyFieldPatch(
-              key = "map_config/survey_area",
-              survey_area_value = newMap?.survey_area,
-            )
+        val withoutLayersAndArea = { m: MapConfig? ->
+          m?.copy(layers = emptyList(), survey_area = null, offline_tile_packages = emptyList())
         }
-        keyed(oldMap?.layers.orEmpty(), newMap?.layers.orEmpty(), { it.id }) { id, v ->
-          patches += SurveyFieldPatch(key = "map_config/layers/$id", layer_value = v)
+        if (withoutLayersAndArea(oldMap) != withoutLayersAndArea(newMap)) {
+          emit(upsert = SurveyDef(map_config = newMap))
+        } else {
+          if (oldMap?.survey_area != newMap.survey_area) {
+            if (newMap.survey_area == null) {
+              emit(delete = SurveyDef(map_config = MapConfig(survey_area = SurveyArea())))
+            } else {
+              emit(upsert = SurveyDef(map_config = MapConfig(survey_area = newMap.survey_area)))
+            }
+          }
+          keyed(
+            oldMap?.offline_tile_packages.orEmpty(),
+            newMap.offline_tile_packages,
+            { it.id },
+          ) { id, v ->
+            if (v != null) {
+              emit(upsert = SurveyDef(map_config = MapConfig(offline_tile_packages = listOf(v))))
+            } else {
+              emit(
+                delete =
+                  SurveyDef(
+                    map_config =
+                      MapConfig(offline_tile_packages = listOf(OfflineTilePackageDef(id = id)))
+                  )
+              )
+            }
+          }
+          keyed(oldMap?.layers.orEmpty(), newMap.layers, { it.id }) { id, v ->
+            if (v != null) emit(upsert = SurveyDef(map_config = MapConfig(layers = listOf(v))))
+            else {
+              emit(delete = SurveyDef(map_config = MapConfig(layers = listOf(LayerDef(id = id)))))
+            }
+          }
         }
       }
     }
-    return patches
+    return mutations
   }
 
-  /** Role patches (one per changed collaborator) and an access rules patch, if any changed. */
-  data class AclDiff(val roles: List<AclRolePatch>, val accessRules: AccessRulesPatch?)
-
-  fun acl(old: SurveyAcl, new: SurveyAcl): AclDiff {
-    val roles = mutableListOf<AclRolePatch>()
-    keyed(old.entries, new.entries, { it.email.ifBlank { it.user_id }.lowercase() }) { key, v ->
-      roles += AclRolePatch(user_id = key, entry_value = v)
+  /** Sparse ACL mutations (one per changed collaborator, plus access rules if any changed). */
+  fun acl(old: SurveyAcl, new: SurveyAcl): List<SurveyMutation> {
+    val mutations = mutableListOf<SurveyMutation>()
+    keyed(old.entries, new.entries, { MutationKeys.aclEntryKey(it) }) { key, v ->
+      if (v != null) {
+        mutations += SurveyMutation(acl_upsert = SurveyAcl(entries = listOf(v)))
+      } else {
+        val removed = old.entries.firstOrNull { MutationKeys.aclEntryKey(it) == key }
+        mutations +=
+          SurveyMutation(
+            acl_delete =
+              SurveyAcl(
+                entries =
+                  listOf(
+                    AclEntry(
+                      id = removed?.id.orEmpty(),
+                      email = removed?.email?.ifBlank { key } ?: key,
+                      user_id = removed?.user_id.orEmpty(),
+                    )
+                  )
+              )
+          )
+      }
     }
-    val access =
-      AccessRulesPatch(
-        sharing_policy =
-          new.sharing_policy.takeIf { it != old.sharing_policy }
-            ?: AccessRulesPatch().sharing_policy,
-        peer_data_visibility =
-          new.peer_data_visibility.takeIf { it != old.peer_data_visibility }
-            ?: AccessRulesPatch().peer_data_visibility,
-        collector_consent_required =
-          new.collector_consent_required.takeIf { it != old.collector_consent_required },
-        collector_consent_text =
-          new.collector_consent_text.takeIf { it != old.collector_consent_text },
-        care_sovereignty_applied =
-          new.care_sovereignty_applied.takeIf { it != old.care_sovereignty_applied },
-        owner_id = new.owner_id.takeIf { it != old.owner_id },
-      )
-    return AclDiff(roles, access.takeIf { it != AccessRulesPatch() })
+    var up = SurveyAcl()
+    var del = SurveyAcl()
+    var hasUp = false
+    var hasDel = false
+    if (old.sharing_policy != new.sharing_policy) {
+      if (new.sharing_policy == SharingPolicy.SHARING_POLICY_UNSPECIFIED) {
+        del = del.copy(sharing_policy = old.sharing_policy)
+        hasDel = true
+      } else {
+        up = up.copy(sharing_policy = new.sharing_policy)
+        hasUp = true
+      }
+    }
+    if (old.peer_data_visibility != new.peer_data_visibility) {
+      if (new.peer_data_visibility == PeerDataVisibility.PEER_DATA_VISIBILITY_UNSPECIFIED) {
+        del = del.copy(peer_data_visibility = old.peer_data_visibility)
+        hasDel = true
+      } else {
+        up = up.copy(peer_data_visibility = new.peer_data_visibility)
+        hasUp = true
+      }
+    }
+    if (old.collector_consent_required != new.collector_consent_required) {
+      if (new.collector_consent_required) {
+        up = up.copy(collector_consent_required = true)
+        hasUp = true
+      } else {
+        del = del.copy(collector_consent_required = true)
+        hasDel = true
+      }
+    }
+    if (old.collector_consent_text != new.collector_consent_text) {
+      if (new.collector_consent_text.isEmpty()) {
+        del = del.copy(collector_consent_text = old.collector_consent_text)
+        hasDel = true
+      } else {
+        up = up.copy(collector_consent_text = new.collector_consent_text)
+        hasUp = true
+      }
+    }
+    if (old.care_sovereignty_applied != new.care_sovereignty_applied) {
+      if (new.care_sovereignty_applied) {
+        up = up.copy(care_sovereignty_applied = true)
+        hasUp = true
+      } else {
+        del = del.copy(care_sovereignty_applied = true)
+        hasDel = true
+      }
+    }
+    if (old.owner_id != new.owner_id) {
+      if (new.owner_id.isEmpty()) {
+        del = del.copy(owner_id = old.owner_id)
+        hasDel = true
+      } else {
+        up = up.copy(owner_id = new.owner_id)
+        hasUp = true
+      }
+    }
+    if (hasUp || hasDel) {
+      mutations +=
+        SurveyMutation(acl_upsert = up.takeIf { hasUp }, acl_delete = del.takeIf { hasDel })
+    }
+    return mutations
   }
 
   private fun normalize(r: EntityRecord) =

@@ -15,23 +15,20 @@ package org.openforis.collectone.v2.server.userdata
 
 import groundplatform.v2.data.AcquirePlotLockRequest
 import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
+import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.GetEntityRequest
 import groundplatform.v2.data.GetSubmissionRequest
 import groundplatform.v2.data.MutateDataRequest
 import groundplatform.v2.data.ReleasePlotLockRequest
-import groundplatform.v2.data.SubmissionFieldPatch
 import groundplatform.v2.data.SubmissionMutation
-import groundplatform.v2.data.SubmissionPatch
+import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.GetLibraryRequest
-import groundplatform.v2.library.LibraryFieldPatch
 import groundplatform.v2.library.LibraryMutation
 import groundplatform.v2.library.MutateLibraryRequest
+import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.library.OrganizationLibrarySettings
 import groundplatform.v2.survey.AcceptSurveyInviteRequest
-import groundplatform.v2.survey.AccessRulesPatch
 import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetSurveyRequest
@@ -40,9 +37,9 @@ import groundplatform.v2.survey.ListSurveyOverviewsRequest
 import groundplatform.v2.survey.MutateOrganizationRequest
 import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationFieldPatch
 import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.SurveyFieldPatch
+import groundplatform.v2.survey.SurveyAcl
+import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -88,7 +85,7 @@ open class RecordVersionTest {
       EntityMutation(
         entity_id = ENTITY,
         dataset_id = DATASET,
-        update = EntityPatch(patches = listOf(EntityFieldPatch(key = "label", label_value = "L"))),
+        upsert = EntityRecord(label = "L"),
       )
     )
     assertBumped("field patch")
@@ -117,7 +114,13 @@ open class RecordVersionTest {
     )
     assertBumped("release plot lock")
 
-    mutateEntity(EntityMutation(entity_id = ENTITY, dataset_id = DATASET, delete = true))
+    mutateEntity(
+      EntityMutation(
+        entity_id = ENTITY,
+        dataset_id = DATASET,
+        delete = EntityRecord(is_deleted = true),
+      )
+    )
     assertBumped("delete")
   }
 
@@ -139,15 +142,15 @@ open class RecordVersionTest {
               submission_mutation =
                 SubmissionMutation(
                   submission_id = id,
-                  update =
-                    SubmissionPatch(
-                      patches =
-                        listOf(SubmissionFieldPatch(key = "form_version", string_value = "v2"))
-                    ),
+                  upsert = SubmissionRecord(form_version = "v2"),
                 )
             ),
             DataMutation(
-              submission_mutation = SubmissionMutation(submission_id = id, delete = true)
+              submission_mutation =
+                SubmissionMutation(
+                  submission_id = id,
+                  delete = SubmissionRecord(is_deleted = true),
+                )
             ),
           ),
       )
@@ -167,12 +170,8 @@ open class RecordVersionTest {
         organization_id = ORG,
         mutations =
           listOf(
-            OrganizationMutation(
-              update_field = OrganizationFieldPatch(key = "description", string_value = "a")
-            ),
-            OrganizationMutation(
-              update_field = OrganizationFieldPatch(key = "name", string_value = "b")
-            ),
+            OrganizationMutation(upsert = Organization(description = "a")),
+            OrganizationMutation(upsert = Organization(name = "b")),
           ),
       )
     )
@@ -184,8 +183,7 @@ open class RecordVersionTest {
       MutateOrganizationRequest(
         organization_id = ORG,
         // A client-supplied version is ignored: the server owns it.
-        mutations =
-          listOf(OrganizationMutation(upsert_organization = current!!.copy(version = 99L))),
+        mutations = listOf(OrganizationMutation(upsert = current!!.copy(version = 99L))),
       )
     )
     assertEquals(start + 2, version(), "upsert")
@@ -198,10 +196,7 @@ open class RecordVersionTest {
     backend.MutateOrganization(
       MutateOrganizationRequest(
         organization_id = ORG,
-        mutations =
-          listOf(
-            OrganizationMutation(delete_organization = OrganizationMutation.DeleteOrganization())
-          ),
+        mutations = listOf(OrganizationMutation(delete = Organization(is_deleted = true))),
       )
     )
     assertEquals(start + 4, version(), "delete")
@@ -213,8 +208,7 @@ open class RecordVersionTest {
             mutations =
               listOf(
                 OrganizationMutation(
-                  upsert_organization =
-                    Organization(organization_id = testId("org-new"), name = "New")
+                  upsert = Organization(organization_id = testId("org-new"), name = "New")
                 )
               ),
           )
@@ -233,10 +227,9 @@ open class RecordVersionTest {
         mutations =
           listOf(
             LibraryMutation(
-              update_field =
-                LibraryFieldPatch(
-                  key = "settings",
-                  settings_value = OrganizationLibrarySettings(organization_id = ORG),
+              upsert =
+                OrganizationLibraryRecord(
+                  settings = OrganizationLibrarySettings(organization_id = ORG)
                 )
             )
           ),
@@ -246,7 +239,7 @@ open class RecordVersionTest {
     backend.MutateLibrary(
       MutateLibraryRequest(
         organization_id = ORG,
-        mutations = listOf(LibraryMutation(upsert_library = library().copy(version = 50L))),
+        mutations = listOf(LibraryMutation(upsert = library().copy(version = 50L))),
       )
     )
     assertEquals(start + 2, library().version, "upsert")
@@ -269,10 +262,7 @@ open class RecordVersionTest {
         MutateSurveyRequest(
           survey_id = KENYA,
           working_copy = true,
-          mutations =
-            listOf(
-              SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Draft"))
-            ),
+          mutations = listOf(SurveyMutation(upsert = SurveyDef(title = "Draft"))),
         )
       )
     val afterEdit = saved()
@@ -288,11 +278,7 @@ open class RecordVersionTest {
       MutateSurveyRequest(
         survey_id = KENYA,
         mutations =
-          listOf(
-            SurveyMutation(
-              update_access_rules = AccessRulesPatch(collector_consent_required = true)
-            )
-          ),
+          listOf(SurveyMutation(acl_upsert = SurveyAcl(collector_consent_required = true))),
       )
     )
     assertEquals(startVersion + 2, overview().record_version)
@@ -315,7 +301,7 @@ open class RecordVersionTest {
         working_copy = true,
         mutations =
           listOf(
-            SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Again")),
+            SurveyMutation(upsert = SurveyDef(title = "Again")),
             SurveyMutation(discard_working_copy = true),
           ),
       )

@@ -84,6 +84,9 @@ message ConceptDef {
   repeated string aliases = 16;
 
   groundplatform.v2.data.AuditInfo audit_info = 17;
+
+  // Display order of this concept within the library (0-based).
+  int32 sort_order = 18;
 }
 
 // A link from a form question or entity property to a concept.
@@ -110,6 +113,9 @@ message CodeListItem {
   // External identifiers (e.g., HS code, AGROVOC URI), keyed by scheme
   // (e.g., "hs", "agrovoc").
   map<string, string> external_ids = 3;
+
+  // Display order of this code item within the code list (0-based).
+  int32 sort_order = 4;
 }
 
 // How dashboards roll up answers to a concept.

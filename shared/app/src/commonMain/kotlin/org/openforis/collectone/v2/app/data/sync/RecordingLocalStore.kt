@@ -17,10 +17,8 @@ package org.openforis.collectone.v2.app.data.sync
 
 import groundplatform.v2.data.DataMutation
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.SubmissionMutation
-import groundplatform.v2.data.SubmissionPatch
 import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.LibraryMutation
 import groundplatform.v2.library.OrganizationLibraryRecord
@@ -294,7 +292,7 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
       recorder.record(raw, target, key, MutationPayload.Organization(m), baseRevision = base)
     when {
       before == null && after == null -> Unit
-      before == null -> record(OrganizationMutation(upsert_organization = after))
+      before == null -> record(OrganizationMutation(upsert = after))
       after == null ->
         record(
           OrganizationMutation(delete_organization = OrganizationMutation.DeleteOrganization())
@@ -302,9 +300,9 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
       else -> {
         val diff = MutationDiffs.organization(before, after)
         if (diff.requiresUpsert) {
-          record(OrganizationMutation(upsert_organization = after))
+          record(OrganizationMutation(upsert = after))
         } else {
-          diff.patches.forEach { record(OrganizationMutation(update_field = it)) }
+          diff.mutations.forEach(::record)
         }
       }
     }
@@ -324,19 +322,13 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
         raw,
         target,
         key,
-        MutationPayload.Library(LibraryMutation(upsert_library = after)),
+        MutationPayload.Library(LibraryMutation(upsert = after)),
         baseRevision = base,
       )
       return
     }
     MutationDiffs.library(before, after).forEach {
-      recorder.record(
-        raw,
-        target,
-        key,
-        MutationPayload.Library(LibraryMutation(update_field = it)),
-        baseRevision = base,
-      )
+      recorder.record(raw, target, key, MutationPayload.Library(it), baseRevision = base)
     }
   }
 
@@ -349,17 +341,14 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
     when {
       before == null && after == null -> Unit
       before == null -> {
-        record(SurveyMutation(upsert_survey = after!!.def))
-        record(SurveyMutation(upsert_acl = after.acl))
+        record(SurveyMutation(upsert = after!!.def))
+        record(SurveyMutation(acl_upsert = after.acl))
       }
       after == null -> record(SurveyMutation(trash_survey = true))
       else -> {
-        MutationDiffs.survey(before.def, after.def.withLayerVisibilityFrom(before.def)).forEach {
-          record(SurveyMutation(update_field = it))
-        }
-        val acl = MutationDiffs.acl(before.acl, after.acl)
-        acl.roles.forEach { record(SurveyMutation(update_acl_role = it)) }
-        acl.accessRules?.let { record(SurveyMutation(update_access_rules = it)) }
+        MutationDiffs.survey(before.def, after.def.withLayerVisibilityFrom(before.def))
+          .forEach(::record)
+        MutationDiffs.acl(before.acl, after.acl).forEach(::record)
       }
     }
   }
@@ -408,14 +397,20 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
         new == null ->
           record(
             key,
-            DataMutation(entity_mutation = EntityMutation(entity_id = id, delete = true)),
+            DataMutation(
+              entity_mutation =
+                EntityMutation(
+                  entity_id = id,
+                  delete = EntityRecord(entity_id = id, is_deleted = true),
+                )
+            ),
             base,
           )
         else -> {
           val diff = MutationDiffs.entity(old, new)
           when {
             diff.requiresUpsert -> upsert()
-            diff.patches.isNotEmpty() ->
+            !diff.diff.isEmpty ->
               record(
                 key,
                 DataMutation(
@@ -423,7 +418,8 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
                     EntityMutation(
                       entity_id = id,
                       dataset_id = new.dataset_id,
-                      update = EntityPatch(patches = diff.patches),
+                      upsert = diff.diff.upsert,
+                      delete = diff.diff.delete,
                     )
                 ),
                 base,
@@ -454,7 +450,11 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
           record(
             key,
             DataMutation(
-              submission_mutation = SubmissionMutation(submission_id = id, delete = true)
+              submission_mutation =
+                SubmissionMutation(
+                  submission_id = id,
+                  delete = SubmissionRecord(submission_id = id, is_deleted = true),
+                )
             ),
             base,
           )
@@ -462,7 +462,7 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
           val diff = MutationDiffs.submission(old, new)
           when {
             diff.requiresUpsert -> upsert()
-            diff.patches.isNotEmpty() ->
+            !diff.diff.isEmpty ->
               record(
                 key,
                 DataMutation(
@@ -470,7 +470,8 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
                     SubmissionMutation(
                       submission_id = id,
                       form_id = new.form_id,
-                      update = SubmissionPatch(patches = diff.patches),
+                      upsert = diff.diff.upsert,
+                      delete = diff.diff.delete,
                     )
                 ),
                 base,

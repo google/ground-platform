@@ -46,6 +46,11 @@ message AclEntry {
     ACCEPTED = 2;
   }
   InvitationStatus invitation_status = 3;
+  string email = 4;
+  string invite_token = 5;
+  CachedProfile profile = 6;
+  string id = 7;
+  int32 sort_order = 8;
 }
 
 message SurveyAcl {

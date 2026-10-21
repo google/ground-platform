@@ -51,6 +51,8 @@ message LayerDef {
     string entity_dataset_id = 5;
     FormGeometrySource form_geometry = 6;
   }
+
+  int32 sort_order = 7;
 }
 
 message FormGeometrySource {

@@ -355,7 +355,7 @@ stateDiagram-v2
   exactly as it was.
 - Narrow `SurveyState.DELETED` to a **server-only tombstone marker**. Overview
   deltas already use `state == DELETED` for tombstones (purged surveys and lost
-  access). Clients can no longer set it through `update_field`.
+  access). Clients can no longer set it through `upsert`.
 
 **Behavior while trashed:**
 
@@ -465,8 +465,8 @@ role(user, survey) = max(
   - `ROLE_UNSPECIFIED` reads as `DATA_COLLECTOR`, matching today's implicit
     behavior. `SURVEY_ORGANIZER` is rejected with `INVALID_ARGUMENT`, because
     organizers must be named on the ACL.
-  - Set through `AccessRulesPatch.sharing_role` and exposed on
-    `SurveyOverview.sharing_role`, so clients can hide collection UI for
+  - Set through `SurveyMutation.acl_upsert.default_role` and exposed on
+    `SurveyOverview.default_role`, so clients can hide collection UI for
     view-only surveys.
   - Suggested UI copy: "Anyone with the link can: **View** / **Collect data**".
   - Names considered: `general_access_role` (vague), `policy_role` (internal
@@ -878,8 +878,8 @@ CREATE TABLE ClientMutationWatermarks (
 - **Proto changes:** `trash_survey`/`restore_survey` replace `delete_survey`;
   add `trash_time` on `SurveyDef`/`SurveyOverview`; deprecate
   `SurveyState.DELETED` as a client-settable state (kept as the overview
-  tombstone marker); add `SurveyAcl.sharing_role`,
-  `AccessRulesPatch.sharing_role`, and `SurveyOverview.sharing_role`; add
+  tombstone marker); add `SurveyAcl.default_role` and
+  `SurveyOverview.default_role`; add
   `BatchGetSurveyOverviews` and `SearchPublicSurveys`; make
   `s2_cell_tokens`/`dataset_id` (entities) and `form_id`/`entity_id`
   (submissions) query-only; restrict `AcceptSurveyInvite` to organizer-created

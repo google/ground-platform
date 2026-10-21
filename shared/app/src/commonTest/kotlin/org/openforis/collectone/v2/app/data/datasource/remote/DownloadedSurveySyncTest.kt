@@ -14,9 +14,8 @@
 package org.openforis.collectone.v2.app.data.datasource.remote
 
 import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
+import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.ListEntitiesRequest
 import groundplatform.v2.library.ListLibrariesRequest
 import groundplatform.v2.survey.ListSurveyOverviewsRequest
@@ -85,13 +84,7 @@ class DownloadedSurveySyncTest {
           MutationPayload.Data(
             DataMutation(
               entity_mutation =
-                EntityMutation(
-                  entity_id = entityId,
-                  update =
-                    EntityPatch(
-                      patches = listOf(EntityFieldPatch(key = "label", label_value = "Offline"))
-                    ),
-                )
+                EntityMutation(entity_id = entityId, upsert = EntityRecord(label = "Offline"))
             )
           ),
         )

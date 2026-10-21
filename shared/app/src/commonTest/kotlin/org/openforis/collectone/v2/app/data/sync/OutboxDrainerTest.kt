@@ -21,9 +21,7 @@ import groundplatform.v2.data.AppliedMutationWatermark
 import groundplatform.v2.data.DataMutation
 import groundplatform.v2.data.DataMutationResult
 import groundplatform.v2.data.DataServiceServer
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.GetAppliedMutationsRequest
 import groundplatform.v2.data.GetAppliedMutationsResponse
@@ -32,7 +30,6 @@ import groundplatform.v2.data.MutateDataResponse
 import groundplatform.v2.survey.MutateSurveyRequest
 import groundplatform.v2.survey.MutateSurveyResponse
 import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyFieldPatch
 import groundplatform.v2.survey.SurveyMutation
 import groundplatform.v2.survey.SurveyServiceServer
 import kotlin.test.Test
@@ -73,7 +70,7 @@ class OutboxDrainerTest {
           results =
             request.mutations.map { m ->
               val em = m.entity_mutation!!
-              val label = em.update?.patches?.firstOrNull { it.key == "label" }?.label_value
+              val label = em.upsert?.label
               DataMutationResult(
                 entity =
                   EntityRecord(
@@ -117,13 +114,7 @@ class OutboxDrainerTest {
         MutationPayload.Data(
           DataMutation(
             entity_mutation =
-              EntityMutation(
-                entity_id = entityId,
-                update =
-                  EntityPatch(
-                    patches = listOf(EntityFieldPatch(key = "label", label_value = label))
-                  ),
-              )
+              EntityMutation(entity_id = entityId, upsert = EntityRecord(label = label))
           )
         ),
         baseRevision = 3L,
@@ -233,9 +224,7 @@ class OutboxDrainerTest {
           this,
           MutationTarget.Survey(SURVEY, workingCopy = true),
           Rebaser.surveyKey(SURVEY),
-          MutationPayload.Survey(
-            SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Draft"))
-          ),
+          MutationPayload.Survey(SurveyMutation(upsert = SurveyDef(title = "Draft"))),
           debounceMillis = 1_500L,
         )
       }
@@ -269,9 +258,7 @@ class OutboxDrainerTest {
           this,
           MutationTarget.Survey(SURVEY, workingCopy = true),
           Rebaser.surveyKey(SURVEY),
-          MutationPayload.Survey(
-            SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Draft"))
-          ),
+          MutationPayload.Survey(SurveyMutation(upsert = SurveyDef(title = "Draft"))),
         )
       }
     }

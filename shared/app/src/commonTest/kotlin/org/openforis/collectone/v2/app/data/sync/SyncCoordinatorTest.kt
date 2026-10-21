@@ -19,9 +19,7 @@ import com.squareup.wire.ofEpochSecond
 import groundplatform.v2.data.DataMutation
 import groundplatform.v2.data.DataMutationResult
 import groundplatform.v2.data.DataServiceServer
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.data.MutateDataRequest
 import groundplatform.v2.data.MutateDataResponse
@@ -87,14 +85,7 @@ class SyncCoordinatorTest {
           Rebaser.entityKey("e1"),
           MutationPayload.Data(
             DataMutation(
-              entity_mutation =
-                EntityMutation(
-                  entity_id = "e1",
-                  update =
-                    EntityPatch(
-                      patches = listOf(EntityFieldPatch(key = "label", label_value = "A"))
-                    ),
-                )
+              entity_mutation = EntityMutation(entity_id = "e1", upsert = EntityRecord(label = "A"))
             )
           ),
         )

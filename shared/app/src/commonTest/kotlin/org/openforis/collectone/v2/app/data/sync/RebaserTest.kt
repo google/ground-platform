@@ -17,17 +17,13 @@ package org.openforis.collectone.v2.app.data.sync
 
 import com.squareup.wire.ofEpochSecond
 import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.forms.TypedValue
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.Organization as OrganizationProto
-import groundplatform.v2.survey.OrganizationFieldPatch
 import groundplatform.v2.survey.OrganizationMutation
 import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyFieldPatch
 import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -68,13 +64,7 @@ class RebaserTest {
         MutationPayload.Data(
           DataMutation(
             entity_mutation =
-              EntityMutation(
-                entity_id = ENTITY,
-                update =
-                  EntityPatch(
-                    patches = listOf(EntityFieldPatch(key = "label", label_value = label))
-                  ),
-              )
+              EntityMutation(entity_id = ENTITY, upsert = EntityRecord(label = label))
           )
         ),
       )
@@ -274,9 +264,7 @@ class RebaserTest {
           MutationTarget.Organization("o1"),
           Rebaser.organizationKey("o1"),
           MutationPayload.Organization(
-            OrganizationMutation(
-              update_field = OrganizationFieldPatch(key = "name", string_value = "Renamed")
-            )
+            OrganizationMutation(upsert = OrganizationProto(name = "Renamed"))
           ),
         )
         Rebaser(this).rebaseOrganization("o1")
@@ -313,11 +301,7 @@ class RebaserTest {
         recordKey = Rebaser.surveyKey(SURVEY),
         payload = MutationPayload.Survey(mutation),
       )
-    val edit =
-      pending(
-        true,
-        SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = "Draft")),
-      )
+    val edit = pending(true, SurveyMutation(upsert = SurveyDef(title = "Draft")))
 
     val editing = RecordFolds.survey(SurveyBase(saved = saved), SURVEY, listOf(edit)).value!!
     assertEquals("Saved", editing.saved?.title)

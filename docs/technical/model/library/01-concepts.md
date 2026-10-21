@@ -86,6 +86,7 @@ message ConceptDef {
   repeated string aliases = 16;
 
   groundplatform.v2.data.AuditInfo audit_info = 17;
+  int32 sort_order = 18;
 }
 
 message CodeList {
@@ -99,6 +100,12 @@ message CodeListItem {
 
   // External identifiers (e.g., HS code, AGROVOC URI).
   map<string, string> external_ids = 3;
+
+  // Stable identifier for sparse mutation upserts and deletions (defaults to `code`).
+  string id = 4;
+
+  // Display sort order within the code list.
+  int32 sort_order = 5;
 }
 
 enum Aggregation {

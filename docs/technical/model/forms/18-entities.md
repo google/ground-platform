@@ -70,6 +70,9 @@ message EntityDeclaration {
 
   // Explicit mapping of dataset property names to form field paths.
   repeated EntityPropertyMapping property_mappings = 7;
+
+  // Stable identifier for sparse mutation upserts and deletions (defaults to `dataset`).
+  string id = 8;
 }
 
 message EntitySyncMetadata {
@@ -89,6 +92,9 @@ message EntityPropertyMapping {
 
   // Source field path in the primary instance record.
   string source_field_path = 2;
+
+  // Stable identifier for sparse mutation upserts and deletions (defaults to `property_name`).
+  string id = 3;
 }
 ```
 

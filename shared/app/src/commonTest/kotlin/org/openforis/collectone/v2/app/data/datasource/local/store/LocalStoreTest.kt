@@ -18,7 +18,6 @@ import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.Organization as OrganizationProto
 import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyFieldPatch
 import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -385,10 +384,7 @@ abstract class LocalStoreContractTest {
       clientSeq = seq,
       target = MutationTarget.Survey("s1", workingCopy = true),
       recordKey = "survey/s1",
-      payload =
-        MutationPayload.Survey(
-          SurveyMutation(update_field = SurveyFieldPatch(key = "title", string_value = title))
-        ),
+      payload = MutationPayload.Survey(SurveyMutation(upsert = SurveyDef(title = title))),
     )
 }
 

@@ -51,6 +51,7 @@ message EntityDatasetDef {
   bool field_creation_enabled = 7;
   repeated EntityPropertyDefinition properties = 8;
   groundplatform.v2.forms.DataType geometry_type = 9;
+  int32 sort_order = 12;
 }
 
 message EntityPropertyDefinition {
@@ -58,6 +59,9 @@ message EntityPropertyDefinition {
   groundplatform.v2.forms.DataType type = 2;
   string label = 3;
   bool required = 4;
+  groundplatform.v2.library.ConceptRef concept_ref = 5;
+  string id = 6;
+  int32 sort_order = 7;
 }
 ```
 

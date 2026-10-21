@@ -16,9 +16,7 @@
 package org.openforis.collectone.v2.app.data.sync
 
 import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityFieldPatch
 import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityPatch
 import groundplatform.v2.data.EntityRecord
 import groundplatform.v2.survey.SurveyDef
 import kotlin.test.Test
@@ -73,13 +71,7 @@ class SyncStatePersistenceTest {
             MutationPayload.Data(
               DataMutation(
                 entity_mutation =
-                  EntityMutation(
-                    entity_id = "e1",
-                    update =
-                      EntityPatch(
-                        patches = listOf(EntityFieldPatch(key = "label", label_value = "Offline"))
-                      ),
-                  )
+                  EntityMutation(entity_id = "e1", upsert = EntityRecord(label = "Offline"))
               )
             ),
             baseRevision = 2,

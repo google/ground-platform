@@ -48,9 +48,9 @@ A sync token is an opaque string. Clients store it and send it back unchanged; t
 ### The Offline Flow (User Disconnected)
 Every local edit goes through the same path, online or offline, on mobile and on the web. The edit is never sent directly; it is queued and drained in the background.
 
-1. **Fine-Grained Mutation:** The client turns the user's intent into one or more field patches (`SurveyFieldPatch`, `EntityFieldPatch`, `SubmissionFieldPatch`, `OrganizationFieldPatch`, `LibraryFieldPatch`). Each patch sets or clears one key path, or upserts or removes one keyed collection item, so applying it twice gives the same result as applying it once.
+1. **Sparse Proto Mutation (`upsert` + `delete`):** The client turns the user's intent into a mutation carrying two sparse instances of the target domain proto (`upsert` for values to set or merge, and `delete` as a structural deletion mask where any non-default scalar, non-empty list, or leaf keyed item signals removal). Applying `delete` first and then recursively merging `upsert` is deterministic and idempotent, so applying the mutation twice gives the same result as applying it once.
 2. **Outbox Transaction:** In one local transaction, the client appends the mutation to the outbox and applies it to the local copy. Each mutation gets a `mutation_id` (UUID), the install's `client_id`, and the next `client_seq`.
-3. **Coalescing:** A queued (not yet sent) patch to the same key path as a newer patch is replaced by the newer one. Removing a collection item drops queued patches beneath it, and deleting a record that was created locally and never sent cancels both.
+3. **Coalescing:** A queued (not yet sent) mutation to the same field or keyed collection item as a newer mutation is replaced by the newer one. Removing a collection item drops queued edits beneath it, and deleting a record that was created locally and never sent cancels both.
 4. **Reactive UI Update:** The local query emitting the Kotlin `Flow` detects the write transaction immediately, so the UI updates in milliseconds.
 5. **Background Drain:** The sync engine drains the outbox when connectivity allows, with exponential backoff on failures.
 
@@ -135,10 +135,10 @@ Browsers reach the gRPC service through gRPC-Web. Every call the sync engine mak
 
 ### Mutation Semantics
 * **Applied at most once:** The server tracks the highest applied `client_seq` per `(client_id, scope)` (returned by `GetAppliedMutations`). Because clients send each scope's mutations in `client_seq` order with one batch in flight, any mutation at or below that watermark is a replay: it's skipped and returns the record's current state, so a stale retry can't overwrite newer writes. Web clients keep their `client_id` in `localStorage` so reloads reuse it.
-* **Last writer wins per field:** Field patches always apply in server commit order. A data patch based on an older `base_revision` reports `AUTO_MERGED`.
-* **Guarded replacements:** Whole-record replacements (`upsert_*`) fail with `FAILED_PRECONDITION` when their `base_version` / `base_revision` is set and stale. The client then pulls, rebases, and retries.
+* **Last writer wins per field:** Sparse field and keyed-collection mutations always apply in server commit order. A data mutation based on an older `base_revision` reports `AUTO_MERGED`.
+* **Guarded replacements:** Whole-record replacements (`upsert` with its root record ID populated and `delete` unset) fail with `FAILED_PRECONDITION` when their `base_version` / `base_revision` is set and stale. The client then pulls, rebases, and retries.
 * **Error handling:** `UNAVAILABLE` and `DEADLINE_EXCEEDED` retry with backoff. `INVALID_ARGUMENT`, `PERMISSION_DENIED`, and `NOT_FOUND` reject the mutation, remove it from the local copy, and show it as failed in the Uploads view, where the user can retry it or download a PDF of the record.
-* **Survey editor autosave:** Editor patches are queued as the organizer types, coalesced per key, and sent to the working copy after about 1.5 seconds without new edits.
+* **Survey editor autosave:** Editor mutations are queued as the organizer types, coalesced per field or keyed collection item, and sent to the working copy after about 1.5 seconds without new edits.
 
 ## Kotlin Multiplatform Code Topology
 

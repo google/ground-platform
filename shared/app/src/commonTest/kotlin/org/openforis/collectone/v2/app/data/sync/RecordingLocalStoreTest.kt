@@ -50,9 +50,9 @@ class RecordingLocalStoreTest {
     val pending = outbox().single()
     assertEquals(MutationTarget.Data(surveyId), pending.target)
     assertEquals(Rebaser.entityKey(entity.id), pending.recordKey)
-    val update = (pending.payload as MutationPayload.Data).mutation.entity_mutation!!.update!!
-    assertEquals(listOf("properties/crop"), update.patches.map { it.key })
-    assertEquals("coffee", update.patches.single().property_value?.string_value)
+    val upsert = (pending.payload as MutationPayload.Data).mutation.entity_mutation!!.upsert!!
+    assertEquals(setOf("crop"), upsert.properties.keys)
+    assertEquals("coffee", upsert.properties["crop"]?.string_value)
   }
 
   @Test
@@ -84,9 +84,8 @@ class RecordingLocalStoreTest {
 
     val pending = outbox().single()
     assertEquals(MutationTarget.Organization(org.id), pending.target)
-    val patch = (pending.payload as MutationPayload.Organization).mutation.update_field!!
-    assertEquals("name", patch.key)
-    assertEquals("Renamed", patch.string_value)
+    val upsert = (pending.payload as MutationPayload.Organization).mutation.upsert!!
+    assertEquals("Renamed", upsert.name)
   }
 
   @Test
@@ -95,9 +94,8 @@ class RecordingLocalStoreTest {
 
     val pending = outbox().single()
     assertEquals(MutationTarget.Survey(surveyId, workingCopy = false), pending.target)
-    val patch = (pending.payload as MutationPayload.Survey).mutation.update_field!!
-    assertEquals("title", patch.key)
-    assertEquals("New title", patch.string_value)
+    val upsert = (pending.payload as MutationPayload.Survey).mutation.upsert!!
+    assertEquals("New title", upsert.title)
   }
 
   @Test
@@ -122,9 +120,9 @@ class RecordingLocalStoreTest {
       }
     }
 
-    val update =
-      (outbox().single().payload as MutationPayload.Data).mutation.entity_mutation!!.update!!
-    assertEquals("Second", update.patches.single { it.key == "label" }.label_value)
+    val upsert =
+      (outbox().single().payload as MutationPayload.Data).mutation.entity_mutation!!.upsert!!
+    assertEquals("Second", upsert.label)
   }
 
   @Test
@@ -160,15 +158,12 @@ class WorkingCopyRecorderTest {
 
     val pending = outbox()
     val titlePatches = pending.filter {
-      (it.payload as MutationPayload.Survey).mutation.update_field?.key == "title"
+      (it.payload as MutationPayload.Survey).mutation.upsert?.title?.isNotEmpty() == true
     }
     assertEquals(1, titlePatches.size)
     assertEquals(
       "Title",
-      (titlePatches.single().payload as MutationPayload.Survey)
-        .mutation
-        .update_field!!
-        .string_value,
+      (titlePatches.single().payload as MutationPayload.Survey).mutation.upsert!!.title,
     )
     assertTrue(pending.all { it.target == MutationTarget.Survey(surveyId, workingCopy = true) })
     assertTrue(pending.all { it.notBefore != null })

@@ -20,6 +20,7 @@ import groundplatform.v2.data.SubmissionRecord
 import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.survey.Organization
 import groundplatform.v2.survey.SurveyAcl
+import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyState
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationTarget
@@ -61,26 +62,30 @@ object RecordFolds {
       val em = (m.payload as? MutationPayload.Data)?.mutation?.entity_mutation ?: continue
       if (em.entity_id != entityId) continue
       val upsert = em.upsert
-      val update = em.update
+      val delete = em.delete
       current =
         when {
-          em.delete == true -> null
-          upsert != null ->
-            upsert.copy(
-              entity_id = entityId,
-              dataset_id = em.dataset_id.ifBlank { upsert.dataset_id },
-              revision = current?.revision ?: base?.revision ?: 0L,
-              commit_timestamp = current?.commit_timestamp ?: base?.commit_timestamp,
-            )
-          update != null && current != null -> {
-            val next = DataPatches.applyEntity(current, update)
-            if (next == current && m.isQueued()) noOps += m.mutationId
+          DataPatches.isEntityRootDelete(delete, upsert) -> null
+          upsert != null || delete != null -> {
+            val from = current ?: EntityRecord(entity_id = entityId, dataset_id = em.dataset_id)
+            val next =
+              DataPatches.applyEntity(from, upsert, delete)
+                .copy(
+                  entity_id = entityId,
+                  dataset_id =
+                    em.dataset_id.ifBlank {
+                      upsert?.dataset_id.orEmpty().ifBlank { from.dataset_id }
+                    },
+                  revision = current?.revision ?: base?.revision ?: 0L,
+                  commit_timestamp = current?.commit_timestamp ?: base?.commit_timestamp,
+                )
+            if (current != null && next == current && m.isQueued()) noOps += m.mutationId
             next
           }
           else -> current
         }
     }
-    return Folded(current, noOps)
+    return Folded(current?.takeUnless { it.is_deleted }, noOps)
   }
 
   /** The submission [submissionId] after [pending] (deleted or never created: `null`). */
@@ -96,26 +101,29 @@ object RecordFolds {
       val sm = (m.payload as? MutationPayload.Data)?.mutation?.submission_mutation ?: continue
       if (sm.submission_id != submissionId) continue
       val upsert = sm.upsert
-      val update = sm.update
+      val delete = sm.delete
       current =
         when {
-          sm.delete == true -> null
-          upsert != null ->
-            upsert.copy(
-              submission_id = submissionId,
-              form_id = sm.form_id.ifBlank { upsert.form_id },
-              revision = current?.revision ?: base?.revision ?: 0L,
-              commit_timestamp = current?.commit_timestamp ?: base?.commit_timestamp,
-            )
-          update != null && current != null -> {
-            val next = DataPatches.applySubmission(current, update)
-            if (next == current && m.isQueued()) noOps += m.mutationId
+          DataPatches.isSubmissionRootDelete(delete, upsert) -> null
+          upsert != null || delete != null -> {
+            val from =
+              current ?: SubmissionRecord(submission_id = submissionId, form_id = sm.form_id)
+            val next =
+              DataPatches.applySubmission(from, upsert, delete)
+                .copy(
+                  submission_id = submissionId,
+                  form_id =
+                    sm.form_id.ifBlank { upsert?.form_id.orEmpty().ifBlank { from.form_id } },
+                  revision = current?.revision ?: base?.revision ?: 0L,
+                  commit_timestamp = current?.commit_timestamp ?: base?.commit_timestamp,
+                )
+            if (current != null && next == current && m.isQueued()) noOps += m.mutationId
             next
           }
           else -> current
         }
     }
-    return Folded(current, noOps)
+    return Folded(current?.takeUnless { it.is_deleted }, noOps)
   }
 
   /** The organization after [pending] (deleted: `null`). */
@@ -129,21 +137,21 @@ object RecordFolds {
     for (m in pending) {
       if (!m.applies()) continue
       val om = (m.payload as? MutationPayload.Organization)?.mutation ?: continue
-      val upsert = om.upsert_organization
-      val patch = om.update_field
+      val upsert = om.upsert
+      val delete = om.delete
       current =
         when {
           om.delete_organization != null -> null
-          upsert != null ->
-            upsert.copy(
-              organization_id = organizationId,
-              version = current?.version ?: base?.version ?: 0L,
-              commit_timestamp = current?.commit_timestamp ?: base?.commit_timestamp,
-            )
-          patch != null -> {
+          upsert != null || delete != null -> {
             val from = current ?: Organization(organization_id = organizationId)
-            val next = OrganizationPatches.applyField(from, patch)
-            if (next == current && m.isQueued()) noOps += m.mutationId
+            val next =
+              OrganizationPatches.apply(from, upsert, delete)
+                .copy(
+                  organization_id = organizationId,
+                  version = current?.version ?: base?.version ?: 0L,
+                  commit_timestamp = current?.commit_timestamp ?: base?.commit_timestamp,
+                )
+            if (current != null && next == current && m.isQueued()) noOps += m.mutationId
             next
           }
           else -> current
@@ -163,20 +171,20 @@ object RecordFolds {
     for (m in pending) {
       if (!m.applies()) continue
       val lm = (m.payload as? MutationPayload.Library)?.mutation ?: continue
-      val upsert = lm.upsert_library
-      val patch = lm.update_field
+      val upsert = lm.upsert
+      val delete = lm.delete
       current =
         when {
-          upsert != null ->
-            upsert.copy(
-              organization_id = organizationId,
-              version = current?.version ?: base?.version ?: 0L,
-              commit_timestamp = current?.commit_timestamp ?: base?.commit_timestamp,
-            )
-          patch != null -> {
+          upsert != null || delete != null -> {
             val from = current ?: OrganizationLibraryRecord(organization_id = organizationId)
-            val next = LibraryPatches.applyField(from, patch)
-            if (next == current && m.isQueued()) noOps += m.mutationId
+            val next =
+              LibraryPatches.apply(from, upsert, delete)
+                .copy(
+                  organization_id = organizationId,
+                  version = current?.version ?: base?.version ?: 0L,
+                  commit_timestamp = current?.commit_timestamp ?: base?.commit_timestamp,
+                )
+            if (current != null && next == current && m.isQueued()) noOps += m.mutationId
             next
           }
           else -> current
@@ -187,8 +195,9 @@ object RecordFolds {
 
   /**
    * The survey's saved revision, working copy, and ACL after [pending], following `MutateSurvey`:
-   * field and snapshot mutations apply to the working copy (starting from the saved revision) when
-   * sent with `working_copy`, saving promotes the working copy, and discarding drops it.
+   * sparse `upsert` and `delete` mutations apply to the working copy (starting from the saved
+   * revision) when sent with `working_copy`, saving promotes the working copy, and discarding drops
+   * it.
    */
   fun survey(
     base: SurveyBase?,
@@ -207,14 +216,13 @@ object RecordFolds {
       val wc = target.workingCopy
       val before = Triple(saved, workingCopy, acl)
       fun targetDef() = if (wc) workingCopy ?: saved else saved
-      fun setTarget(def: groundplatform.v2.survey.SurveyDef?) {
+      fun setTarget(def: SurveyDef?) {
         if (wc) workingCopy = def else saved = def
       }
-      val upSurvey = sm.upsert_survey
-      val upAcl = sm.upsert_acl
-      val field = sm.update_field
-      val role = sm.update_acl_role
-      val access = sm.update_access_rules
+      val upSurvey = sm.upsert
+      val delSurvey = sm.delete
+      val upAcl = sm.acl_upsert
+      val delAcl = sm.acl_delete
       when {
         // Locally, a trashed survey disappears at once, as it does from the server's survey list.
         sm.trash_survey == true -> {
@@ -222,8 +230,6 @@ object RecordFolds {
           workingCopy = null
         }
         sm.restore_survey == true -> saved = saved?.copy(trash_time = null)
-        upSurvey != null -> setTarget(upSurvey.copy(survey_id = surveyId))
-        upAcl != null -> acl = upAcl.copy(survey_id = surveyId)
         sm.save_working_copy == true ->
           workingCopy?.let { toSave ->
             val number = (saved?.saved_revision_number ?: 0L) + 1L
@@ -231,14 +237,28 @@ object RecordFolds {
             workingCopy = null
           }
         sm.discard_working_copy == true -> workingCopy = null
-        field != null -> targetDef()?.let { setTarget(SurveyPatches.applyField(it, field)) }
-        role != null ->
-          acl = SurveyPatches.applyAclRole(acl ?: SurveyAcl(survey_id = surveyId), role)
-        access != null ->
-          acl = SurveyPatches.applyAccessRules(acl ?: SurveyAcl(survey_id = surveyId), access)
+        else -> {
+          if (upSurvey != null || delSurvey != null) {
+            val existingTarget = targetDef()
+            if (existingTarget != null || upSurvey?.survey_id?.isNotEmpty() == true) {
+              val from = existingTarget ?: SurveyDef(survey_id = surveyId)
+              setTarget(SurveyPatches.apply(from, upSurvey, delSurvey).copy(survey_id = surveyId))
+            }
+          }
+          if (upAcl != null || delAcl != null) {
+            val from = acl ?: SurveyAcl(survey_id = surveyId)
+            acl = SurveyPatches.applyAcl(from, upAcl, delAcl).copy(survey_id = surveyId)
+          }
+        }
       }
-      val isFieldPatch = field != null || role != null || access != null
-      if (isFieldPatch && m.isQueued() && before == Triple(saved, workingCopy, acl)) {
+      val isPatch = upSurvey != null || delSurvey != null || upAcl != null || delAcl != null
+      val isInitialCreate =
+        before.first == null &&
+          before.second == null &&
+          (upSurvey?.survey_id?.isNotEmpty() == true || upAcl?.survey_id?.isNotEmpty() == true)
+      if (
+        isPatch && !isInitialCreate && m.isQueued() && before == Triple(saved, workingCopy, acl)
+      ) {
         noOps += m.mutationId
       }
     }

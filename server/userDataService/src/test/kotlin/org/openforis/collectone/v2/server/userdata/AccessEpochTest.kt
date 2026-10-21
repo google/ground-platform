@@ -101,7 +101,7 @@ open class AccessEpochTest {
             mutations =
               listOf(
                 SurveyMutation(
-                  upsert_acl =
+                  acl_upsert =
                     acl.copy(entries = acl.entries.filterNot { it.email == COLLECTOR_ONE })
                 )
               ),
@@ -140,8 +140,7 @@ open class AccessEpochTest {
             mutations =
               listOf(
                 OrganizationMutation(
-                  upsert_organization =
-                    org.copy(members = org.members.filterNot { it.email == COLLECTOR_ONE })
+                  upsert = org.copy(members = org.members.filterNot { it.email == COLLECTOR_ONE })
                 )
               ),
           )
@@ -172,7 +171,7 @@ open class AccessEpochTest {
             mutations =
               listOf(
                 SurveyMutation(
-                  upsert_acl =
+                  acl_upsert =
                     acl.copy(
                       entries =
                         acl.entries +

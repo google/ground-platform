@@ -18,15 +18,12 @@ syntax = "proto3";
 
 package groundplatform.v2.data;
 
-import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/data/entity_record.proto";
 import "shared/protos/data/impact_aggregate.proto";
 import "shared/protos/data/impact_event.proto";
 import "shared/protos/data/submission_record.proto";
-import "shared/protos/forms/audit_log.proto";
-import "shared/protos/forms/record_instance.proto";
 import "shared/protos/forms/types.proto";
 
 // Core gRPC service for reading, syncing, and atomically mutating
@@ -316,73 +313,67 @@ message ListSubmissionsResponse {
 // Batched Idempotent Mutation Messages (MutateData)
 // =============================================================================
 
-message EntityFieldPatch {
-  string key = 1;
-
-  oneof value {
-    google.protobuf.NullValue null_value = 2;
-    groundplatform.v2.forms.TypedValue property_value = 3;
-    string label_value = 4;
-    bool bool_value = 5;
-    groundplatform.v2.forms.GeoPoint point_value = 6;
-    groundplatform.v2.forms.GeoTrace trace_value = 7;
-    groundplatform.v2.forms.GeoShape shape_value = 8;
-  }
-}
-
-message EntityPatch {
-  repeated EntityFieldPatch patches = 1;
-}
-
+// A single idempotent mutation step targeting an `EntityRecord`.
+//
+// Carries sparse instances of `EntityRecord` (`upsert` and `delete`), evaluated
+// in order as `merge(applyDelete(base, delete), upsert)`:
+//   - If `delete` is a root leaf (no child fields set beyond `entity_id` /
+//     `dataset_id` / `survey_id`, or `delete.is_deleted == true`) and `upsert`
+//     does not restore fields, the entity is soft-deleted into a tombstone
+//     (`is_deleted = true`).
+//   - Otherwise, `delete` acts as a structural deletion mask clearing any
+//     populated scalar/geometry/property key, and `upsert` merges its
+//     non-default scalars, geometry, and `properties` entries into the entity.
 message EntityMutation {
   string dataset_id = 1;
   string entity_id = 2;
   // Revision the client based this mutation on (0 when unknown or new).
-  // `update` patches are applied last-writer-wins and report `AUTO_MERGED`
-  // when it is stale; `upsert` fails with `FAILED_PRECONDITION` when it is
-  // non-zero and stale.
+  // Sparse mutations are applied last-writer-wins and report `AUTO_MERGED`
+  // when `base_revision` is non-zero and older than the stored revision.
   int64 base_revision = 3;
 
-  oneof operation {
-    EntityPatch update = 4;
-    bool delete = 5;
-    EntityRecord upsert = 6;
-  }
+  reserved 4, 5;
+  reserved "update";
+
+  // Sparse `EntityRecord` fields (`label`, `geometry`, `properties`,
+  // `is_field_created`, `is_deleted`, etc.) to create or update.
+  EntityRecord upsert = 6;
+
+  // Structural deletion mask for `EntityRecord` (or root leaf tombstone when no
+  // child fields are set).
+  EntityRecord delete = 7;
 }
 
-message SubmissionFieldPatch {
-  string key = 1;
-
-  oneof value {
-    google.protobuf.NullValue null_value = 2;
-    groundplatform.v2.forms.FieldValue field_value = 3;
-    bool bool_value = 4;
-    string string_value = 5;
-    groundplatform.v2.forms.RecordMetadata metadata_value = 6;
-    groundplatform.v2.forms.AuditLog audit_log_value = 7;
-    bytes bytes_value = 8;
-    ReviewStatus review_status_value = 10;
-  }
-}
-
-message SubmissionPatch {
-  repeated SubmissionFieldPatch patches = 1;
-}
-
+// A single idempotent mutation step targeting a `SubmissionRecord`.
+//
+// Carries sparse instances of `SubmissionRecord` (`upsert` and `delete`),
+// evaluated in order as `merge(applyDelete(base, delete), upsert)`:
+//   - If `delete` is a root leaf (no child fields set beyond `submission_id` /
+//     `form_id` / `survey_id`, or `delete.is_deleted == true`) and `upsert`
+//     does not restore fields, the submission is soft-deleted into a tombstone
+//     (`is_deleted = true`).
+//   - Otherwise, `delete` acts as a structural deletion mask clearing any
+//     populated scalar, `record.data.fields` entry, or repeat instance, and
+//     `upsert` recursively merges its non-default scalars and `record` fields.
 message SubmissionMutation {
   string submission_id = 1;
   string form_id = 2;
   // Revision the client based this mutation on (0 when unknown or new).
-  // `update` patches are applied last-writer-wins and report `AUTO_MERGED`
-  // when it is stale; `upsert` fails with `FAILED_PRECONDITION` when it is
-  // non-zero and stale.
+  // Sparse mutations are applied last-writer-wins and report `AUTO_MERGED`
+  // when `base_revision` is non-zero and older than the stored revision.
   int64 base_revision = 3;
 
-  oneof operation {
-    SubmissionPatch update = 4;
-    bool delete = 5;
-    SubmissionRecord upsert = 6;
-  }
+  reserved 4, 5;
+  reserved "update";
+
+  // Sparse `SubmissionRecord` fields (`entity_id`, `record`, `review_status`,
+  // `collector_name`, `collector_email`, `is_deleted`, etc.) to create or
+  // update.
+  SubmissionRecord upsert = 6;
+
+  // Structural deletion mask for `SubmissionRecord` (or root leaf tombstone
+  // when no child fields are set).
+  SubmissionRecord delete = 7;
 }
 
 message DataMutation {

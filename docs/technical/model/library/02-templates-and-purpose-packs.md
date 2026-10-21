@@ -43,6 +43,7 @@ message FormTemplateDef {
 
   LibraryStatus status = 7;
   groundplatform.v2.data.AuditInfo audit_info = 8;
+  int32 sort_order = 9;
 }
 ```
 
@@ -99,6 +100,7 @@ message PurposePackDef {
 
   LibraryStatus status = 11;
   groundplatform.v2.data.AuditInfo audit_info = 12;
+  int32 sort_order = 13;
 }
 ```
 
@@ -142,6 +144,7 @@ message ExportProfileDef {
   map<string, string> field_concepts = 5;
 
   LibraryStatus status = 6;
+  int32 sort_order = 7;
 }
 ```
 
