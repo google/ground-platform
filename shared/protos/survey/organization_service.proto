@@ -124,23 +124,24 @@ message ListOrganizationsResponse {
 // A single idempotent mutation step within a batched
 // `MutateOrganizationRequest`.
 //
-// Carries sparse instances of `Organization` (`upsert` and `delete`), where
+// Carries sparse instances of `Organization` (`delete` and `upsert`), where
 // `delete` is applied first as a structural deletion mask followed by
 // recursively merging `upsert`, or `delete_organization` to permanently delete
 // the organization.
 message OrganizationMutation {
-  // Signal to permanently delete the organization.
-  message DeleteOrganization {}
-
-  reserved 1;
-  reserved "update_field";
+  // Structural deletion mask for `Organization`: any non-default scalar clears
+  // that field to default, and any keyed item (`ImagerySource` by
+  // `imagery_source_id`, `OrganizationMember` by `id` / `user_id` / `email`)
+  // with only its key set removes that item (or recurses into its child fields
+  // if child fields are populated).
+  Organization delete = 1;
 
   // Sparse `Organization` fields and keyed sub-resources (`imagery_sources`,
   // `members`, `quota_limits`) to create or update.
   Organization upsert = 2;
 
   // Permanently deletes the organization and unlinks its surveys to personal.
-  DeleteOrganization delete_organization = 3;
+  bool delete_organization = 3;
 
   // Client-generated UUID from the offline outbox, identifying the mutation in
   // client logs. Replays are detected by `client_seq`, not by this ID.
@@ -156,13 +157,6 @@ message OrganizationMutation {
 
   // Client-side timestamp when the mutation was recorded.
   google.protobuf.Timestamp client_timestamp = 7;
-
-  // Structural deletion mask for `Organization`: any non-default scalar clears
-  // that field to default, and any keyed item (`ImagerySource` by
-  // `imagery_source_id`, `OrganizationMember` by `id` / `user_id` / `email`)
-  // with only its key set removes that item (or recurses into its child fields
-  // if child fields are populated).
-  Organization delete = 8;
 }
 
 message MutateOrganizationRequest {

@@ -115,24 +115,24 @@ object OutboxCoalescer {
         val sm = m.submission_mutation
         when {
           em != null && !isDataUpsert(payload) && !isDataDelete(payload) -> {
-            val up = em.upsert?.let { stripEntity(it, ::superseded) }
             val del = em.delete?.let { stripEntity(it, ::superseded) }
-            if (up == null && del == null) null
+            val up = em.upsert?.let { stripEntity(it, ::superseded) }
+            if (del == null && up == null) null
             else
               mutation.copy(
                 payload =
-                  MutationPayload.Data(m.copy(entity_mutation = em.copy(upsert = up, delete = del)))
+                  MutationPayload.Data(m.copy(entity_mutation = em.copy(delete = del, upsert = up)))
               )
           }
           sm != null && !isDataUpsert(payload) && !isDataDelete(payload) -> {
-            val up = sm.upsert?.let { stripSubmission(it, ::superseded) }
             val del = sm.delete?.let { stripSubmission(it, ::superseded) }
-            if (up == null && del == null) null
+            val up = sm.upsert?.let { stripSubmission(it, ::superseded) }
+            if (del == null && up == null) null
             else
               mutation.copy(
                 payload =
                   MutationPayload.Data(
-                    m.copy(submission_mutation = sm.copy(upsert = up, delete = del))
+                    m.copy(submission_mutation = sm.copy(delete = del, upsert = up))
                   )
               )
           }
@@ -186,7 +186,7 @@ object OutboxCoalescer {
 
   private fun surveyKeys(m: SurveyMutation): Set<String> {
     val keys = mutableSetOf<String>()
-    for (s in listOfNotNull(m.upsert, m.delete)) {
+    for (s in listOfNotNull(m.delete, m.upsert)) {
       if (s.title.isNotEmpty()) keys += "title"
       if (s.description.isNotEmpty()) keys += "description"
       if (s.organization_id.isNotEmpty()) keys += "organization_id"
@@ -231,7 +231,7 @@ object OutboxCoalescer {
         }
       }
     }
-    for (a in listOfNotNull(m.acl_upsert, m.acl_delete)) {
+    for (a in listOfNotNull(m.acl_delete, m.acl_upsert)) {
       for (e in a.entries) keys += aclKey(MutationKeys.aclEntryKey(e))
       if (
         a.sharing_policy != SharingPolicy.SHARING_POLICY_UNSPECIFIED ||
@@ -250,7 +250,7 @@ object OutboxCoalescer {
 
   private fun organizationKeys(m: OrganizationMutation): Set<String> {
     val keys = mutableSetOf<String>()
-    for (o in listOfNotNull(m.upsert, m.delete)) {
+    for (o in listOfNotNull(m.delete, m.upsert)) {
       if (o.name.isNotEmpty()) keys += "name"
       if (o.description.isNotEmpty()) keys += "description"
       if (o.website_url.isNotEmpty()) keys += "website_url"
@@ -269,7 +269,7 @@ object OutboxCoalescer {
 
   private fun libraryKeys(m: LibraryMutation): Set<String> {
     val keys = mutableSetOf<String>()
-    for (r in listOfNotNull(m.upsert, m.delete)) {
+    for (r in listOfNotNull(m.delete, m.upsert)) {
       if (r.settings != null) keys += "settings"
       val b = r.bundle
       if (b != null) {
@@ -286,7 +286,7 @@ object OutboxCoalescer {
     val keys = mutableSetOf<String>()
     val em = m.entity_mutation
     if (em != null) {
-      for (r in listOfNotNull(em.upsert, em.delete)) {
+      for (r in listOfNotNull(em.delete, em.upsert)) {
         if (r.label.isNotEmpty()) keys += "label"
         if (r.point != null || r.trace != null || r.shape != null) keys += "geometry"
         for (k in r.properties.keys) keys += "properties/$k"
@@ -296,7 +296,7 @@ object OutboxCoalescer {
     }
     val sm = m.submission_mutation
     if (sm != null) {
-      for (r in listOfNotNull(sm.upsert, sm.delete)) {
+      for (r in listOfNotNull(sm.delete, sm.upsert)) {
         if (r.entity_id.isNotEmpty()) keys += "entity_id"
         if (r.form_version.isNotEmpty()) keys += "form_version"
         if (r.is_quarantined) keys += "is_quarantined"
@@ -317,13 +317,13 @@ object OutboxCoalescer {
             true
       is MutationPayload.Organization ->
         payload.mutation.upsert?.organization_id?.isNotEmpty() == true ||
-          payload.mutation.delete_organization != null
+          payload.mutation.delete_organization
       is MutationPayload.Library -> payload.mutation.upsert?.organization_id?.isNotEmpty() == true
       is MutationPayload.Data -> isDataUpsert(payload) || isDataDelete(payload)
     }
 
   private fun isDiscardWorkingCopy(payload: MutationPayload): Boolean =
-    payload is MutationPayload.Survey && payload.mutation.discard_working_copy == true
+    payload is MutationPayload.Survey && payload.mutation.discard_working_copy
 
   private fun isDataUpsert(payload: MutationPayload): Boolean =
     payload is MutationPayload.Data &&

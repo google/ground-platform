@@ -61,15 +61,15 @@ object RecordFolds {
       if (!m.applies()) continue
       val em = (m.payload as? MutationPayload.Data)?.mutation?.entity_mutation ?: continue
       if (em.entity_id != entityId) continue
-      val upsert = em.upsert
       val delete = em.delete
+      val upsert = em.upsert
       current =
         when {
           DataPatches.isEntityRootDelete(delete, upsert) -> null
-          upsert != null || delete != null -> {
+          delete != null || upsert != null -> {
             val from = current ?: EntityRecord(entity_id = entityId, dataset_id = em.dataset_id)
             val next =
-              DataPatches.applyEntity(from, upsert, delete)
+              DataPatches.applyEntity(from, delete, upsert)
                 .copy(
                   entity_id = entityId,
                   dataset_id =
@@ -100,16 +100,16 @@ object RecordFolds {
       if (!m.applies()) continue
       val sm = (m.payload as? MutationPayload.Data)?.mutation?.submission_mutation ?: continue
       if (sm.submission_id != submissionId) continue
-      val upsert = sm.upsert
       val delete = sm.delete
+      val upsert = sm.upsert
       current =
         when {
           DataPatches.isSubmissionRootDelete(delete, upsert) -> null
-          upsert != null || delete != null -> {
+          delete != null || upsert != null -> {
             val from =
               current ?: SubmissionRecord(submission_id = submissionId, form_id = sm.form_id)
             val next =
-              DataPatches.applySubmission(from, upsert, delete)
+              DataPatches.applySubmission(from, delete, upsert)
                 .copy(
                   submission_id = submissionId,
                   form_id =
@@ -137,15 +137,15 @@ object RecordFolds {
     for (m in pending) {
       if (!m.applies()) continue
       val om = (m.payload as? MutationPayload.Organization)?.mutation ?: continue
-      val upsert = om.upsert
       val delete = om.delete
+      val upsert = om.upsert
       current =
         when {
-          om.delete_organization != null -> null
-          upsert != null || delete != null -> {
+          om.delete_organization -> null
+          delete != null || upsert != null -> {
             val from = current ?: Organization(organization_id = organizationId)
             val next =
-              OrganizationPatches.apply(from, upsert, delete)
+              OrganizationPatches.apply(from, delete, upsert)
                 .copy(
                   organization_id = organizationId,
                   version = current?.version ?: base?.version ?: 0L,
@@ -171,14 +171,14 @@ object RecordFolds {
     for (m in pending) {
       if (!m.applies()) continue
       val lm = (m.payload as? MutationPayload.Library)?.mutation ?: continue
-      val upsert = lm.upsert
       val delete = lm.delete
+      val upsert = lm.upsert
       current =
         when {
-          upsert != null || delete != null -> {
+          delete != null || upsert != null -> {
             val from = current ?: OrganizationLibraryRecord(organization_id = organizationId)
             val next =
-              LibraryPatches.apply(from, upsert, delete)
+              LibraryPatches.apply(from, delete, upsert)
                 .copy(
                   organization_id = organizationId,
                   version = current?.version ?: base?.version ?: 0L,
@@ -195,7 +195,7 @@ object RecordFolds {
 
   /**
    * The survey's saved revision, working copy, and ACL after [pending], following `MutateSurvey`:
-   * sparse `upsert` and `delete` mutations apply to the working copy (starting from the saved
+   * sparse `delete` and `upsert` mutations apply to the working copy (starting from the saved
    * revision) when sent with `working_copy`, saving promotes the working copy, and discarding drops
    * it.
    */
@@ -219,35 +219,35 @@ object RecordFolds {
       fun setTarget(def: SurveyDef?) {
         if (wc) workingCopy = def else saved = def
       }
-      val upSurvey = sm.upsert
       val delSurvey = sm.delete
-      val upAcl = sm.acl_upsert
+      val upSurvey = sm.upsert
       val delAcl = sm.acl_delete
+      val upAcl = sm.acl_upsert
       when {
         // Locally, a trashed survey disappears at once, as it does from the server's survey list.
-        sm.trash_survey == true -> {
+        sm.trash_survey -> {
           saved = saved?.copy(state = SurveyState.DELETED, trash_time = m.clientTimestamp)
           workingCopy = null
         }
-        sm.restore_survey == true -> saved = saved?.copy(trash_time = null)
-        sm.save_working_copy == true ->
+        sm.restore_survey -> saved = saved?.copy(trash_time = null)
+        sm.save_working_copy ->
           workingCopy?.let { toSave ->
             val number = (saved?.saved_revision_number ?: 0L) + 1L
             saved = toSave.copy(saved_revision_number = number, version = number.toString())
             workingCopy = null
           }
-        sm.discard_working_copy == true -> workingCopy = null
+        sm.discard_working_copy -> workingCopy = null
         else -> {
-          if (upSurvey != null || delSurvey != null) {
+          if (delSurvey != null || upSurvey != null) {
             val existingTarget = targetDef()
             if (existingTarget != null || upSurvey?.survey_id?.isNotEmpty() == true) {
               val from = existingTarget ?: SurveyDef(survey_id = surveyId)
-              setTarget(SurveyPatches.apply(from, upSurvey, delSurvey).copy(survey_id = surveyId))
+              setTarget(SurveyPatches.apply(from, delSurvey, upSurvey).copy(survey_id = surveyId))
             }
           }
-          if (upAcl != null || delAcl != null) {
+          if (delAcl != null || upAcl != null) {
             val from = acl ?: SurveyAcl(survey_id = surveyId)
-            acl = SurveyPatches.applyAcl(from, upAcl, delAcl).copy(survey_id = surveyId)
+            acl = SurveyPatches.applyAcl(from, delAcl, upAcl).copy(survey_id = surveyId)
           }
         }
       }

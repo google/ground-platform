@@ -315,7 +315,7 @@ message ListSubmissionsResponse {
 
 // A single idempotent mutation step targeting an `EntityRecord`.
 //
-// Carries sparse instances of `EntityRecord` (`upsert` and `delete`), evaluated
+// Carries sparse instances of `EntityRecord` (`delete` and `upsert`), evaluated
 // in order as `merge(applyDelete(base, delete), upsert)`:
 //   - If `delete` is a root leaf (no child fields set beyond `entity_id` /
 //     `dataset_id` / `survey_id`, or `delete.is_deleted == true`) and `upsert`
@@ -332,21 +332,18 @@ message EntityMutation {
   // when `base_revision` is non-zero and older than the stored revision.
   int64 base_revision = 3;
 
-  reserved 4, 5;
-  reserved "update";
+  // Structural deletion mask for `EntityRecord` (or root leaf tombstone when no
+  // child fields are set).
+  EntityRecord delete = 4;
 
   // Sparse `EntityRecord` fields (`label`, `geometry`, `properties`,
   // `is_field_created`, `is_deleted`, etc.) to create or update.
-  EntityRecord upsert = 6;
-
-  // Structural deletion mask for `EntityRecord` (or root leaf tombstone when no
-  // child fields are set).
-  EntityRecord delete = 7;
+  EntityRecord upsert = 5;
 }
 
 // A single idempotent mutation step targeting a `SubmissionRecord`.
 //
-// Carries sparse instances of `SubmissionRecord` (`upsert` and `delete`),
+// Carries sparse instances of `SubmissionRecord` (`delete` and `upsert`),
 // evaluated in order as `merge(applyDelete(base, delete), upsert)`:
 //   - If `delete` is a root leaf (no child fields set beyond `submission_id` /
 //     `form_id` / `survey_id`, or `delete.is_deleted == true`) and `upsert`
@@ -363,17 +360,14 @@ message SubmissionMutation {
   // when `base_revision` is non-zero and older than the stored revision.
   int64 base_revision = 3;
 
-  reserved 4, 5;
-  reserved "update";
+  // Structural deletion mask for `SubmissionRecord` (or root leaf tombstone
+  // when no child fields are set).
+  SubmissionRecord delete = 4;
 
   // Sparse `SubmissionRecord` fields (`entity_id`, `record`, `review_status`,
   // `collector_name`, `collector_email`, `is_deleted`, etc.) to create or
   // update.
-  SubmissionRecord upsert = 6;
-
-  // Structural deletion mask for `SubmissionRecord` (or root leaf tombstone
-  // when no child fields are set).
-  SubmissionRecord delete = 7;
+  SubmissionRecord upsert = 5;
 }
 
 message DataMutation {

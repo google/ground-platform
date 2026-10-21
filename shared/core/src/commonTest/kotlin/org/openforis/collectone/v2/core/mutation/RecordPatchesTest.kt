@@ -38,8 +38,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Semantics of sparse-proto mutations (`upsert` + structural `delete` mask), including the
- * idempotency property the client outbox relies on: applying a `(upsert, delete)` pair twice gives
+ * Semantics of sparse-proto mutations (structural `delete` mask + `upsert`), including the
+ * idempotency property the client outbox relies on: applying a `(delete, upsert)` pair twice gives
  * the same record as applying it once, so pending mutations can be re-applied on top of a server
  * copy that may already include them.
  */
@@ -66,27 +66,27 @@ class RecordPatchesTest {
 
   private val surveyMutations: List<Pair<SurveyDef?, SurveyDef?>> =
     listOf(
-      SurveyDef(title = "New") to null,
-      null to SurveyDef(description = "x"),
-      SurveyDef(supported_languages = listOf("en", "sw")) to null,
-      SurveyDef(forms = listOf(FormDef(form_id = "f1", title = "Uno"))) to null,
-      null to SurveyDef(forms = listOf(FormDef(form_id = "f2"))),
-      SurveyDef(map_config = MapConfig(layers = listOf(LayerDef(id = "l1")))) to null,
+      null to SurveyDef(title = "New"),
+      SurveyDef(description = "x") to null,
+      null to SurveyDef(supported_languages = listOf("en", "sw")),
+      null to SurveyDef(forms = listOf(FormDef(form_id = "f1", title = "Uno"))),
+      SurveyDef(forms = listOf(FormDef(form_id = "f2"))) to null,
+      null to SurveyDef(map_config = MapConfig(layers = listOf(LayerDef(id = "l1")))),
     )
 
   @Test
   fun surveyPatches_areIdempotent() {
-    for ((upsert, delete) in surveyMutations) {
-      val once = SurveyPatches.apply(survey, upsert, delete)
-      assertEquals(once, SurveyPatches.apply(once, upsert, delete))
+    for ((delete, upsert) in surveyMutations) {
+      val once = SurveyPatches.apply(survey, delete, upsert)
+      assertEquals(once, SurveyPatches.apply(once, delete, upsert))
     }
   }
 
   @Test
   fun surveyPatches_setClearAndUpsertKeyedItems() {
     val result =
-      surveyMutations.fold(survey) { acc, (upsert, delete) ->
-        SurveyPatches.apply(acc, upsert, delete)
+      surveyMutations.fold(survey) { acc, (delete, upsert) ->
+        SurveyPatches.apply(acc, delete, upsert)
       }
 
     assertEquals("New", result.title)
@@ -112,7 +112,7 @@ class RecordPatchesTest {
   @Test
   fun surveyPatches_branchDeleteClearsNestedFieldsWithoutDroppingParentItem() {
     val deleteFormTitleOnly = SurveyDef(forms = listOf(FormDef(form_id = "f1", title = "x")))
-    val result = SurveyPatches.apply(survey, upsert = null, delete = deleteFormTitleOnly)
+    val result = SurveyPatches.apply(survey, delete = deleteFormTitleOnly, upsert = null)
 
     assertEquals(2, result.forms.size)
     assertEquals("", result.forms.first { it.form_id == "f1" }.title)
@@ -179,16 +179,16 @@ class RecordPatchesTest {
   fun entityPatch_setsAndClearsProperties_idempotently() {
     val record =
       EntityRecord(entity_id = "e1", properties = mapOf("old" to TypedValue(string_value = "x")))
+    val delete = EntityRecord(properties = mapOf("old" to TypedValue()))
     val upsert =
       EntityRecord(
         label = "Plot 1",
         properties = mapOf("crop" to TypedValue(string_value = "coffee")),
       )
-    val delete = EntityRecord(properties = mapOf("old" to TypedValue()))
 
-    val once = DataPatches.applyEntity(record, upsert = upsert, delete = delete)
+    val once = DataPatches.applyEntity(record, delete = delete, upsert = upsert)
 
-    assertEquals(once, DataPatches.applyEntity(once, upsert = upsert, delete = delete))
+    assertEquals(once, DataPatches.applyEntity(once, delete = delete, upsert = upsert))
     assertEquals("Plot 1", once.label)
     assertEquals(mapOf("crop" to TypedValue(string_value = "coffee")), once.properties)
   }
@@ -196,9 +196,10 @@ class RecordPatchesTest {
   @Test
   fun submissionPatch_isIdempotent() {
     val upsert = SubmissionRecord(entity_id = "e1", is_quarantined = true)
-    val once = DataPatches.applySubmission(SubmissionRecord(submission_id = "sub1"), upsert)
+    val once =
+      DataPatches.applySubmission(SubmissionRecord(submission_id = "sub1"), upsert = upsert)
 
-    assertEquals(once, DataPatches.applySubmission(once, upsert))
+    assertEquals(once, DataPatches.applySubmission(once, upsert = upsert))
     assertEquals("e1", once.entity_id)
     assertEquals(true, once.is_quarantined)
   }

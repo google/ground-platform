@@ -277,9 +277,7 @@ class OutboxCoalescerTest {
       pending(
         target,
         "organization/o1",
-        MutationPayload.Organization(
-          OrganizationMutation(delete_organization = OrganizationMutation.DeleteOrganization())
-        ),
+        MutationPayload.Organization(OrganizationMutation(delete_organization = true)),
       )
 
     assertEquals(listOf(delete), emptyList<PendingMutation>().enqueue(rename, delete))

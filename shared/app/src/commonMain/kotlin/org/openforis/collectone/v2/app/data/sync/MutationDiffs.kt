@@ -52,14 +52,14 @@ import groundplatform.v2.survey.SurveyOutcome
 import groundplatform.v2.survey.SurveyState
 import org.openforis.collectone.v2.core.mutation.MutationKeys
 
-/** A sparse `(upsert, delete)` pair describing a change to a domain proto [T]. */
-data class SparseDiff<T>(val upsert: T? = null, val delete: T? = null) {
+/** A sparse `(delete, upsert)` pair describing a change to a domain proto [T]. */
+data class SparseDiff<T>(val delete: T? = null, val upsert: T? = null) {
   val isEmpty: Boolean
-    get() = upsert == null && delete == null
+    get() = delete == null && upsert == null
 }
 
 /**
- * Turns a record's old and new proto values into the fine-grained sparse `upsert` and `delete`
+ * Turns a record's old and new proto values into the fine-grained sparse `delete` and `upsert`
  * masks that transform one into the other. Server bookkeeping (revisions, versions, commit
  * timestamps, sync status) is ignored. Keyed collection items are compared one by one, so editing
  * one form, member, or concept produces one sparse mutation.
@@ -136,7 +136,7 @@ object MutationDiffs {
         .copy(label = "", point = null, trace = null, shape = null, properties = emptyMap())
     }
     return EntityDiff(
-      SparseDiff(upsert = up.takeIf { hasUp }, delete = del.takeIf { hasDel }),
+      SparseDiff(delete = del.takeIf { hasDel }, upsert = up.takeIf { hasUp }),
       patchable(old) != patchable(new),
     )
   }
@@ -199,7 +199,7 @@ object MutationDiffs {
         )
     }
     return SubmissionDiff(
-      SparseDiff(upsert = up.takeIf { hasUp }, delete = del.takeIf { hasDel }),
+      SparseDiff(delete = del.takeIf { hasDel }, upsert = up.takeIf { hasUp }),
       patchable(old) != patchable(new),
     )
   }
@@ -212,8 +212,8 @@ object MutationDiffs {
 
   fun organization(old: Organization, new: Organization): OrganizationDiff {
     val mutations = mutableListOf<OrganizationMutation>()
-    fun emit(upsert: Organization? = null, delete: Organization? = null) {
-      mutations += OrganizationMutation(upsert = upsert, delete = delete)
+    fun emit(delete: Organization? = null, upsert: Organization? = null) {
+      mutations += OrganizationMutation(delete = delete, upsert = upsert)
     }
     fun string(a: String, b: String, build: (String) -> Organization) {
       if (a != b) {
@@ -276,8 +276,8 @@ object MutationDiffs {
     new: OrganizationLibraryRecord,
   ): List<LibraryMutation> {
     val mutations = mutableListOf<LibraryMutation>()
-    fun emit(upsert: OrganizationLibraryRecord? = null, delete: OrganizationLibraryRecord? = null) {
-      mutations += LibraryMutation(upsert = upsert, delete = delete)
+    fun emit(delete: OrganizationLibraryRecord? = null, upsert: OrganizationLibraryRecord? = null) {
+      mutations += LibraryMutation(delete = delete, upsert = upsert)
     }
     if (old.settings != new.settings) {
       val s = new.settings
@@ -345,8 +345,8 @@ object MutationDiffs {
   /** Sparse mutations for a survey definition (saved revision or working copy). */
   fun survey(old: SurveyDef, new: SurveyDef): List<SurveyMutation> {
     val mutations = mutableListOf<SurveyMutation>()
-    fun emit(upsert: SurveyDef? = null, delete: SurveyDef? = null) {
-      mutations += SurveyMutation(upsert = upsert, delete = delete)
+    fun emit(delete: SurveyDef? = null, upsert: SurveyDef? = null) {
+      mutations += SurveyMutation(delete = delete, upsert = upsert)
     }
     fun string(a: String, b: String, build: (String) -> SurveyDef) {
       if (a != b) {
@@ -538,7 +538,7 @@ object MutationDiffs {
     }
     if (hasUp || hasDel) {
       mutations +=
-        SurveyMutation(acl_upsert = up.takeIf { hasUp }, acl_delete = del.takeIf { hasDel })
+        SurveyMutation(acl_delete = del.takeIf { hasDel }, acl_upsert = up.takeIf { hasUp })
     }
     return mutations
   }

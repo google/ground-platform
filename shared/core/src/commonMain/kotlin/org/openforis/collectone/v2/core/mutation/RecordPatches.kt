@@ -77,7 +77,7 @@ import groundplatform.v2.survey.SurveyState
 
 /*
  * Sparse-proto mutation semantics shared by the user data service and the clients. Every mutation
- * carries two optional sparse instances of the target domain proto `T` (`upsert` and `delete`),
+ * carries two optional sparse instances of the target domain proto `T` (`delete` and `upsert`),
  * applied in order as `merge(applyDelete(base, delete), upsert)`:
  *
  * 1. Structural deletion mask (`delete`):
@@ -168,7 +168,7 @@ object MutationKeys {
   fun recordNodeKey(n: RecordNode, index: Int = 0): String = n.id.ifBlank { index.toString() }
 }
 
-/** Applies sparse `SurveyDef` and `SurveyAcl` `upsert` and `delete` masks. */
+/** Applies sparse `SurveyDef` and `SurveyAcl` `delete` and `upsert` masks. */
 object SurveyPatches {
   /**
    * Roles allowed in `SurveyAcl.default_role`. Others leave it unchanged; the server rejects
@@ -179,8 +179,8 @@ object SurveyPatches {
   /** Applies [delete] then merges [upsert] onto [survey]. */
   fun apply(
     survey: SurveyDef,
-    upsert: SurveyDef? = null,
     delete: SurveyDef? = null,
+    upsert: SurveyDef? = null,
   ): SurveyDef {
     val afterDelete = if (delete != null) applyDelete(survey, delete) else survey
     return if (upsert != null) merge(afterDelete, upsert) else afterDelete
@@ -189,8 +189,8 @@ object SurveyPatches {
   /** Applies [delete] then merges [upsert] onto [acl]. */
   fun applyAcl(
     acl: SurveyAcl,
-    upsert: SurveyAcl? = null,
     delete: SurveyAcl? = null,
+    upsert: SurveyAcl? = null,
   ): SurveyAcl {
     val afterDelete = if (delete != null) applyAclDelete(acl, delete) else acl
     return if (upsert != null) mergeAcl(afterDelete, upsert) else afterDelete
@@ -1181,7 +1181,7 @@ object SurveyPatches {
   }
 }
 
-/** Applies sparse `Organization` `upsert` and `delete` masks. */
+/** Applies sparse `Organization` `delete` and `upsert` masks. */
 object OrganizationPatches {
   fun isRootDelete(delete: Organization?, upsert: Organization? = null): Boolean {
     if (delete == null) return false
@@ -1194,8 +1194,8 @@ object OrganizationPatches {
 
   fun apply(
     org: Organization,
-    upsert: Organization? = null,
     delete: Organization? = null,
+    upsert: Organization? = null,
   ): Organization {
     val afterDelete = if (delete != null) applyDelete(org, delete) else org
     return if (upsert != null) merge(afterDelete, upsert) else afterDelete
@@ -1341,12 +1341,12 @@ object OrganizationPatches {
   }
 }
 
-/** Applies sparse `OrganizationLibraryRecord` `upsert` and `delete` masks. */
+/** Applies sparse `OrganizationLibraryRecord` `delete` and `upsert` masks. */
 object LibraryPatches {
   fun apply(
     record: OrganizationLibraryRecord,
-    upsert: OrganizationLibraryRecord? = null,
     delete: OrganizationLibraryRecord? = null,
+    upsert: OrganizationLibraryRecord? = null,
   ): OrganizationLibraryRecord {
     val afterDelete = if (delete != null) applyDelete(record, delete) else record
     return if (upsert != null) merge(afterDelete, upsert) else afterDelete
@@ -1505,7 +1505,7 @@ object LibraryPatches {
   }
 }
 
-/** Applies sparse `EntityRecord` and `SubmissionRecord` `upsert` and `delete` masks. */
+/** Applies sparse `EntityRecord` and `SubmissionRecord` `delete` and `upsert` masks. */
 object DataPatches {
   /**
    * True when [delete] is a root-level soft-delete mask (either `delete.is_deleted == true`, or
@@ -1547,8 +1547,8 @@ object DataPatches {
   /** Applies [delete] then merges [upsert] onto [record]. */
   fun applyEntity(
     record: EntityRecord,
-    upsert: EntityRecord? = null,
     delete: EntityRecord? = null,
+    upsert: EntityRecord? = null,
   ): EntityRecord {
     val afterDelete = if (delete != null) applyEntityDelete(record, delete) else record
     return if (upsert != null) mergeEntity(afterDelete, upsert) else afterDelete
@@ -1636,8 +1636,8 @@ object DataPatches {
   /** Applies [delete] then merges [upsert] onto [record]. */
   fun applySubmission(
     record: SubmissionRecord,
-    upsert: SubmissionRecord? = null,
     delete: SubmissionRecord? = null,
+    upsert: SubmissionRecord? = null,
   ): SubmissionRecord {
     val afterDelete = if (delete != null) applySubmissionDelete(record, delete) else record
     return if (upsert != null) mergeSubmission(afterDelete, upsert) else afterDelete

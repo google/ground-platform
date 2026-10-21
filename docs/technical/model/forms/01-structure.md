@@ -191,7 +191,7 @@ view {
 
 Within this unified schema:
 
-*   The form title, identifier (`form_id`), version, and `sort_order` are first-class fields on `FormDef`. Every repeated collection item across `FormDef` and `RecordInstance` (`FieldDefinition`, `SecondaryInstance`, `DataTableRow`, `FieldBinding`, `ActionDef`, `EntityDeclaration`, `EntityPropertyMapping`, `LanguageTranslation`, `ViewComponent`, `ChoiceItem`, and `RecordNode`) carries a stable `id` (and `sort_order` on ordered items) so sparse `upsert` and `delete` proto mutations can address individual items deterministically without replacing entire lists.
+*   The form title, identifier (`form_id`), version, and `sort_order` are first-class fields on `FormDef`. Every repeated collection item across `FormDef` and `RecordInstance` (`FieldDefinition`, `SecondaryInstance`, `DataTableRow`, `FieldBinding`, `ActionDef`, `EntityDeclaration`, `EntityPropertyMapping`, `LanguageTranslation`, `ViewComponent`, `ChoiceItem`, and `RecordNode`) carries a stable `id` (and `sort_order` on ordered items) so sparse `delete` and `upsert` proto mutations can address individual items deterministically without replacing entire lists.
 *   External applications and intents are declared with typed `intent` controls
     and bindings.
 *   Multi-lingual dictionaries are encapsulated inside `model.translations` (see

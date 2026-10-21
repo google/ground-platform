@@ -145,13 +145,16 @@ message SearchConceptsResponse {
 
 // A single idempotent mutation step within a batched `MutateLibraryRequest`.
 //
-// Carries sparse instances of `OrganizationLibraryRecord` (`upsert` and
-// `delete`), where `delete` is applied first as a structural deletion mask
+// Carries sparse instances of `OrganizationLibraryRecord` (`delete` and
+// `upsert`), where `delete` is applied first as a structural deletion mask
 // (removing keyed entries in `bundle` with only their `id` set, or clearing
 // `settings` fields) followed by recursively merging `upsert`.
 message LibraryMutation {
-  reserved 1;
-  reserved "update_field";
+  // Structural deletion mask for `OrganizationLibraryRecord`: any keyed entry
+  // in `bundle` with only its `id` set removes that entry (or recurses into its
+  // child fields if child fields are populated), and any non-empty
+  // `settings.hidden_global_entry_ids` clears that list.
+  OrganizationLibraryRecord delete = 1;
 
   // Sparse `OrganizationLibraryRecord` entries (`bundle.concepts`,
   // `bundle.form_templates`, `bundle.purpose_packs`, `bundle.export_profiles`,
@@ -171,12 +174,6 @@ message LibraryMutation {
 
   // Client-side timestamp when the mutation was recorded.
   google.protobuf.Timestamp client_timestamp = 6;
-
-  // Structural deletion mask for `OrganizationLibraryRecord`: any keyed entry
-  // in `bundle` with only its `id` set removes that entry (or recurses into its
-  // child fields if child fields are populated), and any non-empty
-  // `settings.hidden_global_entry_ids` clears that list.
-  OrganizationLibraryRecord delete = 7;
 }
 
 message MutateLibraryRequest {

@@ -623,10 +623,10 @@ class UserDataBackend(private val store: UserDataStore) :
       }
       var current: Organization = stored ?: Organization(organization_id = orgId, version = 0L)
       for (mutation in toApply) {
-        val up = mutation.upsert
         val del = mutation.delete
+        val up = mutation.upsert
         when {
-          mutation.delete_organization != null || OrganizationPatches.isRootDelete(del, up) ->
+          mutation.delete_organization || OrganizationPatches.isRootDelete(del, up) ->
             current = current.copy(is_deleted = true)
           // The server owns the version; it's bumped once for the whole request below.
           up != null && up.organization_id.isNotEmpty() && del == null ->
@@ -635,7 +635,7 @@ class UserDataBackend(private val store: UserDataStore) :
                 organization_id = orgId.ifBlank { up.organization_id },
                 version = current.version,
               )
-          else -> current = OrganizationPatches.apply(current, up, del)
+          else -> current = OrganizationPatches.apply(current, del, up)
         }
       }
       // Every write bumps the version by exactly one, however many mutations the request has.
@@ -848,13 +848,13 @@ class UserDataBackend(private val store: UserDataStore) :
             version = 0L,
           )
       for (mutation in toApply) {
-        val upLib = mutation.upsert
         val delLib = mutation.delete
+        val upLib = mutation.upsert
         if (upLib != null && upLib.organization_id.isNotEmpty() && delLib == null) {
           // The server owns the version; it's bumped once for the whole request below.
           current = upLib.copy(organization_id = orgId, version = current.version)
         } else {
-          current = LibraryPatches.apply(current, upLib, delLib)
+          current = LibraryPatches.apply(current, delLib, upLib)
         }
       }
       // Every write bumps the version by exactly one, however many mutations the request has.
@@ -1204,10 +1204,10 @@ class UserDataBackend(private val store: UserDataStore) :
       }
 
       for (mutation in toApply) {
-        val upSurvey = mutation.upsert
         val delSurvey = mutation.delete
-        val upAcl = mutation.acl_upsert
+        val upSurvey = mutation.upsert
         val delAcl = mutation.acl_delete
+        val upAcl = mutation.acl_upsert
         if (mutation.trash_survey) {
           if (saved.trash_time == null) saved = saved.copy(trash_time = tx.now)
         }
@@ -1216,13 +1216,13 @@ class UserDataBackend(private val store: UserDataStore) :
         }
         if (upSurvey != null && upSurvey.survey_id.isNotEmpty() && delSurvey == null) {
           setTarget(upSurvey.copy(survey_id = surveyId))
-        } else if (upSurvey != null || delSurvey != null) {
-          setTarget(SurveyPatches.apply(target(), upSurvey, delSurvey))
+        } else if (delSurvey != null || upSurvey != null) {
+          setTarget(SurveyPatches.apply(target(), delSurvey, upSurvey))
         }
         if (upAcl != null && upAcl.survey_id.isNotEmpty() && delAcl == null) {
           currentAcl = upAcl.copy(survey_id = surveyId)
-        } else if (upAcl != null || delAcl != null) {
-          currentAcl = SurveyPatches.applyAcl(currentAcl, upAcl, delAcl)
+        } else if (delAcl != null || upAcl != null) {
+          currentAcl = SurveyPatches.applyAcl(currentAcl, delAcl, upAcl)
         }
         if (mutation.save_working_copy) {
           val toSave = workingCopy
@@ -1795,8 +1795,8 @@ class UserDataBackend(private val store: UserDataStore) :
               survey_id = surveyId,
               revision = 0L,
             )
-        val emUpsert = em.upsert
         val emDelete = em.delete
+        val emUpsert = em.upsert
         val isEntityWholeUpsert =
           emUpsert != null && emUpsert.entity_id.isNotEmpty() && emDelete == null
         if (isEntityWholeUpsert) {
@@ -1879,7 +1879,7 @@ class UserDataBackend(private val store: UserDataStore) :
                 sync_status_key = "SYNCED",
               )
             else ->
-              DataPatches.applyEntity(existing, emUpsert, emDelete)
+              DataPatches.applyEntity(existing, emDelete, emUpsert)
                 .copy(revision = existing.revision + 1L, sync_status_key = "SYNCED")
           }
         entities[updated.entity_id] = updated
@@ -1898,8 +1898,8 @@ class UserDataBackend(private val store: UserDataStore) :
               survey_id = surveyId,
               revision = 0L,
             )
-        val smUpsert = sm.upsert
         val smDelete = sm.delete
+        val smUpsert = sm.upsert
         val isSubmissionWholeUpsert =
           smUpsert != null && smUpsert.submission_id.isNotEmpty() && smDelete == null
         if (isSubmissionWholeUpsert) {
@@ -1972,7 +1972,7 @@ class UserDataBackend(private val store: UserDataStore) :
                 sync_status_key = "SYNCED",
               )
             else ->
-              DataPatches.applySubmission(existing, smUpsert, smDelete)
+              DataPatches.applySubmission(existing, smDelete, smUpsert)
                 .copy(revision = existing.revision + 1L, sync_status_key = "SYNCED")
           }
         submissions[updated.submission_id] = updated

@@ -293,10 +293,7 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
     when {
       before == null && after == null -> Unit
       before == null -> record(OrganizationMutation(upsert = after))
-      after == null ->
-        record(
-          OrganizationMutation(delete_organization = OrganizationMutation.DeleteOrganization())
-        )
+      after == null -> record(OrganizationMutation(delete_organization = true))
       else -> {
         val diff = MutationDiffs.organization(before, after)
         if (diff.requiresUpsert) {
@@ -418,8 +415,8 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
                     EntityMutation(
                       entity_id = id,
                       dataset_id = new.dataset_id,
-                      upsert = diff.diff.upsert,
                       delete = diff.diff.delete,
+                      upsert = diff.diff.upsert,
                     )
                 ),
                 base,
@@ -470,8 +467,8 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
                     SubmissionMutation(
                       submission_id = id,
                       form_id = new.form_id,
-                      upsert = diff.diff.upsert,
                       delete = diff.diff.delete,
+                      upsert = diff.diff.upsert,
                     )
                 ),
                 base,
