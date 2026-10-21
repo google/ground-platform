@@ -40,3 +40,7 @@ jobs:
         # shared/protos lands in a later PR of the Collect One review series (#2629).
         if: ${{ !cancelled() && hashFiles('shared/protos/**/*.proto') != '' }}
         run: bash scripts/buf-format.sh --check
+
+      - name: Check license headers
+        if: ${{ !cancelled() }}
+        run: bash scripts/license-check.sh --check
