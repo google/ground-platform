@@ -147,6 +147,9 @@ message OrganizationFieldPatch {
 }
 
 message OrganizationMutation {
+  // Signal to permanently delete the organization.
+  message DeleteOrganization {}
+
   oneof operation {
     OrganizationFieldPatch update_field = 1;
 
@@ -154,7 +157,7 @@ message OrganizationMutation {
     Organization upsert_organization = 2;
 
     // Permanently deletes the organization and unlinks its surveys to personal.
-    bool delete_organization = 3;
+    DeleteOrganization delete_organization = 3;
   }
 
   // Client-generated UUID from the offline outbox, identifying the mutation in

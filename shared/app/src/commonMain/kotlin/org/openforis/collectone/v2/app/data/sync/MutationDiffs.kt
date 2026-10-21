@@ -267,7 +267,7 @@ object MutationDiffs {
           new.collector_consent_text.takeIf { it != old.collector_consent_text },
         care_sovereignty_applied =
           new.care_sovereignty_applied.takeIf { it != old.care_sovereignty_applied },
-        owner_email = new.owner_email.takeIf { it != old.owner_email },
+        owner_id = new.owner_id.takeIf { it != old.owner_id },
       )
     return AclDiff(roles, access.takeIf { it != AccessRulesPatch() })
   }

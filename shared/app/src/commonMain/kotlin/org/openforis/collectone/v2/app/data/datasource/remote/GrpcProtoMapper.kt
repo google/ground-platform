@@ -35,7 +35,6 @@ import groundplatform.v2.library.OrganizationLibraryRecord
 import groundplatform.v2.library.OrganizationLibrarySettings
 import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.CachedProfile as CachedProfileProto
-import groundplatform.v2.survey.CostUnitWeights as CostUnitWeightsProto
 import groundplatform.v2.survey.DataTableRow
 import groundplatform.v2.survey.EntityDatasetDef
 import groundplatform.v2.survey.EntityPropertyDefinition
@@ -45,7 +44,6 @@ import groundplatform.v2.survey.FormGeometrySource
 import groundplatform.v2.survey.FormLaunchConfig
 import groundplatform.v2.survey.GeometryStyle
 import groundplatform.v2.survey.ImagerySource as ImagerySourceProto
-import groundplatform.v2.survey.ImagerySourceType as ImagerySourceTypeProto
 import groundplatform.v2.survey.LayerDef
 import groundplatform.v2.survey.MapConfig
 import groundplatform.v2.survey.MembershipStatus as MembershipStatusProto
@@ -65,10 +63,10 @@ import groundplatform.v2.survey.SurveyDef
 import groundplatform.v2.survey.SurveyOutcome as SurveyOutcomeProto
 import groundplatform.v2.survey.SurveyOverview
 import groundplatform.v2.survey.SurveyState
+import groundplatform.v2.survey.XyzTileSource
 import org.openforis.collectone.v2.app.data.datasource.local.LibraryProtoMapper
 import org.openforis.collectone.v2.app.domain.model.CachedProfile
 import org.openforis.collectone.v2.app.domain.model.ConceptLink
-import org.openforis.collectone.v2.app.domain.model.CostUnitWeights
 import org.openforis.collectone.v2.app.domain.model.EffortComparison
 import org.openforis.collectone.v2.app.domain.model.FormAvailability
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
@@ -246,60 +244,39 @@ object GrpcProtoMapper {
     ImagerySourceProto(
       imagery_source_id = source.id,
       name = source.name,
-      type =
-        when (source.type) {
-          ImagerySourceType.XYZ_TILES -> ImagerySourceTypeProto.XYZ_TILES
-        },
-      url_template = source.urlTemplate,
-      allow_offline_download = source.allowOfflineDownload,
+      xyz_tiles =
+        XyzTileSource(
+          url_template = source.urlTemplate,
+          allow_offline_download = source.allowOfflineDownload,
+        ),
     )
 
   fun imagerySourceFromProto(proto: ImagerySourceProto): ImagerySource =
     ImagerySource(
       id = proto.imagery_source_id,
       name = proto.name,
-      urlTemplate = proto.url_template,
+      urlTemplate = proto.xyz_tiles?.url_template.orEmpty(),
       type = ImagerySourceType.XYZ_TILES,
-      allowOfflineDownload = proto.allow_offline_download,
+      allowOfflineDownload = proto.xyz_tiles?.allow_offline_download ?: false,
     )
 
   fun cachedProfileToProto(profile: CachedProfile): CachedProfileProto =
     CachedProfileProto(
       display_name = profile.displayName,
       avatar_url = profile.photoUrl.orEmpty(),
-      cached_on = profile.cachedOn,
+      cached_on = parseIsoToInstant(profile.cachedOn),
     )
 
   fun cachedProfileFromProto(proto: CachedProfileProto): CachedProfile =
     CachedProfile(
       displayName = proto.display_name,
       photoUrl = proto.avatar_url.takeIf { it.isNotBlank() },
-      cachedOn = proto.cached_on,
+      cachedOn = formatInstantDateOrIso(proto.cached_on),
     )
 
   // ---------------------------------------------------------------------------
-  // QuotaLimits & CostUnitWeights ↔ QuotaLimitsProto & CostUnitWeightsProto
+  // QuotaLimits ↔ QuotaLimitsProto
   // ---------------------------------------------------------------------------
-
-  fun costUnitWeightsToProto(weights: CostUnitWeights): CostUnitWeightsProto =
-    CostUnitWeightsProto(
-      usd_per_survey_month = weights.usdPerSurveyMonth,
-      usd_per_thousand_entities = weights.usdPerThousandEntities,
-      usd_per_thousand_submissions = weights.usdPerThousandSubmissions,
-      usd_per_photo = weights.usdPerPhoto,
-      usd_per_thousand_generated_plots = weights.usdPerThousandGeneratedPlots,
-    )
-
-  fun costUnitWeightsFromProto(proto: CostUnitWeightsProto?): CostUnitWeights {
-    if (proto == null) return CostUnitWeights()
-    return CostUnitWeights(
-      usdPerSurveyMonth = proto.usd_per_survey_month,
-      usdPerThousandEntities = proto.usd_per_thousand_entities,
-      usdPerThousandSubmissions = proto.usd_per_thousand_submissions,
-      usdPerPhoto = proto.usd_per_photo,
-      usdPerThousandGeneratedPlots = proto.usd_per_thousand_generated_plots,
-    )
-  }
 
   fun quotaTierToProto(tier: QuotaTier): QuotaTierProto =
     when (tier) {
@@ -330,7 +307,6 @@ object GrpcProtoMapper {
       max_generated_entities = limits.maxGeneratedEntities,
       max_area_vertices = limits.maxAreaVertices,
       monthly_budget_usd = limits.monthlyBudgetUsd,
-      cost_unit_weights = costUnitWeightsToProto(limits.costUnitWeights),
     )
 
   fun quotaLimitsFromProto(proto: QuotaLimitsProto?): QuotaLimitsConfig {
@@ -349,7 +325,6 @@ object GrpcProtoMapper {
       maxGeneratedEntities = proto.max_generated_entities,
       maxAreaVertices = proto.max_area_vertices,
       monthlyBudgetUsd = proto.monthly_budget_usd,
-      costUnitWeights = costUnitWeightsFromProto(proto.cost_unit_weights),
     )
   }
 
@@ -494,7 +469,7 @@ object GrpcProtoMapper {
         sharing_policy = sharingPolicyToProto(sharing?.policy ?: survey.sharingPolicy),
         peer_data_visibility =
           peerDataVisibilityToProto(sharing?.peerDataVisibility ?: survey.peerDataVisibility),
-        owner_email = sharing?.ownerEmail ?: survey.ownerEmail,
+        owner_id = sharing?.ownerEmail ?: survey.ownerEmail,
         owner_profile = sharing?.ownerProfile?.let(::cachedProfileToProto),
         collector_consent_required =
           sharing?.collectorConsentRequired ?: survey.collectorConsentRequired,
@@ -544,8 +519,8 @@ object GrpcProtoMapper {
         acl?.peer_data_visibility ?: PeerDataVisibilityProto.PEER_DATA_VISIBILITY_UNSPECIFIED,
       collector_consent_required = acl?.collector_consent_required ?: false,
       collector_consent_text = acl?.collector_consent_text.orEmpty(),
-      sharing_role =
-        acl?.sharing_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR,
+      default_role =
+        acl?.default_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR,
       quota_limits = surveyDef.quota_limits,
     )
 
@@ -613,7 +588,7 @@ object GrpcProtoMapper {
     surveyPreviewFromOverviewProto(
       overview =
         surveyOverviewFromDef(surveyDef, acl).let { o ->
-          o.copy(owner_id = o.owner_id.ifBlank { acl?.owner_email.orEmpty() })
+          o.copy(owner_id = o.owner_id.ifBlank { acl?.owner_id.orEmpty() })
         },
       mapLayers = mapLayers,
       entities = entities,
@@ -759,7 +734,7 @@ object GrpcProtoMapper {
     val sharing =
       if (acl != null) {
         SharingSettings(
-          ownerEmail = acl.owner_email.ifBlank { surveyPreview.ownerEmail },
+          ownerEmail = acl.owner_id.ifBlank { surveyPreview.ownerEmail },
           ownerProfile = acl.owner_profile?.let(::cachedProfileFromProto),
           policy = sharingPolicyFromProto(acl.sharing_policy),
           peerDataVisibility = peerDataVisibilityFromProto(acl.peer_data_visibility),

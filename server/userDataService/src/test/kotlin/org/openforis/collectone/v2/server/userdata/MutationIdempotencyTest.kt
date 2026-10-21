@@ -296,7 +296,10 @@ open class MutationIdempotencyTest {
 
     assertEquals("Theirs", replay.survey?.title)
     assertTrue(replay.commit_timestamp!! > first.commit_timestamp!!)
-    val workingCopy = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA, working_copy = true))
+    val workingCopy =
+      backend.GetSurvey(
+        GetSurveyRequest(survey_id = KENYA, working_copy = GetSurveyRequest.WorkingCopy())
+      )
     assertEquals("Theirs", workingCopy.survey?.title)
   }
 

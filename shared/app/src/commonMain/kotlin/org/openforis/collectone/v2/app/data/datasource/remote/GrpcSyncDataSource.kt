@@ -693,7 +693,14 @@ class GrpcSyncDataSource(
       workingCopy =
         if (overview.has_working_copy) {
           try {
-            grpcClient.getSurvey(GetSurveyRequest(survey_id = surveyId, working_copy = true)).survey
+            grpcClient
+              .getSurvey(
+                GetSurveyRequest(
+                  survey_id = surveyId,
+                  working_copy = GetSurveyRequest.WorkingCopy(),
+                )
+              )
+              .survey
           } catch (e: GrpcWebException) {
             if (e.status != GrpcWebTransport.PERMISSION_DENIED) throw e
             null

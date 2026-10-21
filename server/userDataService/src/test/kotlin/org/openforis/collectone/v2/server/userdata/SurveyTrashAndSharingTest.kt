@@ -150,18 +150,18 @@ open class SurveyTrashAndSharingTest {
 
   @Test
   fun sharingRole_defaultsToDataCollector_andCanBeViewer(): Unit = runBlocking {
-    assertEquals(Role.DATA_COLLECTOR, batchGet(KENYA).results.single().overview!!.sharing_role)
+    assertEquals(Role.DATA_COLLECTOR, batchGet(KENYA).results.single().overview!!.default_role)
 
-    mutateSurvey(SurveyMutation(update_access_rules = AccessRulesPatch(sharing_role = Role.VIEWER)))
+    mutateSurvey(SurveyMutation(update_access_rules = AccessRulesPatch(default_role = Role.VIEWER)))
 
-    assertEquals(Role.VIEWER, batchGet(KENYA).results.single().overview!!.sharing_role)
+    assertEquals(Role.VIEWER, batchGet(KENYA).results.single().overview!!.default_role)
   }
 
   @Test
   fun sharingRole_rejectsSurveyOrganizer(): Unit = runBlocking {
     assertFailsWith<IllegalArgumentException> {
       mutateSurvey(
-        SurveyMutation(update_access_rules = AccessRulesPatch(sharing_role = Role.SURVEY_ORGANIZER))
+        SurveyMutation(update_access_rules = AccessRulesPatch(default_role = Role.SURVEY_ORGANIZER))
       )
     }
   }

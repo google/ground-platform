@@ -198,7 +198,10 @@ open class RecordVersionTest {
     backend.MutateOrganization(
       MutateOrganizationRequest(
         organization_id = ORG,
-        mutations = listOf(OrganizationMutation(delete_organization = true)),
+        mutations =
+          listOf(
+            OrganizationMutation(delete_organization = OrganizationMutation.DeleteOrganization())
+          ),
       )
     )
     assertEquals(start + 4, version(), "delete")

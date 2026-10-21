@@ -231,7 +231,7 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
       surveys.values.filter { s ->
         (userId.isNotBlank() && s.owner_id == userId) ||
           (email.isNotBlank() &&
-            (s.owner_id == email || acls[s.survey_id]?.owner_email?.trim()?.lowercase() == email))
+            (s.owner_id == email || acls[s.survey_id]?.owner_id?.trim()?.lowercase() == email))
       }
 
     override fun surveyIdsWithAclUser(userId: String) =

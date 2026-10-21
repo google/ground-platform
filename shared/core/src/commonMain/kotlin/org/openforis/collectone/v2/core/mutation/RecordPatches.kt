@@ -163,15 +163,15 @@ object SurveyPatches {
     }
     patch.collector_consent_text?.let { updated = updated.copy(collector_consent_text = it) }
     patch.care_sovereignty_applied?.let { updated = updated.copy(care_sovereignty_applied = it) }
-    patch.owner_email?.let { updated = updated.copy(owner_email = it) }
-    if (patch.sharing_role in SHARING_ROLES) {
-      updated = updated.copy(sharing_role = patch.sharing_role)
+    patch.owner_id?.let { updated = updated.copy(owner_id = it) }
+    if (patch.default_role in SHARING_ROLES) {
+      updated = updated.copy(default_role = patch.default_role)
     }
     return updated
   }
 
   /**
-   * Roles allowed in `SurveyAcl.sharing_role`. Others leave it unchanged; the server rejects
+   * Roles allowed in `SurveyAcl.default_role`. Others leave it unchanged; the server rejects
    * `SURVEY_ORGANIZER` because organizers must be named on the ACL.
    */
   val SHARING_ROLES: Set<Role> = setOf(Role.VIEWER, Role.DATA_COLLECTOR)

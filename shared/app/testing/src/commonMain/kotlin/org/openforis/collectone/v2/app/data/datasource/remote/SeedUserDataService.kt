@@ -360,7 +360,7 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
 
   override suspend fun GetSurvey(request: GetSurveyRequest): GetSurveyResponse {
     val seed = surveys[request.survey_id] ?: return GetSurveyResponse()
-    val survey = if (request.working_copy == true) seed.working_copy else seed.survey
+    val survey = if (request.working_copy != null) seed.working_copy else seed.survey
     return GetSurveyResponse(survey = survey, acl = seed.acl)
   }
 

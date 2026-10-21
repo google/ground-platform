@@ -158,7 +158,7 @@ object OutboxCoalescer {
     when (payload) {
       is MutationPayload.Survey -> payload.mutation.upsert_survey != null
       is MutationPayload.Organization ->
-        payload.mutation.upsert_organization != null || payload.mutation.delete_organization == true
+        payload.mutation.upsert_organization != null || payload.mutation.delete_organization != null
       is MutationPayload.Library -> payload.mutation.upsert_library != null
       is MutationPayload.Data -> isDataUpsert(payload) || isDataDelete(payload)
     }

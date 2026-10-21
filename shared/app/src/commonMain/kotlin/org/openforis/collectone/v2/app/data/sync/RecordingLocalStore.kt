@@ -295,7 +295,10 @@ private class RecordingTransaction(private val raw: LocalStoreTransaction) :
     when {
       before == null && after == null -> Unit
       before == null -> record(OrganizationMutation(upsert_organization = after))
-      after == null -> record(OrganizationMutation(delete_organization = true))
+      after == null ->
+        record(
+          OrganizationMutation(delete_organization = OrganizationMutation.DeleteOrganization())
+        )
       else -> {
         val diff = MutationDiffs.organization(before, after)
         if (diff.requiresUpsert) {

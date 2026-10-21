@@ -133,7 +133,7 @@ object RecordFolds {
       val patch = om.update_field
       current =
         when {
-          om.delete_organization == true -> null
+          om.delete_organization != null -> null
           upsert != null ->
             upsert.copy(
               organization_id = organizationId,

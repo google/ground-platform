@@ -88,7 +88,6 @@ import groundplatform.v2.survey.AclEntry
 import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
 import groundplatform.v2.survey.BatchGetSurveyOverviewsResponse
 import groundplatform.v2.survey.CachedProfile
-import groundplatform.v2.survey.CostUnitWeights
 import groundplatform.v2.survey.GetOrganizationRequest
 import groundplatform.v2.survey.GetOrganizationResponse
 import groundplatform.v2.survey.GetSurveyAclRequest
@@ -627,7 +626,7 @@ class UserDataBackend(private val store: UserDataStore) :
         val up = mutation.upsert_organization
         val patch = mutation.update_field
         when {
-          mutation.delete_organization == true -> current = current.copy(is_deleted = true)
+          mutation.delete_organization != null -> current = current.copy(is_deleted = true)
           // The server owns the version; it's bumped once for the whole request below.
           up != null ->
             current =
@@ -978,7 +977,7 @@ class UserDataBackend(private val store: UserDataStore) :
     val role =
       access.requireSurvey(
         request.survey_id,
-        if (request.working_copy == true) Access.SurveyRole.SURVEY_ORGANIZER
+        if (request.working_copy != null) Access.SurveyRole.SURVEY_ORGANIZER
         else Access.SurveyRole.VIEWER,
       )
     r.checkNotTrashed(request.survey_id)
@@ -986,7 +985,7 @@ class UserDataBackend(private val store: UserDataStore) :
     val requestedVersion = request.saved_version
     val survey =
       when {
-        request.working_copy == true -> r.workingCopy(request.survey_id)
+        request.working_copy != null -> r.workingCopy(request.survey_id)
         !requestedVersion.isNullOrBlank() -> r.surveyRevision(request.survey_id, requestedVersion)
         else -> saved
       }
@@ -1052,49 +1051,6 @@ class UserDataBackend(private val store: UserDataStore) :
         gVal != null && gVal > 0.0 -> gVal
         else -> default
       }
-
-    val gWeights = global?.cost_unit_weights
-    val orgWeights = org?.cost_unit_weights
-    val sWeights = s?.cost_unit_weights
-
-    val effectiveWeights =
-      CostUnitWeights(
-        usd_per_survey_month =
-          resolveDouble(
-            sWeights?.usd_per_survey_month,
-            orgWeights?.usd_per_survey_month,
-            gWeights?.usd_per_survey_month,
-            0.50,
-          ),
-        usd_per_thousand_entities =
-          resolveDouble(
-            sWeights?.usd_per_thousand_entities,
-            orgWeights?.usd_per_thousand_entities,
-            gWeights?.usd_per_thousand_entities,
-            0.10,
-          ),
-        usd_per_thousand_submissions =
-          resolveDouble(
-            sWeights?.usd_per_thousand_submissions,
-            orgWeights?.usd_per_thousand_submissions,
-            gWeights?.usd_per_thousand_submissions,
-            0.25,
-          ),
-        usd_per_photo =
-          resolveDouble(
-            sWeights?.usd_per_photo,
-            orgWeights?.usd_per_photo,
-            gWeights?.usd_per_photo,
-            0.01,
-          ),
-        usd_per_thousand_generated_plots =
-          resolveDouble(
-            sWeights?.usd_per_thousand_generated_plots,
-            orgWeights?.usd_per_thousand_generated_plots,
-            gWeights?.usd_per_thousand_generated_plots,
-            0.05,
-          ),
-      )
 
     return QuotaLimits(
       tier = effectiveTier,
@@ -1177,7 +1133,6 @@ class UserDataBackend(private val store: UserDataStore) :
           global?.monthly_budget_usd,
           0.0,
         ),
-      cost_unit_weights = effectiveWeights,
     )
   }
 
@@ -1210,11 +1165,11 @@ class UserDataBackend(private val store: UserDataStore) :
     }
     require(
       toApply.none {
-        it.update_access_rules?.sharing_role == Role.SURVEY_ORGANIZER ||
-          it.upsert_acl?.sharing_role == Role.SURVEY_ORGANIZER
+        it.update_access_rules?.default_role == Role.SURVEY_ORGANIZER ||
+          it.upsert_acl?.default_role == Role.SURVEY_ORGANIZER
       }
     ) {
-      "sharing_role can't be SURVEY_ORGANIZER; organizers must be named on the ACL"
+      "default_role can't be SURVEY_ORGANIZER; organizers must be named on the ACL"
     }
 
     val committed = store.write { tx ->
@@ -1282,7 +1237,7 @@ class UserDataBackend(private val store: UserDataStore) :
         val limits = tx.resolveEffectiveQuota(target(), target().organization_id)
 
         if (isNewSurvey) {
-          val owner = target().owner_id.ifBlank { currentAcl.owner_email }
+          val owner = target().owner_id.ifBlank { currentAcl.owner_id }
           if (owner.isNotBlank() && limits.max_surveys_per_owner > 0) {
             val ownerSurveys =
               tx.surveysOwnedBy(userId = owner, email = "").count {
@@ -1356,7 +1311,7 @@ class UserDataBackend(private val store: UserDataStore) :
         if (limits.monthly_budget_usd > 0.0) {
           val entities = tx.entities(surveyId).filter { !it.is_deleted }
           val submissions = tx.submissions(surveyId).filter { !it.is_deleted }
-          val weights = limits.cost_unit_weights ?: CostUnitWeights()
+          val weights = CostUnitWeights()
           val estimatedCost =
             weights.usd_per_survey_month +
               (entities.size / 1000.0) * weights.usd_per_thousand_entities +
@@ -1875,7 +1830,7 @@ class UserDataBackend(private val store: UserDataStore) :
                 submissions(surveyId).associateBy { it.submission_id } + submissions
               val entitiesCount = allEntities.values.count { !it.is_deleted } + 1
               val subCount = allSubmissions.values.count { !it.is_deleted }
-              val weights = limits.cost_unit_weights ?: CostUnitWeights()
+              val weights = CostUnitWeights()
               val estimated =
                 weights.usd_per_survey_month +
                   (entitiesCount / 1000.0) * weights.usd_per_thousand_entities +
@@ -1966,7 +1921,7 @@ class UserDataBackend(private val store: UserDataStore) :
                 submissions(surveyId).associateBy { it.submission_id } + submissions
               val entitiesCount = allEntities.values.count { !it.is_deleted }
               val subCount = allSubmissions.values.count { !it.is_deleted } + 1
-              val weights = limits.cost_unit_weights ?: CostUnitWeights()
+              val weights = CostUnitWeights()
               val estimated =
                 weights.usd_per_survey_month +
                   (entitiesCount / 1000.0) * weights.usd_per_thousand_entities +
@@ -2324,8 +2279,8 @@ class UserDataBackend(private val store: UserDataStore) :
         acl?.peer_data_visibility ?: PeerDataVisibility.PEER_DATA_VISIBILITY_UNSPECIFIED,
       collector_consent_required = acl?.collector_consent_required ?: false,
       collector_consent_text = acl?.collector_consent_text.orEmpty(),
-      sharing_role =
-        acl?.sharing_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR,
+      default_role =
+        acl?.default_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR,
     )
   }
 
@@ -2338,3 +2293,12 @@ class UserDataBackend(private val store: UserDataStore) :
       org.openforis.collectone.v2.core.impact.ALL_USERS_ORGANIZATION_ID
   }
 }
+
+/** Internal unit cost weights used to estimate monthly operational costs against budget caps. */
+data class CostUnitWeights(
+  val usd_per_survey_month: Double = 0.50,
+  val usd_per_thousand_entities: Double = 0.10,
+  val usd_per_thousand_submissions: Double = 0.25,
+  val usd_per_photo: Double = 0.01,
+  val usd_per_thousand_generated_plots: Double = 0.05,
+)

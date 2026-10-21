@@ -93,7 +93,7 @@ message Organization {
 
   // Tiered quota limits and monthly budget cap configured for this organization.
   // Overrides global defaults on the synthetic "All users" organization.
-  groundplatform.v2.survey.QuotaLimits quota_limits = 16;
+  QuotaLimits quota_limits = 16;
 }
 
 // Kind of organization, optionally set on an `Organization`'s profile.
@@ -123,14 +123,14 @@ enum OrganizationType {
   OTHER = 7;
 }
 
-// Kind of imagery source an organization can configure.
-enum ImagerySourceType {
-  // Unspecified imagery source type.
-  IMAGERY_SOURCE_TYPE_UNSPECIFIED = 0;
+// Web Mercator XYZ raster tile URL template configuration.
+message XyzTileSource {
+  // XYZ tile URL template containing `{z}`, `{x}`, and `{y}` placeholders.
+  string url_template = 1;
 
-  // Web Mercator XYZ raster tile URL template (e.g.,
-  // `https://tile.opentopomap.org/{z}/{x}/{y}.png`).
-  XYZ_TILES = 1;
+  // Whether collectors on mobile are permitted to download tiles from this
+  // source for offline field use.
+  bool allow_offline_download = 2;
 }
 
 // A custom imagery layer configured on an `Organization`.
@@ -141,15 +141,10 @@ message ImagerySource {
   // Display name shown in the organization editor and basemap layers dialog.
   string name = 2;
 
-  // Kind of imagery source.
-  ImagerySourceType type = 3;
-
-  // XYZ tile URL template containing `{z}`, `{x}`, and `{y}` placeholders.
-  string url_template = 4;
-
-  // Whether collectors on mobile are permitted to download tiles from this
-  // source for offline field use.
-  bool allow_offline_download = 5;
+  oneof source {
+    // Web Mercator XYZ raster tile source.
+    XyzTileSource xyz_tiles = 3;
+  }
 }
 
 // Role of a person in an organization.
@@ -208,8 +203,4 @@ message OrganizationMember {
 
   // Cached display profile of the member once known.
   CachedProfile profile = 7;
-
-  // Optional ISO-8601 timestamp string preserving exact formatting when
-  // round-tripping domain timestamps.
-  string updated_at_iso = 8;
 }

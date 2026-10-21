@@ -269,9 +269,9 @@ message SurveyOverview {
   google.protobuf.Timestamp trash_time = 26;
 
   // What people with access through `sharing_policy` can do (copied from
-  // `SurveyAcl.sharing_role`, with `ROLE_UNSPECIFIED` resolved to
+  // `SurveyAcl.default_role`, with `ROLE_UNSPECIFIED` resolved to
   // `DATA_COLLECTOR`). Clients hide data collection for `VIEWER`.
-  Role sharing_role = 27;
+  Role default_role = 27;
 
   // Tiered quota limits and budget overrides for this survey.
   QuotaLimits quota_limits = 28;

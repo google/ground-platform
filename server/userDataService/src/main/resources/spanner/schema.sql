@@ -127,7 +127,7 @@ CREATE TABLE Surveys (
   AclCommitTs TIMESTAMP OPTIONS (allow_commit_timestamp = true),
   OrganizationId UUID AS (CAST(NULLIF(SavedDef.organization_id, '') AS UUID)) STORED,
   OwnerId STRING(MAX) AS (SavedDef.owner_id) STORED,
-  OwnerEmail STRING(320) AS (LOWER(AclRules.owner_email)) STORED,
+  OwnerEmail STRING(320) AS (LOWER(AclRules.owner_id)) STORED,
   State groundplatform.v2.survey.SurveyState AS (SavedDef.state) STORED,
   SharingPolicy groundplatform.v2.survey.SharingPolicy AS (AclRules.sharing_policy) STORED,
   PeerDataVisibility groundplatform.v2.survey.PeerDataVisibility AS (AclRules.peer_data_visibility) STORED,

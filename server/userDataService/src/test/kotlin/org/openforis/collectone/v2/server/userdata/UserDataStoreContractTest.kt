@@ -378,7 +378,7 @@ abstract class UserDataStoreContractTest {
       tx.putAcl(
         SurveyAcl(
           survey_id = OTHER_SURVEY,
-          owner_email = "Bob@Example.org",
+          owner_id = "Bob@Example.org",
           entries = listOf(AclEntry(email = "ana@example.org", user_id = "uid-ana")),
         )
       )

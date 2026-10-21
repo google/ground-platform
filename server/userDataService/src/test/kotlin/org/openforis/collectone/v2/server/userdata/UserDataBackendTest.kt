@@ -37,7 +37,6 @@ import groundplatform.v2.library.LibraryMutation
 import groundplatform.v2.library.ListLibrariesRequest
 import groundplatform.v2.library.LocalizedText
 import groundplatform.v2.library.MutateLibraryRequest
-import groundplatform.v2.survey.CostUnitWeights
 import groundplatform.v2.survey.GetSurveyRequest
 import groundplatform.v2.survey.ListOrganizationsRequest
 import groundplatform.v2.survey.ListSurveyOverviewsRequest
@@ -230,7 +229,13 @@ open class UserDataBackendTest {
     assertEquals(listOf(KENYA), overviews.map { it.survey_id })
     assertEquals("Updated title", overviews.single().title)
     assertFalse(overviews.single().has_working_copy)
-    assertNull(backend.GetSurvey(GetSurveyRequest(survey_id = KENYA, working_copy = true)).survey)
+    assertNull(
+      backend
+        .GetSurvey(
+          GetSurveyRequest(survey_id = KENYA, working_copy = GetSurveyRequest.WorkingCopy())
+        )
+        .survey
+    )
 
     val orgsFromStart =
       backend.ListOrganizations(ListOrganizationsRequest(sync_token = orgToken)).organizations
@@ -477,7 +482,10 @@ open class UserDataBackendTest {
       )
     )
     val saved = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)).survey!!
-    val workingCopy = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA, working_copy = true))
+    val workingCopy =
+      backend.GetSurvey(
+        GetSurveyRequest(survey_id = KENYA, working_copy = GetSurveyRequest.WorkingCopy())
+      )
     assertEquals("Draft", workingCopy.survey?.title)
     assertTrue(saved.title != "Draft")
   }
@@ -636,11 +644,7 @@ open class UserDataBackendTest {
                     SurveyDef(
                       survey_id = testId("new-survey-budget"),
                       title = "Budget Exceeded Survey",
-                      quota_limits =
-                        QuotaLimits(
-                          monthly_budget_usd = 0.50,
-                          cost_unit_weights = CostUnitWeights(usd_per_survey_month = 5.0),
-                        ),
+                      quota_limits = QuotaLimits(monthly_budget_usd = 0.25),
                     )
                 )
               ),

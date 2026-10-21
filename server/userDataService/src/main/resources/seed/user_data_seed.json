@@ -8,15 +8,7 @@
       "createdAt": "2025-01-01T00:00:00Z",
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:01Z",
-      "quotaLimits": {
-        "costUnitWeights": {
-          "usdPerSurveyMonth": 0.5,
-          "usdPerThousandEntities": 0.1,
-          "usdPerThousandSubmissions": 0.25,
-          "usdPerPhoto": 0.01,
-          "usdPerThousandGeneratedPlots": 0.05
-        }
-      },
+      "quotaLimits": {},
       "members": [
         {
           "userId": "uid-maya-lin",
@@ -26,7 +18,7 @@
           "profile": {
             "displayName": "Maya Lin",
             "avatarUrl": "avatar:2",
-            "cachedOn": "2026-02-10"
+            "cachedOn": "2026-02-10T00:00:00Z"
           }
         }
       ],
@@ -34,9 +26,10 @@
         {
           "imagerySourceId": "imagery-all-users-opentopomap",
           "name": "OpenTopoMap Contours",
-          "type": "XYZ_TILES",
-          "urlTemplate": "https://tile.opentopomap.org/{z}/{x}/{y}.png",
-          "allowOfflineDownload": true
+          "xyzTiles": {
+            "urlTemplate": "https://tile.opentopomap.org/{z}/{x}/{y}.png",
+            "allowOfflineDownload": true
+          }
         }
       ]
     },
@@ -52,15 +45,7 @@
       "countryCode": "KE",
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:02Z",
-      "quotaLimits": {
-        "costUnitWeights": {
-          "usdPerSurveyMonth": 0.5,
-          "usdPerThousandEntities": 0.1,
-          "usdPerThousandSubmissions": 0.25,
-          "usdPerPhoto": 0.01,
-          "usdPerThousandGeneratedPlots": 0.05
-        }
-      },
+      "quotaLimits": {},
       "members": [
         {
           "userId": "uid-maya-lin",
@@ -70,7 +55,7 @@
           "profile": {
             "displayName": "Maya Lin",
             "avatarUrl": "avatar:2",
-            "cachedOn": "2026-02-10"
+            "cachedOn": "2026-02-10T00:00:00Z"
           }
         },
         {
@@ -81,7 +66,7 @@
           "profile": {
             "displayName": "Amina Wanjiru",
             "avatarUrl": "avatar:3",
-            "cachedOn": "2026-01-12"
+            "cachedOn": "2026-01-12T00:00:00Z"
           }
         },
         {
@@ -92,7 +77,7 @@
           "profile": {
             "displayName": "Daniel Kiprop",
             "avatarUrl": "avatar:0",
-            "cachedOn": "2026-01-20"
+            "cachedOn": "2026-01-20T00:00:00Z"
           }
         },
         {
@@ -103,7 +88,7 @@
           "profile": {
             "displayName": "Grace Njeri",
             "avatarUrl": "avatar:5",
-            "cachedOn": "2026-02-02"
+            "cachedOn": "2026-02-02T00:00:00Z"
           }
         },
         {
@@ -114,7 +99,7 @@
           "profile": {
             "displayName": "Ima User",
             "avatarUrl": "avatar:3",
-            "cachedOn": "2026-02-10"
+            "cachedOn": "2026-02-10T00:00:00Z"
           }
         },
         {
@@ -137,9 +122,10 @@
         {
           "imagerySourceId": "imagery-kfs-hillshade",
           "name": "Kenya Forest Hillshade",
-          "type": "XYZ_TILES",
-          "urlTemplate": "https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
-          "allowOfflineDownload": true
+          "xyzTiles": {
+            "urlTemplate": "https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
+            "allowOfflineDownload": true
+          }
         }
       ]
     },
@@ -155,15 +141,7 @@
       "countryCode": "VN",
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:03Z",
-      "quotaLimits": {
-        "costUnitWeights": {
-          "usdPerSurveyMonth": 0.5,
-          "usdPerThousandEntities": 0.1,
-          "usdPerThousandSubmissions": 0.25,
-          "usdPerPhoto": 0.01,
-          "usdPerThousandGeneratedPlots": 0.05
-        }
-      },
+      "quotaLimits": {},
       "members": [
         {
           "userId": "uid-linh-tran",
@@ -173,7 +151,7 @@
           "profile": {
             "displayName": "Linh Trần",
             "avatarUrl": "avatar:1",
-            "cachedOn": "2025-11-03"
+            "cachedOn": "2025-11-03T00:00:00Z"
           }
         },
         {
@@ -184,7 +162,7 @@
           "profile": {
             "displayName": "Maya Lin",
             "avatarUrl": "avatar:2",
-            "cachedOn": "2026-02-10"
+            "cachedOn": "2026-02-10T00:00:00Z"
           }
         },
         {
@@ -195,7 +173,7 @@
           "profile": {
             "displayName": "Minh Nguyễn",
             "avatarUrl": "avatar:6",
-            "cachedOn": "2025-12-15"
+            "cachedOn": "2025-12-15T00:00:00Z"
           }
         }
       ],
@@ -203,8 +181,9 @@
         {
           "imagerySourceId": "imagery-mma-osm",
           "name": "Mekong Delta OpenStreetMap",
-          "type": "XYZ_TILES",
-          "urlTemplate": "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          "xyzTiles": {
+            "urlTemplate": "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          }
         }
       ]
     },
@@ -220,15 +199,7 @@
       "excludeFromPlatformAggregates": true,
       "version": "1",
       "commitTimestamp": "2026-02-02T02:40:04Z",
-      "quotaLimits": {
-        "costUnitWeights": {
-          "usdPerSurveyMonth": 0.5,
-          "usdPerThousandEntities": 0.1,
-          "usdPerThousandSubmissions": 0.25,
-          "usdPerPhoto": 0.01,
-          "usdPerThousandGeneratedPlots": 0.05
-        }
-      },
+      "quotaLimits": {},
       "members": [
         {
           "userId": "uid-community",
@@ -238,7 +209,7 @@
           "profile": {
             "displayName": "Sofia Rossi",
             "avatarUrl": "avatar:1",
-            "cachedOn": "2025-09-01"
+            "cachedOn": "2025-09-01T00:00:00Z"
           }
         }
       ]
@@ -9576,15 +9547,7 @@
         "entityCount": 3,
         "primaryFormId": "single_point_land_use",
         "recordVersion": "1",
-        "quotaLimits": {
-          "costUnitWeights": {
-            "usdPerSurveyMonth": 0.5,
-            "usdPerThousandEntities": 0.1,
-            "usdPerThousandSubmissions": 0.25,
-            "usdPerPhoto": 0.01,
-            "usdPerThousandGeneratedPlots": 0.05
-          }
-        },
+        "quotaLimits": {},
         "forms": [
           {
             "formId": "__primary_form__",
@@ -10249,7 +10212,7 @@
         "surveyId": "00000036-1a1c-5c51-997f-28b67d813aa3",
         "sharingPolicy": "PUBLIC",
         "peerDataVisibility": "ALL",
-        "ownerEmail": "maya.lin@groundplatform.org",
+        "ownerId": "maya.lin@groundplatform.org",
         "commitTimestamp": "2026-02-02T02:40:07Z",
         "recordVersion": "1"
       },
@@ -10544,15 +10507,7 @@
         "entityCount": 5,
         "primaryFormId": "sample_plots_forest_assessment",
         "recordVersion": "1",
-        "quotaLimits": {
-          "costUnitWeights": {
-            "usdPerSurveyMonth": 0.5,
-            "usdPerThousandEntities": 0.1,
-            "usdPerThousandSubmissions": 0.25,
-            "usdPerPhoto": 0.01,
-            "usdPerThousandGeneratedPlots": 0.05
-          }
-        },
+        "quotaLimits": {},
         "forms": [
           {
             "formId": "__primary_form__",
@@ -11926,7 +11881,7 @@
         "surveyId": "00000034-c088-5ab9-8b98-e6bccb3dca71",
         "sharingPolicy": "RESTRICTED",
         "peerDataVisibility": "ALL",
-        "ownerEmail": "maya.lin@groundplatform.org",
+        "ownerId": "maya.lin@groundplatform.org",
         "commitTimestamp": "2026-02-02T02:40:14Z",
         "recordVersion": "1"
       },
@@ -12435,15 +12390,7 @@
         "entityCount": 3,
         "primaryFormId": "commodity_perimeter_and_center",
         "recordVersion": "1",
-        "quotaLimits": {
-          "costUnitWeights": {
-            "usdPerSurveyMonth": 0.5,
-            "usdPerThousandEntities": 0.1,
-            "usdPerThousandSubmissions": 0.25,
-            "usdPerPhoto": 0.01,
-            "usdPerThousandGeneratedPlots": 0.05
-          }
-        },
+        "quotaLimits": {},
         "forms": [
           {
             "formId": "__primary_form__",
@@ -13568,7 +13515,7 @@
         "surveyId": "00000031-ffc6-5c8e-934c-d14ec07533ad",
         "sharingPolicy": "ANYONE_WITH_LINK",
         "peerDataVisibility": "OWN_ONLY",
-        "ownerEmail": "maya.lin@groundplatform.org",
+        "ownerId": "maya.lin@groundplatform.org",
         "commitTimestamp": "2026-02-02T02:40:23Z",
         "recordVersion": "1"
       },
@@ -13950,15 +13897,7 @@
         "entityCount": 6,
         "primaryFormId": "household_survey_past_individuals",
         "recordVersion": "1",
-        "quotaLimits": {
-          "costUnitWeights": {
-            "usdPerSurveyMonth": 0.5,
-            "usdPerThousandEntities": 0.1,
-            "usdPerThousandSubmissions": 0.25,
-            "usdPerPhoto": 0.01,
-            "usdPerThousandGeneratedPlots": 0.05
-          }
-        },
+        "quotaLimits": {},
         "forms": [
           {
             "formId": "__primary_form__",
@@ -15502,7 +15441,7 @@
         "surveyId": "00000032-8d62-5717-8074-f4917e0cd76d",
         "sharingPolicy": "RESTRICTED",
         "peerDataVisibility": "ALL",
-        "ownerEmail": "maya.lin@groundplatform.org",
+        "ownerId": "maya.lin@groundplatform.org",
         "commitTimestamp": "2026-02-02T02:40:30Z",
         "recordVersion": "1"
       },
@@ -16128,15 +16067,7 @@
         "entityCount": 5,
         "primaryFormId": "eudr_shade_survey",
         "recordVersion": "1",
-        "quotaLimits": {
-          "costUnitWeights": {
-            "usdPerSurveyMonth": 0.5,
-            "usdPerThousandEntities": 0.1,
-            "usdPerThousandSubmissions": 0.25,
-            "usdPerPhoto": 0.01,
-            "usdPerThousandGeneratedPlots": 0.05
-          }
-        },
+        "quotaLimits": {},
         "forms": [
           {
             "formId": "__primary_form__",
@@ -19519,11 +19450,11 @@
         "surveyId": "00000033-6b50-51cd-ac94-baea2ea06d65",
         "sharingPolicy": "RESTRICTED",
         "peerDataVisibility": "ALL",
-        "ownerEmail": "organizer@example.org",
+        "ownerId": "organizer@example.org",
         "ownerProfile": {
           "displayName": "Amina Wanjiru",
           "avatarUrl": "avatar:3",
-          "cachedOn": "2026-03-02"
+          "cachedOn": "2026-03-02T00:00:00Z"
         },
         "commitTimestamp": "2026-02-02T02:40:41Z",
         "recordVersion": "1",
@@ -19536,7 +19467,7 @@
             "profile": {
               "displayName": "Daniel Kiprop",
               "avatarUrl": "avatar:0",
-              "cachedOn": "2026-03-04"
+              "cachedOn": "2026-03-04T00:00:00Z"
             }
           },
           {
@@ -19547,7 +19478,7 @@
             "profile": {
               "displayName": "Grace Njeri",
               "avatarUrl": "avatar:5",
-              "cachedOn": "2026-03-06"
+              "cachedOn": "2026-03-06T00:00:00Z"
             }
           },
           {
@@ -19558,7 +19489,7 @@
             "profile": {
               "displayName": "Ima User",
               "avatarUrl": "avatar:3",
-              "cachedOn": "2026-03-08"
+              "cachedOn": "2026-03-08T00:00:00Z"
             }
           },
           {
@@ -19701,15 +19632,7 @@
         "entityCount": 5,
         "primaryFormId": "eudr_shade_survey",
         "recordVersion": "1",
-        "quotaLimits": {
-          "costUnitWeights": {
-            "usdPerSurveyMonth": 0.5,
-            "usdPerThousandEntities": 0.1,
-            "usdPerThousandSubmissions": 0.25,
-            "usdPerPhoto": 0.01,
-            "usdPerThousandGeneratedPlots": 0.05
-          }
-        },
+        "quotaLimits": {},
         "forms": [
           {
             "formId": "__primary_form__",
@@ -23927,15 +23850,7 @@
         "entityCount": 204,
         "primaryFormId": "eudr_shade_survey",
         "recordVersion": "1",
-        "quotaLimits": {
-          "costUnitWeights": {
-            "usdPerSurveyMonth": 0.5,
-            "usdPerThousandEntities": 0.1,
-            "usdPerThousandSubmissions": 0.25,
-            "usdPerPhoto": 0.01,
-            "usdPerThousandGeneratedPlots": 0.05
-          }
-        },
+        "quotaLimits": {},
         "forms": [
           {
             "formId": "__primary_form__",
@@ -26947,11 +26862,11 @@
         "surveyId": "00000035-caf4-571e-b907-f506f92666ab",
         "sharingPolicy": "ORGANIZATION",
         "peerDataVisibility": "ALL",
-        "ownerEmail": "linh.tran@example.org",
+        "ownerId": "linh.tran@example.org",
         "ownerProfile": {
           "displayName": "Linh Tran",
           "avatarUrl": "avatar:6",
-          "cachedOn": "2026-02-11"
+          "cachedOn": "2026-02-11T00:00:00Z"
         },
         "commitTimestamp": "2026-02-02T02:40:56Z",
         "recordVersion": "1"
@@ -27056,15 +26971,7 @@
         "entityCount": 204,
         "primaryFormId": "eudr_shade_survey",
         "recordVersion": "1",
-        "quotaLimits": {
-          "costUnitWeights": {
-            "usdPerSurveyMonth": 0.5,
-            "usdPerThousandEntities": 0.1,
-            "usdPerThousandSubmissions": 0.25,
-            "usdPerPhoto": 0.01,
-            "usdPerThousandGeneratedPlots": 0.05
-          }
-        },
+        "quotaLimits": {},
         "forms": [
           {
             "formId": "__primary_form__",

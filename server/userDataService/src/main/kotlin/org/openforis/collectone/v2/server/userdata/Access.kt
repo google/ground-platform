@@ -77,11 +77,14 @@ internal class Access(private val reader: UserDataReader, private val caller: Ca
   fun surveyRole(survey: SurveyDef?, acl: SurveyAcl?): SurveyRole {
     if (isAdmin) return SurveyRole.OWNER
     if (survey == null) return SurveyRole.NONE
-    if (isCaller(survey.owner_id, survey.owner_id) || isCaller("", acl?.owner_email.orEmpty())) {
+    if (
+      isCaller(survey.owner_id, survey.owner_id) ||
+        isCaller(acl?.owner_id.orEmpty(), acl?.owner_id.orEmpty())
+    ) {
       return SurveyRole.OWNER
     }
     val sharingRole =
-      acl?.sharing_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR
+      acl?.default_role?.takeIf { it in SurveyPatches.SHARING_ROLES } ?: Role.DATA_COLLECTOR
     val grants = buildList {
       acl?.entries.orEmpty().filter { isCaller(it.user_id, it.email) }.forEach { add(it.role) }
       when (acl?.sharing_policy) {
@@ -104,7 +107,10 @@ internal class Access(private val reader: UserDataReader, private val caller: Ca
    */
   fun listsSurvey(survey: SurveyDef, acl: SurveyAcl?): Boolean {
     if (isAdmin) return true
-    if (isCaller(survey.owner_id, survey.owner_id) || isCaller("", acl?.owner_email.orEmpty())) {
+    if (
+      isCaller(survey.owner_id, survey.owner_id) ||
+        isCaller(acl?.owner_id.orEmpty(), acl?.owner_id.orEmpty())
+    ) {
       return true
     }
     if (acl?.entries.orEmpty().any { isCaller(it.user_id, it.email) }) return true
