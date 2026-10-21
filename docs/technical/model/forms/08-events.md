@@ -74,6 +74,12 @@ message ActionDef {
     SetGeopointAction set_geopoint = 4;
     RecordAudioAction record_audio = 5;
   }
+
+  // Stable identifier for sparse mutation upserts and deletions.
+  string id = 6;
+
+  // Display/execution sort order within the parent action list.
+  int32 sort_order = 7;
 }
 
 message SetValueAction {
