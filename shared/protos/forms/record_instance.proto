@@ -102,6 +102,14 @@ message FieldValue {
 message RecordNode {
   // Populated field values keyed by their field name within this scope.
   map<string, FieldValue> fields = 1;
+
+  // Stable identifier for sparse mutation addressing (e.g., repeat instance
+  // UUID or lookup row ID).
+  string id = 2;
+
+  // Display/collection order of this node within a repeat group or inline
+  // lookup table (0-based).
+  int32 sort_order = 3;
 }
 
 // A complete, strongly-typed form submission record instance produced by
