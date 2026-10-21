@@ -126,17 +126,20 @@ message GetSurveyRequest {
   // Unique identifier of the survey (`SurveyDef.survey_id`).
   string survey_id = 1;
 
+  // Reference to the organizer's working copy.
+  message WorkingCopy {}
+
   // Which revision of the survey to fetch. When unset, returns the latest saved
   // revision (the one collectors use).
   oneof revision {
     // A specific immutable saved revision (`SurveyDef.version`).
     string saved_version = 2;
 
-    // When true, returns the organizer's working copy, including edits that
+    // Returns the organizer's working copy, including edits that
     // haven't been saved yet. `GetSurveyResponse.survey` is unset if there is
     // no working copy; clients then start editing from the latest saved
     // revision.
-    bool working_copy = 3;
+    WorkingCopy working_copy = 3;
   }
 }
 
@@ -291,14 +294,14 @@ message AccessRulesPatch {
   // Optional update to `care_sovereignty_applied`.
   optional bool care_sovereignty_applied = 5;
 
-  // Optional update to `owner_email`.
-  optional string owner_email = 6;
+  // Optional update to primary owner user ID (`SurveyAcl.owner_id`).
+  optional string owner_id = 6;
 
-  // If non-unspecified, updates `SurveyAcl.sharing_role`: what people who
+  // If non-unspecified, updates `SurveyAcl.default_role`: what people who
   // have access through `sharing_policy` can do (`VIEWER` or
   // `DATA_COLLECTOR`). `SURVEY_ORGANIZER` is rejected with
   // `INVALID_ARGUMENT`; organizers must be named on the ACL.
-  Role sharing_role = 7;
+  Role default_role = 7;
 }
 
 // A single idempotent mutation step within a batched `MutateSurveyRequest`.
