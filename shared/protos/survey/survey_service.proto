@@ -167,34 +167,54 @@ message GetSurveyAclResponse {
 
 // A single idempotent mutation step within a batched `MutateSurveyRequest`.
 //
-// Carries sparse instances of `SurveyDef` (`upsert` / `delete`) and/or
-// `SurveyAcl` (`acl_upsert` / `acl_delete`), or a lifecycle operation
+// Carries sparse instances of `SurveyDef` (`delete` / `upsert`) and/or
+// `SurveyAcl` (`acl_delete` / `acl_upsert`), or a lifecycle operation
 // (`trash_survey`, `restore_survey`, `save_working_copy`,
 // `discard_working_copy`). For each target (`SurveyDef` and `SurveyAcl`), the
 // structural `delete` mask is applied first (where any non-default scalar/list
 // or leaf item clears/removes that target) followed by recursively merging
 // `upsert`.
 message SurveyMutation {
-  reserved 1, 2, 3, 4;
-  reserved "update_field", "update_acl_role", "update_access_rules", "delete_survey";
+  // Structural deletion mask for `SurveyDef`: any non-default scalar or
+  // repeated value list clears that field to default/empty, and any keyed item
+  // (`FormDef`, `EntityDatasetDef`, `LayerDef`, etc.) with only its ID set
+  // removes that item (or recurses into its child fields if child fields are
+  // populated).
+  SurveyDef delete = 1;
 
   // Sparse `SurveyDef` fields and keyed sub-resources (`forms`,
   // `entity_datasets`, `form_launch_configs`, `form_concept_links`,
   // `map_config`, `translations`, etc.) to create or update on the target
   // revision (the working copy when `MutateSurveyRequest.working_copy` is true,
   // otherwise the saved revision).
-  SurveyDef upsert = 5;
+  SurveyDef upsert = 2;
+
+  // Structural deletion mask for `SurveyAcl`: any non-default scalar or
+  // `quarantined_user_ids` clears that field, and any `AclEntry` in `entries`
+  // with only its `id` / `user_id` / `email` set revokes that collaborator
+  // entry.
+  SurveyAcl acl_delete = 3;
 
   // Sparse `SurveyAcl` fields and collaborator `entries` to create or update.
-  SurveyAcl acl_upsert = 6;
+  SurveyAcl acl_upsert = 4;
 
   // Saves the working copy as the new saved revision and increments
   // `saved_revision_number`. Doesn't change `SurveyDef.state`.
-  bool save_working_copy = 7;
+  bool save_working_copy = 5;
 
   // Discards unsaved edits, resetting the working copy to the latest saved
   // revision.
-  bool discard_working_copy = 8;
+  bool discard_working_copy = 6;
+
+  // Moves the survey to Trash (sets `SurveyDef.trash_time`). Trashed surveys
+  // disappear from every user's survey list and stop syncing; they can be
+  // restored with `restore_survey` until they are purged automatically
+  // after the retention period (30 days). Doesn't change `SurveyDef.state`.
+  bool trash_survey = 7;
+
+  // Restores a trashed survey (clears `SurveyDef.trash_time`). A no-op when
+  // the survey isn't in Trash.
+  bool restore_survey = 8;
 
   // Client-generated UUID from the offline outbox, identifying the mutation in
   // client logs. Replays are detected by `client_seq`, not by this ID.
@@ -209,29 +229,6 @@ message SurveyMutation {
 
   // Client-side timestamp when the mutation was recorded.
   google.protobuf.Timestamp client_timestamp = 12;
-
-  // Moves the survey to Trash (sets `SurveyDef.trash_time`). Trashed surveys
-  // disappear from every user's survey list and stop syncing; they can be
-  // restored with `restore_survey` until they are purged automatically
-  // after the retention period (30 days). Doesn't change `SurveyDef.state`.
-  bool trash_survey = 13;
-
-  // Restores a trashed survey (clears `SurveyDef.trash_time`). A no-op when
-  // the survey isn't in Trash.
-  bool restore_survey = 14;
-
-  // Structural deletion mask for `SurveyDef`: any non-default scalar or
-  // repeated value list clears that field to default/empty, and any keyed item
-  // (`FormDef`, `EntityDatasetDef`, `LayerDef`, etc.) with only its ID set
-  // removes that item (or recurses into its child fields if child fields are
-  // populated).
-  SurveyDef delete = 15;
-
-  // Structural deletion mask for `SurveyAcl`: any non-default scalar or
-  // `quarantined_user_ids` clears that field, and any `AclEntry` in `entries`
-  // with only its `id` / `user_id` / `email` set revokes that collaborator
-  // entry.
-  SurveyAcl acl_delete = 16;
 }
 
 // Request to atomically and idempotently apply an ordered sequence of mutations
