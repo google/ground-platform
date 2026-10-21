@@ -400,6 +400,10 @@ message FormLaunchConfig {
 
   // Stable editor key (e.g., "f1") when authored in the Survey Editor.
   string editor_key = 12;
+
+  // Display order of this launch action within the survey or entity detail
+  // card (0-based).
+  int32 sort_order = 13;
 }
 
 // Lifecycle state of a Survey definition.
@@ -455,6 +459,9 @@ message DataTableRow {
 
   // Optional geometry vertices for map-layer rows in editor drafts.
   repeated groundplatform.v2.forms.GeoPoint geometry = 3;
+
+  // Display order of this row within the lookup table (0-based).
+  int32 sort_order = 4;
 }
 
 // Definition of an Entity Dataset (tabular registry or geospatial entity
@@ -528,6 +535,9 @@ message EntityDatasetDef {
 
   // Inline rows for lookup data tables (`type == TABULAR`) and editor drafts.
   repeated DataTableRow rows = 16;
+
+  // Display order of this dataset within its parent survey (0-based).
+  int32 sort_order = 17;
 }
 
 // Reproducible description of a statistical sample design whose output (one
@@ -745,6 +755,13 @@ message EntityPropertyDefinition {
   // saves to it (`FieldBinding.entity_saveto`), so aggregation can read the
   // current state of map features.
   groundplatform.v2.library.ConceptRef concept_ref = 5;
+
+  // Stable identifier for sparse mutation addressing (defaults to `name` when
+  // unset).
+  string id = 6;
+
+  // Display/column order of this property within the dataset (0-based).
+  int32 sort_order = 7;
 }
 
 // Visual styling attributes for map layers, form geometries, and geospatial
@@ -772,6 +789,9 @@ message OfflineTilePackageDef {
   string zoom_range_label = 4;
   string size_label = 5;
   bool is_downloaded = 6;
+
+  // Display order of this tile package (0-based).
+  int32 sort_order = 7;
 }
 
 // Map visualization, default viewport, and layer stack configuration for the
@@ -864,6 +884,10 @@ message LayerDef {
 
   // Optional form title when linked to a form geometry source.
   string form_title = 11;
+
+  // Stack/z-order of this layer within `MapConfig.layers` (0-based,
+  // bottom-to-top).
+  int32 sort_order = 12;
 }
 
 // Identifies a specific geometry question within a form to render as a map
