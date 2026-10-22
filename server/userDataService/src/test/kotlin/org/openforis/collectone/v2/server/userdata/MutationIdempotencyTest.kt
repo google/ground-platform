@@ -15,25 +15,6 @@
  */
 package org.openforis.collectone.v2.server.userdata
 
-import groundplatform.v2.data.ConflictResolutionStatus
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.GetAppliedMutationsRequest
-import groundplatform.v2.data.GetEntityRequest
-import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.library.LibraryMutation
-import groundplatform.v2.library.MutateLibraryRequest
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.library.OrganizationLibrarySettings
-import groundplatform.v2.survey.GetOrganizationRequest
-import groundplatform.v2.survey.GetSurveyRequest
-import groundplatform.v2.survey.MutateOrganizationRequest
-import groundplatform.v2.survey.MutateSurveyRequest
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -41,6 +22,25 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
+import openforis.collectone.v1.data.ConflictResolutionStatus
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.GetAppliedMutationsRequest
+import openforis.collectone.v1.data.GetEntityRequest
+import openforis.collectone.v1.data.MutateDataRequest
+import openforis.collectone.v1.library.LibraryMutation
+import openforis.collectone.v1.library.MutateLibraryRequest
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.library.OrganizationLibrarySettings
+import openforis.collectone.v1.survey.GetOrganizationRequest
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.MutateOrganizationRequest
+import openforis.collectone.v1.survey.MutateSurveyRequest
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
 
 /**
  * Idempotency and conflict semantics of the `Mutate*` RPCs that the client outbox relies on: each

@@ -15,9 +15,9 @@ package org.openforis.collectone.v2.app.data.seed
 
 import com.squareup.wire.Instant
 import com.squareup.wire.ofEpochSecond
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.userdata.SurveySeed
-import groundplatform.v2.userdata.UserDataSeed
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.userdata.SurveySeed
+import openforis.collectone.v1.userdata.UserDataSeed
 import org.openforis.collectone.v2.app.data.datasource.remote.GrpcProtoMapper
 import org.openforis.collectone.v2.app.data.seed.backend.BackendStaticEntitiesData
 import org.openforis.collectone.v2.app.data.seed.backend.BackendStaticLibraryData
@@ -114,7 +114,7 @@ object UserDataSeedGenerator {
         val surveyDef = unversionedDef.copy(record_version = 1L)
         val acl = unversionedAcl.copy(record_version = 1L)
 
-        val entityRecords = mutableListOf<groundplatform.v2.data.EntityRecord>()
+        val entityRecords = mutableListOf<openforis.collectone.v1.data.EntityRecord>()
         val submissions = linkedMapOf<String, SubmissionRecord>()
         val geometriesBySubId = geometries.groupBy { it.submissionId }
         val consumedGeometryIds = mutableSetOf<String>()

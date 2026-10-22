@@ -49,8 +49,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.GeoPoint
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 import org.openforis.collectone.v2.core.forms.model.FieldState
 

@@ -13,7 +13,7 @@
  */
 package org.openforis.collectone.v2.workbench.ui
 
-import groundplatform.v2.forms.FormDef
+import openforis.collectone.v1.forms.FormDef
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
 import org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm
 

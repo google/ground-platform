@@ -14,41 +14,6 @@
 package org.openforis.collectone.v2.server.userdata
 
 import com.squareup.wire.Instant
-import groundplatform.v2.data.AcquirePlotLockRequest
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.ImpactEvent
-import groundplatform.v2.data.ImpactEventType
-import groundplatform.v2.data.ListEntitiesRequest
-import groundplatform.v2.data.ListImpactEventsRequest
-import groundplatform.v2.data.ListSubmissionsRequest
-import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.data.RecordImpactEventsRequest
-import groundplatform.v2.data.ReleasePlotLockRequest
-import groundplatform.v2.data.SubmissionMutation
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.LibraryBundle
-import groundplatform.v2.library.LibraryMutation
-import groundplatform.v2.library.ListLibrariesRequest
-import groundplatform.v2.library.LocalizedText
-import groundplatform.v2.library.MutateLibraryRequest
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.GetSurveyRequest
-import groundplatform.v2.survey.ListOrganizationsRequest
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.MutateOrganizationRequest
-import groundplatform.v2.survey.MutateSurveyRequest
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.QuotaLimits
-import groundplatform.v2.survey.SearchOrganizationsRequest
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
 import io.grpc.Status
 import io.grpc.StatusException
 import kotlin.test.Test
@@ -59,6 +24,41 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
+import openforis.collectone.v1.data.AcquirePlotLockRequest
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.ImpactEvent
+import openforis.collectone.v1.data.ImpactEventType
+import openforis.collectone.v1.data.ListEntitiesRequest
+import openforis.collectone.v1.data.ListImpactEventsRequest
+import openforis.collectone.v1.data.ListSubmissionsRequest
+import openforis.collectone.v1.data.MutateDataRequest
+import openforis.collectone.v1.data.RecordImpactEventsRequest
+import openforis.collectone.v1.data.ReleasePlotLockRequest
+import openforis.collectone.v1.data.SubmissionMutation
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.library.ConceptDef
+import openforis.collectone.v1.library.LibraryBundle
+import openforis.collectone.v1.library.LibraryMutation
+import openforis.collectone.v1.library.ListLibrariesRequest
+import openforis.collectone.v1.library.LocalizedText
+import openforis.collectone.v1.library.MutateLibraryRequest
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.ListOrganizationsRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.MutateOrganizationRequest
+import openforis.collectone.v1.survey.MutateSurveyRequest
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.QuotaLimits
+import openforis.collectone.v1.survey.SearchOrganizationsRequest
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
 
 /**
  * Behavior of [UserDataBackend] loaded with the bundled sample seed, following
@@ -680,7 +680,8 @@ open class UserDataBackendTest {
                       submission_id = testId("sub-test-1"),
                       form_id = "form-eudr-baseline",
                       entity_id = targetEntity,
-                      audit_info = groundplatform.v2.data.AuditInfo(created_by = "collector-test"),
+                      audit_info =
+                        openforis.collectone.v1.data.AuditInfo(created_by = "collector-test"),
                     ),
                 ),
             )
@@ -708,7 +709,7 @@ open class UserDataBackendTest {
                           form_id = "form-eudr-baseline",
                           entity_id = targetEntity,
                           audit_info =
-                            groundplatform.v2.data.AuditInfo(created_by = "collector-test"),
+                            openforis.collectone.v1.data.AuditInfo(created_by = "collector-test"),
                         ),
                     ),
                 )

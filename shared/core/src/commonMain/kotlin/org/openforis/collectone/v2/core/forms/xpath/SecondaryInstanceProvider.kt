@@ -13,14 +13,14 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath
 
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.TypedValue
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathNode
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathValue
 

@@ -17,23 +17,23 @@ import com.google.type.Date
 import com.google.type.TimeOfDay
 import com.squareup.wire.Instant
 import com.squareup.wire.ofEpochSecond
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldDefinition
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.GeoShape
-import groundplatform.v2.forms.GeoTrace
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordMetadata
-import groundplatform.v2.forms.RecordNode
-import groundplatform.v2.forms.RecordNodeList
-import groundplatform.v2.forms.RecordSchema
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.forms.TypedValueList
 import okio.ByteString
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.encodeUtf8
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldDefinition
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.GeoShape
+import openforis.collectone.v1.forms.GeoTrace
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordMetadata
+import openforis.collectone.v1.forms.RecordNode
+import openforis.collectone.v1.forms.RecordNodeList
+import openforis.collectone.v1.forms.RecordSchema
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.TypedValueList
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlElement
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlParser
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlText
@@ -41,7 +41,7 @@ import org.openforis.collectone.v2.core.forms.serialization.xml.XmlWriter
 
 /**
  * Serializes and deserializes XForms submission instance XML (`<data id="...">...</data>`) to and
- * from `groundplatform.v2.forms.RecordInstance`.
+ * from `openforis.collectone.v1.forms.RecordInstance`.
  */
 internal object RecordInstanceXmlSerializer {
 

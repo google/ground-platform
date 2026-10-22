@@ -69,8 +69,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordInstance
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.MainSurveyViewMode

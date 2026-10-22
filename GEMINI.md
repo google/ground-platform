@@ -87,7 +87,7 @@ These rules govern all AI-assisted research, design, and code changes within Col
 
 ### Normative references
 
-ProtoForms ([`shared/protos/forms/`](shared/protos/forms/), package `groundplatform.v2.forms`) is a Protocol Buffer encoding of the XForms data model. When adding or changing anything in that package, consult these in order of precedence:
+ProtoForms ([`shared/protos/forms/`](shared/protos/forms/), package `openforis.collectone.v1.forms`) is a Protocol Buffer encoding of the XForms data model. When adding or changing anything in that package, consult these in order of precedence:
 
 1. **[ODK XForms Specification](https://getodk.github.io/xforms-spec/)** — the primary target. This is the de facto standard for field data collection: a pragmatic subset of W3C XForms plus widely-implemented extensions (`jr:` / `odk:` namespaces, `itemset`, `constraint`/`jr:constraintMsg`, `jr:preload`, `setvalue`/`setgeopoint`, entities).
 2. **[ODK Entities](https://docs.getodk.org/entities-intro/)** — the entity/dataset model (`entities` block, `save_to`, `entity_id`, create/update conditions, offline branch/trunk versioning).

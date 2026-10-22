@@ -16,13 +16,17 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.forms;
+package openforis.collectone.v1.forms;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/forms/types.proto";
 
 // Client audit logging configuration defining telemetry collection policies,
 // background GPS sampling rates, and change-tracking behavior.
+//
+// Inherited from ODK XForms: see Audit Attributes
+// (https://getodk.github.io/xforms-spec/#audit-attributes) and ODK Form Audit Log
+// (https://docs.getodk.org/form-audit-log/).
 message AuditConfig {
   // Whether client audit logging is enabled for this form session.
   bool enabled = 1;
@@ -50,6 +54,10 @@ message AuditConfig {
 }
 
 // Single audit telemetry event recorded during client form interaction.
+//
+// Inherited from ODK XForms: see Audit Attributes
+// (https://getodk.github.io/xforms-spec/#audit-attributes) and Events
+// (https://getodk.github.io/xforms-spec/#events).
 message AuditEvent {
   // Event identifier (e.g. "form start", "form exit", "question", "group",
   // "form save", "form finalize").
@@ -79,6 +87,9 @@ message AuditEvent {
 
 // Complete audit log session record tracking enumerator interactions, timing,
 // and location breadcrumbs.
+//
+// Inherited from ODK XForms: see Audit Attributes
+// (https://getodk.github.io/xforms-spec/#audit-attributes).
 message AuditLog {
   // Chronological list of recorded audit telemetry events.
   repeated AuditEvent events = 1;

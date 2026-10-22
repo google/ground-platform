@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.library;
+package openforis.collectone.v1.library;
 
 import "shared/protos/library/concept.proto";
 import "shared/protos/library/purpose_pack.proto";

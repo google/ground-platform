@@ -36,13 +36,13 @@ message FormTemplateDef {
   LocalizedText description = 4;
 
   // The form, including concept links and translations.
-  groundplatform.v2.forms.FormDef form = 5;
+  openforis.collectone.v1.forms.FormDef form = 5;
 
   // Default backing map layer or data table created with the form.
-  groundplatform.v2.survey.EntityDatasetDef default_dataset = 6;
+  openforis.collectone.v1.survey.EntityDatasetDef default_dataset = 6;
 
   LibraryStatus status = 7;
-  groundplatform.v2.data.AuditInfo audit_info = 8;
+  openforis.collectone.v1.data.AuditInfo audit_info = 8;
   int32 sort_order = 9;
 }
 ```
@@ -99,7 +99,7 @@ message PurposePackDef {
   Pillar pillar = 10;
 
   LibraryStatus status = 11;
-  groundplatform.v2.data.AuditInfo audit_info = 12;
+  openforis.collectone.v1.data.AuditInfo audit_info = 12;
   int32 sort_order = 13;
 }
 ```

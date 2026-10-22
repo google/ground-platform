@@ -15,21 +15,21 @@
  */
 package org.openforis.collectone.v2.app.data.sync
 
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.ReviewStatus
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.library.LibraryMutation
-import groundplatform.v2.survey.MapConfig
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.OrganizationType
-import groundplatform.v2.survey.PeerDataVisibility
-import groundplatform.v2.survey.Role
-import groundplatform.v2.survey.SharingPolicy
-import groundplatform.v2.survey.SurveyMutation
-import groundplatform.v2.survey.SurveyState
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.ReviewStatus
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.library.LibraryMutation
+import openforis.collectone.v1.survey.MapConfig
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.OrganizationType
+import openforis.collectone.v1.survey.PeerDataVisibility
+import openforis.collectone.v1.survey.Role
+import openforis.collectone.v1.survey.SharingPolicy
+import openforis.collectone.v1.survey.SurveyMutation
+import openforis.collectone.v1.survey.SurveyState
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload
 import org.openforis.collectone.v2.app.data.datasource.local.store.OutboxState
 import org.openforis.collectone.v2.app.data.datasource.local.store.PendingMutation

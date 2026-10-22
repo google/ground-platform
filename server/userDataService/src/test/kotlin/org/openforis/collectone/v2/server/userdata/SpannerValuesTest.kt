@@ -17,11 +17,11 @@ import com.google.cloud.ByteArray
 import com.google.cloud.spanner.Struct
 import com.google.cloud.spanner.Type
 import com.google.cloud.spanner.Value
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyState
 
 class SpannerValuesTest {
   @Test
@@ -33,25 +33,28 @@ class SpannerValuesTest {
         .to(
           Value.protoMessage(
             ByteArray.copyFrom(SurveyDef.ADAPTER.encode(survey)),
-            "groundplatform.v2.survey.SurveyDef",
+            "openforis.collectone.v1.survey.SurveyDef",
           )
         )
         .set("State")
         .to(
           Value.protoEnum(
             SurveyState.PUBLISHED.value.toLong(),
-            "groundplatform.v2.survey.SurveyState",
+            "openforis.collectone.v1.survey.SurveyState",
           )
         )
         .build()
 
     @Suppress("UNCHECKED_CAST") val record = SpannerValues.render(row, 0) as Map<String, Any?>
     assertEquals("proto", record["kind"])
-    assertEquals("groundplatform.v2.survey.SurveyDef", record["type"])
+    assertEquals("openforis.collectone.v1.survey.SurveyDef", record["type"])
     val json = record["json"] as String
     assertTrue("Coffee plots" in json && "s-1" in json, json)
     assertEquals("PUBLISHED", SpannerValues.render(row, 1))
-    assertEquals("groundplatform.v2.survey.SurveyDef", SpannerValues.typeName(row.getColumnType(0)))
+    assertEquals(
+      "openforis.collectone.v1.survey.SurveyDef",
+      SpannerValues.typeName(row.getColumnType(0)),
+    )
   }
 
   @Test

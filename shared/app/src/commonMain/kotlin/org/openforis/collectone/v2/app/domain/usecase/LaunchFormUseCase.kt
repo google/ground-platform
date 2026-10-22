@@ -13,8 +13,8 @@
  */
 package org.openforis.collectone.v2.app.domain.usecase
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FormDef
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FormDef
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.SurveyConfig

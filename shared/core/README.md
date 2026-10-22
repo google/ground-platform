@@ -26,7 +26,7 @@ dependencies** and compiles to **Android/JVM (`jvm`)**, **iOS (`iosArm64`,
 
 -   **[`org.openforis.collectone.v2.core.forms.serialization`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/serialization/README.md)**:
     Bidirectional lossless conversion between XForms XML (`<h:html>` and
-    `<data>`), `groundplatform.v2.forms` Protocol Buffer messages (`FormDef`,
+    `<data>`), `openforis.collectone.v1.forms` Protocol Buffer messages (`FormDef`,
     `RecordInstance`), Protocol Buffer Text Format (`textproto`), and Canonical
     Proto3 JSON (`ProtoJsonSerializer`).
 -   **[`org.openforis.collectone.v2.core.forms.xpath`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/xpath/README.md)**:

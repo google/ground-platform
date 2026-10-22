@@ -16,7 +16,7 @@
 
 # Introduction
 
-The Open Foris Collect One (`groundplatform.v2.survey` and `groundplatform.v2.data`) data
+The Open Foris Collect One (`openforis.collectone.v1.survey` and `openforis.collectone.v1.data`) data
 model specification defines the strongly typed Protocol Buffer (`proto3`)
 schemas governing survey administration, geospatial entity registries, access
 control lists (ACLs), tiered quotas, field data submissions, and append-only
@@ -26,51 +26,51 @@ caches) and **RPCs** (client-server synchronization and service-to-service
 communication).
 
 While [ProtoForms](docs/model/forms/00-introduction.md)
-(`groundplatform.v2.forms`) defines individual form definitions (`FormDef`) and
+(`openforis.collectone.v1.forms`) defines individual form definitions (`FormDef`) and
 form submission records (`RecordInstance`) with full XForms round-trip
-compatibility, the `groundplatform.v2.survey` and `groundplatform.v2.data`
+compatibility, the `openforis.collectone.v1.survey` and `openforis.collectone.v1.data`
 packages provide the higher-level multi-form survey workspace, spatial indexing,
 and operational records that power Open Foris Collect One web and mobile applications.
 
 ## Package and File Architecture
 
 All Open Foris Collect One schemas reside under `shared/protos/` and are organized into
-modular `.proto` files under three packages: `groundplatform.v2.forms` (form
-definitions and records), `groundplatform.v2.survey` (survey definitions and
-metadata), and `groundplatform.v2.data` (user data records):
+modular `.proto` files under three packages: `openforis.collectone.v1.forms` (form
+definitions and records), `openforis.collectone.v1.survey` (survey definitions and
+metadata), and `openforis.collectone.v1.data` (user data records):
 
-*   **`survey/survey_def.proto`** (`groundplatform.v2.survey`): Defines
+*   **`survey/survey_def.proto`** (`openforis.collectone.v1.survey`): Defines
     `SurveyDef` (the root survey container), form launch and multilingual CTA
     configurations (`FormLaunchConfig`), Entity Dataset schemas
     (`EntityDatasetDef`), and map visualization (`MapConfig`, `LayerDef`,
     `GeometryStyle`).
-*   **`survey/acl.proto`** (`groundplatform.v2.survey`): Defines standalone
+*   **`survey/acl.proto`** (`openforis.collectone.v1.survey`): Defines standalone
     access control and quota models (`SurveyAcl`, `AclEntry`, `Role`,
     `QuotaTier`, `QuotaLimits`) using unique user identifiers (e.g., Firebase
     Auth UIDs).
-*   **`survey/organization.proto`** (`groundplatform.v2.survey`): Defines
+*   **`survey/organization.proto`** (`openforis.collectone.v1.survey`): Defines
     `Organization`, the optional multi-tenant owner of surveys
     (`SurveyDef.organization_id`), its optional profile (`OrganizationType`
     and ISO 3166-1 alpha-2 `country_code`), its opt-out from platform-wide
     impact aggregates (`exclude_from_platform_aggregates`), and its memberships
     (`OrganizationMember` with `OrganizationRole` Member / Manager and
     `MembershipStatus`).
-*   **`data/entity_record.proto`** (`groundplatform.v2.data`): Defines
+*   **`data/entity_record.proto`** (`openforis.collectone.v1.data`): Defines
     `EntityRecord`, representing a persistent, versioned tabular or geospatial
     entity instance within an Entity Dataset.
-*   **`data/submission_record.proto`** (`groundplatform.v2.data`): Defines
+*   **`data/submission_record.proto`** (`openforis.collectone.v1.data`): Defines
     `SubmissionRecord`, representing a finalized, versioned form submission
     transaction linked to a survey, form, and optional entity, embedding either
-    a reflection-free `groundplatform.v2.forms.RecordInstance` or raw protobuf
+    a reflection-free `openforis.collectone.v1.forms.RecordInstance` or raw protobuf
     bytes.
-*   **`data/audit_record.proto`** (`groundplatform.v2.data`): Defines
+*   **`data/audit_record.proto`** (`openforis.collectone.v1.data`): Defines
     `AuditRecord`, `FieldDelta`, and `AuditInfo` for platform-wide append-only
     mutation auditing and resource provenance tracking.
 
 ## Design Principles
 
 1.  **Separation of Form Definition and Survey Context**: Individual forms
-    (`groundplatform.v2.forms.FormDef`) remain portable, XForms-compatible
+    (`openforis.collectone.v1.forms.FormDef`) remain portable, XForms-compatible
     definitions that can be shared or exported independently, while `SurveyDef`
     groups multiple forms together with shared lookup tables, map layers, and
     organizational policies.
@@ -78,7 +78,7 @@ metadata), and `groundplatform.v2.data` (user data records):
     immutable user identifiers (such as Firebase Auth UIDs) rather than mutable
     email addresses.
 3.  **Reflection-Free Runtime Compatibility**: Operational submission records
-    directly embed `groundplatform.v2.forms.RecordInstance` so mobile, web, and
+    directly embed `openforis.collectone.v1.forms.RecordInstance` so mobile, web, and
     server runtimes can process data without dynamic schema compilation or
     protobuf reflection.
 4.  **Built-in Spatial & Environmental Traceability**: First-class support for

@@ -37,8 +37,8 @@ import org.openforis.collectone.v2.app.domain.model.editor.GeometryCapture
  * The global library (v0) that bootstraps the `"All users"` organization's library.
  *
  * The canonical copy is the seed files `shared/assets/library/<vocabulary>.textproto` (one
- * `groundplatform.v2.library.LibraryBundle` per vocabulary). Reading resources isn't practical on
- * every target (wasmJs loads them asynchronously), so this is a Kotlin copy;
+ * `openforis.collectone.v1.library.LibraryBundle` per vocabulary). Reading resources isn't
+ * practical on every target (wasmJs loads them asynchronously), so this is a Kotlin copy;
  * `GlobalLibrarySeedTest` (jvmTest) parses the seed files and fails if they differ. Run it with
  * `-PregenerateLibrarySeed` to rewrite them from this file.
  *

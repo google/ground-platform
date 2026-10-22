@@ -15,8 +15,8 @@
  */
 package org.openforis.collectone.v2.core.forms.engine
 
-import groundplatform.v2.forms.GeoPoint
 import kotlin.random.Random
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.core.forms.xpath.EvaluationContext
 import org.openforis.collectone.v2.core.forms.xpath.SecondaryInstanceProvider
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathValue

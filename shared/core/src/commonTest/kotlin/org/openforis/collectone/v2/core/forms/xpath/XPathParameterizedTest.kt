@@ -13,22 +13,22 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.SecondaryInstance
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.SecondaryInstance
 import org.openforis.collectone.v2.core.forms.xpath.ast.XPathDependency
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathValue
 
 /**
  * Data-driven parameterized test suite verifying XPath 1.0 and XForms specification compliance
- * against ProtoForms Protocol Buffer literals ([groundplatform.v2.forms.RecordInstance] &
- * [groundplatform.v2.forms.FormDef]).
+ * against ProtoForms Protocol Buffer literals ([openforis.collectone.v1.forms.RecordInstance] &
+ * [openforis.collectone.v1.forms.FormDef]).
  */
 class XPathParameterizedTest {
 

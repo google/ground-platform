@@ -65,7 +65,7 @@ processing terms, and reference-layer licensing as explicit decisions.
 
 | Input | Source | Used for |
 | :--- | :--- | :--- |
-| Map features (current state) | `EntityRecord` (`groundplatform.v2.data`) | Geometry, GeoID, property values |
+| Map features (current state) | `EntityRecord` (`openforis.collectone.v1.data`) | Geometry, GeoID, property values |
 | Concept links | `SurveyDef.form_concept_links`, `EntityPropertyDefinition.concept_ref` | Which properties carry which concepts |
 | Concept definitions | Organization libraries (`ConceptDef`) | Aggregation rule, privacy class, goals, code lists |
 | Survey context | `SurveyDef` (`organization_id`, `purpose_ids`, `program_ids`, `outcome`, state) | Scope, purposes, outcomes |

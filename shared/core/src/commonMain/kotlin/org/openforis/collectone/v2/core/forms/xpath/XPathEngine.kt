@@ -13,16 +13,16 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.TypedValue
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.xpath.ast.XPathParser
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathValue
 
 /**
  * Primary facade for compiling and evaluating XForms-compliant XPath expressions against ProtoForms
- * Protocol Buffer records (`groundplatform.v2.forms.RecordInstance` and
- * `groundplatform.v2.forms.FormDef`).
+ * Protocol Buffer records (`openforis.collectone.v1.forms.RecordInstance` and
+ * `openforis.collectone.v1.forms.FormDef`).
  */
 object XPathEngine {
 

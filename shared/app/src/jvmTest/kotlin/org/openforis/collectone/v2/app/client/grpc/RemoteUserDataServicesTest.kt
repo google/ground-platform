@@ -15,14 +15,6 @@ package org.openforis.collectone.v2.app.client.grpc
 
 import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.WireRpc
-import groundplatform.v2.data.DataServiceServer
-import groundplatform.v2.library.LibraryServiceServer
-import groundplatform.v2.survey.GetSurveyRequest
-import groundplatform.v2.survey.GetSurveyResponse
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.OrganizationServiceServer
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyServiceServer
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -38,6 +30,14 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
+import openforis.collectone.v1.data.DataServiceServer
+import openforis.collectone.v1.library.LibraryServiceServer
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.GetSurveyResponse
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.OrganizationServiceServer
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyServiceServer
 
 /**
  * Verifies that every remote adapter calls the path declared by the Wire `@WireRpc` annotation, and

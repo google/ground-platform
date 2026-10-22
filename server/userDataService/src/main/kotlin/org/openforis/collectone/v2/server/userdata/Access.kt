@@ -13,17 +13,17 @@
  */
 package org.openforis.collectone.v2.server.userdata
 
-import groundplatform.v2.survey.MembershipStatus
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationMember
-import groundplatform.v2.survey.OrganizationRole
-import groundplatform.v2.survey.PeerDataVisibility
-import groundplatform.v2.survey.Role
-import groundplatform.v2.survey.SharingPolicy
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
 import io.grpc.Status
 import io.grpc.StatusException
+import openforis.collectone.v1.survey.MembershipStatus
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMember
+import openforis.collectone.v1.survey.OrganizationRole
+import openforis.collectone.v1.survey.PeerDataVisibility
+import openforis.collectone.v1.survey.Role
+import openforis.collectone.v1.survey.SharingPolicy
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
 import org.openforis.collectone.v2.core.mutation.SurveyPatches
 
 /**

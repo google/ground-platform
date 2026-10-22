@@ -13,8 +13,6 @@
  */
 package org.openforis.collectone.v2.app.ui.viewmodel
 
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -30,6 +28,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordInstance
 import org.openforis.collectone.v2.app.client.pdf.GeneratedPdf
 import org.openforis.collectone.v2.app.client.pdf.PdfExportClient
 import org.openforis.collectone.v2.app.client.pdf.PdfExportResult

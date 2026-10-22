@@ -40,7 +40,7 @@ or attached to repeating containers:
 ```protobuf
 syntax = "proto3";
 
-package groundplatform.v2.forms;
+package openforis.collectone.v1.forms;
 
 message EntityDeclaration {
   // Target dataset name (e.g., "clinics", "water_points").

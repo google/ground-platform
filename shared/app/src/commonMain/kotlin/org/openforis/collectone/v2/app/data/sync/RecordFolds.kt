@@ -15,13 +15,13 @@
  */
 package org.openforis.collectone.v2.app.data.sync
 
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyState
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyState
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationTarget
 import org.openforis.collectone.v2.app.data.datasource.local.store.OutboxState

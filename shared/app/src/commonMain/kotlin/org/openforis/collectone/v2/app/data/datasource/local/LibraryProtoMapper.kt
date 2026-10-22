@@ -13,20 +13,20 @@
  */
 package org.openforis.collectone.v2.app.data.datasource.local
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.library.Aggregation
-import groundplatform.v2.library.CodeList
-import groundplatform.v2.library.CodeListItem as CodeListItemProto
-import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.ExportProfileDef
-import groundplatform.v2.library.FormTemplateDef
-import groundplatform.v2.library.LibraryBundle
-import groundplatform.v2.library.LibraryStatus as LibraryStatusProto
-import groundplatform.v2.library.LocalizedText as LocalizedTextProto
-import groundplatform.v2.library.OrganizationLibrarySettings as OrganizationLibrarySettingsProto
-import groundplatform.v2.library.Pillar
-import groundplatform.v2.library.PrivacyClass as PrivacyClassProto
-import groundplatform.v2.library.PurposePackDef
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.library.Aggregation
+import openforis.collectone.v1.library.CodeList
+import openforis.collectone.v1.library.CodeListItem as CodeListItemProto
+import openforis.collectone.v1.library.ConceptDef
+import openforis.collectone.v1.library.ExportProfileDef
+import openforis.collectone.v1.library.FormTemplateDef
+import openforis.collectone.v1.library.LibraryBundle
+import openforis.collectone.v1.library.LibraryStatus as LibraryStatusProto
+import openforis.collectone.v1.library.LocalizedText as LocalizedTextProto
+import openforis.collectone.v1.library.OrganizationLibrarySettings as OrganizationLibrarySettingsProto
+import openforis.collectone.v1.library.Pillar
+import openforis.collectone.v1.library.PrivacyClass as PrivacyClassProto
+import openforis.collectone.v1.library.PurposePackDef
 import org.openforis.collectone.v2.app.domain.model.CodeListItem
 import org.openforis.collectone.v2.app.domain.model.ConceptAggregation
 import org.openforis.collectone.v2.app.domain.model.ConceptDataType
@@ -44,8 +44,9 @@ import org.openforis.collectone.v2.app.domain.model.editor.EditorXFormsGenerator
 import org.openforis.collectone.v2.app.domain.model.editor.FormImport
 
 /**
- * Maps organization library domain models to and from their `groundplatform.v2.library` protos
- * (`LibraryBundle` and `OrganizationLibrarySettings`), for seed files, imports, exports, and sync.
+ * Maps organization library domain models to and from their `openforis.collectone.v1.library`
+ * protos (`LibraryBundle` and `OrganizationLibrarySettings`), for seed files, imports, exports, and
+ * sync.
  *
  * Template Forms go through [EditorXFormsGenerator.compile] and [FormImport], so their questions'
  * concept links round-trip as `ground:concept` bind attributes.
@@ -191,7 +192,7 @@ object LibraryProtoMapper {
       title = fromProto(template.title),
       form =
         FormImport.fromFormDef(
-            template.form ?: groundplatform.v2.forms.FormDef(form_id = template.id),
+            template.form ?: openforis.collectone.v1.forms.FormDef(form_id = template.id),
             formId = template.id,
             fallbackTitle = fromProto(template.title).text,
           )

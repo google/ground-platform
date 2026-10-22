@@ -104,10 +104,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import groundplatform.v2.forms.ControlType
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.GeoPoint
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -115,6 +111,10 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import openforis.collectone.v1.forms.ControlType
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.core.forms.media.MediaCapture
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 import org.openforis.collectone.v2.core.forms.model.FieldState

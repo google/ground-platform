@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.library;
+package openforis.collectone.v1.library;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/forms/types.proto";
@@ -136,7 +136,7 @@ message ListLibrariesResponse {
 message SearchConceptsRequest {
   string organization_id = 1;
   string query = 2;
-  groundplatform.v2.forms.DataType data_type = 3;
+  openforis.collectone.v1.forms.DataType data_type = 3;
 }
 
 message SearchConceptsResponse {

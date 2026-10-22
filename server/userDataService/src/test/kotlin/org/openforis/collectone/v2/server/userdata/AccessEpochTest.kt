@@ -13,18 +13,6 @@
  */
 package org.openforis.collectone.v2.server.userdata
 
-import groundplatform.v2.data.AcquirePlotLockRequest
-import groundplatform.v2.data.ListEntitiesRequest
-import groundplatform.v2.survey.AclEntry
-import groundplatform.v2.survey.GetOrganizationRequest
-import groundplatform.v2.survey.GetSurveyAclRequest
-import groundplatform.v2.survey.ListOrganizationsRequest
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.MutateOrganizationRequest
-import groundplatform.v2.survey.MutateSurveyRequest
-import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.Role
-import groundplatform.v2.survey.SurveyMutation
 import io.grpc.Status
 import io.grpc.StatusException
 import kotlin.test.Test
@@ -33,6 +21,18 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import openforis.collectone.v1.data.AcquirePlotLockRequest
+import openforis.collectone.v1.data.ListEntitiesRequest
+import openforis.collectone.v1.survey.AclEntry
+import openforis.collectone.v1.survey.GetOrganizationRequest
+import openforis.collectone.v1.survey.GetSurveyAclRequest
+import openforis.collectone.v1.survey.ListOrganizationsRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.MutateOrganizationRequest
+import openforis.collectone.v1.survey.MutateSurveyRequest
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.Role
+import openforis.collectone.v1.survey.SurveyMutation
 
 /**
  * Caller registration, invite binding, and access epochs

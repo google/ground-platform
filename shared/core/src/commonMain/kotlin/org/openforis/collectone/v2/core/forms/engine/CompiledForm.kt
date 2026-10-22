@@ -15,14 +15,14 @@
  */
 package org.openforis.collectone.v2.core.forms.engine
 
-import groundplatform.v2.forms.ActionDef
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.EventType
-import groundplatform.v2.forms.FieldBinding
-import groundplatform.v2.forms.FieldDefinition
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RepeatDef
-import groundplatform.v2.forms.ViewComponent
+import openforis.collectone.v1.forms.ActionDef
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.EventType
+import openforis.collectone.v1.forms.FieldBinding
+import openforis.collectone.v1.forms.FieldDefinition
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RepeatDef
+import openforis.collectone.v1.forms.ViewComponent
 import org.openforis.collectone.v2.core.forms.xpath.CompiledXPathExpression
 import org.openforis.collectone.v2.core.forms.xpath.InMemorySecondaryInstanceProvider
 import org.openforis.collectone.v2.core.forms.xpath.SecondaryInstanceProvider

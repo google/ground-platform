@@ -13,11 +13,11 @@
  */
 package org.openforis.collectone.v2.app.data.datasource.local
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.library.LibraryStatus as LibraryStatusProto
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.library.LibraryStatus as LibraryStatusProto
 import org.openforis.collectone.v2.app.data.seed.GlobalLibrarySeedData
 import org.openforis.collectone.v2.app.domain.model.ConceptDataType
 import org.openforis.collectone.v2.app.domain.model.Organization

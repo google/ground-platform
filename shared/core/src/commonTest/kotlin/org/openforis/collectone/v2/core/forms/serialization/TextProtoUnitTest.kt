@@ -13,13 +13,13 @@
  */
 package org.openforis.collectone.v2.core.forms.serialization
 
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordNode
-import groundplatform.v2.forms.TypedValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import okio.ByteString.Companion.toByteString
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordNode
+import openforis.collectone.v1.forms.TypedValue
 
 class TextProtoUnitTest {
 

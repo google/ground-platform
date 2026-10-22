@@ -15,27 +15,27 @@
  */
 package org.openforis.collectone.v2.core.mutation
 
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.forms.ViewComponent
-import groundplatform.v2.forms.ViewDef
-import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.LibraryBundle
-import groundplatform.v2.library.LocalizedText
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.AclEntry
-import groundplatform.v2.survey.LayerDef
-import groundplatform.v2.survey.MapConfig
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationMember
-import groundplatform.v2.survey.Role
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.ViewComponent
+import openforis.collectone.v1.forms.ViewDef
+import openforis.collectone.v1.library.ConceptDef
+import openforis.collectone.v1.library.LibraryBundle
+import openforis.collectone.v1.library.LocalizedText
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.AclEntry
+import openforis.collectone.v1.survey.LayerDef
+import openforis.collectone.v1.survey.MapConfig
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMember
+import openforis.collectone.v1.survey.Role
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
 
 /**
  * Semantics of sparse-proto mutations (structural `delete` mask + `upsert`), including the

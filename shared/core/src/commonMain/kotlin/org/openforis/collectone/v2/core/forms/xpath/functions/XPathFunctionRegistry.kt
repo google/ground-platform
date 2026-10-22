@@ -15,8 +15,6 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath.functions
 
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.ViewComponent
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.acos
@@ -35,6 +33,8 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.math.tan
 import kotlin.random.Random
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.ViewComponent
 import org.openforis.collectone.v2.core.forms.xpath.EvaluationContext
 import org.openforis.collectone.v2.core.forms.xpath.XPathEvaluationException
 import org.openforis.collectone.v2.core.forms.xpath.ast.XPathExpr
@@ -663,7 +663,7 @@ internal object XPathFunctionRegistry {
           val points = GeoUtils.extractPoints(args[0])
           XPathValue.Number(GeoUtils.totalDistanceMeters(points))
         } else {
-          val points = mutableListOf<groundplatform.v2.forms.GeoPoint>()
+          val points = mutableListOf<openforis.collectone.v1.forms.GeoPoint>()
           var missingArg = false
           for (arg in args) {
             val extracted = GeoUtils.extractPoints(arg)

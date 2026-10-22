@@ -14,13 +14,13 @@
  */
 package org.openforis.collectone.v2.mobile.ui
 
-import groundplatform.v2.forms.GeoPoint
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
 import org.openforis.collectone.v2.app.domain.model.AppScreen
 import org.openforis.collectone.v2.app.domain.model.BasemapType

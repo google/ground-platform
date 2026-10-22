@@ -13,8 +13,8 @@
  */
 package org.openforis.collectone.v2.app.domain.usecase
 
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordInstance
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.MutationLogItem
@@ -605,7 +605,7 @@ class CompleteFormSubmissionUseCase(
 
       val entries = mutableListOf<SubmissionFieldEntry>()
       orderedFieldStates.forEach { fs ->
-        val isContainerNode = fs.dataType == groundplatform.v2.forms.DataType.TYPE_MESSAGE
+        val isContainerNode = fs.dataType == openforis.collectone.v1.forms.DataType.TYPE_MESSAGE
         val isMetaOrEntityRefField =
           fs.relativePath == "meta/instanceID" ||
             fs.relativePath.startsWith("meta/") ||

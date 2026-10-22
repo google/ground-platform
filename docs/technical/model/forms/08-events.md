@@ -23,7 +23,7 @@ background audio recording.
 
 ## Events
 
-The following event types are defined in `groundplatform.v2.forms.EventType`:
+The following event types are defined in `openforis.collectone.v1.forms.EventType`:
 
 | Event Enum                  | String Identifier         | Description        |
 | --------------------------- | ------------------------- | ------------------ |

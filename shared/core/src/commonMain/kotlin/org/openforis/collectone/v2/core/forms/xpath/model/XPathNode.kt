@@ -13,14 +13,14 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath.model
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldDefinition
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordMetadata
-import groundplatform.v2.forms.RecordNode
-import groundplatform.v2.forms.RecordSchema
-import groundplatform.v2.forms.TypedValue
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldDefinition
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordMetadata
+import openforis.collectone.v1.forms.RecordNode
+import openforis.collectone.v1.forms.RecordSchema
+import openforis.collectone.v1.forms.TypedValue
 
 /**
  * Virtual cursor / zipper node wrapping immutable Protocol Buffer messages ([RecordInstance],

@@ -15,37 +15,6 @@
  */
 package org.openforis.collectone.v2.core.forms.engine
 
-import groundplatform.v2.forms.ActionDef
-import groundplatform.v2.forms.ActionType
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.ControlType
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.EntityDeclaration
-import groundplatform.v2.forms.EntityPropertyMapping
-import groundplatform.v2.forms.EntitySyncMetadata
-import groundplatform.v2.forms.EventType
-import groundplatform.v2.forms.FieldBinding
-import groundplatform.v2.forms.FieldDefinition
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.GroupDef
-import groundplatform.v2.forms.IntentConfig
-import groundplatform.v2.forms.ItemsetDef
-import groundplatform.v2.forms.LabelDef
-import groundplatform.v2.forms.LanguageTranslation
-import groundplatform.v2.forms.LocalizedString
-import groundplatform.v2.forms.MediaRef
-import groundplatform.v2.forms.ModelDef
-import groundplatform.v2.forms.OutputFragment
-import groundplatform.v2.forms.PreloadType
-import groundplatform.v2.forms.PrimaryInstance
-import groundplatform.v2.forms.RangeConfig
-import groundplatform.v2.forms.RecordSchema
-import groundplatform.v2.forms.RepeatDef
-import groundplatform.v2.forms.SecondaryInstance
-import groundplatform.v2.forms.TranslationCatalog
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.forms.ViewComponent
-import groundplatform.v2.forms.ViewDef
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -54,6 +23,37 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.ActionDef
+import openforis.collectone.v1.forms.ActionType
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.ControlType
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.EntityDeclaration
+import openforis.collectone.v1.forms.EntityPropertyMapping
+import openforis.collectone.v1.forms.EntitySyncMetadata
+import openforis.collectone.v1.forms.EventType
+import openforis.collectone.v1.forms.FieldBinding
+import openforis.collectone.v1.forms.FieldDefinition
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.GroupDef
+import openforis.collectone.v1.forms.IntentConfig
+import openforis.collectone.v1.forms.ItemsetDef
+import openforis.collectone.v1.forms.LabelDef
+import openforis.collectone.v1.forms.LanguageTranslation
+import openforis.collectone.v1.forms.LocalizedString
+import openforis.collectone.v1.forms.MediaRef
+import openforis.collectone.v1.forms.ModelDef
+import openforis.collectone.v1.forms.OutputFragment
+import openforis.collectone.v1.forms.PreloadType
+import openforis.collectone.v1.forms.PrimaryInstance
+import openforis.collectone.v1.forms.RangeConfig
+import openforis.collectone.v1.forms.RecordSchema
+import openforis.collectone.v1.forms.RepeatDef
+import openforis.collectone.v1.forms.SecondaryInstance
+import openforis.collectone.v1.forms.TranslationCatalog
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.ViewComponent
+import openforis.collectone.v1.forms.ViewDef
 import org.openforis.collectone.v2.core.forms.buildRecordNode
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
@@ -778,7 +778,7 @@ class FormEngineUnitTest {
                       field_ref = "note",
                       type = ControlType.CONTROL_INPUT,
                       intent =
-                        groundplatform.v2.forms.IntentConfig(
+                        openforis.collectone.v1.forms.IntentConfig(
                           intent_uri = "org.opendatakit.sensors.OXIMETER",
                           parameters = mapOf("subject_note" to "/data/note"),
                           response_mappings = mapOf("bpm" to "pulse_rate"),
@@ -1522,7 +1522,7 @@ class FormEngineUnitTest {
     val env =
       FormEnvironment(
         locationProvider = {
-          groundplatform.v2.forms.GeoPoint(
+          openforis.collectone.v1.forms.GeoPoint(
             latitude = 37.422,
             longitude = -122.084,
             altitude_meters = 12.0,

@@ -16,7 +16,7 @@
 
 # Introduction
 
-The Open Foris Collect One **library** (`groundplatform.v2.library`) defines reusable,
+The Open Foris Collect One **library** (`openforis.collectone.v1.library`) defines reusable,
 organization-owned building blocks for survey design and impact measurement:
 
 *   **Concepts** (the **dictionary**): standard field definitions with a
@@ -125,7 +125,7 @@ references embedded in forms, which the form engine ignores at runtime.
 ## Package and File Architecture
 
 Library schemas reside under `shared/protos/library/` in the
-`groundplatform.v2.library` package:
+`openforis.collectone.v1.library` package:
 
 *   **`library/concept.proto`**: `LocalizedText`, `ConceptDef`, `CodeList`,
     `CodeListItem`, `Aggregation`, `PrivacyClass`, `Pillar`, and

@@ -16,30 +16,30 @@
 package org.openforis.collectone.v2.core.forms.engine
 
 import com.squareup.wire.ofEpochSecond
-import groundplatform.v2.forms.ActionDef
-import groundplatform.v2.forms.ActionType
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.ControlType
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.EventType
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.IntentConfig
-import groundplatform.v2.forms.ItemsetDef
-import groundplatform.v2.forms.LabelDef
-import groundplatform.v2.forms.LocalizedString
-import groundplatform.v2.forms.PreloadType
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordMetadata
-import groundplatform.v2.forms.RecordNode
-import groundplatform.v2.forms.TranslationCatalog
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.forms.ViewComponent
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import kotlin.random.Random
+import openforis.collectone.v1.forms.ActionDef
+import openforis.collectone.v1.forms.ActionType
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.ControlType
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.EventType
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.IntentConfig
+import openforis.collectone.v1.forms.ItemsetDef
+import openforis.collectone.v1.forms.LabelDef
+import openforis.collectone.v1.forms.LocalizedString
+import openforis.collectone.v1.forms.PreloadType
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordMetadata
+import openforis.collectone.v1.forms.RecordNode
+import openforis.collectone.v1.forms.TranslationCatalog
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.ViewComponent
 import org.openforis.collectone.v2.core.forms.media.MediaCapture
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 import org.openforis.collectone.v2.core.forms.model.EntityState
@@ -2086,8 +2086,8 @@ object FormEngine {
 
   private fun collectRangeConfigs(
     compiled: CompiledForm
-  ): Map<String, groundplatform.v2.forms.RangeConfig> {
-    val map = mutableMapOf<String, groundplatform.v2.forms.RangeConfig>()
+  ): Map<String, openforis.collectone.v1.forms.RangeConfig> {
+    val map = mutableMapOf<String, openforis.collectone.v1.forms.RangeConfig>()
     fun visit(components: List<ViewComponent>, parentPath: String) {
       for (comp in components) {
         when {

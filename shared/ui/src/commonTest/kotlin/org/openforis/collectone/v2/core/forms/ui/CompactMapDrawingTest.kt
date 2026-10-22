@@ -13,11 +13,11 @@
  */
 package org.openforis.collectone.v2.core.forms.ui
 
-import groundplatform.v2.forms.DataType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.DataType
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
 
 class CompactMapDrawingTest {

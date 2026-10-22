@@ -16,18 +16,18 @@
 package org.openforis.collectone.v2.app.data.sync
 
 import com.squareup.wire.ofEpochSecond
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.Organization as OrganizationProto
-import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.Organization as OrganizationProto
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
 import org.openforis.collectone.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationTarget

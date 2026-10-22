@@ -13,10 +13,10 @@
  */
 package org.openforis.collectone.v2.app.data.repository
 
-import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
-import groundplatform.v2.survey.SearchPublicSurveysRequest
-import groundplatform.v2.survey.SurveyOverview
-import groundplatform.v2.survey.SurveyState
+import openforis.collectone.v1.survey.BatchGetSurveyOverviewsRequest
+import openforis.collectone.v1.survey.SearchPublicSurveysRequest
+import openforis.collectone.v1.survey.SurveyOverview
+import openforis.collectone.v1.survey.SurveyState
 import org.openforis.collectone.v2.app.client.grpc.CollectOneGrpcClient
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStore
 import org.openforis.collectone.v2.app.data.datasource.remote.GrpcProtoMapper

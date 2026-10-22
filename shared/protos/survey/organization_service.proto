@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.survey;
+package openforis.collectone.v1.survey;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/survey/organization.proto";

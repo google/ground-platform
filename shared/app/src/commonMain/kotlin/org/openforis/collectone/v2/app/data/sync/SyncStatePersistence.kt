@@ -15,7 +15,6 @@
  */
 package org.openforis.collectone.v2.app.data.sync
 
-import groundplatform.v2.userdata.ClientSyncState
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -27,6 +26,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import openforis.collectone.v1.userdata.ClientSyncState
 import org.openforis.collectone.v2.app.client.storage.SyncStateFile
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationTarget

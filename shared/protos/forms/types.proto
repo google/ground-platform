@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.forms;
+package openforis.collectone.v1.forms;
 
 import "google/protobuf/timestamp.proto";
 import "google/type/date.proto";
@@ -27,6 +27,8 @@ import "google/type/timeofday.proto";
 // These types map to native Protocol Buffer scalar and message types, ensuring
 // strong typing, binary efficiency, and cross-platform compatibility without
 // the string-casting pitfalls of legacy XML XForms.
+// Inherited from ODK XForms: see Data Types
+// (https://getodk.github.io/xforms-spec/#data-types).
 enum DataType {
   // Unspecified or unknown data type.
   DATA_TYPE_UNSPECIFIED = 0;
@@ -82,6 +84,9 @@ enum DataType {
 
 // A single geographic coordinate point adhering to the WGS 84 coordinate
 // reference system, with optional altitude and horizontal accuracy.
+//
+// Inherited from ODK XForms: see Data Types (geopoint)
+// (https://getodk.github.io/xforms-spec/#data-types).
 message GeoPoint {
   // Latitude in decimal degrees (WGS 84), between -90.0 and +90.0 inclusive.
   double latitude = 1;
@@ -99,6 +104,9 @@ message GeoPoint {
 
 // An ordered sequence of two or more geographic points forming an open polyline
 // path (such as a road segment, boundary line, river, or field transect).
+//
+// Inherited from ODK XForms: see Data Types (geotrace)
+// (https://getodk.github.io/xforms-spec/#data-types).
 message GeoTrace {
   // Ordered sequence of vertices comprising the trace path.
   repeated GeoPoint points = 1;
@@ -107,6 +115,9 @@ message GeoTrace {
 // A closed polygonal area formed by three or more geographic points (such as a
 // land parcel, forest boundary, or agricultural plot perimeter).
 // The first and last coordinate must coincide to form a closed ring.
+//
+// Inherited from ODK XForms: see Data Types (geoshape)
+// (https://getodk.github.io/xforms-spec/#data-types).
 message GeoShape {
   // Ordered sequence of vertices defining the perimeter of the polygon.
   repeated GeoPoint points = 1;

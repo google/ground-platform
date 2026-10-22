@@ -49,7 +49,7 @@ class GlobalLibrarySeedTest {
     |# limitations under the License.
     |
     |# proto-file: shared/protos/library/library_bundle.proto
-    |# proto-message: groundplatform.v2.library.LibraryBundle
+    |# proto-message: openforis.collectone.v1.library.LibraryBundle
     |#
     |# Global library seed: the `$vocabulary` vocabulary. Bootstraps the "All users"
     |# organization's library on a new deployment; entries omit organization_id,

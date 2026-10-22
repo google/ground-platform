@@ -47,7 +47,7 @@ message AuditRecord {
   string target_id = 4;
   google.protobuf.Timestamp timestamp = 5;
   string actor_id = 6;
-  groundplatform.v2.survey.Role actor_role = 7;
+  openforis.collectone.v1.survey.Role actor_role = 7;
 
   enum AuditAction {
     AUDIT_ACTION_UNSPECIFIED = 0;

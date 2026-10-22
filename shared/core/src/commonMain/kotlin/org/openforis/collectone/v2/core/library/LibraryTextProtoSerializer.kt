@@ -13,20 +13,20 @@
  */
 package org.openforis.collectone.v2.core.library
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.library.Aggregation
-import groundplatform.v2.library.CodeList
-import groundplatform.v2.library.CodeListItem
-import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.ExportProfileDef
-import groundplatform.v2.library.FormTemplateDef
-import groundplatform.v2.library.LibraryBundle
-import groundplatform.v2.library.LibraryStatus
-import groundplatform.v2.library.LocalizedText
-import groundplatform.v2.library.OrganizationLibrarySettings
-import groundplatform.v2.library.Pillar
-import groundplatform.v2.library.PrivacyClass
-import groundplatform.v2.library.PurposePackDef
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.library.Aggregation
+import openforis.collectone.v1.library.CodeList
+import openforis.collectone.v1.library.CodeListItem
+import openforis.collectone.v1.library.ConceptDef
+import openforis.collectone.v1.library.ExportProfileDef
+import openforis.collectone.v1.library.FormTemplateDef
+import openforis.collectone.v1.library.LibraryBundle
+import openforis.collectone.v1.library.LibraryStatus
+import openforis.collectone.v1.library.LocalizedText
+import openforis.collectone.v1.library.OrganizationLibrarySettings
+import openforis.collectone.v1.library.Pillar
+import openforis.collectone.v1.library.PrivacyClass
+import openforis.collectone.v1.library.PurposePackDef
 import org.openforis.collectone.v2.core.forms.serialization.TextProtoSerializer
 import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoField
 import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoMessage
@@ -35,12 +35,12 @@ import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoV
 import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoWriter
 
 /**
- * Serializer and deserializer between Organization Library messages (`groundplatform.v2.library`)
- * and Protocol Buffer Text Format (`textproto`).
+ * Serializer and deserializer between Organization Library messages
+ * (`openforis.collectone.v1.library`) and Protocol Buffer Text Format (`textproto`).
  *
  * Used for the global library seed files (`shared/assets/library/<vocabulary>.textproto`, each a
  * [LibraryBundle]) and library imports and exports. Template forms reuse the [FormDef]
- * (`groundplatform.v2.forms.FormDef`) codec of [TextProtoSerializer].
+ * (`openforis.collectone.v1.forms.FormDef`) codec of [TextProtoSerializer].
  *
  * Not yet supported: `FormTemplateDef.default_dataset` and `audit_info`, which seed files don't
  * use; they are dropped on serialization and left unset on parsing.

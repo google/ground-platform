@@ -14,25 +14,25 @@
 package org.openforis.collectone.v2.server.userdata
 
 import com.squareup.wire.Instant
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.LibraryBundle
-import groundplatform.v2.library.LocalizedText
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.AclEntry
-import groundplatform.v2.survey.CachedProfile
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationMember
-import groundplatform.v2.survey.SharingPolicy
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.ConceptDef
+import openforis.collectone.v1.library.LibraryBundle
+import openforis.collectone.v1.library.LocalizedText
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.AclEntry
+import openforis.collectone.v1.survey.CachedProfile
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMember
+import openforis.collectone.v1.survey.SharingPolicy
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
 
 /**
  * Behavior every [UserDataStore] must have (see its KDoc). Subclasses provide an empty store.
@@ -116,7 +116,7 @@ abstract class UserDataStoreContractTest {
     createSurveys(SURVEY)
     store.write { tx ->
       tx.putWorkingCopy(SURVEY, SurveyDef(survey_id = SURVEY, title = "Draft"))
-      tx.putPlotLock(SURVEY, ENTITY, groundplatform.v2.data.PlotLock(entity_id = ENTITY))
+      tx.putPlotLock(SURVEY, ENTITY, openforis.collectone.v1.data.PlotLock(entity_id = ENTITY))
     }
     store.write { tx ->
       tx.putWorkingCopy(SURVEY, null)

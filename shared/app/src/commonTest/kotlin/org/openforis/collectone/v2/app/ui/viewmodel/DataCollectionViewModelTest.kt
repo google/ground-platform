@@ -13,7 +13,6 @@
  */
 package org.openforis.collectone.v2.app.ui.viewmodel
 
-import groundplatform.v2.forms.DataType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -21,6 +20,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.DataType
 import org.openforis.collectone.v2.app.client.pdf.PdfExportResult
 import org.openforis.collectone.v2.app.data.datasource.local.store.runNow
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem

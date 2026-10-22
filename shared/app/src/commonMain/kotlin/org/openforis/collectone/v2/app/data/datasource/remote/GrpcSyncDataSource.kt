@@ -13,27 +13,27 @@
  */
 package org.openforis.collectone.v2.app.data.datasource.remote
 
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.ImpactEvent as ImpactEventProto
-import groundplatform.v2.data.ListEntitiesRequest
-import groundplatform.v2.data.ListImpactEventsRequest
-import groundplatform.v2.data.ListMutationLogsRequest
-import groundplatform.v2.data.ListPlacesRequest
-import groundplatform.v2.data.ListSubmissionsRequest
-import groundplatform.v2.data.MutationLogRecord
-import groundplatform.v2.data.RecordImpactEventsRequest
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.ListLibrariesRequest
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
-import groundplatform.v2.survey.GetSurveyRequest
-import groundplatform.v2.survey.GetSurveyResponse
-import groundplatform.v2.survey.ListOrganizationsRequest
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyOverview
-import groundplatform.v2.survey.SurveyState
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.ImpactEvent as ImpactEventProto
+import openforis.collectone.v1.data.ListEntitiesRequest
+import openforis.collectone.v1.data.ListImpactEventsRequest
+import openforis.collectone.v1.data.ListMutationLogsRequest
+import openforis.collectone.v1.data.ListPlacesRequest
+import openforis.collectone.v1.data.ListSubmissionsRequest
+import openforis.collectone.v1.data.MutationLogRecord
+import openforis.collectone.v1.data.RecordImpactEventsRequest
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.ListLibrariesRequest
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.BatchGetSurveyOverviewsRequest
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.GetSurveyResponse
+import openforis.collectone.v1.survey.ListOrganizationsRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyOverview
+import openforis.collectone.v1.survey.SurveyState
 import org.openforis.collectone.v2.app.client.grpc.CollectOneGrpcClient
 import org.openforis.collectone.v2.app.client.grpc.GrpcWebException
 import org.openforis.collectone.v2.app.client.grpc.GrpcWebTransport

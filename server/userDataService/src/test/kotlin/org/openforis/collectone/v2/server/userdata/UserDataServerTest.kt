@@ -14,11 +14,6 @@
 package org.openforis.collectone.v2.server.userdata
 
 import com.linecorp.armeria.server.Server
-import groundplatform.v2.survey.GetSurveyRequest
-import groundplatform.v2.survey.GetSurveyResponse
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.ListSurveyOverviewsResponse
-import groundplatform.v2.survey.SurveyServiceServer
 import io.grpc.CallOptions
 import io.grpc.ManagedChannelBuilder
 import io.grpc.MethodDescriptor
@@ -38,6 +33,11 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.GetSurveyResponse
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsResponse
+import openforis.collectone.v1.survey.SurveyServiceServer
 
 /** Calls a running server over gRPC-Web (as browsers and the app do) and over native gRPC. */
 class UserDataServerTest {
@@ -60,7 +60,7 @@ class UserDataServerTest {
   fun grpcWeb_unaryCalls_andSyncTokens() {
     val survey =
       grpcWeb(
-          "/groundplatform.v2.survey.SurveyService/GetSurvey",
+          "/openforis.collectone.v1.survey.SurveyService/GetSurvey",
           GetSurveyRequest.ADAPTER.encode(GetSurveyRequest(survey_id = KENYA)),
         )
         .messages
@@ -109,8 +109,9 @@ class UserDataServerTest {
       )
     @Suppress("UNCHECKED_CAST")
     val getSurvey =
-      definition.getMethod("groundplatform.v2.survey.SurveyService/GetSurvey").methodDescriptor
-        as MethodDescriptor<Any, Any>
+      definition
+        .getMethod("openforis.collectone.v1.survey.SurveyService/GetSurvey")
+        .methodDescriptor as MethodDescriptor<Any, Any>
     val channel =
       ManagedChannelBuilder.forAddress("127.0.0.1", server.activeLocalPort()).usePlaintext().build()
     try {
@@ -126,7 +127,7 @@ class UserDataServerTest {
       @Suppress("UNCHECKED_CAST")
       val listOverviews =
         definition
-          .getMethod("groundplatform.v2.survey.SurveyService/ListSurveyOverviews")
+          .getMethod("openforis.collectone.v1.survey.SurveyService/ListSurveyOverviews")
           .methodDescriptor as MethodDescriptor<Any, Any>
       val error =
         assertFailsWith<StatusRuntimeException> {
@@ -155,7 +156,7 @@ class UserDataServerTest {
     try {
       val response =
         grpcWeb(
-          "/groundplatform.v2.survey.SurveyService/GetSurvey",
+          "/openforis.collectone.v1.survey.SurveyService/GetSurvey",
           GetSurveyRequest.ADAPTER.encode(GetSurveyRequest(survey_id = KENYA)),
           base = "http://127.0.0.1:${firebaseServer.activeLocalPort()}",
         )
@@ -186,7 +187,7 @@ class UserDataServerTest {
       val entry =
         kotlinx.coroutines.runBlocking {
           backend
-            .GetSurveyAcl(groundplatform.v2.survey.GetSurveyAclRequest(survey_id = KENYA))
+            .GetSurveyAcl(openforis.collectone.v1.survey.GetSurveyAclRequest(survey_id = KENYA))
             .acl
             ?.entries
             ?.single { it.email == "collector.two@example.org" }
@@ -266,6 +267,7 @@ class UserDataServerTest {
 
   companion object {
     const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
-    const val LIST_SURVEY_OVERVIEWS = "/groundplatform.v2.survey.SurveyService/ListSurveyOverviews"
+    const val LIST_SURVEY_OVERVIEWS =
+      "/openforis.collectone.v1.survey.SurveyService/ListSurveyOverviews"
   }
 }

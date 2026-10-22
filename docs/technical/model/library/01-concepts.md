@@ -26,7 +26,7 @@ consistently across surveys, organizations, and languages.
 
 Library entries are translated independently of any form, so their text uses
 `LocalizedText`, a map from BCP-47 language tag to text, rather than
-`groundplatform.v2.forms.LocalizedString` (which holds a single language's
+`openforis.collectone.v1.forms.LocalizedString` (which holds a single language's
 variants inside a form's `TranslationCatalog`).
 
 ```protobuf
@@ -59,7 +59,7 @@ message ConceptDef {
 
   // Suggested data type and unit (UCUM code, e.g., "har" for hectares, "m3",
   // "kg").
-  groundplatform.v2.forms.DataType data_type = 7;
+  openforis.collectone.v1.forms.DataType data_type = 7;
   string unit = 8;
 
   // Allowed values for select concepts.
@@ -85,7 +85,7 @@ message ConceptDef {
   // resolve to this concept.
   repeated string aliases = 16;
 
-  groundplatform.v2.data.AuditInfo audit_info = 17;
+  openforis.collectone.v1.data.AuditInfo audit_info = 17;
   int32 sort_order = 18;
 }
 
@@ -163,7 +163,7 @@ enum LibraryStatus {
 Questions link to concepts through a `ConceptRef`. Concept links are
 meaningful only to Ground, so, following the ProtoForms compatibility boundary
 in `GEMINI.md`, they are **not** a typed field of
-`groundplatform.v2.forms`. Instead, two complementary mechanisms carry them:
+`openforis.collectone.v1.forms`. Instead, two complementary mechanisms carry them:
 
 *   **Typed survey-level links (authoritative)**: `SurveyDef` stores the links
     for each of its forms, keyed by field path. Validation, exports, and
@@ -174,7 +174,7 @@ in `GEMINI.md`, they are **not** a typed field of
     round-trips through XForms and XLSForm like any other tool's extension.
 
 ```protobuf
-// groundplatform.v2.library
+// openforis.collectone.v1.library
 message ConceptRef {
   // Concept ID, including the `org.<organization_id>.` prefix for
   // organization concepts.
@@ -182,11 +182,11 @@ message ConceptRef {
   int32 version = 2;
 }
 
-// groundplatform.v2.survey
+// openforis.collectone.v1.survey
 message FormConceptLinks {
   string form_id = 1;
   // Field path (e.g., "/data/commodity") to concept.
-  map<string, groundplatform.v2.library.ConceptRef> field_concepts = 2;
+  map<string, openforis.collectone.v1.library.ConceptRef> field_concepts = 2;
 }
 
 message SurveyDef {
@@ -196,10 +196,10 @@ message SurveyDef {
 
 message EntityPropertyDefinition {
   // ... fields 1–4 ...
-  groundplatform.v2.library.ConceptRef concept_ref = 5;
+  openforis.collectone.v1.library.ConceptRef concept_ref = 5;
 }
 
-// groundplatform.v2.forms (generic XForms round-trip fidelity)
+// openforis.collectone.v1.forms (generic XForms round-trip fidelity)
 message ForeignAttribute {
   string namespace_uri = 1;
   // Qualified name as written in the source document (e.g.,

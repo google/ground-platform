@@ -14,12 +14,12 @@
  */
 package org.openforis.collectone.v2.core.forms.media
 
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.ControlType
-import groundplatform.v2.forms.FieldBinding
-import groundplatform.v2.forms.FieldValue
 import okio.ByteString
 import okio.ByteString.Companion.decodeBase64
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.ControlType
+import openforis.collectone.v1.forms.FieldBinding
+import openforis.collectone.v1.forms.FieldValue
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 import org.openforis.collectone.v2.core.forms.model.FormState
 

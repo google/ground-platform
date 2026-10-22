@@ -13,11 +13,11 @@
  */
 package org.openforis.collectone.v2.app.data.repository
 
-import groundplatform.v2.survey.SurveyDef
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import openforis.collectone.v1.survey.SurveyDef
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStoreTransaction
 import org.openforis.collectone.v2.app.data.datasource.remote.GrpcProtoMapper

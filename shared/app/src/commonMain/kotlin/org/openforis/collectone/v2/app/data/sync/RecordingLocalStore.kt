@@ -15,22 +15,22 @@
  */
 package org.openforis.collectone.v2.app.data.sync
 
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.SubmissionMutation
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.LibraryMutation
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.Organization as OrganizationProto
-import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.withContext
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.SubmissionMutation
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.LibraryMutation
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.Organization as OrganizationProto
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStoreTransaction
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload

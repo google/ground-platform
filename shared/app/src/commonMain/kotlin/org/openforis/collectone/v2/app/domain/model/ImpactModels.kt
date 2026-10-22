@@ -13,7 +13,7 @@
  */
 package org.openforis.collectone.v2.app.domain.model
 
-/** Kind of "data was used" signal (`groundplatform.v2.data.ImpactEventType`). */
+/** Kind of "data was used" signal (`openforis.collectone.v1.data.ImpactEventType`). */
 enum class ImpactEventType(val label: String) {
   EXPORT("Exported"),
   PARTNER_PUSH("Sent to a partner"),
@@ -24,7 +24,7 @@ enum class ImpactEventType(val label: String) {
 }
 
 /**
- * One "data was used" signal (`groundplatform.v2.data.ImpactEvent`; see
+ * One "data was used" signal (`openforis.collectone.v1.data.ImpactEvent`; see
  * `docs/technical/model/data/04-impact-events.md`). Append-only and aggregate only: counts and
  * areas, no geometry, and no personal data beyond [actorUserId].
  *
@@ -65,7 +65,7 @@ data class ImpactCoverage(val featureCount: Int = 0, val areaHa: Double = 0.0) {
   }
 }
 
-/** Lifecycle state of a survey (`groundplatform.v2.survey.SurveyState`). */
+/** Lifecycle state of a survey (`openforis.collectone.v1.survey.SurveyState`). */
 enum class SurveyLifecycleState(val label: String) {
   /** Under construction; editable by organizers and not yet live for field collection. */
   DRAFT("Draft"),

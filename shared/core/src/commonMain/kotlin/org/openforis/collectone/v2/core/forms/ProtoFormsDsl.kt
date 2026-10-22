@@ -16,16 +16,16 @@ package org.openforis.collectone.v2.core.forms
 import com.google.type.Date
 import com.google.type.TimeOfDay
 import com.squareup.wire.ofEpochSecond
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.GeoShape
-import groundplatform.v2.forms.GeoTrace
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordMetadata
-import groundplatform.v2.forms.RecordNode
-import groundplatform.v2.forms.RecordNodeList
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.forms.TypedValueList
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.GeoShape
+import openforis.collectone.v1.forms.GeoTrace
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordMetadata
+import openforis.collectone.v1.forms.RecordNode
+import openforis.collectone.v1.forms.RecordNodeList
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.TypedValueList
 
 /**
  * Ergonomic Kotlin Multiplatform DSL builders for constructing ProtoForms Protocol Buffer instances

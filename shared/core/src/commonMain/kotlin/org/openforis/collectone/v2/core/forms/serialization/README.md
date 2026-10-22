@@ -27,18 +27,18 @@ from the **ProtoForms** protocol buffer model (generated with
 ## Overview
 
 The library bridges XForms XML and strongly-typed Protocol Buffer
-representations defined in the `groundplatform.v2.forms` schema:
+representations defined in the `openforis.collectone.v1.forms` schema:
 
 -   **Form Definitions (`FormDef`)**: Converts `<h:html>` XForms
     documents—including `<model>` (`<instance>`, `<bind>`, `<itext>`
     translations, secondary `<instance>` choice datasets) and `<body>` UI
     controls (`<input>`, `<select1>`, `<select>`, `<range>`, `<rank>`,
     `<upload>`, `<trigger>`, `<group>`, `<repeat>`)—to and from
-    `groundplatform.v2.forms.FormDef` messages.
+    `openforis.collectone.v1.forms.FormDef` messages.
 -   **Submission Instances (`RecordInstance`)**: Converts `<data id="...">` XML
     submission payloads—supporting nested groups, repeats, strongly-typed scalar
     values, coordinates/geometries, select lists, and metadata—to and from
-    `groundplatform.v2.forms.RecordInstance` messages.
+    `openforis.collectone.v1.forms.RecordInstance` messages.
 
 ### Foreign-Namespace Attributes
 
@@ -82,7 +82,7 @@ object and serialize it back to XML:
 
 ```kotlin
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
-import groundplatform.v2.forms.FormDef
+import openforis.collectone.v1.forms.FormDef
 
 val xformsXmlString = """
   <h:html xmlns="http://www.w3.org/2002/xforms"
@@ -134,7 +134,7 @@ protobuf object and serialize it back to XML:
 
 ```kotlin
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
-import groundplatform.v2.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordInstance
 
 val submissionXmlString = """
   <data id="tree_survey" version="1">

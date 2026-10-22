@@ -13,21 +13,21 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath
 
-import groundplatform.v2.forms.ChoiceItem
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.ControlType
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.LabelDef
-import groundplatform.v2.forms.LanguageTranslation
-import groundplatform.v2.forms.LocalizedString
-import groundplatform.v2.forms.ModelDef
-import groundplatform.v2.forms.PrimaryInstance
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordSchema
-import groundplatform.v2.forms.SecondaryInstance
-import groundplatform.v2.forms.TranslationCatalog
-import groundplatform.v2.forms.ViewComponent
-import groundplatform.v2.forms.ViewDef
+import openforis.collectone.v1.forms.ChoiceItem
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.ControlType
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.LabelDef
+import openforis.collectone.v1.forms.LanguageTranslation
+import openforis.collectone.v1.forms.LocalizedString
+import openforis.collectone.v1.forms.ModelDef
+import openforis.collectone.v1.forms.PrimaryInstance
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordSchema
+import openforis.collectone.v1.forms.SecondaryInstance
+import openforis.collectone.v1.forms.TranslationCatalog
+import openforis.collectone.v1.forms.ViewComponent
+import openforis.collectone.v1.forms.ViewDef
 
 typealias RecordNodeBuilder = org.openforis.collectone.v2.core.forms.RecordNodeBuilder
 

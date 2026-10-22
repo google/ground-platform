@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.data;
+package openforis.collectone.v1.data;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
@@ -231,7 +231,7 @@ message ListEntitiesResponse {
 
 message EntityCluster {
   string s2_cell_token = 1;
-  groundplatform.v2.forms.GeoPoint centroid = 2;
+  openforis.collectone.v1.forms.GeoPoint centroid = 2;
   int32 total_count = 3;
   int32 completed_count = 4;
   int32 in_progress_count = 5;

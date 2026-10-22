@@ -13,12 +13,12 @@
  */
 package org.openforis.collectone.v2.core.forms.serialization
 
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordInstance
 
 /**
  * Data-driven round-trip tests verifying that simple and complex XForms XML documents can be

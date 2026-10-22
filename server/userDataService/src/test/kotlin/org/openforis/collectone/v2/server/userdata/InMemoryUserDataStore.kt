@@ -14,21 +14,21 @@
 package org.openforis.collectone.v2.server.userdata
 
 import com.squareup.wire.Instant
-import groundplatform.v2.data.AppliedMutationWatermark
-import groundplatform.v2.data.AuditRecord
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.ImpactEvent
-import groundplatform.v2.data.MutationLogRecord
-import groundplatform.v2.data.PlaceRecord
-import groundplatform.v2.data.PlotLock
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.SharingPolicy
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.userdata.UserDataSeed
+import openforis.collectone.v1.data.AppliedMutationWatermark
+import openforis.collectone.v1.data.AuditRecord
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.ImpactEvent
+import openforis.collectone.v1.data.MutationLogRecord
+import openforis.collectone.v1.data.PlaceRecord
+import openforis.collectone.v1.data.PlotLock
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.ConceptDef
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.SharingPolicy
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.userdata.UserDataSeed
 
 /**
  * Test fake [UserDataStore] that keeps everything in memory, initialized from [seed], so unit tests

@@ -21,7 +21,7 @@ namespaces to prevent naming collisions and manage modularity.
 
 ## Package Structure
 
-The core ProtoForms schema is defined in the `groundplatform.v2.forms` package
+The core ProtoForms schema is defined in the `openforis.collectone.v1.forms` package
 and organized into modular protocol buffer files corresponding to each top-level
 entity:
 
@@ -40,7 +40,7 @@ entity:
 ```protobuf
 syntax = "proto3";
 
-package groundplatform.v2.forms;
+package openforis.collectone.v1.forms;
 ```
 
 Standard types are imported from canonical protobuf repositories rather than

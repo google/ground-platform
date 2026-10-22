@@ -31,12 +31,12 @@ message EntityRecord {
   // Exposed to XForms / ProtoForms XPath expressions and `entity_saveto` bindings
   // under the reserved system property name "geometry".
   oneof geometry {
-    groundplatform.v2.forms.GeoPoint point = 5;
-    groundplatform.v2.forms.GeoTrace trace = 6;
-    groundplatform.v2.forms.GeoShape shape = 7;
+    openforis.collectone.v1.forms.GeoPoint point = 5;
+    openforis.collectone.v1.forms.GeoTrace trace = 6;
+    openforis.collectone.v1.forms.GeoShape shape = 7;
   }
 
-  map<string, groundplatform.v2.forms.TypedValue> properties = 8;
+  map<string, openforis.collectone.v1.forms.TypedValue> properties = 8;
   AuditInfo audit_info = 9;
   bool is_field_created = 10;
   bool is_deleted = 11;

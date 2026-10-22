@@ -15,11 +15,11 @@ package org.openforis.collectone.v2.app.data.seed
 
 import com.squareup.moshi.Moshi
 import com.squareup.wire.WireJsonAdapterFactory
-import groundplatform.v2.userdata.UserDataSeed
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import openforis.collectone.v1.userdata.UserDataSeed
 
 /**
  * Keeps the user data service's sample seed

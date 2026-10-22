@@ -13,7 +13,6 @@
  */
 package org.openforis.collectone.v2.workbench.ui.viewmodel
 
-import groundplatform.v2.forms.FormDef
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -29,6 +28,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import openforis.collectone.v1.forms.FormDef
 import org.openforis.collectone.v2.app.domain.model.DeviceFormFactor
 import org.openforis.collectone.v2.app.domain.model.DeviceOrientation
 import org.openforis.collectone.v2.app.domain.model.SurveyConfig

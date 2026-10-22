@@ -16,17 +16,17 @@ package org.openforis.collectone.v2.core.forms.xpath.model
 import com.google.type.Date
 import com.google.type.TimeOfDay
 import com.squareup.wire.Instant
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.GeoShape
-import groundplatform.v2.forms.GeoTrace
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.forms.TypedValueList
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.GeoShape
+import openforis.collectone.v1.forms.GeoTrace
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.TypedValueList
 
 /**
  * Rich runtime value ADT evaluated by the ProtoForms XPath engine.
@@ -62,7 +62,7 @@ sealed interface XPathValue {
 
   /**
    * Converts this evaluated value into a strongly-typed [TypedValue] suitable for writing to a
-   * [groundplatform.v2.forms.RecordInstance] field (e.g., from a `calculate_expression`).
+   * [openforis.collectone.v1.forms.RecordInstance] field (e.g., from a `calculate_expression`).
    */
   fun toTypedValue(targetType: DataType? = null): TypedValue? {
     val unwrapped = unwrapNodeSet()
@@ -299,7 +299,7 @@ sealed interface XPathValue {
     override fun isEmptyValue(): Boolean = false
   }
 
-  /** Geographic coordinate point (`groundplatform.v2.forms.GeoPoint`). */
+  /** Geographic coordinate point (`openforis.collectone.v1.forms.GeoPoint`). */
   data class GeoPointVal(val value: GeoPoint) : XPathValue {
     override fun toBoolean(): Boolean = true
 
@@ -310,7 +310,7 @@ sealed interface XPathValue {
     override fun isEmptyValue(): Boolean = false
   }
 
-  /** Geographic polyline path (`groundplatform.v2.forms.GeoTrace`). */
+  /** Geographic polyline path (`openforis.collectone.v1.forms.GeoTrace`). */
   data class GeoTraceVal(val value: GeoTrace) : XPathValue {
     override fun toBoolean(): Boolean = value.points.isNotEmpty()
 
@@ -321,7 +321,7 @@ sealed interface XPathValue {
     override fun isEmptyValue(): Boolean = value.points.isEmpty()
   }
 
-  /** Geographic closed polygon (`groundplatform.v2.forms.GeoShape`). */
+  /** Geographic closed polygon (`openforis.collectone.v1.forms.GeoShape`). */
   data class GeoShapeVal(val value: GeoShape) : XPathValue {
     override fun toBoolean(): Boolean = value.points.isNotEmpty()
 
@@ -334,7 +334,7 @@ sealed interface XPathValue {
 
   /**
    * Multi-select choice list or repeated primitive values
-   * (`groundplatform.v2.forms.TypedValueList`).
+   * (`openforis.collectone.v1.forms.TypedValueList`).
    */
   data class ValueList(val values: List<XPathValue>) : XPathValue {
     override fun toBoolean(): Boolean = values.isNotEmpty()

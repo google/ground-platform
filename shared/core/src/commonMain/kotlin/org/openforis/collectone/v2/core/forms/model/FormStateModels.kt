@@ -13,18 +13,18 @@
  */
 package org.openforis.collectone.v2.core.forms.model
 
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.EntityDeclaration
-import groundplatform.v2.forms.FieldBinding
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.GroupDef
-import groundplatform.v2.forms.MediaRef
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordNode
-import groundplatform.v2.forms.RepeatDef
-import groundplatform.v2.forms.TypedValue
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.EntityDeclaration
+import openforis.collectone.v1.forms.FieldBinding
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.GroupDef
+import openforis.collectone.v1.forms.MediaRef
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordNode
+import openforis.collectone.v1.forms.RepeatDef
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.media.MediaCaptureSpec
 
 /**
@@ -177,9 +177,10 @@ data class ValidationError(
 /**
  * Materialized UI component node within the dynamic form view tree.
  *
- * Unlike the static [groundplatform.v2.forms.ViewComponent] protobuf definition, [ComponentState]
- * expands repeat groups into concrete [RepeatInstanceState] items and holds evaluated relevancy,
- * localized/interpolated labels, dynamic itemset choices, and bound [FieldState]s.
+ * Unlike the static [openforis.collectone.v1.forms.ViewComponent] protobuf definition,
+ * [ComponentState] expands repeat groups into concrete [RepeatInstanceState] items and holds
+ * evaluated relevancy, localized/interpolated labels, dynamic itemset choices, and bound
+ * [FieldState]s.
  */
 sealed interface ComponentState {
   /** Canonical instance path associated with this component (or synthetic path if unbound). */

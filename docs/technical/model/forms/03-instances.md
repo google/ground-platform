@@ -28,7 +28,7 @@ The *primary instance* defines the schema, field hierarchy, and default values
 of the record using `RecordSchema` and `RecordNode` within `PrimaryInstance`. To
 ensure clients and servers never need to rely on Protocol Buffer reflection or
 per-form code generation, all submitted form data is represented by the standard
-code-generated `groundplatform.v2.forms.RecordInstance` message.
+code-generated `openforis.collectone.v1.forms.RecordInstance` message.
 
 The following example shows a primary instance definition alongside its
 populated `RecordInstance` payload:
@@ -77,7 +77,7 @@ primary_instance {
 ```
 
 When a user completes and submits the form, the client runtime serializes the
-captured answers into a `groundplatform.v2.forms.RecordInstance` message:
+captured answers into a `openforis.collectone.v1.forms.RecordInstance` message:
 
 ```textproto
 form_id: "household"

@@ -15,16 +15,16 @@
  */
 package org.openforis.collectone.v2.app.data.sync
 
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.survey.SurveyDef
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.survey.SurveyDef
 import org.openforis.collectone.v2.app.client.storage.SyncStateFile
 import org.openforis.collectone.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload

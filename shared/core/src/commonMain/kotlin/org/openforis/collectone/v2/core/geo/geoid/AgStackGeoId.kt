@@ -13,7 +13,7 @@
  */
 package org.openforis.collectone.v2.core.geo.geoid
 
-import groundplatform.v2.forms.GeoPoint
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.core.geo.s2.S2
 import org.openforis.collectone.v2.core.geo.s2.S2FixedLevelCoverer
 import org.openforis.collectone.v2.core.geo.s2.S2LatLngRect

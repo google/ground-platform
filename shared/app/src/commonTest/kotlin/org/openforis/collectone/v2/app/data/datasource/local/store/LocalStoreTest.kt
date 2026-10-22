@@ -13,12 +13,6 @@
  */
 package org.openforis.collectone.v2.app.data.datasource.local.store
 
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.Organization as OrganizationProto
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -36,6 +30,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.Organization as OrganizationProto
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
 import org.openforis.collectone.v2.app.data.seed.SampleDataSeeder
 import org.openforis.collectone.v2.app.data.seed.SampleEntitiesData
 import org.openforis.collectone.v2.app.data.seed.SampleOrganizationsData

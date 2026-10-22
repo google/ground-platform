@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.data;
+package openforis.collectone.v1.data;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/impact_event.proto";

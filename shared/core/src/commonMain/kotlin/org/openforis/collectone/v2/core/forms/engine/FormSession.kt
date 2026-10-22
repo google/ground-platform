@@ -15,12 +15,12 @@
  */
 package org.openforis.collectone.v2.core.forms.engine
 
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.forms.TypedValueList
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.TypedValueList
 import org.openforis.collectone.v2.core.forms.media.MediaAttachment
 import org.openforis.collectone.v2.core.forms.media.MediaAttachmentRejectedException
 import org.openforis.collectone.v2.core.forms.media.MediaCapture

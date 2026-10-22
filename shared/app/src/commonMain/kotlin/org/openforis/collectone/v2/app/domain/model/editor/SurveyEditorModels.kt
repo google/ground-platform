@@ -68,7 +68,7 @@ data class SurveyDetails(
   val quotaLimits: QuotaLimitsConfig = QuotaLimitsConfig(),
 )
 
-/** Collaborator roles (mirrors `groundplatform.v2.survey.Role`). */
+/** Collaborator roles (mirrors `openforis.collectone.v1.survey.Role`). */
 enum class CollaboratorRole(val label: String, val description: String) {
   VIEWER("Viewer", "Can view the map, Map layers, and submissions."),
   DATA_COLLECTOR("Data collector", "Can collect submissions and add map features."),
@@ -91,7 +91,7 @@ data class Collaborator(
     get() = profile?.displayName?.takeIf { it.isNotBlank() } ?: email
 }
 
-/** Mirrors `groundplatform.v2.survey.SharingPolicy`. */
+/** Mirrors `openforis.collectone.v1.survey.SharingPolicy`. */
 enum class SharingPolicy(val label: String, val description: String) {
   RESTRICTED("Restricted", "Only people added above can open this survey."),
   /** Only valid when the survey belongs to an organization ([SurveyDetails.organizationId]). */
@@ -115,7 +115,7 @@ enum class SharingPolicy(val label: String, val description: String) {
     get() = this == PUBLIC
 }
 
-/** Mirrors `groundplatform.v2.survey.PeerDataVisibility`. */
+/** Mirrors `openforis.collectone.v1.survey.PeerDataVisibility`. */
 enum class PeerDataVisibility(val label: String, val description: String) {
   ALL("All data", "Data collectors see everyone's submissions and map features."),
   OWN_ONLY("Own data only", "Data collectors only see what they collected."),
@@ -160,7 +160,8 @@ enum class GeometryKind(val label: String, val dataType: String, val minVertices
 }
 
 /**
- * Property (column) types supported in the editor (subset of `groundplatform.v2.forms.DataType`).
+ * Property (column) types supported in the editor (subset of
+ * `openforis.collectone.v1.forms.DataType`).
  */
 enum class PropertyType(val label: String, val dataType: String) {
   TEXT("Text", "TYPE_STRING"),

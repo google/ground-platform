@@ -113,7 +113,7 @@ if (config.devServer) {
   const proxies = Array.isArray(config.devServer.proxy) ? config.devServer.proxy : [];
   proxies.push({
     // gRPC-Web calls: /<package>.<Service>/<Method>.
-    context: (pathname) => pathname.startsWith('/groundplatform.v2.'),
+    context: (pathname) => pathname.startsWith('/openforis.collectone.v1.'),
     router: () => readUserDataServiceUrl() || 'http://127.0.0.1:9',
     changeOrigin: true,
     on: {

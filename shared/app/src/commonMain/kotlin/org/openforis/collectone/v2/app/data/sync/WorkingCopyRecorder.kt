@@ -15,8 +15,8 @@
  */
 package org.openforis.collectone.v2.app.data.sync
 
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStoreTransaction
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload

@@ -14,11 +14,6 @@
  */
 package org.openforis.collectone.v2.core.forms.media
 
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.ControlType
-import groundplatform.v2.forms.FieldBinding
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.TypedValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -27,6 +22,11 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import okio.ByteString.Companion.encodeUtf8
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.ControlType
+import openforis.collectone.v1.forms.FieldBinding
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.engine.FormSession
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer

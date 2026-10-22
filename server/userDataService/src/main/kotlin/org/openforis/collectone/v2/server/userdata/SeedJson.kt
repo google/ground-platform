@@ -20,7 +20,7 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.wire.WireJsonAdapterFactory
-import groundplatform.v2.userdata.UserDataSeed
+import openforis.collectone.v1.userdata.UserDataSeed
 
 internal val protoJsonMoshi: Moshi =
   Moshi.Builder()

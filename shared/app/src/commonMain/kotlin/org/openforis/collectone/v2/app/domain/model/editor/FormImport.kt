@@ -13,16 +13,16 @@
  */
 package org.openforis.collectone.v2.app.domain.model.editor
 
-import groundplatform.v2.forms.ControlDef
-import groundplatform.v2.forms.ControlType
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldBinding
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.ItemsetDef
-import groundplatform.v2.forms.LabelDef
-import groundplatform.v2.forms.MediaRef
-import groundplatform.v2.forms.RecordNode
-import groundplatform.v2.forms.ViewComponent
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.ControlType
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldBinding
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.ItemsetDef
+import openforis.collectone.v1.forms.LabelDef
+import openforis.collectone.v1.forms.MediaRef
+import openforis.collectone.v1.forms.RecordNode
+import openforis.collectone.v1.forms.ViewComponent
 import org.openforis.collectone.v2.app.domain.model.FormAvailability
 import org.openforis.collectone.v2.core.forms.model.FormDefinition
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer

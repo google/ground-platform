@@ -13,23 +13,6 @@
  */
 package org.openforis.collectone.v2.server.userdata
 
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.ListEntitiesRequest
-import groundplatform.v2.data.ListSubmissionsRequest
-import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.data.SubmissionMutation
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
-import groundplatform.v2.survey.GetSurveyRequest
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.MutateSurveyRequest
-import groundplatform.v2.survey.Role
-import groundplatform.v2.survey.SearchPublicSurveysRequest
-import groundplatform.v2.survey.SharingPolicy
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
-import groundplatform.v2.survey.SurveyState
 import io.grpc.Status
 import io.grpc.StatusException
 import kotlin.test.Test
@@ -39,6 +22,23 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.ListEntitiesRequest
+import openforis.collectone.v1.data.ListSubmissionsRequest
+import openforis.collectone.v1.data.MutateDataRequest
+import openforis.collectone.v1.data.SubmissionMutation
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.survey.BatchGetSurveyOverviewsRequest
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.MutateSurveyRequest
+import openforis.collectone.v1.survey.Role
+import openforis.collectone.v1.survey.SearchPublicSurveysRequest
+import openforis.collectone.v1.survey.SharingPolicy
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
+import openforis.collectone.v1.survey.SurveyState
 
 /**
  * Survey Trash, policy-based sharing (`sharing_role`), downloaded-survey lookups, the public survey

@@ -15,15 +15,15 @@ package org.openforis.collectone.v2.core.forms.engine
 
 import com.google.type.Date
 import com.squareup.wire.Instant
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldDefinition
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordMetadata
-import groundplatform.v2.forms.RecordNode
-import groundplatform.v2.forms.RecordNodeList
-import groundplatform.v2.forms.RecordSchema
-import groundplatform.v2.forms.TypedValue
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldDefinition
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordMetadata
+import openforis.collectone.v1.forms.RecordNode
+import openforis.collectone.v1.forms.RecordNodeList
+import openforis.collectone.v1.forms.RecordSchema
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.xpath.model.TemporalUtils
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathValue
 

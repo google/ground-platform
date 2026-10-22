@@ -26,7 +26,7 @@ target `EntityRecord`.
 To support reflection-free runtime inspection as well as opaque transport,
 `SubmissionRecord` defines a `oneof payload` supporting two representations:
 
-1.  **`groundplatform.v2.forms.RecordInstance record`**: A code-generated
+1.  **`openforis.collectone.v1.forms.RecordInstance record`**: A code-generated
     hierarchical data tree (`RecordNode`, `FieldValue`, `TypedValue`) that
     mobile, web, and server runtimes can traverse without protobuf reflection.
 2.  **`bytes raw_payload`**: Serialized protobuf primary record bytes.
@@ -39,10 +39,10 @@ message SubmissionRecord {
   string form_version = 4;
   string entity_id = 5;
   int64 revision = 6;
-  groundplatform.v2.forms.RecordMetadata metadata = 7;
+  openforis.collectone.v1.forms.RecordMetadata metadata = 7;
 
   oneof payload {
-    groundplatform.v2.forms.RecordInstance record = 8;
+    openforis.collectone.v1.forms.RecordInstance record = 8;
     bytes raw_payload = 9;
   }
 

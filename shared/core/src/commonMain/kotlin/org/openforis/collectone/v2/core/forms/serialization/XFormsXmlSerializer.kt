@@ -13,9 +13,9 @@
  */
 package org.openforis.collectone.v2.core.forms.serialization
 
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordSchema
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordSchema
 
 /**
  * Primary Kotlin Multiplatform serializer and deserializer for XForms XML documents to and from

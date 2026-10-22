@@ -13,7 +13,6 @@
  */
 package org.openforis.collectone.v2.server.userdata
 
-import groundplatform.v2.userdata.UserDataSeed
 import java.io.File
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -21,6 +20,7 @@ import java.net.Socket
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import openforis.collectone.v1.userdata.UserDataSeed
 
 /**
  * The Spanner emulator the `spanner`-tagged tests (`./gradlew spannerTest`) run against: the one at

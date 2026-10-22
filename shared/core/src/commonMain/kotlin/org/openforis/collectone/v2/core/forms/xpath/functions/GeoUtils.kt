@@ -13,13 +13,13 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath.functions
 
-import groundplatform.v2.forms.GeoPoint
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathValue
 
 /**

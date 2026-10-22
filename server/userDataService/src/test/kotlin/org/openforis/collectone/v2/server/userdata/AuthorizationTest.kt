@@ -13,24 +13,6 @@
  */
 package org.openforis.collectone.v2.server.userdata
 
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.ListEntitiesRequest
-import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.survey.BatchGetSurveyOverviewsRequest
-import groundplatform.v2.survey.GetSurveyAclRequest
-import groundplatform.v2.survey.GetSurveyRequest
-import groundplatform.v2.survey.ListOrganizationsRequest
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.MutateOrganizationRequest
-import groundplatform.v2.survey.MutateSurveyRequest
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
-import groundplatform.v2.survey.SurveyState
 import io.grpc.Status
 import io.grpc.StatusException
 import kotlin.test.Test
@@ -39,6 +21,24 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.ListEntitiesRequest
+import openforis.collectone.v1.data.MutateDataRequest
+import openforis.collectone.v1.survey.BatchGetSurveyOverviewsRequest
+import openforis.collectone.v1.survey.GetSurveyAclRequest
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.ListOrganizationsRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.MutateOrganizationRequest
+import openforis.collectone.v1.survey.MutateSurveyRequest
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
+import openforis.collectone.v1.survey.SurveyState
 
 /**
  * Per-caller authorization (`docs/technical/backend/spanner-schema.md`, "Sharing Policies and
@@ -117,7 +117,9 @@ open class AuthorizationTest {
               listOf(
                 SurveyMutation(
                   acl_upsert =
-                    SurveyAcl(sharing_policy = groundplatform.v2.survey.SharingPolicy.RESTRICTED)
+                    SurveyAcl(
+                      sharing_policy = openforis.collectone.v1.survey.SharingPolicy.RESTRICTED
+                    )
                 )
               ),
           )
@@ -254,7 +256,8 @@ open class AuthorizationTest {
                 SurveyMutation(
                   acl_upsert =
                     SurveyAcl(
-                      peer_data_visibility = groundplatform.v2.survey.PeerDataVisibility.OWN_ONLY
+                      peer_data_visibility =
+                        openforis.collectone.v1.survey.PeerDataVisibility.OWN_ONLY
                     )
                 )
               ),

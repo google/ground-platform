@@ -13,16 +13,16 @@
  */
 package org.openforis.collectone.v2.core.sampling
 
-import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.GeoShape
-import groundplatform.v2.survey.EntityDatasetDef
-import groundplatform.v2.survey.MapConfig
-import groundplatform.v2.survey.SamplingDesign
-import groundplatform.v2.survey.SurveyArea
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.GeoShape
+import openforis.collectone.v1.survey.EntityDatasetDef
+import openforis.collectone.v1.survey.MapConfig
+import openforis.collectone.v1.survey.SamplingDesign
+import openforis.collectone.v1.survey.SurveyArea
 
 class SamplingDesignProtosTest {
   private val designs =

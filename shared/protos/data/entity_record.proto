@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.data;
+package openforis.collectone.v1.data;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
@@ -45,7 +45,7 @@ message EntityConflict {
   string field_key = 2;
   int64 base_revision = 3;
   int64 conflicting_revision = 4;
-  groundplatform.v2.forms.TypedValue incoming_value = 5;
+  openforis.collectone.v1.forms.TypedValue incoming_value = 5;
   string incoming_user_id = 6;
   string source_submission_id = 7;
   google.protobuf.Timestamp incoming_timestamp = 8;
@@ -72,13 +72,13 @@ message EntityRecord {
   // `entity_saveto` bindings under the reserved system property name
   // `"geometry"`.
   oneof geometry {
-    groundplatform.v2.forms.GeoPoint point = 5;
-    groundplatform.v2.forms.GeoTrace trace = 6;
-    groundplatform.v2.forms.GeoShape shape = 7;
+    openforis.collectone.v1.forms.GeoPoint point = 5;
+    openforis.collectone.v1.forms.GeoTrace trace = 6;
+    openforis.collectone.v1.forms.GeoShape shape = 7;
   }
 
   // Key-value attribute properties stored for this entity.
-  map<string, groundplatform.v2.forms.TypedValue> properties = 8;
+  map<string, openforis.collectone.v1.forms.TypedValue> properties = 8;
 
   // Audit metadata recording creation and last modification.
   AuditInfo audit_info = 9;

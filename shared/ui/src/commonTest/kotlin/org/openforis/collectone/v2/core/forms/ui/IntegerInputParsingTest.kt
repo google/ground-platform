@@ -13,10 +13,10 @@
  */
 package org.openforis.collectone.v2.core.forms.ui
 
-import groundplatform.v2.forms.DataType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import openforis.collectone.v1.forms.DataType
 
 class IntegerInputParsingTest {
 

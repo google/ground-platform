@@ -13,13 +13,13 @@
  */
 package org.openforis.collectone.v2.core.forms.ui
 
-import groundplatform.v2.forms.ControlType
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.ControlType
 import org.openforis.collectone.v2.core.forms.engine.FormSession
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 

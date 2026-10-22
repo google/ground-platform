@@ -182,8 +182,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordInstance
 import org.openforis.collectone.v2.core.forms.ui.FormWizardController
 import org.openforis.collectone.v2.core.forms.ui.MobileFormRunner
 

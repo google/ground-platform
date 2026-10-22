@@ -13,8 +13,8 @@
  */
 package org.openforis.collectone.v2.core.sampling
 
-import groundplatform.v2.survey.SamplingDesign
-import groundplatform.v2.survey.SubPlotDesign
+import openforis.collectone.v1.survey.SamplingDesign
+import openforis.collectone.v1.survey.SubPlotDesign
 
 /**
  * Conversions between the engine's [SampleDesign] and the persisted `SamplingDesign` proto

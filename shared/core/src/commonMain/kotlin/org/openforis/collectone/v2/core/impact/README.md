@@ -20,7 +20,7 @@
 survey outcomes) into privacy-safe aggregate rows at survey, organization, country, global, and S2
 grid cell scope. It implements the aggregation job designed in
 [Impact Aggregation and Spatial Overlays](../../../../../../../../../../docs/technical/backend/impact-aggregation.md);
-rows correspond to `groundplatform.v2.data.ImpactAggregate`.
+rows correspond to `openforis.collectone.v1.data.ImpactAggregate`.
 
 The same pure, deterministic code runs in the backend job (JVM) and in clients, so dashboards
 match across environments. A run is O(n log n) in the number of features.

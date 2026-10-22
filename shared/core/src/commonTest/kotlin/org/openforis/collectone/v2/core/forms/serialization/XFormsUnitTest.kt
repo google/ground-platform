@@ -13,16 +13,16 @@
  */
 package org.openforis.collectone.v2.core.forms.serialization
 
-import groundplatform.v2.forms.ActionType
-import groundplatform.v2.forms.ControlType
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.EventType
-import groundplatform.v2.forms.PreloadType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.ActionType
+import openforis.collectone.v1.forms.ControlType
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.EventType
+import openforis.collectone.v1.forms.PreloadType
 
 class XFormsUnitTest {
 

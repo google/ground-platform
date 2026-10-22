@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.data;
+package openforis.collectone.v1.data;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
@@ -87,13 +87,13 @@ message SubmissionRecord {
 
   // Provenance metadata including start/end timestamps, device ID, and audit
   // file URI.
-  groundplatform.v2.forms.RecordMetadata metadata = 7;
+  openforis.collectone.v1.forms.RecordMetadata metadata = 7;
 
   // Populated form submission record instance or its serialized bytes.
   oneof payload {
     // Populated form submission record instance containing all captured field
     // answers, nested groups, repeat items, and client session data.
-    groundplatform.v2.forms.RecordInstance record = 8;
+    openforis.collectone.v1.forms.RecordInstance record = 8;
 
     // Serialized protobuf primary record payload bytes.
     bytes raw_payload = 9;

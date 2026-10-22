@@ -13,9 +13,9 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.TypedValue
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.xpath.ast.DependencyAnalyzer
 import org.openforis.collectone.v2.core.forms.xpath.ast.XPathDependency
 import org.openforis.collectone.v2.core.forms.xpath.ast.XPathExpr

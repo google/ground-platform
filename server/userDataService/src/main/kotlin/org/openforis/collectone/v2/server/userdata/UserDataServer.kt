@@ -19,13 +19,13 @@ import com.linecorp.armeria.server.Server
 import com.linecorp.armeria.server.cors.CorsService
 import com.linecorp.armeria.server.grpc.GrpcService
 import com.linecorp.armeria.server.healthcheck.HealthCheckService
-import groundplatform.v2.data.DataServiceServer
-import groundplatform.v2.library.LibraryServiceServer
-import groundplatform.v2.survey.OrganizationServiceServer
-import groundplatform.v2.survey.SurveyServiceServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import openforis.collectone.v1.data.DataServiceServer
+import openforis.collectone.v1.library.LibraryServiceServer
+import openforis.collectone.v1.survey.OrganizationServiceServer
+import openforis.collectone.v1.survey.SurveyServiceServer
 
 /**
  * Builds the HTTP server for the user data service.

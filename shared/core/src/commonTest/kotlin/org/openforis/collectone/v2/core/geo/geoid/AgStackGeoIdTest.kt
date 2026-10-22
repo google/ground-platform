@@ -13,11 +13,11 @@
  */
 package org.openforis.collectone.v2.core.geo.geoid
 
-import groundplatform.v2.forms.GeoPoint
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.GeoPoint
 
 /** A golden covering produced by the AgStack reference code at one S2 level. */
 internal data class GoldenCase(

@@ -13,16 +13,16 @@
  */
 package org.openforis.collectone.v2.core.forms.ui
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.TypedValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
 

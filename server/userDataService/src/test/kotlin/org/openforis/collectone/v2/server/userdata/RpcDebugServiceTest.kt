@@ -14,9 +14,6 @@
 package org.openforis.collectone.v2.server.userdata
 
 import com.linecorp.armeria.server.Server
-import groundplatform.v2.survey.GetSurveyRequest
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.ListSurveyOverviewsResponse
 import io.grpc.Status
 import java.net.URI
 import java.net.http.HttpClient
@@ -29,6 +26,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsResponse
 
 /** Verifies the RPC Debug Web UI and `/debug/rpcs*` endpoints on [UserDataServer]. */
 class RpcDebugServiceTest {
@@ -71,7 +71,7 @@ class RpcDebugServiceTest {
   fun rpcCalls_areRecordedWithProtoJsonDeltaDetectionAndCleared() {
     // 1. Standard lookup RPC.
     sendGrpcWeb(
-      "/groundplatform.v2.survey.SurveyService/GetSurvey",
+      "/openforis.collectone.v1.survey.SurveyService/GetSurvey",
       GetSurveyRequest.ADAPTER.encode(GetSurveyRequest(survey_id = KENYA)),
     )
 
@@ -103,7 +103,7 @@ class RpcDebugServiceTest {
     val getSurvey = entries[0]
     assertEquals("SurveyService", getSurvey.service)
     assertEquals("GetSurvey", getSurvey.method)
-    assertEquals("/groundplatform.v2.survey.SurveyService/GetSurvey", getSurvey.fullPath)
+    assertEquals("/openforis.collectone.v1.survey.SurveyService/GetSurvey", getSurvey.fullPath)
     assertEquals("gRPC-Web", getSurvey.transport)
     assertEquals(0, getSurvey.statusCode)
     assertEquals("OK", getSurvey.statusName)
@@ -181,6 +181,6 @@ class RpcDebugServiceTest {
   companion object {
     private const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
     private const val LIST_SURVEY_OVERVIEWS =
-      "/groundplatform.v2.survey.SurveyService/ListSurveyOverviews"
+      "/openforis.collectone.v1.survey.SurveyService/ListSurveyOverviews"
   }
 }

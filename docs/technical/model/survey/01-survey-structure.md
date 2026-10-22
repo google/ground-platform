@@ -18,7 +18,7 @@
 
 The top-level `SurveyDef` message (defined in `survey_def.proto`) is the root
 organizational container in Open Foris Collect One. It encapsulates one or more ProtoForms
-form definitions (`groundplatform.v2.forms.FormDef`), lookup tables, map
+form definitions (`openforis.collectone.v1.forms.FormDef`), lookup tables, map
 configurations, and sharing policies.
 
 ## Lifecycle States (`SurveyState`)
@@ -67,7 +67,7 @@ message FormLaunchConfig {
   // Multilingual label for the CTA button used to start collecting data
   // (e.g., "Register Plot", "Record Harvest"). References `SurveyDef.translations`
   // via `LabelDef.text_id`, or falls back to `LabelDef.text` / `FormDef.title`.
-  groundplatform.v2.forms.LabelDef cta_label = 2;
+  openforis.collectone.v1.forms.LabelDef cta_label = 2;
 
   // Optional Material Symbols or vector icon identifier for the CTA button.
   string cta_icon = 3;

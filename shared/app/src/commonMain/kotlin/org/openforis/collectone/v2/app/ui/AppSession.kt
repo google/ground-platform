@@ -17,9 +17,9 @@ package org.openforis.collectone.v2.app.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
 import kotlinx.coroutines.launch
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordInstance
 import org.openforis.collectone.v2.app.di.AppDataHolder
 import org.openforis.collectone.v2.app.domain.model.AppScreen
 import org.openforis.collectone.v2.app.domain.model.BasemapType

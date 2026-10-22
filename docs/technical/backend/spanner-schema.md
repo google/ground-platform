@@ -125,7 +125,7 @@ disagree.
 ### PROTO Columns With Generated Columns
 
 Each record's canonical proto is stored in a typed column (for example,
-`Record groundplatform.v2.data.EntityRecord`) registered in a `PROTO BUNDLE`.
+`Record openforis.collectone.v1.data.EntityRecord`) registered in a `PROTO BUNDLE`.
 
 - **Generated columns instead of app-maintained copies.** Indexed and filtered
   fields are declared as `STORED` generated columns, such as
@@ -134,7 +134,7 @@ Each record's canonical proto is stored in a typed column (for example,
   few non-derivable columns: `CommitTs`, `DeletedAt`, S2 cell IDs, and epochs.
 - **No `protobuf-java` dependency.** Spanner converts between `BYTES` and
   `PROTO`, so Wire-generated Kotlin keeps writing serialized bytes, e.g.
-  `CAST(@record AS groundplatform.v2.data.EntityRecord)`, and reads
+  `CAST(@record AS openforis.collectone.v1.data.EntityRecord)`, and reads
   `CAST(Record AS BYTES)`.
 - **Bundle updates are cheap.** `ALTER PROTO BUNDLE` has no DDL fee and runs
   online without downtime. It's needed only when SQL must see new fields or new
@@ -527,29 +527,29 @@ to the app.
 
 ```sql
 CREATE PROTO BUNDLE (
-  groundplatform.v2.data.EntityRecord,
-  groundplatform.v2.data.SubmissionRecord,
-  groundplatform.v2.data.ReviewStatus,
-  groundplatform.v2.data.AuditRecord,
-  groundplatform.v2.data.ImpactEvent,
-  groundplatform.v2.data.ImpactEventType,
-  groundplatform.v2.data.ImpactAggregate,
-  groundplatform.v2.survey.SurveyDef,
-  groundplatform.v2.survey.SurveyState,
-  groundplatform.v2.survey.SurveyAcl,
-  groundplatform.v2.survey.AclEntry,
-  groundplatform.v2.survey.Role,
-  groundplatform.v2.survey.SharingPolicy,
-  groundplatform.v2.survey.PeerDataVisibility,
-  groundplatform.v2.survey.CachedProfile,
-  groundplatform.v2.survey.Organization,
-  groundplatform.v2.survey.OrganizationMember,
-  groundplatform.v2.survey.OrganizationRole,
-  groundplatform.v2.survey.MembershipStatus,
-  groundplatform.v2.library.OrganizationLibraryRecord,
-  groundplatform.v2.library.ConceptDef,
-  groundplatform.v2.library.LibraryStatus,
-  groundplatform.v2.forms.DataType
+  openforis.collectone.v1.data.EntityRecord,
+  openforis.collectone.v1.data.SubmissionRecord,
+  openforis.collectone.v1.data.ReviewStatus,
+  openforis.collectone.v1.data.AuditRecord,
+  openforis.collectone.v1.data.ImpactEvent,
+  openforis.collectone.v1.data.ImpactEventType,
+  openforis.collectone.v1.data.ImpactAggregate,
+  openforis.collectone.v1.survey.SurveyDef,
+  openforis.collectone.v1.survey.SurveyState,
+  openforis.collectone.v1.survey.SurveyAcl,
+  openforis.collectone.v1.survey.AclEntry,
+  openforis.collectone.v1.survey.Role,
+  openforis.collectone.v1.survey.SharingPolicy,
+  openforis.collectone.v1.survey.PeerDataVisibility,
+  openforis.collectone.v1.survey.CachedProfile,
+  openforis.collectone.v1.survey.Organization,
+  openforis.collectone.v1.survey.OrganizationMember,
+  openforis.collectone.v1.survey.OrganizationRole,
+  openforis.collectone.v1.survey.MembershipStatus,
+  openforis.collectone.v1.library.OrganizationLibraryRecord,
+  openforis.collectone.v1.library.ConceptDef,
+  openforis.collectone.v1.library.LibraryStatus,
+  openforis.collectone.v1.forms.DataType
 );
 
 -- Deployment-wide metadata. DataEpoch rotates only on an intentional reset.
@@ -561,7 +561,7 @@ CREATE TABLE ServiceMetadata (
 CREATE TABLE Users (
   UserId           STRING(128) NOT NULL,       -- auth subject (not client-chosen)
   EmailNormalized  STRING(320) NOT NULL,
-  Profile          groundplatform.v2.survey.CachedProfile,
+  Profile          openforis.collectone.v1.survey.CachedProfile,
   AccessEpoch      INT64 NOT NULL,             -- bumped when this user's ACL entries or memberships change
   CreateTime       TIMESTAMP NOT NULL,
   CommitTs         TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
@@ -572,7 +572,7 @@ CREATE UNIQUE INDEX UsersByEmail ON Users(EmailNormalized);
 
 CREATE TABLE Organizations (
   OrganizationId   UUID NOT NULL,
-  Record           groundplatform.v2.survey.Organization NOT NULL,   -- members stripped
+  Record           openforis.collectone.v1.survey.Organization NOT NULL,   -- members stripped
   Name             STRING(MAX) AS (Record.name) STORED,
   Listed           BOOL AS (Record.listed) STORED,
   IsDeleted        BOOL AS (Record.is_deleted) STORED,
@@ -586,10 +586,10 @@ CREATE SEARCH INDEX OrganizationsSearch ON Organizations(SearchTokens)
 CREATE TABLE OrganizationMembers (
   OrganizationId   UUID NOT NULL,
   EmailNormalized  STRING(320) NOT NULL,       -- patch key "members/<email>"
-  Record           groundplatform.v2.survey.OrganizationMember NOT NULL,
+  Record           openforis.collectone.v1.survey.OrganizationMember NOT NULL,
   UserId           STRING(128) AS (NULLIF(Record.user_id, '')) STORED,   -- NULL until invite redeemed
-  Role             groundplatform.v2.survey.OrganizationRole AS (Record.role) STORED,
-  Status           groundplatform.v2.survey.MembershipStatus AS (Record.status) STORED,
+  Role             openforis.collectone.v1.survey.OrganizationRole AS (Record.role) STORED,
+  Status           openforis.collectone.v1.survey.MembershipStatus AS (Record.status) STORED,
   InviteToken      STRING(64) AS (NULLIF(Record.invite_token, '')) STORED,  -- server-generated
   CommitTs         TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (OrganizationId, EmailNormalized),
@@ -601,7 +601,7 @@ CREATE UNIQUE NULL_FILTERED INDEX MembersByInvite ON OrganizationMembers(InviteT
 -- One row per organization, plus the global library under the reserved system organization.
 CREATE TABLE OrganizationLibraries (
   OrganizationId   UUID NOT NULL,
-  Record           groundplatform.v2.library.OrganizationLibraryRecord NOT NULL,
+  Record           openforis.collectone.v1.library.OrganizationLibraryRecord NOT NULL,
   CommitTs         TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (OrganizationId),
   INTERLEAVE IN PARENT Organizations ON DELETE CASCADE;
@@ -610,9 +610,9 @@ CREATE TABLE OrganizationLibraries (
 CREATE TABLE LibraryConcepts (
   OrganizationId   UUID NOT NULL,
   ConceptId        STRING(256) NOT NULL,       -- namespaced library ID, e.g. org.<uuid>.cherry_kg
-  Concept          groundplatform.v2.library.ConceptDef NOT NULL,
-  DataType         groundplatform.v2.forms.DataType AS (Concept.data_type) STORED,
-  Status           groundplatform.v2.library.LibraryStatus AS (Concept.status) STORED,
+  Concept          openforis.collectone.v1.library.ConceptDef NOT NULL,
+  DataType         openforis.collectone.v1.forms.DataType AS (Concept.data_type) STORED,
+  Status           openforis.collectone.v1.library.LibraryStatus AS (Concept.status) STORED,
   SearchText       STRING(MAX) NOT NULL,       -- labels, keywords, codes (app-built from localized fields)
   SearchTokens     TOKENLIST AS (TOKENIZE_FULLTEXT(SearchText)) HIDDEN,
 ) PRIMARY KEY (OrganizationId, ConceptId),
@@ -623,15 +623,15 @@ CREATE SEARCH INDEX LibraryConceptsSearch ON LibraryConcepts(SearchTokens) STORI
 
 CREATE TABLE Surveys (
   SurveyId             UUID NOT NULL,
-  SavedDef             groundplatform.v2.survey.SurveyDef NOT NULL,   -- saved head, patchable in place
-  AclRules             groundplatform.v2.survey.SurveyAcl NOT NULL,   -- entries stripped
+  SavedDef             openforis.collectone.v1.survey.SurveyDef NOT NULL,   -- saved head, patchable in place
+  AclRules             openforis.collectone.v1.survey.SurveyAcl NOT NULL,   -- entries stripped
   OrganizationId       UUID AS (CAST(NULLIF(SavedDef.organization_id, '') AS UUID)) STORED,  -- NULL = personal
   OwnerId              STRING(128) AS (SavedDef.owner_id) STORED,
-  State                groundplatform.v2.survey.SurveyState AS (SavedDef.state) STORED,
+  State                openforis.collectone.v1.survey.SurveyState AS (SavedDef.state) STORED,
   SavedVersion         STRING(64) AS (SavedDef.version) STORED,
   RecordVersion        INT64 AS (SavedDef.record_version) STORED,
-  SharingPolicy        groundplatform.v2.survey.SharingPolicy AS (AclRules.sharing_policy) STORED,
-  PeerDataVisibility   groundplatform.v2.survey.PeerDataVisibility AS (AclRules.peer_data_visibility) STORED,
+  SharingPolicy        openforis.collectone.v1.survey.SharingPolicy AS (AclRules.sharing_policy) STORED,
+  PeerDataVisibility   openforis.collectone.v1.survey.PeerDataVisibility AS (AclRules.peer_data_visibility) STORED,
   SearchTokens         TOKENLIST AS (TOKENIZE_FULLTEXT(CONCAT(SavedDef.title, ' ', SavedDef.description))) HIDDEN,
   HasWorkingCopy       BOOL NOT NULL,
   DataAccessEpoch      INT64 NOT NULL,         -- bumped on PeerDataVisibility change
@@ -648,7 +648,7 @@ CREATE SEARCH INDEX SurveysSearch ON Surveys(SearchTokens) STORING (SharingPolic
 -- 0..1 row; autosave rewrites only this row, not Surveys.SavedDef.
 CREATE TABLE SurveyWorkingCopies (
   SurveyId   UUID NOT NULL,
-  Def        groundplatform.v2.survey.SurveyDef NOT NULL,
+  Def        openforis.collectone.v1.survey.SurveyDef NOT NULL,
   CommitTs   TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (SurveyId),
   INTERLEAVE IN PARENT Surveys ON DELETE CASCADE;
@@ -658,7 +658,7 @@ CREATE TABLE SurveyWorkingCopies (
 CREATE TABLE SurveyRevisions (
   SurveyId        UUID NOT NULL,
   RevisionNumber  INT64 NOT NULL,             -- server-assigned
-  Def             groundplatform.v2.survey.SurveyDef NOT NULL,
+  Def             openforis.collectone.v1.survey.SurveyDef NOT NULL,
   Version         STRING(64) AS (Def.version) STORED,
   CommitTs        TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (SurveyId, RevisionNumber DESC),
@@ -667,9 +667,9 @@ CREATE TABLE SurveyRevisions (
 CREATE TABLE SurveyAclEntries (
   SurveyId          UUID NOT NULL,
   EmailNormalized   STRING(320) NOT NULL,
-  Record            groundplatform.v2.survey.AclEntry NOT NULL,
+  Record            openforis.collectone.v1.survey.AclEntry NOT NULL,
   UserId            STRING(128) AS (NULLIF(Record.user_id, '')) STORED,   -- Firebase uid; set when the invite binds
-  Role              groundplatform.v2.survey.Role AS (Record.role) STORED,
+  Role              openforis.collectone.v1.survey.Role AS (Record.role) STORED,
   InviteToken       STRING(64) AS (NULLIF(Record.invite_token, '')) STORED,
   CommitTs          TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (SurveyId, EmailNormalized),
@@ -683,7 +683,7 @@ CREATE UNIQUE NULL_FILTERED INDEX AclByInvite ON SurveyAclEntries(InviteToken);
 CREATE TABLE Entities (
   SurveyId        UUID NOT NULL,
   EntityId        UUID NOT NULL,
-  Record          groundplatform.v2.data.EntityRecord NOT NULL,   -- incl. revision, active_lock
+  Record          openforis.collectone.v1.data.EntityRecord NOT NULL,   -- incl. revision, active_lock
   DatasetId       STRING(128) AS (Record.dataset_id) STORED,   -- ODK entity list name
   IsDeleted       BOOL AS (Record.is_deleted) STORED,
   CreatedBy       STRING(128) AS (Record.audit_info.created_by) STORED,   -- OWN_ONLY filtering
@@ -707,13 +707,13 @@ CREATE INDEX EntitiesByLabel      ON Entities(SurveyId, DatasetId, Label, Entity
 CREATE TABLE Submissions (
   SurveyId         UUID NOT NULL,
   SubmissionId     UUID NOT NULL,
-  Record           groundplatform.v2.data.SubmissionRecord NOT NULL,   -- media referenced by URI
+  Record           openforis.collectone.v1.data.SubmissionRecord NOT NULL,   -- media referenced by URI
   FormId           STRING(128) AS (Record.form_id) STORED,
   EntityId         UUID AS (CAST(NULLIF(Record.entity_id, '') AS UUID)) STORED,
   IsDeleted        BOOL AS (Record.is_deleted) STORED,
   CreatedBy        STRING(128) AS (Record.audit_info.created_by) STORED,
   CollectorEmail   STRING(320) AS (NULLIF(Record.collector_email, '')) STORED,
-  ReviewStatus     groundplatform.v2.data.ReviewStatus AS (Record.review_status) STORED,
+  ReviewStatus     openforis.collectone.v1.data.ReviewStatus AS (Record.review_status) STORED,
   CommitTs         TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
   DeletedAt        TIMESTAMP OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (SurveyId, SubmissionId),
@@ -732,7 +732,7 @@ CREATE TABLE AuditRecords (
   SurveyId    UUID NOT NULL,
   CommitTs    TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
   AuditId     UUID NOT NULL,                   -- server-generated
-  Record      groundplatform.v2.data.AuditRecord NOT NULL,
+  Record      openforis.collectone.v1.data.AuditRecord NOT NULL,
   TargetId    STRING(64) AS (Record.target_id) STORED,
 ) PRIMARY KEY (SurveyId, CommitTs, AuditId),
   INTERLEAVE IN PARENT Surveys ON DELETE CASCADE;
@@ -753,10 +753,10 @@ CREATE TABLE MediaObjects (
 -- Append-only; idempotent via insert-or-ignore on the client's EventId.
 CREATE TABLE ImpactEvents (
   EventId          UUID NOT NULL,
-  Record           groundplatform.v2.data.ImpactEvent NOT NULL,
+  Record           openforis.collectone.v1.data.ImpactEvent NOT NULL,
   SurveyId         UUID AS (CAST(NULLIF(Record.survey_id, '') AS UUID)) STORED,
   OrganizationId   UUID AS (CAST(NULLIF(Record.organization_id, '') AS UUID)) STORED,
-  Type             groundplatform.v2.data.ImpactEventType AS (Record.type) STORED,
+  Type             openforis.collectone.v1.data.ImpactEventType AS (Record.type) STORED,
   CommitTs         TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (EventId);
 CREATE NULL_FILTERED INDEX ImpactBySurvey ON ImpactEvents(SurveyId, CommitTs, EventId);
@@ -774,7 +774,7 @@ CREATE TABLE ImpactAggregates (
   ScopeId    STRING(64) NOT NULL,
   RunId      UUID NOT NULL,
   RowIndex   INT64 NOT NULL,
-  Record     groundplatform.v2.data.ImpactAggregate NOT NULL,
+  Record     openforis.collectone.v1.data.ImpactAggregate NOT NULL,
 ) PRIMARY KEY (ScopeType, ScopeId, RunId, RowIndex),
   INTERLEAVE IN PARENT ImpactAggregateRuns ON DELETE CASCADE;
 

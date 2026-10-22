@@ -13,10 +13,10 @@
  */
 package org.openforis.collectone.v2.core.forms.xpath
 
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.RecordInstance
-import groundplatform.v2.forms.RecordSchema
-import groundplatform.v2.forms.TranslationCatalog
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.RecordInstance
+import openforis.collectone.v1.forms.RecordSchema
+import openforis.collectone.v1.forms.TranslationCatalog
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathNode
 import org.openforis.collectone.v2.core.forms.xpath.model.XPathValue
 

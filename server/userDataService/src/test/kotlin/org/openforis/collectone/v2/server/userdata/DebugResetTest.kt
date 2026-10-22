@@ -14,8 +14,6 @@
 package org.openforis.collectone.v2.server.userdata
 
 import com.linecorp.armeria.server.Server
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
-import groundplatform.v2.survey.ListSurveyOverviewsResponse
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -25,6 +23,8 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsResponse
 
 /** Verifies `POST /debug/reset` on [UserDataServer]. */
 class DebugResetTest {
@@ -99,7 +99,7 @@ class DebugResetTest {
     val response =
       httpClient.send(
         HttpRequest.newBuilder(
-            URI("$baseUrl/groundplatform.v2.survey.SurveyService/ListSurveyOverviews")
+            URI("$baseUrl/openforis.collectone.v1.survey.SurveyService/ListSurveyOverviews")
           )
           .header("content-type", "application/grpc-web+proto")
           .header("x-grpc-web", "1")

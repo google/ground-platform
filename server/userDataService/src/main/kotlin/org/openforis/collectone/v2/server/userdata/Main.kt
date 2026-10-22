@@ -14,10 +14,10 @@
 package org.openforis.collectone.v2.server.userdata
 
 import com.squareup.wire.Instant
-import groundplatform.v2.userdata.UserDataSeed
 import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import openforis.collectone.v1.userdata.UserDataSeed
 
 /** Classpath location of the sample seed generated from the app's test fixtures. */
 const val SAMPLE_SEED_RESOURCE = "/seed/user_data_seed.json"

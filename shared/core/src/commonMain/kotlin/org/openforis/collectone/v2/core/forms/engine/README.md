@@ -17,14 +17,14 @@
 # ProtoForms Dynamic Form State Model & Evaluation Engine (`org.openforis.collectone.v2.core.forms.engine`)
 
 A pure Kotlin Multiplatform (KMP) runtime state model and reactive evaluation
-engine for **ProtoForms** (`groundplatform.v2.forms.Form` and `Record`) and the
+engine for **ProtoForms** (`openforis.collectone.v1.forms.Form` and `Record`) and the
 [XForms specification](https://getodk.github.io/xforms-spec/).
 
 
 ## Overview
 
-While `groundplatform.v2.forms.Form` defines the static form schema, bindings,
-and UI layout, and `groundplatform.v2.forms.Record` stores the raw field values,
+While `openforis.collectone.v1.forms.Form` defines the static form schema, bindings,
+and UI layout, and `openforis.collectone.v1.forms.Record` stores the raw field values,
 multiplatform UI clients (Compose Multiplatform, Android, iOS, and Web) require
 a reactive runtime engine that evaluates all dynamic aspects of a form and
 produces a ready-to-render UI state tree.
@@ -189,9 +189,9 @@ For UI clients and ViewModels, `FormSession` coordinates initialization, user
 input, repeat manipulation, locale switching, and submission validation:
 
 ```kotlin
-import groundplatform.v2.forms.Form
-import groundplatform.v2.forms.FieldValue
-import groundplatform.v2.forms.TypedValue
+import openforis.collectone.v1.forms.Form
+import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.engine.DefaultFormEnvironment
 import org.openforis.collectone.v2.core.forms.engine.FormSession
 import org.openforis.collectone.v2.core.forms.model.DataFieldState
@@ -275,8 +275,8 @@ device metadata, or SQLite-backed secondary instances
 import com.google.type.Date
 import com.google.type.TimeOfDay
 import com.squareup.wire.Instant
-import groundplatform.v2.forms.PreloadConfig
-import groundplatform.v2.forms.TypedValue
+import openforis.collectone.v1.forms.PreloadConfig
+import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.engine.FormEnvironment
 import org.openforis.collectone.v2.core.forms.xpath.SecondaryInstanceProvider
 

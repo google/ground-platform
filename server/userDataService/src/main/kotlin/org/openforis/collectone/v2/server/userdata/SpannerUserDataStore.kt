@@ -29,26 +29,26 @@ import com.google.cloud.spanner.Value
 import com.squareup.wire.Instant
 import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
-import groundplatform.v2.data.AppliedMutationWatermark
-import groundplatform.v2.data.AuditRecord
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.ImpactEvent
-import groundplatform.v2.data.MutationLogRecord
-import groundplatform.v2.data.PlaceRecord
-import groundplatform.v2.data.PlotLock
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.ConceptDef
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.AclEntry
-import groundplatform.v2.survey.CachedProfile
-import groundplatform.v2.survey.Organization
-import groundplatform.v2.survey.OrganizationMember
-import groundplatform.v2.survey.SharingPolicy
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.userdata.UserDataSeed
 import io.grpc.StatusRuntimeException
 import java.util.UUID
+import openforis.collectone.v1.data.AppliedMutationWatermark
+import openforis.collectone.v1.data.AuditRecord
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.ImpactEvent
+import openforis.collectone.v1.data.MutationLogRecord
+import openforis.collectone.v1.data.PlaceRecord
+import openforis.collectone.v1.data.PlotLock
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.ConceptDef
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.AclEntry
+import openforis.collectone.v1.survey.CachedProfile
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMember
+import openforis.collectone.v1.survey.SharingPolicy
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.userdata.UserDataSeed
 
 /**
  * [UserDataStore] backed by Cloud Spanner (the emulator in development), with the schema in
@@ -705,7 +705,7 @@ class SpannerUserDataStore(
             .set("EntityId")
             .to(uuid(entityId))
             .set("Lock")
-            .to(proto(PlotLock.ADAPTER, lock, "groundplatform.v2.data.PlotLock"))
+            .to(proto(PlotLock.ADAPTER, lock, "openforis.collectone.v1.data.PlotLock"))
             .build()
         )
       }
@@ -721,7 +721,7 @@ class SpannerUserDataStore(
             proto(
               ImpactEvent.ADAPTER,
               event.copy(commit_timestamp = null),
-              "groundplatform.v2.data.ImpactEvent",
+              "openforis.collectone.v1.data.ImpactEvent",
             )
           )
           .set("CommitTs")
@@ -943,14 +943,14 @@ class SpannerUserDataStore(
     const val NO_EPOCH = "unset"
 
     private const val SEED_BATCH_SIZE = 200
-    private const val ORGANIZATION = "groundplatform.v2.survey.Organization"
-    private const val ORGANIZATION_MEMBER = "groundplatform.v2.survey.OrganizationMember"
-    private const val LIBRARY = "groundplatform.v2.library.OrganizationLibraryRecord"
-    private const val CONCEPT = "groundplatform.v2.library.ConceptDef"
-    private const val SURVEY_DEF = "groundplatform.v2.survey.SurveyDef"
-    private const val SURVEY_ACL = "groundplatform.v2.survey.SurveyAcl"
-    private const val ACL_ENTRY = "groundplatform.v2.survey.AclEntry"
-    private const val CACHED_PROFILE = "groundplatform.v2.survey.CachedProfile"
+    private const val ORGANIZATION = "openforis.collectone.v1.survey.Organization"
+    private const val ORGANIZATION_MEMBER = "openforis.collectone.v1.survey.OrganizationMember"
+    private const val LIBRARY = "openforis.collectone.v1.library.OrganizationLibraryRecord"
+    private const val CONCEPT = "openforis.collectone.v1.library.ConceptDef"
+    private const val SURVEY_DEF = "openforis.collectone.v1.survey.SurveyDef"
+    private const val SURVEY_ACL = "openforis.collectone.v1.survey.SurveyAcl"
+    private const val ACL_ENTRY = "openforis.collectone.v1.survey.AclEntry"
+    private const val CACHED_PROFILE = "openforis.collectone.v1.survey.CachedProfile"
     private const val SURVEY_COLUMNS = "SELECT SavedDef AS Record, CommitTs FROM Surveys"
     private const val USER_COLUMNS =
       "SELECT UserId, EmailNormalized, EmailVerified, Profile, AccessEpoch, CreateTime FROM Users"
@@ -958,8 +958,8 @@ class SpannerUserDataStore(
     private fun emailKey(email: String, userId: String): String =
       email.trim().lowercase().ifEmpty { userId.trim() }
 
-    private const val ENTITY = "groundplatform.v2.data.EntityRecord"
-    private const val SUBMISSION = "groundplatform.v2.data.SubmissionRecord"
+    private const val ENTITY = "openforis.collectone.v1.data.EntityRecord"
+    private const val SUBMISSION = "openforis.collectone.v1.data.SubmissionRecord"
 
     private fun uuidOrNull(id: String): UUID? = runCatching { UUID.fromString(id) }.getOrNull()
 

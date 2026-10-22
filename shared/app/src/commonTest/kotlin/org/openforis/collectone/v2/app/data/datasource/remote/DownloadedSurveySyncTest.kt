@@ -13,18 +13,18 @@
  */
 package org.openforis.collectone.v2.app.data.datasource.remote
 
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.ListEntitiesRequest
-import groundplatform.v2.library.ListLibrariesRequest
-import groundplatform.v2.survey.ListSurveyOverviewsRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.ListEntitiesRequest
+import openforis.collectone.v1.library.ListLibrariesRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
 import org.openforis.collectone.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationTarget

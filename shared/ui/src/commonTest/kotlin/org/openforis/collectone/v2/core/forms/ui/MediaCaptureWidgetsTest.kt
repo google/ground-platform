@@ -14,7 +14,6 @@
  */
 package org.openforis.collectone.v2.core.forms.ui
 
-import groundplatform.v2.forms.DataType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -22,6 +21,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import okio.ByteString.Companion.encodeUtf8
+import openforis.collectone.v1.forms.DataType
 import org.openforis.collectone.v2.core.forms.media.MediaAttachment
 import org.openforis.collectone.v2.core.forms.media.MediaCapture
 import org.openforis.collectone.v2.core.forms.media.MediaCaptureKind

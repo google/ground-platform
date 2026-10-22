@@ -28,7 +28,9 @@ package org.openforis.collectone.v2.core.impact
  */
 const val ALL_USERS_ORGANIZATION_ID = "00000000-0000-4000-8000-000000000001"
 
-/** How a concept's values are aggregated (`groundplatform.v2.library.Concept.Aggregation`). */
+/**
+ * How a concept's values are aggregated (`openforis.collectone.v1.library.Concept.Aggregation`).
+ */
 enum class ImpactAggregation {
   /** Deduplicated features with a non-empty value. */
   COUNT_DISTINCT_FEATURES,
@@ -44,7 +46,7 @@ enum class ImpactAggregation {
   NONE,
 }
 
-/** Privacy class of a concept (`groundplatform.v2.library.Concept.PrivacyClass`). */
+/** Privacy class of a concept (`openforis.collectone.v1.library.Concept.PrivacyClass`). */
 enum class ImpactPrivacy {
   AGGREGATE_PUBLIC,
   ORG_ONLY,
@@ -52,7 +54,7 @@ enum class ImpactPrivacy {
   SENSITIVE,
 }
 
-/** Scope of an aggregate row (`groundplatform.v2.data.ImpactAggregate.ScopeType`). */
+/** Scope of an aggregate row (`openforis.collectone.v1.data.ImpactAggregate.ScopeType`). */
 enum class ImpactScopeType {
   SURVEY,
   ORGANIZATION,
@@ -61,7 +63,7 @@ enum class ImpactScopeType {
   CELL,
 }
 
-/** "Data was used" event types (`groundplatform.v2.data.ImpactEventType`). */
+/** "Data was used" event types (`openforis.collectone.v1.data.ImpactEventType`). */
 enum class ImpactEventKind {
   EXPORT,
   PARTNER_PUSH,
@@ -71,7 +73,7 @@ enum class ImpactEventKind {
   SURVEY_CLOSED,
 }
 
-/** Uses of a survey's data (`groundplatform.v2.survey.SurveyOutcome.Outcome`). */
+/** Uses of a survey's data (`openforis.collectone.v1.survey.SurveyOutcome.Outcome`). */
 enum class ImpactOutcomeKind {
   SUBMITTED_EUDR_DDS,
   REPORTED_FERM,
@@ -245,7 +247,7 @@ enum class ImpactMetric {
 /** Outcome kind reported for closed surveys nobody answered (distinct from "Not yet"). */
 const val OUTCOME_UNANSWERED = "UNANSWERED"
 
-/** One aggregate (`groundplatform.v2.data.ImpactAggregate`). */
+/** One aggregate (`openforis.collectone.v1.data.ImpactAggregate`). */
 data class ImpactAggregateRow(
   val scopeType: ImpactScopeType,
   /** Survey ID, organization ID, ISO country code, S2 token, or empty for global. */

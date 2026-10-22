@@ -13,13 +13,13 @@
  */
 package org.openforis.collectone.v2.app.di
 
-import groundplatform.v2.survey.ListOrganizationsRequest
-import groundplatform.v2.survey.ListOrganizationsResponse
-import groundplatform.v2.survey.OrganizationServiceServer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import openforis.collectone.v1.survey.ListOrganizationsRequest
+import openforis.collectone.v1.survey.ListOrganizationsResponse
+import openforis.collectone.v1.survey.OrganizationServiceServer
 import org.openforis.collectone.v2.app.client.grpc.CollectOneGrpcClient
 import org.openforis.collectone.v2.app.client.grpc.GrpcWebException
 import org.openforis.collectone.v2.app.data.datasource.local.store.InMemoryLocalStore
@@ -83,6 +83,6 @@ class UserDataSyncStateTest {
 
   companion object {
     private const val UNAVAILABLE = 14
-    private const val PATH = "/groundplatform.v2.survey.OrganizationService/ListOrganizations"
+    private const val PATH = "/openforis.collectone.v1.survey.OrganizationService/ListOrganizations"
   }
 }

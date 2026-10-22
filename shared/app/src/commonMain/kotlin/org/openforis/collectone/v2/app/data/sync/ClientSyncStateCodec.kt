@@ -15,10 +15,10 @@
  */
 package org.openforis.collectone.v2.app.data.sync
 
-import groundplatform.v2.userdata.ClientSyncState
-import groundplatform.v2.userdata.PendingMutationRecord
-import groundplatform.v2.userdata.SurveyBaseRecord
-import groundplatform.v2.userdata.SyncTokensRecord
+import openforis.collectone.v1.userdata.ClientSyncState
+import openforis.collectone.v1.userdata.PendingMutationRecord
+import openforis.collectone.v1.userdata.SurveyBaseRecord
+import openforis.collectone.v1.userdata.SyncTokensRecord
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStoreTransaction
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationTarget

@@ -13,7 +13,7 @@
  */
 package org.openforis.collectone.v2.app.domain.model
 
-import groundplatform.v2.survey.FormConceptLinks
+import openforis.collectone.v1.survey.FormConceptLinks
 import org.openforis.collectone.v2.app.domain.model.editor.PeerDataVisibility
 import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
 import org.openforis.collectone.v2.core.forms.model.FormDefinition

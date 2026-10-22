@@ -35,7 +35,7 @@ bottom-to-top z-order):
 
 ```protobuf
 message MapConfig {
-  groundplatform.v2.forms.GeoPoint initial_center = 1;
+  openforis.collectone.v1.forms.GeoPoint initial_center = 1;
   double initial_zoom = 2;
   repeated LayerDef layers = 3;
   SurveyArea survey_area = 4;
@@ -74,7 +74,7 @@ message SurveyArea {
   string name = 1;
 
   // Polygon parts, each a closed ring.
-  repeated groundplatform.v2.forms.GeoShape parts = 2;
+  repeated openforis.collectone.v1.forms.GeoShape parts = 2;
 
   // How the area was defined: "search", "drawn" or "uploaded:<filename>".
   string source = 3;

@@ -16,12 +16,12 @@
 package org.openforis.collectone.v2.app.data.sync
 
 import com.squareup.wire.Instant
-import groundplatform.v2.data.GetAppliedMutationsRequest
-import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.library.MutateLibraryRequest
-import groundplatform.v2.survey.MutateOrganizationRequest
-import groundplatform.v2.survey.MutateSurveyRequest
 import kotlin.coroutines.cancellation.CancellationException
+import openforis.collectone.v1.data.GetAppliedMutationsRequest
+import openforis.collectone.v1.data.MutateDataRequest
+import openforis.collectone.v1.library.MutateLibraryRequest
+import openforis.collectone.v1.survey.MutateOrganizationRequest
+import openforis.collectone.v1.survey.MutateSurveyRequest
 import org.openforis.collectone.v2.app.client.grpc.CollectOneGrpcClient
 import org.openforis.collectone.v2.app.client.grpc.GrpcWebException
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStore

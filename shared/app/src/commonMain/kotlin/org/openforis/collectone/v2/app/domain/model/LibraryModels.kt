@@ -19,7 +19,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.EditorQuestionType
 
 /**
  * Text in one or more languages, keyed by BCP-47 language tag (`"en"`, `"fr"`, `"sw"`, …). Mirrors
- * `groundplatform.v2.library.LocalizedText`.
+ * `openforis.collectone.v1.library.LocalizedText`.
  */
 data class LocalizedText(val values: Map<String, String> = emptyMap()) {
   /**
@@ -133,7 +133,8 @@ enum class ConceptDataType(
 
 /**
  * A link from a form question or entity property to a [LibraryConcept]
- * (`groundplatform.v2.library.ConceptRef`): the concept ID and the version it was linked against.
+ * (`openforis.collectone.v1.library.ConceptRef`): the concept ID and the version it was linked
+ * against.
  */
 data class ConceptLink(val conceptId: String, val version: Int = 1) {
   /** The `ground:concept` attribute value, `<conceptId>@<version>` (e.g. `eudr.commodity@1`). */
@@ -172,7 +173,7 @@ data class CodeListItem(
 
 /**
  * A concept (dictionary entry): a standard field definition in an organization's library. Mirrors
- * `groundplatform.v2.library.ConceptDef`; see `docs/technical/model/library/01-concepts.md`.
+ * `openforis.collectone.v1.library.ConceptDef`; see `docs/technical/model/library/01-concepts.md`.
  *
  * Global concepts (owned by `"All users"`) use `<vocabulary>.<name>` IDs; organization concepts use
  * `org.<organizationId>.<name>` (see [LibraryIds]).
@@ -210,7 +211,7 @@ data class LibraryConcept(
 }
 
 /**
- * A reusable Form in an organization's library (`groundplatform.v2.library.FormTemplateDef`).
+ * A reusable Form in an organization's library (`openforis.collectone.v1.library.FormTemplateDef`).
  * Adding it to a survey copies [form]; later template edits don't change existing surveys. Its
  * questions' concept links ([EditorQuestion.conceptLink]) travel in the template's `FormDef` as
  * `ground:concept` bind attributes.
@@ -237,8 +238,8 @@ data class FormTemplate(
 
 /**
  * A choice in the survey-creation step "What will this data be used for?"
- * (`groundplatform.v2.library.PurposePackDef`): templates added to the new survey, export profiles
- * enabled by default, and goal mapping.
+ * (`openforis.collectone.v1.library.PurposePackDef`): templates added to the new survey, export
+ * profiles enabled by default, and goal mapping.
  */
 data class PurposePack(
   val id: String,
@@ -310,7 +311,7 @@ object LibraryPrograms {
 }
 
 /**
- * A named export with a fixed output schema (`groundplatform.v2.library.ExportProfileDef`).
+ * A named export with a fixed output schema (`openforis.collectone.v1.library.ExportProfileDef`).
  * Questions are located through their concept links, so a profile works across differently worded
  * Forms.
  */
@@ -326,7 +327,8 @@ data class ExportProfile(
 )
 
 /**
- * Per-organization library preferences (`groundplatform.v2.library.OrganizationLibrarySettings`).
+ * Per-organization library preferences
+ * (`openforis.collectone.v1.library.OrganizationLibrarySettings`).
  */
 data class OrganizationLibrarySettings(
   /**

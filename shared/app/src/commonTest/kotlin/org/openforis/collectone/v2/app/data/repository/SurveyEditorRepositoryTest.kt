@@ -13,14 +13,14 @@
  */
 package org.openforis.collectone.v2.app.data.repository
 
-import groundplatform.v2.library.ConceptRef
-import groundplatform.v2.survey.FormConceptLinks
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.first
+import openforis.collectone.v1.library.ConceptRef
+import openforis.collectone.v1.survey.FormConceptLinks
 import org.openforis.collectone.v2.app.data.datasource.local.store.runNow
 import org.openforis.collectone.v2.app.data.datasource.local.store.seededStore
 import org.openforis.collectone.v2.app.domain.model.ConceptLink

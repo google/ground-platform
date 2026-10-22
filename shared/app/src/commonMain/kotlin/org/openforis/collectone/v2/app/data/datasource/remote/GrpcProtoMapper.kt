@@ -15,55 +15,55 @@ package org.openforis.collectone.v2.app.data.datasource.remote
 
 import com.squareup.wire.Instant
 import com.squareup.wire.ofEpochSecond
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.ImpactEvent as ImpactEventProto
-import groundplatform.v2.data.ImpactEventType as ImpactEventTypeProto
-import groundplatform.v2.data.MutationLogRecord
-import groundplatform.v2.data.PlaceRecord
-import groundplatform.v2.data.SubmissionFieldEntryDef
-import groundplatform.v2.data.SubmissionGeometryPolygonDef
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.GeoPoint
-import groundplatform.v2.forms.GeoShape
-import groundplatform.v2.forms.LabelDef
-import groundplatform.v2.forms.TypedValue
-import groundplatform.v2.forms.ViewComponent
-import groundplatform.v2.library.ConceptRef
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.library.OrganizationLibrarySettings
-import groundplatform.v2.survey.AclEntry
-import groundplatform.v2.survey.CachedProfile as CachedProfileProto
-import groundplatform.v2.survey.DataTableRow
-import groundplatform.v2.survey.EntityDatasetDef
-import groundplatform.v2.survey.EntityPropertyDefinition
-import groundplatform.v2.survey.EntityType
-import groundplatform.v2.survey.FormAvailability as FormAvailabilityProto
-import groundplatform.v2.survey.FormGeometrySource
-import groundplatform.v2.survey.FormLaunchConfig
-import groundplatform.v2.survey.GeometryStyle
-import groundplatform.v2.survey.ImagerySource as ImagerySourceProto
-import groundplatform.v2.survey.LayerDef
-import groundplatform.v2.survey.MapConfig
-import groundplatform.v2.survey.MembershipStatus as MembershipStatusProto
-import groundplatform.v2.survey.OfflineTilePackageDef
-import groundplatform.v2.survey.Organization as OrganizationProto
-import groundplatform.v2.survey.OrganizationMember as OrganizationMemberProto
-import groundplatform.v2.survey.OrganizationRole as OrganizationRoleProto
-import groundplatform.v2.survey.OrganizationType as OrganizationTypeProto
-import groundplatform.v2.survey.PeerDataVisibility as PeerDataVisibilityProto
-import groundplatform.v2.survey.QuotaLimits as QuotaLimitsProto
-import groundplatform.v2.survey.QuotaTier as QuotaTierProto
-import groundplatform.v2.survey.Role
-import groundplatform.v2.survey.SharingPolicy as SharingPolicyProto
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyArea as SurveyAreaProto
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyOutcome as SurveyOutcomeProto
-import groundplatform.v2.survey.SurveyOverview
-import groundplatform.v2.survey.SurveyState
-import groundplatform.v2.survey.XyzTileSource
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.ImpactEvent as ImpactEventProto
+import openforis.collectone.v1.data.ImpactEventType as ImpactEventTypeProto
+import openforis.collectone.v1.data.MutationLogRecord
+import openforis.collectone.v1.data.PlaceRecord
+import openforis.collectone.v1.data.SubmissionFieldEntryDef
+import openforis.collectone.v1.data.SubmissionGeometryPolygonDef
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.GeoShape
+import openforis.collectone.v1.forms.LabelDef
+import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.ViewComponent
+import openforis.collectone.v1.library.ConceptRef
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.library.OrganizationLibrarySettings
+import openforis.collectone.v1.survey.AclEntry
+import openforis.collectone.v1.survey.CachedProfile as CachedProfileProto
+import openforis.collectone.v1.survey.DataTableRow
+import openforis.collectone.v1.survey.EntityDatasetDef
+import openforis.collectone.v1.survey.EntityPropertyDefinition
+import openforis.collectone.v1.survey.EntityType
+import openforis.collectone.v1.survey.FormAvailability as FormAvailabilityProto
+import openforis.collectone.v1.survey.FormGeometrySource
+import openforis.collectone.v1.survey.FormLaunchConfig
+import openforis.collectone.v1.survey.GeometryStyle
+import openforis.collectone.v1.survey.ImagerySource as ImagerySourceProto
+import openforis.collectone.v1.survey.LayerDef
+import openforis.collectone.v1.survey.MapConfig
+import openforis.collectone.v1.survey.MembershipStatus as MembershipStatusProto
+import openforis.collectone.v1.survey.OfflineTilePackageDef
+import openforis.collectone.v1.survey.Organization as OrganizationProto
+import openforis.collectone.v1.survey.OrganizationMember as OrganizationMemberProto
+import openforis.collectone.v1.survey.OrganizationRole as OrganizationRoleProto
+import openforis.collectone.v1.survey.OrganizationType as OrganizationTypeProto
+import openforis.collectone.v1.survey.PeerDataVisibility as PeerDataVisibilityProto
+import openforis.collectone.v1.survey.QuotaLimits as QuotaLimitsProto
+import openforis.collectone.v1.survey.QuotaTier as QuotaTierProto
+import openforis.collectone.v1.survey.Role
+import openforis.collectone.v1.survey.SharingPolicy as SharingPolicyProto
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyArea as SurveyAreaProto
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyOutcome as SurveyOutcomeProto
+import openforis.collectone.v1.survey.SurveyOverview
+import openforis.collectone.v1.survey.SurveyState
+import openforis.collectone.v1.survey.XyzTileSource
 import org.openforis.collectone.v2.app.data.datasource.local.LibraryProtoMapper
 import org.openforis.collectone.v2.app.domain.model.CachedProfile
 import org.openforis.collectone.v2.app.domain.model.ConceptLink
@@ -127,8 +127,8 @@ import org.openforis.collectone.v2.core.forms.model.FormDefinition
 import org.openforis.collectone.v2.core.mutation.SurveyPatches
 
 /**
- * Bidirectional mapper between Wire-generated gRPC Protocol Buffer messages (`groundplatform.v2.*`)
- * and `shared/app` domain models stored in `LocalStore`.
+ * Bidirectional mapper between Wire-generated gRPC Protocol Buffer messages
+ * (`openforis.collectone.v1.*`) and `shared/app` domain models stored in `LocalStore`.
  */
 object GrpcProtoMapper {
   private const val PRIMARY_FORM_PROTO_ID = "__primary_form__"
@@ -350,7 +350,7 @@ object GrpcProtoMapper {
   fun libraryFromProto(proto: OrganizationLibraryRecord): OrganizationLibrary {
     val parsed =
       LibraryProtoMapper.fromBundle(
-        bundle = proto.bundle ?: groundplatform.v2.library.LibraryBundle(),
+        bundle = proto.bundle ?: openforis.collectone.v1.library.LibraryBundle(),
         organizationId = proto.organization_id,
         settings =
           proto.settings?.let(LibraryProtoMapper::fromProto)

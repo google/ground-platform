@@ -16,12 +16,12 @@
 package org.openforis.collectone.v2.app.data.datasource.local.store
 
 import com.squareup.wire.Instant
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.library.LibraryMutation
-import groundplatform.v2.survey.OrganizationMutation
-import groundplatform.v2.survey.SurveyAcl
-import groundplatform.v2.survey.SurveyDef
-import groundplatform.v2.survey.SurveyMutation
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.library.LibraryMutation
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
 
 /*
  * Sync bookkeeping kept in the [LocalStore] next to the data it describes (see

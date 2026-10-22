@@ -13,11 +13,11 @@
  */
 package org.openforis.collectone.v2.core.forms.serialization
 
-import groundplatform.v2.forms.GeoPoint
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.core.forms.buildRecordInstance
 
 class ProtoJsonUnitTest {

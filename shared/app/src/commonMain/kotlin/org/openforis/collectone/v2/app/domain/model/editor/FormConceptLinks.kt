@@ -13,10 +13,10 @@
  */
 package org.openforis.collectone.v2.app.domain.model.editor
 
-import groundplatform.v2.forms.FieldBinding
-import groundplatform.v2.forms.ForeignAttribute
-import groundplatform.v2.library.ConceptRef
-import groundplatform.v2.survey.FormConceptLinks
+import openforis.collectone.v1.forms.FieldBinding
+import openforis.collectone.v1.forms.ForeignAttribute
+import openforis.collectone.v1.library.ConceptRef
+import openforis.collectone.v1.survey.FormConceptLinks
 import org.openforis.collectone.v2.app.domain.model.ConceptDataType
 import org.openforis.collectone.v2.app.domain.model.ConceptLink
 import org.openforis.collectone.v2.app.domain.model.LibraryConcept

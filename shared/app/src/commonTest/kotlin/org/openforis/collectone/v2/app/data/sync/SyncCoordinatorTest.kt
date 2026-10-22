@@ -16,13 +16,6 @@
 package org.openforis.collectone.v2.app.data.sync
 
 import com.squareup.wire.ofEpochSecond
-import groundplatform.v2.data.DataMutation
-import groundplatform.v2.data.DataMutationResult
-import groundplatform.v2.data.DataServiceServer
-import groundplatform.v2.data.EntityMutation
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.MutateDataRequest
-import groundplatform.v2.data.MutateDataResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -31,6 +24,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.DataMutationResult
+import openforis.collectone.v1.data.DataServiceServer
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.MutateDataRequest
+import openforis.collectone.v1.data.MutateDataResponse
 import org.openforis.collectone.v2.app.client.grpc.CollectOneGrpcClient
 import org.openforis.collectone.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload

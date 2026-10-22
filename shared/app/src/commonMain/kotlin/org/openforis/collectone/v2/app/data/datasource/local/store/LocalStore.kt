@@ -13,11 +13,11 @@
  */
 package org.openforis.collectone.v2.app.data.datasource.local.store
 
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.data.SubmissionRecord
-import groundplatform.v2.library.OrganizationLibraryRecord
-import groundplatform.v2.survey.Organization as OrganizationProto
 import kotlinx.coroutines.flow.Flow
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.survey.Organization as OrganizationProto
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.ImpactEvent

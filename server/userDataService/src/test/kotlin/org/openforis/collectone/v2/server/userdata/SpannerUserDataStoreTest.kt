@@ -14,13 +14,13 @@
 package org.openforis.collectone.v2.server.userdata
 
 import com.google.cloud.spanner.SpannerException
-import groundplatform.v2.data.EntityRecord
-import groundplatform.v2.survey.SurveyDef
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.survey.SurveyDef
 import org.junit.jupiter.api.Tag
 
 /** Runs the [UserDataStoreContractTest] against [SpannerUserDataStore] on the Spanner emulator. */

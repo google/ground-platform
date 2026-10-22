@@ -13,20 +13,20 @@
  */
 package org.openforis.collectone.v2.core.forms.serialization
 
-import groundplatform.v2.forms.DataType
-import groundplatform.v2.forms.FieldBinding
-import groundplatform.v2.forms.ForeignAttribute
-import groundplatform.v2.forms.FormDef
-import groundplatform.v2.forms.ModelDef
-import groundplatform.v2.forms.PrimaryInstance
-import groundplatform.v2.forms.RecordSchema
-import groundplatform.v2.library.FormTemplateDef
-import groundplatform.v2.library.LibraryBundle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.DataType
+import openforis.collectone.v1.forms.FieldBinding
+import openforis.collectone.v1.forms.ForeignAttribute
+import openforis.collectone.v1.forms.FormDef
+import openforis.collectone.v1.forms.ModelDef
+import openforis.collectone.v1.forms.PrimaryInstance
+import openforis.collectone.v1.forms.RecordSchema
+import openforis.collectone.v1.library.FormTemplateDef
+import openforis.collectone.v1.library.LibraryBundle
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlElement
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlParser
 import org.openforis.collectone.v2.core.library.LibraryTextProtoSerializer

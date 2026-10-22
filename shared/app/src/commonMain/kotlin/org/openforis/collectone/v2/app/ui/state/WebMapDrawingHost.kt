@@ -16,7 +16,7 @@ package org.openforis.collectone.v2.app.ui.state
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import groundplatform.v2.forms.GeoPoint
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.app.ui.map.DraftGeometry
 import org.openforis.collectone.v2.app.ui.map.FormGeometryOverlay
 import org.openforis.collectone.v2.core.forms.ui.CompactMapDrawingHost
