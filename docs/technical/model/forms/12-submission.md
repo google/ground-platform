@@ -79,7 +79,7 @@ message SubmissionConfig {
 ## Submission Record Format (`RecordInstance`)
 
 Finalized form submissions are represented using the code-generated
-`groundplatform.v2.forms.RecordInstance` message. Using `RecordInstance` enables
+`openforis.collectone.v1.forms.RecordInstance` message. Using `RecordInstance` enables
 clients and servers to read, validate, and serialize any form's hierarchical
 data structure (`RecordNode`, `FieldValue`, and `TypedValue`) using standard
 generated protobuf code without relying on protobuf reflection or dynamic schema

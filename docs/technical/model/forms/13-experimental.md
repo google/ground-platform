@@ -34,4 +34,4 @@ rather than ad-hoc string prefixes:
 4.  **Graduation to Core**: Once an experimental feature has demonstrated
     interoperability and stability across at least two independent
     implementations, it can be proposed for inclusion as a core field in
-    `groundplatform.v2.forms` or a subsequent major version.
+    `openforis.collectone.v1.forms` or a subsequent major version.

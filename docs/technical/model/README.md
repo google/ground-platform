@@ -16,7 +16,7 @@
 
 # Open Foris Collect One Data Model
 
-The Open Foris Collect One data model is defined as Protocol Buffer (`proto3`) schemas under [`shared/protos/`](../../../shared/protos/) across three packages: **`groundplatform.v2.survey`** (surveys, map layers, entity datasets, and access control), **`groundplatform.v2.forms`** (XForms/XLSForm-compatible form definitions), and **`groundplatform.v2.data`** (stateful entity records, immutable submission records, and audit logs). A fourth package, **`groundplatform.v2.library`**, defines organization-owned concepts (the dictionary), form templates, and Purpose Packs used by the Survey Designer.
+The Open Foris Collect One data model is defined as Protocol Buffer (`proto3`) schemas under [`shared/protos/`](../../../shared/protos/) across three packages: **`openforis.collectone.v1.survey`** (surveys, map layers, entity datasets, and access control), **`openforis.collectone.v1.forms`** (XForms/XLSForm-compatible form definitions), and **`openforis.collectone.v1.data`** (stateful entity records, immutable submission records, and audit logs). A fourth package, **`openforis.collectone.v1.library`**, defines organization-owned concepts (the dictionary), form templates, and Purpose Packs used by the Survey Designer.
 
 At its core, the model separates **Current State** (**Map layers** and **Data tables**, represented by `EntityDatasetDef` and `EntityRecord`) from **Immutable Transactions** (**Forms** and **Submissions**, represented by `FormDef` and `SubmissionRecord`).
 
@@ -72,15 +72,15 @@ flowchart TD
 
 ## Model Specification Index
 
-### Survey Configuration (`groundplatform.v2.survey`)
+### Survey Configuration (`openforis.collectone.v1.survey`)
 
-- **[Introduction](survey/00-introduction.md)**: Architectural overview of `groundplatform.v2.survey` and `groundplatform.v2.data`.
+- **[Introduction](survey/00-introduction.md)**: Architectural overview of `openforis.collectone.v1.survey` and `openforis.collectone.v1.data`.
 - **[Survey Structure](survey/01-survey-structure.md)**: `SurveyDef`, lifecycle states (`SurveyState`), and `FormLaunchConfig`.
 - **[Entity Datasets and Schemas](survey/02-entity-datasets.md)**: `EntityDatasetDef`, `EntityType` (`TABULAR` vs. `GEOSPATIAL`), and `EntityPropertyDefinition`.
 - **[Maps, Layers, and Geometry Styling](survey/03-maps.md)**: `MapConfig`, `LayerDef`, `GeometryStyle`, and `simplestyle-spec` overrides.
 - **[Access Control Lists and Quotas](survey/04-access-control-and-quotas.md)**: `SurveyAcl`, `AclEntry`, `Role`, `SharingPolicy`, `PeerDataVisibility`, and `QuotaLimits`.
 
-### Form Definitions & ProtoForms (`groundplatform.v2.forms`)
+### Form Definitions & ProtoForms (`openforis.collectone.v1.forms`)
 
 - **[Introduction](forms/00-introduction.md)**: ProtoForms overview and XForms/XLSForm round-trip compatibility.
 - **[Structure](forms/01-structure.md)**: `FormDef`, `ModelDef`, `ViewDef`, and `RecordInstance` hierarchy.
@@ -96,14 +96,14 @@ flowchart TD
 - **[Client Audit Logs](forms/17-client-audit-logs.md)**: Question-level interaction telemetry (`AuditConfig`, `AuditLog`).
 - **[Entities](forms/18-entities.md)**: `EntityDeclaration`, `EntityPropertyMapping`, and `EntitySyncMetadata`.
 
-### Operational Data & Provenance (`groundplatform.v2.data`)
+### Operational Data & Provenance (`openforis.collectone.v1.data`)
 
 - **[Entity Records](data/01-entity-records.md)**: `EntityRecord` stateful instances, geometries, and properties.
 - **[Submission Records](data/02-submission-records.md)**: `SubmissionRecord` transactions, `RecordMetadata`, and `RecordInstance` payloads.
 - **[Audit Records and Provenance](data/03-audit-records.md)**: `AuditInfo`, `AuditRecord`, and `FieldDelta` mutation history.
 - **[Impact Events and Survey Outcomes](data/04-impact-events.md)**: `ImpactEvent` "data was used" signals, `SurveyOutcome`, and export profile field mapping.
 
-### Library & Dictionary (`groundplatform.v2.library`)
+### Library & Dictionary (`openforis.collectone.v1.library`)
 
 - **[Introduction](library/00-introduction.md)**: Organization libraries, the global "All users" library, resolution rules, and permissions.
 - **[Concepts and the Dictionary](library/01-concepts.md)**: `ConceptDef`, `CodeList`, IDs and versioning, `ConceptRef` field linking, and XForms/XLSForm serialization.

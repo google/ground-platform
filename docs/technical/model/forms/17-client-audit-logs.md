@@ -31,7 +31,7 @@ protocol buffers:
 ```protobuf
 syntax = "proto3";
 
-package groundplatform.v2.forms;
+package openforis.collectone.v1.forms;
 
 import "google/protobuf/timestamp.proto";
 
