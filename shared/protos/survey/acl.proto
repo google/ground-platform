@@ -250,6 +250,6 @@ message QuotaLimits {
   // schema rule so that uploaded country boundaries fit (Sponsored: 50,000).
   int32 max_area_vertices = 12;
 
-  // Optional monthly USD budget cap (0 means no explicit cap / inherit).
-  double monthly_budget_usd = 13;
+  reserved 13;
+  reserved "monthly_budget_usd";
 }
