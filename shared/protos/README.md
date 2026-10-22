@@ -26,8 +26,8 @@ Collect One's protocol buffer schemas directly model the XForms & Entities
 distinction between stateful master tables and immutable encounter logs:
 
 -   **Data tables / Map layers = Current State (Persistent Master Data)**: Defined
-    by `EntityDatasetDef` (`groundplatform.v2.survey`) and stored as
-    `EntityRecord` rows (`groundplatform.v2.data`), where each row represents a
+    by `EntityDatasetDef` (`openforis.collectone.v1.survey`) and stored as
+    `EntityRecord` rows (`openforis.collectone.v1.data`), where each row represents a
     real-world object (site, plot, asset, or participant). Forms can **Populate a
     Data table / Map layer** (create entity via `entities` sheet `list_name` +
     `save_to`), **Update a Data table / Map layer** (select via
@@ -35,8 +35,8 @@ distinction between stateful master tables and immutable encounter logs:
     `save_to`), or **Reference a Data table** (read-only lookup via
     `select_one_from_file` or `instance('<table_name>')/root/item[...]`).
 -   **Forms = Transactions / Events (Encounter Logs)**: Defined by `FormDef`
-    (`groundplatform.v2.forms`) and persisted as immutable `SubmissionRecord` /
-    `RecordInstance` event records (`groundplatform.v2.data`) preserving GPS,
+    (`openforis.collectone.v1.forms`) and persisted as immutable `SubmissionRecord` /
+    `RecordInstance` event records (`openforis.collectone.v1.data`) preserving GPS,
     timestamps, and raw inputs. Standalone questionnaires with no `entities`
     sheet act as **Log Only** forms.
 -   **Map Layer Categories (`LayerDef.source`)**: Rather than nesting map layers
@@ -52,7 +52,7 @@ distinction between stateful master tables and immutable encounter logs:
 
 ## Packages
 
--   **[`forms/`](forms/)** (`groundplatform.v2.forms`):
+-   **[`forms/`](forms/)** (`openforis.collectone.v1.forms`):
     -   `form_def.proto`: `FormDef`, `RecordSchema`, `FieldBinding`, and UI
         control tree definitions (`ControlNode`, `GroupNode`, `RepeatNode`).
     -   `record_instance.proto`: Reflection-free `RecordInstance` and
@@ -62,7 +62,7 @@ distinction between stateful master tables and immutable encounter logs:
         geospatial coordinates, and multilingual `TranslationCatalog`).
     -   `audit_log.proto`: Client telemetry and question-level interaction audit
         events.
--   **[`survey/`](survey/)** (`groundplatform.v2.survey`):
+-   **[`survey/`](survey/)** (`openforis.collectone.v1.survey`):
     -   `survey_def.proto`: `SurveyDef` root container, `FormLaunchConfig`,
         `EntityDatasetDef`, and `MapConfig` layer definitions.
     -   `acl.proto`: Access control lists (`SurveyAcl`, `AclEntry`, `Role`),
@@ -76,7 +76,7 @@ distinction between stateful master tables and immutable encounter logs:
     -   `survey_service.proto`: `SurveyService` gRPC definition for survey
         discovery, offline definition retrieval, ACL queries, and idempotent
         batched survey mutations (`MutateSurvey`).
--   **[`data/`](data/)** (`groundplatform.v2.data`):
+-   **[`data/`](data/)** (`openforis.collectone.v1.data`):
     -   `entity_record.proto`: Persistent, versioned geospatial/tabular entity
         records (`EntityRecord`).
     -   `submission_record.proto`: Finalized survey submission transactions
@@ -91,7 +91,7 @@ distinction between stateful master tables and immutable encounter logs:
     -   `data_service.proto`: `DataService` gRPC definition for entity and
         submission retrieval (`GetEntity`, `ListEntities`, `GetSubmission`,
         `ListSubmissions`) and idempotent batched data mutations (`MutateData`).
--   **[`library/`](library/)** (`groundplatform.v2.library`): Organization
+-   **[`library/`](library/)** (`openforis.collectone.v1.library`): Organization
     libraries (see
     [`docs/technical/model/library/`](../../docs/technical/model/library/)).
     -   `concept.proto`: Dictionary concepts (`ConceptDef`), code lists

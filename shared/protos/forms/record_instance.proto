@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.forms;
+package openforis.collectone.v1.forms;
 
 import "google/protobuf/timestamp.proto";
 import "google/type/date.proto";
@@ -25,6 +25,9 @@ import "shared/protos/forms/types.proto";
 
 // Standard form metadata header tracking submission provenance, timestamps,
 // device identity, and audit references.
+//
+// Inherited from ODK XForms: see Metadata
+// (https://getodk.github.io/xforms-spec/#metadata).
 message RecordMetadata {
   // Globally unique submission record UUID (RFC 4122 v4), typically prefixed
   // with "uuid:".
@@ -119,6 +122,10 @@ message RecordNode {
 // mobile, web, and server runtimes to process, validate, and serialize any
 // form's data without requiring dynamic schema compilation or protobuf
 // reflection.
+//
+// Inherited from ODK XForms: see Primary Instance & Submission
+// (https://getodk.github.io/xforms-spec/#primary-instance,
+// https://getodk.github.io/xforms-spec/#submission).
 message RecordInstance {
   // Globally unique identifier of the form definition (FormDef.form_id).
   string form_id = 1;
