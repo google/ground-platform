@@ -61,7 +61,7 @@ for **Collect One**.
     -   **XForms XML, TextProto & JSON Serialization**
         (`org.openforis.collectone.v2.core.forms.serialization`): Bidirectional
         conversion between XForms XML (`<h:html>` and `<data>`),
-        `groundplatform.v2.forms` Protocol Buffer messages, Protocol Buffer Text
+        `openforis.collectone.v1.forms` Protocol Buffer messages, Protocol Buffer Text
         Format (`textproto`), and Canonical Proto3 JSON (`ProtoJsonSerializer`).
     -   **XPath 1.0 + XForms Engine**
         (`org.openforis.collectone.v2.core.forms.xpath`): Full AST compiler and
