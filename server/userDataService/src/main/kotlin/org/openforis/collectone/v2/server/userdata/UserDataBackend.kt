@@ -1045,14 +1045,6 @@ class UserDataBackend(private val store: UserDataStore) :
         else -> default
       }
 
-    fun resolveDouble(sVal: Double?, orgVal: Double?, gVal: Double?, default: Double): Double =
-      when {
-        sVal != null && sVal > 0.0 -> sVal
-        orgVal != null && orgVal > 0.0 -> orgVal
-        gVal != null && gVal > 0.0 -> gVal
-        else -> default
-      }
-
     return QuotaLimits(
       tier = effectiveTier,
       max_surveys_per_owner =
@@ -1126,13 +1118,6 @@ class UserDataBackend(private val store: UserDataStore) :
           org?.max_area_vertices,
           global?.max_area_vertices,
           defaultMaxAreaVertices,
-        ),
-      monthly_budget_usd =
-        resolveDouble(
-          s?.monthly_budget_usd,
-          org?.monthly_budget_usd,
-          global?.monthly_budget_usd,
-          0.0,
         ),
     )
   }
@@ -1314,23 +1299,6 @@ class UserDataBackend(private val store: UserDataStore) :
             throw StatusException(
               Status.RESOURCE_EXHAUSTED.withDescription(
                 "Survey area vertex quota exceeded: survey area has $totalVertices vertices, exceeding maximum of ${limits.max_area_vertices}"
-              )
-            )
-          }
-        }
-
-        if (limits.monthly_budget_usd > 0.0) {
-          val entities = tx.entities(surveyId).filter { !it.is_deleted }
-          val submissions = tx.submissions(surveyId).filter { !it.is_deleted }
-          val weights = CostUnitWeights()
-          val estimatedCost =
-            weights.usd_per_survey_month +
-              (entities.size / 1000.0) * weights.usd_per_thousand_entities +
-              (submissions.size / 1000.0) * weights.usd_per_thousand_submissions
-          if (estimatedCost > limits.monthly_budget_usd) {
-            throw StatusException(
-              Status.RESOURCE_EXHAUSTED.withDescription(
-                "Monthly budget cap exceeded: estimated monthly cost exceeds budget limit of $${limits.monthly_budget_usd}"
               )
             )
           }
@@ -1836,26 +1804,6 @@ class UserDataBackend(private val store: UserDataStore) :
                 )
               }
             }
-
-            if (limits.monthly_budget_usd > 0.0) {
-              val allEntities = entities(surveyId).associateBy { it.entity_id } + entities
-              val allSubmissions =
-                submissions(surveyId).associateBy { it.submission_id } + submissions
-              val entitiesCount = allEntities.values.count { !it.is_deleted } + 1
-              val subCount = allSubmissions.values.count { !it.is_deleted }
-              val weights = CostUnitWeights()
-              val estimated =
-                weights.usd_per_survey_month +
-                  (entitiesCount / 1000.0) * weights.usd_per_thousand_entities +
-                  (subCount / 1000.0) * weights.usd_per_thousand_submissions
-              if (estimated > limits.monthly_budget_usd) {
-                throw StatusException(
-                  Status.RESOURCE_EXHAUSTED.withDescription(
-                    "Monthly budget cap exceeded: operation would exceed budget limit of $${limits.monthly_budget_usd}"
-                  )
-                )
-              }
-            }
           }
         }
         val updated: EntityRecord =
@@ -1924,26 +1872,6 @@ class UserDataBackend(private val store: UserDataStore) :
                 throw StatusException(
                   Status.RESOURCE_EXHAUSTED.withDescription(
                     "Submission quota exceeded: maximum submissions per entity per user reached (${limits.max_submissions_per_entity_per_user})"
-                  )
-                )
-              }
-            }
-
-            if (limits.monthly_budget_usd > 0.0) {
-              val allEntities = entities(surveyId).associateBy { it.entity_id } + entities
-              val allSubmissions =
-                submissions(surveyId).associateBy { it.submission_id } + submissions
-              val entitiesCount = allEntities.values.count { !it.is_deleted }
-              val subCount = allSubmissions.values.count { !it.is_deleted } + 1
-              val weights = CostUnitWeights()
-              val estimated =
-                weights.usd_per_survey_month +
-                  (entitiesCount / 1000.0) * weights.usd_per_thousand_entities +
-                  (subCount / 1000.0) * weights.usd_per_thousand_submissions
-              if (estimated > limits.monthly_budget_usd) {
-                throw StatusException(
-                  Status.RESOURCE_EXHAUSTED.withDescription(
-                    "Monthly budget cap exceeded: operation would exceed budget limit of $${limits.monthly_budget_usd}"
                   )
                 )
               }
@@ -2306,12 +2234,3 @@ class UserDataBackend(private val store: UserDataStore) :
       org.openforis.collectone.v2.core.impact.ALL_USERS_ORGANIZATION_ID
   }
 }
-
-/** Internal unit cost weights used to estimate monthly operational costs against budget caps. */
-data class CostUnitWeights(
-  val usd_per_survey_month: Double = 0.50,
-  val usd_per_thousand_entities: Double = 0.10,
-  val usd_per_thousand_submissions: Double = 0.25,
-  val usd_per_photo: Double = 0.01,
-  val usd_per_thousand_generated_plots: Double = 0.05,
-)

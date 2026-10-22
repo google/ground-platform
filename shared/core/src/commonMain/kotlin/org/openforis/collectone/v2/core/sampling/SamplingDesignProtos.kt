@@ -32,7 +32,7 @@ object SamplingDesignProtos {
   ): SamplingDesign {
     val base =
       SamplingDesign(
-        survey_area = if (strataLayer == null) true else null,
+        survey_area = if (strataLayer == null) SamplingDesign.SurveyAreaRef() else null,
         strata_layer = strataLayer,
         plot_shape =
           when (design.plotShape) {

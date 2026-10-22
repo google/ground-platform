@@ -1146,7 +1146,6 @@ object SurveyPatches {
     }
     if (del.max_generated_entities != 0) q = q.copy(max_generated_entities = 0)
     if (del.max_area_vertices != 0) q = q.copy(max_area_vertices = 0)
-    if (del.monthly_budget_usd != 0.0) q = q.copy(monthly_budget_usd = 0.0)
     return q
   }
 
@@ -1176,7 +1175,6 @@ object SurveyPatches {
       q = q.copy(max_generated_entities = up.max_generated_entities)
     }
     if (up.max_area_vertices != 0) q = q.copy(max_area_vertices = up.max_area_vertices)
-    if (up.monthly_budget_usd != 0.0) q = q.copy(monthly_budget_usd = up.monthly_budget_usd)
     return q
   }
 }

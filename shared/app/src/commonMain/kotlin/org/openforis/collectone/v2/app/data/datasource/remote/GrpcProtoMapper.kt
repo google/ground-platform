@@ -306,7 +306,6 @@ object GrpcProtoMapper {
       max_submissions_per_entity_per_user = limits.maxSubmissionsPerEntityPerUser,
       max_generated_entities = limits.maxGeneratedEntities,
       max_area_vertices = limits.maxAreaVertices,
-      monthly_budget_usd = limits.monthlyBudgetUsd,
     )
 
   fun quotaLimitsFromProto(proto: QuotaLimitsProto?): QuotaLimitsConfig {
@@ -324,7 +323,6 @@ object GrpcProtoMapper {
       maxSubmissionsPerEntityPerUser = proto.max_submissions_per_entity_per_user,
       maxGeneratedEntities = proto.max_generated_entities,
       maxAreaVertices = proto.max_area_vertices,
-      monthlyBudgetUsd = proto.monthly_budget_usd,
     )
   }
 

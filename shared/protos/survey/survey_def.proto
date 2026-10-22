@@ -606,6 +606,11 @@ message SamplingDesign {
     string stratum_property = 2;
   }
 
+  // Reference to the survey area. In proto3, setting an empty message inside a
+  // oneof sets the oneof case without requiring field payloads, while preserving
+  // future extensibility without breaking wire compatibility.
+  message SurveyAreaRef {}
+
   // Method used to place plots.
   Method method = 1;
 
@@ -613,7 +618,7 @@ message SamplingDesign {
   oneof area_ref {
     // Use the survey area (`MapConfig.survey_area`); all parts form a single
     // unnamed stratum.
-    bool survey_area = 2;
+    SurveyAreaRef survey_area = 2;
 
     // Use the features of a polygon dataset as strata.
     StrataLayerRef strata_layer = 3;

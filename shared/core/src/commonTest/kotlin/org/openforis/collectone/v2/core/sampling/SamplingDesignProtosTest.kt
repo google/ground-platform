@@ -58,7 +58,7 @@ class SamplingDesignProtosTest {
   fun designsRoundTripThroughProtoBytes() {
     for (design in designs) {
       val proto = SamplingDesignProtos.toProto(design)
-      assertEquals(true, proto.survey_area)
+      assertEquals(SamplingDesign.SurveyAreaRef(), proto.survey_area)
       assertEquals(SAMPLING_ENGINE_VERSION, proto.engine_version)
       val decoded = SamplingDesign.ADAPTER.decode(SamplingDesign.ADAPTER.encode(proto))
       assertEquals(proto, decoded)

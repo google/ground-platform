@@ -622,31 +622,6 @@ open class UserDataBackendTest {
   }
 
   @Test
-  fun surveyMutation_exceedingBudgetCap_throwsResourceExhausted() = runBlocking {
-    val exception =
-      assertFailsWith<StatusException> {
-        backend.MutateSurvey(
-          MutateSurveyRequest(
-            survey_id = testId("new-survey-budget"),
-            mutations =
-              listOf(
-                SurveyMutation(
-                  upsert =
-                    SurveyDef(
-                      survey_id = testId("new-survey-budget"),
-                      title = "Budget Exceeded Survey",
-                      quota_limits = QuotaLimits(monthly_budget_usd = 0.25),
-                    )
-                )
-              ),
-          )
-        )
-      }
-    assertEquals(Status.Code.RESOURCE_EXHAUSTED, exception.status.code)
-    assertTrue(exception.message!!.contains("Monthly budget cap exceeded"))
-  }
-
-  @Test
   fun dataMutation_exceedingSubmissionsPerEntity_throwsResourceExhausted() = runBlocking {
     val initial = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA)).survey!!
     backend.MutateSurvey(
