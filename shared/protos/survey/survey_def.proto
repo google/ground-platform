@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.survey;
+package openforis.collectone.v1.survey;
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
@@ -59,7 +59,7 @@ message SurveyDef {
   string version = 7;
 
   // Hierarchical ProtoForms form definitions contained within this survey.
-  repeated groundplatform.v2.forms.FormDef forms = 8;
+  repeated openforis.collectone.v1.forms.FormDef forms = 8;
 
   reserved 9, 10;
   reserved "sharing_policy", "peer_data_visibility";
@@ -78,7 +78,7 @@ message SurveyDef {
   repeated string supported_languages = 14;
 
   // Audit metadata recording survey creation and modification provenance.
-  groundplatform.v2.data.AuditInfo audit_info = 15;
+  openforis.collectone.v1.data.AuditInfo audit_info = 15;
 
   // Typed extension payloads for custom, vendor, or experimental survey-level
   // metadata.
@@ -87,7 +87,7 @@ message SurveyDef {
   // Multi-lingual translation catalog for survey-level UI strings (such as
   // form launch CTAs, survey title/description, map layer labels, and entity
   // dataset titles).
-  groundplatform.v2.forms.TranslationCatalog translations = 17;
+  openforis.collectone.v1.forms.TranslationCatalog translations = 17;
 
   // Survey-specific launch and CTA configurations for forms in `forms`.
   repeated FormLaunchConfig form_launch_configs = 18;
@@ -337,7 +337,7 @@ message FormConceptLinks {
   string form_id = 1;
 
   // Field path (e.g., "/data/commodity") to concept.
-  map<string, groundplatform.v2.library.ConceptRef> field_concepts = 2;
+  map<string, openforis.collectone.v1.library.ConceptRef> field_concepts = 2;
 }
 
 // Platforms where collectors are permitted to open and submit a form. When
@@ -365,7 +365,7 @@ message FormLaunchConfig {
   // Supports inline text (`LabelDef.text`) and localized catalog lookups
   // (`LabelDef.text_id` referencing `SurveyDef.translations`).
   // Falls back to `FormDef.title` if unset.
-  groundplatform.v2.forms.LabelDef cta_label = 2;
+  openforis.collectone.v1.forms.LabelDef cta_label = 2;
 
   // Optional Material Symbols or vector icon identifier displayed on the CTA
   // button (e.g., "add_location_alt", "forest").
@@ -458,7 +458,7 @@ message DataTableRow {
   map<string, string> values = 2;
 
   // Optional geometry vertices for map-layer rows in editor drafts.
-  repeated groundplatform.v2.forms.GeoPoint geometry = 3;
+  repeated openforis.collectone.v1.forms.GeoPoint geometry = 3;
 
   // Display order of this row within the lookup table (0-based).
   int32 sort_order = 4;
@@ -507,7 +507,7 @@ message EntityDatasetDef {
   // Expected spatial geometry type for GEOSPATIAL datasets (TYPE_GEOPOINT,
   // TYPE_GEOTRACE, or TYPE_GEOSHAPE). Exposed to XPath/ProtoForms under the
   // reserved "geometry" property.
-  groundplatform.v2.forms.DataType geometry_type = 9;
+  openforis.collectone.v1.forms.DataType geometry_type = 9;
 
   // Provenance of the dataset's entities: how they were produced. Entities are
   // always stored as ordinary `EntityRecord`s with real geometry; the generator
@@ -715,7 +715,7 @@ message SubPlotDesign {
 
   // Geometry types interpreters may draw (USER_DRAWN): TYPE_GEOPOINT,
   // TYPE_GEOTRACE or TYPE_GEOSHAPE.
-  repeated groundplatform.v2.forms.DataType allowed_geometry_types = 5;
+  repeated openforis.collectone.v1.forms.DataType allowed_geometry_types = 5;
 }
 
 // Provenance of entities imported from an uploaded file.
@@ -743,7 +743,7 @@ message EntityPropertyDefinition {
   string name = 1;
 
   // Data type of this property.
-  groundplatform.v2.forms.DataType type = 2;
+  openforis.collectone.v1.forms.DataType type = 2;
 
   // Human-readable property label.
   string label = 3;
@@ -754,7 +754,7 @@ message EntityPropertyDefinition {
   // Dictionary concept of this property, copied from the linked question that
   // saves to it (`FieldBinding.entity_saveto`), so aggregation can read the
   // current state of map features.
-  groundplatform.v2.library.ConceptRef concept_ref = 5;
+  openforis.collectone.v1.library.ConceptRef concept_ref = 5;
 
   // Stable identifier for sparse mutation addressing (defaults to `name` when
   // unset).
@@ -799,7 +799,7 @@ message OfflineTilePackageDef {
 message MapConfig {
   // Default initial map center coordinate. When unset, clients derive it from
   // the bounding box of `survey_area`; an explicit value overrides it.
-  groundplatform.v2.forms.GeoPoint initial_center = 1;
+  openforis.collectone.v1.forms.GeoPoint initial_center = 1;
 
   // Default initial map zoom level. When unset, clients fit the bounding box
   // of `survey_area`; an explicit value overrides it.
@@ -829,13 +829,13 @@ message SurveyArea {
   string name = 1;
 
   // Polygon parts, each a closed ring.
-  repeated groundplatform.v2.forms.GeoShape parts = 2;
+  repeated openforis.collectone.v1.forms.GeoShape parts = 2;
 
   // How the area was defined: "search", "drawn" or "uploaded:<filename>".
   string source = 3;
 
   // Explicit center point of the survey area.
-  groundplatform.v2.forms.GeoPoint center = 4;
+  openforis.collectone.v1.forms.GeoPoint center = 4;
 
   // Explicit camera zoom level for framing the survey area.
   double zoom = 5;
