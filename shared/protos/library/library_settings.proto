@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.library;
+package openforis.collectone.v1.library;
 
 // Per-organization library preferences.
 message OrganizationLibrarySettings {

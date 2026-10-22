@@ -16,14 +16,14 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.library;
+package openforis.collectone.v1.library;
 
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/forms/types.proto";
 
 // Text in one or more languages.
 //
-// `groundplatform.v2.forms.LocalizedString` holds a single language's variants
+// `openforis.collectone.v1.forms.LocalizedString` holds a single language's variants
 // (inside a form's `TranslationCatalog`), so library entries, which are
 // translated independently of any form, carry their own map.
 message LocalizedText {
@@ -57,7 +57,7 @@ message ConceptDef {
 
   // Suggested data type and unit (UCUM code, e.g., "har" for hectares, "m3",
   // "kg").
-  groundplatform.v2.forms.DataType data_type = 7;
+  openforis.collectone.v1.forms.DataType data_type = 7;
   string unit = 8;
 
   // Allowed values for select concepts.
@@ -83,7 +83,7 @@ message ConceptDef {
   // resolve to this concept.
   repeated string aliases = 16;
 
-  groundplatform.v2.data.AuditInfo audit_info = 17;
+  openforis.collectone.v1.data.AuditInfo audit_info = 17;
 
   // Display order of this concept within the library (0-based).
   int32 sort_order = 18;

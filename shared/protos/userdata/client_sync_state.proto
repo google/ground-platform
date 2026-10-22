@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.userdata;
+package openforis.collectone.v1.userdata;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/data_service.proto";
@@ -38,10 +38,10 @@ import "shared/protos/survey/survey_service.proto";
 message ClientSyncState {
   repeated PendingMutationRecord outbox = 1;
   repeated SurveyBaseRecord survey_bases = 2;
-  repeated groundplatform.v2.data.EntityRecord entity_bases = 3;
-  repeated groundplatform.v2.data.SubmissionRecord submission_bases = 4;
-  repeated groundplatform.v2.survey.Organization organization_bases = 5;
-  repeated groundplatform.v2.library.OrganizationLibraryRecord library_bases = 6;
+  repeated openforis.collectone.v1.data.EntityRecord entity_bases = 3;
+  repeated openforis.collectone.v1.data.SubmissionRecord submission_bases = 4;
+  repeated openforis.collectone.v1.survey.Organization organization_bases = 5;
+  repeated openforis.collectone.v1.library.OrganizationLibraryRecord library_bases = 6;
 
   // Stable identifier of this install (`*Mutation.client_id`).
   string client_id = 7;
@@ -65,9 +65,9 @@ message ClientSyncState {
 // Last server copies of one survey's saved revision, working copy, and ACL.
 message SurveyBaseRecord {
   string survey_id = 1;
-  groundplatform.v2.survey.SurveyDef saved = 2;
-  groundplatform.v2.survey.SurveyDef working_copy = 3;
-  groundplatform.v2.survey.SurveyAcl acl = 4;
+  openforis.collectone.v1.survey.SurveyDef saved = 2;
+  openforis.collectone.v1.survey.SurveyDef working_copy = 3;
+  openforis.collectone.v1.survey.SurveyAcl acl = 4;
 }
 
 // Opaque `next_sync_token` of each synced `List*` scope
@@ -113,13 +113,13 @@ message PendingMutationRecord {
   // The RPC target and wire mutation, without identity fields.
   oneof payload {
     // `MutateSurvey` for `scope_id` (a survey ID).
-    groundplatform.v2.survey.SurveyMutation survey_mutation = 4;
+    openforis.collectone.v1.survey.SurveyMutation survey_mutation = 4;
     // `MutateData` for `scope_id` (a survey ID).
-    groundplatform.v2.data.DataMutation data_mutation = 5;
+    openforis.collectone.v1.data.DataMutation data_mutation = 5;
     // `MutateOrganization` for `scope_id` (an organization ID).
-    groundplatform.v2.survey.OrganizationMutation organization_mutation = 6;
+    openforis.collectone.v1.survey.OrganizationMutation organization_mutation = 6;
     // `MutateLibrary` for `scope_id` (an organization ID).
-    groundplatform.v2.library.LibraryMutation library_mutation = 7;
+    openforis.collectone.v1.library.LibraryMutation library_mutation = 7;
   }
 
   // Survey or organization ID the target RPC is scoped to.

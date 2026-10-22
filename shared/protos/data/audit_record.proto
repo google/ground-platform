@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.data;
+package openforis.collectone.v1.data;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/survey/acl.proto";
@@ -71,7 +71,7 @@ message AuditRecord {
   string actor_id = 6;
 
   // Role of the actor at the time of the change.
-  groundplatform.v2.survey.Role actor_role = 7;
+  openforis.collectone.v1.survey.Role actor_role = 7;
 
   // Specific mutation action type.
   enum AuditAction {

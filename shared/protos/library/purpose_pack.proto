@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.library;
+package openforis.collectone.v1.library;
 
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/library/concept.proto";
@@ -49,7 +49,7 @@ message PurposePackDef {
   Pillar pillar = 10;
 
   LibraryStatus status = 11;
-  groundplatform.v2.data.AuditInfo audit_info = 12;
+  openforis.collectone.v1.data.AuditInfo audit_info = 12;
 
   // Display order of this purpose pack within the library (0-based).
   int32 sort_order = 13;

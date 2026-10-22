@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package groundplatform.v2.userdata;
+package openforis.collectone.v1.userdata;
 
 import "shared/protos/data/data_service.proto";
 import "shared/protos/data/entity_record.proto";
@@ -34,23 +34,23 @@ import "shared/protos/survey/survey_def.proto";
 // `shared/app/testing` (see `UserDataSeedGenerator`) and checked in as
 // `server/userDataService/src/main/resources/seed/user_data_seed.json`.
 message UserDataSeed {
-  repeated groundplatform.v2.survey.Organization organizations = 1;
-  repeated groundplatform.v2.library.OrganizationLibraryRecord libraries = 2;
+  repeated openforis.collectone.v1.survey.Organization organizations = 1;
+  repeated openforis.collectone.v1.library.OrganizationLibraryRecord libraries = 2;
   repeated SurveySeed surveys = 3;
-  repeated groundplatform.v2.data.PlaceRecord places = 4;
-  repeated groundplatform.v2.data.MutationLogRecord mutation_logs = 5;
+  repeated openforis.collectone.v1.data.PlaceRecord places = 4;
+  repeated openforis.collectone.v1.data.MutationLogRecord mutation_logs = 5;
 }
 
 // A survey with its access rules, optional working copy, and data.
 message SurveySeed {
   // Latest saved revision.
-  groundplatform.v2.survey.SurveyDef survey = 1;
+  openforis.collectone.v1.survey.SurveyDef survey = 1;
 
-  groundplatform.v2.survey.SurveyAcl acl = 2;
+  openforis.collectone.v1.survey.SurveyAcl acl = 2;
 
   // Organizer's working copy, if the survey has unsaved edits.
-  groundplatform.v2.survey.SurveyDef working_copy = 3;
+  openforis.collectone.v1.survey.SurveyDef working_copy = 3;
 
-  repeated groundplatform.v2.data.EntityRecord entities = 4;
-  repeated groundplatform.v2.data.SubmissionRecord submissions = 5;
+  repeated openforis.collectone.v1.data.EntityRecord entities = 4;
+  repeated openforis.collectone.v1.data.SubmissionRecord submissions = 5;
 }
