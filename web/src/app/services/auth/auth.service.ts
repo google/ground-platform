@@ -30,7 +30,6 @@ import {
   signInWithPopup,
   signOut,
 } from '@angular/fire/auth';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, Subject, firstValueFrom, from } from 'rxjs';
 import { filter, map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
 
@@ -41,9 +40,7 @@ import { Survey } from 'app/models/survey.model';
 import { User, UserType } from 'app/models/user.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { environment } from 'environments/environment';
-
-import { HttpClientService } from '../http-client/http-client.service';
+import { CloudFunctionsService } from '../cloud-functions/cloud-functions.service';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -85,8 +82,7 @@ export class AuthService {
     private auth: Auth,
     private dataStore: DataStoreService,
     private navigationService: NavigationService,
-    private functions: Functions,
-    private httpClientService: HttpClientService,
+    private cloudFunctionsService: CloudFunctionsService,
     private injector: Injector,
     private ngZone: NgZone
   ) {
@@ -121,10 +117,7 @@ export class AuthService {
       return;
     }
     try {
-      // TODO(#1159): Refactor access to Cloud Functions into new service.
-      const { expiresAt } = await this.httpClientService.postWithAuth<{
-        expiresAt: number;
-      }>(`${environment.cloudFunctionsUrl}/sessionLogin`, {});
+      const { expiresAt } = await this.cloudFunctionsService.sessionLogin();
       localStorage.setItem(SESSION_COOKIE_EXPIRES_AT_KEY, String(expiresAt));
     } catch (err) {
       console.error(
@@ -145,14 +138,7 @@ export class AuthService {
   }
 
   async callProfileRefresh() {
-    // TODO(#1159): Refactor access to Cloud Functions into new service.
-    const refreshProfile = runInInjectionContext(this.injector, () =>
-      httpsCallable(this.functions, 'profile-refresh')
-    );
-    const result = (await refreshProfile({})).data;
-    if (result !== 'OK') {
-      throw new Error('User profile could not be updated');
-    }
+    await this.cloudFunctionsService.profileRefresh();
   }
 
   getUser$(): Observable<User> {
