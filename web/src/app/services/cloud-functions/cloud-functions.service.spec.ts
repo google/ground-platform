@@ -20,33 +20,37 @@ import { environment } from 'environments/environment';
 
 import { CloudFunctionsService } from './cloud-functions.service';
 import { HttpClientService } from '../http-client/http-client.service';
-import { Injector } from '@angular/core';
-import * as fireFunctions from '@angular/fire/functions';
 
 describe('CloudFunctionsService', () => {
   let service: CloudFunctionsService;
   let postWithAuthSpy: jasmine.Spy;
-  let httpsCallableSpy: jasmine.Spy;
+  let callableSpy: jasmine.Spy;
+  let callableFnSpy: jasmine.Spy;
 
   beforeEach(() => {
-    postWithAuthSpy = jasmine.createSpy('postWithAuth').and.resolveTo({ expiresAt: 12345 });
-
-    httpsCallableSpy = jasmine.createSpy('httpsCallable').and.returnValue(
-      jasmine.createSpy('callableFn').and.resolveTo({ data: 'OK' })
-    );
-
-    spyOn(fireFunctions, 'httpsCallable').and.returnValue(httpsCallableSpy as any);
+    postWithAuthSpy = jasmine
+      .createSpy('postWithAuth')
+      .and.resolveTo({ expiresAt: 12345 });
 
     TestBed.configureTestingModule({
       providers: [
         CloudFunctionsService,
         { provide: Functions, useValue: {} },
-        { provide: HttpClientService, useValue: { postWithAuth: postWithAuthSpy } },
-        { provide: Injector, useValue: TestBed.inject(Injector) }
+        {
+          provide: HttpClientService,
+          useValue: { postWithAuth: postWithAuthSpy },
+        },
       ],
     });
 
     service = TestBed.inject(CloudFunctionsService);
+
+    callableFnSpy = jasmine
+      .createSpy('callableFn')
+      .and.resolveTo({ data: 'OK' });
+    callableSpy = spyOn<any>(service, 'callable').and.returnValue(
+      callableFnSpy
+    );
   });
 
   it('should be created', () => {
@@ -66,20 +70,19 @@ describe('CloudFunctionsService', () => {
   });
 
   describe('profileRefresh', () => {
-    it('should call httpsCallable with profile-refresh', async () => {
+    it('should call the profile-refresh callable', async () => {
       await service.profileRefresh();
 
-      expect(httpsCallableSpy).toHaveBeenCalled();
-      const args = httpsCallableSpy.calls.mostRecent().args;
-      expect(args[1]).toBe('profile-refresh');
+      expect(callableSpy).toHaveBeenCalledOnceWith('profile-refresh');
+      expect(callableFnSpy).toHaveBeenCalledOnceWith({});
     });
 
     it('should throw error if result is not OK', async () => {
-      httpsCallableSpy.and.returnValue(
-        jasmine.createSpy('callableFn').and.resolveTo({ data: 'ERROR' })
-      );
+      callableFnSpy.and.resolveTo({ data: 'ERROR' });
 
-      await expectAsync(service.profileRefresh()).toBeRejectedWithError('User profile could not be updated');
+      await expectAsync(service.profileRefresh()).toBeRejectedWithError(
+        'User profile could not be updated'
+      );
     });
   });
 });

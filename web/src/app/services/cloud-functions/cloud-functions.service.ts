@@ -38,12 +38,18 @@ export class CloudFunctionsService {
   }
 
   async profileRefresh(): Promise<void> {
-    const refreshProfile = runInInjectionContext(this.injector, () =>
-      httpsCallable(this.functions, 'profile-refresh')
-    );
+    const refreshProfile = this.callable('profile-refresh');
     const result = (await refreshProfile({})).data;
     if (result !== 'OK') {
       throw new Error('User profile could not be updated');
     }
+  }
+
+  // Thin wrapper so tests can stub `httpsCallable`, which ES module
+  // namespaces don't allow spying on directly.
+  protected callable(name: string) {
+    return runInInjectionContext(this.injector, () =>
+      httpsCallable(this.functions, name)
+    );
   }
 }
