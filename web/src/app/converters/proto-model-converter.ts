@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,8 @@ export function dataSharingTypeToProto(type: DataSharingType) {
  */
 export function surveyToDocument(
   surveyId: string,
-  survey: Partial<Survey>
+  survey: Partial<Survey>,
+  auditInfo?: { created?: Pb.IAuditInfo; lastModified?: Pb.IAuditInfo }
 ): DocumentData {
   const {
     title: name,
@@ -130,6 +131,8 @@ export function surveyToDocument(
       dataVisibility: PB_DATA_VISIBILITY.get(
         dataVisibility || SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
       ),
+      ...(auditInfo?.created && { created: auditInfo.created }),
+      ...(auditInfo?.lastModified && { lastModified: auditInfo.lastModified }),
     })
   );
 }
