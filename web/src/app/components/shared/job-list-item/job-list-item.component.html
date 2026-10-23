@@ -133,6 +133,7 @@ limitations under the License.
             class="loi-collapsed-toggle"
             [class.tree-node-selected]="item.loi.id === loiId()"
             [attr.aria-label]="item.name"
+            [attr.title]="item.name"
             (click)="selectLoi(item.loi)"
           >
             <mat-icon

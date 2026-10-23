@@ -115,9 +115,14 @@ export class JobListItemComponent {
     viewport: CdkVirtualScrollViewport,
     index: number
   ) {
-    const first = Math.ceil(viewport.measureScrollOffset() / LOI_ROW_HEIGHT);
-    const last = first + this.loiListHeight() / LOI_ROW_HEIGHT - 1;
-    if (index < first || index > last) viewport.scrollToIndex(index);
+    const itemTop = index * LOI_ROW_HEIGHT;
+    const itemBottom = itemTop + LOI_ROW_HEIGHT;
+    const scrollOffset = viewport.measureScrollOffset();
+    if (
+      itemTop < scrollOffset ||
+      itemBottom > scrollOffset + this.loiListHeight()
+    )
+      viewport.scrollToIndex(index);
   }
 
   toggleExpanded() {
