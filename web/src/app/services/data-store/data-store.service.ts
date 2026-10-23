@@ -15,6 +15,7 @@
  */
 
 import { Injectable, Injector, runInInjectionContext } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
 import {
   CollectionReference,
   DocumentData,
@@ -268,7 +269,12 @@ export class DataStoreService {
         const surveyRef = runInInjectionContext(this.injector, () =>
           doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
         );
-        transaction.update(surveyRef, surveyToDocument(surveyId, survey));
+        transaction.update(
+          surveyRef,
+          surveyToDocument(surveyId, survey, {
+            lastModified: this.newAuditInfo(),
+          })
+        );
       })
     );
   }
@@ -283,7 +289,11 @@ export class DataStoreService {
     return runInInjectionContext(this.injector, () =>
       setDoc(
         doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
-        surveyToDocument(surveyId, { title: name }),
+        surveyToDocument(
+          surveyId,
+          { title: name },
+          { lastModified: this.newAuditInfo() }
+        ),
         { merge: true }
       )
     );
@@ -304,7 +314,11 @@ export class DataStoreService {
     return runInInjectionContext(this.injector, () =>
       setDoc(
         doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
-        surveyToDocument(surveyId, { title: name, description }),
+        surveyToDocument(
+          surveyId,
+          { title: name, description },
+          { lastModified: this.newAuditInfo() }
+        ),
         { merge: true }
       )
     );
@@ -662,6 +676,28 @@ export class DataStoreService {
   }
 
   /**
+   * Returns audit info for a write made now by the signed-in user. Survey docs
+   * store timestamps as protos rather than Firestore timestamps, so the server
+   * time can't be a `serverTimestamp()` placeholder: it is the client's guess,
+   * which `onWriteSurvey` replaces with the commit time.
+   */
+  private newAuditInfo(): Pb.AuditInfo {
+    const user = this.injector.get(Auth).currentUser;
+    if (!user) throw new Error('Login required to write survey.');
+    const now = new GroundProtos.google.protobuf.Timestamp({
+      seconds: Math.floor(Date.now() / 1000),
+    });
+    return new Pb.AuditInfo({
+      userId: user.uid,
+      displayName: user.displayName ?? undefined,
+      photoUrl: user.photoURL ?? undefined,
+      emailAddress: user.email ?? undefined,
+      clientTimestamp: now,
+      serverTimestamp: now,
+    });
+  }
+
+  /**
    * Creates a new survey in the remote db using the specified title,
    * returning the id of the newly created survey. ACLs are initialized
    * to include the specified user email as survey organizer.
@@ -674,15 +710,20 @@ export class DataStoreService {
     const surveyId = this.generateId();
     const { email: ownerEmail, id: ownerId } = user;
     const acl = Map<string, Role>({ [ownerEmail]: Role.SURVEY_ORGANIZER });
+    const auditInfo = this.newAuditInfo();
     await setDoc(
       doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
-      surveyToDocument(surveyId, {
-        title: name,
-        description,
-        acl,
-        ownerId,
-        state: SurveyState.DRAFT,
-      })
+      surveyToDocument(
+        surveyId,
+        {
+          title: name,
+          description,
+          acl,
+          ownerId,
+          state: SurveyState.DRAFT,
+        },
+        { created: auditInfo, lastModified: auditInfo }
+      )
     );
     return Promise.resolve(surveyId);
   }
@@ -698,12 +739,17 @@ export class DataStoreService {
 
     if (survey instanceof Error) return '';
 
-    const newSurvey = surveyToDocument(newSurveyId, {
-      ...survey,
-      id: newSurveyId,
-      title: 'Copy of ' + survey.title,
-      acl: survey.acl.filter(role => role === Role.SURVEY_ORGANIZER),
-    });
+    const auditInfo = this.newAuditInfo();
+    const newSurvey = surveyToDocument(
+      newSurveyId,
+      {
+        ...survey,
+        id: newSurveyId,
+        title: 'Copy of ' + survey.title,
+        acl: survey.acl.filter(role => role === Role.SURVEY_ORGANIZER),
+      },
+      { created: auditInfo, lastModified: auditInfo }
+    );
 
     await setDoc(doc(this.db, SURVEYS_COLLECTION_NAME, newSurveyId), newSurvey);
 
