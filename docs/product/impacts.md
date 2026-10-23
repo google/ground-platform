@@ -64,7 +64,7 @@ cooperative societies:
 
 During a 2025 stakeholder meeting involving the governments of multiple
 Nigerian states (Ondo, Ekiti, Abia, Cross River) as well as representatives from
-GIZ, TRACE and FAO GEF7, the Government of Ondo State decided to do geolocation
+GIZ, TRACE and FAO GEF 7, the Government of Ondo State decided to do geolocation
 with Open Foris Ground (with technical support from FAO GEF 7). The aim has been
 to geolocate cocoa & oil palm plots and identify farmers, issue temporary
 permits, and provide tree seedlings for agroforestry.
