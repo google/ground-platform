@@ -101,6 +101,7 @@
     "app.error.clickHereToRegister": "Click here to register",
     "app.submissionPanel.skipped": "Skipped",
     "app.labels.loadingSubmissionPhoto": "Submission photo",
+    "app.labels.submissionPhotoUnavailable": "Photo unavailable. It may not have been uploaded yet, for example if the device was waiting for a Wi-Fi connection.",
     "app.labels.lngEast": "E",
     "app.labels.lngWest": "W",
     "app.labels.latNorth": "N",

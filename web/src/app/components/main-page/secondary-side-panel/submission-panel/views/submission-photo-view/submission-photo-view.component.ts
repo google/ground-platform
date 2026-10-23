@@ -29,18 +29,26 @@ export class SubmissionPhotoViewComponent {
   path = input.required<string | null>();
 
   readonly downloadUrl = signal<string | undefined>(undefined);
+  readonly unavailable = signal(false);
 
   constructor() {
     effect(() => {
       const path = this.path();
       this.downloadUrl.set(undefined);
+      this.unavailable.set(false);
       if (!path || path.trim() === '' || path === '/') {
         console.warn('Photo task has no valid image path.');
+        this.unavailable.set(true);
         return;
       }
       getDownloadURL(ref(this.storage, path))
-        .then(url => this.downloadUrl.set(url))
-        .catch(error => console.error(`Could not load image: ${path}`, error));
+        .then(url => {
+          if (path === this.path()) this.downloadUrl.set(url);
+        })
+        .catch(error => {
+          console.error(`Could not load image: ${path}`, error);
+          if (path === this.path()) this.unavailable.set(true);
+        });
     });
   }
 }
