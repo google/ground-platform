@@ -442,7 +442,6 @@ class ResolveFormDefForLaunchUseCase {
       "form-coffee-parcel" -> return WorkbenchExampleForm.ALL_FIELD_TYPES.formDefinition
     }
     val safeFormId = form.id.replace('-', '_')
-    val ctaDefault = "Verified in field (${form.ctaLabel})"
     val choiceQuestions = choiceQuestionsForForm(form.id)
     val choiceFields = choiceQuestions.map { q ->
       FieldDefinition(
@@ -560,9 +559,7 @@ class ResolveFormDefForLaunchUseCase {
                                       FieldValue(scalar_value = TypedValue(string_value = ""))
                                   )
                               )
-                          ),
-                        "organizer_action_cta" to
-                          FieldValue(scalar_value = TypedValue(string_value = ctaDefault)),
+                          )
                       )
                   ),
               ),

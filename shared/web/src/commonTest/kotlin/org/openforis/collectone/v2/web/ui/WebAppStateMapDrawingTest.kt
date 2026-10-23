@@ -20,6 +20,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.forms.GeoPoint
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
 import org.openforis.collectone.v2.app.ui.map.SurveyMap
 import org.openforis.collectone.v2.app.ui.map.SurveyMapContent
@@ -169,12 +170,38 @@ class WebAppStateMapDrawingTest {
     val state = webAppWithWorkbenchForms()
     assertTrue(state.webFormGeometries.isEmpty())
 
-    // The sample form opens with a point, a line, and a polygon already answered.
+    // Launching a new form starts with empty geometry answers until populated.
     state.launchFormForEntity(
       entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
       formId = "form-shade-canopy-audit",
     )
     val controller = assertNotNull(state.activeFormWizardController)
+    assertTrue(state.webFormGeometries.isEmpty())
+
+    // Populate a point, a line, and a polygon.
+    controller.setMapDrawingVertices(
+      "/data/plot_center_gps",
+      MapDrawingKind.POINT,
+      listOf(GeoPoint(latitude = -1.292066, longitude = 36.821946)),
+    )
+    controller.setMapDrawingVertices(
+      "/data/riparian_transect",
+      MapDrawingKind.LINE,
+      listOf(
+        GeoPoint(latitude = -1.2921, longitude = 36.8219),
+        GeoPoint(latitude = -1.2924, longitude = 36.8222),
+      ),
+    )
+    controller.setMapDrawingVertices(
+      "/data/plot_boundary",
+      MapDrawingKind.POLYGON,
+      listOf(
+        GeoPoint(latitude = -1.2921, longitude = 36.8219),
+        GeoPoint(latitude = -1.2925, longitude = 36.8224),
+        GeoPoint(latitude = -1.2918, longitude = 36.8228),
+      ),
+    )
+
     val byPath = state.webFormGeometries.associateBy { it.path }
     val point = assertNotNull(byPath["/data/plot_center_gps"])
     val line = assertNotNull(byPath["/data/riparian_transect"])
@@ -250,6 +277,20 @@ class WebAppStateMapDrawingTest {
       formId = "form-shade-canopy-audit",
     )
     val controller = assertNotNull(state.activeFormWizardController)
+    controller.setMapDrawingVertices(
+      "/data/plot_center_gps",
+      MapDrawingKind.POINT,
+      listOf(GeoPoint(latitude = -1.292066, longitude = 36.821946)),
+    )
+    controller.setMapDrawingVertices(
+      "/data/plot_boundary",
+      MapDrawingKind.POLYGON,
+      listOf(
+        GeoPoint(latitude = -1.2921, longitude = 36.8219),
+        GeoPoint(latitude = -1.2925, longitude = 36.8224),
+        GeoPoint(latitude = -1.2918, longitude = 36.8228),
+      ),
+    )
     val polygonVertices =
       mapDrawingVertices(
         controller.formState.fieldStates.getValue("/data/plot_boundary"),

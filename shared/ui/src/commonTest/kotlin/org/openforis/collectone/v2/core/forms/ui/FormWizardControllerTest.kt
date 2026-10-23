@@ -416,7 +416,15 @@ class FormWizardControllerTest {
     val formDef = WorkbenchExampleForm.ALL_FIELD_TYPES.formDefinition.proto
     val controller = FormWizardController(formDef = formDef)
 
-    // Repeat #1 steps must carry [1] in their canonicalPath and "#1" in instanceLabel
+    // Repeat group starts with 0 instances until the user adds one
+    assertTrue(
+      controller.steps.filterIsInstance<FormWizardStep.QuestionStep>().none {
+        it.repeatContext != null
+      }
+    )
+
+    // Add Repeat #1 and verify steps carry [1] in their canonicalPath and "#1" in instanceLabel
+    controller.addRepeatInstanceAndOpen("/data/sampled_trees")
     val repeat1Steps =
       controller.steps.filterIsInstance<FormWizardStep.QuestionStep>().filter {
         it.repeatContext?.repeatIndex == 1
@@ -485,7 +493,8 @@ class FormWizardControllerTest {
     val formDef = WorkbenchExampleForm.ALL_FIELD_TYPES.formDefinition.proto
     val controller = FormWizardController(formDef = formDef)
 
-    // Populate instance 1
+    // Add instance 1 and populate
+    controller.addRepeatInstanceAndOpen("/data/sampled_trees")
     controller.updateString("/data/sampled_trees[1]/tree_tag", "Oak-42")
     controller.updateDouble("/data/sampled_trees[1]/stem_dbh_cm", 45.0)
 

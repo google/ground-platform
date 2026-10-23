@@ -318,7 +318,9 @@ class WorkbenchStateTest {
       org.openforis.collectone.v2.core.forms.ui.geoPointPrimaryTriggerLabel(isPanned = true),
     )
 
-    // Advance to the next step (select1 land_use) -> isCurrentFormStepGeoPoint becomes false
+    // Capture a location on the required geopoint step, then advance to the next step (select1
+    // land_use) -> isCurrentFormStepGeoPoint becomes false
+    ctrl.updateGeoPoint("/data/sample_point", -1.292066, 36.821946, 1680.0, 6.4)
     assertTrue(ctrl.nextStep())
     assertFalse(state.isCurrentFormStepGeoPoint)
   }

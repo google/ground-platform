@@ -53,7 +53,7 @@ class SampleDataSeeder(
 
   companion object {
     /** Bump when the seed data changes shape, so existing stores are reseeded. */
-    const val SEED_VERSION: Int = 16
+    const val SEED_VERSION: Int = 17
 
     /** Survey opened by default on first launch. */
     const val DEFAULT_ACTIVE_SURVEY_ID: String = "00000033-6b50-51cd-ac94-baea2ea06d65"

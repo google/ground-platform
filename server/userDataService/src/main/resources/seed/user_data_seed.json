@@ -9573,25 +9573,6 @@
                       "type": "TYPE_STRING"
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "sample_point": {
-                      "scalarValue": {
-                        "geopointValue": {
-                          "latitude": -1.292066,
-                          "longitude": 36.821946,
-                          "altitudeMeters": 1680.0,
-                          "accuracyMeters": 6.4
-                        }
-                      }
-                    },
-                    "land_use": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_shade"
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -9893,25 +9874,6 @@
                       "type": "TYPE_STRING"
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "sample_point": {
-                      "scalarValue": {
-                        "geopointValue": {
-                          "latitude": -1.292066,
-                          "longitude": 36.821946,
-                          "altitudeMeters": 1680.0,
-                          "accuracyMeters": 6.4
-                        }
-                      }
-                    },
-                    "land_use": {
-                      "scalarValue": {
-                        "stringValue": "agroforestry_shade"
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -10565,59 +10527,6 @@
                       "type": "TYPE_STRING"
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "sample_plot_entity": {
-                      "scalarValue": {
-                        "stringValue": "00000016-cc1f-5125-8841-166ab5b5f68f"
-                      }
-                    },
-                    "canopy_photo": {
-                      "scalarValue": {
-                        "stringValue": "hemispherical_canopy_sp01.jpg"
-                      }
-                    },
-                    "canopy_stratum": {
-                      "scalarValue": {
-                        "stringValue": "canopy"
-                      }
-                    },
-                    "canopy_cover_pct": {
-                      "scalarValue": {
-                        "int32Value": 75
-                      }
-                    },
-                    "dominant_species": {
-                      "scalarValue": {
-                        "stringValue": "Cordia africana"
-                      }
-                    },
-                    "stand_basal_area_m2_ha": {
-                      "scalarValue": {
-                        "doubleValue": 24.5
-                      }
-                    },
-                    "regenerating_saplings_count": {
-                      "scalarValue": {
-                        "int32Value": 18
-                      }
-                    },
-                    "disturbance_indicators": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "none"
-                          }
-                        ]
-                      }
-                    },
-                    "assessment_notes": {
-                      "scalarValue": {
-                        "stringValue": "Closed upper canopy with dense natural regeneration."
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -11239,59 +11148,6 @@
                       "type": "TYPE_STRING"
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "sample_plot_entity": {
-                      "scalarValue": {
-                        "stringValue": "00000016-cc1f-5125-8841-166ab5b5f68f"
-                      }
-                    },
-                    "canopy_photo": {
-                      "scalarValue": {
-                        "stringValue": "hemispherical_canopy_sp01.jpg"
-                      }
-                    },
-                    "canopy_stratum": {
-                      "scalarValue": {
-                        "stringValue": "canopy"
-                      }
-                    },
-                    "canopy_cover_pct": {
-                      "scalarValue": {
-                        "int32Value": 75
-                      }
-                    },
-                    "dominant_species": {
-                      "scalarValue": {
-                        "stringValue": "Cordia africana"
-                      }
-                    },
-                    "stand_basal_area_m2_ha": {
-                      "scalarValue": {
-                        "doubleValue": 24.5
-                      }
-                    },
-                    "regenerating_saplings_count": {
-                      "scalarValue": {
-                        "int32Value": 18
-                      }
-                    },
-                    "disturbance_indicators": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "none"
-                          }
-                        ]
-                      }
-                    },
-                    "assessment_notes": {
-                      "scalarValue": {
-                        "stringValue": "Closed upper canopy with dense natural regeneration."
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -12436,83 +12292,6 @@
                       "type": "TYPE_STRING"
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "commodity_type": {
-                      "scalarValue": {
-                        "stringValue": "cocoa"
-                      }
-                    },
-                    "soil_moisture_class": {
-                      "scalarValue": {
-                        "stringValue": "moist_well_drained"
-                      }
-                    },
-                    "producer_farm_id": {
-                      "scalarValue": {
-                        "stringValue": "EUDR-GH-2026-0419"
-                      }
-                    },
-                    "plot_perimeter": {
-                      "scalarValue": {
-                        "geoshapeValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2925,
-                              "longitude": 36.8224,
-                              "altitudeMeters": 1681.0,
-                              "accuracyMeters": 3.8
-                            },
-                            {
-                              "latitude": -1.2918,
-                              "longitude": 36.8228,
-                              "altitudeMeters": 1682.0,
-                              "accuracyMeters": 3.2
-                            },
-                            {
-                              "latitude": -1.2915,
-                              "longitude": 36.8221,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.4
-                            },
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "plot_center_point": {
-                      "scalarValue": {
-                        "geopointValue": {
-                          "latitude": -1.29201,
-                          "longitude": 36.82228,
-                          "altitudeMeters": 1681.0,
-                          "accuracyMeters": 3.1
-                        }
-                      }
-                    },
-                    "planting_year": {
-                      "scalarValue": {
-                        "int32Value": 2016
-                      }
-                    },
-                    "eudr_deforestation_free_attestation": {
-                      "scalarValue": {
-                        "boolValue": true
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -12986,83 +12765,6 @@
                       "type": "TYPE_STRING"
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "commodity_type": {
-                      "scalarValue": {
-                        "stringValue": "cocoa"
-                      }
-                    },
-                    "soil_moisture_class": {
-                      "scalarValue": {
-                        "stringValue": "moist_well_drained"
-                      }
-                    },
-                    "producer_farm_id": {
-                      "scalarValue": {
-                        "stringValue": "EUDR-GH-2026-0419"
-                      }
-                    },
-                    "plot_perimeter": {
-                      "scalarValue": {
-                        "geoshapeValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2925,
-                              "longitude": 36.8224,
-                              "altitudeMeters": 1681.0,
-                              "accuracyMeters": 3.8
-                            },
-                            {
-                              "latitude": -1.2918,
-                              "longitude": 36.8228,
-                              "altitudeMeters": 1682.0,
-                              "accuracyMeters": 3.2
-                            },
-                            {
-                              "latitude": -1.2915,
-                              "longitude": 36.8221,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.4
-                            },
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "plot_center_point": {
-                      "scalarValue": {
-                        "geopointValue": {
-                          "latitude": -1.29201,
-                          "longitude": 36.82228,
-                          "altitudeMeters": 1681.0,
-                          "accuracyMeters": 3.1
-                        }
-                      }
-                    },
-                    "planting_year": {
-                      "scalarValue": {
-                        "int32Value": 2016
-                      }
-                    },
-                    "eudr_deforestation_free_attestation": {
-                      "scalarValue": {
-                        "boolValue": true
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -13955,62 +13657,6 @@
                       "type": "TYPE_STRING"
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "primary_respondent_id": {
-                      "scalarValue": {
-                        "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
-                      }
-                    },
-                    "returning_individuals_present": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
-                          },
-                          {
-                            "stringValue": "0000000d-2972-591c-b23d-4918d3e3b7b1"
-                          },
-                          {
-                            "stringValue": "0000000f-23a2-50ad-b0e8-98639587eba4"
-                          }
-                        ]
-                      }
-                    },
-                    "respondent_residency_status": {
-                      "scalarValue": {
-                        "stringValue": "resident_full_time"
-                      }
-                    },
-                    "current_household_size": {
-                      "scalarValue": {
-                        "int32Value": 5
-                      }
-                    },
-                    "new_individuals_joined_count": {
-                      "scalarValue": {
-                        "int32Value": 1
-                      }
-                    },
-                    "primary_livelihood_sources": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "agroforestry_cocoa"
-                          },
-                          {
-                            "stringValue": "beekeeping"
-                          }
-                        ]
-                      }
-                    },
-                    "clean_cooking_energy": {
-                      "scalarValue": {
-                        "stringValue": "improved_cookstove"
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -14714,62 +14360,6 @@
                       "type": "TYPE_STRING"
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "primary_respondent_id": {
-                      "scalarValue": {
-                        "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
-                      }
-                    },
-                    "returning_individuals_present": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "0000000c-a9ae-59f6-ac51-7f5a8777598f"
-                          },
-                          {
-                            "stringValue": "0000000d-2972-591c-b23d-4918d3e3b7b1"
-                          },
-                          {
-                            "stringValue": "0000000f-23a2-50ad-b0e8-98639587eba4"
-                          }
-                        ]
-                      }
-                    },
-                    "respondent_residency_status": {
-                      "scalarValue": {
-                        "stringValue": "resident_full_time"
-                      }
-                    },
-                    "current_household_size": {
-                      "scalarValue": {
-                        "int32Value": 5
-                      }
-                    },
-                    "new_individuals_joined_count": {
-                      "scalarValue": {
-                        "int32Value": 1
-                      }
-                    },
-                    "primary_livelihood_sources": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "agroforestry_cocoa"
-                          },
-                          {
-                            "stringValue": "beekeeping"
-                          }
-                        ]
-                      }
-                    },
-                    "clean_cooking_energy": {
-                      "scalarValue": {
-                        "stringValue": "improved_cookstove"
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -16186,197 +15776,6 @@
                       ]
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "dominant_shade_species": {
-                      "scalarValue": {
-                        "stringValue": "Grevillea robusta"
-                      }
-                    },
-                    "shade_species_choice": {
-                      "scalarValue": {
-                        "stringValue": "erythrina_poeppigiana"
-                      }
-                    },
-                    "surviving_saplings_count": {
-                      "scalarValue": {
-                        "int32Value": 188
-                      }
-                    },
-                    "mean_dbh_cm": {
-                      "scalarValue": {
-                        "doubleValue": 28.4
-                      }
-                    },
-                    "canopy_cover_pct": {
-                      "scalarValue": {
-                        "int32Value": 70
-                      }
-                    },
-                    "eudr_compliant_buffer": {
-                      "scalarValue": {
-                        "boolValue": true
-                      }
-                    },
-                    "survey_date": {
-                      "scalarValue": {
-                        "dateValue": {
-                          "year": 2026,
-                          "month": 9,
-                          "day": 24
-                        }
-                      }
-                    },
-                    "arrival_time": {
-                      "scalarValue": {
-                        "timeValue": {
-                          "hours": 8,
-                          "minutes": 30
-                        }
-                      }
-                    },
-                    "canopy_health_rating": {
-                      "scalarValue": {
-                        "stringValue": "good"
-                      }
-                    },
-                    "certification_schemes": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "rainforest_alliance"
-                          },
-                          {
-                            "stringValue": "organic_eu"
-                          }
-                        ]
-                      }
-                    },
-                    "conservation_priority_rank": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "riparian_buffer"
-                          },
-                          {
-                            "stringValue": "native_canopy"
-                          },
-                          {
-                            "stringValue": "soil_carbon"
-                          }
-                        ]
-                      }
-                    },
-                    "plot_center_gps": {
-                      "scalarValue": {
-                        "geopointValue": {
-                          "latitude": -1.292066,
-                          "longitude": 36.821946,
-                          "altitudeMeters": 1680.0,
-                          "accuracyMeters": 4.2
-                        }
-                      }
-                    },
-                    "riparian_transect": {
-                      "scalarValue": {
-                        "geotraceValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2924,
-                              "longitude": 36.8222,
-                              "altitudeMeters": 1679.0,
-                              "accuracyMeters": 3.6
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "plot_boundary": {
-                      "scalarValue": {
-                        "geoshapeValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2925,
-                              "longitude": 36.8224,
-                              "altitudeMeters": 1681.0,
-                              "accuracyMeters": 3.8
-                            },
-                            {
-                              "latitude": -1.2918,
-                              "longitude": 36.8228,
-                              "altitudeMeters": 1682.0,
-                              "accuracyMeters": 3.2
-                            },
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "leaf_voucher_photo": {
-                      "scalarValue": {
-                        "stringValue": "erythrina_voucher_104.jpg"
-                      }
-                    },
-                    "safety_protocol_ack": {
-                      "scalarValue": {
-                        "stringValue": "OK"
-                      }
-                    },
-                    "site_conditions_group": {
-                      "nodeValue": {
-                        "fields": {
-                          "soil_moisture_class": {
-                            "scalarValue": {
-                              "stringValue": "moist_well_drained"
-                            }
-                          },
-                          "field_notes": {
-                            "scalarValue": {
-                              "stringValue": "Healthy Erythrina canopy with active natural regeneration."
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "sampled_trees": {
-                      "repeatValue": {
-                        "nodes": [
-                          {
-                            "fields": {
-                              "tree_tag": {
-                                "scalarValue": {
-                                  "stringValue": "T-001"
-                                }
-                              },
-                              "stem_dbh_cm": {
-                                "scalarValue": {
-                                  "doubleValue": 31.5
-                                }
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -17241,11 +16640,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Register baseline parcel)"
-                      }
                     }
                   }
                 }
@@ -17572,11 +16966,6 @@
                             }
                           }
                         }
-                      }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Interview household)"
                       }
                     }
                   }
@@ -17905,11 +17294,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Record canopy audit)"
-                      }
                     }
                   }
                 }
@@ -18215,11 +17599,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Validate alert)"
-                      }
                     }
                   }
                 }
@@ -18521,11 +17900,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Inspect water effluent)"
-                      }
                     }
                   }
                 }
@@ -18736,11 +18110,6 @@
                             }
                           }
                         }
-                      }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Log field sighting)"
                       }
                     }
                   }
@@ -19751,197 +19120,6 @@
                       ]
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "dominant_shade_species": {
-                      "scalarValue": {
-                        "stringValue": "Grevillea robusta"
-                      }
-                    },
-                    "shade_species_choice": {
-                      "scalarValue": {
-                        "stringValue": "erythrina_poeppigiana"
-                      }
-                    },
-                    "surviving_saplings_count": {
-                      "scalarValue": {
-                        "int32Value": 188
-                      }
-                    },
-                    "mean_dbh_cm": {
-                      "scalarValue": {
-                        "doubleValue": 28.4
-                      }
-                    },
-                    "canopy_cover_pct": {
-                      "scalarValue": {
-                        "int32Value": 70
-                      }
-                    },
-                    "eudr_compliant_buffer": {
-                      "scalarValue": {
-                        "boolValue": true
-                      }
-                    },
-                    "survey_date": {
-                      "scalarValue": {
-                        "dateValue": {
-                          "year": 2026,
-                          "month": 9,
-                          "day": 24
-                        }
-                      }
-                    },
-                    "arrival_time": {
-                      "scalarValue": {
-                        "timeValue": {
-                          "hours": 8,
-                          "minutes": 30
-                        }
-                      }
-                    },
-                    "canopy_health_rating": {
-                      "scalarValue": {
-                        "stringValue": "good"
-                      }
-                    },
-                    "certification_schemes": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "rainforest_alliance"
-                          },
-                          {
-                            "stringValue": "organic_eu"
-                          }
-                        ]
-                      }
-                    },
-                    "conservation_priority_rank": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "riparian_buffer"
-                          },
-                          {
-                            "stringValue": "native_canopy"
-                          },
-                          {
-                            "stringValue": "soil_carbon"
-                          }
-                        ]
-                      }
-                    },
-                    "plot_center_gps": {
-                      "scalarValue": {
-                        "geopointValue": {
-                          "latitude": -1.292066,
-                          "longitude": 36.821946,
-                          "altitudeMeters": 1680.0,
-                          "accuracyMeters": 4.2
-                        }
-                      }
-                    },
-                    "riparian_transect": {
-                      "scalarValue": {
-                        "geotraceValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2924,
-                              "longitude": 36.8222,
-                              "altitudeMeters": 1679.0,
-                              "accuracyMeters": 3.6
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "plot_boundary": {
-                      "scalarValue": {
-                        "geoshapeValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2925,
-                              "longitude": 36.8224,
-                              "altitudeMeters": 1681.0,
-                              "accuracyMeters": 3.8
-                            },
-                            {
-                              "latitude": -1.2918,
-                              "longitude": 36.8228,
-                              "altitudeMeters": 1682.0,
-                              "accuracyMeters": 3.2
-                            },
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "leaf_voucher_photo": {
-                      "scalarValue": {
-                        "stringValue": "erythrina_voucher_104.jpg"
-                      }
-                    },
-                    "safety_protocol_ack": {
-                      "scalarValue": {
-                        "stringValue": "OK"
-                      }
-                    },
-                    "site_conditions_group": {
-                      "nodeValue": {
-                        "fields": {
-                          "soil_moisture_class": {
-                            "scalarValue": {
-                              "stringValue": "moist_well_drained"
-                            }
-                          },
-                          "field_notes": {
-                            "scalarValue": {
-                              "stringValue": "Healthy Erythrina canopy with active natural regeneration."
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "sampled_trees": {
-                      "repeatValue": {
-                        "nodes": [
-                          {
-                            "fields": {
-                              "tree_tag": {
-                                "scalarValue": {
-                                  "stringValue": "T-001"
-                                }
-                              },
-                              "stem_dbh_cm": {
-                                "scalarValue": {
-                                  "doubleValue": 31.5
-                                }
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -20806,11 +19984,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Register baseline parcel)"
-                      }
                     }
                   }
                 }
@@ -21137,11 +20310,6 @@
                             }
                           }
                         }
-                      }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Interview household)"
                       }
                     }
                   }
@@ -21470,11 +20638,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Record canopy audit)"
-                      }
                     }
                   }
                 }
@@ -21780,11 +20943,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Validate alert)"
-                      }
                     }
                   }
                 }
@@ -22086,11 +21244,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Inspect water effluent)"
-                      }
                     }
                   }
                 }
@@ -22301,11 +21454,6 @@
                             }
                           }
                         }
-                      }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Log field sighting)"
                       }
                     }
                   }
@@ -23969,197 +23117,6 @@
                       ]
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "dominant_shade_species": {
-                      "scalarValue": {
-                        "stringValue": "Grevillea robusta"
-                      }
-                    },
-                    "shade_species_choice": {
-                      "scalarValue": {
-                        "stringValue": "erythrina_poeppigiana"
-                      }
-                    },
-                    "surviving_saplings_count": {
-                      "scalarValue": {
-                        "int32Value": 188
-                      }
-                    },
-                    "mean_dbh_cm": {
-                      "scalarValue": {
-                        "doubleValue": 28.4
-                      }
-                    },
-                    "canopy_cover_pct": {
-                      "scalarValue": {
-                        "int32Value": 70
-                      }
-                    },
-                    "eudr_compliant_buffer": {
-                      "scalarValue": {
-                        "boolValue": true
-                      }
-                    },
-                    "survey_date": {
-                      "scalarValue": {
-                        "dateValue": {
-                          "year": 2026,
-                          "month": 9,
-                          "day": 24
-                        }
-                      }
-                    },
-                    "arrival_time": {
-                      "scalarValue": {
-                        "timeValue": {
-                          "hours": 8,
-                          "minutes": 30
-                        }
-                      }
-                    },
-                    "canopy_health_rating": {
-                      "scalarValue": {
-                        "stringValue": "good"
-                      }
-                    },
-                    "certification_schemes": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "rainforest_alliance"
-                          },
-                          {
-                            "stringValue": "organic_eu"
-                          }
-                        ]
-                      }
-                    },
-                    "conservation_priority_rank": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "riparian_buffer"
-                          },
-                          {
-                            "stringValue": "native_canopy"
-                          },
-                          {
-                            "stringValue": "soil_carbon"
-                          }
-                        ]
-                      }
-                    },
-                    "plot_center_gps": {
-                      "scalarValue": {
-                        "geopointValue": {
-                          "latitude": -1.292066,
-                          "longitude": 36.821946,
-                          "altitudeMeters": 1680.0,
-                          "accuracyMeters": 4.2
-                        }
-                      }
-                    },
-                    "riparian_transect": {
-                      "scalarValue": {
-                        "geotraceValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2924,
-                              "longitude": 36.8222,
-                              "altitudeMeters": 1679.0,
-                              "accuracyMeters": 3.6
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "plot_boundary": {
-                      "scalarValue": {
-                        "geoshapeValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2925,
-                              "longitude": 36.8224,
-                              "altitudeMeters": 1681.0,
-                              "accuracyMeters": 3.8
-                            },
-                            {
-                              "latitude": -1.2918,
-                              "longitude": 36.8228,
-                              "altitudeMeters": 1682.0,
-                              "accuracyMeters": 3.2
-                            },
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "leaf_voucher_photo": {
-                      "scalarValue": {
-                        "stringValue": "erythrina_voucher_104.jpg"
-                      }
-                    },
-                    "safety_protocol_ack": {
-                      "scalarValue": {
-                        "stringValue": "OK"
-                      }
-                    },
-                    "site_conditions_group": {
-                      "nodeValue": {
-                        "fields": {
-                          "soil_moisture_class": {
-                            "scalarValue": {
-                              "stringValue": "moist_well_drained"
-                            }
-                          },
-                          "field_notes": {
-                            "scalarValue": {
-                              "stringValue": "Healthy Erythrina canopy with active natural regeneration."
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "sampled_trees": {
-                      "repeatValue": {
-                        "nodes": [
-                          {
-                            "fields": {
-                              "tree_tag": {
-                                "scalarValue": {
-                                  "stringValue": "T-001"
-                                }
-                              },
-                              "stem_dbh_cm": {
-                                "scalarValue": {
-                                  "doubleValue": 31.5
-                                }
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -25024,11 +23981,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Register baseline parcel)"
-                      }
                     }
                   }
                 }
@@ -25355,11 +24307,6 @@
                             }
                           }
                         }
-                      }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Interview household)"
                       }
                     }
                   }
@@ -25688,11 +24635,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Record canopy audit)"
-                      }
                     }
                   }
                 }
@@ -25998,11 +24940,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Validate alert)"
-                      }
                     }
                   }
                 }
@@ -26304,11 +25241,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Inspect water effluent)"
-                      }
                     }
                   }
                 }
@@ -26519,11 +25451,6 @@
                             }
                           }
                         }
-                      }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Log field sighting)"
                       }
                     }
                   }
@@ -27090,197 +26017,6 @@
                       ]
                     }
                   ]
-                },
-                "defaultValues": {
-                  "fields": {
-                    "dominant_shade_species": {
-                      "scalarValue": {
-                        "stringValue": "Grevillea robusta"
-                      }
-                    },
-                    "shade_species_choice": {
-                      "scalarValue": {
-                        "stringValue": "erythrina_poeppigiana"
-                      }
-                    },
-                    "surviving_saplings_count": {
-                      "scalarValue": {
-                        "int32Value": 188
-                      }
-                    },
-                    "mean_dbh_cm": {
-                      "scalarValue": {
-                        "doubleValue": 28.4
-                      }
-                    },
-                    "canopy_cover_pct": {
-                      "scalarValue": {
-                        "int32Value": 70
-                      }
-                    },
-                    "eudr_compliant_buffer": {
-                      "scalarValue": {
-                        "boolValue": true
-                      }
-                    },
-                    "survey_date": {
-                      "scalarValue": {
-                        "dateValue": {
-                          "year": 2026,
-                          "month": 9,
-                          "day": 24
-                        }
-                      }
-                    },
-                    "arrival_time": {
-                      "scalarValue": {
-                        "timeValue": {
-                          "hours": 8,
-                          "minutes": 30
-                        }
-                      }
-                    },
-                    "canopy_health_rating": {
-                      "scalarValue": {
-                        "stringValue": "good"
-                      }
-                    },
-                    "certification_schemes": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "rainforest_alliance"
-                          },
-                          {
-                            "stringValue": "organic_eu"
-                          }
-                        ]
-                      }
-                    },
-                    "conservation_priority_rank": {
-                      "listValue": {
-                        "values": [
-                          {
-                            "stringValue": "riparian_buffer"
-                          },
-                          {
-                            "stringValue": "native_canopy"
-                          },
-                          {
-                            "stringValue": "soil_carbon"
-                          }
-                        ]
-                      }
-                    },
-                    "plot_center_gps": {
-                      "scalarValue": {
-                        "geopointValue": {
-                          "latitude": -1.292066,
-                          "longitude": 36.821946,
-                          "altitudeMeters": 1680.0,
-                          "accuracyMeters": 4.2
-                        }
-                      }
-                    },
-                    "riparian_transect": {
-                      "scalarValue": {
-                        "geotraceValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2924,
-                              "longitude": 36.8222,
-                              "altitudeMeters": 1679.0,
-                              "accuracyMeters": 3.6
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "plot_boundary": {
-                      "scalarValue": {
-                        "geoshapeValue": {
-                          "points": [
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            },
-                            {
-                              "latitude": -1.2925,
-                              "longitude": 36.8224,
-                              "altitudeMeters": 1681.0,
-                              "accuracyMeters": 3.8
-                            },
-                            {
-                              "latitude": -1.2918,
-                              "longitude": 36.8228,
-                              "altitudeMeters": 1682.0,
-                              "accuracyMeters": 3.2
-                            },
-                            {
-                              "latitude": -1.2921,
-                              "longitude": 36.8219,
-                              "altitudeMeters": 1680.0,
-                              "accuracyMeters": 3.5
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "leaf_voucher_photo": {
-                      "scalarValue": {
-                        "stringValue": "erythrina_voucher_104.jpg"
-                      }
-                    },
-                    "safety_protocol_ack": {
-                      "scalarValue": {
-                        "stringValue": "OK"
-                      }
-                    },
-                    "site_conditions_group": {
-                      "nodeValue": {
-                        "fields": {
-                          "soil_moisture_class": {
-                            "scalarValue": {
-                              "stringValue": "moist_well_drained"
-                            }
-                          },
-                          "field_notes": {
-                            "scalarValue": {
-                              "stringValue": "Healthy Erythrina canopy with active natural regeneration."
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "sampled_trees": {
-                      "repeatValue": {
-                        "nodes": [
-                          {
-                            "fields": {
-                              "tree_tag": {
-                                "scalarValue": {
-                                  "stringValue": "T-001"
-                                }
-                              },
-                              "stem_dbh_cm": {
-                                "scalarValue": {
-                                  "doubleValue": 31.5
-                                }
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
                 }
               },
               "translations": {
@@ -28145,11 +26881,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Register baseline parcel)"
-                      }
                     }
                   }
                 }
@@ -28476,11 +27207,6 @@
                             }
                           }
                         }
-                      }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Interview household)"
                       }
                     }
                   }
@@ -28809,11 +27535,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Record canopy audit)"
-                      }
                     }
                   }
                 }
@@ -29119,11 +27840,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Validate alert)"
-                      }
                     }
                   }
                 }
@@ -29425,11 +28141,6 @@
                           }
                         }
                       }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Inspect water effluent)"
-                      }
                     }
                   }
                 }
@@ -29640,11 +28351,6 @@
                             }
                           }
                         }
-                      }
-                    },
-                    "organizer_action_cta": {
-                      "scalarValue": {
-                        "stringValue": "Verified in field (Log field sighting)"
                       }
                     }
                   }

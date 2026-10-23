@@ -18,12 +18,49 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import openforis.collectone.v1.forms.ControlType
 import org.openforis.collectone.v2.core.forms.engine.FormSession
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 
 class ExampleFormsCatalogTest {
+
+  private fun collectAllControls(
+    components: List<ComponentState>
+  ): List<ComponentState.ControlState> {
+    val result = mutableListOf<ComponentState.ControlState>()
+    for (component in components) {
+      when (component) {
+        is ComponentState.ControlState -> result += component
+        is ComponentState.GroupState -> result += collectAllControls(component.children)
+        is ComponentState.RepeatGroupState ->
+          for (instance in component.instances) {
+            result += collectAllControls(instance.children)
+          }
+      }
+    }
+    return result
+  }
+
+  private fun collectRepeatGroups(
+    components: List<ComponentState>
+  ): List<ComponentState.RepeatGroupState> {
+    val result = mutableListOf<ComponentState.RepeatGroupState>()
+    for (component in components) {
+      when (component) {
+        is ComponentState.ControlState -> Unit
+        is ComponentState.GroupState -> result += collectRepeatGroups(component.children)
+        is ComponentState.RepeatGroupState -> {
+          result += component
+          for (instance in component.instances) {
+            result += collectRepeatGroups(instance.children)
+          }
+        }
+      }
+    }
+    return result
+  }
 
   private fun collectSelectControls(
     components: List<ComponentState>
@@ -116,5 +153,107 @@ class ExampleFormsCatalogTest {
         )
       }
     }
+  }
+
+  @Test
+  fun allExampleForms_startEmptyExceptCalculatedAndPreloadedFields() {
+    val calculatedPaths =
+      setOf(
+        "/data/selected_plot_stratum",
+        "/data/selected_plot_elevation",
+        "/data/preloaded_household_code",
+        "/data/preloaded_baseline_role",
+        "/data/preloaded_baseline_year",
+        "/data/calculated_shade_index",
+      )
+    for (example in WorkbenchExampleForm.entries) {
+      val session = FormSession(formDef = example.formDefinition.proto)
+      val controls = collectAllControls(session.state.rootComponents)
+      for (control in controls) {
+        if (control.canonicalPath in calculatedPaths) {
+          assertTrue(
+            control.fieldState.isReadOnly,
+            "Expected calculated/preloaded control ${control.canonicalPath} in ${example.name} to be read-only",
+          )
+          if (control.canonicalPath == "/data/calculated_shade_index") {
+            assertEquals(
+              "Species:  | Saplings:  | Canopy: %",
+              control.fieldState.value?.scalar_value?.string_value,
+            )
+          } else {
+            // Entity lookup fields start blank until an entity is selected
+            assertEquals(
+              "",
+              control.fieldState.value?.scalar_value?.string_value.orEmpty(),
+              "Expected lookup field ${control.canonicalPath} in ${example.name} to be blank before entity selection",
+            )
+          }
+        } else {
+          assertNull(
+            control.fieldState.value,
+            "Expected user-input control ${control.canonicalPath} in ${example.name} to start empty, but was ${control.fieldState.value}",
+          )
+        }
+      }
+      val repeatGroups = collectRepeatGroups(session.state.rootComponents)
+      for (repeatGroup in repeatGroups) {
+        assertTrue(
+          repeatGroup.instances.isEmpty(),
+          "Expected repeat group ${repeatGroup.canonicalPath} in ${example.name} to start with 0 instances",
+        )
+      }
+    }
+
+    // Verify preloaded entity lookup fields populate when the user selects an entity
+    val plotSession =
+      FormSession(
+        formDef = WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT.formDefinition.proto
+      )
+    plotSession.updateString("/data/sample_plot_entity", "00000016-cc1f-5125-8841-166ab5b5f68f")
+    val plotControls =
+      collectAllControls(plotSession.state.rootComponents).associateBy { it.canonicalPath }
+    assertEquals(
+      "Montane Moist Indigenous Forest",
+      plotControls["/data/selected_plot_stratum"]?.fieldState?.value?.scalar_value?.string_value,
+    )
+    assertEquals(
+      "1840m",
+      plotControls["/data/selected_plot_elevation"]?.fieldState?.value?.scalar_value?.string_value,
+    )
+
+    val householdSession =
+      FormSession(
+        formDef = WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS.formDefinition.proto
+      )
+    householdSession.updateString(
+      "/data/primary_respondent_id",
+      "0000000c-a9ae-59f6-ac51-7f5a8777598f",
+    )
+    val householdControls =
+      collectAllControls(householdSession.state.rootComponents).associateBy { it.canonicalPath }
+    assertEquals(
+      "HH-KAK-014 (Kakamega East)",
+      householdControls["/data/preloaded_household_code"]
+        ?.fieldState
+        ?.value
+        ?.scalar_value
+        ?.string_value,
+    )
+    assertEquals(
+      "Household Head & Lead Agroforester",
+      householdControls["/data/preloaded_baseline_role"]
+        ?.fieldState
+        ?.value
+        ?.scalar_value
+        ?.string_value,
+    )
+    assertEquals(
+      "2023 Wave 1",
+      householdControls["/data/preloaded_baseline_year"]
+        ?.fieldState
+        ?.value
+        ?.scalar_value
+        ?.string_value,
+    )
   }
 }

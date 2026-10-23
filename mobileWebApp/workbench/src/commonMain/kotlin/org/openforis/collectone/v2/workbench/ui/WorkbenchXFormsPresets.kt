@@ -36,10 +36,10 @@ const val BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML: String =
         <meta>
           <instanceID/>
         </meta>
-        <species>Adansonia digitata</species>
-        <height_m>18.5</height_m>
-        <circumference_m>12.2</circumference_m>
-        <health_status>healthy</health_status>
+        <species/>
+        <height_m/>
+        <circumference_m/>
+        <health_status/>
       </data>
     </instance>
     <bind nodeset="/data/meta/instanceID" type="string" jr:preload="uid"/>

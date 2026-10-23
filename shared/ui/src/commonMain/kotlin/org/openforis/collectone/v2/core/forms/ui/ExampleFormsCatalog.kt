@@ -68,8 +68,8 @@ enum class WorkbenchExampleForm(
           <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">
             <instance>
               <data id="single_point_land_use" version="2026092401">
-                <sample_point>-1.292066 36.821946 1680.0 6.4</sample_point>
-                <land_use>agroforestry_shade</land_use>
+                <sample_point/>
+                <land_use/>
                 <observer_note/>
                 <orx:meta>
                   <orx:instanceID/>
@@ -225,17 +225,17 @@ enum class WorkbenchExampleForm(
           <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">
             <instance>
               <data id="sample_plots_forest_assessment" version="2026092401">
-                <sample_plot_entity>00000016-cc1f-5125-8841-166ab5b5f68f</sample_plot_entity>
+                <sample_plot_entity/>
                 <selected_plot_stratum/>
                 <selected_plot_elevation/>
-                <canopy_photo>hemispherical_canopy_sp01.jpg</canopy_photo>
-                <canopy_stratum>canopy</canopy_stratum>
-                <canopy_cover_pct>75</canopy_cover_pct>
-                <dominant_species>Cordia africana</dominant_species>
-                <stand_basal_area_m2_ha>24.5</stand_basal_area_m2_ha>
-                <regenerating_saplings_count>18</regenerating_saplings_count>
-                <disturbance_indicators>none</disturbance_indicators>
-                <assessment_notes>Closed upper canopy with dense natural regeneration.</assessment_notes>
+                <canopy_photo/>
+                <canopy_stratum/>
+                <canopy_cover_pct/>
+                <dominant_species/>
+                <stand_basal_area_m2_ha/>
+                <regenerating_saplings_count/>
+                <disturbance_indicators/>
+                <assessment_notes/>
                 <orx:meta>
                   <orx:instanceID/>
                   <entities:entity dataset="sample_plots" id="" update="1" baseVersion=""/>
@@ -477,13 +477,13 @@ enum class WorkbenchExampleForm(
           <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">
             <instance>
               <data id="commodity_perimeter_and_center" version="2026092401">
-                <commodity_type>cocoa</commodity_type>
-                <soil_moisture_class>moist_well_drained</soil_moisture_class>
-                <producer_farm_id>EUDR-GH-2026-0419</producer_farm_id>
-                <plot_perimeter>-1.2921 36.8219 1680 3.5; -1.2925 36.8224 1681 3.8; -1.2918 36.8228 1682 3.2; -1.2915 36.8221 1680 3.4; -1.2921 36.8219 1680 3.5</plot_perimeter>
-                <plot_center_point>-1.29201 36.82228 1681.0 3.1</plot_center_point>
-                <planting_year>2016</planting_year>
-                <eudr_deforestation_free_attestation>true</eudr_deforestation_free_attestation>
+                <commodity_type/>
+                <soil_moisture_class/>
+                <producer_farm_id/>
+                <plot_perimeter/>
+                <plot_center_point/>
+                <planting_year/>
+                <eudr_deforestation_free_attestation/>
                 <mapper_remarks/>
                 <orx:meta>
                   <orx:instanceID/>
@@ -691,16 +691,16 @@ enum class WorkbenchExampleForm(
           <model orx:xforms-version="1.0.0">
             <instance>
               <data id="household_survey_past_individuals" version="2026092401">
-                <primary_respondent_id>0000000c-a9ae-59f6-ac51-7f5a8777598f</primary_respondent_id>
+                <primary_respondent_id/>
                 <preloaded_household_code/>
                 <preloaded_baseline_role/>
                 <preloaded_baseline_year/>
-                <returning_individuals_present>0000000c-a9ae-59f6-ac51-7f5a8777598f 0000000d-2972-591c-b23d-4918d3e3b7b1 0000000f-23a2-50ad-b0e8-98639587eba4</returning_individuals_present>
-                <respondent_residency_status>resident_full_time</respondent_residency_status>
-                <current_household_size>5</current_household_size>
-                <new_individuals_joined_count>1</new_individuals_joined_count>
-                <primary_livelihood_sources>agroforestry_cocoa beekeeping</primary_livelihood_sources>
-                <clean_cooking_energy>improved_cookstove</clean_cooking_energy>
+                <returning_individuals_present/>
+                <respondent_residency_status/>
+                <current_household_size/>
+                <new_individuals_joined_count/>
+                <primary_livelihood_sources/>
+                <clean_cooking_energy/>
                 <enumerator_notes/>
                 <orx:meta>
                   <orx:instanceID/>
@@ -976,32 +976,32 @@ enum class WorkbenchExampleForm(
           <model orx:xforms-version="1.0.0" entities:entities-version="2024.1.0">
             <instance>
               <data id="eudr_shade_survey" version="2026032901">
-                <dominant_shade_species>Grevillea robusta</dominant_shade_species>
-                <shade_species_choice>erythrina_poeppigiana</shade_species_choice>
-                <surviving_saplings_count>188</surviving_saplings_count>
-                <mean_dbh_cm>28.4</mean_dbh_cm>
-                <canopy_cover_pct>70</canopy_cover_pct>
-                <eudr_compliant_buffer>true</eudr_compliant_buffer>
-                <survey_date>2026-09-24</survey_date>
-                <arrival_time>08:30</arrival_time>
-                <canopy_health_rating>good</canopy_health_rating>
-                <certification_schemes>rainforest_alliance organic_eu</certification_schemes>
-                <conservation_priority_rank>riparian_buffer native_canopy soil_carbon</conservation_priority_rank>
-                <plot_center_gps>-1.292066 36.821946 1680.0 4.2</plot_center_gps>
-                <riparian_transect>-1.2921 36.8219 1680 3.5; -1.2924 36.8222 1679 3.6</riparian_transect>
-                <plot_boundary>-1.2921 36.8219 1680 3.5; -1.2925 36.8224 1681 3.8; -1.2918 36.8228 1682 3.2; -1.2921 36.8219 1680 3.5</plot_boundary>
-                <leaf_voucher_photo>erythrina_voucher_104.jpg</leaf_voucher_photo>
+                <dominant_shade_species/>
+                <shade_species_choice/>
+                <surviving_saplings_count/>
+                <mean_dbh_cm/>
+                <canopy_cover_pct/>
+                <eudr_compliant_buffer/>
+                <survey_date/>
+                <arrival_time/>
+                <canopy_health_rating/>
+                <certification_schemes/>
+                <conservation_priority_rank/>
+                <plot_center_gps/>
+                <riparian_transect/>
+                <plot_boundary/>
+                <leaf_voucher_photo/>
                 <canopy_walkthrough_video/>
                 <farmer_interview_audio/>
-                <safety_protocol_ack>OK</safety_protocol_ack>
+                <safety_protocol_ack/>
                 <calculated_shade_index/>
                 <site_conditions_group>
-                  <soil_moisture_class>moist_well_drained</soil_moisture_class>
-                  <field_notes>Healthy Erythrina canopy with active natural regeneration.</field_notes>
+                  <soil_moisture_class/>
+                  <field_notes/>
                 </site_conditions_group>
-                <sampled_trees>
-                  <tree_tag>T-001</tree_tag>
-                  <stem_dbh_cm>31.5</stem_dbh_cm>
+                <sampled_trees jr:template="">
+                  <tree_tag/>
+                  <stem_dbh_cm/>
                 </sampled_trees>
                 <orx:meta>
                   <orx:instanceID/>
