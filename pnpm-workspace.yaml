@@ -25,7 +25,7 @@ catalogs:
   default:
     '@angular/animations': ^20.3.15
     '@angular/cdk': ^20.2.14
-    '@angular/common': ^20.3.28
+    '@angular/common': ^20.3.34
     '@angular/compiler': ^20.3.28
     '@angular/core': ^20.3.28
     '@angular/fire': ^20.0.1
@@ -57,9 +57,9 @@ catalogs:
     ngx-autosize-input: ^20.0.5
     ngx-color: ^10.1.0
     nodemailer: ^9.0.1
-    protobufjs: ^7.6.3
+    protobufjs: ^8.8.1
     rxjs: ^7.8.2
-    sanitize-html: ^2.17.7
+    sanitize-html: ^2.18.1
     selenium-webdriver: ^4.19.0
     zone.js: ^0.15.0
   dev:
