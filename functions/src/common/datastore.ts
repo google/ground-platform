@@ -22,19 +22,25 @@ import {
   FieldValue,
   Firestore,
   GeoPoint,
+  QuerySnapshot,
 } from 'firebase-admin/firestore';
 import type { Geometry } from 'geojson';
-import { registry } from '@ground/lib';
+import { registry, toDocumentData } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
+import { toTimestampPb } from './audit-info';
 import { QueryIterator, leftOuterJoinSorted } from './query-iterator';
 
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
+const ai = registry.getFieldIds(Pb.AuditInfo);
 
 /** gRPC status code returned by Firestore when a document doesn't exist. */
 const GRPC_STATUS_NOT_FOUND = 5;
+
+/** How long cached property generator configs are reused before re-reading. */
+const PROPERTY_GENERATORS_TTL_MS = 5 * 60 * 60 * 1000;
 
 /**
  *
@@ -111,6 +117,8 @@ export const mailTemplate = (templateId: string) =>
 
 export class Datastore {
   private db_: Firestore;
+  private propertyGenerators_?: QuerySnapshot;
+  private propertyGeneratorsExpiry_ = 0;
 
   constructor(db: Firestore) {
     this.db_ = db;
@@ -148,8 +156,20 @@ export class Datastore {
     return this.db_.collection(path).get();
   }
 
-  fetchPropertyGenerators() {
-    return this.db_.collection(integrations() + '/propertyGenerators').get();
+  /**
+   * Returns the property generator configs, caching the result for up to
+   * PROPERTY_GENERATORS_TTL_MS. These are global configs which change rarely,
+   * and which would otherwise be re-read once per created LOI.
+   */
+  async fetchPropertyGenerators(): Promise<QuerySnapshot> {
+    const now = Date.now();
+    if (!this.propertyGenerators_ || now > this.propertyGeneratorsExpiry_) {
+      this.propertyGenerators_ = await this.db_
+        .collection(integrations() + '/propertyGenerators')
+        .get();
+      this.propertyGeneratorsExpiry_ = now + PROPERTY_GENERATORS_TTL_MS;
+    }
+    return this.propertyGenerators_;
   }
 
   fetchMailConfig() {
@@ -241,16 +261,25 @@ export class Datastore {
     await this.db_.doc(survey(surveyId)).collection('lois').add(loiDoc);
   }
 
+  /**
+   * Bulk-inserts `loiDocs`, returning the id of the last one created so that
+   * callers can name it when announcing the batch. Returns null when there was
+   * nothing to insert.
+   */
   async insertLocationsOfInterest(
     surveyId: string,
     loiDocs: DocumentData[]
-  ): Promise<void> {
+  ): Promise<string | null> {
     const bulkWriter = this.db_.bulkWriter();
     const collectionRef = this.db_.collection(lois(surveyId));
+    let lastId: string | null = null;
     for (const loiDoc of loiDocs) {
-      bulkWriter.create(collectionRef.doc(), loiDoc);
+      const docRef = collectionRef.doc();
+      bulkWriter.create(docRef, loiDoc);
+      lastId = docRef.id;
     }
     await bulkWriter.close();
+    return lastId;
   }
 
   async countSubmissionsForLoi(
@@ -268,9 +297,6 @@ export class Datastore {
     try {
       await loiRef.update({ [l.submissionCount]: count });
     } catch (e) {
-      // Deleting an LOI also deletes its submissions, so the resulting
-      // submission write events can arrive after the LOI itself is gone. There
-      // is no count left to update in that case.
       if ((e as { code?: number }).code === GRPC_STATUS_NOT_FOUND) return;
       throw e;
     }
@@ -278,12 +304,18 @@ export class Datastore {
 
   async adjustSubmissionCount(surveyId: string, loiId: string, delta: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    try {
-      await loiRef.update({ [l.submissionCount]: FieldValue.increment(delta) });
-    } catch (e) {
-      if ((e as { code?: number }).code === GRPC_STATUS_NOT_FOUND) return;
-      throw e;
-    }
+    await this.db_.runTransaction(async tx => {
+      const loiDoc = (await tx.get(loiRef)).data();
+      if (!loiDoc) return;
+      const lastModified = loiDoc[l.lastModified] ?? loiDoc[l.created] ?? {};
+      tx.update(loiRef, {
+        [l.submissionCount]: FieldValue.increment(delta),
+        [l.lastModified]: {
+          ...lastModified,
+          [ai.serverTimestamp]: toDocumentData(toTimestampPb(Date.now())),
+        },
+      });
+    });
   }
 
   async updateLoiProperties(
@@ -292,7 +324,11 @@ export class Datastore {
     loiDoc: DocumentData
   ) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({ [l.properties]: loiDoc[l.properties] });
+    const update: DocumentData = { [l.properties]: loiDoc[l.properties] };
+    if (l.created in loiDoc) update[l.created] = loiDoc[l.created];
+    if (l.lastModified in loiDoc)
+      update[l.lastModified] = loiDoc[l.lastModified];
+    await loiRef.update(update);
   }
 
   static toFirestoreMap(geometry: any) {

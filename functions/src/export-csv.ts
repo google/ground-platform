@@ -136,7 +136,7 @@ export async function exportCsvHandler(
     surveyId,
     jobId,
     ownerIdFilter,
-    50
+    1000
   );
 
   for await (const row of rows) {
