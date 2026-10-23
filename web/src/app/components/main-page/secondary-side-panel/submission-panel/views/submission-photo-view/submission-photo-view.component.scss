@@ -18,3 +18,17 @@
   border-radius: 4px;
   width: 100%;
 }
+
+.submission-img-unavailable {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
