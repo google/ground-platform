@@ -32,7 +32,7 @@ export class SubmissionPhotoViewComponent {
   readonly unavailable = signal(false);
 
   constructor() {
-    effect(() => {
+    effect(onCleanup => {
       const path = this.path();
       this.downloadUrl.set(undefined);
       this.unavailable.set(false);
@@ -41,13 +41,17 @@ export class SubmissionPhotoViewComponent {
         this.unavailable.set(true);
         return;
       }
+      let active = true;
+      onCleanup(() => {
+        active = false;
+      });
       getDownloadURL(ref(this.storage, path))
         .then(url => {
-          if (path === this.path()) this.downloadUrl.set(url);
+          if (active) this.downloadUrl.set(url);
         })
         .catch(error => {
           console.error(`Could not load image: ${path}`, error);
-          if (path === this.path()) this.unavailable.set(true);
+          if (active) this.unavailable.set(true);
         });
     });
   }
