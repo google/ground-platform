@@ -38,7 +38,10 @@ import { SESSION_COOKIE_DURATION_MS } from '@ground/lib';
 const SESSION_COOKIE_EXPIRES_AT_KEY = 'sessionCookieExpiresAt';
 
 /** Providers shared by all describe blocks that use a mock Auth. */
-function mockAuthProviders(mockAuth: Partial<Auth>, sessionLoginSpy: jasmine.Spy) {
+function mockAuthProviders(
+  mockAuth: Partial<Auth>,
+  sessionLoginSpy: jasmine.Spy
+) {
   return [
     { provide: Auth, useValue: mockAuth },
     { provide: Firestore, useValue: {} },
@@ -55,7 +58,13 @@ function mockAuthProviders(mockAuth: Partial<Auth>, sessionLoginSpy: jasmine.Spy
       },
     },
     { provide: Router, useValue: { events: of() } },
-    { provide: CloudFunctionsService, useValue: { sessionLogin: sessionLoginSpy, profileRefresh: jasmine.createSpy('profileRefresh').and.resolveTo() } },
+    {
+      provide: CloudFunctionsService,
+      useValue: {
+        sessionLogin: sessionLoginSpy,
+        profileRefresh: jasmine.createSpy('profileRefresh').and.resolveTo(),
+      },
+    },
   ];
 }
 
