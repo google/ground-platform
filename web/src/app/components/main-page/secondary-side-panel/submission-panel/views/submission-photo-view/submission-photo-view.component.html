@@ -23,5 +23,14 @@ limitations under the License.
   />
 </ng-container>
 <ng-template #loading>
-  <mat-spinner [diameter]="40"></mat-spinner>
+  <div *ngIf="unavailable(); else spinner" class="submission-img-unavailable">
+    <mat-icon>image_not_supported</mat-icon>
+    <span i18n="@@app.labels.submissionPhotoUnavailable">
+      Photo unavailable. It may not have been uploaded yet, for example if the
+      device was waiting for a Wi-Fi connection.
+    </span>
+  </div>
+  <ng-template #spinner>
+    <mat-spinner [diameter]="40"></mat-spinner>
+  </ng-template>
 </ng-template>
