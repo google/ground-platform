@@ -182,6 +182,8 @@ export class DraftSurveyService {
         .map(job => job.id)
     );
 
+    // The jobs deleted from now on are those of this saved version.
+    this.originalSurvey = currentSurvey;
     this.dirty = false;
   }
 }

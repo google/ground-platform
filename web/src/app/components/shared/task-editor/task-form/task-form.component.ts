@@ -21,11 +21,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   EventEmitter,
   Input,
   Output,
   input,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormArray,
@@ -205,7 +207,8 @@ export class TaskFormComponent {
     private dataStoreService: DataStoreService,
     private dialogService: DialogService,
     private formBuilder: FormBuilder,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private destroyRef: DestroyRef
   ) {}
 
   onTaskFocus() {
@@ -336,6 +339,7 @@ export class TaskFormComponent {
         $localize`:@@app.dialogs.changeTaskType.content:Changing the type of this task may cause data loss for existing submissions. Are you sure you wish to continue?`
       )
       .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(confirmed => {
         if (confirmed) apply();
         else revert();
