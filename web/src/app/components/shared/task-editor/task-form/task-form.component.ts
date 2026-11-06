@@ -316,7 +316,6 @@ export class TaskFormComponent {
       () => {
         this.taskGroup = previous ?? this.taskGroup;
         change.source.value = this.taskGroup;
-        this.changeDetectorRef.markForCheck();
       }
     );
   }
@@ -337,7 +336,11 @@ export class TaskFormComponent {
         $localize`:@@app.dialogs.changeTaskType.content:Changing the type of this task may cause data loss for existing submissions. Are you sure you wish to continue?`
       )
       .afterClosed()
-      .subscribe(confirmed => (confirmed ? apply() : revert()));
+      .subscribe(confirmed => {
+        if (confirmed) apply();
+        else revert();
+        this.changeDetectorRef.markForCheck();
+      });
   }
 
   onTaskTypeSelect(taskTypeOption: TaskTypeOption): void {
