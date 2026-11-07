@@ -97,4 +97,4 @@ describe('SurveyHeaderComponent', () => {
     const titleService = TestBed.inject(Title);
     expect(titleService.getTitle()).toBe('Survey Title - Ground');
   });
-})
+});
