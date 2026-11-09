@@ -16,10 +16,13 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatSelectChange } from '@angular/material/select';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
 
 import { TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
 
 import { TaskFormComponent, TaskTypeOptions } from './task-form.component';
 import { TaskFormModule } from './task-form.module';
@@ -28,12 +31,33 @@ describe('TaskFormComponent', () => {
   let fixture: ComponentFixture<TaskFormComponent>;
   let component: TaskFormComponent;
   let formGroup: FormGroup;
+  let dialogService: jasmine.SpyObj<DialogService>;
+
+  const dateOption = TaskTypeOptions.find(o => o.type === TaskType.DATE)!;
+
+  function answerDialog(confirmed: boolean) {
+    dialogService.openConfirmationDialog.and.returnValue({
+      afterClosed: () => of(confirmed),
+    } as ReturnType<DialogService['openConfirmationDialog']>);
+  }
+
+  function selectChange(value: unknown) {
+    const source = { value: undefined as unknown };
+    return {
+      change: { value, source } as unknown as MatSelectChange,
+      source,
+    };
+  }
 
   beforeEach(async () => {
+    dialogService = jasmine.createSpyObj('DialogService', [
+      'openConfirmationDialog',
+    ]);
     await TestBed.configureTestingModule({
       imports: [TaskFormModule, NoopAnimationsModule],
       providers: [
         { provide: DataStoreService, useValue: { generateId: () => 'id' } },
+        { provide: DialogService, useValue: dialogService },
       ],
     }).compileComponents();
 
@@ -51,35 +75,54 @@ describe('TaskFormComponent', () => {
     component = fixture.componentInstance;
     fixture.componentRef.setInput('formGroup', formGroup);
     fixture.componentRef.setInput('formGroupIndex', 0);
+    fixture.detectChanges();
   });
 
-  function typeSelect(): HTMLElement {
-    return fixture.nativeElement.querySelector('.task-type-select');
-  }
+  describe('when the survey is not published', () => {
+    it('changes the type without asking', () => {
+      component.onTaskTypeChange(selectChange(dateOption).change);
 
-  it('lets the type of a new task change', () => {
-    fixture.detectChanges();
-
-    expect(typeSelect().classList).not.toContain('mat-mdc-select-disabled');
-
-    component.onTaskTypeSelect(
-      TaskTypeOptions.find(o => o.type === TaskType.DATE)!
-    );
-
-    expect(formGroup.get('type')!.value).toBe(TaskType.DATE);
+      expect(dialogService.openConfirmationDialog).not.toHaveBeenCalled();
+      expect(formGroup.get('type')!.value).toBe(TaskType.DATE);
+    });
   });
 
-  it('keeps the type of a locked task', () => {
-    fixture.componentRef.setInput('typeLocked', true);
-    fixture.detectChanges();
+  describe('when the survey is published', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('warnOnTypeChange', true);
+    });
 
-    expect(typeSelect().classList).toContain('mat-mdc-select-disabled');
+    it('changes the type once the user confirms', () => {
+      answerDialog(true);
 
-    component.onTaskTypeSelect(
-      TaskTypeOptions.find(o => o.type === TaskType.DATE)!
-    );
-    component.onTaskGroupSelect(component.TaskGroup.DROP_PIN);
+      component.onTaskTypeChange(selectChange(dateOption).change);
 
-    expect(formGroup.get('type')!.value).toBe(TaskType.TEXT);
+      expect(dialogService.openConfirmationDialog).toHaveBeenCalledTimes(1);
+      expect(formGroup.get('type')!.value).toBe(TaskType.DATE);
+    });
+
+    it('keeps the type and puts the select back if the user declines', () => {
+      answerDialog(false);
+      const previous = component.taskTypeOption;
+      const { change, source } = selectChange(dateOption);
+
+      component.onTaskTypeChange(change);
+
+      expect(formGroup.get('type')!.value).toBe(TaskType.TEXT);
+      expect(source.value).toBe(previous);
+    });
+
+    it('keeps the group of a location task if the user declines', () => {
+      formGroup.get('type')!.setValue(TaskType.DROP_PIN);
+      component.ngOnInit();
+      answerDialog(false);
+      const group = component.taskGroup;
+      const { change } = selectChange(component.TaskGroup.DRAW_AREA);
+
+      component.onTaskGroupChange(change);
+
+      expect(formGroup.get('type')!.value).toBe(TaskType.DROP_PIN);
+      expect(component.taskGroup).toBe(group);
+    });
   });
 });
