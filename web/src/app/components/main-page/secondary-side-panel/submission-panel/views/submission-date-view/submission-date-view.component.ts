@@ -24,13 +24,5 @@ import { Component, computed, input } from '@angular/core';
 export class SubmissionDateViewComponent {
   date = input.required<Date>();
 
-  /**
-   * The result is a `Date` only if the task type was a date when the
-   * submission was made. If the type was changed afterwards, it can be
-   * anything, in which case it is shown as it is.
-   */
-  readonly formattedDate = computed(() => {
-    const date = this.date();
-    return date instanceof Date ? date.toLocaleDateString() : String(date);
-  });
+  readonly formattedDate = computed(() => this.date().toLocaleDateString());
 }

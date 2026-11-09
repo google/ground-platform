@@ -24,15 +24,10 @@ import { Component, computed, input } from '@angular/core';
 export class SubmissionTimeViewComponent {
   time = input.required<Date>();
 
-  /**
-   * The result is a `Date` only if the task type was a time when the
-   * submission was made. If the type was changed afterwards, it can be
-   * anything, in which case it is shown as it is.
-   */
-  readonly formattedTime = computed(() => {
-    const time = this.time();
-    return time instanceof Date
-      ? time.toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })
-      : String(time);
-  });
+  readonly formattedTime = computed(() =>
+    this.time().toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: 'numeric',
+    })
+  );
 }

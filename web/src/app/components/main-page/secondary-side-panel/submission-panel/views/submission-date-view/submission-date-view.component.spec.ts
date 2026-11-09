@@ -38,16 +38,4 @@ describe('SubmissionDateViewComponent', () => {
       date.toLocaleDateString()
     );
   });
-
-  it('renders a value that is not a date as it is', () => {
-    fixture.componentRef.setInput('date', 'some text' as unknown as Date);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent.trim()).toBe('some text');
-
-    fixture.componentRef.setInput('date', 42 as unknown as Date);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent.trim()).toBe('42');
-  });
 });

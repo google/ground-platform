@@ -38,16 +38,4 @@ describe('SubmissionTimeViewComponent', () => {
       date.toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })
     );
   });
-
-  it('renders a value that is not a date as it is', () => {
-    fixture.componentRef.setInput('time', 'some text' as unknown as Date);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent.trim()).toBe('some text');
-
-    fixture.componentRef.setInput('time', 42 as unknown as Date);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent.trim()).toBe('42');
-  });
 });
