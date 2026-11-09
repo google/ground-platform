@@ -72,6 +72,10 @@ limitations under the License.
                   >Skipped</ng-container
                 >
               </div>
+            } @else if (!isCompatible(task, result!)) {
+              <submission-text-view
+                [text]="asDisplayString(result!)"
+              ></submission-text-view>
             } @else if (task.type === taskType.MULTIPLE_CHOICE) {
               <submission-multiple-choice-view
                 [task]="task"
