@@ -103,7 +103,9 @@ export class TaskEditorComponent {
 
   tasks = input<List<Task>>();
   isCreationMode = input<boolean>(false);
-  typeLockedTaskIds = input<ReadonlySet<string>>(new Set());
+
+  /** Whether changing the type of a task needs to be confirmed first. */
+  warnOnTypeChange = input<boolean>(false);
 
   @Output() onValidationChanges: EventEmitter<boolean> =
     new EventEmitter<boolean>();
