@@ -21,11 +21,13 @@ import {
 import { NgModule } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { MAT_SELECT_CONFIG } from '@angular/material/select';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import {
   connectFirestoreEmulator,
-  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   provideFirestore,
 } from '@angular/fire/firestore';
 import {
@@ -72,7 +74,13 @@ import { environment } from 'environments/environment';
       return auth;
     }),
     provideFirestore(() => {
-      const firestore = getFirestore();
+      // Persist the Firestore cache in IndexedDB so reloads resume listeners
+      // from the local cache instead of re-reading every document.
+      const firestore = initializeFirestore(getApp(), {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager(),
+        }),
+      });
       if (environment.useEmulators) {
         connectFirestoreEmulator(firestore, 'localhost', 8080);
       }

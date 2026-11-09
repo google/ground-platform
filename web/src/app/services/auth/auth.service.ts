@@ -30,6 +30,11 @@ import {
   signInWithPopup,
   signOut,
 } from '@angular/fire/auth';
+import {
+  Firestore,
+  clearIndexedDbPersistence,
+  terminate,
+} from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, Subject, firstValueFrom, from } from 'rxjs';
 import { filter, map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
@@ -86,6 +91,7 @@ export class AuthService {
     private dataStore: DataStoreService,
     private navigationService: NavigationService,
     private functions: Functions,
+    private firestore: Firestore,
     private httpClientService: HttpClientService,
     private injector: Injector,
     private ngZone: NgZone
@@ -197,7 +203,25 @@ export class AuthService {
     await firstValueFrom(
       this.user$.pipe(filter(user => !user.isAuthenticated))
     );
-    this.ngZone.run(() => this.navigationService.signOut());
+    await this.ngZone.run(() => this.navigationService.signOut());
+    await this.clearFirestoreCacheAndReload();
+  }
+
+  /**
+   * Wipes the persistent Firestore cache so the signed-out user's data does not
+   * remain in this browser, then reloads the app. Firestore must be terminated
+   * before its persistence can be cleared, which leaves the instance unusable,
+   * so the reload is required (and done even if clearing fails).
+   */
+  private async clearFirestoreCacheAndReload() {
+    try {
+      await terminate(this.firestore);
+      await clearIndexedDbPersistence(this.firestore);
+    } catch (err) {
+      console.error('Failed to clear Firestore cache on sign out', err);
+    } finally {
+      window.location.reload();
+    }
   }
 
   /**
