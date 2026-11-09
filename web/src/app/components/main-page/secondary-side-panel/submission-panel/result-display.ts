@@ -62,7 +62,10 @@ export function resultToString(value: ResultValue | undefined): string {
   if (value === null || value === undefined) return '';
   if (value instanceof MultipleSelection) {
     const selected = value.values.toArray();
-    if (value.otherValue) selected.push(`Other: ${value.otherValue}`);
+    if (value.otherValue) {
+      const other = $localize`:@@app.taskEditor.condition.otherOption:Other`;
+      selected.push(`${other}: ${value.otherValue}`);
+    }
     return selected.join(', ');
   }
   if (value instanceof Date) return value.toLocaleString();
