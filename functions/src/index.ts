@@ -48,6 +48,7 @@ import {
   survey,
 } from './common/datastore';
 import { initializeFirebaseApp } from './common/context';
+import { smtpPassword } from './common/secrets';
 
 // Ensure Firebase is initialized.
 initializeFirebaseApp();
@@ -72,7 +73,7 @@ export const profile = {
 };
 
 export const onCreatePasslistEntry = onDocumentCreated(
-  passlistEntryPathTemplate,
+  { document: passlistEntryPathTemplate, secrets: [smtpPassword] },
   onCreatePasslistEntryHandler
 );
 
