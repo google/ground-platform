@@ -35,7 +35,7 @@ import { ColorPickerComponent } from './color-picker/color-picker.component';
   standalone: false,
 })
 export class EditStyleButtonComponent implements OnInit {
-  @Input() markerColor = 'black';
+  @Input() markerColor = '#000000';
   @Output() markerColorChange = new EventEmitter<MarkerColorEvent>();
   markerPinUrl: SafeUrl;
 
