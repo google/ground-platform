@@ -27,12 +27,33 @@ export class GroundPinService {
   private readonly pinImageSources = new Map<string, string>();
 
   renderPin(options: { color?: string; text?: string }): string {
-    const { color = GroundPinService.defaultIconColor, text } = options;
+    const { text } = options;
+    // Job colors come from Firestore and are not validated there. The result is
+    // inserted into markup (`innerHTML` or a data URL), so never use it as is.
+    const color = GroundPinService.sanitizeColor(options.color);
 
+    // Replacer functions keep `$` in values from being read as replacement
+    // patterns.
     return GroundPinService.svgTemplate
-      .replace('{{ color }}', color)
-      .replace('{{ glyphColor }}', text ? color : 'white')
-      .replace('{{ text }}', text || '');
+      .replace('{{ color }}', () => color)
+      .replace('{{ glyphColor }}', () => (text ? color : 'white'))
+      .replace('{{ text }}', () => GroundPinService.escapeHtml(text || ''));
+  }
+
+  /** Returns `color` if it is a hex color, or the default color otherwise. */
+  private static sanitizeColor(color?: string): string {
+    return color && GroundPinService.hexColorPattern.test(color)
+      ? color
+      : GroundPinService.defaultIconColor;
+  }
+
+  private static escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   getPinImageSource(color?: string): string {
@@ -74,7 +95,10 @@ export class GroundPinService {
   }
 
   public static urlPrefix = 'data:image/svg+xml;charset=UTF-8;base64,';
-  private static defaultIconColor = 'red';
+  private static defaultIconColor = '#ff0000';
+  /** `#RGB`, `#RGBA`, `#RRGGBB` or `#RRGGBBAA`. */
+  private static hexColorPattern =
+    /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
   /** Size of the SVG pin, as declared in `svgTemplate`. */
   private static pinWidth = 22;
   private static pinHeight = 24;
