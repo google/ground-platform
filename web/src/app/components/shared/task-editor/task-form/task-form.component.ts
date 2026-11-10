@@ -19,12 +19,15 @@ import '@angular/localize/init';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  DestroyRef,
   EventEmitter,
   Input,
   Output,
   input,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormArray,
@@ -33,6 +36,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSelectChange } from '@angular/material/select';
 import { List } from 'immutable';
 
 import {
@@ -47,6 +51,7 @@ import {
 } from 'app/models/task/task-condition.model';
 import { TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
 import { moveItemInFormArray } from 'app/utils/utils';
 
 import {
@@ -162,7 +167,9 @@ export class TaskFormComponent {
   @Input() formGroup!: FormGroup;
   @Input() formGroupIndex!: number;
   isCreationMode = input<boolean>(false);
-  typeLocked = input<boolean>(false);
+
+  /** Whether changing the type of the task needs to be confirmed first. */
+  warnOnTypeChange = input<boolean>(false);
 
   expanded = input<boolean>(false);
 
@@ -187,8 +194,6 @@ export class TaskFormComponent {
 
   TaskType = TaskType;
 
-  typeLockedMessage = $localize`:@@app.taskEditor.typeLocked:The type of a task can't be changed once the survey is published. Delete the task and add a new one instead.`;
-
   TaskTypeOptions = TaskTypeOptions;
 
   Tasks = Tasks;
@@ -200,7 +205,10 @@ export class TaskFormComponent {
   constructor(
     public dialog: MatDialog,
     private dataStoreService: DataStoreService,
-    private formBuilder: FormBuilder
+    private dialogService: DialogService,
+    private formBuilder: FormBuilder,
+    private changeDetectorRef: ChangeDetectorRef,
+    private destroyRef: DestroyRef
   ) {}
 
   onTaskFocus() {
@@ -288,9 +296,58 @@ export class TaskFormComponent {
     );
   }
 
-  onTaskTypeSelect(taskTypeOption: TaskTypeOption): void {
-    if (this.typeLocked()) return;
+  /**
+   * Handles a type picked from the question type select, after confirming it
+   * with the user if the task may already have data.
+   */
+  onTaskTypeChange(change: MatSelectChange): void {
+    const previous = this.taskTypeOption;
+    this.confirmTypeChange(
+      () => this.onTaskTypeSelect(change.value),
+      () => (change.source.value = previous)
+    );
+  }
 
+  /**
+   * Handles a group picked from the select of location tasks, after
+   * confirming it with the user if the task may already have data.
+   */
+  onTaskGroupChange(change: MatSelectChange): void {
+    const previous = taskTypeToGroup.get(this.typeControl.value);
+    this.confirmTypeChange(
+      () => this.onTaskGroupSelect(change.value),
+      () => {
+        this.taskGroup = previous ?? this.taskGroup;
+        change.source.value = this.taskGroup;
+      }
+    );
+  }
+
+  /**
+   * Runs `apply` right away unless the survey may already have data, in which
+   * case it runs after the user has confirmed that changing the type may lose
+   * it. Runs `revert` if they decline, to put the select back.
+   */
+  private confirmTypeChange(apply: () => void, revert: () => void): void {
+    if (!this.warnOnTypeChange()) {
+      apply();
+      return;
+    }
+    this.dialogService
+      .openConfirmationDialog(
+        $localize`:@@app.dialogs.changeTaskType.title:Warning`,
+        $localize`:@@app.dialogs.changeTaskType.content:Changing the type of this task may cause data loss for existing submissions. Are you sure you wish to continue?`
+      )
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(confirmed => {
+        if (confirmed) apply();
+        else revert();
+        this.changeDetectorRef.markForCheck();
+      });
+  }
+
+  onTaskTypeSelect(taskTypeOption: TaskTypeOption): void {
     this.taskTypeOption = taskTypeOption;
 
     const { type, cardinality } = this.taskTypeOption;
@@ -304,8 +361,6 @@ export class TaskFormComponent {
   }
 
   onTaskGroupSelect(taskGroup: TaskGroup): void {
-    if (this.typeLocked()) return;
-
     const taskType = taskGroupToTypes.get(taskGroup)?.first();
 
     this.typeControl.setValue(taskType);
