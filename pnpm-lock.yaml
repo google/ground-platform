@@ -55,8 +55,8 @@ catalogs:
       specifier: ^5.0.2
       version: 5.0.2
     '@grpc/grpc-js':
-      specifier: ^1.14.5
-      version: 1.14.6
+      specifier: ^1.14.7
+      version: 1.14.7
     '@iplab/ngx-file-upload':
       specifier: ^20.0.1
       version: 20.0.1
@@ -589,7 +589,7 @@ importers:
         version: 20.3.33(@angular/common@20.3.34(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.16(@angular/animations@20.3.16(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.34(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@grpc/grpc-js':
         specifier: 'catalog:'
-        version: 1.14.6
+        version: 1.14.7
       '@iplab/ngx-file-upload':
         specifier: 'catalog:'
         version: 20.0.1(@angular/animations@20.3.16(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.34(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/forms@20.3.16(@angular/common@20.3.34(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.16(@angular/animations@20.3.16(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.34(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.33(@angular/compiler@20.3.33)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2))(rxjs@7.8.2)
@@ -2633,8 +2633,8 @@ packages:
     resolution: {integrity: sha512-k9Dj3DV/itK9D06Y8f190Qgop7/Ui+D0njFV3LHMPwPT75DpXLQohE9Wmz0QElrJnzsjB7KPWiKJbOl7IPDArQ==}
     engines: {node: '>=12.10.0'}
 
-  '@grpc/grpc-js@1.14.6':
-    resolution: {integrity: sha512-SgC/B3/VZ8lTyOZ4Cwk6f1skWhmkNAaVfiX90qd5u1rRXGKk1//8FTUEN9GvOUq7rfWIqAYkA3CoyumYVpOS6g==}
+  '@grpc/grpc-js@1.14.7':
+    resolution: {integrity: sha512-W4W/fcBMGRVtG6dW2c7cw2mnpS3hvbBd+oQXjh2iYFTZDk1JJmcNqkM5KSaPubQpamlUUurrlb7G1s9NJeERmQ==}
     engines: {node: '>=12.10.0'}
 
   '@grpc/grpc-js@1.9.16':
@@ -4072,6 +4072,9 @@ packages:
   '@smithy/smithy-client@4.10.8':
     resolution: {integrity: sha512-wcr3UEL26k7lLoyf9eVDZoD1nNY3Fa1gbNuOXvfxvVWLGkOVW+RYZgUUp/bXHryJfycIOQnBq9o1JAE00ax8HQ==}
     engines: {node: '>=18.0.0'}
+    deprecated: |-
+      Deprecated due to a bug in custom logger data redaction. Upgrade to the latest version. If you used a custom logger with
+        this version, review your logs and rotate any credentials or other secrets. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/types@4.12.0':
     resolution: {integrity: sha512-9YcuJVTOBDjg9LWo23Qp0lTQ3D7fQsQtwle0jVfpbUHy9qBwCEgKuVH4FqFB3VYu0nwdHKiEMA+oXz7oV8X1kw==}
@@ -6893,6 +6896,7 @@ packages:
   image-size@0.5.5:
     resolution: {integrity: sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==}
     engines: {node: '>=0.10.0'}
+    deprecated: Please migrate to image-size@2.x
     hasBin: true
 
   immediate@3.0.6:
@@ -8253,8 +8257,8 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  node-forge@1.4.2:
-    resolution: {integrity: sha512-rRtAR5XLJ8gCKd9du4qrKAsgCG1ObGP4gLeNJMa4vYSeq4bmBMOJk5IHkrviBV0q7uoAJlVd8HEQYQSVUb4FGQ==}
+  node-forge@1.4.3:
+    resolution: {integrity: sha512-P6wzfh6t70avmV8FrVEAd/36sOPJQ+hkaJVX1Laap9J/77m7M0eyozDvc8SwnDf4P7MP94gwbAAo0rg3YVXT+g==}
     engines: {node: '>= 6.13.0'}
 
   node-gyp-build-optional-packages@5.2.2:
@@ -8954,12 +8958,16 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  qs@6.14.2:
-    resolution: {integrity: sha512-V/yCWTTF7VJ9hIh18Ugr2zhJMP01MY7c5kh4J870L7imm6/DIzBsNLTXzMwUA3yZ5b/KBqLx8Kp3uRvd7xSe3Q==}
+  qs@6.14.3:
+    resolution: {integrity: sha512-rQNAwFzg3KZjjfANpCQOAoZwHQvcpWuabal4khEuSStXNnVh6iLM+yscBqdSZuj+dRNl99Cgq5OuVyDBJZWq6Q==}
     engines: {node: '>=0.6'}
 
-  qs@6.15.2:
-    resolution: {integrity: sha512-Rzq0KEyX/w/tEybncDgdkZrJgVUsUMk3xjh3t5bv3S1HTAtg+uOYt72+ZfwiQwKdysThkTBdL/rTi6HDmX9Ddw==}
+  qs@6.15.4:
+    resolution: {integrity: sha512-d1zNHS+ltAfSgTmYjzXXH9gy9d6pEb33n0ZtUUkukA8UHhFSjv2mSYRiePyjbRiJh0g5sFJbMdAtMIg01Xf5/w==}
+    engines: {node: '>=0.6'}
+
+  qs@6.17.1:
+    resolution: {integrity: sha512-jd3COkaKVgGUW+ZHyEHCG9bH7RoaaiWuMgzsIBjUMVjLAaWGWpoUAVwljVvBHxRu/2qEHnadLGZrkutYUBPQJA==}
     engines: {node: '>=0.6'}
 
   queue-microtask@1.2.3:
@@ -9529,6 +9537,10 @@ packages:
 
   side-channel@1.1.0:
     resolution: {integrity: sha512-ZX99e6tRweoUXqR+VBrslhda51Nh5MTQwou5tnUDgbtyM0dBgmhEDtWGP/xbKn6hqfPRHujUNwz5fy/wbbhnpw==}
+    engines: {node: '>= 0.4'}
+
+  side-channel@1.1.1:
+    resolution: {integrity: sha512-6x6dK6zJdpTzF4sQeNYxwtvBzf6Eg4GtlesS94HOvTudUeyK2WXAaIfmDgsyslYrRBeFIlsi54AYsFGUuhmvrQ==}
     engines: {node: '>= 0.4'}
 
   signal-exit@3.0.7:
@@ -13559,7 +13571,7 @@ snapshots:
       '@grpc/proto-loader': 0.8.0
       '@js-sdsl/ordered-map': 4.4.2
 
-  '@grpc/grpc-js@1.14.6':
+  '@grpc/grpc-js@1.14.7':
     dependencies:
       '@grpc/proto-loader': 0.8.0
       '@js-sdsl/ordered-map': 4.4.2
@@ -16608,7 +16620,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.4.24
       on-finished: 2.4.1
-      qs: 6.15.2
+      qs: 6.15.4
       raw-body: 2.5.3
       type-is: 1.6.18
       unpipe: 1.0.0
@@ -16625,7 +16637,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.4.24
       on-finished: 2.4.1
-      qs: 6.15.2
+      qs: 6.15.4
       raw-body: 2.5.3
       type-is: 1.6.18
       unpipe: 1.0.0
@@ -16640,7 +16652,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.7.2
       on-finished: 2.4.1
-      qs: 6.15.2
+      qs: 6.17.1
       raw-body: 3.0.2
       type-is: 2.1.0
     transitivePeerDependencies:
@@ -16654,7 +16666,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.7.2
       on-finished: 2.4.1
-      qs: 6.15.2
+      qs: 6.17.1
       raw-body: 3.0.2
       type-is: 2.1.0
     transitivePeerDependencies:
@@ -17928,7 +17940,7 @@ snapshots:
       lodash: 4.18.1
       openapi3-ts: 3.2.0
       promise-breaker: 6.0.0
-      qs: 6.15.2
+      qs: 6.17.1
       raw-body: 2.5.3
       semver: 7.8.0
     transitivePeerDependencies:
@@ -17949,7 +17961,7 @@ snapshots:
       lodash: 4.18.1
       openapi3-ts: 3.2.0
       promise-breaker: 6.0.0
-      qs: 6.15.2
+      qs: 6.17.1
       raw-body: 2.5.3
       semver: 7.8.0
     transitivePeerDependencies:
@@ -18005,7 +18017,7 @@ snapshots:
       parseurl: 1.3.3
       path-to-regexp: 0.1.12
       proxy-addr: 2.0.8
-      qs: 6.14.2
+      qs: 6.14.3
       range-parser: 1.2.1
       safe-buffer: 5.2.1
       send: 0.19.2(supports-color@7.2.0)
@@ -18041,7 +18053,7 @@ snapshots:
       parseurl: 1.3.3
       path-to-regexp: 0.1.12
       proxy-addr: 2.0.8
-      qs: 6.14.2
+      qs: 6.14.3
       range-parser: 1.2.1
       safe-buffer: 5.2.1
       send: 0.19.2(supports-color@8.1.1)
@@ -18076,7 +18088,7 @@ snapshots:
       once: 1.4.0
       parseurl: 1.3.3
       proxy-addr: 2.0.8
-      qs: 6.15.2
+      qs: 6.17.1
       range-parser: 1.2.1
       router: 2.2.0(supports-color@7.2.0)
       send: 1.2.1(supports-color@7.2.0)
@@ -18109,7 +18121,7 @@ snapshots:
       once: 1.4.0
       parseurl: 1.3.3
       proxy-addr: 2.0.8
-      qs: 6.15.2
+      qs: 6.17.1
       range-parser: 1.2.1
       router: 2.2.0(supports-color@8.1.1)
       send: 1.2.1(supports-color@8.1.1)
@@ -19056,7 +19068,7 @@ snapshots:
       extend: 3.0.2
       gaxios: 7.2.0(supports-color@7.2.0)
       google-auth-library: 10.9.0(supports-color@7.2.0)
-      qs: 6.15.2
+      qs: 6.17.1
       url-template: 2.0.8
     transitivePeerDependencies:
       - supports-color
@@ -19066,7 +19078,7 @@ snapshots:
       extend: 3.0.2
       gaxios: 7.2.0(supports-color@8.1.1)
       google-auth-library: 10.9.0(supports-color@8.1.1)
-      qs: 6.15.2
+      qs: 6.17.1
       url-template: 2.0.8
     transitivePeerDependencies:
       - supports-color
@@ -21071,7 +21083,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-forge@1.4.2: {}
+  node-forge@1.4.3: {}
 
   node-gyp-build-optional-packages@5.2.2:
     dependencies:
@@ -22103,13 +22115,19 @@ snapshots:
       pngjs: 5.0.0
       yargs: 15.4.1
 
-  qs@6.14.2:
+  qs@6.14.3:
     dependencies:
-      side-channel: 1.1.0
+      side-channel: 1.1.1
 
-  qs@6.15.2:
+  qs@6.15.4:
     dependencies:
-      side-channel: 1.1.0
+      es-define-property: 1.0.1
+      side-channel: 1.1.1
+
+  qs@6.17.1:
+    dependencies:
+      es-define-property: 1.0.1
+      side-channel: 1.1.1
 
   queue-microtask@1.2.3: {}
 
@@ -22639,7 +22657,7 @@ snapshots:
   selfsigned@2.4.1:
     dependencies:
       '@types/node-forge': 1.3.14
-      node-forge: 1.4.2
+      node-forge: 1.4.3
 
   semver-diff@3.1.1:
     dependencies:
@@ -22838,6 +22856,14 @@ snapshots:
       side-channel-map: 1.0.1
 
   side-channel@1.1.0:
+    dependencies:
+      es-errors: 1.3.0
+      object-inspect: 1.13.4
+      side-channel-list: 1.0.1
+      side-channel-map: 1.0.1
+      side-channel-weakmap: 1.0.2
+
+  side-channel@1.1.1:
     dependencies:
       es-errors: 1.3.0
       object-inspect: 1.13.4
