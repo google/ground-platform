@@ -46,7 +46,7 @@ describe('DrawingToolsComponent', () => {
 
   const jobId1 = 'job001';
   const jobId2 = 'job002';
-  const jobColor1 = '#ff0000';
+  const jobColor1 = '#e53935';
   const jobColor2 = '#008000';
   const jobName1 = 'job001 name';
   const jobName2 = 'job002 name';
