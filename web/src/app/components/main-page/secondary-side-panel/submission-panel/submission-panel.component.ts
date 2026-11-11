@@ -34,6 +34,8 @@ import { Task, TaskType } from 'app/models/task/task.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
+import { isResultCompatible, resultToString } from './result-display';
+
 @Component({
   selector: 'submission-panel',
   templateUrl: './submission-panel.component.html',
@@ -153,6 +155,10 @@ export class SubmissionPanelComponent {
     if (!submission) return;
     return submission.data.get(taskId);
   }
+
+  isCompatible = (task: Task, r: Result): boolean =>
+    isResultCompatible(task.type, r.value);
+  asDisplayString = (r: Result): string => resultToString(r.value);
 
   asMultipleSelection = (r: Result): MultipleSelection =>
     r.value as MultipleSelection;
