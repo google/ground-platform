@@ -39,7 +39,7 @@ catalogs:
     '@fast-csv/format': ^4.3.5
     '@google-cloud/firestore': ^7.7.0
     '@google-cloud/functions-framework': ^5.0.2
-    '@grpc/grpc-js': ^1.14.5
+    '@grpc/grpc-js': ^1.14.7
     '@iplab/ngx-file-upload': ^20.0.1
     '@terraformer/wkt': ^2.1.2
     angularx-qrcode: ^20.0.0
