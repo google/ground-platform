@@ -190,7 +190,14 @@ rules_version = '2';
     // Apply passlist and survey-level ACLs to survey documents.
     match /surveys/{surveyId} {
       allow create: if isSignedIn() && isPasslisted() && canSetGeneralAccess();
-      allow read: if canViewSurvey(resource.data);
+      allow get: if canViewSurvey(resource.data);
+      // Unlisted surveys are reachable only by link, so never list them for
+      // users without a role: `list` is checked against the query, so allowing
+      // UNLISTED here would let anyone enumerate them.
+      allow list: if isSignedIn() && (
+        resource.data["8"] == 3 /* PUBLIC */ ||
+        getRole(resource.data) != null
+      );
       allow update: if canManageSurvey(getSurvey(surveyId)) && canSetGeneralAccess();
       allow delete: if canManageSurvey(getSurvey(surveyId));
     }
