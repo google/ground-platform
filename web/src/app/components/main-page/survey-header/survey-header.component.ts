@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, input } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Title } from '@angular/platform-browser';
 
 import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
@@ -33,8 +34,16 @@ export class SurveyHeaderComponent {
   constructor(
     public navigationService: NavigationService,
     public surveyService: SurveyService,
-    private dialog: MatDialog
-  ) {}
+    private dialog: MatDialog,
+    private titleService: Title
+  ) {
+    effect(() => {
+      const survey = this.activeSurvey();
+      this.titleService.setTitle(
+        survey ? `${survey.title} - Ground` : 'Ground'
+    );
+    });
+  }
 
   /**
    * Updates the survey title with input element value.

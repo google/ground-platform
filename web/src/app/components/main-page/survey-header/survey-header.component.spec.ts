@@ -18,6 +18,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Map } from 'immutable';
 import { of } from 'rxjs';
@@ -90,5 +91,10 @@ describe('SurveyHeaderComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+  
+  it('should set the page title to the survey title', () => {
+    const titleService = TestBed.inject(Title);
+    expect(titleService.getTitle()).toBe('Survey Title - Ground');
   });
 });
