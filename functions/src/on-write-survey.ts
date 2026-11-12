@@ -19,12 +19,79 @@ import {
   DocumentSnapshot,
   FirestoreEvent,
 } from 'firebase-functions/v2/firestore';
+import { GroundProtos } from '@ground/proto';
+import { toDocumentData, toMessage } from '@ground/lib';
+import { withServerTimestamp } from './common/audit-info';
 import { broadcastUpdate } from './common/broadcast';
+import { getDatastore } from './common/context';
 
-export function onWriteSurveyHandler(
+import Pb = GroundProtos.ground.v1beta1;
+
+/**
+ * Corrects the server timestamps on a survey's audit info, which clients can
+ * only guess from their own clock, then announces the survey.
+ *
+ * The correction is itself a write, which this handler sees again; the
+ * broadcast is left to that second pass so clients never see the uncorrected
+ * document. Only audit info a client just wrote (a different user or client
+ * time than before) is corrected, which also keeps the second pass from
+ * correcting its own write.
+ */
+export async function onWriteSurveyHandler(
   event: FirestoreEvent<Change<DocumentSnapshot> | undefined>
-): Promise<string> {
+): Promise<string | void> {
   const surveyId = event.params.surveyId;
+  const before = event.data?.before;
+  const after = event.data?.after;
+
+  if (after?.exists) {
+    const beforePb = before?.exists
+      ? (toMessage(before.data()!, Pb.Survey) as Pb.Survey)
+      : undefined;
+    const afterPb = toMessage(after.data()!, Pb.Survey) as Pb.Survey;
+    const corrected = correctedAuditInfo(beforePb, afterPb, event.time);
+
+    if (Object.keys(corrected).length) {
+      await getDatastore().updateSurveyAuditInfo(
+        surveyId,
+        toDocumentData(new Pb.Survey(corrected)) as Record<string, unknown>
+      );
+      return;
+    }
+  }
 
   return broadcastUpdate({ type: 'survey', surveyId }, event.time);
+}
+
+function correctedAuditInfo(
+  before: Pb.ISurvey | undefined,
+  after: Pb.ISurvey,
+  eventTime: string
+): Partial<Pb.Survey> {
+  const corrected: Partial<Pb.Survey> = {};
+  if (isNewAuditInfo(before?.created, after.created))
+    corrected.created = withServerTimestamp(after.created!, eventTime);
+  if (isNewAuditInfo(before?.lastModified, after.lastModified))
+    corrected.lastModified = withServerTimestamp(
+      after.lastModified!,
+      eventTime
+    );
+  return corrected;
+}
+
+/**
+ * Returns true if `after` was written by a client since `before`. The server
+ * timestamp is ignored, since it is the one thing the server itself changes.
+ */
+function isNewAuditInfo(
+  before: Pb.IAuditInfo | null | undefined,
+  after: Pb.IAuditInfo | null | undefined
+): boolean {
+  if (!after) return false;
+  if (!before) return true;
+  return (
+    before.userId !== after.userId ||
+    Number(before.clientTimestamp?.seconds ?? 0) !==
+      Number(after.clientTimestamp?.seconds ?? 0)
+  );
 }

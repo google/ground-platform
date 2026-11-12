@@ -18,6 +18,8 @@ syntax = "proto3";
 
 package ground.v1beta1;
 
+import "ground/v1beta1/audit_info.proto";
+
 option java_multiple_files = true;
 option java_package = "org.groundplatform.android.proto";
 
@@ -118,6 +120,14 @@ message Survey {
 
   // Defines who can see data submitted in this survey.
   DataVisibility data_visibility = 9;
+
+  // Info about who created this survey and when. Unset on surveys created
+  // before this field was introduced.
+  AuditInfo created = 10;
+
+  // Info about who last modified this survey and when. Unset on surveys
+  // never modified since this field was introduced.
+  AuditInfo last_modified = 11;
 }
 
 // Defines a user's role in a survey.

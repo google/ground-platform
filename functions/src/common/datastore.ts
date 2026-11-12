@@ -33,6 +33,7 @@ import { toTimestampPb } from './audit-info';
 import { QueryIterator, leftOuterJoinSorted } from './query-iterator';
 
 const l = registry.getFieldIds(Pb.LocationOfInterest);
+const sv = registry.getFieldIds(Pb.Survey);
 const sb = registry.getFieldIds(Pb.Submission);
 const ai = registry.getFieldIds(Pb.AuditInfo);
 
@@ -329,6 +330,15 @@ export class Datastore {
     if (l.lastModified in loiDoc)
       update[l.lastModified] = loiDoc[l.lastModified];
     await loiRef.update(update);
+  }
+
+  async updateSurveyAuditInfo(surveyId: string, surveyDoc: DocumentData) {
+    const surveyRef = this.db_.doc(survey(surveyId));
+    const update: DocumentData = {};
+    if (sv.created in surveyDoc) update[sv.created] = surveyDoc[sv.created];
+    if (sv.lastModified in surveyDoc)
+      update[sv.lastModified] = surveyDoc[sv.lastModified];
+    await surveyRef.update(update);
   }
 
   static toFirestoreMap(geometry: any) {
