@@ -65,8 +65,8 @@ describe('MapComponent', () => {
   const multipolygonLoiId1 = 'multipolygon_loi001';
   const jobId1 = 'job001';
   const jobId2 = 'job002';
-  const jobColor1 = '#e53935';
-  const jobColor2 = '#008000';
+  const jobColor1 = '#aa0000';
+  const jobColor2 = '#00aa00';
   const job1 = new Job(
     jobId1,
     /* index */ -1,
