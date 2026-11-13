@@ -168,7 +168,12 @@ export class LoiClusterIndex {
   }
 }
 
-/** Returns the area covered by `geometry`, or null for unsupported ones. */
+/**
+ * Returns the area covered by `geometry`, or null for unsupported ones.
+ *
+ * A geometry with points on both sides of the antimeridian gets a very wide
+ * extent, spanning almost the whole world, as its edges are not followed.
+ */
 export function getExtent(geometry: Geometry): Extent | null {
   if (geometry instanceof Point) {
     const { x, y } = geometry.coord;
@@ -235,21 +240,28 @@ export function expandExtent(extent: Extent, factor: number): Extent {
 /** Returns true if the two extents share any area. */
 export function extentsIntersect(a: Extent, b: Extent): boolean {
   if (a.south > b.north || b.south > a.north) return false;
-  return longitudeRanges(a).some(([aWest, aEast]) =>
-    longitudeRanges(b).some(
-      ([bWest, bEast]) => aWest <= bEast && bWest <= aEast
-    )
-  );
+  const aCrosses = a.west > a.east;
+  const bCrosses = b.west > b.east;
+  // Both contain the antimeridian.
+  if (aCrosses && bCrosses) return true;
+  if (aCrosses) return rangeTouchesCrossing(b.west, b.east, a.west, a.east);
+  if (bCrosses) return rangeTouchesCrossing(a.west, a.east, b.west, b.east);
+  return a.west <= b.east && b.west <= a.east;
 }
 
-/** Splits the longitudes of an extent so that none crosses the antimeridian. */
-function longitudeRanges({ west, east }: Extent): [number, number][] {
-  return west <= east
-    ? [[west, east]]
-    : [
-        [west, 180],
-        [-180, east],
-      ];
+/**
+ * Returns true if the longitudes `west` to `east` overlap those from
+ * `crossingWest` eastward past the antimeridian to `crossingEast`.
+ *
+ * Called for every LOI whenever the map moves, so it does not allocate.
+ */
+function rangeTouchesCrossing(
+  west: number,
+  east: number,
+  crossingWest: number,
+  crossingEast: number
+): boolean {
+  return east >= crossingWest || west <= crossingEast;
 }
 
 function wrapLongitude(lng: number): number {

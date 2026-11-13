@@ -201,7 +201,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
           this.survey = survey;
           this.loisMap = loisMap;
 
-          this.removeDeletedLocationsOfInterest(loiIdsToRemove);
+          this.removeDeletedLocationsOfInterest(new Set(loiIdsToRemove));
           if (loiIdsToRemove.size || loisToAdd.size || surveyChanged) {
             this.reloadClusterIndex(survey);
           }
@@ -363,14 +363,14 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
    * Remove submission geometry based task results from existing map
    */
   removeSubmissionResultsOnMap() {
-    let idsToRemove = List<string>();
+    const idsToRemove = new Set<string>();
     this.submission?.job?.tasks?.forEach(task => {
       if (
         task.type === TaskType.DRAW_AREA ||
         task.type === TaskType.DROP_PIN ||
         task.type === TaskType.CAPTURE_LOCATION
       ) {
-        idsToRemove = idsToRemove.push(task.id);
+        idsToRemove.add(task.id);
       }
     });
     this.removeDeletedLocationsOfInterest(idsToRemove);
@@ -430,12 +430,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
    * Remove deleted lois to map. The LOIs that were displayed on
    * the map but not in the `newLocationsOfInterest` are considered as deleted.
    */
-  private removeDeletedLocationsOfInterest(idsToRemove: List<string>) {
-    // Looked up for every marker and polygon, so it must be cheap to ask.
-    const ids = new Set(idsToRemove);
-    this.removeDeletedMarkers(ids);
-    this.removeDeletedPolygons(ids);
-    ids.forEach(id => this.loiObjectIds.delete(id));
+  private removeDeletedLocationsOfInterest(idsToRemove: ReadonlySet<string>) {
+    this.removeDeletedMarkers(idsToRemove);
+    this.removeDeletedPolygons(idsToRemove);
+    idsToRemove.forEach(id => this.loiObjectIds.delete(id));
   }
 
   private removeDeletedMarkers(idsToRemove: ReadonlySet<string>) {
@@ -626,7 +624,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (this.selectedLocationOfInterestId) {
       keep.add(this.selectedLocationOfInterestId);
     }
-    this.removeLoiObjects([...this.loiObjectIds].filter(id => !keep.has(id)));
+    this.removeLoiObjects(id => !keep.has(id));
 
     const ids = this.clusterIndex.getLoiIdsIntersecting(
       expandExtent(viewport, DRAW_PADDING)
@@ -639,15 +637,16 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private removeLoiObjectsExceptSelected() {
-    this.removeLoiObjects(
-      [...this.loiObjectIds].filter(
-        id => id !== this.selectedLocationOfInterestId
-      )
-    );
+    this.removeLoiObjects(id => id !== this.selectedLocationOfInterestId);
   }
 
-  private removeLoiObjects(ids: string[]) {
-    if (ids.length) this.removeDeletedLocationsOfInterest(List(ids));
+  /** Removes the map objects of the drawn LOIs that match `shouldRemove`. */
+  private removeLoiObjects(shouldRemove: (id: string) => boolean) {
+    const ids = new Set<string>();
+    for (const id of this.loiObjectIds) {
+      if (shouldRemove(id)) ids.add(id);
+    }
+    if (ids.size) this.removeDeletedLocationsOfInterest(ids);
   }
 
   private fitMapToLocationsOfInterest(lois: List<LocationOfInterest>) {

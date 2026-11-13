@@ -295,6 +295,33 @@ describe('extentsIntersect', () => {
   });
 });
 
+describe('extentsIntersect across the antimeridian', () => {
+  const crossing: Extent = { west: 170, south: 0, east: -170, north: 10 };
+
+  it('is true for an extent on either side of it', () => {
+    const east: Extent = { west: 175, south: 0, east: 178, north: 10 };
+    const west: Extent = { west: -178, south: 0, east: -175, north: 10 };
+
+    expect(extentsIntersect(crossing, east)).toBeTrue();
+    expect(extentsIntersect(east, crossing)).toBeTrue();
+    expect(extentsIntersect(crossing, west)).toBeTrue();
+    expect(extentsIntersect(west, crossing)).toBeTrue();
+  });
+
+  it('is false for an extent away from it', () => {
+    const away: Extent = { west: -10, south: 0, east: 10, north: 10 };
+
+    expect(extentsIntersect(crossing, away)).toBeFalse();
+    expect(extentsIntersect(away, crossing)).toBeFalse();
+  });
+
+  it('is true for two extents that both cross it', () => {
+    const other: Extent = { west: 160, south: 5, east: -160, north: 20 };
+
+    expect(extentsIntersect(crossing, other)).toBeTrue();
+  });
+});
+
 describe('isClusterMode', () => {
   it('is on below the threshold and off from it', () => {
     expect(isClusterMode(CLUSTERING_ZOOM_THRESHOLD - 0.1)).toBeTrue();

@@ -14,12 +14,26 @@
  * limitations under the License.
  */
 
-import { createClusterBubbleElement, getBubbleLabel } from './cluster-bubble';
+import {
+  createClusterBubbleElement,
+  getBubbleDescription,
+  getBubbleLabel,
+} from './cluster-bubble';
 
 describe('getBubbleLabel', () => {
   it('shows LOIs with data over all LOIs', () => {
     expect(getBubbleLabel(3, 12)).toBe('3/12');
     expect(getBubbleLabel(0, 1)).toBe('0/1');
+  });
+});
+
+describe('getBubbleDescription', () => {
+  it('uses the singular for one location', () => {
+    expect(getBubbleDescription(1, 1)).toBe('1 location, 1 with data');
+  });
+
+  it('uses the plural otherwise', () => {
+    expect(getBubbleDescription(2, 7)).toBe('7 locations, 2 with data');
   });
 });
 

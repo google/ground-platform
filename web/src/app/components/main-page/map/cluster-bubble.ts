@@ -27,6 +27,13 @@ export function getBubbleLabel(withData: number, total: number): string {
   return `${withData}/${total}`;
 }
 
+/** Returns what assistive technology reads out for a bubble. */
+export function getBubbleDescription(withData: number, total: number): string {
+  return total === 1
+    ? $localize`:@@app.map.clusterBubble.description.one:1 location, ${withData}:withData: with data`
+    : $localize`:@@app.map.clusterBubble.description.other:${total}:total: locations, ${withData}:withData: with data`;
+}
+
 /**
  * Creates the element shown by a map marker standing for a group of LOIs. The
  * look and the label follow the cluster bubble of Ground Android.
@@ -43,10 +50,7 @@ export function createClusterBubbleElement(
   const bubble = document.createElement('div');
   bubble.className = 'cluster-bubble';
   bubble.setAttribute('role', 'button');
-  bubble.setAttribute(
-    'aria-label',
-    `${total} ${total === 1 ? 'location' : 'locations'}, ${withData} with data`
-  );
+  bubble.setAttribute('aria-label', getBubbleDescription(withData, total));
   Object.assign(bubble.style, {
     width: `${BUBBLE_SIZE_PX}px`,
     height: `${BUBBLE_SIZE_PX}px`,
