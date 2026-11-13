@@ -120,6 +120,9 @@ catalogs:
     selenium-webdriver:
       specifier: ^4.19.0
       version: 4.39.0
+    supercluster:
+      specifier: ^9.1.0
+      version: 9.1.0
     zone.js:
       specifier: ^0.15.0
       version: 0.15.1
@@ -614,6 +617,9 @@ importers:
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2
+      supercluster:
+        specifier: 'catalog:'
+        version: 9.1.0
       zone.js:
         specifier: 'catalog:'
         version: 0.15.1
@@ -7621,6 +7627,9 @@ packages:
     engines: {node: '>= 10'}
     hasBin: true
 
+  kdbush@4.1.0:
+    resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
+
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -9800,6 +9809,9 @@ packages:
 
   stubs@3.0.0:
     resolution: {integrity: sha512-PdHt7hHUJKxvTCgbKX9C1V/ftOcjJQgz8BZwNfV5c4B6dcGqlpelTbJ999jBGZ2jYiPAwcX5dP6oBwVlBlUbxw==}
+
+  supercluster@9.1.0:
+    resolution: {integrity: sha512-WMhsJPm8Tf9f5mKxJ1D0mB5tbCMOFi8wTrm/LGnsJHGg8xkeNT/TWDZuFauOGRISnclbYgnxD7g3xJAfQO3FLg==}
 
   superstatic@10.0.0:
     resolution: {integrity: sha512-4xIenBdrIIYuqXrIVx/lejyCh4EJwEMPCwfk9VGFfRlhZcdvzTd3oVOUILrAGfC4pFUWixzPgaOVzAEZgeYI3w==}
@@ -20368,6 +20380,8 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  kdbush@4.1.0: {}
+
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
@@ -23213,6 +23227,10 @@ snapshots:
     optional: true
 
   stubs@3.0.0: {}
+
+  supercluster@9.1.0:
+    dependencies:
+      kdbush: 4.1.0
 
   superstatic@10.0.0(encoding@0.1.13)(supports-color@7.2.0):
     dependencies:
