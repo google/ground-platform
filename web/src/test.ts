@@ -124,13 +124,26 @@ const googleMock = {
       googleMap: any = this;
       listeners: any = {};
 
+      /**
+       * Zoom level and viewport, which tests set to simulate the map. By
+       * default it is zoomed in far enough to show LOIs as themselves, and
+       * shows the whole world, so that every LOI is in view.
+       */
+      zoom = 14;
+      bounds: { toJSON(): object } | undefined = {
+        toJSON: () => ({ west: -180, south: -85, east: 180, north: 85 }),
+      };
+
       setOptions() {}
       setCenter() {}
       setZoom() {}
       fitBounds() {}
       panTo() {}
       getZoom() {
-        return 10;
+        return this.zoom;
+      }
+      getBounds() {
+        return this.bounds;
       }
       addListener(event: string, handler: Function) {
         if (!this.listeners[event]) this.listeners[event] = [];
