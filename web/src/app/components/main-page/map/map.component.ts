@@ -55,11 +55,38 @@ import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
+import { createClusterBubbleElement } from './cluster-bubble';
+import {
+  CLUSTERING_ZOOM_THRESHOLD,
+  Extent,
+  LoiBubble,
+  LoiClusterIndex,
+  expandExtent,
+  isClusterMode,
+} from './loi-cluster-index';
 
 // To make ESLint happy:
 /*global google*/
 
-const zoomedInLevel = 13;
+/**
+ * Zoom level LOIs are brought to when selected. It is the first level at which
+ * LOIs are drawn as themselves rather than as bubbles, so the selected LOI is
+ * never hidden inside one.
+ */
+const zoomedInLevel = CLUSTERING_ZOOM_THRESHOLD;
+/** What is shown while the map has not told its viewport yet. */
+const WORLD: Extent = { west: -180, south: -90, east: 180, north: 90 };
+/** Bubbles slightly outside the viewport are drawn too, as they reach into it. */
+const BUBBLE_VIEWPORT_PADDING = 0.1;
+/**
+ * LOIs are drawn when they come within this share of the viewport size of it,
+ * and dropped only when they are farther than `KEEP_PADDING`. The gap keeps a
+ * LOI from being created and removed again as the map is nudged back and forth.
+ */
+const DRAW_PADDING = 0.5;
+const KEEP_PADDING = 1.5;
+/** Space between the viewport and the LOIs of a bubble when zooming to them. */
+const BUBBLE_FIT_PADDING_PX = 50;
 const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;
 
@@ -78,6 +105,19 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   >(undefined);
   lois$: Observable<List<LocationOfInterest>>;
   loisMap: ImmutableMap<string, LocationOfInterest> = ImmutableMap();
+  private survey?: Survey;
+  /** Groups LOIs into bubbles while zoomed out. */
+  private clusterIndex = new LoiClusterIndex();
+  private bubbleMarkers = new Map<
+    string,
+    google.maps.marker.AdvancedMarkerElement
+  >();
+  /**
+   * Ids of the LOIs that currently have a marker or polygon on the map. LOIs
+   * are drawn only while zoomed in and in view, so this is a small part of them.
+   */
+  private loiObjectIds = new Set<string>();
+  private editModeActive = false;
   activeSurvey$: Observable<Survey>;
   private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
@@ -157,10 +197,14 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
           const loisMap = this.getLoiMap(lois, selectedJob);
           const loiIdsToRemove = this.getLoiIdsToRemove(loisMap);
           const loisToAdd = this.getLoiIdsToAdd(loisMap);
+          const surveyChanged = this.survey !== survey;
+          this.survey = survey;
           this.loisMap = loisMap;
 
           this.removeDeletedLocationsOfInterest(loiIdsToRemove);
-          this.addNewLocationsOfInterest(survey, loisToAdd);
+          if (loiIdsToRemove.size || loisToAdd.size || surveyChanged) {
+            this.reloadClusterIndex(survey);
+          }
           if (
             this.lastFitSurveyId !== survey.id ||
             this.lastFitJobId !== (selectedJob?.id ?? '')
@@ -169,11 +213,16 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
             this.lastFitSurveyId = survey.id;
             this.lastFitJobId = selectedJob?.id ?? '';
           }
+          this.ensureLoiObjects(survey, locationOfInterestId);
           this.selectLocationOfInterest(locationOfInterestId);
           this.selectSubmissionTask(taskId);
+          this.render();
         }
       )
     );
+
+    // Redraw whenever the map comes to rest after a pan or zoom.
+    this.subscription.add(this.map.idle.subscribe(() => this.render()));
 
     if (this.shouldEnableDrawingTools) {
       this.subscription.add(
@@ -382,22 +431,25 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
    * the map but not in the `newLocationsOfInterest` are considered as deleted.
    */
   private removeDeletedLocationsOfInterest(idsToRemove: List<string>) {
-    this.removeDeletedMarkers(idsToRemove);
-    this.removeDeletedPolygons(idsToRemove);
+    // Looked up for every marker and polygon, so it must be cheap to ask.
+    const ids = new Set(idsToRemove);
+    this.removeDeletedMarkers(ids);
+    this.removeDeletedPolygons(ids);
+    ids.forEach(id => this.loiObjectIds.delete(id));
   }
 
-  private removeDeletedMarkers(idsToRemove: List<string>) {
+  private removeDeletedMarkers(idsToRemove: ReadonlySet<string>) {
     for (const id of this.markers.keys()) {
-      if (idsToRemove.includes(id)) {
+      if (idsToRemove.has(id)) {
         this.markers.get(id)!.map = null;
         this.markers.delete(id);
       }
     }
   }
 
-  private removeDeletedPolygons(idsToRemove: List<string>) {
+  private removeDeletedPolygons(idsToRemove: ReadonlySet<string>) {
     for (const id of this.polygons.keys()) {
-      if (idsToRemove.includes(id)) {
+      if (idsToRemove.has(id)) {
         for (const polygon of this.polygons.get(id)!) {
           polygon.setMap(null);
         }
@@ -407,61 +459,195 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   /**
-   * Add new lois to map. The LOIs that were not displayed on
-   * the map but in the `newLocationsOfInterest` are considered as new.
+   * Returns false for LOIs that are not shown on the map: those whose job has
+   * been removed.
    */
-  private addNewLocationsOfInterest(
-    survey: Survey,
-    loisToAdd: List<LocationOfInterest>
-  ) {
-    loisToAdd.forEach(loi => {
-      if (!this.showPredefinedLoisOnly && !survey.getJob(loi.jobId)) {
-        // Ignore lois whose job has been removed.
-        console.debug(`Ignoring loi ${loi.id} with missing job ${loi.jobId}`);
-        return;
-      }
-      const color = this.showPredefinedLoisOnly
-        ? this.selectedJob?.color
-        : survey.getJob(loi.jobId)?.color;
-      const jobName = this.showPredefinedLoisOnly
-        ? this.selectedJob?.name
-        : survey.getJob(loi.jobId)?.name;
+  private isDrawable(survey: Survey, loi: LocationOfInterest): boolean {
+    return this.showPredefinedLoisOnly || !!survey.getJob(loi.jobId);
+  }
 
-      if (loi.geometry instanceof Point) {
-        const { id, jobId, geometry } = loi;
-        const marker = this.addLocationOfInterestMarkerToMap(
-          id,
-          jobId,
-          geometry,
-          color
+  /**
+   * Draws the LOI as a marker or as polygons, with the color of its job.
+   */
+  private createLoiObjects(survey: Survey, loi: LocationOfInterest) {
+    if (!this.isDrawable(survey, loi)) {
+      // Ignore lois whose job has been removed.
+      console.debug(`Ignoring loi ${loi.id} with missing job ${loi.jobId}`);
+      return;
+    }
+    const color = this.showPredefinedLoisOnly
+      ? this.selectedJob?.color
+      : survey.getJob(loi.jobId)?.color;
+    const jobName = this.showPredefinedLoisOnly
+      ? this.selectedJob?.name
+      : survey.getJob(loi.jobId)?.name;
+
+    if (loi.geometry instanceof Point) {
+      const { id, jobId, geometry } = loi;
+      const marker = this.addLocationOfInterestMarkerToMap(
+        id,
+        jobId,
+        geometry,
+        color
+      );
+      this.markers.set(id, marker);
+    }
+    if (loi.geometry instanceof Polygon) {
+      const polygon = this.addLocationOfInterestPolygonToMap(
+        loi.id,
+        jobName,
+        loi.geometry,
+        color
+      );
+      this.polygons.set(loi.id, [polygon]);
+    }
+    if (loi.geometry instanceof MultiPolygon) {
+      const geometry: MultiPolygon = loi.geometry;
+      const polygons: google.maps.Polygon[] = [];
+      for (const polygon of geometry.polygons) {
+        polygons.push(
+          this.addLocationOfInterestPolygonToMap(
+            loi.id,
+            jobName,
+            polygon,
+            color
+          )
         );
-        this.markers.set(id, marker);
       }
-      if (loi.geometry instanceof Polygon) {
-        const polygon = this.addLocationOfInterestPolygonToMap(
-          loi.id,
-          jobName,
-          loi.geometry,
-          color
-        );
-        this.polygons.set(loi.id, [polygon]);
+      this.polygons.set(loi.id, polygons);
+    }
+    this.loiObjectIds.add(loi.id);
+  }
+
+  /** Draws the LOI if it is not yet, e.g. because it is out of view. */
+  private ensureLoiObjects(survey: Survey, loiId: string | null) {
+    if (!loiId || this.loiObjectIds.has(loiId)) return;
+    const loi = this.loisMap.get(loiId);
+    if (loi) this.createLoiObjects(survey, loi);
+  }
+
+  /** Indexes the LOIs for clustering, and drops the bubbles of the old ones. */
+  private reloadClusterIndex(survey: Survey) {
+    this.clusterIndex.load(
+      this.loisMap.valueSeq().filter(loi => this.isDrawable(survey, loi))
+    );
+    this.removeBubbles();
+  }
+
+  /**
+   * Draws what the zoom level and the viewport call for. Zoomed out, LOIs are
+   * bubbles, each standing for a group of them. Zoomed in, they are drawn as
+   * themselves, but only the ones in view: creating a map object for every LOI
+   * is what makes surveys with thousands of them slow.
+   *
+   * The selected LOI is drawn at any zoom level.
+   */
+  render() {
+    const googleMap = this.map?.googleMap;
+    const survey = this.survey;
+    const zoom = googleMap?.getZoom();
+    if (!googleMap || !survey || zoom === undefined) return;
+    const viewport = this.getViewport();
+    if (isClusterMode(zoom)) {
+      this.renderBubbles(viewport ?? WORLD, zoom);
+      this.removeLoiObjectsExceptSelected();
+    } else {
+      this.removeBubbles();
+      // Until the map reports its viewport, nothing is known to be in view.
+      if (viewport) this.renderLoiObjects(survey, viewport);
+    }
+  }
+
+  private getViewport(): Extent | null {
+    const bounds = this.map.googleMap?.getBounds();
+    if (!bounds) return null;
+    const { west, south, east, north } = bounds.toJSON();
+    return { west, south, east, north };
+  }
+
+  private renderBubbles(viewport: Extent, zoom: number) {
+    const bubbles = this.clusterIndex.getBubbles(
+      expandExtent(viewport, BUBBLE_VIEWPORT_PADDING),
+      zoom
+    );
+    const keys = new Set(bubbles.map(bubble => bubble.key));
+    for (const [key, marker] of this.bubbleMarkers) {
+      if (!keys.has(key)) {
+        marker.map = null;
+        this.bubbleMarkers.delete(key);
       }
-      if (loi.geometry instanceof MultiPolygon) {
-        const geometry: MultiPolygon = loi.geometry;
-        const polygons: google.maps.Polygon[] = [];
-        for (const polygon of geometry.polygons) {
-          polygons.push(
-            this.addLocationOfInterestPolygonToMap(
-              loi.id,
-              jobName,
-              polygon,
-              color
-            )
-          );
-        }
-        this.polygons.set(loi.id, polygons);
+    }
+    for (const bubble of bubbles) {
+      if (!this.bubbleMarkers.has(bubble.key)) {
+        this.bubbleMarkers.set(bubble.key, this.addBubbleToMap(bubble));
       }
+    }
+  }
+
+  private removeBubbles() {
+    for (const marker of this.bubbleMarkers.values()) marker.map = null;
+    this.bubbleMarkers.clear();
+  }
+
+  private addBubbleToMap(
+    bubble: LoiBubble
+  ): google.maps.marker.AdvancedMarkerElement {
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      map: this.map.googleMap,
+      position: { lat: bubble.lat, lng: bubble.lng },
+      content: createClusterBubbleElement(bubble.withData, bubble.total),
+      gmpClickable: true,
     });
+    marker.addListener('click', () => this.onBubbleClick(bubble));
+    return marker;
+  }
+
+  /** Zooms to the LOIs of the bubble. */
+  private onBubbleClick(bubble: LoiBubble) {
+    const googleMap = this.map.googleMap;
+    const extent = this.clusterIndex.getBubbleExtent(bubble);
+    if (!googleMap || !extent) return;
+    const { west, south, east, north } = extent;
+    if (west === east && south === north) {
+      // A lone point: fitting the map to it would zoom in as far as it goes.
+      googleMap.panTo({ lat: south, lng: west });
+      googleMap.setZoom(zoomedInLevel);
+      return;
+    }
+    googleMap.fitBounds(extent, BUBBLE_FIT_PADDING_PX);
+  }
+
+  private renderLoiObjects(survey: Survey, viewport: Extent) {
+    const keep = new Set(
+      this.clusterIndex.getLoiIdsIntersecting(
+        expandExtent(viewport, KEEP_PADDING)
+      )
+    );
+    if (this.selectedLocationOfInterestId) {
+      keep.add(this.selectedLocationOfInterestId);
+    }
+    this.removeLoiObjects([...this.loiObjectIds].filter(id => !keep.has(id)));
+
+    const ids = this.clusterIndex.getLoiIdsIntersecting(
+      expandExtent(viewport, DRAW_PADDING)
+    );
+    for (const id of ids) {
+      if (this.loiObjectIds.has(id)) continue;
+      const loi = this.loisMap.get(id);
+      if (loi) this.createLoiObjects(survey, loi);
+    }
+  }
+
+  private removeLoiObjectsExceptSelected() {
+    this.removeLoiObjects(
+      [...this.loiObjectIds].filter(
+        id => id !== this.selectedLocationOfInterestId
+      )
+    );
+  }
+
+  private removeLoiObjects(ids: string[]) {
+    if (ids.length) this.removeDeletedLocationsOfInterest(List(ids));
   }
 
   private fitMapToLocationsOfInterest(lois: List<LocationOfInterest>) {
@@ -489,7 +675,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       position: new google.maps.LatLng(latitude, longitude),
       content: this.groundPinService.createPinElement(color, markerText),
       title: id,
-      gmpClickable: !this.disableMapClicks,
+      gmpClickable: !this.disableMapClicks && !this.editModeActive,
     };
 
     return new google.maps.marker.AdvancedMarkerElement(options);
@@ -615,6 +801,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private onEditModeChange(editMode: EditMode) {
+    this.editModeActive = editMode !== EditMode.None;
     if (editMode !== EditMode.None) {
       this.navigationService.clearLocationOfInterestId();
       for (const marker of this.markers) {

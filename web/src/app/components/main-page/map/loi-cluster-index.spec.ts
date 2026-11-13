@@ -25,6 +25,8 @@ import {
   CLUSTERING_ZOOM_THRESHOLD,
   Extent,
   LoiClusterIndex,
+  expandExtent,
+  extentsIntersect,
   getExtent,
   isClusterMode,
   mergeExtents,
@@ -208,6 +210,88 @@ describe('LoiClusterIndex', () => {
       20000
     );
     expect(elapsed).toBeLessThan(2000);
+  });
+});
+
+describe('LoiClusterIndex.getLoiIdsIntersecting', () => {
+  it('finds a polygon while any part of it is in view', () => {
+    const index = new LoiClusterIndex();
+    index.load([
+      // Its center (10, 10) is far from the viewport, but its edge is not.
+      new LocationOfInterest('big', 'job', square(0, 0, 20), Map()),
+      pointLoi('far', 100, 50),
+    ]);
+
+    expect(
+      index.getLoiIdsIntersecting({ west: 15, south: 5, east: 30, north: 8 })
+    ).toEqual(['big']);
+  });
+
+  it('finds LOIs on both sides of the antimeridian', () => {
+    const index = new LoiClusterIndex();
+    index.load([
+      pointLoi('east', 179, 0),
+      pointLoi('west', -179, 0),
+      pointLoi('middle', 0, 0),
+    ]);
+
+    expect(
+      index.getLoiIdsIntersecting({
+        west: 170,
+        south: -5,
+        east: -170,
+        north: 5,
+      })
+    ).toEqual(jasmine.arrayWithExactContents(['east', 'west']));
+  });
+});
+
+describe('expandExtent', () => {
+  it('grows an extent on every side', () => {
+    expect(
+      expandExtent({ west: 10, south: 20, east: 20, north: 40 }, 0.5)
+    ).toEqual({ west: 5, south: 10, east: 25, north: 50 });
+  });
+
+  it('stays within the world', () => {
+    expect(
+      expandExtent({ west: -170, south: -80, east: 170, north: 80 }, 1)
+    ).toEqual({ west: -180, south: -90, east: 180, north: 90 });
+  });
+
+  it('grows an extent crossing the antimeridian', () => {
+    const grown = expandExtent(
+      { west: 170, south: 0, east: -170, north: 10 },
+      0.5
+    );
+
+    expect(grown.west).toBeCloseTo(160);
+    expect(grown.east).toBeCloseTo(-160);
+  });
+});
+
+describe('extentsIntersect', () => {
+  const a: Extent = { west: 0, south: 0, east: 10, north: 10 };
+
+  it('is true for overlapping extents', () => {
+    expect(
+      extentsIntersect(a, { west: 5, south: 5, east: 15, north: 15 })
+    ).toBeTrue();
+  });
+
+  it('is false for disjoint extents', () => {
+    expect(
+      extentsIntersect(a, { west: 11, south: 0, east: 15, north: 10 })
+    ).toBeFalse();
+    expect(
+      extentsIntersect(a, { west: 0, south: 11, east: 10, north: 15 })
+    ).toBeFalse();
+  });
+
+  it('is true for extents that only touch', () => {
+    expect(
+      extentsIntersect(a, { west: 10, south: 10, east: 20, north: 20 })
+    ).toBeTrue();
   });
 });
 

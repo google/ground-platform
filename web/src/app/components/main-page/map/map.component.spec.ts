@@ -65,8 +65,8 @@ describe('MapComponent', () => {
   const multipolygonLoiId1 = 'multipolygon_loi001';
   const jobId1 = 'job001';
   const jobId2 = 'job002';
-  const jobColor1 = 'red';
-  const jobColor2 = 'green';
+  const jobColor1 = '#aa0000';
+  const jobColor2 = '#00aa00';
   const job1 = new Job(
     jobId1,
     /* index */ -1,
@@ -736,6 +736,211 @@ describe('MapComponent', () => {
     expect(polygon.get('strokeColor')).toEqual(color);
     expect(polygon.get('strokeWeight')).toEqual(strokeWeight);
   }
+
+  describe('clustering', () => {
+    const world = { west: -180, south: -85, east: 180, north: 85 };
+
+    /** Moves the (mock) map to the given zoom level and viewport. */
+    function showMap(zoom: number, viewport = world) {
+      const googleMap = component.map.googleMap as unknown as {
+        zoom: number;
+        bounds: { toJSON(): object };
+      };
+      googleMap.zoom = zoom;
+      googleMap.bounds = { toJSON: () => viewport };
+      component.render();
+    }
+
+    function bubbleMarkers() {
+      return [...component['bubbleMarkers'].values()];
+    }
+
+    function bubbleLabels(): string[] {
+      return bubbleMarkers()
+        .map(marker => marker.element.textContent)
+        .sort() as string[];
+    }
+
+    it('shows LOIs as themselves when zoomed in', () => {
+      showMap(14);
+
+      expect([...component.markers.keys()].sort()).toEqual([poiId1, poiId2]);
+      expect([...component.polygons.keys()]).toEqual([polygonLoiId1]);
+      expect(bubbleMarkers().length).toBe(0);
+    });
+
+    it('shows bubbles instead of LOIs when zoomed out', () => {
+      showMap(3);
+
+      expect(component.markers.size).toBe(0);
+      expect(component.polygons.size).toBe(0);
+      // poi1 and the polygon are close together, poi2 is far from both.
+      expect(bubbleLabels()).toEqual(['0/1', '0/2']);
+    });
+
+    it('counts the LOIs with submissions in bubbles', () => {
+      const withSubmissions = new LocationOfInterest(
+        'with-submissions',
+        jobId1,
+        new Point(new Coordinate(-100, -40)),
+        Map(),
+        '',
+        true,
+        2
+      );
+      fixture.componentRef.setInput(
+        'lois',
+        List<LocationOfInterest>([withSubmissions])
+      );
+      fixture.detectChanges();
+      showMap(3);
+
+      expect(bubbleLabels()).toEqual(['1/1']);
+    });
+
+    it('draws only the LOIs near the viewport', () => {
+      showMap(14, { west: -1, south: -1, east: 11, north: 11 });
+
+      expect([...component.markers.keys()]).toEqual([poiId1]);
+      expect([...component.polygons.keys()]).toEqual([polygonLoiId1]);
+    });
+
+    it('draws LOIs that come into view and drops those far away', () => {
+      showMap(14, { west: -1, south: -1, east: 11, north: 11 });
+
+      showMap(14, { west: 10, south: 44, east: 15, north: 48 });
+
+      expect([...component.markers.keys()]).toEqual([poiId2]);
+      expect(component.polygons.size).toBe(0);
+    });
+
+    it('keeps LOIs that are just out of view, so panning back and forth does not redraw them', () => {
+      showMap(14, { west: -1, south: -1, east: 11, north: 11 });
+      const marker = component.markers.get(poiId1);
+
+      // Moves the map a little, keeping poi1 close to the viewport.
+      showMap(14, { west: 8, south: 0, east: 20, north: 12 });
+
+      expect(component.markers.get(poiId1)).toBe(marker);
+    });
+
+    it('swaps LOIs for bubbles when zooming out, and back when zooming in', () => {
+      showMap(14);
+      showMap(3);
+      expect(component.markers.size).toBe(0);
+      expect(bubbleMarkers().length).toBe(2);
+
+      showMap(14);
+
+      expect(component.markers.size).toBe(2);
+      expect(bubbleMarkers().length).toBe(0);
+    });
+
+    it('removes the map object of a bubble that is no longer shown', () => {
+      showMap(3);
+      const [first] = bubbleMarkers();
+
+      showMap(3, { west: 100, south: 40, east: 120, north: 50 });
+
+      expect(first.map).toBeNull();
+    });
+
+    it('keeps the selected LOI drawn while zoomed out', () => {
+      showMap(3, { west: -1, south: -1, east: 11, north: 11 });
+
+      // poi2 is far outside the viewport.
+      mockLocationOfInterestId$.next(poiId2);
+
+      expect([...component.markers.keys()]).toEqual([poiId2]);
+    });
+
+    it('stops drawing the LOI that was selected once it is not, and is zoomed out', () => {
+      showMap(3, { west: -1, south: -1, east: 11, north: 11 });
+      mockLocationOfInterestId$.next(poiId2);
+
+      mockLocationOfInterestId$.next(null);
+
+      expect(component.markers.size).toBe(0);
+    });
+
+    it('zooms to the LOIs of a bubble when it is clicked', () => {
+      showMap(3);
+      const googleMap = component.map.googleMap!;
+      spyOn(googleMap, 'fitBounds');
+      const bubble = bubbleMarkers().find(
+        marker => marker.element.textContent === '0/2'
+      )!;
+
+      google.maps.event.trigger(bubble, 'click');
+
+      // The extent of poi1 and the polygon (0..10).
+      expect(googleMap.fitBounds).toHaveBeenCalledOnceWith(
+        { west: 0, south: 0, east: 10, north: 10 },
+        50
+      );
+    });
+
+    it('zooms in on a lone LOI when its bubble is clicked', () => {
+      showMap(3);
+      const googleMap = component.map.googleMap!;
+      spyOn(googleMap, 'panTo');
+      spyOn(googleMap, 'setZoom');
+      spyOn(googleMap, 'fitBounds');
+      const bubble = bubbleMarkers().find(
+        marker => marker.element.textContent === '0/1'
+      )!;
+
+      google.maps.event.trigger(bubble, 'click');
+
+      expect(googleMap.panTo).toHaveBeenCalledOnceWith({
+        lat: 45.6,
+        lng: 12.3,
+      });
+      expect(googleMap.setZoom).toHaveBeenCalledOnceWith(14);
+      // Fitting the map to a single point would zoom in as far as it goes.
+      expect(googleMap.fitBounds).not.toHaveBeenCalled();
+    });
+
+    it('updates the bubbles when LOIs change', () => {
+      showMap(3);
+      expect(bubbleLabels()).toEqual(['0/1', '0/2']);
+
+      fixture.componentRef.setInput(
+        'lois',
+        List<LocationOfInterest>([poi1, poi2])
+      );
+      fixture.detectChanges();
+
+      expect(bubbleLabels()).toEqual(['0/1', '0/1']);
+    });
+
+    it('does not count LOIs of a job that was removed', () => {
+      const orphan = new LocationOfInterest(
+        'orphan',
+        'removed-job',
+        new Point(new Coordinate(1.5, 4.5)),
+        Map()
+      );
+      fixture.componentRef.setInput(
+        'lois',
+        List<LocationOfInterest>([poi1, orphan])
+      );
+      fixture.detectChanges();
+      showMap(3);
+
+      expect(bubbleLabels()).toEqual(['0/1']);
+    });
+
+    it('zooms the selected LOI in far enough to show it as itself', () => {
+      showMap(5);
+      const googleMap = component.map.googleMap!;
+      spyOn(googleMap, 'setZoom');
+
+      mockLocationOfInterestId$.next(poiId1);
+
+      expect(googleMap.setZoom).toHaveBeenCalledWith(14);
+    });
+  });
 
   describe('when submission is selected', () => {
     const submissionId = 'submission001';

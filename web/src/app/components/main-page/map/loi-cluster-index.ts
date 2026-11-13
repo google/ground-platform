@@ -131,6 +131,19 @@ export class LoiClusterIndex {
     });
   }
 
+  /**
+   * Returns the ids of the LOIs whose geometry overlaps `viewport`. Unlike
+   * `getBubbles()`, this looks at the whole geometry, not at its center, so a
+   * large polygon is found while any part of it is in view.
+   */
+  getLoiIdsIntersecting(viewport: Extent): string[] {
+    const ids: string[] = [];
+    for (const [id, extent] of this.extents) {
+      if (extentsIntersect(extent, viewport)) ids.push(id);
+    }
+    return ids;
+  }
+
   /** Returns the area covered by the geometries of the LOIs in `bubble`. */
   getBubbleExtent(bubble: LoiBubble): Extent | null {
     const ids =
@@ -194,4 +207,51 @@ export function mergeExtents(
       : extent;
   }
   return merged;
+}
+
+/**
+ * Returns `extent` grown by `factor` of its size on each side. An extent
+ * crossing the antimeridian has `west` greater than `east`, and so may the
+ * result.
+ */
+export function expandExtent(extent: Extent, factor: number): Extent {
+  const { west, south, east, north } = extent;
+  const width = east >= west ? east - west : east - west + 360;
+  const height = north - south;
+  const grown = {
+    south: Math.max(-90, south - height * factor),
+    north: Math.min(90, north + height * factor),
+  };
+  if (width * (1 + 2 * factor) >= 360) {
+    return { west: -180, east: 180, ...grown };
+  }
+  return {
+    west: wrapLongitude(west - width * factor),
+    east: wrapLongitude(east + width * factor),
+    ...grown,
+  };
+}
+
+/** Returns true if the two extents share any area. */
+export function extentsIntersect(a: Extent, b: Extent): boolean {
+  if (a.south > b.north || b.south > a.north) return false;
+  return longitudeRanges(a).some(([aWest, aEast]) =>
+    longitudeRanges(b).some(
+      ([bWest, bEast]) => aWest <= bEast && bWest <= aEast
+    )
+  );
+}
+
+/** Splits the longitudes of an extent so that none crosses the antimeridian. */
+function longitudeRanges({ west, east }: Extent): [number, number][] {
+  return west <= east
+    ? [[west, east]]
+    : [
+        [west, 180],
+        [-180, east],
+      ];
+}
+
+function wrapLongitude(lng: number): number {
+  return ((((lng + 180) % 360) + 360) % 360) - 180;
 }
