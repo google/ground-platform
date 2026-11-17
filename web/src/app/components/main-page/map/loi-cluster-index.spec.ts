@@ -113,8 +113,9 @@ describe('LoiClusterIndex', () => {
   });
 
   it('splits a group as the zoom level grows', () => {
-    // About 1 km apart.
-    index.load([pointLoi('a', 10, 20), pointLoi('b', 10.01, 20)]);
+    // About 2 km apart: 117 px at the last clustered zoom level, so more than
+    // the 100 px radius. A bubble stands for LOIs closer than that.
+    index.load([pointLoi('a', 10, 20), pointLoi('b', 10.02, 20)]);
 
     expect(index.getBubbles(WORLD, 5).length).toBe(1);
     expect(index.getBubbles(WORLD, CLUSTERING_ZOOM_THRESHOLD - 1).length).toBe(

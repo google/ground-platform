@@ -30,6 +30,9 @@ export const CLUSTERING_ZOOM_THRESHOLD = 14;
 /** Distance in pixels within which LOIs are grouped into one bubble. */
 const CLUSTER_RADIUS_PX = 100;
 
+/** Width in pixels of the whole world in Google Maps at zoom level 0. */
+const GOOGLE_MAPS_WORLD_SIZE_PX = 256;
+
 /** Returns true if LOIs are to be shown as bubbles at `zoom`. */
 export function isClusterMode(zoom: number): boolean {
   return zoom < CLUSTERING_ZOOM_THRESHOLD;
@@ -158,6 +161,11 @@ export class LoiClusterIndex {
   private createIndex(): Supercluster<IndexedLoi, { withData: number }> {
     return new Supercluster<IndexedLoi, { withData: number }>({
       radius: CLUSTER_RADIUS_PX,
+      // Supercluster measures the radius against a world 512 px wide at zoom 0,
+      // while Google Maps' world is 256 px wide. Without this, the radius would
+      // be half of what it says, and LOIs would group at half the distance
+      // they do in Ground Android.
+      extent: GOOGLE_MAPS_WORLD_SIZE_PX,
       // Beyond this zoom level, no LOIs are grouped.
       maxZoom: CLUSTERING_ZOOM_THRESHOLD - 1,
       map: ({ withData }) => ({ withData }),
