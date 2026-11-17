@@ -306,7 +306,7 @@ export class NavigationService implements OnDestroy {
    * Navigate to the URL for signout.
    */
   signOut() {
-    this.router.navigate([SIGN_IN_SEGMENT]);
+    return this.router.navigate([SIGN_IN_SEGMENT]);
   }
 
   /**
