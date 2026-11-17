@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import {
+  CdkVirtualScrollViewport,
+  ScrollingModule,
+} from '@angular/cdk/scrolling';
 import { WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
+import { By } from '@angular/platform-browser';
 import { List, Map } from 'immutable';
 
 import { Coordinate } from 'app/models/geometry/coordinate';
@@ -79,14 +84,30 @@ describe('JobListItemComponent', () => {
     return Array.from(fixture.nativeElement.querySelectorAll(selector));
   }
 
-  function setLois(lois: List<LocationOfInterest>) {
-    fixture.componentRef.setInput('lois', lois);
+  /**
+   * Runs change detection, and lets the virtual scroll viewport, if any, size
+   * itself and render its rows.
+   */
+  async function detectChanges() {
     fixture.detectChanges();
+    const viewport = fixture.debugElement.query(
+      By.directive(CdkVirtualScrollViewport)
+    );
+    if (viewport) {
+      viewport.componentInstance.checkViewportSize();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
   }
 
-  function clickExpandToggle() {
+  async function setLois(lois: List<LocationOfInterest>) {
+    fixture.componentRef.setInput('lois', lois);
+    await detectChanges();
+  }
+
+  async function clickExpandToggle() {
     query<HTMLButtonElement>('.expand-toggle')!.click();
-    fixture.detectChanges();
+    await detectChanges();
   }
 
   beforeEach(async () => {
@@ -114,7 +135,12 @@ describe('JobListItemComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [JobListItemComponent],
-      imports: [GroundIconModule, MatButtonModule, MatMenuModule],
+      imports: [
+        GroundIconModule,
+        MatButtonModule,
+        MatMenuModule,
+        ScrollingModule,
+      ],
       providers: [
         { provide: NavigationService, useValue: navigationServiceSpy },
         { provide: AuthService, useValue: {} },
@@ -125,54 +151,54 @@ describe('JobListItemComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListItemComponent);
     fixture.componentRef.setInput('job', job);
-    fixture.detectChanges();
+    detectChanges();
   });
 
-  it('should render the job', () => {
+  it('should render the job', async () => {
     expect(queryAll('.job-tree-node').length).toBe(1);
     expect(query('.job-name')!.textContent!.trim()).toBe('job 1');
   });
 
-  it('should not show the expand toggle when the job has no lois', () => {
+  it('should not show the expand toggle when the job has no lois', async () => {
     expect(query('.expand-toggle')).toBeNull();
   });
 
-  it('should not render lois until the job is expanded', () => {
-    setLois(createLois(2));
+  it('should not render lois until the job is expanded', async () => {
+    await setLois(createLois(2));
 
     expect(queryAll('.loi-tree-node').length).toBe(0);
   });
 
-  it('should render lois when the job is expanded', () => {
-    setLois(createLois(2));
+  it('should render lois when the job is expanded', async () => {
+    await setLois(createLois(2));
 
-    clickExpandToggle();
+    await clickExpandToggle();
 
     expect(queryAll('.loi-tree-node').length).toBe(2);
     expect(query('.expand-toggle')!.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('should hide lois when the job is collapsed again', () => {
-    setLois(createLois(2));
-    clickExpandToggle();
+  it('should hide lois when the job is collapsed again', async () => {
+    await setLois(createLois(2));
+    await clickExpandToggle();
 
-    clickExpandToggle();
+    await clickExpandToggle();
 
     expect(queryAll('.loi-tree-node').length).toBe(0);
   });
 
-  it('should render lois added after the job was expanded', () => {
-    setLois(createLois(1));
-    clickExpandToggle();
+  it('should render lois added after the job was expanded', async () => {
+    await setLois(createLois(1));
+    await clickExpandToggle();
 
-    setLois(createLois(3));
+    await setLois(createLois(3));
 
     expect(queryAll('.loi-tree-node').length).toBe(3);
   });
 
-  it('should render the name and submission count of each loi', () => {
-    setLois(createLois(3, [0, 4, 12]));
-    clickExpandToggle();
+  it('should render the name and submission count of each loi', async () => {
+    await setLois(createLois(3, [0, 4, 12]));
+    await clickExpandToggle();
 
     const names = queryAll('.loi-name').map(e => e.textContent!.trim());
     const counts = queryAll('.loi-submission-count').map(e =>
@@ -182,12 +208,35 @@ describe('JobListItemComponent', () => {
     expect(counts).toEqual(['0', '4', '12']);
   });
 
-  it('should highlight the selected loi', () => {
-    setLois(createLois(3));
-    clickExpandToggle();
+  it('should render only the visible lois of a long list', async () => {
+    await setLois(createLois(10000));
+    await clickExpandToggle();
+
+    const rendered = queryAll('.loi-tree-node').length;
+    expect(rendered).toBeGreaterThan(0);
+    expect(rendered).toBeLessThan(100);
+  });
+
+  it('should scroll to the selected loi when it is not rendered', async () => {
+    await setLois(createLois(10000));
+    await clickExpandToggle();
+
+    urlParamsSignal.set(new UrlParams(surveyId, 'loi5000', null, null));
+    await detectChanges();
+
+    const selected = queryAll('.loi-tree-node.tree-node-selected');
+    expect(selected.length).toBe(1);
+    expect(selected[0].querySelector('.loi-name')!.textContent!.trim()).toBe(
+      'Site loi5000'
+    );
+  });
+
+  it('should highlight the selected loi', async () => {
+    await setLois(createLois(3));
+    await clickExpandToggle();
 
     urlParamsSignal.set(new UrlParams(surveyId, 'loi1', null, null));
-    fixture.detectChanges();
+    await detectChanges();
 
     const selected = queryAll('.loi-tree-node').map(e =>
       e.classList.contains('tree-node-selected')
@@ -195,9 +244,9 @@ describe('JobListItemComponent', () => {
     expect(selected).toEqual([false, true, false]);
   });
 
-  it('should select the loi when it is clicked', () => {
-    setLois(createLois(2));
-    clickExpandToggle();
+  it('should select the loi when it is clicked', async () => {
+    await setLois(createLois(2));
+    await clickExpandToggle();
 
     queryAll<HTMLButtonElement>('.loi-tree-node')[1].click();
 
@@ -206,9 +255,9 @@ describe('JobListItemComponent', () => {
     ).toHaveBeenCalledOnceWith(surveyId, 'loi1');
   });
 
-  it('should close the loi when the back button is clicked', () => {
+  it('should close the loi when the back button is clicked', async () => {
     fixture.componentRef.setInput('actionsType', JobListItemActionsType.BACK);
-    fixture.detectChanges();
+    await detectChanges();
 
     query<HTMLButtonElement>('.job-actions button')!.click();
 
@@ -216,23 +265,23 @@ describe('JobListItemComponent', () => {
   });
 
   describe('when the side panel is collapsed', () => {
-    beforeEach(() => {
-      setLois(createLois(2));
+    beforeEach(async () => {
+      await setLois(createLois(2));
       sidePanelExpanded.set(false);
-      fixture.detectChanges();
+      await detectChanges();
     });
 
-    it('should expand the job when its icon is clicked', () => {
+    it('should expand the job when its icon is clicked', async () => {
       query<HTMLButtonElement>('.job-tree-node button')!.click();
-      fixture.detectChanges();
+      await detectChanges();
 
       expect(queryAll('.loi-collapsed-toggle').length).toBe(2);
       expect(queryAll('.loi-name').length).toBe(0);
     });
 
-    it('should label loi buttons with the loi name', () => {
+    it('should label loi buttons with the loi name', async () => {
       query<HTMLButtonElement>('.job-tree-node button')!.click();
-      fixture.detectChanges();
+      await detectChanges();
 
       const labels = queryAll('.loi-collapsed-toggle').map(e =>
         e.getAttribute('aria-label')

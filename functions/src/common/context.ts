@@ -16,6 +16,7 @@
 
 import { Datastore } from './datastore';
 import { MailService } from './mail-service';
+import { smtpPassword } from './secrets';
 import { getApp, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
@@ -44,7 +45,13 @@ export async function getMailService(): Promise<MailService | undefined> {
   const mailServerConfig =
     await MailService.getMailServerConfig(getDatastore());
   if (!mailServerConfig) return;
-  mailService = new MailService(mailServerConfig);
+  // The SMTP password lives in Secret Manager, never in Firestore.
+  const password = smtpPassword.value();
+  if (!password) {
+    console.error('SMTP_PASSWORD secret is not set; unable to send mail');
+    return;
+  }
+  mailService = new MailService({ ...mailServerConfig, password });
   return mailService;
 }
 

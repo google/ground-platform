@@ -830,6 +830,14 @@ a:hover {
   margin-bottom: 1rem;
 }
 
+.deployment-summary a,
+.goal-body a,
+.metric-context a {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .deployment-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

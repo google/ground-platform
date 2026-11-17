@@ -18,15 +18,11 @@
   <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
-    <div
-      *ngIf="GeometryTasks.includes(taskGroup)"
-      [matTooltip]="typeLocked() ? typeLockedMessage : ''"
-    >
+    <div *ngIf="GeometryTasks.includes(taskGroup)">
       <mat-select
         [(value)]="taskGroup"
-        [disabled]="typeLocked()"
         [hideSingleSelectionIndicator]="true"
-        (selectionChange)="onTaskGroupSelect($event.value)"
+        (selectionChange)="onTaskGroupChange($event)"
       >
         <mat-select-trigger class="task-label">
           <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
@@ -114,17 +110,11 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field
-      class="task-type"
-      appearance="fill"
-      *ngIf="taskGroup === TaskGroup.QUESTION"
-      [matTooltip]="typeLocked() ? typeLockedMessage : ''"
-    >
+    <mat-form-field class="task-type" appearance="fill" *ngIf="taskGroup === TaskGroup.QUESTION">
       <mat-select
         class="task-type-select"
-        [disabled]="typeLocked()"
         [value]="taskTypeOption"
-        (selectionChange)="onTaskTypeSelect($event.value)"
+        (selectionChange)="onTaskTypeChange($event)"
         (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>

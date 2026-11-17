@@ -72,6 +72,10 @@ limitations under the License.
                   >Skipped</ng-container
                 >
               </div>
+            } @else if (!isCompatible(task, result!)) {
+              <submission-text-view
+                [text]="asDisplayString(result!)"
+              ></submission-text-view>
             } @else if (task.type === taskType.MULTIPLE_CHOICE) {
               <submission-multiple-choice-view
                 [task]="task"
@@ -102,10 +106,12 @@ limitations under the License.
               <submission-time-view
                 [time]="asDate(result!)"
               ></submission-time-view>
+            } @else if (task.type === taskType.DATE_TIME) {
+              <submission-text-view
+                [text]="asDisplayString(result!)"
+              ></submission-text-view>
             } @else if (
-              task.type === taskType.TEXT ||
-              task.type === taskType.NUMBER ||
-              task.type === taskType.DATE_TIME
+              task.type === taskType.TEXT || task.type === taskType.NUMBER
             ) {
               <submission-text-view
                 [text]="asStringOrNumber(result!)"

@@ -46,8 +46,8 @@ describe('DrawingToolsComponent', () => {
 
   const jobId1 = 'job001';
   const jobId2 = 'job002';
-  const jobColor1 = 'red';
-  const jobColor2 = 'green';
+  const jobColor1 = '#aa0000';
+  const jobColor2 = '#00aa00';
   const jobName1 = 'job001 name';
   const jobName2 = 'job002 name';
   const mockSurvey = new Survey(

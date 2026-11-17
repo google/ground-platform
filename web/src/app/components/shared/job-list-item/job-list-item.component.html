@@ -98,41 +98,52 @@ limitations under the License.
   </div>
 
   @if (expanded()) {
-    @for (item of loiItems(); track item.loi.id) {
-      @if (isSidePanelExpanded()) {
-        <button
-          type="button"
-          class="loi-tree-node expanded"
-          [class.tree-node-selected]="item.loi.id === loiId()"
-          (click)="selectLoi(item.loi)"
-        >
-          <mat-icon
-            [svgIcon]="item.iconName"
-            class="loi-icon"
-            [style.color]="job().color"
-          ></mat-icon>
+    <!-- Only the visible rows are rendered, so jobs with thousands of LOIs stay fast. -->
+    <cdk-virtual-scroll-viewport
+      class="loi-list"
+      [itemSize]="loiRowHeight"
+      [style.height.px]="loiListHeight()"
+    >
+      <ng-container
+        *cdkVirtualFor="let item of loiItems(); trackBy: trackByLoiId"
+      >
+        @if (isSidePanelExpanded()) {
+          <button
+            type="button"
+            class="loi-tree-node expanded"
+            [class.tree-node-selected]="item.loi.id === loiId()"
+            [attr.title]="item.name"
+            (click)="selectLoi(item.loi)"
+          >
+            <mat-icon
+              [svgIcon]="item.iconName"
+              class="loi-icon"
+              [style.color]="job().color"
+            ></mat-icon>
 
-          <span class="loi-name">{{ item.name }}</span>
+            <span class="loi-name">{{ item.name }}</span>
 
-          <span class="loi-submission-count">
-            {{ item.loi.submissionCount ?? 0 }}
-          </span>
-        </button>
-      } @else {
-        <button
-          mat-icon-button
-          class="loi-collapsed-toggle"
-          [class.tree-node-selected]="item.loi.id === loiId()"
-          [attr.aria-label]="item.name"
-          (click)="selectLoi(item.loi)"
-        >
-          <mat-icon
-            [svgIcon]="item.iconName"
-            class="loi-icon"
-            [style.color]="job().color"
-          ></mat-icon>
-        </button>
-      }
-    }
+            <span class="loi-submission-count">
+              {{ item.loi.submissionCount ?? 0 }}
+            </span>
+          </button>
+        } @else {
+          <button
+            mat-icon-button
+            class="loi-collapsed-toggle"
+            [class.tree-node-selected]="item.loi.id === loiId()"
+            [attr.aria-label]="item.name"
+            [attr.title]="item.name"
+            (click)="selectLoi(item.loi)"
+          >
+            <mat-icon
+              [svgIcon]="item.iconName"
+              class="loi-icon"
+              [style.color]="job().color"
+            ></mat-icon>
+          </button>
+        }
+      </ng-container>
+    </cdk-virtual-scroll-viewport>
   }
 </div>

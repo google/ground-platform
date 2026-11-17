@@ -92,11 +92,15 @@
   height: 24px;
 }
 
+.loi-list {
+  width: 100%;
+}
+
 .loi-tree-node {
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 36px;
+  height: 36px;
   padding: 0;
   border: none;
   border-radius: 24px;
@@ -117,8 +121,9 @@
     flex: 1;
     min-width: 0;
     padding-left: 16px;
-    white-space: normal;
-    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .loi-submission-count {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,6 +33,7 @@ import { JobListItemComponent } from './job-list-item.component';
     MatListModule,
     MatMenuModule,
     MatSnackBarModule,
+    ScrollingModule,
   ],
   exports: [JobListItemComponent],
   declarations: [JobListItemComponent],

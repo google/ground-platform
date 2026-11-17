@@ -116,7 +116,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   submission: Submission | null = null;
   showSubmissionGeometry = false;
 
-  readonly DEFAULT_MARKER_COLOR = 'black';
+  readonly DEFAULT_MARKER_COLOR = '#000000';
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
