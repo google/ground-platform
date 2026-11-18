@@ -338,6 +338,8 @@ export class Datastore {
     if (sv.created in surveyDoc) update[sv.created] = surveyDoc[sv.created];
     if (sv.lastModified in surveyDoc)
       update[sv.lastModified] = surveyDoc[sv.lastModified];
+    // Firestore rejects an update with no fields.
+    if (Object.keys(update).length === 0) return;
     await surveyRef.update(update);
   }
 

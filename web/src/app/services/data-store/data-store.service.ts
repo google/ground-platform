@@ -324,15 +324,6 @@ export class DataStoreService {
     );
   }
 
-  addOrUpdateSurvey(survey: Survey): Promise<void> {
-    return runInInjectionContext(this.injector, () =>
-      setDoc(
-        doc(this.db, SURVEYS_COLLECTION_NAME, survey.id),
-        surveyToDocument(survey.id, survey)
-      )
-    );
-  }
-
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
     return runInInjectionContext(this.injector, () =>
       setDoc(
