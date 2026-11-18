@@ -594,10 +594,19 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       map: this.map.googleMap,
       position: { lat: bubble.lat, lng: bubble.lng },
       content: createClusterBubbleElement(bubble.withData, bubble.total),
-      gmpClickable: true,
+      gmpClickable: this.areBubblesClickable(),
     });
     marker.addListener('click', () => this.onBubbleClick(bubble));
     return marker;
+  }
+
+  /**
+   * Bubbles can't be clicked while a drawing tool is in use or a marker is
+   * being repositioned, as with the markers of single LOIs: a click on the map
+   * is meant for the tool, not for the bubble underneath.
+   */
+  private areBubblesClickable(): boolean {
+    return !this.disableMapClicks && !this.editModeActive;
   }
 
   /** Zooms to the LOIs of the bubble. */
@@ -810,6 +819,9 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       for (const marker of this.markers) {
         marker[1].gmpClickable = true;
       }
+    }
+    for (const bubble of this.bubbleMarkers.values()) {
+      bubble.gmpClickable = this.areBubblesClickable();
     }
     this.mapOptions =
       editMode === EditMode.AddPoint

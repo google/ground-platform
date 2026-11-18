@@ -914,6 +914,50 @@ describe('MapComponent', () => {
       expect(bubbleLabels()).toEqual(['0/1', '0/1']);
     });
 
+    it('updates the counts of the bubbles when the submissions of a LOI change', () => {
+      showMap(3);
+      expect(bubbleLabels()).toEqual(['0/1', '0/2']);
+
+      // Same LOIs as before, but poi1 now has submissions.
+      const poi1WithSubmissions = new LocationOfInterest(
+        poiId1,
+        jobId1,
+        new Point(new Coordinate(1.23, 4.56)),
+        Map(),
+        '',
+        true,
+        2
+      );
+      fixture.componentRef.setInput(
+        'lois',
+        mockLois$
+          .getValue()
+          .map(loi => (loi.id === poiId1 ? poi1WithSubmissions : loi))
+      );
+      fixture.detectChanges();
+
+      expect(bubbleLabels()).toEqual(['0/1', '1/2']);
+    });
+
+    it('makes the bubbles unclickable while a drawing tool is in use, and clickable again after', () => {
+      showMap(3);
+      expect(bubbleMarkers().every(marker => marker.gmpClickable)).toBeTrue();
+
+      mockEditMode$.next(EditMode.AddPolygon);
+      expect(bubbleMarkers().every(marker => !marker.gmpClickable)).toBeTrue();
+
+      mockEditMode$.next(EditMode.None);
+      expect(bubbleMarkers().every(marker => marker.gmpClickable)).toBeTrue();
+    });
+
+    it('draws bubbles unclickable while a drawing tool is in use', () => {
+      mockEditMode$.next(EditMode.AddPolygon);
+      showMap(3);
+
+      expect(bubbleMarkers().length).toBeGreaterThan(0);
+      expect(bubbleMarkers().every(marker => !marker.gmpClickable)).toBeTrue();
+    });
+
     it('does not count LOIs of a job that was removed', () => {
       const orphan = new LocationOfInterest(
         'orphan',
