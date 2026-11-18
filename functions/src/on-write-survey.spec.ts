@@ -185,6 +185,18 @@ describe('onWriteSurveyHandler()', () => {
     );
   });
 
+  it('still broadcasts when the survey data cannot be read', async () => {
+    const event = writeEvent(undefined, { [sv.name]: 'Survey' });
+    spyOn(event.data!.after!, 'data').and.throwError('unreadable');
+
+    await onWriteSurveyHandler(event);
+
+    expect(broadcastSpy).toHaveBeenCalledOnceWith(
+      { type: 'survey', surveyId: SURVEY_ID },
+      EVENT_TIME
+    );
+  });
+
   it('broadcasts when a survey is deleted', async () => {
     await onWriteSurveyHandler(writeEvent({ [sv.name]: 'Survey' }, undefined));
 

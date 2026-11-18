@@ -46,25 +46,25 @@ export async function onWriteSurveyHandler(
   const after = event.data?.after;
 
   if (after?.exists) {
-    const beforePb = before?.exists
-      ? (toMessage(before.data()!, Pb.Survey) as Pb.Survey)
-      : undefined;
-    const afterPb = toMessage(after.data()!, Pb.Survey) as Pb.Survey;
-    const corrected = correctedAuditInfo(beforePb, afterPb, event.time);
+    try {
+      const beforePb = before?.exists
+        ? (toMessage(before.data()!, Pb.Survey) as Pb.Survey)
+        : undefined;
+      const afterPb = toMessage(after.data()!, Pb.Survey) as Pb.Survey;
+      const corrected = correctedAuditInfo(beforePb, afterPb, event.time);
 
-    if (Object.keys(corrected).length) {
-      try {
+      if (Object.keys(corrected).length) {
         await getDatastore().updateSurveyAuditInfo(
           surveyId,
           toDocumentData(new Pb.Survey(corrected)) as Record<string, unknown>
         );
         return;
-      } catch (err) {
-        // The broadcast was left to the write this correction would have
-        // caused, so without it devices would never hear of the change.
-        // Announce the survey with the timestamps the client guessed instead.
-        logger.error(`Failed to correct audit info of survey ${surveyId}`, err);
       }
+    } catch (err) {
+      // The broadcast was left to the write this correction would have
+      // caused, so without it devices would never hear of the change.
+      // Announce the survey with the timestamps the client guessed instead.
+      logger.error(`Failed to correct audit info of survey ${surveyId}`, err);
     }
   }
 
