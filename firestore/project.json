@@ -1,0 +1,28 @@
+{
+  "name": "firestore",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "eslint ."
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "prettier --check \"*.mjs\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "inputs": ["{projectRoot}/**/*"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "jasmine --config=jasmine.json"
+      }
+    }
+  }
+}

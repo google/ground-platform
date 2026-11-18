@@ -167,7 +167,49 @@ rules_version = '2';
      * Returns true iff the current user is the owner of the specified submission.
      */
     function isSubmissionOwner(submission) {
-      return submission['5'] == request.auth.uid;
+      return submission.get('5', null) == request.auth.uid;
+    }
+
+    /**
+     * Returns true iff the specified `AuditInfo` map matches the requesting
+     * user's auth context:
+     * - `user_id` (field 1) equals `request.auth.uid`.
+     * - `display_name` (field 4), if present, is a string (left unconstrained
+     *   against `token.name` because Firebase Auth display names are
+     *   user-editable and cached client-side across token refreshes).
+     * - `email_address` (field 6) equals `request.auth.token.email` when the
+     *   auth token carries a non-empty email claim, or is omitted/empty when
+     *   the auth token has no email claim.
+     */
+    function hasValidAuditInfo(auditInfo) {
+      let authEmail = request.auth.token.get('email', '');
+      return auditInfo is map
+        && auditInfo.get('1', null) == request.auth.uid
+        && (!('4' in auditInfo) || auditInfo['4'] is string)
+        && (authEmail is string && authEmail != ''
+          ? auditInfo.get('6', null) == authEmail
+          : (!('6' in auditInfo) || auditInfo['6'] == ''));
+    }
+
+    /**
+     * Returns true iff a newly created submission has valid `created` (field 6)
+     * and optional `last_modified` (field 7) `AuditInfo` for the requesting user.
+     */
+    function hasValidNewSubmissionAuditInfo(submission) {
+      return hasValidAuditInfo(submission.get('6', null))
+        && (!('7' in submission) || hasValidAuditInfo(submission['7']));
+    }
+
+    /**
+     * Returns true iff an updated submission preserves `owner_id` (field 5) and
+     * `created` `AuditInfo` (field 6), and any modified `last_modified`
+     * `AuditInfo` (field 7) matches the requesting user's auth context.
+     */
+    function hasValidUpdatedSubmission(existingSubmission, updatedSubmission) {
+      return updatedSubmission.get('5', null) == existingSubmission.get('5', null)
+        && updatedSubmission.get('6', null) == existingSubmission.get('6', null)
+        && (updatedSubmission.get('7', null) == existingSubmission.get('7', null)
+          || hasValidAuditInfo(updatedSubmission.get('7', null)));
     }
 
     // Allow signed in users to look up profiles by uid, but never to list them:
@@ -228,8 +270,12 @@ rules_version = '2';
 
     // Apply survey-level permissions to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
-      // Allow if user is owner of the new submission and can collect data.
-      allow create: if isSubmissionOwner(request.resource.data) && canCollectData(getSurvey(surveyId));
+      // Allow if user is owner of the new submission, its AuditInfo matches the
+      // requesting user's auth context, and the user can collect data.
+      allow create: if isSignedIn()
+        && isSubmissionOwner(request.resource.data)
+        && hasValidNewSubmissionAuditInfo(request.resource.data)
+        && canCollectData(getSurvey(surveyId));
       // Allow if user has read access to the survey and the submission.
       allow get: if canViewSubmission(getSurvey(surveyId), resource.data);
       // Allow survey users to list only the submissions they can see: `list` is
@@ -239,8 +285,20 @@ rules_version = '2';
         canViewDataCollectedByOthers(getSurvey(surveyId)) ||
         isSubmissionOwner(resource.data)
       );
+      // Allow if `owner_id` and `created` AuditInfo are unchanged, any modified
+      // `last_modified` AuditInfo matches the requesting user, and the user
+      // either owns the submission and can collect data or can manage the survey.
+      allow update: if isSignedIn()
+        && hasValidUpdatedSubmission(resource.data, request.resource.data)
+        && (
+          (isSubmissionOwner(resource.data) && canCollectData(getSurvey(surveyId)))
+          || canManageSurvey(getSurvey(surveyId))
+        );
       // Allow if user is owner of the existing submission and can collect data, or can manage survey.
-      allow update, delete: if (isSubmissionOwner(resource.data) && canCollectData(getSurvey(surveyId))) || canManageSurvey(getSurvey(surveyId));
+      allow delete: if isSignedIn() && (
+        (isSubmissionOwner(resource.data) && canCollectData(getSurvey(surveyId)))
+        || canManageSurvey(getSurvey(surveyId))
+      );
     }
 
     // Apply survey-level permissions to job documents.
