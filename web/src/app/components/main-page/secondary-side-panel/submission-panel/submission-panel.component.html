@@ -84,6 +84,9 @@ limitations under the License.
             } @else if (task.type === taskType.PHOTO) {
               <submission-photo-view
                 [path]="asString(result!)"
+                [surveyId]="activeSurvey()?.id"
+                [submissionId]="submission()?.id"
+                [taskId]="task.id"
               ></submission-photo-view>
             } @else if (
               task.type === taskType.DROP_PIN ||
