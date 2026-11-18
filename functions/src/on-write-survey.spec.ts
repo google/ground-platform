@@ -27,6 +27,7 @@ import {
   FirestoreEvent,
 } from 'firebase-functions/v2/firestore';
 import { resetDatastore } from './common/context';
+import { Datastore } from './common/datastore';
 import { GroundProtos } from '@ground/proto';
 import { onWriteSurveyHandler } from './on-write-survey';
 import * as broadcastModule from './common/broadcast';
@@ -160,6 +161,24 @@ describe('onWriteSurveyHandler()', () => {
     await onWriteSurveyHandler(writeEvent(before, after));
 
     expect(await storedSurvey()).toEqual(after);
+    expect(broadcastSpy).toHaveBeenCalledOnceWith(
+      { type: 'survey', surveyId: SURVEY_ID },
+      EVENT_TIME
+    );
+  });
+
+  it('still broadcasts when correcting the audit info fails', async () => {
+    const survey = {
+      [sv.name]: 'Survey',
+      [sv.lastModified]: auditInfo('user1'),
+    };
+    await mockFirestore.doc(SURVEY_PATH).set(survey);
+    spyOn(Datastore.prototype, 'updateSurveyAuditInfo').and.rejectWith(
+      new Error('update failed')
+    );
+
+    await onWriteSurveyHandler(writeEvent(undefined, survey));
+
     expect(broadcastSpy).toHaveBeenCalledOnceWith(
       { type: 'survey', surveyId: SURVEY_ID },
       EVENT_TIME

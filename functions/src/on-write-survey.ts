@@ -21,6 +21,7 @@ import {
 } from 'firebase-functions/v2/firestore';
 import { GroundProtos } from '@ground/proto';
 import { toDocumentData, toMessage } from '@ground/lib';
+import * as logger from 'firebase-functions/logger';
 import { withServerTimestamp } from './common/audit-info';
 import { broadcastUpdate } from './common/broadcast';
 import { getDatastore } from './common/context';
@@ -52,11 +53,18 @@ export async function onWriteSurveyHandler(
     const corrected = correctedAuditInfo(beforePb, afterPb, event.time);
 
     if (Object.keys(corrected).length) {
-      await getDatastore().updateSurveyAuditInfo(
-        surveyId,
-        toDocumentData(new Pb.Survey(corrected)) as Record<string, unknown>
-      );
-      return;
+      try {
+        await getDatastore().updateSurveyAuditInfo(
+          surveyId,
+          toDocumentData(new Pb.Survey(corrected)) as Record<string, unknown>
+        );
+        return;
+      } catch (err) {
+        // The broadcast was left to the write this correction would have
+        // caused, so without it devices would never hear of the change.
+        // Announce the survey with the timestamps the client guessed instead.
+        logger.error(`Failed to correct audit info of survey ${surveyId}`, err);
+      }
     }
   }
 
