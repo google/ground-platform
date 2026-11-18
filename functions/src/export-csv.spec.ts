@@ -23,7 +23,7 @@ import {
   createResponseSpy,
 } from './testing/http-test-helpers';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { SURVEY_ORGANIZER_ROLE } from './common/auth';
+import { DATA_COLLECTOR_ROLE, SURVEY_ORGANIZER_ROLE } from './common/auth';
 import { getDatastore, resetDatastore } from './common/context';
 import * as context from './common/context';
 import { PassThrough } from 'stream';
@@ -614,7 +614,10 @@ describe('exportCsv()', () => {
         const res = createResponseSpy();
 
         // Run export CSV handler.
-        await exportCsvHandler(req, res, { email } as DecodedIdToken);
+        await exportCsvHandler(req, res, {
+          email,
+          uid: userId,
+        } as DecodedIdToken);
 
         // Check post-conditions.
         expect(res.redirect as jasmine.Spy).toHaveBeenCalledTimes(1);
@@ -634,4 +637,354 @@ describe('exportCsv()', () => {
         expect(lines).toEqual(expectedCsv);
       })
   );
+
+  describe('LOI access control', () => {
+    const otherUserId = 'user6000';
+    const unroledUser = {
+      email: 'visitor@test.it',
+      uid: userId,
+    } as DecodedIdToken;
+    const collectorUser = {
+      email: 'collector@test.it',
+      uid: userId,
+    } as DecodedIdToken;
+    const organizerUser = {
+      email,
+      uid: 'organizer1000',
+    } as DecodedIdToken;
+
+    const simpleJob = {
+      id: 'job789',
+      [j.name]: 'Visibility job',
+      [j.tasks]: [
+        {
+          [t.id]: 'task001',
+          [t.index]: 1,
+          [t.prompt]: 'Notes',
+          [t.textQuestion]: {
+            ['1' /* type */]: Pb.Task.TextQuestion.Type.SHORT_TEXT,
+          },
+        },
+      ],
+    };
+
+    const importedLoi = {
+      id: 'loi100',
+      [l.id]: 'loi100',
+      [l.jobId]: simpleJob.id,
+      [l.customTag]: 'IMPORTED_001',
+      [l.geometry]: {
+        [g.point]: {
+          [p.coordinates]: { [c.latitude]: 10.1, [c.longitude]: 125.6 },
+        },
+      },
+      [l.submissionCount]: 1,
+      [l.source]: Pb.LocationOfInterest.Source.IMPORTED,
+      [l.properties]: {
+        name: { [pr.stringValue]: 'Public Plot' },
+      },
+    };
+
+    const ownFieldLoiWithSub = {
+      id: 'loi200',
+      [l.id]: 'loi200',
+      [l.jobId]: simpleJob.id,
+      [l.customTag]: 'OWN_FIELD_001',
+      [l.geometry]: {
+        [g.point]: {
+          [p.coordinates]: { [c.latitude]: 47.05, [c.longitude]: 8.3 },
+        },
+      },
+      [l.submissionCount]: 1,
+      [l.ownerId]: userId,
+      [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
+      [l.properties]: {
+        name: { [pr.stringValue]: 'Own Site' },
+        ownProp: { [pr.stringValue]: 'own-val' },
+      },
+    };
+
+    const ownFieldLoiWithoutSub = {
+      id: 'loi250',
+      [l.id]: 'loi250',
+      [l.jobId]: simpleJob.id,
+      [l.customTag]: 'OWN_FIELD_002',
+      [l.geometry]: {
+        [g.point]: {
+          [p.coordinates]: { [c.latitude]: 48.85, [c.longitude]: 2.35 },
+        },
+      },
+      [l.submissionCount]: 0,
+      [l.ownerId]: userId,
+      [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
+      [l.properties]: {
+        name: { [pr.stringValue]: 'Own Empty Site' },
+      },
+    };
+
+    const foreignFieldLoiWithSub = {
+      id: 'loi300',
+      [l.id]: 'loi300',
+      [l.jobId]: simpleJob.id,
+      [l.customTag]: 'SECRET_FOREIGN_001',
+      [l.geometry]: {
+        [g.point]: {
+          [p.coordinates]: { [c.latitude]: 42.42, [c.longitude]: 13.37 },
+        },
+      },
+      [l.submissionCount]: 1,
+      [l.ownerId]: otherUserId,
+      [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
+      [l.properties]: {
+        name: { [pr.stringValue]: 'Secret Foreign Site' },
+        secretProp: { [pr.stringValue]: 'secret-val' },
+      },
+    };
+
+    const foreignFieldLoiWithoutSub = {
+      id: 'loi350',
+      [l.id]: 'loi350',
+      [l.jobId]: simpleJob.id,
+      [l.customTag]: 'SECRET_FOREIGN_002',
+      [l.geometry]: {
+        [g.point]: {
+          [p.coordinates]: { [c.latitude]: 51.5, [c.longitude]: -0.12 },
+        },
+      },
+      [l.submissionCount]: 0,
+      [l.ownerId]: otherUserId,
+      [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
+    };
+
+    const unownedFieldLoi = {
+      id: 'loi400',
+      [l.id]: 'loi400',
+      [l.jobId]: simpleJob.id,
+      [l.customTag]: 'UNOWNED_FIELD_001',
+      [l.geometry]: {
+        [g.point]: {
+          [p.coordinates]: { [c.latitude]: 35.68, [c.longitude]: 139.69 },
+        },
+      },
+      [l.submissionCount]: 0,
+      [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
+    };
+
+    const ownSubOnOwnLoi = {
+      id: 'sub200',
+      [s.id]: 'sub200',
+      [s.loiId]: ownFieldLoiWithSub.id,
+      [s.index]: 1,
+      [s.jobId]: simpleJob.id,
+      [s.ownerId]: userId,
+      [s.taskData]: [
+        {
+          [d.id]: 'data200',
+          [d.taskId]: 'task001',
+          [d.textResponse]: { '1': 'Own answer' },
+        },
+      ],
+    };
+
+    const foreignSubOnImportedLoi = {
+      id: 'sub100other',
+      [s.id]: 'sub100other',
+      [s.loiId]: importedLoi.id,
+      [s.index]: 1,
+      [s.jobId]: simpleJob.id,
+      [s.ownerId]: otherUserId,
+      [s.taskData]: [
+        {
+          [d.id]: 'data100other',
+          [d.taskId]: 'task001',
+          [d.textResponse]: { '1': 'Foreign answer on imported LOI' },
+        },
+      ],
+    };
+
+    const foreignSubOnForeignLoi = {
+      id: 'sub300other',
+      [s.id]: 'sub300other',
+      [s.loiId]: foreignFieldLoiWithSub.id,
+      [s.index]: 1,
+      [s.jobId]: simpleJob.id,
+      [s.ownerId]: otherUserId,
+      [s.taskData]: [
+        {
+          [d.id]: 'data300other',
+          [d.taskId]: 'task001',
+          [d.textResponse]: { '1': 'Secret foreign answer' },
+        },
+      ],
+    };
+
+    async function runExport(
+      surveyData: Record<string, unknown>,
+      loisData: Array<{ id: string } & Record<string, unknown>>,
+      submissionsData: Array<{ id: string } & Record<string, unknown>>,
+      caller: DecodedIdToken
+    ): Promise<string> {
+      mockFirestore.doc(`surveys/${surveyId}`).set(surveyData);
+      const { id: jobDocId, ...jobFields } = simpleJob;
+      mockFirestore.doc(`surveys/${surveyId}/jobs/${jobDocId}`).set(jobFields);
+      loisData.forEach(({ id, ...loi }) =>
+        mockFirestore.doc(`surveys/${surveyId}/lois/${id}`).set(loi)
+      );
+      submissionsData.forEach(({ id, ...sub }) =>
+        mockFirestore.doc(`surveys/${surveyId}/submissions/${id}`).set(sub)
+      );
+
+      const req = await createGetRequestSpy({
+        url: '/exportCsv',
+        headers: { host, 'x-forwarded-proto': 'https' },
+        query: { survey: surveyId, job: simpleJob.id },
+      });
+      const res = createResponseSpy();
+
+      await exportCsvHandler(req, res, caller);
+
+      expect(res.redirect as jasmine.Spy).toHaveBeenCalledTimes(1);
+      return storageChunks.join('').trim();
+    }
+
+    it('skips foreign field LOIs for an unroled user on an unlisted survey with restricted data visibility', async () => {
+      const unlistedSurvey = {
+        [sv.name]: 'Unlisted survey',
+        [sv.generalAccess]: Pb.Survey.GeneralAccess.UNLISTED,
+        [sv.dataVisibility]:
+          Pb.Survey.DataVisibility.CONTRIBUTOR_AND_ORGANIZERS,
+        [sv.acl]: {
+          [email]: SURVEY_ORGANIZER_ROLE,
+        },
+      };
+
+      const output = await runExport(
+        unlistedSurvey,
+        [
+          importedLoi,
+          ownFieldLoiWithSub,
+          ownFieldLoiWithoutSub,
+          foreignFieldLoiWithSub,
+          foreignFieldLoiWithoutSub,
+        ],
+        [ownSubOnOwnLoi, foreignSubOnImportedLoi, foreignSubOnForeignLoi],
+        unroledUser
+      );
+
+      expect(output).not.toContain('SECRET_FOREIGN_001');
+      expect(output).not.toContain('SECRET_FOREIGN_002');
+      expect(output).not.toContain('POINT (13.37 42.42)');
+      expect(output).not.toContain('POINT (-0.12 51.5)');
+      expect(output).not.toContain('Secret Foreign Site');
+      expect(output).not.toContain('secretProp');
+      expect(output).not.toContain('secret-val');
+      expect(output).not.toContain('Secret foreign answer');
+      expect(output).not.toContain('Foreign answer on imported LOI');
+
+      expect(output.split('\n')).toEqual([
+        '"system:index","geometry","name","ownProp","data:Notes","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"IMPORTED_001","POINT (125.6 10.1)","Public Plot",,,,,,',
+        '"OWN_FIELD_001","POINT (8.3 47.05)","Own Site","own-val","Own answer",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"OWN_FIELD_002","POINT (2.35 48.85)","Own Empty Site",,,,,,',
+      ]);
+    });
+
+    it('skips foreign and unowned field LOIs for a data collector when data visibility is unset', async () => {
+      const restrictedSurvey = {
+        [sv.name]: 'Restricted survey',
+        [sv.generalAccess]: Pb.Survey.GeneralAccess.RESTRICTED,
+        [sv.acl]: {
+          [email]: SURVEY_ORGANIZER_ROLE,
+          [collectorUser.email!]: DATA_COLLECTOR_ROLE,
+        },
+      };
+
+      const output = await runExport(
+        restrictedSurvey,
+        [ownFieldLoiWithSub, foreignFieldLoiWithoutSub, unownedFieldLoi],
+        [ownSubOnOwnLoi],
+        collectorUser
+      );
+
+      expect(output).not.toContain('SECRET_FOREIGN_002');
+      expect(output).not.toContain('UNOWNED_FIELD_001');
+      expect(output.split('\n')).toEqual([
+        '"system:index","geometry","name","ownProp","data:Notes","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"OWN_FIELD_001","POINT (8.3 47.05)","Own Site","own-val","Own answer",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+      ]);
+    });
+
+    it('writes an empty CSV when all LOIs in the job are inaccessible to the caller', async () => {
+      const restrictedSurvey = {
+        [sv.name]: 'Restricted survey',
+        [sv.generalAccess]: Pb.Survey.GeneralAccess.UNLISTED,
+        [sv.dataVisibility]:
+          Pb.Survey.DataVisibility.CONTRIBUTOR_AND_ORGANIZERS,
+        [sv.acl]: {
+          [email]: SURVEY_ORGANIZER_ROLE,
+        },
+      };
+
+      const output = await runExport(
+        restrictedSurvey,
+        [foreignFieldLoiWithSub, foreignFieldLoiWithoutSub],
+        [foreignSubOnForeignLoi],
+        unroledUser
+      );
+
+      expect(output).toEqual('');
+    });
+
+    it('exports all field LOIs and submissions for a non-organizer when all survey participants may view data', async () => {
+      const openVisibilitySurvey = {
+        [sv.name]: 'Open visibility survey',
+        [sv.generalAccess]: Pb.Survey.GeneralAccess.RESTRICTED,
+        [sv.dataVisibility]: Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS,
+        [sv.acl]: {
+          [email]: SURVEY_ORGANIZER_ROLE,
+          [collectorUser.email!]: DATA_COLLECTOR_ROLE,
+        },
+      };
+
+      const output = await runExport(
+        openVisibilitySurvey,
+        [ownFieldLoiWithSub, foreignFieldLoiWithSub, foreignFieldLoiWithoutSub],
+        [ownSubOnOwnLoi, foreignSubOnForeignLoi],
+        collectorUser
+      );
+
+      expect(output.split('\n')).toEqual([
+        '"system:index","geometry","name","ownProp","secretProp","data:Notes","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"OWN_FIELD_001","POINT (8.3 47.05)","Own Site","own-val",,"Own answer",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"SECRET_FOREIGN_001","POINT (13.37 42.42)","Secret Foreign Site",,"secret-val","Secret foreign answer",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"SECRET_FOREIGN_002","POINT (-0.12 51.5)",,,,,,,,',
+      ]);
+    });
+
+    it('exports all field LOIs and submissions for a survey organizer even when data visibility is restricted', async () => {
+      const restrictedSurvey = {
+        [sv.name]: 'Restricted survey',
+        [sv.generalAccess]: Pb.Survey.GeneralAccess.RESTRICTED,
+        [sv.dataVisibility]:
+          Pb.Survey.DataVisibility.CONTRIBUTOR_AND_ORGANIZERS,
+        [sv.acl]: {
+          [email]: SURVEY_ORGANIZER_ROLE,
+        },
+      };
+
+      const output = await runExport(
+        restrictedSurvey,
+        [ownFieldLoiWithSub, foreignFieldLoiWithSub, foreignFieldLoiWithoutSub],
+        [ownSubOnOwnLoi, foreignSubOnForeignLoi],
+        organizerUser
+      );
+
+      expect(output.split('\n')).toEqual([
+        '"system:index","geometry","name","ownProp","secretProp","data:Notes","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"OWN_FIELD_001","POINT (8.3 47.05)","Own Site","own-val",,"Own answer",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"SECRET_FOREIGN_001","POINT (13.37 42.42)","Secret Foreign Site",,"secret-val","Secret foreign answer",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"SECRET_FOREIGN_002","POINT (-0.12 51.5)",,,,,,,,',
+      ]);
+    });
+  });
 });
