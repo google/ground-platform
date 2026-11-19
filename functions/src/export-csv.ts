@@ -144,7 +144,8 @@ export async function exportCsvHandler(
       const [loiDoc, submissionDoc] = row;
       const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(loi, ownerIdFilter) && submissionDoc) {
+      if (!isAccessibleLoi(loi, ownerIdFilter)) continue;
+      if (submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
         writeRow(csvStream, loiProperties, tasks, loi, photoUrl, submission);
