@@ -37,6 +37,21 @@ export class CloudFunctionsService {
     );
   }
 
+  async getSubmissionMediaBlob(
+    surveyId: string,
+    submissionId: string,
+    taskId: string
+  ): Promise<Blob> {
+    const params = new URLSearchParams({
+      survey: surveyId,
+      submission: submissionId,
+      task: taskId,
+    });
+    return this.httpClientService.getBlobWithAuth(
+      `${environment.cloudFunctionsUrl}/exportMedia?${params.toString()}`
+    );
+  }
+
   async profileRefresh(): Promise<void> {
     const refreshProfile = this.callable<Record<string, never>, string>(
       'profile-refresh'

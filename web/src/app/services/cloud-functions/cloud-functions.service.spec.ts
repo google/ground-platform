@@ -23,11 +23,15 @@ import { HttpClientService } from '../http-client/http-client.service';
 
 describe('CloudFunctionsService', () => {
   let service: CloudFunctionsService;
+  let getBlobWithAuthSpy: jasmine.Spy;
   let postWithAuthSpy: jasmine.Spy;
   let callableSpy: jasmine.Spy;
   let callableFnSpy: jasmine.Spy;
 
   beforeEach(() => {
+    getBlobWithAuthSpy = jasmine
+      .createSpy('getBlobWithAuth')
+      .and.resolveTo(new Blob(['image-bytes'], { type: 'image/jpeg' }));
     postWithAuthSpy = jasmine
       .createSpy('postWithAuth')
       .and.resolveTo({ expiresAt: 12345 });
@@ -38,7 +42,10 @@ describe('CloudFunctionsService', () => {
         { provide: Functions, useValue: {} },
         {
           provide: HttpClientService,
-          useValue: { postWithAuth: postWithAuthSpy },
+          useValue: {
+            getBlobWithAuth: getBlobWithAuthSpy,
+            postWithAuth: postWithAuthSpy,
+          },
         },
       ],
     });
@@ -83,6 +90,21 @@ describe('CloudFunctionsService', () => {
       await expectAsync(service.profileRefresh()).toBeRejectedWithError(
         'User profile could not be updated'
       );
+    });
+  });
+
+  describe('getSubmissionMediaBlob', () => {
+    it('should call getBlobWithAuth with encoded exportMedia query parameters', async () => {
+      const blob = await service.getSubmissionMediaBlob(
+        'survey-1',
+        'sub-1',
+        'task-1'
+      );
+
+      expect(getBlobWithAuthSpy).toHaveBeenCalledOnceWith(
+        `${environment.cloudFunctionsUrl}/exportMedia?survey=survey-1&submission=sub-1&task=task-1`
+      );
+      expect(await blob.text()).toBe('image-bytes');
     });
   });
 });

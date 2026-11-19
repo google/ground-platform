@@ -26,10 +26,11 @@ service firebase.storage {
     }
 
     /**
-     * Returns the survey with the specified id.
+     * Returns the survey with the specified id, or null if it does not exist.
      */
     function getSurvey(surveyId) {
-      return firestore.get(/databases/(default)/documents/surveys/$(surveyId)).data;
+      let doc = firestore.get(/databases/(default)/documents/surveys/$(surveyId));
+      return doc == null ? null : doc.data;
     }
 
     /**
@@ -37,10 +38,19 @@ service firebase.storage {
      * data to the specified survey.
      */
     function isUnlistedOrPublic(survey) {
-      return survey["8"] in [
+      return survey.get("8", 0) in [
         2 /* UNLISTED */,
         3 /* PUBLIC */
       ];
+    }
+
+    /**
+     * Returns the current user's role in the given survey, or null if none.
+     */
+    function getRole(survey) {
+      return "email" in request.auth.token
+        ? survey.get("4", {}).get(request.auth.token.email, null)
+        : null;
     }
 
     /**
@@ -48,17 +58,15 @@ service firebase.storage {
      * given survey.
      */
     function isOneOf(survey, roles) {
-     return survey["4"][request.auth.token.email] in roles;
+      return getRole(survey) in roles;
     }
 
     /**
-     * Returns true iff the user with the user's email can read the specified
-     * survey.
+     * Returns true iff the signed-in user can read the specified survey.
      */
-    function canViewSurvey(surveyId) {
-      let survey = getSurvey(surveyId);
+    function canViewSurvey(survey) {
       return survey != null && isSignedIn() &&
-        (isUnlistedOrPublic(survey) || survey["4"][request.auth.token.email] != null);
+        (isUnlistedOrPublic(survey) || getRole(survey) != null);
     }
 
     /**
@@ -74,6 +82,40 @@ service firebase.storage {
         ]));
     }
 
+    /**
+     * Returns true iff the requesting user owns the media at the given user path.
+     */
+    function isResourceOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Returns true iff the current user may view media collected by other users
+     * in the specified survey, either because the survey shares all data with
+     * all participants or because the user is a survey organizer.
+     */
+    function canViewAllData(surveyId) {
+      let survey = getSurvey(surveyId);
+      return canViewSurvey(survey) &&
+        (survey.get("9", 0) == 2 /* ALL_SURVEY_PARTICIPANTS */ || isOneOf(survey, [
+          3 /* SURVEY_ORGANIZER */
+        ]));
+    }
+
+    /**
+     * Returns true iff the current user may view media under `userId`'s
+     * per-user subpath in the specified survey.
+     */
+    function canViewUserMedia(surveyId, userId) {
+      let survey = getSurvey(surveyId);
+      return canViewSurvey(survey) &&
+        (isResourceOwner(userId) ||
+          survey.get("9", 0) == 2 /* ALL_SURVEY_PARTICIPANTS */ ||
+          isOneOf(survey, [
+            3 /* SURVEY_ORGANIZER */
+          ]));
+    }
+
     match /temp/{userId}/{allPaths=**} {
       // Only the owning user can read their own temporary files.
       allow read: if isSignedIn() && request.auth.uid == userId;
@@ -83,12 +125,27 @@ service firebase.storage {
       // All authenticated users can read.
       allow read: if isSignedIn();
     }
-    
-    match /user-media/surveys/{surveyId}/{allPaths=**} {
-      // Only users with permission to access the survey can read media.
-      allow read: if canViewSurvey(surveyId);
 
-      // Only users with permission to contribute data to the survey can create/update media.
+    match /user-media/surveys/{surveyId}/users/{userId}/{allPaths=**} {
+      // Users with survey access may fetch their own media, or other users'
+      // media when the survey shares all data with all participants or when
+      // they are a survey organizer. Listing is never allowed.
+      allow get: if canViewUserMedia(surveyId, userId);
+
+      // Only the owning user with permission to contribute data to the survey
+      // can create/update media under their own user path.
+      allow create, write: if isResourceOwner(userId) && canCollectData(surveyId);
+    }
+
+    match /user-media/surveys/{surveyId}/submissions/{allPaths=**} {
+      // Submission media paths carry no owner uid, so direct Storage reads are
+      // restricted to survey organizers or surveys that share all data with all
+      // participants; contributors read their own restricted photos via
+      // `/exportMedia`. Listing is never allowed.
+      allow get: if canViewAllData(surveyId);
+
+      // Only users with permission to contribute data to the survey can
+      // create/update submission media.
       allow create, write: if canCollectData(surveyId);
     }
   }
