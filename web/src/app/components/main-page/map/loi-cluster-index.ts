@@ -102,7 +102,11 @@ export class LoiClusterIndex {
         geometry: {
           type: 'Point',
           coordinates: [
-            (extent.west + extent.east) / 2,
+            extent.west <= extent.east
+              ? (extent.west + extent.east) / 2
+              : wrapLongitude(
+                  extent.west + (extent.east - extent.west + 360) / 2
+                ),
             (extent.south + extent.north) / 2,
           ],
         },
@@ -217,7 +221,7 @@ export function mergeExtents(
           east: Math.max(merged.east, extent.east),
           north: Math.max(merged.north, extent.north),
         }
-      : extent;
+      : { ...extent };
   }
   return merged;
 }
