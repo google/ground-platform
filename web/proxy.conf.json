@@ -11,6 +11,10 @@
     "target": "http://localhost:5001",
     "secure": false
   },
+  "/exportMedia": {
+    "target": "http://localhost:5001",
+    "secure": false
+  },
   "/sessionLogin": {
     "target": "http://localhost:5001",
     "secure": false
