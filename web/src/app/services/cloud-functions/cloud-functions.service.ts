@@ -48,7 +48,7 @@ export class CloudFunctionsService {
       task: taskId,
     });
     return this.httpClientService.getBlobWithAuth(
-      `${environment.cloudFunctionsUrl}/exportMedia?${params}`
+      `${environment.cloudFunctionsUrl}/exportMedia?${params.toString()}`
     );
   }
 
