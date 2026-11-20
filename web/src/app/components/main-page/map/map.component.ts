@@ -60,10 +60,9 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 /*global google*/
 
 const zoomedInLevel = 13;
-const zoomCutoff = 10;
-const normalPolygonStrokeWeight = 3;
-const enlargedPolygonStrokeWeight = 6;
-const highZoomPolygonStrokeWeight = 10;
+// Same as ground-android: 2dp outline, doubled when selected, at every zoom.
+const normalPolygonStrokeWeight = 2;
+const enlargedPolygonStrokeWeight = 4;
 
 @Component({
   selector: 'ground-map',
@@ -144,24 +143,6 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   ngOnChanges() {
     this.selectedJob$.next(this.selectedJob);
-  }
-
-  onZoomChange() {
-    const currentZoom = this.map.getZoom()!;
-
-    const newStrokeWeight =
-      currentZoom <= zoomCutoff
-        ? highZoomPolygonStrokeWeight
-        : normalPolygonStrokeWeight;
-
-    this.polygons?.forEach(polygons =>
-      polygons.forEach(polygon => {
-        if (!polygon.get('selected'))
-          polygon.setOptions({
-            strokeWeight: newStrokeWeight,
-          });
-      })
-    );
   }
 
   ngAfterViewInit() {
@@ -708,10 +689,9 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     const polygons = this.polygons.get(locationOfInterestId);
 
-    polygons?.forEach(polygon => {
-      polygon.set('selected', true);
-      polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight });
-    });
+    polygons?.forEach(polygon =>
+      polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight })
+    );
 
     this.fitMapToLocationsOfInterest(
       this.getLoisByIds(List([locationOfInterestId]))
@@ -725,12 +705,11 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       this.selectedLocationOfInterestId
     );
 
-    selectedPolygons?.forEach(polygon => {
-      polygon.set('selected', false);
+    selectedPolygons?.forEach(polygon =>
       polygon.setOptions({
         strokeWeight: normalPolygonStrokeWeight,
-      });
-    });
+      })
+    );
   }
 
   /**
