@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@angular/fire/firestore';
-import {toDocumentData} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {List, Map} from 'immutable';
+import { DocumentData } from '@angular/fire/firestore';
+import { toDocumentData } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { List, Map } from 'immutable';
 
-import {Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
+import { Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
@@ -32,8 +32,8 @@ import {
   Cardinality,
   MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
-import {TaskCondition} from 'app/models/task/task-condition.model';
-import {Task, TaskType} from 'app/models/task/task.model';
+import { TaskCondition } from 'app/models/task/task-condition.model';
+import { Task, TaskType } from 'app/models/task/task.model';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -100,7 +100,8 @@ export function dataSharingTypeToProto(type: DataSharingType) {
  */
 export function surveyToDocument(
   surveyId: string,
-  survey: Partial<Survey>
+  survey: Partial<Survey>,
+  auditInfo?: { created?: Pb.IAuditInfo; lastModified?: Pb.IAuditInfo }
 ): DocumentData {
   const {
     title: name,
@@ -117,8 +118,8 @@ export function surveyToDocument(
     new Pb.Survey({
       id: surveyId,
       name,
-      ...(description && {description}),
-      ...(acl && {acl: acl.map(role => roleToProtoRole(role)).toObject()}),
+      ...(description && { description }),
+      ...(acl && { acl: acl.map(role => roleToProtoRole(role)).toObject() }),
       ownerId,
       ...(dataSharingTerms && {
         dataSharingTerms: toDataSharingTermsMessage(dataSharingTerms),
@@ -130,6 +131,8 @@ export function surveyToDocument(
       dataVisibility: PB_DATA_VISIBILITY.get(
         dataVisibility || SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
       ),
+      ...(auditInfo?.created && { created: auditInfo.created }),
+      ...(auditInfo?.lastModified && { lastModified: auditInfo.lastModified }),
     })
   );
 }
@@ -138,16 +141,20 @@ export function surveyToDocument(
  * Returns the proto representation of a Job model object.
  */
 export function jobToDocument(job: Job): DocumentData {
-  const {id, index, name, color, tasks} = job;
+  const { id, index, name, color, tasks, enabledIntegrations } = job;
 
   return toDocumentData(
     new Pb.Job({
       id,
       index,
       name,
-      style: new Pb.Style({color}),
+      style: new Pb.Style({ color }),
       tasks: (tasks?.toList() ?? List())
         .map((task: Task) => toTaskMessage(task))
+        .toArray(),
+      enabledIntegrations: enabledIntegrations
+        .valueSeq()
+        .map(i => new Pb.Integration({ id: i.id }))
         .toArray(),
     })
   );
@@ -261,6 +268,7 @@ function toTaskConditionMessage(
             multipleChoice: new Pb.Task.MultipleChoiceSelection({
               optionIds: expression.optionIds.toArray(),
               taskId: expression.taskId,
+              otherSelected: expression.otherSelected,
             }),
           })
       )

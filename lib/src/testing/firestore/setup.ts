@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-import {Firestore} from '@google-cloud/firestore';
+import { Firestore } from '@google-cloud/firestore';
+import * as app from 'firebase-admin/app';
+import * as firestore from 'firebase-admin/firestore';
+
+let initializeAppSpy: jasmine.Spy;
 
 export function stubAdminApi(mockFirestore: Firestore) {
-  spyOn(require('firebase-admin'), 'initializeApp').and.returnValue({
+  const stubbedApp = {
     firestore: () => mockFirestore,
-  });
-  spyOn(require('firebase-admin/firestore'), 'getFirestore').and.returnValue(
-    mockFirestore
+  } as unknown as app.App;
+
+  initializeAppSpy = spyOnProperty(app, 'initializeApp', 'get').and.returnValue(
+    () => stubbedApp
+  );
+
+  spyOn(firestore, 'getFirestore').and.returnValue(
+    mockFirestore as unknown as firestore.Firestore
   );
 }
 
 export function resetSpies() {
-  require('firebase-admin').initializeApp.and.callThrough();
-  require('firebase-admin/firestore').getFirestore.and.callThrough();
+  initializeAppSpy?.and.callThrough();
+  (firestore.getFirestore as jasmine.Spy).and.callThrough();
 }

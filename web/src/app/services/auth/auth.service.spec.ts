@@ -14,35 +14,83 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {AngularFireFunctions} from '@angular/fire/compat/functions';
-import {Router} from '@angular/router';
-import {NEVER, of} from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import {
+  Auth,
+  User as FirebaseUser,
+  getAuth,
+  provideAuth,
+} from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
+import { Functions } from '@angular/fire/functions';
+import { Router } from '@angular/router';
+import { of } from 'rxjs';
 
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { User, UserType } from 'app/models/user.model';
+import { environment } from 'environments/environment';
 
-import {HttpClientService} from '../http-client/http-client.service';
+import { CloudFunctionsService } from '../cloud-functions/cloud-functions.service';
+import { SESSION_COOKIE_DURATION_MS } from '@ground/lib';
+
+const SESSION_COOKIE_EXPIRES_AT_KEY = 'sessionCookieExpiresAt';
+
+/** Providers shared by all describe blocks that use a mock Auth. */
+function mockAuthProviders(
+  mockAuth: Partial<Auth>,
+  sessionLoginSpy: jasmine.Spy
+) {
+  return [
+    { provide: Auth, useValue: mockAuth },
+    { provide: Firestore, useValue: {} },
+    {
+      provide: DataStoreService,
+      useValue: {
+        user$: () =>
+          of({
+            id: 'user-1',
+            email: 'test@test.com',
+            displayName: 'Test User',
+            isAuthenticated: true,
+          } as User),
+      },
+    },
+    { provide: Router, useValue: { events: of() } },
+    {
+      provide: CloudFunctionsService,
+      useValue: {
+        sessionLogin: sessionLoginSpy,
+        profileRefresh: jasmine.createSpy('profileRefresh').and.resolveTo(),
+      },
+    },
+  ];
+}
+
+/** Returns a minimal Auth mock where onAuthStateChanged is a no-op. */
+function createMockAuth(onIdTokenChanged: jasmine.Spy): Partial<Auth> {
+  return {
+    onIdTokenChanged,
+    onAuthStateChanged: jasmine
+      .createSpy('onAuthStateChanged')
+      .and.returnValue(() => {}),
+  };
+}
 
 describe('AuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [],
       providers: [
-        {provide: AngularFirestore, useValue: {}},
-        {provide: AngularFireFunctions, useValue: {}},
-        {
-          provide: AngularFireAuth,
-          useValue: {
-            authState: NEVER,
-            onIdTokenChanged: (callback: Function) => callback(null),
-          },
-        },
-        {provide: DataStoreService, useValue: {user$: () => of()}},
-        {provide: Router, useValue: {events: of()}},
-        {provide: HttpClientService, useValue: {}},
+        provideFirebaseApp(() =>
+          initializeApp({ appId: '123', apiKey: '123' })
+        ),
+        provideAuth(() => getAuth()),
+        { provide: Firestore, useValue: {} },
+        { provide: DataStoreService, useValue: { user$: () => of() } },
+        { provide: Router, useValue: { events: of() } },
+        { provide: CloudFunctionsService, useValue: {} },
       ],
     });
   });
@@ -50,5 +98,160 @@ describe('AuthService', () => {
   it('should be created', () => {
     const service: AuthService = TestBed.inject(AuthService);
     expect(service).toBeTruthy();
+  });
+});
+
+describe('AuthService createSessionCookie()', () => {
+  let service: AuthService;
+  let sessionLoginSpy: jasmine.Spy;
+  const futureExpiry = Date.now() + SESSION_COOKIE_DURATION_MS;
+
+  beforeEach(() => {
+    localStorage.clear();
+
+    sessionLoginSpy = jasmine
+      .createSpy('sessionLogin')
+      .and.resolveTo({ expiresAt: futureExpiry });
+
+    const mockAuth = createMockAuth(
+      jasmine.createSpy('onIdTokenChanged').and.returnValue(() => {})
+    );
+
+    TestBed.configureTestingModule({
+      providers: mockAuthProviders(mockAuth, sessionLoginSpy),
+    });
+
+    service = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => localStorage.clear());
+
+  it('calls sessionLogin and persists expiresAt in localStorage on first call', async () => {
+    await service.createSessionCookie();
+
+    expect(sessionLoginSpy).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY)).toBe(
+      String(futureExpiry)
+    );
+  });
+
+  it('skips sessionLogin when a valid cookie already exists in localStorage', async () => {
+    localStorage.setItem(SESSION_COOKIE_EXPIRES_AT_KEY, String(futureExpiry));
+
+    await service.createSessionCookie();
+
+    expect(sessionLoginSpy).not.toHaveBeenCalled();
+  });
+
+  it('calls sessionLogin again when the stored cookie has expired', async () => {
+    localStorage.setItem(SESSION_COOKIE_EXPIRES_AT_KEY, String(Date.now() - 1));
+
+    await service.createSessionCookie();
+
+    expect(sessionLoginSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls sessionLogin when the stored cookie expires within the refresh buffer', async () => {
+    const expiresWithinBuffer = Date.now() + 60 * 1000; // 1 minute from now, within the 5-minute buffer
+    localStorage.setItem(
+      SESSION_COOKIE_EXPIRES_AT_KEY,
+      String(expiresWithinBuffer)
+    );
+
+    await service.createSessionCookie();
+
+    expect(sessionLoginSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('AuthService session cookie invalidation', () => {
+  let service: AuthService;
+  let capturedIdTokenCallback: (user: FirebaseUser | null) => void;
+
+  beforeEach(() => {
+    localStorage.setItem(
+      SESSION_COOKIE_EXPIRES_AT_KEY,
+      String(Date.now() + SESSION_COOKIE_DURATION_MS)
+    );
+
+    const onIdTokenChangedSpy = jasmine
+      .createSpy('onIdTokenChanged')
+      .and.callFake((cb: (user: FirebaseUser | null) => void) => {
+        capturedIdTokenCallback = cb;
+        return () => {};
+      });
+
+    const mockAuth = createMockAuth(onIdTokenChangedSpy);
+
+    TestBed.configureTestingModule({
+      providers: mockAuthProviders(mockAuth, jasmine.createSpy('sessionLogin')),
+    });
+
+    service = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => localStorage.clear());
+
+  it('clears localStorage entry when user signs out', () => {
+    expect(localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY)).not.toBeNull();
+
+    capturedIdTokenCallback!(null);
+
+    expect(localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY)).toBeNull();
+  });
+
+  it('preserves localStorage entry on token refresh for the same user', () => {
+    // Spy on callProfileRefresh to prevent it from calling httpsCallable with
+    // the mock Functions instance, which would fail with a missing _url error.
+    spyOn(service, 'callProfileRefresh').and.resolveTo();
+
+    capturedIdTokenCallback!({ uid: 'user-1' } as FirebaseUser);
+
+    expect(localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY)).not.toBeNull();
+  });
+});
+
+describe('AuthService isAdmin()', () => {
+  let service: AuthService;
+
+  beforeEach(() => {
+    const mockAuth = createMockAuth(
+      jasmine.createSpy('onIdTokenChanged').and.returnValue(() => {})
+    );
+
+    TestBed.configureTestingModule({
+      providers: mockAuthProviders(mockAuth, jasmine.createSpy('sessionLogin')),
+    });
+
+    service = TestBed.inject(AuthService);
+  });
+
+  it('returns true when current user has ADMIN userType', () => {
+    service['currentUser'] = new User(
+      'uid',
+      'admin@example.com',
+      true,
+      'Admin',
+      undefined,
+      UserType.ADMIN
+    );
+    expect(service.isAdmin()).toBeTrue();
+  });
+
+  it('returns false when current user has UNDEFINED userType', () => {
+    service['currentUser'] = new User(
+      'uid',
+      'user@example.com',
+      true,
+      'User',
+      undefined,
+      UserType.UNDEFINED
+    );
+    expect(service.isAdmin()).toBeFalse();
+  });
+
+  it('returns false when current user has no userType', () => {
+    service['currentUser'] = new User('uid', 'user@example.com', true);
+    expect(service.isAdmin()).toBeFalse();
   });
 });

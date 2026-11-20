@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
 // To make ESLint happy:
 /*global btoa*/
@@ -23,30 +23,86 @@ import {Injectable} from '@angular/core';
   providedIn: 'root',
 })
 export class GroundPinService {
-  renderPin(options: {color?: string; text?: string}): string {
-    const {color = GroundPinService.defaultIconColor, text} = options;
+  /** Data URLs of pins without text, keyed by color. */
+  private readonly pinImageSources = new Map<string, string>();
 
+  renderPin(options: { color?: string; text?: string }): string {
+    const { text } = options;
+    // Job colors come from Firestore and are not validated there. The result is
+    // inserted into markup (`innerHTML` or a data URL), so never use it as is.
+    const color = GroundPinService.sanitizeColor(options.color);
+
+    // Replacer functions keep `$` in values from being read as replacement
+    // patterns.
     return GroundPinService.svgTemplate
-      .replace('{{ color }}', color)
-      .replace('{{ glyphColor }}', text ? color : 'white')
-      .replace('{{ text }}', text || '');
+      .replace('{{ color }}', () => color)
+      .replace('{{ glyphColor }}', () => (text ? color : 'white'))
+      .replace('{{ text }}', () => GroundPinService.escapeHtml(text || ''));
+  }
+
+  /** Returns `color` if it is a hex color, or the default color otherwise. */
+  private static sanitizeColor(color?: string): string {
+    return color && GroundPinService.hexColorPattern.test(color)
+      ? color
+      : GroundPinService.defaultIconColor;
+  }
+
+  private static escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   getPinImageSource(color?: string): string {
-    return GroundPinService.urlPrefix + btoa(this.renderPin({color}));
+    const key = color ?? '';
+    let source = this.pinImageSources.get(key);
+    if (!source) {
+      source = GroundPinService.urlPrefix + btoa(this.renderPin({ color }));
+      this.pinImageSources.set(key, source);
+    }
+    return source;
   }
 
-  getPinImageSvgElement(color: string, text?: string): Element {
-    const svgMarker = document.createElement('div');
-    svgMarker.innerHTML = this.renderPin({color, text});
-    svgMarker.style.transform = 'scale(1.5)';
-    return svgMarker;
+  /**
+   * Creates the element shown by a map marker.
+   *
+   * Pins without text are rendered as an image, so the browser decodes the SVG
+   * (and its filters) once per color and shares it across all pins, instead of
+   * parsing and painting a separate inline SVG for each one. This matters for
+   * surveys with thousands of LOIs. Pins with text keep an inline SVG, since
+   * text inside an image can't use the page font.
+   */
+  createPinElement(color: string, text?: string): Element {
+    const pin = document.createElement('div');
+    if (text) {
+      pin.innerHTML = this.renderPin({ color, text });
+    } else {
+      const image = document.createElement('img');
+      image.src = this.getPinImageSource(color);
+      image.width = GroundPinService.pinWidth;
+      image.height = GroundPinService.pinHeight;
+      image.alt = '';
+      // Prevents the browser's native image drag from interfering with map
+      // panning and marker dragging.
+      image.draggable = false;
+      pin.appendChild(image);
+    }
+    pin.style.transform = 'scale(1.5)';
+    return pin;
   }
 
   public static urlPrefix = 'data:image/svg+xml;charset=UTF-8;base64,';
-  private static defaultIconColor = 'red';
-  private static svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  private static defaultIconColor = '#ff0000';
+  /** `#RGB`, `#RGBA`, `#RRGGBB` or `#RRGGBBAA`. */
+  private static hexColorPattern =
+    /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+  /** Size of the SVG pin, as declared in `svgTemplate`. */
+  private static pinWidth = 22;
+  private static pinHeight = 24;
+  private static svgTemplate = `<svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <filter x="-37.5%" y="-60.0%" width="175.0%" height="220.0%" filterUnits="objectBoundingBox" id="filter-1">
             <feGaussianBlur stdDeviation="0.666666667" in="SourceGraphic"></feGaussianBlur>

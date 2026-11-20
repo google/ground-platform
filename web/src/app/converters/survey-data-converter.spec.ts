@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {GroundProtos} from '@ground/proto';
+import { GroundProtos } from '@ground/proto';
 
-import {Role} from 'app/models/role.model';
+import { Role } from 'app/models/role.model';
 
-import {MODEL_ROLES} from './survey-data-converter';
+import { MODEL_ROLES } from './survey-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
 

@@ -25,7 +25,6 @@ import {
   SURVEY_TITLE,
   TEST_TIMEOUT,
   WEB_URL,
-  USER,
 } from '../test-config.js';
 
 // Increase default timeout.

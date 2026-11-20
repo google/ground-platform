@@ -15,14 +15,14 @@
  */
 
 import cors from 'cors';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import {https, Response} from 'firebase-functions';
-import {getDecodedIdToken} from './common/auth';
-import {INTERNAL_SERVER_ERROR, UNAUTHORIZED} from 'http-status-codes';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { HttpsOptions, Request, onRequest } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import { getDecodedIdToken } from './common/auth';
 import cookieParser from 'cookie-parser';
-import HttpStatus from 'http-status-codes';
 
-const corsOptions = {origin: true};
+const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
 
 /** Token to be used when running on local emulator for debugging. */
@@ -30,7 +30,7 @@ export class EmulatorIdToken implements DecodedIdToken {
   aud = '';
   auth_time = 0;
   exp = 0;
-  firebase = {identities: {}, sign_in_provider: ''};
+  firebase = { identities: {}, sign_in_provider: '' };
   iat = 0;
   iss = '';
   sub = '';
@@ -42,7 +42,7 @@ export class EmulatorIdToken implements DecodedIdToken {
  * Sends an UNAUTHORIZED HTTP response code if not present or invalid.
  */
 async function requireIdToken(
-  req: https.Request,
+  req: Request,
   res: Response,
   next: (decodedIdToken: DecodedIdToken) => Promise<any>
 ): Promise<any> {
@@ -54,17 +54,19 @@ async function requireIdToken(
   if (token) {
     return next(token);
   } else {
-    return res.status(UNAUTHORIZED).send('Unauthorized');
+    return res.status(StatusCodes.UNAUTHORIZED).send('Unauthorized');
   }
 }
 
 function onError(res: any, err: any) {
   console.error(err);
-  res.status(INTERNAL_SERVER_ERROR).end(`Internal error: ${err.message}`);
+  res
+    .status(StatusCodes.INTERNAL_SERVER_ERROR)
+    .end(`Internal error: ${err.message}`);
 }
 
 export type HttpsRequestHandler = (
-  req: https.Request,
+  req: Request,
   res: Response,
   idToken: DecodedIdToken
 ) => Promise<any>;
@@ -72,8 +74,11 @@ export type HttpsRequestHandler = (
 /**
  * A synchronous HTTPS request handler. The HTTPS request is closed as soon as the handler resolves.
  */
-export function onHttpsRequest(handler: HttpsRequestHandler) {
-  return https.onRequest((req: https.Request, res: Response) =>
+export function onHttpsRequest(
+  handler: HttpsRequestHandler,
+  options: HttpsOptions = {}
+) {
+  return onRequest(options, (req: Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
         req as any,
@@ -101,7 +106,7 @@ export type ErrorHandler = (httpStatusCode: number, message: string) => void;
  * callbacks are invoked.
  */
 export type HttpsRequestCallback = (
-  req: https.Request,
+  req: Request,
   res: Response<any>,
   user: DecodedIdToken,
   done: () => void,
@@ -110,7 +115,7 @@ export type HttpsRequestCallback = (
 
 export async function invokeCallbackAsync(
   callback: HttpsRequestCallback,
-  req: https.Request,
+  req: Request,
   res: Response<any>,
   user: DecodedIdToken
 ) {
@@ -121,7 +126,7 @@ export async function invokeCallbackAsync(
       res,
       user,
       () => {
-        res.status(HttpStatus.OK).end();
+        res.status(StatusCodes.OK).end();
         resolve(undefined);
       },
       (errorCode: number, message: string) => {
@@ -134,7 +139,7 @@ export async function invokeCallbackAsync(
 
 function invokeCallback(
   callback: HttpsRequestCallback,
-  req: https.Request,
+  req: Request,
   res: Response<any>,
   user: DecodedIdToken,
   done: () => void,
@@ -144,7 +149,7 @@ function invokeCallback(
     callback(req, res, user, done, error);
   } catch (e: any) {
     console.error('Unhandled exception', e);
-    error(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+    error(StatusCodes.INTERNAL_SERVER_ERROR, e.toString());
   }
 }
 
@@ -154,8 +159,11 @@ function invokeCallback(
  * work is completed, but the HTTPS request will not complete until one of those two
  * callbacks are invoked.
  */
-export function onHttpsRequestAsync(callback: HttpsRequestCallback) {
-  return https.onRequest((req: https.Request, res: Response) =>
+export function onHttpsRequestAsync(
+  callback: HttpsRequestCallback,
+  options: HttpsOptions = {}
+) {
+  return onRequest(options, (req: Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
         req as any,

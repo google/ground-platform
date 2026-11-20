@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Inject, Injectable, inject} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
+import { Component, Inject, Injectable, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle,
@@ -37,18 +36,19 @@ export interface DialogData {
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions>
-      <button mat-button (click)="onClose()">No</button>
-      <button mat-button (click)="onConfirm()">Yes</button>
+      <button mat-button (click)="onClose()" i18n="@@app.labels.no">No</button>
+      <button mat-button (click)="onConfirm()">
+        <span i18n="@@app.labels.yes">Yes</span>
+      </button>
     </mat-dialog-actions>
   `,
-  standalone: true,
   imports: [
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    MatDialogClose,
     MatButtonModule,
+    MatDialogActions,
+    MatDialogContent,
+    MatDialogTitle,
   ],
+  standalone: true,
 })
 export class ConfirmationDialogComponent {
   constructor(

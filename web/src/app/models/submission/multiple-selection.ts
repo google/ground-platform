@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {List} from 'immutable';
+import { List } from 'immutable';
 
 export class MultipleSelection {
   constructor(

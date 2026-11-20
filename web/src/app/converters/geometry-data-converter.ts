@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {GroundProtos} from '@ground/proto';
-import {List} from 'immutable';
+import { GroundProtos } from '@ground/proto';
+import { List } from 'immutable';
 
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Geometry} from 'app/models/geometry/geometry';
-import {LinearRing} from 'app/models/geometry/linear-ring';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {Point} from 'app/models/geometry/point';
-import {Polygon} from 'app/models/geometry/polygon';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Geometry } from 'app/models/geometry/geometry';
+import { LinearRing } from 'app/models/geometry/linear-ring';
+import { MultiPolygon } from 'app/models/geometry/multi-polygon';
+import { Point } from 'app/models/geometry/point';
+import { Polygon } from 'app/models/geometry/polygon';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -63,6 +63,6 @@ function linearRingPbToModel(pb: Pb.ILinearRing): LinearRing {
 }
 
 export function coordinatesPbToModel(pb: Pb.ICoordinates): Coordinate {
-  if (!pb.longitude || !pb.latitude) throw new Error(`Incomplete coordinate`);
+  if (!pb.longitude || !pb.latitude) throw new Error('Incomplete coordinate');
   return new Coordinate(pb.longitude, pb.latitude);
 }

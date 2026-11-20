@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {DecodedIdToken, getAuth} from 'firebase-admin/auth';
-import {DocumentSnapshot} from 'firebase-admin/firestore';
-import {https, Response} from 'firebase-functions/v1';
-import {EmulatorIdToken} from '../handlers';
-import {GroundProtos} from '@ground/proto';
-import {registry} from '@ground/lib';
+import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
+import { DocumentSnapshot } from 'firebase-admin/firestore';
+import { Request } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
+import { EmulatorIdToken } from '../handlers';
+import { GroundProtos } from '@ground/proto';
+import { SESSION_COOKIE_DURATION_MS, registry } from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
 const s = registry.getFieldIds(Pb.Survey);
@@ -34,7 +35,7 @@ export const DATA_COLLECTOR_ROLE = Pb.Role.DATA_COLLECTOR;
  * Returns the encoded auth token from the "Authorization: Bearer" HTTP header
  * if present, or `undefined` if not.
  */
-export function getAuthBearer(req: https.Request): string | undefined {
+export function getAuthBearer(req: Request): string | undefined {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.split('Bearer ')[1];
@@ -47,12 +48,12 @@ export function getAuthBearer(req: https.Request): string | undefined {
  * Verifies and returns the decoded user details from the `Authorization` header or session cookie.
  */
 export async function getDecodedIdToken(
-  req: https.Request
+  req: Request
 ): Promise<DecodedIdToken | undefined> {
   const idToken = getAuthBearer(req);
   if (idToken) {
     return getAuth().verifyIdToken(idToken);
-  } else if (req.cookies) {
+  } else if (req.cookies?.[SESSION_COOKIE_NAME]) {
     return await getAuth().verifySessionCookie(
       req.cookies[SESSION_COOKIE_NAME],
       true /** checkRevoked */
@@ -64,19 +65,22 @@ export async function getDecodedIdToken(
 
 /**
  * Generates and sets a session cookie for the current user into the provided response.
+ * Returns the absolute expiry timestamp (ms since epoch) of the created cookie.
  */
 export async function setSessionCookie(
-  req: https.Request,
+  req: Request,
   res: Response
-): Promise<void> {
+): Promise<number> {
   const token = getAuthBearer(req);
-  const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-  const cookie = await getAuth().createSessionCookie(token!, {expiresIn});
+  const expiresIn = SESSION_COOKIE_DURATION_MS;
+  const cookie = await getAuth().createSessionCookie(token!, { expiresIn });
+  const expiresAt = Date.now() + expiresIn;
   res.cookie(SESSION_COOKIE_NAME, cookie, {
     maxAge: expiresIn,
     httpOnly: true,
     secure: true,
   });
+  return expiresAt;
 }
 
 function isEmulatorIdToken(user: DecodedIdToken): boolean {

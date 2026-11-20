@@ -32,7 +32,7 @@ message Geometry {
 
     // A polygon geometry.
     Polygon polygon = 2;
-    
+
     // A multi-polygon geometry.
     MultiPolygon multi_polygon = 3;
   }

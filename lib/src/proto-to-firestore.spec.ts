@@ -1,22 +1,22 @@
 /**
  * Copyright 2024 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-import {registry} from './message-registry';
-import {GroundProtos} from '@ground/proto';
-import {toDocumentData} from './proto-to-firestore';
+import { registry } from './message-registry';
+import { GroundProtos } from '@ground/proto';
+import { toDocumentData } from './proto-to-firestore';
 
 import Pb = GroundProtos.ground.v1beta1;
 const s = registry.getFieldIds(Pb.Survey);
@@ -27,7 +27,7 @@ const t = registry.getFieldIds(Pb.Task);
 const st = registry.getFieldIds(Pb.Style);
 const dtq = registry.getFieldIds(Pb.Task.DateTimeQuestion);
 
-const {Job, Role, Style, Survey, Task, LinearRing, Coordinates} =
+const { Job, Role, Style, Survey, Task, LinearRing, Coordinates } =
   GroundProtos.ground.v1beta1;
 
 describe('toDocumentData()', () => {
@@ -43,34 +43,34 @@ describe('toDocumentData()', () => {
         [s.description]: 'Survey desc',
         [s.state]: Survey.State.STATE_UNSPECIFIED,
         [s.generalAccess]: Survey.GeneralAccess.GENERAL_ACCESS_UNSPECIFIED,
-        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED
+        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED,
       },
     },
     {
       desc: 'converts repeated message',
       input: new LinearRing({
         coordinates: [
-          new Coordinates({latitude: 5, longitude: 7}),
-          new Coordinates({latitude: 12, longitude: 23}),
-          new Coordinates({latitude: 9, longitude: 2}),
+          new Coordinates({ latitude: 5, longitude: 7 }),
+          new Coordinates({ latitude: 12, longitude: 23 }),
+          new Coordinates({ latitude: 9, longitude: 2 }),
         ],
       }),
       expected: {
         [lr.coordinates]: [
-          {[c.latitude]: 5, [c.longitude]: 7},
-          {[c.latitude]: 12, [c.longitude]: 23},
-          {[c.latitude]: 9, [c.longitude]: 2},
+          { [c.latitude]: 5, [c.longitude]: 7 },
+          { [c.latitude]: 12, [c.longitude]: 23 },
+          { [c.latitude]: 9, [c.longitude]: 2 },
         ],
       },
     },
     {
       desc: 'converts nested message',
       input: new Job({
-        style: new Style({color: '#112233'}),
+        style: new Style({ color: '#112233' }),
       }),
       expected: {
         [j.index]: 0,
-        [j.style]: {[st.color]: '#112233'},
+        [j.style]: { [st.color]: '#112233' },
       },
     },
     {
@@ -88,7 +88,7 @@ describe('toDocumentData()', () => {
         },
         [s.state]: Survey.State.STATE_UNSPECIFIED,
         [s.generalAccess]: Survey.GeneralAccess.GENERAL_ACCESS_UNSPECIFIED,
-        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED
+        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED,
       },
     },
     {
@@ -113,16 +113,16 @@ describe('toDocumentData()', () => {
       desc: 'converts repeated message',
       input: new LinearRing({
         coordinates: [
-          new Coordinates({latitude: 5, longitude: 7}),
-          new Coordinates({latitude: 12, longitude: 23}),
-          new Coordinates({latitude: 9, longitude: 2}),
+          new Coordinates({ latitude: 5, longitude: 7 }),
+          new Coordinates({ latitude: 12, longitude: 23 }),
+          new Coordinates({ latitude: 9, longitude: 2 }),
         ],
       }),
       expected: {
         [lr.coordinates]: [
-          {[c.latitude]: 5, [c.longitude]: 7},
-          {[c.latitude]: 12, [c.longitude]: 23},
-          {[c.latitude]: 9, [c.longitude]: 2},
+          { [c.latitude]: 5, [c.longitude]: 7 },
+          { [c.latitude]: 12, [c.longitude]: 23 },
+          { [c.latitude]: 9, [c.longitude]: 2 },
         ],
       },
     },
@@ -137,13 +137,63 @@ describe('toDocumentData()', () => {
         [t.index]: 0,
         [t.required]: false,
         [t.level]: 0,
-        [t.textQuestion]: {'1': 1},
+        [t.textQuestion]: { '1': 1 },
       },
     },
-  ].forEach(({desc, input, expected}) =>
+  ].forEach(({ desc, input, expected }) =>
     it(desc, () => {
       const output = toDocumentData(input);
       expect(output).toEqual(expected);
     })
   );
+
+  it('returns empty object for message with no fields set', () => {
+    expect(toDocumentData({})).toEqual({});
+  });
+
+  it('logs and drops fields whose value has an unsupported type', () => {
+    const errorSpy = spyOn(console, 'error');
+    const survey = new Survey({ name: 'Survey name' });
+    (survey as any).description = () => 'not a string'; // function is unsupported
+    const output = toDocumentData(survey);
+    expect(output).toEqual({
+      [s.name]: 'Survey name',
+      [s.state]: Survey.State.STATE_UNSPECIFIED,
+      [s.generalAccess]: Survey.GeneralAccess.GENERAL_ACCESS_UNSPECIFIED,
+      [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED,
+    });
+    expect(errorSpy).toHaveBeenCalledWith(jasmine.any(Error));
+  });
+
+  it('drops fields whose value is empty string', () => {
+    const output = toDocumentData(
+      new Survey({ name: '', description: 'desc' })
+    );
+    expect(output).toEqual({
+      [s.description]: 'desc',
+      [s.state]: Survey.State.STATE_UNSPECIFIED,
+      [s.generalAccess]: Survey.GeneralAccess.GENERAL_ACCESS_UNSPECIFIED,
+      [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED,
+    });
+  });
+
+  it('recursively converts array input', () => {
+    const output = toDocumentData([
+      new Coordinates({ latitude: 1, longitude: 2 }),
+      new Coordinates({ latitude: 3, longitude: 4 }),
+    ]);
+    expect(output).toEqual([
+      { [c.latitude]: 1, [c.longitude]: 2 },
+      { [c.latitude]: 3, [c.longitude]: 4 },
+    ]);
+  });
+
+  it('throws when message type is not registered', () => {
+    class UnknownMessage {
+      foo = 'bar';
+    }
+    expect(() => toDocumentData(new UnknownMessage())).toThrowError(
+      /Unknown message type UnknownMessage/
+    );
+  });
 });

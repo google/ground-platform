@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {SideNavMode} from './navigation.service';
+export enum SideNavMode {
+  JOB_LIST = 1,
+  SUBMISSION = 2,
+}
 
 export class UrlParams {
-  public sideNavMode: SideNavMode;
+  public sideNavMode: SideNavMode | null;
 
   constructor(
     readonly surveyId: string | null,
@@ -27,8 +30,10 @@ export class UrlParams {
   ) {
     if (this.submissionId) {
       this.sideNavMode = SideNavMode.SUBMISSION;
-    } else {
+    } else if (this.loiId) {
       this.sideNavMode = SideNavMode.JOB_LIST;
+    } else {
+      this.sideNavMode = null;
     }
   }
 }

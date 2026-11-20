@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@angular/fire/firestore';
-import {timestampToInt, toMessage} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {List, Map} from 'immutable';
+import { DocumentData } from '@angular/fire/firestore';
+import { timestampToInt, toMessage } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { List, Map } from 'immutable';
 
-import {AuditInfo} from 'app/models/audit-info.model';
-import {Geometry} from 'app/models/geometry/geometry';
-import {Point} from 'app/models/geometry/point';
-import {Polygon} from 'app/models/geometry/polygon';
-import {Job} from 'app/models/job.model';
-import {MultipleSelection} from 'app/models/submission/multiple-selection';
-import {Result} from 'app/models/submission/result.model';
+import { AuditInfo } from 'app/models/audit-info.model';
+import { Geometry } from 'app/models/geometry/geometry';
+import { Point } from 'app/models/geometry/point';
+import { Job } from 'app/models/job.model';
+import { MultipleSelection } from 'app/models/submission/multiple-selection';
+import { Result } from 'app/models/submission/result.model';
 import {
   Submission,
   SubmissionData,
 } from 'app/models/submission/submission.model';
-import {User} from 'app/models/user.model';
+import { User } from 'app/models/user.model';
 
 import {
   coordinatesPbToModel,
@@ -48,7 +47,7 @@ function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
 }
 
 function taskDataPbArrayToModel(pb: Pb.ITaskData[]): SubmissionData {
-  const submissionData: {[k: string]: Result} = {};
+  const submissionData: { [k: string]: Result } = {};
 
   pb.forEach(taskData => {
     const result = taskDataPbToModel(taskData);
@@ -57,7 +56,7 @@ function taskDataPbArrayToModel(pb: Pb.ITaskData[]): SubmissionData {
     }
   });
 
-  return Map(submissionData);
+  return Map(Object.entries(submissionData));
 }
 
 function taskDataPbToModel(taskData: Pb.ITaskData): Result | null {
@@ -102,12 +101,19 @@ function taskDataPbToModelValue(
   else if (dateTimeResponse)
     return new Date(timestampToInt(dateTimeResponse.dateTime));
   else if (multipleChoiceResponses) {
-    const {selectedOptionIds, otherText} = multipleChoiceResponses;
+    const { selectedOptionIds, otherText } = multipleChoiceResponses;
 
     return new MultipleSelection(List(selectedOptionIds || []), otherText);
-  } else if (drawGeometryResult)
-    return geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
-  else if (captureLocationResult)
+  } else if (drawGeometryResult) {
+    const geometry = geometryPbToModel(drawGeometryResult.geometry!);
+    if (!(geometry instanceof Point)) return geometry;
+    // Points captured at the device location also carry accuracy and altitude.
+    return new Point(
+      geometry.coord,
+      drawGeometryResult.accuracy || undefined,
+      drawGeometryResult.altitude || undefined
+    );
+  } else if (captureLocationResult)
     return new Point(
       coordinatesPbToModel(captureLocationResult.coordinates!),
       captureLocationResult.accuracy || undefined,
@@ -122,15 +128,25 @@ export function submissionDocToModel(
   id: string,
   data: DocumentData
 ): Submission | Error {
-  const pb = toMessage(data, Pb.Submission) as Pb.Submission;
-  if (!pb.jobId) return Error(`Missing job_id in submission ${id}`);
-  if (!pb.loiId) return Error(`Missing loi_id in loi ${id}`);
-  return new Submission(
-    id,
-    pb.loiId,
-    job,
-    authInfoPbToModel(pb.created!),
-    authInfoPbToModel(pb.lastModified!),
-    taskDataPbArrayToModel(pb.taskData)
-  );
+  try {
+    const pbOrError = toMessage(data, Pb.Submission);
+    if (pbOrError instanceof Error) throw pbOrError;
+    const pb = pbOrError;
+    if (!pb.jobId) return Error(`Missing job_id in submission ${id}`);
+    if (!pb.loiId) return Error(`Missing loi_id in loi ${id}`);
+    if (!pb.created)
+      return Error(`Missing created audit info in submission ${id}`);
+    if (!pb.lastModified)
+      return Error(`Missing last_modified audit info in submission ${id}`);
+    return new Submission(
+      id,
+      pb.loiId,
+      job,
+      authInfoPbToModel(pb.created),
+      authInfoPbToModel(pb.lastModified),
+      taskDataPbArrayToModel(pb.taskData)
+    );
+  } catch (e) {
+    return new Error(`Invalid submission data for ${id}`, { cause: e });
+  }
 }

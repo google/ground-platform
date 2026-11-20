@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
-import {Router} from '@angular/router';
-import {of} from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { of } from 'rxjs';
 
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+
+import { DataStoreService } from '../data-store/data-store.service';
 
 describe('NavigationService', () => {
   let service: NavigationService;
@@ -33,8 +35,15 @@ describe('NavigationService', () => {
     });
 
     TestBed.configureTestingModule({
-      providers: [{provide: Router, useValue: routerSpy}],
+      providers: [
+        {
+          provide: DataStoreService,
+          useValue: { getAccessDeniedMessage: () => '' },
+        },
+        { provide: Router, useValue: routerSpy },
+      ],
     });
+
     service = TestBed.inject(NavigationService);
   });
 
@@ -48,6 +57,23 @@ describe('NavigationService', () => {
 
     expect(routerSpy.navigateByUrl).toHaveBeenCalledOnceWith(
       'survey/survey123/edit/survey'
+    );
+  });
+
+  it('side panel is expanded by default and toggles on each click', () => {
+    expect(service.getSidePanelExpanded()).toBeTrue();
+
+    service.onClickSidePanelButton();
+    expect(service.getSidePanelExpanded()).toBeFalse();
+
+    service.onClickSidePanelButton();
+    expect(service.getSidePanelExpanded()).toBeTrue();
+  });
+
+  it('getPlayStoreUrl carries the survey id in the install referrer', () => {
+    expect(service.getPlayStoreUrl('org.ground.app', 'survey123')).toBe(
+      'https://play.google.com/store/apps/details?id=org.ground.app' +
+        '&referrer=survey_id%3Dsurvey123'
     );
   });
 });

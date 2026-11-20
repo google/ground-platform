@@ -1,0 +1,82 @@
+<!--
+  Copyright 2023 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<div class="survey-details-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title i18n="@@app.cards.surveyDetails.title">Survey name and description</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="edit-survey-details">
+        <survey-details
+          #surveyDetails
+          [title]="survey?.title"
+          [description]="survey?.description"
+          (onValueChanges)="onDetailsChange($event)"
+        ></survey-details>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="survey?.dataSharingTerms as terms">
+    <mat-card-header>
+      <mat-card-title i18n="@@app.cards.dataSharingAgreement.title">Data sharing agreement</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div [innerHtml]="dataSharingTermsDetails.description"></div>
+
+      <div *ngIf="dataSharingTermsDetails.customText as customText">
+        <div class="card-subtitle" i18n="@@app.labels.customTerms">Custom terms</div>
+
+        <p>{{ customText }}</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <div class="floating-button">
+      <button id="copy-survey-button" mat-stroked-button (click)="openCopySurveyDialog()">
+        <span i18n="@@app.labels.copySurvey">Copy survey</span>
+      </button>
+    </div>
+
+    <mat-card-header>
+      <mat-card-title i18n="@@app.cards.copySurvey.title">Copy survey</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div i18n="@@app.cards.copySurvey.description">Copies jobs and tasks in this survey. Data collection sites and submission data are not copied.</div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <div class="floating-button">
+      <button class="delete-survey-button" id="delete-survey-button" mat-stroked-button (click)="openDeleteSurveyDialog()">
+        <span i18n="@@app.labels.deleteSurvey">Delete survey</span>
+      </button>
+    </div>
+
+    <mat-card-header>
+      <mat-card-title i18n="@@app.cards.deleteSurvey.title">Delete survey</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div i18n="@@app.cards.deleteSurvey.description">Permanently delete survey and associated data</div>
+    </mat-card-content>
+  </mat-card>
+</div>

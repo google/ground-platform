@@ -1,0 +1,69 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin color($theme) {
+  .page {
+    background-color: mat.get-theme-color($theme, surface-container);
+  }
+
+  .filters-container {
+    --mat-chip-elevated-disabled-container-color: #D4E8D1;
+    --mat-chip-elevated-selected-container-color: #D4E8D1;
+    --mat-chip-outline-color: #C4C7C5;
+    --mat-chip-disabled-outline-color: #D4E8D1;
+    --mat-chip-selected-outline-color: #D4E8D1;
+    --mat-chip-label-text-color: #0F1F11;
+    --mat-chip-disabled-label-text-color: #0F1F11;
+    --mat-chip-selected-label-text-color: #0F1F11;
+    --mat-chip-with-icon-icon-color: #006E2C;
+    --mat-chip-with-icon-disabled-icon-color: #0F1F11;
+    --mat-chip-with-icon-selected-icon-color: #0F1F11;
+    --mat-chip-with-avatar-disabled-avatar-opacity: 1;
+    --mat-chip-with-avatar-selected-avatar-opacity: 1;
+  }
+
+  .mat-mdc-card {
+    &.survey-card {
+      background-color: mat.get-theme-color($theme, surface);
+
+      &:hover {
+        background-color: mat.get-theme-color($theme, surface-variant);
+      }
+    }
+
+    &.new-survey-card {
+      background-color: mat.get-theme-color($theme, surface-variant);
+    }
+
+    .add-icon-container {
+      background-color: mat.get-theme-color($theme, primary-container);
+    }
+  
+    .survey-title {
+      color: mat.get-theme-color($theme, on-surface);
+    }
+
+    .survey-description {
+      color: mat.get-theme-color($theme, outline);
+    }
+  }
+}
+
+@mixin typography($theme) {
+  .page-title {
+    font: mat.get-theme-typography($theme, display-medium, font);
+  }
+
+  .survey-title {
+    font: mat.get-theme-typography($theme, headline-small, font);
+  }
+
+  .survey-description {
+    font: mat.get-theme-typography($theme, body-medium, font);
+  }
+}
+
+@mixin theme($theme) {
+  @include color($theme);
+  @include typography($theme);
+}

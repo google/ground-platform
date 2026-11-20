@@ -14,18 +14,48 @@
  * limitations under the License.
  */
 
-import {DOCUMENT} from '@angular/common';
-import {Inject, Injectable, OnDestroy, effect, signal} from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {
+  Inject,
+  Injectable,
+  OnDestroy,
+  Signal,
+  computed,
+  effect,
+  signal,
+} from '@angular/core';
 import {
   IsActiveMatchOptions,
   NavigationEnd,
   Params,
   Router,
 } from '@angular/router';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
-import {UrlParams} from './url-params';
+import {
+  ABOUT,
+  ANDROID_SEGMENT,
+  ERROR,
+  JOB_SEGMENT,
+  LOI_ID,
+  LOI_SEGMENT,
+  SIGN_IN_SEGMENT,
+  SUBMISSION_ID,
+  SUBMISSION_SEGMENT,
+  SURVEYS_CREATE,
+  SURVEYS_EDIT,
+  SURVEYS_SEGMENT,
+  SURVEYS_SHARE,
+  SURVEY_ID,
+  SURVEY_ID_NEW,
+  SURVEY_SEGMENT,
+  TASK_ID,
+  TASK_SEGMENT,
+  TERMS,
+} from './navigation.constants';
+import { SideNavMode, UrlParams } from './url-params';
+import { DataStoreService } from '../data-store/data-store.service';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -35,46 +65,42 @@ import {UrlParams} from './url-params';
   providedIn: 'root',
 })
 export class NavigationService implements OnDestroy {
-  static readonly LOI_SEGMENT = 'site';
-  static readonly LOI_ID = 'siteId';
-  static readonly JOB_ID_NEW = 'new';
-  static readonly SUBMISSION_SEGMENT = 'submission';
-  static readonly SUBMISSION_ID = 'submissionId';
-  static readonly SUBMISSION_ID_NEW = 'new';
-  static readonly SURVEY_ID_NEW = 'new';
-  static readonly SURVEY_ID = 'surveyId';
-  static readonly SURVEY_SEGMENT = 'survey';
-  static readonly SIGN_IN_SEGMENT = 'signin';
-  static readonly SURVEYS_SEGMENT = 'surveys';
-  static readonly SURVEYS_CREATE = 'create';
-  static readonly SURVEYS_EDIT = 'edit';
-  static readonly TASK_SEGMENT = 'task';
-  static readonly TASK_ID = 'taskId';
-  static readonly JOB_SEGMENT = 'job';
-  static readonly ERROR = 'error';
-  static readonly ABOUT = 'about';
-  static readonly TERMS = 'terms';
-  static readonly ANDROID_SEGMENT = 'android';
+  private sidePanelExpanded = signal(true);
 
-  private sidePanelExpanded = true;
+  private urlSignal = signal<string>('');
 
-  public urlParams = signal<UrlParams>(new UrlParams(null, null, null, null));
+  private urlParamsSignal = signal<UrlParams>(
+    new UrlParams(null, null, null, null)
+  );
+
+  private surveyIdSignal = computed(() => this.urlParamsSignal().surveyId);
+  private loiIdSignal = computed(() => this.urlParamsSignal().loiId);
+  private submissionIdSignal = computed(
+    () => this.urlParamsSignal().submissionId
+  );
+  private taskIdSignal = computed(() => this.urlParamsSignal().taskId);
+  private sideNavModeSignal = computed(
+    () => this.urlParamsSignal().sideNavMode
+  );
 
   private surveyId$ = new BehaviorSubject<string | null>(null);
   private loiId$ = new BehaviorSubject<string | null>(null);
   private submissionId$ = new BehaviorSubject<string | null>(null);
   private taskId$ = new BehaviorSubject<string | null>(null);
-  private sideNavMode$ = new BehaviorSubject<SideNavMode>(SideNavMode.JOB_LIST);
+  private sideNavMode$ = new BehaviorSubject<SideNavMode | null>(
+    SideNavMode.JOB_LIST
+  );
 
   private subscription: Subscription;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
+    private dataStore: DataStoreService,
     private router: Router
   ) {
     this.subscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => {
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(e => {
         let currentRoute = this.router.routerState.root;
 
         while (currentRoute.firstChild) {
@@ -89,7 +115,9 @@ export class NavigationService implements OnDestroy {
           route = route.parent!;
         }
 
-        this.urlParams.set(
+        this.urlSignal.set(e?.url ?? '');
+
+        this.urlParamsSignal.set(
           new UrlParams(
             params[SURVEY_ID],
             params[LOI_ID],
@@ -99,15 +127,40 @@ export class NavigationService implements OnDestroy {
         );
       });
 
+    // TODO remove this effect when everything will be migrated to Signals
     effect(() => {
-      const {surveyId, loiId, submissionId, taskId, sideNavMode} =
-        this.urlParams();
+      const { surveyId, loiId, submissionId, taskId, sideNavMode } =
+        this.urlParamsSignal();
       this.surveyId$.next(surveyId);
       this.loiId$.next(loiId);
       this.submissionId$.next(submissionId);
       this.taskId$.next(taskId);
       this.sideNavMode$.next(sideNavMode);
     });
+  }
+
+  getUrlParams(): Signal<UrlParams> {
+    return this.urlParamsSignal;
+  }
+
+  getSurveyId(): Signal<string | null> {
+    return this.surveyIdSignal;
+  }
+
+  getLoiId(): Signal<string | null> {
+    return this.loiIdSignal;
+  }
+
+  getSubmissionId(): Signal<string | null> {
+    return this.submissionIdSignal;
+  }
+
+  getTaskId(): Signal<string | null> {
+    return this.taskIdSignal;
+  }
+
+  getSideNavMode(): Signal<SideNavMode | null> {
+    return this.sideNavModeSignal;
   }
 
   getSurveyId$(): Observable<string | null> {
@@ -126,7 +179,7 @@ export class NavigationService implements OnDestroy {
     return this.taskId$!;
   }
 
-  getSideNavMode$(): Observable<SideNavMode> {
+  getSideNavMode$(): Observable<SideNavMode | null> {
     return this.sideNavMode$!;
   }
 
@@ -157,14 +210,16 @@ export class NavigationService implements OnDestroy {
   }
 
   clearLocationOfInterestId() {
-    const surveyId = this.urlParams().surveyId;
+    const surveyId = this.urlParamsSignal().surveyId;
     this.router.navigateByUrl(`${SURVEY_SEGMENT}/${surveyId}`);
   }
 
   clearSubmissionId() {
-    const surveyId = this.urlParams().surveyId;
-    const loiId = this.urlParams().loiId;
-    surveyId && loiId && this.selectLocationOfInterest(surveyId, loiId);
+    const surveyId = this.urlParamsSignal().surveyId;
+    const loiId = this.urlParamsSignal().loiId;
+    if (surveyId && loiId) {
+      this.selectLocationOfInterest(surveyId, loiId);
+    }
   }
 
   /**
@@ -179,6 +234,18 @@ export class NavigationService implements OnDestroy {
    */
   newSurvey() {
     this.router.navigate([SURVEY_SEGMENT, SURVEY_ID_NEW]);
+  }
+
+  async getAccessDeniedLink(): Promise<string | undefined> {
+    const accessDeniedMessage = await this.dataStore.getAccessDeniedMessage();
+
+    return accessDeniedMessage?.link;
+  }
+
+  async navigateToSubscriptionForm() {
+    const accessDeniedLink = await this.getAccessDeniedLink();
+
+    if (accessDeniedLink) window.location.href = accessDeniedLink;
   }
 
   /**
@@ -206,11 +273,16 @@ export class NavigationService implements OnDestroy {
     const url = `${SURVEYS_SEGMENT}${
       surveyId ? `/${surveyId}` : ''
     }/${SURVEYS_CREATE}`;
-    this.router.navigateByUrl(url, {replaceUrl});
+    this.router.navigateByUrl(url, { replaceUrl });
   }
 
   navigateToEditSurvey(surveyId: string): void {
     const url = `${SURVEY_SEGMENT}/${surveyId}/${SURVEYS_EDIT}/${SURVEY_SEGMENT}`;
+    this.router.navigateByUrl(url);
+  }
+
+  navigateToSurveyDashboard(surveyId: string): void {
+    const url = `${SURVEY_SEGMENT}/${surveyId}`;
     this.router.navigateByUrl(url);
   }
 
@@ -234,14 +306,14 @@ export class NavigationService implements OnDestroy {
    * Navigate to the URL for signout.
    */
   signOut() {
-    this.router.navigate(['/']);
+    return this.router.navigate([SIGN_IN_SEGMENT]);
   }
 
   /**
    * Navigate to the URL for error.
    */
   error(error: Error) {
-    this.router.navigate([ERROR, {error}]);
+    this.router.navigate([ERROR, { error }]);
   }
 
   isSurveyPage(surveyId: string): boolean {
@@ -266,48 +338,44 @@ export class NavigationService implements OnDestroy {
   }
 
   isShareSurveyPage(): boolean {
-    return this.router.url.endsWith('/share');
+    return this.router.url.endsWith(SURVEYS_SHARE);
+  }
+
+  getHost(): string {
+    return this.document.location.host;
   }
 
   getSurveyAppLink(surveyId: string): string {
     return `${this.document.location.origin}/${ANDROID_SEGMENT}/${SURVEY_SEGMENT}/${surveyId}`;
   }
 
+  getPlayStoreUrl(googlePlayId: string, surveyId?: string): string {
+    const url = `https://play.google.com/store/apps/details?id=${googlePlayId}`;
+    if (!surveyId) return url;
+    const referrer = encodeURIComponent(`survey_id=${surveyId}`);
+    return `${url}&referrer=${referrer}`;
+  }
+
   getSidePanelExpanded(): boolean {
-    return this.sidePanelExpanded;
+    return this.sidePanelExpanded();
   }
 
   onClickSidePanelButton() {
-    this.sidePanelExpanded = !this.sidePanelExpanded;
+    this.sidePanelExpanded.update(expanded => !expanded);
+  }
+
+  private editSurveyPageSignal = computed(() => {
+    const url = this.urlSignal();
+    if (url.endsWith('survey')) return SURVEY_SEGMENT;
+    else if (url.endsWith('share')) return SURVEYS_SHARE;
+    else return '';
+  });
+
+  getEditSurveyPageSignal(): Signal<string> {
+    return this.editSurveyPageSignal;
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 }
-
-export enum SideNavMode {
-  JOB_LIST = 1,
-  SUBMISSION = 2,
-}
-
-const {
-  ABOUT,
-  ERROR,
-  LOI_ID,
-  LOI_SEGMENT,
-  JOB_SEGMENT,
-  SIGN_IN_SEGMENT,
-  SUBMISSION_ID,
-  SUBMISSION_SEGMENT,
-  SURVEY_ID,
-  SURVEY_ID_NEW,
-  SURVEY_SEGMENT,
-  SURVEYS_CREATE,
-  SURVEYS_EDIT,
-  SURVEYS_SEGMENT,
-  TASK_ID,
-  TASK_SEGMENT,
-  TERMS,
-  ANDROID_SEGMENT,
-} = NavigationService;

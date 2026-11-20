@@ -14,38 +14,41 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@angular/fire/firestore';
-import {toMessage} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {Map} from 'immutable';
+import { DocumentData } from '@angular/fire/firestore';
+import { toMessage } from '@ground/lib';
 
-import {LocationOfInterest} from 'app/models/loi.model';
+import { GroundProtos } from '@ground/proto';
+import { Map } from 'immutable';
 
-import {geometryPbToModel} from './geometry-data-converter';
+import { LocationOfInterest } from 'app/models/loi.model';
+
+import { geometryPbToModel } from './geometry-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
 
 function propertiesPbToModel(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
 }): Map<string, string | number> {
-  const properties: {[k: string]: string | number} = {};
+  const properties: { [k: string]: string | number } = {};
   for (const k of Object.keys(pb)) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {
       properties[k] = v;
     }
   }
-  return Map(properties);
+  return Map(Object.entries(properties));
 }
 
 export function loiDocToModel(
   id: string,
   data: DocumentData
 ): LocationOfInterest | Error {
-  const pb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
-  if (!pb.jobId) return Error(`Missing job_id in loi ${id}`);
-  if (!pb.geometry) return Error(`Missing geometry in loi ${id}`);
   try {
+    const pbOrError = toMessage(data, Pb.LocationOfInterest);
+    if (pbOrError instanceof Error) throw pbOrError;
+    const pb = pbOrError;
+    if (!pb.jobId) return Error(`Missing job_id in loi ${id}`);
+    if (!pb.geometry) return Error(`Missing geometry in loi ${id}`);
     const geometry = geometryPbToModel(pb.geometry);
     if (!geometry) return Error(`Invalid geometry in loi ${id}`);
     const properties = propertiesPbToModel(pb.properties || {});
@@ -55,11 +58,11 @@ export function loiDocToModel(
       geometry,
       properties,
       pb.customTag,
-      pb.source === Pb.LocationOfInterest.Source.IMPORTED
+      pb.source === Pb.LocationOfInterest.Source.IMPORTED,
+      pb.submissionCount ?? 0,
+      pb.ownerId ?? ''
     );
-  } catch (e: any) {
-    return Error(`Error converting LOI with ID ${id}`, {
-      cause: e,
-    });
+  } catch (e) {
+    return new Error(`Invalid LOI data for ${id}`, { cause: e });
   }
 }

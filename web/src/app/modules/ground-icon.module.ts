@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {MatIconModule, MatIconRegistry} from '@angular/material/icon';
-import {DomSanitizer} from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
 
 // TODO: Make custom svgs match the color of the job icon
 const POINT_ICON = `

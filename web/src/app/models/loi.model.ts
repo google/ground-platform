@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {List, Map} from 'immutable';
+import { List, Map, is } from 'immutable';
 
-import {Geometry} from './geometry/geometry';
+import { Geometry } from './geometry/geometry';
 
 export class LocationOfInterest {
   constructor(
@@ -25,10 +25,27 @@ export class LocationOfInterest {
     readonly geometry: Geometry,
     readonly properties: Map<string, string | number>,
     readonly customId: string = '',
-    readonly predefined: boolean = true
+    readonly predefined: boolean = true,
+    readonly submissionCount: number = 0,
+    readonly ownerId: string = ''
   ) {}
 
-  static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
+  equals(other: LocationOfInterest): boolean {
+    return (
+      this.id === other.id &&
+      this.jobId === other.jobId &&
+      this.customId === other.customId &&
+      this.predefined === other.predefined &&
+      this.submissionCount === other.submissionCount &&
+      this.ownerId === other.ownerId &&
+      is(this.geometry, other.geometry) &&
+      is(this.properties, other.properties)
+    );
+  }
+
+  static getSmallestByArea(
+    lois: List<LocationOfInterest>
+  ): LocationOfInterest | undefined {
     return lois
       .sort((a, b) =>
         (a.geometry?.getArea() || 0) < (b.geometry?.getArea() || 0) ? -1 : 1

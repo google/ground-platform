@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-import {List, Map} from 'immutable';
+import { List, Map, OrderedMap } from 'immutable';
 
-import {Copiable} from './copiable';
-import {Task} from './task/task.model';
+import { Copiable } from './copiable';
+import { Task } from './task/task.model';
 
 export enum DataCollectionStrategy {
   PREDEFINED = 'PREDEFINED',
   MIXED = 'MIXED',
+}
+
+export const JOB_NAME_MAX_LENGTH = 255;
+
+// Configuration for a single integration associated with a job.
+export interface Integration {
+  id: string;
 }
 
 export class Job extends Copiable {
@@ -30,8 +37,9 @@ export class Job extends Copiable {
     readonly index: number,
     readonly color?: string,
     readonly name?: string,
-    readonly tasks?: Map<string, Task>,
-    readonly strategy?: DataCollectionStrategy
+    readonly tasks?: OrderedMap<string, Task>,
+    readonly strategy?: DataCollectionStrategy,
+    readonly enabledIntegrations: Map<string, Integration> = Map()
   ) {
     super();
 

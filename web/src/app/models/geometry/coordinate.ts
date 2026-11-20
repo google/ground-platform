@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hash} from 'immutable';
+import { hash } from 'immutable';
 
 /**
  * A lightweight class used to store coordinates on the 2-dimensional Cartesian
@@ -25,7 +25,10 @@ import {hash} from 'immutable';
  * Based on https://locationtech.github.io/jts/javadoc/org/locationtech/jts/geom/Coordinate.html
  */
 export class Coordinate {
-  constructor(readonly x: number, readonly y: number) {}
+  constructor(
+    readonly x: number,
+    readonly y: number
+  ) {}
 
   equals(other: Coordinate): boolean {
     return this.x === other.x && this.y === other.y;

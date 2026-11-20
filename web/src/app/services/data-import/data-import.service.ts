@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import {environment} from 'environments/environment';
+import { environment } from 'environments/environment';
 
-import {HttpClientService} from '../http-client/http-client.service';
+import { HttpClientService } from '../http-client/http-client.service';
 
 const IMPORT_GEOJSON_URL = `${environment.cloudFunctionsUrl}/importGeoJson`;
 
@@ -41,6 +41,7 @@ export class DataImportService {
     const formData = new FormData();
     formData.set('survey', surveyId);
     formData.set('job', jobId);
+    formData.set('clientTimestamp', Date.now().toString());
     formData.append('file', file);
     let importUrl;
     if (file.name.endsWith('.geojson') || file.name.endsWith('.json')) {

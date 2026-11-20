@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "module": "CommonJS",
+    "module": "Node16",
     "esModuleInterop": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
@@ -9,8 +9,10 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2019",
-    "resolveJsonModule": true,
-    "allowJs": true
+    "allowJs": true,
+    "skipLibCheck": true,
+    "types": ["node", "jasmine"],
+    "moduleResolution": "node16"
   },
   "compileOnSave": true,
   "include": [

@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
-import {Map} from 'immutable';
-import {canExport, hasOrganizerRole} from './common/auth';
-import {getDatastore} from './common/context';
-import {isAccessibleLoi} from './common/utils';
-import * as HttpStatus from 'http-status-codes';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import {toMessage} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {toGeoJsonGeometry} from '@ground/lib';
+import { Request } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
+import { canExport, hasOrganizerRole } from './common/auth';
+import {
+  getDatastore,
+  getFirebaseDownloadUrl,
+  getStorageBucket,
+} from './common/context';
+import { getTempFilePath } from './common/temp-storage';
+import { isAccessibleLoi } from './common/utils';
+import { propertiesPbToObject } from './common/loi-properties';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { StatusCodes } from 'http-status-codes';
+import { toMessage } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { toGeoJsonGeometry } from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -31,45 +37,45 @@ import Pb = GroundProtos.ground.v1beta1;
  * Iterates over all LOIs in a job returning a valid GeoJSON file.
  */
 export async function exportGeojsonHandler(
-  req: functions.Request,
-  res: functions.Response<any>,
+  req: Request,
+  res: Response,
   user: DecodedIdToken
 ) {
   const db = getDatastore();
-  const {uid: userId} = user;
+  const { uid: userId } = user;
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
 
   const surveyDoc = await db.fetchSurvey(surveyId);
   if (!surveyDoc.exists) {
-    res.status(HttpStatus.NOT_FOUND).send('Survey not found');
+    res.status(StatusCodes.NOT_FOUND).send('Survey not found');
     return;
   }
   if (!canExport(user, surveyDoc)) {
-    res.status(HttpStatus.FORBIDDEN).send('Permission denied');
+    res.status(StatusCodes.FORBIDDEN).send('Permission denied');
     return;
   }
   const survey = toMessage(surveyDoc.data()!, Pb.Survey);
   if (survey instanceof Error) {
     res
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send('Unsupported or corrupt survey');
     return;
   }
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
-    res.status(HttpStatus.NOT_FOUND).send('Job not found');
+    res.status(StatusCodes.NOT_FOUND).send('Job not found');
     return;
   }
   const job = toMessage(jobDoc.data()!, Pb.Job);
   if (job instanceof Error) {
     res
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send('Unsupported or corrupt job');
     return;
   }
-  const {name: jobName} = job;
+  const { name: jobName } = job;
 
   const isOrganizer = hasOrganizerRole(user, surveyDoc);
 
@@ -79,15 +85,18 @@ export async function exportGeojsonHandler(
 
   const ownerIdFilter = canViewAll ? null : userId;
 
-  res.type('application/json');
-  res.setHeader(
-    'Content-Disposition',
-    'attachment; filename=' + getFileName(jobName)
-  );
-  res.status(HttpStatus.OK);
+  const fileName = getFileName(jobName);
+  const bucket = getStorageBucket();
+  const file = bucket.file(getTempFilePath(userId, `${Date.now()}.geojson`));
+  const writeStream = file.createWriteStream({
+    metadata: {
+      contentType: 'application/json',
+      contentDisposition: `attachment; filename=${fileName}`,
+    },
+  });
 
   // Write opening of FeatureCollection manually
-  res.write('{\n  "type": "FeatureCollection",\n  "features": [\n');
+  writeStream.write('{\n  "type": "FeatureCollection",\n  "features": [\n');
 
   // Fetch all locations of interest
   const rows = await db.fetchLocationsOfInterest(surveyId, jobId);
@@ -103,13 +112,13 @@ export async function exportGeojsonHandler(
 
         // Manually write the separator comma before each feature except the first one.
         if (!first) {
-          res.write(',\n');
+          writeStream.write(',\n');
         } else {
           first = false;
         }
 
         // Use JSON.stringify to convert the feature object to a string and write it.
-        res.write(JSON.stringify(feature, null, 2));
+        writeStream.write(JSON.stringify(feature, null, 2));
       }
     } catch (e) {
       console.debug('Skipping row', e);
@@ -117,8 +126,15 @@ export async function exportGeojsonHandler(
   }
 
   // Close the FeatureCollection after the loop completes.
-  res.write('\n  ]\n}');
-  res.end();
+  writeStream.write('\n  ]\n}');
+  writeStream.end();
+
+  await new Promise<void>((resolve, reject) => {
+    writeStream.on('finish', resolve);
+    writeStream.on('error', reject);
+  });
+
+  res.redirect(await getFirebaseDownloadUrl(file));
 }
 
 function buildFeature(loi: Pb.LocationOfInterest) {
@@ -128,7 +144,7 @@ function buildFeature(loi: Pb.LocationOfInterest) {
   }
   return {
     type: 'Feature',
-    properties: propertiesPbToModel(loi.properties).toObject(),
+    properties: propertiesPbToObject(loi.properties),
     geometry: toGeoJsonGeometry(loi.geometry),
   };
 }
@@ -140,17 +156,4 @@ function getFileName(jobName: string | null) {
   jobName = jobName || 'ground-export';
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
   return `${fileBase}.geojson`;
-}
-
-function propertiesPbToModel(pb: {
-  [k: string]: Pb.LocationOfInterest.IProperty;
-}): Map<string, string | number> {
-  const properties: {[k: string]: string | number} = {};
-  for (const k of Object.keys(pb)) {
-    const v = pb[k].stringValue || pb[k].numericValue;
-    if (v !== null && v !== undefined) {
-      properties[k] = v;
-    }
-  }
-  return Map(properties);
 }

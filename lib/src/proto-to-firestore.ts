@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import {FieldDescriptor, MessageDescriptor, registry} from './message-registry';
-import {isEmpty} from './obj-util';
-import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
+import {
+  FieldDescriptor,
+  MessageDescriptor,
+  registry,
+} from './message-registry';
+import { isEmpty } from './obj-util';
+import { DocumentData, DocumentFieldValue } from '@google-cloud/firestore';
 
 /**
  * Returns the map representation of the provided message ready for serialization in Firestore.
@@ -96,7 +100,6 @@ function toValue(
   // TODO(#1758): Coerce values to type specified in `fieldType`.Fix   switch (typeof value) {
   switch (typeof value) {
     case 'string':
-    case 'boolean':
     case 'number': // This handles proto enums as well.
     case 'boolean':
       return value;

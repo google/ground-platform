@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {List} from 'immutable';
+import { List } from 'immutable';
+
+export const OTHER_OPTION_ID = '__other__';
 
 export enum TaskConditionMatchType {
   MATCH_ALL = 'MATCH_ALL',
@@ -28,7 +30,8 @@ export class TaskConditionExpression {
   constructor(
     readonly expressionType: TaskConditionExpressionType,
     readonly taskId: string,
-    readonly optionIds: List<string>
+    readonly optionIds: List<string>,
+    readonly otherSelected: boolean = false
   ) {}
 }
 

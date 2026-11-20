@@ -1,0 +1,25 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin color($theme) {
+  .ground-title {
+    color: mat.get-theme-color($theme, on-surface);
+  }
+
+  .header-divider {
+    border-left: 1px solid mat.get-theme-color($theme, outline-variant);
+  }
+
+  .header .cancel-edit-button {
+    --mat-button-text-label-text-color: #{mat.get-theme-color($theme, secondary)};
+  }
+
+  .header .finish-edit-button {
+    --mat-button-filled-container-color: #{mat.get-theme-color($theme, tertiary)};
+    --mat-button-filled-label-text-color: #{mat.get-theme-color($theme, on-primary)};
+  }
+}
+
+@mixin theme($theme) {
+  @include color($theme);
+}

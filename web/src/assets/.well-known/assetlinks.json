@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "org.groundplatform.android",
+    "sha256_cert_fingerprints":
+    ["9f:f1:da:1e:97:93:c7:93:9a:8d:52:24:af:8b:a6:07:da:0a:10:db:1c:d2:40:47:5c:07:eb:be:c4:e8:57:80"]
+  }
+}]

@@ -16,24 +16,36 @@
 
 import '@angular/localize/init';
 
-import {Injectable} from '@angular/core';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFireFunctions} from '@angular/fire/compat/functions';
-import {GoogleAuthProvider} from 'firebase/auth';
-import firebase from 'firebase/compat/app';
-import {Observable, Subject, firstValueFrom, from} from 'rxjs';
-import {map, mergeWith, shareReplay, switchMap} from 'rxjs/operators';
+import {
+  Injectable,
+  Injector,
+  NgZone,
+  runInInjectionContext,
+} from '@angular/core';
+import {
+  Auth,
+  User as FirebaseUser,
+  GoogleAuthProvider,
+  authState,
+  signInWithPopup,
+  signOut,
+} from '@angular/fire/auth';
+import {
+  Firestore,
+  clearIndexedDbPersistence,
+  terminate,
+} from '@angular/fire/firestore';
+import { Observable, Subject, firstValueFrom, from } from 'rxjs';
+import { filter, map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
 
-import {AclEntry} from 'app/models/acl-entry.model';
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
-import {User} from 'app/models/user.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {environment} from 'environments/environment';
-
-import {HttpClientService} from '../http-client/http-client.service';
+import { AclEntry } from 'app/models/acl-entry.model';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
+import { Survey } from 'app/models/survey.model';
+import { User, UserType } from 'app/models/user.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { CloudFunctionsService } from '../cloud-functions/cloud-functions.service';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -58,24 +70,34 @@ export const ROLE_OPTIONS = [
   },
 ];
 
+const SESSION_COOKIE_EXPIRES_AT_KEY = 'sessionCookieExpiresAt';
+// Refresh the session cookie this many ms before it expires to avoid using a stale cookie.
+const SESSION_COOKIE_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private user$: Observable<User>;
-  private tokenChanged$ = new Subject<firebase.User | null>();
+  private tokenChanged$ = new Subject<FirebaseUser | null>();
   private currentUser!: User;
   private hasAcceptedTos = false;
 
   constructor(
-    private afAuth: AngularFireAuth,
+    private auth: Auth,
     private dataStore: DataStoreService,
     private navigationService: NavigationService,
-    private functions: AngularFireFunctions,
-    private httpClientService: HttpClientService
+    private firestore: Firestore,
+    private cloudFunctionsService: CloudFunctionsService,
+    private injector: Injector,
+    private ngZone: NgZone
   ) {
-    this.afAuth.onIdTokenChanged(user => this.tokenChanged$.next(user));
-    this.user$ = this.afAuth.authState.pipe(
+    this.auth.onIdTokenChanged(user => {
+      if (!user) localStorage.removeItem(SESSION_COOKIE_EXPIRES_AT_KEY);
+      this.tokenChanged$.next(user);
+    });
+
+    this.user$ = authState(this.auth).pipe(
       mergeWith(this.tokenChanged$),
       switchMap(user => from(this.onAuthStateChange(user))),
       map(user => user || ANONYMOUS_USER),
@@ -90,21 +112,29 @@ export class AuthService {
    * backend functions which require session auth. Namely, this is necessary for functions which
    * download arbitrarily large files (namely, "/exportCsv"). These functions can only be invoked via
    * HTTP GET, since browser do not allow streaming directly to disk via POST or other methods.
+   *
+   * Skips the server call if a valid session cookie was already created in this browser. The expiry
+   * timestamp is persisted in localStorage (sourced from the server response) so the check survives
+   * page refreshes. The entry is cleared when the user signs out (tracked via onIdTokenChanged).
    */
   async createSessionCookie() {
+    const stored = localStorage.getItem(SESSION_COOKIE_EXPIRES_AT_KEY);
+    if (stored !== null && Date.now() + SESSION_COOKIE_REFRESH_BUFFER_MS < parseInt(stored, 10)) {
+      return;
+    }
     try {
-      // TODO(#1159): Refactor access to Cloud Functions into new service.
-      await this.httpClientService.postWithAuth(
-        `${environment.cloudFunctionsUrl}/sessionLogin`,
-        {}
-      );
+      const { expiresAt } = await this.cloudFunctionsService.sessionLogin();
+      localStorage.setItem(SESSION_COOKIE_EXPIRES_AT_KEY, String(expiresAt));
     } catch (err) {
-      console.error('Session login failed. Some features may be unavailable');
+      console.error(
+        'Session login failed. Some features may be unavailable',
+        err
+      );
     }
   }
 
   private async onAuthStateChange(
-    user: firebase.User | null
+    user: FirebaseUser | null
   ): Promise<User | undefined> {
     if (!user) {
       return undefined;
@@ -114,12 +144,7 @@ export class AuthService {
   }
 
   async callProfileRefresh() {
-    // TODO(#1159): Refactor access to Cloud Functions into new service.
-    const refreshProfile = this.functions.httpsCallable('profile-refresh');
-    const result = await firstValueFrom(refreshProfile({}));
-    if (result !== 'OK') {
-      throw new Error('User profile could not be updated');
-    }
+    await this.cloudFunctionsService.profileRefresh();
   }
 
   getUser$(): Observable<User> {
@@ -128,6 +153,12 @@ export class AuthService {
 
   async getUser(userId: string): Promise<User | undefined> {
     return firstValueFrom(this.dataStore.user$(userId));
+  }
+
+  async isPasslisted(): Promise<boolean> {
+    const { email } = this.currentUser;
+
+    return this.dataStore.isPasslisted(email);
   }
 
   isAuthenticated$(): Observable<boolean> {
@@ -148,12 +179,35 @@ export class AuthService {
 
   async signIn() {
     const provider = new GoogleAuthProvider();
-    await this.afAuth.signInWithPopup(provider);
+    await runInInjectionContext(this.injector, () =>
+      signInWithPopup(this.auth, provider)
+    );
   }
 
   async signOut() {
-    await this.afAuth.signOut();
-    return this.navigationService.signOut();
+    await runInInjectionContext(this.injector, () => signOut(this.auth));
+    await firstValueFrom(
+      this.user$.pipe(filter(user => !user.isAuthenticated))
+    );
+    await this.ngZone.run(() => this.navigationService.signOut());
+    await this.clearFirestoreCacheAndReload();
+  }
+
+  /**
+   * Wipes the persistent Firestore cache so the signed-out user's data does not
+   * remain in this browser, then reloads the app. Firestore must be terminated
+   * before its persistence can be cleared, which leaves the instance unusable,
+   * so the reload is required (and done even if clearing fails).
+   */
+  private async clearFirestoreCacheAndReload() {
+    try {
+      await terminate(this.firestore);
+      await clearIndexedDbPersistence(this.firestore);
+    } catch (err) {
+      console.error('Failed to clear Firestore cache on sign out', err);
+    } finally {
+      window.location.reload();
+    }
   }
 
   /**
@@ -179,6 +233,10 @@ export class AuthService {
       (this.isContributor(userRole) &&
         job.strategy !== DataCollectionStrategy.PREDEFINED)
     );
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.userType === UserType.ADMIN;
   }
 
   isManager(role: Role): boolean {

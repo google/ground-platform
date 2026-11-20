@@ -1,0 +1,65 @@
+<!--
+  Copyright 2020 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<mat-button-toggle-group
+  id="button-group"
+  class="button-group"
+  [disabled]="(isSubmissionSelected$ | async) || (disabled$ | async)"
+  [(value)]="selectedValue"
+>
+  <mat-button-toggle
+    *ngIf="!jobs().isEmpty()"
+    id="add-point-button"
+    class="add-point-button"
+    value="{{ pointValue }}"
+    (click)="onButtonClick()"
+  >
+    <img id="add-point-icon" class="add-point-icon" [src]="addPointIcon" />
+  </mat-button-toggle>
+  <mat-button-toggle
+    hidden
+    value="{{ polygonValue }}"
+    (click)="onButtonClick()"
+  >
+    add polygon
+  </mat-button-toggle>
+</mat-button-toggle-group>
+
+<div
+  *ngIf="selectedValue"
+  id="job-selector-section"
+  class="job-selector-section"
+>
+  <mat-form-field appearance="fill">
+    <mat-label id="job-selector-label"
+      >Adding {{ selectedValue }} for</mat-label
+    >
+    <mat-select
+      id="job-selector"
+      [(value)]="selectedJobId"
+      (selectionChange)="onJobIdChange()"
+    >
+      <mat-option
+        *ngFor="let job of jobs()"
+        id="job-selector-item-{{ job.id }}"
+        [value]="job.id"
+      >
+        <img [src]="jobPinUrl(job)" />&nbsp;{{ job?.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button id="cancel-button" mat-button (click)="onCancel()">Cancel</button>
+</div>

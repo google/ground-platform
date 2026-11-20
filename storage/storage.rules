@@ -1,19 +1,19 @@
 /**
  * Copyright 2024 The Ground Authors.
  *
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
@@ -24,16 +24,129 @@ service firebase.storage {
     function isSignedIn() {
       return request.auth != null;
     }
-    
+
+    /**
+     * Returns the survey with the specified id, or null if it does not exist.
+     */
+    function getSurvey(surveyId) {
+      let doc = firestore.get(/databases/(default)/documents/surveys/$(surveyId));
+      return doc == null ? null : doc.data;
+    }
+
+    /**
+     * Returns true iff all authenticated users can read and contribute
+     * data to the specified survey.
+     */
+    function isUnlistedOrPublic(survey) {
+      return survey.get("8", 0) in [
+        2 /* UNLISTED */,
+        3 /* PUBLIC */
+      ];
+    }
+
+    /**
+     * Returns the current user's role in the given survey, or null if none.
+     */
+    function getRole(survey) {
+      return "email" in request.auth.token
+        ? survey.get("4", {}).get(request.auth.token.email, null)
+        : null;
+    }
+
+    /**
+     * Returns true if the current user has one of the specified roles in the
+     * given survey.
+     */
+    function isOneOf(survey, roles) {
+      return getRole(survey) in roles;
+    }
+
+    /**
+     * Returns true iff the signed-in user can read the specified survey.
+     */
+    function canViewSurvey(survey) {
+      return survey != null && isSignedIn() &&
+        (isUnlistedOrPublic(survey) || getRole(survey) != null);
+    }
+
+    /**
+     * Returns true iff the current user with the given email can contribute LOIs
+     * and submissions to the specified survey.
+     */
+    function canCollectData(surveyId) {
+      let survey = getSurvey(surveyId);
+      return survey != null && isSignedIn() &&
+        (isUnlistedOrPublic(survey) || isOneOf(survey, [
+          2 /* DATA_COLLECTOR */,
+          3 /* SURVEY_ORGANIZER */
+        ]));
+    }
+
+    /**
+     * Returns true iff the requesting user owns the media at the given user path.
+     */
+    function isResourceOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Returns true iff the current user may view media collected by other users
+     * in the specified survey, either because the survey shares all data with
+     * all participants or because the user is a survey organizer.
+     */
+    function canViewAllData(surveyId) {
+      let survey = getSurvey(surveyId);
+      return canViewSurvey(survey) &&
+        (survey.get("9", 0) == 2 /* ALL_SURVEY_PARTICIPANTS */ || isOneOf(survey, [
+          3 /* SURVEY_ORGANIZER */
+        ]));
+    }
+
+    /**
+     * Returns true iff the current user may view media under `userId`'s
+     * per-user subpath in the specified survey.
+     */
+    function canViewUserMedia(surveyId, userId) {
+      let survey = getSurvey(surveyId);
+      return canViewSurvey(survey) &&
+        (isResourceOwner(userId) ||
+          survey.get("9", 0) == 2 /* ALL_SURVEY_PARTICIPANTS */ ||
+          isOneOf(survey, [
+            3 /* SURVEY_ORGANIZER */
+          ]));
+    }
+
+    match /temp/{userId}/{allPaths=**} {
+      // Only the owning user can read their own temporary files.
+      allow read: if isSignedIn() && request.auth.uid == userId;
+    }
+
     match /offline-imagery/{allPaths=**} {
       // All authenticated users can read.
       allow read: if isSignedIn();
     }
-    
-    match /user-media/{allPaths=**} {
-      // All authenticated users can read.
-      // TODO(#1373): Only allow users with permission to access.
-      allow create, read, write: if isSignedIn();
-    }    
+
+    match /user-media/surveys/{surveyId}/users/{userId}/{allPaths=**} {
+      // Users with survey access may fetch their own media, or other users'
+      // media when the survey shares all data with all participants or when
+      // they are a survey organizer. Listing is never allowed.
+      allow get: if canViewUserMedia(surveyId, userId);
+
+      // Only the owning user with permission to contribute data to the survey
+      // can create/update media under their own user path.
+      allow create, write: if isResourceOwner(userId) && canCollectData(surveyId);
+    }
+
+    match /user-media/surveys/{surveyId}/submissions/{allPaths=**} {
+      // Submission media paths carry no owner uid, so direct Storage reads are
+      // restricted to survey organizers or surveys that share all data with all
+      // participants; contributors read their own restricted photos via
+      // `/exportMedia`. Listing is never allowed.
+      allow get: if canViewAllData(surveyId);
+
+      // Only users with permission to contribute data to the survey can
+      // create/update submission media.
+      allow create, write: if canCollectData(surveyId);
+    }
   }
 }

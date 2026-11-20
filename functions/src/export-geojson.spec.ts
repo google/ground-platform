@@ -17,19 +17,20 @@
 import {
   createMockFirestore,
   stubAdminApi,
-} from '@ground/lib/dist/testing/firestore';
+} from '@ground/lib/testing/firestore';
 import {
   createGetRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import HttpStatus from 'http-status-codes';
-import {DATA_COLLECTOR_ROLE} from './common/auth';
-import {resetDatastore} from './common/context';
-import {Firestore} from 'firebase-admin/firestore';
-import {exportGeojsonHandler} from './export-geojson';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { DATA_COLLECTOR_ROLE } from './common/auth';
+import { resetDatastore } from './common/context';
+import * as context from './common/context';
+import { PassThrough } from 'stream';
+import { Firestore } from 'firebase-admin/firestore';
+import { exportGeojsonHandler } from './export-geojson';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 const sv = registry.getFieldIds(Pb.Survey);
@@ -45,6 +46,10 @@ const op = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion.Option);
 
 describe('export()', () => {
   let mockFirestore: Firestore;
+  let storageChunks: string[];
+  let mockFile: jasmine.SpyObj<any>;
+  const FIREBASE_DOWNLOAD_URL_PREFIX =
+    'https://firebasestorage.googleapis.com/v0/b/test-bucket/o/';
   const email = 'somebody@test.it';
   const userId = 'user5000';
   const survey = {
@@ -122,13 +127,15 @@ describe('export()', () => {
     [l.jobId]: job1.id,
     [l.customTag]: 'POINT_001',
     [l.geometry]: {
-      [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 10.1, [c.longitude]: 125.6 },
+      },
     },
     [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
     [l.properties]: {
-      name: {[pr.stringValue]: 'Dinagat Islands'},
-      area: {[pr.numericValue]: 3.08},
+      area: { [pr.numericValue]: 3.08 },
+      name: { [pr.stringValue]: 'Dinagat Islands' },
     },
     [l.ownerId]: userId,
   };
@@ -138,12 +145,14 @@ describe('export()', () => {
     [l.jobId]: job1.id,
     [l.customTag]: 'POINT_002',
     [l.geometry]: {
-      [g.point]: {[p.coordinates]: {[c.latitude]: 47.05, [c.longitude]: 8.3}},
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 47.05, [c.longitude]: 8.3 },
+      },
     },
     [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
     [l.properties]: {
-      name: {[pr.stringValue]: 'Luzern'},
+      name: { [pr.stringValue]: 'Luzern' },
     },
   };
   const testCases = [
@@ -159,8 +168,8 @@ describe('export()', () => {
         features: [
           {
             type: 'Feature',
-            properties: {name: 'Dinagat Islands', area: 3.08},
-            geometry: {type: 'Point', coordinates: [125.6, 10.1]},
+            properties: { area: 3.08, name: 'Dinagat Islands' },
+            geometry: { type: 'Point', coordinates: [125.6, 10.1] },
           },
         ],
       },
@@ -170,6 +179,26 @@ describe('export()', () => {
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+    storageChunks = [];
+    const writeStream = new PassThrough();
+    writeStream.on('data', (chunk: Buffer) =>
+      storageChunks.push(chunk.toString())
+    );
+    mockFile = jasmine.createSpyObj('file', [
+      'createWriteStream',
+      'setMetadata',
+    ]);
+    mockFile.createWriteStream.and.returnValue(writeStream);
+    mockFile.setMetadata.and.resolveTo([{}]);
+    Object.defineProperty(mockFile, 'name', {
+      value: 'temp/user5000/job.geojson',
+    });
+    Object.defineProperty(mockFile, 'bucket', {
+      value: { name: 'test-bucket' },
+    });
+    const mockBucket = jasmine.createSpyObj('bucket', ['file']);
+    mockBucket.file.and.returnValue(mockFile);
+    spyOn(context, 'getStorageBucket').and.returnValue(mockBucket);
   });
 
   afterEach(() => {
@@ -177,14 +206,14 @@ describe('export()', () => {
   });
 
   testCases.forEach(
-    ({desc, jobId, survey, jobs, lois, expectedFilename, expectedGeojson}) =>
+    ({ desc, jobId, survey, jobs, lois, expectedFilename, expectedGeojson }) =>
       it(desc, async () => {
         // Populate database.
         mockFirestore.doc(`surveys/${survey.id}`).set(survey);
-        jobs?.forEach(({id, ...job}) =>
+        jobs?.forEach(({ id, ...job }) =>
           mockFirestore.doc(`surveys/${survey.id}/jobs/${id}`).set(job)
         );
-        lois?.forEach(({id, ...loi}) =>
+        lois?.forEach(({ id, ...loi }) =>
           mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
         );
 
@@ -196,8 +225,7 @@ describe('export()', () => {
             job: jobId,
           },
         });
-        const chunks: string[] = [];
-        const res = createResponseSpy(chunks);
+        const res = createResponseSpy();
 
         // Run export handler.
         await exportGeojsonHandler(req, res, {
@@ -206,14 +234,21 @@ describe('export()', () => {
         } as DecodedIdToken);
 
         // Check post-conditions.
-        expect(res.status).toHaveBeenCalledOnceWith(HttpStatus.OK);
-        expect(res.type).toHaveBeenCalledOnceWith('application/json');
-        expect(res.setHeader).toHaveBeenCalledOnceWith(
-          'Content-Disposition',
-          `attachment; filename=${expectedFilename}`
+        expect(res.redirect as jasmine.Spy).toHaveBeenCalledTimes(1);
+        const redirectUrl: string = (
+          res.redirect as jasmine.Spy
+        ).calls.mostRecent().args[0];
+        expect(redirectUrl).toContain(FIREBASE_DOWNLOAD_URL_PREFIX);
+        expect(mockFile.createWriteStream).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            metadata: jasmine.objectContaining({
+              contentDisposition: `attachment; filename=${expectedFilename}`,
+            }),
+          })
         );
-        const output = JSON.parse(chunks.join(''));
+        const output = JSON.parse(storageChunks.join(''));
         expect(output).toEqual(expectedGeojson);
+        expect(JSON.stringify(output)).toEqual(JSON.stringify(expectedGeojson));
       })
   );
 });

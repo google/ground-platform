@@ -14,30 +14,33 @@
  * limitations under the License.
  */
 
-// import * as admin from 'firebase-admin';
-import {Change, EventContext} from 'firebase-functions';
-import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {getDatastore} from './common/context';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
+import {
+  Change,
+  DocumentSnapshot,
+  FirestoreEvent,
+} from 'firebase-functions/v2/firestore';
+import { getDatastore } from './common/context';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 const sb = registry.getFieldIds(Pb.Submission);
 
 export async function onWriteSubmissionHandler(
-  change: Change<DocumentSnapshot>,
-  context: EventContext
+  event: FirestoreEvent<Change<DocumentSnapshot> | undefined>
 ) {
-  const surveyId = context.params.surveyId;
-  const loiId = change.after?.get(sb.loiId) || change.before?.get(sb.loiId);
+  const surveyId = event.params.surveyId;
+  const change = event.data;
+  const loiId = change?.after?.get(sb.loiId) || change?.before?.get(sb.loiId);
   if (!loiId) return;
-  // Note: Counting submissions requires scanning the index, which has O(N) cost,
-  // where N=submission count. This could be done in constant time by
-  // incrementing/decrementing the count on create/delete, however that could lead to
-  // skew or invalid states should the event not be handled for any reason.
-  // An example of how this might be done for is shared here for future reference:
-  //   https://gist.github.com/gino-m/6097f38c950921b7f98d8de87bbde4dd
+
+  const hadData = !!change?.before?.exists;
+  const hasData = !!change?.after?.exists;
+
+  if (hadData === hasData) return;
+
+  const delta = hasData ? 1 : -1;
+
   const db = getDatastore();
-  const count = await db.countSubmissionsForLoi(surveyId, loiId);
-  await db.updateSubmissionCount(surveyId, loiId, count);
+  await db.adjustSubmissionCount(surveyId, loiId, delta);
 }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {hash, is} from 'immutable';
+import { hash, is } from 'immutable';
 
-import {Coordinate} from './coordinate';
-import {Geometry, GeometryType} from './geometry';
+import { Coordinate } from './coordinate';
+import { Geometry, GeometryType } from './geometry';
 
 /**
  * Represents a single point.
@@ -42,7 +42,7 @@ export class Point implements Geometry {
   }
 
   extendBounds(bounds: google.maps.LatLngBounds) {
-    const {y, x} = this.coord;
+    const { y, x } = this.coord;
     bounds.extend(new google.maps.LatLng(y, x));
     return bounds;
   }

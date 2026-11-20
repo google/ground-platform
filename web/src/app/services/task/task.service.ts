@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {Observable, switchMap} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {MultipleChoice} from 'app/models/task/multiple-choice.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-
-import {SurveyService} from '../survey/survey.service';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { MultipleChoice } from 'app/models/task/multiple-choice.model';
+import { Option } from 'app/models/task/option.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
 export type TaskUpdate = {
   label: string;
@@ -37,23 +35,7 @@ export type TaskUpdate = {
   providedIn: 'root',
 })
 export class TaskService {
-  private tasks$: Observable<List<Task>>;
-
-  constructor(
-    private dataStoreService: DataStoreService,
-    private surveyService: SurveyService
-  ) {
-    this.tasks$ = this.surveyService
-      .getActiveSurvey$()
-      .pipe(
-        switchMap(survey =>
-          this.dataStoreService.tasks$(
-            survey.id,
-            survey.jobs.values().next().value.id
-          )
-        )
-      );
-  }
+  constructor(private dataStoreService: DataStoreService) {}
 
   /**
    * Creates and returns a new task with a generated unique identifier.
@@ -70,33 +52,40 @@ export class TaskService {
   }
 
   /**
-   * Returns a new task which is an exact copy of the provided task, but with new UUIDs.
+   * Creates a duplicate of the provided task with a freshly generated id
+   * (and fresh option ids for multiple-choice tasks). Note: `condition`
+   * references are copied verbatim — when duplicating tasks across a job
+   * boundary, the caller is responsible for remapping them.
    */
   duplicateTask(task: Task): Task {
-    return {
-      ...task,
-      id: this.dataStoreService.generateId(),
-      multipleChoice: task.multipleChoice
+    return new Task(
+      this.dataStoreService.generateId(),
+      task.type,
+      task.label,
+      task.required,
+      task.index,
+      task.multipleChoice
         ? this.duplicateMultipleChoice(task.multipleChoice)
         : undefined,
-    } as Task;
+      task.condition,
+      task.addLoiTask
+    );
   }
 
-  /**
-   * Returns a new multiple choice which is an exact copy of the provided one, but with new UUIDs for all options.
-   */
   duplicateMultipleChoice(multipleChoice: MultipleChoice): MultipleChoice {
-    return {
-      ...multipleChoice,
-      options: multipleChoice.options?.map(option => ({
-        ...option,
-        id: this.dataStoreService.generateId(),
-      })),
-    } as MultipleChoice;
-  }
-
-  getTasks$(): Observable<List<Task>> {
-    return this.tasks$;
+    return new MultipleChoice(
+      multipleChoice.cardinality,
+      multipleChoice.options.map(
+        option =>
+          new Option(
+            this.dataStoreService.generateId(),
+            option.code,
+            option.label,
+            option.index
+          )
+      ),
+      multipleChoice.hasOtherOption
+    );
   }
 
   addOrUpdateTasks(
@@ -132,7 +121,7 @@ export class TaskService {
     );
 
     const newTasks = tasks.map((task: Task) =>
-      task.copyWith({index: task.index + 1})
+      task.copyWith({ index: task.index + 1 })
     );
 
     return newTasks.set(loiTask.id, loiTask);

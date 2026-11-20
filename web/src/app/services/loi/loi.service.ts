@@ -14,88 +14,136 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List} from 'immutable';
-import {Observable, ReplaySubject, of} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { List } from 'immutable';
+import { Observable, of } from 'rxjs';
+import { map, shareReplay, switchMap } from 'rxjs/operators';
 
-import {GeometryType} from 'app/models/geometry/geometry';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {SurveyDataVisibility, SurveyState} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { GeometryType } from 'app/models/geometry/geometry';
+import { LocationOfInterest } from 'app/models/loi.model';
+import {
+  Survey,
+  SurveyDataVisibility,
+  SurveyState,
+} from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LocationOfInterestService {
-  private lois$: Observable<List<LocationOfInterest>>;
-  private selectedLoiId$ = new ReplaySubject<string>(1);
-  private selectedLoi$: Observable<LocationOfInterest>;
+  /**
+   * Compares LOI display names. Reusing one collator is about twice as fast as
+   * calling `localeCompare()` on every comparison, and gives the same order.
+   */
+  private static readonly displayNameCollator = new Intl.Collator();
 
   constructor(
     private authService: AuthService,
     private dataStore: DataStoreService,
     private surveyService: SurveyService
-  ) {
-    this.lois$ = this.authService
-      .getUser$()
-      .pipe(
+  ) {}
+
+  /**
+   * Sorted LOI streams, shared by everyone asking for the same survey.
+   *
+   * Each stream holds a Firestore listener over the whole `lois` collection,
+   * and attaching one re-reads every LOI. Sharing it means a component that is
+   * created while another already watches the survey (e.g. moving between jobs
+   * in the survey editor) reuses the live listener instead of attaching a new
+   * one. With `refCount`, the listener is still detached when nobody listens.
+   */
+  private readonly loisBySurvey = new Map<
+    string,
+    Observable<List<LocationOfInterest>>
+  >();
+
+  getLocationsOfInterest$(
+    survey: Survey
+  ): Observable<List<LocationOfInterest>> {
+    const unsaved = !survey || survey.state === SurveyState.UNSAVED;
+    if (unsaved) return of(List<LocationOfInterest>());
+
+    const canViewAll =
+      this.surveyService.canManageSurvey(survey) ||
+      survey.dataVisibility === SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS;
+    const key = `${survey.id}:${canViewAll}`;
+
+    let lois$ = this.loisBySurvey.get(key);
+    if (!lois$) {
+      lois$ = this.authService.getUser$().pipe(
         switchMap(user =>
-          this.surveyService
-            .getActiveSurvey$()
-            .pipe(
-              switchMap(survey =>
-                !survey || survey.state === SurveyState.UNSAVED
-                  ? of(List<LocationOfInterest>())
-                  : this.dataStore.getAccessibleLois$(
-                      survey,
-                      user.id,
-                      this.surveyService.canManageSurvey() ||
-                        survey.dataVisibility ===
-                          SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
-                    )
+          this.dataStore.getAccessibleLois$(survey, user.id, canViewAll)
+        ),
+        map(lois =>
+          lois
+            .map(loi => ({
+              loi,
+              name: LocationOfInterestService.getDisplayName(loi),
+            }))
+            .sort((a, b) =>
+              LocationOfInterestService.displayNameCollator.compare(
+                a.name,
+                b.name
               )
             )
-        )
+            .map(({ loi }) => loi)
+        ),
+        shareReplay({ bufferSize: 1, refCount: true })
       );
-
-    this.selectedLoi$ = this.selectedLoiId$.pipe(
-      switchMap(loiId =>
-        this.lois$.pipe(map(lois => lois.find(({id}) => id === loiId)!))
-      )
-    );
-  }
-
-  getLocationsOfInterest$(): Observable<List<LocationOfInterest>> {
-    return this.lois$.pipe(
-      map(lois =>
-        lois.sort((a, b) =>
-          LocationOfInterestService.getDisplayName(a).localeCompare(
-            LocationOfInterestService.getDisplayName(b)
-          )
-        )
-      )
-    );
-  }
-
-  selectLocationOfInterest(loiId: string) {
-    this.selectedLoiId$.next(loiId);
-  }
-
-  getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
-    return this.selectedLoi$;
+      this.loisBySurvey.set(key, lois$);
+    }
+    return lois$;
   }
 
   getPredefinedLoisByJobId$(
+    survey: Survey,
     jobId: string
   ): Observable<List<LocationOfInterest>> {
-    return this.getLocationsOfInterest$().pipe(
+    return this.getLocationsOfInterest$(survey).pipe(
       map(lois =>
         lois.filter(loi => loi.jobId === jobId && loi.predefined !== false)
       )
     );
+  }
+
+  /**
+   * Returns true iff the current user may delete the given LOI.
+   *
+   * Survey organizers may delete any LOI in their survey, including field data
+   * collected by others, so that deleting a job or survey can clean up after
+   * itself. Otherwise an LOI added while collecting data belongs to the
+   * collector who created it, and only that collector may remove it.
+   *
+   * Imported LOIs are never deletable by a non-organizer, not even by the user
+   * who uploaded them. They are part of the survey design, and they are the
+   * only LOIs that can accumulate submissions from more than one collector, so
+   * deleting one takes other people's data with it. Ownership alone is not
+   * enough here: `ownerId` on an imported LOI is whoever ran the GeoJSON
+   * import, who may since have been demoted out of the organizer role.
+   *
+   * This mirrors the `delete` rule for LOIs in firestore.rules.
+   */
+  canDeleteLocationOfInterest(
+    survey: Survey,
+    loi: LocationOfInterest
+  ): boolean {
+    if (this.surveyService.canManageSurvey(survey)) return true;
+    if (loi.predefined) return false;
+    const user = this.authService.getCurrentUser();
+    return !!loi.ownerId && loi.ownerId === user?.id;
+  }
+
+  /**
+   * Deletes the given LOI along with every submission collected for it.
+   *
+   * @param surveyId the id of the survey the LOI belongs to.
+   * @param loiId the id of the LOI to delete.
+   */
+  deleteLocationOfInterest(surveyId: string, loiId: string): Promise<void> {
+    return this.dataStore.deleteLocationOfInterest(surveyId, loiId);
   }
 
   /** A label for a given geometry type. Defaults to 'Polygon'. */
@@ -122,7 +170,7 @@ export class LocationOfInterestService {
   }
 
   static getDisplayName(loi: LocationOfInterest): string {
-    const {customId, properties} = loi;
+    const { customId, properties } = loi;
     const name = properties?.get('name')?.toString()?.trim() || '';
     const loiId = customId?.trim() || '';
     if (name && loiId) {
@@ -154,14 +202,14 @@ export class LocationOfInterestService {
   }
 
   async addPoint(
-    lat: number,
-    lng: number,
-    jobId: string
+    _lat: number,
+    _lng: number,
+    _jobId: string
   ): Promise<LocationOfInterest | null> {
     throw new Error('Adding LOIs via web app not yet supported');
   }
 
-  async updatePoint(loi: LocationOfInterest): Promise<void> {
+  async updatePoint(_loi: LocationOfInterest): Promise<void> {
     throw new Error('Editing LOIs via web app not yet supported');
   }
 }

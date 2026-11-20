@@ -1,0 +1,12 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@ground/lib": ["lib/src/index.ts"],
+      "@ground/lib/testing/firestore": ["lib/src/testing/firestore/index.ts"],
+      "@ground/proto": ["proto"]
+    }
+  }
+}
