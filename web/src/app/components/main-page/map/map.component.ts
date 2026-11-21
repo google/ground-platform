@@ -87,8 +87,9 @@ const DRAW_PADDING = 0.5;
 const KEEP_PADDING = 1.5;
 /** Space between the viewport and the LOIs of a bubble when zooming to them. */
 const BUBBLE_FIT_PADDING_PX = 50;
-const normalPolygonStrokeWeight = 3;
-const enlargedPolygonStrokeWeight = 6;
+// Same as ground-android: 2dp outline, doubled when selected, at every zoom.
+const normalPolygonStrokeWeight = 2;
+const enlargedPolygonStrokeWeight = 4;
 
 @Component({
   selector: 'ground-map',

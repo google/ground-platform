@@ -276,7 +276,7 @@ describe('MapComponent', () => {
         new google.maps.LatLng(0, 0),
       ],
     ]);
-    assertPolygonStyle(polygon, jobColor1, 3);
+    assertPolygonStyle(polygon, jobColor1, 2);
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   });
 
@@ -307,8 +307,8 @@ describe('MapComponent', () => {
         new google.maps.LatLng(-10, -10),
       ],
     ]);
-    assertPolygonStyle(polygon1, jobColor1, 3);
-    assertPolygonStyle(polygon2, jobColor1, 3);
+    assertPolygonStyle(polygon1, jobColor1, 2);
+    assertPolygonStyle(polygon2, jobColor1, 2);
     expect(polygon1.getMap()).toEqual(component.map.googleMap!);
     expect(polygon2.getMap()).toEqual(component.map.googleMap!);
   });
@@ -392,7 +392,7 @@ describe('MapComponent', () => {
           new google.maps.LatLng(0, 0),
         ],
       ]);
-      assertPolygonStyle(polygon, jobColor1, 3);
+      assertPolygonStyle(polygon, jobColor1, 2);
       expect(polygon.getMap()).toEqual(component.map.googleMap!);
     });
   });
@@ -423,7 +423,7 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const [polygon] = component.polygons.get(polygonLoiId1)!;
-    assertPolygonStyle(polygon, jobColor1, 6);
+    assertPolygonStyle(polygon, jobColor1, 4);
   });
 
   it('should clear selected loi when map is clicked', async () => {
