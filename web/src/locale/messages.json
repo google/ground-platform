@@ -203,6 +203,8 @@
     "app.labels.roles.viewer": "Viewer",
     "app.labels.no": "No",
     "app.labels.yes": "Yes",
-    "app.labels.changeLanguage": "Change language"
+    "app.labels.changeLanguage": "Change language",
+    "app.map.clusterBubble.description.one": "1 location, {$withData} with data",
+    "app.map.clusterBubble.description.other": "{$total} locations, {$withData} with data"
   }
 }

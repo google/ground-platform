@@ -134,6 +134,7 @@
     "ngx-autosize-input": "catalog:",
     "ngx-color": "catalog:",
     "rxjs": "catalog:",
+    "supercluster": "catalog:",
     "zone.js": "catalog:"
   },
   "devDependencies": {
