@@ -60,8 +60,9 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 /*global google*/
 
 const zoomedInLevel = 13;
-const normalPolygonStrokeWeight = 3;
-const enlargedPolygonStrokeWeight = 6;
+// Same as ground-android: 2dp outline, doubled when selected, at every zoom.
+const normalPolygonStrokeWeight = 2;
+const enlargedPolygonStrokeWeight = 4;
 
 @Component({
   selector: 'ground-map',
