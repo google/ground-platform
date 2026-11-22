@@ -137,7 +137,6 @@
     "app.cards.dataVisibility.description": "Permitir a los recolectores de datos ver los datos de los demás usuarios",
     "app.login.signInToContinue": "Inicie sesión para continuar",
     "app.login.signInWithGoogle": "Iniciar sesión con Google",
-    "app.labels.survey": "Encuesta",
     "app.labels.surveys": "Encuestas",
     "app.labels.createSurvey": "Crear encuesta",
     "app.labels.createSurveyDescription": "Definir los trabajos y sitios para los recopiladores de dato",

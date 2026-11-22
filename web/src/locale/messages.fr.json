@@ -137,7 +137,6 @@
     "app.cards.dataVisibility.description": "Permettre aux collecteurs de données de voir les données des autres collecteurs",
     "app.login.signInToContinue": "Connectez-vous pour continuer",
     "app.login.signInWithGoogle": "Se connecter avec Google",
-    "app.labels.survey": "Enquête",
     "app.labels.surveys": "Enquêtes",
     "app.labels.createSurvey": "Créer une enquête",
     "app.labels.createSurveyDescription": "Définir les missions et les sites pour les collecteurs de données",

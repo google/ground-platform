@@ -116,6 +116,7 @@ export class CreateSurveyComponent implements OnInit {
   subscription: Subscription = new Subscription();
   surveyId?: string;
   survey?: Survey;
+  draftSurveyTitle?: string;
   lois?: List<LocationOfInterest>;
   canContinue = true;
   skipLoiSelection = false;
@@ -148,6 +149,13 @@ export class CreateSurveyComponent implements OnInit {
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService
   ) {}
+
+  get headerSurveyTitle(): string {
+    return (
+      (this.draftSurveyTitle ?? this.survey?.title ?? '').trim() ||
+      'Untitled survey'
+    );
+  }
 
   ngOnInit(): void {
     this.subscription.add(
@@ -188,6 +196,7 @@ export class CreateSurveyComponent implements OnInit {
         )
         .subscribe(([survey, lois]) => {
           this.survey = survey;
+          this.draftSurveyTitle = undefined;
           if (this.isSetupFinished(this.survey)) {
             this.navigationService.selectSurvey(this.survey.id);
           }

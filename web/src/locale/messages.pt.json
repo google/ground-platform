@@ -137,7 +137,6 @@
     "app.cards.dataVisibility.description": "Permitir que os coletores de dados vejam os dados uns dos outros",
     "app.login.signInToContinue": "Iniciar sessão para continuar",
     "app.login.signInWithGoogle": "Faça login com o Google",
-    "app.labels.survey": "Inquérito",
     "app.labels.surveys": "Inquéritos",
     "app.labels.createSurvey": "Criar inquérito",
     "app.labels.createSurveyDescription": "Definir tarefas e locais para os coletores de dados",

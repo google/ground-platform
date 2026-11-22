@@ -15,7 +15,12 @@
 -->
 
 <div class="page">
-  <ground-header [survey]="survey"></ground-header>
+  <ground-header [survey]="survey">
+    <div left *ngIf="createSurveyPhase !== CreateSurveyPhase.LOADING">
+      <div class="header-divider"></div>
+      <div class="survey-title">{{ headerSurveyTitle }}</div>
+    </div>
+  </ground-header>
   <!-- TODO(#1170): Extract the spinner into a component -->
   <div
     id="loading-spinner"
@@ -52,7 +57,6 @@
         <ground-step-card
           [title]="cardTitle()"
           [description]="cardDescription()"
-          [surveyTitle]="survey?.title || ''"
           [jobName]="
             [
               CreateSurveyPhase.DEFINE_LOIS,
@@ -69,6 +73,7 @@
               [title]="survey.title"
               [description]="survey.description"
               (onValidationChange)="onValidationChange($event)"
+              (onTitleChange)="draftSurveyTitle = $event"
             ></survey-details>
             <app-job-details
               *ngSwitchCase="CreateSurveyPhase.JOB_DETAILS"

@@ -91,4 +91,27 @@ describe('SurveyDetailsComponent', () => {
     expect(descriptionControl.hasError('maxlength')).toBeTrue();
     expect(component.formGroup.valid).toBeFalse();
   });
+
+  it('emits the title when it is edited', () => {
+    const emitted: string[] = [];
+    component.onTitleChange.subscribe((t: string) => emitted.push(t));
+
+    component.formGroup.controls[component.titleControlKey].setValue('new');
+
+    expect(emitted).toEqual(['new']);
+  });
+
+  it('does not emit the title when the initial value is loaded', () => {
+    const emitted: string[] = [];
+    component.onTitleChange.subscribe((t: string) => emitted.push(t));
+
+    const fresh = TestBed.createComponent(SurveyDetailsComponent);
+    fresh.componentInstance.title = 'initial';
+    fresh.componentInstance.onTitleChange.subscribe((t: string) =>
+      emitted.push(t)
+    );
+    fresh.detectChanges();
+
+    expect(emitted).toEqual([]);
+  });
 });

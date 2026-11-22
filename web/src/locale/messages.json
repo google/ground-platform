@@ -150,7 +150,6 @@
     "app.cards.dataVisibility.description": "Allow data collectors to see each others' data",
     "app.login.signInToContinue": "Sign in to continue",
     "app.login.signInWithGoogle": "Sign in with Google",
-    "app.labels.survey": "Survey",
     "app.labels.surveys": "Surveys",
     "app.labels.createSurvey": "Create survey",
     "app.labels.createSurveyDescription": "Define jobs and sites for data collectors",
