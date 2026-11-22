@@ -161,6 +161,7 @@ export class CreateSurveyComponent implements OnInit {
     this.subscription.add(
       this.navigationService.getSurveyId$().subscribe(async surveyId => {
         this.surveyId = surveyId ? surveyId : SURVEY_ID_NEW;
+        this.draftSurveyTitle = undefined;
         await this.draftSurveyService.init(this.surveyId);
         this.draftSurveyService
           .getSurvey$()
@@ -196,7 +197,6 @@ export class CreateSurveyComponent implements OnInit {
         )
         .subscribe(([survey, lois]) => {
           this.survey = survey;
-          this.draftSurveyTitle = undefined;
           if (this.isSetupFinished(this.survey)) {
             this.navigationService.selectSurvey(this.survey.id);
           }
