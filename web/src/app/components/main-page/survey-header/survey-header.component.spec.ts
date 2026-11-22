@@ -104,4 +104,16 @@ describe('SurveyHeaderComponent', () => {
     const title = fixture.nativeElement.querySelector('.survey-title');
     expect(title.textContent.trim()).toBe(component.untitledSurvey);
   });
+
+  it('shows a fallback when the title is blank', () => {
+    fixture.componentRef.setInput(
+      'activeSurvey',
+      new Survey('survey2', '   ', '', Map(), Map(), 'owner1', {
+        type: DataSharingType.PRIVATE,
+      })
+    );
+    fixture.detectChanges();
+    const title = fixture.nativeElement.querySelector('.survey-title');
+    expect(title.textContent.trim()).toBe(component.untitledSurvey);
+  });
 });

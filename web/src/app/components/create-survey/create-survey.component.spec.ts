@@ -277,6 +277,30 @@ describe('CreateSurveyComponent', () => {
     });
   });
 
+  describe('header survey title', () => {
+    beforeEach(async () => {
+      createComponent(false);
+      component.createSurveyPhase = CreateSurveyPhase.SURVEY_DETAILS;
+      component.survey = unsavedSurvey;
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    it('falls back to "Untitled survey" when there is no title', () => {
+      expect(component.headerSurveyTitle).toBe('Untitled survey');
+    });
+
+    it('shows the title being typed', () => {
+      component.onSurveyTitleChange('My draft');
+      expect(component.headerSurveyTitle).toBe('My draft');
+    });
+
+    it('falls back when the title being typed is blank', () => {
+      component.onSurveyTitleChange('   ');
+      expect(component.headerSurveyTitle).toBe('Untitled survey');
+    });
+  });
+
   describe('when active survey has empty title', () => {
     beforeEach(async () => {
       createComponent(false);

@@ -70,7 +70,7 @@ export class SurveyDetailsComponent implements OnInit {
     );
 
     this.formGroup.controls[this.titleControlKey].valueChanges.subscribe(
-      title => this.onTitleChange.emit(title)
+      title => this.onTitleChange.emit(title ?? '')
     );
   }
 

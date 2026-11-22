@@ -28,7 +28,7 @@
     <div class="header-divider"></div>
 
     <div class="survey-title">
-      {{ activeSurvey()?.title ?? untitledSurvey }}
+      {{ activeSurvey()?.title?.trim() || untitledSurvey }}
     </div>
   </div>
 </ground-header>

@@ -117,6 +117,7 @@ export class CreateSurveyComponent implements OnInit {
   surveyId?: string;
   survey?: Survey;
   draftSurveyTitle?: string;
+  private draftSurveyId?: string;
   lois?: List<LocationOfInterest>;
   canContinue = true;
   skipLoiSelection = false;
@@ -157,11 +158,15 @@ export class CreateSurveyComponent implements OnInit {
     );
   }
 
+  onSurveyTitleChange(title: string) {
+    this.draftSurveyTitle = title;
+    this.draftSurveyId = this.survey?.id;
+  }
+
   ngOnInit(): void {
     this.subscription.add(
       this.navigationService.getSurveyId$().subscribe(async surveyId => {
         this.surveyId = surveyId ? surveyId : SURVEY_ID_NEW;
-        this.draftSurveyTitle = undefined;
         await this.draftSurveyService.init(this.surveyId);
         this.draftSurveyService
           .getSurvey$()
@@ -196,6 +201,12 @@ export class CreateSurveyComponent implements OnInit {
           )
         )
         .subscribe(([survey, lois]) => {
+          // Drop the draft title only once a different survey is loaded, so
+          // background updates of the same survey don't wipe what is typed and
+          // the header doesn't flash the fallback while loading.
+          if (survey.id !== this.draftSurveyId) {
+            this.draftSurveyTitle = undefined;
+          }
           this.survey = survey;
           if (this.isSetupFinished(this.survey)) {
             this.navigationService.selectSurvey(this.survey.id);

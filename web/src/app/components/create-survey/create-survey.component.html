@@ -73,7 +73,7 @@
               [title]="survey.title"
               [description]="survey.description"
               (onValidationChange)="onValidationChange($event)"
-              (onTitleChange)="draftSurveyTitle = $event"
+              (onTitleChange)="onSurveyTitleChange($event)"
             ></survey-details>
             <app-job-details
               *ngSwitchCase="CreateSurveyPhase.JOB_DETAILS"
