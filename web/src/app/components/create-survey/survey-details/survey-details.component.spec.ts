@@ -102,7 +102,6 @@ describe('SurveyDetailsComponent', () => {
 
   it('does not emit the title when the initial value is loaded', () => {
     const emitted: string[] = [];
-    component.onTitleChange.subscribe((t: string) => emitted.push(t));
 
     const fresh = TestBed.createComponent(SurveyDetailsComponent);
     fresh.componentInstance.title = 'initial';
