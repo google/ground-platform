@@ -16,6 +16,7 @@
     "app.createSurvey.surveyDetails.progress": "ສ້າງແບບສຳຫຼວດ",
     "app.createSurvey.surveyDetails.title": "ເລີ່ມສ້າງແບບສຳຫຼວດຂອງທ່ານ",
     "app.createSurvey.surveyDetails.description": "ກະລຸນາໃຫ້ຂໍ້ມູນພື້ນຖານກ່ຽວກັບແບບສຳຫຼວດ",
+    "app.createSurvey.untitledSurvey": "ແບບສຳຫຼວດທີ່ບໍ່ມີຊື່",
     "app.createSurvey.jobDetails.progress": "ເພີ່ມພາລະກິດ",
     "app.createSurvey.jobDetails.title": "ເພີ່ມພາລະກິດ",
     "app.createSurvey.jobDetails.description": "ໃນຂັ້ນຕອນຕໍ່ໄປ ທ່ານຈະກຳນົດຂໍ້ມູນທີ່ຈະຖືກເກັບສຳລັບຈຸດຕ່າງໆ ໃນພາລະກິດນີ້",

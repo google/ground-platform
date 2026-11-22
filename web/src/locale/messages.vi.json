@@ -16,6 +16,7 @@
     "app.createSurvey.surveyDetails.progress": "Tạo khảo sát",
     "app.createSurvey.surveyDetails.title": "Bắt đầu xây dựng khảo sát của bạn",
     "app.createSurvey.surveyDetails.description": "Cung cấp một số thông tin cơ bản về khảo sát của bạn",
+    "app.createSurvey.untitledSurvey": "Khảo sát chưa có tên",
     "app.createSurvey.jobDetails.progress": "Thêm công việc",
     "app.createSurvey.jobDetails.title": "Thêm công việc",
     "app.createSurvey.jobDetails.description": "Trong các bước tiếp theo, bạn sẽ xác định dữ liệu cần thu thập tại các địa điểm cụ thể cho công việc này",

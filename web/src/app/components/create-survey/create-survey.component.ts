@@ -153,7 +153,7 @@ export class CreateSurveyComponent implements OnInit {
   get headerSurveyTitle(): string {
     return (
       (this.draftSurveyTitle ?? this.survey?.title ?? '').trim() ||
-      'Untitled survey'
+      $localize`:@@app.createSurvey.untitledSurvey:Untitled survey`
     );
   }
 

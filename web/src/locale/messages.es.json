@@ -16,6 +16,7 @@
     "app.createSurvey.surveyDetails.progress": "Crear una encuesta",
     "app.createSurvey.surveyDetails.title": "Comience a construir su encuesta",
     "app.createSurvey.surveyDetails.description": "Proporcione información básica sobre su encuesta",
+    "app.createSurvey.untitledSurvey": "Encuesta sin título",
     "app.createSurvey.jobDetails.progress": "Añadir un trabajo",
     "app.createSurvey.jobDetails.title": "Añadir un trabajo",
     "app.createSurvey.jobDetails.description": "En los siguientes pasos, definirá los datos que deben ser recolectados para ciertos sitios como parte de este trabajo",

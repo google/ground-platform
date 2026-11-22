@@ -16,6 +16,7 @@
     "app.createSurvey.surveyDetails.progress": "Create a survey",
     "app.createSurvey.surveyDetails.title": "Start building your survey",
     "app.createSurvey.surveyDetails.description": "Provide some basic info about your survey",
+    "app.createSurvey.untitledSurvey": "Untitled survey",
     "app.createSurvey.jobDetails.progress": "Add a job",
     "app.createSurvey.jobDetails.title": "Add a job",
     "app.createSurvey.jobDetails.description": "In the following steps, you'll define the data that should be collected for certain sites as part of this job",

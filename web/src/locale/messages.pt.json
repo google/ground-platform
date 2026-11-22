@@ -16,6 +16,7 @@
     "app.createSurvey.surveyDetails.progress": "Criar um inquérito",
     "app.createSurvey.surveyDetails.title": "Comece a criar o seu inquérito",
     "app.createSurvey.surveyDetails.description": "Forneça algumas informações básicas sobre o seu inquérito",
+    "app.createSurvey.untitledSurvey": "Inquérito sem título",
     "app.createSurvey.jobDetails.progress": "Adicionar uma tarefa",
     "app.createSurvey.jobDetails.title": "Adicionar uma tarefa",
     "app.createSurvey.jobDetails.description": "Nos passos a seguir, irá definir os dados que devem ser coletados em determinados sítios como parte desta tarefa",
