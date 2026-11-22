@@ -42,8 +42,6 @@ export class SurveyDetailsComponent implements OnInit {
   @Output() onValueChanges: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() onTitleChange: EventEmitter<string> = new EventEmitter<string>();
 
-  private initialized = false;
-
   constructor(private formBuilder: FormBuilder) {
     this.formGroup = this.formBuilder.group({
       [this.titleControlKey]: [
@@ -63,12 +61,6 @@ export class SurveyDetailsComponent implements OnInit {
     this.formGroup.valueChanges.subscribe(_ => {
       this.onValueChanges.emit(this.formGroup?.valid);
     });
-
-    this.formGroup.controls[this.titleControlKey].valueChanges.subscribe(
-      title => {
-        if (this.initialized) this.onTitleChange.emit(title);
-      }
-    );
   }
 
   ngOnInit(): void {
@@ -76,7 +68,10 @@ export class SurveyDetailsComponent implements OnInit {
     this.formGroup.controls[this.descriptionControlKey].setValue(
       this.description
     );
-    this.initialized = true;
+
+    this.formGroup.controls[this.titleControlKey].valueChanges.subscribe(
+      title => this.onTitleChange.emit(title)
+    );
   }
 
   toTitleAndDescription(): [string, string] {
