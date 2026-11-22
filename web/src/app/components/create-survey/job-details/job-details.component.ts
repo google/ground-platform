@@ -17,6 +17,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+import { JOB_NAME_MAX_LENGTH } from 'app/models/job.model';
+
 @Component({
   selector: 'app-job-details',
   templateUrl: './job-details.component.html',
@@ -25,6 +27,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class JobDetailsComponent implements OnInit {
   readonly nameControlKey = 'name';
+  readonly nameMaxLength = JOB_NAME_MAX_LENGTH;
   formGroup!: FormGroup;
 
   @Input() name = '';
@@ -33,7 +36,10 @@ export class JobDetailsComponent implements OnInit {
 
   constructor() {
     this.formGroup = new FormBuilder().group({
-      [this.nameControlKey]: ['', Validators.required],
+      [this.nameControlKey]: [
+        '',
+        [Validators.required, Validators.maxLength(this.nameMaxLength)],
+      ],
     });
 
     this.formGroup.statusChanges.subscribe(_ => {

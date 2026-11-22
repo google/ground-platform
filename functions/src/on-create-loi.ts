@@ -14,156 +14,96 @@
  * limitations under the License.
  */
 
-import { EventContext } from 'firebase-functions/v1';
-import { QueryDocumentSnapshot } from 'firebase-functions/v1/firestore';
+import {
+  DocumentSnapshot,
+  FirestoreEvent,
+} from 'firebase-functions/v2/firestore';
 import { getDatastore } from './common/context';
-import { Datastore } from './common/datastore';
-import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
+import { withServerTimestamp } from './common/audit-info';
+import { broadcastUpdate } from './common/broadcast';
+import {
+  propertiesEqual,
+  propertiesPbToObject,
+  regenerateLoiProperties,
+} from './common/loi-properties';
 import { GroundProtos } from '@ground/proto';
-import { toDocumentData, toGeoJsonGeometry, toMessage } from '@ground/lib';
-import { geojsonToWKT } from '@terraformer/wkt';
+import { toDocumentData, toMessage } from '@ground/lib';
 import { toLoiPbProperties } from './import-geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
 
-type Properties = Record<string, string | number>;
-
-type Headers = Record<string, string>;
-
-type Body = Record<string, unknown>;
-
-type PropertyGenerator = {
-  headers?: Headers;
-  body?: Body;
-  name: string;
-  prefix: string;
-  url: string;
-};
-
-const defaultHeaders = { 'Content-Type': 'application/json' };
-
 /**
- * Handles the creation of a Location of Interest (LOI) document in Firestore.
- * This function is triggered by a Cloud Function on Firestore document creation.
+ * Fills in a newly created Location of Interest with generated properties and
+ * corrects the server timestamps its client could only guess at.
  *
- * @param snapshot The QueryDocumentSnapshot object containing the created LOI data.
- * @param context The EventContext object provided by the Cloud Functions framework.
+ * That fix-up is itself a write, which `onUpdateLoi` announces - so the
+ * broadcast is left to it, and clients never see the half-populated document.
+ * When there is nothing to fix up no update follows, so this announces the LOI
+ * itself. Between them the two handlers announce a created LOI exactly once.
+ *
+ * Imported LOIs are the exception, and are announced by neither handler:
+ * `importGeoJson` sends a single message for the whole batch once the import
+ * finishes. Their audit info is left alone too - the import stamps it just
+ * before writing, so there is nothing to correct. Their properties are still
+ * generated like everyone else's; that write simply goes unannounced.
  */
 export async function onCreateLoiHandler(
-  snapshot: QueryDocumentSnapshot,
-  context: EventContext
+  event: FirestoreEvent<DocumentSnapshot | undefined>
 ) {
-  const surveyId = context.params.surveyId;
-  const loiId = context.params.loiId;
-  const data = snapshot.data();
+  const { surveyId, loiId } = event.params;
+  const data = event.data?.data();
 
-  if (!loiId || !data) return;
+  if (!surveyId || !loiId || !data) return;
 
   const loiPb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
-
-  const geometry = toGeoJsonGeometry(loiPb.geometry!);
-
   const db = getDatastore();
 
-  let properties = propertiesPbToObject(loiPb.properties) || {};
+  const isImported = loiPb.source === Pb.LocationOfInterest.Source.IMPORTED;
 
-  const propertyGenerators = await db.fetchPropertyGenerators();
-
-  for (const propertyGeneratorDoc of propertyGenerators.docs) {
-    const propertyGenerator = propertyGeneratorDoc.data() as PropertyGenerator;
-
-    if (propertyGeneratorDoc.id === 'whisp') {
-      const { body, headers, prefix, url } = propertyGenerator;
-
-      const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
-
-      const newProperties = await fetchWhispProperties(
-        url,
-        { ...defaultHeaders, ...headers },
-        { wkt, ...body }
-      );
-
-      properties = await updateProperties(properties, newProperties, prefix);
-    }
-
-    Object.keys(properties)
-      .filter(key => typeof properties[key] === 'object')
-      .forEach(key => (properties[key] = JSON.stringify(properties[key])));
-  }
-
-  await db.updateLoiProperties(
-    surveyId,
-    loiId,
-    toDocumentData(
-      new Pb.LocationOfInterest({ properties: toLoiPbProperties(properties) })
-    )
+  const properties = await regenerateLoiProperties(db, surveyId, loiId, loiPb);
+  const auditInfo = isImported ? {} : correctedAuditInfo(loiPb, event.time);
+  const propertiesChanged = !propertiesEqual(
+    propertiesPbToObject(loiPb.properties),
+    properties
   );
 
-  await broadcastSurveyUpdate(context.params.surveyId);
+  if (propertiesChanged || Object.keys(auditInfo).length) {
+    await db.updateLoiProperties(
+      surveyId,
+      loiId,
+      toDocumentData(
+        new Pb.LocationOfInterest({
+          properties: toLoiPbProperties(properties),
+          ...auditInfo,
+        })
+      )
+    );
+
+    // onUpdateLoi announces the write just made.
+    return;
+  }
+
+  // importGeoJson announces the batch this LOI came in.
+  if (isImported) return;
+
+  return broadcastUpdate(
+    { type: 'loi', surveyId, loiId, deleted: false },
+    event.time
+  );
 }
 
-async function updateProperties(
-  properties: Properties,
-  newProperties: Properties,
-  prefix?: string
-): Promise<Properties> {
-  if (prefix) properties = removePrefixedKeys(properties, prefix);
+function correctedAuditInfo(
+  loiPb: Pb.LocationOfInterest,
+  eventTime: string
+): Partial<Pb.LocationOfInterest> {
+  if (!loiPb.created) return {};
+
+  const created = withServerTimestamp(loiPb.created, eventTime);
 
   return {
-    ...properties,
-    ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
+    created,
+    lastModified: loiPb.lastModified
+      ? withServerTimestamp(loiPb.lastModified, eventTime)
+      : created,
   };
-}
-
-async function fetchWhispProperties(
-  url: string,
-  headers: Headers,
-  body: Body
-): Promise<Properties> {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) return {};
-
-  const json = (await response.json()) as any;
-
-  if (json?.code !== 'analysis_completed') return {};
-
-  return json?.data?.features[0]?.properties || {};
-}
-
-/**
- * Returns a new object with all keys of the original object prefixed with the given value.
- */
-function prefixKeys(obj: Properties, prefix: string): Properties {
-  return Object.keys(obj).reduce(
-    (a, k) => ((a[`${prefix}${k}`] = obj[k]), a),
-    {} as Properties
-  );
-}
-
-/**
- * Returns a new object containing only the keys that do not start with the specified prefix.
- */
-function removePrefixedKeys(obj: Properties, prefix: string): Properties {
-  Object.keys(obj).forEach(k => {
-    if (k.startsWith(prefix)) delete obj[k];
-  });
-  return obj;
-}
-
-function propertiesPbToObject(pb: {
-  [k: string]: Pb.LocationOfInterest.IProperty;
-}): Properties {
-  const properties: { [k: string]: string | number } = {};
-  for (const k of Object.keys(pb)) {
-    const v = pb[k].stringValue || pb[k].numericValue;
-    if (v !== null && v !== undefined) {
-      properties[k] = v;
-    }
-  }
-  return properties;
 }

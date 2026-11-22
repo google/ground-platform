@@ -41,9 +41,16 @@ runs:
       shell: bash
       run: |
         MAX_TRIES=60
-        pnpm exec nx start-android-test-data > firebase-emulator.log 2>&1 &
+        stdbuf -oL -eL pnpm exec nx start-android-test-data > /tmp/firebase-emulator.log 2>&1 &
+        EMULATOR_PID=$!
     
         for ((i=1; i<=$MAX_TRIES; i++)); do
+          if ! kill -0 $EMULATOR_PID 2>/dev/null; then
+            echo "Firebase emulator process exited unexpectedly"
+            cat /tmp/firebase-emulator.log
+            exit 1
+          fi
+
           if curl -sf http://localhost:4000 > /dev/null 2>&1; then
             echo "Firebase emulator started!"
             exit 0
@@ -53,6 +60,5 @@ runs:
         done
     
         echo "Firebase Emulator failed to start"
-        cat firebase-emulator.log
+        cat /tmp/firebase-emulator.log
         exit 1
-        

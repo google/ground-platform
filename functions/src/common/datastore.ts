@@ -14,17 +14,34 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions/v1';
-import { firestore } from 'firebase-admin';
-import { DocumentData, FieldPath, GeoPoint } from 'firebase-admin/firestore';
-import { registry } from '@ground/lib';
+import { UserRecord } from 'firebase-admin/auth';
+import {
+  DocumentData,
+  DocumentReference,
+  FieldPath,
+  FieldValue,
+  Firestore,
+  GeoPoint,
+  QuerySnapshot,
+} from 'firebase-admin/firestore';
+import type { Geometry } from 'geojson';
+import { registry, toDocumentData } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
+import { toTimestampPb } from './audit-info';
 import { QueryIterator, leftOuterJoinSorted } from './query-iterator';
 
 const l = registry.getFieldIds(Pb.LocationOfInterest);
+const sv = registry.getFieldIds(Pb.Survey);
 const sb = registry.getFieldIds(Pb.Submission);
+const ai = registry.getFieldIds(Pb.AuditInfo);
+
+/** gRPC status code returned by Firestore when a document doesn't exist. */
+const GRPC_STATUS_NOT_FOUND = 5;
+
+/** How long cached property generator configs are reused before re-reading. */
+const PROPERTY_GENERATORS_TTL_MS = 5 * 60 * 60 * 1000;
 
 /**
  *
@@ -100,9 +117,11 @@ export const mailTemplate = (templateId: string) =>
   `${mail()}/templates/${templateId}`;
 
 export class Datastore {
-  private db_: firestore.Firestore;
+  private db_: Firestore;
+  private propertyGenerators_?: QuerySnapshot;
+  private propertyGeneratorsExpiry_ = 0;
 
-  constructor(db: firestore.Firestore) {
+  constructor(db: Firestore) {
     this.db_ = db;
     db.settings({ ignoreUndefinedProperties: true });
   }
@@ -111,7 +130,7 @@ export class Datastore {
    * Stores user email, name, and avatar to db for use in application LOIs.
    * These attributes are merged with other existing ones if already present.
    */
-  async mergeUserProfile(user: functions.auth.UserRecord) {
+  async mergeUserProfile(user: UserRecord) {
     const { uid, email, displayName, photoURL } = user;
     await this.db_.doc(`users/${uid}`).set(
       {
@@ -124,8 +143,8 @@ export class Datastore {
   }
 
   async fetch_(
-    docRef: firestore.DocumentReference
-  ): Promise<firestore.DocumentData | null | undefined> {
+    docRef: DocumentReference
+  ): Promise<DocumentData | null | undefined> {
     const doc = await docRef.get();
     return doc.exists ? doc.data() : null;
   }
@@ -138,8 +157,20 @@ export class Datastore {
     return this.db_.collection(path).get();
   }
 
-  fetchPropertyGenerators() {
-    return this.db_.collection(integrations() + '/propertyGenerators').get();
+  /**
+   * Returns the property generator configs, caching the result for up to
+   * PROPERTY_GENERATORS_TTL_MS. These are global configs which change rarely,
+   * and which would otherwise be re-read once per created LOI.
+   */
+  async fetchPropertyGenerators(): Promise<QuerySnapshot> {
+    const now = Date.now();
+    if (!this.propertyGenerators_ || now > this.propertyGeneratorsExpiry_) {
+      this.propertyGenerators_ = await this.db_
+        .collection(integrations() + '/propertyGenerators')
+        .get();
+      this.propertyGeneratorsExpiry_ = now + PROPERTY_GENERATORS_TTL_MS;
+    }
+    return this.propertyGenerators_;
   }
 
   fetchMailConfig() {
@@ -158,11 +189,28 @@ export class Datastore {
     return this.fetchDoc_(loi(surveyId, loiId));
   }
 
+  fetchSubmission(surveyId: string, submissionId: string) {
+    return this.db_.doc(submission(surveyId, submissionId)).get();
+  }
+
   fetchLocationsOfInterest(surveyId: string, jobId: string) {
     return this.db_
       .collection(lois(surveyId))
       .where(l.jobId, '==', jobId)
       .get();
+  }
+
+  fetchPartialLocationsOfInterest(
+    surveyId: string,
+    jobId: string,
+    limit: number
+  ) {
+    return this.db_
+      .collection(lois(surveyId))
+      .where(l.jobId, '==', jobId)
+      .orderBy(FieldPath.documentId())
+      .select(String(l.ownerId), String(l.source), String(l.properties))
+      .limit(limit);
   }
 
   fetchMailTemplate(templateId: string) {
@@ -214,6 +262,27 @@ export class Datastore {
     await this.db_.doc(survey(surveyId)).collection('lois').add(loiDoc);
   }
 
+  /**
+   * Bulk-inserts `loiDocs`, returning the id of the last one created so that
+   * callers can name it when announcing the batch. Returns null when there was
+   * nothing to insert.
+   */
+  async insertLocationsOfInterest(
+    surveyId: string,
+    loiDocs: DocumentData[]
+  ): Promise<string | null> {
+    const bulkWriter = this.db_.bulkWriter();
+    const collectionRef = this.db_.collection(lois(surveyId));
+    let lastId: string | null = null;
+    for (const loiDoc of loiDocs) {
+      const docRef = collectionRef.doc();
+      bulkWriter.create(docRef, loiDoc);
+      lastId = docRef.id;
+    }
+    await bulkWriter.close();
+    return lastId;
+  }
+
   async countSubmissionsForLoi(
     surveyId: string,
     loiId: string
@@ -226,7 +295,28 @@ export class Datastore {
 
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({ [l.submissionCount]: count });
+    try {
+      await loiRef.update({ [l.submissionCount]: count });
+    } catch (e) {
+      if ((e as { code?: number }).code === GRPC_STATUS_NOT_FOUND) return;
+      throw e;
+    }
+  }
+
+  async adjustSubmissionCount(surveyId: string, loiId: string, delta: number) {
+    const loiRef = this.db_.doc(loi(surveyId, loiId));
+    await this.db_.runTransaction(async tx => {
+      const loiDoc = (await tx.get(loiRef)).data();
+      if (!loiDoc) return;
+      const lastModified = loiDoc[l.lastModified] ?? loiDoc[l.created] ?? {};
+      tx.update(loiRef, {
+        [l.submissionCount]: FieldValue.increment(delta),
+        [l.lastModified]: {
+          ...lastModified,
+          [ai.serverTimestamp]: toDocumentData(toTimestampPb(Date.now())),
+        },
+      });
+    });
   }
 
   async updateLoiProperties(
@@ -235,7 +325,22 @@ export class Datastore {
     loiDoc: DocumentData
   ) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({ [l.properties]: loiDoc[l.properties] });
+    const update: DocumentData = { [l.properties]: loiDoc[l.properties] };
+    if (l.created in loiDoc) update[l.created] = loiDoc[l.created];
+    if (l.lastModified in loiDoc)
+      update[l.lastModified] = loiDoc[l.lastModified];
+    await loiRef.update(update);
+  }
+
+  async updateSurveyAuditInfo(surveyId: string, surveyDoc: DocumentData) {
+    const surveyRef = this.db_.doc(survey(surveyId));
+    const update: DocumentData = {};
+    if (sv.created in surveyDoc) update[sv.created] = surveyDoc[sv.created];
+    if (sv.lastModified in surveyDoc)
+      update[sv.lastModified] = surveyDoc[sv.lastModified];
+    // Firestore rejects an update with no fields.
+    if (Object.keys(update).length === 0) return;
+    await surveyRef.update(update);
   }
 
   static toFirestoreMap(geometry: any) {
@@ -275,7 +380,7 @@ export class Datastore {
    *
    * @returns GeoJSON geometry object (with geometry as list of lists)
    */
-  static fromFirestoreMap(geoJsonGeometry: any): any {
+  static fromFirestoreMap(geoJsonGeometry: object): Geometry {
     const geometryObject = geoJsonGeometry as pseudoGeoJsonGeometry;
     if (!geometryObject) {
       throw new Error(
@@ -287,7 +392,7 @@ export class Datastore {
       geometryObject.coordinates
     );
 
-    return geometryObject;
+    return geometryObject as unknown as Geometry;
   }
 
   static fromFirestoreValue(coordinates: any) {

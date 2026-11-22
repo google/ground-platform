@@ -23,6 +23,7 @@ import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.
 import { TaskEditorComponent } from 'app/components/shared/task-editor/task-editor.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
+import { SurveyState } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
@@ -78,6 +79,14 @@ export class EditJobComponent {
     );
   }
 
+  /**
+   * Whether the survey is published, and so may already hold submissions that
+   * depend on the type of its tasks.
+   */
+  get isSurveyPublished(): boolean {
+    return this.draftSurveyService.getSurvey().state === SurveyState.READY;
+  }
+
   async ngOnInit(): Promise<void> {
     this.subscription.add(
       this.route.params.subscribe(async params => {
@@ -97,8 +106,12 @@ export class EditJobComponent {
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
+    this.addLoiTaskId = this.job?.tasks?.find(task => !!task.addLoiTask)?.id;
+
     if (!this.job) return;
 
+    this.loisSubscription.unsubscribe();
+    this.loisSubscription = new Subscription();
     this.loisSubscription.add(
       this.loiService
         .getPredefinedLoisByJobId$(
@@ -129,19 +142,21 @@ export class EditJobComponent {
   }
 
   onStrategyChange(strategy: DataCollectionStrategy) {
-    const addLoiTask = this.job?.tasks?.find(task => !!task.addLoiTask);
+    const job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+
+    if (!job) return;
+
+    const addLoiTask = job.tasks?.find(task => !!task.addLoiTask);
 
     if (addLoiTask) this.addLoiTaskId = addLoiTask.id;
 
     const tasks = this.taskService.updateLoiTasks(
-      this.job?.tasks,
+      job.tasks,
       strategy,
       this.addLoiTaskId
     );
 
-    this.draftSurveyService.addOrUpdateJob(
-      this.job!.copyWith({ tasks, strategy })
-    );
+    this.draftSurveyService.addOrUpdateJob(job.copyWith({ tasks, strategy }));
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 

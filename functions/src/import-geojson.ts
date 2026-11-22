@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 
-import functions from 'firebase-functions/v1';
+import { Request } from 'firebase-functions/v2/https';
+import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { getDatastore } from './common/context';
+import { broadcastUpdate } from './common/broadcast';
+import { toTimestampPb } from './common/audit-info';
 import Busboy from 'busboy';
 import JSONStream from 'jsonstream-ts';
 import { canImport } from './common/auth';
 import { DecodedIdToken } from 'firebase-admin/auth';
+import { DocumentData } from 'firebase-admin/firestore';
 import { GroundProtos } from '@ground/proto';
-import { isGeometryValid, toDocumentData, toGeometryPb } from '@ground/lib';
+import {
+  isGeometryValid,
+  registry,
+  toDocumentData,
+  toGeometryPb,
+} from '@ground/lib';
 import { Feature, GeoJsonProperties } from 'geojson';
 import { ErrorHandler } from './handlers';
 
 import Pb = GroundProtos.ground.v1beta1;
+
+const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 class BadRequestError extends Error {
   statusCode = StatusCodes.BAD_REQUEST;
@@ -37,8 +48,8 @@ class BadRequestError extends Error {
  * and required 'survey' id and 'job' id to the database.
  */
 export function importGeoJsonCallback(
-  req: functions.https.Request,
-  res: functions.Response<any>,
+  req: Request,
+  res: Response,
   user: DecodedIdToken,
   done: () => void,
   error: ErrorHandler
@@ -57,9 +68,8 @@ export function importGeoJsonCallback(
   // Dictionary used to accumulate task step values, keyed by step name.
   const params: { [name: string]: string } = {};
 
-  // Accumulate Promises for insert operations, so we don't finalize the res
-  // stream before operations are complete.
-  const inserts: any[] = [];
+  // Accumulate LOI documents to be bulk-inserted once the file is fully parsed.
+  const loiDocs: DocumentData[] = [];
 
   const db = getDatastore();
 
@@ -67,45 +77,49 @@ export function importGeoJsonCallback(
 
   // This code will process each file uploaded.
   busboy.on('file', async (_fieldname, fileStream) => {
-    const { survey: surveyId, job: jobId } = params;
-    if (!surveyId || !jobId) {
-      return error(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
-    }
-    const survey = await db.fetchSurvey(surveyId);
-    if (!survey.exists) {
-      return error(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
-    }
-    if (!canImport(user, survey)) {
-      return error(
-        StatusCodes.FORBIDDEN,
-        `User does not have permission to import into survey ${surveyId}`
+    try {
+      const { survey: surveyId, job: jobId } = params;
+      if (!surveyId || !jobId) {
+        return error(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
+      }
+      const survey = await db.fetchSurvey(surveyId);
+      if (!survey.exists) {
+        return error(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
+      }
+      if (!canImport(user, survey)) {
+        return error(
+          StatusCodes.FORBIDDEN,
+          `User does not have permission to import into survey ${surveyId}`
+        );
+      }
+
+      console.debug(
+        `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
       );
+
+      const parser = JSONStream.parse(['features', true], undefined);
+
+      fileStream.pipe(
+        parser
+          .on('header', (data: any) => {
+            try {
+              onGeoJsonType(data.type);
+              if (data.crs) onGeoJsonCrs(data.crs);
+            } catch (error: any) {
+              busboy.emit('error', error);
+            }
+          })
+          .on('data', (data: any) => {
+            if (!hasError) onGeoJsonFeature(data, jobId);
+          })
+      );
+    } catch (err) {
+      busboy.emit('error', err);
     }
-
-    console.debug(
-      `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
-    );
-
-    const parser = JSONStream.parse(['features', true], undefined);
-
-    fileStream.pipe(
-      parser
-        .on('header', (data: any) => {
-          try {
-            onGeoJsonType(data.type);
-            if (data.crs) onGeoJsonCrs(data.crs);
-          } catch (error: any) {
-            busboy.emit('error', error);
-          }
-        })
-        .on('data', (data: any) => {
-          if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
-        })
-    );
   });
 
-  // Handle non-file fields in the task. survey and job must appear
-  // before the file for the file handler to work properly.
+  // Handle non-file fields in the task. survey, job, and clientTimestamp must
+  // appear before the file for the file handler to work properly.
   busboy.on('field', (key, val) => {
     params[key] = val;
   });
@@ -114,9 +128,25 @@ export function importGeoJsonCallback(
   busboy.on('finish', async () => {
     if (hasError) return;
     try {
-      await Promise.all(inserts);
-      const count = inserts.length;
+      const surveyId = params.survey;
+
+      // Stamped here rather than while parsing: a large file takes minutes to
+      // read, and clients delta-sync on last_modified, so the timestamp has to
+      // sit as close to the write as possible or the batch sorts before a
+      // checkpoint taken while it was still being parsed.
+      stampAuditInfo(loiDocs, toAuditInfoPb(ownerId, params.clientTimestamp));
+
+      const lastLoiId = await db.insertLocationsOfInterest(surveyId, loiDocs);
+      const count = loiDocs.length;
       console.debug(`${count} LOIs imported`);
+
+      if (lastLoiId) {
+        await broadcastUpdate(
+          { type: 'loi', surveyId, loiId: lastLoiId, deleted: false },
+          new Date().toISOString()
+        );
+      }
+
       res.send(JSON.stringify({ count }));
       done();
     } catch (err) {
@@ -182,11 +212,7 @@ export function importGeoJsonCallback(
    * GeoJSON Feature objects within the file. It checks the feature type, geometry
    * validity, and converts the feature to a document data format for insertion.
    */
-  function onGeoJsonFeature(
-    geoJsonFeature: any,
-    surveyId: string,
-    jobId: string
-  ) {
+  function onGeoJsonFeature(geoJsonFeature: any, jobId: string) {
     if (geoJsonFeature.type !== 'Feature') {
       console.debug(
         `Skipping Feature with invalid type ${geoJsonFeature.type}`
@@ -202,10 +228,9 @@ export function importGeoJsonCallback(
       return;
     }
     try {
-      const loi = toDocumentData(
-        toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
+      loiDocs.push(
+        toDocumentData(toLoiPb(geoJsonFeature as Feature, jobId, ownerId))
       );
-      inserts.push(db.insertLocationOfInterest(surveyId, loi));
     } catch (loiErr) {
       console.debug('Skipping LOI', loiErr);
     }
@@ -221,7 +246,6 @@ function toLoiPb(
   jobId: string,
   ownerId: string
 ): Pb.LocationOfInterest {
-  // TODO: Add created/modified metadata.
   const { id, geometry, properties } = feature;
   const geometryPb = toGeometryPb(geometry);
   return new Pb.LocationOfInterest({
@@ -232,6 +256,45 @@ function toLoiPb(
     geometry: geometryPb,
     properties: toLoiPbProperties(properties),
   });
+}
+
+/** Sets `auditInfo` as both created and lastModified on every doc in `loiDocs`. */
+function stampAuditInfo(loiDocs: DocumentData[], auditInfo: Pb.AuditInfo) {
+  const auditData = toDocumentData(
+    new Pb.LocationOfInterest({
+      created: auditInfo,
+      lastModified: auditInfo,
+    })
+  ) as DocumentData;
+  // Only the two audit fields: toDocumentData also emits defaults for every
+  // other field, which would overwrite the ones already set on the doc.
+  for (const loiDoc of loiDocs) {
+    loiDoc[l.created] = auditData[l.created];
+    loiDoc[l.lastModified] = auditData[l.lastModified];
+  }
+}
+
+function toAuditInfoPb(
+  ownerId: string,
+  clientTimestamp?: string
+): Pb.AuditInfo {
+  const serverTimeMillis = Date.now();
+  const clientTimeMillis = toMillis(clientTimestamp) ?? serverTimeMillis;
+  return new Pb.AuditInfo({
+    userId: ownerId,
+    clientTimestamp: toTimestampPb(clientTimeMillis),
+    serverTimestamp: toTimestampPb(serverTimeMillis),
+  });
+}
+
+function toMillis(value: string | undefined): number | null {
+  if (!value) return null;
+  const millis = Number(value);
+  if (!Number.isFinite(millis)) {
+    console.debug(`Ignoring invalid client timestamp '${value}'`);
+    return null;
+  }
+  return millis;
 }
 
 export function toLoiPbProperties(properties: GeoJsonProperties): {

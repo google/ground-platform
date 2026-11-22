@@ -15,18 +15,29 @@
  */
 
 import 'module-alias/register';
-import * as functions from 'firebase-functions/v1';
+import { onSchedule } from 'firebase-functions/scheduler';
+import {
+  onDocumentCreated,
+  onDocumentDeleted,
+  onDocumentUpdated,
+  onDocumentWritten,
+} from 'firebase-functions/v2/firestore';
 import { onHttpsRequest, onHttpsRequestAsync } from './handlers';
 import { handleProfileRefresh } from './profile-refresh';
 import { sessionLoginHandler } from './session-login';
 import { importGeoJsonCallback } from './import-geojson';
 import { exportCsvHandler } from './export-csv';
 import { exportGeojsonHandler } from './export-geojson';
+import { exportMediaHandler } from './export-media';
+import { cleanTempHandler } from './clean-temp';
+import { cleanOrphanMediaHandler } from './clean-orphan-media';
 import { onCall } from 'firebase-functions/v2/https';
 import { onCreateLoiHandler } from './on-create-loi';
 import { onCreatePasslistEntryHandler } from './on-create-passlist-entry';
+import { onDeleteSubmissionHandler } from './on-delete-submission';
+import { onDeleteLoiHandler } from './on-delete-loi';
+import { onUpdateLoiHandler } from './on-update-loi';
 import { onWriteJobHandler } from './on-write-job';
-import { onWriteLoiHandler } from './on-write-loi';
 import { onWriteSubmissionHandler } from './on-write-submission';
 import { onWriteSurveyHandler } from './on-write-survey';
 import {
@@ -37,6 +48,7 @@ import {
   survey,
 } from './common/datastore';
 import { initializeFirebaseApp } from './common/context';
+import { smtpPassword } from './common/secrets';
 
 // Ensure Firebase is initialized.
 initializeFirebaseApp();
@@ -60,34 +72,68 @@ export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
 };
 
-export const onCreatePasslistEntry = functions.firestore
-  .document(passlistEntryPathTemplate)
-  .onCreate(onCreatePasslistEntryHandler);
+export const onCreatePasslistEntry = onDocumentCreated(
+  { document: passlistEntryPathTemplate, secrets: [smtpPassword] },
+  onCreatePasslistEntryHandler
+);
 
-export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
+export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback, {
+  memory: '4GiB',
+  timeoutSeconds: 3600,
+  cpu: 2,
+});
 
-export const exportCsv = onHttpsRequest(exportCsvHandler);
+export const exportCsv = onHttpsRequest(exportCsvHandler, {
+  memory: '4GiB',
+  timeoutSeconds: 3600,
+  cpu: 2,
+});
 
-export const exportGeojson = onHttpsRequest(exportGeojsonHandler);
+export const exportGeojson = onHttpsRequest(exportGeojsonHandler, {
+  memory: '4GiB',
+  timeoutSeconds: 3600,
+  cpu: 2,
+});
 
-export const onCreateLoi = functions.firestore
-  .document(loiPathTemplate)
-  .onCreate(onCreateLoiHandler);
+export const exportMedia = onHttpsRequest(exportMediaHandler);
 
-export const onWriteJob = functions.firestore
-  .document(jobPathTemplate)
-  .onWrite(onWriteJobHandler);
+export const onCreateLoi = onDocumentCreated(
+  loiPathTemplate,
+  onCreateLoiHandler
+);
 
-export const onWriteLoi = functions.firestore
-  .document(loiPathTemplate)
-  .onWrite(onWriteLoiHandler);
+export const onWriteJob = onDocumentWritten(jobPathTemplate, onWriteJobHandler);
 
-export const onWriteSubmission = functions.firestore
-  .document(submissionPathTemplate)
-  .onWrite(onWriteSubmissionHandler);
+export const onUpdateLoi = onDocumentUpdated(
+  loiPathTemplate,
+  onUpdateLoiHandler
+);
 
-export const onWriteSurvey = functions.firestore
-  .document(surveyPathTemplate)
-  .onWrite(onWriteSurveyHandler);
+export const onDeleteLoi = onDocumentDeleted(
+  loiPathTemplate,
+  onDeleteLoiHandler
+);
+
+export const onWriteSubmission = onDocumentWritten(
+  submissionPathTemplate,
+  onWriteSubmissionHandler
+);
+
+export const onDeleteSubmission = onDocumentDeleted(
+  submissionPathTemplate,
+  onDeleteSubmissionHandler
+);
+
+export const onWriteSurvey = onDocumentWritten(
+  surveyPathTemplate,
+  onWriteSurveyHandler
+);
 
 export const sessionLogin = onHttpsRequest(sessionLoginHandler);
+
+export const cleanTemp = onSchedule('every 1 hours', cleanTempHandler);
+
+export const cleanOrphanMedia = onSchedule(
+  'every 24 hours',
+  cleanOrphanMediaHandler
+);

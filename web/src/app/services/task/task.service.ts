@@ -19,6 +19,7 @@ import { List, Map } from 'immutable';
 
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { MultipleChoice } from 'app/models/task/multiple-choice.model';
+import { Option } from 'app/models/task/option.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 
@@ -51,40 +52,40 @@ export class TaskService {
   }
 
   /**
-   * Creates a duplicate of the provided task.
-   * @param task - The task to be duplicated.
-   * @param preserveId - If true, keeps the original task ID.
-   * If false (default), generates a new unique ID for the duplicate.
-   * @returns A new Task instance with duplicated nested properties.
+   * Creates a duplicate of the provided task with a freshly generated id
+   * (and fresh option ids for multiple-choice tasks). Note: `condition`
+   * references are copied verbatim — when duplicating tasks across a job
+   * boundary, the caller is responsible for remapping them.
    */
-  duplicateTask(task: Task, preserveId: boolean = false): Task {
-    return {
-      ...task,
-      id: preserveId ? task.id : this.dataStoreService.generateId(),
-      multipleChoice: task.multipleChoice
-        ? this.duplicateMultipleChoice(task.multipleChoice, preserveId)
+  duplicateTask(task: Task): Task {
+    return new Task(
+      this.dataStoreService.generateId(),
+      task.type,
+      task.label,
+      task.required,
+      task.index,
+      task.multipleChoice
+        ? this.duplicateMultipleChoice(task.multipleChoice)
         : undefined,
-    } as Task;
+      task.condition,
+      task.addLoiTask
+    );
   }
 
-  /**
-   * Creates a duplicate of the provided multiple choice object.
-   * @param multipleChoice - The multiple choice attribute to be duplicated.
-   * @param preserveId - If true, keeps the original option IDs.
-   * If false (default), generates new unique IDs for the options.
-   * @returns A new MultipleChoice instance with duplicated options.
-   */
-  duplicateMultipleChoice(
-    multipleChoice: MultipleChoice,
-    preserveId: boolean = false
-  ): MultipleChoice {
-    return {
-      ...multipleChoice,
-      options: multipleChoice.options?.map(option => ({
-        ...option,
-        id: preserveId ? option.id : this.dataStoreService.generateId(),
-      })),
-    } as MultipleChoice;
+  duplicateMultipleChoice(multipleChoice: MultipleChoice): MultipleChoice {
+    return new MultipleChoice(
+      multipleChoice.cardinality,
+      multipleChoice.options.map(
+        option =>
+          new Option(
+            this.dataStoreService.generateId(),
+            option.code,
+            option.label,
+            option.index
+          )
+      ),
+      multipleChoice.hasOtherOption
+    );
   }
 
   addOrUpdateTasks(

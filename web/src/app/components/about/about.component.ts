@@ -17,6 +17,8 @@
 import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 
+import { buildCommitId, buildVersion } from 'environments/build-info.generated';
+
 @Component({
   selector: 'ground-about-page',
   templateUrl: './about.component.html',
@@ -24,6 +26,9 @@ import { Component } from '@angular/core';
   standalone: false,
 })
 export class AboutComponent {
+  readonly buildVersion = buildVersion;
+  readonly buildCommitId = buildCommitId;
+
   constructor(private location: Location) {}
 
   onBackButtonClick() {

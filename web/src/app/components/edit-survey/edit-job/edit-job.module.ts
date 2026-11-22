@@ -23,6 +23,7 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 
 import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
+import { JobIntegrationEditorModule } from 'app/components/shared/job-integration-editor/job-integration-editor.module';
 import { LoiEditorModule } from 'app/components/shared/loi-editor/loi-editor.module';
 import { TaskEditorModule } from 'app/components/shared/task-editor/task-editor.module';
 
@@ -33,6 +34,7 @@ import { TaskEditorModule } from 'app/components/shared/task-editor/task-editor.
     MatButtonToggleGroup,
     MatButtonToggle,
     MatIconModule,
+    JobIntegrationEditorModule,
     LoiEditorModule,
     TaskEditorModule,
   ],

@@ -19,11 +19,15 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { MatIconRegistry } from '@angular/material/icon';
+import { MAT_SELECT_CONFIG } from '@angular/material/select';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import {
   connectFirestoreEmulator,
-  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   provideFirestore,
 } from '@angular/fire/firestore';
 import {
@@ -31,6 +35,7 @@ import {
   getFunctions,
   provideFunctions,
 } from '@angular/fire/functions';
+import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import {
   getRemoteConfig,
   provideRemoteConfig,
@@ -43,7 +48,7 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from 'app/app.component';
-import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
+import { MainPageModule } from 'app/components/main-page/main-page.module';
 import { AppRoutingModule } from 'app/routing.module';
 import { environment } from 'environments/environment';
 
@@ -55,7 +60,7 @@ import { environment } from 'environments/environment';
     BrowserModule,
     AppRoutingModule,
 
-    MainPageContainerModule,
+    MainPageModule,
   ],
   providers: [
     provideFirebaseApp(() => initializeApp(environment.firebase!)),
@@ -69,7 +74,20 @@ import { environment } from 'environments/environment';
       return auth;
     }),
     provideFirestore(() => {
-      const firestore = getFirestore();
+      // Persist the Firestore cache in IndexedDB so reloads resume listeners
+      // from the local cache instead of re-reading every document. Skipped
+      // with the emulator, whose state resets on restart while IndexedDB
+      // would keep the old documents.
+      const firestore = initializeFirestore(
+        getApp(),
+        environment.useEmulators
+          ? {}
+          : {
+              localCache: persistentLocalCache({
+                tabManager: persistentMultipleTabManager(),
+              }),
+            }
+      );
       if (environment.useEmulators) {
         connectFirestoreEmulator(firestore, 'localhost', 8080);
       }
@@ -82,6 +100,9 @@ import { environment } from 'environments/environment';
       }
       return functions;
     }),
+    ...(environment.firebase?.measurementId
+      ? [provideAnalytics(() => getAnalytics())]
+      : []),
     provideRemoteConfig(() => getRemoteConfig()),
     provideStorage(() => {
       const storage = getStorage();
@@ -92,6 +113,11 @@ import { environment } from 'environments/environment';
     }),
 
     provideHttpClient(withInterceptorsFromDi()),
+    { provide: MAT_SELECT_CONFIG, useValue: { panelWidth: null } },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(iconRegistry: MatIconRegistry) {
+    iconRegistry.setDefaultFontSetClass('material-symbols-outlined');
+  }
+}

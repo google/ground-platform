@@ -41,6 +41,7 @@ export class DataImportService {
     const formData = new FormData();
     formData.set('survey', surveyId);
     formData.set('job', jobId);
+    formData.set('clientTimestamp', Date.now().toString());
     formData.append('file', file);
     let importUrl;
     if (file.name.endsWith('.geojson') || file.name.endsWith('.json')) {

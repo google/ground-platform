@@ -16,15 +16,19 @@
 
 <div class="page">
   <ground-survey-header
-    *ngIf="survey; let activeSurvey"
-    [activeSurvey]="activeSurvey"
+    *ngIf="activeSurvey()"
+    [activeSurvey]="activeSurvey()"
   ></ground-survey-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->
   <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
     <div>
       <mat-spinner></mat-spinner>
-      <p class="loading-label" i18n="@@app.labels.loadingSurvey">Loading survey...</p>
+      <p class="loading-label">
+        <ng-container i18n="@@app.labels.loadingSurvey"
+          >Loading survey...</ng-container
+        >
+      </p>
     </div>
   </div>
   <div *ngIf="survey" class="container">
@@ -35,12 +39,12 @@
         [routerLink]="['./survey']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="material-symbols-outlined button-icon" matListItemIcon>
+        <mat-icon class="button-icon" matListItemIcon>
           quick_reference_all
         </mat-icon>
-        <span matListItemTitle i18n="@@app.editSurvey.surveyDetails.title">
-          Survey details
-        </span>
+        <span matListItemTitle i18n="@@app.editSurvey.surveyDetails.title"
+          >Survey details</span
+        >
       </a>
 
       <a
@@ -49,12 +53,12 @@
         [routerLink]="['./share']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="material-symbols-outlined button-icon" matListItemIcon>
+        <mat-icon class="button-icon" matListItemIcon>
           group
         </mat-icon>
-        <span matListItemTitle i18n="@@app.editSurvey.sharing.title">
-          Sharing
-        </span>
+        <span matListItemTitle i18n="@@app.editSurvey.sharing.title"
+          >Sharing</span
+        >
       </a>
 
       <a
@@ -64,7 +68,7 @@
         [routerLink]="['./json']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="material-symbols-outlined button-icon" matListItemIcon>
+        <mat-icon class="button-icon" matListItemIcon>
           code
         </mat-icon>
         <span matListItemTitle>JSON</span>
@@ -72,12 +76,8 @@
 
       <div class="job-label-and-add-button">
         <h3 matSubheader class="job-label" i18n="@@app.labels.jobs">Jobs</h3>
-        <button
-          mat-icon-button
-          id="add-button"
-          (click)="addJob()"
-        >
-          <mat-icon class="material-symbols-outlined">add</mat-icon>
+        <button mat-icon-button id="add-button" (click)="addJob()">
+          <mat-icon>add</mat-icon>
         </button>
       </div>
 
@@ -89,7 +89,7 @@
         [routerLink]="jobRouterLink(job.id)"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="icon" [ngStyle]="{ color: job.color }" matListItemIcon>
+        <mat-icon class="icon" fontSet="material-icons" [ngStyle]="{ color: job.color }" matListItemIcon>
           label
         </mat-icon>
 
@@ -109,27 +109,24 @@
           <button
             mat-menu-item
             id="rename-button-{{ i }}"
-            i18n="@@app.labels.rename"
             (click)="renameJob(job)"
           >
-            Rename
+            <ng-container i18n="@@app.labels.rename">Rename</ng-container>
           </button>
           <button
             mat-menu-item
             id="duplicate-button-{{ i }}"
-            i18n="@@app.labels.duplicate"
             (click)="duplicateJob(job)"
           >
-            Duplicate
+            <ng-container i18n="@@app.labels.duplicate">Duplicate</ng-container>
           </button>
           <mat-divider></mat-divider>
           <button
             mat-menu-item
             id="delete-button-{{ i }}"
-            i18n="@@app.labels.remove"
             (click)="deleteJob(job)"
           >
-            Remove
+            <ng-container i18n="@@app.labels.remove">Remove</ng-container>
           </button>
         </mat-menu>
       </a>
@@ -142,12 +139,6 @@
         </h1>
 
         <router-outlet></router-outlet>
-
-        <div class="button-section" *ngIf="navigationService.isShareSurveyPage()">
-          <ground-copy-survey-controls
-            [surveyId]="surveyId"
-          ></ground-copy-survey-controls>
-        </div>
       </div>
     </div>
   </div>

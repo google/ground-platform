@@ -14,17 +14,49 @@
  * limitations under the License.
  */
 
-::ng-deep .mat-mdc-list .mat-mdc-list-item .mat-line {
-  word-wrap: break-word !important;
-  white-space: pre-wrap !important;
-}
-
 .job-list-item-container {
   margin-bottom: 8px;
 }
 
 .job-tree-node {
   display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  position: relative;
+
+  .expand-toggle {
+    position: absolute;
+    left: -16px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    color: inherit;
+    transition: transform 0.15s ease-in-out;
+
+    &:hover {
+      background: rgb(0 0 0 / 6%);
+    }
+
+    &.expanded {
+      transform: rotate(90deg);
+    }
+
+    .expand-toggle-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+    }
+  }
 
   .job-tree-node-label {
     min-width: 0;
@@ -32,13 +64,26 @@
     align-items: center;
     gap: 8px;
     flex: 1;
+    margin-left: 8px;
 
     .job-name {
       flex: 1;
+      min-width: 0;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
     }
+  }
+
+  .job-menu-trigger {
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
+  }
+
+  &:hover .job-menu-trigger,
+  &:focus-within .job-menu-trigger,
+  .job-menu-trigger[aria-expanded='true'] {
+    opacity: 1;
   }
 }
 
@@ -47,18 +92,52 @@
   height: 24px;
 }
 
+.loi-list {
+  width: 100%;
+}
+
 .loi-tree-node {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 36px;
+  padding: 0;
+  border: none;
   border-radius: 24px;
+  font: inherit;
+  text-align: start;
   cursor: pointer;
+  min-width: 0;
+
+  .loi-icon {
+    flex-shrink: 0;
+  }
+
+  &.expanded .loi-icon {
+    margin-left: 8px;
+  }
 
   .loi-name {
     flex: 1;
+    min-width: 0;
     padding-left: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  &.tree-node-selected {
-    .loi-name {
-      font-weight: 700;
-    }
+  .loi-submission-count {
+    flex-shrink: 0;
+    padding: 0 16px;
+    min-width: 48px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
+}
+
+.loi-collapsed-toggle {
+  display: flex;
+  height: 36px;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }

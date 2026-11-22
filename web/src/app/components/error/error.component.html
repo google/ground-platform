@@ -18,22 +18,32 @@
   <ground-header></ground-header>
 
   <div *ngIf="!isLoading" class="page-content">
-      <img src="assets/img/access-denied.svg">
+    <img src="assets/img/access-denied.svg" />
 
-      <ng-container *ngIf="errorType == ErrorType.GENERIC">
-        <h1 i18n="@@app.error.generic">Oops, something went wrong</h1>
+    <ng-container *ngIf="errorType === ErrorType.GENERIC">
+      <h1 i18n="@@app.error.generic">Oops, something went wrong</h1>
 
-        <h2>{{error}}</h2>
-      </ng-container>
+      <h2>{{ error }}</h2>
+    </ng-container>
 
-      <ng-container *ngIf="errorType == ErrorType.ACCESS_DENIED">
-        <h1 i18n="@@app.error.accessDenied">Access denied</h1>
+    <ng-container *ngIf="errorType === ErrorType.ACCESS_DENIED">
+      <h1 i18n="@@app.error.accessDenied">Access denied</h1>
 
-        <h2 *ngIf="accessDeniedMessage.message">{{accessDeniedMessage.message}}</h2>
+      <h2 *ngIf="accessDeniedMessage.message">
+        {{ accessDeniedMessage.message }}
+      </h2>
 
-        <a *ngIf="accessDeniedMessage.link" mat-flat-button color="primary" href="{{accessDeniedMessage.link}}" target="_blank" i18n="@@app.error.clickHereToRegister">
-          Click here to register
-        </a>
-      </ng-container>
-    </div>
+      <a
+        *ngIf="accessDeniedMessage.link"
+        mat-flat-button
+        color="primary"
+        href="{{ accessDeniedMessage.link }}"
+        target="_blank"
+      >
+        <ng-container i18n="@@app.error.clickHereToRegister"
+          >Click here to register</ng-container
+        >
+      </a>
+    </ng-container>
+  </div>
 </div>

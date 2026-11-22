@@ -15,7 +15,7 @@
 -->
 
 <div class="header">
-  <div>
+  <div class="header-left">
     <ng-content select="[beginning]"></ng-content>
     <img
       class="logo"
@@ -31,13 +31,15 @@
     <ng-container *ngIf="canManage">
       <ng-container *ngIf="state === HeaderState.MAP_VIEW">
         <button mat-icon-button [matMenuTriggerFor]="editSurveyMenu">
-          <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+          <mat-icon>settings</mat-icon>
         </button>
 
         <mat-menu #editSurveyMenu="matMenu">
           <a (click)="onEditSurveyClick()">
-            <button mat-menu-item i18n="@@app.labels.manageSurvey">
-              Manage survey
+            <button mat-menu-item>
+              <ng-container i18n="@@app.labels.manageSurvey"
+                >Manage survey</ng-container
+              >
             </button>
           </a>
         </mat-menu>
@@ -49,10 +51,9 @@
         <button
           mat-button
           class="cancel-edit-button"
-          i18n="@@app.labels.cancel"
           (click)="onCancelEditSurveyClick()"
         >
-          Cancel
+          <ng-container i18n="@@app.labels.cancel">Cancel</ng-container>
         </button>
 
         <button
@@ -61,7 +62,9 @@
           [disabled]="isPublishingChanges"
           (click)="onFinishEditSurveyClick()"
         >
-          <span i18n="@@app.labels.publishChanges">Publish changes</span>
+          <ng-container i18n="@@app.labels.publishChanges"
+            >Publish changes</ng-container
+          >
 
           <mat-icon *ngIf="isPublishingChanges">
             <mat-spinner diameter="18"></mat-spinner>
@@ -72,14 +75,20 @@
       </ng-container>
     </ng-container>
 
+    <ground-language-switcher></ground-language-switcher>
+
     <ng-container *ngIf="authService.getUser$() | async as user">
       <button mat-icon-button [matMenuTriggerFor]="infoMenu">
-        <mat-icon fontSet="material-symbols-outlined">info_outline_24px</mat-icon>
+        <mat-icon>info_outline_24px</mat-icon>
       </button>
 
       <mat-menu #infoMenu="matMenu">
         <a *ngIf="user.isAuthenticated" (click)="onTermsOfServiceClick()">
-          <button mat-menu-item i18n="@@app.labels.termsOfService">Terms of service</button>
+          <button mat-menu-item>
+            <ng-container i18n="@@app.labels.termsOfService"
+              >Terms of service</ng-container
+            >
+          </button>
         </a>
 
         <a (click)="onAboutClick()">

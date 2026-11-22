@@ -6,7 +6,7 @@
   "hosting": {
     "public": "web/dist/web",
     "i18n": {
-      "root": "web/dist/web"
+      "root": "/"
     },
     "redirects": [
       {
@@ -33,6 +33,10 @@
         "function": "exportGeojson"
       },
       {
+        "source": "/exportMedia",
+        "function": "exportMedia"
+      },
+      {
         "source": "/sessionLogin",
         "function": "sessionLogin"
       },
@@ -49,8 +53,16 @@
         "destination": "/fr/index.html"
       },
       {
+        "source": "/lo{,/**}",
+        "destination": "/lo/index.html"
+      },
+      {
         "source": "/pt{,/**}",
         "destination": "/pt/index.html"
+      },
+      {
+        "source": "/th{,/**}",
+        "destination": "/th/index.html"
       },
       {
         "source": "/vi{,/**}",

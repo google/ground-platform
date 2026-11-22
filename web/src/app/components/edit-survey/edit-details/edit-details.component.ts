@@ -27,8 +27,8 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import {
   DialogData,
   DialogType,
-  JobDialogComponent,
-} from '../job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 
 interface DataSharingTermsDetails {
   description: string;
@@ -87,7 +87,7 @@ export class EditDetailsComponent implements OnInit {
 
   openDeleteSurveyDialog() {
     this.dialog
-      .open(JobDialogComponent, {
+      .open(DialogComponent, {
         data: { dialogType: DialogType.DeleteSurvey },
         panelClass: 'small-width-dialog',
       })
@@ -103,7 +103,7 @@ export class EditDetailsComponent implements OnInit {
 
   openCopySurveyDialog() {
     this.dialog
-      .open(JobDialogComponent, {
+      .open(DialogComponent, {
         data: { dialogType: DialogType.CopySurvey },
         panelClass: 'small-width-dialog',
       })

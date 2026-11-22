@@ -65,7 +65,7 @@ import { DataStoreService } from '../data-store/data-store.service';
   providedIn: 'root',
 })
 export class NavigationService implements OnDestroy {
-  private sidePanelExpanded = true;
+  private sidePanelExpanded = signal(true);
 
   private urlSignal = signal<string>('');
 
@@ -306,7 +306,7 @@ export class NavigationService implements OnDestroy {
    * Navigate to the URL for signout.
    */
   signOut() {
-    this.router.navigate(['/']);
+    return this.router.navigate([SIGN_IN_SEGMENT]);
   }
 
   /**
@@ -349,12 +349,19 @@ export class NavigationService implements OnDestroy {
     return `${this.document.location.origin}/${ANDROID_SEGMENT}/${SURVEY_SEGMENT}/${surveyId}`;
   }
 
+  getPlayStoreUrl(googlePlayId: string, surveyId?: string): string {
+    const url = `https://play.google.com/store/apps/details?id=${googlePlayId}`;
+    if (!surveyId) return url;
+    const referrer = encodeURIComponent(`survey_id=${surveyId}`);
+    return `${url}&referrer=${referrer}`;
+  }
+
   getSidePanelExpanded(): boolean {
-    return this.sidePanelExpanded;
+    return this.sidePanelExpanded();
   }
 
   onClickSidePanelButton() {
-    this.sidePanelExpanded = !this.sidePanelExpanded;
+    this.sidePanelExpanded.update(expanded => !expanded);
   }
 
   private editSurveyPageSignal = computed(() => {

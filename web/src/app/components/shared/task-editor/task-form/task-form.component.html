@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected': expanded}" cdkDrag>
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected': expanded()}" cdkDrag>
   <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
@@ -22,16 +22,16 @@
       <mat-select
         [(value)]="taskGroup"
         [hideSingleSelectionIndicator]="true"
-        (selectionChange)="onTaskGroupSelect($event.value)"
+        (selectionChange)="onTaskGroupChange($event)"
       >
         <mat-select-trigger class="task-label">
-          <mat-icon class="material-symbols-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
+          <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
           <div>{{ Tasks[taskGroup].label }}</div>
         </mat-select-trigger>
 
         <mat-option *ngFor="let addLoiTaskGroup of AddLoiTaskGroups" [value]="addLoiTaskGroup">
           <div class="task-label">
-            <mat-icon class="material-symbols-outlined">{{ Tasks[addLoiTaskGroup].icon }}</mat-icon>
+            <mat-icon>{{ Tasks[addLoiTaskGroup].icon }}</mat-icon>
             <div>{{ Tasks[addLoiTaskGroup].label }}</div>
           </div>
         </mat-option>
@@ -39,7 +39,7 @@
     </div>
 
     <div *ngIf="!GeometryTasks.includes(taskGroup)" class="task-label">
-      <mat-icon class="material-symbols-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
+      <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
       <div>{{ Tasks[taskGroup].label }}</div>
     </div>
 
@@ -60,13 +60,21 @@
         </button>
 
         <button mat-menu-item (click)="onTaskConditionToggle()">
-          <span>{{ !conditionControl ? 'Add condition' : 'Remove condition' }}</span>
+          @if (!conditionControl) {
+            <ng-container i18n="@@app.controls.tasks.addCondition"
+              >Add condition</ng-container
+            >
+          } @else {
+            <ng-container i18n="@@app.controls.tasks.removeCondition"
+              >Remove condition</ng-container
+            >
+          }
         </button>
 
         <mat-divider></mat-divider>
 
         <button mat-menu-item (click)="onTaskDelete()">
-          <span i18n="@@app.labels.delete">Delete</span>
+          <ng-container i18n="@@app.labels.delete">Delete</ng-container>
         </button>
       </mat-menu>
     </div>
@@ -78,7 +86,7 @@
 
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="onTaskDelete()">
-          <span i18n="@@app.labels.delete">Delete</span>
+          <ng-container i18n="@@app.labels.delete">Delete</ng-container>
         </button>
       </mat-menu>
     </div>
@@ -106,7 +114,7 @@
       <mat-select
         class="task-type-select"
         [value]="taskTypeOption"
-        (selectionChange)="onTaskTypeSelect($event.value)"
+        (selectionChange)="onTaskTypeChange($event)"
         (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>
@@ -147,7 +155,7 @@
     </ground-edit-option>
 
     <div class="option-add-buttons">
-      <mat-icon class="option-icon material-symbols-outlined">
+      <mat-icon class="option-icon">
         {{ cardinalityControl.value === Cardinality.SELECT_ONE ? 'radio_button_unchecked' : 'check_box_outline_blank'}}
       </mat-icon>
 
@@ -157,11 +165,13 @@
         (click)="onAddOption()"
         class="add-option"
       >
-        Add option
+        <ng-container i18n="@@app.taskEditor.multipleChoice.addOption"
+          >Add option</ng-container
+        >
       </button>
 
       <ng-container *ngIf="!hasOtherOptionControl.value">
-        <div>or</div>
+        <div i18n="@@app.labels.or">or</div>
 
         <button
           mat-button
@@ -170,7 +180,9 @@
           color="primary"
           class="add-option"
         >
-          add "Other"
+          <ng-container i18n="@@app.taskEditor.multipleChoice.addOther"
+            >add "Other"</ng-container
+          >
         </button>
       </ng-container>
     </div>

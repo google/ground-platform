@@ -27,8 +27,12 @@ type MailServerConfig = {
   host: string;
   port: number;
   username: string;
-  password: string;
   sender?: string;
+};
+
+type MailCredentials = MailServerConfig & {
+  /** Read from Secret Manager (`SMTP_PASSWORD`), not from Firestore. */
+  password: string;
 };
 
 export interface MailServiceEmail {
@@ -44,7 +48,7 @@ export class MailService {
   private transporter_: nodemailer.Transporter;
   private sender_: string;
 
-  constructor(mailServerConfig: MailServerConfig) {
+  constructor(mailServerConfig: MailCredentials) {
     const { host, port, username, password, sender } = mailServerConfig;
 
     this.sender_ = sender || username;

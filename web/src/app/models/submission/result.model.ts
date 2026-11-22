@@ -17,15 +17,17 @@
 import { MultipleSelection } from './multiple-selection';
 import { Geometry } from '../geometry/geometry';
 
+export type ResultValue =
+  | null
+  | number
+  | string
+  | MultipleSelection
+  | Date
+  | Geometry;
+
 export class Result {
   constructor(
-    readonly value:
-      | null
-      | number
-      | string
-      | MultipleSelection
-      | Date
-      | Geometry,
+    readonly value: ResultValue,
     readonly skipped: boolean = false
   ) {}
 }

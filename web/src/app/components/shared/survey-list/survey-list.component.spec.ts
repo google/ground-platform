@@ -31,8 +31,8 @@ import { of } from 'rxjs';
 import {
   DialogData,
   DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
+  DialogComponent,
+} from 'app/components/shared/dialog/dialog.component';
 import { AclEntry } from 'app/models/acl-entry.model';
 import { Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
@@ -62,7 +62,7 @@ describe('SurveyListComponent', () => {
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let dialogRefSpy: jasmine.SpyObj<
-    MatDialogRef<JobDialogComponent, DialogData>
+    MatDialogRef<DialogComponent, DialogData>
   >;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
 
@@ -164,7 +164,7 @@ describe('SurveyListComponent', () => {
     );
 
     dialogRefSpy = jasmine.createSpyObj<
-      MatDialogRef<JobDialogComponent, DialogData>
+      MatDialogRef<DialogComponent, DialogData>
     >('MatDialogRef', ['afterClosed', 'close']);
     dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     dialogSpy.open.and.returnValue(dialogRefSpy);

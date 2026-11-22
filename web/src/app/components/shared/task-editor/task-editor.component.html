@@ -19,11 +19,14 @@
 
   <div
     class="task-container"
-    *ngFor="let formGroup of formArray.controls; let i = index;"
+    *ngFor="let formGroup of formArray.controls; let i = index; trackBy: trackByTaskId"
     [ngClass]="{'loi-task-container': formGroup.get('addLoiTask').value || formGroup.get('condition')}"
+    (click)="onTaskContainerClick(i, $event)"
   >
-    <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label" i18n="@@app.texts.whenAdding">
-      When adding a new collection site...
+    <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">
+      <ng-container i18n="@@app.texts.whenAdding"
+        >When adding a new collection site...</ng-container
+      >
     </div>
 
     <div *ngIf="formGroup.get('condition')">
@@ -37,6 +40,10 @@
     <task-form
       [formGroup]="formGroup"
       [formGroupIndex]="i"
+      [isCreationMode]="isCreationMode()"
+      [warnOnTypeChange]="warnOnTypeChange()"
+      [expanded]="expandedIndex() === i"
+      (expand)="expandedIndex.set(i)"
       (delete)="onTaskDelete(i)"
       (duplicate)="onTaskDuplicate(i)"
       (toggleCondition)="onTaskConditionToggle(i)"

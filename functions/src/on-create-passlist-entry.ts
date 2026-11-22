@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { EventContext } from 'firebase-functions/v1';
-import { QueryDocumentSnapshot } from 'firebase-functions/v1/firestore';
+import {
+  FirestoreEvent,
+  QueryDocumentSnapshot,
+} from 'firebase-functions/v2/firestore';
 import { getDatastore, getMailService } from './common/context';
 import { MailServiceEmail } from './common/mail-service';
 import { stringFormat } from './common/utils';
@@ -28,10 +30,14 @@ import { stringFormat } from './common/utils';
  * @param context The EventContext object provided by the Cloud Functions framework.
  */
 export async function onCreatePasslistEntryHandler(
-  _: QueryDocumentSnapshot,
-  context: EventContext
+  event: FirestoreEvent<QueryDocumentSnapshot | undefined>
 ) {
-  const entryId = context!.params.entryId;
+  const entryId = event.params.entryId;
+
+  // Domain-wide entries (`@<domain>`) are not user mailboxes, so skip mail.
+  if (typeof entryId === 'string' && entryId.startsWith('@')) {
+    return;
+  }
 
   const db = getDatastore();
 

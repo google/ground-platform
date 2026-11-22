@@ -2,19 +2,50 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "clean": "rm -rf dist coverage *.log",
-    "pretest": "./pretest.sh",
-    "posttest": "./posttest.sh",
-    "postinstall": "node scripts/patch-karma.cjs",
-    "extract-i18n": "ng extract-i18n"
+    "postinstall": "node scripts/patch-karma.cjs"
   },
   "nx": {
     "name": "web",
     "targets": {
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "rm -rf dist coverage *.log"
+        }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "commands": [
+            "eslint \"src/**/*.ts\"",
+            "eslint \"src/**/*.html\""
+          ],
+          "forwardAllArgs": true
+        }
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "bash -c './pretest.sh && ng test; EXIT=$?; ./posttest.sh; exit $EXIT'"
+        },
+        "dependsOn": [
+          "^build"
+        ]
+      },
+      "generate-build-info": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node ../scripts/generate-build-info.mjs"
+        }
+      },
       "build": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web"
+          "cwd": "{projectRoot}"
         },
         "configurations": {
           "development": {
@@ -28,14 +59,15 @@
           }
         },
         "dependsOn": [
-          "^build"
+          "^build",
+          "generate-build-info"
         ],
         "defaultConfiguration": "development"
       },
       "serve": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web"
+          "cwd": "{projectRoot}"
         },
         "configurations": {
           "development": {
@@ -49,33 +81,22 @@
           }
         },
         "dependsOn": [
-          "^build"
+          "^build",
+          "generate-build-info"
         ],
         "defaultConfiguration": "development"
       },
-      "test": {
+      "format:check": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
-          "command": "ng test",
-          "forwardAllArgs": true
-        },
-        "dependsOn": [
-          "^build"
-        ]
-      },
-      "lint": {
-        "executor": "nx:run-commands",
-        "options": {
-          "cwd": "web",
-          "command": "ng lint",
-          "forwardAllArgs": true
+          "cwd": "{projectRoot}",
+          "command": "prettier --check \"src/**/*.{ts,html,scss}\""
         }
       },
       "extract-i18n": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
+          "cwd": "{projectRoot}",
           "command": "ng extract-i18n",
           "forwardAllArgs": true
         }
@@ -83,7 +104,7 @@
       "deploy": {
         "executor": "nx:run-commands",
         "options": {
-          "cwd": "web",
+          "cwd": "{projectRoot}",
           "command": "ng deploy",
           "forwardAllArgs": true
         }
@@ -101,11 +122,9 @@
     "@angular/google-maps": "catalog:",
     "@angular/localize": "catalog:",
     "@angular/material": "catalog:",
-    "@angular/material-experimental": "catalog:",
     "@angular/platform-browser": "catalog:",
     "@angular/platform-browser-dynamic": "catalog:",
     "@angular/router": "catalog:",
-    "@babel/runtime": "catalog:",
     "@grpc/grpc-js": "catalog:",
     "@iplab/ngx-file-upload": "catalog:",
     "angularx-qrcode": "catalog:",
@@ -115,24 +134,17 @@
     "ngx-autosize-input": "catalog:",
     "ngx-color": "catalog:",
     "rxjs": "catalog:",
+    "supercluster": "catalog:",
     "zone.js": "catalog:"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "catalog:dev",
-    "@angular-devkit/core": "catalog:dev",
-    "@angular-eslint/builder": "catalog:dev",
-    "@angular-eslint/eslint-plugin": "catalog:dev",
-    "@angular-eslint/eslint-plugin-template": "catalog:dev",
-    "@angular-eslint/template-parser": "catalog:dev",
     "@angular/cli": "catalog:dev",
     "@angular/compiler-cli": "catalog:dev",
     "@angular/language-service": "catalog:dev",
-    "@jridgewell/source-map": "catalog:dev",
-    "@nx/angular": "catalog:dev",
     "@types/google.maps": "catalog:dev",
     "@types/jasmine": "catalog:dev",
     "@types/node": "catalog:dev",
-    "@types/webpack-env": "catalog:dev",
     "karma": "catalog:dev",
     "karma-chrome-launcher": "catalog:dev",
     "karma-coverage": "catalog:dev",

@@ -29,6 +29,18 @@ export class HttpClientService {
   ) {}
 
   /**
+   * Sends an HTTP GET with the Authorization Bearer token of the current user
+   * in the request header and returns the response body as a `Blob`.
+   */
+  async getBlobWithAuth(url: string): Promise<Blob> {
+    const token = await firstValueFrom(idToken(this.auth));
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return firstValueFrom(
+      this.httpClient.get(url, { headers, responseType: 'blob' })
+    );
+  }
+
+  /**
    * Sends an HTTP post with the Authorization Bearer token of the current user
    * in the request header.
    */

@@ -77,10 +77,11 @@ function toMessageValue(
   if (!descriptor.fields) return null;
   const field = descriptor.fields[fieldName];
   const fieldType = field?.type;
-  if (field.keyType) {
+  if (field?.keyType) {
     if (field.keyType !== 'string')
       return Error(`${field.keyType} map keys not supported`);
-    // TODO: Check that firestoreValue is an object.
+    if (typeof firestoreValue !== 'object' || Array.isArray(firestoreValue))
+      return Error(`Expected object, but got ${firestoreValue}`);
     return toMapValue(messageTypePath, fieldType, firestoreValue);
   } else if (field?.rule === 'repeated') {
     if (!Array.isArray(firestoreValue))
@@ -96,6 +97,7 @@ function toMapValue(
   valueType: string,
   nestedObject: [key: string]
 ): any | null {
+  if (!nestedObject) return null;
   const messageMap: { [key: string]: any } = {};
   for (const key in nestedObject) {
     const firestoreValue = nestedObject[key];
@@ -149,8 +151,7 @@ function toMessageOrEnumValue(
     ? registry.getMessageDescriptor(constructor)
     : null;
   if (constructor && nestedDescriptor) {
-    if (!nestedDescriptor)
-      return Error(`Unknown message type ${nestedDescriptor}`);
+    if (firestoreValue === null || firestoreValue === undefined) return null;
     // TODO: Check firestoreValue is a DocumentData.
     return toMessageInternal(
       firestoreValue as DocumentData,

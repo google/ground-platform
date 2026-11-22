@@ -17,9 +17,11 @@
 import { Injectable } from '@angular/core';
 import { List, Map } from 'immutable';
 import { Observable, firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
+import { AnalyticsService } from 'app/services/analytics/analytics.service';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 
@@ -29,7 +31,8 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 export class SurveyService {
   constructor(
     private dataStore: DataStoreService,
-    private authService: AuthService
+    private authService: AuthService,
+    private analyticsService: AnalyticsService
   ) {}
 
   loadSurvey$(id: string): Observable<Survey> {
@@ -42,7 +45,9 @@ export class SurveyService {
       return of(List<Survey>());
     }
     const { email: userEmail } = user;
-    return this.dataStore.loadAccessibleSurveys$(userEmail);
+    return this.dataStore
+      .loadAccessibleSurveys$(userEmail)
+      .pipe(catchError(() => of(List<Survey>())));
   }
 
   /**
@@ -125,6 +130,7 @@ export class SurveyService {
       description ?? '',
       user
     );
+    this.analyticsService.logEvent('survey_created');
     return Promise.resolve(surveyId);
   }
 

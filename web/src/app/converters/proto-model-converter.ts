@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 The Ground Authors.
+ * Copyright 2026 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,8 @@ export function dataSharingTypeToProto(type: DataSharingType) {
  */
 export function surveyToDocument(
   surveyId: string,
-  survey: Partial<Survey>
+  survey: Partial<Survey>,
+  auditInfo?: { created?: Pb.IAuditInfo; lastModified?: Pb.IAuditInfo }
 ): DocumentData {
   const {
     title: name,
@@ -130,6 +131,8 @@ export function surveyToDocument(
       dataVisibility: PB_DATA_VISIBILITY.get(
         dataVisibility || SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
       ),
+      ...(auditInfo?.created && { created: auditInfo.created }),
+      ...(auditInfo?.lastModified && { lastModified: auditInfo.lastModified }),
     })
   );
 }
@@ -138,7 +141,7 @@ export function surveyToDocument(
  * Returns the proto representation of a Job model object.
  */
 export function jobToDocument(job: Job): DocumentData {
-  const { id, index, name, color, tasks } = job;
+  const { id, index, name, color, tasks, enabledIntegrations } = job;
 
   return toDocumentData(
     new Pb.Job({
@@ -148,6 +151,10 @@ export function jobToDocument(job: Job): DocumentData {
       style: new Pb.Style({ color }),
       tasks: (tasks?.toList() ?? List())
         .map((task: Task) => toTaskMessage(task))
+        .toArray(),
+      enabledIntegrations: enabledIntegrations
+        .valueSeq()
+        .map(i => new Pb.Integration({ id: i.id }))
         .toArray(),
     })
   );
@@ -261,6 +268,7 @@ function toTaskConditionMessage(
             multipleChoice: new Pb.Task.MultipleChoiceSelection({
               optionIds: expression.optionIds.toArray(),
               taskId: expression.taskId,
+              otherSelected: expression.otherSelected,
             }),
           })
       )

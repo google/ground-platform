@@ -17,30 +17,30 @@
 <div class="page">
   <ground-header></ground-header>
   <div class="page-content">
-    <h1 class="page-title" i18n="@@app.labels.termsOfService">Terms of service</h1>
+    <h1 class="page-title">
+      <ng-container i18n="@@app.labels.termsOfService"
+        >Terms of service</ng-container
+      >
+    </h1>
     <div class="terms-text-container" [innerHTML]="termsOfServiceText"></div>
     <div class="action-buttons">
-      @if(!hasAcceptedTos) {
-        <mat-checkbox i18n="@@app.labels.agreeWithTermsOfService" [(ngModel)]="isTermsOfServiceChecked">
-          I have read and agree with terms of service.
-        </mat-checkbox>
+      @if (!hasAcceptedTos) {
+        <mat-checkbox
+          i18n="@@app.labels.agreeWithTermsOfService"
+          [(ngModel)]="isTermsOfServiceChecked"
+          >I have read and agree with terms of service.</mat-checkbox
+        >
         <button
           mat-flat-button
-          i18n="@@app.labels.continue"
           (click)="onContinueButtonClick()"
           [disabled]="!isTermsOfServiceChecked"
         >
-          Continue
+          <ng-container i18n="@@app.labels.continue">Continue</ng-container>
         </button>
-      }
-      @else {
-        <button
-          mat-button
-          color="primary"
-          (click)="onBackButtonClick()"
-        >
+      } @else {
+        <button mat-button color="primary" (click)="onBackButtonClick()">
           <mat-icon>arrow_back</mat-icon>
-          <span i18n="@@app.labels.back">Back</span>
+          <ng-container i18n="@@app.labels.back">Back</ng-container>
         </button>
       }
     </div>

@@ -15,6 +15,7 @@
  */
 
 import { Injectable, Injector, runInInjectionContext } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
 import {
   CollectionReference,
   DocumentData,
@@ -186,7 +187,11 @@ export class DataStoreService {
         query(
           surveysRef,
           where(s.generalAccess, '==', GeneralAccess.UNLISTED),
-          where(new FieldPath(s.acl, userEmail), '==', AclRole.SURVEY_ORGANIZER)
+          where(new FieldPath(s.acl, userEmail), 'in', [
+            AclRole.VIEWER,
+            AclRole.DATA_COLLECTOR,
+            AclRole.SURVEY_ORGANIZER,
+          ])
         ),
         { idField: 'id' }
       ).pipe(
@@ -240,9 +245,13 @@ export class DataStoreService {
 
     await runInInjectionContext(this.injector, () =>
       runTransaction(this.db, async transaction => {
+        const promises: Promise<void>[] = [];
+
         if (jobIdsToDelete) {
           for (const jobId of jobIdsToDelete) {
-            await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+            promises.push(
+              this._deleteJobAndRelatedData(transaction, surveyId, jobId)
+            );
           }
         }
 
@@ -250,13 +259,22 @@ export class DataStoreService {
           ({ id }) => !jobIdsToDelete?.includes(id)
         );
         for (const job of jobsToUpdate.values()) {
-          await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
+          promises.push(
+            this._addOrUpdateJobInTransaction(transaction, surveyId, job)
+          );
         }
+
+        await Promise.all(promises);
 
         const surveyRef = runInInjectionContext(this.injector, () =>
           doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
         );
-        transaction.update(surveyRef, surveyToDocument(surveyId, survey));
+        transaction.update(
+          surveyRef,
+          surveyToDocument(surveyId, survey, {
+            lastModified: this.newAuditInfo(),
+          })
+        );
       })
     );
   }
@@ -271,7 +289,11 @@ export class DataStoreService {
     return runInInjectionContext(this.injector, () =>
       setDoc(
         doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
-        surveyToDocument(surveyId, { title: name }),
+        surveyToDocument(
+          surveyId,
+          { title: name },
+          { lastModified: this.newAuditInfo() }
+        ),
         { merge: true }
       )
     );
@@ -292,17 +314,12 @@ export class DataStoreService {
     return runInInjectionContext(this.injector, () =>
       setDoc(
         doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
-        surveyToDocument(surveyId, { title: name, description }),
+        surveyToDocument(
+          surveyId,
+          { title: name, description },
+          { lastModified: this.newAuditInfo() }
+        ),
         { merge: true }
-      )
-    );
-  }
-
-  addOrUpdateSurvey(survey: Survey): Promise<void> {
-    return runInInjectionContext(this.injector, () =>
-      setDoc(
-        doc(this.db, SURVEYS_COLLECTION_NAME, survey.id),
-        surveyToDocument(survey.id, survey)
       )
     );
   }
@@ -389,9 +406,11 @@ export class DataStoreService {
 
     await runInInjectionContext(this.injector, () =>
       runTransaction(this.db, async transaction => {
-        for (const { id: jobId } of jobs.values()) {
-          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
-        }
+        await Promise.all(
+          Array.from(jobs.values()).map(({ id: jobId }) =>
+            this._deleteJobAndRelatedData(transaction, surveyId, jobId)
+          )
+        );
 
         const surveyRef = runInInjectionContext(this.injector, () =>
           doc(this.db, SURVEYS_COLLECTION_NAME, surveyId)
@@ -401,14 +420,19 @@ export class DataStoreService {
     );
   }
 
-  private async deleteSubmissionsByLoiId(
+  async deleteSubmissionsByLoiId(
     surveyId: string,
-    loiId: string
+    loiId: string,
+    ownerId?: string
   ): Promise<void> {
-    const submissions = query(
-      collection(this.db, `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`),
-      where(sb.loiId, '==', loiId)
+    const submissionsRef = collection(
+      this.db,
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`
     );
+    const byLoi = query(submissionsRef, where(sb.loiId, '==', loiId));
+    const submissions = ownerId
+      ? query(byLoi, where(sb.ownerId, '==', ownerId))
+      : byLoi;
     const querySnapshot = await runInInjectionContext(this.injector, () =>
       getDocs(submissions)
     );
@@ -475,38 +499,27 @@ export class DataStoreService {
   }
 
   /**
-   * Returns a promise resolving to true if the user's email is either
-   * explicitly listed as a document ID in the 'passlist' collection or
-   * matches the regular expression stored in the 'passlist/regexp' document.
+   * Returns a promise resolving to true if the user's email is granted access
+   * by the passlist: either an exact-email entry (`passlist/<email>`) or a
+   * domain-wide entry (`passlist/@<domain>`).
    *
    * @param userEmail The email of the user to check against the passlist.
    */
   async isPasslisted(userEmail: string): Promise<boolean> {
-    const docSnapshot = await runInInjectionContext(this.injector, () =>
+    const emailSnapshot = await runInInjectionContext(this.injector, () =>
       getDoc(doc(this.db, 'passlist', userEmail))
     );
 
-    if (docSnapshot.exists()) return true;
+    if (emailSnapshot.exists()) return true;
 
-    const regexpSnapshot = await runInInjectionContext(this.injector, () =>
-      getDoc(doc(this.db, 'passlist', 'regexp'))
+    const domain = userEmail.split('@')[1];
+    if (!domain) return false;
+
+    const domainSnapshot = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.db, 'passlist', `@${domain}`))
     );
 
-    if (regexpSnapshot.exists()) {
-      const regexpData = regexpSnapshot.data() as
-        | { regexp?: string }
-        | undefined;
-
-      const regexpString = regexpData?.regexp;
-
-      if (regexpString) {
-        const regex = new RegExp(regexpString);
-
-        return regex.test(userEmail);
-      }
-    }
-
-    return false;
+    return domainSnapshot.exists();
   }
 
   private toLocationsOfInterest(
@@ -654,6 +667,28 @@ export class DataStoreService {
   }
 
   /**
+   * Returns audit info for a write made now by the signed-in user. Survey docs
+   * store timestamps as protos rather than Firestore timestamps, so the server
+   * time can't be a `serverTimestamp()` placeholder: it is the client's guess,
+   * which `onWriteSurvey` replaces with the commit time.
+   */
+  private newAuditInfo(): Pb.AuditInfo {
+    const user = this.injector.get(Auth).currentUser;
+    if (!user) throw new Error('Login required to write survey.');
+    const now = new GroundProtos.google.protobuf.Timestamp({
+      seconds: Math.floor(Date.now() / 1000),
+    });
+    return new Pb.AuditInfo({
+      userId: user.uid,
+      displayName: user.displayName ?? undefined,
+      photoUrl: user.photoURL ?? undefined,
+      emailAddress: user.email ?? undefined,
+      clientTimestamp: now,
+      serverTimestamp: now,
+    });
+  }
+
+  /**
    * Creates a new survey in the remote db using the specified title,
    * returning the id of the newly created survey. ACLs are initialized
    * to include the specified user email as survey organizer.
@@ -666,15 +701,20 @@ export class DataStoreService {
     const surveyId = this.generateId();
     const { email: ownerEmail, id: ownerId } = user;
     const acl = Map<string, Role>({ [ownerEmail]: Role.SURVEY_ORGANIZER });
+    const auditInfo = this.newAuditInfo();
     await setDoc(
       doc(this.db, SURVEYS_COLLECTION_NAME, surveyId),
-      surveyToDocument(surveyId, {
-        title: name,
-        description,
-        acl,
-        ownerId,
-        state: SurveyState.DRAFT,
-      })
+      surveyToDocument(
+        surveyId,
+        {
+          title: name,
+          description,
+          acl,
+          ownerId,
+          state: SurveyState.DRAFT,
+        },
+        { created: auditInfo, lastModified: auditInfo }
+      )
     );
     return Promise.resolve(surveyId);
   }
@@ -690,12 +730,17 @@ export class DataStoreService {
 
     if (survey instanceof Error) return '';
 
-    const newSurvey = surveyToDocument(newSurveyId, {
-      ...survey,
-      id: newSurveyId,
-      title: 'Copy of ' + survey.title,
-      acl: survey.acl.filter(role => role === Role.SURVEY_ORGANIZER),
-    });
+    const auditInfo = this.newAuditInfo();
+    const newSurvey = surveyToDocument(
+      newSurveyId,
+      {
+        ...survey,
+        id: newSurveyId,
+        title: 'Copy of ' + survey.title,
+        acl: survey.acl.filter(role => role === Role.SURVEY_ORGANIZER),
+      },
+      { created: auditInfo, lastModified: auditInfo }
+    );
 
     await setDoc(doc(this.db, SURVEYS_COLLECTION_NAME, newSurveyId), newSurvey);
 
@@ -735,11 +780,13 @@ export class DataStoreService {
     );
   }
 
-  async getTermsOfService(): Promise<string> {
+  async getTermsOfService(locale: string): Promise<string> {
     const tos = await runInInjectionContext(this.injector, () =>
       getDoc(doc(this.db, 'config', 'tos'))
     );
-    return tos.get('text');
+    const translations = tos.get('translations') ?? {};
+    const language = locale.split('-')[0];
+    return translations[locale] ?? translations[language] ?? tos.get('text');
   }
 
   async getAccessDeniedMessage(): Promise<{ message?: string; link?: string }> {

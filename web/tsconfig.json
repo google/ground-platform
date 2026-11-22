@@ -17,7 +17,7 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "jasmine"],
     "moduleResolution": "bundler"
   },
   "angularCompilerOptions": {

@@ -74,6 +74,27 @@ export class SubmissionService {
     );
   }
 
+  deleteSubmission(surveyId: string, submissionId: string): Promise<void> {
+    return this.dataStore.deleteSubmission(surveyId, submissionId);
+  }
+
+  canDeleteSubmission(survey: Survey, submission: Submission): boolean {
+    if (this.surveyService.canManageSurvey(survey)) return true;
+    const userId = this.authService.getCurrentUser()?.id;
+    return !!userId && submission.created.user.id === userId;
+  }
+
+  canDeleteSubmissions(survey: Survey, submissions: List<Submission>): boolean {
+    return submissions.some(s => this.canDeleteSubmission(survey, s));
+  }
+
+  deleteSubmissionsForLoi(survey: Survey, loiId: string): Promise<void> {
+    const ownerId = this.surveyService.canManageSurvey(survey)
+      ? undefined
+      : this.authService.getCurrentUser()?.id;
+    return this.dataStore.deleteSubmissionsByLoiId(survey.id, loiId, ownerId);
+  }
+
   createNewSubmission(
     user: User,
     survey: Survey,

@@ -125,7 +125,8 @@ function jobPbToModel(pb: Pb.IJob): Job {
     ),
     pb.tasks!.find(task => task.level === DataCollectionLevel.LOI_METADATA)
       ? DataCollectionStrategy.MIXED
-      : DataCollectionStrategy.PREDEFINED
+      : DataCollectionStrategy.PREDEFINED,
+    Map((pb.enabledIntegrations ?? []).map(i => [i.id!, {id: i.id!}]))
   );
 }
 
@@ -176,7 +177,8 @@ function taskConditionPbToModel(pb: Pb.ITask): TaskCondition | undefined {
         new TaskConditionExpression(
           TaskConditionExpressionType.ONE_OF_SELECTED,
           multipleChoice!.taskId!,
-          List(multipleChoice!.optionIds!)
+          List(multipleChoice!.optionIds!),
+          multipleChoice!.otherSelected ?? false
         ),
       ])
     );
