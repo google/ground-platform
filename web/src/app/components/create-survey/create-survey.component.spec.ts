@@ -18,7 +18,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { By } from '@angular/platform-browser';
+import { By, Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { List, Map } from 'immutable';
 import { Observable, ReplaySubject, Subject, of } from 'rxjs';
@@ -238,6 +238,12 @@ describe('CreateSurveyComponent', () => {
     expect(spinner.innerText).toContain('Loading survey...');
   });
 
+  it('sets the page title to New survey', () => {
+    createComponent();
+    const titleService = TestBed.inject(Title);
+    expect(titleService.getTitle()).toBe('New survey - Ground');
+  });
+  
   describe('when survey id is empty', () => {
     beforeEach(() => {
       surveyId$.next('');

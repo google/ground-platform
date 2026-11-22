@@ -17,6 +17,7 @@
 import '@angular/localize/init';
 
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { List } from 'immutable';
 import { Subscription, filter, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -146,10 +147,12 @@ export class CreateSurveyComponent implements OnInit {
     private jobService: JobService,
     private taskService: TaskService,
     private navigationService: NavigationService,
-    private loiService: LocationOfInterestService
+    private loiService: LocationOfInterestService,
+    private titleService: Title
   ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('New survey - Ground');
     this.subscription.add(
       this.navigationService.getSurveyId$().subscribe(async surveyId => {
         this.surveyId = surveyId ? surveyId : SURVEY_ID_NEW;
