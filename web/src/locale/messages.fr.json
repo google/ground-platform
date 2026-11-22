@@ -16,6 +16,7 @@
     "app.createSurvey.surveyDetails.progress": "Créer une enquête",
     "app.createSurvey.surveyDetails.title": "Nom et description de l'enquête",
     "app.createSurvey.surveyDetails.description": "Fournir des informations de base sur votre enquête",
+    "app.createSurvey.untitledSurvey": "Enquête sans titre",
     "app.createSurvey.jobDetails.progress": "Ajouter une mission",
     "app.createSurvey.jobDetails.title": "Ajouter une mission",
     "app.createSurvey.jobDetails.description": "Dans les étapes suivantes, vous définirez les données à collecter pour certains sites dans le cadre de cette mission",

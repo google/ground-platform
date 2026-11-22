@@ -16,6 +16,7 @@
     "app.createSurvey.surveyDetails.progress": "สร้างแบบสำรวจ",
     "app.createSurvey.surveyDetails.title": "เริ่มสร้างแบบสำรวจของคุณ",
     "app.createSurvey.surveyDetails.description": "ระบุข้อมูลพื้นฐานเกี่ยวกับแบบสำรวจของคุณ",
+    "app.createSurvey.untitledSurvey": "แบบสำรวจที่ไม่มีชื่อ",
     "app.createSurvey.jobDetails.progress": "เพิ่มงาน",
     "app.createSurvey.jobDetails.title": "เพิ่มงาน",
     "app.createSurvey.jobDetails.description": "ในขั้นตอนถัดไป คุณจะกำหนดข้อมูลที่ต้องเก็บรวบรวมจากจุดต่าง ๆ ภายใต้งานนี้",

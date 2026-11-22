@@ -40,6 +40,7 @@ export class SurveyDetailsComponent implements OnInit {
   @Output() onValidationChange: EventEmitter<boolean> =
     new EventEmitter<boolean>();
   @Output() onValueChanges: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() onTitleChange: EventEmitter<string> = new EventEmitter<string>();
 
   constructor(private formBuilder: FormBuilder) {
     this.formGroup = this.formBuilder.group({
@@ -66,6 +67,10 @@ export class SurveyDetailsComponent implements OnInit {
     this.formGroup.controls[this.titleControlKey].setValue(this.title);
     this.formGroup.controls[this.descriptionControlKey].setValue(
       this.description
+    );
+
+    this.formGroup.controls[this.titleControlKey].valueChanges.subscribe(
+      title => this.onTitleChange.emit(title ?? '')
     );
   }
 

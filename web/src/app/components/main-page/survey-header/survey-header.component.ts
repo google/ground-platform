@@ -29,6 +29,7 @@ import { SurveyService } from 'app/services/survey/survey.service';
 })
 export class SurveyHeaderComponent {
   activeSurvey = input<Survey>();
+  readonly untitledSurvey = $localize`:@@app.createSurvey.untitledSurvey:Untitled survey`;
 
   constructor(
     public navigationService: NavigationService,
