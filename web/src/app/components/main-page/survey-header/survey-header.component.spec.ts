@@ -91,4 +91,17 @@ describe('SurveyHeaderComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('shows the survey title', () => {
+    const title = fixture.nativeElement.querySelector('.survey-title');
+    expect(title.textContent.trim()).toBe('Survey Title');
+  });
+
+  it('shows a fallback when there is no active survey', () => {
+    spyOn(console, 'error');
+    fixture.componentRef.setInput('activeSurvey', undefined);
+    fixture.detectChanges();
+    const title = fixture.nativeElement.querySelector('.survey-title');
+    expect(title.textContent.trim()).toBe(component.untitledSurvey);
+  });
 });
