@@ -48,7 +48,6 @@ jobs:
   # the coverage report in kmp-tests.
   server:
     name: server Spanner tests
-    if: ${{ hashFiles('server/build.gradle.kts') != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -60,6 +59,7 @@ jobs:
       # `-Pcollectone.serverOnly=true` configures only `:shared:core` and `:server`, without an
       # Android SDK.
       - name: Set up JDK
+        if: ${{ hashFiles('server/build.gradle.kts') != '' }}
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
@@ -67,6 +67,7 @@ jobs:
           cache: gradle
 
       - name: Cache the Spanner emulator
+        if: ${{ hashFiles('server/build.gradle.kts') != '' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/collect-one/spanner-emulator
@@ -74,6 +75,7 @@ jobs:
 
       # Starts its own Spanner emulator from scripts/spanner-emulator.sh.
       - name: Run Spanner tests
+        if: ${{ hashFiles('server/build.gradle.kts') != '' }}
         run: ./gradlew -Pcollectone.serverOnly=true :server:spannerTest --console=plain
 
       - name: Upload test reports
@@ -89,7 +91,6 @@ jobs:
   # run in goldens.yml.
   kmp-tests:
     name: jvm tests, coverage, and detekt
-    if: ${{ hashFiles('shared/**/build.gradle.kts', 'server/build.gradle.kts') != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -100,6 +101,7 @@ jobs:
       # The Gradle build downloads its own JDK 21 toolchain; this JDK only runs Gradle. The runner
       # image provides the Android SDK (ANDROID_HOME) that the Android targets need.
       - name: Set up JDK
+        if: ${{ hashFiles('shared/**/build.gradle.kts', 'server/build.gradle.kts') != '' }}
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
@@ -110,6 +112,7 @@ jobs:
       # runs; :koverVerifyJvmTests fails when the merged line coverage drops below the minimum in the
       # root build.gradle.kts (checked once the full module tree is present).
       - name: Run JVM unit tests, coverage, and detekt
+        if: ${{ hashFiles('shared/**/build.gradle.kts', 'server/build.gradle.kts') != '' }}
         run: |
           TASKS="jvmTest detekt :koverXmlReportJvmTests :koverHtmlReportJvmTests"
           if [ -f server/build.gradle.kts ]; then
