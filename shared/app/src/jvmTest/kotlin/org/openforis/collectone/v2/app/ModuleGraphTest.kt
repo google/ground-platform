@@ -139,13 +139,12 @@ class ModuleGraphTest {
   }
 
   /**
-   * The list search feature builds on the shared presentation code and the data layer (whether a
-   * live places geocoder is configured), not on other features.
+   * The list search feature builds on the shared presentation code, not on data or other features.
    */
   @Test
-  fun listSearchBuildsOnlyOnUiCommonAndData() {
+  fun listSearchBuildsOnlyOnUiCommon() {
     assertEquals(
-      setOf("shared.app.uiCommon", "shared.app.data", APP_TEST_FIXTURES),
+      setOf("shared.app.uiCommon", APP_TEST_FIXTURES),
       projectDependencies(buildScript("listsearch")),
     )
   }

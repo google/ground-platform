@@ -54,7 +54,6 @@ flowchart TD
   onboarding --> uicommon
   onboarding --> data
   listsearch --> uicommon
-  listsearch --> data
   datacollection --> mapfeature
   datacollection --> data
   mapfeature --> uicommon[":shared:app:ui-common"]
@@ -92,7 +91,7 @@ data layer implements and the app session provides (`LocalProfileImageLoader`).
 | `:shared:app:dashboard` | `ui.dashboard`: `DashboardViewModel` (with its layout session state in `DashboardSession` and dataset exports in `DashboardExports`), `DashboardUiState`; `di.dashboardModule` | `:shared:app:ui-common` | Yes (no views) |
 | `:shared:app:onboarding` | `ui.onboarding`: `OnboardingViewModel` (with debounced remote lookup in `SurveyDirectorySearch` and pure filtering in `OnboardingSurveyFilter.kt`), `OnboardingUiState`; `di.onboardingModule` | `:shared:app:ui-common`, `:shared:app:data` (the initial sync state its Koin module reads) | Yes (no views) |
 | `:shared:app:settings` | `ui.settings`: `SettingsViewModel`, `SettingsUiState`, `LanguageSelection.kt`; `di.settingsModule` | `:shared:app:ui-common` | Yes (no views) |
-| `:shared:app:listsearch` | `ui.listsearch`: `ListSearchViewModel`, `ListSearchUiState`; `di.listSearchModule` | `:shared:app:ui-common`, `:shared:app:data` (whether a live places geocoder is configured) | Yes (no views) |
+| `:shared:app:listsearch` | `ui.listsearch`: `ListSearchViewModel`, `ListSearchUiState`; `di.listSearchModule` | `:shared:app:ui-common` | Yes (no views) |
 | `:shared:app` | The session shell (`ui.session`: `SessionCoordinator`, `SurveyRecordsUiStates`, the backend and sync banners, the developer sign-in dialog), `ui.AppViewModels`, and the rest of `di` (`domainModule`, `appModules`, and the `AppDataHolder` facade, which creates ViewModels) | all of the above | Yes |
 | `:shared:web:domain` | `org.openforis.collectone.v2.web.domain.*`: the web console's own editor models, importers, and use cases | `:shared:app:domain` | No |
 | `:shared:app:testing` | Data-level test fixtures (sample stores, seeded user data service, sample data, editor samples, fakes) | `:shared:app:data`, `:shared:ui:testing` | — |
@@ -253,9 +252,9 @@ flowchart TD
     `:shared:app:ui-common` on the domain, strings, and `:shared:ui` (not data),
     `:shared:app:map` on `:shared:app:ui-common` and `:shared:map`,
     `:shared:app:datacollection` on the map feature, `:shared:app:ui-common`,
-    and data, `:shared:app:dashboard` and `:shared:app:settings` on
-    `:shared:app:ui-common` only, `:shared:app:onboarding` and
-    `:shared:app:listsearch` on `:shared:app:ui-common` and data, and
+    and data, `:shared:app:dashboard`, `:shared:app:settings`, and
+    `:shared:app:listsearch` on `:shared:app:ui-common` only,
+    `:shared:app:onboarding` on `:shared:app:ui-common` and data, and
     `:shared:app:testing` on data only. `shared/web`'s
     `ModuleGraphTest` pins the web modules the same way: `:shared:web:domain`
     only on `:shared:app:domain` (without Compose), `:shared:web:resources` on
@@ -290,10 +289,6 @@ flowchart TD
 
 ## Next Steps
 
--   **List search without the data layer.** `ListSearchViewModel` asks the
-    data layer directly whether a live places geocoder is configured
-    (`hasLivePlacesGeocoder`); a domain flag or repository method would let
-    `:shared:app:listsearch` build on `:shared:app:ui-common` only.
 -   **Feature tests in their modules.** Most map and data collection ViewModel
     tests stay in `:shared:app` because they build the whole session; moving
     them means a session fixture that doesn't need `:shared:app` (for example

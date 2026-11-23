@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openforis.collectone.v2.app.client.places.hasLivePlacesGeocoder
 import org.openforis.collectone.v2.app.domain.model.EntityDatasetFeaturesGroup
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.SurveyMapAnchor
@@ -281,7 +280,7 @@ class ListSearchViewModel(
       query = session.query,
       isOnline = data.isOnline,
       // A live geocoder already searches the survey's region; the gazetteer stands in for it.
-      localPlaces = if (hasLivePlacesGeocoder()) emptyList() else data.localPlaces,
+      localPlaces = if (placeRepository.hasLiveGeocoder) emptyList() else data.localPlaces,
       remoteApiPlaces = session.geocoderPlaces,
       surveyBaseLng = longitude,
       surveyBaseLat = latitude,

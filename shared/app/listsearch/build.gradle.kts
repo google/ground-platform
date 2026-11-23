@@ -33,8 +33,6 @@ kotlin {
     val commonMain by getting {
       dependencies {
         api(projects.shared.app.uiCommon)
-        // Whether a live places geocoder is configured (client.places).
-        implementation(projects.shared.app.data)
         // The feature's Koin module (its ViewModel definition).
         implementation(libs.koin.core.viewmodel)
         // The Compose compiler infers the stability of the UI state the views consume, as it did
