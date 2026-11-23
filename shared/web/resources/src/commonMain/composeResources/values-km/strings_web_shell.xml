@@ -206,4 +206,5 @@
   <string name="web_discard_form_message">អ្នកកំពុងបំពេញទម្រង់មួយ។ ការចាកចេញឥឡូវនេះនឹងបោះបង់ចម្លើយដែលមិនទាន់បានរក្សាទុក។</string>
   <string name="web_discard_form_confirm">បោះបង់</string>
   <string name="web_discard_form_cancel">បន្តកែសម្រួល</string>
+  <string name="web_open_mobile_app">ទូរស័ព្ទ</string>
 </resources>

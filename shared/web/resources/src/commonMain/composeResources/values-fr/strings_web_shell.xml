@@ -211,4 +211,5 @@
   <string name="web_discard_form_message">Vous êtes en train de remplir un formulaire. Quitter maintenant supprimera toutes les réponses non enregistrées.</string>
   <string name="web_discard_form_confirm">Abandonner</string>
   <string name="web_discard_form_cancel">Continuer la modification</string>
+  <string name="web_open_mobile_app">Mobile</string>
 </resources>

@@ -52,6 +52,19 @@ private val LOCAL_BACKEND_ORIGIN =
   Regex("""^(https?)://(?:localhost|127\.0\.0\.1|\[::1]):(\d+)(/.*)?$""", RegexOption.IGNORE_CASE)
 private val LOCAL_LOOPBACK_HOSTS = setOf("", "localhost", "127.0.0.1", "::1", "[::1]")
 private val STANDARD_WEB_PORTS = setOf("80", "443")
+private val MOBILE_USER_AGENT_REGEX =
+  Regex(
+    """Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile""",
+    RegexOption.IGNORE_CASE,
+  )
+private val DESKTOP_PARAM_REGEX =
+  Regex("""(?:^|[?&])desktop=([^&]*)(?:&|$)""", RegexOption.IGNORE_CASE)
+
+/**
+ * Default local dev server URL for `mobileWebApp` (`./gradlew
+ * :mobileWebApp:wasmJsBrowserDevelopmentRun`).
+ */
+const val DEFAULT_LOCAL_MOBILE_WEB_URL = "http://localhost:8093"
 
 /**
  * Resolves the active [AppEnvironment] for a browser host.
@@ -122,7 +135,124 @@ fun resolveBackendDebugBaseUrl(
     configuredDebugUrl?.trim()?.takeIf { it.isNotEmpty() }
       ?: configuredServiceUrl?.trim()?.takeIf { it.isNotEmpty() }
       ?: return ""
-  val trimmed = raw.trimEnd('/')
+  return resolveLocalWorkstationUrl(
+    rawUrl = raw,
+    browserProtocol = browserProtocol,
+    browserHostname = browserHostname,
+    browserPort = browserPort,
+  )
+}
+
+/**
+ * Returns `true` when the browser reports a mobile or tablet environment: a mobile user-agent
+ * token, iPadOS desktop-class Safari (`Macintosh` with multi-touch), or a coarse primary pointer
+ * without hover capability.
+ */
+fun isMobileBrowser(
+  userAgent: String,
+  maxTouchPoints: Int = 0,
+  isCoarsePointerWithoutHover: Boolean = false,
+): Boolean {
+  if (isCoarsePointerWithoutHover) return true
+  if (MOBILE_USER_AGENT_REGEX.containsMatchIn(userAgent)) return true
+  if (userAgent.contains("Macintosh", ignoreCase = true) && maxTouchPoints > 1) return true
+  return false
+}
+
+/**
+ * Resolves the mobile web app URL for non-production (`DEV` / `STAGING`) web console builds, or
+ * `null` when unavailable or disabled.
+ *
+ * - In [AppEnvironment.PROD], always returns `null`.
+ * - Explicit `"none"`, `"false"`, or `"off"` disables the link/redirect even in
+ *   [AppEnvironment.DEV].
+ * - In [AppEnvironment.DEV], defaults to [DEFAULT_LOCAL_MOBILE_WEB_URL] when
+ *   [configuredMobileWebUrl] is unset, rewriting `localhost:<port>` to match remote workstation
+ *   hostnames or port-prefixed proxies.
+ * - In [AppEnvironment.STAGING], returns `null` unless [configuredMobileWebUrl] is configured.
+ */
+fun resolveMobileWebUrl(
+  environment: AppEnvironment,
+  configuredMobileWebUrl: String?,
+  browserProtocol: String = "",
+  browserHostname: String = "",
+  browserPort: String = "",
+): String? {
+  if (!environment.isNonProduction) return null
+  val raw = configuredMobileWebUrl?.trim().orEmpty()
+  if (
+    raw.equals("none", ignoreCase = true) ||
+      raw.equals("false", ignoreCase = true) ||
+      raw.equals("off", ignoreCase = true)
+  ) {
+    return null
+  }
+  val effective =
+    when {
+      raw.isNotEmpty() -> raw
+      environment == AppEnvironment.DEV -> DEFAULT_LOCAL_MOBILE_WEB_URL
+      else -> return null
+    }
+  return resolveLocalWorkstationUrl(
+    rawUrl = effective,
+    browserProtocol = browserProtocol,
+    browserHostname = browserHostname,
+    browserPort = browserPort,
+  )
+}
+
+/**
+ * Resolves the target URL when a mobile browser visits the web console in a non-production
+ * environment and should be redirected directly to the mobile web app, or `null` when no redirect
+ * should occur.
+ *
+ * Passing `?desktop=1` or `?desktop=true` in [currentSearch] bypasses the redirect.
+ */
+fun resolveMobileRedirectUrl(
+  environment: AppEnvironment,
+  configuredMobileWebUrl: String?,
+  currentOrigin: String,
+  currentSearch: String,
+  currentHash: String = "",
+  userAgent: String,
+  maxTouchPoints: Int = 0,
+  isCoarsePointerWithoutHover: Boolean = false,
+  browserProtocol: String = "",
+  browserHostname: String = "",
+  browserPort: String = "",
+): String? {
+  val desktopParam = DESKTOP_PARAM_REGEX.find(currentSearch)?.groupValues?.get(1)?.lowercase()
+  if (desktopParam == "1" || desktopParam == "true") return null
+  if (!isMobileBrowser(userAgent, maxTouchPoints, isCoarsePointerWithoutHover)) return null
+  val target =
+    resolveMobileWebUrl(
+      environment = environment,
+      configuredMobileWebUrl = configuredMobileWebUrl,
+      browserProtocol = browserProtocol,
+      browserHostname = browserHostname,
+      browserPort = browserPort,
+    ) ?: return null
+  if (
+    currentOrigin.isNotBlank() &&
+      target.trimEnd('/').equals(currentOrigin.trimEnd('/'), ignoreCase = true)
+  ) {
+    return null
+  }
+  val hash = currentHash.trim()
+  if (hash.isNotEmpty() && '#' !in target) {
+    val normalizedHash = if (hash.startsWith('#')) hash else "#$hash"
+    return "$target$normalizedHash"
+  }
+  return target
+}
+
+private fun resolveLocalWorkstationUrl(
+  rawUrl: String,
+  browserProtocol: String,
+  browserHostname: String,
+  browserPort: String,
+): String {
+  val trimmed = rawUrl.trimEnd('/')
   val host = browserHostname.trim()
   val localBackendMatch = LOCAL_BACKEND_ORIGIN.matchEntire(trimmed)
   if (localBackendMatch != null && host.lowercase() !in LOCAL_LOOPBACK_HOSTS) {

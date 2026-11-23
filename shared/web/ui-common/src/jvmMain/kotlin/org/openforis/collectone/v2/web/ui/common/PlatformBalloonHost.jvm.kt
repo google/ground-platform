@@ -13,7 +13,9 @@
  */
 package org.openforis.collectone.v2.web.ui.common
 
+import org.openforis.collectone.v2.app.domain.model.AppEnvironment
 import org.openforis.collectone.v2.app.domain.model.resolveBackendDebugBaseUrl
+import org.openforis.collectone.v2.app.domain.model.resolveMobileWebUrl
 
 actual fun platformBalloonAppUrl(): String = ""
 
@@ -25,6 +27,14 @@ actual fun platformBackendDebugUrl(configuredServiceUrl: String?): String =
     configuredDebugUrl = null,
     configuredServiceUrl = configuredServiceUrl?.takeIf { it.isNotBlank() } ?: platformServiceUrl(),
   )
+
+actual fun platformMobileWebUrl(environment: AppEnvironment): String? {
+  val configured =
+    System.getProperty("collectone.mobileWebUrl")?.trim()?.takeIf { it.isNotEmpty() }
+      ?: System.getenv("MOBILE_WEB_URL")?.trim()?.takeIf { it.isNotEmpty() }
+      ?: return null
+  return resolveMobileWebUrl(environment = environment, configuredMobileWebUrl = configured)
+}
 
 /** Last external URL requested via [openExternalUrl] in JVM tests. */
 var lastOpenedExternalUrlForTest: String? = null

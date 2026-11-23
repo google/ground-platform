@@ -211,4 +211,5 @@
   <string name="web_discard_form_message">Actualmente estás completando un formulario. Si sales ahora, se descartarán las respuestas no guardadas.</string>
   <string name="web_discard_form_confirm">Descartar</string>
   <string name="web_discard_form_cancel">Seguir editando</string>
+  <string name="web_open_mobile_app">Móvil</string>
 </resources>

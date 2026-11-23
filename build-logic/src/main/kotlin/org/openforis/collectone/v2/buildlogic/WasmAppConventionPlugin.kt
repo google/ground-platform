@@ -207,20 +207,24 @@ class WasmAppConventionPlugin : Plugin<Project> {
   /** Registers the task that writes `user-data-service-config.js`. */
   private fun Project.registerUserDataServiceConfig(settings: LocalSettings): TaskProvider<Task> {
     val url = settings.get("USER_DATA_SERVICE_URL") ?: ""
+    val mobileWebUrl = (settings.get("MOBILE_WEB_URL") ?: "").trim()
     val outputDir = layout.buildDirectory.dir("generated/userDataServiceConfig")
     return tasks.register("generateUserDataServiceConfig") {
       inputs.property("userDataServiceUrl", url)
+      inputs.property("mobileWebUrl", mobileWebUrl)
       outputs.dir(outputDir)
       doLast {
         val value = if (url.isEmpty()) "null" else JsonOutput.toJson(url)
+        val mobileValue = if (mobileWebUrl.isEmpty()) "null" else JsonOutput.toJson(mobileWebUrl)
         outputDir
           .get()
           .file("user-data-service-config.js")
           .asFile
           .apply { parentFile.mkdirs() }
           .writeText(
-            "// Generated from USER_DATA_SERVICE_URL by build.gradle.kts; do not edit.\n" +
-              "window.COLLECT_ONE_USER_DATA_SERVICE_URL = $value;\n"
+            "// Generated from USER_DATA_SERVICE_URL and MOBILE_WEB_URL by build.gradle.kts; do not edit.\n" +
+              "window.COLLECT_ONE_USER_DATA_SERVICE_URL = $value;\n" +
+              "window.COLLECT_ONE_MOBILE_WEB_URL = $mobileValue;\n"
           )
       }
     }

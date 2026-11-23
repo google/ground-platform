@@ -218,4 +218,6 @@
   <string name="web_file_upload_unavailable">Uploading files isn't available here.</string>
   <string name="web_collapse_form">Collapse form</string>
   <string name="web_expand_form">Expand form</string>
+  <!-- Header button in non-production builds opening the mobile web app. -->
+  <string name="web_open_mobile_app">Mobile</string>
 </resources>

@@ -49,12 +49,6 @@ import org.openforis.collectone.v2.mobile.ui.onboarding.MobileScreenHost
 private val CHROME_PARAM_REGEX =
   Regex("""(?:^|[?&])chrome=([^&]*)(?:&|$)""", RegexOption.IGNORE_CASE)
 
-private val MOBILE_USER_AGENT_REGEX =
-  Regex(
-    """Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile""",
-    RegexOption.IGNORE_CASE,
-  )
-
 /**
  * Returns `true` when the browser reports a mobile or tablet environment: a mobile user-agent
  * token, iPadOS desktop-class Safari (`Macintosh` with multi-touch), or a coarse primary pointer
@@ -64,12 +58,12 @@ fun isMobileBrowser(
   userAgent: String,
   maxTouchPoints: Int = 0,
   isCoarsePointerWithoutHover: Boolean = false,
-): Boolean {
-  if (isCoarsePointerWithoutHover) return true
-  if (MOBILE_USER_AGENT_REGEX.containsMatchIn(userAgent)) return true
-  if (userAgent.contains("Macintosh", ignoreCase = true) && maxTouchPoints > 1) return true
-  return false
-}
+): Boolean =
+  org.openforis.collectone.v2.app.domain.model.isMobileBrowser(
+    userAgent = userAgent,
+    maxTouchPoints = maxTouchPoints,
+    isCoarsePointerWithoutHover = isCoarsePointerWithoutHover,
+  )
 
 /**
  * Resolves whether the workbench device frame and controls should be shown around the mobile app.

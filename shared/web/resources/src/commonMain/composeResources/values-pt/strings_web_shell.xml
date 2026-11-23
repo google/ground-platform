@@ -216,4 +216,5 @@
   <string name="web_discard_form_message">Você está preenchendo um formulário no momento. Sair agora descartará todas as respostas não salvas.</string>
   <string name="web_discard_form_confirm">Descartar</string>
   <string name="web_discard_form_cancel">Continuar editando</string>
+  <string name="web_open_mobile_app">Móvel</string>
 </resources>

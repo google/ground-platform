@@ -137,6 +137,12 @@ The deployed bundle uses the `USER_DATA_SERVICE_URL` set where it was built, so
 set it to a reachable service (for example a Cloud Run deployment) before
 deploying; without one, the preview shows setup instructions.
 
+In non-production builds (`dev` / `staging`), set `MOBILE_WEB_URL` (via
+`-PMOBILE_WEB_URL=…`, environment variable, or `local.properties`) to link to
+the mobile web app from the header and automatically redirect mobile browsers
+(bypass the redirect with `?desktop=1`). Local `dev` defaults to
+`http://localhost:8093`; set `MOBILE_WEB_URL=none` to disable.
+
 Configure `FIREBASE_PROJECT_ID` and `FIREBASE_SA_EMAIL` via `--project` /
 `--sa-email`, environment variables, or the root `local.properties` file:
 

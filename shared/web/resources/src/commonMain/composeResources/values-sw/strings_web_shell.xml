@@ -211,4 +211,5 @@
   <string name="web_discard_form_message">Unajaza fomu kwa sasa. Kuondoka sasa kutatupa majibu yoyote ambayo hayajahifadhiwa.</string>
   <string name="web_discard_form_confirm">Tupa</string>
   <string name="web_discard_form_cancel">Endelea kuhariri</string>
+  <string name="web_open_mobile_app">Simu</string>
 </resources>

@@ -15,7 +15,9 @@
 
 package org.openforis.collectone.v2.web.ui.common
 
+import org.openforis.collectone.v2.app.domain.model.AppEnvironment
 import org.openforis.collectone.v2.app.domain.model.resolveBackendDebugBaseUrl
+import org.openforis.collectone.v2.app.domain.model.resolveMobileWebUrl
 
 @JsFun("() => (typeof window !== 'undefined' && window.location ? window.location.origin : '')")
 private external fun jsLocationOrigin(): String
@@ -48,6 +50,15 @@ private external fun jsUserDataServiceUrl(): String
 private external fun jsBackendDebugUrl(): String
 
 @JsFun(
+  """() => {
+    if (typeof window === 'undefined') return '';
+    const url = window.COLLECT_ONE_MOBILE_WEB_URL;
+    return typeof url === 'string' ? url : '';
+  }"""
+)
+private external fun jsMobileWebUrl(): String
+
+@JsFun(
   """(url) => {
     if (typeof window !== 'undefined' && typeof window.open === 'function') {
       window.open(url, '_blank', 'noopener,noreferrer');
@@ -71,6 +82,15 @@ actual fun platformBackendDebugUrl(configuredServiceUrl: String?): String =
   resolveBackendDebugBaseUrl(
     configuredDebugUrl = jsBackendDebugUrl(),
     configuredServiceUrl = configuredServiceUrl?.takeIf { it.isNotBlank() } ?: platformServiceUrl(),
+    browserProtocol = jsLocationProtocol(),
+    browserHostname = jsLocationHostname(),
+    browserPort = jsLocationPort(),
+  )
+
+actual fun platformMobileWebUrl(environment: AppEnvironment): String? =
+  resolveMobileWebUrl(
+    environment = environment,
+    configuredMobileWebUrl = jsMobileWebUrl(),
     browserProtocol = jsLocationProtocol(),
     browserHostname = jsLocationHostname(),
     browserPort = jsLocationPort(),

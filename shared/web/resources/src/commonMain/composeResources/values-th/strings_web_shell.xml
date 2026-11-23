@@ -206,4 +206,5 @@
   <string name="web_discard_form_message">คุณกำลังกรอกแบบฟอร์มอยู่ การออกตอนนี้จะละทิ้งคำตอบที่ยังไม่ได้บันทึก</string>
   <string name="web_discard_form_confirm">ละทิ้ง</string>
   <string name="web_discard_form_cancel">แก้ไขต่อ</string>
+  <string name="web_open_mobile_app">มือถือ</string>
 </resources>

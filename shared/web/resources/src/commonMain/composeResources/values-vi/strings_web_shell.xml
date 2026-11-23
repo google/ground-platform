@@ -206,4 +206,5 @@
   <string name="web_discard_form_message">Bạn đang điền biểu mẫu. Rời khỏi ngay bây giờ sẽ hủy bỏ mọi câu trả lời chưa được lưu.</string>
   <string name="web_discard_form_confirm">Hủy bỏ</string>
   <string name="web_discard_form_cancel">Tiếp tục chỉnh sửa</string>
+  <string name="web_open_mobile_app">Di động</string>
 </resources>

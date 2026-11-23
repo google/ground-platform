@@ -206,4 +206,5 @@
   <string name="web_discard_form_message">ທ່ານກຳລັງຕື່ມແບບຟອມຢູ່. ການອອກຕອນນີ້ຈະຍົກເລີກຄຳຕອບທີ່ຍັງບໍ່ໄດ້ບັນທຶກ.</string>
   <string name="web_discard_form_confirm">ຍົກເລີກ</string>
   <string name="web_discard_form_cancel">ສືບຕໍ່ແກ້ໄຂ</string>
+  <string name="web_open_mobile_app">ມືຖື</string>
 </resources>

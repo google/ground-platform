@@ -13,6 +13,8 @@
  */
 package org.openforis.collectone.v2.web.ui.common
 
+import org.openforis.collectone.v2.app.domain.model.AppEnvironment
+
 /**
  * Absolute URL of the standalone KML balloon form runner (`/balloon/balloon-form.html`) served
  * alongside this Web Console build, or `""` outside a browser host.
@@ -31,6 +33,13 @@ expect fun platformServiceUrl(): String
  * own origin, or [configuredServiceUrl] / [platformServiceUrl] otherwise.
  */
 expect fun platformBackendDebugUrl(configuredServiceUrl: String? = null): String
+
+/**
+ * URL of the Collect One mobile web app (`window.COLLECT_ONE_MOBILE_WEB_URL` or the local dev
+ * default) for the given [environment], or `null` when hidden/disabled (always `null` in
+ * [AppEnvironment.PROD]).
+ */
+expect fun platformMobileWebUrl(environment: AppEnvironment): String?
 
 /** Opens [url] in a new browser tab (`_blank` with `noopener,noreferrer`). */
 expect fun openExternalUrl(url: String)

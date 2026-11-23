@@ -95,6 +95,7 @@ fun WebHeaderButton(
   text: String,
   icon: ImageVector,
   onClick: () -> Unit,
+  modifier: Modifier = Modifier,
   tonal: Boolean = false,
   trailing: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -117,14 +118,14 @@ fun WebHeaderButton(
     FilledTonalButton(
       onClick = onClick,
       contentPadding = padding,
-      modifier = Modifier.height(36.dp),
+      modifier = modifier.height(36.dp),
       content = content,
     )
   } else {
     OutlinedButton(
       onClick = onClick,
       contentPadding = padding,
-      modifier = Modifier.height(36.dp),
+      modifier = modifier.height(36.dp),
       content = content,
     )
   }

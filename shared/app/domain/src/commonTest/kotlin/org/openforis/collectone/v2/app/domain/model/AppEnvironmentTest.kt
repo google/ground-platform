@@ -188,6 +188,138 @@ class AppEnvironmentTest {
   }
 
   @Test
+  fun resolveMobileWebUrl_handlesDevDefaultWorkstationProxyStagingAndProd() {
+    // Local dev defaults to localhost:8093 and rewrites for remote workstations / proxies.
+    assertEquals(
+      DEFAULT_LOCAL_MOBILE_WEB_URL,
+      resolveMobileWebUrl(environment = AppEnvironment.DEV, configuredMobileWebUrl = null),
+    )
+    assertEquals(
+      "https://8093-dev.proxy.example.com",
+      resolveMobileWebUrl(
+        environment = AppEnvironment.DEV,
+        configuredMobileWebUrl = null,
+        browserProtocol = "https:",
+        browserHostname = "8090-dev.proxy.example.com",
+      ),
+    )
+    assertEquals(
+      "http://dev.workstation.example.com:8093",
+      resolveMobileWebUrl(
+        environment = AppEnvironment.DEV,
+        configuredMobileWebUrl = null,
+        browserProtocol = "http:",
+        browserHostname = "dev.workstation.example.com",
+        browserPort = "8090",
+      ),
+    )
+    // Explicit override and explicit disable in DEV.
+    assertEquals(
+      "https://mobile.example.org",
+      resolveMobileWebUrl(
+        environment = AppEnvironment.DEV,
+        configuredMobileWebUrl = "https://mobile.example.org/",
+      ),
+    )
+    assertNull(
+      resolveMobileWebUrl(environment = AppEnvironment.DEV, configuredMobileWebUrl = "none")
+    )
+    // STAGING requires an explicit URL; PROD always disables.
+    assertNull(
+      resolveMobileWebUrl(environment = AppEnvironment.STAGING, configuredMobileWebUrl = null)
+    )
+    assertEquals(
+      "https://mobile.example.org",
+      resolveMobileWebUrl(
+        environment = AppEnvironment.STAGING,
+        configuredMobileWebUrl = "https://mobile.example.org/",
+      ),
+    )
+    assertNull(
+      resolveMobileWebUrl(
+        environment = AppEnvironment.PROD,
+        configuredMobileWebUrl = "https://mobile.example.org",
+      )
+    )
+  }
+
+  @Test
+  fun resolveMobileRedirectUrl_redirectsMobileBrowsersInNonProdWithDesktopEscapeHatch() {
+    val androidUa =
+      "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Mobile Safari/537.36"
+    val desktopUa =
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/134.0.0.0 Safari/537.36"
+    val ipadUa =
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15"
+
+    // Mobile browser in DEV redirects to configured URL and preserves hash deep link.
+    assertEquals(
+      "https://mobile.example.org#join/s1/tok",
+      resolveMobileRedirectUrl(
+        environment = AppEnvironment.DEV,
+        configuredMobileWebUrl = "https://mobile.example.org/",
+        currentOrigin = "https://web.example.org",
+        currentSearch = "",
+        currentHash = "#join/s1/tok",
+        userAgent = androidUa,
+        maxTouchPoints = 5,
+      ),
+    )
+    // iPadOS desktop-class Safari redirects when multi-touch is present.
+    assertEquals(
+      "https://mobile.example.org",
+      resolveMobileRedirectUrl(
+        environment = AppEnvironment.STAGING,
+        configuredMobileWebUrl = "https://mobile.example.org",
+        currentOrigin = "https://web.example.org",
+        currentSearch = "",
+        userAgent = ipadUa,
+        maxTouchPoints = 5,
+      ),
+    )
+    // Desktop browsers do not redirect.
+    assertNull(
+      resolveMobileRedirectUrl(
+        environment = AppEnvironment.DEV,
+        configuredMobileWebUrl = "https://mobile.example.org",
+        currentOrigin = "https://web.example.org",
+        currentSearch = "",
+        userAgent = desktopUa,
+      )
+    )
+    // ?desktop=1 and ?desktop=true bypass the redirect on mobile browsers.
+    assertNull(
+      resolveMobileRedirectUrl(
+        environment = AppEnvironment.DEV,
+        configuredMobileWebUrl = "https://mobile.example.org",
+        currentOrigin = "https://web.example.org",
+        currentSearch = "?desktop=1",
+        userAgent = androidUa,
+      )
+    )
+    // Same-origin loop guard prevents redirecting to the current host.
+    assertNull(
+      resolveMobileRedirectUrl(
+        environment = AppEnvironment.DEV,
+        configuredMobileWebUrl = "https://mobile.example.org",
+        currentOrigin = "https://mobile.example.org",
+        currentSearch = "",
+        userAgent = androidUa,
+      )
+    )
+    // PROD never redirects.
+    assertNull(
+      resolveMobileRedirectUrl(
+        environment = AppEnvironment.PROD,
+        configuredMobileWebUrl = "https://mobile.example.org",
+        currentOrigin = "https://web.example.org",
+        currentSearch = "",
+        userAgent = androidUa,
+      )
+    )
+  }
+
+  @Test
   fun appBuildConfigExposesNonBlankGradleVersion() {
     assertTrue(AppBuildConfig.APP_VERSION.isNotBlank())
     assertFalse(AppBuildConfig.APP_VERSION.equals("unspecified", ignoreCase = true))

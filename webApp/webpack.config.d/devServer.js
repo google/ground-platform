@@ -69,9 +69,10 @@ if (config.devServer) {
   // call the URL baked in at build time instead (see build.gradle.kts).
   const fs = require('fs');
   const os = require('os');
-  const readUserDataServiceUrl = () => {
-    if (process.env.USER_DATA_SERVICE_URL) return process.env.USER_DATA_SERVICE_URL;
-    let url = null;
+  const readLocalSetting = (key) => {
+    if (process.env[key]) return process.env[key];
+    let value = null;
+    const pattern = new RegExp(`^\\s*${key}\\s*[=:]\\s*(.*?)\\s*$`);
     // ~/.gradle/gradle.properties, root local.properties, then this app's own local.properties.
     for (const file of [
       path.join(os.homedir(), '.gradle/gradle.properties'),
@@ -86,13 +87,15 @@ if (config.devServer) {
     ]) {
       if (!fs.existsSync(file)) continue;
       for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
-        const match = line.match(/^\s*USER_DATA_SERVICE_URL\s*[=:]\s*(.*?)\s*$/);
+        const match = line.match(pattern);
         // Java properties may escape ':' and '=' (e.g. http\://host).
-        if (match) url = match[1].replace(/\\([:=])/g, '$1');
+        if (match) value = match[1].replace(/\\([:=])/g, '$1');
       }
     }
-    return url || null;
+    return value || null;
   };
+  const readUserDataServiceUrl = () => readLocalSetting('USER_DATA_SERVICE_URL');
+  const readMobileWebUrl = () => readLocalSetting('MOBILE_WEB_URL');
 
   // Tells the app to call the user data service through this dev server (its own origin), or that
   // none is configured, in which case the app shows setup instructions instead of starting.
@@ -106,6 +109,7 @@ if (config.devServer) {
       path: '/user-data-service-config.js',
       middleware: (req, res) => {
         const targetUrl = readUserDataServiceUrl();
+        const mobileWebUrl = readMobileWebUrl();
         res.setHeader('Content-Type', 'application/javascript');
         res.setHeader('Cache-Control', 'no-store');
         res.end(
@@ -114,6 +118,9 @@ if (config.devServer) {
             ';\n' +
             'window.COLLECT_ONE_BACKEND_DEBUG_URL = ' +
             (targetUrl ? JSON.stringify(targetUrl) : 'null') +
+            ';\n' +
+            'window.COLLECT_ONE_MOBILE_WEB_URL = ' +
+            (mobileWebUrl ? JSON.stringify(mobileWebUrl) : 'null') +
             ';\n'
         );
       },

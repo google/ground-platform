@@ -29,6 +29,8 @@ import org.openforis.collectone.v2.web.navigation.MemoryBrowserHistory
 import org.openforis.collectone.v2.web.ui.WebAppState
 import org.openforis.collectone.v2.web.ui.canManageActiveSurvey
 import org.openforis.collectone.v2.web.ui.common.WEB_COMPACT_LANGUAGE_SELECTOR_TAG
+import org.openforis.collectone.v2.web.ui.common.lastOpenedExternalUrlForTest
+import org.openforis.collectone.v2.web.ui.header.WEB_HEADER_MOBILE_LINK_TAG
 
 /**
  * The header every web console page shares (logo, language selector) and the survey toolbar on the
@@ -144,5 +146,47 @@ class WebConsoleHeaderTest {
         "/surveys/${state.viewModels.dashboard.uiState.value.activeSurveyId}/editor",
         history.path,
       )
+    }
+
+  @Test
+  fun mobileLink_shownInDevWhenConfiguredAndOpensMobileUrl() =
+    runDesktopComposeUiTest(width = 1440, height = 900) {
+      val prevEnv = System.getProperty("collectone.environment")
+      val prevUrl = System.getProperty("collectone.mobileWebUrl")
+      lastOpenedExternalUrlForTest = null
+      try {
+        System.setProperty("collectone.environment", "dev")
+        System.setProperty("collectone.mobileWebUrl", "https://mobile.example.org/")
+        showConsole(signedInState(), "/surveys")
+
+        onNodeWithTag(WEB_HEADER_MOBILE_LINK_TAG).performClick()
+        waitForIdle()
+
+        assertEquals("https://mobile.example.org", lastOpenedExternalUrlForTest)
+      } finally {
+        if (prevEnv == null) System.clearProperty("collectone.environment")
+        else System.setProperty("collectone.environment", prevEnv)
+        if (prevUrl == null) System.clearProperty("collectone.mobileWebUrl")
+        else System.setProperty("collectone.mobileWebUrl", prevUrl)
+      }
+    }
+
+  @Test
+  fun mobileLink_hiddenInProdEvenWhenConfigured() =
+    runDesktopComposeUiTest(width = 1440, height = 900) {
+      val prevEnv = System.getProperty("collectone.environment")
+      val prevUrl = System.getProperty("collectone.mobileWebUrl")
+      try {
+        System.setProperty("collectone.environment", "prod")
+        System.setProperty("collectone.mobileWebUrl", "https://mobile.example.org")
+        showConsole(signedInState(), "/surveys")
+
+        onNodeWithTag(WEB_HEADER_MOBILE_LINK_TAG).assertDoesNotExist()
+      } finally {
+        if (prevEnv == null) System.clearProperty("collectone.environment")
+        else System.setProperty("collectone.environment", prevEnv)
+        if (prevUrl == null) System.clearProperty("collectone.mobileWebUrl")
+        else System.setProperty("collectone.mobileWebUrl", prevUrl)
+      }
     }
 }

@@ -232,6 +232,7 @@ WHISP_API_KEY=your-whisp-api-key
 | Key | Used by | Purpose |
 | :--- | :--- | :--- |
 | `USER_DATA_SERVICE_URL` | `webApp`, `mobileWebApp`, `androidApp`, `iosApp` | Backend gRPC / gRPC-Web URL (`http://localhost:8080` locally; HTTPS URL in deployed builds). |
+| `MOBILE_WEB_URL` | `webApp` | Optional mobile web app URL for non-production (`dev`/`staging`) builds. Shows a **Mobile** link in the web header and automatically redirects mobile browsers (bypass with `?desktop=1`). Defaults to `http://localhost:8093` in local `dev`; set to `none` to disable. |
 | `MAPBOX_ACCESS_TOKEN` | `webApp`, `mobileWebApp`, `androidApp`, `iosApp` | Public Mapbox token (`pk.…`) for map rendering, labels, and Places search. |
 | `FIREBASE_WEB_CONFIG` | `webApp`, `mobileWebApp` | Single-line Firebase web app JSON config for Google sign-in; omit or set `none` to use local fake sign-in. |
 | `DEV_SIGN_IN`, `APP_ENV`, `PASSLIST` | `webApp`, `mobileWebApp`, `server` | Optional build/runtime toggles: dev role switcher (`true`/`false`), explicit environment (`dev`/`staging`/`prod`), and comma-separated email/domain allowlist. |

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
@@ -52,6 +53,7 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
@@ -65,6 +67,7 @@ import org.openforis.collectone.v2.app.domain.model.SurveyLifecycleState
 import org.openforis.collectone.v2.app.ui.common.CloudAcaciaLogo
 import org.openforis.collectone.v2.app.ui.common.DemoBadge
 import org.openforis.collectone.v2.app.ui.common.UserAvatarProfileMenu
+import org.openforis.collectone.v2.app.ui.common.platformAppEnvironment
 import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionActions
 import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionUiState
 import org.openforis.collectone.v2.core.forms.ui.LocalAppBrandFontFamily
@@ -75,6 +78,7 @@ import org.openforis.collectone.v2.web.resources.Res
 import org.openforis.collectone.v2.web.resources.web_all_surveys_menu_item
 import org.openforis.collectone.v2.web.resources.web_manage_survey
 import org.openforis.collectone.v2.web.resources.web_not_saved
+import org.openforis.collectone.v2.web.resources.web_open_mobile_app
 import org.openforis.collectone.v2.web.resources.web_recent_surveys
 import org.openforis.collectone.v2.web.resources.web_saved
 import org.openforis.collectone.v2.web.resources.web_saving
@@ -83,6 +87,8 @@ import org.openforis.collectone.v2.web.ui.common.WebCompactLanguageSelector
 import org.openforis.collectone.v2.web.ui.common.WebHeaderButton
 import org.openforis.collectone.v2.web.ui.common.WebHeaderContext
 import org.openforis.collectone.v2.web.ui.common.WebHeaderSupportingText
+import org.openforis.collectone.v2.web.ui.common.openExternalUrl
+import org.openforis.collectone.v2.web.ui.common.platformMobileWebUrl
 import org.openforis.collectone.v2.web.ui.datacollection.WebCollectDataMenuButton
 import org.openforis.collectone.v2.web.ui.surveyeditor.SurveyStatusBadgeMenu
 
@@ -303,6 +309,9 @@ fun WebSaveStatusIndicator(
 /** How long the header confirms "Saved" after a save finishes. */
 internal const val SAVED_CONFIRMATION_MILLIS = 2_500L
 
+/** Test tag on the non-production header button that opens the mobile web app. */
+internal const val WEB_HEADER_MOBILE_LINK_TAG = "web_header_mobile_link"
+
 /** Drop shadow of [WebAppHeader]: X=0, Y=4, Blur=12, Spread=0, #000000 at 10% alpha. */
 private val HeaderShadowOffsetY = 4.dp
 private val HeaderShadowBlurRadius = 12.dp
@@ -354,6 +363,7 @@ internal fun WebAppHeader(
   actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
   val brandFont = LocalAppBrandFontFamily.current
+  val mobileWebUrl = platformMobileWebUrl(platformAppEnvironment())
 
   Surface(
     modifier =
@@ -449,12 +459,21 @@ internal fun WebAppHeader(
           if (actions != null) {
             actions()
 
-            if (onSignOut != null || showLanguageSelector) {
+            if (mobileWebUrl != null || onSignOut != null || showLanguageSelector) {
               VerticalDivider(
                 modifier = Modifier.height(24.dp),
                 color = MaterialTheme.colorScheme.outlineVariant,
               )
             }
+          }
+
+          if (mobileWebUrl != null) {
+            WebHeaderButton(
+              text = stringResource(Res.string.web_open_mobile_app),
+              icon = Icons.Outlined.Smartphone,
+              onClick = { openExternalUrl(mobileWebUrl) },
+              modifier = Modifier.testTag(WEB_HEADER_MOBILE_LINK_TAG),
+            )
           }
 
           if (showLanguageSelector) {
