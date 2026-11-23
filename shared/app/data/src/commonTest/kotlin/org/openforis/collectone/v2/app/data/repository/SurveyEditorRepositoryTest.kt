@@ -31,6 +31,7 @@ import org.openforis.collectone.v2.app.domain.model.computeAgStackGeoId
 import org.openforis.collectone.v2.app.domain.model.editor.Collaborator
 import org.openforis.collectone.v2.app.domain.model.editor.CollaboratorRole
 import org.openforis.collectone.v2.app.domain.model.editor.DatasetKind
+import org.openforis.collectone.v2.app.domain.model.editor.EntityDataset
 import org.openforis.collectone.v2.app.domain.model.editor.EntityRow
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyAccess
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
@@ -137,42 +138,7 @@ class SurveyEditorRepositoryTest {
     val renamedEntity = entitiesBefore.first { it.id == renamed.key }
     assertTrue(renamedEntity.submissions.isNotEmpty(), "fixture entity has Submissions")
 
-    val edited =
-      initial.copy(
-        datasets =
-          initial.datasets.map { d ->
-            if (d.key != dataset.key) {
-              d
-            } else {
-              d.copy(
-                style = d.style.copy(colorHex = "#AD1457", iconName = "flag"),
-                rows =
-                  d.rows
-                    .filter { it.key != removed.key }
-                    .map { row ->
-                      if (row.key == renamed.key) {
-                        row.copy(values = row.values + (d.labelProperty to "Renamed parcel"))
-                      } else {
-                        row
-                      }
-                    } +
-                    EntityRow(
-                      key = "new-row",
-                      values = mapOf(d.labelProperty to "Added in the editor"),
-                      geometry = listOf(LatLng(-0.4150, 36.9500)),
-                    ),
-              )
-            }
-          },
-        forms =
-          initial.forms.mapIndexed { index, entry ->
-            if (index == 0) {
-              entry.copy(form = entry.form.copy(availability = FormAvailability.WEB))
-            } else {
-              entry
-            }
-          },
-      )
+    val edited = applyStyleRowAndFormEdits(initial, dataset, renamed.key, removed.key)
     runNow { repository.saveDraft(surveyId, edited) }
 
     val layer = runNow {
@@ -212,6 +178,48 @@ class SurveyEditorRepositoryTest {
     assertNotNull(reopenedRows.firstOrNull { it.key == added.id })
     assertTrue(reopenedRows.none { it.key == removed.key })
   }
+
+  private fun applyStyleRowAndFormEdits(
+    initial: SurveyEditorDraft,
+    dataset: EntityDataset,
+    renamedKey: String,
+    removedKey: String,
+  ): SurveyEditorDraft =
+    initial.copy(
+      datasets =
+        initial.datasets.map { d ->
+          if (d.key != dataset.key) {
+            d
+          } else {
+            d.copy(
+              style = d.style.copy(colorHex = "#AD1457", iconName = "flag"),
+              rows =
+                d.rows
+                  .filter { it.key != removedKey }
+                  .map { row ->
+                    if (row.key == renamedKey) {
+                      row.copy(values = row.values + (d.labelProperty to "Renamed parcel"))
+                    } else {
+                      row
+                    }
+                  } +
+                  EntityRow(
+                    key = "new-row",
+                    values = mapOf(d.labelProperty to "Added in the editor"),
+                    geometry = listOf(LatLng(-0.4150, 36.9500)),
+                  ),
+            )
+          }
+        },
+      forms =
+        initial.forms.mapIndexed { index, entry ->
+          if (index == 0) {
+            entry.copy(form = entry.form.copy(availability = FormAvailability.WEB))
+          } else {
+            entry
+          }
+        },
+    )
 
   @Test
   fun saveDraft_keepsMapFeaturesAddedSinceTheDraftWasOpened() {

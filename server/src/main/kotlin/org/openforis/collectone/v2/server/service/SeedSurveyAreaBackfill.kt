@@ -14,6 +14,7 @@
 package org.openforis.collectone.v2.server.service
 
 import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.SubmissionRecord
 import openforis.collectone.v1.survey.MapConfig
 import openforis.collectone.v1.survey.SurveyArea
 import openforis.collectone.v1.survey.SurveyDef
@@ -58,56 +59,115 @@ internal class SeedSurveyAreaBackfill(
     return backfilled.map { it.first }
   }
 
+  private data class BackfillCandidate(
+    val surveyId: String,
+    val saved: SurveyDef,
+    val workingCopy: SurveyDef?,
+    val area: SurveyArea,
+    val missingArea: Boolean,
+  )
+
   /**
    * Sets `survey_area` (and relocates pre-relocation seed features) on [surveySeed]'s survey if
    * needed; returns its new record version if it changed anything.
    */
   private fun UserDataWriter.backfill(surveySeed: SurveySeed): Pair<String, Long>? {
-    val seedSurvey = surveySeed.survey ?: return null
-    val area = seedSurvey.map_config?.survey_area ?: return null
-    val surveyId = seedSurvey.survey_id
-    val saved = survey(surveyId)?.takeIf { it.state != SurveyState.DELETED } ?: return null
-    val workingCopy = workingCopy(surveyId)
+    val candidate = resolveBackfillCandidate(surveySeed) ?: return null
+    val relocatedEntities =
+      relocateSeedEntities(candidate.surveyId, surveySeed.entities, candidate.area)
+    val relocatedSubmissions = relocateSeedSubmissions(candidate.surveyId, surveySeed.submissions)
+    return if (candidate.missingArea || relocatedEntities || relocatedSubmissions) {
+      applySurveyAreaBackfill(candidate)
+    } else {
+      null
+    }
+  }
+
+  private fun UserDataWriter.resolveBackfillCandidate(surveySeed: SurveySeed): BackfillCandidate? {
+    val seedSurvey = surveySeed.survey
+    val area = seedSurvey?.map_config?.survey_area
+    val saved =
+      if (seedSurvey != null && area != null) {
+        survey(seedSurvey.survey_id)?.takeIf { it.state != SurveyState.DELETED }
+      } else {
+        null
+      }
+    if (seedSurvey == null || area == null || saved == null) return null
+    val workingCopy = workingCopy(seedSurvey.survey_id)
     val missingArea = !saved.hasSurveyArea && workingCopy?.hasSurveyArea != true
     val matchesSeedArea = missingArea || saved.map_config?.survey_area == area
-    if (!matchesSeedArea) return null
+    return if (matchesSeedArea) {
+      BackfillCandidate(seedSurvey.survey_id, saved, workingCopy, area, missingArea)
+    } else {
+      null
+    }
+  }
 
-    var relocatedData = false
-    for (seedEntity in surveySeed.entities) {
-      val storedEntity = entity(surveyId, seedEntity.entity_id) ?: continue
-      if (storedEntity.is_deleted) continue
-      if (
-        storedEntity.geometry != seedEntity.geometry &&
-          !isInsideArea(storedEntity, area) &&
-          isInsideArea(seedEntity, area)
-      ) {
+  private fun UserDataWriter.relocateSeedEntities(
+    surveyId: String,
+    seedEntities: List<EntityRecord>,
+    area: SurveyArea,
+  ): Boolean {
+    var relocated = false
+    for (seedEntity in seedEntities) {
+      val storedEntity = entity(surveyId, seedEntity.entity_id)
+      if (storedEntity != null && shouldRelocateEntity(storedEntity, seedEntity, area)) {
         putEntity(seedEntity.copy(revision = storedEntity.revision + 1L))
-        relocatedData = true
+        relocated = true
       }
     }
-    for (seedSub in surveySeed.submissions) {
-      val storedSub = submission(surveyId, seedSub.submission_id) ?: continue
-      if (storedSub.is_deleted) continue
-      if (seedSub.location != null && storedSub.location != seedSub.location) {
+    return relocated
+  }
+
+  private fun shouldRelocateEntity(
+    storedEntity: EntityRecord,
+    seedEntity: EntityRecord,
+    area: SurveyArea,
+  ): Boolean {
+    if (storedEntity.is_deleted || storedEntity.geometry == seedEntity.geometry) return false
+    return !isInsideArea(storedEntity, area) && isInsideArea(seedEntity, area)
+  }
+
+  private fun UserDataWriter.relocateSeedSubmissions(
+    surveyId: String,
+    seedSubmissions: List<SubmissionRecord>,
+  ): Boolean {
+    var relocated = false
+    for (seedSub in seedSubmissions) {
+      val storedSub = submission(surveyId, seedSub.submission_id)
+      if (storedSub != null && shouldRelocateSubmission(storedSub, seedSub)) {
         putSubmission(seedSub.copy(revision = storedSub.revision + 1L))
-        relocatedData = true
+        relocated = true
       }
     }
+    return relocated
+  }
 
-    if (!missingArea && !relocatedData) return null
+  private fun shouldRelocateSubmission(
+    storedSub: SubmissionRecord,
+    seedSub: SubmissionRecord,
+  ): Boolean =
+    !storedSub.is_deleted && seedSub.location != null && storedSub.location != seedSub.location
 
-    val recordVersion = nextSurveyRecordVersion(surveyId)
+  private fun UserDataWriter.applySurveyAreaBackfill(
+    candidate: BackfillCandidate
+  ): Pair<String, Long> {
+    val recordVersion = nextSurveyRecordVersion(candidate.surveyId)
     val updatedSaved =
-      (if (missingArea) saved.withSurveyArea(area) else saved).copy(record_version = recordVersion)
+      (if (candidate.missingArea) candidate.saved.withSurveyArea(candidate.area)
+        else candidate.saved)
+        .copy(record_version = recordVersion)
     putSurvey(updatedSaved)
-    workingCopy?.let {
+    candidate.workingCopy?.let {
       putWorkingCopy(
-        surveyId,
-        (if (missingArea) it.withSurveyArea(area) else it).copy(record_version = recordVersion),
+        candidate.surveyId,
+        (if (candidate.missingArea) it.withSurveyArea(candidate.area) else it).copy(
+          record_version = recordVersion
+        ),
       )
     }
-    acl(surveyId)?.let { putAcl(it.copy(record_version = recordVersion)) }
-    return surveyId to recordVersion
+    acl(candidate.surveyId)?.let { putAcl(it.copy(record_version = recordVersion)) }
+    return candidate.surveyId to recordVersion
   }
 
   private fun isInsideArea(entity: EntityRecord, area: SurveyArea): Boolean {

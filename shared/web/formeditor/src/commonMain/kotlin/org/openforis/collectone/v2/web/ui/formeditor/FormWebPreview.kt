@@ -557,82 +557,100 @@ private fun WebWireframeCardFooter(
     )
     Spacer(Modifier.width(8.dp))
     if (question.type.isGeometry) {
-      Surface(
-        onClick = onToggleZoom,
-        shape = RoundedCornerShape(50),
-        color = if (isZoomedIn) colors.primaryContainer else colors.surfaceContainerHighest,
-        contentColor = if (isZoomedIn) colors.onPrimaryContainer else colors.onSurfaceVariant,
-      ) {
-        Row(
-          modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Icon(
-            imageVector = FitScreenIcon,
-            contentDescription = null,
-            modifier = Modifier.size(12.dp),
-          )
-          Text(
-            text =
-              if (isZoomedIn) stringResource(Res.string.formeditor_reset_view)
-              else stringResource(Res.string.formeditor_adjust_view),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Medium,
-          )
-        }
-      }
+      WireframeGeometryZoomChip(isZoomedIn = isZoomedIn, onToggleZoom = onToggleZoom)
     } else {
-      val resolvedChoices =
-        if (
-          question.type == EditorQuestionType.SELECT_ONE ||
-            question.type == EditorQuestionType.SELECT_MULTIPLE
-        ) {
-          question.resolvedChoices(datasets)
-        } else {
-          emptyList()
-        }
-      val coloredChoices = resolvedChoices.mapNotNull { choice ->
-        ChoiceImageRegistry.parseChoiceColor(choice.colorHex)?.let { color ->
-          choice.displayLabel(activeLanguage, defaultLanguage).ifBlank { choice.value } to color
-        }
+      WireframeQuestionSummaryBadge(
+        question = question,
+        datasets = datasets,
+        activeLanguage = activeLanguage,
+        defaultLanguage = defaultLanguage,
+      )
+    }
+  }
+}
+
+@Composable
+private fun WireframeGeometryZoomChip(isZoomedIn: Boolean, onToggleZoom: () -> Unit) {
+  val colors = MaterialTheme.colorScheme
+  Surface(
+    onClick = onToggleZoom,
+    shape = RoundedCornerShape(50),
+    color = if (isZoomedIn) colors.primaryContainer else colors.surfaceContainerHighest,
+    contentColor = if (isZoomedIn) colors.onPrimaryContainer else colors.onSurfaceVariant,
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        imageVector = FitScreenIcon,
+        contentDescription = null,
+        modifier = Modifier.size(12.dp),
+      )
+      Text(
+        text =
+          if (isZoomedIn) stringResource(Res.string.formeditor_reset_view)
+          else stringResource(Res.string.formeditor_adjust_view),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Medium,
+      )
+    }
+  }
+}
+
+@Composable
+private fun WireframeQuestionSummaryBadge(
+  question: EditorQuestion,
+  datasets: List<EditorDataset>,
+  activeLanguage: String,
+  defaultLanguage: String,
+) {
+  val colors = MaterialTheme.colorScheme
+  val resolvedChoices =
+    if (
+      question.type == EditorQuestionType.SELECT_ONE ||
+        question.type == EditorQuestionType.SELECT_MULTIPLE
+    ) {
+      question.resolvedChoices(datasets)
+    } else {
+      emptyList()
+    }
+  val coloredChoices = resolvedChoices.mapNotNull { choice ->
+    ChoiceImageRegistry.parseChoiceColor(choice.colorHex)?.let { color ->
+      choice.displayLabel(activeLanguage, defaultLanguage).ifBlank { choice.value } to color
+    }
+  }
+  if (coloredChoices.isNotEmpty()) {
+    Row(
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      coloredChoices.take(2).forEach { (label, color) ->
+        ChoiceColorPill(label = label, color = color, compact = true)
       }
-      if (coloredChoices.isNotEmpty()) {
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          coloredChoices.take(2).forEach { (label, color) ->
-            ChoiceColorPill(
-              label = label,
-              color = color,
-              compact = true,
-            )
-          }
-          if (resolvedChoices.size > 2) {
-            Text(
-              text = "+${resolvedChoices.size - 2}",
-              style = MaterialTheme.typography.labelSmall,
-              color = colors.onSurfaceVariant,
-            )
-          }
-        }
-      } else {
-        Surface(
-          shape = RoundedCornerShape(6.dp),
-          color = colors.surfaceContainerLowest,
-          border = BorderStroke(1.dp, colors.outlineVariant),
-        ) {
-          Text(
-            text = wireframeWidgetSummary(question, datasets, activeLanguage, defaultLanguage),
-            style = MaterialTheme.typography.labelSmall,
-            color = colors.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-          )
-        }
+      if (resolvedChoices.size > 2) {
+        Text(
+          text = "+${resolvedChoices.size - 2}",
+          style = MaterialTheme.typography.labelSmall,
+          color = colors.onSurfaceVariant,
+        )
       }
+    }
+  } else {
+    Surface(
+      shape = RoundedCornerShape(6.dp),
+      color = colors.surfaceContainerLowest,
+      border = BorderStroke(1.dp, colors.outlineVariant),
+    ) {
+      Text(
+        text = wireframeWidgetSummary(question, datasets, activeLanguage, defaultLanguage),
+        style = MaterialTheme.typography.labelSmall,
+        color = colors.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+      )
     }
   }
 }

@@ -48,40 +48,7 @@ class KmlSurveyExporterTest {
 
   @Test
   fun kmlExportEmbedsPanelBalloonIframeFormsAndClosedPolygonRings() {
-    val polygon =
-      Geometry.Polygon(
-        rings =
-          listOf(
-            listOf(
-              LatLng(latitude = 8.472438, longitude = -83.579452),
-              LatLng(latitude = 8.472438, longitude = -83.578816),
-              LatLng(latitude = 8.471805, longitude = -83.578816),
-              LatLng(latitude = 8.471805, longitude = -83.579452),
-            )
-          )
-      )
-    val entity =
-      GeospatialEntityItem(
-        id = "plot-101",
-        label = "Parcel #101 & \"North\"",
-        datasetId = "coffee_parcels",
-        datasetName = "Smallholder Coffee Parcels",
-        layerId = "layer-coffee-parcels",
-        geoId = "ENT-COFF-01",
-        geometry = polygon,
-        areaHectares = 1.85,
-        perimeterMeters = 520,
-        colorHex = 0xFF2E7D32L,
-        properties =
-          mapOf(
-            "status" to "In progress",
-            "marker-symbol" to "◐",
-            "farmer_owner" to "Maria Rojas",
-          ),
-        submissions = emptyList(),
-        syncStatus = SyncStatus.SYNCED,
-      )
-
+    val entity = buildSampleCoffeeParcelEntity()
     val embeddedForm =
       KmlEmbeddedForm(
         id = "form_plot_check",
@@ -133,6 +100,41 @@ class KmlSurveyExporterTest {
     assertTrue(
       "-83.579452,8.472438,0 -83.578816,8.472438,0 -83.578816,8.471805,0 -83.579452,8.471805,0 -83.579452,8.472438,0" in
         file.content
+    )
+  }
+
+  private fun buildSampleCoffeeParcelEntity(): GeospatialEntityItem {
+    val polygon =
+      Geometry.Polygon(
+        rings =
+          listOf(
+            listOf(
+              LatLng(latitude = 8.472438, longitude = -83.579452),
+              LatLng(latitude = 8.472438, longitude = -83.578816),
+              LatLng(latitude = 8.471805, longitude = -83.578816),
+              LatLng(latitude = 8.471805, longitude = -83.579452),
+            )
+          )
+      )
+    return GeospatialEntityItem(
+      id = "plot-101",
+      label = "Parcel #101 & \"North\"",
+      datasetId = "coffee_parcels",
+      datasetName = "Smallholder Coffee Parcels",
+      layerId = "layer-coffee-parcels",
+      geoId = "ENT-COFF-01",
+      geometry = polygon,
+      areaHectares = 1.85,
+      perimeterMeters = 520,
+      colorHex = 0xFF2E7D32L,
+      properties =
+        mapOf(
+          "status" to "In progress",
+          "marker-symbol" to "◐",
+          "farmer_owner" to "Maria Rojas",
+        ),
+      submissions = emptyList(),
+      syncStatus = SyncStatus.SYNCED,
     )
   }
 

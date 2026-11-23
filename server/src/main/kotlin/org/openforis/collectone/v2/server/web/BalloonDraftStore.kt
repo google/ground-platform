@@ -41,39 +41,19 @@ class BalloonDraftStore(private val clockMillis: () -> Long = System::currentTim
     val cleanEntityId = entityId.trim()
     val cleanFormId = formId.trim()
     val cleanRecord = recordBase64.trim()
-    if (
-      cleanSurveyId.isEmpty() ||
-        cleanSurveyId.length > MAX_ID_LENGTH ||
-        cleanEntityId.isEmpty() ||
-        cleanEntityId.length > MAX_ID_LENGTH
-    ) {
-      return false
-    }
+    if (!isValidId(cleanSurveyId) || !isValidId(cleanEntityId)) return false
     val key = keyOf(cleanSurveyId, cleanEntityId)
-    if (cleanRecord.isEmpty()) {
-      drafts.remove(key)
-      return true
+    return when {
+      cleanRecord.isEmpty() -> {
+        drafts.remove(key)
+        true
+      }
+      !isValidId(cleanFormId) || cleanRecord.length > MAX_DRAFT_BASE64_LENGTH -> false
+      else -> {
+        storeDraft(key, cleanFormId, cleanRecord)
+        true
+      }
     }
-    if (
-      cleanFormId.isEmpty() ||
-        cleanFormId.length > MAX_ID_LENGTH ||
-        cleanRecord.length > MAX_DRAFT_BASE64_LENGTH
-    ) {
-      return false
-    }
-    val now = clockMillis()
-    evictExpired(now)
-    if (drafts.size >= MAX_DRAFTS && !drafts.containsKey(key)) {
-      drafts.keys.firstOrNull()?.let(drafts::remove)
-    }
-    drafts[key] =
-      StoredBalloonDraft(
-        formId = cleanFormId,
-        recordBase64 = cleanRecord,
-        updatedAtMillis = now,
-        expiresAtMillis = now + DRAFT_TTL_MILLIS,
-      )
-    return true
   }
 
   fun getDraft(surveyId: String, entityId: String): StoredBalloonDraft? {
@@ -83,12 +63,33 @@ class BalloonDraftStore(private val clockMillis: () -> Long = System::currentTim
     val now = clockMillis()
     evictExpired(now)
     val key = keyOf(cleanSurveyId, cleanEntityId)
-    val entry = drafts[key] ?: return null
-    if (entry.expiresAtMillis <= now) {
-      drafts.remove(key, entry)
-      return null
+    val entry = drafts[key]
+    return when {
+      entry == null -> null
+      entry.expiresAtMillis <= now -> {
+        drafts.remove(key, entry)
+        null
+      }
+      else -> entry
     }
-    return entry
+  }
+
+  private fun isValidId(value: String): Boolean =
+    value.isNotEmpty() && value.length <= MAX_ID_LENGTH
+
+  private fun storeDraft(key: String, formId: String, recordBase64: String) {
+    val now = clockMillis()
+    evictExpired(now)
+    if (drafts.size >= MAX_DRAFTS && !drafts.containsKey(key)) {
+      drafts.keys.firstOrNull()?.let(drafts::remove)
+    }
+    drafts[key] =
+      StoredBalloonDraft(
+        formId = formId,
+        recordBase64 = recordBase64,
+        updatedAtMillis = now,
+        expiresAtMillis = now + DRAFT_TTL_MILLIS,
+      )
   }
 
   fun clearDraft(surveyId: String, entityId: String) {

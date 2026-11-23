@@ -171,8 +171,7 @@ internal class SyncLists(private val epoch: () -> String) {
     if (params.syncToken.isNotBlank()) {
       return listDelta(
         params = params,
-        scopeKey = scopeKey,
-        epoch = epoch,
+        scope = TokenScope(scopeKey, epoch),
         changedAfter = changedAfter,
         commitTimestamp = commitTimestamp,
         id = id,
@@ -211,10 +210,11 @@ internal class SyncLists(private val epoch: () -> String) {
     }
   }
 
+  private data class TokenScope(val scopeKey: String, val epoch: String)
+
   private fun <T> listDelta(
     params: ListParams,
-    scopeKey: String,
-    epoch: String,
+    scope: TokenScope,
     changedAfter: (after: SyncPosition, limit: Int) -> List<T>,
     commitTimestamp: (T) -> Instant?,
     id: (T) -> String,
@@ -225,13 +225,14 @@ internal class SyncLists(private val epoch: () -> String) {
       throw invalidArgument("Query-only fields aren't allowed with sync_token: $queryFieldsSet")
     }
     val pageSize = pageSizeOf(params.pageSize)
-    val start = decodeSync(params.syncToken, scopeKey, epoch)
+    val start = decodeSync(params.syncToken, scope.scopeKey, scope.epoch)
     val from =
-      if (params.pageToken.isBlank()) start else decodeSync(params.pageToken, scopeKey, epoch)
+      if (params.pageToken.isBlank()) start
+      else decodeSync(params.pageToken, scope.scopeKey, scope.epoch)
     val changed = changedAfter(from, pageSize + 1)
     val page = changed.take(pageSize)
     val last = page.lastOrNull()?.let { SyncPosition.of(commitTimestamp(it), id(it)) } ?: from
-    val token = encodeSync(scopeKey, last, epoch)
+    val token = encodeSync(scope.scopeKey, last, scope.epoch)
     val items = page.filter(visible)
     return if (changed.size > page.size) {
       ListPage(items, nextPageToken = token, nextSyncToken = "")

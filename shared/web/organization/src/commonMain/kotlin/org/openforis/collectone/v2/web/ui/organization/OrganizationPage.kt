@@ -74,6 +74,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.MembershipStatus
 import org.openforis.collectone.v2.app.domain.model.Organization
 import org.openforis.collectone.v2.app.domain.model.OrganizationRole
+import org.openforis.collectone.v2.app.domain.model.OrganizationType
 import org.openforis.collectone.v2.app.domain.usecase.ResolvedLibrary
 import org.openforis.collectone.v2.app.ui.common.AdminOnlyBadge
 import org.openforis.collectone.v2.app.ui.text.UiText
@@ -308,15 +309,7 @@ fun OrganizationPage(
   val organization = uiState.openOrganization
   val isManager = organization != null && uiState.managesOrganization(organization)
   val isMember = organization != null && uiState.isMemberOf(organization)
-  val defaultTab =
-    if (organization?.isSynthetic == true) OrganizationTab.MEMBERS else OrganizationTab.DETAILS
-  var tab by
-    remember(organization?.id) {
-      val shownInitialTab = initialTab?.takeIf {
-        organization != null && it.isShownFor(organization, isManager)
-      }
-      mutableStateOf(shownInitialTab ?: defaultTab)
-    }
+  var tab by rememberOrganizationTab(organization, isManager, initialTab)
   var isCreatingSurvey by remember { mutableStateOf(false) }
 
   val triggerCreateSurvey: () -> Unit = {
@@ -332,13 +325,7 @@ fun OrganizationPage(
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
     if (organization == null) {
-      if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-          CircularProgressIndicator()
-        }
-      } else {
-        MissingOrganization(onBack = actions::openOrganizations)
-      }
+      OrganizationEmptyOrLoading(isLoading = isLoading, onBack = actions::openOrganizations)
       return@Column
     }
 
@@ -364,152 +351,19 @@ fun OrganizationPage(
         modifier = Modifier.weight(1f).fillMaxHeight(),
         color = MaterialTheme.colorScheme.surface,
       ) {
-        when (tab) {
-          OrganizationTab.DETAILS ->
-            PaneScaffold(
-              title = stringResource(Res.string.org_tab_details),
-              subtitle =
-                if (isManager) {
-                  stringResource(Res.string.org_details_subtitle_manager, organization.name)
-                } else {
-                  stringResource(Res.string.org_details_subtitle_member, organization.name)
-                },
-            ) {
-              NoticeSlot(uiState, actions)
-              DetailsPane(uiState, actions, organization, isManager, onOpenImpact, imageFilePicker)
-            }
-          OrganizationTab.SURVEYS ->
-            PaneScaffold(
-              title = stringResource(Res.string.org_tab_surveys),
-              subtitle =
-                if (isManager) {
-                  stringResource(Res.string.org_surveys_subtitle_manager, organization.name)
-                } else {
-                  stringResource(Res.string.org_surveys_subtitle_member, organization.name)
-                },
-            ) {
-              NoticeSlot(uiState, actions)
-              SurveysPane(
-                uiState,
-                organization,
-                isMember,
-                onOpenSurvey,
-                triggerCreateSurvey,
-                isLoading,
-              )
-            }
-          OrganizationTab.MEMBERS ->
-            PaneScaffold(
-              title =
-                if (organization.isSynthetic) stringResource(Res.string.org_platform_admins)
-                else stringResource(Res.string.org_tab_members),
-              subtitle =
-                if (organization.isSynthetic) {
-                  stringResource(Res.string.org_members_subtitle_admins)
-                } else {
-                  stringResource(Res.string.org_members_subtitle, organization.name)
-                },
-              titleTrailing = if (organization.isSynthetic) ({ AdminOnlyBadge() }) else null,
-            ) {
-              NoticeSlot(uiState, actions)
-              MembersPane(uiState, actions, organization, isManager)
-            }
-          OrganizationTab.IMAGERY_SOURCES ->
-            PaneScaffold(
-              title = stringResource(Res.string.org_tab_imagery),
-              subtitle =
-                if (organization.isSynthetic) {
-                  stringResource(Res.string.org_imagery_subtitle_admins)
-                } else if (isManager) {
-                  stringResource(Res.string.org_imagery_subtitle_manager, organization.name)
-                } else {
-                  stringResource(Res.string.org_imagery_subtitle_member, organization.name)
-                },
-              titleTrailing = if (organization.isSynthetic) ({ AdminOnlyBadge() }) else null,
-            ) {
-              NoticeSlot(uiState, actions)
-              ImagerySourcesPane(actions, organization, isManager)
-            }
-          OrganizationTab.PURPOSES ->
-            PaneScaffold(
-              title = stringResource(Res.string.org_tab_purposes),
-              subtitle =
-                if (organization.isSynthetic) {
-                  stringResource(Res.string.org_purposes_subtitle_admins)
-                } else {
-                  stringResource(Res.string.org_purposes_subtitle, organization.name)
-                },
-              titleTrailing = if (organization.isSynthetic) ({ AdminOnlyBadge() }) else null,
-            ) {
-              NoticeSlot(uiState, actions)
-              PurposesPane(uiState.library, actions, organization, isLoading)
-            }
-          OrganizationTab.DICTIONARY ->
-            PaneScaffold(
-              title = stringResource(Res.string.org_tab_dictionary),
-              subtitle =
-                if (organization.isSynthetic) {
-                  stringResource(Res.string.org_dictionary_subtitle_admins)
-                } else {
-                  stringResource(Res.string.org_dictionary_subtitle, organization.name)
-                },
-              titleTrailing = if (organization.isSynthetic) ({ AdminOnlyBadge() }) else null,
-            ) {
-              NoticeSlot(uiState, actions)
-              DictionaryPane(uiState.library, actions, organization, isLoading)
-            }
-          OrganizationTab.TEMPLATES ->
-            PaneScaffold(
-              title = stringResource(Res.string.org_tab_templates),
-              subtitle =
-                if (organization.isSynthetic) {
-                  stringResource(Res.string.org_templates_subtitle_admins)
-                } else {
-                  stringResource(Res.string.org_templates_subtitle, organization.name)
-                },
-              titleTrailing = if (organization.isSynthetic) ({ AdminOnlyBadge() }) else null,
-            ) {
-              NoticeSlot(uiState, actions)
-              TemplatesPane(uiState.library, actions, organization, isLoading)
-            }
-          OrganizationTab.COST_CONTROLS ->
-            PaneScaffold(
-              title =
-                if (organization.isSynthetic)
-                  stringResource(Res.string.org_cost_controls_title_global)
-                else stringResource(Res.string.org_tab_cost_controls),
-              subtitle =
-                if (organization.isSynthetic) {
-                  stringResource(Res.string.org_cost_controls_subtitle_global)
-                } else if (isManager) {
-                  stringResource(Res.string.org_cost_controls_subtitle_manager, organization.name)
-                } else {
-                  stringResource(Res.string.org_cost_controls_subtitle_member, organization.name)
-                },
-              titleTrailing = if (organization.isSynthetic) ({ AdminOnlyBadge() }) else null,
-            ) {
-              NoticeSlot(uiState, actions)
-              CostControlsPane(organization, isManager, actions)
-            }
-          OrganizationTab.COST_TRACKING ->
-            PaneScaffold(
-              title = stringResource(Res.string.org_cost_tracking_title),
-              subtitle = stringResource(Res.string.org_cost_tracking_subtitle),
-              titleTrailing = { AdminOnlyBadge() },
-            ) {
-              NoticeSlot(uiState, actions)
-              CostTrackingPane(uiState, isLoading)
-            }
-          OrganizationTab.MOBILE_APP ->
-            PaneScaffold(
-              title = stringResource(Res.string.org_mobile_version_title),
-              subtitle = stringResource(Res.string.org_mobile_version_subtitle),
-              titleTrailing = { AdminOnlyBadge() },
-            ) {
-              NoticeSlot(uiState, actions)
-              MobileClientVersionPane(LocalClientVersionRepository.current)
-            }
-        }
+        OrganizationTabContent(
+          tab = tab,
+          uiState = uiState,
+          actions = actions,
+          organization = organization,
+          isManager = isManager,
+          isMember = isMember,
+          onOpenSurvey = onOpenSurvey,
+          onCreateSurvey = triggerCreateSurvey,
+          onOpenImpact = onOpenImpact,
+          isLoading = isLoading,
+          imageFilePicker = imageFilePicker,
+        )
       }
     }
   }
@@ -527,6 +381,169 @@ fun OrganizationPage(
     )
   }
 }
+
+@Composable
+private fun rememberOrganizationTab(
+  organization: Organization?,
+  isManager: Boolean,
+  initialTab: OrganizationTab?,
+) =
+  remember(organization?.id) {
+    val defaultTab =
+      if (organization?.isSynthetic == true) OrganizationTab.MEMBERS else OrganizationTab.DETAILS
+    val shownInitialTab = initialTab?.takeIf {
+      organization != null && it.isShownFor(organization, isManager)
+    }
+    mutableStateOf(shownInitialTab ?: defaultTab)
+  }
+
+@Composable
+private fun OrganizationEmptyOrLoading(isLoading: Boolean, onBack: () -> Unit) {
+  if (isLoading) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      CircularProgressIndicator()
+    }
+  } else {
+    MissingOrganization(onBack = onBack)
+  }
+}
+
+@Composable
+private fun OrganizationTabContent(
+  tab: OrganizationTab,
+  uiState: OrganizationUiState,
+  actions: OrganizationActions,
+  organization: Organization,
+  isManager: Boolean,
+  isMember: Boolean,
+  onOpenSurvey: (surveyId: String) -> Unit,
+  onCreateSurvey: () -> Unit,
+  onOpenImpact: (organizationId: String) -> Unit,
+  isLoading: Boolean,
+  imageFilePicker: ImageFilePicker,
+) {
+  PaneScaffold(
+    title = organizationTabTitle(tab, organization),
+    subtitle = organizationTabSubtitle(tab, organization, isManager),
+    titleTrailing =
+      if (organizationTabShowsAdminBadge(tab, organization)) ({ AdminOnlyBadge() }) else null,
+  ) {
+    NoticeSlot(uiState, actions)
+    when (tab) {
+      OrganizationTab.DETAILS ->
+        DetailsPane(uiState, actions, organization, isManager, onOpenImpact, imageFilePicker)
+      OrganizationTab.SURVEYS ->
+        SurveysPane(uiState, organization, isMember, onOpenSurvey, onCreateSurvey, isLoading)
+      OrganizationTab.MEMBERS -> MembersPane(uiState, actions, organization, isManager)
+      OrganizationTab.IMAGERY_SOURCES -> ImagerySourcesPane(actions, organization, isManager)
+      OrganizationTab.PURPOSES -> PurposesPane(uiState.library, actions, organization, isLoading)
+      OrganizationTab.DICTIONARY ->
+        DictionaryPane(uiState.library, actions, organization, isLoading)
+      OrganizationTab.TEMPLATES -> TemplatesPane(uiState.library, actions, organization, isLoading)
+      OrganizationTab.COST_CONTROLS -> CostControlsPane(organization, isManager, actions)
+      OrganizationTab.COST_TRACKING -> CostTrackingPane(uiState, isLoading)
+      OrganizationTab.MOBILE_APP -> MobileClientVersionPane(LocalClientVersionRepository.current)
+    }
+  }
+}
+
+private fun organizationTabShowsAdminBadge(
+  tab: OrganizationTab,
+  organization: Organization,
+): Boolean =
+  when (tab) {
+    OrganizationTab.COST_TRACKING,
+    OrganizationTab.MOBILE_APP -> true
+    OrganizationTab.DETAILS,
+    OrganizationTab.SURVEYS -> false
+    else -> organization.isSynthetic
+  }
+
+@Composable
+private fun organizationTabTitle(tab: OrganizationTab, organization: Organization): String =
+  when (tab) {
+    OrganizationTab.DETAILS -> stringResource(Res.string.org_tab_details)
+    OrganizationTab.SURVEYS -> stringResource(Res.string.org_tab_surveys)
+    OrganizationTab.MEMBERS ->
+      if (organization.isSynthetic) stringResource(Res.string.org_platform_admins)
+      else stringResource(Res.string.org_tab_members)
+    OrganizationTab.IMAGERY_SOURCES -> stringResource(Res.string.org_tab_imagery)
+    OrganizationTab.PURPOSES -> stringResource(Res.string.org_tab_purposes)
+    OrganizationTab.DICTIONARY -> stringResource(Res.string.org_tab_dictionary)
+    OrganizationTab.TEMPLATES -> stringResource(Res.string.org_tab_templates)
+    OrganizationTab.COST_CONTROLS ->
+      if (organization.isSynthetic) stringResource(Res.string.org_cost_controls_title_global)
+      else stringResource(Res.string.org_tab_cost_controls)
+    OrganizationTab.COST_TRACKING -> stringResource(Res.string.org_cost_tracking_title)
+    OrganizationTab.MOBILE_APP -> stringResource(Res.string.org_mobile_version_title)
+  }
+
+@Composable
+private fun organizationTabSubtitle(
+  tab: OrganizationTab,
+  organization: Organization,
+  isManager: Boolean,
+): String =
+  if (organization.isSynthetic) {
+    syntheticOrganizationTabSubtitle(tab)
+  } else {
+    regularOrganizationTabSubtitle(tab, organization.name, isManager)
+  }
+
+@Composable
+private fun syntheticOrganizationTabSubtitle(tab: OrganizationTab): String =
+  when (tab) {
+    OrganizationTab.MEMBERS -> stringResource(Res.string.org_members_subtitle_admins)
+    OrganizationTab.IMAGERY_SOURCES -> stringResource(Res.string.org_imagery_subtitle_admins)
+    OrganizationTab.PURPOSES -> stringResource(Res.string.org_purposes_subtitle_admins)
+    OrganizationTab.DICTIONARY -> stringResource(Res.string.org_dictionary_subtitle_admins)
+    OrganizationTab.TEMPLATES -> stringResource(Res.string.org_templates_subtitle_admins)
+    OrganizationTab.COST_CONTROLS -> stringResource(Res.string.org_cost_controls_subtitle_global)
+    OrganizationTab.COST_TRACKING -> stringResource(Res.string.org_cost_tracking_subtitle)
+    OrganizationTab.MOBILE_APP -> stringResource(Res.string.org_mobile_version_subtitle)
+    OrganizationTab.DETAILS,
+    OrganizationTab.SURVEYS -> ""
+  }
+
+@Composable
+private fun regularOrganizationTabSubtitle(
+  tab: OrganizationTab,
+  organizationName: String,
+  isManager: Boolean,
+): String =
+  when (tab) {
+    OrganizationTab.DETAILS ->
+      stringResource(
+        if (isManager) Res.string.org_details_subtitle_manager
+        else Res.string.org_details_subtitle_member,
+        organizationName,
+      )
+    OrganizationTab.SURVEYS ->
+      stringResource(
+        if (isManager) Res.string.org_surveys_subtitle_manager
+        else Res.string.org_surveys_subtitle_member,
+        organizationName,
+      )
+    OrganizationTab.MEMBERS -> stringResource(Res.string.org_members_subtitle, organizationName)
+    OrganizationTab.IMAGERY_SOURCES ->
+      stringResource(
+        if (isManager) Res.string.org_imagery_subtitle_manager
+        else Res.string.org_imagery_subtitle_member,
+        organizationName,
+      )
+    OrganizationTab.PURPOSES -> stringResource(Res.string.org_purposes_subtitle, organizationName)
+    OrganizationTab.DICTIONARY ->
+      stringResource(Res.string.org_dictionary_subtitle, organizationName)
+    OrganizationTab.TEMPLATES -> stringResource(Res.string.org_templates_subtitle, organizationName)
+    OrganizationTab.COST_CONTROLS ->
+      stringResource(
+        if (isManager) Res.string.org_cost_controls_subtitle_manager
+        else Res.string.org_cost_controls_subtitle_member,
+        organizationName,
+      )
+    OrganizationTab.COST_TRACKING -> stringResource(Res.string.org_cost_tracking_subtitle)
+    OrganizationTab.MOBILE_APP -> stringResource(Res.string.org_mobile_version_subtitle)
+  }
 
 /** Shows the pending organization notice, if any, at the top of a pane. */
 @Composable
@@ -1157,6 +1174,16 @@ private fun PlatformNumbersCard(
   }
 }
 
+private data class EditableOrganizationDraft(
+  val logoUrl: String?,
+  val name: String,
+  val description: String,
+  val websiteUrl: String,
+  val isListed: Boolean,
+  val type: OrganizationType?,
+  val countryCode: String?,
+)
+
 @Composable
 private fun EditableDetailsCard(
   actions: OrganizationActions,
@@ -1165,209 +1192,246 @@ private fun EditableDetailsCard(
   imageFilePicker: ImageFilePicker = ::openPlatformImageFilePicker,
 ) {
   val initialLogoUrl = effectiveOrganizationLogoUrl(organization.logoUrl)
-  var logoUrl by remember(organization.id, initialLogoUrl) { mutableStateOf(initialLogoUrl) }
-  var logoError by remember(organization.id, initialLogoUrl) { mutableStateOf<UiText?>(null) }
-  var name by remember(organization.id, organization.name) { mutableStateOf(organization.name) }
-  var description by
-    remember(organization.id, organization.description) { mutableStateOf(organization.description) }
-  var websiteUrl by
-    remember(organization.id, organization.websiteUrl) { mutableStateOf(organization.websiteUrl) }
-  var isListed by
-    remember(organization.id, organization.isListed) { mutableStateOf(organization.isListed) }
-  var type by
-    remember(organization.id, organization.organizationType) {
-      mutableStateOf(organization.organizationType)
+  val initialDraft =
+    remember(organization, initialLogoUrl) {
+      EditableOrganizationDraft(
+        logoUrl = initialLogoUrl,
+        name = organization.name,
+        description = organization.description,
+        websiteUrl = organization.websiteUrl,
+        isListed = organization.isListed,
+        type = organization.organizationType,
+        countryCode = organization.countryCode,
+      )
     }
-  var countryCode by
-    remember(organization.id, organization.countryCode) { mutableStateOf(organization.countryCode) }
-  val isDirty =
-    logoUrl != initialLogoUrl ||
-      name != organization.name ||
-      description != organization.description ||
-      websiteUrl != organization.websiteUrl ||
-      isListed != organization.isListed ||
-      type != organization.organizationType ||
-      countryCode != organization.countryCode
+  var draft by remember(organization.id, initialDraft) { mutableStateOf(initialDraft) }
+  var logoError by remember(organization.id, initialLogoUrl) { mutableStateOf<UiText?>(null) }
+  val isDirty = draft != initialDraft
 
   DetailsCard(stringResource(Res.string.org_profile_title)) {
     if (!organization.isSynthetic) {
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth(),
-      ) {
-        OrganizationAvatar(
-          name = name.ifBlank { organization.name },
-          logoUrl = logoUrl,
-          size = 64.dp,
-        )
-        Column(
-          modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-          Text(
-            stringResource(Res.string.org_field_logo),
-            style = MaterialTheme.typography.labelLarge,
-          )
-          Text(
-            stringResource(Res.string.org_details_logo_help),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-          Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 4.dp),
-          ) {
-            OutlinedButton(
-              onClick = {
-                logoError = null
-                imageFilePicker(DEFAULT_LOGO_MAX_DIMENSION_PX) { result ->
-                  when (result) {
-                    is ImageFilePickResult.Picked -> {
-                      logoUrl = result.dataUrl
-                      logoError = null
-                    }
-                    is ImageFilePickResult.Failed -> logoError = result.message
-                    ImageFilePickResult.Cancelled -> Unit
-                  }
-                }
-              },
-              enabled = !isSaving,
-            ) {
-              Icon(
-                imageVector = Icons.Outlined.Upload,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-              )
-              Spacer(Modifier.width(8.dp))
-              Text(
-                stringResource(
-                  if (logoUrl != null) Res.string.org_logo_change else Res.string.org_logo_upload
-                )
-              )
-            }
-            if (logoUrl != null) {
-              TextButton(
-                onClick = {
-                  logoUrl = null
-                  logoError = null
-                },
-                enabled = !isSaving,
-              ) {
-                Text(stringResource(Res.string.org_logo_remove))
-              }
-            }
-          }
-          logoError?.let { error ->
-            Text(
-              text = error.resolve(),
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.error,
-            )
-          }
-        }
-      }
+      OrganizationLogoEditorRow(
+        displayName = draft.name.ifBlank { organization.name },
+        logoUrl = draft.logoUrl,
+        logoError = logoError,
+        isSaving = isSaving,
+        imageFilePicker = imageFilePicker,
+        onLogoChange = { newUrl, newError ->
+          draft = draft.copy(logoUrl = newUrl)
+          logoError = newError
+        },
+      )
     }
-    OutlinedTextField(
-      value = name,
-      onValueChange = { name = it },
-      label = { Text(stringResource(Res.string.org_field_name)) },
-      singleLine = true,
-      isError = name.isBlank(),
-      supportingText =
-        if (name.isBlank()) ({ Text(stringResource(Res.string.org_details_name_required)) })
-        else null,
-      modifier = Modifier.fillMaxWidth(),
-    )
-    OutlinedTextField(
-      value = description,
-      onValueChange = { description = it },
-      label = { Text(stringResource(Res.string.org_field_description)) },
-      supportingText = { Text(stringResource(Res.string.org_details_description_help)) },
-      minLines = 3,
-      modifier = Modifier.fillMaxWidth(),
-    )
-    OutlinedTextField(
-      value = websiteUrl,
-      onValueChange = { websiteUrl = it },
-      label = { Text(stringResource(Res.string.org_field_website)) },
-      singleLine = true,
-      modifier = Modifier.fillMaxWidth(),
+    EditableDetailsTextFields(
+      name = draft.name,
+      onNameChange = { draft = draft.copy(name = it) },
+      description = draft.description,
+      onDescriptionChange = { draft = draft.copy(description = it) },
+      websiteUrl = draft.websiteUrl,
+      onWebsiteUrlChange = { draft = draft.copy(websiteUrl = it) },
     )
     // "All users" is platform-wide, so it has no type or country.
     if (organization.hasTypeAndCountry) {
-      OrganizationTypeDropdown(type = type, onTypeChange = { type = it })
-      CountryPicker(countryCode = countryCode, onCountryCodeChange = { countryCode = it })
+      OrganizationTypeDropdown(type = draft.type, onTypeChange = { draft = draft.copy(type = it) })
+      CountryPicker(
+        countryCode = draft.countryCode,
+        onCountryCodeChange = { draft = draft.copy(countryCode = it) },
+      )
     }
     // "All users" is never listed in the directory.
-    if (!organization.isSynthetic)
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(checked = isListed, onCheckedChange = { isListed = it })
-        Spacer(Modifier.width(4.dp))
-        Column {
-          Text(
-            stringResource(Res.string.org_list_in_directory),
-            style = MaterialTheme.typography.bodyMedium,
-          )
-          Text(
-            stringResource(Res.string.org_details_listed_help),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-      }
-    Row(
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Button(
-        onClick = {
-          actions.updateOrganizationDetails(
-            organizationId = organization.id,
-            name = name,
-            description = description,
-            websiteUrl = websiteUrl,
-            isListed = isListed,
-            organizationType = type,
-            countryCode = countryCode,
-            logoUrl = logoUrl,
-          )
-        },
-        enabled = isDirty && name.isNotBlank() && !isSaving,
+    if (!organization.isSynthetic) {
+      OrganizationDirectoryListingCheckbox(
+        isListed = draft.isListed,
+        onCheckedChange = { draft = draft.copy(isListed = it) },
+      )
+    }
+    EditableDetailsActionsRow(
+      isDirty = isDirty,
+      canSave = isDirty && draft.name.isNotBlank() && !isSaving,
+      isSaving = isSaving,
+      onSave = {
+        actions.updateOrganizationDetails(
+          organizationId = organization.id,
+          name = draft.name,
+          description = draft.description,
+          websiteUrl = draft.websiteUrl,
+          isListed = draft.isListed,
+          organizationType = draft.type,
+          countryCode = draft.countryCode,
+          logoUrl = draft.logoUrl,
+        )
+      },
+      onDiscard = {
+        draft = initialDraft
+        logoError = null
+      },
+    )
+  }
+}
+
+@Composable
+private fun OrganizationLogoEditorRow(
+  displayName: String,
+  logoUrl: String?,
+  logoError: UiText?,
+  isSaving: Boolean,
+  imageFilePicker: ImageFilePicker,
+  onLogoChange: (logoUrl: String?, logoError: UiText?) -> Unit,
+) {
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(16.dp),
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    OrganizationAvatar(name = displayName, logoUrl = logoUrl, size = 64.dp)
+    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Text(
+        stringResource(Res.string.org_field_logo),
+        style = MaterialTheme.typography.labelLarge,
+      )
+      Text(
+        stringResource(Res.string.org_details_logo_help),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = 4.dp),
       ) {
-        if (isSaving) {
-          CircularProgressIndicator(
-            modifier = Modifier.size(16.dp),
-            strokeWidth = 2.dp,
-            color = MaterialTheme.colorScheme.onPrimary,
+        OutlinedButton(
+          onClick = {
+            onLogoChange(logoUrl, null)
+            imageFilePicker(DEFAULT_LOGO_MAX_DIMENSION_PX) { result ->
+              when (result) {
+                is ImageFilePickResult.Picked -> onLogoChange(result.dataUrl, null)
+                is ImageFilePickResult.Failed -> onLogoChange(logoUrl, result.message)
+                ImageFilePickResult.Cancelled -> Unit
+              }
+            }
+          },
+          enabled = !isSaving,
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.Upload,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
           )
           Spacer(Modifier.width(8.dp))
+          Text(
+            stringResource(
+              if (logoUrl != null) Res.string.org_logo_change else Res.string.org_logo_upload
+            )
+          )
         }
-        Text(stringResource(Res.string.org_save))
+        if (logoUrl != null) {
+          TextButton(onClick = { onLogoChange(null, null) }, enabled = !isSaving) {
+            Text(stringResource(Res.string.org_logo_remove))
+          }
+        }
       }
-      TextButton(
-        onClick = {
-          logoUrl = initialLogoUrl
-          logoError = null
-          name = organization.name
-          description = organization.description
-          websiteUrl = organization.websiteUrl
-          isListed = organization.isListed
-          type = organization.organizationType
-          countryCode = organization.countryCode
-        },
-        enabled = isDirty,
-      ) {
-        Text(stringResource(Res.string.org_discard))
-      }
-      if (isDirty) {
+      logoError?.let { error ->
         Text(
-          stringResource(Res.string.org_unsaved_changes),
+          text = error.resolve(),
           style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          color = MaterialTheme.colorScheme.error,
         )
       }
+    }
+  }
+}
+
+@Composable
+private fun EditableDetailsTextFields(
+  name: String,
+  onNameChange: (String) -> Unit,
+  description: String,
+  onDescriptionChange: (String) -> Unit,
+  websiteUrl: String,
+  onWebsiteUrlChange: (String) -> Unit,
+) {
+  OutlinedTextField(
+    value = name,
+    onValueChange = onNameChange,
+    label = { Text(stringResource(Res.string.org_field_name)) },
+    singleLine = true,
+    isError = name.isBlank(),
+    supportingText =
+      if (name.isBlank()) ({ Text(stringResource(Res.string.org_details_name_required)) })
+      else null,
+    modifier = Modifier.fillMaxWidth(),
+  )
+  OutlinedTextField(
+    value = description,
+    onValueChange = onDescriptionChange,
+    label = { Text(stringResource(Res.string.org_field_description)) },
+    supportingText = { Text(stringResource(Res.string.org_details_description_help)) },
+    minLines = 3,
+    modifier = Modifier.fillMaxWidth(),
+  )
+  OutlinedTextField(
+    value = websiteUrl,
+    onValueChange = onWebsiteUrlChange,
+    label = { Text(stringResource(Res.string.org_field_website)) },
+    singleLine = true,
+    modifier = Modifier.fillMaxWidth(),
+  )
+}
+
+@Composable
+private fun OrganizationDirectoryListingCheckbox(
+  isListed: Boolean,
+  onCheckedChange: (Boolean) -> Unit,
+) {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+    Checkbox(checked = isListed, onCheckedChange = onCheckedChange)
+    Spacer(Modifier.width(4.dp))
+    Column {
+      Text(
+        stringResource(Res.string.org_list_in_directory),
+        style = MaterialTheme.typography.bodyMedium,
+      )
+      Text(
+        stringResource(Res.string.org_details_listed_help),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
+}
+
+@Composable
+private fun EditableDetailsActionsRow(
+  isDirty: Boolean,
+  canSave: Boolean,
+  isSaving: Boolean,
+  onSave: () -> Unit,
+  onDiscard: () -> Unit,
+) {
+  Row(
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Button(onClick = onSave, enabled = canSave) {
+      if (isSaving) {
+        CircularProgressIndicator(
+          modifier = Modifier.size(16.dp),
+          strokeWidth = 2.dp,
+          color = MaterialTheme.colorScheme.onPrimary,
+        )
+        Spacer(Modifier.width(8.dp))
+      }
+      Text(stringResource(Res.string.org_save))
+    }
+    TextButton(onClick = onDiscard, enabled = isDirty) {
+      Text(stringResource(Res.string.org_discard))
+    }
+    if (isDirty) {
+      Text(
+        stringResource(Res.string.org_unsaved_changes),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
   }
 }

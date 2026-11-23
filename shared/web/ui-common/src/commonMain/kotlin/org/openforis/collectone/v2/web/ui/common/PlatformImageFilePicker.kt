@@ -15,6 +15,11 @@ package org.openforis.collectone.v2.web.ui.common
 
 import org.openforis.collectone.v2.app.ui.text.UiText
 
+/** Defaults for [openPlatformImageFilePicker]. */
+internal object PlatformImageFilePicker {
+  const val DEFAULT_MAX_DIMENSION_PX = DEFAULT_LOGO_MAX_DIMENSION_PX
+}
+
 /**
  * Outcome of picking an image file (e.g. an organization logo) with [openPlatformImageFilePicker].
  */

@@ -587,8 +587,12 @@ class SurveyEditorViewModel(
       navigateToFirstIssue(current)
       return
     }
-    if (!current.canPublish) return
-    val currentDraft = draft
+    if (current.canPublish) {
+      publishValidatedDraft(draft)
+    }
+  }
+
+  private fun publishValidatedDraft(currentDraft: SurveyEditorDraft) {
     val org =
       currentDraft.details.organizationId?.let { id ->
         data.value.organizations.firstOrNull { it.id == id }
@@ -719,33 +723,54 @@ class SurveyEditorViewModel(
   override fun setLifecycleState(state: SurveyLifecycleState) {
     val current = uiState.value
     val lifecycle = surveyLifecycle ?: return
-    if (session.value.isSaving || !current.canManageSurvey || current.lifecycleState == state) {
-      return
-    }
+    if (!canChangeLifecycleState(current, state)) return
     if (state == SurveyLifecycleState.PUBLISHED && current.issueCount > 0) {
       navigateToFirstIssue(current)
       return
     }
     val surveyId = current.surveyId
-    val closesOrArchives =
-      state == SurveyLifecycleState.CLOSED || state == SurveyLifecycleState.ARCHIVED
     // A closed or archived survey is read-only, so uncommitted edits can't be kept.
     val discardedSurveyId =
-      if (closesOrArchives) clearSessionForDiscard() else null.also { outcomeCard.dismiss() }
+      if (state == SurveyLifecycleState.CLOSED || state == SurveyLifecycleState.ARCHIVED) {
+        clearSessionForDiscard()
+      } else {
+        outcomeCard.dismiss()
+        null
+      }
+    val shouldSave = shouldSaveBeforePublishing(state, current)
     viewModelScope.launch {
-      if (discardedSurveyId != null) {
-        surveyEditorRepository.discardWorkingCopy(discardedSurveyId)
-      }
-      if (
-        state == SurveyLifecycleState.PUBLISHED &&
-          (current.canPublish || draft.datasets.any(samplePlotHandler::needsSampleGeneration))
-      ) {
-        saveWorkingDraftNow()
-      }
-      val stoppedCollecting = lifecycle.setState(surveyId, state)
-      if (stoppedCollecting) {
-        surveyRepository.getSurveys().firstOrNull { it.id == surveyId }?.let(outcomeCard::open)
-      }
+      applyLifecycleTransition(lifecycle, surveyId, state, discardedSurveyId, shouldSave)
+    }
+  }
+
+  private fun canChangeLifecycleState(
+    current: SurveyEditorUiState,
+    state: SurveyLifecycleState,
+  ): Boolean = !session.value.isSaving && current.canManageSurvey && current.lifecycleState != state
+
+  private fun shouldSaveBeforePublishing(
+    state: SurveyLifecycleState,
+    current: SurveyEditorUiState,
+  ): Boolean =
+    state == SurveyLifecycleState.PUBLISHED &&
+      (current.canPublish || draft.datasets.any(samplePlotHandler::needsSampleGeneration))
+
+  private suspend fun applyLifecycleTransition(
+    lifecycle: SurveyLifecycleUseCase,
+    surveyId: String,
+    state: SurveyLifecycleState,
+    discardedSurveyId: String?,
+    shouldSave: Boolean,
+  ) {
+    if (discardedSurveyId != null) {
+      surveyEditorRepository.discardWorkingCopy(discardedSurveyId)
+    }
+    if (shouldSave) {
+      saveWorkingDraftNow()
+    }
+    val stoppedCollecting = lifecycle.setState(surveyId, state)
+    if (stoppedCollecting) {
+      surveyRepository.getSurveys().firstOrNull { it.id == surveyId }?.let(outcomeCard::open)
     }
   }
 

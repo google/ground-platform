@@ -22,6 +22,7 @@ import openforis.collectone.v1.userdata.ClientSyncState
 import org.openforis.collectone.v2.app.client.storage.SyncStateFile
 import org.openforis.collectone.v2.app.data.datasource.local.persistence.ClientSyncStateCodec
 import org.openforis.collectone.v2.app.data.datasource.local.persistence.PersistentLocalStore
+import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStoreTransaction
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationPayload
 import org.openforis.collectone.v2.app.data.datasource.local.store.MutationTarget
 import org.openforis.collectone.v2.app.data.datasource.local.store.OutboxState
@@ -66,59 +67,8 @@ class SyncStatePersistence(
       if (cleanedOutbox.size != outbox().size) {
         putOutbox(cleanedOutbox)
       }
-      val rebaser = Rebaser(this)
-      val pending = outbox()
-      val organizationIds =
-        (saved.organization_bases.map { it.organization_id } +
-            pending.mapNotNull { (it.target as? MutationTarget.Organization)?.organizationId })
-          .distinct()
-      organizationIds.forEach(rebaser::rebaseOrganization)
-      val libraryIds =
-        (saved.library_bases.map { it.organization_id } +
-            pending.mapNotNull { (it.target as? MutationTarget.Library)?.organizationId })
-          .distinct()
-      libraryIds.forEach(rebaser::rebaseLibrary)
-      val dataSurveyIds =
-        (saved.entity_bases.map { it.survey_id } +
-            saved.submission_bases.map { it.survey_id } +
-            pending.mapNotNull { (it.target as? MutationTarget.Data)?.surveyId })
-          .distinct()
-      for (surveyId in dataSurveyIds) {
-        val target = MutationTarget.Data(surveyId)
-        val forSurvey = pending.filter { it.target == target }
-        rebaser.rebaseData(
-          surveyId,
-          entityBases(surveyId).keys +
-            forSurvey.mapNotNull { m ->
-              m.recordKey.removePrefix("entity/").takeIf { m.recordKey.startsWith("entity/") }
-            },
-          submissionBases(surveyId).keys +
-            forSurvey.mapNotNull { m ->
-              m.recordKey.removePrefix("submission/").takeIf {
-                m.recordKey.startsWith("submission/")
-              }
-            },
-        )
-      }
-      val surveyIds =
-        (saved.survey_bases.map { it.survey_id } +
-            pending.mapNotNull { (it.target as? MutationTarget.Survey)?.surveyId })
-          .distinct()
-      surveyIds.forEach { rebaser.rebaseSurvey(it) }
-      val restoredSurveyIds = (surveys().map { it.id } + syncState().downloadedSurveyIds).toSet()
-      val prunedOutbox =
-        outbox().filter { m ->
-          when (val target = m.target) {
-            is MutationTarget.Data -> {
-              val data = (m.payload as? MutationPayload.Data)?.mutation
-              target.surveyId in restoredSurveyIds &&
-                (data?.entity_mutation != null || data?.submission_mutation != null)
-            }
-            is MutationTarget.Survey -> target.surveyId in restoredSurveyIds
-            else -> true
-          }
-        }
-      if (prunedOutbox.size != outbox().size) putOutbox(prunedOutbox)
+      rebaseRestoredState(saved)
+      pruneOrphanedOutboxEntries()
       // The restored data replaces the initial download.
       updatePreferences { prefs ->
         prefs.copy(
@@ -130,6 +80,65 @@ class SyncStatePersistence(
       }
     }
     return true
+  }
+
+  private fun LocalStoreTransaction.rebaseRestoredState(saved: ClientSyncState) {
+    val rebaser = Rebaser(this)
+    val pending = outbox()
+    val organizationIds =
+      (saved.organization_bases.map { it.organization_id } +
+          pending.mapNotNull { (it.target as? MutationTarget.Organization)?.organizationId })
+        .distinct()
+    organizationIds.forEach(rebaser::rebaseOrganization)
+    val libraryIds =
+      (saved.library_bases.map { it.organization_id } +
+          pending.mapNotNull { (it.target as? MutationTarget.Library)?.organizationId })
+        .distinct()
+    libraryIds.forEach(rebaser::rebaseLibrary)
+    val dataSurveyIds =
+      (saved.entity_bases.map { it.survey_id } +
+          saved.submission_bases.map { it.survey_id } +
+          pending.mapNotNull { (it.target as? MutationTarget.Data)?.surveyId })
+        .distinct()
+    for (surveyId in dataSurveyIds) {
+      val target = MutationTarget.Data(surveyId)
+      val forSurvey = pending.filter { it.target == target }
+      rebaser.rebaseData(
+        surveyId,
+        entityBases(surveyId).keys +
+          forSurvey.mapNotNull { m ->
+            m.recordKey.removePrefix("entity/").takeIf { m.recordKey.startsWith("entity/") }
+          },
+        submissionBases(surveyId).keys +
+          forSurvey.mapNotNull { m ->
+            m.recordKey.removePrefix("submission/").takeIf {
+              m.recordKey.startsWith("submission/")
+            }
+          },
+      )
+    }
+    val surveyIds =
+      (saved.survey_bases.map { it.survey_id } +
+          pending.mapNotNull { (it.target as? MutationTarget.Survey)?.surveyId })
+        .distinct()
+    surveyIds.forEach { rebaser.rebaseSurvey(it) }
+  }
+
+  private fun LocalStoreTransaction.pruneOrphanedOutboxEntries() {
+    val restoredSurveyIds = (surveys().map { it.id } + syncState().downloadedSurveyIds).toSet()
+    val prunedOutbox =
+      outbox().filter { m ->
+        when (val target = m.target) {
+          is MutationTarget.Data -> {
+            val data = (m.payload as? MutationPayload.Data)?.mutation
+            target.surveyId in restoredSurveyIds &&
+              (data?.entity_mutation != null || data?.submission_mutation != null)
+          }
+          is MutationTarget.Survey -> target.surveyId in restoredSurveyIds
+          else -> true
+        }
+      }
+    if (prunedOutbox.size != outbox().size) putOutbox(prunedOutbox)
   }
 
   /**

@@ -127,35 +127,10 @@ internal fun AvailabilityToggles(uiState: FormEditorUiState, actions: FormSettin
       },
     )
     if (availability.includesWeb && !uiState.isTemplate) {
-      val canOpenInGoogleEarth = uiState.canOpenInGoogleEarth
-      val earthOffCaption =
-        when {
-          canOpenInGoogleEarth ->
-            stringResource(Res.string.formeditor_availability_google_earth_off)
-          uiState.updatesMapLayerByQuestion ->
-            stringResource(
-              Res.string.formeditor_availability_google_earth_needs_map_selection,
-              stringResource(Res.string.formeditor_find_map_feature_by),
-              stringResource(Res.string.formeditor_selected_on_map),
-            )
-          else -> stringResource(Res.string.formeditor_availability_google_earth_unavailable)
-        }
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      AvailabilityToggleRow(
-        icon = Icons.Outlined.Public,
-        title = stringResource(Res.string.formeditor_enable_open_in_google_earth),
-        onCaption = stringResource(Res.string.formeditor_availability_google_earth_on),
-        offCaption = earthOffCaption,
-        checked = canOpenInGoogleEarth && uiState.form.openInGoogleEarth,
-        enabled = !uiState.isReadOnly && canOpenInGoogleEarth,
-        unavailable = !canOpenInGoogleEarth,
-        onCheckedChange = { enabled ->
-          if (enabled) {
-            confirmingEnableGoogleEarth = true
-          } else {
-            actions.updateOpenInGoogleEarth(false)
-          }
-        },
+      GoogleEarthAvailabilityRow(
+        uiState = uiState,
+        onRequestEnable = { confirmingEnableGoogleEarth = true },
+        onDisable = { actions.updateOpenInGoogleEarth(false) },
       )
     }
     AvailabilityCompatibilityRows(uiState)
@@ -163,6 +138,37 @@ internal fun AvailabilityToggles(uiState: FormEditorUiState, actions: FormSettin
   if (availability == FormAvailability.NONE) {
     AvailabilityNoneWarning()
   }
+}
+
+@Composable
+private fun GoogleEarthAvailabilityRow(
+  uiState: FormEditorUiState,
+  onRequestEnable: () -> Unit,
+  onDisable: () -> Unit,
+) {
+  val canOpenInGoogleEarth = uiState.canOpenInGoogleEarth
+  val earthOffCaption =
+    when {
+      canOpenInGoogleEarth -> stringResource(Res.string.formeditor_availability_google_earth_off)
+      uiState.updatesMapLayerByQuestion ->
+        stringResource(
+          Res.string.formeditor_availability_google_earth_needs_map_selection,
+          stringResource(Res.string.formeditor_find_map_feature_by),
+          stringResource(Res.string.formeditor_selected_on_map),
+        )
+      else -> stringResource(Res.string.formeditor_availability_google_earth_unavailable)
+    }
+  HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+  AvailabilityToggleRow(
+    icon = Icons.Outlined.Public,
+    title = stringResource(Res.string.formeditor_enable_open_in_google_earth),
+    onCaption = stringResource(Res.string.formeditor_availability_google_earth_on),
+    offCaption = earthOffCaption,
+    checked = canOpenInGoogleEarth && uiState.form.openInGoogleEarth,
+    enabled = !uiState.isReadOnly && canOpenInGoogleEarth,
+    unavailable = !canOpenInGoogleEarth,
+    onCheckedChange = { enabled -> if (enabled) onRequestEnable() else onDisable() },
+  )
 }
 
 @Composable

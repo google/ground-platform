@@ -58,27 +58,11 @@ object MapLayerImporter {
   fun plan(fileName: String, result: GeoReadResult): MapLayerImportPlan? {
     val features = result.features
     if (features.isEmpty()) return null
-    val kind =
-      when {
-        features.any { it.geometry is GeoGeometry.Polygon } -> GeometryType.POLYGON
-        features.any { it.geometry is GeoGeometry.LineString } -> GeometryType.LINE_STRING
-        else -> GeometryType.POINT
-      }
+    val kind = selectGeometryKind(features)
     val kept = features.filter { it.kind() == kind }
-
-    // One property per attribute, with names made valid and unique.
-    val names = LinkedHashMap<String, String>() // attribute → property name
-    kept.forEach { f ->
-      f.properties.keys
-        .filterNot { it in KML_SYSTEM_ATTRIBUTES }
-        .forEach { attr ->
-          if (attr !in names) names[attr] = uniqueName(propertyName(attr), names.values)
-        }
-    }
+    val names = buildAttributeNameMap(kept)
     val idAttr = names.entries.firstOrNull { it.value == "id" }?.key
-    val idValues = kept.map { it.properties[idAttr].orEmpty().trim() }
-    val idIsUsableKey =
-      idAttr != null && idValues.none { it.isEmpty() } && idValues.toSet().size == idValues.size
+    val idIsUsableKey = isUsableIdAttribute(kept, idAttr)
     val keyProperty = if (idIsUsableKey) "id" else uniqueName("feature_id", names.values)
     val properties = buildList {
       if (!idIsUsableKey) add(EntityProperty(keyProperty, "Feature ID", required = true))
@@ -87,19 +71,7 @@ object MapLayerImporter {
       }
     }
     val labelProperty = names.values.firstOrNull { it == "name" } ?: keyProperty
-    val rows = kept.mapIndexed { i, f ->
-      val values = buildMap {
-        if (!idIsUsableKey) put(keyProperty, "F-${(i + 1).toString().padStart(4, '0')}")
-        f.properties.forEach { (attr, v) ->
-          if (attr in names) {
-            put(names.getValue(attr), v)
-          } else if (attr == "c1_geo_id" && v.isNotBlank()) {
-            put("c1_geo_id", v)
-          }
-        }
-      }
-      values to f.vertices()
-    }
+    val rows = kept.mapIndexed { i, f -> buildImportedRow(i, f, names, keyProperty, idIsUsableKey) }
     return MapLayerImportPlan(
       name = fileName.substringBeforeLast('.').ifBlank { "Imported map layer" },
       geometryType = kind,
@@ -109,6 +81,52 @@ object MapLayerImporter {
       rows = rows,
       skippedFeatures = features.size - kept.size,
     )
+  }
+
+  private fun selectGeometryKind(features: List<GeoFeature>): GeometryType =
+    when {
+      features.any { it.geometry is GeoGeometry.Polygon } -> GeometryType.POLYGON
+      features.any { it.geometry is GeoGeometry.LineString } -> GeometryType.LINE_STRING
+      else -> GeometryType.POINT
+    }
+
+  private fun buildAttributeNameMap(kept: List<GeoFeature>): LinkedHashMap<String, String> {
+    // One property per attribute, with names made valid and unique.
+    val names = LinkedHashMap<String, String>() // attribute → property name
+    kept.forEach { f ->
+      f.properties.keys
+        .filterNot { it in KML_SYSTEM_ATTRIBUTES }
+        .forEach { attr ->
+          if (attr !in names) names[attr] = uniqueName(propertyName(attr), names.values)
+        }
+    }
+    return names
+  }
+
+  private fun isUsableIdAttribute(kept: List<GeoFeature>, idAttr: String?): Boolean {
+    if (idAttr == null) return false
+    val idValues = kept.map { it.properties[idAttr].orEmpty().trim() }
+    return idValues.none { it.isEmpty() } && idValues.toSet().size == idValues.size
+  }
+
+  private fun buildImportedRow(
+    index: Int,
+    feature: GeoFeature,
+    names: Map<String, String>,
+    keyProperty: String,
+    idIsUsableKey: Boolean,
+  ): Pair<Map<String, String>, List<LatLng>> {
+    val values = buildMap {
+      if (!idIsUsableKey) put(keyProperty, "F-${(index + 1).toString().padStart(4, '0')}")
+      feature.properties.forEach { (attr, v) ->
+        if (attr in names) {
+          put(names.getValue(attr), v)
+        } else if (attr == "c1_geo_id" && v.isNotBlank()) {
+          put("c1_geo_id", v)
+        }
+      }
+    }
+    return values to feature.vertices()
   }
 
   private fun GeoFeature.kind(): GeometryType =

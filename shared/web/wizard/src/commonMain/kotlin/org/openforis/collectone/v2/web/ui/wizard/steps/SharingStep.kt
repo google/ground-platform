@@ -72,7 +72,6 @@ import org.openforis.collectone.v2.web.ui.wizard.CreateSurveyWizardUiState
 // Step 6: Sharing & Impact Readiness
 // ---------------------------------------------------------------------------------------------
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun SharingStepContent(
   uiState: CreateSurveyWizardUiState,
@@ -81,8 +80,6 @@ internal fun SharingStepContent(
   editorActions: SurveyEditorActions,
   careCardPosition: CareCardPosition,
 ) {
-  val readiness = uiState.impactReadiness
-
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
     Text(
       text = stringResource(Res.string.wizard_step_sharing),
@@ -100,6 +97,28 @@ internal fun SharingStepContent(
     ValidationErrorBanner(message = errorMsg.resolve())
   }
 
+  DraftModeNoticeBanner()
+
+  ImpactReadinessSummaryCard(uiState = uiState)
+
+  // CARE Principles & FAO Indigenous / Community Data Sovereignty Card
+  WizardCareCard(
+    uiState = uiState,
+    actions = actions,
+    editorUiState = editorUiState,
+    position = careCardPosition,
+  )
+
+  // Standard Collect One SharingContent (without PaneScaffold's nested verticalScroll)
+  SharingContent(
+    uiState = editorUiState,
+    actions = editorActions,
+    modifier = Modifier.fillMaxWidth(),
+  )
+}
+
+@Composable
+private fun DraftModeNoticeBanner() {
   // Draft Mode & How to Publish Notice
   Surface(
     color = MaterialTheme.colorScheme.tertiaryContainer,
@@ -135,8 +154,12 @@ internal fun SharingStepContent(
       }
     }
   }
+}
 
-  // Impact & Export Readiness Summary Card
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ImpactReadinessSummaryCard(uiState: CreateSurveyWizardUiState) {
+  val readiness = uiState.impactReadiness
   ElevatedCard(
     colors =
       CardDefaults.elevatedCardColors(
@@ -168,119 +191,114 @@ internal fun SharingStepContent(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-
-      FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        TonalBadge(
-          text =
-            stringResource(
-              Res.string.wizard_readiness_mode,
-              stringResource(uiState.collectionMode.labelRes),
-            ),
-          tone = BadgeTone.PRIMARY,
-        )
-        TonalBadge(
-          text =
-            stringResource(
-              Res.string.wizard_readiness_fields_linked,
-              readiness.linkedConceptCount,
-              readiness.totalQuestionCount,
-            ),
-          tone = if (readiness.linkedConceptCount > 0) BadgeTone.PRIMARY else BadgeTone.NEUTRAL,
-        )
-        if (readiness.selectedPackTitles.isNotEmpty()) {
-          TonalBadge(
-            text =
-              stringResource(
-                Res.string.wizard_readiness_purposes,
-                readiness.selectedPackTitles.map { it.resolve() }.joinToString(", "),
-              ),
-            tone = BadgeTone.TERTIARY,
-          )
-        }
-        if (readiness.selectedProgramLabels.isNotEmpty()) {
-          TonalBadge(
-            text =
-              stringResource(
-                Res.string.wizard_readiness_programs,
-                readiness.selectedProgramLabels.joinToString(", "),
-              ),
-            tone = BadgeTone.NEUTRAL,
-          )
-        }
-        if (readiness.goalTitles.isNotEmpty()) {
-          TonalBadge(
-            text =
-              stringResource(
-                Res.string.wizard_readiness_goals,
-                readiness.goalTitles.map { it.resolve() }.joinToString(", "),
-              ),
-            tone = BadgeTone.PRIMARY,
-          )
-        }
-      }
-
+      ImpactReadinessBadgesRow(uiState = uiState)
       if (readiness.exportPlans.isNotEmpty()) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-          Text(
-            text = stringResource(Res.string.wizard_readiness_export_profiles),
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-          )
-          readiness.exportPlans.forEach { plan ->
-            val mapped = plan.fields.count { it.isMapped }
-            val total = plan.fields.size
-            val fraction = if (total > 0) mapped.toFloat() / total.toFloat() else 1f
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-              Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                Text(
-                  text = plan.profile.title.get("en"),
-                  style = MaterialTheme.typography.bodySmall,
-                  fontWeight = FontWeight.Medium,
-                )
-                Text(
-                  text =
-                    stringResource(
-                      if (plan.unmappedFields.isEmpty()) Res.string.wizard_readiness_mapped_ready
-                      else Res.string.wizard_readiness_mapped,
-                      mapped,
-                      total,
-                    ),
-                  style = MaterialTheme.typography.labelSmall,
-                  color =
-                    if (plan.unmappedFields.isEmpty()) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.error,
-                )
-              }
-              LinearProgressIndicator(
-                progress = { fraction },
-                modifier = Modifier.fillMaxWidth().height(6.dp),
-              )
-            }
-          }
-        }
+        ImpactReadinessExportPlansSection(uiState = uiState)
       }
     }
   }
+}
 
-  // CARE Principles & FAO Indigenous / Community Data Sovereignty Card
-  WizardCareCard(
-    uiState = uiState,
-    actions = actions,
-    editorUiState = editorUiState,
-    position = careCardPosition,
-  )
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ImpactReadinessBadgesRow(uiState: CreateSurveyWizardUiState) {
+  val readiness = uiState.impactReadiness
+  FlowRow(
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    TonalBadge(
+      text =
+        stringResource(
+          Res.string.wizard_readiness_mode,
+          stringResource(uiState.collectionMode.labelRes),
+        ),
+      tone = BadgeTone.PRIMARY,
+    )
+    TonalBadge(
+      text =
+        stringResource(
+          Res.string.wizard_readiness_fields_linked,
+          readiness.linkedConceptCount,
+          readiness.totalQuestionCount,
+        ),
+      tone = if (readiness.linkedConceptCount > 0) BadgeTone.PRIMARY else BadgeTone.NEUTRAL,
+    )
+    if (readiness.selectedPackTitles.isNotEmpty()) {
+      TonalBadge(
+        text =
+          stringResource(
+            Res.string.wizard_readiness_purposes,
+            readiness.selectedPackTitles.map { it.resolve() }.joinToString(", "),
+          ),
+        tone = BadgeTone.TERTIARY,
+      )
+    }
+    if (readiness.selectedProgramLabels.isNotEmpty()) {
+      TonalBadge(
+        text =
+          stringResource(
+            Res.string.wizard_readiness_programs,
+            readiness.selectedProgramLabels.joinToString(", "),
+          ),
+        tone = BadgeTone.NEUTRAL,
+      )
+    }
+    if (readiness.goalTitles.isNotEmpty()) {
+      TonalBadge(
+        text =
+          stringResource(
+            Res.string.wizard_readiness_goals,
+            readiness.goalTitles.map { it.resolve() }.joinToString(", "),
+          ),
+        tone = BadgeTone.PRIMARY,
+      )
+    }
+  }
+}
 
-  // Standard Collect One SharingContent (without PaneScaffold's nested verticalScroll)
-  SharingContent(
-    uiState = editorUiState,
-    actions = editorActions,
-    modifier = Modifier.fillMaxWidth(),
-  )
+@Composable
+private fun ImpactReadinessExportPlansSection(uiState: CreateSurveyWizardUiState) {
+  Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Text(
+      text = stringResource(Res.string.wizard_readiness_export_profiles),
+      style = MaterialTheme.typography.labelMedium,
+      fontWeight = FontWeight.SemiBold,
+    )
+    uiState.impactReadiness.exportPlans.forEach { plan ->
+      val mapped = plan.fields.count { it.isMapped }
+      val total = plan.fields.size
+      val fraction = if (total > 0) mapped.toFloat() / total.toFloat() else 1f
+      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = plan.profile.title.get("en"),
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium,
+          )
+          Text(
+            text =
+              stringResource(
+                if (plan.unmappedFields.isEmpty()) Res.string.wizard_readiness_mapped_ready
+                else Res.string.wizard_readiness_mapped,
+                mapped,
+                total,
+              ),
+            style = MaterialTheme.typography.labelSmall,
+            color =
+              if (plan.unmappedFields.isEmpty()) MaterialTheme.colorScheme.primary
+              else MaterialTheme.colorScheme.error,
+          )
+        }
+        LinearProgressIndicator(
+          progress = { fraction },
+          modifier = Modifier.fillMaxWidth().height(6.dp),
+        )
+      }
+    }
+  }
 }

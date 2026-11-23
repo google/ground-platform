@@ -14,6 +14,7 @@
 package org.openforis.collectone.v2.web.ui.surveyeditor
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -112,6 +114,7 @@ import org.openforis.collectone.v2.core.sync.EntityFieldMask
 import org.openforis.collectone.v2.map.GeometryType
 import org.openforis.collectone.v2.map.LatLng
 import org.openforis.collectone.v2.web.domain.model.ColumnPrefixGroup
+import org.openforis.collectone.v2.web.domain.model.GroupedColumnsLayout
 import org.openforis.collectone.v2.web.domain.model.GroupedTableColumn
 import org.openforis.collectone.v2.web.domain.model.PagedEntityTableCache
 import org.openforis.collectone.v2.web.domain.model.TableCellLoadState
@@ -364,27 +367,6 @@ private fun DatasetHeader(
   issueCount: Int,
   totalPropertyCount: Int = dataset.properties.size,
 ) {
-  val itemsCount =
-    if (dataset.kind == DatasetKind.MAP_LAYER) {
-      pluralStringResource(
-        Res.plurals.surveyeditor_dataset_features_count,
-        dataset.rows.size,
-        dataset.rows.size,
-      )
-    } else {
-      pluralStringResource(
-        Res.plurals.surveyeditor_dataset_rows_count,
-        dataset.rows.size,
-        dataset.rows.size,
-      )
-    }
-  val propertiesCount =
-    pluralStringResource(
-      Res.plurals.surveyeditor_dataset_properties_count,
-      totalPropertyCount,
-      totalPropertyCount,
-    )
-  var menuOpen by remember { mutableStateOf(false) }
   var confirmDelete by remember { mutableStateOf(false) }
 
   if (confirmDelete) {
@@ -408,87 +390,118 @@ private fun DatasetHeader(
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = stringResource(dataset.kind.singularRes),
-          style = MaterialTheme.typography.labelMedium,
-          color = MaterialTheme.colorScheme.primary,
-          fontWeight = FontWeight.Bold,
-        )
-        Text(
-          text =
-            dataset.displayName.ifBlank {
-              stringResource(Res.string.surveyeditor_dataset_untitled)
-            },
-          style = MaterialTheme.typography.titleLarge,
-          fontWeight = FontWeight.Bold,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-          text =
-            buildString {
-              append("$itemsCount • $propertiesCount")
-              if (dataset.kind == DatasetKind.MAP_LAYER) {
-                append(" • ${stringResource(dataset.geometryType.pluralRes).lowercase()}")
-              }
-            },
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
+      DatasetHeaderTitleColumn(
+        dataset = dataset,
+        totalPropertyCount = totalPropertyCount,
+        modifier = Modifier.weight(1f),
+      )
       if (issueCount > 0) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(
-            Icons.Outlined.Warning,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(18.dp),
-          )
-          Spacer(Modifier.width(4.dp))
-          Text(
-            pluralStringResource(
-              Res.plurals.surveyeditor_dataset_issues_count,
-              issueCount,
-              issueCount,
-            ),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.error,
-          )
-        }
+        DatasetHeaderIssuesBadge(issueCount = issueCount)
       }
       if (!uiState.isReadOnly) {
-        Box {
-          IconButton(onClick = { menuOpen = true }) {
-            Icon(
-              Icons.Outlined.MoreVert,
-              contentDescription =
-                stringResource(
-                  Res.string.surveyeditor_dataset_more_options,
-                  dataset.displayName.ifBlank { stringResource(dataset.kind.singularRes) },
-                ),
-            )
-          }
-          DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-            DropdownMenuItem(
-              text = {
-                Text(deleteDatasetMenuLabel(dataset.kind), color = MaterialTheme.colorScheme.error)
-              },
-              leadingIcon = {
-                Icon(
-                  Icons.Outlined.Delete,
-                  contentDescription = null,
-                  tint = MaterialTheme.colorScheme.error,
-                )
-              },
-              onClick = {
-                menuOpen = false
-                confirmDelete = true
-              },
-            )
-          }
-        }
+        DatasetHeaderOverflowMenu(dataset = dataset, onRequestDelete = { confirmDelete = true })
       }
+    }
+  }
+}
+
+@Composable
+private fun DatasetHeaderTitleColumn(
+  dataset: EntityDataset,
+  totalPropertyCount: Int,
+  modifier: Modifier = Modifier,
+) {
+  val itemsCount =
+    pluralStringResource(
+      if (dataset.kind == DatasetKind.MAP_LAYER) Res.plurals.surveyeditor_dataset_features_count
+      else Res.plurals.surveyeditor_dataset_rows_count,
+      dataset.rows.size,
+      dataset.rows.size,
+    )
+  val propertiesCount =
+    pluralStringResource(
+      Res.plurals.surveyeditor_dataset_properties_count,
+      totalPropertyCount,
+      totalPropertyCount,
+    )
+  Column(modifier = modifier) {
+    Text(
+      text = stringResource(dataset.kind.singularRes),
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.primary,
+      fontWeight = FontWeight.Bold,
+    )
+    Text(
+      text =
+        dataset.displayName.ifBlank { stringResource(Res.string.surveyeditor_dataset_untitled) },
+      style = MaterialTheme.typography.titleLarge,
+      fontWeight = FontWeight.Bold,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+    Text(
+      text =
+        buildString {
+          append("$itemsCount • $propertiesCount")
+          if (dataset.kind == DatasetKind.MAP_LAYER) {
+            append(" • ${stringResource(dataset.geometryType.pluralRes).lowercase()}")
+          }
+        },
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+  }
+}
+
+@Composable
+private fun DatasetHeaderIssuesBadge(issueCount: Int) {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+    Icon(
+      Icons.Outlined.Warning,
+      contentDescription = null,
+      tint = MaterialTheme.colorScheme.error,
+      modifier = Modifier.size(18.dp),
+    )
+    Spacer(Modifier.width(4.dp))
+    Text(
+      pluralStringResource(Res.plurals.surveyeditor_dataset_issues_count, issueCount, issueCount),
+      style = MaterialTheme.typography.labelLarge,
+      color = MaterialTheme.colorScheme.error,
+    )
+  }
+}
+
+@Composable
+private fun DatasetHeaderOverflowMenu(dataset: EntityDataset, onRequestDelete: () -> Unit) {
+  var menuOpen by remember { mutableStateOf(false) }
+  Box {
+    IconButton(onClick = { menuOpen = true }) {
+      Icon(
+        Icons.Outlined.MoreVert,
+        contentDescription =
+          stringResource(
+            Res.string.surveyeditor_dataset_more_options,
+            dataset.displayName.ifBlank { stringResource(dataset.kind.singularRes) },
+          ),
+      )
+    }
+    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+      DropdownMenuItem(
+        text = {
+          Text(deleteDatasetMenuLabel(dataset.kind), color = MaterialTheme.colorScheme.error)
+        },
+        leadingIcon = {
+          Icon(
+            Icons.Outlined.Delete,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.error,
+          )
+        },
+        onClick = {
+          menuOpen = false
+          onRequestDelete()
+        },
+      )
     }
   }
 }
@@ -593,15 +606,90 @@ private fun RowsTableCard(
 ) {
   val isMap = dataset.kind == DatasetKind.MAP_LAYER
   val colors = MaterialTheme.colorScheme
-  val density = LocalDensity.current
   val scope = rememberCoroutineScope()
   val rowIssues = remember(issues) { issues.mapNotNull { it.rowKey }.toSet() }
   val listState = remember(dataset.key) { LazyListState() }
   val horizontalScroll = rememberScrollState()
   var editingCell by remember(dataset.key) { mutableStateOf<Pair<String, String>?>(null) }
+  val groupState = rememberDatasetColumnGroupState(dataset, tableColumns)
+  val displaySlots = groupState.groupedLayout.displaySlots
+  val columnWidths = remember(displaySlots) { computeDatasetColumnWidths(displaySlots) }
+  ScrollToExpandedDatasetGroupEffect(
+    scrollToGroupId = groupState.scrollToGroupId,
+    groupedLayout = groupState.groupedLayout,
+    columnWidths = columnWidths,
+    horizontalScroll = horizontalScroll,
+    onClearScrollTarget = groupState.clearScrollTarget,
+  )
+  val surveyId = uiState.surveyId.ifBlank { uiState.details.surveyId }
+  val rowEntityIds = rememberDatasetRowEntityIds(dataset, surveyId)
+  val slotRuntimeKeys = remember(displaySlots) { datasetSlotRuntimeKeys(displaySlots) }
+  val cacheRevision by (tableCache?.revision?.collectAsState() ?: remember { mutableStateOf(0) })
+
+  ElevatedCard(
+    modifier = modifier,
+    colors = CardDefaults.elevatedCardColors(containerColor = colors.surface),
+  ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      RowsTableToolbar(
+        isMap = isMap,
+        canAddRow = !dataset.isGenerated && !uiState.isReadOnly,
+        groups = groupState.groupedLayout.groups,
+        expandedGroupIds = groupState.expandedGroupIds,
+        onToggleGroup = { group -> groupState.toggle(group.id, true) },
+        onAddRow = { onSelectRow(actions.addRow(dataset.key)) },
+      )
+      if (issues.isNotEmpty()) {
+        DatasetIssuesBanner(issues = issues, onSelectRow = onSelectRow)
+        Spacer(Modifier.height(8.dp))
+      }
+      DatasetVirtualTable(
+        uiState = uiState,
+        actions = actions,
+        dataset = dataset,
+        isMap = isMap,
+        displaySlots = displaySlots,
+        columnWidths = columnWidths,
+        listState = listState,
+        horizontalScroll = horizontalScroll,
+        selectedRow = selectedRow,
+        rowIssues = rowIssues,
+        rowEntityIds = rowEntityIds,
+        tableCache = tableCache,
+        cacheRevision = cacheRevision,
+        editingCell = editingCell,
+        onEditingCellChange = { editingCell = it },
+        onToggleGroup = { groupId -> groupState.toggle(groupId, false) },
+        onSelectRow = onSelectRow,
+        onViewportChanged = { rowRange, colRange ->
+          tableCache?.onViewportChanged(
+            scope = scope,
+            rowRange = rowRange,
+            colRange = colRange,
+            rowEntityIds = rowEntityIds,
+            columnKeys = slotRuntimeKeys,
+          )
+        },
+      )
+    }
+  }
+}
+
+private class DatasetColumnGroupState(
+  val groupedLayout: GroupedColumnsLayout<DatasetTableColumn>,
+  val expandedGroupIds: Set<String>,
+  val scrollToGroupId: String?,
+  val toggle: (groupId: String, scrollOnExpand: Boolean) -> Unit,
+  val clearScrollTarget: () -> Unit,
+)
+
+@Composable
+private fun rememberDatasetColumnGroupState(
+  dataset: EntityDataset,
+  tableColumns: List<DatasetTableColumn>,
+): DatasetColumnGroupState {
   var expandedGroupIds by remember(dataset.key) { mutableStateOf(emptySet<String>()) }
   var scrollToGroupId by remember(dataset.key) { mutableStateOf<String?>(null) }
-
   val groupedLayout =
     remember(tableColumns, expandedGroupIds, dataset.keyProperty, dataset.labelProperty) {
       groupColumnsByCommonPrefix(
@@ -616,35 +704,65 @@ private fun RowsTableCard(
         },
       )
     }
-  val displaySlots = groupedLayout.displaySlots
-
-  val selectedIndex =
-    remember(dataset.rows, selectedRow) {
-      if (selectedRow == null) -1 else dataset.rows.indexOfFirst { it.key == selectedRow }
-    }
-  val columnWidths =
-    remember(displaySlots) {
-      displaySlots.map { slot ->
-        when (slot) {
-          is GroupedTableColumn.CollapsedGroup -> CollapsedColumnGroupWidth
-          is GroupedTableColumn.Single -> {
-            val headerChars = maxOf(slot.item.property.label.length, slot.item.property.name.length)
-            val extra = if (slot.isGroupStart) 24f else 0f
-            (headerChars * 7.5f + 28f + extra).dp.coerceIn(CellWidth, 260.dp)
-          }
-        }
+  return DatasetColumnGroupState(
+    groupedLayout = groupedLayout,
+    expandedGroupIds = expandedGroupIds,
+    scrollToGroupId = scrollToGroupId,
+    toggle = { groupId, scrollOnExpand ->
+      if (groupId in expandedGroupIds) {
+        expandedGroupIds = expandedGroupIds - groupId
+        scrollToGroupId = null
+      } else {
+        expandedGroupIds = expandedGroupIds + groupId
+        if (scrollOnExpand) scrollToGroupId = groupId
       }
-    }
-  val toggleGroup: (String, Boolean) -> Unit = { groupId, scrollOnExpand ->
-    if (groupId in expandedGroupIds) {
-      expandedGroupIds = expandedGroupIds - groupId
-      scrollToGroupId = null
-    } else {
-      expandedGroupIds = expandedGroupIds + groupId
-      if (scrollOnExpand) scrollToGroupId = groupId
+    },
+    clearScrollTarget = { scrollToGroupId = null },
+  )
+}
+
+private fun computeDatasetColumnWidths(
+  displaySlots: List<GroupedTableColumn<DatasetTableColumn>>
+): List<Dp> = displaySlots.map { slot ->
+  when (slot) {
+    is GroupedTableColumn.CollapsedGroup -> CollapsedColumnGroupWidth
+    is GroupedTableColumn.Single -> {
+      val headerChars = maxOf(slot.item.property.label.length, slot.item.property.name.length)
+      val extra = if (slot.isGroupStart) 24f else 0f
+      (headerChars * 7.5f + 28f + extra).dp.coerceIn(CellWidth, 260.dp)
     }
   }
-  LaunchedEffect(scrollToGroupId, displaySlots) {
+}
+
+@Composable
+private fun rememberDatasetRowEntityIds(dataset: EntityDataset, surveyId: String): List<String> =
+  remember(dataset.rows, dataset.keyProperty, dataset.id, dataset.kind, surveyId) {
+    dataset.rows.map { row ->
+      if (RecordIds.isUuid(row.key)) row.key
+      else SurveyEditorDerivation.entityIdOf(dataset, row, surveyId)
+    }
+  }
+
+// Placeholder slots map to "" so PagedEntityTableCache skips fetching collapsed group columns.
+private fun datasetSlotRuntimeKeys(
+  displaySlots: List<GroupedTableColumn<DatasetTableColumn>>
+): List<String> = displaySlots.map { slot ->
+  when (slot) {
+    is GroupedTableColumn.Single -> slot.item.runtimeKey
+    is GroupedTableColumn.CollapsedGroup -> ""
+  }
+}
+
+@Composable
+private fun ScrollToExpandedDatasetGroupEffect(
+  scrollToGroupId: String?,
+  groupedLayout: GroupedColumnsLayout<DatasetTableColumn>,
+  columnWidths: List<Dp>,
+  horizontalScroll: ScrollState,
+  onClearScrollTarget: () -> Unit,
+) {
+  val density = LocalDensity.current
+  LaunchedEffect(scrollToGroupId, groupedLayout.displaySlots) {
     val targetId = scrollToGroupId ?: return@LaunchedEffect
     val slotIndex = groupedLayout.firstExpandedSlotIndex(targetId)
     if (slotIndex >= 0) {
@@ -655,179 +773,225 @@ private fun RowsTableCard(
         withFrameNanos {}
       }
       horizontalScroll.animateScrollTo(targetPx.coerceIn(0, horizontalScroll.maxValue))
-      scrollToGroupId = null
+      onClearScrollTarget()
     }
   }
+}
 
-  val surveyId = uiState.surveyId.ifBlank { uiState.details.surveyId }
-  val rowEntityIds =
-    remember(dataset.rows, dataset.keyProperty, dataset.id, dataset.kind, surveyId) {
-      dataset.rows.map { row ->
-        if (RecordIds.isUuid(row.key)) row.key
-        else SurveyEditorDerivation.entityIdOf(dataset, row, surveyId)
-      }
+@Composable
+private fun DatasetVirtualTable(
+  uiState: SurveyEditorUiState,
+  actions: DatasetActions,
+  dataset: EntityDataset,
+  isMap: Boolean,
+  displaySlots: List<GroupedTableColumn<DatasetTableColumn>>,
+  columnWidths: List<Dp>,
+  listState: LazyListState,
+  horizontalScroll: ScrollState,
+  selectedRow: String?,
+  rowIssues: Set<String>,
+  rowEntityIds: List<String>,
+  tableCache: PagedEntityTableCache?,
+  cacheRevision: Int,
+  editingCell: Pair<String, String>?,
+  onEditingCellChange: (Pair<String, String>?) -> Unit,
+  onToggleGroup: (String) -> Unit,
+  onSelectRow: (String?) -> Unit,
+  onViewportChanged: (IntRange, IntRange) -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  val selectedIndex =
+    remember(dataset.rows, selectedRow) {
+      if (selectedRow == null) -1 else dataset.rows.indexOfFirst { it.key == selectedRow }
     }
-  // Placeholder slots map to "" so PagedEntityTableCache skips fetching collapsed group columns.
-  val slotRuntimeKeys =
-    remember(displaySlots) {
-      displaySlots.map { slot ->
-        when (slot) {
-          is GroupedTableColumn.Single -> slot.item.runtimeKey
-          is GroupedTableColumn.CollapsedGroup -> ""
-        }
-      }
-    }
-  val cacheRevision by (tableCache?.revision?.collectAsState() ?: remember { mutableStateOf(0) })
-
-  ElevatedCard(
-    modifier = modifier,
-    colors = CardDefaults.elevatedCardColors(containerColor = colors.surface),
-  ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-      RowsTableToolbar(
-        isMap = isMap,
-        canAddRow = !dataset.isGenerated && !uiState.isReadOnly,
-        groups = groupedLayout.groups,
-        expandedGroupIds = expandedGroupIds,
-        onToggleGroup = { group -> toggleGroup(group.id, true) },
-        onAddRow = { onSelectRow(actions.addRow(dataset.key)) },
+  VirtualDataTable(
+    rowCount = dataset.rows.size,
+    rowKey = { dataset.rows[it].key },
+    columnWidths = columnWidths,
+    listState = listState,
+    horizontalScroll = horizontalScroll,
+    leadingWidth = IndexCellWidth,
+    trailingWidth = (if (isMap) GeometryCellWidth else 0.dp) + IndexCellWidth,
+    scrollToRowIndex = selectedIndex,
+    onVisibleWindowChanged = if (tableCache != null) onViewportChanged else null,
+    modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+    emptyContent = { DatasetTableEmptyState(dataset, isMap) },
+    leadingHeader = { HeaderCell("#", IndexCellWidth) },
+    headerCell = { colIndex, width ->
+      DatasetTableHeaderSlot(dataset, displaySlots[colIndex], width, onToggleGroup)
+    },
+    trailingHeader = { DatasetTableTrailingHeader(isMap) },
+    rowModifier = { rowIndex ->
+      val selected = dataset.rows[rowIndex].key == selectedRow
+      Modifier.background(if (selected) colors.secondaryContainer else Color.Transparent)
+    },
+    leadingCell = { rowIndex ->
+      val row = dataset.rows[rowIndex]
+      val selected = row.key == selectedRow
+      RowIndexCell(
+        index = rowIndex,
+        selected = selected,
+        hasIssue = row.key in rowIssues,
+        onClick = { onSelectRow(if (selected) null else row.key) },
       )
-      if (issues.isNotEmpty()) {
-        DatasetIssuesBanner(issues = issues, onSelectRow = onSelectRow)
-        Spacer(Modifier.height(8.dp))
-      }
-      VirtualDataTable(
-        rowCount = dataset.rows.size,
-        rowKey = { dataset.rows[it].key },
-        columnWidths = columnWidths,
-        listState = listState,
-        horizontalScroll = horizontalScroll,
-        leadingWidth = IndexCellWidth,
-        trailingWidth = (if (isMap) GeometryCellWidth else 0.dp) + IndexCellWidth,
-        scrollToRowIndex = selectedIndex,
-        onVisibleWindowChanged =
-          tableCache?.let { cache ->
-            { rowRange, colRange ->
-              cache.onViewportChanged(
-                scope = scope,
-                rowRange = rowRange,
-                colRange = colRange,
-                rowEntityIds = rowEntityIds,
-                columnKeys = slotRuntimeKeys,
-              )
-            }
-          },
-        modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-        emptyContent = { DatasetTableEmptyState(dataset, isMap) },
-        leadingHeader = { HeaderCell("#", IndexCellWidth) },
-        headerCell = { colIndex, width ->
-          when (val slot = displaySlots[colIndex]) {
-            is GroupedTableColumn.CollapsedGroup ->
-              CollapsedColumnGroupHeaderCell(
-                groupId = slot.group.id,
-                wildcardLabel = slot.group.wildcardLabel,
-                count = slot.group.size,
-                width = width,
-                height = CellHeight,
-                onExpand = { toggleGroup(slot.group.id, false) },
-              )
-            is GroupedTableColumn.Single ->
-              DatasetTableHeaderCell(
-                dataset = dataset,
-                slot = slot,
-                width = width,
-                onCollapseGroup = { id -> toggleGroup(id, false) },
-              )
-          }
-        },
-        trailingHeader = {
-          if (isMap) {
-            HeaderCell(
-              stringResource(Res.string.surveyeditor_dataset_column_geometry),
-              GeometryCellWidth,
-            )
-          }
-          HeaderCell("", IndexCellWidth)
-        },
-        rowModifier = { rowIndex ->
-          val selected = dataset.rows[rowIndex].key == selectedRow
-          Modifier.background(if (selected) colors.secondaryContainer else Color.Transparent)
-        },
-        leadingCell = { rowIndex ->
-          val row = dataset.rows[rowIndex]
-          val selected = row.key == selectedRow
-          RowIndexCell(
-            index = rowIndex,
-            selected = selected,
-            hasIssue = row.key in rowIssues,
-            onClick = { onSelectRow(if (selected) null else row.key) },
-          )
-        },
-        cell = { rowIndex, colIndex, width ->
-          when (val slot = displaySlots[colIndex]) {
-            is GroupedTableColumn.CollapsedGroup ->
-              CollapsedColumnGroupBodyCell(
-                width = width,
-                height = CellHeight,
-                onExpand = { toggleGroup(slot.group.id, false) },
-              )
-            is GroupedTableColumn.Single -> {
-              // Read cacheRevision before resolving loadState so tile loads invalidate visible
-              // cells and pass immutable TableCellLoadState directly into DatasetTableBodyCell.
-              val row = dataset.rows[rowIndex]
-              val col = slot.item
-              val entityId = rowEntityIds[rowIndex]
-              val loadState =
-                resolveEditorCellLoadState(
-                  dataset = dataset,
-                  row = row,
-                  column = col,
-                  entityId = entityId,
-                  rowIndex = rowIndex,
-                  colIndex = colIndex,
-                  tableCache = tableCache,
-                  cacheRevision = cacheRevision,
-                )
-              DatasetTableBodyCell(
-                uiState = uiState,
-                actions = actions,
-                dataset = dataset,
-                row = row,
-                column = col,
-                entityId = entityId,
-                loadState = loadState,
-                width = width,
-                selected = row.key == selectedRow,
-                editingCell = editingCell,
-                onEditingCellChange = { editingCell = it },
-                onSelectRow = onSelectRow,
-                tableCache = tableCache,
-              )
-            }
-          }
-        },
-        trailingCell = { rowIndex ->
-          val row = dataset.rows[rowIndex]
-          val selected = row.key == selectedRow
-          val cellTextColor = if (selected) colors.onSecondaryContainer else colors.onSurface
-          val editingColumn = editingCell?.takeIf { it.first == row.key }?.second
-          RowTrailingCells(
-            dataset = dataset,
-            row = row,
-            isMap = isMap,
-            isReadOnly = uiState.isReadOnly,
-            selected = selected,
-            textColor = cellTextColor,
-            editingColumn = editingColumn,
-            onSelectRow = { onSelectRow(row.key) },
-            onStartEditingGeometry = {
-              onSelectRow(row.key)
-              editingCell = row.key to GEOMETRY_COLUMN_KEY
-            },
-            onStopEditing = { col -> if (editingCell == row.key to col) editingCell = null },
-            actions = actions,
-          )
-        },
+    },
+    cell = { rowIndex, colIndex, width ->
+      DatasetTableCellSlot(
+        uiState = uiState,
+        actions = actions,
+        dataset = dataset,
+        rowIndex = rowIndex,
+        colIndex = colIndex,
+        slot = displaySlots[colIndex],
+        entityId = rowEntityIds[rowIndex],
+        width = width,
+        selectedRow = selectedRow,
+        editingCell = editingCell,
+        onEditingCellChange = onEditingCellChange,
+        onSelectRow = onSelectRow,
+        tableCache = tableCache,
+        cacheRevision = cacheRevision,
+        onToggleGroup = onToggleGroup,
+      )
+    },
+    trailingCell = { rowIndex ->
+      DatasetTableTrailingSlot(
+        dataset = dataset,
+        row = dataset.rows[rowIndex],
+        isMap = isMap,
+        isReadOnly = uiState.isReadOnly,
+        selectedRow = selectedRow,
+        editingCell = editingCell,
+        onEditingCellChange = onEditingCellChange,
+        onSelectRow = onSelectRow,
+        actions = actions,
+      )
+    },
+  )
+}
+
+@Composable
+private fun DatasetTableTrailingHeader(isMap: Boolean) {
+  if (isMap) {
+    HeaderCell(stringResource(Res.string.surveyeditor_dataset_column_geometry), GeometryCellWidth)
+  }
+  HeaderCell("", IndexCellWidth)
+}
+
+@Composable
+private fun DatasetTableTrailingSlot(
+  dataset: EntityDataset,
+  row: EntityRow,
+  isMap: Boolean,
+  isReadOnly: Boolean,
+  selectedRow: String?,
+  editingCell: Pair<String, String>?,
+  onEditingCellChange: (Pair<String, String>?) -> Unit,
+  onSelectRow: (String?) -> Unit,
+  actions: DatasetActions,
+) {
+  val colors = MaterialTheme.colorScheme
+  val selected = row.key == selectedRow
+  RowTrailingCells(
+    dataset = dataset,
+    row = row,
+    isMap = isMap,
+    isReadOnly = isReadOnly,
+    selected = selected,
+    textColor = if (selected) colors.onSecondaryContainer else colors.onSurface,
+    editingColumn = editingCell?.takeIf { it.first == row.key }?.second,
+    onSelectRow = { onSelectRow(row.key) },
+    onStartEditingGeometry = {
+      onSelectRow(row.key)
+      onEditingCellChange(row.key to GEOMETRY_COLUMN_KEY)
+    },
+    onStopEditing = { col -> if (editingCell == row.key to col) onEditingCellChange(null) },
+    actions = actions,
+  )
+}
+
+@Composable
+private fun DatasetTableHeaderSlot(
+  dataset: EntityDataset,
+  slot: GroupedTableColumn<DatasetTableColumn>,
+  width: Dp,
+  onToggleGroup: (String) -> Unit,
+) {
+  when (slot) {
+    is GroupedTableColumn.CollapsedGroup ->
+      CollapsedColumnGroupHeaderCell(
+        groupId = slot.group.id,
+        wildcardLabel = slot.group.wildcardLabel,
+        count = slot.group.size,
+        width = width,
+        height = CellHeight,
+        onExpand = { onToggleGroup(slot.group.id) },
+      )
+    is GroupedTableColumn.Single ->
+      DatasetTableHeaderCell(
+        dataset = dataset,
+        slot = slot,
+        width = width,
+        onCollapseGroup = onToggleGroup,
+      )
+  }
+}
+
+@Composable
+private fun DatasetTableCellSlot(
+  uiState: SurveyEditorUiState,
+  actions: DatasetActions,
+  dataset: EntityDataset,
+  rowIndex: Int,
+  colIndex: Int,
+  slot: GroupedTableColumn<DatasetTableColumn>,
+  entityId: String,
+  width: Dp,
+  selectedRow: String?,
+  editingCell: Pair<String, String>?,
+  onEditingCellChange: (Pair<String, String>?) -> Unit,
+  onSelectRow: (String?) -> Unit,
+  tableCache: PagedEntityTableCache?,
+  cacheRevision: Int,
+  onToggleGroup: (String) -> Unit,
+) {
+  when (slot) {
+    is GroupedTableColumn.CollapsedGroup ->
+      CollapsedColumnGroupBodyCell(
+        width = width,
+        height = CellHeight,
+        onExpand = { onToggleGroup(slot.group.id) },
+      )
+    is GroupedTableColumn.Single -> {
+      // Read cacheRevision before resolving loadState so tile loads invalidate visible
+      // cells and pass immutable TableCellLoadState directly into DatasetTableBodyCell.
+      val row = dataset.rows[rowIndex]
+      val col = slot.item
+      val loadState =
+        resolveEditorCellLoadState(
+          dataset = dataset,
+          row = row,
+          column = col,
+          entityId = entityId,
+          rowIndex = rowIndex,
+          colIndex = colIndex,
+          tableCache = tableCache,
+          cacheRevision = cacheRevision,
+        )
+      DatasetTableBodyCell(
+        uiState = uiState,
+        actions = actions,
+        dataset = dataset,
+        row = row,
+        column = col,
+        entityId = entityId,
+        loadState = loadState,
+        width = width,
+        selected = row.key == selectedRow,
+        editingCell = editingCell,
+        onEditingCellChange = onEditingCellChange,
+        onSelectRow = onSelectRow,
+        tableCache = tableCache,
       )
     }
   }
@@ -1402,162 +1566,19 @@ private fun DatasetSettingsPanel(
       contentPadding = PaddingValues(20.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-      item(key = "settings-header") {
-        SectionLabel(stringResource(Res.string.surveyeditor_dataset_settings))
-      }
-      item(key = "name") {
-        OutlinedTextField(
-          value = dataset.displayName,
-          onValueChange = { v -> actions.updateDataset(key) { it.copy(displayName = v) } },
-          enabled = !uiState.isReadOnly,
-          label = { Text(stringResource(Res.string.surveyeditor_dataset_name)) },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth(),
-        )
-      }
-      item(key = "description") {
-        OutlinedTextField(
-          value = dataset.description,
-          onValueChange = { v -> actions.updateDataset(key) { it.copy(description = v) } },
-          enabled = !uiState.isReadOnly,
-          label = { Text(stringResource(Res.string.surveyeditor_description)) },
-          minLines = 2,
-          modifier = Modifier.fillMaxWidth(),
-        )
-      }
-      if (isMap && !dataset.isGenerated) {
-        item(key = "geometry-type") {
-          DropdownSelector(
-            label = stringResource(Res.string.surveyeditor_dataset_geometry_type),
-            selectedText = stringResource(dataset.geometryType.pluralRes),
-            options = GeometryType.entries,
-            optionText = { stringResource(it.pluralRes) },
-            enabled = !uiState.isReadOnly,
-            onSelect = { g -> actions.updateDataset(key) { it.copy(geometryType = g) } },
-          )
-        }
-      }
-      if (dataset.generator != null) {
-        item(key = "sample-design") {
-          Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            SectionLabel(stringResource(Res.string.surveyeditor_dataset_sample_design))
-            SamplingDesignPanel(uiState, actions, dataset)
-          }
-        }
-        item(key = "plot-review") {
-          Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            SectionLabel(stringResource(Res.string.surveyeditor_plot_review))
-            PlotReviewPanel(uiState, actions, dataset)
-          }
-        }
-      }
-      item(key = "key-label-properties") {
-        val choose = stringResource(Res.string.surveyeditor_dataset_choose)
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-          DropdownSelector(
-            label = stringResource(Res.string.surveyeditor_dataset_key_property),
-            selectedText = dataset.property(dataset.keyProperty)?.label ?: choose,
-            options = dataset.properties,
-            optionText = { it.label },
-            enabled = !uiState.isReadOnly,
-            onSelect = { p -> actions.updateDataset(key) { it.copy(keyProperty = p.name) } },
-          )
-          DropdownSelector(
-            label = stringResource(Res.string.surveyeditor_dataset_label_property),
-            selectedText = dataset.property(dataset.labelProperty)?.label ?: choose,
-            options = dataset.properties,
-            optionText = { it.label },
-            enabled = !uiState.isReadOnly,
-            onSelect = { p -> actions.updateDataset(key) { it.copy(labelProperty = p.name) } },
-          )
-        }
-      }
-      item(key = "field-collection") {
-        FieldCollectionSettingsSection(uiState = uiState, actions = actions, dataset = dataset)
-      }
-      if (isMap) {
-        item(key = "map-style") {
-          Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            SectionLabel(stringResource(Res.string.surveyeditor_dataset_map_style))
-            LayerStyleEditor(dataset, enabled = !uiState.isReadOnly) { transform ->
-              actions.updateDataset(key) { it.copy(style = transform(it.style)) }
-            }
-          }
-        }
-      }
-      item(key = "properties-header") {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-          SectionLabel(stringResource(Res.string.surveyeditor_dataset_properties))
-          if (dataset.isLinkedToForm) {
-            Surface(
-              color = MaterialTheme.colorScheme.surfaceContainerHigh,
-              shape = MaterialTheme.shapes.small,
-              modifier = Modifier.fillMaxWidth(),
-            ) {
-              Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                Icon(
-                  Icons.Outlined.Link,
-                  contentDescription = null,
-                  tint = MaterialTheme.colorScheme.primary,
-                  modifier = Modifier.size(16.dp),
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                  stringResource(Res.string.surveyeditor_dataset_properties_managed_by_form),
-                  style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-              }
-            }
-          }
-        }
-      }
-      itemsIndexed(dataset.properties, key = { index, _ -> "property-$index" }) { index, property ->
-        val reserved = dataset.isGenerated && property.name in SamplePlotProperties.all
-        PropertyEditor(
-          property = property,
-          readOnly = dataset.isLinkedToForm || reserved || uiState.isReadOnly,
-          canRemove =
-            !uiState.isReadOnly &&
-              !dataset.isLinkedToForm &&
-              !reserved &&
-              dataset.properties.size > 1,
-          onChange = { actions.updateProperty(key, index, it) },
-          onRemove = { actions.removeProperty(key, index) },
-        )
-      }
+      datasetIdentityItems(uiState, actions, dataset, isMap)
+      datasetSamplingAndStyleItems(uiState, actions, dataset, isMap)
+      datasetPropertiesItems(uiState, actions, dataset)
       if (extraRemoteProperties.isNotEmpty()) {
-        val groupedRemote =
-          groupColumnsByCommonPrefix(columns = extraRemoteProperties, keyOf = { it.name })
-        groupedRemote.groups.forEach { group ->
-          val expanded = group.id in expandedRemotePropertyGroups
-          item(key = "remote-group-header-${group.id}") {
-            CollapsiblePropertyGroupRow(
-              groupId = group.id,
-              wildcardLabel = group.wildcardLabel,
-              count = group.size,
-              expanded = expanded,
-              onToggle = {
-                expandedRemotePropertyGroups =
-                  if (expanded) expandedRemotePropertyGroups - group.id
-                  else expandedRemotePropertyGroups + group.id
-              },
-            )
-          }
-          if (expanded) {
-            items(group.items, key = { prop -> "remote-property-${prop.name}" }) { prop ->
-              RemotePropertyChip(prop = prop, indented = true)
-            }
-          }
-        }
-        val ungroupedRemote =
-          groupedRemote.displaySlots.filterIsInstance<GroupedTableColumn.Single<EntityProperty>>()
-        items(ungroupedRemote, key = { slot -> "remote-property-${slot.item.name}" }) { slot ->
-          RemotePropertyChip(prop = slot.item, indented = false)
-        }
+        datasetRemotePropertiesItems(
+          extraRemoteProperties = extraRemoteProperties,
+          expandedGroups = expandedRemotePropertyGroups,
+          onToggleGroup = { groupId ->
+            expandedRemotePropertyGroups =
+              if (groupId in expandedRemotePropertyGroups) expandedRemotePropertyGroups - groupId
+              else expandedRemotePropertyGroups + groupId
+          },
+        )
       }
       if (!dataset.isLinkedToForm && !uiState.isReadOnly) {
         item(key = "add-property") {
@@ -1579,6 +1600,192 @@ private fun DatasetSettingsPanel(
         )
       }
     }
+  }
+}
+
+private fun LazyListScope.datasetIdentityItems(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  dataset: EntityDataset,
+  isMap: Boolean,
+) {
+  val key = dataset.key
+  item(key = "settings-header") {
+    SectionLabel(stringResource(Res.string.surveyeditor_dataset_settings))
+  }
+  item(key = "name") {
+    OutlinedTextField(
+      value = dataset.displayName,
+      onValueChange = { v -> actions.updateDataset(key) { it.copy(displayName = v) } },
+      enabled = !uiState.isReadOnly,
+      label = { Text(stringResource(Res.string.surveyeditor_dataset_name)) },
+      singleLine = true,
+      modifier = Modifier.fillMaxWidth(),
+    )
+  }
+  item(key = "description") {
+    OutlinedTextField(
+      value = dataset.description,
+      onValueChange = { v -> actions.updateDataset(key) { it.copy(description = v) } },
+      enabled = !uiState.isReadOnly,
+      label = { Text(stringResource(Res.string.surveyeditor_description)) },
+      minLines = 2,
+      modifier = Modifier.fillMaxWidth(),
+    )
+  }
+  if (isMap && !dataset.isGenerated) {
+    item(key = "geometry-type") {
+      DropdownSelector(
+        label = stringResource(Res.string.surveyeditor_dataset_geometry_type),
+        selectedText = stringResource(dataset.geometryType.pluralRes),
+        options = GeometryType.entries,
+        optionText = { stringResource(it.pluralRes) },
+        enabled = !uiState.isReadOnly,
+        onSelect = { g -> actions.updateDataset(key) { it.copy(geometryType = g) } },
+      )
+    }
+  }
+}
+
+private fun LazyListScope.datasetSamplingAndStyleItems(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  dataset: EntityDataset,
+  isMap: Boolean,
+) {
+  val key = dataset.key
+  if (dataset.generator != null) {
+    item(key = "sample-design") {
+      Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        SectionLabel(stringResource(Res.string.surveyeditor_dataset_sample_design))
+        SamplingDesignPanel(uiState, actions, dataset)
+      }
+    }
+    item(key = "plot-review") {
+      Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        SectionLabel(stringResource(Res.string.surveyeditor_plot_review))
+        PlotReviewPanel(uiState, actions, dataset)
+      }
+    }
+  }
+  item(key = "key-label-properties") {
+    val choose = stringResource(Res.string.surveyeditor_dataset_choose)
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+      DropdownSelector(
+        label = stringResource(Res.string.surveyeditor_dataset_key_property),
+        selectedText = dataset.property(dataset.keyProperty)?.label ?: choose,
+        options = dataset.properties,
+        optionText = { it.label },
+        enabled = !uiState.isReadOnly,
+        onSelect = { p -> actions.updateDataset(key) { it.copy(keyProperty = p.name) } },
+      )
+      DropdownSelector(
+        label = stringResource(Res.string.surveyeditor_dataset_label_property),
+        selectedText = dataset.property(dataset.labelProperty)?.label ?: choose,
+        options = dataset.properties,
+        optionText = { it.label },
+        enabled = !uiState.isReadOnly,
+        onSelect = { p -> actions.updateDataset(key) { it.copy(labelProperty = p.name) } },
+      )
+    }
+  }
+  item(key = "field-collection") {
+    FieldCollectionSettingsSection(uiState = uiState, actions = actions, dataset = dataset)
+  }
+  if (isMap) {
+    item(key = "map-style") {
+      Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        SectionLabel(stringResource(Res.string.surveyeditor_dataset_map_style))
+        LayerStyleEditor(dataset, enabled = !uiState.isReadOnly) { transform ->
+          actions.updateDataset(key) { it.copy(style = transform(it.style)) }
+        }
+      }
+    }
+  }
+}
+
+private fun LazyListScope.datasetPropertiesItems(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  dataset: EntityDataset,
+) {
+  val key = dataset.key
+  item(key = "properties-header") {
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+      SectionLabel(stringResource(Res.string.surveyeditor_dataset_properties))
+      if (dataset.isLinkedToForm) {
+        DatasetPropertiesLinkedToFormNotice()
+      }
+    }
+  }
+  itemsIndexed(dataset.properties, key = { index, _ -> "property-$index" }) { index, property ->
+    val reserved = dataset.isGenerated && property.name in SamplePlotProperties.all
+    PropertyEditor(
+      property = property,
+      readOnly = dataset.isLinkedToForm || reserved || uiState.isReadOnly,
+      canRemove =
+        !uiState.isReadOnly && !dataset.isLinkedToForm && !reserved && dataset.properties.size > 1,
+      onChange = { actions.updateProperty(key, index, it) },
+      onRemove = { actions.removeProperty(key, index) },
+    )
+  }
+}
+
+@Composable
+private fun DatasetPropertiesLinkedToFormNotice() {
+  Surface(
+    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    shape = MaterialTheme.shapes.small,
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        Icons.Outlined.Link,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.size(16.dp),
+      )
+      Spacer(Modifier.width(6.dp))
+      Text(
+        stringResource(Res.string.surveyeditor_dataset_properties_managed_by_form),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
+}
+
+private fun LazyListScope.datasetRemotePropertiesItems(
+  extraRemoteProperties: List<EntityProperty>,
+  expandedGroups: Set<String>,
+  onToggleGroup: (String) -> Unit,
+) {
+  val groupedRemote =
+    groupColumnsByCommonPrefix(columns = extraRemoteProperties, keyOf = { it.name })
+  groupedRemote.groups.forEach { group ->
+    val expanded = group.id in expandedGroups
+    item(key = "remote-group-header-${group.id}") {
+      CollapsiblePropertyGroupRow(
+        groupId = group.id,
+        wildcardLabel = group.wildcardLabel,
+        count = group.size,
+        expanded = expanded,
+        onToggle = { onToggleGroup(group.id) },
+      )
+    }
+    if (expanded) {
+      items(group.items, key = { prop -> "remote-property-${prop.name}" }) { prop ->
+        RemotePropertyChip(prop = prop, indented = true)
+      }
+    }
+  }
+  val ungroupedRemote =
+    groupedRemote.displaySlots.filterIsInstance<GroupedTableColumn.Single<EntityProperty>>()
+  items(ungroupedRemote, key = { slot -> "remote-property-${slot.item.name}" }) { slot ->
+    RemotePropertyChip(prop = slot.item, indented = false)
   }
 }
 

@@ -116,6 +116,7 @@ import org.openforis.collectone.v2.web.ui.surveyeditor.SurveyEditorSection
 import org.openforis.collectone.v2.web.ui.surveyeditor.SurveyEditorViewModel
 import org.openforis.collectone.v2.web.ui.surveys.SurveyOutcomePromptViewModel
 import org.openforis.collectone.v2.web.ui.surveys.WebSurveysPage
+import org.openforis.collectone.v2.web.ui.timeseries.TimeSeriesActions
 import org.openforis.collectone.v2.web.ui.wizard.CreateSurveyWizardPage
 
 // Destinations of the web console's NavHost (see WebConsoleNavHost.kt): each gets its page's
@@ -636,6 +637,81 @@ internal fun WebDashboardDestination(
   val timeSeriesUiState by timeSeries.uiState.collectAsState()
   val impactUiState by impact.uiState.collectAsState()
   val hasCompletedInitialSync by web.dataHolder.hasCompletedInitialSync.collectAsState()
+  val guarded = rememberGuardedDashboardControllers(web, navigation, timeSeries, impact)
+  PlatformBeforeUnloadEffect(enabled = records.dataCollection.isActivelyFillingForm)
+  val hasMapLayers = records.dashboard.mapLayers.isNotEmpty()
+  val hasGoogleEarthForms = records.dashboard.hasGoogleEarthForms
+  WebDashboardPage(
+    uiState =
+      WebDashboardUiState(
+        dashboard = records.dashboard,
+        dataCollection = records.dataCollection,
+        map = records.map,
+        timeSeries = timeSeriesUiState,
+        impactMessage = impactUiState.message,
+        hasCompletedInitialSync = hasCompletedInitialSync,
+      ),
+    actions = guarded.actions,
+    onOpenInGoogleEarth =
+      if (hasGoogleEarthForms) ({ openSurveyInGoogleEarth(viewModels.dashboard) }) else null,
+    toolbar = {
+      DashboardTopToolbar(
+        web = web,
+        navigation = guarded.navigation,
+        dataCollection = records.dataCollection,
+        dataCollectionActions = guarded.toolbarDataCollection,
+        hasMapLayers = hasMapLayers,
+        onSelectLifecycleState = surveyEditor::setLifecycleState,
+        onSignOut = { guarded.exitGuard.guardNavigation(onSignOut) },
+      )
+    },
+    featureList = { modifier ->
+      BottomSheetSearchableListContent(
+        uiState = records.searchableListUiState(viewModels.surveyMap),
+        actions = guarded.searchableListActions,
+        modifier = modifier,
+        isSidePanel = true,
+      )
+    },
+    entityDetailsCard = { entity, onCollapse, modifier ->
+      WebEntityDetailsCard(
+        details = records.entityDetailsUiState(entity, onWeb = true, viewModels.surveyMap),
+        actions = web.entityDetailsActions,
+        dashboard = viewModels.dashboard,
+        dataCollection = viewModels.dataCollection,
+        surveyId = records.dashboard.activeSurveyId,
+        onCollapse = onCollapse,
+        modifier = modifier,
+      )
+    },
+    submissionDetailsCard = { submission, onCollapse, modifier ->
+      WebSubmissionDetailsCard(
+        details = records.submissionDetailsUiState(submission, viewModels.surveyMap),
+        dataCollection = viewModels.dataCollection,
+        onCollapse = onCollapse,
+        modifier = modifier,
+      )
+    },
+  )
+  DiscardDataCollectionFormDialog(guard = guarded.exitGuard)
+}
+
+private class GuardedDashboardControllers(
+  val exitGuard: DataCollectionExitGuard,
+  val navigation: WebPageNavigation,
+  val searchableListActions: GuardedSearchableListActions,
+  val toolbarDataCollection: GuardedDataCollectionActions,
+  val actions: WebDashboardActions,
+)
+
+@Composable
+private fun rememberGuardedDashboardControllers(
+  web: WebAppState,
+  navigation: WebPageNavigation,
+  timeSeries: TimeSeriesActions,
+  impact: ImpactViewModel,
+): GuardedDashboardControllers {
+  val viewModels = web.viewModels
   val exitGuard =
     remember(viewModels) {
       DataCollectionExitGuard(
@@ -664,62 +740,21 @@ internal fun WebDashboardDestination(
         requestCloseForm = exitGuard::requestCloseForm,
       )
     }
-  PlatformBeforeUnloadEffect(enabled = records.dataCollection.isActivelyFillingForm)
-  val hasMapLayers = records.dashboard.mapLayers.isNotEmpty()
-  val hasGoogleEarthForms = records.dashboard.hasGoogleEarthForms
-  WebDashboardPage(
-    uiState =
-      WebDashboardUiState(
-        dashboard = records.dashboard,
-        dataCollection = records.dataCollection,
-        map = records.map,
-        timeSeries = timeSeriesUiState,
-        impactMessage = impactUiState.message,
-        hasCompletedInitialSync = hasCompletedInitialSync,
-      ),
-    actions = actions,
-    onOpenInGoogleEarth =
-      if (hasGoogleEarthForms) ({ openSurveyInGoogleEarth(viewModels.dashboard) }) else null,
-    toolbar = {
-      DashboardTopToolbar(
-        web = web,
-        navigation = guardedNavigation,
-        dataCollection = records.dataCollection,
-        dataCollectionActions = guardedToolbarDataCollection,
-        hasMapLayers = hasMapLayers,
-        onSelectLifecycleState = surveyEditor::setLifecycleState,
-        onSignOut = { exitGuard.guardNavigation(onSignOut) },
-      )
-    },
-    featureList = { modifier ->
-      BottomSheetSearchableListContent(
-        uiState = records.searchableListUiState(viewModels.surveyMap),
-        actions = guardedSearchableListActions,
-        modifier = modifier,
-        isSidePanel = true,
-      )
-    },
-    entityDetailsCard = { entity, onCollapse, modifier ->
-      WebEntityDetailsCard(
-        details = records.entityDetailsUiState(entity, onWeb = true, viewModels.surveyMap),
-        actions = web.entityDetailsActions,
-        dashboard = viewModels.dashboard,
-        dataCollection = viewModels.dataCollection,
-        surveyId = records.dashboard.activeSurveyId,
-        onCollapse = onCollapse,
-        modifier = modifier,
-      )
-    },
-    submissionDetailsCard = { submission, onCollapse, modifier ->
-      WebSubmissionDetailsCard(
-        details = records.submissionDetailsUiState(submission, viewModels.surveyMap),
-        dataCollection = viewModels.dataCollection,
-        onCollapse = onCollapse,
-        modifier = modifier,
-      )
-    },
-  )
-  DiscardDataCollectionFormDialog(guard = exitGuard)
+  return remember(
+    exitGuard,
+    guardedNavigation,
+    guardedSearchableListActions,
+    guardedToolbarDataCollection,
+    actions,
+  ) {
+    GuardedDashboardControllers(
+      exitGuard = exitGuard,
+      navigation = guardedNavigation,
+      searchableListActions = guardedSearchableListActions,
+      toolbarDataCollection = guardedToolbarDataCollection,
+      actions = actions,
+    )
+  }
 }
 
 @Composable

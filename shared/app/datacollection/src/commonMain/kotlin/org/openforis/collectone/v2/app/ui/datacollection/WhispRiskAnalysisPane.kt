@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -184,32 +185,8 @@ fun WhispRiskBadge(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun WhispRiskAnalysisPane(analysis: WhispAnalysis, modifier: Modifier = Modifier) {
-  var showAllFields by remember(analysis) { mutableStateOf(false) }
-
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-    // Attribution banner mentioning Open Foris Whisp
-    Surface(
-      shape = MaterialTheme.shapes.medium,
-      color = MaterialTheme.colorScheme.surfaceContainerLow,
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        Icon(
-          imageVector = Icons.Outlined.Forest,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.primary,
-          modifier = Modifier.size(18.dp),
-        )
-        Text(
-          text = stringResource(Res.string.app_risk_analysis_whisp_intro),
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-    }
+    WhispAttributionBanner()
 
     // 1. Risk verdicts
     if (analysis.riskVerdicts.isNotEmpty()) {
@@ -270,48 +247,81 @@ fun WhispRiskAnalysisPane(analysis: WhispAnalysis, modifier: Modifier = Modifier
     }
 
     // 9. Expandable raw Whisp fields disclosure
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    WhispRawFieldsDisclosure(analysis)
+  }
+}
+
+@Composable
+private fun WhispAttributionBanner() {
+  Surface(
+    shape = MaterialTheme.shapes.medium,
+    color = MaterialTheme.colorScheme.surfaceContainerLow,
+  ) {
     Row(
-      modifier =
-        Modifier.fillMaxWidth()
-          .clip(MaterialTheme.shapes.small)
-          .clickable { showAllFields = !showAllFields }
-          .padding(vertical = 6.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Text(
-        text = stringResource(Res.string.app_risk_all_fields_toggle, analysis.rawEntries.size),
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.primary,
-      )
       Icon(
-        imageVector = if (showAllFields) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+        imageVector = Icons.Outlined.Forest,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(18.dp),
       )
+      Text(
+        text = stringResource(Res.string.app_risk_analysis_whisp_intro),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
-    AnimatedVisibility(visible = showAllFields) {
-      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        analysis.rawEntries.forEach { (key, value) ->
-          Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top,
-          ) {
-            Text(
-              text = WhispAnalysis.humanizeWhispKey(key),
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.weight(1f).padding(end = 8.dp),
-            )
-            Text(
-              text = value.ifBlank { "—" },
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurface,
-            )
-          }
+  }
+}
+
+@Composable
+private fun WhispRawFieldsDisclosure(analysis: WhispAnalysis) {
+  var showAllFields by remember(analysis) { mutableStateOf(false) }
+
+  HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clip(MaterialTheme.shapes.small)
+        .clickable { showAllFields = !showAllFields }
+        .padding(vertical = 6.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceBetween,
+  ) {
+    Text(
+      text = stringResource(Res.string.app_risk_all_fields_toggle, analysis.rawEntries.size),
+      style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+      color = MaterialTheme.colorScheme.primary,
+    )
+    Icon(
+      imageVector = if (showAllFields) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+      contentDescription = null,
+      tint = MaterialTheme.colorScheme.primary,
+      modifier = Modifier.size(18.dp),
+    )
+  }
+  AnimatedVisibility(visible = showAllFields) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      analysis.rawEntries.forEach { (key, value) ->
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.Top,
+        ) {
+          Text(
+            text = WhispAnalysis.humanizeWhispKey(key),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f).padding(end = 8.dp),
+          )
+          Text(
+            text = value.ifBlank { "—" },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+          )
         }
       }
     }
@@ -444,24 +454,13 @@ private fun RiskKeyValueRow(label: String, value: String) {
  * Multi-series overlaid annual disturbance, loss, and fire chart with a vertical 2020 EUDR cutoff
  * reference line and interactive legend chips to toggle individual categories.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun WhispYearlyDisturbanceChart(analysis: WhispAnalysis) {
   val allSeries = analysis.chartSeries
   if (allSeries.isEmpty()) return
 
   if (!analysis.hasYearlyActivity) {
-    Surface(
-      shape = MaterialTheme.shapes.small,
-      color = MaterialTheme.colorScheme.surfaceContainerLow,
-    ) {
-      Text(
-        text = stringResource(Res.string.app_risk_yearly_chart_no_activity),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
-      )
-    }
+    WhispNoYearlyActivityNotice()
     return
   }
 
@@ -471,20 +470,14 @@ private fun WhispYearlyDisturbanceChart(analysis: WhispAnalysis) {
     remember(allSeries) {
       allSeries.mapIndexed { idx, s -> s.key to colorForSeries(s, idx) }.toMap()
     }
-
   val allYears =
     remember(allSeries) {
       allSeries.flatMap { s -> s.points.map { it.first } }.distinct().sorted()
     }
   val minYear = allYears.first()
   val maxYear = allYears.last()
-  val yearSpan = max(1, maxYear - minYear)
-
-  val rawMax = visibleSeries.maxOfOrNull { it.maxValue } ?: 1.0
-  val yMax = niceAxisMax(rawMax, isPercent = analysis.isPercentUnit)
-
+  val yMax = niceAxisMax(visibleSeries.maxOfOrNull { it.maxValue } ?: 1.0, analysis.isPercentUnit)
   val gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
-  val cutoffColor = RiskMoreInfoColor
   val axisLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
 
   Surface(
@@ -497,185 +490,276 @@ private fun WhispYearlyDisturbanceChart(analysis: WhispAnalysis) {
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Row(modifier = Modifier.fillMaxWidth().height(144.dp)) {
-        // Y-axis tick labels
-        Column(
-          modifier = Modifier.width(38.dp).fillMaxHeight().padding(end = 4.dp),
-          verticalArrangement = Arrangement.SpaceBetween,
-          horizontalAlignment = Alignment.End,
-        ) {
-          Text(
-            text = analysis.formatMetricValue(yMax),
-            style = MaterialTheme.typography.labelSmall,
-            color = axisLabelColor,
-            maxLines = 1,
-          )
-          Text(
-            text = analysis.formatMetricValue(yMax / 2.0),
-            style = MaterialTheme.typography.labelSmall,
-            color = axisLabelColor,
-            maxLines = 1,
-          )
-          Text(
-            text = analysis.formatMetricValue(0.0),
-            style = MaterialTheme.typography.labelSmall,
-            color = axisLabelColor,
-            maxLines = 1,
-          )
-        }
-
-        // Chart canvas
-        Canvas(modifier = Modifier.weight(1f).fillMaxHeight()) {
-          val padTop = 6.dp.toPx()
-          val padBottom = 6.dp.toPx()
-          val padH = 4.dp.toPx()
-          val plotW = (size.width - padH * 2f).coerceAtLeast(1f)
-          val plotH = (size.height - padTop - padBottom).coerceAtLeast(1f)
-
-          fun xForYear(year: Int): Float = padH + ((year - minYear).toFloat() / yearSpan) * plotW
-          fun yForVal(value: Double): Float =
-            padTop + plotH * (1f - (value / yMax).toFloat().coerceIn(0f, 1f))
-
-          // Horizontal gridlines (0, 50%, 100%)
-          listOf(0f, 0.5f, 1f).forEach { frac ->
-            val gy = padTop + plotH * frac
-            drawLine(
-              color = gridColor,
-              start = Offset(padH, gy),
-              end = Offset(padH + plotW, gy),
-              strokeWidth = 1.dp.toPx(),
-            )
-          }
-
-          // Vertical dashed 2020 EUDR cutoff line
-          if (2020 in minYear..maxYear) {
-            val cutoffX = xForYear(2020)
-            drawLine(
-              color = cutoffColor,
-              start = Offset(cutoffX, padTop),
-              end = Offset(cutoffX, padTop + plotH),
-              strokeWidth = 1.25.dp.toPx(),
-              pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f), 0f),
-            )
-          }
-
-          // Overlaid series lines + subtle fills + non-zero point dots
-          visibleSeries.forEach { series ->
-            val color = seriesColors[series.key] ?: WhispChartPalette.first()
-            if (series.points.isEmpty()) return@forEach
-
-            val strokePath = Path()
-            val fillPath = Path()
-            val baseY = padTop + plotH
-            series.points.forEachIndexed { idx, (year, value) ->
-              val px = xForYear(year)
-              val py = yForVal(value)
-              if (idx == 0) {
-                strokePath.moveTo(px, py)
-                fillPath.moveTo(px, baseY)
-                fillPath.lineTo(px, py)
-              } else {
-                strokePath.lineTo(px, py)
-                fillPath.lineTo(px, py)
-              }
-              if (idx == series.points.lastIndex) {
-                fillPath.lineTo(px, baseY)
-                fillPath.close()
-              }
-            }
-            drawPath(path = fillPath, color = color.copy(alpha = 0.12f))
-            drawPath(
-              path = strokePath,
-              color = color,
-              style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
-            )
-            series.points.forEach { (year, value) ->
-              if (value > 0.0) {
-                drawCircle(
-                  color = color,
-                  radius = 3.dp.toPx(),
-                  center = Offset(xForYear(year), yForVal(value)),
-                )
-              }
-            }
-          }
-        }
-      }
-
-      // X-axis year ticks
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 38.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
-        Text(
-          text = minYear.toString(),
-          style = MaterialTheme.typography.labelSmall,
-          color = axisLabelColor,
-        )
-        if (2020 in (minYear + 1) until maxYear) {
-          Text(
-            text = stringResource(Res.string.app_risk_yearly_chart_cutoff_label),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-            color = cutoffColor,
-          )
-        }
-        Text(
-          text = maxYear.toString(),
-          style = MaterialTheme.typography.labelSmall,
-          color = axisLabelColor,
+        WhispChartYAxis(analysis = analysis, yMax = yMax, axisLabelColor = axisLabelColor)
+        WhispChartCanvas(
+          visibleSeries = visibleSeries,
+          seriesColors = seriesColors,
+          minYear = minYear,
+          maxYear = maxYear,
+          yMax = yMax,
+          gridColor = gridColor,
+          cutoffColor = RiskMoreInfoColor,
+          modifier = Modifier.weight(1f).fillMaxHeight(),
         )
       }
+      WhispChartXAxis(
+        minYear = minYear,
+        maxYear = maxYear,
+        axisLabelColor = axisLabelColor,
+        cutoffColor = RiskMoreInfoColor,
+      )
+      WhispChartLegend(
+        allSeries = allSeries,
+        seriesColors = seriesColors,
+        hiddenKeys = hiddenKeys,
+        onToggleSeries = { key ->
+          hiddenKeys = toggleHiddenSeriesKey(hiddenKeys, key, totalSeriesCount = allSeries.size)
+        },
+      )
+    }
+  }
+}
 
-      // Interactive legend chips to overlay or isolate series
-      FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-      ) {
-        allSeries.forEach { series ->
-          val color = seriesColors[series.key] ?: WhispChartPalette.first()
-          val isEnabled = series.key !in hiddenKeys
-          Surface(
-            shape = MaterialTheme.shapes.extraSmall,
-            color =
-              if (isEnabled) color.copy(alpha = 0.14f)
-              else MaterialTheme.colorScheme.surfaceContainer,
-            modifier =
-              Modifier.clip(MaterialTheme.shapes.extraSmall).clickable {
-                hiddenKeys =
-                  if (isEnabled) {
-                    if (allSeries.size - hiddenKeys.size > 1) hiddenKeys + series.key
-                    else hiddenKeys
-                  } else {
-                    hiddenKeys - series.key
-                  }
-              },
-          ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
-              Box(
-                modifier =
-                  Modifier.size(8.dp)
-                    .background(
-                      if (isEnabled) color else MaterialTheme.colorScheme.outline,
-                      CircleShape,
-                    )
-              )
-              Text(
-                text = series.label,
-                style = MaterialTheme.typography.labelSmall,
-                color =
-                  if (isEnabled) MaterialTheme.colorScheme.onSurface
-                  else MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-            }
-          }
-        }
-      }
+private fun toggleHiddenSeriesKey(
+  hiddenKeys: Set<String>,
+  key: String,
+  totalSeriesCount: Int,
+): Set<String> =
+  if (key !in hiddenKeys) {
+    if (totalSeriesCount - hiddenKeys.size > 1) hiddenKeys + key else hiddenKeys
+  } else {
+    hiddenKeys - key
+  }
+
+@Composable
+private fun WhispNoYearlyActivityNotice() {
+  Surface(
+    shape = MaterialTheme.shapes.small,
+    color = MaterialTheme.colorScheme.surfaceContainerLow,
+  ) {
+    Text(
+      text = stringResource(Res.string.app_risk_yearly_chart_no_activity),
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.fillMaxWidth().padding(12.dp),
+    )
+  }
+}
+
+@Composable
+private fun WhispChartYAxis(analysis: WhispAnalysis, yMax: Double, axisLabelColor: Color) {
+  Column(
+    modifier = Modifier.width(38.dp).fillMaxHeight().padding(end = 4.dp),
+    verticalArrangement = Arrangement.SpaceBetween,
+    horizontalAlignment = Alignment.End,
+  ) {
+    listOf(yMax, yMax / 2.0, 0.0).forEach { tick ->
+      Text(
+        text = analysis.formatMetricValue(tick),
+        style = MaterialTheme.typography.labelSmall,
+        color = axisLabelColor,
+        maxLines = 1,
+      )
+    }
+  }
+}
+
+@Composable
+private fun WhispChartCanvas(
+  visibleSeries: List<WhispYearlySeries>,
+  seriesColors: Map<String, Color>,
+  minYear: Int,
+  maxYear: Int,
+  yMax: Double,
+  gridColor: Color,
+  cutoffColor: Color,
+  modifier: Modifier = Modifier,
+) {
+  val yearSpan = max(1, maxYear - minYear)
+  Canvas(modifier = modifier) {
+    val padTop = 6.dp.toPx()
+    val padBottom = 6.dp.toPx()
+    val padH = 4.dp.toPx()
+    val plotW = (size.width - padH * 2f).coerceAtLeast(1f)
+    val plotH = (size.height - padTop - padBottom).coerceAtLeast(1f)
+
+    fun xForYear(year: Int): Float = padH + ((year - minYear).toFloat() / yearSpan) * plotW
+    fun yForVal(value: Double): Float =
+      padTop + plotH * (1f - (value / yMax).toFloat().coerceIn(0f, 1f))
+
+    drawYearlyChartGrid(plotW, plotH, padH, padTop, gridColor)
+
+    if (2020 in minYear..maxYear) {
+      val cutoffX = xForYear(2020)
+      drawLine(
+        color = cutoffColor,
+        start = Offset(cutoffX, padTop),
+        end = Offset(cutoffX, padTop + plotH),
+        strokeWidth = 1.25.dp.toPx(),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f), 0f),
+      )
+    }
+
+    val baseY = padTop + plotH
+    visibleSeries.forEach { series ->
+      val color = seriesColors[series.key] ?: WhispChartPalette.first()
+      drawYearlySeries(series, color, baseY, ::xForYear, ::yForVal)
+    }
+  }
+}
+
+private fun DrawScope.drawYearlyChartGrid(
+  plotW: Float,
+  plotH: Float,
+  padH: Float,
+  padTop: Float,
+  gridColor: Color,
+) {
+  listOf(0f, 0.5f, 1f).forEach { frac ->
+    val gy = padTop + plotH * frac
+    drawLine(
+      color = gridColor,
+      start = Offset(padH, gy),
+      end = Offset(padH + plotW, gy),
+      strokeWidth = 1.dp.toPx(),
+    )
+  }
+}
+
+private fun DrawScope.drawYearlySeries(
+  series: WhispYearlySeries,
+  color: Color,
+  baseY: Float,
+  xForYear: (Int) -> Float,
+  yForVal: (Double) -> Float,
+) {
+  if (series.points.isEmpty()) return
+  val strokePath = Path()
+  val fillPath = Path()
+  series.points.forEachIndexed { idx, (year, value) ->
+    val px = xForYear(year)
+    val py = yForVal(value)
+    if (idx == 0) {
+      strokePath.moveTo(px, py)
+      fillPath.moveTo(px, baseY)
+      fillPath.lineTo(px, py)
+    } else {
+      strokePath.lineTo(px, py)
+      fillPath.lineTo(px, py)
+    }
+    if (idx == series.points.lastIndex) {
+      fillPath.lineTo(px, baseY)
+      fillPath.close()
+    }
+  }
+  drawPath(path = fillPath, color = color.copy(alpha = 0.12f))
+  drawPath(
+    path = strokePath,
+    color = color,
+    style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+  )
+  series.points.forEach { (year, value) ->
+    if (value > 0.0) {
+      drawCircle(
+        color = color,
+        radius = 3.dp.toPx(),
+        center = Offset(xForYear(year), yForVal(value)),
+      )
+    }
+  }
+}
+
+@Composable
+private fun WhispChartXAxis(
+  minYear: Int,
+  maxYear: Int,
+  axisLabelColor: Color,
+  cutoffColor: Color,
+) {
+  Row(
+    modifier = Modifier.fillMaxWidth().padding(start = 38.dp),
+    horizontalArrangement = Arrangement.SpaceBetween,
+  ) {
+    Text(
+      text = minYear.toString(),
+      style = MaterialTheme.typography.labelSmall,
+      color = axisLabelColor,
+    )
+    if (2020 in (minYear + 1) until maxYear) {
+      Text(
+        text = stringResource(Res.string.app_risk_yearly_chart_cutoff_label),
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+        color = cutoffColor,
+      )
+    }
+    Text(
+      text = maxYear.toString(),
+      style = MaterialTheme.typography.labelSmall,
+      color = axisLabelColor,
+    )
+  }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WhispChartLegend(
+  allSeries: List<WhispYearlySeries>,
+  seriesColors: Map<String, Color>,
+  hiddenKeys: Set<String>,
+  onToggleSeries: (String) -> Unit,
+) {
+  FlowRow(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(6.dp),
+    verticalArrangement = Arrangement.spacedBy(6.dp),
+  ) {
+    allSeries.forEach { series ->
+      val color = seriesColors[series.key] ?: WhispChartPalette.first()
+      WhispChartLegendChip(
+        label = series.label,
+        color = color,
+        isEnabled = series.key !in hiddenKeys,
+        onClick = { onToggleSeries(series.key) },
+      )
+    }
+  }
+}
+
+@Composable
+private fun WhispChartLegendChip(
+  label: String,
+  color: Color,
+  isEnabled: Boolean,
+  onClick: () -> Unit,
+) {
+  Surface(
+    shape = MaterialTheme.shapes.extraSmall,
+    color =
+      if (isEnabled) color.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surfaceContainer,
+    modifier = Modifier.clip(MaterialTheme.shapes.extraSmall).clickable(onClick = onClick),
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+      Box(
+        modifier =
+          Modifier.size(8.dp)
+            .background(
+              if (isEnabled) color else MaterialTheme.colorScheme.outline,
+              CircleShape,
+            )
+      )
+      Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall,
+        color =
+          if (isEnabled) MaterialTheme.colorScheme.onSurface
+          else MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
     }
   }
 }

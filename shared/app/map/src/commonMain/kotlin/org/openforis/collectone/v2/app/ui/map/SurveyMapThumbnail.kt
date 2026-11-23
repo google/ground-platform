@@ -119,15 +119,13 @@ class SurveyThumbnailTileCache(private val maxTiles: Int = DEFAULT_MAX_CACHED_IM
     }
     val deferred = CompletableDeferred<ImageBitmap?>()
     inFlight[url] = deferred
+    var bitmap: ImageBitmap? = null
     return try {
-      val bitmap = repository.fetchTile(url)?.let(::decode)?.also { store(url, it) }
+      bitmap = repository.fetchTile(url)?.let(::decode)?.also { store(url, it) }
+      bitmap
+    } finally {
       inFlight.remove(url)
       deferred.complete(bitmap)
-      bitmap
-    } catch (t: Throwable) {
-      inFlight.remove(url)
-      deferred.complete(null)
-      throw t
     }
   }
 

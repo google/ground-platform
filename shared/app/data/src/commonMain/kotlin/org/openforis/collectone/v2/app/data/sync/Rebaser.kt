@@ -383,16 +383,41 @@ internal fun LocalStoreTransaction.projectEntityAndSubmissionDeltas(
   subDeltas: List<SubmissionRecord>,
 ) {
   val existingEntities = entities(surveyId)
-  val existingStandalone = standaloneSubmissions(surveyId)
-  val existingGeoms = submissionGeometries(surveyId)
-
   val allSubmissionsById = LinkedHashMap<String, SubmissionPreviewItem>()
   existingEntities.flatMap { it.submissions }.forEach { allSubmissionsById[it.id] = it }
-  existingStandalone.forEach { allSubmissionsById[it.id] = it }
+  standaloneSubmissions(surveyId).forEach { allSubmissionsById[it.id] = it }
 
   val allGeomsById = LinkedHashMap<String, SubmissionGeometryPolygon>()
-  existingGeoms.forEach { allGeomsById[it.id] = it }
+  submissionGeometries(surveyId).forEach { allGeomsById[it.id] = it }
 
+  applySubmissionDeltas(subDeltas, allSubmissionsById, allGeomsById)
+
+  val linkedSubsByEntityId =
+    allSubmissionsById.values.filter { it.entityId.isNotBlank() }.groupBy { it.entityId }
+  val standaloneList = allSubmissionsById.values.filter { it.entityId.isBlank() }
+
+  val entityMap = LinkedHashMap<String, GeospatialEntityItem>()
+  existingEntities.forEach { ent ->
+    entityMap[ent.id] = ent.copy(submissions = linkedSubsByEntityId[ent.id].orEmpty())
+  }
+
+  val generatedDatasetIds = ProtoSurveyMapper.generatedDatasetIds(surveyBase(surveyId)?.saved)
+  applyEntityDeltas(entDeltas, entityMap, linkedSubsByEntityId, generatedDatasetIds)
+
+  val updatedEntities = entityMap.values.toList()
+  putEntities(surveyId, updatedEntities)
+  putStandaloneSubmissions(surveyId, standaloneList)
+  putSubmissionGeometries(surveyId, allGeomsById.values.toList())
+  if (entDeltas.isNotEmpty()) {
+    refreshSurveyAfterEntityDeltas(surveyId, updatedEntities)
+  }
+}
+
+private fun applySubmissionDeltas(
+  subDeltas: List<SubmissionRecord>,
+  allSubmissionsById: MutableMap<String, SubmissionPreviewItem>,
+  allGeomsById: MutableMap<String, SubmissionGeometryPolygon>,
+) {
   for (subProto in subDeltas) {
     if (subProto.is_deleted) {
       allSubmissionsById.remove(subProto.submission_id)
@@ -407,17 +432,14 @@ internal fun LocalStoreTransaction.projectEntityAndSubmissionDeltas(
       }
     }
   }
+}
 
-  val linkedSubsByEntityId =
-    allSubmissionsById.values.filter { it.entityId.isNotBlank() }.groupBy { it.entityId }
-  val standaloneList = allSubmissionsById.values.filter { it.entityId.isBlank() }
-
-  val entityMap = LinkedHashMap<String, GeospatialEntityItem>()
-  existingEntities.forEach { ent ->
-    entityMap[ent.id] = ent.copy(submissions = linkedSubsByEntityId[ent.id].orEmpty())
-  }
-
-  val generatedDatasetIds = ProtoSurveyMapper.generatedDatasetIds(surveyBase(surveyId)?.saved)
+private fun applyEntityDeltas(
+  entDeltas: List<EntityRecord>,
+  entityMap: MutableMap<String, GeospatialEntityItem>,
+  linkedSubsByEntityId: Map<String, List<SubmissionPreviewItem>>,
+  generatedDatasetIds: Set<String>,
+) {
   for (entProto in entDeltas) {
     if (entProto.is_deleted) {
       entityMap.remove(entProto.entity_id)
@@ -431,29 +453,27 @@ internal fun LocalStoreTransaction.projectEntityAndSubmissionDeltas(
         )
     }
   }
+}
 
-  val updatedEntities = entityMap.values.toList()
-  putEntities(surveyId, updatedEntities)
-  putStandaloneSubmissions(surveyId, standaloneList)
-  putSubmissionGeometries(surveyId, allGeomsById.values.toList())
-  if (entDeltas.isNotEmpty()) {
-    val currentLayers = mapLayers(surveyId)
-    updateSurvey(surveyId) { existing ->
-      val geoCount = updatedEntities.count { it.geometry != null }
-      existing.copy(
-        entityCount =
-          if (existing.entityCount == 0 || existing.isDownloaded) geoCount
-          else existing.entityCount,
-        thumbnail =
-          SurveyThumbnailGenerator.fromRuntime(
-            surveyId = surveyId,
-            surveyArea = existing.surveyArea,
-            mapLayers = currentLayers,
-            entities = updatedEntities,
-            tileUrlTemplate = existing.thumbnail.tileUrlTemplate,
-          ),
-      )
-    }
+private fun LocalStoreTransaction.refreshSurveyAfterEntityDeltas(
+  surveyId: String,
+  updatedEntities: List<GeospatialEntityItem>,
+) {
+  val currentLayers = mapLayers(surveyId)
+  updateSurvey(surveyId) { existing ->
+    val geoCount = updatedEntities.count { it.geometry != null }
+    existing.copy(
+      entityCount =
+        if (existing.entityCount == 0 || existing.isDownloaded) geoCount else existing.entityCount,
+      thumbnail =
+        SurveyThumbnailGenerator.fromRuntime(
+          surveyId = surveyId,
+          surveyArea = existing.surveyArea,
+          mapLayers = currentLayers,
+          entities = updatedEntities,
+          tileUrlTemplate = existing.thumbnail.tileUrlTemplate,
+        ),
+    )
   }
 }
 

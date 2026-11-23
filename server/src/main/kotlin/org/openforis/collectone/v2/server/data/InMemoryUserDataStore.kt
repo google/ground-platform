@@ -157,7 +157,7 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
       maxOf(INITIAL_EPOCH_SECOND, timestamps.maxOfOrNull { it?.epochSecond ?: 0L } ?: 0L)
   }
 
-  private open inner class Reader : UserDataReader {
+  private abstract inner class BaseReader : UserDataReader {
     override val snapshotTimestamp: Instant = latestCommit()
 
     override fun organization(organizationId: String) = organizations[organizationId]
@@ -183,6 +183,45 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
       return resolved.values.toList()
     }
 
+    override fun impactEvents() = impactEvents.values.toList()
+
+    override fun auditRecords() = auditRecords.values.toList()
+
+    override fun places() = places.toList()
+
+    override fun mutationLogs() = mutationLogs.toList()
+
+    override fun user(userId: String) = users[userId]
+
+    override fun usersByEmail(email: String) = users.values.filter { it.email == email }
+
+    override fun surveyIdsWithAclEmail(email: String) =
+      acls.values
+        .filter { acl -> acl.entries.any { it.email.trim().lowercase() == email } }
+        .map { it.survey_id }
+
+    override fun organizationIdsWithMemberEmail(email: String) =
+      organizations.values
+        .filter { org -> org.members.any { it.email.trim().lowercase() == email } }
+        .map { it.organization_id }
+
+    override fun surveyIdsWithAclUser(userId: String) =
+      if (userId.isBlank()) emptyList()
+      else
+        acls.values.filter { acl -> acl.entries.any { it.user_id == userId } }.map { it.survey_id }
+
+    override fun organizationIdsWithMemberUser(userId: String) =
+      if (userId.isBlank()) emptyList()
+      else
+        organizations.values
+          .filter { org -> org.members.any { it.user_id == userId } }
+          .map { it.organization_id }
+
+    override fun appliedWatermarks(clientId: String) =
+      watermarks.filterKeys { it.first == clientId }.values.toList()
+  }
+
+  private open inner class Reader : BaseReader() {
     override fun survey(surveyId: String) = surveys[surveyId]
 
     override fun surveyRevision(surveyId: String, version: String) =
@@ -234,28 +273,6 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
 
     override fun plotLock(surveyId: String, entityId: String) = plotLocks[surveyId to entityId]
 
-    override fun impactEvents() = impactEvents.values.toList()
-
-    override fun auditRecords() = auditRecords.values.toList()
-
-    override fun places() = places.toList()
-
-    override fun mutationLogs() = mutationLogs.toList()
-
-    override fun user(userId: String) = users[userId]
-
-    override fun usersByEmail(email: String) = users.values.filter { it.email == email }
-
-    override fun surveyIdsWithAclEmail(email: String) =
-      acls.values
-        .filter { acl -> acl.entries.any { it.email.trim().lowercase() == email } }
-        .map { it.survey_id }
-
-    override fun organizationIdsWithMemberEmail(email: String) =
-      organizations.values
-        .filter { org -> org.members.any { it.email.trim().lowercase() == email } }
-        .map { it.organization_id }
-
     override fun surveysOwnedBy(userId: String, email: String) =
       surveys.values.filter { s ->
         (userId.isNotBlank() && s.owner_id == userId) ||
@@ -263,23 +280,8 @@ class InMemoryUserDataStore(private val seed: UserDataSeed = UserDataSeed()) : U
             (s.owner_id == email || acls[s.survey_id]?.owner_id?.trim()?.lowercase() == email))
       }
 
-    override fun surveyIdsWithAclUser(userId: String) =
-      if (userId.isBlank()) emptyList()
-      else
-        acls.values.filter { acl -> acl.entries.any { it.user_id == userId } }.map { it.survey_id }
-
-    override fun organizationIdsWithMemberUser(userId: String) =
-      if (userId.isBlank()) emptyList()
-      else
-        organizations.values
-          .filter { org -> org.members.any { it.user_id == userId } }
-          .map { it.organization_id }
-
     override fun surveysInOrganization(organizationId: String) =
       surveys.values.filter { it.organization_id == organizationId }
-
-    override fun appliedWatermarks(clientId: String) =
-      watermarks.filterKeys { it.first == clientId }.values.toList()
   }
 
   /** Reads committed data and buffers writes, applied in order once the block returns. */

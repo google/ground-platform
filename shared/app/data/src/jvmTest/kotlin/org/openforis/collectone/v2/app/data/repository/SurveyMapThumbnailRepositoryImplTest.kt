@@ -115,36 +115,9 @@ class SurveyMapThumbnailRepositoryImplTest {
         maxCacheEntries = 2,
       )
 
-    val layer =
-      MapLayerItem(
-        id = "layer-plots",
-        label = "Plots",
-        colorHex = 0xFF00897BL,
-        geometryType = GeometryType.POINT,
-        isVisible = true,
-      )
-    val entity1 =
-      GeospatialEntityItem(
-        id = "p1",
-        label = "Plot 1",
-        datasetId = "plots",
-        datasetName = "Plots",
-        layerId = "layer-plots",
-        geoId = "P-1",
-        geometry = Geometry.Point(LatLng(-3.385, 36.682)),
-        areaHectares = 0.0,
-        perimeterMeters = 0,
-        colorHex = 0xFF00897BL,
-        properties = emptyMap(),
-        submissions = emptyList(),
-      )
-    val entity2 =
-      entity1.copy(
-        id = "p2",
-        label = "Plot 2",
-        geoId = "P-2",
-        geometry = Geometry.Point(LatLng(-3.392, 36.691)),
-      )
+    val layer = samplePlotsLayer()
+    val entity1 = samplePlotEntity("p1", "Plot 1", "P-1", LatLng(-3.385, 36.682))
+    val entity2 = samplePlotEntity("p2", "Plot 2", "P-2", LatLng(-3.392, 36.691))
 
     val thumb1 =
       SurveyThumbnailGenerator.fromRuntime(
@@ -188,4 +161,34 @@ class SurveyMapThumbnailRepositoryImplTest {
     assertEquals(4, requestCount)
     assertEquals(2, repo.cachedTileCount())
   }
+
+  private fun samplePlotsLayer(): MapLayerItem =
+    MapLayerItem(
+      id = "layer-plots",
+      label = "Plots",
+      colorHex = 0xFF00897BL,
+      geometryType = GeometryType.POINT,
+      isVisible = true,
+    )
+
+  private fun samplePlotEntity(
+    id: String,
+    label: String,
+    geoId: String,
+    latLng: LatLng,
+  ): GeospatialEntityItem =
+    GeospatialEntityItem(
+      id = id,
+      label = label,
+      datasetId = "plots",
+      datasetName = "Plots",
+      layerId = "layer-plots",
+      geoId = geoId,
+      geometry = Geometry.Point(latLng),
+      areaHectares = 0.0,
+      perimeterMeters = 0,
+      colorHex = 0xFF00897BL,
+      properties = emptyMap(),
+      submissions = emptyList(),
+    )
 }

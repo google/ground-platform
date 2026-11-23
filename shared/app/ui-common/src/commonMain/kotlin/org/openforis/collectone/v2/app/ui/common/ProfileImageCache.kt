@@ -57,12 +57,8 @@ class ProfileImageCache(private val maxImages: Int = DEFAULT_MAX_IMAGES) {
       bitmaps[url] = hit
       return hit
     }
-    if (isDataImageUri(url)) {
-      val decoded = decodeDataImageUri(url) ?: return null
-      return decodeAndStore(url, decoded)
-    }
-    val cachedBytes = loader.cachedBytes(url) ?: return null
-    return decodeAndStore(url, cachedBytes)
+    val bytes = if (isDataImageUri(url)) decodeDataImageUri(url) else loader.cachedBytes(url)
+    return bytes?.let { decodeAndStore(url, it) }
   }
 
   /**

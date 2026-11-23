@@ -104,6 +104,12 @@ import org.openforis.collectone.v2.web.resources.wizard_care_sticky_chip_a11y
 import org.openforis.collectone.v2.web.resources.wizard_care_summary_count
 import org.openforis.collectone.v2.web.resources.wizard_care_summary_title
 
+/** Defaults for [CareConformityCard]. */
+internal object CareConformityCardDefaults {
+  /** How long to let the details expand before scrolling a criterion into view. */
+  const val EXPAND_ANIMATION_MILLIS = 250L
+}
+
 /**
  * Where the CARE card sits on screen, so the Sharing step can show [CareStickyChip] while the
  * card's summary row is scrolled above the step's viewport, and scroll back to it.
@@ -128,7 +134,7 @@ class CareCardPosition {
  * it adds the full analysis: what the defaults do, the explainer link, and each criterion's effect.
  * Clicking a pip expands the card and scrolls to that criterion.
  */
-@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CareConformityCard(
   conformity: CareConformity,
@@ -139,15 +145,13 @@ fun CareConformityCard(
   position: CareCardPosition? = null,
   autoReason: String? = null,
 ) {
-  val criteria = conformity.criteria
-  val metCount = conformity.metCount
   val rowRequesters = remember { mutableMapOf<String, BringIntoViewRequester>() }
   var pendingCriterion by remember { mutableStateOf<String?>(null) }
 
   LaunchedEffect(pendingCriterion, expanded) {
     val code = pendingCriterion ?: return@LaunchedEffect
     if (!expanded) return@LaunchedEffect
-    delay(EXPAND_ANIMATION_MILLIS)
+    delay(CareConformityCardDefaults.EXPAND_ANIMATION_MILLIS)
     rowRequesters[code]?.bringIntoView()
     pendingCriterion = null
   }
@@ -156,16 +160,6 @@ fun CareConformityCard(
   if (isShowingCareExplainer) {
     CareExplainerDialog(onDismiss = { isShowingCareExplainer = false })
   }
-
-  val toggleLabel =
-    stringResource(
-      if (expanded) Res.string.wizard_care_hide_details else Res.string.wizard_care_show_details
-    )
-  val stateLabel =
-    stringResource(
-      if (expanded) Res.string.wizard_care_state_expanded
-      else Res.string.wizard_care_state_collapsed
-    )
 
   Surface(
     color = MaterialTheme.colorScheme.secondaryContainer,
@@ -178,76 +172,17 @@ fun CareConformityCard(
       modifier = Modifier.fillMaxWidth().padding(12.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      // Summary row: always visible. Clicking anywhere outside its own controls toggles details.
-      Row(
-        modifier =
-          Modifier.fillMaxWidth()
-            .clip(MaterialTheme.shapes.small)
-            .clickable(onClickLabel = toggleLabel, role = Role.Button) {
-              onExpandedChange(!expanded)
-            }
-            .semantics { stateDescription = stateLabel }
-            .onGloballyPositioned {
-              position?.summaryBottom = it.positionInRoot().y + it.size.height
-            }
-            .padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        Icon(Icons.Outlined.Shield, contentDescription = null, modifier = Modifier.size(22.dp))
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            Text(
-              text = stringResource(Res.string.wizard_care_summary_title),
-              style = MaterialTheme.typography.titleSmall,
-              fontWeight = FontWeight.Bold,
-            )
-            Text(
-              text = stringResource(Res.string.wizard_care_summary_count, metCount, criteria.size),
-              style = MaterialTheme.typography.labelMedium,
-            )
-          }
-          FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-          ) {
-            criteria.forEach { criterion ->
-              CareStatusPip(
-                criterion = criterion,
-                onClick = {
-                  pendingCriterion = criterion.code
-                  onExpandedChange(true)
-                },
-              )
-            }
-          }
-        }
-        if (conformity.isCareApplied) {
-          CareDefaultsAppliedBadge()
-        } else if (onApplyDefaults != null) {
-          OutlinedButton(onClick = onApplyDefaults) {
-            Text(stringResource(Res.string.wizard_care_apply_defaults))
-          }
-        }
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-          Text(
-            text = toggleLabel,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-          )
-          Icon(
-            if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-          )
-        }
-      }
+      CareSummaryRow(
+        conformity = conformity,
+        expanded = expanded,
+        position = position,
+        onToggleExpanded = { onExpandedChange(!expanded) },
+        onSelectCriterion = { code ->
+          pendingCriterion = code
+          onExpandedChange(true)
+        },
+        onApplyDefaults = onApplyDefaults,
+      )
 
       // What CARE is and what its defaults do stays visible above the fold.
       Text(
@@ -261,67 +196,173 @@ fun CareConformityCard(
       )
 
       // Why CARE was applied for the organizer stays visible, never hidden behind "Show details".
-      autoReason?.let { reason ->
-        Row(
-          modifier = Modifier.padding(start = 38.dp, end = 4.dp),
-          verticalAlignment = Alignment.Top,
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          Icon(
-            Icons.Outlined.AutoAwesome,
-            contentDescription = null,
-            modifier = Modifier.padding(top = 1.dp).size(16.dp),
-          )
+      autoReason?.let { CareAutoReasonRow(it) }
+
+      CareDetailsSection(
+        conformity = conformity,
+        expanded = expanded,
+        rowRequesters = rowRequesters,
+        onShowExplainer = { isShowingCareExplainer = true },
+      )
+    }
+  }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CareSummaryRow(
+  conformity: CareConformity,
+  expanded: Boolean,
+  position: CareCardPosition?,
+  onToggleExpanded: () -> Unit,
+  onSelectCriterion: (String) -> Unit,
+  onApplyDefaults: (() -> Unit)?,
+) {
+  val criteria = conformity.criteria
+  val toggleLabel =
+    stringResource(
+      if (expanded) Res.string.wizard_care_hide_details else Res.string.wizard_care_show_details
+    )
+  val stateLabel =
+    stringResource(
+      if (expanded) Res.string.wizard_care_state_expanded
+      else Res.string.wizard_care_state_collapsed
+    )
+  // Summary row: always visible. Clicking anywhere outside its own controls toggles details.
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clip(MaterialTheme.shapes.small)
+        .clickable(onClickLabel = toggleLabel, role = Role.Button, onClick = onToggleExpanded)
+        .semantics { stateDescription = stateLabel }
+        .onGloballyPositioned { position?.summaryBottom = it.positionInRoot().y + it.size.height }
+        .padding(4.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    Icon(Icons.Outlined.Shield, contentDescription = null, modifier = Modifier.size(22.dp))
+    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Text(
+          text = stringResource(Res.string.wizard_care_summary_title),
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.Bold,
+        )
+        Text(
+          text =
+            stringResource(
+              Res.string.wizard_care_summary_count,
+              conformity.metCount,
+              criteria.size,
+            ),
+          style = MaterialTheme.typography.labelMedium,
+        )
+      }
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        criteria.forEach { criterion ->
+          CareStatusPip(criterion = criterion, onClick = { onSelectCriterion(criterion.code) })
+        }
+      }
+    }
+    if (conformity.isCareApplied) {
+      CareDefaultsAppliedBadge()
+    } else if (onApplyDefaults != null) {
+      OutlinedButton(onClick = onApplyDefaults) {
+        Text(stringResource(Res.string.wizard_care_apply_defaults))
+      }
+    }
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+      Text(
+        text = toggleLabel,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+      )
+      Icon(
+        if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+      )
+    }
+  }
+}
+
+@Composable
+private fun CareAutoReasonRow(reason: String) {
+  Row(
+    modifier = Modifier.padding(start = 38.dp, end = 4.dp),
+    verticalAlignment = Alignment.Top,
+    horizontalArrangement = Arrangement.spacedBy(6.dp),
+  ) {
+    Icon(
+      Icons.Outlined.AutoAwesome,
+      contentDescription = null,
+      modifier = Modifier.padding(top = 1.dp).size(16.dp),
+    )
+    Text(
+      text = reason,
+      style = MaterialTheme.typography.labelMedium,
+      fontWeight = FontWeight.SemiBold,
+    )
+  }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CareDetailsSection(
+  conformity: CareConformity,
+  expanded: Boolean,
+  rowRequesters: MutableMap<String, BringIntoViewRequester>,
+  onShowExplainer: () -> Unit,
+) {
+  AnimatedVisibility(
+    visible = expanded,
+    enter = expandVertically() + fadeIn(),
+    exit = shrinkVertically() + fadeOut(),
+  ) {
+    Column(
+      modifier = Modifier.padding(horizontal = 4.dp).padding(top = 4.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Column(
+        modifier = Modifier.padding(start = 34.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        conformity.excludedOrganizationName?.let { organizationName ->
           Text(
-            text = reason,
-            style = MaterialTheme.typography.labelMedium,
+            text =
+              stringResource(
+                Res.string.wizard_care_excluded_from_aggregates,
+                organizationName,
+              ),
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
           )
         }
-      }
-
-      AnimatedVisibility(
-        visible = expanded,
-        enter = expandVertically() + fadeIn(),
-        exit = shrinkVertically() + fadeOut(),
-      ) {
-        Column(
-          modifier = Modifier.padding(horizontal = 4.dp).padding(top = 4.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
+        TextButton(
+          onClick = onShowExplainer,
+          contentPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp),
         ) {
-          Column(
-            modifier = Modifier.padding(start = 34.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
-            conformity.excludedOrganizationName?.let { organizationName ->
-              Text(
-                text =
-                  stringResource(
-                    Res.string.wizard_care_excluded_from_aggregates,
-                    organizationName,
-                  ),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-              )
-            }
-            TextButton(
-              onClick = { isShowingCareExplainer = true },
-              contentPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp),
-            ) {
-              Icon(
-                Icons.AutoMirrored.Outlined.HelpOutline,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-              )
-              Spacer(Modifier.width(6.dp))
-              Text(stringResource(Res.string.wizard_care_learn_more))
-            }
-          }
-          criteria.forEach { criterion ->
-            val requester = rowRequesters.getOrPut(criterion.code) { BringIntoViewRequester() }
-            CareCriterionRow(criterion, Modifier.bringIntoViewRequester(requester))
-          }
+          Icon(
+            Icons.AutoMirrored.Outlined.HelpOutline,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+          )
+          Spacer(Modifier.width(6.dp))
+          Text(stringResource(Res.string.wizard_care_learn_more))
         }
+      }
+      conformity.criteria.forEach { criterion ->
+        val requester = rowRequesters.getOrPut(criterion.code) { BringIntoViewRequester() }
+        CareCriterionRow(criterion, Modifier.bringIntoViewRequester(requester))
       }
     }
   }
@@ -515,9 +556,6 @@ private fun CareCriterionRow(criterion: CareGovernanceCriterion, modifier: Modif
     }
   }
 }
-
-/** How long to let the details expand before scrolling a criterion into view. */
-private const val EXPAND_ANIMATION_MILLIS = 250L
 
 /** Space left above the CARE card when the sticky chip scrolls back to it. */
 private val STICKY_SCROLL_MARGIN = 16.dp

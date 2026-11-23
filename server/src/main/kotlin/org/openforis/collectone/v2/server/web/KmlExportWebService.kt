@@ -50,13 +50,7 @@ object KmlExportWebService {
     if (req.method() != HttpMethod.GET && req.method() != HttpMethod.HEAD) {
       return@HttpService HttpResponse.of(HttpStatus.METHOD_NOT_ALLOWED)
     }
-    val rawParam = ctx.pathParam("surveyId").orEmpty().trim()
-    val surveyId =
-      if (rawParam.endsWith(".kml", ignoreCase = true)) {
-        rawParam.dropLast(4).trim()
-      } else {
-        rawParam
-      }
+    val surveyId = parseSurveyId(ctx)
     if (surveyId.isEmpty()) {
       return@HttpService textError(HttpStatus.BAD_REQUEST, "Missing surveyId")
     }
@@ -82,17 +76,9 @@ object KmlExportWebService {
       scope
         .future {
           if (isNetworkLinkMode) {
-            val encodedSurveyId = GoogleEarthDeepLinks.encodeUriComponent(surveyId)
-            val targetQuery =
-              if (balloonUrl.isBlank()) {
-                "?source=networklink"
-              } else {
-                "?balloonUrl=${GoogleEarthDeepLinks.encodeUriComponent(balloonUrl)}&source=networklink"
-              }
-            val targetKmlUrl = "$serviceUrl/kml/surveys/$encodedSurveyId.kml$targetQuery"
             backend.exportSurveyNetworkLinkKml(
               surveyId = surveyId,
-              targetKmlUrl = targetKmlUrl,
+              targetKmlUrl = buildNetworkLinkTargetUrl(serviceUrl, surveyId, balloonUrl),
               refreshIntervalSeconds = refreshIntervalSeconds,
             )
           } else {
@@ -104,37 +90,60 @@ object KmlExportWebService {
             )
           }
         }
-        .thenApply { exported ->
-          val etag = "\"${sha256Hex(exported.content)}\""
-          if (matchesIfNoneMatch(req.headers().get("if-none-match"), etag)) {
-            val notModifiedHeaders =
-              ResponseHeaders.builder(HttpStatus.NOT_MODIFIED)
-                .add("etag", etag)
-                .add("cache-control", "no-cache")
-                .build()
-            return@thenApply HttpResponse.of(notModifiedHeaders)
-          }
-          val headers =
-            ResponseHeaders.builder(HttpStatus.OK)
-              .contentType(KML_MEDIA_TYPE)
-              .add(
-                "content-disposition",
-                "inline; filename=\"${asciiFileName(exported.fileName)}\"",
-              )
-              .add("etag", etag)
-              .add("cache-control", "no-cache")
-              .build()
-          if (req.method() == HttpMethod.HEAD) {
-            HttpResponse.of(headers)
-          } else {
-            HttpResponse.of(headers, HttpData.ofUtf8(exported.content))
-          }
-        }
+        .thenApply { exported -> buildKmlResponse(req, exported.content, exported.fileName) }
         .exceptionally { err ->
           val root = (err as? java.util.concurrent.CompletionException)?.cause ?: err
           statusError(StatusMapper.toStatusException(root))
         }
     )
+  }
+
+  private fun parseSurveyId(ctx: ServiceRequestContext): String {
+    val rawParam = ctx.pathParam("surveyId").orEmpty().trim()
+    return if (rawParam.endsWith(".kml", ignoreCase = true)) {
+      rawParam.dropLast(4).trim()
+    } else {
+      rawParam
+    }
+  }
+
+  private fun buildNetworkLinkTargetUrl(
+    serviceUrl: String,
+    surveyId: String,
+    balloonUrl: String,
+  ): String {
+    val encodedSurveyId = GoogleEarthDeepLinks.encodeUriComponent(surveyId)
+    val targetQuery =
+      if (balloonUrl.isBlank()) {
+        "?source=networklink"
+      } else {
+        "?balloonUrl=${GoogleEarthDeepLinks.encodeUriComponent(balloonUrl)}&source=networklink"
+      }
+    return "$serviceUrl/kml/surveys/$encodedSurveyId.kml$targetQuery"
+  }
+
+  private fun buildKmlResponse(req: HttpRequest, content: String, fileName: String): HttpResponse {
+    val etag = "\"${sha256Hex(content)}\""
+    if (matchesIfNoneMatch(req.headers().get("if-none-match"), etag)) {
+      val notModifiedHeaders =
+        ResponseHeaders.builder(HttpStatus.NOT_MODIFIED)
+          .add("etag", etag)
+          .add("cache-control", "no-cache")
+          .build()
+      return HttpResponse.of(notModifiedHeaders)
+    }
+    val headers =
+      ResponseHeaders.builder(HttpStatus.OK)
+        .contentType(KML_MEDIA_TYPE)
+        .add("content-disposition", "inline; filename=\"${asciiFileName(fileName)}\"")
+        .add("etag", etag)
+        .add("cache-control", "no-cache")
+        .build()
+    return if (req.method() == HttpMethod.HEAD) {
+      HttpResponse.of(headers)
+    } else {
+      HttpResponse.of(headers, HttpData.ofUtf8(content))
+    }
   }
 
   internal fun sha256Hex(content: String): String {

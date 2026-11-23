@@ -288,47 +288,61 @@ internal object SurveyDatasetMapper {
         ?.takeIf { it.entity_dataset_id.isNotBlank() }
         ?.let { SampleAreaSource.StrataLayer(it.entity_dataset_id, it.stratum_property) }
         ?: SampleAreaSource.SurveyArea
-    val plotShape =
-      when (design.plotShape) {
-        PlotShape.SQUARE -> PlotShapeOption.SQUARE
-        PlotShape.CIRCLE -> PlotShapeOption.CIRCLE
-        PlotShape.POINT -> PlotShapeOption.POINT
-      }
-    val subPlot =
-      when (design.subPlot) {
-        SubPlotLayout.None -> SubPlotMode.NONE
-        SubPlotLayout.Center -> SubPlotMode.CENTER
-        is SubPlotLayout.Grid -> SubPlotMode.GRID
-        is SubPlotLayout.Random -> SubPlotMode.RANDOM
-      }
     val subPlotGrid = design.subPlot as? SubPlotLayout.Grid
     val subPlotRandom = design.subPlot as? SubPlotLayout.Random
-    val lastRun =
-      if (proto.generated_at != null || proto.input_hash.isNotBlank() || proto.feature_count > 0L) {
-        GenerationRecord(
-          generatedAt = proto.generated_at?.let { isoUtc(it.toKotlinInstant()) }.orEmpty(),
-          inputHash = proto.input_hash,
-          featureCount = if (proto.feature_count > 0L) proto.feature_count.toInt() else rowCount,
-          engineVersion =
-            if (proto.engine_version > 0) proto.engine_version else SAMPLING_ENGINE_VERSION,
-        )
-      } else {
-        null
-      }
     val base =
       defaults.copy(
         areaSource = areaSource,
-        plotShape = plotShape,
+        plotShape = mapPlotShape(design.plotShape),
         plotSizeM = if (design.plotSizeM > 0.0) design.plotSizeM else defaults.plotSizeM,
-        subPlot = subPlot,
+        subPlot = mapSubPlotMode(design.subPlot),
         subPlotGridN = subPlotGrid?.n ?: defaults.subPlotGridN,
         subPlotSpacingM = subPlotGrid?.spacingM ?: defaults.subPlotSpacingM,
         subPlotRandomCount = subPlotRandom?.count ?: defaults.subPlotRandomCount,
         shuffle = design.shuffle,
         seed = design.seed,
-        lastRun = lastRun,
+        lastRun = generationRecordFromProto(proto, rowCount),
       )
-    return when (val layout = design.layout) {
+    return applyPlotLayout(base, defaults, design.layout)
+  }
+
+  private fun mapPlotShape(shape: PlotShape): PlotShapeOption =
+    when (shape) {
+      PlotShape.SQUARE -> PlotShapeOption.SQUARE
+      PlotShape.CIRCLE -> PlotShapeOption.CIRCLE
+      PlotShape.POINT -> PlotShapeOption.POINT
+    }
+
+  private fun mapSubPlotMode(subPlot: SubPlotLayout): SubPlotMode =
+    when (subPlot) {
+      SubPlotLayout.None -> SubPlotMode.NONE
+      SubPlotLayout.Center -> SubPlotMode.CENTER
+      is SubPlotLayout.Grid -> SubPlotMode.GRID
+      is SubPlotLayout.Random -> SubPlotMode.RANDOM
+    }
+
+  private fun generationRecordFromProto(
+    proto: SamplingDesign,
+    rowCount: Int,
+  ): GenerationRecord? {
+    val hasRecord =
+      proto.generated_at != null || proto.input_hash.isNotBlank() || proto.feature_count > 0L
+    if (!hasRecord) return null
+    return GenerationRecord(
+      generatedAt = proto.generated_at?.let { isoUtc(it.toKotlinInstant()) }.orEmpty(),
+      inputHash = proto.input_hash,
+      featureCount = if (proto.feature_count > 0L) proto.feature_count.toInt() else rowCount,
+      engineVersion =
+        if (proto.engine_version > 0) proto.engine_version else SAMPLING_ENGINE_VERSION,
+    )
+  }
+
+  private fun applyPlotLayout(
+    base: SampleDesignConfig,
+    defaults: SampleDesignConfig,
+    layout: PlotLayout,
+  ): SampleDesignConfig =
+    when (layout) {
       is PlotLayout.SystematicGrid ->
         base.copy(
           method = SampleMethod.SYSTEMATIC_GRID,
@@ -362,5 +376,4 @@ internal object SurveyDatasetMapper {
           minDistanceM = layout.minDistanceM,
         )
     }
-  }
 }

@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
+import org.openforis.collectone.v2.app.domain.model.WhispAnalysis
 import org.openforis.collectone.v2.app.domain.model.geometryType
 import org.openforis.collectone.v2.app.domain.model.updatedAtLabel
 import org.openforis.collectone.v2.app.domain.model.whispAnalysis
@@ -199,31 +200,11 @@ internal fun WebEntityDetailsCard(
         modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp),
       )
 
-      PrimaryTabRow(
-        selectedTabIndex = visiblePanes.indexOf(pane).coerceAtLeast(0),
-        containerColor = Color.Transparent,
-      ) {
-        visiblePanes.forEach { tabPane ->
-          Tab(
-            selected = pane == tabPane,
-            onClick = { dashboard.selectEntityDetailsTab(tabPane) },
-            text = {
-              Text(
-                text =
-                  when (tabPane) {
-                    EntityDetailsPane.PROPERTIES -> stringResource(Res.string.web_entity_tab_data)
-                    EntityDetailsPane.SUBMISSIONS ->
-                      stringResource(Res.string.web_entity_tab_history)
-                    EntityDetailsPane.RISK_ANALYSIS ->
-                      stringResource(Res.string.web_entity_tab_risk_analysis)
-                  },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-            },
-          )
-        }
-      }
+      EntityDetailsTabRow(
+        visiblePanes = visiblePanes,
+        selectedPane = pane,
+        onSelectTab = dashboard::selectEntityDetailsTab,
+      )
 
       Column(
         modifier =
@@ -232,44 +213,92 @@ internal fun WebEntityDetailsCard(
             .verticalScroll(scrollState)
             .padding(16.dp)
       ) {
-        when {
-          pane == EntityDetailsPane.RISK_ANALYSIS && whispAnalysis != null ->
-            WhispRiskAnalysisPane(analysis = whispAnalysis)
-          pane == EntityDetailsPane.PROPERTIES ->
-            EntityPropertiesPane(
-              uiState = effectiveDetails,
-              actions = actions,
-              isWeb = true,
-              trailingWebActions = {
-                if (
-                  entity.geometryType == GeometryType.POINT ||
-                    entity.geometryType == GeometryType.POLYGON
-                ) {
-                  EntityDetailsActionButton(
-                    text = stringResource(Res.string.web_time_series_open),
-                    icon = Icons.Outlined.Timeline,
-                    onClick = { dashboard.showTimeSeries() },
-                  )
-                }
-              },
-            )
-          submission != null ->
-            SubmissionFullDetailsCard(
-              uiState = submission,
-              backLabel = stringResource(Res.string.web_back_to_submissions),
-              onBack = { dataCollection.selectSubmissionDetail(null) },
-              onSharePdf = { dataCollection.downloadSubmissionPdf(submission.submission.id) },
-              isSidePanel = true,
-            )
-          else ->
-            EntitySubmissionsPane(
-              uiState = effectiveDetails,
-              actions = actions,
-              isWeb = true,
-            )
-        }
+        EntityDetailsTabBody(
+          pane = pane,
+          effectiveDetails = effectiveDetails,
+          whispAnalysis = whispAnalysis,
+          actions = actions,
+          dashboard = dashboard,
+          dataCollection = dataCollection,
+        )
       }
     }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EntityDetailsTabRow(
+  visiblePanes: List<EntityDetailsPane>,
+  selectedPane: EntityDetailsPane,
+  onSelectTab: (EntityDetailsPane) -> Unit,
+) {
+  PrimaryTabRow(
+    selectedTabIndex = visiblePanes.indexOf(selectedPane).coerceAtLeast(0),
+    containerColor = Color.Transparent,
+  ) {
+    visiblePanes.forEach { tabPane ->
+      Tab(
+        selected = selectedPane == tabPane,
+        onClick = { onSelectTab(tabPane) },
+        text = {
+          Text(
+            text =
+              when (tabPane) {
+                EntityDetailsPane.PROPERTIES -> stringResource(Res.string.web_entity_tab_data)
+                EntityDetailsPane.SUBMISSIONS -> stringResource(Res.string.web_entity_tab_history)
+                EntityDetailsPane.RISK_ANALYSIS ->
+                  stringResource(Res.string.web_entity_tab_risk_analysis)
+              },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        },
+      )
+    }
+  }
+}
+
+@Composable
+private fun EntityDetailsTabBody(
+  pane: EntityDetailsPane,
+  effectiveDetails: EntityDetailsUiState,
+  whispAnalysis: WhispAnalysis?,
+  actions: EntityDetailsActions,
+  dashboard: DashboardActions,
+  dataCollection: DataCollectionActions,
+) {
+  val entity = effectiveDetails.entity
+  val submission = effectiveDetails.openSubmission
+  when {
+    pane == EntityDetailsPane.RISK_ANALYSIS && whispAnalysis != null ->
+      WhispRiskAnalysisPane(analysis = whispAnalysis)
+    pane == EntityDetailsPane.PROPERTIES ->
+      EntityPropertiesPane(
+        uiState = effectiveDetails,
+        actions = actions,
+        isWeb = true,
+        trailingWebActions = {
+          if (
+            entity.geometryType == GeometryType.POINT || entity.geometryType == GeometryType.POLYGON
+          ) {
+            EntityDetailsActionButton(
+              text = stringResource(Res.string.web_time_series_open),
+              icon = Icons.Outlined.Timeline,
+              onClick = { dashboard.showTimeSeries() },
+            )
+          }
+        },
+      )
+    submission != null ->
+      SubmissionFullDetailsCard(
+        uiState = submission,
+        backLabel = stringResource(Res.string.web_back_to_submissions),
+        onBack = { dataCollection.selectSubmissionDetail(null) },
+        onSharePdf = { dataCollection.downloadSubmissionPdf(submission.submission.id) },
+        isSidePanel = true,
+      )
+    else -> EntitySubmissionsPane(uiState = effectiveDetails, actions = actions, isWeb = true)
   }
 }
 

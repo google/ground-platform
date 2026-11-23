@@ -144,83 +144,113 @@ fun buildDashboardDataTables(
   entities
     .groupBy { it.datasetId }
     .map { (datasetId, datasetEntities) ->
-      val allPropertyKeys =
-        datasetEntities
-          .asSequence()
-          .flatMap { it.properties.keys.asSequence() }
-          .filter { it !in EntityPresentationPropertyKeys }
-          .distinct()
-          .toList()
-      val (whispKeys, regularKeys) = allPropertyKeys.partition { it.isWhispPropertyKey() }
-      val rollUpWhisp = whispKeys.isNotEmpty() && !expandWhispColumns
-      val fixedColumns =
-        listOf(
-          DASHBOARD_STATUS_COLUMN,
-          DASHBOARD_LABEL_COLUMN,
-          "Submissions",
-          DASHBOARD_GEO_ID_COLUMN,
-        )
-      val displayColumns =
-        if (rollUpWhisp) {
-          fixedColumns + DASHBOARD_WHISP_COLUMN + regularKeys
-        } else {
-          fixedColumns + regularKeys + whispKeys
-        }
-      val exportKeys = regularKeys + whispKeys
-      val exportColumns = fixedColumns + exportKeys
-      val exportRows = datasetEntities.map { entity ->
-        listOf(
-          entity.workflowStatus,
-          entity.label,
-          entity.submissionCount.toString(),
-          entity.geoId,
-        ) +
-          exportKeys.map { key ->
-            val value = entity.properties[key].orEmpty()
-            relatedLabel(entity, value) ?: value
-          }
-      }
-      DashboardDataTable(
-        id = "dataset:$datasetId",
+      buildDatasetDashboardTable(
         datasetId = datasetId,
-        title = datasetEntities.first().datasetName,
-        kind =
-          if (datasetEntities.any { it.hasGeometry }) {
-            DashboardDataTableKind.MAP_LAYER
-          } else {
-            DashboardDataTableKind.DATA_TABLE
-          },
-        columns = displayColumns,
-        rows =
-          datasetEntities.mapIndexed { idx, entity ->
-            val displayCells =
-              if (rollUpWhisp) {
-                listOf(
-                  entity.workflowStatus,
-                  entity.label,
-                  entity.submissionCount.toString(),
-                  entity.geoId,
-                  whispSummaryCellText(entity.whispAnalysis),
-                ) +
-                  regularKeys.map { key ->
-                    val value = entity.properties[key].orEmpty()
-                    relatedLabel(entity, value) ?: value
-                  }
-              } else {
-                exportRows[idx]
-              }
-            DashboardDataTableRow(
-              id = entity.id,
-              cells = displayCells,
-              isSelected = entity.id == selectedEntityId,
-              entity = entity,
-            )
-          },
-        whispColumnCount = whispKeys.size,
-        isWhispExpanded = expandWhispColumns && whispKeys.isNotEmpty(),
-        exportColumns = exportColumns,
-        exportRows = exportRows,
+        datasetEntities = datasetEntities,
+        selectedEntityId = selectedEntityId,
+        relatedLabel = relatedLabel,
+        expandWhispColumns = expandWhispColumns,
       )
+    }
+
+private val DASHBOARD_FIXED_COLUMNS =
+  listOf(
+    DASHBOARD_STATUS_COLUMN,
+    DASHBOARD_LABEL_COLUMN,
+    "Submissions",
+    DASHBOARD_GEO_ID_COLUMN,
+  )
+
+private fun buildDatasetDashboardTable(
+  datasetId: String,
+  datasetEntities: List<GeospatialEntityItem>,
+  selectedEntityId: String?,
+  relatedLabel: (entity: GeospatialEntityItem, value: String) -> String?,
+  expandWhispColumns: Boolean,
+): DashboardDataTable {
+  val allPropertyKeys =
+    datasetEntities
+      .asSequence()
+      .flatMap { it.properties.keys.asSequence() }
+      .filter { it !in EntityPresentationPropertyKeys }
+      .distinct()
+      .toList()
+  val (whispKeys, regularKeys) = allPropertyKeys.partition { it.isWhispPropertyKey() }
+  val rollUpWhisp = whispKeys.isNotEmpty() && !expandWhispColumns
+  val displayColumns =
+    if (rollUpWhisp) {
+      DASHBOARD_FIXED_COLUMNS + DASHBOARD_WHISP_COLUMN + regularKeys
+    } else {
+      DASHBOARD_FIXED_COLUMNS + regularKeys + whispKeys
+    }
+  val exportKeys = regularKeys + whispKeys
+  val exportRows = datasetEntities.map { entity ->
+    buildEntityRowCells(entity, exportKeys, relatedLabel)
+  }
+  return DashboardDataTable(
+    id = "dataset:$datasetId",
+    datasetId = datasetId,
+    title = datasetEntities.first().datasetName,
+    kind =
+      if (datasetEntities.any { it.hasGeometry }) {
+        DashboardDataTableKind.MAP_LAYER
+      } else {
+        DashboardDataTableKind.DATA_TABLE
+      },
+    columns = displayColumns,
+    rows =
+      datasetEntities.mapIndexed { idx, entity ->
+        val displayCells =
+          if (rollUpWhisp) {
+            buildRolledUpWhispRowCells(entity, regularKeys, relatedLabel)
+          } else {
+            exportRows[idx]
+          }
+        DashboardDataTableRow(
+          id = entity.id,
+          cells = displayCells,
+          isSelected = entity.id == selectedEntityId,
+          entity = entity,
+        )
+      },
+    whispColumnCount = whispKeys.size,
+    isWhispExpanded = expandWhispColumns && whispKeys.isNotEmpty(),
+    exportColumns = DASHBOARD_FIXED_COLUMNS + exportKeys,
+    exportRows = exportRows,
+  )
+}
+
+private fun buildEntityRowCells(
+  entity: GeospatialEntityItem,
+  keys: List<String>,
+  relatedLabel: (entity: GeospatialEntityItem, value: String) -> String?,
+): List<String> =
+  listOf(
+    entity.workflowStatus,
+    entity.label,
+    entity.submissionCount.toString(),
+    entity.geoId,
+  ) +
+    keys.map { key ->
+      val value = entity.properties[key].orEmpty()
+      relatedLabel(entity, value) ?: value
+    }
+
+private fun buildRolledUpWhispRowCells(
+  entity: GeospatialEntityItem,
+  regularKeys: List<String>,
+  relatedLabel: (entity: GeospatialEntityItem, value: String) -> String?,
+): List<String> =
+  listOf(
+    entity.workflowStatus,
+    entity.label,
+    entity.submissionCount.toString(),
+    entity.geoId,
+    whispSummaryCellText(entity.whispAnalysis),
+  ) +
+    regularKeys.map { key ->
+      val value = entity.properties[key].orEmpty()
+      relatedLabel(entity, value) ?: value
     }
 
 /** Compact summary text for a rolled-up Whisp risk column cell. */

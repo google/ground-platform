@@ -144,42 +144,7 @@ class ProtoSurveyEditorRoundTripTest {
   @Test
   fun generatedSamplePlotsDataset_roundTripsWithPlotIdSchemaAndZeroValidationIssues() {
     val surveyId = "00000099-56d7-5c1d-9457-7457267120a3"
-    val samplePlots =
-      EntityDataset(
-        key = "d1",
-        kind = DatasetKind.MAP_LAYER,
-        id = "sample_plots",
-        displayName = "Sample plots",
-        geometryType = GeometryType.POLYGON,
-        keyProperty = SamplePlotProperties.PLOT_ID,
-        labelProperty = SamplePlotProperties.PLOT_ID,
-        properties = SamplePlotProperties.schema,
-        rows =
-          listOf(
-            EntityRow(
-              key = "d1-P000001",
-              values =
-                mapOf(
-                  SamplePlotProperties.PLOT_ID to "P000001",
-                  SamplePlotProperties.STRATUM to "Forest",
-                  SamplePlotProperties.SAMPLE_ORDER to "1",
-                  SamplePlotProperties.INCLUSION_WEIGHT to "25",
-                ),
-              geometry =
-                listOf(
-                  LatLng(-1.290, 36.820),
-                  LatLng(-1.290, 36.821),
-                  LatLng(-1.291, 36.821),
-                  LatLng(-1.291, 36.820),
-                ),
-            )
-          ),
-        generator =
-          SampleDesignConfig(
-            gridSpacingM = 500.0,
-            lastRun = GenerationRecord("2026-04-01T00:00:00Z", "hash-1", 1),
-          ),
-      )
+    val samplePlots = samplePlotsDataset()
     val initialDraft =
       SurveyEditorDraft.blank(surveyId, title = survey.title).copy(datasets = listOf(samplePlots))
     val projected =
@@ -228,4 +193,41 @@ class ProtoSurveyEditorRoundTripTest {
     )
     assertEquals(emptyList(), EntityDatasetValidator.validate(restoredPlots, emptyList()))
   }
+
+  private fun samplePlotsDataset(): EntityDataset =
+    EntityDataset(
+      key = "d1",
+      kind = DatasetKind.MAP_LAYER,
+      id = "sample_plots",
+      displayName = "Sample plots",
+      geometryType = GeometryType.POLYGON,
+      keyProperty = SamplePlotProperties.PLOT_ID,
+      labelProperty = SamplePlotProperties.PLOT_ID,
+      properties = SamplePlotProperties.schema,
+      rows =
+        listOf(
+          EntityRow(
+            key = "d1-P000001",
+            values =
+              mapOf(
+                SamplePlotProperties.PLOT_ID to "P000001",
+                SamplePlotProperties.STRATUM to "Forest",
+                SamplePlotProperties.SAMPLE_ORDER to "1",
+                SamplePlotProperties.INCLUSION_WEIGHT to "25",
+              ),
+            geometry =
+              listOf(
+                LatLng(-1.290, 36.820),
+                LatLng(-1.290, 36.821),
+                LatLng(-1.291, 36.821),
+                LatLng(-1.291, 36.820),
+              ),
+          )
+        ),
+      generator =
+        SampleDesignConfig(
+          gridSpacingM = 500.0,
+          lastRun = GenerationRecord("2026-04-01T00:00:00Z", "hash-1", 1),
+        ),
+    )
 }

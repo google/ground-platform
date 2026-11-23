@@ -26,6 +26,9 @@ import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import openforis.collectone.v1.survey.FormLaunchConfig
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.userdata.SurveySeed
 import openforis.collectone.v1.userdata.UserDataSeed
 import org.openforis.collectone.v2.core.impact.ALL_USERS_ORGANIZATION_ID
 import org.openforis.collectone.v2.core.library.TemplateVersioning
@@ -242,25 +245,32 @@ class SpannerUserDataStore(
       }
     }
     for (surveySeed in missingSeeds) {
-      val survey = surveySeed.survey ?: continue
-      val surveyId = survey.survey_id
+      insertMissingSeedSurvey(surveySeed)
+    }
+    syncStaleLaunchConfigsFromSeed()
+  }
+
+  private suspend fun insertMissingSeedSurvey(surveySeed: SurveySeed) {
+    val survey = surveySeed.survey ?: return
+    val surveyId = survey.survey_id
+    write { writer ->
+      writer.putSurvey(survey)
+      surveySeed.acl?.let(writer::putAcl)
+    }
+    val hasSeedContent =
+      surveySeed.working_copy != null ||
+        surveySeed.entities.isNotEmpty() ||
+        surveySeed.submissions.isNotEmpty()
+    if (hasSeedContent) {
       write { writer ->
-        writer.putSurvey(survey)
-        surveySeed.acl?.let(writer::putAcl)
-      }
-      if (
-        surveySeed.working_copy != null ||
-          surveySeed.entities.isNotEmpty() ||
-          surveySeed.submissions.isNotEmpty()
-      ) {
-        write { writer ->
-          surveySeed.working_copy?.let { writer.putWorkingCopy(surveyId, it) }
-          surveySeed.entities.forEach(writer::putEntity)
-          surveySeed.submissions.forEach(writer::putSubmission)
-        }
+        surveySeed.working_copy?.let { writer.putWorkingCopy(surveyId, it) }
+        surveySeed.entities.forEach(writer::putEntity)
+        surveySeed.submissions.forEach(writer::putSubmission)
       }
     }
+  }
 
+  private suspend fun syncStaleLaunchConfigsFromSeed() {
     // Sync launch config availability flags (e.g. open_in_google_earth) on unedited v1 seed rows.
     val staleLaunchSurveyIds = read { reader ->
       seed.surveys.mapNotNull { surveySeed ->
@@ -268,12 +278,7 @@ class SpannerUserDataStore(
         val surveyId = seedSurvey.survey_id
         val saved = reader.survey(surveyId) ?: return@mapNotNull null
         val working = reader.workingCopy(surveyId)
-        if (
-          saved.record_version == 1L &&
-            saved.trash_time == null &&
-            working == null &&
-            saved.form_launch_configs != seedSurvey.form_launch_configs
-        ) {
+        if (shouldSyncSeedLaunchConfigs(saved, working, seedSurvey.form_launch_configs)) {
           surveyId to seedSurvey.form_launch_configs
         } else {
           null
@@ -284,12 +289,7 @@ class SpannerUserDataStore(
       write { writer ->
         val saved = writer.survey(surveyId) ?: return@write
         val working = writer.workingCopy(surveyId)
-        if (
-          saved.record_version == 1L &&
-            saved.trash_time == null &&
-            working == null &&
-            saved.form_launch_configs != launchConfigs
-        ) {
+        if (shouldSyncSeedLaunchConfigs(saved, working, launchConfigs)) {
           val nextVer = saved.record_version + 1L
           writer.putSurvey(
             saved.copy(form_launch_configs = launchConfigs, record_version = nextVer)
@@ -298,6 +298,15 @@ class SpannerUserDataStore(
         }
       }
     }
+  }
+
+  private fun shouldSyncSeedLaunchConfigs(
+    saved: SurveyDef,
+    working: SurveyDef?,
+    seedConfigs: List<FormLaunchConfig>,
+  ): Boolean {
+    val isUneditedV1 = saved.record_version == 1L && saved.trash_time == null && working == null
+    return isUneditedV1 && saved.form_launch_configs != seedConfigs
   }
 
   companion object {

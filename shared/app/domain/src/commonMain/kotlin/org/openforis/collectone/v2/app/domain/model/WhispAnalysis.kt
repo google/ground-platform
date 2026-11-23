@@ -193,6 +193,12 @@ data class WhispAnalysis(
         "geo",
       )
 
+    private data class ClassifiedMetrics(
+      val treeCover: List<WhispMetric>,
+      val commodity: List<WhispMetric>,
+      val other: List<WhispMetric>,
+    )
+
     /**
      * Parses [properties] into a [WhispAnalysis], or returns `null` when no `whisp_*` keys are
      * present.
@@ -206,21 +212,47 @@ data class WhispAnalysis(
       if (stripped.isEmpty()) return null
 
       val byLower = stripped.associate { (k, v) -> k.lowercase() to v }
-      val unit = normalizeUnit(byLower["unit"])
-
-      val context =
-        WhispPlotContext(
-          country = byLower["country"]?.takeIf { it.isNotBlank() },
-          producerCountry = byLower["producercountry"]?.takeIf { it.isNotBlank() },
-          adminLevel1 = byLower["admin_level_1"]?.takeIf { it.isNotBlank() },
-          areaHa = (byLower["area"] ?: byLower["plot_area_ha"])?.takeIf { it.isNotBlank() },
-          geometryType = byLower["geometry_type"]?.takeIf { it.isNotBlank() },
-          inWaterbody = parseBooleanOrNull(byLower["in_waterbody"] ?: byLower["water_flag"]),
-        )
-
       val consumedKeys = mutableSetOf<String>()
+      val riskVerdicts = parseRiskVerdicts(stripped, consumedKeys)
+      val overallRisk =
+        riskVerdicts
+          .map { it.level }
+          .filter { it != WhispRiskLevel.UNKNOWN }
+          .minByOrNull { it.ordinal } ?: WhispRiskLevel.UNKNOWN
+      val indicators = parseIndicators(stripped, consumedKeys)
+      val yearlySeries = parseYearlySeries(stripped, consumedKeys)
+      val beforeAfterComparisons = parseBeforeAfterComparisons(stripped, consumedKeys)
+      val metrics = classifyRemainingMetrics(stripped, consumedKeys)
 
-      // 1. Risk verdicts (risk_pcrop, risk_acrop, risk_timber, etc.)
+      return WhispAnalysis(
+        riskVerdicts = riskVerdicts,
+        overallRisk = overallRisk,
+        unit = normalizeUnit(byLower["unit"]),
+        context = parsePlotContext(byLower),
+        yearlySeries = yearlySeries,
+        beforeAfterComparisons = beforeAfterComparisons,
+        indicators = indicators,
+        treeCoverMetrics = metrics.treeCover,
+        commodityMetrics = metrics.commodity,
+        otherMetrics = metrics.other,
+        rawEntries = stripped,
+      )
+    }
+
+    private fun parsePlotContext(byLower: Map<String, String>): WhispPlotContext =
+      WhispPlotContext(
+        country = byLower["country"]?.takeIf { it.isNotBlank() },
+        producerCountry = byLower["producercountry"]?.takeIf { it.isNotBlank() },
+        adminLevel1 = byLower["admin_level_1"]?.takeIf { it.isNotBlank() },
+        areaHa = (byLower["area"] ?: byLower["plot_area_ha"])?.takeIf { it.isNotBlank() },
+        geometryType = byLower["geometry_type"]?.takeIf { it.isNotBlank() },
+        inWaterbody = parseBooleanOrNull(byLower["in_waterbody"] ?: byLower["water_flag"]),
+      )
+
+    private fun parseRiskVerdicts(
+      stripped: List<Pair<String, String>>,
+      consumedKeys: MutableSet<String>,
+    ): List<WhispRiskVerdict> {
       val riskVerdicts = mutableListOf<WhispRiskVerdict>()
       stripped.forEach { (key, value) ->
         val lower = key.lowercase()
@@ -235,15 +267,13 @@ data class WhispAnalysis(
             )
         }
       }
-      val overallRisk =
-        riskVerdicts
-          .map { it.level }
-          .filter { it != WhispRiskLevel.UNKNOWN }
-          .minByOrNull {
-            it.ordinal
-          } ?: WhispRiskLevel.UNKNOWN
+      return riskVerdicts
+    }
 
-      // 2. Decision-tree indicators (Ind_01_treecover, etc.)
+    private fun parseIndicators(
+      stripped: List<Pair<String, String>>,
+      consumedKeys: MutableSet<String>,
+    ): List<WhispIndicator> {
       val indicators = mutableListOf<WhispIndicator>()
       stripped.forEach { (key, value) ->
         if (INDICATOR_REGEX.matches(key)) {
@@ -257,8 +287,13 @@ data class WhispAnalysis(
             )
         }
       }
+      return indicators
+    }
 
-      // 3. Yearly time series (same prefix across >= 2 distinct years, excluding before/after)
+    private fun parseYearlySeries(
+      stripped: List<Pair<String, String>>,
+      consumedKeys: MutableSet<String>,
+    ): List<WhispYearlySeries> {
       val yearCandidates = linkedMapOf<String, MutableList<Triple<String, Int, Double>>>()
       stripped.forEach { (key, value) ->
         if (key in consumedKeys || key.lowercase() in METADATA_KEYS) return@forEach
@@ -269,23 +304,26 @@ data class WhispAnalysis(
         val numeric = value.toDoubleOrNull() ?: return@forEach
         yearCandidates.getOrPut(prefix) { mutableListOf() } += Triple(key, year, numeric)
       }
-      val yearlySeries =
-        yearCandidates
-          .filter { (_, entries) -> entries.map { it.second }.distinct().size >= 2 }
-          .map { (prefix, entries) ->
-            entries.forEach { (originalKey, _, _) -> consumedKeys += originalKey }
-            val sortedPoints =
-              entries.sortedBy { it.second }.map { (_, year, value) -> year to value }
-            WhispYearlySeries(
-              key = prefix,
-              label = yearlySeriesLabel(prefix),
-              category = yearlySeriesCategory(prefix),
-              points = sortedPoints,
-            )
-          }
-          .sortedWith(compareBy({ it.category.ordinal }, { it.label }))
+      return yearCandidates
+        .filter { (_, entries) -> entries.map { it.second }.distinct().size >= 2 }
+        .map { (prefix, entries) ->
+          entries.forEach { (originalKey, _, _) -> consumedKeys += originalKey }
+          val sortedPoints =
+            entries.sortedBy { it.second }.map { (_, year, value) -> year to value }
+          WhispYearlySeries(
+            key = prefix,
+            label = yearlySeriesLabel(prefix),
+            category = yearlySeriesCategory(prefix),
+            points = sortedPoints,
+          )
+        }
+        .sortedWith(compareBy({ it.category.ordinal }, { it.label }))
+    }
 
-      // 4. Before/After 2020 paired summaries
+    private fun parseBeforeAfterComparisons(
+      stripped: List<Pair<String, String>>,
+      consumedKeys: MutableSet<String>,
+    ): List<WhispBeforeAfterComparison> {
       val beforeMap = linkedMapOf<String, Pair<String, Double>>()
       val afterMap = linkedMapOf<String, Pair<String, Double>>()
       stripped.forEach { (key, value) ->
@@ -299,34 +337,35 @@ data class WhispAnalysis(
         }
       }
       val comparisonPrefixes = (beforeMap.keys + afterMap.keys).distinct()
-      val beforeAfterComparisons = comparisonPrefixes.mapNotNull { prefix ->
+      return comparisonPrefixes.mapNotNull { prefix ->
         val beforeEntry = beforeMap[prefix]
         val afterEntry = afterMap[prefix]
-        if (beforeEntry == null && afterEntry == null) return@mapNotNull null
-        // Only group into Before/After comparison when at least one disturbance/loss/fire/gain
-        // summary is present and it's paired or clearly a disturbance summary.
-        if (beforeEntry != null || isDisturbanceKey(prefix)) {
-          beforeEntry?.let { consumedKeys += it.first }
-          afterEntry?.let { consumedKeys += it.first }
-          WhispBeforeAfterComparison(
-            key = prefix,
-            label = yearlySeriesLabel(prefix),
-            before2020 = beforeEntry?.second,
-            after2020 = afterEntry?.second,
-          )
-        } else {
-          null
-        }
+        val shouldInclude =
+          (beforeEntry != null || afterEntry != null) &&
+            (beforeEntry != null || isDisturbanceKey(prefix))
+        if (!shouldInclude) return@mapNotNull null
+        beforeEntry?.let { consumedKeys += it.first }
+        afterEntry?.let { consumedKeys += it.first }
+        WhispBeforeAfterComparison(
+          key = prefix,
+          label = yearlySeriesLabel(prefix),
+          before2020 = beforeEntry?.second,
+          after2020 = afterEntry?.second,
+        )
       }
+    }
 
-      // 5. Remaining metrics classified into Tree Cover, Commodities, and Other
+    private fun classifyRemainingMetrics(
+      stripped: List<Pair<String, String>>,
+      consumedKeys: Set<String>,
+    ): ClassifiedMetrics {
       val treeCoverMetrics = mutableListOf<WhispMetric>()
       val commodityMetrics = mutableListOf<WhispMetric>()
       val otherMetrics = mutableListOf<WhispMetric>()
-
       stripped.forEach { (key, value) ->
-        if (key in consumedKeys || key.lowercase() in METADATA_KEYS) return@forEach
-        if (value.isBlank()) return@forEach
+        if (key in consumedKeys || key.lowercase() in METADATA_KEYS || value.isBlank()) {
+          return@forEach
+        }
         val metric =
           WhispMetric(
             key = key,
@@ -340,19 +379,10 @@ data class WhispAnalysis(
           else -> otherMetrics += metric
         }
       }
-
-      return WhispAnalysis(
-        riskVerdicts = riskVerdicts,
-        overallRisk = overallRisk,
-        unit = unit,
-        context = context,
-        yearlySeries = yearlySeries,
-        beforeAfterComparisons = beforeAfterComparisons,
-        indicators = indicators,
-        treeCoverMetrics = treeCoverMetrics,
-        commodityMetrics = commodityMetrics,
-        otherMetrics = otherMetrics,
-        rawEntries = stripped,
+      return ClassifiedMetrics(
+        treeCover = treeCoverMetrics,
+        commodity = commodityMetrics,
+        other = otherMetrics,
       )
     }
 

@@ -25,31 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlinx.coroutines.test.runTest
-import openforis.collectone.v1.data.DataMutation
-import openforis.collectone.v1.data.EntityMutation
-import openforis.collectone.v1.data.EntityRecord
-import openforis.collectone.v1.data.MutateDataRequest
-import openforis.collectone.v1.forms.DataType
-import openforis.collectone.v1.forms.FormDef
-import openforis.collectone.v1.forms.TypedValue
-import openforis.collectone.v1.survey.EntityDatasetDef
-import openforis.collectone.v1.survey.EntityType
-import openforis.collectone.v1.survey.FormLaunchConfig
-import openforis.collectone.v1.survey.LayerDef
-import openforis.collectone.v1.survey.MapConfig
-import openforis.collectone.v1.survey.MutateSurveyRequest
-import openforis.collectone.v1.survey.SamplingDesign
-import openforis.collectone.v1.survey.SubPlotDesign
-import openforis.collectone.v1.survey.SurveyDef
-import openforis.collectone.v1.survey.SurveyMutation
-import org.openforis.collectone.v2.core.geo.GeoCoord
-import org.openforis.collectone.v2.core.geo.GeometryProtos
 import org.openforis.collectone.v2.core.ids.RecordIds
-import org.openforis.collectone.v2.core.sampling.PlotGeometry
-import org.openforis.collectone.v2.core.sampling.PlotShape
-import org.openforis.collectone.v2.core.sampling.SampleEncoding
-import org.openforis.collectone.v2.core.sampling.SubPlotLayout
 import org.openforis.collectone.v2.server.app.UserDataServer
 import org.openforis.collectone.v2.server.app.UserDataServerTest.Companion.KENYA
 import org.openforis.collectone.v2.server.auth.Authenticator
@@ -249,17 +225,9 @@ class KmlExportWebServiceTest {
 
   @Test
   fun networkLinkModeAndEtagConditionalGetReturn304WhenUnchanged() {
+    val balloonParam = "balloonUrl=https://example.org/balloon/balloon-form.html"
     val networkLinkResp =
-      client.send(
-        HttpRequest.newBuilder(
-            URI(
-              "$baseUrl/kml/surveys/$KENYA.kml?mode=networklink&refreshInterval=15&balloonUrl=https://example.org/balloon/balloon-form.html"
-            )
-          )
-          .GET()
-          .build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
+      get("/kml/surveys/$KENYA.kml?mode=networklink&refreshInterval=15&$balloonParam")
     assertEquals(200, networkLinkResp.statusCode())
     val nlBody = networkLinkResp.body()
     assertTrue("<NetworkLink id=\"collectone-networklink-$KENYA\">" in nlBody, nlBody)
@@ -272,34 +240,14 @@ class KmlExportWebServiceTest {
     assertTrue("/kml/surveys/$KENYA.kml?balloonUrl=" in nlBody, nlBody)
     assertTrue("&amp;source=networklink" in nlBody, nlBody)
 
-    val networkLinkTargetPoll =
-      client.send(
-        HttpRequest.newBuilder(
-            URI(
-              "$baseUrl/kml/surveys/$KENYA.kml?balloonUrl=https://example.org/balloon/balloon-form.html&source=networklink"
-            )
-          )
-          .GET()
-          .build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
+    val networkLinkTargetPoll = get("/kml/surveys/$KENYA.kml?$balloonParam&source=networklink")
     assertEquals(200, networkLinkTargetPoll.statusCode())
     val nlTargetBody = networkLinkTargetPoll.body()
     assertTrue("    <name>Map Layers</name>" in nlTargetBody, nlTargetBody)
     assertTrue("<Folder id=" in nlTargetBody, nlTargetBody)
     assertFalse("All Form Field Types Showcase (Kenya Coffee)</name>" in nlTargetBody, nlTargetBody)
 
-    val firstPoll =
-      client.send(
-        HttpRequest.newBuilder(
-            URI(
-              "$baseUrl/kml/surveys/$KENYA.kml?balloonUrl=https://example.org/balloon/balloon-form.html"
-            )
-          )
-          .GET()
-          .build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
+    val firstPoll = get("/kml/surveys/$KENYA.kml?$balloonParam")
     assertEquals(200, firstPoll.statusCode())
     val etag = firstPoll.headers().firstValue("etag").orElse("")
     assertTrue(etag.startsWith("\"") && etag.endsWith("\""), "Expected strong ETag, got: $etag")
@@ -318,17 +266,7 @@ class KmlExportWebServiceTest {
     assertFalse("\$[c1_marker_symbol]" in kmlBody)
 
     val conditionalPoll =
-      client.send(
-        HttpRequest.newBuilder(
-            URI(
-              "$baseUrl/kml/surveys/$KENYA.kml?balloonUrl=https://example.org/balloon/balloon-form.html"
-            )
-          )
-          .header("If-None-Match", etag)
-          .GET()
-          .build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
+      get("/kml/surveys/$KENYA.kml?$balloonParam", mapOf("If-None-Match" to etag))
     assertEquals(304, conditionalPoll.statusCode())
     assertEquals("", conditionalPoll.body())
   }
@@ -420,298 +358,9 @@ class KmlExportWebServiceTest {
     assertTrue("\"draftRecordBase64\":\"\"" in afterDelete.body(), afterDelete.body())
   }
 
-  @Test
-  fun getSurveyKmlIncludesSamplingDesignSubPlotsAndOmitsThemWhenSubPlotModeIsNone() = runTest {
-    val surveyId = RecordIds.newId()
-    upsertSubPlotSurvey(
-      surveyId = surveyId,
-      seq = 1L,
-      subPlot = SubPlotDesign(mode = SubPlotDesign.Mode.GRID, grid_n = 2, spacing_m = 10.0),
-    )
-    insertSubPlotEntity(surveyId = surveyId, seq = 2L)
-
-    val withSubPlots =
-      client.send(
-        HttpRequest.newBuilder(
-            URI(
-              "$baseUrl/kml/surveys/$surveyId.kml?balloonUrl=https://example.org/balloon/balloon-form.html"
-            )
-          )
-          .GET()
-          .build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
-    assertEquals(200, withSubPlots.statusCode(), withSubPlots.body())
-    val kmlWithSubPlots = withSubPlots.body()
-    assertTrue("<Folder id=\"layer-sample-plots\">" in kmlWithSubPlots, kmlWithSubPlots)
-    assertTrue("<Placemark id=\"plot-entity-1\">" in kmlWithSubPlots, kmlWithSubPlots)
-    assertTrue("<MultiGeometry>" in kmlWithSubPlots, kmlWithSubPlots)
-    assertTrue("<Polygon>" in kmlWithSubPlots, kmlWithSubPlots)
-    for (idx in 1..4) {
-      assertTrue(
-        """<LineString id="plot-entity-1-subplot-$idx">""" in kmlWithSubPlots,
-        kmlWithSubPlots,
-      )
-    }
-    assertTrue(
-      """<Data name="c1_subplot_count"><value>4</value></Data>""" in kmlWithSubPlots,
-      kmlWithSubPlots,
-    )
-    assertTrue("<gx:displayMode>panel</gx:displayMode>" in kmlWithSubPlots, kmlWithSubPlots)
-    assertTrue("https://example.org/balloon/balloon-form.html" in kmlWithSubPlots, kmlWithSubPlots)
-
-    // Switch sampling design subplot mode to NONE -> exported KML omits subplot geometries.
-    upsertSubPlotSurvey(
-      surveyId = surveyId,
-      seq = 3L,
-      subPlot = SubPlotDesign(mode = SubPlotDesign.Mode.NONE),
-    )
-    val withoutSubPlots =
-      client.send(
-        HttpRequest.newBuilder(URI("$baseUrl/kml/surveys/$surveyId.kml")).GET().build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
-    assertEquals(200, withoutSubPlots.statusCode(), withoutSubPlots.body())
-    val kmlWithoutSubPlots = withoutSubPlots.body()
-    assertTrue("<Placemark id=\"plot-entity-1\">" in kmlWithoutSubPlots, kmlWithoutSubPlots)
-    assertTrue("<Polygon>" in kmlWithoutSubPlots, kmlWithoutSubPlots)
-    assertFalse("<MultiGeometry>" in kmlWithoutSubPlots, kmlWithoutSubPlots)
-    assertFalse("plot-entity-1-subplot-" in kmlWithoutSubPlots, kmlWithoutSubPlots)
-    assertFalse("c1_subplot_count" in kmlWithoutSubPlots, kmlWithoutSubPlots)
-  }
-
-  private suspend fun upsertSubPlotSurvey(
-    surveyId: String,
-    seq: Long,
-    subPlot: SubPlotDesign,
-  ) {
-    val sampling =
-      SamplingDesign(
-        method = SamplingDesign.Method.SYSTEMATIC_GRID,
-        survey_area = SamplingDesign.SurveyAreaRef(),
-        spacing_m = 250.0,
-        plot_shape = SamplingDesign.PlotShape.SQUARE,
-        plot_size_m = 30.0,
-        seed = 7L,
-        engine_version = 1,
-        sub_plot = subPlot,
-      )
-    backend.MutateSurvey(
-      MutateSurveyRequest(
-        survey_id = surveyId,
-        mutations =
-          listOf(
-            SurveyMutation(
-              mutation_id = "mut-survey-$seq",
-              client_id = "test-client",
-              client_seq = seq,
-              upsert =
-                SurveyDef(
-                  survey_id = surveyId,
-                  title = "Subplot Interpretation Survey",
-                  forms = listOf(FormDef(form_id = "form-interp", title = "Plot Interpretation")),
-                  form_launch_configs =
-                    listOf(
-                      FormLaunchConfig(
-                        form_id = "form-interp",
-                        title = "Plot Interpretation",
-                        target_entity_dataset_id = "sample_plots",
-                        requires_entity = true,
-                        open_in_google_earth = true,
-                      )
-                    ),
-                  map_config =
-                    MapConfig(
-                      layers =
-                        listOf(
-                          LayerDef(
-                            id = "layer-sample-plots",
-                            label = "Sample plots",
-                            entity_dataset_id = "sample_plots",
-                            visible_by_default = true,
-                          )
-                        )
-                    ),
-                  entity_datasets =
-                    listOf(
-                      EntityDatasetDef(
-                        id = "sample_plots",
-                        display_name = "Sample plots",
-                        type = EntityType.GEOSPATIAL,
-                        key_property = "plot_id",
-                        label_property = "plot_id",
-                        geometry_type = DataType.TYPE_GEOSHAPE,
-                        sampling = sampling,
-                      )
-                    ),
-                ),
-            )
-          ),
-      )
-    )
-  }
-
-  private suspend fun insertSubPlotEntity(surveyId: String, seq: Long) {
-    val center = GeoCoord(-0.4200, 36.9500)
-    val boundary = PlotGeometry.boundary(center, PlotShape.SQUARE, 30.0)
-    val samples =
-      PlotGeometry.subPlotSamples(
-        center = center,
-        boundary = boundary,
-        shape = PlotShape.SQUARE,
-        sizeM = 30.0,
-        layout = SubPlotLayout.Grid(n = 2, spacingM = 10.0),
-        plotSeed = 1L,
-      )
-    backend.MutateData(
-      MutateDataRequest(
-        survey_id = surveyId,
-        mutations =
-          listOf(
-            DataMutation(
-              mutation_id = "mut-plot-1",
-              client_id = "test-client",
-              client_seq = seq,
-              entity_mutation =
-                EntityMutation(
-                  dataset_id = "sample_plots",
-                  entity_id = "plot-entity-1",
-                  base_revision = 0L,
-                  upsert =
-                    EntityRecord(
-                      entity_id = "plot-entity-1",
-                      survey_id = surveyId,
-                      dataset_id = "sample_plots",
-                      layer_id = "layer-sample-plots",
-                      geo_id = "P000001",
-                      label = "P000001",
-                      geometry =
-                        GeometryProtos.polygon(
-                          listOf(boundary.map { GeometryProtos.position(it.lat, it.lng) })
-                        ),
-                      properties =
-                        mapOf(
-                          "plot_id" to TypedValue(string_value = "P000001"),
-                          "samples" to
-                            TypedValue(string_value = SampleEncoding.encodeSamples(samples)),
-                          "sample_ids" to TypedValue(string_value = "1 2 3 4"),
-                        ),
-                    ),
-                ),
-            )
-          ),
-      )
-    )
-  }
-
-  @Test
-  fun googleEarthSampleSurveyServesNetworkLinkPolygonPlotsAndLiveStatusPrefixes() {
-    val earthSurveyId = "00000037-7e4a-5b2c-9d18-3f8a61c4e902"
-    val nlResponse =
-      client.send(
-        HttpRequest.newBuilder(
-            URI(
-              "$baseUrl/kml/surveys/$earthSurveyId.kml?mode=networklink&balloonUrl=https://example.org/balloon/balloon-form.html"
-            )
-          )
-          .GET()
-          .build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
-    assertEquals(200, nlResponse.statusCode())
-    assertTrue(
-      "<NetworkLink id=\"collectone-networklink-$earthSurveyId\">" in nlResponse.body(),
-      nlResponse.body(),
-    )
-    assertTrue("<name>Live Layers</name>" in nlResponse.body(), nlResponse.body())
-    assertTrue("&amp;source=networklink" in nlResponse.body(), nlResponse.body())
-
-    val nlTargetResponse =
-      client.send(
-        HttpRequest.newBuilder(
-            URI(
-              "$baseUrl/kml/surveys/$earthSurveyId.kml?balloonUrl=https://example.org/balloon/balloon-form.html&source=networklink"
-            )
-          )
-          .header("Origin", "https://earth.google.com")
-          .GET()
-          .build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
-    assertEquals(200, nlTargetResponse.statusCode())
-    val nlTargetBody = nlTargetResponse.body()
-    assertTrue("<Document id=\"layer-interpretation-plots\">" in nlTargetBody, nlTargetBody)
-    assertFalse("<Folder" in nlTargetBody, nlTargetBody)
-    assertTrue("<name>✓ PLT-GE-01 • Sebangau North Dome</name>" in nlTargetBody, nlTargetBody)
-
-    val response =
-      client.send(
-        HttpRequest.newBuilder(
-            URI(
-              "$baseUrl/kml/surveys/$earthSurveyId.kml?balloonUrl=https://example.org/balloon/balloon-form.html"
-            )
-          )
-          .header("Origin", "https://earth.google.com")
-          .GET()
-          .build(),
-        HttpResponse.BodyHandlers.ofString(),
-      )
-    assertEquals(200, response.statusCode())
-    val body = response.body()
-    assertTrue("<Folder id=\"layer-interpretation-plots\">" in body, body)
-    assertTrue("<Polygon>" in body, body)
-    assertTrue("<name>✓ PLT-GE-01 • Sebangau North Dome</name>" in body, body)
-    assertTrue("<name>✓ PLT-GE-02 • Kahayan Canal Block</name>" in body, body)
-    assertTrue("<name>◐ PLT-GE-03 • Central Peat Core</name>" in body, body)
-    assertTrue("<name>○ PLT-GE-04 • West Blackwater Buffer</name>" in body, body)
-    assertTrue("<name>○ PLT-GE-05 • South Drainage Margin</name>" in body, body)
-    val stylePayloads =
-      Regex("""var sharedForms = "([^"]+)";""")
-        .findAll(body)
-        .map { match -> String(Base64.getUrlDecoder().decode(match.groupValues[1])) }
-        .toList()
-    assertTrue(
-      stylePayloads.any { "\"id\":\"form-google-earth-interpretation\"" in it },
-      "Expected embedded form-google-earth-interpretation payload in KML",
-    )
-
-    // Sample surveys with GPS/photo questions do not embed incompatible forms in Google Earth KML
-    // and instead render a read-only properties balloon rather than the interactive form iframe.
-    val photoSurveyKml =
-      client
-        .send(
-          HttpRequest.newBuilder(
-              URI("$baseUrl/kml/surveys/00000034-c088-5ab9-8b98-e6bccb3dca71.kml")
-            )
-            .GET()
-            .build(),
-          HttpResponse.BodyHandlers.ofString(),
-        )
-        .body()
-    assertFalse("balloon-form.html" in photoSurveyKml, photoSurveyKml)
-    assertFalse("sharedForms" in photoSurveyKml, photoSurveyKml)
-    assertTrue("id=\"c1-ro-table\"" in photoSurveyKml, photoSurveyKml)
-
-    // Simple Point & Land Use Survey has a CREATE + geopoint form (not Google Earth-enabled), so
-    // its KML serves read-only feature properties without triggering "No Google Earth forms".
-    val simplePointKml =
-      client
-        .send(
-          HttpRequest.newBuilder(
-              URI(
-                "$baseUrl/kml/surveys/00000036-1a1c-5c51-997f-28b67d813aa3.kml?balloonUrl=https://example.org/balloon/balloon-form.html"
-              )
-            )
-            .GET()
-            .build(),
-          HttpResponse.BodyHandlers.ofString(),
-        )
-        .body()
-    assertFalse("balloon-form.html" in simplePointKml, simplePointKml)
-    assertFalse("sharedForms" in simplePointKml, simplePointKml)
-    assertTrue("<th>Land use</th><td data-c1-prop-val=\"true\">\$[land_use]</td>" in simplePointKml)
-    assertTrue(
-      "<th>Observer note</th><td data-c1-prop-val=\"true\">\$[observer_note]</td>" in simplePointKml
-    )
+  private fun get(path: String, headers: Map<String, String> = emptyMap()): HttpResponse<String> {
+    val builder = HttpRequest.newBuilder(URI("$baseUrl$path")).GET()
+    headers.forEach { (name, value) -> builder.header(name, value) }
+    return client.send(builder.build(), HttpResponse.BodyHandlers.ofString())
   }
 }

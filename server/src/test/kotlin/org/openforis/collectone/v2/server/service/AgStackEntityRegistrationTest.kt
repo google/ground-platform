@@ -109,90 +109,54 @@ class AgStackEntityRegistrationTest {
       assertNotEquals(candidatesA.fallback, candidatesB.fallback)
 
       // 1. Creating plotA with a bogus client geo_id ("P001") replaces it with the L13 primary.
-      val respA =
-        backend.MutateData(
-          MutateDataRequest(
-            survey_id = SURVEY,
-            mutations =
-              listOf(
-                DataMutation(
-                  mutation_id = "mut-a",
-                  entity_mutation =
-                    EntityMutation(
-                      entity_id = idA,
-                      dataset_id = DATASET,
-                      upsert =
-                        EntityRecord(
-                          entity_id = idA,
-                          dataset_id = DATASET,
-                          label = "Plot A",
-                          geo_id = "P001",
-                          geometry = plotA,
-                        ),
-                    ),
-                )
-              ),
-          )
+      val savedA =
+        upsertEntity(
+          backend = backend,
+          mutationId = "mut-a",
+          entityId = idA,
+          upsert =
+            EntityRecord(
+              entity_id = idA,
+              dataset_id = DATASET,
+              label = "Plot A",
+              geo_id = "P001",
+              geometry = plotA,
+            ),
         )
-      val savedA = respA.results.single().entity!!
       assertEquals(candidatesA.primary, savedA.geo_id)
       assertEquals(AgStackGeoId.s2CellToken(plotA), savedA.s2_cell_token)
 
       // 2. Creating adjacentPlotB in the same L13 cell (<95% L20 overlap) promotes it to L20.
-      val respB =
-        backend.MutateData(
-          MutateDataRequest(
-            survey_id = SURVEY,
-            mutations =
-              listOf(
-                DataMutation(
-                  mutation_id = "mut-b",
-                  entity_mutation =
-                    EntityMutation(
-                      entity_id = idB,
-                      dataset_id = DATASET,
-                      upsert =
-                        EntityRecord(
-                          entity_id = idB,
-                          dataset_id = DATASET,
-                          label = "Plot B",
-                          geo_id = candidatesB.primary,
-                          geometry = adjacentPlotB,
-                        ),
-                    ),
-                )
-              ),
-          )
+      val savedB =
+        upsertEntity(
+          backend = backend,
+          mutationId = "mut-b",
+          entityId = idB,
+          upsert =
+            EntityRecord(
+              entity_id = idB,
+              dataset_id = DATASET,
+              label = "Plot B",
+              geo_id = candidatesB.primary,
+              geometry = adjacentPlotB,
+            ),
         )
-      val savedB = respB.results.single().entity!!
       assertEquals(candidatesB.fallback, savedB.geo_id)
 
       // 3. Creating duplicatePlotA (>=95% L20 overlap with plotA) reuses plotA's GeoID.
-      val respDup =
-        backend.MutateData(
-          MutateDataRequest(
-            survey_id = SURVEY,
-            mutations =
-              listOf(
-                DataMutation(
-                  mutation_id = "mut-dup",
-                  entity_mutation =
-                    EntityMutation(
-                      entity_id = idDup,
-                      dataset_id = DATASET,
-                      upsert =
-                        EntityRecord(
-                          entity_id = idDup,
-                          dataset_id = DATASET,
-                          label = "Plot A Duplicate",
-                          geometry = duplicatePlotA,
-                        ),
-                    ),
-                )
-              ),
-          )
+      val savedDup =
+        upsertEntity(
+          backend = backend,
+          mutationId = "mut-dup",
+          entityId = idDup,
+          upsert =
+            EntityRecord(
+              entity_id = idDup,
+              dataset_id = DATASET,
+              label = "Plot A Duplicate",
+              geometry = duplicatePlotA,
+            ),
         )
-      val savedDup = respDup.results.single().entity!!
       assertEquals(candidatesA.primary, savedDup.geo_id)
     }
 
@@ -230,32 +194,21 @@ class AgStackEntityRegistrationTest {
         )
       val entityId = testId("plot-c")
 
-      val createResp =
-        backend.MutateData(
-          MutateDataRequest(
-            survey_id = SURVEY,
-            mutations =
-              listOf(
-                DataMutation(
-                  mutation_id = "mut-create",
-                  entity_mutation =
-                    EntityMutation(
-                      entity_id = entityId,
-                      dataset_id = DATASET,
-                      upsert =
-                        EntityRecord(
-                          entity_id = entityId,
-                          dataset_id = DATASET,
-                          label = "Parcel C",
-                          geometry = distantPlotC,
-                        ),
-                    ),
-                )
-              ),
-          )
+      val created =
+        upsertEntity(
+          backend = backend,
+          mutationId = "mut-create",
+          entityId = entityId,
+          upsert =
+            EntityRecord(
+              entity_id = entityId,
+              dataset_id = DATASET,
+              label = "Parcel C",
+              geometry = distantPlotC,
+            ),
         )
       // Synchronously inside MutateData it received the provisional L13 primary:
-      assertEquals(candidatesC.primary, createResp.results.single().entity!!.geo_id)
+      assertEquals(candidatesC.primary, created.geo_id)
       // Immediately after commit, AgStackEntityRegistrar reconciled it to the L20 fallback:
       assertEquals(listOf(distantPlotC), registeredGeometries)
       assertEquals(2, topicNotifier.entityChanges.size)
@@ -265,25 +218,12 @@ class AgStackEntityRegistrationTest {
       assertEquals(candidatesC.fallback, reconciled.geo_id)
 
       // Non-geometry property edits preserve the registered L20 fallback without calling AgStack:
-      backend.MutateData(
-        MutateDataRequest(
-          survey_id = SURVEY,
-          mutations =
-            listOf(
-              DataMutation(
-                mutation_id = "mut-prop",
-                entity_mutation =
-                  EntityMutation(
-                    entity_id = entityId,
-                    dataset_id = DATASET,
-                    upsert =
-                      EntityRecord(
-                        properties = mapOf("status" to TypedValue(string_value = "Completed"))
-                      ),
-                  ),
-              )
-            ),
-        )
+      upsertEntity(
+        backend = backend,
+        mutationId = "mut-prop",
+        entityId = entityId,
+        upsert =
+          EntityRecord(properties = mapOf("status" to TypedValue(string_value = "Completed"))),
       )
       assertEquals(1, registeredGeometries.size)
       val afterPropEdit =
@@ -292,26 +232,39 @@ class AgStackEntityRegistrationTest {
 
       // Editing the geometry invalidates the old GeoID and registers the new boundary with AgStack:
       val point = GeometryProtos.point(latitude = 30.90706, longitude = 74.78209)
-      backend.MutateData(
-        MutateDataRequest(
-          survey_id = SURVEY,
-          mutations =
-            listOf(
-              DataMutation(
-                mutation_id = "mut-move",
-                entity_mutation =
-                  EntityMutation(
-                    entity_id = entityId,
-                    dataset_id = DATASET,
-                    upsert = EntityRecord(geometry = point),
-                  ),
-              )
-            ),
-        )
+      upsertEntity(
+        backend = backend,
+        mutationId = "mut-move",
+        entityId = entityId,
+        upsert = EntityRecord(geometry = point),
       )
       assertEquals(listOf(distantPlotC, point), registeredGeometries)
       val afterMove =
         backend.GetEntity(GetEntityRequest(survey_id = SURVEY, entity_id = entityId)).entity!!
       assertEquals(AgStackGeoId.computeCandidate(point), afterMove.geo_id)
     }
+
+  private suspend fun upsertEntity(
+    backend: UserDataBackend,
+    mutationId: String,
+    entityId: String,
+    upsert: EntityRecord,
+  ): EntityRecord =
+    backend
+      .MutateData(
+        MutateDataRequest(
+          survey_id = SURVEY,
+          mutations =
+            listOf(
+              DataMutation(
+                mutation_id = mutationId,
+                entity_mutation =
+                  EntityMutation(entity_id = entityId, dataset_id = DATASET, upsert = upsert),
+              )
+            ),
+        )
+      )
+      .results
+      .single()
+      .entity!!
 }

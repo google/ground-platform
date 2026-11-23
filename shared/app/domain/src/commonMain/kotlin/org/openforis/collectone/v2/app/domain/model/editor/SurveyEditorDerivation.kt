@@ -272,65 +272,77 @@ object SurveyEditorDerivation {
       return if (withoutGeometry.size == dataset.properties.size) dataset
       else dataset.copy(properties = withoutGeometry)
     }
-    val keyProperty =
-      if (dataset.isGenerated) {
-        dataset.keyProperty.takeUnless { it.isBlank() || it == ID_PROPERTY }
-          ?: SamplePlotProperties.PLOT_ID
-      } else {
-        dataset.keyProperty
-      }
-    val labelProperty =
-      if (dataset.isGenerated) {
-        dataset.labelProperty.takeUnless {
-          it.isBlank() || it == ID_PROPERTY || it == LABEL_PROPERTY
-        } ?: keyProperty
-      } else {
-        dataset.labelProperty
-      }
-    val hasExplicitId =
-      keyProperty == ID_PROPERTY ||
-        entities.any { ID_PROPERTY in it.properties } ||
-        dataset.rows.any { !it.values[ID_PROPERTY].isNullOrBlank() }
-    val hasExplicitLabel =
-      labelProperty == LABEL_PROPERTY ||
-        entities.any { LABEL_PROPERTY in it.properties } ||
-        dataset.rows.any { !it.values[LABEL_PROPERTY].isNullOrBlank() }
+    val keyProperty = normalizeSamplePlotKeyProperty(dataset)
+    val labelProperty = normalizeSamplePlotLabelProperty(dataset, keyProperty)
+    val hasExplicitId = hasExplicitProperty(ID_PROPERTY, keyProperty, dataset, entities)
+    val hasExplicitLabel = hasExplicitProperty(LABEL_PROPERTY, labelProperty, dataset, entities)
     val filtered = withoutGeometry.filterNot { prop ->
       (prop.name == ID_PROPERTY && !hasExplicitId) ||
         (prop.name == LABEL_PROPERTY && !hasExplicitLabel)
     }
-    val normalizedProperties =
-      if (dataset.isGenerated) {
-        val byName = filtered.associateBy { it.name }
-        val canonicalSampleProps =
-          SamplePlotProperties.schema.map { schemaProp ->
-            val existing = byName[schemaProp.name]
-            if (existing?.conceptLink != null) {
-              schemaProp.copy(conceptLink = existing.conceptLink)
-            } else {
-              schemaProp
-            }
-          }
-        val extraProps = filtered.filterNot { it.name in SamplePlotProperties.all }
-        canonicalSampleProps + extraProps
-      } else {
-        filtered.map { prop ->
-          if (
-            prop.name == SamplePlotProperties.PLOT_ID &&
-              (prop.label.isBlank() || prop.label == SamplePlotProperties.PLOT_ID)
-          ) {
-            prop.copy(label = "Plot ID", required = true)
-          } else {
-            prop
-          }
-        }
-      }
+    val normalizedProperties = normalizeSamplePlotProperties(dataset.isGenerated, filtered)
     return dataset.copy(
       keyProperty = keyProperty,
       labelProperty = labelProperty,
       properties = normalizedProperties,
     )
   }
+
+  private fun normalizeSamplePlotKeyProperty(dataset: EntityDataset): String =
+    if (dataset.isGenerated) {
+      dataset.keyProperty.takeUnless { it.isBlank() || it == ID_PROPERTY }
+        ?: SamplePlotProperties.PLOT_ID
+    } else {
+      dataset.keyProperty
+    }
+
+  private fun normalizeSamplePlotLabelProperty(
+    dataset: EntityDataset,
+    keyProperty: String,
+  ): String =
+    if (dataset.isGenerated) {
+      dataset.labelProperty.takeUnless {
+        it.isBlank() || it == ID_PROPERTY || it == LABEL_PROPERTY
+      } ?: keyProperty
+    } else {
+      dataset.labelProperty
+    }
+
+  private fun hasExplicitProperty(
+    propertyName: String,
+    referencedName: String,
+    dataset: EntityDataset,
+    entities: List<GeospatialEntityItem>,
+  ): Boolean =
+    referencedName == propertyName ||
+      entities.any { propertyName in it.properties } ||
+      dataset.rows.any { !it.values[propertyName].isNullOrBlank() }
+
+  private fun normalizeSamplePlotProperties(
+    isGenerated: Boolean,
+    filtered: List<EntityProperty>,
+  ): List<EntityProperty> =
+    if (isGenerated) {
+      val byName = filtered.associateBy { it.name }
+      val canonicalSampleProps =
+        SamplePlotProperties.schema.map { schemaProp ->
+          val existing = byName[schemaProp.name]
+          if (existing?.conceptLink != null) {
+            schemaProp.copy(conceptLink = existing.conceptLink)
+          } else {
+            schemaProp
+          }
+        }
+      val extraProps = filtered.filterNot { it.name in SamplePlotProperties.all }
+      canonicalSampleProps + extraProps
+    } else {
+      filtered.map { prop ->
+        val needsPlotIdLabel =
+          prop.name == SamplePlotProperties.PLOT_ID &&
+            (prop.label.isBlank() || prop.label == SamplePlotProperties.PLOT_ID)
+        if (needsPlotIdLabel) prop.copy(label = "Plot ID", required = true) else prop
+      }
+    }
 
   private fun isSamplePlotEntities(entities: List<GeospatialEntityItem>): Boolean =
     entities.any { it.isGenerated } ||
@@ -347,51 +359,7 @@ object SurveyEditorDerivation {
   ): EntityDataset {
     val geometryType = layer.geometryType ?: GeometryType.POINT
     if (isSamplePlotEntities(entities)) {
-      val taken = SamplePlotProperties.all.toMutableSet()
-      val extraKeys =
-        entities
-          .flatMap { it.properties.keys }
-          .distinct()
-          .filterNot {
-            it in NON_PROPERTY_KEYS || it in SamplePlotProperties.all || it == ID_PROPERTY
-          }
-      val extraProperties = extraKeys.map { key ->
-        val name = uniqueName(propertyName(key), taken)
-        EntityProperty(name, key, inferType(entities.mapNotNull { it.properties[key] }))
-      }
-      val properties = SamplePlotProperties.schema + extraProperties
-      val dataset =
-        EntityDataset(
-          key = layer.id,
-          kind = DatasetKind.MAP_LAYER,
-          id = layer.datasetId ?: layer.id,
-          displayName = layer.label,
-          geometryType = geometryType,
-          keyProperty = SamplePlotProperties.PLOT_ID,
-          labelProperty = SamplePlotProperties.PLOT_ID,
-          properties = properties,
-          style =
-            LayerStyle(
-              colorHex = formatHexColorCss(layer.colorHex),
-              visibleByDefault = layer.isVisible,
-              iconName = layer.iconName,
-            ),
-        )
-      val runtimeKeys = runtimeKeysFor(dataset, entities)
-      return dataset.copy(
-        rows =
-          entities.map { entity ->
-            val values = rowValues(dataset, entity, runtimeKeys)
-            val plotId = values[SamplePlotProperties.PLOT_ID]?.takeIf { it.isNotBlank() }
-            val rowKey =
-              if (plotId != null && plotId != entity.id) "${layer.id}-$plotId" else entity.id
-            EntityRow(
-              key = rowKey,
-              values = values,
-              geometry = rowGeometry(entity),
-            )
-          }
-      )
+      return deriveSamplePlotDataset(layer, entities, geometryType)
     }
     val keys =
       entities
@@ -432,6 +400,57 @@ object SurveyEditorDerivation {
           EntityRow(
             key = entity.id,
             values = rowValues(dataset, entity, runtimeKeys),
+            geometry = rowGeometry(entity),
+          )
+        }
+    )
+  }
+
+  private fun deriveSamplePlotDataset(
+    layer: MapLayerItem,
+    entities: List<GeospatialEntityItem>,
+    geometryType: GeometryType,
+  ): EntityDataset {
+    val taken = SamplePlotProperties.all.toMutableSet()
+    val extraKeys =
+      entities
+        .flatMap { it.properties.keys }
+        .distinct()
+        .filterNot {
+          it in NON_PROPERTY_KEYS || it in SamplePlotProperties.all || it == ID_PROPERTY
+        }
+    val extraProperties = extraKeys.map { key ->
+      val name = uniqueName(propertyName(key), taken)
+      EntityProperty(name, key, inferType(entities.mapNotNull { it.properties[key] }))
+    }
+    val dataset =
+      EntityDataset(
+        key = layer.id,
+        kind = DatasetKind.MAP_LAYER,
+        id = layer.datasetId ?: layer.id,
+        displayName = layer.label,
+        geometryType = geometryType,
+        keyProperty = SamplePlotProperties.PLOT_ID,
+        labelProperty = SamplePlotProperties.PLOT_ID,
+        properties = SamplePlotProperties.schema + extraProperties,
+        style =
+          LayerStyle(
+            colorHex = formatHexColorCss(layer.colorHex),
+            visibleByDefault = layer.isVisible,
+            iconName = layer.iconName,
+          ),
+      )
+    val runtimeKeys = runtimeKeysFor(dataset, entities)
+    return dataset.copy(
+      rows =
+        entities.map { entity ->
+          val values = rowValues(dataset, entity, runtimeKeys)
+          val plotId = values[SamplePlotProperties.PLOT_ID]?.takeIf { it.isNotBlank() }
+          val rowKey =
+            if (plotId != null && plotId != entity.id) "${layer.id}-$plotId" else entity.id
+          EntityRow(
+            key = rowKey,
+            values = values,
             geometry = rowGeometry(entity),
           )
         }

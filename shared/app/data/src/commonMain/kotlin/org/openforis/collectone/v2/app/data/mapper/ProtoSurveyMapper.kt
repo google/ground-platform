@@ -300,54 +300,10 @@ object ProtoSurveyMapper {
         .toMap()
 
     if (entities.isEmpty()) {
-      return surveyDef.entity_datasets
-        .filter { it.type == EntityType.GEOSPATIAL }
-        .flatMap { ds ->
-          val mappedDs = SurveyDatasetMapper.entityDatasetFromProto(ds)
-          val layer = layersByDatasetId[ds.id]
-          val rawColor =
-            layer?.colorHex
-              ?: parseHexColorOrDefault(ds.default_style?.color, DEFAULT_THUMBNAIL_COLOR_HEX)
-          val colorHex = 0xFF000000L or (rawColor and 0xFFFFFFL)
-          val geomType = mappedDs.geometryType
-          mappedDs.rows.mapNotNull { row ->
-            val geom =
-              when (geomType) {
-                GeometryType.POLYGON ->
-                  row.geometry.takeIf { it.size >= 3 }?.let { Geometry.Polygon(listOf(it)) }
-                GeometryType.LINE_STRING ->
-                  row.geometry.takeIf { it.size >= 2 }?.let { Geometry.LineString(it) }
-                GeometryType.POINT -> row.geometry.firstOrNull()?.let { Geometry.Point(it) }
-              } ?: return@mapNotNull null
-            SurveyThumbnailFeatureProto(
-              entity_id = row.key,
-              geometry = GeometryMapper.toProto(geom),
-              color_hex = colorHex,
-            )
-          }
-        }
-        .sampleEvenly(SurveyThumbnailGenerator.MAX_THUMBNAIL_FEATURES)
+      return datasetThumbnailFeaturesToProto(surveyDef, layersByDatasetId)
     }
 
-    val visibleLayerIds = effectiveLayers.filter { it.isVisible }.map { it.id }.toSet()
-    val visibleDatasetIds =
-      effectiveLayers
-        .filter { it.isVisible }
-        .mapNotNull { it.datasetId?.takeIf(String::isNotBlank) }
-        .toSet()
-
-    val sourceEntities =
-      if (visibleLayerIds.isEmpty() && visibleDatasetIds.isEmpty()) {
-        entities
-      } else {
-        entities
-          .filter { entity ->
-            entity.layerId in visibleLayerIds ||
-              (entity.datasetId.isNotBlank() && entity.datasetId in visibleDatasetIds)
-          }
-          .ifEmpty { entities }
-      }
-
+    val sourceEntities = selectThumbnailSourceEntities(entities, effectiveLayers)
     return sourceEntities
       .mapNotNull { entity ->
         val geometry = entity.geometry ?: return@mapNotNull null
@@ -361,6 +317,60 @@ object ProtoSurveyMapper {
         )
       }
       .sampleEvenly(SurveyThumbnailGenerator.MAX_THUMBNAIL_FEATURES)
+  }
+
+  private fun datasetThumbnailFeaturesToProto(
+    surveyDef: SurveyDef,
+    layersByDatasetId: Map<String, MapLayerItem>,
+  ): List<SurveyThumbnailFeatureProto> =
+    surveyDef.entity_datasets
+      .filter { it.type == EntityType.GEOSPATIAL }
+      .flatMap { ds ->
+        val mappedDs = SurveyDatasetMapper.entityDatasetFromProto(ds)
+        val layer = layersByDatasetId[ds.id]
+        val rawColor =
+          layer?.colorHex
+            ?: parseHexColorOrDefault(ds.default_style?.color, DEFAULT_THUMBNAIL_COLOR_HEX)
+        val colorHex = 0xFF000000L or (rawColor and 0xFFFFFFL)
+        val geomType = mappedDs.geometryType
+        mappedDs.rows.mapNotNull { row ->
+          val geom =
+            when (geomType) {
+              GeometryType.POLYGON ->
+                row.geometry.takeIf { it.size >= 3 }?.let { Geometry.Polygon(listOf(it)) }
+              GeometryType.LINE_STRING ->
+                row.geometry.takeIf { it.size >= 2 }?.let { Geometry.LineString(it) }
+              GeometryType.POINT -> row.geometry.firstOrNull()?.let { Geometry.Point(it) }
+            } ?: return@mapNotNull null
+          SurveyThumbnailFeatureProto(
+            entity_id = row.key,
+            geometry = GeometryMapper.toProto(geom),
+            color_hex = colorHex,
+          )
+        }
+      }
+      .sampleEvenly(SurveyThumbnailGenerator.MAX_THUMBNAIL_FEATURES)
+
+  private fun selectThumbnailSourceEntities(
+    entities: List<GeospatialEntityItem>,
+    effectiveLayers: List<MapLayerItem>,
+  ): List<GeospatialEntityItem> {
+    val visibleLayerIds = effectiveLayers.filter { it.isVisible }.map { it.id }.toSet()
+    val visibleDatasetIds =
+      effectiveLayers
+        .filter { it.isVisible }
+        .mapNotNull { it.datasetId?.takeIf(String::isNotBlank) }
+        .toSet()
+    return if (visibleLayerIds.isEmpty() && visibleDatasetIds.isEmpty()) {
+      entities
+    } else {
+      entities
+        .filter { entity ->
+          entity.layerId in visibleLayerIds ||
+            (entity.datasetId.isNotBlank() && entity.datasetId in visibleDatasetIds)
+        }
+        .ifEmpty { entities }
+    }
   }
 
   private fun thumbnailFeaturesFromOverviewProto(

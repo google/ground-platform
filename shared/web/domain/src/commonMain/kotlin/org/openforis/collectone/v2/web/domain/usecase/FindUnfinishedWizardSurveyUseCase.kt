@@ -47,18 +47,18 @@ class FindUnfinishedWizardSurveyUseCase(
     surveys: List<SurveyPreviewItem>,
     ownerEmail: String,
   ): UnfinishedWizardSurvey? {
-    for (survey in surveys) {
-      if (
-        survey.state != SurveyLifecycleState.DRAFT ||
-          survey.title != CreateSurveyUseCase.DEFAULT_TITLE ||
-          !survey.ownerEmail.equals(ownerEmail, ignoreCase = true)
-      ) {
-        continue
-      }
-      val workingCopy = surveyEditorRepository.getWorkingCopyDraft(survey.id) ?: continue
-      val saved = surveyEditorRepository.getDraft(survey.id)
-      if (saved.details.purposeIds.isEmpty() && saved.details.otherPurpose.isBlank()) {
-        return UnfinishedWizardSurvey(survey, saved, workingCopy)
+    val candidates = surveys.filter { survey ->
+      survey.state == SurveyLifecycleState.DRAFT &&
+        survey.title == CreateSurveyUseCase.DEFAULT_TITLE &&
+        survey.ownerEmail.equals(ownerEmail, ignoreCase = true)
+    }
+    for (survey in candidates) {
+      val workingCopy = surveyEditorRepository.getWorkingCopyDraft(survey.id)
+      if (workingCopy != null) {
+        val saved = surveyEditorRepository.getDraft(survey.id)
+        if (saved.details.purposeIds.isEmpty() && saved.details.otherPurpose.isBlank()) {
+          return UnfinishedWizardSurvey(survey, saved, workingCopy)
+        }
       }
     }
     return null

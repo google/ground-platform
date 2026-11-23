@@ -1176,28 +1176,30 @@ class CreateSurveyWizardViewModel(
 
     surveyEditor.updateDetails { d -> d.copy(title = finalTitle) }
     val surveyId = session.value.workingSurveyId.ifBlank { surveyRepository.getActiveSurveyId() }
-    val saveError =
-      try {
-        // Changes the server rejected on an earlier attempt are sent again with this one.
-        outboxSyncRepository?.retryRejected(surveyId)
-        val savedDraft = surveyEditor.saveWorkingDraftNow() ?: surveyEditor.uiState.value.draft
-        surveyRepository.updateSurvey(surveyId) { preview ->
-          WizardDraftEdits.finishedSurveyPreview(
-            preview = preview,
-            surveyId = surveyId,
-            title = finalTitle,
-            description = finalDesc,
-            organizationId = finalOrgId,
-            organization = finalOrg,
-            savedDraft = savedDraft,
-          )
-        }
-        outboxSyncRepository?.awaitSurveySaved(surveyId)
-      } catch (e: CancellationException) {
-        throw e
-      } catch (e: Exception) {
-        DomainError.Unknown(e)
+    val saveError = runCatching {
+      // Changes the server rejected on an earlier attempt are sent again with this one.
+      outboxSyncRepository?.retryRejected(surveyId)
+      val savedDraft = surveyEditor.saveWorkingDraftNow() ?: surveyEditor.uiState.value.draft
+      surveyRepository.updateSurvey(surveyId) { preview ->
+        WizardDraftEdits.finishedSurveyPreview(
+          preview = preview,
+          surveyId = surveyId,
+          title = finalTitle,
+          description = finalDesc,
+          organizationId = finalOrgId,
+          organization = finalOrg,
+          savedDraft = savedDraft,
+        )
       }
+      outboxSyncRepository?.awaitSurveySaved(surveyId)
+    }
+      .fold(
+        onSuccess = { it },
+        onFailure = { e ->
+          if (e is CancellationException) throw e
+          DomainError.Unknown(e)
+        },
+      )
     if (saveError != null) {
       session.update {
         it.copy(

@@ -16,6 +16,7 @@ package org.openforis.collectone.v2.web.ui.wizard
 import org.openforis.collectone.v2.app.domain.model.LibraryPrograms
 import org.openforis.collectone.v2.app.domain.model.Organization
 import org.openforis.collectone.v2.app.domain.model.OrganizationLibrary
+import org.openforis.collectone.v2.app.domain.model.PurposePack
 import org.openforis.collectone.v2.app.domain.model.SurveyPreviewItem
 import org.openforis.collectone.v2.app.domain.model.editor.CollectEarthProjectImport
 import org.openforis.collectone.v2.app.domain.model.editor.DatasetKind
@@ -24,6 +25,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.PlotReviewWorkflow
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
 import org.openforis.collectone.v2.app.domain.usecase.CreateSurveyUseCase
 import org.openforis.collectone.v2.app.domain.usecase.ResolveLibraryUseCase
+import org.openforis.collectone.v2.app.domain.usecase.ResolvedLibrary
 import org.openforis.collectone.v2.app.ui.text.UiText
 import org.openforis.collectone.v2.web.domain.model.editor.CareDefaultsReason
 import org.openforis.collectone.v2.web.domain.model.editor.CreateSurveyWizardStep
@@ -219,30 +221,18 @@ internal fun buildCreateSurveyWizardUiState(
 ): CreateSurveyWizardUiState {
   val draft = editorUi.draft
   val details = draft.details
-  val email = editorUi.signedInUserEmail
-  val memberOrgs = organizations.filter { !it.isSynthetic && it.isMember(email) }
-  val selectedOrg = details.organizationId?.let { id -> organizations.firstOrNull { it.id == id } }
-  val library = resolveLibraryUseCase.forOrganization(libraries, selectedOrg?.id)
-  val sortedPacks = SurveyWizardRules.sortPurposePacks(library, s.collectionMode)
-  val selectedPacks = sortedPacks.filter { it.id in details.purposeIds }
-  val offeredPrograms = LibraryPrograms.offeredFor(selectedPacks, details.programIds)
+  val resolved =
+    resolveWizardCatalogState(
+      s = s,
+      editorUi = editorUi,
+      surveys = surveys,
+      organizations = organizations,
+      libraries = libraries,
+      resolveLibraryUseCase = resolveLibraryUseCase,
+      evaluateImpactReadiness = evaluateImpactReadiness,
+    )
   val primaryLayer = draft.datasets.firstOrNull { it.kind == DatasetKind.MAP_LAYER }
   val primaryForm = draft.forms.firstOrNull()
-  val existingSurveys =
-    surveys.filter { it.id != s.workingSurveyId }.sortedBy { it.title.lowercase() }
-  val hasFormVariantIncompatibility =
-    draft.forms.any { it.form.googleEarthIncompatibleQuestions().isNotEmpty() }
-
-  val readiness =
-    evaluateImpactReadiness(
-      draft = draft,
-      library = library,
-      selectedOrganization = selectedOrg,
-      language = details.defaultLanguage.ifBlank { "en" },
-      isCareSovereigntyApplied = s.isCareSovereigntyApplied,
-      isCollectorConsentRequired = s.isCollectorConsentRequired,
-    )
-
   return CreateSurveyWizardUiState(
     currentStep = s.step,
     workingSurveyId = s.workingSurveyId,
@@ -252,7 +242,7 @@ internal fun buildCreateSurveyWizardUiState(
     description = details.description,
     organizationId = details.organizationId,
     startMethod = s.startMethod,
-    copySourceSurveyId = s.copySourceSurveyId ?: existingSurveys.firstOrNull()?.id,
+    copySourceSurveyId = s.copySourceSurveyId ?: resolved.existingSurveys.firstOrNull()?.id,
     importedXFormsFileName = s.importedXFormsFileName,
     importedXForms = s.importedXForms,
     importedCepProjects = s.importedCepProjects,
@@ -265,7 +255,8 @@ internal fun buildCreateSurveyWizardUiState(
     showPurposeValidationErrors = s.showPurposeValidationErrors,
     surveyArea = details.surveyArea,
     showSurveyAreaValidationErrors = s.showSurveyAreaValidationErrors,
-    hasFormVariantIncompatibility = hasFormVariantIncompatibility,
+    hasFormVariantIncompatibility =
+      draft.forms.any { it.form.googleEarthIncompatibleQuestions().isNotEmpty() },
     showFormQuestionsValidationErrors = s.showFormQuestionsValidationErrors,
     validationAttemptCount = s.validationAttemptCount,
     mapFeatureSource = s.mapFeatureSource,
@@ -276,13 +267,13 @@ internal fun buildCreateSurveyWizardUiState(
     collectorConsentRequired =
       draft.sharing.collectorConsentRequired || s.isCollectorConsentRequired,
     collectorConsentText = draft.sharing.collectorConsentText.ifBlank { s.collectorConsentText },
-    existingSurveys = existingSurveys,
-    memberOrganizations = memberOrgs,
-    selectedOrganization = selectedOrg,
-    library = library,
-    sortedPurposePacks = sortedPacks,
-    offeredProgramIds = offeredPrograms,
-    selectedPurposePack = selectedPacks.singleOrNull(),
+    existingSurveys = resolved.existingSurveys,
+    memberOrganizations = resolved.memberOrgs,
+    selectedOrganization = resolved.selectedOrg,
+    library = resolved.library,
+    sortedPurposePacks = resolved.sortedPacks,
+    offeredProgramIds = resolved.offeredPrograms,
+    selectedPurposePack = resolved.selectedPacks.singleOrNull(),
     starterTemplateId = s.starterTemplateId,
     pendingStarterTemplateId = s.pendingStarterTemplateId,
     primaryMapLayer = primaryLayer,
@@ -295,9 +286,59 @@ internal fun buildCreateSurveyWizardUiState(
           s.effectiveCollectionMode(details.purposeIds),
         ),
     plotReview = primaryLayer?.let { PlotReviewWorkflow.setup(draft, it.key) },
-    impactReadiness = readiness,
-    careDefaultsAutoReason = s.careDefaultsAutoReason.takeIf { readiness.careSovereigntyApplied },
+    impactReadiness = resolved.readiness,
+    careDefaultsAutoReason =
+      s.careDefaultsAutoReason.takeIf { resolved.readiness.careSovereigntyApplied },
     isCareCardExpanded = s.isCareCardExpanded,
     isPromptingUnsavedDraft = s.isPromptingUnsavedDraft,
+  )
+}
+
+private class ResolvedWizardCatalogState(
+  val memberOrgs: List<Organization>,
+  val selectedOrg: Organization?,
+  val library: ResolvedLibrary,
+  val sortedPacks: List<PurposePack>,
+  val selectedPacks: List<PurposePack>,
+  val offeredPrograms: List<String>,
+  val existingSurveys: List<SurveyPreviewItem>,
+  val readiness: WizardImpactReadiness,
+)
+
+private fun resolveWizardCatalogState(
+  s: CreateSurveyWizardSession,
+  editorUi: SurveyEditorUiState,
+  surveys: List<SurveyPreviewItem>,
+  organizations: List<Organization>,
+  libraries: Map<String, OrganizationLibrary>,
+  resolveLibraryUseCase: ResolveLibraryUseCase,
+  evaluateImpactReadiness: EvaluateWizardImpactReadinessUseCase,
+): ResolvedWizardCatalogState {
+  val draft = editorUi.draft
+  val details = draft.details
+  val email = editorUi.signedInUserEmail
+  val memberOrgs = organizations.filter { !it.isSynthetic && it.isMember(email) }
+  val selectedOrg = details.organizationId?.let { id -> organizations.firstOrNull { it.id == id } }
+  val library = resolveLibraryUseCase.forOrganization(libraries, selectedOrg?.id)
+  val sortedPacks = SurveyWizardRules.sortPurposePacks(library, s.collectionMode)
+  val selectedPacks = sortedPacks.filter { it.id in details.purposeIds }
+  return ResolvedWizardCatalogState(
+    memberOrgs = memberOrgs,
+    selectedOrg = selectedOrg,
+    library = library,
+    sortedPacks = sortedPacks,
+    selectedPacks = selectedPacks,
+    offeredPrograms = LibraryPrograms.offeredFor(selectedPacks, details.programIds),
+    existingSurveys =
+      surveys.filter { it.id != s.workingSurveyId }.sortedBy { it.title.lowercase() },
+    readiness =
+      evaluateImpactReadiness(
+        draft = draft,
+        library = library,
+        selectedOrganization = selectedOrg,
+        language = details.defaultLanguage.ifBlank { "en" },
+        isCareSovereigntyApplied = s.isCareSovereigntyApplied,
+        isCollectorConsentRequired = s.isCollectorConsentRequired,
+      ),
   )
 }

@@ -577,41 +577,7 @@ open class DataServiceImplTest {
 
   @Test
   fun listEntities_withFieldMask_entityIds_offset_andPropertyKeys() = runTest {
-    val enriched =
-      listOf("A", "B", "C").mapIndexed { index, suffix ->
-        val id = testId("whisp-entity-$suffix")
-        backend.MutateData(
-          MutateDataRequest(
-            survey_id = SURVEY,
-            mutations =
-              listOf(
-                DataMutation(
-                  client_id = "c1",
-                  client_seq = 500L + index,
-                  entity_mutation =
-                    EntityMutation(
-                      entity_id = id,
-                      dataset_id = "sample_plots",
-                      upsert =
-                        EntityRecord(
-                          entity_id = id,
-                          dataset_id = "sample_plots",
-                          survey_id = SURVEY,
-                          label = "Plot $suffix",
-                          properties =
-                            mapOf(
-                              "plot_id" to TypedValue(string_value = "P$suffix"),
-                              "whisp_Country" to TypedValue(string_value = "KEN"),
-                              "whisp_TMF_def_2020" to TypedValue(string_value = "$index.0"),
-                            ),
-                        ),
-                    ),
-                )
-              ),
-          )
-        )
-        id
-      }
+    val enriched = seedWhispEntities(listOf("A", "B", "C"))
 
     // Schema-only query returns total_size and all distinct property keys including whisp_*.
     val schema =
@@ -670,6 +636,42 @@ open class DataServiceImplTest {
       }
     assertEquals(Status.Code.INVALID_ARGUMENT, error.status.code)
   }
+
+  private suspend fun seedWhispEntities(suffixes: List<String>): List<String> =
+    suffixes.mapIndexed { index, suffix ->
+      val id = testId("whisp-entity-$suffix")
+      backend.MutateData(
+        MutateDataRequest(
+          survey_id = SURVEY,
+          mutations =
+            listOf(
+              DataMutation(
+                client_id = "c1",
+                client_seq = 500L + index,
+                entity_mutation =
+                  EntityMutation(
+                    entity_id = id,
+                    dataset_id = "sample_plots",
+                    upsert =
+                      EntityRecord(
+                        entity_id = id,
+                        dataset_id = "sample_plots",
+                        survey_id = SURVEY,
+                        label = "Plot $suffix",
+                        properties =
+                          mapOf(
+                            "plot_id" to TypedValue(string_value = "P$suffix"),
+                            "whisp_Country" to TypedValue(string_value = "KEN"),
+                            "whisp_TMF_def_2020" to TypedValue(string_value = "$index.0"),
+                          ),
+                      ),
+                  ),
+              )
+            ),
+        )
+      )
+      id
+    }
 
   private fun exportEvent(id: String) =
     ImpactEvent(

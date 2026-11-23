@@ -28,6 +28,7 @@ import org.openforis.collectone.v2.app.data.mapper.ProtoOrganizationMapper
 import org.openforis.collectone.v2.app.data.mapper.ProtoRecordMapper
 import org.openforis.collectone.v2.app.data.mapper.ProtoSurveyMapper
 import org.openforis.collectone.v2.app.data.sync.rebaseRecords
+import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.MeasurementUnitSystem
 import org.openforis.collectone.v2.app.domain.model.SyncStatus
 import org.openforis.collectone.v2.app.domain.model.UserSettings
@@ -159,19 +160,9 @@ private fun LocalStoreTransaction.putSeededSurvey(
     )
   }
 
-  val effectiveDefForPreview =
-    if (
-      surveyDef.entity_datasets.isEmpty() &&
-        fullSurvey.workingCopy != null &&
-        fullSurvey.workingCopy.entity_datasets.isNotEmpty()
-    ) {
-      surveyDef.copy(entity_datasets = fullSurvey.workingCopy.entity_datasets)
-    } else {
-      surveyDef
-    }
   val preview =
     ProtoSurveyMapper.surveyPreviewFromProto(
-      surveyDef = effectiveDefForPreview,
+      surveyDef = effectiveDefForPreview(surveyDef, fullSurvey.workingCopy),
       acl = fullSurvey.saved.acl,
       mapLayers = mapLayers,
       entities = entities,
@@ -199,6 +190,26 @@ private fun LocalStoreTransaction.putSeededSurvey(
       ),
     )
   }
+  putSeededWorkingCopyDraft(surveyId, surveyDef, fullSurvey, entities)
+}
+
+private fun effectiveDefForPreview(surveyDef: SurveyDef, workingCopy: SurveyDef?): SurveyDef =
+  if (
+    surveyDef.entity_datasets.isEmpty() &&
+      workingCopy != null &&
+      workingCopy.entity_datasets.isNotEmpty()
+  ) {
+    surveyDef.copy(entity_datasets = workingCopy.entity_datasets)
+  } else {
+    surveyDef
+  }
+
+private fun LocalStoreTransaction.putSeededWorkingCopyDraft(
+  surveyId: String,
+  surveyDef: SurveyDef,
+  fullSurvey: SurveyRevisions,
+  entities: List<GeospatialEntityItem>,
+) {
   putSurveyWorkingCopyDraft(
     surveyId,
     fullSurvey.workingCopy

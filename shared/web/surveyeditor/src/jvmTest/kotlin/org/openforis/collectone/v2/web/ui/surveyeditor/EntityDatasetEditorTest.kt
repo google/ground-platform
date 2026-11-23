@@ -189,58 +189,8 @@ class EntityDatasetEditorTest {
     runDesktopComposeUiTest(width = 1440, height = 900) {
       val remoteCols = listOf("plot_id") + (1..230).map { i -> "whisp_metric_$i" }
       val fetchedTiles = mutableListOf<Pair<Int, List<String>>>()
-      val fakeRepo =
-        object : EntityTableRepository {
-          override val isLazyLoadingEnabled: Boolean = true
-
-          override suspend fun fetchSchema(surveyId: String, datasetId: String): EntityTableSchema =
-            EntityTableSchema(totalCount = 414, propertyKeys = remoteCols)
-
-          override suspend fun fetchEntityProperties(
-            surveyId: String,
-            datasetId: String,
-            entityIds: List<String>,
-            propertyKeys: List<String>,
-          ): Map<String, Map<String, String>> {
-            fetchedTiles += entityIds.size to propertyKeys
-            return entityIds.associateWith { id ->
-              propertyKeys.associateWith { col -> "$col:$id" }
-            }
-          }
-
-          override suspend fun fetchEntityProperties(
-            surveyId: String,
-            datasetId: String,
-            entityId: String,
-          ): Map<String, String>? = null
-
-          override suspend fun fetchAllEntitiesForExport(
-            surveyId: String,
-            datasetId: String,
-          ): List<GeospatialEntityItem> = emptyList()
-        }
-
-      val rows =
-        (1..414).map { r ->
-          EntityRow(
-            key = "r$r",
-            values = mapOf("plot_id" to "P$r"),
-            geometry = listOf(LatLng(0.0 + r * 0.001, 36.0)),
-          )
-        }
-      val dataset =
-        EntityDataset(
-          key = "d101",
-          kind = DatasetKind.MAP_LAYER,
-          id = "sample_plots",
-          displayName = "Sample plots",
-          geometryType = GeometryType.POINT,
-          keyProperty = "plot_id",
-          labelProperty = "plot_id",
-          properties =
-            listOf(EntityProperty("plot_id", "Plot ID", PropertyType.TEXT, required = true)),
-          rows = rows,
-        )
+      val fakeRepo = fakeLazyEntityTableRepository(remoteCols, totalCount = 414, fetchedTiles)
+      val dataset = samplePlotsDataset(rowCount = 414)
       val draft = SurveyEditorDraft.blank("survey-lazy").copy(datasets = listOf(dataset))
       val baseState = surveyEditorViewModel(draft)
       baseState.select(SurveyEditorSection.Dataset(dataset.key))
@@ -278,10 +228,7 @@ class EntityDatasetEditorTest {
         fetchedTiles.any { (_, cols) -> cols.any { it.startsWith("whisp_") } },
         "Expected expanding whisp_* to trigger lazy fetch of initial visible tile",
       )
-      assertTrue(
-        fetchedTiles.all { (rowCount, cols) -> rowCount <= 50 && cols.size <= 24 },
-        "Expected bounded tile fetches, got $fetchedTiles",
-      )
+      assertBoundedTileFetches(fetchedTiles)
       // Far-off whisp columns are not eagerly composed.
       onAllNodesWithText("whisp_metric_230").assertCountEquals(0)
 
@@ -297,10 +244,7 @@ class EntityDatasetEditorTest {
         fetchedTiles.size > fetchesBeforeScroll,
         "Expected horizontal scrollbar click to trigger lazy fetch for newly visible whisp_* chunk",
       )
-      assertTrue(
-        fetchedTiles.all { (rowCount, cols) -> rowCount <= 50 && cols.size <= 24 },
-        "Expected all scrolled tile fetches to remain bounded, got $fetchedTiles",
-      )
+      assertBoundedTileFetches(fetchedTiles)
       // Origin column whisp_metric_1 scrolled out of view while mid-table whisp_* columns show.
       onAllNodesWithText("whisp_metric_1").assertCountEquals(0)
 
@@ -309,6 +253,66 @@ class EntityDatasetEditorTest {
       waitForIdle()
       onNodeWithTag(columnGroupHeaderTestTag("whisp_")).assertIsDisplayed()
     }
+
+  private fun fakeLazyEntityTableRepository(
+    remoteCols: List<String>,
+    totalCount: Int,
+    fetchedTiles: MutableList<Pair<Int, List<String>>>,
+  ): EntityTableRepository =
+    object : EntityTableRepository {
+      override val isLazyLoadingEnabled: Boolean = true
+
+      override suspend fun fetchSchema(surveyId: String, datasetId: String): EntityTableSchema =
+        EntityTableSchema(totalCount = totalCount, propertyKeys = remoteCols)
+
+      override suspend fun fetchEntityProperties(
+        surveyId: String,
+        datasetId: String,
+        entityIds: List<String>,
+        propertyKeys: List<String>,
+      ): Map<String, Map<String, String>> {
+        fetchedTiles += entityIds.size to propertyKeys
+        return entityIds.associateWith { id -> propertyKeys.associateWith { col -> "$col:$id" } }
+      }
+
+      override suspend fun fetchEntityProperties(
+        surveyId: String,
+        datasetId: String,
+        entityId: String,
+      ): Map<String, String>? = null
+
+      override suspend fun fetchAllEntitiesForExport(
+        surveyId: String,
+        datasetId: String,
+      ): List<GeospatialEntityItem> = emptyList()
+    }
+
+  private fun samplePlotsDataset(rowCount: Int): EntityDataset =
+    EntityDataset(
+      key = "d101",
+      kind = DatasetKind.MAP_LAYER,
+      id = "sample_plots",
+      displayName = "Sample plots",
+      geometryType = GeometryType.POINT,
+      keyProperty = "plot_id",
+      labelProperty = "plot_id",
+      properties = listOf(EntityProperty("plot_id", "Plot ID", PropertyType.TEXT, required = true)),
+      rows =
+        (1..rowCount).map { r ->
+          EntityRow(
+            key = "r$r",
+            values = mapOf("plot_id" to "P$r"),
+            geometry = listOf(LatLng(0.0 + r * 0.001, 36.0)),
+          )
+        },
+    )
+
+  private fun assertBoundedTileFetches(fetchedTiles: List<Pair<Int, List<String>>>) {
+    assertTrue(
+      fetchedTiles.all { (rowCount, cols) -> rowCount <= 50 && cols.size <= 24 },
+      "Expected bounded tile fetches, got $fetchedTiles",
+    )
+  }
 
   @Test
   fun lazyTableRepository_asyncTileCompletion_replacesLoadingPlaceholderWithoutExtraScroll() =

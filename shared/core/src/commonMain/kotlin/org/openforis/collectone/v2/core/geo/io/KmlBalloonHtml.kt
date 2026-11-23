@@ -25,6 +25,20 @@ import org.openforis.collectone.v2.core.geo.io.KmlBalloonWriter.jsonString
 internal object KmlBalloonHtml {
   private const val MAX_INLINE_HASH_FORMS_CHARS = 16_384
 
+  private const val READ_ONLY_PROPERTIES_STYLES =
+    """  html, body { margin: 0; padding: 0; width: 100%; background: #FFFFFF; color: #1F1F1F; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; line-height: 1.45; }
+  #earth-balloon-content, #balloon-content { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  .c1-card { padding: 14px 16px; box-sizing: border-box; }
+  .c1-eyebrow { font-size: 11px; font-weight: 600; color: #0B57D0; letter-spacing: 0.02em; margin-bottom: 4px; }
+  .c1-title { margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1F1F1F; word-break: break-word; }
+  .c1-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .c1-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #F0F4F9; color: #444746; font-size: 11px; font-weight: 500; }
+  .c1-table { width: 100%; border-collapse: collapse; border-top: 1px solid #E0E2EC; }
+  .c1-table th, .c1-table td { text-align: left; vertical-align: top; padding: 8px 0; border-bottom: 1px solid #E0E2EC; word-break: break-word; }
+  .c1-table th { width: 38%; padding-right: 12px; color: #444746; font-weight: 500; font-size: 12px; }
+  .c1-table td { color: #1F1F1F; font-size: 13px; }
+  .c1-empty { margin: 8px 0 0 0; color: #444746; font-size: 12px; }"""
+
   /**
    * Builds a self-contained read-only Terrarium-styled properties balloon for layers without Google
    * Earth-enabled forms, rendering the placemark's title, GeoID, coordinates, and [propertyKeys]
@@ -48,25 +62,14 @@ internal object KmlBalloonHtml {
         val label = escapeXml(formatPropertyLabel(key))
         """        <tr data-c1-prop-row="true"><th>$label</th><td data-c1-prop-val="true">${'$'}[$key]</td></tr>"""
       }
-    val fallbackTitleJs = jsStringLiteral(cleanDataset)
+    val script = buildReadOnlyPropertiesScript(jsStringLiteral(cleanDataset))
     return """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-  html, body { margin: 0; padding: 0; width: 100%; background: #FFFFFF; color: #1F1F1F; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; line-height: 1.45; }
-  #earth-balloon-content, #balloon-content { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-  .c1-card { padding: 14px 16px; box-sizing: border-box; }
-  .c1-eyebrow { font-size: 11px; font-weight: 600; color: #0B57D0; letter-spacing: 0.02em; margin-bottom: 4px; }
-  .c1-title { margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1F1F1F; word-break: break-word; }
-  .c1-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .c1-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #F0F4F9; color: #444746; font-size: 11px; font-weight: 500; }
-  .c1-table { width: 100%; border-collapse: collapse; border-top: 1px solid #E0E2EC; }
-  .c1-table th, .c1-table td { text-align: left; vertical-align: top; padding: 8px 0; border-bottom: 1px solid #E0E2EC; word-break: break-word; }
-  .c1-table th { width: 38%; padding-right: 12px; color: #444746; font-weight: 500; font-size: 12px; }
-  .c1-table td { color: #1F1F1F; font-size: 13px; }
-  .c1-empty { margin: 8px 0 0 0; color: #444746; font-size: 12px; }
+$READ_ONLY_PROPERTIES_STYLES
 </style>
 </head>
 <body>
@@ -85,7 +88,14 @@ $rowsHtml
   <p class="c1-empty" id="c1-ro-empty"${if (propertyKeys.isNotEmpty()) """ style="display:none"""" else ""}>No recorded properties for this feature.</p>
 </div>
 <script>
-(function () {
+$script
+</script>
+</body>
+</html>"""
+  }
+
+  private fun buildReadOnlyPropertiesScript(fallbackTitleJs: String): String =
+    """(function () {
   function clean(el) {
     var txt = el ? (el.textContent || '').trim() : '';
     return txt.indexOf('${'$'}[') === 0 ? '' : txt;
@@ -121,11 +131,7 @@ $rowsHtml
   var emptyEl = document.getElementById('c1-ro-empty');
   if (tableEl) tableEl.style.display = visibleCount > 0 ? '' : 'none';
   if (emptyEl) emptyEl.style.display = visibleCount > 0 ? 'none' : '';
-})();
-</script>
-</body>
-</html>"""
-  }
+})();"""
 
   internal fun formatPropertyLabel(key: String): String {
     val words = key.trim().replace('_', ' ').replace('-', ' ').replace(Regex("\\s+"), " ")

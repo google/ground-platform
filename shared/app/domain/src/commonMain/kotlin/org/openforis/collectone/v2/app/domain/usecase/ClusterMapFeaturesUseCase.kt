@@ -78,37 +78,37 @@ class ClusterMapFeaturesUseCase {
       )
     }
 
+  private class WorkingCluster(
+    val members: MutableList<MapClusterFeatureItem>,
+    var sumX: Float,
+    var sumY: Float,
+    var minX: Float,
+    var maxX: Float,
+    var minY: Float,
+    var maxY: Float,
+  ) {
+    val cx: Float
+      get() = sumX / members.size
+
+    val cy: Float
+      get() = sumY / members.size
+
+    fun absorb(other: WorkingCluster) {
+      members.addAll(other.members)
+      sumX += other.sumX
+      sumY += other.sumY
+      if (other.minX < minX) minX = other.minX
+      if (other.maxX > maxX) maxX = other.maxX
+      if (other.minY < minY) minY = other.minY
+      if (other.maxY > maxY) maxY = other.maxY
+    }
+  }
+
   operator fun invoke(
     features: List<MapClusterFeatureItem>,
     radiusNormalized: Float,
   ): List<MapFeatureCluster> {
     if (features.isEmpty() || radiusNormalized <= 0f) return emptyList()
-
-    class WorkingCluster(
-      val members: MutableList<MapClusterFeatureItem>,
-      var sumX: Float,
-      var sumY: Float,
-      var minX: Float,
-      var maxX: Float,
-      var minY: Float,
-      var maxY: Float,
-    ) {
-      val cx: Float
-        get() = sumX / members.size
-
-      val cy: Float
-        get() = sumY / members.size
-
-      fun absorb(other: WorkingCluster) {
-        members.addAll(other.members)
-        sumX += other.sumX
-        sumY += other.sumY
-        if (other.minX < minX) minX = other.minX
-        if (other.maxX > maxX) maxX = other.maxX
-        if (other.minY < minY) minY = other.minY
-        if (other.maxY > maxY) maxY = other.maxY
-      }
-    }
 
     // 1. For large datasets (>64 features), pre-aggregate points into a fine sub-radius spatial
     // hash grid (cell <= 0.25 * radiusNormalized) so points within the same micro-cell are
@@ -282,33 +282,23 @@ class ClusterMapFeaturesUseCase {
         mergedRemnant = false
         for (i in working.indices.reversed()) {
           val remnant = working[i]
-          if (remnant.members.size > SMALL_REMNANT_MAX_SIZE) continue
-          var bestIdx = -1
-          var bestMetric = Float.MAX_VALUE
-          for (j in working.indices) {
-            if (i == j) continue
-            val candidate = working[j]
-            val dx = abs(remnant.cx - candidate.cx)
-            val dy = abs(remnant.cy - candidate.cy)
-            if (dx > captureRx || dy > captureRy) continue
-            val metric = hypot(dx / captureRx, dy / captureRy)
-            if (metric < bestMetric) {
-              val combinedSpanX =
-                maxOf(remnant.maxX, candidate.maxX) - minOf(remnant.minX, candidate.minX)
-              val combinedSpanY =
-                maxOf(remnant.maxY, candidate.maxY) - minOf(remnant.minY, candidate.minY)
-              if (combinedSpanX <= maxSpanX && combinedSpanY <= maxSpanY) {
-                bestMetric = metric
-                bestIdx = j
-              }
+          if (remnant.members.size <= SMALL_REMNANT_MAX_SIZE) {
+            val bestIdx =
+              findBestRemnantMergeTarget(
+                working = working,
+                remnantIndex = i,
+                captureRx = captureRx,
+                captureRy = captureRy,
+                maxSpanX = maxSpanX,
+                maxSpanY = maxSpanY,
+              )
+            if (bestIdx >= 0) {
+              val target = working[bestIdx]
+              working.removeAt(i)
+              target.absorb(remnant)
+              mergedRemnant = true
+              break
             }
-          }
-          if (bestIdx >= 0) {
-            val target = working[bestIdx]
-            working.removeAt(i)
-            target.absorb(remnant)
-            mergedRemnant = true
-            break
           }
         }
       }
@@ -332,6 +322,38 @@ class ClusterMapFeaturesUseCase {
           maxNormalizedY = cluster.maxY,
         )
       }
+  }
+
+  private fun findBestRemnantMergeTarget(
+    working: List<WorkingCluster>,
+    remnantIndex: Int,
+    captureRx: Float,
+    captureRy: Float,
+    maxSpanX: Float,
+    maxSpanY: Float,
+  ): Int {
+    val remnant = working[remnantIndex]
+    var bestIdx = -1
+    var bestMetric = Float.MAX_VALUE
+    for (j in working.indices) {
+      if (j != remnantIndex) {
+        val candidate = working[j]
+        val dx = abs(remnant.cx - candidate.cx)
+        val dy = abs(remnant.cy - candidate.cy)
+        if (dx <= captureRx && dy <= captureRy) {
+          val metric = hypot(dx / captureRx, dy / captureRy)
+          val combinedSpanX =
+            maxOf(remnant.maxX, candidate.maxX) - minOf(remnant.minX, candidate.minX)
+          val combinedSpanY =
+            maxOf(remnant.maxY, candidate.maxY) - minOf(remnant.minY, candidate.minY)
+          if (metric < bestMetric && combinedSpanX <= maxSpanX && combinedSpanY <= maxSpanY) {
+            bestMetric = metric
+            bestIdx = j
+          }
+        }
+      }
+    }
+    return bestIdx
   }
 
   /**

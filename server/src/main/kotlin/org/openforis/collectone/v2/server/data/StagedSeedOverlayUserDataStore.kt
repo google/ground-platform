@@ -98,7 +98,7 @@ private constructor(
     }
   }
 
-  private open inner class MergedReader(
+  private abstract inner class BaseMergedReader(
     protected val p: UserDataReader,
     protected val o: UserDataReader,
   ) : UserDataReader {
@@ -124,6 +124,47 @@ private constructor(
     override fun searchConcepts(organizationIds: List<String>, query: String): List<ConceptDef> =
       p.searchConcepts(organizationIds, query)
 
+    override fun impactEvents(): List<ImpactEvent> = p.impactEvents() + o.impactEvents()
+
+    override fun auditRecords(): List<AuditRecord> = p.auditRecords() + o.auditRecords()
+
+    override fun places(): List<PlaceRecord> = p.places()
+
+    override fun mutationLogs(): List<MutationLogRecord> = p.mutationLogs()
+
+    override fun user(userId: String): UserAccount? = o.user(userId) ?: p.user(userId)
+
+    override fun usersByEmail(email: String): List<UserAccount> =
+      (o.usersByEmail(email) + p.usersByEmail(email)).distinctBy { it.userId }
+
+    override fun surveyIdsWithAclEmail(email: String): List<String> =
+      (p.surveyIdsWithAclEmail(email) + o.surveyIdsWithAclEmail(email)).distinct()
+
+    override fun organizationIdsWithMemberEmail(email: String): List<String> =
+      p.organizationIdsWithMemberEmail(email)
+
+    override fun surveyIdsWithAclUser(userId: String): List<String> =
+      (p.surveyIdsWithAclUser(userId) + o.surveyIdsWithAclUser(userId)).distinct()
+
+    override fun organizationIdsWithMemberUser(userId: String): List<String> =
+      p.organizationIdsWithMemberUser(userId)
+
+    override fun appliedWatermarks(clientId: String): List<AppliedMutationWatermark> {
+      val merged = LinkedHashMap<String, AppliedMutationWatermark>()
+      for (wm in p.appliedWatermarks(clientId) + o.appliedWatermarks(clientId)) {
+        val prev = merged[wm.scope]
+        if (prev == null || wm.client_seq > prev.client_seq) {
+          merged[wm.scope] = wm
+        }
+      }
+      return merged.values.toList()
+    }
+  }
+
+  private open inner class MergedReader(
+    p: UserDataReader,
+    o: UserDataReader,
+  ) : BaseMergedReader(p, o) {
     override fun survey(surveyId: String): SurveyDef? =
       if (surveyId in overlaySurveyIds) o.survey(surveyId)
       else patchUneditedSeedSurvey(p.survey(surveyId))
@@ -193,49 +234,13 @@ private constructor(
       if (surveyId in overlaySurveyIds) o.plotLock(surveyId, entityId)
       else p.plotLock(surveyId, entityId)
 
-    override fun impactEvents(): List<ImpactEvent> = p.impactEvents() + o.impactEvents()
-
-    override fun auditRecords(): List<AuditRecord> = p.auditRecords() + o.auditRecords()
-
-    override fun places(): List<PlaceRecord> = p.places()
-
-    override fun mutationLogs(): List<MutationLogRecord> = p.mutationLogs()
-
-    override fun user(userId: String): UserAccount? = o.user(userId) ?: p.user(userId)
-
-    override fun usersByEmail(email: String): List<UserAccount> =
-      (o.usersByEmail(email) + p.usersByEmail(email)).distinctBy { it.userId }
-
-    override fun surveyIdsWithAclEmail(email: String): List<String> =
-      (p.surveyIdsWithAclEmail(email) + o.surveyIdsWithAclEmail(email)).distinct()
-
-    override fun organizationIdsWithMemberEmail(email: String): List<String> =
-      p.organizationIdsWithMemberEmail(email)
-
     override fun surveysOwnedBy(userId: String, email: String): List<SurveyDef> =
       p.surveysOwnedBy(userId, email).mapNotNull(::patchUneditedSeedSurvey) +
         o.surveysOwnedBy(userId, email)
 
-    override fun surveyIdsWithAclUser(userId: String): List<String> =
-      (p.surveyIdsWithAclUser(userId) + o.surveyIdsWithAclUser(userId)).distinct()
-
-    override fun organizationIdsWithMemberUser(userId: String): List<String> =
-      p.organizationIdsWithMemberUser(userId)
-
     override fun surveysInOrganization(organizationId: String): List<SurveyDef> =
       p.surveysInOrganization(organizationId).mapNotNull(::patchUneditedSeedSurvey) +
         o.surveysInOrganization(organizationId)
-
-    override fun appliedWatermarks(clientId: String): List<AppliedMutationWatermark> {
-      val merged = LinkedHashMap<String, AppliedMutationWatermark>()
-      for (wm in p.appliedWatermarks(clientId) + o.appliedWatermarks(clientId)) {
-        val prev = merged[wm.scope]
-        if (prev == null || wm.client_seq > prev.client_seq) {
-          merged[wm.scope] = wm
-        }
-      }
-      return merged.values.toList()
-    }
   }
 
   private fun isOverlayScope(scope: String): Boolean = overlaySurveyIds.any { id ->

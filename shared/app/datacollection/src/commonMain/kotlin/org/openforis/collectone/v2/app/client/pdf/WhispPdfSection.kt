@@ -17,7 +17,9 @@ import kotlin.math.ceil
 import kotlin.math.max
 import org.openforis.collectone.v2.app.domain.model.WhispAnalysis
 import org.openforis.collectone.v2.app.domain.model.WhispBeforeAfterComparison
+import org.openforis.collectone.v2.app.domain.model.WhispIndicator
 import org.openforis.collectone.v2.app.domain.model.WhispMetric
+import org.openforis.collectone.v2.app.domain.model.WhispPlotContext
 import org.openforis.collectone.v2.app.domain.model.WhispRiskLevel
 import org.openforis.collectone.v2.app.domain.model.WhispRiskVerdict
 import org.openforis.collectone.v2.app.domain.model.WhispYearlyCategory
@@ -52,55 +54,70 @@ internal fun PdfReportLayout.whispRiskAnalysisSection(
     whispRiskVerdictChips(analysis.riskVerdicts, strings)
   }
 
-  val ctx = analysis.context
-  if (!ctx.isEmpty) {
-    ctx.country?.let { country ->
-      val display =
-        if (ctx.producerCountry != null && ctx.producerCountry != country) {
-          "$country (${ctx.producerCountry})"
-        } else {
-          country
-        }
-      field("Country", display)
-    }
-    ctx.adminLevel1?.let { field("Admin region", it) }
-    ctx.areaHa?.let { field("Plot area", "$it ha") }
-    ctx.inWaterbody?.let { field("In waterbody", if (it) "Yes" else "No") }
-  }
+  whispContextSection(analysis.context)
+  whispYearlySection(analysis, strings)
+  whispActiveComparisonsSection(analysis, strings)
+  whispIndicatorsSection(analysis.indicators, strings.riskIndicators)
+  whispActiveMetricsSection(analysis.treeCoverMetrics, strings.riskTreecover, analysis)
+  whispActiveMetricsSection(analysis.commodityMetrics, strings.riskCommodities, analysis)
+}
 
-  if (analysis.yearlySeries.isNotEmpty()) {
-    groupLabel(strings.riskYearlyChart)
-    if (analysis.hasYearlyActivity) {
-      whispYearlyVectorChart(analysis, strings)
-    } else {
-      paragraph(strings.riskYearlyNoActivity, size = 9f, color = PdfPalette.onSurfaceVariant)
-    }
+private fun PdfReportLayout.whispContextSection(ctx: WhispPlotContext) {
+  if (ctx.isEmpty) return
+  ctx.country?.let { country ->
+    val display =
+      if (ctx.producerCountry != null && ctx.producerCountry != country) {
+        "$country (${ctx.producerCountry})"
+      } else {
+        country
+      }
+    field("Country", display)
   }
+  ctx.adminLevel1?.let { field("Admin region", it) }
+  ctx.areaHa?.let { field("Plot area", "$it ha") }
+  ctx.inWaterbody?.let { field("In waterbody", if (it) "Yes" else "No") }
+}
 
+private fun PdfReportLayout.whispYearlySection(analysis: WhispAnalysis, strings: PdfReportStrings) {
+  if (analysis.yearlySeries.isEmpty()) return
+  groupLabel(strings.riskYearlyChart)
+  if (analysis.hasYearlyActivity) {
+    whispYearlyVectorChart(analysis, strings)
+  } else {
+    paragraph(strings.riskYearlyNoActivity, size = 9f, color = PdfPalette.onSurfaceVariant)
+  }
+}
+
+private fun PdfReportLayout.whispActiveComparisonsSection(
+  analysis: WhispAnalysis,
+  strings: PdfReportStrings,
+) {
   val activeComparisons = analysis.beforeAfterComparisons.filter { it.hasNonZeroValues }
-  if (activeComparisons.isNotEmpty()) {
-    groupLabel(strings.riskBeforeAfter)
-    whispBeforeAfterBars(activeComparisons, analysis)
-  }
+  if (activeComparisons.isEmpty()) return
+  groupLabel(strings.riskBeforeAfter)
+  whispBeforeAfterBars(activeComparisons, analysis)
+}
 
-  if (analysis.indicators.isNotEmpty()) {
-    groupLabel(strings.riskIndicators)
-    analysis.indicators.forEach { indicator ->
-      field(indicator.label, indicator.rawValue.replaceFirstChar { it.uppercaseChar() })
-    }
+private fun PdfReportLayout.whispIndicatorsSection(
+  indicators: List<WhispIndicator>,
+  heading: String,
+) {
+  if (indicators.isEmpty()) return
+  groupLabel(heading)
+  indicators.forEach { indicator ->
+    field(indicator.label, indicator.rawValue.replaceFirstChar { it.uppercaseChar() })
   }
+}
 
-  val activeTreeCover = analysis.treeCoverMetrics.filter { (it.numericValue ?: 1.0) > 0.0 }
-  if (activeTreeCover.isNotEmpty()) {
-    groupLabel(strings.riskTreecover)
-    whispMetricBars(activeTreeCover, analysis)
-  }
-
-  val activeCommodities = analysis.commodityMetrics.filter { (it.numericValue ?: 1.0) > 0.0 }
-  if (activeCommodities.isNotEmpty()) {
-    groupLabel(strings.riskCommodities)
-    whispMetricBars(activeCommodities, analysis)
-  }
+private fun PdfReportLayout.whispActiveMetricsSection(
+  metrics: List<WhispMetric>,
+  heading: String,
+  analysis: WhispAnalysis,
+) {
+  val active = metrics.filter { (it.numericValue ?: 1.0) > 0.0 }
+  if (active.isEmpty()) return
+  groupLabel(heading)
+  whispMetricBars(active, analysis)
 }
 
 private fun PdfReportLayout.whispRiskVerdictChips(
@@ -141,6 +158,25 @@ private fun PdfReportLayout.whispRiskVerdictChips(
   spacer(chipHeight + 8f)
 }
 
+private class PdfChartFrame(
+  val plotLeft: Float,
+  val plotRight: Float,
+  val plotTop: Float,
+  val plotBottom: Float,
+  val minYear: Int,
+  val maxYear: Int,
+  val yMax: Double,
+) {
+  private val yearSpan = max(1, maxYear - minYear)
+  val plotW = (plotRight - plotLeft).coerceAtLeast(1f)
+  val plotH = (plotBottom - plotTop).coerceAtLeast(1f)
+
+  fun xForYear(year: Int): Float = plotLeft + ((year - minYear).toFloat() / yearSpan) * plotW
+
+  fun yForVal(value: Double): Float =
+    plotTop + plotH * (1f - (value / yMax).toFloat().coerceIn(0f, 1f))
+}
+
 /**
  * Draws a vector multi-series yearly disturbance/loss/fire chart with a 2020 EUDR cutoff marker and
  * color legend directly onto the PDF page.
@@ -152,17 +188,11 @@ private fun PdfReportLayout.whispYearlyVectorChart(
   val seriesList = analysis.chartSeries
   if (seriesList.isEmpty()) return
   val allYears = seriesList.flatMap { s -> s.points.map { it.first } }.distinct().sorted()
-  val minYear = allYears.first()
-  val maxYear = allYears.last()
-  val yearSpan = max(1, maxYear - minYear)
-
-  val rawMax = seriesList.maxOfOrNull { it.maxValue } ?: 1.0
-  val yMax = pdfNiceAxisMax(rawMax, analysis.isPercentUnit)
+  val yMax = pdfNiceAxisMax(seriesList.maxOfOrNull { it.maxValue } ?: 1.0, analysis.isPercentUnit)
 
   val chartBoxHeight = 148f
   val legendRows = ceil(seriesList.size / 3.0).toInt().coerceAtLeast(1)
-  val totalHeight = chartBoxHeight + legendRows * 14f + 16f
-  ensureSpace(totalHeight)
+  ensureSpace(chartBoxHeight + legendRows * 14f + 16f)
 
   val boxTop = y + 2f
   page.roundedRect(
@@ -176,26 +206,35 @@ private fun PdfReportLayout.whispYearlyVectorChart(
     lineWidth = 0.5f,
   )
 
-  val yAxisW = 38f
-  val plotLeft = left + yAxisW + 6f
-  val plotRight = right - 12f
-  val plotTop = boxTop + 14f
-  val plotBottom = boxTop + chartBoxHeight - 24f
-  val plotW = (plotRight - plotLeft).coerceAtLeast(1f)
-  val plotH = (plotBottom - plotTop).coerceAtLeast(1f)
+  val frame =
+    PdfChartFrame(
+      plotLeft = left + 44f,
+      plotRight = right - 12f,
+      plotTop = boxTop + 14f,
+      plotBottom = boxTop + chartBoxHeight - 24f,
+      minYear = allYears.first(),
+      maxYear = allYears.last(),
+      yMax = yMax,
+    )
+  drawChartGridAndAxes(frame, analysis, strings)
+  drawChartSeries(frame, seriesList)
+  val legendY = drawChartLegend(seriesList, startY = boxTop + chartBoxHeight + 12f)
+  spacer(legendY - y + 8f)
+}
 
-  fun xForYear(year: Int): Float = plotLeft + ((year - minYear).toFloat() / yearSpan) * plotW
-  fun yForVal(value: Double): Float =
-    plotTop + plotH * (1f - (value / yMax).toFloat().coerceIn(0f, 1f))
-
+private fun PdfReportLayout.drawChartGridAndAxes(
+  frame: PdfChartFrame,
+  analysis: WhispAnalysis,
+  strings: PdfReportStrings,
+) {
   // Horizontal gridlines & Y-axis ticks
   listOf(1.0, 0.5, 0.0).forEach { frac ->
-    val gy = plotTop + plotH * (1f - frac.toFloat())
-    page.line(plotLeft, gy, plotRight, gy, PdfPalette.outlineVariant, 0.5f)
-    val label = analysis.formatMetricValue(yMax * frac)
+    val gy = frame.plotTop + frame.plotH * (1f - frac.toFloat())
+    page.line(frame.plotLeft, gy, frame.plotRight, gy, PdfPalette.outlineVariant, 0.5f)
+    val label = analysis.formatMetricValue(frame.yMax * frac)
     val tw = PdfFont.REGULAR.measure(label, 7.5f)
     page.text(
-      x = plotLeft - tw - 5f,
+      x = frame.plotLeft - tw - 5f,
       baseline = gy + 2.5f,
       text = label,
       font = PdfFont.REGULAR,
@@ -205,51 +244,59 @@ private fun PdfReportLayout.whispYearlyVectorChart(
   }
 
   // Vertical 2020 EUDR cutoff marker
-  if (2020 in minYear..maxYear) {
-    val cutoffX = xForYear(2020)
-    page.line(cutoffX, plotTop, cutoffX, plotBottom, PdfRiskMoreInfo, 0.9f)
+  if (2020 in frame.minYear..frame.maxYear) {
+    val cutoffX = frame.xForYear(2020)
+    page.line(cutoffX, frame.plotTop, cutoffX, frame.plotBottom, PdfRiskMoreInfo, 0.9f)
     val cutLabel = strings.riskCutoff2020
     val cutW = PdfFont.BOLD.measure(cutLabel, 7.5f)
-    val labelX = (cutoffX - cutW / 2f).coerceIn(plotLeft, plotRight - cutW)
-    page.text(labelX, plotBottom + 14f, cutLabel, PdfFont.BOLD, 7.5f, PdfRiskMoreInfo)
+    val labelX = (cutoffX - cutW / 2f).coerceIn(frame.plotLeft, frame.plotRight - cutW)
+    page.text(labelX, frame.plotBottom + 14f, cutLabel, PdfFont.BOLD, 7.5f, PdfRiskMoreInfo)
   }
 
   // X-axis min & max year labels
   page.text(
-    plotLeft,
-    plotBottom + 14f,
-    minYear.toString(),
+    frame.plotLeft,
+    frame.plotBottom + 14f,
+    frame.minYear.toString(),
     PdfFont.REGULAR,
     7.5f,
     PdfPalette.onSurfaceVariant,
   )
-  val maxYearLabel = maxYear.toString()
+  val maxYearLabel = frame.maxYear.toString()
   val maxYearW = PdfFont.REGULAR.measure(maxYearLabel, 7.5f)
   page.text(
-    plotRight - maxYearW,
-    plotBottom + 14f,
+    frame.plotRight - maxYearW,
+    frame.plotBottom + 14f,
     maxYearLabel,
     PdfFont.REGULAR,
     7.5f,
     PdfPalette.onSurfaceVariant,
   )
+}
 
-  // Overlaid series polylines & markers
+private fun PdfReportLayout.drawChartSeries(
+  frame: PdfChartFrame,
+  seriesList: List<WhispYearlySeries>,
+) {
   seriesList.forEachIndexed { idx, series ->
     val color = pdfColorForSeries(series, idx)
-    val pts = series.points.map { (yr, v) -> xForYear(yr) to yForVal(v) }
+    val pts = series.points.map { (yr, v) -> frame.xForYear(yr) to frame.yForVal(v) }
     if (pts.size >= 2) {
       page.polyline(points = pts, closed = false, stroke = color, lineWidth = 1.4f)
     }
     series.points.forEach { (yr, v) ->
       if (v > 0.0) {
-        page.circle(xForYear(yr), yForVal(v), 2.2f, fill = color)
+        page.circle(frame.xForYear(yr), frame.yForVal(v), 2.2f, fill = color)
       }
     }
   }
+}
 
-  // Wrapping color legend below chart
-  var legendY = boxTop + chartBoxHeight + 12f
+private fun PdfReportLayout.drawChartLegend(
+  seriesList: List<WhispYearlySeries>,
+  startY: Float,
+): Float {
+  var legendY = startY
   var cursorX = left
   seriesList.forEachIndexed { idx, series ->
     val color = pdfColorForSeries(series, idx)
@@ -263,8 +310,7 @@ private fun PdfReportLayout.whispYearlyVectorChart(
     page.text(cursorX + 9f, legendY, series.label, PdfFont.REGULAR, 8f, PdfPalette.onSurface)
     cursorX += itemW
   }
-
-  spacer(legendY - y + 8f)
+  return legendY
 }
 
 private fun PdfReportLayout.whispBeforeAfterBars(

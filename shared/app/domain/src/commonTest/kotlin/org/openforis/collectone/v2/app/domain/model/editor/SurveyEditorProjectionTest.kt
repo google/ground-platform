@@ -78,40 +78,7 @@ class SurveyEditorProjectionTest {
   @Test
   fun samplePlotRowsProjectToDeterministicUuidsAndRoundTripPlotIds() {
     val surveyId = "00000099-56d7-5c1d-9457-7457267120a3"
-    val sampleLayer =
-      EntityDataset(
-        key = "d1",
-        kind = DatasetKind.MAP_LAYER,
-        id = "sample_plots",
-        displayName = "Sample plots",
-        keyProperty = SamplePlotProperties.PLOT_ID,
-        labelProperty = SamplePlotProperties.PLOT_ID,
-        properties = SamplePlotProperties.schema,
-        rows =
-          listOf(
-            EntityRow(
-              key = "d1-P001",
-              values =
-                mapOf(
-                  SamplePlotProperties.PLOT_ID to "P001",
-                  SamplePlotProperties.STRATUM to "1",
-                  SamplePlotProperties.SAMPLE_ORDER to "1",
-                ),
-              geometry = listOf(LatLng(-1.29, 36.82)),
-            ),
-            EntityRow(
-              key = "d1-P002",
-              values =
-                mapOf(
-                  SamplePlotProperties.PLOT_ID to "P002",
-                  SamplePlotProperties.STRATUM to "1",
-                  SamplePlotProperties.SAMPLE_ORDER to "2",
-                ),
-              geometry = listOf(LatLng(-1.30, 36.83)),
-            ),
-          ),
-        generator = SampleDesignConfig(),
-      )
+    val sampleLayer = samplePlotDataset()
     val draft = SurveyEditorDraft.blank(surveyId).copy(datasets = listOf(sampleLayer))
 
     val projected =
@@ -144,20 +111,20 @@ class SurveyEditorProjectionTest {
       projected.entities.map { it.properties[SamplePlotProperties.PLOT_ID] },
     )
 
-    val refreshed =
+    val refreshedDataset =
       SurveyEditorDerivation.refresh(
-        draft = draft,
-        surveyId = surveyId,
-        mapLayers = projected.mapLayers,
-        entities = projected.entities,
-      )
-    val refreshedDataset = refreshed.datasets.single()
-    val refreshedRows = refreshedDataset.rows
+          draft = draft,
+          surveyId = surveyId,
+          mapLayers = projected.mapLayers,
+          entities = projected.entities,
+        )
+        .datasets
+        .single()
     assertEquals(SamplePlotProperties.schema, refreshedDataset.properties)
-    assertEquals(listOf("d1-P001", "d1-P002"), refreshedRows.map { it.key })
+    assertEquals(listOf("d1-P001", "d1-P002"), refreshedDataset.rows.map { it.key })
     assertEquals(
       listOf("P001", "P002"),
-      refreshedRows.map { it.values[SamplePlotProperties.PLOT_ID] },
+      refreshedDataset.rows.map { it.values[SamplePlotProperties.PLOT_ID] },
     )
     assertEquals(emptyList(), EntityDatasetValidator.validate(refreshedDataset, emptyList()))
 
@@ -175,23 +142,9 @@ class SurveyEditorProjectionTest {
     assertEquals(emptyList(), EntityDatasetValidator.validate(derivedDataset, emptyList()))
 
     // Previously saved drafts polluted with derived "id"/"label" columns are healed on refresh.
-    val pollutedDraft =
-      draft.copy(
-        datasets =
-          listOf(
-            sampleLayer.copy(
-              properties =
-                listOf(
-                  EntityProperty("id", "ID", PropertyType.TEXT, required = true),
-                  EntityProperty("label", "Label", PropertyType.TEXT),
-                  EntityProperty("plot_id", "plot_id", PropertyType.TEXT),
-                )
-            )
-          )
-      )
     val healedDataset =
       SurveyEditorDerivation.refresh(
-          draft = pollutedDraft,
+          draft = pollutedSamplePlotDraft(draft, sampleLayer),
           surveyId = surveyId,
           mapLayers = projected.mapLayers,
           entities = projected.entities,
@@ -202,6 +155,59 @@ class SurveyEditorProjectionTest {
     assertEquals(SamplePlotProperties.schema, healedDataset.properties)
     assertEquals(emptyList(), EntityDatasetValidator.validate(healedDataset, emptyList()))
   }
+
+  private fun samplePlotDataset(): EntityDataset =
+    EntityDataset(
+      key = "d1",
+      kind = DatasetKind.MAP_LAYER,
+      id = "sample_plots",
+      displayName = "Sample plots",
+      keyProperty = SamplePlotProperties.PLOT_ID,
+      labelProperty = SamplePlotProperties.PLOT_ID,
+      properties = SamplePlotProperties.schema,
+      rows =
+        listOf(
+          EntityRow(
+            key = "d1-P001",
+            values =
+              mapOf(
+                SamplePlotProperties.PLOT_ID to "P001",
+                SamplePlotProperties.STRATUM to "1",
+                SamplePlotProperties.SAMPLE_ORDER to "1",
+              ),
+            geometry = listOf(LatLng(-1.29, 36.82)),
+          ),
+          EntityRow(
+            key = "d1-P002",
+            values =
+              mapOf(
+                SamplePlotProperties.PLOT_ID to "P002",
+                SamplePlotProperties.STRATUM to "1",
+                SamplePlotProperties.SAMPLE_ORDER to "2",
+              ),
+            geometry = listOf(LatLng(-1.30, 36.83)),
+          ),
+        ),
+      generator = SampleDesignConfig(),
+    )
+
+  private fun pollutedSamplePlotDraft(
+    draft: SurveyEditorDraft,
+    sampleLayer: EntityDataset,
+  ): SurveyEditorDraft =
+    draft.copy(
+      datasets =
+        listOf(
+          sampleLayer.copy(
+            properties =
+              listOf(
+                EntityProperty("id", "ID", PropertyType.TEXT, required = true),
+                EntityProperty("label", "Label", PropertyType.TEXT),
+                EntityProperty("plot_id", "plot_id", PropertyType.TEXT),
+              )
+          )
+        )
+    )
 
   @Test
   fun editingRowGeometry_recomputesAgStackGeoId_whileUnchangedGeometryPreservesFallbackGeoId() {

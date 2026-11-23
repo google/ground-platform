@@ -81,49 +81,91 @@ object MutationDiffs {
       get() = diff.isEmpty && !requiresUpsert
   }
 
+  private class EntityDiffBuilder {
+    private var up = EntityRecord()
+    private var del = EntityRecord()
+    private var hasUp = false
+    private var hasDel = false
+
+    fun recordUpsert(transform: (EntityRecord) -> EntityRecord) {
+      up = transform(up)
+      hasUp = true
+    }
+
+    fun recordDelete(transform: (EntityRecord) -> EntityRecord) {
+      del = transform(del)
+      hasDel = true
+    }
+
+    fun <T> diffScalar(
+      oldVal: T,
+      newVal: T,
+      isEmpty: (T) -> Boolean,
+      apply: EntityRecord.(T) -> EntityRecord,
+    ) {
+      if (oldVal == newVal) return
+      if (isEmpty(newVal)) {
+        recordDelete { it.apply(oldVal) }
+      } else {
+        recordUpsert { it.apply(newVal) }
+      }
+    }
+
+    fun toSparseDiff(): SparseDiff<EntityRecord> =
+      SparseDiff(delete = del.takeIf { hasDel }, upsert = up.takeIf { hasUp })
+  }
+
   /**
    * The label, geometry, and properties as sparse masks. Canonical and legacy geometry fields are
    * compared together: any change upserts the new one, and removing every geometry deletes it.
    */
   fun entity(old: EntityRecord, new: EntityRecord): EntityDiff {
-    var up = EntityRecord()
-    var del = EntityRecord()
-    var hasUp = false
-    var hasDel = false
+    val builder = EntityDiffBuilder()
+    builder.diffScalar(old.label, new.label, String::isEmpty) { copy(label = it) }
+    diffEntityGeometry(old, new, builder)
+    diffEntityProperties(old, new, builder)
+    builder.diffScalar(old.dataset_name, new.dataset_name, String::isEmpty) {
+      copy(dataset_name = it)
+    }
+    builder.diffScalar(old.layer_id, new.layer_id, String::isEmpty) { copy(layer_id = it) }
+    builder.diffScalar(old.geo_id, new.geo_id, String::isEmpty) { copy(geo_id = it) }
+    builder.diffScalar(old.area_hectares, new.area_hectares, { it == 0.0 }) {
+      copy(area_hectares = it)
+    }
+    builder.diffScalar(old.perimeter_meters, new.perimeter_meters, { it == 0 }) {
+      copy(perimeter_meters = it)
+    }
+    builder.diffScalar(old.color_hex, new.color_hex, { it == 0L }) { copy(color_hex = it) }
+    builder.diffScalar(old.singular_type_label, new.singular_type_label, String::isEmpty) {
+      copy(singular_type_label = it)
+    }
 
-    if (old.label != new.label) {
-      if (new.label.isEmpty()) {
-        del = del.copy(label = old.label)
-        hasDel = true
-      } else {
-        up = up.copy(label = new.label)
-        hasUp = true
-      }
+    return EntityDiff(
+      builder.toSparseDiff(),
+      unpatchableEntityFields(old) != unpatchableEntityFields(new),
+    )
+  }
+
+  private fun diffEntityGeometry(
+    old: EntityRecord,
+    new: EntityRecord,
+    builder: EntityDiffBuilder,
+  ) {
+    if (geometryFields(old) == geometryFields(new)) return
+    when {
+      new.geometry != null -> builder.recordUpsert { it.copy(geometry = new.geometry) }
+      new.point != null -> builder.recordUpsert { it.copy(point = new.point) }
+      new.trace != null -> builder.recordUpsert { it.copy(trace = new.trace) }
+      new.shape != null -> builder.recordUpsert { it.copy(shape = new.shape) }
+      else -> builder.recordDelete { it.copy(geometry = Geometry()) }
     }
-    if (geometryFields(old) != geometryFields(new)) {
-      when {
-        new.geometry != null -> {
-          up = up.copy(geometry = new.geometry)
-          hasUp = true
-        }
-        new.point != null -> {
-          up = up.copy(point = new.point)
-          hasUp = true
-        }
-        new.trace != null -> {
-          up = up.copy(trace = new.trace)
-          hasUp = true
-        }
-        new.shape != null -> {
-          up = up.copy(shape = new.shape)
-          hasUp = true
-        }
-        else -> {
-          del = del.copy(geometry = Geometry())
-          hasDel = true
-        }
-      }
-    }
+  }
+
+  private fun diffEntityProperties(
+    old: EntityRecord,
+    new: EntityRecord,
+    builder: EntityDiffBuilder,
+  ) {
     val upProps = LinkedHashMap<String, TypedValue>()
     val delProps = LinkedHashMap<String, TypedValue>()
     for (key in (old.properties.keys + new.properties.keys).distinct()) {
@@ -132,102 +174,27 @@ object MutationDiffs {
         if (value != null) upProps[key] = value else delProps[key] = TypedValue()
       }
     }
-    if (upProps.isNotEmpty()) {
-      up = up.copy(properties = upProps)
-      hasUp = true
-    }
-    if (delProps.isNotEmpty()) {
-      del = del.copy(properties = delProps)
-      hasDel = true
-    }
-
-    if (old.dataset_name != new.dataset_name) {
-      if (new.dataset_name.isEmpty()) {
-        del = del.copy(dataset_name = old.dataset_name)
-        hasDel = true
-      } else {
-        up = up.copy(dataset_name = new.dataset_name)
-        hasUp = true
-      }
-    }
-    if (old.layer_id != new.layer_id) {
-      if (new.layer_id.isEmpty()) {
-        del = del.copy(layer_id = old.layer_id)
-        hasDel = true
-      } else {
-        up = up.copy(layer_id = new.layer_id)
-        hasUp = true
-      }
-    }
-    if (old.geo_id != new.geo_id) {
-      if (new.geo_id.isEmpty()) {
-        del = del.copy(geo_id = old.geo_id)
-        hasDel = true
-      } else {
-        up = up.copy(geo_id = new.geo_id)
-        hasUp = true
-      }
-    }
-    if (old.area_hectares != new.area_hectares) {
-      if (new.area_hectares == 0.0) {
-        del = del.copy(area_hectares = old.area_hectares)
-        hasDel = true
-      } else {
-        up = up.copy(area_hectares = new.area_hectares)
-        hasUp = true
-      }
-    }
-    if (old.perimeter_meters != new.perimeter_meters) {
-      if (new.perimeter_meters == 0) {
-        del = del.copy(perimeter_meters = old.perimeter_meters)
-        hasDel = true
-      } else {
-        up = up.copy(perimeter_meters = new.perimeter_meters)
-        hasUp = true
-      }
-    }
-    if (old.color_hex != new.color_hex) {
-      if (new.color_hex == 0L) {
-        del = del.copy(color_hex = old.color_hex)
-        hasDel = true
-      } else {
-        up = up.copy(color_hex = new.color_hex)
-        hasUp = true
-      }
-    }
-    if (old.singular_type_label != new.singular_type_label) {
-      if (new.singular_type_label.isEmpty()) {
-        del = del.copy(singular_type_label = old.singular_type_label)
-        hasDel = true
-      } else {
-        up = up.copy(singular_type_label = new.singular_type_label)
-        hasUp = true
-      }
-    }
-
-    val patchable = { r: EntityRecord ->
-      normalize(r)
-        .copy(
-          label = "",
-          geometry = null,
-          point = null,
-          trace = null,
-          shape = null,
-          properties = emptyMap(),
-          dataset_name = "",
-          layer_id = "",
-          geo_id = "",
-          area_hectares = 0.0,
-          perimeter_meters = 0,
-          color_hex = 0L,
-          singular_type_label = "",
-        )
-    }
-    return EntityDiff(
-      SparseDiff(delete = del.takeIf { hasDel }, upsert = up.takeIf { hasUp }),
-      patchable(old) != patchable(new),
-    )
+    if (upProps.isNotEmpty()) builder.recordUpsert { it.copy(properties = upProps) }
+    if (delProps.isNotEmpty()) builder.recordDelete { it.copy(properties = delProps) }
   }
+
+  private fun unpatchableEntityFields(record: EntityRecord): EntityRecord =
+    normalize(record)
+      .copy(
+        label = "",
+        geometry = null,
+        point = null,
+        trace = null,
+        shape = null,
+        properties = emptyMap(),
+        dataset_name = "",
+        layer_id = "",
+        geo_id = "",
+        area_hectares = 0.0,
+        perimeter_meters = 0,
+        color_hex = 0L,
+        singular_type_label = "",
+      )
 
   /** Sparse diff for a submission, and whether other fields changed too. */
   data class SubmissionDiff(val diff: SparseDiff<SubmissionRecord>, val requiresUpsert: Boolean) {

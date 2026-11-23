@@ -227,7 +227,7 @@ internal class DataMutationApplier(
     val emDelete = em.delete
     val emUpsert =
       em.upsert?.let {
-        if (stored == null && !isOrganizer && !it.is_deleted && !it.is_field_created) {
+        if (shouldMarkFieldCreated(stored, it)) {
           it.copy(is_field_created = true)
         } else {
           it
@@ -272,6 +272,11 @@ internal class DataMutationApplier(
       entity = updated,
       conflict_status = patchConflictStatus(em.base_revision, existing.revision),
     )
+  }
+
+  private fun shouldMarkFieldCreated(stored: EntityRecord?, upsert: EntityRecord): Boolean {
+    val isNewByCollector = stored == null && !isOrganizer
+    return isNewByCollector && !upsert.is_deleted && !upsert.is_field_created
   }
 
   /**

@@ -160,52 +160,30 @@ class WhispEntityEnrichmentTest {
     val (backend, _) = testFixture(calledGeometries)
     val entityId = testId("whisp-plot-2")
 
-    backend.MutateData(
-      MutateDataRequest(
-        survey_id = SURVEY,
-        mutations =
-          listOf(
-            DataMutation(
-              mutation_id = "mut-create",
-              entity_mutation =
-                EntityMutation(
-                  entity_id = entityId,
-                  dataset_id = DATASET,
-                  upsert =
-                    EntityRecord(
-                      entity_id = entityId,
-                      dataset_id = DATASET,
-                      label = "Parcel 102",
-                      geometry = plotPolygon1,
-                      properties = mapOf("farmer_name" to TypedValue(string_value = "Ana Silva")),
-                    ),
-                ),
-            )
-          ),
-      )
+    mutateEntity(
+      backend = backend,
+      mutationId = "mut-create",
+      entityId = entityId,
+      upsert =
+        EntityRecord(
+          entity_id = entityId,
+          dataset_id = DATASET,
+          label = "Parcel 102",
+          geometry = plotPolygon1,
+          properties = mapOf("farmer_name" to TypedValue(string_value = "Ana Silva")),
+        ),
     )
 
     // Updating a non-geometry field does NOT re-call Whisp and preserves whisp_* properties.
-    backend.MutateData(
-      MutateDataRequest(
-        survey_id = SURVEY,
-        mutations =
-          listOf(
-            DataMutation(
-              mutation_id = "mut-label",
-              entity_mutation =
-                EntityMutation(
-                  entity_id = entityId,
-                  dataset_id = DATASET,
-                  upsert =
-                    EntityRecord(
-                      label = "Parcel 102 Updated",
-                      properties = mapOf("crop" to TypedValue(string_value = "cocoa")),
-                    ),
-                ),
-            )
-          ),
-      )
+    mutateEntity(
+      backend = backend,
+      mutationId = "mut-label",
+      entityId = entityId,
+      upsert =
+        EntityRecord(
+          label = "Parcel 102 Updated",
+          properties = mapOf("crop" to TypedValue(string_value = "cocoa")),
+        ),
     )
     assertEquals(1, calledGeometries.size, "Non-geometry edits must not re-invoke Whisp")
     val afterLabelEdit =
@@ -216,22 +194,11 @@ class WhispEntityEnrichmentTest {
     assertEquals("low", afterLabelEdit.properties["whisp_Ind_01_treecover"]?.string_value)
 
     // Updating the entity's geometry re-calls Whisp and replaces whisp_* properties.
-    backend.MutateData(
-      MutateDataRequest(
-        survey_id = SURVEY,
-        mutations =
-          listOf(
-            DataMutation(
-              mutation_id = "mut-geo",
-              entity_mutation =
-                EntityMutation(
-                  entity_id = entityId,
-                  dataset_id = DATASET,
-                  upsert = EntityRecord(geometry = plotPolygon2),
-                ),
-            )
-          ),
-      )
+    mutateEntity(
+      backend = backend,
+      mutationId = "mut-geo",
+      entityId = entityId,
+      upsert = EntityRecord(geometry = plotPolygon2),
     )
     assertEquals(listOf(plotPolygon1, plotPolygon2), calledGeometries)
     val afterGeoEdit =
@@ -240,6 +207,27 @@ class WhispEntityEnrichmentTest {
     assertEquals("4.8", afterGeoEdit.properties["whisp_Plot_area_ha"]?.string_value)
     assertEquals("high", afterGeoEdit.properties["whisp_Ind_01_treecover"]?.string_value)
     assertEquals("cocoa", afterGeoEdit.properties["crop"]?.string_value)
+  }
+
+  private suspend fun mutateEntity(
+    backend: UserDataBackend,
+    mutationId: String,
+    entityId: String,
+    upsert: EntityRecord,
+  ) {
+    backend.MutateData(
+      MutateDataRequest(
+        survey_id = SURVEY,
+        mutations =
+          listOf(
+            DataMutation(
+              mutation_id = mutationId,
+              entity_mutation =
+                EntityMutation(entity_id = entityId, dataset_id = DATASET, upsert = upsert),
+            )
+          ),
+      )
+    )
   }
 
   @Test

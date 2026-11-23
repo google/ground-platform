@@ -385,13 +385,12 @@ class CompiledForm internal constructor(val formDef: FormDef) {
     val trimmed = fieldRef.trim()
     if (trimmed.isEmpty()) return parentRelativePath
     val normalized = RecordMutator.normalizeSchemaPath(trimmed, rootAliases)
-    if (trimmed.startsWith('/') || parentRelativePath.isEmpty()) {
-      return normalized
-    }
-    if (normalized == parentRelativePath || normalized.startsWith("$parentRelativePath/")) {
-      return normalized
-    }
-    return "$parentRelativePath/$normalized"
+    val isDirectPath =
+      trimmed.startsWith('/') ||
+        parentRelativePath.isEmpty() ||
+        normalized == parentRelativePath ||
+        normalized.startsWith("$parentRelativePath/")
+    return if (isDirectPath) normalized else "$parentRelativePath/$normalized"
   }
 }
 

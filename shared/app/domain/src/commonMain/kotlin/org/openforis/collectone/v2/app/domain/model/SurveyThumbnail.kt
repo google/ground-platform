@@ -758,6 +758,16 @@ internal object MapboxStaticUrlEncoder {
    * the full spatial distribution fits within the URL budget. Returns `null` when zero valid
    * features fit.
    */
+  private data class CollectionUrlSpec(
+    val baseUrl: String,
+    val viewportSuffix: String,
+    val encodedPrefix: String,
+    val encodedSuffix: String,
+    val encodedComma: String,
+    val fixedUrlOverhead: Int,
+    val maxUrlLength: Int,
+  )
+
   fun buildGreedyFeatureCollectionUrl(
     baseUrl: String,
     viewportSuffix: String,
@@ -775,62 +785,63 @@ internal object MapboxStaticUrlEncoder {
         encodedSuffix.length +
         ")/".length +
         viewportSuffix.length
+    val spec =
+      CollectionUrlSpec(
+        baseUrl = baseUrl,
+        viewportSuffix = viewportSuffix,
+        encodedPrefix = encodedPrefix,
+        encodedSuffix = encodedSuffix,
+        encodedComma = encodedComma,
+        fixedUrlOverhead = fixedUrlOverhead,
+        maxUrlLength = maxUrlLength,
+      )
 
     val smallPolygonCount = features.count {
       it.type == GeometryType.POLYGON &&
         stripClosingVertex(it.vertices).size in 3..MAX_COMPACT_PLOT_VERTICES
     }
+    val compactUrl =
+      if (smallPolygonCount > COMPACT_MULTIPOLYGON_THRESHOLD) {
+        buildBestCompactMultiPolygonUrl(spec = spec, features = features, bounds = bounds)
+      } else {
+        null
+      }
+    if (compactUrl != null) return compactUrl
 
-    if (smallPolygonCount > COMPACT_MULTIPOLYGON_THRESHOLD) {
-      val compactUrl =
-        buildBestCompactMultiPolygonUrl(
+    val acceptedEncodedFeatures =
+      features
+        .mapNotNull { feature ->
+          buildFeatureGeoJsonOrNull(feature, bounds)?.let(::encodeComponent)
+        }
+        .takeIf { it.isNotEmpty() }
+        ?.let { encoded ->
+          selectFittingSubset(
+            allEncodedFeatures = encoded,
+            fixedUrlOverhead = fixedUrlOverhead,
+            separatorLength = encodedComma.length,
+            maxUrlLength = maxUrlLength,
+          )
+        }
+        .orEmpty()
+
+    return acceptedEncodedFeatures
+      .takeIf { it.isNotEmpty() }
+      ?.let {
+        assembleCollectionUrl(
           baseUrl = baseUrl,
           viewportSuffix = viewportSuffix,
           encodedPrefix = encodedPrefix,
           encodedSuffix = encodedSuffix,
           encodedComma = encodedComma,
-          fixedUrlOverhead = fixedUrlOverhead,
-          features = features,
-          bounds = bounds,
-          maxUrlLength = maxUrlLength,
+          encodedFeatures = it,
         )
-      if (compactUrl != null) return compactUrl
-    }
-
-    val allEncodedFeatures = features.mapNotNull { feature ->
-      buildFeatureGeoJsonOrNull(feature, bounds)?.let(::encodeComponent)
-    }
-    if (allEncodedFeatures.isEmpty()) return null
-
-    val acceptedEncodedFeatures =
-      selectFittingSubset(
-        allEncodedFeatures = allEncodedFeatures,
-        fixedUrlOverhead = fixedUrlOverhead,
-        separatorLength = encodedComma.length,
-        maxUrlLength = maxUrlLength,
-      )
-    if (acceptedEncodedFeatures.isEmpty()) return null
-
-    return assembleCollectionUrl(
-      baseUrl = baseUrl,
-      viewportSuffix = viewportSuffix,
-      encodedPrefix = encodedPrefix,
-      encodedSuffix = encodedSuffix,
-      encodedComma = encodedComma,
-      encodedFeatures = acceptedEncodedFeatures,
-    )
+      }
   }
 
   private fun buildBestCompactMultiPolygonUrl(
-    baseUrl: String,
-    viewportSuffix: String,
-    encodedPrefix: String,
-    encodedSuffix: String,
-    encodedComma: String,
-    fixedUrlOverhead: Int,
+    spec: CollectionUrlSpec,
     features: List<SurveyThumbnailFeature>,
     bounds: LngLatBounds?,
-    maxUrlLength: Int,
   ): String? {
     var low = 1
     var high = features.size
@@ -841,10 +852,10 @@ internal object MapboxStaticUrlEncoder {
       val subset = features.sampleEvenly(mid)
       val encodedCandidate = buildCompactFeatureJsonList(subset, bounds).map(::encodeComponent)
       val totalLen =
-        fixedUrlOverhead +
+        spec.fixedUrlOverhead +
           encodedCandidate.sumOf { it.length } +
-          (encodedCandidate.size - 1).coerceAtLeast(0) * encodedComma.length
-      if (encodedCandidate.isNotEmpty() && totalLen <= maxUrlLength) {
+          (encodedCandidate.size - 1).coerceAtLeast(0) * spec.encodedComma.length
+      if (encodedCandidate.isNotEmpty() && totalLen <= spec.maxUrlLength) {
         bestEncodedFeatures = encodedCandidate
         low = mid + 1
       } else {
@@ -854,11 +865,11 @@ internal object MapboxStaticUrlEncoder {
 
     val accepted = bestEncodedFeatures ?: return null
     return assembleCollectionUrl(
-      baseUrl = baseUrl,
-      viewportSuffix = viewportSuffix,
-      encodedPrefix = encodedPrefix,
-      encodedSuffix = encodedSuffix,
-      encodedComma = encodedComma,
+      baseUrl = spec.baseUrl,
+      viewportSuffix = spec.viewportSuffix,
+      encodedPrefix = spec.encodedPrefix,
+      encodedSuffix = spec.encodedSuffix,
+      encodedComma = spec.encodedComma,
       encodedFeatures = accepted,
     )
   }
