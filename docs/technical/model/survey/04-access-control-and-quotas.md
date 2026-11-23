@@ -198,6 +198,21 @@ Quota Limit                           | Basic Tier | Sponsored Tier
 `max_generated_entities`              | 10,000     | 100,000
 `max_area_vertices`                   | 5,000      | 50,000
 
+### Surveys per Owner, Deleted Surveys, and Administrators
+
+*   **`max_surveys_per_owner`** counts the surveys a person owns, whether the
+    survey names them by user ID or by email. Surveys in Trash (`trash_time`
+    set, which is what deleting a survey does) and purged surveys don't count,
+    so deleting a survey frees its owner's slot right away.
+*   Anyone with `SURVEY_ORGANIZER` access (the owner, an accepted organizer on
+    the ACL, a Manager of the survey's organization, or a platform
+    administrator) can delete a survey from **Survey details** > **Danger
+    zone**, in any lifecycle state, including closed and archived.
+*   **Platform administrators** (named by the deployment, or active Managers
+    of the synthetic "All users" organization) can create any number of
+    surveys: `max_surveys_per_owner` doesn't apply to them. Every other quota
+    still applies to the surveys they create.
+
 ### Generated Entities and Polygon Vertices
 
 *   **`max_generated_entities`** caps the plots a sample design may generate

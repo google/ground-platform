@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_time_series_tab">Séries temporelles et imagerie</string>
+  <string name="web_time_series_open">Analyser l'imagerie</string>
+  <string name="web_time_series_select_feature">Sélectionnez un point ou un polygone sur la carte pour voir sa série temporelle satellitaire.</string>
+  <string name="web_time_series_unsupported">Les séries temporelles sont disponibles pour les points et les polygones.</string>
+  <string name="web_time_series_unavailable">Les séries temporelles nécessitent une connexion au service Collect One.</string>
+  <string name="web_time_series_loading">Chargement des observations satellitaires…</string>
+  <string name="web_time_series_no_observations">Aucune observation sans nuages de %1$s sur cette période.</string>
+  <string name="web_time_series_retry">Réessayer</string>
+  <string name="web_time_series_error_not_uploaded">Cette enquête n'est pas encore sur le serveur. Les séries temporelles apparaîtront une fois qu'elle aura été envoyée.</string>
+  <string name="web_time_series_error_unsupported">Cet élément de la carte ne peut pas être analysé.</string>
+  <string name="web_time_series_error_busy">Trop de requêtes. Réessayez dans une minute.</string>
+  <string name="web_time_series_error_timeout">Earth Engine a mis trop de temps à répondre. Réessayez.</string>
+  <string name="web_time_series_error_unavailable">Earth Engine n'est pas disponible pour le moment.</string>
+  <string name="web_time_series_error_denied">Vous n'avez pas accès à cette enquête.</string>
+  <string name="web_time_series_error_other">Impossible de charger les données.</string>
+  <string name="web_time_series_area">%1$s ha</string>
+  <string name="web_time_series_elevation_range">Altitude %1$s–%2$s m</string>
+  <string name="web_time_series_elevation">Altitude %1$s m</string>
+  <string name="web_time_series_population">Population %1$s (%2$s/km², %3$d)</string>
+  <string name="web_time_series_population_density">%1$s hab./km² (%2$d)</string>
+  <string name="web_time_series_source_landsat">Landsat</string>
+  <string name="web_time_series_source_sentinel2">Sentinel-2</string>
+  <string name="web_time_series_source_sentinel1">Sentinel-1</string>
+  <string name="web_time_series_source_picker">Source d'imagerie</string>
+  <string name="web_time_series_band_picker">Bande</string>
+  <string name="web_time_series_picker_selection">%1$s : %2$s</string>
+  <string name="web_time_series_source_landsat_detail">Optique · 30 m · tous les 8 à 16 jours</string>
+  <string name="web_time_series_source_sentinel2_detail">Optique · 10 m · tous les 5 jours</string>
+  <string name="web_time_series_source_sentinel1_detail">Radar · 10 m · voit à travers les nuages</string>
+  <string name="web_time_series_band_group_indices">Indices</string>
+  <string name="web_time_series_band_group_reflectance">Réflectance</string>
+  <string name="web_time_series_band_group_backscatter">Rétrodiffusion</string>
+  <string name="web_time_series_band_blue">Bleu</string>
+  <string name="web_time_series_band_green">Vert</string>
+  <string name="web_time_series_band_red">Rouge</string>
+  <string name="web_time_series_band_nir">PIR</string>
+  <string name="web_time_series_band_swir1">SWIR 1</string>
+  <string name="web_time_series_band_swir2">SWIR 2</string>
+  <string name="web_time_series_band_ndvi_detail">Verdure de la végétation</string>
+  <string name="web_time_series_band_ndfi_detail">Dégradation du couvert forestier</string>
+  <string name="web_time_series_band_evi_detail">Verdure sous couvert dense</string>
+  <string name="web_time_series_band_evi2_detail">EVI à deux bandes, sans le bleu</string>
+  <string name="web_time_series_band_nbr_detail">Cicatrices de feu et perte de couvert</string>
+  <string name="web_time_series_band_ndmi_detail">Teneur en eau du couvert</string>
+  <string name="web_time_series_band_ndwi_detail">Eau libre</string>
+  <string name="web_time_series_band_blue_detail">Lumière bleue visible</string>
+  <string name="web_time_series_band_green_detail">Lumière verte visible</string>
+  <string name="web_time_series_band_red_detail">Rouge visible, absorbé par les plantes</string>
+  <string name="web_time_series_band_nir_detail">Proche infrarouge, réfléchi par les feuilles</string>
+  <string name="web_time_series_band_swir1_detail">Infrarouge à ondes courtes : humidité</string>
+  <string name="web_time_series_band_swir2_detail">Infrarouge à ondes courtes : sol et brûlis</string>
+  <string name="web_time_series_band_vv_detail">Rétrodiffusion de surface (dB)</string>
+  <string name="web_time_series_band_vh_detail">Rétrodiffusion du couvert (dB)</string>
+  <string name="web_time_series_band_vv_vh_detail">Rapport entre VV et VH</string>
+  <string name="web_time_series_band_rfdi_detail">Indice radar de dégradation forestière</string>
+  <string name="web_time_series_observations">%1$d observations · %2$s</string>
+  <string name="web_time_series_selected">%1$s · %2$s · %3$s %4$s</string>
+  <string name="web_time_series_chart_hint">Cliquez sur un point (ou utilisez ← →) pour afficher la scène de ce jour sur la carte.</string>
+  <string name="web_time_series_chart_description">Graphique de la série temporelle de %1$s avec %2$d observations</string>
+  <string name="web_time_series_scene_loading">Chargement de la scène…</string>
+  <string name="web_time_series_scene_failed">Impossible de charger cette scène.</string>
+  <string name="web_time_series_scene_clear">Retirer la scène de la carte</string>
+  <string name="web_time_series_stretch_true_color">Couleurs naturelles</string>
+  <string name="web_time_series_stretch_swir_nir_red">SWIR · PIR · Rouge</string>
+  <string name="web_time_series_stretch_nir_swir_red">PIR · SWIR · Rouge</string>
+  <string name="web_time_series_stretch_sar">VV · VH · Rapport</string>
+  <string name="web_time_series_close">Fermer les séries temporelles</string>
+</resources>

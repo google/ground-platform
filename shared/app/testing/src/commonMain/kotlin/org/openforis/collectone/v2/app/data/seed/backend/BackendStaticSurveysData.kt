@@ -13,7 +13,6 @@
  */
 package org.openforis.collectone.v2.app.data.seed.backend
 
-import org.openforis.collectone.v2.app.data.seed.SampleDataSeeder
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
 import org.openforis.collectone.v2.app.domain.model.MapThumbnailTheme
 import org.openforis.collectone.v2.app.domain.model.SurveyLifecycleState
@@ -21,16 +20,13 @@ import org.openforis.collectone.v2.app.domain.model.SurveyPreviewItem
 import org.openforis.collectone.v2.app.domain.model.SurveyThumbnailGenerator
 import org.openforis.collectone.v2.app.domain.model.editor.PeerDataVisibility
 import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
-import org.openforis.collectone.v2.app.domain.usecase.ResolveFormDefForLaunchUseCase
 import org.openforis.collectone.v2.core.forms.model.FormDefinition
 import org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm
 
 /** Hardcoded sample surveys, forms, and XForms presets for the sample data. */
 object BackendStaticSurveysData {
-  private val resolveFormDef = ResolveFormDefForLaunchUseCase()
-
   fun builtInFallbackFormForForm(form: FormPreviewItem): FormDefinition =
-    resolveFormDef.builtInFallbackFormForForm(form)
+    SampleFallbackForms.fallbackFormFor(form)
 
   /**
    * Default sample surveys shared with the user, including the 5 swappable Workbench Example
@@ -52,8 +48,7 @@ object BackendStaticSurveysData {
           description =
             "Single GPS point (map pan allowed, <= 10m accuracy required) and land-use classification. Forms auto-create land_use_observations entities via save_to.",
           location = "Arusha, Tanzania",
-          coordinatesLabel = "3.38°S, 36.68°E",
-          offlineSizeLabel = "4.2 MB",
+          surveyArea = BackendStaticSurveyEditorData.arushaSurveyArea(),
           isDownloaded = true,
           thumbnailTheme = MapThumbnailTheme.SAVANNA,
           entityCount = 3,
@@ -66,8 +61,7 @@ object BackendStaticSurveysData {
           description =
             "Predefined permanent sample plot entities (SP-01 to SP-05) with forest stand assessment form: selecting the sample plot entity, taking a canopy photo, canopy cover %, and basal area.",
           location = "Pará, Brazil",
-          coordinatesLabel = "3.46°S, 62.21°W",
-          offlineSizeLabel = "14.8 MB",
+          surveyArea = BackendStaticSurveyEditorData.paraSurveyArea(),
           isDownloaded = true,
           thumbnailTheme = MapThumbnailTheme.RAINFOREST,
           entityCount = 5,
@@ -78,8 +72,7 @@ object BackendStaticSurveysData {
           description =
             "Walk forest-risk commodity plot boundary (GPS override / manual pan allowed while walking) and capture the plot center point. Forms auto-create commodity_plots entities via save_to.",
           location = "Ashanti Region, Ghana",
-          coordinatesLabel = "6.69°N, 1.62°W",
-          offlineSizeLabel = "11.5 MB",
+          surveyArea = BackendStaticSurveyEditorData.ashantiSurveyArea(),
           isDownloaded = true,
           thumbnailTheme = MapThumbnailTheme.WATERSHED,
           entityCount = 3,
@@ -92,8 +85,7 @@ object BackendStaticSurveysData {
           description =
             "Household longitudinal survey using a preloaded roster of past household individuals (IND-101 to IND-106) for residency reconciliation, occupation updates, and new member enrollment.",
           location = "Kakamega, Western Province",
-          coordinatesLabel = "0.28°N, 34.75°E",
-          offlineSizeLabel = "8.4 MB",
+          surveyArea = BackendStaticSurveyEditorData.kakamegaSurveyArea(),
           isDownloaded = true,
           thumbnailTheme = MapThumbnailTheme.COASTAL_DELTA,
           entityCount = 6,
@@ -108,11 +100,23 @@ object BackendStaticSurveysData {
           description =
             "EUDR traceability polygon mapping, shade-tree biodiversity inventory, and all 20+ XForms field types showcase for cooperative coffee growers.",
           location = "Nyeri County, Kenya",
-          coordinatesLabel = "0.42°S, 36.95°E",
-          offlineSizeLabel = "9.6 MB",
+          surveyArea = BackendStaticSurveyEditorData.kenyaSurveyArea(),
           isDownloaded = true,
           thumbnailTheme = MapThumbnailTheme.HIGHLAND_AGRI,
           entityCount = 5,
+        ),
+        SurveyPreviewItem(
+          id = BackendStaticEntitiesData.GOOGLE_EARTH_SURVEY_ID,
+          title = "Peatland & Canopy Change Interpretation (Google Earth)",
+          description =
+            "Visual interpretation of predefined permanent sample plots (PLT-GE-01 to PLT-GE-05) in Google Earth 3D & historical imagery: land-use transition, canopy stratum, crown cover %, disturbance drivers, and EUDR deforestation-free status (`save_to` updates `marker-symbol` ○ → ◐ → ✓).",
+          location = "Central Kalimantan, Indonesia",
+          surveyArea = BackendStaticSurveyEditorData.kalimantanSurveyArea(),
+          isDownloaded = true,
+          thumbnailTheme = MapThumbnailTheme.RAINFOREST,
+          entityCount = 5,
+          sharingPolicy = SharingPolicy.PUBLIC,
+          peerDataVisibility = PeerDataVisibility.ALL,
         ),
         SurveyPreviewItem(
           id = "00000035-caf4-571e-b907-f506f92666ab",
@@ -120,8 +124,7 @@ object BackendStaticSurveysData {
           description =
             "Coastal shoreline erosion monitoring and sapling survival rate audits across intertidal restoration zones.",
           location = "Cần Thơ, Vietnam",
-          coordinatesLabel = "9.82°N, 106.34°E",
-          offlineSizeLabel = "12.8 MB",
+          surveyArea = BackendStaticSurveyEditorData.mekongDeltaSurveyArea(),
           isDownloaded = false,
           thumbnailTheme = MapThumbnailTheme.PEATLAND,
           entityCount = 204,
@@ -130,19 +133,13 @@ object BackendStaticSurveysData {
         ),
       )
       .map { survey ->
-        val surveyArea =
-          if (survey.id == SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID) {
-            BackendStaticSurveyEditorData.kenyaSurveyArea()
-          } else {
-            null
-          }
         survey.copy(
           ownerEmail = BackendStaticOrganizationsData.ownerEmailForSurvey(survey.id),
           organizationId = BackendStaticOrganizationsData.organizationIdForSurvey(survey.id),
           thumbnail =
             SurveyThumbnailGenerator.fromRuntime(
               surveyId = survey.id,
-              surveyArea = surveyArea,
+              surveyArea = survey.surveyArea,
               mapLayers = BackendStaticMapLayersData.mapLayersForSurvey(survey.id),
               entities = BackendStaticEntitiesData.entitiesForSurvey(survey.id),
             ),
@@ -158,6 +155,8 @@ object BackendStaticSurveysData {
       WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS ->
         "00000032-8d62-5717-8074-f4917e0cd76d"
       WorkbenchExampleForm.ALL_FIELD_TYPES -> "00000033-6b50-51cd-ac94-baea2ea06d65"
+      WorkbenchExampleForm.GOOGLE_EARTH_PLOT_INTERPRETATION ->
+        BackendStaticEntitiesData.GOOGLE_EARTH_SURVEY_ID
     }
 
   /** Maps an Example Survey ID to its corresponding [WorkbenchExampleForm]. */
@@ -168,6 +167,8 @@ object BackendStaticSurveysData {
       "00000031-ffc6-5c8e-934c-d14ec07533ad" -> WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER
       "00000032-8d62-5717-8074-f4917e0cd76d" ->
         WorkbenchExampleForm.HOUSEHOLD_SURVEY_PAST_INDIVIDUALS
+      BackendStaticEntitiesData.GOOGLE_EARTH_SURVEY_ID ->
+        WorkbenchExampleForm.GOOGLE_EARTH_PLOT_INTERPRETATION
       else -> WorkbenchExampleForm.ALL_FIELD_TYPES
     }
 
@@ -178,6 +179,7 @@ object BackendStaticSurveysData {
       "00000034-c088-5ab9-8b98-e6bccb3dca71" -> 5
       "00000031-ffc6-5c8e-934c-d14ec07533ad" -> 3
       "00000032-8d62-5717-8074-f4917e0cd76d" -> 6
+      BackendStaticEntitiesData.GOOGLE_EARTH_SURVEY_ID -> 5
       else -> 5
     }
 
@@ -188,6 +190,7 @@ object BackendStaticSurveysData {
       "00000034-c088-5ab9-8b98-e6bccb3dca71" -> 3
       "00000031-ffc6-5c8e-934c-d14ec07533ad" -> 3
       "00000032-8d62-5717-8074-f4917e0cd76d" -> 4
+      BackendStaticEntitiesData.GOOGLE_EARTH_SURVEY_ID -> 3
       else -> 9
     }
 
@@ -204,10 +207,12 @@ object BackendStaticSurveysData {
             version = "2026092401",
             targetDatasetId = "land_use_observations",
             targetDatasetName = "Land Use Observations",
+            targetTypeNoun = "Land Use Observation",
             questionCount = 3,
             ctaLabel = "Collect Point & Land Use",
             requiresEntity = false,
             hasEntitySelectQuestion = false,
+            openInGoogleEarth = false,
           )
         )
       "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
@@ -220,9 +225,11 @@ object BackendStaticSurveysData {
             version = "2026092401",
             targetDatasetId = "sample_plots",
             targetDatasetName = "Permanent Forest Sample Plots",
+            targetTypeNoun = "Permanent Forest Sample Plot",
             questionCount = 9,
             ctaLabel = "Assess Forest Sample Plot",
             hasEntitySelectQuestion = true,
+            openInGoogleEarth = false,
           )
         )
       "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
@@ -235,10 +242,12 @@ object BackendStaticSurveysData {
             version = "2026092401",
             targetDatasetId = "commodity_plots",
             targetDatasetName = "Commodity Plots",
+            targetTypeNoun = "Commodity Plot",
             questionCount = 6,
             ctaLabel = "Map Plot Perimeter & Center",
             requiresEntity = false,
             hasEntitySelectQuestion = false,
+            openInGoogleEarth = false,
           )
         )
       "00000032-8d62-5717-8074-f4917e0cd76d" ->
@@ -251,9 +260,29 @@ object BackendStaticSurveysData {
             version = "2026092401",
             targetDatasetId = "past_individuals",
             targetDatasetName = "Preloaded Past Household Individuals",
+            targetTypeNoun = "Preloaded Past Household Individual",
             questionCount = 11,
             ctaLabel = "Conduct Household Follow-Up",
             hasEntitySelectQuestion = true,
+            openInGoogleEarth = true,
+          )
+        )
+      BackendStaticEntitiesData.GOOGLE_EARTH_SURVEY_ID ->
+        listOf(
+          FormPreviewItem(
+            id = "form-google-earth-interpretation",
+            title = "Peatland & Canopy Change Interpretation (Google Earth)",
+            description =
+              "Interpret predefined sample plots (PLT-GE-01 to PLT-GE-05) in Google Earth 3D & historical imagery: land-use transition, canopy stratum, crown cover %, disturbance drivers, and deforestation-free status (`save_to` updates `marker-symbol` ○ → ◐ → ✓).",
+            version = "1",
+            targetDatasetId = "interpretation_plots",
+            targetDatasetName = "Satellite Interpretation Sample Plots",
+            targetTypeNoun = "Satellite Interpretation Sample Plot",
+            questionCount = 7,
+            ctaLabel = "Interpret Sample Plot",
+            requiresEntity = true,
+            hasEntitySelectQuestion = true,
+            openInGoogleEarth = true,
           )
         )
       else -> defaultForms()
@@ -273,9 +302,11 @@ object BackendStaticSurveysData {
         version = "v2026.09.1",
         targetDatasetId = "coffee_parcels",
         targetDatasetName = "Smallholder Coffee Parcels",
+        targetTypeNoun = "Coffee Parcel",
         questionCount = 8,
         ctaLabel = "Register baseline parcel",
         hasEntitySelectQuestion = true,
+        openInGoogleEarth = true,
       ),
       FormPreviewItem(
         id = "form-household-interview",
@@ -285,9 +316,11 @@ object BackendStaticSurveysData {
         version = "v2026.09.1",
         targetDatasetId = "coffee_parcels",
         targetDatasetName = "Smallholder Coffee Parcels",
+        targetTypeNoun = "Coffee Parcel",
         questionCount = 6,
         ctaLabel = "Interview household",
         hasEntitySelectQuestion = true,
+        openInGoogleEarth = true,
       ),
       FormPreviewItem(
         id = "form-shade-canopy-audit",
@@ -297,9 +330,11 @@ object BackendStaticSurveysData {
         version = "v2026.09.2",
         targetDatasetId = "shade_monitoring_plots",
         targetDatasetName = "Shade Tree Monitoring Plots",
+        targetTypeNoun = "Shade Tree Monitoring Plot",
         questionCount = 11,
         ctaLabel = "Record canopy audit",
         hasEntitySelectQuestion = true,
+        openInGoogleEarth = true,
       ),
       FormPreviewItem(
         id = "form-deforestation-alert",
@@ -309,9 +344,11 @@ object BackendStaticSurveysData {
         version = "v2026.09.2",
         targetDatasetId = "shade_monitoring_plots",
         targetDatasetName = "Shade Tree Monitoring Plots",
+        targetTypeNoun = "Shade Tree Monitoring Plot",
         questionCount = 5,
         ctaLabel = "Validate alert",
         hasEntitySelectQuestion = true,
+        openInGoogleEarth = true,
       ),
       FormPreviewItem(
         id = "form-water-quality",
@@ -321,9 +358,11 @@ object BackendStaticSurveysData {
         version = "v2026.08.4",
         targetDatasetId = "washing_stations",
         targetDatasetName = "Cooperative Washing Stations",
+        targetTypeNoun = "Cooperative Washing Station",
         questionCount = 6,
         ctaLabel = "Inspect water effluent",
         hasEntitySelectQuestion = true,
+        openInGoogleEarth = true,
       ),
       FormPreviewItem(
         id = "form-pest-disease-sighting",

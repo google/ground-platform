@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions shared across the survey editor. -->
+  <string name="surveyeditor_cancel">ยกเลิก</string>
+  <!-- Button that dismisses a dialog. -->
+  <string name="surveyeditor_close">ปิด</string>
+  <!-- Button that returns to the previous step of a dialog. -->
+  <string name="surveyeditor_back">ย้อนกลับ</string>
+  <string name="surveyeditor_import">นำเข้า</string>
+  <!-- Button that confirms importing a file. %1$s is the file name. -->
+  <string name="surveyeditor_import_file">นำเข้า %1$s</string>
+  <string name="surveyeditor_select">เลือก</string>
+  <string name="surveyeditor_description">คำอธิบาย</string>
+  <string name="surveyeditor_clear_search">ล้างการค้นหา</string>
+  <string name="surveyeditor_delete">ลบ</string>
+  <string name="surveyeditor_done">เสร็จสิ้น</string>
+  <!-- Header button that saves edits of a draft survey. -->
+  <string name="surveyeditor_save_changes">บันทึกการเปลี่ยนแปลง</string>
+  <!-- Header button that publishes edits of an already published survey again. -->
+  <string name="surveyeditor_republish">เผยแพร่อีกครั้ง</string>
+  <string name="surveyeditor_read_only_closed">แบบสำรวจนี้ปิดแล้ว เปิดอีกครั้งเพื่อทำการเปลี่ยนแปลง</string>
+  <string name="surveyeditor_read_only_archived">แบบสำรวจนี้ถูกเก็บถาวรแล้ว เปิดอีกครั้งเพื่อทำการเปลี่ยนแปลง</string>
+  <string name="surveyeditor_survey_area_required">จำเป็นต้องมีพื้นที่สำรวจ</string>
+  <!-- Notice after removing the survey's organization. %1$s is the name of the general access option (e.g. Restricted). -->
+  <string name="surveyeditor_access_changed_no_organization">การเข้าถึงทั่วไปถูกเปลี่ยนเป็น “%1$s” เนื่องจากแบบสำรวจไม่ได้อยู่ในองค์กรอีกต่อไป</string>
+
+  <!-- Sharing: errors when inviting a person or accepting an invite. -->
+  <string name="surveyeditor_invite_invalid_email">กรุณากรอกที่อยู่อีเมลที่ถูกต้อง</string>
+  <string name="surveyeditor_invite_is_owner">บุคคลนี้เป็นเจ้าของแบบสำรวจ</string>
+  <string name="surveyeditor_invite_enter_name">กรุณากรอกชื่อ</string>
+  <string name="surveyeditor_invite_not_invited">ไม่ได้รับเชิญ</string>
+  <string name="surveyeditor_invite_already_joined">เข้าร่วมแล้ว</string>
+
+  <!-- Data table import: how numeric dates like 03/04/2025 are read. -->
+  <string name="surveyeditor_date_order_day_first">วันขึ้นก่อน</string>
+  <string name="surveyeditor_date_order_month_first">เดือนขึ้นก่อน</string>
+  <!-- Data table import notes shown before importing a CSV file. -->
+  <string name="surveyeditor_import_file_empty">ไฟล์ว่างเปล่า</string>
+  <string name="surveyeditor_import_no_data_rows">ไฟล์มีแถวส่วนหัวแต่ไม่มีแถวข้อมูล</string>
+  <plurals name="surveyeditor_import_ragged_rows">
+    <item quantity="other">%1$d แถวมีจำนวนคอลัมน์ไม่ตรงกับส่วนหัว เซลล์ที่ขาดจะเว้นว่างไว้ และเซลล์ที่เกินจะถูกตัดออก</item>
+  </plurals>
+  <!-- "id" is the literal CSV column name; "Row ID" is the name of the column that is added. -->
+  <string name="surveyeditor_import_id_column_not_unique">คอลัมน์ id มีค่าว่างหรือค่าซ้ำ จึงมีการเพิ่มคอลัมน์ Row ID ใหม่</string>
+  <!-- %1$s is a comma-separated list of quoted column names; %2$s is a date pattern such as DD/MM/YYYY. -->
+  <string name="surveyeditor_import_ambiguous_dates">วันที่ใน %1$s อาจเป็นแบบวันขึ้นก่อนหรือเดือนขึ้นก่อน ระบบจะอ่านเป็น %2$s</string>
+
+  <!-- Sample plots: why plots can't be generated. -->
+  <string name="surveyeditor_sampling_area_missing">กำหนดพื้นที่สำรวจในรายละเอียดแบบสำรวจ หรือใช้ชั้นข้อมูลแผนที่แบบรูปหลายเหลี่ยมเป็นชั้นภูมิ</string>
+  <string name="surveyeditor_sampling_strata_deleted">ชั้นข้อมูลแผนที่ที่ใช้เป็นชั้นภูมิถูกลบแล้ว กรุณาเลือกชั้นอื่น</string>
+  <string name="surveyeditor_sampling_strata_not_polygon">ชั้นภูมิต้องมาจากชั้นข้อมูลแผนที่แบบรูปหลายเหลี่ยม</string>
+  <!-- %1$s is the name of a map layer. -->
+  <string name="surveyeditor_sampling_strata_no_polygons">“%1$s” ยังไม่มีรูปหลายเหลี่ยม เพิ่มรูปหลายเหลี่ยมเพื่อใช้เป็นชั้นภูมิ</string>
+  <string name="surveyeditor_sampling_cant_generate_design">ไม่สามารถสร้างตามแบบแผนนี้ได้</string>
+  <!-- %1$s is a technical error message. -->
+  <string name="surveyeditor_sampling_generate_failed_reason">ไม่สามารถสร้างแปลงตัวอย่างได้: %1$s</string>
+  <string name="surveyeditor_sampling_generate_failed">ไม่สามารถสร้างแปลงตัวอย่างได้ ตรวจสอบแบบแผนแล้วลองอีกครั้ง</string>
+  <string name="surveyeditor_sampling_no_plots_fit">ไม่มีแปลงตัวอย่างที่พอดีกับพื้นที่ ลองลดระยะห่างหรือขนาดแปลง หรือใช้พื้นที่ที่ใหญ่ขึ้น</string>
+  <string name="surveyeditor_sampling_no_design">ชั้นข้อมูลแผนที่นี้ไม่มีแบบแผนการสุ่มตัวอย่าง</string>
+  <string name="surveyeditor_sampling_already_generating">กำลังสร้างแปลงตัวอย่างอยู่แล้ว</string>
+  <string name="surveyeditor_sampling_layer_missing">ชั้นข้อมูลแผนที่นี้ไม่มีอยู่แล้ว</string>
+  <!-- %1$d is the number of submissions. -->
+  <plurals name="surveyeditor_regenerate_blocked">
+    <item quantity="other">ปิดการสร้างใหม่แล้ว เนื่องจากมีการส่งข้อมูล %1$d รายการอ้างอิงแปลงตัวอย่างเหล่านี้ หากต้องการลองแบบแผนอื่น ให้เพิ่มชั้นข้อมูลแผนที่แปลงตัวอย่างใหม่</item>
+  </plurals>
+
+  <!-- Survey editor page: header, lifecycle, navigation, survey details, sharing. -->
+  <!-- Survey editor page: header. -->
+  <!-- Fallback title for a survey without a title. -->
+  <string name="surveyeditor_untitled_survey">แบบสำรวจที่ไม่มีชื่อ</string>
+  <!-- Header context label identifying the survey editor page. -->
+  <string name="surveyeditor_header_survey_editor">เครื่องมือแก้ไขแบบสำรวจ</string>
+  <!-- Header status for a draft survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_save">
+    <item quantity="other">แก้ไข %1$d ปัญหาเพื่อบันทึก</item>
+  </plurals>
+  <!-- Header status for a published survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_publish">
+    <item quantity="other">แก้ไข %1$d ปัญหาเพื่อเผยแพร่</item>
+  </plurals>
+  <string name="surveyeditor_header_unsaved_changes">มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก</string>
+  <string name="surveyeditor_header_unpublished_changes">มีการเปลี่ยนแปลงที่ยังไม่เผยแพร่</string>
+  <string name="surveyeditor_header_draft_saved">บันทึกฉบับร่างแล้ว</string>
+  <string name="surveyeditor_header_all_changes_published">เผยแพร่การเปลี่ยนแปลงทั้งหมดแล้ว</string>
+  <!-- Button that discards pending survey edits. -->
+  <string name="surveyeditor_header_discard">ละทิ้ง</string>
+  <string name="surveyeditor_header_discard_unsaved_title">ละทิ้งการเปลี่ยนแปลงที่ยังไม่ได้บันทึกหรือไม่?</string>
+  <string name="surveyeditor_header_discard_unpublished_title">ละทิ้งการเปลี่ยนแปลงที่ยังไม่เผยแพร่หรือไม่?</string>
+  <string name="surveyeditor_header_discard_unsaved_message">การเปลี่ยนแปลงที่คุณทำหลังจากบันทึกฉบับร่างนี้ครั้งล่าสุดจะสูญหาย</string>
+  <string name="surveyeditor_header_discard_unpublished_message">การเปลี่ยนแปลงที่คุณทำหลังจากเผยแพร่แบบสำรวจนี้ครั้งล่าสุดจะสูญหาย ผู้เก็บข้อมูลจะยังคงเห็นเวอร์ชันที่เผยแพร่แล้ว</string>
+  <string name="surveyeditor_header_keep_editing">แก้ไขต่อ</string>
+  <string name="surveyeditor_working_copy_prompt_title">แก้ไขฉบับร่างที่ยังไม่ได้บันทึกต่อหรือไม่?</string>
+  <string name="surveyeditor_working_copy_prompt_draft_message">คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึกจากเซสชันก่อนหน้าในฉบับร่างแบบสำรวจนี้ คุณต้องการแก้ไขฉบับร่างที่ยังไม่ได้บันทึกต่อ หรือละทิ้งการเปลี่ยนแปลงเหล่านั้น?</string>
+  <string name="surveyeditor_working_copy_prompt_published_message">คุณมีการเปลี่ยนแปลงที่ยังไม่เผยแพร่จากเซสชันก่อนหน้าในแบบสำรวจนี้ คุณต้องการแก้ไขฉบับร่างที่ยังไม่ได้บันทึกต่อ หรือละทิ้งการเปลี่ยนแปลงเหล่านั้น?</string>
+  <string name="surveyeditor_working_copy_continue">แก้ไขต่อ</string>
+  <string name="surveyeditor_working_copy_discard">ละทิ้งฉบับร่าง</string>
+
+  <!-- Survey lifecycle (status) controls. -->
+  <!-- Button that reopens a closed or archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen">เปิดอีกครั้ง</string>
+  <string name="surveyeditor_lifecycle_draft_description">ผู้จัดทำแก้ไขได้ ซ่อนจากผู้เก็บข้อมูลบนมือถือจนกว่าจะเผยแพร่</string>
+  <string name="surveyeditor_lifecycle_published_description">พร้อมใช้งานสำหรับการเก็บข้อมูลภาคสนามและบนเว็บ</string>
+  <string name="surveyeditor_lifecycle_closed_description">การเก็บข้อมูลสิ้นสุดแล้ว และแบบสำรวจเป็นแบบอ่านอย่างเดียวจนกว่าจะเปิดอีกครั้ง</string>
+  <string name="surveyeditor_lifecycle_archived_description">เลิกใช้งานและเก็บไว้แบบอ่านอย่างเดียวเพื่ออ้างอิงในระยะยาว</string>
+  <string name="surveyeditor_lifecycle_publish_survey">เผยแพร่แบบสำรวจ</string>
+  <string name="surveyeditor_lifecycle_publish_survey_description">เปิดใช้งานสำหรับการเก็บข้อมูลบนมือถือและเว็บ</string>
+  <string name="surveyeditor_lifecycle_archive_survey">เก็บถาวรแบบสำรวจ</string>
+  <string name="surveyeditor_lifecycle_archive_survey_description">เลิกใช้งานและเก็บไว้แบบอ่านอย่างเดียวเพื่ออ้างอิง</string>
+  <string name="surveyeditor_lifecycle_switch_to_draft">เปลี่ยนเป็นฉบับร่าง</string>
+  <!-- Description of switching a published survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_published_description">หยุดการแสดงในภาคสนามชั่วคราวขณะแก้ไขต่อ</string>
+  <!-- Description of switching a closed survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_closed_description">ปลดล็อกการแก้ไขในโหมดฉบับร่างก่อนเผยแพร่อีกครั้ง</string>
+  <!-- Description of switching an archived survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_archived_description">กู้คืนในโหมดฉบับร่างเพื่อแก้ไข</string>
+  <string name="surveyeditor_lifecycle_close_survey">ปิดแบบสำรวจ</string>
+  <string name="surveyeditor_lifecycle_close_survey_description">สิ้นสุดการเก็บข้อมูลและตั้งเป็นแบบอ่านอย่างเดียว</string>
+  <string name="surveyeditor_lifecycle_reopen_survey">เปิดแบบสำรวจอีกครั้ง</string>
+  <!-- Description of reopening a closed survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_closed_description">กลับมาเก็บข้อมูลและแก้ไขต่อ</string>
+  <!-- Description of reopening an archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_archived_description">กู้คืนเพื่อเก็บข้อมูลและแก้ไขต่อ</string>
+  <!-- Screen reader description of the status badge. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_badge_description">สถานะแบบสำรวจ: %1$s คลิกเพื่อเปลี่ยนสถานะ</string>
+  <!-- Heading of the status menu. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_label">สถานะแบบสำรวจ: %1$s</string>
+  <string name="surveyeditor_lifecycle_archive_title">เก็บถาวรแบบสำรวจนี้หรือไม่?</string>
+  <string name="surveyeditor_lifecycle_close_title">ปิดแบบสำรวจนี้หรือไม่?</string>
+  <string name="surveyeditor_lifecycle_archive_message">แบบสำรวจที่เก็บถาวรจะถูกเก็บไว้เพื่ออ้างอิง จะไม่มีใครเก็บข้อมูลหรือทำการเปลี่ยนแปลงได้ คุณเปิดอีกครั้งได้ทุกเมื่อ</string>
+  <string name="surveyeditor_lifecycle_archive_message_discard">แบบสำรวจที่เก็บถาวรจะถูกเก็บไว้เพื่ออ้างอิง จะไม่มีใครเก็บข้อมูลหรือทำการเปลี่ยนแปลงได้ คุณเปิดอีกครั้งได้ทุกเมื่อ การเปลี่ยนแปลงที่ยังไม่ได้บันทึกจะถูกละทิ้ง</string>
+  <string name="surveyeditor_lifecycle_close_message">ผู้เก็บข้อมูลจะเพิ่มข้อมูลใหม่ไม่ได้ และจะไม่มีใครทำการเปลี่ยนแปลงได้ คุณเปิดอีกครั้งได้ทุกเมื่อ</string>
+  <string name="surveyeditor_lifecycle_close_message_discard">ผู้เก็บข้อมูลจะเพิ่มข้อมูลใหม่ไม่ได้ และจะไม่มีใครทำการเปลี่ยนแปลงได้ คุณเปิดอีกครั้งได้ทุกเมื่อ การเปลี่ยนแปลงที่ยังไม่ได้บันทึกจะถูกละทิ้ง</string>
+  <!-- Button that confirms archiving the survey. -->
+  <string name="surveyeditor_lifecycle_archive">เก็บถาวร</string>
+
+  <!-- Survey editor navigation panel. -->
+  <!-- Navigation item and pane title for the survey's basic information. -->
+  <string name="surveyeditor_nav_survey_details">รายละเอียดแบบสำรวจ</string>
+  <!-- Navigation item and pane title for sharing settings. -->
+  <string name="surveyeditor_nav_sharing">การแชร์</string>
+  <!-- Navigation heading and summary card label for the survey's forms. -->
+  <string name="surveyeditor_nav_forms">แบบฟอร์ม</string>
+  <string name="surveyeditor_nav_add_form">เพิ่มแบบฟอร์ม</string>
+  <string name="surveyeditor_nav_no_forms">ยังไม่มีแบบฟอร์ม</string>
+  <!-- Fallback name for a form without a title. -->
+  <string name="surveyeditor_untitled_form">แบบฟอร์มที่ไม่มีชื่อ</string>
+  <string name="surveyeditor_nav_add_map_layer">เพิ่มชั้นข้อมูลแผนที่</string>
+  <string name="surveyeditor_nav_add_data_table">เพิ่มตารางข้อมูล</string>
+  <string name="surveyeditor_nav_no_map_layers">ยังไม่มีชั้นข้อมูลแผนที่</string>
+  <string name="surveyeditor_nav_no_data_tables">ยังไม่มีตารางข้อมูล</string>
+  <!-- Fallback name for a map layer or data table without a name. -->
+  <string name="surveyeditor_untitled">ไม่มีชื่อ</string>
+  <!-- Screen reader action that moves a navigation item up. -->
+  <string name="surveyeditor_nav_move_up">ย้ายขึ้น</string>
+  <!-- Screen reader action that moves a navigation item down. -->
+  <string name="surveyeditor_nav_move_down">ย้ายลง</string>
+  <!-- Screen reader description of the warning icon on a navigation item. -->
+  <string name="surveyeditor_nav_has_issues">มีปัญหา</string>
+
+  <!-- Survey details pane. -->
+  <string name="surveyeditor_details_subtitle">ข้อมูลพื้นฐานที่แสดงต่อผู้เก็บข้อมูลเมื่อเปิดแบบสำรวจ</string>
+  <string name="surveyeditor_details_survey_title">ชื่อแบบสำรวจ</string>
+  <string name="surveyeditor_details_contents">เนื้อหา</string>
+  <string name="surveyeditor_details_map_layers">ชั้นข้อมูลแผนที่</string>
+  <string name="surveyeditor_details_data_tables">ตารางข้อมูล</string>
+  <string name="surveyeditor_details_people">บุคคล</string>
+  <!-- Heading of the list of survey activity events (exports, receipts, closing). -->
+  <string name="surveyeditor_details_activity">กิจกรรม</string>
+  <!-- Part of an activity event summary. %1$d is the number of map features. -->
+  <plurals name="surveyeditor_details_activity_map_features">
+    <item quantity="other">%1$d ฟีเจอร์แผนที่</item>
+  </plurals>
+  <!-- Part of an activity event summary. %1$s is the export profile ID. -->
+  <string name="surveyeditor_details_activity_profile">โปรไฟล์: %1$s</string>
+  <string name="surveyeditor_details_survey_status">สถานะแบบสำรวจ</string>
+  <!-- Section title and dropdown label for the survey's organization. -->
+  <string name="surveyeditor_details_organization">องค์กร</string>
+  <!-- Organization dropdown option for a survey that doesn't belong to an organization. -->
+  <string name="surveyeditor_details_organization_none">ไม่มี (แบบสำรวจส่วนตัว)</string>
+  <string name="surveyeditor_details_organization_hint">คุณเลือกดำเนินแบบสำรวจนี้ในนามขององค์กรที่คุณเป็นสมาชิกได้ (ไม่บังคับ) คุณยังคงเป็นเจ้าของ ผู้จัดการขององค์กรจะแก้ไขแบบสำรวจ จัดการการแชร์ และส่งออกข้อมูลได้ด้วย และสมาชิกขององค์กรจะเห็นแบบสำรวจนี้ในรายการของตน</string>
+  <!-- Selected organization that couldn't be found. %1$s is its ID. -->
+  <string name="surveyeditor_details_organization_unknown">องค์กรที่ไม่รู้จัก (%1$s)</string>
+  <string name="surveyeditor_details_organization_missing">องค์กรนี้ไม่มีอยู่แล้ว กรุณาเลือกองค์กรอื่นหรือตั้งเป็นแบบสำรวจส่วนตัว</string>
+  <!-- Screen reader label of the button that dismisses a notice. -->
+  <string name="surveyeditor_details_dismiss">ปิด</string>
+  <string name="surveyeditor_details_cost_title">การควบคุมค่าใช้จ่ายและโควต้า</string>
+  <string name="surveyeditor_details_cost_estimated">ค่าใช้จ่ายรายเดือนโดยประมาณ</string>
+  <!-- Part of the cost summary, e.g. "3 forms · 12 questions · …". -->
+  <plurals name="surveyeditor_details_cost_forms">
+    <item quantity="other">%1$d แบบฟอร์ม</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of questions. -->
+  <plurals name="surveyeditor_details_cost_questions">
+    <item quantity="other">%1$d คำถาม</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of predefined entities. -->
+  <plurals name="surveyeditor_details_cost_predefined">
+    <item quantity="other">กำหนดไว้ล่วงหน้า %1$d รายการ</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of generated sample plots. -->
+  <plurals name="surveyeditor_details_cost_sample_plots">
+    <item quantity="other">%1$d แปลงตัวอย่าง</item>
+  </plurals>
+  <string name="surveyeditor_details_cost_tier_override">กำหนดระดับแทน:</string>
+  <!-- Quota tier option: inherit the tier from the organization or default. -->
+  <string name="surveyeditor_details_cost_tier_inherit">สืบทอด</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_basic">พื้นฐาน</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_sponsored">ได้รับการสนับสนุน</string>
+  <string name="surveyeditor_details_cost_budget_cap">วงเงินงบประมาณรายเดือนของแบบสำรวจ ($ USD)</string>
+  <string name="surveyeditor_details_cost_budget_placeholder">0.00 (ไม่จำกัด)</string>
+  <string name="surveyeditor_details_cost_hide_limits">ซ่อนขีดจำกัดทรัพยากรแบบละเอียด</string>
+  <string name="surveyeditor_details_cost_customize_limits">ปรับแต่งขีดจำกัดทรัพยากรแบบละเอียด</string>
+  <string name="surveyeditor_details_cost_max_forms">แบบฟอร์มสูงสุด</string>
+  <string name="surveyeditor_details_cost_max_questions_per_form">คำถามสูงสุด / แบบฟอร์ม</string>
+  <string name="surveyeditor_details_cost_max_photo_questions_per_form">คำถามรูปภาพสูงสุด / แบบฟอร์ม</string>
+  <string name="surveyeditor_details_cost_max_predefined_entities">รายการที่กำหนดไว้ล่วงหน้าสูงสุด</string>
+  <string name="surveyeditor_details_cost_max_sample_plots">แปลงตัวอย่างสูงสุด</string>
+  <string name="surveyeditor_details_cost_max_area_vertices">จุดยอดของพื้นที่สูงสุด</string>
+  <string name="surveyeditor_details_cost_max_acl_collaborators">ผู้ทำงานร่วมกันใน ACL สูงสุด</string>
+  <string name="surveyeditor_details_purpose_title">วัตถุประสงค์</string>
+  <string name="surveyeditor_details_purpose_hint">ข้อมูลของแบบสำรวจนี้จะนำไปใช้ทำอะไร แบบสำรวจหนึ่งมีได้หลายวัตถุประสงค์ ฟิลด์มาตรฐานของวัตถุประสงค์เหล่านั้นจะแนะนำก่อนเมื่อคุณเขียนคำถาม การเปลี่ยนวัตถุประสงค์ที่นี่ไม่ได้เพิ่มหรือลบแบบฟอร์ม หากต้องการเพิ่มแบบฟอร์มเริ่มต้นของวัตถุประสงค์ ให้ใช้ เพิ่มแบบฟอร์ม &gt; สำหรับวัตถุประสงค์</string>
+  <string name="surveyeditor_details_purpose_none">ไม่มีวัตถุประสงค์ที่ใช้ได้สำหรับแบบสำรวจนี้</string>
+  <string name="surveyeditor_details_purpose_unavailable">ไม่มีในคลังของแบบสำรวจนี้แล้ว:</string>
+  <!-- Screen reader label of a button that removes an item. %1$s is the item's name. -->
+  <string name="surveyeditor_details_remove_item">นำ %1$s ออก</string>
+
+  <!-- Survey languages. -->
+  <string name="surveyeditor_language_title">ภาษา</string>
+  <string name="surveyeditor_language_hint">เลือกภาษาที่ใช้สร้างและเก็บข้อมูลแบบฟอร์มและคำถามในแบบสำรวจ ระบบจะแสดงภาษาเริ่มต้นเมื่อไม่มีคำแปลในภาษาที่ต้องการ</string>
+  <string name="surveyeditor_language_supported">ภาษาที่รองรับ</string>
+  <!-- Chip for the survey's default language. %1$s is the language name. -->
+  <string name="surveyeditor_language_default_chip">%1$s • ค่าเริ่มต้น</string>
+  <string name="surveyeditor_language_add">เพิ่มภาษา</string>
+  <string name="surveyeditor_language_none_selected">ไม่ได้เลือก</string>
+  <string name="surveyeditor_language_default">ภาษาเริ่มต้น</string>
+  <string name="surveyeditor_language_picker_title">เลือกภาษา</string>
+  <string name="surveyeditor_language_search_label">ค้นหาตามชื่อภาษา</string>
+  <string name="surveyeditor_language_search_placeholder">เช่น ภาษาสวาฮีลี ภาษาอังกฤษ ภาษาสเปน ภาษาอัมฮาริก...</string>
+  <string name="surveyeditor_language_popular">ภาษายอดนิยมและตัวอย่างแคตตาล็อก:</string>
+  <!-- %1$d is the number of languages matching the search. -->
+  <plurals name="surveyeditor_language_matches">
+    <item quantity="other">พบ %1$d รายการที่ตรงกัน:</item>
+  </plurals>
+  <!-- %1$s is the search query. -->
+  <string name="surveyeditor_language_no_matches">ไม่มีภาษาที่ตรงกับ “%1$s”</string>
+  <!-- Badge on a language that is already supported by the survey. -->
+  <string name="surveyeditor_language_added">เพิ่มแล้ว</string>
+
+  <!-- Survey area section of the survey details pane. -->
+  <!-- Fallback location label for an untitled survey in the survey area editor. -->
+  <string name="surveyeditor_details_area_default_location">แบบสำรวจ</string>
+  <!-- Title of the required survey area section; * marks a required field. -->
+  <string name="surveyeditor_details_area_title">พื้นที่สำรวจ *</string>
+  <string name="surveyeditor_details_area_hint">ขอบเขตทางภูมิศาสตร์และขีดจำกัดพื้นที่สำหรับการเก็บข้อมูลในแบบสำรวจนี้</string>
+  <!-- %1$s describes where the survey area came from, e.g. an uploaded file. -->
+  <string name="surveyeditor_details_area_source">แหล่งที่มา: %1$s</string>
+  <string name="surveyeditor_details_area_edit">แก้ไขพื้นที่สำรวจ</string>
+  <string name="surveyeditor_details_area_required">เลือกหรือวาดพื้นที่สำรวจเพื่อดำเนินการต่อ</string>
+  <string name="surveyeditor_details_area_empty_title">ยังไม่ได้กำหนดพื้นที่สำรวจ</string>
+  <string name="surveyeditor_details_area_empty_hint">ค้นหาสถานที่ วาดขอบเขตบนแผนที่ หรืออัปโหลดไฟล์ GeoJSON หรือ KML</string>
+  <string name="surveyeditor_details_area_set">กำหนดพื้นที่สำรวจ</string>
+
+  <!-- Sharing pane. -->
+  <string name="surveyeditor_sharing_subtitle">เลือกว่าใครเปิดแบบสำรวจนี้ได้ และผู้เก็บข้อมูลเห็นข้อมูลอะไรได้บ้าง</string>
+  <string name="surveyeditor_sharing_people_with_access">ผู้ที่มีสิทธิ์เข้าถึง</string>
+  <string name="surveyeditor_sharing_owner_detail">เจ้าของแบบสำรวจ</string>
+  <string name="surveyeditor_sharing_owner">เจ้าของ</string>
+  <string name="surveyeditor_sharing_pending_detail">รอให้ผู้รับยอมรับลิงก์คำเชิญ</string>
+  <string name="surveyeditor_sharing_joined_now">เพิ่งเข้าร่วม</string>
+  <!-- %1$s is the date the person joined. -->
+  <string name="surveyeditor_sharing_joined">เข้าร่วมเมื่อ %1$s</string>
+  <!-- Dropdown label for a collaborator's role. -->
+  <string name="surveyeditor_sharing_role">บทบาท</string>
+  <string name="surveyeditor_sharing_profile_note">ชื่อและรูปภาพมาจากบัญชีของแต่ละคน Collect One จะบันทึกไว้เมื่อผู้ใช้ยอมรับลิงก์คำเชิญ และรีเฟรชเมื่อผู้ใช้ลงชื่อเข้าใช้</string>
+  <string name="surveyeditor_sharing_data_access">การเข้าถึงและการมองเห็นข้อมูล</string>
+  <string name="surveyeditor_sharing_add_by_email">เพิ่มบุคคลด้วยอีเมล</string>
+  <string name="surveyeditor_sharing_invite">เชิญ</string>
+  <string name="surveyeditor_sharing_org_managers">ผู้จัดการองค์กร</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_org_managers_hint">สืบทอดจาก %1$s ผู้จัดการแก้ไขแบบสำรวจนี้ จัดการการแชร์ และส่งออกข้อมูลได้ เปลี่ยนผู้จัดการองค์กรได้จากหน้าสมาชิกขององค์กร</string>
+  <string name="surveyeditor_sharing_no_managers">ยังไม่มีผู้จัดการ</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_manager_of">ผู้จัดการของ %1$s</string>
+  <string name="surveyeditor_sharing_share_link_title">แชร์ลิงก์และรหัส QR</string>
+  <!-- Badge for a survey that is only reachable through its link. -->
+  <string name="surveyeditor_sharing_badge_unlisted">ไม่แสดงสาธารณะ</string>
+  <!-- Badge for a survey listed in the public survey directory. -->
+  <string name="surveyeditor_sharing_badge_public">ไดเรกทอรีสาธารณะ</string>
+  <!-- Copy button label after the link was copied. -->
+  <string name="surveyeditor_sharing_copied">คัดลอกแล้ว</string>
+  <string name="surveyeditor_sharing_copy_link">คัดลอกลิงก์</string>
+  <string name="surveyeditor_sharing_show_qr">แสดงรหัส QR</string>
+  <!-- QR code dialog title. %1$s is the survey title. -->
+  <string name="surveyeditor_sharing_qr_title">แชร์ “%1$s”</string>
+  <string name="surveyeditor_sharing_qr_title_untitled">ลิงก์แชร์แบบสำรวจและรหัส QR</string>
+  <string name="surveyeditor_sharing_qr_hint">ผู้เก็บข้อมูลสแกนรหัส QR นี้ด้วยกล้องโทรศัพท์หรือแอป Collect One เพื่อเปิดแบบสำรวจได้โดยตรง</string>
+
+  <!-- General access sliders: audience stops. -->
+  <string name="surveyeditor_access_contributors_and_organizers">ผู้มีส่วนร่วมและผู้จัดทำ</string>
+  <string name="surveyeditor_access_invited_people">ผู้ที่ได้รับเชิญ</string>
+  <string name="surveyeditor_access_anyone_in_organization">ทุกคนในองค์กรของคุณ</string>
+  <string name="surveyeditor_access_anyone">ทุกคน</string>
+  <string name="surveyeditor_access_who_can_view">ผู้ที่ดูข้อมูลได้</string>
+  <string name="surveyeditor_access_who_can_collect">ผู้ที่เก็บข้อมูลได้</string>
+  <!-- Screen reader description of a slider stop. %1$s is the slider title, %2$s the audience. -->
+  <string name="surveyeditor_access_slider_stop_description">%1$s: %2$s</string>
+  <string name="surveyeditor_access_view_hint_contributors">ผู้เก็บข้อมูลจะเห็นเฉพาะการส่งข้อมูลของตนเอง ผู้จัดทำแบบสำรวจดูการส่งข้อมูลทั้งหมดและตัวตนของผู้มีส่วนร่วมได้</string>
+  <string name="surveyeditor_access_view_hint_invited">บุคคลที่เพิ่มไว้ด้านบนดูฟีเจอร์แผนที่ คำตอบ รูปภาพ และสื่ออื่น ๆ ที่อัปโหลดทั้งหมดได้ เฉพาะผู้จัดทำแบบสำรวจเท่านั้นที่ดูตัวตนของผู้มีส่วนร่วมได้</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_access_view_hint_organization">ทุกคนใน %1$s ดูฟีเจอร์แผนที่ คำตอบ รูปภาพ และสื่ออื่น ๆ ที่อัปโหลดทั้งหมดได้ เฉพาะผู้จัดทำแบบสำรวจเท่านั้นที่ดูตัวตนของผู้มีส่วนร่วมได้</string>
+  <string name="surveyeditor_access_view_hint_organization_unset">ทุกคนในองค์กรของคุณดูฟีเจอร์แผนที่ คำตอบ รูปภาพ และสื่ออื่น ๆ ที่อัปโหลดทั้งหมดได้ เลือกองค์กรในรายละเอียดแบบสำรวจ</string>
+  <string name="surveyeditor_access_view_hint_anyone">ทุกคนดูฟีเจอร์แผนที่ คำตอบ รูปภาพ และสื่ออื่น ๆ ที่อัปโหลดทั้งหมดได้ เฉพาะผู้จัดทำแบบสำรวจเท่านั้นที่ดูตัวตนของผู้มีส่วนร่วมได้ ผู้เข้าร่วมต้องยอมรับประกาศการให้ความยินยอมก่อนเก็บข้อมูล</string>
+  <string name="surveyeditor_access_collect_hint_invited">เฉพาะบุคคลที่เพิ่มไว้ด้านบนเท่านั้นที่เปิดแบบสำรวจนี้และเก็บข้อมูลได้</string>
+  <!-- %1$s is the organization name (used twice). -->
+  <string name="surveyeditor_access_collect_hint_organization">สมาชิกของ %1$s เปิดแบบสำรวจนี้และเก็บข้อมูลได้ ผู้จัดการของ %1$s แก้ไขแบบสำรวจได้ด้วย</string>
+  <string name="surveyeditor_access_collect_hint_organization_unset">สมาชิกขององค์กรของคุณเปิดแบบสำรวจนี้และเก็บข้อมูลได้ เลือกองค์กรในรายละเอียดแบบสำรวจ</string>
+  <string name="surveyeditor_access_collect_hint_anyone">ทุกคนเปิดแบบสำรวจนี้และส่งข้อมูลได้</string>
+  <string name="surveyeditor_access_unlisted_option">ไม่แสดงสาธารณะ (เฉพาะผู้ที่มีลิงก์หรือรหัส QR)</string>
+  <string name="surveyeditor_access_public_option">สาธารณะ (แสดงในไดเรกทอรีแบบสำรวจ)</string>
+  <string name="surveyeditor_access_who_can_find">ผู้ที่ค้นหาแบบสำรวจนี้ได้</string>
+  <string name="surveyeditor_access_unlisted_hint">ไม่แสดงสาธารณะ: เฉพาะผู้ที่มีลิงก์โดยตรงหรือสแกนรหัส QR ด้านล่างเท่านั้นที่ค้นหาและเปิดแบบสำรวจนี้ได้</string>
+  <string name="surveyeditor_access_public_hint">สาธารณะ: ทุกคนที่เรียกดูไดเรกทอรีแบบสำรวจจะค้นพบและเปิดแบบสำรวจนี้ได้ หรือใช้ลิงก์โดยตรงและรหัส QR ด้านล่าง</string>
+
+  <!-- Data tables, map layers, add dialogs, people. -->
+  <!-- Map layer / data table editor (EntityDatasetEditor). -->
+  <!-- Shown in place of a map layer or data table name when it is blank. -->
+  <string name="surveyeditor_dataset_untitled">ไม่มีชื่อ</string>
+  <!-- Count in a data table summary, e.g. "3 rows • 2 properties". -->
+  <plurals name="surveyeditor_dataset_rows_count">
+    <item quantity="other">%1$d แถว</item>
+  </plurals>
+  <!-- Count in a map layer summary, e.g. "3 features • 2 properties". -->
+  <plurals name="surveyeditor_dataset_features_count">
+    <item quantity="other">%1$d ฟีเจอร์</item>
+  </plurals>
+  <!-- Count of the columns (properties) of a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_properties_count">
+    <item quantity="other">%1$d คุณสมบัติ</item>
+  </plurals>
+  <!-- Number of validation issues found in a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_issues_count">
+    <item quantity="other">%1$d ปัญหา</item>
+  </plurals>
+  <!-- Content description of a dataset's overflow menu button. %1$s is the dataset name. -->
+  <string name="surveyeditor_dataset_more_options">ตัวเลือกเพิ่มเติมสำหรับ %1$s</string>
+  <string name="surveyeditor_dataset_delete_map_layer_menu">ลบชั้นข้อมูลแผนที่…</string>
+  <string name="surveyeditor_dataset_delete_data_table_menu">ลบตารางข้อมูล…</string>
+  <string name="surveyeditor_dataset_delete_map_layer_title">ลบชั้นข้อมูลแผนที่นี้หรือไม่?</string>
+  <string name="surveyeditor_dataset_delete_data_table_title">ลบตารางข้อมูลนี้หรือไม่?</string>
+  <!-- %1$s is the map layer name, %2$d the number of features. -->
+  <plurals name="surveyeditor_dataset_delete_map_layer_body">
+    <item quantity="other">“%1$s” และฟีเจอร์ %2$d รายการจะถูกนำออกจากแบบสำรวจนี้</item>
+  </plurals>
+  <!-- %1$s is the data table name, %2$d the number of rows. -->
+  <plurals name="surveyeditor_dataset_delete_data_table_body">
+    <item quantity="other">“%1$s” และ %2$d แถวจะถูกนำออกจากแบบสำรวจนี้</item>
+  </plurals>
+  <string name="surveyeditor_dataset_delete_map_layer">ลบชั้นข้อมูลแผนที่</string>
+  <string name="surveyeditor_dataset_delete_data_table">ลบตารางข้อมูล</string>
+  <!-- Title of the table listing a map layer's features. -->
+  <string name="surveyeditor_dataset_features">ฟีเจอร์</string>
+  <!-- Title of the table listing a data table's rows. -->
+  <string name="surveyeditor_dataset_rows">แถว</string>
+  <string name="surveyeditor_dataset_add_feature">เพิ่มฟีเจอร์</string>
+  <string name="surveyeditor_dataset_add_row">เพิ่มแถว</string>
+  <!-- Shown after the first issues of a dataset. %1$d is how many more issues there are. -->
+  <plurals name="surveyeditor_dataset_more_issues">
+    <item quantity="other">…และอีก %1$d รายการ</item>
+  </plurals>
+  <!-- Table column header of the dataset's key property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_key">%1$s (คีย์)</string>
+  <!-- Table column header of the dataset's label property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_label">%1$s (ป้ายกำกับ)</string>
+  <!-- Header of the column where feature geometry is typed as coordinates. -->
+  <string name="surveyeditor_dataset_column_geometry">รูปทรงเรขาคณิต (lat, lng; …)</string>
+  <string name="surveyeditor_dataset_empty_sample_plots">ยังไม่มีแปลงตัวอย่าง สร้างได้จากแบบแผนการสุ่มตัวอย่าง</string>
+  <string name="surveyeditor_dataset_empty_features">ยังไม่มีฟีเจอร์ เพิ่มได้ที่นี่หรือบนแผนที่</string>
+  <string name="surveyeditor_dataset_empty_rows">ยังไม่มีแถว</string>
+  <!-- Sample points of a sample plot, shown when a plot has none. -->
+  <string name="surveyeditor_dataset_samples_none">ไม่มี</string>
+  <!-- Number of sample points of a sample plot. -->
+  <plurals name="surveyeditor_dataset_samples_count">
+    <item quantity="other">%1$d จุด</item>
+  </plurals>
+  <!-- Section label of the dataset settings panel. -->
+  <string name="surveyeditor_dataset_settings">การตั้งค่า</string>
+  <string name="surveyeditor_dataset_name">ชื่อ</string>
+  <string name="surveyeditor_dataset_geometry_type">ประเภทรูปทรงเรขาคณิต</string>
+  <string name="surveyeditor_dataset_sample_design">แบบแผนการสุ่มตัวอย่าง</string>
+  <string name="surveyeditor_dataset_key_property">คุณสมบัติคีย์ (ID ที่ไม่ซ้ำกัน)</string>
+  <!-- Shown in a dropdown when nothing has been chosen yet. -->
+  <string name="surveyeditor_dataset_choose">เลือก…</string>
+  <string name="surveyeditor_dataset_label_property">คุณสมบัติป้ายกำกับ (แสดงในรายการ)</string>
+  <string name="surveyeditor_dataset_field_collection">การเก็บข้อมูลภาคสนามและแบบฟอร์ม</string>
+  <!-- %1$s is the title of the form linked to the dataset. -->
+  <string name="surveyeditor_dataset_linked_to">ลิงก์กับ %1$s</string>
+  <string name="surveyeditor_dataset_linked_form_map_layer">ผู้เก็บข้อมูลเพิ่มฟีเจอร์แผนที่ใหม่ได้โดยใช้แบบฟอร์มนี้ คุณสมบัติของสคีมาจะซิงค์กับคำถามในแบบฟอร์มเสมอ</string>
+  <string name="surveyeditor_dataset_linked_form_data_table">ผู้เก็บข้อมูลเพิ่มแถวใหม่ได้โดยใช้แบบฟอร์มนี้ คุณสมบัติของสคีมาจะซิงค์กับคำถามในแบบฟอร์มเสมอ</string>
+  <string name="surveyeditor_dataset_edit_form">แก้ไขแบบฟอร์ม</string>
+  <string name="surveyeditor_dataset_unlink_form">ยกเลิกการลิงก์แบบฟอร์ม</string>
+  <string name="surveyeditor_dataset_no_form_map_layer">ไม่มีแบบฟอร์มที่ลิงก์กับชั้นข้อมูลแผนที่นี้ ผู้เก็บข้อมูลดูได้เฉพาะรายการที่มีอยู่</string>
+  <string name="surveyeditor_dataset_no_form_data_table">ไม่มีแบบฟอร์มที่ลิงก์กับตารางข้อมูลนี้ ผู้เก็บข้อมูลดูได้เฉพาะรายการที่มีอยู่</string>
+  <string name="surveyeditor_dataset_create_form_map_layer">สร้างแบบฟอร์มสำหรับชั้นข้อมูลแผนที่</string>
+  <string name="surveyeditor_dataset_create_form_data_table">สร้างแบบฟอร์มสำหรับตารางข้อมูล</string>
+  <!-- Label above the list of forms that update this dataset. -->
+  <string name="surveyeditor_dataset_updated_by">อัปเดตโดย</string>
+  <string name="surveyeditor_dataset_map_style">รูปแบบแผนที่</string>
+  <!-- Section label of the dataset's schema (its properties / columns). -->
+  <string name="surveyeditor_dataset_properties">คุณสมบัติ</string>
+  <string name="surveyeditor_dataset_properties_managed_by_form">คุณสมบัติได้รับการจัดการโดยแบบฟอร์มที่ลิงก์อยู่ หากต้องการแก้ไข เพิ่ม หรือลบคุณสมบัติ ให้แก้ไขแบบฟอร์ม</string>
+  <string name="surveyeditor_dataset_add_property">เพิ่มคุณสมบัติ</string>
+  <!-- Section label of the advanced dataset settings. -->
+  <string name="surveyeditor_dataset_advanced">ขั้นสูง</string>
+  <!-- Button that collapses the advanced section. -->
+  <string name="surveyeditor_dataset_hide">ซ่อน</string>
+  <!-- Button that expands the advanced section. -->
+  <string name="surveyeditor_dataset_show">แสดง</string>
+  <string name="surveyeditor_dataset_id">ID ชุดข้อมูล</string>
+  <string name="surveyeditor_dataset_id_supporting">แบบฟอร์มใช้ ID นี้เพื่อค้นหาระเบียนจากชุดข้อมูลนี้</string>
+  <!-- Field for a map layer's color as a hex code. -->
+  <string name="surveyeditor_dataset_color">สี</string>
+  <!-- %1$d is the line width in pixels. -->
+  <string name="surveyeditor_dataset_stroke_width">ความกว้างเส้น: %1$d px</string>
+  <!-- %1$d is the polygon fill opacity in percent; the % after it is a literal percent sign. -->
+  <string name="surveyeditor_dataset_fill_opacity">ความทึบของสีเติม: %1$d%</string>
+  <string name="surveyeditor_dataset_visible_by_default">แสดงโดยค่าเริ่มต้น</string>
+  <string name="surveyeditor_dataset_visible_by_default_description">แสดงชั้นข้อมูลนี้เมื่อเปิดแผนที่ครั้งแรก</string>
+  <!-- Field for the display label of a dataset property. -->
+  <string name="surveyeditor_dataset_property_label">ป้ายกำกับ</string>
+  <!-- Button that hides a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_hide_id">ซ่อน ID</string>
+  <!-- Button that shows a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_advanced">ขั้นสูง</string>
+  <string name="surveyeditor_dataset_property_internal_id">ID ภายใน</string>
+  <string name="surveyeditor_dataset_property_internal_id_supporting">ใช้ในนิพจน์ XForms และการส่งออก GeoJSON</string>
+  <!-- Field for the data type of a dataset property. -->
+  <string name="surveyeditor_dataset_property_type">ประเภท</string>
+  <!-- Checkbox label: the property must have a value. -->
+  <string name="surveyeditor_dataset_property_required">จำเป็นต้องระบุ</string>
+  <string name="surveyeditor_dataset_remove_property">นำคุณสมบัติออก</string>
+
+  <!-- Add data table dialog. -->
+  <string name="surveyeditor_add_table_title">เพิ่มตารางข้อมูล</string>
+  <string name="surveyeditor_add_table_empty">ตารางข้อมูลเปล่า</string>
+  <string name="surveyeditor_add_table_empty_body">เพิ่มคอลัมน์และกรอกแถวในตาราง</string>
+  <string name="surveyeditor_add_table_import_csv">นำเข้าจาก CSV</string>
+  <string name="surveyeditor_add_table_import_csv_body">สร้างตารางข้อมูลจากคอลัมน์และแถวในไฟล์ CSV</string>
+  <string name="surveyeditor_add_table_no_rows">ไม่สามารถอ่านแถวใดจากไฟล์นี้ได้</string>
+  <!-- Number of columns found in an imported CSV file. -->
+  <plurals name="surveyeditor_add_table_columns_count">
+    <item quantity="other">%1$d คอลัมน์</item>
+  </plurals>
+  <!-- An imported column: %1$s is its name, %2$s its detected type. -->
+  <string name="surveyeditor_add_table_column_with_type">%1$s (%2$s)</string>
+  <!-- Date order option: %1$s is the order (e.g. "Day first"), %2$s an example date. -->
+  <string name="surveyeditor_add_table_date_order_option">%1$s (%2$s)</string>
+
+  <!-- Add map layer dialog. -->
+  <string name="surveyeditor_add_layer_title">เพิ่มชั้นข้อมูลแผนที่</string>
+  <string name="surveyeditor_add_layer_empty">ชั้นข้อมูลแผนที่เปล่า</string>
+  <string name="surveyeditor_add_layer_empty_body">เพิ่มฟีเจอร์โดยวาดบนแผนที่หรือกรอกในตาราง</string>
+  <string name="surveyeditor_add_layer_import_file">นำเข้าไฟล์</string>
+  <string name="surveyeditor_add_layer_import_file_body">สร้างชั้นข้อมูลแผนที่จากจุด เส้น หรือรูปหลายเหลี่ยมในไฟล์ GeoJSON หรือ KML</string>
+  <string name="surveyeditor_add_layer_generate_plots">สร้างแปลงตัวอย่าง</string>
+  <string name="surveyeditor_add_layer_generate_plots_body">ออกแบบการสุ่มตัวอย่างและสร้างแปลงภายในพื้นที่สำรวจหรือชั้นภูมิ</string>
+  <!-- Shown when sample plots can't be generated yet. -->
+  <string name="surveyeditor_add_layer_generate_plots_need_area">กำหนดพื้นที่สำรวจหรือเพิ่มชั้นข้อมูลแผนที่แบบรูปหลายเหลี่ยมก่อน</string>
+  <string name="surveyeditor_add_layer_no_features">ไม่สามารถอ่านฟีเจอร์ใดจากไฟล์นี้ได้</string>
+  <!-- Number of features in an imported file. %1$d is the count, %2$s the lowercase geometry type (e.g. "polygon"). -->
+  <string name="surveyeditor_add_layer_feature_count">%2$s %1$d รายการ</string>
+  <!-- %1$d is the number of features that will not be imported. -->
+  <plurals name="surveyeditor_add_layer_skipped_features">
+    <item quantity="other">ฟีเจอร์ %1$d รายการที่มีรูปทรงเรขาคณิตประเภทอื่นจะถูกข้าม ชั้นข้อมูลแผนที่มีรูปทรงเรขาคณิตได้เพียงประเภทเดียว</item>
+  </plurals>
+
+  <!-- Add form dialog. -->
+  <string name="surveyeditor_add_form_title">เพิ่มแบบฟอร์ม</string>
+  <string name="surveyeditor_add_form_empty">แบบฟอร์มเปล่า</string>
+  <string name="surveyeditor_add_form_empty_body">เริ่มจากแบบฟอร์มเปล่าและเพิ่มคำถามตั้งแต่ต้น</string>
+  <string name="surveyeditor_add_form_from_template">จากเทมเพลต…</string>
+  <string name="surveyeditor_add_form_for_purpose">สำหรับวัตถุประสงค์…</string>
+  <string name="surveyeditor_add_form_for_purpose_body">เพิ่มแบบฟอร์มเริ่มต้นจากเทมเพลตของวัตถุประสงค์ วัตถุประสงค์และโปรแกรมจะถูกเพิ่มลงในแบบสำรวจ แบบสำรวจหนึ่งจึงรองรับได้หลายวัตถุประสงค์</string>
+  <string name="surveyeditor_add_form_no_purposes">ไม่มีวัตถุประสงค์สำหรับแบบสำรวจนี้</string>
+  <string name="surveyeditor_add_form_purpose_title">เพิ่มแบบฟอร์มสำหรับวัตถุประสงค์</string>
+  <string name="surveyeditor_add_form_purpose_note">เลือกวัตถุประสงค์และเทมเพลตเริ่มต้น แบบฟอร์มของเทมเพลตจะถูกเพิ่มลงในแบบสำรวจ และบันทึกวัตถุประสงค์พร้อมโปรแกรมที่เลือกไว้</string>
+  <string name="surveyeditor_add_form_purpose_add">เพิ่มแบบฟอร์ม</string>
+  <string name="surveyeditor_add_form_no_templates">ยังไม่มีเทมเพลตสำหรับแบบสำรวจนี้</string>
+  <string name="surveyeditor_add_form_templates_body">เริ่มจากแบบฟอร์มที่ใช้ซ้ำได้พร้อมฟิลด์มาตรฐาน จากองค์กรของคุณหรือคลังส่วนกลาง</string>
+  <string name="surveyeditor_add_form_import_file">นำเข้าจากไฟล์</string>
+  <string name="surveyeditor_add_form_import_file_body">สร้างแบบฟอร์มจากไฟล์ ODK XForms (.xml) หรือ Collect Earth (.cep)</string>
+  <string name="surveyeditor_add_form_no_questions">ไม่สามารถอ่านคำถามใดจากไฟล์นี้ได้</string>
+  <!-- Number of questions in an imported form or template. -->
+  <plurals name="surveyeditor_add_form_questions_count">
+    <item quantity="other">%1$d คำถาม</item>
+  </plurals>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it updates. -->
+  <string name="surveyeditor_add_form_updates_dataset">อัปเดต %1$s</string>
+  <string name="surveyeditor_add_form_updates_existing">อัปเดตฟีเจอร์ที่มีอยู่</string>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it adds to. -->
+  <string name="surveyeditor_add_form_adds_to_dataset">เพิ่มลงใน %1$s</string>
+  <string name="surveyeditor_add_form_adds_to_new_map_layer">เพิ่มลงในชั้นข้อมูลแผนที่ใหม่</string>
+  <string name="surveyeditor_add_form_adds_to_new_data_table">เพิ่มลงในตารางข้อมูลใหม่</string>
+  <string name="surveyeditor_add_form_template_title">เพิ่มแบบฟอร์มจากเทมเพลต</string>
+  <string name="surveyeditor_add_form_template_note">แบบฟอร์มจะถูกคัดลอกลงในแบบสำรวจนี้ การเปลี่ยนแปลงเทมเพลตในภายหลังจะไม่มีผลกับแบบฟอร์มนี้</string>
+  <!-- Badge of a template from the user's organization (when its name is unknown). -->
+  <string name="surveyeditor_add_form_template_organization">องค์กร</string>
+  <!-- Badge of a template from the global library. -->
+  <string name="surveyeditor_add_form_template_global">ส่วนกลาง</string>
+  <!-- %1$s is the question count (e.g. "12 questions"), %2$d how many link to standard fields. -->
+  <plurals name="surveyeditor_add_form_template_linked">
+    <item quantity="other">%1$s · ลิงก์กับฟิลด์มาตรฐาน %2$d ข้อ</item>
+  </plurals>
+
+  <!-- Map layer pin icon picker. -->
+  <!-- %1$s is the name of the chosen icon. -->
+  <string name="surveyeditor_icon_pin_icon">ไอคอนหมุด: %1$s</string>
+  <!-- Shown as the pin icon name when no icon is chosen. -->
+  <string name="surveyeditor_icon_none">ไม่มี</string>
+  <string name="surveyeditor_icon_no_icon">ไม่มีไอคอน</string>
+
+  <!-- Basemap options of the map layer editor. -->
+  <string name="surveyeditor_basemap_satellite">ภาพถ่ายดาวเทียม</string>
+  <string name="surveyeditor_basemap_terrain">ภูมิประเทศ</string>
+  <!-- Basemap option: no basemap imagery. -->
+  <string name="surveyeditor_basemap_none">ไม่มี</string>
+
+  <!-- Short labels of sample design thumbnail cards. -->
+  <string name="surveyeditor_thumbnail_grid">ตาราง</string>
+  <string name="surveyeditor_thumbnail_random">สุ่ม</string>
+  <string name="surveyeditor_thumbnail_stratified">แบ่งชั้นภูมิ</string>
+  <string name="surveyeditor_thumbnail_cluster">กลุ่ม</string>
+  <!-- Plot shape: a single point. -->
+  <string name="surveyeditor_thumbnail_point">จุด</string>
+  <!-- Sample point layout: one point at the plot center. -->
+  <string name="surveyeditor_thumbnail_center">กึ่งกลาง</string>
+
+  <!-- People with access and invite acceptance. -->
+  <!-- Badge of a person who was invited but hasn't joined yet. -->
+  <string name="surveyeditor_people_invited">ได้รับเชิญแล้ว</string>
+  <!-- Shown on the copy button after the invite link was copied. -->
+  <string name="surveyeditor_people_copied">คัดลอกแล้ว</string>
+  <string name="surveyeditor_people_copy_link">คัดลอกลิงก์</string>
+  <string name="surveyeditor_people_new_link">ลิงก์ใหม่</string>
+  <string name="surveyeditor_people_open_as_invitee">เปิดในฐานะผู้ได้รับเชิญ</string>
+  <!-- Name of the survey page listing people; used as %1$s in surveyeditor_people_accept_invite_note. -->
+  <string name="surveyeditor_people_sharing_page">หน้าการแชร์</string>
+  <!-- Title of the invite acceptance dialog. %1$s is the survey or organization name. -->
+  <string name="surveyeditor_people_join_title">เข้าร่วม “%1$s”</string>
+  <!-- %1$s is the invitee's email address. -->
+  <string name="surveyeditor_people_accept_invite_preview">ตัวอย่างสิ่งที่ %1$s จะเห็นหลังจากเปิดลิงก์คำเชิญและลงชื่อเข้าใช้</string>
+  <!-- %1$s is the invitee's email address, %2$s their role. -->
+  <string name="surveyeditor_people_signed_in_as">ลงชื่อเข้าใช้เป็น %1$s • %2$s</string>
+  <string name="surveyeditor_people_full_name">ชื่อและนามสกุล</string>
+  <string name="surveyeditor_people_profile_photo">รูปโปรไฟล์</string>
+  <!-- %1$s is the page where organizers see people, e.g. "Sharing page" or "Members page". -->
+  <string name="surveyeditor_people_accept_invite_note">Collect One จะบันทึกชื่อและรูปภาพของคุณเพื่อให้ผู้จัดทำจดจำคุณได้ใน%1$s ข้อมูลจะรีเฟรชทุกครั้งที่คุณลงชื่อเข้าใช้</string>
+  <string name="surveyeditor_people_accept_invite">ยอมรับคำเชิญ</string>
+
+  <!-- Interactive layer map, survey area editor, sampling design panel. -->
+  <!-- Interactive layer map (InteractiveLayerMap.kt). -->
+  <!-- Title of the map card in the map layer and survey area editors. -->
+  <string name="surveyeditor_map_title">แผนที่</string>
+  <string name="surveyeditor_map_generated_locked">ไม่สามารถแก้ไขรูปทรงเรขาคณิตที่สร้างขึ้นได้</string>
+  <!-- Vertex progress while drawing. %1$d is the number of vertices placed, %2$d the minimum needed. -->
+  <string name="surveyeditor_map_draft_vertices">%1$d / %2$d+ จุดยอด</string>
+  <string name="surveyeditor_map_undo">เลิกทำ</string>
+  <!-- Button that completes drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_finish_point">เสร็จสิ้นจุด</string>
+  <string name="surveyeditor_map_finish_line">เสร็จสิ้นเส้น</string>
+  <string name="surveyeditor_map_finish_polygon">เสร็จสิ้นรูปหลายเหลี่ยม</string>
+  <!-- Button that completes drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_finish_part">เสร็จสิ้นส่วนนี้</string>
+  <!-- Chip that starts drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_add_point">เพิ่มจุด</string>
+  <string name="surveyeditor_map_add_line">เพิ่มเส้น</string>
+  <string name="surveyeditor_map_add_polygon">เพิ่มรูปหลายเหลี่ยม</string>
+  <!-- Starts drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_add_part">เพิ่มส่วน</string>
+  <string name="surveyeditor_map_zoom_in">ซูมเข้า</string>
+  <string name="surveyeditor_map_zoom_out">ซูมออก</string>
+  <string name="surveyeditor_map_fit_to_features">ปรับให้พอดีกับฟีเจอร์</string>
+  <!-- Current map zoom level, shown next to the scale bar. %1$s is the zoom level (e.g. "12.5"). -->
+  <string name="surveyeditor_map_zoom_level">z %1$s</string>
+  <!-- Map hints shown in a pill at the bottom of the map. -->
+  <string name="surveyeditor_map_hint_locked">ลากเพื่อเลื่อน • เลื่อนเมาส์หรือบีบนิ้วเพื่อซูม • คลิกแปลงเพื่อดูจุดตัวอย่าง</string>
+  <string name="surveyeditor_map_hint_place_point">คลิกแผนที่เพื่อวางจุด</string>
+  <string name="surveyeditor_map_hint_start_line">คลิกเพื่อเริ่มเส้น</string>
+  <string name="surveyeditor_map_hint_continue_line">คลิกเพื่อเพิ่มจุดยอด • คลิกจุดยอดสุดท้ายอีกครั้งเพื่อเสร็จสิ้น</string>
+  <string name="surveyeditor_map_hint_start_polygon">คลิกเพื่อเริ่มรูปหลายเหลี่ยม</string>
+  <string name="surveyeditor_map_hint_continue_polygon">คลิกเพื่อเพิ่มจุดยอด • คลิกจุดยอดแรกหรือสุดท้ายเพื่อเสร็จสิ้น</string>
+  <string name="surveyeditor_map_hint_move_point">ลากจุดเพื่อย้าย</string>
+  <!-- "○ handles" refers to the small circles drawn at segment midpoints. -->
+  <string name="surveyeditor_map_hint_reshape">ลากจุดยอดเพื่อปรับรูปทรง • ลากจุดจับ ○ เพื่อเพิ่มจุดยอด • ลากด้านในเพื่อย้าย</string>
+  <string name="surveyeditor_map_hint_select">ลากเพื่อเลื่อน • เลื่อนเมาส์หรือบีบนิ้วเพื่อซูม • คลิกฟีเจอร์เพื่อเลือก</string>
+
+  <!-- Survey area editor dialog (SurveyAreaEditor.kt). -->
+  <string name="surveyeditor_area_tab_search">ค้นหา</string>
+  <string name="surveyeditor_area_tab_draw">วาด</string>
+  <string name="surveyeditor_area_tab_upload">อัปโหลด</string>
+  <string name="surveyeditor_area_title">พื้นที่สำรวจ</string>
+  <string name="surveyeditor_area_close_editor">ปิดเครื่องมือแก้ไขพื้นที่สำรวจ</string>
+  <string name="surveyeditor_area_save">บันทึกพื้นที่สำรวจ</string>
+  <!-- Part of an area summary like "3 parts • 1,204 vertices • 850 ha". -->
+  <plurals name="surveyeditor_area_parts_count">
+    <item quantity="other">%1$d ส่วน</item>
+  </plurals>
+  <!-- Vertex count in an area summary. %1$s is the count with thousands separators. -->
+  <plurals name="surveyeditor_area_vertices_count">
+    <item quantity="other">%1$s จุดยอด</item>
+  </plurals>
+  <string name="surveyeditor_area_search_label">ค้นหาสถานที่หรือกรอกพิกัด</string>
+  <!-- Example place names are from the default survey region. -->
+  <string name="surveyeditor_area_search_placeholder">เช่น Nairobi, Othaya, Chinga Dam หรือ -0.419, 36.950</string>
+  <string name="surveyeditor_area_suggested_locations">ตำแหน่งสำรวจที่แนะนำ:</string>
+  <plurals name="surveyeditor_area_locations_found">
+    <item quantity="other">พบ %1$d ตำแหน่ง:</item>
+  </plurals>
+  <string name="surveyeditor_area_searching_places">กำลังค้นหาสถานที่...</string>
+  <!-- %1$s is the search text the user typed. -->
+  <string name="surveyeditor_area_no_places_matching">ไม่มีสถานที่ที่ตรงกับ “%1$s”</string>
+  <!-- Category of a search result built from typed coordinates. -->
+  <string name="surveyeditor_area_custom_coordinates">พิกัดที่กำหนดเอง</string>
+  <string name="surveyeditor_area_direct_coordinates_input">ป้อนพิกัดโดยตรง</string>
+  <!-- Source badge for results from the online places search. -->
+  <string name="surveyeditor_area_source_online">ออนไลน์</string>
+  <!-- Badge on the search result that is the current survey area. -->
+  <string name="surveyeditor_area_selected">เลือกแล้ว</string>
+  <string name="surveyeditor_area_name">ชื่อพื้นที่</string>
+  <string name="surveyeditor_area_draw_instructions">คลิกแผนที่เพื่อวางมุมของขอบเขต คลิกส่วนที่มีอยู่เพื่อเลือก แล้วลากมุมเพื่อปรับรูปทรง</string>
+  <string name="surveyeditor_area_parts">ส่วน</string>
+  <string name="surveyeditor_area_no_parts">ยังไม่มีส่วน วาดอย่างน้อยหนึ่งส่วนเพื่อบันทึกพื้นที่สำรวจ</string>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_part_number">ส่วนที่ %1$d</string>
+  <!-- Vertex count and area of one part. %2$s is the formatted area (e.g. "850 ha"). -->
+  <plurals name="surveyeditor_area_part_vertices_area">
+    <item quantity="other">%1$d จุดยอด • %2$s</item>
+  </plurals>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_delete_part">ลบส่วนที่ %1$d</string>
+  <string name="surveyeditor_area_draw_boundary_hint">คลิกแผนที่เพื่อวาดขอบเขต…</string>
+  <plurals name="surveyeditor_area_drawing_corners">
+    <item quantity="other">กำลังวาด (%1$d มุม)</item>
+  </plurals>
+  <string name="surveyeditor_area_upload_geojson_title">GeoJSON หรือ KML</string>
+  <string name="surveyeditor_area_upload_geojson_body">รูปหลายเหลี่ยมและรูปหลายเหลี่ยมหลายส่วนจะกลายเป็นส่วนของพื้นที่สำรวจ รูภายในจะถูกนำออก</string>
+  <string name="surveyeditor_area_choose_file">เลือกไฟล์</string>
+  <string name="surveyeditor_area_upload_shapefile_title">Shapefile (.zip)</string>
+  <string name="surveyeditor_area_upload_shapefile_body">Shapefile ที่บีบอัดเป็น zip พร้อมไฟล์ .shp, .shx, .dbf และ .prj</string>
+  <string name="surveyeditor_area_choose_shapefile">เลือก Shapefile</string>
+  <string name="surveyeditor_area_shapefile_coming_soon">การนำเข้า Shapefile จะพร้อมใช้งานเร็ว ๆ นี้ ในตอนนี้ให้แปลง Shapefile เป็น GeoJSON หรือ KML (เช่น ใน QGIS) แล้วอัปโหลดไฟล์นั้น</string>
+  <string name="surveyeditor_area_upload_empty">อัปโหลดไฟล์ขอบเขตเพื่อดูตัวอย่างที่นี่</string>
+  <string name="surveyeditor_area_edit_in_draw_tab">แก้ไขในแท็บวาด</string>
+  <plurals name="surveyeditor_area_ignored_features">
+    <item quantity="other">ฟีเจอร์ %1$d รายการไม่ใช่รูปหลายเหลี่ยมและถูกละเว้น</item>
+  </plurals>
+  <string name="surveyeditor_area_no_polygons">ไฟล์นี้ไม่มีรูปหลายเหลี่ยมที่ใช้เป็นพื้นที่สำรวจได้</string>
+  <!-- Icon descriptions for file import issues. -->
+  <string name="surveyeditor_area_issue_error">ข้อผิดพลาด</string>
+  <string name="surveyeditor_area_issue_warning">คำเตือน</string>
+  <!-- Shown after a capped list of issues. %1$d is how many more issues are hidden. -->
+  <plurals name="surveyeditor_area_more_issues">
+    <item quantity="other">…และอีก %1$d รายการ</item>
+  </plurals>
+
+  <!-- Sampling design panel (SamplingDesignPanel.kt). -->
+  <string name="surveyeditor_sampling_update_preview">อัปเดตตัวอย่าง</string>
+  <string name="surveyeditor_sampling_show_preview">แสดงตัวอย่าง</string>
+  <string name="surveyeditor_sampling_stale_title">ตัวอย่างไม่เป็นปัจจุบัน — อัปเดตตัวอย่าง</string>
+  <string name="surveyeditor_sampling_stale_body">แบบแผนหรือพื้นที่มีการเปลี่ยนแปลงหลังจากสร้างตัวอย่างนี้</string>
+  <string name="surveyeditor_sampling_in_use_title">แปลงตัวอย่างกำลังถูกใช้งาน</string>
+  <string name="surveyeditor_sampling_generate_failed_title">ไม่สามารถสร้างแปลงตัวอย่างได้</string>
+  <string name="surveyeditor_sampling_method">วิธีการ</string>
+  <!-- %1$s is the sampling method name, %2$s its description. -->
+  <string name="surveyeditor_sampling_method_description">%1$s: %2$s</string>
+  <string name="surveyeditor_sampling_plot_shape">รูปทรงแปลง</string>
+  <string name="surveyeditor_sampling_plot_diameter">เส้นผ่านศูนย์กลางแปลง (ม.)</string>
+  <string name="surveyeditor_sampling_plot_side">ความยาวด้านของแปลง (ม.)</string>
+  <string name="surveyeditor_sampling_sample_points">จุดตัวอย่างในแต่ละแปลง</string>
+  <string name="surveyeditor_sampling_sample_points_require_shape">จุดตัวอย่างภายในแปลงต้องใช้แปลงรูปสี่เหลี่ยมจัตุรัสหรือวงกลม</string>
+  <string name="surveyeditor_sampling_points_per_side">จำนวนจุดต่อด้าน</string>
+  <!-- %1$d is the number of sample points in each plot. -->
+  <plurals name="surveyeditor_sampling_points_per_plot">
+    <item quantity="other">%1$d จุดตัวอย่างต่อแปลง</item>
+  </plurals>
+  <string name="surveyeditor_sampling_point_spacing">ระยะห่างระหว่างจุด (ม.)</string>
+  <string name="surveyeditor_sampling_number_of_points">จำนวนจุด</string>
+  <string name="surveyeditor_sampling_shuffle">สุ่มลำดับการเยี่ยมชม</string>
+  <string name="surveyeditor_sampling_shuffle_description">กำหนดหมายเลขแปลงแบบสุ่ม เพื่อไม่ให้ต้องไปแปลงที่อยู่ติดกันต่อเนื่องกัน</string>
+  <string name="surveyeditor_sampling_random_seed">ค่าเริ่มต้นการสุ่ม (Seed)</string>
+  <string name="surveyeditor_sampling_random_seed_description">ค่าเริ่มต้นการสุ่มเดียวกันจะให้แปลงชุดเดิมเสมอ</string>
+  <string name="surveyeditor_sampling_reroll_seed">เลือกค่าเริ่มต้นการสุ่มใหม่</string>
+  <!-- Progress while generating plots. %1$s is the number generated so far (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_generating">
+    <item quantity="other">กำลังสร้าง… %1$s แปลง</item>
+  </plurals>
+  <!-- Progress while generating plots. %1$s is the number generated so far, %2$s the expected total. -->
+  <plurals name="surveyeditor_sampling_generating_of_about">
+    <item quantity="other">กำลังสร้าง… %1$s จากประมาณ %2$s แปลง</item>
+  </plurals>
+  <!-- %1$s is the number of plots in the preview (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_previewing_plots">
+    <item quantity="other">กำลังแสดงตัวอย่างแปลงตัวอย่าง %1$s แปลง</item>
+  </plurals>
+  <!-- Sample area option: the survey's own area. -->
+  <string name="surveyeditor_sampling_area_survey_area">พื้นที่สำรวจ</string>
+  <!-- Sample area option. %1$s is the name of a polygon map layer whose features are strata. -->
+  <string name="surveyeditor_sampling_area_strata_from">ชั้นภูมิจาก %1$s</string>
+  <string name="surveyeditor_sampling_area_deleted_layer">ชั้นข้อมูลแผนที่ที่ถูกลบ</string>
+  <string name="surveyeditor_sampling_area">พื้นที่</string>
+  <string name="surveyeditor_sampling_stratum_property">คุณสมบัติชั้นภูมิ</string>
+  <string name="surveyeditor_sampling_choose">เลือก…</string>
+  <!-- %1$d is the number of strata, %2$s a comma-separated list of the first few stratum IDs. -->
+  <plurals name="surveyeditor_sampling_strata_list">
+    <item quantity="other">%1$d ชั้นภูมิ: %2$s</item>
+  </plurals>
+  <string name="surveyeditor_sampling_min_distance">ระยะห่างขั้นต่ำระหว่างแปลง (ม.)</string>
+  <string name="surveyeditor_sampling_grid_spacing">ระยะห่างของตาราง (ม.)</string>
+  <!-- %1$d is the target number of plots used to suggest a grid spacing. -->
+  <string name="surveyeditor_sampling_grid_spacing_auto_description">ระยะห่างระหว่างจุดกึ่งกลางของแปลงที่อยู่ติดกัน กำหนดจากขนาดพื้นที่ (ประมาณ %1$d แปลง) พื้นที่ที่ใหญ่กว่าจะมีระยะห่างกว้างกว่า</string>
+  <string name="surveyeditor_sampling_grid_spacing_description">ระยะห่างระหว่างจุดกึ่งกลางของแปลงที่อยู่ติดกัน</string>
+  <!-- %1$s is the suggested grid spacing in meters. -->
+  <string name="surveyeditor_sampling_match_area_size">ตามขนาดพื้นที่ (%1$s ม.)</string>
+  <string name="surveyeditor_sampling_number_of_plots">จำนวนแปลง</string>
+  <string name="surveyeditor_sampling_survey_area_one_stratum">พื้นที่สำรวจนับเป็นหนึ่งชั้นภูมิ หากต้องการสุ่มตัวอย่างแยกแต่ละชั้นภูมิ ให้เลือกชั้นข้อมูลแผนที่แบบรูปหลายเหลี่ยมเป็นพื้นที่</string>
+  <string name="surveyeditor_sampling_allocation">การจัดสรร</string>
+  <!-- Label of a field for the number of plots in one stratum. %1$s is the stratum ID. -->
+  <string name="surveyeditor_sampling_plots_in_stratum">แปลงใน %1$s</string>
+  <!-- Label of the plot count field when there are no strata. -->
+  <string name="surveyeditor_sampling_plots_in_survey_area">แปลงในพื้นที่สำรวจ</string>
+  <!-- %1$d is the number of strata not listed. -->
+  <plurals name="surveyeditor_sampling_more_strata">
+    <item quantity="other">อีก %1$d ชั้นภูมิจะไม่มีแปลงหากไม่ได้กำหนด</item>
+  </plurals>
+  <string name="surveyeditor_sampling_total_plots">จำนวนแปลงทั้งหมด</string>
+  <string name="surveyeditor_sampling_number_of_clusters">จำนวนกลุ่ม</string>
+  <string name="surveyeditor_sampling_plots_per_side">จำนวนแปลงต่อด้าน</string>
+  <!-- %1$d is the number of plots in each cluster. -->
+  <plurals name="surveyeditor_sampling_plots_per_cluster">
+    <item quantity="other">%1$d แปลงในแต่ละกลุ่ม</item>
+  </plurals>
+  <string name="surveyeditor_sampling_cluster_spacing">ระยะห่างระหว่างแปลงในกลุ่ม (ม.)</string>
+  <string name="surveyeditor_sampling_estimate_unavailable">ยังไม่มีค่าประมาณ</string>
+  <!-- %1$s is the formatted area (e.g. "850 ha"), %2$s the estimated plot count with thousands separators. -->
+  <plurals name="surveyeditor_sampling_estimate">
+    <item quantity="other">พื้นที่ %1$s • ประมาณ %2$s แปลง</item>
+  </plurals>
+  <string name="surveyeditor_sampling_estimate_title">ค่าประมาณ</string>
+  <string name="surveyeditor_sampling_large_design_warning">แบบแผนขนาดใหญ่อาจใช้เวลานานในการสร้างและแก้ไข</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_number_at_least">กรุณากรอกตัวเลขอย่างน้อย %1$s</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_whole_number_at_least">กรุณากรอกจำนวนเต็มอย่างน้อย %1$s</string>
+  <!-- Validation message. %1$s and %2$s are the minimum and maximum allowed values. -->
+  <string name="surveyeditor_sampling_enter_whole_number_range">กรุณากรอกจำนวนเต็มตั้งแต่ %1$s ถึง %2$s</string>
+
+  <string name="surveyeditor_plot_review">การตรวจทานแปลง</string>
+  <string name="surveyeditor_plot_review_description">ตรวจแต่ละแปลงบนภาพถ่ายดาวเทียมก่อน แล้วส่งแปลงที่จำเป็นให้ทีมภาคสนาม</string>
+  <string name="surveyeditor_plot_review_desk">ตรวจแปลงบนภาพถ่าย (เว็บ)</string>
+  <string name="surveyeditor_plot_review_desk_on">ผู้แปลภาพกรอกแบบฟอร์มสำหรับแต่ละแปลงในแดชบอร์ดเว็บ</string>
+  <string name="surveyeditor_plot_review_desk_off">เพิ่มแบบฟอร์มเว็บสำหรับจำแนกแต่ละแปลงจากภาพถ่าย</string>
+  <string name="surveyeditor_plot_review_field">ยืนยันแปลงในภาคสนาม (มือถือ)</string>
+  <string name="surveyeditor_plot_review_field_on">แปลงที่ต้องลงพื้นที่จะมีเครื่องหมาย ! ทีมภาคสนามยืนยันแปลงเหล่านี้ในแอปมือถือ</string>
+  <string name="surveyeditor_plot_review_field_off">เพิ่มแบบฟอร์มมือถือให้ทีมภาคสนามยืนยันแปลงที่ต้องลงพื้นที่</string>
+  <string name="surveyeditor_plot_review_confidence">ส่งแปลงที่มีความมั่นใจต่ำกว่าค่านี้</string>
+  <string name="surveyeditor_plot_review_confidence_description">ผู้แปลภาพให้คะแนนความมั่นใจตั้งแต่ 0 ถึง 100 ป้อน 0 เพื่อส่งเฉพาะแปลงที่ผู้แปลภาพทำเครื่องหมายไว้</string>
+  <string name="surveyeditor_plot_review_spot_checks">การสุ่มตรวจ</string>
+  <string name="surveyeditor_plot_review_spot_checks_description">แปลงที่สุ่มเลือกจะถูกส่งไปภาคสนามด้วย เพื่อวัดความแม่นยำของการตรวจในสำนักงาน ป้อน 0 หากไม่ต้องการ</string>
+  <plurals name="surveyeditor_plot_review_spot_checks_share">
+    <item quantity="other">%1$s จาก %2$s แปลง สุ่มเลือกเพื่อวัดความแม่นยำของการตรวจในสำนักงาน</item>
+  </plurals>
+  <string name="surveyeditor_plot_review_spot_checks_unshuffled">เปิด “สุ่มลำดับการเยี่ยมชม” เพื่อให้สุ่มเลือกแปลงที่จะตรวจ</string>
+  <string name="surveyeditor_plot_review_desk_form">%1$s จะเป็นแบบฟอร์มตรวจในสำนักงาน: ใช้บนเว็บเท่านั้น พร้อมคำถามเรื่องความมั่นใจและการทำเครื่องหมาย</string>
+  <string name="surveyeditor_plot_review_show_desk">แสดงคำตอบจากสำนักงานให้ทีมภาคสนาม</string>
+  <string name="surveyeditor_plot_review_show_desk_on">ทีมเห็นสิ่งปกคลุมดินและความมั่นใจจากการตรวจในสำนักงานบนแต่ละแปลง</string>
+  <string name="surveyeditor_plot_review_show_desk_off">ตรวจแบบปิดตา: ทีมเห็นเพียงเหตุผลที่แปลงถูกทำเครื่องหมาย</string>
+  <string name="surveyeditor_plot_review_open_form">เปิด %1$s</string>
+  <string name="surveyeditor_plot_review_remove_title">หยุดตรวจแปลงบนภาพถ่ายหรือไม่?</string>
+  <string name="surveyeditor_plot_review_remove_body">การดำเนินการนี้จะนำแบบฟอร์มและคำถามตรวจทานแปลงออกจากแบบสำรวจ รวมถึงการเปลี่ยนแปลงที่คุณทำไว้</string>
+  <string name="surveyeditor_plot_review_remove_field_title">หยุดยืนยันแปลงในภาคสนามหรือไม่?</string>
+  <string name="surveyeditor_plot_review_remove_field_body">การดำเนินการนี้จะนำแบบฟอร์มยืนยันภาคสนามออกจากแบบสำรวจ รวมถึงการเปลี่ยนแปลงที่คุณทำไว้</string>
+  <string name="surveyeditor_plot_review_remove">นำแบบฟอร์มออก</string>
+  <string name="surveyeditor_plot_review_remove_field">นำแบบฟอร์มออก</string>
+  <!-- Sampling design: button that uploads a strata file. -->
+  <string name="surveyeditor_sampling_upload_strata_file">อัปโหลดไฟล์ชั้นภูมิ (GeoJSON / KML)</string>
+  <!-- Error under the strata file upload when the file has no polygons. %1$s = file name. -->
+  <string name="surveyeditor_sampling_strata_file_no_polygons">ไม่พบฟีเจอร์รูปหลายเหลี่ยมใน %1$s</string>
+  <!-- Error under the strata file upload when the file has points or lines instead of polygons. -->
+  <string name="surveyeditor_sampling_strata_file_not_polygons">ไฟล์ชั้นภูมิต้องมีฟีเจอร์รูปหลายเหลี่ยม</string>
+
+  <!-- Problems found in an uploaded GeoJSON or KML file (GeoIssueText.kt). Shown in the survey area, map layer, and strata uploads. %1$d is the feature's number in the file, counted from 1. -->
+  <string name="geo_issue_unsupported_file_type">ไม่รองรับไฟล์ประเภทนี้ อัปโหลดไฟล์ GeoJSON (.geojson, .json) หรือ KML (.kml)</string>
+  <string name="geo_issue_unreadable_geojson">ไฟล์นี้ไม่ใช่ GeoJSON ที่ถูกต้อง ตรวจสอบว่าส่งออกเป็น GeoJSON แล้วลองอีกครั้ง</string>
+  <string name="geo_issue_geojson_not_an_object">ไฟล์นี้ไม่ใช่ GeoJSON ที่ถูกต้อง ไฟล์ควรมีออบเจ็กต์</string>
+  <string name="geo_issue_geojson_without_type">ไฟล์นี้ไม่ใช่ GeoJSON ที่ถูกต้อง</string>
+  <string name="geo_issue_invalid_kml">ไฟล์นี้ไม่ใช่ KML ที่ถูกต้อง ตรวจสอบว่าส่งออกเป็น KML (ไม่ใช่ KMZ) แล้วลองอีกครั้ง</string>
+  <string name="geo_issue_no_geometry">ไฟล์นี้ไม่มีรูปทรงเรขาคณิตใด ๆ</string>
+  <string name="geo_issue_feature_collection_without_features">FeatureCollection ไม่มีฟีเจอร์</string>
+  <!-- %1$d is the number of holes removed. -->
+  <plurals name="geo_issue_holes_removed">
+    <item quantity="other">นำรู %1$d รูออกจากรูปหลายเหลี่ยมแล้ว Collect One ใช้เฉพาะขอบเขตด้านนอก</item>
+  </plurals>
+  <string name="geo_issue_invalid_feature">ฟีเจอร์ที่ %1$d ไม่ใช่ Feature ของ GeoJSON ที่ถูกต้อง</string>
+  <string name="geo_issue_feature_without_geometry">ฟีเจอร์ที่ %1$d ไม่มีรูปทรงเรขาคณิตและถูกข้ามไป</string>
+  <string name="geo_issue_invalid_geometry">ฟีเจอร์ที่ %1$d มีรูปทรงเรขาคณิตไม่ถูกต้อง</string>
+  <!-- %2$s is the GeoJSON geometry type found in the file, e.g. "Circle". -->
+  <string name="geo_issue_unsupported_geometry_type">ฟีเจอร์ที่ %1$d มีประเภทรูปทรงเรขาคณิตที่ไม่รองรับ "%2$s"</string>
+  <!-- Shown as %2$s of geo_issue_unsupported_geometry_type when the geometry has no type. -->
+  <string name="geo_issue_geometry_type_unknown">ไม่ทราบ</string>
+  <string name="geo_issue_invalid_coordinates">ฟีเจอร์ที่ %1$d มีพิกัดที่ขาดหายหรือไม่ถูกต้องและถูกข้ามไป</string>
+  <string name="geo_issue_coordinates_out_of_range">ฟีเจอร์ที่ %1$d มีพิกัดอยู่นอกช่วงที่ถูกต้องและถูกข้ามไป ใช้องศาทศนิยม WGS 84 (ละติจูด −90 ถึง 90 ลองจิจูด −180 ถึง 180)</string>
+  <string name="geo_issue_too_few_corners">ฟีเจอร์ที่ %1$d มีมุมที่ต่างกันน้อยกว่า 3 มุมและถูกข้ามไป</string>
+  <string name="geo_issue_outline_closed">เส้นขอบของฟีเจอร์ที่ %1$d ไม่ได้ปิด จึงปิดให้โดยอัตโนมัติ</string>
+  <string name="geo_issue_self_intersection">เส้นขอบของฟีเจอร์ที่ %1$d ตัดกันเอง พื้นที่และแปลงตัวอย่างอาจไม่ถูกต้อง แก้ไขขอบเขตในเครื่องมือ GIS แล้วอัปโหลดอีกครั้ง</string>
+  <string name="geo_issue_may_cross_antimeridian">ฟีเจอร์ที่ %1$d อาจข้ามเส้นเมริเดียน 180° ซึ่งยังไม่รองรับ แบ่งออกเป็นส่วนต่าง ๆ ทั้งสองฝั่งของเส้นเมริเดียน</string>
+  <!-- How a survey's area was defined, after "Source:". "Places API" is the name of the place search service. -->
+  <string name="surveyeditor_area_source_selected_boundary">ขอบเขตที่เลือก</string>
+  <string name="surveyeditor_area_source_drawn">วาดบนแผนที่</string>
+  <string name="surveyeditor_area_source_uploaded">อัปโหลดแล้ว: %1$s</string>
+  <string name="surveyeditor_area_source_place_search">Places API</string>
+  <string name="surveyeditor_area_source_coordinates">พิกัด</string>
+  <plurals name="surveyeditor_area_source_collect_earth_grid">
+    <item quantity="other">กริดแปลงตัวอย่างของ Collect Earth (%1$d แปลง)</item>
+  </plurals>
+
+  <!-- Survey details: Danger zone, where organizers delete the survey. -->
+  <string name="surveyeditor_danger_zone">โซนอันตราย</string>
+  <string name="surveyeditor_danger_zone_body">การลบแบบสำรวจจะนำแบบสำรวจออกจากทุกคนที่มีสิทธิ์เข้าถึง รวมถึงผู้เก็บข้อมูล และจะไม่นับรวมในขีดจำกัดจำนวนแบบสำรวจของเจ้าของอีกต่อไป</string>
+  <string name="surveyeditor_delete_survey">ลบแบบสำรวจ</string>
+  <!-- %1$s: the survey's title. -->
+  <string name="surveyeditor_delete_survey_title">ลบ “%1$s” ใช่ไหม</string>
+  <string name="surveyeditor_delete_survey_message">ทุกคนจะไม่สามารถเข้าถึงแบบสำรวจนี้และข้อมูลที่เก็บรวบรวมไว้ได้อีก การเปลี่ยนแปลงที่ยังไม่ได้เผยแพร่จะถูกยกเลิก และแบบสำรวจจะไม่นับรวมในขีดจำกัดจำนวนแบบสำรวจของเจ้าของอีกต่อไป</string>
+  <string name="surveyeditor_add_dataset_from_template">จากเทมเพลต</string>
+  <string name="surveyeditor_add_layer_from_template_body">เพิ่มแบบฟอร์มของเทมเพลต การส่งข้อมูลจะเพิ่มฟีเจอร์ลงในชั้นข้อมูลแผนที่ใหม่</string>
+  <string name="surveyeditor_add_table_from_template_body">เพิ่มแบบฟอร์มของเทมเพลต การส่งข้อมูลจะเพิ่มแถวลงในตารางข้อมูลใหม่</string>
+  <string name="surveyeditor_add_dataset_no_templates">คลังของคุณไม่มีเทมเพลตประเภทนี้</string>
+</resources>

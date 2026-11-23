@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { expect, expectScreen, tap, test } from './fixtures';
+import { acceptTermsOfService, expect, expectScreen, tap, test } from './fixtures';
 
 test('signs in, accepts the terms, lists surveys, and opens a survey', async ({ page }) => {
   // Full window, without the workbench's simulated device.
@@ -23,11 +23,16 @@ test('signs in, accepts the terms, lists surveys, and opens a survey', async ({ 
   await expectScreen(page, 'signIn.png');
 
   await tap(page, signIn);
-  const agree = page.getByRole('button', { name: 'Agree & continue' });
-  await expect(agree).toBeVisible();
+  const continueButton = page.getByRole('button', { name: 'Continue', exact: true });
+  const checkbox = page.getByRole('checkbox', {
+    name: 'I have read and agree to the Collect One Terms of Service.',
+  });
+  await expect(continueButton).toBeVisible();
+  await expect(checkbox).toBeDisabled();
+  await expect(continueButton).toBeDisabled();
   await expectScreen(page, 'termsOfService.png');
 
-  await tap(page, agree);
+  await acceptTermsOfService(page);
   const openSurvey = page.getByRole('button', { name: 'Open Simple Point & Land Use Survey' });
   await expect(openSurvey).toBeVisible();
   await expectScreen(page, 'surveys.png');

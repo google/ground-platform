@@ -17,7 +17,12 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import openforis.collectone.v1.forms.ChoiceItem
+import openforis.collectone.v1.forms.ControlDef
+import openforis.collectone.v1.forms.FormDef
 import openforis.collectone.v1.forms.GeoPoint
+import openforis.collectone.v1.forms.ViewComponent
+import openforis.collectone.v1.forms.ViewDef
 import org.openforis.collectone.v2.core.forms.buildRecordInstance
 
 class ProtoJsonUnitTest {
@@ -206,4 +211,38 @@ class ProtoJsonUnitTest {
     val decoded = ProtoJsonSerializer.deserializeRecordInstance(json)
     assertEquals(24.8, decoded.data_?.fields?.get("finite")?.scalar_value?.double_value)
   }
+
+  @Test
+  fun formDef_cascadingSelect_keepsParentsAndOrder() {
+    val formDef = cascadingSelectForm()
+
+    val decoded =
+      ProtoJsonSerializer.deserializeFormDef(ProtoJsonSerializer.serializeFormDef(formDef))
+
+    assertEquals(formDef, decoded)
+  }
+
+  private fun cascadingSelectForm(): FormDef =
+    FormDef(
+      form_id = "cascade",
+      view =
+        ViewDef(
+          components =
+            listOf(
+              ViewComponent(
+                id = "district",
+                sort_order = 1,
+                control =
+                  ControlDef(
+                    field_ref = "/data/district",
+                    parent_question_key = "region",
+                    choices =
+                      listOf(
+                        ChoiceItem(value_ = "d1", parent_value = "r1", id = "d1", sort_order = 2)
+                      ),
+                  ),
+              )
+            )
+        ),
+    )
 }

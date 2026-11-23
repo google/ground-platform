@@ -15,7 +15,7 @@ package org.openforis.collectone.v2.core.geo.io
 
 import kotlin.math.PI
 import kotlin.math.cos
-import org.openforis.collectone.v2.core.sampling.GeoCoord
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.sampling.Ring
 
 /**

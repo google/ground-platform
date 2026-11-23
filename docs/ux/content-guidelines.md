@@ -23,7 +23,7 @@ This guide is for UX writers, product designers, technical writers, and engineer
 
 ## Voice & Tone
 
-Ground connects non-technical survey organizers, conservation managers, and frontline community collectors in remote and challenging environments. Our copy should feel human, dependable, and easy to understand at a glance under bright sunlight or in difficult field conditions.
+Collect One connects non-technical survey organizers, conservation managers, and frontline community collectors in remote and challenging environments. Our copy should feel human, dependable, and easy to understand at a glance under bright sunlight or in difficult field conditions.
 
 ### Brand Voice
 Our voice is consistent across all surfaces:
@@ -170,7 +170,7 @@ Use standard, short status descriptors:
   * ✅ *"Survey settings"*, *"Add new question"*, *"Save to device"*
   * ❌ *"Survey Settings"*, *"Add New Question"*, *"Save To Device"*
 * **Title Case**: Reserved strictly for proper product names:
-  * ✅ *Ground*, *Google Sans Flex*, *Collect Earth Online*, *ODK Central*
+  * ✅ *Collect One*, *Google Sans Flex*, *Collect Earth Online*, *ODK Central*
 
 ### Punctuation
 * **No trailing periods**: Do not use periods on:
@@ -183,8 +183,8 @@ Use standard, short status descriptors:
   * Error message bodies explaining next steps
   * Instructional notes with two or more sentences
 * **Avoid exclamation points**: Exclamation points can feel alarming or overly cheerful. Deliver messages with calm professionalism.
-  * ✅ *"Welcome to Ground."* / *"All submissions synced."*
-  * ❌ *"Welcome to Ground!"* / *"Sync completed successfully!"*
+  * ✅ *"Welcome to Collect One."* / *"All submissions synced."*
+  * ❌ *"Welcome to Collect One!"* / *"Sync completed successfully!"*
 
 ### Contractions
 * Use natural, common contractions (*"can't"*, *"don't"*, *"you're"*, *"it's"*) in explanatory text, dialogs, helper text, and empty states to maintain a friendly, approachable tone.
@@ -197,7 +197,7 @@ Use standard, short status descriptors:
 
 ## Accessibility & Global Inclusivity
 
-Ground is deployed globally across diverse cultures, languages, and technical backgrounds.
+Collect One is deployed globally across diverse cultures, languages, and technical backgrounds.
 
 * **Write for Translation (Internationalization)**:
   * Keep sentence structures straightforward (Subject-Verb-Object).

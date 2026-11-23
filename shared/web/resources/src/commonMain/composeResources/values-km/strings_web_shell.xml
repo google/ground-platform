@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_language">ភាសា</string>
+  <!-- Content description of the language selector; %1$s is the current language's native name. -->
+  <string name="web_language_with_current">ភាសា៖ %1$s</string>
+  <string name="web_manage_survey">គ្រប់គ្រងការស្ទង់មតិ</string>
+  <string name="web_switch_survey">ប្តូរការស្ទង់មតិ</string>
+  <string name="web_recent_surveys">ការស្ទង់មតិថ្មីៗ</string>
+  <!-- Survey switcher menu item linking to the full surveys page. -->
+  <string name="web_all_surveys_menu_item">ការស្ទង់មតិទាំងអស់…</string>
+  <string name="web_saving">កំពុងរក្សាទុក…</string>
+  <string name="web_saved">បានរក្សាទុក</string>
+  <string name="web_not_saved">មិនទាន់បានរក្សាទុក</string>
+  <string name="web_create_survey">បង្កើតការស្ទង់មតិ</string>
+  <!-- Create survey dialog title; %1$s is the organization name. -->
+  <string name="web_create_survey_in_organization">បង្កើតការស្ទង់មតិក្នុង %1$s</string>
+  <string name="web_survey_title_label">ចំណងជើងការស្ទង់មតិ</string>
+  <string name="web_organization">ស្ថាប័ន</string>
+  <!-- Organization picker option for a survey that belongs to no organization. -->
+  <string name="web_no_organization_personal">គ្មាន (ការស្ទង់មតិផ្ទាល់ខ្លួន)</string>
+  <string name="web_personal_survey_access_hint">មានតែមនុស្សដែលអ្នកចែករំលែកជាមួយប៉ុណ្ណោះ ដែលអាចបើកការស្ទង់មតិផ្ទាល់ខ្លួនបាន។</string>
+  <!-- %1$s is the organization name. -->
+  <string name="web_organization_survey_access_hint">អ្នកនៅតែជាម្ចាស់។ អ្នកគ្រប់គ្រងនៃ %1$s ក៏អាចកែសម្រួលការស្ទង់មតិនេះ គ្រប់គ្រងការចែករំលែក និងនាំចេញទិន្នន័យបានផងដែរ។</string>
+  <string name="web_create">បង្កើត</string>
+  <string name="web_next">បន្ទាប់</string>
+  <string name="web_cancel">បោះបង់</string>
+  <string name="web_create_survey_purposes_title">តើទិន្នន័យនេះនឹងត្រូវប្រើសម្រាប់អ្វី?</string>
+  <string name="web_create_survey_purposes_description">ជ្រើសរើសគោលបំណងចម្បងសម្រាប់ការស្ទង់មតិនេះ។ យើងនឹងបន្ថែមសំណុំបែបបទរបស់វា ជាមួយវាលស្តង់ដារ ដើម្បីឱ្យទិន្នន័យរបស់អ្នកអាចប្រៀបធៀប និងរាយការណ៍បាន។ អ្នកអាចផ្លាស់ប្តូរវានៅពេលក្រោយក្នុងព័ត៌មានលម្អិតនៃការស្ទង់មតិ។</string>
+  <string name="web_programs_optional">កម្មវិធី (ស្រេចចិត្ត)</string>
+  <string name="web_programs_description">កម្មវិធីដែលអ្នករាយការណ៍ទៅ ដោយប្រើការស្ទង់មតិនេះ។</string>
+  <string name="web_back">ថយក្រោយ</string>
+  <string name="web_skip">រំលង</string>
+  <string name="web_download">ទាញយក</string>
+  <string name="web_download_csv">ទាញយក CSV</string>
+  <string name="web_download_geojson">ទាញយក GeoJSON</string>
+  <string name="web_download_kml">ទាញយក KML (Google Earth)</string>
+  <string name="web_download_survey_kml">ទាញយក KML ស្ទង់មតិ (ស្រទាប់ទាំងអស់)</string>
+  <string name="web_open_in_google_earth">បើកក្នុង Google Earth</string>
+  <!-- Subtitle of an export profile menu item that has no warnings. -->
+  <string name="web_export_profile_for_survey_purposes">សម្រាប់គោលបំណងនៃការស្ទង់មតិរបស់អ្នក</string>
+  <!-- Export warnings dialog title; %1$s is the export profile name (e.g. "EUDR GeoJSON"). -->
+  <string name="web_export_profile_title">នាំចេញ %1$s?</string>
+  <!-- %1$s is a comma-separated list of included standard fields. -->
+  <string name="web_export_profile_included">បានរួមបញ្ចូល៖ %1$s។</string>
+  <string name="web_export_profile_link_missing_hint">ភ្ជាប់សំណួរដែលខ្វះទៅវាលស្តង់ដារក្នុងកម្មវិធីកែសំណុំបែបបទ ដើម្បីរួមបញ្ចូលពួកវានៅពេលក្រោយ។</string>
+  <string name="web_export_anyway">នាំចេញទោះយ៉ាងណាក៏ដោយ</string>
+  <!-- Data table column header: the record's workflow status. -->
+  <string name="web_column_status">ស្ថានភាព</string>
+  <!-- Data table column header: the record's label. -->
+  <string name="web_column_label">ស្លាក</string>
+  <!-- Data table column header: number of submissions for the record. -->
+  <string name="web_column_submissions">ការដាក់ស្នើ</string>
+  <!-- Data table column header: the record's GeoID identifier. -->
+  <string name="web_column_geo_id">GeoID</string>
+  <string name="web_dismiss">បិទ</string>
+  <string name="web_resize_side_panel">ប្តូរទំហំផ្ទាំងចំហៀង</string>
+  <string name="web_collapse_side_panel">បង្រួមផ្ទាំងចំហៀង</string>
+  <string name="web_expand_side_panel">ពង្រីកផ្ទាំងចំហៀង</string>
+  <string name="web_expand_details">ពង្រីកព័ត៌មានលម្អិត</string>
+  <string name="web_close_details">បិទព័ត៌មានលម្អិត</string>
+  <!-- Data table tab title; %1$s is the table name, %2$d the number of rows. -->
+  <string name="web_table_tab_title">%1$s (%2$d)</string>
+  <string name="web_collapse_table">បង្រួមតារាង</string>
+  <string name="web_expand_table">ពង្រីកតារាង</string>
+  <string name="web_no_rows_yet">មិនទាន់មានជួរទេ។</string>
+  <string name="web_map_layer">ស្រទាប់ផែនទី</string>
+  <string name="web_data_table">តារាងទិន្នន័យ</string>
+  <string name="web_collapse_details">បង្រួមព័ត៌មានលម្អិត</string>
+  <!-- Label above the number of map features in a layer. -->
+  <string name="web_map_features">ធាតុផែនទី</string>
+  <!-- Section heading: map feature counts grouped by status. -->
+  <string name="web_by_status">តាមស្ថានភាព</string>
+  <string name="web_show_in_table">បង្ហាញក្នុងតារាង</string>
+  <!-- Surveys page filter chip: show every survey. -->
+  <string name="web_survey_filter_all">ទាំងអស់</string>
+  <!-- Surveys page filter chip: show surveys the user owns. -->
+  <string name="web_survey_filter_mine">ការស្ទង់មតិរបស់ខ្ញុំ</string>
+  <!-- Survey card chip: the signed-in user owns the survey. -->
+  <string name="web_survey_access_owner">ម្ចាស់</string>
+  <!-- Survey card chip: the user manages the survey's organization. -->
+  <string name="web_survey_access_organization_manager">អ្នកគ្រប់គ្រងស្ថាប័ន</string>
+  <!-- Survey card chip: the user is a member of the survey's organization. -->
+  <string name="web_survey_access_organization_member">សមាជិកស្ថាប័ន</string>
+  <!-- Survey card chip: the survey was shared with the user. -->
+  <string name="web_survey_access_shared">បានចែករំលែកជាមួយអ្នក</string>
+  <!-- Heading of the group of surveys that belong to no organization. -->
+  <string name="web_personal_surveys">ការស្ទង់មតិផ្ទាល់ខ្លួន</string>
+  <string name="web_surveys">ការស្ទង់មតិ</string>
+  <!-- Surveys page header summary; %1$s is the survey count phrase (e.g. "3 surveys"), %2$s the organization count phrase (e.g. "2 organizations"). -->
+  <string name="web_surveys_header_summary">%1$s · %2$s</string>
+  <string name="web_impact">ផលប៉ះពាល់</string>
+  <string name="web_search_surveys_placeholder">ស្វែងរកការស្ទង់មតិតាមឈ្មោះ ទីតាំង ឬស្ថាប័ន</string>
+  <string name="web_clear_search">សម្អាតការស្វែងរក</string>
+  <string name="web_search_surveys">ស្វែងរកការស្ទង់មតិ</string>
+  <string name="web_no_surveys_match_search">គ្មានការស្ទង់មតិត្រូវនឹងការស្វែងរករបស់អ្នកទេ។</string>
+  <string name="web_no_surveys_yet">មិនទាន់មានការស្ទង់មតិទេ។ បង្កើតមួយ ដើម្បីចាប់ផ្តើម។</string>
+  <!-- Badge next to an organization heading: the signed-in user is a manager of it. -->
+  <string name="web_organization_role_you_manage">អ្នកគ្រប់គ្រង</string>
+  <!-- Badge next to an organization heading: the signed-in user is a member of it. -->
+  <string name="web_organization_role_member">សមាជិក</string>
+  <string name="web_no_description_yet">មិនទាន់មានការពិពណ៌នាទេ។</string>
+  <string name="web_public_data">ទិន្នន័យសាធារណៈ</string>
+  <string name="web_private_submissions">ការដាក់ស្នើឯកជន</string>
+  <!-- Survey card label: this survey is the one currently open. -->
+  <string name="web_survey_open_now">កំពុងបើក</string>
+  <!-- Badge on closed surveys asking whether their data was used. -->
+  <string name="web_outcome_prompt_label">តើទិន្នន័យនេះត្រូវបានប្រើទេ?</string>
+  <string name="web_collect_data">ប្រមូលទិន្នន័យ</string>
+  <!-- Data collection panel subtitle for a new standalone record; %1$s is the user's GPS coordinates. -->
+  <string name="web_new_record_at_location">កំណត់ត្រាថ្មី • %1$s</string>
+  <!-- Data collection panel subtitle; %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_select_target_to_begin">ជ្រើសរើស %1$s ដើម្បីចាប់ផ្តើម</string>
+  <!-- %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_entity_ref_picker_instructions">ចុច %1$s លើផែនទី ឬក្នុងបញ្ជី ដើម្បីចាប់ផ្តើមសំណុំបែបបទនេះ ឬជ្រើសរើសមួយខាងក្រោម។</string>
+  <string name="web_search_map_features">ស្វែងរកធាតុផែនទី</string>
+  <!-- Search field placeholder; %1$s is the lowercase name of the map layer or data table (e.g. "plots"), %2$d the total number of its map features. -->
+  <string name="web_entity_ref_filter_placeholder">ត្រង %1$s (%2$d)</string>
+  <!-- %1$s is the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_entity_ref_no_matches">រកមិនឃើញ %1$s ដែលត្រូវគ្នាទេ។</string>
+  <string name="web_entity_ref_empty">មិនទាន់មាន %1$s នៅឡើយទេ។</string>
+  <!-- Badge on a map feature whose form is already completed. -->
+  <string name="web_completed">បានបញ្ចប់</string>
+  <string name="web_start_a_form">ចាប់ផ្តើមសំណុំបែបបទ</string>
+  <!-- Collect data menu item subtitle; %1$s is the question count phrase (e.g. "5 questions"), %2$d the number of map features left, %3$s the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_form_menu_summary_remaining">%1$s • នៅសល់ %3$s %2$d</string>
+  <!-- Collect data menu item subtitle for a standalone form; %1$s is the question count phrase (e.g. "5 questions"). -->
+  <string name="web_form_menu_summary_new_record">%1$s • កំណត់ត្រាថ្មី</string>
+  <string name="web_survey_has_no_forms">ការស្ទង់មតិនេះមិនទាន់មានសំណុំបែបបទទេ។</string>
+  <string name="web_no_forms_available_on_web">គ្មានសំណុំបែបបទណាក្នុងការស្ទង់មតិនេះអាចប្រើលើគេហទំព័របានទេ។</string>
+  <string name="web_qr_code">កូដ QR</string>
+  <!-- Overflow menu button description; %1$s is the lowercase map feature type (e.g. "plot"). -->
+  <string name="web_more_entity_actions">សកម្មភាព %1$s បន្ថែម</string>
+  <!-- Map feature details tab showing the feature's current properties. -->
+  <string name="web_entity_tab_data">ទិន្នន័យ</string>
+  <!-- Map feature details tab listing the feature's submissions. -->
+  <string name="web_entity_tab_history">ប្រវត្តិ</string>
+  <string name="web_back_to_submissions">ត្រឡប់ទៅការដាក់ស្នើ</string>
+  <string name="web_more_submission_actions">សកម្មភាពការដាក់ស្នើបន្ថែម</string>
+  <string name="web_close_form">បិទសំណុំបែបបទ</string>
+  <string name="web_map_drawing_place_point">ចុចលើផែនទី ដើម្បីដាក់ចំណុច</string>
+  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
+  <string name="web_map_drawing_add_vertices">ចុចលើផែនទី ដើម្បីបន្ថែមចំណុចកំពូល • %1$d នៃយ៉ាងហោចណាស់ %2$d</string>
+  <string name="web_undo">មិនធ្វើវិញ</string>
+  <string name="web_done">រួចរាល់</string>
+  <string name="web_cancel_drawing">បោះបង់ការគូរ</string>
+  <string name="web_sign_in">ចូលគណនី</string>
+  <string name="web_sign_in_tagline">គូសផែនទីប្រព័ន្ធអេកូឡូស៊ី រចនាការស្ទង់មតិនៅវាល និងផ្ទៀងផ្ទាត់ការសង្កេតនៅទីតាំងជាមួយស្ថាប័នរបស់អ្នក។</string>
+  <string name="web_sign_in_description">ចូលគណនី ដើម្បីមើលការស្ទង់មតិ និងស្ថាប័នដែលបានចែករំលែកជាមួយគណនីរបស់អ្នក។</string>
+  <string name="web_signing_in">កំពុងចូលគណនី…</string>
+  <string name="web_sign_in_with_google">ចូលដោយប្រើ Google</string>
+  <string name="web_sign_in_google_accounts_only">បច្ចុប្បន្ន ការផ្ទៀងផ្ទាត់ត្រូវបានកំណត់ត្រឹមគណនី Google ប៉ុណ្ណោះ។</string>
+  <string name="web_terms_of_service_title">លក្ខខណ្ឌនៃសេវាកម្ម</string>
+  <string name="web_tos_signed_in_as">បានចូលជា %1$s</string>
+  <string name="web_tos_decline">បដិសេធ</string>
+  <string name="web_tos_continue">បន្ត</string>
+  <string name="web_tos_intro">សូមពិនិត្យ និងទទួលយកលក្ខខណ្ឌនៃសេវាកម្មរបស់ Collect One ដើម្បីបន្ត។</string>
+  <string name="web_tos_agree_checkbox">ខ្ញុំបានអាន និងយល់ព្រមនឹងលក្ខខណ្ឌនៃសេវាកម្មរបស់ Collect One។</string>
+  <!-- Shown when a link names a console page that doesn't exist or that the user can't open. -->
+  <string name="web_link_unavailable">ទំព័រនោះមិនអាចប្រើបានទេ។ វាប្រហែលជាត្រូវបានលុប ឬអ្នកប្រហែលជាគ្មានសិទ្ធិចូលប្រើវា។</string>
+  <!-- Error shown when an uploaded file can't be read; %1$s is the file name. -->
+  <string name="web_file_read_failed">មិនអាចអាន %1$s បានទេ។ សូមព្យាយាមម្តងទៀត។</string>
+  <!-- Subtitle of an export profile menu item; %1$d is the number of warnings to review. -->
+  <plurals name="web_export_profile_warnings_to_review">
+    <item quantity="other">%1$d ត្រូវពិនិត្យមុនពេលនាំចេញ</item>
+  </plurals>
+  <plurals name="web_survey_count">
+    <item quantity="other">%1$d ការស្ទង់មតិ</item>
+  </plurals>
+  <plurals name="web_organization_count">
+    <item quantity="other">%1$d ស្ថាប័ន</item>
+  </plurals>
+  <!-- Survey card: number of locations (map features) in the survey. -->
+  <plurals name="web_survey_location_count">
+    <item quantity="other">%1$d ទីតាំង</item>
+  </plurals>
+  <plurals name="web_form_question_count">
+    <item quantity="other">%1$d សំណួរ</item>
+  </plurals>
+
+  <!-- Shown when this build of the console can't open a file picker. -->
+  <string name="web_file_upload_unavailable">មិនអាចផ្ទុកឡើងឯកសារនៅទីនេះបានទេ។</string>
+  <string name="web_collapse_form">បង្រួមសំណុំបែបបទ</string>
+  <string name="web_expand_form">ពង្រីកសំណុំបែបបទ</string>
+</resources>

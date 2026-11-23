@@ -21,6 +21,7 @@ package openforis.collectone.v1.survey;
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
+import "shared/protos/data/geometry.proto";
 import "shared/protos/forms/form_def.proto";
 import "shared/protos/forms/types.proto";
 import "shared/protos/library/concept.proto";
@@ -78,10 +79,16 @@ message SurveyDef {
   repeated string supported_languages = 14;
 
   // Audit metadata recording survey creation and modification provenance.
+  // Server-owned: the server stamps it on each write that creates or changes
+  // the saved revision or working copy (who from the authenticated caller,
+  // when from its clock) and ignores any value a mutation carries.
   openforis.collectone.v1.data.AuditInfo audit_info = 15;
 
   // Typed extension payloads for custom, vendor, or experimental survey-level
   // metadata.
+  // Not yet supported by the client codecs: reading and writing `Any` payloads
+  // needs a type registry, so ProtoJSON and textproto drop them, and
+  // `ProtoFieldCoverageTest` excludes them from field coverage.
   repeated google.protobuf.Any custom_extensions = 16;
 
   // Multi-lingual translation catalog for survey-level UI strings (such as
@@ -99,11 +106,12 @@ message SurveyDef {
   repeated string purpose_ids = 19;
 
   // Programs the survey reports to (e.g., "eudr", "uk_frc"), offered from the
-  // selected Purpose Packs' `program_ids`.
+  // selected Purpose Packs' `program_ids`. Preset by the starter template;
+  // used for tracking and impact reporting.
   repeated string program_ids = 20;
 
   // Dictionary concept linked to each form question, per form. Authoritative
-  // inside Ground: on export each link is also written as a `ground:concept`
+  // inside Collect One: on export each link is also written as a `collectone:concept`
   // foreign attribute on the question's binding (see
   // docs/technical/model/library/01-concepts.md).
   repeated FormConceptLinks form_concept_links = 21;
@@ -121,23 +129,30 @@ message SurveyDef {
   // Timestamp when the survey was closed or archived.
   google.protobuf.Timestamp closed_at = 24;
 
-  // ISO-8601 string representation of `closed_at` when set.
-  string closed_at_iso = 25;
+  // Was `closed_at_iso`, a text copy of `closed_at`; clients format
+  // `closed_at` themselves.
+  reserved 25;
+  reserved "closed_at_iso";
 
   // Sequential number of the latest saved revision, incremented each time the
-  // working copy is saved (`SurveyMutation.save_working_copy`).
+  // working copy is saved (`SurveyMutation.save_working_copy`). On a working
+  // copy, the number of the saved revision it edits. Server-owned: a new
+  // survey starts at 1, and the server ignores any value a mutation carries.
   int64 saved_revision_number = 26;
 
   // Geographic location summary label shown in the survey catalog (e.g.,
   // "Nyeri County, Kenya").
   string location_label = 27;
 
-  // Formatted coordinate summary shown in the survey catalog (e.g.,
-  // "0.42°S, 36.95°E").
-  string coordinates_label = 28;
+  // Was `coordinates_label`, a text summary of the coordinates; clients show
+  // the centroid of `map_config.survey_area` instead.
+  reserved 28;
+  reserved "coordinates_label";
 
-  // Estimated offline package size label (e.g., "18.4 MB").
-  string offline_size_label = 29;
+  // Was `offline_size_label`, a hand-written placeholder for the offline
+  // package size; nothing computes a real size yet.
+  reserved 29;
+  reserved "offline_size_label";
 
   // Whether the survey package is marked as downloaded for offline use by
   // default. Mobile clients add such surveys to a new install's downloaded set;
@@ -172,15 +187,21 @@ message SurveyDef {
   // and don't change on working-copy edits.
   int64 record_version = 36;
 
-  // When the survey was moved to Trash (`SurveyMutation.trash_survey`); unset
-  // when it isn't trashed. Trashed surveys disappear from survey lists and
-  // stop syncing until restored, and are purged automatically 30 days after
-  // this time. Independent of `state`, which a restore leaves unchanged.
+  // When the survey was moved to Trash (`SurveyMutation.upsert.trash_time`);
+  // unset when it isn't trashed. Trashed surveys disappear from survey lists and
+  // stop syncing until restored (`SurveyMutation.delete.trash_time`), and are
+  // purged automatically 30 days after this time. Independent of `state`, which
+  // a restore leaves unchanged.
   google.protobuf.Timestamp trash_time = 37;
 
   // Tiered quota limits and monthly budget cap configured for this survey.
   // Overrides organization and global defaults.
   QuotaLimits quota_limits = 38;
+
+  // Library template (and version) each form was first populated from, and
+  // whether it has been modified since. Internal provenance; not shown to
+  // organizers.
+  repeated FormTemplateOrigin form_template_origins = 39;
 }
 
 // Lightweight survey overview listed by `SurveyService.ListSurveyOverviews`
@@ -217,12 +238,15 @@ message SurveyOverview {
   // "Nyeri County, Kenya").
   string location_label = 9;
 
-  // Formatted coordinate summary shown in the survey catalog (e.g.,
-  // "0.42°S, 36.95°E").
-  string coordinates_label = 10;
+  // Was `coordinates_label`, a text summary of the coordinates; clients show
+  // the centroid of `survey_area` instead.
+  reserved 10;
+  reserved "coordinates_label";
 
-  // Estimated offline package size label (e.g., "18.4 MB").
-  string offline_size_label = 11;
+  // Was `offline_size_label`, a hand-written placeholder for the offline
+  // package size; nothing computes a real size yet.
+  reserved 11;
+  reserved "offline_size_label";
 
   // Copied from `SurveyDef.is_downloaded`: whether the survey is marked as
   // downloaded for offline use by default.
@@ -243,8 +267,9 @@ message SurveyOverview {
   // Timestamp when the survey was closed or archived.
   google.protobuf.Timestamp closed_at = 17;
 
-  // ISO-8601 string representation of `closed_at` when set.
-  string closed_at_iso = 18;
+  // Was `closed_at_iso`, a text copy of `closed_at`.
+  reserved 18;
+  reserved "closed_at_iso";
 
   // Later of the survey's and its ACL's commit timestamps. For display only;
   // compare `record_version` to tell which copy is newer.
@@ -275,6 +300,19 @@ message SurveyOverview {
 
   // Tiered quota limits and budget overrides for this survey.
   QuotaLimits quota_limits = 28;
+
+  // Map feature geometries and resolved RGB colors (capped at 150) so catalog
+  // card thumbnails render map features before the full survey is downloaded.
+  repeated SurveyThumbnailFeature thumbnail_features = 29;
+}
+
+// Map feature geometry and resolved RGB color included on `SurveyOverview`
+// (capped at 150) so catalog card thumbnails render map features before the
+// full survey is downloaded.
+message SurveyThumbnailFeature {
+  string entity_id = 1;
+  openforis.collectone.v1.data.Geometry geometry = 2;
+  int64 color_hex = 3;
 }
 
 // The organizer's answer to "What happened with this data?" when a survey is
@@ -328,11 +366,24 @@ message SurveyOutcome {
   // User ID or email of the person who answered.
   string answered_by = 4;
 
-  // Optional ISO-8601 string representation of `answered_at`.
-  string answered_at_iso = 5;
+  // Was `answered_at_iso`, a text copy of `answered_at`.
+  reserved 5;
+  reserved "answered_at_iso";
 }
 
 // Dictionary concepts linked to the questions of one form.
+// The library form template a survey form was first populated from.
+message FormTemplateOrigin {
+  string form_id = 1;
+
+  // `FormTemplateDef.id` and `FormTemplateDef.version` at the time of copying.
+  string template_id = 2;
+  int32 template_version = 3;
+
+  // Whether the form was edited after it was copied from the template.
+  bool modified = 4;
+}
+
 message FormConceptLinks {
   string form_id = 1;
 
@@ -392,6 +443,11 @@ message FormLaunchConfig {
   // Human-readable display name of `target_entity_dataset_id`.
   string target_dataset_name = 9;
 
+  // The survey author's singular noun for the features of
+  // `target_entity_dataset_id` (e.g., "Coffee Parcel"), or empty when the
+  // author gave none; clients then use a generic noun in the user's language.
+  string target_type_noun = 14;
+
   // Number of questions in the form.
   int32 question_count = 10;
 
@@ -404,6 +460,10 @@ message FormLaunchConfig {
   // Display order of this launch action within the survey or entity detail
   // card (0-based).
   int32 sort_order = 13;
+
+  // Whether "Open in Google Earth" is enabled for this form when web data
+  // collection is enabled.
+  bool open_in_google_earth = 15;
 }
 
 // Lifecycle state of a Survey definition.
@@ -428,7 +488,7 @@ enum SurveyState {
   // Server-only tombstone marker on `SurveyOverview.state`: the survey was
   // trashed or purged, or the caller lost access, so clients remove it.
   // Clients never set it; they move surveys to Trash with
-  // `SurveyMutation.trash_survey`.
+  // `SurveyMutation.upsert.trash_time`.
   DELETED = 5;
 }
 
@@ -457,11 +517,17 @@ message DataTableRow {
   // Column key-value pairs for the row.
   map<string, string> values = 2;
 
-  // Optional geometry vertices for map-layer rows in editor drafts.
-  repeated openforis.collectone.v1.forms.GeoPoint geometry = 3;
+  // Formerly the row's vertices as `repeated forms.GeoPoint`; replaced by
+  // `geometry` (field 5). The name is reused; clients read rows that still
+  // carry field 3 as described in `docs/technical/model/data/05-geometry.md`.
+  reserved 3;
 
   // Display order of this row within the lookup table (0-based).
   int32 sort_order = 4;
+
+  // Geometry of a Map layer row in WGS 84, of the dataset's geometry type;
+  // unset for Data table rows.
+  openforis.collectone.v1.data.Geometry geometry = 5;
 }
 
 // Definition of an Entity Dataset (tabular registry or geospatial entity
@@ -787,24 +853,62 @@ message GeometryStyle {
 }
 
 // Pre-cached vector/raster offline basemap tile package definition.
+//
+// Deprecated: clients no longer read it. Collectors now save the map areas
+// they need on their own devices; a separate server-side cleanup removes this
+// message.
 message OfflineTilePackageDef {
   string id = 1;
+
+  // Human-readable region name chosen for the package.
   string region_name = 2;
-  string tile_type_label = 3;
+
+  // Formerly the English name of the package's tile source (e.g., "Satellite
+  // Raster Tiles"); replaced by `tile_type` (8), which clients name in the
+  // user's language. Clients read rows that still carry it.
+  reserved 3;
+  reserved "tile_type_label";
+
+  // Display text for the package's zoom levels (e.g., "Zoom 10–18"), authored
+  // with the package.
   string zoom_range_label = 4;
+
+  // Display text for the package's estimated download size (e.g., "84 MB").
   string size_label = 5;
+
+  // Whether a new install starts with the package marked as downloaded.
+  // Mobile clients keep each device's downloaded packages in local storage and
+  // never write them back to the server.
   bool is_downloaded = 6;
 
   // Display order of this tile package (0-based).
   int32 sort_order = 7;
+
+  // Kind of tiles in the package.
+  OfflineTileType tile_type = 8;
+}
+
+// Kind of tiles in an offline basemap package.
+enum OfflineTileType {
+  // Unknown kind of tiles.
+  OFFLINE_TILE_TYPE_UNSPECIFIED = 0;
+
+  // Vector tiles (e.g., contours and roads).
+  OFFLINE_TILE_TYPE_VECTOR = 1;
+
+  // Satellite raster tiles.
+  OFFLINE_TILE_TYPE_SATELLITE = 2;
+
+  // Vector tiles over satellite raster tiles.
+  OFFLINE_TILE_TYPE_HYBRID = 3;
 }
 
 // Map visualization, default viewport, and layer stack configuration for the
 // survey.
 message MapConfig {
-  // Default initial map center coordinate. When unset, clients derive it from
-  // the bounding box of `survey_area`; an explicit value overrides it.
-  openforis.collectone.v1.forms.GeoPoint initial_center = 1;
+  // Formerly the initial center as `forms.GeoPoint`; replaced by
+  // `initial_center` (6).
+  reserved 1;
 
   // Default initial map zoom level. When unset, clients fit the bounding box
   // of `survey_area`; an explicit value overrides it.
@@ -818,14 +922,20 @@ message MapConfig {
   // the initial camera, and the mobile offline download area.
   SurveyArea survey_area = 4;
 
-  // Available offline basemap tile packages for field use.
+  // Available offline basemap tile packages for field use. Deprecated:
+  // clients ignore it, since collectors save map areas on their devices.
   repeated OfflineTilePackageDef offline_tile_packages = 5;
+
+  // Default initial map center in WGS 84. When unset, clients derive it from
+  // the bounding box of `survey_area`; an explicit value overrides it.
+  openforis.collectone.v1.data.Position initial_center = 6;
 }
 
 // Geographic extent of a survey, made of one or more polygon parts (e.g. a
 // mainland and its islands).
 //
-// Each part is a single closed ring (`GeoShape`). Holes are not supported:
+// `boundary` is a MultiPolygon whose polygons each have only an exterior ring.
+// Holes are not supported:
 // importers drop interior rings with a visible warning. Parts should not
 // overlap. Vertex counts are bounded by the `QuotaLimits.max_area_vertices`
 // quota rather than by a schema rule, so country-scale boundaries fit.
@@ -833,17 +943,70 @@ message SurveyArea {
   // Human-readable name (e.g. a place name or the uploaded file name).
   string name = 1;
 
-  // Polygon parts, each a closed ring.
-  repeated openforis.collectone.v1.forms.GeoShape parts = 2;
+  // Formerly the polygon parts as `repeated forms.GeoShape`; replaced by
+  // `boundary`. Clients read rows that still carry them as described in
+  // `docs/technical/model/data/05-geometry.md`.
+  reserved 2;
+  reserved "parts";
 
-  // How the area was defined: "search", "drawn" or "uploaded:<filename>".
-  string source = 3;
+  // Formerly how the area was defined, as English text (e.g., "Drawn on map"
+  // or "Uploaded: plots.geojson"); replaced by `area_source` (8). Clients read
+  // rows that still carry it.
+  reserved 3;
+  reserved "source";
 
-  // Explicit center point of the survey area.
-  openforis.collectone.v1.forms.GeoPoint center = 4;
+  // Formerly the center as `forms.GeoPoint`; replaced by `center` (7), which
+  // took over the field name. Clients read rows that still carry it as
+  // described in `docs/technical/model/data/05-geometry.md`.
+  reserved 4;
 
   // Explicit camera zoom level for framing the survey area.
   double zoom = 5;
+
+  // The area's polygon parts in WGS 84: a MultiPolygon with one polygon per
+  // part, each an exterior ring only.
+  openforis.collectone.v1.data.Geometry boundary = 6;
+
+  // Explicit center point of the survey area, in WGS 84.
+  openforis.collectone.v1.data.Position center = 7;
+
+  // How the area was defined. Clients name it in the user's language.
+  SurveyAreaSource area_source = 8;
+}
+
+// How a survey area was defined.
+message SurveyAreaSource {
+  // Kind of source.
+  enum Kind {
+    // Unknown source; clients treat it as a selected boundary.
+    KIND_UNSPECIFIED = 0;
+
+    // A boundary chosen for the survey, such as its organization's country.
+    SELECTED_BOUNDARY = 1;
+
+    // Drawn on the map.
+    DRAWN = 2;
+
+    // Uploaded as a file named `file_name`.
+    UPLOADED = 3;
+
+    // A place found with the place search.
+    PLACE_SEARCH = 4;
+
+    // Coordinates typed into the place search.
+    COORDINATES = 5;
+
+    // The plot grid of a Collect Earth project with `plot_count` plots.
+    COLLECT_EARTH_GRID = 6;
+  }
+
+  Kind kind = 1;
+
+  // Name of the uploaded file, for `UPLOADED`.
+  string file_name = 2;
+
+  // Number of plots in the grid, for `COLLECT_EARTH_GRID`.
+  int32 plot_count = 3;
 }
 
 // Definition of a visual map layer in the survey map view.
@@ -875,11 +1038,16 @@ message LayerDef {
     FormGeometrySource form_geometry = 6;
   }
 
-  // Human-readable description of the data source backing this layer.
-  string source_description = 7;
+  // Formerly a stored English description of the data source (e.g.,
+  // "Dataset: plots (Polygon)"), which no client showed. The source is
+  // `entity_dataset_id` or `form_geometry`, and its type is `geometry_type`.
+  reserved 7;
+  reserved "source_description";
 
-  // Human-readable geometry type label (e.g., "Polygon", "Point").
-  string geometry_type_label = 8;
+  // Formerly a stored geometry type label (e.g., "Polygon"); superseded by
+  // `geometry_type`.
+  reserved 8;
+  reserved "geometry_type_label";
 
   // Singular domain noun for features in this layer (e.g., "parcel", "plot").
   string singular_item_label = 9;
@@ -893,6 +1061,10 @@ message LayerDef {
   // Stack/z-order of this layer within `MapConfig.layers` (0-based,
   // bottom-to-top).
   int32 sort_order = 12;
+
+  // Type of the geometries this layer draws. Clients name it in the user's
+  // language.
+  openforis.collectone.v1.data.GeometryType geometry_type = 13;
 }
 
 // Identifies a specific geometry question within a form to render as a map

@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Title of the development-build dialog for choosing a simulated app role. -->
+  <string name="app_dev_sign_in_title">Login de desenvolvimento</string>
+  <string name="app_dev_sign_in_real_accounts_intro">Você entrou com sua Conta do Google. O serviço de dados do usuário está em modo de desenvolvimento, então escolha qual papel no app simular durante os testes.</string>
+  <string name="app_dev_sign_in_sample_users_intro">O login do Firebase está desativado neste build, então você entrará como um usuário de exemplo em vez da sua própria conta.</string>
+  <!-- Simulated app role option. -->
+  <string name="app_dev_sign_in_role_administrator">Administrador</string>
+  <string name="app_dev_sign_in_role_administrator_real_description">Vê e pode alterar todas as pesquisas, organizações e dados de exemplo.</string>
+  <!-- Adam Admin is the name of a sample user. -->
+  <string name="app_dev_sign_in_role_administrator_sample_description">Entra como Adam Admin, que vê e pode alterar todos os dados de exemplo.</string>
+  <!-- Simulated app role option. -->
+  <string name="app_dev_sign_in_role_regular_user">Usuário comum</string>
+  <string name="app_dev_sign_in_role_regular_user_real_description">Vê somente as pesquisas das quais você é proprietário, para as quais foi convidado ou que suas organizações ou links públicos compartilham com você.</string>
+  <!-- Ima User is the name of a sample user; Kenya Forest Service is a sample organization. -->
+  <string name="app_dev_sign_in_role_regular_user_sample_description">Entra como Ima User, coletor de dados da organização de exemplo Kenya Forest Service.</string>
+  <string name="app_dev_sign_in_footer">Este dispositivo lembra sua escolha; saia para trocar de papel. Builds de produção fazem login normalmente, sem esta caixa de diálogo.</string>
+  <!-- Generic button label to proceed. -->
+  <string name="app_continue">Continuar</string>
+  <!-- Generic button label to cancel and close. -->
+  <string name="app_cancel">Cancelar</string>
+  <!-- Device preview caption. %1$s = form factor (Mobile/Tablet), %2$s = orientation (Portrait/Landscape), %3$s = dimensions such as “404 × 764 dp”. -->
+  <string name="app_device_frame_viewport">Janela de visualização: %1$s • %2$s (%3$s)</string>
+  <!-- Device preview form factor option. -->
+  <string name="app_device_form_factor_mobile">Celular</string>
+  <!-- Device preview form factor option. -->
+  <string name="app_device_form_factor_tablet">Tablet</string>
+  <!-- Device preview orientation. -->
+  <string name="app_device_orientation_portrait">Retrato</string>
+  <!-- Device preview orientation. -->
+  <string name="app_device_orientation_landscape">Paisagem</string>
+  <!-- Accessibility label for the rotate button in the device preview. -->
+  <string name="app_device_rotate_description">Girar dispositivo</string>
+  <!-- Chip label to rotate the device preview. -->
+  <string name="app_device_rotate">Girar</string>
+  <string name="app_device_switch_to_light_mode">Mudar para o modo claro</string>
+  <string name="app_device_switch_to_dark_mode">Mudar para o modo escuro</string>
+  <!-- Chip label: the device preview currently uses the dark theme. -->
+  <string name="app_device_theme_dark">Escuro</string>
+  <!-- Chip label: the device preview currently uses the light theme. -->
+  <string name="app_device_theme_light">Claro</string>
+  <string name="app_device_disable_airplane_mode">Desativar modo avião</string>
+  <string name="app_device_enable_airplane_mode">Ativar modo avião</string>
+  <!-- Chip label to simulate being offline in the device preview. -->
+  <string name="app_device_airplane_mode">Modo avião</string>
+  <string name="app_device_walk_closer_description">Simular caminhar mais perto do alvo</string>
+  <string name="app_device_walk_closer">Aproximar-se</string>
+  <!-- Accessibility label of the icon next to a GeoID that the registry hasn't confirmed yet because the record hasn't synced. -->
+  <string name="app_geo_id_pending_sync">Sincronização pendente</string>
+  <!-- Error title shown when no user data service is configured. -->
+  <string name="app_user_data_service_cannot_start">Não é possível iniciar o app</string>
+  <!-- Error banner title; the detailed error message follows below it. -->
+  <string name="app_user_data_sync_error_title">Não foi possível carregar dados do serviço de dados do usuário</string>
+  <string name="app_backend_error_title">Não foi possível salvar as alterações</string>
+  <!-- Generic button label to try a failed action again. -->
+  <string name="app_retry">Tentar novamente</string>
+  <!-- Accessibility label of the avatar button. %1$s = signed-in user's name. -->
+  <string name="app_account_menu_for_user">Menu da conta de %1$s</string>
+  <!-- Accessibility label of the avatar button when the user's name is unknown. -->
+  <string name="app_account_menu">Menu da conta</string>
+  <!-- Title of the account menu panel. -->
+  <string name="app_account">Conta</string>
+  <!-- Accessibility label of the close button in the account menu. -->
+  <string name="app_close_account_menu">Fechar menu da conta</string>
+  <!-- Account menu item. -->
+  <string name="app_manage_organizations">Gerenciar organizações</string>
+  <!-- Account menu item. -->
+  <string name="app_admin_panel">Painel de administração</string>
+  <!-- Account menu item. -->
+  <string name="app_sign_out">Sair</string>
+  <!-- Label before a map feature's GeoID (a registry identifier). %1$s = the GeoID. -->
+  <string name="app_geo_id_label">GeoID: %1$s</string>
+  <!-- Fallback title of a data collection form that has no title. -->
+  <string name="app_data_collection_form_fallback_title">Formulário de coleta de dados</string>
+  <!-- Accessibility label of the back button that closes a form and returns to the survey. -->
+  <string name="app_back_to_survey">Voltar para a pesquisa</string>
+  <!-- Form context banner for a submission without a map feature. %1$s = GPS coordinates. -->
+  <string name="app_standalone_field_log_with_location">Registro de campo avulso • %1$s</string>
+  <!-- Form context banner prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel), %2$s = map layer name or “Required”. -->
+  <string name="app_select_target_with_dataset">Selecionar %1$s (%2$s)</string>
+  <!-- Fallback name of a map feature type when the form doesn't define one. -->
+  <string name="app_target_type_fallback">Elemento</string>
+  <!-- Marks a step or field as required. -->
+  <string name="app_required">Obrigatório</string>
+  <!-- Chip label that closes the form and returns to the map. -->
+  <string name="app_map">Mapa</string>
+  <!-- Accessibility label of the icon that cancels the form. -->
+  <string name="app_cancel_form">Cancelar formulário</string>
+  <!-- Badge on the map feature selection step. %1$d = current step number, %2$d = total steps. -->
+  <string name="app_entity_ref_step_badge">Etapa %1$d de %2$d • Obrigatória</string>
+  <!-- Title prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel). -->
+  <string name="app_select_target_type">Selecionar %1$s</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_entity_ref_no_preselection">Nenhum item do tipo %1$s foi pré-selecionado no mapa. Escolha abaixo um item do tipo %1$s usando o Mapa ou a Lista para continuar a coleta de dados.</string>
+  <!-- Segmented button: pick the map feature on the map. -->
+  <string name="app_select_on_map">Selecionar no mapa</string>
+  <!-- Segmented button: pick the map feature from a list. %1$d = number of map features. -->
+  <string name="app_select_from_list">Selecionar da lista (%1$d)</string>
+  <!-- Accessibility label of the check icon marking the selected map feature. -->
+  <string name="app_selected">Selecionado</string>
+  <!-- %1$s = name of the selected map feature. -->
+  <string name="app_selected_entity">Selecionado: %1$s</string>
+  <!-- Badge: a map feature is selected and the form can continue. -->
+  <string name="app_ready">Pronto</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_entity_ref_map_hint">Toque em um item do tipo %1$s no mapa ou abaixo para selecionar</string>
+  <!-- Heading of the list of map features shown on the map. %1$s = map layer name. -->
+  <string name="app_dataset_on_map">%1$s no mapa</string>
+  <!-- Accessibility label of the search icon. -->
+  <string name="app_search_map_features">Buscar elementos do mapa</string>
+  <!-- Accessibility label of the button that clears the search field. -->
+  <string name="app_clear_search">Limpar busca</string>
+  <!-- Search field placeholder. %1$s = map layer name in lowercase. -->
+  <string name="app_filter_dataset_placeholder">Filtrar %1$s por nome ou GeoID...</string>
+  <!-- Empty search result. %1$s = map layer name in lowercase. -->
+  <string name="app_no_matching_dataset">Nenhum resultado encontrado em %1$s.</string>
+  <string name="app_no_dataset_items_yet">Ainda não há %1$s.</string>
+  <!-- Button to continue the form with the selected map feature. %1$s = map feature name. -->
+  <string name="app_continue_with_entity">Continuar com %1$s</string>
+  <!-- Disabled button label. %1$s = map feature type in lowercase. -->
+  <string name="app_select_target_to_continue">Selecione um item do tipo %1$s para continuar</string>
+  <!-- Number of submissions for a map feature. -->
+  <plurals name="app_submission_count">
+    <item quantity="one">%1$d submissão</item>
+    <item quantity="many">%1$d submissões</item>
+    <item quantity="other">%1$d submissões</item>
+  </plurals>
+  <!-- Badge on the selected map feature option. -->
+  <string name="app_selected_check">Selecionado ✓</string>
+  <!-- Chip label to select a map feature option. -->
+  <string name="app_select">Selecionar</string>
+  <!-- Badge: data was already collected for this map feature. -->
+  <string name="app_completed">Concluído</string>
+  <string name="app_public_data_banner">Pesquisa de dados públicos: qualquer pessoa pode ver respostas, fotos e localizações. Não inclua informações pessoais ou sensíveis.</string>
+  <!-- Title of the consent dialog for a public data survey. -->
+  <string name="app_consent_public_title">Os dados desta pesquisa são públicos</string>
+  <!-- Title of the consent dialog for a survey with organizer terms. -->
+  <string name="app_consent_title">Antes de coletar dados</string>
+  <!-- %1$s = survey title. -->
+  <string name="app_consent_public_intro">Você está prestes a contribuir com "%1$s". Como esta pesquisa usa dados públicos:</string>
+  <string name="app_consent_what_is_public_title">O que é público</string>
+  <string name="app_consent_what_is_public_body">Qualquer pessoa pode ver os elementos do mapa, as coordenadas GPS, as respostas e as fotos que você enviar.</string>
+  <string name="app_consent_identity_hidden_title">Sua identidade fica oculta</string>
+  <string name="app_consent_identity_hidden_body">Seu nome e endereço de e-mail ficam ocultos para outros participantes e visíveis apenas para os organizadores da pesquisa.</string>
+  <string name="app_consent_protect_privacy_title">Proteja a privacidade</string>
+  <string name="app_consent_protect_privacy_body">Não inclua rostos, placas de veículos ou dados pessoais em fotos ou respostas de texto.</string>
+  <!-- Heading above custom consent text written by the survey organizer. -->
+  <string name="app_consent_organizer_terms">Termos do organizador da pesquisa</string>
+  <!-- Button accepting the consent terms. -->
+  <string name="app_consent_accept">Entendi, continuar</string>
+  <!-- Accessibility label of the back button in map feature details. -->
+  <string name="app_back_to_all_map_features">Voltar para todos os elementos do mapa</string>
+  <!-- Accessibility label. -->
+  <string name="app_collapse_details">Recolher detalhes</string>
+  <!-- Accessibility label. -->
+  <string name="app_close_details">Fechar detalhes</string>
+  <!-- Accessibility label of the overflow (⋮) menu button. -->
+  <string name="app_more_actions">Mais ações</string>
+  <!-- Section heading in map feature details. -->
+  <string name="app_details_heading">Detalhes</string>
+  <!-- Field label: the map layer a map feature belongs to. -->
+  <string name="app_details_layer">Camada</string>
+  <!-- Field label: the shape summary of a map feature (e.g. polygon area). -->
+  <string name="app_details_geometry">Geometria</string>
+  <!-- Field label: the map feature's GeoID registry identifier. -->
+  <string name="app_details_geo_id">GeoID</string>
+  <!-- Section heading listing a map feature's attribute values. -->
+  <string name="app_details_properties">Propriedades</string>
+  <!-- Button that shows the selected map feature in the data table. -->
+  <string name="app_show_in_table">Mostrar na tabela</string>
+  <!-- Action that saves a PDF report to the device. -->
+  <string name="app_download_pdf">Baixar PDF</string>
+  <!-- Action that creates a PDF report and opens the share sheet. -->
+  <string name="app_share_pdf">Compartilhar PDF</string>
+  <!-- Short chip label to stop navigating to a map feature. -->
+  <string name="app_stop_navigation_short">Parar nav.</string>
+  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_navigate_with_distance">Navegar • %1$s</string>
+  <!-- Label to start straight-line navigation to a location. -->
+  <string name="app_navigate">Navegar</string>
+  <!-- Action that shows the map feature's QR code. -->
+  <string name="app_qr_code">Código QR</string>
+  <!-- Chip label: number of media uploads not yet sent. -->
+  <plurals name="app_pending_uploads">
+    <item quantity="one">%1$d envio pendente</item>
+    <item quantity="many">%1$d envios pendentes</item>
+    <item quantity="other">%1$d envios pendentes</item>
+  </plurals>
+  <!-- Chip label opening the uploads list. %1$d = number of uploads. -->
+  <string name="app_uploads_count">Envios (%1$d)</string>
+  <!-- Section heading above the buttons that open data collection forms. -->
+  <string name="app_collect_data">Coletar dados</string>
+  <!-- Disabled form button. %1$s = the form's action label (e.g. “Visit parcel”). -->
+  <string name="app_form_action_completed">%1$s (Concluído)</string>
+  <!-- Heading/link with the number of submissions. %1$d = count. -->
+  <string name="app_submissions_count">Submissões (%1$d)</string>
+  <string name="app_submissions_stored_offline">Armazenadas neste dispositivo. Conecte-se à internet para ver todas as submissões.</string>
+  <string name="app_no_submissions_yet">Nenhuma submissão ainda</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_view_submission_history">Veja o histórico de dados coletados para este item (%1$s)</string>
+  <!-- Accessibility label of the back button returning to map feature details. -->
+  <string name="app_back_to_details">Voltar para os detalhes</string>
+  <string name="app_offline_showing_local_submissions">Você está offline. Mostrando as submissões armazenadas neste dispositivo. Conecte-se à internet para ver todas as submissões.</string>
+  <!-- %1$s = map feature type in lowercase. -->
+  <string name="app_no_local_submissions_for_entity">Nenhuma submissão para este item (%1$s) está armazenada neste dispositivo.</string>
+  <!-- %1$s = map feature type in lowercase. -->
+  <string name="app_no_submissions_for_entity">Nenhuma submissão ainda para este item (%1$s).</string>
+  <!-- Back button label returning to the submissions list. -->
+  <string name="app_back_to_submissions">Voltar para as submissões</string>
+  <!-- QR code dialog title. %1$s = map feature type (e.g. Coffee parcel). -->
+  <string name="app_entity_qr_code_title">Código QR: %1$s</string>
+  <!-- Accessibility label of the QR code image. %1$s = map feature name. -->
+  <string name="app_entity_qr_matrix_description">Matriz QR de %1$s</string>
+  <!-- %1$s = map feature type in lowercase. EUDR = EU Deforestation Regulation. -->
+  <string name="app_entity_qr_code_hint">Leia com o Collect One ou qualquer leitor de conformidade com o EUDR para verificar a geometria e o GeoID (%1$s).</string>
+  <!-- Generic button label / accessibility label to close a dialog or sheet. -->
+  <string name="app_close">Fechar</string>
+  <!-- Number of pages in a generated PDF. -->
+  <plurals name="app_pdf_page_count">
+    <item quantity="one">%1$d página</item>
+    <item quantity="many">%1$d páginas</item>
+    <item quantity="other">%1$d páginas</item>
+  </plurals>
+  <!-- Accessibility label of the icon that opens a PDF preview. -->
+  <string name="app_preview_pdf">Visualizar PDF</string>
+  <string name="app_pdf_created_can_share">Criado neste dispositivo, então você pode compartilhá-lo mesmo offline.</string>
+  <string name="app_pdf_created_download_to_send">Criado neste dispositivo. Para enviá-lo, baixe-o e anexe-o em qualquer app.</string>
+  <!-- Button that opens the system share sheet. -->
+  <string name="app_share">Compartilhar</string>
+  <!-- Button that saves a file to the device. -->
+  <string name="app_download">Baixar</string>
+  <!-- Button that dismisses a message. -->
+  <string name="app_ok">OK</string>
+  <!-- Accessibility label of the back button returning to the map feature list. -->
+  <string name="app_back_to_searchable_list">Voltar para a lista pesquisável</string>
+  <!-- Form subtitle. %1$s = the form's action button label, %2$s = form version. -->
+  <string name="app_form_action_subtitle">Ação: "%1$s" • %2$s</string>
+  <!-- Submission target. %1$s = map feature type (e.g. Coffee parcel), %2$s = map feature name. -->
+  <string name="app_target_with_entity">%1$s: %2$s</string>
+  <!-- Submission without a map feature. %1$s = map feature type, %2$s = GPS coordinates. -->
+  <string name="app_target_no_feature_with_location">%1$s • Nenhum elemento do mapa associado (%2$s)</string>
+  <!-- Submission without a map feature. %1$s = map feature type. -->
+  <string name="app_target_no_feature">%1$s • Nenhum elemento do mapa associado</string>
+  <!-- Badge on the most recent submission (all caps). -->
+  <string name="app_latest">MAIS RECENTE</string>
+  <!-- Accessibility label of the button that opens a submission. -->
+  <string name="app_submission_details">Detalhes da submissão</string>
+  <!-- Search field placeholder. -->
+  <string name="app_search_placeholder">Buscar...</string>
+  <!-- Accessibility label of the search icon. -->
+  <string name="app_search">Buscar</string>
+  <!-- Accessibility label of the button that clears the list search field. -->
+  <string name="app_clear_search_title_case">Limpar busca</string>
+  <!-- Accessibility label. -->
+  <string name="app_collapse_list_sheet">Recolher a lista para o mapa</string>
+  <!-- Accessibility label. -->
+  <string name="app_expand_list_sheet">Expandir a lista pesquisável</string>
+  <!-- Accessibility label of the offline icon. -->
+  <string name="app_device_offline">Dispositivo offline</string>
+  <!-- %1$s = plural map feature noun in lowercase (e.g. coffee parcels, map features). -->
+  <string name="app_offline_searching_local">Dispositivo offline • Buscando apenas em %1$s no dispositivo</string>
+  <!-- %1$s = plural map feature noun in lowercase. -->
+  <string name="app_offline_search_local_only">A busca é feita apenas em %1$s no dispositivo. A busca de lugares não está disponível offline.</string>
+  <!-- Generic plural noun for map features, used inside sentences. -->
+  <string name="app_map_features_lowercase">elementos do mapa</string>
+  <!-- Generic plural noun used inside sentences when a map layer has no feature name. -->
+  <string name="app_features_lowercase">elementos</string>
+  <!-- Section heading (all caps). -->
+  <string name="app_map_layers_heading">CAMADAS DO MAPA</string>
+  <!-- Accessibility label. %1$s = map layer name. -->
+  <string name="app_expand_dataset">Expandir %1$s</string>
+  <!-- Accessibility label. %1$s = map layer name. -->
+  <string name="app_collapse_dataset">Recolher %1$s</string>
+  <!-- %1$d = number shown, %2$d = total number, %3$s = plural map feature noun, %4$s = map layer name. -->
+  <string name="app_showing_first_features">Mostrando os primeiros %1$d de %2$d %3$s em %4$s. Use a barra de busca acima para filtrar todos os %2$d %3$s.</string>
+  <!-- Section heading listing place search results (all caps). -->
+  <string name="app_places_heading">LUGARES</string>
+  <!-- Accessibility label. -->
+  <string name="app_fly_to_place">Ir até o lugar no mapa</string>
+  <!-- Chip label to stop navigating to a place. -->
+  <string name="app_stop_navigation">Parar nav.</string>
+  <!-- Accessibility label. -->
+  <string name="app_navigate_to_place">Navegar em linha reta até o lugar</string>
+  <!-- %1$s = search query. -->
+  <string name="app_no_local_layers_match">Nenhuma camada do mapa local corresponde a "%1$s". A busca de lugares não está disponível offline.</string>
+  <!-- %1$s = search query. -->
+  <string name="app_no_layers_or_places_match">Nenhuma camada do mapa ou lugar corresponde a "%1$s".</string>
+  <string name="app_no_map_layers_yet">Nenhuma camada do mapa ainda.</string>
+  <string name="app_no_map_features_yet">Nenhuma feição do mapa ainda.</string>
+  <!-- Accessibility label of the overflow menu. -->
+  <string name="app_more_submission_actions">Mais ações da submissão</string>
+  <!-- Accessibility label of the share icon. -->
+  <string name="app_share_submission_pdf">Compartilhar PDF da submissão</string>
+  <!-- %1$s = form version. -->
+  <string name="app_schema_version">Esquema: %1$s</string>
+  <!-- %1$s = name of the person who collected the data. -->
+  <string name="app_data_collector">Coletor de dados: %1$s</string>
+  <!-- %1$s = date and time of collection. -->
+  <string name="app_collected_at">Coletado em: %1$s</string>
+  <!-- Sync status title. -->
+  <string name="app_sync_uploading_changes">Enviando alterações</string>
+  <!-- Sync status title. -->
+  <string name="app_sync_all_changes_saved">Todas as alterações foram salvas</string>
+  <!-- Sync status title / description. -->
+  <string name="app_sync_upload_failed_retry">Falha no envio — toque para tentar novamente</string>
+  <!-- Sync status description. -->
+  <string name="app_sync_uploading_description">Enviando alterações locais para o servidor</string>
+  <!-- Sync status description. -->
+  <string name="app_sync_synced_description">Sincronizado com o servidor na nuvem</string>
+  <!-- Accessibility label of the basemap/layers button on the map. -->
+  <string name="app_layers">Camadas</string>
+  <!-- Section heading in the basemap selector: basemap type (Satellite / Map). -->
+  <string name="app_basemap_type_heading">Tipo</string>
+  <!-- Section heading in the basemap selector listing custom imagery layers. -->
+  <string name="app_imagery_heading">Imagens</string>
+  <!-- Imagery layer subtitle. -->
+  <string name="app_offline_download_permitted">Download offline permitido</string>
+  <!-- Imagery layer subtitle. -->
+  <string name="app_online_only_offline_disabled">Somente online · download offline desativado</string>
+  <!-- Section heading in the layers sheet: the map areas saved on the device for offline use. -->
+  <string name="app_downloaded_imagery_heading">Imagens baixadas</string>
+  <!-- Switch in the layers sheet that shows the satellite imagery saved for offline use. -->
+  <string name="app_downloaded_satellite">Satélite baixado</string>
+  <!-- Switch in the layers sheet that shows the terrain map saved for offline use. -->
+  <string name="app_downloaded_terrain">Terreno baixado</string>
+  <!-- Subtitle of a downloaded imagery switch. %1$d: number of saved areas; %2$s: the space they take, e.g. "76 MB". -->
+  <plurals name="app_downloaded_imagery_summary">
+    <item quantity="one">%1$d área · %2$s</item>
+    <item quantity="other">%1$d áreas · %2$s</item>
+  </plurals>
+  <!-- Subtitle of a downloaded imagery switch when no area of that kind is saved. -->
+  <string name="app_downloaded_imagery_none">Nenhuma área salva</string>
+  <!-- Button that starts framing a map area to save for offline use. -->
+  <string name="app_save_an_area">Salvar uma área</string>
+  <!-- Imagery layer type: a web map tile URL template. -->
+  <string name="app_imagery_type_xyz_tiles">URL de blocos XYZ</string>
+  <string name="app_imagery_type_earth_engine">Camada do Earth Engine</string>
+  <!-- Basemap type option: standard map with roads and terrain. -->
+  <string name="app_basemap_type_map">Terreno</string>
+  <!-- Basemap type option: satellite imagery. -->
+  <string name="app_basemap_type_satellite">Satélite</string>
+  <!-- Title of the basemap selection dialog. -->
+  <string name="app_basemap">Mapa base</string>
+  <!-- Generic button label to close a dialog after making changes. -->
+  <string name="app_done">Concluído</string>
+  <!-- Accessibility label. -->
+  <string name="app_hide_layer">Ocultar camada</string>
+  <!-- Accessibility label. -->
+  <string name="app_show_layer">Mostrar camada</string>
+  <!-- Button on a map cluster balloon that zooms into the cluster. -->
+  <string name="app_zoom_in">Aumentar zoom</string>
+  <!-- Accessibility label. -->
+  <string name="app_dismiss_cluster_balloon">Fechar balão do agrupamento</string>
+  <!-- Cluster balloon chip. %1$s = workflow status (e.g. Visited), %2$d = number of map features. -->
+  <string name="app_cluster_status_count">%1$s: %2$d</string>
+  <!-- Accessibility label. -->
+  <string name="app_clear_selected_place">Limpar lugar selecionado</string>
+  <!-- Accessibility label of the icon marking a survey downloaded for offline use. -->
+  <string name="app_downloaded">Baixada</string>
+  <!-- Map label on the navigation line once at the target. %1$s = distance and bearing. -->
+  <string name="app_map_navigation_arrived">✓ Chegou • %1$s</string>
+  <!-- Map label on the navigation line. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_map_navigation_distance">➤ %1$s</string>
+  <!-- Map label under the user's location while navigating. %1$s = bearing, e.g. “319° NW”. -->
+  <string name="app_map_user_navigating">⊕ Você • %1$s</string>
+  <!-- Map label under the user's location while the map follows it. -->
+  <string name="app_map_user_centered">⊕ Você (centralizado)</string>
+  <!-- Map label under the user's GPS location. -->
+  <string name="app_map_user_gps">⊕ Você (GPS)</string>
+  <!-- Fallback label of a place picked from search that has no name. -->
+  <string name="app_place">Lugar</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_point">Ponto</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_line">Linha</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_polygon">Polígono</string>
+  <!-- Map feature geometry type: a data table row without a location. -->
+  <string name="app_geometry_none">Sem geometria</string>
+  <!-- Name of a map pin icon in the icon picker. -->
+  <string name="app_layer_icon_place">Lugar</string>
+  <string name="app_layer_icon_flag">Bandeira</string>
+  <string name="app_layer_icon_star">Estrela</string>
+  <string name="app_layer_icon_circle">Círculo</string>
+  <string name="app_layer_icon_park">Árvore</string>
+  <string name="app_layer_icon_forest">Floresta</string>
+  <string name="app_layer_icon_eco">Folha</string>
+  <string name="app_layer_icon_grass">Grama</string>
+  <string name="app_layer_icon_agriculture">Agricultura</string>
+  <string name="app_layer_icon_yard">Jardim</string>
+  <string name="app_layer_icon_emoji_nature">Vida selvagem</string>
+  <string name="app_layer_icon_pets">Animais</string>
+  <string name="app_layer_icon_water_drop">Gota d’água</string>
+  <string name="app_layer_icon_water">Água</string>
+  <string name="app_layer_icon_waves">Ondas</string>
+  <string name="app_layer_icon_plumbing">Poço / bomba</string>
+  <string name="app_layer_icon_landscape">Paisagem</string>
+  <string name="app_layer_icon_terrain">Terreno</string>
+  <string name="app_layer_icon_hiking">Trilha</string>
+  <string name="app_layer_icon_signpost">Placa de sinalização</string>
+  <string name="app_layer_icon_fence">Cerca</string>
+  <string name="app_layer_icon_home">Casa</string>
+  <string name="app_layer_icon_cottage">Chalé</string>
+  <string name="app_layer_icon_apartment">Prédio</string>
+  <string name="app_layer_icon_school">Escola</string>
+  <string name="app_layer_icon_local_hospital">Unidade de saúde</string>
+  <string name="app_layer_icon_church">Local de culto</string>
+  <string name="app_layer_icon_storefront">Mercado</string>
+  <string name="app_layer_icon_factory">Fábrica</string>
+  <string name="app_layer_icon_construction">Construção</string>
+  <string name="app_layer_icon_solar_power">Energia solar</string>
+  <string name="app_layer_icon_cell_tower">Torre de celular</string>
+  <string name="app_layer_icon_sensors">Sensor</string>
+  <string name="app_layer_icon_photo_camera">Câmera</string>
+  <string name="app_layer_icon_science">Amostra</string>
+  <string name="app_layer_icon_recycling">Reciclagem</string>
+  <string name="app_layer_icon_local_fire_department">Fogo</string>
+  <string name="app_layer_icon_warning">Perigo</string>
+  <string name="app_layer_icon_person">Pessoa</string>
+  <string name="app_layer_icon_groups">Grupo</string>
+  <!-- Shown instead of a data collector's name in surveys that hide contributor identities. -->
+  <string name="app_participant_identity_hidden">Participante (identidade oculta)</string>
+  <!-- The signed-in user's own name as data collector. %1$s = name. -->
+  <string name="app_collector_you">%1$s (você)</string>
+  <!-- Data collector attribution. %1$s = name, %2$s = email address. -->
+  <string name="app_collector_with_email">%1$s (%2$s)</string>
+  <!-- Notice. %1$s = PDF file name. -->
+  <string name="app_pdf_saved">%1$s salvo</string>
+  <!-- Notice. %1$s = PDF file name, %2$s = page count and file size. -->
+  <string name="app_pdf_saved_with_summary">%1$s salvo (%2$s)</string>
+  <!-- Notice. %1$s = PDF file name. -->
+  <string name="app_pdf_share_failed">Não foi possível compartilhar %1$s</string>
+  <!-- Attribution badge shown in the time series panel and on the map when Earth Engine layers are displayed. Keep “Google Earth Engine” untranslated. -->
+  <string name="app_powered_by_google_earth_engine">Tecnologia Google Earth Engine</string>
+  <!-- Coordinates of a point. %1$s = latitude such as “0.4160°S”, %2$s = longitude such as “36.9470°E”. -->
+  <string name="app_coordinates">%1$s, %2$s</string>
+  <!-- Latitude north of the equator. %1$s = degrees such as “0.4160”. Use the standard abbreviation for north. -->
+  <string name="app_coordinates_latitude_north">%1$s°N</string>
+  <!-- Latitude south of the equator. %1$s = degrees such as “0.4160”. Use the standard abbreviation for south. -->
+  <string name="app_coordinates_latitude_south">%1$s°S</string>
+  <!-- Longitude east of the prime meridian. %1$s = degrees such as “36.9470”. Use the standard abbreviation for east. -->
+  <string name="app_coordinates_longitude_east">%1$s°L</string>
+  <!-- Longitude west of the prime meridian. %1$s = degrees such as “36.9470”. Use the standard abbreviation for west. -->
+  <string name="app_coordinates_longitude_west">%1$s°O</string>
+  <!-- Notice when straight-line navigation to a map feature or place starts. %1$s = its name; %2$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_map_navigation_started">Navegação em linha reta até %1$s (%2$s)</string>
+  <!-- Notice when straight-line navigation to a submission starts. %1$s = form title; %2$s = its map feature, location, or “Standalone Field Log”; %3$s = distance and bearing. -->
+  <string name="app_map_navigation_started_submission">Navegação em linha reta até %1$s • %2$s (%3$s)</string>
+  <!-- In the navigation notice, stands for a submission that has neither a map feature nor a location. -->
+  <string name="app_map_navigation_standalone_field_log">Registro de campo avulso</string>
+  <!-- Notice when the map centers on a place. %1$s = place name; %2$s = its coordinates. -->
+  <string name="app_map_centered_on_place">Mapa centralizado em %1$s (%2$s)</string>
+  <!-- Place search result for coordinates the user typed. %1$s = the coordinates, e.g. “0.4210°S, 36.9505°E”. -->
+  <string name="app_place_coordinates_name">Coordenadas (%1$s)</string>
+  <!-- Category badge of a place search result for typed coordinates. -->
+  <string name="app_place_coordinates_category">Coordenadas GPS</string>
+  <!-- Region line of a place search result for typed coordinates. %1$s = the survey's location, e.g. “Nyeri County, Kenya”. -->
+  <string name="app_place_coordinates_region">%1$s • Pesquisa direta de coordenadas</string>
+
+  <!-- Dates in summaries (DateText.kt), e.g. "Mar 5, 2026". date_medium: %1$s is the abbreviated month name, %2$d the day of the month, %3$d the year. -->
+  <string name="date_medium">%2$d de %1$s de %3$d</string>
+  <string name="date_month_short_1">jan</string>
+  <string name="date_month_short_2">fev</string>
+  <string name="date_month_short_3">mar</string>
+  <string name="date_month_short_4">abr</string>
+  <string name="date_month_short_5">mai</string>
+  <string name="date_month_short_6">jun</string>
+  <string name="date_month_short_7">jul</string>
+  <string name="date_month_short_8">ago</string>
+  <string name="date_month_short_9">set</string>
+  <string name="date_month_short_10">out</string>
+  <string name="date_month_short_11">nov</string>
+  <string name="date_month_short_12">dez</string>
+  <!-- Title the system share sheet gives a PDF report: of a map feature (%1$s is its type, e.g. Coffee parcel) or of a submission (%1$s is the form title). -->
+  <string name="app_pdf_share_title_map_feature">Relatório de %1$s</string>
+  <string name="app_pdf_share_title_submission">Envio de %1$s</string>
+  <!-- Number of map features in a map cluster, when no single map layer names its features. -->
+  <plurals name="app_map_features_count">
+    <item quantity="one">%1$d elemento do mapa</item>
+    <item quantity="other">%1$d elementos do mapa</item>
+  </plurals>
+  <!-- Type of a map feature when the survey names none (first), and what a submission without a map feature was recorded as (second). -->
+  <string name="app_feature_type_generic">Local</string>
+  <string name="app_target_standalone">Registro de campo avulso</string>
+  <string name="app_measurement">%1$s %2$s</string>
+  <string name="app_unit_meter">m</string>
+  <string name="app_unit_kilometer">km</string>
+  <string name="app_unit_foot">pés</string>
+  <string name="app_unit_mile">mi</string>
+  <string name="app_unit_hectare">ha</string>
+  <string name="app_unit_acre">acres</string>
+  <string name="app_unit_square_kilometer">km²</string>
+  <string name="app_unit_kilobyte">kB</string>
+  <string name="app_unit_megabyte">MB</string>
+  <string name="app_unit_gigabyte">GB</string>
+  <string name="app_unit_terabyte">TB</string>
+  <string name="app_gnss_accuracy">±%1$s</string>
+  <string name="app_wayfinding_badge">%1$s • %2$s</string>
+</resources>

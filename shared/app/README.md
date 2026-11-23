@@ -16,10 +16,33 @@
 
 # Collect One Shared App Module
 
-`org.openforis.collectone.v2:app` holds the code that the mobile app and the web
+`shared/app` holds the code that the mobile app and the web
 console share: the domain model, the data layer, device and network clients,
 and the UI pieces both apps use. It targets Android, JVM, and WasmJS. iOS
 targets will be added when iOS work resumes.
+
+It is split into Gradle modules along its layers, and its presentation layer by
+feature, so the compiler keeps them apart (see
+[`docs/technical/client/modules.md`](../../docs/technical/client/modules.md)):
+
+| Module | Directory | Holds |
+| :--- | :--- | :--- |
+| `:shared:app:domain` | [`domain/`](domain/) | `domain/`: pure Kotlin, no Compose |
+| `:shared:app:data` | [`data/`](data/) | `data/`, `client/`, and the data-layer Koin graph in `di/` |
+| `:shared:app:resources` | [`resources/`](resources/) | The UI strings of all 9 locales and their `Res` accessors |
+| `:shared:app:ui-common` | [`ui-common/`](ui-common/) | `ui/text/`, `ui/common/`, `ui/navigation/`, and the ViewModel helpers in `ui/viewmodel/` |
+| `:shared:app:map` | [`map/`](map/) | The survey map feature (`ui/map/`) and its Koin module |
+| `:shared:app:datacollection` | [`datacollection/`](datacollection/) | The data collection feature (`ui/datacollection/`), the PDF report rendering (`client/pdf/`), and its Koin module |
+| `:shared:app:dashboard` | [`dashboard/`](dashboard/) | The dashboard feature (`ui/dashboard/`) and its Koin module |
+| `:shared:app:onboarding` | [`onboarding/`](onboarding/) | The onboarding feature (`ui/onboarding/`) and its Koin module |
+| `:shared:app:settings` | [`settings/`](settings/) | The settings feature (`ui/settings/`) and its Koin module |
+| `:shared:app:listsearch` | [`listsearch/`](listsearch/) | The list search feature (`ui/listsearch/`) and its Koin module |
+| `:shared:app` | this directory | The session shell (`ui/session/`) and the rest of `di/` |
+| `:shared:app:testing` | [`testing/`](testing/) | Data-level test fixtures |
+| `:shared:app:ui-testing` | [`ui-testing/`](ui-testing/) | App-level test fixtures (the assembled session) |
+
+Packages are the same in every module, so imports don't say which module a
+class is in.
 
 Only code both apps use belongs here. Web-only domain models, use cases, and
 UI live in [`../web/`](../web/) and mobile-only state in
@@ -31,24 +54,42 @@ workbench sets on any session (`SampleDataRepository`, `SyncStatusSimulator`).
 
 ## Package Structure (`org.openforis.collectone.v2.app`)
 
--   **`domain/`**: Domain models, repository interfaces, and use cases. Pure
-    Kotlin with no Compose, data, or platform imports.
--   **`data/`**: Repository implementations, data sources (local store, remote,
-    device), and sample data (`data/seed/`). Only `data/` and `di/` may import
-    `data.*`.
--   **`client/`**: Platform clients (auth, location, network, PDF export, places
-    search), with `expect`/`actual` implementations in `src/<platform>Main/`.
--   **`di/`**: The composition root (`AppDataHolder`): the local store,
-    repositories, and the use cases both apps use. Each app wires its own
-    use cases from these repositories (`WebUseCases` in `shared/web`).
--   **`ui/AppSession.kt`**: The base class of `MobileAppState` and
-    `WebAppState`, holding only the session state and actions both apps use.
--   **`ui/`**: Shared presentation code: UI state (`ui/state/`), shared
-    ViewModels (`ui/viewmodel/`), and components used by both apps (`ui/common/`,
-    `ui/map/`, `ui/datacollection/`).
+-   **`domain/`** (`:shared:app:domain`): Domain models, repository
+    interfaces, and use cases. Pure Kotlin with no Compose, data, or platform
+    imports.
+-   **`data/`** (`:shared:app:data`): Repository implementations, data sources
+    (local store, remote, device), the SQLDelight database, and sample data
+    (`data/seed/`). Only `data/` and `di/` may import `data.*`.
+-   **`client/`** (`:shared:app:data`): Platform clients (auth, location,
+    network, PDF export, places search), with `expect`/`actual` implementations
+    in `src/<platform>Main/`. The PDF report rendering (`client/pdf/`
+    `PdfReportLayout` and friends) formats localized text, so it is
+    presentation, in `:shared:app:datacollection`.
+-   **`di/`**: The composition root. `:shared:app:data` holds `AppConfig`,
+    `platformModule(...)`, `dataModule(config)`, and the classes they build
+    (`UserDataSyncController`, `BackendErrorMonitor`); the feature modules hold
+    the Koin modules of their ViewModels (`mapModule`, `dataCollectionModule`,
+    `dashboardModule`, `onboardingModule`, `settingsModule`,
+    `listSearchModule`); `:shared:app` holds `domainModule`, `appModules(...)`,
+    and the `AppDataHolder` facade. Each app adds its own modules (`webModules` in
+    `shared/web`).
+-   **`ui/session/`**: What wires one client session together without holding UI
+    state: `SessionCoordinator` (routes the feature ViewModels' events and tells
+    the client's `SessionShell`), `NoticeController`, `ActiveSurveyAccess`,
+    `SurveyRecordsUiStates` (the record surfaces built from several features'
+    states), the list and details intents over the ViewModels, and the session's
+    banners and developer sign-in dialog.
+-   **`ui/<feature>/`**: One package per shared feature, each in its own
+    module (`ui/map/`, `ui/datacollection/`, `ui/dashboard/`, `ui/onboarding/`,
+    `ui/settings/`, `ui/listsearch/`), holding its ViewModel and `*Actions`, its
+    UI state and events, and its views.
+-   **`ui/common/`, `ui/text/`, `ui/navigation/`, `ui/viewmodel/`**
+    (`:shared:app:ui-common`): Shared composables and platform bridges, the
+    domain text mappers, the navigation models, and the ViewModel helpers.
 
-`LayerDependencyGuardrailTest` and `SampleDataGuardrailTest` (in `jvmTest`)
-enforce these layer rules.
+The module graph enforces most layer rules. `ModuleGraphTest`,
+`LayerDependencyArchitectureTest`, and `SampleDataGuardrailTest` (in this
+module's `jvmTest`) check the module graph and the rules the compiler can't.
 
 ## Local Data Store
 
@@ -100,10 +141,10 @@ and look the same on web and mobile.
     `[photo]`); other scripts render as `?`. Embedding a Unicode font (for
     example Noto Sans) is the next step.
 
-## User Data Service
+## Server Connection
 
 The app syncs `LocalStore` from the
-[user data service](../../server/userDataService/README.md) through
+[Collect One server](../../server/README.md) through
 `GrpcSyncDataSource`, over gRPC-Web (`client/grpc/GrpcWebTransport.kt` and
 `RemoteUserDataServices.kt`) on every platform. `AppDataHolder` takes the
 service's base URL as `userDataServiceUrl`; when it's null, nothing is synced
@@ -114,19 +155,19 @@ URL. Sync failures appear in `AppDataHolder.userDataSyncState` and are shown
 with `UserDataSyncErrorBanner`, whose Retry calls `retryUserDataSync()`.
 The URL comes from:
 
--   **WasmJS:** `window.GROUND_USER_DATA_SERVICE_URL` from
+-   **WasmJS:** `window.COLLECT_ONE_USER_DATA_SERVICE_URL` from
     `user-data-service-config.js`. In development it's the page's own origin,
     because the dev server proxies the service set by `USER_DATA_SERVICE_URL`;
     production bundles bake in an absolute URL. It can't be set from the page
     URL.
--   **JVM:** the `groundplatform.userDataServiceUrl` system property or the
+-   **JVM:** the `collectone.userDataServiceUrl` system property or the
     `USER_DATA_SERVICE_URL` environment variable.
--   **Android:** the `groundplatform.userDataServiceUrl` system property, which
+-   **Android:** the `collectone.userDataServiceUrl` system property, which
     `androidApp` sets from its `USER_DATA_SERVICE_URL` build setting.
 
 ## Test Fixtures (`testing/`)
 
-The `:app-testing` subproject (`org.openforis.collectone.v2:app-testing`) contains
+The `:shared:app:testing` subproject contains
 fixtures shared by this module's tests and by the tests of modules built on it:
 the sample data (`data/seed/Sample*Data`, `GlobalLibrarySeedData`), seeded
 in-memory stores (`seededStore()`, `sampleDataHolder()`, `runNow`), the
@@ -134,34 +175,40 @@ read-only `SeedUserDataService` fake with `sampleSyncDataSource()`, survey and
 form editor samples, `DataCollectionFixture`, and `testScope()`.
 Depend on it from `commonTest` only.
 
-`UserDataSeedGenerator` builds the user data service's sample seed from the same
+`UserDataSeedGenerator` builds the server's sample seed from the same
 fixtures. After changing them, rewrite the service's seed snapshot with
-`./gradlew jvmTest -PregenerateUserDataSeed`.
+`./gradlew :shared:app:data:jvmTest -PregenerateUserDataSeed`.
 
 ## Web Hosts
 
-The WasmJS clients call JavaScript bridges in `src/wasmJsMain/resources/`
-(`pdf-export-bridge.js`, `media-capture-bridge.js`). Each web host copies them
-into its bundle and loads them from its `index.html`.
+The WasmJS clients call JavaScript bridges in
+`ui-common/src/wasmJsMain/resources/` (`media-capture-bridge.js`) and `data/src/wasmJsMain/resources/`
+(`firebase-auth-bridge.js`, `pdf-export-bridge.js`). Each web host copies them
+into its bundle and loads them from its `index.html`. The browser's local
+database runs in the worker in `data/web/sqlite-worker/`.
 
 ## Building and Testing
 
-`./gradlew` here runs the Gradle wrapper from [`../ui/`](../ui/), so this
-module doesn't check in its own `gradle-wrapper.jar`.
+Run these from the repository root (the repository is a single Gradle build):
 
 ```bash
-# JVM unit and Compose UI tests:
-./gradlew jvmTest
+# JVM unit and Compose UI tests of the shared/app modules:
+./gradlew :shared:app:domain:jvmTest :shared:app:data:jvmTest :shared:app:ui-common:jvmTest \
+  :shared:app:map:jvmTest :shared:app:datacollection:jvmTest :shared:app:dashboard:jvmTest \
+  :shared:app:onboarding:jvmTest :shared:app:settings:jvmTest :shared:app:listsearch:jvmTest \
+  :shared:app:jvmTest
 
 # Compile every target:
-./gradlew compileKotlinJvm compileKotlinWasmJs compileDebugKotlinAndroid
+./gradlew :shared:app:compileKotlinJvm :shared:app:compileKotlinWasmJs :shared:app:compileDebugKotlinAndroid
 ```
 
 Rewrite the global library seed files (`shared/assets/library/*.textproto`)
-from the Kotlin copy with `./gradlew jvmTest -PregenerateLibrarySeed`.
+from the Kotlin copy with `./gradlew :shared:app:data:jvmTest -PregenerateLibrarySeed`.
 
 ## Dependencies
 
--   [`../core/`](../core/) (`org.openforis.collectone.v2:protoforms`)
--   [`../ui/`](../ui/) (`org.openforis.collectone.v2:protoforms-ui`)
--   [`../map/`](../map/) (`org.openforis.collectone.v2:map`)
+-   [`../core/`](../core/) (`:shared:core`): `:shared:app:domain` and up
+-   [`../map/geometry/`](../map/geometry/) (`:shared:map:geometry`):
+    `:shared:app:domain` (geometry types, no Compose) and up
+-   [`../map/`](../map/) (`:shared:map`): `:shared:app:map` and up
+-   [`../ui/`](../ui/) (`:shared:ui`): `:shared:app:ui-common` and up

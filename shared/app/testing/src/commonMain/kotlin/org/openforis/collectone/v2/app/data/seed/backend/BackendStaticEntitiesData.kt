@@ -13,15 +13,379 @@
  */
 package org.openforis.collectone.v2.app.data.seed.backend
 
+import kotlin.time.Instant
+import org.openforis.collectone.v2.app.domain.model.EntityShape
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.SubmissionFieldEntry
 import org.openforis.collectone.v2.app.domain.model.SubmissionPreviewItem
+import org.openforis.collectone.v2.app.domain.model.SurveyMapAnchor
 import org.openforis.collectone.v2.app.domain.model.SyncStatus
+import org.openforis.collectone.v2.app.domain.model.computeAgStackGeoId
+import org.openforis.collectone.v2.map.GeometryType
+import org.openforis.collectone.v2.map.LatLng
 
 /** Hardcoded sample geospatial entities for the sample data. */
 object BackendStaticEntitiesData {
+  const val GOOGLE_EARTH_SURVEY_ID = "00000037-7e4a-5b2c-9d18-3f8a61c4e902"
+
   /** Returns the preloaded [GeospatialEntityItem] list for [surveyId]. */
   fun entitiesForSurvey(surveyId: String): List<GeospatialEntityItem> =
+    when (surveyId) {
+      "00000036-1a1c-5c51-997f-28b67d813aa3" ->
+        MekongDeltaSampleData.relocateEntities(
+          authored = authoredEntitiesForSurvey(surveyId),
+          targetArea = BackendStaticSurveyEditorData.arushaSurveyArea(),
+        )
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
+        MekongDeltaSampleData.relocateEntities(
+          authored = authoredEntitiesForSurvey(surveyId),
+          targetArea = BackendStaticSurveyEditorData.ashantiSurveyArea(),
+        )
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
+        MekongDeltaSampleData.relocateEntities(
+          authored = authoredEntitiesForSurvey(surveyId),
+          targetArea = BackendStaticSurveyEditorData.paraSurveyArea(),
+        )
+      "00000032-8d62-5717-8074-f4917e0cd76d" ->
+        MekongDeltaSampleData.relocateEntities(
+          authored = authoredEntitiesForSurvey(surveyId),
+          targetArea = BackendStaticSurveyEditorData.kakamegaSurveyArea(),
+        )
+      GOOGLE_EARTH_SURVEY_ID -> googleEarthInterpretationPlots()
+      BackendStaticSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID ->
+        MekongDeltaSampleData.entities()
+      else -> defaultGeospatialEntities()
+    }
+
+  private fun googleEarthInterpretationPlots(): List<GeospatialEntityItem> {
+    val anchor = SurveyMapAnchor.forSurvey(GOOGLE_EARTH_SURVEY_ID)
+    fun plotCenter(nx: Double, ny: Double): LatLng = anchor.toLatLng(nx, ny)
+    fun plotPolygon(nx: Double, ny: Double) =
+      EntityShape.placeholder(GeometryType.POLYGON, plotCenter(nx, ny))
+
+    val p1Center = plotCenter(0.22, 0.22)
+    val p2Center = plotCenter(0.78, 0.22)
+    val p3Center = plotCenter(0.50, 0.50)
+    val p1Geom = plotPolygon(0.22, 0.22)
+    val p2Geom = plotPolygon(0.78, 0.22)
+    val p3Geom = plotPolygon(0.50, 0.50)
+    val p4Geom = plotPolygon(0.22, 0.78)
+    val p5Geom = plotPolygon(0.78, 0.78)
+
+    return listOf(
+      GeospatialEntityItem(
+        id = "00000041-7e4a-5b2c-9d18-3f8a61c4e901",
+        label = "PLT-GE-01 • Sebangau North Dome",
+        datasetId = "interpretation_plots",
+        datasetName = "Satellite Interpretation Sample Plots",
+        typeNoun = "Satellite Interpretation Sample Plot",
+        layerId = "layer-interpretation-plots",
+        geoId = p1Geom.computeAgStackGeoId(),
+        geometry = p1Geom,
+        areaHectares = 1.0,
+        perimeterMeters = 400,
+        colorHex = 0xFF00897B,
+        properties =
+          mapOf(
+            "status" to "Completed",
+            "marker-symbol" to "✓",
+            "marker-color" to "#1E8E3E",
+            "stroke" to "#1E8E3E",
+            "fill" to "#1E8E3E",
+            "plot_code" to "PLT-GE-01",
+            "peat_zone" to "Deep Ombrotrophic Dome (> 4m peat)",
+            "land_use_transition" to "stable_peat_forest",
+            "canopy_stratum" to "emergent",
+            "canopy_cover_pct" to "88",
+            "disturbance_drivers" to "none",
+            "deforestation_free_status" to "compliant_post_2020",
+            "imagery_acquisition_date" to "2026-08-19",
+            "interpreter_notes" to
+              "Intact closed ramin and shorea crown canopy; zero canal intrusion across 2020–2026 imagery.",
+          ),
+        submissions =
+          listOf(
+            SubmissionPreviewItem(
+              id = "00000051-7e4a-5b2c-9d18-3f8a61c4e911",
+              entityId = "00000041-7e4a-5b2c-9d18-3f8a61c4e901",
+              entityLabel = "PLT-GE-01 • Sebangau North Dome",
+              formId = "form-google-earth-interpretation",
+              formTitle = "Peatland & Canopy Change Interpretation (Google Earth)",
+              formVersion = "1",
+              collectorName = "Maya Lin",
+              collectorEmail = "maya.lin@collect-one.example.org",
+              clientUpdatedAt = Instant.parse("2026-09-24T07:20:00Z"),
+              serverUpdatedAt = Instant.parse("2026-09-24T07:21:00Z"),
+              targetTypeNoun = "Satellite Interpretation Sample Plot",
+              location = p1Center,
+              fields =
+                listOf(
+                  SubmissionFieldEntry(
+                    questionName = "land_use_transition",
+                    questionLabel = "Multi-Temporal Land-Use Transition Class",
+                    answerValue = "stable_peat_forest",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "canopy_stratum",
+                    questionLabel = "Dominant Overstory Canopy Stratum",
+                    answerValue = "emergent",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "canopy_cover_pct",
+                    questionLabel = "Estimated Live Tree Crown Cover (%)",
+                    answerValue = "88",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "disturbance_drivers",
+                    questionLabel = "Observed Disturbance & Hydrology Drivers",
+                    answerValue = "none",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "deforestation_free_status",
+                    questionLabel = "Post-2020 Deforestation-Free Assessment",
+                    answerValue = "compliant_post_2020",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "imagery_acquisition_date",
+                    questionLabel = "Latest Clear Satellite Imagery Date",
+                    answerValue = "2026-08-19",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "interpreter_notes",
+                    questionLabel = "Visual Interpretation & Historical Timeline Notes",
+                    answerValue =
+                      "Intact closed ramin and shorea crown canopy; zero canal intrusion across 2020–2026 imagery.",
+                  ),
+                ),
+            )
+          ),
+      ),
+      GeospatialEntityItem(
+        id = "00000042-7e4a-5b2c-9d18-3f8a61c4e902",
+        label = "PLT-GE-02 • Kahayan Canal Block",
+        datasetId = "interpretation_plots",
+        datasetName = "Satellite Interpretation Sample Plots",
+        typeNoun = "Satellite Interpretation Sample Plot",
+        layerId = "layer-interpretation-plots",
+        geoId = p2Geom.computeAgStackGeoId(),
+        geometry = p2Geom,
+        areaHectares = 1.0,
+        perimeterMeters = 400,
+        colorHex = 0xFF00897B,
+        properties =
+          mapOf(
+            "status" to "Completed",
+            "marker-symbol" to "✓",
+            "marker-color" to "#1E8E3E",
+            "stroke" to "#1E8E3E",
+            "fill" to "#1E8E3E",
+            "plot_code" to "PLT-GE-02",
+            "peat_zone" to "Rewetted Canal Buffer (2–4m peat)",
+            "land_use_transition" to "rewetted_restoration",
+            "canopy_stratum" to "canopy",
+            "canopy_cover_pct" to "71",
+            "disturbance_drivers" to "drainage_canal",
+            "deforestation_free_status" to "compliant_post_2020",
+            "imagery_acquisition_date" to "2026-08-19",
+            "interpreter_notes" to
+              "Legacy 2014 canal compacted by wooden check-dams; vigorous belangiran crown closure since 2021.",
+          ),
+        submissions =
+          listOf(
+            SubmissionPreviewItem(
+              id = "00000052-7e4a-5b2c-9d18-3f8a61c4e912",
+              entityId = "00000042-7e4a-5b2c-9d18-3f8a61c4e902",
+              entityLabel = "PLT-GE-02 • Kahayan Canal Block",
+              formId = "form-google-earth-interpretation",
+              formTitle = "Peatland & Canopy Change Interpretation (Google Earth)",
+              formVersion = "1",
+              collectorName = "Maya Lin",
+              collectorEmail = "maya.lin@collect-one.example.org",
+              clientUpdatedAt = Instant.parse("2026-09-24T07:45:00Z"),
+              serverUpdatedAt = Instant.parse("2026-09-24T07:46:00Z"),
+              targetTypeNoun = "Satellite Interpretation Sample Plot",
+              location = p2Center,
+              fields =
+                listOf(
+                  SubmissionFieldEntry(
+                    questionName = "land_use_transition",
+                    questionLabel = "Multi-Temporal Land-Use Transition Class",
+                    answerValue = "rewetted_restoration",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "canopy_stratum",
+                    questionLabel = "Dominant Overstory Canopy Stratum",
+                    answerValue = "canopy",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "canopy_cover_pct",
+                    questionLabel = "Estimated Live Tree Crown Cover (%)",
+                    answerValue = "71",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "disturbance_drivers",
+                    questionLabel = "Observed Disturbance & Hydrology Drivers",
+                    answerValue = "drainage_canal",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "deforestation_free_status",
+                    questionLabel = "Post-2020 Deforestation-Free Assessment",
+                    answerValue = "compliant_post_2020",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "imagery_acquisition_date",
+                    questionLabel = "Latest Clear Satellite Imagery Date",
+                    answerValue = "2026-08-19",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "interpreter_notes",
+                    questionLabel = "Visual Interpretation & Historical Timeline Notes",
+                    answerValue =
+                      "Legacy 2014 canal compacted by wooden check-dams; vigorous belangiran crown closure since 2021.",
+                  ),
+                ),
+            )
+          ),
+      ),
+      GeospatialEntityItem(
+        id = "00000043-7e4a-5b2c-9d18-3f8a61c4e903",
+        label = "PLT-GE-03 • Central Peat Core",
+        datasetId = "interpretation_plots",
+        datasetName = "Satellite Interpretation Sample Plots",
+        typeNoun = "Satellite Interpretation Sample Plot",
+        layerId = "layer-interpretation-plots",
+        geoId = p3Geom.computeAgStackGeoId(),
+        geometry = p3Geom,
+        areaHectares = 1.0,
+        perimeterMeters = 400,
+        colorHex = 0xFF00897B,
+        properties =
+          mapOf(
+            "status" to "In progress",
+            "marker-symbol" to "◐",
+            "marker-color" to "#F9AB00",
+            "stroke" to "#F9AB00",
+            "fill" to "#F9AB00",
+            "plot_code" to "PLT-GE-03",
+            "peat_zone" to "Central Transition Ridge (3–4m peat)",
+            "land_use_transition" to "selective_degradation",
+            "canopy_stratum" to "understory",
+            "canopy_cover_pct" to "46",
+            "disturbance_drivers" to "selective_logging",
+            "deforestation_free_status" to "needs_field_verification",
+            "imagery_acquisition_date" to "2026-08-19",
+            "interpreter_notes" to
+              "Thin haze over SW quadrant; narrow skidding trail visible in 2024 dry-season scene.",
+          ),
+        submissions =
+          listOf(
+            SubmissionPreviewItem(
+              id = "00000053-7e4a-5b2c-9d18-3f8a61c4e913",
+              entityId = "00000043-7e4a-5b2c-9d18-3f8a61c4e903",
+              entityLabel = "PLT-GE-03 • Central Peat Core",
+              formId = "form-google-earth-interpretation",
+              formTitle = "Peatland & Canopy Change Interpretation (Google Earth)",
+              formVersion = "1",
+              collectorName = "Maya Lin",
+              collectorEmail = "maya.lin@collect-one.example.org",
+              clientUpdatedAt = Instant.parse("2026-09-24T08:10:00Z"),
+              serverUpdatedAt = Instant.parse("2026-09-24T08:11:00Z"),
+              targetTypeNoun = "Satellite Interpretation Sample Plot",
+              location = p3Center,
+              fields =
+                listOf(
+                  SubmissionFieldEntry(
+                    questionName = "land_use_transition",
+                    questionLabel = "Multi-Temporal Land-Use Transition Class",
+                    answerValue = "selective_degradation",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "canopy_stratum",
+                    questionLabel = "Dominant Overstory Canopy Stratum",
+                    answerValue = "understory",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "canopy_cover_pct",
+                    questionLabel = "Estimated Live Tree Crown Cover (%)",
+                    answerValue = "46",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "disturbance_drivers",
+                    questionLabel = "Observed Disturbance & Hydrology Drivers",
+                    answerValue = "selective_logging",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "deforestation_free_status",
+                    questionLabel = "Post-2020 Deforestation-Free Assessment",
+                    answerValue = "needs_field_verification",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "imagery_acquisition_date",
+                    questionLabel = "Latest Clear Satellite Imagery Date",
+                    answerValue = "2026-08-19",
+                  ),
+                  SubmissionFieldEntry(
+                    questionName = "interpreter_notes",
+                    questionLabel = "Visual Interpretation & Historical Timeline Notes",
+                    answerValue =
+                      "Thin haze over SW quadrant; narrow skidding trail visible in 2024 dry-season scene.",
+                  ),
+                ),
+            )
+          ),
+      ),
+      GeospatialEntityItem(
+        id = "00000044-7e4a-5b2c-9d18-3f8a61c4e904",
+        label = "PLT-GE-04 • West Blackwater Buffer",
+        datasetId = "interpretation_plots",
+        datasetName = "Satellite Interpretation Sample Plots",
+        typeNoun = "Satellite Interpretation Sample Plot",
+        layerId = "layer-interpretation-plots",
+        geoId = p4Geom.computeAgStackGeoId(),
+        geometry = p4Geom,
+        areaHectares = 1.0,
+        perimeterMeters = 400,
+        colorHex = 0xFF00897B,
+        properties =
+          mapOf(
+            "status" to "Pending",
+            "marker-symbol" to "○",
+            "marker-color" to "#00897B",
+            "stroke" to "#00897B",
+            "fill" to "#00897B",
+            "plot_code" to "PLT-GE-04",
+            "peat_zone" to "Riparian Blackwater Swamp Margin (1–2m peat)",
+          ),
+        submissions = emptyList(),
+      ),
+      GeospatialEntityItem(
+        id = "00000045-7e4a-5b2c-9d18-3f8a61c4e905",
+        label = "PLT-GE-05 • South Drainage Margin",
+        datasetId = "interpretation_plots",
+        datasetName = "Satellite Interpretation Sample Plots",
+        typeNoun = "Satellite Interpretation Sample Plot",
+        layerId = "layer-interpretation-plots",
+        geoId = p5Geom.computeAgStackGeoId(),
+        geometry = p5Geom,
+        areaHectares = 1.0,
+        perimeterMeters = 400,
+        colorHex = 0xFF00897B,
+        properties =
+          mapOf(
+            "status" to "Pending",
+            "marker-symbol" to "○",
+            "marker-color" to "#00897B",
+            "stroke" to "#00897B",
+            "fill" to "#00897B",
+            "plot_code" to "PLT-GE-05",
+            "peat_zone" to "Southern Agricultural Frontier (1–3m peat)",
+          ),
+        submissions = emptyList(),
+      ),
+    )
+  }
+
+  internal fun authoredEntitiesForSurvey(surveyId: String): List<GeospatialEntityItem> =
     when (surveyId) {
       "00000036-1a1c-5c51-997f-28b67d813aa3" ->
         listOf(
@@ -30,14 +394,12 @@ object BackendStaticEntitiesData {
             label = "Primary Forest • -0.4182°, 36.9491°",
             datasetId = "land_use_observations",
             datasetName = "Land Use Observations",
+            typeNoun = "Land Use Observation",
             layerId = "layer-land-use-observations",
             geoId = "ENT-SPLU-01",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4182, 36.9491),
             areaHectares = 0.05,
             perimeterMeters = 25,
-            coordinatesLabel = "0.4182° S, 36.9491° E",
-            normalizedX = 0.30f,
-            normalizedY = 0.34f,
             colorHex = 0xFF2E7D32,
             properties =
               mapOf(
@@ -54,10 +416,11 @@ object BackendStaticEntitiesData {
                   formTitle = "Simple Point & Land Use Observation",
                   formVersion = "2026092401",
                   collectorName = "Maya Lin",
-                  collectorEmail = "maya.lin@ground-demo.org",
-                  timestamp = "2026-09-24 08:15 UTC",
-                  targetTypeLabel = "Land Use Observation",
-                  coordinatesLabel = "0.4182° S, 36.9491° E (±4.8m <=10m GPS)",
+                  collectorEmail = "maya.lin@demo.collect-one.example.org",
+                  clientUpdatedAt = Instant.parse("2026-09-24T08:15:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-24T08:17:00Z"),
+                  targetTypeNoun = "Land Use Observation",
+                  location = LatLng(latitude = -0.4182, longitude = 36.9491),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -84,14 +447,12 @@ object BackendStaticEntitiesData {
             label = "Agroforestry • -0.4209°, 36.9524°",
             datasetId = "land_use_observations",
             datasetName = "Land Use Observations",
+            typeNoun = "Land Use Observation",
             layerId = "layer-land-use-observations",
             geoId = "ENT-SPLU-02",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4209, 36.9524),
             areaHectares = 0.05,
             perimeterMeters = 25,
-            coordinatesLabel = "0.4209° S, 36.9524° E",
-            normalizedX = 0.54f,
-            normalizedY = 0.56f,
             colorHex = 0xFF2E7D32,
             properties =
               mapOf(
@@ -109,9 +470,10 @@ object BackendStaticEntitiesData {
                   formVersion = "2026092401",
                   collectorName = "David Kamau",
                   collectorEmail = "d.kamau@nyericoop.ke",
-                  timestamp = "2026-09-24 09:05 UTC",
-                  targetTypeLabel = "Land Use Observation",
-                  coordinatesLabel = "0.4209° S, 36.9524° E (±6.2m <=10m GPS)",
+                  clientUpdatedAt = Instant.parse("2026-09-24T09:05:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-24T09:07:00Z"),
+                  targetTypeNoun = "Land Use Observation",
+                  location = LatLng(latitude = -0.4209, longitude = 36.9524),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -138,14 +500,12 @@ object BackendStaticEntitiesData {
             label = "Wetland Riparian • -0.4168°, 36.9538°",
             datasetId = "land_use_observations",
             datasetName = "Land Use Observations",
+            typeNoun = "Land Use Observation",
             layerId = "layer-land-use-observations",
             geoId = "ENT-SPLU-03",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4168, 36.9538),
             areaHectares = 0.05,
             perimeterMeters = 25,
-            coordinatesLabel = "0.4168° S, 36.9538° E",
-            normalizedX = 0.68f,
-            normalizedY = 0.30f,
             colorHex = 0xFF2E7D32,
             properties =
               mapOf(
@@ -163,9 +523,10 @@ object BackendStaticEntitiesData {
                   formVersion = "2026092401",
                   collectorName = "Grace Wanjiku",
                   collectorEmail = "g.wanjiku@nyericoop.ke",
-                  timestamp = "2026-09-24 09:42 UTC",
-                  targetTypeLabel = "Land Use Observation",
-                  coordinatesLabel = "0.4168° S, 36.9538° E (±5.1m <=10m GPS)",
+                  clientUpdatedAt = Instant.parse("2026-09-24T09:42:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-24T09:44:00Z"),
+                  targetTypeNoun = "Land Use Observation",
+                  location = LatLng(latitude = -0.4168, longitude = 36.9538),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -195,14 +556,12 @@ object BackendStaticEntitiesData {
             label = "Cocoa • EUDR-GH-0419",
             datasetId = "commodity_plots",
             datasetName = "Commodity Plots",
+            typeNoun = "Commodity Plot",
             layerId = "layer-commodity-plots",
             geoId = "EUDR-GH-0419",
-            geometryTypeLabel = "Polygon",
+            geometry = SeedGeometry.square(-0.4194, 36.9510, areaHectares = 1.42),
             areaHectares = 1.42,
             perimeterMeters = 512,
-            coordinatesLabel = "0.4194° S, 36.9510° E",
-            normalizedX = 0.31f,
-            normalizedY = 0.35f,
             colorHex = 0xFFD84315,
             properties =
               mapOf(
@@ -226,10 +585,11 @@ object BackendStaticEntitiesData {
                   formTitle = "Commodity Plot Perimeter & Center Mapping",
                   formVersion = "2026092401",
                   collectorName = "Maya Lin",
-                  collectorEmail = "maya.lin@ground-demo.org",
-                  timestamp = "2026-09-24 08:30 UTC",
-                  targetTypeLabel = "Commodity Plot",
-                  coordinatesLabel = "Center: 0.41935° S, 36.95100° E (±2.4m <=5m GPS, No Pan)",
+                  collectorEmail = "maya.lin@demo.collect-one.example.org",
+                  clientUpdatedAt = Instant.parse("2026-09-24T08:30:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-24T08:32:00Z"),
+                  targetTypeNoun = "Commodity Plot",
+                  location = LatLng(latitude = -0.41935, longitude = 36.951),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -273,14 +633,12 @@ object BackendStaticEntitiesData {
             label = "Coffee • EUDR-GH-0422",
             datasetId = "commodity_plots",
             datasetName = "Commodity Plots",
+            typeNoun = "Commodity Plot",
             layerId = "layer-commodity-plots",
             geoId = "EUDR-GH-0422",
-            geometryTypeLabel = "Polygon",
+            geometry = SeedGeometry.square(-0.4211, 36.9487, areaHectares = 0.95),
             areaHectares = 0.95,
             perimeterMeters = 380,
-            coordinatesLabel = "0.4211° S, 36.9487° E",
-            normalizedX = 0.56f,
-            normalizedY = 0.52f,
             colorHex = 0xFFD84315,
             properties =
               mapOf(
@@ -304,9 +662,10 @@ object BackendStaticEntitiesData {
                   formVersion = "2026092401",
                   collectorName = "Samuel Kariuki",
                   collectorEmail = "s.kariuki@nyericoop.ke",
-                  timestamp = "2026-09-24 09:25 UTC",
-                  targetTypeLabel = "Commodity Plot",
-                  coordinatesLabel = "Center: 0.42110° S, 36.94870° E (±3.1m <=5m GPS, No Pan)",
+                  clientUpdatedAt = Instant.parse("2026-09-24T09:25:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-24T09:27:00Z"),
+                  targetTypeNoun = "Commodity Plot",
+                  location = LatLng(latitude = -0.4211, longitude = 36.9487),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -343,14 +702,12 @@ object BackendStaticEntitiesData {
             label = "Rubber • EUDR-GH-0428",
             datasetId = "commodity_plots",
             datasetName = "Commodity Plots",
+            typeNoun = "Commodity Plot",
             layerId = "layer-commodity-plots",
             geoId = "EUDR-GH-0428",
-            geometryTypeLabel = "Polygon",
+            geometry = SeedGeometry.square(-0.4176, 36.9532, areaHectares = 2.18),
             areaHectares = 2.18,
             perimeterMeters = 640,
-            coordinatesLabel = "0.4176° S, 36.9532° E",
-            normalizedX = 0.69f,
-            normalizedY = 0.29f,
             colorHex = 0xFFD84315,
             properties =
               mapOf(
@@ -373,9 +730,10 @@ object BackendStaticEntitiesData {
                   formVersion = "2026092401",
                   collectorName = "David Kamau",
                   collectorEmail = "d.kamau@nyericoop.ke",
-                  timestamp = "2026-09-24 10:12 UTC",
-                  targetTypeLabel = "Commodity Plot",
-                  coordinatesLabel = "Center: 0.41760° S, 36.95320° E (±4.2m <=5m GPS, No Pan)",
+                  clientUpdatedAt = Instant.parse("2026-09-24T10:12:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-24T10:14:00Z"),
+                  targetTypeNoun = "Commodity Plot",
+                  location = LatLng(latitude = -0.4176, longitude = 36.9532),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -411,14 +769,12 @@ object BackendStaticEntitiesData {
             label = "Plot SP-01 • Upper Montane Buffer",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
+            typeNoun = "Permanent Forest Sample Plot",
             layerId = "layer-sample-plots",
             geoId = "SP-01-MONTANE",
-            geometryTypeLabel = "Polygon",
+            geometry = SeedGeometry.square(-0.4182, 36.9491, areaHectares = 0.13),
             areaHectares = 0.13,
             perimeterMeters = 126,
-            coordinatesLabel = "0.4182° S, 36.9491° E",
-            normalizedX = 0.30f,
-            normalizedY = 0.34f,
             colorHex = 0xFF1B5E20,
             properties =
               mapOf(
@@ -442,10 +798,11 @@ object BackendStaticEntitiesData {
                   formTitle = "Sample Plot Entity & Forest Stand Assessment",
                   formVersion = "2026092401",
                   collectorName = "Maya Lin",
-                  collectorEmail = "maya.lin@ground-demo.org",
-                  timestamp = "2026-09-23 09:20 UTC",
-                  targetTypeLabel = "Sample Plot",
-                  coordinatesLabel = "0.4182° S, 36.9491° E",
+                  collectorEmail = "maya.lin@demo.collect-one.example.org",
+                  clientUpdatedAt = Instant.parse("2026-09-23T09:20:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-23T09:22:00Z"),
+                  targetTypeNoun = "Sample Plot",
+                  location = LatLng(latitude = -0.4182, longitude = 36.9491),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -498,14 +855,12 @@ object BackendStaticEntitiesData {
             label = "Plot SP-02 • Riparian Gallery Transect",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
+            typeNoun = "Permanent Forest Sample Plot",
             layerId = "layer-sample-plots",
             geoId = "SP-02-RIPARIAN",
-            geometryTypeLabel = "Polygon",
+            geometry = SeedGeometry.square(-0.4196, 36.9522, areaHectares = 0.13),
             areaHectares = 0.13,
             perimeterMeters = 126,
-            coordinatesLabel = "0.4196° S, 36.9522° E",
-            normalizedX = 0.56f,
-            normalizedY = 0.42f,
             colorHex = 0xFF1B5E20,
             properties =
               mapOf(
@@ -530,9 +885,10 @@ object BackendStaticEntitiesData {
                   formVersion = "2026092401",
                   collectorName = "Samuel Kariuki",
                   collectorEmail = "s.kariuki@nyericoop.ke",
-                  timestamp = "2026-09-23 11:05 UTC",
-                  targetTypeLabel = "Sample Plot",
-                  coordinatesLabel = "0.4196° S, 36.9522° E",
+                  clientUpdatedAt = Instant.parse("2026-09-23T11:05:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-23T11:07:00Z"),
+                  targetTypeNoun = "Sample Plot",
+                  location = LatLng(latitude = -0.4196, longitude = 36.9522),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -575,14 +931,12 @@ object BackendStaticEntitiesData {
             label = "Plot SP-03 • Shade Agroforestry Core",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
+            typeNoun = "Permanent Forest Sample Plot",
             layerId = "layer-sample-plots",
             geoId = "SP-03-AGROFOREST",
-            geometryTypeLabel = "Polygon",
+            geometry = SeedGeometry.square(-0.4214, 36.9484, areaHectares = 0.13),
             areaHectares = 0.13,
             perimeterMeters = 126,
-            coordinatesLabel = "0.4214° S, 36.9484° E",
-            normalizedX = 0.26f,
-            normalizedY = 0.62f,
             colorHex = 0xFF1B5E20,
             properties =
               mapOf(
@@ -606,10 +960,11 @@ object BackendStaticEntitiesData {
                   formTitle = "Sample Plot Entity & Forest Stand Assessment",
                   formVersion = "2026092401",
                   collectorName = "Maya Lin",
-                  collectorEmail = "maya.lin@ground-demo.org",
-                  timestamp = "2026-09-24 07:50 UTC",
-                  targetTypeLabel = "Sample Plot",
-                  coordinatesLabel = "0.4214° S, 36.9484° E",
+                  collectorEmail = "maya.lin@demo.collect-one.example.org",
+                  clientUpdatedAt = Instant.parse("2026-09-24T07:50:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-24T07:52:00Z"),
+                  targetTypeNoun = "Sample Plot",
+                  location = LatLng(latitude = -0.4214, longitude = 36.9484),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -647,14 +1002,12 @@ object BackendStaticEntitiesData {
             label = "Plot SP-04 • Community Forest Edge",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
+            typeNoun = "Permanent Forest Sample Plot",
             layerId = "layer-sample-plots",
             geoId = "SP-04-EDGE",
-            geometryTypeLabel = "Polygon",
+            geometry = SeedGeometry.square(-0.4172, 36.9541, areaHectares = 0.13),
             areaHectares = 0.13,
             perimeterMeters = 126,
-            coordinatesLabel = "0.4172° S, 36.9541° E",
-            normalizedX = 0.72f,
-            normalizedY = 0.28f,
             colorHex = 0xFF1B5E20,
             properties =
               mapOf(
@@ -675,14 +1028,12 @@ object BackendStaticEntitiesData {
             label = "Plot SP-05 • Ridge Benchmark Control",
             datasetId = "sample_plots",
             datasetName = "Permanent Forest Sample Plots",
+            typeNoun = "Permanent Forest Sample Plot",
             layerId = "layer-sample-plots",
             geoId = "SP-05-BENCHMARK",
-            geometryTypeLabel = "Polygon",
+            geometry = SeedGeometry.square(-0.4228, 36.9535, areaHectares = 0.13),
             areaHectares = 0.13,
             perimeterMeters = 126,
-            coordinatesLabel = "0.4228° S, 36.9535° E",
-            normalizedX = 0.68f,
-            normalizedY = 0.68f,
             colorHex = 0xFF1B5E20,
             properties =
               mapOf(
@@ -706,14 +1057,12 @@ object BackendStaticEntitiesData {
             label = "IND-101 • Amina Wanjiku (HH-KAK-014, Head)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
+            typeNoun = "Preloaded Past Household Individual",
             layerId = "layer-past-individuals",
             geoId = "IND-101-KAK014",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4184, 36.9495),
             areaHectares = 0.0,
             perimeterMeters = 0,
-            coordinatesLabel = "0.4184° S, 36.9495° E",
-            normalizedX = 0.32f,
-            normalizedY = 0.36f,
             colorHex = 0xFF6A1B9A,
             properties =
               mapOf(
@@ -739,9 +1088,10 @@ object BackendStaticEntitiesData {
                   formVersion = "2026092401",
                   collectorName = "Grace Wanjiku",
                   collectorEmail = "g.wanjiku@nyericoop.ke",
-                  timestamp = "2026-09-23 14:10 UTC",
-                  targetTypeLabel = "Past Individual",
-                  coordinatesLabel = "0.4184° S, 36.9495° E",
+                  clientUpdatedAt = Instant.parse("2026-09-23T14:10:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-23T14:12:00Z"),
+                  targetTypeNoun = "Past Individual",
+                  location = LatLng(latitude = -0.4184, longitude = 36.9495),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -779,14 +1129,12 @@ object BackendStaticEntitiesData {
             label = "IND-102 • Samuel Ochieng (HH-KAK-014, Spouse)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
+            typeNoun = "Preloaded Past Household Individual",
             layerId = "layer-past-individuals",
             geoId = "IND-102-KAK014",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4187, 36.9501),
             areaHectares = 0.0,
             perimeterMeters = 0,
-            coordinatesLabel = "0.4187° S, 36.9501° E",
-            normalizedX = 0.38f,
-            normalizedY = 0.39f,
             colorHex = 0xFF6A1B9A,
             properties =
               mapOf(
@@ -812,9 +1160,10 @@ object BackendStaticEntitiesData {
                   formVersion = "2026092401",
                   collectorName = "Grace Wanjiku",
                   collectorEmail = "g.wanjiku@nyericoop.ke",
-                  timestamp = "2026-09-23 14:28 UTC",
-                  targetTypeLabel = "Past Individual",
-                  coordinatesLabel = "0.4187° S, 36.9501° E",
+                  clientUpdatedAt = Instant.parse("2026-09-23T14:28:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-23T14:30:00Z"),
+                  targetTypeNoun = "Past Individual",
+                  location = LatLng(latitude = -0.4187, longitude = 36.9501),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -842,14 +1191,12 @@ object BackendStaticEntitiesData {
             label = "IND-103 • Grace Atieno (HH-KAK-022, Head)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
+            typeNoun = "Preloaded Past Household Individual",
             layerId = "layer-past-individuals",
             geoId = "IND-103-KAK022",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4202, 36.9526),
             areaHectares = 0.0,
             perimeterMeters = 0,
-            coordinatesLabel = "0.4202° S, 36.9526° E",
-            normalizedX = 0.58f,
-            normalizedY = 0.48f,
             colorHex = 0xFF6A1B9A,
             properties =
               mapOf(
@@ -874,10 +1221,11 @@ object BackendStaticEntitiesData {
                   formTitle = "Household Follow-Up Survey (Past Individuals)",
                   formVersion = "2026092401",
                   collectorName = "Maya Lin",
-                  collectorEmail = "maya.lin@ground-demo.org",
-                  timestamp = "2026-09-23 15:40 UTC",
-                  targetTypeLabel = "Past Individual",
-                  coordinatesLabel = "0.4202° S, 36.9526° E",
+                  collectorEmail = "maya.lin@demo.collect-one.example.org",
+                  clientUpdatedAt = Instant.parse("2026-09-23T15:40:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-23T15:42:00Z"),
+                  targetTypeNoun = "Past Individual",
+                  location = LatLng(latitude = -0.4202, longitude = 36.9526),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -905,14 +1253,12 @@ object BackendStaticEntitiesData {
             label = "IND-104 • David Barasa (HH-KAK-014, Child)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
+            typeNoun = "Preloaded Past Household Individual",
             layerId = "layer-past-individuals",
             geoId = "IND-104-KAK014",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4215, 36.9488),
             areaHectares = 0.0,
             perimeterMeters = 0,
-            coordinatesLabel = "0.4215° S, 36.9488° E",
-            normalizedX = 0.29f,
-            normalizedY = 0.61f,
             colorHex = 0xFF6A1B9A,
             properties =
               mapOf(
@@ -937,10 +1283,11 @@ object BackendStaticEntitiesData {
                   formTitle = "Household Follow-Up Survey (Past Individuals)",
                   formVersion = "2026092401",
                   collectorName = "Maya Lin",
-                  collectorEmail = "maya.lin@ground-demo.org",
-                  timestamp = "2026-09-24 08:10 UTC",
-                  targetTypeLabel = "Past Individual",
-                  coordinatesLabel = "0.4215° S, 36.9488° E",
+                  collectorEmail = "maya.lin@demo.collect-one.example.org",
+                  clientUpdatedAt = Instant.parse("2026-09-24T08:10:00Z"),
+                  serverUpdatedAt = Instant.parse("2026-09-24T08:12:00Z"),
+                  targetTypeNoun = "Past Individual",
+                  location = LatLng(latitude = -0.4215, longitude = 36.9488),
                   fields =
                     listOf(
                       SubmissionFieldEntry(
@@ -968,14 +1315,12 @@ object BackendStaticEntitiesData {
             label = "IND-105 • Esther Nekesa (HH-KAK-031, Head)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
+            typeNoun = "Preloaded Past Household Individual",
             layerId = "layer-past-individuals",
             geoId = "IND-105-KAK031",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4174, 36.9539),
             areaHectares = 0.0,
             perimeterMeters = 0,
-            coordinatesLabel = "0.4174° S, 36.9539° E",
-            normalizedX = 0.70f,
-            normalizedY = 0.30f,
             colorHex = 0xFF6A1B9A,
             properties =
               mapOf(
@@ -997,14 +1342,12 @@ object BackendStaticEntitiesData {
             label = "IND-106 • Peter Wafula (HH-KAK-039, Head)",
             datasetId = "past_individuals",
             datasetName = "Preloaded Past Household Individuals",
+            typeNoun = "Preloaded Past Household Individual",
             layerId = "layer-past-individuals",
             geoId = "IND-106-KAK039",
-            geometryTypeLabel = "Point",
+            geometry = SeedGeometry.point(-0.4226, 36.9532),
             areaHectares = 0.0,
             perimeterMeters = 0,
-            coordinatesLabel = "0.4226° S, 36.9532° E",
-            normalizedX = 0.66f,
-            normalizedY = 0.66f,
             colorHex = 0xFF6A1B9A,
             properties =
               mapOf(
@@ -1022,6 +1365,8 @@ object BackendStaticEntitiesData {
             submissions = emptyList(),
           ),
         )
+      BackendStaticSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID ->
+        MekongDeltaSampleData.entities()
       else -> defaultGeospatialEntities()
     }
 
@@ -1043,14 +1388,12 @@ object BackendStaticEntitiesData {
         label = "Plot NYR-104 • Kamau Family Parcel",
         datasetId = "coffee_parcels",
         datasetName = "Smallholder Coffee Parcels",
+        typeNoun = "Coffee Parcel",
         layerId = "layer-coffee-parcels",
         geoId = "S2-10c4a89e2f",
-        geometryTypeLabel = "Polygon",
+        geometry = SeedGeometry.square(-0.4182, 36.9481, areaHectares = 1.84),
         areaHectares = 1.84,
         perimeterMeters = 542,
-        coordinatesLabel = "0.4182°S, 36.9481°E",
-        normalizedX = 0.28f,
-        normalizedY = 0.32f,
         colorHex = 0xFF2E7D32,
         properties =
           mapOf(
@@ -1079,9 +1422,10 @@ object BackendStaticEntitiesData {
               formTitle = "EUDR Parcel Baseline Registration",
               formVersion = "v2026.09.1",
               collectorName = "Maya Lin",
-              collectorEmail = "maya.lin@groundplatform.org",
-              timestamp = "2026-09-18 10:14 UTC",
-              targetTypeLabel = "Coffee Parcel",
+              collectorEmail = "maya.lin@collect-one.example.org",
+              clientUpdatedAt = Instant.parse("2026-09-18T10:14:00Z"),
+              serverUpdatedAt = Instant.parse("2026-09-18T10:16:00Z"),
+              targetTypeNoun = "Coffee Parcel",
               fields =
                 listOf(
                   SubmissionFieldEntry(
@@ -1124,14 +1468,12 @@ object BackendStaticEntitiesData {
         label = "Transect SHD-201 • Chinga North Agroforestry",
         datasetId = "shade_monitoring_plots",
         datasetName = "Shade Tree Monitoring Plots",
+        typeNoun = "Shade Tree Monitoring Plot",
         layerId = "layer-shade-transects",
         geoId = "S2-10c4b12d9a",
-        geometryTypeLabel = "LineString",
+        geometry = SeedGeometry.transect(-0.4245, 36.9560, lengthMeters = 738),
         areaHectares = 3.12,
         perimeterMeters = 738,
-        coordinatesLabel = "0.4245°S, 36.9560°E",
-        normalizedX = 0.65f,
-        normalizedY = 0.29f,
         colorHex = 0xFF1565C0,
         properties =
           mapOf(
@@ -1156,9 +1498,10 @@ object BackendStaticEntitiesData {
               formTitle = "Seasonal Shade Tree & Canopy Audit",
               formVersion = "v2026.09.2",
               collectorName = "Maya Lin",
-              collectorEmail = "maya.lin@groundplatform.org",
-              timestamp = "2026-09-19 08:45 UTC",
-              targetTypeLabel = "Shade Tree Monitoring Plot",
+              collectorEmail = "maya.lin@collect-one.example.org",
+              clientUpdatedAt = Instant.parse("2026-09-19T08:45:00Z"),
+              serverUpdatedAt = Instant.parse("2026-09-19T08:47:00Z"),
+              targetTypeNoun = "Shade Tree Monitoring Plot",
               syncStatus = SyncStatus.UPLOADING,
               fields =
                 listOf(
@@ -1198,8 +1541,9 @@ object BackendStaticEntitiesData {
               formVersion = "v2026.06.0",
               collectorName = "Samuel Kariuki",
               collectorEmail = "s.kariuki@kenyaforestry.org",
-              timestamp = "2026-06-14 14:20 UTC",
-              targetTypeLabel = "Shade Tree Monitoring Plot",
+              clientUpdatedAt = Instant.parse("2026-06-14T14:20:00Z"),
+              serverUpdatedAt = Instant.parse("2026-06-14T14:22:00Z"),
+              targetTypeNoun = "Shade Tree Monitoring Plot",
               syncStatus = SyncStatus.SYNCED,
               fields =
                 listOf(
@@ -1229,8 +1573,9 @@ object BackendStaticEntitiesData {
               formVersion = "v2026.03.1",
               collectorName = "Grace Wanjiku",
               collectorEmail = "g.wanjiku@kenyaforestry.org",
-              timestamp = "2026-03-08 11:05 UTC",
-              targetTypeLabel = "Shade Tree Monitoring Plot",
+              clientUpdatedAt = Instant.parse("2026-03-08T11:05:00Z"),
+              serverUpdatedAt = Instant.parse("2026-03-08T11:07:00Z"),
+              targetTypeNoun = "Shade Tree Monitoring Plot",
               syncStatus = SyncStatus.SYNCED,
               fields =
                 listOf(
@@ -1255,14 +1600,12 @@ object BackendStaticEntitiesData {
         label = "Plot NYR-108 • Njeri Cooperative Block B",
         datasetId = "coffee_parcels",
         datasetName = "Smallholder Coffee Parcels",
+        typeNoun = "Coffee Parcel",
         layerId = "layer-coffee-parcels",
         geoId = "S2-10c4a91c04",
-        geometryTypeLabel = "Polygon",
+        geometry = SeedGeometry.square(-0.4290, 36.9442, areaHectares = 2.45),
         areaHectares = 2.45,
         perimeterMeters = 615,
-        coordinatesLabel = "0.4290°S, 36.9442°E",
-        normalizedX = 0.34f,
-        normalizedY = 0.64f,
         colorHex = 0xFF2E7D32,
         properties =
           mapOf(
@@ -1292,8 +1635,9 @@ object BackendStaticEntitiesData {
               formVersion = "v2026.09.1",
               collectorName = "Samuel Kariuki",
               collectorEmail = "s.kariuki@kenyaforestry.org",
-              timestamp = "2026-09-17 16:02 UTC",
-              targetTypeLabel = "Coffee Parcel",
+              clientUpdatedAt = Instant.parse("2026-09-17T16:02:00Z"),
+              serverUpdatedAt = Instant.parse("2026-09-17T16:04:00Z"),
+              targetTypeNoun = "Coffee Parcel",
               syncStatus = SyncStatus.UPLOADING,
               fields =
                 listOf(
@@ -1328,14 +1672,12 @@ object BackendStaticEntitiesData {
         label = "Plot NYR-112 • Kariuki Hillside Parcel",
         datasetId = "coffee_parcels",
         datasetName = "Smallholder Coffee Parcels",
+        typeNoun = "Coffee Parcel",
         layerId = "layer-coffee-parcels",
         geoId = "S2-10c4a98e7b",
-        geometryTypeLabel = "Polygon",
+        geometry = SeedGeometry.square(-0.4150, 36.9585, areaHectares = 1.56),
         areaHectares = 1.56,
         perimeterMeters = 498,
-        coordinatesLabel = "0.4150°S, 36.9585°E",
-        normalizedX = 0.24f,
-        normalizedY = 0.80f,
         colorHex = 0xFF2E7D32,
         properties =
           mapOf(
@@ -1363,14 +1705,12 @@ object BackendStaticEntitiesData {
         label = "Station WSH-01 • Gura River Wet Mill",
         datasetId = "washing_stations",
         datasetName = "Cooperative Washing Stations",
+        typeNoun = "Cooperative Washing Station",
         layerId = "layer-water-points",
         geoId = "S2-10c4a77f11",
-        geometryTypeLabel = "Point",
+        geometry = SeedGeometry.point(-0.4212, 36.9518),
         areaHectares = 0.15,
         perimeterMeters = 160,
-        coordinatesLabel = "0.4212°S, 36.9518°E",
-        normalizedX = 0.72f,
-        normalizedY = 0.62f,
         colorHex = 0xFFEF6C00,
         properties =
           mapOf(
@@ -1393,9 +1733,10 @@ object BackendStaticEntitiesData {
               formTitle = "Washing Station Effluent & Water Check",
               formVersion = "v2026.08.4",
               collectorName = "Maya Lin",
-              collectorEmail = "maya.lin@groundplatform.org",
-              timestamp = "2026-09-18 17:30 UTC",
-              targetTypeLabel = "Cooperative Washing Station",
+              collectorEmail = "maya.lin@collect-one.example.org",
+              clientUpdatedAt = Instant.parse("2026-09-18T17:30:00Z"),
+              serverUpdatedAt = Instant.parse("2026-09-18T17:32:00Z"),
+              targetTypeNoun = "Cooperative Washing Station",
               syncStatus = SyncStatus.FAILED,
               fields =
                 listOf(
@@ -1425,8 +1766,9 @@ object BackendStaticEntitiesData {
               formVersion = "v2026.08.4",
               collectorName = "Grace Wanjiku",
               collectorEmail = "g.wanjiku@kenyaforestry.org",
-              timestamp = "2026-08-22 09:50 UTC",
-              targetTypeLabel = "Cooperative Washing Station",
+              clientUpdatedAt = Instant.parse("2026-08-22T09:50:00Z"),
+              serverUpdatedAt = Instant.parse("2026-08-22T09:52:00Z"),
+              targetTypeNoun = "Cooperative Washing Station",
               fields =
                 listOf(
                   SubmissionFieldEntry(

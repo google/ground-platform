@@ -1,0 +1,151 @@
+{
+  "formId": "f",
+  "metadata": {
+    "instanceId": "uuid:1",
+    "startTime": "1970-01-01T00:00:00Z",
+    "endTime": "1969-12-31T23:59:59.000000500Z",
+    "today": "2026-02-03",
+    "auditConfig": {
+      "enabled": true,
+      "locationPriority": "high"
+    }
+  },
+  "data": {
+    "s": "say \"hi\" \\ back\nslash\ttab ünïcødé 🌳",
+    "temporal": {
+      "string": "2026-01-02"
+    },
+    "empty": "",
+    "i32": 0,
+    "i64small": {
+      "int64": "5"
+    },
+    "i64mid": 3000000000,
+    "i64big": {
+      "int64": "9223372036854775807"
+    },
+    "d": 1.0,
+    "dneg0": -0.0,
+    "dnan": "NaN",
+    "dinf": "-Infinity",
+    "dexp": 1.0E-7,
+    "b": false,
+    "date": "2026-01-02",
+    "time": "01:02:03.004",
+    "time_ns": "23:00:00.000000005",
+    "ts": "2026-09-18T12:10:15.123456789Z",
+    "gp": [
+      1.5,
+      -2.0
+    ],
+    "gp_acc": [
+      1.0,
+      2.0,
+      0.0,
+      3.0
+    ],
+    "gp_alt": [
+      0.0,
+      0.0,
+      7.0
+    ],
+    "bin": {
+      "base64": "AP8KImE="
+    },
+    "trace": [
+      [
+        1.0,
+        2.0
+      ],
+      [
+        3.0,
+        4.0
+      ]
+    ],
+    "trace_closed": {
+      "geotrace": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "shape": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        1.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "shape_open": {
+      "geoshape": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ]
+    },
+    "shape_empty": {
+      "geoshape": []
+    },
+    "list": [
+      "a",
+      1
+    ],
+    "list_empty": [],
+    "group": {
+      "x": true
+    },
+    "repeat": [
+      {
+        "n": 1
+      },
+      {}
+    ],
+    "repeat_empty": []
+  },
+  "auditLog": {
+    "events": [
+      {
+        "event": "e",
+        "startTime": "1970-01-01T00:00:10Z",
+        "location": [
+          0.0,
+          0.0
+        ]
+      },
+      {}
+    ]
+  }
+}

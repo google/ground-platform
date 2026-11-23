@@ -16,6 +16,7 @@ package org.openforis.collectone.v2.map
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import kotlin.math.roundToInt
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -34,20 +35,23 @@ import kotlinx.serialization.json.putJsonObject
  */
 internal object MapboxStyleSpec {
   /** Source and layers the renderer draws [MapContent.userLocation] with, above all content. */
-  const val USER_LOCATION_SOURCE = "ground-map-user-location"
-  const val USER_LOCATION_HALO_LAYER = "ground-map-user-location-halo"
-  const val USER_LOCATION_DOT_LAYER = "ground-map-user-location-dot"
+  const val USER_LOCATION_SOURCE = "app-map-user-location"
+  const val USER_LOCATION_HALO_LAYER = "app-map-user-location-halo"
+  const val USER_LOCATION_DOT_LAYER = "app-map-user-location-dot"
 
   /** Property that carries [MapFeature.id]; SDKs only keep numeric GeoJSON feature ids. */
   const val FEATURE_ID_PROPERTY = "__id"
+
+  /** The highest layer `maxzoom` the Style Specification allows, its default. */
+  private const val MAX_LAYER_ZOOM = 24
 
   /**
    * What to pass to the SDK's style loader for [basemap]: the style URL of a [Basemap.MapboxStyle],
    * otherwise style JSON. Every Mapbox SDK accepts either; JSON always starts with `{`.
    *
    * The style has no content or user-location layers. After each style load, renderers add
-   * [userLocationSource] and [userLocationLayers], then insert content layers below
-   * [USER_LOCATION_HALO_LAYER].
+   * [overlays] (for a [Basemap.MapboxStyle]), then [userLocationSource] and [userLocationLayers],
+   * then insert content layers below [USER_LOCATION_HALO_LAYER].
    */
   fun style(basemap: Basemap): String =
     when (basemap) {
@@ -60,7 +64,7 @@ internal object MapboxStyleSpec {
   fun styleJson(basemap: Basemap): JsonObject = buildJsonObject {
     val tiles = (basemap as? Basemap.RasterTiles)?.layers.orEmpty()
     put("version", 8)
-    put("name", "Ground basemap")
+    put("name", "Collect One basemap")
     // Only fetched when a symbol layer draws text; resolved with the SDK's access token.
     put("glyphs", "mapbox://fonts/mapbox/{fontstack}/{range}.pbf")
     putJsonObject("sources") {
@@ -69,7 +73,7 @@ internal object MapboxStyleSpec {
     putJsonArray("layers") {
       add(
         buildJsonObject {
-          put("id", "ground-map-background")
+          put("id", "app-map-background")
           put("type", "background")
           putJsonObject("paint") { put("background-color", color(basemap.backgroundColor)) }
         }
@@ -291,17 +295,42 @@ internal object MapboxStyleSpec {
   }
 
   private fun geometry(geometry: Geometry) = buildJsonObject {
-    put("type", geometryTypeName(geometry.type))
     when (geometry) {
-      is Geometry.Point -> put("coordinates", position(geometry.position))
-      is Geometry.LineString ->
-        putJsonArray("coordinates") { geometry.points.forEach { add(position(it)) } }
-      is Geometry.Polygon ->
-        putJsonArray("coordinates") {
-          geometry.rings.forEach { ring ->
-            addJsonArray { (ring + ring.first()).forEach { add(position(it)) } }
-          }
-        }
+      is Geometry.Point -> {
+        put("type", "Point")
+        put("coordinates", position(geometry.position))
+      }
+      is Geometry.LineString -> {
+        put("type", "LineString")
+        put("coordinates", line(geometry))
+      }
+      is Geometry.Polygon -> {
+        put("type", "Polygon")
+        put("coordinates", rings(geometry))
+      }
+      is Geometry.MultiPoint -> {
+        put("type", "MultiPoint")
+        putJsonArray("coordinates") { geometry.parts.forEach { add(position(it.position)) } }
+      }
+      is Geometry.MultiLineString -> {
+        put("type", "MultiLineString")
+        putJsonArray("coordinates") { geometry.parts.forEach { add(line(it)) } }
+      }
+      is Geometry.MultiPolygon -> {
+        put("type", "MultiPolygon")
+        putJsonArray("coordinates") { geometry.parts.forEach { add(rings(it)) } }
+      }
+    }
+  }
+
+  private fun line(line: Geometry.LineString) = buildJsonArray {
+    line.points.forEach { add(position(it)) }
+  }
+
+  /** GeoJSON closes polygon rings by repeating their first position (RFC 7946 section 3.1.6). */
+  private fun rings(polygon: Geometry.Polygon) = buildJsonArray {
+    polygon.rings.forEach { ring ->
+      addJsonArray { (ring + ring.first()).forEach { add(position(it)) } }
     }
   }
 
@@ -310,13 +339,37 @@ internal object MapboxStyleSpec {
     add(p.latitude)
   }
 
-  private fun rasterSourceId(index: Int) = "ground-map-raster-$index"
+  private fun rasterSourceId(index: Int) = "app-map-raster-$index"
+
+  /** One overlay of a [Basemap.MapboxStyle]: its source id and JSON, and its layer JSON. */
+  data class Overlay(val sourceId: String, val source: JsonObject, val layer: JsonObject)
+
+  /**
+   * The [Basemap.MapboxStyle.overlays] of [basemap] as sources and layers, bottom to top, for
+   * renderers to add after the style loads. Empty for other basemaps, whose style JSON already has
+   * its raster layers.
+   */
+  fun overlays(basemap: Basemap): List<Overlay> =
+    (basemap as? Basemap.MapboxStyle)?.overlays.orEmpty().mapIndexed { i, overlay ->
+      val id = "app-map-overlay-$i"
+      when (overlay) {
+        is RasterTileLayer -> Overlay(id, rasterSource(overlay), rasterLayer(id, overlay))
+        is VectorLineOverlay -> Overlay(id, vectorSource(overlay), vectorLineLayer(id, overlay))
+      }
+    }
 
   private fun rasterSource(tile: RasterTileLayer) = buildJsonObject {
     put("type", "raster")
-    putJsonArray("tiles") { add(tile.urlTemplate) }
+    val tilesetUrl = tile.tilesetUrl
+    if (tilesetUrl.isNullOrBlank()) {
+      putJsonArray("tiles") { add(tile.urlTemplate) }
+    } else {
+      put("url", tilesetUrl)
+    }
     put("tileSize", tile.tileSize)
+    if (tile.minZoom > 0) put("minzoom", tile.minZoom)
     put("maxzoom", tile.maxZoom)
+    tile.bounds?.let { put("bounds", bounds(it)) }
   }
 
   private fun rasterLayer(source: String, tile: RasterTileLayer) = buildJsonObject {
@@ -328,6 +381,66 @@ internal object MapboxStyleSpec {
       put("raster-contrast", tile.contrast)
       put("raster-saturation", tile.saturation)
     }
+  }
+
+  /**
+   * The zoom range stays on the layer rather than the source: a source `maxzoom` would override the
+   * tileset's own and request tiles it doesn't have.
+   */
+  private fun vectorSource(overlay: VectorLineOverlay) = buildJsonObject {
+    put("type", "vector")
+    put("url", overlay.tilesetUrl)
+    overlay.bounds?.let { put("bounds", bounds(it)) }
+  }
+
+  private fun vectorLineLayer(source: String, overlay: VectorLineOverlay) = buildJsonObject {
+    put("id", source)
+    put("type", "line")
+    put("source", source)
+    put("source-layer", overlay.sourceLayer)
+    if (overlay.minZoom > 0) put("minzoom", overlay.minZoom)
+    if (overlay.maxZoom < MAX_LAYER_ZOOM) put("maxzoom", overlay.maxZoom)
+    overlay.filter?.let { put("filter", vectorFilter(it)) }
+    putJsonObject("paint") {
+      put("line-color", color(overlay.color))
+      val emphasis = overlay.emphasis
+      if (emphasis == null) {
+        put("line-width", dp(overlay.width))
+      } else {
+        putJsonArray("line-width") {
+          add("case")
+          add(vectorFilter(emphasis.filter))
+          add(dp(emphasis.width))
+          add(dp(overlay.width))
+        }
+      }
+      put("line-opacity", overlay.opacity)
+    }
+  }
+
+  /** A `match` filter expression; numeric labels must be integers in Mapbox GL JS. */
+  private fun vectorFilter(filter: VectorFeatureFilter): JsonElement {
+    val labels =
+      when (filter) {
+        is VectorFeatureFilter.NumberIn -> filter.values.sorted().map { JsonPrimitive(it) }
+        is VectorFeatureFilter.StringIn -> filter.values.sorted().map { JsonPrimitive(it) }
+      }
+    if (labels.isEmpty()) return JsonPrimitive(false)
+    return buildJsonArray {
+      add("match")
+      add(get(filter.property))
+      add(JsonArray(labels))
+      add(true)
+      add(false)
+    }
+  }
+
+  /** Style Specification bounds, `[west, south, east, north]`. */
+  private fun bounds(bounds: LngLatBounds) = buildJsonArray {
+    add(bounds.west)
+    add(bounds.south)
+    add(bounds.east)
+    add(bounds.north)
   }
 
   private fun circleLayer(

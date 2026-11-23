@@ -18,9 +18,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
-import org.openforis.collectone.v2.app.domain.model.AppScreen
 import org.openforis.collectone.v2.app.domain.model.MeasurementUnitSystem
 import org.openforis.collectone.v2.app.domain.model.UserSettings
+import org.openforis.collectone.v2.mobile.ui.navigation.MobileRoute
 
 /**
  * End-to-end checks that the mobile app reads from and writes through the local data store, which
@@ -29,61 +29,78 @@ import org.openforis.collectone.v2.app.domain.model.UserSettings
 class MobileLocalStoreTest {
   /** Appends [count] map features (copies of the first, without submissions) through the store. */
   private fun MobileAppState.addEntities(count: Int) {
-    val existing = entities
-    entities =
-      existing +
-        List(count) { i ->
-          existing.first().copy(id = "entity-extra-$i", submissions = emptyList())
-        }
+    val existing = viewModels.dataCollection.uiState.value.entities
+    val added =
+      List(count) { i -> existing.first().copy(id = "entity-extra-$i", submissions = emptyList()) }
+    dataHolder.launch { dataHolder.surveyRepository.setEntities(existing + added) }
   }
 
   @Test
   fun submittedForm_survivesSwitchingSurveysAndBack() {
     val state =
-      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
-    assertEquals("00000033-6b50-51cd-ac94-baea2ea06d65", state.activeSurveyId)
+      MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
+    assertEquals(
+      "00000033-6b50-51cd-ac94-baea2ea06d65",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
     val before =
-      state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }.submissions.size
+      state.viewModels.dataCollection.uiState.value.entities
+        .first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
+        .submissions
+        .size
 
-    state.launchFormForEntity(
+    state.viewModels.dataCollection.launchFormForEntity(
       entityId = "00000009-1699-51bb-b7a3-f90a60bedd4d",
       formId = "form-household-interview",
     )
-    state.completeActiveFormSubmission()
+    state.viewModels.dataCollection.completeActiveFormSubmission()
     assertEquals(
       before + 1,
-      state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }.submissions.size,
+      state.viewModels.dataCollection.uiState.value.entities
+        .first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
+        .submissions
+        .size,
     )
 
-    state.openSurvey("00000034-c088-5ab9-8b98-e6bccb3dca71")
-    assertEquals("00000034-c088-5ab9-8b98-e6bccb3dca71", state.activeSurveyId)
-    assertTrue(state.entities.none { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" })
+    state.viewModels.onboarding.openSurvey("00000034-c088-5ab9-8b98-e6bccb3dca71")
+    assertEquals(
+      "00000034-c088-5ab9-8b98-e6bccb3dca71",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
+    assertTrue(
+      state.viewModels.dataCollection.uiState.value.entities.none {
+        it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d"
+      }
+    )
 
-    state.openSurvey("00000033-6b50-51cd-ac94-baea2ea06d65")
+    state.viewModels.onboarding.openSurvey("00000033-6b50-51cd-ac94-baea2ea06d65")
     assertEquals(
       before + 1,
-      state.entities.first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }.submissions.size,
+      state.viewModels.dataCollection.uiState.value.entities
+        .first { it.id == "00000009-1699-51bb-b7a3-f90a60bedd4d" }
+        .submissions
+        .size,
     )
   }
 
   @Test
   fun dataHolderAppData_mirrorsStoreData() {
     val state =
-      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+      MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
     state.addEntities(count = 25)
     val appData = state.dataHolder.appData.value
-    assertEquals(state.entities, appData.content.entities)
-    assertEquals(state.mutations, appData.mutations)
-    assertEquals(state.activeSurveyId, appData.activeSurveyId)
+    assertEquals(state.viewModels.dataCollection.uiState.value.entities, appData.content.entities)
+    assertEquals(state.viewModels.dashboard.uiState.value.mutations, appData.mutations)
+    assertEquals(state.viewModels.dashboard.uiState.value.activeSurveyId, appData.activeSurveyId)
   }
 
   @Test
   fun settings_areWrittenToTheStore() {
     val state =
-      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
-    state.updateUnitSystem(MeasurementUnitSystem.IMPERIAL)
-    state.updateSelectedLanguage("fr")
-    state.updateUploadMediaOverUnmeteredConnectionOnly(true)
+      MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
+    state.viewModels.settings.updateMeasurementUnits(MeasurementUnitSystem.IMPERIAL)
+    state.viewModels.settings.updateLanguage("fr")
+    state.viewModels.settings.updateUploadMediaOverUnmeteredConnectionOnly(true)
     assertEquals(
       UserSettings("fr", MeasurementUnitSystem.IMPERIAL, shouldUploadPhotosOnWifiOnly = true),
       state.dataHolder.appData.value.userSettings,
@@ -93,10 +110,13 @@ class MobileLocalStoreTest {
   @Test
   fun appStates_doNotShareData() {
     val first =
-      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+      MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
     val second =
-      MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+      MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
     first.addEntities(count = 10)
-    assertEquals(first.entities.size - 10, second.entities.size)
+    assertEquals(
+      first.viewModels.dataCollection.uiState.value.entities.size - 10,
+      second.viewModels.dataCollection.uiState.value.entities.size,
+    )
   }
 }

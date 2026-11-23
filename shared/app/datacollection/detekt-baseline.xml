@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:DataCollectionFormScreen.kt$@Composable fun CollectorConsentModalDialog( uiState: DataCollectionUiState, actions: DataCollectionActions, )</ID>
+    <ID>LongMethod:DataCollectionFormScreen.kt$@Composable fun DataCollectionFormScreen( uiState: DataCollectionUiState, actions: DataCollectionActions, userGpsCoordinatesLabel: String, distanceAndBearingToEntity: (entityId: String) -&gt; StraightLineVector?, geoPointMap: @Composable (viewportState: GeoPointMapViewportState, modifier: Modifier) -&gt; Unit, entityRefMap: @Composable (form: FormPreviewItem, modifier: Modifier) -&gt; Unit, )</ID>
+    <ID>LongMethod:DataCollectionFormScreen.kt$@Composable private fun EntityRefCandidateOptionCard( isEligible: Boolean, wayfindingBadge: String, candidate: GeospatialEntityItem, isSelected: Boolean, onSelect: () -&gt; Unit, )</ID>
+    <ID>LongMethod:DataCollectionFormScreen.kt$@Composable private fun EntityRefStepMapOrListSelector( uiState: DataCollectionUiState, actions: DataCollectionActions, form: FormPreviewItem, controller: FormWizardController, distanceAndBearingToEntity: (entityId: String) -&gt; StraightLineVector?, entityRefMap: @Composable (form: FormPreviewItem, modifier: Modifier) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:EntityDetailsContent.kt$@Composable internal fun EntityBottomSheetCard( uiState: EntityDetailsUiState, actions: EntityDetailsActions, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:EntityDetailsContent.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable internal fun EntityListRow( entity: GeospatialEntityItem, isSelected: Boolean, onClick: () -&gt; Unit, modifier: Modifier = Modifier, compact: Boolean = false, compactHeight: Dp = 32.dp, compactStartIndent: Dp = 8.dp, layer: MapLayerItem? = null, )</ID>
+    <ID>LongMethod:PdfReportLayout.kt$PdfReportLayout$fun geometryFigure( paths: List&lt;List&lt;Pair&lt;Double, Double&gt;&gt;&gt;, closed: Boolean, color: PdfColor, height: Float = 190f, )</ID>
+    <ID>LongMethod:RecordShareDialogs.kt$@Composable fun EntityQrCodeModalDialog( actions: DataCollectionActions, entity: GeospatialEntityItem, isWeb: Boolean = false, )</ID>
+    <ID>LongMethod:RecordShareDialogs.kt$@Composable fun SharePdfToAppModalDialog( uiState: DataCollectionUiState, actions: DataCollectionActions, sheet: SharedPdfSheetState, )</ID>
+    <ID>LongMethod:SearchableListContent.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable private fun ListSearchField( query: String, onQueryChange: (String) -&gt; Unit, onClear: () -&gt; Unit, compact: Boolean, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:SurveyBottomSheetContent.kt$@Composable fun SubmissionFullDetailsCard( uiState: SubmissionDetailsUiState, backLabel: String, onBack: () -&gt; Unit, onSharePdf: () -&gt; Unit, onCycleSyncStatus: () -&gt; Unit = {}, isSidePanel: Boolean = false, showBackButton: Boolean = true, showHeader: Boolean = true, showTitle: Boolean = true, )</ID>
+    <ID>LongMethod:SurveyBottomSheetContent.kt$@Composable internal fun FormGroupedSubmissionsSection( groups: List&lt;FormSubmissionsGroup&gt;, viewer: SubmissionViewer, showTargetEntityLabel: Boolean, showFormActionSubtitle: Boolean, onSelectSubmission: (SubmissionPreviewItem) -&gt; Unit, showSyncStatus: Boolean = true, )</ID>
+    <ID>LongMethod:SurveyBottomSheetContent.kt$@Composable internal fun SyncStatusIndicatorBadge( syncStatus: SyncStatus, modifier: Modifier = Modifier, countSuffix: String? = null, isHighlighted: Boolean = false, onClick: (() -&gt; Unit)? = null, )</ID>
+    <ID>ReturnCount:DataCollectionViewModel.kt$DataCollectionViewModel$override fun launchFormForEntity(entityId: String, formId: String)</ID>
+    <ID>TooManyFunctions:DataCollectionViewModel.kt$DataCollectionViewModel : ViewModelDataCollectionActions</ID>
+    <ID>UnusedParameter:SurveyBottomSheetContent.kt$showSyncStatus: Boolean = true</ID>
+  </CurrentIssues>
+</SmellBaseline>

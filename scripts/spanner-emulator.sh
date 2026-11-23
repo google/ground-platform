@@ -14,15 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Runs the Cloud Spanner emulator for local development of the user data
-# service, using a pinned, checksum-verified release on Linux x86_64 and the
+# Runs the Cloud Spanner emulator for local development of the Collect One
+# server, using a pinned, checksum-verified release on Linux x86_64 and the
 # matching Docker image elsewhere. Data lives in memory and is lost on exit.
 #
 # Usage:
 #   scripts/spanner-emulator.sh     # gRPC on localhost:9010, REST on localhost:9020.
 #
 # Then start the service against it:
-#   cd server/userDataService && SPANNER_EMULATOR_HOST=localhost:9010 ./gradlew run
+#   SPANNER_EMULATOR_HOST=localhost:9010 ./gradlew :server:run
 
 set -euo pipefail
 
@@ -44,7 +44,7 @@ if [[ "${os}-${arch}" != "Linux-x86_64" ]]; then
     "gcr.io/cloud-spanner-emulator/emulator:${EMULATOR_VERSION}"
 fi
 
-cache_dir="${SPANNER_EMULATOR_CACHE_DIR:-${XDG_CACHE_HOME:-${HOME}/.cache}/ground/spanner-emulator}"
+cache_dir="${SPANNER_EMULATOR_CACHE_DIR:-${XDG_CACHE_HOME:-${HOME}/.cache}/collect-one/spanner-emulator}"
 install_dir="${cache_dir}/${EMULATOR_VERSION}"
 
 sha256() {

@@ -17,9 +17,9 @@
 # Entity Datasets and Schemas
 
 Entity Datasets (`EntityDatasetDef` in `survey_def.proto`) define preloaded and
-field-created XForms Entity Lists (datasets) that data collectors can query, create,
-or update during data collection. Ground manages Entity Datasets internally,
-which can be populated via CSV or GeoJSON imports.
+field-created XForms Entity Lists (datasets) that data collectors can query,
+create, or update during data collection. Collect One manages Entity Datasets
+internally, which can be populated via CSV or GeoJSON imports.
 
 ## Entity Classifications (`EntityType`)
 
@@ -80,7 +80,7 @@ following reserved system properties mapped from `EntityRecord`:
 > **Note:** Map layer visualization, ordering, visibility, and styling
 > (`GeometryStyle`) for geospatial entity datasets are configured in
 > `SurveyDef.map_config.layers` via `LayerDef`. See
-> [Maps and Layer Styling](docs/model/survey/03-maps.md).
+> [Maps and Layer Styling](03-maps.md).
 
 ## Generated Datasets (Sample Designs)
 
@@ -172,8 +172,8 @@ byte-identically on every platform.
 
 Desk labels for sample points are **repeat instances** in the interpretation
 submission, one per sample point, keyed by `sample_id`. The template uses only
-standard ODK XForms constructs, so it behaves the same in Ground, ODK Collect
-and Enketo:
+standard ODK XForms constructs, so it behaves the same in Collect One, ODK
+Collect and Enketo:
 
 | type | name | label | calculation / repeat_count | read_only |
 | :--- | :--- | :--- | :--- | :--- |
@@ -193,7 +193,7 @@ and Enketo:
     space-separated list. Because every point has exactly four numbers, point
     *i* starts at token `4 × (i − 1)`.
 *   **Launching from a plot**: when the form is launched from a plot
-    (`FormLaunchConfig.target_entity_dataset_id`), Ground is expected to
+    (`FormLaunchConfig.target_entity_dataset_id`), Collect One is expected to
     pre-fill `plot` with the plot entity's `name`. Interpretation clients
     still have to implement this.
 *   **Tests**: the XForms equivalent of this template is
@@ -255,6 +255,54 @@ plot-level questions) and sample-level answers in
     `sample_id`, computes the modal answer per sample question (or `null` on a
     tie) and disagreement rate, and rolls the consensus sample labels up to the
     plot's canonical summary and `EntityRecord.properties["status"]`.
+
+### Plot Review Forms
+
+The **Plot review** section under a generated layer's sample design (web
+Survey editor) sets up a desk-to-field review of its plots
+(`PlotReviewWorkflow`), following the base case journey in
+[`ceo-integration.md`](../../../product/ceo-integration.md):
+
+| Form | Availability | Questions (and the plot properties they update) | Status rules (first match wins) |
+| :--- | :--- | :--- | :--- |
+| **Desk check**: a new **Desk visual check** Form, or an adopted interpretation Form | Web | `desk_land_cover` (new Forms only) or the adopted Form's own questions, `desk_confidence` (0–100); with field validation also `needs_field_check` and `flag_reason` | `needs_field_check = yes`, `desk_confidence` below the threshold, or `sample_order` within the spot checks → `! Needs field validation`; otherwise `✓ Desk verified` |
+| **Field verification** (optional) | Mobile | `plot_reached`, `field_location` (GPS, not saved to the plot), `field_land_cover`, `field_photo`, `field_notes` | `plot_reached = no` → `✕ Not reachable`; otherwise `✓ Field verified` |
+
+*   Both Forms update the plot they're opened from (`SaveToMode.UPDATE`,
+    `EntityIdSource.SELECTED_FEATURE`), so desk and field answers end up side
+    by side on each plot. Desk answers are saved to plot properties of the
+    same names.
+*   **Create-survey wizard**: Step 4 offers **Verify plots in the field
+    (mobile)** for sample plots interpreted on imagery. The wizard's
+    interpretation Form (or the purpose's template Form) becomes the desk
+    check: the review adds the confidence and flagging questions and the
+    status rules to it rather than adding a Desk visual check Form. The
+    wizard's Form sync leaves the review Forms' availability, save-to, and
+    status rules alone, sets the review up again when a purpose or starter
+    template replaces the interpretation Form, and removes it when the survey
+    stops using sample plots for visual interpretation.
+*   **Spot checks**: with **Shuffle visiting order** on, `sample_order` is a
+    seeded random permutation of the plots, so the plots with
+    `sample_order ≤ N` are a simple random subsample. Sending them to the
+    field along with the flagged plots measures how accurate desk checks are
+    on plots interpreters were sure about.
+*   **Blind field checks**: when desk answers are hidden from field crews, no
+    desk answer is saved to the plot (they stay in the desk submissions)
+    except `flag_reason`.
+*   The Forms are the only record of the setup: the panel reads the options
+    back from the Forms that update the layer and have the review questions
+    (found by name), so organizers can keep editing them. Changing an option
+    rewrites the desk check's mappings, both Forms' availability, and their
+    status rules. Turning the review off removes the field Form and a Desk
+    visual check Form; an adopted desk check stays, without the questions and
+    status rules the review added. Status rules survive publishing and
+    syncing: `FormImport` reads them back from the status `calculate` binds
+    (`StatusRulesImport`).
+*   **Known limit**: every submission sets the plot's status, and published
+    Forms embed the plots as they were when the survey was published. A desk
+    check submitted again after a field visit therefore replaces
+    `✓ Field verified`; status rules can't read field results until entity
+    lists are refreshed when a Form is opened.
 
 ## Example: Geospatial Plot Dataset
 

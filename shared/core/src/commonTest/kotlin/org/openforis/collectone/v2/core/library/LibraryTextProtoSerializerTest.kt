@@ -32,6 +32,7 @@ import openforis.collectone.v1.library.OrganizationLibrarySettings
 import openforis.collectone.v1.library.Pillar
 import openforis.collectone.v1.library.PrivacyClass
 import openforis.collectone.v1.library.PurposePackDef
+import openforis.collectone.v1.library.StarterTemplateDef
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
 
 class LibraryTextProtoSerializerTest {
@@ -108,6 +109,16 @@ class LibraryTextProtoSerializerTest {
             goals = listOf("deforestation_free_supply_chains"),
             pillar = Pillar.MITIGATION,
             status = LibraryStatus.STABLE,
+            starter_templates =
+              listOf(
+                StarterTemplateDef(
+                  id = "eudr",
+                  title = LocalizedText(mapOf("en" to "EUDR")),
+                  form_template_ids = listOf("eudr_plot_registration"),
+                  export_profile_ids = listOf("eudr_geojson"),
+                  program_ids = listOf("eudr"),
+                )
+              ),
           )
         ),
       export_profiles =

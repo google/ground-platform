@@ -14,25 +14,25 @@
  */
 
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
-import { USER_DATA_SERVICE_URL } from '../harness/config.mjs';
+import { SERVER_URL } from '../harness/config.mjs';
 
-/** How long the user data service must have no calls in flight for the app to count as idle. */
+/** How long the server must have no calls in flight for the app to count as idle. */
 const QUIET_MS = 750;
 
 /** How long [expectScreen] keeps retrying before it reports the difference. */
 const SCREEN_TIMEOUT_MS = 30_000;
 
-/** Calls to the user data service in flight, and when the last one ended, per page. */
+/** Calls to the server in flight, and when the last one ended, per page. */
 const serviceCalls = new WeakMap<Page, { inFlight: number; lastActivity: number }>();
 
 export const test = base.extend({
   page: async ({ page }, use) => {
-    const reset = await fetch(`${USER_DATA_SERVICE_URL}/debug/reset`, { method: 'POST' });
+    const reset = await fetch(`${SERVER_URL}/debug/reset`, { method: 'POST' });
     if (!reset.ok) {
       throw new Error(`POST /debug/reset failed: ${reset.status} ${reset.statusText}`);
     }
 
-    // Only the local apps and user data service. Without the Mapbox GL JS script the maps fall back
+    // Only the local apps and the server. Without the Mapbox GL JS script the maps fall back
     // to Compose's own renderer, and Compose uses the fonts bundled with the app, so nothing on
     // screen depends on the network. Fulfilling external requests with 404 instead of aborting
     // avoids browser fetch() rejections in background thumbnail loaders.
@@ -44,7 +44,7 @@ export const test = base.extend({
     });
     const calls = { inFlight: 0, lastActivity: Date.now() };
     serviceCalls.set(page, calls);
-    const isServiceCall = (url: string) => url.startsWith(USER_DATA_SERVICE_URL);
+    const isServiceCall = (url: string) => url.startsWith(SERVER_URL);
     page.on('request', (request) => {
       if (!isServiceCall(request.url())) return;
       calls.inFlight++;
@@ -75,7 +75,35 @@ export async function tap(page: Page, locator: Locator): Promise<void> {
 }
 
 /**
- * Waits until the app has made no calls to the user data service for a moment, counting from now
+ * Scrolls the Terms of Service text to the bottom, ticks the agreement checkbox, and clicks
+ * Continue.
+ */
+export async function acceptTermsOfService(page: Page): Promise<void> {
+  const checkbox = page.getByRole('checkbox', {
+    name: 'I have read and agree to the Collect One Terms of Service.',
+  });
+  const continueButton = page.getByRole('button', { name: 'Continue', exact: true });
+  await expect(checkbox).toBeVisible();
+  await expect(continueButton).toBeVisible();
+
+  const termsStart = page.getByText(/Lorem ipsum/).first();
+  await termsStart.waitFor();
+  const box = await termsStart.boundingBox();
+  if (!box) throw new Error('Terms of Service text has no bounds');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  for (let attempt = 0; attempt < 10; attempt++) {
+    if (await checkbox.isEnabled()) break;
+    await page.mouse.wheel(0, 1_500);
+    await page.waitForTimeout(100);
+  }
+  await expect(checkbox).toBeEnabled();
+  await tap(page, checkbox);
+  await expect(continueButton).toBeEnabled();
+  await tap(page, continueButton);
+}
+
+/**
+ * Waits until the app has made no calls to the server for a moment, counting from now
  * at the earliest, so calls that an action just triggered have time to start.
  */
 export async function waitForServiceIdle(page: Page): Promise<void> {

@@ -13,7 +13,7 @@
  */
 package org.openforis.collectone.v2.core.geo.io
 
-import org.openforis.collectone.v2.core.sampling.GeoCoord
+import org.openforis.collectone.v2.core.geo.GeoCoord
 
 /**
  * Reads the geometry of a KML 2.2 document ([OGC 07-147r2](https://www.ogc.org/standard/kml/)).
@@ -33,9 +33,7 @@ object KmlReader {
     val doc = stripComments(text)
     if (!Regex("<(?:\\w+:)?kml\\b", RegexOption.IGNORE_CASE).containsMatchIn(doc)) {
       if (!doc.trimStart().startsWith("<")) {
-        return GeoReadResult.failure(
-          "This file isn't valid KML. Check that it was exported as KML (not KMZ) and try again."
-        )
+        return GeoReadResult.failure(GeoIssue.InvalidKml)
       }
     }
     val features = mutableListOf<GeoFeature>()
@@ -86,25 +84,15 @@ object KmlReader {
           features.size == before &&
           issues.none { it.featureIndex == index }
       ) {
-        issues +=
-          GeoIssue(
-            GeoIssueSeverity.WARNING,
-            "Feature ${index + 1} has no geometry and was skipped.",
-            index,
-          )
+        issues += GeoIssue.FeatureWithoutGeometry(index)
       }
     }
     if (features.isEmpty() && issues.none { it.severity == GeoIssueSeverity.ERROR }) {
-      issues += GeoIssue(GeoIssueSeverity.ERROR, "This file doesn't contain any geometry.")
+      issues += GeoIssue.NoGeometry
     }
     val holes = features.sumOf { (it.geometry as? GeoGeometry.Polygon)?.droppedHoles ?: 0 }
     if (holes > 0) {
-      issues +=
-        GeoIssue(
-          GeoIssueSeverity.WARNING,
-          "$holes ${if (holes == 1) "hole was" else "holes were"} removed from polygons. " +
-            "Ground uses outer boundaries only.",
-        )
+      issues += GeoIssue.HolesRemoved(holes)
     }
     return GeoReadResult(features, issues)
   }
@@ -170,10 +158,5 @@ object KmlReader {
       .replace("&apos;", "'")
       .replace("&amp;", "&")
 
-  private fun badCoordinates(index: Int) =
-    GeoIssue(
-      GeoIssueSeverity.ERROR,
-      "${RingValidator.featureName(index)} has missing or invalid coordinates and was skipped.",
-      index,
-    )
+  private fun badCoordinates(index: Int) = GeoIssue.InvalidCoordinates(index)
 }

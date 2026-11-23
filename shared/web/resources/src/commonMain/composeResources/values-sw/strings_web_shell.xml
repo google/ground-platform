@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_language">Lugha</string>
+  <!-- Content description of the language selector; %1$s is the current language's native name. -->
+  <string name="web_language_with_current">Lugha: %1$s</string>
+  <string name="web_manage_survey">Simamia utafiti</string>
+  <string name="web_switch_survey">Badilisha utafiti</string>
+  <string name="web_recent_surveys">Tafiti za hivi karibuni</string>
+  <!-- Survey switcher menu item linking to the full surveys page. -->
+  <string name="web_all_surveys_menu_item">Tafiti zote…</string>
+  <string name="web_saving">Inahifadhi…</string>
+  <string name="web_saved">Imehifadhiwa</string>
+  <string name="web_not_saved">Haijahifadhiwa</string>
+  <string name="web_create_survey">Unda utafiti</string>
+  <!-- Create survey dialog title; %1$s is the organization name. -->
+  <string name="web_create_survey_in_organization">Unda utafiti katika %1$s</string>
+  <string name="web_survey_title_label">Kichwa cha utafiti</string>
+  <string name="web_organization">Shirika</string>
+  <!-- Organization picker option for a survey that belongs to no organization. -->
+  <string name="web_no_organization_personal">Hakuna (utafiti binafsi)</string>
+  <string name="web_personal_survey_access_hint">Ni watu unaoshiriki nao tu wanaoweza kufungua utafiti binafsi.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="web_organization_survey_access_hint">Utabaki kuwa mmiliki. Wasimamizi wa %1$s pia wanaweza kuhariri utafiti huu, kusimamia ushiriki na kuhamisha data.</string>
+  <string name="web_create">Unda</string>
+  <string name="web_next">Ifuatayo</string>
+  <string name="web_cancel">Ghairi</string>
+  <string name="web_create_survey_purposes_title">Data hii itatumika kwa ajili ya nini?</string>
+  <string name="web_create_survey_purposes_description">Chagua lengo kuu la utafiti huu. Tutaongeza fomu zake, zenye sehemu sanifu, ili data yako iweze kulinganishwa na kuripotiwa. Unaweza kubadilisha hili baadaye katika Maelezo ya utafiti.</string>
+  <string name="web_programs_optional">Programu (si lazima)</string>
+  <string name="web_programs_description">Programu unazoripoti kwazo kupitia utafiti huu.</string>
+  <string name="web_back">Rudi</string>
+  <string name="web_skip">Ruka</string>
+  <string name="web_download">Pakua</string>
+  <string name="web_download_csv">Pakua CSV</string>
+  <string name="web_download_geojson">Pakua GeoJSON</string>
+  <string name="web_download_kml">Pakua KML (Google Earth)</string>
+  <string name="web_download_survey_kml">Pakua KML ya utafiti (tabaka zote)</string>
+  <string name="web_open_in_google_earth">Fungua kwenye Google Earth</string>
+  <!-- Subtitle of an export profile menu item that has no warnings. -->
+  <string name="web_export_profile_for_survey_purposes">Kwa malengo ya utafiti wako</string>
+  <!-- Export warnings dialog title; %1$s is the export profile name (e.g. "EUDR GeoJSON"). -->
+  <string name="web_export_profile_title">Hamisha %1$s?</string>
+  <!-- %1$s is a comma-separated list of included standard fields. -->
+  <string name="web_export_profile_included">Zimejumuishwa: %1$s.</string>
+  <string name="web_export_profile_link_missing_hint">Unganisha maswali yanayokosekana na sehemu sanifu katika kihariri cha fomu ili yajumuishwe wakati ujao.</string>
+  <string name="web_export_anyway">Hamisha hata hivyo</string>
+  <!-- Data table column header: the record's workflow status. -->
+  <string name="web_column_status">Hali</string>
+  <!-- Data table column header: the record's label. -->
+  <string name="web_column_label">Lebo</string>
+  <!-- Data table column header: number of submissions for the record. -->
+  <string name="web_column_submissions">Mawasilisho</string>
+  <!-- Data table column header: the record's GeoID identifier. -->
+  <string name="web_column_geo_id">GeoID</string>
+  <string name="web_dismiss">Ondoa</string>
+  <string name="web_resize_side_panel">Badilisha ukubwa wa paneli ya pembeni</string>
+  <string name="web_collapse_side_panel">Kunja paneli ya pembeni</string>
+  <string name="web_expand_side_panel">Panua paneli ya pembeni</string>
+  <string name="web_expand_details">Panua maelezo</string>
+  <string name="web_close_details">Funga maelezo</string>
+  <!-- Data table tab title; %1$s is the table name, %2$d the number of rows. -->
+  <string name="web_table_tab_title">%1$s (%2$d)</string>
+  <string name="web_collapse_table">Kunja jedwali</string>
+  <string name="web_expand_table">Panua jedwali</string>
+  <string name="web_no_rows_yet">Bado hakuna safu.</string>
+  <string name="web_map_layer">Tabaka la ramani</string>
+  <string name="web_data_table">Jedwali la data</string>
+  <string name="web_collapse_details">Kunja maelezo</string>
+  <!-- Label above the number of map features in a layer. -->
+  <string name="web_map_features">Vipengele vya ramani</string>
+  <!-- Section heading: map feature counts grouped by status. -->
+  <string name="web_by_status">Kwa hali</string>
+  <string name="web_show_in_table">Onyesha kwenye jedwali</string>
+  <!-- Surveys page filter chip: show every survey. -->
+  <string name="web_survey_filter_all">Zote</string>
+  <!-- Surveys page filter chip: show surveys the user owns. -->
+  <string name="web_survey_filter_mine">Tafiti zangu</string>
+  <!-- Survey card chip: the signed-in user owns the survey. -->
+  <string name="web_survey_access_owner">Mmiliki</string>
+  <!-- Survey card chip: the user manages the survey's organization. -->
+  <string name="web_survey_access_organization_manager">Msimamizi wa shirika</string>
+  <!-- Survey card chip: the user is a member of the survey's organization. -->
+  <string name="web_survey_access_organization_member">Mwanachama wa shirika</string>
+  <!-- Survey card chip: the survey was shared with the user. -->
+  <string name="web_survey_access_shared">Umeshirikiwa</string>
+  <!-- Heading of the group of surveys that belong to no organization. -->
+  <string name="web_personal_surveys">Tafiti binafsi</string>
+  <string name="web_surveys">Tafiti</string>
+  <!-- Surveys page header summary; %1$s is the survey count phrase (e.g. "3 surveys"), %2$s the organization count phrase (e.g. "2 organizations"). -->
+  <string name="web_surveys_header_summary">%1$s · %2$s</string>
+  <string name="web_impact">Athari</string>
+  <string name="web_search_surveys_placeholder">Tafuta tafiti kwa jina, mahali au shirika</string>
+  <string name="web_clear_search">Futa utafutaji</string>
+  <string name="web_search_surveys">Tafuta tafiti</string>
+  <string name="web_no_surveys_match_search">Hakuna tafiti zinazolingana na utafutaji wako.</string>
+  <string name="web_no_surveys_yet">Bado hakuna tafiti. Unda mmoja ili kuanza.</string>
+  <!-- Badge next to an organization heading: the signed-in user is a manager of it. -->
+  <string name="web_organization_role_you_manage">Unasimamia</string>
+  <!-- Badge next to an organization heading: the signed-in user is a member of it. -->
+  <string name="web_organization_role_member">Mwanachama</string>
+  <string name="web_no_description_yet">Bado hakuna maelezo.</string>
+  <string name="web_public_data">Data ya umma</string>
+  <string name="web_private_submissions">Mawasilisho ya faragha</string>
+  <!-- Survey card label: this survey is the one currently open. -->
+  <string name="web_survey_open_now">Umefunguliwa sasa</string>
+  <!-- Badge on closed surveys asking whether their data was used. -->
+  <string name="web_outcome_prompt_label">Je, data hii ilitumika?</string>
+  <string name="web_collect_data">Kusanya data</string>
+  <!-- Data collection panel subtitle for a new standalone record; %1$s is the user's GPS coordinates. -->
+  <string name="web_new_record_at_location">Rekodi mpya • %1$s</string>
+  <!-- Data collection panel subtitle; %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_select_target_to_begin">Chagua %1$s ili kuanza</string>
+  <!-- %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_entity_ref_picker_instructions">Bofya %1$s kwenye ramani au kwenye orodha ili kuanza fomu hii, au chagua kimoja hapa chini.</string>
+  <string name="web_search_map_features">Tafuta vipengele vya ramani</string>
+  <!-- Search field placeholder; %1$s is the lowercase name of the map layer or data table (e.g. "plots"), %2$d the total number of its map features. -->
+  <string name="web_entity_ref_filter_placeholder">Chuja %1$s (%2$d)</string>
+  <!-- %1$s is the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_entity_ref_no_matches">Hakuna %1$s zinazolingana zilizopatikana.</string>
+  <string name="web_entity_ref_empty">Bado hakuna %1$s.</string>
+  <!-- Badge on a map feature whose form is already completed. -->
+  <string name="web_completed">Imekamilika</string>
+  <string name="web_start_a_form">Anza fomu</string>
+  <!-- Collect data menu item subtitle; %1$s is the question count phrase (e.g. "5 questions"), %2$d the number of map features left, %3$s the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_form_menu_summary_remaining">%1$s • %3$s %2$d zimebaki</string>
+  <!-- Collect data menu item subtitle for a standalone form; %1$s is the question count phrase (e.g. "5 questions"). -->
+  <string name="web_form_menu_summary_new_record">%1$s • rekodi mpya</string>
+  <string name="web_survey_has_no_forms">Utafiti huu bado hauna fomu.</string>
+  <string name="web_no_forms_available_on_web">Hakuna fomu katika utafiti huu zinazopatikana kwenye wavuti.</string>
+  <string name="web_qr_code">Msimbo wa QR</string>
+  <!-- Overflow menu button description; %1$s is the lowercase map feature type (e.g. "plot"). -->
+  <string name="web_more_entity_actions">Vitendo zaidi vya %1$s</string>
+  <!-- Map feature details tab showing the feature's current properties. -->
+  <string name="web_entity_tab_data">Data</string>
+  <!-- Map feature details tab listing the feature's submissions. -->
+  <string name="web_entity_tab_history">Historia</string>
+  <string name="web_back_to_submissions">Rudi kwenye mawasilisho</string>
+  <string name="web_more_submission_actions">Vitendo zaidi vya wasilisho</string>
+  <string name="web_close_form">Funga fomu</string>
+  <string name="web_map_drawing_place_point">Bofya ramani ili kuweka nukta</string>
+  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
+  <string name="web_map_drawing_add_vertices">Bofya ramani ili kuongeza vipeo • %1$d kati ya angalau %2$d</string>
+  <string name="web_undo">Tendua</string>
+  <string name="web_done">Nimemaliza</string>
+  <string name="web_cancel_drawing">Ghairi kuchora</string>
+  <string name="web_sign_in">Ingia</string>
+  <string name="web_sign_in_tagline">Weka mifumo ikolojia kwenye ramani, buni tafiti za uwandani na uthibitishe uchunguzi wa ardhini pamoja na shirika lako.</string>
+  <string name="web_sign_in_description">Ingia ili kuona tafiti na mashirika yaliyoshirikiwa na akaunti yako.</string>
+  <string name="web_signing_in">Inaingia…</string>
+  <string name="web_sign_in_with_google">Ingia kwa kutumia Google</string>
+  <string name="web_sign_in_google_accounts_only">Kwa sasa uthibitishaji unahusu Akaunti za Google pekee.</string>
+  <string name="web_terms_of_service_title">Masharti ya Huduma</string>
+  <string name="web_tos_signed_in_as">Umeingia kama %1$s</string>
+  <string name="web_tos_decline">Kataa</string>
+  <string name="web_tos_continue">Endelea</string>
+  <string name="web_tos_intro">Tafadhali kagua na ukubali Masharti ya Huduma ya Collect One ili kuendelea.</string>
+  <string name="web_tos_agree_checkbox">Nimesoma na ninakubali Masharti ya Huduma ya Collect One.</string>
+  <!-- Shown when a link names a console page that doesn't exist or that the user can't open. -->
+  <string name="web_link_unavailable">Ukurasa huo haupatikani. Huenda umefutwa, au huna ruhusa ya kuufikia.</string>
+  <!-- Error shown when an uploaded file can't be read; %1$s is the file name. -->
+  <string name="web_file_read_failed">Imeshindwa kusoma %1$s. Jaribu tena.</string>
+  <!-- Subtitle of an export profile menu item; %1$d is the number of warnings to review. -->
+  <plurals name="web_export_profile_warnings_to_review">
+    <item quantity="one">%1$d la kukagua kabla ya kuhamisha</item>
+    <item quantity="other">%1$d ya kukagua kabla ya kuhamisha</item>
+  </plurals>
+  <plurals name="web_survey_count">
+    <item quantity="one">Utafiti %1$d</item>
+    <item quantity="other">Tafiti %1$d</item>
+  </plurals>
+  <plurals name="web_organization_count">
+    <item quantity="one">Shirika %1$d</item>
+    <item quantity="other">Mashirika %1$d</item>
+  </plurals>
+  <!-- Survey card: number of locations (map features) in the survey. -->
+  <plurals name="web_survey_location_count">
+    <item quantity="one">Mahali %1$d</item>
+    <item quantity="other">Maeneo %1$d</item>
+  </plurals>
+  <plurals name="web_form_question_count">
+    <item quantity="one">Swali %1$d</item>
+    <item quantity="other">Maswali %1$d</item>
+  </plurals>
+
+  <!-- Shown when this build of the console can't open a file picker. -->
+  <string name="web_file_upload_unavailable">Kupakia faili hakupatikani hapa.</string>
+  <string name="web_collapse_form">Kunja fomu</string>
+  <string name="web_expand_form">Panua fomu</string>
+</resources>

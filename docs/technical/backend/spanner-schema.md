@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-# User Data Service: Cloud Spanner Schema
+# Server: Cloud Spanner Schema
 
 Authors: [Gino Miceli](https://github.com/gino-m) \
 Status: Draft for review \
@@ -38,8 +38,8 @@ This design builds on [sync-engine.md](../sync-engine.md),
 [survey_service.proto](../../../shared/protos/survey/survey_service.proto),
 [organization_service.proto](../../../shared/protos/survey/organization_service.proto),
 [library_service.proto](../../../shared/protos/library/library_service.proto),
-[UserDataBackend.kt](../../../server/userDataService/src/main/kotlin/org/openforis/collectone/v2/server/userdata/UserDataBackend.kt),
-[SyncLists.kt](../../../server/userDataService/src/main/kotlin/org/openforis/collectone/v2/server/userdata/SyncLists.kt).
+[service/](../../../server/src/main/kotlin/org/openforis/collectone/v2/server/service/),
+[SyncLists.kt](../../../server/src/main/kotlin/org/openforis/collectone/v2/server/data/SyncLists.kt).
 
 ## Decisions
 
@@ -60,6 +60,7 @@ This design builds on [sync-engine.md](../sync-engine.md),
 | Accounts                     | **Signed-in Firebase accounts required** for every RPC, including public and link surveys; no anonymous users. Email/password sign-up is enabled for participants without Google accounts.                                                                                                                                                                                                                                                                              |
 | ACL ownership                | **Only organizers add or remove ACL entries.** `PUBLIC` and `ANYONE_WITH_LINK` grant access by policy, checked on every request, and never create ACL rows.                                                                                                                                                                                                                                                                                                             |
 | Mobile sync scope            | **Explicit Download, per-survey scope.** Only downloaded surveys sync, each in full (definition, entities, submissions); no area or dataset sub-scopes. The survey list syncs only while its page is open.                                                                                                                                                                                                                                                              |
+| Mobile push notifications    | **Stateless two-topic FCM tickles (`survey_<id>_def`, `survey_<id>_entities`).** Mobile clients subscribe/unsubscribe directly via FCM when downloading or removing a survey. The server publishes data-only tickles after Spanner commits; no device tokens or subscription tables are stored in Spanner. |
 
 ## Requirements From the Existing Contract
 
@@ -153,8 +154,9 @@ Each record's canonical proto is stored in a typed column (for example,
 ### Interleaving Roots
 
 - **`Surveys` is top-level, not interleaved under `Organizations`.** Surveys can
-  be personal and can move between organizations (`delete_organization` "unlinks
-  its surveys to personal"), and interleaved parent keys are immutable.
+  be personal and can move between organizations (soft-deleting an organization
+  with `upsert.is_deleted = true` unlinks its surveys to personal), and
+  interleaved parent keys are immutable.
 - **Survey-scoped data is interleaved in `Surveys`:** ACL entries, revisions,
   working copy, entities, submissions, audit records, and media.
 - **Org-scoped data is interleaved in `Organizations`:** members, library, and
@@ -251,13 +253,37 @@ this splits mobile sync into two independent parts:
 | Part                      | Lifetime                                                                       | RPCs                                                                                                                          | Tokens                                                                                                                    |
 | :------------------------ | :----------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
 | **Survey list** (catalog) | Only while the list page is visible, on mobile and web                         | `ListSurveyOverviews`: query mode on open, then delta polling every ~10–60 s until the page closes                            | **In memory only.** Each open starts with a fresh query, so `ClientSyncState.sync_tokens.surveys` is no longer persisted. |
-| **Downloaded surveys**    | From Download until Remove download; background sweeps plus foreground polling | `GetSurvey`, `ListEntities`, `ListSubmissions` (scoped by `survey_id`), plus `BatchGetSurveyOverviews` for survey-level state | Persisted per survey (`entities_by_survey`, `submissions_by_survey`)                                                      |
+| **Downloaded surveys**    | From Download until Remove download; FCM topic tickles (`survey_<id>_def`, `survey_<id>_entities`) plus foreground/reconnect catch-up sweeps | `GetSurvey`, `ListEntities`, `ListSubmissions` (scoped by `survey_id`), plus `BatchGetSurveyOverviews` for survey-level state | Persisted per survey (`entities_by_survey`, `submissions_by_survey`)                                                      |
 
 **Download:** In one flow, the client fetches the saved revision with
 `GetSurvey`, runs full syncs for `ListEntities` and `ListSubmissions`, stores
-the bases and tokens, and adds the survey to its downloaded set. Remove download
-drops the survey's bases and tokens after its outbox has drained (or after the
-user confirms discarding pending edits).
+the bases and tokens, adds the survey to its downloaded set, and subscribes to
+the `survey_<survey_id>_def` and `survey_<survey_id>_entities` FCM topics.
+Remove download unsubscribes from both FCM topics and drops the survey's bases
+and tokens after its outbox has drained (or after the user confirms discarding
+pending edits).
+
+**FCM topic notifications (no Spanner tables):**
+
+- **`survey_<survey_id>_def`:** Published after commit when a survey's saved
+  definition, lifecycle state, trash/restore/purge status, or ACL/sharing rules
+  change (`MutateSurvey` when `!working_copy` or when saving a new revision or
+  updating ACLs, `AcceptSurveyInvite`, and the trash purge job). Working-copy
+  autosaves do not publish to this topic. Payload:
+  `{"survey_id": "<uuid>", "scope": "def", "record_version": "<n>"}`.
+  On receipt, mobile checks whether its stored `surveyBase(survey_id)` already
+  has `record_version >= n`; if not, it calls
+  `BatchGetSurveyOverviews([survey_id])` and (when `version` / `record_version`
+  advanced) `GetSurvey(survey_id)`, without touching `ListEntities` or
+  `ListSubmissions`.
+- **`survey_<survey_id>_entities`:** Published (debounced over a short window,
+  e.g. 2 s per survey) after `MutateData` commits entity creations, updates, or
+  deletes, or after `AcquirePlotLock` / `ReleasePlotLock` modifies a plot lock.
+  Payload: `{"survey_id": "<uuid>", "scope": "entities", "commit_ts": "<ms>"}`.
+  On receipt, mobile runs `ListEntities` in delta mode for `survey_id` only.
+- **Zero schema impact:** Because topic membership is managed between the mobile
+  client and FCM directly from `ClientSyncState.downloaded_survey_ids`, Cloud
+  Spanner stores no device tokens or topic subscriptions.
 
 **Survey-level state for downloaded surveys:** Today a downloaded survey learns
 about a new saved revision, lost access, or trash through the catalog delta.
@@ -340,15 +366,15 @@ Trash. It stays restorable for 30 days and is then purged by a background job.
 ```mermaid
 stateDiagram-v2
     [*] --> Active
-    Active --> Trashed: trash_survey
-    Trashed --> Active: restore_survey (within 30 d)
+    Active --> Trashed: upsert.trash_time
+    Trashed --> Active: delete.trash_time (within 30 d)
     Trashed --> Purged: purge job (trash_time + 30 d)
 ```
 
 **Proto changes** (`survey_service.proto`, `survey_def.proto`):
 
-- Replace `SurveyMutation.delete_survey` with `trash_survey` and
-  `restore_survey` (both `bool`), and reserve the old field.
+- Move a survey to Trash with `SurveyMutation.upsert.trash_time` and restore it
+  with `SurveyMutation.delete.trash_time` (clearing `trash_time`).
 - Add `SurveyDef.trash_time` and `SurveyOverview.trash_time`
   (`google.protobuf.Timestamp`; unset means not trashed). Trash is independent
   of lifecycle state, so a survey restores to `DRAFT`, `PUBLISHED`, or `CLOSED`
@@ -513,8 +539,8 @@ change would be needed.
 
 ### Contention
 
-- **Don't denormalize live counters onto `Surveys`** (`entity_count`,
-  `offline_size_label`). Otherwise every `MutateData` writes the survey row,
+- **Don't denormalize live counters onto `Surveys`** (`entity_count`, or an
+  offline package size). Otherwise every `MutateData` writes the survey row,
   which serializes all data writes for that survey and churns its overview.
   Compute counters asynchronously (periodic job or change stream) or on read.
 - A `MutateData` batch locks only the rows it touches plus one watermark row,
@@ -875,17 +901,17 @@ CREATE TABLE ClientMutationWatermarks (
 - **Storage seam:** Split `UserDataBackend` into RPC handling plus a
   `UserDataStore` interface, keeping `InMemoryUserDataStore` (today's maps) as
   the default.
-- **Proto changes:** `trash_survey`/`restore_survey` replace `delete_survey`;
-  add `trash_time` on `SurveyDef`/`SurveyOverview`; deprecate
-  `SurveyState.DELETED` as a client-settable state (kept as the overview
-  tombstone marker); add `SurveyAcl.default_role` and
-  `SurveyOverview.default_role`; add
-  `BatchGetSurveyOverviews` and `SearchPublicSurveys`; make
-  `s2_cell_tokens`/`dataset_id` (entities) and `form_id`/`entity_id`
-  (submissions) query-only; restrict `AcceptSurveyInvite` to organizer-created
-  email invites; stop persisting `ClientSyncState.sync_tokens.surveys`. Update
-  `sync-engine.md` ("Survey Downloads & Working Copies", "Foreground Polling"),
-  the in-memory backend, and clients to match before the Spanner work.
+- **Proto changes:** `upsert.trash_time` and `delete.trash_time` move surveys to
+  Trash and restore them; add `trash_time` on `SurveyDef`/`SurveyOverview`;
+  deprecate `SurveyState.DELETED` as a client-settable state (kept as the
+  overview tombstone marker); add `SurveyAcl.default_role` and
+  `SurveyOverview.default_role`; add `BatchGetSurveyOverviews` and
+  `SearchPublicSurveys`; make `s2_cell_tokens`/`dataset_id` (entities) and
+  `form_id`/`entity_id` (submissions) query-only; restrict `AcceptSurveyInvite`
+  to organizer-created email invites; stop persisting
+  `ClientSyncState.sync_tokens.surveys`. Update `sync-engine.md` ("Survey
+  Downloads & Working Copies", "Foreground Polling"), the in-memory backend, and
+  clients to match before the Spanner work.
 - **Auth:** Armeria decorator for Firebase ID tokens, `Users` upsert, and
   binding invites to verified emails.
 - **ID hygiene:** Add a shared UUID validator and normalizer in `shared/core`,
@@ -915,7 +941,7 @@ CREATE TABLE ClientMutationWatermarks (
 The storage seam, proto changes, and ID hygiene are done.
 `SpannerUserDataStore`, the service's only store (the in-memory store is now a
 test fake), implements the store interface on a subset of this schema
-(`server/userDataService/src/main/resources/spanner/schema.sql`), and the
+(`server/src/main/resources/spanner/schema.sql`), and the
 backend tests run against it on the emulator. It differs from the design above
 in these ways, to be closed in later steps:
 

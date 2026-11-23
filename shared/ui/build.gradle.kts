@@ -12,73 +12,53 @@
  * the License.
  */
 plugins {
-  kotlin("multiplatform") version "2.4.20"
-  id("org.jetbrains.compose") version "1.12.0"
-  id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
-  id("com.android.library") version "8.5.2"
+  id("collectone.kmp.android")
+  id("collectone.kmp.compose")
+  id("collectone.kover")
 }
 
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
-
-  jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
-
   iosArm64()
   iosSimulatorArm64()
 
   js(IR) {
     browser()
     nodejs()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
   }
 
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-    nodejs()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
-  }
+  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class) wasmJs { nodejs() }
 
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api("org.openforis.collectone.v2:protoforms:2.0.0-SNAPSHOT")
+        api(projects.shared.core)
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
-        api("org.jetbrains.compose.material:material-icons-core:1.7.3")
+        api(libs.compose.material.icons.core)
         implementation(compose.ui)
         implementation(compose.components.resources)
       }
     }
-    val commonTest by getting { dependencies { implementation(kotlin("test")) } }
-    val jvmTest by getting { dependencies { implementation(kotlin("test-junit5")) } }
+    val commonTest by getting {
+      dependencies {
+        implementation(kotlin("test"))
+        implementation(projects.shared.ui.testing)
+      }
+    }
+    val jvmTest by getting {
+      dependencies {
+        implementation(kotlin("test-junit5"))
+        // Headless Compose UI tests (runComposeUiTest) for the form widgets and runners.
+        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+        implementation(compose.uiTest)
+        implementation(compose.desktop.currentOs)
+      }
+    }
   }
 }
 
-android {
-  namespace = "org.openforis.collectone.v2.ui"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
-}
+android { namespace = "org.openforis.collectone.v2.ui" }
 
 compose.resources {
   publicResClass = true

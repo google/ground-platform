@@ -18,14 +18,79 @@
 
 The pages of the Open Foris Collect One web console ([`shared/web`](../../../shared/web/),
 hosted by [`webApp`](../../../webApp/)). Paths in this document are relative to
-`shared/web/src/commonMain/kotlin/org/openforis/collectone/v2/web/` for web-only code
-and to `shared/app/src/commonMain/kotlin/org/openforis/collectone/v2/app/` for code
-both apps share (map, data collection, domain, and clients).
+`org/openforis/collectone/v2/web/` in the common source sets of the web modules (the
+shell in `shared/web` and the feature modules under it, such as
+`shared/web/surveyeditor`; see [modules.md](modules.md#web-console-modules)) for
+web-only code and to `org/openforis/collectone/v2/app/` in the common source sets of `shared/app`
+(map, data collection), `shared/app/domain` (domain), and `shared/app/data` (data
+and clients) for code both apps share.
 
-## Web Surveys Page (`#surveys`)
+## Navigation and URLs
 
-The web console's landing page (`#surveys`). Web pages are gated behind a simple
-**Sign in with Google** card while the user is signed out.
+Every page has its own URL, so a link to it can be shared, the browser's Back and
+Forward buttons move between pages, and reloading keeps the page:
+
+| Path | Page |
+| --- | --- |
+| `/surveys` (or `/`) | Web Surveys page |
+| `/surveys/<id>/dashboard` | Web Dashboard of survey `<id>` |
+| `/surveys/<id>/editor[/sharing \| /forms/<key> \| /datasets/<key>]` | Survey editor, on a section |
+| `/surveys/new[/<step>]`, `/organizations/<id>/surveys/new[/<step>]` | Survey Creation Wizard |
+| `/organizations` | Organizations directory |
+| `/organizations/<id>[/<tab>]` | Organization page, on a tab |
+| `/impact[/<organizationId>]` | Impact page, focused on an organization |
+| `/admin[/<tab>]` | Admin panel |
+
+Tabs, wizard steps, and editor sections are URL segments named after them
+(`/organizations/<id>/imagery-sources`, `/surveys/new/survey-area`); a page's
+default part has none. Switching tabs, steps, or sections updates the URL in
+place; opening another page adds a browser history entry.
+
+-   **Routes**: Each page is a `@Serializable` route (`navigation/WebRoute.kt`) and a
+    destination of the type-safe Compose Multiplatform `NavHost` in
+    `WebConsoleNavHost.kt`. `navigation/WebUrls.kt` maps routes to paths and back,
+    and `navigation/RouteSegments.kt` names tabs, steps, and sections.
+-   **Moving between pages**: Pages ask `WebPageNavigation` (`open`, `returnTo`,
+    `update`) for page changes; `WebNavigator` applies them to the back stack.
+    ViewModel outcomes (opening an organization, publishing or closing the Survey
+    editor, finishing or canceling the wizard) become page changes in
+    `navigation/WebNavigationRequests.kt`.
+-   **Browser history**: `BrowserHistoryBinding` writes each page's URL and stores
+    the whole back stack with its history entry, so Back, Forward, and reloading
+    restore it. `webApp` binds it to the browser window (`WindowBrowserHistory`);
+    tests use `MemoryBrowserHistory`.
+-   **Access**: `navigation/WebRouteGuard.kt` decides whether the signed-in user
+    can see a page. A link to a survey, organization, or page that doesn't exist,
+    or to the admin panel for someone who isn't a platform administrator, opens
+    the surveys list with a notice; an unlisted organization's page opens the
+    organizations list for non-members, and the Survey editor of a survey the
+    user can't manage opens its dashboard. Missing data only counts as missing
+    once the initial sync finished.
+-   **Invitations and earlier links**: Invitation emails link to
+    `/#join/<surveyId>/<token>` and `/#org-join/<organizationId>/<token>`; the URL
+    keeps the invitation until the user signs in and it's accepted, then the survey
+    dashboard or organization page opens. Hashes of earlier console versions
+    (`/#organizations`, `/#impact/<id>`, ...) still open their pages; their survey
+    pages named no survey, so they open the surveys list.
+-   **Hosting**: Firebase Hosting (`webApp/firebase.json`) and the dev server serve
+    `index.html` for every page path, and its `<base href="/">` resolves the
+    bundle's relative URLs against the site root.
+
+## Web Surveys Page (`/surveys`)
+
+The web console's landing page (`/surveys`). Web pages are gated behind a simple
+**Sign in with Google** card while the user is signed out, and then behind the
+**Terms of Service** card (`WebTermsOfServicePage`) until the signed-in user
+accepts them; the page's URL stays, so it opens once they sign in and accept.
+
+-   **Terms after every sign-in**: the console asks for the terms after every
+    sign-in, including signing in again after signing out, and as another
+    account. **Decline** signs the user out and returns to the sign-in card.
+    The acceptance lasts until signing out: it's kept in the browser's
+    `localStorage` (`webConsoleSignedInSessionStore`), so reloading the page
+    while Firebase keeps the session doesn't ask again. Invitation links are
+    redeemed only after the terms are accepted. Asking only on a user's first
+    sign-in (keeping the acceptance per user on the server) is a follow-up.
 
 -   **Survey cards**: Every survey the signed-in user can open, grouped into a
     section per **Organization** (with its logo and the user's role: *You
@@ -46,7 +111,7 @@ The web console's landing page (`#surveys`). Web pages are gated behind a simple
     days have passed since it was closed or since the last *Not yet* answer,
     whichever is later (so answering *Not yet* again restarts the wait;
     Skip changes nothing). Any other answer hides the badge for good. The
-    badge is driven by `SurveyOutcomePromptViewModel` (`ui/viewmodel/`) with an
+    badge is driven by `SurveyOutcomePromptViewModel` (`ui/surveys/`) with an
     injectable clock. The seeded **Household Panel Survey (Past Individuals)**
     was closed on 2026-05-29 without an answer, so its card shows the badge.
 -   **Create survey**: Opens a dialog for the title and an optional
@@ -68,10 +133,10 @@ The web console's landing page (`#surveys`). Web pages are gated behind a simple
 -   The Web dashboard and Survey editor redirect here when there is no survey
     to open, and **Sign out** from any web page returns here.
 
-## Organizations Pages (`#organizations`, `#organization/<id>`)
+## Organizations Pages (`/organizations`, `/organizations/<id>`)
 
 Open from **Manage organizations** in the user profile card (avatar in the web
-header), or deep-link to `#organizations`. Organizations
+header), or deep-link to `/organizations`. Organizations
 are the Open Foris Collect One counterpart of Collect Earth Online institutions: a survey
 can optionally belong to one, and the organization's **Managers** inherit
 Survey organizer access to all of its surveys while **Members** can create
@@ -139,13 +204,12 @@ surveys in it and find them in their list.
         Managers only.
 
 Code lives in `ui/organization/` (`OrganizationsPage.kt`, `OrganizationPage.kt`,
-`OrganizationLibraryPanes.kt` for the library tabs, `OrganizationProfileFields.kt`
+`OrganizationLibraryPanes.kt` for the library tabs, `OrganizationCostPanes.kt` and
+`OrganizationImagerySourcesPane.kt` for the cost and imagery tabs, `OrganizationProfileFields.kt`
 for the Type and Country pickers, and `OrganizationPages.kt` for the page's
 tabs). Both pages are stateless `(uiState, actions)` screens
-driven by `OrganizationViewModel` (`ui/viewmodel/`); the directory, relation,
-and member-grouping rules live in `domain/model/OrganizationDirectory.kt`, and
-the matching methods on `WebAppState` are one-line delegates to the view
-model.
+driven by `OrganizationViewModel` (`ui/organization/`); the directory, relation,
+and member-grouping rules live in `domain/model/OrganizationDirectory.kt`.
 
 The library model (`domain/model/LibraryModels.kt`: concepts, Form templates,
 Purpose Packs, export profiles, library settings, and ID rules) is stored per
@@ -156,8 +220,8 @@ library with the global one, `SearchConceptsUseCase` searches it, and
 seeded from `data/seed/GlobalLibrarySeedData.kt`, a Kotlin copy of the
 canonical `shared/assets/library/<vocabulary>.textproto` files;
 `GlobalLibrarySeedTest` (`shared/app` jvmTest) fails when they differ, and
-running `./gradlew jvmTest -PregenerateLibrarySeed` from `shared/app` rewrites
-the files from the Kotlin copy.
+running `./gradlew :shared:app:data:jvmTest -PregenerateLibrarySeed` from the
+repository root rewrites the files from the Kotlin copy.
 
 ## Impact Views
 
@@ -212,13 +276,13 @@ survey, linking a column, or opting out updates the numbers right away.
 The sample map shapes are illustrative, so features pass their recorded
 area and a representative point instead of their drawn outline.
 
-## Web Dashboard Page (`#dashboard`)
+## Web Dashboard Page (`/surveys/<id>/dashboard`)
 
-Open a survey from the **Surveys** page, or deep-link to `#dashboard`.
+Open a survey from the **Surveys** page, or deep-link to `/surveys/<id>/dashboard`.
 
--   **Top toolbar**: Displays Ground branding and the active survey title as a
-    **survey switcher** dropdown (other surveys grouped by organization, plus
-    **All surveys…**), with its organization and location below it, a
+-   **Top toolbar**: Displays Collect One branding and the active survey title
+    as a **survey switcher** dropdown (other surveys grouped by organization,
+    plus **All surveys…**), with its organization and location below it, a
     **Manage survey** button to enter the **Survey editor**, and user profile
     controls. **Map** and **Impact** tabs below it switch the main area between
     the live map and the survey's numbers (see [Impact Views](#impact-views)).
@@ -242,8 +306,18 @@ Open a survey from the **Surveys** page, or deep-link to `#dashboard`.
     feature's **Collect data** buttons (one per form linked to its dataset,
     disabled once completed), then its properties arranged vertically, with
     references to other records shown as links. **Show in table** opens the
-    bottom table on the feature's row. **History** lists its submissions
-    grouped by form; opening one shows it in the tab, in a document-style view.
+    bottom table on the feature's row (and docks the right-hand card into a
+    compact top-right pill), and **Analyze imagery** (for points and polygons)
+    opens a dedicated **Time series & imagery** bottom sheet
+    (`DashboardTimeSeriesSheet`) alongside the right-hand panel. **History**
+    lists its submissions grouped by form; opening one shows it in the tab, in
+    a document-style view. Opening the bottom data table docks the right-hand
+    panel (details card or open form) into its top-right pill, and expanding
+    the right-hand panel docks the bottom data table, so only one of the two
+    is visible at a time. The docked data table bar, the time series bottom
+    sheet, the pinned-scene banner, and the other map overlays stay left of
+    the card and follow its edge as it opens and closes, so the card (or an
+    open form) can run the map's full height.
 -   **Data collection on web** (`ui/datacollection/WebDataCollectionCard.kt`): The mobile entry
     points are adapted to the web paradigm. **Collect data** in the top toolbar
     (the counterpart of the mobile `+` FAB) lists the survey's forms; a
@@ -267,7 +341,7 @@ Open a survey from the **Surveys** page, or deep-link to `#dashboard`.
     searchable list; the questions then appear and the target step is left out
     of the stack. There is no field GPS in a browser, so every geometry question
     (`geopoint`, `geotrace`, `geoshape`, "GPS only" or not) is answered by
-    drawing on the main map (`ui/state/WebMapDrawingHost.kt`): **Draw on map**
+    drawing on the main map (`shared/app`'s `ui/datacollection/WebMapDrawingHost.kt`): **Draw on map**
     in the question's card routes map clicks to it
     (`DataCollectionViewModel.webMapDrawing`, the `CompactMapDrawingHost`), a floating chip at the top of the map shows
     the progress (`2 of at least 3`) with **Undo**, **Done**, and **Cancel
@@ -308,11 +382,17 @@ Open a survey from the **Surveys** page, or deep-link to `#dashboard`.
     function; off the web (JVM tests) the handler falls back to the shared
     `SimulatedMediaCaptureHandler`.
 -   **Data tables**: A collapsible panel docks to the bottom of the map with
-    one tab per entity dataset (map layers and data tables), with the selected
+    the same gutter on either side, clear of the left panel's collapse tab, with
+    one tab per entity dataset (map layers and data tables) and the selected
     record highlighted. The first column is a compact status chip. It never
     opens on its own: expand it with its arrow button, a tab, or the card's
-    **Show in table** button. Click a row to select that record. Submissions
-    are never shown in tables, since their data can be hierarchical.
+    **Show in table** button; expanding it docks the right-hand panel into a
+    top-right pill so the table gets the full map width, and expanding the
+    right-hand panel (or selecting a record, layer, or form) docks the table.
+    Click a row to select that record. Submissions are never shown in tables,
+    since their data can be hierarchical. **Time series & imagery** lives in its
+    own dedicated bottom sheet rather than a tab of this table, and appears only
+    when triggered from a map feature's details card.
 -   **Export** (download icon in the table header): **Download CSV** for the
     selected tab, **Download GeoJSON** for Map layers, and the export
     profiles enabled by the survey's purposes (their Purpose Packs'
@@ -334,12 +414,12 @@ Open a survey from the **Surveys** page, or deep-link to `#dashboard`.
 
 Code lives in `ui/dashboard/WebDashboardPage.kt`.
 
-## Survey Editor Page (`#survey-editor`)
+## Survey Editor Page (`/surveys/<id>/editor`)
 
 Open the survey editor from the web dashboard via the **Edit survey** button in
 the left-hand survey header (and return to the dashboard with the back arrow in
-the survey editor header), or deep-link directly to `#survey-editor`
-(`#form-editor` also works).
+the survey editor header), or deep-link directly to `/surveys/<id>/editor`
+(`/surveys/<id>/editor/forms/<key>` opens a Form).
 The left-hand navigation lists:
 
 -   **Survey details**: Title, description, survey ID, organization,
@@ -368,7 +448,7 @@ The left-hand navigation lists:
         member under the organization policy → anyone under link/public). The
         dashboard only shows **Manage survey** to people who can manage the
         active survey.
-    -   Each new invite gets an invite link (`https://ground.example.org/join/…`)
+    -   Each new invite gets an invite link (`https://collect-one.example.org/join/…`)
         with **Copy link** and **New link** actions. Until it's accepted, the
         person is listed by email with an **Invited** badge.
     -   **Open as invitee** previews what the invitee sees after opening the
@@ -385,7 +465,19 @@ The left-hand navigation lists:
         hidden) with their source and linked-field counts; choosing one copies
         it into the survey (`SurveyFormTemplates.addTemplate`: new Form ID,
         unique title, its own linked dataset), so later template edits don't
-        change it.
+        change it. Each template lists where its submissions go ("Adds to a
+        new map layer · Polygons" or "Adds to a new data table").
+    -   **+** next to **Map layers** / **Data tables** also offers **From
+        template**, listing only the templates whose Form adds map features
+        (it captures a geometry) or table rows (it doesn't). Choosing one adds
+        the template's Form and opens its new linked dataset.
+    -   A dataset linked to a Form (`FormDatasetLinks.newLinkedDataset`) has
+        an `id` key, one property per answer, and the Form's kind of
+        geometry. A Map layer's primary geometry question becomes each
+        feature's geometry, so it gets no property of its own. Features are
+        labeled by the first name-like free-text answer, else an identifier
+        (`*_id`, `*_code`), else the first single choice or free text, else the
+        key (`FormDatasetLinks.labelPropertyFor`).
     -   **Save as template** in the Form editor toolbar (also in its **⋮**
         menu, where it's disabled with the reason for non-Managers and
         personal surveys) saves a copy of the Form, with its standard field
@@ -453,14 +545,14 @@ The editor's models are pure Kotlin in `domain/model/editor/`
 `SurveyEditorDerivation.kt`, `SurveyEditorProjection.kt`, `SurveyAccess.kt`,
 `SampleGeneration.kt`, `MapLayerImporter.kt`, `FormDatasetLinks.kt`), so
 repositories and the local data store depend only on the domain. The page is
-driven by `SurveyEditorViewModel` (`ui/viewmodel/`), which exposes a `StateFlow`
-of `SurveyEditorUiState` (`ui/state/`) and implements `SurveyEditorActions`;
+driven by `SurveyEditorViewModel` (`ui/surveyeditor/`), which exposes a `StateFlow`
+of `SurveyEditorUiState` (same package) and implements `SurveyEditorActions`;
 the Compose screens in `ui/surveyeditor/` (`SurveyEditorPage.kt`,
 `EntityDatasetEditor.kt`, `SamplingDesignPanel.kt`, `SurveyAreaEditor.kt`,
 `InteractiveLayerMap.kt`, `LayerEditorGeometry.kt`) take `(uiState, actions)`
 and hold only transient UI state such as dialogs and the selected table row.
-`SurveyEditorPage(state: WebAppState, …)` is the thin shell that collects
-the view model and renders the shared `WebAppHeader`. Drag-to-reorder for the
+`SurveyEditorDestination` (`WebConsoleDestinations.kt`) is the thin shell that
+collects the view model and renders the shared `WebAppHeader`. Drag-to-reorder for the
 navigation and the flow canvas shares `ui/formeditor/DragReorder.kt`.
 
 The view model observes the active survey's draft through
@@ -480,7 +572,7 @@ area **Draw** tab only need `MapFeatureEditor` (add a feature, replace its
 vertices), which `SurveyEditorActions` extends and the Draw tab backs with a
 scratch `DrawnPartsEditor`.
 
-The layer editor map and the survey area thumbnail are `GroundMap`s from
+The layer editor map and the survey area thumbnail are `AppMap`s from
 `shared/map`, like the survey map. Features are drawn as map style layers;
 vertex and midpoint handles, labels, and the in-progress drawing are a draw-only
 Compose overlay placed with `MapCameraState.project`. Vertex and feature drags
@@ -492,7 +584,9 @@ containment and lines and points by a 12 dp tolerance. Without a Mapbox renderer
 ### Form Editor
 
 Selecting a Form opens the visual Form editor in `ui/formeditor/`
-(`FormEditorPage.kt`, `FormSaveToEditor.kt`, `FormWebPreview.kt`); its models,
+(`FormEditorPage.kt`, which composes `FormEditorToolbar.kt`, `FormFlowCanvas.kt`,
+`QuestionPropertiesPanel.kt`, `SectionPropertiesPanel.kt`, `ChoicesEditor.kt` and
+`FormPreviewOverlay.kt`, plus `FormSaveToEditor.kt` and `FormWebPreview.kt`); its models,
 validation rules, and XForms generator are pure Kotlin in `domain/model/editor/`
 (`FormEditorModels.kt`, `FormValidationRules.kt`, `FormIds.kt`). The screens
 take `(uiState: FormEditorUiState, actions: FormEditorActions)`, provided by a
@@ -545,7 +639,7 @@ for tests:
     where it lands, and the canvas scrolls at its edges. The `←` / `→`
     buttons on the selected card also move it one step.
 -   **XForms XML**: Shows the generated ODK-compatible XForms and confirms it
-    parses with the Ground form engine.
+    parses with the Collect One form engine.
 -   **Mobile / Web toggle**: The toolbar's segmented toggle switches the
     canvas between the mobile flow above and the **Web** layout
     (`FormWebPreview.kt`): the Form as collectors see it in the web dashboard's
@@ -619,13 +713,13 @@ for tests:
     draft organization concept (`ManageLibraryUseCase`) and links it. Manual
     choices of a linked select question each get a **Standard value**
     dropdown mapping them to code-list values
-    (`ChoiceItem.properties["ground_code"]`, a `ground_code` column in the
+    (`ChoiceItem.properties["collectone_code"]`, a `collectone_code` column in the
     choice instance). The
     validator's concept warnings (`ConceptLinkValidator`: type mismatch,
     unmatched choices, one concept on several questions, deprecated or
     unknown concepts) show in amber and never block publishing. Deleting a
     linked question asks for confirmation, naming the impact reports it feeds.
-    After **Import Form**, `ground:concept` links to concepts in the
+    After **Import Form**, `collectone:concept` links to concepts in the
     dictionary stay linked (others are kept as foreign attributes and
     reported), and a "We found N fields that match standard definitions" card
     offers links for unlinked questions, with exact and prefix matches
@@ -633,7 +727,7 @@ for tests:
     `SurveyConfig.formConceptLinks` (the client's mirror of
     `SurveyDef.form_concept_links`, keyed by field path `/data/<name>`;
     authoritative) and written into the published XForms as
-    `ground:concept="<id>@<version>"` bind attributes
+    `collectone:concept="<id>@<version>"` bind attributes
     (`FieldBinding.foreign_attributes`). Properties that linked questions save
     to inherit their concepts (`SaveToRules.inheritConcepts`,
     `EntityProperty.conceptLink`). Code is in

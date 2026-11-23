@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import GroundMobile
+import AppMobile
 import SwiftUI
 import UIKit
 
+/// Hosts the shared Compose mobile app (`MainViewController` in shared/mobile's iosMain) in SwiftUI.
+/// Compose owns all of the app's UI and state, so there is nothing to update from SwiftUI.
 struct ComposeView: UIViewControllerRepresentable {
   func makeUIViewController(context: Context) -> UIViewController {
     MainViewControllerKt.MainViewController()
@@ -26,7 +28,9 @@ struct ComposeView: UIViewControllerRepresentable {
 
 struct ContentView: View {
   var body: some View {
+    // Full screen: the Compose app draws behind the status bar and home indicator and applies the
+    // safe-area insets itself (the map extends under the status bar).
     ComposeView()
-      .ignoresSafeArea(.keyboard)
+      .ignoresSafeArea()
   }
 }

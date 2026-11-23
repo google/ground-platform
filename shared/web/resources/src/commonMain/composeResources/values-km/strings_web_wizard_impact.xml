@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Impact goals: plain-language names of the goals survey data can contribute to. -->
+  <string name="wizard_goal_deforestation_free_supply_chains">ខ្សែសង្វាក់ផ្គត់ផ្គង់គ្មានការកាប់បំផ្លាញព្រៃឈើ</string>
+  <string name="wizard_goal_ecosystem_restoration">ការស្ដារប្រព័ន្ធអេកូឡូស៊ី</string>
+  <string name="wizard_goal_effective_protected_areas">តំបន់ការពារ</string>
+  <string name="wizard_goal_iplc_rights_and_tenure">សិទ្ធិដីធ្លីរបស់ជនជាតិដើមភាគតិច និងសហគមន៍</string>
+  <string name="wizard_goal_legal_timber">ឈើស្របច្បាប់</string>
+  <string name="wizard_goal_forest_carbon_and_conservation">កាបូនព្រៃឈើ និងការអភិរក្ស</string>
+  <string name="wizard_goal_smallholder_livelihoods">ជីវភាពកសិករខ្នាតតូច និងលទ្ធភាពចូលទីផ្សារ</string>
+  <string name="wizard_goal_open_earth_data">ទិន្នន័យយោងបើកចំហអំពីគម្របដី និងដំណាំ</string>
+  <!-- Heading of standard fields (shared data definitions) that don't contribute to any goal. -->
+  <string name="wizard_goal_other_standard_fields">វាលស្តង់ដារផ្សេងទៀត</string>
+
+  <!-- Impact attribution levels: how directly a survey's data contributed to results (1–5). -->
+  <string name="wizard_impact_attribution_official_submission">បានប្រើក្នុងការដាក់ស្នើផ្លូវការ</string>
+  <string name="wizard_impact_attribution_official_submission_explanation">អ្នករៀបចំបាននិយាយថា ទិន្នន័យត្រូវបានប្រើក្នុងការដាក់ស្នើផ្លូវការ ដូចជាសេចក្តីថ្លែងការណ៍ការប្រុងប្រយ័ត្នដោយយកចិត្តទុកដាក់ EUDR របាយការណ៍ FERM ឬការវាយតម្លៃតំបន់ការពារ។</string>
+  <string name="wizard_impact_attribution_partner_use">បានប្រើដោយដៃគូ</string>
+  <string name="wizard_impact_attribution_partner_use_explanation">ទិន្នន័យត្រូវបានផ្ញើទៅដៃគូ ឬត្រូវបានប្រើដោយអ្នកទិញ សម្រាប់ការចេញប័ណ្ណកម្មសិទ្ធិដីធ្លី ឬដើម្បីពិនិត្យផែនទី ឬគំរូ។</string>
+  <string name="wizard_impact_attribution_purpose_export">បាននាំចេញសម្រាប់គោលបំណងរបស់វា</string>
+  <string name="wizard_impact_attribution_purpose_export_explanation">ទិន្នន័យត្រូវបានទាញយកជាទម្រង់ដែលគោលបំណងណាមួយរបស់វាផ្តល់ ដូចជា EUDR GeoJSON។</string>
+  <string name="wizard_impact_attribution_data_collected">បានប្រមូលទិន្នន័យ</string>
+  <string name="wizard_impact_attribution_data_collected_explanation">ទិន្នន័យត្រូវបានប្រមូល ប៉ុន្តែយើងមិនទាន់ដឹងថាវាត្រូវបានប្រើយ៉ាងដូចម្តេចនៅឡើយទេ។</string>
+  <string name="wizard_impact_attribution_exploratory">កំពុងចាប់ផ្តើម</string>
+  <string name="wizard_impact_attribution_exploratory_explanation">ការស្ទង់មតិសាកល្បង ឬស្វែងយល់ ឬការស្ទង់មតិដែលមិនទាន់មានទិន្នន័យ។</string>
+
+  <!-- Impact setup hints, shown when a summary has no numbers yet. -->
+  <string name="wizard_impact_hint_collect_data">លេខនឹងបង្ហាញនៅទីនេះ នៅពេលទិន្នន័យត្រូវបានប្រមូល។</string>
+  <string name="wizard_impact_hint_pick_purpose">ជ្រើសរើសអ្វីដែលទិន្នន័យនឹងត្រូវប្រើសម្រាប់ នៅក្នុងព័ត៌មានលម្អិតការស្ទង់មតិ ដើម្បីឱ្យលទ្ធផលអាចដាក់ជាក្រុមតាមគោលដៅបាន។</string>
+  <string name="wizard_impact_hint_link_fields">ភ្ជាប់សំណួរក្នុងសំណុំបែបបទ ឬជួរឈរស្រទាប់ទៅនឹងវាលស្តង់ដារ (ដូចជា ទំនិញ) ដើម្បីឱ្យចម្លើយរបស់វាអាចបូកសរុបបាន។</string>
+
+  <!-- Impact activity: kinds of "data was used" events, with their count next to them. -->
+  <string name="wizard_impact_activity_downloads">ការទាញយក</string>
+  <string name="wizard_impact_activity_sent_to_partners">បានផ្ញើទៅដៃគូ</string>
+  <string name="wizard_impact_activity_receipts_created">បង្កាន់ដៃដែលបានបង្កើត</string>
+  <string name="wizard_impact_activity_receipts_shared">បង្កាន់ដៃដែលបានចែករំលែក</string>
+  <string name="wizard_impact_activity_doi_minted">DOI ដែលបានចេញ</string>
+  <string name="wizard_impact_activity_surveys_closed">ការស្ទង់មតិដែលបានបិទ</string>
+
+  <!-- Impact indicators. %1$s is the formatted count (e.g. "1,234"). -->
+  <plurals name="wizard_impact_map_features">
+    <item quantity="other">%1$s ធាតុផែនទី</item>
+  </plurals>
+  <!-- %1$s: a count of map features (e.g. "3 map features"); %2$s: their area (e.g. "5.9 ha"). -->
+  <string name="wizard_impact_value_with_area">%1$s · %2$s</string>
+  <!-- Headline of a share indicator. %1$s: a percentage (e.g. "67%"); %2$s: the most common answer (e.g. "Yes"). -->
+  <string name="wizard_impact_share_value">%1$s %2$s</string>
+  <!-- What a breakdown indicator is split by. %1$s: the indicator name in lower case (e.g. "commodity"). -->
+  <string name="wizard_impact_detail_by">តាម %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_of_answered">ក្នុងចំណោម %1$s ដែលមានចម្លើយ</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_total_from">សរុបពី %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_average_of">មធ្យមនៃ %1$s</string>
+  <!-- %1$s: an area (e.g. "5.9 ha") or a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_covering">គ្របដណ្តប់ %1$s</string>
+
+  <!-- Impact notes on what couldn't be counted. %1$s: the standard field (shared data definition) name. -->
+  <string name="wizard_impact_note_link_unknown">វាលមួយភ្ជាប់ទៅវាលស្តង់ដារដែលលែងមានទៀតហើយ (%1$s)។</string>
+  <string name="wizard_impact_note_link_deprecated">វាលមួយភ្ជាប់ទៅវាលស្តង់ដារដែលត្រូវបានឈប់ប្រើ (%1$s)។</string>
+  <string name="wizard_impact_note_link_not_in_library">វាលមួយភ្ជាប់ទៅវាលស្តង់ដាររបស់ស្ថាប័នផ្សេង ដូច្នេះវាមិនត្រូវបានរាប់នៅទីនេះទេ (%1$s)។</string>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_not_a_number">
+    <item quantity="other">%1$s៖ តម្លៃ %2$s មិនមែនជាលេខ (%3$s) ដូច្នេះមិនត្រូវបានរាប់បញ្ចូលទេ។</item>
+  </plurals>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_unsupported_unit">
+    <item quantity="other">%1$s៖ តម្លៃ %2$s ប្រើឯកតាដែលមិនអាចបម្លែងបាន (%3$s) ដូច្នេះមិនត្រូវបានរាប់បញ្ចូលទេ។</item>
+  </plurals>
+
+  <!-- Impact views (survey Impact tab, Impact page, platform-wide view) and PDF summaries. -->
+  <string name="wizard_impact_title">ផលប៉ះពាល់</string>
+  <string name="wizard_impact_survey_subtitle">លទ្ធផលសរុបនៃទិន្នន័យការស្ទង់មតិនេះ និងរបៀបដែលវាត្រូវបានប្រើ។ ក្បាលដីដែលបានគូសផែនទីច្រើនដង ត្រូវបានរាប់តែម្តង។</string>
+  <string name="wizard_impact_organization_subtitle">លទ្ធផលសរុបនៃទិន្នន័យការស្ទង់មតិរបស់អ្នក និងរបៀបដែលវាត្រូវបានប្រើ។ ក្បាលដីដែលបានគូសផែនទីក្នុងការស្ទង់មតិច្រើន ត្រូវបានរាប់តែម្តង។</string>
+  <!-- Option of the survey filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_surveys">ការស្ទង់មតិទាំងអស់</string>
+  <!-- Option of the country filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_countries">ប្រទេសទាំងអស់</string>
+  <!-- Label of the survey filter dropdown. -->
+  <string name="wizard_impact_filter_survey">ការស្ទង់មតិ</string>
+  <!-- Label of the country filter dropdown. -->
+  <string name="wizard_impact_filter_country">ប្រទេស</string>
+  <!-- Title of the platform-wide Impact view ("Collect One" is the product name). -->
+  <string name="wizard_impact_all_of_collect_one">Collect One ទាំងមូល</string>
+  <string name="wizard_impact_global_subtitle_full">លទ្ធផលសរុបនៃទិន្នន័យរបស់អ្នករាល់គ្នា ពីវាលស្តង់ដារសកលតែប៉ុណ្ណោះ។ ស្ថាប័នដែលបានជ្រើសមិនចូលរួម មិនត្រូវបានរាប់បញ្ចូលទេ ហើយក្រុមតូចៗត្រូវបានរក្សាជាឯកជន។ ក្នុងនាមជាអ្នកគ្រប់គ្រងនៃ អ្នកប្រើទាំងអស់ អ្នកក៏ឃើញវាលស្តង់ដារដែលមិនត្រូវបានបោះពុម្ពផ្សាយផងដែរ។</string>
+  <string name="wizard_impact_global_subtitle_published">លទ្ធផលសរុបនៃទិន្នន័យរបស់អ្នករាល់គ្នា ពីវាលស្តង់ដារសកលសាធារណៈតែប៉ុណ្ណោះ។ ស្ថាប័នដែលបានជ្រើសមិនចូលរួម មិនត្រូវបានរាប់បញ្ចូលទេ ហើយក្រុមតូចៗត្រូវបានរក្សាជាឯកជន។</string>
+  <!-- Title of the platform-wide impact summary (PDF) ("Collect One" is the product name). -->
+  <string name="wizard_impact_global_title">អ្នកប្រើ Collect One ទាំងអស់</string>
+  <string name="wizard_impact_download_pdf">ទាញយកសេចក្តីសង្ខេប PDF</string>
+  <string name="wizard_impact_adding_up">កំពុងបូកសរុបលេខ…</string>
+  <string name="wizard_impact_no_numbers_for_this">មិនទាន់មានលេខសម្រាប់ផ្នែកនេះនៅឡើយទេ។</string>
+  <!-- Heading of an organization's own indicators, in its published view. -->
+  <string name="wizard_impact_own_indicators">សូចនាករផ្ទាល់ខ្លួន</string>
+  <!-- Heading of the viewer's organization's own indicators, in its members' full view. -->
+  <string name="wizard_impact_your_indicators">សូចនាកររបស់អ្នក</string>
+  <string name="wizard_impact_own_indicators_supporting">វាលស្តង់ដារផ្ទាល់ខ្លួនរបស់ស្ថាប័ន ដែលបានបោះពុម្ពផ្សាយជាចំនួនសរុប។</string>
+  <string name="wizard_impact_your_indicators_supporting">វាលស្តង់ដារផ្ទាល់ខ្លួនរបស់ស្ថាប័នអ្នក។ មានតែវាលដែលបានសម្គាល់ថា ចំនួនសរុបសាធារណៈ ទេដែលត្រូវបានបោះពុម្ពផ្សាយ ចំណែកវាលផ្សេងទៀតនៅតែជារបស់ស្ថាប័នអ្នក។</string>
+  <string name="wizard_impact_suggested_indicators">សូចនាករដែលស្ថាប័នបានណែនាំ</string>
+  <string name="wizard_impact_suggested_indicators_supporting">វាលផ្ទាល់ខ្លួនរបស់ស្ថាប័ន ដែលពួកគេណែនាំថារាប់ចូលគោលដៅមួយ។ បង្ហាញដាច់ដោយឡែក ហើយមិនត្រូវបានបូកចូលក្នុងចំនួនសរុបខាងលើទេ។</string>
+  <string name="wizard_impact_how_data_was_used">របៀបដែលទិន្នន័យត្រូវបានប្រើ</string>
+  <string name="wizard_impact_unique_hectares_mapped">ហិកតាមិនស្ទួនដែលបានគូសផែនទី</string>
+  <string name="wizard_impact_unique_hectares_mapped_detail">ផ្ទៃក្រឡានៃធាតុផែនទីមិនស្ទួន</string>
+  <string name="wizard_impact_plots_and_map_features">ក្បាលដី និងធាតុផែនទី</string>
+  <!-- %1$s: the formatted number of duplicate map features. -->
+  <plurals name="wizard_impact_duplicates_counted_once">
+    <item quantity="other">%1$s ស្ទួនដែលបានរាប់តែម្តង (GeoID ដដែលត្រូវបានគូសផែនទីម្តងទៀត)</item>
+  </plurals>
+  <string name="wizard_impact_no_plot_mapped_twice">គ្មានក្បាលដីណាត្រូវបានគូសផែនទីពីរដងទេ</string>
+  <string name="wizard_impact_producers_registered">អ្នកផលិតដែលបានចុះឈ្មោះ</string>
+  <string name="wizard_impact_producers_registered_detail">អ្នកផលិតផ្សេងៗគ្នាដែលមានឈ្មោះនៅលើធាតុផែនទី</string>
+  <string name="wizard_impact_what_happened_with_data">អ្វីដែលបានកើតឡើងចំពោះទិន្នន័យ</string>
+  <string name="wizard_impact_outcomes_empty_survey">អ្នកនឹងត្រូវបានសួរ នៅពេលការស្ទង់មតិត្រូវបានបិទ។</string>
+  <string name="wizard_impact_outcomes_empty">មិនទាន់មានចម្លើយនៅឡើយទេ។ អ្នករៀបចំត្រូវបានសួរ នៅពេលពួកគេបិទការស្ទង់មតិ។</string>
+  <!-- Shown next to an outcome a single survey's organizer chose. -->
+  <string name="wizard_impact_outcome_yes">បាទ/ចាស</string>
+  <string name="wizard_impact_not_used_yet">មិនទាន់បានប្រើ</string>
+  <string name="wizard_impact_closed_not_answered_yet">បានបិទ មិនទាន់បានឆ្លើយ</string>
+  <string name="wizard_impact_closed_surveys_not_answered">ការស្ទង់មតិដែលបានបិទ មិនទាន់បានឆ្លើយ</string>
+  <!-- PDF summary: closed surveys whose organizer didn't say what happened with the data. -->
+  <string name="wizard_impact_closed_not_answered">បានបិទ មិនបានឆ្លើយ</string>
+  <string name="wizard_impact_how_directly_contributed">កម្រិតដែលទិន្នន័យបានរួមចំណែកដោយផ្ទាល់</string>
+  <!-- Attribution level on a 1–5 scale. %1$s: the level (e.g. "2"). -->
+  <string name="wizard_impact_level_of_five">%1$s ក្នុងចំណោម 5</string>
+  <string name="wizard_impact_no_global_purpose_surveys">មិនទាន់មានការស្ទង់មតិដែលមានគោលបំណងសកលនៅឡើយទេ។</string>
+  <string name="wizard_impact_no_surveys">មិនទាន់មានការស្ទង់មតិនៅឡើយទេ។</string>
+  <string name="wizard_impact_global_purpose_by_level">ការស្ទង់មតិដែលមានគោលបំណងសកល តាមកម្រិត</string>
+  <!-- %1$s: the formatted number of surveys. -->
+  <plurals name="wizard_impact_surveys">
+    <item quantity="other">%1$s ការស្ទង់មតិ</item>
+  </plurals>
+  <string name="wizard_impact_by_country_and_map_area">តាមប្រទេស និងតំបន់ផែនទី</string>
+  <string name="wizard_impact_by_country_and_map_area_supporting">ប្រទេសត្រូវមានធាតុផែនទីយ៉ាងហោចណាស់ 10 ហើយតំបន់ផែនទីត្រូវមានធាតុផែនទីយ៉ាងហោចណាស់ 10 ពីស្ថាប័ន 2 មុនពេលលេខរបស់វាត្រូវបានបង្ហាញ។</string>
+  <string name="wizard_impact_countries">ប្រទេស</string>
+  <string name="wizard_impact_no_countries">មិនទាន់មានប្រទេសនៅឡើយទេ។</string>
+  <!-- Shown instead of a country's numbers when it has fewer than 10 map features. -->
+  <string name="wizard_impact_fewer_than_10">តិចជាង 10</string>
+  <string name="wizard_impact_map_areas_kept_private">តំបន់ផែនទីដែលរក្សាជាឯកជន</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_map_areas_with_numbers">
+    <item quantity="other">%1$s តំបន់ផែនទីដែលមានលេខ</item>
+  </plurals>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_map_features_in_private_areas">
+    <item quantity="other">%1$s ធាតុផែនទីក្នុងតំបន់ឯកជន</item>
+  </plurals>
+  <string name="wizard_impact_organizations_not_included">ស្ថាប័នដែលមិនត្រូវបានរាប់បញ្ចូល</string>
+  <string name="wizard_impact_organizations_not_included_detail">ពួកគេមិនបញ្ចូលទិន្នន័យរបស់ខ្លួនក្នុងលេខទូទាំងប្រព័ន្ធទេ</string>
+  <string name="wizard_impact_not_enough_data_title">មិនទាន់មានទិន្នន័យគ្រប់គ្រាន់ដើម្បីបោះពុម្ពផ្សាយនៅឡើយទេ</string>
+  <!-- %1$d: the minimum number of map features before an organization's numbers are published. -->
+  <string name="wizard_impact_not_enough_data_body">លេខត្រូវបានបោះពុម្ពផ្សាយ នៅពេលមានធាតុផែនទីយ៉ាងហោចណាស់ %1$d ដើម្បីកុំឱ្យក្រុមតូចៗអាចត្រូវបានកំណត់អត្តសញ្ញាណ។</string>
+  <string name="wizard_impact_hints_title_empty">របៀបទទួលបានលេខនៅទីនេះ</string>
+  <string name="wizard_impact_hints_title">ទាញយកប្រយោជន៍បន្ថែមពីទិន្នន័យរបស់អ្នក</string>
+  <!-- %1$s: the formatted number of linked fields. -->
+  <plurals name="wizard_impact_linked_fields_not_counted">
+    <item quantity="other">%1$s វាលដែលបានភ្ជាប់មិនអាចរាប់បានទេ</item>
+  </plurals>
+  <!-- Button hiding the list of what couldn't be counted. -->
+  <string name="wizard_impact_hide">លាក់</string>
+  <!-- Button showing why some fields couldn't be counted. -->
+  <string name="wizard_impact_why">ហេតុអ្វី?</string>
+
+  <!-- PDF impact summary. -->
+  <!-- %1$s: the survey, organization, or platform-wide title. -->
+  <string name="wizard_impact_pdf_title">សេចក្តីសង្ខេបផលប៉ះពាល់ • %1$s</string>
+  <!-- Running header on every page ("Open Foris Collect One" is the product name). %1$s: the summary title. -->
+  <string name="wizard_impact_pdf_running_header">Open Foris Collect One • សេចក្តីសង្ខេបផលប៉ះពាល់ • %1$s</string>
+  <!-- %1$s: when the PDF was generated (e.g. "2026-09-18 10:14 UTC"). -->
+  <string name="wizard_impact_pdf_footer">សេចក្តីសង្ខេបផលប៉ះពាល់ • បានបង្កើតនៅ %1$s</string>
+  <string name="wizard_impact_pdf_subject_survey">សេចក្តីសង្ខេបផលប៉ះពាល់នៃការស្ទង់មតិ</string>
+  <string name="wizard_impact_pdf_subject_organization">សេចក្តីសង្ខេបផលប៉ះពាល់នៃស្ថាប័ន</string>
+  <string name="wizard_impact_pdf_subject_global">សេចក្តីសង្ខេបផលប៉ះពាល់នៃស្ថាប័នទាំងអស់ដែលចូលរួមក្នុងលេខទូទាំងប្រព័ន្ធ</string>
+  <string name="wizard_impact_pdf_published_numbers">លេខដែលបានបោះពុម្ពផ្សាយ</string>
+  <string name="wizard_impact_pdf_counted_once_note">ក្បាលដីដែលបានគូសផែនទីច្រើនដង (GeoID ដដែល) ត្រូវបានរាប់តែម្តង។</string>
+  <string name="wizard_impact_pdf_counted_once_note_published">ក្បាលដីដែលបានគូសផែនទីច្រើនដង (GeoID ដដែល) ត្រូវបានរាប់តែម្តង។ លេខដែលបានបោះពុម្ពផ្សាយ គឺជាចំនួនសរុបអនាមិកពីវាលស្តង់ដារសាធារណៈតែប៉ុណ្ណោះ។</string>
+  <string name="wizard_impact_pdf_at_a_glance">ទិដ្ឋភាពទូទៅ</string>
+  <string name="wizard_impact_pdf_unique_map_features">ធាតុផែនទីមិនស្ទួន</string>
+  <string name="wizard_impact_pdf_area_mapped">ផ្ទៃក្រឡាដែលបានគូសផែនទី</string>
+  <string name="wizard_impact_pdf_counted_once">បានរាប់តែម្តង</string>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_pdf_mapped_again">
+    <item quantity="other">%1$s ធាតុផែនទីដែលបានគូសផែនទីម្តងទៀតនៅកន្លែងផ្សេង</item>
+  </plurals>
+  <string name="wizard_impact_pdf_suggested_note">វាលផ្ទាល់ខ្លួនរបស់ស្ថាប័ន ដែលពួកគេណែនាំថារាប់ចូលគោលដៅមួយ។ មិនត្រូវបានបូកចូលក្នុងចំនួនសរុបខាងលើទេ។</string>
+  <!-- How directly the data contributed (attribution level). -->
+  <string name="wizard_impact_pdf_contribution">ការរួមចំណែក</string>
+  <string name="wizard_impact_pdf_by_country">តាមប្រទេស</string>
+  <string name="wizard_impact_pdf_fewer_than_10_features">ធាតុផែនទីតិចជាង 10</string>
+  <string name="wizard_impact_pdf_map_areas">តំបន់ផែនទី</string>
+  <string name="wizard_impact_pdf_map_areas_with_numbers">តំបន់ផែនទីដែលមានលេខ</string>
+  <string name="wizard_impact_pdf_kept_private">រក្សាជាឯកជន</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_pdf_kept_private_areas">
+    <item quantity="other">%1$s តំបន់ផែនទីដែលមានធាតុផែនទីតិចជាង 10 ឬស្ថាប័នតិចជាង 2</item>
+  </plurals>
+  <!-- %1$s: the formatted number of organizations. -->
+  <plurals name="wizard_impact_pdf_excluded_organizations">
+    <item quantity="other">ស្ថាប័ន %1$s មិនបញ្ចូលទិន្នន័យរបស់ខ្លួនក្នុងលេខទូទាំងប្រព័ន្ធទេ។</item>
+  </plurals>
+  <string name="wizard_impact_pdf_not_counted">មិនបានរាប់</string>
+
+  <!-- Impact page (#impact): the organizations a user follows and all of Collect One. -->
+  <string name="wizard_impact_back_to_surveys">ត្រឡប់ទៅការស្ទង់មតិ</string>
+  <string name="wizard_impact_page_title">សូចនាករផ្ទាល់</string>
+  <!-- Header line under "Live Metrics". %1$s: the formatted number of followed organizations. -->
+  <plurals name="wizard_impact_published_by_followed">
+    <item quantity="other">បោះពុម្ពផ្សាយដោយស្ថាប័ន %1$s ដែលអ្នកតាមដាន</item>
+  </plurals>
+  <string name="wizard_impact_choose_organizations">ជ្រើសរើសស្ថាប័ន</string>
+  <!-- Navigation item of the Impact page's overview. -->
+  <string name="wizard_impact_overview">ទិដ្ឋភាពទូទៅ</string>
+  <!-- Section heading in the Impact page's left panel (shown in capitals). -->
+  <string name="wizard_impact_organizations_you_follow">ស្ថាប័នដែលអ្នកតាមដាន</string>
+  <!-- The signed-in user is a member of this organization. -->
+  <string name="wizard_impact_member">សមាជិក</string>
+  <!-- The signed-in user is a Manager of this organization. -->
+  <string name="wizard_impact_you_manage">អ្នកជាអ្នកគ្រប់គ្រង</string>
+  <!-- Fallback description of an organization with no type or country. -->
+  <string name="wizard_impact_organization">ស្ថាប័ន</string>
+  <string name="wizard_impact_no_followed_organizations">អ្នកមិនទាន់តាមដានស្ថាប័នណាមួយនៅឡើយទេ។</string>
+  <string name="wizard_impact_dashboard_title">ផ្ទាំងគ្រប់គ្រងផលប៉ះពាល់របស់អ្នក</string>
+  <string name="wizard_impact_dashboard_subtitle">លេខដែលបានបោះពុម្ពផ្សាយរបស់ស្ថាប័នដែលអ្នកតាមដាន។ ជ្រើសរើសស្ថាប័នណាមួយក្នុងបញ្ជី ដើម្បីមើលលទ្ធផលសរុបនៃទិន្នន័យរបស់វា។</string>
+  <string name="wizard_impact_all_of_collect_one_supporting">ស្ថាប័នទាំងអស់ដែលចូលរួមក្នុងលេខទូទាំងប្រព័ន្ធ</string>
+  <string name="wizard_impact_follow_more_organizations">តាមដានស្ថាប័នបន្ថែម</string>
+  <!-- Screen reader label of the button removing an organization from the Impact page. %1$s: the organization name. -->
+  <string name="wizard_impact_stop_following">ឈប់តាមដាន %1$s</string>
+  <string name="wizard_impact_no_numbers_yet">មិនទាន់មានលេខនៅឡើយទេ។</string>
+  <string name="wizard_impact_not_enough_data_short">មិនទាន់មានទិន្នន័យគ្រប់គ្រាន់ដើម្បីបោះពុម្ពផ្សាយនៅឡើយទេ។</string>
+  <!-- Label under a headline area number. -->
+  <string name="wizard_impact_unique_hectares">ហិកតាមិនស្ទួន</string>
+  <!-- Label under a headline count of map features. -->
+  <string name="wizard_impact_map_features_label">ធាតុផែនទី</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_organization_published_subtitle">លទ្ធផលសរុបនៃការស្ទង់មតិរបស់ %1$s ដូចដែលបានបោះពុម្ពផ្សាយដល់អ្នករាល់គ្នានៅលើ Collect One។ ក្បាលដីដែលបានគូសផែនទីក្នុងការស្ទង់មតិច្រើន ត្រូវបានរាប់តែម្តង។</string>
+  <string name="wizard_impact_organization_page">ទំព័រស្ថាប័ន</string>
+  <string name="wizard_impact_unfollow">ឈប់តាមដាន</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_manager">អ្នកកំពុងមើលលេខពេញលេញរបស់អ្នក ក្នុងនាមជាអ្នកគ្រប់គ្រងនៃ %1$s</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_member">អ្នកកំពុងមើលលេខពេញលេញរបស់ %1$s ក្នុងនាមជាសមាជិក</string>
+  <string name="wizard_impact_notice_published_member">នេះជាអ្វីដែលអ្នករាល់គ្នានៅលើ Collect One មើលឃើញ</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_published_by">បោះពុម្ពផ្សាយដោយ %1$s</string>
+  <!-- %1$s: the organization name; %2$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body_manager">%1$s បោះពុម្ពផ្សាយចំនួនសរុបអនាមិកពីការស្ទង់មតិរបស់ខ្លួន សម្រាប់អ្នកណាដែលបានចូលគណនី Collect One។ %2$s</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body">ស្ថាប័ននីមួយៗនៅលើ Collect One បោះពុម្ពផ្សាយចំនួនសរុបអនាមិកពីការស្ទង់មតិរបស់ខ្លួន។ %1$s</string>
+  <!-- Label of the switch showing members the published view. -->
+  <string name="wizard_impact_show_published">បង្ហាញអ្វីដែលបានបោះពុម្ពផ្សាយ</string>
+  <!-- "All users" is the name of the platform-wide organization. -->
+  <string name="wizard_impact_platform_notice_full">អ្នកកំពុងមើលវាលស្តង់ដារទាំងអស់ ក្នុងនាមជាអ្នកគ្រប់គ្រងនៃ អ្នកប្រើទាំងអស់</string>
+  <string name="wizard_impact_platform_notice_published">បានបោះពុម្ពផ្សាយសម្រាប់អ្នករាល់គ្នានៅលើ Collect One</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_platform_notice_body">ចំនួនសរុបពីស្ថាប័នទាំងអស់ដែលចូលរួមក្នុងលេខទូទាំងប្រព័ន្ធ។ %1$s</string>
+  <string name="wizard_impact_explainer_title">ស្ថាប័ននីមួយៗបោះពុម្ពផ្សាយចំនួនសរុបអនាមិក</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_explainer_body">អ្នករៀបចំនៅលើ Collect One បោះពុម្ពផ្សាយលទ្ធផលសរុបនៃការស្ទង់មតិរបស់ពួកគេ ដូចជាចំនួនហិកតាដែលបានគូសផែនទី និងរបៀបដែលទិន្នន័យត្រូវបានប្រើ ដើម្បីឱ្យអ្នកណាដែលបានចូលគណនីអាចមើលឃើញ។ %1$s</string>
+  <!-- What's never published. %1$d: the minimum number of map features before numbers are shown. -->
+  <string name="wizard_impact_published_rules">ការដាក់ស្នើ ធាតុផែនទី ទីតាំង និងចម្លើយ មិនត្រូវបានបោះពុម្ពផ្សាយទេ ហើយវាលស្តង់ដារដែលរក្សាទុកសម្រាប់តែស្ថាប័ន ឬដែលបានសម្គាល់ថារសើប ក៏មិនត្រូវបានបោះពុម្ពផ្សាយដែរ។ ស្ថាប័នដែលមានធាតុផែនទីតិចជាង %1$d មិនបង្ហាញលេខទេ។</string>
+  <string name="wizard_impact_choose_organizations_body">ស្ថាប័ននីមួយៗបោះពុម្ពផ្សាយចំនួនសរុបអនាមិកពីការស្ទង់មតិរបស់ខ្លួន។ ជ្រើសរើសលេខរបស់ស្ថាប័នណាដែលត្រូវតាមដាន នៅលើទំព័រផលប៉ះពាល់របស់អ្នក។</string>
+  <string name="wizard_impact_search_organizations">ស្វែងរកស្ថាប័ន</string>
+  <string name="wizard_impact_no_organizations_match">គ្មានស្ថាប័នដែលត្រូវគ្នាទេ។</string>
+  <!-- Appended to an organization's description when it isn't listed publicly. -->
+  <string name="wizard_impact_unlisted">មិនមានក្នុងបញ្ជី មានតែសមាជិកទេដែលមើលឃើញ</string>
+  <string name="wizard_impact_save">រក្សាទុក</string>
+  <string name="wizard_impact_cancel">បោះបង់</string>
+  <!-- Snackbar after saving a PDF summary. %1$s: the file name; %2$s: its page count and size (e.g. "2 pages • 14 KB"). -->
+  <string name="wizard_impact_saved_pdf">បានរក្សាទុក %1$s (%2$s)</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the survey title. -->
+  <string name="wizard_impact_filter_label_survey">ការស្ទង់មតិ៖ %1$s</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the country name. -->
+  <string name="wizard_impact_filter_label_country">ប្រទេស៖ %1$s</string>
+
+  <!-- "What happened with this data?" card/dialog, asked after a survey is closed. -->
+  <string name="wizard_outcome_title">តើមានអ្វីកើតឡើងចំពោះទិន្នន័យនេះ?</string>
+  <string name="wizard_outcome_supporting">ជ្រើសរើសទាំងអស់ដែលពាក់ព័ន្ធ។ ចម្លើយរបស់អ្នកជួយបង្ហាញពីរបៀបដែលទិន្នន័យស្ទង់មតិត្រូវបានប្រើ។</string>
+  <string name="wizard_outcome_skip">រំលង</string>
+  <string name="wizard_outcome_save">រក្សាទុក</string>
+  <!-- Question completed by one of the chips below (e.g. "Less time and cost"). -->
+  <string name="wizard_outcome_effort_question">បើប្រៀបធៀបនឹងវិធីសាស្ត្រមុនរបស់អ្នក វាបានចំណាយ… (ស្រេចចិត្ត)</string>
+  <string name="wizard_outcome_effort_less">ពេលវេលា និងថ្លៃដើមតិចជាង</string>
+  <string name="wizard_outcome_effort_same">ប្រហាក់ប្រហែលគ្នា</string>
+  <string name="wizard_outcome_effort_more">ពេលវេលា និងថ្លៃដើមច្រើនជាង</string>
+
+  <!-- Purpose Pack picker ("What will this data be used for?"). -->
+  <!-- Screen reader label of the error icon in a validation banner. -->
+  <string name="wizard_purpose_error">កំហុស</string>
+  <string name="wizard_validation_purpose_required">ជ្រើសរើសគោលបំណងមួយ (ឬជ្រើសរើស “ផ្សេងទៀត” ហើយពិពណ៌នាគោលដៅរបស់អ្នក) ដើម្បីបន្ត។</string>
+  <string name="wizard_validation_other_purpose_required">សូមពិពណ៌នាគោលបំណងនៃការស្ទង់មតិនេះ ដើម្បីបន្ត។</string>
+  <!-- Badge of a Purpose Pack defined by an organization, when its name is unknown. -->
+  <string name="wizard_purpose_source_organization">ស្ថាប័ន</string>
+  <!-- Badge of a Purpose Pack available to every organization. -->
+  <string name="wizard_purpose_source_global">សកល</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_purpose_other_label">ពិពណ៌នាគោលបំណងនៃការស្ទង់មតិនេះ *</string>
+  <string name="wizard_purpose_other_placeholder">ឧ. ការតាមដានការស្ដារតំបន់ទីជម្រាលទឹកសហគមន៍</string>
+  <string name="wizard_purpose_other_supporting">ជួយតម្រឹមសំណុំបែបបទ គោលគំនិតបណ្ណាល័យ និងការរាយការណ៍ផលប៉ះពាល់ ឱ្យស្របនឹងគោលដៅរបស់អ្នក។</string>
+  <!-- Screen reader label of the check mark on a selected card. -->
+  <string name="wizard_purpose_selected">បានជ្រើសរើស</string>
+  <!-- Title of the card for a custom survey purpose. -->
+  <string name="wizard_purpose_other">ផ្សេងទៀត</string>
+  <string name="wizard_purpose_other_description">គោលដៅស្រាវជ្រាវ ការតាមដាន ឬសហគមន៍ផ្ទាល់ខ្លួន ដែលមិនមាននៅក្នុងកញ្ចប់ស្តង់ដារ។</string>
+  <!-- Badge of the "Other" purpose card. -->
+  <string name="wizard_purpose_custom">ផ្ទាល់ខ្លួន</string>
+  <!-- What a Purpose Pack adds. %1$d: the number of form templates. -->
+  <plurals name="wizard_purpose_forms">
+    <item quantity="other">%1$d សំណុំបែបបទ</item>
+  </plurals>
+  <!-- What a Purpose Pack adds. %1$d: the number of questions linked to standard fields (shared data definitions). -->
+  <plurals name="wizard_purpose_standard_fields">
+    <item quantity="other">%1$d វាលស្តង់ដារ</item>
+  </plurals>
+
+  <!-- Create survey wizard (#create-survey): page chrome. -->
+  <string name="wizard_cancel_survey_creation">បោះបង់ការបង្កើតការស្ទង់មតិ</string>
+  <!-- Page title while the survey has no title yet, and the wizard's final button. -->
+  <string name="wizard_create_survey">បង្កើតការស្ទង់មតិ</string>
+  <string name="wizard_saving_survey">កំពុងរក្សាទុកការស្ទង់មតិ…</string>
+  <string name="wizard_save_failed">មិនអាចរក្សាទុកការស្ទង់មតិបានទេ ដូច្នេះវានៅតែបើកនៅទីនេះ។ %1$s</string>
+  <string name="wizard_discard_title">បោះបង់ការស្ទង់មតិ?</string>
+  <string name="wizard_discard_body">ប្រសិនបើអ្នកចាកចេញឥឡូវនេះ ការស្ទង់មតិនេះ និងការផ្លាស់ប្តូរណាមួយដែលអ្នកបានធ្វើ នឹងត្រូវបាត់បង់។</string>
+  <string name="wizard_discard">បោះបង់ចោល</string>
+  <string name="wizard_keep_editing">បន្តកែ</string>
+  <string name="wizard_working_copy_prompt_title">បន្តកែសម្រួលសេចក្តីព្រាងដែលមិនទាន់រក្សាទុក?</string>
+  <string name="wizard_working_copy_prompt_body">អ្នកមានសេចក្តីព្រាងការស្ទង់មតិដែលមិនទាន់រក្សាទុកកំពុងដំណើរការ។ តើអ្នកចង់បន្តកែសម្រួលវា ឬបោះចោលវា ហើយចាប់ផ្តើមការស្ទង់មតិថ្មី?</string>
+  <string name="wizard_working_copy_continue">បន្តកែសម្រួល</string>
+  <string name="wizard_working_copy_discard">បោះចោលសេចក្តីព្រាង</string>
+  <string name="wizard_back">ថយក្រោយ</string>
+  <string name="wizard_cancel">បោះបង់</string>
+  <string name="wizard_required_field_missing">ខ្វះចន្លោះចាំបាច់ — សូមមើលផ្នែកដែលបានរំលេច</string>
+  <string name="wizard_skip_for_now">រំលងសិន</string>
+  <string name="wizard_next">បន្ទាប់</string>
+
+  <!-- Wizard steps: name and short description of each of the 6 steps. -->
+  <string name="wizard_step_overview">ទិដ្ឋភាពទូទៅ</string>
+  <string name="wizard_step_overview_subtitle">ចំណងជើង ស្ថាប័ន ភាសា និងវិធីចាប់ផ្តើម</string>
+  <string name="wizard_step_purpose">គោលបំណង</string>
+  <string name="wizard_step_purpose_subtitle">គោលដៅការស្ទង់មតិ កញ្ចប់គោលបំណង និងកម្មវិធីរាយការណ៍</string>
+  <string name="wizard_step_survey_area">តំបន់ស្ទង់មតិ</string>
+  <string name="wizard_step_survey_area_subtitle">ព្រំដែនសិក្សា និងរូបភាពផែនទីមូលដ្ឋានក្រៅបណ្ដាញ/គេហទំព័រ</string>
+  <string name="wizard_step_map_features">ធាតុផែនទី</string>
+  <string name="wizard_step_map_features_subtitle">ស្រទាប់ផែនទីចម្បង ក្បាលដីសំណាក ឬធាតុដែលបាននាំចូល</string>
+  <string name="wizard_step_forms">សំណុំបែបបទ</string>
+  <string name="wizard_step_forms_subtitle">កម្រងសំណួរ គោលគំនិតបណ្ណាល័យ និងការផ្គូផ្គងការនាំចេញ</string>
+  <string name="wizard_step_sharing">ការចែករំលែក</string>
+  <string name="wizard_step_sharing_subtitle">សិទ្ធិចូលប្រើ អធិបតេយ្យភាពទិន្នន័យ CARE និងការត្រៀមខ្លួនសម្រាប់ផលប៉ះពាល់</string>
+
+  <!-- Wizard step 1: Overview. -->
+  <string name="wizard_overview_subtitle">ដាក់ឈ្មោះការស្ទង់មតិរបស់អ្នក ជ្រើសរើសស្ថាប័នដែលដំណើរការវា កំណត់ភាសា និងជ្រើសរើសរបៀបដែលអ្នកចង់ចាប់ផ្តើម។</string>
+  <string name="wizard_survey_identity">អត្តសញ្ញាណការស្ទង់មតិ</string>
+  <string name="wizard_validation_title_required">បញ្ចូលចំណងជើងការស្ទង់មតិ ដើម្បីបន្ត។</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_survey_title_label">ចំណងជើងការស្ទង់មតិ *</string>
+  <string name="wizard_survey_title_placeholder">ឧ. ការគូសផែនទីក្បាលដីកាហ្វេកសិករខ្នាតតូច Nyeri</string>
+  <string name="wizard_description_label">ការពិពណ៌នា (ស្រេចចិត្ត)</string>
+  <string name="wizard_description_placeholder">ពិពណ៌នាគោលដៅ និងការណែនាំសម្រាប់អ្នកប្រមូលទិន្នន័យ។</string>
+  <!-- Label of the organization dropdown. -->
+  <string name="wizard_organization">ស្ថាប័ន</string>
+  <!-- Organization dropdown option for a survey not run by any organization. -->
+  <string name="wizard_no_organization">គ្មាន (ការស្ទង់មតិផ្ទាល់ខ្លួន)</string>
+  <string name="wizard_organization_supporting">ការដំណើរការការស្ទង់មតិក្រោមស្ថាប័នមួយ នឹងបើកលទ្ធភាពប្រើកញ្ចប់គោលបំណង គោលគំនិតវចនានុក្រម គំរូសំណុំបែបបទ និងរូបភាពផែនទីមូលដ្ឋានផ្ទាល់ខ្លួន ដែលបានចែករំលែករបស់វា។</string>
+  <string name="wizard_start_method_title">តើអ្នកចង់ចាប់ផ្តើមដោយរបៀបណា?</string>
+  <string name="wizard_start_from_scratch">បង្កើតការស្ទង់មតិថ្មី</string>
+  <string name="wizard_start_from_scratch_description">កំណត់ស្រទាប់ផែនទី និងសំណុំបែបបទម្តងមួយជំហាន ឬពីកញ្ចប់គោលបំណង។</string>
+  <string name="wizard_start_copy_existing">ចម្លងការស្ទង់មតិដែលមានស្រាប់</string>
+  <string name="wizard_start_copy_existing_description">ចម្លងសំណុំបែបបទ គ្រោងស្រទាប់ផែនទី តំបន់ស្ទង់មតិ និងកញ្ចប់គោលបំណង ដោយគ្មានទិន្នន័យ។</string>
+  <string name="wizard_start_import">នាំចូលពីឯកសារ</string>
+  <string name="wizard_start_import_description">នាំចូលនិយមន័យសំណុំបែបបទពី ODK XForms (.xml) ឬ Collect Earth (.cep)។</string>
+  <string name="wizard_no_surveys_to_copy">គ្មានការស្ទង់មតិដែលមានស្រាប់សម្រាប់ចម្លងទេ។</string>
+  <string name="wizard_copy_source_label">ការស្ទង់មតិប្រភពដែលត្រូវចម្លង</string>
+  <string name="wizard_copy_source_supporting">ចម្លងសំណុំបែបបទ គ្រោងស្រទាប់ផែនទី ការរចនាក្បាលដីសំណាក និងគោលបំណង ដោយមិនចម្លងកំណត់ត្រាដែលបានប្រមូលពីមុន។</string>
+  <string name="wizard_import_supported_formats">ទម្រង់ដែលគាំទ្រ៖ ODK XForms (.xml), Collect Earth (.cep, .zip)</string>
+  <string name="wizard_import_choose_another_file">ជ្រើសរើសឯកសារផ្សេង (.xml, .cep)</string>
+  <string name="wizard_import_choose_file">ជ្រើសរើសឯកសារ (.xml, .cep)</string>
+  <!-- %1$d: the number of questions in the imported form. -->
+  <plurals name="wizard_import_questions">
+    <item quantity="other">%1$d សំណួរ</item>
+  </plurals>
+  <!-- %1$d: the number of sample plots in the imported Collect Earth project. -->
+  <plurals name="wizard_import_sample_plots">
+    <item quantity="other">%1$d ក្បាលដីសំណាក</item>
+  </plurals>
+  <!-- %1$s: the number of questions (e.g. "12 questions"). -->
+  <string name="wizard_import_parsed">បានវិភាគ %1$s · រួចរាល់សម្រាប់នាំចូលទៅជំហានទី 5</string>
+  <!-- %1$s: the number of questions (e.g. "12 questions"); %2$s: the number of sample plots (e.g. "50 sample plots"). -->
+  <string name="wizard_import_parsed_with_plots">បានវិភាគ %1$s · %2$s · រួចរាល់សម្រាប់នាំចូលទៅជំហានទី 5</string>
+  <string name="wizard_import_clear_file">សម្អាតឯកសារដែលបាននាំចូល</string>
+  <!-- %1$d: the number of Collect Earth surveys found in the imported archive. -->
+  <string name="wizard_import_cep_archive_label">ការស្ទង់មតិ Collect Earth ក្នុងបណ្ណសារ (រកឃើញ %1$d)</string>
+
+  <!-- Wizard step 2: Purpose. -->
+  <string name="wizard_purpose_subtitle">ជ្រើសរើសលទ្ធផល ឬស្តង់ដាររាយការណ៍ដែលការស្ទង់មតិនេះគាំទ្រ ដើម្បីកំណត់ជាមុននូវស្រទាប់ផែនទី និងសំណុំបែបបទចាប់ផ្តើមរបស់វា។</string>
+  <!-- Section title of a required choice (* marks it required). -->
+  <string name="wizard_purpose_question">តើទិន្នន័យនេះនឹងត្រូវប្រើសម្រាប់អ្វី? *</string>
+  <string name="wizard_purpose_question_supporting">ជ្រើសរើសគោលបំណងចម្បង ដើម្បីឱ្យ Collect One អាចសម្រួលលំនាំដើមស្រទាប់ផែនទី សំណុំបែបបទចាប់ផ្តើម គោលគំនិតបណ្ណាល័យស្តង់ដារ របាំងការពារអភិបាលកិច្ចទិន្នន័យ (ដូចជា EUDR ឬអធិបតេយ្យភាព CARE) និងប្រវត្តិរូបនាំចេញដោយចុចតែម្តង សម្រាប់ការស្ទង់មតិរបស់អ្នក។ ជ្រើសរើស “ផ្សេងទៀត” ប្រសិនបើគោលដៅរបស់អ្នកមិនមានក្នុងបញ្ជី។</string>
+  <string name="wizard_purpose_programs_title">កម្មវិធីរាយការណ៍ និងក្របខ័ណ្ឌ</string>
+  <string name="wizard_purpose_programs_supporting">កម្មវិធីដែលទិន្នន័យនៃការស្ទង់មតិនេះរួមចំណែក។ ការជ្រើសរើសគំរូនឹងជ្រើសរើសវាជាមុន។ ពួកវាប្រើសម្រាប់តាមដាន និងរាយការណ៍ពីផលប៉ះពាល់ ហើយមិនផ្លាស់ប្តូរទម្រង់ទេ។</string>
+  <string name="wizard_purpose_loading">កំពុងផ្ទុកគោលបំណង…</string>
+  <string name="wizard_starter_template_title">គំរូចាប់ផ្តើម</string>
+  <string name="wizard_starter_template_supporting">ជ្រើសរើសរបៀបដែលការស្ទង់មតិនេះបំពេញគោលបំណងរបស់វា។ គំរូនេះរៀបចំទម្រង់ចាប់ផ្តើម ការត្រួតពិនិត្យ និងប្រវត្តិរូបនាំចេញ ហើយជ្រើសរើសជាមុននូវកម្មវិធីដែលវារាយការណ៍ទៅ។</string>
+  <string name="wizard_starter_template_programs">រាយការណ៍ទៅ៖ %1$s</string>
+  <string name="wizard_starter_template_replace_title">ជំនួសទម្រង់របស់អ្នកឬ?</string>
+  <string name="wizard_starter_template_replace_body">អ្នកបានកែសម្រួលទម្រង់ដែលបានបង្កើតពីគំរូនៃការស្ទង់មតិនេះ។ ការប្តូរទៅ %1$s អាចជំនួសវាដោយទម្រង់ចាប់ផ្តើមរបស់វា ឬរក្សាទម្រង់របស់អ្នកដដែល។</string>
+  <string name="wizard_starter_template_replace_forms">ជំនួសទម្រង់</string>
+  <string name="wizard_starter_template_keep_forms">រក្សាទម្រង់របស់ខ្ញុំ</string>
+  <string name="wizard_starter_template_cancel">បោះបង់</string>
+
+  <!-- Wizard step 3: Survey area. -->
+  <string name="wizard_survey_area_subtitle_field">កំណត់ព្រំដែនភូមិសាស្ត្រ ដើម្បីកំណត់ក្របផែនទីការស្ទង់មតិ និងរៀបចំជាមុននូវរូបភាពផែនទីមូលដ្ឋានក្រៅបណ្ដាញសម្រាប់អ្នកប្រមូលទិន្នន័យនៅទីវាល។</string>
+  <string name="wizard_survey_area_subtitle_visual">កំណត់តំបន់ចំណាប់អារម្មណ៍ (AOI) ដែលក្បាលដីសំណាកនឹងត្រូវបង្កើត និងបកស្រាយ ហើយផ្ទៀងផ្ទាត់រូបភាពផែនទីមូលដ្ឋានផ្កាយរណប។</string>
+  <string name="wizard_imagery_title">ផែនទីមូលដ្ឋាន និងរូបភាពយោង</string>
+  <string name="wizard_imagery_supporting_field">ជ្រើសរើសស្រទាប់រូបភាពផ្កាយរណប និងរូបភាពយោងណាដែលត្រូវបើក រួមជាមួយផែនទីមូលដ្ឋានផ្កាយរណបលំនាំដើម។</string>
+  <string name="wizard_imagery_supporting_visual">ជ្រើសរើសស្រទាប់រូបភាពគុណភាពបង្ហាញខ្ពស់ ឬតាមពេលវេលា (ដូចជា NICFI Planet ឬ mosaic Sentinel-2) ដែលអ្នកបកស្រាយរូបថតនឹងពិនិត្យ នៅពេលចាត់ថ្នាក់ក្បាលដី។</string>
+  <string name="wizard_imagery_default_only">ផែនទីមូលដ្ឋាន Mapbox Satellite លំនាំដើមត្រូវបានបើក។ គ្មានស្រទាប់រូបភាពផ្ទាល់ខ្លួនដែលបានកំណត់ទេ។</string>
+  <!-- Badge of imagery available to everyone ("All users" is the name of the platform-wide organization). -->
+  <string name="wizard_imagery_source_all_users">អ្នកប្រើទាំងអស់</string>
+  <!-- Imagery layer that comes with the platform. -->
+  <string name="wizard_imagery_built_in">រូបភាពភ្ជាប់មកជាមួយប្រព័ន្ធ</string>
+  <!-- %1$s: the organization that added the imagery layer. -->
+  <string name="wizard_imagery_added_by">បន្ថែមដោយ %1$s</string>
+  <string name="wizard_imagery_offline_available">អាចទាញយកសម្រាប់ប្រើក្រៅបណ្ដាញនៅទីវាល និងសម្រាប់ផែនទីលើគេហទំព័រ</string>
+  <string name="wizard_imagery_online_only">ស្រទាប់រូបភាពផ្កាយរណប និងរូបភាពយោងតាមអ៊ីនធឺណិត</string>
+
+  <!-- Wizard step 4: Map features. -->
+  <string name="wizard_map_features_subtitle">កំណត់ស្រទាប់ផែនទីចម្បងដែលទិន្នន័យនឹងត្រូវកត់ត្រា៖ ការប្រមូលនៅទីវាលដោយសេរី ក្រឡាក្បាលដីសំណាកស្ថិតិ ឬធាតុ GeoJSON / KML ដែលបាននាំចូល។</string>
+  <string name="wizard_map_features_source_title">តើធាតុផែនទីត្រូវបានបង្កើតដោយរបៀបណា?</string>
+  <string name="wizard_source_field_freeform">អ្នកប្រមូលទិន្នន័យបន្ថែមធាតុផែនទីនៅទីវាល</string>
+  <string name="wizard_source_field_freeform_description">អ្នកប្រមូលទិន្នន័យកត់ត្រាចំណុច ឬពហុកោណថ្មីនៅនឹងកន្លែង ក្នុងអំឡុងពេលចុះទីវាល។</string>
+  <string name="wizard_source_sample_plots">បង្កើតក្បាលដីសំណាក</string>
+  <string name="wizard_source_sample_plots_description">បង្កើតក្បាលដីសំណាកជាប្រព័ន្ធ ឬចៃដន្យ (និងក្រឡាក្បាលដីរង) នៅក្នុងតំបន់ស្ទង់មតិ។</string>
+  <string name="wizard_source_import_file">នាំចូលធាតុផែនទី (GeoJSON / KML)</string>
+  <string name="wizard_source_import_file_description">ផ្ទុកឡើងព្រំដែនក្បាលដី ក្បាលដីធ្លី ឬចំណុចដែលបានកំណត់ជាមុនពីឯកសារ។</string>
+  <!-- %1$s: the description of the chosen way of creating map features (a full sentence). -->
+  <string name="wizard_map_features_source_preselected">%1$s បានជ្រើសរើសជាមុនសម្រាប់គោលបំណង និងរបៀបប្រមូលដែលអ្នកបានជ្រើសរើស។</string>
+  <string name="wizard_change">ផ្លាស់ប្តូរ</string>
+  <string name="wizard_eudr_guardrail_title">របាំងការពារទីតាំងភូមិសាស្ត្រ EUDR មាត្រា 9</string>
+  <string name="wizard_eudr_guardrail_body">បទប្បញ្ញត្តិស្តីពីការកាប់បំផ្លាញព្រៃឈើរបស់ EU (EUDR) តម្រូវឱ្យមានព្រំដែនពហុកោណសម្រាប់ក្បាលដីផលិតកម្មទាំងអស់ដែលធំជាង 4 ហិកតា។ ធរណីមាត្រពហុកោណត្រូវបានជ្រើសរើសតាមលំនាំដើម។</string>
+  <string name="wizard_eudr_plots_under_four_ha">ក្បាលដីផលិតកម្មទាំងអស់ក្នុងការស្ទង់មតិនេះ ≤ 4 ha (អនុញ្ញាតទីតាំងចំណុចតែមួយ)</string>
+  <string name="wizard_primary_layer_settings">ការកំណត់ស្រទាប់ផែនទីចម្បង</string>
+  <string name="wizard_map_layer_name">ឈ្មោះស្រទាប់ផែនទី</string>
+  <string name="wizard_geometry_type">ប្រភេទធរណីមាត្រ</string>
+  <string name="wizard_allow_field_creation">អនុញ្ញាតឱ្យអ្នកប្រមូលទិន្នន័យបន្ថែមធាតុផែនទីថ្មីនៅទីវាល</string>
+  <string name="wizard_allow_field_creation_supporting">នៅពេលបើក អ្នកប្រមូលទិន្នន័យអាចកំណត់ទីតាំង ឬដើរជុំវិញបរិវេណក្បាលដី ដើម្បីបង្កើតធាតុផែនទីថ្មី។</string>
+  <string name="wizard_sample_design_title">ការរចនាសំណាកស្ថិតិ និងចំណុចក្បាលដីរង</string>
+  <string name="wizard_sample_design_supporting">កំណត់ក្បាលដីតាមក្រឡាជាប្រព័ន្ធ ចៃដន្យសាមញ្ញ ឬចៃដន្យតាមស្រទាប់ រាងក្បាលដី (ចំណុច ការ៉េ រង្វង់) និងក្រឡាចំណុចសំណាកក្បាលដីរងខាងក្នុង។</string>
+  <string name="wizard_import_features_title">នាំចូលធាតុផែនទីពី GeoJSON ឬ KML</string>
+  <string name="wizard_import_features_supporting">ផ្ទុកឡើងព្រំដែនកសិដ្ឋាន ក្បាលដីតាមដាន ឬចំណុចចំណាប់អារម្មណ៍ដែលមានស្រាប់។ គុណលក្ខណៈក្នុងឯកសារនឹងក្លាយជាលក្ខណៈសម្បត្តិនៃស្រទាប់ផែនទី។</string>
+  <string name="wizard_import_features_choose_file">ជ្រើសរើសឯកសារ GeoJSON ឬ KML</string>
+  <!-- %1$d: the number of imported map features; %2$s: their geometry type in lower case (e.g. "polygon"). -->
+  <plurals name="wizard_import_features_loaded">
+    <item quantity="other">បានផ្ទុកធាតុ %2$s ចំនួន %1$d</item>
+  </plurals>
+  <string name="wizard_also_allow_field_creation">អនុញ្ញាតឱ្យអ្នកប្រមូលទិន្នន័យបន្ថែមធាតុផែនទីថ្មីនៅទីវាលផងដែរ</string>
+  <string name="wizard_also_allow_field_creation_supporting">បិទសម្រាប់ក្បាលដីតាមដានថេរ បើកប្រសិនបើអ្នកប្រមូលទិន្នន័យក៏អាចបន្ថែមទីតាំងថ្មីបានដែរ។</string>
+  <!-- %1$d: the number of other map layers and data tables in the survey. -->
+  <plurals name="wizard_other_datasets_note">
+    <item quantity="other">ការស្ទង់មតិនេះក៏មានស្រទាប់ផែនទី ឬតារាងទិន្នន័យ %1$d ទៀត ដែលភ្ជាប់ទៅសំណុំបែបបទផ្សេងទៀតរបស់វា។ អ្នកអាចពិនិត្យវានៅជំហានបន្ទាប់។</item>
+  </plurals>
+
+  <!-- Wizard validation messages. -->
+  <string name="wizard_validation_copy_source_required">ជ្រើសរើសការស្ទង់មតិប្រភពដែលត្រូវចម្លង មុនពេលបន្ត។</string>
+  <string name="wizard_validation_import_file_required">ជ្រើសរើសឯកសារ XForms XML ដែលត្រឹមត្រូវដើម្បីនាំចូល មុនពេលបន្ត។</string>
+  <string name="wizard_validation_survey_area_required">ជ្រើសរើស ឬគូរតំបន់ស្ទង់មតិ ដើម្បីបន្ត។</string>
+  <string name="wizard_validation_form_variant_incompatible">ដោះស្រាយសំណួរទម្រង់ដែលមិនត្រូវគ្នាជាមួយជម្រើសទម្រង់ដែលបានជ្រើសរើស (Web ឬ Google Earth) មុនពេលបន្ត។</string>
+  <!-- %1$s: the name of the file that couldn't be read. -->
+  <string name="wizard_import_parse_failed">មិនអាចវិភាគសំណួរ XForms ឬ Collect Earth ណាមួយពី “%1$s” បានទេ។</string>
+
+  <!-- Collection modes: field data collection, desk-based visual classification, or both. -->
+  <string name="wizard_mode_field_survey">ការស្ទង់មតិនៅទីវាល</string>
+  <string name="wizard_mode_field_survey_summary">ការប្រមូលទិន្នន័យនៅទីវាលលើទូរស័ព្ទ ក្រៅបណ្ដាញ/តាមអ៊ីនធឺណិត ដោយអ្នកប្រមូលទិន្នន័យនៅនឹងកន្លែង។</string>
+  <string name="wizard_mode_visual_classification">ការចាត់ថ្នាក់តាមរូបភាព</string>
+  <string name="wizard_mode_visual_classification_summary">ការចាត់ថ្នាក់ក្បាលដីសំណាកតាមរូបភាពនៅការិយាល័យ លើរូបភាពផ្កាយរណប និងផែនទីមូលដ្ឋាន។</string>
+  <!-- Collection mode combining field survey and visual classification. -->
+  <string name="wizard_mode_both">ទាំងពីរ</string>
+  <string name="wizard_mode_both_summary">ការរួមបញ្ចូលគ្នានៃការចាត់ថ្នាក់តាមរូបភាពនៅការិយាល័យ និងការប្រមូលទិន្នន័យនៅទីវាលលើទូរស័ព្ទ។</string>
+
+  <!-- Wizard step 5: Forms. -->
+  <string name="wizard_show_forms_and_layers">បង្ហាញសំណុំបែបបទ និងស្រទាប់ទាំងអស់</string>
+  <string name="wizard_hide_forms_and_layers">លាក់សំណុំបែបបទ និងស្រទាប់</string>
+  <string name="wizard_add_another_form">បន្ថែមសំណុំបែបបទមួយទៀត</string>
+  <string name="wizard_add_form">បន្ថែមសំណុំបែបបទ</string>
+  <string name="wizard_untitled_form">សំណុំបែបបទគ្មានចំណងជើង</string>
+  <!-- Name shown for a map layer or data table without a name. -->
+  <string name="wizard_untitled">គ្មានចំណងជើង</string>
+
+  <!-- Wizard step 6: Sharing. -->
+  <string name="wizard_sharing_subtitle">ពិនិត្យការត្រៀមខ្លួនសម្រាប់ផលប៉ះពាល់ និងការនាំចេញនៃការស្ទង់មតិរបស់អ្នក កំណត់លំនាំដើមអធិបតេយ្យភាពទិន្នន័យ និងអញ្ជើញអ្នកសហការ។</string>
+  <string name="wizard_draft_mode_title">ចាប់ផ្តើមក្នុងរបៀបសេចក្តីព្រាង</string>
+  <!-- Badge of a survey that isn't published yet. -->
+  <string name="wizard_draft_badge">សេចក្តីព្រាង</string>
+  <string name="wizard_draft_mode_body">ការចុច បង្កើតការស្ទង់មតិ នឹងបើកការស្ទង់មតិនៅលើផែនទីមេក្នុងរបៀបសេចក្តីព្រាង ដើម្បីឱ្យអ្នកអាចពិនិត្យតំបន់សិក្សា និងស្រទាប់ ឬបើកកម្មវិធីកែការស្ទង់មតិ មុនពេលអ្នកប្រមូលទិន្នន័យមើលឃើញវា។ នៅពេលអ្នករួចរាល់ដើម្បីដាក់ឱ្យដំណើរការ សូមបើកកម្មវិធីកែការស្ទង់មតិ ចុចស្លាកស្ថានភាព សេចក្តីព្រាង នៅជាប់ឈ្មោះការស្ទង់មតិ ហើយជ្រើសរើស បោះពុម្ពផ្សាយការស្ទង់មតិ។</string>
+  <string name="wizard_readiness_title">ការត្រៀមខ្លួនសម្រាប់ផលប៉ះពាល់ និងការនាំចេញ</string>
+  <string name="wizard_readiness_supporting">របៀបដែលគ្រោងនៃការស្ទង់មតិនេះភ្ជាប់ទៅនឹងការបូកសរុបផលប៉ះពាល់របស់ស្ថាប័នអ្នក សូចនាករបរិស្ថាន FAO/UN និងប្រវត្តិរូបនាំចេញដោយចុចតែម្តង។</string>
+  <!-- %1$s: the collection mode (e.g. "Field survey"). -->
+  <string name="wizard_readiness_mode">របៀប៖ %1$s</string>
+  <!-- %1$d: questions linked to standard fields (shared data definitions); %2$d: all questions. -->
+  <string name="wizard_readiness_fields_linked">បានភ្ជាប់វាលស្តង់ដារ %1$d/%2$d</string>
+  <!-- %1$s: comma-separated purpose names. -->
+  <string name="wizard_readiness_purposes">គោលបំណង៖ %1$s</string>
+  <!-- %1$s: comma-separated reporting program names. -->
+  <string name="wizard_readiness_programs">កម្មវិធី៖ %1$s</string>
+  <!-- %1$s: comma-separated impact goal names. -->
+  <string name="wizard_readiness_goals">គោលដៅផលប៉ះពាល់៖ %1$s</string>
+  <!-- Purpose list entry for a custom purpose. %1$s: the organizer's description of it. -->
+  <string name="wizard_readiness_other_purpose">ផ្សេងទៀត៖ %1$s</string>
+  <string name="wizard_readiness_export_profiles">ប្រវត្តិរូបនាំចេញដោយចុចតែម្តង</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped_ready">បានផ្គូផ្គង %1$d/%2$d (រួចរាល់)</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped">បានផ្គូផ្គង %1$d/%2$d</string>
+
+  <!-- CARE Principles for Indigenous Data Governance and FAO Free, Prior and Informed Consent (FPIC). -->
+  <string name="wizard_care_title">គោលការណ៍ CARE និងអធិបតេយ្យភាពទិន្នន័យជនជាតិដើមភាគតិច / សហគមន៍</string>
+  <string name="wizard_care_applied_body">សិទ្ធិចូលប្រើដែលមានការកំណត់ ភាពមើលឃើញរវាងអ្នកប្រមូល “តែការដាក់ស្នើរបស់ខ្លួនប៉ុណ្ណោះ” និងលក្ខខណ្ឌអ្នកប្រមូលស្តីពីការយល់ព្រមដោយសេរី ជាមុន និងមានព័ត៌មានគ្រប់គ្រាន់ (FPIC) របស់ FAO កំពុងសកម្ម ដើម្បីការពារទិន្នន័យសហគមន៍ និងកម្មសិទ្ធិដីធ្លី។</string>
+  <string name="wizard_care_not_applied_body">កំពុងធ្វើការជាមួយជនជាតិដើមភាគតិច សហគមន៍មូលដ្ឋាន ឬទិន្នន័យកម្មសិទ្ធិដីធ្លីដែលរសើបមែនទេ? សូមអនុវត្តលំនាំដើមអធិបតេយ្យភាព CARE និង FAO FPIC (សិទ្ធិចូលប្រើដែលមានការកំណត់ + អ្នកប្រមូលមើលឃើញតែការដាក់ស្នើរបស់ខ្លួន + លក្ខខណ្ឌយល់ព្រម FPIC)។</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_care_excluded_from_aggregates">ចំណាំ៖ %1$s មិនត្រូវបានរាប់បញ្ចូលក្នុងចំនួនសរុបទូទាំងប្រព័ន្ធទេ។</string>
+  <string name="wizard_care_defaults_applied">✓ បានអនុវត្តលំនាំដើម CARE</string>
+  <string name="wizard_care_apply_defaults">អនុវត្តលំនាំដើម CARE</string>
+  <!-- CARE principle "C". -->
+  <string name="wizard_care_collective_benefit">អត្ថប្រយោជន៍រួម</string>
+  <string name="wizard_care_collective_benefit_description">សូចនាករប្រព័ន្ធអេកូឡូស៊ី និងសហគមន៍ ប្រើគោលគំនិតបណ្ណាល័យរួម សម្រាប់ភស្តុតាងដែលសហគមន៍ជាម្ចាស់។</string>
+  <!-- CARE principle "A". -->
+  <string name="wizard_care_authority_to_control">សិទ្ធិអំណាចក្នុងការគ្រប់គ្រង</string>
+  <string name="wizard_care_authority_to_control_description">សិទ្ធិចូលប្រើត្រូវបានកំណត់ ដើម្បីឱ្យអ្នកថែរក្សាសហគមន៍គ្រប់គ្រងថាអ្នកណាអាចមើល ឬប្រមូលកំណត់ត្រាស្ទង់មតិបាន។</string>
+  <!-- CARE principle "R". -->
+  <string name="wizard_care_responsibility">ការទទួលខុសត្រូវ</string>
+  <string name="wizard_care_responsibility_description">ភាពមើលឃើញរវាងអ្នកប្រមូល ត្រូវបានកំណត់ត្រឹមការដាក់ស្នើរបស់អ្នករួមចំណែកម្នាក់ៗ បូកនឹងអ្នករៀបចំការស្ទង់មតិ។</string>
+  <!-- CARE principle "E". -->
+  <string name="wizard_care_ethics">ក្រមសីលធម៌</string>
+  <string name="wizard_care_ethics_description">ទិន្នន័យសហគមន៍ដែលរសើប ត្រូវបានការពារពីការបូកសរុបពីខាងក្រៅដែលមិនបានអនុម័ត។</string>
+  <!-- CARE principle "E", as checked in the wizard. -->
+  <string name="wizard_care_ethics_aggregate_protection">ក្រមសីលធម៌ និងការការពារការបូកសរុប</string>
+  <string name="wizard_care_ethics_aggregate_protection_description">កំណត់ត្រាកម្មសិទ្ធិដីធ្លី និងគ្រួសារនីមួយៗ មិនត្រូវបានបង្ហាញក្នុងការបូកសរុបសាធារណៈរបស់ប្រព័ន្ធឡើយ។</string>
+  <string name="wizard_care_fpic">ការយល់ព្រមដោយសេរី ជាមុន និងមានព័ត៌មានគ្រប់គ្រាន់</string>
+  <string name="wizard_care_fpic_description">ត្រូវការការយល់ព្រមច្បាស់លាស់ពីអ្នកប្រមូល/អ្នកចូលរួម មុនពេលកត់ត្រាទិន្នន័យនៅទីវាល។</string>
+  <string name="wizard_care_fpic_wizard_description">អ្នកប្រមូលទិន្នន័យត្រូវតែពិនិត្យ និងទទួលយកលក្ខខណ្ឌយល់ព្រមរបស់សហគមន៍យ៉ាងច្បាស់លាស់ មុនពេលប្រមូលទិន្នន័យ។</string>
+  <!-- Standards and guidelines a CARE / FPIC criterion comes from. -->
+  <string name="wizard_care_standard_care_fao_indigenous_data_policy">គោលនយោបាយទិន្នន័យជនជាតិដើមភាគតិច CARE និង FAO</string>
+  <string name="wizard_care_standard_care_fao_vggt">អភិបាលកិច្ចកម្មសិទ្ធិដីធ្លី CARE និង FAO VGGT</string>
+  <string name="wizard_care_standard_care_principles">គោលការណ៍ CARE</string>
+  <string name="wizard_care_standard_fao_fpic_manual">សៀវភៅណែនាំ FAO FPIC</string>
+  <string name="wizard_care_standard_fao_fpic_guidelines">គោលការណ៍ណែនាំប្រតិបត្តិការ FAO FPIC</string>
+  <string name="wizard_care_criterion_met">បំពេញ</string>
+  <string name="wizard_care_criterion_not_met">មិនទាន់បំពេញ</string>
+  <string name="wizard_care_effect_collective_benefit_on">សំណួរដែលភ្ជាប់ទៅនឹងវាលស្តង់ដារ អនុញ្ញាតឱ្យទិន្នន័យនៃការស្ទង់មតិនេះចូលរួមក្នុងសូចនាករសហគមន៍ និងផលប៉ះពាល់រួម ព្រមទាំងការនាំចេញដោយចុចតែម្តង។</string>
+  <string name="wizard_care_effect_collective_benefit_off">គ្មានសំណួរណាភ្ជាប់ទៅនឹងវាលស្តង់ដារទេ ដូច្នេះទិន្នន័យនៃការស្ទង់មតិនេះនឹងមិនចូលរួមក្នុងសូចនាករសហគមន៍ ឬផលប៉ះពាល់រួមទេ។ សូមជ្រើសរើសគោលបំណង ឬភ្ជាប់សំណួរទៅនឹងវាលស្តង់ដារនៅជំហានសំណុំបែបបទ។</string>
+  <string name="wizard_care_effect_authority_on">មានតែមនុស្សដែលអ្នកអញ្ជើញប៉ុណ្ណោះដែលអាចបើកការស្ទង់មតិនេះ និងប្រមូលទិន្នន័យ ដូច្នេះអ្នកថែរក្សាសហគមន៍គ្រប់គ្រងថាអ្នកណាមើលឃើញកំណត់ត្រា។</string>
+  <string name="wizard_care_effect_authority_off">មនុស្សដែលអ្នកមិនបានអញ្ជើញ អាចបើកការស្ទង់មតិនេះ និងកំណត់ត្រារបស់វាបាន។ ដើម្បីកំណត់ សូមកំណត់ អ្នកដែលអាចប្រមូលទិន្នន័យ ជា អ្នកដែលបានអញ្ជើញ ខាងក្រោម។</string>
+  <string name="wizard_care_effect_responsibility_on">អ្នកប្រមូលទិន្នន័យមើលឃើញតែការដាក់ស្នើរបស់ខ្លួននៅលើផែនទី។ អ្នករៀបចំការស្ទង់មតិមើលឃើញទាំងអស់។</string>
+  <string name="wizard_care_effect_responsibility_off">អ្នកប្រមូលទិន្នន័យអាចមើលឃើញការដាក់ស្នើរបស់អ្នកគ្រប់គ្នានៅលើផែនទី រួមទាំងកំណត់ត្រាកម្មសិទ្ធិដីធ្លី និងធនធានរបស់គ្រួសារផ្សេងទៀត។ ដើម្បីកំណត់ សូមកំណត់ អ្នកដែលអាចមើលទិន្នន័យ ជា អ្នករួមចំណែក និងអ្នករៀបចំ ខាងក្រោម។</string>
+  <string name="wizard_care_effect_ethics_on">សេចក្តីសង្ខេបផលប៉ះពាល់សាធារណៈបង្ហាញតែចំនួនសរុបដែលលើសកម្រិតអប្បបរមា មិនដែលបង្ហាញកំណត់ត្រាកម្មសិទ្ធិដីធ្លី ឬគ្រួសារនីមួយៗទេ។</string>
+  <string name="wizard_care_effect_fpic_on">អ្នកប្រមូលទិន្នន័យត្រូវអាន និងទទួលយកលក្ខខណ្ឌយល់ព្រមរបស់អ្នក មុនពេលអាចប្រមូលទិន្នន័យបាន។</string>
+  <string name="wizard_care_effect_fpic_off">អ្នកប្រមូលទិន្នន័យអាចចាប់ផ្តើមប្រមូលដោយមិនចាំបាច់ទទួលយកលក្ខខណ្ឌយល់ព្រមណាមួយ។ ដើម្បីតម្រូវឱ្យមានការយល់ព្រម សូមបើក លក្ខខណ្ឌយល់ព្រម និងអភិបាលកិច្ចសម្រាប់អ្នកប្រមូលទិន្នន័យ ខាងក្រោម។</string>
+  <string name="wizard_care_summary_title">CARE និង FPIC</string>
+  <string name="wizard_care_summary_count">បំពេញ %1$d ក្នុងចំណោម %2$d</string>
+  <string name="wizard_care_show_details">បង្ហាញព័ត៌មានលម្អិត</string>
+  <string name="wizard_care_hide_details">លាក់ព័ត៌មានលម្អិត</string>
+  <string name="wizard_care_state_expanded">កំពុងបង្ហាញព័ត៌មានលម្អិត</string>
+  <string name="wizard_care_state_collapsed">បានលាក់ព័ត៌មានលម្អិត</string>
+  <string name="wizard_care_sticky_chip">CARE និង FPIC · %1$d/%2$d</string>
+  <string name="wizard_care_sticky_chip_a11y">CARE និង FPIC៖ បំពេញលក្ខខណ្ឌ %1$d ក្នុងចំណោម %2$d។ ទៅកាន់ព័ត៌មានលម្អិត CARE។</string>
+  <string name="wizard_care_learn_more">តើ CARE និង FPIC ជាអ្វី?</string>
+  <string name="wizard_care_auto_reason_organization">បានអនុវត្តដោយស្វ័យប្រវត្តិ ព្រោះ %1$s ត្រូវបានចុះឈ្មោះជាអង្គការជនជាតិដើមភាគតិច ឬសហគមន៍មូលដ្ឋាន។ អ្នកអាចផ្លាស់ប្តូរការកំណត់ទាំងនេះខាងក្រោម។</string>
+  <string name="wizard_care_auto_reason_concepts">បានអនុវត្តដោយស្វ័យប្រវត្តិ ព្រោះការស្ទង់មតិនេះប្រមូលទិន្នន័យជនជាតិដើមភាគតិច និងសហគមន៍៖ %1$s។ អ្នកអាចផ្លាស់ប្តូរការកំណត់ទាំងនេះខាងក្រោម។</string>
+  <string name="wizard_care_auto_reason_more">%1$s និង %2$d ទៀត</string>
+  <string name="wizard_care_explainer_title">CARE និង FPIC ក្នុង Collect One</string>
+  <string name="wizard_care_explainer_intro">ទិន្នន័យអំពីជនជាតិដើមភាគតិច និងសហគមន៍មូលដ្ឋាន ដីធ្លី និងធនធានរបស់ពួកគេ អាចប៉ះពាល់ដល់សិទ្ធិដីធ្លី ជីវភាព និងសុវត្ថិភាព។ Collect One គាំទ្រក្របខណ្ឌពីរដែលប្រើយ៉ាងទូលំទូលាយ ដែលជួយសហគមន៍រក្សាការគ្រប់គ្រងលើទិន្នន័យនោះ។</string>
+  <string name="wizard_care_explainer_care_heading">គោលការណ៍ CARE សម្រាប់អភិបាលកិច្ចទិន្នន័យជនជាតិដើមភាគតិច</string>
+  <string name="wizard_care_explainer_care_body">បង្កើតឡើងដោយ Global Indigenous Data Alliance ដើម្បីបំពេញបន្ថែមលើគោលការណ៍ទិន្នន័យ FAIR គោលការណ៍ CARE ដាក់មនុស្ស និងគោលបំណងជាចំណុចកណ្តាលនៃការប្រើប្រាស់ទិន្នន័យ៖</string>
+  <string name="wizard_care_explainer_care_c">អត្ថប្រយោជន៍រួម៖ ទិន្នន័យគួរផ្តល់អត្ថប្រយោជន៍ដល់សហគមន៍ដែលវាពិពណ៌នា។</string>
+  <string name="wizard_care_explainer_care_a">សិទ្ធិអំណាចក្នុងការគ្រប់គ្រង៖ សហគមន៍សម្រេចថាតើទិន្នន័យអំពីពួកគេ ដីធ្លី និងធនធានរបស់ពួកគេ ត្រូវបានប្រមូល ចូលប្រើ និងប្រើប្រាស់យ៉ាងដូចម្តេច។</string>
+  <string name="wizard_care_explainer_care_r">ការទទួលខុសត្រូវ៖ អ្នកដែលធ្វើការជាមួយទិន្នន័យ ត្រូវទទួលខុសត្រូវចំពោះសហគមន៍ និងបើកចំហអំពីរបៀបប្រើប្រាស់ទិន្នន័យ។</string>
+  <string name="wizard_care_explainer_care_e">ក្រមសីលធម៌៖ សិទ្ធិ និងសុខុមាលភាពរបស់សហគមន៍ត្រូវមកមុនគេ នៅគ្រប់ដំណាក់កាលនៃវដ្តជីវិតទិន្នន័យ។</string>
+  <string name="wizard_care_explainer_fpic_heading">ការយល់ព្រមដោយសេរី ជាមុន និងមានព័ត៌មានគ្រប់គ្រាន់ (FPIC)</string>
+  <string name="wizard_care_explainer_fpic_body">FPIC គឺជាសិទ្ធិរបស់ជនជាតិដើមភាគតិច ដែលត្រូវបានទទួលស្គាល់ក្នុងសេចក្តីប្រកាសរបស់អង្គការសហប្រជាជាតិស្តីពីសិទ្ធិជនជាតិដើមភាគតិច និងអនុវត្តក្នុងកម្មវិធីរបស់ FAO ក្នុងការផ្តល់ ឬបដិសេធការយល់ព្រមចំពោះសកម្មភាពដែលប៉ះពាល់ដល់ពួកគេ។ ការយល់ព្រមត្រូវផ្តល់ដោយសេរី ស្នើសុំមុនពេលសកម្មភាពចាប់ផ្តើម ផ្អែកលើព័ត៌មានពេញលេញ ហើយអាចដកវិញបានគ្រប់ពេល។</string>
+  <string name="wizard_care_explainer_defaults_heading">អ្វីដែលលំនាំដើម CARE ផ្លាស់ប្តូរក្នុងការស្ទង់មតិនេះ</string>
+  <string name="wizard_care_explainer_defaults_restricted">សិទ្ធិចូលប្រើដែលមានការកំណត់៖ មានតែមនុស្សដែលអ្នកអញ្ជើញប៉ុណ្ណោះដែលអាចបើកការស្ទង់មតិ និងទិន្នន័យរបស់វា។</string>
+  <string name="wizard_care_explainer_defaults_own_only">ការដាក់ស្នើឯកជន៖ អ្នកប្រមូលទិន្នន័យមើលឃើញតែការដាក់ស្នើរបស់ខ្លួននៅលើផែនទី មិនមែនរបស់អ្នកដទៃទេ។</string>
+  <string name="wizard_care_explainer_defaults_consent">លក្ខខណ្ឌយល់ព្រម៖ អ្នកប្រមូលទិន្នន័យត្រូវអាន និងទទួលយកលក្ខខណ្ឌ FPIC មុនពេលចាប់ផ្តើមប្រមូល។</string>
+  <string name="wizard_care_explainer_defaults_editable">សេចក្តីសង្ខេបផលប៉ះពាល់សាធារណៈមិនដែលបង្ហាញកំណត់ត្រានីមួយៗទេ។ អ្នកអាចផ្លាស់ប្តូរការកំណត់នីមួយៗ ឬកែលក្ខខណ្ឌយល់ព្រម ខាងក្រោម។</string>
+  <string name="wizard_care_explainer_auto_heading">ពេលណា Collect One អនុវត្តវាជំនួសអ្នក</string>
+  <string name="wizard_care_explainer_auto_body">លំនាំដើម CARE ត្រូវបានអនុវត្តដោយស្វ័យប្រវត្តិ នៅពេលការស្ទង់មតិជារបស់អង្គការជនជាតិដើមភាគតិច ឬសហគមន៍មូលដ្ឋាន ឬនៅពេលសំណួររបស់វាភ្ជាប់ទៅនឹងវាលស្តង់ដារជនជាតិដើមភាគតិច និងសហគមន៍ (ដូចជាឈ្មោះសហគមន៍ ឬប្រភេទកម្មសិទ្ធិដីធ្លី) ឧទាហរណ៍តាមរយៈគោលបំណងគូសផែនទីដីធ្លី និងធនធានសហគមន៍។</string>
+  <string name="wizard_care_explainer_close">យល់ហើយ</string>
+  <string name="wizard_consent_title">លក្ខខណ្ឌយល់ព្រម និងអភិបាលកិច្ចសម្រាប់អ្នកប្រមូលទិន្នន័យ</string>
+  <string name="wizard_consent_supporting">តម្រូវឱ្យអ្នកប្រមូលទិន្នន័យពិនិត្យ និងទទួលយកលក្ខខណ្ឌការយល់ព្រមដោយសេរី ជាមុន និងមានព័ត៌មានគ្រប់គ្រាន់ (FPIC) ឬលក្ខខណ្ឌគម្រោងផ្ទាល់ខ្លួន មុនពេលបើកការស្ទង់មតិ។</string>
+  <string name="wizard_consent_terms_label">លក្ខខណ្ឌយល់ព្រមដែលបង្ហាញដល់អ្នកប្រមូលទិន្នន័យ</string>
+</resources>

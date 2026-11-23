@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Web console: organizations directory, organization page, and organization library. -->
+<resources>
+  <!-- Common actions -->
+  <string name="org_cancel">បោះបង់</string>
+  <string name="org_save">រក្សាទុក</string>
+  <string name="org_close">បិទ</string>
+  <string name="org_ok">យល់ព្រម</string>
+  <string name="org_discard">បោះបង់ចោល</string>
+  <string name="org_dismiss">បោះបង់ការជូនដំណឹង</string>
+  <string name="org_show">បង្ហាញ</string>
+  <string name="org_hide">លាក់</string>
+  <!-- Empty choice in a dropdown, e.g. no impact pillar. -->
+  <string name="org_none">គ្មាន</string>
+  <string name="org_clear_search">សម្អាតការស្វែងរក</string>
+  <!-- Screen reader label of an edit button. %1$s: name of the item, e.g. an imagery source or template. -->
+  <string name="org_edit_item">កែ %1$s</string>
+  <!-- Screen reader label of a delete button. %1$s: name of the library item. -->
+  <string name="org_delete_item">លុប %1$s</string>
+  <!-- Confirmation dialog title. %1$s: name of the organization, template, or purpose. -->
+  <string name="org_delete_item_title">លុប %1$s?</string>
+
+  <!-- Relation badges on organization cards -->
+  <string name="org_relation_manager">អ្នកជាអ្នកគ្រប់គ្រង</string>
+  <string name="org_relation_member">សមាជិក</string>
+  <string name="org_relation_invited">បានអញ្ជើញ</string>
+  <string name="org_relation_requested">បានស្នើសុំចូលរួម</string>
+  <string name="org_badge_synthetic">សំយោគ</string>
+
+  <!-- Organization counts, joined with " · " -->
+  <plurals name="org_count_members">
+    <item quantity="other">%1$d សមាជិក</item>
+  </plurals>
+  <plurals name="org_count_surveys">
+    <item quantity="other">%1$d ការស្ទង់មតិ</item>
+  </plurals>
+  <!-- %1$d: number of imagery sources. -->
+  <string name="org_count_imagery">%1$d រូបភាព</string>
+  <!-- Pending requests to join the organization. -->
+  <plurals name="org_count_requests">
+    <item quantity="other">%1$d សំណើ</item>
+  </plurals>
+  <!-- Shown after the counts when the organization isn't listed in the directory. -->
+  <string name="org_unlisted">មិនមានក្នុងបញ្ជី</string>
+
+  <!-- Organizations directory -->
+  <string name="org_back_to_surveys">ត្រឡប់ទៅការស្ទង់មតិ</string>
+  <string name="org_organizations_title">ស្ថាប័ន</string>
+  <!-- Header summary. %1$d: organizations the user belongs to; %2$d: all organizations. -->
+  <string name="org_directory_summary">%1$d របស់អ្នក · សរុប %2$d</string>
+  <string name="org_admin_panel">ផ្ទាំងអ្នកគ្រប់គ្រងប្រព័ន្ធ</string>
+  <!-- Header button that opens the Impact page. -->
+  <string name="org_impact">ផលប៉ះពាល់</string>
+  <string name="org_create_organization">បង្កើតស្ថាប័ន</string>
+  <string name="org_search_placeholder">ស្វែងរកស្ថាប័ន</string>
+  <string name="org_section_yours">ស្ថាប័នរបស់អ្នក</string>
+  <string name="org_section_yours_empty">អ្នកមិនទាន់ជាសមាជិកស្ថាប័នណាមួយនៅឡើយទេ។ សូមបង្កើតស្ថាប័នមួយ ឬស្នើសុំចូលរួមស្ថាប័នណាមួយខាងក្រោម។</string>
+  <string name="org_section_yours_no_matches">គ្មានស្ថាប័នរបស់អ្នកណាមួយត្រូវនឹងការស្វែងរករបស់អ្នកទេ។</string>
+  <string name="org_section_others">ស្ថាប័នផ្សេងទៀត</string>
+  <string name="org_section_others_empty">គ្មានស្ថាប័នផ្សេងទៀតក្នុងបញ្ជីទេ។</string>
+  <string name="org_section_others_no_matches">គ្មានស្ថាប័នផ្សេងទៀតត្រូវនឹងការស្វែងរករបស់អ្នកទេ។</string>
+  <string name="org_no_description">មិនទាន់មានការពិពណ៌នានៅឡើយទេ។</string>
+  <!-- Card summary of the platform-wide "All users" organization. %1$d: number of imagery sources. -->
+  <plurals name="org_card_all_users_summary">
+    <item quantity="other">អ្នកប្រើទាំងអស់ · ប្រភពរូបភាព %1$d</item>
+  </plurals>
+  <string name="org_request_to_join">ស្នើសុំចូលរួម</string>
+
+  <!-- Create organization dialog -->
+  <string name="org_field_name">ឈ្មោះស្ថាប័ន</string>
+  <string name="org_field_description">ការពិពណ៌នា</string>
+  <string name="org_list_in_directory">ដាក់ក្នុងបញ្ជីឈ្មោះ</string>
+  <string name="org_create_listed_help">អ្នកណាក៏អាចស្វែងរកស្ថាប័ននេះ ស្នើសុំចូលរួម និងតាមដានលេខផលប៉ះពាល់ដែលបានបោះពុម្ពផ្សាយរបស់វាបាន។ ស្ថាប័នដែលមិនមានក្នុងបញ្ជី អាចចូលរួមបានតាមការអញ្ជើញតែប៉ុណ្ណោះ។</string>
+  <string name="org_create_manager_help">អ្នកនឹងក្លាយជាអ្នកគ្រប់គ្រងដំបូងរបស់វា។ អ្នកគ្រប់គ្រងអាចកែស្ថាប័ន គ្រប់គ្រងសមាជិក និងគ្រប់គ្រងការស្ទង់មតិទាំងអស់របស់វា។</string>
+  <string name="org_create_publish_help">ស្ថាប័ននីមួយៗបោះពុម្ពផ្សាយចំនួនសរុបអនាមិកពីការស្ទង់មតិរបស់ខ្លួន ដូចជាចំនួនហិកតាដែលបានគូសផែនទី សម្រាប់អ្នកណាដែលបានចូលគណនី Collect One។ ការដាក់ស្នើ ធាតុផែនទី ទីតាំង និងចម្លើយ មិនត្រូវបានបោះពុម្ពផ្សាយទេ។</string>
+  <string name="org_create">បង្កើត</string>
+
+  <!-- Organization type and country fields -->
+  <!-- Organization type field label. -->
+  <string name="org_field_type">ប្រភេទ</string>
+  <string name="org_field_country">ប្រទេស</string>
+  <string name="org_country_search_placeholder">ស្វែងរកតាមឈ្មោះ ឬលេខកូដ</string>
+  <string name="org_country_no_matches">គ្មានប្រទេសដែលត្រូវគ្នាទេ</string>
+  <!-- Value of an optional organization type or country that hasn't been set. -->
+  <string name="org_not_specified">មិនបានបញ្ជាក់</string>
+
+  <!-- Organization page sections (left panel) -->
+  <string name="org_tab_details">ព័ត៌មានលម្អិតស្ថាប័ន</string>
+  <string name="org_tab_surveys">ការស្ទង់មតិ</string>
+  <string name="org_tab_members">សមាជិក</string>
+  <string name="org_tab_imagery">រូបភាព</string>
+  <string name="org_tab_purposes">គោលបំណង</string>
+  <string name="org_tab_dictionary">វចនានុក្រម</string>
+  <string name="org_tab_templates">គំរូ</string>
+  <string name="org_tab_cost_controls">ការគ្រប់គ្រងចំណាយ</string>
+  <string name="org_tab_cost_tracking">ការតាមដានចំណាយ</string>
+  <!-- Members section of the platform-wide "All users" organization. -->
+  <string name="org_platform_admins">អ្នកគ្រប់គ្រងប្រព័ន្ធ</string>
+  <string name="org_nav_global_library">បណ្ណាល័យសកល</string>
+  <string name="org_nav_cost_quotas">ចំណាយ និងកូតា</string>
+  <string name="org_nav_governance">អភិបាលកិច្ច</string>
+
+  <!-- Organization page header -->
+  <string name="org_back_to_organizations">ត្រឡប់ទៅស្ថាប័ន</string>
+  <!-- Label saying that the page is an organization. -->
+  <string name="org_organization_label">ស្ថាប័ន</string>
+  <string name="org_view_impact">មើលផលប៉ះពាល់</string>
+  <string name="org_create_survey">បង្កើតការស្ទង់មតិ</string>
+  <string name="org_admin_panel_subtitle">ការគ្រប់គ្រងប្រព័ន្ធ និងបណ្ណាល័យសកល</string>
+
+  <!-- Section subtitles. %1$s: organization name. -->
+  <string name="org_details_subtitle_manager">របៀបដែល %1$s បង្ហាញដល់សមាជិក និងក្នុងបញ្ជីឈ្មោះ។ មានតែអ្នកគ្រប់គ្រងទេដែលអាចផ្លាស់ប្តូរទាំងនេះបាន។</string>
+  <string name="org_details_subtitle_member">របៀបដែល %1$s បង្ហាញដល់សមាជិក និងក្នុងបញ្ជីឈ្មោះ។ សូមស្នើអ្នកគ្រប់គ្រងឱ្យផ្លាស់ប្តូរទាំងនេះ។</string>
+  <string name="org_surveys_subtitle_manager">ការស្ទង់មតិដែលធ្វើឡើងក្នុងនាម %1$s។ ក្នុងនាមជាអ្នកគ្រប់គ្រង អ្នកអាចកែការស្ទង់មតិនីមួយៗ គ្រប់គ្រងការចែករំលែក និងនាំចេញទិន្នន័យរបស់វាបាន។</string>
+  <string name="org_surveys_subtitle_member">ការស្ទង់មតិដែលធ្វើឡើងក្នុងនាម %1$s។ បើកការស្ទង់មតិមួយ ដើម្បីមើលអ្វីដែលអ្នកអាចធ្វើបាននៅក្នុងនោះ។</string>
+  <string name="org_members_subtitle_admins">អ្នកគ្រប់គ្រងប្រព័ន្ធដែលគ្រប់គ្រងរូបភាព គោលបំណង គំរូ និងគោលគំនិតវចនានុក្រមសកល។</string>
+  <string name="org_members_subtitle">មនុស្សដែលមានទំនាក់ទំនងជាមួយ %1$s។ អ្នកគ្រប់គ្រងដឹកនាំស្ថាប័ន និងការស្ទង់មតិទាំងអស់របស់វា ចំណែកសមាជិកអាចបង្កើតការស្ទង់មតិនៅក្នុងនោះបាន។</string>
+  <string name="org_imagery_subtitle_admins">ស្រទាប់រូបភាពផែនទីមូលដ្ឋានផ្ទាល់ខ្លួន ដែលមានសម្រាប់អ្នកប្រើ Collect One ទាំងអស់ ក្នុងការស្ទង់មតិទាំងអស់ នៅក្នុងប្រអប់ស្រទាប់ផែនទីមូលដ្ឋាន លើទូរស័ព្ទ និងគេហទំព័រ។</string>
+  <string name="org_imagery_subtitle_manager">ស្រទាប់រូបភាពផែនទីមូលដ្ឋានផ្ទាល់ខ្លួន ដែលមាននៅក្នុងប្រអប់ស្រទាប់ផែនទីមូលដ្ឋាន លើទូរស័ព្ទ និងគេហទំព័រ សម្រាប់ការស្ទង់មតិក្នុង %1$s។</string>
+  <string name="org_imagery_subtitle_member">ស្រទាប់រូបភាពផែនទីមូលដ្ឋានផ្ទាល់ខ្លួន ដែលបានកំណត់សម្រាប់ការស្ទង់មតិក្នុង %1$s។ សូមស្នើអ្នកគ្រប់គ្រងឱ្យបន្ថែម ឬផ្លាស់ប្តូរប្រភពរូបភាព។</string>
+  <string name="org_purposes_subtitle_admins">ជម្រើសដែលស្ថាប័ននីមួយៗឃើញសម្រាប់ “តើទិន្នន័យនេះនឹងត្រូវប្រើសម្រាប់អ្វី?” នៅពេលបង្កើតការស្ទង់មតិ។ គោលបំណងនីមួយៗបន្ថែមគំរូរបស់វាទៅក្នុងការស្ទង់មតិថ្មី។</string>
+  <string name="org_purposes_subtitle">ជម្រើសដែលផ្តល់ជូនសម្រាប់ “តើទិន្នន័យនេះនឹងត្រូវប្រើសម្រាប់អ្វី?” នៅពេលបង្កើតការស្ទង់មតិក្នុង %1$s៖ គោលបំណងផ្ទាល់ខ្លួនរបស់វាមុន បន្ទាប់មកគោលបំណងសកល។</string>
+  <string name="org_dictionary_subtitle_admins">គោលគំនិតសកល៖ វាលស្តង់ដារដែលភ្ជាប់សំណួរក្នុងសំណុំបែបបទទៅនឹងអត្ថន័យរួម ដើម្បីឱ្យចម្លើយអាចប្រៀបធៀប និងបូកសរុបបាន ឆ្លងការស្ទង់មតិ និងភាសា។</string>
+  <string name="org_dictionary_subtitle">គោលគំនិតដែលមានសម្រាប់ការស្ទង់មតិក្នុង %1$s៖ វាលស្តង់ដារដែលផ្តល់អត្ថន័យរួមដល់សំណួរក្នុងសំណុំបែបបទ ដើម្បីឱ្យចម្លើយអាចប្រៀបធៀប និងបូកសរុបបាន។</string>
+  <string name="org_templates_subtitle_admins">គំរូសំណុំបែបបទសកល ដែលស្ថាប័ននីមួយៗអាចបន្ថែមទៅក្នុងការស្ទង់មតិរបស់ខ្លួនបាន។</string>
+  <string name="org_templates_subtitle">គំរូសំណុំបែបបទដែលមានសម្រាប់ការស្ទង់មតិក្នុង %1$s៖ គំរូផ្ទាល់ខ្លួនរបស់វាមុន បន្ទាប់មកគំរូសកល។</string>
+  <string name="org_cost_controls_title_global">ការគ្រប់គ្រងចំណាយ និងកូតាសកល</string>
+  <string name="org_cost_controls_subtitle_global">ដែនកំណត់កូតាលំនាំដើម និងទម្ងន់ថ្លៃឯកតាទូទាំងប្រព័ន្ធ ដែលអនុវត្តចំពោះស្ថាប័ន និងការស្ទង់មតិ។</string>
+  <string name="org_cost_controls_subtitle_manager">ពិដានថវិកា និងដែនកំណត់កូតាសម្រាប់ %1$s។ កំណត់ការកំណត់ជាមុននៃកម្រិត ឬដែនកំណត់ធនធានលម្អិត។</string>
+  <string name="org_cost_controls_subtitle_member">ពិដានថវិកា និងដែនកំណត់កូតាសម្រាប់ %1$s។ សូមស្នើអ្នកគ្រប់គ្រងស្ថាប័នឱ្យកែតម្រូវដែនកំណត់ទាំងនេះ។</string>
+  <string name="org_cost_tracking_title">ការតាមដានចំណាយប្រព័ន្ធ</string>
+  <string name="org_cost_tracking_subtitle">គណនេយ្យចំណាយផ្ទាល់ ការបូកសរុបការប្រើប្រាស់ធនធាន និងការបំបែកការអនុលោមតាមថវិកា តាមស្ថាប័ន ការស្ទង់មតិ និងអ្នកប្រើ។</string>
+
+  <!-- Missing organization -->
+  <string name="org_missing_title">ស្ថាប័ននេះមិនមានទេ</string>
+  <string name="org_missing_body">វាអាចត្រូវបានលុប ឬតំណភ្ជាប់មិនត្រឹមត្រូវ។</string>
+
+  <!-- Surveys section -->
+  <!-- %1$s: organization name. -->
+  <string name="org_surveys_empty_member">មិនទាន់មានការស្ទង់មតិនៅឡើយទេ។ បង្កើតការស្ទង់មតិដំបូងសម្រាប់ %1$s។</string>
+  <string name="org_surveys_empty">មិនទាន់មានការស្ទង់មតិនៅឡើយទេ។</string>
+
+  <!-- Members section -->
+  <!-- Name of the list where Managers see the name and photo an invitee accepts with; completes "…shown on the <list>". -->
+  <string name="org_members_page_name">ទំព័រសមាជិក</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_leave_title">ចាកចេញពី %1$s?</string>
+  <string name="org_leave_body">អ្នកនឹងបាត់បង់សិទ្ធិចូលប្រើការស្ទង់មតិរបស់វា លុះត្រាតែការស្ទង់មតិទាំងនោះត្រូវបានចែករំលែកជាមួយអ្នកដោយផ្ទាល់។ ការស្ទង់មតិដែលអ្នកជាម្ចាស់ នៅតែជារបស់អ្នក។</string>
+  <string name="org_leave">ចាកចេញ</string>
+  <string name="org_leave_organization">ចាកចេញពីស្ថាប័ន</string>
+  <string name="org_members_requests_title">សំណើសុំចូលរួម</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_members_requests_body">មនុស្សដែលបានរកឃើញ %1$s ក្នុងបញ្ជីឈ្មោះ ហើយបានស្នើសុំចូលរួម។</string>
+  <string name="org_members_asked_to_join">បានស្នើសុំចូលរួម</string>
+  <!-- Badge on a person who asked to join. -->
+  <string name="org_members_requested">បានស្នើសុំ</string>
+  <string name="org_decline">បដិសេធ</string>
+  <string name="org_approve">អនុម័ត</string>
+  <string name="org_members_admins_help">អ្នកគ្រប់គ្រងប្រព័ន្ធគ្រប់គ្រងបណ្ណាល័យសកល ប្រភពរូបភាពប្រព័ន្ធ និងការកំណត់ប្រព័ន្ធ។</string>
+  <!-- The signed-in user in the members list. %1$s: their name. -->
+  <string name="org_member_you">%1$s (អ្នក)</string>
+  <!-- Member role field label. -->
+  <string name="org_field_role">តួនាទី</string>
+  <!-- Screen reader label. %1$s: name of the member to remove. -->
+  <string name="org_remove_member">លុប %1$s ចេញ</string>
+  <string name="org_members_manager_help">ស្ថាប័នមួយត្រូវមានអ្នកគ្រប់គ្រងយ៉ាងហោចណាស់ម្នាក់ជានិច្ច។ ឈ្មោះ និងរូបថតបានមកពីគណនីរបស់មនុស្សម្នាក់ៗ នៅពេលពួកគេទទួលយកការអញ្ជើញ។</string>
+  <!-- Section heading listing pending invites. -->
+  <string name="org_members_invited_title">បានអញ្ជើញ</string>
+  <!-- %1$s: the invited role, e.g. Manager. -->
+  <string name="org_members_invite_pending">កំពុងរង់ចាំពួកគេទទួលយកតំណអញ្ជើញ · %1$s</string>
+  <!-- Screen reader label. %1$s: email address of the invitee. -->
+  <string name="org_revoke_invite">ដកការអញ្ជើញសម្រាប់ %1$s</string>
+  <string name="org_invite_label">អញ្ជើញមនុស្សតាមអ៊ីមែល</string>
+  <string name="org_invite">អញ្ជើញ</string>
+
+  <!-- Details section -->
+  <string name="org_published_title">លេខផលប៉ះពាល់ដែលបានបោះពុម្ពផ្សាយ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_manager">ក្នុងនាមជាអ្នកគ្រប់គ្រង %1$s អ្នកបោះពុម្ពផ្សាយចំនួនសរុបអនាមិកពីការស្ទង់មតិរបស់វា</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_member">%1$s បោះពុម្ពផ្សាយចំនួនសរុបអនាមិកពីការស្ទង់មតិរបស់ខ្លួន</string>
+  <!-- %1$s: a sentence stating what is never published. -->
+  <string name="org_published_body">អ្នកណាដែលបានចូលគណនី Collect One អាចតាមដានលទ្ធផលសរុបនៃការស្ទង់មតិរបស់អ្នក ដូចជាចំនួនហិកតាដែលបានគូសផែនទី និងរបៀបដែលទិន្នន័យត្រូវបានប្រើ នៅលើទំព័រផលប៉ះពាល់។ %1$s</string>
+  <string name="org_published_see">មើលអ្វីដែលបានបោះពុម្ពផ្សាយ</string>
+  <string name="org_platform_numbers_title">លេខទូទាំងប្រព័ន្ធ</string>
+  <string name="org_platform_numbers_exclude">កុំបញ្ចូលទិន្នន័យរបស់យើងក្នុងចំនួនសរុបនៃប្រព័ន្ធ</string>
+  <string name="org_platform_numbers_help">ការស្ទង់មតិរបស់អ្នកនៅតែរាប់បញ្ចូលក្នុងលេខផលប៉ះពាល់ផ្ទាល់ខ្លួនរបស់អ្នក មានតែចំនួនសរុបទូទាំង Collect One ទេដែលមិនរាប់បញ្ចូលវា។</string>
+  <string name="org_ask_manager_change">សូមស្នើអ្នកគ្រប់គ្រងឱ្យផ្លាស់ប្តូរវា។</string>
+  <string name="org_profile_title">ប្រវត្តិរូប</string>
+  <string name="org_field_logo">និមិត្តសញ្ញាអង្គការ</string>
+  <string name="org_details_logo_help">PNG, JPG, WebP ឬ SVG។ បង្ហាញនៅលើកាត និងក្បាលទំព័រអង្គការ។</string>
+  <string name="org_logo_upload">ផ្ទុកឡើងនិមិត្តសញ្ញា</string>
+  <string name="org_logo_change">ប្តូរនិមិត្តសញ្ញា</string>
+  <string name="org_logo_remove">លុបចេញ</string>
+  <!-- Shown under an empty organization name field. -->
+  <string name="org_details_name_required">បញ្ចូលឈ្មោះ</string>
+  <string name="org_details_description_help">បង្ហាញក្នុងបញ្ជីឈ្មោះ និងនៅលើទំព័រការស្ទង់មតិ។</string>
+  <string name="org_field_website">គេហទំព័រ</string>
+  <string name="org_details_listed_help">អ្នកណាក៏អាចស្វែងរកស្ថាប័ននេះ និងស្នើសុំចូលរួមបាន។ ស្ថាប័នដែលមិនមានក្នុងបញ្ជី អាចចូលរួមបានតាមការអញ្ជើញតែប៉ុណ្ណោះ។</string>
+  <string name="org_unsaved_changes">ការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុក</string>
+  <!-- Organization name label on the read-only details. -->
+  <string name="org_field_name_short">ឈ្មោះ</string>
+  <!-- Shown when the organization has no website. -->
+  <string name="org_not_provided">មិនបានផ្តល់។</string>
+  <!-- Directory listing label on the read-only details. -->
+  <string name="org_field_directory">បញ្ជីឈ្មោះ</string>
+  <string name="org_directory_listed">មានក្នុងបញ្ជី · អ្នកណាក៏អាចស្វែងរក និងស្នើសុំចូលរួមបាន</string>
+  <string name="org_directory_unlisted">មិនមានក្នុងបញ្ជី · តាមការអញ្ជើញតែប៉ុណ្ណោះ</string>
+  <!-- %1$d: number of surveys in the organization. -->
+  <plurals name="org_delete_body_surveys">
+    <item quantity="other">សមាជិកនឹងបាត់បង់ការពាក់ព័ន្ធរបស់ពួកគេ។ ការស្ទង់មតិ %1$d របស់វានឹងក្លាយជាការស្ទង់មតិផ្ទាល់ខ្លួនរបស់ម្ចាស់។ គ្មានទិន្នន័យណាមួយត្រូវបានលុបទេ។</item>
+  </plurals>
+  <string name="org_delete_body_no_surveys">សមាជិកនឹងបាត់បង់ការពាក់ព័ន្ធរបស់ពួកគេ។ វាគ្មានការស្ទង់មតិទេ។</string>
+  <string name="org_delete_organization">លុបស្ថាប័ន</string>
+  <string name="org_danger_zone">តំបន់គ្រោះថ្នាក់</string>
+  <string name="org_danger_zone_body">ការលុបស្ថាប័ននឹងដកការពាក់ព័ន្ធរបស់អ្នកទាំងអស់។ ការស្ទង់មតិរបស់វានឹងក្លាយជាការស្ទង់មតិផ្ទាល់ខ្លួនរបស់ម្ចាស់ ហើយរក្សាទិន្នន័យទាំងអស់របស់វា។</string>
+
+  <!-- Imagery section -->
+  <string name="org_imagery_configured_title">ប្រភពរូបភាពដែលបានកំណត់</string>
+  <string name="org_imagery_empty_manager">មិនទាន់មានប្រភពរូបភាពដែលបានកំណត់នៅឡើយទេ។ បន្ថែម URL ក្រឡា XYZ ខាងក្រោម ដើម្បីឱ្យវាអាចបិទ/បើកបាននៅក្នុងប្រអប់ស្រទាប់ផែនទីមូលដ្ឋាន។</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_imagery_empty_member">គ្មានប្រភពរូបភាពដែលបានកំណត់សម្រាប់ %1$s ទេ។</string>
+  <string name="org_imagery_source_name">ឈ្មោះប្រភព</string>
+  <!-- Example imagery source name. -->
+  <string name="org_imagery_source_name_placeholder">ឧ. OpenTopoMap Contours</string>
+  <string name="org_imagery_url">URL ក្រឡា XYZ</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_edit">ត្រូវតែមានកន្លែងដាក់ក្រឡា {z}, {x} និង {y}។</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_add">គំរូ URL ក្រឡា raster Web Mercator ដែលមានកន្លែងដាក់ {z}, {x} និង {y}។</string>
+  <string name="org_imagery_offline_title">អនុញ្ញាតការទាញយកក្រៅបណ្ដាញលើទូរស័ព្ទ</string>
+  <string name="org_imagery_offline_help_edit">អនុញ្ញាតឱ្យអ្នកប្រមូលទិន្នន័យទាញយកក្រឡាពីប្រភពនេះ សម្រាប់ប្រើក្រៅបណ្ដាញនៅទីវាល។</string>
+  <string name="org_imagery_offline_help_add">អនុញ្ញាតឱ្យអ្នកប្រមូលទិន្នន័យលើឧបករណ៍ទូរស័ព្ទ ទាញយកក្រឡាពីប្រភព XYZ នេះ សម្រាប់ប្រើក្រៅបណ្ដាញនៅទីវាល។</string>
+  <string name="org_imagery_offline_allowed">អ្នកប្រមូលទិន្នន័យអាចទាញយកក្រឡាពីប្រភពនេះទៅក្នុងឧបករណ៍ទូរស័ព្ទរបស់ពួកគេបាន។</string>
+  <string name="org_imagery_offline_disabled">ការចាក់ផ្សាយតាមអ៊ីនធឺណិតតែប៉ុណ្ណោះ ការទាញយកក្រឡាក្រៅបណ្ដាញត្រូវបានបិទលើទូរស័ព្ទ។</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_permitted">បានអនុញ្ញាត</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_not_permitted">មិនបានអនុញ្ញាត</string>
+  <!-- Screen reader label. %1$s: name of the imagery source to remove. -->
+  <string name="org_remove_imagery_source">លុប %1$s ចេញ</string>
+  <string name="org_imagery_add">បន្ថែមប្រភពរូបភាព</string>
+  <string name="org_imagery_add_body">បន្ថែមសេវាក្រឡា raster ដែលអ្នកប្រមូលទិន្នន័យ និងអ្នករៀបចំអាចបើកនៅក្នុងប្រអប់ស្រទាប់ផែនទីមូលដ្ឋាន។</string>
+  <string name="org_imagery_source_type">ប្រភេទប្រភព</string>
+  <string name="org_imagery_ee_preset">ការកំណត់ជាមុនរបស់ Earth Engine</string>
+  <string name="org_imagery_ee_preset_placeholder">ជ្រើសរើសការកំណត់ជាមុន…</string>
+  <string name="org_imagery_ee_description">គណនាដោយ Earth Engine · ក្រឡាធ្វើឱ្យស្រស់ដោយស្វ័យប្រវត្តិ</string>
+
+  <!-- Cost controls section -->
+  <string name="org_quota_tier_title">ការកំណត់ជាមុននៃកម្រិតកូតា</string>
+  <string name="org_quota_tier_body">អនុវត្តលំនាំដើមនៃកម្រិតសេវាស្តង់ដារ ឬប្ដូរកូតាធនធាននីមួយៗតាមបំណងខាងក្រោម។</string>
+  <string name="org_quota_tier_inherit">ទទួលពីសកល</string>
+  <string name="org_quota_tier_basic">កម្រិតមូលដ្ឋាន</string>
+  <string name="org_quota_tier_sponsored">កម្រិតឧបត្ថម្ភ</string>
+  <string name="org_budget_title">ពិដានថវិកាប្រចាំខែ</string>
+  <string name="org_budget_body">ដែនកំណត់តឹងរ៉ឹងជា USD សម្រាប់ចំណាយប៉ាន់ស្មាននៃការស្ទង់មតិ និងការប្រមូលទិន្នន័យ។ បញ្ចូល 0 សម្រាប់ថវិកាគ្មានដែនកំណត់។</string>
+  <string name="org_budget_field">ពិដានថវិកាប្រចាំខែ ($ USD)</string>
+  <string name="org_budget_placeholder">0.00 (គ្មានដែនកំណត់)</string>
+  <string name="org_limits_survey_title">ដែនកំណត់ការស្ទង់មតិ និងសំណុំបែបបទ</string>
+  <string name="org_limit_surveys_per_owner">ការស្ទង់មតិអតិបរមា / ម្ចាស់</string>
+  <string name="org_limit_forms_per_survey">សំណុំបែបបទអតិបរមា / ការស្ទង់មតិ</string>
+  <string name="org_limit_questions_per_form">សំណួរអតិបរមា / សំណុំបែបបទ</string>
+  <string name="org_limit_photo_questions_per_form">សំណួររូបថតអតិបរមា / សំណុំបែបបទ</string>
+  <string name="org_limit_predefined_entities">អង្គធាតុកំណត់ជាមុនអតិបរមា</string>
+  <string name="org_limit_sample_plots">ក្បាលដីសំណាកអតិបរមា</string>
+  <string name="org_limit_boundary_vertices">ចំណុចកំពូលព្រំដែនអតិបរមា</string>
+  <string name="org_limit_acl_collaborators">អ្នកសហការ ACL អតិបរមា</string>
+  <string name="org_limits_collector_title">ដែនកំណត់អ្នកប្រមូលទិន្នន័យ និងការដាក់ស្នើ</string>
+  <string name="org_limit_active_surveys_per_user">ការស្ទង់មតិសកម្មអតិបរមា / អ្នកប្រើ</string>
+  <string name="org_limit_adhoc_features_per_user">ធាតុបន្ថែមភ្លាមៗអតិបរមា / អ្នកប្រើ</string>
+  <string name="org_limit_submissions_per_feature">ការដាក់ស្នើអតិបរមា / ធាតុ / អ្នកប្រើ</string>
+  <string name="org_cost_weights_title">ទម្ងន់ថ្លៃឯកតាប្រព័ន្ធ ($ USD)</string>
+  <string name="org_cost_weight_survey_month">USD / ការស្ទង់មតិ / ខែ</string>
+  <string name="org_cost_weight_entities">USD / 1k អង្គធាតុ</string>
+  <string name="org_cost_weight_submissions">USD / 1k ការដាក់ស្នើ</string>
+  <string name="org_cost_weight_photo">USD / រូបថត</string>
+  <string name="org_cost_controls_save">រក្សាទុកការគ្រប់គ្រងចំណាយ</string>
+  <string name="org_cost_controls_saved">បានរក្សាទុកការគ្រប់គ្រងចំណាយ។</string>
+
+  <!-- Cost tracking section -->
+  <string name="org_cost_total">ចំណាយប៉ាន់ស្មានសរុប</string>
+  <!-- Monthly cost. %1$s: formatted amount, e.g. $12.50. -->
+  <string name="org_cost_per_month">%1$s / ខែ</string>
+  <!-- %1$s: formatted monthly budget, e.g. $100.00. -->
+  <string name="org_cost_budget_cap">ពិដានថវិកា៖ %1$s / ខែ</string>
+  <string name="org_cost_tracked_surveys">ការស្ទង់មតិដែលបានតាមដាន</string>
+  <string name="org_cost_total_entities">អង្គធាតុសរុប</string>
+  <string name="org_cost_submissions">ការដាក់ស្នើ</string>
+  <string name="org_cost_photos">រូបថតដែលបានថត</string>
+  <!-- %1$d: number of alerts. -->
+  <string name="org_cost_budget_alerts">ការជូនដំណឹងថវិកា (%1$d)</string>
+  <!-- %1$s: organization or survey name; %2$s: estimated monthly cost; %3$s: monthly budget. -->
+  <string name="org_cost_budget_alert">%1$s លើសថវិកាប្រចាំខែ (%2$s > %3$s)</string>
+  <!-- Filter chips. %1$d: number of rows. -->
+  <string name="org_cost_by_organization">តាមស្ថាប័ន (%1$d)</string>
+  <string name="org_cost_by_survey">តាមការស្ទង់មតិ (%1$d)</string>
+  <string name="org_cost_by_collector">តាមអ្នកប្រមូលទិន្នន័យ (%1$d)</string>
+  <string name="org_cost_exceeded">លើសថវិកា</string>
+  <string name="org_cost_within">ក្នុងថវិកា</string>
+  <plurals name="org_count_entities">
+    <item quantity="other">%1$d អង្គធាតុ</item>
+  </plurals>
+  <plurals name="org_count_submissions">
+    <item quantity="other">%1$d ការដាក់ស្នើ</item>
+  </plurals>
+  <plurals name="org_count_photos">
+    <item quantity="other">%1$d រូបថត</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features. -->
+  <string name="org_count_predefined">%1$d កំណត់ជាមុន</string>
+  <!-- %1$d: number of generated map features (sample plots). -->
+  <string name="org_count_generated">%1$d បានបង្កើត</string>
+  <!-- A collector's activity. %1$d: number of surveys. -->
+  <plurals name="org_count_active_in_surveys">
+    <item quantity="other">សកម្មក្នុងការស្ទង់មតិ %1$d</item>
+  </plurals>
+
+  <!-- Notices -->
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed">មិនអាចបង្កើត “%1$s” បានទេ។</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed_country">មិនអាចបង្កើត “%1$s” បានទេ។ សូមជ្រើសរើសប្រទេសពីបញ្ជី។</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_created">បានបង្កើតស្ថាប័ន “%1$s”។</string>
+  <string name="org_notice_save_failed_country">មិនអាចរក្សាទុកបានទេ។ សូមជ្រើសរើសប្រទេសពីបញ្ជី។</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_deleted">បានលុបស្ថាប័ន “%1$s”។</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_notice_role_all_users">អ្នករាល់គ្នាជាសមាជិករបស់ %1$s រួចហើយ។ សូមលុបអ្នកគ្រប់គ្រងចេញជំនួសវិញ។</string>
+  <string name="org_notice_last_manager_role">ស្ថាប័នមួយត្រូវការអ្នកគ្រប់គ្រងយ៉ាងហោចណាស់ម្នាក់។ សូមតែងតាំងអ្នកផ្សេងជាអ្នកគ្រប់គ្រងជាមុនសិន។</string>
+  <string name="org_notice_last_manager_leave">ស្ថាប័នមួយត្រូវការអ្នកគ្រប់គ្រងយ៉ាងហោចណាស់ម្នាក់។ សូមតែងតាំងអ្នកផ្សេងជាអ្នកគ្រប់គ្រង មុនពេលចាកចេញ។</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_left">អ្នកបានចាកចេញពី “%1$s”។</string>
+
+  <!-- Validation errors -->
+  <string name="org_error_invalid_email">បញ្ចូលអាសយដ្ឋានអ៊ីមែលដែលត្រឹមត្រូវ។</string>
+  <string name="org_error_not_found">រកមិនឃើញស្ថាប័នទេ។</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_error_invite_all_users">អ្នករាល់គ្នាជាសមាជិករបស់ %1$s រួចហើយ។ សូមអញ្ជើញមនុស្សជាអ្នកគ្រប់គ្រង។</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_member">%1$s ជាសមាជិករួចហើយ។</string>
+  <!-- %1$s: the person's email address. -->
+  <string name="org_error_already_invited">%1$s ត្រូវបានអញ្ជើញរួចហើយ។</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_requested">%1$s បានស្នើសុំចូលរួម។ សូមអនុម័តសំណើរបស់ពួកគេជំនួសវិញ។</string>
+  <!-- An invitee accepting without a name. -->
+  <string name="org_error_enter_name">បញ្ចូលឈ្មោះ។</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_error_library_managers_only">មានតែអ្នកគ្រប់គ្រងរបស់ %1$s ទេដែលអាចផ្លាស់ប្តូរបណ្ណាល័យរបស់វាបាន។</string>
+  <string name="org_error_question_labels">បញ្ចូលស្លាកសម្រាប់សំណួរនីមួយៗ។</string>
+  <string name="org_error_concept_missing">គោលគំនិតនេះលែងមានទៀតហើយ។</string>
+  <string name="org_error_concept_not_draft">មានតែគោលគំនិតសេចក្តីព្រាងទេដែលអាចលុបបាន។ សូមបញ្ឈប់ការប្រើវាជំនួសវិញ ដើម្បីឱ្យតំណភ្ជាប់ដែលមានស្រាប់នៅតែដំណើរការ។</string>
+
+  <!-- Dictionary (concepts) -->
+  <string name="org_concept_delete_error_title">មិនអាចលុបគោលគំនិតនេះបានទេ</string>
+  <string name="org_concept_search_label">ស្វែងរកគោលគំនិត</string>
+  <!-- "cultivo" is an example search term in Spanish; keep it as is. -->
+  <string name="org_concept_search_placeholder">ស្លាក ឬពាក្យគន្លឹះជាភាសាណាមួយ ឧទាហរណ៍ cultivo</string>
+  <!-- %1$d: concepts shown; %2$d: all concepts (selects the plural form). -->
+  <plurals name="org_concept_search_count">
+    <item quantity="other">%1$d ក្នុងចំណោមគោលគំនិត %2$d</item>
+  </plurals>
+  <string name="org_concepts_global_title">គោលគំនិតសកល</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_concepts_org_title">គោលគំនិតរបស់ %1$s</string>
+  <string name="org_concepts_global_body">វាលស្តង់ដារដែលមានសម្រាប់ការស្ទង់មតិទាំងអស់។ ការផ្លាស់ប្តូរអនុវត្តចំពោះស្ថាប័នទាំងអស់។</string>
+  <!-- %1$s: organization ID, part of the concept ID prefix. -->
+  <string name="org_concepts_org_body">វាលស្តង់ដារដែលមានតែស្ថាប័ននេះប្រើ។ ID របស់វាចាប់ផ្តើមដោយ org.%1$s។</string>
+  <string name="org_concepts_no_matches">គ្មានគោលគំនិតដែលត្រូវគ្នាទេ។</string>
+  <string name="org_concepts_global_empty">មិនទាន់មានគោលគំនិតសកលនៅឡើយទេ។</string>
+  <string name="org_concepts_empty">មិនទាន់មានគោលគំនិតនៅឡើយទេ។</string>
+  <string name="org_concepts_global_shared_body">ចែករំលែកជាមួយស្ថាប័នទាំងអស់ដោយ អ្នកប្រើទាំងអស់។ មានតែអ្នកគ្រប់គ្រងប្រព័ន្ធទេដែលអាចផ្លាស់ប្តូរវាបាន។</string>
+  <string name="org_concept_add">បន្ថែមគោលគំនិត</string>
+  <string name="org_concept_edit_title">កែគោលគំនិត</string>
+  <!-- %1$s: unit code, e.g. kg. -->
+  <string name="org_concept_unit">ឯកតា %1$s</string>
+  <!-- %1$d: number of list values; %2$s: the first few value labels. -->
+  <plurals name="org_concept_values">
+    <item quantity="other">%1$d តម្លៃ៖ %2$s</item>
+  </plurals>
+  <!-- Like org_concept_values, when only some of the values are listed. -->
+  <plurals name="org_concept_values_truncated">
+    <item quantity="other">%1$d តម្លៃ៖ %2$s…</item>
+  </plurals>
+  <!-- Short concept version. %1$d: version number. -->
+  <string name="org_concept_version_short">v%1$d</string>
+  <string name="org_field_label_english">ស្លាក (អង់គ្លេស)</string>
+  <string name="org_concept_label_help">ក៏ជាស្លាកសំណួរលំនាំដើមនៅពេលបានភ្ជាប់</string>
+  <string name="org_concept_vocabulary">វាក្យសព្ទ</string>
+  <!-- Concept name, the last part of its ID. -->
+  <string name="org_concept_name">ឈ្មោះ</string>
+  <!-- %1$s: the concept ID. -->
+  <string name="org_concept_id">ID៖ %1$s</string>
+  <!-- %1$s: the concept ID; %2$d: version number. -->
+  <string name="org_concept_id_version">%1$s · កំណែ %2$d</string>
+  <!-- %1$s: list of language codes and labels. -->
+  <string name="org_concept_translations">ការបកប្រែ៖ %1$s</string>
+  <string name="org_field_description_english">ការពិពណ៌នា (អង់គ្លេស)</string>
+  <string name="org_concept_data_type">ប្រភេទទិន្នន័យ</string>
+  <string name="org_concept_unit_label">ឯកតា (ស្រេចចិត្ត)</string>
+  <string name="org_concept_unit_help">លេខកូដ UCUM</string>
+  <string name="org_concept_list_values">តម្លៃបញ្ជី</string>
+  <!-- Code of a list value. -->
+  <string name="org_concept_value">តម្លៃ</string>
+  <string name="org_concept_remove_value">លុបតម្លៃចេញ</string>
+  <string name="org_concept_add_value">បន្ថែមតម្លៃ</string>
+  <string name="org_concept_aggregation">ការបូកសរុប</string>
+  <string name="org_concept_privacy">ឯកជនភាព</string>
+  <string name="org_concept_goals">គោលដៅ (ស្រេចចិត្ត)</string>
+  <string name="org_concept_suggested_goals">គោលដៅដែលបានណែនាំ (ស្រេចចិត្ត)</string>
+  <string name="org_concept_goals_help">បំបែក ID គោលដៅដោយសញ្ញាក្បៀស</string>
+  <!-- Impact pillar of a concept. -->
+  <string name="org_concept_pillar">សសរស្តម្ភ</string>
+  <!-- Lifecycle status of a concept. -->
+  <string name="org_concept_status">ស្ថានភាព</string>
+  <!-- %1$s: list of references. -->
+  <string name="org_concept_references">ឯកសារយោង៖ %1$s</string>
+
+  <!-- Library entries -->
+  <string name="org_badge_hidden">បានលាក់</string>
+  <string name="org_badge_hidden_with_templates">បានលាក់ជាមួយគំរូរបស់វា</string>
+  <string name="org_field_title_english">ចំណងជើង (អង់គ្លេស)</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_library_global_body_member">ចែករំលែកដោយ អ្នកប្រើទាំងអស់។ សូមស្នើអ្នកគ្រប់គ្រងឱ្យលាក់អ្វីដែល %1$s មិនប្រើ។</string>
+
+  <!-- Templates -->
+  <string name="org_template_new_title">គំរូថ្មី</string>
+  <string name="org_template_edit_title">កែគំរូ</string>
+  <string name="org_template_delete_body">វានឹងត្រូវលុបចេញពីបណ្ណាល័យ និងពីកញ្ចប់គោលបំណងដែលប្រើវា។ ការស្ទង់មតិដែលបានបង្កើតពីវារួចហើយ នៅតែរក្សាសំណុំបែបបទរបស់ខ្លួន។</string>
+  <string name="org_template_delete">លុបគំរូ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_org_title">គំរូរបស់ %1$s</string>
+  <string name="org_templates_empty">មិនទាន់មានគំរូនៅឡើយទេ។ គំរូដែលបានរក្សាទុកពីសំណុំបែបបទរបស់ស្ថាប័ននេះ នឹងបង្ហាញនៅទីនេះ។</string>
+  <string name="org_template_new_button">គំរូថ្មី</string>
+  <string name="org_templates_global_title">គំរូសកល</string>
+  <string name="org_templates_global_body_admins">សំណុំបែបបទដែលស្ថាប័ននីមួយៗអាចបន្ថែមទៅក្នុងការស្ទង់មតិរបស់ខ្លួនបាន។</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_global_body_manager">ចែករំលែកដោយ អ្នកប្រើទាំងអស់។ លាក់អ្វីដែល %1$s មិនប្រើ។ ការស្ទង់មតិដែលបានបង្កើតពីវារួចហើយ មិនរងផលប៉ះពាល់ទេ។</string>
+  <string name="org_templates_global_empty">មិនទាន់មានគំរូសកលនៅឡើយទេ។</string>
+  <!-- %1$d: number of questions; %2$d: questions linked to dictionary concepts. -->
+  <plurals name="org_template_summary">
+    <item quantity="other">%1$d សំណួរ · %2$d បានភ្ជាប់ទៅគោលគំនិត</item>
+  </plurals>
+  <!-- Label before the purposes a template belongs to. -->
+  <string name="org_template_purposes_label">គោលបំណង៖</string>
+  <string name="org_template_associated_purposes">គោលបំណងដែលពាក់ព័ន្ធ</string>
+
+  <!-- Template questions dialog -->
+  <!-- %1$s: template title. -->
+  <!-- Default label of a new question. %1$d: its position. -->
+  <!-- Heading of a question card. %1$d: its position. -->
+  <!-- Code of a choice. -->
+  <!-- Label of a choice. -->
+  <!-- Default label of a new choice. %1$d: its position. -->
+
+  <!-- Purposes -->
+  <string name="org_purpose_new_title">គោលបំណងថ្មី</string>
+  <string name="org_purpose_edit_title">កែគោលបំណង</string>
+  <string name="org_purpose_delete_body">វានឹងលែងត្រូវបានផ្តល់ជូននៅពេលបង្កើតការស្ទង់មតិទៀតហើយ។ ការស្ទង់មតិដែលមានស្រាប់ នៅតែរក្សាសំណុំបែបបទរបស់ខ្លួន។</string>
+  <string name="org_purpose_delete">លុបគោលបំណង</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_purposes_org_title">គោលបំណងរបស់ %1$s</string>
+  <string name="org_purposes_empty">មិនទាន់មានគោលបំណងនៅឡើយទេ។</string>
+  <string name="org_purpose_new_button">គោលបំណងថ្មី</string>
+  <string name="org_purposes_global_title">គោលបំណងសកល</string>
+  <string name="org_purposes_global_body_admins">គោលបំណងដែលស្ថាប័ននីមួយៗអាចជ្រើសរើសបាន នៅពេលបង្កើតការស្ទង់មតិ។</string>
+  <string name="org_purposes_global_body_manager">ចែករំលែកដោយ អ្នកប្រើទាំងអស់។ ការលាក់គំរូមួយ ក៏លាក់គោលបំណងដែលប្រើតែគំរូដែលបានលាក់ដែរ។</string>
+  <string name="org_purposes_global_empty">មិនទាន់មានគោលបំណងសកលនៅឡើយទេ។</string>
+  <!-- %1$s: list of reporting programs and frameworks. -->
+  <string name="org_purpose_programs">កម្មវិធីរាយការណ៍ និងក្របខ័ណ្ឌ៖ %1$s</string>
+  <!-- %1$s: list of export profile IDs. -->
+  <string name="org_purpose_exports">ការនាំចេញ៖ %1$s</string>
+  <!-- Label before the templates of a purpose. -->
+  <string name="org_purpose_templates_label">គំរូ៖</string>
+  <!-- Impact pillar of the MAP framework. -->
+  <string name="org_purpose_pillar">សសរស្តម្ភ MAP</string>
+  <string name="org_purpose_associated_templates">គំរូដែលពាក់ព័ន្ធ</string>
+  <!-- A country in pickers and on the organization page: %1$s is its name, %2$s its ISO code, e.g. Kenya (KE). -->
+  <string name="org_country_with_code">%1$s (%2$s)</string>
+  <string name="org_template_discard_title">បោះបង់ការផ្លាស់ប្ដូរលើគំរូនេះឬ?</string>
+  <string name="org_template_discard_body">ការកែសម្រួលសំណុំបែបបទ ការពិពណ៌នា និងគោលបំណងរបស់វា មិនទាន់បានរក្សាទុកទេ។</string>
+  <string name="org_template_discard">បោះបង់</string>
+  <string name="org_template_keep_editing">បន្តកែសម្រួល</string>
+
+  <!-- Admin panel: mobile client version policy -->
+  <string name="org_tab_mobile_app">កម្មវិធីទូរស័ព្ទ</string>
+  <string name="org_mobile_version_title">កំណែកម្មវិធីទូរស័ព្ទ</string>
+  <string name="org_mobile_version_subtitle">ណែនាំការធ្វើបច្ចុប្បន្នភាពនៅពេលមានកំណែថ្មី ឬតម្រូវកំណែអប្បបរមាមុនពេលធ្វើសមកាលកម្ម។</string>
+  <string name="org_mobile_version_latest_label">កំណែថ្មីបំផុតដែលមាន</string>
+  <string name="org_mobile_version_latest_help">កម្មវិធីទូរស័ព្ទដែលចាស់ជាង SemVer នេះ (ឧ. 2.1.0) នឹងឃើញសារណែនាំ។ ទុកទទេដើម្បីបិទ។</string>
+  <string name="org_mobile_version_min_label">កំណែអប្បបរមាដែលតម្រូវ</string>
+  <string name="org_mobile_version_min_help">កម្មវិធីទូរស័ព្ទដែលចាស់ជាង SemVer នេះ (ឧ. 2.0.0) នឹងត្រូវបានរារាំងរហូតដល់ធ្វើបច្ចុប្បន្នភាព។</string>
+  <string name="org_mobile_version_url_label">URL ធ្វើបច្ចុប្បន្នភាព</string>
+  <string name="org_mobile_version_url_help">តំណហាង ឬទាញយកជាជម្រើស (ត្រូវចាប់ផ្តើមដោយ https:// ឬ http://)។</string>
+  <string name="org_mobile_version_save">រក្សាទុកគោលការណ៍</string>
+  <string name="org_mobile_version_saved">បានរក្សាទុកគោលការណ៍កំណែទូរស័ព្ទ។</string>
+  <string name="org_mobile_version_unavailable">ភ្ជាប់ទៅម៉ាស៊ីនមេដើម្បីគ្រប់គ្រងគោលការណ៍កំណែទូរស័ព្ទ។</string>
+</resources>

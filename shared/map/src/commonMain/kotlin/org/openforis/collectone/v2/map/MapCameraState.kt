@@ -52,11 +52,14 @@ data class CameraPosition(
 )
 
 /**
- * Hoisted, observable camera for a [GroundMap], in the style of maps-compose `CameraPositionState`.
+ * Hoisted, observable camera for a [AppMap], in the style of maps-compose `CameraPositionState`.
  *
- * Both sides write to it: user gestures (reported by the platform renderer) and the app (through
- * [move], [animateTo], and [fitBounds]). Read [position] to observe the camera; use [project] and
- * [unproject] to place Compose overlays such as editing handles.
+ * It is the single source of truth for where the map looks: the shared gesture handling and the app
+ * (through [move], [animateTo], and [fitBounds]) write [position], and each platform's native map
+ * follows it by jumping the SDK camera whenever [position] changes. Animations therefore run here,
+ * frame by frame on the composition's frame clock, not in the native SDK. Read [position] to
+ * observe the camera; use [project] and [unproject] to place Compose overlays such as editing
+ * handles. Call it from the UI thread.
  */
 @Stable
 class MapCameraState(initial: CameraPosition) {
@@ -72,16 +75,12 @@ class MapCameraState(initial: CameraPosition) {
   var isMovingByGesture: Boolean by mutableStateOf(false)
     private set
 
-  /** Bound by the platform renderer while it is on screen; `null` falls back to Mercator math. */
-  internal var renderer: MapRenderer? = null
-
-  /** The running [animateTo] without a renderer; cancelled by gestures and newer moves. */
+  /** The running [animateTo]; cancelled by gestures and newer moves. */
   private var animation: Job? = null
 
   /** Jumps to [target] without animation. */
   fun move(target: CameraPosition) {
     stopAnimation()
-    renderer?.moveTo(target)
     updatePosition(target, byGesture = false)
   }
 
@@ -99,12 +98,11 @@ class MapCameraState(initial: CameraPosition) {
   internal suspend fun animateByGesture(target: CameraPosition, durationMs: Int) =
     animate(target, durationMs, byGesture = true)
 
+  /**
+   * Without a frame clock in the coroutine context (outside composition, as in tests) or with no
+   * duration, jumps straight to [target].
+   */
   private suspend fun animate(target: CameraPosition, durationMs: Int, byGesture: Boolean) {
-    val r = renderer
-    if (r != null) {
-      r.animateTo(target, durationMs)
-      return
-    }
     stopAnimation()
     if (durationMs <= 0 || coroutineContext[MonotonicFrameClock] == null) {
       updatePosition(target, byGesture)
@@ -155,14 +153,12 @@ class MapCameraState(initial: CameraPosition) {
   }
 
   /** Screen position of [point], relative to the map's top-left corner. */
-  fun project(point: LatLng): DpOffset =
-    renderer?.project(point) ?: WebMercator.project(point, position, viewportSize)
+  fun project(point: LatLng): DpOffset = WebMercator.project(point, position, viewportSize)
 
   /** Geographic position under [offset], relative to the map's top-left corner. */
-  fun unproject(offset: DpOffset): LatLng =
-    renderer?.unproject(offset) ?: WebMercator.unproject(offset, position, viewportSize)
+  fun unproject(offset: DpOffset): LatLng = WebMercator.unproject(offset, position, viewportSize)
 
-  /** Called by renderers whenever the camera changes, including on every gesture frame. */
+  /** Called by gesture handling and animations whenever the camera changes, on every frame. */
   internal fun updatePosition(target: CameraPosition, byGesture: Boolean) {
     isMovingByGesture = byGesture
     position = target
@@ -189,20 +185,9 @@ private fun cameraStateSaver() =
   )
 
 /**
- * Camera operations a platform renderer implements. Renderers that don't override [project] and
- * [unproject] get the pitch-free [WebMercator] math, which matches Mapbox at zero pitch.
+ * Spherical Web Mercator (EPSG:3857) with Mapbox's 512 dp world size at zoom 0. Ignores pitch, so
+ * [MapCameraState.project] matches the native map only at zero pitch.
  */
-internal interface MapRenderer {
-  fun moveTo(target: CameraPosition)
-
-  suspend fun animateTo(target: CameraPosition, durationMs: Int)
-
-  fun project(point: LatLng): DpOffset?
-
-  fun unproject(offset: DpOffset): LatLng?
-}
-
-/** Spherical Web Mercator (EPSG:3857) with Mapbox's 512 dp world size at zoom 0. Ignores pitch. */
 internal object WebMercator {
   const val TILE_SIZE = 512.0
   const val MAX_LATITUDE = 85.05112878

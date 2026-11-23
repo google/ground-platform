@@ -23,36 +23,164 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
-import org.openforis.collectone.v2.app.domain.model.EntityGeometryKind
+import org.openforis.collectone.v2.app.domain.model.BasemapType
+import org.openforis.collectone.v2.app.domain.model.DataSize
 import org.openforis.collectone.v2.app.domain.model.editor.toLatLng
 import org.openforis.collectone.v2.app.domain.model.formatHexColorCss
-import org.openforis.collectone.v2.app.domain.model.geometryKind
-import org.openforis.collectone.v2.app.ui.AppSession
+import org.openforis.collectone.v2.app.domain.model.geometryType
+import org.openforis.collectone.v2.app.ui.datacollection.geoPointForm
+import org.openforis.collectone.v2.app.ui.session.TestAppSession
+import org.openforis.collectone.v2.map.Basemap
 import org.openforis.collectone.v2.map.CameraPosition
 import org.openforis.collectone.v2.map.Geometry
+import org.openforis.collectone.v2.map.GeometryType
 import org.openforis.collectone.v2.map.LatLng
+import org.openforis.collectone.v2.map.LngLatBounds
+import org.openforis.collectone.v2.map.RasterTileLayer
+import org.openforis.collectone.v2.map.VectorLineOverlay
 
 class SurveyMapContentTest {
-  private val state = AppSession(sampleDataHolder())
+  private val state = TestAppSession(sampleDataHolder())
 
   private fun SurveyMap.entityFeatures() =
     content.sources.first { it.id == SurveyMapContent.ENTITY_SOURCE }.features
 
+  private fun SurveyMap.overlayFeatures() =
+    content.sources.first { it.id == SurveyMapContent.OVERLAY_SOURCE }.features
+
+  private val savedSatellite =
+    SavedImageryArea(
+      "a1",
+      LngLatBounds(west = 36.90, south = -0.45, east = 36.95, north = -0.40),
+      DataSize.ofMegabytes(38),
+    )
+  private val savedTerrain =
+    SavedImageryArea(
+      "a2",
+      LngLatBounds(west = 37.00, south = -0.45, east = 37.05, north = -0.40),
+      DataSize.ofMegabytes(10),
+    )
+
+  /**
+   * A map of no entities on [basemap] with the two saved areas, each drawn when its switch is on.
+   */
+  private fun savedImageryMap(
+    basemap: BasemapType,
+    drawSatellite: Boolean,
+    drawTerrain: Boolean,
+  ): SurveyMap =
+    SurveyMapContent.build(
+      SurveyMapScene(
+        anchor = state.viewModels.surveyMap.uiState.value.anchor,
+        basemapType = basemap,
+        entities = emptyList(),
+        selectedEntityId = null,
+        pendingIds = emptySet(),
+        userGps = 0.5f to 0.5f,
+        isFollowingUser = false,
+        savedImagery =
+          SavedImageryOnMap(
+            satellite = if (drawSatellite) listOf(savedSatellite) else emptyList(),
+            terrain = if (drawTerrain) listOf(savedTerrain) else emptyList(),
+            drawSatellite = drawSatellite,
+            drawTerrain = drawTerrain,
+          ),
+      )
+    )
+
+  private val SurveyMap.overlays
+    get() = (content.basemap as Basemap.MapboxStyle).overlays
+
+  @Test
+  fun savedImagery_onTerrain_drawsSatelliteImageryInsideItsAreas() {
+    for (drawTerrain in listOf(false, true)) {
+      val map = savedImageryMap(BasemapType.NORMAL, drawSatellite = true, drawTerrain = drawTerrain)
+      val raster = map.overlays.filterIsInstance<RasterTileLayer>().single()
+      assertEquals(SurveyBasemaps.SATELLITE_TILESET, raster.tilesetUrl)
+      assertEquals(savedSatellite.bounds, raster.bounds)
+      assertEquals(16, raster.maxZoom)
+      // The terrain is the basemap itself: outlined only.
+      assertTrue(map.overlays.none { it is VectorLineOverlay })
+    }
+  }
+
+  @Test
+  fun savedImagery_onSatellite_drawsContoursInsideTerrainAreas() {
+    for (drawSatellite in listOf(false, true)) {
+      val map =
+        savedImageryMap(BasemapType.SATELLITE, drawSatellite = drawSatellite, drawTerrain = true)
+      val contours = map.overlays.filterIsInstance<VectorLineOverlay>().single()
+      assertEquals(SurveyBasemaps.TERRAIN_TILESET, contours.tilesetUrl)
+      assertEquals("contour", contours.sourceLayer)
+      assertEquals(savedTerrain.bounds, contours.bounds)
+      assertNotNull(contours.emphasis)
+      // The imagery is the basemap itself: outlined only.
+      assertTrue(map.overlays.none { it is RasterTileLayer })
+    }
+  }
+
+  @Test
+  fun savedImagery_switchedOff_drawsNothing() {
+    for (basemap in BasemapType.entries) {
+      val map = savedImageryMap(basemap, drawSatellite = false, drawTerrain = false)
+      assertTrue(map.overlays.isEmpty())
+      assertTrue(map.overlayFeatures().isEmpty())
+    }
+  }
+
+  @Test
+  fun savedImagery_outlinesEachArea_byItsKind() {
+    for (basemap in BasemapType.entries) {
+      val outlines =
+        savedImageryMap(basemap, drawSatellite = true, drawTerrain = true).overlayFeatures()
+      assertEquals(
+        setOf("saved-satellite", "saved-terrain"),
+        outlines.map { it.properties.getValue(SurveyMapContent.PROP_KIND) }.toSet(),
+      )
+      outlines.forEach { assertTrue(it.geometry is Geometry.LineString) }
+    }
+  }
+
+  @Test
+  fun selectionMode_outlinesSavedAreasWhoseSwitchIsOff() {
+    val uiState =
+      state.viewModels.surveyMap.uiState.value.copy(
+        savedSatelliteAreas = listOf(savedSatellite),
+        isDownloadedSatelliteVisible = false,
+      )
+    fun outlines(selecting: Boolean) =
+      SurveyMapContent.main(
+          uiState.copy(isSelectingOfflineArea = selecting),
+          pendingIds = emptySet(),
+          showNavigation = false,
+        )
+        .overlayFeatures()
+        .filter { it.properties[SurveyMapContent.PROP_KIND] == "saved-satellite" }
+    assertTrue(outlines(selecting = false).isEmpty())
+    assertEquals(1, outlines(selecting = true).size)
+  }
+
   @Test
   fun main_carriesOnePinIconPerDistinctPointPin() {
-    val points = state.visibleMapEntities.filter { it.geometryKind == EntityGeometryKind.POINT }
+    val points =
+      state.viewModels.surveyMap.uiState.value.visibleMapEntities.filter {
+        it.geometryType == GeometryType.POINT
+      }
     assertTrue(points.isNotEmpty(), "sample survey should have point features")
 
-    val map = SurveyMapContent.main(state, showNavigation = true)
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
 
     val expectedIds =
       points
         .map { ent ->
-          val layer = state.mapLayerFor(ent)
-          GroundPin.iconId(
+          val layer =
+            state.viewModels.dashboard.uiState.value.mapLayers.firstOrNull {
+              it.id == (ent).layerId
+            }
+          AppPin.iconId(
             formatHexColorCss(ent.mapColorHex(layer)),
             layer?.iconName,
-            ent.id in state.pendingUploadEntityIds,
+            ent.id in state.viewModels.dashboard.uiState.value.pendingUploadEntityIds,
           )
         }
         .toSet()
@@ -66,8 +194,9 @@ class SurveyMapContentTest {
 
   @Test
   fun main_drawsFeaturesInTheirLayerColor_notTheirStatusColor() {
-    val map = SurveyMapContent.main(state, showNavigation = true)
-    val entitiesById = state.visibleMapEntities.associateBy { it.id }
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
+    val entitiesById =
+      state.viewModels.surveyMap.uiState.value.visibleMapEntities.associateBy { it.id }
     val shapes =
       map.entityFeatures().filter {
         it.properties[SurveyMapContent.PROP_KIND] != SurveyMapContent.KIND_VERTEX
@@ -77,12 +206,23 @@ class SurveyMapContentTest {
     assertTrue(
       shapes.any { feature ->
         val entity = entitiesById.getValue(SurveyMapIds.entityIdOf(feature.id)!!)
-        entity.markerColorHex != entity.mapColorHex(state.mapLayerFor(entity))
+        entity.markerColorHex !=
+          entity.mapColorHex(
+            state.viewModels.dashboard.uiState.value.mapLayers.firstOrNull {
+              it.id == (entity).layerId
+            }
+          )
       }
     )
     shapes.forEach { feature ->
       val entity = entitiesById.getValue(SurveyMapIds.entityIdOf(feature.id)!!)
-      val layer = assertNotNull(state.mapLayerFor(entity), "no layer for ${entity.id}")
+      val layer =
+        assertNotNull(
+          state.viewModels.dashboard.uiState.value.mapLayers.firstOrNull {
+            it.id == (entity).layerId
+          },
+          "no layer for ${entity.id}",
+        )
       val layerCss = formatHexColorCss(layer.colorHex)
       assertEquals(layerCss, feature.properties["stroke"], entity.id)
       if (feature.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_POLYGON) {
@@ -93,10 +233,16 @@ class SurveyMapContentTest {
 
   @Test
   fun main_pinsShowTheirLayerIcon() {
-    val layer = state.mapLayers.first { it.geometryTypeLabel == "Point" && it.iconName != null }
+    val layer =
+      state.viewModels.dashboard.uiState.value.mapLayers.first {
+        it.geometryType == GeometryType.POINT && it.iconName != null
+      }
     val layerEntityIds =
-      state.visibleMapEntities.filter { it.layerId == layer.id }.map { it.id }.toSet()
-    val map = SurveyMapContent.main(state, showNavigation = true)
+      state.viewModels.surveyMap.uiState.value.visibleMapEntities
+        .filter { it.layerId == layer.id }
+        .map { it.id }
+        .toSet()
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
     val pins =
       map.entityFeatures().filter {
         it.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_POINT &&
@@ -108,11 +254,19 @@ class SurveyMapContentTest {
 
   @Test
   fun main_labelsUseTheLayerColor() {
-    val map = SurveyMapContent.main(state, showNavigation = true)
-    val entitiesById = state.visibleMapEntities.associateBy { it.id }
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
+    val entitiesById =
+      state.viewModels.surveyMap.uiState.value.visibleMapEntities.associateBy { it.id }
     map.markers.forEach { (id, marker) ->
       val entity = SurveyMapIds.entityIdOf(id)?.let { entitiesById[it] } ?: return@forEach
-      val expected = Color(entity.mapColorHex(state.mapLayerFor(entity)))
+      val expected =
+        Color(
+          entity.mapColorHex(
+            state.viewModels.dashboard.uiState.value.mapLayers.firstOrNull {
+              it.id == (entity).layerId
+            }
+          )
+        )
       val expectedLabel = entity.label.substringBefore(" •").ifBlank { entity.id }
       val expectedStatus =
         if (entity.hasMarkerSymbol) {
@@ -138,7 +292,7 @@ class SurveyMapContentTest {
 
   @Test
   fun main_chipsShowStatusInTheStatusColorOnTheLayerColor() {
-    val map = SurveyMapContent.main(state, showNavigation = true)
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
     val badges =
       map.markers.values.mapNotNull {
         when (it) {
@@ -154,34 +308,34 @@ class SurveyMapContentTest {
 
   @Test
   fun build_fallsBackToTheEntityColorWithoutItsLayer() {
-    val entity = state.visibleMapEntities.first { it.geometryKind == EntityGeometryKind.POINT }
+    val entity =
+      state.viewModels.surveyMap.uiState.value.visibleMapEntities.first {
+        it.geometryType == GeometryType.POINT
+      }
     val map =
       SurveyMapContent.build(
-        anchor = state.surveyMapUiState.anchor,
-        basemapType = state.selectedBasemapType,
-        showOfflineSector = false,
-        entities = listOf(entity),
-        selectedEntityId = null,
-        pendingIds = emptySet(),
-        clusters = null,
-        selectedClusterId = null,
-        clusterHeader = { "" },
-        navigation = null,
-        userGps = 0.5f to 0.5f,
-        isFollowingUser = false,
-        place = null,
-        layers = emptyList(),
+        SurveyMapScene(
+          anchor = state.viewModels.surveyMap.uiState.value.anchor,
+          basemapType = state.viewModels.surveyMap.uiState.value.selectedBasemapType,
+          entities = listOf(entity),
+          selectedEntityId = null,
+          pendingIds = emptySet(),
+          userGps = 0.5f to 0.5f,
+          isFollowingUser = false,
+        )
       )
     val pin = map.entityFeatures().single().properties.getValue("pin")
-    assertEquals(GroundPin.iconId(formatHexColorCss(entity.colorHex), null, isPending = false), pin)
+    assertEquals(AppPin.iconId(formatHexColorCss(entity.colorHex), null, isPending = false), pin)
   }
 
   @Test
   fun main_drawsEveryVisibleEntityWithGeometry() {
-    val map = SurveyMapContent.main(state, showNavigation = true)
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
     val drawn = map.entityFeatures().mapNotNull { SurveyMapIds.entityIdOf(it.id) }.toSet()
     val expected =
-      state.visibleMapEntities.filter { it.geometryKind != EntityGeometryKind.NONE }.map { it.id }
+      state.viewModels.surveyMap.uiState.value.visibleMapEntities
+        .filter { it.geometryType != null }
+        .map { it.id }
     assertEquals(expected.toSet(), drawn)
     // Every layer references an existing source (MapContent validates this on construction).
     assertTrue(map.content.layers.isNotEmpty())
@@ -189,10 +343,13 @@ class SurveyMapContentTest {
 
   @Test
   fun main_selectedEntityIsDrawnLastAndEmphasized() {
-    val target = state.visibleMapEntities.first { it.geometryKind == EntityGeometryKind.POLYGON }
-    state.selectEntity(target.id)
+    val target =
+      state.viewModels.surveyMap.uiState.value.visibleMapEntities.first {
+        it.geometryType == GeometryType.POLYGON
+      }
+    state.viewModels.surveyMap.selectEntity(target.id)
 
-    val features = SurveyMapContent.main(state, showNavigation = true).entityFeatures()
+    val features = state.viewModels.mainSurveyMap(showNavigation = true).entityFeatures()
     val polygons = features.filter {
       it.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_POLYGON
     }
@@ -203,7 +360,7 @@ class SurveyMapContentTest {
 
   @Test
   fun main_onlyFeatureLabelsHideOnCollision() {
-    val map = SurveyMapContent.main(state, showNavigation = true)
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
     val (labels, others) = map.content.markers.partition { SurveyMapIds.entityIdOf(it.id) != null }
     assertTrue(labels.isNotEmpty())
     assertTrue(labels.all { it.collides })
@@ -212,13 +369,13 @@ class SurveyMapContentTest {
 
   @Test
   fun main_showsUserChipAndSelectedPlace() {
-    val place = state.places.first()
-    state.selectPlace(place.id)
+    val place = state.dataHolder.appData.value.places.first()
+    state.searchableListActions.selectPlace(place.id)
 
-    val map = SurveyMapContent.main(state, showNavigation = true)
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
 
     val user = map.markers[SurveyMapIds.USER] as SurveyMarker.UserChip
-    assertEquals("⊕ You (GPS)", user.text)
+    assertEquals(SurveyMarker.UserChip(SurveyMarker.UserChipMode.GPS), user)
     assertTrue(map.markers.keys.any { SurveyMapIds.isPlace(it) })
     assertEquals(map.markers.keys, map.content.markers.map { it.id }.toSet())
   }
@@ -228,15 +385,14 @@ class SurveyMapContentTest {
     assertEquals("e1", SurveyMapIds.entityIdOf(SurveyMapIds.vertex("e1", 3)))
     assertEquals("e1", SurveyMapIds.entityIdOf(SurveyMapIds.entity("e1")))
     assertEquals("c1", SurveyMapIds.clusterIdOf(SurveyMapIds.cluster("c1")))
-    assertEquals(null, SurveyMapIds.entityIdOf("offline-sector"))
+    assertEquals(null, SurveyMapIds.entityIdOf("navigation-line"))
   }
 
   @Test
-  fun entityGeometry_boundsMatchTheDrawnShape() {
-    val anchor = state.surveyMapUiState.anchor
-    for (entity in state.entities) {
-      val geometry = EntityGeometry.of(entity, anchor) ?: continue
-      val bounds = EntityGeometry.bounds(entity, anchor)
+  fun entityGeometry_boundsMatchTheStoredGeometry() {
+    for (entity in state.viewModels.dataCollection.uiState.value.entities) {
+      val geometry = entity.geometry ?: continue
+      val bounds = assertNotNull(EntityGeometry.bounds(entity))
       geometry.coordinates.forEach { assertTrue(it in bounds, "${entity.id}: $it outside $bounds") }
       if (geometry is Geometry.Point) {
         assertEquals(bounds.west, bounds.east)
@@ -247,29 +403,32 @@ class SurveyMapContentTest {
 
   @Test
   fun desiredMapCamera_followsGpsAndZoomDelta() {
-    val camera = state.desiredMapCamera()
-    val gps = state.surveyMapUiState.anchor.toLatLng(0.5, 0.5)
+    val camera = state.viewModels.surveyMap.desiredMapCamera()
+    val gps = state.viewModels.surveyMap.uiState.value.anchor.toLatLng(0.5, 0.5)
     assertNear(gps.latitude, camera.center.latitude)
     assertNear(gps.longitude, camera.center.longitude)
 
-    state.surveyMap.zoomInMap()
-    assertNear(state.surveyMapUiState.anchor.zoom + 0.75, state.desiredMapCamera().zoom)
+    state.viewModels.surveyMap.zoomInMap()
+    assertNear(
+      state.viewModels.surveyMap.uiState.value.anchor.zoom + 0.75,
+      state.viewModels.surveyMap.desiredMapCamera().zoom,
+    )
   }
 
   @Test
   fun syncMapCamera_roundTripsAndStopsFollowing() {
-    assertTrue(state.isCameraFollowingUser)
-    val start = state.desiredMapCamera()
+    assertTrue(state.viewModels.surveyMap.uiState.value.isCameraFollowingUser)
+    val start = state.viewModels.surveyMap.desiredMapCamera()
     val moved =
       CameraPosition(
         LatLng(start.center.latitude + 0.002, start.center.longitude - 0.001),
         start.zoom + 1.0,
       )
 
-    state.syncMapCamera(moved)
+    state.viewModels.surveyMap.syncMapCamera(moved)
 
-    assertFalse(state.isCameraFollowingUser)
-    val desired = state.desiredMapCamera()
+    assertFalse(state.viewModels.surveyMap.uiState.value.isCameraFollowingUser)
+    val desired = state.viewModels.surveyMap.desiredMapCamera()
     assertNear(moved.center.latitude, desired.center.latitude, 1e-6)
     assertNear(moved.center.longitude, desired.center.longitude, 1e-6)
     assertNear(moved.zoom, desired.zoom, 1e-5)
@@ -277,10 +436,10 @@ class SurveyMapContentTest {
 
   @Test
   fun syncMapCamera_zoomOnlyKeepsFollowing() {
-    val start = state.desiredMapCamera()
-    state.syncMapCamera(start.copy(zoom = start.zoom - 0.5))
-    assertTrue(state.isCameraFollowingUser)
-    assertNear(-0.5, state.mapZoomDelta.toDouble(), 1e-5)
+    val start = state.viewModels.surveyMap.desiredMapCamera()
+    state.viewModels.surveyMap.syncMapCamera(start.copy(zoom = start.zoom - 0.5))
+    assertTrue(state.viewModels.surveyMap.uiState.value.isCameraFollowingUser)
+    assertNear(-0.5, state.viewModels.surveyMap.uiState.value.mapZoomDelta.toDouble(), 1e-5)
   }
 
   @Test
@@ -299,8 +458,13 @@ class SurveyMapContentTest {
   fun build_isValidMapContentForEveryForm() {
     val maps =
       listOf(
-        SurveyMapContent.main(state, showNavigation = false),
-        SurveyMapContent.geoPointForm(state, isFollowingUser = true),
+        state.viewModels.mainSurveyMap(showNavigation = false),
+        SurveyMapContent.geoPointForm(
+          uiState = state.viewModels.surveyMap.uiState.value,
+          dataCollection = state.viewModels.dataCollection.uiState.value,
+          pendingIds = state.viewModels.dashboard.uiState.value.pendingUploadEntityIds,
+          isFollowingUser = true,
+        ),
       )
     maps.forEach { map ->
       assertEquals(map.markers.keys, map.content.markers.map { it.id }.toSet())

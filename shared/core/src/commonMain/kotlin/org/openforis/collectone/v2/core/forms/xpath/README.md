@@ -303,10 +303,12 @@ All standard XPath 1.0 and XForms functions are implemented in `commonMain`:
 
 ### Java Environment Requirement
 
-Gradle runs on **Java 21**, pinned in `gradle/gradle-daemon-jvm.properties`.
-Gradle uses an installed JDK 21 if it finds one and downloads one otherwise;
-`./gradlew` itself only needs a JDK on the `PATH` (or `JAVA_HOME`) to start. To
-change the version, run `./gradlew updateDaemonJvm --jvm-version=<version>`.
+Run Gradle from the repository root: the repository is a single Gradle build
+with one `./gradlew`. Gradle runs on **Java 21**, pinned in the root build's
+`gradle/gradle-daemon-jvm.properties`. Gradle uses an installed JDK 21 if it
+finds one and downloads one otherwise; `./gradlew` itself only needs a JDK on
+the `PATH` (or `JAVA_HOME`) to start. To change the version for the whole
+build, run `./gradlew updateDaemonJvm --jvm-version=<version>`.
 
 ### Run JVM Unit and Parameterized Tests
 
@@ -315,14 +317,13 @@ To execute all `commonTest` and JUnit 5 `@ParameterizedTest` suites (covering
 literals):
 
 ```bash
-./gradlew jvmTest
+./gradlew :shared:core:jvmTest
 ```
 
 ### Run Multiplatform Checks and Compilations
 
-To run the full test suite and verify compilation across JVM, JS, and WasmJS
-targets:
+To run the JVM tests and verify compilation of the JS and WasmJS targets:
 
 ```bash
-./gradlew check compileKotlinJs compileKotlinWasmJs
+./gradlew :shared:core:jvmTest :shared:core:compileKotlinJs :shared:core:compileKotlinWasmJs
 ```

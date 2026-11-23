@@ -26,15 +26,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,12 +49,54 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToLong
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.decodeToImageBitmap
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.core.forms.media.MediaAttachment
 import org.openforis.collectone.v2.core.forms.media.MediaCapture
 import org.openforis.collectone.v2.core.forms.media.MediaCaptureKind
 import org.openforis.collectone.v2.core.forms.media.MediaCaptureSpec
 import org.openforis.collectone.v2.core.forms.model.ComponentState
+import org.openforis.collectone.v2.core.forms.ui.controls.Button
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_attached_with_duration
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_audio_attached
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_capture_only
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_capture_or_upload
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_captured_photo_description
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_choose_file
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_choose_from_device
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_file_attached
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_file_unavailable_capture
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_file_unavailable_choose
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_front_camera
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_kind_audio
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_kind_file
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_kind_photo
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_kind_video
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_live_unavailable_audio
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_live_unavailable_file
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_live_unavailable_photo
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_live_unavailable_video
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_max_pixels
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_photo_attached
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_record_again
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_record_audio
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_record_video
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_remove
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_replace_file
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_retake_photo
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_take_photo
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_unavailable_audio
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_unavailable_file
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_unavailable_photo
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_unavailable_video
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_upload
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_video_attached
 
 /**
  * Photo, video, and audio capture question (`<upload>` bound to a `binary` field).
@@ -88,7 +125,7 @@ internal fun MediaCaptureWidget(
   val fileName = MediaCapture.attachmentFileName(control.fieldState.value)
   // The field value changes whenever the attachment does, so keying on it keeps this in sync.
   val attachment = remember(path, fileName) { fileName?.let { controller.attachmentFor(path) } }
-  var errorMessage by remember(path) { mutableStateOf<String?>(null) }
+  var errorMessage by remember(path) { mutableStateOf<FormUiText?>(null) }
   var isCapturing by remember(path) { mutableStateOf(false) }
 
   val launch: (MediaCaptureSource) -> Unit = { source ->
@@ -112,7 +149,7 @@ internal fun MediaCaptureWidget(
         is MediaCaptureResult.Captured ->
           errorMessage = controller.attachMedia(path, result.attachment)
         is MediaCaptureResult.Cancelled -> Unit
-        is MediaCaptureResult.Failed -> errorMessage = result.message
+        is MediaCaptureResult.Failed -> errorMessage = FormUiText.Verbatim(result.message)
       }
     }
   }
@@ -143,9 +180,11 @@ internal fun MediaCaptureWidget(
         fileName != null ->
           Text(
             text =
-              "$fileName\nThis file isn't available on this device. " +
-                (if (canCapture) "Capture it again to replace it."
-                else "Choose it again to replace it."),
+              stringResource(
+                if (canCapture) Res.string.forms_media_file_unavailable_capture
+                else Res.string.forms_media_file_unavailable_choose,
+                fileName,
+              ),
             style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
           )
         else -> Unit
@@ -160,11 +199,19 @@ internal fun MediaCaptureWidget(
           ) {
             Icon(mediaKindIcon(spec.kind), contentDescription = null, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text(captureActionLabel(spec.kind), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+              stringResource(captureActionLabel(spec.kind)),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+            )
           }
         }
         if (canPick) {
-          val pickLabel = if (canCapture) "Choose from device" else "Choose file"
+          val pickLabel =
+            stringResource(
+              if (canCapture) Res.string.forms_media_choose_from_device
+              else Res.string.forms_media_choose_file
+            )
           if (canCapture) {
             OutlinedButton(
               onClick = { launch(MediaCaptureSource.EXISTING_FILE) },
@@ -187,7 +234,7 @@ internal fun MediaCaptureWidget(
         }
         if (!canCapture && !canPick) {
           Text(
-            text = captureUnavailableMessage(spec.kind, captureOnly),
+            text = stringResource(captureUnavailableMessage(spec.kind, captureOnly)),
             style = MaterialTheme.typography.bodySmall.copy(color = colors.error),
           )
         }
@@ -215,8 +262,10 @@ internal fun MediaCaptureWidget(
               modifier = Modifier.weight(1f),
             ) {
               Text(
-                if (retakeSource == MediaCaptureSource.CAPTURE) retakeActionLabel(spec.kind)
-                else "Replace file",
+                stringResource(
+                  if (retakeSource == MediaCaptureSource.CAPTURE) retakeActionLabel(spec.kind)
+                  else Res.string.forms_media_replace_file
+                ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
               )
@@ -227,7 +276,7 @@ internal fun MediaCaptureWidget(
               onClick = { launch(MediaCaptureSource.EXISTING_FILE) },
               enabled = !isCapturing,
             ) {
-              Text("Upload", maxLines = 1)
+              Text(stringResource(Res.string.forms_media_upload), maxLines = 1)
             }
           }
           TextButton(
@@ -237,14 +286,14 @@ internal fun MediaCaptureWidget(
             },
             enabled = !isCapturing,
           ) {
-            Text("Remove", maxLines = 1)
+            Text(stringResource(Res.string.forms_media_remove), maxLines = 1)
           }
         }
       }
 
       errorMessage?.let { message ->
         Text(
-          text = message,
+          text = message.resolve(),
           style =
             MaterialTheme.typography.bodySmall.copy(
               color = colors.error,
@@ -280,14 +329,14 @@ private fun MediaCaptureHeader(spec: MediaCaptureSpec) {
     }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {
       Text(
-        text = mediaKindTitle(spec.kind),
+        text = stringResource(mediaKindTitle(spec.kind)),
         style =
           MaterialTheme.typography.titleSmall.copy(
             fontWeight = FontWeight.SemiBold,
             color = colors.onSurface,
           ),
       )
-      val constraintsText = describeMediaConstraints(spec)
+      val constraintsText = describeMediaConstraints(spec).map { it.resolve() }.joinToString(" · ")
       if (constraintsText.isNotEmpty()) {
         Text(
           text = constraintsText,
@@ -322,7 +371,7 @@ private fun MediaSourceBadge(captureOnly: Boolean) {
         )
       }
       Text(
-        text = mediaSourceModeLabel(captureOnly),
+        text = stringResource(mediaSourceModeLabel(captureOnly)),
         style =
           MaterialTheme.typography.labelSmall.copy(
             color = if (captureOnly) colors.onTertiaryContainer else colors.onSurfaceVariant,
@@ -351,7 +400,8 @@ private fun MediaAttachmentPreview(attachment: MediaAttachment) {
     if (bitmap != null) {
       Image(
         bitmap = bitmap,
-        contentDescription = "Captured photo ${attachment.fileName}",
+        contentDescription =
+          stringResource(Res.string.forms_media_captured_photo_description, attachment.fileName),
         contentScale = ContentScale.Crop,
         modifier = Modifier.fillMaxWidth().height(200.dp).clip(MaterialTheme.shapes.medium),
       )
@@ -373,14 +423,24 @@ private fun MediaAttachmentPreview(attachment: MediaAttachment) {
             tint = colors.onSecondaryContainer,
             modifier = Modifier.size(28.dp),
           )
+          val attachedLabel =
+            stringResource(
+              when (attachment.kind) {
+                MediaCaptureKind.PHOTO -> Res.string.forms_media_photo_attached
+                MediaCaptureKind.VIDEO -> Res.string.forms_media_video_attached
+                MediaCaptureKind.AUDIO -> Res.string.forms_media_audio_attached
+                MediaCaptureKind.FILE -> Res.string.forms_media_file_attached
+              }
+            )
           Text(
             text =
-              when (attachment.kind) {
-                MediaCaptureKind.PHOTO -> "Photo attached"
-                MediaCaptureKind.VIDEO -> "Video attached"
-                MediaCaptureKind.AUDIO -> "Audio recording attached"
-                MediaCaptureKind.FILE -> "File attached"
-              } + (attachment.durationMillis?.let { " · ${formatMediaDuration(it)}" } ?: ""),
+              attachment.durationMillis?.let {
+                stringResource(
+                  Res.string.forms_media_attached_with_duration,
+                  attachedLabel,
+                  formatMediaDuration(it),
+                )
+              } ?: attachedLabel,
             style =
               MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold,
@@ -399,52 +459,67 @@ private fun MediaAttachmentPreview(attachment: MediaAttachment) {
   }
 }
 
-internal fun mediaKindTitle(kind: MediaCaptureKind): String =
+internal fun mediaKindTitle(kind: MediaCaptureKind): StringResource =
   when (kind) {
-    MediaCaptureKind.PHOTO -> "Photo"
-    MediaCaptureKind.VIDEO -> "Video"
-    MediaCaptureKind.AUDIO -> "Audio recording"
-    MediaCaptureKind.FILE -> "File"
+    MediaCaptureKind.PHOTO -> Res.string.forms_media_kind_photo
+    MediaCaptureKind.VIDEO -> Res.string.forms_media_kind_video
+    MediaCaptureKind.AUDIO -> Res.string.forms_media_kind_audio
+    MediaCaptureKind.FILE -> Res.string.forms_media_kind_file
   }
 
-internal fun captureActionLabel(kind: MediaCaptureKind): String =
+internal fun captureActionLabel(kind: MediaCaptureKind): StringResource =
   when (kind) {
-    MediaCaptureKind.PHOTO -> "Take photo"
-    MediaCaptureKind.VIDEO -> "Record video"
-    MediaCaptureKind.AUDIO -> "Record audio"
-    MediaCaptureKind.FILE -> "Choose file"
+    MediaCaptureKind.PHOTO -> Res.string.forms_media_take_photo
+    MediaCaptureKind.VIDEO -> Res.string.forms_media_record_video
+    MediaCaptureKind.AUDIO -> Res.string.forms_media_record_audio
+    MediaCaptureKind.FILE -> Res.string.forms_media_choose_file
   }
 
-internal fun retakeActionLabel(kind: MediaCaptureKind): String =
+internal fun retakeActionLabel(kind: MediaCaptureKind): StringResource =
   when (kind) {
-    MediaCaptureKind.PHOTO -> "Retake photo"
-    MediaCaptureKind.VIDEO -> "Record again"
-    MediaCaptureKind.AUDIO -> "Record again"
-    MediaCaptureKind.FILE -> "Replace file"
+    MediaCaptureKind.PHOTO -> Res.string.forms_media_retake_photo
+    MediaCaptureKind.VIDEO -> Res.string.forms_media_record_again
+    MediaCaptureKind.AUDIO -> Res.string.forms_media_record_again
+    MediaCaptureKind.FILE -> Res.string.forms_media_replace_file
   }
 
 /** Badge label for a media question's source mode (ODK `new` appearance ⇒ capture only). */
-internal fun mediaSourceModeLabel(captureOnly: Boolean): String =
-  if (captureOnly) "Capture only" else "Capture or upload"
+internal fun mediaSourceModeLabel(captureOnly: Boolean): StringResource =
+  if (captureOnly) Res.string.forms_media_capture_only else Res.string.forms_media_capture_or_upload
 
 /**
  * Error shown on a capture-only question when the host can't capture live media, so collectors
  * learn why there is no action rather than seeing an empty card.
  */
-internal fun captureUnavailableMessage(kind: MediaCaptureKind, captureOnly: Boolean): String =
+internal fun captureUnavailableMessage(
+  kind: MediaCaptureKind,
+  captureOnly: Boolean,
+): StringResource =
   if (captureOnly) {
-    "This question needs a live ${kind.noun}, which this device/browser can't capture."
+    when (kind) {
+      MediaCaptureKind.PHOTO -> Res.string.forms_media_live_unavailable_photo
+      MediaCaptureKind.VIDEO -> Res.string.forms_media_live_unavailable_video
+      MediaCaptureKind.AUDIO -> Res.string.forms_media_live_unavailable_audio
+      MediaCaptureKind.FILE -> Res.string.forms_media_live_unavailable_file
+    }
   } else {
-    "This device can't capture or choose a ${kind.noun}."
+    when (kind) {
+      MediaCaptureKind.PHOTO -> Res.string.forms_media_unavailable_photo
+      MediaCaptureKind.VIDEO -> Res.string.forms_media_unavailable_video
+      MediaCaptureKind.AUDIO -> Res.string.forms_media_unavailable_audio
+      MediaCaptureKind.FILE -> Res.string.forms_media_unavailable_file
+    }
   }
 
-/** One-line summary of a question's capture constraints, e.g. `Max 1024 px · Capture only`. */
-internal fun describeMediaConstraints(spec: MediaCaptureSpec): String = buildList {
-  spec.maxPixels?.let { add("Max $it px") }
-  if (spec.requireNewCapture) add("Capture only")
-  if (spec.preferFrontCamera) add("Front camera")
+/**
+ * A question's capture constraints, shown joined with ` · ` on one line (e.g. `Max 1024 px ·
+ * Capture only`).
+ */
+internal fun describeMediaConstraints(spec: MediaCaptureSpec): List<FormUiText> = buildList {
+  spec.maxPixels?.let { add(FormUiText.Resource(Res.string.forms_media_max_pixels, it)) }
+  if (spec.requireNewCapture) add(FormUiText.Resource(Res.string.forms_media_capture_only))
+  if (spec.preferFrontCamera) add(FormUiText.Resource(Res.string.forms_media_front_camera))
 }
-  .joinToString(" · ")
 
 /** One-line summary of an attachment, e.g. `leaf_1.jpg · 1.2 MB · 1600×1200`. */
 internal fun describeAttachment(attachment: MediaAttachment): String = buildList {
@@ -505,7 +580,7 @@ private fun materialIcon(name: String, pathData: String): ImageVector =
 
 private val CameraIcon: ImageVector by lazy {
   materialIcon(
-    "Ground.Camera",
+    "App.Camera",
     "M12,12m-3.2,0a3.2,3.2 0,1 1,6.4 0a3.2,3.2 0,1 1,-6.4 0" +
       "M9,2L7.17,4H4c-1.1,0 -2,0.9 -2,2v12c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2V6" +
       "c0,-1.1 -0.9,-2 -2,-2h-3.17L15,2H9zM12,17c-2.76,0 -5,-2.24 -5,-5s2.24,-5 5,-5 5,2.24 5,5" +
@@ -515,7 +590,7 @@ private val CameraIcon: ImageVector by lazy {
 
 private val VideocamIcon: ImageVector by lazy {
   materialIcon(
-    "Ground.Videocam",
+    "App.Videocam",
     "M17,10.5V7c0,-0.55 -0.45,-1 -1,-1H4c-0.55,0 -1,0.45 -1,1v10c0,0.55 0.45,1 1,1h12" +
       "c0.55,0 1,-0.45 1,-1v-3.5l4,4v-11l-4,4z",
   )
@@ -523,7 +598,7 @@ private val VideocamIcon: ImageVector by lazy {
 
 private val MicIcon: ImageVector by lazy {
   materialIcon(
-    "Ground.Mic",
+    "App.Mic",
     "M12,14c1.66,0 2.99,-1.34 2.99,-3L15,5c0,-1.66 -1.34,-3 -3,-3S9,3.34 9,5v6" +
       "c0,1.66 1.34,3 3,3zM17.3,11c0,3 -2.54,5.1 -5.3,5.1S6.7,14 6.7,11H5c0,3.41 2.72,6.23 6,6.72" +
       "V21h2v-3.28c3.28,-0.48 6,-3.3 6,-6.72h-1.7z",
@@ -532,7 +607,7 @@ private val MicIcon: ImageVector by lazy {
 
 private val AttachFileIcon: ImageVector by lazy {
   materialIcon(
-    "Ground.AttachFile",
+    "App.AttachFile",
     "M16.5,6v11.5c0,2.21 -1.79,4 -4,4s-4,-1.79 -4,-4V5c0,-1.38 1.12,-2.5 2.5,-2.5" +
       "s2.5,1.12 2.5,2.5v10.5c0,0.55 -0.45,1 -1,1s-1,-0.45 -1,-1V6H10v9.5c0,1.38 1.12,2.5 2.5,2.5" +
       "s2.5,-1.12 2.5,-2.5V5c0,-2.21 -1.79,-4 -4,-4S7,2.79 7,5v12.5c0,3.04 2.46,5.5 5.5,5.5" +
@@ -542,7 +617,7 @@ private val AttachFileIcon: ImageVector by lazy {
 
 private val LockIcon: ImageVector by lazy {
   materialIcon(
-    "Ground.Lock",
+    "App.Lock",
     "M18,8h-1V6c0,-2.76 -2.24,-5 -5,-5S7,3.24 7,6v2H6c-1.1,0 -2,0.9 -2,2v10c0,1.1 0.9,2 2,2h12" +
       "c1.1,0 2,-0.9 2,-2V10c0,-1.1 -0.9,-2 -2,-2zM12,17c-1.1,0 -2,-0.9 -2,-2s0.9,-2 2,-2 2,0.9 2,2" +
       " -0.9,2 -2,2zM15.1,8H8.9V6c0,-1.71 1.39,-3.1 3.1,-3.1 1.71,0 3.1,1.39 3.1,3.1v2z",

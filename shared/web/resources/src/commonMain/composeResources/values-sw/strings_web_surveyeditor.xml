@@ -1,0 +1,893 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions shared across the survey editor. -->
+  <string name="surveyeditor_cancel">Ghairi</string>
+  <!-- Button that dismisses a dialog. -->
+  <string name="surveyeditor_close">Funga</string>
+  <!-- Button that returns to the previous step of a dialog. -->
+  <string name="surveyeditor_back">Rudi</string>
+  <string name="surveyeditor_import">Leta</string>
+  <!-- Button that confirms importing a file. %1$s is the file name. -->
+  <string name="surveyeditor_import_file">Leta %1$s</string>
+  <string name="surveyeditor_select">Chagua</string>
+  <string name="surveyeditor_description">Maelezo</string>
+  <string name="surveyeditor_clear_search">Futa utafutaji</string>
+  <string name="surveyeditor_delete">Futa</string>
+  <string name="surveyeditor_done">Imekamilika</string>
+  <!-- Header button that saves edits of a draft survey. -->
+  <string name="surveyeditor_save_changes">Hifadhi mabadiliko</string>
+  <!-- Header button that publishes edits of an already published survey again. -->
+  <string name="surveyeditor_republish">Chapisha upya</string>
+  <string name="surveyeditor_read_only_closed">Utafiti huu umefungwa. Ufungue upya ili kufanya mabadiliko.</string>
+  <string name="surveyeditor_read_only_archived">Utafiti huu umewekwa kumbukumbu. Ufungue upya ili kufanya mabadiliko.</string>
+  <string name="surveyeditor_survey_area_required">Eneo la utafiti linahitajika.</string>
+  <!-- Notice after removing the survey's organization. %1$s is the name of the general access option (e.g. Restricted). -->
+  <string name="surveyeditor_access_changed_no_organization">Ufikiaji wa jumla umebadilishwa kuwa "%1$s" kwa sababu utafiti haumo tena katika shirika.</string>
+
+  <!-- Sharing: errors when inviting a person or accepting an invite. -->
+  <string name="surveyeditor_invite_invalid_email">Weka anwani sahihi ya barua pepe.</string>
+  <string name="surveyeditor_invite_is_owner">Huyo ndiye mmiliki wa utafiti.</string>
+  <string name="surveyeditor_invite_enter_name">Weka jina.</string>
+  <string name="surveyeditor_invite_not_invited">Hajaalikwa.</string>
+  <string name="surveyeditor_invite_already_joined">Tayari amejiunga.</string>
+
+  <!-- Data table import: how numeric dates like 03/04/2025 are read. -->
+  <string name="surveyeditor_date_order_day_first">Siku kwanza</string>
+  <string name="surveyeditor_date_order_month_first">Mwezi kwanza</string>
+  <!-- Data table import notes shown before importing a CSV file. -->
+  <string name="surveyeditor_import_file_empty">Faili ni tupu.</string>
+  <string name="surveyeditor_import_no_data_rows">Faili ina safu ya vichwa lakini haina safu za data.</string>
+  <plurals name="surveyeditor_import_ragged_rows">
+    <item quantity="one">Safu %1$d ina idadi tofauti ya safuwima kuliko safu ya vichwa. Visanduku vinavyokosekana vinaachwa wazi na vya ziada vinaondolewa.</item>
+    <item quantity="other">Safu %1$d zina idadi tofauti ya safuwima kuliko safu ya vichwa. Visanduku vinavyokosekana vinaachwa wazi na vya ziada vinaondolewa.</item>
+  </plurals>
+  <!-- "id" is the literal CSV column name; "Row ID" is the name of the column that is added. -->
+  <string name="surveyeditor_import_id_column_not_unique">Safuwima ya id ina thamani tupu au zinazojirudia, kwa hivyo safuwima mpya ya Kitambulisho cha safu inaongezwa.</string>
+  <!-- %1$s is a comma-separated list of quoted column names; %2$s is a date pattern such as DD/MM/YYYY. -->
+  <string name="surveyeditor_import_ambiguous_dates">Tarehe katika %1$s zinaweza kuanza na siku au mwezi. Zinasomwa kama %2$s.</string>
+
+  <!-- Sample plots: why plots can't be generated. -->
+  <string name="surveyeditor_sampling_area_missing">Weka eneo la utafiti katika Maelezo ya utafiti, au tumia tabaka la ramani la poligoni kama matabaka-sampuli.</string>
+  <string name="surveyeditor_sampling_strata_deleted">Tabaka la ramani la matabaka-sampuli limefutwa. Chagua lingine.</string>
+  <string name="surveyeditor_sampling_strata_not_polygon">Matabaka-sampuli lazima yatoke kwenye tabaka la ramani la poligoni.</string>
+  <!-- %1$s is the name of a map layer. -->
+  <string name="surveyeditor_sampling_strata_no_polygons">"%1$s" bado halina poligoni. Ongeza poligoni ili kulitumia kama matabaka-sampuli.</string>
+  <string name="surveyeditor_sampling_cant_generate_design">Muundo huu hauwezi kuzalishwa.</string>
+  <!-- %1$s is a technical error message. -->
+  <string name="surveyeditor_sampling_generate_failed_reason">Imeshindwa kuzalisha viwanja vya sampuli: %1$s</string>
+  <string name="surveyeditor_sampling_generate_failed">Imeshindwa kuzalisha viwanja vya sampuli. Kagua muundo kisha ujaribu tena.</string>
+  <string name="surveyeditor_sampling_no_plots_fit">Hakuna viwanja vya sampuli vinavyotosha katika eneo hili. Jaribu nafasi au ukubwa mdogo wa kiwanja, au eneo kubwa zaidi.</string>
+  <string name="surveyeditor_sampling_no_design">Tabaka hili la ramani halina muundo wa sampuli.</string>
+  <string name="surveyeditor_sampling_already_generating">Viwanja vya sampuli tayari vinazalishwa.</string>
+  <string name="surveyeditor_sampling_layer_missing">Tabaka hili la ramani halipo tena.</string>
+  <!-- %1$d is the number of submissions. -->
+  <plurals name="surveyeditor_regenerate_blocked">
+    <item quantity="one">Kuzalisha upya kumezimwa kwa sababu wasilisho %1$d linarejelea viwanja hivi vya sampuli. Ili kujaribu muundo tofauti, ongeza tabaka jipya la ramani la viwanja vya sampuli.</item>
+    <item quantity="other">Kuzalisha upya kumezimwa kwa sababu mawasilisho %1$d yanarejelea viwanja hivi vya sampuli. Ili kujaribu muundo tofauti, ongeza tabaka jipya la ramani la viwanja vya sampuli.</item>
+  </plurals>
+
+  <!-- Survey editor page: header, lifecycle, navigation, survey details, sharing. -->
+  <!-- Survey editor page: header. -->
+  <!-- Fallback title for a survey without a title. -->
+  <string name="surveyeditor_untitled_survey">Utafiti usio na jina</string>
+  <!-- Header context label identifying the survey editor page. -->
+  <string name="surveyeditor_header_survey_editor">Kihariri cha utafiti</string>
+  <!-- Header status for a draft survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_save">
+    <item quantity="one">Rekebisha tatizo %1$d ili kuhifadhi</item>
+    <item quantity="other">Rekebisha matatizo %1$d ili kuhifadhi</item>
+  </plurals>
+  <!-- Header status for a published survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_publish">
+    <item quantity="one">Rekebisha tatizo %1$d ili kuchapisha</item>
+    <item quantity="other">Rekebisha matatizo %1$d ili kuchapisha</item>
+  </plurals>
+  <string name="surveyeditor_header_unsaved_changes">Mabadiliko ambayo hayajahifadhiwa</string>
+  <string name="surveyeditor_header_unpublished_changes">Mabadiliko ambayo hayajachapishwa</string>
+  <string name="surveyeditor_header_draft_saved">Rasimu imehifadhiwa</string>
+  <string name="surveyeditor_header_all_changes_published">Mabadiliko yote yamechapishwa</string>
+  <!-- Button that discards pending survey edits. -->
+  <string name="surveyeditor_header_discard">Tupa</string>
+  <string name="surveyeditor_header_discard_unsaved_title">Ungependa kutupa mabadiliko ambayo hayajahifadhiwa?</string>
+  <string name="surveyeditor_header_discard_unpublished_title">Ungependa kutupa mabadiliko ambayo hayajachapishwa?</string>
+  <string name="surveyeditor_header_discard_unsaved_message">Mabadiliko uliyofanya tangu rasimu hii ilipohifadhiwa mara ya mwisho yatapotea.</string>
+  <string name="surveyeditor_header_discard_unpublished_message">Mabadiliko uliyofanya tangu utafiti huu ulipochapishwa mara ya mwisho yatapotea. Wakusanyaji data wataendelea kuona toleo lililochapishwa.</string>
+  <string name="surveyeditor_header_keep_editing">Endelea kuhariri</string>
+  <string name="surveyeditor_working_copy_prompt_title">Ungependa kuendelea kuhariri rasimu ambayo haijahifadhiwa?</string>
+  <string name="surveyeditor_working_copy_prompt_draft_message">Una mabadiliko ambayo hayajahifadhiwa kutoka kipindi kilichopita kwenye rasimu hii ya utafiti. Je, ungependa kuendelea kuhariri rasimu yako ambayo haijahifadhiwa au kutupa mabadiliko hayo?</string>
+  <string name="surveyeditor_working_copy_prompt_published_message">Una mabadiliko ambayo hayajachapishwa kutoka kipindi kilichopita kwenye utafiti huu. Je, ungependa kuendelea kuhariri rasimu yako ambayo haijahifadhiwa au kutupa mabadiliko hayo?</string>
+  <string name="surveyeditor_working_copy_continue">Endelea kuhariri</string>
+  <string name="surveyeditor_working_copy_discard">Tupa rasimu</string>
+
+  <!-- Survey lifecycle (status) controls. -->
+  <!-- Button that reopens a closed or archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen">Fungua upya</string>
+  <string name="surveyeditor_lifecycle_draft_description">Inaweza kuhaririwa na waratibu. Imefichwa kwa wakusanyaji data wa simu hadi ichapishwe.</string>
+  <string name="surveyeditor_lifecycle_published_description">Iko hai kwa ukusanyaji wa data shambani na kwenye wavuti.</string>
+  <string name="surveyeditor_lifecycle_closed_description">Ukusanyaji wa data umekwisha na utafiti ni wa kusoma tu hadi ufunguliwe upya.</string>
+  <string name="surveyeditor_lifecycle_archived_description">Umestaafishwa na unahifadhiwa kwa kusoma tu kwa marejeleo ya muda mrefu.</string>
+  <string name="surveyeditor_lifecycle_publish_survey">Chapisha utafiti</string>
+  <string name="surveyeditor_lifecycle_publish_survey_description">Uweke hai kwa ukusanyaji wa data kwenye simu na wavuti</string>
+  <string name="surveyeditor_lifecycle_archive_survey">Weka utafiti kumbukumbu</string>
+  <string name="surveyeditor_lifecycle_archive_survey_description">Ustaafishe na uuhifadhi kwa kusoma tu kwa marejeleo</string>
+  <string name="surveyeditor_lifecycle_switch_to_draft">Badilisha kuwa rasimu</string>
+  <!-- Description of switching a published survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_published_description">Sitisha mwonekano shambani huku ukiendelea kuhariri</string>
+  <!-- Description of switching a closed survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_closed_description">Ruhusu kuhariri katika hali ya rasimu kabla ya kuchapisha upya</string>
+  <!-- Description of switching an archived survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_archived_description">Rejesha katika hali ya rasimu ili kuhariri</string>
+  <string name="surveyeditor_lifecycle_close_survey">Funga utafiti</string>
+  <string name="surveyeditor_lifecycle_close_survey_description">Maliza ukusanyaji wa data na uufanye wa kusoma tu</string>
+  <string name="surveyeditor_lifecycle_reopen_survey">Fungua utafiti upya</string>
+  <!-- Description of reopening a closed survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_closed_description">Endelea na ukusanyaji wa data na kuhariri</string>
+  <!-- Description of reopening an archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_archived_description">Rejesha kwa ukusanyaji wa data na kuhariri</string>
+  <!-- Screen reader description of the status badge. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_badge_description">Hali ya utafiti: %1$s. Bofya ili kubadilisha hali</string>
+  <!-- Heading of the status menu. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_label">Hali ya utafiti: %1$s</string>
+  <string name="surveyeditor_lifecycle_archive_title">Ungependa kuweka utafiti huu kumbukumbu?</string>
+  <string name="surveyeditor_lifecycle_close_title">Ungependa kufunga utafiti huu?</string>
+  <string name="surveyeditor_lifecycle_archive_message">Tafiti zilizowekwa kumbukumbu huhifadhiwa kwa marejeleo. Hakuna anayeweza kukusanya data au kufanya mabadiliko. Unaweza kuufungua upya wakati wowote.</string>
+  <string name="surveyeditor_lifecycle_archive_message_discard">Tafiti zilizowekwa kumbukumbu huhifadhiwa kwa marejeleo. Hakuna anayeweza kukusanya data au kufanya mabadiliko. Unaweza kuufungua upya wakati wowote. Mabadiliko ambayo hayajahifadhiwa yatatupwa.</string>
+  <string name="surveyeditor_lifecycle_close_message">Wakusanyaji data hawawezi kuongeza data mpya, na hakuna anayeweza kufanya mabadiliko. Unaweza kuufungua upya wakati wowote.</string>
+  <string name="surveyeditor_lifecycle_close_message_discard">Wakusanyaji data hawawezi kuongeza data mpya, na hakuna anayeweza kufanya mabadiliko. Unaweza kuufungua upya wakati wowote. Mabadiliko ambayo hayajahifadhiwa yatatupwa.</string>
+  <!-- Button that confirms archiving the survey. -->
+  <string name="surveyeditor_lifecycle_archive">Weka kumbukumbu</string>
+
+  <!-- Survey editor navigation panel. -->
+  <!-- Navigation item and pane title for the survey's basic information. -->
+  <string name="surveyeditor_nav_survey_details">Maelezo ya utafiti</string>
+  <!-- Navigation item and pane title for sharing settings. -->
+  <string name="surveyeditor_nav_sharing">Kushiriki</string>
+  <!-- Navigation heading and summary card label for the survey's forms. -->
+  <string name="surveyeditor_nav_forms">Fomu</string>
+  <string name="surveyeditor_nav_add_form">Ongeza fomu</string>
+  <string name="surveyeditor_nav_no_forms">Bado hakuna fomu</string>
+  <!-- Fallback name for a form without a title. -->
+  <string name="surveyeditor_untitled_form">Fomu isiyo na jina</string>
+  <string name="surveyeditor_nav_add_map_layer">Ongeza tabaka la ramani</string>
+  <string name="surveyeditor_nav_add_data_table">Ongeza jedwali la data</string>
+  <string name="surveyeditor_nav_no_map_layers">Bado hakuna matabaka ya ramani</string>
+  <string name="surveyeditor_nav_no_data_tables">Bado hakuna majedwali ya data</string>
+  <!-- Fallback name for a map layer or data table without a name. -->
+  <string name="surveyeditor_untitled">Bila jina</string>
+  <!-- Screen reader action that moves a navigation item up. -->
+  <string name="surveyeditor_nav_move_up">Sogeza juu</string>
+  <!-- Screen reader action that moves a navigation item down. -->
+  <string name="surveyeditor_nav_move_down">Sogeza chini</string>
+  <!-- Screen reader description of the warning icon on a navigation item. -->
+  <string name="surveyeditor_nav_has_issues">Ina matatizo</string>
+
+  <!-- Survey details pane. -->
+  <string name="surveyeditor_details_subtitle">Maelezo ya msingi yanayoonyeshwa kwa wakusanyaji data wanapofungua utafiti.</string>
+  <string name="surveyeditor_details_survey_title">Jina la utafiti</string>
+  <string name="surveyeditor_details_contents">Maudhui</string>
+  <string name="surveyeditor_details_map_layers">Matabaka ya ramani</string>
+  <string name="surveyeditor_details_data_tables">Majedwali ya data</string>
+  <string name="surveyeditor_details_people">Watu</string>
+  <!-- Heading of the list of survey activity events (exports, receipts, closing). -->
+  <string name="surveyeditor_details_activity">Shughuli</string>
+  <!-- Part of an activity event summary. %1$d is the number of map features. -->
+  <plurals name="surveyeditor_details_activity_map_features">
+    <item quantity="one">kipengele %1$d cha ramani</item>
+    <item quantity="other">vipengele %1$d vya ramani</item>
+  </plurals>
+  <!-- Part of an activity event summary. %1$s is the export profile ID. -->
+  <string name="surveyeditor_details_activity_profile">Wasifu: %1$s</string>
+  <string name="surveyeditor_details_survey_status">Hali ya utafiti</string>
+  <!-- Section title and dropdown label for the survey's organization. -->
+  <string name="surveyeditor_details_organization">Shirika</string>
+  <!-- Organization dropdown option for a survey that doesn't belong to an organization. -->
+  <string name="surveyeditor_details_organization_none">Hakuna (utafiti binafsi)</string>
+  <string name="surveyeditor_details_organization_hint">Ukipenda, endesha utafiti huu kwa niaba ya shirika ambalo wewe ni mwanachama wake. Utabaki kuwa mmiliki. Wasimamizi wa shirika wanaweza pia kuhariri utafiti, kudhibiti kushiriki na kuhamisha data, na wanachama wake wanaweza kuuona utafiti katika orodha yao.</string>
+  <!-- Selected organization that couldn't be found. %1$s is its ID. -->
+  <string name="surveyeditor_details_organization_unknown">Shirika lisilojulikana (%1$s)</string>
+  <string name="surveyeditor_details_organization_missing">Shirika hili halipo tena. Chagua lingine au ufanye utafiti kuwa binafsi.</string>
+  <!-- Screen reader label of the button that dismisses a notice. -->
+  <string name="surveyeditor_details_dismiss">Ondoa</string>
+  <string name="surveyeditor_details_cost_title">Udhibiti wa gharama na kiwango</string>
+  <string name="surveyeditor_details_cost_estimated">Makadirio ya gharama ya kila mwezi</string>
+  <!-- Part of the cost summary, e.g. "3 forms · 12 questions · …". -->
+  <plurals name="surveyeditor_details_cost_forms">
+    <item quantity="one">fomu %1$d</item>
+    <item quantity="other">fomu %1$d</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of questions. -->
+  <plurals name="surveyeditor_details_cost_questions">
+    <item quantity="one">swali %1$d</item>
+    <item quantity="other">maswali %1$d</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of predefined entities. -->
+  <plurals name="surveyeditor_details_cost_predefined">
+    <item quantity="one">%1$d kilichobainishwa awali</item>
+    <item quantity="other">%1$d vilivyobainishwa awali</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of generated sample plots. -->
+  <plurals name="surveyeditor_details_cost_sample_plots">
+    <item quantity="one">kiwanja %1$d cha sampuli</item>
+    <item quantity="other">viwanja %1$d vya sampuli</item>
+  </plurals>
+  <string name="surveyeditor_details_cost_tier_override">Badilisha kiwango:</string>
+  <!-- Quota tier option: inherit the tier from the organization or default. -->
+  <string name="surveyeditor_details_cost_tier_inherit">Rithi</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_basic">Msingi</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_sponsored">Kinachofadhiliwa</string>
+  <string name="surveyeditor_details_cost_budget_cap">Kikomo cha bajeti ya kila mwezi ya utafiti ($ USD)</string>
+  <string name="surveyeditor_details_cost_budget_placeholder">0.00 (Bila kikomo)</string>
+  <string name="surveyeditor_details_cost_hide_limits">Ficha vikomo vya kina vya rasilimali</string>
+  <string name="surveyeditor_details_cost_customize_limits">Weka mapendeleo ya vikomo vya kina vya rasilimali</string>
+  <string name="surveyeditor_details_cost_max_forms">Idadi ya juu ya fomu</string>
+  <string name="surveyeditor_details_cost_max_questions_per_form">Idadi ya juu ya maswali / fomu</string>
+  <string name="surveyeditor_details_cost_max_photo_questions_per_form">Idadi ya juu ya maswali ya picha / fomu</string>
+  <string name="surveyeditor_details_cost_max_predefined_entities">Idadi ya juu ya vitu vilivyobainishwa awali</string>
+  <string name="surveyeditor_details_cost_max_sample_plots">Idadi ya juu ya viwanja vya sampuli</string>
+  <string name="surveyeditor_details_cost_max_area_vertices">Idadi ya juu ya vipeo vya eneo</string>
+  <string name="surveyeditor_details_cost_max_acl_collaborators">Idadi ya juu ya washirika wa ACL</string>
+  <string name="surveyeditor_details_purpose_title">Madhumuni</string>
+  <string name="surveyeditor_details_purpose_hint">Data ya utafiti huu itatumika kwa nini; utafiti unaweza kuwa na madhumuni kadhaa. Sehemu za kawaida za madhumuni yake hupendekezwa kwanza unapoandika maswali. Kubadilisha madhumuni hapa hakuongezi wala kuondoa fomu; ili kuongeza fomu za kuanzia za madhumuni, tumia Ongeza fomu &gt; Kwa madhumuni.</string>
+  <string name="surveyeditor_details_purpose_none">Hakuna malengo yanayopatikana kwa utafiti huu.</string>
+  <string name="surveyeditor_details_purpose_unavailable">Hayapatikani tena katika maktaba ya utafiti huu:</string>
+  <!-- Screen reader label of a button that removes an item. %1$s is the item's name. -->
+  <string name="surveyeditor_details_remove_item">Ondoa %1$s</string>
+
+  <!-- Survey languages. -->
+  <string name="surveyeditor_language_title">Lugha</string>
+  <string name="surveyeditor_language_hint">Chagua lugha ambazo fomu na maswali ya utafiti yanaweza kuandikwa na kukusanywa. Lugha chaguomsingi huonyeshwa wakati tafsiri mahususi haipatikani.</string>
+  <string name="surveyeditor_language_supported">Lugha zinazotumika</string>
+  <!-- Chip for the survey's default language. %1$s is the language name. -->
+  <string name="surveyeditor_language_default_chip">%1$s • Chaguomsingi</string>
+  <string name="surveyeditor_language_add">Ongeza lugha</string>
+  <string name="surveyeditor_language_none_selected">Hakuna iliyochaguliwa</string>
+  <string name="surveyeditor_language_default">Lugha chaguomsingi</string>
+  <string name="surveyeditor_language_picker_title">Chagua lugha</string>
+  <string name="surveyeditor_language_search_label">Tafuta kwa jina la lugha</string>
+  <string name="surveyeditor_language_search_placeholder">k.m. Kiswahili, Kiingereza, Kihispania, Kiamhari...</string>
+  <string name="surveyeditor_language_popular">Lugha maarufu na muhtasari wa katalogi:</string>
+  <!-- %1$d is the number of languages matching the search. -->
+  <plurals name="surveyeditor_language_matches">
+    <item quantity="one">Imepatikana lugha %1$d inayolingana:</item>
+    <item quantity="other">Zimepatikana lugha %1$d zinazolingana:</item>
+  </plurals>
+  <!-- %1$s is the search query. -->
+  <string name="surveyeditor_language_no_matches">Hakuna lugha zinazolingana na “%1$s”</string>
+  <!-- Badge on a language that is already supported by the survey. -->
+  <string name="surveyeditor_language_added">Imeongezwa</string>
+
+  <!-- Survey area section of the survey details pane. -->
+  <!-- Fallback location label for an untitled survey in the survey area editor. -->
+  <string name="surveyeditor_details_area_default_location">Utafiti</string>
+  <!-- Title of the required survey area section; * marks a required field. -->
+  <string name="surveyeditor_details_area_title">Eneo la utafiti *</string>
+  <string name="surveyeditor_details_area_hint">Eneo la kijiografia na mipaka ya ukusanyaji wa data katika utafiti huu.</string>
+  <!-- %1$s describes where the survey area came from, e.g. an uploaded file. -->
+  <string name="surveyeditor_details_area_source">Chanzo: %1$s</string>
+  <string name="surveyeditor_details_area_edit">Hariri eneo la utafiti</string>
+  <string name="surveyeditor_details_area_required">Chagua au chora eneo la utafiti ili kuendelea.</string>
+  <string name="surveyeditor_details_area_empty_title">Hakuna eneo la utafiti lililowekwa</string>
+  <string name="surveyeditor_details_area_empty_hint">Tafuta mahali, chora mpaka kwenye ramani, au pakia faili ya GeoJSON au KML.</string>
+  <string name="surveyeditor_details_area_set">Weka eneo la utafiti</string>
+
+  <!-- Sharing pane. -->
+  <string name="surveyeditor_sharing_subtitle">Chagua nani anaweza kufungua utafiti huu na kile ambacho wakusanyaji data wanaweza kuona.</string>
+  <string name="surveyeditor_sharing_people_with_access">Watu wenye ufikiaji</string>
+  <string name="surveyeditor_sharing_owner_detail">Mmiliki wa utafiti</string>
+  <string name="surveyeditor_sharing_owner">Mmiliki</string>
+  <string name="surveyeditor_sharing_pending_detail">Inasubiri wakubali kiungo chao cha mwaliko</string>
+  <string name="surveyeditor_sharing_joined_now">Amejiunga sasa hivi</string>
+  <!-- %1$s is the date the person joined. -->
+  <string name="surveyeditor_sharing_joined">Alijiunga %1$s</string>
+  <!-- Dropdown label for a collaborator's role. -->
+  <string name="surveyeditor_sharing_role">Jukumu</string>
+  <string name="surveyeditor_sharing_profile_note">Majina na picha hutoka kwenye akaunti ya kila mtu. Collect One huvihifadhi wanapokubali kiungo chao cha mwaliko, na huvisasisha wanapoingia.</string>
+  <string name="surveyeditor_sharing_data_access">Ufikiaji na mwonekano wa data</string>
+  <string name="surveyeditor_sharing_add_by_email">Ongeza watu kwa barua pepe</string>
+  <string name="surveyeditor_sharing_invite">Alika</string>
+  <string name="surveyeditor_sharing_org_managers">Wasimamizi wa shirika</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_org_managers_hint">Imerithiwa kutoka %1$s. Wasimamizi wanaweza kuhariri utafiti huu, kudhibiti kushiriki na kuhamisha data. Badilisha wanaosimamia shirika kwenye ukurasa wake wa Wanachama.</string>
+  <string name="surveyeditor_sharing_no_managers">Bado hakuna wasimamizi.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_manager_of">Msimamizi wa %1$s</string>
+  <string name="surveyeditor_sharing_share_link_title">Kiungo cha kushiriki na msimbo wa QR</string>
+  <!-- Badge for a survey that is only reachable through its link. -->
+  <string name="surveyeditor_sharing_badge_unlisted">Haijaorodheshwa</string>
+  <!-- Badge for a survey listed in the public survey directory. -->
+  <string name="surveyeditor_sharing_badge_public">Saraka ya umma</string>
+  <!-- Copy button label after the link was copied. -->
+  <string name="surveyeditor_sharing_copied">Imenakiliwa</string>
+  <string name="surveyeditor_sharing_copy_link">Nakili kiungo</string>
+  <string name="surveyeditor_sharing_show_qr">Onyesha msimbo wa QR</string>
+  <!-- QR code dialog title. %1$s is the survey title. -->
+  <string name="surveyeditor_sharing_qr_title">Shiriki “%1$s”</string>
+  <string name="surveyeditor_sharing_qr_title_untitled">Kiungo cha kushiriki utafiti na msimbo wa QR</string>
+  <string name="surveyeditor_sharing_qr_hint">Wakusanyaji data wanaweza kuchanganua msimbo huu wa QR kwa kamera ya simu yao au programu ya Collect One ili kufungua utafiti moja kwa moja.</string>
+
+  <!-- General access sliders: audience stops. -->
+  <string name="surveyeditor_access_contributors_and_organizers">Wachangiaji na waratibu</string>
+  <string name="surveyeditor_access_invited_people">Watu walioalikwa</string>
+  <string name="surveyeditor_access_anyone_in_organization">Mtu yeyote katika shirika lako</string>
+  <string name="surveyeditor_access_anyone">Mtu yeyote</string>
+  <string name="surveyeditor_access_who_can_view">Nani anaweza kuona data</string>
+  <string name="surveyeditor_access_who_can_collect">Nani anaweza kukusanya data</string>
+  <!-- Screen reader description of a slider stop. %1$s is the slider title, %2$s the audience. -->
+  <string name="surveyeditor_access_slider_stop_description">%1$s: %2$s</string>
+  <string name="surveyeditor_access_view_hint_contributors">Wakusanyaji data huona mawasilisho yao wenyewe pekee. Waratibu wa utafiti wanaweza kuona mawasilisho yote na utambulisho wa wachangiaji.</string>
+  <string name="surveyeditor_access_view_hint_invited">Watu walioongezwa hapo juu wanaweza kuona vipengele vyote vya ramani, majibu, picha na midia nyingine iliyopakiwa. Ni waratibu wa utafiti pekee wanaoweza kuona utambulisho wa wachangiaji.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_access_view_hint_organization">Mtu yeyote katika %1$s anaweza kuona vipengele vyote vya ramani, majibu, picha na midia nyingine iliyopakiwa. Ni waratibu wa utafiti pekee wanaoweza kuona utambulisho wa wachangiaji.</string>
+  <string name="surveyeditor_access_view_hint_organization_unset">Mtu yeyote katika shirika lako anaweza kuona vipengele vyote vya ramani, majibu, picha na midia nyingine iliyopakiwa. Chagua shirika katika Maelezo ya utafiti.</string>
+  <string name="surveyeditor_access_view_hint_anyone">Mtu yeyote anaweza kuona vipengele vyote vya ramani, majibu, picha na midia nyingine iliyopakiwa. Ni waratibu wa utafiti pekee wanaoweza kuona utambulisho wa wachangiaji. Washiriki lazima wakubali ilani ya idhini kabla ya kukusanya data.</string>
+  <string name="surveyeditor_access_collect_hint_invited">Ni watu walioongezwa hapo juu pekee wanaoweza kufungua utafiti huu na kukusanya data.</string>
+  <!-- %1$s is the organization name (used twice). -->
+  <string name="surveyeditor_access_collect_hint_organization">Wanachama wa %1$s wanaweza kufungua utafiti huu na kukusanya data. Wasimamizi wa %1$s wanaweza pia kuhariri utafiti.</string>
+  <string name="surveyeditor_access_collect_hint_organization_unset">Wanachama wa shirika lako wanaweza kufungua utafiti huu na kukusanya data. Chagua shirika katika Maelezo ya utafiti.</string>
+  <string name="surveyeditor_access_collect_hint_anyone">Mtu yeyote anaweza kufungua utafiti huu na kuwasilisha data.</string>
+  <string name="surveyeditor_access_unlisted_option">Haijaorodheshwa (watu wenye kiungo au msimbo wa QR pekee)</string>
+  <string name="surveyeditor_access_public_option">Wa umma (umeorodheshwa katika saraka ya tafiti)</string>
+  <string name="surveyeditor_access_who_can_find">Nani anaweza kupata utafiti huu</string>
+  <string name="surveyeditor_access_unlisted_hint">Haijaorodheshwa: ni watu walio na kiungo cha moja kwa moja au wanaochanganua msimbo wa QR ulio hapa chini pekee wanaoweza kupata na kufungua utafiti huu.</string>
+  <string name="surveyeditor_access_public_hint">Wa umma: mtu yeyote anayevinjari saraka ya tafiti anaweza kugundua na kufungua utafiti huu, au kutumia kiungo cha moja kwa moja na msimbo wa QR ulio hapa chini.</string>
+
+  <!-- Data tables, map layers, add dialogs, people. -->
+  <!-- Map layer / data table editor (EntityDatasetEditor). -->
+  <!-- Shown in place of a map layer or data table name when it is blank. -->
+  <string name="surveyeditor_dataset_untitled">Bila jina</string>
+  <!-- Count in a data table summary, e.g. "3 rows • 2 properties". -->
+  <plurals name="surveyeditor_dataset_rows_count">
+    <item quantity="one">safu %1$d</item>
+    <item quantity="other">safu %1$d</item>
+  </plurals>
+  <!-- Count in a map layer summary, e.g. "3 features • 2 properties". -->
+  <plurals name="surveyeditor_dataset_features_count">
+    <item quantity="one">kipengele %1$d</item>
+    <item quantity="other">vipengele %1$d</item>
+  </plurals>
+  <!-- Count of the columns (properties) of a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_properties_count">
+    <item quantity="one">sifa %1$d</item>
+    <item quantity="other">sifa %1$d</item>
+  </plurals>
+  <!-- Number of validation issues found in a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_issues_count">
+    <item quantity="one">tatizo %1$d</item>
+    <item quantity="other">matatizo %1$d</item>
+  </plurals>
+  <!-- Content description of a dataset's overflow menu button. %1$s is the dataset name. -->
+  <string name="surveyeditor_dataset_more_options">Chaguo zaidi za %1$s</string>
+  <string name="surveyeditor_dataset_delete_map_layer_menu">Futa tabaka la ramani…</string>
+  <string name="surveyeditor_dataset_delete_data_table_menu">Futa jedwali la data…</string>
+  <string name="surveyeditor_dataset_delete_map_layer_title">Ungependa kufuta tabaka hili la ramani?</string>
+  <string name="surveyeditor_dataset_delete_data_table_title">Ungependa kufuta jedwali hili la data?</string>
+  <!-- %1$s is the map layer name, %2$d the number of features. -->
+  <plurals name="surveyeditor_dataset_delete_map_layer_body">
+    <item quantity="one">“%1$s” na kipengele chake %2$d vitaondolewa kwenye utafiti huu.</item>
+    <item quantity="other">“%1$s” na vipengele vyake %2$d vitaondolewa kwenye utafiti huu.</item>
+  </plurals>
+  <!-- %1$s is the data table name, %2$d the number of rows. -->
+  <plurals name="surveyeditor_dataset_delete_data_table_body">
+    <item quantity="one">“%1$s” na safu yake %2$d vitaondolewa kwenye utafiti huu.</item>
+    <item quantity="other">“%1$s” na safu zake %2$d vitaondolewa kwenye utafiti huu.</item>
+  </plurals>
+  <string name="surveyeditor_dataset_delete_map_layer">Futa tabaka la ramani</string>
+  <string name="surveyeditor_dataset_delete_data_table">Futa jedwali la data</string>
+  <!-- Title of the table listing a map layer's features. -->
+  <string name="surveyeditor_dataset_features">Vipengele</string>
+  <!-- Title of the table listing a data table's rows. -->
+  <string name="surveyeditor_dataset_rows">Safu</string>
+  <string name="surveyeditor_dataset_add_feature">Ongeza kipengele</string>
+  <string name="surveyeditor_dataset_add_row">Ongeza safu</string>
+  <!-- Shown after the first issues of a dataset. %1$d is how many more issues there are. -->
+  <plurals name="surveyeditor_dataset_more_issues">
+    <item quantity="one">…na %1$d zaidi</item>
+    <item quantity="other">…na %1$d zaidi</item>
+  </plurals>
+  <!-- Table column header of the dataset's key property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_key">%1$s (ufunguo)</string>
+  <!-- Table column header of the dataset's label property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_label">%1$s (lebo)</string>
+  <!-- Header of the column where feature geometry is typed as coordinates. -->
+  <string name="surveyeditor_dataset_column_geometry">Jiometri (lat, lng; …)</string>
+  <string name="surveyeditor_dataset_empty_sample_plots">Bado hakuna viwanja vya sampuli. Vizalishe kutoka kwenye muundo wa sampuli.</string>
+  <string name="surveyeditor_dataset_empty_features">Bado hakuna vipengele. Ongeza kimoja hapa au kwenye ramani.</string>
+  <string name="surveyeditor_dataset_empty_rows">Bado hakuna safu.</string>
+  <!-- Sample points of a sample plot, shown when a plot has none. -->
+  <string name="surveyeditor_dataset_samples_none">Hakuna</string>
+  <!-- Number of sample points of a sample plot. -->
+  <plurals name="surveyeditor_dataset_samples_count">
+    <item quantity="one">nukta %1$d</item>
+    <item quantity="other">nukta %1$d</item>
+  </plurals>
+  <!-- Section label of the dataset settings panel. -->
+  <string name="surveyeditor_dataset_settings">Mipangilio</string>
+  <string name="surveyeditor_dataset_name">Jina</string>
+  <string name="surveyeditor_dataset_geometry_type">Aina ya jiometri</string>
+  <string name="surveyeditor_dataset_sample_design">Muundo wa sampuli</string>
+  <string name="surveyeditor_dataset_key_property">Sifa ya ufunguo (kitambulisho cha kipekee)</string>
+  <!-- Shown in a dropdown when nothing has been chosen yet. -->
+  <string name="surveyeditor_dataset_choose">Chagua…</string>
+  <string name="surveyeditor_dataset_label_property">Sifa ya lebo (huonyeshwa kwenye orodha)</string>
+  <string name="surveyeditor_dataset_field_collection">Ukusanyaji shambani na fomu</string>
+  <!-- %1$s is the title of the form linked to the dataset. -->
+  <string name="surveyeditor_dataset_linked_to">Imeunganishwa na %1$s</string>
+  <string name="surveyeditor_dataset_linked_form_map_layer">Wakusanyaji data wanaweza kuongeza vipengele vipya vya ramani kwa kutumia fomu hii. Sifa za muundo husawazishwa na maswali ya fomu.</string>
+  <string name="surveyeditor_dataset_linked_form_data_table">Wakusanyaji data wanaweza kuongeza safu mpya kwa kutumia fomu hii. Sifa za muundo husawazishwa na maswali ya fomu.</string>
+  <string name="surveyeditor_dataset_edit_form">Hariri fomu</string>
+  <string name="surveyeditor_dataset_unlink_form">Tenganisha fomu</string>
+  <string name="surveyeditor_dataset_no_form_map_layer">Hakuna fomu iliyounganishwa na tabaka hili la ramani. Wakusanyaji data wanaweza tu kuona vitu vilivyopo.</string>
+  <string name="surveyeditor_dataset_no_form_data_table">Hakuna fomu iliyounganishwa na jedwali hili la data. Wakusanyaji data wanaweza tu kuona vitu vilivyopo.</string>
+  <string name="surveyeditor_dataset_create_form_map_layer">Unda fomu ya tabaka la ramani</string>
+  <string name="surveyeditor_dataset_create_form_data_table">Unda fomu ya jedwali la data</string>
+  <!-- Label above the list of forms that update this dataset. -->
+  <string name="surveyeditor_dataset_updated_by">Husasishwa na</string>
+  <string name="surveyeditor_dataset_map_style">Mtindo wa ramani</string>
+  <!-- Section label of the dataset's schema (its properties / columns). -->
+  <string name="surveyeditor_dataset_properties">Sifa</string>
+  <string name="surveyeditor_dataset_properties_managed_by_form">Sifa zinadhibitiwa na fomu iliyounganishwa. Ili kuhariri, kuongeza au kufuta sifa, hariri fomu.</string>
+  <string name="surveyeditor_dataset_add_property">Ongeza sifa</string>
+  <!-- Section label of the advanced dataset settings. -->
+  <string name="surveyeditor_dataset_advanced">Mipangilio ya kina</string>
+  <!-- Button that collapses the advanced section. -->
+  <string name="surveyeditor_dataset_hide">Ficha</string>
+  <!-- Button that expands the advanced section. -->
+  <string name="surveyeditor_dataset_show">Onyesha</string>
+  <string name="surveyeditor_dataset_id">Kitambulisho cha seti ya data</string>
+  <string name="surveyeditor_dataset_id_supporting">Fomu hutumia kitambulisho hiki kutafuta rekodi kutoka kwenye seti hii ya data.</string>
+  <!-- Field for a map layer's color as a hex code. -->
+  <string name="surveyeditor_dataset_color">Rangi</string>
+  <!-- %1$d is the line width in pixels. -->
+  <string name="surveyeditor_dataset_stroke_width">Upana wa mstari: px %1$d</string>
+  <!-- %1$d is the polygon fill opacity in percent; the % after it is a literal percent sign. -->
+  <string name="surveyeditor_dataset_fill_opacity">Uangavu wa ujazo: %1$d%</string>
+  <string name="surveyeditor_dataset_visible_by_default">Huonekana kwa chaguomsingi</string>
+  <string name="surveyeditor_dataset_visible_by_default_description">Onyesha tabaka hili ramani inapofunguliwa mara ya kwanza.</string>
+  <!-- Field for the display label of a dataset property. -->
+  <string name="surveyeditor_dataset_property_label">Lebo</string>
+  <!-- Button that hides a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_hide_id">Ficha kitambulisho</string>
+  <!-- Button that shows a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_advanced">Mipangilio ya kina</string>
+  <string name="surveyeditor_dataset_property_internal_id">Kitambulisho cha ndani</string>
+  <string name="surveyeditor_dataset_property_internal_id_supporting">Hutumika katika semi za XForms na uhamishaji wa GeoJSON.</string>
+  <!-- Field for the data type of a dataset property. -->
+  <string name="surveyeditor_dataset_property_type">Aina</string>
+  <!-- Checkbox label: the property must have a value. -->
+  <string name="surveyeditor_dataset_property_required">Inahitajika</string>
+  <string name="surveyeditor_dataset_remove_property">Ondoa sifa</string>
+
+  <!-- Add data table dialog. -->
+  <string name="surveyeditor_add_table_title">Ongeza jedwali la data</string>
+  <string name="surveyeditor_add_table_empty">Jedwali tupu la data</string>
+  <string name="surveyeditor_add_table_empty_body">Ongeza safuwima na uweke safu kwenye jedwali.</string>
+  <string name="surveyeditor_add_table_import_csv">Leta kutoka CSV</string>
+  <string name="surveyeditor_add_table_import_csv_body">Unda jedwali la data kutoka kwenye safuwima na safu za faili ya CSV.</string>
+  <string name="surveyeditor_add_table_no_rows">Hakuna safu zilizoweza kusomwa kutoka kwenye faili hii.</string>
+  <!-- Number of columns found in an imported CSV file. -->
+  <plurals name="surveyeditor_add_table_columns_count">
+    <item quantity="one">safuwima %1$d</item>
+    <item quantity="other">safuwima %1$d</item>
+  </plurals>
+  <!-- An imported column: %1$s is its name, %2$s its detected type. -->
+  <string name="surveyeditor_add_table_column_with_type">%1$s (%2$s)</string>
+  <!-- Date order option: %1$s is the order (e.g. "Day first"), %2$s an example date. -->
+  <string name="surveyeditor_add_table_date_order_option">%1$s (%2$s)</string>
+
+  <!-- Add map layer dialog. -->
+  <string name="surveyeditor_add_layer_title">Ongeza tabaka la ramani</string>
+  <string name="surveyeditor_add_layer_empty">Tabaka tupu la ramani</string>
+  <string name="surveyeditor_add_layer_empty_body">Ongeza vipengele kwa kuvichora kwenye ramani au kuviweka kwenye jedwali.</string>
+  <string name="surveyeditor_add_layer_import_file">Leta faili</string>
+  <string name="surveyeditor_add_layer_import_file_body">Unda tabaka la ramani kutoka kwenye nukta, mistari au poligoni za faili ya GeoJSON au KML.</string>
+  <string name="surveyeditor_add_layer_generate_plots">Zalisha viwanja vya sampuli</string>
+  <string name="surveyeditor_add_layer_generate_plots_body">Buni sampuli na uzalishe viwanja ndani ya eneo la utafiti au matabaka-sampuli.</string>
+  <!-- Shown when sample plots can't be generated yet. -->
+  <string name="surveyeditor_add_layer_generate_plots_need_area">Weka eneo la utafiti au ongeza tabaka la ramani la poligoni kwanza.</string>
+  <string name="surveyeditor_add_layer_no_features">Hakuna vipengele vilivyoweza kusomwa kutoka kwenye faili hii.</string>
+  <!-- Number of features in an imported file. %1$d is the count, %2$s the lowercase geometry type (e.g. "polygon"). -->
+  <string name="surveyeditor_add_layer_feature_count">%2$s %1$d</string>
+  <!-- %1$d is the number of features that will not be imported. -->
+  <plurals name="surveyeditor_add_layer_skipped_features">
+    <item quantity="one">Kipengele %1$d chenye aina nyingine ya jiometri kitarukwa. Tabaka la ramani lina aina moja ya jiometri.</item>
+    <item quantity="other">Vipengele %1$d vyenye aina nyingine za jiometri vitarukwa. Tabaka la ramani lina aina moja ya jiometri.</item>
+  </plurals>
+
+  <!-- Add form dialog. -->
+  <string name="surveyeditor_add_form_title">Ongeza fomu</string>
+  <string name="surveyeditor_add_form_empty">Fomu tupu</string>
+  <string name="surveyeditor_add_form_empty_body">Anza na fomu tupu na uongeze maswali kuanzia mwanzo.</string>
+  <string name="surveyeditor_add_form_from_template">Kutoka kiolezo…</string>
+  <string name="surveyeditor_add_form_for_purpose">Kwa madhumuni…</string>
+  <string name="surveyeditor_add_form_for_purpose_body">Ongeza fomu za kuanzia za kiolezo cha madhumuni. Madhumuni na programu zake huongezwa kwenye utafiti, hivyo utafiti mmoja unaweza kutumikia madhumuni kadhaa.</string>
+  <string name="surveyeditor_add_form_no_purposes">Hakuna madhumuni yanayopatikana kwa utafiti huu.</string>
+  <string name="surveyeditor_add_form_purpose_title">Ongeza fomu za madhumuni</string>
+  <string name="surveyeditor_add_form_purpose_note">Chagua madhumuni na kiolezo chake cha kuanzia. Fomu za kiolezo huongezwa kwenye utafiti, na madhumuni pamoja na programu zilizochaguliwa hurekodiwa nao.</string>
+  <string name="surveyeditor_add_form_purpose_add">Ongeza fomu</string>
+  <string name="surveyeditor_add_form_no_templates">Bado hakuna violezo vinavyopatikana kwa utafiti huu.</string>
+  <string name="surveyeditor_add_form_templates_body">Anza na fomu inayoweza kutumika tena, yenye sehemu sanifu, kutoka shirika lako au maktaba ya jumla.</string>
+  <string name="surveyeditor_add_form_import_file">Leta kutoka faili</string>
+  <string name="surveyeditor_add_form_import_file_body">Unda fomu kutoka faili ya ODK XForms (.xml) au Collect Earth (.cep).</string>
+  <string name="surveyeditor_add_form_no_questions">Hakuna maswali yaliyoweza kusomwa kutoka kwenye faili hii.</string>
+  <!-- Number of questions in an imported form or template. -->
+  <plurals name="surveyeditor_add_form_questions_count">
+    <item quantity="one">swali %1$d</item>
+    <item quantity="other">maswali %1$d</item>
+  </plurals>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it updates. -->
+  <string name="surveyeditor_add_form_updates_dataset">Husasisha %1$s</string>
+  <string name="surveyeditor_add_form_updates_existing">Husasisha vipengele vilivyopo</string>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it adds to. -->
+  <string name="surveyeditor_add_form_adds_to_dataset">Huongeza kwenye %1$s</string>
+  <string name="surveyeditor_add_form_adds_to_new_map_layer">Huongeza kwenye tabaka jipya la ramani</string>
+  <string name="surveyeditor_add_form_adds_to_new_data_table">Huongeza kwenye jedwali jipya la data</string>
+  <string name="surveyeditor_add_form_template_title">Ongeza fomu kutoka kiolezo</string>
+  <string name="surveyeditor_add_form_template_note">Fomu inanakiliwa kwenye utafiti huu. Mabadiliko ya baadaye kwenye kiolezo hayataiathiri.</string>
+  <!-- Badge of a template from the user's organization (when its name is unknown). -->
+  <string name="surveyeditor_add_form_template_organization">Shirika</string>
+  <!-- Badge of a template from the global library. -->
+  <string name="surveyeditor_add_form_template_global">Jumla</string>
+  <!-- %1$s is the question count (e.g. "12 questions"), %2$d how many link to standard fields. -->
+  <plurals name="surveyeditor_add_form_template_linked">
+    <item quantity="one">%1$s · %2$d limeunganishwa na sehemu sanifu</item>
+    <item quantity="other">%1$s · %2$d yameunganishwa na sehemu sanifu</item>
+  </plurals>
+
+  <!-- Map layer pin icon picker. -->
+  <!-- %1$s is the name of the chosen icon. -->
+  <string name="surveyeditor_icon_pin_icon">Aikoni ya pini: %1$s</string>
+  <!-- Shown as the pin icon name when no icon is chosen. -->
+  <string name="surveyeditor_icon_none">Hakuna</string>
+  <string name="surveyeditor_icon_no_icon">Hakuna aikoni</string>
+
+  <!-- Basemap options of the map layer editor. -->
+  <string name="surveyeditor_basemap_satellite">Setilaiti</string>
+  <string name="surveyeditor_basemap_terrain">Ardhi</string>
+  <!-- Basemap option: no basemap imagery. -->
+  <string name="surveyeditor_basemap_none">Hakuna</string>
+
+  <!-- Short labels of sample design thumbnail cards. -->
+  <string name="surveyeditor_thumbnail_grid">Gridi</string>
+  <string name="surveyeditor_thumbnail_random">Nasibu</string>
+  <string name="surveyeditor_thumbnail_stratified">Kwa matabaka</string>
+  <string name="surveyeditor_thumbnail_cluster">Kishada</string>
+  <!-- Plot shape: a single point. -->
+  <string name="surveyeditor_thumbnail_point">Nukta</string>
+  <!-- Sample point layout: one point at the plot center. -->
+  <string name="surveyeditor_thumbnail_center">Katikati</string>
+
+  <!-- People with access and invite acceptance. -->
+  <!-- Badge of a person who was invited but hasn't joined yet. -->
+  <string name="surveyeditor_people_invited">Amealikwa</string>
+  <!-- Shown on the copy button after the invite link was copied. -->
+  <string name="surveyeditor_people_copied">Imenakiliwa</string>
+  <string name="surveyeditor_people_copy_link">Nakili kiungo</string>
+  <string name="surveyeditor_people_new_link">Kiungo kipya</string>
+  <string name="surveyeditor_people_open_as_invitee">Fungua kama mwalikwa</string>
+  <!-- Name of the survey page listing people; used as %1$s in surveyeditor_people_accept_invite_note. -->
+  <string name="surveyeditor_people_sharing_page">ukurasa wa Kushiriki</string>
+  <!-- Title of the invite acceptance dialog. %1$s is the survey or organization name. -->
+  <string name="surveyeditor_people_join_title">Jiunge na “%1$s”</string>
+  <!-- %1$s is the invitee's email address. -->
+  <string name="surveyeditor_people_accept_invite_preview">Onyesho la kukagua kile ambacho %1$s ataona baada ya kufungua kiungo chake cha mwaliko na kuingia.</string>
+  <!-- %1$s is the invitee's email address, %2$s their role. -->
+  <string name="surveyeditor_people_signed_in_as">Umeingia kama %1$s • %2$s</string>
+  <string name="surveyeditor_people_full_name">Jina kamili</string>
+  <string name="surveyeditor_people_profile_photo">Picha ya wasifu</string>
+  <!-- %1$s is the page where organizers see people, e.g. "Sharing page" or "Members page". -->
+  <string name="surveyeditor_people_accept_invite_note">Collect One huhifadhi jina na picha yako ili waratibu wakutambue kwenye %1$s. Husasishwa kila unapoingia.</string>
+  <string name="surveyeditor_people_accept_invite">Kubali mwaliko</string>
+
+  <!-- Interactive layer map, survey area editor, sampling design panel. -->
+  <!-- Interactive layer map (InteractiveLayerMap.kt). -->
+  <!-- Title of the map card in the map layer and survey area editors. -->
+  <string name="surveyeditor_map_title">Ramani</string>
+  <string name="surveyeditor_map_generated_locked">Jiometri iliyozalishwa haiwezi kuhaririwa</string>
+  <!-- Vertex progress while drawing. %1$d is the number of vertices placed, %2$d the minimum needed. -->
+  <string name="surveyeditor_map_draft_vertices">vipeo %1$d / %2$d+</string>
+  <string name="surveyeditor_map_undo">Tendua</string>
+  <!-- Button that completes drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_finish_point">Maliza nukta</string>
+  <string name="surveyeditor_map_finish_line">Maliza mstari</string>
+  <string name="surveyeditor_map_finish_polygon">Maliza poligoni</string>
+  <!-- Button that completes drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_finish_part">Maliza sehemu</string>
+  <!-- Chip that starts drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_add_point">Ongeza nukta</string>
+  <string name="surveyeditor_map_add_line">Ongeza mstari</string>
+  <string name="surveyeditor_map_add_polygon">Ongeza poligoni</string>
+  <!-- Starts drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_add_part">Ongeza sehemu</string>
+  <string name="surveyeditor_map_zoom_in">Kuza</string>
+  <string name="surveyeditor_map_zoom_out">Fifiza</string>
+  <string name="surveyeditor_map_fit_to_features">Tosheleza vipengele</string>
+  <!-- Current map zoom level, shown next to the scale bar. %1$s is the zoom level (e.g. "12.5"). -->
+  <string name="surveyeditor_map_zoom_level">z %1$s</string>
+  <!-- Map hints shown in a pill at the bottom of the map. -->
+  <string name="surveyeditor_map_hint_locked">Buruta ili kusogeza • Sogeza gurudumu au bana ili kukuza • Bofya kiwanja ili kuona nukta zake za sampuli</string>
+  <string name="surveyeditor_map_hint_place_point">Bofya ramani ili kuweka nukta</string>
+  <string name="surveyeditor_map_hint_start_line">Bofya ili kuanza mstari</string>
+  <string name="surveyeditor_map_hint_continue_line">Bofya ili kuongeza vipeo • Bofya kipeo cha mwisho tena ili kumaliza</string>
+  <string name="surveyeditor_map_hint_start_polygon">Bofya ili kuanza poligoni</string>
+  <string name="surveyeditor_map_hint_continue_polygon">Bofya ili kuongeza vipeo • Bofya kipeo cha kwanza au cha mwisho ili kumaliza</string>
+  <string name="surveyeditor_map_hint_move_point">Buruta nukta ili kuisogeza</string>
+  <!-- "○ handles" refers to the small circles drawn at segment midpoints. -->
+  <string name="surveyeditor_map_hint_reshape">Buruta vipeo ili kubadilisha umbo • Buruta vishikio ○ ili kuongeza kipeo • Buruta ndani ili kusogeza</string>
+  <string name="surveyeditor_map_hint_select">Buruta ili kusogeza • Sogeza gurudumu au bana ili kukuza • Bofya kipengele ili kukichagua</string>
+
+  <!-- Survey area editor dialog (SurveyAreaEditor.kt). -->
+  <string name="surveyeditor_area_tab_search">Tafuta</string>
+  <string name="surveyeditor_area_tab_draw">Chora</string>
+  <string name="surveyeditor_area_tab_upload">Pakia</string>
+  <string name="surveyeditor_area_title">Eneo la utafiti</string>
+  <string name="surveyeditor_area_close_editor">Funga kihariri cha eneo la utafiti</string>
+  <string name="surveyeditor_area_save">Hifadhi eneo la utafiti</string>
+  <!-- Part of an area summary like "3 parts • 1,204 vertices • 850 ha". -->
+  <plurals name="surveyeditor_area_parts_count">
+    <item quantity="one">sehemu %1$d</item>
+    <item quantity="other">sehemu %1$d</item>
+  </plurals>
+  <!-- Vertex count in an area summary. %1$s is the count with thousands separators. -->
+  <plurals name="surveyeditor_area_vertices_count">
+    <item quantity="one">kipeo %1$s</item>
+    <item quantity="other">vipeo %1$s</item>
+  </plurals>
+  <string name="surveyeditor_area_search_label">Tafuta maeneo au weka viwianishi</string>
+  <!-- Example place names are from the default survey region. -->
+  <string name="surveyeditor_area_search_placeholder">k.m. Nairobi, Othaya, Bwawa la Chinga, au -0.419, 36.950</string>
+  <string name="surveyeditor_area_suggested_locations">Maeneo ya utafiti yanayopendekezwa:</string>
+  <plurals name="surveyeditor_area_locations_found">
+    <item quantity="one">Limepatikana eneo %1$d:</item>
+    <item quantity="other">Yamepatikana maeneo %1$d:</item>
+  </plurals>
+  <string name="surveyeditor_area_searching_places">Inatafuta maeneo...</string>
+  <!-- %1$s is the search text the user typed. -->
+  <string name="surveyeditor_area_no_places_matching">Hakuna maeneo yanayolingana na “%1$s”</string>
+  <!-- Category of a search result built from typed coordinates. -->
+  <string name="surveyeditor_area_custom_coordinates">Viwianishi maalum</string>
+  <string name="surveyeditor_area_direct_coordinates_input">Kuweka viwianishi moja kwa moja</string>
+  <!-- Source badge for results from the online places search. -->
+  <string name="surveyeditor_area_source_online">Mtandaoni</string>
+  <!-- Badge on the search result that is the current survey area. -->
+  <string name="surveyeditor_area_selected">Limechaguliwa</string>
+  <string name="surveyeditor_area_name">Jina la eneo</string>
+  <string name="surveyeditor_area_draw_instructions">Bofya ramani ili kuweka pembe za mpaka. Bofya sehemu iliyopo ili kuichagua, kisha buruta pembe zake ili kubadilisha umbo lake.</string>
+  <string name="surveyeditor_area_parts">Sehemu</string>
+  <string name="surveyeditor_area_no_parts">Bado hakuna sehemu. Chora angalau sehemu moja ili kuhifadhi eneo la utafiti.</string>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_part_number">Sehemu %1$d</string>
+  <!-- Vertex count and area of one part. %2$s is the formatted area (e.g. "850 ha"). -->
+  <plurals name="surveyeditor_area_part_vertices_area">
+    <item quantity="one">kipeo %1$d • %2$s</item>
+    <item quantity="other">vipeo %1$d • %2$s</item>
+  </plurals>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_delete_part">Futa sehemu %1$d</string>
+  <string name="surveyeditor_area_draw_boundary_hint">Bofya ramani ili kuchora mpaka…</string>
+  <plurals name="surveyeditor_area_drawing_corners">
+    <item quantity="one">Inachora (pembe %1$d)</item>
+    <item quantity="other">Inachora (pembe %1$d)</item>
+  </plurals>
+  <string name="surveyeditor_area_upload_geojson_title">GeoJSON au KML</string>
+  <string name="surveyeditor_area_upload_geojson_body">Poligoni na poligoni-nyingi huwa sehemu za eneo la utafiti. Mashimo huondolewa.</string>
+  <string name="surveyeditor_area_choose_file">Chagua faili</string>
+  <string name="surveyeditor_area_upload_shapefile_title">Shapefile (.zip)</string>
+  <string name="surveyeditor_area_upload_shapefile_body">Shapefile iliyobanwa pamoja na faili zake za .shp, .shx, .dbf na .prj.</string>
+  <string name="surveyeditor_area_choose_shapefile">Chagua Shapefile</string>
+  <string name="surveyeditor_area_shapefile_coming_soon">Kuleta Shapefile kunakuja hivi karibuni. Kwa sasa, geuza Shapefile kuwa GeoJSON au KML (kwa mfano katika QGIS) na upakie hiyo.</string>
+  <string name="surveyeditor_area_upload_empty">Pakia faili ya mpaka ili kuikagua hapa.</string>
+  <string name="surveyeditor_area_edit_in_draw_tab">Hariri katika kichupo cha Chora</string>
+  <plurals name="surveyeditor_area_ignored_features">
+    <item quantity="one">Kipengele %1$d si poligoni na kimepuuzwa.</item>
+    <item quantity="other">Vipengele %1$d si poligoni na vimepuuzwa.</item>
+  </plurals>
+  <string name="surveyeditor_area_no_polygons">Faili hii haina poligoni za kutumia kama eneo la utafiti.</string>
+  <!-- Icon descriptions for file import issues. -->
+  <string name="surveyeditor_area_issue_error">Hitilafu</string>
+  <string name="surveyeditor_area_issue_warning">Onyo</string>
+  <!-- Shown after a capped list of issues. %1$d is how many more issues are hidden. -->
+  <plurals name="surveyeditor_area_more_issues">
+    <item quantity="one">…na %1$d zaidi</item>
+    <item quantity="other">…na %1$d zaidi</item>
+  </plurals>
+
+  <!-- Sampling design panel (SamplingDesignPanel.kt). -->
+  <string name="surveyeditor_sampling_update_preview">Sasisha onyesho la kukagua</string>
+  <string name="surveyeditor_sampling_show_preview">Onyesha onyesho la kukagua</string>
+  <string name="surveyeditor_sampling_stale_title">Onyesho la kukagua limepitwa na wakati — lisasishe</string>
+  <string name="surveyeditor_sampling_stale_body">Muundo au eneo lake limebadilika baada ya onyesho hili la kukagua kuzalishwa.</string>
+  <string name="surveyeditor_sampling_in_use_title">Viwanja vya sampuli vinatumika</string>
+  <string name="surveyeditor_sampling_generate_failed_title">Imeshindwa kuzalisha viwanja vya sampuli</string>
+  <string name="surveyeditor_sampling_method">Mbinu</string>
+  <!-- %1$s is the sampling method name, %2$s its description. -->
+  <string name="surveyeditor_sampling_method_description">%1$s: %2$s</string>
+  <string name="surveyeditor_sampling_plot_shape">Umbo la kiwanja</string>
+  <string name="surveyeditor_sampling_plot_diameter">Kipenyo cha kiwanja (m)</string>
+  <string name="surveyeditor_sampling_plot_side">Upande wa kiwanja (m)</string>
+  <string name="surveyeditor_sampling_sample_points">Nukta za sampuli katika kila kiwanja</string>
+  <string name="surveyeditor_sampling_sample_points_require_shape">Nukta za sampuli ndani ya viwanja zinahitaji viwanja vya mraba au duara.</string>
+  <string name="surveyeditor_sampling_points_per_side">Nukta kwa kila upande</string>
+  <!-- %1$d is the number of sample points in each plot. -->
+  <plurals name="surveyeditor_sampling_points_per_plot">
+    <item quantity="one">nukta %1$d ya sampuli kwa kila kiwanja</item>
+    <item quantity="other">nukta %1$d za sampuli kwa kila kiwanja</item>
+  </plurals>
+  <string name="surveyeditor_sampling_point_spacing">Nafasi kati ya nukta (m)</string>
+  <string name="surveyeditor_sampling_number_of_points">Idadi ya nukta</string>
+  <string name="surveyeditor_sampling_shuffle">Changanya mpangilio wa kutembelea</string>
+  <string name="surveyeditor_sampling_shuffle_description">Panga namba za viwanja kwa mpangilio wa nasibu ili viwanja jirani visitembelewe kimoja baada ya kingine.</string>
+  <string name="surveyeditor_sampling_random_seed">Mbegu ya nasibu</string>
+  <string name="surveyeditor_sampling_random_seed_description">Mbegu ile ile hutoa viwanja vile vile kila wakati.</string>
+  <string name="surveyeditor_sampling_reroll_seed">Chagua mbegu mpya ya nasibu</string>
+  <!-- Progress while generating plots. %1$s is the number generated so far (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_generating">
+    <item quantity="one">Inazalisha… kiwanja %1$s</item>
+    <item quantity="other">Inazalisha… viwanja %1$s</item>
+  </plurals>
+  <!-- Progress while generating plots. %1$s is the number generated so far, %2$s the expected total. -->
+  <plurals name="surveyeditor_sampling_generating_of_about">
+    <item quantity="one">Inazalisha… %1$s kati ya takriban viwanja %2$s</item>
+    <item quantity="other">Inazalisha… %1$s kati ya takriban viwanja %2$s</item>
+  </plurals>
+  <!-- %1$s is the number of plots in the preview (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_previewing_plots">
+    <item quantity="one">Inaonyesha kiwanja %1$s cha sampuli</item>
+    <item quantity="other">Inaonyesha viwanja %1$s vya sampuli</item>
+  </plurals>
+  <!-- Sample area option: the survey's own area. -->
+  <string name="surveyeditor_sampling_area_survey_area">Eneo la utafiti</string>
+  <!-- Sample area option. %1$s is the name of a polygon map layer whose features are strata. -->
+  <string name="surveyeditor_sampling_area_strata_from">Matabaka-sampuli kutoka %1$s</string>
+  <string name="surveyeditor_sampling_area_deleted_layer">Tabaka la ramani lililofutwa</string>
+  <string name="surveyeditor_sampling_area">Eneo</string>
+  <string name="surveyeditor_sampling_stratum_property">Sifa ya tabaka-sampuli</string>
+  <string name="surveyeditor_sampling_choose">Chagua…</string>
+  <!-- %1$d is the number of strata, %2$s a comma-separated list of the first few stratum IDs. -->
+  <plurals name="surveyeditor_sampling_strata_list">
+    <item quantity="one">Tabaka-sampuli %1$d: %2$s</item>
+    <item quantity="other">Matabaka-sampuli %1$d: %2$s</item>
+  </plurals>
+  <string name="surveyeditor_sampling_min_distance">Umbali wa chini kati ya viwanja (m)</string>
+  <string name="surveyeditor_sampling_grid_spacing">Nafasi ya gridi (m)</string>
+  <!-- %1$d is the target number of plots used to suggest a grid spacing. -->
+  <string name="surveyeditor_sampling_grid_spacing_auto_description">Umbali kati ya vitovu vya viwanja jirani. Huwekwa kulingana na ukubwa wa eneo (takriban viwanja %1$d); maeneo makubwa zaidi hupata nafasi pana zaidi.</string>
+  <string name="surveyeditor_sampling_grid_spacing_description">Umbali kati ya vitovu vya viwanja jirani.</string>
+  <!-- %1$s is the suggested grid spacing in meters. -->
+  <string name="surveyeditor_sampling_match_area_size">Linganisha na ukubwa wa eneo (m %1$s)</string>
+  <string name="surveyeditor_sampling_number_of_plots">Idadi ya viwanja</string>
+  <string name="surveyeditor_sampling_survey_area_one_stratum">Eneo la utafiti huhesabiwa kama tabaka-sampuli moja. Ili kuchukua sampuli za matabaka-sampuli kando, chagua tabaka la ramani la poligoni kama eneo.</string>
+  <string name="surveyeditor_sampling_allocation">Mgawanyo</string>
+  <!-- Label of a field for the number of plots in one stratum. %1$s is the stratum ID. -->
+  <string name="surveyeditor_sampling_plots_in_stratum">Viwanja katika %1$s</string>
+  <!-- Label of the plot count field when there are no strata. -->
+  <string name="surveyeditor_sampling_plots_in_survey_area">Viwanja katika eneo la utafiti</string>
+  <!-- %1$d is the number of strata not listed. -->
+  <plurals name="surveyeditor_sampling_more_strata">
+    <item quantity="one">Tabaka-sampuli %1$d zaidi halipati viwanja isipokuwa likiwekwa.</item>
+    <item quantity="other">Matabaka-sampuli %1$d zaidi hayapati viwanja isipokuwa yakiwekwa.</item>
+  </plurals>
+  <string name="surveyeditor_sampling_total_plots">Jumla ya viwanja</string>
+  <string name="surveyeditor_sampling_number_of_clusters">Idadi ya vishada</string>
+  <string name="surveyeditor_sampling_plots_per_side">Viwanja kwa kila upande</string>
+  <!-- %1$d is the number of plots in each cluster. -->
+  <plurals name="surveyeditor_sampling_plots_per_cluster">
+    <item quantity="one">kiwanja %1$d katika kila kishada</item>
+    <item quantity="other">viwanja %1$d katika kila kishada</item>
+  </plurals>
+  <string name="surveyeditor_sampling_cluster_spacing">Nafasi kati ya viwanja katika kishada (m)</string>
+  <string name="surveyeditor_sampling_estimate_unavailable">Makadirio bado hayapatikani.</string>
+  <!-- %1$s is the formatted area (e.g. "850 ha"), %2$s the estimated plot count with thousands separators. -->
+  <plurals name="surveyeditor_sampling_estimate">
+    <item quantity="one">Eneo %1$s • takriban kiwanja %2$s</item>
+    <item quantity="other">Eneo %1$s • takriban viwanja %2$s</item>
+  </plurals>
+  <string name="surveyeditor_sampling_estimate_title">Makadirio</string>
+  <string name="surveyeditor_sampling_large_design_warning">Miundo mikubwa inaweza kuchukua muda mrefu kuzalisha na kuhariri.</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_number_at_least">Weka namba isiyopungua %1$s.</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_whole_number_at_least">Weka namba kamili isiyopungua %1$s.</string>
+  <!-- Validation message. %1$s and %2$s are the minimum and maximum allowed values. -->
+  <string name="surveyeditor_sampling_enter_whole_number_range">Weka namba kamili kuanzia %1$s hadi %2$s.</string>
+
+  <string name="surveyeditor_plot_review">Mapitio ya viwanja</string>
+  <string name="surveyeditor_plot_review_description">Kagua kwanza kila kiwanja kwenye picha za setilaiti, kisha tuma kwa timu za uwandani viwanja vinavyohitaji kutembelewa.</string>
+  <string name="surveyeditor_plot_review_desk">Kagua viwanja kwenye picha (wavuti)</string>
+  <string name="surveyeditor_plot_review_desk_on">Wafasiri hujaza fomu kwa kila kiwanja kwenye dashibodi ya wavuti.</string>
+  <string name="surveyeditor_plot_review_desk_off">Huongeza fomu ya wavuti ya kuainisha kila kiwanja kutoka kwenye picha.</string>
+  <string name="surveyeditor_plot_review_field">Thibitisha viwanja uwandani (simu)</string>
+  <string name="surveyeditor_plot_review_field_on">Viwanja vinavyohitaji kutembelewa hupata alama !. Timu za uwandani huvithibitisha kwenye programu ya simu.</string>
+  <string name="surveyeditor_plot_review_field_off">Huongeza fomu ya simu ili timu za uwandani zithibitishe viwanja vinavyohitaji kutembelewa.</string>
+  <string name="surveyeditor_plot_review_confidence">Tuma viwanja vilivyo chini ya kiwango hiki cha uhakika</string>
+  <string name="surveyeditor_plot_review_confidence_description">Wafasiri hukadiria uhakika wao kuanzia 0 hadi 100. Weka 0 ili kutuma tu viwanja wanavyovialamisha.</string>
+  <string name="surveyeditor_plot_review_spot_checks">Ukaguzi wa nasibu</string>
+  <string name="surveyeditor_plot_review_spot_checks_description">Viwanja vilivyochaguliwa kwa nasibu pia hupelekwa uwandani ili kupima usahihi wa ukaguzi wa ofisini. Weka 0 kama hutaki yoyote.</string>
+  <plurals name="surveyeditor_plot_review_spot_checks_share">
+    <item quantity="one">%1$s ya kiwanja %2$s. Kimechaguliwa kwa nasibu ili kupima usahihi wa ukaguzi wa ofisini.</item>
+    <item quantity="other">%1$s ya viwanja %2$s. Vimechaguliwa kwa nasibu ili kupima usahihi wa ukaguzi wa ofisini.</item>
+  </plurals>
+  <string name="surveyeditor_plot_review_spot_checks_unshuffled">Washa Changanya mpangilio wa kutembelea ili viwanja vya ukaguzi vichaguliwe kwa nasibu.</string>
+  <string name="surveyeditor_plot_review_desk_form">%1$s inakuwa ukaguzi wa ofisini: wavuti pekee, pamoja na maswali ya uhakika na ya kualamisha.</string>
+  <string name="surveyeditor_plot_review_show_desk">Onyesha majibu ya ofisini kwa timu za uwandani</string>
+  <string name="surveyeditor_plot_review_show_desk_on">Timu huona aina ya ardhi na kiwango cha uhakika kutoka kwenye ukaguzi wa ofisini kwenye kila kiwanja.</string>
+  <string name="surveyeditor_plot_review_show_desk_off">Ukaguzi bila kujua majibu: timu huona tu sababu ya kiwanja kualamishwa.</string>
+  <string name="surveyeditor_plot_review_open_form">Fungua %1$s</string>
+  <string name="surveyeditor_plot_review_remove_title">Ungependa kuacha kukagua viwanja kwenye picha?</string>
+  <string name="surveyeditor_plot_review_remove_body">Hii itaondoa fomu na maswali ya mapitio ya viwanja kwenye utafiti, pamoja na mabadiliko uliyoyafanya.</string>
+  <string name="surveyeditor_plot_review_remove_field_title">Ungependa kuacha kuthibitisha viwanja uwandani?</string>
+  <string name="surveyeditor_plot_review_remove_field_body">Hii itaondoa fomu ya uthibitishaji wa uwandani kwenye utafiti, pamoja na mabadiliko uliyoifanyia.</string>
+  <string name="surveyeditor_plot_review_remove">Ondoa fomu</string>
+  <string name="surveyeditor_plot_review_remove_field">Ondoa fomu</string>
+  <!-- Sampling design: button that uploads a strata file. -->
+  <string name="surveyeditor_sampling_upload_strata_file">Pakia faili ya matabaka-sampuli (GeoJSON / KML)</string>
+  <!-- Error under the strata file upload when the file has no polygons. %1$s = file name. -->
+  <string name="surveyeditor_sampling_strata_file_no_polygons">Hakuna vipengele vya poligoni vilivyopatikana katika %1$s.</string>
+  <!-- Error under the strata file upload when the file has points or lines instead of polygons. -->
+  <string name="surveyeditor_sampling_strata_file_not_polygons">Faili ya matabaka-sampuli lazima iwe na vipengele vya poligoni.</string>
+
+  <!-- Problems found in an uploaded GeoJSON or KML file (GeoIssueText.kt). Shown in the survey area, map layer, and strata uploads. %1$d is the feature's number in the file, counted from 1. -->
+  <string name="geo_issue_unsupported_file_type">Aina hii ya faili haitumiki. Pakia faili ya GeoJSON (.geojson, .json) au KML (.kml).</string>
+  <string name="geo_issue_unreadable_geojson">Faili hii si GeoJSON halali. Hakikisha ilihamishwa kama GeoJSON kisha ujaribu tena.</string>
+  <string name="geo_issue_geojson_not_an_object">Faili hii si GeoJSON halali. Inapaswa kuwa na kitu (object).</string>
+  <string name="geo_issue_geojson_without_type">Faili hii si GeoJSON halali.</string>
+  <string name="geo_issue_invalid_kml">Faili hii si KML halali. Hakikisha ilihamishwa kama KML (si KMZ) kisha ujaribu tena.</string>
+  <string name="geo_issue_no_geometry">Faili hii haina jiometri yoyote.</string>
+  <string name="geo_issue_feature_collection_without_features">FeatureCollection haina vipengele.</string>
+  <!-- %1$d is the number of holes removed. -->
+  <plurals name="geo_issue_holes_removed">
+    <item quantity="one">Tundu %1$d liliondolewa kwenye poligoni. Collect One hutumia mipaka ya nje pekee.</item>
+    <item quantity="other">Matundu %1$d yaliondolewa kwenye poligoni. Collect One hutumia mipaka ya nje pekee.</item>
+  </plurals>
+  <string name="geo_issue_invalid_feature">Kipengele %1$d si Feature halali ya GeoJSON.</string>
+  <string name="geo_issue_feature_without_geometry">Kipengele %1$d hakina jiometri na kiliachwa.</string>
+  <string name="geo_issue_invalid_geometry">Kipengele %1$d kina jiometri batili.</string>
+  <!-- %2$s is the GeoJSON geometry type found in the file, e.g. "Circle". -->
+  <string name="geo_issue_unsupported_geometry_type">Kipengele %1$d kina aina ya jiometri isiyotumika "%2$s".</string>
+  <!-- Shown as %2$s of geo_issue_unsupported_geometry_type when the geometry has no type. -->
+  <string name="geo_issue_geometry_type_unknown">haijulikani</string>
+  <string name="geo_issue_invalid_coordinates">Kipengele %1$d kina viwianishi vinavyokosekana au batili na kiliachwa.</string>
+  <string name="geo_issue_coordinates_out_of_range">Kipengele %1$d kina viwianishi nje ya masafa halali na kiliachwa. Tumia digrii za desimali za WGS 84 (latitudo −90 hadi 90, longitudo −180 hadi 180).</string>
+  <string name="geo_issue_too_few_corners">Kipengele %1$d kina pembe tofauti chini ya 3 na kiliachwa.</string>
+  <string name="geo_issue_outline_closed">Mpaka wa kipengele %1$d haukuwa umefungwa, kwa hivyo ulifungwa kiotomatiki.</string>
+  <string name="geo_issue_self_intersection">Mpaka wa kipengele %1$d unajikata wenyewe. Maeneo na viwanja vya sampuli vinaweza kuwa si sahihi; rekebisha mpaka katika zana ya GIS kisha uupakie tena.</string>
+  <string name="geo_issue_may_cross_antimeridian">Kipengele %1$d kinaweza kuvuka meridiani ya 180°, jambo ambalo bado halitumiki. Kigawe katika sehemu za pande zote mbili za meridiani.</string>
+  <!-- How a survey's area was defined, after "Source:". "Places API" is the name of the place search service. -->
+  <string name="surveyeditor_area_source_selected_boundary">Mpaka uliochaguliwa</string>
+  <string name="surveyeditor_area_source_drawn">Imechorwa kwenye ramani</string>
+  <string name="surveyeditor_area_source_uploaded">Imepakiwa: %1$s</string>
+  <string name="surveyeditor_area_source_place_search">Places API</string>
+  <string name="surveyeditor_area_source_coordinates">Viwianishi</string>
+  <plurals name="surveyeditor_area_source_collect_earth_grid">
+    <item quantity="one">Gridi ya viwanja vya Collect Earth (kiwanja %1$d)</item>
+    <item quantity="other">Gridi ya viwanja vya Collect Earth (viwanja %1$d)</item>
+  </plurals>
+
+  <!-- Survey details: Danger zone, where organizers delete the survey. -->
+  <string name="surveyeditor_danger_zone">Eneo la hatari</string>
+  <string name="surveyeditor_danger_zone_body">Kufuta utafiti huu kunauondoa kwa kila mtu mwenye ufikiaji, wakiwemo wakusanyaji wa data. Hautahesabiwa tena katika kikomo cha tafiti cha mmiliki wake.</string>
+  <string name="surveyeditor_delete_survey">Futa utafiti</string>
+  <!-- %1$s: the survey's title. -->
+  <string name="surveyeditor_delete_survey_title">Ungependa kufuta “%1$s”?</string>
+  <string name="surveyeditor_delete_survey_message">Kila mtu atapoteza ufikiaji wa utafiti huu na data iliyokusanywa ndani yake. Mabadiliko ambayo hayajachapishwa yatatupwa, na utafiti hautahesabiwa tena katika kikomo cha tafiti cha mmiliki wake.</string>
+  <string name="surveyeditor_add_dataset_from_template">Kutoka kiolezo</string>
+  <string name="surveyeditor_add_layer_from_template_body">Ongeza fomu ya kiolezo. Mawasilisho yake huongeza vipengele kwenye tabaka jipya la ramani.</string>
+  <string name="surveyeditor_add_table_from_template_body">Ongeza fomu ya kiolezo. Mawasilisho yake huongeza safu kwenye jedwali jipya la data.</string>
+  <string name="surveyeditor_add_dataset_no_templates">Maktaba yako haina violezo vya aina hii.</string>
+</resources>

@@ -19,9 +19,9 @@ import {
   SPANNER_EMULATOR_PORT,
   SPANNER_EMULATOR_REST_PORT,
   SPANNER_EMULATOR_SCRIPT,
-  USER_DATA_SERVICE_BINARY,
-  USER_DATA_SERVICE_PORT,
-  USER_DATA_SERVICE_URL,
+  SERVER_BINARY,
+  SERVER_PORT,
+  SERVER_URL,
   appUrl,
 } from './harness/config.mjs';
 
@@ -34,7 +34,7 @@ export default defineConfig({
   outputDir: './build/test-results',
   reporter: [['list'], ['html', { outputFolder: './build/report', open: 'never' }]],
   forbidOnly: !!process.env.CI,
-  // Tests share a single local userDataService instance and reset its state before each test.
+  // Tests share a single local server instance and reset its state before each test.
   workers: 1,
   retries: 0,
   timeout: 60_000,
@@ -56,12 +56,12 @@ export default defineConfig({
   projects: [
     {
       name: 'webConsole',
-      testMatch: 'webConsole.spec.ts',
+      testMatch: /webConsole.*\.spec\.ts$/,
       use: { baseURL: appUrl('webConsole'), viewport: { width: 1280, height: 800 } },
     },
     {
       name: 'mobileApp',
-      testMatch: 'mobileApp.spec.ts',
+      testMatch: /mobileApp.*\.spec\.ts$/,
       // A typical Android phone. `?chrome=0` in the tests hides the workbench around the app.
       use: { baseURL: appUrl('mobileApp'), viewport: { width: 412, height: 915 }, hasTouch: true },
     },
@@ -83,11 +83,11 @@ export default defineConfig({
       gracefulShutdown: { signal: 'SIGTERM', timeout: 10_000 },
     },
     {
-      name: 'userDataService',
-      command: `"${USER_DATA_SERVICE_BINARY}"`,
-      url: `${USER_DATA_SERVICE_URL}/healthz`,
+      name: 'server',
+      command: `"${SERVER_BINARY}"`,
+      url: `${SERVER_URL}/healthz`,
       env: {
-        PORT: String(USER_DATA_SERVICE_PORT),
+        PORT: String(SERVER_PORT),
         SPANNER_EMULATOR_HOST: `localhost:${SPANNER_EMULATOR_PORT}`,
         AUTH_MODE: 'dev',
       },

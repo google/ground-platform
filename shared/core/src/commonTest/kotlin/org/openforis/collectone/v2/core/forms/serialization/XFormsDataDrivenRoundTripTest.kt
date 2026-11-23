@@ -447,7 +447,7 @@ class XFormsDataDrivenRoundTripTest {
                   <bind nodeset="/data/tree_tag" type="string" required="true()" entities:saveto="tag_number"/>
                   <bind nodeset="/data/dbh_cm" type="decimal" entities:saveto="latest_dbh"/>
                   <bind nodeset="/data/gps_point" type="geopoint" entities:saveto="geometry"/>
-                  <submission action="https://odk.groundplatform.org/v1/projects/1/submission" method="post" base64RsaPublicKey="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA123456" auto-send="true" auto-delete="true"/>
+                  <submission action="https://odk.collect-one.example.org/v1/projects/1/submission" method="post" base64RsaPublicKey="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA123456" auto-send="true" auto-delete="true"/>
                   <setvalue event="odk-instance-first-load" ref="/data/dbh_cm" value="15.0"/>
                   <odk:setgeopoint event="xforms-value-changed" ref="/data/gps_point"/>
                 </model>

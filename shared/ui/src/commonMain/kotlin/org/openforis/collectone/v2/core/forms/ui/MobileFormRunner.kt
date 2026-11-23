@@ -14,10 +14,8 @@
 package org.openforis.collectone.v2.core.forms.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,34 +27,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -66,11 +55,63 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.model.ValidationStatus
+import org.openforis.collectone.v2.core.forms.ui.controls.Button
+import org.openforis.collectone.v2.core.forms.ui.controls.Card
+import org.openforis.collectone.v2.core.forms.ui.controls.ElevatedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalButton
+import org.openforis.collectone.v2.core.forms.ui.controls.FilterChip
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
+import org.openforis.collectone.v2.core.forms.ui.controls.clickable
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_all_entries
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_all_form_steps
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_back
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_blocker_location
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_blocker_optional
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_blocker_required
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_cannot_submit_errors
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_close_form
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_close_step_list
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_edit
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_form_finalized
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_invalid_badge
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_issue_count
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_language
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_next
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_ready_to_submit
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_record_new_in_dataset
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_record_unchanged_in_dataset
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_record_updated_in_dataset
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_repeat_entry_position
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_repeat_next_entry
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_repeat_previous_entry
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_review
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_review_and_finalize_summary
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_review_answers
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_review_answers_hint
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_skip
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_step_counter
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_step_list_item
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_step_of_total
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_steps_count
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_submit
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_untitled_survey_form
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_updated_records
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_validation_error_item
 
 /**
  * Reusable Compose Multiplatform mobile form runner displaying a single question screen at a time
@@ -90,10 +131,7 @@ fun MobileFormRunner(
   val stepIndex = controller.currentStepIndex
   val totalSteps = controller.totalSteps.coerceAtLeast(1)
   val progress = (stepIndex + 1).toFloat() / totalSteps.toFloat()
-  val formTitle =
-    state.formDef.title.takeIf { it.isNotBlank() }
-      ?: state.formDef.form_id.takeIf { it.isNotBlank() }
-      ?: "Survey form"
+  val formTitle = formDisplayTitle(state.formDef, untitled = Res.string.forms_untitled_survey_form)
   val colors = MaterialTheme.colorScheme
   // The top bar is a saturated `primary` surface, so everything drawn on it is tinted from
   // `onPrimary` rather than the default surface roles. Deriving the de-emphasized variants by
@@ -106,33 +144,34 @@ fun MobileFormRunner(
 
   Scaffold(
     modifier = modifier.fillMaxSize(),
-    containerColor = colors.surfaceContainerLow,
+    containerColor = colors.surface,
     topBar = {
       Surface(color = colors.primary, contentColor = onAppBar, tonalElevation = 2.dp) {
         Column(modifier = Modifier.fillMaxWidth()) {
           TopAppBar(
             title = {
-              Column {
-                Text(
-                  text = formTitle,
-                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                  color = onAppBar,
-                )
-                Text(
-                  text =
-                    if (currentStep is FormWizardStep.SummaryStep) {
-                      "Review & finalize (${controller.totalQuestionSteps} questions)"
-                    } else {
-                      "Step ${stepIndex + 1} of $totalSteps"
-                    },
-                  style = MaterialTheme.typography.labelSmall,
-                  color = onAppBarSecondary,
-                )
-              }
+              FormHeaderTitle(
+                title = formTitle,
+                subtitle =
+                  if (currentStep is FormWizardStep.SummaryStep) {
+                    pluralStringResource(
+                      Res.plurals.forms_review_and_finalize_summary,
+                      controller.totalQuestionSteps,
+                      controller.totalQuestionSteps,
+                    )
+                  } else {
+                    stringResource(Res.string.forms_step_of_total, stepIndex + 1, totalSteps)
+                  },
+                titleColor = onAppBar,
+                subtitleColor = onAppBarSecondary,
+              )
             },
             actions = {
               FilledTonalButton(
-                onClick = { controller.isOverviewOpen = !controller.isOverviewOpen },
+                onClick = {
+                  if (controller.isOverviewOpen) controller.closeOverview()
+                  else controller.openOverview()
+                },
                 colors =
                   ButtonDefaults.filledTonalButtonColors(
                     containerColor = appBarTonalContainer,
@@ -149,7 +188,12 @@ fun MobileFormRunner(
                   Spacer(modifier = Modifier.width(6.dp))
                 }
                 Text(
-                  text = if (controller.isOverviewOpen) "Close list" else "Steps ($totalSteps)",
+                  text =
+                    if (controller.isOverviewOpen) {
+                      stringResource(Res.string.forms_close_step_list)
+                    } else {
+                      stringResource(Res.string.forms_steps_count, totalSteps)
+                    },
                   style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
@@ -164,7 +208,7 @@ fun MobileFormRunner(
                 ) {
                   Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Close form",
+                    contentDescription = stringResource(Res.string.forms_close_form),
                   )
                 }
               }
@@ -189,7 +233,7 @@ fun MobileFormRunner(
             ) {
               Icon(
                 imageVector = LanguageIcon,
-                contentDescription = "Language",
+                contentDescription = stringResource(Res.string.forms_language),
                 tint = onAppBarSecondary,
                 modifier = Modifier.size(18.dp),
               )
@@ -206,6 +250,15 @@ fun MobileFormRunner(
                       // switch back to the bar's own color to stay legible.
                       selectedContainerColor = onAppBar,
                       selectedLabelColor = colors.primary,
+                    ),
+                  elevation =
+                    androidx.compose.material3.FilterChipDefaults.filterChipElevation(
+                      elevation = 0.dp,
+                      pressedElevation = 0.dp,
+                      focusedElevation = 0.dp,
+                      hoveredElevation = 0.dp,
+                      draggedElevation = 0.dp,
+                      disabledElevation = 0.dp,
                     ),
                   label = {
                     Text(
@@ -252,11 +305,16 @@ fun MobileFormRunner(
               modifier = Modifier.size(16.dp),
             )
             Spacer(modifier = Modifier.width(6.dp))
-            Text("Back", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+            Text(
+              stringResource(Res.string.forms_back),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
+            )
           }
 
           Text(
-            text = "${stepIndex + 1} / $totalSteps",
+            text = stringResource(Res.string.forms_step_counter, stepIndex + 1, totalSteps),
             style =
               MaterialTheme.typography.labelMedium.copy(
                 fontWeight = FontWeight.SemiBold,
@@ -273,7 +331,12 @@ fun MobileFormRunner(
                 }
               }
             ) {
-              Text("Submit", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+              Text(
+                stringResource(Res.string.forms_submit),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+              )
             }
           } else {
             val isLastQuestionBeforeSummary = stepIndex == totalSteps - 2
@@ -283,7 +346,12 @@ fun MobileFormRunner(
             ) {
               if (controller.isCurrentStepOptional) {
                 OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
-                  Text("Skip", maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false)
+                  Text(
+                    stringResource(Res.string.forms_skip),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                  )
                 }
               }
 
@@ -292,7 +360,10 @@ fun MobileFormRunner(
                 enabled = !controller.isCurrentStepWaitingForLocationCapture,
               ) {
                 Text(
-                  if (isLastQuestionBeforeSummary) "Review" else "Next",
+                  stringResource(
+                    if (isLastQuestionBeforeSummary) Res.string.forms_review
+                    else Res.string.forms_next
+                  ),
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
                   softWrap = false,
@@ -324,13 +395,17 @@ fun MobileFormRunner(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        // Enclosing Group / Repeat Breadcrumb Banner
-        if (currentStep.breadcrumbs.isNotEmpty()) {
-          BreadcrumbBar(
+        // Where the step sits: the repeat entry being filled in (with its own actions), else the
+        // enclosing groups.
+        val repeatContext = currentStep.repeatContext
+        if (repeatContext != null) {
+          RepeatEntryBar(
             breadcrumbs = currentStep.breadcrumbs,
-            repeatContext = currentStep.repeatContext,
+            repeatContext = repeatContext,
             controller = controller,
           )
+        } else if (currentStep.breadcrumbs.isNotEmpty()) {
+          BreadcrumbBar(breadcrumbs = currentStep.breadcrumbs)
         }
 
         when (currentStep) {
@@ -343,12 +418,13 @@ fun MobileFormRunner(
           }
           is FormWizardStep.FieldListGroupStep -> {
             Text(
-              text = currentStep.title,
+              text = currentStep.title.resolve(),
               style =
                 MaterialTheme.typography.titleMedium.copy(
                   fontWeight = FontWeight.Bold,
                   color = colors.primary,
                 ),
+              modifier = Modifier.semantics { heading() },
             )
             currentStep.controls.forEach { control ->
               QuestionControlCard(
@@ -359,18 +435,30 @@ fun MobileFormRunner(
             }
           }
           is FormWizardStep.RepeatHubStep -> {
-            RepeatHubScreenContent(step = currentStep, controller = controller)
+            RepeatHub(
+              step = currentStep,
+              onOpenEntry = controller::openRepeatInstance,
+              onRemoveEntry = { index ->
+                controller.removeRepeatInstance(currentStep.repeatGroup.canonicalPath, index)
+              },
+              onAddEntry = {
+                controller.addRepeatInstanceAndOpen(currentStep.repeatGroup.canonicalPath)
+              },
+            )
           }
           is FormWizardStep.SummaryStep -> {
             FormSummaryScreenContent(controller = controller)
           }
         }
 
-        // Validation blocker notice when user pressed Next on an invalid question
+        // Validation blocker notice when user pressed Next on an invalid non-single-question step
+        // or while waiting for location capture (single QuestionStep already renders its error
+        // card)
         if (
           controller.showCurrentStepValidationWarning &&
-            (controller.currentStepErrors.isNotEmpty() ||
-              controller.isCurrentStepWaitingForLocationCapture) &&
+            (controller.isCurrentStepWaitingForLocationCapture ||
+              (controller.currentStepErrors.isNotEmpty() &&
+                currentStep !is FormWizardStep.QuestionStep)) &&
             currentStep !is FormWizardStep.SummaryStep
         ) {
           Card(
@@ -389,9 +477,12 @@ fun MobileFormRunner(
             ) {
               Text(
                 text =
-                  stepValidationBlockerMessage(
-                    isWaitingForLocationCapture = controller.isCurrentStepWaitingForLocationCapture,
-                    isStepOptional = controller.isCurrentStepOptional,
+                  stringResource(
+                    stepValidationBlockerMessage(
+                      isWaitingForLocationCapture =
+                        controller.isCurrentStepWaitingForLocationCapture,
+                      isStepOptional = controller.isCurrentStepOptional,
+                    )
                   ),
                 style =
                   MaterialTheme.typography.bodySmall.copy(
@@ -409,7 +500,7 @@ fun MobileFormRunner(
                   border = BorderStroke(1.dp, colors.onErrorContainer.copy(alpha = 0.5f)),
                 ) {
                   Text(
-                    "Skip",
+                    stringResource(Res.string.forms_skip),
                     style = MaterialTheme.typography.labelSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -431,12 +522,9 @@ fun MobileFormRunner(
   }
 }
 
+/** The groups enclosing a step outside any repeat entry. */
 @Composable
-private fun BreadcrumbBar(
-  breadcrumbs: List<String>,
-  repeatContext: RepeatStepContext?,
-  controller: FormWizardController,
-) {
+private fun BreadcrumbBar(breadcrumbs: List<String>) {
   val colors = MaterialTheme.colorScheme
   Card(
     modifier = Modifier.fillMaxWidth(),
@@ -447,290 +535,174 @@ private fun BreadcrumbBar(
         contentColor = colors.onSecondaryContainer,
       ),
   ) {
-    Column(
+    Text(
+      text = breadcrumbs.joinToString("  ›  "),
+      style =
+        MaterialTheme.typography.labelMedium.copy(
+          fontWeight = FontWeight.SemiBold,
+          color = colors.onSecondaryContainer,
+        ),
       modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-      Text(
-        text = breadcrumbs.joinToString("  ›  "),
-        style =
-          MaterialTheme.typography.labelMedium.copy(
-            fontWeight = FontWeight.SemiBold,
-            color = colors.onSecondaryContainer,
-          ),
-      )
-      if (repeatContext != null) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-            text = "Entry #${repeatContext.repeatIndex} of ${repeatContext.totalInstances}",
-            style =
-              MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Medium,
-                color = colors.onSecondaryContainer,
-              ),
-          )
-          Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            FilledTonalButton(
-              onClick = { controller.openRepeatHub(repeatContext.repeatGroupPath) },
-              contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-            ) {
-              Text(
-                text = "All entries",
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-              )
-            }
-            if (repeatContext.canAddInstance) {
-              FilledTonalButton(
-                onClick = { controller.addRepeatInstanceAndOpen(repeatContext.repeatGroupPath) },
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.Default.Add,
-                  contentDescription = null,
-                  modifier = Modifier.size(14.dp),
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                  text = "Add ${repeatContext.repeatGroupLabel}",
-                  style = MaterialTheme.typography.labelSmall,
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                  softWrap = false,
-                )
-              }
-            }
-            if (repeatContext.canRemoveInstance) {
-              OutlinedButton(
-                onClick = {
-                  controller.removeRepeatInstance(
-                    repeatContext.repeatGroupPath,
-                    repeatContext.repeatIndex,
-                  )
-                },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.error),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-              ) {
-                Text(
-                  text = "Delete #${repeatContext.repeatIndex}",
-                  style = MaterialTheme.typography.labelSmall,
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                  softWrap = false,
-                )
-              }
-            }
-          }
-        }
-      }
-    }
+    )
   }
 }
 
+/**
+ * Header of a step inside a repeat entry: a top row with the groups above the entry, the entry's
+ * full-width title, and Delete; and a bottom row with previous/next entry arrows (when more than
+ * one entry exists), its position ("Entry #2 of 3", plus any group within the entry), and **All
+ * entries** back to the repeat's list. Delete asks for confirmation when the entry holds answers
+ * and then returns to the list, since the entry's screens are gone. Repeats whose entry count is
+ * fixed by the form have no list or Delete, but still keep previous/next entry navigation.
+ */
 @Composable
-private fun RepeatHubScreenContent(
-  step: FormWizardStep.RepeatHubStep,
+private fun RepeatEntryBar(
+  breadcrumbs: List<String>,
+  repeatContext: RepeatStepContext,
   controller: FormWizardController,
 ) {
   val colors = MaterialTheme.colorScheme
-  val repeatGroup = step.repeatGroup
-  val groupLabel =
-    repeatGroup.label?.text?.takeIf { it.isNotBlank() }
-      ?: repeatGroup.canonicalPath.substringAfterLast('/')
-
-  ElevatedCard(
+  val entryCrumb = breadcrumbs.lastIndexOf(repeatContext.instanceLabel)
+  val above = if (entryCrumb >= 0) breadcrumbs.take(entryCrumb) else emptyList()
+  val within = breadcrumbsWithinEntry(breadcrumbs, repeatContext)
+  val hasList = repeatContext.canAddInstance || repeatContext.canRemoveInstance
+  val prevPath = controller.previousRepeatInstancePath(repeatContext)
+  val nextPath = controller.nextRepeatInstancePath(repeatContext)
+  val showEntryStepper = repeatContext.totalInstances > 1 || prevPath != null || nextPath != null
+  Card(
     modifier = Modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.large,
-    colors = CardDefaults.elevatedCardColors(containerColor = colors.surfaceContainerLowest),
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.cardColors(
+        containerColor = colors.secondaryContainer,
+        contentColor = colors.onSecondaryContainer,
+      ),
   ) {
     Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp),
+      modifier =
+        Modifier.fillMaxWidth().padding(start = 12.dp, end = 6.dp, top = 8.dp, bottom = 6.dp),
+      verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          if (above.isNotEmpty()) {
+            Text(
+              text = above.joinToString(" › "),
+              style = MaterialTheme.typography.labelSmall,
+              color = colors.onSecondaryContainer.copy(alpha = 0.8f),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+            )
+          }
+          Text(
+            text = repeatContext.instanceLabel,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            color = colors.onSecondaryContainer,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+        if (repeatContext.canRemoveInstance) {
+          RepeatEntryDeleteButton(
+            entryTitle = repeatContext.instanceLabel,
+            // Without a summary, err on the side of asking.
+            answeredCount = controller.repeatEntrySummary(repeatContext)?.answeredCount ?: 1,
+            onDelete = {
+              controller.removeRepeatInstance(
+                repeatContext.repeatGroupPath,
+                repeatContext.repeatIndex,
+              )
+              controller.openRepeatHub(repeatContext.repeatGroupPath)
+            },
+            buttonSize = 36.dp,
+            iconSize = 18.dp,
+          )
+        }
+      }
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Column(modifier = Modifier.weight(1f)) {
-          GroundTonalBadge(
-            text =
-              "Repeated section • ${repeatGroup.instances.size} ${if (repeatGroup.instances.size == 1) "entry" else "entries"}",
-            tone = GroundBadgeTone.PRIMARY,
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = groupLabel,
-            style =
-              MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = colors.onSurface,
-              ),
-          )
-          Text(
-            text = "Add one or more '$groupLabel' entries below.",
-            style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
-          )
-        }
-        if (repeatGroup.targetCount != null) {
-          GroundTonalBadge(
-            text = "${repeatGroup.targetCount} required",
-            tone = GroundBadgeTone.TERTIARY,
-          )
-        }
-      }
-
-      if (repeatGroup.instances.isEmpty()) {
-        Surface(
-          modifier = Modifier.fillMaxWidth(),
-          shape = MaterialTheme.shapes.medium,
-          color = colors.surfaceContainer,
+        Row(
+          modifier = Modifier.weight(1f),
+          horizontalArrangement = Arrangement.spacedBy(2.dp),
+          verticalAlignment = Alignment.CenterVertically,
         ) {
-          Box(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            contentAlignment = Alignment.Center,
-          ) {
-            Text(
-              text = "No repeat entries added yet.",
-              style = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurfaceVariant),
-            )
-          }
-        }
-      } else {
-        repeatGroup.instances.forEach { instance ->
-          val summary = step.summaries.firstOrNull { it.repeatIndex == instance.repeatIndex }
-          val instTitle =
-            summary?.title?.ifBlank { "$groupLabel #${instance.repeatIndex}" }
-              ?: "$groupLabel #${instance.repeatIndex}"
-          val preview =
-            summary?.previewText?.ifBlank { "Tap to fill out details" } ?: "Tap to fill out details"
-
-          OutlinedCard(
-            onClick = {
-              val stepIdx =
-                controller.steps.indexOfFirst {
-                  it.repeatContext?.instancePath == instance.canonicalPath
+          if (showEntryStepper) {
+            IconButton(
+              onClick = {
+                prevPath?.let {
+                  controller.openSiblingRepeatInstance(repeatContext.instancePath, it)
                 }
-              if (stepIdx >= 0) controller.jumpToStep(stepIdx)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLow),
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically,
+              },
+              enabled = prevPath != null,
+              modifier = Modifier.size(28.dp),
             ) {
-              Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                Surface(
-                  shape = CircleShape,
-                  color = colors.secondaryContainer,
-                  contentColor = colors.onSecondaryContainer,
-                ) {
-                  Box(
-                    modifier = Modifier.size(32.dp),
-                    contentAlignment = Alignment.Center,
-                  ) {
-                    Text(
-                      text = "#${instance.repeatIndex}",
-                      style =
-                        MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    )
-                  }
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                  Text(
-                    text = instTitle,
-                    style =
-                      MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.onSurface,
-                      ),
+              Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = stringResource(Res.string.forms_repeat_previous_entry),
+                modifier = Modifier.size(18.dp),
+              )
+            }
+          }
+          Text(
+            text =
+              (listOf(
+                  stringResource(
+                    Res.string.forms_repeat_entry_position,
+                    repeatContext.repeatIndex,
+                    repeatContext.totalInstances,
                   )
-                  Text(
-                    text = preview,
-                    style =
-                      MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                  )
+                ) + within)
+                .joinToString(" • "),
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSecondaryContainer.copy(alpha = 0.85f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+          if (showEntryStepper) {
+            IconButton(
+              onClick = {
+                nextPath?.let {
+                  controller.openSiblingRepeatInstance(repeatContext.instancePath, it)
                 }
-              }
-              Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                OutlinedButton(
-                  onClick = {
-                    val stepIdx =
-                      controller.steps.indexOfFirst {
-                        it.repeatContext?.instancePath == instance.canonicalPath
-                      }
-                    if (stepIdx >= 0) controller.jumpToStep(stepIdx)
-                  },
-                  contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                ) {
-                  Text(
-                    "Edit",
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
-                  )
-                }
-                if (repeatGroup.canRemoveInstance) {
-                  TextButton(
-                    onClick = {
-                      controller.removeRepeatInstance(
-                        repeatGroup.canonicalPath,
-                        instance.repeatIndex,
-                      )
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                  ) {
-                    Text(
-                      "Delete",
-                      style = MaterialTheme.typography.labelSmall,
-                      maxLines = 1,
-                    )
-                  }
-                }
-              }
+              },
+              enabled = nextPath != null,
+              modifier = Modifier.size(28.dp),
+            ) {
+              Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = stringResource(Res.string.forms_repeat_next_entry),
+                modifier = Modifier.size(18.dp),
+              )
             }
           }
         }
-      }
-
-      if (repeatGroup.canAddInstance) {
-        Button(
-          onClick = { controller.addRepeatInstanceAndOpen(repeatGroup.canonicalPath) },
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-          )
-          Spacer(modifier = Modifier.width(6.dp))
-          Text(
-            "+ Add $groupLabel entry",
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false,
-          )
+        if (hasList) {
+          TextButton(
+            onClick = { controller.openRepeatHub(repeatContext.repeatGroupPath) },
+            colors = ButtonDefaults.textButtonColors(contentColor = colors.onSecondaryContainer),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+          ) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.List,
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = stringResource(Res.string.forms_all_entries),
+              style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              softWrap = false,
+            )
+          }
         }
       }
     }
@@ -760,7 +732,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
       ) {
         Column(modifier = Modifier.weight(1f)) {
           Text(
-            text = "Review answers",
+            text = stringResource(Res.string.forms_review_answers),
             style =
               MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
@@ -768,18 +740,22 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
               ),
           )
           Text(
-            text = "Tap any question below to jump back and edit its response.",
+            text = stringResource(Res.string.forms_review_answers_hint),
             style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
           )
         }
-        GroundTonalBadge(
+        TonalBadge(
           text =
             if (state.isValid) {
-              "✓ Ready to submit"
+              stringResource(Res.string.forms_ready_to_submit)
             } else {
-              "${state.validationErrors.size} issue(s)"
+              pluralStringResource(
+                Res.plurals.forms_issue_count,
+                state.validationErrors.size,
+                state.validationErrors.size,
+              )
             },
-          tone = if (state.isValid) GroundBadgeTone.PRIMARY else GroundBadgeTone.ERROR,
+          tone = if (state.isValid) BadgeTone.PRIMARY else BadgeTone.ERROR,
         )
       }
 
@@ -801,7 +777,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 verticalArrangement = Arrangement.spacedBy(4.dp),
               ) {
                 Text(
-                  text = "✓ Form finalized successfully",
+                  text = stringResource(Res.string.forms_form_finalized),
                   style =
                     MaterialTheme.typography.bodyMedium.copy(
                       fontWeight = FontWeight.Bold,
@@ -826,7 +802,12 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 verticalArrangement = Arrangement.spacedBy(4.dp),
               ) {
                 Text(
-                  text = "⚠ Cannot submit: ${subResult.errors.size} validation error(s):",
+                  text =
+                    pluralStringResource(
+                      Res.plurals.forms_cannot_submit_errors,
+                      subResult.errors.size,
+                      subResult.errors.size,
+                    ),
                   style =
                     MaterialTheme.typography.bodySmall.copy(
                       fontWeight = FontWeight.Bold,
@@ -835,7 +816,12 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 )
                 subResult.errors.forEach { err ->
                   Text(
-                    text = "• ${controller.questionTitleFor(err.fieldPath)}: ${err.message}",
+                    text =
+                      stringResource(
+                        Res.string.forms_validation_error_item,
+                        controller.questionTitleFor(err.fieldPath).resolve(),
+                        err.message,
+                      ),
                     style =
                       MaterialTheme.typography.labelSmall.copy(color = colors.onErrorContainer),
                     modifier = Modifier.clickable { controller.jumpToField(err.fieldPath) },
@@ -885,29 +871,56 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
                 )
               }
               Text(
-                text = qStep.title,
+                text = qStep.questionLabel,
                 style =
                   MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = if (isInvalid) colors.onErrorContainer else colors.onSurface,
                   ),
               )
-              Text(
-                text = formatFieldValueForDisplay(fieldState.value, fieldState.dataType),
-                style =
-                  MaterialTheme.typography.bodySmall.copy(
-                    color =
-                      when {
-                        isInvalid -> colors.onErrorContainer.copy(alpha = 0.85f)
-                        fieldState.isEmpty -> colors.onSurfaceVariant
-                        else -> colors.primary
-                      }
-                  ),
-              )
+              val selectedValues =
+                fieldState.value
+                  ?.list_value
+                  ?.values
+                  ?.mapNotNull { it.string_value }
+                  ?.filter { it.isNotBlank() }
+                  ?: fieldState.value?.scalar_value?.string_value?.split(' ')?.filter {
+                    it.isNotBlank()
+                  }
+                  ?: emptyList()
+              val coloredSelections =
+                if (!isInvalid && !fieldState.isEmpty) {
+                  ChoiceImageRegistry.resolveSelectedOptionColors(control.options, selectedValues)
+                } else {
+                  emptyList()
+                }
+              if (coloredSelections.isNotEmpty()) {
+                ChoiceColorPillsRow(
+                  items = coloredSelections,
+                  compact = true,
+                  modifier = Modifier.padding(top = 4.dp),
+                )
+              } else {
+                Text(
+                  text = fieldValueDisplayText(fieldState.value, fieldState.dataType),
+                  style =
+                    MaterialTheme.typography.bodySmall.copy(
+                      color =
+                        when {
+                          isInvalid -> colors.onErrorContainer.copy(alpha = 0.85f)
+                          fieldState.isEmpty -> colors.onSurfaceVariant
+                          else -> colors.primary
+                        }
+                    ),
+                )
+              }
             }
-            GroundTonalBadge(
-              text = if (isInvalid) "Invalid" else "Edit",
-              tone = if (isInvalid) GroundBadgeTone.ERROR else GroundBadgeTone.PRIMARY,
+            TonalBadge(
+              text =
+                stringResource(
+                  if (isInvalid) Res.string.forms_invalid_badge else Res.string.forms_edit
+                ),
+              tone = if (isInvalid) BadgeTone.ERROR else BadgeTone.PRIMARY,
             )
           }
         }
@@ -917,7 +930,7 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
       if (state.entityStates.isNotEmpty()) {
         HorizontalDivider(color = colors.outlineVariant)
         Text(
-          text = "Updated records (${state.entityStates.size})",
+          text = stringResource(Res.string.forms_updated_records, state.entityStates.size),
           style =
             MaterialTheme.typography.labelLarge.copy(
               fontWeight = FontWeight.Bold,
@@ -948,12 +961,12 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
               )
               val actionLabel =
                 when {
-                  entity.shouldCreate -> "New record"
-                  entity.shouldUpdate -> "Updated record"
-                  else -> "Unchanged record"
+                  entity.shouldCreate -> Res.string.forms_record_new_in_dataset
+                  entity.shouldUpdate -> Res.string.forms_record_updated_in_dataset
+                  else -> Res.string.forms_record_unchanged_in_dataset
                 }
               Text(
-                text = "$actionLabel in ${entity.dataset}",
+                text = stringResource(actionLabel, entity.dataset),
                 style =
                   MaterialTheme.typography.labelSmall.copy(color = colors.onSecondaryContainer),
               )
@@ -973,7 +986,7 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     Text(
-      text = "All form steps (${controller.totalSteps})",
+      text = stringResource(Res.string.forms_all_form_steps, controller.totalSteps),
       style =
         MaterialTheme.typography.titleMedium.copy(
           fontWeight = FontWeight.Bold,
@@ -1014,7 +1027,7 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
               )
             }
             Text(
-              text = "${idx + 1}. ${step.title}",
+              text = stringResource(Res.string.forms_step_list_item, idx + 1, step.title.resolve()),
               style =
                 MaterialTheme.typography.bodyMedium.copy(
                   fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
@@ -1025,7 +1038,7 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
           if (step is FormWizardStep.QuestionStep) {
             val fs = step.control.fieldState
             val isInvalid = fs.validationStatus is ValidationStatus.Invalid
-            GroundTonalBadge(
+            TonalBadge(
               text =
                 when {
                   isInvalid -> "!"
@@ -1035,9 +1048,9 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
                 },
               tone =
                 when {
-                  isInvalid -> GroundBadgeTone.ERROR
-                  !fs.isEmpty -> GroundBadgeTone.PRIMARY
-                  else -> GroundBadgeTone.NEUTRAL
+                  isInvalid -> BadgeTone.ERROR
+                  !fs.isEmpty -> BadgeTone.PRIMARY
+                  else -> BadgeTone.NEUTRAL
                 },
             )
           }
@@ -1049,7 +1062,7 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
 
 private val LanguageIcon: ImageVector by lazy {
   ImageVector.Builder(
-      name = "Ground.Language",
+      name = "App.Language",
       defaultWidth = 24.dp,
       defaultHeight = 24.dp,
       viewportWidth = 24f,
@@ -1085,9 +1098,9 @@ private val LanguageIcon: ImageVector by lazy {
 internal fun stepValidationBlockerMessage(
   isWaitingForLocationCapture: Boolean,
   isStepOptional: Boolean,
-): String =
+): StringResource =
   when {
-    isWaitingForLocationCapture -> "Please capture a location or drop a pin before proceeding."
-    isStepOptional -> "Please resolve validation errors above or skip to continue."
-    else -> "Please resolve validation errors above to continue."
+    isWaitingForLocationCapture -> Res.string.forms_blocker_location
+    isStepOptional -> Res.string.forms_blocker_optional
+    else -> Res.string.forms_blocker_required
   }

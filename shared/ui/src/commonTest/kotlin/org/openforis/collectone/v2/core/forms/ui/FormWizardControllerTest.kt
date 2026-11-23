@@ -25,6 +25,14 @@ import openforis.collectone.v1.forms.GeoPoint
 import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_add_point
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_blocker_location
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_blocker_optional
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_blocker_required
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_capture_location
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_no
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_yes
 
 class FormWizardControllerTest {
 
@@ -74,6 +82,29 @@ class FormWizardControllerTest {
     </h:html>
     """
       .trimIndent()
+
+  @Test
+  fun overview_opensAndCloses() {
+    val controller =
+      FormWizardController(formDef = XFormsXmlSerializer.deserializeFormDef(sampleFormXml))
+
+    controller.openOverview()
+    assertTrue(controller.isOverviewOpen)
+
+    controller.closeOverview()
+    assertFalse(controller.isOverviewOpen)
+  }
+
+  @Test
+  fun overview_closesWhenJumpingToAStep() {
+    val controller =
+      FormWizardController(formDef = XFormsXmlSerializer.deserializeFormDef(sampleFormXml))
+    controller.openOverview()
+
+    controller.jumpToStep(1)
+
+    assertFalse(controller.isOverviewOpen)
+  }
 
   @Test
   fun singleQuestionNavigationAndDynamicRelevanceUpdatesSteps() {
@@ -147,17 +178,10 @@ class FormWizardControllerTest {
   @Test
   fun geoPointTriggerAndCoordinateFormatting_supportsCaptureLocationAndAddPointWhenPanned() {
     // 1. Trigger label switches between "Capture location" (unpanned GPS) and "Add point" (panned)
-    assertEquals("Capture location", geoPointPrimaryTriggerLabel(isPanned = false))
-    assertEquals("Add point", geoPointPrimaryTriggerLabel(isPanned = true))
+    assertEquals(Res.string.forms_capture_location, geoPointPrimaryTriggerLabel(isPanned = false))
+    assertEquals(Res.string.forms_add_point, geoPointPrimaryTriggerLabel(isPanned = true))
 
-    // 2. Map pan appearance detection
-    assertTrue(isGeoPointPanAllowed("placement-map"))
-    assertTrue(isGeoPointPanAllowed("map"))
-    assertTrue(isGeoPointPanAllowed("maps"))
-    assertFalse(isGeoPointPanAllowed(""))
-    assertFalse(isGeoPointPanAllowed("minimal"))
-
-    // 3. Coordinate and accuracy formatting for UI display
+    // 2. Coordinate and accuracy formatting for UI display
     assertEquals(
       "1.292066° S, 36.821946° E",
       formatGeoPointCoordinates(latitude = -1.292066, longitude = 36.821946),
@@ -348,7 +372,10 @@ class FormWizardControllerTest {
 
   @Test
   fun booleanInputOptionsAndDisplay_usesYesAndNoWithoutTrueOrFalse() {
-    assertEquals(listOf(true to "Yes", false to "No"), BooleanInputOptions)
+    assertEquals(
+      listOf(true to Res.string.forms_yes, false to Res.string.forms_no),
+      BooleanInputOptions,
+    )
     assertEquals(
       "Yes",
       formatFieldValueForDisplay(
@@ -376,7 +403,7 @@ class FormWizardControllerTest {
     assertFalse(controller.nextStep(enforceValidation = true))
     assertTrue(controller.showCurrentStepValidationWarning)
     assertEquals(
-      "Please resolve validation errors above to continue.",
+      Res.string.forms_blocker_required,
       stepValidationBlockerMessage(
         isWaitingForLocationCapture = controller.isCurrentStepWaitingForLocationCapture,
         isStepOptional = controller.isCurrentStepOptional,
@@ -393,7 +420,7 @@ class FormWizardControllerTest {
     assertFalse(controller.nextStep(enforceValidation = true))
     assertTrue(controller.showCurrentStepValidationWarning)
     assertEquals(
-      "Please resolve validation errors above or skip to continue.",
+      Res.string.forms_blocker_optional,
       stepValidationBlockerMessage(
         isWaitingForLocationCapture = controller.isCurrentStepWaitingForLocationCapture,
         isStepOptional = controller.isCurrentStepOptional,
@@ -402,11 +429,11 @@ class FormWizardControllerTest {
 
     // Waiting for location capture takes precedence
     assertEquals(
-      "Please capture a location or drop a pin before proceeding.",
+      Res.string.forms_blocker_location,
       stepValidationBlockerMessage(isWaitingForLocationCapture = true, isStepOptional = false),
     )
     assertEquals(
-      "Please capture a location or drop a pin before proceeding.",
+      Res.string.forms_blocker_location,
       stepValidationBlockerMessage(isWaitingForLocationCapture = true, isStepOptional = true),
     )
   }
@@ -511,11 +538,15 @@ class FormWizardControllerTest {
 
     val summary1 = current.summaries[0]
     assertEquals(1, summary1.repeatIndex)
-    assertTrue(summary1.previewText.contains("Oak-42") || summary1.previewText.contains("45"))
+    val preview1 = summary1.previewParts
+    assertTrue(
+      FormUiText.Verbatim("Oak-42") in preview1 || FormUiText.Verbatim("45") in preview1,
+      preview1.toString(),
+    )
 
     val summary2 = current.summaries[1]
     assertEquals(2, summary2.repeatIndex)
-    assertTrue(summary2.previewText.contains("Pine-17"))
+    assertTrue(FormUiText.Verbatim("Pine-17") in summary2.previewParts, summary2.toString())
   }
 
   @Test

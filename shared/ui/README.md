@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-# ProtoForms Compose Multiplatform Form UI (`org.openforis.collectone.v2:protoforms-ui`)
+# ProtoForms Compose Multiplatform Form UI (`:shared:ui`)
 
 A reusable **Compose Multiplatform** UI library
 ([`org.openforis.collectone.v2.core.forms.ui`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/README.md))
@@ -26,7 +26,7 @@ and **Web (`js`, `wasmJs`)**.
 ## Overview
 
 `protoforms-ui` builds directly on top of the pure KMP `FormEngine` and
-`FormSession` in `org.openforis.collectone.v2:protoforms`:
+`FormSession` in `:shared:core`:
 
 -   **Single-Question-Per-Screen Mobile Navigation
     ([`FormWizardController`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/FormWizardController.kt))**:
@@ -35,6 +35,14 @@ and **Web (`js`, `wasmJs`)**.
     `FieldListGroupStep` for `appearance="field-list"`, `RepeatHubStep` for
     adding/removing repeat instances, and `SummaryStep` for final review and
     submission).
+    The controller holds only the screen state; the step models live in
+    [`FormWizardStep.kt`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/FormWizardStep.kt),
+    building them in
+    [`FormWizardSteps`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/FormWizardSteps.kt),
+    cascading-select pruning in
+    [`CascadingSelects`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/CascadingSelects.kt),
+    and question lookup by path in
+    [`FormQuestionLookup`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/FormQuestionLookup.kt).
 -   **Reactive Step Re-Evaluation**: Preserves the user's current question
     position (`stepKey`) whenever an answer dynamically alters downstream
     `relevant` expressions, `jr:count` repeat counts, cascading `itemset`
@@ -51,7 +59,7 @@ and **Web (`js`, `wasmJs`)**.
     ([`CompactFormRunner`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/CompactFormRunner.kt))**:
     Renders the same `FormWizardController` session as a vertical stack of
     collapsible question cards (`CompactQuestionCard`) that fits a web side
-    panel. Each card shows a status icon (answered ✓, skipped ⊘, pending ○, or
+    panel. Each card shows a status icon (answered ✓, skipped ⊘, pending numbered circle `1`…`n`, or
     needs attention !), reuses `ControlWidget` for its input, and optional
     questions can be skipped. Every card starts expanded; in interactive
     sessions a card collapses on its own once its question becomes answered
@@ -90,8 +98,8 @@ and **Web (`js`, `wasmJs`)**.
     `+1` and `-0.5` / `+0.5` stepper buttons (range sliders their `- step` /
     `+ step` buttons) and keep just the text field or slider
     (`showNumericSteppers`), and free-text fields (string, integer,
-    decimal, date, time) use the slightly shorter `GroundOutlinedTextField`
-    ([`GroundOutlinedTextField.kt`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/GroundOutlinedTextField.kt):
+    decimal, date, time) use the slightly shorter `FormOutlinedTextField`
+    ([`FormOutlinedTextField.kt`](src/commonMain/kotlin/org/openforis/collectone/v2/core/forms/ui/FormOutlinedTextField.kt):
     `bodyMedium` text, ~48 dp minimum height instead of Material's 56 dp, a
     plain `OutlinedTextField` on mobile). Every other widget, card and chrome
     dimension is identical in both densities.

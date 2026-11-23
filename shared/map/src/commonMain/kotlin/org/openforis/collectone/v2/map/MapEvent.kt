@@ -15,7 +15,7 @@ package org.openforis.collectone.v2.map
 
 import androidx.compose.runtime.Immutable
 
-/** User interactions and camera changes reported by a [GroundMap]. */
+/** User interactions and camera changes reported by a [AppMap]. */
 @Immutable
 sealed interface MapEvent {
   /** A feature drawn by layer [layerId] was tapped at [at]; the topmost hit wins. */

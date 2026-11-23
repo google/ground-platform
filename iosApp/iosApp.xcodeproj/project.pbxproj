@@ -65,7 +65,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A80000020000000000000001 /* Build configuration list for PBXNativeTarget "iosApp" */;
 			buildPhases = (
-				A60000010000000000000001 /* Compile Kotlin GroundMobile Framework */,
+				A60000010000000000000001 /* Compile Kotlin AppMobile Framework */,
 				A60000020000000000000001 /* Sources */,
 				A30000010000000000000001 /* Frameworks */,
 				A60000030000000000000001 /* Resources */,
@@ -119,19 +119,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		A60000010000000000000001 /* Compile Kotlin GroundMobile Framework */ = {
+		A60000010000000000000001 /* Compile Kotlin AppMobile Framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Compile Kotlin GroundMobile Framework";
+			name = "Compile Kotlin AppMobile Framework";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/../shared/mobile\"\nif [ \"$PLATFORM_NAME\" = \"iphonesimulator\" ]; then\n  ./gradlew linkDebugFrameworkIosSimulatorArm64\nelse\n  ./gradlew linkDebugFrameworkIosArm64\nfi\n";
+			shellScript = "cd \"$SRCROOT/..\"\nif [ \"$PLATFORM_NAME\" = \"iphonesimulator\" ]; then\n  ./gradlew :shared:mobile:linkDebugFrameworkIosSimulatorArm64\nelse\n  ./gradlew :shared:mobile:linkDebugFrameworkIosArm64\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -188,11 +188,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
-					"GroundMobile",
+					"AppMobile",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.openforis.collectone.v2.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -220,11 +220,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
-					"GroundMobile",
+					"AppMobile",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.openforis.collectone.v2.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -21,7 +21,7 @@
 #
 # The clients embed a Kotlin copy (GlobalLibrarySeedData.kt), and its
 # GlobalLibrarySeedTest fails when the two differ. Template questions carry
-# their concept links as `ground:concept` foreign attributes on their bindings.
+# their concept links as `collectone:concept` foreign attributes on their bindings.
 
 concepts {
   id: "pame.threat_type"
@@ -692,7 +692,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "core_strict"
@@ -718,7 +718,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "buffer_zone"
@@ -744,7 +744,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "ecological_restoration"
@@ -770,7 +770,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "sustainable_use"
@@ -796,7 +796,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "wildlife_corridor"
@@ -825,7 +825,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "logging"
@@ -851,7 +851,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "poaching"
@@ -877,7 +877,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "fire"
@@ -903,7 +903,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "encroachment"
@@ -929,7 +929,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "mining"
@@ -955,7 +955,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "grazing"
@@ -981,7 +981,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "invasive_species"
@@ -1007,7 +1007,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "pollution"
@@ -1033,7 +1033,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "other"
@@ -1062,7 +1062,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "low"
@@ -1088,7 +1088,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "medium"
@@ -1114,7 +1114,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "high"
@@ -1143,7 +1143,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "observation_logged"
@@ -1169,7 +1169,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "snare_gear_removed"
@@ -1195,7 +1195,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "warning_issued"
@@ -1221,7 +1221,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "incident_escalated"
@@ -1247,7 +1247,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "fire_suppressed"
@@ -1273,7 +1273,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "boundary_repaired"
@@ -1287,8 +1287,8 @@ form_templates {
         type: TYPE_DATE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "pame.patrol_date@1"
         }
       }
@@ -1297,8 +1297,8 @@ form_templates {
         type: TYPE_SELECT_ONE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "pame.management_zone@1"
         }
       }
@@ -1306,8 +1306,8 @@ form_templates {
         field_path: "ranger_count"
         type: TYPE_INT32
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "pame.ranger_count@1"
         }
       }
@@ -1315,8 +1315,8 @@ form_templates {
         field_path: "patrol_effort_km"
         type: TYPE_DOUBLE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "pame.patrol_effort_km@1"
         }
       }
@@ -1325,8 +1325,8 @@ form_templates {
         type: TYPE_SELECT_MULTIPLE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "pame.threat_type@1"
         }
       }
@@ -1335,8 +1335,8 @@ form_templates {
         type: TYPE_SELECT_ONE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "pame.threat_severity@1"
         }
       }
@@ -1344,8 +1344,8 @@ form_templates {
         field_path: "management_action"
         type: TYPE_SELECT_ONE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "pame.management_action@1"
         }
       }
@@ -1353,8 +1353,8 @@ form_templates {
         field_path: "species_observed"
         type: TYPE_STRING
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "pame.species_observed@1"
         }
       }
@@ -1362,8 +1362,8 @@ form_templates {
         field_path: "site_photo"
         type: TYPE_BINARY
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.site_photo@1"
         }
       }
@@ -1484,6 +1484,7 @@ form_templates {
     }
   }
   status: STABLE
+  version: 1
 }
 purpose_packs {
   id: "protected_area_management"

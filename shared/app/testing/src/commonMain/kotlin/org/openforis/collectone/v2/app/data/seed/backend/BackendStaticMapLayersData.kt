@@ -15,7 +15,7 @@ package org.openforis.collectone.v2.app.data.seed.backend
 
 import org.openforis.collectone.v2.app.domain.model.LayerSourceType
 import org.openforis.collectone.v2.app.domain.model.MapLayerItem
-import org.openforis.collectone.v2.app.domain.model.OfflineTilePackageItem
+import org.openforis.collectone.v2.map.GeometryType
 
 /** Hardcoded sample map layers and offline tile packages for the sample data. */
 object BackendStaticMapLayersData {
@@ -27,13 +27,12 @@ object BackendStaticMapLayersData {
           MapLayerItem(
             id = "layer-land-use-observations",
             label = "Land Use Observations",
-            sourceDescription = "Dataset: land_use_observations (Point)",
             colorHex = 0xFF2E7D32,
-            geometryTypeLabel = "Point",
+            geometryType = GeometryType.POINT,
             isVisible = true,
             sourceType = LayerSourceType.ENTITY_DATASET,
-            singularItemLabel = "land-use observation",
-            pluralItemLabel = "land-use observations",
+            singularNoun = "land-use observation",
+            pluralNoun = "land-use observations",
             datasetId = "land_use_observations",
             iconName = "landscape",
           )
@@ -43,13 +42,12 @@ object BackendStaticMapLayersData {
           MapLayerItem(
             id = "layer-sample-plots",
             label = "Permanent Forest Sample Plots",
-            sourceDescription = "Dataset: sample_plots (Polygon, SP-01 to SP-05)",
             colorHex = 0xFF1B5E20,
-            geometryTypeLabel = "Polygon",
+            geometryType = GeometryType.POLYGON,
             isVisible = true,
             sourceType = LayerSourceType.ENTITY_DATASET,
-            singularItemLabel = "sample plot",
-            pluralItemLabel = "sample plots",
+            singularNoun = "sample plot",
+            pluralNoun = "sample plots",
             datasetId = "sample_plots",
             iconName = "forest",
           )
@@ -59,13 +57,12 @@ object BackendStaticMapLayersData {
           MapLayerItem(
             id = "layer-commodity-plots",
             label = "Commodity Plots (EUDR)",
-            sourceDescription = "Dataset: commodity_plots (Polygon)",
             colorHex = 0xFFD84315,
-            geometryTypeLabel = "Polygon",
+            geometryType = GeometryType.POLYGON,
             isVisible = true,
             sourceType = LayerSourceType.ENTITY_DATASET,
-            singularItemLabel = "commodity plot",
-            pluralItemLabel = "commodity plots",
+            singularNoun = "commodity plot",
+            pluralNoun = "commodity plots",
             datasetId = "commodity_plots",
             iconName = "agriculture",
           )
@@ -75,15 +72,29 @@ object BackendStaticMapLayersData {
           MapLayerItem(
             id = "layer-past-individuals",
             label = "Preloaded Past Household Individuals",
-            sourceDescription = "Dataset: past_individuals (Point, IND-101 to IND-106)",
             colorHex = 0xFF6A1B9A,
-            geometryTypeLabel = "Point",
+            geometryType = GeometryType.POINT,
             isVisible = true,
             sourceType = LayerSourceType.ENTITY_DATASET,
-            singularItemLabel = "past individual",
-            pluralItemLabel = "past individuals",
+            singularNoun = "past individual",
+            pluralNoun = "past individuals",
             datasetId = "past_individuals",
             iconName = "person",
+          )
+        )
+      "00000037-7e4a-5b2c-9d18-3f8a61c4e902" ->
+        listOf(
+          MapLayerItem(
+            id = "layer-interpretation-plots",
+            label = "Satellite Interpretation Sample Plots",
+            colorHex = 0xFF00897B,
+            geometryType = GeometryType.POLYGON,
+            isVisible = true,
+            sourceType = LayerSourceType.ENTITY_DATASET,
+            singularNoun = "interpretation plot",
+            pluralNoun = "interpretation plots",
+            datasetId = "interpretation_plots",
+            iconName = "forest",
           )
         )
       else -> defaultMapLayers()
@@ -99,70 +110,38 @@ object BackendStaticMapLayersData {
       MapLayerItem(
         id = "layer-coffee-parcels",
         label = "Smallholder Coffee Parcels",
-        sourceDescription = "Dataset: coffee_parcels (Polygon)",
         colorHex = 0xFF6D4C41,
-        geometryTypeLabel = "Polygon",
+        geometryType = GeometryType.POLYGON,
         isVisible = true,
         sourceType = LayerSourceType.ENTITY_DATASET,
-        singularItemLabel = "coffee parcel",
-        pluralItemLabel = "coffee parcels",
+        singularNoun = "coffee parcel",
+        pluralNoun = "coffee parcels",
         datasetId = "coffee_parcels",
         iconName = "eco",
       ),
       MapLayerItem(
         id = "layer-shade-transects",
         label = "Shade Tree Monitoring Plots",
-        sourceDescription = "Dataset: shade_monitoring_plots (LineString)",
         colorHex = 0xFF2E7D32,
-        geometryTypeLabel = "LineString",
+        geometryType = GeometryType.LINE_STRING,
         isVisible = true,
         sourceType = LayerSourceType.ENTITY_DATASET,
-        singularItemLabel = "monitoring plot",
-        pluralItemLabel = "monitoring plots",
+        singularNoun = "monitoring plot",
+        pluralNoun = "monitoring plots",
         datasetId = "shade_monitoring_plots",
         iconName = "park",
       ),
       MapLayerItem(
         id = "layer-water-points",
         label = "Cooperative Washing Stations",
-        sourceDescription = "Dataset: washing_stations (Point)",
         colorHex = 0xFF0277BD,
-        geometryTypeLabel = "Point",
+        geometryType = GeometryType.POINT,
         isVisible = true,
         sourceType = LayerSourceType.ENTITY_DATASET,
-        singularItemLabel = "washing station",
-        pluralItemLabel = "washing stations",
+        singularNoun = "washing station",
+        pluralNoun = "washing stations",
         datasetId = "washing_stations",
         iconName = "water_drop",
-      ),
-    )
-
-  /** Sample Mapbox vector & satellite raster tile packages for `Offline maps`. */
-  fun defaultOfflineTilePackages(): List<OfflineTilePackageItem> =
-    listOf(
-      OfflineTilePackageItem(
-        id = "tiles-nyeri-vector",
-        regionName = "Nyeri & Mt. Kenya West Vector Basemap",
-        tileTypeLabel = "Vector Tiles (Contours & Roads)",
-        zoomRangeLabel = "Zoom 10–18",
-        sizeLabel = "14.2 MB",
-        isDownloaded = true,
-      ),
-      OfflineTilePackageItem(
-        id = "tiles-nyeri-satellite",
-        regionName = "Othaya & Chinga High-Res Satellite Imagery",
-        tileTypeLabel = "Satellite Raster Tiles",
-        zoomRangeLabel = "Zoom 12–19",
-        sizeLabel = "68.5 MB",
-        isDownloaded = true,
-      ),
-      OfflineTilePackageItem(
-        id = "tiles-kirinyaga-east",
-        regionName = "Kirinyaga Neighboring Cooperative Sector",
-        tileTypeLabel = "Hybrid Vector + Raster Tiles",
-        zoomRangeLabel = "Zoom 11–18",
-        sizeLabel = "42.0 MB",
-        isDownloaded = false,
       ),
     )
 }

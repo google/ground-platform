@@ -48,8 +48,36 @@ message SubmissionRecord {
 
   AuditInfo audit_info = 11;
   bool is_deleted = 12;
+  google.protobuf.Timestamp commit_timestamp = 13;
+  // …
+  google.protobuf.Timestamp client_updated_at = 28;
+  google.protobuf.Timestamp server_updated_at = 29;
 }
 ```
+
+## Update Times
+
+A submission records when it was last updated twice, once per clock:
+
+| Field | Set by | Meaning |
+| :--- | :--- | :--- |
+| `client_updated_at` | The client, on every save | When the collector saved the submission, in the device clock |
+| `server_updated_at` | The server, on every accepted `SubmissionMutation` | When the server accepted the last change, in the server clock |
+| `commit_timestamp` | The store, on every write | Sync bookkeeping, not stored in the record (see [Sync Engine](../../sync-engine.md)) |
+
+`server_updated_at` is server-owned: the server overwrites whatever a client
+sends, and upsert merges ignore it.
+
+Clients show a submission's time as `client_updated_at`, because that is when
+the work happened even if the upload came hours later, and fall back to
+`server_updated_at`. Rows written before either field existed have neither;
+clients fall back to their `commit_timestamp`, and show no time when that is
+missing too. The text is the UTC minute (`2026-09-24 08:15 UTC`), formatted on
+the client by `formatSubmissionTime` in `:shared:app:domain`.
+
+The display label these times replace, `timestamp_label` (field 20, and field
+11 of `SubmissionGeometryPolygonDef`), is reserved: proto3 skips it in rows
+that still carry it.
 
 ## Example: `SubmissionRecord` Embedding `RecordInstance`
 

@@ -1,0 +1,842 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Shared across the form editor. -->
+  <string name="formeditor_cancel">Cancelar</string>
+  <string name="formeditor_delete">Excluir</string>
+  <!-- Shown in place of a form title the designer hasn't entered yet. -->
+  <string name="formeditor_untitled_form">Formulário sem título</string>
+  <!-- Field label: the value a condition compares against. -->
+  <string name="formeditor_value">Valor</string>
+  <!-- Field label: comparison operator of a display-logic or status rule (e.g. "is equal to"). -->
+  <string name="formeditor_condition">Condição</string>
+  <!-- Field label: which form question a rule refers to. -->
+  <string name="formeditor_question">Pergunta</string>
+  <!-- Dropdown placeholder when nothing is selected yet. -->
+  <string name="formeditor_choose">Escolher</string>
+  <!-- Dropdown placeholder for picking one of a question's answer choices. -->
+  <string name="formeditor_pick_a_choice">Escolha uma opção</string>
+  <!-- Dropdown option meaning "no selection". -->
+  <string name="formeditor_none">Nenhuma</string>
+  <!-- Button that fixes every listed problem at once. -->
+  <string name="formeditor_fix_all">Corrigir tudo</string>
+  <!-- Heading of a collapsible section with advanced settings. -->
+  <string name="formeditor_advanced">Avançado</string>
+  <!-- Last screen of a form, where the collector reviews answers and submits. -->
+  <string name="formeditor_review_and_submit">Revisar e enviar</string>
+  <!-- Question has no display logic, so it is always shown. -->
+  <string name="formeditor_always_shown">Sempre exibida</string>
+  <!-- Shown in place of a question label the designer hasn't entered yet. -->
+  <string name="formeditor_no_label">(sem rótulo)</string>
+  <!-- Icon description: the question is linked to a standard (dictionary) field. -->
+  <string name="formeditor_linked_to_standard_field">Vinculada a um campo padrão</string>
+  <!-- Icon description: the question has validation issues. -->
+  <string name="formeditor_has_issues">Tem problemas</string>
+  <!-- Preview map button that zooms in to the selected feature. -->
+  <string name="formeditor_adjust_view">Ajustar visualização</string>
+  <!-- Preview map button that zooms back out. -->
+  <string name="formeditor_reset_view">Redefinir visualização</string>
+  <!-- Subtitle of the data-collection screen in previews. -->
+  <string name="formeditor_collect_data">Coletar dados</string>
+  <string name="formeditor_add_a_question">Adicionar uma pergunta</string>
+  <string name="formeditor_next">Próximo</string>
+  <string name="formeditor_form_settings">Configurações do formulário</string>
+  <!-- Field label for a question or choice label. -->
+  <string name="formeditor_label">Rótulo</string>
+  <!-- Field label for a question or choice label in a non-default language. %1$s: language name. -->
+  <string name="formeditor_label_in_language">Rótulo (%1$s)</string>
+  <!-- Short question number badge. %1$d: question number (Q1, Q2, …). -->
+  <string name="formeditor_question_number_badge">P%1$d</string>
+  <!-- Language menu entry for the survey's default language. %1$s: language name. -->
+  <string name="formeditor_language_default">%1$s • Padrão</string>
+  <!-- Title of the form preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title">Pré-visualização • %1$s</string>
+
+  <!-- Errors when adding a question's label to the organization's dictionary. -->
+  <string name="formeditor_error_question_not_found">Pergunta não encontrada.</string>
+  <string name="formeditor_error_dictionary_managers_only">Somente os gerentes da organização desta pesquisa podem adicionar itens ao dicionário dela.</string>
+  <string name="formeditor_error_enter_label">Insira um rótulo primeiro.</string>
+  <string name="formeditor_error_notes_cant_be_linked">Notas não podem ser vinculadas.</string>
+
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: list of impact purposes (e.g. "EUDR due diligence"). -->
+  <string name="formeditor_delete_warning_feeds_impact_report">Este campo alimenta seu relatório de impacto para %1$s.</string>
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: standard field name. -->
+  <string name="formeditor_delete_warning_linked_standard_field">Este campo está vinculado ao campo padrão "%1$s", então as respostas dele contam para os relatórios de impacto.</string>
+  <!-- Joins two items of a list: "A and B" (applied repeatedly for longer lists: "A and B and C"). -->
+  <string name="formeditor_list_and">%1$s e %2$s</string>
+
+  <!-- Form editor page: header, menus, flow canvas, and question cards. -->
+  <!-- Floating button that opens the menu of question types to add. -->
+  <string name="formeditor_add_question">Adicionar pergunta</string>
+  <!-- Title of the dialog confirming deletion of a form. -->
+  <string name="formeditor_delete_form_title">Excluir formulário?</string>
+  <!-- Body of the delete-form confirmation dialog. %1$s: form title. -->
+  <string name="formeditor_delete_form_message">Excluir "%1$s"? Esta ação não pode ser desfeita.</string>
+  <!-- Button / menu item that deletes the form. -->
+  <string name="formeditor_delete_form">Excluir formulário</string>
+  <!-- Subtitle under the form title in the form editor toolbar. -->
+  <string name="formeditor_editor_subtitle">Crie perguntas, lógica de exibição e fluxos.</string>
+  <!-- Icon description: undo the last edit. -->
+  <string name="formeditor_undo">Desfazer</string>
+  <!-- Icon description: redo the last undone edit. -->
+  <string name="formeditor_redo">Refazer</string>
+  <!-- Button that creates a map layer from this form's submissions. -->
+  <string name="formeditor_create_map_layer">Criar camada do mapa</string>
+  <!-- Button that creates a data table from this form's submissions. -->
+  <string name="formeditor_create_data_table">Criar tabela de dados</string>
+  <!-- Toolbar button (verb) that opens the form preview. -->
+  <string name="formeditor_preview">Visualizar</string>
+  <!-- Icon description of the overflow menu button. -->
+  <string name="formeditor_more_options">Mais opções</string>
+  <!-- Menu item that downloads the form as an XForms XML file. -->
+  <string name="formeditor_download_xforms_xml">Baixar XML do XForms</string>
+  <!-- Menu item that opens the save-as-template dialog. -->
+  <string name="formeditor_save_as_template_menu">Salvar como modelo…</string>
+  <!-- Screen reader description of the language selector. %1$s: active language name. -->
+  <string name="formeditor_form_language_description">Idioma do formulário: %1$s</string>
+  <!-- Add-question menu item that adds a new section (group of questions). -->
+  <string name="formeditor_add_menu_section">Seção</string>
+  <!-- Flow summary for the mobile preview. %1$s: screen count (e.g. "5 screens"); %2$s: path count (e.g. "3 potential paths"). -->
+  <string name="formeditor_flow_summary_mobile">%1$s • %2$s</string>
+  <!-- Number of question screens in the mobile flow. -->
+  <plurals name="formeditor_screen_count">
+    <item quantity="one">%1$d tela</item>
+    <item quantity="other">%1$d telas</item>
+  </plurals>
+  <!-- Number of distinct paths a collector may take through the form. -->
+  <plurals name="formeditor_potential_path_count">
+    <item quantity="one">%1$d caminho possível</item>
+    <item quantity="other">%1$d caminhos possíveis</item>
+  </plurals>
+  <!-- Flow summary for the web preview. %1$d: number of questions. -->
+  <plurals name="formeditor_flow_summary_web">
+    <item quantity="one">%1$d pergunta • Layout web</item>
+    <item quantity="other">%1$d perguntas • Layout web</item>
+  </plurals>
+  <!-- Badge counting the form's validation issues. -->
+  <plurals name="formeditor_issue_count">
+    <item quantity="one">%1$d problema</item>
+    <item quantity="other">%1$d problemas</item>
+  </plurals>
+  <!-- Tooltip explaining the completion time estimate. %1$d: number of questions on the longest path. -->
+  <plurals name="formeditor_duration_estimate">
+    <item quantity="one">Estimativa de ~2 min por pergunta no caminho mais longo (%1$d pergunta).</item>
+    <item quantity="other">Estimativa de ~2 min por pergunta no caminho mais longo (%1$d perguntas).</item>
+  </plurals>
+  <!-- Tooltip sentence appended to the estimate when the survey is long. -->
+  <string name="formeditor_duration_fatigue_warning">Pesquisas com mais de 10 perguntas (~20 min) podem cansar os respondentes.</string>
+  <!-- Estimated completion time badge. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes">~%1$d min</string>
+  <!-- Estimated completion time badge for a long survey. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes_long">~%1$d min • Pesquisa longa</string>
+  <!-- Flow legend: solid arrow to the next screen. -->
+  <string name="formeditor_legend_always_next">Sempre a seguir</string>
+  <!-- Flow legend: dashed arrow taken only when a condition holds. -->
+  <string name="formeditor_legend_if_condition_true">Se a condição for verdadeira</string>
+  <!-- Badge on a repeated section in the flow. %1$s: section title. -->
+  <string name="formeditor_repeated_section_badge">Seção repetida: %1$s</string>
+  <!-- Badge on a repeated section that has no title yet. -->
+  <string name="formeditor_repeated_section_badge_untitled">Seção repetida: Sem título</string>
+  <!-- Badge on a section in the flow. %1$s: section title. -->
+  <string name="formeditor_section_badge">Seção: %1$s</string>
+  <!-- Badge on a section that has no title yet. -->
+  <string name="formeditor_section_badge_untitled">Seção: Sem título</string>
+  <!-- Badge: the section has display logic. -->
+  <string name="formeditor_conditional">Condicional</string>
+  <!-- Repeat count expression of a repeated section. %1$s: expression. -->
+  <string name="formeditor_repeat_count_expression">Quantidade: %1$s</string>
+  <!-- Ghost card title for appending a question to an untitled section. -->
+  <string name="formeditor_add_to_section">Adicionar à seção</string>
+  <!-- Ghost card title for appending a question to a section. %1$s: section title. -->
+  <string name="formeditor_add_to_named_section">Adicionar a %1$s</string>
+  <!-- Ghost card subtitle inside a section. -->
+  <string name="formeditor_append_question_in_section">Acrescentar pergunta nesta seção</string>
+  <!-- Screen reader description of the ghost card inside an untitled section. -->
+  <string name="formeditor_add_question_inside_section">Adicionar pergunta dentro da seção</string>
+  <!-- Screen reader description of the ghost card inside a section. %1$s: section title. -->
+  <string name="formeditor_add_question_inside_named_section">Adicionar pergunta dentro de %1$s</string>
+  <!-- Condition pill on a flow edge. %1$s: operator (e.g. "is equal to"); %2$s: compared value. -->
+  <string name="formeditor_condition_pill">%1$s '%2$s'</string>
+  <!-- Icon description of the "+" button between flow cards. -->
+  <string name="formeditor_add_question_here">Adicionar pergunta aqui</string>
+  <!-- Screen reader description of the flow's start node. %1$s: launch button label. -->
+  <string name="formeditor_start_node_description">Início: %1$s</string>
+  <!-- Subtitle of the ghost card at the end of the flow. -->
+  <string name="formeditor_ghost_card_subtitle">Clique para acrescentar uma tela antes de Revisar e enviar</string>
+  <!-- Screen reader description of the ghost card at the end of the flow. -->
+  <string name="formeditor_add_question_at_end_of_flow">Adicionar uma pergunta no final do fluxo</string>
+  <!-- Icon description of the drag handle on a question card. -->
+  <string name="formeditor_drag_to_reorder">Arraste para reordenar</string>
+  <!-- Caption of a required question's type. %1$s: question type (e.g. "Text"). -->
+  <string name="formeditor_question_type_required">%1$s • Obrigatória</string>
+  <!-- Back button in the mini screen preview. -->
+  <string name="formeditor_back">Voltar</string>
+  <!-- Placeholder of a text field in the mini screen preview. -->
+  <string name="formeditor_answer">Resposta</string>
+  <!-- Placeholder when a choice question's data table isn't chosen yet. -->
+  <string name="formeditor_choose_data_table">Escolher tabela de dados</string>
+  <!-- Placeholder when a choice question's map layer isn't chosen yet. -->
+  <string name="formeditor_choose_map_layer">Escolher camada do mapa</string>
+  <!-- Number of additional choices not shown in the mini preview. %1$d: count. -->
+  <string name="formeditor_more_choices">+%1$d outras</string>
+  <!-- Mini preview action to add a new entity. %1$s: feature noun (e.g. "plot"). -->
+  <string name="formeditor_add_new_feature">+ Adicionar %1$s</string>
+  <!-- Mini preview action to add a new entity of unknown kind. -->
+  <string name="formeditor_add_new_item">+ Adicionar novo item</string>
+  <!-- Mini preview caption: capture a point with GPS only. -->
+  <string name="formeditor_capture_point_gps">Capturar ponto (GPS)</string>
+  <!-- Mini preview caption: capture a point with GPS or by drawing on the map. -->
+  <string name="formeditor_capture_point_or_draw">Capturar ponto ou desenhar no mapa</string>
+  <!-- Mini preview caption: walk a line with GPS only. -->
+  <string name="formeditor_walk_line_gps">Percorrer linha (GPS)</string>
+  <!-- Mini preview caption: walk a line with GPS or draw it on the map. -->
+  <string name="formeditor_walk_line_or_draw">Percorrer linha ou desenhar no mapa</string>
+  <!-- Mini preview caption: walk a polygon with GPS only. -->
+  <string name="formeditor_walk_polygon_gps">Percorrer polígono (GPS)</string>
+  <!-- Mini preview caption: walk a polygon with GPS or draw it on the map. -->
+  <string name="formeditor_walk_polygon_or_draw">Percorrer polígono ou desenhar no mapa</string>
+  <!-- Mini preview caption: take a photo with the camera. -->
+  <string name="formeditor_take_photo">Tirar foto</string>
+  <!-- Mini preview caption: take a photo or upload one. -->
+  <string name="formeditor_take_photo_or_upload">Tirar foto ou enviar</string>
+  <!-- Mini preview caption: record a video. -->
+  <string name="formeditor_record_video">Gravar vídeo</string>
+  <!-- Mini preview caption: record a video or upload one. -->
+  <string name="formeditor_record_video_or_upload">Gravar vídeo ou enviar</string>
+  <!-- Mini preview caption: record audio. -->
+  <string name="formeditor_record_audio">Gravar áudio</string>
+  <!-- Mini preview caption: record audio or upload a file. -->
+  <string name="formeditor_record_audio_or_upload">Gravar áudio ou enviar</string>
+  <!-- Mini preview caption of a note question (display-only text). -->
+  <string name="formeditor_read_only_note">Nota somente leitura</string>
+
+  <!-- Question and section properties, choices, display logic, and flow preview. -->
+  <!-- Question properties panel. -->
+  <!-- Panel title. %1$d: position of the selected question; %2$d: total number of questions. -->
+  <string name="formeditor_question_position">Pergunta %1$d de %2$d</string>
+  <!-- Button that selects the previous question. -->
+  <string name="formeditor_previous">Anterior</string>
+  <!-- Icon description: opens the menu of actions for the selected question. -->
+  <string name="formeditor_question_options">Opções da pergunta</string>
+  <!-- Menu action that duplicates the selected question. -->
+  <string name="formeditor_duplicate">Duplicar</string>
+  <string name="formeditor_question_type">Tipo de pergunta</string>
+  <!-- Field label for a question's optional hint text. -->
+  <string name="formeditor_hint_optional">Dica (opcional)</string>
+  <!-- Field label for a question's optional hint in a non-default language. %1$s: language name. -->
+  <string name="formeditor_hint_in_language_optional">Dica (%1$s, opcional)</string>
+  <!-- Toggle: the question must be answered. -->
+  <string name="formeditor_required">Obrigatória</string>
+  <!-- Explains why a note (read-only) question can't be made required. -->
+  <string name="formeditor_notes_cant_be_required">Notas não podem ser obrigatórias.</string>
+  <string name="formeditor_required_description">Os coletores precisam responder antes de continuar.</string>
+
+  <!-- Section properties panel. -->
+  <!-- Section that collectors can fill in multiple times. -->
+  <string name="formeditor_repeated_section">Seção repetida</string>
+  <!-- Panel title for a (non-repeated) group of questions. -->
+  <string name="formeditor_section">Seção</string>
+  <string name="formeditor_section_description">Grupo de perguntas no fluxo do formulário</string>
+  <string name="formeditor_delete_section">Excluir seção</string>
+  <!-- Icon description: closes the properties panel. -->
+  <string name="formeditor_close_properties">Fechar propriedades</string>
+  <string name="formeditor_section_title">Título da seção</string>
+  <!-- Section that is filled in once (not repeated). -->
+  <string name="formeditor_single_section">Seção única</string>
+  <string name="formeditor_repeated_section_description">Os coletores podem adicionar várias entradas.</string>
+  <string name="formeditor_single_section_description">As perguntas são agrupadas visual e logicamente.</string>
+  <!-- Field label: how many times a repeated section repeats, as an optional XForms expression. -->
+  <string name="formeditor_repeat_count_optional">Número de repetições (expressão opcional)</string>
+  <!-- Placeholder example for the repeat count field; keep the number and the path unchanged. -->
+  <string name="formeditor_repeat_count_placeholder">ex.: 3 ou /data/number_of_plots</string>
+  <!-- Toggle: the section is shown only when a condition is met. -->
+  <string name="formeditor_section_condition">Condição da seção</string>
+  <string name="formeditor_section_condition_on">A seção só é exibida quando a condição é atendida.</string>
+  <string name="formeditor_section_condition_off">A seção é sempre exibida.</string>
+  <string name="formeditor_section_condition_no_sources">Adicione uma pergunta antes desta seção para torná-la condicional.</string>
+  <string name="formeditor_move_section_up">Mover seção para cima</string>
+  <string name="formeditor_move_section_down">Mover seção para baixo</string>
+  <string name="formeditor_no_section">Sem seção</string>
+  <string name="formeditor_in_conditional_section">Também fica oculta quando sua seção "%1$s" está oculta.</string>
+  <!-- Field label: the question the section condition depends on. -->
+  <string name="formeditor_depends_on_question">Depende da pergunta</string>
+  <!-- Shown when the question a condition refers to no longer exists. -->
+  <string name="formeditor_missing">(ausente)</string>
+  <!-- Dropdown placeholder when no value is selected for a condition. -->
+  <string name="formeditor_select_value">(selecionar valor)</string>
+
+  <!-- Number question settings. -->
+  <string name="formeditor_decimal_places">Casas decimais</string>
+  <string name="formeditor_decimal_places_zero">0 para números inteiros.</string>
+  <!-- %1$d: maximum number of decimal places. -->
+  <plurals name="formeditor_decimal_places_up_to">
+    <item quantity="one">Até %1$d casa decimal.</item>
+    <item quantity="other">Até %1$d casas decimais.</item>
+  </plurals>
+
+  <!-- Geometry question settings. -->
+  <!-- Field label: how a geometry (location) answer is captured. -->
+  <string name="formeditor_capture">Captura</string>
+  <!-- Capture mode of a polygon question: the collector walks the boundary while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_boundary">Percorrer o limite (GPS a cada 5 s)</string>
+  <!-- Capture mode of a line question: the collector walks the path while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_path">Percorrer o trajeto (GPS a cada 5 s)</string>
+  <string name="formeditor_capture_walk_boundary_description">Os coletores percorrem o perímetro no local; os vértices de GPS são registrados a cada 5 s.</string>
+  <string name="formeditor_capture_walk_path_description">Os coletores percorrem o trajeto no local; os vértices de GPS são registrados a cada 5 s.</string>
+  <!-- Field label: whether a photo/video/audio is captured or uploaded. -->
+  <string name="formeditor_media_source">Origem da mídia</string>
+
+  <!-- Advanced section. -->
+  <string name="formeditor_advanced_has_errors">As configurações avançadas têm erros</string>
+  <string name="formeditor_collapse_advanced">Recolher avançado</string>
+  <string name="formeditor_expand_advanced">Expandir avançado</string>
+  <!-- Field label: the question's data column name. -->
+  <string name="formeditor_name">Nome</string>
+  <!-- Help text for the question name field; keep the characters "_ . -" unchanged. -->
+  <string name="formeditor_name_supporting_text">Nome da coluna de dados. Letras, dígitos, _ . -</string>
+
+  <!-- Validation rules. -->
+  <string name="formeditor_validation">Validação</string>
+  <string name="formeditor_no_validation_rules">Não há regras de validação para este tipo de pergunta.</string>
+  <!-- Field label: minimum allowed number. -->
+  <string name="formeditor_minimum">Mínimo</string>
+  <!-- Field label: maximum allowed number. -->
+  <string name="formeditor_maximum">Máximo</string>
+  <string name="formeditor_min_length">Comprimento mín.</string>
+  <string name="formeditor_max_length">Comprimento máx.</string>
+  <!-- Field label: text pattern (e.g. email, digits only) the answer must match. -->
+  <string name="formeditor_pattern">Padrão</string>
+  <string name="formeditor_regular_expression">Expressão regular</string>
+  <string name="formeditor_allowed_dates">Datas permitidas</string>
+  <!-- Allowed dates option: no restriction. -->
+  <string name="formeditor_any_date">Qualquer data</string>
+  <string name="formeditor_minimum_selections">Mínimo de seleções</string>
+  <string name="formeditor_maximum_selections">Máximo de seleções</string>
+  <!-- Field label: custom message shown when the answer fails validation. -->
+  <string name="formeditor_error_message_optional">Mensagem de erro (opcional)</string>
+  <string name="formeditor_earliest_date">Data mais antiga</string>
+  <string name="formeditor_latest_date">Data mais recente</string>
+  <!-- Placeholder for a date field with no date. -->
+  <string name="formeditor_not_set">Não definida</string>
+  <!-- Icon description: clears a date field. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_clear_field">Limpar %1$s</string>
+  <!-- Icon description: opens a date picker. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_pick_field">Escolher %1$s</string>
+  <!-- Date picker confirmation button. -->
+  <string name="formeditor_ok">OK</string>
+
+  <!-- Choices editor. -->
+  <!-- Heading and field label: the answer choices of a select question, and where they come from. -->
+  <string name="formeditor_choices">Opções</string>
+  <!-- Visual style of choices: plain text. -->
+  <string name="formeditor_visual_text_only">Somente texto</string>
+  <!-- Visual style of choices: each choice has a color. -->
+  <string name="formeditor_visual_colors">Cores</string>
+  <!-- Visual style of choices: each choice has an image. -->
+  <string name="formeditor_visual_images">Imagens</string>
+  <!-- Button that imports choices from a file; keep the file extensions unchanged. -->
+  <string name="formeditor_import_choices_file">Importar (.csv / .txt)</string>
+  <!-- Title of the dialog shown after picking a choices file. -->
+  <string name="formeditor_import_choices">Importar opções</string>
+  <!-- %1$d: number of choices found in the file; %2$d: number of current choices. -->
+  <plurals name="formeditor_import_choices_message">
+    <item quantity="one">%1$d opção encontrada no arquivo. Deseja substituir as opções atuais (%2$d) ou acrescentá-la a elas?</item>
+    <item quantity="other">%1$d opções encontradas no arquivo. Deseja substituir as opções atuais (%2$d) ou acrescentá-las a elas?</item>
+  </plurals>
+  <!-- Button: replace the current choices with the imported ones. -->
+  <string name="formeditor_replace">Substituir</string>
+  <!-- Button: add the imported choices after the current ones. -->
+  <string name="formeditor_append">Acrescentar</string>
+  <!-- Field label: how choices are displayed (text, colors, or images). -->
+  <string name="formeditor_visual_style">Estilo visual</string>
+  <!-- Field label: an earlier question whose answer filters this question's choices. -->
+  <string name="formeditor_cascading_filter">Filtro em cascata (pergunta principal)</string>
+  <!-- Label before chips that filter the choice list by parent choice. -->
+  <string name="formeditor_filter_label">Filtro:</string>
+  <!-- Filter chip that shows all choices. -->
+  <string name="formeditor_filter_all">Todas</string>
+  <!-- Error when a choice image is too large. %1$d: maximum size in kilobytes. -->
+  <string name="formeditor_choice_image_too_large">Escolha um arquivo de imagem com menos de %1$d KB.</string>
+  <!-- Field label: the parent question's choice this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_choice">Opção principal (%1$s)</string>
+  <!-- Parent choice option meaning the choice is shown regardless of the parent answer. -->
+  <string name="formeditor_any_unfiltered">Qualquer (sem filtro)</string>
+  <!-- Field label: the parent question's value this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_value">Valor principal (%1$s)</string>
+  <string name="formeditor_remove_choice">Remover opção</string>
+  <string name="formeditor_add_choice">Adicionar opção</string>
+  <string name="formeditor_no_map_layers_available">Ainda não há camadas do mapa disponíveis nesta pesquisa.</string>
+  <string name="formeditor_no_data_tables_available">Ainda não há tabelas de dados disponíveis nesta pesquisa.</string>
+  <!-- Button that creates a new map layer for the question's choices. -->
+  <string name="formeditor_new_map_layer">Nova camada do mapa</string>
+  <!-- Button that creates a new data table for the question's choices. -->
+  <string name="formeditor_new_data_table">Nova tabela de dados</string>
+  <!-- %1$d: number of features/rows; %2$s: feature noun matching the count (e.g. "plot"/"plots"); %3$s: map layer or data table name. -->
+  <plurals name="formeditor_collectors_choose_from">
+    <item quantity="one">Os coletores de dados escolhem entre %1$d %2$s em %3$s.</item>
+    <item quantity="other">Os coletores de dados escolhem entre %1$d %2$s em %3$s.</item>
+  </plurals>
+  <!-- %1$s: identifier of an external choice list. -->
+  <string name="formeditor_choices_from_external_list">As opções são carregadas da lista externa "%1$s".</string>
+  <string name="formeditor_sample_plots_cant_be_added">As parcelas amostrais são geradas a partir de um desenho amostral e não podem ser adicionadas pelos coletores.</string>
+  <!-- Toggle. %1$s: plural feature noun (e.g. "plots", "trees"). -->
+  <string name="formeditor_allow_add_new">Permitir que os coletores adicionem %1$s</string>
+  <!-- %1$s: form title; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_uses_form_to_add_new">Usa %1$s para adicionar %2$s.</string>
+  <!-- %1$s: singular feature noun (e.g. "plot"). -->
+  <string name="formeditor_collectors_can_add_new">Os coletores podem adicionar %1$s durante a seleção.</string>
+  <!-- Chip that opens the linked form. -->
+  <string name="formeditor_open_form">Abrir formulário</string>
+  <!-- %1$s: map layer or data table name; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_dataset_has_no_form">%1$s ainda não tem um formulário para adicionar %2$s.</string>
+  <!-- Button. %1$s: map layer or data table name. -->
+  <string name="formeditor_create_form_for">Criar formulário para %1$s</string>
+  <!-- Accessibility description of the marker beside a text-only choice. -->
+  <string name="formeditor_text_choice">Opção de texto</string>
+  <!-- Chip text for a choice linked to a standard code that isn't in the code list. %1$s: code. -->
+  <string name="formeditor_code_value">Código: %1$s</string>
+  <string name="formeditor_link_to_standard_choice">Vincular a uma opção padrão…</string>
+  <!-- Menu option: the choice isn't linked to a standard choice. -->
+  <string name="formeditor_not_linked">Não vinculada</string>
+  <!-- Icon description. %1$s: color name or hex code. -->
+  <string name="formeditor_choice_color_named">Cor da opção: %1$s</string>
+  <!-- Icon description for a choice with no color. -->
+  <string name="formeditor_choice_color_none">Cor da opção: nenhuma</string>
+  <!-- Heading of the choice color palette. -->
+  <string name="formeditor_choice_color">Cor da opção</string>
+  <string name="formeditor_add_choice_image">Adicionar imagem da opção</string>
+  <string name="formeditor_choice_image">Imagem da opção</string>
+  <string name="formeditor_replace_image">Substituir imagem</string>
+  <string name="formeditor_remove_image">Remover imagem</string>
+
+  <!-- Display logic editor. -->
+  <string name="formeditor_display_logic">Lógica de exibição</string>
+  <!-- Segmented button: the question is always shown. -->
+  <string name="formeditor_always_show">Sempre exibir</string>
+  <!-- Segmented button: the question is shown only if a condition is met. -->
+  <string name="formeditor_show_only_if">Exibir somente se…</string>
+  <string name="formeditor_first_screen_in_form">Primeira tela do formulário</string>
+  <string name="formeditor_first_screen_display_logic_notice">A lógica de exibição pode depender de perguntas anteriores. Mova esta pergunta para depois ou selecione uma pergunta posterior para configurar a visibilidade condicional.</string>
+  <string name="formeditor_select_question_2">Selecionar a pergunta 2 →</string>
+  <string name="formeditor_move_question_down">Mover pergunta para baixo</string>
+  <string name="formeditor_add_question_2">Adicionar a pergunta 2</string>
+  <!-- Shown when the question a display-logic rule refers to no longer exists. -->
+  <string name="formeditor_missing_question">(pergunta ausente)</string>
+
+  <!-- Flow preview side panel. -->
+  <string name="formeditor_flow_preview">Pré-visualização do fluxo</string>
+  <string name="formeditor_close_preview">Fechar pré-visualização</string>
+  <!-- Field label: language used in the preview. -->
+  <string name="formeditor_language">Idioma</string>
+  <!-- %1$s: technical error message. -->
+  <string name="formeditor_preview_load_error">Não foi possível carregar o XForms gerado:\n%1$s</string>
+  <string name="formeditor_preview_web_description">As perguntas são atualizadas em tempo real conforme você responde: os cartões condicionais aparecem ou desaparecem de acordo com a lógica de exibição.</string>
+  <string name="formeditor_preview_mobile_description">As telas são atualizadas em tempo real conforme você responde: as perguntas condicionais aparecem ou desaparecem de acordo com a lógica de exibição.</string>
+  <string name="formeditor_submission_passed_validation">A submissão passou na validação.</string>
+  <!-- Heading of the list of screens the collector is going through. -->
+  <string name="formeditor_current_path">Caminho atual</string>
+  <!-- Button that restarts the form preview. -->
+  <string name="formeditor_restart">Reiniciar</string>
+  <string name="formeditor_back_to_editor">Voltar ao editor</string>
+
+  <!-- Form properties: availability, where submissions are saved, and status markers. -->
+  <!-- Form properties panel (form-level settings, availability, and where submissions are saved). -->
+  <string name="formeditor_form_properties">Propriedades do formulário</string>
+  <!-- Part of the form properties subtitle. %1$d: number of questions in the form. -->
+  <plurals name="formeditor_form_properties_question_count">
+    <item quantity="one">%1$d pergunta</item>
+    <item quantity="other">%1$d perguntas</item>
+  </plurals>
+  <!-- Part of the form properties subtitle. %1$d: number of distinct paths through the form's display logic. -->
+  <plurals name="formeditor_form_properties_path_count">
+    <item quantity="one">%1$d caminho possível</item>
+    <item quantity="other">%1$d caminhos possíveis</item>
+  </plurals>
+  <!-- Form properties subtitle. %1$s: question count (e.g. "3 questions"); %2$s: path count (e.g. "4 potential paths"). -->
+  <string name="formeditor_form_properties_counts">%1$s • %2$s</string>
+  <string name="formeditor_form_title">Título do formulário</string>
+  <!-- Field label: text of the buttons that start data collection for this form. -->
+  <string name="formeditor_button_label">Rótulo do botão</string>
+  <string name="formeditor_button_label_help">Exibido nos botões que iniciam a coleta de dados deste formulário. Por padrão, é o título do formulário.</string>
+  <string name="formeditor_form_no_questions_yet">Este formulário ainda não tem perguntas. Use "+" na tela de edição para adicionar uma.</string>
+  <!-- Section heading: on which platforms (mobile app, web dashboard) collectors can open the form. -->
+  <string name="formeditor_availability">Disponibilidade</string>
+  <!-- Section heading: what happens to data when the form is submitted. -->
+  <string name="formeditor_submissions">Submissões</string>
+  <!-- %1$s: name of the map layer or data table the form's submissions are added to. -->
+  <string name="formeditor_linked_to_dataset">Vinculado a %1$s</string>
+  <string name="formeditor_linked_map_layer_description">Cada submissão adiciona um novo elemento do mapa a esta camada do mapa. As propriedades do esquema ficam sincronizadas com as perguntas do formulário.</string>
+  <string name="formeditor_linked_data_table_description">Cada submissão adiciona uma nova linha a esta tabela de dados. As propriedades do esquema ficam sincronizadas com as perguntas do formulário.</string>
+  <string name="formeditor_edit_map_layer">Editar camada do mapa</string>
+  <string name="formeditor_edit_data_table">Editar tabela de dados</string>
+  <string name="formeditor_unlink_map_layer">Desvincular camada do mapa</string>
+  <string name="formeditor_unlink_data_table">Desvincular tabela de dados</string>
+  <string name="formeditor_create_map_layer_for_form">Criar camada do mapa para o formulário</string>
+  <string name="formeditor_create_data_table_for_form">Criar tabela de dados para o formulário</string>
+  <!-- Icon description: opens a map layer or data table. %1$s: its name. -->
+  <string name="formeditor_open_dataset">Abrir %1$s</string>
+  <string name="formeditor_available_on_mobile">Disponível no app</string>
+  <string name="formeditor_available_on_web">Disponível na web</string>
+  <string name="formeditor_availability_mobile_on">Os coletores podem abrir este formulário no aplicativo para dispositivos móveis.</string>
+  <string name="formeditor_availability_mobile_off">Oculto para os coletores no aplicativo para dispositivos móveis.</string>
+  <string name="formeditor_availability_web_on">Os coletores podem abrir este formulário no painel web.</string>
+  <string name="formeditor_availability_web_off">Oculto para os coletores no painel web.</string>
+  <string name="formeditor_availability_none_warning">Os coletores não podem abrir este formulário em nenhum lugar até que uma destas opções seja ativada.</string>
+  <!-- Error: some location questions can only use GPS, which the web dashboard can't capture. %1$d: number of such questions; %2$s: name of the capture option that also allows drawing on the map (e.g. "GPS or map"). -->
+  <plurals name="formeditor_web_incompatible_geometry_summary">
+    <item quantity="one">%1$d pergunta de geometria usa somente GPS e não pode ser respondida na web. Mude-a para "%2$s".</item>
+    <item quantity="other">%1$d perguntas de geometria usam somente GPS e não podem ser respondidas na web. Mude-as para "%2$s".</item>
+  </plurals>
+  <!-- Accessibility action label for expanding a collapsible section. -->
+  <string name="formeditor_expand_section">Expandir</string>
+  <!-- Accessibility action label for collapsing a collapsible section. -->
+  <string name="formeditor_collapse_section">Recolher</string>
+  <string name="formeditor_when_form_submitted">Quando o formulário é enviado</string>
+  <!-- %1$s: name of the map layer or data table submissions are added to. -->
+  <string name="formeditor_save_to_create_linked_description">Cada submissão é adicionada a %1$s.</string>
+  <string name="formeditor_save_to_create_map_layer_description">Uma camada do mapa é criada para este formulário.</string>
+  <string name="formeditor_save_to_create_data_table_description">Uma tabela de dados é criada para este formulário.</string>
+  <string name="formeditor_save_to_update_unavailable">Adicione outra camada do mapa ou tabela de dados à pesquisa para usar esta opção.</string>
+  <string name="formeditor_save_to_update_description">Cada submissão altera as propriedades de um elemento que já existe.</string>
+  <string name="formeditor_submissions_always_kept">As submissões são sempre mantidas, então cada alteração tem um registro de quem a fez e quando.</string>
+  <string name="formeditor_update_target_label">Camada do mapa ou tabela de dados a atualizar</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_map_layer">Camada do mapa</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_data_table">Tabela de dados</string>
+  <!-- Section heading, followed by the ways to identify which map feature a submission updates. -->
+  <string name="formeditor_find_map_feature_by">Encontrar o elemento do mapa por</string>
+  <!-- Section heading, followed by the ways to identify which table row a submission updates. -->
+  <string name="formeditor_find_table_row_by">Encontrar a linha da tabela por</string>
+  <string name="formeditor_selected_on_map">Seleção no mapa</string>
+  <string name="formeditor_picked_from_list">Escolha em uma lista</string>
+  <!-- The answer a collector gives to a question (used as an option for identifying features and in status rules). -->
+  <string name="formeditor_question_answer">Resposta à pergunta</string>
+  <string name="formeditor_find_by_selected_map_feature_help">Os coletores abrem o formulário a partir de um elemento no mapa. O formulário começa com uma tela "Elemento do mapa a atualizar", preenchida automaticamente, para que um elemento também possa ser escolhido em uma lista.</string>
+  <!-- %1$s: name of the data table. -->
+  <string name="formeditor_find_by_selected_table_row_help">O formulário começa com uma tela "Linha a atualizar" que lista as linhas de %1$s.</string>
+  <!-- Field label: the dataset property the question's answer is matched against. -->
+  <string name="formeditor_matches_property">Corresponde à propriedade</string>
+  <string name="formeditor_fields_to_update">Campos a atualizar</string>
+  <string name="formeditor_fields_to_update_empty">Adicione perguntas para escolher quais propriedades elas atualizam.</string>
+  <!-- %1$s: property name. -->
+  <string name="formeditor_property_already_updated">Outra pergunta já atualiza "%1$s".</string>
+  <!-- Field label: which property a question's answer updates. -->
+  <string name="formeditor_updates">Atualiza</string>
+  <!-- Dropdown option: the question's answer doesn't update any property. -->
+  <string name="formeditor_dont_update">Não atualizar</string>
+  <!-- Dropdown option: the question's answer updates the feature's geometry. -->
+  <string name="formeditor_geometry_location">Geometria (localização)</string>
+  <string name="formeditor_status_marker">Marcador de status</string>
+  <string name="formeditor_set_status_marker">Definir marcador de status</string>
+  <string name="formeditor_status_marker_on_map_feature">Define o símbolo, a cor e o rótulo do marcador de status do elemento do mapa ao enviar.</string>
+  <string name="formeditor_status_marker_on_table_row">Define o símbolo, a cor e o rótulo do marcador de status da linha da tabela ao enviar.</string>
+  <string name="formeditor_status_marker_off_map_features">Desativado por padrão. Ative para marcar elementos do mapa (por exemplo, ✓ Pesquisado ou ○ Pendente).</string>
+  <string name="formeditor_status_marker_off_table_rows">Desativado por padrão. Ative para marcar linhas da tabela (por exemplo, ✓ Pesquisado ou ○ Pendente).</string>
+  <string name="formeditor_status_rules_help">As regras são verificadas em ordem. A primeira regra correspondente define o marcador e o rótulo de status.</string>
+  <string name="formeditor_add_status_rule">Adicionar regra de status</string>
+  <!-- Heading of the fallback status used when no status rule matches. -->
+  <string name="formeditor_otherwise">Caso contrário</string>
+  <string name="formeditor_otherwise_help">Status padrão quando nenhuma regra acima corresponde.</string>
+  <string name="formeditor_default_status_color">Cor de status padrão</string>
+  <!-- Status rule subject: a property of the data table row. -->
+  <string name="formeditor_row_property">Propriedade da linha</string>
+  <!-- Status rule subject: a property of the map feature. -->
+  <string name="formeditor_feature_property">Propriedade do elemento</string>
+  <!-- Status rule subject: number of submissions for the feature. -->
+  <string name="formeditor_submission_count">Número de submissões</string>
+  <!-- %1$d: status rule number. -->
+  <string name="formeditor_status_rule_title">Regra %1$d</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_up">Mover a regra de status %1$d para cima</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_down">Mover a regra de status %1$d para baixo</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_remove_status_rule">Remover a regra de status %1$d</string>
+  <!-- Field label: what a status rule's condition is about (submission count, question answer, property). -->
+  <string name="formeditor_status_rule_when">Quando</string>
+  <!-- Field label: minimum number of submissions for a status rule to match. -->
+  <string name="formeditor_at_least_submissions">Pelo menos (submissões)</string>
+  <string name="formeditor_matches_when_submitted">Corresponde quando este formulário é enviado.</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_feature">
+    <item quantity="one">Corresponde quando o elemento tem pelo menos %1$d submissão.</item>
+    <item quantity="other">Corresponde quando o elemento tem pelo menos %1$d submissões.</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_map_feature">
+    <item quantity="one">Corresponde quando o elemento do mapa tem pelo menos %1$d submissão.</item>
+    <item quantity="other">Corresponde quando o elemento do mapa tem pelo menos %1$d submissões.</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_table_row">
+    <item quantity="one">Corresponde quando a linha da tabela tem pelo menos %1$d submissão.</item>
+    <item quantity="other">Corresponde quando a linha da tabela tem pelo menos %1$d submissões.</item>
+  </plurals>
+  <!-- Button description for a status rule's color picker. %1$d: status rule number. -->
+  <string name="formeditor_status_color_for_rule">Cor de status da regra %1$d</string>
+  <!-- Field label: status marker symbol (e.g. ✓, ○). -->
+  <string name="formeditor_symbol">Símbolo</string>
+  <string name="formeditor_status_label">Rótulo de status</string>
+  <string name="formeditor_marker_color">Cor do marcador</string>
+  <!-- Placeholder text in a status pill when the designer hasn't entered a status label. -->
+  <string name="formeditor_status_placeholder">Status</string>
+  <string name="formeditor_submission_updates_unchosen">Cada submissão atualiza um elemento existente. Escolha qual em Avançado.</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_updates_map_feature_in">Cada submissão atualiza um elemento do mapa existente em:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_updates_table_row_in">Cada submissão atualiza uma linha existente em:</string>
+  <string name="formeditor_submission_saved_without_dataset">As submissões são salvas sem adicionar um elemento do mapa ou uma linha de tabela.</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_adds_map_feature_to">Cada submissão adiciona um novo elemento do mapa a:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_adds_table_row_to">Cada submissão adiciona uma nova linha a:</string>
+  <!-- Summary of the save-to setting. %1$s: update option label (e.g. "Update existing map features"); %2$s: map layer or data table name. -->
+  <string name="formeditor_save_to_summary_update_in">%1$s em %2$s</string>
+  <!-- Summary of the save-to setting plus status markers. %1$s: save-to summary; %2$s: status badges separated by " / " (e.g. "✓ Surveyed / ○ Pending"). -->
+  <string name="formeditor_save_to_summary_with_status">%1$s • Status: %2$s</string>
+
+  <!-- Web preview, Save as template, and standard-field (concept) linking. -->
+  <!-- Web preview: platform banners. -->
+  <!-- Short name of the mobile platform, used inside sentences. -->
+  <string name="formeditor_preview_target_mobile_sentence">o aplicativo para dispositivos móveis</string>
+  <!-- Short name of the web platform, used inside sentences. -->
+  <string name="formeditor_preview_target_web_sentence">o painel web</string>
+  <!-- Banner title when the form is switched off for the mobile app. -->
+  <string name="formeditor_not_available_on_mobile">Indisponível no app</string>
+  <!-- Banner title when the form is switched off for the web dashboard. -->
+  <string name="formeditor_not_available_on_web">Indisponível na web</string>
+  <string name="formeditor_not_available_on_mobile_body">Os coletores não encontrarão este formulário no aplicativo para dispositivos móveis. Ative-o para oferecê-lo lá (também em Configurações do formulário).</string>
+  <string name="formeditor_not_available_on_web_body">Os coletores não encontrarão este formulário no painel web. Ative-o para oferecê-lo lá (também em Configurações do formulário).</string>
+  <!-- Banner action that turns the form on for the previewed platform. -->
+  <string name="formeditor_enable_on_platform">Ativar</string>
+  <string name="formeditor_cant_be_used_on_web_title">Ainda não pode ser usado na web</string>
+  <!-- %1$s: sentence summarizing how many geometry questions are GPS only. -->
+  <string name="formeditor_cant_be_used_on_web_body">Este formulário não pode ser usado na web até que as perguntas somente GPS permitam desenhar no mapa. %1$s</string>
+
+  <!-- Web preview: wireframe and mock dashboard. -->
+  <!-- Wireframe summary of a whole-number question's input. -->
+  <string name="formeditor_integer_input">Entrada de número inteiro</string>
+  <!-- Wireframe summary of a decimal question's input. %1$d: number of decimal places ("dp"). -->
+  <string name="formeditor_decimal_input">Decimal (%1$d c.d.)</string>
+  <!-- Accessibility label of the ghost card that adds a question at the end of the web form. -->
+  <string name="formeditor_add_question_at_end_of_web_form">Adicionar uma pergunta no final do formulário web</string>
+  <!-- Progress line in the web form wireframe footer. %1$d: number of questions. -->
+  <string name="formeditor_answered_progress">0 de %1$d respondidas</string>
+  <!-- Fallback name of the dataset shown in the mock web dashboard. -->
+  <string name="formeditor_sample_plots">Parcelas amostrais</string>
+  <!-- Placeholder of the mock feature search box in the web preview. -->
+  <string name="formeditor_search_features">Pesquisar elementos…</string>
+  <!-- Title of the web preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title_web">Pré-visualização • %1$s • Web</string>
+  <!-- Web preview button that zooms the map back out. -->
+  <string name="formeditor_reset_map_view">Redefinir visualização do mapa</string>
+
+  <!-- Save as template. -->
+  <string name="formeditor_save_template_needs_organization">Mova esta pesquisa para uma organização para salvar os formulários dela como modelos.</string>
+  <!-- %1$s: organization name. -->
+  <string name="formeditor_save_template_managers_only">Somente os gerentes de %1$s podem salvar modelos.</string>
+  <string name="formeditor_save_template_managers_only_this_organization">Somente os gerentes desta organização podem salvar modelos.</string>
+  <string name="formeditor_template_saved_title">Modelo salvo</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_global">"%1$s" está na biblioteca global. Ele fica disponível em "A partir de modelo…" ao adicionar um formulário e aparece na guia Modelos da organização.</string>
+  <!-- %1$s: template name. %2$s: organization name. -->
+  <string name="formeditor_template_saved_organization">"%1$s" está nos modelos de %2$s. Ele fica disponível em "A partir de modelo…" ao adicionar um formulário e aparece na guia Modelos da organização.</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_your_organization">"%1$s" está nos modelos da sua organização. Ele fica disponível em "A partir de modelo…" ao adicionar um formulário e aparece na guia Modelos da organização.</string>
+  <!-- Button that closes a confirmation dialog. -->
+  <string name="formeditor_done">Concluído</string>
+  <string name="formeditor_save_as_template_title">Salvar como modelo</string>
+  <string name="formeditor_save_as_template_intro">Salve uma cópia deste formulário para que ele possa ser adicionado a outras pesquisas. Os vínculos com campos padrão e os códigos das opções são mantidos; o local onde ele salva os dados, não.</string>
+  <string name="formeditor_template_name">Nome do modelo</string>
+  <string name="formeditor_template_description_optional">Descrição (opcional)</string>
+  <!-- Template destination option. %1$s: organization name. -->
+  <string name="formeditor_template_destination_organization">Modelos de %1$s</string>
+  <!-- Template destination option when the organization name is unknown. -->
+  <string name="formeditor_template_destination_your_organization">modelos da sua organização</string>
+  <string name="formeditor_template_destination_global">Biblioteca global (todas as organizações)</string>
+  <!-- Template summary. %1$d: number of questions. -->
+  <plurals name="formeditor_template_question_summary">
+    <item quantity="one">%1$d pergunta.</item>
+    <item quantity="other">%1$d perguntas.</item>
+  </plurals>
+  <!-- Template summary. %1$d: number of questions. %2$d: number of them linked to standard fields. -->
+  <plurals name="formeditor_template_question_summary_linked">
+    <item quantity="one">%1$d pergunta, %2$d vinculada(s) a campos padrão.</item>
+    <item quantity="other">%1$d perguntas, %2$d vinculada(s) a campos padrão.</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. %2$s: organization name. -->
+  <plurals name="formeditor_template_dropped_links">
+    <item quantity="one">Modelos globais só podem usar campos padrão globais, então %1$d vínculo com campos de %2$s será removido do modelo.</item>
+    <item quantity="other">Modelos globais só podem usar campos padrão globais, então %1$d vínculos com campos de %2$s serão removidos do modelo.</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. -->
+  <plurals name="formeditor_template_dropped_links_your_organization">
+    <item quantity="one">Modelos globais só podem usar campos padrão globais, então %1$d vínculo com campos da sua organização será removido do modelo.</item>
+    <item quantity="other">Modelos globais só podem usar campos padrão globais, então %1$d vínculos com campos da sua organização serão removidos do modelo.</item>
+  </plurals>
+  <string name="formeditor_save_template">Salvar modelo</string>
+
+  <!-- Concept (standard field) linking. -->
+  <!-- Field label for the text of a note question. -->
+  <string name="formeditor_note_text">Texto da nota</string>
+  <!-- Field label for the text of a note question in a non-default language. %1$s: language name. -->
+  <string name="formeditor_note_text_in_language">Texto da nota (%1$s)</string>
+  <!-- Heading of the standard-field suggestions under the Label field. -->
+  <string name="formeditor_standard_fields">Campos padrão</string>
+  <!-- %1$s: question label. %2$s: organization name. -->
+  <string name="formeditor_add_label_to_dictionary">Adicionar "%1$s" ao dicionário de %2$s</string>
+  <!-- %1$s: question label. Used when the organization name is unknown. -->
+  <string name="formeditor_add_label_to_organization_dictionary">Adicionar "%1$s" ao dicionário da organização</string>
+  <!-- Suggestion detail for a standard field of an incompatible type. %1$s: data type (e.g. "Number"). -->
+  <string name="formeditor_concept_type_answers">Respostas do tipo %1$s</string>
+  <string name="formeditor_unlink_standard_field">Desvincular campo padrão</string>
+  <!-- %1$s: the standard field's label. -->
+  <string name="formeditor_use_standard_label">Usar o rótulo padrão "%1$s"</string>
+  <!-- %1$s: standard field ID. -->
+  <string name="formeditor_concept_not_in_dictionary">%1$s não está no dicionário desta pesquisa.</string>
+  <!-- %1$s: unit of measure. -->
+  <string name="formeditor_concept_unit">Unidade: %1$s</string>
+  <!-- %1$s: comma-separated list of references. -->
+  <string name="formeditor_concept_reference">Referência: %1$s</string>
+  <!-- %1$s: standard field ID. %2$s: version. -->
+  <string name="formeditor_concept_id_version">%1$s · versão %2$s</string>
+  <!-- Button that opens the standard field search dialog. -->
+  <string name="formeditor_link_to_standard_field_button">Vincular a um campo padrão…</string>
+  <string name="formeditor_link_to_standard_field_title">Vincular a um campo padrão</string>
+  <string name="formeditor_search_the_dictionary">Pesquisar no dicionário</string>
+  <string name="formeditor_no_dictionary_yet">Esta pesquisa ainda não tem um dicionário.</string>
+  <string name="formeditor_no_standard_fields_available">Ainda não há campos padrão disponíveis neste dicionário.</string>
+  <!-- %1$s: search text. -->
+  <string name="formeditor_no_standard_fields_match">Nenhum campo padrão corresponde a "%1$s".</string>
+  <!-- Field label: the standard code-list value a choice maps to. -->
+  <string name="formeditor_standard_value">Valor padrão</string>
+  <!-- A choice not mapped to any standard code-list value. -->
+  <string name="formeditor_not_matched">Sem correspondência</string>
+  <string name="formeditor_delete_question">Excluir pergunta</string>
+  <string name="formeditor_delete_question_title">Excluir pergunta?</string>
+  <string name="formeditor_delete_question_message">Esta pergunta será marcada como excluída. Os usuários deixarão de vê-la assim que seus dispositivos sincronizarem, e todos os dados já coletados serão preservados.</string>
+  <string name="formeditor_delete_linked_question_title">Excluir pergunta vinculada?</string>
+  <!-- %1$s: sentence saying what the question's answers feed. -->
+  <string name="formeditor_delete_linked_question_message">%1$s Excluí-la remove essas respostas dos relatórios.</string>
+  <!-- %1$d: number of imported fields matching standard definitions. -->
+  <plurals name="formeditor_import_matches_title">
+    <item quantity="one">Encontramos %1$d campo que corresponde a definições padrão</item>
+    <item quantity="other">Encontramos %1$d campos que correspondem a definições padrão</item>
+  </plurals>
+  <!-- Icon description: closes a card. -->
+  <string name="formeditor_dismiss">Dispensar</string>
+  <string name="formeditor_linked_fields_explainer">Campos vinculados podem ser comparados e somados entre pesquisas.</string>
+  <string name="formeditor_link_all">Vincular todos</string>
+  <!-- %1$d: number of selected matches. -->
+  <string name="formeditor_link_selected">Vincular %1$d selecionados</string>
+  <string name="formeditor_not_now">Agora não</string>
+  <string name="formeditor_saving_to_global_library">Salvando na biblioteca global (todas as organizações)</string>
+  <!-- Banner title when the template a form was built from has changed. %1$s: template title. -->
+  <string name="formeditor_template_update_available">Atualização de modelo disponível: %1$s</string>
+  <!-- Banner body. %1$d: number of suggested additions; %2$d: number of suggested removals. -->
+  <string name="formeditor_template_update_summary">Revise %1$d adição(ões) sugerida(s) e %2$d remoção(ões) antes de aplicar a este formulário.</string>
+  <!-- Button that opens the template update review dialog. -->
+  <string name="formeditor_template_review_changes">Revisar alterações</string>
+  <!-- Template update review dialog title. %1$s: template title. -->
+  <string name="formeditor_template_review_title">Revisar atualizações do modelo: %1$s</string>
+  <!-- Template update review dialog explanation. -->
+  <string name="formeditor_template_review_description">Selecione quais atualizações regulatórias ou do modelo aplicar ao seu formulário. Os itens desmarcados permanecerão inalterados.</string>
+  <!-- Template update review dialog: heading above questions the template added. -->
+  <string name="formeditor_template_suggested_additions">Adições sugeridas</string>
+  <!-- Template update review dialog: heading above questions the template no longer has. -->
+  <string name="formeditor_template_removed_questions">Perguntas que não estão mais no modelo</string>
+  <!-- Template update review dialog: checkbox label to remove a question. %1$s: question label. -->
+  <string name="formeditor_template_remove_question">Remover: %1$s</string>
+  <!-- Template update review dialog: applies the checked additions and removals. -->
+  <string name="formeditor_template_apply_selected">Aplicar selecionados</string>
+  <!-- Menu action that duplicates the selected question together with the questions that depend on it. -->
+  <string name="formeditor_duplicate_branch">Duplicar ramificação</string>
+  <!-- Summary of a question's validation rules. %1$s = one or more conditions, e.g. “be between 0 and 120”. -->
+  <string name="formeditor_validation_must">Deve %1$s.</string>
+  <!-- Joins two validation conditions. %1$s, %2$s = conditions. -->
+  <string name="formeditor_validation_and">%1$s e %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number from %1$s to %2$s. -->
+  <string name="formeditor_validation_number_between">estar entre %1$s e %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at least %1$s. -->
+  <string name="formeditor_validation_number_at_least">ser pelo menos %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at most %1$s. -->
+  <string name="formeditor_validation_number_at_most">ser no máximo %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has %1$d to %2$d characters. -->
+  <string name="formeditor_validation_length_between">ter entre %1$d e %2$d caracteres</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at least %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_least">
+    <item quantity="one">ter pelo menos %1$d caractere</item>
+    <item quantity="other">ter pelo menos %1$d caracteres</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at most %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_most">
+    <item quantity="one">ter no máximo %1$d caractere</item>
+    <item quantity="other">ter no máximo %1$d caracteres</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is an email address. -->
+  <string name="formeditor_validation_pattern_email">ser um endereço de e-mail</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only digits. -->
+  <string name="formeditor_validation_pattern_digits">conter apenas dígitos</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only the Latin letters A to Z. -->
+  <string name="formeditor_validation_pattern_letters">conter apenas letras A–Z</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer matches the organizer's own pattern. -->
+  <string name="formeditor_validation_pattern_custom">corresponder ao padrão</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or earlier. -->
+  <string name="formeditor_validation_date_not_in_future">não estar no futuro</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or later. -->
+  <string name="formeditor_validation_date_not_in_past">não estar no passado</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or later. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_after">ser em %1$s ou depois</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or earlier. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_before">ser em %1$s ou antes</string>
+  <!-- Validation summary of a select multiple question. %1$d, %2$d = fewest and most options. -->
+  <string name="formeditor_validation_selections_between">Selecione entre %1$d e %2$d opções.</string>
+  <!-- Validation summary of a select multiple question. %1$d = fewest options. -->
+  <plurals name="formeditor_validation_selections_at_least">
+    <item quantity="one">Selecione pelo menos %1$d opção.</item>
+    <item quantity="other">Selecione pelo menos %1$d opções.</item>
+  </plurals>
+  <!-- Validation summary of a select multiple question. %1$d = most options. -->
+  <plurals name="formeditor_validation_selections_at_most">
+    <item quantity="one">Selecione no máximo %1$d opção.</item>
+    <item quantity="other">Selecione no máximo %1$d opções.</item>
+  </plurals>
+  <!-- Lowercase name of one or several records of a dataset, used inside sentences: map features of a map layer, rows of a data table. -->
+  <string name="formeditor_feature_noun_map_feature">elemento do mapa</string>
+  <string name="formeditor_feature_noun_map_features">elementos do mapa</string>
+  <string name="formeditor_feature_noun_table_row">linha da tabela</string>
+  <string name="formeditor_feature_noun_table_rows">linhas da tabela</string>
+  <string name="formeditor_template_subtitle">Modelo da biblioteca: perguntas, lógica de exibição e fluxos.</string>
+  <string name="formeditor_template_section">Modelo</string>
+  <string name="formeditor_template_title">Título do modelo</string>
+  <string name="formeditor_template_adds_map_layer">As pesquisas que adicionam este modelo recebem uma nova camada do mapa de %1$s para suas submissões. A primeira pergunta de geometria posiciona cada elemento.</string>
+  <string name="formeditor_template_adds_data_table">As pesquisas que adicionam este modelo recebem uma nova tabela de dados para suas submissões. Adicione uma pergunta de localização, linha ou polígono para coletar elementos do mapa.</string>
+  <string name="formeditor_enable_open_in_google_earth">Ativar Abrir no Google Earth</string>
+  <string name="formeditor_availability_google_earth_on">Os coletores podem abrir os elementos do mapa e o formulário incorporado no Google Earth.</string>
+  <string name="formeditor_availability_google_earth_off">Ative para permitir que os coletores abram este formulário dentro dos balões do mapa do Google Earth.</string>
+  <string name="formeditor_availability_google_earth_unavailable">Disponível apenas para formulários que atualizam elementos do mapa existentes.</string>
+  <string name="formeditor_availability_google_earth_needs_map_selection">Disponível apenas quando &quot;%1$s&quot; está definido como &quot;%2$s&quot;.</string>
+  <string name="formeditor_enable_web_confirm_title">Ativar na web?</string>
+  <string name="formeditor_enable_web_confirm_message">Alguns tipos de perguntas não são compatíveis com a web e não estarão disponíveis.</string>
+  <string name="formeditor_enable_google_earth_confirm_title">Ativar Abrir no Google Earth?</string>
+  <string name="formeditor_enable_google_earth_confirm_message">Alguns tipos de perguntas não são compatíveis com o Google Earth e não estarão disponíveis.</string>
+  <plurals name="formeditor_google_earth_incompatible_questions_summary">
+    <item quantity="one">%1$d pergunta usa um tipo de campo não compatível com o Google Earth.</item>
+    <item quantity="other">%1$d perguntas usam tipos de campo não compatíveis com o Google Earth.</item>
+  </plurals>
+</resources>

@@ -1,0 +1,48 @@
+{
+  "form_id": "form_id-value",
+  "form_version": "form_version-value",
+  "metadata": {
+    "instance_id": "instance_id-value",
+    "start_time": "2026-01-01T00:00:00.125Z",
+    "end_time": "2026-01-01T00:00:00.125Z",
+    "today": "0007-07-07",
+    "device_id": "device_id-value",
+    "subscriber_id": "subscriber_id-value",
+    "sim_serial": "sim_serial-value",
+    "phone_number": "phone_number-value",
+    "audit_file_uri": "audit_file_uri-value",
+    "audit_config": {
+      "enabled": true,
+      "location_min_interval_seconds": 7,
+      "location_max_age_seconds": 7,
+      "location_priority": "location_priority-value",
+      "track_changes": true,
+      "track_changes_reasons": "track_changes_reasons-value"
+    }
+  },
+  "data": {
+    "fields-value": [
+      {
+        "fields-value": 2.25
+      }
+    ]
+  },
+  "audit_log": {
+    "events": [
+      {
+        "event": "event-value",
+        "field_path": "field_path-value",
+        "start_time": "2026-01-01T00:00:00.125Z",
+        "end_time": "2026-01-01T00:00:00.125Z",
+        "location": [
+          2.25,
+          2.25,
+          2.25,
+          2.25
+        ],
+        "old_value": "old_value-value",
+        "new_value": "new_value-value"
+      }
+    ]
+  }
+}

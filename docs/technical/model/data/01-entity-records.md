@@ -28,9 +28,8 @@ message EntityRecord {
   int64 revision = 3;
   string label = 4;
 
-  // Exposed to XForms / ProtoForms XPath expressions and `entity_saveto` bindings
-  // under the reserved system property name "geometry".
-  oneof geometry {
+  // Legacy geometry, read only for rows written before `geometry`.
+  oneof legacy_geometry {
     openforis.collectone.v1.forms.GeoPoint point = 5;
     openforis.collectone.v1.forms.GeoTrace trace = 6;
     openforis.collectone.v1.forms.GeoShape shape = 7;
@@ -41,6 +40,11 @@ message EntityRecord {
   bool is_field_created = 10;
   bool is_deleted = 11;
   string s2_cell_token = 12;
+  // …
+
+  // Exposed to XForms / ProtoForms XPath expressions and `entity_saveto` bindings
+  // under the reserved system property name "geometry".
+  Geometry geometry = 30;
 }
 ```
 
@@ -52,12 +56,13 @@ alongside custom `properties`:
 *   **`"name"` / `"__id"`**: Maps to `entity_id`
 *   **`"label"`**: Maps to `label`
 *   **`"__version"`**: Maps to `revision`
-*   **`"geometry"`**: Maps to `geometry` (`point`, `trace`, or `shape`)
+*   **`"geometry"`**: Maps to `geometry`, the canonical GeoJSON geometry described
+    in [Geometry](05-geometry.md)
 
 ## Geometry Size
 
-Polygon geometries (`shape`) are ordinary `forms.GeoShape` closed rings. Their
-vertex count is limited by the per-tier `QuotaLimits.max_area_vertices` quota
+Polygon geometries have closed rings (see [Geometry](05-geometry.md)). Their
+vertex count, counting every ring's closing vertex, is limited by the per-tier `QuotaLimits.max_area_vertices` quota
 (see [Access Control & Quotas](../survey/04-access-control-and-quotas.md)), not
 by a fixed schema rule. Generated sample plots use 5 coordinates for squares
 and 25 for circles (24 vertices plus the closing one).
@@ -70,9 +75,9 @@ representative point:
 
 | Geometry | Representative point |
 | :--- | :--- |
-| `point` | The point itself |
-| `trace` | The first vertex |
-| `shape` | The average of the ring's vertices, excluding the closing vertex |
+| Point | The point itself |
+| LineString | The first vertex |
+| Polygon | The average of the exterior ring's vertices, excluding the closing vertex |
 
 The token is the hex cell ID with trailing zeros removed (`S2CellId::ToToken`).
 `shared/core` computes it with `s2CellToken(lat, lng)` in
@@ -90,11 +95,16 @@ entity_id: "ent-plot-7721"
 dataset_id: "plots"
 revision: 1
 label: "Plot 104 - Grace Wanjiku"
-shape {
-  points { latitude: -0.28270 longitude: 34.75190 altitude_meters: 1580.2 accuracy_meters: 2.8 }
-  points { latitude: -0.28285 longitude: 34.75210 altitude_meters: 1581.0 accuracy_meters: 3.1 }
-  points { latitude: -0.28300 longitude: 34.75195 altitude_meters: 1580.5 accuracy_meters: 2.9 }
-  points { latitude: -0.28270 longitude: 34.75190 altitude_meters: 1580.2 accuracy_meters: 2.8 }
+geometry {
+  type: GEOMETRY_TYPE_POLYGON
+  polygon {
+    rings {
+      positions { longitude: 34.75190 latitude: -0.28270 altitude_meters: 1580.2 }
+      positions { longitude: 34.75210 latitude: -0.28285 altitude_meters: 1581.0 }
+      positions { longitude: 34.75195 latitude: -0.28300 altitude_meters: 1580.5 }
+      positions { longitude: 34.75190 latitude: -0.28270 altitude_meters: 1580.2 }
+    }
+  }
 }
 properties {
   key: "farmer_name"

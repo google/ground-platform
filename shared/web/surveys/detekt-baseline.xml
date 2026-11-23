@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:CreateSurveyDialog.kt$@Composable fun CreateSurveyDialog( organizations: List&lt;Organization&gt;, surveyLibrary: (organizationId: String?) -&gt; ResolvedLibrary, onCreate: (CreateSurveyRequest) -&gt; Unit, onDismiss: () -&gt; Unit, organization: Organization? = null, )</ID>
+    <ID>LongMethod:CreateSurveyDialog.kt$@Composable fun CreateSurveyDialog( organizations: List&lt;Organization&gt;, surveyLibrary: (organizationId: String?) -&gt; ResolvedLibrary, onCreate: (CreateSurveyRequest) -&gt; Unit, onDismiss: () -&gt; Unit, organization: Organization? = null, )</ID>
+    <ID>LongMethod:WebSurveysPage.kt$@Composable fun WebSurveysPage( uiState: DashboardUiState, onOpenSurvey: (surveyId: String) -&gt; Unit, onCreateSurvey: (CreateSurveyRequest) -&gt; Unit, header: @Composable (onCreateSurveyClick: () -&gt; Unit) -&gt; Unit, onOpenCreateSurveyWizard: (() -&gt; Unit)? = null, outcomePrompt: SurveyOutcomePromptUiState = SurveyOutcomePromptUiState(), outcomeActions: SurveyOutcomePromptActions? = null, isLoading: Boolean = false, )</ID>
+    <ID>MatchingDeclarationName:CreateSurveyDialog.kt$CreateSurveyRequest</ID>
+  </CurrentIssues>
+</SmellBaseline>

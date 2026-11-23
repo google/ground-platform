@@ -29,110 +29,154 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.openforis.collectone.v2.app.domain.model.AppScreen
 import org.openforis.collectone.v2.app.ui.common.CloudAcaciaLogo
-import org.openforis.collectone.v2.app.ui.common.DevSignInDialog
+import org.openforis.collectone.v2.app.ui.common.DemoAttributionFooterBar
+import org.openforis.collectone.v2.app.ui.common.DemoBadge
 import org.openforis.collectone.v2.app.ui.common.GoogleLogoIcon
-import org.openforis.collectone.v2.app.ui.common.GroundMissionGraphic
-import org.openforis.collectone.v2.app.ui.common.UserDataSyncErrorBanner
-import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionFormScreen
-import org.openforis.collectone.v2.core.forms.ui.LocalGroundBrandFontFamily
-import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.app.ui.common.LocalMobileTopInset
+import org.openforis.collectone.v2.app.ui.common.MissionGraphic
+import org.openforis.collectone.v2.app.ui.session.BackendErrorBanner
+import org.openforis.collectone.v2.app.ui.session.UserDataSyncErrorBanner
+import org.openforis.collectone.v2.core.forms.ui.LocalAppBrandFontFamily
+import org.openforis.collectone.v2.core.forms.ui.controls.Card
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.resources.Res as UiRes
 import org.openforis.collectone.v2.core.forms.ui.resources.sign_in_with_google
+import org.openforis.collectone.v2.core.version.MobileUpdateStatus
+import org.openforis.collectone.v2.mobile.resources.Res
+import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_google_accounts_only
+import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_prompt
+import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_signing_in
+import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_tagline
 import org.openforis.collectone.v2.mobile.ui.MobileAppState
-import org.openforis.collectone.v2.mobile.ui.navigation.MainSurveyScreen
-import org.openforis.collectone.v2.mobile.ui.settings.SignInLanguageSelector
+import org.openforis.collectone.v2.mobile.ui.navigation.MobileNavHost
+import org.openforis.collectone.v2.mobile.ui.navigation.MobileRoute
+import org.openforis.collectone.v2.mobile.ui.version.MobileUpdateRequiredScreen
+import org.openforis.collectone.v2.mobile.ui.version.MobileUpdateSuggestedBanner
 
 /**
- * Host composable that switches between the 4 Ground mobile app screens:
+ * Host of the Collect One mobile app's screens ([MobileNavHost], driven by [navController]) with
+ * the sync and backend error banners over them and the demo attribution footer below:
  * 1. Sign In Screen (Sign in with Google only)
  * 2. Terms of Service Screen
  * 3. Download Survey Screen (with search by name or location, map thumbnail, and downloaded
  *    indicator)
  * 4. Main Survey UI (Map & List Views, Layers toggle, simplestyle-spec Marker Progression ○ → ◐ →
- *    ✓, and Navigation Drawer)
+ *    ✓, and Navigation Drawer), its drawer pages, and the data collection form
  */
 @Composable
-fun MobileScreenHost(state: MobileAppState) {
-  Box(modifier = Modifier.fillMaxSize()) {
-    MobileScreens(state)
-    val syncState by state.dataHolder.userDataSyncState.collectAsState()
-    UserDataSyncErrorBanner(
-      state = syncState,
-      onRetry = state.dataHolder::retryUserDataSync,
-      modifier = Modifier.align(Alignment.TopCenter),
-    )
-  }
-}
+fun MobileScreenHost(
+  state: MobileAppState,
+  navController: NavHostController = rememberNavController(),
+) {
+  val topInset = LocalMobileTopInset.current
+  val clientVersionRepository = state.dataHolder.clientVersionRepository
+  val updateStatus by clientVersionRepository.updateStatus.collectAsState()
+  val isSuggestionDismissed by clientVersionRepository.isSuggestionDismissed.collectAsState()
+  val scope = rememberCoroutineScope()
+  var isCheckingUpdate by remember { mutableStateOf(false) }
 
-@Composable
-private fun MobileScreens(state: MobileAppState) {
-  val dataCollectionUiState = state.dataCollectionUiState
-  if (
-    dataCollectionUiState.isDataCollectionFormOpen &&
-      dataCollectionUiState.activeFormWizardController != null
-  ) {
-    DataCollectionFormScreen(state)
-    return
-  }
-  val onboarding = state.onboarding
-  val onboardingUiState by onboarding.uiState.collectAsState()
-  val settingsUiState by state.settings.uiState.collectAsState()
-  when (state.currentScreen) {
-    AppScreen.SIGN_IN -> {
-      SignInScreen(
-        onSignIn = onboarding::signInWithGoogle,
-        languageSelector = {
-          SignInLanguageSelector(
-            languageCode = settingsUiState.languageCode,
-            onLanguageChange = state.settings::updateLanguage,
+  LaunchedEffect(clientVersionRepository) { clientVersionRepository.refreshPolicy() }
+
+  Column(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+      MobileNavHost(state, navController)
+      val syncState by state.dataHolder.userDataSyncState.collectAsState()
+      val backendError by state.dataHolder.backendError.collectAsState()
+      val isOnline by state.dataHolder.connectivityRepository.observeIsOnline().collectAsState()
+      val backStackEntry by navController.currentBackStackEntryAsState()
+      val onDownloadSurvey =
+        backStackEntry?.destination?.hasRoute(MobileRoute.DownloadSurvey::class) == true
+      val isUpdateRequired = updateStatus is MobileUpdateStatus.Required
+      if (!isUpdateRequired) {
+        Column(
+          modifier = Modifier.align(Alignment.TopCenter).padding(top = topInset),
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          val suggested = updateStatus as? MobileUpdateStatus.Suggested
+          if (suggested != null && !isSuggestionDismissed) {
+            MobileUpdateSuggestedBanner(
+              status = suggested,
+              onDismiss = clientVersionRepository::dismissSuggestion,
+            )
+          }
+          if (
+            showsUserDataSyncErrorBanner(isOnline = isOnline, onDownloadSurvey = onDownloadSurvey)
+          ) {
+            UserDataSyncErrorBanner(
+              state = syncState,
+              onRetry = state.dataHolder::retryUserDataSync,
+            )
+          }
+          BackendErrorBanner(
+            error = backendError,
+            onRetry = state.dataHolder::retryBackendSync,
+            onDismiss = state.dataHolder::dismissBackendError,
           )
-        },
-        isSigningIn = onboardingUiState.isSigningIn,
-      )
-      onboardingUiState.devSignIn?.let { dialog ->
-        DevSignInDialog(
-          state = dialog,
-          onSelectRole = onboarding::selectSimulatedRole,
-          onConfirm = onboarding::confirmDevSignIn,
-          onDismiss = onboarding::dismissDevSignIn,
+        }
+      }
+      DemoBadge(modifier = Modifier.align(Alignment.TopEnd).padding(top = topInset))
+      val required = updateStatus as? MobileUpdateStatus.Required
+      if (required != null) {
+        MobileUpdateRequiredScreen(
+          status = required,
+          isChecking = isCheckingUpdate,
+          onCheckAgain = {
+            if (!isCheckingUpdate) {
+              isCheckingUpdate = true
+              scope.launch {
+                try {
+                  clientVersionRepository.refreshPolicy()
+                  state.dataHolder.retryUserDataSync()
+                } finally {
+                  isCheckingUpdate = false
+                }
+              }
+            }
+          },
         )
       }
     }
-    AppScreen.TERMS_OF_SERVICE ->
-      TermsOfServiceScreen(
-        uiState = onboardingUiState,
-        actions = onboarding,
-      )
-    AppScreen.DOWNLOAD_SURVEY ->
-      DownloadSurveyScreen(
-        uiState = onboardingUiState,
-        actions = onboarding,
-        notice = state.activeSurveyNotice,
-        isDarkTheme = state.isDarkTheme,
-      )
-    AppScreen.MAIN_SURVEY -> MainSurveyScreen(state)
+    DemoAttributionFooterBar()
   }
 }
 
 /**
- * 1. Sign In screen (Sign in with Google + Language selector matching Ground SettingsSelectItem).
+ * Whether the sync error banner may show. Download survey shows its own offline banner, which
+ * already explains why surveys can't sync, so the sync error banner stays hidden there while the
+ * device is offline.
+ */
+internal fun showsUserDataSyncErrorBanner(isOnline: Boolean, onDownloadSurvey: Boolean): Boolean =
+  isOnline || !onDownloadSurvey
+
+/**
+ * The first screen of the app: Sign in with Google, under the [languageSelector] so the user can
+ * pick the app's language before signing in. The button is disabled while [isSigningIn], so a slow
+ * sign-in can't be started twice; [notice] shows why the last attempt failed.
  */
 @Composable
 fun SignInScreen(
@@ -140,9 +184,10 @@ fun SignInScreen(
   /** Language selector shown above the sign-in button. */
   languageSelector: @Composable () -> Unit = {},
   isSigningIn: Boolean = false,
+  notice: String? = null,
 ) {
   val surfaceColor = MaterialTheme.colorScheme.surface
-  val brandFont = LocalGroundBrandFontFamily.current
+  val brandFont = LocalAppBrandFontFamily.current
 
   Column(
     modifier =
@@ -185,8 +230,7 @@ fun SignInScreen(
         )
       }
       Text(
-        text =
-          "Collect field observations, map boundaries, and synchronize survey records offline.",
+        text = stringResource(Res.string.mobile_sign_in_tagline),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
@@ -208,10 +252,10 @@ fun SignInScreen(
         verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
         // Stylized naturalistic mission & field survey illustration
-        GroundMissionGraphic(modifier = Modifier.fillMaxWidth().height(152.dp))
+        MissionGraphic(modifier = Modifier.fillMaxWidth().height(152.dp))
 
         Text(
-          text = "Sign in to access surveys shared with your account.",
+          text = stringResource(Res.string.mobile_sign_in_prompt),
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           textAlign = TextAlign.Center,
@@ -221,13 +265,24 @@ fun SignInScreen(
 
     Spacer(modifier = Modifier.height(10.dp))
 
-    // Language Selector matching Ground SettingsSelectItem + Bottom Sign-In Actions
+    // Language Selector matching ground-android's SettingsSelectItem + Bottom Sign-In Actions
     Column(
       modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       languageSelector()
+
+      notice
+        ?.takeIf { it.isNotBlank() }
+        ?.let { message ->
+          Text(
+            text = message,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center,
+          )
+        }
 
       OutlinedButton(
         onClick = onSignIn,
@@ -256,7 +311,8 @@ fun SignInScreen(
           }
           Text(
             text =
-              if (isSigningIn) "Signing in…" else stringResource(Res.string.sign_in_with_google),
+              if (isSigningIn) stringResource(Res.string.mobile_sign_in_signing_in)
+              else stringResource(UiRes.string.sign_in_with_google),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold,
@@ -265,7 +321,7 @@ fun SignInScreen(
       }
 
       Text(
-        text = "Authentication is currently limited to Google Accounts.",
+        text = stringResource(Res.string.mobile_sign_in_google_accounts_only),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,

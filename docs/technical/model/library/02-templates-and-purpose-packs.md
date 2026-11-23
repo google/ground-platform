@@ -51,6 +51,21 @@ message FormTemplateDef {
     **From template**, listing templates from the survey's resolved library.
     The template is copied into the survey; later template edits do not change
     existing surveys.
+*   **Linked dataset**: the copy's submissions add to a new dataset linked to
+    it: a map layer when the form captures a geometry (its first geometry
+    question gives each feature's geometry and the layer's point, line, or
+    polygon kind), else a data table. The dataset gets one property per
+    answer and is labeled by its most name-like answer. **Add map layer** and
+    **Add data table** also offer **From template**, listing the templates
+    whose form feeds that kind of dataset.
+*   **Editing templates**: in the organization editor's **Templates** tab,
+    **New template** and **Edit template** open the template's form in the
+    same Form editor surveys use, in template mode: its Form properties hold
+    the template's title, description, and Purpose Packs, and say which
+    dataset surveys adding it get, while the survey-only submission
+    settings, dataset-backed choice lists, and **Save as template** are
+    hidden. Saving keeps the template's ID, Form ID, status, and other
+    translations, and makes the form portable like **Save as template**.
 *   **Save as template**: organization Managers can save any form, with its
     concept links, to their organization's library. "All users" Managers can
     also save to the global library. The template drops the form's
@@ -63,7 +78,8 @@ message FormTemplateDef {
 A Purpose Pack is one high-level choice in the survey-creation step **"What will
 this data be used for?"** Purpose titles describe the real-world monitoring or
 operational goal in plain language (for example, *Deforestation compliance*,
-*Ecosystem restoration*, *Forest carbon & conservation monitoring*, *Timber
+*Ecosystem restoration*, *Deforestation & land-use change (Activity Data)*,
+*Forest carbon & biomass inventory (Emission Factors)*, *Timber
 traceability*, *Protected area management*, *Community land & resource mapping*,
 *Producer registration & market access*, and *Land cover & crop mapping*), while
 individual regulations, registries, and standards are listed under **Reporting

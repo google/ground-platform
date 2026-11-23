@@ -1,0 +1,842 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Shared across the form editor. -->
+  <string name="formeditor_cancel">Ghairi</string>
+  <string name="formeditor_delete">Futa</string>
+  <!-- Shown in place of a form title the designer hasn't entered yet. -->
+  <string name="formeditor_untitled_form">Fomu isiyo na jina</string>
+  <!-- Field label: the value a condition compares against. -->
+  <string name="formeditor_value">Thamani</string>
+  <!-- Field label: comparison operator of a display-logic or status rule (e.g. "is equal to"). -->
+  <string name="formeditor_condition">Sharti</string>
+  <!-- Field label: which form question a rule refers to. -->
+  <string name="formeditor_question">Swali</string>
+  <!-- Dropdown placeholder when nothing is selected yet. -->
+  <string name="formeditor_choose">Chagua</string>
+  <!-- Dropdown placeholder for picking one of a question's answer choices. -->
+  <string name="formeditor_pick_a_choice">Chagua chaguo</string>
+  <!-- Dropdown option meaning "no selection". -->
+  <string name="formeditor_none">Hakuna</string>
+  <!-- Button that fixes every listed problem at once. -->
+  <string name="formeditor_fix_all">Rekebisha yote</string>
+  <!-- Heading of a collapsible section with advanced settings. -->
+  <string name="formeditor_advanced">Mipangilio ya kina</string>
+  <!-- Last screen of a form, where the collector reviews answers and submits. -->
+  <string name="formeditor_review_and_submit">Kagua na uwasilishe</string>
+  <!-- Question has no display logic, so it is always shown. -->
+  <string name="formeditor_always_shown">Huonyeshwa kila wakati</string>
+  <!-- Shown in place of a question label the designer hasn't entered yet. -->
+  <string name="formeditor_no_label">(hakuna lebo)</string>
+  <!-- Icon description: the question is linked to a standard (dictionary) field. -->
+  <string name="formeditor_linked_to_standard_field">Limeunganishwa na sehemu sanifu</string>
+  <!-- Icon description: the question has validation issues. -->
+  <string name="formeditor_has_issues">Lina matatizo</string>
+  <!-- Preview map button that zooms in to the selected feature. -->
+  <string name="formeditor_adjust_view">Rekebisha mwonekano</string>
+  <!-- Preview map button that zooms back out. -->
+  <string name="formeditor_reset_view">Rejesha mwonekano</string>
+  <!-- Subtitle of the data-collection screen in previews. -->
+  <string name="formeditor_collect_data">Kusanya data</string>
+  <string name="formeditor_add_a_question">Ongeza swali</string>
+  <string name="formeditor_next">Ifuatayo</string>
+  <string name="formeditor_form_settings">Mipangilio ya fomu</string>
+  <!-- Field label for a question or choice label. -->
+  <string name="formeditor_label">Lebo</string>
+  <!-- Field label for a question or choice label in a non-default language. %1$s: language name. -->
+  <string name="formeditor_label_in_language">Lebo (%1$s)</string>
+  <!-- Short question number badge. %1$d: question number (Q1, Q2, …). -->
+  <string name="formeditor_question_number_badge">S%1$d</string>
+  <!-- Language menu entry for the survey's default language. %1$s: language name. -->
+  <string name="formeditor_language_default">%1$s • Chaguomsingi</string>
+  <!-- Title of the form preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title">Onyesho la kukagua • %1$s</string>
+
+  <!-- Errors when adding a question's label to the organization's dictionary. -->
+  <string name="formeditor_error_question_not_found">Swali halikupatikana.</string>
+  <string name="formeditor_error_dictionary_managers_only">Ni Wasimamizi wa shirika la utafiti huu pekee wanaoweza kuongeza kwenye kamusi yake.</string>
+  <string name="formeditor_error_enter_label">Weka lebo kwanza.</string>
+  <string name="formeditor_error_notes_cant_be_linked">Madokezo hayawezi kuunganishwa.</string>
+
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: list of impact purposes (e.g. "EUDR due diligence"). -->
+  <string name="formeditor_delete_warning_feeds_impact_report">Sehemu hii inachangia ripoti yako ya athari kwa %1$s.</string>
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: standard field name. -->
+  <string name="formeditor_delete_warning_linked_standard_field">Sehemu hii imeunganishwa na sehemu sanifu "%1$s", kwa hivyo majibu yake yanahesabiwa katika ripoti za athari.</string>
+  <!-- Joins two items of a list: "A and B" (applied repeatedly for longer lists: "A and B and C"). -->
+  <string name="formeditor_list_and">%1$s na %2$s</string>
+
+  <!-- Form editor page: header, menus, flow canvas, and question cards. -->
+  <!-- Floating button that opens the menu of question types to add. -->
+  <string name="formeditor_add_question">Ongeza swali</string>
+  <!-- Title of the dialog confirming deletion of a form. -->
+  <string name="formeditor_delete_form_title">Ungependa kufuta fomu?</string>
+  <!-- Body of the delete-form confirmation dialog. %1$s: form title. -->
+  <string name="formeditor_delete_form_message">Ungependa kufuta "%1$s"? Kitendo hiki hakiwezi kutenduliwa.</string>
+  <!-- Button / menu item that deletes the form. -->
+  <string name="formeditor_delete_form">Futa fomu</string>
+  <!-- Subtitle under the form title in the form editor toolbar. -->
+  <string name="formeditor_editor_subtitle">Buni maswali, mantiki ya kuonyesha na mtiririko.</string>
+  <!-- Icon description: undo the last edit. -->
+  <string name="formeditor_undo">Tendua</string>
+  <!-- Icon description: redo the last undone edit. -->
+  <string name="formeditor_redo">Rudia</string>
+  <!-- Button that creates a map layer from this form's submissions. -->
+  <string name="formeditor_create_map_layer">Unda tabaka la ramani</string>
+  <!-- Button that creates a data table from this form's submissions. -->
+  <string name="formeditor_create_data_table">Unda jedwali la data</string>
+  <!-- Toolbar button (verb) that opens the form preview. -->
+  <string name="formeditor_preview">Kagua</string>
+  <!-- Icon description of the overflow menu button. -->
+  <string name="formeditor_more_options">Chaguo zaidi</string>
+  <!-- Menu item that downloads the form as an XForms XML file. -->
+  <string name="formeditor_download_xforms_xml">Pakua XForms XML</string>
+  <!-- Menu item that opens the save-as-template dialog. -->
+  <string name="formeditor_save_as_template_menu">Hifadhi kama kiolezo…</string>
+  <!-- Screen reader description of the language selector. %1$s: active language name. -->
+  <string name="formeditor_form_language_description">Lugha ya fomu: %1$s</string>
+  <!-- Add-question menu item that adds a new section (group of questions). -->
+  <string name="formeditor_add_menu_section">Kifungu</string>
+  <!-- Flow summary for the mobile preview. %1$s: screen count (e.g. "5 screens"); %2$s: path count (e.g. "3 potential paths"). -->
+  <string name="formeditor_flow_summary_mobile">%1$s • %2$s</string>
+  <!-- Number of question screens in the mobile flow. -->
+  <plurals name="formeditor_screen_count">
+    <item quantity="one">skrini %1$d</item>
+    <item quantity="other">skrini %1$d</item>
+  </plurals>
+  <!-- Number of distinct paths a collector may take through the form. -->
+  <plurals name="formeditor_potential_path_count">
+    <item quantity="one">njia %1$d inayowezekana</item>
+    <item quantity="other">njia %1$d zinazowezekana</item>
+  </plurals>
+  <!-- Flow summary for the web preview. %1$d: number of questions. -->
+  <plurals name="formeditor_flow_summary_web">
+    <item quantity="one">swali %1$d • Mpangilio wa wavuti</item>
+    <item quantity="other">maswali %1$d • Mpangilio wa wavuti</item>
+  </plurals>
+  <!-- Badge counting the form's validation issues. -->
+  <plurals name="formeditor_issue_count">
+    <item quantity="one">tatizo %1$d</item>
+    <item quantity="other">matatizo %1$d</item>
+  </plurals>
+  <!-- Tooltip explaining the completion time estimate. %1$d: number of questions on the longest path. -->
+  <plurals name="formeditor_duration_estimate">
+    <item quantity="one">Makadirio ni takriban dakika 2 kwa kila swali kwenye njia ndefu zaidi (swali %1$d).</item>
+    <item quantity="other">Makadirio ni takriban dakika 2 kwa kila swali kwenye njia ndefu zaidi (maswali %1$d).</item>
+  </plurals>
+  <!-- Tooltip sentence appended to the estimate when the survey is long. -->
+  <string name="formeditor_duration_fatigue_warning">Tafiti zenye maswali zaidi ya 10 (~dakika 20) zinaweza kuwachosha wahojiwa.</string>
+  <!-- Estimated completion time badge. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes">~dak %1$d</string>
+  <!-- Estimated completion time badge for a long survey. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes_long">~dak %1$d • Utafiti mrefu</string>
+  <!-- Flow legend: solid arrow to the next screen. -->
+  <string name="formeditor_legend_always_next">Inayofuata kila wakati</string>
+  <!-- Flow legend: dashed arrow taken only when a condition holds. -->
+  <string name="formeditor_legend_if_condition_true">Ikiwa sharti ni kweli</string>
+  <!-- Badge on a repeated section in the flow. %1$s: section title. -->
+  <string name="formeditor_repeated_section_badge">Kifungu kinachorudiwa: %1$s</string>
+  <!-- Badge on a repeated section that has no title yet. -->
+  <string name="formeditor_repeated_section_badge_untitled">Kifungu kinachorudiwa: Hakina jina</string>
+  <!-- Badge on a section in the flow. %1$s: section title. -->
+  <string name="formeditor_section_badge">Kifungu: %1$s</string>
+  <!-- Badge on a section that has no title yet. -->
+  <string name="formeditor_section_badge_untitled">Kifungu: Hakina jina</string>
+  <!-- Badge: the section has display logic. -->
+  <string name="formeditor_conditional">Kwa masharti</string>
+  <!-- Repeat count expression of a repeated section. %1$s: expression. -->
+  <string name="formeditor_repeat_count_expression">Idadi: %1$s</string>
+  <!-- Ghost card title for appending a question to an untitled section. -->
+  <string name="formeditor_add_to_section">Ongeza kwenye kifungu</string>
+  <!-- Ghost card title for appending a question to a section. %1$s: section title. -->
+  <string name="formeditor_add_to_named_section">Ongeza kwenye %1$s</string>
+  <!-- Ghost card subtitle inside a section. -->
+  <string name="formeditor_append_question_in_section">Ongeza swali mwishoni mwa kifungu hiki</string>
+  <!-- Screen reader description of the ghost card inside an untitled section. -->
+  <string name="formeditor_add_question_inside_section">Ongeza swali ndani ya kifungu</string>
+  <!-- Screen reader description of the ghost card inside a section. %1$s: section title. -->
+  <string name="formeditor_add_question_inside_named_section">Ongeza swali ndani ya %1$s</string>
+  <!-- Condition pill on a flow edge. %1$s: operator (e.g. "is equal to"); %2$s: compared value. -->
+  <string name="formeditor_condition_pill">%1$s '%2$s'</string>
+  <!-- Icon description of the "+" button between flow cards. -->
+  <string name="formeditor_add_question_here">Ongeza swali hapa</string>
+  <!-- Screen reader description of the flow's start node. %1$s: launch button label. -->
+  <string name="formeditor_start_node_description">Mwanzo: %1$s</string>
+  <!-- Subtitle of the ghost card at the end of the flow. -->
+  <string name="formeditor_ghost_card_subtitle">Bofya ili kuongeza skrini kabla ya Kagua na uwasilishe</string>
+  <!-- Screen reader description of the ghost card at the end of the flow. -->
+  <string name="formeditor_add_question_at_end_of_flow">Ongeza swali mwishoni mwa mtiririko</string>
+  <!-- Icon description of the drag handle on a question card. -->
+  <string name="formeditor_drag_to_reorder">Buruta ili kupanga upya</string>
+  <!-- Caption of a required question's type. %1$s: question type (e.g. "Text"). -->
+  <string name="formeditor_question_type_required">%1$s • Inahitajika</string>
+  <!-- Back button in the mini screen preview. -->
+  <string name="formeditor_back">Rudi</string>
+  <!-- Placeholder of a text field in the mini screen preview. -->
+  <string name="formeditor_answer">Jibu</string>
+  <!-- Placeholder when a choice question's data table isn't chosen yet. -->
+  <string name="formeditor_choose_data_table">Chagua jedwali la data</string>
+  <!-- Placeholder when a choice question's map layer isn't chosen yet. -->
+  <string name="formeditor_choose_map_layer">Chagua tabaka la ramani</string>
+  <!-- Number of additional choices not shown in the mini preview. %1$d: count. -->
+  <string name="formeditor_more_choices">+%1$d zaidi</string>
+  <!-- Mini preview action to add a new entity. %1$s: feature noun (e.g. "plot"). -->
+  <string name="formeditor_add_new_feature">+ Ongeza %1$s mpya</string>
+  <!-- Mini preview action to add a new entity of unknown kind. -->
+  <string name="formeditor_add_new_item">+ Ongeza kitu kipya</string>
+  <!-- Mini preview caption: capture a point with GPS only. -->
+  <string name="formeditor_capture_point_gps">Nasa nukta (GPS)</string>
+  <!-- Mini preview caption: capture a point with GPS or by drawing on the map. -->
+  <string name="formeditor_capture_point_or_draw">Nasa nukta au chora kwenye ramani</string>
+  <!-- Mini preview caption: walk a line with GPS only. -->
+  <string name="formeditor_walk_line_gps">Tembea mstari (GPS)</string>
+  <!-- Mini preview caption: walk a line with GPS or draw it on the map. -->
+  <string name="formeditor_walk_line_or_draw">Tembea mstari au chora kwenye ramani</string>
+  <!-- Mini preview caption: walk a polygon with GPS only. -->
+  <string name="formeditor_walk_polygon_gps">Tembea poligoni (GPS)</string>
+  <!-- Mini preview caption: walk a polygon with GPS or draw it on the map. -->
+  <string name="formeditor_walk_polygon_or_draw">Tembea poligoni au chora kwenye ramani</string>
+  <!-- Mini preview caption: take a photo with the camera. -->
+  <string name="formeditor_take_photo">Piga picha</string>
+  <!-- Mini preview caption: take a photo or upload one. -->
+  <string name="formeditor_take_photo_or_upload">Piga picha au pakia</string>
+  <!-- Mini preview caption: record a video. -->
+  <string name="formeditor_record_video">Rekodi video</string>
+  <!-- Mini preview caption: record a video or upload one. -->
+  <string name="formeditor_record_video_or_upload">Rekodi video au pakia</string>
+  <!-- Mini preview caption: record audio. -->
+  <string name="formeditor_record_audio">Rekodi sauti</string>
+  <!-- Mini preview caption: record audio or upload a file. -->
+  <string name="formeditor_record_audio_or_upload">Rekodi sauti au pakia</string>
+  <!-- Mini preview caption of a note question (display-only text). -->
+  <string name="formeditor_read_only_note">Dokezo la kusoma tu</string>
+
+  <!-- Question and section properties, choices, display logic, and flow preview. -->
+  <!-- Question properties panel. -->
+  <!-- Panel title. %1$d: position of the selected question; %2$d: total number of questions. -->
+  <string name="formeditor_question_position">Swali %1$d kati ya %2$d</string>
+  <!-- Button that selects the previous question. -->
+  <string name="formeditor_previous">Iliyotangulia</string>
+  <!-- Icon description: opens the menu of actions for the selected question. -->
+  <string name="formeditor_question_options">Chaguo za swali</string>
+  <!-- Menu action that duplicates the selected question. -->
+  <string name="formeditor_duplicate">Nakili</string>
+  <string name="formeditor_question_type">Aina ya swali</string>
+  <!-- Field label for a question's optional hint text. -->
+  <string name="formeditor_hint_optional">Kidokezo (si lazima)</string>
+  <!-- Field label for a question's optional hint in a non-default language. %1$s: language name. -->
+  <string name="formeditor_hint_in_language_optional">Kidokezo (%1$s, si lazima)</string>
+  <!-- Toggle: the question must be answered. -->
+  <string name="formeditor_required">Inahitajika</string>
+  <!-- Explains why a note (read-only) question can't be made required. -->
+  <string name="formeditor_notes_cant_be_required">Madokezo hayawezi kuwa ya lazima.</string>
+  <string name="formeditor_required_description">Wakusanyaji data lazima wajibu kabla ya kuendelea.</string>
+
+  <!-- Section properties panel. -->
+  <!-- Section that collectors can fill in multiple times. -->
+  <string name="formeditor_repeated_section">Kifungu kinachorudiwa</string>
+  <!-- Panel title for a (non-repeated) group of questions. -->
+  <string name="formeditor_section">Kifungu</string>
+  <string name="formeditor_section_description">Kundi la maswali katika mtiririko wa fomu</string>
+  <string name="formeditor_delete_section">Futa kifungu</string>
+  <!-- Icon description: closes the properties panel. -->
+  <string name="formeditor_close_properties">Funga sifa</string>
+  <string name="formeditor_section_title">Jina la kifungu</string>
+  <!-- Section that is filled in once (not repeated). -->
+  <string name="formeditor_single_section">Kifungu kimoja</string>
+  <string name="formeditor_repeated_section_description">Wakusanyaji data wanaweza kuongeza maingizo mengi.</string>
+  <string name="formeditor_single_section_description">Maswali yamepangwa pamoja kwa mwonekano na kimantiki.</string>
+  <!-- Field label: how many times a repeated section repeats, as an optional XForms expression. -->
+  <string name="formeditor_repeat_count_optional">Idadi ya marudio (usemi, si lazima)</string>
+  <!-- Placeholder example for the repeat count field; keep the number and the path unchanged. -->
+  <string name="formeditor_repeat_count_placeholder">k.m. 3 au /data/number_of_plots</string>
+  <!-- Toggle: the section is shown only when a condition is met. -->
+  <string name="formeditor_section_condition">Sharti la kifungu</string>
+  <string name="formeditor_section_condition_on">Kifungu huonyeshwa tu sharti likitimizwa.</string>
+  <string name="formeditor_section_condition_off">Kifungu huonyeshwa kila wakati.</string>
+  <string name="formeditor_section_condition_no_sources">Ongeza swali kabla ya kifungu hiki ili kiwe na masharti.</string>
+  <string name="formeditor_move_section_up">Sogeza kifungu juu</string>
+  <string name="formeditor_move_section_down">Sogeza kifungu chini</string>
+  <string name="formeditor_no_section">Hakuna kifungu</string>
+  <string name="formeditor_in_conditional_section">Pia hufichwa wakati kifungu chake "%1$s" kimefichwa.</string>
+  <!-- Field label: the question the section condition depends on. -->
+  <string name="formeditor_depends_on_question">Kinategemea swali</string>
+  <!-- Shown when the question a condition refers to no longer exists. -->
+  <string name="formeditor_missing">(halipo)</string>
+  <!-- Dropdown placeholder when no value is selected for a condition. -->
+  <string name="formeditor_select_value">(chagua thamani)</string>
+
+  <!-- Number question settings. -->
+  <string name="formeditor_decimal_places">Nafasi za desimali</string>
+  <string name="formeditor_decimal_places_zero">0 kwa namba kamili.</string>
+  <!-- %1$d: maximum number of decimal places. -->
+  <plurals name="formeditor_decimal_places_up_to">
+    <item quantity="one">Hadi nafasi %1$d ya desimali.</item>
+    <item quantity="other">Hadi nafasi %1$d za desimali.</item>
+  </plurals>
+
+  <!-- Geometry question settings. -->
+  <!-- Field label: how a geometry (location) answer is captured. -->
+  <string name="formeditor_capture">Unasaji</string>
+  <!-- Capture mode of a polygon question: the collector walks the boundary while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_boundary">Tembea mpaka (GPS kila sekunde 5)</string>
+  <!-- Capture mode of a line question: the collector walks the path while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_path">Tembea njia (GPS kila sekunde 5)</string>
+  <string name="formeditor_capture_walk_boundary_description">Wakusanyaji data hutembea kuzunguka mzingo papo hapo; vipeo vya GPS hurekodiwa kila sekunde 5.</string>
+  <string name="formeditor_capture_walk_path_description">Wakusanyaji data hutembea njia papo hapo; vipeo vya GPS hurekodiwa kila sekunde 5.</string>
+  <!-- Field label: whether a photo/video/audio is captured or uploaded. -->
+  <string name="formeditor_media_source">Chanzo cha midia</string>
+
+  <!-- Advanced section. -->
+  <string name="formeditor_advanced_has_errors">Mipangilio ya kina ina hitilafu</string>
+  <string name="formeditor_collapse_advanced">Kunja mipangilio ya kina</string>
+  <string name="formeditor_expand_advanced">Panua mipangilio ya kina</string>
+  <!-- Field label: the question's data column name. -->
+  <string name="formeditor_name">Jina</string>
+  <!-- Help text for the question name field; keep the characters "_ . -" unchanged. -->
+  <string name="formeditor_name_supporting_text">Jina la safuwima ya data. Herufi, tarakimu, _ . -</string>
+
+  <!-- Validation rules. -->
+  <string name="formeditor_validation">Uthibitishaji</string>
+  <string name="formeditor_no_validation_rules">Hakuna kanuni za uthibitishaji kwa aina hii ya swali.</string>
+  <!-- Field label: minimum allowed number. -->
+  <string name="formeditor_minimum">Kiwango cha chini</string>
+  <!-- Field label: maximum allowed number. -->
+  <string name="formeditor_maximum">Kiwango cha juu</string>
+  <string name="formeditor_min_length">Urefu wa chini</string>
+  <string name="formeditor_max_length">Urefu wa juu</string>
+  <!-- Field label: text pattern (e.g. email, digits only) the answer must match. -->
+  <string name="formeditor_pattern">Ruwaza</string>
+  <string name="formeditor_regular_expression">Usemi wa kawaida (regex)</string>
+  <string name="formeditor_allowed_dates">Tarehe zinazoruhusiwa</string>
+  <!-- Allowed dates option: no restriction. -->
+  <string name="formeditor_any_date">Tarehe yoyote</string>
+  <string name="formeditor_minimum_selections">Idadi ya chini ya machaguo</string>
+  <string name="formeditor_maximum_selections">Idadi ya juu ya machaguo</string>
+  <!-- Field label: custom message shown when the answer fails validation. -->
+  <string name="formeditor_error_message_optional">Ujumbe wa hitilafu (si lazima)</string>
+  <string name="formeditor_earliest_date">Tarehe ya mapema zaidi</string>
+  <string name="formeditor_latest_date">Tarehe ya mwisho zaidi</string>
+  <!-- Placeholder for a date field with no date. -->
+  <string name="formeditor_not_set">Haijawekwa</string>
+  <!-- Icon description: clears a date field. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_clear_field">Futa %1$s</string>
+  <!-- Icon description: opens a date picker. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_pick_field">Chagua %1$s</string>
+  <!-- Date picker confirmation button. -->
+  <string name="formeditor_ok">Sawa</string>
+
+  <!-- Choices editor. -->
+  <!-- Heading and field label: the answer choices of a select question, and where they come from. -->
+  <string name="formeditor_choices">Machaguo</string>
+  <!-- Visual style of choices: plain text. -->
+  <string name="formeditor_visual_text_only">Maandishi pekee</string>
+  <!-- Visual style of choices: each choice has a color. -->
+  <string name="formeditor_visual_colors">Rangi</string>
+  <!-- Visual style of choices: each choice has an image. -->
+  <string name="formeditor_visual_images">Picha</string>
+  <!-- Button that imports choices from a file; keep the file extensions unchanged. -->
+  <string name="formeditor_import_choices_file">Leta (.csv / .txt)</string>
+  <!-- Title of the dialog shown after picking a choices file. -->
+  <string name="formeditor_import_choices">Leta machaguo</string>
+  <!-- %1$d: number of choices found in the file; %2$d: number of current choices. -->
+  <plurals name="formeditor_import_choices_message">
+    <item quantity="one">Chaguo %1$d limepatikana kwenye faili. Ungependa kubadilisha machaguo yako ya sasa (%2$d) au kuyaongeza mwishoni?</item>
+    <item quantity="other">Machaguo %1$d yamepatikana kwenye faili. Ungependa kubadilisha machaguo yako ya sasa (%2$d) au kuyaongeza mwishoni?</item>
+  </plurals>
+  <!-- Button: replace the current choices with the imported ones. -->
+  <string name="formeditor_replace">Badilisha</string>
+  <!-- Button: add the imported choices after the current ones. -->
+  <string name="formeditor_append">Ongeza mwishoni</string>
+  <!-- Field label: how choices are displayed (text, colors, or images). -->
+  <string name="formeditor_visual_style">Mtindo wa mwonekano</string>
+  <!-- Field label: an earlier question whose answer filters this question's choices. -->
+  <string name="formeditor_cascading_filter">Kichujio cha mfululizo (swali kuu)</string>
+  <!-- Label before chips that filter the choice list by parent choice. -->
+  <string name="formeditor_filter_label">Chuja:</string>
+  <!-- Filter chip that shows all choices. -->
+  <string name="formeditor_filter_all">Yote</string>
+  <!-- Error when a choice image is too large. %1$d: maximum size in kilobytes. -->
+  <string name="formeditor_choice_image_too_large">Chagua faili ya picha iliyo chini ya KB %1$d.</string>
+  <!-- Field label: the parent question's choice this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_choice">Chaguo kuu (%1$s)</string>
+  <!-- Parent choice option meaning the choice is shown regardless of the parent answer. -->
+  <string name="formeditor_any_unfiltered">Lolote (bila kuchujwa)</string>
+  <!-- Field label: the parent question's value this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_value">Thamani kuu (%1$s)</string>
+  <string name="formeditor_remove_choice">Ondoa chaguo</string>
+  <string name="formeditor_add_choice">Ongeza chaguo</string>
+  <string name="formeditor_no_map_layers_available">Bado hakuna matabaka ya ramani katika utafiti huu.</string>
+  <string name="formeditor_no_data_tables_available">Bado hakuna majedwali ya data katika utafiti huu.</string>
+  <!-- Button that creates a new map layer for the question's choices. -->
+  <string name="formeditor_new_map_layer">Tabaka jipya la ramani</string>
+  <!-- Button that creates a new data table for the question's choices. -->
+  <string name="formeditor_new_data_table">Jedwali jipya la data</string>
+  <!-- %1$d: number of features/rows; %2$s: feature noun matching the count (e.g. "plot"/"plots"); %3$s: map layer or data table name. -->
+  <plurals name="formeditor_collectors_choose_from">
+    <item quantity="one">Wakusanyaji data huchagua kutoka %2$s %1$d katika %3$s.</item>
+    <item quantity="other">Wakusanyaji data huchagua kutoka %2$s %1$d katika %3$s.</item>
+  </plurals>
+  <!-- %1$s: identifier of an external choice list. -->
+  <string name="formeditor_choices_from_external_list">Machaguo yanapakiwa kutoka orodha ya nje "%1$s".</string>
+  <string name="formeditor_sample_plots_cant_be_added">Viwanja vya sampuli huzalishwa kutoka muundo wa sampuli na haviwezi kuongezwa na wakusanyaji data.</string>
+  <!-- Toggle. %1$s: plural feature noun (e.g. "plots", "trees"). -->
+  <string name="formeditor_allow_add_new">Ruhusu wakusanyaji data kuongeza %1$s mpya</string>
+  <!-- %1$s: form title; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_uses_form_to_add_new">Hutumia %1$s kuongeza %2$s mpya.</string>
+  <!-- %1$s: singular feature noun (e.g. "plot"). -->
+  <string name="formeditor_collectors_can_add_new">Wakusanyaji data wanaweza kuongeza %1$s mpya wanapochagua.</string>
+  <!-- Chip that opens the linked form. -->
+  <string name="formeditor_open_form">Fungua fomu</string>
+  <!-- %1$s: map layer or data table name; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_dataset_has_no_form">%1$s bado haina fomu ya kuongeza %2$s mpya.</string>
+  <!-- Button. %1$s: map layer or data table name. -->
+  <string name="formeditor_create_form_for">Unda fomu ya %1$s</string>
+  <!-- Accessibility description of the marker beside a text-only choice. -->
+  <string name="formeditor_text_choice">Chaguo la maandishi</string>
+  <!-- Chip text for a choice linked to a standard code that isn't in the code list. %1$s: code. -->
+  <string name="formeditor_code_value">Msimbo: %1$s</string>
+  <string name="formeditor_link_to_standard_choice">Unganisha na chaguo sanifu…</string>
+  <!-- Menu option: the choice isn't linked to a standard choice. -->
+  <string name="formeditor_not_linked">Halijaunganishwa</string>
+  <!-- Icon description. %1$s: color name or hex code. -->
+  <string name="formeditor_choice_color_named">Rangi ya chaguo: %1$s</string>
+  <!-- Icon description for a choice with no color. -->
+  <string name="formeditor_choice_color_none">Rangi ya chaguo: hakuna</string>
+  <!-- Heading of the choice color palette. -->
+  <string name="formeditor_choice_color">Rangi ya chaguo</string>
+  <string name="formeditor_add_choice_image">Ongeza picha ya chaguo</string>
+  <string name="formeditor_choice_image">Picha ya chaguo</string>
+  <string name="formeditor_replace_image">Badilisha picha</string>
+  <string name="formeditor_remove_image">Ondoa picha</string>
+
+  <!-- Display logic editor. -->
+  <string name="formeditor_display_logic">Mantiki ya kuonyesha</string>
+  <!-- Segmented button: the question is always shown. -->
+  <string name="formeditor_always_show">Onyesha kila wakati</string>
+  <!-- Segmented button: the question is shown only if a condition is met. -->
+  <string name="formeditor_show_only_if">Onyesha tu ikiwa…</string>
+  <string name="formeditor_first_screen_in_form">Skrini ya kwanza katika fomu</string>
+  <string name="formeditor_first_screen_display_logic_notice">Mantiki ya kuonyesha inaweza kutegemea maswali yaliyotangulia. Sogeza swali hili chini au chagua swali la baadaye ili kuweka mwonekano wa masharti.</string>
+  <string name="formeditor_select_question_2">Chagua Swali 2 →</string>
+  <string name="formeditor_move_question_down">Sogeza swali chini</string>
+  <string name="formeditor_add_question_2">Ongeza Swali 2</string>
+  <!-- Shown when the question a display-logic rule refers to no longer exists. -->
+  <string name="formeditor_missing_question">(swali halipo)</string>
+
+  <!-- Flow preview side panel. -->
+  <string name="formeditor_flow_preview">Onyesho la kukagua mtiririko</string>
+  <string name="formeditor_close_preview">Funga onyesho la kukagua</string>
+  <!-- Field label: language used in the preview. -->
+  <string name="formeditor_language">Lugha</string>
+  <!-- %1$s: technical error message. -->
+  <string name="formeditor_preview_load_error">XForms iliyozalishwa haikuweza kupakiwa:\n%1$s</string>
+  <string name="formeditor_preview_web_description">Maswali husasishwa papo hapo unapojibu: kadi za masharti huonekana au kutoweka kulingana na mantiki ya kuonyesha.</string>
+  <string name="formeditor_preview_mobile_description">Skrini husasishwa papo hapo unapojibu: maswali ya masharti huonekana au kutoweka kulingana na mantiki ya kuonyesha.</string>
+  <string name="formeditor_submission_passed_validation">Wasilisho limepita uthibitishaji.</string>
+  <!-- Heading of the list of screens the collector is going through. -->
+  <string name="formeditor_current_path">Njia ya sasa</string>
+  <!-- Button that restarts the form preview. -->
+  <string name="formeditor_restart">Anza upya</string>
+  <string name="formeditor_back_to_editor">Rudi kwenye kihariri</string>
+
+  <!-- Form properties: availability, where submissions are saved, and status markers. -->
+  <!-- Form properties panel (form-level settings, availability, and where submissions are saved). -->
+  <string name="formeditor_form_properties">Sifa za fomu</string>
+  <!-- Part of the form properties subtitle. %1$d: number of questions in the form. -->
+  <plurals name="formeditor_form_properties_question_count">
+    <item quantity="one">swali %1$d</item>
+    <item quantity="other">maswali %1$d</item>
+  </plurals>
+  <!-- Part of the form properties subtitle. %1$d: number of distinct paths through the form's display logic. -->
+  <plurals name="formeditor_form_properties_path_count">
+    <item quantity="one">njia %1$d inayowezekana</item>
+    <item quantity="other">njia %1$d zinazowezekana</item>
+  </plurals>
+  <!-- Form properties subtitle. %1$s: question count (e.g. "3 questions"); %2$s: path count (e.g. "4 potential paths"). -->
+  <string name="formeditor_form_properties_counts">%1$s • %2$s</string>
+  <string name="formeditor_form_title">Jina la fomu</string>
+  <!-- Field label: text of the buttons that start data collection for this form. -->
+  <string name="formeditor_button_label">Lebo ya kitufe</string>
+  <string name="formeditor_button_label_help">Huonyeshwa kwenye vitufe vinavyoanzisha ukusanyaji wa data kwa fomu hii. Chaguomsingi ni jina la fomu.</string>
+  <string name="formeditor_form_no_questions_yet">Fomu hii bado haina maswali. Tumia "+" kwenye turubai kuongeza swali.</string>
+  <!-- Section heading: on which platforms (mobile app, web dashboard) collectors can open the form. -->
+  <string name="formeditor_availability">Upatikanaji</string>
+  <!-- Section heading: what happens to data when the form is submitted. -->
+  <string name="formeditor_submissions">Mawasilisho</string>
+  <!-- %1$s: name of the map layer or data table the form's submissions are added to. -->
+  <string name="formeditor_linked_to_dataset">Imeunganishwa na %1$s</string>
+  <string name="formeditor_linked_map_layer_description">Kila wasilisho huongeza kipengele kipya cha ramani kwenye tabaka hili la ramani. Sifa za muundo husawazishwa na maswali ya fomu.</string>
+  <string name="formeditor_linked_data_table_description">Kila wasilisho huongeza safu mpya kwenye jedwali hili la data. Sifa za muundo husawazishwa na maswali ya fomu.</string>
+  <string name="formeditor_edit_map_layer">Hariri tabaka la ramani</string>
+  <string name="formeditor_edit_data_table">Hariri jedwali la data</string>
+  <string name="formeditor_unlink_map_layer">Tenganisha tabaka la ramani</string>
+  <string name="formeditor_unlink_data_table">Tenganisha jedwali la data</string>
+  <string name="formeditor_create_map_layer_for_form">Unda tabaka la ramani kwa fomu</string>
+  <string name="formeditor_create_data_table_for_form">Unda jedwali la data kwa fomu</string>
+  <!-- Icon description: opens a map layer or data table. %1$s: its name. -->
+  <string name="formeditor_open_dataset">Fungua %1$s</string>
+  <string name="formeditor_available_on_mobile">Inapatikana kwenye simu</string>
+  <string name="formeditor_available_on_web">Inapatikana kwenye wavuti</string>
+  <string name="formeditor_availability_mobile_on">Wakusanyaji data wanaweza kufungua fomu hii kwenye programu ya simu.</string>
+  <string name="formeditor_availability_mobile_off">Imefichwa kwa wakusanyaji data kwenye programu ya simu.</string>
+  <string name="formeditor_availability_web_on">Wakusanyaji data wanaweza kufungua fomu hii kwenye dashibodi ya wavuti.</string>
+  <string name="formeditor_availability_web_off">Imefichwa kwa wakusanyaji data kwenye dashibodi ya wavuti.</string>
+  <string name="formeditor_availability_none_warning">Wakusanyaji data hawawezi kufungua fomu hii popote hadi mojawapo ya hizi iwashwe.</string>
+  <!-- Error: some location questions can only use GPS, which the web dashboard can't capture. %1$d: number of such questions; %2$s: name of the capture option that also allows drawing on the map (e.g. "GPS or map"). -->
+  <plurals name="formeditor_web_incompatible_geometry_summary">
+    <item quantity="one">Swali %1$d la jiometri ni la GPS pekee na haliwezi kujibiwa kwenye wavuti. Libadilishe kuwa "%2$s".</item>
+    <item quantity="other">Maswali %1$d ya jiometri ni ya GPS pekee na hayawezi kujibiwa kwenye wavuti. Yabadilishe kuwa "%2$s".</item>
+  </plurals>
+  <!-- Accessibility action label for expanding a collapsible section. -->
+  <string name="formeditor_expand_section">Panua</string>
+  <!-- Accessibility action label for collapsing a collapsible section. -->
+  <string name="formeditor_collapse_section">Kunja</string>
+  <string name="formeditor_when_form_submitted">Fomu inapowasilishwa</string>
+  <!-- %1$s: name of the map layer or data table submissions are added to. -->
+  <string name="formeditor_save_to_create_linked_description">Kila wasilisho huongezwa kwenye %1$s.</string>
+  <string name="formeditor_save_to_create_map_layer_description">Tabaka la ramani litaundwa kwa fomu hii.</string>
+  <string name="formeditor_save_to_create_data_table_description">Jedwali la data litaundwa kwa fomu hii.</string>
+  <string name="formeditor_save_to_update_unavailable">Ongeza tabaka lingine la ramani au jedwali la data kwenye utafiti ili kutumia chaguo hili.</string>
+  <string name="formeditor_save_to_update_description">Kila wasilisho hubadilisha sifa za kipengele kilichopo tayari.</string>
+  <string name="formeditor_submissions_always_kept">Mawasilisho huhifadhiwa kila wakati, kwa hivyo kila badiliko lina rekodi ya aliyelifanya na lini.</string>
+  <string name="formeditor_update_target_label">Tabaka la ramani au jedwali la data la kusasisha</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_map_layer">Tabaka la ramani</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_data_table">Jedwali la data</string>
+  <!-- Section heading, followed by the ways to identify which map feature a submission updates. -->
+  <string name="formeditor_find_map_feature_by">Tafuta kipengele cha ramani kwa</string>
+  <!-- Section heading, followed by the ways to identify which table row a submission updates. -->
+  <string name="formeditor_find_table_row_by">Tafuta safu ya jedwali kwa</string>
+  <string name="formeditor_selected_on_map">Kilichochaguliwa kwenye ramani</string>
+  <string name="formeditor_picked_from_list">Kilichochaguliwa kutoka orodha</string>
+  <!-- The answer a collector gives to a question (used as an option for identifying features and in status rules). -->
+  <string name="formeditor_question_answer">Jibu la swali</string>
+  <string name="formeditor_find_by_selected_map_feature_help">Wakusanyaji data hufungua fomu kutoka kipengele kilicho kwenye ramani. Fomu huanza na skrini ya "Kipengele cha ramani cha kusasisha" iliyojazwa kiotomatiki, kwa hivyo kipengele kinaweza pia kuchaguliwa kutoka orodha.</string>
+  <!-- %1$s: name of the data table. -->
+  <string name="formeditor_find_by_selected_table_row_help">Fomu huanza na skrini ya "Safu ya kusasisha" inayoorodhesha safu za %1$s.</string>
+  <!-- Field label: the dataset property the question's answer is matched against. -->
+  <string name="formeditor_matches_property">Inalingana na sifa</string>
+  <string name="formeditor_fields_to_update">Sehemu za kusasisha</string>
+  <string name="formeditor_fields_to_update_empty">Ongeza maswali ili kuchagua sifa watakazosasisha.</string>
+  <!-- %1$s: property name. -->
+  <string name="formeditor_property_already_updated">Swali lingine tayari linasasisha "%1$s".</string>
+  <!-- Field label: which property a question's answer updates. -->
+  <string name="formeditor_updates">Husasisha</string>
+  <!-- Dropdown option: the question's answer doesn't update any property. -->
+  <string name="formeditor_dont_update">Usisasishe</string>
+  <!-- Dropdown option: the question's answer updates the feature's geometry. -->
+  <string name="formeditor_geometry_location">Jiometri (mahali)</string>
+  <string name="formeditor_status_marker">Alama ya hali</string>
+  <string name="formeditor_set_status_marker">Weka alama ya hali</string>
+  <string name="formeditor_status_marker_on_map_feature">Huweka ishara, rangi na lebo ya alama ya hali ya kipengele cha ramani kinapowasilishwa.</string>
+  <string name="formeditor_status_marker_on_table_row">Huweka ishara, rangi na lebo ya alama ya hali ya safu ya jedwali inapowasilishwa.</string>
+  <string name="formeditor_status_marker_off_map_features">Imezimwa kwa chaguomsingi. Iwashe ili kuweka alama kwenye vipengele vya ramani (kwa mfano, ✓ Kimefanyiwa utafiti au ○ Inasubiri).</string>
+  <string name="formeditor_status_marker_off_table_rows">Imezimwa kwa chaguomsingi. Iwashe ili kuweka alama kwenye safu za jedwali (kwa mfano, ✓ Imefanyiwa utafiti au ○ Inasubiri).</string>
+  <string name="formeditor_status_rules_help">Kanuni hukaguliwa kwa mpangilio. Kanuni ya kwanza inayolingana huweka alama ya hali na lebo.</string>
+  <string name="formeditor_add_status_rule">Ongeza kanuni ya hali</string>
+  <!-- Heading of the fallback status used when no status rule matches. -->
+  <string name="formeditor_otherwise">Vinginevyo</string>
+  <string name="formeditor_otherwise_help">Hali chaguomsingi wakati hakuna kanuni iliyo hapo juu inayolingana.</string>
+  <string name="formeditor_default_status_color">Rangi chaguomsingi ya hali</string>
+  <!-- Status rule subject: a property of the data table row. -->
+  <string name="formeditor_row_property">Sifa ya safu</string>
+  <!-- Status rule subject: a property of the map feature. -->
+  <string name="formeditor_feature_property">Sifa ya kipengele</string>
+  <!-- Status rule subject: number of submissions for the feature. -->
+  <string name="formeditor_submission_count">Idadi ya mawasilisho</string>
+  <!-- %1$d: status rule number. -->
+  <string name="formeditor_status_rule_title">Kanuni %1$d</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_up">Sogeza kanuni ya hali %1$d juu</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_down">Sogeza kanuni ya hali %1$d chini</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_remove_status_rule">Ondoa kanuni ya hali %1$d</string>
+  <!-- Field label: what a status rule's condition is about (submission count, question answer, property). -->
+  <string name="formeditor_status_rule_when">Wakati</string>
+  <!-- Field label: minimum number of submissions for a status rule to match. -->
+  <string name="formeditor_at_least_submissions">Angalau (mawasilisho)</string>
+  <string name="formeditor_matches_when_submitted">Inalingana fomu hii inapowasilishwa.</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_feature">
+    <item quantity="one">Inalingana kipengele kikiwa na angalau wasilisho %1$d.</item>
+    <item quantity="other">Inalingana kipengele kikiwa na angalau mawasilisho %1$d.</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_map_feature">
+    <item quantity="one">Inalingana kipengele cha ramani kikiwa na angalau wasilisho %1$d.</item>
+    <item quantity="other">Inalingana kipengele cha ramani kikiwa na angalau mawasilisho %1$d.</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_table_row">
+    <item quantity="one">Inalingana safu ya jedwali ikiwa na angalau wasilisho %1$d.</item>
+    <item quantity="other">Inalingana safu ya jedwali ikiwa na angalau mawasilisho %1$d.</item>
+  </plurals>
+  <!-- Button description for a status rule's color picker. %1$d: status rule number. -->
+  <string name="formeditor_status_color_for_rule">Rangi ya hali ya kanuni %1$d</string>
+  <!-- Field label: status marker symbol (e.g. ✓, ○). -->
+  <string name="formeditor_symbol">Ishara</string>
+  <string name="formeditor_status_label">Lebo ya hali</string>
+  <string name="formeditor_marker_color">Rangi ya alama</string>
+  <!-- Placeholder text in a status pill when the designer hasn't entered a status label. -->
+  <string name="formeditor_status_placeholder">Hali</string>
+  <string name="formeditor_submission_updates_unchosen">Kila wasilisho husasisha kipengele kilichopo. Chagua kipi katika Mipangilio ya kina.</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_updates_map_feature_in">Kila wasilisho husasisha kipengele cha ramani kilichopo katika:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_updates_table_row_in">Kila wasilisho husasisha safu ya jedwali iliyopo katika:</string>
+  <string name="formeditor_submission_saved_without_dataset">Mawasilisho huhifadhiwa bila kuongeza kipengele cha ramani au safu ya jedwali.</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_adds_map_feature_to">Kila wasilisho huongeza kipengele kipya cha ramani kwenye:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_adds_table_row_to">Kila wasilisho huongeza safu mpya ya jedwali kwenye:</string>
+  <!-- Summary of the save-to setting. %1$s: update option label (e.g. "Update existing map features"); %2$s: map layer or data table name. -->
+  <string name="formeditor_save_to_summary_update_in">%1$s katika %2$s</string>
+  <!-- Summary of the save-to setting plus status markers. %1$s: save-to summary; %2$s: status badges separated by " / " (e.g. "✓ Surveyed / ○ Pending"). -->
+  <string name="formeditor_save_to_summary_with_status">%1$s • Hali: %2$s</string>
+
+  <!-- Web preview, Save as template, and standard-field (concept) linking. -->
+  <!-- Web preview: platform banners. -->
+  <!-- Short name of the mobile platform, used inside sentences. -->
+  <string name="formeditor_preview_target_mobile_sentence">programu ya simu</string>
+  <!-- Short name of the web platform, used inside sentences. -->
+  <string name="formeditor_preview_target_web_sentence">dashibodi ya wavuti</string>
+  <!-- Banner title when the form is switched off for the mobile app. -->
+  <string name="formeditor_not_available_on_mobile">Haipatikani kwenye simu</string>
+  <!-- Banner title when the form is switched off for the web dashboard. -->
+  <string name="formeditor_not_available_on_web">Haipatikani kwenye wavuti</string>
+  <string name="formeditor_not_available_on_mobile_body">Wakusanyaji data hawataiona fomu hii kwenye programu ya simu. Iwezeshe ili kuitoa huko (pia katika Mipangilio ya fomu).</string>
+  <string name="formeditor_not_available_on_web_body">Wakusanyaji data hawataiona fomu hii kwenye dashibodi ya wavuti. Iwezeshe ili kuitoa huko (pia katika Mipangilio ya fomu).</string>
+  <!-- Banner action that turns the form on for the previewed platform. -->
+  <string name="formeditor_enable_on_platform">Wezesha</string>
+  <string name="formeditor_cant_be_used_on_web_title">Bado haiwezi kutumika kwenye wavuti</string>
+  <!-- %1$s: sentence summarizing how many geometry questions are GPS only. -->
+  <string name="formeditor_cant_be_used_on_web_body">Fomu hii haiwezi kutumika kwenye wavuti hadi maswali yake ya GPS pekee yaruhusu kuchora kwenye ramani. %1$s</string>
+
+  <!-- Web preview: wireframe and mock dashboard. -->
+  <!-- Wireframe summary of a whole-number question's input. -->
+  <string name="formeditor_integer_input">Ingizo la namba kamili</string>
+  <!-- Wireframe summary of a decimal question's input. %1$d: number of decimal places ("dp"). -->
+  <string name="formeditor_decimal_input">Desimali (nafasi %1$d)</string>
+  <!-- Accessibility label of the ghost card that adds a question at the end of the web form. -->
+  <string name="formeditor_add_question_at_end_of_web_form">Ongeza swali mwishoni mwa fomu ya wavuti</string>
+  <!-- Progress line in the web form wireframe footer. %1$d: number of questions. -->
+  <string name="formeditor_answered_progress">0 kati ya %1$d yamejibiwa</string>
+  <!-- Fallback name of the dataset shown in the mock web dashboard. -->
+  <string name="formeditor_sample_plots">Viwanja vya sampuli</string>
+  <!-- Placeholder of the mock feature search box in the web preview. -->
+  <string name="formeditor_search_features">Tafuta vipengele…</string>
+  <!-- Title of the web preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title_web">Onyesho la kukagua • %1$s • Wavuti</string>
+  <!-- Web preview button that zooms the map back out. -->
+  <string name="formeditor_reset_map_view">Rejesha mwonekano wa ramani</string>
+
+  <!-- Save as template. -->
+  <string name="formeditor_save_template_needs_organization">Hamishia utafiti huu kwenye shirika ili kuhifadhi fomu zake kama violezo.</string>
+  <!-- %1$s: organization name. -->
+  <string name="formeditor_save_template_managers_only">Ni Wasimamizi wa %1$s pekee wanaoweza kuhifadhi violezo.</string>
+  <string name="formeditor_save_template_managers_only_this_organization">Ni Wasimamizi wa shirika hili pekee wanaoweza kuhifadhi violezo.</string>
+  <string name="formeditor_template_saved_title">Kiolezo kimehifadhiwa</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_global">"%1$s" kiko kwenye maktaba ya jumla. Kinapatikana katika "Kutoka kiolezo…" unapoongeza fomu, na kimeorodheshwa kwenye kichupo cha Violezo cha shirika.</string>
+  <!-- %1$s: template name. %2$s: organization name. -->
+  <string name="formeditor_template_saved_organization">"%1$s" kiko kwenye violezo vya %2$s. Kinapatikana katika "Kutoka kiolezo…" unapoongeza fomu, na kimeorodheshwa kwenye kichupo cha Violezo cha shirika.</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_your_organization">"%1$s" kiko kwenye violezo vya shirika lako. Kinapatikana katika "Kutoka kiolezo…" unapoongeza fomu, na kimeorodheshwa kwenye kichupo cha Violezo cha shirika.</string>
+  <!-- Button that closes a confirmation dialog. -->
+  <string name="formeditor_done">Imekamilika</string>
+  <string name="formeditor_save_as_template_title">Hifadhi kama kiolezo</string>
+  <string name="formeditor_save_as_template_intro">Hifadhi nakala ya fomu hii ili iweze kuongezwa kwenye tafiti nyingine. Viungo vyake vya sehemu sanifu na misimbo ya machaguo huhifadhiwa; mahali inapohifadhi data hapahifadhiwi.</string>
+  <string name="formeditor_template_name">Jina la kiolezo</string>
+  <string name="formeditor_template_description_optional">Maelezo (si lazima)</string>
+  <!-- Template destination option. %1$s: organization name. -->
+  <string name="formeditor_template_destination_organization">Violezo vya %1$s</string>
+  <!-- Template destination option when the organization name is unknown. -->
+  <string name="formeditor_template_destination_your_organization">violezo vya shirika lako</string>
+  <string name="formeditor_template_destination_global">Maktaba ya jumla (mashirika yote)</string>
+  <!-- Template summary. %1$d: number of questions. -->
+  <plurals name="formeditor_template_question_summary">
+    <item quantity="one">Swali %1$d.</item>
+    <item quantity="other">Maswali %1$d.</item>
+  </plurals>
+  <!-- Template summary. %1$d: number of questions. %2$d: number of them linked to standard fields. -->
+  <plurals name="formeditor_template_question_summary_linked">
+    <item quantity="one">Swali %1$d, %2$d limeunganishwa na sehemu sanifu.</item>
+    <item quantity="other">Maswali %1$d, %2$d yameunganishwa na sehemu sanifu.</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. %2$s: organization name. -->
+  <plurals name="formeditor_template_dropped_links">
+    <item quantity="one">Violezo vya jumla vinaweza kutumia sehemu sanifu za jumla pekee, kwa hivyo kiungo %1$d cha sehemu za %2$s kitaondolewa kwenye kiolezo.</item>
+    <item quantity="other">Violezo vya jumla vinaweza kutumia sehemu sanifu za jumla pekee, kwa hivyo viungo %1$d vya sehemu za %2$s vitaondolewa kwenye kiolezo.</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. -->
+  <plurals name="formeditor_template_dropped_links_your_organization">
+    <item quantity="one">Violezo vya jumla vinaweza kutumia sehemu sanifu za jumla pekee, kwa hivyo kiungo %1$d cha sehemu za shirika lako kitaondolewa kwenye kiolezo.</item>
+    <item quantity="other">Violezo vya jumla vinaweza kutumia sehemu sanifu za jumla pekee, kwa hivyo viungo %1$d vya sehemu za shirika lako vitaondolewa kwenye kiolezo.</item>
+  </plurals>
+  <string name="formeditor_save_template">Hifadhi kiolezo</string>
+
+  <!-- Concept (standard field) linking. -->
+  <!-- Field label for the text of a note question. -->
+  <string name="formeditor_note_text">Maandishi ya dokezo</string>
+  <!-- Field label for the text of a note question in a non-default language. %1$s: language name. -->
+  <string name="formeditor_note_text_in_language">Maandishi ya dokezo (%1$s)</string>
+  <!-- Heading of the standard-field suggestions under the Label field. -->
+  <string name="formeditor_standard_fields">Sehemu sanifu</string>
+  <!-- %1$s: question label. %2$s: organization name. -->
+  <string name="formeditor_add_label_to_dictionary">Ongeza "%1$s" kwenye kamusi ya %2$s</string>
+  <!-- %1$s: question label. Used when the organization name is unknown. -->
+  <string name="formeditor_add_label_to_organization_dictionary">Ongeza "%1$s" kwenye kamusi ya shirika</string>
+  <!-- Suggestion detail for a standard field of an incompatible type. %1$s: data type (e.g. "Number"). -->
+  <string name="formeditor_concept_type_answers">Majibu ya %1$s</string>
+  <string name="formeditor_unlink_standard_field">Tenganisha sehemu sanifu</string>
+  <!-- %1$s: the standard field's label. -->
+  <string name="formeditor_use_standard_label">Tumia lebo sanifu "%1$s"</string>
+  <!-- %1$s: standard field ID. -->
+  <string name="formeditor_concept_not_in_dictionary">%1$s haipo kwenye kamusi ya utafiti huu.</string>
+  <!-- %1$s: unit of measure. -->
+  <string name="formeditor_concept_unit">Kipimo: %1$s</string>
+  <!-- %1$s: comma-separated list of references. -->
+  <string name="formeditor_concept_reference">Marejeleo: %1$s</string>
+  <!-- %1$s: standard field ID. %2$s: version. -->
+  <string name="formeditor_concept_id_version">%1$s · toleo %2$s</string>
+  <!-- Button that opens the standard field search dialog. -->
+  <string name="formeditor_link_to_standard_field_button">Unganisha na sehemu sanifu…</string>
+  <string name="formeditor_link_to_standard_field_title">Unganisha na sehemu sanifu</string>
+  <string name="formeditor_search_the_dictionary">Tafuta kwenye kamusi</string>
+  <string name="formeditor_no_dictionary_yet">Utafiti huu bado hauna kamusi.</string>
+  <string name="formeditor_no_standard_fields_available">Bado hakuna sehemu sanifu zinazopatikana katika kamusi hii.</string>
+  <!-- %1$s: search text. -->
+  <string name="formeditor_no_standard_fields_match">Hakuna sehemu sanifu zinazolingana na "%1$s".</string>
+  <!-- Field label: the standard code-list value a choice maps to. -->
+  <string name="formeditor_standard_value">Thamani sanifu</string>
+  <!-- A choice not mapped to any standard code-list value. -->
+  <string name="formeditor_not_matched">Haijalinganishwa</string>
+  <string name="formeditor_delete_question">Futa swali</string>
+  <string name="formeditor_delete_question_title">Ungependa kufuta swali?</string>
+  <string name="formeditor_delete_question_message">Swali hili litawekewa alama kuwa limefutwa. Watumiaji hawataliona tena mara tu vifaa vyao vitakaposawazishwa, na data yoyote ambayo tayari imekusanywa itahifadhiwa.</string>
+  <string name="formeditor_delete_linked_question_title">Ungependa kufuta swali lililounganishwa?</string>
+  <!-- %1$s: sentence saying what the question's answers feed. -->
+  <string name="formeditor_delete_linked_question_message">%1$s Kulifuta kutaondoa majibu haya kwenye ripoti.</string>
+  <!-- %1$d: number of imported fields matching standard definitions. -->
+  <plurals name="formeditor_import_matches_title">
+    <item quantity="one">Tumepata sehemu %1$d inayolingana na fasili sanifu</item>
+    <item quantity="other">Tumepata sehemu %1$d zinazolingana na fasili sanifu</item>
+  </plurals>
+  <!-- Icon description: closes a card. -->
+  <string name="formeditor_dismiss">Ondoa</string>
+  <string name="formeditor_linked_fields_explainer">Sehemu zilizounganishwa zinaweza kulinganishwa na kujumlishwa katika tafiti mbalimbali.</string>
+  <string name="formeditor_link_all">Unganisha zote</string>
+  <!-- %1$d: number of selected matches. -->
+  <string name="formeditor_link_selected">Unganisha %1$d zilizochaguliwa</string>
+  <string name="formeditor_not_now">Si sasa</string>
+  <string name="formeditor_saving_to_global_library">Inahifadhi kwenye Maktaba ya jumla (mashirika yote)</string>
+  <!-- Banner title when the template a form was built from has changed. %1$s: template title. -->
+  <string name="formeditor_template_update_available">Sasisho la kiolezo linapatikana: %1$s</string>
+  <!-- Banner body. %1$d: number of suggested additions; %2$d: number of suggested removals. -->
+  <string name="formeditor_template_update_summary">Kagua nyongeza %1$d zilizopendekezwa na uondoaji %2$d kabla ya kutumia kwenye fomu hii.</string>
+  <!-- Button that opens the template update review dialog. -->
+  <string name="formeditor_template_review_changes">Kagua mabadiliko</string>
+  <!-- Template update review dialog title. %1$s: template title. -->
+  <string name="formeditor_template_review_title">Kagua masasisho ya kiolezo: %1$s</string>
+  <!-- Template update review dialog explanation. -->
+  <string name="formeditor_template_review_description">Chagua masasisho ya kanuni au ya kiolezo ya kutumia kwenye fomu yako. Vipengee visivyochaguliwa havitabadilika.</string>
+  <!-- Template update review dialog: heading above questions the template added. -->
+  <string name="formeditor_template_suggested_additions">Nyongeza zilizopendekezwa</string>
+  <!-- Template update review dialog: heading above questions the template no longer has. -->
+  <string name="formeditor_template_removed_questions">Maswali ambayo hayapo tena kwenye kiolezo</string>
+  <!-- Template update review dialog: checkbox label to remove a question. %1$s: question label. -->
+  <string name="formeditor_template_remove_question">Ondoa: %1$s</string>
+  <!-- Template update review dialog: applies the checked additions and removals. -->
+  <string name="formeditor_template_apply_selected">Tumia vilivyochaguliwa</string>
+  <!-- Menu action that duplicates the selected question together with the questions that depend on it. -->
+  <string name="formeditor_duplicate_branch">Nakili tawi</string>
+  <!-- Summary of a question's validation rules. %1$s = one or more conditions, e.g. “be between 0 and 120”. -->
+  <string name="formeditor_validation_must">Lazima %1$s.</string>
+  <!-- Joins two validation conditions. %1$s, %2$s = conditions. -->
+  <string name="formeditor_validation_and">%1$s na %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number from %1$s to %2$s. -->
+  <string name="formeditor_validation_number_between">iwe kati ya %1$s na %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at least %1$s. -->
+  <string name="formeditor_validation_number_at_least">iwe angalau %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at most %1$s. -->
+  <string name="formeditor_validation_number_at_most">isizidi %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has %1$d to %2$d characters. -->
+  <string name="formeditor_validation_length_between">iwe na herufi %1$d–%2$d</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at least %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_least">
+    <item quantity="one">iwe na angalau herufi %1$d</item>
+    <item quantity="other">iwe na angalau herufi %1$d</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at most %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_most">
+    <item quantity="one">iwe na herufi isiyozidi %1$d</item>
+    <item quantity="other">iwe na herufi zisizozidi %1$d</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is an email address. -->
+  <string name="formeditor_validation_pattern_email">iwe anwani ya barua pepe</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only digits. -->
+  <string name="formeditor_validation_pattern_digits">iwe na tarakimu tu</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only the Latin letters A to Z. -->
+  <string name="formeditor_validation_pattern_letters">iwe na herufi A–Z tu</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer matches the organizer's own pattern. -->
+  <string name="formeditor_validation_pattern_custom">ilingane na muundo</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or earlier. -->
+  <string name="formeditor_validation_date_not_in_future">isiwe tarehe ya baadaye</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or later. -->
+  <string name="formeditor_validation_date_not_in_past">isiwe tarehe iliyopita</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or later. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_after">iwe %1$s au baadaye</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or earlier. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_before">iwe %1$s au kabla</string>
+  <!-- Validation summary of a select multiple question. %1$d, %2$d = fewest and most options. -->
+  <string name="formeditor_validation_selections_between">Chagua kati ya chaguo %1$d na %2$d.</string>
+  <!-- Validation summary of a select multiple question. %1$d = fewest options. -->
+  <plurals name="formeditor_validation_selections_at_least">
+    <item quantity="one">Chagua angalau chaguo %1$d.</item>
+    <item quantity="other">Chagua angalau chaguo %1$d.</item>
+  </plurals>
+  <!-- Validation summary of a select multiple question. %1$d = most options. -->
+  <plurals name="formeditor_validation_selections_at_most">
+    <item quantity="one">Chagua chaguo isiyozidi %1$d.</item>
+    <item quantity="other">Chagua chaguo zisizozidi %1$d.</item>
+  </plurals>
+  <!-- Lowercase name of one or several records of a dataset, used inside sentences: map features of a map layer, rows of a data table. -->
+  <string name="formeditor_feature_noun_map_feature">kipengele cha ramani</string>
+  <string name="formeditor_feature_noun_map_features">vipengele vya ramani</string>
+  <string name="formeditor_feature_noun_table_row">safu ya jedwali</string>
+  <string name="formeditor_feature_noun_table_rows">safu za jedwali</string>
+  <string name="formeditor_template_subtitle">Kiolezo cha maktaba: maswali, mantiki ya kuonyesha na mtiririko.</string>
+  <string name="formeditor_template_section">Kiolezo</string>
+  <string name="formeditor_template_title">Jina la kiolezo</string>
+  <string name="formeditor_template_adds_map_layer">Tafiti zinazoongeza kiolezo hiki hupata tabaka jipya la ramani la %1$s kwa mawasilisho yake. Swali la kwanza la jiometri huweka kila kipengele.</string>
+  <string name="formeditor_template_adds_data_table">Tafiti zinazoongeza kiolezo hiki hupata jedwali jipya la data kwa mawasilisho yake. Ongeza swali la eneo, mstari au poligoni ili kukusanya vipengele vya ramani badala yake.</string>
+  <string name="formeditor_enable_open_in_google_earth">Washa Fungua katika Google Earth</string>
+  <string name="formeditor_availability_google_earth_on">Wakusanyaji wanaweza kufungua vipengele vya ramani na fomu iliyopachikwa katika Google Earth.</string>
+  <string name="formeditor_availability_google_earth_off">Washa ili kuwaruhusu wakusanyaji kufungua fomu hii ndani ya viputo vya ramani vya Google Earth.</string>
+  <string name="formeditor_availability_google_earth_unavailable">Inapatikana tu kwa fomu zinazosasisha vipengele vya ramani vilivyopo.</string>
+  <string name="formeditor_availability_google_earth_needs_map_selection">Inapatikana tu wakati &quot;%1$s&quot; imewekwa kuwa &quot;%2$s&quot;.</string>
+  <string name="formeditor_enable_web_confirm_title">Uwashe kwenye wavuti?</string>
+  <string name="formeditor_enable_web_confirm_message">Baadhi ya aina za maswali hazitumiki kwenye wavuti na hazitapatikana.</string>
+  <string name="formeditor_enable_google_earth_confirm_title">Uwashe Fungua katika Google Earth?</string>
+  <string name="formeditor_enable_google_earth_confirm_message">Baadhi ya aina za maswali hazitumiki katika Google Earth na hazitapatikana.</string>
+  <plurals name="formeditor_google_earth_incompatible_questions_summary">
+    <item quantity="one">Swali %1$d linatumia aina ya sehemu ambayo haitumiki katika Google Earth.</item>
+    <item quantity="other">Maswali %1$d yanatumia aina za sehemu ambazo hazitumiki katika Google Earth.</item>
+  </plurals>
+</resources>

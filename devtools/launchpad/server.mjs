@@ -69,20 +69,21 @@ for (let i = 0; i < argv.length; i++) {
 // Subsystem definitions
 const SERVICE_DEFINITIONS = [
   {
-    id: 'user-data-service',
+    id: 'server',
     name: 'Server',
     code: 'SERVER',
     category: 'CORE',
-    role: 'User data service (server/userDataService): gRPC API the apps sync with',
+    role: 'Collect One server (server/): gRPC API, invite emails, and FCM push notifications',
     port: 8080,
     healthCheck: { type: 'http', path: '/healthz', expectedStatus: 200 },
-    cwdRel: 'server/userDataService',
+    cwdRel: '',
     sharesGradleBuild: true,
-    command: ['./gradlew', 'run', '--console=plain'],
-    readyRegex: /User data service listening on port/i,
+    command: ['./gradlew', ':server:run', '--console=plain'],
+    readyRegex: /Collect One server listening on port/i,
     endpoints: [
       { label: 'RPC inspector', view: 'rpc' },
       { label: 'Spanner data', view: 'spanner' },
+      { label: 'Messages', path: '/debug/messages', type: 'route' },
       { label: 'Health check', path: '/healthz', type: 'api' }
     ]
   },
@@ -94,9 +95,9 @@ const SERVICE_DEFINITIONS = [
     role: 'Admin web app (webApp): surveys, organizations, data',
     port: 8092,
     healthCheck: { type: 'http', path: '/', expectedStatus: 500, comparison: '<' },
-    cwdRel: 'webApp',
+    cwdRel: '',
     sharesGradleBuild: true,
-    command: ['./gradlew', 'wasmJsBrowserDevelopmentRun', '--console=plain'],
+    command: ['./gradlew', ':webApp:wasmJsBrowserDevelopmentRun', '--console=plain'],
     readyRegex: /webpack \d+.*compiled/i,
     endpoints: [
       { label: 'Surveys', path: '#surveys', type: 'route' },
@@ -113,9 +114,9 @@ const SERVICE_DEFINITIONS = [
     role: 'Field data collection app in a simulated device (mobileWebApp)',
     port: 8093,
     healthCheck: { type: 'http', path: '/', expectedStatus: 500, comparison: '<' },
-    cwdRel: 'mobileWebApp',
+    cwdRel: '',
     sharesGradleBuild: true,
-    command: ['./gradlew', 'wasmJsBrowserDevelopmentRun', '--console=plain'],
+    command: ['./gradlew', ':mobileWebApp:wasmJsBrowserDevelopmentRun', '--console=plain'],
     readyRegex: /webpack \d+.*compiled/i,
     endpoints: [
       { label: 'With device frame', path: '?chrome=1', type: 'route' },
@@ -489,7 +490,7 @@ let spannerRestartInFlight = false;
  */
 function restartServerForSpannerIfNeeded() {
   const emulator = serviceStates.get('spanner-emulator');
-  const server = serviceStates.get('user-data-service');
+  const server = serviceStates.get('server');
   if (spannerRestartInFlight || emulator.state !== 'ONLINE' || !emulator.pid) return;
   if (!server.child || server.state !== 'ONLINE' || !server.emulatorPidAtStart) return;
   if (emulator.pid === server.emulatorPidAtStart) return;
@@ -505,7 +506,7 @@ function restartServerForSpannerIfNeeded() {
       '[LAUNCHPAD] Spanner emulator restarted, so restarting the server to set up its database again',
       'stdout'
     );
-    restartService('user-data-service')
+    restartService('server')
       .catch((err) => appendLog(server, `[LAUNCHPAD ERROR] Restart failed: ${err.message}`, 'stderr'))
       .finally(() => {
         spannerRestartInFlight = false;
@@ -595,7 +596,7 @@ async function startService(id, options = {}) {
   // The server stores its data in Spanner: the local emulator, unless the launchpad's environment
   // names another database (SPANNER_EMULATOR_HOST or SPANNER_INSTANCE_ID).
   service.emulatorPidAtStart = null;
-  if (id === 'user-data-service' && !childEnv.SPANNER_EMULATOR_HOST && !childEnv.SPANNER_INSTANCE_ID) {
+  if (id === 'server' && !childEnv.SPANNER_EMULATOR_HOST && !childEnv.SPANNER_INSTANCE_ID) {
     const spanner = await ensureSpannerEmulator(service);
     if (spanner === 'canceled') {
       return { success: false, message: `Start of ${service.name} canceled` };
@@ -779,7 +780,7 @@ async function stopService(id) {
   return { success: true, message: `Stop initiated for ${service.name}` };
 }
 
-const CORE_SERVICE_IDS = ['user-data-service', 'web-console', 'mobile-app'];
+const CORE_SERVICE_IDS = ['server', 'web-console', 'mobile-app'];
 
 /** How long the server waits for the Spanner emulator (which may download first) to start. */
 const SPANNER_START_TIMEOUT_MS = 90000;

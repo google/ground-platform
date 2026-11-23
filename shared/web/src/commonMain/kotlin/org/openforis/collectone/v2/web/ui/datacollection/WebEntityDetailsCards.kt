@@ -27,17 +27,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CollapseContent
 import androidx.compose.material.icons.outlined.QrCode
+import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,32 +46,91 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.openforis.collectone.v2.app.domain.model.EntityDetailsPane
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
-import org.openforis.collectone.v2.app.domain.model.SubmissionPreviewItem
+import org.openforis.collectone.v2.app.domain.model.geometryType
+import org.openforis.collectone.v2.app.domain.model.updatedAtLabel
+import org.openforis.collectone.v2.app.domain.model.whispAnalysis
+import org.openforis.collectone.v2.app.ui.dashboard.DashboardActions
+import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionActions
 import org.openforis.collectone.v2.app.ui.datacollection.DetailsMenuAction
 import org.openforis.collectone.v2.app.ui.datacollection.DetailsOverflowMenu
+import org.openforis.collectone.v2.app.ui.datacollection.EntityDetailsActionButton
+import org.openforis.collectone.v2.app.ui.datacollection.EntityDetailsActions
 import org.openforis.collectone.v2.app.ui.datacollection.EntityDetailsHeader
+import org.openforis.collectone.v2.app.ui.datacollection.EntityDetailsUiState
 import org.openforis.collectone.v2.app.ui.datacollection.EntityPropertiesPane
 import org.openforis.collectone.v2.app.ui.datacollection.EntitySubmissionsPane
+import org.openforis.collectone.v2.app.ui.datacollection.SubmissionDetailsUiState
 import org.openforis.collectone.v2.app.ui.datacollection.SubmissionFullDetailsCard
+import org.openforis.collectone.v2.app.ui.datacollection.WhispRiskAnalysisPane
 import org.openforis.collectone.v2.app.ui.datacollection.downloadPdfMenuAction
-import org.openforis.collectone.v2.app.ui.viewmodel.DataCollectionActions
-import org.openforis.collectone.v2.web.ui.WebAppState
+import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
+import org.openforis.collectone.v2.app.ui.text.typeText
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.Tab
+import org.openforis.collectone.v2.map.GeometryType
+import org.openforis.collectone.v2.web.resources.Res
+import org.openforis.collectone.v2.web.resources.web_back
+import org.openforis.collectone.v2.web.resources.web_back_to_submissions
+import org.openforis.collectone.v2.web.resources.web_collapse_details
+import org.openforis.collectone.v2.web.resources.web_entity_tab_data
+import org.openforis.collectone.v2.web.resources.web_entity_tab_history
+import org.openforis.collectone.v2.web.resources.web_entity_tab_risk_analysis
+import org.openforis.collectone.v2.web.resources.web_more_entity_actions
+import org.openforis.collectone.v2.web.resources.web_more_submission_actions
+import org.openforis.collectone.v2.web.resources.web_qr_code
+import org.openforis.collectone.v2.web.resources.web_time_series_open
 
 /** Secondary entity actions shown in the web header's overflow menu, sent to [actions]. */
+@Composable
 private fun entityOverflowActions(
   entity: GeospatialEntityItem,
   actions: DataCollectionActions,
 ): List<DetailsMenuAction> =
   listOf(
-    DetailsMenuAction("QR code", Icons.Outlined.QrCode) { actions.openEntityQrCode(entity.id) },
+    DetailsMenuAction(stringResource(Res.string.web_qr_code), Icons.Outlined.QrCode) {
+      actions.openEntityQrCode(entity.id)
+    },
     downloadPdfMenuAction { actions.downloadEntityPdf(entity.id) },
   )
 
+@Composable
+private fun rememberHydratedEntityDetails(
+  details: EntityDetailsUiState,
+  surveyId: String,
+  tableRepo: org.openforis.collectone.v2.app.domain.repository.EntityTableRepository?,
+): EntityDetailsUiState {
+  val rawEntity = details.entity
+  var hydratedProperties by
+    remember(surveyId, rawEntity.datasetId, rawEntity.id) {
+      mutableStateOf<Map<String, String>?>(null)
+    }
+  LaunchedEffect(surveyId, rawEntity.datasetId, rawEntity.id, tableRepo) {
+    val canHydrate =
+      tableRepo?.isLazyLoadingEnabled == true &&
+        surveyId.isNotBlank() &&
+        rawEntity.datasetId.isNotBlank()
+    if (canHydrate) {
+      hydratedProperties =
+        runCatching {
+          tableRepo.fetchEntityProperties(surveyId, rawEntity.datasetId, rawEntity.id)
+        }
+          .getOrNull()
+    }
+  }
+  return remember(details, hydratedProperties) {
+    val fetched = hydratedProperties
+    if (fetched.isNullOrEmpty()) details
+    else
+      details.copy(entity = details.entity.copy(properties = fetched + details.entity.properties))
+  }
+}
+
 /**
  * Web dashboard's floating details card (upper-right corner of the map) for the selected entity,
- * with two tabs backed by [WebAppState.entityDetailsPane]:
+ * with two tabs backed by the dashboard's [EntityDetailsPane]:
  * - `Data` ([EntityDetailsPane.PROPERTIES], default): a compact status chip and the entity's
  *   properties (its current state).
  * - `History` ([EntityDetailsPane.SUBMISSIONS]): the entity's submissions. An opened submission
@@ -81,51 +140,82 @@ private fun entityOverflowActions(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun WebEntityDetailsCard(
-  entity: GeospatialEntityItem,
-  state: WebAppState,
+  details: EntityDetailsUiState,
+  actions: EntityDetailsActions,
+  dashboard: DashboardActions,
+  dataCollection: DataCollectionActions,
   modifier: Modifier = Modifier,
+  surveyId: String = "",
   onCollapse: (() -> Unit)? = null,
 ) {
-  val submission =
-    state.dataCollectionUiState.selectedSubmission?.takeIf { it.entityId == entity.id }
-  val pane = state.entityDetailsPane
+  val effectiveDetails =
+    rememberHydratedEntityDetails(
+      details = details,
+      surveyId = surveyId,
+      tableRepo = dashboard.tableRepository(),
+    )
+  val entity = effectiveDetails.entity
+  val submission = effectiveDetails.openSubmission
+  val whispAnalysis = remember(entity.properties) { entity.whispAnalysis }
+  val visiblePanes =
+    remember(whispAnalysis != null) {
+      buildList {
+        add(EntityDetailsPane.PROPERTIES)
+        add(EntityDetailsPane.SUBMISSIONS)
+        if (whispAnalysis != null) add(EntityDetailsPane.RISK_ANALYSIS)
+      }
+    }
+  val pane =
+    if (effectiveDetails.pane in visiblePanes) effectiveDetails.pane
+    else EntityDetailsPane.PROPERTIES
   // Each tab (and an opened submission) starts scrolled to the top.
-  val scrollState = remember(entity.id, pane, submission?.id) { ScrollState(initial = 0) }
+  val scrollState =
+    remember(entity.id, pane, submission?.submission?.id) { ScrollState(initial = 0) }
 
   Surface(
     modifier = modifier,
     shape = MaterialTheme.shapes.large,
-    color = MaterialTheme.colorScheme.surfaceContainerLow,
+    color = MaterialTheme.colorScheme.surfaceContainerLowest,
     shadowElevation = 6.dp,
   ) {
     Column {
       EntityDetailsHeader(
         entity = entity,
-        onClose = { state.selectEntity(null) },
+        onClose = { actions.selectEntity(null) },
         onCollapse = onCollapse,
-        layer = state.mapLayerFor(entity),
+        layer = details.layer,
         // The status chip is shown, compact, at the top of the `Data` tab body instead.
         showStatus = false,
         trailingActions = {
           DetailsOverflowMenu(
-            actions = entityOverflowActions(entity, state.dataCollection),
-            contentDescription = "More ${entity.singularTypeLabel.lowercase()} actions",
+            actions = entityOverflowActions(entity, dataCollection),
+            contentDescription =
+              stringResource(
+                Res.string.web_more_entity_actions,
+                entity.typeText.resolve().lowercase(),
+              ),
           )
         },
         modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp),
       )
 
-      PrimaryTabRow(selectedTabIndex = pane.ordinal, containerColor = Color.Transparent) {
-        EntityDetailsPane.entries.forEach { tabPane ->
+      PrimaryTabRow(
+        selectedTabIndex = visiblePanes.indexOf(pane).coerceAtLeast(0),
+        containerColor = Color.Transparent,
+      ) {
+        visiblePanes.forEach { tabPane ->
           Tab(
             selected = pane == tabPane,
-            onClick = { state.selectEntityDetailsTab(tabPane) },
+            onClick = { dashboard.selectEntityDetailsTab(tabPane) },
             text = {
               Text(
                 text =
                   when (tabPane) {
-                    EntityDetailsPane.PROPERTIES -> "Data"
-                    EntityDetailsPane.SUBMISSIONS -> "History"
+                    EntityDetailsPane.PROPERTIES -> stringResource(Res.string.web_entity_tab_data)
+                    EntityDetailsPane.SUBMISSIONS ->
+                      stringResource(Res.string.web_entity_tab_history)
+                    EntityDetailsPane.RISK_ANALYSIS ->
+                      stringResource(Res.string.web_entity_tab_risk_analysis)
                   },
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -143,20 +233,40 @@ internal fun WebEntityDetailsCard(
             .padding(16.dp)
       ) {
         when {
+          pane == EntityDetailsPane.RISK_ANALYSIS && whispAnalysis != null ->
+            WhispRiskAnalysisPane(analysis = whispAnalysis)
           pane == EntityDetailsPane.PROPERTIES ->
-            EntityPropertiesPane(entity = entity, state = state, isWeb = true)
+            EntityPropertiesPane(
+              uiState = effectiveDetails,
+              actions = actions,
+              isWeb = true,
+              trailingWebActions = {
+                if (
+                  entity.geometryType == GeometryType.POINT ||
+                    entity.geometryType == GeometryType.POLYGON
+                ) {
+                  EntityDetailsActionButton(
+                    text = stringResource(Res.string.web_time_series_open),
+                    icon = Icons.Outlined.Timeline,
+                    onClick = { dashboard.showTimeSeries() },
+                  )
+                }
+              },
+            )
           submission != null ->
             SubmissionFullDetailsCard(
-              submission = submission,
-              state = state,
-              isDark = state.isDarkTheme,
-              textColor = MaterialTheme.colorScheme.onSurface,
-              backLabel = "Back to submissions",
-              onBack = { state.dataCollection.selectSubmissionDetail(null) },
-              onSharePdf = { state.dataCollection.downloadSubmissionPdf(submission.id) },
+              uiState = submission,
+              backLabel = stringResource(Res.string.web_back_to_submissions),
+              onBack = { dataCollection.selectSubmissionDetail(null) },
+              onSharePdf = { dataCollection.downloadSubmissionPdf(submission.submission.id) },
               isSidePanel = true,
             )
-          else -> EntitySubmissionsPane(entity = entity, state = state, isWeb = true)
+          else ->
+            EntitySubmissionsPane(
+              uiState = effectiveDetails,
+              actions = actions,
+              isWeb = true,
+            )
         }
       }
     }
@@ -169,15 +279,16 @@ internal fun WebEntityDetailsCard(
  */
 @Composable
 internal fun WebSubmissionDetailsCard(
-  submission: SubmissionPreviewItem,
-  state: WebAppState,
+  details: SubmissionDetailsUiState,
+  dataCollection: DataCollectionActions,
   modifier: Modifier = Modifier,
   onCollapse: (() -> Unit)? = null,
 ) {
+  val submission = details.submission
   Surface(
     modifier = modifier,
     shape = MaterialTheme.shapes.large,
-    color = MaterialTheme.colorScheme.surfaceContainerLow,
+    color = MaterialTheme.colorScheme.surfaceContainerLowest,
     shadowElevation = 6.dp,
   ) {
     Column {
@@ -188,12 +299,12 @@ internal fun WebSubmissionDetailsCard(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
         IconButton(
-          onClick = { state.dataCollection.selectSubmissionDetail(null) },
+          onClick = { dataCollection.selectSubmissionDetail(null) },
           modifier = Modifier.size(32.dp),
         ) {
           Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-            contentDescription = "Back",
+            contentDescription = stringResource(Res.string.web_back),
             modifier = Modifier.size(20.dp),
           )
         }
@@ -206,7 +317,7 @@ internal fun WebSubmissionDetailsCard(
             overflow = TextOverflow.Ellipsis,
           )
           Text(
-            text = submission.timestamp,
+            text = submission.updatedAtLabel,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
@@ -215,16 +326,14 @@ internal fun WebSubmissionDetailsCard(
         }
         DetailsOverflowMenu(
           actions =
-            listOf(
-              downloadPdfMenuAction { state.dataCollection.downloadSubmissionPdf(submission.id) }
-            ),
-          contentDescription = "More submission actions",
+            listOf(downloadPdfMenuAction { dataCollection.downloadSubmissionPdf(submission.id) }),
+          contentDescription = stringResource(Res.string.web_more_submission_actions),
         )
         if (onCollapse != null) {
           IconButton(onClick = onCollapse, modifier = Modifier.size(32.dp)) {
             Icon(
               imageVector = Icons.Outlined.CollapseContent,
-              contentDescription = "Collapse details",
+              contentDescription = stringResource(Res.string.web_collapse_details),
               tint = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.size(22.dp),
             )
@@ -234,13 +343,10 @@ internal fun WebSubmissionDetailsCard(
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
       Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
         SubmissionFullDetailsCard(
-          submission = submission,
-          state = state,
-          isDark = state.isDarkTheme,
-          textColor = MaterialTheme.colorScheme.onSurface,
-          backLabel = "Back",
-          onBack = { state.dataCollection.selectSubmissionDetail(null) },
-          onSharePdf = { state.dataCollection.downloadSubmissionPdf(submission.id) },
+          uiState = details,
+          backLabel = stringResource(Res.string.web_back),
+          onBack = { dataCollection.selectSubmissionDetail(null) },
+          onSharePdf = { dataCollection.downloadSubmissionPdf(submission.id) },
           isSidePanel = true,
           showHeader = false,
         )

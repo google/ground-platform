@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions and labels shared across mobile screens -->
+  <!-- Back navigation button label and accessibility description. -->
+  <string name="mobile_back">ກັບຄືນ</string>
+  <string name="mobile_cancel">ຍົກເລີກ</string>
+  <!-- Confirm button of dialogs that remove offline data from the device. -->
+  <string name="mobile_remove">ລຶບອອກ</string>
+  <!-- Button that opens a downloaded survey. -->
+  <string name="mobile_open">ເປີດ</string>
+  <!-- Button that downloads a survey or offline map to the device. -->
+  <string name="mobile_download">ດາວໂຫຼດ</string>
+  <!-- Status chip on a survey or offline map already stored on the device. -->
+  <string name="mobile_downloaded">ດາວໂຫຼດແລ້ວ</string>
+  <!-- Badge on a survey that is no longer available to the user. -->
+  <string name="mobile_unavailable">ບໍ່ສາມາດໃຊ້ໄດ້</string>
+  <!-- Accessibility description of the button that clears the search field. -->
+  <string name="mobile_clear_search_content_description">ລ້າງການຊອກຫາ</string>
+  <string name="mobile_terms_of_service_title">ເງື່ອນໄຂການໃຫ້ບໍລິການ</string>
+  <!-- Title of the Uploads screen (list of local changes waiting to sync or already synced). -->
+  <string name="mobile_uploads_title">ການອັບໂຫຼດ</string>
+
+  <!-- Sign-in screen -->
+  <string name="mobile_sign_in_tagline">ເກັບຂໍ້ມູນສັງເກດການພາກສະໜາມ, ທຳແຜນທີ່ຂອບເຂດ ແລະ ຊິງບັນທຶກແບບສຳຫຼວດແບບອອບລາຍ.</string>
+  <string name="mobile_sign_in_prompt">ເຂົ້າລະບົບເພື່ອເຂົ້າເຖິງແບບສຳຫຼວດທີ່ແບ່ງປັນກັບບັນຊີຂອງທ່ານ.</string>
+  <!-- Sign-in button label while sign-in is in progress. -->
+  <string name="mobile_sign_in_signing_in">ກຳລັງເຂົ້າລະບົບ…</string>
+  <string name="mobile_sign_in_google_accounts_only">ປັດຈຸບັນການຢືນຢັນຕົວຕົນຈຳກັດສະເພາະບັນຊີ Google ເທົ່ານັ້ນ.</string>
+
+  <!-- Terms of Service screen -->
+  <!-- %1$s: email address of the signed-in user. -->
+  <string name="mobile_tos_signed_in_as">ເຂົ້າລະບົບເປັນ %1$s</string>
+  <string name="mobile_tos_decline">ປະຕິເສດ</string>
+  <string name="mobile_tos_continue">ສືບຕໍ່</string>
+  <string name="mobile_tos_intro">ກະລຸນາອ່ານ ແລະ ຍອມຮັບເງື່ອນໄຂການໃຫ້ບໍລິການຂອງ Collect One ກ່ອນດາວໂຫຼດແບບສຳຫຼວດ.</string>
+  <!-- Label of the checkbox that must be checked before accepting the Terms of Service. -->
+  <string name="mobile_tos_agree_checkbox">ຂ້ອຍໄດ້ອ່ານ ແລະ ຍອມຮັບເງື່ອນໄຂການໃຫ້ບໍລິການຂອງ Collect One.</string>
+
+  <!-- Settings screen -->
+  <!-- Title of the device storage section in Settings. -->
+  <string name="mobile_settings_storage_title">ພື້ນທີ່ຈັດເກັບ</string>
+  <!-- Confirmation after opening the project website. %1$s: website URL. -->
+  <string name="mobile_settings_opened_website">ເປີດ %1$s ແລ້ວ</string>
+
+  <!-- Download survey screen -->
+  <string name="mobile_download_survey_title">ດາວໂຫຼດແບບສຳຫຼວດ</string>
+  <!-- Subtitle. %1$d: number of surveys shared with the user; %2$d: number of those downloaded. -->
+  <string name="mobile_download_survey_subtitle">ແບ່ງປັນໃຫ້ທ່ານ %1$d • ດາວໂຫຼດແລ້ວ %2$d</string>
+  <string name="mobile_download_survey_offline_banner">ທ່ານກຳລັງອອບລາຍ. ກະລຸນາເຊື່ອມຕໍ່ອິນເຕີເນັດ ເພື່ອດາວໂຫຼດແບບສຳຫຼວດໄວ້ໃຊ້ແບບອອບລາຍ.</string>
+  <string name="mobile_download_survey_search_content_description">ຊອກຫາແບບສຳຫຼວດ</string>
+  <string name="mobile_download_survey_search_placeholder">ຊອກຫາຕາມຊື່ ຫຼື ສະຖານທີ່ ຫຼື ວາງລິ້ງແບບສຳຫຼວດ</string>
+  <string name="mobile_download_survey_public_section">ແບບສຳຫຼວດສາທາລະນະ</string>
+  <!-- List header. %1$d: number of surveys shared with the user. -->
+  <string name="mobile_download_survey_shared_header">ແບບສຳຫຼວດທີ່ແບ່ງປັນໃຫ້ທ່ານ (%1$d)</string>
+  <!-- List header while searching. %1$d: number of matching surveys; %2$d: total surveys. -->
+  <string name="mobile_download_survey_matching_header">ແບບສຳຫຼວດທີ່ກົງກັນ (%1$d ຈາກ %2$d)</string>
+  <string name="mobile_download_survey_clear_search">ລ້າງການຊອກຫາ</string>
+  <!-- Empty search result. %1$s: the search text typed by the user. -->
+  <string name="mobile_download_survey_no_match">ບໍ່ມີແບບສຳຫຼວດທີ່ກົງກັບ "%1$s"</string>
+  <string name="mobile_download_survey_no_match_hint">ລອງຊອກຫາດ້ວຍຊື່ແບບສຳຫຼວດອື່ນ, ຄຳສຳຄັນ ຫຼື ສະຖານທີ່ (ເຊັ່ນ: Brazil, Kenya, Vietnam) ຫຼື ວາງລິ້ງແບບສຳຫຼວດ.</string>
+  <string name="mobile_download_survey_empty">ຍັງບໍ່ມີແບບສຳຫຼວດທີ່ແບ່ງປັນກັບທ່ານ</string>
+  <string name="mobile_download_survey_empty_hint">ຊອກຫາດ້ວຍຊື່ແບບສຳຫຼວດ, ຄຳສຳຄັນ ຫຼື ສະຖານທີ່ (ເຊັ່ນ: Brazil, Kenya, Vietnam) ຫຼື ວາງລິ້ງແບບສຳຫຼວດ.</string>
+  <!-- List header for surveys found in the public directory. %1$d: number of surveys. -->
+  <string name="mobile_download_survey_directory_header">ແບບສຳຫຼວດສາທາລະນະ ແລະ ທີ່ແບ່ງປັນຜ່ານລິ້ງ (%1$d)</string>
+  <!-- Survey card footer. %1$d: number of map locations in the survey; %2$s: offline download size (e.g. "12 MB"). -->
+  <plurals name="mobile_survey_location_count_and_size">
+    <item quantity="other">%1$d ສະຖານທີ່ • %2$s</item>
+  </plurals>
+  <!-- Badge on a survey whose submissions are visible to the public. -->
+  <string name="mobile_survey_badge_public_data">ຂໍ້ມູນສາທາລະນະ</string>
+  <!-- Badge on a survey where each collector sees only their own submissions. -->
+  <string name="mobile_survey_badge_private_submissions">ການສົ່ງຂໍ້ມູນແບບສ່ວນຕົວ</string>
+  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
+  <string name="mobile_survey_downloaded_content_description">ດາວໂຫຼດ %1$s ແລ້ວ</string>
+  <!-- Accessibility description of the Open button. %1$s: survey title. -->
+  <string name="mobile_survey_open_content_description">ເປີດ %1$s</string>
+  <!-- Accessibility description of the Download button. %1$s: survey title. -->
+  <string name="mobile_survey_download_content_description">ດາວໂຫຼດ %1$s</string>
+  <!-- %1$s: survey title. -->
+  <string name="mobile_remove_survey_dialog_title">ລຶບແບບສຳຫຼວດອອບລາຍອອກບໍ?</string>
+  <!-- %1$s: survey title. -->
+  <string name="mobile_remove_survey_dialog_body">ການລຶບ "%1$s" ຈະລຶບສຳເນົາອອບລາຍອອກຈາກອຸປະກອນນີ້. ທ່ານຈະຕ້ອງເຊື່ອມຕໍ່ອິນເຕີເນັດເພື່ອດາວໂຫຼດ ແລະ ໃຊ້ແບບອອບລາຍອີກຄັ້ງ.</string>
+  <string name="mobile_sign_out_dialog_title">ອອກຈາກລະບົບບໍ?</string>
+  <!-- %1$s: email address of the signed-in user. -->
+  <string name="mobile_sign_out_dialog_body">ການກັບຄືນຈະອອກຈາກລະບົບ %1$s ແລະ ກັບໄປທີ່ໜ້າເຂົ້າລະບົບ.</string>
+  <string name="mobile_sign_out">ອອກຈາກລະບົບ</string>
+
+  <!-- Main survey screen: top bar and upload status -->
+  <string name="mobile_open_navigation_drawer">ເປີດເມນູນຳທາງ</string>
+  <!-- Placeholder of the map/list search field. -->
+  <string name="mobile_search_placeholder">ຊອກຫາ...</string>
+  <!-- Upload status. %1$d: number of items that failed to upload. -->
+  <plurals name="mobile_upload_status_failed">
+    <item quantity="other">ອັບໂຫຼດລົ້ມເຫຼວ %1$d ລາຍການ</item>
+  </plurals>
+  <!-- Upload status. %1$d: number of items currently uploading. -->
+  <plurals name="mobile_upload_status_uploading">
+    <item quantity="other">ກຳລັງອັບໂຫຼດ %1$d ລາຍການ</item>
+  </plurals>
+  <string name="mobile_upload_status_all_saved">ບັນທຶກການປ່ຽນແປງທັງໝົດແລ້ວ</string>
+  <!-- Upload statistics. %1$d: synced items; %2$d: uploading items; %3$d: failed items. -->
+  <string name="mobile_upload_status_summary">ຊິງແລ້ວ %1$d • ກຳລັງອັບໂຫຼດ %2$d • ລົ້ມເຫຼວ %3$d</string>
+  <string name="mobile_upload_status_syncing_now">ກຳລັງຊິງ…</string>
+  <string name="mobile_upload_status_last_synced_just_now">ຊິງລ່າສຸດ: ຫາກໍ່ນີ້</string>
+  <string name="mobile_retry_failed_uploads">ລອງອັບໂຫຼດທີ່ລົ້ມເຫຼວໃໝ່</string>
+  <!-- Time of the last successful sync. %1$d: minutes since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_minutes_ago">
+    <item quantity="other">ຊິງລ່າສຸດ: %1$d ນາທີກ່ອນ</item>
+  </plurals>
+  <!-- Time of the last successful sync. %1$d: hours since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_hours_ago">
+    <item quantity="other">ຊິງລ່າສຸດ: %1$d ຊົ່ວໂມງກ່ອນ</item>
+  </plurals>
+  <!-- Time of the last successful sync. %1$d: days since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_days_ago">
+    <item quantity="other">ຊິງລ່າສຸດ: %1$d ມື້ກ່ອນ</item>
+  </plurals>
+  <!-- Notice when the device goes offline. %1$s: plural noun of the survey's map features. -->
+  <string name="mobile_notice_device_offline">ອຸປະກອນອອບລາຍ: ປິດການຊອກຫາສະຖານທີ່ແລ້ວ. ກຳລັງຊອກຫາສະເພາະ %1$s ໃນເຄື່ອງ.</string>
+  <!-- Notice when the device comes back online. -->
+  <string name="mobile_notice_device_online">ອຸປະກອນອອນລາຍ: ເປີດການຊອກຫາສະຖານທີ່ແລ້ວ.</string>
+  <!-- Notice when selecting the Places list tab offline. %1$s: plural noun of the survey's map features. -->
+
+  <!-- Main survey screen: map controls -->
+  <string name="mobile_recenter_content_description">ຈັດແຜນທີ່ໃຫ້ຢູ່ກາງຕຳແໜ່ງ GPS</string>
+  <!-- Button that recenters the map on the user's GPS location. -->
+  <string name="mobile_recenter">ຈັດຕຳແໜ່ງກາງໃໝ່</string>
+  <!-- Accessibility description of the map chip when the camera follows the user's GPS location. -->
+  <string name="mobile_gps_auto_center">ຈັດກາງອັດຕະໂນມັດຕາມ GPS</string>
+  <!-- Map chip shown when the user has panned the map away from their GPS location. -->
+  <string name="mobile_gps_panned">ເລື່ອນແຜນທີ່ແລ້ວ</string>
+  <!-- Map chip. %1$s: GPS signal status (e.g. "High accuracy"). -->
+  <string name="mobile_gps_status">GPS: %1$s</string>
+  <!-- Accessibility description of the floating button that opens the list of forms. -->
+  <string name="mobile_collect_data">ເກັບຂໍ້ມູນ</string>
+  <string name="mobile_available_forms_title">ແບບຟອມເກັບຂໍ້ມູນທີ່ມີ</string>
+  <string name="mobile_available_forms_subtitle">ເລືອກແບບຟອມເພື່ອເລີ່ມເກັບຂໍ້ມູນ.</string>
+  <string name="mobile_available_forms_close">ປິດແບບຟອມທີ່ມີ</string>
+  <!-- Badge on a form. %1$d: number of questions in the form. -->
+  <plurals name="mobile_form_question_count">
+    <item quantity="other">%1$d ຄຳຖາມ</item>
+  </plurals>
+
+  <!-- Main survey screen: straight-line navigation (wayfinding) banner -->
+  <!-- Navigation target type pill. %1$s: map feature type (e.g. "Plot"). -->
+  <string name="mobile_wayfinding_entity">ນຳທາງໄປ %1$s</string>
+  <!-- Navigation target type pill when navigating to a place found by search. -->
+  <string name="mobile_wayfinding_place">ນຳທາງໄປສະຖານທີ່</string>
+  <!-- Navigation target type pill when navigating to a form submission. -->
+  <string name="mobile_wayfinding_submission">ນຳທາງໄປການສົ່ງຂໍ້ມູນ</string>
+  <string name="mobile_compass_bearing_arrow">ລູກສອນທິດທາງເຂັມທິດ</string>
+  <!-- Compass bearing to the target. %1$s: formatted bearing (e.g. "321° NW"). -->
+  <string name="mobile_bearing">ທິດທາງ %1$s</string>
+  <!-- Shown when the user is within 8 meters of the navigation target. -->
+  <string name="mobile_arrived">ຮອດແລ້ວ (≤ 8 m)</string>
+  <!-- Estimated walking time. %1$d: number of minutes. -->
+  <plurals name="mobile_walk_minutes">
+    <item quantity="other">ຍ່າງ ~%1$d ນາທີ</item>
+  </plurals>
+  <string name="mobile_wayfinding_subtitle">ເສັ້ນຊື່ຕາມພູມິສາດຈາກຕຳແໜ່ງ GPS ຂອງທ່ານ</string>
+  <string name="mobile_walk_closer_content_description">ຈຳລອງການຍ່າງເຂົ້າໃກ້ເປົ້າໝາຍ</string>
+  <!-- Demo button that simulates walking closer to the navigation target. -->
+  <string name="mobile_walk_closer">ຍ່າງເຂົ້າໃກ້</string>
+  <string name="mobile_stop_navigation_content_description">ຢຸດການນຳທາງແບບເສັ້ນຊື່</string>
+  <!-- Button that stops straight-line navigation. -->
+  <string name="mobile_stop">ຢຸດ</string>
+
+  <!-- Main survey screen: basemap / layers sheet -->
+  <string name="mobile_basemap_title">ແຜນທີ່ພື້ນຖານ</string>
+  <string name="mobile_basemap_subtitle">ເລືອກປະເພດແຜນທີ່ພື້ນຖານ, ຮູບແຜນທີ່ ແລະ ຊັ້ນແຜ່ນແຜນທີ່ອອບລາຍ</string>
+  <string name="mobile_close_layers">ປິດຊັ້ນຂໍ້ມູນ</string>
+
+  <!-- Navigation drawer -->
+  <string name="mobile_close_drawer">ປິດເມນູ</string>
+  <!-- Label above the title of the currently open survey. -->
+  <string name="mobile_drawer_active_survey">ແບບສຳຫຼວດທີ່ໃຊ້ຢູ່</string>
+  <!-- Drawer item that lists downloaded surveys. -->
+  <string name="mobile_drawer_surveys">ແບບສຳຫຼວດ</string>
+  <!-- Drawer item subtitle. %1$d: number of surveys downloaded on the device. -->
+  <plurals name="mobile_drawer_surveys_downloaded">
+    <item quantity="other">ດາວໂຫຼດໃນອຸປະກອນ %1$d</item>
+  </plurals>
+  <string name="mobile_drawer_offline_maps">ແຜນທີ່ອອບລາຍ</string>
+  <string name="mobile_drawer_offline_maps_subtitle">ແຄດແຜ່ນແຜນທີ່ແບບເວັກເຕີ ແລະ ພາບດາວທຽມ</string>
+  <string name="mobile_drawer_settings">ການຕັ້ງຄ່າ</string>
+  <!-- Drawer item subtitle. %1$s: area unit symbol (e.g. "ha"). -->
+  <string name="mobile_drawer_settings_subtitle">ຫົວໜ່ວຍ (%1$s), ພາສາ ແລະ ແຄດສື່</string>
+  <string name="mobile_drawer_tos_subtitle">ເງື່ອນໄຂການຄຸ້ມຄອງຂໍ້ມູນ ແລະ ຄວາມເປັນສ່ວນຕົວຂອງແພລັດຟອມ</string>
+  <string name="mobile_brand_organization">Open Foris</string>
+  <string name="mobile_brand_product">Collect One</string>
+  <!-- Drawer footer shown after the product name "Open Foris Collect One". -->
+  <string name="mobile_drawer_footer_tagline">• ອອບລາຍເປັນຫຼັກ</string>
+
+  <!-- Uploads screen -->
+  <!-- Button that syncs all pending uploads. %1$d: number of pending uploads. -->
+  <string name="mobile_uploads_sync_all_count">ຊິງທັງໝົດ (%1$d)</string>
+  <string name="mobile_uploads_sync_all">ຊິງທັງໝົດ</string>
+  <!-- %1$d: number of activity records (e.g. PDF receipts) waiting to sync. -->
+  <plurals name="mobile_uploads_pending_activity_records">
+    <item quantity="other">%1$d ບັນທຶກກິດຈະກຳທີ່ລໍຖ້າການຊິງ</item>
+  </plurals>
+  <!-- Upload status filter chip. %1$s: status name (e.g. "Pending"); %2$d: number of uploads with that status. -->
+  <string name="mobile_upload_filter_chip">%1$s (%2$d)</string>
+  <!-- Upload status: waiting to be uploaded. -->
+  <string name="mobile_upload_status_pending">ລໍຖ້າ</string>
+  <!-- Upload status: currently uploading. -->
+  <string name="mobile_upload_status_in_progress">ກຳລັງດຳເນີນການ</string>
+  <!-- Upload status: successfully uploaded. -->
+  <string name="mobile_upload_status_uploaded">ອັບໂຫຼດແລ້ວ</string>
+  <!-- Upload status: upload failed. -->
+  <string name="mobile_upload_status_failed_label">ລົ້ມເຫຼວ</string>
+  <string name="mobile_uploads_empty_pending">ບໍ່ມີການອັບໂຫຼດທີ່ລໍຖ້າ.</string>
+  <string name="mobile_uploads_empty_in_progress">ບໍ່ມີການອັບໂຫຼດທີ່ກຳລັງດຳເນີນການ.</string>
+  <string name="mobile_uploads_empty_uploaded">ບໍ່ມີລາຍການທີ່ອັບໂຫຼດແລ້ວ.</string>
+  <string name="mobile_uploads_empty_failed">ບໍ່ມີການອັບໂຫຼດທີ່ລົ້ມເຫຼວ.</string>
+  <string name="mobile_uploads_empty_for_feature">ບໍ່ມີການອັບໂຫຼດສຳລັບອົງປະກອບແຜນທີ່ນີ້.</string>
+  <string name="mobile_uploads_empty">ຍັງບໍ່ມີການອັບໂຫຼດ.</string>
+  <!-- Accessibility description of the button that removes the map feature filter from Uploads. -->
+  <string name="mobile_uploads_show_all_features">ສະແດງການອັບໂຫຼດຂອງອົງປະກອບແຜນທີ່ທັງໝົດ</string>
+  <!-- Button that retries a failed upload. -->
+  <string name="mobile_retry">ລອງໃໝ່</string>
+  <!-- Button that uploads a pending change now. -->
+  <string name="mobile_upload">ອັບໂຫຼດ</string>
+
+  <!-- Downloaded surveys screen -->
+  <string name="mobile_downloaded_surveys_title">ແບບສຳຫຼວດທີ່ດາວໂຫຼດແລ້ວ</string>
+  <!-- %1$d: number of surveys downloaded on the device. -->
+  <plurals name="mobile_downloaded_surveys_count">
+    <item quantity="other">%1$d ແບບສຳຫຼວດທີ່ພ້ອມໃຊ້ອອບລາຍໃນອຸປະກອນນີ້</item>
+  </plurals>
+  <!-- Badge on the currently open survey. -->
+  <string name="mobile_survey_badge_active">ໃຊ້ຢູ່</string>
+  <!-- Survey card details. %1$s: survey location (e.g. "Kenya"); %2$d: number of map locations. -->
+  <plurals name="mobile_survey_location_entity_count">
+    <item quantity="other">%1$s • %2$d ສະຖານທີ່</item>
+  </plurals>
+  <!-- Button that switches to another downloaded survey. -->
+  <string name="mobile_switch">ປ່ຽນ</string>
+  <string name="mobile_browse_more_surveys">ເບິ່ງ ແລະ ດາວໂຫຼດແບບສຳຫຼວດເພີ່ມເຕີມ</string>
+
+  <!-- Offline maps screen -->
+  <string name="mobile_offline_maps_title">ແຜນທີ່ອອບລາຍ</string>
+
+  <!-- Device storage card -->
+  <string name="mobile_device_storage_title">ພື້ນທີ່ຈັດເກັບຂອງອຸປະກອນ</string>
+  <!-- %1$s: free storage (e.g. "12 GB"); %2$s: total storage (e.g. "64 GB"). -->
+  <string name="mobile_device_storage_free_of_total">ວ່າງ %1$s ຈາກ %2$s</string>
+  <string name="mobile_device_storage_downloaded_imagery">ຮູບແຜນທີ່ທີ່ດາວໂຫຼດແລ້ວ</string>
+  <string name="mobile_device_storage_data">ແບບຟອມທີ່ສົ່ງແລ້ວ, ຮູບພາບ ແລະ ອື່ນໆ</string>
+  <string name="mobile_device_storage_other">ລະບົບ ແລະ ແອັບອື່ນໆ</string>
+  <string name="mobile_device_storage_free">ພື້ນທີ່ວ່າງ</string>
+  <string name="mobile_device_storage_safeguard_notice">ການດາວໂຫຼດອອບລາຍຈະຢຸດຊົ່ວຄາວອັດຕະໂນມັດ ຖ້າພື້ນທີ່ຈັດເກັບຂອງອຸປະກອນຕ່ຳກວ່າ 500 MB ເພື່ອປົກປ້ອງຄວາມສະຖຽນຂອງລະບົບ.</string>
+  <!-- Title of the map mode where the user frames an area to save for offline use. -->
+  <string name="mobile_offline_area_title">ບັນທຶກພື້ນທີ່ເພື່ອໃຊ້ແບບອອບລາຍ</string>
+  <!-- Hint under the title while framing an area to save for offline use. -->
+  <string name="mobile_offline_area_hint">ເລື່ອນ ແລະ ຊູມແຜນທີ່ໃຫ້ພື້ນທີ່ເຮັດວຽກຂອງທ່ານຢູ່ໃນກອບ</string>
+  <!-- Accessibility label of the button that leaves the area framing mode. -->
+  <string name="mobile_offline_area_close">ປິດ</string>
+  <!-- Shown while the name of the framed place is looked up. -->
+  <string name="mobile_offline_area_finding_name">ກຳລັງຊອກຫາຊື່ສະຖານທີ່…</string>
+  <!-- Name of a saved map area when no place name was found. %1$s: coordinates of its center, e.g. "0.4160°S, 36.9470°E". -->
+  <string name="mobile_offline_area_near">ພື້ນທີ່ໃກ້ %1$s</string>
+  <!-- Shown while the download size of the framed area is estimated. -->
+  <string name="mobile_offline_area_estimating">ກຳລັງປະເມີນຂະໜາດ…</string>
+  <!-- Estimated download size of the framed area and the free space on the device. %1$s: size, e.g. "48 MB"; %2$s: free space, e.g. "12.4 GB". -->
+  <string name="mobile_offline_area_estimate">ປະມານ %1$s · ຫວ່າງ %2$s</string>
+  <!-- Estimated download size of the framed area when the free space is unknown. %1$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_area_estimate_size">ປະມານ %1$s</string>
+  <!-- The framed area is too large to save. %1$s: its area, e.g. "140 km²"; %2$s: the largest area, e.g. "50 km²". -->
+  <string name="mobile_offline_area_too_large">ພື້ນທີ່ນີ້ປະມານ %1$s. ຊູມເຂົ້າເພື່ອເລືອກ %2$s ຫຼື ໜ້ອຍກວ່າ.</string>
+  <!-- The device lacks space to save the framed area. %1$s: space to free, e.g. "120 MB". -->
+  <string name="mobile_offline_area_not_enough_space">ພື້ນທີ່ບໍ່ພຽງພໍ. ລຶບຂໍ້ມູນໃຫ້ຫວ່າງ %1$s ເພື່ອບັນທຶກພື້ນທີ່ນີ້.</string>
+  <!-- The device is offline, so the framed area can't be estimated or saved. -->
+  <string name="mobile_offline_area_offline">ທ່ານອອບລາຍຢູ່. ເຊື່ອມຕໍ່ອິນເຕີເນັດເພື່ອບັນທຶກພື້ນທີ່ນີ້.</string>
+  <!-- The framed area spans the 180° meridian, which saved areas can't. -->
+  <string name="mobile_offline_area_crosses_antimeridian">ພື້ນທີ່ນີ້ຂ້າມເສັ້ນແວງ 180°. ເລື່ອນແຜນທີ່ເພື່ອເລືອກພື້ນທີ່ຢູ່ຂ້າງດຽວ.</string>
+  <!-- This build of the app can't save map areas. -->
+  <string name="mobile_offline_area_unavailable">ບໍ່ສາມາດບັນທຶກພື້ນທີ່ແຜນທີ່ໃນອຸປະກອນນີ້ໄດ້.</string>
+  <!-- The size of the framed area couldn't be estimated, for a reason other than the connection. -->
+  <string name="mobile_offline_area_estimate_failed">ບໍ່ສາມາດປະເມີນຂະໜາດຂອງພື້ນທີ່ນີ້ໄດ້.</string>
+  <!-- Primary button that saves the framed area for offline use. -->
+  <string name="mobile_offline_area_save">ບັນທຶກໄວ້ໃຊ້ອອບລາຍ</string>
+  <!-- Progress of saving an area for offline use. %1$d: percent done, e.g. 27. -->
+  <string name="mobile_offline_area_saving">ກຳລັງບັນທຶກໄວ້ໃຊ້ອອບລາຍ… %1$d%</string>
+  <!-- How much of an area was saved so far. %1$s: saved, e.g. "13 MB"; %2$s: estimated total, e.g. "48 MB". -->
+  <string name="mobile_offline_area_saving_size">%1$s ຈາກປະມານ %2$s</string>
+  <!-- Shown when an area finished saving for offline use. -->
+  <string name="mobile_offline_area_saved">ບັນທຶກໄວ້ໃຊ້ອອບລາຍແລ້ວ</string>
+  <!-- Saving an area stopped because the device reached its limit of offline imagery. -->
+  <string name="mobile_offline_area_tile_limit">ອຸປະກອນນີ້ຮອດຂີດຈຳກັດພາບອອບລາຍແລ້ວ. ລຶບພື້ນທີ່ໜຶ່ງອອກເພື່ອບັນທຶກເພີ່ມ.</string>
+  <!-- Saving an area stopped because of an error. -->
+  <string name="mobile_offline_area_failed">ບໍ່ສາມາດບັນທຶກພື້ນທີ່ນີ້ໄດ້.</string>
+  <!-- Button that hides the saving progress while the area keeps saving. -->
+  <string name="mobile_hide">ເຊື່ອງ</string>
+  <!-- Button that closes the area framing mode after an area was saved. -->
+  <string name="mobile_done">ແລ້ວໆ</string>
+  <!-- Button that tries a failed estimate or save again. -->
+  <string name="mobile_try_again">ລອງໃໝ່</string>
+  <!-- Button that resumes saving a paused layer of a saved area. -->
+  <string name="mobile_resume">ສືບຕໍ່</string>
+  <!-- Notice in the mobile app in a web browser, where saving map areas is only simulated. -->
+  <string name="mobile_offline_area_simulated_notice">ການດາວໂຫຼດຈຳລອງ. ແຜນທີ່ອອບລາຍໃຊ້ໄດ້ສະເພາະໃນແອັບ Android ແລະ iOS.</string>
+  <!-- Banner on Offline maps in the mobile app in a web browser, where saving map areas is only simulated. -->
+  <string name="mobile_offline_maps_simulated_banner">ການດາວໂຫຼດຢູ່ນີ້ເປັນການຈຳລອງ: ບໍ່ມີການບັນທຶກພາບ ແລະ ຊື່ພື້ນທີ່ເປັນພຽງຕົວຢ່າງ. ເພື່ອໃຊ້ແຜນທີ່ໂດຍບໍ່ມີອິນເຕີເນັດ, ໃຫ້ບັນທຶກພື້ນທີ່ໃນແອັບ Android ຫຼື iOS.</string>
+  <!-- Label on a saved area or layer that was only simulated (mobile app in a web browser). -->
+  <string name="mobile_offline_maps_simulated_label">ຈຳລອງ</string>
+  <!-- Empty state of Offline maps when no area is saved. -->
+  <string name="mobile_offline_maps_empty_title">ບໍ່ມີພື້ນທີ່ທີ່ບັນທຶກໄວ້ໃຊ້ອອບລາຍ</string>
+  <string name="mobile_offline_maps_empty_body">ບັນທຶກພື້ນທີ່ທີ່ທ່ານເຮັດວຽກ ເພື່ອເບິ່ງແຜນທີ່ໂດຍບໍ່ມີອິນເຕີເນັດ.</string>
+  <!-- When a saved area was saved and what removing it frees. %1$s: date, e.g. "Oct 30, 2026"; %2$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_maps_area_summary">ບັນທຶກເມື່ອ %1$s · ສູງສຸດ %2$s</string>
+  <!-- Percent saved of a layer of a saved area. %1$d: percent, e.g. 62. -->
+  <string name="mobile_offline_maps_layer_percent">%1$d%</string>
+  <!-- Status of a layer of a saved area whose download stopped before it finished. -->
+  <string name="mobile_offline_maps_layer_paused">ຢຸດຊົ່ວຄາວ</string>
+  <!-- Status of a layer of a saved area whose download failed. -->
+  <string name="mobile_offline_maps_layer_failed">ບັນທຶກບໍ່ໄດ້</string>
+  <!-- Accessibility label of the menu of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_area_options">ຕົວເລືອກສຳລັບ %1$s</string>
+  <!-- Accessibility label of the menu of a layer of a saved area. %1$s: layer, e.g. "Satellite". -->
+  <string name="mobile_offline_maps_layer_options">ຕົວເລືອກສຳລັບ %1$s</string>
+  <!-- Menu item that shows a saved area on the map. -->
+  <string name="mobile_offline_maps_show_on_map">ສະແດງໃນແຜນທີ່</string>
+  <!-- Menu item and confirmation button that remove a saved area. -->
+  <string name="mobile_offline_maps_remove_area">ລຶບພື້ນທີ່</string>
+  <!-- Title of the confirmation before removing a saved area. -->
+  <string name="mobile_offline_maps_remove_area_title">ລຶບພື້ນທີ່ທີ່ບັນທຶກໄວ້ບໍ?</string>
+  <!-- Body of the confirmation before removing a saved area. %1$s: area name; %2$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_maps_remove_area_body">ການລຶບ "%1$s" ຈະເຮັດໃຫ້ມີພື້ນທີ່ຫວ່າງສູງສຸດ %2$s. ທ່ານຈະຕ້ອງໃຊ້ອິນເຕີເນັດເພື່ອເບິ່ງພື້ນທີ່ນີ້ແບບອອບລາຍອີກ.</string>
+  <!-- Menu item and confirmation button that remove the satellite layer of a saved area. -->
+  <string name="mobile_offline_maps_remove_satellite">ລຶບດາວທຽມ</string>
+  <!-- Menu item and confirmation button that remove the terrain layer of a saved area. -->
+  <string name="mobile_offline_maps_remove_terrain">ລຶບພູມສັນຖານ</string>
+  <!-- Title of the confirmation before removing the satellite layer of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_remove_satellite_title">ລຶບດາວທຽມອອກຈາກ "%1$s" ບໍ?</string>
+  <!-- Title of the confirmation before removing the terrain layer of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_remove_terrain_title">ລຶບພູມສັນຖານອອກຈາກ "%1$s" ບໍ?</string>
+  <!-- Body of the confirmation before removing a layer of a saved area. %1$s: size, e.g. "38 MB". -->
+  <string name="mobile_offline_maps_remove_layer_body">ສິ່ງນີ້ຈະເຮັດໃຫ້ມີພື້ນທີ່ຫວ່າງສູງສຸດ %1$s. ທ່ານຈະຕ້ອງໃຊ້ອິນເຕີເນັດເພື່ອເບິ່ງພາບນີ້ອີກ.</string>
+
+  <!-- Mobile client version update prompts -->
+  <string name="mobile_update_available_title">ມີການອັບເດດໃໝ່</string>
+  <string name="mobile_update_available_body">ມີ Collect One ເວີຊັນໃໝ່ກວ່າ (%1$s) ໃຫ້ໃຊ້ແລ້ວ.</string>
+  <string name="mobile_update_required_title">ຈຳເປັນຕ້ອງອັບເດດ</string>
+  <string name="mobile_update_required_body">Collect One ເວີຊັນນີ້ (%1$s) ບໍ່ໄດ້ຮັບການຮອງຮັບແລ້ວ. ກະລຸນາອັບເດດເປັນ %2$s ຫຼືສູງກວ່າເພື່ອສືບຕໍ່.</string>
+  <string name="mobile_update_now">ອັບເດດດຽວນີ້</string>
+  <string name="mobile_update_later">ພາຍຫຼັງ</string>
+  <string name="mobile_update_check_again">ກວດສອບອີກຄັ້ງ</string>
+</resources>

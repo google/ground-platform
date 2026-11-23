@@ -61,8 +61,9 @@ message ImpactEvent {
   // Authoritative server commit timestamp for stateless delta synchronization.
   google.protobuf.Timestamp commit_timestamp = 11;
 
-  // Optional ISO-8601 string representation of `occurred_at`.
-  string occurred_at_iso = 12;
+  // Was `occurred_at_iso`, a text copy of `occurred_at`.
+  reserved 12;
+  reserved "occurred_at_iso";
 }
 
 // Kind of "data was used" signal.

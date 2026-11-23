@@ -20,16 +20,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
-import org.openforis.collectone.v2.app.domain.model.AppScreen
 import org.openforis.collectone.v2.app.domain.model.DeviceFormFactor
 import org.openforis.collectone.v2.app.domain.model.DeviceOrientation
-import org.openforis.collectone.v2.app.domain.model.ListFilterTab
 import org.openforis.collectone.v2.app.ui.map.SurveyMap
 import org.openforis.collectone.v2.app.ui.map.SurveyMapContent
 import org.openforis.collectone.v2.core.forms.media.MediaCaptureKind
 import org.openforis.collectone.v2.core.forms.ui.FormWizardStep
 import org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm
 import org.openforis.collectone.v2.mobile.ui.MobileAppState
+import org.openforis.collectone.v2.mobile.ui.navigation.MobileRoute
 
 class WorkbenchStateTest {
   private fun SurveyMap.entityFeatures() =
@@ -41,19 +40,19 @@ class WorkbenchStateTest {
     val state = workbench.mobile
 
     // Defaults to Mobile (404 × 764 dp)
-    assertEquals(DeviceFormFactor.MOBILE, workbench.deviceFormFactor)
-    assertEquals(404, workbench.deviceFormFactor.frameWidthDp)
-    assertEquals(764, workbench.deviceFormFactor.frameHeightDp)
+    assertEquals(DeviceFormFactor.MOBILE, workbench.viewModel.uiState.value.deviceFormFactor)
+    assertEquals(404, workbench.viewModel.uiState.value.deviceFormFactor.frameWidthDp)
+    assertEquals(764, workbench.viewModel.uiState.value.deviceFormFactor.frameHeightDp)
 
     // Toggle to Tablet (780 × 620 dp)
     workbench.toggleDeviceFormFactor()
-    assertEquals(DeviceFormFactor.TABLET, workbench.deviceFormFactor)
-    assertEquals(780, workbench.deviceFormFactor.frameWidthDp)
-    assertEquals(620, workbench.deviceFormFactor.frameHeightDp)
+    assertEquals(DeviceFormFactor.TABLET, workbench.viewModel.uiState.value.deviceFormFactor)
+    assertEquals(780, workbench.viewModel.uiState.value.deviceFormFactor.frameWidthDp)
+    assertEquals(620, workbench.viewModel.uiState.value.deviceFormFactor.frameHeightDp)
 
     // Explicitly select Mobile
     workbench.selectDeviceFormFactor(DeviceFormFactor.MOBILE)
-    assertEquals(DeviceFormFactor.MOBILE, workbench.deviceFormFactor)
+    assertEquals(DeviceFormFactor.MOBILE, workbench.viewModel.uiState.value.deviceFormFactor)
   }
 
   @Test
@@ -62,104 +61,116 @@ class WorkbenchStateTest {
     val state = workbench.mobile
 
     // Mobile defaults to Portrait (404 × 764 dp)
-    assertEquals(DeviceFormFactor.MOBILE, workbench.deviceFormFactor)
-    assertEquals(DeviceOrientation.PORTRAIT, workbench.deviceOrientation)
-    assertFalse(workbench.isDeviceRotated)
-    assertEquals(404, workbench.effectiveFrameWidthDp)
-    assertEquals(764, workbench.effectiveFrameHeightDp)
-    assertEquals("404 × 764 dp", workbench.effectiveDimensionsLabel)
+    assertEquals(DeviceFormFactor.MOBILE, workbench.viewModel.uiState.value.deviceFormFactor)
+    assertEquals(DeviceOrientation.PORTRAIT, workbench.viewModel.uiState.value.deviceOrientation)
+    assertFalse(workbench.viewModel.uiState.value.isDeviceRotated)
+    assertEquals(404, workbench.viewModel.uiState.value.effectiveFrameWidthDp)
+    assertEquals(764, workbench.viewModel.uiState.value.effectiveFrameHeightDp)
+    assertEquals("404 × 764 dp", workbench.viewModel.uiState.value.effectiveDimensionsLabel)
 
     // Rotate Mobile -> Landscape (764 × 404 dp)
     workbench.rotateDevice()
-    assertEquals(DeviceOrientation.LANDSCAPE, workbench.deviceOrientation)
-    assertTrue(workbench.isDeviceRotated)
-    assertEquals(764, workbench.effectiveFrameWidthDp)
-    assertEquals(404, workbench.effectiveFrameHeightDp)
-    assertEquals("764 × 404 dp", workbench.effectiveDimensionsLabel)
+    assertEquals(DeviceOrientation.LANDSCAPE, workbench.viewModel.uiState.value.deviceOrientation)
+    assertTrue(workbench.viewModel.uiState.value.isDeviceRotated)
+    assertEquals(764, workbench.viewModel.uiState.value.effectiveFrameWidthDp)
+    assertEquals(404, workbench.viewModel.uiState.value.effectiveFrameHeightDp)
+    assertEquals("764 × 404 dp", workbench.viewModel.uiState.value.effectiveDimensionsLabel)
 
     // Rotate Mobile back -> Portrait (404 × 764 dp)
     workbench.rotateDevice()
-    assertEquals(DeviceOrientation.PORTRAIT, workbench.deviceOrientation)
-    assertFalse(workbench.isDeviceRotated)
-    assertEquals(404, workbench.effectiveFrameWidthDp)
-    assertEquals(764, workbench.effectiveFrameHeightDp)
+    assertEquals(DeviceOrientation.PORTRAIT, workbench.viewModel.uiState.value.deviceOrientation)
+    assertFalse(workbench.viewModel.uiState.value.isDeviceRotated)
+    assertEquals(404, workbench.viewModel.uiState.value.effectiveFrameWidthDp)
+    assertEquals(764, workbench.viewModel.uiState.value.effectiveFrameHeightDp)
 
     // Switch to Tablet -> defaults to Landscape (780 × 620 dp)
     workbench.selectDeviceFormFactor(DeviceFormFactor.TABLET)
-    assertEquals(DeviceFormFactor.TABLET, workbench.deviceFormFactor)
-    assertEquals(DeviceOrientation.LANDSCAPE, workbench.deviceOrientation)
-    assertFalse(workbench.isDeviceRotated)
-    assertEquals(780, workbench.effectiveFrameWidthDp)
-    assertEquals(620, workbench.effectiveFrameHeightDp)
-    assertEquals("780 × 620 dp", workbench.effectiveDimensionsLabel)
+    assertEquals(DeviceFormFactor.TABLET, workbench.viewModel.uiState.value.deviceFormFactor)
+    assertEquals(DeviceOrientation.LANDSCAPE, workbench.viewModel.uiState.value.deviceOrientation)
+    assertFalse(workbench.viewModel.uiState.value.isDeviceRotated)
+    assertEquals(780, workbench.viewModel.uiState.value.effectiveFrameWidthDp)
+    assertEquals(620, workbench.viewModel.uiState.value.effectiveFrameHeightDp)
+    assertEquals("780 × 620 dp", workbench.viewModel.uiState.value.effectiveDimensionsLabel)
 
     // Rotate Tablet -> Portrait (620 × 780 dp)
     workbench.rotateDevice()
-    assertEquals(DeviceOrientation.PORTRAIT, workbench.deviceOrientation)
-    assertTrue(workbench.isDeviceRotated)
-    assertEquals(620, workbench.effectiveFrameWidthDp)
-    assertEquals(780, workbench.effectiveFrameHeightDp)
-    assertEquals("620 × 780 dp", workbench.effectiveDimensionsLabel)
+    assertEquals(DeviceOrientation.PORTRAIT, workbench.viewModel.uiState.value.deviceOrientation)
+    assertTrue(workbench.viewModel.uiState.value.isDeviceRotated)
+    assertEquals(620, workbench.viewModel.uiState.value.effectiveFrameWidthDp)
+    assertEquals(780, workbench.viewModel.uiState.value.effectiveFrameHeightDp)
+    assertEquals("620 × 780 dp", workbench.viewModel.uiState.value.effectiveDimensionsLabel)
   }
 
   @Test
   fun updateCustomXFormsXml_parsesValidAndInvalidXForms_andRefreshesActiveController() {
     val workbench =
       WorkbenchState(
-        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+        MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
       )
     val state = workbench.mobile
-    assertEquals(null, workbench.xformsXmlError)
-    assertTrue(state.customFormDef != null)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    assertTrue(state.viewModels.dataCollection.uiState.value.customFormDef != null)
 
     // Launch form runner first
-    state.launchFormForEntity(
+    state.viewModels.dataCollection.launchFormForEntity(
       entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
       formId = "form-shade-canopy-audit",
     )
-    assertTrue(state.isDataCollectionFormOpen)
+    assertTrue(state.viewModels.dataCollection.uiState.value.isDataCollectionFormOpen)
 
     // 1. Update with valid Baobab Biometrics XForms XML -> refreshes open FormWizardController
     workbench.updateCustomXFormsXml(BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML)
-    assertEquals(null, workbench.xformsXmlError)
-    assertEquals("Shade Tree & Baobab Biometrics", state.customFormDef?.title)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
     assertEquals(
       "Shade Tree & Baobab Biometrics",
-      state.activeFormWizardController?.formState?.formDef?.title,
+      state.viewModels.dataCollection.uiState.value.customFormDef?.title,
+    )
+    assertEquals(
+      "Shade Tree & Baobab Biometrics",
+      state.viewModels.dataCollection.uiState.value.activeFormWizardController
+        ?.formState
+        ?.formDef
+        ?.title,
     )
 
     // 2. Update with invalid XML -> populates xformsXmlError and clears customFormDef
     workbench.updateCustomXFormsXml("<h:html><unclosed_tag></h:html>")
-    assertTrue(workbench.xformsXmlError != null)
-    assertEquals(null, state.customFormDef)
+    assertTrue(workbench.viewModel.uiState.value.xformsXmlError != null)
+    assertEquals(null, state.viewModels.dataCollection.uiState.value.customFormDef)
 
     // 3. Reset to default sample XForms XML -> clears error and restores default FormDef
     workbench.resetDefaultXFormsXml()
-    assertEquals(null, workbench.xformsXmlError)
-    assertEquals("EUDR & Shade-Tree Field Survey", state.customFormDef?.title)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    assertEquals(
+      "EUDR & Shade-Tree Field Survey",
+      state.viewModels.dataCollection.uiState.value.customFormDef?.title,
+    )
 
     // 4. Clearing customXFormsXml uses built-in fallback FormDef per form ID
     workbench.updateCustomXFormsXml("")
-    assertEquals(null, workbench.xformsXmlError)
-    assertEquals(null, state.customFormDef)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    assertEquals(null, state.viewModels.dataCollection.uiState.value.customFormDef)
     assertEquals(
       "Seasonal Shade Tree & Canopy Audit",
-      state.activeFormWizardController?.formState?.formDef?.title,
+      state.viewModels.dataCollection.uiState.value.activeFormWizardController
+        ?.formState
+        ?.formDef
+        ?.title,
     )
-    state.closeActiveFormRunner()
-    assertFalse(state.isDataCollectionFormOpen)
+    state.viewModels.dataCollection.closeActiveFormRunner()
+    assertFalse(state.viewModels.dataCollection.uiState.value.isDataCollectionFormOpen)
   }
 
   @Test
   fun selectWorkbenchExampleForm_swapsAndValidatesAllFiveExampleForms() {
     val workbench =
       WorkbenchState(
-        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+        MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
       )
     val state = workbench.mobile
     assertEquals(
       org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm.ALL_FIELD_TYPES,
-      workbench.selectedWorkbenchExampleForm,
+      workbench.viewModel.uiState.value.selectedWorkbenchExampleForm,
     )
 
     // 1. Simple Single-Point & Land Use Survey (pan allowed via placement-map, 10m accuracy
@@ -168,19 +179,22 @@ class WorkbenchStateTest {
       org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm.SINGLE_POINT_LAND_USE,
       launchImmediately = true,
     )
-    assertEquals("00000036-1a1c-5c51-997f-28b67d813aa3", state.activeSurveyId)
-    assertEquals(3, state.entities.size)
-    assertEquals(0, state.standaloneSubmissions.size)
-    assertEquals(3, state.allSubmissions.size)
-    assertEquals(3, state.submissionGeometries.size)
-    assertEquals(1, state.forms.size)
-    assertFalse(state.forms.first().requiresEntity)
-    assertEquals(null, workbench.xformsXmlError)
-    assertTrue(state.isDataCollectionFormOpen)
-    val singlePointFormDef = state.customFormDef!!
+    assertEquals(
+      "00000036-1a1c-5c51-997f-28b67d813aa3",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.entities.size)
+    assertEquals(0, state.viewModels.dataCollection.uiState.value.standaloneSubmissions.size)
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.allSubmissions.size)
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.submissionGeometries.size)
+    assertEquals(1, state.viewModels.dataCollection.uiState.value.forms.size)
+    assertFalse(state.viewModels.dataCollection.uiState.value.forms.first().requiresEntity)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    assertTrue(state.viewModels.dataCollection.uiState.value.isDataCollectionFormOpen)
+    val singlePointFormDef = state.viewModels.dataCollection.uiState.value.customFormDef!!
     assertEquals("Simple Point & Land Use Observation", singlePointFormDef.title)
     val samplePointCtrl =
-      state.activeFormWizardController!!
+      state.viewModels.dataCollection.uiState.value.activeFormWizardController!!
         .steps
         .filterIsInstance<org.openforis.collectone.v2.core.forms.ui.FormWizardStep.QuestionStep>()
         .map { it.control }
@@ -194,15 +208,21 @@ class WorkbenchStateTest {
       org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
       launchImmediately = true,
     )
-    assertEquals("00000034-c088-5ab9-8b98-e6bccb3dca71", state.activeSurveyId)
-    assertEquals(5, state.entities.size)
-    assertEquals("00000016-cc1f-5125-8841-166ab5b5f68f", state.entities.first().id)
-    assertEquals(3, state.allSubmissions.size)
-    assertEquals(3, state.submissionGeometries.size)
-    assertEquals(1, state.forms.size)
-    assertTrue(state.forms.first().requiresEntity)
-    assertEquals(null, workbench.xformsXmlError)
-    val samplePlotsFormDef = state.customFormDef!!
+    assertEquals(
+      "00000034-c088-5ab9-8b98-e6bccb3dca71",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
+    assertEquals(5, state.viewModels.dataCollection.uiState.value.entities.size)
+    assertEquals(
+      "00000016-cc1f-5125-8841-166ab5b5f68f",
+      state.viewModels.dataCollection.uiState.value.entities.first().id,
+    )
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.allSubmissions.size)
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.submissionGeometries.size)
+    assertEquals(1, state.viewModels.dataCollection.uiState.value.forms.size)
+    assertTrue(state.viewModels.dataCollection.uiState.value.forms.first().requiresEntity)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    val samplePlotsFormDef = state.viewModels.dataCollection.uiState.value.customFormDef!!
     assertEquals("Sample Plot Entity & Forest Stand Assessment", samplePlotsFormDef.title)
     assertTrue(
       samplePlotsFormDef.model?.secondary_instances?.any { sec ->
@@ -213,7 +233,7 @@ class WorkbenchStateTest {
       } == true
     )
     val plotSelectCtrl =
-      state.activeFormWizardController!!
+      state.viewModels.dataCollection.uiState.value.activeFormWizardController!!
         .steps
         .filterIsInstance<org.openforis.collectone.v2.core.forms.ui.FormWizardStep.QuestionStep>()
         .map { it.control }
@@ -227,18 +247,21 @@ class WorkbenchStateTest {
       org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm.COMMODITY_PERIMETER_AND_CENTER,
       launchImmediately = true,
     )
-    assertEquals("00000031-ffc6-5c8e-934c-d14ec07533ad", state.activeSurveyId)
-    assertEquals(3, state.entities.size)
-    assertEquals(0, state.standaloneSubmissions.size)
-    assertEquals(3, state.allSubmissions.size)
-    assertEquals(3, state.submissionGeometries.size)
-    assertEquals(1, state.forms.size)
-    assertFalse(state.forms.first().requiresEntity)
-    assertEquals(null, workbench.xformsXmlError)
-    val commodityFormDef = state.customFormDef!!
+    assertEquals(
+      "00000031-ffc6-5c8e-934c-d14ec07533ad",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.entities.size)
+    assertEquals(0, state.viewModels.dataCollection.uiState.value.standaloneSubmissions.size)
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.allSubmissions.size)
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.submissionGeometries.size)
+    assertEquals(1, state.viewModels.dataCollection.uiState.value.forms.size)
+    assertFalse(state.viewModels.dataCollection.uiState.value.forms.first().requiresEntity)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    val commodityFormDef = state.viewModels.dataCollection.uiState.value.customFormDef!!
     assertEquals("Forest-Risk Commodity Plot Perimeter & Center Mapping", commodityFormDef.title)
     val commodityQuestionControls =
-      state.activeFormWizardController!!
+      state.viewModels.dataCollection.uiState.value.activeFormWizardController!!
         .steps
         .filterIsInstance<org.openforis.collectone.v2.core.forms.ui.FormWizardStep.QuestionStep>()
         .map { it.control }
@@ -258,18 +281,24 @@ class WorkbenchStateTest {
         .HOUSEHOLD_SURVEY_PAST_INDIVIDUALS,
       launchImmediately = true,
     )
-    assertEquals("00000032-8d62-5717-8074-f4917e0cd76d", state.activeSurveyId)
-    assertEquals(6, state.entities.size)
-    assertEquals("0000000c-a9ae-59f6-ac51-7f5a8777598f", state.entities.first().id)
-    assertEquals(4, state.allSubmissions.size)
-    assertEquals(2, state.submissionGeometries.size)
-    assertEquals(1, state.forms.size)
-    assertTrue(state.forms.first().requiresEntity)
-    assertEquals(null, workbench.xformsXmlError)
-    val householdFormDef = state.customFormDef!!
+    assertEquals(
+      "00000032-8d62-5717-8074-f4917e0cd76d",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
+    assertEquals(6, state.viewModels.dataCollection.uiState.value.entities.size)
+    assertEquals(
+      "0000000c-a9ae-59f6-ac51-7f5a8777598f",
+      state.viewModels.dataCollection.uiState.value.entities.first().id,
+    )
+    assertEquals(4, state.viewModels.dataCollection.uiState.value.allSubmissions.size)
+    assertEquals(2, state.viewModels.dataCollection.uiState.value.submissionGeometries.size)
+    assertEquals(1, state.viewModels.dataCollection.uiState.value.forms.size)
+    assertTrue(state.viewModels.dataCollection.uiState.value.forms.first().requiresEntity)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    val householdFormDef = state.viewModels.dataCollection.uiState.value.customFormDef!!
     assertEquals("Household Panel Survey (Preloaded Past Individuals)", householdFormDef.title)
     val respondentSelectCtrl =
-      state.activeFormWizardController!!
+      state.viewModels.dataCollection.uiState.value.activeFormWizardController!!
         .steps
         .filterIsInstance<org.openforis.collectone.v2.core.forms.ui.FormWizardStep.QuestionStep>()
         .map { it.control }
@@ -282,20 +311,42 @@ class WorkbenchStateTest {
       org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm.ALL_FIELD_TYPES,
       launchImmediately = true,
     )
-    assertEquals("00000033-6b50-51cd-ac94-baea2ea06d65", state.activeSurveyId)
-    assertEquals(5, state.entities.size)
-    assertEquals(6, state.forms.size)
-    assertEquals(null, workbench.xformsXmlError)
-    val allTypesFormDef = state.customFormDef!!
+    assertEquals(
+      "00000033-6b50-51cd-ac94-baea2ea06d65",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
+    assertEquals(5, state.viewModels.dataCollection.uiState.value.entities.size)
+    assertEquals(6, state.viewModels.dataCollection.uiState.value.forms.size)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    val allTypesFormDef = state.viewModels.dataCollection.uiState.value.customFormDef!!
     assertEquals("EUDR & Shade-Tree Field Survey", allTypesFormDef.title)
     assertTrue((allTypesFormDef.model?.bindings?.size ?: 0) >= 18)
+
+    // 6. Google Earth Sample-Plot Interpretation ("Peatland & Canopy Change Interpretation",
+    // 5 polygon plots, 3 preloaded submissions, strictly Earth-compatible fields)
+    workbench.selectWorkbenchExampleForm(
+      WorkbenchExampleForm.GOOGLE_EARTH_PLOT_INTERPRETATION,
+      launchImmediately = true,
+    )
+    assertEquals(
+      "00000037-7e4a-5b2c-9d18-3f8a61c4e902",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
+    assertEquals(5, state.viewModels.dataCollection.uiState.value.entities.size)
+    assertEquals(3, state.viewModels.dataCollection.uiState.value.allSubmissions.size)
+    assertEquals(1, state.viewModels.dataCollection.uiState.value.forms.size)
+    assertTrue(state.viewModels.dataCollection.uiState.value.forms.first().openInGoogleEarth)
+    assertTrue(state.viewModels.dataCollection.uiState.value.forms.first().requiresEntity)
+    assertEquals(null, workbench.viewModel.uiState.value.xformsXmlError)
+    val earthFormDef = state.viewModels.dataCollection.uiState.value.customFormDef!!
+    assertEquals("Peatland & Canopy Change Interpretation (Google Earth)", earthFormDef.title)
   }
 
   @Test
   fun geoPointStepInDataCollectionForm_showsMapAndSupportsCaptureLocationAndAddPointTriggers() {
     val workbench =
       WorkbenchState(
-        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+        MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
       )
     val state = workbench.mobile
     workbench.selectWorkbenchExampleForm(
@@ -303,26 +354,17 @@ class WorkbenchStateTest {
       launchImmediately = true,
     )
 
-    assertTrue(state.isDataCollectionFormOpen)
-    val ctrl = assertNotNull(state.activeFormWizardController)
+    assertTrue(state.viewModels.dataCollection.uiState.value.isDataCollectionFormOpen)
+    val ctrl =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.activeFormWizardController)
     assertEquals(0, ctrl.currentStepIndex)
-    assertTrue(state.isCurrentFormStepGeoPoint)
-
-    // Verify trigger labels for unpanned ("Capture location") vs panned ("Add point")
-    assertEquals(
-      "Capture location",
-      org.openforis.collectone.v2.core.forms.ui.geoPointPrimaryTriggerLabel(isPanned = false),
-    )
-    assertEquals(
-      "Add point",
-      org.openforis.collectone.v2.core.forms.ui.geoPointPrimaryTriggerLabel(isPanned = true),
-    )
+    assertTrue(state.viewModels.dataCollection.uiState.value.isCurrentFormStepGeoPoint)
 
     // Capture a location on the required geopoint step, then advance to the next step (select1
     // land_use) -> isCurrentFormStepGeoPoint becomes false
     ctrl.updateGeoPoint("/data/sample_point", -1.292066, 36.821946, 1680.0, 6.4)
     assertTrue(ctrl.nextStep())
-    assertFalse(state.isCurrentFormStepGeoPoint)
+    assertFalse(state.viewModels.dataCollection.uiState.value.isCurrentFormStepGeoPoint)
   }
 
   @Test
@@ -334,7 +376,7 @@ class WorkbenchStateTest {
       launchImmediately = true,
     )
     val kinds =
-      state.activeFormWizardController!!
+      state.viewModels.dataCollection.uiState.value.activeFormWizardController!!
         .steps
         .filterIsInstance<FormWizardStep.QuestionStep>()
         .mapNotNull { it.control.mediaCapture?.kind }
@@ -354,10 +396,10 @@ class WorkbenchStateTest {
       description = "Updated survey description from the survey editor.",
     )
 
-    assertEquals("Updated Survey Title", workbench.mobile.activeSurvey.title)
+    assertEquals("Updated Survey Title", workbench.mobile.activeSurveyAccess.activeSurvey.title)
     assertEquals(
       "Updated survey description from the survey editor.",
-      workbench.mobile.activeSurvey.description,
+      workbench.mobile.activeSurveyAccess.activeSurvey.description,
     )
   }
 
@@ -365,37 +407,44 @@ class WorkbenchStateTest {
   fun reset_reseedsSampleData() {
     val workbench =
       WorkbenchState(
-        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+        MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
       )
     val state = workbench.mobile
-    val initialEntities = state.entities
-    state.entities =
-      initialEntities +
-        List(10) { i ->
-          initialEntities.first().copy(id = "entity-extra-$i", submissions = emptyList())
-        }
-    state.syncAllOutboxMutations()
-    assertEquals(initialEntities.size + 10, state.entities.size)
+    val initialEntities = state.viewModels.dataCollection.uiState.value.entities
+    val added =
+      List(10) { i ->
+        initialEntities.first().copy(id = "entity-extra-$i", submissions = emptyList())
+      }
+    state.dataHolder.launch {
+      state.dataHolder.surveyRepository.setEntities(initialEntities + added)
+    }
+    state.viewModels.dashboard.syncAllOutboxMutations()
+    assertEquals(
+      initialEntities.size + 10,
+      state.viewModels.dataCollection.uiState.value.entities.size,
+    )
 
     workbench.resetSampleData()
-    assertEquals("00000033-6b50-51cd-ac94-baea2ea06d65", state.activeSurveyId)
-    assertEquals(initialEntities, state.entities)
-    assertTrue(state.mutations.any { it.isOutbox })
+    assertEquals(
+      "00000033-6b50-51cd-ac94-baea2ea06d65",
+      state.viewModels.dashboard.uiState.value.activeSurveyId,
+    )
+    assertEquals(initialEntities, state.viewModels.dataCollection.uiState.value.entities)
+    assertTrue(state.viewModels.dashboard.uiState.value.mutations.any { it.isOutbox })
   }
 
   @Test
   fun airplaneMode_takesTheMobileAppOffline() {
     val workbench =
       WorkbenchState(
-        MobileAppState(initialScreen = AppScreen.MAIN_SURVEY, dataHolder = sampleDataHolder())
+        MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
       )
     val mobile = workbench.mobile
 
     workbench.updateAirplaneMode(true)
-    assertFalse(mobile.isOnline)
-    assertFalse(mobile.isPlacesSearchAvailable)
-    assertEquals(ListFilterTab.ALL, mobile.listFilterTab)
-    assertTrue(mobile.filteredListPlaces.isEmpty())
+    assertFalse(mobile.viewModels.surveyMap.uiState.value.isOnline)
+    assertFalse(mobile.viewModels.surveyMap.uiState.value.isPlacesSearchAvailable)
+    assertTrue(mobile.viewModels.listSearch.uiState.value.places.isEmpty())
   }
 
   @Test
@@ -435,5 +484,21 @@ class WorkbenchStateTest {
     // Explicit ?chrome=1 / ?chrome=true forces chrome on mobile
     assertTrue(shouldShowWorkbenchChrome(search = "?chrome=1", userAgent = androidUa))
     assertTrue(shouldShowWorkbenchChrome(search = "?foo=1&chrome=true", userAgent = iphoneUa))
+  }
+
+  @Test
+  fun downloadUrls_resolveFromHostOriginAndIgnoreBlank() {
+    assertEquals(
+      "https://mobile.example.org/collect-one.apk",
+      apkDownloadUrl("https://mobile.example.org"),
+    )
+    assertEquals(
+      "https://mobile.example.org/collect-one-ios.html",
+      iosDownloadUrl("https://mobile.example.org"),
+    )
+    assertEquals("https://example.com/collect-one.apk", apkDownloadUrl("https://example.com/"))
+    assertEquals("https://example.com/collect-one-ios.html", iosDownloadUrl("https://example.com/"))
+    assertEquals("", apkDownloadUrl(""))
+    assertEquals("", iosDownloadUrl(""))
   }
 }

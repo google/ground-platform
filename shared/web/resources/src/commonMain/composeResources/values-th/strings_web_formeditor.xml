@@ -1,0 +1,819 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Shared across the form editor. -->
+  <string name="formeditor_cancel">ยกเลิก</string>
+  <string name="formeditor_delete">ลบ</string>
+  <!-- Shown in place of a form title the designer hasn't entered yet. -->
+  <string name="formeditor_untitled_form">แบบฟอร์มที่ไม่มีชื่อ</string>
+  <!-- Field label: the value a condition compares against. -->
+  <string name="formeditor_value">ค่า</string>
+  <!-- Field label: comparison operator of a display-logic or status rule (e.g. "is equal to"). -->
+  <string name="formeditor_condition">เงื่อนไข</string>
+  <!-- Field label: which form question a rule refers to. -->
+  <string name="formeditor_question">คำถาม</string>
+  <!-- Dropdown placeholder when nothing is selected yet. -->
+  <string name="formeditor_choose">เลือก</string>
+  <!-- Dropdown placeholder for picking one of a question's answer choices. -->
+  <string name="formeditor_pick_a_choice">เลือกตัวเลือก</string>
+  <!-- Dropdown option meaning "no selection". -->
+  <string name="formeditor_none">ไม่มี</string>
+  <!-- Button that fixes every listed problem at once. -->
+  <string name="formeditor_fix_all">แก้ไขทั้งหมด</string>
+  <!-- Heading of a collapsible section with advanced settings. -->
+  <string name="formeditor_advanced">ขั้นสูง</string>
+  <!-- Last screen of a form, where the collector reviews answers and submits. -->
+  <string name="formeditor_review_and_submit">ตรวจสอบและส่ง</string>
+  <!-- Question has no display logic, so it is always shown. -->
+  <string name="formeditor_always_shown">แสดงเสมอ</string>
+  <!-- Shown in place of a question label the designer hasn't entered yet. -->
+  <string name="formeditor_no_label">(ไม่มีป้ายกำกับ)</string>
+  <!-- Icon description: the question is linked to a standard (dictionary) field. -->
+  <string name="formeditor_linked_to_standard_field">ลิงก์กับฟิลด์มาตรฐานแล้ว</string>
+  <!-- Icon description: the question has validation issues. -->
+  <string name="formeditor_has_issues">มีปัญหา</string>
+  <!-- Preview map button that zooms in to the selected feature. -->
+  <string name="formeditor_adjust_view">ปรับมุมมอง</string>
+  <!-- Preview map button that zooms back out. -->
+  <string name="formeditor_reset_view">รีเซ็ตมุมมอง</string>
+  <!-- Subtitle of the data-collection screen in previews. -->
+  <string name="formeditor_collect_data">เก็บข้อมูล</string>
+  <string name="formeditor_add_a_question">เพิ่มคำถาม</string>
+  <string name="formeditor_next">ถัดไป</string>
+  <string name="formeditor_form_settings">การตั้งค่าแบบฟอร์ม</string>
+  <!-- Field label for a question or choice label. -->
+  <string name="formeditor_label">ป้ายกำกับ</string>
+  <!-- Field label for a question or choice label in a non-default language. %1$s: language name. -->
+  <string name="formeditor_label_in_language">ป้ายกำกับ (%1$s)</string>
+  <!-- Short question number badge. %1$d: question number (Q1, Q2, …). -->
+  <string name="formeditor_question_number_badge">ข้อ %1$d</string>
+  <!-- Language menu entry for the survey's default language. %1$s: language name. -->
+  <string name="formeditor_language_default">%1$s • ค่าเริ่มต้น</string>
+  <!-- Title of the form preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title">ตัวอย่าง • %1$s</string>
+
+  <!-- Errors when adding a question's label to the organization's dictionary. -->
+  <string name="formeditor_error_question_not_found">ไม่พบคำถาม</string>
+  <string name="formeditor_error_dictionary_managers_only">เฉพาะผู้จัดการขององค์กรของแบบสำรวจนี้เท่านั้นที่เพิ่มรายการลงในพจนานุกรมได้</string>
+  <string name="formeditor_error_enter_label">กรุณากรอกป้ายกำกับก่อน</string>
+  <string name="formeditor_error_notes_cant_be_linked">ไม่สามารถลิงก์หมายเหตุได้</string>
+
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: list of impact purposes (e.g. "EUDR due diligence"). -->
+  <string name="formeditor_delete_warning_feeds_impact_report">ฟิลด์นี้ใช้ในรายงานผลกระทบของคุณสำหรับ %1$s</string>
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: standard field name. -->
+  <string name="formeditor_delete_warning_linked_standard_field">ฟิลด์นี้ลิงก์กับฟิลด์มาตรฐาน “%1$s” คำตอบจึงถูกนับรวมในรายงานผลกระทบ</string>
+  <!-- Joins two items of a list: "A and B" (applied repeatedly for longer lists: "A and B and C"). -->
+  <string name="formeditor_list_and">%1$s และ %2$s</string>
+
+  <!-- Form editor page: header, menus, flow canvas, and question cards. -->
+  <!-- Floating button that opens the menu of question types to add. -->
+  <string name="formeditor_add_question">เพิ่มคำถาม</string>
+  <!-- Title of the dialog confirming deletion of a form. -->
+  <string name="formeditor_delete_form_title">ลบแบบฟอร์มหรือไม่?</string>
+  <!-- Body of the delete-form confirmation dialog. %1$s: form title. -->
+  <string name="formeditor_delete_form_message">ลบ “%1$s” หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้</string>
+  <!-- Button / menu item that deletes the form. -->
+  <string name="formeditor_delete_form">ลบแบบฟอร์ม</string>
+  <!-- Subtitle under the form title in the form editor toolbar. -->
+  <string name="formeditor_editor_subtitle">ออกแบบคำถาม ตรรกะการแสดงผล และลำดับขั้นตอน</string>
+  <!-- Icon description: undo the last edit. -->
+  <string name="formeditor_undo">เลิกทำ</string>
+  <!-- Icon description: redo the last undone edit. -->
+  <string name="formeditor_redo">ทำซ้ำ</string>
+  <!-- Button that creates a map layer from this form's submissions. -->
+  <string name="formeditor_create_map_layer">สร้างชั้นข้อมูลแผนที่</string>
+  <!-- Button that creates a data table from this form's submissions. -->
+  <string name="formeditor_create_data_table">สร้างตารางข้อมูล</string>
+  <!-- Toolbar button (verb) that opens the form preview. -->
+  <string name="formeditor_preview">ดูตัวอย่าง</string>
+  <!-- Icon description of the overflow menu button. -->
+  <string name="formeditor_more_options">ตัวเลือกเพิ่มเติม</string>
+  <!-- Menu item that downloads the form as an XForms XML file. -->
+  <string name="formeditor_download_xforms_xml">ดาวน์โหลด XForms XML</string>
+  <!-- Menu item that opens the save-as-template dialog. -->
+  <string name="formeditor_save_as_template_menu">บันทึกเป็นเทมเพลต…</string>
+  <!-- Screen reader description of the language selector. %1$s: active language name. -->
+  <string name="formeditor_form_language_description">ภาษาของแบบฟอร์ม: %1$s</string>
+  <!-- Add-question menu item that adds a new section (group of questions). -->
+  <string name="formeditor_add_menu_section">ส่วน</string>
+  <!-- Flow summary for the mobile preview. %1$s: screen count (e.g. "5 screens"); %2$s: path count (e.g. "3 potential paths"). -->
+  <string name="formeditor_flow_summary_mobile">%1$s • %2$s</string>
+  <!-- Number of question screens in the mobile flow. -->
+  <plurals name="formeditor_screen_count">
+    <item quantity="other">%1$d หน้าจอ</item>
+  </plurals>
+  <!-- Number of distinct paths a collector may take through the form. -->
+  <plurals name="formeditor_potential_path_count">
+    <item quantity="other">%1$d เส้นทางที่เป็นไปได้</item>
+  </plurals>
+  <!-- Flow summary for the web preview. %1$d: number of questions. -->
+  <plurals name="formeditor_flow_summary_web">
+    <item quantity="other">%1$d คำถาม • เลย์เอาต์เว็บ</item>
+  </plurals>
+  <!-- Badge counting the form's validation issues. -->
+  <plurals name="formeditor_issue_count">
+    <item quantity="other">%1$d ปัญหา</item>
+  </plurals>
+  <!-- Tooltip explaining the completion time estimate. %1$d: number of questions on the longest path. -->
+  <plurals name="formeditor_duration_estimate">
+    <item quantity="other">ประมาณ ~2 นาทีต่อคำถามตามเส้นทางที่ยาวที่สุด (%1$d คำถาม)</item>
+  </plurals>
+  <!-- Tooltip sentence appended to the estimate when the survey is long. -->
+  <string name="formeditor_duration_fatigue_warning">แบบสำรวจที่มีมากกว่า 10 คำถาม (~20 นาที) อาจทำให้ผู้ตอบเหนื่อยล้า</string>
+  <!-- Estimated completion time badge. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes">~%1$d นาที</string>
+  <!-- Estimated completion time badge for a long survey. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes_long">~%1$d นาที • แบบสำรวจยาว</string>
+  <!-- Flow legend: solid arrow to the next screen. -->
+  <string name="formeditor_legend_always_next">ไปถัดไปเสมอ</string>
+  <!-- Flow legend: dashed arrow taken only when a condition holds. -->
+  <string name="formeditor_legend_if_condition_true">หากเงื่อนไขเป็นจริง</string>
+  <!-- Badge on a repeated section in the flow. %1$s: section title. -->
+  <string name="formeditor_repeated_section_badge">ส่วนที่ทำซ้ำ: %1$s</string>
+  <!-- Badge on a repeated section that has no title yet. -->
+  <string name="formeditor_repeated_section_badge_untitled">ส่วนที่ทำซ้ำ: ไม่มีชื่อ</string>
+  <!-- Badge on a section in the flow. %1$s: section title. -->
+  <string name="formeditor_section_badge">ส่วน: %1$s</string>
+  <!-- Badge on a section that has no title yet. -->
+  <string name="formeditor_section_badge_untitled">ส่วน: ไม่มีชื่อ</string>
+  <!-- Badge: the section has display logic. -->
+  <string name="formeditor_conditional">มีเงื่อนไข</string>
+  <!-- Repeat count expression of a repeated section. %1$s: expression. -->
+  <string name="formeditor_repeat_count_expression">จำนวน: %1$s</string>
+  <!-- Ghost card title for appending a question to an untitled section. -->
+  <string name="formeditor_add_to_section">เพิ่มในส่วน</string>
+  <!-- Ghost card title for appending a question to a section. %1$s: section title. -->
+  <string name="formeditor_add_to_named_section">เพิ่มใน %1$s</string>
+  <!-- Ghost card subtitle inside a section. -->
+  <string name="formeditor_append_question_in_section">เพิ่มคำถามต่อท้ายในส่วนนี้</string>
+  <!-- Screen reader description of the ghost card inside an untitled section. -->
+  <string name="formeditor_add_question_inside_section">เพิ่มคำถามภายในส่วน</string>
+  <!-- Screen reader description of the ghost card inside a section. %1$s: section title. -->
+  <string name="formeditor_add_question_inside_named_section">เพิ่มคำถามภายใน %1$s</string>
+  <!-- Condition pill on a flow edge. %1$s: operator (e.g. "is equal to"); %2$s: compared value. -->
+  <string name="formeditor_condition_pill">%1$s '%2$s'</string>
+  <!-- Icon description of the "+" button between flow cards. -->
+  <string name="formeditor_add_question_here">เพิ่มคำถามที่นี่</string>
+  <!-- Screen reader description of the flow's start node. %1$s: launch button label. -->
+  <string name="formeditor_start_node_description">เริ่มต้น: %1$s</string>
+  <!-- Subtitle of the ghost card at the end of the flow. -->
+  <string name="formeditor_ghost_card_subtitle">คลิกเพื่อเพิ่มหน้าจอก่อน “ตรวจสอบและส่ง”</string>
+  <!-- Screen reader description of the ghost card at the end of the flow. -->
+  <string name="formeditor_add_question_at_end_of_flow">เพิ่มคำถามที่ท้ายลำดับขั้นตอน</string>
+  <!-- Icon description of the drag handle on a question card. -->
+  <string name="formeditor_drag_to_reorder">ลากเพื่อจัดลำดับใหม่</string>
+  <!-- Caption of a required question's type. %1$s: question type (e.g. "Text"). -->
+  <string name="formeditor_question_type_required">%1$s • จำเป็นต้องระบุ</string>
+  <!-- Back button in the mini screen preview. -->
+  <string name="formeditor_back">ย้อนกลับ</string>
+  <!-- Placeholder of a text field in the mini screen preview. -->
+  <string name="formeditor_answer">คำตอบ</string>
+  <!-- Placeholder when a choice question's data table isn't chosen yet. -->
+  <string name="formeditor_choose_data_table">เลือกตารางข้อมูล</string>
+  <!-- Placeholder when a choice question's map layer isn't chosen yet. -->
+  <string name="formeditor_choose_map_layer">เลือกชั้นข้อมูลแผนที่</string>
+  <!-- Number of additional choices not shown in the mini preview. %1$d: count. -->
+  <string name="formeditor_more_choices">+อีก %1$d รายการ</string>
+  <!-- Mini preview action to add a new entity. %1$s: feature noun (e.g. "plot"). -->
+  <string name="formeditor_add_new_feature">+ เพิ่ม%1$sใหม่</string>
+  <!-- Mini preview action to add a new entity of unknown kind. -->
+  <string name="formeditor_add_new_item">+ เพิ่มรายการใหม่</string>
+  <!-- Mini preview caption: capture a point with GPS only. -->
+  <string name="formeditor_capture_point_gps">บันทึกจุด (GPS)</string>
+  <!-- Mini preview caption: capture a point with GPS or by drawing on the map. -->
+  <string name="formeditor_capture_point_or_draw">บันทึกจุดหรือวาดบนแผนที่</string>
+  <!-- Mini preview caption: walk a line with GPS only. -->
+  <string name="formeditor_walk_line_gps">เดินตามเส้น (GPS)</string>
+  <!-- Mini preview caption: walk a line with GPS or draw it on the map. -->
+  <string name="formeditor_walk_line_or_draw">เดินตามเส้นหรือวาดบนแผนที่</string>
+  <!-- Mini preview caption: walk a polygon with GPS only. -->
+  <string name="formeditor_walk_polygon_gps">เดินรอบรูปหลายเหลี่ยม (GPS)</string>
+  <!-- Mini preview caption: walk a polygon with GPS or draw it on the map. -->
+  <string name="formeditor_walk_polygon_or_draw">เดินรอบรูปหลายเหลี่ยมหรือวาดบนแผนที่</string>
+  <!-- Mini preview caption: take a photo with the camera. -->
+  <string name="formeditor_take_photo">ถ่ายภาพ</string>
+  <!-- Mini preview caption: take a photo or upload one. -->
+  <string name="formeditor_take_photo_or_upload">ถ่ายภาพหรืออัปโหลด</string>
+  <!-- Mini preview caption: record a video. -->
+  <string name="formeditor_record_video">บันทึกวิดีโอ</string>
+  <!-- Mini preview caption: record a video or upload one. -->
+  <string name="formeditor_record_video_or_upload">บันทึกวิดีโอหรืออัปโหลด</string>
+  <!-- Mini preview caption: record audio. -->
+  <string name="formeditor_record_audio">บันทึกเสียง</string>
+  <!-- Mini preview caption: record audio or upload a file. -->
+  <string name="formeditor_record_audio_or_upload">บันทึกเสียงหรืออัปโหลด</string>
+  <!-- Mini preview caption of a note question (display-only text). -->
+  <string name="formeditor_read_only_note">หมายเหตุแบบอ่านอย่างเดียว</string>
+
+  <!-- Question and section properties, choices, display logic, and flow preview. -->
+  <!-- Question properties panel. -->
+  <!-- Panel title. %1$d: position of the selected question; %2$d: total number of questions. -->
+  <string name="formeditor_question_position">คำถามที่ %1$d จาก %2$d</string>
+  <!-- Button that selects the previous question. -->
+  <string name="formeditor_previous">ก่อนหน้า</string>
+  <!-- Icon description: opens the menu of actions for the selected question. -->
+  <string name="formeditor_question_options">ตัวเลือกคำถาม</string>
+  <!-- Menu action that duplicates the selected question. -->
+  <string name="formeditor_duplicate">ทำสำเนา</string>
+  <string name="formeditor_question_type">ประเภทคำถาม</string>
+  <!-- Field label for a question's optional hint text. -->
+  <string name="formeditor_hint_optional">คำแนะนำ (ไม่บังคับ)</string>
+  <!-- Field label for a question's optional hint in a non-default language. %1$s: language name. -->
+  <string name="formeditor_hint_in_language_optional">คำแนะนำ (%1$s, ไม่บังคับ)</string>
+  <!-- Toggle: the question must be answered. -->
+  <string name="formeditor_required">จำเป็นต้องระบุ</string>
+  <!-- Explains why a note (read-only) question can't be made required. -->
+  <string name="formeditor_notes_cant_be_required">ไม่สามารถตั้งหมายเหตุเป็นข้อบังคับได้</string>
+  <string name="formeditor_required_description">ผู้เก็บข้อมูลต้องตอบก่อนดำเนินการต่อ</string>
+
+  <!-- Section properties panel. -->
+  <!-- Section that collectors can fill in multiple times. -->
+  <string name="formeditor_repeated_section">ส่วนที่ทำซ้ำ</string>
+  <!-- Panel title for a (non-repeated) group of questions. -->
+  <string name="formeditor_section">ส่วน</string>
+  <string name="formeditor_section_description">กลุ่มคำถามในลำดับขั้นตอนของแบบฟอร์ม</string>
+  <string name="formeditor_delete_section">ลบส่วน</string>
+  <!-- Icon description: closes the properties panel. -->
+  <string name="formeditor_close_properties">ปิดคุณสมบัติ</string>
+  <string name="formeditor_section_title">ชื่อส่วน</string>
+  <!-- Section that is filled in once (not repeated). -->
+  <string name="formeditor_single_section">ส่วนเดี่ยว</string>
+  <string name="formeditor_repeated_section_description">ผู้เก็บข้อมูลเพิ่มได้หลายรายการ</string>
+  <string name="formeditor_single_section_description">คำถามถูกจัดกลุ่มทั้งด้านการแสดงผลและตรรกะ</string>
+  <!-- Field label: how many times a repeated section repeats, as an optional XForms expression. -->
+  <string name="formeditor_repeat_count_optional">จำนวนครั้งที่ทำซ้ำ (นิพจน์ ไม่บังคับ)</string>
+  <!-- Placeholder example for the repeat count field; keep the number and the path unchanged. -->
+  <string name="formeditor_repeat_count_placeholder">เช่น 3 หรือ /data/number_of_plots</string>
+  <!-- Toggle: the section is shown only when a condition is met. -->
+  <string name="formeditor_section_condition">เงื่อนไขของส่วน</string>
+  <string name="formeditor_section_condition_on">แสดงส่วนนี้เฉพาะเมื่อตรงตามเงื่อนไข</string>
+  <string name="formeditor_section_condition_off">แสดงส่วนนี้เสมอ</string>
+  <string name="formeditor_section_condition_no_sources">เพิ่มคำถามก่อนส่วนนี้เพื่อตั้งเงื่อนไขให้ส่วนนี้</string>
+  <string name="formeditor_move_section_up">ย้ายส่วนขึ้น</string>
+  <string name="formeditor_move_section_down">ย้ายส่วนลง</string>
+  <string name="formeditor_no_section">ไม่มีส่วน</string>
+  <string name="formeditor_in_conditional_section">จะถูกซ่อนด้วยเมื่อส่วน “%1$s” ที่อยู่ถูกซ่อน</string>
+  <!-- Field label: the question the section condition depends on. -->
+  <string name="formeditor_depends_on_question">ขึ้นอยู่กับคำถาม</string>
+  <!-- Shown when the question a condition refers to no longer exists. -->
+  <string name="formeditor_missing">(ไม่พบ)</string>
+  <!-- Dropdown placeholder when no value is selected for a condition. -->
+  <string name="formeditor_select_value">(เลือกค่า)</string>
+
+  <!-- Number question settings. -->
+  <string name="formeditor_decimal_places">ตำแหน่งทศนิยม</string>
+  <string name="formeditor_decimal_places_zero">0 สำหรับจำนวนเต็ม</string>
+  <!-- %1$d: maximum number of decimal places. -->
+  <plurals name="formeditor_decimal_places_up_to">
+    <item quantity="other">ทศนิยมสูงสุด %1$d ตำแหน่ง</item>
+  </plurals>
+
+  <!-- Geometry question settings. -->
+  <!-- Field label: how a geometry (location) answer is captured. -->
+  <string name="formeditor_capture">วิธีบันทึก</string>
+  <!-- Capture mode of a polygon question: the collector walks the boundary while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_boundary">เดินรอบขอบเขต (GPS ทุก 5 วินาที)</string>
+  <!-- Capture mode of a line question: the collector walks the path while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_path">เดินตามเส้นทาง (GPS ทุก 5 วินาที)</string>
+  <string name="formeditor_capture_walk_boundary_description">ผู้เก็บข้อมูลเดินรอบขอบเขตในพื้นที่จริง ระบบจะบันทึกจุดยอด GPS ทุก 5 วินาที</string>
+  <string name="formeditor_capture_walk_path_description">ผู้เก็บข้อมูลเดินตามเส้นทางในพื้นที่จริง ระบบจะบันทึกจุดยอด GPS ทุก 5 วินาที</string>
+  <!-- Field label: whether a photo/video/audio is captured or uploaded. -->
+  <string name="formeditor_media_source">แหล่งที่มาของสื่อ</string>
+
+  <!-- Advanced section. -->
+  <string name="formeditor_advanced_has_errors">การตั้งค่าขั้นสูงมีข้อผิดพลาด</string>
+  <string name="formeditor_collapse_advanced">ยุบส่วนขั้นสูง</string>
+  <string name="formeditor_expand_advanced">ขยายส่วนขั้นสูง</string>
+  <!-- Field label: the question's data column name. -->
+  <string name="formeditor_name">ชื่อ</string>
+  <!-- Help text for the question name field; keep the characters "_ . -" unchanged. -->
+  <string name="formeditor_name_supporting_text">ชื่อคอลัมน์ข้อมูล ใช้ตัวอักษร ตัวเลข _ . -</string>
+
+  <!-- Validation rules. -->
+  <string name="formeditor_validation">การตรวจสอบความถูกต้อง</string>
+  <string name="formeditor_no_validation_rules">ไม่มีกฎการตรวจสอบสำหรับคำถามประเภทนี้</string>
+  <!-- Field label: minimum allowed number. -->
+  <string name="formeditor_minimum">ต่ำสุด</string>
+  <!-- Field label: maximum allowed number. -->
+  <string name="formeditor_maximum">สูงสุด</string>
+  <string name="formeditor_min_length">ความยาวต่ำสุด</string>
+  <string name="formeditor_max_length">ความยาวสูงสุด</string>
+  <!-- Field label: text pattern (e.g. email, digits only) the answer must match. -->
+  <string name="formeditor_pattern">รูปแบบ</string>
+  <string name="formeditor_regular_expression">นิพจน์ทั่วไป (Regex)</string>
+  <string name="formeditor_allowed_dates">วันที่ที่อนุญาต</string>
+  <!-- Allowed dates option: no restriction. -->
+  <string name="formeditor_any_date">วันที่ใดก็ได้</string>
+  <string name="formeditor_minimum_selections">จำนวนตัวเลือกต่ำสุด</string>
+  <string name="formeditor_maximum_selections">จำนวนตัวเลือกสูงสุด</string>
+  <!-- Field label: custom message shown when the answer fails validation. -->
+  <string name="formeditor_error_message_optional">ข้อความแสดงข้อผิดพลาด (ไม่บังคับ)</string>
+  <string name="formeditor_earliest_date">วันที่เร็วที่สุด</string>
+  <string name="formeditor_latest_date">วันที่ล่าสุด</string>
+  <!-- Placeholder for a date field with no date. -->
+  <string name="formeditor_not_set">ไม่ได้ตั้งค่า</string>
+  <!-- Icon description: clears a date field. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_clear_field">ล้าง %1$s</string>
+  <!-- Icon description: opens a date picker. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_pick_field">เลือก %1$s</string>
+  <!-- Date picker confirmation button. -->
+  <string name="formeditor_ok">ตกลง</string>
+
+  <!-- Choices editor. -->
+  <!-- Heading and field label: the answer choices of a select question, and where they come from. -->
+  <string name="formeditor_choices">ตัวเลือก</string>
+  <!-- Visual style of choices: plain text. -->
+  <string name="formeditor_visual_text_only">ข้อความเท่านั้น</string>
+  <!-- Visual style of choices: each choice has a color. -->
+  <string name="formeditor_visual_colors">สี</string>
+  <!-- Visual style of choices: each choice has an image. -->
+  <string name="formeditor_visual_images">รูปภาพ</string>
+  <!-- Button that imports choices from a file; keep the file extensions unchanged. -->
+  <string name="formeditor_import_choices_file">นำเข้า (.csv / .txt)</string>
+  <!-- Title of the dialog shown after picking a choices file. -->
+  <string name="formeditor_import_choices">นำเข้าตัวเลือก</string>
+  <!-- %1$d: number of choices found in the file; %2$d: number of current choices. -->
+  <plurals name="formeditor_import_choices_message">
+    <item quantity="other">พบ %1$d ตัวเลือกในไฟล์ ต้องการแทนที่ตัวเลือกปัจจุบัน (%2$d) หรือเพิ่มต่อท้าย?</item>
+  </plurals>
+  <!-- Button: replace the current choices with the imported ones. -->
+  <string name="formeditor_replace">แทนที่</string>
+  <!-- Button: add the imported choices after the current ones. -->
+  <string name="formeditor_append">เพิ่มต่อท้าย</string>
+  <!-- Field label: how choices are displayed (text, colors, or images). -->
+  <string name="formeditor_visual_style">รูปแบบการแสดงผล</string>
+  <!-- Field label: an earlier question whose answer filters this question's choices. -->
+  <string name="formeditor_cascading_filter">ตัวกรองแบบลำดับขั้น (คำถามหลัก)</string>
+  <!-- Label before chips that filter the choice list by parent choice. -->
+  <string name="formeditor_filter_label">ตัวกรอง:</string>
+  <!-- Filter chip that shows all choices. -->
+  <string name="formeditor_filter_all">ทั้งหมด</string>
+  <!-- Error when a choice image is too large. %1$d: maximum size in kilobytes. -->
+  <string name="formeditor_choice_image_too_large">กรุณาเลือกไฟล์รูปภาพที่มีขนาดไม่เกิน %1$d KB</string>
+  <!-- Field label: the parent question's choice this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_choice">ตัวเลือกหลัก (%1$s)</string>
+  <!-- Parent choice option meaning the choice is shown regardless of the parent answer. -->
+  <string name="formeditor_any_unfiltered">ทั้งหมด (ไม่กรอง)</string>
+  <!-- Field label: the parent question's value this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_value">ค่าหลัก (%1$s)</string>
+  <string name="formeditor_remove_choice">นำตัวเลือกออก</string>
+  <string name="formeditor_add_choice">เพิ่มตัวเลือก</string>
+  <string name="formeditor_no_map_layers_available">ยังไม่มีชั้นข้อมูลแผนที่ในแบบสำรวจนี้</string>
+  <string name="formeditor_no_data_tables_available">ยังไม่มีตารางข้อมูลในแบบสำรวจนี้</string>
+  <!-- Button that creates a new map layer for the question's choices. -->
+  <string name="formeditor_new_map_layer">ชั้นข้อมูลแผนที่ใหม่</string>
+  <!-- Button that creates a new data table for the question's choices. -->
+  <string name="formeditor_new_data_table">ตารางข้อมูลใหม่</string>
+  <!-- %1$d: number of features/rows; %2$s: feature noun matching the count (e.g. "plot"/"plots"); %3$s: map layer or data table name. -->
+  <plurals name="formeditor_collectors_choose_from">
+    <item quantity="other">ผู้เก็บข้อมูลเลือกจาก%2$s %1$d รายการใน %3$s</item>
+  </plurals>
+  <!-- %1$s: identifier of an external choice list. -->
+  <string name="formeditor_choices_from_external_list">ตัวเลือกถูกโหลดจากรายการภายนอก “%1$s”</string>
+  <string name="formeditor_sample_plots_cant_be_added">แปลงตัวอย่างสร้างขึ้นจากแบบแผนการสุ่มตัวอย่าง ผู้เก็บข้อมูลจึงเพิ่มเองไม่ได้</string>
+  <!-- Toggle. %1$s: plural feature noun (e.g. "plots", "trees"). -->
+  <string name="formeditor_allow_add_new">อนุญาตให้ผู้เก็บข้อมูลเพิ่ม%1$sใหม่</string>
+  <!-- %1$s: form title; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_uses_form_to_add_new">ใช้ %1$s เพื่อเพิ่ม%2$sใหม่</string>
+  <!-- %1$s: singular feature noun (e.g. "plot"). -->
+  <string name="formeditor_collectors_can_add_new">ผู้เก็บข้อมูลเพิ่ม%1$sใหม่ได้ระหว่างการเลือก</string>
+  <!-- Chip that opens the linked form. -->
+  <string name="formeditor_open_form">เปิดแบบฟอร์ม</string>
+  <!-- %1$s: map layer or data table name; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_dataset_has_no_form">%1$s ยังไม่มีแบบฟอร์มสำหรับเพิ่ม%2$sใหม่</string>
+  <!-- Button. %1$s: map layer or data table name. -->
+  <string name="formeditor_create_form_for">สร้างแบบฟอร์มสำหรับ %1$s</string>
+  <!-- Accessibility description of the marker beside a text-only choice. -->
+  <string name="formeditor_text_choice">ตัวเลือกแบบข้อความ</string>
+  <!-- Chip text for a choice linked to a standard code that isn't in the code list. %1$s: code. -->
+  <string name="formeditor_code_value">รหัส: %1$s</string>
+  <string name="formeditor_link_to_standard_choice">ลิงก์กับตัวเลือกมาตรฐาน…</string>
+  <!-- Menu option: the choice isn't linked to a standard choice. -->
+  <string name="formeditor_not_linked">ไม่ได้ลิงก์</string>
+  <!-- Icon description. %1$s: color name or hex code. -->
+  <string name="formeditor_choice_color_named">สีของตัวเลือก: %1$s</string>
+  <!-- Icon description for a choice with no color. -->
+  <string name="formeditor_choice_color_none">สีของตัวเลือก: ไม่มี</string>
+  <!-- Heading of the choice color palette. -->
+  <string name="formeditor_choice_color">สีของตัวเลือก</string>
+  <string name="formeditor_add_choice_image">เพิ่มรูปภาพของตัวเลือก</string>
+  <string name="formeditor_choice_image">รูปภาพของตัวเลือก</string>
+  <string name="formeditor_replace_image">แทนที่รูปภาพ</string>
+  <string name="formeditor_remove_image">นำรูปภาพออก</string>
+
+  <!-- Display logic editor. -->
+  <string name="formeditor_display_logic">ตรรกะการแสดงผล</string>
+  <!-- Segmented button: the question is always shown. -->
+  <string name="formeditor_always_show">แสดงเสมอ</string>
+  <!-- Segmented button: the question is shown only if a condition is met. -->
+  <string name="formeditor_show_only_if">แสดงเฉพาะเมื่อ…</string>
+  <string name="formeditor_first_screen_in_form">หน้าจอแรกของแบบฟอร์ม</string>
+  <string name="formeditor_first_screen_display_logic_notice">ตรรกะการแสดงผลอ้างอิงได้เฉพาะคำถามก่อนหน้า ย้ายคำถามนี้ไปไว้ด้านหลัง หรือเลือกคำถามถัดไปเพื่อตั้งค่าการแสดงผลแบบมีเงื่อนไข</string>
+  <string name="formeditor_select_question_2">เลือกคำถามที่ 2 →</string>
+  <string name="formeditor_move_question_down">ย้ายคำถามลง</string>
+  <string name="formeditor_add_question_2">เพิ่มคำถามที่ 2</string>
+  <!-- Shown when the question a display-logic rule refers to no longer exists. -->
+  <string name="formeditor_missing_question">(ไม่พบคำถาม)</string>
+
+  <!-- Flow preview side panel. -->
+  <string name="formeditor_flow_preview">ตัวอย่างลำดับขั้นตอน</string>
+  <string name="formeditor_close_preview">ปิดตัวอย่าง</string>
+  <!-- Field label: language used in the preview. -->
+  <string name="formeditor_language">ภาษา</string>
+  <!-- %1$s: technical error message. -->
+  <string name="formeditor_preview_load_error">ไม่สามารถโหลด XForms ที่สร้างขึ้นได้:\n%1$s</string>
+  <string name="formeditor_preview_web_description">คำถามอัปเดตทันทีขณะที่คุณตอบ: การ์ดแบบมีเงื่อนไขจะแสดงหรือซ่อนตามตรรกะการแสดงผล</string>
+  <string name="formeditor_preview_mobile_description">หน้าจออัปเดตทันทีขณะที่คุณตอบ: คำถามแบบมีเงื่อนไขจะแสดงหรือซ่อนตามตรรกะการแสดงผล</string>
+  <string name="formeditor_submission_passed_validation">การส่งข้อมูลผ่านการตรวจสอบแล้ว</string>
+  <!-- Heading of the list of screens the collector is going through. -->
+  <string name="formeditor_current_path">เส้นทางปัจจุบัน</string>
+  <!-- Button that restarts the form preview. -->
+  <string name="formeditor_restart">เริ่มใหม่</string>
+  <string name="formeditor_back_to_editor">กลับไปที่เครื่องมือแก้ไข</string>
+
+  <!-- Form properties: availability, where submissions are saved, and status markers. -->
+  <!-- Form properties panel (form-level settings, availability, and where submissions are saved). -->
+  <string name="formeditor_form_properties">คุณสมบัติของแบบฟอร์ม</string>
+  <!-- Part of the form properties subtitle. %1$d: number of questions in the form. -->
+  <plurals name="formeditor_form_properties_question_count">
+    <item quantity="other">%1$d คำถาม</item>
+  </plurals>
+  <!-- Part of the form properties subtitle. %1$d: number of distinct paths through the form's display logic. -->
+  <plurals name="formeditor_form_properties_path_count">
+    <item quantity="other">%1$d เส้นทางที่เป็นไปได้</item>
+  </plurals>
+  <!-- Form properties subtitle. %1$s: question count (e.g. "3 questions"); %2$s: path count (e.g. "4 potential paths"). -->
+  <string name="formeditor_form_properties_counts">%1$s • %2$s</string>
+  <string name="formeditor_form_title">ชื่อแบบฟอร์ม</string>
+  <!-- Field label: text of the buttons that start data collection for this form. -->
+  <string name="formeditor_button_label">ป้ายกำกับปุ่ม</string>
+  <string name="formeditor_button_label_help">แสดงบนปุ่มที่ใช้เริ่มเก็บข้อมูลด้วยแบบฟอร์มนี้ ค่าเริ่มต้นคือชื่อแบบฟอร์ม</string>
+  <string name="formeditor_form_no_questions_yet">แบบฟอร์มนี้ยังไม่มีคำถาม ใช้ “+” บนพื้นที่ทำงานเพื่อเพิ่มคำถาม</string>
+  <!-- Section heading: on which platforms (mobile app, web dashboard) collectors can open the form. -->
+  <string name="formeditor_availability">ความพร้อมใช้งาน</string>
+  <!-- Section heading: what happens to data when the form is submitted. -->
+  <string name="formeditor_submissions">การส่งข้อมูล</string>
+  <!-- %1$s: name of the map layer or data table the form's submissions are added to. -->
+  <string name="formeditor_linked_to_dataset">ลิงก์กับ %1$s</string>
+  <string name="formeditor_linked_map_layer_description">การส่งข้อมูลแต่ละครั้งจะเพิ่มฟีเจอร์แผนที่ใหม่ลงในชั้นข้อมูลแผนที่นี้ คุณสมบัติของสคีมาจะซิงค์กับคำถามในแบบฟอร์มเสมอ</string>
+  <string name="formeditor_linked_data_table_description">การส่งข้อมูลแต่ละครั้งจะเพิ่มแถวใหม่ลงในตารางข้อมูลนี้ คุณสมบัติของสคีมาจะซิงค์กับคำถามในแบบฟอร์มเสมอ</string>
+  <string name="formeditor_edit_map_layer">แก้ไขชั้นข้อมูลแผนที่</string>
+  <string name="formeditor_edit_data_table">แก้ไขตารางข้อมูล</string>
+  <string name="formeditor_unlink_map_layer">ยกเลิกการลิงก์ชั้นข้อมูลแผนที่</string>
+  <string name="formeditor_unlink_data_table">ยกเลิกการลิงก์ตารางข้อมูล</string>
+  <string name="formeditor_create_map_layer_for_form">สร้างชั้นข้อมูลแผนที่สำหรับแบบฟอร์ม</string>
+  <string name="formeditor_create_data_table_for_form">สร้างตารางข้อมูลสำหรับแบบฟอร์ม</string>
+  <!-- Icon description: opens a map layer or data table. %1$s: its name. -->
+  <string name="formeditor_open_dataset">เปิด %1$s</string>
+  <string name="formeditor_available_on_mobile">ใช้งานได้บนมือถือ</string>
+  <string name="formeditor_available_on_web">ใช้งานได้บนเว็บ</string>
+  <string name="formeditor_availability_mobile_on">ผู้เก็บข้อมูลเปิดแบบฟอร์มนี้ในแอปมือถือได้</string>
+  <string name="formeditor_availability_mobile_off">ซ่อนจากผู้เก็บข้อมูลในแอปมือถือ</string>
+  <string name="formeditor_availability_web_on">ผู้เก็บข้อมูลเปิดแบบฟอร์มนี้ในแดชบอร์ดเว็บได้</string>
+  <string name="formeditor_availability_web_off">ซ่อนจากผู้เก็บข้อมูลในแดชบอร์ดเว็บ</string>
+  <string name="formeditor_availability_none_warning">ผู้เก็บข้อมูลจะเปิดแบบฟอร์มนี้ไม่ได้เลยจนกว่าจะเปิดใช้ตัวเลือกใดตัวเลือกหนึ่งเหล่านี้</string>
+  <!-- Error: some location questions can only use GPS, which the web dashboard can't capture. %1$d: number of such questions; %2$s: name of the capture option that also allows drawing on the map (e.g. "GPS or map"). -->
+  <plurals name="formeditor_web_incompatible_geometry_summary">
+    <item quantity="other">คำถามเชิงเรขาคณิต %1$d ข้อใช้ GPS เท่านั้นและตอบบนเว็บไม่ได้ กรุณาเปลี่ยนเป็น “%2$s”</item>
+  </plurals>
+  <!-- Accessibility action label for expanding a collapsible section. -->
+  <string name="formeditor_expand_section">ขยาย</string>
+  <!-- Accessibility action label for collapsing a collapsible section. -->
+  <string name="formeditor_collapse_section">ยุบ</string>
+  <string name="formeditor_when_form_submitted">เมื่อส่งแบบฟอร์ม</string>
+  <!-- %1$s: name of the map layer or data table submissions are added to. -->
+  <string name="formeditor_save_to_create_linked_description">การส่งข้อมูลแต่ละครั้งจะถูกเพิ่มลงใน %1$s</string>
+  <string name="formeditor_save_to_create_map_layer_description">ระบบจะสร้างชั้นข้อมูลแผนที่สำหรับแบบฟอร์มนี้</string>
+  <string name="formeditor_save_to_create_data_table_description">ระบบจะสร้างตารางข้อมูลสำหรับแบบฟอร์มนี้</string>
+  <string name="formeditor_save_to_update_unavailable">เพิ่มชั้นข้อมูลแผนที่หรือตารางข้อมูลอื่นลงในแบบสำรวจเพื่อใช้ตัวเลือกนี้</string>
+  <string name="formeditor_save_to_update_description">การส่งข้อมูลแต่ละครั้งจะเปลี่ยนคุณสมบัติของฟีเจอร์ที่มีอยู่แล้ว</string>
+  <string name="formeditor_submissions_always_kept">ระบบจะเก็บการส่งข้อมูลไว้เสมอ ทุกการเปลี่ยนแปลงจึงมีบันทึกว่าใครเป็นผู้เปลี่ยนและเมื่อใด</string>
+  <string name="formeditor_update_target_label">ชั้นข้อมูลแผนที่หรือตารางข้อมูลที่จะอัปเดต</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_map_layer">ชั้นข้อมูลแผนที่</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_data_table">ตารางข้อมูล</string>
+  <!-- Section heading, followed by the ways to identify which map feature a submission updates. -->
+  <string name="formeditor_find_map_feature_by">ค้นหาฟีเจอร์แผนที่โดย</string>
+  <!-- Section heading, followed by the ways to identify which table row a submission updates. -->
+  <string name="formeditor_find_table_row_by">ค้นหาแถวในตารางโดย</string>
+  <string name="formeditor_selected_on_map">เลือกบนแผนที่</string>
+  <string name="formeditor_picked_from_list">เลือกจากรายการ</string>
+  <!-- The answer a collector gives to a question (used as an option for identifying features and in status rules). -->
+  <string name="formeditor_question_answer">คำตอบของคำถาม</string>
+  <string name="formeditor_find_by_selected_map_feature_help">ผู้เก็บข้อมูลเปิดแบบฟอร์มจากฟีเจอร์บนแผนที่ แบบฟอร์มจะเริ่มด้วยหน้าจอ “ฟีเจอร์แผนที่ที่จะอัปเดต” ซึ่งกรอกให้อัตโนมัติ และยังเลือกฟีเจอร์จากรายการได้ด้วย</string>
+  <!-- %1$s: name of the data table. -->
+  <string name="formeditor_find_by_selected_table_row_help">แบบฟอร์มจะเริ่มด้วยหน้าจอ “แถวที่จะอัปเดต” ซึ่งแสดงรายการแถวของ %1$s</string>
+  <!-- Field label: the dataset property the question's answer is matched against. -->
+  <string name="formeditor_matches_property">ตรงกับคุณสมบัติ</string>
+  <string name="formeditor_fields_to_update">ฟิลด์ที่จะอัปเดต</string>
+  <string name="formeditor_fields_to_update_empty">เพิ่มคำถามเพื่อเลือกว่าจะอัปเดตคุณสมบัติใด</string>
+  <!-- %1$s: property name. -->
+  <string name="formeditor_property_already_updated">มีคำถามอื่นอัปเดต “%1$s” อยู่แล้ว</string>
+  <!-- Field label: which property a question's answer updates. -->
+  <string name="formeditor_updates">อัปเดต</string>
+  <!-- Dropdown option: the question's answer doesn't update any property. -->
+  <string name="formeditor_dont_update">ไม่อัปเดต</string>
+  <!-- Dropdown option: the question's answer updates the feature's geometry. -->
+  <string name="formeditor_geometry_location">รูปทรงเรขาคณิต (ตำแหน่ง)</string>
+  <string name="formeditor_status_marker">เครื่องหมายสถานะ</string>
+  <string name="formeditor_set_status_marker">ตั้งเครื่องหมายสถานะ</string>
+  <string name="formeditor_status_marker_on_map_feature">กำหนดสัญลักษณ์ สี และป้ายกำกับของเครื่องหมายสถานะของฟีเจอร์แผนที่เมื่อส่งข้อมูล</string>
+  <string name="formeditor_status_marker_on_table_row">กำหนดสัญลักษณ์ สี และป้ายกำกับของเครื่องหมายสถานะของแถวในตารางเมื่อส่งข้อมูล</string>
+  <string name="formeditor_status_marker_off_map_features">ปิดอยู่โดยค่าเริ่มต้น เปิดเพื่อทำเครื่องหมายฟีเจอร์แผนที่ (เช่น ✓ สำรวจแล้ว หรือ ○ รอดำเนินการ)</string>
+  <string name="formeditor_status_marker_off_table_rows">ปิดอยู่โดยค่าเริ่มต้น เปิดเพื่อทำเครื่องหมายแถวในตาราง (เช่น ✓ สำรวจแล้ว หรือ ○ รอดำเนินการ)</string>
+  <string name="formeditor_status_rules_help">ระบบจะตรวจสอบกฎตามลำดับ กฎแรกที่ตรงกันจะกำหนดเครื่องหมายสถานะและป้ายกำกับ</string>
+  <string name="formeditor_add_status_rule">เพิ่มกฎสถานะ</string>
+  <!-- Heading of the fallback status used when no status rule matches. -->
+  <string name="formeditor_otherwise">กรณีอื่น</string>
+  <string name="formeditor_otherwise_help">สถานะเริ่มต้นเมื่อไม่มีกฎใดด้านบนที่ตรงกัน</string>
+  <string name="formeditor_default_status_color">สีสถานะเริ่มต้น</string>
+  <!-- Status rule subject: a property of the data table row. -->
+  <string name="formeditor_row_property">คุณสมบัติของแถว</string>
+  <!-- Status rule subject: a property of the map feature. -->
+  <string name="formeditor_feature_property">คุณสมบัติของฟีเจอร์</string>
+  <!-- Status rule subject: number of submissions for the feature. -->
+  <string name="formeditor_submission_count">จำนวนการส่งข้อมูล</string>
+  <!-- %1$d: status rule number. -->
+  <string name="formeditor_status_rule_title">กฎ %1$d</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_up">ย้ายกฎสถานะ %1$d ขึ้น</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_down">ย้ายกฎสถานะ %1$d ลง</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_remove_status_rule">นำกฎสถานะ %1$d ออก</string>
+  <!-- Field label: what a status rule's condition is about (submission count, question answer, property). -->
+  <string name="formeditor_status_rule_when">เมื่อ</string>
+  <!-- Field label: minimum number of submissions for a status rule to match. -->
+  <string name="formeditor_at_least_submissions">อย่างน้อย (การส่งข้อมูล)</string>
+  <string name="formeditor_matches_when_submitted">ตรงกันเมื่อส่งแบบฟอร์มนี้</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_feature">
+    <item quantity="other">ตรงกันเมื่อฟีเจอร์มีการส่งข้อมูลอย่างน้อย %1$d รายการ</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_map_feature">
+    <item quantity="other">ตรงกันเมื่อฟีเจอร์แผนที่มีการส่งข้อมูลอย่างน้อย %1$d รายการ</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_table_row">
+    <item quantity="other">ตรงกันเมื่อแถวในตารางมีการส่งข้อมูลอย่างน้อย %1$d รายการ</item>
+  </plurals>
+  <!-- Button description for a status rule's color picker. %1$d: status rule number. -->
+  <string name="formeditor_status_color_for_rule">สีสถานะของกฎ %1$d</string>
+  <!-- Field label: status marker symbol (e.g. ✓, ○). -->
+  <string name="formeditor_symbol">สัญลักษณ์</string>
+  <string name="formeditor_status_label">ป้ายกำกับสถานะ</string>
+  <string name="formeditor_marker_color">สีเครื่องหมาย</string>
+  <!-- Placeholder text in a status pill when the designer hasn't entered a status label. -->
+  <string name="formeditor_status_placeholder">สถานะ</string>
+  <string name="formeditor_submission_updates_unchosen">การส่งข้อมูลแต่ละครั้งจะอัปเดตฟีเจอร์ที่มีอยู่ เลือกฟีเจอร์ได้ในส่วนขั้นสูง</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_updates_map_feature_in">การส่งข้อมูลแต่ละครั้งจะอัปเดตฟีเจอร์แผนที่ที่มีอยู่ใน:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_updates_table_row_in">การส่งข้อมูลแต่ละครั้งจะอัปเดตแถวที่มีอยู่ใน:</string>
+  <string name="formeditor_submission_saved_without_dataset">การส่งข้อมูลจะถูกบันทึกโดยไม่เพิ่มฟีเจอร์แผนที่หรือแถวในตาราง</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_adds_map_feature_to">การส่งข้อมูลแต่ละครั้งจะเพิ่มฟีเจอร์แผนที่ใหม่ลงใน:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_adds_table_row_to">การส่งข้อมูลแต่ละครั้งจะเพิ่มแถวใหม่ลงใน:</string>
+  <!-- Summary of the save-to setting. %1$s: update option label (e.g. "Update existing map features"); %2$s: map layer or data table name. -->
+  <string name="formeditor_save_to_summary_update_in">%1$s ใน %2$s</string>
+  <!-- Summary of the save-to setting plus status markers. %1$s: save-to summary; %2$s: status badges separated by " / " (e.g. "✓ Surveyed / ○ Pending"). -->
+  <string name="formeditor_save_to_summary_with_status">%1$s • สถานะ: %2$s</string>
+
+  <!-- Web preview, Save as template, and standard-field (concept) linking. -->
+  <!-- Web preview: platform banners. -->
+  <!-- Short name of the mobile platform, used inside sentences. -->
+  <string name="formeditor_preview_target_mobile_sentence">แอปมือถือ</string>
+  <!-- Short name of the web platform, used inside sentences. -->
+  <string name="formeditor_preview_target_web_sentence">แดชบอร์ดเว็บ</string>
+  <!-- Banner title when the form is switched off for the mobile app. -->
+  <string name="formeditor_not_available_on_mobile">ไม่พร้อมใช้งานบนมือถือ</string>
+  <!-- Banner title when the form is switched off for the web dashboard. -->
+  <string name="formeditor_not_available_on_web">ไม่พร้อมใช้งานบนเว็บ</string>
+  <string name="formeditor_not_available_on_mobile_body">ผู้เก็บข้อมูลจะไม่เห็นแบบฟอร์มนี้ในแอปมือถือ เปิดใช้งานเพื่อให้ใช้ได้ในแอป (ตั้งค่าได้ในการตั้งค่าแบบฟอร์มเช่นกัน)</string>
+  <string name="formeditor_not_available_on_web_body">ผู้เก็บข้อมูลจะไม่เห็นแบบฟอร์มนี้ในแดชบอร์ดเว็บ เปิดใช้งานเพื่อให้ใช้ได้บนเว็บ (ตั้งค่าได้ในการตั้งค่าแบบฟอร์มเช่นกัน)</string>
+  <!-- Banner action that turns the form on for the previewed platform. -->
+  <string name="formeditor_enable_on_platform">เปิดใช้งาน</string>
+  <string name="formeditor_cant_be_used_on_web_title">ยังใช้งานบนเว็บไม่ได้</string>
+  <!-- %1$s: sentence summarizing how many geometry questions are GPS only. -->
+  <string name="formeditor_cant_be_used_on_web_body">แบบฟอร์มนี้จะใช้งานบนเว็บไม่ได้จนกว่าคำถามที่ใช้ GPS เท่านั้นจะอนุญาตให้วาดบนแผนที่ %1$s</string>
+
+  <!-- Web preview: wireframe and mock dashboard. -->
+  <!-- Wireframe summary of a whole-number question's input. -->
+  <string name="formeditor_integer_input">ช่องกรอกจำนวนเต็ม</string>
+  <!-- Wireframe summary of a decimal question's input. %1$d: number of decimal places ("dp"). -->
+  <string name="formeditor_decimal_input">ทศนิยม (%1$d ตำแหน่ง)</string>
+  <!-- Accessibility label of the ghost card that adds a question at the end of the web form. -->
+  <string name="formeditor_add_question_at_end_of_web_form">เพิ่มคำถามที่ท้ายแบบฟอร์มเว็บ</string>
+  <!-- Progress line in the web form wireframe footer. %1$d: number of questions. -->
+  <string name="formeditor_answered_progress">ตอบแล้ว 0 จาก %1$d</string>
+  <!-- Fallback name of the dataset shown in the mock web dashboard. -->
+  <string name="formeditor_sample_plots">แปลงตัวอย่าง</string>
+  <!-- Placeholder of the mock feature search box in the web preview. -->
+  <string name="formeditor_search_features">ค้นหาฟีเจอร์…</string>
+  <!-- Title of the web preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title_web">ตัวอย่าง • %1$s • เว็บ</string>
+  <!-- Web preview button that zooms the map back out. -->
+  <string name="formeditor_reset_map_view">รีเซ็ตมุมมองแผนที่</string>
+
+  <!-- Save as template. -->
+  <string name="formeditor_save_template_needs_organization">ย้ายแบบสำรวจนี้ไปไว้ในองค์กรเพื่อบันทึกแบบฟอร์มเป็นเทมเพลต</string>
+  <!-- %1$s: organization name. -->
+  <string name="formeditor_save_template_managers_only">เฉพาะผู้จัดการของ %1$s เท่านั้นที่บันทึกเทมเพลตได้</string>
+  <string name="formeditor_save_template_managers_only_this_organization">เฉพาะผู้จัดการขององค์กรนี้เท่านั้นที่บันทึกเทมเพลตได้</string>
+  <string name="formeditor_template_saved_title">บันทึกเทมเพลตแล้ว</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_global">“%1$s” อยู่ในคลังส่วนกลางแล้ว ใช้ได้จาก “จากเทมเพลต…” เมื่อเพิ่มแบบฟอร์ม และแสดงอยู่ในแท็บเทมเพลตขององค์กร</string>
+  <!-- %1$s: template name. %2$s: organization name. -->
+  <string name="formeditor_template_saved_organization">“%1$s” อยู่ในเทมเพลตของ %2$s แล้ว ใช้ได้จาก “จากเทมเพลต…” เมื่อเพิ่มแบบฟอร์ม และแสดงอยู่ในแท็บเทมเพลตขององค์กร</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_your_organization">“%1$s” อยู่ในเทมเพลตขององค์กรคุณแล้ว ใช้ได้จาก “จากเทมเพลต…” เมื่อเพิ่มแบบฟอร์ม และแสดงอยู่ในแท็บเทมเพลตขององค์กร</string>
+  <!-- Button that closes a confirmation dialog. -->
+  <string name="formeditor_done">เสร็จสิ้น</string>
+  <string name="formeditor_save_as_template_title">บันทึกเป็นเทมเพลต</string>
+  <string name="formeditor_save_as_template_intro">บันทึกสำเนาของแบบฟอร์มนี้เพื่อนำไปเพิ่มในแบบสำรวจอื่น ลิงก์ฟิลด์มาตรฐานและรหัสตัวเลือกจะยังคงอยู่ แต่ตำแหน่งที่บันทึกข้อมูลจะไม่ถูกคัดลอก</string>
+  <string name="formeditor_template_name">ชื่อเทมเพลต</string>
+  <string name="formeditor_template_description_optional">คำอธิบาย (ไม่บังคับ)</string>
+  <!-- Template destination option. %1$s: organization name. -->
+  <string name="formeditor_template_destination_organization">เทมเพลตของ %1$s</string>
+  <!-- Template destination option when the organization name is unknown. -->
+  <string name="formeditor_template_destination_your_organization">เทมเพลตขององค์กรคุณ</string>
+  <string name="formeditor_template_destination_global">คลังส่วนกลาง (ทุกองค์กร)</string>
+  <!-- Template summary. %1$d: number of questions. -->
+  <plurals name="formeditor_template_question_summary">
+    <item quantity="other">%1$d คำถาม</item>
+  </plurals>
+  <!-- Template summary. %1$d: number of questions. %2$d: number of them linked to standard fields. -->
+  <plurals name="formeditor_template_question_summary_linked">
+    <item quantity="other">%1$d คำถาม ลิงก์กับฟิลด์มาตรฐาน %2$d ข้อ</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. %2$s: organization name. -->
+  <plurals name="formeditor_template_dropped_links">
+    <item quantity="other">เทมเพลตส่วนกลางใช้ได้เฉพาะฟิลด์มาตรฐานส่วนกลาง ลิงก์ %1$d รายการไปยังฟิลด์ของ %2$s จะถูกนำออกจากเทมเพลต</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. -->
+  <plurals name="formeditor_template_dropped_links_your_organization">
+    <item quantity="other">เทมเพลตส่วนกลางใช้ได้เฉพาะฟิลด์มาตรฐานส่วนกลาง ลิงก์ %1$d รายการไปยังฟิลด์ขององค์กรคุณจะถูกนำออกจากเทมเพลต</item>
+  </plurals>
+  <string name="formeditor_save_template">บันทึกเทมเพลต</string>
+
+  <!-- Concept (standard field) linking. -->
+  <!-- Field label for the text of a note question. -->
+  <string name="formeditor_note_text">ข้อความหมายเหตุ</string>
+  <!-- Field label for the text of a note question in a non-default language. %1$s: language name. -->
+  <string name="formeditor_note_text_in_language">ข้อความหมายเหตุ (%1$s)</string>
+  <!-- Heading of the standard-field suggestions under the Label field. -->
+  <string name="formeditor_standard_fields">ฟิลด์มาตรฐาน</string>
+  <!-- %1$s: question label. %2$s: organization name. -->
+  <string name="formeditor_add_label_to_dictionary">เพิ่ม “%1$s” ลงในพจนานุกรมของ %2$s</string>
+  <!-- %1$s: question label. Used when the organization name is unknown. -->
+  <string name="formeditor_add_label_to_organization_dictionary">เพิ่ม “%1$s” ลงในพจนานุกรมขององค์กร</string>
+  <!-- Suggestion detail for a standard field of an incompatible type. %1$s: data type (e.g. "Number"). -->
+  <string name="formeditor_concept_type_answers">คำตอบประเภท%1$s</string>
+  <string name="formeditor_unlink_standard_field">ยกเลิกการลิงก์ฟิลด์มาตรฐาน</string>
+  <!-- %1$s: the standard field's label. -->
+  <string name="formeditor_use_standard_label">ใช้ป้ายกำกับมาตรฐาน “%1$s”</string>
+  <!-- %1$s: standard field ID. -->
+  <string name="formeditor_concept_not_in_dictionary">%1$s ไม่อยู่ในพจนานุกรมของแบบสำรวจนี้</string>
+  <!-- %1$s: unit of measure. -->
+  <string name="formeditor_concept_unit">หน่วย: %1$s</string>
+  <!-- %1$s: comma-separated list of references. -->
+  <string name="formeditor_concept_reference">ข้อมูลอ้างอิง: %1$s</string>
+  <!-- %1$s: standard field ID. %2$s: version. -->
+  <string name="formeditor_concept_id_version">%1$s · เวอร์ชัน %2$s</string>
+  <!-- Button that opens the standard field search dialog. -->
+  <string name="formeditor_link_to_standard_field_button">ลิงก์กับฟิลด์มาตรฐาน…</string>
+  <string name="formeditor_link_to_standard_field_title">ลิงก์กับฟิลด์มาตรฐาน</string>
+  <string name="formeditor_search_the_dictionary">ค้นหาในพจนานุกรม</string>
+  <string name="formeditor_no_dictionary_yet">แบบสำรวจนี้ยังไม่มีพจนานุกรม</string>
+  <string name="formeditor_no_standard_fields_available">ยังไม่มีฟิลด์มาตรฐานในพจนานุกรมนี้</string>
+  <!-- %1$s: search text. -->
+  <string name="formeditor_no_standard_fields_match">ไม่มีฟิลด์มาตรฐานที่ตรงกับ “%1$s”</string>
+  <!-- Field label: the standard code-list value a choice maps to. -->
+  <string name="formeditor_standard_value">ค่ามาตรฐาน</string>
+  <!-- A choice not mapped to any standard code-list value. -->
+  <string name="formeditor_not_matched">ไม่ตรงกัน</string>
+  <string name="formeditor_delete_question">ลบคำถาม</string>
+  <string name="formeditor_delete_question_title">ลบคำถามหรือไม่?</string>
+  <string name="formeditor_delete_question_message">คำถามนี้จะถูกทำเครื่องหมายว่าลบแล้ว ผู้ใช้จะไม่เห็นคำถามนี้อีกเมื่อซิงค์อุปกรณ์ และข้อมูลที่เก็บรวบรวมไว้แล้วจะถูกเก็บรักษาไว้</string>
+  <string name="formeditor_delete_linked_question_title">ลบคำถามที่ลิงก์อยู่หรือไม่?</string>
+  <!-- %1$s: sentence saying what the question's answers feed. -->
+  <string name="formeditor_delete_linked_question_message">%1$s การลบคำถามนี้จะนำคำตอบเหล่านี้ออกจากรายงาน</string>
+  <!-- %1$d: number of imported fields matching standard definitions. -->
+  <plurals name="formeditor_import_matches_title">
+    <item quantity="other">เราพบ %1$d ฟิลด์ที่ตรงกับคำนิยามมาตรฐาน</item>
+  </plurals>
+  <!-- Icon description: closes a card. -->
+  <string name="formeditor_dismiss">ปิด</string>
+  <string name="formeditor_linked_fields_explainer">ฟิลด์ที่ลิงก์แล้วสามารถเปรียบเทียบและรวมผลข้ามแบบสำรวจได้</string>
+  <string name="formeditor_link_all">ลิงก์ทั้งหมด</string>
+  <!-- %1$d: number of selected matches. -->
+  <string name="formeditor_link_selected">ลิงก์ %1$d รายการที่เลือก</string>
+  <string name="formeditor_not_now">ไว้ภายหลัง</string>
+  <string name="formeditor_saving_to_global_library">กำลังบันทึกลงในคลังส่วนกลาง (ทุกองค์กร)</string>
+  <!-- Banner title when the template a form was built from has changed. %1$s: template title. -->
+  <string name="formeditor_template_update_available">มีการอัปเดตเทมเพลต: %1$s</string>
+  <!-- Banner body. %1$d: number of suggested additions; %2$d: number of suggested removals. -->
+  <string name="formeditor_template_update_summary">ตรวจสอบรายการที่แนะนำให้เพิ่ม %1$d รายการและรายการที่จะนำออก %2$d รายการก่อนนำไปใช้กับแบบฟอร์มนี้</string>
+  <!-- Button that opens the template update review dialog. -->
+  <string name="formeditor_template_review_changes">ตรวจสอบการเปลี่ยนแปลง</string>
+  <!-- Template update review dialog title. %1$s: template title. -->
+  <string name="formeditor_template_review_title">ตรวจสอบการอัปเดตเทมเพลต: %1$s</string>
+  <!-- Template update review dialog explanation. -->
+  <string name="formeditor_template_review_description">เลือกการอัปเดตตามข้อกำหนดหรือเทมเพลตที่จะนำไปใช้กับแบบฟอร์มของคุณ รายการที่ไม่ได้เลือกจะไม่มีการเปลี่ยนแปลง</string>
+  <!-- Template update review dialog: heading above questions the template added. -->
+  <string name="formeditor_template_suggested_additions">รายการที่แนะนำให้เพิ่ม</string>
+  <!-- Template update review dialog: heading above questions the template no longer has. -->
+  <string name="formeditor_template_removed_questions">คำถามที่ไม่อยู่ในเทมเพลตแล้ว</string>
+  <!-- Template update review dialog: checkbox label to remove a question. %1$s: question label. -->
+  <string name="formeditor_template_remove_question">นำออก: %1$s</string>
+  <!-- Template update review dialog: applies the checked additions and removals. -->
+  <string name="formeditor_template_apply_selected">ใช้รายการที่เลือก</string>
+  <!-- Menu action that duplicates the selected question together with the questions that depend on it. -->
+  <string name="formeditor_duplicate_branch">ทำสำเนาสาขา</string>
+  <!-- Summary of a question's validation rules. %1$s = one or more conditions, e.g. “be between 0 and 120”. -->
+  <string name="formeditor_validation_must">ต้อง%1$s</string>
+  <!-- Joins two validation conditions. %1$s, %2$s = conditions. -->
+  <string name="formeditor_validation_and">%1$s และ%2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number from %1$s to %2$s. -->
+  <string name="formeditor_validation_number_between">อยู่ระหว่าง %1$s ถึง %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at least %1$s. -->
+  <string name="formeditor_validation_number_at_least">มีค่าอย่างน้อย %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at most %1$s. -->
+  <string name="formeditor_validation_number_at_most">มีค่าไม่เกิน %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has %1$d to %2$d characters. -->
+  <string name="formeditor_validation_length_between">มีความยาว %1$d–%2$d อักขระ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at least %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_least">
+    <item quantity="other">มีความยาวอย่างน้อย %1$d อักขระ</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at most %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_most">
+    <item quantity="other">มีความยาวไม่เกิน %1$d อักขระ</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is an email address. -->
+  <string name="formeditor_validation_pattern_email">เป็นที่อยู่อีเมล</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only digits. -->
+  <string name="formeditor_validation_pattern_digits">มีเฉพาะตัวเลข</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only the Latin letters A to Z. -->
+  <string name="formeditor_validation_pattern_letters">มีเฉพาะตัวอักษร A–Z</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer matches the organizer's own pattern. -->
+  <string name="formeditor_validation_pattern_custom">ตรงกับรูปแบบ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or earlier. -->
+  <string name="formeditor_validation_date_not_in_future">ไม่เป็นวันที่ในอนาคต</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or later. -->
+  <string name="formeditor_validation_date_not_in_past">ไม่เป็นวันที่ในอดีต</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or later. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_after">เป็นวันที่ %1$s หรือหลังจากนั้น</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or earlier. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_before">เป็นวันที่ %1$s หรือก่อนหน้านั้น</string>
+  <!-- Validation summary of a select multiple question. %1$d, %2$d = fewest and most options. -->
+  <string name="formeditor_validation_selections_between">เลือกระหว่าง %1$d ถึง %2$d ตัวเลือก</string>
+  <!-- Validation summary of a select multiple question. %1$d = fewest options. -->
+  <plurals name="formeditor_validation_selections_at_least">
+    <item quantity="other">เลือกอย่างน้อย %1$d ตัวเลือก</item>
+  </plurals>
+  <!-- Validation summary of a select multiple question. %1$d = most options. -->
+  <plurals name="formeditor_validation_selections_at_most">
+    <item quantity="other">เลือกไม่เกิน %1$d ตัวเลือก</item>
+  </plurals>
+  <!-- Lowercase name of one or several records of a dataset, used inside sentences: map features of a map layer, rows of a data table. -->
+  <string name="formeditor_feature_noun_map_feature">ฟีเจอร์แผนที่</string>
+  <string name="formeditor_feature_noun_map_features">ฟีเจอร์แผนที่</string>
+  <string name="formeditor_feature_noun_table_row">แถวตาราง</string>
+  <string name="formeditor_feature_noun_table_rows">แถวตาราง</string>
+  <string name="formeditor_template_subtitle">เทมเพลตในคลัง: คำถาม ตรรกะการแสดงผล และลำดับขั้นตอน</string>
+  <string name="formeditor_template_section">เทมเพลต</string>
+  <string name="formeditor_template_title">ชื่อเทมเพลต</string>
+  <string name="formeditor_template_adds_map_layer">แบบสำรวจที่เพิ่มเทมเพลตนี้จะได้ชั้นข้อมูลแผนที่ใหม่แบบ%1$sสำหรับการส่งข้อมูล คำถามรูปทรงเรขาคณิตข้อแรกกำหนดตำแหน่งของแต่ละฟีเจอร์</string>
+  <string name="formeditor_template_adds_data_table">แบบสำรวจที่เพิ่มเทมเพลตนี้จะได้ตารางข้อมูลใหม่สำหรับการส่งข้อมูล เพิ่มคำถามตำแหน่ง เส้น หรือรูปหลายเหลี่ยมเพื่อเก็บฟีเจอร์แผนที่แทน</string>
+  <string name="formeditor_enable_open_in_google_earth">เปิดใช้ เปิดใน Google Earth</string>
+  <string name="formeditor_availability_google_earth_on">ผู้เก็บข้อมูลสามารถเปิดฟีเจอร์แผนที่และแบบฟอร์มที่ฝังไว้ใน Google Earth ได้</string>
+  <string name="formeditor_availability_google_earth_off">เปิดเพื่อให้ผู้เก็บข้อมูลเปิดแบบฟอร์มนี้ภายในบอลลูนแผนที่ของ Google Earth ได้</string>
+  <string name="formeditor_availability_google_earth_unavailable">ใช้งานได้เฉพาะกับแบบฟอร์มที่อัปเดตฟีเจอร์แผนที่ที่มีอยู่เท่านั้น</string>
+  <string name="formeditor_availability_google_earth_needs_map_selection">ใช้งานได้เฉพาะเมื่อตั้งค่า &quot;%1$s&quot; เป็น &quot;%2$s&quot; เท่านั้น</string>
+  <string name="formeditor_enable_web_confirm_title">เปิดใช้บนเว็บหรือไม่</string>
+  <string name="formeditor_enable_web_confirm_message">คำถามบางประเภทไม่รองรับบนเว็บและจะไม่สามารถใช้งานได้</string>
+  <string name="formeditor_enable_google_earth_confirm_title">เปิดใช้ เปิดใน Google Earth หรือไม่</string>
+  <string name="formeditor_enable_google_earth_confirm_message">คำถามบางประเภทไม่รองรับใน Google Earth และจะไม่สามารถใช้งานได้</string>
+  <plurals name="formeditor_google_earth_incompatible_questions_summary">
+    <item quantity="one">คำถาม %1$d ข้อใช้ประเภทช่องข้อมูลที่ไม่รองรับใน Google Earth</item>
+    <item quantity="other">คำถาม %1$d ข้อใช้ประเภทช่องข้อมูลที่ไม่รองรับใน Google Earth</item>
+  </plurals>
+</resources>

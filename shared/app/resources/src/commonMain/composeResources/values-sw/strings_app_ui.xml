@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Title of the development-build dialog for choosing a simulated app role. -->
+  <string name="app_dev_sign_in_title">Kuingia kwa uundaji</string>
+  <string name="app_dev_sign_in_real_accounts_intro">Umeingia kwa akaunti yako ya Google. Huduma ya data ya mtumiaji inaendeshwa katika hali ya uundaji, kwa hivyo chagua jukumu la programu la kuiga unapojaribu.</string>
+  <string name="app_dev_sign_in_sample_users_intro">Kuingia kwa Firebase kumezimwa katika toleo hili, kwa hivyo utaingia kama mtumiaji wa mfano badala ya akaunti yako mwenyewe.</string>
+  <!-- Simulated app role option. -->
+  <string name="app_dev_sign_in_role_administrator">Msimamizi mkuu</string>
+  <string name="app_dev_sign_in_role_administrator_real_description">Huona na anaweza kubadilisha tafiti zote za mfano, mashirika na data.</string>
+  <!-- Adam Admin is the name of a sample user. -->
+  <string name="app_dev_sign_in_role_administrator_sample_description">Huingia kama Adam Admin, anayeona na anayeweza kubadilisha data yote ya mfano.</string>
+  <!-- Simulated app role option. -->
+  <string name="app_dev_sign_in_role_regular_user">Mtumiaji wa kawaida</string>
+  <string name="app_dev_sign_in_role_regular_user_real_description">Huona tu tafiti unazomiliki, ulizoalikwa, au ambazo mashirika yako au viungo vya umma vinashiriki nawe.</string>
+  <!-- Ima User is the name of a sample user; Kenya Forest Service is a sample organization. -->
+  <string name="app_dev_sign_in_role_regular_user_sample_description">Huingia kama Ima User, mkusanyaji data katika shirika la mfano la Kenya Forest Service.</string>
+  <string name="app_dev_sign_in_footer">Kifaa hiki hukumbuka chaguo lako; ondoka ili kubadilisha majukumu. Matoleo rasmi huingia kama kawaida, bila kidirisha hiki.</string>
+  <!-- Generic button label to proceed. -->
+  <string name="app_continue">Endelea</string>
+  <!-- Generic button label to cancel and close. -->
+  <string name="app_cancel">Ghairi</string>
+  <!-- Device preview caption. %1$s = form factor (Mobile/Tablet), %2$s = orientation (Portrait/Landscape), %3$s = dimensions such as “404 × 764 dp”. -->
+  <string name="app_device_frame_viewport">Eneo la kuonyesha: %1$s • %2$s (%3$s)</string>
+  <!-- Device preview form factor option. -->
+  <string name="app_device_form_factor_mobile">Simu</string>
+  <!-- Device preview form factor option. -->
+  <string name="app_device_form_factor_tablet">Kompyuta kibao</string>
+  <!-- Device preview orientation. -->
+  <string name="app_device_orientation_portrait">Wima</string>
+  <!-- Device preview orientation. -->
+  <string name="app_device_orientation_landscape">Mlalo</string>
+  <!-- Accessibility label for the rotate button in the device preview. -->
+  <string name="app_device_rotate_description">Zungusha kifaa</string>
+  <!-- Chip label to rotate the device preview. -->
+  <string name="app_device_rotate">Zungusha</string>
+  <string name="app_device_switch_to_light_mode">Badilisha hadi hali ya mwangaza</string>
+  <string name="app_device_switch_to_dark_mode">Badilisha hadi hali ya giza</string>
+  <!-- Chip label: the device preview currently uses the dark theme. -->
+  <string name="app_device_theme_dark">Giza</string>
+  <!-- Chip label: the device preview currently uses the light theme. -->
+  <string name="app_device_theme_light">Mwangaza</string>
+  <string name="app_device_disable_airplane_mode">Zima hali ya ndegeni</string>
+  <string name="app_device_enable_airplane_mode">Washa hali ya ndegeni</string>
+  <!-- Chip label to simulate being offline in the device preview. -->
+  <string name="app_device_airplane_mode">Hali ya ndegeni</string>
+  <string name="app_device_walk_closer_description">Iga kutembea karibu zaidi na lengo</string>
+  <string name="app_device_walk_closer">Sogea karibu</string>
+  <!-- Accessibility label of the icon next to a GeoID that the registry hasn't confirmed yet because the record hasn't synced. -->
+  <string name="app_geo_id_pending_sync">Inasubiri kusawazishwa</string>
+  <!-- Error title shown when no user data service is configured. -->
+  <string name="app_user_data_service_cannot_start">Programu haiwezi kuanza</string>
+  <!-- Error banner title; the detailed error message follows below it. -->
+  <string name="app_user_data_sync_error_title">Imeshindwa kupakia data kutoka kwenye huduma ya data ya mtumiaji</string>
+  <string name="app_backend_error_title">Imeshindwa kuhifadhi mabadiliko</string>
+  <!-- Generic button label to try a failed action again. -->
+  <string name="app_retry">Jaribu tena</string>
+  <!-- Accessibility label of the avatar button. %1$s = signed-in user's name. -->
+  <string name="app_account_menu_for_user">Menyu ya akaunti ya %1$s</string>
+  <!-- Accessibility label of the avatar button when the user's name is unknown. -->
+  <string name="app_account_menu">Menyu ya akaunti</string>
+  <!-- Title of the account menu panel. -->
+  <string name="app_account">Akaunti</string>
+  <!-- Accessibility label of the close button in the account menu. -->
+  <string name="app_close_account_menu">Funga menyu ya akaunti</string>
+  <!-- Account menu item. -->
+  <string name="app_manage_organizations">Simamia mashirika</string>
+  <!-- Account menu item. -->
+  <string name="app_admin_panel">Paneli ya msimamizi</string>
+  <!-- Account menu item. -->
+  <string name="app_sign_out">Ondoka</string>
+  <!-- Label before a map feature's GeoID (a registry identifier). %1$s = the GeoID. -->
+  <string name="app_geo_id_label">GeoID: %1$s</string>
+  <!-- Fallback title of a data collection form that has no title. -->
+  <string name="app_data_collection_form_fallback_title">Fomu ya ukusanyaji data</string>
+  <!-- Accessibility label of the back button that closes a form and returns to the survey. -->
+  <string name="app_back_to_survey">Rudi kwenye utafiti</string>
+  <!-- Form context banner for a submission without a map feature. %1$s = GPS coordinates. -->
+  <string name="app_standalone_field_log_with_location">Kumbukumbu huru ya uwandani • %1$s</string>
+  <!-- Form context banner prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel), %2$s = map layer name or “Required”. -->
+  <string name="app_select_target_with_dataset">Chagua %1$s (%2$s)</string>
+  <!-- Fallback name of a map feature type when the form doesn't define one. -->
+  <string name="app_target_type_fallback">Kipengele</string>
+  <!-- Marks a step or field as required. -->
+  <string name="app_required">Inahitajika</string>
+  <!-- Chip label that closes the form and returns to the map. -->
+  <string name="app_map">Ramani</string>
+  <!-- Accessibility label of the icon that cancels the form. -->
+  <string name="app_cancel_form">Ghairi fomu</string>
+  <!-- Badge on the map feature selection step. %1$d = current step number, %2$d = total steps. -->
+  <string name="app_entity_ref_step_badge">Hatua %1$d kati ya %2$d • Inahitajika</string>
+  <!-- Title prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel). -->
+  <string name="app_select_target_type">Chagua %1$s</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_entity_ref_no_preselection">Hakuna %1$s kilichochaguliwa awali kwenye ramani. Chagua %1$s lengwa hapa chini ukitumia Ramani au Orodha ili kuendelea kukusanya data.</string>
+  <!-- Segmented button: pick the map feature on the map. -->
+  <string name="app_select_on_map">Chagua kwenye ramani</string>
+  <!-- Segmented button: pick the map feature from a list. %1$d = number of map features. -->
+  <string name="app_select_from_list">Chagua kutoka kwenye orodha (%1$d)</string>
+  <!-- Accessibility label of the check icon marking the selected map feature. -->
+  <string name="app_selected">Kimechaguliwa</string>
+  <!-- %1$s = name of the selected map feature. -->
+  <string name="app_selected_entity">Kilichochaguliwa: %1$s</string>
+  <!-- Badge: a map feature is selected and the form can continue. -->
+  <string name="app_ready">Tayari</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_entity_ref_map_hint">Gusa %1$s kwenye ramani au hapa chini ili kuchagua</string>
+  <!-- Heading of the list of map features shown on the map. %1$s = map layer name. -->
+  <string name="app_dataset_on_map">%1$s kwenye ramani</string>
+  <!-- Accessibility label of the search icon. -->
+  <string name="app_search_map_features">Tafuta vipengele vya ramani</string>
+  <!-- Accessibility label of the button that clears the search field. -->
+  <string name="app_clear_search">Futa utafutaji</string>
+  <!-- Search field placeholder. %1$s = map layer name in lowercase. -->
+  <string name="app_filter_dataset_placeholder">Chuja %1$s kwa jina au GeoID...</string>
+  <!-- Empty search result. %1$s = map layer name in lowercase. -->
+  <string name="app_no_matching_dataset">Hakuna %1$s zinazolingana zilizopatikana.</string>
+  <string name="app_no_dataset_items_yet">Bado hakuna %1$s.</string>
+  <!-- Button to continue the form with the selected map feature. %1$s = map feature name. -->
+  <string name="app_continue_with_entity">Endelea na %1$s</string>
+  <!-- Disabled button label. %1$s = map feature type in lowercase. -->
+  <string name="app_select_target_to_continue">Chagua %1$s ili kuendelea</string>
+  <!-- Number of submissions for a map feature. -->
+  <plurals name="app_submission_count">
+    <item quantity="one">Wasilisho %1$d</item>
+    <item quantity="other">Mawasilisho %1$d</item>
+  </plurals>
+  <!-- Badge on the selected map feature option. -->
+  <string name="app_selected_check">Kimechaguliwa ✓</string>
+  <!-- Chip label to select a map feature option. -->
+  <string name="app_select">Chagua</string>
+  <!-- Badge: data was already collected for this map feature. -->
+  <string name="app_completed">Imekamilika</string>
+  <string name="app_public_data_banner">Utafiti wa data ya umma: Mtu yeyote anaweza kuona majibu, picha na maeneo. Usijumuishe maelezo ya kibinafsi au nyeti.</string>
+  <!-- Title of the consent dialog for a public data survey. -->
+  <string name="app_consent_public_title">Data katika utafiti huu ni ya umma</string>
+  <!-- Title of the consent dialog for a survey with organizer terms. -->
+  <string name="app_consent_title">Kabla ya kukusanya data</string>
+  <!-- %1$s = survey title. -->
+  <string name="app_consent_public_intro">Unakaribia kuchangia "%1$s". Kwa sababu utafiti huu unatumia data ya umma:</string>
+  <string name="app_consent_what_is_public_title">Kilicho cha umma</string>
+  <string name="app_consent_what_is_public_body">Mtu yeyote anaweza kuona vipengele vya ramani, viwianishi vya GPS, majibu na picha unazowasilisha.</string>
+  <string name="app_consent_identity_hidden_title">Utambulisho wako umefichwa</string>
+  <string name="app_consent_identity_hidden_body">Jina lako na anwani yako ya barua pepe vimefichwa kwa washiriki wengine na vinaonekana tu kwa waratibu wa utafiti.</string>
+  <string name="app_consent_protect_privacy_title">Linda faragha</string>
+  <string name="app_consent_protect_privacy_body">Usijumuishe nyuso, nambari za magari au maelezo ya kibinafsi katika picha au majibu ya maandishi.</string>
+  <!-- Heading above custom consent text written by the survey organizer. -->
+  <string name="app_consent_organizer_terms">Masharti ya mratibu wa utafiti</string>
+  <!-- Button accepting the consent terms. -->
+  <string name="app_consent_accept">Nimeelewa, endelea</string>
+  <!-- Accessibility label of the back button in map feature details. -->
+  <string name="app_back_to_all_map_features">Rudi kwenye vipengele vyote vya ramani</string>
+  <!-- Accessibility label. -->
+  <string name="app_collapse_details">Kunja maelezo</string>
+  <!-- Accessibility label. -->
+  <string name="app_close_details">Funga maelezo</string>
+  <!-- Accessibility label of the overflow (⋮) menu button. -->
+  <string name="app_more_actions">Vitendo zaidi</string>
+  <!-- Section heading in map feature details. -->
+  <string name="app_details_heading">Maelezo</string>
+  <!-- Field label: the map layer a map feature belongs to. -->
+  <string name="app_details_layer">Tabaka</string>
+  <!-- Field label: the shape summary of a map feature (e.g. polygon area). -->
+  <string name="app_details_geometry">Jiometri</string>
+  <!-- Field label: the map feature's GeoID registry identifier. -->
+  <string name="app_details_geo_id">GeoID</string>
+  <!-- Section heading listing a map feature's attribute values. -->
+  <string name="app_details_properties">Sifa</string>
+  <!-- Button that shows the selected map feature in the data table. -->
+  <string name="app_show_in_table">Onyesha kwenye jedwali</string>
+  <!-- Action that saves a PDF report to the device. -->
+  <string name="app_download_pdf">Pakua PDF</string>
+  <!-- Action that creates a PDF report and opens the share sheet. -->
+  <string name="app_share_pdf">Shiriki PDF</string>
+  <!-- Short chip label to stop navigating to a map feature. -->
+  <string name="app_stop_navigation_short">Acha urambazaji</string>
+  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_navigate_with_distance">Elekea • %1$s</string>
+  <!-- Label to start straight-line navigation to a location. -->
+  <string name="app_navigate">Elekea</string>
+  <!-- Action that shows the map feature's QR code. -->
+  <string name="app_qr_code">Msimbo wa QR</string>
+  <!-- Chip label: number of media uploads not yet sent. -->
+  <plurals name="app_pending_uploads">
+    <item quantity="one">Kipakiwa %1$d kinasubiri</item>
+    <item quantity="other">Vipakiwa %1$d vinasubiri</item>
+  </plurals>
+  <!-- Chip label opening the uploads list. %1$d = number of uploads. -->
+  <string name="app_uploads_count">Vipakiwa (%1$d)</string>
+  <!-- Section heading above the buttons that open data collection forms. -->
+  <string name="app_collect_data">Kusanya data</string>
+  <!-- Disabled form button. %1$s = the form's action label (e.g. “Visit parcel”). -->
+  <string name="app_form_action_completed">%1$s (Imekamilika)</string>
+  <!-- Heading/link with the number of submissions. %1$d = count. -->
+  <string name="app_submissions_count">Mawasilisho (%1$d)</string>
+  <string name="app_submissions_stored_offline">Yamehifadhiwa kwenye kifaa hiki. Unganisha kwenye intaneti ili kuona mawasilisho yote.</string>
+  <string name="app_no_submissions_yet">Bado hakuna mawasilisho</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_view_submission_history">Angalia historia ya data iliyokusanywa kwa %1$s hiki</string>
+  <!-- Accessibility label of the back button returning to map feature details. -->
+  <string name="app_back_to_details">Rudi kwenye maelezo</string>
+  <string name="app_offline_showing_local_submissions">Uko nje ya mtandao. Inaonyesha mawasilisho yaliyohifadhiwa kwenye kifaa hiki. Unganisha kwenye intaneti ili kuona mawasilisho yote.</string>
+  <!-- %1$s = map feature type in lowercase. -->
+  <string name="app_no_local_submissions_for_entity">Hakuna mawasilisho ya %1$s hiki yaliyohifadhiwa kwenye kifaa hiki.</string>
+  <!-- %1$s = map feature type in lowercase. -->
+  <string name="app_no_submissions_for_entity">Bado hakuna mawasilisho ya %1$s hiki.</string>
+  <!-- Back button label returning to the submissions list. -->
+  <string name="app_back_to_submissions">Rudi kwenye mawasilisho</string>
+  <!-- QR code dialog title. %1$s = map feature type (e.g. Coffee parcel). -->
+  <string name="app_entity_qr_code_title">Msimbo wa QR wa %1$s</string>
+  <!-- Accessibility label of the QR code image. %1$s = map feature name. -->
+  <string name="app_entity_qr_matrix_description">Matriki ya QR ya %1$s</string>
+  <!-- %1$s = map feature type in lowercase. EUDR = EU Deforestation Regulation. -->
+  <string name="app_entity_qr_code_hint">Changanua kwa Collect One au kisomaji chochote cha utiifu wa EUDR ili kuthibitisha jiometri na GeoID ya %1$s.</string>
+  <!-- Generic button label / accessibility label to close a dialog or sheet. -->
+  <string name="app_close">Funga</string>
+  <!-- Number of pages in a generated PDF. -->
+  <plurals name="app_pdf_page_count">
+    <item quantity="one">Ukurasa %1$d</item>
+    <item quantity="other">Kurasa %1$d</item>
+  </plurals>
+  <!-- Accessibility label of the icon that opens a PDF preview. -->
+  <string name="app_preview_pdf">Hakiki PDF</string>
+  <string name="app_pdf_created_can_share">Imeundwa kwenye kifaa hiki, kwa hivyo unaweza kuishiriki hata ukiwa nje ya mtandao.</string>
+  <string name="app_pdf_created_download_to_send">Imeundwa kwenye kifaa hiki. Ili kuituma, ipakue, kisha uiambatishe katika programu yoyote.</string>
+  <!-- Button that opens the system share sheet. -->
+  <string name="app_share">Shiriki</string>
+  <!-- Button that saves a file to the device. -->
+  <string name="app_download">Pakua</string>
+  <!-- Button that dismisses a message. -->
+  <string name="app_ok">Sawa</string>
+  <!-- Accessibility label of the back button returning to the map feature list. -->
+  <string name="app_back_to_searchable_list">Rudi kwenye orodha inayotafutika</string>
+  <!-- Form subtitle. %1$s = the form's action button label, %2$s = form version. -->
+  <string name="app_form_action_subtitle">Kitendo: "%1$s" • %2$s</string>
+  <!-- Submission target. %1$s = map feature type (e.g. Coffee parcel), %2$s = map feature name. -->
+  <string name="app_target_with_entity">%1$s: %2$s</string>
+  <!-- Submission without a map feature. %1$s = map feature type, %2$s = GPS coordinates. -->
+  <string name="app_target_no_feature_with_location">%1$s • Hakuna kipengele cha ramani kilichoambatishwa (%2$s)</string>
+  <!-- Submission without a map feature. %1$s = map feature type. -->
+  <string name="app_target_no_feature">%1$s • Hakuna kipengele cha ramani kilichoambatishwa</string>
+  <!-- Badge on the most recent submission (all caps). -->
+  <string name="app_latest">KIPYA ZAIDI</string>
+  <!-- Accessibility label of the button that opens a submission. -->
+  <string name="app_submission_details">Maelezo ya wasilisho</string>
+  <!-- Search field placeholder. -->
+  <string name="app_search_placeholder">Tafuta...</string>
+  <!-- Accessibility label of the search icon. -->
+  <string name="app_search">Tafuta</string>
+  <!-- Accessibility label of the button that clears the list search field. -->
+  <string name="app_clear_search_title_case">Futa utafutaji</string>
+  <!-- Accessibility label. -->
+  <string name="app_collapse_list_sheet">Kunja orodha kurudi kwenye ramani</string>
+  <!-- Accessibility label. -->
+  <string name="app_expand_list_sheet">Panua orodha inayotafutika</string>
+  <!-- Accessibility label of the offline icon. -->
+  <string name="app_device_offline">Kifaa kiko nje ya mtandao</string>
+  <!-- %1$s = plural map feature noun in lowercase (e.g. coffee parcels, map features). -->
+  <string name="app_offline_searching_local">Kifaa kiko nje ya mtandao • Inatafuta %1$s vilivyo kwenye kifaa pekee</string>
+  <!-- %1$s = plural map feature noun in lowercase. -->
+  <string name="app_offline_search_local_only">Utafutaji ni katika %1$s vilivyo kwenye kifaa pekee. Utafutaji wa maeneo haupatikani nje ya mtandao.</string>
+  <!-- Generic plural noun for map features, used inside sentences. -->
+  <string name="app_map_features_lowercase">vipengele vya ramani</string>
+  <!-- Generic plural noun used inside sentences when a map layer has no feature name. -->
+  <string name="app_features_lowercase">vipengele</string>
+  <!-- Section heading (all caps). -->
+  <string name="app_map_layers_heading">MATABAKA YA RAMANI</string>
+  <!-- Accessibility label. %1$s = map layer name. -->
+  <string name="app_expand_dataset">Panua %1$s</string>
+  <!-- Accessibility label. %1$s = map layer name. -->
+  <string name="app_collapse_dataset">Kunja %1$s</string>
+  <!-- %1$d = number shown, %2$d = total number, %3$s = plural map feature noun, %4$s = map layer name. -->
+  <string name="app_showing_first_features">Inaonyesha %3$s %1$d vya kwanza kati ya %2$d katika %4$s. Tumia upau wa kutafuta ulio juu ili kuchuja %3$s vyote %2$d.</string>
+  <!-- Section heading listing place search results (all caps). -->
+  <string name="app_places_heading">MAENEO</string>
+  <!-- Accessibility label. -->
+  <string name="app_fly_to_place">Ruka hadi mahali kwenye ramani</string>
+  <!-- Chip label to stop navigating to a place. -->
+  <string name="app_stop_navigation">Acha urambazaji</string>
+  <!-- Accessibility label. -->
+  <string name="app_navigate_to_place">Elekea mahali kwa mstari wa moja kwa moja</string>
+  <!-- %1$s = search query. -->
+  <string name="app_no_local_layers_match">Hakuna matabaka ya ramani yaliyo kwenye kifaa yanayolingana na "%1$s". Utafutaji wa maeneo haupatikani nje ya mtandao.</string>
+  <!-- %1$s = search query. -->
+  <string name="app_no_layers_or_places_match">Hakuna matabaka ya ramani wala maeneo yanayolingana na "%1$s".</string>
+  <string name="app_no_map_layers_yet">Bado hakuna matabaka ya ramani.</string>
+  <string name="app_no_map_features_yet">Bado hakuna vipengele vya ramani.</string>
+  <!-- Accessibility label of the overflow menu. -->
+  <string name="app_more_submission_actions">Vitendo zaidi vya wasilisho</string>
+  <!-- Accessibility label of the share icon. -->
+  <string name="app_share_submission_pdf">Shiriki PDF ya wasilisho</string>
+  <!-- %1$s = form version. -->
+  <string name="app_schema_version">Skima: %1$s</string>
+  <!-- %1$s = name of the person who collected the data. -->
+  <string name="app_data_collector">Mkusanyaji data: %1$s</string>
+  <!-- %1$s = date and time of collection. -->
+  <string name="app_collected_at">Ilikusanywa: %1$s</string>
+  <!-- Sync status title. -->
+  <string name="app_sync_uploading_changes">Inapakia mabadiliko</string>
+  <!-- Sync status title. -->
+  <string name="app_sync_all_changes_saved">Mabadiliko yote yamehifadhiwa</string>
+  <!-- Sync status title / description. -->
+  <string name="app_sync_upload_failed_retry">Imeshindwa kupakia — gusa ili kujaribu tena</string>
+  <!-- Sync status description. -->
+  <string name="app_sync_uploading_description">Inapakia mabadiliko ya kifaa kwenye seva</string>
+  <!-- Sync status description. -->
+  <string name="app_sync_synced_description">Imesawazishwa na seva ya wingu</string>
+  <!-- Accessibility label of the basemap/layers button on the map. -->
+  <string name="app_layers">Matabaka</string>
+  <!-- Section heading in the basemap selector: basemap type (Satellite / Map). -->
+  <string name="app_basemap_type_heading">Aina</string>
+  <!-- Section heading in the basemap selector listing custom imagery layers. -->
+  <string name="app_imagery_heading">Picha za angani</string>
+  <!-- Imagery layer subtitle. -->
+  <string name="app_offline_download_permitted">Upakuaji wa nje ya mtandao unaruhusiwa</string>
+  <!-- Imagery layer subtitle. -->
+  <string name="app_online_only_offline_disabled">Mtandaoni pekee · upakuaji wa nje ya mtandao umezimwa</string>
+  <!-- Section heading in the layers sheet: the map areas saved on the device for offline use. -->
+  <string name="app_downloaded_imagery_heading">Picha zilizopakuliwa</string>
+  <!-- Switch in the layers sheet that shows the satellite imagery saved for offline use. -->
+  <string name="app_downloaded_satellite">Setilaiti iliyopakuliwa</string>
+  <!-- Switch in the layers sheet that shows the terrain map saved for offline use. -->
+  <string name="app_downloaded_terrain">Ardhi iliyopakuliwa</string>
+  <!-- Subtitle of a downloaded imagery switch. %1$d: number of saved areas; %2$s: the space they take, e.g. "76 MB". -->
+  <plurals name="app_downloaded_imagery_summary">
+    <item quantity="one">Eneo %1$d · %2$s</item>
+    <item quantity="other">Maeneo %1$d · %2$s</item>
+  </plurals>
+  <!-- Subtitle of a downloaded imagery switch when no area of that kind is saved. -->
+  <string name="app_downloaded_imagery_none">Hakuna maeneo yaliyohifadhiwa</string>
+  <!-- Button that starts framing a map area to save for offline use. -->
+  <string name="app_save_an_area">Hifadhi eneo</string>
+  <!-- Imagery layer type: a web map tile URL template. -->
+  <string name="app_imagery_type_xyz_tiles">URL ya vigae vya XYZ</string>
+  <string name="app_imagery_type_earth_engine">Safu ya Earth Engine</string>
+  <!-- Basemap type option: standard map with roads and terrain. -->
+  <string name="app_basemap_type_map">Ardhi</string>
+  <!-- Basemap type option: satellite imagery. -->
+  <string name="app_basemap_type_satellite">Setilaiti</string>
+  <!-- Title of the basemap selection dialog. -->
+  <string name="app_basemap">Ramani ya msingi</string>
+  <!-- Generic button label to close a dialog after making changes. -->
+  <string name="app_done">Nimemaliza</string>
+  <!-- Accessibility label. -->
+  <string name="app_hide_layer">Ficha tabaka</string>
+  <!-- Accessibility label. -->
+  <string name="app_show_layer">Onyesha tabaka</string>
+  <!-- Button on a map cluster balloon that zooms into the cluster. -->
+  <string name="app_zoom_in">Kuza</string>
+  <!-- Accessibility label. -->
+  <string name="app_dismiss_cluster_balloon">Ondoa kiputo cha kundi</string>
+  <!-- Cluster balloon chip. %1$s = workflow status (e.g. Visited), %2$d = number of map features. -->
+  <string name="app_cluster_status_count">%1$s: %2$d</string>
+  <!-- Accessibility label. -->
+  <string name="app_clear_selected_place">Futa mahali palipochaguliwa</string>
+  <!-- Accessibility label of the icon marking a survey downloaded for offline use. -->
+  <string name="app_downloaded">Imepakuliwa</string>
+  <!-- Map label on the navigation line once at the target. %1$s = distance and bearing. -->
+  <string name="app_map_navigation_arrived">✓ Umefika • %1$s</string>
+  <!-- Map label on the navigation line. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_map_navigation_distance">➤ %1$s</string>
+  <!-- Map label under the user's location while navigating. %1$s = bearing, e.g. “319° NW”. -->
+  <string name="app_map_user_navigating">⊕ Wewe • %1$s</string>
+  <!-- Map label under the user's location while the map follows it. -->
+  <string name="app_map_user_centered">⊕ Wewe (katikati)</string>
+  <!-- Map label under the user's GPS location. -->
+  <string name="app_map_user_gps">⊕ Wewe (GPS)</string>
+  <!-- Fallback label of a place picked from search that has no name. -->
+  <string name="app_place">Mahali</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_point">Nukta</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_line">Mstari</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_polygon">Poligoni</string>
+  <!-- Map feature geometry type: a data table row without a location. -->
+  <string name="app_geometry_none">Hakuna jiometri</string>
+  <!-- Name of a map pin icon in the icon picker. -->
+  <string name="app_layer_icon_place">Mahali</string>
+  <string name="app_layer_icon_flag">Bendera</string>
+  <string name="app_layer_icon_star">Nyota</string>
+  <string name="app_layer_icon_circle">Duara</string>
+  <string name="app_layer_icon_park">Mti</string>
+  <string name="app_layer_icon_forest">Msitu</string>
+  <string name="app_layer_icon_eco">Jani</string>
+  <string name="app_layer_icon_grass">Nyasi</string>
+  <string name="app_layer_icon_agriculture">Kilimo</string>
+  <string name="app_layer_icon_yard">Bustani</string>
+  <string name="app_layer_icon_emoji_nature">Wanyamapori</string>
+  <string name="app_layer_icon_pets">Wanyama</string>
+  <string name="app_layer_icon_water_drop">Tone la maji</string>
+  <string name="app_layer_icon_water">Maji</string>
+  <string name="app_layer_icon_waves">Mawimbi</string>
+  <string name="app_layer_icon_plumbing">Kisima / pampu</string>
+  <string name="app_layer_icon_landscape">Mandhari</string>
+  <string name="app_layer_icon_terrain">Ardhi</string>
+  <string name="app_layer_icon_hiking">Njia</string>
+  <string name="app_layer_icon_signpost">Kibao cha alama</string>
+  <string name="app_layer_icon_fence">Uzio</string>
+  <string name="app_layer_icon_home">Nyumbani</string>
+  <string name="app_layer_icon_cottage">Kibanda</string>
+  <string name="app_layer_icon_apartment">Jengo</string>
+  <string name="app_layer_icon_school">Shule</string>
+  <string name="app_layer_icon_local_hospital">Kituo cha afya</string>
+  <string name="app_layer_icon_church">Mahali pa ibada</string>
+  <string name="app_layer_icon_storefront">Soko</string>
+  <string name="app_layer_icon_factory">Kiwanda</string>
+  <string name="app_layer_icon_construction">Ujenzi</string>
+  <string name="app_layer_icon_solar_power">Nishati ya jua</string>
+  <string name="app_layer_icon_cell_tower">Mnara wa simu</string>
+  <string name="app_layer_icon_sensors">Kitambuzi</string>
+  <string name="app_layer_icon_photo_camera">Kamera</string>
+  <string name="app_layer_icon_science">Sampuli</string>
+  <string name="app_layer_icon_recycling">Urejelezaji</string>
+  <string name="app_layer_icon_local_fire_department">Moto</string>
+  <string name="app_layer_icon_warning">Hatari</string>
+  <string name="app_layer_icon_person">Mtu</string>
+  <string name="app_layer_icon_groups">Kikundi</string>
+  <!-- Shown instead of a data collector's name in surveys that hide contributor identities. -->
+  <string name="app_participant_identity_hidden">Mshiriki (utambulisho umefichwa)</string>
+  <!-- The signed-in user's own name as data collector. %1$s = name. -->
+  <string name="app_collector_you">%1$s (Wewe)</string>
+  <!-- Data collector attribution. %1$s = name, %2$s = email address. -->
+  <string name="app_collector_with_email">%1$s (%2$s)</string>
+  <!-- Notice. %1$s = PDF file name. -->
+  <string name="app_pdf_saved">%1$s imehifadhiwa</string>
+  <!-- Notice. %1$s = PDF file name, %2$s = page count and file size. -->
+  <string name="app_pdf_saved_with_summary">%1$s imehifadhiwa (%2$s)</string>
+  <!-- Notice. %1$s = PDF file name. -->
+  <string name="app_pdf_share_failed">Imeshindwa kushiriki %1$s</string>
+  <!-- Attribution badge shown in the time series panel and on the map when Earth Engine layers are displayed. Keep “Google Earth Engine” untranslated. -->
+  <string name="app_powered_by_google_earth_engine">Inaendeshwa na Google Earth Engine</string>
+  <!-- Coordinates of a point. %1$s = latitude such as “0.4160°S”, %2$s = longitude such as “36.9470°E”. -->
+  <string name="app_coordinates">%1$s, %2$s</string>
+  <!-- Latitude north of the equator. %1$s = degrees such as “0.4160”. Use the standard abbreviation for north. -->
+  <string name="app_coordinates_latitude_north">%1$s°N</string>
+  <!-- Latitude south of the equator. %1$s = degrees such as “0.4160”. Use the standard abbreviation for south. -->
+  <string name="app_coordinates_latitude_south">%1$s°S</string>
+  <!-- Longitude east of the prime meridian. %1$s = degrees such as “36.9470”. Use the standard abbreviation for east. -->
+  <string name="app_coordinates_longitude_east">%1$s°E</string>
+  <!-- Longitude west of the prime meridian. %1$s = degrees such as “36.9470”. Use the standard abbreviation for west. -->
+  <string name="app_coordinates_longitude_west">%1$s°W</string>
+  <!-- Notice when straight-line navigation to a map feature or place starts. %1$s = its name; %2$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_map_navigation_started">Uelekezaji wa mstari ulionyooka hadi %1$s (%2$s)</string>
+  <!-- Notice when straight-line navigation to a submission starts. %1$s = form title; %2$s = its map feature, location, or “Standalone Field Log”; %3$s = distance and bearing. -->
+  <string name="app_map_navigation_started_submission">Uelekezaji wa mstari ulionyooka hadi %1$s • %2$s (%3$s)</string>
+  <!-- In the navigation notice, stands for a submission that has neither a map feature nor a location. -->
+  <string name="app_map_navigation_standalone_field_log">Kumbukumbu huru ya uwandani</string>
+  <!-- Notice when the map centers on a place. %1$s = place name; %2$s = its coordinates. -->
+  <string name="app_map_centered_on_place">Ramani imewekwa katikati kwenye %1$s (%2$s)</string>
+  <!-- Place search result for coordinates the user typed. %1$s = the coordinates, e.g. “0.4210°S, 36.9505°E”. -->
+  <string name="app_place_coordinates_name">Viwianishi (%1$s)</string>
+  <!-- Category badge of a place search result for typed coordinates. -->
+  <string name="app_place_coordinates_category">Viwianishi vya GPS</string>
+  <!-- Region line of a place search result for typed coordinates. %1$s = the survey's location, e.g. “Nyeri County, Kenya”. -->
+  <string name="app_place_coordinates_region">%1$s • Utafutaji wa moja kwa moja wa viwianishi</string>
+
+  <!-- Dates in summaries (DateText.kt), e.g. "Mar 5, 2026". date_medium: %1$s is the abbreviated month name, %2$d the day of the month, %3$d the year. -->
+  <string name="date_medium">%2$d %1$s %3$d</string>
+  <string name="date_month_short_1">Jan</string>
+  <string name="date_month_short_2">Feb</string>
+  <string name="date_month_short_3">Mac</string>
+  <string name="date_month_short_4">Apr</string>
+  <string name="date_month_short_5">Mei</string>
+  <string name="date_month_short_6">Jun</string>
+  <string name="date_month_short_7">Jul</string>
+  <string name="date_month_short_8">Ago</string>
+  <string name="date_month_short_9">Sep</string>
+  <string name="date_month_short_10">Okt</string>
+  <string name="date_month_short_11">Nov</string>
+  <string name="date_month_short_12">Des</string>
+  <!-- Title the system share sheet gives a PDF report: of a map feature (%1$s is its type, e.g. Coffee parcel) or of a submission (%1$s is the form title). -->
+  <string name="app_pdf_share_title_map_feature">Ripoti ya %1$s</string>
+  <string name="app_pdf_share_title_submission">Wasilisho la %1$s</string>
+  <!-- Number of map features in a map cluster, when no single map layer names its features. -->
+  <plurals name="app_map_features_count">
+    <item quantity="one">kipengele %1$d cha ramani</item>
+    <item quantity="other">vipengele %1$d vya ramani</item>
+  </plurals>
+  <!-- Type of a map feature when the survey names none (first), and what a submission without a map feature was recorded as (second). -->
+  <string name="app_feature_type_generic">Mahali</string>
+  <string name="app_target_standalone">Kumbukumbu huru ya uwandani</string>
+  <string name="app_measurement">%1$s %2$s</string>
+  <string name="app_unit_meter">m</string>
+  <string name="app_unit_kilometer">km</string>
+  <string name="app_unit_foot">futi</string>
+  <string name="app_unit_mile">maili</string>
+  <string name="app_unit_hectare">hekta</string>
+  <string name="app_unit_acre">ekari</string>
+  <string name="app_unit_square_kilometer">km²</string>
+  <string name="app_unit_kilobyte">kB</string>
+  <string name="app_unit_megabyte">MB</string>
+  <string name="app_unit_gigabyte">GB</string>
+  <string name="app_unit_terabyte">TB</string>
+  <string name="app_gnss_accuracy">±%1$s</string>
+  <string name="app_wayfinding_badge">%1$s • %2$s</string>
+</resources>

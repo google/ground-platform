@@ -1,0 +1,667 @@
+{
+ "expression": {
+  "result": "0",
+  "values": {
+   "0": {
+    "functionDefinitionValue": {
+     "argumentNames": [
+      "geometry",
+      "start",
+      "end"
+     ],
+     "body": "1"
+    }
+   },
+   "1": {
+    "functionInvocationValue": {
+     "arguments": {
+      "collection": {
+       "functionInvocationValue": {
+        "arguments": {
+         "collection": {
+          "functionInvocationValue": {
+           "arguments": {
+            "collection": {
+             "functionInvocationValue": {
+              "arguments": {
+               "collection": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "baseAlgorithm": {
+                   "functionDefinitionValue": {
+                    "argumentNames": [
+                     "_MAPPING_VAR_0_0"
+                    ],
+                    "body": "2"
+                   }
+                  },
+                  "collection": {
+                   "functionInvocationValue": {
+                    "arguments": {
+                     "condition": {
+                      "functionInvocationValue": {
+                       "arguments": {
+                        "left": {
+                         "functionInvocationValue": {
+                          "arguments": {
+                           "collection": {
+                            "valueReference": "16"
+                           }
+                          },
+                          "functionName": "Collection.size"
+                         }
+                        },
+                        "right": {
+                         "functionInvocationValue": {
+                          "arguments": {
+                           "collection": {
+                            "valueReference": "20"
+                           }
+                          },
+                          "functionName": "Collection.size"
+                         }
+                        }
+                       },
+                       "functionName": "Number.gte"
+                      }
+                     },
+                     "falseCase": {
+                      "valueReference": "20"
+                     },
+                     "trueCase": {
+                      "valueReference": "16"
+                     }
+                    },
+                    "functionName": "If"
+                   }
+                  }
+                 },
+                 "functionName": "Collection.map"
+                }
+               },
+               "filter": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "properties": {
+                   "constantValue": [
+                    "ok"
+                   ]
+                  }
+                 },
+                 "functionName": "Filter.notNull"
+                }
+               }
+              },
+              "functionName": "Collection.filter"
+             }
+            },
+            "properties": {
+             "constantValue": [
+              "day",
+              "p"
+             ]
+            }
+           },
+           "functionName": "Collection.distinct"
+          }
+         },
+         "key": {
+          "constantValue": "t"
+         }
+        },
+        "functionName": "Collection.limit"
+       }
+      },
+      "property": {
+       "constantValue": "obs"
+      }
+     },
+     "functionName": "AggregateFeatureCollection.array"
+    }
+   },
+   "10": {
+    "arrayValue": {
+     "values": [
+      {
+       "valueReference": "8"
+      }
+     ]
+    }
+   },
+   "11": {
+    "arrayValue": {
+     "values": [
+      {
+       "valueReference": "9"
+      }
+     ]
+    }
+   },
+   "12": {
+    "functionInvocationValue": {
+     "arguments": {
+      "bandSelectors": {
+       "valueReference": "10"
+      },
+      "input": {
+       "valueReference": "13"
+      }
+     },
+     "functionName": "Image.select"
+    }
+   },
+   "13": {
+    "functionInvocationValue": {
+     "arguments": {
+      "image1": {
+       "valueReference": "14"
+      },
+      "image2": {
+       "functionInvocationValue": {
+        "arguments": {
+         "image1": {
+          "valueReference": "7"
+         },
+         "image2": {
+          "valueReference": "14"
+         }
+        },
+        "functionName": "Image.divide"
+       }
+      }
+     },
+     "functionName": "Image.pow"
+    }
+   },
+   "14": {
+    "functionInvocationValue": {
+     "arguments": {
+      "value": {
+       "constantValue": 10
+      }
+     },
+     "functionName": "Image.constant"
+    }
+   },
+   "15": {
+    "functionInvocationValue": {
+     "arguments": {
+      "bandSelectors": {
+       "valueReference": "11"
+      },
+      "input": {
+       "valueReference": "13"
+      }
+     },
+     "functionName": "Image.select"
+    }
+   },
+   "16": {
+    "functionInvocationValue": {
+     "arguments": {
+      "collection": {
+       "valueReference": "17"
+      },
+      "filter": {
+       "functionInvocationValue": {
+        "arguments": {
+         "leftField": {
+          "valueReference": "19"
+         },
+         "rightValue": {
+          "constantValue": "ASCENDING"
+         }
+        },
+        "functionName": "Filter.equals"
+       }
+      }
+     },
+     "functionName": "Collection.filter"
+    }
+   },
+   "17": {
+    "functionInvocationValue": {
+     "arguments": {
+      "collection": {
+       "functionInvocationValue": {
+        "arguments": {
+         "collection": {
+          "functionInvocationValue": {
+           "arguments": {
+            "collection": {
+             "functionInvocationValue": {
+              "arguments": {
+               "collection": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "collection": {
+                   "functionInvocationValue": {
+                    "arguments": {
+                     "id": {
+                      "constantValue": "COPERNICUS/S1_GRD"
+                     }
+                    },
+                    "functionName": "ImageCollection.load"
+                   }
+                  },
+                  "filter": {
+                   "functionInvocationValue": {
+                    "arguments": {
+                     "leftField": {
+                      "constantValue": ".all"
+                     },
+                     "rightValue": {
+                      "functionInvocationValue": {
+                       "arguments": {
+                        "geometry": {
+                         "argumentReference": "geometry"
+                        }
+                       },
+                       "functionName": "Feature"
+                      }
+                     }
+                    },
+                    "functionName": "Filter.intersects"
+                   }
+                  }
+                 },
+                 "functionName": "Collection.filter"
+                }
+               },
+               "filter": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "leftValue": {
+                   "functionInvocationValue": {
+                    "arguments": {
+                     "end": {
+                      "argumentReference": "end"
+                     },
+                     "start": {
+                      "argumentReference": "start"
+                     }
+                    },
+                    "functionName": "DateRange"
+                   }
+                  },
+                  "rightField": {
+                   "valueReference": "4"
+                  }
+                 },
+                 "functionName": "Filter.dateRangeContains"
+                }
+               }
+              },
+              "functionName": "Collection.filter"
+             }
+            },
+            "filter": {
+             "functionInvocationValue": {
+              "arguments": {
+               "leftField": {
+                "valueReference": "18"
+               },
+               "rightValue": {
+                "valueReference": "8"
+               }
+              },
+              "functionName": "Filter.listContains"
+             }
+            }
+           },
+           "functionName": "Collection.filter"
+          }
+         },
+         "filter": {
+          "functionInvocationValue": {
+           "arguments": {
+            "leftField": {
+             "valueReference": "18"
+            },
+            "rightValue": {
+             "valueReference": "9"
+            }
+           },
+           "functionName": "Filter.listContains"
+          }
+         }
+        },
+        "functionName": "Collection.filter"
+       }
+      },
+      "filter": {
+       "functionInvocationValue": {
+        "arguments": {
+         "leftField": {
+          "constantValue": "instrumentMode"
+         },
+         "rightValue": {
+          "constantValue": "IW"
+         }
+        },
+        "functionName": "Filter.equals"
+       }
+      }
+     },
+     "functionName": "Collection.filter"
+    }
+   },
+   "18": {
+    "constantValue": "transmitterReceiverPolarisation"
+   },
+   "19": {
+    "constantValue": "orbitProperties_pass"
+   },
+   "2": {
+    "functionInvocationValue": {
+     "arguments": {
+      "metadata": {
+       "dictionaryValue": {
+        "values": {
+         "day": {
+          "functionInvocationValue": {
+           "arguments": {
+            "date": {
+             "functionInvocationValue": {
+              "arguments": {
+               "value": {
+                "valueReference": "3"
+               }
+              },
+              "functionName": "Date"
+             }
+            },
+            "format": {
+             "constantValue": "YYYY-MM-dd"
+            }
+           },
+           "functionName": "Date.format"
+          }
+         },
+         "obs": {
+          "dictionaryValue": {
+           "values": {
+            "id": {
+             "functionInvocationValue": {
+              "arguments": {
+               "object": {
+                "argumentReference": "_MAPPING_VAR_0_0"
+               },
+               "property": {
+                "constantValue": "system:id"
+               }
+              },
+              "functionName": "Element.get"
+             }
+            },
+            "p": {
+             "valueReference": "5"
+            },
+            "t": {
+             "valueReference": "3"
+            },
+            "v": {
+             "valueReference": "6"
+            }
+           }
+          }
+         },
+         "ok": {
+          "functionInvocationValue": {
+           "arguments": {
+            "dictionary": {
+             "valueReference": "6"
+            },
+            "key": {
+             "valueReference": "8"
+            }
+           },
+           "functionName": "Dictionary.get"
+          }
+         },
+         "p": {
+          "valueReference": "5"
+         },
+         "t": {
+          "valueReference": "3"
+         }
+        }
+       }
+      }
+     },
+     "functionName": "Feature"
+    }
+   },
+   "20": {
+    "functionInvocationValue": {
+     "arguments": {
+      "collection": {
+       "valueReference": "17"
+      },
+      "filter": {
+       "functionInvocationValue": {
+        "arguments": {
+         "leftField": {
+          "valueReference": "19"
+         },
+         "rightValue": {
+          "constantValue": "DESCENDING"
+         }
+        },
+        "functionName": "Filter.equals"
+       }
+      }
+     },
+     "functionName": "Collection.filter"
+    }
+   },
+   "3": {
+    "functionInvocationValue": {
+     "arguments": {
+      "object": {
+       "argumentReference": "_MAPPING_VAR_0_0"
+      },
+      "property": {
+       "valueReference": "4"
+      }
+     },
+     "functionName": "Element.get"
+    }
+   },
+   "4": {
+    "constantValue": "system:time_start"
+   },
+   "5": {
+    "functionInvocationValue": {
+     "arguments": {
+      "string1": {
+       "constantValue": "SENTINEL-1"
+      },
+      "string2": {
+       "functionInvocationValue": {
+        "arguments": {
+         "input": {
+          "functionInvocationValue": {
+           "arguments": {
+            "object": {
+             "argumentReference": "_MAPPING_VAR_0_0"
+            },
+            "property": {
+             "constantValue": "platform_number"
+            }
+           },
+           "functionName": "Element.get"
+          }
+         }
+        },
+        "functionName": "String"
+       }
+      }
+     },
+     "functionName": "String.cat"
+    }
+   },
+   "6": {
+    "functionInvocationValue": {
+     "arguments": {
+      "bestEffort": {
+       "constantValue": true
+      },
+      "geometry": {
+       "argumentReference": "geometry"
+      },
+      "image": {
+       "functionInvocationValue": {
+        "arguments": {
+         "dstImg": {
+          "functionInvocationValue": {
+           "arguments": {
+            "dstImg": {
+             "valueReference": "7"
+            },
+            "srcImg": {
+             "functionInvocationValue": {
+              "arguments": {
+               "input": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "image1": {
+                   "functionInvocationValue": {
+                    "arguments": {
+                     "bandSelectors": {
+                      "valueReference": "10"
+                     },
+                     "input": {
+                      "valueReference": "7"
+                     }
+                    },
+                    "functionName": "Image.select"
+                   }
+                  },
+                  "image2": {
+                   "functionInvocationValue": {
+                    "arguments": {
+                     "bandSelectors": {
+                      "valueReference": "11"
+                     },
+                     "input": {
+                      "valueReference": "7"
+                     }
+                    },
+                    "functionName": "Image.select"
+                   }
+                  }
+                 },
+                 "functionName": "Image.divide"
+                }
+               },
+               "names": {
+                "constantValue": [
+                 "VV/VH"
+                ]
+               }
+              },
+              "functionName": "Image.rename"
+             }
+            }
+           },
+           "functionName": "Image.addBands"
+          }
+         },
+         "srcImg": {
+          "functionInvocationValue": {
+           "arguments": {
+            "input": {
+             "functionInvocationValue": {
+              "arguments": {
+               "image1": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "image1": {
+                   "valueReference": "12"
+                  },
+                  "image2": {
+                   "valueReference": "15"
+                  }
+                 },
+                 "functionName": "Image.subtract"
+                }
+               },
+               "image2": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "image1": {
+                   "valueReference": "12"
+                  },
+                  "image2": {
+                   "valueReference": "15"
+                  }
+                 },
+                 "functionName": "Image.add"
+                }
+               }
+              },
+              "functionName": "Image.divide"
+             }
+            },
+            "names": {
+             "constantValue": [
+              "RFDI"
+             ]
+            }
+           },
+           "functionName": "Image.rename"
+          }
+         }
+        },
+        "functionName": "Image.addBands"
+       }
+      },
+      "maxPixels": {
+       "constantValue": 1000000.0
+      },
+      "reducer": {
+       "functionInvocationValue": {
+        "arguments": {},
+        "functionName": "Reducer.mean"
+       }
+      },
+      "scale": {
+       "constantValue": 10
+      }
+     },
+     "functionName": "Image.reduceRegion"
+    }
+   },
+   "7": {
+    "functionInvocationValue": {
+     "arguments": {
+      "bandSelectors": {
+       "arrayValue": {
+        "values": [
+         {
+          "valueReference": "8"
+         },
+         {
+          "valueReference": "9"
+         }
+        ]
+       }
+      },
+      "input": {
+       "argumentReference": "_MAPPING_VAR_0_0"
+      }
+     },
+     "functionName": "Image.select"
+    }
+   },
+   "8": {
+    "constantValue": "VV"
+   },
+   "9": {
+    "constantValue": "VH"
+   }
+  }
+ },
+ "templateVersion": 1
+}

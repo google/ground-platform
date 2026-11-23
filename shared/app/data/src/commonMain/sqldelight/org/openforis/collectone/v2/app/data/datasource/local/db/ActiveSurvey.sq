@@ -1,0 +1,31 @@
+-- Copyright 2026 The Collect One Authors.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     https://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
+-- The survey the user last opened on this device, so a relaunch (a reload of the mobile app in the
+-- browser, or Android restoring the app after process death) reopens it
+-- (docs/technical/client/local-data-store.md, "Active Survey"). A single row, deleted on sign-out
+-- and when the survey is removed from the device.
+CREATE TABLE active_survey (
+  id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+  survey_id TEXT NOT NULL
+);
+
+select:
+SELECT survey_id FROM active_survey WHERE id = 0;
+
+put:
+INSERT OR REPLACE INTO active_survey(id, survey_id) VALUES (0, ?);
+
+delete:
+DELETE FROM active_survey;

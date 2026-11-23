@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Kind of "data was used" event, shown in impact history. -->
+  <string name="domain_impact_event_type_export">Đã xuất</string>
+  <string name="domain_impact_event_type_partner_push">Đã gửi cho đối tác</string>
+  <string name="domain_impact_event_type_receipt_generated">Đã tạo biên nhận</string>
+  <string name="domain_impact_event_type_receipt_shared">Đã chia sẻ biên nhận</string>
+  <string name="domain_impact_event_type_doi_minted">Đã cấp DOI</string>
+  <string name="domain_impact_event_type_survey_closed">Đã đóng khảo sát</string>
+  <!-- Lifecycle state of a survey. -->
+  <string name="domain_survey_lifecycle_state_draft">Bản nháp</string>
+  <string name="domain_survey_lifecycle_state_published">Đã xuất bản</string>
+  <string name="domain_survey_lifecycle_state_closed">Đã đóng</string>
+  <string name="domain_survey_lifecycle_state_archived">Đã lưu trữ</string>
+  <!-- Answer option to "What happened with this data?" for a closed survey. -->
+  <string name="domain_survey_outcome_kind_submitted_eudr_dds">Đã nộp trong một bản tuyên bố thẩm định EUDR</string>
+  <string name="domain_survey_outcome_kind_reported_ferm">Đã báo cáo cho FERM</string>
+  <string name="domain_survey_outcome_kind_land_titling">Được dùng để cấp quyền sở hữu đất</string>
+  <string name="domain_survey_outcome_kind_shared_with_buyers">Đã chia sẻ với người mua</string>
+  <string name="domain_survey_outcome_kind_trained_or_validated_model">Đã huấn luyện hoặc kiểm tra bản đồ hay mô hình</string>
+  <string name="domain_survey_outcome_kind_protected_area_management">Được dùng để quản lý khu bảo tồn</string>
+  <string name="domain_survey_outcome_kind_not_yet">Chưa</string>
+  <!-- Answer option: time and cost compared with the previous method. -->
+  <string name="domain_effort_comparison_less">Ít hơn</string>
+  <string name="domain_effort_comparison_same">Gần như nhau</string>
+  <string name="domain_effort_comparison_more">Nhiều hơn</string>
+  <!-- Upload status of a submission. -->
+  <string name="domain_sync_status_uploading">Đang tải lên</string>
+  <string name="domain_sync_status_uploading_description">Đang tải các thay đổi cục bộ lên máy chủ</string>
+  <string name="domain_sync_status_synced">Đã đồng bộ</string>
+  <string name="domain_sync_status_synced_description">Đã đồng bộ với máy chủ đám mây</string>
+  <string name="domain_sync_status_failed">Thất bại</string>
+  <string name="domain_sync_status_failed_description">Tải lên thất bại — nhấn để thử lại</string>
+  <!-- Name of a quota tier (plan). -->
+  <string name="domain_quota_tier_unspecified">Chưa xác định</string>
+  <string name="domain_quota_tier_basic">Cơ bản</string>
+  <string name="domain_quota_tier_sponsored">Được tài trợ</string>
+  <!-- Measurement unit system option in Settings. -->
+  <string name="domain_measurement_unit_system_metric">Hệ mét (ha, m)</string>
+  <string name="domain_measurement_unit_system_metric_short">Hệ mét</string>
+  <string name="domain_measurement_unit_system_imperial">Hệ Anh (mẫu Anh, ft)</string>
+  <string name="domain_measurement_unit_system_imperial_short">Hệ Anh</string>
+  <!-- State of the map camera relative to the GPS location. -->
+  <string name="domain_location_lock_state_locked">Tự căn giữa theo GPS</string>
+  <string name="domain_location_lock_state_locked_3d">GPS 3D</string>
+  <string name="domain_location_lock_state_panned">Đã kéo bản đồ</string>
+  <!-- Badge shown on a map layer that comes from the survey. -->
+  <string name="domain_layer_source_type_entity_dataset">Lớp khảo sát</string>
+  <!-- Basemap option in the map layers panel. -->
+  <string name="domain_basemap_type_normal">Địa hình</string>
+  <string name="domain_basemap_type_normal_description">Bản đồ địa hình có đường đồng mức, bóng địa hình và đường sá</string>
+  <string name="domain_basemap_type_satellite">Vệ tinh</string>
+  <string name="domain_basemap_type_satellite_description">Hình ảnh vệ tinh Mapbox Standard Satellite kèm nhãn tham chiếu</string>
+  <!-- Layer of a map area saved for offline use: satellite imagery, or the terrain map (contours, hillshade, and roads). -->
+  <string name="domain_offline_imagery_type_satellite">Vệ tinh</string>
+  <string name="domain_offline_imagery_type_terrain">Địa hình</string>
+  <!-- Role of a person in an organization. -->
+  <string name="domain_organization_role_member">Thành viên</string>
+  <string name="domain_organization_role_member_description">Được liệt kê là có liên kết, có thể xem các khảo sát của tổ chức và tạo khảo sát mới.</string>
+  <string name="domain_organization_role_manager">Người quản lý</string>
+  <string name="domain_organization_role_manager_description">Có thể chỉnh sửa tổ chức, quản lý thành viên và quản lý tất cả các khảo sát của tổ chức.</string>
+  <!-- Status of a person's membership in an organization. -->
+  <string name="domain_membership_status_invited">Đã mời</string>
+  <string name="domain_membership_status_requested">Đã yêu cầu tham gia</string>
+  <string name="domain_membership_status_active">Thành viên</string>
+  <!-- Kind of custom imagery source. -->
+  <string name="domain_imagery_source_type_xyz_tiles">URL ô bản đồ XYZ</string>
+  <string name="domain_imagery_source_type_earth_engine">Lớp Earth Engine</string>
+  <!-- Kind of organization. -->
+  <string name="domain_organization_type_government_agency">Cơ quan chính phủ</string>
+  <string name="domain_organization_type_cooperative">Hợp tác xã</string>
+  <string name="domain_organization_type_iplc_organization">Tổ chức của người bản địa hoặc cộng đồng địa phương</string>
+  <string name="domain_organization_type_ngo">Tổ chức phi chính phủ</string>
+  <string name="domain_organization_type_company">Công ty</string>
+  <string name="domain_organization_type_research">Viện nghiên cứu</string>
+  <string name="domain_organization_type_other">Khác</string>
+  <!-- Upload status filter and upload state of a pending change. -->
+  <string name="domain_upload_status_filter_pending">Đang chờ</string>
+  <string name="domain_upload_status_filter_in_progress">Đang thực hiện</string>
+  <string name="domain_upload_status_filter_uploaded">Đã tải lên</string>
+  <string name="domain_upload_status_filter_failed">Thất bại</string>
+  <!-- Kind of change waiting to upload or already uploaded. -->
+  <string name="domain_mutation_operation_kind_create_submission">Đã gửi biểu mẫu</string>
+  <string name="domain_mutation_operation_kind_update_submission">Đã sửa biểu mẫu</string>
+  <string name="domain_mutation_operation_kind_delete_submission">Đã xóa biểu mẫu</string>
+  <string name="domain_mutation_operation_kind_create_entity">Đã tạo đối tượng bản đồ</string>
+  <string name="domain_mutation_operation_kind_update_entity">Đã sửa đối tượng bản đồ</string>
+  <string name="domain_mutation_operation_kind_delete_entity">Đã xóa đối tượng bản đồ</string>
+  <string name="domain_mutation_operation_kind_upload_media">Đã đính kèm ảnh</string>
+  <!-- Status of an invitation to join. -->
+  <string name="domain_invitation_status_pending">Đã mời</string>
+  <string name="domain_invitation_status_accepted">Đã tham gia</string>
+  <!-- Geometry type: point, line, or polygon. -->
+  <string name="domain_geometry_point">Điểm</string>
+  <string name="domain_geometry_line">Đường</string>
+  <string name="domain_geometry_polygon">Đa giác</string>
+  <!-- Geometry type (point, line, polygon) of a map feature or question. -->
+  <string name="domain_entity_geometry_kind_none">Không có hình học</string>
+  <!-- Title or subtitle of a mobile app screen in the screen navigator. -->
+  <string name="domain_app_screen_sign_in_title">Đăng nhập</string>
+  <string name="domain_app_screen_sign_in_subtitle">Điểm truy cập xác thực Google</string>
+  <string name="domain_app_screen_terms_of_service_title">Điều khoản dịch vụ</string>
+  <string name="domain_app_screen_terms_of_service_subtitle">Chấp nhận điều khoản quản trị dữ liệu và nền tảng</string>
+  <string name="domain_app_screen_download_survey_title">Tải xuống khảo sát</string>
+  <string name="domain_app_screen_download_survey_subtitle">Duyệt các khảo sát được chia sẻ hoặc tìm theo tên/vị trí</string>
+  <string name="domain_app_screen_main_survey_title">Khảo sát chính (Bản đồ và Danh sách)</string>
+  <string name="domain_app_screen_main_survey_subtitle">Bản đồ khảo sát, lớp bản đồ, bảng dưới cùng về vị trí và bài gửi, danh sách tìm kiếm và ngăn điều hướng</string>
+  <!-- Tab: show the survey as a map or as a list. -->
+  <string name="domain_main_survey_view_mode_map">Bản đồ</string>
+  <string name="domain_main_survey_view_mode_list">Danh sách</string>
+  <!-- Lifecycle status of a library entry. -->
+  <string name="domain_library_status_draft">Bản nháp</string>
+  <string name="domain_library_status_stable">Ổn định</string>
+  <string name="domain_library_status_deprecated">Không còn dùng</string>
+  <!-- How dashboards roll up answers to a standard field. -->
+  <string name="domain_concept_aggregation_count_distinct_features">Đếm đối tượng bản đồ</string>
+  <string name="domain_concept_aggregation_count_distinct_features_description">Đếm các đối tượng bản đồ có câu trả lời.</string>
+  <string name="domain_concept_aggregation_count_by_code">Đếm theo giá trị</string>
+  <string name="domain_concept_aggregation_count_by_code_description">Đếm đối tượng bản đồ cho từng giá trị trong danh sách.</string>
+  <string name="domain_concept_aggregation_sum">Tổng</string>
+  <string name="domain_concept_aggregation_sum_description">Cộng dồn các câu trả lời.</string>
+  <string name="domain_concept_aggregation_mean">Trung bình</string>
+  <string name="domain_concept_aggregation_mean_description">Tính trung bình các câu trả lời.</string>
+  <string name="domain_concept_aggregation_share_by_code">Tỷ lệ theo giá trị</string>
+  <string name="domain_concept_aggregation_share_by_code_description">Hiển thị tỷ lệ đối tượng bản đồ có từng giá trị.</string>
+  <string name="domain_concept_aggregation_none">Không tổng hợp</string>
+  <string name="domain_concept_aggregation_none_description">Tên, mã định danh và các câu trả lời khác không được tổng hợp.</string>
+  <!-- Privacy class of a standard field: what may leave the organization. -->
+  <string name="domain_privacy_class_aggregate_public">Tổng công khai</string>
+  <string name="domain_privacy_class_aggregate_public_description">Các tổng có thể xuất hiện trong bảng điều khiển toàn nền tảng và công khai.</string>
+  <string name="domain_privacy_class_org_only">Chỉ trong tổ chức</string>
+  <string name="domain_privacy_class_org_only_description">Các tổng chỉ hiển thị trong tổ chức sở hữu.</string>
+  <string name="domain_privacy_class_sensitive">Nhạy cảm</string>
+  <string name="domain_privacy_class_sensitive_description">Không bao giờ được đưa vào tổng liên tổ chức hoặc tổng công khai.</string>
+  <!-- Impact pillar used to group goals. -->
+  <string name="domain_impact_pillar_mitigation">Giảm thiểu</string>
+  <string name="domain_impact_pillar_adaptation">Thích ứng</string>
+  <string name="domain_impact_pillar_protection">Bảo vệ</string>
+  <!-- Data type of an answer or property. -->
+  <string name="domain_data_type_text">Văn bản</string>
+  <string name="domain_data_type_integer">Số nguyên</string>
+  <string name="domain_data_type_decimal">Số thập phân</string>
+  <string name="domain_data_type_date">Ngày</string>
+  <string name="domain_data_type_select_one">Chọn một</string>
+  <string name="domain_data_type_select_multiple">Chọn nhiều</string>
+  <!-- Answer data type (also used for question types and table property types). -->
+  <string name="domain_concept_data_type_media">Ảnh, video hoặc âm thanh</string>
+  <!-- Role of a collaborator on a survey. -->
+  <string name="domain_collaborator_role_viewer">Người xem</string>
+  <string name="domain_collaborator_role_viewer_description">Có thể xem bản đồ, lớp bản đồ và bài gửi.</string>
+  <string name="domain_collaborator_role_data_collector">Người thu thập dữ liệu</string>
+  <string name="domain_collaborator_role_data_collector_description">Có thể thu thập bài gửi và thêm đối tượng bản đồ.</string>
+  <string name="domain_collaborator_role_survey_organizer">Người tổ chức khảo sát</string>
+  <string name="domain_collaborator_role_survey_organizer_description">Có thể chỉnh sửa biểu mẫu, quản lý chia sẻ và xuất dữ liệu.</string>
+  <!-- General access option of a survey. -->
+  <string name="domain_sharing_policy_restricted">Hạn chế</string>
+  <string name="domain_sharing_policy_restricted_description">Chỉ những người được thêm ở trên mới có thể mở khảo sát này.</string>
+  <string name="domain_sharing_policy_organization">Mọi người trong tổ chức</string>
+  <string name="domain_sharing_policy_organization_description">Thành viên của tổ chức sở hữu khảo sát có thể thu thập dữ liệu. Người quản lý cũng có thể chỉnh sửa khảo sát.</string>
+  <string name="domain_sharing_policy_anyone_with_link">Cần liên kết hoặc mã QR</string>
+  <string name="domain_sharing_policy_anyone_with_link_description">Người dùng cần có liên kết hoặc mã QR để truy cập khảo sát này và thu thập dữ liệu.</string>
+  <string name="domain_sharing_policy_public">Được liệt kê trong danh bạ</string>
+  <string name="domain_sharing_policy_public_description">Được liệt kê trong danh bạ để mọi người đều có thể tìm thấy khảo sát này và thu thập dữ liệu.</string>
+  <!-- Which data a data collector can see. -->
+  <string name="domain_peer_data_visibility_all">Tất cả dữ liệu</string>
+  <string name="domain_peer_data_visibility_all_description">Người thu thập dữ liệu xem được bài gửi và đối tượng bản đồ của mọi người.</string>
+  <string name="domain_peer_data_visibility_own_only">Chỉ dữ liệu của mình</string>
+  <string name="domain_peer_data_visibility_own_only_description">Người thu thập dữ liệu chỉ xem được những gì họ đã thu thập.</string>
+  <!-- Kind of survey dataset, singular and plural. -->
+  <string name="domain_dataset_kind_map_layer">Lớp bản đồ</string>
+  <string name="domain_dataset_kind_map_layer_plural">Lớp bản đồ</string>
+  <string name="domain_dataset_kind_data_table">Bảng dữ liệu</string>
+  <string name="domain_dataset_kind_data_table_plural">Bảng dữ liệu</string>
+  <!-- Geometry type of a map layer (plural). -->
+  <string name="domain_geometry_kind_point">Điểm</string>
+  <string name="domain_geometry_kind_line">Đường</string>
+  <string name="domain_geometry_kind_polygon">Đa giác</string>
+  <string name="domain_property_type_boolean">Có / Không</string>
+  <!-- Sampling method option for generated sample plots. -->
+  <string name="domain_sample_method_systematic_grid">Lưới hệ thống</string>
+  <string name="domain_sample_method_systematic_grid_description">Các lô mẫu trên lưới đều với điểm bắt đầu ngẫu nhiên.</string>
+  <string name="domain_sample_method_simple_random">Ngẫu nhiên đơn giản</string>
+  <string name="domain_sample_method_simple_random_description">Một số lượng lô mẫu cố định được đặt ngẫu nhiên.</string>
+  <string name="domain_sample_method_stratified_random">Ngẫu nhiên phân tầng</string>
+  <string name="domain_sample_method_stratified_random_description">Các lô mẫu được đặt ngẫu nhiên trong từng tầng.</string>
+  <string name="domain_sample_method_cluster">Theo cụm</string>
+  <string name="domain_sample_method_cluster_description">Các nhóm lô mẫu được đặt ngẫu nhiên.</string>
+  <!-- How sample plots are allocated across strata. -->
+  <string name="domain_allocation_mode_equal">Bằng nhau</string>
+  <string name="domain_allocation_mode_proportional">Tỷ lệ theo diện tích</string>
+  <string name="domain_allocation_mode_custom">Tùy chỉnh</string>
+  <!-- Shape of a sample plot. -->
+  <string name="domain_plot_shape_option_square">Hình vuông</string>
+  <string name="domain_plot_shape_option_circle">Hình tròn</string>
+  <string name="domain_plot_shape_option_point">Điểm (chỉ tâm)</string>
+  <!-- How sub-plot sample points are placed within a plot. -->
+  <string name="domain_sub_plot_mode_none">Không có</string>
+  <string name="domain_sub_plot_mode_center">Một điểm ở tâm</string>
+  <string name="domain_sub_plot_mode_grid">Lưới</string>
+  <string name="domain_sub_plot_mode_random">Ngẫu nhiên</string>
+  <!-- Device to preview a form on. -->
+  <string name="domain_form_preview_target_mobile">Di động</string>
+  <string name="domain_form_preview_target_web">Web</string>
+  <!-- Question type in the form editor. -->
+  <string name="domain_editor_question_type_text">Văn bản ngắn</string>
+  <string name="domain_editor_question_type_long_text">Đoạn văn</string>
+  <string name="domain_editor_question_type_number">Số</string>
+  <string name="domain_editor_question_type_photo">Ảnh</string>
+  <string name="domain_editor_question_type_video">Video</string>
+  <string name="domain_editor_question_type_audio">Âm thanh</string>
+  <string name="domain_editor_question_type_note">Ghi chú</string>
+  <!-- How data collectors provide a photo, video, or audio answer. -->
+  <string name="domain_media_source_capture_or_upload">Ghi trực tiếp hoặc tải lên</string>
+  <string name="domain_media_source_capture_or_upload_description">Người thu thập dữ liệu có thể dùng máy ảnh hoặc micrô, hoặc tải lên tệp có sẵn từ thiết bị của họ.</string>
+  <string name="domain_media_source_capture_only">Chỉ ghi trực tiếp</string>
+  <string name="domain_media_source_capture_only_description">Người thu thập dữ liệu phải chụp ảnh, quay video hoặc ghi âm mới. Không được tải lên tệp có sẵn.</string>
+  <!-- How data collectors record a location answer. -->
+  <string name="domain_geometry_capture_gps_only">Chỉ GPS</string>
+  <string name="domain_geometry_capture_gps_only_description">Người thu thập dữ liệu ghi lại vị trí GPS của thiết bị. Không khả dụng trên web.</string>
+  <string name="domain_geometry_capture_gps_or_map">GPS hoặc vẽ trên bản đồ</string>
+  <string name="domain_geometry_capture_gps_or_map_description">Người thu thập dữ liệu có thể dùng vị trí GPS hoặc đặt vị trí trên bản đồ. Bắt buộc đối với web.</string>
+  <!-- Comparison operator in display logic and status rules; read mid-sentence after a question name, e.g. "age is greater than 5". -->
+  <string name="domain_relevance_operator_equals">bằng</string>
+  <string name="domain_relevance_operator_not_equals">không bằng</string>
+  <string name="domain_relevance_operator_greater_than">lớn hơn</string>
+  <string name="domain_relevance_operator_less_than">nhỏ hơn</string>
+  <string name="domain_relevance_operator_includes">bao gồm</string>
+  <string name="domain_relevance_operator_is_answered">đã được trả lời</string>
+  <!-- Where a choice question's options come from. -->
+  <string name="domain_choice_source_manual">Danh sách thủ công</string>
+  <!-- Name of a status marker symbol (accessibility label). -->
+  <string name="domain_status_marker_symbol_open">Vòng tròn rỗng</string>
+  <string name="domain_status_marker_symbol_half">Nửa vòng tròn</string>
+  <string name="domain_status_marker_symbol_check">Dấu kiểm</string>
+  <string name="domain_status_marker_symbol_alert">Dấu chấm than</string>
+  <string name="domain_status_marker_symbol_cross">Dấu gạch chéo</string>
+  <!-- What a map feature status rule checks. -->
+  <string name="domain_status_condition_subject_submissions">Số bài gửi</string>
+  <string name="domain_status_condition_subject_question">Câu trả lời của câu hỏi</string>
+  <string name="domain_status_condition_subject_entity_property">Thuộc tính đối tượng</string>
+  <!-- Data type of a map layer or data table property. -->
+  <string name="domain_editor_property_kind_boolean">Có / không</string>
+  <!-- Validation rule option for a date question. -->
+  <string name="domain_date_rule_not_in_future">Không ở tương lai</string>
+  <string name="domain_date_rule_not_in_past">Không ở quá khứ</string>
+  <string name="domain_date_rule_between">Giữa hai ngày</string>
+  <!-- Preset pattern option for validating a text answer. -->
+  <string name="domain_text_pattern_email">Địa chỉ email</string>
+  <string name="domain_text_pattern_digits">Chỉ chữ số</string>
+  <string name="domain_text_pattern_letters">Chỉ chữ cái</string>
+  <string name="domain_text_pattern_custom">Mẫu tùy chỉnh</string>
+  <!-- Form editor: validation issues shown next to questions and at the top of the form. -->
+  <string name="domain_issue_form_missing_id">Biểu mẫu thiếu ID.</string>
+  <string name="domain_issue_name_required">Bắt buộc có tên.</string>
+  <string name="domain_issue_name_invalid">Tên phải bắt đầu bằng chữ cái và chỉ dùng chữ cái, chữ số, _ . -</string>
+  <!-- %1$s: the question's name (an identifier). -->
+  <string name="domain_issue_name_duplicate">Tên "%1$s" được dùng nhiều lần.</string>
+  <string name="domain_issue_label_empty">Nhãn đang trống.</string>
+  <string name="domain_issue_choose_choice_data_table">Chọn một bảng dữ liệu cho các lựa chọn.</string>
+  <string name="domain_issue_choose_choice_map_layer">Chọn một lớp bản đồ cho các lựa chọn.</string>
+  <!-- %1$s: ID of the map layer or data table that was deleted. -->
+  <string name="domain_issue_choice_dataset_missing">Lớp bản đồ hoặc bảng dữ liệu "%1$s" không còn tồn tại.</string>
+  <!-- %1$s: name of a map layer of generated sample plots. -->
+  <string name="domain_issue_choice_dataset_generated">Các lô mẫu trong "%1$s" được tạo tự động và người thu thập dữ liệu không thể thêm.</string>
+  <!-- %1$s: name of a map layer. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_map_layer">"%1$s" không có biểu mẫu để thêm đối tượng bản đồ mới.</string>
+  <!-- %1$s: name of a data table. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_data_table">"%1$s" không có biểu mẫu để thêm hàng mới vào bảng.</string>
+  <string name="domain_issue_add_choice">Thêm ít nhất một lựa chọn.</string>
+  <string name="domain_issue_choice_value_invalid">Giá trị lựa chọn không được để trống và không được chứa dấu cách.</string>
+  <string name="domain_issue_choice_value_duplicate">Giá trị lựa chọn phải là duy nhất.</string>
+  <string name="domain_issue_display_logic_source_deleted">Logic hiển thị tham chiếu đến một câu hỏi đã bị xóa.</string>
+  <!-- %1$s: name of the question the display logic depends on. -->
+  <string name="domain_issue_display_logic_source_later">Logic hiển thị phụ thuộc vào "%1$s", là câu hỏi xuất hiện sau.</string>
+  <string name="domain_issue_display_logic_source_in_repeat">Logic hiển thị phụ thuộc vào "%1$s", là câu hỏi nằm trong một phần lặp lại.</string>
+  <string name="domain_issue_section_display_logic_source_inside">Logic hiển thị của phần không thể phụ thuộc vào "%1$s", là câu hỏi nằm trong chính phần đó.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_display_logic_operator_not_applicable">"%1$s" không áp dụng cho %2$s.</string>
+  <string name="domain_issue_display_logic_value_missing">Logic hiển thị cần một giá trị để so sánh.</string>
+  <string name="domain_issue_display_logic_value_not_number">Giá trị của logic hiển thị phải là số.</string>
+  <string name="domain_issue_cascade_parent_deleted">Bộ lọc phân cấp tham chiếu đến một câu hỏi đã bị xóa.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_later">Bộ lọc phân cấp phụ thuộc vào "%1$s", là câu hỏi xuất hiện sau.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_not_choice">Câu hỏi cha của bộ lọc phân cấp, "%1$s", phải là câu hỏi lựa chọn.</string>
+  <!-- %1$s: comma-separated parent values set on choices; %2$s: name of the parent question. -->
+  <string name="domain_issue_cascade_choice_parent_value_unknown">Các lựa chọn gắn với %1$s sẽ không bao giờ hiển thị: "%2$s" không có lựa chọn đó.</string>
+  <!-- %1$s: question label; %2$s: name of the "GPS or draw on map" option. "Available on web" is a form setting. -->
+  <string name="domain_issue_web_incompatible_geometry">"%1$s" chỉ dùng GPS, mà web không thể ghi lại. Hãy chọn "%2$s" hoặc tắt Có trên web.</string>
+  <string name="domain_issue_google_earth_incompatible_question">"%1$s" (%2$s) không được hỗ trợ trong Google Earth. Hãy xóa câu hỏi này, đổi loại câu hỏi hoặc tắt Bật Mở trong Google Earth.</string>
+  <!-- Form editor: validation rule issues of a question. -->
+  <string name="domain_issue_min_not_number">Giá trị tối thiểu phải là số.</string>
+  <string name="domain_issue_max_not_number">Giá trị tối đa phải là số.</string>
+  <string name="domain_issue_min_more_than_max">Giá trị tối thiểu không được lớn hơn giá trị tối đa.</string>
+  <string name="domain_issue_min_length_invalid">Độ dài tối thiểu phải là số nguyên từ 0 trở lên.</string>
+  <string name="domain_issue_max_length_invalid">Độ dài tối đa phải là số nguyên từ 0 trở lên.</string>
+  <string name="domain_issue_min_length_more_than_max">Độ dài tối thiểu không được lớn hơn độ dài tối đa.</string>
+  <string name="domain_issue_min_selections_invalid">Số lựa chọn tối thiểu phải là số nguyên từ 0 trở lên.</string>
+  <string name="domain_issue_max_selections_invalid">Số lựa chọn tối đa phải là số nguyên từ 0 trở lên.</string>
+  <string name="domain_issue_min_selections_more_than_max">Số lựa chọn tối thiểu không được lớn hơn số lựa chọn tối đa.</string>
+  <string name="domain_issue_min_selections_more_than_choices">Số lựa chọn tối thiểu lớn hơn số lựa chọn hiện có.</string>
+  <string name="domain_issue_custom_pattern_missing">Nhập mẫu tùy chỉnh.</string>
+  <string name="domain_issue_custom_pattern_invalid">Mẫu tùy chỉnh không hợp lệ.</string>
+  <string name="domain_issue_custom_pattern_quotes">Mẫu tùy chỉnh không được chứa cả ' và ".</string>
+  <string name="domain_issue_date_range_missing">Chọn ngày sớm nhất hoặc muộn nhất.</string>
+  <string name="domain_issue_date_range_reversed">Ngày sớm nhất không được sau ngày muộn nhất.</string>
+  <!-- Form editor: summary of a map feature status rule's condition. -->
+  <string name="domain_status_rule_when_submitted">Khi biểu mẫu được gửi</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="domain_status_rule_min_submissions">
+    <item quantity="other">Ít nhất %1$d bài gửi</item>
+  </plurals>
+  <string name="domain_status_rule_missing_question">Thiếu câu hỏi</string>
+  <!-- Placeholder for a property name in a status rule summary when none is chosen. -->
+  <string name="domain_status_rule_property_fallback">thuộc tính</string>
+  <!-- Status rule condition without a value. %1$s: question or property name; %2$s: operator (e.g. "is answered"). -->
+  <string name="domain_status_rule_condition">%1$s %2$s</string>
+  <!-- Status rule condition with a value. %1$s: question or property name; %2$s: operator (e.g. "equals"); %3$s: value. -->
+  <string name="domain_status_rule_condition_value">%1$s %2$s "%3$s"</string>
+  <!-- Form editor: issues with how a form updates map features or table rows. -->
+  <string name="domain_issue_save_to_target_missing">Chọn lớp bản đồ hoặc bảng dữ liệu mà biểu mẫu này cập nhật.</string>
+  <!-- %1$s: ID of the deleted map layer or data table. -->
+  <string name="domain_issue_save_to_target_deleted">Lớp bản đồ hoặc bảng dữ liệu "%1$s" không còn tồn tại.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_map_layer">Tên "%1$s" được dành riêng cho đối tượng bản đồ đang được cập nhật.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_data_table">Tên "%1$s" được dành riêng cho hàng đang được cập nhật trong bảng.</string>
+  <string name="domain_issue_save_to_id_question_missing_map_layer">Chọn câu hỏi xác định đối tượng bản đồ cần cập nhật.</string>
+  <string name="domain_issue_save_to_id_question_missing_data_table">Chọn câu hỏi xác định hàng cần cập nhật trong bảng.</string>
+  <string name="domain_issue_save_to_match_property_missing">Chọn thuộc tính dùng để đối chiếu câu trả lời.</string>
+  <string name="domain_issue_save_to_geometry_question_required">Chỉ câu hỏi dạng Điểm, Đường hoặc Đa giác mới có thể cập nhật hình học của đối tượng bản đồ.</string>
+  <!-- %1$s: property name; %2$s: name of the map layer or data table. -->
+  <string name="domain_issue_save_to_unknown_property">Cập nhật "%1$s", nhưng đây không phải là thuộc tính của %2$s.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_not_updatable">Biểu mẫu không thể cập nhật "%1$s".</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_already_updated">Một câu hỏi khác đã cập nhật "%1$s".</string>
+  <string name="domain_issue_save_to_no_fields">Chọn ít nhất một trường để cập nhật.</string>
+  <string name="domain_issue_save_to_type_mismatch">Câu trả lời dạng %1$s có thể không phù hợp với thuộc tính dạng %2$s "%3$s".</string>
+  <string name="domain_display_logic_source_deleted">Tham chiếu đến một câu hỏi đã bị xóa.</string>
+  <string name="domain_display_logic_shown_if_answered">Chỉ hiển thị nếu "%1$s" đã được trả lời.</string>
+  <string name="domain_display_logic_shown_if">Chỉ hiển thị nếu "%1$s" %2$s %3$s.</string>
+  <string name="domain_issue_status_default_label_missing">Nhập nhãn trạng thái mặc định.</string>
+  <string name="domain_issue_status_rule_label_missing">Mỗi quy tắc trạng thái cần có nhãn trạng thái.</string>
+  <string name="domain_issue_status_rule_min_submissions">Số bài gửi phải ít nhất là 1.</string>
+  <string name="domain_issue_status_rule_question_missing">Chọn một câu hỏi cho quy tắc trạng thái.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_status_rule_operator_not_applicable">"%1$s" không áp dụng cho %2$s trong quy tắc trạng thái.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_missing">Quy tắc trạng thái cho "%1$s" cần một giá trị để so sánh.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_not_number">Giá trị quy tắc trạng thái cho "%1$s" phải là số.</string>
+  <string name="domain_issue_status_rule_property_missing_map_layer">Chọn một thuộc tính đối tượng bản đồ cho quy tắc trạng thái.</string>
+  <string name="domain_issue_status_rule_property_missing_data_table">Chọn một thuộc tính hàng của bảng cho quy tắc trạng thái.</string>
+  <string name="domain_issue_status_rule_property_missing">Chọn một thuộc tính đối tượng cho quy tắc trạng thái.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_unwritten">Không có câu hỏi nào ghi vào thuộc tính "%1$s" cho quy tắc trạng thái.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: property data type in lowercase (e.g. "text"); %3$s: property name. -->
+  <string name="domain_issue_status_rule_property_operator_not_applicable">"%1$s" không áp dụng cho thuộc tính %2$s "%3$s".</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_missing">Quy tắc trạng thái cho thuộc tính "%1$s" cần một giá trị để so sánh.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_not_number">Giá trị quy tắc trạng thái cho thuộc tính "%1$s" phải là số.</string>
+  <!-- Form editor: warnings about a question's link to a standard field (concept). -->
+  <!-- %1$s: ID of a standard field, e.g. "eudr.commodity". -->
+  <string name="domain_warning_concept_not_in_dictionary">Được liên kết với "%1$s", nhưng trường này không có trong từ điển của khảo sát.</string>
+  <!-- %1$s: standard field name; %2$s: its answer type in lowercase (e.g. "decimal"); %3$s: the question's type in lowercase (e.g. "short text"). -->
+  <string name="domain_warning_concept_type_mismatch">"%1$s" yêu cầu câu trả lời dạng %2$s, nhưng đây là câu hỏi dạng %3$s.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_deprecated">"%1$s" không còn được dùng. Hãy liên kết với một trường chuẩn hiện hành.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_linked_twice">"%1$s" được liên kết với nhiều câu hỏi trong biểu mẫu này.</string>
+  <!-- %1$d: number of choices; %2$s: standard field name; %3$s: comma-separated choice labels. -->
+  <plurals name="domain_warning_concept_unmapped_choices">
+    <item quantity="other">Hãy khớp %1$d lựa chọn với các giá trị của "%2$s" để có thể cộng dồn câu trả lời: %3$s.</item>
+  </plurals>
+  <!-- Survey editor: issues in a map layer or data table. -->
+  <string name="domain_issue_dataset_id_invalid">ID phải bắt đầu bằng chữ cái và chỉ dùng chữ cái, chữ số, _ . -</string>
+  <!-- %1$s: the map layer or data table ID. -->
+  <string name="domain_issue_dataset_id_duplicate">ID "%1$s" đã được một tập dữ liệu khác trong khảo sát này sử dụng.</string>
+  <!-- %1$s: property name (an identifier). -->
+  <string name="domain_issue_dataset_property_name_invalid">Thuộc tính "%1$s" có tên không hợp lệ.</string>
+  <string name="domain_issue_dataset_property_name_duplicate">Tên thuộc tính phải là duy nhất.</string>
+  <string name="domain_issue_dataset_key_property_missing">Chọn thuộc tính khóa.</string>
+  <string name="domain_issue_dataset_label_property_missing">Chọn thuộc tính nhãn.</string>
+  <!-- %1$s: row or map feature name. -->
+  <string name="domain_issue_dataset_row_key_missing">"%1$s" thiếu khóa.</string>
+  <!-- %1$s: duplicated key value. -->
+  <string name="domain_issue_dataset_row_key_duplicate">Khóa "%1$s" bị trùng lặp.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label. -->
+  <string name="domain_issue_dataset_row_value_missing">"%1$s" thiếu %2$s.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label; %3$s: expected type in lowercase (e.g. "integer"). -->
+  <string name="domain_issue_dataset_row_value_wrong_type">"%1$s": %2$s phải là %3$s.</string>
+  <string name="domain_issue_sharing_organization_missing">"%1$s" cần một tổ chức. Hãy chọn một tổ chức trong Chi tiết khảo sát hoặc chọn tùy chọn truy cập chung khác.</string>
+  <!-- %1$s: map feature name; %2$d: minimum number of vertices. -->
+  <plurals name="domain_issue_dataset_row_geometry_too_short">
+    <item quantity="other">"%1$s" cần ít nhất %2$d đỉnh.</item>
+  </plurals>
+  <!-- Quota and budget limits: why an action is blocked. -->
+  <!-- %1$d: surveys the owner has; %2$d: the limit. -->
+  <string name="domain_quota_max_surveys_per_owner">Đã đạt giới hạn số khảo sát tối đa cho mỗi chủ sở hữu (%1$d/%2$d). Hãy nâng cấp gói hoặc xóa các khảo sát cũ.</string>
+  <!-- %1$s: budget amount in US dollars, e.g. "$50.00". -->
+  <string name="domain_quota_org_budget_exceeded">Tạo thêm khảo sát sẽ vượt quá hạn mức ngân sách hằng tháng của tổ chức (%1$s).</string>
+  <!-- %1$s: estimated cost in US dollars; %2$s: budget in US dollars. -->
+  <string name="domain_quota_survey_budget_exceeded">Chi phí hằng tháng ước tính của thiết kế khảo sát (%1$s) vượt quá hạn mức ngân sách hằng tháng của khảo sát (%2$s).</string>
+  <!-- %1$d: number of forms; %2$d: the limit; %3$s: quota tier name (e.g. "Basic"). -->
+  <plurals name="domain_quota_max_forms">
+    <item quantity="other">Khảo sát có %1$d biểu mẫu, vượt quá giới hạn %2$d của gói %3$s.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_questions">
+    <item quantity="other">Biểu mẫu "%1$s" có %2$d câu hỏi, vượt quá giới hạn %3$d.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of photo questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_photo_questions">
+    <item quantity="other">Biểu mẫu "%1$s" có %2$d câu hỏi ảnh, vượt quá giới hạn %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features; %2$d: the limit. -->
+  <plurals name="domain_quota_max_predefined_entities">
+    <item quantity="other">Khảo sát có %1$d đối tượng định sẵn, vượt quá giới hạn %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of generated sample plots; %2$d: the limit. -->
+  <plurals name="domain_quota_max_generated_entities">
+    <item quantity="other">Thiết kế mẫu đã tạo %1$d lô mẫu, vượt quá giới hạn %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of vertices of the survey area; %2$d: the limit. -->
+  <plurals name="domain_quota_max_area_vertices">
+    <item quantity="other">Khu vực khảo sát có %1$d đỉnh, vượt quá giới hạn %2$d.</item>
+  </plurals>
+  <plurals name="domain_quota_max_dataset_polygon_vertices">
+    <item quantity="other">Tập dữ liệu "%1$s" có một đa giác với %2$d đỉnh, vượt quá giới hạn %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of collaborators; %2$d: the limit. -->
+  <plurals name="domain_quota_max_collaborators">
+    <item quantity="other">Danh sách kiểm soát truy cập có %1$d cộng tác viên, vượt quá giới hạn %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of surveys; %2$d: the limit. -->
+  <plurals name="domain_quota_max_surveys_per_user">
+    <item quantity="other">Người dùng đang tham gia %1$d khảo sát, vượt quá giới hạn %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of map features the user added in the field; %2$d: the limit. -->
+  <plurals name="domain_quota_max_adhoc_entities">
+    <item quantity="other">Người dùng đã tạo %1$d đối tượng tại chỗ, đạt giới hạn %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of submissions; %2$d: the limit. -->
+  <plurals name="domain_quota_max_submissions_per_entity">
+    <item quantity="other">Người dùng đã ghi %1$d bài gửi cho đối tượng này, đạt giới hạn %2$d.</item>
+  </plurals>
+  <!-- Notices shown after a data collector submits a form. -->
+  <!-- %1$s: name of the new map feature. "save_to" is a technical term; keep it as is. -->
+  <string name="domain_notice_entity_created">Đã tạo đối tượng mới "%1$s" qua save_to (✓ Đã hoàn thành)</string>
+  <!-- %1$s: form title; %2$s: GPS coordinates. -->
+  <string name="domain_notice_standalone_submitted">Đã gửi ghi chép thực địa độc lập "%1$s" (%2$s)</string>
+  <!-- %1$s: form title; %2$s: map feature name; %3$s: previous status symbol (e.g. ○); %4$s: new status symbol (e.g. ◐); %5$s: new status label (e.g. "In progress"). -->
+  <string name="domain_notice_entity_submitted">Đã gửi "%1$s" cho %2$s (Điểm đánh dấu: %3$s → %4$s %5$s)</string>
+  <!-- Geometry summary of a polygon map feature. %1$s: area with unit (e.g. "1.2 ha"); %2$s: perimeter length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_polygon">Đa giác • %1$s, chu vi %2$s</string>
+  <!-- Geometry summary of a line map feature. %1$s: length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_line">Đường • %1$s</string>
+  <!-- Geometry summary of a point map feature. %1$s: coordinates. -->
+  <string name="domain_geometry_summary_point">Điểm • %1$s</string>
+  <!-- PDF reports of map features and submissions. -->
+  <!-- Summary of a generated PDF file. %1$d: number of pages; %2$s: file size (e.g. "14 KB"). -->
+  <plurals name="domain_pdf_summary">
+    <item quantity="other">%1$d trang • %2$s</item>
+  </plurals>
+  <!-- PDF page footer. %1$d: page number; %2$d: number of pages. -->
+  <string name="domain_pdf_page_of">Trang %1$d/%2$d</string>
+  <string name="domain_pdf_running_header">Open Foris Collect One • %1$s</string>
+  <!-- Caption under a point's location figure. %1$s: latitude; %2$s: longitude. -->
+  <string name="domain_pdf_location_point">Vị trí %1$s, %2$s</string>
+  <!-- Caption under a location figure. %1$s/%2$s: min/max latitude; %3$s/%4$s: min/max longitude. "WGS 84" is a coordinate system name. -->
+  <string name="domain_pdf_bounds">Phạm vi: vĩ độ %1$s đến %2$s, kinh độ %3$s đến %4$s (WGS 84)</string>
+  <!-- PDF footer of a map feature report. %1$s: map feature type (e.g. "Coffee Parcel"); %2$s: date and time. -->
+  <string name="domain_pdf_entity_footer">Báo cáo %1$s • Tạo lúc %2$s</string>
+  <!-- PDF footer of a submission report. %1$s: date and time. -->
+  <string name="domain_pdf_submission_footer">Báo cáo bài gửi • Tạo lúc %1$s</string>
+  <!-- PDF subtitle of a submission report. %1$s: date and time collected. -->
+  <string name="domain_pdf_submission_subtitle">Bài gửi • %1$s</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_details">Chi tiết</string>
+  <!-- PDF field label: map layer of a map feature. -->
+  <string name="domain_pdf_layer">Lớp</string>
+  <!-- PDF field label: geometry summary of a map feature. -->
+  <string name="domain_pdf_geometry">Hình học</string>
+  <!-- PDF field label: geographic identifier of a plot. -->
+  <string name="domain_pdf_geo_id">GeoID</string>
+  <string name="domain_pdf_coordinates">Tọa độ</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_location">Vị trí</string>
+  <!-- PDF field label of one vertex of a line or polygon. %1$d: vertex number. -->
+  <string name="domain_pdf_vertex">Đỉnh %1$d</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_properties">Thuộc tính</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_submissions">Bài gửi</string>
+  <string name="domain_pdf_no_submissions">Chưa có bài gửi nào được ghi lại.</string>
+  <!-- %1$s: data collector name; %2$s: form version. -->
+  <string name="domain_pdf_collected_by">Thu thập bởi %1$s • Phiên bản biểu mẫu %2$s</string>
+  <!-- Map feature a submission is attached to. %1$s: map feature name; %2$s: map feature type; %3$s: GeoID. -->
+  <string name="domain_pdf_entity_target">%1$s (%2$s • GeoID %3$s)</string>
+  <!-- %1$s: coordinates where the submission was collected. -->
+  <string name="domain_pdf_no_attached_feature_at">Không gắn với đối tượng bản đồ (%1$s)</string>
+  <string name="domain_pdf_no_attached_feature">Không gắn với đối tượng bản đồ</string>
+  <string name="domain_pdf_data_collector">Người thu thập dữ liệu</string>
+  <!-- PDF field label: when a submission was collected. -->
+  <string name="domain_pdf_collected">Thời gian thu thập</string>
+  <string name="domain_pdf_form_version">Phiên bản biểu mẫu</string>
+  <!-- PDF section heading: answers of a submission. -->
+  <string name="domain_pdf_responses">Câu trả lời</string>
+  <string name="domain_pdf_no_responses">Chưa có câu trả lời nào được ghi lại.</string>
+  <!-- Status chip of a group of map features in a map cluster, by the marker symbol they share. -->
+  <string name="domain_cluster_marker_status_completed">Đã hoàn thành</string>
+  <string name="domain_cluster_marker_status_in_progress">Đang thực hiện</string>
+  <string name="domain_cluster_marker_status_pending">Đang chờ</string>
+  <string name="domain_cluster_marker_status_no_marker_symbol">Không có ký hiệu đánh dấu</string>
+  <string name="domain_cluster_marker_status_other_symbol">Ký hiệu %1$s</string>
+</resources>

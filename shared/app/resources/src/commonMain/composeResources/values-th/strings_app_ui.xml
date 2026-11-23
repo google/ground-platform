@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Title of the development-build dialog for choosing a simulated app role. -->
+  <string name="app_dev_sign_in_title">ลงชื่อเข้าใช้สำหรับการพัฒนา</string>
+  <string name="app_dev_sign_in_real_accounts_intro">คุณลงชื่อเข้าใช้ด้วยบัญชี Google ของคุณแล้ว บริการข้อมูลผู้ใช้ทำงานในโหมดการพัฒนา กรุณาเลือกบทบาทในแอปที่จะจำลองระหว่างการทดสอบ</string>
+  <string name="app_dev_sign_in_sample_users_intro">การลงชื่อเข้าใช้ด้วย Firebase ปิดอยู่ในบิลด์นี้ คุณจึงจะลงชื่อเข้าใช้ในฐานะผู้ใช้ตัวอย่างแทนบัญชีของคุณเอง</string>
+  <!-- Simulated app role option. -->
+  <string name="app_dev_sign_in_role_administrator">ผู้ดูแลระบบ</string>
+  <string name="app_dev_sign_in_role_administrator_real_description">เห็นและเปลี่ยนแปลงแบบสำรวจ องค์กร และข้อมูลตัวอย่างทั้งหมดได้</string>
+  <!-- Adam Admin is the name of a sample user. -->
+  <string name="app_dev_sign_in_role_administrator_sample_description">ลงชื่อเข้าใช้ในฐานะ Adam Admin ซึ่งเห็นและเปลี่ยนแปลงข้อมูลตัวอย่างทั้งหมดได้</string>
+  <!-- Simulated app role option. -->
+  <string name="app_dev_sign_in_role_regular_user">ผู้ใช้ทั่วไป</string>
+  <string name="app_dev_sign_in_role_regular_user_real_description">เห็นเฉพาะแบบสำรวจที่คุณเป็นเจ้าของ ได้รับเชิญ หรือที่องค์กรของคุณหรือลิงก์สาธารณะแชร์กับคุณ</string>
+  <!-- Ima User is the name of a sample user; Kenya Forest Service is a sample organization. -->
+  <string name="app_dev_sign_in_role_regular_user_sample_description">ลงชื่อเข้าใช้ในฐานะ Ima User ผู้เก็บข้อมูลในองค์กรตัวอย่าง Kenya Forest Service</string>
+  <string name="app_dev_sign_in_footer">อุปกรณ์นี้จะจดจำตัวเลือกของคุณ ออกจากระบบเพื่อเปลี่ยนบทบาท บิลด์สำหรับใช้งานจริงจะลงชื่อเข้าใช้ตามปกติโดยไม่มีกล่องโต้ตอบนี้</string>
+  <!-- Generic button label to proceed. -->
+  <string name="app_continue">ดำเนินการต่อ</string>
+  <!-- Generic button label to cancel and close. -->
+  <string name="app_cancel">ยกเลิก</string>
+  <!-- Device preview caption. %1$s = form factor (Mobile/Tablet), %2$s = orientation (Portrait/Landscape), %3$s = dimensions such as “404 × 764 dp”. -->
+  <string name="app_device_frame_viewport">วิวพอร์ต: %1$s • %2$s (%3$s)</string>
+  <!-- Device preview form factor option. -->
+  <string name="app_device_form_factor_mobile">มือถือ</string>
+  <!-- Device preview form factor option. -->
+  <string name="app_device_form_factor_tablet">แท็บเล็ต</string>
+  <!-- Device preview orientation. -->
+  <string name="app_device_orientation_portrait">แนวตั้ง</string>
+  <!-- Device preview orientation. -->
+  <string name="app_device_orientation_landscape">แนวนอน</string>
+  <!-- Accessibility label for the rotate button in the device preview. -->
+  <string name="app_device_rotate_description">หมุนอุปกรณ์</string>
+  <!-- Chip label to rotate the device preview. -->
+  <string name="app_device_rotate">หมุน</string>
+  <string name="app_device_switch_to_light_mode">เปลี่ยนเป็นโหมดสว่าง</string>
+  <string name="app_device_switch_to_dark_mode">เปลี่ยนเป็นโหมดมืด</string>
+  <!-- Chip label: the device preview currently uses the dark theme. -->
+  <string name="app_device_theme_dark">มืด</string>
+  <!-- Chip label: the device preview currently uses the light theme. -->
+  <string name="app_device_theme_light">สว่าง</string>
+  <string name="app_device_disable_airplane_mode">ปิดโหมดเครื่องบิน</string>
+  <string name="app_device_enable_airplane_mode">เปิดโหมดเครื่องบิน</string>
+  <!-- Chip label to simulate being offline in the device preview. -->
+  <string name="app_device_airplane_mode">โหมดเครื่องบิน</string>
+  <string name="app_device_walk_closer_description">จำลองการเดินเข้าใกล้เป้าหมาย</string>
+  <string name="app_device_walk_closer">เดินเข้าใกล้</string>
+  <!-- Accessibility label of the icon next to a GeoID that the registry hasn't confirmed yet because the record hasn't synced. -->
+  <string name="app_geo_id_pending_sync">รอซิงค์</string>
+  <!-- Error title shown when no user data service is configured. -->
+  <string name="app_user_data_service_cannot_start">แอปเริ่มทำงานไม่ได้</string>
+  <!-- Error banner title; the detailed error message follows below it. -->
+  <string name="app_user_data_sync_error_title">ไม่สามารถโหลดข้อมูลจากบริการข้อมูลผู้ใช้ได้</string>
+  <string name="app_backend_error_title">ไม่สามารถบันทึกการเปลี่ยนแปลงได้</string>
+  <!-- Generic button label to try a failed action again. -->
+  <string name="app_retry">ลองอีกครั้ง</string>
+  <!-- Accessibility label of the avatar button. %1$s = signed-in user's name. -->
+  <string name="app_account_menu_for_user">เมนูบัญชีของ %1$s</string>
+  <!-- Accessibility label of the avatar button when the user's name is unknown. -->
+  <string name="app_account_menu">เมนูบัญชี</string>
+  <!-- Title of the account menu panel. -->
+  <string name="app_account">บัญชี</string>
+  <!-- Accessibility label of the close button in the account menu. -->
+  <string name="app_close_account_menu">ปิดเมนูบัญชี</string>
+  <!-- Account menu item. -->
+  <string name="app_manage_organizations">จัดการองค์กร</string>
+  <!-- Account menu item. -->
+  <string name="app_admin_panel">แผงผู้ดูแลระบบ</string>
+  <!-- Account menu item. -->
+  <string name="app_sign_out">ออกจากระบบ</string>
+  <!-- Label before a map feature's GeoID (a registry identifier). %1$s = the GeoID. -->
+  <string name="app_geo_id_label">GeoID: %1$s</string>
+  <!-- Fallback title of a data collection form that has no title. -->
+  <string name="app_data_collection_form_fallback_title">แบบฟอร์มเก็บข้อมูล</string>
+  <!-- Accessibility label of the back button that closes a form and returns to the survey. -->
+  <string name="app_back_to_survey">กลับไปที่แบบสำรวจ</string>
+  <!-- Form context banner for a submission without a map feature. %1$s = GPS coordinates. -->
+  <string name="app_standalone_field_log_with_location">บันทึกภาคสนามแบบอิสระ • %1$s</string>
+  <!-- Form context banner prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel), %2$s = map layer name or “Required”. -->
+  <string name="app_select_target_with_dataset">เลือก %1$s (%2$s)</string>
+  <!-- Fallback name of a map feature type when the form doesn't define one. -->
+  <string name="app_target_type_fallback">ฟีเจอร์</string>
+  <!-- Marks a step or field as required. -->
+  <string name="app_required">จำเป็นต้องระบุ</string>
+  <!-- Chip label that closes the form and returns to the map. -->
+  <string name="app_map">แผนที่</string>
+  <!-- Accessibility label of the icon that cancels the form. -->
+  <string name="app_cancel_form">ยกเลิกแบบฟอร์ม</string>
+  <!-- Badge on the map feature selection step. %1$d = current step number, %2$d = total steps. -->
+  <string name="app_entity_ref_step_badge">ขั้นตอนที่ %1$d จาก %2$d • จำเป็นต้องระบุ</string>
+  <!-- Title prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel). -->
+  <string name="app_select_target_type">เลือก %1$s</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_entity_ref_no_preselection">ไม่ได้เลือก %1$s ไว้ล่วงหน้าบนแผนที่ กรุณาเลือก %1$s เป้าหมายด้านล่างจาก “แผนที่” หรือ “รายการ” เพื่อเก็บข้อมูลต่อ</string>
+  <!-- Segmented button: pick the map feature on the map. -->
+  <string name="app_select_on_map">เลือกบนแผนที่</string>
+  <!-- Segmented button: pick the map feature from a list. %1$d = number of map features. -->
+  <string name="app_select_from_list">เลือกจากรายการ (%1$d)</string>
+  <!-- Accessibility label of the check icon marking the selected map feature. -->
+  <string name="app_selected">เลือกแล้ว</string>
+  <!-- %1$s = name of the selected map feature. -->
+  <string name="app_selected_entity">เลือกแล้ว: %1$s</string>
+  <!-- Badge: a map feature is selected and the form can continue. -->
+  <string name="app_ready">พร้อม</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_entity_ref_map_hint">แตะ %1$s บนแผนที่หรือด้านล่างเพื่อเลือก</string>
+  <!-- Heading of the list of map features shown on the map. %1$s = map layer name. -->
+  <string name="app_dataset_on_map">%1$s บนแผนที่</string>
+  <!-- Accessibility label of the search icon. -->
+  <string name="app_search_map_features">ค้นหาฟีเจอร์แผนที่</string>
+  <!-- Accessibility label of the button that clears the search field. -->
+  <string name="app_clear_search">ล้างการค้นหา</string>
+  <!-- Search field placeholder. %1$s = map layer name in lowercase. -->
+  <string name="app_filter_dataset_placeholder">กรอง %1$s ตามชื่อหรือ GeoID...</string>
+  <!-- Empty search result. %1$s = map layer name in lowercase. -->
+  <string name="app_no_matching_dataset">ไม่พบ %1$s ที่ตรงกัน</string>
+  <string name="app_no_dataset_items_yet">ยังไม่มี %1$s</string>
+  <!-- Button to continue the form with the selected map feature. %1$s = map feature name. -->
+  <string name="app_continue_with_entity">ดำเนินการต่อด้วย %1$s</string>
+  <!-- Disabled button label. %1$s = map feature type in lowercase. -->
+  <string name="app_select_target_to_continue">เลือก %1$s เพื่อดำเนินการต่อ</string>
+  <!-- Number of submissions for a map feature. -->
+  <plurals name="app_submission_count">
+    <item quantity="other">การส่งข้อมูล %1$d รายการ</item>
+  </plurals>
+  <!-- Badge on the selected map feature option. -->
+  <string name="app_selected_check">เลือกแล้ว ✓</string>
+  <!-- Chip label to select a map feature option. -->
+  <string name="app_select">เลือก</string>
+  <!-- Badge: data was already collected for this map feature. -->
+  <string name="app_completed">เสร็จสิ้นแล้ว</string>
+  <string name="app_public_data_banner">แบบสำรวจข้อมูลสาธารณะ: ทุกคนสามารถดูคำตอบ รูปภาพ และตำแหน่งได้ กรุณาอย่าใส่ข้อมูลส่วนบุคคลหรือข้อมูลที่ละเอียดอ่อน</string>
+  <!-- Title of the consent dialog for a public data survey. -->
+  <string name="app_consent_public_title">ข้อมูลในแบบสำรวจนี้เป็นข้อมูลสาธารณะ</string>
+  <!-- Title of the consent dialog for a survey with organizer terms. -->
+  <string name="app_consent_title">ก่อนเริ่มเก็บข้อมูล</string>
+  <!-- %1$s = survey title. -->
+  <string name="app_consent_public_intro">คุณกำลังจะมีส่วนร่วมใน “%1$s” เนื่องจากแบบสำรวจนี้ใช้ข้อมูลสาธารณะ:</string>
+  <string name="app_consent_what_is_public_title">ข้อมูลที่เป็นสาธารณะ</string>
+  <string name="app_consent_what_is_public_body">ทุกคนสามารถดูฟีเจอร์แผนที่ พิกัด GPS คำตอบ และรูปภาพที่คุณส่งได้</string>
+  <string name="app_consent_identity_hidden_title">ข้อมูลระบุตัวตนของคุณถูกซ่อนไว้</string>
+  <string name="app_consent_identity_hidden_body">ชื่อและที่อยู่อีเมลของคุณจะถูกซ่อนจากผู้เข้าร่วมคนอื่น และมีเพียงผู้จัดทำแบบสำรวจเท่านั้นที่มองเห็นได้</string>
+  <string name="app_consent_protect_privacy_title">ปกป้องความเป็นส่วนตัว</string>
+  <string name="app_consent_protect_privacy_body">อย่าใส่ใบหน้า ป้ายทะเบียนรถ หรือข้อมูลส่วนบุคคลในรูปภาพหรือคำตอบแบบข้อความ</string>
+  <!-- Heading above custom consent text written by the survey organizer. -->
+  <string name="app_consent_organizer_terms">ข้อกำหนดของผู้จัดทำแบบสำรวจ</string>
+  <!-- Button accepting the consent terms. -->
+  <string name="app_consent_accept">เข้าใจแล้ว ดำเนินการต่อ</string>
+  <!-- Accessibility label of the back button in map feature details. -->
+  <string name="app_back_to_all_map_features">กลับไปที่ฟีเจอร์แผนที่ทั้งหมด</string>
+  <!-- Accessibility label. -->
+  <string name="app_collapse_details">ยุบรายละเอียด</string>
+  <!-- Accessibility label. -->
+  <string name="app_close_details">ปิดรายละเอียด</string>
+  <!-- Accessibility label of the overflow (⋮) menu button. -->
+  <string name="app_more_actions">การดำเนินการเพิ่มเติม</string>
+  <!-- Section heading in map feature details. -->
+  <string name="app_details_heading">รายละเอียด</string>
+  <!-- Field label: the map layer a map feature belongs to. -->
+  <string name="app_details_layer">ชั้นข้อมูล</string>
+  <!-- Field label: the shape summary of a map feature (e.g. polygon area). -->
+  <string name="app_details_geometry">รูปทรงเรขาคณิต</string>
+  <!-- Field label: the map feature's GeoID registry identifier. -->
+  <string name="app_details_geo_id">GeoID</string>
+  <!-- Section heading listing a map feature's attribute values. -->
+  <string name="app_details_properties">คุณสมบัติ</string>
+  <!-- Button that shows the selected map feature in the data table. -->
+  <string name="app_show_in_table">แสดงในตาราง</string>
+  <!-- Action that saves a PDF report to the device. -->
+  <string name="app_download_pdf">ดาวน์โหลด PDF</string>
+  <!-- Action that creates a PDF report and opens the share sheet. -->
+  <string name="app_share_pdf">แชร์ PDF</string>
+  <!-- Short chip label to stop navigating to a map feature. -->
+  <string name="app_stop_navigation_short">หยุดนำทาง</string>
+  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_navigate_with_distance">นำทาง • %1$s</string>
+  <!-- Label to start straight-line navigation to a location. -->
+  <string name="app_navigate">นำทาง</string>
+  <!-- Action that shows the map feature's QR code. -->
+  <string name="app_qr_code">รหัส QR</string>
+  <!-- Chip label: number of media uploads not yet sent. -->
+  <plurals name="app_pending_uploads">
+    <item quantity="other">รออัปโหลด %1$d รายการ</item>
+  </plurals>
+  <!-- Chip label opening the uploads list. %1$d = number of uploads. -->
+  <string name="app_uploads_count">การอัปโหลด (%1$d)</string>
+  <!-- Section heading above the buttons that open data collection forms. -->
+  <string name="app_collect_data">เก็บข้อมูล</string>
+  <!-- Disabled form button. %1$s = the form's action label (e.g. “Visit parcel”). -->
+  <string name="app_form_action_completed">%1$s (เสร็จสิ้นแล้ว)</string>
+  <!-- Heading/link with the number of submissions. %1$d = count. -->
+  <string name="app_submissions_count">การส่งข้อมูล (%1$d)</string>
+  <string name="app_submissions_stored_offline">จัดเก็บไว้ในอุปกรณ์นี้ เชื่อมต่ออินเทอร์เน็ตเพื่อดูการส่งข้อมูลทั้งหมด</string>
+  <string name="app_no_submissions_yet">ยังไม่มีการส่งข้อมูล</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_view_submission_history">ดูประวัติข้อมูลที่เก็บสำหรับ %1$s นี้</string>
+  <!-- Accessibility label of the back button returning to map feature details. -->
+  <string name="app_back_to_details">กลับไปที่รายละเอียด</string>
+  <string name="app_offline_showing_local_submissions">คุณออฟไลน์อยู่ กำลังแสดงการส่งข้อมูลที่จัดเก็บในอุปกรณ์นี้ เชื่อมต่ออินเทอร์เน็ตเพื่อดูการส่งข้อมูลทั้งหมด</string>
+  <!-- %1$s = map feature type in lowercase. -->
+  <string name="app_no_local_submissions_for_entity">ไม่มีการส่งข้อมูลสำหรับ %1$s นี้ที่จัดเก็บในอุปกรณ์นี้</string>
+  <!-- %1$s = map feature type in lowercase. -->
+  <string name="app_no_submissions_for_entity">ยังไม่มีการส่งข้อมูลสำหรับ %1$s นี้</string>
+  <!-- Back button label returning to the submissions list. -->
+  <string name="app_back_to_submissions">กลับไปที่การส่งข้อมูล</string>
+  <!-- QR code dialog title. %1$s = map feature type (e.g. Coffee parcel). -->
+  <string name="app_entity_qr_code_title">รหัส QR ของ %1$s</string>
+  <!-- Accessibility label of the QR code image. %1$s = map feature name. -->
+  <string name="app_entity_qr_matrix_description">เมทริกซ์ QR ของ %1$s</string>
+  <!-- %1$s = map feature type in lowercase. EUDR = EU Deforestation Regulation. -->
+  <string name="app_entity_qr_code_hint">สแกนด้วย Collect One หรือเครื่องอ่านการปฏิบัติตาม EUDR ใดก็ได้ เพื่อตรวจสอบรูปทรงเรขาคณิต &amp; GeoID ของ %1$s</string>
+  <!-- Generic button label / accessibility label to close a dialog or sheet. -->
+  <string name="app_close">ปิด</string>
+  <!-- Number of pages in a generated PDF. -->
+  <plurals name="app_pdf_page_count">
+    <item quantity="other">%1$d หน้า</item>
+  </plurals>
+  <!-- Accessibility label of the icon that opens a PDF preview. -->
+  <string name="app_preview_pdf">แสดงตัวอย่าง PDF</string>
+  <string name="app_pdf_created_can_share">สร้างบนอุปกรณ์นี้แล้ว คุณจึงแชร์ได้แม้ขณะออฟไลน์</string>
+  <string name="app_pdf_created_download_to_send">สร้างบนอุปกรณ์นี้แล้ว หากต้องการส่ง ให้ดาวน์โหลดก่อน แล้วแนบในแอปใดก็ได้</string>
+  <!-- Button that opens the system share sheet. -->
+  <string name="app_share">แชร์</string>
+  <!-- Button that saves a file to the device. -->
+  <string name="app_download">ดาวน์โหลด</string>
+  <!-- Button that dismisses a message. -->
+  <string name="app_ok">ตกลง</string>
+  <!-- Accessibility label of the back button returning to the map feature list. -->
+  <string name="app_back_to_searchable_list">กลับไปที่รายการที่ค้นหาได้</string>
+  <!-- Form subtitle. %1$s = the form's action button label, %2$s = form version. -->
+  <string name="app_form_action_subtitle">การดำเนินการ: “%1$s” • %2$s</string>
+  <!-- Submission target. %1$s = map feature type (e.g. Coffee parcel), %2$s = map feature name. -->
+  <string name="app_target_with_entity">%1$s: %2$s</string>
+  <!-- Submission without a map feature. %1$s = map feature type, %2$s = GPS coordinates. -->
+  <string name="app_target_no_feature_with_location">%1$s • ไม่มีฟีเจอร์แผนที่ที่แนบไว้ (%2$s)</string>
+  <!-- Submission without a map feature. %1$s = map feature type. -->
+  <string name="app_target_no_feature">%1$s • ไม่มีฟีเจอร์แผนที่ที่แนบไว้</string>
+  <!-- Badge on the most recent submission (all caps). -->
+  <string name="app_latest">ล่าสุด</string>
+  <!-- Accessibility label of the button that opens a submission. -->
+  <string name="app_submission_details">รายละเอียดการส่งข้อมูล</string>
+  <!-- Search field placeholder. -->
+  <string name="app_search_placeholder">ค้นหา...</string>
+  <!-- Accessibility label of the search icon. -->
+  <string name="app_search">ค้นหา</string>
+  <!-- Accessibility label of the button that clears the list search field. -->
+  <string name="app_clear_search_title_case">ล้างการค้นหา</string>
+  <!-- Accessibility label. -->
+  <string name="app_collapse_list_sheet">ยุบแผงรายการกลับไปที่แผนที่</string>
+  <!-- Accessibility label. -->
+  <string name="app_expand_list_sheet">ขยายแผงรายการที่ค้นหาได้</string>
+  <!-- Accessibility label of the offline icon. -->
+  <string name="app_device_offline">อุปกรณ์ออฟไลน์</string>
+  <!-- %1$s = plural map feature noun in lowercase (e.g. coffee parcels, map features). -->
+  <string name="app_offline_searching_local">อุปกรณ์ออฟไลน์ • ค้นหาเฉพาะ %1$s ในเครื่อง</string>
+  <!-- %1$s = plural map feature noun in lowercase. -->
+  <string name="app_offline_search_local_only">ค้นหาได้เฉพาะ %1$s ในเครื่องเท่านั้น การค้นหาสถานที่ใช้งานไม่ได้ขณะออฟไลน์</string>
+  <!-- Generic plural noun for map features, used inside sentences. -->
+  <string name="app_map_features_lowercase">ฟีเจอร์แผนที่</string>
+  <!-- Generic plural noun used inside sentences when a map layer has no feature name. -->
+  <string name="app_features_lowercase">ฟีเจอร์</string>
+  <!-- Section heading (all caps). -->
+  <string name="app_map_layers_heading">ชั้นข้อมูลแผนที่</string>
+  <!-- Accessibility label. %1$s = map layer name. -->
+  <string name="app_expand_dataset">ขยาย %1$s</string>
+  <!-- Accessibility label. %1$s = map layer name. -->
+  <string name="app_collapse_dataset">ยุบ %1$s</string>
+  <!-- %1$d = number shown, %2$d = total number, %3$s = plural map feature noun, %4$s = map layer name. -->
+  <string name="app_showing_first_features">แสดง %1$d รายการแรกจาก %3$s ทั้งหมด %2$d รายการใน %4$s ใช้แถบค้นหาด้านบนเพื่อกรอง %3$s ทั้งหมด %2$d รายการ</string>
+  <!-- Section heading listing place search results (all caps). -->
+  <string name="app_places_heading">สถานที่</string>
+  <!-- Accessibility label. -->
+  <string name="app_fly_to_place">ไปยังสถานที่บนแผนที่</string>
+  <!-- Chip label to stop navigating to a place. -->
+  <string name="app_stop_navigation">หยุดนำทาง</string>
+  <!-- Accessibility label. -->
+  <string name="app_navigate_to_place">นำทางเป็นเส้นตรงไปยังสถานที่</string>
+  <!-- %1$s = search query. -->
+  <string name="app_no_local_layers_match">ไม่มีชั้นข้อมูลแผนที่ในเครื่องที่ตรงกับ “%1$s” การค้นหาสถานที่ใช้งานไม่ได้ขณะออฟไลน์</string>
+  <!-- %1$s = search query. -->
+  <string name="app_no_layers_or_places_match">ไม่มีชั้นข้อมูลแผนที่หรือสถานที่ที่ตรงกับ “%1$s”</string>
+  <string name="app_no_map_layers_yet">ยังไม่มีชั้นข้อมูลแผนที่</string>
+  <string name="app_no_map_features_yet">ยังไม่มีฟีเจอร์แผนที่</string>
+  <!-- Accessibility label of the overflow menu. -->
+  <string name="app_more_submission_actions">การดำเนินการเพิ่มเติมสำหรับการส่งข้อมูล</string>
+  <!-- Accessibility label of the share icon. -->
+  <string name="app_share_submission_pdf">แชร์ PDF ของการส่งข้อมูล</string>
+  <!-- %1$s = form version. -->
+  <string name="app_schema_version">สคีมา: %1$s</string>
+  <!-- %1$s = name of the person who collected the data. -->
+  <string name="app_data_collector">ผู้เก็บข้อมูล: %1$s</string>
+  <!-- %1$s = date and time of collection. -->
+  <string name="app_collected_at">เก็บเมื่อ: %1$s</string>
+  <!-- Sync status title. -->
+  <string name="app_sync_uploading_changes">กำลังอัปโหลดการเปลี่ยนแปลง</string>
+  <!-- Sync status title. -->
+  <string name="app_sync_all_changes_saved">บันทึกการเปลี่ยนแปลงทั้งหมดแล้ว</string>
+  <!-- Sync status title / description. -->
+  <string name="app_sync_upload_failed_retry">อัปโหลดไม่สำเร็จ — แตะเพื่อลองอีกครั้ง</string>
+  <!-- Sync status description. -->
+  <string name="app_sync_uploading_description">กำลังอัปโหลดการเปลี่ยนแปลงในเครื่องไปยังเซิร์ฟเวอร์</string>
+  <!-- Sync status description. -->
+  <string name="app_sync_synced_description">ซิงค์กับเซิร์ฟเวอร์คลาวด์แล้ว</string>
+  <!-- Accessibility label of the basemap/layers button on the map. -->
+  <string name="app_layers">ชั้นข้อมูล</string>
+  <!-- Section heading in the basemap selector: basemap type (Satellite / Map). -->
+  <string name="app_basemap_type_heading">ประเภท</string>
+  <!-- Section heading in the basemap selector listing custom imagery layers. -->
+  <string name="app_imagery_heading">ภาพแผนที่</string>
+  <!-- Imagery layer subtitle. -->
+  <string name="app_offline_download_permitted">อนุญาตให้ดาวน์โหลดแบบออฟไลน์</string>
+  <!-- Imagery layer subtitle. -->
+  <string name="app_online_only_offline_disabled">ออนไลน์เท่านั้น · ปิดการดาวน์โหลดแบบออฟไลน์</string>
+  <!-- Section heading in the layers sheet: the map areas saved on the device for offline use. -->
+  <string name="app_downloaded_imagery_heading">ภาพที่ดาวน์โหลดแล้ว</string>
+  <!-- Switch in the layers sheet that shows the satellite imagery saved for offline use. -->
+  <string name="app_downloaded_satellite">ดาวเทียมที่ดาวน์โหลดแล้ว</string>
+  <!-- Switch in the layers sheet that shows the terrain map saved for offline use. -->
+  <string name="app_downloaded_terrain">ภูมิประเทศที่ดาวน์โหลดแล้ว</string>
+  <!-- Subtitle of a downloaded imagery switch. %1$d: number of saved areas; %2$s: the space they take, e.g. "76 MB". -->
+  <plurals name="app_downloaded_imagery_summary">
+    <item quantity="other">%1$d พื้นที่ · %2$s</item>
+  </plurals>
+  <!-- Subtitle of a downloaded imagery switch when no area of that kind is saved. -->
+  <string name="app_downloaded_imagery_none">ไม่มีพื้นที่ที่บันทึกไว้</string>
+  <!-- Button that starts framing a map area to save for offline use. -->
+  <string name="app_save_an_area">บันทึกพื้นที่</string>
+  <!-- Imagery layer type: a web map tile URL template. -->
+  <string name="app_imagery_type_xyz_tiles">URL ไทล์ XYZ</string>
+  <string name="app_imagery_type_earth_engine">เลเยอร์ Earth Engine</string>
+  <!-- Basemap type option: standard map with roads and terrain. -->
+  <string name="app_basemap_type_map">ภูมิประเทศ</string>
+  <!-- Basemap type option: satellite imagery. -->
+  <string name="app_basemap_type_satellite">ภาพถ่ายดาวเทียม</string>
+  <!-- Title of the basemap selection dialog. -->
+  <string name="app_basemap">แผนที่ฐาน</string>
+  <!-- Generic button label to close a dialog after making changes. -->
+  <string name="app_done">เสร็จแล้ว</string>
+  <!-- Accessibility label. -->
+  <string name="app_hide_layer">ซ่อนชั้นข้อมูล</string>
+  <!-- Accessibility label. -->
+  <string name="app_show_layer">แสดงชั้นข้อมูล</string>
+  <!-- Button on a map cluster balloon that zooms into the cluster. -->
+  <string name="app_zoom_in">ซูมเข้า</string>
+  <!-- Accessibility label. -->
+  <string name="app_dismiss_cluster_balloon">ปิดบอลลูนกลุ่ม</string>
+  <!-- Cluster balloon chip. %1$s = workflow status (e.g. Visited), %2$d = number of map features. -->
+  <string name="app_cluster_status_count">%1$s: %2$d</string>
+  <!-- Accessibility label. -->
+  <string name="app_clear_selected_place">ล้างสถานที่ที่เลือก</string>
+  <!-- Accessibility label of the icon marking a survey downloaded for offline use. -->
+  <string name="app_downloaded">ดาวน์โหลดแล้ว</string>
+  <!-- Map label on the navigation line once at the target. %1$s = distance and bearing. -->
+  <string name="app_map_navigation_arrived">✓ ถึงแล้ว • %1$s</string>
+  <!-- Map label on the navigation line. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_map_navigation_distance">➤ %1$s</string>
+  <!-- Map label under the user's location while navigating. %1$s = bearing, e.g. “319° NW”. -->
+  <string name="app_map_user_navigating">⊕ คุณ • %1$s</string>
+  <!-- Map label under the user's location while the map follows it. -->
+  <string name="app_map_user_centered">⊕ คุณ (กึ่งกลาง)</string>
+  <!-- Map label under the user's GPS location. -->
+  <string name="app_map_user_gps">⊕ คุณ (GPS)</string>
+  <!-- Fallback label of a place picked from search that has no name. -->
+  <string name="app_place">สถานที่</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_point">จุด</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_line">เส้น</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_polygon">รูปหลายเหลี่ยม</string>
+  <!-- Map feature geometry type: a data table row without a location. -->
+  <string name="app_geometry_none">ไม่มีรูปทรงเรขาคณิต</string>
+  <!-- Name of a map pin icon in the icon picker. -->
+  <string name="app_layer_icon_place">สถานที่</string>
+  <string name="app_layer_icon_flag">ธง</string>
+  <string name="app_layer_icon_star">ดาว</string>
+  <string name="app_layer_icon_circle">วงกลม</string>
+  <string name="app_layer_icon_park">ต้นไม้</string>
+  <string name="app_layer_icon_forest">ป่าไม้</string>
+  <string name="app_layer_icon_eco">ใบไม้</string>
+  <string name="app_layer_icon_grass">หญ้า</string>
+  <string name="app_layer_icon_agriculture">เกษตรกรรม</string>
+  <string name="app_layer_icon_yard">สวน</string>
+  <string name="app_layer_icon_emoji_nature">สัตว์ป่า</string>
+  <string name="app_layer_icon_pets">สัตว์</string>
+  <string name="app_layer_icon_water_drop">หยดน้ำ</string>
+  <string name="app_layer_icon_water">น้ำ</string>
+  <string name="app_layer_icon_waves">คลื่น</string>
+  <string name="app_layer_icon_plumbing">บ่อน้ำ / ปั๊ม</string>
+  <string name="app_layer_icon_landscape">ภูมิทัศน์</string>
+  <string name="app_layer_icon_terrain">ภูมิประเทศ</string>
+  <string name="app_layer_icon_hiking">เส้นทางเดิน</string>
+  <string name="app_layer_icon_signpost">ป้ายบอกทาง</string>
+  <string name="app_layer_icon_fence">รั้ว</string>
+  <string name="app_layer_icon_home">บ้าน</string>
+  <string name="app_layer_icon_cottage">กระท่อม</string>
+  <string name="app_layer_icon_apartment">อาคาร</string>
+  <string name="app_layer_icon_school">โรงเรียน</string>
+  <string name="app_layer_icon_local_hospital">สถานพยาบาล</string>
+  <string name="app_layer_icon_church">ศาสนสถาน</string>
+  <string name="app_layer_icon_storefront">ตลาด</string>
+  <string name="app_layer_icon_factory">โรงงาน</string>
+  <string name="app_layer_icon_construction">การก่อสร้าง</string>
+  <string name="app_layer_icon_solar_power">พลังงานแสงอาทิตย์</string>
+  <string name="app_layer_icon_cell_tower">เสาสัญญาณโทรศัพท์</string>
+  <string name="app_layer_icon_sensors">เซ็นเซอร์</string>
+  <string name="app_layer_icon_photo_camera">กล้อง</string>
+  <string name="app_layer_icon_science">ตัวอย่าง</string>
+  <string name="app_layer_icon_recycling">รีไซเคิล</string>
+  <string name="app_layer_icon_local_fire_department">ไฟไหม้</string>
+  <string name="app_layer_icon_warning">อันตราย</string>
+  <string name="app_layer_icon_person">บุคคล</string>
+  <string name="app_layer_icon_groups">กลุ่ม</string>
+  <!-- Shown instead of a data collector's name in surveys that hide contributor identities. -->
+  <string name="app_participant_identity_hidden">ผู้เข้าร่วม (ซ่อนข้อมูลระบุตัวตน)</string>
+  <!-- The signed-in user's own name as data collector. %1$s = name. -->
+  <string name="app_collector_you">%1$s (คุณ)</string>
+  <!-- Data collector attribution. %1$s = name, %2$s = email address. -->
+  <string name="app_collector_with_email">%1$s (%2$s)</string>
+  <!-- Notice. %1$s = PDF file name. -->
+  <string name="app_pdf_saved">บันทึก %1$s แล้ว</string>
+  <!-- Notice. %1$s = PDF file name, %2$s = page count and file size. -->
+  <string name="app_pdf_saved_with_summary">บันทึก %1$s แล้ว (%2$s)</string>
+  <!-- Notice. %1$s = PDF file name. -->
+  <string name="app_pdf_share_failed">ไม่สามารถแชร์ %1$s ได้</string>
+  <!-- Attribution badge shown in the time series panel and on the map when Earth Engine layers are displayed. Keep “Google Earth Engine” untranslated. -->
+  <string name="app_powered_by_google_earth_engine">ขับเคลื่อนโดย Google Earth Engine</string>
+  <!-- Coordinates of a point. %1$s = latitude such as “0.4160°S”, %2$s = longitude such as “36.9470°E”. -->
+  <string name="app_coordinates">%1$s, %2$s</string>
+  <!-- Latitude north of the equator. %1$s = degrees such as “0.4160”. Use the standard abbreviation for north. -->
+  <string name="app_coordinates_latitude_north">%1$s°N</string>
+  <!-- Latitude south of the equator. %1$s = degrees such as “0.4160”. Use the standard abbreviation for south. -->
+  <string name="app_coordinates_latitude_south">%1$s°S</string>
+  <!-- Longitude east of the prime meridian. %1$s = degrees such as “36.9470”. Use the standard abbreviation for east. -->
+  <string name="app_coordinates_longitude_east">%1$s°E</string>
+  <!-- Longitude west of the prime meridian. %1$s = degrees such as “36.9470”. Use the standard abbreviation for west. -->
+  <string name="app_coordinates_longitude_west">%1$s°W</string>
+  <!-- Notice when straight-line navigation to a map feature or place starts. %1$s = its name; %2$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_map_navigation_started">นำทางเป็นเส้นตรงไปยัง %1$s (%2$s)</string>
+  <!-- Notice when straight-line navigation to a submission starts. %1$s = form title; %2$s = its map feature, location, or “Standalone Field Log”; %3$s = distance and bearing. -->
+  <string name="app_map_navigation_started_submission">นำทางเป็นเส้นตรงไปยัง %1$s • %2$s (%3$s)</string>
+  <!-- In the navigation notice, stands for a submission that has neither a map feature nor a location. -->
+  <string name="app_map_navigation_standalone_field_log">บันทึกภาคสนามแบบอิสระ</string>
+  <!-- Notice when the map centers on a place. %1$s = place name; %2$s = its coordinates. -->
+  <string name="app_map_centered_on_place">จัดแผนที่ให้อยู่กึ่งกลางที่ %1$s (%2$s)</string>
+  <!-- Place search result for coordinates the user typed. %1$s = the coordinates, e.g. “0.4210°S, 36.9505°E”. -->
+  <string name="app_place_coordinates_name">พิกัด (%1$s)</string>
+  <!-- Category badge of a place search result for typed coordinates. -->
+  <string name="app_place_coordinates_category">พิกัด GPS</string>
+  <!-- Region line of a place search result for typed coordinates. %1$s = the survey's location, e.g. “Nyeri County, Kenya”. -->
+  <string name="app_place_coordinates_region">%1$s • ค้นหาพิกัดโดยตรง</string>
+
+  <!-- Dates in summaries (DateText.kt), e.g. "Mar 5, 2026". date_medium: %1$s is the abbreviated month name, %2$d the day of the month, %3$d the year. -->
+  <string name="date_medium">%2$d %1$s %3$d</string>
+  <string name="date_month_short_1">ม.ค.</string>
+  <string name="date_month_short_2">ก.พ.</string>
+  <string name="date_month_short_3">มี.ค.</string>
+  <string name="date_month_short_4">เม.ย.</string>
+  <string name="date_month_short_5">พ.ค.</string>
+  <string name="date_month_short_6">มิ.ย.</string>
+  <string name="date_month_short_7">ก.ค.</string>
+  <string name="date_month_short_8">ส.ค.</string>
+  <string name="date_month_short_9">ก.ย.</string>
+  <string name="date_month_short_10">ต.ค.</string>
+  <string name="date_month_short_11">พ.ย.</string>
+  <string name="date_month_short_12">ธ.ค.</string>
+  <!-- Title the system share sheet gives a PDF report: of a map feature (%1$s is its type, e.g. Coffee parcel) or of a submission (%1$s is the form title). -->
+  <string name="app_pdf_share_title_map_feature">รายงาน %1$s</string>
+  <string name="app_pdf_share_title_submission">การส่ง %1$s</string>
+  <!-- Number of map features in a map cluster, when no single map layer names its features. -->
+  <plurals name="app_map_features_count">
+    <item quantity="other">ฟีเจอร์แผนที่ %1$d รายการ</item>
+  </plurals>
+  <!-- Type of a map feature when the survey names none (first), and what a submission without a map feature was recorded as (second). -->
+  <string name="app_feature_type_generic">ตำแหน่ง</string>
+  <string name="app_target_standalone">บันทึกภาคสนามแบบอิสระ</string>
+  <string name="app_measurement">%1$s %2$s</string>
+  <string name="app_unit_meter">ม.</string>
+  <string name="app_unit_kilometer">กม.</string>
+  <string name="app_unit_foot">ฟุต</string>
+  <string name="app_unit_mile">ไมล์</string>
+  <string name="app_unit_hectare">เฮกตาร์</string>
+  <string name="app_unit_acre">เอเคอร์</string>
+  <string name="app_unit_square_kilometer">ตร.กม.</string>
+  <string name="app_unit_kilobyte">kB</string>
+  <string name="app_unit_megabyte">MB</string>
+  <string name="app_unit_gigabyte">GB</string>
+  <string name="app_unit_terabyte">TB</string>
+  <string name="app_gnss_accuracy">±%1$s</string>
+  <string name="app_wayfinding_badge">%1$s • %2$s</string>
+</resources>

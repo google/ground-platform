@@ -20,6 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.measureTimedValue
+import org.openforis.collectone.v2.core.geo.GeoCoord
 
 /**
  * Coarse JVM timings for the plan's performance budgets (100k grid plots ≤ 500 ms, 100k stratified

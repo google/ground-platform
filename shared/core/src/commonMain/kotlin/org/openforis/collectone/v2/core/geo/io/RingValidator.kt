@@ -17,7 +17,7 @@ import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
-import org.openforis.collectone.v2.core.sampling.GeoCoord
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.sampling.Ring
 
 /**
@@ -37,22 +37,11 @@ object RingValidator {
    * Validates [raw] (as read from the file, closed or not) and returns it as an open ring with
    * consecutive duplicate vertices removed.
    *
-   * @param featureIndex 0-based feature index used in messages, or `null` for a lone polygon.
+   * @param featureIndex 0-based index of the polygon's feature in the file, for its issues.
    */
-  fun normalize(raw: List<GeoCoord>, featureIndex: Int? = null): Normalized {
-    val name = featureName(featureIndex)
+  fun normalize(raw: List<GeoCoord>, featureIndex: Int): Normalized {
     if (raw.any { !isValidCoord(it) }) {
-      return Normalized(
-        null,
-        listOf(
-          GeoIssue(
-            GeoIssueSeverity.ERROR,
-            "$name has coordinates outside the valid range and was skipped. Use WGS 84 decimal " +
-              "degrees (latitude −90 to 90, longitude −180 to 180).",
-            featureIndex,
-          )
-        ),
-      )
+      return Normalized(null, listOf(GeoIssue.CoordinatesOutOfRange(featureIndex)))
     }
     val issues = mutableListOf<GeoIssue>()
     val closed = raw.size >= 2 && raw.first() == raw.last()
@@ -63,53 +52,23 @@ object RingValidator {
       deduped.lastIndex
     )
     if (deduped.toSet().size < 3) {
-      return Normalized(
-        null,
-        listOf(
-          GeoIssue(
-            GeoIssueSeverity.ERROR,
-            "$name has fewer than 3 distinct corners and was skipped.",
-            featureIndex,
-          )
-        ),
-      )
+      return Normalized(null, listOf(GeoIssue.TooFewCorners(featureIndex)))
     }
     if (!closed) {
-      issues +=
-        GeoIssue(
-          GeoIssueSeverity.WARNING,
-          "$name's outline wasn't closed, so it was closed automatically.",
-          featureIndex,
-        )
+      issues += GeoIssue.OutlineClosed(featureIndex)
     }
     if (findSelfIntersection(deduped) != null) {
-      issues +=
-        GeoIssue(
-          GeoIssueSeverity.WARNING,
-          "$name's outline crosses itself. Areas and sample plots may be wrong; fix the boundary " +
-            "in a GIS tool and upload it again.",
-          featureIndex,
-        )
+      issues += GeoIssue.SelfIntersection(featureIndex)
     }
     val lngSpan = deduped.maxOf { it.lng } - deduped.minOf { it.lng }
     if (lngSpan > 180.0) {
-      issues +=
-        GeoIssue(
-          GeoIssueSeverity.WARNING,
-          "$name may cross the 180° meridian, which isn't supported yet. Split it into parts on " +
-            "either side of the meridian.",
-          featureIndex,
-        )
+      issues += GeoIssue.MayCrossAntimeridian(featureIndex)
     }
     return Normalized(deduped, issues)
   }
 
   fun isValidCoord(c: GeoCoord): Boolean =
     !c.lat.isNaN() && !c.lng.isNaN() && c.lat in -90.0..90.0 && c.lng in -180.0..180.0
-
-  /** "Feature 3" (1-based) for messages, or "The polygon" when there's no index. */
-  internal fun featureName(featureIndex: Int?): String =
-    if (featureIndex == null) "The polygon" else "Feature ${featureIndex + 1}"
 
   /**
    * Whether the open [ring] is wound counter-clockwise (positive signed area in lng/lat space), as

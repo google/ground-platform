@@ -20,6 +20,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.geo.s2.s2CellToken
 import org.openforis.collectone.v2.core.impact.Fx.concept
 import org.openforis.collectone.v2.core.impact.Fx.feature
@@ -236,36 +237,63 @@ class ImpactScopeRulesTest {
   }
 
   @Test
-  fun countryScope_featureCountryOverridesOrganization_andSmallCountriesAreSuppressed() {
-    val result =
-      run(
-        listOf(
-          survey(
-            "s1",
-            "o1",
-            links = setOf(public.id),
-            features =
-              listOf(
-                plot("a", "G1", values = values(public)),
-                plot("b", "G2", values = values(public)),
-                feature("c", "G3", areaHa = 7.0, country = " tz ", values = values(public)),
-              ),
-          ),
-          survey("s2", "o9", features = listOf(plot("d", "G4"))),
-        ),
-        concepts,
-        organizations,
-        ImpactConfig(countryMinFeatures = 2),
-      )
+  fun countryScope_featuresCountInTheirOrganizationCountry() {
+    val result = mixedCountryResult()
+
     assertFeatures(result.row(COUNTRY, "KE", FEATURES), 2, 2.0)
+  }
+
+  @Test
+  fun countryScope_featureCountryOverridesOrganizationAndSmallCountryIsSuppressed() {
+    // Feature `c` declares " tz " although its organization is in KE; TZ then falls below
+    // countryMinFeatures, so its row is published as suppressed.
+    val result = mixedCountryResult()
+
     assertEquals(
       listOf(ImpactAggregateRow(COUNTRY, "TZ", FEATURES, suppressed = true)),
       result.rows(COUNTRY, "TZ"),
     )
+  }
+
+  @Test
+  fun countryScope_suppressedCountries_areCountedInDiagnostics() {
+    val result = mixedCountryResult()
+
     assertEquals(1, result.diagnostics.suppressedCountryCount)
+  }
+
+  @Test
+  fun countryScope_featureWithoutCountry_stillCountsGlobally() {
     // Unknown organization o9 has no country: its plot counts globally but in no country.
+    val result = mixedCountryResult()
+
     assertFeatures(result.row(GLOBAL, "", FEATURES), 4, 10.0)
   }
+
+  /**
+   * Two KE plots and one 7 ha feature declaring " tz " in organization o1, plus one plot in the
+   * unknown organization o9, with countryMinFeatures = 2.
+   */
+  private fun mixedCountryResult() =
+    run(
+      listOf(
+        survey(
+          "s1",
+          "o1",
+          links = setOf(public.id),
+          features =
+            listOf(
+              plot("a", "G1", values = values(public)),
+              plot("b", "G2", values = values(public)),
+              feature("c", "G3", areaHa = 7.0, country = " tz ", values = values(public)),
+            ),
+        ),
+        survey("s2", "o9", features = listOf(plot("d", "G4"))),
+      ),
+      concepts,
+      organizations,
+      ImpactConfig(countryMinFeatures = 2),
+    )
 
   @Test
   fun unknownOrganization_isNotOptedOut() {
@@ -288,7 +316,7 @@ class ImpactScopeRulesTest {
       fineCellLevel = 10,
       coarseCellLevel = 7,
     )
-  private val base = ImpactLatLng(-0.42, 36.95)
+  private val base = GeoCoord(-0.42, 36.95)
 
   private fun at(id: String, lat: Double, lng: Double, geoId: String = id) =
     feature(id, geoId, geometry = Fx.point(lat, lng), areaHa = 1.0)

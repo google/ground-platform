@@ -1,0 +1,1 @@
+RecordInstance{form_id=, form_version=, data_=RecordNode{fields={a=FieldValue{scalar_value=TypedValue{double_value=2.5}}}, id=, sort_order=0}}

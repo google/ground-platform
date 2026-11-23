@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Impact goals: plain-language names of the goals survey data can contribute to. -->
+  <string name="wizard_goal_deforestation_free_supply_chains">ห่วงโซ่อุปทานปลอดการตัดไม้ทำลายป่า</string>
+  <string name="wizard_goal_ecosystem_restoration">การฟื้นฟูระบบนิเวศ</string>
+  <string name="wizard_goal_effective_protected_areas">พื้นที่คุ้มครอง</string>
+  <string name="wizard_goal_iplc_rights_and_tenure">สิทธิในที่ดินของชนพื้นเมืองและชุมชน</string>
+  <string name="wizard_goal_legal_timber">ไม้ที่ถูกกฎหมาย</string>
+  <string name="wizard_goal_forest_carbon_and_conservation">คาร์บอนป่าไม้และการอนุรักษ์</string>
+  <string name="wizard_goal_smallholder_livelihoods">การดำรงชีพและการเข้าถึงตลาดของเกษตรกรรายย่อย</string>
+  <string name="wizard_goal_open_earth_data">ข้อมูลอ้างอิงแบบเปิดด้านสิ่งปกคลุมดินและพืชผล</string>
+  <!-- Heading of standard fields (shared data definitions) that don't contribute to any goal. -->
+  <string name="wizard_goal_other_standard_fields">ฟิลด์มาตรฐานอื่นๆ</string>
+
+  <!-- Impact attribution levels: how directly a survey's data contributed to results (1–5). -->
+  <string name="wizard_impact_attribution_official_submission">ใช้ในการยื่นเอกสารอย่างเป็นทางการ</string>
+  <string name="wizard_impact_attribution_official_submission_explanation">ผู้จัดทำระบุว่าข้อมูลถูกนำไปใช้ในการยื่นเอกสารอย่างเป็นทางการ เช่น คำแถลงการตรวจสอบสถานะตาม EUDR รายงาน FERM หรือการประเมินพื้นที่คุ้มครอง</string>
+  <string name="wizard_impact_attribution_partner_use">ใช้โดยพาร์ทเนอร์</string>
+  <string name="wizard_impact_attribution_partner_use_explanation">ข้อมูลถูกส่งให้พาร์ทเนอร์ หรือถูกใช้โดยผู้ซื้อ เพื่อการออกโฉนดที่ดิน หรือเพื่อตรวจสอบแผนที่หรือแบบจำลอง</string>
+  <string name="wizard_impact_attribution_purpose_export">ส่งออกตามวัตถุประสงค์</string>
+  <string name="wizard_impact_attribution_purpose_export_explanation">ข้อมูลถูกดาวน์โหลดในรูปแบบที่วัตถุประสงค์หนึ่งรองรับ เช่น EUDR GeoJSON</string>
+  <string name="wizard_impact_attribution_data_collected">เก็บข้อมูลแล้ว</string>
+  <string name="wizard_impact_attribution_data_collected_explanation">มีการเก็บข้อมูลแล้ว แต่ยังไม่ทราบว่านำไปใช้อย่างไร</string>
+  <string name="wizard_impact_attribution_exploratory">เริ่มต้นใช้งาน</string>
+  <string name="wizard_impact_attribution_exploratory_explanation">แบบสำรวจทดสอบหรือแบบสำรวจเชิงสำรวจ หรือแบบสำรวจที่ยังไม่มีข้อมูล</string>
+
+  <!-- Impact setup hints, shown when a summary has no numbers yet. -->
+  <string name="wizard_impact_hint_collect_data">ตัวเลขจะแสดงที่นี่เมื่อมีการเก็บข้อมูลแล้ว</string>
+  <string name="wizard_impact_hint_pick_purpose">เลือกว่าข้อมูลจะนำไปใช้ทำอะไรในรายละเอียดแบบสำรวจ เพื่อให้จัดกลุ่มผลลัพธ์ตามเป้าหมายได้</string>
+  <string name="wizard_impact_hint_link_fields">เชื่อมโยงคำถามในแบบฟอร์มหรือคอลัมน์ของชั้นข้อมูลกับฟิลด์มาตรฐาน (เช่น สินค้าโภคภัณฑ์) เพื่อให้รวมคำตอบได้</string>
+
+  <!-- Impact activity: kinds of "data was used" events, with their count next to them. -->
+  <string name="wizard_impact_activity_downloads">การดาวน์โหลด</string>
+  <string name="wizard_impact_activity_sent_to_partners">ส่งให้พาร์ทเนอร์</string>
+  <string name="wizard_impact_activity_receipts_created">ใบรับที่สร้าง</string>
+  <string name="wizard_impact_activity_receipts_shared">ใบรับที่แชร์</string>
+  <string name="wizard_impact_activity_doi_minted">DOI ที่ออกให้</string>
+  <string name="wizard_impact_activity_surveys_closed">แบบสำรวจที่ปิดแล้ว</string>
+
+  <!-- Impact indicators. %1$s is the formatted count (e.g. "1,234"). -->
+  <plurals name="wizard_impact_map_features">
+    <item quantity="other">ฟีเจอร์แผนที่ %1$s รายการ</item>
+  </plurals>
+  <!-- %1$s: a count of map features (e.g. "3 map features"); %2$s: their area (e.g. "5.9 ha"). -->
+  <string name="wizard_impact_value_with_area">%1$s · %2$s</string>
+  <!-- Headline of a share indicator. %1$s: a percentage (e.g. "67%"); %2$s: the most common answer (e.g. "Yes"). -->
+  <string name="wizard_impact_share_value">%1$s %2$s</string>
+  <!-- What a breakdown indicator is split by. %1$s: the indicator name in lower case (e.g. "commodity"). -->
+  <string name="wizard_impact_detail_by">ตาม%1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_of_answered">จาก%1$sที่มีคำตอบ</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_total_from">ผลรวมจาก%1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_average_of">ค่าเฉลี่ยของ%1$s</string>
+  <!-- %1$s: an area (e.g. "5.9 ha") or a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_covering">ครอบคลุม %1$s</string>
+
+  <!-- Impact notes on what couldn't be counted. %1$s: the standard field (shared data definition) name. -->
+  <string name="wizard_impact_note_link_unknown">มีฟิลด์ที่เชื่อมโยงกับฟิลด์มาตรฐานที่ไม่มีอยู่แล้ว (%1$s)</string>
+  <string name="wizard_impact_note_link_deprecated">มีฟิลด์ที่เชื่อมโยงกับฟิลด์มาตรฐานที่เลิกใช้แล้ว (%1$s)</string>
+  <string name="wizard_impact_note_link_not_in_library">มีฟิลด์ที่เชื่อมโยงกับฟิลด์มาตรฐานขององค์กรอื่น จึงไม่นับรวมที่นี่ (%1$s)</string>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_not_a_number">
+    <item quantity="other">%1$s: ค่า %2$s รายการไม่ใช่ตัวเลข (%3$s) จึงไม่นับรวม</item>
+  </plurals>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_unsupported_unit">
+    <item quantity="other">%1$s: ค่า %2$s รายการใช้หน่วยที่แปลงไม่ได้ (%3$s) จึงไม่นับรวม</item>
+  </plurals>
+
+  <!-- Impact views (survey Impact tab, Impact page, platform-wide view) and PDF summaries. -->
+  <string name="wizard_impact_title">ผลกระทบ</string>
+  <string name="wizard_impact_survey_subtitle">ผลรวมจากข้อมูลของแบบสำรวจนี้ และวิธีการนำข้อมูลไปใช้ แปลงที่ทำแผนที่มากกว่าหนึ่งครั้งจะนับเพียงครั้งเดียว</string>
+  <string name="wizard_impact_organization_subtitle">ผลรวมจากข้อมูลในแบบสำรวจของคุณ และวิธีการนำข้อมูลไปใช้ แปลงที่ทำแผนที่ในแบบสำรวจมากกว่าหนึ่งรายการจะนับเพียงครั้งเดียว</string>
+  <!-- Option of the survey filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_surveys">แบบสำรวจทั้งหมด</string>
+  <!-- Option of the country filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_countries">ทุกประเทศ</string>
+  <!-- Label of the survey filter dropdown. -->
+  <string name="wizard_impact_filter_survey">แบบสำรวจ</string>
+  <!-- Label of the country filter dropdown. -->
+  <string name="wizard_impact_filter_country">ประเทศ</string>
+  <!-- Title of the platform-wide Impact view ("Collect One" is the product name). -->
+  <string name="wizard_impact_all_of_collect_one">Collect One ทั้งหมด</string>
+  <string name="wizard_impact_global_subtitle_full">ผลรวมจากข้อมูลของทุกคน โดยนับจากฟิลด์มาตรฐานส่วนกลางเท่านั้น ไม่รวมองค์กรที่เลือกไม่เข้าร่วม และกลุ่มขนาดเล็กจะถูกเก็บเป็นส่วนตัว ในฐานะผู้จัดการของ "ผู้ใช้ทั้งหมด" คุณจะเห็นฟิลด์มาตรฐานที่ไม่ได้เผยแพร่ด้วย</string>
+  <string name="wizard_impact_global_subtitle_published">ผลรวมจากข้อมูลของทุกคน โดยนับจากฟิลด์มาตรฐานส่วนกลางที่เป็นสาธารณะเท่านั้น ไม่รวมองค์กรที่เลือกไม่เข้าร่วม และกลุ่มขนาดเล็กจะถูกเก็บเป็นส่วนตัว</string>
+  <!-- Title of the platform-wide impact summary (PDF) ("Collect One" is the product name). -->
+  <string name="wizard_impact_global_title">ผู้ใช้ Collect One ทั้งหมด</string>
+  <string name="wizard_impact_download_pdf">ดาวน์โหลดสรุปเป็น PDF</string>
+  <string name="wizard_impact_adding_up">กำลังรวมตัวเลข…</string>
+  <string name="wizard_impact_no_numbers_for_this">ยังไม่มีตัวเลขสำหรับรายการนี้</string>
+  <!-- Heading of an organization's own indicators, in its published view. -->
+  <string name="wizard_impact_own_indicators">ตัวชี้วัดขององค์กร</string>
+  <!-- Heading of the viewer's organization's own indicators, in its members' full view. -->
+  <string name="wizard_impact_your_indicators">ตัวชี้วัดของคุณ</string>
+  <string name="wizard_impact_own_indicators_supporting">ฟิลด์มาตรฐานขององค์กรเอง ซึ่งเผยแพร่เป็นยอดรวม</string>
+  <string name="wizard_impact_your_indicators_supporting">ฟิลด์มาตรฐานขององค์กรคุณเอง จะเผยแพร่เฉพาะฟิลด์ที่ทำเครื่องหมายว่า "ยอดรวมสาธารณะ" ส่วนที่เหลือจะอยู่ภายในองค์กรของคุณ</string>
+  <string name="wizard_impact_suggested_indicators">ตัวชี้วัดที่องค์กรแนะนำ</string>
+  <string name="wizard_impact_suggested_indicators_supporting">ฟิลด์ขององค์กรเองที่องค์กรแนะนำให้นับรวมในเป้าหมาย แสดงแยกต่างหากและไม่นำไปรวมกับยอดรวมด้านบน</string>
+  <string name="wizard_impact_how_data_was_used">วิธีการนำข้อมูลไปใช้</string>
+  <string name="wizard_impact_unique_hectares_mapped">จำนวนเฮกตาร์ที่ทำแผนที่ (ไม่ซ้ำ)</string>
+  <string name="wizard_impact_unique_hectares_mapped_detail">พื้นที่ของฟีเจอร์แผนที่ที่ไม่ซ้ำกัน</string>
+  <string name="wizard_impact_plots_and_map_features">แปลงและฟีเจอร์แผนที่</string>
+  <!-- %1$s: the formatted number of duplicate map features. -->
+  <plurals name="wizard_impact_duplicates_counted_once">
+    <item quantity="other">รายการซ้ำ %1$s รายการนับเพียงครั้งเดียว (GeoID เดียวกันถูกทำแผนที่อีกครั้ง)</item>
+  </plurals>
+  <string name="wizard_impact_no_plot_mapped_twice">ไม่มีแปลงที่ทำแผนที่ซ้ำ</string>
+  <string name="wizard_impact_producers_registered">ผู้ผลิตที่ลงทะเบียน</string>
+  <string name="wizard_impact_producers_registered_detail">ผู้ผลิตแต่ละรายที่ระบุชื่อในฟีเจอร์แผนที่</string>
+  <string name="wizard_impact_what_happened_with_data">ข้อมูลถูกนำไปใช้อย่างไร</string>
+  <string name="wizard_impact_outcomes_empty_survey">ระบบจะถามคุณเมื่อปิดแบบสำรวจ</string>
+  <string name="wizard_impact_outcomes_empty">ยังไม่มีคำตอบ ระบบจะถามผู้จัดทำเมื่อปิดแบบสำรวจ</string>
+  <!-- Shown next to an outcome a single survey's organizer chose. -->
+  <string name="wizard_impact_outcome_yes">ใช่</string>
+  <string name="wizard_impact_not_used_yet">ยังไม่ได้ใช้</string>
+  <string name="wizard_impact_closed_not_answered_yet">ปิดแล้ว ยังไม่ได้ตอบ</string>
+  <string name="wizard_impact_closed_surveys_not_answered">แบบสำรวจที่ปิดแล้วแต่ยังไม่ได้ตอบ</string>
+  <!-- PDF summary: closed surveys whose organizer didn't say what happened with the data. -->
+  <string name="wizard_impact_closed_not_answered">ปิดแล้ว ไม่ได้ตอบ</string>
+  <string name="wizard_impact_how_directly_contributed">ข้อมูลมีส่วนร่วมโดยตรงเพียงใด</string>
+  <!-- Attribution level on a 1–5 scale. %1$s: the level (e.g. "2"). -->
+  <string name="wizard_impact_level_of_five">%1$s จาก 5</string>
+  <string name="wizard_impact_no_global_purpose_surveys">ยังไม่มีแบบสำรวจที่มีวัตถุประสงค์ส่วนกลาง</string>
+  <string name="wizard_impact_no_surveys">ยังไม่มีแบบสำรวจ</string>
+  <string name="wizard_impact_global_purpose_by_level">แบบสำรวจที่มีวัตถุประสงค์ส่วนกลาง แยกตามระดับ</string>
+  <!-- %1$s: the formatted number of surveys. -->
+  <plurals name="wizard_impact_surveys">
+    <item quantity="other">แบบสำรวจ %1$s รายการ</item>
+  </plurals>
+  <string name="wizard_impact_by_country_and_map_area">ตามประเทศและพื้นที่แผนที่</string>
+  <string name="wizard_impact_by_country_and_map_area_supporting">ประเทศต้องมีฟีเจอร์แผนที่อย่างน้อย 10 รายการ และพื้นที่แผนที่ต้องมีฟีเจอร์แผนที่อย่างน้อย 10 รายการจาก 2 องค์กร จึงจะแสดงตัวเลข</string>
+  <string name="wizard_impact_countries">ประเทศ</string>
+  <string name="wizard_impact_no_countries">ยังไม่มีประเทศ</string>
+  <!-- Shown instead of a country's numbers when it has fewer than 10 map features. -->
+  <string name="wizard_impact_fewer_than_10">น้อยกว่า 10</string>
+  <string name="wizard_impact_map_areas_kept_private">พื้นที่แผนที่ที่เก็บเป็นส่วนตัว</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_map_areas_with_numbers">
+    <item quantity="other">พื้นที่แผนที่ที่มีตัวเลข %1$s พื้นที่</item>
+  </plurals>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_map_features_in_private_areas">
+    <item quantity="other">ฟีเจอร์แผนที่ %1$s รายการในพื้นที่ส่วนตัว</item>
+  </plurals>
+  <string name="wizard_impact_organizations_not_included">องค์กรที่ไม่ได้นับรวม</string>
+  <string name="wizard_impact_organizations_not_included_detail">องค์กรเหล่านี้ไม่นำข้อมูลของตนไปรวมในตัวเลขทั่วทั้งแพลตฟอร์ม</string>
+  <string name="wizard_impact_not_enough_data_title">ยังมีข้อมูลไม่พอที่จะเผยแพร่</string>
+  <!-- %1$d: the minimum number of map features before an organization's numbers are published. -->
+  <string name="wizard_impact_not_enough_data_body">ตัวเลขจะเผยแพร่เมื่อมีฟีเจอร์แผนที่อย่างน้อย %1$d รายการ เพื่อไม่ให้ระบุกลุ่มขนาดเล็กได้</string>
+  <string name="wizard_impact_hints_title_empty">วิธีทำให้มีตัวเลขที่นี่</string>
+  <string name="wizard_impact_hints_title">ใช้ประโยชน์จากข้อมูลของคุณให้มากขึ้น</string>
+  <!-- %1$s: the formatted number of linked fields. -->
+  <plurals name="wizard_impact_linked_fields_not_counted">
+    <item quantity="other">นับฟิลด์ที่เชื่อมโยง %1$s รายการไม่ได้</item>
+  </plurals>
+  <!-- Button hiding the list of what couldn't be counted. -->
+  <string name="wizard_impact_hide">ซ่อน</string>
+  <!-- Button showing why some fields couldn't be counted. -->
+  <string name="wizard_impact_why">เพราะอะไร</string>
+
+  <!-- PDF impact summary. -->
+  <!-- %1$s: the survey, organization, or platform-wide title. -->
+  <string name="wizard_impact_pdf_title">สรุปผลกระทบ • %1$s</string>
+  <!-- Running header on every page ("Open Foris Collect One" is the product name). %1$s: the summary title. -->
+  <string name="wizard_impact_pdf_running_header">Open Foris Collect One • สรุปผลกระทบ • %1$s</string>
+  <!-- %1$s: when the PDF was generated (e.g. "2026-09-18 10:14 UTC"). -->
+  <string name="wizard_impact_pdf_footer">สรุปผลกระทบ • สร้างเมื่อ %1$s</string>
+  <string name="wizard_impact_pdf_subject_survey">สรุปผลกระทบของแบบสำรวจ</string>
+  <string name="wizard_impact_pdf_subject_organization">สรุปผลกระทบขององค์กร</string>
+  <string name="wizard_impact_pdf_subject_global">สรุปผลกระทบขององค์กรทั้งหมดที่เข้าร่วมในตัวเลขทั่วทั้งแพลตฟอร์ม</string>
+  <string name="wizard_impact_pdf_published_numbers">ตัวเลขที่เผยแพร่</string>
+  <string name="wizard_impact_pdf_counted_once_note">แปลงที่ทำแผนที่มากกว่าหนึ่งครั้ง (GeoID เดียวกัน) จะนับเพียงครั้งเดียว</string>
+  <string name="wizard_impact_pdf_counted_once_note_published">แปลงที่ทำแผนที่มากกว่าหนึ่งครั้ง (GeoID เดียวกัน) จะนับเพียงครั้งเดียว ตัวเลขที่เผยแพร่เป็นยอดรวมแบบไม่ระบุตัวตนจากฟิลด์มาตรฐานสาธารณะเท่านั้น</string>
+  <string name="wizard_impact_pdf_at_a_glance">ภาพรวม</string>
+  <string name="wizard_impact_pdf_unique_map_features">ฟีเจอร์แผนที่ที่ไม่ซ้ำกัน</string>
+  <string name="wizard_impact_pdf_area_mapped">พื้นที่ที่ทำแผนที่</string>
+  <string name="wizard_impact_pdf_counted_once">นับครั้งเดียว</string>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_pdf_mapped_again">
+    <item quantity="other">ฟีเจอร์แผนที่ %1$s รายการถูกทำแผนที่ซ้ำที่อื่น</item>
+  </plurals>
+  <string name="wizard_impact_pdf_suggested_note">ฟิลด์ขององค์กรเองที่องค์กรแนะนำให้นับรวมในเป้าหมาย ไม่นำไปรวมกับยอดรวมด้านบน</string>
+  <!-- How directly the data contributed (attribution level). -->
+  <string name="wizard_impact_pdf_contribution">การมีส่วนร่วม</string>
+  <string name="wizard_impact_pdf_by_country">ตามประเทศ</string>
+  <string name="wizard_impact_pdf_fewer_than_10_features">ฟีเจอร์แผนที่น้อยกว่า 10 รายการ</string>
+  <string name="wizard_impact_pdf_map_areas">พื้นที่แผนที่</string>
+  <string name="wizard_impact_pdf_map_areas_with_numbers">พื้นที่แผนที่ที่มีตัวเลข</string>
+  <string name="wizard_impact_pdf_kept_private">เก็บเป็นส่วนตัว</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_pdf_kept_private_areas">
+    <item quantity="other">พื้นที่แผนที่ %1$s พื้นที่ที่มีฟีเจอร์แผนที่น้อยกว่า 10 รายการหรือน้อยกว่า 2 องค์กร</item>
+  </plurals>
+  <!-- %1$s: the formatted number of organizations. -->
+  <plurals name="wizard_impact_pdf_excluded_organizations">
+    <item quantity="other">องค์กร %1$s แห่งไม่นำข้อมูลของตนไปรวมในตัวเลขทั่วทั้งแพลตฟอร์ม</item>
+  </plurals>
+  <string name="wizard_impact_pdf_not_counted">ไม่ได้นับรวม</string>
+
+  <!-- Impact page (#impact): the organizations a user follows and all of Collect One. -->
+  <string name="wizard_impact_back_to_surveys">กลับไปที่แบบสำรวจ</string>
+  <string name="wizard_impact_page_title">เมตริกแบบเรียลไทม์</string>
+  <!-- Header line under "Live Metrics". %1$s: the formatted number of followed organizations. -->
+  <plurals name="wizard_impact_published_by_followed">
+    <item quantity="other">เผยแพร่โดยองค์กรที่คุณติดตาม %1$s แห่ง</item>
+  </plurals>
+  <string name="wizard_impact_choose_organizations">เลือกองค์กร</string>
+  <!-- Navigation item of the Impact page's overview. -->
+  <string name="wizard_impact_overview">ภาพรวม</string>
+  <!-- Section heading in the Impact page's left panel (shown in capitals). -->
+  <string name="wizard_impact_organizations_you_follow">องค์กรที่คุณติดตาม</string>
+  <!-- The signed-in user is a member of this organization. -->
+  <string name="wizard_impact_member">สมาชิก</string>
+  <!-- The signed-in user is a Manager of this organization. -->
+  <string name="wizard_impact_you_manage">คุณเป็นผู้จัดการ</string>
+  <!-- Fallback description of an organization with no type or country. -->
+  <string name="wizard_impact_organization">องค์กร</string>
+  <string name="wizard_impact_no_followed_organizations">คุณยังไม่ได้ติดตามองค์กรใด</string>
+  <string name="wizard_impact_dashboard_title">แดชบอร์ดผลกระทบของคุณ</string>
+  <string name="wizard_impact_dashboard_subtitle">ตัวเลขที่เผยแพร่ขององค์กรที่คุณติดตาม เลือกองค์กรใดก็ได้ในรายการเพื่อดูผลรวมจากข้อมูลขององค์กรนั้น</string>
+  <string name="wizard_impact_all_of_collect_one_supporting">ทุกองค์กรที่เข้าร่วมในตัวเลขทั่วทั้งแพลตฟอร์ม</string>
+  <string name="wizard_impact_follow_more_organizations">ติดตามองค์กรเพิ่มเติม</string>
+  <!-- Screen reader label of the button removing an organization from the Impact page. %1$s: the organization name. -->
+  <string name="wizard_impact_stop_following">เลิกติดตาม %1$s</string>
+  <string name="wizard_impact_no_numbers_yet">ยังไม่มีตัวเลข</string>
+  <string name="wizard_impact_not_enough_data_short">ยังมีข้อมูลไม่พอที่จะเผยแพร่</string>
+  <!-- Label under a headline area number. -->
+  <string name="wizard_impact_unique_hectares">เฮกตาร์ (ไม่ซ้ำ)</string>
+  <!-- Label under a headline count of map features. -->
+  <string name="wizard_impact_map_features_label">ฟีเจอร์แผนที่</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_organization_published_subtitle">ผลรวมจากแบบสำรวจของ %1$s ตามที่เผยแพร่ให้ทุกคนใน Collect One เห็น แปลงที่ทำแผนที่ในแบบสำรวจมากกว่าหนึ่งรายการจะนับเพียงครั้งเดียว</string>
+  <string name="wizard_impact_organization_page">หน้าองค์กร</string>
+  <string name="wizard_impact_unfollow">เลิกติดตาม</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_manager">คุณกำลังดูตัวเลขทั้งหมดในฐานะผู้จัดการของ %1$s</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_member">คุณกำลังดูตัวเลขทั้งหมดของ %1$s ในฐานะสมาชิก</string>
+  <string name="wizard_impact_notice_published_member">นี่คือสิ่งที่ทุกคนใน Collect One เห็น</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_published_by">เผยแพร่โดย %1$s</string>
+  <!-- %1$s: the organization name; %2$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body_manager">%1$s เผยแพร่ยอดรวมแบบไม่ระบุตัวตนจากแบบสำรวจขององค์กรให้ทุกคนที่ลงชื่อเข้าใช้ Collect One เห็น %2$s</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body">ทุกองค์กรใน Collect One เผยแพร่ยอดรวมแบบไม่ระบุตัวตนจากแบบสำรวจของตน %1$s</string>
+  <!-- Label of the switch showing members the published view. -->
+  <string name="wizard_impact_show_published">แสดงสิ่งที่เผยแพร่</string>
+  <!-- "All users" is the name of the platform-wide organization. -->
+  <string name="wizard_impact_platform_notice_full">คุณกำลังดูฟิลด์มาตรฐานทั้งหมดในฐานะผู้จัดการของ "ผู้ใช้ทั้งหมด"</string>
+  <string name="wizard_impact_platform_notice_published">เผยแพร่ให้ทุกคนใน Collect One</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_platform_notice_body">ยอดรวมจากทุกองค์กรที่เข้าร่วมในตัวเลขทั่วทั้งแพลตฟอร์ม %1$s</string>
+  <string name="wizard_impact_explainer_title">ทุกองค์กรเผยแพร่ยอดรวมแบบไม่ระบุตัวตน</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_explainer_body">ผู้จัดทำใน Collect One เผยแพร่ผลรวมจากแบบสำรวจของตน เช่น จำนวนเฮกตาร์ที่ทำแผนที่และวิธีการนำข้อมูลไปใช้ ให้ทุกคนที่ลงชื่อเข้าใช้เห็น %1$s</string>
+  <!-- What's never published. %1$d: the minimum number of map features before numbers are shown. -->
+  <string name="wizard_impact_published_rules">จะไม่มีการเผยแพร่การส่งข้อมูล ฟีเจอร์แผนที่ ตำแหน่ง และคำตอบ รวมถึงฟิลด์มาตรฐานที่เก็บไว้เฉพาะภายในองค์กรหรือทำเครื่องหมายว่าละเอียดอ่อน องค์กรที่มีฟีเจอร์แผนที่น้อยกว่า %1$d รายการจะไม่แสดงตัวเลข</string>
+  <string name="wizard_impact_choose_organizations_body">ทุกองค์กรเผยแพร่ยอดรวมแบบไม่ระบุตัวตนจากแบบสำรวจของตน เลือกองค์กรที่จะติดตามตัวเลขในหน้าผลกระทบของคุณ</string>
+  <string name="wizard_impact_search_organizations">ค้นหาองค์กร</string>
+  <string name="wizard_impact_no_organizations_match">ไม่มีองค์กรที่ตรงกัน</string>
+  <!-- Appended to an organization's description when it isn't listed publicly. -->
+  <string name="wizard_impact_unlisted">ไม่แสดงสาธารณะ เฉพาะสมาชิกที่เห็น</string>
+  <string name="wizard_impact_save">บันทึก</string>
+  <string name="wizard_impact_cancel">ยกเลิก</string>
+  <!-- Snackbar after saving a PDF summary. %1$s: the file name; %2$s: its page count and size (e.g. "2 pages • 14 KB"). -->
+  <string name="wizard_impact_saved_pdf">บันทึก %1$s แล้ว (%2$s)</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the survey title. -->
+  <string name="wizard_impact_filter_label_survey">แบบสำรวจ: %1$s</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the country name. -->
+  <string name="wizard_impact_filter_label_country">ประเทศ: %1$s</string>
+
+  <!-- "What happened with this data?" card/dialog, asked after a survey is closed. -->
+  <string name="wizard_outcome_title">ข้อมูลนี้ถูกนำไปใช้อย่างไร</string>
+  <string name="wizard_outcome_supporting">เลือกทั้งหมดที่ตรงกัน คำตอบของคุณช่วยแสดงให้เห็นว่าข้อมูลแบบสำรวจถูกนำไปใช้อย่างไร</string>
+  <string name="wizard_outcome_skip">ข้าม</string>
+  <string name="wizard_outcome_save">บันทึก</string>
+  <!-- Question completed by one of the chips below (e.g. "Less time and cost"). -->
+  <string name="wizard_outcome_effort_question">เมื่อเทียบกับวิธีการเดิมของคุณ วิธีนี้ใช้… (ไม่บังคับ)</string>
+  <string name="wizard_outcome_effort_less">เวลาและค่าใช้จ่ายน้อยกว่า</string>
+  <string name="wizard_outcome_effort_same">พอๆ กัน</string>
+  <string name="wizard_outcome_effort_more">เวลาและค่าใช้จ่ายมากกว่า</string>
+
+  <!-- Purpose Pack picker ("What will this data be used for?"). -->
+  <!-- Screen reader label of the error icon in a validation banner. -->
+  <string name="wizard_purpose_error">ข้อผิดพลาด</string>
+  <string name="wizard_validation_purpose_required">เลือกวัตถุประสงค์ (หรือเลือก "อื่นๆ" และอธิบายเป้าหมายของคุณ) เพื่อดำเนินการต่อ</string>
+  <string name="wizard_validation_other_purpose_required">กรุณาอธิบายวัตถุประสงค์ของแบบสำรวจนี้เพื่อดำเนินการต่อ</string>
+  <!-- Badge of a Purpose Pack defined by an organization, when its name is unknown. -->
+  <string name="wizard_purpose_source_organization">องค์กร</string>
+  <!-- Badge of a Purpose Pack available to every organization. -->
+  <string name="wizard_purpose_source_global">ส่วนกลาง</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_purpose_other_label">อธิบายวัตถุประสงค์ของแบบสำรวจนี้ *</string>
+  <string name="wizard_purpose_other_placeholder">เช่น การติดตามการฟื้นฟูลุ่มน้ำโดยชุมชน</string>
+  <string name="wizard_purpose_other_supporting">ช่วยให้แบบฟอร์ม แนวคิดในคลัง และการรายงานผลกระทบสอดคล้องกับเป้าหมายของคุณ</string>
+  <!-- Screen reader label of the check mark on a selected card. -->
+  <string name="wizard_purpose_selected">เลือกแล้ว</string>
+  <!-- Title of the card for a custom survey purpose. -->
+  <string name="wizard_purpose_other">อื่นๆ</string>
+  <string name="wizard_purpose_other_description">เป้าหมายด้านการวิจัย การติดตาม หรือชุมชนที่กำหนดเอง ซึ่งไม่อยู่ในชุดมาตรฐาน</string>
+  <!-- Badge of the "Other" purpose card. -->
+  <string name="wizard_purpose_custom">กำหนดเอง</string>
+  <!-- What a Purpose Pack adds. %1$d: the number of form templates. -->
+  <plurals name="wizard_purpose_forms">
+    <item quantity="other">แบบฟอร์ม %1$d รายการ</item>
+  </plurals>
+  <!-- What a Purpose Pack adds. %1$d: the number of questions linked to standard fields (shared data definitions). -->
+  <plurals name="wizard_purpose_standard_fields">
+    <item quantity="other">ฟิลด์มาตรฐาน %1$d รายการ</item>
+  </plurals>
+
+  <!-- Create survey wizard (#create-survey): page chrome. -->
+  <string name="wizard_cancel_survey_creation">ยกเลิกการสร้างแบบสำรวจ</string>
+  <!-- Page title while the survey has no title yet, and the wizard's final button. -->
+  <string name="wizard_create_survey">สร้างแบบสำรวจ</string>
+  <string name="wizard_saving_survey">กำลังบันทึกแบบสำรวจ…</string>
+  <string name="wizard_save_failed">บันทึกแบบสำรวจไม่ได้ จึงยังเปิดค้างไว้ที่นี่ %1$s</string>
+  <string name="wizard_discard_title">ทิ้งแบบสำรวจใช่ไหม</string>
+  <string name="wizard_discard_body">หากออกตอนนี้ แบบสำรวจนี้และการเปลี่ยนแปลงทั้งหมดที่คุณทำจะสูญหาย</string>
+  <string name="wizard_discard">ทิ้ง</string>
+  <string name="wizard_keep_editing">แก้ไขต่อ</string>
+  <string name="wizard_working_copy_prompt_title">แก้ไขฉบับร่างที่ยังไม่ได้บันทึกต่อหรือไม่?</string>
+  <string name="wizard_working_copy_prompt_body">คุณมีฉบับร่างแบบสำรวจที่ยังไม่ได้บันทึกซึ่งกำลังดำเนินการอยู่ คุณต้องการแก้ไขต่อ หรือละทิ้งและเริ่มแบบสำรวจใหม่?</string>
+  <string name="wizard_working_copy_continue">แก้ไขต่อ</string>
+  <string name="wizard_working_copy_discard">ละทิ้งฉบับร่าง</string>
+  <string name="wizard_back">กลับ</string>
+  <string name="wizard_cancel">ยกเลิก</string>
+  <string name="wizard_required_field_missing">ยังไม่ได้กรอกช่องที่จำเป็น — ดูส่วนที่ไฮไลต์</string>
+  <string name="wizard_skip_for_now">ข้ามไปก่อน</string>
+  <string name="wizard_next">ถัดไป</string>
+
+  <!-- Wizard steps: name and short description of each of the 6 steps. -->
+  <string name="wizard_step_overview">ภาพรวม</string>
+  <string name="wizard_step_overview_subtitle">ชื่อ องค์กร ภาษา และวิธีเริ่มต้น</string>
+  <string name="wizard_step_purpose">วัตถุประสงค์</string>
+  <string name="wizard_step_purpose_subtitle">เป้าหมายของแบบสำรวจ ชุดวัตถุประสงค์ และโปรแกรมการรายงาน</string>
+  <string name="wizard_step_survey_area">พื้นที่สำรวจ</string>
+  <string name="wizard_step_survey_area_subtitle">ขอบเขตการศึกษาและภาพแผนที่ฐานแบบออฟไลน์/เว็บ</string>
+  <string name="wizard_step_map_features">ฟีเจอร์แผนที่</string>
+  <string name="wizard_step_map_features_subtitle">ชั้นข้อมูลแผนที่หลัก แปลงตัวอย่าง หรือฟีเจอร์ที่นำเข้า</string>
+  <string name="wizard_step_forms">แบบฟอร์ม</string>
+  <string name="wizard_step_forms_subtitle">แบบสอบถาม แนวคิดในคลัง และการจับคู่สำหรับส่งออก</string>
+  <string name="wizard_step_sharing">การแชร์</string>
+  <string name="wizard_step_sharing_subtitle">การเข้าถึง อธิปไตยทางข้อมูลตาม CARE และความพร้อมด้านผลกระทบ</string>
+
+  <!-- Wizard step 1: Overview. -->
+  <string name="wizard_overview_subtitle">ตั้งชื่อแบบสำรวจ เลือกองค์กรที่ดำเนินการ กำหนดค่าภาษา และเลือกวิธีที่คุณต้องการเริ่มต้น</string>
+  <string name="wizard_survey_identity">ข้อมูลระบุแบบสำรวจ</string>
+  <string name="wizard_validation_title_required">ป้อนชื่อแบบสำรวจเพื่อดำเนินการต่อ</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_survey_title_label">ชื่อแบบสำรวจ *</string>
+  <string name="wizard_survey_title_placeholder">เช่น การทำแผนที่แปลงกาแฟของเกษตรกรรายย่อยใน Nyeri</string>
+  <string name="wizard_description_label">คำอธิบาย (ไม่บังคับ)</string>
+  <string name="wizard_description_placeholder">อธิบายเป้าหมายและคำแนะนำสำหรับผู้เก็บข้อมูล</string>
+  <!-- Label of the organization dropdown. -->
+  <string name="wizard_organization">องค์กร</string>
+  <!-- Organization dropdown option for a survey not run by any organization. -->
+  <string name="wizard_no_organization">ไม่มี (แบบสำรวจส่วนตัว)</string>
+  <string name="wizard_organization_supporting">การดำเนินแบบสำรวจภายใต้องค์กรจะปลดล็อกชุดวัตถุประสงค์ แนวคิดในพจนานุกรม เทมเพลตแบบฟอร์ม และภาพแผนที่ฐานที่กำหนดเองซึ่งองค์กรแชร์ไว้</string>
+  <string name="wizard_start_method_title">คุณต้องการเริ่มต้นอย่างไร</string>
+  <string name="wizard_start_from_scratch">สร้างแบบสำรวจใหม่</string>
+  <string name="wizard_start_from_scratch_description">กำหนดค่าชั้นข้อมูลแผนที่และแบบฟอร์มทีละขั้นตอนหรือจากชุดวัตถุประสงค์</string>
+  <string name="wizard_start_copy_existing">คัดลอกแบบสำรวจที่มีอยู่</string>
+  <string name="wizard_start_copy_existing_description">โคลนแบบฟอร์ม สคีมาชั้นข้อมูลแผนที่ พื้นที่สำรวจ และชุดวัตถุประสงค์โดยไม่รวมข้อมูล</string>
+  <string name="wizard_start_import">นำเข้าจากไฟล์</string>
+  <string name="wizard_start_import_description">นำเข้าคำจำกัดความแบบฟอร์มจาก ODK XForms (.xml) หรือ Collect Earth (.cep)</string>
+  <string name="wizard_no_surveys_to_copy">ไม่มีแบบสำรวจที่คัดลอกได้</string>
+  <string name="wizard_copy_source_label">แบบสำรวจต้นทางที่จะคัดลอก</string>
+  <string name="wizard_copy_source_supporting">คัดลอกแบบฟอร์ม สคีมาชั้นข้อมูลแผนที่ การออกแบบแปลงตัวอย่าง และวัตถุประสงค์ โดยไม่คัดลอกระเบียนที่เก็บไว้ก่อนหน้า</string>
+  <string name="wizard_import_supported_formats">รูปแบบที่รองรับ: ODK XForms (.xml), Collect Earth (.cep, .zip)</string>
+  <string name="wizard_import_choose_another_file">เลือกไฟล์อื่น (.xml, .cep)</string>
+  <string name="wizard_import_choose_file">เลือกไฟล์ (.xml, .cep)</string>
+  <!-- %1$d: the number of questions in the imported form. -->
+  <plurals name="wizard_import_questions">
+    <item quantity="other">คำถาม %1$d ข้อ</item>
+  </plurals>
+  <!-- %1$d: the number of sample plots in the imported Collect Earth project. -->
+  <plurals name="wizard_import_sample_plots">
+    <item quantity="other">แปลงตัวอย่าง %1$d แปลง</item>
+  </plurals>
+  <!-- %1$s: the number of questions (e.g. "12 questions"). -->
+  <string name="wizard_import_parsed">แยกวิเคราะห์ %1$s แล้ว · พร้อมนำเข้าในขั้นตอนที่ 5</string>
+  <!-- %1$s: the number of questions (e.g. "12 questions"); %2$s: the number of sample plots (e.g. "50 sample plots"). -->
+  <string name="wizard_import_parsed_with_plots">แยกวิเคราะห์ %1$s · %2$s แล้ว · พร้อมนำเข้าในขั้นตอนที่ 5</string>
+  <string name="wizard_import_clear_file">ล้างไฟล์ที่นำเข้า</string>
+  <!-- %1$d: the number of Collect Earth surveys found in the imported archive. -->
+  <string name="wizard_import_cep_archive_label">แบบสำรวจ Collect Earth ในไฟล์เก็บถาวร (พบ %1$d รายการ)</string>
+
+  <!-- Wizard step 2: Purpose. -->
+  <string name="wizard_purpose_subtitle">เลือกผลลัพธ์หรือมาตรฐานการรายงานที่แบบสำรวจนี้รองรับ เพื่อกำหนดค่าชั้นข้อมูลแผนที่และแบบฟอร์มเริ่มต้นล่วงหน้า</string>
+  <!-- Section title of a required choice (* marks it required). -->
+  <string name="wizard_purpose_question">ข้อมูลนี้จะนำไปใช้ทำอะไร *</string>
+  <string name="wizard_purpose_question_supporting">เลือกวัตถุประสงค์หลัก เพื่อให้ Collect One ปรับค่าเริ่มต้นของชั้นข้อมูลแผนที่ แบบฟอร์มเริ่มต้น แนวคิดในคลังมาตรฐาน มาตรการคุ้มครองด้านธรรมาภิบาลข้อมูล (เช่น EUDR หรืออธิปไตยตาม CARE) และโปรไฟล์การส่งออกในคลิกเดียวให้เหมาะกับแบบสำรวจของคุณ เลือก "อื่นๆ" หากไม่มีเป้าหมายของคุณในรายการ</string>
+  <string name="wizard_purpose_programs_title">โปรแกรมและกรอบการรายงาน</string>
+  <string name="wizard_purpose_programs_supporting">โปรแกรมที่ข้อมูลของแบบสำรวจนี้มีส่วนร่วม การเลือกเทมเพลตจะเลือกโปรแกรมไว้ล่วงหน้า ใช้สำหรับการติดตามและรายงานผลกระทบ และไม่เปลี่ยนแบบฟอร์ม</string>
+  <string name="wizard_purpose_loading">กำลังโหลดวัตถุประสงค์…</string>
+  <string name="wizard_starter_template_title">เทมเพลตเริ่มต้น</string>
+  <string name="wizard_starter_template_supporting">เลือกวิธีที่แบบสำรวจนี้บรรลุวัตถุประสงค์ เทมเพลตจะตั้งค่าแบบฟอร์มเริ่มต้น การตรวจสอบ และโปรไฟล์การส่งออก และเลือกโปรแกรมที่รายงานไว้ล่วงหน้า</string>
+  <string name="wizard_starter_template_programs">รายงานต่อ: %1$s</string>
+  <string name="wizard_starter_template_replace_title">แทนที่แบบฟอร์มของคุณหรือไม่</string>
+  <string name="wizard_starter_template_replace_body">คุณได้แก้ไขแบบฟอร์มที่สร้างจากเทมเพลตของแบบสำรวจนี้ การเปลี่ยนเป็น %1$s สามารถแทนที่ด้วยแบบฟอร์มเริ่มต้นของเทมเพลตนั้น หรือเก็บแบบฟอร์มของคุณไว้ตามเดิม</string>
+  <string name="wizard_starter_template_replace_forms">แทนที่แบบฟอร์ม</string>
+  <string name="wizard_starter_template_keep_forms">เก็บแบบฟอร์มของฉัน</string>
+  <string name="wizard_starter_template_cancel">ยกเลิก</string>
+
+  <!-- Wizard step 3: Survey area. -->
+  <string name="wizard_survey_area_subtitle_field">กำหนดขอบเขตทางภูมิศาสตร์เพื่อกำหนดกรอบแผนที่แบบสำรวจ และเตรียมภาพแผนที่ฐานแบบออฟไลน์ล่วงหน้าให้ผู้เก็บข้อมูลภาคสนาม</string>
+  <string name="wizard_survey_area_subtitle_visual">กำหนดพื้นที่สนใจ (AOI) ที่จะสร้างและแปลความหมายแปลงตัวอย่าง และตรวจสอบภาพแผนที่ฐานจากดาวเทียม</string>
+  <string name="wizard_imagery_title">แผนที่ฐานและภาพอ้างอิง</string>
+  <string name="wizard_imagery_supporting_field">เลือกชั้นข้อมูลภาพดาวเทียมและภาพอ้างอิงที่จะเปิดใช้ร่วมกับแผนที่ฐานดาวเทียมเริ่มต้น</string>
+  <string name="wizard_imagery_supporting_visual">เลือกชั้นข้อมูลภาพความละเอียดสูงหรือภาพตามช่วงเวลา (เช่น ภาพโมเสก NICFI Planet หรือ Sentinel-2) ที่ผู้แปลภาพจะตรวจสอบเมื่อจำแนกแปลง</string>
+  <string name="wizard_imagery_default_only">เปิดใช้แผนที่ฐาน Mapbox Satellite เริ่มต้นแล้ว ไม่มีชั้นข้อมูลภาพที่กำหนดเอง</string>
+  <!-- Badge of imagery available to everyone ("All users" is the name of the platform-wide organization). -->
+  <string name="wizard_imagery_source_all_users">ผู้ใช้ทั้งหมด</string>
+  <!-- Imagery layer that comes with the platform. -->
+  <string name="wizard_imagery_built_in">ภาพในตัวของแพลตฟอร์ม</string>
+  <!-- %1$s: the organization that added the imagery layer. -->
+  <string name="wizard_imagery_added_by">เพิ่มโดย %1$s</string>
+  <string name="wizard_imagery_offline_available">ดาวน์โหลดเพื่อใช้งานภาคสนามแบบออฟไลน์และทำแผนที่บนเว็บได้</string>
+  <string name="wizard_imagery_online_only">ชั้นข้อมูลภาพดาวเทียมและภาพอ้างอิงแบบออนไลน์</string>
+
+  <!-- Wizard step 4: Map features. -->
+  <string name="wizard_map_features_subtitle">กำหนดค่าชั้นข้อมูลแผนที่หลักที่จะบันทึกข้อมูล: การเก็บข้อมูลภาคสนามแบบอิสระ ตารางแปลงตัวอย่างทางสถิติ หรือฟีเจอร์ GeoJSON / KML ที่นำเข้า</string>
+  <string name="wizard_map_features_source_title">ฟีเจอร์แผนที่สร้างขึ้นอย่างไร</string>
+  <string name="wizard_source_field_freeform">ผู้เก็บข้อมูลเพิ่มฟีเจอร์แผนที่ในภาคสนาม</string>
+  <string name="wizard_source_field_freeform_description">ผู้เก็บข้อมูลบันทึกจุดหรือรูปหลายเหลี่ยมใหม่ ณ สถานที่จริงระหว่างการลงพื้นที่</string>
+  <string name="wizard_source_sample_plots">สร้างแปลงตัวอย่าง</string>
+  <string name="wizard_source_sample_plots_description">สร้างแปลงตัวอย่างแบบมีระบบหรือแบบสุ่ม (และตารางแปลงย่อย) ภายในพื้นที่สำรวจ</string>
+  <string name="wizard_source_import_file">นำเข้าฟีเจอร์แผนที่ (GeoJSON / KML)</string>
+  <string name="wizard_source_import_file_description">อัปโหลดขอบเขตแปลง ที่ดิน หรือจุดที่กำหนดไว้ล่วงหน้าจากไฟล์</string>
+  <!-- %1$s: the description of the chosen way of creating map features (a full sentence). -->
+  <string name="wizard_map_features_source_preselected">%1$s เลือกไว้ล่วงหน้าตามวัตถุประสงค์และโหมดการเก็บข้อมูลที่คุณเลือก</string>
+  <string name="wizard_change">เปลี่ยน</string>
+  <string name="wizard_eudr_guardrail_title">มาตรการคุ้มครองตำแหน่งทางภูมิศาสตร์ตาม EUDR มาตรา 9</string>
+  <string name="wizard_eudr_guardrail_body">กฎระเบียบว่าด้วยการตัดไม้ทำลายป่าของสหภาพยุโรป (EUDR) กำหนดให้แปลงผลิตทั้งหมดที่ใหญ่กว่า 4 เฮกตาร์ต้องมีขอบเขตแบบรูปหลายเหลี่ยม ระบบจึงเลือกรูปทรงเรขาคณิตแบบรูปหลายเหลี่ยมไว้เป็นค่าเริ่มต้น</string>
+  <string name="wizard_eudr_plots_under_four_ha">แปลงผลิตทั้งหมดในแบบสำรวจนี้มีขนาด ≤ 4 ha (อนุญาตตำแหน่งแบบจุดเดียว)</string>
+  <string name="wizard_primary_layer_settings">การตั้งค่าชั้นข้อมูลแผนที่หลัก</string>
+  <string name="wizard_map_layer_name">ชื่อชั้นข้อมูลแผนที่</string>
+  <string name="wizard_geometry_type">ประเภทรูปทรงเรขาคณิต</string>
+  <string name="wizard_allow_field_creation">อนุญาตให้ผู้เก็บข้อมูลเพิ่มฟีเจอร์แผนที่ใหม่ในภาคสนาม</string>
+  <string name="wizard_allow_field_creation_supporting">เมื่อเปิดใช้ ผู้เก็บข้อมูลจะปักหมุดหรือเดินรอบขอบแปลงเพื่อสร้างฟีเจอร์แผนที่ใหม่ได้</string>
+  <string name="wizard_sample_design_title">การออกแบบตัวอย่างทางสถิติและจุดในแปลงย่อย</string>
+  <string name="wizard_sample_design_supporting">กำหนดค่าแปลงแบบตารางมีระบบ แบบสุ่มอย่างง่าย หรือแบบสุ่มแบ่งชั้น รูปร่างแปลง (จุด สี่เหลี่ยมจัตุรัส วงกลม) และตารางจุดตัวอย่างในแปลงย่อย</string>
+  <string name="wizard_import_features_title">นำเข้าฟีเจอร์แผนที่จาก GeoJSON หรือ KML</string>
+  <string name="wizard_import_features_supporting">อัปโหลดขอบเขตฟาร์ม แปลงติดตาม หรือจุดที่น่าสนใจที่มีอยู่ แอตทริบิวต์ในไฟล์จะกลายเป็นพร็อพเพอร์ตีของชั้นข้อมูลแผนที่</string>
+  <string name="wizard_import_features_choose_file">เลือกไฟล์ GeoJSON หรือ KML</string>
+  <!-- %1$d: the number of imported map features; %2$s: their geometry type in lower case (e.g. "polygon"). -->
+  <plurals name="wizard_import_features_loaded">
+    <item quantity="other">โหลดฟีเจอร์%2$s %1$d รายการแล้ว</item>
+  </plurals>
+  <string name="wizard_also_allow_field_creation">อนุญาตให้ผู้เก็บข้อมูลเพิ่มฟีเจอร์แผนที่ใหม่ในภาคสนามด้วย</string>
+  <string name="wizard_also_allow_field_creation_supporting">ปิดไว้สำหรับแปลงติดตามแบบคงที่ เปิดหากผู้เก็บข้อมูลเพิ่มไซต์ใหม่ได้ด้วย</string>
+  <!-- %1$d: the number of other map layers and data tables in the survey. -->
+  <plurals name="wizard_other_datasets_note">
+    <item quantity="other">แบบสำรวจนี้ยังมีชั้นข้อมูลแผนที่และตารางข้อมูลอีก %1$d รายการ ซึ่งเชื่อมโยงกับแบบฟอร์มอื่นๆ คุณตรวจสอบได้ในขั้นตอนถัดไป</item>
+  </plurals>
+
+  <!-- Wizard validation messages. -->
+  <string name="wizard_validation_copy_source_required">เลือกแบบสำรวจต้นทางที่จะคัดลอกก่อนดำเนินการต่อ</string>
+  <string name="wizard_validation_import_file_required">เลือกไฟล์ XForms XML ที่ถูกต้องเพื่อนำเข้าก่อนดำเนินการต่อ</string>
+  <string name="wizard_validation_survey_area_required">เลือกหรือวาดพื้นที่สำรวจเพื่อดำเนินการต่อ</string>
+  <string name="wizard_validation_form_variant_incompatible">แก้ไขคำถามในแบบฟอร์มที่ไม่รองรับรูปแบบฟอร์มที่เลือก (Web หรือ Google Earth) ก่อนดำเนินการต่อ</string>
+  <!-- %1$s: the name of the file that couldn't be read. -->
+  <string name="wizard_import_parse_failed">แยกวิเคราะห์คำถาม XForms หรือ Collect Earth จาก "%1$s" ไม่ได้</string>
+
+  <!-- Collection modes: field data collection, desk-based visual classification, or both. -->
+  <string name="wizard_mode_field_survey">การสำรวจภาคสนาม</string>
+  <string name="wizard_mode_field_survey_summary">การเก็บข้อมูลภาคสนามบนมือถือแบบออฟไลน์/ออนไลน์โดยผู้เก็บข้อมูลในพื้นที่</string>
+  <string name="wizard_mode_visual_classification">การจำแนกด้วยสายตา</string>
+  <string name="wizard_mode_visual_classification_summary">การจำแนกแปลงตัวอย่างด้วยสายตาจากโต๊ะทำงาน โดยใช้ภาพดาวเทียมและภาพแผนที่ฐาน</string>
+  <!-- Collection mode combining field survey and visual classification. -->
+  <string name="wizard_mode_both">ทั้งสองแบบ</string>
+  <string name="wizard_mode_both_summary">การจำแนกด้วยสายตาจากโต๊ะทำงานร่วมกับการเก็บข้อมูลภาคสนามบนมือถือ</string>
+
+  <!-- Wizard step 5: Forms. -->
+  <string name="wizard_show_forms_and_layers">แสดงแบบฟอร์มและชั้นข้อมูลทั้งหมด</string>
+  <string name="wizard_hide_forms_and_layers">ซ่อนแบบฟอร์มและชั้นข้อมูล</string>
+  <string name="wizard_add_another_form">เพิ่มแบบฟอร์มอื่น</string>
+  <string name="wizard_add_form">เพิ่มแบบฟอร์ม</string>
+  <string name="wizard_untitled_form">แบบฟอร์มที่ไม่มีชื่อ</string>
+  <!-- Name shown for a map layer or data table without a name. -->
+  <string name="wizard_untitled">ไม่มีชื่อ</string>
+
+  <!-- Wizard step 6: Sharing. -->
+  <string name="wizard_sharing_subtitle">ตรวจสอบความพร้อมด้านผลกระทบและการส่งออกของแบบสำรวจ กำหนดค่าเริ่มต้นด้านอธิปไตยทางข้อมูล และเชิญผู้ทำงานร่วมกัน</string>
+  <string name="wizard_draft_mode_title">เริ่มต้นในโหมดฉบับร่าง</string>
+  <!-- Badge of a survey that isn't published yet. -->
+  <string name="wizard_draft_badge">ฉบับร่าง</string>
+  <string name="wizard_draft_mode_body">การคลิก "สร้างแบบสำรวจ" จะเปิดแบบสำรวจบนแผนที่หลักในโหมดฉบับร่าง เพื่อให้คุณตรวจสอบพื้นที่ศึกษาและชั้นข้อมูล หรือเปิดเครื่องมือแก้ไขแบบสำรวจก่อนที่ผู้เก็บข้อมูลจะเห็น เมื่อพร้อมเปิดใช้งานจริง ให้เปิดเครื่องมือแก้ไขแบบสำรวจ คลิกป้ายสถานะ "ฉบับร่าง" ถัดจากชื่อแบบสำรวจ แล้วเลือก "เผยแพร่แบบสำรวจ"</string>
+  <string name="wizard_readiness_title">ความพร้อมด้านผลกระทบและการส่งออก</string>
+  <string name="wizard_readiness_supporting">สคีมาของแบบสำรวจนี้เชื่อมโยงกับการสรุปผลกระทบขององค์กร ตัวชี้วัดด้านสิ่งแวดล้อมของ FAO/UN และโปรไฟล์การส่งออกในคลิกเดียวอย่างไร</string>
+  <!-- %1$s: the collection mode (e.g. "Field survey"). -->
+  <string name="wizard_readiness_mode">โหมด: %1$s</string>
+  <!-- %1$d: questions linked to standard fields (shared data definitions); %2$d: all questions. -->
+  <string name="wizard_readiness_fields_linked">เชื่อมโยงฟิลด์มาตรฐานแล้ว %1$d/%2$d</string>
+  <!-- %1$s: comma-separated purpose names. -->
+  <string name="wizard_readiness_purposes">วัตถุประสงค์: %1$s</string>
+  <!-- %1$s: comma-separated reporting program names. -->
+  <string name="wizard_readiness_programs">โปรแกรม: %1$s</string>
+  <!-- %1$s: comma-separated impact goal names. -->
+  <string name="wizard_readiness_goals">เป้าหมายด้านผลกระทบ: %1$s</string>
+  <!-- Purpose list entry for a custom purpose. %1$s: the organizer's description of it. -->
+  <string name="wizard_readiness_other_purpose">อื่นๆ: %1$s</string>
+  <string name="wizard_readiness_export_profiles">โปรไฟล์การส่งออกในคลิกเดียว</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped_ready">จับคู่แล้ว %1$d/%2$d (พร้อม)</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped">จับคู่แล้ว %1$d/%2$d</string>
+
+  <!-- CARE Principles for Indigenous Data Governance and FAO Free, Prior and Informed Consent (FPIC). -->
+  <string name="wizard_care_title">หลักการ CARE และอธิปไตยทางข้อมูลของชนพื้นเมือง / ชุมชน</string>
+  <string name="wizard_care_applied_body">การเข้าถึงแบบจำกัด การมองเห็นระหว่างผู้เก็บข้อมูลแบบ "เฉพาะการส่งข้อมูลของตนเอง" และเงื่อนไขผู้เก็บข้อมูลตามหลักความยินยอมโดยอิสระ ล่วงหน้า และได้รับการบอกกล่าว (FPIC) ของ FAO เปิดใช้อยู่ เพื่อคุ้มครองข้อมูลชุมชนและการถือครองที่ดิน</string>
+  <string name="wizard_care_not_applied_body">ทำงานกับชนพื้นเมือง ชุมชนท้องถิ่น หรือข้อมูลการถือครองที่ดินที่ละเอียดอ่อนใช่ไหม ใช้ค่าเริ่มต้นด้านอธิปไตยตาม CARE และ FAO FPIC (การเข้าถึงแบบจำกัด + ผู้เก็บข้อมูลเห็นเฉพาะการส่งข้อมูลของตนเอง + เงื่อนไขความยินยอมตาม FPIC)</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_care_excluded_from_aggregates">หมายเหตุ: %1$s ไม่ถูกนับรวมในยอดรวมทั่วทั้งแพลตฟอร์ม</string>
+  <string name="wizard_care_defaults_applied">✓ ใช้ค่าเริ่มต้นตาม CARE แล้ว</string>
+  <string name="wizard_care_apply_defaults">ใช้ค่าเริ่มต้นตาม CARE</string>
+  <!-- CARE principle "C". -->
+  <string name="wizard_care_collective_benefit">ประโยชน์ร่วมกัน</string>
+  <string name="wizard_care_collective_benefit_description">ตัวชี้วัดด้านระบบนิเวศและชุมชนใช้แนวคิดในคลังที่แชร์ร่วมกัน เพื่อเป็นหลักฐานที่ชุมชนเป็นเจ้าของ</string>
+  <!-- CARE principle "A". -->
+  <string name="wizard_care_authority_to_control">อำนาจในการควบคุม</string>
+  <string name="wizard_care_authority_to_control_description">การเข้าถึงเป็นแบบจำกัด เพื่อให้ผู้ดูแลชุมชนควบคุมได้ว่าใครดูหรือเก็บระเบียนแบบสำรวจได้</string>
+  <!-- CARE principle "R". -->
+  <string name="wizard_care_responsibility">ความรับผิดชอบ</string>
+  <string name="wizard_care_responsibility_description">การมองเห็นระหว่างผู้ร่วมงานจำกัดเฉพาะการส่งข้อมูลของผู้มีส่วนร่วมแต่ละคนและผู้จัดทำแบบสำรวจ</string>
+  <!-- CARE principle "E". -->
+  <string name="wizard_care_ethics">จริยธรรม</string>
+  <string name="wizard_care_ethics_description">ข้อมูลชุมชนที่ละเอียดอ่อนได้รับการคุ้มครองจากการรวบรวมโดยภายนอกที่ไม่ได้รับอนุมัติ</string>
+  <!-- CARE principle "E", as checked in the wizard. -->
+  <string name="wizard_care_ethics_aggregate_protection">จริยธรรมและการคุ้มครองข้อมูลรวม</string>
+  <string name="wizard_care_ethics_aggregate_protection_description">ระเบียนการถือครองที่ดินและครัวเรือนรายบุคคลจะไม่ถูกเปิดเผยในการสรุปข้อมูลสาธารณะของแพลตฟอร์ม</string>
+  <string name="wizard_care_fpic">ความยินยอมโดยอิสระ ล่วงหน้า และได้รับการบอกกล่าว</string>
+  <string name="wizard_care_fpic_description">ต้องได้รับความยินยอมอย่างชัดแจ้งจากผู้เก็บข้อมูล/ผู้เข้าร่วมก่อนบันทึกข้อมูลภาคสนาม</string>
+  <string name="wizard_care_fpic_wizard_description">ผู้เก็บข้อมูลต้องอ่านและยอมรับเงื่อนไขความยินยอมของชุมชนอย่างชัดแจ้งก่อนเก็บข้อมูล</string>
+  <!-- Standards and guidelines a CARE / FPIC criterion comes from. -->
+  <string name="wizard_care_standard_care_fao_indigenous_data_policy">CARE และนโยบายข้อมูลชนพื้นเมืองของ FAO</string>
+  <string name="wizard_care_standard_care_fao_vggt">CARE และธรรมาภิบาลการถือครองที่ดินตาม VGGT ของ FAO</string>
+  <string name="wizard_care_standard_care_principles">หลักการ CARE</string>
+  <string name="wizard_care_standard_fao_fpic_manual">คู่มือ FPIC ของ FAO</string>
+  <string name="wizard_care_standard_fao_fpic_guidelines">แนวทางปฏิบัติ FPIC ของ FAO</string>
+  <string name="wizard_care_criterion_met">ผ่าน</string>
+  <string name="wizard_care_criterion_not_met">ไม่ผ่าน</string>
+  <string name="wizard_care_effect_collective_benefit_on">คำถามที่เชื่อมโยงกับฟิลด์มาตรฐานทำให้ข้อมูลของแบบสำรวจนี้นำไปใช้กับตัวชี้วัดด้านชุมชนและผลกระทบร่วมกัน รวมถึงการส่งออกได้ในคลิกเดียว</string>
+  <string name="wizard_care_effect_collective_benefit_off">ยังไม่มีคำถามที่เชื่อมโยงกับฟิลด์มาตรฐาน ข้อมูลของแบบสำรวจนี้จึงจะไม่ถูกนำไปใช้กับตัวชี้วัดด้านชุมชนหรือผลกระทบร่วมกัน เลือกวัตถุประสงค์ หรือเชื่อมโยงคำถามกับฟิลด์มาตรฐานในขั้นตอนแบบฟอร์ม</string>
+  <string name="wizard_care_effect_authority_on">เฉพาะผู้ที่คุณเชิญเท่านั้นที่เปิดแบบสำรวจนี้และเก็บข้อมูลได้ ผู้ดูแลชุมชนจึงควบคุมได้ว่าใครเห็นบันทึกบ้าง</string>
+  <string name="wizard_care_effect_authority_off">ผู้ที่คุณไม่ได้เชิญสามารถเปิดแบบสำรวจนี้และบันทึกได้ หากต้องการจำกัด ให้ตั้งค่า ผู้ที่เก็บข้อมูลได้ เป็น ผู้ที่ได้รับเชิญ ด้านล่าง</string>
+  <string name="wizard_care_effect_responsibility_on">ผู้เก็บข้อมูลเห็นเฉพาะการส่งข้อมูลของตนเองบนแผนที่ ผู้จัดแบบสำรวจเห็นทั้งหมด</string>
+  <string name="wizard_care_effect_responsibility_off">ผู้เก็บข้อมูลเห็นการส่งข้อมูลของทุกคนบนแผนที่ รวมถึงบันทึกการถือครองที่ดินและทรัพยากรของครัวเรือนอื่น หากต้องการจำกัด ให้ตั้งค่า ผู้ที่ดูข้อมูลได้ เป็น ผู้มีส่วนร่วมและผู้จัดทำ ด้านล่าง</string>
+  <string name="wizard_care_effect_ethics_on">สรุปผลกระทบสาธารณะแสดงเฉพาะยอดรวมที่ผ่านเกณฑ์ขั้นต่ำ ไม่แสดงบันทึกการถือครองที่ดินหรือครัวเรือนรายบุคคล</string>
+  <string name="wizard_care_effect_fpic_on">ผู้เก็บข้อมูลต้องอ่านและยอมรับเงื่อนไขความยินยอมของคุณก่อนจึงจะเก็บข้อมูลได้</string>
+  <string name="wizard_care_effect_fpic_off">ผู้เก็บข้อมูลเริ่มเก็บข้อมูลได้โดยไม่ต้องยอมรับเงื่อนไขความยินยอมใด ๆ หากต้องการให้ยินยอมก่อน ให้เปิด เงื่อนไขความยินยอมและธรรมาภิบาลสำหรับผู้เก็บข้อมูล ด้านล่าง</string>
+  <string name="wizard_care_summary_title">CARE และ FPIC</string>
+  <string name="wizard_care_summary_count">ผ่าน %1$d จาก %2$d ข้อ</string>
+  <string name="wizard_care_show_details">แสดงรายละเอียด</string>
+  <string name="wizard_care_hide_details">ซ่อนรายละเอียด</string>
+  <string name="wizard_care_state_expanded">แสดงรายละเอียดอยู่</string>
+  <string name="wizard_care_state_collapsed">ซ่อนรายละเอียดอยู่</string>
+  <string name="wizard_care_sticky_chip">CARE และ FPIC · %1$d/%2$d</string>
+  <string name="wizard_care_sticky_chip_a11y">CARE และ FPIC: ผ่าน %1$d จาก %2$d เกณฑ์ ไปที่รายละเอียด CARE</string>
+  <string name="wizard_care_learn_more">CARE และ FPIC คืออะไร</string>
+  <string name="wizard_care_auto_reason_organization">ใช้โดยอัตโนมัติเนื่องจาก %1$s ลงทะเบียนเป็นองค์กรของชนพื้นเมืองหรือชุมชนท้องถิ่น คุณเปลี่ยนการตั้งค่าเหล่านี้ได้ด้านล่าง</string>
+  <string name="wizard_care_auto_reason_concepts">ใช้โดยอัตโนมัติเนื่องจากแบบสำรวจนี้เก็บข้อมูลของชนพื้นเมืองและชุมชน: %1$s คุณเปลี่ยนการตั้งค่าเหล่านี้ได้ด้านล่าง</string>
+  <string name="wizard_care_auto_reason_more">%1$s และอีก %2$d รายการ</string>
+  <string name="wizard_care_explainer_title">CARE และ FPIC ใน Collect One</string>
+  <string name="wizard_care_explainer_intro">ข้อมูลเกี่ยวกับชนพื้นเมืองและชุมชนท้องถิ่น ที่ดิน และทรัพยากรของพวกเขา อาจส่งผลต่อสิทธิในที่ดิน การดำรงชีพ และความปลอดภัย Collect One รองรับกรอบการทำงานที่ใช้กันอย่างแพร่หลายสองกรอบ ซึ่งช่วยให้ชุมชนยังคงควบคุมข้อมูลนั้นได้</string>
+  <string name="wizard_care_explainer_care_heading">หลักการ CARE สำหรับธรรมาภิบาลข้อมูลของชนพื้นเมือง</string>
+  <string name="wizard_care_explainer_care_body">พัฒนาโดย Global Indigenous Data Alliance เพื่อเสริมหลักการข้อมูล FAIR โดย CARE ให้ผู้คนและวัตถุประสงค์เป็นศูนย์กลางของการใช้ข้อมูล:</string>
+  <string name="wizard_care_explainer_care_c">ประโยชน์ร่วม: ข้อมูลควรเป็นประโยชน์ต่อชุมชนที่ข้อมูลนั้นอธิบายถึง</string>
+  <string name="wizard_care_explainer_care_a">อำนาจในการควบคุม: ชุมชนเป็นผู้ตัดสินใจว่าข้อมูลเกี่ยวกับพวกเขา ที่ดิน และทรัพยากรของพวกเขาจะถูกเก็บ เข้าถึง และใช้อย่างไร</string>
+  <string name="wizard_care_explainer_care_r">ความรับผิดชอบ: ผู้ที่ทำงานกับข้อมูลต้องรับผิดชอบต่อชุมชนและเปิดเผยว่าข้อมูลถูกใช้อย่างไร</string>
+  <string name="wizard_care_explainer_care_e">จริยธรรม: สิทธิและความเป็นอยู่ที่ดีของชุมชนมาก่อนในทุกขั้นตอนของวงจรชีวิตข้อมูล</string>
+  <string name="wizard_care_explainer_fpic_heading">ความยินยอมโดยอิสระ ล่วงหน้า และได้รับการบอกกล่าว (FPIC)</string>
+  <string name="wizard_care_explainer_fpic_body">FPIC คือสิทธิของชนพื้นเมืองที่ได้รับการรับรองในปฏิญญาสหประชาชาติว่าด้วยสิทธิของชนพื้นเมือง และนำไปใช้ในโครงการของ FAO ในการให้หรือไม่ให้ความยินยอมต่อกิจกรรมที่ส่งผลกระทบต่อพวกเขา ความยินยอมต้องให้โดยอิสระ ขอก่อนเริ่มกิจกรรม อยู่บนพื้นฐานของข้อมูลที่ครบถ้วน และเพิกถอนได้ทุกเมื่อ</string>
+  <string name="wizard_care_explainer_defaults_heading">ค่าเริ่มต้น CARE เปลี่ยนอะไรในแบบสำรวจนี้</string>
+  <string name="wizard_care_explainer_defaults_restricted">การเข้าถึงแบบจำกัด: เฉพาะผู้ที่คุณเชิญเท่านั้นที่เปิดแบบสำรวจและข้อมูลได้</string>
+  <string name="wizard_care_explainer_defaults_own_only">การส่งข้อมูลแบบส่วนตัว: ผู้เก็บข้อมูลเห็นเฉพาะการส่งข้อมูลของตนเองบนแผนที่ ไม่เห็นของผู้อื่น</string>
+  <string name="wizard_care_explainer_defaults_consent">เงื่อนไขความยินยอม: ผู้เก็บข้อมูลต้องอ่านและยอมรับเงื่อนไข FPIC ก่อนเริ่มเก็บข้อมูล</string>
+  <string name="wizard_care_explainer_defaults_editable">สรุปผลกระทบสาธารณะจะไม่แสดงบันทึกรายบุคคล คุณเปลี่ยนการตั้งค่าแต่ละรายการ หรือแก้ไขเงื่อนไขความยินยอมได้ด้านล่าง</string>
+  <string name="wizard_care_explainer_auto_heading">เมื่อใดที่ Collect One ใช้ค่าเหล่านี้ให้คุณ</string>
+  <string name="wizard_care_explainer_auto_body">ค่าเริ่มต้น CARE จะถูกใช้โดยอัตโนมัติเมื่อแบบสำรวจเป็นขององค์กรของชนพื้นเมืองหรือชุมชนท้องถิ่น หรือเมื่อคำถามเชื่อมโยงกับฟิลด์มาตรฐานด้านชนพื้นเมืองและชุมชน (เช่น ชื่อชุมชนหรือประเภทการถือครองที่ดิน) เช่น ผ่านวัตถุประสงค์การทำแผนที่ที่ดินและทรัพยากรของชุมชน</string>
+  <string name="wizard_care_explainer_close">เข้าใจแล้ว</string>
+  <string name="wizard_consent_title">เงื่อนไขความยินยอมและธรรมาภิบาลสำหรับผู้เก็บข้อมูล</string>
+  <string name="wizard_consent_supporting">กำหนดให้ผู้เก็บข้อมูลอ่านและยอมรับเงื่อนไขความยินยอมโดยอิสระ ล่วงหน้า และได้รับการบอกกล่าว (FPIC) หรือเงื่อนไขโครงการที่กำหนดเองก่อนเปิดแบบสำรวจ</string>
+  <string name="wizard_consent_terms_label">เงื่อนไขความยินยอมที่แสดงต่อผู้เก็บข้อมูล</string>
+</resources>

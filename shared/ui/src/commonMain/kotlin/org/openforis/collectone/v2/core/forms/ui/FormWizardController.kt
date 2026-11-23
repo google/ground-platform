@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import com.google.type.Date
 import com.google.type.TimeOfDay
 import com.squareup.wire.ofEpochSecond
-import openforis.collectone.v1.forms.DataType
 import openforis.collectone.v1.forms.FieldValue
 import openforis.collectone.v1.forms.FormDef
 import openforis.collectone.v1.forms.GeoPoint
@@ -36,106 +35,31 @@ import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.model.FormState
 import org.openforis.collectone.v2.core.forms.model.ValidationError
 import org.openforis.collectone.v2.core.forms.model.ValidationStatus
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_attachment_rejected
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_this_question
 
 /**
- * Context describing the enclosing repeat group iteration when a question or group is rendered
- * inside a repeat instance.
- */
-data class RepeatStepContext(
-  val repeatGroupPath: String,
-  val repeatGroupLabel: String,
-  val instancePath: String,
-  val repeatIndex: Int,
-  val totalInstances: Int,
-  val instanceLabel: String,
-  val canAddInstance: Boolean,
-  val canRemoveInstance: Boolean,
-)
-
-/**
- * Human-readable preview summary of a single repeat instance for repeat hubs and overview screens.
- */
-data class RepeatInstanceSummary(
-  val repeatIndex: Int,
-  val title: String,
-  val previewText: String,
-  val instancePath: String,
-  val answeredCount: Int = 0,
-)
-
-/** Represents a single navigable screen in the mobile one-question-at-a-time form runner. */
-sealed interface FormWizardStep {
-  /** Stable identifier used to preserve user position when dynamic steps are recomputed. */
-  val stepKey: String
-
-  /** Display title for step overview lists and navigation headers. */
-  val title: String
-
-  /** Enclosing group / repeat breadcrumb labels leading to this step. */
-  val breadcrumbs: List<String>
-
-  /** Optional enclosing repeat iteration metadata if this step lives inside a repeat. */
-  val repeatContext: RepeatStepContext?
-
-  /** Standard single-question screen rendering a single [ComponentState.ControlState]. */
-  data class QuestionStep(
-    override val stepKey: String,
-    override val title: String,
-    override val breadcrumbs: List<String>,
-    override val repeatContext: RepeatStepContext?,
-    val control: ComponentState.ControlState,
-  ) : FormWizardStep
-
-  /**
-   * Multi-question group screen for groups configured with `appearance="field-list"`, rendering all
-   * relevant child controls on a single screen per the XForms specification.
-   */
-  data class FieldListGroupStep(
-    override val stepKey: String,
-    override val title: String,
-    override val breadcrumbs: List<String>,
-    override val repeatContext: RepeatStepContext?,
-    val controls: List<ComponentState.ControlState>,
-  ) : FormWizardStep
-
-  /**
-   * Repeat group management screen allowing data collectors to inspect existing iterations, jump to
-   * a specific repeat instance, remove an instance, or add a new repeat instance.
-   */
-  data class RepeatHubStep(
-    override val stepKey: String,
-    override val title: String,
-    override val breadcrumbs: List<String>,
-    override val repeatContext: RepeatStepContext?,
-    val repeatGroup: ComponentState.RepeatGroupState,
-    val summaries: List<RepeatInstanceSummary> = emptyList(),
-  ) : FormWizardStep
-
-  /**
-   * Final summary and review screen displaying all relevant questions, validation statuses,
-   * evaluated XForms Entities, and the final submission button.
-   */
-  data class SummaryStep(
-    override val stepKey: String = "__summary__",
-    override val title: String = "Review & submit",
-    override val breadcrumbs: List<String> = emptyList(),
-    override val repeatContext: RepeatStepContext? = null,
-  ) : FormWizardStep
-}
-
-/**
- * Reactive controller driving single-question-per-screen navigation and live form state mutations
- * over a [FormSession].
+ * Screen state of the one-question-per-screen form runner over a [FormSession]: which step is
+ * shown, the validation banner, the overview sheet, and the last submission attempt.
+ *
+ * Its properties are Compose snapshot state, so composables read them directly; it is not a
+ * ViewModel and isn't thread-safe (call it from the UI thread). Edits go through the session, whose
+ * synchronous state listener rebuilds [steps] and keeps the user on the same step by its key (see
+ * [FormWizardStep.stepKey]) when relevance changes add or remove screens. [onRecordUpdated] gets
+ * the initial state on construction and every later one, so hosts can autosave drafts.
  */
 class FormWizardController(
   val session: FormSession,
   private val onRecordUpdated: ((RecordInstance, FormState) -> Unit)? = null,
+  variant: FormVariant = FormVariant.MOBILE,
 ) {
   constructor(
     formDef: FormDef,
     existingRecord: RecordInstance? = null,
     environment: FormEnvironment = FormEnvironment.DEFAULT,
     onRecordUpdated: ((RecordInstance, FormState) -> Unit)? = null,
+    variant: FormVariant = FormVariant.MOBILE,
   ) : this(
     session =
       FormSession(
@@ -145,7 +69,14 @@ class FormWizardController(
         environment = environment,
       ),
     onRecordUpdated = onRecordUpdated,
+    variant = variant,
   )
+
+  private val baseSkippedFieldPaths: Set<String> = session.environment.skippedFieldPaths
+
+  /** Active [FormVariant] under which this form session is rendered. */
+  var variant: FormVariant by mutableStateOf(variant)
+    private set
 
   /** Current immutable [FormState] snapshot from [FormSession]. */
   var formState: FormState by mutableStateOf(session.state)
@@ -165,10 +96,14 @@ class FormWizardController(
 
   /** Whether the question overview jump sheet is currently open. */
   var isOverviewOpen: Boolean by mutableStateOf(false)
+    private set
 
   /** Most recent submission finalization result, if the user clicked Submit. */
   var submissionResult: FinalizationResult? by mutableStateOf(null)
     private set
+
+  /** Map editing state of each geo question shown so far, by canonical path. */
+  private val geoEditStates = mutableMapOf<String, GeoEditState>()
 
   init {
     session.addStateListener { newState ->
@@ -185,8 +120,24 @@ class FormWizardController(
         }
       onRecordUpdated?.invoke(newState.recordInstance, newState)
     }
-    // Notify initial state
-    onRecordUpdated?.invoke(formState.recordInstance, formState)
+    if (variant != FormVariant.MOBILE) {
+      updateVariant(variant)
+    } else {
+      onRecordUpdated?.invoke(formState.recordInstance, formState)
+    }
+  }
+
+  /**
+   * Updates the active [FormVariant], marking any fields incompatible with [newVariant] as skipped
+   * in [FormSession.environment] so they do not fail validation on submission.
+   */
+  fun updateVariant(newVariant: FormVariant) {
+    val incompatiblePaths = collectIncompatibleFieldPaths(session.compiledForm, newVariant)
+    val nextSkipped = baseSkippedFieldPaths + incompatiblePaths
+    variant = newVariant
+    if (session.environment.skippedFieldPaths != nextSkipped) {
+      session.updateEnvironment(session.environment.copy(skippedFieldPaths = nextSkipped))
+    }
   }
 
   /** Currently active [FormWizardStep]. */
@@ -225,7 +176,7 @@ class FormWizardController(
    * via "Next".
    */
   val isCurrentStepWaitingForLocationCapture: Boolean
-    get() = isWaitingForGeometryCapture(currentStep)
+    get() = isWaitingForGeometryCapture(currentStep, variant)
 
   /**
    * Whether the [currentStep] is an optional question (all its input controls are not required).
@@ -254,6 +205,16 @@ class FormWizardController(
     return false
   }
 
+  /** Opens the question overview jump sheet. */
+  fun openOverview() {
+    isOverviewOpen = true
+  }
+
+  /** Closes the question overview jump sheet. */
+  fun closeOverview() {
+    isOverviewOpen = false
+  }
+
   /** Navigates back to the previous screen. */
   fun previousStep() {
     showCurrentStepValidationWarning = false
@@ -273,7 +234,9 @@ class FormWizardController(
 
   /** Jumps to the step containing the control with [canonicalPath]. */
   fun jumpToField(canonicalPath: String) {
-    val idx = steps.indexOfFirst { step -> stepContainsField(step, canonicalPath) }
+    val idx = steps.indexOfFirst { step ->
+      FormQuestionLookup.stepContainsField(step, canonicalPath)
+    }
     if (idx >= 0) {
       jumpToStep(idx)
     }
@@ -281,55 +244,23 @@ class FormWizardController(
 
   /**
    * Collector-facing title of the question at [canonicalPath] (its label), for messages that refer
-   * to a field. Falls back to the step title, never to the internal data name.
+   * to a field. Falls back to a localized "This question" when the question can't be found.
    */
-  fun questionTitleFor(canonicalPath: String): String {
-    val step = steps.firstOrNull { stepContainsField(it, canonicalPath) }
-    val control =
-      when (step) {
-        is FormWizardStep.QuestionStep -> step.control
-        is FormWizardStep.FieldListGroupStep ->
-          step.controls.firstOrNull { matchesPath(it.canonicalPath, canonicalPath) }
-        else -> null
-      }
-    val title =
-      control?.label?.text?.takeIf { it.isNotBlank() } ?: step?.title?.takeIf { it.isNotBlank() }
-    if (title != null && title != "This question") return title
+  fun questionTitleFor(canonicalPath: String): FormUiText =
+    questionTitleOrNull(canonicalPath)?.let(FormUiText::Verbatim)
+      ?: FormUiText.Resource(Res.string.forms_this_question)
 
-    val leaf = canonicalPath.trim().substringAfterLast('/')
-    val componentControl =
-      collectAllControls(formState.rootComponents).firstOrNull {
-        matchesPath(it.canonicalPath, canonicalPath) || it.controlDef.field_ref == leaf
-      }
-    return componentControl?.label?.text?.takeIf { it.isNotBlank() }
-      ?: formState.formDef.view
-        ?.components
-        ?.mapNotNull { it.control }
-        ?.firstOrNull {
-          it.field_ref == leaf || it.field_ref == canonicalPath
-        }
-        ?.label
-        ?.text
-        ?.takeIf { it.isNotBlank() }
-      ?: "This question"
-  }
+  /**
+   * Like [questionTitleFor], but returns `null` instead of a generic stand-in when the question
+   * can't be found.
+   */
+  fun questionTitleOrNull(canonicalPath: String): String? =
+    FormQuestionLookup.questionTitleOrNull(steps, formState, canonicalPath)
 
-  private fun stepContainsField(step: FormWizardStep, canonicalPath: String): Boolean =
-    when (step) {
-      is FormWizardStep.QuestionStep -> matchesPath(step.control.canonicalPath, canonicalPath)
-      is FormWizardStep.FieldListGroupStep ->
-        step.controls.any { matchesPath(it.canonicalPath, canonicalPath) }
-      else -> false
-    }
-
-  private fun matchesPath(fullPath: String, target: String): Boolean {
-    val cleanTarget = target.trim()
-    val cleanFull = fullPath.trim()
-    return cleanFull == cleanTarget ||
-      cleanFull.substringAfterLast('/') == cleanTarget ||
-      cleanTarget.substringAfterLast('/') == cleanFull.substringAfterLast('/')
-  }
-
+  /**
+   * The parent question of a cascading select, for the child's choice filtering and its "answer
+   * <parent> first" hint. [selectedValues] holds the parent's choice codes.
+   */
   data class ParentQuestionInfo(
     val path: String,
     val label: String,
@@ -345,22 +276,11 @@ class FormWizardController(
     val parentRef = control.controlDef.parent_question_key.trim()
     if (parentRef.isBlank()) return null
 
-    val fieldState = formState.findFieldState(parentRef)
+    val fieldState = CascadingSelects.parentFieldFor(formState, control)
     val parentPath = fieldState?.canonicalPath ?: parentRef
-    val parentLabel =
-      questionTitleFor(parentPath).let {
-        if (it == "This question") parentRef.substringAfterLast('/') else it
-      }
+    val parentLabel = questionTitleOrNull(parentPath) ?: parentRef.substringAfterLast('/')
 
-    val stringVal = fieldState?.value?.scalar_value?.string_value?.trim()
-    val listVal = fieldState?.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
-    val selectedValues =
-      when {
-        !listVal.isNullOrEmpty() -> listVal.filter { it.isNotBlank() }
-        !stringVal.isNullOrBlank() ->
-          stringVal.split(' ').map { it.trim() }.filter { it.isNotBlank() }
-        else -> emptyList()
-      }
+    val selectedValues = CascadingSelects.selectedValues(fieldState)
 
     return ParentQuestionInfo(
       path = parentPath,
@@ -370,139 +290,57 @@ class FormWizardController(
     )
   }
 
-  private fun collectAllControls(
-    components: List<ComponentState>
-  ): List<ComponentState.ControlState> {
-    val result = mutableListOf<ComponentState.ControlState>()
-    fun walk(list: List<ComponentState>) {
-      for (item in list) {
-        when (item) {
-          is ComponentState.ControlState -> result.add(item)
-          is ComponentState.GroupState -> walk(item.children)
-          is ComponentState.RepeatGroupState -> {
-            // Repeat instances are dynamic
-          }
-        }
-      }
-    }
-    walk(components)
-    return result
-  }
-
-  private fun pruneCascadingChildAnswers(
-    changedPath: String,
-    visited: MutableSet<String> = mutableSetOf(),
-  ) {
-    if (changedPath in visited) return
-    visited.add(changedPath)
-
-    val leafName = changedPath.substringAfterLast('/')
-    val parentField = formState.findFieldState(changedPath)
-    val parentStringVal = parentField?.value?.scalar_value?.string_value?.trim()
-    val parentListVal =
-      parentField?.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
-    val parentValues =
-      when {
-        !parentListVal.isNullOrEmpty() -> parentListVal.filter { it.isNotBlank() }.toSet()
-        !parentStringVal.isNullOrBlank() ->
-          parentStringVal.split(' ').map { it.trim() }.filter { it.isNotBlank() }.toSet()
-        else -> emptySet()
-      }
-
-    val allControls = collectAllControls(formState.rootComponents)
-    for (child in allControls) {
-      val childParentRef = child.controlDef.parent_question_key.trim()
-      if (childParentRef.isBlank()) continue
-      if (
-        childParentRef != changedPath &&
-          childParentRef != leafName &&
-          !changedPath.endsWith("/$childParentRef") &&
-          !childParentRef.endsWith("/$leafName")
-      ) {
-        continue
-      }
-
-      val childField = formState.findFieldState(child.canonicalPath) ?: continue
-      val childString = childField.value?.scalar_value?.string_value?.trim()
-      val childList = childField.value?.list_value?.values?.mapNotNull { it.string_value?.trim() }
-
-      if (parentValues.isEmpty()) {
-        val hasChildValue = !childString.isNullOrBlank() || !childList.isNullOrEmpty()
-        if (hasChildValue) {
-          session.clearField(child.canonicalPath)
-          pruneCascadingChildAnswers(child.canonicalPath, visited)
-        }
-      } else {
-        if (!childString.isNullOrBlank()) {
-          val selectedOption = child.options.firstOrNull { it.value == childString }
-          val isInvalid =
-            selectedOption != null &&
-              selectedOption.parentValue.isNotBlank() &&
-              selectedOption.parentValue !in parentValues
-          if (isInvalid) {
-            session.clearField(child.canonicalPath)
-            pruneCascadingChildAnswers(child.canonicalPath, visited)
-          }
-        } else if (!childList.isNullOrEmpty()) {
-          val validValues = childList.filter { valVal ->
-            val opt = child.options.firstOrNull { it.value == valVal }
-            opt == null || opt.parentValue.isBlank() || opt.parentValue in parentValues
-          }
-          if (validValues.size != childList.size) {
-            if (validValues.isEmpty()) {
-              session.clearField(child.canonicalPath)
-            } else {
-              session.updateMultiSelect(child.canonicalPath, validValues)
-            }
-            pruneCascadingChildAnswers(child.canonicalPath, visited)
-          }
-        }
-      }
-    }
-  }
-
   // ---------------------------------------------------------------------------
   // Field & Repeat Mutation Actions
   // ---------------------------------------------------------------------------
 
-  fun updateString(path: String, value: String) {
+  /**
+   * Resets the per-attempt feedback before an answer changes: the validation banner and the last
+   * submission result describe the previous answers, so they'd be stale after the edit.
+   */
+  private fun beginEdit() {
     showCurrentStepValidationWarning = false
     submissionResult = null
+  }
+
+  /**
+   * Answers a text or select question. An empty string clears the answer (an XForms empty value),
+   * and cascading selects under [path] drop choices the new answer no longer allows.
+   */
+  fun updateString(path: String, value: String) {
+    beginEdit()
     if (value.isEmpty()) {
       session.clearField(path)
     } else {
       session.updateString(path, value)
     }
-    pruneCascadingChildAnswers(path)
+    CascadingSelects.pruneChildAnswers(session, path)
   }
 
+  /** Answers a numeric question; `null` (an empty or unparsable input) clears it. */
   fun updateInt(path: String, value: Int?) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     if (value == null) session.clearField(path) else session.updateInt(path, value)
   }
 
   fun updateLong(path: String, value: Long?) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     if (value == null) session.clearField(path) else session.updateLong(path, value)
   }
 
   fun updateDouble(path: String, value: Double?) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     if (value == null) session.clearField(path) else session.updateDouble(path, value)
   }
 
   fun updateBoolean(path: String, value: Boolean?) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     if (value == null) session.clearField(path) else session.updateBoolean(path, value)
   }
 
+  /** Answers a date question; [month] and [day] are 1-based (`google.type.Date`). */
   fun updateDate(path: String, year: Int, month: Int, day: Int) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     session.updateField(
       path,
       FieldValue(
@@ -512,8 +350,7 @@ class FormWizardController(
   }
 
   fun updateTime(path: String, hours: Int, minutes: Int, seconds: Int = 0) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     session.updateField(
       path,
       FieldValue(
@@ -523,15 +360,19 @@ class FormWizardController(
     )
   }
 
+  /** Answers a date-time question with an instant in seconds since the Unix epoch (UTC). */
   fun updateTimestamp(path: String, epochSeconds: Long) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     session.updateField(
       path,
       FieldValue(scalar_value = TypedValue(timestamp_value = ofEpochSecond(epochSeconds, 0L))),
     )
   }
 
+  /**
+   * Answers a geopoint question. The widgets always pass the captured accuracy (`null` when there
+   * is none); the 3.5 m default only serves callers that don't track it, such as tests.
+   */
   fun updateGeoPoint(
     path: String,
     latitude: Double,
@@ -539,8 +380,7 @@ class FormWizardController(
     altitudeMeters: Double? = null,
     accuracyMeters: Double? = 3.5,
   ) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     session.updateGeoPoint(
       path = path,
       latitude = latitude,
@@ -550,9 +390,12 @@ class FormWizardController(
     )
   }
 
+  /**
+   * Answers a geotrace (line) question; an empty list clears it. Fewer than 2 points is stored as
+   * is: the step still blocks Next until the trace is complete (see [isWaitingForGeometryCapture]).
+   */
   fun updateGeoTrace(path: String, points: List<GeoPoint>) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     if (points.isEmpty()) {
       session.clearField(path)
     } else {
@@ -563,9 +406,12 @@ class FormWizardController(
     }
   }
 
+  /**
+   * Answers a geoshape (polygon) question with its vertices, listed without repeating the first
+   * one; an empty list clears it.
+   */
   fun updateGeoShape(path: String, points: List<GeoPoint>) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     if (points.isEmpty()) {
       session.clearField(path)
     } else {
@@ -576,43 +422,45 @@ class FormWizardController(
     }
   }
 
+  /**
+   * Answers a select-multiple or rank question with choice codes in order; an empty list clears it.
+   * Cascading selects under [path] are pruned as in [updateString].
+   */
   fun updateMultiSelect(path: String, selectedValues: List<String>) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     if (selectedValues.isEmpty()) {
       session.clearField(path)
     } else {
       session.updateMultiSelect(path, selectedValues)
     }
-    pruneCascadingChildAnswers(path)
+    CascadingSelects.pruneChildAnswers(session, path)
   }
 
+  /** Clears the answer at [path] and prunes cascading selects under it. */
   fun clearField(path: String) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     session.clearField(path)
-    pruneCascadingChildAnswers(path)
+    CascadingSelects.pruneChildAnswers(session, path)
   }
 
   /**
-   * Answers the photo / video / audio question at [path] with [attachment]. Returns an error
-   * message if the attachment was rejected (e.g. wrong media type), or `null` on success.
+   * Answers the photo / video / audio question at [path] with [attachment]. Returns why the
+   * attachment was rejected (e.g. wrong media type), or `null` on success.
    */
-  fun attachMedia(path: String, attachment: MediaAttachment): String? {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+  fun attachMedia(path: String, attachment: MediaAttachment): FormUiText? {
+    beginEdit()
     return try {
       session.attachMedia(path, attachment)
       null
     } catch (e: MediaAttachmentRejectedException) {
-      e.message ?: "Attachment rejected"
+      e.message?.let(FormUiText::Verbatim)
+        ?: FormUiText.Resource(Res.string.forms_attachment_rejected)
     }
   }
 
   /** Clears the media question at [path] and discards its attachment. */
   fun removeMedia(path: String) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     session.removeMedia(path)
   }
 
@@ -628,15 +476,12 @@ class FormWizardController(
    * the newly created repeat instance.
    */
   fun addRepeatInstanceAndOpen(repeatPath: String) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     val updatedState = session.addRepeatInstance(repeatPath)
     val repeatGroup = findRepeatGroup(updatedState.rootComponents, repeatPath)
     val newInstancePath = repeatGroup?.instances?.lastOrNull()?.canonicalPath
     if (newInstancePath != null) {
-      val targetIdx = steps.indexOfFirst { step ->
-        step.repeatContext?.instancePath == newInstancePath
-      }
+      val targetIdx = steps.indexOfFirst { it.isWithinRepeatInstance(newInstancePath) }
       if (targetIdx >= 0) {
         currentStepIndex = targetIdx
       }
@@ -645,9 +490,86 @@ class FormWizardController(
 
   /** Removes the 1-based [repeatIndex] instance from [repeatPath]. */
   fun removeRepeatInstance(repeatPath: String, repeatIndex: Int) {
-    showCurrentStepValidationWarning = false
-    submissionResult = null
+    beginEdit()
     session.removeRepeatInstance(repeatPath, repeatIndex)
+    // Later instances shift down to the removed index, so per-path map history would now belong to
+    // a different entry.
+    geoEditStates.keys.removeAll { it.startsWith("$repeatPath[") }
+  }
+
+  /**
+   * Map editing state (pan, zoom, walking, undo / redo) of the geo question at [path]. The same
+   * instance is returned for the whole session, so it survives recomposition and navigating away
+   * from the question and back.
+   */
+  fun geoEditState(path: String): GeoEditState = geoEditStates.getOrPut(path) { GeoEditState() }
+
+  /** Jumps to the first step of the repeat entry at [instancePath], if it has any. */
+  fun openRepeatInstance(instancePath: String) {
+    val targetIdx = steps.indexOfFirst { it.isWithinRepeatInstance(instancePath) }
+    if (targetIdx >= 0) {
+      jumpToStep(targetIdx)
+    }
+  }
+
+  /**
+   * Instance path of the previous relevant entry in [repeatContext]'s repeat group, or `null` at
+   * the first entry.
+   */
+  internal fun previousRepeatInstancePath(repeatContext: RepeatStepContext): String? {
+    val siblings = siblingRepeatInstancePaths(repeatContext.repeatGroupPath)
+    val pos = siblings.indexOf(repeatContext.instancePath)
+    return if (pos > 0) siblings[pos - 1] else null
+  }
+
+  /**
+   * Instance path of the next relevant entry in [repeatContext]'s repeat group, or `null` at the
+   * last entry.
+   */
+  internal fun nextRepeatInstancePath(repeatContext: RepeatStepContext): String? {
+    val siblings = siblingRepeatInstancePaths(repeatContext.repeatGroupPath)
+    val pos = siblings.indexOf(repeatContext.instancePath)
+    return if (pos >= 0 && pos < siblings.lastIndex) siblings[pos + 1] else null
+  }
+
+  /**
+   * Jumps from [fromInstancePath] to sibling entry [toInstancePath], landing on the corresponding
+   * question step when it is relevant in [toInstancePath] and falling back to [toInstancePath]'s
+   * first step otherwise.
+   */
+  internal fun openSiblingRepeatInstance(fromInstancePath: String, toInstancePath: String) {
+    val activeKey = currentStep.stepKey
+    val matchingKey =
+      when {
+        activeKey.startsWith("$fromInstancePath/") ->
+          toInstancePath + activeKey.removePrefix(fromInstancePath)
+        activeKey.startsWith("group:$fromInstancePath/") ->
+          "group:$toInstancePath" + activeKey.removePrefix("group:$fromInstancePath")
+        activeKey.startsWith("repeat-hub:$fromInstancePath/") ->
+          "repeat-hub:$toInstancePath" + activeKey.removePrefix("repeat-hub:$fromInstancePath")
+        else -> null
+      }
+    val matchingIdx = matchingKey?.let { key -> steps.indexOfFirst { it.stepKey == key } } ?: -1
+    if (matchingIdx >= 0) {
+      jumpToStep(matchingIdx)
+    } else {
+      openRepeatInstance(toInstancePath)
+    }
+  }
+
+  private fun siblingRepeatInstancePaths(repeatGroupPath: String): List<String> =
+    steps
+      .mapNotNull { step ->
+        val instancePath = step.repeatContext?.instancePath ?: return@mapNotNull null
+        repeatInstancePrefixes(instancePath).firstOrNull {
+          it.substringBeforeLast('[') == repeatGroupPath
+        }
+      }
+      .distinct()
+
+  private fun FormWizardStep.isWithinRepeatInstance(instancePath: String): Boolean {
+    val path = repeatContext?.instancePath ?: return false
+    return path == instancePath || path.startsWith("$instancePath/")
   }
 
   /** Navigates directly to the [FormWizardStep.RepeatHubStep] for repeat group [repeatPath]. */
@@ -660,12 +582,19 @@ class FormWizardController(
     }
   }
 
-  /** Switches active translation language. */
+  /**
+   * Switches the form's language (an XForms `itext` translation); labels, hints, and choice labels
+   * re-evaluate, and answers are kept because they store choice codes, not labels.
+   */
   fun setLanguage(language: String) {
     session.setLanguage(language)
   }
 
-  /** Finalizes and validates the form session. */
+  /**
+   * Validates the whole record for submission and stamps its end-of-form preloads (ODK `end`). On
+   * failure the validation banner is shown; the user stays on the current step and finds the errors
+   * on the summary step.
+   */
   fun finalizeForm(): FinalizationResult {
     val result = session.finalize()
     submissionResult = result
@@ -709,243 +638,12 @@ class FormWizardController(
   companion object {
     /**
      * Flattens the hierarchical [FormState.rootComponents] tree into an ordered list of relevant
-     * mobile wizard screens.
+     * mobile wizard screens; see [FormWizardSteps.buildSteps].
      */
-    fun buildSteps(state: FormState): List<FormWizardStep> {
-      val result = mutableListOf<FormWizardStep>()
+    fun buildSteps(state: FormState): List<FormWizardStep> = FormWizardSteps.buildSteps(state)
 
-      fun visitComponents(
-        components: List<ComponentState>,
-        breadcrumbs: List<String>,
-        repeatContext: RepeatStepContext?,
-      ) {
-        for (component in components) {
-          if (!component.isRelevant) continue
-          when (component) {
-            is ComponentState.ControlState -> {
-              val title =
-                component.label?.text?.takeIf { it.isNotBlank() }
-                  ?: component.canonicalPath.substringAfterLast('/')
-              result.add(
-                FormWizardStep.QuestionStep(
-                  stepKey = component.canonicalPath,
-                  title = title,
-                  breadcrumbs = breadcrumbs,
-                  repeatContext = repeatContext,
-                  control = component,
-                )
-              )
-            }
-            is ComponentState.GroupState -> {
-              val groupTitle =
-                component.label?.text?.takeIf { it.isNotBlank() }
-                  ?: component.canonicalPath.substringAfterLast('/').takeIf { it.isNotBlank() }
-              val nextBreadcrumbs =
-                if (groupTitle != null) breadcrumbs + groupTitle else breadcrumbs
-              val isFieldList = component.appearance.split(' ').contains("field-list")
-              if (isFieldList) {
-                val directControls = collectRelevantControls(component.children)
-                if (directControls.isNotEmpty()) {
-                  result.add(
-                    FormWizardStep.FieldListGroupStep(
-                      stepKey = "group:${component.canonicalPath}",
-                      title = groupTitle ?: "Question group",
-                      breadcrumbs = breadcrumbs,
-                      repeatContext = repeatContext,
-                      controls = directControls,
-                    )
-                  )
-                }
-              } else {
-                visitComponents(component.children, nextBreadcrumbs, repeatContext)
-              }
-            }
-            is ComponentState.RepeatGroupState -> {
-              val repeatTitle =
-                component.label?.text?.takeIf { it.isNotBlank() }
-                  ?: component.canonicalPath.substringAfterLast('/').ifEmpty { "Repeat section" }
-              val relevantInstances = component.instances.filter { it.isRelevant }
-
-              for (instance in relevantInstances) {
-                val dynamicLabel = instance.label?.text?.trim()
-                val instanceTitle =
-                  if (!dynamicLabel.isNullOrBlank() && dynamicLabel != repeatTitle) {
-                    dynamicLabel
-                  } else {
-                    "$repeatTitle #${instance.repeatIndex}"
-                  }
-                val instanceContext =
-                  RepeatStepContext(
-                    repeatGroupPath = component.canonicalPath,
-                    repeatGroupLabel = repeatTitle,
-                    instancePath = instance.canonicalPath,
-                    repeatIndex = instance.repeatIndex,
-                    totalInstances = relevantInstances.size,
-                    instanceLabel = instanceTitle,
-                    canAddInstance = component.canAddInstance,
-                    canRemoveInstance = component.canRemoveInstance,
-                  )
-                visitComponents(
-                  components = instance.children,
-                  breadcrumbs = breadcrumbs + instanceTitle,
-                  repeatContext = instanceContext,
-                )
-              }
-
-              val summaries = relevantInstances.map { instance ->
-                val dynamicLabel = instance.label?.text?.trim()
-                val instTitle =
-                  if (!dynamicLabel.isNullOrBlank() && dynamicLabel != repeatTitle) {
-                    dynamicLabel
-                  } else {
-                    "$repeatTitle #${instance.repeatIndex}"
-                  }
-                val controls = collectRelevantControls(instance.children)
-                val answeredValues = controls.mapNotNull { formatControlPreview(it) }
-                val preview =
-                  when {
-                    answeredValues.isEmpty() -> "Tap to fill out details"
-                    else -> answeredValues.take(3).joinToString(" • ")
-                  }
-                RepeatInstanceSummary(
-                  repeatIndex = instance.repeatIndex,
-                  title = instTitle,
-                  previewText = preview,
-                  instancePath = instance.canonicalPath,
-                  answeredCount = answeredValues.size,
-                )
-              }
-
-              // Always provide a RepeatHubStep if the user can add/remove instances or if 0
-              // instances exist
-              if (
-                component.canAddInstance ||
-                  component.canRemoveInstance ||
-                  relevantInstances.isEmpty()
-              ) {
-                result.add(
-                  FormWizardStep.RepeatHubStep(
-                    stepKey = "repeat-hub:${component.canonicalPath}",
-                    title = "$repeatTitle (${relevantInstances.size})",
-                    breadcrumbs = breadcrumbs,
-                    repeatContext = repeatContext,
-                    repeatGroup = component,
-                    summaries = summaries,
-                  )
-                )
-              }
-            }
-          }
-        }
-      }
-
-      visitComponents(
-        components = state.rootComponents,
-        breadcrumbs = emptyList(),
-        repeatContext = null,
-      )
-      result.add(FormWizardStep.SummaryStep())
-      return result
-    }
-
-    fun formatControlPreview(control: ComponentState.ControlState): String? {
-      val value = control.fieldState.value ?: return null
-      val scalar = value.scalar_value
-      if (scalar != null) {
-        val str = scalar.string_value?.trim()
-        if (!str.isNullOrBlank()) {
-          val matchingOpt = control.options.firstOrNull { it.value == str }
-          return matchingOpt?.label?.text?.ifBlank { str } ?: str
-        }
-        if (scalar.int32_value != null) return scalar.int32_value.toString()
-        if (scalar.int64_value != null) return scalar.int64_value.toString()
-        val d = scalar.double_value
-        if (d != null) {
-          return if (d % 1.0 == 0.0) d.toLong().toString() else d.toString()
-        }
-        val b = scalar.bool_value
-        if (b != null) return if (b) "Yes" else "No"
-        val date = scalar.date_value
-        if (date != null && (date.year != 0 || date.month != 0 || date.day != 0)) {
-          return "${date.year}-${date.month.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}"
-        }
-        if (scalar.geopoint_value != null) return "Location recorded"
-        if (scalar.geotrace_value != null) return "Trace recorded"
-        if (scalar.geoshape_value != null) return "Shape recorded"
-      }
-      val list = value.list_value
-      if (list != null && list.values.isNotEmpty()) {
-        val labels =
-          list.values.mapNotNull { item ->
-            val v = item.string_value ?: return@mapNotNull null
-            control.options.firstOrNull { it.value == v }?.label?.text?.ifBlank { v } ?: v
-          }
-        if (labels.isNotEmpty()) return labels.joinToString(", ")
-      }
-      return null
-    }
-
-    private fun collectRelevantControls(
-      components: List<ComponentState>
-    ): List<ComponentState.ControlState> {
-      val list = mutableListOf<ComponentState.ControlState>()
-      for (comp in components) {
-        if (!comp.isRelevant) continue
-        when (comp) {
-          is ComponentState.ControlState -> list.add(comp)
-          is ComponentState.GroupState -> list.addAll(collectRelevantControls(comp.children))
-          is ComponentState.RepeatGroupState -> {}
-        }
-      }
-      return list
-    }
+    /** Short preview of [control]'s answer; see [FormWizardSteps.formatControlPreview]. */
+    fun formatControlPreview(control: ComponentState.ControlState): FormUiText? =
+      FormWizardSteps.formatControlPreview(control)
   }
 }
-
-/**
- * Returns `true` if [control] represents a geometry question (`TYPE_GEOPOINT`, `TYPE_GEOTRACE`, or
- * `TYPE_GEOSHAPE`) that has not yet captured the minimum required vertices:
- * - `TYPE_GEOPOINT`: value is null
- * - `TYPE_GEOTRACE`: fewer than 2 points
- * - `TYPE_GEOSHAPE`: fewer than 3 points
- */
-fun isControlWaitingForGeometryCapture(control: ComponentState.ControlState): Boolean {
-  val fieldState = control.fieldState
-  val scalar = fieldState.value?.scalar_value
-  return when (fieldState.dataType) {
-    DataType.TYPE_GEOPOINT -> scalar?.geopoint_value == null
-    DataType.TYPE_GEOTRACE -> (scalar?.geotrace_value?.points?.size ?: 0) < 2
-    DataType.TYPE_GEOSHAPE -> (scalar?.geoshape_value?.points?.size ?: 0) < 3
-    else -> false
-  }
-}
-
-/**
- * Returns `true` if [step] contains a geometry question (`TYPE_GEOPOINT`, `TYPE_GEOTRACE`, or
- * `TYPE_GEOSHAPE`) that has not yet had sufficient coordinates captured.
- */
-fun isWaitingForGeometryCapture(step: FormWizardStep): Boolean =
-  when (step) {
-    is FormWizardStep.QuestionStep -> isControlWaitingForGeometryCapture(step.control)
-    is FormWizardStep.FieldListGroupStep ->
-      step.controls.any { isControlWaitingForGeometryCapture(it) }
-    else -> false
-  }
-
-/**
- * Returns `true` if [step] represents an optional question (all its input controls are not
- * required, not read-only, and not calculated).
- */
-fun isStepOptional(step: FormWizardStep): Boolean =
-  when (step) {
-    is FormWizardStep.QuestionStep ->
-      !step.control.fieldState.isRequired &&
-        !step.control.fieldState.isReadOnly &&
-        !step.control.fieldState.isCalculated
-    is FormWizardStep.FieldListGroupStep ->
-      step.controls.isNotEmpty() &&
-        step.controls.all {
-          !it.fieldState.isRequired && !it.fieldState.isReadOnly && !it.fieldState.isCalculated
-        }
-    else -> false
-  }

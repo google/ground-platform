@@ -15,6 +15,7 @@ package org.openforis.collectone.v2.core.sampling
 
 import kotlin.math.abs
 import kotlin.math.roundToLong
+import org.openforis.collectone.v2.core.geo.GeoCoord
 
 /**
  * Encoding of a plot's reserved `samples` and `sample_ids` properties.

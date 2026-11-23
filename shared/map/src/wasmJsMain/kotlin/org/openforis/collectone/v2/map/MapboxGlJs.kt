@@ -37,12 +37,12 @@ internal external fun isMapboxGlAvailable(): Boolean
  */
 @JsFun(
   """() => {
-    let canvas = window.__groundComposeCanvas;
+    let canvas = window.__collectOneComposeCanvas;
     if (!canvas || !canvas.isConnected) {
       const target = document.getElementById('ComposeTarget') || document.body;
       const root = target.shadowRoot || target;
       canvas = root.querySelector('canvas:not(.mapboxgl-canvas)');
-      window.__groundComposeCanvas = canvas;
+      window.__collectOneComposeCanvas = canvas;
     }
     if (!canvas || !canvas.width) return 0;
     return canvas.getBoundingClientRect().width / canvas.width;
@@ -53,18 +53,19 @@ internal external fun cssPxPerComposePx(): Double
 /**
  * Creates a display-only map in a fixed-position `div` below the Compose canvas. The outer element
  * clips to the visible part of the map's layout; the inner one is the full layout. [style] is a
- * style URL or style JSON (see [MapboxStyleSpec.style]).
+ * style URL or style JSON (see [MapboxStyleSpec.style]). [onError] receives the map's error
+ * messages (e.g. a tile or style that failed to load).
  */
 @JsFun(
-  """(style, lng, lat, zoom, bearing, pitch) => {
-    let root = document.getElementById('GroundMapboxHosts');
+  """(style, lng, lat, zoom, bearing, pitch, onError) => {
+    let root = document.getElementById('AppMapboxHosts');
     if (!root) {
       root = document.createElement('div');
-      root.id = 'GroundMapboxHosts';
+      root.id = 'AppMapboxHosts';
       root.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;z-index:1;';
       document.body.appendChild(root);
     }
-    const z = (window.__groundMapboxNextZ = (window.__groundMapboxNextZ || 0) + 1);
+    const z = (window.__collectOneMapboxNextZ = (window.__collectOneMapboxNextZ || 0) + 1);
     const outer = document.createElement('div');
     outer.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;' +
       'pointer-events:none;z-index:' + z + ';visibility:hidden;';
@@ -87,7 +88,7 @@ internal external fun cssPxPerComposePx(): Double
     if (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) {
       host.ready = true;
     }
-    map.on('error', (e) => console.warn('GroundMap:', e && e.error ? e.error.message : e));
+    map.on('error', (e) => onError(String(e && e.error ? e.error.message : e)));
     return host;
   }"""
 )
@@ -98,6 +99,7 @@ internal external fun createMapboxHost(
   zoom: Double,
   bearing: Double,
   pitch: Double,
+  onError: (String) -> Unit,
 ): MapboxHost
 
 /** Resolves once the current style has loaded. */
@@ -246,7 +248,7 @@ internal external fun mapboxUpdateLayer(
 @JsFun("(h, id) => { if (h.map.getLayer(id)) h.map.removeLayer(id); }")
 internal external fun mapboxRemoveLayer(host: MapboxHost, id: String)
 
-/** Rasterizes [svg] at 4× and registers it as image [id]; resolves when done or on failure. */
+/** Rasterizes [svg] at 4× and registers it as image [id]; resolves to whether the image loaded. */
 @JsFun(
   """(h, id, svg) => new Promise((resolve) => {
     const img = new Image();
@@ -260,13 +262,13 @@ internal external fun mapboxRemoveLayer(host: MapboxHost, id: String)
       ctx.drawImage(img, 0, 0, w, ht);
       if (h.map.hasImage(id)) h.map.removeImage(id);
       h.map.addImage(id, ctx.getImageData(0, 0, w, ht), { pixelRatio: scale });
-      resolve(null);
+      resolve(true);
     };
-    img.onerror = () => { console.warn('GroundMap: could not load icon ' + id); resolve(null); };
+    img.onerror = () => resolve(false);
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   })"""
 )
-internal external fun mapboxAddIcon(host: MapboxHost, id: String, svg: String): Promise<JsAny?>
+internal external fun mapboxAddIcon(host: MapboxHost, id: String, svg: String): Promise<JsBoolean>
 
 @JsFun("(h, id) => { if (h.map.hasImage(id)) h.map.removeImage(id); }")
 internal external fun mapboxRemoveIcon(host: MapboxHost, id: String)

@@ -73,20 +73,14 @@ const val BAOBAB_BIOMETRICS_SAMPLE_XFORMS_XML: String =
   </h:body>
 </h:html>"""
 
-/** Parses XForms XML into [FormDef]s, parsing each distinct XML string at most once. */
-object XFormsParseCache {
-  private val cache = mutableMapOf<String, FormDef?>()
-
-  /** Returns the parsed [FormDef] for [xml], or null if it doesn't parse. */
-  fun formDef(xml: String): FormDef? =
-    cache.getOrPut(xml) {
-      try {
-        XFormsXmlSerializer.deserializeFormDef(xml)
-      } catch (_: Exception) {
-        null
-      }
-    }
-
-  /** Returns the parsed [FormDef] for [example], or null if it doesn't parse. */
-  fun formDef(example: WorkbenchExampleForm): FormDef? = formDef(example.xformsXml)
+/**
+ * [DEFAULT_WORKBENCH_XFORMS_XML] parsed, or null if it doesn't parse. Parsed once, on first use,
+ * because every new workbench UI state starts from it; the value never changes after that.
+ */
+val DEFAULT_WORKBENCH_FORM_DEF: FormDef? by lazy {
+  try {
+    XFormsXmlSerializer.deserializeFormDef(DEFAULT_WORKBENCH_XFORMS_XML)
+  } catch (_: Exception) {
+    null
+  }
 }

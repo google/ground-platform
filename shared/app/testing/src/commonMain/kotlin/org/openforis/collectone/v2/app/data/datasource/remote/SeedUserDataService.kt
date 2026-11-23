@@ -69,8 +69,17 @@ import openforis.collectone.v1.survey.AcceptSurveyInviteRequest
 import openforis.collectone.v1.survey.AcceptSurveyInviteResponse
 import openforis.collectone.v1.survey.BatchGetSurveyOverviewsRequest
 import openforis.collectone.v1.survey.BatchGetSurveyOverviewsResponse
+import openforis.collectone.v1.survey.GeoDataServiceServer
 import openforis.collectone.v1.survey.GetOrganizationRequest
 import openforis.collectone.v1.survey.GetOrganizationResponse
+import openforis.collectone.v1.survey.GetOverlayTileUrlRequest
+import openforis.collectone.v1.survey.GetOverlayTileUrlResponse
+import openforis.collectone.v1.survey.GetPlotStatisticsRequest
+import openforis.collectone.v1.survey.GetPlotStatisticsResponse
+import openforis.collectone.v1.survey.GetPlotTimeSeriesRequest
+import openforis.collectone.v1.survey.GetPlotTimeSeriesResponse
+import openforis.collectone.v1.survey.GetSceneTileUrlRequest
+import openforis.collectone.v1.survey.GetSceneTileUrlResponse
 import openforis.collectone.v1.survey.GetSurveyAclRequest
 import openforis.collectone.v1.survey.GetSurveyAclResponse
 import openforis.collectone.v1.survey.GetSurveyRequest
@@ -96,17 +105,24 @@ import openforis.collectone.v1.survey.SurveyOverview
 import openforis.collectone.v1.survey.SurveyOverviewResult
 import openforis.collectone.v1.survey.SurveyServiceServer
 import openforis.collectone.v1.survey.SurveyState
+import openforis.collectone.v1.sync.SyncChangesRequest
+import openforis.collectone.v1.sync.SyncChangesResponse
+import openforis.collectone.v1.sync.SyncServiceServer
 import openforis.collectone.v1.userdata.SurveySeed
 import openforis.collectone.v1.userdata.UserDataSeed
 import org.openforis.collectone.v2.app.client.grpc.CollectOneGrpcClient
 import org.openforis.collectone.v2.app.client.grpc.GrpcWebException
 import org.openforis.collectone.v2.app.client.grpc.GrpcWebTransport
+import org.openforis.collectone.v2.app.data.mapper.ProtoRecordMapper
+import org.openforis.collectone.v2.app.data.mapper.ProtoSurveyMapper
 import org.openforis.collectone.v2.app.data.seed.UserDataSeedGenerator
+import org.openforis.collectone.v2.core.sync.ListBackedSyncService
 
 /**
  * Read-only, in-memory stand-in for the user data service, serving a [UserDataSeed] through the
- * sync RPCs the client uses (`List*` in query and delta modes, `GetSurvey`, `GetSurveyAcl`,
- * `ListPlaces`). Other RPCs throw; their behavior is tested in `server/userDataService`.
+ * sync RPCs the client uses (`List*` in query and delta modes, `SyncChanges` over them like the
+ * real service, `GetSurvey`, `GetSurveyAcl`, `ListPlaces`). Other RPCs throw; their behavior is
+ * tested in `server/`.
  *
  * Calls never suspend, so tests can run sync code inside `runDirect`. Tests simulate changes made
  * by other clients with [putEntity], [deleteEntity], [removeEntity], [deleteLibrary], and
@@ -116,7 +132,29 @@ import org.openforis.collectone.v2.app.data.seed.UserDataSeedGenerator
  * Its sync tokens use a format of its own: like the real service's, they are opaque to clients.
  */
 class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate()) :
-  SurveyServiceServer, OrganizationServiceServer, LibraryServiceServer, DataServiceServer {
+  SurveyServiceServer,
+  OrganizationServiceServer,
+  LibraryServiceServer,
+  DataServiceServer,
+  GeoDataServiceServer,
+  SyncServiceServer {
+
+  private val syncService =
+    ListBackedSyncService(
+      surveyService = this,
+      organizationService = this,
+      libraryService = this,
+      dataService = this,
+      scopeErrorCode = { (it as? GrpcWebException)?.status },
+    )
+
+  /** Every `SyncChanges` request received, oldest first. */
+  val syncChangesRequests: MutableList<SyncChangesRequest> = mutableListOf()
+
+  override suspend fun SyncChanges(request: SyncChangesRequest): SyncChangesResponse {
+    syncChangesRequests += request
+    return syncService.SyncChanges(request)
+  }
 
   private val organizations = seed.organizations.toMutableList()
   private val libraries = seed.libraries.toMutableList()
@@ -148,13 +186,18 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
     epoch++
   }
 
-  /** A client of this service. */
-  fun client(): CollectOneGrpcClient =
+  /**
+   * A client of this service. With [withSyncService] false, the client answers `SyncChanges` with
+   * the `List*` RPCs itself, as it does against a service that doesn't implement it.
+   */
+  fun client(withSyncService: Boolean = true): CollectOneGrpcClient =
     CollectOneGrpcClient(
       surveyService = this,
       organizationService = this,
       libraryService = this,
       dataService = this,
+      geoDataService = this,
+      syncService = if (withSyncService) this else null,
     )
 
   /**
@@ -624,17 +667,44 @@ class SeedUserDataService(seed: UserDataSeed = UserDataSeedGenerator.generate())
     request: GetAppliedMutationsRequest
   ): GetAppliedMutationsResponse = GetAppliedMutationsResponse()
 
-  private fun unsupported(): Nothing =
-    throw UnsupportedOperationException(
-      "Not served by SeedUserDataService; test it in server/userDataService"
+  override suspend fun GetOverlayTileUrl(
+    request: GetOverlayTileUrlRequest
+  ): GetOverlayTileUrlResponse =
+    GetOverlayTileUrlResponse(
+      url_template =
+        "https://mock.earthengine.googleapis.com/v1/projects/mock/maps/${request.imagery_source_id}/tiles/{z}/{x}/{y}",
+      ttl = com.squareup.wire.durationOfSeconds(7200L, 0L),
     )
 
-  private fun overviewOf(seed: SurveySeed): SurveyOverview =
-    GrpcProtoMapper.surveyOverviewFromDef(
-      surveyDef = seed.survey!!,
+  override suspend fun GetPlotStatistics(
+    request: GetPlotStatisticsRequest
+  ): GetPlotStatisticsResponse = SeedImageryAnalytics.statistics(request)
+
+  override suspend fun GetPlotTimeSeries(
+    request: GetPlotTimeSeriesRequest
+  ): GetPlotTimeSeriesResponse = SeedImageryAnalytics.timeSeries(request)
+
+  override suspend fun GetSceneTileUrl(request: GetSceneTileUrlRequest): GetSceneTileUrlResponse =
+    SeedImageryAnalytics.sceneTileUrl(request)
+
+  private fun unsupported(): Nothing =
+    throw UnsupportedOperationException("Not served by SeedUserDataService; test it in server/")
+
+  private fun overviewOf(seed: SurveySeed): SurveyOverview {
+    val surveyDef = seed.survey!!
+    val mapLayers = ProtoSurveyMapper.mapLayersFromProto(surveyDef)
+    val entities =
+      seed.entities
+        .filter { !it.is_deleted }
+        .map { ProtoRecordMapper.entityFromProto(it, emptyList(), isGenerated = false) }
+    return ProtoSurveyMapper.surveyOverviewFromDef(
+      surveyDef = surveyDef,
       acl = seed.acl,
       hasWorkingCopy = seed.working_copy != null,
+      mapLayers = mapLayers,
+      entities = entities,
     )
+  }
 
   private companion object {
     const val DELTA = "D"

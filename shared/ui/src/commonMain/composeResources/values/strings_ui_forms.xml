@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Strings for the field-facing form runner (mobile wizard and compact web layout) and its
+     question widgets. -->
+<resources>
+  <!-- Common actions -->
+  <string name="forms_cancel">Cancel</string>
+  <string name="forms_submit">Submit</string>
+  <!-- Button that skips an optional question without answering it. -->
+  <string name="forms_skip">Skip</string>
+  <!-- Button / badge that opens an answer or repeat entry for editing. -->
+  <string name="forms_edit">Edit</string>
+  <string name="forms_delete">Delete</string>
+  <!-- Button that clears the current answer. -->
+  <string name="forms_clear">Clear</string>
+  <string name="forms_undo">Undo</string>
+  <string name="forms_redo">Redo</string>
+  <!-- Button that finishes drawing a geometry on the map. -->
+  <string name="forms_done">Done</string>
+  <!-- Confirm button of the date picker dialog. -->
+  <string name="forms_ok">OK</string>
+  <!-- Confirms adding a new choice option typed by the collector. -->
+  <string name="forms_add">Add</string>
+  <string name="forms_yes">Yes</string>
+  <string name="forms_no">No</string>
+
+  <!-- Form header, navigation, and progress -->
+  <!-- Fallback title of a form that has no title in the compact (web) layout. -->
+  <string name="forms_untitled_form">Form</string>
+  <!-- Fallback title of a form that has no title in the mobile runner. -->
+  <string name="forms_untitled_survey_form">Survey form</string>
+  <!-- Title of the final review step; also the submit button label while answers still need review. -->
+  <string name="forms_review_and_submit">Review &amp; submit</string>
+  <!-- Compact layout progress. %1$d = settled (answered or skipped) questions, %2$d = total questions. -->
+  <string name="forms_progress_answered_of_total">%1$d of %2$d answered</string>
+  <string name="forms_expand_all">Expand all</string>
+  <string name="forms_collapse_all">Collapse all</string>
+  <!-- Footer progress segments, joined with " • ". %1$d = number of questions. -->
+  <string name="forms_progress_answered_count">%1$d answered</string>
+  <string name="forms_progress_skipped_count">%1$d skipped</string>
+  <string name="forms_progress_pending_count">%1$d pending</string>
+  <!-- Mobile app bar subtitle on the final review step. %1$d = number of questions in the form. -->
+  <plurals name="forms_review_and_finalize_summary">
+    <item quantity="one">Review &amp; finalize (%1$d question)</item>
+    <item quantity="other">Review &amp; finalize (%1$d questions)</item>
+  </plurals>
+  <!-- Mobile app bar subtitle. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_of_total">Step %1$d of %2$d</string>
+  <!-- Compact step counter in the bottom bar. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_counter">%1$d / %2$d</string>
+  <!-- Toggle that closes the list of all form steps. -->
+  <string name="forms_close_step_list">Close list</string>
+  <!-- Toggle that opens the list of all form steps. %1$d = number of steps. -->
+  <string name="forms_steps_count">Steps (%1$d)</string>
+  <string name="forms_close_form">Close form</string>
+  <!-- Content description of the icon in front of the form's language selector. -->
+  <string name="forms_language">Language</string>
+  <!-- Button that goes back to the previous question. -->
+  <string name="forms_back">Back</string>
+  <!-- Button that moves on to the final review step. -->
+  <string name="forms_review">Review</string>
+  <!-- Button that moves on to the next question. -->
+  <string name="forms_next">Next</string>
+  <!-- Heading of the step overview list. %1$d = number of steps. -->
+  <string name="forms_all_form_steps">All form steps (%1$d)</string>
+  <!-- Row of the step overview list. %1$d = step number, %2$s = step title. -->
+  <string name="forms_step_list_item">%1$d. %2$s</string>
+  <!-- Banner shown when Next is tapped before capturing a required location. -->
+  <string name="forms_blocker_location">Please capture a location or drop a pin before proceeding.</string>
+  <string name="forms_blocker_optional">Please resolve validation errors above or skip to continue.</string>
+  <string name="forms_blocker_required">Please resolve validation errors above to continue.</string>
+
+  <!-- Question cards -->
+  <!-- Question label with a required marker. %1$s = question label. -->
+  <string name="forms_required_label">%1$s *</string>
+  <!-- Badge on a required question. -->
+  <string name="forms_badge_required">Required *</string>
+  <!-- Badge on a question whose value is computed by the form. -->
+  <string name="forms_badge_calculated">Calculated</string>
+  <string name="forms_badge_read_only">Read-only</string>
+  <!-- Toggle for the extra instructions written for enumerators (data collectors). -->
+  <string name="forms_hide_guidance">Hide Enumerator Guidance</string>
+  <string name="forms_show_guidance">Show Enumerator Guidance</string>
+  <!-- Collapsed card summary of a question the collector skipped. -->
+  <string name="forms_status_skipped">Skipped</string>
+  <!-- Collapsed card summary of a question with no answer yet. -->
+  <string name="forms_status_not_answered">Not answered</string>
+  <!-- Screen reader descriptions of a question's status icon. -->
+  <string name="forms_status_answered">Answered</string>
+  <string name="forms_status_pending">Pending</string>
+  <string name="forms_status_needs_attention">Needs attention</string>
+  <string name="forms_collapse_question">Collapse question</string>
+  <string name="forms_expand_question">Expand question</string>
+  <!-- Generic stand-in for a question that has no label. -->
+  <string name="forms_this_question">This question</string>
+  <!-- Title of a group of questions shown on one screen when the group has no label. -->
+  <string name="forms_untitled_question_group">Question group</string>
+  <!-- Shown when a photo, video, or audio file can't answer the question and no reason is given. -->
+  <string name="forms_attachment_rejected">Attachment rejected</string>
+  <!-- %1$d = number of questions with validation errors. -->
+  <plurals name="forms_questions_need_attention">
+    <item quantity="one">%1$d question needs attention before submitting.</item>
+    <item quantity="other">%1$d questions need attention before submitting.</item>
+  </plurals>
+
+  <!-- Repeated sections -->
+  <!-- Number of entries of a repeated section. %1$d = number of entries. -->
+  <plurals name="forms_repeat_section_entries">
+    <item quantity="one">%1$d entry</item>
+    <item quantity="other">%1$d entries</item>
+  </plurals>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entries_hint">Add one or more '%1$s' entries below.</string>
+  <string name="forms_repeat_no_entries">No repeat entries added yet.</string>
+  <!-- Fallback title of one repeat entry. %1$s = repeated section label, %2$d = entry number. -->
+  <string name="forms_repeat_instance_title">%1$s #%2$d</string>
+  <!-- Preview of a repeat entry that has no answers yet. -->
+  <string name="forms_repeat_tap_to_fill">Tap to fill out details</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entry">Add %1$s entry</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_named">Add %1$s</string>
+  <!-- Delete action of one repeat entry. %1$s = entry title. -->
+  <string name="forms_repeat_delete_entry">Delete %1$s</string>
+  <!-- Ordinal number badge of a repeat entry or ranked item. %1$d = number. -->
+  <string name="forms_number_badge">#%1$d</string>
+  <!-- %1$d = current entry number, %2$d = number of entries. -->
+  <string name="forms_repeat_entry_position">Entry #%1$d of %2$d</string>
+  <!-- Button that opens the list of all entries of a repeated section. -->
+  <string name="forms_all_entries">All entries</string>
+  <!-- Buttons that jump to the previous or next entry of a repeated section. -->
+  <string name="forms_repeat_previous_entry">Previous entry</string>
+  <string name="forms_repeat_next_entry">Next entry</string>
+  <!-- Badge with the number of entries a repeated section requires. %1$d = number of entries. -->
+  <string name="forms_repeat_required_count">%1$d required</string>
+  <!-- %1$s = repeated section label. Shown once a section has entries. -->
+  <string name="forms_repeat_add_another">Add another %1$s entry</string>
+  <!-- Title of the dialog confirming an entry deletion. %1$s = entry title. -->
+  <string name="forms_repeat_delete_title">Delete %1$s?</string>
+  <!-- Body of the dialog confirming an entry deletion. %1$d = answers in the entry. -->
+  <plurals name="forms_repeat_delete_message">
+    <item quantity="one">Its %1$d answer will be deleted too. This can't be undone.</item>
+    <item quantity="other">Its %1$d answers will be deleted too. This can't be undone.</item>
+  </plurals>
+  <!-- Status of a repeat entry. -->
+  <string name="forms_repeat_status_not_started">Not started</string>
+  <string name="forms_repeat_status_in_progress">In progress</string>
+  <string name="forms_repeat_status_complete">Complete</string>
+
+  <!-- Review step -->
+  <string name="forms_review_answers">Review answers</string>
+  <string name="forms_review_answers_hint">Tap any question below to jump back and edit its response.</string>
+  <string name="forms_ready_to_submit">✓ Ready to submit</string>
+  <!-- Badge with the number of validation issues. %1$d = number of issues. -->
+  <plurals name="forms_issue_count">
+    <item quantity="one">%1$d issue</item>
+    <item quantity="other">%1$d issue(s)</item>
+  </plurals>
+  <string name="forms_form_finalized">✓ Form finalized successfully</string>
+  <!-- %1$d = number of validation errors; the list of errors follows. -->
+  <plurals name="forms_cannot_submit_errors">
+    <item quantity="one">⚠ Cannot submit: %1$d validation error:</item>
+    <item quantity="other">⚠ Cannot submit: %1$d validation error(s):</item>
+  </plurals>
+  <!-- One validation error in a list. %1$s = question label, %2$s = error message. -->
+  <string name="forms_validation_error_item">• %1$s: %2$s</string>
+  <!-- Badge on a review card whose answer is invalid. -->
+  <string name="forms_invalid_badge">Invalid</string>
+  <!-- Heading of the data table records the submission creates or updates. %1$d = number of records. -->
+  <string name="forms_updated_records">Updated records (%1$d)</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_new_in_dataset">New record in %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_updated_in_dataset">Updated record in %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_unchanged_in_dataset">Unchanged record in %1$s</string>
+
+  <!-- Answer summaries -->
+  <!-- Shown in place of an answer for a question that has none. -->
+  <string name="forms_unanswered">(Unanswered)</string>
+  <!-- Summary of a line (geotrace) answer. %1$d = number of points. -->
+  <plurals name="forms_trace_point_count">
+    <item quantity="one">%1$d trace point</item>
+    <item quantity="other">%1$d trace points</item>
+  </plurals>
+  <!-- Summary of a polygon (geoshape) answer. %1$d = number of vertices. -->
+  <plurals name="forms_polygon_vertex_count">
+    <item quantity="one">%1$d polygon vertex</item>
+    <item quantity="other">%1$d polygon vertices</item>
+  </plurals>
+  <!-- Repeat entry previews of location, line, and polygon answers. -->
+  <string name="forms_preview_location_recorded">Location recorded</string>
+  <string name="forms_preview_trace_recorded">Trace recorded</string>
+  <string name="forms_preview_shape_recorded">Shape recorded</string>
+
+  <!-- Text, number, date, and time inputs -->
+  <string name="forms_text_placeholder">Enter response...</string>
+  <!-- Character count of a text answer. %1$d = number of characters. -->
+  <plurals name="forms_text_char_count">
+    <item quantity="one">%1$d char</item>
+    <item quantity="other">%1$d chars</item>
+  </plurals>
+  <string name="forms_decimal_invalid">Enter a valid decimal number</string>
+  <string name="forms_integer_invalid">Enter a whole integer number</string>
+  <!-- %1$d = smallest allowed value, %2$d = largest allowed value. -->
+  <string name="forms_integer_out_of_range">Enter a value between %1$d and %2$d</string>
+  <!-- Placeholder showing the required ISO date format (year-month-day); typed dates must use it. -->
+  <string name="forms_date_placeholder">YYYY-MM-DD</string>
+  <string name="forms_date_invalid">Enter a valid date in YYYY-MM-DD format</string>
+  <string name="forms_clear_date">Clear date</string>
+  <string name="forms_select_date">Select date</string>
+  <!-- Placeholder showing the required 24-hour time format (hours:minutes:seconds). -->
+  <string name="forms_time_placeholder">HH:MM:SS</string>
+  <!-- Button that fills a time question with the current time. -->
+  <string name="forms_now">Now</string>
+  <string name="forms_no_timestamp">(No timestamp recorded)</string>
+  <string name="forms_capture_timestamp">Capture Timestamp</string>
+
+  <!-- Location (geopoint) questions -->
+  <!-- Button that records the point under the map crosshair. -->
+  <string name="forms_add_point">Add point</string>
+  <!-- Button that records the device's current GPS position. -->
+  <string name="forms_capture_location">Capture location</string>
+  <string name="forms_map_pan_allowed">Map pan allowed</string>
+  <string name="forms_gps_only_no_pan">GPS only (no pan)</string>
+  <!-- Required GPS accuracy. %1$s = accuracy in meters. -->
+  <string name="forms_accuracy_required">Required ≤ %1$s m</string>
+  <!-- Location capture status badges. -->
+  <string name="forms_geo_status_panned">Panned</string>
+  <string name="forms_geo_status_captured">Captured</string>
+  <string name="forms_geo_status_ready">Ready</string>
+  <string name="forms_geo_target_coordinates">Target coordinates (panned crosshair)</string>
+  <string name="forms_geo_captured_coordinates">Captured coordinates</string>
+  <string name="forms_geo_current_coordinates">Current GPS coordinates</string>
+  <!-- Raw coordinates with altitude. %1$s = latitude, %2$s = longitude, %3$d = altitude in meters. -->
+  <string name="forms_geo_coordinates_with_altitude">%1$s, %2$s • Alt %3$d m</string>
+  <!-- Label of the GPS accuracy readout. -->
+  <string name="forms_accuracy">Accuracy</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m), %4$s = label of the Add point button. -->
+  <string name="forms_geo_saved_point">Saved point: %1$s, %2$s (%3$s) — tap "%4$s" to update, or use Undo / Redo</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m). "Next →" is the Next button. -->
+  <string name="forms_geo_location_captured">Location captured: %1$s, %2$s (%3$s) — tap "Next →" to continue, or use Undo / Redo</string>
+  <!-- %1$s = label of the Add point button. -->
+  <string name="forms_geo_map_panned_hint">Map panned — tap "%1$s" below to record this point</string>
+  <!-- %1$s = label of the Capture location button. -->
+  <string name="forms_geo_capture_hint">Tap "%1$s" below to record your current GPS coordinates</string>
+  <string name="forms_recenter_on_gps">Recenter on GPS</string>
+  <string name="forms_geo_pan_disabled">Map panning is disabled for this question. Coordinates are captured directly from your GPS location.</string>
+  <!-- %1$s = required accuracy in meters. -->
+  <string name="forms_geo_pan_disabled_with_accuracy">Map panning is disabled for this question. Coordinates are captured directly from your GPS location (requires ≤ %1$s m accuracy).</string>
+  <!-- Map overlay status. -->
+  <string name="forms_gps_locked">GPS locked</string>
+  <string name="forms_geo_waiting_for_location">Waiting for GPS location…</string>
+  <string name="forms_map_panned_crosshair">Panned • Crosshair active</string>
+  <string name="forms_map_centered_on_gps">Centered on GPS (drag map to pan)</string>
+  <string name="forms_zoom_in">Zoom in</string>
+  <string name="forms_zoom_out">Zoom out</string>
+  <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->
+  <string name="forms_gps_accuracy_zoom">GPS %1$s • %2$sz</string>
+
+  <!-- Line (geotrace) and polygon (geoshape) questions -->
+  <!-- Button that records the device's current GPS position as a new vertex. -->
+  <string name="forms_capture_vertex">Capture vertex</string>
+  <!-- "pts" abbreviates points. -->
+  <string name="forms_geometry_polygon_min">Polygon (≥3 pts)</string>
+  <string name="forms_geometry_line_min">Linestring (≥2 pts)</string>
+  <string name="forms_geometry_walk_or_draw">Walk or draw (Pan allowed)</string>
+  <string name="forms_geometry_gps_walk_only">GPS walk only (Locked)</string>
+  <string name="forms_geometry_gps_stream_only">GPS stream only (Pan locked)</string>
+  <!-- %1$d = number of vertices. -->
+  <plurals name="forms_vertex_count">
+    <item quantity="one">%1$d vertex</item>
+    <item quantity="other">%1$d vertices</item>
+  </plurals>
+  <!-- Status while walking a line or polygon. %1$d = number of points logged so far ("pts" abbreviates points). -->
+  <plurals name="forms_geometry_walking">
+    <item quantity="one">Walking • Logging GPS waypoint every 5s (%1$d pt)</item>
+    <item quantity="other">Walking • Logging GPS waypoint every 5s (%1$d pts)</item>
+  </plurals>
+  <!-- %1$d = number of points logged so far, %2$s = label of the Stop walking button. -->
+  <plurals name="forms_geometry_walking_stop_hint">
+    <item quantity="one">Walking • Logging GPS waypoint every 5s (%1$d pt). Tap "%2$s" when finished.</item>
+    <item quantity="other">Walking • Logging GPS waypoint every 5s (%1$d pts). Tap "%2$s" when finished.</item>
+  </plurals>
+  <string name="forms_geo_target_point_coordinates">Target Point Coordinates</string>
+  <string name="forms_gps_location">GPS Location</string>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_polygon_ready">
+    <item quantity="one">%1$d vertex captured • Closed polygon ready — tap "Next →" to continue or add more vertices</item>
+    <item quantity="other">%1$d vertices captured • Closed polygon ready — tap "Next →" to continue or add more vertices</item>
+  </plurals>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_line_ready">
+    <item quantity="one">%1$d vertex captured • Linestring ready — tap "Next →" to continue or add more vertices</item>
+    <item quantity="other">%1$d vertices captured • Linestring ready — tap "Next →" to continue or add more vertices</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_polygon_need_more">
+    <item quantity="one">Need %1$d more vertex to complete polygon. Tap "%2$s" below to record.</item>
+    <item quantity="other">Need %1$d more vertices to complete polygon. Tap "%2$s" below to record.</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_line_need_more">
+    <item quantity="one">Need %1$d more vertex to complete linestring. Tap "%2$s" below to record.</item>
+    <item quantity="other">Need %1$d more vertices to complete linestring. Tap "%2$s" below to record.</item>
+  </plurals>
+  <string name="forms_stop_walking">Stop walking</string>
+  <string name="forms_start_walking">Start walking</string>
+  <string name="forms_clear_all_vertices">Clear all vertices</string>
+  <!-- %1$s = label of the Start walking button, %2$s = label of the Add point button. -->
+  <string name="forms_geometry_pan_disabled_hint">Map panning is disabled for this question. Tap "%1$s" to log GPS waypoints every 5s, or "%2$s" to capture manually.</string>
+
+  <!-- Drawing geometry on the host's map (web) -->
+  <string name="forms_map_instruction_point">Click the map to place this point.</string>
+  <string name="forms_map_instruction_line">Click the map to add the line's vertices, in order (at least 2).</string>
+  <string name="forms_map_instruction_polygon">Click the map to add the polygon's corners, in order (at least 3).</string>
+  <!-- "Draw on map" is the label of the button that starts drawing. -->
+  <string name="forms_map_drawn_point">Drawn on the map: point. Use Draw on map to start.</string>
+  <string name="forms_map_drawn_line">Drawn on the map: line. Use Draw on map to start.</string>
+  <string name="forms_map_drawn_polygon">Drawn on the map: polygon. Use Draw on map to start.</string>
+  <string name="forms_map_no_point">No point yet</string>
+  <string name="forms_map_point_placed">Point placed</string>
+  <string name="forms_drawing_on_map">Drawing on map</string>
+  <string name="forms_draw_on_map">Draw on map</string>
+  <string name="forms_redraw">Redraw</string>
+  <string name="forms_zoom_to_fit">Zoom to fit</string>
+
+  <!-- Choice questions -->
+  <!-- Shown on a cascading choice question. %1$s = label of the question it depends on. -->
+  <string name="forms_select_parent_first">Select an answer for '%1$s' first</string>
+  <string name="forms_no_matching_options">(No selectable options match the current filter)</string>
+  <!-- Button that adds a choice option typed by the collector. -->
+  <string name="forms_add_new">Add new</string>
+  <string name="forms_new_item_placeholder">New item label</string>
+
+  <!-- Range, rank, and acknowledge questions -->
+  <!-- %1$s = minimum value of the range. -->
+  <string name="forms_range_min">Min: %1$s</string>
+  <!-- %1$s = currently selected value. -->
+  <string name="forms_range_selected">Selected: %1$s</string>
+  <!-- %1$s = maximum value of the range. -->
+  <string name="forms_range_max">Max: %1$s</string>
+  <string name="forms_rank_instructions">Drag items to order from highest (#1) to lowest priority:</string>
+  <string name="forms_rank_move_up">Move up</string>
+  <string name="forms_rank_move_down">Move down</string>
+  <string name="forms_rank_drag_to_reorder">Drag to reorder</string>
+  <string name="forms_trigger_acknowledged">Acknowledged (OK)</string>
+  <string name="forms_trigger_acknowledge">Acknowledge / Confirm</string>
+
+  <!-- Photo, video, audio, and file questions -->
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_capture">%1$s\nThis file isn't available on this device. Capture it again to replace it.</string>
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_choose">%1$s\nThis file isn't available on this device. Choose it again to replace it.</string>
+  <!-- Secondary button that uploads an existing file instead of capturing a new one. -->
+  <string name="forms_media_choose_from_device">Choose from device</string>
+  <string name="forms_media_choose_file">Choose file</string>
+  <string name="forms_media_replace_file">Replace file</string>
+  <string name="forms_media_upload">Upload</string>
+  <string name="forms_media_remove">Remove</string>
+  <!-- Screen reader description of a captured photo. %1$s = file name. -->
+  <string name="forms_media_captured_photo_description">Captured photo %1$s</string>
+  <string name="forms_media_photo_attached">Photo attached</string>
+  <string name="forms_media_video_attached">Video attached</string>
+  <string name="forms_media_audio_attached">Audio recording attached</string>
+  <string name="forms_media_file_attached">File attached</string>
+  <!-- Attachment status with its length. %1$s = status (e.g. Video attached), %2$s = duration (e.g. 0:05). -->
+  <string name="forms_media_attached_with_duration">%1$s · %2$s</string>
+  <!-- Titles of media questions. -->
+  <string name="forms_media_kind_photo">Photo</string>
+  <string name="forms_media_kind_video">Video</string>
+  <string name="forms_media_kind_audio">Audio recording</string>
+  <string name="forms_media_kind_file">File</string>
+  <string name="forms_media_take_photo">Take photo</string>
+  <string name="forms_media_record_video">Record video</string>
+  <string name="forms_media_record_audio">Record audio</string>
+  <string name="forms_media_retake_photo">Retake photo</string>
+  <!-- Re-records a video or audio answer. -->
+  <string name="forms_media_record_again">Record again</string>
+  <!-- Badge: the question only accepts media captured live, not uploaded files. -->
+  <string name="forms_media_capture_only">Capture only</string>
+  <!-- Badge: the question accepts live capture or an uploaded file. -->
+  <string name="forms_media_capture_or_upload">Capture or upload</string>
+  <string name="forms_media_live_unavailable_photo">This question needs a live photo, which this device/browser can't capture.</string>
+  <string name="forms_media_live_unavailable_video">This question needs a live video, which this device/browser can't capture.</string>
+  <string name="forms_media_live_unavailable_audio">This question needs a live audio recording, which this device/browser can't capture.</string>
+  <string name="forms_media_live_unavailable_file">This question needs a live file, which this device/browser can't capture.</string>
+  <string name="forms_media_unavailable_photo">This device can't capture or choose a photo.</string>
+  <string name="forms_media_unavailable_video">This device can't capture or choose a video.</string>
+  <string name="forms_media_unavailable_audio">This device can't capture or choose an audio recording.</string>
+  <string name="forms_media_unavailable_file">This device can't capture or choose a file.</string>
+  <!-- Photo size limit. %1$d = maximum long edge in pixels. -->
+  <string name="forms_media_max_pixels">Max %1$d px</string>
+  <!-- The question prefers the front (selfie) camera. -->
+  <string name="forms_media_front_camera">Front camera</string>
+
+  <!-- Variant-incompatible question fallback warnings -->
+  <string name="forms_variant_web">web</string>
+  <string name="forms_variant_google_earth">Google Earth</string>
+  <string name="forms_incompatible_type_gps_location">GPS-only location</string>
+  <string name="forms_incompatible_type_gps_line">GPS-only line</string>
+  <string name="forms_incompatible_type_gps_polygon">GPS-only polygon</string>
+  <string name="forms_incompatible_type_location">Location</string>
+  <string name="forms_incompatible_type_line">Line</string>
+  <string name="forms_incompatible_type_polygon">Polygon</string>
+  <string name="forms_incompatible_type_photo">Photo</string>
+  <string name="forms_incompatible_type_video">Video</string>
+  <string name="forms_incompatible_type_audio">Audio</string>
+  <string name="forms_incompatible_type_file">File</string>
+  <!-- %1$s = question type (e.g. Photo, GPS-only location); %2$s = variant name (web or Google Earth). -->
+  <string name="forms_variant_incompatible_warning">%1$s questions aren't available on %2$s. This question will be skipped. Contact the survey organizer to resolve this.</string>
+</resources>

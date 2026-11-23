@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Impact goals: plain-language names of the goals survey data can contribute to. -->
+  <string name="wizard_goal_deforestation_free_supply_chains">Minyororo ya ugavi isiyo na ukataji misitu</string>
+  <string name="wizard_goal_ecosystem_restoration">Urejeshaji wa mifumo ikolojia</string>
+  <string name="wizard_goal_effective_protected_areas">Maeneo yaliyohifadhiwa</string>
+  <string name="wizard_goal_iplc_rights_and_tenure">Haki za ardhi za Watu wa Asili na jamii</string>
+  <string name="wizard_goal_legal_timber">Mbao halali</string>
+  <string name="wizard_goal_forest_carbon_and_conservation">Kaboni ya misitu na uhifadhi</string>
+  <string name="wizard_goal_smallholder_livelihoods">Riziki za wakulima wadogo na ufikiaji wa masoko</string>
+  <string name="wizard_goal_open_earth_data">Data huria ya marejeo ya kifuniko cha ardhi na mazao</string>
+  <!-- Heading of standard fields (shared data definitions) that don't contribute to any goal. -->
+  <string name="wizard_goal_other_standard_fields">Sehemu sanifu nyingine</string>
+
+  <!-- Impact attribution levels: how directly a survey's data contributed to results (1–5). -->
+  <string name="wizard_impact_attribution_official_submission">Imetumika katika uwasilishaji rasmi</string>
+  <string name="wizard_impact_attribution_official_submission_explanation">Mratibu alisema data ilitumika katika uwasilishaji rasmi, kama taarifa ya uchunguzi wa kina ya EUDR, ripoti ya FERM, au tathmini ya eneo lililohifadhiwa.</string>
+  <string name="wizard_impact_attribution_partner_use">Imetumiwa na mshirika</string>
+  <string name="wizard_impact_attribution_partner_use_explanation">Data ilitumwa kwa mshirika, au ilitumiwa na wanunuzi, kwa utoaji wa hati za ardhi, au kukagua ramani au modeli.</string>
+  <string name="wizard_impact_attribution_purpose_export">Imehamishwa kwa madhumuni yake</string>
+  <string name="wizard_impact_attribution_purpose_export_explanation">Data ilipakuliwa katika muundo unaotolewa na mojawapo ya madhumuni yake, kama EUDR GeoJSON.</string>
+  <string name="wizard_impact_attribution_data_collected">Data imekusanywa</string>
+  <string name="wizard_impact_attribution_data_collected_explanation">Data ilikusanywa, lakini bado hatujui jinsi ilivyotumika.</string>
+  <string name="wizard_impact_attribution_exploratory">Hatua za mwanzo</string>
+  <string name="wizard_impact_attribution_exploratory_explanation">Utafiti wa majaribio au uchunguzi, au usio na data bado.</string>
+
+  <!-- Impact setup hints, shown when a summary has no numbers yet. -->
+  <string name="wizard_impact_hint_collect_data">Takwimu zitaonekana hapa data ikishakusanywa.</string>
+  <string name="wizard_impact_hint_pick_purpose">Chagua data itatumika kwa nini katika Maelezo ya utafiti, ili matokeo yaweze kupangwa kwa lengo.</string>
+  <string name="wizard_impact_hint_link_fields">Unganisha maswali ya fomu au safuwima za tabaka na sehemu sanifu (kama Bidhaa), ili majibu yake yaweze kujumlishwa.</string>
+
+  <!-- Impact activity: kinds of "data was used" events, with their count next to them. -->
+  <string name="wizard_impact_activity_downloads">Vipakuliwa</string>
+  <string name="wizard_impact_activity_sent_to_partners">Imetumwa kwa washirika</string>
+  <string name="wizard_impact_activity_receipts_created">Stakabadhi zilizoundwa</string>
+  <string name="wizard_impact_activity_receipts_shared">Stakabadhi zilizoshirikiwa</string>
+  <string name="wizard_impact_activity_doi_minted">DOI zilizotolewa</string>
+  <string name="wizard_impact_activity_surveys_closed">Tafiti zilizofungwa</string>
+
+  <!-- Impact indicators. %1$s is the formatted count (e.g. "1,234"). -->
+  <plurals name="wizard_impact_map_features">
+    <item quantity="one">Kipengele %1$s cha ramani</item>
+    <item quantity="other">Vipengele %1$s vya ramani</item>
+  </plurals>
+  <!-- %1$s: a count of map features (e.g. "3 map features"); %2$s: their area (e.g. "5.9 ha"). -->
+  <string name="wizard_impact_value_with_area">%1$s · %2$s</string>
+  <!-- Headline of a share indicator. %1$s: a percentage (e.g. "67%"); %2$s: the most common answer (e.g. "Yes"). -->
+  <string name="wizard_impact_share_value">%1$s %2$s</string>
+  <!-- What a breakdown indicator is split by. %1$s: the indicator name in lower case (e.g. "commodity"). -->
+  <string name="wizard_impact_detail_by">Kwa %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_of_answered">Kati ya %1$s vyenye jibu</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_total_from">Jumla kutoka %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_average_of">Wastani wa %1$s</string>
+  <!-- %1$s: an area (e.g. "5.9 ha") or a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_covering">Ikijumuisha %1$s</string>
+
+  <!-- Impact notes on what couldn't be counted. %1$s: the standard field (shared data definition) name. -->
+  <string name="wizard_impact_note_link_unknown">Sehemu moja imeunganishwa na sehemu sanifu ambayo haipo tena (%1$s).</string>
+  <string name="wizard_impact_note_link_deprecated">Sehemu moja imeunganishwa na sehemu sanifu iliyoachwa kutumika (%1$s).</string>
+  <string name="wizard_impact_note_link_not_in_library">Sehemu moja imeunganishwa na sehemu sanifu ya shirika jingine, kwa hivyo haihesabiwi hapa (%1$s).</string>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_not_a_number">
+    <item quantity="one">%1$s: thamani %2$s si nambari (%3$s), kwa hivyo imeachwa.</item>
+    <item quantity="other">%1$s: thamani %2$s si nambari (%3$s), kwa hivyo zimeachwa.</item>
+  </plurals>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_unsupported_unit">
+    <item quantity="one">%1$s: thamani %2$s inatumia kipimo kisichoweza kubadilishwa (%3$s), kwa hivyo imeachwa.</item>
+    <item quantity="other">%1$s: thamani %2$s zinatumia kipimo kisichoweza kubadilishwa (%3$s), kwa hivyo zimeachwa.</item>
+  </plurals>
+
+  <!-- Impact views (survey Impact tab, Impact page, platform-wide view) and PDF summaries. -->
+  <string name="wizard_impact_title">Athari</string>
+  <string name="wizard_impact_survey_subtitle">Jumla ya data ya utafiti huu, na jinsi ilivyotumika. Viwanja vilivyochorwa zaidi ya mara moja vinahesabiwa mara moja.</string>
+  <string name="wizard_impact_organization_subtitle">Jumla ya data ya tafiti zako, na jinsi ilivyotumika. Viwanja vilivyochorwa katika zaidi ya utafiti mmoja vinahesabiwa mara moja.</string>
+  <!-- Option of the survey filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_surveys">Tafiti zote</string>
+  <!-- Option of the country filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_countries">Nchi zote</string>
+  <!-- Label of the survey filter dropdown. -->
+  <string name="wizard_impact_filter_survey">Utafiti</string>
+  <!-- Label of the country filter dropdown. -->
+  <string name="wizard_impact_filter_country">Nchi</string>
+  <!-- Title of the platform-wide Impact view ("Collect One" is the product name). -->
+  <string name="wizard_impact_all_of_collect_one">Collect One nzima</string>
+  <string name="wizard_impact_global_subtitle_full">Jumla ya data ya kila mtu, kutoka kwa sehemu sanifu za kimataifa pekee. Mashirika yaliyojiondoa hayajajumuishwa, na makundi madogo yanawekwa faragha. Kama Msimamizi wa Watumiaji wote, unaona pia sehemu sanifu ambazo hazijachapishwa.</string>
+  <string name="wizard_impact_global_subtitle_published">Jumla ya data ya kila mtu, kutoka kwa sehemu sanifu za kimataifa za umma pekee. Mashirika yaliyojiondoa hayajajumuishwa, na makundi madogo yanawekwa faragha.</string>
+  <!-- Title of the platform-wide impact summary (PDF) ("Collect One" is the product name). -->
+  <string name="wizard_impact_global_title">Watumiaji wote wa Collect One</string>
+  <string name="wizard_impact_download_pdf">Pakua muhtasari wa PDF</string>
+  <string name="wizard_impact_adding_up">Inajumlisha takwimu…</string>
+  <string name="wizard_impact_no_numbers_for_this">Bado hakuna takwimu za hili.</string>
+  <!-- Heading of an organization's own indicators, in its published view. -->
+  <string name="wizard_impact_own_indicators">Viashiria vyake</string>
+  <!-- Heading of the viewer's organization's own indicators, in its members' full view. -->
+  <string name="wizard_impact_your_indicators">Viashiria vyako</string>
+  <string name="wizard_impact_own_indicators_supporting">Sehemu sanifu za shirika lenyewe, zilizochapishwa kama jumla.</string>
+  <string name="wizard_impact_your_indicators_supporting">Sehemu sanifu za shirika lako lenyewe. Ni zile zilizowekwa alama ya Jumla za umma pekee ndizo huchapishwa; zingine hubaki ndani ya shirika lako.</string>
+  <string name="wizard_impact_suggested_indicators">Viashiria vilivyopendekezwa na mashirika</string>
+  <string name="wizard_impact_suggested_indicators_supporting">Sehemu za mashirika yenyewe ambazo yanapendekeza zihesabiwe kuelekea lengo. Zinaonyeshwa kando na haziongezwi kamwe kwenye jumla zilizo hapo juu.</string>
+  <string name="wizard_impact_how_data_was_used">Jinsi data ilivyotumika</string>
+  <string name="wizard_impact_unique_hectares_mapped">Hekta za kipekee zilizochorwa</string>
+  <string name="wizard_impact_unique_hectares_mapped_detail">Eneo la vipengele vya kipekee vya ramani</string>
+  <string name="wizard_impact_plots_and_map_features">Viwanja na vipengele vya ramani</string>
+  <!-- %1$s: the formatted number of duplicate map features. -->
+  <plurals name="wizard_impact_duplicates_counted_once">
+    <item quantity="one">Nakala %1$s imehesabiwa mara moja (GeoID ileile imechorwa tena)</item>
+    <item quantity="other">Nakala %1$s zimehesabiwa mara moja (GeoID ileile imechorwa tena)</item>
+  </plurals>
+  <string name="wizard_impact_no_plot_mapped_twice">Hakuna kiwanja kilichochorwa mara mbili</string>
+  <string name="wizard_impact_producers_registered">Wazalishaji waliosajiliwa</string>
+  <string name="wizard_impact_producers_registered_detail">Wazalishaji tofauti waliotajwa kwenye vipengele vya ramani</string>
+  <string name="wizard_impact_what_happened_with_data">Kilichotokea kwa data</string>
+  <string name="wizard_impact_outcomes_empty_survey">Utaulizwa utafiti utakapofungwa.</string>
+  <string name="wizard_impact_outcomes_empty">Bado hakuna majibu. Waratibu huulizwa wanapofunga utafiti.</string>
+  <!-- Shown next to an outcome a single survey's organizer chose. -->
+  <string name="wizard_impact_outcome_yes">Ndiyo</string>
+  <string name="wizard_impact_not_used_yet">Bado haijatumika</string>
+  <string name="wizard_impact_closed_not_answered_yet">Imefungwa, bado haijajibiwa</string>
+  <string name="wizard_impact_closed_surveys_not_answered">Tafiti zilizofungwa ambazo hazijajibiwa</string>
+  <!-- PDF summary: closed surveys whose organizer didn't say what happened with the data. -->
+  <string name="wizard_impact_closed_not_answered">Imefungwa, haijajibiwa</string>
+  <string name="wizard_impact_how_directly_contributed">Jinsi data ilivyochangia moja kwa moja</string>
+  <!-- Attribution level on a 1–5 scale. %1$s: the level (e.g. "2"). -->
+  <string name="wizard_impact_level_of_five">%1$s kati ya 5</string>
+  <string name="wizard_impact_no_global_purpose_surveys">Bado hakuna tafiti zenye madhumuni ya kimataifa.</string>
+  <string name="wizard_impact_no_surveys">Bado hakuna tafiti.</string>
+  <string name="wizard_impact_global_purpose_by_level">Tafiti zenye madhumuni ya kimataifa, kwa kiwango</string>
+  <!-- %1$s: the formatted number of surveys. -->
+  <plurals name="wizard_impact_surveys">
+    <item quantity="one">Utafiti %1$s</item>
+    <item quantity="other">Tafiti %1$s</item>
+  </plurals>
+  <string name="wizard_impact_by_country_and_map_area">Kwa nchi na eneo la ramani</string>
+  <string name="wizard_impact_by_country_and_map_area_supporting">Nchi zinahitaji angalau vipengele 10 vya ramani, na maeneo ya ramani angalau vipengele 10 vya ramani kutoka mashirika 2, kabla ya takwimu zao kuonyeshwa.</string>
+  <string name="wizard_impact_countries">Nchi</string>
+  <string name="wizard_impact_no_countries">Bado hakuna nchi.</string>
+  <!-- Shown instead of a country's numbers when it has fewer than 10 map features. -->
+  <string name="wizard_impact_fewer_than_10">Chini ya 10</string>
+  <string name="wizard_impact_map_areas_kept_private">Maeneo ya ramani yaliyowekwa faragha</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_map_areas_with_numbers">
+    <item quantity="one">Eneo %1$s la ramani lenye takwimu</item>
+    <item quantity="other">Maeneo %1$s ya ramani yenye takwimu</item>
+  </plurals>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_map_features_in_private_areas">
+    <item quantity="one">Kipengele %1$s cha ramani katika maeneo ya faragha</item>
+    <item quantity="other">Vipengele %1$s vya ramani katika maeneo ya faragha</item>
+  </plurals>
+  <string name="wizard_impact_organizations_not_included">Mashirika ambayo hayajajumuishwa</string>
+  <string name="wizard_impact_organizations_not_included_detail">Hayajumuishi data yao kwenye takwimu za jukwaa zima</string>
+  <string name="wizard_impact_not_enough_data_title">Bado hakuna data ya kutosha kuchapisha</string>
+  <!-- %1$d: the minimum number of map features before an organization's numbers are published. -->
+  <string name="wizard_impact_not_enough_data_body">Takwimu huchapishwa kukiwa na angalau vipengele %1$d vya ramani, ili makundi madogo yasiweze kutambuliwa.</string>
+  <string name="wizard_impact_hints_title_empty">Jinsi ya kupata takwimu hapa</string>
+  <string name="wizard_impact_hints_title">Pata manufaa zaidi kutoka kwa data yako</string>
+  <!-- %1$s: the formatted number of linked fields. -->
+  <plurals name="wizard_impact_linked_fields_not_counted">
+    <item quantity="one">Sehemu %1$s iliyounganishwa haikuweza kuhesabiwa</item>
+    <item quantity="other">Sehemu %1$s zilizounganishwa hazikuweza kuhesabiwa</item>
+  </plurals>
+  <!-- Button hiding the list of what couldn't be counted. -->
+  <string name="wizard_impact_hide">Ficha</string>
+  <!-- Button showing why some fields couldn't be counted. -->
+  <string name="wizard_impact_why">Kwa nini?</string>
+
+  <!-- PDF impact summary. -->
+  <!-- %1$s: the survey, organization, or platform-wide title. -->
+  <string name="wizard_impact_pdf_title">Muhtasari wa athari • %1$s</string>
+  <!-- Running header on every page ("Open Foris Collect One" is the product name). %1$s: the summary title. -->
+  <string name="wizard_impact_pdf_running_header">Open Foris Collect One • Muhtasari wa athari • %1$s</string>
+  <!-- %1$s: when the PDF was generated (e.g. "2026-09-18 10:14 UTC"). -->
+  <string name="wizard_impact_pdf_footer">Muhtasari wa athari • Umetolewa %1$s</string>
+  <string name="wizard_impact_pdf_subject_survey">Muhtasari wa athari za utafiti</string>
+  <string name="wizard_impact_pdf_subject_organization">Muhtasari wa athari za shirika</string>
+  <string name="wizard_impact_pdf_subject_global">Muhtasari wa athari za mashirika yote yanayoshiriki katika takwimu za jukwaa zima</string>
+  <string name="wizard_impact_pdf_published_numbers">Takwimu zilizochapishwa</string>
+  <string name="wizard_impact_pdf_counted_once_note">Viwanja vilivyochorwa zaidi ya mara moja (GeoID ileile) vinahesabiwa mara moja.</string>
+  <string name="wizard_impact_pdf_counted_once_note_published">Viwanja vilivyochorwa zaidi ya mara moja (GeoID ileile) vinahesabiwa mara moja. Takwimu zilizochapishwa ni jumla zisizo na utambulisho kutoka kwa sehemu sanifu za umma pekee.</string>
+  <string name="wizard_impact_pdf_at_a_glance">Kwa muhtasari</string>
+  <string name="wizard_impact_pdf_unique_map_features">Vipengele vya kipekee vya ramani</string>
+  <string name="wizard_impact_pdf_area_mapped">Eneo lililochorwa</string>
+  <string name="wizard_impact_pdf_counted_once">Imehesabiwa mara moja</string>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_pdf_mapped_again">
+    <item quantity="one">Kipengele %1$s cha ramani kimechorwa tena mahali pengine</item>
+    <item quantity="other">Vipengele %1$s vya ramani vimechorwa tena mahali pengine</item>
+  </plurals>
+  <string name="wizard_impact_pdf_suggested_note">Sehemu za mashirika yenyewe ambazo yanapendekeza zihesabiwe kuelekea lengo. Haziongezwi kwenye jumla zilizo hapo juu.</string>
+  <!-- How directly the data contributed (attribution level). -->
+  <string name="wizard_impact_pdf_contribution">Mchango</string>
+  <string name="wizard_impact_pdf_by_country">Kwa nchi</string>
+  <string name="wizard_impact_pdf_fewer_than_10_features">Chini ya vipengele 10 vya ramani</string>
+  <string name="wizard_impact_pdf_map_areas">Maeneo ya ramani</string>
+  <string name="wizard_impact_pdf_map_areas_with_numbers">Maeneo ya ramani yenye takwimu</string>
+  <string name="wizard_impact_pdf_kept_private">Yamewekwa faragha</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_pdf_kept_private_areas">
+    <item quantity="one">Eneo %1$s la ramani lenye chini ya vipengele 10 vya ramani au mashirika 2</item>
+    <item quantity="other">Maeneo %1$s ya ramani yenye chini ya vipengele 10 vya ramani au mashirika 2</item>
+  </plurals>
+  <!-- %1$s: the formatted number of organizations. -->
+  <plurals name="wizard_impact_pdf_excluded_organizations">
+    <item quantity="one">Shirika %1$s halijumuishi data yake kwenye takwimu za jukwaa zima.</item>
+    <item quantity="other">Mashirika %1$s hayajumuishi data yao kwenye takwimu za jukwaa zima.</item>
+  </plurals>
+  <string name="wizard_impact_pdf_not_counted">Haijahesabiwa</string>
+
+  <!-- Impact page (#impact): the organizations a user follows and all of Collect One. -->
+  <string name="wizard_impact_back_to_surveys">Rudi kwenye tafiti</string>
+  <string name="wizard_impact_page_title">Vipimo vya moja kwa moja</string>
+  <!-- Header line under "Live Metrics". %1$s: the formatted number of followed organizations. -->
+  <plurals name="wizard_impact_published_by_followed">
+    <item quantity="one">Imechapishwa na shirika %1$s unalofuata</item>
+    <item quantity="other">Imechapishwa na mashirika %1$s unayofuata</item>
+  </plurals>
+  <string name="wizard_impact_choose_organizations">Chagua mashirika</string>
+  <!-- Navigation item of the Impact page's overview. -->
+  <string name="wizard_impact_overview">Muhtasari</string>
+  <!-- Section heading in the Impact page's left panel (shown in capitals). -->
+  <string name="wizard_impact_organizations_you_follow">MASHIRIKA UNAYOFUATA</string>
+  <!-- The signed-in user is a member of this organization. -->
+  <string name="wizard_impact_member">Mwanachama</string>
+  <!-- The signed-in user is a Manager of this organization. -->
+  <string name="wizard_impact_you_manage">Unasimamia</string>
+  <!-- Fallback description of an organization with no type or country. -->
+  <string name="wizard_impact_organization">Shirika</string>
+  <string name="wizard_impact_no_followed_organizations">Bado hufuati shirika lolote.</string>
+  <string name="wizard_impact_dashboard_title">Dashibodi yako ya athari</string>
+  <string name="wizard_impact_dashboard_subtitle">Takwimu zilizochapishwa za mashirika unayofuata. Chagua shirika lolote lililoorodheshwa kuona jumla ya data yake.</string>
+  <string name="wizard_impact_all_of_collect_one_supporting">Kila shirika linaloshiriki katika takwimu za jukwaa zima</string>
+  <string name="wizard_impact_follow_more_organizations">Fuata mashirika zaidi</string>
+  <!-- Screen reader label of the button removing an organization from the Impact page. %1$s: the organization name. -->
+  <string name="wizard_impact_stop_following">Acha kufuata %1$s</string>
+  <string name="wizard_impact_no_numbers_yet">Bado hakuna takwimu.</string>
+  <string name="wizard_impact_not_enough_data_short">Bado hakuna data ya kutosha kuchapisha.</string>
+  <!-- Label under a headline area number. -->
+  <string name="wizard_impact_unique_hectares">Hekta za kipekee</string>
+  <!-- Label under a headline count of map features. -->
+  <string name="wizard_impact_map_features_label">Vipengele vya ramani</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_organization_published_subtitle">Jumla ya tafiti za %1$s, kama ilivyochapishwa kwa kila mtu kwenye Collect One. Viwanja vilivyochorwa katika zaidi ya utafiti mmoja vinahesabiwa mara moja.</string>
+  <string name="wizard_impact_organization_page">Ukurasa wa shirika</string>
+  <string name="wizard_impact_unfollow">Acha kufuata</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_manager">Unaona takwimu zako kamili kama Msimamizi wa %1$s</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_member">Unaona takwimu kamili za %1$s kama mwanachama</string>
+  <string name="wizard_impact_notice_published_member">Hiki ndicho kila mtu kwenye Collect One anaona</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_published_by">Imechapishwa na %1$s</string>
+  <!-- %1$s: the organization name; %2$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body_manager">%1$s huchapisha jumla zisizo na utambulisho kutoka kwa tafiti zake kwa yeyote aliyeingia kwenye Collect One. %2$s</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body">Kila shirika kwenye Collect One huchapisha jumla zisizo na utambulisho kutoka kwa tafiti zake. %1$s</string>
+  <!-- Label of the switch showing members the published view. -->
+  <string name="wizard_impact_show_published">Onyesha kilichochapishwa</string>
+  <!-- "All users" is the name of the platform-wide organization. -->
+  <string name="wizard_impact_platform_notice_full">Unaona kila sehemu sanifu kama Msimamizi wa Watumiaji wote</string>
+  <string name="wizard_impact_platform_notice_published">Imechapishwa kwa kila mtu kwenye Collect One</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_platform_notice_body">Jumla za kila shirika linaloshiriki katika takwimu za jukwaa zima. %1$s</string>
+  <string name="wizard_impact_explainer_title">Kila shirika huchapisha jumla zisizo na utambulisho</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_explainer_body">Waratibu kwenye Collect One huchapisha jumla za tafiti zao, kama hekta zilizochorwa na jinsi data ilivyotumika, ili yeyote aliyeingia aone. %1$s</string>
+  <!-- What's never published. %1$d: the minimum number of map features before numbers are shown. -->
+  <string name="wizard_impact_published_rules">Mawasilisho, vipengele vya ramani, maeneo, na majibu hayachapishwi kamwe, wala sehemu sanifu zilizowekwa kwa ajili ya shirika pekee au zilizowekwa alama kuwa nyeti. Mashirika yenye chini ya vipengele %1$d vya ramani hayaonyeshi takwimu.</string>
+  <string name="wizard_impact_choose_organizations_body">Kila shirika huchapisha jumla zisizo na utambulisho kutoka kwa tafiti zake. Chagua takwimu za nani ungependa kufuata kwenye ukurasa wako wa Athari.</string>
+  <string name="wizard_impact_search_organizations">Tafuta mashirika</string>
+  <string name="wizard_impact_no_organizations_match">Hakuna mashirika yanayolingana.</string>
+  <!-- Appended to an organization's description when it isn't listed publicly. -->
+  <string name="wizard_impact_unlisted">Haijaorodheshwa, wanachama pekee wanaliona</string>
+  <string name="wizard_impact_save">Hifadhi</string>
+  <string name="wizard_impact_cancel">Ghairi</string>
+  <!-- Snackbar after saving a PDF summary. %1$s: the file name; %2$s: its page count and size (e.g. "2 pages • 14 KB"). -->
+  <string name="wizard_impact_saved_pdf">%1$s imehifadhiwa (%2$s)</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the survey title. -->
+  <string name="wizard_impact_filter_label_survey">Utafiti: %1$s</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the country name. -->
+  <string name="wizard_impact_filter_label_country">Nchi: %1$s</string>
+
+  <!-- "What happened with this data?" card/dialog, asked after a survey is closed. -->
+  <string name="wizard_outcome_title">Nini kilitokea kwa data hii?</string>
+  <string name="wizard_outcome_supporting">Chagua zote zinazohusika. Jibu lako husaidia kuonyesha jinsi data ya utafiti inavyotumika.</string>
+  <string name="wizard_outcome_skip">Ruka</string>
+  <string name="wizard_outcome_save">Hifadhi</string>
+  <!-- Question completed by one of the chips below (e.g. "Less time and cost"). -->
+  <string name="wizard_outcome_effort_question">Ikilinganishwa na mbinu yako ya awali, hii ilichukua… (si lazima)</string>
+  <string name="wizard_outcome_effort_less">Muda na gharama kidogo</string>
+  <string name="wizard_outcome_effort_same">Karibu sawa</string>
+  <string name="wizard_outcome_effort_more">Muda na gharama zaidi</string>
+
+  <!-- Purpose Pack picker ("What will this data be used for?"). -->
+  <!-- Screen reader label of the error icon in a validation banner. -->
+  <string name="wizard_purpose_error">Hitilafu</string>
+  <string name="wizard_validation_purpose_required">Chagua madhumuni (au chagua "Nyingine" na ueleze lengo lako) ili kuendelea.</string>
+  <string name="wizard_validation_other_purpose_required">Tafadhali eleza madhumuni ya utafiti huu ili kuendelea.</string>
+  <!-- Badge of a Purpose Pack defined by an organization, when its name is unknown. -->
+  <string name="wizard_purpose_source_organization">Shirika</string>
+  <!-- Badge of a Purpose Pack available to every organization. -->
+  <string name="wizard_purpose_source_global">Kimataifa</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_purpose_other_label">Eleza madhumuni ya utafiti huu *</string>
+  <string name="wizard_purpose_other_placeholder">k.m., Ufuatiliaji wa urejeshaji wa vyanzo vya maji vya jamii</string>
+  <string name="wizard_purpose_other_supporting">Husaidia kuoanisha fomu, dhana za maktaba, na kuripoti athari na lengo lako.</string>
+  <!-- Screen reader label of the check mark on a selected card. -->
+  <string name="wizard_purpose_selected">Imechaguliwa</string>
+  <!-- Title of the card for a custom survey purpose. -->
+  <string name="wizard_purpose_other">Nyingine</string>
+  <string name="wizard_purpose_other_description">Lengo maalum la utafiti, ufuatiliaji, au jamii ambalo halijashughulikiwa na vifurushi sanifu.</string>
+  <!-- Badge of the "Other" purpose card. -->
+  <string name="wizard_purpose_custom">Maalum</string>
+  <!-- What a Purpose Pack adds. %1$d: the number of form templates. -->
+  <plurals name="wizard_purpose_forms">
+    <item quantity="one">Fomu %1$d</item>
+    <item quantity="other">Fomu %1$d</item>
+  </plurals>
+  <!-- What a Purpose Pack adds. %1$d: the number of questions linked to standard fields (shared data definitions). -->
+  <plurals name="wizard_purpose_standard_fields">
+    <item quantity="one">Sehemu sanifu %1$d</item>
+    <item quantity="other">Sehemu sanifu %1$d</item>
+  </plurals>
+
+  <!-- Create survey wizard (#create-survey): page chrome. -->
+  <string name="wizard_cancel_survey_creation">Ghairi kuunda utafiti</string>
+  <!-- Page title while the survey has no title yet, and the wizard's final button. -->
+  <string name="wizard_create_survey">Unda utafiti</string>
+  <string name="wizard_saving_survey">Inahifadhi utafiti…</string>
+  <string name="wizard_save_failed">Imeshindwa kuhifadhi utafiti, kwa hivyo bado uko wazi hapa. %1$s</string>
+  <string name="wizard_discard_title">Ungependa kutupa utafiti?</string>
+  <string name="wizard_discard_body">Ukiondoka sasa, utafiti huu na mabadiliko yoyote uliyofanya yatapotea.</string>
+  <string name="wizard_discard">Tupa</string>
+  <string name="wizard_keep_editing">Endelea kuhariri</string>
+  <string name="wizard_working_copy_prompt_title">Ungependa kuendelea kuhariri rasimu ambayo haijahifadhiwa?</string>
+  <string name="wizard_working_copy_prompt_body">Una rasimu ya utafiti ambayo haijahifadhiwa inayoendelea. Je, ungependa kuendelea kuihariri au kuitupa na kuanza utafiti mpya?</string>
+  <string name="wizard_working_copy_continue">Endelea kuhariri</string>
+  <string name="wizard_working_copy_discard">Tupa rasimu</string>
+  <string name="wizard_back">Rudi</string>
+  <string name="wizard_cancel">Ghairi</string>
+  <string name="wizard_required_field_missing">Sehemu inayohitajika haijajazwa — angalia sehemu iliyoangaziwa</string>
+  <string name="wizard_skip_for_now">Ruka kwa sasa</string>
+  <string name="wizard_next">Ifuatayo</string>
+
+  <!-- Wizard steps: name and short description of each of the 6 steps. -->
+  <string name="wizard_step_overview">Muhtasari</string>
+  <string name="wizard_step_overview_subtitle">Kichwa, shirika, lugha, na njia ya kuanza</string>
+  <string name="wizard_step_purpose">Madhumuni</string>
+  <string name="wizard_step_purpose_subtitle">Lengo la utafiti, kifurushi cha madhumuni, na mipango ya kuripoti</string>
+  <string name="wizard_step_survey_area">Eneo la utafiti</string>
+  <string name="wizard_step_survey_area_subtitle">Mpaka wa utafiti na taswira ya ramani ya msingi ya nje ya mtandao/wavuti</string>
+  <string name="wizard_step_map_features">Vipengele vya ramani</string>
+  <string name="wizard_step_map_features_subtitle">Tabaka kuu la ramani, viwanja vya sampuli, au vipengele vilivyoletwa</string>
+  <string name="wizard_step_forms">Fomu</string>
+  <string name="wizard_step_forms_subtitle">Hojaji, dhana za maktaba, na ulinganishaji wa uhamishaji</string>
+  <string name="wizard_step_sharing">Kushiriki</string>
+  <string name="wizard_step_sharing_subtitle">Ufikiaji, mamlaka ya data ya CARE, na utayari wa athari</string>
+
+  <!-- Wizard step 1: Overview. -->
+  <string name="wizard_overview_subtitle">Ipe utafiti wako jina, chagua shirika linaloliendesha, weka lugha, na uchague jinsi ungependa kuanza.</string>
+  <string name="wizard_survey_identity">Utambulisho wa utafiti</string>
+  <string name="wizard_validation_title_required">Weka kichwa cha utafiti ili kuendelea.</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_survey_title_label">Kichwa cha utafiti *</string>
+  <string name="wizard_survey_title_placeholder">k.m. Uchoraji wa Ramani ya Viwanja vya Kahawa vya Wakulima Wadogo Nyeri</string>
+  <string name="wizard_description_label">Maelezo (si lazima)</string>
+  <string name="wizard_description_placeholder">Eleza malengo na maagizo kwa wakusanyaji data.</string>
+  <!-- Label of the organization dropdown. -->
+  <string name="wizard_organization">Shirika</string>
+  <!-- Organization dropdown option for a survey not run by any organization. -->
+  <string name="wizard_no_organization">Hakuna (utafiti binafsi)</string>
+  <string name="wizard_organization_supporting">Kuendesha utafiti chini ya shirika kunafungua Vifurushi vyake vya Madhumuni vinavyoshirikiwa, dhana za Kamusi, violezo vya Fomu, na taswira maalum ya ramani ya msingi.</string>
+  <string name="wizard_start_method_title">Ungependa kuanza vipi?</string>
+  <string name="wizard_start_from_scratch">Tengeneza utafiti mpya</string>
+  <string name="wizard_start_from_scratch_description">Weka matabaka ya ramani na fomu hatua kwa hatua au kutoka kwa vifurushi vya madhumuni.</string>
+  <string name="wizard_start_copy_existing">Nakili utafiti uliopo</string>
+  <string name="wizard_start_copy_existing_description">Nakili fomu, miundo ya matabaka ya ramani, eneo la utafiti, na vifurushi vya madhumuni bila data.</string>
+  <string name="wizard_start_import">Leta kutoka kwenye faili</string>
+  <string name="wizard_start_import_description">Leta ufafanuzi wa fomu kutoka ODK XForms (.xml) au Collect Earth (.cep).</string>
+  <string name="wizard_no_surveys_to_copy">Hakuna tafiti zilizopo za kunakili.</string>
+  <string name="wizard_copy_source_label">Utafiti chanzo wa kunakili</string>
+  <string name="wizard_copy_source_supporting">Hunakili Fomu, miundo ya Matabaka ya ramani, miundo ya viwanja vya sampuli, na Madhumuni bila kunakili rekodi zilizokusanywa awali.</string>
+  <string name="wizard_import_supported_formats">Miundo inayotumika: ODK XForms (.xml), Collect Earth (.cep, .zip)</string>
+  <string name="wizard_import_choose_another_file">Chagua faili nyingine (.xml, .cep)</string>
+  <string name="wizard_import_choose_file">Chagua faili (.xml, .cep)</string>
+  <!-- %1$d: the number of questions in the imported form. -->
+  <plurals name="wizard_import_questions">
+    <item quantity="one">Swali %1$d</item>
+    <item quantity="other">Maswali %1$d</item>
+  </plurals>
+  <!-- %1$d: the number of sample plots in the imported Collect Earth project. -->
+  <plurals name="wizard_import_sample_plots">
+    <item quantity="one">Kiwanja %1$d cha sampuli</item>
+    <item quantity="other">Viwanja %1$d vya sampuli</item>
+  </plurals>
+  <!-- %1$s: the number of questions (e.g. "12 questions"). -->
+  <string name="wizard_import_parsed">%1$s yamechanganuliwa · Tayari kuletwa kwenye Hatua ya 5</string>
+  <!-- %1$s: the number of questions (e.g. "12 questions"); %2$s: the number of sample plots (e.g. "50 sample plots"). -->
+  <string name="wizard_import_parsed_with_plots">%1$s · %2$s vimechanganuliwa · Tayari kuletwa kwenye Hatua ya 5</string>
+  <string name="wizard_import_clear_file">Ondoa faili iliyoletwa</string>
+  <!-- %1$d: the number of Collect Earth surveys found in the imported archive. -->
+  <string name="wizard_import_cep_archive_label">Utafiti wa Collect Earth kwenye kumbukumbu (%1$d zimepatikana)</string>
+
+  <!-- Wizard step 2: Purpose. -->
+  <string name="wizard_purpose_subtitle">Chagua matokeo au viwango vya kuripoti ambavyo utafiti huu unaunga mkono ili kuweka mapema tabaka lake la ramani na fomu ya kuanzia.</string>
+  <!-- Section title of a required choice (* marks it required). -->
+  <string name="wizard_purpose_question">Data hii itatumika kwa nini? *</string>
+  <string name="wizard_purpose_question_supporting">Chagua madhumuni makuu ili Collect One iweze kurekebisha chaguomsingi za tabaka la ramani la utafiti wako, fomu ya kuanzia, dhana sanifu za maktaba, kinga za utawala wa data (kama EUDR au mamlaka ya CARE), na wasifu wa uhamishaji kwa mbofyo mmoja. Chagua "Nyingine" ikiwa lengo lako halijaorodheshwa.</string>
+  <string name="wizard_purpose_programs_title">Mipango ya kuripoti na mifumo</string>
+  <string name="wizard_purpose_programs_supporting">Programu ambazo data ya utafiti huu inachangia. Kuchagua kiolezo huzichagua mapema; zinatumika kwa ufuatiliaji na kuripoti matokeo na hazibadilishi fomu za utafiti.</string>
+  <string name="wizard_purpose_loading">Inapakia madhumuni…</string>
+  <string name="wizard_starter_template_title">Kiolezo cha kuanzia</string>
+  <string name="wizard_starter_template_supporting">Chagua jinsi utafiti huu unavyotimiza madhumuni yake. Kiolezo huandaa fomu za kuanzia, ukaguzi na wasifu wa kuhamisha data, na huchagua mapema programu unazoripotia.</string>
+  <string name="wizard_starter_template_programs">Huripotia: %1$s</string>
+  <string name="wizard_starter_template_replace_title">Ubadilishe fomu zako?</string>
+  <string name="wizard_starter_template_replace_body">Umehariri fomu zilizoundwa kutoka kiolezo cha utafiti huu. Ukibadilisha hadi %1$s unaweza kuzibadilisha kwa fomu zake za kuanzia, au kubaki na fomu zako kama zilivyo.</string>
+  <string name="wizard_starter_template_replace_forms">Badilisha fomu</string>
+  <string name="wizard_starter_template_keep_forms">Baki na fomu zangu</string>
+  <string name="wizard_starter_template_cancel">Ghairi</string>
+
+  <!-- Wizard step 3: Survey area. -->
+  <string name="wizard_survey_area_subtitle_field">Bainisha mpaka wa kijiografia ili kuweka mipaka ya ramani ya utafiti na kuandaa mapema taswira ya ramani ya msingi ya nje ya mtandao kwa wakusanyaji wa uwandani.</string>
+  <string name="wizard_survey_area_subtitle_visual">Bainisha eneo linalokuvutia (AOI) ambapo viwanja vya sampuli vitazalishwa na kufasiriwa, na uthibitishe taswira ya setilaiti ya ramani ya msingi.</string>
+  <string name="wizard_imagery_title">Ramani ya msingi na taswira ya marejeo</string>
+  <string name="wizard_imagery_supporting_field">Chagua matabaka ya taswira ya setilaiti na marejeo yatakayowashwa pamoja na ramani ya msingi chaguomsingi ya setilaiti.</string>
+  <string name="wizard_imagery_supporting_visual">Chagua matabaka ya taswira ya ubora wa juu au ya vipindi vya muda (kama NICFI Planet au mosaiki za Sentinel-2) ambayo wafasiri wa picha watakagua wakati wa kuainisha viwanja.</string>
+  <string name="wizard_imagery_default_only">Ramani ya msingi chaguomsingi ya Mapbox Satellite imewashwa. Hakuna matabaka maalum ya taswira yaliyowekwa.</string>
+  <!-- Badge of imagery available to everyone ("All users" is the name of the platform-wide organization). -->
+  <string name="wizard_imagery_source_all_users">Watumiaji wote</string>
+  <!-- Imagery layer that comes with the platform. -->
+  <string name="wizard_imagery_built_in">Taswira iliyojengewa ndani ya jukwaa</string>
+  <!-- %1$s: the organization that added the imagery layer. -->
+  <string name="wizard_imagery_added_by">Imeongezwa na %1$s</string>
+  <string name="wizard_imagery_offline_available">Inapatikana kwa kupakuliwa uwandani nje ya mtandao na kuchora ramani kwenye wavuti</string>
+  <string name="wizard_imagery_online_only">Tabaka la mtandaoni la taswira ya setilaiti na marejeo</string>
+
+  <!-- Wizard step 4: Map features. -->
+  <string name="wizard_map_features_subtitle">Weka Tabaka kuu la ramani ambapo data itarekodiwa: ukusanyaji huru wa uwandani, gridi ya kitakwimu ya viwanja vya sampuli, au vipengele vya GeoJSON / KML vilivyoletwa.</string>
+  <string name="wizard_map_features_source_title">Vipengele vya ramani vinaundwa vipi?</string>
+  <string name="wizard_source_field_freeform">Wakusanyaji data huongeza vipengele vya ramani uwandani</string>
+  <string name="wizard_source_field_freeform_description">Wakusanyaji hunasa nukta au poligoni mpya papo hapo wakati wa ziara za uwandani.</string>
+  <string name="wizard_source_sample_plots">Zalisha viwanja vya sampuli</string>
+  <string name="wizard_source_sample_plots_description">Unda viwanja vya sampuli vya kimfumo au vya nasibu (na gridi za viwanja vidogo) ndani ya eneo la utafiti.</string>
+  <string name="wizard_source_import_file">Leta vipengele vya ramani (GeoJSON / KML)</string>
+  <string name="wizard_source_import_file_description">Pakia mipaka ya viwanja, vipande vya ardhi, au nukta zilizobainishwa awali kutoka kwenye faili.</string>
+  <!-- %1$s: the description of the chosen way of creating map features (a full sentence). -->
+  <string name="wizard_map_features_source_preselected">%1$s Imechaguliwa mapema kwa madhumuni na hali ya ukusanyaji uliyochagua.</string>
+  <string name="wizard_change">Badilisha</string>
+  <string name="wizard_eudr_guardrail_title">Kinga ya mahali kijiografia ya Kifungu cha 9 cha EUDR</string>
+  <string name="wizard_eudr_guardrail_body">Kanuni ya EU kuhusu Ukataji Misitu (EUDR) inahitaji mipaka ya poligoni kwa viwanja vyote vya uzalishaji vilivyo kubwa kuliko hekta 4. Jiometri ya poligoni imechaguliwa kwa chaguomsingi.</string>
+  <string name="wizard_eudr_plots_under_four_ha">Viwanja vyote vya uzalishaji katika utafiti huu ni ≤ 4 ha (ruhusu maeneo ya nukta moja)</string>
+  <string name="wizard_primary_layer_settings">Mipangilio ya tabaka kuu la ramani</string>
+  <string name="wizard_map_layer_name">Jina la tabaka la ramani</string>
+  <string name="wizard_geometry_type">Aina ya jiometri</string>
+  <string name="wizard_allow_field_creation">Ruhusu wakusanyaji kuongeza vipengele vipya vya ramani uwandani</string>
+  <string name="wizard_allow_field_creation_supporting">Kikiwashwa, wakusanyaji data wanaweza kuweka pini au kutembea kuzunguka mipaka ya viwanja ili kuunda vipengele vipya vya ramani.</string>
+  <string name="wizard_sample_design_title">Muundo wa kitakwimu wa sampuli na nukta za viwanja vidogo</string>
+  <string name="wizard_sample_design_supporting">Weka viwanja vya gridi ya kimfumo, nasibu rahisi, au nasibu ya matabaka, umbo la kiwanja (Nukta, Mraba, Duara), na gridi za ndani za nukta za sampuli za viwanja vidogo.</string>
+  <string name="wizard_import_features_title">Leta vipengele vya ramani kutoka GeoJSON au KML</string>
+  <string name="wizard_import_features_supporting">Pakia mipaka ya mashamba iliyopo, viwanja vya ufuatiliaji, au maeneo ya kuvutia. Sifa zilizo kwenye faili zitakuwa sifa za Tabaka la ramani.</string>
+  <string name="wizard_import_features_choose_file">Chagua faili ya GeoJSON au KML</string>
+  <!-- %1$d: the number of imported map features; %2$s: their geometry type in lower case (e.g. "polygon"). -->
+  <plurals name="wizard_import_features_loaded">
+    <item quantity="one">Kipengele %1$d cha %2$s kimepakiwa</item>
+    <item quantity="other">Vipengele %1$d vya %2$s vimepakiwa</item>
+  </plurals>
+  <string name="wizard_also_allow_field_creation">Pia ruhusu wakusanyaji kuongeza vipengele vipya vya ramani uwandani</string>
+  <string name="wizard_also_allow_field_creation_supporting">Acha kimezimwa kwa viwanja vya kudumu vya ufuatiliaji; kiwashe ikiwa wakusanyaji data wanaweza pia kuongeza maeneo mapya.</string>
+  <!-- %1$d: the number of other map layers and data tables in the survey. -->
+  <plurals name="wizard_other_datasets_note">
+    <item quantity="one">Utafiti huu pia una tabaka la ramani au jedwali la data %1$d zaidi, lililounganishwa na fomu zake nyingine. Unaweza kulikagua katika hatua inayofuata.</item>
+    <item quantity="other">Utafiti huu pia una matabaka ya ramani na majedwali ya data %1$d zaidi, yaliyounganishwa na fomu zake nyingine. Unaweza kuyakagua katika hatua inayofuata.</item>
+  </plurals>
+
+  <!-- Wizard validation messages. -->
+  <string name="wizard_validation_copy_source_required">Chagua utafiti chanzo wa kunakili kabla ya kuendelea.</string>
+  <string name="wizard_validation_import_file_required">Chagua faili sahihi ya XForms XML ya kuleta kabla ya kuendelea.</string>
+  <string name="wizard_validation_survey_area_required">Chagua au chora eneo la utafiti ili kuendelea.</string>
+  <string name="wizard_validation_form_variant_incompatible">Tatua maswali ya fomu yasiyoendana na matoleo ya fomu yaliyochaguliwa (Wavuti au Google Earth) kabla ya kuendelea.</string>
+  <!-- %1$s: the name of the file that couldn't be read. -->
+  <string name="wizard_import_parse_failed">Haikuweza kuchanganua maswali yoyote ya XForms au Collect Earth kutoka "%1$s".</string>
+
+  <!-- Collection modes: field data collection, desk-based visual classification, or both. -->
+  <string name="wizard_mode_field_survey">Utafiti wa uwandani</string>
+  <string name="wizard_mode_field_survey_summary">Ukusanyaji wa data uwandani kwa simu, nje ya mtandao/mtandaoni, unaofanywa na wakusanyaji data walioko eneo husika.</string>
+  <string name="wizard_mode_visual_classification">Uainishaji kwa kuona</string>
+  <string name="wizard_mode_visual_classification_summary">Uainishaji kwa kuona ukiwa ofisini wa viwanja vya sampuli juu ya taswira ya setilaiti na ramani ya msingi.</string>
+  <!-- Collection mode combining field survey and visual classification. -->
+  <string name="wizard_mode_both">Zote mbili</string>
+  <string name="wizard_mode_both_summary">Uainishaji kwa kuona ukiwa ofisini pamoja na ukusanyaji wa data uwandani kwa simu.</string>
+
+  <!-- Wizard step 5: Forms. -->
+  <string name="wizard_show_forms_and_layers">Onyesha fomu na matabaka yote</string>
+  <string name="wizard_hide_forms_and_layers">Ficha fomu na matabaka</string>
+  <string name="wizard_add_another_form">Ongeza fomu nyingine</string>
+  <string name="wizard_add_form">Ongeza fomu</string>
+  <string name="wizard_untitled_form">Fomu isiyo na jina</string>
+  <!-- Name shown for a map layer or data table without a name. -->
+  <string name="wizard_untitled">Bila jina</string>
+
+  <!-- Wizard step 6: Sharing. -->
+  <string name="wizard_sharing_subtitle">Kagua utayari wa athari na uhamishaji wa utafiti wako, weka chaguomsingi za mamlaka ya data, na ualike washirika.</string>
+  <string name="wizard_draft_mode_title">Huanza katika hali ya Rasimu</string>
+  <!-- Badge of a survey that isn't published yet. -->
+  <string name="wizard_draft_badge">Rasimu</string>
+  <string name="wizard_draft_mode_body">Kubofya Unda utafiti hufungua utafiti kwenye ramani kuu katika hali ya Rasimu ili uweze kukagua eneo lako la utafiti na matabaka au kufungua Kihariri cha utafiti kabla wakusanyaji data hawajauona. Ukiwa tayari kuuzindua, fungua Kihariri cha utafiti, bofya beji ya hali ya Rasimu karibu na jina la utafiti, na uchague Chapisha utafiti.</string>
+  <string name="wizard_readiness_title">Utayari wa athari na uhamishaji</string>
+  <string name="wizard_readiness_supporting">Jinsi muundo wa utafiti huu unavyounganishwa na muhtasari wa athari wa shirika lako, viashiria vya mazingira vya FAO/UN, na wasifu wa uhamishaji kwa mbofyo mmoja.</string>
+  <!-- %1$s: the collection mode (e.g. "Field survey"). -->
+  <string name="wizard_readiness_mode">Hali: %1$s</string>
+  <!-- %1$d: questions linked to standard fields (shared data definitions); %2$d: all questions. -->
+  <string name="wizard_readiness_fields_linked">Sehemu sanifu %1$d/%2$d zimeunganishwa</string>
+  <!-- %1$s: comma-separated purpose names. -->
+  <string name="wizard_readiness_purposes">Madhumuni: %1$s</string>
+  <!-- %1$s: comma-separated reporting program names. -->
+  <string name="wizard_readiness_programs">Mipango: %1$s</string>
+  <!-- %1$s: comma-separated impact goal names. -->
+  <string name="wizard_readiness_goals">Malengo ya athari: %1$s</string>
+  <!-- Purpose list entry for a custom purpose. %1$s: the organizer's description of it. -->
+  <string name="wizard_readiness_other_purpose">Nyingine: %1$s</string>
+  <string name="wizard_readiness_export_profiles">Wasifu wa uhamishaji kwa mbofyo mmoja</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped_ready">%1$d/%2$d zimelinganishwa (Tayari)</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped">%1$d/%2$d zimelinganishwa</string>
+
+  <!-- CARE Principles for Indigenous Data Governance and FAO Free, Prior and Informed Consent (FPIC). -->
+  <string name="wizard_care_title">Kanuni za CARE na mamlaka ya data ya Watu wa Asili / jamii</string>
+  <string name="wizard_care_applied_body">Ufikiaji uliodhibitiwa, uonekanaji kwa wenzao wa 'Mawasilisho yao wenyewe pekee', na masharti ya wakusanyaji ya Ridhaa Huru, ya Awali na yenye Taarifa (FPIC) ya FAO yanatumika kulinda data ya jamii na ya umiliki wa ardhi.</string>
+  <string name="wizard_care_not_applied_body">Unafanya kazi na Watu wa Asili, jamii za wenyeji, au data nyeti ya umiliki wa ardhi? Tumia chaguomsingi za mamlaka za CARE na FPIC ya FAO (Ufikiaji uliodhibitiwa + Wakusanyaji wanaona mawasilisho yao wenyewe pekee + masharti ya ridhaa ya FPIC).</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_care_excluded_from_aggregates">Kumbuka: %1$s halijajumuishwa kwenye jumla za jukwaa zima.</string>
+  <string name="wizard_care_defaults_applied">✓ Chaguomsingi za CARE zimetumika</string>
+  <string name="wizard_care_apply_defaults">Tumia chaguomsingi za CARE</string>
+  <!-- CARE principle "C". -->
+  <string name="wizard_care_collective_benefit">Manufaa ya Pamoja</string>
+  <string name="wizard_care_collective_benefit_description">Viashiria vya mifumo ikolojia na jamii vinatumia dhana za maktaba zinazoshirikiwa kwa ushahidi unaomilikiwa na jamii.</string>
+  <!-- CARE principle "A". -->
+  <string name="wizard_care_authority_to_control">Mamlaka ya Kudhibiti</string>
+  <string name="wizard_care_authority_to_control_description">Ufikiaji umedhibitiwa ili wasimamizi wa jamii waamue nani anaweza kuona au kukusanya rekodi za utafiti.</string>
+  <!-- CARE principle "R". -->
+  <string name="wizard_care_responsibility">Uwajibikaji</string>
+  <string name="wizard_care_responsibility_description">Uonekanaji kwa wenzao umewekewa kikomo kwa mawasilisho ya kila mchangiaji mwenyewe pamoja na waratibu wa utafiti.</string>
+  <!-- CARE principle "E". -->
+  <string name="wizard_care_ethics">Maadili</string>
+  <string name="wizard_care_ethics_description">Data nyeti ya jamii inalindwa dhidi ya ujumlishaji wa nje usioidhinishwa.</string>
+  <!-- CARE principle "E", as checked in the wizard. -->
+  <string name="wizard_care_ethics_aggregate_protection">Maadili na Ulinzi wa Jumla</string>
+  <string name="wizard_care_ethics_aggregate_protection_description">Rekodi za umiliki wa ardhi na za kaya za mtu binafsi hazionyeshwi kamwe katika muhtasari wa umma wa jukwaa.</string>
+  <string name="wizard_care_fpic">Ridhaa Huru, ya Awali na yenye Taarifa</string>
+  <string name="wizard_care_fpic_description">Ridhaa ya wazi ya mkusanyaji/mshiriki inahitajika kabla ya kurekodi data ya uwandani.</string>
+  <string name="wizard_care_fpic_wizard_description">Wakusanyaji data lazima wakague na kukubali masharti ya wazi ya ridhaa ya jamii kabla ya kukusanya data.</string>
+  <!-- Standards and guidelines a CARE / FPIC criterion comes from. -->
+  <string name="wizard_care_standard_care_fao_indigenous_data_policy">Sera ya Data ya Watu wa Asili ya CARE na FAO</string>
+  <string name="wizard_care_standard_care_fao_vggt">Utawala wa Umiliki wa Ardhi wa CARE na FAO VGGT</string>
+  <string name="wizard_care_standard_care_principles">Kanuni za CARE</string>
+  <string name="wizard_care_standard_fao_fpic_manual">Mwongozo wa FPIC wa FAO</string>
+  <string name="wizard_care_standard_fao_fpic_guidelines">Miongozo ya Utekelezaji ya FPIC ya FAO</string>
+  <string name="wizard_care_criterion_met">Imetimizwa</string>
+  <string name="wizard_care_criterion_not_met">Haijatimizwa</string>
+  <string name="wizard_care_effect_collective_benefit_on">Maswali yaliyounganishwa na sehemu sanifu yanaruhusu data ya utafiti huu kuchangia viashiria vya pamoja vya jamii na matokeo, na uhamishaji kwa mbofyo mmoja.</string>
+  <string name="wizard_care_effect_collective_benefit_off">Hakuna swali lililounganishwa na sehemu sanifu, kwa hivyo data ya utafiti huu haitachangia viashiria vya pamoja vya jamii au matokeo. Chagua madhumuni, au unganisha maswali na sehemu sanifu katika hatua ya Fomu.</string>
+  <string name="wizard_care_effect_authority_on">Ni watu unaowaalika pekee wanaoweza kufungua utafiti huu na kukusanya data, ili walinzi wa jamii wadhibiti nani anaona rekodi zake.</string>
+  <string name="wizard_care_effect_authority_off">Watu ambao hujawaalika wanaweza kufungua utafiti huu na rekodi zake. Ili kuudhibiti, weka Nani anaweza kukusanya data kuwa Watu walioalikwa hapa chini.</string>
+  <string name="wizard_care_effect_responsibility_on">Wakusanyaji wa data wanaona mawasilisho yao wenyewe pekee kwenye ramani. Waandaaji wa utafiti wanaona yote.</string>
+  <string name="wizard_care_effect_responsibility_off">Wakusanyaji wa data wanaweza kuona mawasilisho ya kila mtu kwenye ramani, ikiwemo rekodi za umiliki wa ardhi na rasilimali za kaya nyingine. Ili kupunguza hili, weka Nani anaweza kuona data kuwa Wachangiaji na waratibu hapa chini.</string>
+  <string name="wizard_care_effect_ethics_on">Muhtasari wa umma wa matokeo unaonyesha jumla zilizovuka kiwango cha chini pekee, kamwe si rekodi za umiliki wa ardhi au za kaya moja moja.</string>
+  <string name="wizard_care_effect_fpic_on">Wakusanyaji wa data lazima wasome na kukubali masharti yako ya ridhaa kabla ya kukusanya data.</string>
+  <string name="wizard_care_effect_fpic_off">Wakusanyaji wa data wanaweza kuanza kukusanya bila kukubali masharti yoyote ya ridhaa. Ili kuhitaji ridhaa, washa Ridhaa ya mkusanyaji data na masharti ya utawala hapa chini.</string>
+  <string name="wizard_care_summary_title">CARE na FPIC</string>
+  <string name="wizard_care_summary_count">%1$d kati ya %2$d yametimizwa</string>
+  <string name="wizard_care_show_details">Onyesha maelezo</string>
+  <string name="wizard_care_hide_details">Ficha maelezo</string>
+  <string name="wizard_care_state_expanded">Maelezo yanaonyeshwa</string>
+  <string name="wizard_care_state_collapsed">Maelezo yamefichwa</string>
+  <string name="wizard_care_sticky_chip">CARE na FPIC · %1$d/%2$d</string>
+  <string name="wizard_care_sticky_chip_a11y">CARE na FPIC: vigezo %1$d kati ya %2$d vimetimizwa. Nenda kwenye maelezo ya CARE.</string>
+  <string name="wizard_care_learn_more">CARE na FPIC ni nini?</string>
+  <string name="wizard_care_auto_reason_organization">Zimetumika kiotomatiki kwa sababu %1$s imesajiliwa kama shirika la Watu wa Asili au jamii za wenyeji. Unaweza kubadilisha mipangilio hii hapa chini.</string>
+  <string name="wizard_care_auto_reason_concepts">Zimetumika kiotomatiki kwa sababu utafiti huu unakusanya data ya Watu wa Asili na ya jamii: %1$s. Unaweza kubadilisha mipangilio hii hapa chini.</string>
+  <string name="wizard_care_auto_reason_more">%1$s, na %2$d zaidi</string>
+  <string name="wizard_care_explainer_title">CARE na FPIC katika Collect One</string>
+  <string name="wizard_care_explainer_intro">Data kuhusu Watu wa Asili na jamii za wenyeji, ardhi zao, na rasilimali zao inaweza kuathiri haki za ardhi, riziki, na usalama. Collect One inaauni mifumo miwili inayotumika sana inayosaidia jamii kudhibiti data hiyo.</string>
+  <string name="wizard_care_explainer_care_heading">Kanuni za CARE za Usimamizi wa Data ya Watu wa Asili</string>
+  <string name="wizard_care_explainer_care_body">Zimeandaliwa na Global Indigenous Data Alliance ili kukamilisha kanuni za data za FAIR, kanuni za CARE zinaweka watu na madhumuni katikati ya jinsi data inavyotumika:</string>
+  <string name="wizard_care_explainer_care_c">Manufaa ya pamoja: data inapaswa kunufaisha jamii inazozieleza.</string>
+  <string name="wizard_care_explainer_care_a">Mamlaka ya kudhibiti: jamii zinaamua jinsi data kuzihusu, ardhi zao, na rasilimali zao inavyokusanywa, kufikiwa, na kutumiwa.</string>
+  <string name="wizard_care_explainer_care_r">Uwajibikaji: wanaofanya kazi na data wanawajibika kwa jamii na ni wawazi kuhusu jinsi inavyotumika.</string>
+  <string name="wizard_care_explainer_care_e">Maadili: haki na ustawi wa jamii vinatangulizwa katika kila hatua ya mzunguko wa maisha ya data.</string>
+  <string name="wizard_care_explainer_fpic_heading">Ridhaa Huru, ya Awali na yenye Taarifa (FPIC)</string>
+  <string name="wizard_care_explainer_fpic_body">FPIC ni haki ya Watu wa Asili, inayotambuliwa katika Azimio la Umoja wa Mataifa kuhusu Haki za Watu wa Asili na kutumika katika programu za FAO, ya kutoa au kunyima ridhaa kwa shughuli zinazowaathiri. Ridhaa lazima itolewe kwa hiari, iombwe kabla shughuli kuanza, itegemee taarifa kamili, na inaweza kuondolewa wakati wowote.</string>
+  <string name="wizard_care_explainer_defaults_heading">Chaguomsingi za CARE zinabadilisha nini katika utafiti huu</string>
+  <string name="wizard_care_explainer_defaults_restricted">Ufikiaji uliodhibitiwa: ni watu unaowaalika pekee wanaoweza kufungua utafiti na data yake.</string>
+  <string name="wizard_care_explainer_defaults_own_only">Mawasilisho ya faragha: wakusanyaji wa data wanaona mawasilisho yao wenyewe pekee kwenye ramani, si ya wenzao.</string>
+  <string name="wizard_care_explainer_defaults_consent">Masharti ya ridhaa: wakusanyaji wa data lazima wasome na kukubali masharti ya FPIC kabla ya kuanza kukusanya.</string>
+  <string name="wizard_care_explainer_defaults_editable">Muhtasari wa umma wa matokeo hauonyeshi kamwe rekodi za mtu mmoja mmoja. Unaweza kubadilisha kila mpangilio, au kuhariri masharti ya ridhaa, hapa chini.</string>
+  <string name="wizard_care_explainer_auto_heading">Collect One inapozitumia kwa niaba yako</string>
+  <string name="wizard_care_explainer_auto_body">Chaguomsingi za CARE hutumika kiotomatiki utafiti unapokuwa wa shirika la Watu wa Asili au jamii za wenyeji, au maswali yake yanapounganishwa na sehemu sanifu za Watu wa Asili na jamii (kama jina la jamii au aina ya umiliki wa ardhi), kwa mfano kupitia madhumuni ya Uchoraji ramani wa ardhi na rasilimali za jamii.</string>
+  <string name="wizard_care_explainer_close">Nimeelewa</string>
+  <string name="wizard_consent_title">Ridhaa ya mkusanyaji data na masharti ya utawala</string>
+  <string name="wizard_consent_supporting">Wahitaji wakusanyaji data kukagua na kukubali masharti maalum ya Ridhaa Huru, ya Awali na yenye Taarifa (FPIC) au ya mradi kabla ya kufungua utafiti.</string>
+  <string name="wizard_consent_terms_label">Masharti ya ridhaa yanayoonyeshwa kwa wakusanyaji data</string>
+</resources>

@@ -24,8 +24,8 @@ stacks (`LayerDef`), and visual geometry styling (`GeometryStyle`) inside
 > (`appearance`), and proximity validation guardrails (`constraint_expression`)
 > are configured on individual questions in ProtoForms (`FormDef`), adhering to
 > the XForms specification. See
-> [Form Controls and View](docs/model/forms/05-body.md#geospatial-configuration)
-> and [Bindings and Field Rules](docs/model/forms/04-bindings.md).
+> [Form Controls and View](../forms/05-body.md#geospatial-configuration)
+> and [Bindings and Field Rules](../forms/04-bindings.md).
 
 ## Map Configuration & Layer Stack (`MapConfig` and `LayerDef`)
 
@@ -35,10 +35,11 @@ bottom-to-top z-order):
 
 ```protobuf
 message MapConfig {
-  openforis.collectone.v1.forms.GeoPoint initial_center = 1;
+  reserved 1;  // was `forms.GeoPoint initial_center`
   double initial_zoom = 2;
   repeated LayerDef layers = 3;
   SurveyArea survey_area = 4;
+  openforis.collectone.v1.data.Position initial_center = 6;
 }
 
 message LayerDef {
@@ -52,7 +53,19 @@ message LayerDef {
     FormGeometrySource form_geometry = 6;
   }
 
-  int32 sort_order = 7;
+  reserved 7, 8;  // were English display text (source description, geometry type)
+
+  // The survey author's nouns for one and several of the layer's features
+  // (e.g. "coffee parcel", "coffee parcels"). Empty when the author gave none;
+  // clients then use a generic noun in the user's language.
+  string singular_item_label = 9;
+  string plural_item_label = 10;
+
+  int32 sort_order = 12;
+
+  // Type of the geometries the layer draws; clients name it in the user's
+  // language (see ../data/05-geometry.md).
+  openforis.collectone.v1.data.GeometryType geometry_type = 13;
 }
 
 message FormGeometrySource {
@@ -73,19 +86,37 @@ message SurveyArea {
   // Human-readable name (e.g. a place name or the uploaded file name).
   string name = 1;
 
-  // Polygon parts, each a closed ring.
-  repeated openforis.collectone.v1.forms.GeoShape parts = 2;
+  reserved 3;  // was the English `source` text, e.g. "Drawn on map"
 
-  // How the area was defined: "search", "drawn" or "uploaded:<filename>".
-  string source = 3;
+  // The polygon parts: a MultiPolygon, one polygon per part.
+  openforis.collectone.v1.data.Geometry boundary = 6;
+
+  // How the area was defined; clients name it in the user's language.
+  SurveyAreaSource area_source = 8;
+}
+
+message SurveyAreaSource {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;  // read as SELECTED_BOUNDARY
+    SELECTED_BOUNDARY = 1;
+    DRAWN = 2;
+    UPLOADED = 3;
+    PLACE_SEARCH = 4;
+    COORDINATES = 5;
+    COLLECT_EARTH_GRID = 6;
+  }
+  Kind kind = 1;
+  string file_name = 2;  // for UPLOADED
+  int32 plot_count = 3;  // for COLLECT_EARTH_GRID
 }
 ```
 
-*   **One ring format everywhere**: every part is an ordinary
-    `forms.GeoShape`, the same closed-ring type used by form geoshape answers
-    and entity geometries. No separate polygon type exists.
+*   **One geometry format everywhere**: the boundary is the canonical
+    `Geometry` (see [Geometry](../data/05-geometry.md)) that map features use.
+    The former `parts` field (`forms.GeoShape` rings) is reserved.
 *   **Several parts**: a country with islands, or two disjoint project sites,
-    is expressed as several `parts`. Parts should not overlap.
+    is expressed as several polygons of the MultiPolygon. Parts should not
+    overlap.
 *   **No holes**: interior rings are out of scope. Importers drop them and show
     a visible warning.
 *   **Large boundaries**: vertex counts are limited by the per-tier
@@ -94,6 +125,10 @@ message SurveyArea {
     rule, so uploaded country boundaries with tens of thousands of vertices fit.
     Clients simplify the geometry for display and keep full precision for
     sampling.
+*   **Typed source**: the source is a kind plus the file name or plot count it
+    needs, never display text. Rows stored with the former English `source`
+    text (`"Drawn on map"`, `"Uploaded: plots.geojson"`, ...) decode to the
+    matching kind; anything else reads as a selected boundary.
 *   **Camera defaults**: when `initial_center` or `initial_zoom` is unset,
     clients derive them from the bounding box of all parts. Explicit values
     still override.
@@ -159,7 +194,7 @@ Map layers apply visual styling using the following precedence rules:
 
 ```textproto
 map_config {
-  initial_center { latitude: -0.2827 longitude: 34.7519 }
+  initial_center { longitude: 34.7519 latitude: -0.2827 }
   initial_zoom: 13.0
 
   layers {

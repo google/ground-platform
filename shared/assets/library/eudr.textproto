@@ -21,7 +21,7 @@
 #
 # The clients embed a Kotlin copy (GlobalLibrarySeedData.kt), and its
 # GlobalLibrarySeedTest fails when the two differ. Template questions carry
-# their concept links as `ground:concept` foreign attributes on their bindings.
+# their concept links as `collectone:concept` foreign attributes on their bindings.
 
 concepts {
   id: "eudr.commodity"
@@ -1162,7 +1162,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "cattle"
@@ -1188,7 +1188,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "cocoa"
@@ -1214,7 +1214,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "coffee"
@@ -1240,7 +1240,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "oil_palm"
@@ -1266,7 +1266,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "rubber"
@@ -1292,7 +1292,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "soya"
@@ -1318,7 +1318,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "wood"
@@ -1347,7 +1347,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "yes"
@@ -1373,7 +1373,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "no"
@@ -1402,7 +1402,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "yes"
@@ -1428,7 +1428,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "no"
@@ -1454,7 +1454,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "unknown"
@@ -1483,7 +1483,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "verified_legal"
@@ -1509,7 +1509,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "customary_recognized"
@@ -1535,7 +1535,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "pending_verification"
@@ -1561,7 +1561,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "non_compliant"
@@ -1575,8 +1575,8 @@ form_templates {
         type: TYPE_SELECT_ONE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "eudr.commodity@1"
         }
       }
@@ -1585,8 +1585,8 @@ form_templates {
         type: TYPE_GEOSHAPE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "eudr.production_place@1"
         }
       }
@@ -1594,8 +1594,8 @@ form_templates {
         field_path: "area_ha"
         type: TYPE_DOUBLE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.area_ha@1"
         }
       }
@@ -1603,8 +1603,8 @@ form_templates {
         field_path: "plot_over_4ha"
         type: TYPE_SELECT_ONE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "eudr.plot_over_4ha@1"
         }
       }
@@ -1613,8 +1613,8 @@ form_templates {
         type: TYPE_STRING
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.producer_id@1"
         }
       }
@@ -1622,8 +1622,8 @@ form_templates {
         field_path: "harvest_date_range"
         type: TYPE_STRING
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "eudr.harvest_date_range@1"
         }
       }
@@ -1632,8 +1632,8 @@ form_templates {
         type: TYPE_SELECT_ONE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "eudr.deforestation_free@1"
         }
       }
@@ -1641,8 +1641,8 @@ form_templates {
         field_path: "legal_land_use"
         type: TYPE_SELECT_ONE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "eudr.legal_land_use@1"
         }
       }
@@ -1754,6 +1754,502 @@ form_templates {
     }
   }
   status: STABLE
+  version: 1
+}
+form_templates {
+  id: "uk_frc_plot_registration"
+  title {
+    values {
+      key: "en"
+      value: "UK forest risk commodity legality check"
+    }
+    values {
+      key: "fr"
+      value: "Contrôle de légalité des produits à risque forestier (Royaume-Uni)"
+    }
+    values {
+      key: "es"
+      value: "Verificación de legalidad de productos de riesgo forestal (Reino Unido)"
+    }
+    values {
+      key: "vi"
+      value: "Kiểm tra tính hợp pháp hàng hóa rủi ro rừng (Vương quốc Anh)"
+    }
+    values {
+      key: "sw"
+      value: "Ukaguzi wa uhalali wa bidhaa za hatari ya misitu (Uingereza)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Records plot location, commodity, producer ID, harvest period, and evidence that the commodity was produced in line with relevant local land-use laws."
+    }
+  }
+  form {
+    form_id: "uk_frc_plot_registration"
+    title: "UK forest risk commodity legality check"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "UK forest risk commodity legality check"
+          fields {
+            name: "commodity"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "production_place"
+            type: TYPE_GEOSHAPE
+          }
+          fields {
+            name: "area_ha"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "producer_id"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "harvest_date_range"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "legal_land_use"
+            type: TYPE_SELECT_ONE
+          }
+        }
+      }
+      secondary_instances {
+        id: "commodity"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cattle"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cattle"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cattle"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cocoa"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Coffee"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Oil palm"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Rubber"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "soya"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Soya"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "soya"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wood"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Wood"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "wood"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "legal_land_use"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "verified_legal"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Verified legal title or use right"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "verified_legal"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "customary_recognized"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Recognized customary or cooperative right"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "customary_recognized"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "pending_verification"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Pending verification"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "pending_verification"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "non_compliant"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "No legal land-use evidence"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "non_compliant"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "commodity"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.commodity@1"
+        }
+      }
+      bindings {
+        field_path: "production_place"
+        type: TYPE_GEOSHAPE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.production_place@1"
+        }
+      }
+      bindings {
+        field_path: "area_ha"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.area_ha@1"
+        }
+      }
+      bindings {
+        field_path: "producer_id"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.producer_id@1"
+        }
+      }
+      bindings {
+        field_path: "harvest_date_range"
+        type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.harvest_date_range@1"
+        }
+      }
+      bindings {
+        field_path: "legal_land_use"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.legal_land_use@1"
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "commodity"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Commodity"
+          }
+          itemset {
+            instance_id: "commodity"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "production_place"
+          type: CONTROL_INPUT
+          label {
+            text: "Production place"
+          }
+          hint {
+            text: "Walk or draw the area where the commodity was produced."
+          }
+          appearance: "placement-map"
+        }
+      }
+      components {
+        control {
+          field_ref: "area_ha"
+          type: CONTROL_INPUT
+          label {
+            text: "Plot / parcel area (ha)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "producer_id"
+          type: CONTROL_INPUT
+          label {
+            text: "Producer ID"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "harvest_date_range"
+          type: CONTROL_INPUT
+          label {
+            text: "Harvest date range"
+          }
+          hint {
+            text: "For example 2026-01-01/2026-03-31."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "legal_land_use"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Legal land-use status"
+          }
+          itemset {
+            instance_id: "legal_land_use"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+    }
+  }
+  status: STABLE
+  version: 1
 }
 purpose_packs {
   id: "eudr_due_diligence"
@@ -1795,6 +2291,73 @@ purpose_packs {
   goals: "deforestation_free_supply_chains"
   pillar: MITIGATION
   status: STABLE
+  starter_templates {
+    id: "eudr"
+    title {
+      values {
+        key: "en"
+        value: "EU Deforestation Regulation (EUDR)"
+      }
+      values {
+        key: "fr"
+        value: "Règlement européen sur la déforestation (RDUE)"
+      }
+      values {
+        key: "es"
+        value: "Reglamento europeo contra la deforestación (EUDR)"
+      }
+      values {
+        key: "vi"
+        value: "Quy định chống phá rừng của EU (EUDR)"
+      }
+      values {
+        key: "sw"
+        value: "Kanuni ya EU ya Ukataji Misitu (EUDR)"
+      }
+    }
+    description {
+      values {
+        key: "en"
+        value: "Plot check for EU due diligence statements: plot boundaries (polygons for plots over 4 ha), deforestation-free status after 31 December 2020, legality, and a TRACES-ready GeoJSON export."
+      }
+    }
+    form_template_ids: "eudr_plot_registration"
+    export_profile_ids: "eudr_geojson"
+    program_ids: "eudr"
+  }
+  starter_templates {
+    id: "uk_frc"
+    title {
+      values {
+        key: "en"
+        value: "UK Forest Risk Commodities"
+      }
+      values {
+        key: "fr"
+        value: "Produits à risque forestier (Royaume-Uni)"
+      }
+      values {
+        key: "es"
+        value: "Productos de riesgo forestal (Reino Unido)"
+      }
+      values {
+        key: "vi"
+        value: "Hàng hóa rủi ro rừng (Vương quốc Anh)"
+      }
+      values {
+        key: "sw"
+        value: "Bidhaa za hatari ya misitu (Uingereza)"
+      }
+    }
+    description {
+      values {
+        key: "en"
+        value: "Legality check for UK due diligence: where the commodity was produced and evidence that it complied with relevant local land-use laws."
+      }
+    }
+    form_template_ids: "uk_frc_plot_registration"
+    program_ids: "uk_frc"
+  }
 }
 export_profiles {
   id: "eudr_geojson"

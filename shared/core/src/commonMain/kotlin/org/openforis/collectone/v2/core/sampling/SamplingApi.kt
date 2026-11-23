@@ -13,6 +13,8 @@
  */
 package org.openforis.collectone.v2.core.sampling
 
+import org.openforis.collectone.v2.core.geo.GeoCoord
+
 /**
  * Public API of the statistical sample design engine.
  *
@@ -26,9 +28,6 @@ package org.openforis.collectone.v2.core.sampling
 
 /** Version of the generation algorithms. Bump whenever output for a given seed would change. */
 const val SAMPLING_ENGINE_VERSION: Int = 1
-
-/** A WGS 84 coordinate in decimal degrees. */
-data class GeoCoord(val lat: Double, val lng: Double)
 
 /**
  * A closed polygon ring. The first and last coordinates may or may not repeat; both are accepted.

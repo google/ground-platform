@@ -20,79 +20,72 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
-import org.openforis.collectone.v2.app.domain.model.EntityDetailsPane
 import org.openforis.collectone.v2.app.ui.map.SurveyMap
 import org.openforis.collectone.v2.app.ui.map.SurveyMapContent
+import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
 
 class WebAppStateTest {
   private fun SurveyMap.overlayIds() =
     content.sources.first { it.id == SurveyMapContent.OVERLAY_SOURCE }.features.map { it.id }
 
   @Test
-  fun selectPage_updatesActivePageAndNotifiesListener() {
-    val state = WebAppState(dataHolder = sampleDataHolder())
-    assertEquals(WebPage.WEB_SURVEYS, state.activePage)
-
-    var notifiedPage: WebPage? = null
-    state.onPageChanged = { notifiedPage = it }
-
-    state.selectPage(WebPage.WEB_DASHBOARD)
-    assertEquals(WebPage.WEB_DASHBOARD, state.activePage)
-    assertEquals(WebPage.WEB_DASHBOARD, notifiedPage)
-
-    state.selectPage(WebPage.SURVEY_EDITOR)
-    assertEquals(WebPage.SURVEY_EDITOR, state.activePage)
-    assertEquals(WebPage.SURVEY_EDITOR, notifiedPage)
-  }
-
-  @Test
   fun webEntityDetailsTabs_openingSubmissionSelectsHistoryAndSwitchingTabsKeepsIt() {
     val state = WebAppState(dataHolder = sampleDataHolder())
-    val entity = state.entities.first { it.submissions.isNotEmpty() }
+    val entity =
+      state.viewModels.dataCollection.uiState.value.entities.first { it.submissions.isNotEmpty() }
     val submission = entity.submissions.first()
-    state.selectEntity(entity.id)
+    state.viewModels.surveyMap.selectEntity(entity.id)
 
-    state.selectEntityDetailsTab(EntityDetailsPane.SUBMISSIONS)
-    assertEquals(EntityDetailsPane.SUBMISSIONS, state.entityDetailsPane)
+    state.viewModels.dashboard.selectEntityDetailsTab(EntityDetailsPane.SUBMISSIONS)
+    assertEquals(
+      EntityDetailsPane.SUBMISSIONS,
+      state.viewModels.dashboard.uiState.value.entityDetailsPane,
+    )
 
     // Opening a submission (e.g. from `Uploads`) lands on the `History` tab.
-    state.selectEntityDetailsTab(EntityDetailsPane.PROPERTIES)
-    state.selectSubmissionDetail(submission.id)
-    assertEquals(EntityDetailsPane.SUBMISSIONS, state.entityDetailsPane)
+    state.viewModels.dashboard.selectEntityDetailsTab(EntityDetailsPane.PROPERTIES)
+    state.viewModels.dataCollection.selectSubmissionDetail(submission.id)
+    assertEquals(
+      EntityDetailsPane.SUBMISSIONS,
+      state.viewModels.dashboard.uiState.value.entityDetailsPane,
+    )
 
     // Switching to `Data` and back keeps the opened submission.
-    state.selectEntityDetailsTab(EntityDetailsPane.PROPERTIES)
-    assertEquals(EntityDetailsPane.PROPERTIES, state.entityDetailsPane)
-    assertEquals(submission.id, state.selectedSubmissionId)
-    state.selectEntityDetailsTab(EntityDetailsPane.SUBMISSIONS)
-    assertEquals(submission.id, state.selectedSubmissionId)
+    state.viewModels.dashboard.selectEntityDetailsTab(EntityDetailsPane.PROPERTIES)
+    assertEquals(
+      EntityDetailsPane.PROPERTIES,
+      state.viewModels.dashboard.uiState.value.entityDetailsPane,
+    )
+    assertEquals(submission.id, state.viewModels.dataCollection.uiState.value.selectedSubmissionId)
+    state.viewModels.dashboard.selectEntityDetailsTab(EntityDetailsPane.SUBMISSIONS)
+    assertEquals(submission.id, state.viewModels.dataCollection.uiState.value.selectedSubmissionId)
   }
 
   @Test
   fun focusWebFormQuestion_issuesRequestsWithIncreasingTokens_andClearsWithTheForm() {
     val state = WebAppState(dataHolder = sampleDataHolder())
-    state.launchFormForEntity(
+    state.viewModels.dataCollection.launchFormForEntity(
       entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
       formId = "form-shade-canopy-audit",
     )
-    assertNull(state.webFormFocusRequest)
+    assertNull(state.viewModels.dataCollection.uiState.value.webFormFocusRequest)
 
-    state.focusWebFormQuestion("/data/plot_boundary")
-    val first = assertNotNull(state.webFormFocusRequest)
+    state.viewModels.dataCollection.focusWebFormQuestion("/data/plot_boundary")
+    val first = assertNotNull(state.viewModels.dataCollection.uiState.value.webFormFocusRequest)
     assertEquals("/data/plot_boundary", first.path)
 
     // Clicking the same geometry again re-fires with a new token.
-    state.focusWebFormQuestion("/data/plot_boundary")
-    val second = assertNotNull(state.webFormFocusRequest)
+    state.viewModels.dataCollection.focusWebFormQuestion("/data/plot_boundary")
+    val second = assertNotNull(state.viewModels.dataCollection.uiState.value.webFormFocusRequest)
     assertEquals(first.path, second.path)
     assertTrue(second.token > first.token)
 
-    state.consumeWebFormFocusRequest()
-    assertNull(state.webFormFocusRequest)
+    state.viewModels.dataCollection.consumeWebFormFocusRequest()
+    assertNull(state.viewModels.dataCollection.uiState.value.webFormFocusRequest)
 
-    state.focusWebFormQuestion("/data/plot_center_gps")
-    assertNotNull(state.webFormFocusRequest)
-    state.closeActiveFormRunner()
-    assertNull(state.webFormFocusRequest)
+    state.viewModels.dataCollection.focusWebFormQuestion("/data/plot_center_gps")
+    assertNotNull(state.viewModels.dataCollection.uiState.value.webFormFocusRequest)
+    state.viewModels.dataCollection.closeActiveFormRunner()
+    assertNull(state.viewModels.dataCollection.uiState.value.webFormFocusRequest)
   }
 }

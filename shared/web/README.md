@@ -15,10 +15,10 @@
 
 # Collect One Web Console Module
 
-`org.openforis.collectone.v2:web` contains the Collect One web console: its pages
+`:shared:web` contains the Collect One web console: its pages
 (surveys, organizations, the Impact page with organizations' published numbers,
-dashboard, survey editor, form editor, and survey creation wizard), its state
-(`WebAppState`, with `WebPage` routing), and its root composable
+dashboard, survey editor, form editor, and survey creation wizard), its session
+state (`WebAppState`), and its root composable
 (`WebConsoleApp()`). It's built on the domain, data, and shared UI in
 [`../app/`](../app/), and hosted by [`../../webApp/`](../../webApp/).
 
@@ -28,47 +28,89 @@ no Android target: nothing that builds for Android depends on it.
 The pages and their behavior are described in
 [`docs/technical/client/web-console.md`](../../docs/technical/client/web-console.md).
 
-## Package Structure (`org.openforis.collectone.v2.web`)
+## Modules and Packages (`org.openforis.collectone.v2.web`)
 
--   **`WebConsoleApp.kt`**: `WebConsoleApp()` (theme, URL hash routing) and
-    `WebConsolePages()` (the page switch).
--   **`domain/`**: Domain models and use cases only the web console uses
-    (organizations directory, impact summaries, survey outcome prompts, sample
-    plot generation, map layer import, survey editor mutations and wizard
-    rules, and the organization, library, collaborator, concept search, survey
-    lifecycle, and impact use cases). Pure Kotlin, like `app`'s `domain/`.
--   **`client/`**: Web-only clients (the impact PDF report).
--   **`di/`**: `WebUseCases`, which wires the web-only use cases from the
-    repositories in `app`'s `AppDataHolder`.
--   **`ui/`**: `WebAppState` (with the session state and actions only the web
-    console uses), `WebPage`, the pages by feature (`dashboard/`,
-    `organization/`, `surveyeditor/`, `formeditor/`, `wizard/`, `impact/`,
-    `onboarding/`, `datacollection/`), the header (`common/WebTopToolbar.kt`),
-    the console's ViewModels and UI state (`viewmodel/`, `state/`), and
-    web-only components (`common/`, `map/`) with their `expect`/`actual`
-    platform pieces in `src/<platform>Main/`.
+The console is split into Gradle modules (see
+[`docs/technical/client/modules.md`](../../docs/technical/client/modules.md#web-console-modules)).
+Packages keep their names across modules.
 
-`LayerDependencyGuardrailTest` (in `jvmTest`) keeps this module from importing
-`app.data`, keeps `domain/` free of outer layers, keeps views from reaching
-`app.client`, and keeps the module from importing the mobile app or the
-workbench.
+-   **`:shared:web`** (this directory), the console shell: `WebConsoleApp.kt`
+    (`WebConsoleApp()`, theme and routing), the navigation (`navigation/`),
+    `ui/WebAppState` (the session state and actions only the web console uses,
+    and the store of the ViewModels its pages share), `ui/WebSessionViewModels.kt`
+    (`ProvideWebSession`, `sessionViewModel()`), the dashboard
+    (`ui/dashboard/`, with `ui/datacollection/` and `ui/map/`), the header
+    (`ui/header/`), onboarding (`ui/onboarding/`), and `di/` (`webModules`,
+    `webViewModelModule`, which includes each feature's Koin module).
+-   **[`domain/`](domain/)** (`:shared:web:domain`): domain models and use
+    cases only the web console uses (organizations directory, impact
+    summaries, survey outcome prompts, sample plot generation, map layer
+    import, survey editor mutations and wizard rules, and the organization,
+    library, collaborator, concept search, survey lifecycle, and impact use
+    cases). Pure Kotlin; builds only on `:shared:app:domain`.
+-   **[`resources/`](resources/)** (`:shared:web:resources`): the console's
+    strings in all 9 locales and their generated `Res` accessors.
+-   **[`ui-common/`](ui-common/)** (`:shared:web:ui-common`): shared
+    composables and browser bridges (`ui/common/`), the text mappers of the web
+    domain (`ui/text/`), and the survey outcome card (`ui/surveyoutcome/`).
+-   **Feature modules**, each with its ViewModel, UI state, views, tests, and
+    Koin module (in `di/`): [`formeditor/`](formeditor/),
+    [`surveyeditor/`](surveyeditor/), [`wizard/`](wizard/),
+    [`surveys/`](surveys/), [`organization/`](organization/),
+    [`impact/`](impact/) (with the impact PDF report in `client/pdf/`), and
+    [`timeseries/`](timeseries/).
 
-The `:web-testing` subproject holds test fixtures for this module's tests
-(`SurveyEditorTestSupport`, `SurveyLifecycleFixture`).
+`ModuleGraphTest` (in `jvmTest`) pins what each web module builds on.
+`LayerDependencyArchitectureTest` checks every web module: no `app.data`
+imports, a pure `domain/`, views that reach neither `app.client` nor importers,
+each ViewModel and UI state in its feature's package, and no imports of the
+mobile app or the workbench.
+
+The `:shared:web:testing` subproject holds test fixtures for the web modules'
+tests (`SurveyEditorTestSupport`, `SurveyLifecycleFixture`); it builds on
+`:shared:web:surveyeditor`.
 
 ## Building and Testing
 
-`./gradlew` here runs the Gradle wrapper from [`../ui/`](../ui/).
+Run these from the repository root (the repository is a single Gradle build).
 
 ```bash
-# JVM unit and Compose UI tests:
-./gradlew jvmTest
+# JVM unit and Compose UI tests of the shell (a feature module's tests run with
+# its own task, e.g. :shared:web:surveyeditor:jvmTest):
+./gradlew :shared:web:jvmTest
 
 # Compile the Wasm target:
-./gradlew compileKotlinWasmJs
+./gradlew :shared:web:compileKotlinWasmJs
+```
+
+### Golden Screenshot Tests
+
+The web console includes Compose golden-screenshot tests in `src/jvmTest/kotlin/org/openforis/collectone/v2/web/ThemeScreenshotTest.kt` that render 15 key screens (plus component sheets) in both light and dark themes and compare them against checked-in golden images in [`src/jvmTest/resources/goldens/`](src/jvmTest/resources/goldens/).
+
+To run and verify the goldens:
+
+```bash
+# Run all web tests including goldens:
+./gradlew :shared:web:jvmTest
+
+# Run only the golden screenshot test:
+./gradlew :shared:web:jvmTest --tests org.openforis.collectone.v2.web.ThemeScreenshotTest
+```
+
+When an intentional UI change alters how screens look, regenerate the golden images before committing:
+
+```bash
+# Regenerate all web golden images:
+UPDATE_GOLDENS=true ./gradlew :shared:web:jvmTest --tests org.openforis.collectone.v2.web.ThemeScreenshotTest
+```
+
+To export clean PNG copies to an arbitrary directory for visual inspection or design reviews:
+
+```bash
+THEME_SCREENSHOT_DIR=/tmp/web-screenshots ./gradlew :shared:web:jvmTest --tests org.openforis.collectone.v2.web.ThemeScreenshotTest
 ```
 
 ## Dependencies
 
--   [`../app/`](../app/) (`org.openforis.collectone.v2:app`)
+-   [`../app/`](../app/) (`:shared:app`)
 -   [`../core/`](../core/), [`../ui/`](../ui/), and [`../map/`](../map/)

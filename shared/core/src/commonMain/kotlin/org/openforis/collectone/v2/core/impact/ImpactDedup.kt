@@ -16,6 +16,7 @@
 package org.openforis.collectone.v2.core.impact
 
 import kotlin.math.max
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.geo.Wgs84
 
 /*
@@ -90,7 +91,11 @@ internal fun resolveLinks(
           SkippedLinkReason.NOT_IN_LIBRARY
         else -> null
       }
-    if (reason == null) resolved[id] = concept!! else skipped += SkippedLink(survey.id, id, reason)
+    if (reason != null) {
+      skipped += SkippedLink(survey.id, id, reason)
+    } else if (concept != null) {
+      resolved[id] = concept
+    }
   }
   return resolved
 }
@@ -144,7 +149,7 @@ internal fun geodesicAreaHa(geometry: ImpactGeometry?): Double =
     }
   }
 
-private fun ringAreaHa(ring: List<ImpactLatLng>): Double =
+private fun ringAreaHa(ring: List<GeoCoord>): Double =
   Wgs84.ringAreaHa(DoubleArray(ring.size) { ring[it].lat }, DoubleArray(ring.size) { ring[it].lng })
 
 /**
@@ -164,7 +169,7 @@ internal fun featureAreaHa(feature: ImpactFeature): Double {
  * A vertex mean is not an area centroid, but it is cheap, deterministic, and always near small
  * plots. Rings crossing the antimeridian are not supported. Returns `null` for empty geometries.
  */
-internal fun representativePoint(geometry: ImpactGeometry?): ImpactLatLng? {
+internal fun representativePoint(geometry: ImpactGeometry?): GeoCoord? {
   val point =
     when (geometry) {
       null -> null
@@ -178,10 +183,10 @@ internal fun representativePoint(geometry: ImpactGeometry?): ImpactLatLng? {
   return point?.takeIf { it.lat.isFinite() && it.lng.isFinite() }
 }
 
-private fun vertexMean(positions: List<ImpactLatLng>): ImpactLatLng? =
+private fun vertexMean(positions: List<GeoCoord>): GeoCoord? =
   if (positions.isEmpty()) null
   else
-    ImpactLatLng(
+    GeoCoord(
       positions.sumOf { it.lat } / positions.size,
       positions.sumOf { it.lng } / positions.size,
     )

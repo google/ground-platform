@@ -12,49 +12,30 @@
  * the License.
  */
 plugins {
-  kotlin("multiplatform") version "2.4.20"
-  id("org.jetbrains.compose") version "1.12.0"
-  id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
-  id("com.android.library") version "8.5.2"
+  id("collectone.kmp.android")
+  id("collectone.kmp.compose")
+  id("collectone.kover")
 }
 
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
-
-  jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
-
   iosArm64()
   iosSimulatorArm64()
-
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
-  }
 
   sourceSets {
     val commonMain by getting {
       dependencies {
+        api(projects.shared.map.geometry)
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.ui)
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+        implementation(libs.kotlinx.serialization.json)
+        implementation(libs.kermit)
       }
     }
     val androidMain by getting {
       dependencies {
-        implementation("com.mapbox.maps:android-ndk27:11.31.1")
-        implementation("com.caverock:androidsvg-aar:1.4")
+        implementation(libs.mapbox.android)
+        implementation(libs.androidsvg)
       }
     }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
@@ -69,12 +50,4 @@ kotlin {
   }
 }
 
-android {
-  namespace = "org.openforis.collectone.v2.map"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
-}
+android { namespace = "org.openforis.collectone.v2.map" }

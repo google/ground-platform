@@ -14,40 +14,37 @@
  limitations under the License.
 -->
 
+
 # UI & Presentation Layer
 
-**TL;DR:** The `ui` package implements the Compose Multiplatform presentation layer using a unidirectional data flow (UDF) MVVM pattern (`Views → ViewModels → Domain`).
+**TL;DR:** The `ui` packages implement the Compose Multiplatform presentation layer both clients share, using a unidirectional data flow (UDF) MVVM pattern (`Views → ViewModels → Domain`). They are split across Gradle modules by feature (see [`docs/technical/client/modules.md`](../../../../../../../../../docs/technical/client/modules.md)).
 
 ## Scope & Purpose
 
-The UI layer renders application state and forwards user intents to ViewModels without containing business logic or direct data-store access. It is organized into horizontal architectural sub-packages and vertical feature screen packages:
+The UI layer renders application state and forwards user intents to ViewModels without containing business logic or direct data-store access.
 
-- **Architectural Component Sub-packages**:
-  - `viewmodel/`: Feature `*ViewModel` state holders and `*Actions` user-intent interfaces (`OnboardingViewModel`, `SettingsViewModel`, `SurveyMapViewModel`, `DashboardViewModel`, `OrganizationViewModel`, `SurveyEditorViewModel`, `FormEditorViewModel`, `DataCollectionViewModel`, `WorkbenchViewModel`).
-  - `state/`: Immutable `*UiState` snapshots, one-shot `*Event` sealed interfaces, and documented UI-infrastructure state holders (`WebMapDrawingHost`).
-  - `screen/`: Top-level Compose screen host (`AppScreenHost`) that binds the application shell to feature screens.
-  - `common/`: Reusable, feature-agnostic Compose widgets and foreground UI platform bridges (file pickers, downloads, media capture, cursors).
-- **Per-Feature Screen Packages**:
-  - `onboarding/`, `settings/`, `map/`, `dashboard/`, `organization/`, `surveyeditor/`, `formeditor/`, `datacollection/`, `navigation/`, `workbench/`: Stateless Compose screens and feature-scoped visual components that consume `(*UiState, *Actions)`.
+- **Feature packages**, each in its own module: `map/` (`:shared:app:map`), `datacollection/` (`:shared:app:datacollection`), `dashboard/` (`:shared:app:dashboard`), `onboarding/` (`:shared:app:onboarding`), `settings/` (`:shared:app:settings`), and `listsearch/` (`:shared:app:listsearch`). Each holds its feature's `*ViewModel` and `*Actions` interface, its immutable `*UiState` and one-shot `*Event`s, and its stateless Compose views that consume `(*UiState, *Actions)`.
+- **Session shell** (`session/`, this module): `SessionCoordinator`, `SurveyRecordsUiStates`, and the other pieces that wire one client session's features together, plus the session's banners and developer sign-in dialog. `AppViewModels` (this package) groups the session's ViewModels.
+- **Shared presentation code** (`:shared:app:ui-common`): `common/` (feature-agnostic widgets and foreground platform bridges), `text/` (domain text mappers), `navigation/` (navigation models), and `viewmodel/` (ViewModel helpers).
 
 ## Role in the Overall Architecture
 
-The UI layer follows strict Unidirectional Data Flow:
-
 ```
-Compose Views (ui/<feature>/*, ui/screen/*)
+Compose Views (ui/<feature>/*)
    │  ↑ collects StateFlow<*UiState>
    ↓ invokes *Actions
-Feature ViewModels (ui/viewmodel/*)
+Feature ViewModels (ui/<feature>/*ViewModel)
    │  ↑ observes Flow<DomainModel>
    ↓ invokes suspend functions
 Domain Use Cases & Repositories (domain/usecase/*, domain/repository/*)
 ```
 
+Cross-feature coordination (such as selecting an entity on the map and opening its details) happens through one-shot `*Event` flows collected by `session/SessionCoordinator`, which tells the client shell (`MobileAppState` or `WebAppState`, through `SessionShell`) what to show.
+
 ## Dependency Rules
 
-- **Inbound access**: Entry point invoked by the hosts' `Main` (`webApp`, `mobileWebApp`, `androidApp`, `iosApp`).
+- **Inbound access**: Entry point invoked by the client shells in `shared/mobile` and `shared/web`.
 - **Outbound dependencies**:
-  - Compose Views (`ui/<feature>/*`, `ui/screen/*`, `ui/common/*`) depend on `ui/state/`, `ui/viewmodel/` (`*Actions` interfaces), and `domain/model/`.
-  - Feature ViewModels (`ui/viewmodel/*`) depend on `ui/state/`, `domain/usecase/`, `domain/repository/`, and `domain/model/`.
-  - Enforced by `LayerDependencyGuardrailTest`, **no** file in `ui/` may import `data.*`, and **no** Compose View may import `client.*` (with `PdfExportClient` restricted to `DataCollectionViewModel`).
+  - Compose views depend on their feature's state and `*Actions`, on `ui/common/`, `ui/text/`, and `ui/navigation/`, and on `domain/model/`. A feature module may build on a lower feature (data collection builds on the map), never on a higher one or on the session shell.
+  - Feature ViewModels depend on their feature's state, `domain/usecase/`, `domain/repository/`, and `domain/model/`.
+  - Enforced by the module graph (`ModuleGraphTest`) and `LayerDependencyArchitectureTest`: **no** file in `ui/` may import `data.*`, and **no** Compose view may import `client.*`.

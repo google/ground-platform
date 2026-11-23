@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Strings for the field-facing form runner (mobile wizard and compact web layout) and its
+     question widgets. -->
+<resources>
+  <!-- Common actions -->
+  <string name="forms_cancel">ยกเลิก</string>
+  <string name="forms_submit">ส่ง</string>
+  <!-- Button that skips an optional question without answering it. -->
+  <string name="forms_skip">ข้าม</string>
+  <!-- Button / badge that opens an answer or repeat entry for editing. -->
+  <string name="forms_edit">แก้ไข</string>
+  <string name="forms_delete">ลบ</string>
+  <!-- Button that clears the current answer. -->
+  <string name="forms_clear">ล้าง</string>
+  <string name="forms_undo">เลิกทำ</string>
+  <string name="forms_redo">ทำซ้ำ</string>
+  <!-- Button that finishes drawing a geometry on the map. -->
+  <string name="forms_done">เสร็จแล้ว</string>
+  <!-- Confirm button of the date picker dialog. -->
+  <string name="forms_ok">ตกลง</string>
+  <!-- Confirms adding a new choice option typed by the collector. -->
+  <string name="forms_add">เพิ่ม</string>
+  <string name="forms_yes">ใช่</string>
+  <string name="forms_no">ไม่</string>
+
+  <!-- Form header, navigation, and progress -->
+  <!-- Fallback title of a form that has no title in the compact (web) layout. -->
+  <string name="forms_untitled_form">แบบฟอร์ม</string>
+  <!-- Fallback title of a form that has no title in the mobile runner. -->
+  <string name="forms_untitled_survey_form">แบบฟอร์มสำรวจ</string>
+  <!-- Title of the final review step; also the submit button label while answers still need review. -->
+  <string name="forms_review_and_submit">ตรวจทานและส่ง</string>
+  <!-- Compact layout progress. %1$d = settled (answered or skipped) questions, %2$d = total questions. -->
+  <string name="forms_progress_answered_of_total">ตอบแล้ว %1$d จาก %2$d</string>
+  <string name="forms_expand_all">ขยายทั้งหมด</string>
+  <string name="forms_collapse_all">ยุบทั้งหมด</string>
+  <!-- Footer progress segments, joined with " • ". %1$d = number of questions. -->
+  <string name="forms_progress_answered_count">ตอบแล้ว %1$d</string>
+  <string name="forms_progress_skipped_count">ข้ามแล้ว %1$d</string>
+  <string name="forms_progress_pending_count">รอดำเนินการ %1$d</string>
+  <!-- Mobile app bar subtitle on the final review step. %1$d = number of questions in the form. -->
+  <plurals name="forms_review_and_finalize_summary">
+    <item quantity="other">ตรวจทานและยืนยัน (%1$d คำถาม)</item>
+  </plurals>
+  <!-- Mobile app bar subtitle. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_of_total">ขั้นตอนที่ %1$d จาก %2$d</string>
+  <!-- Compact step counter in the bottom bar. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_counter">%1$d / %2$d</string>
+  <!-- Toggle that closes the list of all form steps. -->
+  <string name="forms_close_step_list">ปิดรายการ</string>
+  <!-- Toggle that opens the list of all form steps. %1$d = number of steps. -->
+  <string name="forms_steps_count">ขั้นตอน (%1$d)</string>
+  <string name="forms_close_form">ปิดแบบฟอร์ม</string>
+  <!-- Content description of the icon in front of the form's language selector. -->
+  <string name="forms_language">ภาษา</string>
+  <!-- Button that goes back to the previous question. -->
+  <string name="forms_back">ย้อนกลับ</string>
+  <!-- Button that moves on to the final review step. -->
+  <string name="forms_review">ตรวจทาน</string>
+  <!-- Button that moves on to the next question. -->
+  <string name="forms_next">ถัดไป</string>
+  <!-- Heading of the step overview list. %1$d = number of steps. -->
+  <string name="forms_all_form_steps">ขั้นตอนทั้งหมดของแบบฟอร์ม (%1$d)</string>
+  <!-- Row of the step overview list. %1$d = step number, %2$s = step title. -->
+  <string name="forms_step_list_item">%1$d. %2$s</string>
+  <!-- Banner shown when Next is tapped before capturing a required location. -->
+  <string name="forms_blocker_location">กรุณาบันทึกตำแหน่งหรือปักหมุดก่อนดำเนินการต่อ</string>
+  <string name="forms_blocker_optional">กรุณาแก้ไขข้อผิดพลาดในการตรวจสอบด้านบน หรือข้ามเพื่อดำเนินการต่อ</string>
+  <string name="forms_blocker_required">กรุณาแก้ไขข้อผิดพลาดในการตรวจสอบด้านบนเพื่อดำเนินการต่อ</string>
+
+  <!-- Question cards -->
+  <!-- Question label with a required marker. %1$s = question label. -->
+  <string name="forms_required_label">%1$s *</string>
+  <!-- Badge on a required question. -->
+  <string name="forms_badge_required">จำเป็นต้องระบุ *</string>
+  <!-- Badge on a question whose value is computed by the form. -->
+  <string name="forms_badge_calculated">คำนวณอัตโนมัติ</string>
+  <string name="forms_badge_read_only">อ่านอย่างเดียว</string>
+  <!-- Toggle for the extra instructions written for enumerators (data collectors). -->
+  <string name="forms_hide_guidance">ซ่อนคำแนะนำสำหรับผู้เก็บข้อมูล</string>
+  <string name="forms_show_guidance">แสดงคำแนะนำสำหรับผู้เก็บข้อมูล</string>
+  <!-- Collapsed card summary of a question the collector skipped. -->
+  <string name="forms_status_skipped">ข้ามแล้ว</string>
+  <!-- Collapsed card summary of a question with no answer yet. -->
+  <string name="forms_status_not_answered">ยังไม่ได้ตอบ</string>
+  <!-- Screen reader descriptions of a question's status icon. -->
+  <string name="forms_status_answered">ตอบแล้ว</string>
+  <string name="forms_status_pending">รอดำเนินการ</string>
+  <string name="forms_status_needs_attention">ต้องตรวจสอบ</string>
+  <string name="forms_collapse_question">ยุบคำถาม</string>
+  <string name="forms_expand_question">ขยายคำถาม</string>
+  <!-- Generic stand-in for a question that has no label. -->
+  <string name="forms_this_question">คำถามนี้</string>
+  <!-- Title of a group of questions shown on one screen when the group has no label. -->
+  <string name="forms_untitled_question_group">กลุ่มคำถาม</string>
+  <!-- Shown when a photo, video, or audio file can't answer the question and no reason is given. -->
+  <string name="forms_attachment_rejected">ไฟล์แนบถูกปฏิเสธ</string>
+  <!-- %1$d = number of questions with validation errors. -->
+  <plurals name="forms_questions_need_attention">
+    <item quantity="other">มี %1$d คำถามที่ต้องตรวจสอบก่อนส่ง</item>
+  </plurals>
+
+  <!-- Repeated sections -->
+  <!-- Number of entries of a repeated section. %1$d = number of entries. -->
+  <plurals name="forms_repeat_section_entries">
+    <item quantity="other">%1$d รายการ</item>
+  </plurals>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entries_hint">เพิ่มรายการ '%1$s' อย่างน้อยหนึ่งรายการด้านล่าง</string>
+  <string name="forms_repeat_no_entries">ยังไม่มีการเพิ่มรายการที่ทำซ้ำ</string>
+  <!-- Fallback title of one repeat entry. %1$s = repeated section label, %2$d = entry number. -->
+  <string name="forms_repeat_instance_title">%1$s #%2$d</string>
+  <!-- Preview of a repeat entry that has no answers yet. -->
+  <string name="forms_repeat_tap_to_fill">แตะเพื่อกรอกรายละเอียด</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entry">เพิ่มรายการ %1$s</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_named">เพิ่ม %1$s</string>
+  <!-- Delete action of one repeat entry. %1$s = entry title. -->
+  <string name="forms_repeat_delete_entry">ลบ %1$s</string>
+  <!-- Ordinal number badge of a repeat entry or ranked item. %1$d = number. -->
+  <string name="forms_number_badge">#%1$d</string>
+  <!-- %1$d = current entry number, %2$d = number of entries. -->
+  <string name="forms_repeat_entry_position">รายการ #%1$d จาก %2$d</string>
+  <!-- Button that opens the list of all entries of a repeated section. -->
+  <string name="forms_all_entries">รายการทั้งหมด</string>
+  <!-- Buttons that jump to the previous or next entry of a repeated section. -->
+  <string name="forms_repeat_previous_entry">รายการก่อนหน้า</string>
+  <string name="forms_repeat_next_entry">รายการถัดไป</string>
+  <!-- Badge with the number of entries a repeated section requires. %1$d = number of entries. -->
+  <string name="forms_repeat_required_count">ต้องมี %1$d รายการ</string>
+  <!-- %1$s = repeated section label. Shown once a section has entries. -->
+  <string name="forms_repeat_add_another">เพิ่มรายการ %1$s อีก</string>
+  <!-- Title of the dialog confirming an entry deletion. %1$s = entry title. -->
+  <string name="forms_repeat_delete_title">ลบ %1$s ใช่ไหม</string>
+  <!-- Body of the dialog confirming an entry deletion. %1$d = answers in the entry. -->
+  <plurals name="forms_repeat_delete_message">
+    <item quantity="other">คำตอบ %1$d รายการของรายการนี้จะถูกลบด้วย และไม่สามารถเลิกทำได้</item>
+  </plurals>
+  <!-- Status of a repeat entry. -->
+  <string name="forms_repeat_status_not_started">ยังไม่เริ่ม</string>
+  <string name="forms_repeat_status_in_progress">กำลังดำเนินการ</string>
+  <string name="forms_repeat_status_complete">เสร็จสมบูรณ์</string>
+
+  <!-- Review step -->
+  <string name="forms_review_answers">ตรวจทานคำตอบ</string>
+  <string name="forms_review_answers_hint">แตะคำถามด้านล่างเพื่อย้อนกลับไปแก้ไขคำตอบ</string>
+  <string name="forms_ready_to_submit">✓ พร้อมส่ง</string>
+  <!-- Badge with the number of validation issues. %1$d = number of issues. -->
+  <plurals name="forms_issue_count">
+    <item quantity="other">%1$d ปัญหา</item>
+  </plurals>
+  <string name="forms_form_finalized">✓ ยืนยันแบบฟอร์มเรียบร้อยแล้ว</string>
+  <!-- %1$d = number of validation errors; the list of errors follows. -->
+  <plurals name="forms_cannot_submit_errors">
+    <item quantity="other">⚠ ไม่สามารถส่งได้: มีข้อผิดพลาดในการตรวจสอบ %1$d รายการ:</item>
+  </plurals>
+  <!-- One validation error in a list. %1$s = question label, %2$s = error message. -->
+  <string name="forms_validation_error_item">• %1$s: %2$s</string>
+  <!-- Badge on a review card whose answer is invalid. -->
+  <string name="forms_invalid_badge">ไม่ถูกต้อง</string>
+  <!-- Heading of the data table records the submission creates or updates. %1$d = number of records. -->
+  <string name="forms_updated_records">ระเบียนที่อัปเดต (%1$d)</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_new_in_dataset">ระเบียนใหม่ใน %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_updated_in_dataset">ระเบียนที่อัปเดตใน %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_unchanged_in_dataset">ระเบียนที่ไม่เปลี่ยนแปลงใน %1$s</string>
+
+  <!-- Answer summaries -->
+  <!-- Shown in place of an answer for a question that has none. -->
+  <string name="forms_unanswered">(ยังไม่ได้ตอบ)</string>
+  <!-- Summary of a line (geotrace) answer. %1$d = number of points. -->
+  <plurals name="forms_trace_point_count">
+    <item quantity="other">จุดบนเส้นทาง %1$d จุด</item>
+  </plurals>
+  <!-- Summary of a polygon (geoshape) answer. %1$d = number of vertices. -->
+  <plurals name="forms_polygon_vertex_count">
+    <item quantity="other">จุดยอดรูปหลายเหลี่ยม %1$d จุด</item>
+  </plurals>
+  <!-- Repeat entry previews of location, line, and polygon answers. -->
+  <string name="forms_preview_location_recorded">บันทึกตำแหน่งแล้ว</string>
+  <string name="forms_preview_trace_recorded">บันทึกเส้นทางแล้ว</string>
+  <string name="forms_preview_shape_recorded">บันทึกรูปร่างแล้ว</string>
+
+  <!-- Text, number, date, and time inputs -->
+  <string name="forms_text_placeholder">กรอกคำตอบ...</string>
+  <!-- Character count of a text answer. %1$d = number of characters. -->
+  <plurals name="forms_text_char_count">
+    <item quantity="other">%1$d ตัวอักษร</item>
+  </plurals>
+  <string name="forms_decimal_invalid">กรอกตัวเลขทศนิยมที่ถูกต้อง</string>
+  <string name="forms_integer_invalid">กรอกจำนวนเต็ม</string>
+  <!-- %1$d = smallest allowed value, %2$d = largest allowed value. -->
+  <string name="forms_integer_out_of_range">กรอกค่าระหว่าง %1$d ถึง %2$d</string>
+  <!-- Placeholder showing the required ISO date format (year-month-day); typed dates must use it. -->
+  <string name="forms_date_placeholder">YYYY-MM-DD</string>
+  <string name="forms_date_invalid">กรอกวันที่ที่ถูกต้องในรูปแบบ YYYY-MM-DD</string>
+  <string name="forms_clear_date">ล้างวันที่</string>
+  <string name="forms_select_date">เลือกวันที่</string>
+  <!-- Placeholder showing the required 24-hour time format (hours:minutes:seconds). -->
+  <string name="forms_time_placeholder">HH:MM:SS</string>
+  <!-- Button that fills a time question with the current time. -->
+  <string name="forms_now">ตอนนี้</string>
+  <string name="forms_no_timestamp">(ไม่มีการบันทึกเวลา)</string>
+  <string name="forms_capture_timestamp">บันทึกเวลา</string>
+
+  <!-- Location (geopoint) questions -->
+  <!-- Button that records the point under the map crosshair. -->
+  <string name="forms_add_point">เพิ่มจุด</string>
+  <!-- Button that records the device's current GPS position. -->
+  <string name="forms_capture_location">บันทึกตำแหน่งที่ตั้ง</string>
+  <string name="forms_map_pan_allowed">เลื่อนแผนที่ได้</string>
+  <string name="forms_gps_only_no_pan">GPS เท่านั้น (เลื่อนแผนที่ไม่ได้)</string>
+  <!-- Required GPS accuracy. %1$s = accuracy in meters. -->
+  <string name="forms_accuracy_required">ต้องแม่นยำ ≤ %1$s ม.</string>
+  <!-- Location capture status badges. -->
+  <string name="forms_geo_status_panned">เลื่อนแผนที่แล้ว</string>
+  <string name="forms_geo_status_captured">บันทึกแล้ว</string>
+  <string name="forms_geo_status_ready">พร้อม</string>
+  <string name="forms_geo_target_coordinates">พิกัดเป้าหมาย (กากบาทที่เลื่อนไป)</string>
+  <string name="forms_geo_captured_coordinates">พิกัดที่บันทึก</string>
+  <string name="forms_geo_current_coordinates">พิกัด GPS ปัจจุบัน</string>
+  <!-- Raw coordinates with altitude. %1$s = latitude, %2$s = longitude, %3$d = altitude in meters. -->
+  <string name="forms_geo_coordinates_with_altitude">%1$s, %2$s • ความสูง %3$d ม.</string>
+  <!-- Label of the GPS accuracy readout. -->
+  <string name="forms_accuracy">ความแม่นยำ</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m), %4$s = label of the Add point button. -->
+  <string name="forms_geo_saved_point">จุดที่บันทึก: %1$s, %2$s (%3$s) — แตะ “%4$s” เพื่ออัปเดต หรือใช้ เลิกทำ / ทำซ้ำ</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m). "Next →" is the Next button. -->
+  <string name="forms_geo_location_captured">บันทึกตำแหน่งแล้ว: %1$s, %2$s (%3$s) — แตะ “ถัดไป →” เพื่อดำเนินการต่อ หรือใช้ เลิกทำ / ทำซ้ำ</string>
+  <!-- %1$s = label of the Add point button. -->
+  <string name="forms_geo_map_panned_hint">เลื่อนแผนที่แล้ว — แตะ “%1$s” ด้านล่างเพื่อบันทึกจุดนี้</string>
+  <!-- %1$s = label of the Capture location button. -->
+  <string name="forms_geo_capture_hint">แตะ “%1$s” ด้านล่างเพื่อบันทึกพิกัด GPS ปัจจุบันของคุณ</string>
+  <string name="forms_recenter_on_gps">จัดกึ่งกลางที่ GPS</string>
+  <string name="forms_geo_pan_disabled">ปิดการเลื่อนแผนที่สำหรับคำถามนี้ ระบบจะบันทึกพิกัดจากตำแหน่ง GPS ของคุณโดยตรง</string>
+  <!-- %1$s = required accuracy in meters. -->
+  <string name="forms_geo_pan_disabled_with_accuracy">ปิดการเลื่อนแผนที่สำหรับคำถามนี้ ระบบจะบันทึกพิกัดจากตำแหน่ง GPS ของคุณโดยตรง (ต้องแม่นยำ ≤ %1$s ม.)</string>
+  <!-- Map overlay status. -->
+  <string name="forms_gps_locked">GPS ล็อกแล้ว</string>
+  <string name="forms_geo_waiting_for_location">กำลังรอตำแหน่ง GPS…</string>
+  <string name="forms_map_panned_crosshair">เลื่อนแผนที่แล้ว • ใช้กากบาทอยู่</string>
+  <string name="forms_map_centered_on_gps">อยู่กึ่งกลางที่ GPS (ลากแผนที่เพื่อเลื่อน)</string>
+  <string name="forms_zoom_in">ซูมเข้า</string>
+  <string name="forms_zoom_out">ซูมออก</string>
+  <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->
+  <string name="forms_gps_accuracy_zoom">GPS %1$s • %2$sz</string>
+
+  <!-- Line (geotrace) and polygon (geoshape) questions -->
+  <!-- Button that records the device's current GPS position as a new vertex. -->
+  <string name="forms_capture_vertex">บันทึกจุดยอด</string>
+  <!-- "pts" abbreviates points. -->
+  <string name="forms_geometry_polygon_min">รูปหลายเหลี่ยม (≥3 จุด)</string>
+  <string name="forms_geometry_line_min">เส้น (≥2 จุด)</string>
+  <string name="forms_geometry_walk_or_draw">เดินหรือวาด (เลื่อนแผนที่ได้)</string>
+  <string name="forms_geometry_gps_walk_only">เดินด้วย GPS เท่านั้น (ล็อก)</string>
+  <string name="forms_geometry_gps_stream_only">สตรีม GPS เท่านั้น (ล็อกการเลื่อนแผนที่)</string>
+  <!-- %1$d = number of vertices. -->
+  <plurals name="forms_vertex_count">
+    <item quantity="other">%1$d จุดยอด</item>
+  </plurals>
+  <!-- Status while walking a line or polygon. %1$d = number of points logged so far ("pts" abbreviates points). -->
+  <plurals name="forms_geometry_walking">
+    <item quantity="other">กำลังเดิน • บันทึกจุด GPS ทุก 5 วินาที (%1$d จุด)</item>
+  </plurals>
+  <!-- %1$d = number of points logged so far, %2$s = label of the Stop walking button. -->
+  <plurals name="forms_geometry_walking_stop_hint">
+    <item quantity="other">กำลังเดิน • บันทึกจุด GPS ทุก 5 วินาที (%1$d จุด) แตะ “%2$s” เมื่อเสร็จ</item>
+  </plurals>
+  <string name="forms_geo_target_point_coordinates">พิกัดจุดเป้าหมาย</string>
+  <string name="forms_gps_location">ตำแหน่ง GPS</string>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_polygon_ready">
+    <item quantity="other">บันทึกแล้ว %1$d จุดยอด • รูปหลายเหลี่ยมปิดพร้อมแล้ว — แตะ “ถัดไป →” เพื่อดำเนินการต่อ หรือเพิ่มจุดยอด</item>
+  </plurals>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_line_ready">
+    <item quantity="other">บันทึกแล้ว %1$d จุดยอด • เส้นพร้อมแล้ว — แตะ “ถัดไป →” เพื่อดำเนินการต่อ หรือเพิ่มจุดยอด</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_polygon_need_more">
+    <item quantity="other">ต้องมีจุดยอดอีก %1$d จุดเพื่อให้รูปหลายเหลี่ยมสมบูรณ์ แตะ “%2$s” ด้านล่างเพื่อบันทึก</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_line_need_more">
+    <item quantity="other">ต้องมีจุดยอดอีก %1$d จุดเพื่อให้เส้นสมบูรณ์ แตะ “%2$s” ด้านล่างเพื่อบันทึก</item>
+  </plurals>
+  <string name="forms_stop_walking">หยุดเดิน</string>
+  <string name="forms_start_walking">เริ่มเดิน</string>
+  <string name="forms_clear_all_vertices">ล้างจุดยอดทั้งหมด</string>
+  <!-- %1$s = label of the Start walking button, %2$s = label of the Add point button. -->
+  <string name="forms_geometry_pan_disabled_hint">ปิดการเลื่อนแผนที่สำหรับคำถามนี้ แตะ “%1$s” เพื่อบันทึกจุด GPS ทุก 5 วินาที หรือ “%2$s” เพื่อบันทึกด้วยตนเอง</string>
+
+  <!-- Drawing geometry on the host's map (web) -->
+  <string name="forms_map_instruction_point">คลิกบนแผนที่เพื่อวางจุดนี้</string>
+  <string name="forms_map_instruction_line">คลิกบนแผนที่เพื่อเพิ่มจุดยอดของเส้นตามลำดับ (อย่างน้อย 2 จุด)</string>
+  <string name="forms_map_instruction_polygon">คลิกบนแผนที่เพื่อเพิ่มมุมของรูปหลายเหลี่ยมตามลำดับ (อย่างน้อย 3 จุด)</string>
+  <!-- "Draw on map" is the label of the button that starts drawing. -->
+  <string name="forms_map_drawn_point">วาดบนแผนที่: จุด ใช้ “วาดบนแผนที่” เพื่อเริ่ม</string>
+  <string name="forms_map_drawn_line">วาดบนแผนที่: เส้น ใช้ “วาดบนแผนที่” เพื่อเริ่ม</string>
+  <string name="forms_map_drawn_polygon">วาดบนแผนที่: รูปหลายเหลี่ยม ใช้ “วาดบนแผนที่” เพื่อเริ่ม</string>
+  <string name="forms_map_no_point">ยังไม่มีจุด</string>
+  <string name="forms_map_point_placed">วางจุดแล้ว</string>
+  <string name="forms_drawing_on_map">กำลังวาดบนแผนที่</string>
+  <string name="forms_draw_on_map">วาดบนแผนที่</string>
+  <string name="forms_redraw">วาดใหม่</string>
+  <string name="forms_zoom_to_fit">ซูมให้พอดี</string>
+
+  <!-- Choice questions -->
+  <!-- Shown on a cascading choice question. %1$s = label of the question it depends on. -->
+  <string name="forms_select_parent_first">เลือกคำตอบสำหรับ '%1$s' ก่อน</string>
+  <string name="forms_no_matching_options">(ไม่มีตัวเลือกที่ตรงกับตัวกรองปัจจุบัน)</string>
+  <!-- Button that adds a choice option typed by the collector. -->
+  <string name="forms_add_new">เพิ่มใหม่</string>
+  <string name="forms_new_item_placeholder">ป้ายกำกับรายการใหม่</string>
+
+  <!-- Range, rank, and acknowledge questions -->
+  <!-- %1$s = minimum value of the range. -->
+  <string name="forms_range_min">ต่ำสุด: %1$s</string>
+  <!-- %1$s = currently selected value. -->
+  <string name="forms_range_selected">ที่เลือก: %1$s</string>
+  <!-- %1$s = maximum value of the range. -->
+  <string name="forms_range_max">สูงสุด: %1$s</string>
+  <string name="forms_rank_instructions">เรียงลำดับรายการจากความสำคัญสูงสุด (#1) ไปต่ำสุด:</string>
+  <string name="forms_rank_move_up">เลื่อนขึ้น</string>
+  <string name="forms_rank_move_down">เลื่อนลง</string>
+  <string name="forms_rank_drag_to_reorder">ลากเพื่อจัดลำดับใหม่</string>
+  <string name="forms_trigger_acknowledged">รับทราบแล้ว (ตกลง)</string>
+  <string name="forms_trigger_acknowledge">รับทราบ / ยืนยัน</string>
+
+  <!-- Photo, video, audio, and file questions -->
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_capture">%1$s\nไฟล์นี้ไม่มีในอุปกรณ์นี้ บันทึกอีกครั้งเพื่อแทนที่</string>
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_choose">%1$s\nไฟล์นี้ไม่มีในอุปกรณ์นี้ เลือกอีกครั้งเพื่อแทนที่</string>
+  <!-- Secondary button that uploads an existing file instead of capturing a new one. -->
+  <string name="forms_media_choose_from_device">เลือกจากอุปกรณ์</string>
+  <string name="forms_media_choose_file">เลือกไฟล์</string>
+  <string name="forms_media_replace_file">แทนที่ไฟล์</string>
+  <string name="forms_media_upload">อัปโหลด</string>
+  <string name="forms_media_remove">นำออก</string>
+  <!-- Screen reader description of a captured photo. %1$s = file name. -->
+  <string name="forms_media_captured_photo_description">รูปภาพที่ถ่าย %1$s</string>
+  <string name="forms_media_photo_attached">แนบรูปภาพแล้ว</string>
+  <string name="forms_media_video_attached">แนบวิดีโอแล้ว</string>
+  <string name="forms_media_audio_attached">แนบไฟล์บันทึกเสียงแล้ว</string>
+  <string name="forms_media_file_attached">แนบไฟล์แล้ว</string>
+  <!-- Attachment status with its length. %1$s = status (e.g. Video attached), %2$s = duration (e.g. 0:05). -->
+  <string name="forms_media_attached_with_duration">%1$s · %2$s</string>
+  <!-- Titles of media questions. -->
+  <string name="forms_media_kind_photo">รูปภาพ</string>
+  <string name="forms_media_kind_video">วิดีโอ</string>
+  <string name="forms_media_kind_audio">บันทึกเสียง</string>
+  <string name="forms_media_kind_file">ไฟล์</string>
+  <string name="forms_media_take_photo">ถ่ายภาพ</string>
+  <string name="forms_media_record_video">บันทึกวิดีโอ</string>
+  <string name="forms_media_record_audio">บันทึกเสียง</string>
+  <string name="forms_media_retake_photo">ถ่ายภาพใหม่</string>
+  <!-- Re-records a video or audio answer. -->
+  <string name="forms_media_record_again">บันทึกอีกครั้ง</string>
+  <!-- Badge: the question only accepts media captured live, not uploaded files. -->
+  <string name="forms_media_capture_only">บันทึกสดเท่านั้น</string>
+  <!-- Badge: the question accepts live capture or an uploaded file. -->
+  <string name="forms_media_capture_or_upload">บันทึกหรืออัปโหลด</string>
+  <string name="forms_media_live_unavailable_photo">คำถามนี้ต้องใช้รูปภาพที่ถ่ายสด ซึ่งอุปกรณ์/เบราว์เซอร์นี้ไม่สามารถถ่ายได้</string>
+  <string name="forms_media_live_unavailable_video">คำถามนี้ต้องใช้วิดีโอที่บันทึกสด ซึ่งอุปกรณ์/เบราว์เซอร์นี้ไม่สามารถบันทึกได้</string>
+  <string name="forms_media_live_unavailable_audio">คำถามนี้ต้องใช้เสียงที่บันทึกสด ซึ่งอุปกรณ์/เบราว์เซอร์นี้ไม่สามารถบันทึกได้</string>
+  <string name="forms_media_live_unavailable_file">คำถามนี้ต้องใช้ไฟล์ที่บันทึกสด ซึ่งอุปกรณ์/เบราว์เซอร์นี้ไม่สามารถบันทึกได้</string>
+  <string name="forms_media_unavailable_photo">อุปกรณ์นี้ไม่สามารถถ่ายหรือเลือกรูปภาพได้</string>
+  <string name="forms_media_unavailable_video">อุปกรณ์นี้ไม่สามารถบันทึกหรือเลือกวิดีโอได้</string>
+  <string name="forms_media_unavailable_audio">อุปกรณ์นี้ไม่สามารถบันทึกหรือเลือกไฟล์บันทึกเสียงได้</string>
+  <string name="forms_media_unavailable_file">อุปกรณ์นี้ไม่สามารถบันทึกหรือเลือกไฟล์ได้</string>
+  <!-- Photo size limit. %1$d = maximum long edge in pixels. -->
+  <string name="forms_media_max_pixels">สูงสุด %1$d px</string>
+  <!-- The question prefers the front (selfie) camera. -->
+  <string name="forms_media_front_camera">กล้องหน้า</string>
+
+  <!-- Variant-incompatible question fallback warnings -->
+  <string name="forms_variant_web">เว็บ</string>
+  <string name="forms_variant_google_earth">Google Earth</string>
+  <string name="forms_incompatible_type_gps_location">ตำแหน่งจาก GPS เท่านั้น</string>
+  <string name="forms_incompatible_type_gps_line">เส้นจาก GPS เท่านั้น</string>
+  <string name="forms_incompatible_type_gps_polygon">รูปหลายเหลี่ยมจาก GPS เท่านั้น</string>
+  <string name="forms_incompatible_type_location">ตำแหน่ง</string>
+  <string name="forms_incompatible_type_line">เส้น</string>
+  <string name="forms_incompatible_type_polygon">รูปหลายเหลี่ยม</string>
+  <string name="forms_incompatible_type_photo">รูปภาพ</string>
+  <string name="forms_incompatible_type_video">วิดีโอ</string>
+  <string name="forms_incompatible_type_audio">เสียง</string>
+  <string name="forms_incompatible_type_file">ไฟล์</string>
+  <!-- %1$s = question type; %2$s = variant name. -->
+  <string name="forms_variant_incompatible_warning">คำถามประเภท %1$s ไม่รองรับบน %2$s คำถามนี้จะถูกข้ามไป โปรดติดต่อผู้จัดทำแบบสำรวจเพื่อแก้ไขปัญหานี้</string>
+</resources>

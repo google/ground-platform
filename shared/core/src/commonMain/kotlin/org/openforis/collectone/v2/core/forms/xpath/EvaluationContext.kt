@@ -59,10 +59,15 @@ data class EvaluationContext(
   /** Named variables accessible via `$var` or `${var}`. */
   val variables: Map<String, XPathValue> = emptyMap(),
   /**
-   * Supplier for current UTC epoch milliseconds (`today()` and `now()`). Defaults to
-   * `1789675200000L` (2026-09-17T20:00:00Z) if unspecified in pure KMP.
+   * Supplier for current UTC epoch milliseconds (`today()` and `now()`). Defaults to the fixed
+   * [DEFAULT_EPOCH_MILLIS] (2026-09-17T00:00:00Z) for deterministic tests.
    */
   val clockEpochMillis: () -> Long = { DEFAULT_EPOCH_MILLIS },
+  /**
+   * Offset in milliseconds of the local time zone from UTC at a UTC epoch-millisecond instant, so
+   * `today()` is the local calendar day. Defaults to UTC.
+   */
+  val utcOffsetMillis: (epochMillis: Long) -> Long = { 0L },
   /** Optional deterministic seed for `random()` and `uuid()`. */
   val randomSeed: Long? = null,
 ) {
@@ -96,6 +101,7 @@ data class EvaluationContext(
       activeLanguage: String? = formDef?.default_language,
       variables: Map<String, XPathValue> = emptyMap(),
       clockEpochMillis: () -> Long = { DEFAULT_EPOCH_MILLIS },
+      utcOffsetMillis: (epochMillis: Long) -> Long = { 0L },
       randomSeed: Long? = null,
     ): EvaluationContext {
       val docRoot = XPathNode.fromRecordInstance(recordInstance, schema)
@@ -114,6 +120,7 @@ data class EvaluationContext(
           activeLanguage = activeLanguage,
           variables = variables,
           clockEpochMillis = clockEpochMillis,
+          utcOffsetMillis = utcOffsetMillis,
           randomSeed = randomSeed,
         )
 

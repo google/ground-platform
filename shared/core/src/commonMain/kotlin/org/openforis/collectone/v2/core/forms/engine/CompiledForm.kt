@@ -30,8 +30,12 @@ import org.openforis.collectone.v2.core.forms.xpath.XPathEngine
 import org.openforis.collectone.v2.core.forms.xpath.ast.XPathDependency
 
 /**
- * Pre-compiled, immutable representation of a [FormDef] with cached XPath ASTs, indexed schema/view
+ * Pre-compiled representation of a [FormDef] with cached XPath ASTs, indexed schema/view
  * definitions, and a topologically sorted recalculation DAG.
+ *
+ * The indexes never change after construction, but [compileExpression]'s cache fills lazily and
+ * isn't synchronized, so use one instance from one thread at a time (a [FormSession] compiles its
+ * own).
  */
 class CompiledForm internal constructor(val formDef: FormDef) {
 
@@ -55,6 +59,10 @@ class CompiledForm internal constructor(val formDef: FormDef) {
     if (trimmed.isEmpty()) return null
     return expressionCache.getOrPut(trimmed) { XPathEngine.compile(trimmed) }
   }
+
+  /** Number of distinct XPath expressions parsed by this instance so far. */
+  internal val parsedExpressionCount: Int
+    get() = expressionCache.size
 
   /** Schema [FieldDefinition]s indexed by normalized relative path (e.g., `"person/age"`). */
   val schemaByRelativePath: Map<String, FieldDefinition> = buildSchemaIndex()
@@ -330,6 +338,11 @@ class CompiledForm internal constructor(val formDef: FormDef) {
     return map
   }
 
+  /**
+   * Actions that run when a record opens: those listening for `odk-instance-first-load` or
+   * `odk-instance-load` (ODK XForms spec, "Events"), model-level ones first, then the view's in
+   * document order.
+   */
   private fun buildStartupActionIndex(): List<ActionDef> {
     val result = mutableListOf<ActionDef>()
     fun isStartup(action: ActionDef): Boolean =
@@ -363,7 +376,12 @@ class CompiledForm internal constructor(val formDef: FormDef) {
     return result
   }
 
-  internal fun resolveComponentRelativePath(fieldRef: String, parentRelativePath: String): String {
+  /**
+   * Resolves a view component's `ref` against its enclosing group's path. Absolute refs (and refs
+   * at the top level) are normalized as is; a relative ref that already starts with the parent path
+   * is not prefixed twice, since forms write nested refs both ways.
+   */
+  fun resolveComponentRelativePath(fieldRef: String, parentRelativePath: String): String {
     val trimmed = fieldRef.trim()
     if (trimmed.isEmpty()) return parentRelativePath
     val normalized = RecordMutator.normalizeSchemaPath(trimmed, rootAliases)

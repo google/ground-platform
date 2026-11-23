@@ -14,7 +14,13 @@
 package org.openforis.collectone.v2.mobile
 
 import androidx.compose.ui.window.ComposeUIViewController
+import org.openforis.collectone.v2.mobile.services.MonitorDeviceConnectivity
 import platform.UIKit.UIViewController
 
-/** Entry point invoked by the iOS SwiftUI host app (`iosApp`) to mount `GroundMobileApp`. */
-fun MainViewController(): UIViewController = ComposeUIViewController { GroundMobileApp() }
+/** Entry point invoked by the iOS SwiftUI host app (`iosApp`) to mount `MobileApp`. */
+fun MainViewController(): UIViewController = ComposeUIViewController {
+  MobileAppSession(AppMobileSyncIos.getOrCreateDataHolder()) { state ->
+    MonitorDeviceConnectivity(state, AlwaysOnlineConnectivityMonitor)
+    MobileApp(state = state)
+  }
+}

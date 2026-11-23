@@ -18,15 +18,18 @@
 
 The local data store is the single source of truth of both Open Foris Collect One clients. The UI reads
 everything from it and writes everything through it. This note covers how it
-works today and how a persistent backend and a sync engine plug in later.
+works, how the sync engine's state is kept on the device, and the database
+schema.
 
-## Today
+## Working Copy
 
 -   `LocalStore` is the boundary. Reads are `Flow`s per collection; writes run
     in `suspend` transactions that are atomic and can be nested (a nested
     transaction joins the outer one).
--   `InMemoryLocalStore` keeps an immutable snapshot in a `StateFlow`. On web
-    it is an ephemeral cache, refilled from sample data on every page load.
+-   `InMemoryLocalStore` keeps an immutable snapshot in a `StateFlow`. It is
+    the working copy on every platform; on mobile (and in the mobile app in the
+    browser) `PersistentLocalStore` keeps the sync state from it on the device
+    ([Sync State on the Device](#sync-state-on-the-device)).
 -   Map features and their submissions are stored separately and joined on
     read, as a relational backend would store them.
 -   `SampleDataSeeder` fills the store when its `seedVersion` differs from
@@ -42,42 +45,221 @@ works today and how a persistent backend and a sync engine plug in later.
 
 ## Sync State on the Device
 
-Mobile clients keep the sync engine's state between launches in one file
-(`ClientSyncState` in `shared/protos/userdata/client_sync_state.proto`): the
-outbox, the server bases, the install's `client_id` and next `client_seq`, and
-the opaque sync token of each `List*` scope. `SyncStatePersistence` saves it (debounced) whenever the
-outbox changes or a sync completes, and restores it on launch: it loads the
-bases and outbox, then rebuilds the domain collections by applying the pending
-mutations on top of the bases. The app opens offline with the last synced data
-and unsent edits, and catches up from the saved sync tokens once online. The
-Android app keeps the file in its private files directory; the web keeps its
-outbox in memory by design.
+Mobile clients, including the mobile app in the browser (`mobileWebApp`), keep
+the sync engine's state between launches in a local SQLite database: the
+outbox, the server bases, the install's `client_id` and next `client_seq`, the
+opaque sync token of each `List*` scope, and the surveys downloaded to the
+device. The domain collections the UI observes stay in the in-memory working
+copy and are not stored; on launch they are rebuilt from the bases and the
+outbox.
 
-Device-only collections (places, offline tile packages, preferences, and the
-`Uploads` history) aren't part of the file; a persistent backend covers them.
+-   **`PersistentLocalStore`** (`data/datasource/local/persistence/`) wraps the
+    in-memory store. Once writing through, every transaction that changes the
+    sync state also writes those changes to the database before it commits.
+    If the database write fails, the transaction fails and the working copy is
+    unchanged, so an outbox append and the base update it depends on are stored
+    together or not at all. Only the rows a transaction touched are written.
+-   **`SyncStatePersistence`** (`data/sync/`) restores the stored state on
+    launch (it loads the bases and outbox, then rebuilds the domain
+    collections by applying the pending mutations on top of the bases) and then
+    starts writing through. Until then nothing is written, so the app can
+    start from a clean working copy. Clearing the store while writing through
+    (signing out, switching users) also clears the database.
+-   **Account**: the database records whose state it holds: the signed-in
+    account's email with real accounts, or blank for sample and development
+    accounts. `UserDataSyncController` restores only the signed-in account's
+    state; starting for another account replaces it, so one account never sees
+    another's offline edits, even if the app closed before signing out.
+-   **`SqlDelightSyncStateStore`** reads and writes the database
+    (`SyncStateStore` is its interface). The Koin `dataModule` binds
+    `LocalStore` to a `PersistentLocalStore` over it when the host's
+    `platformModule(localDatabase = ...)` provides a `SqlDriverFactory` (the
+    Android app, the mobile app in the browser, and iOS); hosts without one
+    (the web console, tests, the workbench's in-memory runs) keep everything
+    in memory with `InMemoryLocalStore`. The restore and write-through start
+    once per graph, when its `AppDataHolder` starts the initial sync; sessions
+    rebuilt over the same graph (for example after an Android configuration
+    change) don't restore again.
+-   **Closing**: the stores share one `LocalDatabaseConnection`, which the
+    host's `platformModule(localDatabase = ...)` provides. When the Koin graph
+    stops (for example when the Android app switches to another user data
+    service and calls `stopKoin`), its `onClose` hooks cancel the app scope,
+    which stops the sync engine and background writes, and close the database.
+-   **Migration from the sync state file**: older versions saved the whole
+    state as one `ClientSyncState` proto file
+    (`shared/protos/userdata/client_sync_state.proto`) after every change. On
+    the first launch with the database, `SyncStatePersistence.restore` moves the
+    file's contents into the (empty) database in one transaction and deletes
+    the file; nothing writes it anymore. An unreadable file is deleted. The
+    file never held real accounts' state for restoring, so it moves in as the
+    sample and development accounts' state.
+
+Map areas saved for offline use are stored in the same database
+([Offline Map Areas](#offline-map-areas)). The other device-only collections
+(places, preferences, and the `Uploads` history) aren't
+stored yet.
+
+## Signed-In Account
+
+Mobile clients keep the account signed in on the device in the same database
+(`signed_in_session`), so relaunching (offline too) goes straight back into
+the app instead of asking to sign in and accept the Terms of Service again.
+
+-   **What's stored**: the account's email, display name, organization, and
+    photo URL, and the email of the account that accepted the Terms of Service
+    since signing in (`terms_accepted_email`). No ID tokens, refresh tokens, or other credentials: the auth client
+    keeps those as it always has (Firebase in the browser's storage), and
+    `FakeAuthClient` has none.
+-   **Restoring**: `AuthRepositoryImpl.restoreSession` runs once per graph,
+    before the initial sync. The auth client's own session wins. When the
+    client has none to restore, because it keeps no session
+    (`FakeAuthClient`) or because Firebase couldn't be loaded (offline at
+    startup), the stored account is restored into the client
+    (`AuthClient.restoreSession`). The mobile app (`MobileAppSession`) then
+    starts on the survey list, or on the terms if they weren't accepted, or on
+    sign-in when nobody is signed in.
+-   **Back online**: the next call that needs an ID token loads Firebase again.
+    Its session replaces the restored one: the same account stays signed in
+    (its data is kept: `UserDataSyncController` only starts over when the
+    account or simulated role changes), and the app signs out only when
+    Firebase has no session for the device any more.
+-   **Terms per account**: the acceptance applies only to the account that
+    accepted (`terms_accepted_email`). When another account is signed in (a
+    simulated role switch, or the auth service restoring a different account
+    than the stored one), it must accept the terms again.
+-   **Signing out** (or the auth service ending the session) deletes the row,
+    so the next launch asks to sign in and accept the terms again. The web
+    console keeps the row in the browser's `localStorage` instead
+    (`webConsoleSignedInSessionStore`), only to keep the terms accepted across
+    page reloads: it never signs anyone in by itself
+    (`SignedInSessionStore.restoresAccount` is false), so Firebase alone decides
+    who is signed in. Other hosts without a local database (tests) keep the
+    account in memory only (`InMemorySignedInSessionStore`).
+
+## Active Survey
+
+Mobile clients keep the survey the user has open in the same database
+(`active_survey`), so a relaunch, a reload of the mobile app in the browser at
+`#survey`, or Android restoring the app after process death, reopens that
+survey instead of another one.
+
+-   **What's stored**: the ID of the survey the user last opened
+    (`SurveyRepository.setActiveSurveyId`, through `ActiveSurveyStore`).
+    Defaults the app picks itself, such as the survey the initial download
+    makes active, aren't stored.
+-   **Restoring**: once the initial sync has put the local data in place
+    (restored from the device or downloaded), `UserDataSyncController` calls
+    `SurveyRepository.restoreActiveSurvey`, which makes the stored survey
+    active again if it is still stored locally, and
+    `SurveyRepository.observeOpenSurveyId` then reports it. When the data was
+    restored from the device, this happens before
+    `UserDataSyncController.hasLoadedLocalData` turns true, which is before
+    anything is downloaded.
+-   **Launch rules**: past onboarding, the mobile app chooses where to start
+    from the data on the device alone, as soon as `hasLoadedLocalData` is
+    true, and never waits for the network (`MobileLaunchViewModel`,
+    `launchRoute`): the Main Survey when the survey the user had open is still
+    on the device; otherwise the surveys on the device when any is downloaded;
+    otherwise Download survey, with an offline banner while the device has no
+    connection. A route from before the launch (the URL fragment on a reload,
+    the back stack after process death) comes back only if it doesn't need
+    another survey (`MobileLaunch.mayRestore`): the Main Survey, its pages,
+    and its form need a survey open, and otherwise the app starts at its start
+    route.
+-   **Forgetting**: removing the survey's download, deleting it, signing out,
+    or the auth service ending the session deletes the row. Hosts without a
+    local database (the web console, tests, the workbench) keep it in memory
+    only (`InMemoryActiveSurveyStore`).
+
+## Offline Map Areas
+
+Mobile clients keep the map areas the user saved for offline use in the same
+database (`offline_map_area` and `offline_map_area_layer`), so the list of saved
+areas, and what each layer's imagery takes, survive relaunches. In the mobile
+app in the browser the downloads are simulated, but the saved areas are stored
+the same way, so they also survive a reload.
+
+-   **What's stored**: each area's ID, name (a place name, or the position the
+    UI names it after when no place name was found), bounds, and creation
+    time; and per imagery layer (Satellite, Terrain) its status (`SAVING`,
+    `READY`, `PAUSED`, `FAILED`) and size. Download progress and the reason a
+    download stopped are live state that `OfflineMapRepositoryImpl` keeps in
+    memory; the tiles themselves are kept by the map SDK
+    (`OfflineRegionClient`), one tile region per layer.
+-   **Restoring**: on first use, layers left `SAVING` (the app stopped
+    mid-download) become `PAUSED`, and the user resumes them from the list.
+    With a native region client, `READY` layers whose region is gone become
+    `PAUSED`, and regions no layer refers to are removed.
+-   **Kept on sign-out**: saved areas belong to the device, not the account.
+    Signing out, switching accounts, and clearing the sync state
+    (`SqlDelightSyncStateStore` deletes only the sync tables it names) keep
+    them, because the imagery they describe stays on the device. Hosts
+    without a local database (the web console, tests, the workbench's
+    in-memory runs) keep them in memory only (`InMemoryOfflineMapAreaStore`).
 
 ## Persistent Backend
 
-Mobile needs a store that survives restarts and works offline. The chosen
-technology is Room 3 on the `androidx.sqlite` drivers, because one Kotlin
-Multiplatform schema and DAO layer covers every platform:
+The local database uses [SQLDelight](https://sqldelight.github.io/sqldelight/),
+which generates type-safe Kotlin from the SQL schema in
+`shared/app/data/src/commonMain/sqldelight/` for every platform. Queries are
+generated as suspend functions (`generateAsync`), because the browser's driver
+is asynchronous; the same code runs unchanged on the synchronous drivers.
 
-| Platform | Driver                                           |
-| -------- | ------------------------------------------------ |
-| Android  | `BundledSQLiteDriver`                            |
-| iOS      | `BundledSQLiteDriver`                            |
-| JVM      | `BundledSQLiteDriver` (tests and desktop)        |
-| Web      | `WebWorkerSQLiteDriver`, in memory (cache only)  |
+| Platform | Driver (`SqlDriverFactory`)                                   | Storage                                    |
+| -------- | ------------------------------------------------------------- | ------------------------------------------ |
+| Android  | `AndroidSqlDriverFactory` (`AndroidSqliteDriver`)             | The app's private databases directory      |
+| JVM      | `JdbcSqlDriverFactory` (`JdbcSqliteDriver`)                   | In memory (tests) or a file (desktop)      |
+| Web      | `BrowserSqlDriverFactory` (`WebWorkerDriver`)                 | OPFS, else IndexedDB (see below)           |
+| iOS      | `NativeSqlDriverFactory` (`NativeSqliteDriver`), not built in CI | The app's sandbox                        |
 
-Steps when it is added:
+### Schema
 
--   Add a `RoomLocalStore` implementing `LocalStore`. Collections map to
-    tables; `transaction` maps to Room's `useWriterConnection` /
-    `immediateTransaction`; observers map to Room's `Flow` queries.
--   Add a subclass of `LocalStoreContractTest` for it. Tests that need real
-    suspension use a blocking runner in the platform test source set.
--   Before adopting, confirm the Room 3 release, KSP support for `wasmJs`, and
-    how the SQLite web worker is bundled.
+Records the app treats as opaque are stored as encoded protos (`BLOB`); only
+the keys used to find, replace, or delete them are columns.
+
+| Table               | Key                           | Columns                                                   |
+| ------------------- | ----------------------------- | --------------------------------------------------------- |
+| `outbox_mutation`   | `mutation_id`                 | `client_seq` (indexed, send order), `record` (`PendingMutationRecord`) |
+| `survey_base`       | `survey_id`                   | `record` (`SurveyBaseRecord`: saved revision, working copy, ACL) |
+| `entity_base`       | `survey_id`, `entity_id`      | `record` (`EntityRecord`)                                 |
+| `submission_base`   | `survey_id`, `submission_id`  | `record` (`SubmissionRecord`)                             |
+| `organization_base` | `organization_id`             | `record` (`Organization`)                                 |
+| `library_base`      | `organization_id`             | `record` (`OrganizationLibraryRecord`)                    |
+| `sync_state`        | single row (`id = 0`)         | `client_id`, `next_client_seq`, `sync_tokens` (`SyncTokensRecord`) |
+| `downloaded_survey` | `survey_id`                   |                                                           |
+| `stored_account`    | single row (`id = 0`)         | `account` (whose state is stored; blank for sample accounts) |
+| `signed_in_session` | single row (`id = 0`)         | `email`, `display_name`, `organization`, `photo_url`, `terms_accepted_email` ([Signed-In Account](#signed-in-account)) |
+| `active_survey`     | single row (`id = 0`)         | `survey_id` ([Active Survey](#active-survey))             |
+| `offline_map_area`  | `id`                          | `name` (or `name_lat`, `name_lng`), `west`, `south`, `east`, `north`, `created_at` ([Offline Map Areas](#offline-map-areas)) |
+| `offline_map_area_layer` | `area_id`, `imagery_type` | `status`, `size_bytes`                                    |
+
+The composite keys of the entity and submission bases also serve deleting all
+of a survey's bases when the survey is deleted.
+
+### Web
+
+The mobile app in the browser runs SQLite in a web worker
+(`shared/app/data/web/sqlite-worker/`), which implements the message protocol of
+SQLDelight's `WebWorkerDriver` with the official SQLite WebAssembly build
+(`@sqlite.org/sqlite-wasm`). `mobileWebApp`'s `webpack.config.d/sqliteWorker.js`
+lets webpack bundle the worker and the SQLite WebAssembly module as separate
+assets. SQLDelight's own worker uses
+sql.js, which can only keep a whole database in memory, so persisting it means
+rewriting the whole file after every write; SQLite's own build writes only the
+pages a transaction changes. The worker picks its storage when it starts:
+
+1.  **Origin Private File System** through SQLite's `opfs-sahpool` VFS, in
+    every current browser. It needs no cross-origin isolation headers.
+2.  **IndexedDB**, when the browser has no OPFS (older browsers and some
+    private browsing modes): an in-memory database whose bytes are saved to
+    IndexedDB after every committed write.
+3.  **Memory only**, when another tab already holds the database: the second
+    tab's changes last until it is closed, so the tabs can't overwrite each
+    other's data.
+
+Writes are answered only after they are stored. The web console (`webApp`)
+doesn't pass a database and keeps its outbox in memory by design
+([Web Client](../sync-engine.md#web-client)).
 
 ## Versioning and Migrations
 
@@ -85,8 +267,30 @@ Steps when it is added:
     `SampleDataSeeder.SEED_VERSION` when the sample data changes. Stores with an
     older version are reseeded, which replaces local edits. This only applies
     while the store holds sample data.
--   **Schema version**: the persistent backend owns its schema version and Room
-    migrations. Migrations must keep the outbox (pending mutations) intact.
+-   **Schema version**: SQLite's `user_version`. A new database gets the current
+    schema. To change the schema, edit the `.sq` files and add a migration
+    `<version>.sqm` next to them (SQLDelight numbers versions from 1, so the
+    first migration is `1.sqm`, from version 1 to 2); the database version is
+    the number of migrations plus one. On open, a database with an older version
+    runs the migrations from its version, and `user_version` is updated in the
+    same transaction. Android and iOS drivers run them while opening; the JVM
+    and browser drivers run them in `openLocalDatabase`. A database newer than
+    the app fails to open.
+-   **Keep the outbox**: migrations must keep `outbox_mutation` and the bases
+    intact; never drop and recreate them. Because records are encoded protos,
+    adding fields to `PendingMutationRecord` or the base records needs no
+    migration (proto3 skips unknown fields and defaults missing ones).
+-   **Verify migrations**: the schema of every version is committed in
+    `shared/app/data/src/commonMain/sqldelight/databases/` (`<version>.db`), and
+    `./gradlew :shared:app:data:verifySqlDelightMigration` checks every migration
+    against it. After changing the schema, run `./gradlew
+    :shared:app:data:generateCommonMainLocalDatabaseSchema` (on its own, not with the
+    verification) to add the new version's file.
+-   **Migrations so far**: `1.sqm` (version 1 to 2) adds `signed_in_session`;
+    `2.sqm` (version 2 to 3) adds `active_survey`; `3.sqm` (version 3 to 4)
+    replaces `signed_in_session.has_accepted_terms` with `terms_accepted_email`,
+    tying a stored acceptance to the stored account; `4.sqm` (version 4 to 5)
+    adds `offline_map_area` and `offline_map_area_layer`.
 
 ## Sync Engine Handoff
 
@@ -113,17 +317,19 @@ the network directly.
 ## Data Flow
 
 All app data lives in a local data store, the single source of truth
-(`shared/app`'s `data/datasource/local/store/`; paths below are relative to
-`shared/app/src/commonMain/kotlin/org/openforis/collectone/v2/app/` unless noted). On web it is an in-memory cache that starts
-fresh on every page load; on mobile it will become the persistent offline store.
+(`shared/app/data`'s `data/datasource/local/store/`; paths below are relative to
+`org/openforis/collectone/v2/app/` in the common source set of `shared/app`
+or, for `data/` and `client/`, `shared/app/data`, unless noted). In the web console it is an in-memory cache that starts
+fresh on every page load; on mobile, and in the mobile app in the browser, the
+sync state behind it is kept on the device
+([Sync State on the Device](#sync-state-on-the-device)).
 
 -   **Reads**: `LocalStore` exposes a `Flow` per collection (surveys, forms, map
     layers, map features with their submissions, standalone submissions,
-    geometries, survey configs and editor drafts, mutations, places, offline
-    tile packages, and preferences). `AppDataHolder.appData` combines them into
-    one `StateFlow`; the session states (`AppSession` and its mobile and web
-    subclasses) and the feature view models read from
-    the repositories it wires.
+    geometries, survey configs and editor drafts, mutations, places, and
+    preferences). `AppDataHolder.appData` combines them into
+    one `StateFlow`; the client shells (`MobileAppState`, `WebAppState`) and the
+    feature view models read from the repositories it wires.
 -   **Writes**: Repositories (`data/repository/`) write through `suspend`
     functions inside `LocalStore.transaction`, which is atomic and can be
     nested. Use cases that touch several repositories run in one transaction via
@@ -132,17 +338,17 @@ fresh on every page load; on mobile it will become the persistent offline store.
     hardcoded sample datasets (`Sample*Data`, `SurveyEditorSamples`,
     `FormEditorSamples`). It fills the store on first launch and again on
     **Reset**. `SampleDataGuardrailTest` keeps other code from reading them.
--   **Layering**: `LayerDependencyGuardrailTest` checks imports against
+-   **Layering**: `LayerDependencyArchitectureTest` checks imports against
     `docs/technical/client/architecture.md`: `domain/` depends on nothing
     outside the domain and shared core, `data/` never imports `di/` or
     presentation packages, only `data/` and `di/` (`AppDataHolder`) may import
-    `data.*`, and Views (`ui/` outside `ui/viewmodel/`) never import `data/` or
-    `client/` packages.
+    `data.*`, and Views (`ui/` files other than `*ViewModel.kt`) never import
+    `data/` or `client/` packages.
 -   **Feature view models**: Screens in `ui/<feature>/` of `shared/app`,
-    `shared/mobile`, and `shared/web` observe per-feature view models in
-    `ui/viewmodel/` (wired by `di/AppDataHolder`, `WebAppState`, and
-    `MobileAppState`), each exposing a
-    `StateFlow` of an immutable UI state (`ui/state/`) plus an actions interface
+    `shared/mobile`, and `shared/web` observe per-feature view models (in
+    `shared/app`, next to the feature's views in `ui/<feature>/`; wired by Koin,
+    `WebAppState`, and `MobileAppState`), each exposing a
+    `StateFlow` of an immutable UI state (in the same package) plus an actions interface
     the screen calls. Screens take `(uiState, actions)` and hold no state of
     their own.
     `OnboardingViewModel` (Sign In → Terms of Service → Download survey) reads
@@ -164,7 +370,7 @@ fresh on every page load; on mobile it will become the persistent offline store.
     selection, drawer, notices) are `SurveyMapEvent`s the app shell applies.
     `DashboardViewModel` (the web dashboard's panel layout, data tables, layer
     selection, and entity details pane; the web Surveys page; the searchable
-    list's filter tabs and collapsed datasets; and the `Uploads` drawer
+    list's search query and collapsed datasets; and the `Uploads` drawer
     sub-screen) observes surveys, map features, and layers through
     `SurveyRepository`, organizations through `OrganizationRepository`, the
     signed-in user through `AuthRepository`, and the mutation log through
@@ -206,7 +412,7 @@ fresh on every page load; on mobile it will become the persistent offline store.
     selections made on the map flow back through the shell. Three pieces of UI
     infrastructure are allowed in its state and dependencies by exception:
     the shared `FormWizardController` (Compose snapshot state), the
-    `WebMapDrawingHost` (`ui/state/`) that edits it while drawing, and
+    `WebMapDrawingHost` (`ui/datacollection/`) that edits it while drawing, and
     `PdfExportClient` (`client/pdf/`), the platform file delivery.
     `WorkbenchViewModel` (`mobileWebApp/workbench`, the workbench around the
     mobile app in the browser: simulated device form factor and orientation, the XForms `<h:html>` editor and example survey
@@ -226,5 +432,7 @@ fresh on every page load; on mobile it will become the persistent offline store.
     only stores drafts for the two sample surveys with extras that cannot be
     derived (`SampleSurveyEditorData`: sharing people, survey area,
     languages, Data tables).
--   **Backends**: `InMemoryLocalStore` is the only backend today. A persistent
-    backend (Room on `androidx.sqlite`) must pass `LocalStoreContractTest`.
+-   **Backends**: `InMemoryLocalStore` holds the working copy everywhere.
+    `PersistentLocalStore` adds the device's database for the sync state; it
+    passes `LocalStoreContractTest` over SQLite (`PersistentLocalStoreContractTest`
+    also checks that the database matches the working copy after each test).

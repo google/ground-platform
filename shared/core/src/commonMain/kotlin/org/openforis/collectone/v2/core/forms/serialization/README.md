@@ -17,7 +17,7 @@
 # XForms Protobuf Serializer (`xforms-proto-serializer`)
 
 A Kotlin Multiplatform (KMP) library
-(`org.openforis.collectone.v2:xforms-proto-serializer`) that serializes and
+(`:shared:core`) that serializes and
 deserializes [XForms](https://getodk.github.io/xforms-spec/) XML documents
 (`FormDef` form definitions and `RecordInstance` submission instances) to and
 from the **ProtoForms** protocol buffer model (generated with
@@ -43,7 +43,7 @@ representations defined in the `openforis.collectone.v1.forms` schema:
 ### Foreign-Namespace Attributes
 
 `<bind>` attributes in namespaces ProtoForms doesn't model (another tool's
-extension, or Ground's `ground:concept`) are preserved as
+extension, or Collect One's `collectone:concept`) are preserved as
 `FieldBinding.foreign_attributes` (namespace URI, qualified name as written,
 value) instead of being dropped. Unprefixed attributes, `xmlns` declarations,
 and the XForms, XHTML, `jr`, `odk`, `orx`, `entities`, `ev`, and `xsd`
@@ -51,7 +51,7 @@ namespaces are modeled and never preserved this way. On serialization, foreign
 attributes follow the modeled ones and each distinct prefix → URI pair is
 declared once on `<h:html>`; a prefix already bound to a different URI is
 renamed to `<prefix>2`, `<prefix>3`, and so on. The namespace URI constants
-(including `GROUND_XFORMS_NAMESPACE`) live in `XFormsNamespaces.kt`. See
+(including `COLLECT_ONE_XFORMS_NAMESPACE`) live in `XFormsNamespaces.kt`. See
 `docs/technical/model/forms/04-bindings.md` ("Foreign Attributes").
 
 
@@ -165,24 +165,25 @@ val serializedSubmissionXml: String = XFormsXmlSerializer.serialize(
 
 ### Java Environment Requirement
 
-Gradle runs on **Java 21**, pinned in `gradle/gradle-daemon-jvm.properties`.
-Gradle uses an installed JDK 21 if it finds one and downloads one otherwise;
-`./gradlew` itself only needs a JDK on the `PATH` (or `JAVA_HOME`) to start. To
-change the version, run `./gradlew updateDaemonJvm --jvm-version=<version>`.
+Run Gradle from the repository root: the repository is a single Gradle build
+with one `./gradlew`. Gradle runs on **Java 21**, pinned in the root build's
+`gradle/gradle-daemon-jvm.properties`. Gradle uses an installed JDK 21 if it
+finds one and downloads one otherwise; `./gradlew` itself only needs a JDK on
+the `PATH` (or `JAVA_HOME`) to start. To change the version for the whole
+build, run `./gradlew updateDaemonJvm --jvm-version=<version>`.
 
 ### Run JVM Unit and Round-Trip Tests
 
 To execute all JVM unit tests and data-driven XForms round-trip tests:
 
 ```bash
-./gradlew jvmTest
+./gradlew :shared:core:jvmTest
 ```
 
 ### Run Multiplatform Checks and Compilations
 
-To run the full test suite and verify compilation across JVM, JS, and WasmJS
-targets:
+To run the JVM tests and verify compilation of the JS and WasmJS targets:
 
 ```bash
-./gradlew check compileKotlinJs compileKotlinWasmJs
+./gradlew :shared:core:jvmTest :shared:core:compileKotlinJs :shared:core:compileKotlinWasmJs
 ```

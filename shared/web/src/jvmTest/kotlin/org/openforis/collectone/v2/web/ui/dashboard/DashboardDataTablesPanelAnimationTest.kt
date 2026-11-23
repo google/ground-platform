@@ -14,6 +14,8 @@
 package org.openforis.collectone.v2.web.ui.dashboard
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -37,18 +39,27 @@ class DashboardDataTablesPanelAnimationTest {
   fun collapsingTable_keepsRowsComposedDuringCollapseAnimation() =
     runDesktopComposeUiTest(width = 1200, height = 600) {
       val state = WebAppState(dataHolder = sampleDataHolder())
-      state.updateDashboardTableExpanded(true)
-      val firstRowLabel = state.entities.first().label
+      state.viewModels.dashboard.updateDashboardTableExpanded(true)
+      val firstRowLabel = state.viewModels.dataCollection.uiState.value.entities.first().label
 
       setContent {
-        MaterialTheme { DashboardDataTablesPanel(state = state, expandedTableHeight = 240.dp) }
+        val uiState by state.viewModels.dashboard.uiState.collectAsState()
+        MaterialTheme {
+          DashboardDataTablesPanel(
+            uiState = uiState,
+            actions = state.viewModels.dashboard,
+            selectedEntityId = null,
+            onRowClick = {},
+            expandedTableHeight = 240.dp,
+          )
+        }
       }
       waitForIdle()
       onNodeWithText(firstRowLabel).assertExists()
 
       mainClock.autoAdvance = false
       onNodeWithContentDescription("Collapse table").performClick()
-      assertFalse(state.isDashboardTableExpanded)
+      assertFalse(state.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
 
       // Advance partway through the collapse animation: rows must still be composed as the panel
       // slides down.

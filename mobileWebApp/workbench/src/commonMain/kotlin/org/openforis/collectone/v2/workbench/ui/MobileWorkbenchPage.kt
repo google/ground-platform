@@ -15,24 +15,35 @@ package org.openforis.collectone.v2.workbench.ui
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import org.openforis.collectone.v2.app.di.AppDataHolder
-import org.openforis.collectone.v2.app.di.requireUserDataServiceUrl
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import org.openforis.collectone.v2.app.ui.common.DemoAttributionFooterBar
 import org.openforis.collectone.v2.app.ui.common.DevicePreviewFrame
-import org.openforis.collectone.v2.core.forms.ui.GroundTheme
-import org.openforis.collectone.v2.mobile.GroundMobileApp
-import org.openforis.collectone.v2.mobile.ui.MobileAppState
+import org.openforis.collectone.v2.app.ui.navigation.AppScreen
+import org.openforis.collectone.v2.core.forms.ui.AppTheme
+import org.openforis.collectone.v2.core.forms.ui.LocalGeoLocationSource
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.mobile.MobileApp
+import org.openforis.collectone.v2.mobile.ui.navigation.appScreen
 import org.openforis.collectone.v2.mobile.ui.onboarding.MobileScreenHost
 
 private val CHROME_PARAM_REGEX =
@@ -87,41 +98,70 @@ fun shouldShowWorkbenchChrome(
 /**
  * Root of the Wasm mobile build (`mobileWebApp`). With [showChrome], the mobile app runs inside the
  * workbench's simulated device ([MobileWorkbenchPage]); without it (on a mobile browser or with
- * `?chrome=0`), the mobile app fills the browser window like a native app.
+ * `?chrome=0`), the mobile app fills the browser window like a native app. Inside the simulated
+ * device, location questions get the workbench's [SimulatedGeoLocationSource]; without the chrome,
+ * they get the host's `LocalGeoLocationSource` (the device's real location).
+ *
+ * Without the chrome, [navController] drives the mobile app's navigation, so the host can bind it
+ * to the browser history; the simulated device keeps its own, unbound from the browser.
  */
 @Composable
 fun MobileWorkbenchApp(
-  state: WorkbenchState = remember {
-    WorkbenchState(
-      MobileAppState(
-        dataHolder =
-          AppDataHolder(
-            userDataServiceUrl = requireUserDataServiceUrl(),
-            syncDownloadedSurveysOnly = true,
-          )
-      )
-    )
-  },
+  state: WorkbenchState,
   showChrome: Boolean = true,
+  hostOrigin: String = "",
+  navController: NavHostController = rememberNavController(),
 ) {
   if (!showChrome) {
-    GroundMobileApp(state.mobile)
+    MobileApp(state.mobile, navController = navController)
     return
   }
+  val geoLocationSource = remember { SimulatedGeoLocationSource() }
+  LaunchedEffect(geoLocationSource) { geoLocationSource.walk() }
+  CompositionLocalProvider(LocalGeoLocationSource provides geoLocationSource) {
+    MobileWorkbenchContent(state = state, hostOrigin = hostOrigin)
+  }
+}
+
+@Composable
+private fun MobileWorkbenchContent(state: WorkbenchState, hostOrigin: String) {
   val mobile = state.mobile
-  GroundTheme(darkTheme = mobile.isDarkTheme) {
+  val settingsUiState by mobile.viewModels.settings.uiState.collectAsState()
+  val dataCollectionUiState by mobile.viewModels.dataCollection.uiState.collectAsState()
+
+  val isMapShowing = mobile.isMapShowing(dataCollectionUiState)
+  AppTheme(darkTheme = settingsUiState.isDarkTheme) {
     Surface(
       modifier = Modifier.fillMaxSize(),
       // The Mapbox basemap renders behind the Compose canvas, so the root surface must stay
       // transparent while the device preview shows it.
       color =
-        if (mobile.isMapShowing) Color.Transparent
-        else MaterialTheme.colorScheme.surfaceContainerLowest,
+        if (isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerLowest,
     ) {
-      MobileWorkbenchPage(workbench = state, isMapShowing = mobile.isMapShowing)
+      Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+          MobileWorkbenchPage(
+            workbench = state,
+            isMapShowing = isMapShowing,
+            hostOrigin = hostOrigin,
+          )
+        }
+        DemoAttributionFooterBar()
+      }
     }
   }
 }
+
+/** URL of the hosted Android APK served alongside the mobile web workbench, or empty if unset. */
+internal fun apkDownloadUrl(hostOrigin: String): String =
+  hostOrigin.trimEnd('/').takeIf { it.isNotEmpty() }?.let { "$it/collect-one.apk" } ?: ""
+
+/**
+ * URL of the hosted iOS development install page served alongside the mobile web workbench, or
+ * empty if unset.
+ */
+internal fun iosDownloadUrl(hostOrigin: String): String =
+  hostOrigin.trimEnd('/').takeIf { it.isNotEmpty() }?.let { "$it/collect-one-ios.html" } ?: ""
 
 /**
  * Mobile and tablet device preview stage: the workbench's simulated device around the mobile app.
@@ -129,11 +169,21 @@ fun MobileWorkbenchApp(
 @Composable
 fun MobileWorkbenchPage(
   workbench: WorkbenchState,
+  hostOrigin: String = "",
   isMapShowing: Boolean,
 ) {
   val verticalScrollState = rememberScrollState()
   val horizontalScrollState = rememberScrollState()
   val mobile = workbench.mobile
+  val uiState by workbench.viewModel.uiState.collectAsState()
+  val settings = mobile.viewModels.settings
+  val settingsUiState by settings.uiState.collectAsState()
+  val surveyMap = mobile.viewModels.surveyMap
+  val mapUiState by surveyMap.uiState.collectAsState()
+  val dataCollectionUiState by mobile.viewModels.dataCollection.uiState.collectAsState()
+  val clipboardManager = LocalClipboardManager.current
+  val apkUrl = apkDownloadUrl(hostOrigin)
+  val iosUrl = iosDownloadUrl(hostOrigin)
 
   Box(
     modifier =
@@ -145,18 +195,41 @@ fun MobileWorkbenchPage(
   ) {
     DevicePreviewFrame(
       deviceTitle =
-        "Collect One ${workbench.deviceFormFactor.label} UI • ${mobile.currentScreen.title}",
-      isDarkTheme = mobile.isDarkTheme,
+        "Collect One ${uiState.deviceFormFactor.label} UI • ${mobile.currentRoute.appScreen.deviceFrameTitle}",
+      isDarkTheme = settingsUiState.isDarkTheme,
       isScreenTransparent = isMapShowing,
-      formFactor = workbench.deviceFormFactor,
-      orientation = workbench.deviceOrientation,
+      isTopInsetTransparent = mobile.isMainMapScreenShowing(dataCollectionUiState),
+      formFactor = uiState.deviceFormFactor,
+      orientation = uiState.deviceOrientation,
       onSelectFormFactor = workbench::selectDeviceFormFactor,
       onRotateDevice = workbench::rotateDevice,
-      onToggleDarkTheme = mobile::toggleDarkTheme,
-      isAirplaneMode = workbench.isAirplaneMode,
+      onToggleDarkTheme = settings::toggleDarkTheme,
+      isAirplaneMode = uiState.isAirplaneMode,
       onToggleAirplaneMode = workbench::toggleAirplaneMode,
+      onWalkCloser =
+        mapUiState.activeNavigation
+          ?.takeIf { !it.vector.isArrived }
+          ?.let { { surveyMap.stepUserTowardNavigationTarget() } },
+      onCopyApkLink =
+        if (apkUrl.isNotEmpty()) {
+          { clipboardManager.setText(AnnotatedString(apkUrl)) }
+        } else null,
+      onCopyIosLink =
+        if (iosUrl.isNotEmpty()) {
+          { clipboardManager.setText(AnnotatedString(iosUrl)) }
+        } else null,
     ) {
       MobileScreenHost(mobile)
     }
   }
 }
+
+/** Name of this screen in the device frame's title bar (the workbench's English developer UI). */
+private val AppScreen.deviceFrameTitle: String
+  get() =
+    when (this) {
+      AppScreen.SIGN_IN -> "Sign In"
+      AppScreen.TERMS_OF_SERVICE -> "Terms of Service"
+      AppScreen.DOWNLOAD_SURVEY -> "Download Survey"
+      AppScreen.MAIN_SURVEY -> "Main Survey (Map & List)"
+    }

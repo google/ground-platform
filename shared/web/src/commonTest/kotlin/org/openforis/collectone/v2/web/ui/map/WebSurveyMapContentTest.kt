@@ -19,12 +19,16 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
+import org.openforis.collectone.v2.app.domain.model.ImagerySourceType
+import org.openforis.collectone.v2.app.domain.model.Organization
 import org.openforis.collectone.v2.app.ui.map.SurveyMap
 import org.openforis.collectone.v2.app.ui.map.SurveyMapContent
 import org.openforis.collectone.v2.app.ui.map.SurveyMapIds
+import org.openforis.collectone.v2.app.ui.map.mainSurveyMap
 import org.openforis.collectone.v2.web.ui.WebAppState
-import org.openforis.collectone.v2.web.ui.viewmodel.surveyEditorViewModel
-import org.openforis.collectone.v2.web.ui.viewmodel.ui
+import org.openforis.collectone.v2.web.ui.organization
+import org.openforis.collectone.v2.web.ui.surveyeditor.surveyEditorViewModel
+import org.openforis.collectone.v2.web.ui.surveyeditor.ui
 
 /** The survey map's content after edits only the web console makes (layer styles, imagery). */
 class WebSurveyMapContentTest {
@@ -35,20 +39,31 @@ class WebSurveyMapContentTest {
 
   @Test
   fun main_usesThePublishedSurveyEditorLayerStyle() {
-    val editor = surveyEditorViewModel(state.activeSurveyEditorDraft)
+    val editor = surveyEditorViewModel(state.dataHolder.appData.value.editorDraft)
     val plots = editor.ui.mapLayers.first { it.id == "shade_monitoring_plots" }
     editor.updateDataset(plots.key) {
       it.copy(style = it.style.copy(colorHex = "#AD1457", iconName = "flag"))
     }
-    state.saveSurveyEditorDraft(state.activeSurveyId, editor.ui.draft)
+    state.dataHolder.launch {
+      state.dataHolder.surveyEditorRepository.saveDraft(
+        state.viewModels.dashboard.uiState.value.activeSurveyId,
+        editor.ui.draft,
+      )
+    }
 
-    val layer = state.mapLayers.first { it.datasetId == "shade_monitoring_plots" }
+    val layer =
+      state.viewModels.dashboard.uiState.value.mapLayers.first {
+        it.datasetId == "shade_monitoring_plots"
+      }
     assertEquals(0xFFAD1457, layer.colorHex)
     assertEquals("flag", layer.iconName)
     val layerEntityIds =
-      state.visibleMapEntities.filter { it.layerId == layer.id }.map { it.id }.toSet()
+      state.viewModels.surveyMap.uiState.value.visibleMapEntities
+        .filter { it.layerId == layer.id }
+        .map { it.id }
+        .toSet()
     assertTrue(layerEntityIds.isNotEmpty())
-    val map = SurveyMapContent.main(state, showNavigation = true)
+    val map = state.viewModels.mainSurveyMap(showNavigation = true)
     map
       .entityFeatures()
       .filter {
@@ -60,48 +75,62 @@ class WebSurveyMapContentTest {
 
   @Test
   fun imagerySources_fromAllUsersAndSurveyOrgCanBeToggledAndRenderedOnBasemap() {
-    val allUsersSource = state.allUsersImagerySources.single()
-    val surveyOrgSource = state.activeSurveyOrganizationImagerySources.single()
+    // "All users" also has the preloaded Earth Engine layers; this test covers the XYZ one.
+    val allUsersSource =
+      state.viewModels.surveyMap.uiState.value.allUsersImagerySources.single {
+        it.type == ImagerySourceType.XYZ_TILES
+      }
+    val surveyOrgSource =
+      state.viewModels.surveyMap.uiState.value.activeSurveyOrganizationImagerySources.single()
     assertTrue(allUsersSource.isValidXyzUrl)
     assertTrue(surveyOrgSource.isValidXyzUrl)
 
     val beforeBasemap =
-      SurveyMapContent.main(state, showNavigation = false).content.basemap
-        as org.openforis.collectone.v2.map.Basemap.RasterTiles
-    val baseLayerCount = beforeBasemap.layers.size
+      state.viewModels.mainSurveyMap(showNavigation = false).content.basemap
+        as org.openforis.collectone.v2.map.Basemap.MapboxStyle
+    val baseLayerCount = beforeBasemap.overlays.size
 
     // Toggle both "All users" and survey-specific Organization imagery layers on.
-    state.toggleImagerySource(allUsersSource.id)
-    state.toggleImagerySource(surveyOrgSource.id)
-    assertTrue(state.isImagerySourceEnabled(allUsersSource.id))
-    assertTrue(state.isImagerySourceEnabled(surveyOrgSource.id))
+    state.viewModels.surveyMap.toggleImagerySource(allUsersSource.id)
+    state.viewModels.surveyMap.toggleImagerySource(surveyOrgSource.id)
+    assertTrue(state.viewModels.surveyMap.uiState.value.isImagerySourceEnabled(allUsersSource.id))
+    assertTrue(state.viewModels.surveyMap.uiState.value.isImagerySourceEnabled(surveyOrgSource.id))
 
     val afterBasemap =
-      SurveyMapContent.main(state, showNavigation = false).content.basemap
-        as org.openforis.collectone.v2.map.Basemap.RasterTiles
-    assertEquals(baseLayerCount + 2, afterBasemap.layers.size)
+      state.viewModels.mainSurveyMap(showNavigation = false).content.basemap
+        as org.openforis.collectone.v2.map.Basemap.MapboxStyle
+    assertEquals(baseLayerCount + 2, afterBasemap.overlays.size)
     assertEquals(
       listOf(allUsersSource.urlTemplate, surveyOrgSource.urlTemplate),
-      afterBasemap.layers.takeLast(2).map { it.urlTemplate },
+      afterBasemap.overlays.takeLast(2).map {
+        (it as org.openforis.collectone.v2.map.RasterTileLayer).urlTemplate
+      },
     )
 
     // Add a new XYZ tile source to "All users" with offline download permitted toggled off.
     val err =
-      state.addOrganizationImagerySource(
-        organizationId = state.allUsersOrganization!!.id,
+      state.organization.addImagerySource(
+        organizationId = Organization.ALL_USERS_ID,
         name = "USGS Topo",
         urlTemplate =
           "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
         allowOfflineDownload = false,
       )
     assertEquals(null, err)
-    val added = state.allUsersImagerySources.first { it.name == "USGS Topo" }
+    val added =
+      state.viewModels.surveyMap.uiState.value.allUsersImagerySources.first {
+        it.name == "USGS Topo"
+      }
     assertFalse(added.allowOfflineDownload)
-    state.setOrganizationImagerySourceOfflineAllowed(
-      organizationId = state.allUsersOrganization!!.id,
+    state.organization.setImagerySourceOfflineAllowed(
+      organizationId = Organization.ALL_USERS_ID,
       sourceId = added.id,
       allowOfflineDownload = true,
     )
-    assertTrue(state.allUsersImagerySources.first { it.id == added.id }.allowOfflineDownload)
+    assertTrue(
+      state.viewModels.surveyMap.uiState.value.allUsersImagerySources
+        .first { it.id == added.id }
+        .allowOfflineDownload
+    )
   }
 }

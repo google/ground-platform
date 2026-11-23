@@ -13,26 +13,28 @@
  * limitations under the License.
  */
 
-// Builds what the tests run: the user data service binary and the production bundles of the web
-// console and the mobile app. The builds share the included shared/ builds, so they run one after
-// another. To rerun the tests against the last builds, run `npx playwright test` instead.
+// Builds what the tests run: the server binary and the production bundles of the web
+// console and the mobile app, in one run of the root Gradle build. To rerun the tests against the
+// last builds, run `npx playwright test` instead.
 //
 // Usage: node harness/build-apps.mjs
 
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
-import { GRADLE_BUILDS, GRADLE_WRAPPER, REPO_ROOT } from './config.mjs';
+import { GRADLE_TASKS, GRADLE_WRAPPER, REPO_ROOT } from './config.mjs';
 
-for (const { dir, task } of GRADLE_BUILDS) {
-  console.log(`> ${path.relative(REPO_ROOT, dir)}: ./${GRADLE_WRAPPER} ${task}`);
-  const result = spawnSync(path.join(dir, GRADLE_WRAPPER), [task, '--console=plain', '--quiet'], {
-    cwd: dir,
+console.log(`> ./${GRADLE_WRAPPER} ${GRADLE_TASKS.join(' ')}`);
+const result = spawnSync(
+  path.join(REPO_ROOT, GRADLE_WRAPPER),
+  [...GRADLE_TASKS, '--console=plain', '--quiet'],
+  {
+    cwd: REPO_ROOT,
     stdio: 'inherit',
     // gradlew.bat needs a shell on Windows.
     shell: process.platform === 'win32',
-  });
-  if (result.status !== 0) {
-    console.error(`Building ${path.relative(REPO_ROOT, dir)} failed.`);
-    process.exit(result.status ?? 1);
-  }
+  },
+);
+if (result.status !== 0) {
+  console.error('Building the apps failed.');
+  process.exit(result.status ?? 1);
 }

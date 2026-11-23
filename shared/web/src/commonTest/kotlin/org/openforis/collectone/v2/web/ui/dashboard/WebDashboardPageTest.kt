@@ -22,32 +22,31 @@ import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
 import org.openforis.collectone.v2.app.domain.model.BasemapType
 import org.openforis.collectone.v2.app.domain.model.relatedEntityForPropertyValue
+import org.openforis.collectone.v2.app.ui.session.searchableListUiState
+import org.openforis.collectone.v2.map.LatLng
 import org.openforis.collectone.v2.web.ui.WebAppState
-import org.openforis.collectone.v2.web.ui.WebPage
+import org.openforis.collectone.v2.web.ui.surveyRecords
 
 class WebDashboardPageTest {
 
   private val state = WebAppState(dataHolder = sampleDataHolder())
-  private val entity = state.entities.first { it.submissions.isNotEmpty() }
-  private val datasetEntities = state.entities.filter { it.datasetId == entity.datasetId }
+  private val entity =
+    state.viewModels.dataCollection.uiState.value.entities.first { it.submissions.isNotEmpty() }
+  private val datasetEntities =
+    state.viewModels.dataCollection.uiState.value.entities.filter {
+      it.datasetId == entity.datasetId
+    }
 
   private fun buildTables(selectedEntityId: String? = entity.id) =
     buildDashboardDataTables(
-      entities = state.entities,
+      entities = state.viewModels.dataCollection.uiState.value.entities,
       selectedEntityId = selectedEntityId,
-      relatedLabel = { e, value -> state.relatedEntityForPropertyValue(e, value)?.label },
+      relatedLabel = { e, value ->
+        state.viewModels.dashboard.uiState.value.relatedEntityForPropertyValue(e, value)?.label
+      },
     )
 
   private fun layerTable() = buildTables().first { it.datasetId == entity.datasetId }
-
-  @Test
-  fun fromHash_resolvesDashboardPage() {
-    assertEquals(
-      WebPage.WEB_DASHBOARD,
-      WebPage.fromHash("#dashboard"),
-    )
-    assertEquals(WebPage.WEB_DASHBOARD, WebPage.fromHash("#web"))
-  }
 
   @Test
   fun mapLayerTable_listsDatasetFeaturesAndHighlightsSelection() {
@@ -74,9 +73,15 @@ class WebDashboardPageTest {
   fun dataTables_oneTablePerDatasetAndNoSubmissionTables() {
     val tables = buildTables()
 
-    assertEquals(state.entities.map { it.datasetId }.distinct(), tables.map { it.datasetId })
+    assertEquals(
+      state.viewModels.dataCollection.uiState.value.entities.map { it.datasetId }.distinct(),
+      tables.map { it.datasetId },
+    )
     assertTrue(tables.all { it.kind == DashboardDataTableKind.MAP_LAYER })
-    assertEquals(state.entities.size, tables.sumOf { it.rows.size })
+    assertEquals(
+      state.viewModels.dataCollection.uiState.value.entities.size,
+      tables.sumOf { it.rows.size },
+    )
     tables.forEach { table -> assertTrue(table.rows.all { it.cells.size == table.columns.size }) }
   }
 
@@ -88,7 +93,7 @@ class WebDashboardPageTest {
 
   @Test
   fun dataTables_recordsWithoutGeometryAreDataTables() {
-    val record = entity.copy(id = "record-1", datasetId = "farmers", geometryTypeLabel = "")
+    val record = entity.copy(id = "record-1", datasetId = "farmers", geometry = null)
 
     val table = buildDashboardDataTables(listOf(record), selectedEntityId = null).single()
 
@@ -97,8 +102,14 @@ class WebDashboardPageTest {
 
   @Test
   fun dataTables_showRelatedRecordLabelsInsteadOfIds() {
-    val parcel = state.entities.first { it.properties["Washing Station"] != null }
-    val station = state.entities.first { it.id == parcel.properties["Washing Station"] }
+    val parcel =
+      state.viewModels.dataCollection.uiState.value.entities.first {
+        it.properties["Washing Station"] != null
+      }
+    val station =
+      state.viewModels.dataCollection.uiState.value.entities.first {
+        it.id == parcel.properties["Washing Station"]
+      }
     val table = buildTables().first { it.datasetId == parcel.datasetId }
     val column = table.columns.indexOf("Washing Station")
 
@@ -108,31 +119,50 @@ class WebDashboardPageTest {
   @Test
   fun dashboardTable_staysCollapsedOnSelectionAndExpandsOnShowInTable() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    assertFalse(testState.isDashboardTableExpanded)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
 
-    testState.selectEntity(entity.id)
-    assertFalse(testState.isDashboardTableExpanded)
-    assertEquals(entity.datasetId, testState.dashboardTableDatasetId)
+    testState.viewModels.surveyMap.selectEntity(entity.id)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
+    assertEquals(
+      entity.datasetId,
+      testState.viewModels.dashboard.uiState.value.dashboardTableDatasetId,
+    )
 
-    testState.showSelectedEntityInTable()
-    assertTrue(testState.isDashboardTableExpanded)
-    assertEquals(entity.datasetId, testState.dashboardTableDatasetId)
+    testState.viewModels.dashboard.showDatasetInTable(
+      checkNotNull(testState.viewModels.dataCollection.uiState.value.selectedEntity).datasetId
+    )
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
+    assertEquals(
+      entity.datasetId,
+      testState.viewModels.dashboard.uiState.value.dashboardTableDatasetId,
+    )
 
-    // Once open, the table stays open and follows the selection to other datasets.
-    val other = testState.entities.first { it.datasetId != entity.datasetId }
-    testState.selectEntity(other.id)
-    assertTrue(testState.isDashboardTableExpanded)
-    assertEquals(other.datasetId, testState.dashboardTableDatasetId)
+    // Selecting another entity opens its details card, docks the table, and switches the table's
+    // active dataset to match.
+    val other =
+      testState.viewModels.dataCollection.uiState.value.entities.first {
+        it.datasetId != entity.datasetId
+      }
+    testState.viewModels.surveyMap.selectEntity(other.id)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
+    assertEquals(
+      other.datasetId,
+      testState.viewModels.dashboard.uiState.value.dashboardTableDatasetId,
+    )
 
-    testState.toggleDashboardTableExpanded()
-    assertFalse(testState.isDashboardTableExpanded)
+    testState.viewModels.dashboard.toggleDashboardTableExpanded()
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.toggleDashboardTableExpanded()
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
   }
 
   @Test
   fun recenterMapOnEntity_adjustsTargetScreenYForReducedViewport() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    testState.selectEntity(entity.id)
-    assertEquals(entity.id, testState.selectedEntityId)
+    testState.viewModels.surveyMap.selectEntity(entity.id)
+    assertEquals(entity.id, testState.viewModels.dataCollection.uiState.value.selectedEntityId)
 
     val expandedTableHeightDp = 336f
     val tabsHeightDp = 48f
@@ -141,15 +171,18 @@ class WebDashboardPageTest {
     val visibleViewportHeight = totalHeightDp - tablePanelHeight
     val targetScreenY = (visibleViewportHeight / 2) / totalHeightDp
 
-    testState.recenterMapOnEntity(entity, targetScreenY)
+    testState.viewModels.surveyMap.recenterMapOnEntity(entity, targetScreenY)
+    val (lng, lat) = testState.viewModels.surveyMap.resolveEntityLngLat(entity)
+    val (entityX, entityY) =
+      testState.viewModels.surveyMap.uiState.value.anchor.positionOf(LatLng(lat, lng))
     assertEquals(
       0.50f,
-      entity.normalizedX + testState.surveyMapUiState.mapWorldToScreenShiftX,
+      entityX + testState.viewModels.surveyMap.uiState.value.mapWorldToScreenShiftX,
       0.0001f,
     )
     assertEquals(
       targetScreenY,
-      entity.normalizedY + testState.surveyMapUiState.mapWorldToScreenShiftY,
+      entityY + testState.viewModels.surveyMap.uiState.value.mapWorldToScreenShiftY,
       0.0001f,
     )
   }
@@ -157,207 +190,179 @@ class WebDashboardPageTest {
   @Test
   fun sidePanel_startsExpandedByDefault() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    assertTrue(testState.isSidePanelExpanded)
-    assertTrue(testState.isDashboardSidePanelExpanded)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
   }
 
   @Test
   fun toggleSidePanel_togglesBetweenExpandedAndCollapsed() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    assertTrue(testState.isSidePanelExpanded)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
 
-    testState.toggleSidePanel()
-    assertFalse(testState.isSidePanelExpanded)
-    assertFalse(testState.isDashboardSidePanelExpanded)
+    testState.viewModels.dashboard.toggleSidePanel()
+    assertFalse(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
 
-    testState.toggleDashboardSidePanel()
-    assertTrue(testState.isSidePanelExpanded)
-    assertTrue(testState.isDashboardSidePanelExpanded)
+    testState.viewModels.dashboard.toggleSidePanel()
+    assertTrue(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
   }
 
   @Test
   fun collapseAndExpandSidePanel_updatesStateExplicitly() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
 
-    testState.collapseSidePanel()
-    assertFalse(testState.isSidePanelExpanded)
+    testState.viewModels.dashboard.collapseSidePanel()
+    assertFalse(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
 
-    testState.expandSidePanel()
-    assertTrue(testState.isSidePanelExpanded)
+    testState.viewModels.dashboard.expandSidePanel()
+    assertTrue(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
 
-    testState.collapseDashboardSidePanel()
-    assertFalse(testState.isDashboardSidePanelExpanded)
+    testState.viewModels.dashboard.updateSidePanelExpanded(false)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
 
-    testState.expandDashboardSidePanel()
-    assertTrue(testState.isDashboardSidePanelExpanded)
-
-    testState.updateSidePanelExpanded(false)
-    assertFalse(testState.isSidePanelExpanded)
-
-    testState.updateSidePanelExpanded(true)
-    assertTrue(testState.isSidePanelExpanded)
-
-    testState.updateDashboardSidePanelExpanded(false)
-    assertFalse(testState.isDashboardSidePanelExpanded)
-
-    testState.updateDashboardSidePanelExpanded(true)
-    assertTrue(testState.isDashboardSidePanelExpanded)
+    testState.viewModels.dashboard.updateSidePanelExpanded(true)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
   }
 
   @Test
   fun reset_resetsSidePanelToExpanded() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    testState.collapseSidePanel()
-    assertFalse(testState.isSidePanelExpanded)
+    testState.viewModels.dashboard.collapseSidePanel()
+    assertFalse(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
 
     testState.reset()
-    assertTrue(testState.isSidePanelExpanded)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isSidePanelExpanded)
   }
 
   @Test
   fun signedInUserInitials_derivesTwoLetterInitialsCorrectly() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    assertEquals("ML", testState.signedInUserInitials)
+    assertEquals("ML", testState.viewModels.onboarding.uiState.value.profile.initials)
   }
 
   @Test
   fun signOut_resetsAuthentication() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    testState.signInWithGoogle()
-    assertTrue(testState.isSignedIn)
+    testState.viewModels.onboarding.signInWithGoogle(ignoreOffline = true)
+    testState.viewModels.onboarding.acceptTermsOfService()
+    assertTrue(testState.viewModels.onboarding.uiState.value.isSignedIn)
 
     testState.signOut()
-    assertFalse(testState.isSignedIn)
+    assertFalse(testState.viewModels.onboarding.uiState.value.isSignedIn)
   }
 
   @Test
   fun languageSelector_updatesSettingsLanguageAndLocale() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    assertEquals("en", testState.settings.uiState.value.languageCode)
-    testState.settings.updateLanguage("es")
-    assertEquals("es", testState.settings.uiState.value.languageCode)
-    assertEquals("Español", testState.settings.uiState.value.selectedLanguageDisplayName)
+    assertEquals("en", testState.viewModels.settings.uiState.value.languageCode)
+    testState.viewModels.settings.updateLanguage("es")
+    assertEquals("es", testState.viewModels.settings.uiState.value.languageCode)
+    assertEquals("Español", testState.viewModels.settings.uiState.value.selectedLanguageDisplayName)
   }
 
   @Test
   fun layersSheet_togglesStateAndControlsBasemapAndLayerVisibility() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    assertFalse(testState.isLayersSheetOpen)
+    assertFalse(testState.viewModels.surveyMap.uiState.value.isLayersSheetOpen)
 
-    testState.updateLayersSheetOpen(true)
-    assertTrue(testState.isLayersSheetOpen)
+    testState.viewModels.surveyMap.updateLayersSheetOpen(true)
+    assertTrue(testState.viewModels.surveyMap.uiState.value.isLayersSheetOpen)
 
-    testState.selectBasemapType(BasemapType.SATELLITE)
-    assertEquals(BasemapType.SATELLITE, testState.selectedBasemapType)
-
-    val initialOfflineVisibility = testState.isOfflineBasemapVisible
-    testState.toggleOfflineBasemapVisibility()
-    assertEquals(!initialOfflineVisibility, testState.isOfflineBasemapVisible)
-
-    val firstLayer = testState.entityDatasetLayers.first()
-    val initialLayerVisibility = firstLayer.isVisible
-    testState.toggleLayerVisibility(firstLayer.id)
+    testState.viewModels.surveyMap.selectBasemapType(BasemapType.SATELLITE)
     assertEquals(
-      !initialLayerVisibility,
-      testState.entityDatasetLayers.first { it.id == firstLayer.id }.isVisible,
+      BasemapType.SATELLITE,
+      testState.viewModels.surveyMap.uiState.value.selectedBasemapType,
     )
 
-    testState.updateLayersSheetOpen(false)
-    assertFalse(testState.isLayersSheetOpen)
+    val firstLayer = testState.viewModels.dashboard.uiState.value.entityDatasetLayers.first()
+    val initialLayerVisibility = firstLayer.isVisible
+    testState.searchableListActions.toggleLayerVisibility(firstLayer.id)
+    assertEquals(
+      !initialLayerVisibility,
+      testState.viewModels.dashboard.uiState.value.entityDatasetLayers
+        .first { it.id == firstLayer.id }
+        .isVisible,
+    )
+
+    testState.viewModels.surveyMap.updateLayersSheetOpen(false)
+    assertFalse(testState.viewModels.surveyMap.uiState.value.isLayersSheetOpen)
   }
 
   @Test
   fun detailsPanel_startsExpandedByDefault() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    assertTrue(testState.isDetailsPanelExpanded)
-    assertTrue(testState.isDashboardDetailsPanelExpanded)
-    assertTrue(testState.isRightPanelExpanded)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
   }
 
   @Test
   fun toggleDetailsPanel_togglesBetweenExpandedAndCollapsed() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    assertTrue(testState.isDetailsPanelExpanded)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.toggleDetailsPanel()
-    assertFalse(testState.isDetailsPanelExpanded)
-    assertFalse(testState.isDashboardDetailsPanelExpanded)
-    assertFalse(testState.isRightPanelExpanded)
+    testState.viewModels.dashboard.toggleDetailsPanel()
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.toggleDashboardDetailsPanel()
-    assertTrue(testState.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.toggleDetailsPanel()
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.collapseDetailsPanel()
-    assertFalse(testState.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.collapseDetailsPanel()
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.expandDetailsPanel()
-    assertTrue(testState.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.expandDetailsPanel()
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.updateDetailsPanelExpanded(false)
-    assertFalse(testState.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.updateDetailsPanelExpanded(false)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.updateDetailsPanelExpanded(true)
-    assertTrue(testState.isDetailsPanelExpanded)
-
-    testState.toggleRightPanel()
-    assertFalse(testState.isRightPanelExpanded)
-
-    testState.expandRightPanel()
-    assertTrue(testState.isRightPanelExpanded)
-
-    testState.collapseRightPanel()
-    assertFalse(testState.isRightPanelExpanded)
-
-    testState.updateRightPanelExpanded(true)
-    assertTrue(testState.isRightPanelExpanded)
+    testState.viewModels.dashboard.updateDetailsPanelExpanded(true)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
   }
 
   @Test
-  fun openingTable_collapsesDetailsPanel() {
+  fun openingTable_docksDetailsPanel_andExpandingDetailsDocksTable() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    testState.selectEntity(entity.id)
-    assertTrue(testState.isDetailsPanelExpanded)
-    assertFalse(testState.isDashboardTableExpanded)
+    testState.viewModels.surveyMap.selectEntity(entity.id)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
 
-    testState.showSelectedEntityInTable()
-    assertTrue(testState.isDashboardTableExpanded)
-    assertFalse(testState.isDetailsPanelExpanded)
+    // Opening the bottom data table docks the right-hand details panel.
+    testState.viewModels.dashboard.showDatasetInTable(
+      checkNotNull(testState.viewModels.dataCollection.uiState.value.selectedEntity).datasetId
+    )
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    // Collapsing the data table restores the details panel for the selected entity
-    testState.toggleDashboardTableExpanded()
-    assertFalse(testState.isDashboardTableExpanded)
-    assertTrue(testState.isDetailsPanelExpanded)
+    // Expanding the details panel docks the bottom data table.
+    testState.viewModels.dashboard.expandDetailsPanel()
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
 
-    // Expanding via updateDashboardTableExpanded also collapses details panel
-    testState.updateDashboardTableExpanded(true)
-    assertTrue(testState.isDashboardTableExpanded)
-    assertFalse(testState.isDetailsPanelExpanded)
+    // Closing the table leaves the details panel docked.
+    testState.viewModels.dashboard.updateDashboardTableExpanded(true)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.updateDashboardTableExpanded(false)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
   }
 
   @Test
-  fun selectingEntityWhileTableIsOpen_keepsDetailsPanelCollapsed() {
+  fun selectingEntityWhileTableIsOpen_showsItsDetailsAndDocksTable() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    testState.updateDashboardTableExpanded(true)
-    assertTrue(testState.isDashboardTableExpanded)
-    assertFalse(testState.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.updateDashboardTableExpanded(true)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.selectEntity(entity.id)
-    assertEquals(entity.id, testState.selectedEntityId)
-    assertFalse(testState.isDetailsPanelExpanded)
-
-    // Closing the table restores the panel
-    testState.updateDashboardTableExpanded(false)
-    assertTrue(testState.isDetailsPanelExpanded)
+    testState.viewModels.surveyMap.selectEntity(entity.id)
+    assertEquals(entity.id, testState.viewModels.dataCollection.uiState.value.selectedEntityId)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
   }
 
   @Test
   fun reset_resetsDetailsPanelToExpanded() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    testState.collapseDetailsPanel()
-    assertFalse(testState.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.collapseDetailsPanel()
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
     testState.reset()
-    assertTrue(testState.isDetailsPanelExpanded)
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
   }
 
   @Test
@@ -399,10 +404,10 @@ class WebDashboardPageTest {
   @Test
   fun buildDashboardDataTables_statusIsFirstColumnAndHoldsWorkflowStatusAndRowEntity() {
     val table = layerTable()
-    val statusIndex = table.columns.indexOf(DashboardStatusColumn)
+    val statusIndex = table.columns.indexOf(DASHBOARD_STATUS_COLUMN)
 
     assertEquals(0, statusIndex)
-    assertEquals(1, table.columns.indexOf(DashboardLabelColumn))
+    assertEquals(1, table.columns.indexOf(DASHBOARD_LABEL_COLUMN))
     table.rows.forEach { row ->
       val entity = assertNotNull(row.entity)
       assertEquals(row.id, entity.id)
@@ -421,7 +426,11 @@ class WebDashboardPageTest {
 
   @Test
   fun buildDashboardLayerSummary_countsFeaturesPerStatus() {
-    val summary = buildDashboardLayerSummary(state.entities, entity.datasetId)!!
+    val summary =
+      buildDashboardLayerSummary(
+        state.viewModels.dataCollection.uiState.value.entities,
+        entity.datasetId,
+      )!!
 
     assertEquals(entity.datasetName, summary.title)
     assertEquals(datasetEntities.size, summary.featureCount)
@@ -434,49 +443,70 @@ class WebDashboardPageTest {
       summary.statusCounts.map { it.count }.sortedDescending(),
       summary.statusCounts.map { it.count },
     )
-    assertEquals(null, buildDashboardLayerSummary(state.entities, "missing-dataset"))
+    assertEquals(
+      null,
+      buildDashboardLayerSummary(
+        state.viewModels.dataCollection.uiState.value.entities,
+        "missing-dataset",
+      ),
+    )
   }
 
   @Test
   fun selectLayer_isMutuallyExclusiveWithEntitySelection() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    testState.selectEntity(entity.id)
+    testState.viewModels.surveyMap.selectEntity(entity.id)
 
-    testState.selectLayer(entity.datasetId)
-    assertEquals(entity.datasetId, testState.selectedLayerDatasetId)
-    assertEquals(null, testState.selectedEntityId)
-    assertEquals(entity.datasetId, testState.dashboardTableDatasetId)
-    assertTrue(testState.isDetailsPanelExpanded)
+    testState.searchableListActions.selectLayer(entity.datasetId)
+    assertEquals(
+      entity.datasetId,
+      testState.viewModels.dashboard.uiState.value.selectedLayerDatasetId,
+    )
+    assertEquals(null, testState.viewModels.dataCollection.uiState.value.selectedEntityId)
+    assertEquals(
+      entity.datasetId,
+      testState.viewModels.dashboard.uiState.value.dashboardTableDatasetId,
+    )
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.selectEntity(entity.id)
-    assertEquals(null, testState.selectedLayerDatasetId)
-    assertEquals(entity.id, testState.selectedEntityId)
+    testState.viewModels.surveyMap.selectEntity(entity.id)
+    assertEquals(null, testState.viewModels.dashboard.uiState.value.selectedLayerDatasetId)
+    assertEquals(entity.id, testState.viewModels.dataCollection.uiState.value.selectedEntityId)
   }
 
   @Test
-  fun showSelectedLayerInTable_expandsTableOnLayerDataset() {
+  fun showSelectedLayerInTable_expandsTableOnLayerDatasetAndDocksDetails() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    testState.selectLayer(entity.datasetId)
+    testState.searchableListActions.selectLayer(entity.datasetId)
 
-    testState.showSelectedLayerInTable()
-    assertTrue(testState.isDashboardTableExpanded)
-    assertEquals(entity.datasetId, testState.dashboardTableDatasetId)
-    assertFalse(testState.isDetailsPanelExpanded)
+    // Opening the table docks the layer's details card; expanding details docks the table.
+    testState.viewModels.dashboard.showSelectedLayerInTable()
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
+    assertEquals(
+      entity.datasetId,
+      testState.viewModels.dashboard.uiState.value.dashboardTableDatasetId,
+    )
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
 
-    testState.updateDashboardTableExpanded(false)
-    assertTrue(testState.isDetailsPanelExpanded)
+    testState.viewModels.dashboard.expandDetailsPanel()
+    assertTrue(testState.viewModels.dashboard.uiState.value.isDetailsPanelExpanded)
+    assertFalse(testState.viewModels.dashboard.uiState.value.isDashboardTableExpanded)
   }
 
   @Test
   fun dataTables_titlesNeverIncludeInternalDatasetIdsAcrossAllSurveys() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    for (survey in testState.surveys) {
-      testState.onboarding.openSurvey(survey.id)
+    for (survey in testState.viewModels.dashboard.uiState.value.surveys) {
+      testState.viewModels.onboarding.openSurvey(survey.id)
       val tables =
         buildDashboardDataTables(
-          entities = testState.entities,
+          entities = testState.viewModels.dataCollection.uiState.value.entities,
           selectedEntityId = null,
-          relatedLabel = { e, value -> testState.relatedEntityForPropertyValue(e, value)?.label },
+          relatedLabel = { e, value ->
+            testState.viewModels.dashboard.uiState.value
+              .relatedEntityForPropertyValue(e, value)
+              ?.label
+          },
         )
       tables.forEach { table ->
         assertFalse(
@@ -484,13 +514,13 @@ class WebDashboardPageTest {
           "Data table title '${table.title}' for survey '${survey.id}' should not include internal dataset ID '${table.datasetId}'",
         )
       }
-      testState.entities.forEach { surveyEntity ->
+      testState.viewModels.dataCollection.uiState.value.entities.forEach { surveyEntity ->
         assertFalse(
           "(${surveyEntity.datasetId})" in surveyEntity.datasetName,
           "Entity datasetName '${surveyEntity.datasetName}' should not include internal datasetId '${surveyEntity.datasetId}'",
         )
       }
-      testState.forms.forEach { form ->
+      testState.viewModels.dataCollection.uiState.value.forms.forEach { form ->
         if (form.targetDatasetId.isNotEmpty()) {
           assertFalse(
             "(${form.targetDatasetId})" in form.targetDatasetName,
@@ -504,8 +534,9 @@ class WebDashboardPageTest {
   @Test
   fun webFormsForEntity_onlyReturnsFormsWithEntitySelectQuestion() {
     val testState = WebAppState(dataHolder = sampleDataHolder())
-    val ent = testState.entities.first()
-    val webForms = testState.formsForEntity(ent, onWeb = true)
+    val ent = testState.viewModels.dataCollection.uiState.value.entities.first()
+    val webForms =
+      testState.viewModels.dataCollection.uiState.value.formsForEntity(ent, onWeb = true)
     assertTrue(
       webForms.isNotEmpty(),
       "Expected at least one seeded form targeting ${ent.datasetId}",
@@ -514,5 +545,70 @@ class WebDashboardPageTest {
       webForms.all { it.hasEntitySelectQuestion },
       "All web forms for selected entity must have hasEntitySelectQuestion == true",
     )
+  }
+
+  @Test
+  fun buildDashboardTableCsv_andDashboardTableCsvFileName_handleQuotingEscapingAndSanitization() {
+    val table =
+      DashboardDataTable(
+        id = "dataset:ds-1",
+        datasetId = "ds-1",
+        title = "Coffee / Cocoa: Plots?",
+        kind = DashboardDataTableKind.MAP_LAYER,
+        columns = listOf("ID", "Notes, \"Quotes\"", "Missing"),
+        rows =
+          listOf(
+            DashboardDataTableRow(
+              id = "r1",
+              cells = listOf("P-01", "Line 1\n\"Line 2\", ok", ""),
+              isSelected = true,
+              entity = null,
+            )
+          ),
+      )
+
+    assertEquals(0, table.selectedRowIndex)
+    val csv = buildDashboardTableCsv(table)
+    assertEquals(
+      "ID,\"Notes, \"\"Quotes\"\"\",Missing\r\nP-01,\"Line 1\n\"\"Line 2\"\", ok\",\r\n",
+      csv,
+    )
+    assertEquals(
+      "Coffee _ Cocoa_ Plots_.csv",
+      dashboardTableCsvFileName(table),
+    )
+    assertEquals("table.csv", dashboardTableCsvFileName(table.copy(title = "   ...   ")))
+  }
+
+  @Test
+  fun statusFilter_filtersTargetDatasetAndExpandsOnlyFilteredDatasetWhenCollapsed() {
+    val testState = WebAppState(dataHolder = sampleDataHolder())
+    testState.searchableListActions.toggleListDatasetCollapsed("coffee_parcels")
+    testState.searchableListActions.toggleListDatasetCollapsed("shade_monitoring_plots")
+    assertEquals(
+      setOf("coffee_parcels", "shade_monitoring_plots"),
+      testState.surveyRecords
+        .searchableListUiState(testState.viewModels.surveyMap)
+        .collapsedDatasetIds,
+    )
+
+    testState.searchableListActions.toggleListStatusFilter("coffee_parcels", "In progress")
+    val filteredList = testState.surveyRecords.searchableListUiState(testState.viewModels.surveyMap)
+    assertTrue(filteredList.usesEntityStatus)
+    assertEquals("In progress", filteredList.activeStatusFilters["coffee_parcels"])
+    // coffee_parcels is expanded while its status filter is active, whereas shade_monitoring_plots
+    // keeps its collapsed state.
+    assertEquals(setOf("shade_monitoring_plots"), filteredList.collapsedDatasetIds)
+    val parcelsGroup = filteredList.entityGroups.first { it.datasetId == "coffee_parcels" }
+    assertEquals(1, parcelsGroup.entities.size)
+    assertEquals("In progress", parcelsGroup.entities.single().workflowStatus)
+
+    // Switching to Simple Point & Land Use Survey hides the status filter options cleanly.
+    testState.viewModels.onboarding.openSurvey("00000036-1a1c-5c51-997f-28b67d813aa3")
+    val noStatusList = testState.surveyRecords.searchableListUiState(testState.viewModels.surveyMap)
+    assertFalse(noStatusList.usesEntityStatus)
+    assertTrue(noStatusList.activeStatusFilters.isEmpty())
+    assertTrue(noStatusList.entityGroups.all { it.statusFilterOptions.isEmpty() })
+    assertEquals(3, noStatusList.entityGroups.flatMap { it.entities }.size)
   }
 }

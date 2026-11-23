@@ -38,17 +38,24 @@ const val XML_EVENTS_NAMESPACE = "http://www.w3.org/2001/xml-events"
 const val XML_SCHEMA_NAMESPACE = "http://www.w3.org/2001/XMLSchema"
 
 /**
- * Ground XForms extension namespace (conventional prefix [GROUND_XFORMS_PREFIX]), e.g.
- * `ground:concept="eudr.commodity@1"` on a `<bind>`.
+ * Collect One XForms extension namespace (conventional prefix [COLLECT_ONE_XFORMS_PREFIX]), e.g.
+ * `collectone:concept="eudr.commodity@1"` on a `<bind>`.
  *
  * ProtoForms doesn't model this namespace: its attributes are carried as
  * `FieldBinding.foreign_attributes` like any other tool's extension (see
  * `docs/technical/model/library/01-concepts.md`, "XForms and XLSForm Serialization").
  */
-const val GROUND_XFORMS_NAMESPACE = "http://groundplatform.org/xforms"
+const val COLLECT_ONE_XFORMS_NAMESPACE = "http://openforis.org/collect-one/xforms"
 
-/** Conventional prefix for [GROUND_XFORMS_NAMESPACE]. */
-const val GROUND_XFORMS_PREFIX = "ground"
+/** Conventional prefix for [COLLECT_ONE_XFORMS_NAMESPACE]. */
+const val COLLECT_ONE_XFORMS_PREFIX = "collectone"
+
+/**
+ * XForms extension namespace of Ground, the platform Collect One replaces. Forms written before the
+ * rename carry their extensions (e.g. `ground:concept`) in it: readers accept it like
+ * [COLLECT_ONE_XFORMS_NAMESPACE], writers never use it.
+ */
+const val LEGACY_GROUND_XFORMS_NAMESPACE = "http://groundplatform.org/xforms"
 
 /**
  * Namespace bound to the reserved `xml` prefix. Namespaces in XML 1.0 (Third Edition), section 3:

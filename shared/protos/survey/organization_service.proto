@@ -126,8 +126,8 @@ message ListOrganizationsResponse {
 //
 // Carries sparse instances of `Organization` (`delete` and `upsert`), where
 // `delete` is applied first as a structural deletion mask followed by
-// recursively merging `upsert`, or `delete_organization` to permanently delete
-// the organization.
+// recursively merging `upsert`. Soft-deleting an organization sets
+// `upsert.is_deleted = true`; restoring it sets `delete.is_deleted = true`.
 message OrganizationMutation {
   // Structural deletion mask for `Organization`: any non-default scalar clears
   // that field to default, and any keyed item (`ImagerySource` by
@@ -140,23 +140,20 @@ message OrganizationMutation {
   // `members`, `quota_limits`) to create or update.
   Organization upsert = 2;
 
-  // Permanently deletes the organization and unlinks its surveys to personal.
-  bool delete_organization = 3;
-
   // Client-generated UUID from the offline outbox, identifying the mutation in
   // client logs. Replays are detected by `client_seq`, not by this ID.
-  string mutation_id = 4;
+  string mutation_id = 3;
 
   // Stable identifier of the client install that recorded the mutation.
-  string client_id = 5;
+  string client_id = 4;
 
   // Monotonically increasing sequence number of the mutation within
   // `client_id` (`GetAppliedMutations`, scope
   // `"organizations/<organization_id>"`).
-  int64 client_seq = 6;
+  int64 client_seq = 5;
 
   // Client-side timestamp when the mutation was recorded.
-  google.protobuf.Timestamp client_timestamp = 7;
+  google.protobuf.Timestamp client_timestamp = 6;
 }
 
 message MutateOrganizationRequest {

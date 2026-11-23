@@ -15,10 +15,13 @@ package org.openforis.collectone.v2.app.data.seed
 
 import com.squareup.wire.Instant
 import com.squareup.wire.ofEpochSecond
+import openforis.collectone.v1.data.AuditInfo
 import openforis.collectone.v1.data.SubmissionRecord
 import openforis.collectone.v1.userdata.SurveySeed
 import openforis.collectone.v1.userdata.UserDataSeed
-import org.openforis.collectone.v2.app.data.datasource.remote.GrpcProtoMapper
+import org.openforis.collectone.v2.app.data.mapper.ProtoOrganizationMapper
+import org.openforis.collectone.v2.app.data.mapper.ProtoRecordMapper
+import org.openforis.collectone.v2.app.data.mapper.ProtoSurveyMapper
 import org.openforis.collectone.v2.app.data.seed.backend.BackendStaticEntitiesData
 import org.openforis.collectone.v2.app.data.seed.backend.BackendStaticLibraryData
 import org.openforis.collectone.v2.app.data.seed.backend.BackendStaticMapLayersData
@@ -32,8 +35,8 @@ import org.openforis.collectone.v2.app.domain.model.SurveyConfig
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDerivation
 
 /**
- * Builds the sample [UserDataSeed] loaded by the user data service (`server/userDataService`) from
- * the Kotlin sample data fixtures.
+ * Builds the sample [UserDataSeed] loaded by the Collect One server (`server/`) from the Kotlin
+ * sample data fixtures.
  *
  * Every record starts at version 1 (`revision`, `version`, or `record_version`) and gets a
  * distinct, increasing `commit_timestamp`, in the order organizations, libraries, then each survey
@@ -53,14 +56,15 @@ object UserDataSeedGenerator {
 
     val organizations =
       BackendStaticOrganizationsData.defaultOrganizations().map { org ->
-        GrpcProtoMapper.organizationToProto(org, commitTimestamp = nextCommitTimestamp())
+        ProtoOrganizationMapper.organizationToProto(org, commitTimestamp = nextCommitTimestamp())
       }
     val libraries =
       (listOf(GlobalLibrarySeedData.library()) +
           BackendStaticLibraryData.defaultOrganizationLibraries())
-        .map { lib -> GrpcProtoMapper.libraryToProto(lib, commitTimestamp = nextCommitTimestamp()) }
+        .map { lib ->
+          ProtoOrganizationMapper.libraryToProto(lib, commitTimestamp = nextCommitTimestamp())
+        }
 
-    val defaultTilePackages = BackendStaticMapLayersData.defaultOfflineTilePackages()
     val surveys =
       BackendStaticSurveysData.defaultSampleSurveys().map { survey ->
         val surveyId = survey.id
@@ -98,15 +102,12 @@ object UserDataSeedGenerator {
           }
 
         val (unversionedDef, unversionedAcl) =
-          GrpcProtoMapper.surveyToProto(
+          ProtoSurveyMapper.surveyToProto(
             survey = survey,
             forms = forms,
             mapLayers = mapLayers,
             config = config,
             editorDraft = customDraft,
-            offlineTilePackages =
-              if (surveyId == SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID) defaultTilePackages
-              else emptyList(),
             commitTimestamp = nextCommitTimestamp(),
           )
         // Every record starts at version 1 (entity and submission `revision`, organization and
@@ -121,7 +122,7 @@ object UserDataSeedGenerator {
 
         for (entity in entities) {
           entityRecords +=
-            GrpcProtoMapper.entityToProto(
+            ProtoRecordMapper.entityToProto(
               surveyId = surveyId,
               entity = entity,
               commitTimestamp = nextCommitTimestamp(),
@@ -130,12 +131,13 @@ object UserDataSeedGenerator {
             val subPolys = geometriesBySubId[sub.id].orEmpty()
             subPolys.forEach { consumedGeometryIds += it.id }
             submissions[sub.id] =
-              GrpcProtoMapper.submissionToProto(
-                surveyId = surveyId,
-                submission = sub,
-                geometryPolygons = subPolys,
-                commitTimestamp = nextCommitTimestamp(),
-              )
+              ProtoRecordMapper.submissionToProto(
+                  surveyId = surveyId,
+                  submission = sub,
+                  geometryPolygons = subPolys,
+                  commitTimestamp = nextCommitTimestamp(),
+                )
+                .stampedByServer()
           }
         }
 
@@ -150,12 +152,13 @@ object UserDataSeedGenerator {
             }
           subPolys.forEach { consumedGeometryIds += it.id }
           submissions[sub.id] =
-            GrpcProtoMapper.submissionToProto(
-              surveyId = surveyId,
-              submission = sub,
-              geometryPolygons = subPolys,
-              commitTimestamp = nextCommitTimestamp(),
-            )
+            ProtoRecordMapper.submissionToProto(
+                surveyId = surveyId,
+                submission = sub,
+                geometryPolygons = subPolys,
+                commitTimestamp = nextCommitTimestamp(),
+              )
+              .stampedByServer()
         }
 
         val remainingGeoms = geometries.filter { it.id !in consumedGeometryIds }
@@ -166,7 +169,7 @@ object UserDataSeedGenerator {
             firstSub.copy(
               geometry_polygons =
                 firstSub.geometry_polygons +
-                  remainingGeoms.map(GrpcProtoMapper::geometryPolygonToProto)
+                  remainingGeoms.map(ProtoRecordMapper::geometryPolygonToProto)
             )
         }
 
@@ -179,10 +182,10 @@ object UserDataSeedGenerator {
         )
       }
 
-    val places = BackendStaticPlacesData.defaultSurveyPlaces().map(GrpcProtoMapper::placeToProto)
+    val places = BackendStaticPlacesData.defaultSurveyPlaces().map(ProtoRecordMapper::placeToProto)
     val mutationLogs =
       BackendStaticMutationsData.defaultMutations().map { mut ->
-        GrpcProtoMapper.mutationLogToProto(mut, commitTimestamp = nextCommitTimestamp())
+        ProtoRecordMapper.mutationLogToProto(mut, commitTimestamp = nextCommitTimestamp())
       }
 
     return UserDataSeed(
@@ -193,4 +196,13 @@ object UserDataSeedGenerator {
       mutation_logs = mutationLogs,
     )
   }
+
+  /**
+   * [this] with the `audit_info` the server stamps on a submission it accepts: its collector as the
+   * creator. The seed is server data, so it carries what the client leaves unset.
+   */
+  private fun SubmissionRecord.stampedByServer(): SubmissionRecord =
+    copy(
+      audit_info = collector_email.takeIf { it.isNotBlank() }?.let { AuditInfo(created_by = it) }
+    )
 }

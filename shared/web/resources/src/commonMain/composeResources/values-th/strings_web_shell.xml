@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_language">ภาษา</string>
+  <!-- Content description of the language selector; %1$s is the current language's native name. -->
+  <string name="web_language_with_current">ภาษา: %1$s</string>
+  <string name="web_manage_survey">จัดการแบบสำรวจ</string>
+  <string name="web_switch_survey">สลับแบบสำรวจ</string>
+  <string name="web_recent_surveys">แบบสำรวจล่าสุด</string>
+  <!-- Survey switcher menu item linking to the full surveys page. -->
+  <string name="web_all_surveys_menu_item">แบบสำรวจทั้งหมด…</string>
+  <string name="web_saving">กำลังบันทึก…</string>
+  <string name="web_saved">บันทึกแล้ว</string>
+  <string name="web_not_saved">ยังไม่ได้บันทึก</string>
+  <string name="web_create_survey">สร้างแบบสำรวจ</string>
+  <!-- Create survey dialog title; %1$s is the organization name. -->
+  <string name="web_create_survey_in_organization">สร้างแบบสำรวจใน %1$s</string>
+  <string name="web_survey_title_label">ชื่อแบบสำรวจ</string>
+  <string name="web_organization">องค์กร</string>
+  <!-- Organization picker option for a survey that belongs to no organization. -->
+  <string name="web_no_organization_personal">ไม่มี (แบบสำรวจส่วนตัว)</string>
+  <string name="web_personal_survey_access_hint">เฉพาะผู้ที่คุณแชร์ด้วยเท่านั้นที่เปิดแบบสำรวจส่วนตัวได้</string>
+  <!-- %1$s is the organization name. -->
+  <string name="web_organization_survey_access_hint">คุณยังคงเป็นเจ้าของ ผู้จัดการของ %1$s สามารถแก้ไขแบบสำรวจนี้ จัดการการแชร์ และส่งออกข้อมูลได้ด้วย</string>
+  <string name="web_create">สร้าง</string>
+  <string name="web_next">ถัดไป</string>
+  <string name="web_cancel">ยกเลิก</string>
+  <string name="web_create_survey_purposes_title">ข้อมูลนี้จะนำไปใช้เพื่ออะไร</string>
+  <string name="web_create_survey_purposes_description">เลือกวัตถุประสงค์หลักของแบบสำรวจนี้ เราจะเพิ่มแบบฟอร์มที่เกี่ยวข้องพร้อมฟิลด์มาตรฐาน เพื่อให้เปรียบเทียบและรายงานข้อมูลของคุณได้ คุณเปลี่ยนการตั้งค่านี้ภายหลังได้ใน “รายละเอียดแบบสำรวจ”</string>
+  <string name="web_programs_optional">โครงการ (ไม่บังคับ)</string>
+  <string name="web_programs_description">โครงการที่คุณรายงานผลด้วยแบบสำรวจนี้</string>
+  <string name="web_back">ย้อนกลับ</string>
+  <string name="web_skip">ข้าม</string>
+  <string name="web_download">ดาวน์โหลด</string>
+  <string name="web_download_csv">ดาวน์โหลด CSV</string>
+  <string name="web_download_geojson">ดาวน์โหลด GeoJSON</string>
+  <string name="web_download_kml">ดาวน์โหลด KML (Google Earth)</string>
+  <string name="web_download_survey_kml">ดาวน์โหลด KML แบบสำรวจ (ทุกชั้นข้อมูล)</string>
+  <string name="web_open_in_google_earth">เปิดใน Google Earth</string>
+  <!-- Subtitle of an export profile menu item that has no warnings. -->
+  <string name="web_export_profile_for_survey_purposes">สำหรับวัตถุประสงค์ของแบบสำรวจของคุณ</string>
+  <!-- Export warnings dialog title; %1$s is the export profile name (e.g. "EUDR GeoJSON"). -->
+  <string name="web_export_profile_title">ส่งออก %1$s ใช่ไหม</string>
+  <!-- %1$s is a comma-separated list of included standard fields. -->
+  <string name="web_export_profile_included">รวมอยู่: %1$s</string>
+  <string name="web_export_profile_link_missing_hint">ลิงก์คำถามที่ขาดหายไปกับฟิลด์มาตรฐานในเครื่องมือแก้ไขแบบฟอร์ม เพื่อรวมไว้ในครั้งถัดไป</string>
+  <string name="web_export_anyway">ส่งออกต่อไป</string>
+  <!-- Data table column header: the record's workflow status. -->
+  <string name="web_column_status">สถานะ</string>
+  <!-- Data table column header: the record's label. -->
+  <string name="web_column_label">ป้ายกำกับ</string>
+  <!-- Data table column header: number of submissions for the record. -->
+  <string name="web_column_submissions">การส่งข้อมูล</string>
+  <!-- Data table column header: the record's GeoID identifier. -->
+  <string name="web_column_geo_id">GeoID</string>
+  <string name="web_dismiss">ปิดข้อความ</string>
+  <string name="web_resize_side_panel">ปรับขนาดแผงด้านข้าง</string>
+  <string name="web_collapse_side_panel">ยุบแผงด้านข้าง</string>
+  <string name="web_expand_side_panel">ขยายแผงด้านข้าง</string>
+  <string name="web_expand_details">ขยายรายละเอียด</string>
+  <string name="web_close_details">ปิดรายละเอียด</string>
+  <!-- Data table tab title; %1$s is the table name, %2$d the number of rows. -->
+  <string name="web_table_tab_title">%1$s (%2$d)</string>
+  <string name="web_collapse_table">ยุบตาราง</string>
+  <string name="web_expand_table">ขยายตาราง</string>
+  <string name="web_no_rows_yet">ยังไม่มีแถว</string>
+  <string name="web_map_layer">ชั้นข้อมูลแผนที่</string>
+  <string name="web_data_table">ตารางข้อมูล</string>
+  <string name="web_collapse_details">ยุบรายละเอียด</string>
+  <!-- Label above the number of map features in a layer. -->
+  <string name="web_map_features">ฟีเจอร์แผนที่</string>
+  <!-- Section heading: map feature counts grouped by status. -->
+  <string name="web_by_status">ตามสถานะ</string>
+  <string name="web_show_in_table">แสดงในตาราง</string>
+  <!-- Surveys page filter chip: show every survey. -->
+  <string name="web_survey_filter_all">ทั้งหมด</string>
+  <!-- Surveys page filter chip: show surveys the user owns. -->
+  <string name="web_survey_filter_mine">แบบสำรวจของฉัน</string>
+  <!-- Survey card chip: the signed-in user owns the survey. -->
+  <string name="web_survey_access_owner">เจ้าของ</string>
+  <!-- Survey card chip: the user manages the survey's organization. -->
+  <string name="web_survey_access_organization_manager">ผู้จัดการองค์กร</string>
+  <!-- Survey card chip: the user is a member of the survey's organization. -->
+  <string name="web_survey_access_organization_member">สมาชิกองค์กร</string>
+  <!-- Survey card chip: the survey was shared with the user. -->
+  <string name="web_survey_access_shared">แชร์กับคุณ</string>
+  <!-- Heading of the group of surveys that belong to no organization. -->
+  <string name="web_personal_surveys">แบบสำรวจส่วนตัว</string>
+  <string name="web_surveys">แบบสำรวจ</string>
+  <!-- Surveys page header summary; %1$s is the survey count phrase (e.g. "3 surveys"), %2$s the organization count phrase (e.g. "2 organizations"). -->
+  <string name="web_surveys_header_summary">%1$s · %2$s</string>
+  <string name="web_impact">ผลกระทบ</string>
+  <string name="web_search_surveys_placeholder">ค้นหาแบบสำรวจตามชื่อ ตำแหน่ง หรือองค์กร</string>
+  <string name="web_clear_search">ล้างการค้นหา</string>
+  <string name="web_search_surveys">ค้นหาแบบสำรวจ</string>
+  <string name="web_no_surveys_match_search">ไม่มีแบบสำรวจที่ตรงกับการค้นหาของคุณ</string>
+  <string name="web_no_surveys_yet">ยังไม่มีแบบสำรวจ สร้างแบบสำรวจเพื่อเริ่มต้นใช้งาน</string>
+  <!-- Badge next to an organization heading: the signed-in user is a manager of it. -->
+  <string name="web_organization_role_you_manage">คุณเป็นผู้จัดการ</string>
+  <!-- Badge next to an organization heading: the signed-in user is a member of it. -->
+  <string name="web_organization_role_member">สมาชิก</string>
+  <string name="web_no_description_yet">ยังไม่มีคำอธิบาย</string>
+  <string name="web_public_data">ข้อมูลสาธารณะ</string>
+  <string name="web_private_submissions">การส่งข้อมูลแบบส่วนตัว</string>
+  <!-- Survey card label: this survey is the one currently open. -->
+  <string name="web_survey_open_now">เปิดอยู่</string>
+  <!-- Badge on closed surveys asking whether their data was used. -->
+  <string name="web_outcome_prompt_label">ข้อมูลนี้ได้นำไปใช้หรือไม่</string>
+  <string name="web_collect_data">เก็บข้อมูล</string>
+  <!-- Data collection panel subtitle for a new standalone record; %1$s is the user's GPS coordinates. -->
+  <string name="web_new_record_at_location">ระเบียนใหม่ • %1$s</string>
+  <!-- Data collection panel subtitle; %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_select_target_to_begin">เลือก%1$sเพื่อเริ่มต้น</string>
+  <!-- %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_entity_ref_picker_instructions">คลิก%1$sบนแผนที่หรือในรายการเพื่อเริ่มแบบฟอร์มนี้ หรือเลือกจากด้านล่าง</string>
+  <string name="web_search_map_features">ค้นหาฟีเจอร์แผนที่</string>
+  <!-- Search field placeholder; %1$s is the lowercase name of the map layer or data table (e.g. "plots"), %2$d the total number of its map features. -->
+  <string name="web_entity_ref_filter_placeholder">กรอง%1$s (%2$d)</string>
+  <!-- %1$s is the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_entity_ref_no_matches">ไม่พบ%1$sที่ตรงกัน</string>
+  <string name="web_entity_ref_empty">ยังไม่มี%1$s</string>
+  <!-- Badge on a map feature whose form is already completed. -->
+  <string name="web_completed">เสร็จสมบูรณ์</string>
+  <string name="web_start_a_form">เริ่มแบบฟอร์ม</string>
+  <!-- Collect data menu item subtitle; %1$s is the question count phrase (e.g. "5 questions"), %2$d the number of map features left, %3$s the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_form_menu_summary_remaining">%1$s • เหลือ%3$s %2$d รายการ</string>
+  <!-- Collect data menu item subtitle for a standalone form; %1$s is the question count phrase (e.g. "5 questions"). -->
+  <string name="web_form_menu_summary_new_record">%1$s • ระเบียนใหม่</string>
+  <string name="web_survey_has_no_forms">แบบสำรวจนี้ยังไม่มีแบบฟอร์ม</string>
+  <string name="web_no_forms_available_on_web">ไม่มีแบบฟอร์มในแบบสำรวจนี้ที่ใช้งานบนเว็บได้</string>
+  <string name="web_qr_code">รหัส QR</string>
+  <!-- Overflow menu button description; %1$s is the lowercase map feature type (e.g. "plot"). -->
+  <string name="web_more_entity_actions">การดำเนินการอื่นๆ สำหรับ%1$s</string>
+  <!-- Map feature details tab showing the feature's current properties. -->
+  <string name="web_entity_tab_data">ข้อมูล</string>
+  <!-- Map feature details tab listing the feature's submissions. -->
+  <string name="web_entity_tab_history">ประวัติ</string>
+  <string name="web_back_to_submissions">กลับไปที่การส่งข้อมูล</string>
+  <string name="web_more_submission_actions">การดำเนินการอื่นๆ สำหรับการส่งข้อมูล</string>
+  <string name="web_close_form">ปิดแบบฟอร์ม</string>
+  <string name="web_map_drawing_place_point">คลิกแผนที่เพื่อวางจุด</string>
+  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
+  <string name="web_map_drawing_add_vertices">คลิกแผนที่เพื่อเพิ่มจุดยอด • %1$d จากอย่างน้อย %2$d</string>
+  <string name="web_undo">เลิกทำ</string>
+  <string name="web_done">เสร็จแล้ว</string>
+  <string name="web_cancel_drawing">ยกเลิกการวาด</string>
+  <string name="web_sign_in">ลงชื่อเข้าใช้</string>
+  <string name="web_sign_in_tagline">ทำแผนที่ระบบนิเวศ ออกแบบแบบสำรวจภาคสนาม และตรวจสอบข้อมูลจากการสังเกตในพื้นที่ร่วมกับองค์กรของคุณ</string>
+  <string name="web_sign_in_description">ลงชื่อเข้าใช้เพื่อดูแบบสำรวจและองค์กรที่แชร์กับบัญชีของคุณ</string>
+  <string name="web_signing_in">กำลังลงชื่อเข้าใช้…</string>
+  <string name="web_sign_in_with_google">ลงชื่อเข้าใช้ด้วย Google</string>
+  <string name="web_sign_in_google_accounts_only">ขณะนี้การตรวจสอบสิทธิ์รองรับเฉพาะบัญชี Google เท่านั้น</string>
+  <string name="web_terms_of_service_title">ข้อกำหนดในการให้บริการ</string>
+  <string name="web_tos_signed_in_as">ลงชื่อเข้าใช้ในชื่อ %1$s</string>
+  <string name="web_tos_decline">ปฏิเสธ</string>
+  <string name="web_tos_continue">ดำเนินการต่อ</string>
+  <string name="web_tos_intro">กรุณาอ่านและยอมรับข้อกำหนดในการให้บริการของ Collect One เพื่อดำเนินการต่อ</string>
+  <string name="web_tos_agree_checkbox">ฉันได้อ่านและยอมรับข้อกำหนดในการให้บริการของ Collect One แล้ว</string>
+  <!-- Shown when a link names a console page that doesn't exist or that the user can't open. -->
+  <string name="web_link_unavailable">หน้านั้นไม่พร้อมใช้งาน อาจถูกลบไปแล้ว หรือคุณอาจไม่มีสิทธิ์เข้าถึง</string>
+  <!-- Error shown when an uploaded file can't be read; %1$s is the file name. -->
+  <string name="web_file_read_failed">อ่าน %1$s ไม่ได้ กรุณาลองอีกครั้ง</string>
+  <!-- Subtitle of an export profile menu item; %1$d is the number of warnings to review. -->
+  <plurals name="web_export_profile_warnings_to_review">
+    <item quantity="other">ต้องตรวจทาน %1$d รายการก่อนส่งออก</item>
+  </plurals>
+  <plurals name="web_survey_count">
+    <item quantity="other">แบบสำรวจ %1$d รายการ</item>
+  </plurals>
+  <plurals name="web_organization_count">
+    <item quantity="other">%1$d องค์กร</item>
+  </plurals>
+  <!-- Survey card: number of locations (map features) in the survey. -->
+  <plurals name="web_survey_location_count">
+    <item quantity="other">%1$d ตำแหน่ง</item>
+  </plurals>
+  <plurals name="web_form_question_count">
+    <item quantity="other">%1$d คำถาม</item>
+  </plurals>
+
+  <!-- Shown when this build of the console can't open a file picker. -->
+  <string name="web_file_upload_unavailable">ไม่สามารถอัปโหลดไฟล์ที่นี่ได้</string>
+  <string name="web_collapse_form">ยุบแบบฟอร์ม</string>
+  <string name="web_expand_form">ขยายแบบฟอร์ม</string>
+</resources>

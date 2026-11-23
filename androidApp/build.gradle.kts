@@ -11,32 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Placeholder Android application build script wrapping `org.openforis.collectone.v2:mobile`.
+// Placeholder Android application build script wrapping `:shared:mobile`.
 import java.util.Properties
 
-plugins {
-  id("com.android.application") version "8.5.2"
-  kotlin("multiplatform") version "2.4.20"
-  id("org.jetbrains.compose") version "1.12.0"
-  id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
-}
-
-group = "org.openforis.collectone.v2.android"
-
-version = "2.0.0-SNAPSHOT"
+plugins { id("collectone.android.app") }
 
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
-
   sourceSets {
     val androidMain by getting {
-      dependencies { implementation("androidx.activity:activity-compose:1.10.0") }
+      dependencies {
+        implementation(libs.androidx.activity.compose)
+        implementation(libs.androidx.lifecycle.process)
+        implementation(libs.androidx.work.runtime.ktx)
+        implementation(libs.firebase.messaging)
+        implementation(libs.kotlinx.coroutines.play.services)
+      }
     }
+    // JVM unit tests of the app's own logic (./gradlew :androidApp:testDebugUnitTest).
+    val androidUnitTest by getting { dependencies { implementation(kotlin("test")) } }
     val commonMain by getting {
       dependencies {
-        implementation("org.openforis.collectone.v2:mobile:2.0.0-SNAPSHOT")
+        implementation(projects.shared.mobile)
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
@@ -46,11 +41,13 @@ kotlin {
   }
 }
 
-val localProperties = Properties()
-
-listOf(rootProject.file("../local.properties"), rootProject.file("local.properties"))
-  .filter { it.isFile }
-  .forEach { file -> file.inputStream().use(localProperties::load) }
+// The repository root's local.properties, then this module's own (whose values win).
+val localProperties =
+  Properties().apply {
+    for (dir in listOf(layout.settingsDirectory, layout.projectDirectory)) {
+      providers.fileContents(dir.file("local.properties")).asText.orNull?.let { load(it.reader()) }
+    }
+  }
 
 val mapboxAccessToken =
   (localProperties.getProperty("MAPBOX_ACCESS_TOKEN")
@@ -61,7 +58,7 @@ val mapboxAccessToken =
       ?: "")
     .trim()
 
-// Base URL of the user data service (server/userDataService) the app syncs from, e.g.
+// Base URL of the Collect One server (server/) the app syncs from, e.g.
 // http://10.0.2.2:8080 for a service running on the emulator's host. A Gradle property or the
 // environment overrides local.properties. Empty: the app shows setup instructions instead of
 // starting.
@@ -72,17 +69,49 @@ val userDataServiceUrl =
       ?: "")
     .trim()
 
+// Firebase web app config JSON (`FIREBASE_WEB_CONFIG`), read from Gradle properties, the
+// environment, or `local.properties` so no `google-services.json` or API keys are committed to the
+// repository. When present, `MobileSyncRuntime` initializes `FirebaseApp` at startup so FCM topic
+// subscriptions (`survey_<id>_def`, `survey_<id>_entities`) are active; when absent or `"none"`,
+// the app falls back to foreground polling.
+val firebaseWebConfig =
+  (providers.gradleProperty("FIREBASE_WEB_CONFIG").orNull
+      ?: providers.environmentVariable("FIREBASE_WEB_CONFIG").orNull
+      ?: localProperties.getProperty("FIREBASE_WEB_CONFIG")
+      ?: "")
+    .trim()
+    .let { if (it == "none") "" else it }
+
+val appEnvironment =
+  (providers.gradleProperty("APP_ENV").orNull
+      ?: providers.gradleProperty("COLLECT_ONE_ENV").orNull
+      ?: providers.environmentVariable("APP_ENV").orNull
+      ?: providers.environmentVariable("COLLECT_ONE_ENV").orNull
+      ?: localProperties.getProperty("APP_ENV")
+      ?: localProperties.getProperty("COLLECT_ONE_ENV")
+      ?: "")
+    .trim()
+
+val appVersionName =
+  (providers.gradleProperty("APP_VERSION").orNull
+      ?: providers.environmentVariable("APP_VERSION").orNull
+      ?: project.version.toString())
+    .trim()
+
 android {
   namespace = "org.openforis.collectone.v2.android"
-  compileSdk = 35
   defaultConfig {
     applicationId = "org.openforis.collectone.v2.android"
-    minSdk = 24
-    targetSdk = 35
     versionCode = 1
-    versionName = "1.0"
+    versionName = appVersionName
     resValue("string", "mapbox_access_token", mapboxAccessToken)
     resValue("string", "user_data_service_url", userDataServiceUrl)
+    resValue("string", "app_environment", appEnvironment)
+    resValue(
+      "string",
+      "firebase_web_config",
+      firebaseWebConfig.replace("\\", "\\\\").replace("\"", "\\\""),
+    )
   }
   buildTypes {
     debug {
@@ -97,15 +126,4 @@ android {
       signingConfig = signingConfigs.getByName("debug")
     }
   }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
 }
-
-// Compose Multiplatform 1.12.0 bundles AndroidX AARs whose metadata declares minCompileSdk=37 /
-// minAgpVersion=9.1.0, even though no API > 35 is called at runtime. Disable the strict AAR
-// metadata gate so the APK assembles cleanly with Android SDK 35 and AGP 8.5.2.
-tasks
-  .matching { it.name.startsWith("check") && it.name.endsWith("AarMetadata") }
-  .configureEach { enabled = false }

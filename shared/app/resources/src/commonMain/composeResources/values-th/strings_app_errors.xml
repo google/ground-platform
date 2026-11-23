@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Why an operation failed: the user data service or auth service couldn't be reached. -->
+  <string name="app_error_network">เชื่อมต่อไม่ได้ ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง</string>
+  <!-- Why an operation failed: the user's session has expired. -->
+  <string name="app_error_unauthenticated">เซสชันของคุณหมดอายุแล้ว โปรดลงชื่อเข้าใช้อีกครั้ง</string>
+  <!-- Why an operation failed: the signed-in user isn't allowed to do it. -->
+  <string name="app_error_permission_denied">คุณไม่มีสิทธิ์ดำเนินการนี้</string>
+  <!-- Why an operation failed: what it refers to was deleted. -->
+  <string name="app_error_not_found">รายการนี้ไม่มีอยู่แล้ว</string>
+  <!-- Why an operation failed: someone changed the same thing at the same time. -->
+  <string name="app_error_conflict">รายการนี้ถูกเปลี่ยนแปลงจากที่อื่น โปรดลองอีกครั้ง</string>
+  <!-- Why an operation failed: what it changes no longer accepts changes, e.g. a closed or archived survey; retrying won't help. -->
+  <string name="app_error_not_editable">ไม่สามารถเปลี่ยนแปลงรายการนี้ได้ในขณะนี้ แบบสำรวจอาจถูกปิดหรือเก็บถาวรแล้ว</string>
+  <!-- Why an operation failed: the server rejected what was entered. -->
+  <string name="app_error_validation">ข้อมูลบางส่วนไม่ถูกต้อง ตรวจสอบแล้วลองอีกครั้ง</string>
+  <!-- Why an operation failed: a quota or rate limit was reached. -->
+  <string name="app_error_quota_exceeded">คุณใช้งานถึงขีดจำกัดแล้ว โปรดลองอีกครั้งในภายหลัง</string>
+  <!-- Why an operation failed: the user cancelled it. -->
+  <string name="app_error_cancelled">ยกเลิกแล้ว</string>
+  <!-- Why an operation failed, when there is no more specific reason. -->
+  <string name="app_error_unknown">เกิดข้อผิดพลาด โปรดลองอีกครั้ง</string>
+  <!-- Notice after sign-in fails. %1$s = why, one of the app_error_* sentences. -->
+  <string name="app_sign_in_failed">ลงชื่อเข้าใช้ไม่ได้ %1$s</string>
+</resources>

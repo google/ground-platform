@@ -31,10 +31,13 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import co.touchlab.kermit.Logger
 import kotlin.math.log2
 import kotlinx.coroutines.await
 
 /** Tap tolerance for features, in CSS px. */
+private val log = Logger.withTag("AppMap")
+
 private const val TAP_RADIUS_PX = 6.0
 
 /**
@@ -126,6 +129,7 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
       initialCamera.zoom,
       initialCamera.bearing,
       initialCamera.pitch,
+      onError = { message -> log.w { "Mapbox GL JS: $message" } },
     )
   private var styleBasemap = initialBasemap
   /** Whether the current style has the user-location source and layers yet. */
@@ -161,6 +165,7 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
         if (destroyed) return
         if (!styleDecorated) {
           styleDecorated = true
+          addOverlayLayers()
           addUserLocationLayers()
         }
       }
@@ -168,10 +173,22 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
         apply(op)
       } catch (e: Throwable) {
         // A bad layer shouldn't take the app down; the rest of the content still renders.
-        println("GroundMap: failed to apply $op: ${e.message}")
+        log.w(e) { "Failed to apply ${op::class.simpleName}" }
       }
     }
     shown = content
+  }
+
+  /** Adds the [Basemap.MapboxStyle] overlays, raster and vector, above the style's own layers. */
+  private fun addOverlayLayers() {
+    for (overlay in MapboxStyleSpec.overlays(styleBasemap)) {
+      try {
+        mapboxAddSource(host, overlay.sourceId, overlay.source.toString())
+        mapboxAddLayer(host, overlay.layer.toString(), null, "")
+      } catch (e: Throwable) {
+        log.w(e) { "Failed to add overlay ${overlay.sourceId}" }
+      }
+    }
   }
 
   private fun addUserLocationLayers() {
@@ -183,7 +200,7 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
       )
       MapboxStyleSpec.userLocationLayers().forEach { mapboxAddLayer(host, it.toString(), null, "") }
     } catch (e: Throwable) {
-      println("GroundMap: failed to add the user-location layers: ${e.message}")
+      log.w(e) { "Failed to add the user-location layers" }
     }
   }
 
@@ -197,7 +214,10 @@ private class MapboxWebRenderer(initialBasemap: Basemap, initialCamera: CameraPo
           mapboxSetStyle(host, MapboxStyleSpec.style(op.basemap))
         }
       }
-      is MapOp.AddIcon -> mapboxAddIcon(host, op.icon.id, op.icon.svg).await<JsAny?>()
+      is MapOp.AddIcon ->
+        if (!mapboxAddIcon(host, op.icon.id, op.icon.svg).await<JsBoolean>().toBoolean()) {
+          log.w { "Couldn't load icon ${op.icon.id}" }
+        }
       is MapOp.RemoveIcon -> mapboxRemoveIcon(host, op.iconId)
       is MapOp.AddSource ->
         mapboxAddSource(

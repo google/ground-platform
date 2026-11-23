@@ -22,17 +22,17 @@ import platform.UIKit.UIView
  * The Mapbox Maps SDK for iOS is a Swift API, which Kotlin/Native can't call directly, so the app
  * implements [MapboxIosViewFactory] in Swift and registers it at launch:
  * ```swift
- * GroundMapIos.shared.viewFactory = GroundMapboxViewFactory()
+ * AppMapIos.shared.viewFactory = AppMapboxViewFactory()
  * ```
  *
- * Without a factory, or when it returns `nil` (e.g. no access token), [GroundMap] falls back to
+ * Without a factory, or when it returns `nil` (e.g. no access token), [AppMap] falls back to
  * [PreviewMap].
  */
-object GroundMapIos {
+object AppMapIos {
   var viewFactory: MapboxIosViewFactory? = null
 }
 
-/** Creates one native map per [GroundMap] on screen. */
+/** Creates one native map per [AppMap] on screen. */
 interface MapboxIosViewFactory {
   /** A new map view, or `null` if Mapbox can't be used, e.g. without an access token. */
   fun create(): MapboxIosView?

@@ -1,7 +1,7 @@
 {
-  "name": "@groundplatform/e2e-tests",
+  "name": "@collect-one/e2e-tests",
   "private": true,
-  "description": "Golden-screenshot integration tests of the Collect One web console and mobile app against a local user data service.",
+  "description": "Golden-screenshot integration tests of the Collect One web console and mobile app against a local Collect One server.",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {

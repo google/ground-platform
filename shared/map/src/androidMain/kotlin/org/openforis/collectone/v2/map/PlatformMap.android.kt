@@ -17,7 +17,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
@@ -33,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
+import co.touchlab.kermit.Logger
 import com.caverock.androidsvg.SVG
 import com.mapbox.bindgen.Value
 import com.mapbox.common.MapboxOptions
@@ -55,7 +55,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 
-private const val TAG = "GroundMap"
+private val log = Logger.withTag("AppMap")
 
 /** Tap tolerance for features, in dp. */
 private const val TAP_RADIUS_DP = 6f
@@ -93,7 +93,7 @@ internal actual fun PlatformMap(
           context.resources.getIdentifier("mapbox_access_token", "string", context.packageName)
         val fromRes =
           (if (resId != 0) context.getString(resId).trim() else "").ifEmpty {
-            System.getProperty("ground.mapbox.accessToken").orEmpty().trim()
+            System.getProperty("collectone.mapbox.accessToken").orEmpty().trim()
           }
         if (fromRes.isNotEmpty()) {
           runCatching { MapboxOptions.accessToken = fromRes }
@@ -169,7 +169,7 @@ private class MapboxAndroidRenderer(
 
   init {
     // Compose handles gestures. Mapbox's logo and attribution button (with the telemetry opt-out
-    // its terms require) stay; GroundMap also draws the basemap's attribution text.
+    // its terms require) stay; AppMap also draws the basemap's attribution text.
     mapView.gestures.updateSettings {
       scrollEnabled = false
       rotateEnabled = false
@@ -191,6 +191,7 @@ private class MapboxAndroidRenderer(
     styleReady = ready
     map.loadStyle(MapboxStyleSpec.style(basemap)) { loaded ->
       if (destroyed || styleReady !== ready) return@loadStyle
+      addOverlayLayers(loaded, basemap)
       addUserLocationLayers(loaded)
       style = loaded
       ready.complete(loaded)
@@ -211,7 +212,7 @@ private class MapboxAndroidRenderer(
         apply(style, op, content)
       } catch (e: Exception) {
         // A bad layer shouldn't take the app down; the rest of the content still renders.
-        Log.w(TAG, "Failed to apply $op", e)
+        log.w(e) { "Failed to apply ${op::class.simpleName}" }
       }
     }
     shown = content
@@ -277,6 +278,14 @@ private class MapboxAndroidRenderer(
     style
       .addStyleLayer(MapboxStyleSpec.layer(layer).toValue(), LayerPosition(null, below, null))
       .check("add layer ${layer.id}")
+  }
+
+  /** Adds the [Basemap.MapboxStyle] overlays, raster and vector, above the style's own layers. */
+  private fun addOverlayLayers(style: Style, basemap: Basemap) {
+    for (overlay in MapboxStyleSpec.overlays(basemap)) {
+      style.addStyleSource(overlay.sourceId, overlay.source.toValue()).check("add overlay source")
+      style.addStyleLayer(overlay.layer.toValue(), null).check("add overlay layer")
+    }
   }
 
   private fun addUserLocationLayers(style: Style) {
@@ -420,5 +429,5 @@ private fun kotlinx.serialization.json.JsonElement.toValue(): Value {
 
 /** Logs the error of a Mapbox style call, if any. */
 private fun com.mapbox.bindgen.Expected<String, *>.check(what: String) {
-  error?.let { Log.w(TAG, "Failed to $what: $it") }
+  error?.let { log.w { "Failed to $what: $it" } }
 }

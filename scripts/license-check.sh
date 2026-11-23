@@ -45,6 +45,7 @@ while IFS= read -r -d '' file; do
     missing+=("${file}")
   fi
 done < <(
+  # detekt-baseline.xml files are generated (and rewritten) by `./gradlew detektBaseline`.
   find . \
     \( -name .git -o -name build -o -name .gradle -o -name .kotlin -o -name node_modules -o -name kotlin-js-store -o -name .nx -o -name dist -o -name .cache \) -prune \
     -o -type f \( \
@@ -61,11 +62,15 @@ done < <(
       -o -name '*.tsx' \
       -o -name '*.jsx' \
       -o -name '*.sql' \
+      -o -name '*.sq' \
+      -o -name '*.sqm' \
       -o -name '*.yml' \
       -o -name '*.yaml' \
       -o -name '*.xml' \
       -o -name '*.html' \
-    \) -print0 | sort -z
+    \) \
+    -not -name 'detekt-baseline.xml' \
+    -print0 | sort -z
 )
 
 if [[ ${#missing[@]} -gt 0 ]]; then

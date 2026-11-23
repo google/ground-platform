@@ -18,8 +18,8 @@
 
 A **concept** (`ConceptDef`) is a standard field definition in an
 organization's library. Taken together, the concepts available to a survey form
-its **dictionary**. Linking a form question to a concept tells Ground what the
-answer *means*, so answers can be validated, exported, and aggregated
+its **dictionary**. Linking a form question to a concept tells Collect One what
+the answer *means*, so answers can be validated, exported, and aggregated
 consistently across surveys, organizations, and languages.
 
 ## Concept Schema (`ConceptDef`)
@@ -161,7 +161,7 @@ enum LibraryStatus {
 ## Linking Form Fields (`ConceptRef`)
 
 Questions link to concepts through a `ConceptRef`. Concept links are
-meaningful only to Ground, so, following the ProtoForms compatibility boundary
+meaningful only to Collect One, so, following the ProtoForms compatibility boundary
 in `GEMINI.md`, they are **not** a typed field of
 `openforis.collectone.v1.forms`. Instead, two complementary mechanisms carry them:
 
@@ -170,7 +170,7 @@ in `GEMINI.md`, they are **not** a typed field of
     aggregation read these.
 *   **Generic foreign-attribute preservation (portable)**: ProtoForms preserves
     any foreign-namespace attribute it does not model, so the
-    `ground:concept` attribute travels with a standalone `FormDef` and
+    `collectone:concept` attribute travels with a standalone `FormDef` and
     round-trips through XForms and XLSForm like any other tool's extension.
 
 ```protobuf
@@ -203,7 +203,7 @@ message EntityPropertyDefinition {
 message ForeignAttribute {
   string namespace_uri = 1;
   // Qualified name as written in the source document (e.g.,
-  // "ground:concept").
+  // "collectone:concept").
   string qualified_name = 2;
   string value = 3;
 }
@@ -215,16 +215,18 @@ message FieldBinding {
 ```
 
 *   **Keeping the two in sync**: survey-level links are authoritative inside
-    Ground. On export, Ground writes each link as a `ground:concept`
-    attribute. On import, `ground:concept` attributes found among a binding's
-    foreign attributes populate the survey-level links after validation against
-    the survey's resolved library. Unknown concept IDs remain as foreign
-    attributes and are reported by the form validator.
+    Collect One. On export, Collect One writes each link as a
+    `collectone:concept` attribute. On import, `collectone:concept` attributes
+    (and legacy `ground:concept` attributes from forms exported by Ground) found
+    among a binding's foreign attributes populate the survey-level links after
+    validation against the survey's resolved library. Unknown concept IDs remain
+    as foreign attributes and are reported by the form validator.
 *   **Choices**: each `ChoiceItem` of a linked select question maps to a
-    code-list value through `ChoiceItem.properties["ground_code"]` (e.g., the
+    code-list value through `ChoiceItem.properties["collectone_code"]` (e.g., the
     choice labeled "Café" maps to `coffee`), the same generic extra-column
-    mechanism used for choice colors. Choices without a mapping are reported by
-    the form validator.
+    mechanism used for choice colors (the legacy Ground `ground_code` column is
+    also read on import). Choices without a mapping are reported by the form
+    validator.
 *   **`save_to` inheritance**: when a linked question saves to an entity
     property (`FieldBinding.entity_saveto`), the Survey Designer copies its
     concept to the matching `EntityPropertyDefinition.concept_ref`.
@@ -242,10 +244,10 @@ remain portable.
 
 | Representation | Encoding |
 | :--- | :--- |
-| XForms | `<bind nodeset="/data/commodity" type="string" ground:concept="eudr.commodity@1"/>` with `xmlns:ground="http://groundplatform.org/xforms"` on the root element |
-| XForms choices | A `ground_code` child element on each item of the choice list's secondary instance (`<item><name>cafe</name><label>Café</label><ground_code>coffee</ground_code></item>`), like any other extra choice column |
-| XLSForm `survey` sheet | `bind::ground:concept` column (e.g., `eudr.commodity@1`), with `ground="http://groundplatform.org/xforms"` in the `namespaces` column of the `settings` sheet |
-| XLSForm `choices` sheet | `ground_code` column (an underscore rather than a colon, because extra choice columns become XML element names) |
+| XForms | `<bind nodeset="/data/commodity" type="string" collectone:concept="eudr.commodity@1"/>` with `xmlns:collectone="http://openforis.org/collect-one/xforms"` on the root element |
+| XForms choices | A `collectone_code` child element on each item of the choice list's secondary instance (`<item><name>cafe</name><label>Café</label><collectone_code>coffee</collectone_code></item>`), like any other extra choice column |
+| XLSForm `survey` sheet | `bind::collectone:concept` column (e.g., `eudr.commodity@1`), with `collectone="http://openforis.org/collect-one/xforms"` in the `namespaces` column of the `settings` sheet |
+| XLSForm `choices` sheet | `collectone_code` column (an underscore rather than a colon, because extra choice columns become XML element names) |
 
 <!-- mdformat on -->
 

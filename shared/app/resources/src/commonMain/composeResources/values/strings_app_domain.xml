@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Kind of "data was used" event, shown in impact history. -->
+  <string name="domain_impact_event_type_export">Exported</string>
+  <string name="domain_impact_event_type_partner_push">Sent to a partner</string>
+  <string name="domain_impact_event_type_receipt_generated">Receipt created</string>
+  <string name="domain_impact_event_type_receipt_shared">Receipt shared</string>
+  <string name="domain_impact_event_type_doi_minted">DOI minted</string>
+  <string name="domain_impact_event_type_survey_closed">Survey closed</string>
+  <!-- Lifecycle state of a survey. -->
+  <string name="domain_survey_lifecycle_state_draft">Draft</string>
+  <string name="domain_survey_lifecycle_state_published">Published</string>
+  <string name="domain_survey_lifecycle_state_closed">Closed</string>
+  <string name="domain_survey_lifecycle_state_archived">Archived</string>
+  <!-- Answer option to "What happened with this data?" for a closed survey. -->
+  <string name="domain_survey_outcome_kind_submitted_eudr_dds">Submitted in an EUDR due diligence statement</string>
+  <string name="domain_survey_outcome_kind_reported_ferm">Reported to FERM</string>
+  <string name="domain_survey_outcome_kind_land_titling">Used for land titling</string>
+  <string name="domain_survey_outcome_kind_shared_with_buyers">Shared with buyers</string>
+  <string name="domain_survey_outcome_kind_trained_or_validated_model">Trained or checked a map or model</string>
+  <string name="domain_survey_outcome_kind_protected_area_management">Used to manage a protected area</string>
+  <string name="domain_survey_outcome_kind_not_yet">Not yet</string>
+  <!-- Answer option: time and cost compared with the previous method. -->
+  <string name="domain_effort_comparison_less">Less</string>
+  <string name="domain_effort_comparison_same">About the same</string>
+  <string name="domain_effort_comparison_more">More</string>
+  <!-- Upload status of a submission. -->
+  <string name="domain_sync_status_uploading">Uploading</string>
+  <string name="domain_sync_status_uploading_description">Uploading local changes to server</string>
+  <string name="domain_sync_status_synced">Synced</string>
+  <string name="domain_sync_status_synced_description">Synchronized with cloud server</string>
+  <string name="domain_sync_status_failed">Failed</string>
+  <string name="domain_sync_status_failed_description">Upload failed — tap to retry</string>
+  <!-- Name of a quota tier (plan). -->
+  <string name="domain_quota_tier_unspecified">Unspecified</string>
+  <string name="domain_quota_tier_basic">Basic</string>
+  <string name="domain_quota_tier_sponsored">Sponsored</string>
+  <!-- Measurement unit system option in Settings. -->
+  <string name="domain_measurement_unit_system_metric">Metric (ha, m)</string>
+  <string name="domain_measurement_unit_system_metric_short">Metric</string>
+  <string name="domain_measurement_unit_system_imperial">Imperial (acres, ft)</string>
+  <string name="domain_measurement_unit_system_imperial_short">Imperial</string>
+  <!-- State of the map camera relative to the GPS location. -->
+  <string name="domain_location_lock_state_locked">GPS Auto-Center</string>
+  <string name="domain_location_lock_state_locked_3d">GPS 3D</string>
+  <string name="domain_location_lock_state_panned">Panned</string>
+  <!-- Badge shown on a map layer that comes from the survey. -->
+  <string name="domain_layer_source_type_entity_dataset">Survey Layer</string>
+  <!-- Basemap option in the map layers panel. -->
+  <string name="domain_basemap_type_normal">Terrain</string>
+  <string name="domain_basemap_type_normal_description">Terrain map with contours, hillshade &amp; roads</string>
+  <string name="domain_basemap_type_satellite">Satellite</string>
+  <string name="domain_basemap_type_satellite_description">Mapbox Standard Satellite imagery with reference labels</string>
+  <!-- Layer of a map area saved for offline use: satellite imagery, or the terrain map (contours, hillshade, and roads). -->
+  <string name="domain_offline_imagery_type_satellite">Satellite</string>
+  <string name="domain_offline_imagery_type_terrain">Terrain</string>
+  <!-- Role of a person in an organization. -->
+  <string name="domain_organization_role_member">Member</string>
+  <string name="domain_organization_role_member_description">Listed as affiliated, can see the organization's surveys and create new ones.</string>
+  <string name="domain_organization_role_manager">Manager</string>
+  <string name="domain_organization_role_manager_description">Can edit the organization, manage members, and manage all of its surveys.</string>
+  <!-- Status of a person's membership in an organization. -->
+  <string name="domain_membership_status_invited">Invited</string>
+  <string name="domain_membership_status_requested">Requested to join</string>
+  <string name="domain_membership_status_active">Member</string>
+  <!-- Kind of custom imagery source. -->
+  <string name="domain_imagery_source_type_xyz_tiles">XYZ tile URL</string>
+  <string name="domain_imagery_source_type_earth_engine">Earth Engine layer</string>
+  <!-- Kind of organization. -->
+  <string name="domain_organization_type_government_agency">Government agency</string>
+  <string name="domain_organization_type_cooperative">Cooperative</string>
+  <string name="domain_organization_type_iplc_organization">Indigenous Peoples or local community organization</string>
+  <string name="domain_organization_type_ngo">NGO</string>
+  <string name="domain_organization_type_company">Company</string>
+  <string name="domain_organization_type_research">Research institution</string>
+  <string name="domain_organization_type_other">Other</string>
+  <!-- Upload status filter and upload state of a pending change. -->
+  <string name="domain_upload_status_filter_pending">Pending</string>
+  <string name="domain_upload_status_filter_in_progress">In progress</string>
+  <string name="domain_upload_status_filter_uploaded">Uploaded</string>
+  <string name="domain_upload_status_filter_failed">Failed</string>
+  <!-- Kind of change waiting to upload or already uploaded. -->
+  <string name="domain_mutation_operation_kind_create_submission">Form submitted</string>
+  <string name="domain_mutation_operation_kind_update_submission">Form modified</string>
+  <string name="domain_mutation_operation_kind_delete_submission">Form deleted</string>
+  <string name="domain_mutation_operation_kind_create_entity">Map feature created</string>
+  <string name="domain_mutation_operation_kind_update_entity">Map feature modified</string>
+  <string name="domain_mutation_operation_kind_delete_entity">Map feature deleted</string>
+  <string name="domain_mutation_operation_kind_upload_media">Photo attached</string>
+  <!-- Status of an invitation to join. -->
+  <string name="domain_invitation_status_pending">Invited</string>
+  <string name="domain_invitation_status_accepted">Joined</string>
+  <!-- Geometry type: point, line, or polygon. -->
+  <string name="domain_geometry_point">Point</string>
+  <string name="domain_geometry_line">Line</string>
+  <string name="domain_geometry_polygon">Polygon</string>
+  <!-- Geometry type (point, line, polygon) of a map feature or question. -->
+  <string name="domain_entity_geometry_kind_none">No geometry</string>
+  <!-- Title or subtitle of a mobile app screen in the screen navigator. -->
+  <string name="domain_app_screen_sign_in_title">Sign In</string>
+  <string name="domain_app_screen_sign_in_subtitle">Google authentication entry point</string>
+  <string name="domain_app_screen_terms_of_service_title">Terms of Service</string>
+  <string name="domain_app_screen_terms_of_service_subtitle">Data governance &amp; platform terms acceptance</string>
+  <string name="domain_app_screen_download_survey_title">Download Survey</string>
+  <string name="domain_app_screen_download_survey_subtitle">Browse shared surveys or search by name/location</string>
+  <string name="domain_app_screen_main_survey_title">Main Survey (Map &amp; List)</string>
+  <string name="domain_app_screen_main_survey_subtitle">Survey map, map layers, location &amp; submission bottom sheets, searchable list &amp; drawer</string>
+  <!-- Tab: show the survey as a map or as a list. -->
+  <string name="domain_main_survey_view_mode_map">Map</string>
+  <string name="domain_main_survey_view_mode_list">List</string>
+  <!-- Lifecycle status of a library entry. -->
+  <string name="domain_library_status_draft">Draft</string>
+  <string name="domain_library_status_stable">Stable</string>
+  <string name="domain_library_status_deprecated">Deprecated</string>
+  <!-- How dashboards roll up answers to a standard field. -->
+  <string name="domain_concept_aggregation_count_distinct_features">Count map features</string>
+  <string name="domain_concept_aggregation_count_distinct_features_description">Counts map features with an answer.</string>
+  <string name="domain_concept_aggregation_count_by_code">Count by value</string>
+  <string name="domain_concept_aggregation_count_by_code_description">Counts map features for each value in the list.</string>
+  <string name="domain_concept_aggregation_sum">Sum</string>
+  <string name="domain_concept_aggregation_sum_description">Adds up the answers.</string>
+  <string name="domain_concept_aggregation_mean">Average</string>
+  <string name="domain_concept_aggregation_mean_description">Averages the answers.</string>
+  <string name="domain_concept_aggregation_share_by_code">Share by value</string>
+  <string name="domain_concept_aggregation_share_by_code_description">Shows the share of map features with each value.</string>
+  <string name="domain_concept_aggregation_none">Not aggregated</string>
+  <string name="domain_concept_aggregation_none_description">Names, identifiers, and other answers that aren't rolled up.</string>
+  <!-- Privacy class of a standard field: what may leave the organization. -->
+  <string name="domain_privacy_class_aggregate_public">Public totals</string>
+  <string name="domain_privacy_class_aggregate_public_description">Totals can appear in platform-wide and public dashboards.</string>
+  <string name="domain_privacy_class_org_only">Organization only</string>
+  <string name="domain_privacy_class_org_only_description">Totals are visible only within the owning organization.</string>
+  <string name="domain_privacy_class_sensitive">Sensitive</string>
+  <string name="domain_privacy_class_sensitive_description">Never included in cross-organization or public totals.</string>
+  <!-- Impact pillar used to group goals. -->
+  <string name="domain_impact_pillar_mitigation">Mitigation</string>
+  <string name="domain_impact_pillar_adaptation">Adaptation</string>
+  <string name="domain_impact_pillar_protection">Protection</string>
+  <!-- Data type of an answer or property. -->
+  <string name="domain_data_type_text">Text</string>
+  <string name="domain_data_type_integer">Integer</string>
+  <string name="domain_data_type_decimal">Decimal</string>
+  <string name="domain_data_type_date">Date</string>
+  <string name="domain_data_type_select_one">Select one</string>
+  <string name="domain_data_type_select_multiple">Select multiple</string>
+  <!-- Answer data type (also used for question types and table property types). -->
+  <string name="domain_concept_data_type_media">Photo, video, or audio</string>
+  <!-- Role of a collaborator on a survey. -->
+  <string name="domain_collaborator_role_viewer">Viewer</string>
+  <string name="domain_collaborator_role_viewer_description">Can view the map, Map layers, and submissions.</string>
+  <string name="domain_collaborator_role_data_collector">Data collector</string>
+  <string name="domain_collaborator_role_data_collector_description">Can collect submissions and add map features.</string>
+  <string name="domain_collaborator_role_survey_organizer">Survey organizer</string>
+  <string name="domain_collaborator_role_survey_organizer_description">Can edit Forms, manage sharing, and export data.</string>
+  <!-- General access option of a survey. -->
+  <string name="domain_sharing_policy_restricted">Restricted</string>
+  <string name="domain_sharing_policy_restricted_description">Only people added above can open this survey.</string>
+  <string name="domain_sharing_policy_organization">Anyone in the organization</string>
+  <string name="domain_sharing_policy_organization_description">Members of the survey's organization can collect data. Managers can also edit the survey.</string>
+  <string name="domain_sharing_policy_anyone_with_link">Link or QR code required</string>
+  <string name="domain_sharing_policy_anyone_with_link_description">Users need a link or QR code to access this survey and collect data.</string>
+  <string name="domain_sharing_policy_public">Listed in the directory</string>
+  <string name="domain_sharing_policy_public_description">Listed in the directory so anyone can find this survey and collect data.</string>
+  <!-- Which data a data collector can see. -->
+  <string name="domain_peer_data_visibility_all">All data</string>
+  <string name="domain_peer_data_visibility_all_description">Data collectors see everyone's submissions and map features.</string>
+  <string name="domain_peer_data_visibility_own_only">Own data only</string>
+  <string name="domain_peer_data_visibility_own_only_description">Data collectors only see what they collected.</string>
+  <!-- Kind of survey dataset, singular and plural. -->
+  <string name="domain_dataset_kind_map_layer">Map layer</string>
+  <string name="domain_dataset_kind_map_layer_plural">Map layers</string>
+  <string name="domain_dataset_kind_data_table">Data table</string>
+  <string name="domain_dataset_kind_data_table_plural">Data tables</string>
+  <!-- Geometry type of a map layer (plural). -->
+  <string name="domain_geometry_kind_point">Points</string>
+  <string name="domain_geometry_kind_line">Lines</string>
+  <string name="domain_geometry_kind_polygon">Polygons</string>
+  <string name="domain_property_type_boolean">Yes / No</string>
+  <!-- Sampling method option for generated sample plots. -->
+  <string name="domain_sample_method_systematic_grid">Systematic grid</string>
+  <string name="domain_sample_method_systematic_grid_description">Plots on a regular grid with a random starting point.</string>
+  <string name="domain_sample_method_simple_random">Simple random</string>
+  <string name="domain_sample_method_simple_random_description">A set number of plots placed at random.</string>
+  <string name="domain_sample_method_stratified_random">Stratified random</string>
+  <string name="domain_sample_method_stratified_random_description">Plots placed at random within each stratum.</string>
+  <string name="domain_sample_method_cluster">Cluster</string>
+  <string name="domain_sample_method_cluster_description">Groups of plots placed at random.</string>
+  <!-- How sample plots are allocated across strata. -->
+  <string name="domain_allocation_mode_equal">Equal</string>
+  <string name="domain_allocation_mode_proportional">Proportional to area</string>
+  <string name="domain_allocation_mode_custom">Custom</string>
+  <!-- Shape of a sample plot. -->
+  <string name="domain_plot_shape_option_square">Square</string>
+  <string name="domain_plot_shape_option_circle">Circle</string>
+  <string name="domain_plot_shape_option_point">Point (center only)</string>
+  <!-- How sub-plot sample points are placed within a plot. -->
+  <string name="domain_sub_plot_mode_none">None</string>
+  <string name="domain_sub_plot_mode_center">One at the center</string>
+  <string name="domain_sub_plot_mode_grid">Grid</string>
+  <string name="domain_sub_plot_mode_random">Random</string>
+  <!-- Device to preview a form on. -->
+  <string name="domain_form_preview_target_mobile">Mobile</string>
+  <string name="domain_form_preview_target_web">Web</string>
+  <!-- Question type in the form editor. -->
+  <string name="domain_editor_question_type_text">Short text</string>
+  <string name="domain_editor_question_type_long_text">Paragraph</string>
+  <string name="domain_editor_question_type_number">Number</string>
+  <string name="domain_editor_question_type_photo">Photo</string>
+  <string name="domain_editor_question_type_video">Video</string>
+  <string name="domain_editor_question_type_audio">Audio</string>
+  <string name="domain_editor_question_type_note">Note</string>
+  <!-- How data collectors provide a photo, video, or audio answer. -->
+  <string name="domain_media_source_capture_or_upload">Capture or upload</string>
+  <string name="domain_media_source_capture_or_upload_description">Collectors can use the camera or microphone, or upload an existing file from their device.</string>
+  <string name="domain_media_source_capture_only">Capture only</string>
+  <string name="domain_media_source_capture_only_description">Collectors must take a new photo, video, or recording. Uploading existing files is not allowed.</string>
+  <!-- How data collectors record a location answer. -->
+  <string name="domain_geometry_capture_gps_only">GPS only</string>
+  <string name="domain_geometry_capture_gps_only_description">Collectors record their device's GPS position. Not available on web.</string>
+  <string name="domain_geometry_capture_gps_or_map">GPS or draw on map</string>
+  <string name="domain_geometry_capture_gps_or_map_description">Collectors can use their GPS position or place it on the map. Required for web.</string>
+  <!-- Comparison operator in display logic and status rules; read mid-sentence after a question name, e.g. "age is greater than 5". -->
+  <string name="domain_relevance_operator_equals">equals</string>
+  <string name="domain_relevance_operator_not_equals">does not equal</string>
+  <string name="domain_relevance_operator_greater_than">is greater than</string>
+  <string name="domain_relevance_operator_less_than">is less than</string>
+  <string name="domain_relevance_operator_includes">includes</string>
+  <string name="domain_relevance_operator_is_answered">is answered</string>
+  <!-- Where a choice question's options come from. -->
+  <string name="domain_choice_source_manual">Manual list</string>
+  <!-- Name of a status marker symbol (accessibility label). -->
+  <string name="domain_status_marker_symbol_open">Open circle</string>
+  <string name="domain_status_marker_symbol_half">Half circle</string>
+  <string name="domain_status_marker_symbol_check">Checkmark</string>
+  <string name="domain_status_marker_symbol_alert">Exclamation</string>
+  <string name="domain_status_marker_symbol_cross">Cross</string>
+  <!-- What a map feature status rule checks. -->
+  <string name="domain_status_condition_subject_submissions">Submission count</string>
+  <string name="domain_status_condition_subject_question">Question answer</string>
+  <string name="domain_status_condition_subject_entity_property">Feature property</string>
+  <!-- Data type of a map layer or data table property. -->
+  <string name="domain_editor_property_kind_boolean">Yes / no</string>
+  <!-- Validation rule option for a date question. -->
+  <string name="domain_date_rule_not_in_future">Not in the future</string>
+  <string name="domain_date_rule_not_in_past">Not in the past</string>
+  <string name="domain_date_rule_between">Between two dates</string>
+  <!-- Preset pattern option for validating a text answer. -->
+  <string name="domain_text_pattern_email">Email address</string>
+  <string name="domain_text_pattern_digits">Digits only</string>
+  <string name="domain_text_pattern_letters">Letters only</string>
+  <string name="domain_text_pattern_custom">Custom pattern</string>
+  <!-- Form editor: validation issues shown next to questions and at the top of the form. -->
+  <string name="domain_issue_form_missing_id">Form is missing its ID.</string>
+  <string name="domain_issue_name_required">Name is required.</string>
+  <string name="domain_issue_name_invalid">Name must start with a letter and use only letters, digits, _ . -</string>
+  <!-- %1$s: the question's name (an identifier). -->
+  <string name="domain_issue_name_duplicate">Name "%1$s" is used more than once.</string>
+  <string name="domain_issue_label_empty">Label is empty.</string>
+  <string name="domain_issue_choose_choice_data_table">Choose a data table for the options.</string>
+  <string name="domain_issue_choose_choice_map_layer">Choose a map layer for the options.</string>
+  <!-- %1$s: ID of the map layer or data table that was deleted. -->
+  <string name="domain_issue_choice_dataset_missing">Map layer or data table "%1$s" no longer exists.</string>
+  <!-- %1$s: name of a map layer of generated sample plots. -->
+  <string name="domain_issue_choice_dataset_generated">Sample plots in "%1$s" are generated and can't be added by collectors.</string>
+  <!-- %1$s: name of a map layer. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_map_layer">"%1$s" has no form to add new map features.</string>
+  <!-- %1$s: name of a data table. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_data_table">"%1$s" has no form to add new table rows.</string>
+  <string name="domain_issue_add_choice">Add at least one choice.</string>
+  <string name="domain_issue_choice_value_invalid">Choice values must be non-empty and contain no spaces.</string>
+  <string name="domain_issue_choice_value_duplicate">Choice values must be unique.</string>
+  <string name="domain_issue_display_logic_source_deleted">Display logic refers to a deleted question.</string>
+  <!-- %1$s: name of the question the display logic depends on. -->
+  <string name="domain_issue_display_logic_source_later">Display logic depends on "%1$s", which comes later.</string>
+  <!-- %1$s: name of a question inside a repeated section that display logic outside it depends on. -->
+  <string name="domain_issue_display_logic_source_in_repeat">Display logic depends on "%1$s", which is inside a repeated section.</string>
+  <!-- %1$s: name of a question inside the section whose display logic depends on it. -->
+  <string name="domain_issue_section_display_logic_source_inside">Section display logic can't depend on "%1$s", which is inside the section.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_display_logic_operator_not_applicable">"%1$s" doesn't apply to %2$s.</string>
+  <string name="domain_issue_display_logic_value_missing">Display logic needs a value to compare against.</string>
+  <string name="domain_issue_display_logic_value_not_number">Display logic value must be a number.</string>
+  <string name="domain_issue_cascade_parent_deleted">Cascading filter refers to a deleted question.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_later">Cascading filter depends on "%1$s", which comes later.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_not_choice">Cascading filter parent "%1$s" must be a choice question.</string>
+  <!-- %1$s: comma-separated parent values set on choices; %2$s: name of the parent question. -->
+  <string name="domain_issue_cascade_choice_parent_value_unknown">Choices tied to %1$s never show: "%2$s" has no such choice.</string>
+  <!-- %1$s: question label; %2$s: name of the "GPS or draw on map" option. "Available on web" is a form setting. -->
+  <string name="domain_issue_web_incompatible_geometry">"%1$s" is GPS only, which web can't capture. Choose "%2$s" or turn off Available on web.</string>
+  <!-- %1$s: question label; %2$s: question type (e.g. "Location", "Photo"). "Enable Open in Google Earth" is a form setting. -->
+  <string name="domain_issue_google_earth_incompatible_question">"%1$s" (%2$s) isn't supported in Google Earth. Remove it, change its question type, or turn off Enable Open in Google Earth.</string>
+  <!-- Form editor: validation rule issues of a question. -->
+  <string name="domain_issue_min_not_number">Minimum must be a number.</string>
+  <string name="domain_issue_max_not_number">Maximum must be a number.</string>
+  <string name="domain_issue_min_more_than_max">Minimum can't be more than maximum.</string>
+  <string name="domain_issue_min_length_invalid">Minimum length must be a whole number of 0 or more.</string>
+  <string name="domain_issue_max_length_invalid">Maximum length must be a whole number of 0 or more.</string>
+  <string name="domain_issue_min_length_more_than_max">Minimum length can't be more than maximum.</string>
+  <string name="domain_issue_min_selections_invalid">Minimum number of selections must be a whole number of 0 or more.</string>
+  <string name="domain_issue_max_selections_invalid">Maximum number of selections must be a whole number of 0 or more.</string>
+  <string name="domain_issue_min_selections_more_than_max">Minimum number of selections can't be more than maximum.</string>
+  <string name="domain_issue_min_selections_more_than_choices">Minimum number of selections is more than the number of choices.</string>
+  <string name="domain_issue_custom_pattern_missing">Enter a custom pattern.</string>
+  <string name="domain_issue_custom_pattern_invalid">Custom pattern isn't valid.</string>
+  <string name="domain_issue_custom_pattern_quotes">Custom pattern can't contain both ' and ".</string>
+  <string name="domain_issue_date_range_missing">Pick an earliest or latest date.</string>
+  <string name="domain_issue_date_range_reversed">Earliest date can't be after latest date.</string>
+  <!-- Form editor: summary of a map feature status rule's condition. -->
+  <string name="domain_status_rule_when_submitted">When form is submitted</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="domain_status_rule_min_submissions">
+    <item quantity="one">At least %1$d submission</item>
+    <item quantity="other">At least %1$d submissions</item>
+  </plurals>
+  <string name="domain_status_rule_missing_question">Missing question</string>
+  <!-- Placeholder for a property name in a status rule summary when none is chosen. -->
+  <string name="domain_status_rule_property_fallback">property</string>
+  <!-- Status rule condition without a value. %1$s: question or property name; %2$s: operator (e.g. "is answered"). -->
+  <string name="domain_status_rule_condition">%1$s %2$s</string>
+  <!-- Status rule condition with a value. %1$s: question or property name; %2$s: operator (e.g. "equals"); %3$s: value. -->
+  <string name="domain_status_rule_condition_value">%1$s %2$s "%3$s"</string>
+  <!-- Form editor: issues with how a form updates map features or table rows. -->
+  <string name="domain_issue_save_to_target_missing">Choose the map layer or data table this form updates.</string>
+  <!-- %1$s: ID of the deleted map layer or data table. -->
+  <string name="domain_issue_save_to_target_deleted">The map layer or data table "%1$s" no longer exists.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_map_layer">Name "%1$s" is reserved for the map feature being updated.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_data_table">Name "%1$s" is reserved for the table row being updated.</string>
+  <string name="domain_issue_save_to_id_question_missing_map_layer">Choose the question that identifies the map feature to update.</string>
+  <string name="domain_issue_save_to_id_question_missing_data_table">Choose the question that identifies the table row to update.</string>
+  <string name="domain_issue_save_to_match_property_missing">Choose the property the answer is matched against.</string>
+  <string name="domain_issue_save_to_geometry_question_required">Only a Point, Line, or Polygon question can update a map feature's geometry.</string>
+  <!-- %1$s: property name; %2$s: name of the map layer or data table. -->
+  <string name="domain_issue_save_to_unknown_property">Updates "%1$s", which isn't a property of %2$s.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_not_updatable">"%1$s" can't be updated by a form.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_already_updated">Another question already updates "%1$s".</string>
+  <string name="domain_issue_save_to_no_fields">Choose at least one field to update.</string>
+  <string name="domain_issue_save_to_type_mismatch">%1$s answers may not fit the %2$s property "%3$s".</string>
+  <string name="domain_display_logic_source_deleted">Refers to a deleted question.</string>
+  <string name="domain_display_logic_shown_if_answered">Shown only if "%1$s" is answered.</string>
+  <string name="domain_display_logic_shown_if">Shown only if "%1$s" %2$s %3$s.</string>
+  <string name="domain_issue_status_default_label_missing">Enter a default status label.</string>
+  <string name="domain_issue_status_rule_label_missing">Every status rule needs a status label.</string>
+  <string name="domain_issue_status_rule_min_submissions">Submission count must be at least 1.</string>
+  <string name="domain_issue_status_rule_question_missing">Choose a question for the status rule.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_status_rule_operator_not_applicable">"%1$s" doesn't apply to %2$s in status rule.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_missing">Status rule for "%1$s" needs a value to compare against.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_not_number">Status rule value for "%1$s" must be a number.</string>
+  <string name="domain_issue_status_rule_property_missing_map_layer">Choose a map feature property for the status rule.</string>
+  <string name="domain_issue_status_rule_property_missing_data_table">Choose a table row property for the status rule.</string>
+  <string name="domain_issue_status_rule_property_missing">Choose a feature property for the status rule.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_unwritten">No question writes to property "%1$s" for the status rule.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: property data type in lowercase (e.g. "text"); %3$s: property name. -->
+  <string name="domain_issue_status_rule_property_operator_not_applicable">"%1$s" doesn't apply to %2$s property "%3$s".</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_missing">Status rule for property "%1$s" needs a value to compare against.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_not_number">Status rule value for property "%1$s" must be a number.</string>
+  <!-- Form editor: warnings about a question's link to a standard field (concept). -->
+  <!-- %1$s: ID of a standard field, e.g. "eudr.commodity". -->
+  <string name="domain_warning_concept_not_in_dictionary">Linked to "%1$s", which isn't in this survey's dictionary.</string>
+  <!-- %1$s: standard field name; %2$s: its answer type in lowercase (e.g. "decimal"); %3$s: the question's type in lowercase (e.g. "short text"). -->
+  <string name="domain_warning_concept_type_mismatch">"%1$s" expects %2$s answers, but this is a %3$s question.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_deprecated">"%1$s" is deprecated. Link a current standard field.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_linked_twice">"%1$s" is linked to more than one question in this form.</string>
+  <!-- %1$d: number of choices; %2$s: standard field name; %3$s: comma-separated choice labels. -->
+  <plurals name="domain_warning_concept_unmapped_choices">
+    <item quantity="one">Match %1$d choice to "%2$s" values so answers can be added up: %3$s.</item>
+    <item quantity="other">Match %1$d choices to "%2$s" values so answers can be added up: %3$s.</item>
+  </plurals>
+  <!-- Survey editor: issues in a map layer or data table. -->
+  <string name="domain_issue_dataset_id_invalid">ID must start with a letter and use only letters, digits, _ . -</string>
+  <!-- %1$s: the map layer or data table ID. -->
+  <string name="domain_issue_dataset_id_duplicate">ID "%1$s" is used by another dataset in this survey.</string>
+  <!-- %1$s: property name (an identifier). -->
+  <string name="domain_issue_dataset_property_name_invalid">Property "%1$s" has an invalid name.</string>
+  <string name="domain_issue_dataset_property_name_duplicate">Property names must be unique.</string>
+  <string name="domain_issue_dataset_key_property_missing">Choose a key property.</string>
+  <string name="domain_issue_dataset_label_property_missing">Choose a label property.</string>
+  <!-- %1$s: row or map feature name. -->
+  <string name="domain_issue_dataset_row_key_missing">"%1$s" is missing a key.</string>
+  <!-- %1$s: duplicated key value. -->
+  <string name="domain_issue_dataset_row_key_duplicate">Key "%1$s" is duplicated.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label. -->
+  <string name="domain_issue_dataset_row_value_missing">"%1$s" is missing %2$s.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label; %3$s: expected type in lowercase (e.g. "integer"). -->
+  <string name="domain_issue_dataset_row_value_wrong_type">"%1$s": %2$s must be %3$s.</string>
+  <string name="domain_issue_sharing_organization_missing">"%1$s" needs an organization. Choose one in Survey details or pick another general access option.</string>
+  <!-- %1$s: map feature name; %2$d: minimum number of vertices. -->
+  <plurals name="domain_issue_dataset_row_geometry_too_short">
+    <item quantity="one">"%1$s" needs at least %2$d coordinate.</item>
+    <item quantity="other">"%1$s" needs at least %2$d vertices.</item>
+  </plurals>
+  <!-- Quota and budget limits: why an action is blocked. -->
+  <!-- %1$d: surveys the owner has; %2$d: the limit. -->
+  <string name="domain_quota_max_surveys_per_owner">Maximum surveys per owner limit reached (%1$d of %2$d). Upgrade tier or delete old surveys.</string>
+  <!-- %1$s: budget amount in US dollars, e.g. "$50.00". -->
+  <string name="domain_quota_org_budget_exceeded">Creating another survey would exceed organization monthly budget cap (%1$s).</string>
+  <!-- %1$s: estimated cost in US dollars; %2$s: budget in US dollars. -->
+  <string name="domain_quota_survey_budget_exceeded">Survey design estimated monthly cost (%1$s) exceeds survey monthly budget cap (%2$s).</string>
+  <!-- %1$d: number of forms; %2$d: the limit; %3$s: quota tier name (e.g. "Basic"). -->
+  <plurals name="domain_quota_max_forms">
+    <item quantity="one">Survey contains %1$d form, exceeding the limit of %2$d for %3$s tier.</item>
+    <item quantity="other">Survey contains %1$d forms, exceeding the limit of %2$d for %3$s tier.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_questions">
+    <item quantity="one">Form "%1$s" has %2$d question, exceeding the limit of %3$d.</item>
+    <item quantity="other">Form "%1$s" has %2$d questions, exceeding the limit of %3$d.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of photo questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_photo_questions">
+    <item quantity="one">Form "%1$s" has %2$d photo question, exceeding the limit of %3$d.</item>
+    <item quantity="other">Form "%1$s" has %2$d photo questions, exceeding the limit of %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features; %2$d: the limit. -->
+  <plurals name="domain_quota_max_predefined_entities">
+    <item quantity="one">Survey has %1$d predefined entity, exceeding the limit of %2$d.</item>
+    <item quantity="other">Survey has %1$d predefined entities, exceeding the limit of %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of generated sample plots; %2$d: the limit. -->
+  <plurals name="domain_quota_max_generated_entities">
+    <item quantity="one">Sample design generated %1$d plot, exceeding the limit of %2$d.</item>
+    <item quantity="other">Sample design generated %1$d plots, exceeding the limit of %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of vertices of the survey area; %2$d: the limit. -->
+  <plurals name="domain_quota_max_area_vertices">
+    <item quantity="one">Survey area has %1$d vertex, exceeding the limit of %2$d.</item>
+    <item quantity="other">Survey area has %1$d vertices, exceeding the limit of %2$d.</item>
+  </plurals>
+  <plurals name="domain_quota_max_dataset_polygon_vertices">
+    <item quantity="one">Dataset "%1$s" has a polygon with %2$d vertex, exceeding the limit of %3$d.</item>
+    <item quantity="other">Dataset "%1$s" has a polygon with %2$d vertices, exceeding the limit of %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of collaborators; %2$d: the limit. -->
+  <plurals name="domain_quota_max_collaborators">
+    <item quantity="one">Access control list has %1$d collaborator, exceeding the limit of %2$d.</item>
+    <item quantity="other">Access control list has %1$d collaborators, exceeding the limit of %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of surveys; %2$d: the limit. -->
+  <plurals name="domain_quota_max_surveys_per_user">
+    <item quantity="one">User is active in %1$d survey, exceeding the limit of %2$d.</item>
+    <item quantity="other">User is active in %1$d surveys, exceeding the limit of %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of map features the user added in the field; %2$d: the limit. -->
+  <plurals name="domain_quota_max_adhoc_entities">
+    <item quantity="one">User has created %1$d ad-hoc entity, reaching the limit of %2$d.</item>
+    <item quantity="other">User has created %1$d ad-hoc entities, reaching the limit of %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of submissions; %2$d: the limit. -->
+  <plurals name="domain_quota_max_submissions_per_entity">
+    <item quantity="one">User has recorded %1$d submission for this entity, reaching the limit of %2$d.</item>
+    <item quantity="other">User has recorded %1$d submissions for this entity, reaching the limit of %2$d.</item>
+  </plurals>
+  <!-- Notices shown after a data collector submits a form. -->
+  <!-- %1$s: name of the new map feature. "save_to" is a technical term; keep it as is. -->
+  <string name="domain_notice_entity_created">Created new entity "%1$s" via save_to (✓ Completed)</string>
+  <!-- %1$s: form title; %2$s: GPS coordinates. -->
+  <string name="domain_notice_standalone_submitted">Submitted standalone field log "%1$s" (%2$s)</string>
+  <!-- %1$s: form title; %2$s: map feature name; %3$s: previous status symbol (e.g. ○); %4$s: new status symbol (e.g. ◐); %5$s: new status label (e.g. "In progress"). -->
+  <string name="domain_notice_entity_submitted">Submitted "%1$s" for %2$s (Marker: %3$s → %4$s %5$s)</string>
+  <!-- Geometry summary of a polygon map feature. %1$s: area with unit (e.g. "1.2 ha"); %2$s: perimeter length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_polygon">Polygon • %1$s, %2$s perimeter</string>
+  <!-- Geometry summary of a line map feature. %1$s: length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_line">Line • %1$s</string>
+  <!-- Geometry summary of a point map feature. %1$s: coordinates. -->
+  <string name="domain_geometry_summary_point">Point • %1$s</string>
+  <!-- PDF reports of map features and submissions. -->
+  <!-- Summary of a generated PDF file. %1$d: number of pages; %2$s: file size (e.g. "14 KB"). -->
+  <plurals name="domain_pdf_summary">
+    <item quantity="one">%1$d page • %2$s</item>
+    <item quantity="other">%1$d pages • %2$s</item>
+  </plurals>
+  <!-- PDF page footer. %1$d: page number; %2$d: number of pages. -->
+  <string name="domain_pdf_page_of">Page %1$d of %2$d</string>
+  <string name="domain_pdf_running_header">Open Foris Collect One • %1$s</string>
+  <!-- Caption under a point's location figure. %1$s: latitude; %2$s: longitude. -->
+  <string name="domain_pdf_location_point">Location %1$s, %2$s</string>
+  <!-- Caption under a location figure. %1$s/%2$s: min/max latitude; %3$s/%4$s: min/max longitude. "WGS 84" is a coordinate system name. -->
+  <string name="domain_pdf_bounds">Bounds: lat %1$s to %2$s, lng %3$s to %4$s (WGS 84)</string>
+  <!-- PDF footer of a map feature report. %1$s: map feature type (e.g. "Coffee Parcel"); %2$s: date and time. -->
+  <string name="domain_pdf_entity_footer">%1$s report • Generated %2$s</string>
+  <!-- PDF footer of a submission report. %1$s: date and time. -->
+  <string name="domain_pdf_submission_footer">Submission report • Generated %1$s</string>
+  <!-- PDF subtitle of a submission report. %1$s: date and time collected. -->
+  <string name="domain_pdf_submission_subtitle">Submission • %1$s</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_details">Details</string>
+  <!-- PDF field label: map layer of a map feature. -->
+  <string name="domain_pdf_layer">Layer</string>
+  <!-- PDF field label: geometry summary of a map feature. -->
+  <string name="domain_pdf_geometry">Geometry</string>
+  <!-- PDF field label: geographic identifier of a plot. -->
+  <string name="domain_pdf_geo_id">GeoID</string>
+  <string name="domain_pdf_coordinates">Coordinates</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_location">Location</string>
+  <!-- PDF field label of one vertex of a line or polygon. %1$d: vertex number. -->
+  <string name="domain_pdf_vertex">Vertex %1$d</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_properties">Properties</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_submissions">Submissions</string>
+  <string name="domain_pdf_no_submissions">No submissions recorded yet.</string>
+  <!-- %1$s: data collector name; %2$s: form version. -->
+  <string name="domain_pdf_collected_by">Collected by %1$s • Form version %2$s</string>
+  <!-- Map feature a submission is attached to. %1$s: map feature name; %2$s: map feature type; %3$s: GeoID. -->
+  <string name="domain_pdf_entity_target">%1$s (%2$s • GeoID %3$s)</string>
+  <!-- %1$s: coordinates where the submission was collected. -->
+  <string name="domain_pdf_no_attached_feature_at">No attached map feature (%1$s)</string>
+  <string name="domain_pdf_no_attached_feature">No attached map feature</string>
+  <string name="domain_pdf_data_collector">Data collector</string>
+  <!-- PDF field label: when a submission was collected. -->
+  <string name="domain_pdf_collected">Collected</string>
+  <string name="domain_pdf_form_version">Form version</string>
+  <!-- PDF section heading: answers of a submission. -->
+  <string name="domain_pdf_responses">Responses</string>
+  <string name="domain_pdf_no_responses">No responses recorded.</string>
+  <!-- Status chip of a group of map features in a map cluster, by the marker symbol they share. -->
+  <string name="domain_cluster_marker_status_completed">Completed</string>
+  <string name="domain_cluster_marker_status_in_progress">In progress</string>
+  <string name="domain_cluster_marker_status_pending">Pending</string>
+  <string name="domain_cluster_marker_status_no_marker_symbol">No marker symbol</string>
+  <string name="domain_cluster_marker_status_other_symbol">Symbol %1$s</string>
+  <!-- PDF section heading and labels for Open Foris Whisp risk analysis. -->
+  <string name="domain_pdf_risk_analysis">Risk analysis (Open Foris Whisp)</string>
+  <string name="domain_pdf_risk_intro">Deforestation and land-use risk screening powered by Open Foris Whisp.</string>
+  <string name="domain_pdf_risk_high">High risk</string>
+  <string name="domain_pdf_risk_more_info">More info needed</string>
+  <string name="domain_pdf_risk_low">Low risk</string>
+  <string name="domain_pdf_risk_unknown">Unknown</string>
+  <string name="domain_pdf_risk_yearly_chart">Annual disturbance &amp; loss</string>
+  <string name="domain_pdf_risk_yearly_no_activity">No annual disturbance, forest loss, or fire detected across monitored years.</string>
+  <string name="domain_pdf_risk_cutoff_2020">2020 cutoff</string>
+  <string name="domain_pdf_risk_before_after">Before vs. after 2020</string>
+  <string name="domain_pdf_risk_indicators">Key indicators</string>
+  <string name="domain_pdf_risk_treecover">Tree cover &amp; forest (2020)</string>
+  <string name="domain_pdf_risk_commodities">Commodities &amp; land use</string>
+</resources>

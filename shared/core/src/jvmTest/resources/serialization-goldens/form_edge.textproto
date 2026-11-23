@@ -1,0 +1,143 @@
+form_id: "say \"hi\" \\ back\nslash\ttab ünïcødé 🌳"
+version: "v1"
+default_language: "en"
+model {
+  primary_instance {
+    record_schema {
+      name: "data"
+      fields {
+        name: "height"
+        type: TYPE_DOUBLE
+      }
+      fields {
+        name: "trees"
+        type: TYPE_MESSAGE
+        is_repeated: true
+        fields {
+          name: "dbh"
+          type: TYPE_INT64
+        }
+      }
+    }
+    message_type_name: "m"
+  }
+  secondary_instances {
+    id: "list"
+    rows {
+      fields {
+        key: "name"
+        value {
+          scalar_value {
+            string_value: "a"
+          }
+        }
+      }
+      id: "r1"
+      sort_order: 2
+    }
+  }
+  bindings {
+    field_path: "/data/height"
+    type: TYPE_DOUBLE
+    max_pixels: -5
+    preload: PRELOAD_UID
+  }
+  bindings {
+  }
+  translations {
+    languages {
+      language: "fr"
+      strings {
+        key: "b"
+        value {
+          value: "B"
+        }
+      }
+      strings {
+        key: "a"
+        value {
+        }
+      }
+      strings {
+        key: "c"
+        value {
+          media {
+            image_uri: "x.png"
+          }
+        }
+      }
+    }
+  }
+  actions {
+    events: EVENT_VALUE_CHANGED
+  }
+  actions {
+    literal_value {
+    }
+  }
+  actions {
+    literal_value {
+      int32_value: 0
+    }
+  }
+  actions {
+    literal_value {
+      string_value: "2026-01-02"
+    }
+  }
+  actions {
+    literal_value {
+      string_value: ""
+    }
+  }
+  metadata {
+  }
+  submission {
+    auto_send: true
+  }
+}
+view {
+  components {
+    control {
+      type: CONTROL_RANGE
+      choices {
+        value: "v"
+        properties {
+          key: "z"
+          value: ""
+        }
+        properties {
+          key: "a"
+          value: "1"
+        }
+      }
+      range_config {
+        end: 1.0E21
+        step: 0.1
+        tick_interval: -2.5
+      }
+      intent {
+        parameters {
+          key: "k"
+          value: "v"
+        }
+      }
+      geo_config {
+        accuracy_threshold_meters: 5.0
+      }
+    }
+    id: "c1"
+  }
+  components {
+    group {
+      components {
+        repeat {
+          no_add_remove: true
+        }
+      }
+    }
+  }
+  components {
+  }
+}
+sort_order: -3

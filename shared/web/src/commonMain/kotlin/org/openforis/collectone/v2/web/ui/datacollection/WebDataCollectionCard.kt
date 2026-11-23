@@ -27,18 +27,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CollapseContent
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -52,21 +52,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
 import org.openforis.collectone.v2.app.ui.common.GeoIdText
 import org.openforis.collectone.v2.app.ui.common.PlatformMediaCaptureHandler
+import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionActions
+import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionUiState
 import org.openforis.collectone.v2.app.ui.datacollection.EntityGeometryIcon
 import org.openforis.collectone.v2.app.ui.datacollection.PublicDataInFormBanner
 import org.openforis.collectone.v2.app.ui.datacollection.isWizardStepEntityRef
-import org.openforis.collectone.v2.app.ui.state.DataCollectionUiState
-import org.openforis.collectone.v2.app.ui.viewmodel.DataCollectionActions
+import org.openforis.collectone.v2.app.ui.text.targetTypeText
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
+import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.CompactFocusRequest
 import org.openforis.collectone.v2.core.forms.ui.CompactFormRunner
 import org.openforis.collectone.v2.core.forms.ui.CompactGeometryInput
-import org.openforis.collectone.v2.core.forms.ui.GroundBadgeTone
-import org.openforis.collectone.v2.core.forms.ui.GroundTonalBadge
 import org.openforis.collectone.v2.core.forms.ui.LocalMediaCaptureHandler
+import org.openforis.collectone.v2.core.forms.ui.TonalBadge
+import org.openforis.collectone.v2.core.forms.ui.controls.DropdownMenuItem
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.web.resources.Res
+import org.openforis.collectone.v2.web.resources.web_clear_search
+import org.openforis.collectone.v2.web.resources.web_collapse_form
+import org.openforis.collectone.v2.web.resources.web_collect_data
+import org.openforis.collectone.v2.web.resources.web_completed
+import org.openforis.collectone.v2.web.resources.web_download_survey_kml
+import org.openforis.collectone.v2.web.resources.web_entity_ref_empty
+import org.openforis.collectone.v2.web.resources.web_entity_ref_filter_placeholder
+import org.openforis.collectone.v2.web.resources.web_entity_ref_no_matches
+import org.openforis.collectone.v2.web.resources.web_entity_ref_picker_instructions
+import org.openforis.collectone.v2.web.resources.web_form_menu_summary_new_record
+import org.openforis.collectone.v2.web.resources.web_form_menu_summary_remaining
+import org.openforis.collectone.v2.web.resources.web_form_question_count
+import org.openforis.collectone.v2.web.resources.web_manage_survey
+import org.openforis.collectone.v2.web.resources.web_new_record_at_location
+import org.openforis.collectone.v2.web.resources.web_no_forms_available_on_web
+import org.openforis.collectone.v2.web.resources.web_search_map_features
+import org.openforis.collectone.v2.web.resources.web_select_target_to_begin
+import org.openforis.collectone.v2.web.resources.web_start_a_form
+import org.openforis.collectone.v2.web.resources.web_survey_has_no_forms
+import org.openforis.collectone.v2.web.ui.common.WebFormPanelChrome
 import org.openforis.collectone.v2.web.ui.common.WebHeaderButton
 
 /**
@@ -79,7 +107,8 @@ import org.openforis.collectone.v2.web.ui.common.WebHeaderButton
  *   counterpart of mobile's bottom FAB) with no target feature first show a picker
  *   ([WebEntityRefPicker]): clicking a matching feature on the map, in the left-hand list, or in
  *   the picker's list fills the form's `entityref` and reveals the questions. That step is then
- *   left out of the stack.
+ *   left out of the stack. A matching feature already selected when the form opens fills it right
+ *   away, so the picker is skipped.
  * - Forms opened from a map feature's card (**Collect data** buttons) go straight to the questions.
  * - Geometry questions (`geopoint`, `geotrace`, `geoshape`) are drawn on the main map through
  *   [DataCollectionUiState.webMapDrawing] instead of captured from a device GPS: **Draw on map**
@@ -94,36 +123,36 @@ import org.openforis.collectone.v2.web.ui.common.WebHeaderButton
  * [userGpsCoordinatesLabel] is the collector's current GPS position, shown in the subtitle of a
  * standalone form (one that needs no target feature).
  */
+/**
+ * Display title of the active web data collection form, shared by the card and its collapsed pill.
+ */
+@Composable
+internal fun webDataCollectionFormTitle(uiState: DataCollectionUiState): String =
+  uiState.activeFormWizardController?.formState?.formDef?.title?.takeIf { it.isNotBlank() }
+    ?: uiState.activeDataCollectionForm?.title
+    ?: stringResource(Res.string.web_collect_data)
+
 @Composable
 internal fun WebDataCollectionCard(
   uiState: DataCollectionUiState,
   actions: DataCollectionActions,
   userGpsCoordinatesLabel: String,
   modifier: Modifier = Modifier,
+  onCollapse: (() -> Unit)? = null,
+  onRequestClose: () -> Unit = { actions.closeActiveFormRunner() },
 ) {
   val controller = uiState.activeFormWizardController ?: return
   val form = uiState.activeDataCollectionForm
   val entity = uiState.activeDataCollectionEntity
   val needsEntity = form != null && form.requiresEntity && entity == null
-  val title =
-    controller.formState.formDef.title.takeIf { it.isNotBlank() } ?: form?.title ?: "Collect data"
+  val title = webDataCollectionFormTitle(uiState)
 
-  // Picking a map feature anywhere in the dashboard while the form waits for its target answers the
-  // `entityref` step, the way the mobile Map or List selector does. The feature that happened to be
-  // selected when the form opened doesn't count: the collector has to pick one deliberately.
-  val selected = uiState.selectedEntity
-  val selectionWhenOpened = remember(controller) { uiState.selectedEntityId }
-  LaunchedEffect(selected?.id, needsEntity) {
-    val target = selected ?: return@LaunchedEffect
-    if (
-      needsEntity &&
-        target.id != selectionWhenOpened &&
-        form != null &&
-        target.datasetId == form.targetDatasetId &&
-        uiState.isFormButtonEnabled(target, form)
-    ) {
-      actions.selectEntityRefForActiveForm(target.id)
-    }
+  // The selected map feature answers the `entityref` step, the way the mobile Map or List selector
+  // does: one already selected when the form opens links the form to it right away, and picking
+  // one anywhere in the dashboard while the form waits for its target does the same.
+  val selectionTarget = uiState.entityRefTargetFromSelection
+  LaunchedEffect(controller, selectionTarget?.id) {
+    selectionTarget?.let { actions.selectEntityRefForActiveForm(it.id) }
   }
 
   WebFormPanelChrome(
@@ -131,11 +160,29 @@ internal fun WebDataCollectionCard(
     subtitle =
       when {
         entity != null -> "${entity.label} • ${entity.datasetName}"
-        form != null && !form.requiresEntity -> "New record • $userGpsCoordinatesLabel"
-        form != null -> "Select ${form.targetSingularTypeLabel.lowercase()} to begin"
+        form != null && !form.requiresEntity ->
+          stringResource(Res.string.web_new_record_at_location, userGpsCoordinatesLabel)
+        form != null ->
+          stringResource(
+            Res.string.web_select_target_to_begin,
+            form.targetTypeText.resolve().lowercase(),
+          )
         else -> null
       },
-    onClose = { actions.closeActiveFormRunner() },
+    onClose = onRequestClose,
+    headerAccessory =
+      onCollapse?.let { collapse ->
+        {
+          IconButton(onClick = collapse, modifier = Modifier.size(32.dp)) {
+            Icon(
+              imageVector = Icons.Outlined.CollapseContent,
+              contentDescription = stringResource(Res.string.web_collapse_form),
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(22.dp),
+            )
+          }
+        }
+      },
     modifier = modifier,
   ) {
     if (uiState.isActiveSurveyPublicData) {
@@ -155,7 +202,7 @@ internal fun WebDataCollectionCard(
         CompositionLocalProvider(LocalMediaCaptureHandler provides mediaCaptureHandler) {
           CompactFormRunner(
             controller = controller,
-            onCancel = { actions.closeActiveFormRunner() },
+            onCancel = onRequestClose,
             onSubmitted = { result: FinalizationResult.Success ->
               actions.completeActiveFormSubmission(result.recordInstance, result.entityStates)
             },
@@ -205,7 +252,10 @@ private fun WebEntityRefPicker(
         )
         Text(
           text =
-            "Click a ${form.targetSingularTypeLabel.lowercase()} on the map or in the list to start this form, or pick one below.",
+            stringResource(
+              Res.string.web_entity_ref_picker_instructions,
+              form.targetTypeText.resolve().lowercase(),
+            ),
           style = MaterialTheme.typography.bodySmall,
         )
       }
@@ -218,7 +268,7 @@ private fun WebEntityRefPicker(
       leadingIcon = {
         Icon(
           imageVector = Icons.Outlined.Search,
-          contentDescription = "Search map features",
+          contentDescription = stringResource(Res.string.web_search_map_features),
           modifier = Modifier.size(18.dp),
         )
       },
@@ -227,7 +277,7 @@ private fun WebEntityRefPicker(
           IconButton(onClick = { actions.clearEntityRefSearchQuery() }) {
             Icon(
               imageVector = Icons.Outlined.Close,
-              contentDescription = "Clear search",
+              contentDescription = stringResource(Res.string.web_clear_search),
               modifier = Modifier.size(16.dp),
             )
           }
@@ -235,14 +285,27 @@ private fun WebEntityRefPicker(
       },
       placeholder = {
         Text(
-          text = "Filter ${form.targetDatasetName.lowercase()} ($total)",
+          text =
+            stringResource(
+              Res.string.web_entity_ref_filter_placeholder,
+              form.targetDatasetName.lowercase(),
+              total,
+            ),
           style = MaterialTheme.typography.bodySmall,
         )
       },
     )
     if (candidates.isEmpty()) {
       Text(
-        text = "No matching ${form.targetDatasetName.lowercase()} found.",
+        text =
+          stringResource(
+            if (uiState.entityRefSearchQuery.isBlank()) {
+              Res.string.web_entity_ref_empty
+            } else {
+              Res.string.web_entity_ref_no_matches
+            },
+            form.targetDatasetName.lowercase(),
+          ),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -279,14 +342,16 @@ private fun WebEntityRefPicker(
             )
           }
           if (!isEligible || candidate.hasWorkflowStatus) {
-            GroundTonalBadge(
-              text = if (isEligible) candidate.mapStatusSummaryBadge else "Completed",
+            TonalBadge(
+              text =
+                if (isEligible) candidate.mapStatusSummaryBadge
+                else stringResource(Res.string.web_completed),
               tone =
                 when {
-                  !isEligible -> GroundBadgeTone.NEUTRAL
-                  candidate.markerSymbol == "✓" -> GroundBadgeTone.PRIMARY
-                  candidate.markerSymbol == "◐" -> GroundBadgeTone.TERTIARY
-                  else -> GroundBadgeTone.WARNING
+                  !isEligible -> BadgeTone.NEUTRAL
+                  candidate.markerSymbol == "✓" -> BadgeTone.PRIMARY
+                  candidate.markerSymbol == "◐" -> BadgeTone.TERTIARY
+                  else -> BadgeTone.WARNING
                 },
             )
           }
@@ -300,17 +365,20 @@ private fun WebEntityRefPicker(
  * **Collect data** action for the web dashboard's toolbar: the counterpart of mobile's bottom FAB
  * and its Available Forms sheet. Opens a menu of the survey's forms; choosing one starts it in the
  * right-hand panel via [DataCollectionActions.launchFormFromFab]. Forms whose features are all
- * completed are listed but disabled.
+ * completed are listed but disabled. When [onDownloadSurveyKml] is provided, also offers
+ * downloading the survey's KML balloon forms for Google Earth.
  */
 @Composable
 internal fun WebCollectDataMenuButton(
   uiState: DataCollectionUiState,
   actions: DataCollectionActions,
+  onManageForms: (() -> Unit)? = null,
+  onDownloadSurveyKml: (() -> Unit)? = null,
 ) {
   var expanded by remember { mutableStateOf(false) }
   Box {
     WebHeaderButton(
-      text = "Collect data",
+      text = stringResource(Res.string.web_collect_data),
       icon = Icons.Outlined.Add,
       onClick = { expanded = true },
       tonal = true,
@@ -321,48 +389,15 @@ internal fun WebCollectDataMenuButton(
       modifier = Modifier.widthIn(min = 280.dp, max = 360.dp),
     ) {
       Text(
-        text = "Start a form",
+        text = stringResource(Res.string.web_start_a_form),
         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
       )
       uiState.webForms.forEach { form ->
-        val eligibleCount = uiState.eligibleEntitiesForForm(form).size
-        val canLaunch = !form.requiresEntity || eligibleCount > 0
-        DropdownMenuItem(
-          enabled = canLaunch,
-          text = {
-            Column {
-              Text(
-                text = form.ctaLabel.ifBlank { form.title },
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-              Text(
-                text =
-                  buildString {
-                    append("${form.questionCount} questions")
-                    if (form.requiresEntity) {
-                      append(" • $eligibleCount ${form.targetDatasetName.lowercase()} remaining")
-                    } else {
-                      append(" • new record")
-                    }
-                  },
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-            }
-          },
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Outlined.Description,
-              contentDescription = null,
-              modifier = Modifier.size(18.dp),
-            )
-          },
+        CollectDataFormMenuItem(
+          form = form,
+          eligibleCount = uiState.eligibleEntitiesForForm(form).size,
           onClick = {
             expanded = false
             actions.launchFormFromFab(form.id)
@@ -370,15 +405,137 @@ internal fun WebCollectDataMenuButton(
         )
       }
       if (uiState.webForms.isEmpty()) {
-        Text(
-          text =
-            if (uiState.forms.isEmpty()) "This survey has no forms yet."
-            else "No forms in this survey are available on web.",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        CollectDataEmptyFormsSection(
+          hasAnyForms = uiState.forms.isNotEmpty(),
+          onManageForms = onManageForms,
+          onDismiss = { expanded = false },
         )
       }
+      CollectDataGoogleEarthMenuItems(
+        onDownloadSurveyKml = onDownloadSurveyKml,
+        onDismiss = { expanded = false },
+      )
     }
   }
+}
+
+@Composable
+private fun CollectDataEmptyFormsSection(
+  hasAnyForms: Boolean,
+  onManageForms: (() -> Unit)?,
+  onDismiss: () -> Unit,
+) {
+  Text(
+    text =
+      stringResource(
+        if (hasAnyForms) Res.string.web_no_forms_available_on_web
+        else Res.string.web_survey_has_no_forms
+      ),
+    style = MaterialTheme.typography.bodySmall,
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+  )
+  if (onManageForms != null) {
+    DropdownMenuItem(
+      text = {
+        Text(
+          text = stringResource(Res.string.web_manage_survey),
+          style = MaterialTheme.typography.bodyMedium,
+        )
+      },
+      leadingIcon = {
+        Icon(
+          imageVector = Icons.Outlined.Edit,
+          contentDescription = null,
+          modifier = Modifier.size(18.dp),
+        )
+      },
+      onClick = {
+        onDismiss()
+        onManageForms()
+      },
+    )
+  }
+}
+
+@Composable
+private fun CollectDataFormMenuItem(
+  form: FormPreviewItem,
+  eligibleCount: Int,
+  onClick: () -> Unit,
+) {
+  val canLaunch = !form.requiresEntity || eligibleCount > 0
+  DropdownMenuItem(
+    enabled = canLaunch,
+    text = {
+      Column {
+        Text(
+          text = form.ctaLabel.ifBlank { form.title },
+          style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+          text =
+            pluralStringResource(
+                Res.plurals.web_form_question_count,
+                form.questionCount,
+                form.questionCount,
+              )
+              .let { questions ->
+                if (form.requiresEntity) {
+                  stringResource(
+                    Res.string.web_form_menu_summary_remaining,
+                    questions,
+                    eligibleCount,
+                    form.targetDatasetName.lowercase(),
+                  )
+                } else {
+                  stringResource(Res.string.web_form_menu_summary_new_record, questions)
+                }
+              },
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+    },
+    leadingIcon = {
+      Icon(
+        imageVector = Icons.Outlined.Description,
+        contentDescription = null,
+        modifier = Modifier.size(18.dp),
+      )
+    },
+    onClick = onClick,
+  )
+}
+
+@Composable
+private fun CollectDataGoogleEarthMenuItems(
+  onDownloadSurveyKml: (() -> Unit)?,
+  onDismiss: () -> Unit,
+) {
+  if (onDownloadSurveyKml == null) return
+  HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+  DropdownMenuItem(
+    text = {
+      Text(
+        text = stringResource(Res.string.web_download_survey_kml),
+        style = MaterialTheme.typography.bodyMedium,
+      )
+    },
+    leadingIcon = {
+      Icon(
+        imageVector = Icons.Outlined.Download,
+        contentDescription = null,
+        modifier = Modifier.size(18.dp),
+      )
+    },
+    onClick = {
+      onDismiss()
+      onDownloadSurveyKml()
+    },
+  )
 }

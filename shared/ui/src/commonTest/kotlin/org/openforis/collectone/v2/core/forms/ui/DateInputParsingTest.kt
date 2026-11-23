@@ -19,6 +19,8 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import openforis.collectone.v1.forms.DataType
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_date_invalid
 
 class DateInputParsingTest {
 
@@ -46,7 +48,7 @@ class DateInputParsingTest {
     assertIs<DateInput.Invalid>(parseDateInput("2026-13-01"))
     assertIs<DateInput.Invalid>(parseDateInput("2026-00-10"))
     val invalid = assertIs<DateInput.Invalid>(parseDateInput("not-a-date"))
-    assertEquals("Enter a valid date in YYYY-MM-DD format", invalid.message)
+    assertEquals(FormUiText.Resource(Res.string.forms_date_invalid), invalid.message)
   }
 
   @Test

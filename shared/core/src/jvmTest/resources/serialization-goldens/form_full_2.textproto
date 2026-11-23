@@ -1,0 +1,245 @@
+form_id: "form_id-value"
+title: "title-value"
+version: "version-value"
+default_language: "default_language-value"
+model {
+  primary_instance {
+    record_schema {
+      name: "name-value"
+      title: "title-value"
+      fields {
+        name: "name-value"
+        type: TYPE_STRING
+        is_repeated: true
+        fields {
+          name: "name-value"
+          type: TYPE_STRING
+          is_repeated: true
+          type_name: "type_name-value"
+          id: "id-value"
+          sort_order: 7
+        }
+        type_name: "type_name-value"
+        id: "id-value"
+        sort_order: 7
+      }
+      sms_prefix: "sms_prefix-value"
+      sms_delimiter: "sms_delimiter-value"
+    }
+    default_values {
+      fields {
+        key: "fields-value"
+        value {
+          node_value {
+            fields {
+              key: "fields-value"
+              value {
+                scalar_value {
+                  int64_value: 11
+                }
+              }
+            }
+            id: "id-value"
+            sort_order: 7
+          }
+        }
+      }
+      id: "id-value"
+      sort_order: 7
+    }
+    message_type_name: "message_type_name-value"
+  }
+  secondary_instances {
+    id: "id-value"
+    uri: "uri-value"
+    root_name: "root_name-value"
+    item_name: "item_name-value"
+    rows {
+      fields {
+        key: "fields-value"
+        value {
+          node_value {
+            fields {
+              key: "fields-value"
+              value {
+                scalar_value {
+                  int64_value: 11
+                }
+              }
+            }
+            id: "id-value"
+            sort_order: 7
+          }
+        }
+      }
+      id: "id-value"
+      sort_order: 7
+    }
+    sort_order: 7
+  }
+  bindings {
+    field_path: "field_path-value"
+    type: TYPE_STRING
+    read_only: true
+    relevant_expression: "relevant_expression-value"
+    calculate_expression: "calculate_expression-value"
+    constraint_expression: "constraint_expression-value"
+    required_expression: "required_expression-value"
+    constraint_message: "constraint_message-value"
+    required_message: "required_message-value"
+    sms_tag: "sms_tag-value"
+    entity_saveto: "entity_saveto-value"
+    max_pixels: 7
+    preload: PRELOAD_TIMESTAMP
+    preload_param: "preload_param-value"
+    read_only_expression: "read_only_expression-value"
+    foreign_attributes {
+      namespace_uri: "namespace_uri-value"
+      qualified_name: "qualified_name-value"
+      value: "value-value"
+      id: "id-value"
+    }
+    id: "id-value"
+  }
+  translations {
+    languages {
+      language: "language-value"
+      is_default: true
+      strings {
+        key: "strings-value"
+        value {
+          value: "value-value"
+          short_value: "short_value-value"
+          guidance_value: "guidance_value-value"
+          media {
+            image_uri: "image_uri-value"
+            big_image_uri: "big_image_uri-value"
+            audio_uri: "audio_uri-value"
+            video_uri: "video_uri-value"
+          }
+        }
+      }
+      sort_order: 7
+    }
+  }
+  actions {
+    events: EVENT_INSTANCE_FIRST_LOAD
+    type: ACTION_SET_VALUE
+    target_field: "target_field-value"
+    value_expression: "value_expression-value"
+    id: "id-value"
+    sort_order: 7
+  }
+  entities {
+    dataset: "dataset-value"
+    entity_id_expression: "entity_id_expression-value"
+    label_expression: "label_expression-value"
+    create_condition: "create_condition-value"
+    update_condition: "update_condition-value"
+    sync_metadata {
+      base_version_expression: "base_version_expression-value"
+      trunk_version_expression: "trunk_version_expression-value"
+      branch_id_expression: "branch_id_expression-value"
+    }
+    property_mappings {
+      entity_property: "entity_property-value"
+      source_field_path: "source_field_path-value"
+      id: "id-value"
+    }
+    id: "id-value"
+  }
+  metadata {
+    instance_id: "instance_id-value"
+    start_time {
+      seconds: 1767225600
+      nanos: 125000000
+    }
+    end_time {
+      seconds: 1767225600
+      nanos: 125000000
+    }
+    today {
+      year: 7
+      month: 7
+      day: 7
+    }
+    device_id: "device_id-value"
+    subscriber_id: "subscriber_id-value"
+    sim_serial: "sim_serial-value"
+    phone_number: "phone_number-value"
+    audit_file_uri: "audit_file_uri-value"
+    audit_config {
+      enabled: true
+      location_min_interval_seconds: 7
+      location_max_age_seconds: 7
+      location_priority: "location_priority-value"
+      track_changes: true
+      track_changes_reasons: "track_changes_reasons-value"
+    }
+  }
+  submission {
+    action_url: "action_url-value"
+    method: "method-value"
+    base64_rsa_public_key: "base64_rsa_public_key-value"
+    auto_send: true
+    auto_delete: true
+    client_editable: true
+  }
+}
+view {
+  components {
+    repeat {
+      field_ref: "field_ref-value"
+      label {
+        text: "text-value"
+        text_id: "text_id-value"
+        outputs {
+          placeholder_id: "placeholder_id-value"
+          value_expression: "value_expression-value"
+          id: "id-value"
+        }
+      }
+      appearance: "appearance-value"
+      count_expression: "count_expression-value"
+      no_add_remove: true
+      components {
+        repeat {
+          field_ref: "field_ref-value"
+          label {
+            text: "text-value"
+            text_id: "text_id-value"
+            outputs {
+              placeholder_id: "placeholder_id-value"
+              value_expression: "value_expression-value"
+              id: "id-value"
+            }
+          }
+          appearance: "appearance-value"
+          count_expression: "count_expression-value"
+          no_add_remove: true
+          actions {
+            events: EVENT_INSTANCE_FIRST_LOAD
+            type: ACTION_SET_VALUE
+            target_field: "target_field-value"
+            value_expression: "value_expression-value"
+            id: "id-value"
+            sort_order: 7
+          }
+        }
+        id: "id-value"
+        sort_order: 7
+      }
+      actions {
+        events: EVENT_INSTANCE_FIRST_LOAD
+        type: ACTION_SET_VALUE
+        target_field: "target_field-value"
+        value_expression: "value_expression-value"
+        id: "id-value"
+        sort_order: 7
+      }
+    }
+    id: "id-value"
+    sort_order: 7
+  }
+}
+sort_order: 7

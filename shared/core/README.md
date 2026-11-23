@@ -16,7 +16,7 @@
 
 # Collect One Core Runtime Library (`shared/core`)
 
-`org.openforis.collectone.v2:protoforms` is the pure Kotlin Multiplatform (KMP) domain
+`:shared:core` is the pure Kotlin Multiplatform (KMP) domain
 and form runtime library for Collect One. It has **no UI or Compose
 dependencies** and compiles to **Android/JVM (`jvm`)**, **iOS (`iosArm64`,
 `iosSimulatorArm64`, `iosX64`)**, **WebAssembly (`wasmJs`)**, and **JavaScript
@@ -44,12 +44,12 @@ dependencies** and compiles to **Android/JVM (`jvm`)**, **iOS (`iosArm64`,
 
 ## Building and Running Tests
 
-From `shared/core/`:
+From the repository root:
 
 ```bash
 # Run JVM unit and round-trip tests
-./gradlew jvmTest
+./gradlew :shared:core:jvmTest
 
 # Compile and verify JS and WasmJS targets
-./gradlew check compileKotlinJs compileKotlinWasmJs
+./gradlew :shared:core:compileKotlinJs :shared:core:compileKotlinWasmJs
 ```

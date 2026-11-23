@@ -153,6 +153,37 @@ components {
 }
 ```
 
+### Cascading Selects
+
+A cascading select lists only the choices allowed by an earlier choice question's
+answer (for example, regions filtered by country). The Form editor stores the
+link in two places:
+
+*   `ControlDef.parent_question_key` names the parent question's data name.
+*   Each choice's `parent_value` (the `parent_value` column of the question's
+    choice instance) names the parent choice it belongs to. A choice without a
+    parent value is listed under every parent answer.
+
+The published itemset filters on both, so any XForms runtime lists the right
+rows:
+
+```xpath
+instance('region')/root/item[string-length(parent_value) = 0 or selected(/data/country, parent_value)]
+```
+
+`selected()` makes a select-multiple parent list the choices of every selected
+parent value, and dataset-backed choice lists match on `parent_value`, a column
+named after the parent question, or `parent`. A parent in the child's own repeat
+is addressed as `current()/../country`, so each repeat instance filters on its
+own answer.
+
+When the parent answer changes, the mobile and web runners clear (or, for
+select-multiple children, trim) child answers the new parent answer no longer
+allows, and cascade to grandchildren. XLSForm `choice_filter` cascades without
+a `parent_question_key` are pruned the same way against the engine's filtered
+itemset rows. On import, `<column> = <parent>` and
+`selected(<parent>, <column>)` itemset predicates become editor cascades.
+
 ### Range Configuration
 
 For `RANGE` controls, `RangeConfig` defines the slider behavior:

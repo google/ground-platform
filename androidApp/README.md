@@ -34,16 +34,32 @@ that `androidApp` and [`../iosApp/`](../iosApp/) deliver consistent behavior.
     adaptive launcher icon configuration.
 -   **`src/androidMain/kotlin/org/openforis/collectone/v2/android/MainActivity.kt`**:
     Android `ComponentActivity` that enables edge-to-edge rendering, wires
-    system back navigation, and mounts `MobileScreenHost` inside `GroundTheme`.
+    system back navigation, and mounts `MobileScreenHost` inside `AppTheme`.
+-   **`src/androidMain/kotlin/org/openforis/collectone/v2/android/AndroidGeoLocationSource.kt`**:
+    the device location for location questions, from the platform
+    `LocationManager` without Google Play Services: GPS for precise fixes and
+    the network provider for a quick rough fix, keeping the better and fresher
+    one (`LocationFixSelector`). It listens only while a location question is
+    on screen and the app is visible. `MainActivity` asks for the location
+    permission when the first location question opens, not at launch, and
+    explains why first (`LocationPermissionRationaleDialog` in `shared/mobile`)
+    if the user denied it before. Google's fused location provider would be
+    faster but needs Play Services; it could be added later as an optional
+    build variant behind the same `GeoLocationSource` interface.
+-   **`src/androidMain/kotlin/org/openforis/collectone/v2/android/MobileSyncRuntime.kt`**,
+    **`CollectOneFirebaseMessagingService.kt`**, and **`ScopedSyncWorker.kt`**:
+    Process-wide `AppDataHolder` wiring, Firebase Cloud Messaging (FCM) topic
+    subscription delegate (`survey_<survey_id>_def` and
+    `survey_<survey_id>_entities`), and WorkManager background catch-up worker.
 -   **`src/androidMain/res/`**: Collect One Cloud-Acacia adaptive launcher icon
     vector drawables and mipmap resources.
 
 ## Configuring the Mapbox Access Token
 
-Maps in the mobile UI are rendered by `GroundMap` from
+Maps in the mobile UI are rendered by `AppMap` from
 [`../shared/map/`](../shared/map/) using the Mapbox Maps SDK for Android, and
 place search uses the Mapbox Geocoding API when a public access token (`pk.…`)
-is present. Without a token, `GroundMap` falls back to its built-in preview
+is present. Without a token, `AppMap` falls back to its built-in preview
 renderer (`PreviewMap`).
 
 Keep your Mapbox token in a local `local.properties` file (either
@@ -64,10 +80,10 @@ MAPBOX_ACCESS_TOKEN=pk.your_mapbox_public_token_here
     project property
 -   `MAPBOX_ACCESS_TOKEN` environment variable
 
-## Connecting to the User Data Service
+## Connecting to the Server
 
 The app loads surveys, organizations, and data from the
-[user data service](../server/userDataService/README.md) and doesn't start
+[Collect One server](../server/README.md) and doesn't start
 without one: it shows setup instructions instead. Set the service URL at build
 time (first match wins):
 
@@ -75,8 +91,8 @@ time (first match wins):
 -   `USER_DATA_SERVICE_URL` environment variable
 -   `USER_DATA_SERVICE_URL` in `local.properties` (or `../local.properties`)
 
-For a service running on your machine (`./gradlew run` in
-`server/userDataService/`), the Android emulator reaches the host at
+For a service running on your machine (`./gradlew :server:run` from
+the repository root), the Android emulator reaches the host at
 `10.0.2.2`:
 
 ```properties
@@ -88,32 +104,54 @@ On a physical device, use your machine's LAN address, or forward the port with
 allow plain `http://` URLs; release builds require `https://`, such as a Cloud
 Run deployment.
 
+## Configuring Firebase Cloud Messaging (Optional)
+
+When Firebase is configured, the mobile app subscribes to two FCM topics per
+downloaded survey (`survey_<survey_id>_def` and `survey_<survey_id>_entities`)
+and suppresses idle 3-second foreground polling, relying on silent FCM data
+tickles (plus foreground resume and connectivity-restore catch-up) to fetch
+scoped deltas. When Firebase is not configured, the app automatically falls back
+to foreground polling.
+
+To keep the repository free of committed `google-services.json` files or API
+keys, pass `FIREBASE_WEB_CONFIG` (the same JSON object used by `webApp` and
+`mobileWebApp`, containing `projectId`, `appId`, `apiKey`, and
+`messagingSenderId`) via `local.properties`, a `-PFIREBASE_WEB_CONFIG=…` Gradle
+property, or the `FIREBASE_WEB_CONFIG` environment variable:
+
+```properties
+FIREBASE_WEB_CONFIG={"projectId":"your-firebase-project","appId":"1:1234567890:android:abcdef","apiKey":"your-api-key","messagingSenderId":"1234567890"}
+```
+
+`MobileSyncRuntime` initializes `FirebaseApp` at startup from this configuration
+whenever no default `FirebaseApp` is already initialized.
+
 ## Building and Installing
 
-Run Gradle commands from `androidApp/`:
+Run Gradle commands from the repository root:
 
 ### Build a Debug APK
 
 ```sh
-./gradlew assembleDebug
+./gradlew :androidApp:assembleDebug
 ```
 
-Output: `build/outputs/apk/debug/androidApp-debug.apk`
+Output: `androidApp/build/outputs/apk/debug/androidApp-debug.apk`
 
 To install directly onto a connected Android device or running emulator:
 
 ```sh
-./gradlew installDebug
+./gradlew :androidApp:installDebug
 ```
 
 ### Build Android App Bundles (`.aab`)
 
 ```sh
 # Debug app bundle
-./gradlew bundleDebug
+./gradlew :androidApp:bundleDebug
 
 # Release app bundle (signed with debug key for internal testing)
-./gradlew bundleRelease
+./gradlew :androidApp:bundleRelease
 ```
 
 Outputs:

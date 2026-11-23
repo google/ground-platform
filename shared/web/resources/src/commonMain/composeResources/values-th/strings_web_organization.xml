@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Web console: organizations directory, organization page, and organization library. -->
+<resources>
+  <!-- Common actions -->
+  <string name="org_cancel">ยกเลิก</string>
+  <string name="org_save">บันทึก</string>
+  <string name="org_close">ปิด</string>
+  <string name="org_ok">ตกลง</string>
+  <string name="org_discard">ทิ้ง</string>
+  <string name="org_dismiss">ปิด</string>
+  <string name="org_show">แสดง</string>
+  <string name="org_hide">ซ่อน</string>
+  <!-- Empty choice in a dropdown, e.g. no impact pillar. -->
+  <string name="org_none">ไม่มี</string>
+  <string name="org_clear_search">ล้างการค้นหา</string>
+  <!-- Screen reader label of an edit button. %1$s: name of the item, e.g. an imagery source or template. -->
+  <string name="org_edit_item">แก้ไข %1$s</string>
+  <!-- Screen reader label of a delete button. %1$s: name of the library item. -->
+  <string name="org_delete_item">ลบ %1$s</string>
+  <!-- Confirmation dialog title. %1$s: name of the organization, template, or purpose. -->
+  <string name="org_delete_item_title">ลบ %1$s ใช่ไหม</string>
+
+  <!-- Relation badges on organization cards -->
+  <string name="org_relation_manager">คุณเป็นผู้จัดการ</string>
+  <string name="org_relation_member">สมาชิก</string>
+  <string name="org_relation_invited">ได้รับเชิญ</string>
+  <string name="org_relation_requested">ขอเข้าร่วมแล้ว</string>
+  <string name="org_badge_synthetic">ข้อมูลสังเคราะห์</string>
+
+  <!-- Organization counts, joined with " · " -->
+  <plurals name="org_count_members">
+    <item quantity="other">สมาชิก %1$d คน</item>
+  </plurals>
+  <plurals name="org_count_surveys">
+    <item quantity="other">แบบสำรวจ %1$d รายการ</item>
+  </plurals>
+  <!-- %1$d: number of imagery sources. -->
+  <string name="org_count_imagery">ภาพแผนที่ %1$d แหล่ง</string>
+  <!-- Pending requests to join the organization. -->
+  <plurals name="org_count_requests">
+    <item quantity="other">คำขอ %1$d รายการ</item>
+  </plurals>
+  <!-- Shown after the counts when the organization isn't listed in the directory. -->
+  <string name="org_unlisted">ไม่แสดงสาธารณะ</string>
+
+  <!-- Organizations directory -->
+  <string name="org_back_to_surveys">กลับไปที่แบบสำรวจ</string>
+  <string name="org_organizations_title">องค์กร</string>
+  <!-- Header summary. %1$d: organizations the user belongs to; %2$d: all organizations. -->
+  <string name="org_directory_summary">ของคุณ %1$d · ทั้งหมด %2$d</string>
+  <string name="org_admin_panel">แผงผู้ดูแลระบบ</string>
+  <!-- Header button that opens the Impact page. -->
+  <string name="org_impact">ผลกระทบ</string>
+  <string name="org_create_organization">สร้างองค์กร</string>
+  <string name="org_search_placeholder">ค้นหาองค์กร</string>
+  <string name="org_section_yours">องค์กรของคุณ</string>
+  <string name="org_section_yours_empty">คุณยังไม่ได้เป็นสมาชิกขององค์กรใด สร้างองค์กรใหม่ หรือขอเข้าร่วมองค์กรด้านล่าง</string>
+  <string name="org_section_yours_no_matches">ไม่มีองค์กรของคุณที่ตรงกับการค้นหา</string>
+  <string name="org_section_others">องค์กรอื่นๆ</string>
+  <string name="org_section_others_empty">ไม่มีองค์กรอื่นที่แสดงในไดเรกทอรี</string>
+  <string name="org_section_others_no_matches">ไม่มีองค์กรอื่นที่ตรงกับการค้นหา</string>
+  <string name="org_no_description">ยังไม่มีคำอธิบาย</string>
+  <!-- Card summary of the platform-wide "All users" organization. %1$d: number of imagery sources. -->
+  <plurals name="org_card_all_users_summary">
+    <item quantity="other">ผู้ใช้ทั้งหมด · แหล่งภาพแผนที่ %1$d แหล่ง</item>
+  </plurals>
+  <string name="org_request_to_join">ขอเข้าร่วม</string>
+
+  <!-- Create organization dialog -->
+  <string name="org_field_name">ชื่อองค์กร</string>
+  <string name="org_field_description">คำอธิบาย</string>
+  <string name="org_list_in_directory">แสดงในไดเรกทอรี</string>
+  <string name="org_create_listed_help">ทุกคนสามารถค้นหาองค์กร ขอเข้าร่วม และติดตามตัวเลขผลกระทบที่เผยแพร่ได้ องค์กรที่ไม่แสดงสาธารณะจะเข้าร่วมได้เฉพาะผู้ที่ได้รับเชิญเท่านั้น</string>
+  <string name="org_create_manager_help">คุณจะเป็นผู้จัดการคนแรกขององค์กรนี้ ผู้จัดการสามารถแก้ไของค์กร จัดการสมาชิก และจัดการแบบสำรวจทั้งหมดขององค์กรได้</string>
+  <string name="org_create_publish_help">ทุกองค์กรจะเผยแพร่ยอดรวมแบบไม่ระบุตัวตนจากแบบสำรวจของตน เช่น จำนวนเฮกตาร์ที่ทำแผนที่แล้ว ให้ทุกคนที่ลงชื่อเข้าใช้ Collect One เห็น โดยจะไม่เผยแพร่การส่งข้อมูล ฟีเจอร์แผนที่ ตำแหน่ง และคำตอบเด็ดขาด</string>
+  <string name="org_create">สร้าง</string>
+
+  <!-- Organization type and country fields -->
+  <!-- Organization type field label. -->
+  <string name="org_field_type">ประเภท</string>
+  <string name="org_field_country">ประเทศ</string>
+  <string name="org_country_search_placeholder">ค้นหาตามชื่อหรือรหัส</string>
+  <string name="org_country_no_matches">ไม่มีประเทศที่ตรงกัน</string>
+  <!-- Value of an optional organization type or country that hasn't been set. -->
+  <string name="org_not_specified">ไม่ได้ระบุ</string>
+
+  <!-- Organization page sections (left panel) -->
+  <string name="org_tab_details">รายละเอียดองค์กร</string>
+  <string name="org_tab_surveys">แบบสำรวจ</string>
+  <string name="org_tab_members">สมาชิก</string>
+  <string name="org_tab_imagery">ภาพแผนที่</string>
+  <string name="org_tab_purposes">วัตถุประสงค์</string>
+  <string name="org_tab_dictionary">พจนานุกรม</string>
+  <string name="org_tab_templates">เทมเพลต</string>
+  <string name="org_tab_cost_controls">การควบคุมค่าใช้จ่าย</string>
+  <string name="org_tab_cost_tracking">การติดตามค่าใช้จ่าย</string>
+  <!-- Members section of the platform-wide "All users" organization. -->
+  <string name="org_platform_admins">ผู้ดูแลแพลตฟอร์ม</string>
+  <string name="org_nav_global_library">คลังส่วนกลาง</string>
+  <string name="org_nav_cost_quotas">ค่าใช้จ่ายและโควต้า</string>
+  <string name="org_nav_governance">ธรรมาภิบาล</string>
+
+  <!-- Organization page header -->
+  <string name="org_back_to_organizations">กลับไปที่องค์กร</string>
+  <!-- Label saying that the page is an organization. -->
+  <string name="org_organization_label">องค์กร</string>
+  <string name="org_view_impact">ดูผลกระทบ</string>
+  <string name="org_create_survey">สร้างแบบสำรวจ</string>
+  <string name="org_admin_panel_subtitle">การดูแลแพลตฟอร์มและคลังส่วนกลาง</string>
+
+  <!-- Section subtitles. %1$s: organization name. -->
+  <string name="org_details_subtitle_manager">วิธีที่ %1$s แสดงต่อสมาชิกและในไดเรกทอรี เฉพาะผู้จัดการเท่านั้นที่เปลี่ยนแปลงข้อมูลเหล่านี้ได้</string>
+  <string name="org_details_subtitle_member">วิธีที่ %1$s แสดงต่อสมาชิกและในไดเรกทอรี ขอให้ผู้จัดการเปลี่ยนแปลงข้อมูลเหล่านี้</string>
+  <string name="org_surveys_subtitle_manager">แบบสำรวจที่ดำเนินการในนามของ %1$s ในฐานะผู้จัดการ คุณสามารถแก้ไขแบบสำรวจทั้งหมด จัดการการแชร์ และส่งออกข้อมูลได้</string>
+  <string name="org_surveys_subtitle_member">แบบสำรวจที่ดำเนินการในนามของ %1$s เปิดแบบสำรวจเพื่อดูสิ่งที่คุณทำได้</string>
+  <string name="org_members_subtitle_admins">ผู้ดูแลแพลตฟอร์มที่จัดการภาพแผนที่ วัตถุประสงค์ เทมเพลต และแนวคิดในพจนานุกรมส่วนกลาง</string>
+  <string name="org_members_subtitle">บุคคลที่สังกัด %1$s ผู้จัดการดูแลองค์กรและแบบสำรวจทั้งหมดขององค์กร ส่วนสมาชิกสามารถสร้างแบบสำรวจในองค์กรได้</string>
+  <string name="org_imagery_subtitle_admins">ชั้นข้อมูลภาพแผนที่ฐานที่กำหนดเอง ซึ่งผู้ใช้ Collect One ทุกคนใช้ได้ในทุกแบบสำรวจ ผ่านกล่องโต้ตอบชั้นข้อมูลแผนที่ฐานบนมือถือและเว็บ</string>
+  <string name="org_imagery_subtitle_manager">ชั้นข้อมูลภาพแผนที่ฐานที่กำหนดเอง ซึ่งใช้ได้ในกล่องโต้ตอบชั้นข้อมูลแผนที่ฐานบนมือถือและเว็บสำหรับแบบสำรวจใน %1$s</string>
+  <string name="org_imagery_subtitle_member">ชั้นข้อมูลภาพแผนที่ฐานที่กำหนดเองซึ่งตั้งค่าไว้สำหรับแบบสำรวจใน %1$s ขอให้ผู้จัดการเพิ่มหรือเปลี่ยนแหล่งภาพแผนที่</string>
+  <string name="org_purposes_subtitle_admins">ตัวเลือกที่ทุกองค์กรเห็นสำหรับคำถาม "ข้อมูลนี้จะนำไปใช้ทำอะไร" เมื่อสร้างแบบสำรวจ แต่ละวัตถุประสงค์จะเพิ่มเทมเพลตของตนลงในแบบสำรวจใหม่</string>
+  <string name="org_purposes_subtitle">ตัวเลือกสำหรับคำถาม "ข้อมูลนี้จะนำไปใช้ทำอะไร" เมื่อสร้างแบบสำรวจใน %1$s โดยแสดงวัตถุประสงค์ขององค์กรก่อน แล้วตามด้วยวัตถุประสงค์ส่วนกลาง</string>
+  <string name="org_dictionary_subtitle_admins">แนวคิดส่วนกลาง: ฟิลด์มาตรฐานที่เชื่อมโยงคำถามในแบบฟอร์มเข้ากับความหมายร่วมกัน เพื่อให้เปรียบเทียบและรวมคำตอบข้ามแบบสำรวจและภาษาได้</string>
+  <string name="org_dictionary_subtitle">แนวคิดที่ใช้ได้กับแบบสำรวจใน %1$s: ฟิลด์มาตรฐานที่ให้ความหมายร่วมกันแก่คำถามในแบบฟอร์ม เพื่อให้เปรียบเทียบและรวมคำตอบได้</string>
+  <string name="org_templates_subtitle_admins">เทมเพลตแบบฟอร์มส่วนกลางที่ทุกองค์กรเพิ่มลงในแบบสำรวจของตนได้</string>
+  <string name="org_templates_subtitle">เทมเพลตแบบฟอร์มที่ใช้ได้กับแบบสำรวจใน %1$s โดยแสดงเทมเพลตขององค์กรก่อน แล้วตามด้วยเทมเพลตส่วนกลาง</string>
+  <string name="org_cost_controls_title_global">การควบคุมค่าใช้จ่ายและโควต้าส่วนกลาง</string>
+  <string name="org_cost_controls_subtitle_global">ขีดจำกัดโควต้าเริ่มต้นและน้ำหนักต้นทุนต่อหน่วยทั่วทั้งแพลตฟอร์ม ซึ่งใช้กับองค์กรและแบบสำรวจ</string>
+  <string name="org_cost_controls_subtitle_manager">เพดานงบประมาณและขีดจำกัดโควต้าสำหรับ %1$s กำหนดค่าระดับที่ตั้งไว้ล่วงหน้าหรือขีดจำกัดทรัพยากรแบบละเอียด</string>
+  <string name="org_cost_controls_subtitle_member">เพดานงบประมาณและขีดจำกัดโควต้าสำหรับ %1$s ขอให้ผู้จัดการองค์กรปรับขีดจำกัดเหล่านี้</string>
+  <string name="org_cost_tracking_title">การติดตามค่าใช้จ่ายของแพลตฟอร์ม</string>
+  <string name="org_cost_tracking_subtitle">การบัญชีต้นทุนแบบเรียลไทม์ สรุปการใช้ทรัพยากร และรายละเอียดการปฏิบัติตามงบประมาณขององค์กร แบบสำรวจ และผู้ใช้</string>
+
+  <!-- Missing organization -->
+  <string name="org_missing_title">ไม่มีองค์กรนี้</string>
+  <string name="org_missing_body">องค์กรอาจถูกลบไปแล้ว หรือลิงก์ไม่ถูกต้อง</string>
+
+  <!-- Surveys section -->
+  <!-- %1$s: organization name. -->
+  <string name="org_surveys_empty_member">ยังไม่มีแบบสำรวจ สร้างแบบสำรวจแรกสำหรับ %1$s</string>
+  <string name="org_surveys_empty">ยังไม่มีแบบสำรวจ</string>
+
+  <!-- Members section -->
+  <!-- Name of the list where Managers see the name and photo an invitee accepts with; completes "…shown on the <list>". -->
+  <string name="org_members_page_name">หน้าสมาชิก</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_leave_title">ออกจาก %1$s ใช่ไหม</string>
+  <string name="org_leave_body">คุณจะเสียสิทธิ์เข้าถึงแบบสำรวจขององค์กร เว้นแต่จะมีการแชร์แบบสำรวจกับคุณโดยตรง แบบสำรวจที่คุณเป็นเจ้าของจะยังคงเป็นของคุณ</string>
+  <string name="org_leave">ออก</string>
+  <string name="org_leave_organization">ออกจากองค์กร</string>
+  <string name="org_members_requests_title">คำขอเข้าร่วม</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_members_requests_body">บุคคลที่พบ %1$s ในไดเรกทอรีและขอเข้าร่วม</string>
+  <string name="org_members_asked_to_join">ขอเข้าร่วม</string>
+  <!-- Badge on a person who asked to join. -->
+  <string name="org_members_requested">ส่งคำขอแล้ว</string>
+  <string name="org_decline">ปฏิเสธ</string>
+  <string name="org_approve">อนุมัติ</string>
+  <string name="org_members_admins_help">ผู้ดูแลแพลตฟอร์มจัดการคลังส่วนกลาง แหล่งภาพแผนที่ของแพลตฟอร์ม และการตั้งค่าแพลตฟอร์ม</string>
+  <!-- The signed-in user in the members list. %1$s: their name. -->
+  <string name="org_member_you">%1$s (คุณ)</string>
+  <!-- Member role field label. -->
+  <string name="org_field_role">บทบาท</string>
+  <!-- Screen reader label. %1$s: name of the member to remove. -->
+  <string name="org_remove_member">นำ %1$s ออก</string>
+  <string name="org_members_manager_help">องค์กรต้องมีผู้จัดการอย่างน้อยหนึ่งคนเสมอ ชื่อและรูปภาพมาจากบัญชีของแต่ละคนเมื่อยอมรับคำเชิญ</string>
+  <!-- Section heading listing pending invites. -->
+  <string name="org_members_invited_title">ได้รับเชิญ</string>
+  <!-- %1$s: the invited role, e.g. Manager. -->
+  <string name="org_members_invite_pending">กำลังรอให้ยอมรับลิงก์คำเชิญ · %1$s</string>
+  <!-- Screen reader label. %1$s: email address of the invitee. -->
+  <string name="org_revoke_invite">เพิกถอนคำเชิญสำหรับ %1$s</string>
+  <string name="org_invite_label">เชิญบุคคลทางอีเมล</string>
+  <string name="org_invite">เชิญ</string>
+
+  <!-- Details section -->
+  <string name="org_published_title">ตัวเลขผลกระทบที่เผยแพร่</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_manager">ในฐานะผู้จัดการของ %1$s คุณเผยแพร่ยอดรวมแบบไม่ระบุตัวตนจากแบบสำรวจขององค์กร</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_member">%1$s เผยแพร่ยอดรวมแบบไม่ระบุตัวตนจากแบบสำรวจขององค์กร</string>
+  <!-- %1$s: a sentence stating what is never published. -->
+  <string name="org_published_body">ทุกคนที่ลงชื่อเข้าใช้ Collect One สามารถติดตามผลรวมจากแบบสำรวจของคุณ เช่น จำนวนเฮกตาร์ที่ทำแผนที่และวิธีการนำข้อมูลไปใช้ ได้ในหน้าผลกระทบ %1$s</string>
+  <string name="org_published_see">ดูสิ่งที่เผยแพร่</string>
+  <string name="org_platform_numbers_title">ตัวเลขทั่วทั้งแพลตฟอร์ม</string>
+  <string name="org_platform_numbers_exclude">ไม่นับข้อมูลของเราในยอดรวมของแพลตฟอร์ม</string>
+  <string name="org_platform_numbers_help">แบบสำรวจของคุณยังคงนับรวมในตัวเลขผลกระทบของคุณเอง มีเพียงยอดรวมของ Collect One ทั้งหมดเท่านั้นที่จะไม่นับรวม</string>
+  <string name="org_ask_manager_change">ขอให้ผู้จัดการเปลี่ยนแปลงการตั้งค่านี้</string>
+  <string name="org_profile_title">โปรไฟล์</string>
+  <string name="org_field_logo">โลโก้องค์กร</string>
+  <string name="org_details_logo_help">PNG, JPG, WebP หรือ SVG แสดงบนการ์ดและส่วนหัวขององค์กร</string>
+  <string name="org_logo_upload">อัปโหลดโลโก้</string>
+  <string name="org_logo_change">เปลี่ยนโลโก้</string>
+  <string name="org_logo_remove">ลบออก</string>
+  <!-- Shown under an empty organization name field. -->
+  <string name="org_details_name_required">ป้อนชื่อ</string>
+  <string name="org_details_description_help">แสดงในไดเรกทอรีและในหน้าแบบสำรวจ</string>
+  <string name="org_field_website">เว็บไซต์</string>
+  <string name="org_details_listed_help">ทุกคนสามารถค้นหาองค์กรและขอเข้าร่วมได้ องค์กรที่ไม่แสดงสาธารณะจะเข้าร่วมได้เฉพาะผู้ที่ได้รับเชิญเท่านั้น</string>
+  <string name="org_unsaved_changes">มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก</string>
+  <!-- Organization name label on the read-only details. -->
+  <string name="org_field_name_short">ชื่อ</string>
+  <!-- Shown when the organization has no website. -->
+  <string name="org_not_provided">ไม่ได้ระบุ</string>
+  <!-- Directory listing label on the read-only details. -->
+  <string name="org_field_directory">ไดเรกทอรี</string>
+  <string name="org_directory_listed">แสดงในไดเรกทอรี · ทุกคนค้นหาและขอเข้าร่วมได้</string>
+  <string name="org_directory_unlisted">ไม่แสดงสาธารณะ · เฉพาะผู้ที่ได้รับเชิญ</string>
+  <!-- %1$d: number of surveys in the organization. -->
+  <plurals name="org_delete_body_surveys">
+    <item quantity="other">สมาชิกจะสิ้นสุดการสังกัด แบบสำรวจ %1$d รายการขององค์กรจะกลายเป็นแบบสำรวจส่วนตัวของเจ้าของ โดยไม่มีข้อมูลใดถูกลบ</item>
+  </plurals>
+  <string name="org_delete_body_no_surveys">สมาชิกจะสิ้นสุดการสังกัด องค์กรนี้ไม่มีแบบสำรวจ</string>
+  <string name="org_delete_organization">ลบองค์กร</string>
+  <string name="org_danger_zone">โซนอันตราย</string>
+  <string name="org_danger_zone_body">การลบองค์กรจะยกเลิกการสังกัดของทุกคน แบบสำรวจขององค์กรจะกลายเป็นแบบสำรวจส่วนตัวของเจ้าของและยังคงเก็บข้อมูลไว้ทั้งหมด</string>
+
+  <!-- Imagery section -->
+  <string name="org_imagery_configured_title">แหล่งภาพแผนที่ที่ตั้งค่าไว้</string>
+  <string name="org_imagery_empty_manager">ยังไม่ได้ตั้งค่าแหล่งภาพแผนที่ เพิ่ม URL ไทล์ XYZ ด้านล่างเพื่อให้เปิด/ปิดได้ในกล่องโต้ตอบชั้นข้อมูลแผนที่ฐาน</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_imagery_empty_member">ไม่มีแหล่งภาพแผนที่ที่ตั้งค่าไว้สำหรับ %1$s</string>
+  <string name="org_imagery_source_name">ชื่อแหล่งภาพแผนที่</string>
+  <!-- Example imagery source name. -->
+  <string name="org_imagery_source_name_placeholder">เช่น OpenTopoMap Contours</string>
+  <string name="org_imagery_url">URL ไทล์ XYZ</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_edit">ต้องมีตัวยึดตำแหน่งไทล์ {z}, {x} และ {y}</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_add">เทมเพลต URL ไทล์แรสเตอร์ Web Mercator ที่มีตัวยึดตำแหน่ง {z}, {x} และ {y}</string>
+  <string name="org_imagery_offline_title">อนุญาตให้ดาวน์โหลดแบบออฟไลน์บนมือถือ</string>
+  <string name="org_imagery_offline_help_edit">อนุญาตให้ผู้เก็บข้อมูลดาวน์โหลดไทล์จากแหล่งนี้เพื่อใช้งานภาคสนามแบบออฟไลน์</string>
+  <string name="org_imagery_offline_help_add">อนุญาตให้ผู้เก็บข้อมูลบนอุปกรณ์มือถือดาวน์โหลดไทล์จากแหล่ง XYZ นี้เพื่อใช้งานภาคสนามแบบออฟไลน์</string>
+  <string name="org_imagery_offline_allowed">ผู้เก็บข้อมูลสามารถดาวน์โหลดไทล์จากแหล่งนี้ลงในอุปกรณ์มือถือได้</string>
+  <string name="org_imagery_offline_disabled">สตรีมแบบออนไลน์เท่านั้น ปิดใช้การดาวน์โหลดไทล์แบบออฟไลน์บนมือถือ</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_permitted">อนุญาต</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_not_permitted">ไม่อนุญาต</string>
+  <!-- Screen reader label. %1$s: name of the imagery source to remove. -->
+  <string name="org_remove_imagery_source">นำ %1$s ออก</string>
+  <string name="org_imagery_add">เพิ่มแหล่งภาพแผนที่</string>
+  <string name="org_imagery_add_body">เพิ่มบริการไทล์แรสเตอร์ที่ผู้เก็บข้อมูลและผู้จัดทำสามารถเปิดใช้ได้ในกล่องโต้ตอบชั้นข้อมูลแผนที่ฐาน</string>
+  <string name="org_imagery_source_type">ประเภทแหล่งภาพแผนที่</string>
+  <string name="org_imagery_ee_preset">ค่าที่กำหนดไว้ล่วงหน้าของ Earth Engine</string>
+  <string name="org_imagery_ee_preset_placeholder">เลือกค่าที่กำหนดไว้ล่วงหน้า…</string>
+  <string name="org_imagery_ee_description">คำนวณโดย Earth Engine · ไทล์จะรีเฟรชอัตโนมัติ</string>
+
+  <!-- Cost controls section -->
+  <string name="org_quota_tier_title">ระดับโควต้าที่ตั้งไว้ล่วงหน้า</string>
+  <string name="org_quota_tier_body">ใช้ค่าเริ่มต้นของระดับบริการมาตรฐาน หรือกำหนดโควต้าทรัพยากรแต่ละรายการด้านล่าง</string>
+  <string name="org_quota_tier_inherit">ใช้ค่าส่วนกลาง</string>
+  <string name="org_quota_tier_basic">ระดับพื้นฐาน</string>
+  <string name="org_quota_tier_sponsored">ระดับที่ได้รับการสนับสนุน</string>
+  <string name="org_budget_title">เพดานงบประมาณรายเดือน</string>
+  <string name="org_budget_body">ขีดจำกัดสูงสุดเป็น USD สำหรับค่าใช้จ่ายโดยประมาณของแบบสำรวจและการเก็บข้อมูล ป้อน 0 หากไม่จำกัดงบประมาณ</string>
+  <string name="org_budget_field">เพดานงบประมาณรายเดือน ($ USD)</string>
+  <string name="org_budget_placeholder">0.00 (ไม่จำกัด)</string>
+  <string name="org_limits_survey_title">ขีดจำกัดของแบบสำรวจและแบบฟอร์ม</string>
+  <string name="org_limit_surveys_per_owner">แบบสำรวจสูงสุด / เจ้าของ</string>
+  <string name="org_limit_forms_per_survey">แบบฟอร์มสูงสุด / แบบสำรวจ</string>
+  <string name="org_limit_questions_per_form">คำถามสูงสุด / แบบฟอร์ม</string>
+  <string name="org_limit_photo_questions_per_form">คำถามรูปภาพสูงสุด / แบบฟอร์ม</string>
+  <string name="org_limit_predefined_entities">เอนทิตีที่กำหนดไว้ล่วงหน้าสูงสุด</string>
+  <string name="org_limit_sample_plots">แปลงตัวอย่างสูงสุด</string>
+  <string name="org_limit_boundary_vertices">จุดยอดขอบเขตสูงสุด</string>
+  <string name="org_limit_acl_collaborators">ผู้ทำงานร่วมกันใน ACL สูงสุด</string>
+  <string name="org_limits_collector_title">ขีดจำกัดของผู้เก็บข้อมูลและการส่งข้อมูล</string>
+  <string name="org_limit_active_surveys_per_user">แบบสำรวจที่ใช้งานอยู่สูงสุด / ผู้ใช้</string>
+  <string name="org_limit_adhoc_features_per_user">ฟีเจอร์เฉพาะกิจสูงสุด / ผู้ใช้</string>
+  <string name="org_limit_submissions_per_feature">การส่งข้อมูลสูงสุด / ฟีเจอร์ / ผู้ใช้</string>
+  <string name="org_cost_weights_title">น้ำหนักต้นทุนต่อหน่วยของแพลตฟอร์ม ($ USD)</string>
+  <string name="org_cost_weight_survey_month">USD / แบบสำรวจ / เดือน</string>
+  <string name="org_cost_weight_entities">USD / 1,000 เอนทิตี</string>
+  <string name="org_cost_weight_submissions">USD / 1,000 การส่งข้อมูล</string>
+  <string name="org_cost_weight_photo">USD / รูปภาพ</string>
+  <string name="org_cost_controls_save">บันทึกการควบคุมค่าใช้จ่าย</string>
+  <string name="org_cost_controls_saved">บันทึกการควบคุมค่าใช้จ่ายแล้ว</string>
+
+  <!-- Cost tracking section -->
+  <string name="org_cost_total">ค่าใช้จ่ายรวมโดยประมาณ</string>
+  <!-- Monthly cost. %1$s: formatted amount, e.g. $12.50. -->
+  <string name="org_cost_per_month">%1$s / เดือน</string>
+  <!-- %1$s: formatted monthly budget, e.g. $100.00. -->
+  <string name="org_cost_budget_cap">เพดานงบประมาณ: %1$s / เดือน</string>
+  <string name="org_cost_tracked_surveys">แบบสำรวจที่ติดตาม</string>
+  <string name="org_cost_total_entities">เอนทิตีทั้งหมด</string>
+  <string name="org_cost_submissions">การส่งข้อมูล</string>
+  <string name="org_cost_photos">รูปภาพที่บันทึก</string>
+  <!-- %1$d: number of alerts. -->
+  <string name="org_cost_budget_alerts">การแจ้งเตือนงบประมาณ (%1$d)</string>
+  <!-- %1$s: organization or survey name; %2$s: estimated monthly cost; %3$s: monthly budget. -->
+  <string name="org_cost_budget_alert">%1$s เกินงบประมาณรายเดือน (%2$s > %3$s)</string>
+  <!-- Filter chips. %1$d: number of rows. -->
+  <string name="org_cost_by_organization">ตามองค์กร (%1$d)</string>
+  <string name="org_cost_by_survey">ตามแบบสำรวจ (%1$d)</string>
+  <string name="org_cost_by_collector">ตามผู้เก็บข้อมูล (%1$d)</string>
+  <string name="org_cost_exceeded">เกินงบประมาณ</string>
+  <string name="org_cost_within">อยู่ในงบประมาณ</string>
+  <plurals name="org_count_entities">
+    <item quantity="other">%1$d เอนทิตี</item>
+  </plurals>
+  <plurals name="org_count_submissions">
+    <item quantity="other">การส่งข้อมูล %1$d รายการ</item>
+  </plurals>
+  <plurals name="org_count_photos">
+    <item quantity="other">รูปภาพ %1$d รูป</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features. -->
+  <string name="org_count_predefined">กำหนดไว้ล่วงหน้า %1$d</string>
+  <!-- %1$d: number of generated map features (sample plots). -->
+  <string name="org_count_generated">สร้างอัตโนมัติ %1$d</string>
+  <!-- A collector's activity. %1$d: number of surveys. -->
+  <plurals name="org_count_active_in_surveys">
+    <item quantity="other">ใช้งานอยู่ในแบบสำรวจ %1$d รายการ</item>
+  </plurals>
+
+  <!-- Notices -->
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed">สร้าง "%1$s" ไม่ได้</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed_country">สร้าง "%1$s" ไม่ได้ กรุณาเลือกประเทศจากรายการ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_created">สร้างองค์กร "%1$s" แล้ว</string>
+  <string name="org_notice_save_failed_country">บันทึกไม่ได้ กรุณาเลือกประเทศจากรายการ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_deleted">ลบองค์กร "%1$s" แล้ว</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_notice_role_all_users">ทุกคนเป็นสมาชิกของ %1$s อยู่แล้ว ให้นำผู้จัดการออกแทน</string>
+  <string name="org_notice_last_manager_role">องค์กรต้องมีผู้จัดการอย่างน้อยหนึ่งคน กรุณาตั้งให้ผู้อื่นเป็นผู้จัดการก่อน</string>
+  <string name="org_notice_last_manager_leave">องค์กรต้องมีผู้จัดการอย่างน้อยหนึ่งคน กรุณาตั้งให้ผู้อื่นเป็นผู้จัดการก่อนออกจากองค์กร</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_left">คุณออกจาก "%1$s" แล้ว</string>
+
+  <!-- Validation errors -->
+  <string name="org_error_invalid_email">ป้อนอีเมลที่ถูกต้อง</string>
+  <string name="org_error_not_found">ไม่พบองค์กร</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_error_invite_all_users">ทุกคนเป็นสมาชิกของ %1$s อยู่แล้ว ให้เชิญบุคคลในฐานะผู้จัดการ</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_member">%1$s เป็นสมาชิกอยู่แล้ว</string>
+  <!-- %1$s: the person's email address. -->
+  <string name="org_error_already_invited">%1$s ได้รับเชิญแล้ว</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_requested">%1$s ขอเข้าร่วมแล้ว ให้อนุมัติคำขอแทน</string>
+  <!-- An invitee accepting without a name. -->
+  <string name="org_error_enter_name">ป้อนชื่อ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_error_library_managers_only">เฉพาะผู้จัดการของ %1$s เท่านั้นที่เปลี่ยนแปลงคลังขององค์กรได้</string>
+  <string name="org_error_question_labels">ป้อนป้ายกำกับสำหรับทุกคำถาม</string>
+  <string name="org_error_concept_missing">แนวคิดนี้ไม่มีอยู่แล้ว</string>
+  <string name="org_error_concept_not_draft">ลบได้เฉพาะแนวคิดที่เป็นฉบับร่างเท่านั้น ให้เลิกใช้แนวคิดนี้แทน เพื่อให้ลิงก์ที่มีอยู่ยังใช้งานได้</string>
+
+  <!-- Dictionary (concepts) -->
+  <string name="org_concept_delete_error_title">ลบแนวคิดนี้ไม่ได้</string>
+  <string name="org_concept_search_label">ค้นหาแนวคิด</string>
+  <!-- "cultivo" is an example search term in Spanish; keep it as is. -->
+  <string name="org_concept_search_placeholder">ป้ายกำกับหรือคีย์เวิร์ดในภาษาใดก็ได้ เช่น cultivo</string>
+  <!-- %1$d: concepts shown; %2$d: all concepts (selects the plural form). -->
+  <plurals name="org_concept_search_count">
+    <item quantity="other">แนวคิด %1$d จาก %2$d รายการ</item>
+  </plurals>
+  <string name="org_concepts_global_title">แนวคิดส่วนกลาง</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_concepts_org_title">แนวคิดของ %1$s</string>
+  <string name="org_concepts_global_body">ฟิลด์มาตรฐานที่ใช้ได้กับทุกแบบสำรวจ การเปลี่ยนแปลงจะมีผลกับทุกองค์กร</string>
+  <!-- %1$s: organization ID, part of the concept ID prefix. -->
+  <string name="org_concepts_org_body">ฟิลด์มาตรฐานที่ใช้เฉพาะในองค์กรนี้ รหัสจะขึ้นต้นด้วย org.%1$s</string>
+  <string name="org_concepts_no_matches">ไม่มีแนวคิดที่ตรงกัน</string>
+  <string name="org_concepts_global_empty">ยังไม่มีแนวคิดส่วนกลาง</string>
+  <string name="org_concepts_empty">ยังไม่มีแนวคิด</string>
+  <string name="org_concepts_global_shared_body">แชร์กับทุกองค์กรโดย "ผู้ใช้ทั้งหมด" เฉพาะผู้ดูแลแพลตฟอร์มเท่านั้นที่เปลี่ยนแปลงได้</string>
+  <string name="org_concept_add">เพิ่มแนวคิด</string>
+  <string name="org_concept_edit_title">แก้ไขแนวคิด</string>
+  <!-- %1$s: unit code, e.g. kg. -->
+  <string name="org_concept_unit">หน่วย %1$s</string>
+  <!-- %1$d: number of list values; %2$s: the first few value labels. -->
+  <plurals name="org_concept_values">
+    <item quantity="other">%1$d ค่า: %2$s</item>
+  </plurals>
+  <!-- Like org_concept_values, when only some of the values are listed. -->
+  <plurals name="org_concept_values_truncated">
+    <item quantity="other">%1$d ค่า: %2$s…</item>
+  </plurals>
+  <!-- Short concept version. %1$d: version number. -->
+  <string name="org_concept_version_short">v%1$d</string>
+  <string name="org_field_label_english">ป้ายกำกับ (ภาษาอังกฤษ)</string>
+  <string name="org_concept_label_help">ใช้เป็นป้ายกำกับคำถามเริ่มต้นเมื่อเชื่อมโยงด้วย</string>
+  <string name="org_concept_vocabulary">คำศัพท์</string>
+  <!-- Concept name, the last part of its ID. -->
+  <string name="org_concept_name">ชื่อ</string>
+  <!-- %1$s: the concept ID. -->
+  <string name="org_concept_id">รหัส: %1$s</string>
+  <!-- %1$s: the concept ID; %2$d: version number. -->
+  <string name="org_concept_id_version">%1$s · เวอร์ชัน %2$d</string>
+  <!-- %1$s: list of language codes and labels. -->
+  <string name="org_concept_translations">คำแปล: %1$s</string>
+  <string name="org_field_description_english">คำอธิบาย (ภาษาอังกฤษ)</string>
+  <string name="org_concept_data_type">ประเภทข้อมูล</string>
+  <string name="org_concept_unit_label">หน่วย (ไม่บังคับ)</string>
+  <string name="org_concept_unit_help">รหัส UCUM</string>
+  <string name="org_concept_list_values">ค่าในรายการ</string>
+  <!-- Code of a list value. -->
+  <string name="org_concept_value">ค่า</string>
+  <string name="org_concept_remove_value">นำค่าออก</string>
+  <string name="org_concept_add_value">เพิ่มค่า</string>
+  <string name="org_concept_aggregation">การรวมข้อมูล</string>
+  <string name="org_concept_privacy">ความเป็นส่วนตัว</string>
+  <string name="org_concept_goals">เป้าหมาย (ไม่บังคับ)</string>
+  <string name="org_concept_suggested_goals">เป้าหมายที่แนะนำ (ไม่บังคับ)</string>
+  <string name="org_concept_goals_help">คั่นรหัสเป้าหมายด้วยเครื่องหมายจุลภาค</string>
+  <!-- Impact pillar of a concept. -->
+  <string name="org_concept_pillar">เสาหลัก</string>
+  <!-- Lifecycle status of a concept. -->
+  <string name="org_concept_status">สถานะ</string>
+  <!-- %1$s: list of references. -->
+  <string name="org_concept_references">ข้อมูลอ้างอิง: %1$s</string>
+
+  <!-- Library entries -->
+  <string name="org_badge_hidden">ซ่อนอยู่</string>
+  <string name="org_badge_hidden_with_templates">ซ่อนพร้อมเทมเพลต</string>
+  <string name="org_field_title_english">ชื่อ (ภาษาอังกฤษ)</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_library_global_body_member">แชร์โดย "ผู้ใช้ทั้งหมด" ขอให้ผู้จัดการซ่อนรายการที่ %1$s ไม่ได้ใช้</string>
+
+  <!-- Templates -->
+  <string name="org_template_new_title">เทมเพลตใหม่</string>
+  <string name="org_template_edit_title">แก้ไขเทมเพลต</string>
+  <string name="org_template_delete_body">เทมเพลตจะถูกนำออกจากคลังและจากชุดวัตถุประสงค์ที่ใช้เทมเพลตนี้ แบบสำรวจที่สร้างจากเทมเพลตนี้แล้วจะยังคงมีแบบฟอร์มอยู่</string>
+  <string name="org_template_delete">ลบเทมเพลต</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_org_title">เทมเพลตของ %1$s</string>
+  <string name="org_templates_empty">ยังไม่มีเทมเพลต เทมเพลตที่บันทึกจากแบบฟอร์มขององค์กรนี้จะแสดงที่นี่</string>
+  <string name="org_template_new_button">เทมเพลตใหม่</string>
+  <string name="org_templates_global_title">เทมเพลตส่วนกลาง</string>
+  <string name="org_templates_global_body_admins">แบบฟอร์มที่ทุกองค์กรเพิ่มลงในแบบสำรวจของตนได้</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_global_body_manager">แชร์โดย "ผู้ใช้ทั้งหมด" ซ่อนรายการที่ %1$s ไม่ได้ใช้ได้ โดยไม่กระทบแบบสำรวจที่สร้างจากเทมเพลตเหล่านั้นแล้ว</string>
+  <string name="org_templates_global_empty">ยังไม่มีเทมเพลตส่วนกลาง</string>
+  <!-- %1$d: number of questions; %2$d: questions linked to dictionary concepts. -->
+  <plurals name="org_template_summary">
+    <item quantity="other">คำถาม %1$d ข้อ · เชื่อมโยงกับแนวคิด %2$d ข้อ</item>
+  </plurals>
+  <!-- Label before the purposes a template belongs to. -->
+  <string name="org_template_purposes_label">วัตถุประสงค์:</string>
+  <string name="org_template_associated_purposes">วัตถุประสงค์ที่เกี่ยวข้อง</string>
+
+  <!-- Template questions dialog -->
+  <!-- %1$s: template title. -->
+  <!-- Default label of a new question. %1$d: its position. -->
+  <!-- Heading of a question card. %1$d: its position. -->
+  <!-- Code of a choice. -->
+  <!-- Label of a choice. -->
+  <!-- Default label of a new choice. %1$d: its position. -->
+
+  <!-- Purposes -->
+  <string name="org_purpose_new_title">วัตถุประสงค์ใหม่</string>
+  <string name="org_purpose_edit_title">แก้ไขวัตถุประสงค์</string>
+  <string name="org_purpose_delete_body">วัตถุประสงค์นี้จะไม่แสดงเป็นตัวเลือกเมื่อสร้างแบบสำรวจอีกต่อไป แบบสำรวจที่มีอยู่จะยังคงมีแบบฟอร์มอยู่</string>
+  <string name="org_purpose_delete">ลบวัตถุประสงค์</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_purposes_org_title">วัตถุประสงค์ของ %1$s</string>
+  <string name="org_purposes_empty">ยังไม่มีวัตถุประสงค์</string>
+  <string name="org_purpose_new_button">วัตถุประสงค์ใหม่</string>
+  <string name="org_purposes_global_title">วัตถุประสงค์ส่วนกลาง</string>
+  <string name="org_purposes_global_body_admins">วัตถุประสงค์ที่ทุกองค์กรเลือกได้เมื่อสร้างแบบสำรวจ</string>
+  <string name="org_purposes_global_body_manager">แชร์โดย "ผู้ใช้ทั้งหมด" การซ่อนเทมเพลตจะซ่อนวัตถุประสงค์ที่ใช้เฉพาะเทมเพลตที่ซ่อนอยู่ด้วย</string>
+  <string name="org_purposes_global_empty">ยังไม่มีวัตถุประสงค์ส่วนกลาง</string>
+  <!-- %1$s: list of reporting programs and frameworks. -->
+  <string name="org_purpose_programs">โปรแกรมและกรอบการรายงาน: %1$s</string>
+  <!-- %1$s: list of export profile IDs. -->
+  <string name="org_purpose_exports">การส่งออก: %1$s</string>
+  <!-- Label before the templates of a purpose. -->
+  <string name="org_purpose_templates_label">เทมเพลต:</string>
+  <!-- Impact pillar of the MAP framework. -->
+  <string name="org_purpose_pillar">เสาหลัก MAP</string>
+  <string name="org_purpose_associated_templates">เทมเพลตที่เกี่ยวข้อง</string>
+  <!-- A country in pickers and on the organization page: %1$s is its name, %2$s its ISO code, e.g. Kenya (KE). -->
+  <string name="org_country_with_code">%1$s (%2$s)</string>
+  <string name="org_template_discard_title">ทิ้งการเปลี่ยนแปลงของเทมเพลตนี้หรือไม่</string>
+  <string name="org_template_discard_body">การแก้ไขแบบฟอร์ม คำอธิบาย และวัตถุประสงค์ของเทมเพลตยังไม่ได้บันทึก</string>
+  <string name="org_template_discard">ทิ้ง</string>
+  <string name="org_template_keep_editing">แก้ไขต่อ</string>
+
+  <!-- Admin panel: mobile client version policy -->
+  <string name="org_tab_mobile_app">แอปมือถือ</string>
+  <string name="org_mobile_version_title">เวอร์ชันแอปมือถือ</string>
+  <string name="org_mobile_version_subtitle">แนะนำการอัปเดตเมื่อมีเวอร์ชันใหม่ หรือกำหนดเวอร์ชันขั้นต่ำก่อนซิงค์</string>
+  <string name="org_mobile_version_latest_label">เวอร์ชันล่าสุดที่มี</string>
+  <string name="org_mobile_version_latest_help">แอปมือถือที่เก่ากว่า SemVer นี้ (เช่น 2.1.0) จะเห็นแบนเนอร์แนะนำให้อัปเดต เว้นว่างเพื่อปิด</string>
+  <string name="org_mobile_version_min_label">เวอร์ชันขั้นต่ำที่ต้องใช้</string>
+  <string name="org_mobile_version_min_help">แอปมือถือที่เก่ากว่า SemVer นี้ (เช่น 2.0.0) จะถูกบล็อกโดยเซิร์ฟเวอร์จนกว่าจะอัปเดต</string>
+  <string name="org_mobile_version_url_label">URL อัปเดต</string>
+  <string name="org_mobile_version_url_help">ลิงก์สโตร์หรือดาวน์โหลด (ต้องขึ้นต้นด้วย https:// หรือ http://)</string>
+  <string name="org_mobile_version_save">บันทึกนโยบาย</string>
+  <string name="org_mobile_version_saved">บันทึกนโยบายเวอร์ชันมือถือแล้ว</string>
+  <string name="org_mobile_version_unavailable">เชื่อมต่อกับเซิร์ฟเวอร์เพื่อจัดการนโยบายเวอร์ชันมือถือ</string>
+</resources>

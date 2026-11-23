@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_time_series_tab">Chuỗi thời gian &amp; hình ảnh</string>
+  <string name="web_time_series_open">Phân tích hình ảnh</string>
+  <string name="web_time_series_select_feature">Chọn một điểm hoặc đa giác trên bản đồ để xem chuỗi thời gian vệ tinh.</string>
+  <string name="web_time_series_unsupported">Chuỗi thời gian có sẵn cho điểm và đa giác.</string>
+  <string name="web_time_series_unavailable">Chuỗi thời gian cần kết nối với dịch vụ Collect One.</string>
+  <string name="web_time_series_loading">Đang tải các quan sát vệ tinh…</string>
+  <string name="web_time_series_no_observations">Không có quan sát không mây nào của %1$s trong khoảng thời gian này.</string>
+  <string name="web_time_series_retry">Thử lại</string>
+  <string name="web_time_series_error_not_uploaded">Khảo sát này chưa có trên máy chủ. Chuỗi thời gian sẽ xuất hiện sau khi được tải lên.</string>
+  <string name="web_time_series_error_unsupported">Đối tượng bản đồ này không thể phân tích được.</string>
+  <string name="web_time_series_error_busy">Quá nhiều yêu cầu. Vui lòng thử lại sau một phút.</string>
+  <string name="web_time_series_error_timeout">Earth Engine mất quá nhiều thời gian để phản hồi. Hãy thử lại.</string>
+  <string name="web_time_series_error_unavailable">Earth Engine hiện không khả dụng.</string>
+  <string name="web_time_series_error_denied">Bạn không có quyền truy cập vào khảo sát này.</string>
+  <string name="web_time_series_error_other">Không thể tải dữ liệu.</string>
+  <string name="web_time_series_area">%1$s ha</string>
+  <string name="web_time_series_elevation_range">Độ cao %1$s–%2$s m</string>
+  <string name="web_time_series_elevation">Độ cao %1$s m</string>
+  <string name="web_time_series_population">Dân số %1$s (%2$s/km², %3$d)</string>
+  <string name="web_time_series_population_density">%1$s người/km² (%2$d)</string>
+  <string name="web_time_series_source_landsat">Landsat</string>
+  <string name="web_time_series_source_sentinel2">Sentinel-2</string>
+  <string name="web_time_series_source_sentinel1">Sentinel-1</string>
+  <string name="web_time_series_source_picker">Nguồn hình ảnh</string>
+  <string name="web_time_series_band_picker">Dải phổ</string>
+  <string name="web_time_series_picker_selection">%1$s: %2$s</string>
+  <string name="web_time_series_source_landsat_detail">Quang học · 30 m · mỗi 8–16 ngày</string>
+  <string name="web_time_series_source_sentinel2_detail">Quang học · 10 m · mỗi 5 ngày</string>
+  <string name="web_time_series_source_sentinel1_detail">Radar · 10 m · xuyên qua mây</string>
+  <string name="web_time_series_band_group_indices">Chỉ số</string>
+  <string name="web_time_series_band_group_reflectance">Độ phản xạ</string>
+  <string name="web_time_series_band_group_backscatter">Tán xạ ngược</string>
+  <string name="web_time_series_band_blue">Xanh lam</string>
+  <string name="web_time_series_band_green">Xanh lục</string>
+  <string name="web_time_series_band_red">Đỏ</string>
+  <string name="web_time_series_band_nir">NIR</string>
+  <string name="web_time_series_band_swir1">SWIR 1</string>
+  <string name="web_time_series_band_swir2">SWIR 2</string>
+  <string name="web_time_series_band_ndvi_detail">Độ xanh của thảm thực vật</string>
+  <string name="web_time_series_band_ndfi_detail">Suy thoái tán rừng</string>
+  <string name="web_time_series_band_evi_detail">Độ xanh dưới tán rừng rậm</string>
+  <string name="web_time_series_band_evi2_detail">EVI hai dải phổ, không có xanh lam</string>
+  <string name="web_time_series_band_nbr_detail">Vết sẹo cháy và suy giảm tán rừng</string>
+  <string name="web_time_series_band_ndmi_detail">Hàm lượng nước trong tán rừng</string>
+  <string name="web_time_series_band_ndwi_detail">Mặt nước thoáng</string>
+  <string name="web_time_series_band_blue_detail">Ánh sáng xanh lam nhìn thấy</string>
+  <string name="web_time_series_band_green_detail">Ánh sáng xanh lục nhìn thấy</string>
+  <string name="web_time_series_band_red_detail">Ánh sáng đỏ nhìn thấy, được thực vật hấp thụ</string>
+  <string name="web_time_series_band_nir_detail">Hồng ngoại gần, được lá cây phản xạ</string>
+  <string name="web_time_series_band_swir1_detail">Hồng ngoại sóng ngắn: độ ẩm</string>
+  <string name="web_time_series_band_swir2_detail">Hồng ngoại sóng ngắn: đất và vết cháy</string>
+  <string name="web_time_series_band_vv_detail">Tán xạ ngược bề mặt (dB)</string>
+  <string name="web_time_series_band_vh_detail">Tán xạ ngược tán rừng (dB)</string>
+  <string name="web_time_series_band_vv_vh_detail">Tỷ lệ giữa VV và VH</string>
+  <string name="web_time_series_band_rfdi_detail">Chỉ số suy thoái rừng bằng radar</string>
+  <string name="web_time_series_observations">%1$d quan sát · %2$s</string>
+  <string name="web_time_series_selected">%1$s · %2$s · %3$s %4$s</string>
+  <string name="web_time_series_chart_hint">Nhấp vào một điểm (hoặc dùng ← →) để hiển thị cảnh của ngày đó trên bản đồ.</string>
+  <string name="web_time_series_chart_description">Biểu đồ chuỗi thời gian %1$s với %2$d quan sát</string>
+  <string name="web_time_series_scene_loading">Đang tải cảnh…</string>
+  <string name="web_time_series_scene_failed">Không thể tải cảnh này.</string>
+  <string name="web_time_series_scene_clear">Xóa cảnh khỏi bản đồ</string>
+  <string name="web_time_series_stretch_true_color">Màu thực</string>
+  <string name="web_time_series_stretch_swir_nir_red">SWIR · NIR · Đỏ</string>
+  <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · Đỏ</string>
+  <string name="web_time_series_stretch_sar">VV · VH · Tỷ lệ</string>
+  <string name="web_time_series_close">Đóng chuỗi thời gian</string>
+</resources>

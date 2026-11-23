@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Strings for the field-facing form runner (mobile wizard and compact web layout) and its
+     question widgets. -->
+<resources>
+  <!-- Common actions -->
+  <string name="forms_cancel">Hủy</string>
+  <string name="forms_submit">Gửi</string>
+  <!-- Button that skips an optional question without answering it. -->
+  <string name="forms_skip">Bỏ qua</string>
+  <!-- Button / badge that opens an answer or repeat entry for editing. -->
+  <string name="forms_edit">Chỉnh sửa</string>
+  <string name="forms_delete">Xóa</string>
+  <!-- Button that clears the current answer. -->
+  <string name="forms_clear">Xóa câu trả lời</string>
+  <string name="forms_undo">Hoàn tác</string>
+  <string name="forms_redo">Làm lại</string>
+  <!-- Button that finishes drawing a geometry on the map. -->
+  <string name="forms_done">Xong</string>
+  <!-- Confirm button of the date picker dialog. -->
+  <string name="forms_ok">OK</string>
+  <!-- Confirms adding a new choice option typed by the collector. -->
+  <string name="forms_add">Thêm</string>
+  <string name="forms_yes">Có</string>
+  <string name="forms_no">Không</string>
+
+  <!-- Form header, navigation, and progress -->
+  <!-- Fallback title of a form that has no title in the compact (web) layout. -->
+  <string name="forms_untitled_form">Biểu mẫu</string>
+  <!-- Fallback title of a form that has no title in the mobile runner. -->
+  <string name="forms_untitled_survey_form">Biểu mẫu khảo sát</string>
+  <!-- Title of the final review step; also the submit button label while answers still need review. -->
+  <string name="forms_review_and_submit">Xem lại và gửi</string>
+  <!-- Compact layout progress. %1$d = settled (answered or skipped) questions, %2$d = total questions. -->
+  <string name="forms_progress_answered_of_total">Đã trả lời %1$d/%2$d</string>
+  <string name="forms_expand_all">Mở rộng tất cả</string>
+  <string name="forms_collapse_all">Thu gọn tất cả</string>
+  <!-- Footer progress segments, joined with " • ". %1$d = number of questions. -->
+  <string name="forms_progress_answered_count">%1$d đã trả lời</string>
+  <string name="forms_progress_skipped_count">%1$d đã bỏ qua</string>
+  <string name="forms_progress_pending_count">%1$d đang chờ</string>
+  <!-- Mobile app bar subtitle on the final review step. %1$d = number of questions in the form. -->
+  <plurals name="forms_review_and_finalize_summary">
+    <item quantity="other">Xem lại và hoàn tất (%1$d câu hỏi)</item>
+  </plurals>
+  <!-- Mobile app bar subtitle. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_of_total">Bước %1$d/%2$d</string>
+  <!-- Compact step counter in the bottom bar. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_counter">%1$d / %2$d</string>
+  <!-- Toggle that closes the list of all form steps. -->
+  <string name="forms_close_step_list">Đóng danh sách</string>
+  <!-- Toggle that opens the list of all form steps. %1$d = number of steps. -->
+  <string name="forms_steps_count">Các bước (%1$d)</string>
+  <string name="forms_close_form">Đóng biểu mẫu</string>
+  <!-- Content description of the icon in front of the form's language selector. -->
+  <string name="forms_language">Ngôn ngữ</string>
+  <!-- Button that goes back to the previous question. -->
+  <string name="forms_back">Quay lại</string>
+  <!-- Button that moves on to the final review step. -->
+  <string name="forms_review">Xem lại</string>
+  <!-- Button that moves on to the next question. -->
+  <string name="forms_next">Tiếp theo</string>
+  <!-- Heading of the step overview list. %1$d = number of steps. -->
+  <string name="forms_all_form_steps">Tất cả các bước của biểu mẫu (%1$d)</string>
+  <!-- Row of the step overview list. %1$d = step number, %2$s = step title. -->
+  <string name="forms_step_list_item">%1$d. %2$s</string>
+  <!-- Banner shown when Next is tapped before capturing a required location. -->
+  <string name="forms_blocker_location">Vui lòng ghi lại vị trí hoặc ghim điểm trước khi tiếp tục.</string>
+  <string name="forms_blocker_optional">Vui lòng sửa các lỗi xác thực ở trên hoặc bỏ qua để tiếp tục.</string>
+  <string name="forms_blocker_required">Vui lòng sửa các lỗi xác thực ở trên để tiếp tục.</string>
+
+  <!-- Question cards -->
+  <!-- Question label with a required marker. %1$s = question label. -->
+  <string name="forms_required_label">%1$s *</string>
+  <!-- Badge on a required question. -->
+  <string name="forms_badge_required">Bắt buộc *</string>
+  <!-- Badge on a question whose value is computed by the form. -->
+  <string name="forms_badge_calculated">Được tính toán</string>
+  <string name="forms_badge_read_only">Chỉ đọc</string>
+  <!-- Toggle for the extra instructions written for enumerators (data collectors). -->
+  <string name="forms_hide_guidance">Ẩn hướng dẫn cho người thu thập dữ liệu</string>
+  <string name="forms_show_guidance">Hiện hướng dẫn cho người thu thập dữ liệu</string>
+  <!-- Collapsed card summary of a question the collector skipped. -->
+  <string name="forms_status_skipped">Đã bỏ qua</string>
+  <!-- Collapsed card summary of a question with no answer yet. -->
+  <string name="forms_status_not_answered">Chưa trả lời</string>
+  <!-- Screen reader descriptions of a question's status icon. -->
+  <string name="forms_status_answered">Đã trả lời</string>
+  <string name="forms_status_pending">Đang chờ</string>
+  <string name="forms_status_needs_attention">Cần chú ý</string>
+  <string name="forms_collapse_question">Thu gọn câu hỏi</string>
+  <string name="forms_expand_question">Mở rộng câu hỏi</string>
+  <!-- Generic stand-in for a question that has no label. -->
+  <string name="forms_this_question">Câu hỏi này</string>
+  <!-- Title of a group of questions shown on one screen when the group has no label. -->
+  <string name="forms_untitled_question_group">Nhóm câu hỏi</string>
+  <!-- Shown when a photo, video, or audio file can't answer the question and no reason is given. -->
+  <string name="forms_attachment_rejected">Tệp đính kèm bị từ chối</string>
+  <!-- %1$d = number of questions with validation errors. -->
+  <plurals name="forms_questions_need_attention">
+    <item quantity="other">%1$d câu hỏi cần được chú ý trước khi gửi.</item>
+  </plurals>
+
+  <!-- Repeated sections -->
+  <!-- Number of entries of a repeated section. %1$d = number of entries. -->
+  <plurals name="forms_repeat_section_entries">
+    <item quantity="other">%1$d mục</item>
+  </plurals>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entries_hint">Thêm một hoặc nhiều mục '%1$s' bên dưới.</string>
+  <string name="forms_repeat_no_entries">Chưa có mục lặp lại nào.</string>
+  <!-- Fallback title of one repeat entry. %1$s = repeated section label, %2$d = entry number. -->
+  <string name="forms_repeat_instance_title">%1$s #%2$d</string>
+  <!-- Preview of a repeat entry that has no answers yet. -->
+  <string name="forms_repeat_tap_to_fill">Nhấn để điền thông tin chi tiết</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entry">Thêm mục %1$s</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_named">Thêm %1$s</string>
+  <!-- Delete action of one repeat entry. %1$s = entry title. -->
+  <string name="forms_repeat_delete_entry">Xóa %1$s</string>
+  <!-- Ordinal number badge of a repeat entry or ranked item. %1$d = number. -->
+  <string name="forms_number_badge">#%1$d</string>
+  <!-- %1$d = current entry number, %2$d = number of entries. -->
+  <string name="forms_repeat_entry_position">Mục #%1$d/%2$d</string>
+  <!-- Button that opens the list of all entries of a repeated section. -->
+  <string name="forms_all_entries">Tất cả các mục</string>
+  <!-- Buttons that jump to the previous or next entry of a repeated section. -->
+  <string name="forms_repeat_previous_entry">Mục trước</string>
+  <string name="forms_repeat_next_entry">Mục tiếp theo</string>
+  <!-- Badge with the number of entries a repeated section requires. %1$d = number of entries. -->
+  <string name="forms_repeat_required_count">Yêu cầu %1$d</string>
+  <!-- %1$s = repeated section label. Shown once a section has entries. -->
+  <string name="forms_repeat_add_another">Thêm một mục %1$s khác</string>
+  <!-- Title of the dialog confirming an entry deletion. %1$s = entry title. -->
+  <string name="forms_repeat_delete_title">Xóa %1$s?</string>
+  <!-- Body of the dialog confirming an entry deletion. %1$d = answers in the entry. -->
+  <plurals name="forms_repeat_delete_message">
+    <item quantity="other">%1$d câu trả lời của mục này cũng sẽ bị xóa. Không thể hoàn tác.</item>
+  </plurals>
+  <!-- Status of a repeat entry. -->
+  <string name="forms_repeat_status_not_started">Chưa bắt đầu</string>
+  <string name="forms_repeat_status_in_progress">Đang thực hiện</string>
+  <string name="forms_repeat_status_complete">Hoàn tất</string>
+
+  <!-- Review step -->
+  <string name="forms_review_answers">Xem lại câu trả lời</string>
+  <string name="forms_review_answers_hint">Nhấn vào câu hỏi bất kỳ bên dưới để quay lại và chỉnh sửa câu trả lời.</string>
+  <string name="forms_ready_to_submit">✓ Sẵn sàng gửi</string>
+  <!-- Badge with the number of validation issues. %1$d = number of issues. -->
+  <plurals name="forms_issue_count">
+    <item quantity="other">%1$d vấn đề</item>
+  </plurals>
+  <string name="forms_form_finalized">✓ Đã hoàn tất biểu mẫu</string>
+  <!-- %1$d = number of validation errors; the list of errors follows. -->
+  <plurals name="forms_cannot_submit_errors">
+    <item quantity="other">⚠ Không thể gửi: %1$d lỗi xác thực:</item>
+  </plurals>
+  <!-- One validation error in a list. %1$s = question label, %2$s = error message. -->
+  <string name="forms_validation_error_item">• %1$s: %2$s</string>
+  <!-- Badge on a review card whose answer is invalid. -->
+  <string name="forms_invalid_badge">Không hợp lệ</string>
+  <!-- Heading of the data table records the submission creates or updates. %1$d = number of records. -->
+  <string name="forms_updated_records">Bản ghi được cập nhật (%1$d)</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_new_in_dataset">Bản ghi mới trong %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_updated_in_dataset">Bản ghi được cập nhật trong %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_unchanged_in_dataset">Bản ghi không thay đổi trong %1$s</string>
+
+  <!-- Answer summaries -->
+  <!-- Shown in place of an answer for a question that has none. -->
+  <string name="forms_unanswered">(Chưa trả lời)</string>
+  <!-- Summary of a line (geotrace) answer. %1$d = number of points. -->
+  <plurals name="forms_trace_point_count">
+    <item quantity="other">%1$d điểm vết</item>
+  </plurals>
+  <!-- Summary of a polygon (geoshape) answer. %1$d = number of vertices. -->
+  <plurals name="forms_polygon_vertex_count">
+    <item quantity="other">%1$d đỉnh đa giác</item>
+  </plurals>
+  <!-- Repeat entry previews of location, line, and polygon answers. -->
+  <string name="forms_preview_location_recorded">Đã ghi lại vị trí</string>
+  <string name="forms_preview_trace_recorded">Đã ghi lại đường đi</string>
+  <string name="forms_preview_shape_recorded">Đã ghi lại hình dạng</string>
+
+  <!-- Text, number, date, and time inputs -->
+  <string name="forms_text_placeholder">Nhập câu trả lời...</string>
+  <!-- Character count of a text answer. %1$d = number of characters. -->
+  <plurals name="forms_text_char_count">
+    <item quantity="other">%1$d ký tự</item>
+  </plurals>
+  <string name="forms_decimal_invalid">Nhập số thập phân hợp lệ</string>
+  <string name="forms_integer_invalid">Nhập số nguyên</string>
+  <!-- %1$d = smallest allowed value, %2$d = largest allowed value. -->
+  <string name="forms_integer_out_of_range">Nhập giá trị từ %1$d đến %2$d</string>
+  <!-- Placeholder showing the required ISO date format (year-month-day); typed dates must use it. -->
+  <string name="forms_date_placeholder">YYYY-MM-DD</string>
+  <string name="forms_date_invalid">Nhập ngày hợp lệ theo định dạng YYYY-MM-DD</string>
+  <string name="forms_clear_date">Xóa ngày</string>
+  <string name="forms_select_date">Chọn ngày</string>
+  <!-- Placeholder showing the required 24-hour time format (hours:minutes:seconds). -->
+  <string name="forms_time_placeholder">HH:MM:SS</string>
+  <!-- Button that fills a time question with the current time. -->
+  <string name="forms_now">Bây giờ</string>
+  <string name="forms_no_timestamp">(Chưa ghi lại dấu thời gian)</string>
+  <string name="forms_capture_timestamp">Ghi lại dấu thời gian</string>
+
+  <!-- Location (geopoint) questions -->
+  <!-- Button that records the point under the map crosshair. -->
+  <string name="forms_add_point">Thêm điểm</string>
+  <!-- Button that records the device's current GPS position. -->
+  <string name="forms_capture_location">Ghi lại vị trí</string>
+  <string name="forms_map_pan_allowed">Cho phép kéo bản đồ</string>
+  <string name="forms_gps_only_no_pan">Chỉ GPS (không kéo bản đồ)</string>
+  <!-- Required GPS accuracy. %1$s = accuracy in meters. -->
+  <string name="forms_accuracy_required">Yêu cầu ≤ %1$s m</string>
+  <!-- Location capture status badges. -->
+  <string name="forms_geo_status_panned">Đã kéo bản đồ</string>
+  <string name="forms_geo_status_captured">Đã ghi lại</string>
+  <string name="forms_geo_status_ready">Sẵn sàng</string>
+  <string name="forms_geo_target_coordinates">Tọa độ mục tiêu (tâm ngắm đã di chuyển)</string>
+  <string name="forms_geo_captured_coordinates">Tọa độ đã ghi lại</string>
+  <string name="forms_geo_current_coordinates">Tọa độ GPS hiện tại</string>
+  <!-- Raw coordinates with altitude. %1$s = latitude, %2$s = longitude, %3$d = altitude in meters. -->
+  <string name="forms_geo_coordinates_with_altitude">%1$s, %2$s • Độ cao %3$d m</string>
+  <!-- Label of the GPS accuracy readout. -->
+  <string name="forms_accuracy">Độ chính xác</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m), %4$s = label of the Add point button. -->
+  <string name="forms_geo_saved_point">Điểm đã lưu: %1$s, %2$s (%3$s) — nhấn "%4$s" để cập nhật, hoặc dùng Hoàn tác / Làm lại</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m). "Next →" is the Next button. -->
+  <string name="forms_geo_location_captured">Đã ghi lại vị trí: %1$s, %2$s (%3$s) — nhấn "Tiếp theo →" để tiếp tục, hoặc dùng Hoàn tác / Làm lại</string>
+  <!-- %1$s = label of the Add point button. -->
+  <string name="forms_geo_map_panned_hint">Đã kéo bản đồ — nhấn "%1$s" bên dưới để ghi lại điểm này</string>
+  <!-- %1$s = label of the Capture location button. -->
+  <string name="forms_geo_capture_hint">Nhấn "%1$s" bên dưới để ghi lại tọa độ GPS hiện tại của bạn</string>
+  <string name="forms_recenter_on_gps">Căn giữa theo GPS</string>
+  <string name="forms_geo_pan_disabled">Không thể kéo bản đồ đối với câu hỏi này. Tọa độ được ghi lại trực tiếp từ vị trí GPS của bạn.</string>
+  <!-- %1$s = required accuracy in meters. -->
+  <string name="forms_geo_pan_disabled_with_accuracy">Không thể kéo bản đồ đối với câu hỏi này. Tọa độ được ghi lại trực tiếp từ vị trí GPS của bạn (yêu cầu độ chính xác ≤ %1$s m).</string>
+  <!-- Map overlay status. -->
+  <string name="forms_gps_locked">Đã khóa GPS</string>
+  <string name="forms_geo_waiting_for_location">Đang chờ vị trí GPS…</string>
+  <string name="forms_map_panned_crosshair">Đã kéo bản đồ • Tâm ngắm đang bật</string>
+  <string name="forms_map_centered_on_gps">Đã căn giữa theo GPS (kéo bản đồ để di chuyển)</string>
+  <string name="forms_zoom_in">Phóng to</string>
+  <string name="forms_zoom_out">Thu nhỏ</string>
+  <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->
+  <string name="forms_gps_accuracy_zoom">GPS %1$s • %2$sz</string>
+
+  <!-- Line (geotrace) and polygon (geoshape) questions -->
+  <!-- Button that records the device's current GPS position as a new vertex. -->
+  <string name="forms_capture_vertex">Ghi lại đỉnh</string>
+  <!-- "pts" abbreviates points. -->
+  <string name="forms_geometry_polygon_min">Đa giác (≥3 điểm)</string>
+  <string name="forms_geometry_line_min">Đường (≥2 điểm)</string>
+  <string name="forms_geometry_walk_or_draw">Đi bộ hoặc vẽ (Cho phép kéo bản đồ)</string>
+  <string name="forms_geometry_gps_walk_only">Chỉ đi bộ theo GPS (Đã khóa)</string>
+  <string name="forms_geometry_gps_stream_only">Chỉ luồng GPS (Đã khóa kéo bản đồ)</string>
+  <!-- %1$d = number of vertices. -->
+  <plurals name="forms_vertex_count">
+    <item quantity="other">%1$d đỉnh</item>
+  </plurals>
+  <!-- Status while walking a line or polygon. %1$d = number of points logged so far ("pts" abbreviates points). -->
+  <plurals name="forms_geometry_walking">
+    <item quantity="other">Đang đi bộ • Ghi điểm GPS mỗi 5 giây (%1$d điểm)</item>
+  </plurals>
+  <!-- %1$d = number of points logged so far, %2$s = label of the Stop walking button. -->
+  <plurals name="forms_geometry_walking_stop_hint">
+    <item quantity="other">Đang đi bộ • Ghi điểm GPS mỗi 5 giây (%1$d điểm). Nhấn "%2$s" khi hoàn tất.</item>
+  </plurals>
+  <string name="forms_geo_target_point_coordinates">Tọa độ điểm mục tiêu</string>
+  <string name="forms_gps_location">Vị trí GPS</string>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_polygon_ready">
+    <item quantity="other">Đã ghi lại %1$d đỉnh • Đa giác khép kín đã sẵn sàng — nhấn "Tiếp theo →" để tiếp tục hoặc thêm đỉnh</item>
+  </plurals>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_line_ready">
+    <item quantity="other">Đã ghi lại %1$d đỉnh • Đường đã sẵn sàng — nhấn "Tiếp theo →" để tiếp tục hoặc thêm đỉnh</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_polygon_need_more">
+    <item quantity="other">Cần thêm %1$d đỉnh để hoàn thành đa giác. Nhấn "%2$s" bên dưới để ghi lại.</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_line_need_more">
+    <item quantity="other">Cần thêm %1$d đỉnh để hoàn thành đường. Nhấn "%2$s" bên dưới để ghi lại.</item>
+  </plurals>
+  <string name="forms_stop_walking">Dừng đi bộ</string>
+  <string name="forms_start_walking">Bắt đầu đi bộ</string>
+  <string name="forms_clear_all_vertices">Xóa tất cả các đỉnh</string>
+  <!-- %1$s = label of the Start walking button, %2$s = label of the Add point button. -->
+  <string name="forms_geometry_pan_disabled_hint">Không thể kéo bản đồ đối với câu hỏi này. Nhấn "%1$s" để ghi điểm GPS mỗi 5 giây, hoặc "%2$s" để ghi lại thủ công.</string>
+
+  <!-- Drawing geometry on the host's map (web) -->
+  <string name="forms_map_instruction_point">Nhấp vào bản đồ để đặt điểm này.</string>
+  <string name="forms_map_instruction_line">Nhấp vào bản đồ để thêm các đỉnh của đường theo thứ tự (ít nhất 2).</string>
+  <string name="forms_map_instruction_polygon">Nhấp vào bản đồ để thêm các góc của đa giác theo thứ tự (ít nhất 3).</string>
+  <!-- "Draw on map" is the label of the button that starts drawing. -->
+  <string name="forms_map_drawn_point">Vẽ trên bản đồ: điểm. Dùng Vẽ trên bản đồ để bắt đầu.</string>
+  <string name="forms_map_drawn_line">Vẽ trên bản đồ: đường. Dùng Vẽ trên bản đồ để bắt đầu.</string>
+  <string name="forms_map_drawn_polygon">Vẽ trên bản đồ: đa giác. Dùng Vẽ trên bản đồ để bắt đầu.</string>
+  <string name="forms_map_no_point">Chưa có điểm</string>
+  <string name="forms_map_point_placed">Đã đặt điểm</string>
+  <string name="forms_drawing_on_map">Đang vẽ trên bản đồ</string>
+  <string name="forms_draw_on_map">Vẽ trên bản đồ</string>
+  <string name="forms_redraw">Vẽ lại</string>
+  <string name="forms_zoom_to_fit">Thu phóng vừa khung</string>
+
+  <!-- Choice questions -->
+  <!-- Shown on a cascading choice question. %1$s = label of the question it depends on. -->
+  <string name="forms_select_parent_first">Trước tiên hãy chọn câu trả lời cho '%1$s'</string>
+  <string name="forms_no_matching_options">(Không có lựa chọn nào khớp với bộ lọc hiện tại)</string>
+  <!-- Button that adds a choice option typed by the collector. -->
+  <string name="forms_add_new">Thêm mới</string>
+  <string name="forms_new_item_placeholder">Nhãn mục mới</string>
+
+  <!-- Range, rank, and acknowledge questions -->
+  <!-- %1$s = minimum value of the range. -->
+  <string name="forms_range_min">Tối thiểu: %1$s</string>
+  <!-- %1$s = currently selected value. -->
+  <string name="forms_range_selected">Đã chọn: %1$s</string>
+  <!-- %1$s = maximum value of the range. -->
+  <string name="forms_range_max">Tối đa: %1$s</string>
+  <string name="forms_rank_instructions">Sắp xếp các mục từ mức ưu tiên cao nhất (#1) đến thấp nhất:</string>
+  <string name="forms_rank_move_up">Di chuyển lên</string>
+  <string name="forms_rank_move_down">Di chuyển xuống</string>
+  <string name="forms_rank_drag_to_reorder">Kéo để sắp xếp lại</string>
+  <string name="forms_trigger_acknowledged">Đã xác nhận (OK)</string>
+  <string name="forms_trigger_acknowledge">Ghi nhận / Xác nhận</string>
+
+  <!-- Photo, video, audio, and file questions -->
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_capture">%1$s\nTệp này không có trên thiết bị này. Hãy ghi lại lần nữa để thay thế.</string>
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_choose">%1$s\nTệp này không có trên thiết bị này. Hãy chọn lại để thay thế.</string>
+  <!-- Secondary button that uploads an existing file instead of capturing a new one. -->
+  <string name="forms_media_choose_from_device">Chọn từ thiết bị</string>
+  <string name="forms_media_choose_file">Chọn tệp</string>
+  <string name="forms_media_replace_file">Thay thế tệp</string>
+  <string name="forms_media_upload">Tải lên</string>
+  <string name="forms_media_remove">Gỡ bỏ</string>
+  <!-- Screen reader description of a captured photo. %1$s = file name. -->
+  <string name="forms_media_captured_photo_description">Ảnh đã chụp %1$s</string>
+  <string name="forms_media_photo_attached">Đã đính kèm ảnh</string>
+  <string name="forms_media_video_attached">Đã đính kèm video</string>
+  <string name="forms_media_audio_attached">Đã đính kèm bản ghi âm</string>
+  <string name="forms_media_file_attached">Đã đính kèm tệp</string>
+  <!-- Attachment status with its length. %1$s = status (e.g. Video attached), %2$s = duration (e.g. 0:05). -->
+  <string name="forms_media_attached_with_duration">%1$s · %2$s</string>
+  <!-- Titles of media questions. -->
+  <string name="forms_media_kind_photo">Ảnh</string>
+  <string name="forms_media_kind_video">Video</string>
+  <string name="forms_media_kind_audio">Bản ghi âm</string>
+  <string name="forms_media_kind_file">Tệp</string>
+  <string name="forms_media_take_photo">Chụp ảnh</string>
+  <string name="forms_media_record_video">Quay video</string>
+  <string name="forms_media_record_audio">Ghi âm</string>
+  <string name="forms_media_retake_photo">Chụp lại ảnh</string>
+  <!-- Re-records a video or audio answer. -->
+  <string name="forms_media_record_again">Ghi lại lần nữa</string>
+  <!-- Badge: the question only accepts media captured live, not uploaded files. -->
+  <string name="forms_media_capture_only">Chỉ ghi trực tiếp</string>
+  <!-- Badge: the question accepts live capture or an uploaded file. -->
+  <string name="forms_media_capture_or_upload">Ghi trực tiếp hoặc tải lên</string>
+  <string name="forms_media_live_unavailable_photo">Câu hỏi này cần ảnh chụp trực tiếp, nhưng thiết bị/trình duyệt này không thể chụp.</string>
+  <string name="forms_media_live_unavailable_video">Câu hỏi này cần video quay trực tiếp, nhưng thiết bị/trình duyệt này không thể quay.</string>
+  <string name="forms_media_live_unavailable_audio">Câu hỏi này cần bản ghi âm trực tiếp, nhưng thiết bị/trình duyệt này không thể ghi âm.</string>
+  <string name="forms_media_live_unavailable_file">Câu hỏi này cần tệp ghi trực tiếp, nhưng thiết bị/trình duyệt này không thể ghi.</string>
+  <string name="forms_media_unavailable_photo">Thiết bị này không thể chụp hoặc chọn ảnh.</string>
+  <string name="forms_media_unavailable_video">Thiết bị này không thể quay hoặc chọn video.</string>
+  <string name="forms_media_unavailable_audio">Thiết bị này không thể ghi âm hoặc chọn bản ghi âm.</string>
+  <string name="forms_media_unavailable_file">Thiết bị này không thể ghi hoặc chọn tệp.</string>
+  <!-- Photo size limit. %1$d = maximum long edge in pixels. -->
+  <string name="forms_media_max_pixels">Tối đa %1$d px</string>
+  <!-- The question prefers the front (selfie) camera. -->
+  <string name="forms_media_front_camera">Camera trước</string>
+
+  <!-- Variant-incompatible question fallback warnings -->
+  <string name="forms_variant_web">web</string>
+  <string name="forms_variant_google_earth">Google Earth</string>
+  <string name="forms_incompatible_type_gps_location">Vị trí chỉ bằng GPS</string>
+  <string name="forms_incompatible_type_gps_line">Đường chỉ bằng GPS</string>
+  <string name="forms_incompatible_type_gps_polygon">Đa giác chỉ bằng GPS</string>
+  <string name="forms_incompatible_type_location">Vị trí</string>
+  <string name="forms_incompatible_type_line">Đường</string>
+  <string name="forms_incompatible_type_polygon">Đa giác</string>
+  <string name="forms_incompatible_type_photo">Ảnh</string>
+  <string name="forms_incompatible_type_video">Video</string>
+  <string name="forms_incompatible_type_audio">Âm thanh</string>
+  <string name="forms_incompatible_type_file">Tệp</string>
+  <!-- %1$s = question type; %2$s = variant name. -->
+  <string name="forms_variant_incompatible_warning">Câu hỏi loại %1$s không khả dụng trên %2$s. Câu hỏi này sẽ được bỏ qua. Vui lòng liên hệ người tổ chức khảo sát để khắc phục.</string>
+</resources>

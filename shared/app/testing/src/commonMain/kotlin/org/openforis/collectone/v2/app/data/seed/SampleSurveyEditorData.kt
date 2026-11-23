@@ -33,8 +33,6 @@ object SampleSurveyEditorData {
   fun organizationSharedDraft(derived: SurveyEditorDraft): SurveyEditorDraft =
     BackendStaticSurveyEditorData.organizationSharedDraft(derived)
 
-  fun serengetiSurveyArea(): SurveyArea = BackendStaticSurveyEditorData.serengetiSurveyArea()
-
   fun kenyaSurveyArea(): SurveyArea = BackendStaticSurveyEditorData.kenyaSurveyArea()
 
   fun kenyaSharing(): SharingSettings = BackendStaticSurveyEditorData.kenyaSharing()

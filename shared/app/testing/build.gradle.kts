@@ -12,48 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// Data-level test fixtures for the shared/app modules: seeded in-memory stores, sample data, survey
+// and form editor samples, and recording fakes, on :shared:app:data only. The fixtures that need
+// the
+// presentation layer (the app session, ViewModel builders) are in :shared:app:ui-testing. Depend on
+// this from `commonTest` only.
+plugins { id("collectone.kmp.android") }
 
-// Test fixtures for `org.openforis.collectone.v2:app`: seeded in-memory stores, survey and form
-// editor
-// samples, and recording fakes. Depend on this from `commonTest` only.
-plugins {
-  kotlin("multiplatform")
-  id("com.android.library")
-  id("com.ncorti.ktfmt.gradle")
-}
-
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
-ktfmt { googleStyle() }
+val iosEnabled = providers.gradleProperty("collectone.ios").orNull == "true"
 
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
+  if (iosEnabled) {
+    iosArm64()
+    iosSimulatorArm64()
   }
-
-  jvm()
-
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class) wasmJs { browser() }
 
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api(project(":"))
-        api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+        api(projects.shared.app.data)
+        api(projects.shared.ui.testing)
+        api(libs.kotlinx.coroutines.core)
+        api(libs.kotlinx.coroutines.test)
+        api(libs.turbine)
         implementation(kotlin("test"))
       }
     }
   }
 }
 
-android {
-  namespace = "org.openforis.collectone.v2.app.testing"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
-}
+android { namespace = "org.openforis.collectone.v2.app.testing" }

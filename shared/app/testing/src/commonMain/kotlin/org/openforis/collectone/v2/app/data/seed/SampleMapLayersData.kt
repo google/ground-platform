@@ -15,7 +15,6 @@ package org.openforis.collectone.v2.app.data.seed
 
 import org.openforis.collectone.v2.app.data.seed.backend.BackendStaticMapLayersData
 import org.openforis.collectone.v2.app.domain.model.MapLayerItem
-import org.openforis.collectone.v2.app.domain.model.OfflineTilePackageItem
 
 /**
  * Facade delegating to [BackendStaticMapLayersData] (static sample data moved out of the client and
@@ -26,7 +25,4 @@ object SampleMapLayersData {
     BackendStaticMapLayersData.mapLayersForSurvey(surveyId)
 
   fun defaultMapLayers(): List<MapLayerItem> = BackendStaticMapLayersData.defaultMapLayers()
-
-  fun defaultOfflineTilePackages(): List<OfflineTilePackageItem> =
-    BackendStaticMapLayersData.defaultOfflineTilePackages()
 }

@@ -11,46 +11,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import org.openforis.collectone.v2.buildlogic.ProtoSchemaDescriptorsFactory
+import org.openforis.collectone.v2.buildlogic.isServerOnly
+
 plugins {
-  kotlin("multiplatform") version "2.4.20"
-  id("com.squareup.wire") version "7.0.3"
-  id("com.android.library") version "8.5.2"
+  id("collectone.kmp.library")
+  id("collectone.detekt")
+  id("collectone.kover")
+  alias(libs.plugins.wire)
 }
 
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
+  if (!isServerOnly()) {
+    iosArm64()
+    iosSimulatorArm64()
+    iosX64()
 
-  jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
-
-  iosArm64()
-  iosSimulatorArm64()
-  iosX64()
-
-  js(IR) {
-    browser()
-    nodejs()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
+    js(IR) {
+      browser()
+      nodejs()
     }
-  }
 
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-    nodejs()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class) wasmJs { nodejs() }
   }
 
   sourceSets {
@@ -59,29 +41,23 @@ kotlin {
         files(layout.buildDirectory.dir("generated/source/wire"))
           .builtBy("generateCommonMainProtos")
       )
+      kotlin.srcDir(
+        files(layout.buildDirectory.dir("generated/source/protoSchema"))
+          .builtBy("generateCommonMainProtos")
+      )
       dependencies {
-        api("com.squareup.wire:wire-runtime:7.0.3")
-        api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+        api(libs.wire.runtime)
+        api(libs.kotlinx.coroutines.core)
+        implementation(libs.kotlinx.serialization.json)
       }
     }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
-        implementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
+        implementation(libs.junit.jupiter.params)
       }
     }
-  }
-}
-
-android {
-  namespace = "org.openforis.collectone.v2.core"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
   }
 }
 
@@ -108,9 +84,11 @@ wire {
     include("shared/protos/survey/*.proto")
     include("shared/protos/library/*.proto")
     include("shared/protos/userdata/*.proto")
+    include("shared/protos/sync/*.proto")
+    include("shared/protos/earthengine/*.proto")
   }
   sourcePath {
-    srcJar("com.google.api.grpc:proto-google-common-protos:2.48.0")
+    srcJar(libs.google.common.protos)
     include("google/type/date.proto")
     include("google/type/timeofday.proto")
   }
@@ -119,6 +97,25 @@ wire {
     rpcCallStyle = "suspending"
     rpcRole = "server"
   }
+  // Field tables for the ProtoJSON and textproto codecs (see ProtoSchemaDescriptorsFactory).
+  custom {
+    schemaHandlerFactory = ProtoSchemaDescriptorsFactory()
+    exclusive = false
+    out = layout.buildDirectory.dir("generated/source/protoSchema").get().asFile.path
+    options =
+      mapOf(
+        "roots" to
+          listOf(
+              "openforis.collectone.v1.forms.FormDef",
+              "openforis.collectone.v1.forms.RecordInstance",
+              "openforis.collectone.v1.library.LibraryBundle",
+              "openforis.collectone.v1.library.OrganizationLibrarySettings",
+            )
+            .joinToString(","),
+        "package" to "org.openforis.collectone.v2.core.proto.schema",
+        "name" to "CoreProtoSchema",
+      )
+  }
 }
 
 tasks
@@ -126,4 +123,6 @@ tasks
   .configureEach {
     dependsOn(stageProtos)
     dependsOn(tasks.matching { it.name == "transformCommonMainDependenciesMetadata" })
+    // Regenerate the field tables when their generator (in build-logic) changes.
+    inputs.files(ProtoSchemaDescriptorsFactory::class.java.protectionDomain.codeSource.location)
   }

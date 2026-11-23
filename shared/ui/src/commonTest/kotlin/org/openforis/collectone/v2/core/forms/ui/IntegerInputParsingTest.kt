@@ -17,6 +17,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import openforis.collectone.v1.forms.DataType
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_integer_invalid
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_integer_out_of_range
 
 class IntegerInputParsingTest {
 
@@ -27,7 +30,10 @@ class IntegerInputParsingTest {
     val result = parseIntegerInput("3000000000", DataType.TYPE_INT32)
 
     assertIs<IntegerInput.Invalid>(result)
-    assertEquals("Enter a value between -2147483648 and 2147483647", result.message)
+    assertEquals(
+      FormUiText.Resource(Res.string.forms_integer_out_of_range, -2147483648, 2147483647),
+      result.message,
+    )
   }
 
   @Test
@@ -68,7 +74,7 @@ class IntegerInputParsingTest {
     val result = parseIntegerInput("12.5", DataType.TYPE_INT32)
 
     assertIs<IntegerInput.Invalid>(result)
-    assertEquals("Enter a whole integer number", result.message)
+    assertEquals(FormUiText.Resource(Res.string.forms_integer_invalid), result.message)
   }
 
   @Test

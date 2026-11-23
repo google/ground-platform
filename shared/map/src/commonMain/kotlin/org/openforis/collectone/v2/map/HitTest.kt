@@ -52,29 +52,36 @@ private fun layerHits(
   val geometry = feature.geometry
   return when (layer) {
     is MapLayer.Fill ->
-      geometry is Geometry.Polygon && polygonContains(geometry.rings.first().map(project), tap)
+      geometry.parts.any { part ->
+        part is Geometry.Polygon && polygonContains(part.rings.first().map(project), tap)
+      }
     is MapLayer.Line -> {
       val tolerance = layer.width.evaluate(feature.properties).value / 2 + HIT_SLOP.value
       lineRings(geometry).any { ring -> nearPolyline(ring.map(project), tap, tolerance) }
     }
-    is MapLayer.Circle ->
-      geometry is Geometry.Point &&
-        distance(project(geometry.position), tap) <=
-          (layer.radius.evaluate(feature.properties) + HIT_SLOP).value
+    is MapLayer.Circle -> {
+      val radius = (layer.radius.evaluate(feature.properties) + HIT_SLOP).value
+      points(geometry).any { distance(project(it), tap) <= radius }
+    }
     is MapLayer.Symbol ->
-      geometry is Geometry.Point &&
-        distance(project(geometry.position), tap) <= SYMBOL_HIT_RADIUS.value
+      points(geometry).any { distance(project(it), tap) <= SYMBOL_HIT_RADIUS.value }
   }
 }
 
 internal val SYMBOL_HIT_RADIUS = 16.dp
 
-/** Vertex lists a line layer strokes, with polygon rings closed. */
+/** Positions a circle or symbol layer draws at: those of [geometry]'s point parts. */
+internal fun points(geometry: Geometry): List<LatLng> =
+  geometry.parts.mapNotNull { (it as? Geometry.Point)?.position }
+
+/** Vertex lists a line layer strokes, of every part, with polygon rings closed. */
 internal fun lineRings(geometry: Geometry): List<List<LatLng>> =
-  when (geometry) {
-    is Geometry.Point -> emptyList()
-    is Geometry.LineString -> listOf(geometry.points)
-    is Geometry.Polygon -> geometry.rings.map { it + it.first() }
+  geometry.parts.flatMap { part ->
+    when (part) {
+      is Geometry.LineString -> listOf(part.points)
+      is Geometry.Polygon -> part.rings.map { it + it.first() }
+      else -> emptyList()
+    }
   }
 
 internal fun distance(a: DpOffset, b: DpOffset): Float {

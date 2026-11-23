@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions shared across the survey editor. -->
+  <string name="surveyeditor_cancel">បោះបង់</string>
+  <!-- Button that dismisses a dialog. -->
+  <string name="surveyeditor_close">បិទ</string>
+  <!-- Button that returns to the previous step of a dialog. -->
+  <string name="surveyeditor_back">ថយក្រោយ</string>
+  <string name="surveyeditor_import">នាំចូល</string>
+  <!-- Button that confirms importing a file. %1$s is the file name. -->
+  <string name="surveyeditor_import_file">នាំចូល %1$s</string>
+  <string name="surveyeditor_select">ជ្រើសរើស</string>
+  <string name="surveyeditor_description">ការពិពណ៌នា</string>
+  <string name="surveyeditor_clear_search">សម្អាតការស្វែងរក</string>
+  <string name="surveyeditor_delete">លុប</string>
+  <string name="surveyeditor_done">រួចរាល់</string>
+  <!-- Header button that saves edits of a draft survey. -->
+  <string name="surveyeditor_save_changes">រក្សាទុកការផ្លាស់ប្តូរ</string>
+  <!-- Header button that publishes edits of an already published survey again. -->
+  <string name="surveyeditor_republish">បោះពុម្ពផ្សាយឡើងវិញ</string>
+  <string name="surveyeditor_read_only_closed">ការស្ទង់មតិនេះត្រូវបានបិទ។ សូមបើកវាឡើងវិញ ដើម្បីធ្វើការផ្លាស់ប្តូរ។</string>
+  <string name="surveyeditor_read_only_archived">ការស្ទង់មតិនេះត្រូវបានទុកក្នុងបណ្ណសារ។ សូមបើកវាឡើងវិញ ដើម្បីធ្វើការផ្លាស់ប្តូរ។</string>
+  <string name="surveyeditor_survey_area_required">តំបន់ស្ទង់មតិគឺចាំបាច់។</string>
+  <!-- Notice after removing the survey's organization. %1$s is the name of the general access option (e.g. Restricted). -->
+  <string name="surveyeditor_access_changed_no_organization">ការចូលប្រើទូទៅត្រូវបានប្តូរទៅ "%1$s" ដោយសារការស្ទង់មតិលែងជាកម្មសិទ្ធិរបស់ស្ថាប័នណាមួយទៀតហើយ។</string>
+
+  <!-- Sharing: errors when inviting a person or accepting an invite. -->
+  <string name="surveyeditor_invite_invalid_email">សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែលដែលត្រឹមត្រូវ។</string>
+  <string name="surveyeditor_invite_is_owner">នោះគឺជាម្ចាស់ការស្ទង់មតិ។</string>
+  <string name="surveyeditor_invite_enter_name">សូមបញ្ចូលឈ្មោះ។</string>
+  <string name="surveyeditor_invite_not_invited">មិនបានអញ្ជើញ។</string>
+  <string name="surveyeditor_invite_already_joined">បានចូលរួមរួចហើយ។</string>
+
+  <!-- Data table import: how numeric dates like 03/04/2025 are read. -->
+  <string name="surveyeditor_date_order_day_first">ថ្ងៃមុន</string>
+  <string name="surveyeditor_date_order_month_first">ខែមុន</string>
+  <!-- Data table import notes shown before importing a CSV file. -->
+  <string name="surveyeditor_import_file_empty">ឯកសារទទេ។</string>
+  <string name="surveyeditor_import_no_data_rows">ឯកសារមានជួរដេកក្បាល ប៉ុន្តែគ្មានជួរដេកទិន្នន័យទេ។</string>
+  <plurals name="surveyeditor_import_ragged_rows">
+    <item quantity="other">ជួរដេក %1$d មានចំនួនជួរឈរខុសពីជួរដេកក្បាល។ ក្រឡាដែលខ្វះត្រូវទុកទទេ ហើយក្រឡាលើសត្រូវបានដកចេញ។</item>
+  </plurals>
+  <!-- "id" is the literal CSV column name; "Row ID" is the name of the column that is added. -->
+  <string name="surveyeditor_import_id_column_not_unique">ជួរឈរ id មានតម្លៃទទេ ឬស្ទួន ដូច្នេះជួរឈរ Row ID ថ្មីត្រូវបានបន្ថែម។</string>
+  <!-- %1$s is a comma-separated list of quoted column names; %2$s is a date pattern such as DD/MM/YYYY. -->
+  <string name="surveyeditor_import_ambiguous_dates">កាលបរិច្ឆេទក្នុង %1$s អាចជាថ្ងៃមុន ឬខែមុន។ ពួកវាត្រូវបានអានជា %2$s។</string>
+
+  <!-- Sample plots: why plots can't be generated. -->
+  <string name="surveyeditor_sampling_area_missing">សូមកំណត់តំបន់ស្ទង់មតិក្នុង ព័ត៌មានលម្អិតការស្ទង់មតិ ឬប្រើស្រទាប់ផែនទីពហុកោណជាក្រុមរង។</string>
+  <string name="surveyeditor_sampling_strata_deleted">ស្រទាប់ផែនទីក្រុមរងត្រូវបានលុប។ សូមជ្រើសរើសមួយផ្សេងទៀត។</string>
+  <string name="surveyeditor_sampling_strata_not_polygon">ក្រុមរងត្រូវតែមកពីស្រទាប់ផែនទីពហុកោណ។</string>
+  <!-- %1$s is the name of a map layer. -->
+  <string name="surveyeditor_sampling_strata_no_polygons">"%1$s" មិនទាន់មានពហុកោណនៅឡើយទេ។ សូមបន្ថែមពហុកោណ ដើម្បីប្រើវាជាក្រុមរង។</string>
+  <string name="surveyeditor_sampling_cant_generate_design">មិនអាចបង្កើតការរចនានេះបានទេ។</string>
+  <!-- %1$s is a technical error message. -->
+  <string name="surveyeditor_sampling_generate_failed_reason">មិនអាចបង្កើតក្បាលដីគំរូបានទេ៖ %1$s</string>
+  <string name="surveyeditor_sampling_generate_failed">មិនអាចបង្កើតក្បាលដីគំរូបានទេ។ សូមពិនិត្យការរចនា ហើយព្យាយាមម្តងទៀត។</string>
+  <string name="surveyeditor_sampling_no_plots_fit">គ្មានក្បាលដីគំរូណាសមនឹងតំបន់នេះទេ។ សូមសាកល្បងគម្លាត ឬទំហំក្បាលដីតូចជាងនេះ ឬតំបន់ធំជាងនេះ។</string>
+  <string name="surveyeditor_sampling_no_design">ស្រទាប់ផែនទីនេះមិនមានការរចនាគំរូទេ។</string>
+  <string name="surveyeditor_sampling_already_generating">ក្បាលដីគំរូកំពុងត្រូវបានបង្កើតរួចហើយ។</string>
+  <string name="surveyeditor_sampling_layer_missing">ស្រទាប់ផែនទីនេះលែងមានទៀតហើយ។</string>
+  <!-- %1$d is the number of submissions. -->
+  <plurals name="surveyeditor_regenerate_blocked">
+    <item quantity="other">ការបង្កើតឡើងវិញត្រូវបានបិទ ដោយសារការដាក់ស្នើ %1$d យោងទៅក្បាលដីគំរូទាំងនេះ។ ដើម្បីសាកល្បងការរចនាផ្សេង សូមបន្ថែមស្រទាប់ផែនទីក្បាលដីគំរូថ្មី។</item>
+  </plurals>
+
+  <!-- Survey editor page: header, lifecycle, navigation, survey details, sharing. -->
+  <!-- Survey editor page: header. -->
+  <!-- Fallback title for a survey without a title. -->
+  <string name="surveyeditor_untitled_survey">ការស្ទង់មតិគ្មានចំណងជើង</string>
+  <!-- Header context label identifying the survey editor page. -->
+  <string name="surveyeditor_header_survey_editor">កម្មវិធីកែសម្រួលការស្ទង់មតិ</string>
+  <!-- Header status for a draft survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_save">
+    <item quantity="other">ជួសជុល %1$d បញ្ហា ដើម្បីរក្សាទុក</item>
+  </plurals>
+  <!-- Header status for a published survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_publish">
+    <item quantity="other">ជួសជុល %1$d បញ្ហា ដើម្បីបោះពុម្ពផ្សាយ</item>
+  </plurals>
+  <string name="surveyeditor_header_unsaved_changes">ការផ្លាស់ប្តូរមិនទាន់រក្សាទុក</string>
+  <string name="surveyeditor_header_unpublished_changes">ការផ្លាស់ប្តូរមិនទាន់បោះពុម្ពផ្សាយ</string>
+  <string name="surveyeditor_header_draft_saved">បានរក្សាទុកសេចក្តីព្រាង</string>
+  <string name="surveyeditor_header_all_changes_published">បានបោះពុម្ពផ្សាយការផ្លាស់ប្តូរទាំងអស់</string>
+  <!-- Button that discards pending survey edits. -->
+  <string name="surveyeditor_header_discard">បោះចោល</string>
+  <string name="surveyeditor_header_discard_unsaved_title">បោះចោលការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុក?</string>
+  <string name="surveyeditor_header_discard_unpublished_title">បោះចោលការផ្លាស់ប្តូរដែលមិនទាន់បោះពុម្ពផ្សាយ?</string>
+  <string name="surveyeditor_header_discard_unsaved_message">ការផ្លាស់ប្តូរដែលអ្នកបានធ្វើ ចាប់តាំងពីសេចក្តីព្រាងនេះត្រូវបានរក្សាទុកចុងក្រោយ នឹងត្រូវបាត់បង់។</string>
+  <string name="surveyeditor_header_discard_unpublished_message">ការផ្លាស់ប្តូរដែលអ្នកបានធ្វើ ចាប់តាំងពីការស្ទង់មតិនេះត្រូវបានបោះពុម្ពផ្សាយចុងក្រោយ នឹងត្រូវបាត់បង់។ អ្នកប្រមូលទិន្នន័យនឹងនៅតែឃើញកំណែដែលបានបោះពុម្ពផ្សាយ។</string>
+  <string name="surveyeditor_header_keep_editing">បន្តកែសម្រួល</string>
+  <string name="surveyeditor_working_copy_prompt_title">បន្តកែសម្រួលសេចក្តីព្រាងដែលមិនទាន់រក្សាទុក?</string>
+  <string name="surveyeditor_working_copy_prompt_draft_message">អ្នកមានការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុកពីវគ្គមុនលើសេចក្តីព្រាងការស្ទង់មតិនេះ។ តើអ្នកចង់បន្តកែសម្រួលសេចក្តីព្រាងដែលមិនទាន់រក្សាទុករបស់អ្នក ឬបោះចោលការផ្លាស់ប្តូរទាំងនោះ?</string>
+  <string name="surveyeditor_working_copy_prompt_published_message">អ្នកមានការផ្លាស់ប្តូរដែលមិនទាន់បោះពុម្ពផ្សាយពីវគ្គមុនលើការស្ទង់មតិនេះ។ តើអ្នកចង់បន្តកែសម្រួលសេចក្តីព្រាងដែលមិនទាន់រក្សាទុករបស់អ្នក ឬបោះចោលការផ្លាស់ប្តូរទាំងនោះ?</string>
+  <string name="surveyeditor_working_copy_continue">បន្តកែសម្រួល</string>
+  <string name="surveyeditor_working_copy_discard">បោះចោលសេចក្តីព្រាង</string>
+
+  <!-- Survey lifecycle (status) controls. -->
+  <!-- Button that reopens a closed or archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen">បើកឡើងវិញ</string>
+  <string name="surveyeditor_lifecycle_draft_description">អ្នករៀបចំអាចកែសម្រួលបាន។ លាក់ពីអ្នកប្រមូលទិន្នន័យតាមទូរសព្ទ រហូតដល់បោះពុម្ពផ្សាយ។</string>
+  <string name="surveyeditor_lifecycle_published_description">កំពុងដំណើរការសម្រាប់ការប្រមូលទិន្នន័យនៅទីវាល និងលើគេហទំព័រ។</string>
+  <string name="surveyeditor_lifecycle_closed_description">ការប្រមូលទិន្នន័យបានបញ្ចប់ ហើយការស្ទង់មតិសម្រាប់មើលតែប៉ុណ្ណោះ រហូតដល់បើកឡើងវិញ។</string>
+  <string name="surveyeditor_lifecycle_archived_description">បានឈប់ប្រើ ហើយរក្សាទុកសម្រាប់មើលតែប៉ុណ្ណោះ ដើម្បីយោងរយៈពេលវែង។</string>
+  <string name="surveyeditor_lifecycle_publish_survey">បោះពុម្ពផ្សាយការស្ទង់មតិ</string>
+  <string name="surveyeditor_lifecycle_publish_survey_description">ដាក់ឱ្យដំណើរការសម្រាប់ការប្រមូលទិន្នន័យលើទូរសព្ទ និងគេហទំព័រ</string>
+  <string name="surveyeditor_lifecycle_archive_survey">ទុកការស្ទង់មតិក្នុងបណ្ណសារ</string>
+  <string name="surveyeditor_lifecycle_archive_survey_description">ឈប់ប្រើ ហើយរក្សាទុកសម្រាប់មើលតែប៉ុណ្ណោះ ដើម្បីយោង</string>
+  <string name="surveyeditor_lifecycle_switch_to_draft">ប្តូរទៅសេចក្តីព្រាង</string>
+  <!-- Description of switching a published survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_published_description">ផ្អាកការបង្ហាញនៅទីវាល ខណៈពេលបន្តកែសម្រួល</string>
+  <!-- Description of switching a closed survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_closed_description">ដោះសោការកែសម្រួលក្នុងរបៀបសេចក្តីព្រាង មុនពេលបោះពុម្ពផ្សាយឡើងវិញ</string>
+  <!-- Description of switching an archived survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_archived_description">ស្តារក្នុងរបៀបសេចក្តីព្រាង ដើម្បីកែសម្រួល</string>
+  <string name="surveyeditor_lifecycle_close_survey">បិទការស្ទង់មតិ</string>
+  <string name="surveyeditor_lifecycle_close_survey_description">បញ្ចប់ការប្រមូលទិន្នន័យ ហើយកំណត់ឱ្យមើលតែប៉ុណ្ណោះ</string>
+  <string name="surveyeditor_lifecycle_reopen_survey">បើកការស្ទង់មតិឡើងវិញ</string>
+  <!-- Description of reopening a closed survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_closed_description">បន្តការប្រមូលទិន្នន័យ និងការកែសម្រួល</string>
+  <!-- Description of reopening an archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_archived_description">ស្តារឡើងវិញសម្រាប់ការប្រមូលទិន្នន័យ និងការកែសម្រួលសកម្ម</string>
+  <!-- Screen reader description of the status badge. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_badge_description">ស្ថានភាពការស្ទង់មតិ៖ %1$s។ ចុចដើម្បីប្តូរស្ថានភាព</string>
+  <!-- Heading of the status menu. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_label">ស្ថានភាពការស្ទង់មតិ៖ %1$s</string>
+  <string name="surveyeditor_lifecycle_archive_title">ទុកការស្ទង់មតិនេះក្នុងបណ្ណសារ?</string>
+  <string name="surveyeditor_lifecycle_close_title">បិទការស្ទង់មតិនេះ?</string>
+  <string name="surveyeditor_lifecycle_archive_message">ការស្ទង់មតិក្នុងបណ្ណសារត្រូវបានរក្សាទុកសម្រាប់យោង។ គ្មាននរណាអាចប្រមូលទិន្នន័យ ឬធ្វើការផ្លាស់ប្តូរបានទេ។ អ្នកអាចបើកវាឡើងវិញបានគ្រប់ពេល។</string>
+  <string name="surveyeditor_lifecycle_archive_message_discard">ការស្ទង់មតិក្នុងបណ្ណសារត្រូវបានរក្សាទុកសម្រាប់យោង។ គ្មាននរណាអាចប្រមូលទិន្នន័យ ឬធ្វើការផ្លាស់ប្តូរបានទេ។ អ្នកអាចបើកវាឡើងវិញបានគ្រប់ពេល។ ការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុកនឹងត្រូវបោះចោល។</string>
+  <string name="surveyeditor_lifecycle_close_message">អ្នកប្រមូលទិន្នន័យមិនអាចបន្ថែមទិន្នន័យថ្មីបានទេ ហើយគ្មាននរណាអាចធ្វើការផ្លាស់ប្តូរបានទេ។ អ្នកអាចបើកវាឡើងវិញបានគ្រប់ពេល។</string>
+  <string name="surveyeditor_lifecycle_close_message_discard">អ្នកប្រមូលទិន្នន័យមិនអាចបន្ថែមទិន្នន័យថ្មីបានទេ ហើយគ្មាននរណាអាចធ្វើការផ្លាស់ប្តូរបានទេ។ អ្នកអាចបើកវាឡើងវិញបានគ្រប់ពេល។ ការផ្លាស់ប្តូរដែលមិនទាន់រក្សាទុកនឹងត្រូវបោះចោល។</string>
+  <!-- Button that confirms archiving the survey. -->
+  <string name="surveyeditor_lifecycle_archive">ទុកក្នុងបណ្ណសារ</string>
+
+  <!-- Survey editor navigation panel. -->
+  <!-- Navigation item and pane title for the survey's basic information. -->
+  <string name="surveyeditor_nav_survey_details">ព័ត៌មានលម្អិតការស្ទង់មតិ</string>
+  <!-- Navigation item and pane title for sharing settings. -->
+  <string name="surveyeditor_nav_sharing">ការចែករំលែក</string>
+  <!-- Navigation heading and summary card label for the survey's forms. -->
+  <string name="surveyeditor_nav_forms">សំណុំបែបបទ</string>
+  <string name="surveyeditor_nav_add_form">បន្ថែមសំណុំបែបបទ</string>
+  <string name="surveyeditor_nav_no_forms">មិនទាន់មានសំណុំបែបបទ</string>
+  <!-- Fallback name for a form without a title. -->
+  <string name="surveyeditor_untitled_form">សំណុំបែបបទគ្មានចំណងជើង</string>
+  <string name="surveyeditor_nav_add_map_layer">បន្ថែមស្រទាប់ផែនទី</string>
+  <string name="surveyeditor_nav_add_data_table">បន្ថែមតារាងទិន្នន័យ</string>
+  <string name="surveyeditor_nav_no_map_layers">មិនទាន់មានស្រទាប់ផែនទី</string>
+  <string name="surveyeditor_nav_no_data_tables">មិនទាន់មានតារាងទិន្នន័យ</string>
+  <!-- Fallback name for a map layer or data table without a name. -->
+  <string name="surveyeditor_untitled">គ្មានចំណងជើង</string>
+  <!-- Screen reader action that moves a navigation item up. -->
+  <string name="surveyeditor_nav_move_up">ផ្លាស់ទីឡើងលើ</string>
+  <!-- Screen reader action that moves a navigation item down. -->
+  <string name="surveyeditor_nav_move_down">ផ្លាស់ទីចុះក្រោម</string>
+  <!-- Screen reader description of the warning icon on a navigation item. -->
+  <string name="surveyeditor_nav_has_issues">មានបញ្ហា</string>
+
+  <!-- Survey details pane. -->
+  <string name="surveyeditor_details_subtitle">ព័ត៌មានមូលដ្ឋានដែលបង្ហាញដល់អ្នកប្រមូលទិន្នន័យ នៅពេលពួកគេបើកការស្ទង់មតិ។</string>
+  <string name="surveyeditor_details_survey_title">ចំណងជើងការស្ទង់មតិ</string>
+  <string name="surveyeditor_details_contents">ខ្លឹមសារ</string>
+  <string name="surveyeditor_details_map_layers">ស្រទាប់ផែនទី</string>
+  <string name="surveyeditor_details_data_tables">តារាងទិន្នន័យ</string>
+  <string name="surveyeditor_details_people">មនុស្ស</string>
+  <!-- Heading of the list of survey activity events (exports, receipts, closing). -->
+  <string name="surveyeditor_details_activity">សកម្មភាព</string>
+  <!-- Part of an activity event summary. %1$d is the number of map features. -->
+  <plurals name="surveyeditor_details_activity_map_features">
+    <item quantity="other">%1$d ធាតុផែនទី</item>
+  </plurals>
+  <!-- Part of an activity event summary. %1$s is the export profile ID. -->
+  <string name="surveyeditor_details_activity_profile">ប្រវត្តិរូប៖ %1$s</string>
+  <string name="surveyeditor_details_survey_status">ស្ថានភាពការស្ទង់មតិ</string>
+  <!-- Section title and dropdown label for the survey's organization. -->
+  <string name="surveyeditor_details_organization">ស្ថាប័ន</string>
+  <!-- Organization dropdown option for a survey that doesn't belong to an organization. -->
+  <string name="surveyeditor_details_organization_none">គ្មាន (ការស្ទង់មតិផ្ទាល់ខ្លួន)</string>
+  <string name="surveyeditor_details_organization_hint">អ្នកអាចដំណើរការការស្ទង់មតិនេះក្នុងនាមស្ថាប័នដែលអ្នកជាសមាជិក (ស្រេចចិត្ត)។ អ្នកនៅតែជាម្ចាស់។ អ្នកគ្រប់គ្រងនៃស្ថាប័នក៏អាចកែសម្រួលការស្ទង់មតិ គ្រប់គ្រងការចែករំលែក និងនាំចេញទិន្នន័យបានដែរ ហើយសមាជិករបស់ស្ថាប័នអាចរកឃើញការស្ទង់មតិក្នុងបញ្ជីរបស់ពួកគេ។</string>
+  <!-- Selected organization that couldn't be found. %1$s is its ID. -->
+  <string name="surveyeditor_details_organization_unknown">ស្ថាប័នមិនស្គាល់ (%1$s)</string>
+  <string name="surveyeditor_details_organization_missing">ស្ថាប័ននេះលែងមានទៀតហើយ។ សូមជ្រើសរើសស្ថាប័នផ្សេង ឬធ្វើឱ្យការស្ទង់មតិក្លាយជាផ្ទាល់ខ្លួន។</string>
+  <!-- Screen reader label of the button that dismisses a notice. -->
+  <string name="surveyeditor_details_dismiss">បោះបង់ការជូនដំណឹង</string>
+  <string name="surveyeditor_details_cost_title">ការគ្រប់គ្រងថ្លៃដើម និងកូតា</string>
+  <string name="surveyeditor_details_cost_estimated">ថ្លៃដើមប្រចាំខែប៉ាន់ស្មាន</string>
+  <!-- Part of the cost summary, e.g. "3 forms · 12 questions · …". -->
+  <plurals name="surveyeditor_details_cost_forms">
+    <item quantity="other">%1$d សំណុំបែបបទ</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of questions. -->
+  <plurals name="surveyeditor_details_cost_questions">
+    <item quantity="other">%1$d សំណួរ</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of predefined entities. -->
+  <plurals name="surveyeditor_details_cost_predefined">
+    <item quantity="other">%1$d កំណត់ជាមុន</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of generated sample plots. -->
+  <plurals name="surveyeditor_details_cost_sample_plots">
+    <item quantity="other">%1$d ក្បាលដីគំរូ</item>
+  </plurals>
+  <string name="surveyeditor_details_cost_tier_override">កម្រិតជំនួស៖</string>
+  <!-- Quota tier option: inherit the tier from the organization or default. -->
+  <string name="surveyeditor_details_cost_tier_inherit">ទទួលបន្ត</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_basic">មូលដ្ឋាន</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_sponsored">ឧបត្ថម្ភ</string>
+  <string name="surveyeditor_details_cost_budget_cap">ពិដានថវិកាប្រចាំខែនៃការស្ទង់មតិ ($ USD)</string>
+  <string name="surveyeditor_details_cost_budget_placeholder">0.00 (គ្មានដែនកំណត់)</string>
+  <string name="surveyeditor_details_cost_hide_limits">លាក់ដែនកំណត់ធនធានលម្អិត</string>
+  <string name="surveyeditor_details_cost_customize_limits">ប្តូរតាមបំណងដែនកំណត់ធនធានលម្អិត</string>
+  <string name="surveyeditor_details_cost_max_forms">សំណុំបែបបទអតិបរមា</string>
+  <string name="surveyeditor_details_cost_max_questions_per_form">សំណួរអតិបរមា / សំណុំបែបបទ</string>
+  <string name="surveyeditor_details_cost_max_photo_questions_per_form">សំណួររូបថតអតិបរមា / សំណុំបែបបទ</string>
+  <string name="surveyeditor_details_cost_max_predefined_entities">ធាតុកំណត់ជាមុនអតិបរមា</string>
+  <string name="surveyeditor_details_cost_max_sample_plots">ក្បាលដីគំរូអតិបរមា</string>
+  <string name="surveyeditor_details_cost_max_area_vertices">ចំណុចកំពូលតំបន់អតិបរមា</string>
+  <string name="surveyeditor_details_cost_max_acl_collaborators">អ្នកសហការ ACL អតិបរមា</string>
+  <string name="surveyeditor_details_purpose_title">គោលបំណង</string>
+  <string name="surveyeditor_details_purpose_hint">ទិន្នន័យនៃការស្ទង់មតិនេះនឹងប្រើសម្រាប់អ្វី។ ការស្ទង់មតិមួយអាចមានគោលបំណងច្រើន។ វាលស្តង់ដារនៃគោលបំណងរបស់វាត្រូវបានស្នើមុនពេលអ្នកសរសេរសំណួរ។ ការផ្លាស់ប្តូរគោលបំណងនៅទីនេះមិនបន្ថែម ឬលុបទម្រង់ទេ។ ដើម្បីបន្ថែមទម្រង់ចាប់ផ្តើមនៃគោលបំណង សូមប្រើ បន្ថែមទម្រង់ &gt; សម្រាប់គោលបំណង។</string>
+  <string name="surveyeditor_details_purpose_none">គ្មានគោលបំណងសម្រាប់ការស្ទង់មតិនេះទេ។</string>
+  <string name="surveyeditor_details_purpose_unavailable">លែងមាននៅក្នុងបណ្ណាល័យរបស់ការស្ទង់មតិនេះទៀតហើយ៖</string>
+  <!-- Screen reader label of a button that removes an item. %1$s is the item's name. -->
+  <string name="surveyeditor_details_remove_item">លុប %1$s ចេញ</string>
+
+  <!-- Survey languages. -->
+  <string name="surveyeditor_language_title">ភាសា</string>
+  <string name="surveyeditor_language_hint">ជ្រើសរើសភាសាដែលសំណុំបែបបទ និងសំណួរស្ទង់មតិអាចត្រូវបានសរសេរ និងប្រមូល។ ភាសាលំនាំដើមត្រូវបានបង្ហាញ នៅពេលគ្មានការបកប្រែជាក់លាក់។</string>
+  <string name="surveyeditor_language_supported">ភាសាដែលគាំទ្រ</string>
+  <!-- Chip for the survey's default language. %1$s is the language name. -->
+  <string name="surveyeditor_language_default_chip">%1$s • លំនាំដើម</string>
+  <string name="surveyeditor_language_add">បន្ថែមភាសា</string>
+  <string name="surveyeditor_language_none_selected">មិនបានជ្រើសរើស</string>
+  <string name="surveyeditor_language_default">ភាសាលំនាំដើម</string>
+  <string name="surveyeditor_language_picker_title">ជ្រើសរើសភាសា</string>
+  <string name="surveyeditor_language_search_label">ស្វែងរកតាមឈ្មោះភាសា</string>
+  <string name="surveyeditor_language_search_placeholder">ឧ. ស្វាហ៊ីលី អង់គ្លេស អេស្ប៉ាញ អាំហារិក...</string>
+  <string name="surveyeditor_language_popular">ភាសាពេញនិយម និងការមើលកាតាឡុកជាមុន៖</string>
+  <!-- %1$d is the number of languages matching the search. -->
+  <plurals name="surveyeditor_language_matches">
+    <item quantity="other">បានរកឃើញ %1$d ដែលត្រូវគ្នា៖</item>
+  </plurals>
+  <!-- %1$s is the search query. -->
+  <string name="surveyeditor_language_no_matches">គ្មានភាសាដែលត្រូវនឹង “%1$s” ទេ</string>
+  <!-- Badge on a language that is already supported by the survey. -->
+  <string name="surveyeditor_language_added">បានបន្ថែម</string>
+
+  <!-- Survey area section of the survey details pane. -->
+  <!-- Fallback location label for an untitled survey in the survey area editor. -->
+  <string name="surveyeditor_details_area_default_location">ការស្ទង់មតិ</string>
+  <!-- Title of the required survey area section; * marks a required field. -->
+  <string name="surveyeditor_details_area_title">តំបន់ស្ទង់មតិ *</string>
+  <string name="surveyeditor_details_area_hint">វិសាលភាពភូមិសាស្ត្រ និងព្រំដែនសម្រាប់ការប្រមូលទិន្នន័យក្នុងការស្ទង់មតិនេះ។</string>
+  <!-- %1$s describes where the survey area came from, e.g. an uploaded file. -->
+  <string name="surveyeditor_details_area_source">ប្រភព៖ %1$s</string>
+  <string name="surveyeditor_details_area_edit">កែសម្រួលតំបន់ស្ទង់មតិ</string>
+  <string name="surveyeditor_details_area_required">សូមជ្រើសរើស ឬគូរតំបន់ស្ទង់មតិ ដើម្បីបន្ត។</string>
+  <string name="surveyeditor_details_area_empty_title">មិនទាន់កំណត់តំបន់ស្ទង់មតិ</string>
+  <string name="surveyeditor_details_area_empty_hint">ស្វែងរកទីកន្លែង គូរព្រំដែនលើផែនទី ឬផ្ទុកឡើងឯកសារ GeoJSON ឬ KML។</string>
+  <string name="surveyeditor_details_area_set">កំណត់តំបន់ស្ទង់មតិ</string>
+
+  <!-- Sharing pane. -->
+  <string name="surveyeditor_sharing_subtitle">ជ្រើសរើសអ្នកដែលអាចបើកការស្ទង់មតិនេះ និងអ្វីដែលអ្នកប្រមូលទិន្នន័យអាចមើលឃើញ។</string>
+  <string name="surveyeditor_sharing_people_with_access">អ្នកដែលមានសិទ្ធិចូលប្រើ</string>
+  <string name="surveyeditor_sharing_owner_detail">ម្ចាស់ការស្ទង់មតិ</string>
+  <string name="surveyeditor_sharing_owner">ម្ចាស់</string>
+  <string name="surveyeditor_sharing_pending_detail">កំពុងរង់ចាំពួកគេទទួលយកតំណអញ្ជើញ</string>
+  <string name="surveyeditor_sharing_joined_now">ទើបតែចូលរួម</string>
+  <!-- %1$s is the date the person joined. -->
+  <string name="surveyeditor_sharing_joined">បានចូលរួម %1$s</string>
+  <!-- Dropdown label for a collaborator's role. -->
+  <string name="surveyeditor_sharing_role">តួនាទី</string>
+  <string name="surveyeditor_sharing_profile_note">ឈ្មោះ និងរូបថតមកពីគណនីរបស់មនុស្សម្នាក់ៗ។ Collect One រក្សាទុកពួកវានៅពេលពួកគេទទួលយកតំណអញ្ជើញ ហើយធ្វើឱ្យទាន់សម័យនៅពេលពួកគេចូលគណនី។</string>
+  <string name="surveyeditor_sharing_data_access">ការចូលប្រើទិន្នន័យ និងភាពមើលឃើញ</string>
+  <string name="surveyeditor_sharing_add_by_email">បន្ថែមមនុស្សតាមអ៊ីមែល</string>
+  <string name="surveyeditor_sharing_invite">អញ្ជើញ</string>
+  <string name="surveyeditor_sharing_org_managers">អ្នកគ្រប់គ្រងស្ថាប័ន</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_org_managers_hint">ទទួលបន្តពី %1$s។ អ្នកគ្រប់គ្រងអាចកែសម្រួលការស្ទង់មតិនេះ គ្រប់គ្រងការចែករំលែក និងនាំចេញទិន្នន័យ។ សូមប្តូរអ្នកគ្រប់គ្រងស្ថាប័ននៅទំព័រ សមាជិក របស់វា។</string>
+  <string name="surveyeditor_sharing_no_managers">មិនទាន់មានអ្នកគ្រប់គ្រង។</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_manager_of">អ្នកគ្រប់គ្រងនៃ %1$s</string>
+  <string name="surveyeditor_sharing_share_link_title">តំណចែករំលែក និងកូដ QR</string>
+  <!-- Badge for a survey that is only reachable through its link. -->
+  <string name="surveyeditor_sharing_badge_unlisted">មិនមានក្នុងបញ្ជី</string>
+  <!-- Badge for a survey listed in the public survey directory. -->
+  <string name="surveyeditor_sharing_badge_public">បញ្ជីសាធារណៈ</string>
+  <!-- Copy button label after the link was copied. -->
+  <string name="surveyeditor_sharing_copied">បានចម្លង</string>
+  <string name="surveyeditor_sharing_copy_link">ចម្លងតំណ</string>
+  <string name="surveyeditor_sharing_show_qr">បង្ហាញកូដ QR</string>
+  <!-- QR code dialog title. %1$s is the survey title. -->
+  <string name="surveyeditor_sharing_qr_title">ចែករំលែក “%1$s”</string>
+  <string name="surveyeditor_sharing_qr_title_untitled">តំណចែករំលែកការស្ទង់មតិ និងកូដ QR</string>
+  <string name="surveyeditor_sharing_qr_hint">អ្នកប្រមូលទិន្នន័យអាចស្កេនកូដ QR នេះដោយប្រើកាមេរ៉ាទូរសព្ទ ឬកម្មវិធី Collect One ដើម្បីបើកការស្ទង់មតិដោយផ្ទាល់។</string>
+
+  <!-- General access sliders: audience stops. -->
+  <string name="surveyeditor_access_contributors_and_organizers">អ្នករួមចំណែក និងអ្នករៀបចំ</string>
+  <string name="surveyeditor_access_invited_people">អ្នកដែលបានអញ្ជើញ</string>
+  <string name="surveyeditor_access_anyone_in_organization">នរណាម្នាក់ក្នុងស្ថាប័នរបស់អ្នក</string>
+  <string name="surveyeditor_access_anyone">នរណាក៏បាន</string>
+  <string name="surveyeditor_access_who_can_view">អ្នកដែលអាចមើលទិន្នន័យ</string>
+  <string name="surveyeditor_access_who_can_collect">អ្នកដែលអាចប្រមូលទិន្នន័យ</string>
+  <!-- Screen reader description of a slider stop. %1$s is the slider title, %2$s the audience. -->
+  <string name="surveyeditor_access_slider_stop_description">%1$s៖ %2$s</string>
+  <string name="surveyeditor_access_view_hint_contributors">អ្នកប្រមូលទិន្នន័យឃើញតែការដាក់ស្នើរបស់ខ្លួនប៉ុណ្ណោះ។ អ្នករៀបចំការស្ទង់មតិអាចមើលការដាក់ស្នើទាំងអស់ និងអត្តសញ្ញាណអ្នករួមចំណែក។</string>
+  <string name="surveyeditor_access_view_hint_invited">អ្នកដែលបានបន្ថែមខាងលើអាចមើលធាតុផែនទី ចម្លើយ រូបថត និងមេឌៀផ្សេងទៀតដែលបានផ្ទុកឡើងទាំងអស់។ មានតែអ្នករៀបចំការស្ទង់មតិប៉ុណ្ណោះដែលអាចមើលអត្តសញ្ញាណអ្នករួមចំណែក។</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_access_view_hint_organization">នរណាម្នាក់ក្នុង %1$s អាចមើលធាតុផែនទី ចម្លើយ រូបថត និងមេឌៀផ្សេងទៀតដែលបានផ្ទុកឡើងទាំងអស់។ មានតែអ្នករៀបចំការស្ទង់មតិប៉ុណ្ណោះដែលអាចមើលអត្តសញ្ញាណអ្នករួមចំណែក។</string>
+  <string name="surveyeditor_access_view_hint_organization_unset">នរណាម្នាក់ក្នុងស្ថាប័នរបស់អ្នកអាចមើលធាតុផែនទី ចម្លើយ រូបថត និងមេឌៀផ្សេងទៀតដែលបានផ្ទុកឡើងទាំងអស់។ សូមជ្រើសរើសស្ថាប័នក្នុង ព័ត៌មានលម្អិតការស្ទង់មតិ។</string>
+  <string name="surveyeditor_access_view_hint_anyone">នរណាក៏អាចមើលធាតុផែនទី ចម្លើយ រូបថត និងមេឌៀផ្សេងទៀតដែលបានផ្ទុកឡើងទាំងអស់។ មានតែអ្នករៀបចំការស្ទង់មតិប៉ុណ្ណោះដែលអាចមើលអត្តសញ្ញាណអ្នករួមចំណែក។ អ្នកចូលរួមត្រូវតែទទួលយកសេចក្តីជូនដំណឹងអំពីការយល់ព្រម មុនពេលប្រមូលទិន្នន័យ។</string>
+  <string name="surveyeditor_access_collect_hint_invited">មានតែអ្នកដែលបានបន្ថែមខាងលើប៉ុណ្ណោះដែលអាចបើកការស្ទង់មតិនេះ និងប្រមូលទិន្នន័យ។</string>
+  <!-- %1$s is the organization name (used twice). -->
+  <string name="surveyeditor_access_collect_hint_organization">សមាជិកនៃ %1$s អាចបើកការស្ទង់មតិនេះ និងប្រមូលទិន្នន័យ។ អ្នកគ្រប់គ្រងនៃ %1$s ក៏អាចកែសម្រួលការស្ទង់មតិបានដែរ។</string>
+  <string name="surveyeditor_access_collect_hint_organization_unset">សមាជិកនៃស្ថាប័នរបស់អ្នកអាចបើកការស្ទង់មតិនេះ និងប្រមូលទិន្នន័យ។ សូមជ្រើសរើសស្ថាប័នក្នុង ព័ត៌មានលម្អិតការស្ទង់មតិ។</string>
+  <string name="surveyeditor_access_collect_hint_anyone">នរណាក៏អាចបើកការស្ទង់មតិនេះ និងដាក់ស្នើទិន្នន័យបាន។</string>
+  <string name="surveyeditor_access_unlisted_option">មិនមានក្នុងបញ្ជី (មានតែអ្នកដែលមានតំណ ឬកូដ QR)</string>
+  <string name="surveyeditor_access_public_option">សាធារណៈ (មានក្នុងបញ្ជីការស្ទង់មតិ)</string>
+  <string name="surveyeditor_access_who_can_find">អ្នកដែលអាចរកឃើញការស្ទង់មតិនេះ</string>
+  <string name="surveyeditor_access_unlisted_hint">មិនមានក្នុងបញ្ជី៖ មានតែអ្នកដែលមានតំណផ្ទាល់ ឬស្កេនកូដ QR ខាងក្រោមប៉ុណ្ណោះ ដែលអាចរកឃើញ និងបើកការស្ទង់មតិនេះ។</string>
+  <string name="surveyeditor_access_public_hint">សាធារណៈ៖ នរណាក៏ដែលរុករកបញ្ជីការស្ទង់មតិ អាចរកឃើញ និងបើកការស្ទង់មតិនេះ ឬប្រើតំណផ្ទាល់ និងកូដ QR ខាងក្រោម។</string>
+
+  <!-- Data tables, map layers, add dialogs, people. -->
+  <!-- Map layer / data table editor (EntityDatasetEditor). -->
+  <!-- Shown in place of a map layer or data table name when it is blank. -->
+  <string name="surveyeditor_dataset_untitled">គ្មានចំណងជើង</string>
+  <!-- Count in a data table summary, e.g. "3 rows • 2 properties". -->
+  <plurals name="surveyeditor_dataset_rows_count">
+    <item quantity="other">%1$d ជួរដេក</item>
+  </plurals>
+  <!-- Count in a map layer summary, e.g. "3 features • 2 properties". -->
+  <plurals name="surveyeditor_dataset_features_count">
+    <item quantity="other">%1$d ធាតុ</item>
+  </plurals>
+  <!-- Count of the columns (properties) of a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_properties_count">
+    <item quantity="other">%1$d លក្ខណៈសម្បត្តិ</item>
+  </plurals>
+  <!-- Number of validation issues found in a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_issues_count">
+    <item quantity="other">%1$d បញ្ហា</item>
+  </plurals>
+  <!-- Content description of a dataset's overflow menu button. %1$s is the dataset name. -->
+  <string name="surveyeditor_dataset_more_options">ជម្រើសបន្ថែមសម្រាប់ %1$s</string>
+  <string name="surveyeditor_dataset_delete_map_layer_menu">លុបស្រទាប់ផែនទី…</string>
+  <string name="surveyeditor_dataset_delete_data_table_menu">លុបតារាងទិន្នន័យ…</string>
+  <string name="surveyeditor_dataset_delete_map_layer_title">លុបស្រទាប់ផែនទីនេះ?</string>
+  <string name="surveyeditor_dataset_delete_data_table_title">លុបតារាងទិន្នន័យនេះ?</string>
+  <!-- %1$s is the map layer name, %2$d the number of features. -->
+  <plurals name="surveyeditor_dataset_delete_map_layer_body">
+    <item quantity="other">“%1$s” និងធាតុ %2$d របស់វា នឹងត្រូវលុបចេញពីការស្ទង់មតិនេះ។</item>
+  </plurals>
+  <!-- %1$s is the data table name, %2$d the number of rows. -->
+  <plurals name="surveyeditor_dataset_delete_data_table_body">
+    <item quantity="other">“%1$s” និងជួរដេក %2$d របស់វា នឹងត្រូវលុបចេញពីការស្ទង់មតិនេះ។</item>
+  </plurals>
+  <string name="surveyeditor_dataset_delete_map_layer">លុបស្រទាប់ផែនទី</string>
+  <string name="surveyeditor_dataset_delete_data_table">លុបតារាងទិន្នន័យ</string>
+  <!-- Title of the table listing a map layer's features. -->
+  <string name="surveyeditor_dataset_features">ធាតុ</string>
+  <!-- Title of the table listing a data table's rows. -->
+  <string name="surveyeditor_dataset_rows">ជួរដេក</string>
+  <string name="surveyeditor_dataset_add_feature">បន្ថែមធាតុ</string>
+  <string name="surveyeditor_dataset_add_row">បន្ថែមជួរដេក</string>
+  <!-- Shown after the first issues of a dataset. %1$d is how many more issues there are. -->
+  <plurals name="surveyeditor_dataset_more_issues">
+    <item quantity="other">…និង %1$d ទៀត</item>
+  </plurals>
+  <!-- Table column header of the dataset's key property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_key">%1$s (គន្លឹះ)</string>
+  <!-- Table column header of the dataset's label property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_label">%1$s (ស្លាក)</string>
+  <!-- Header of the column where feature geometry is typed as coordinates. -->
+  <string name="surveyeditor_dataset_column_geometry">ធរណីមាត្រ (lat, lng; …)</string>
+  <string name="surveyeditor_dataset_empty_sample_plots">មិនទាន់មានក្បាលដីគំរូ។ សូមបង្កើតពួកវាពីការរចនាគំរូ។</string>
+  <string name="surveyeditor_dataset_empty_features">មិនទាន់មានធាតុ។ សូមបន្ថែមនៅទីនេះ ឬលើផែនទី។</string>
+  <string name="surveyeditor_dataset_empty_rows">មិនទាន់មានជួរដេក។</string>
+  <!-- Sample points of a sample plot, shown when a plot has none. -->
+  <string name="surveyeditor_dataset_samples_none">គ្មាន</string>
+  <!-- Number of sample points of a sample plot. -->
+  <plurals name="surveyeditor_dataset_samples_count">
+    <item quantity="other">%1$d ចំណុច</item>
+  </plurals>
+  <!-- Section label of the dataset settings panel. -->
+  <string name="surveyeditor_dataset_settings">ការកំណត់</string>
+  <string name="surveyeditor_dataset_name">ឈ្មោះ</string>
+  <string name="surveyeditor_dataset_geometry_type">ប្រភេទធរណីមាត្រ</string>
+  <string name="surveyeditor_dataset_sample_design">ការរចនាគំរូ</string>
+  <string name="surveyeditor_dataset_key_property">លក្ខណៈសម្បត្តិគន្លឹះ (ID តែមួយគត់)</string>
+  <!-- Shown in a dropdown when nothing has been chosen yet. -->
+  <string name="surveyeditor_dataset_choose">ជ្រើសរើស…</string>
+  <string name="surveyeditor_dataset_label_property">លក្ខណៈសម្បត្តិស្លាក (បង្ហាញក្នុងបញ្ជី)</string>
+  <string name="surveyeditor_dataset_field_collection">ការប្រមូលនៅទីវាល និងសំណុំបែបបទ</string>
+  <!-- %1$s is the title of the form linked to the dataset. -->
+  <string name="surveyeditor_dataset_linked_to">បានភ្ជាប់ទៅ %1$s</string>
+  <string name="surveyeditor_dataset_linked_form_map_layer">អ្នកប្រមូលទិន្នន័យអាចបន្ថែមធាតុផែនទីថ្មីដោយប្រើសំណុំបែបបទនេះ។ លក្ខណៈសម្បត្តិគ្រោងទិន្នន័យនៅតែស្របគ្នាជាមួយសំណួរសំណុំបែបបទ។</string>
+  <string name="surveyeditor_dataset_linked_form_data_table">អ្នកប្រមូលទិន្នន័យអាចបន្ថែមជួរដេកថ្មីដោយប្រើសំណុំបែបបទនេះ។ លក្ខណៈសម្បត្តិគ្រោងទិន្នន័យនៅតែស្របគ្នាជាមួយសំណួរសំណុំបែបបទ។</string>
+  <string name="surveyeditor_dataset_edit_form">កែសម្រួលសំណុំបែបបទ</string>
+  <string name="surveyeditor_dataset_unlink_form">ផ្តាច់សំណុំបែបបទ</string>
+  <string name="surveyeditor_dataset_no_form_map_layer">គ្មានសំណុំបែបបទណាភ្ជាប់ទៅស្រទាប់ផែនទីនេះទេ។ អ្នកប្រមូលទិន្នន័យអាចមើលបានតែធាតុដែលមានស្រាប់ប៉ុណ្ណោះ។</string>
+  <string name="surveyeditor_dataset_no_form_data_table">គ្មានសំណុំបែបបទណាភ្ជាប់ទៅតារាងទិន្នន័យនេះទេ។ អ្នកប្រមូលទិន្នន័យអាចមើលបានតែធាតុដែលមានស្រាប់ប៉ុណ្ណោះ។</string>
+  <string name="surveyeditor_dataset_create_form_map_layer">បង្កើតសំណុំបែបបទសម្រាប់ស្រទាប់ផែនទី</string>
+  <string name="surveyeditor_dataset_create_form_data_table">បង្កើតសំណុំបែបបទសម្រាប់តារាងទិន្នន័យ</string>
+  <!-- Label above the list of forms that update this dataset. -->
+  <string name="surveyeditor_dataset_updated_by">ធ្វើបច្ចុប្បន្នភាពដោយ</string>
+  <string name="surveyeditor_dataset_map_style">រចនាប័ទ្មផែនទី</string>
+  <!-- Section label of the dataset's schema (its properties / columns). -->
+  <string name="surveyeditor_dataset_properties">លក្ខណៈសម្បត្តិ</string>
+  <string name="surveyeditor_dataset_properties_managed_by_form">លក្ខណៈសម្បត្តិត្រូវបានគ្រប់គ្រងដោយសំណុំបែបបទដែលបានភ្ជាប់។ ដើម្បីកែសម្រួល បន្ថែម ឬលុបលក្ខណៈសម្បត្តិ សូមកែសម្រួលសំណុំបែបបទ។</string>
+  <string name="surveyeditor_dataset_add_property">បន្ថែមលក្ខណៈសម្បត្តិ</string>
+  <!-- Section label of the advanced dataset settings. -->
+  <string name="surveyeditor_dataset_advanced">កម្រិតខ្ពស់</string>
+  <!-- Button that collapses the advanced section. -->
+  <string name="surveyeditor_dataset_hide">លាក់</string>
+  <!-- Button that expands the advanced section. -->
+  <string name="surveyeditor_dataset_show">បង្ហាញ</string>
+  <string name="surveyeditor_dataset_id">ID សំណុំទិន្នន័យ</string>
+  <string name="surveyeditor_dataset_id_supporting">សំណុំបែបបទប្រើ ID នេះ ដើម្បីរកមើលកំណត់ត្រាពីសំណុំទិន្នន័យនេះ។</string>
+  <!-- Field for a map layer's color as a hex code. -->
+  <string name="surveyeditor_dataset_color">ពណ៌</string>
+  <!-- %1$d is the line width in pixels. -->
+  <string name="surveyeditor_dataset_stroke_width">ទទឹងខ្សែ៖ %1$d px</string>
+  <!-- %1$d is the polygon fill opacity in percent; the % after it is a literal percent sign. -->
+  <string name="surveyeditor_dataset_fill_opacity">ភាពស្រអាប់នៃការបំពេញ៖ %1$d%</string>
+  <string name="surveyeditor_dataset_visible_by_default">មើលឃើញតាមលំនាំដើម</string>
+  <string name="surveyeditor_dataset_visible_by_default_description">បង្ហាញស្រទាប់នេះ នៅពេលផែនទីបើកដំបូង។</string>
+  <!-- Field for the display label of a dataset property. -->
+  <string name="surveyeditor_dataset_property_label">ស្លាក</string>
+  <!-- Button that hides a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_hide_id">លាក់ ID</string>
+  <!-- Button that shows a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_advanced">កម្រិតខ្ពស់</string>
+  <string name="surveyeditor_dataset_property_internal_id">ID ផ្ទៃក្នុង</string>
+  <string name="surveyeditor_dataset_property_internal_id_supporting">ប្រើក្នុងកន្សោម XForms និងការនាំចេញ GeoJSON។</string>
+  <!-- Field for the data type of a dataset property. -->
+  <string name="surveyeditor_dataset_property_type">ប្រភេទ</string>
+  <!-- Checkbox label: the property must have a value. -->
+  <string name="surveyeditor_dataset_property_required">ចាំបាច់</string>
+  <string name="surveyeditor_dataset_remove_property">លុបលក្ខណៈសម្បត្តិចេញ</string>
+
+  <!-- Add data table dialog. -->
+  <string name="surveyeditor_add_table_title">បន្ថែមតារាងទិន្នន័យ</string>
+  <string name="surveyeditor_add_table_empty">តារាងទិន្នន័យទទេ</string>
+  <string name="surveyeditor_add_table_empty_body">បន្ថែមជួរឈរ និងបញ្ចូលជួរដេកក្នុងតារាង។</string>
+  <string name="surveyeditor_add_table_import_csv">នាំចូលពី CSV</string>
+  <string name="surveyeditor_add_table_import_csv_body">បង្កើតតារាងទិន្នន័យពីជួរឈរ និងជួរដេកក្នុងឯកសារ CSV។</string>
+  <string name="surveyeditor_add_table_no_rows">មិនអាចអានជួរដេកណាមួយពីឯកសារនេះបានទេ។</string>
+  <!-- Number of columns found in an imported CSV file. -->
+  <plurals name="surveyeditor_add_table_columns_count">
+    <item quantity="other">%1$d ជួរឈរ</item>
+  </plurals>
+  <!-- An imported column: %1$s is its name, %2$s its detected type. -->
+  <string name="surveyeditor_add_table_column_with_type">%1$s (%2$s)</string>
+  <!-- Date order option: %1$s is the order (e.g. "Day first"), %2$s an example date. -->
+  <string name="surveyeditor_add_table_date_order_option">%1$s (%2$s)</string>
+
+  <!-- Add map layer dialog. -->
+  <string name="surveyeditor_add_layer_title">បន្ថែមស្រទាប់ផែនទី</string>
+  <string name="surveyeditor_add_layer_empty">ស្រទាប់ផែនទីទទេ</string>
+  <string name="surveyeditor_add_layer_empty_body">បន្ថែមធាតុដោយគូរពួកវាលើផែនទី ឬបញ្ចូលពួកវាក្នុងតារាង។</string>
+  <string name="surveyeditor_add_layer_import_file">នាំចូលឯកសារ</string>
+  <string name="surveyeditor_add_layer_import_file_body">បង្កើតស្រទាប់ផែនទីពីចំណុច បន្ទាត់ ឬពហុកោណក្នុងឯកសារ GeoJSON ឬ KML។</string>
+  <string name="surveyeditor_add_layer_generate_plots">បង្កើតក្បាលដីគំរូ</string>
+  <string name="surveyeditor_add_layer_generate_plots_body">រចនាគំរូ ហើយបង្កើតក្បាលដីនៅក្នុងតំបន់ស្ទង់មតិ ឬក្រុមរង។</string>
+  <!-- Shown when sample plots can't be generated yet. -->
+  <string name="surveyeditor_add_layer_generate_plots_need_area">សូមកំណត់តំបន់ស្ទង់មតិ ឬបន្ថែមស្រទាប់ផែនទីពហុកោណជាមុនសិន។</string>
+  <string name="surveyeditor_add_layer_no_features">មិនអាចអានធាតុណាមួយពីឯកសារនេះបានទេ។</string>
+  <!-- Number of features in an imported file. %1$d is the count, %2$s the lowercase geometry type (e.g. "polygon"). -->
+  <string name="surveyeditor_add_layer_feature_count">%1$d %2$s</string>
+  <!-- %1$d is the number of features that will not be imported. -->
+  <plurals name="surveyeditor_add_layer_skipped_features">
+    <item quantity="other">ធាតុ %1$d ដែលមានប្រភេទធរណីមាត្រផ្សេង នឹងត្រូវរំលង។ ស្រទាប់ផែនទីមួយមានប្រភេទធរណីមាត្រតែមួយ។</item>
+  </plurals>
+
+  <!-- Add form dialog. -->
+  <string name="surveyeditor_add_form_title">បន្ថែមសំណុំបែបបទ</string>
+  <string name="surveyeditor_add_form_empty">សំណុំបែបបទទទេ</string>
+  <string name="surveyeditor_add_form_empty_body">ចាប់ផ្តើមជាមួយសំណុំបែបបទទទេ ហើយបន្ថែមសំណួរពីដំបូង។</string>
+  <string name="surveyeditor_add_form_from_template">ពីគំរូ…</string>
+  <string name="surveyeditor_add_form_for_purpose">សម្រាប់គោលបំណង…</string>
+  <string name="surveyeditor_add_form_for_purpose_body">បន្ថែមទម្រង់ចាប់ផ្តើមនៃគំរូរបស់គោលបំណងមួយ។ គោលបំណង និងកម្មវិធីរបស់វាត្រូវបានបន្ថែមទៅការស្ទង់មតិ ដូច្នេះការស្ទង់មតិមួយអាចបម្រើគោលបំណងច្រើន។</string>
+  <string name="surveyeditor_add_form_no_purposes">មិនមានគោលបំណងសម្រាប់ការស្ទង់មតិនេះទេ។</string>
+  <string name="surveyeditor_add_form_purpose_title">បន្ថែមទម្រង់សម្រាប់គោលបំណង</string>
+  <string name="surveyeditor_add_form_purpose_note">ជ្រើសរើសគោលបំណង និងគំរូចាប់ផ្តើមរបស់វា។ ទម្រង់នៃគំរូត្រូវបានបន្ថែមទៅការស្ទង់មតិ ហើយគោលបំណង និងកម្មវិធីដែលបានជ្រើសរើសត្រូវបានកត់ត្រាជាមួយវា។</string>
+  <string name="surveyeditor_add_form_purpose_add">បន្ថែមទម្រង់</string>
+  <string name="surveyeditor_add_form_no_templates">មិនទាន់មានគំរូសម្រាប់ការស្ទង់មតិនេះនៅឡើយទេ។</string>
+  <string name="surveyeditor_add_form_templates_body">ចាប់ផ្តើមពីសំណុំបែបបទដែលអាចប្រើឡើងវិញ ដែលមានវាលស្តង់ដារ ពីស្ថាប័នរបស់អ្នក ឬបណ្ណាល័យសកល។</string>
+  <string name="surveyeditor_add_form_import_file">នាំចូលពីឯកសារ</string>
+  <string name="surveyeditor_add_form_import_file_body">បង្កើតសំណុំបែបបទពីឯកសារ ODK XForms (.xml) ឬ Collect Earth (.cep)។</string>
+  <string name="surveyeditor_add_form_no_questions">មិនអាចអានសំណួរណាមួយពីឯកសារនេះបានទេ។</string>
+  <!-- Number of questions in an imported form or template. -->
+  <plurals name="surveyeditor_add_form_questions_count">
+    <item quantity="other">%1$d សំណួរ</item>
+  </plurals>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it updates. -->
+  <string name="surveyeditor_add_form_updates_dataset">ធ្វើបច្ចុប្បន្នភាព %1$s</string>
+  <string name="surveyeditor_add_form_updates_existing">ធ្វើបច្ចុប្បន្នភាពធាតុដែលមានស្រាប់</string>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it adds to. -->
+  <string name="surveyeditor_add_form_adds_to_dataset">បន្ថែមទៅ %1$s</string>
+  <string name="surveyeditor_add_form_adds_to_new_map_layer">បន្ថែមទៅស្រទាប់ផែនទីថ្មី</string>
+  <string name="surveyeditor_add_form_adds_to_new_data_table">បន្ថែមទៅតារាងទិន្នន័យថ្មី</string>
+  <string name="surveyeditor_add_form_template_title">បន្ថែមសំណុំបែបបទពីគំរូ</string>
+  <string name="surveyeditor_add_form_template_note">សំណុំបែបបទត្រូវបានចម្លងចូលក្នុងការស្ទង់មតិនេះ។ ការផ្លាស់ប្តូរគំរូនៅពេលក្រោយមិនប៉ះពាល់ដល់វាទេ។</string>
+  <!-- Badge of a template from the user's organization (when its name is unknown). -->
+  <string name="surveyeditor_add_form_template_organization">ស្ថាប័ន</string>
+  <!-- Badge of a template from the global library. -->
+  <string name="surveyeditor_add_form_template_global">សកល</string>
+  <!-- %1$s is the question count (e.g. "12 questions"), %2$d how many link to standard fields. -->
+  <plurals name="surveyeditor_add_form_template_linked">
+    <item quantity="other">%1$s · %2$d បានភ្ជាប់ទៅវាលស្តង់ដារ</item>
+  </plurals>
+
+  <!-- Map layer pin icon picker. -->
+  <!-- %1$s is the name of the chosen icon. -->
+  <string name="surveyeditor_icon_pin_icon">រូបតំណាងម្ជុល៖ %1$s</string>
+  <!-- Shown as the pin icon name when no icon is chosen. -->
+  <string name="surveyeditor_icon_none">គ្មាន</string>
+  <string name="surveyeditor_icon_no_icon">គ្មានរូបតំណាង</string>
+
+  <!-- Basemap options of the map layer editor. -->
+  <string name="surveyeditor_basemap_satellite">ផែនទីផ្កាយរណប</string>
+  <string name="surveyeditor_basemap_terrain">ផែនទីភូមិសាស្ត្រ</string>
+  <!-- Basemap option: no basemap imagery. -->
+  <string name="surveyeditor_basemap_none">គ្មាន</string>
+
+  <!-- Short labels of sample design thumbnail cards. -->
+  <string name="surveyeditor_thumbnail_grid">ក្រឡាចត្រង្គ</string>
+  <string name="surveyeditor_thumbnail_random">ចៃដន្យ</string>
+  <string name="surveyeditor_thumbnail_stratified">តាមក្រុមរង</string>
+  <string name="surveyeditor_thumbnail_cluster">ចង្កោម</string>
+  <!-- Plot shape: a single point. -->
+  <string name="surveyeditor_thumbnail_point">ចំណុច</string>
+  <!-- Sample point layout: one point at the plot center. -->
+  <string name="surveyeditor_thumbnail_center">កណ្ដាល</string>
+
+  <!-- People with access and invite acceptance. -->
+  <!-- Badge of a person who was invited but hasn't joined yet. -->
+  <string name="surveyeditor_people_invited">បានអញ្ជើញ</string>
+  <!-- Shown on the copy button after the invite link was copied. -->
+  <string name="surveyeditor_people_copied">បានចម្លង</string>
+  <string name="surveyeditor_people_copy_link">ចម្លងតំណ</string>
+  <string name="surveyeditor_people_new_link">តំណថ្មី</string>
+  <string name="surveyeditor_people_open_as_invitee">បើកជាអ្នកទទួលការអញ្ជើញ</string>
+  <!-- Name of the survey page listing people; used as %1$s in surveyeditor_people_accept_invite_note. -->
+  <string name="surveyeditor_people_sharing_page">ទំព័រចែករំលែក</string>
+  <!-- Title of the invite acceptance dialog. %1$s is the survey or organization name. -->
+  <string name="surveyeditor_people_join_title">ចូលរួម “%1$s”</string>
+  <!-- %1$s is the invitee's email address. -->
+  <string name="surveyeditor_people_accept_invite_preview">ការមើលជាមុននូវអ្វីដែល %1$s ឃើញ បន្ទាប់ពីបើកតំណអញ្ជើញ និងចូលគណនី។</string>
+  <!-- %1$s is the invitee's email address, %2$s their role. -->
+  <string name="surveyeditor_people_signed_in_as">បានចូលគណនីជា %1$s • %2$s</string>
+  <string name="surveyeditor_people_full_name">ឈ្មោះពេញ</string>
+  <string name="surveyeditor_people_profile_photo">រូបថតប្រវត្តិរូប</string>
+  <!-- %1$s is the page where organizers see people, e.g. "Sharing page" or "Members page". -->
+  <string name="surveyeditor_people_accept_invite_note">Collect One រក្សាទុកឈ្មោះ និងរូបថតរបស់អ្នក ដើម្បីឱ្យអ្នករៀបចំអាចស្គាល់អ្នកនៅលើ %1$s។ ពួកវាត្រូវបានធ្វើឱ្យទាន់សម័យរាល់ពេលអ្នកចូលគណនី។</string>
+  <string name="surveyeditor_people_accept_invite">ទទួលយកការអញ្ជើញ</string>
+
+  <!-- Interactive layer map, survey area editor, sampling design panel. -->
+  <!-- Interactive layer map (InteractiveLayerMap.kt). -->
+  <!-- Title of the map card in the map layer and survey area editors. -->
+  <string name="surveyeditor_map_title">ផែនទី</string>
+  <string name="surveyeditor_map_generated_locked">មិនអាចកែសម្រួលធរណីមាត្រដែលបានបង្កើតដោយស្វ័យប្រវត្តិបានទេ</string>
+  <!-- Vertex progress while drawing. %1$d is the number of vertices placed, %2$d the minimum needed. -->
+  <string name="surveyeditor_map_draft_vertices">%1$d / %2$d+ ចំណុចកំពូល</string>
+  <string name="surveyeditor_map_undo">មិនធ្វើវិញ</string>
+  <!-- Button that completes drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_finish_point">បញ្ចប់ចំណុច</string>
+  <string name="surveyeditor_map_finish_line">បញ្ចប់បន្ទាត់</string>
+  <string name="surveyeditor_map_finish_polygon">បញ្ចប់ពហុកោណ</string>
+  <!-- Button that completes drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_finish_part">បញ្ចប់ផ្នែក</string>
+  <!-- Chip that starts drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_add_point">បន្ថែមចំណុច</string>
+  <string name="surveyeditor_map_add_line">បន្ថែមបន្ទាត់</string>
+  <string name="surveyeditor_map_add_polygon">បន្ថែមពហុកោណ</string>
+  <!-- Starts drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_add_part">បន្ថែមផ្នែក</string>
+  <string name="surveyeditor_map_zoom_in">ពង្រីក</string>
+  <string name="surveyeditor_map_zoom_out">បង្រួម</string>
+  <string name="surveyeditor_map_fit_to_features">សមតាមធាតុ</string>
+  <!-- Current map zoom level, shown next to the scale bar. %1$s is the zoom level (e.g. "12.5"). -->
+  <string name="surveyeditor_map_zoom_level">z %1$s</string>
+  <!-- Map hints shown in a pill at the bottom of the map. -->
+  <string name="surveyeditor_map_hint_locked">អូសដើម្បីរំកិល • រមូរ ឬច្បិចដើម្បីពង្រីក • ចុចក្បាលដីដើម្បីមើលចំណុចគំរូរបស់វា</string>
+  <string name="surveyeditor_map_hint_place_point">ចុចលើផែនទីដើម្បីដាក់ចំណុច</string>
+  <string name="surveyeditor_map_hint_start_line">ចុចដើម្បីចាប់ផ្តើមបន្ទាត់</string>
+  <string name="surveyeditor_map_hint_continue_line">ចុចដើម្បីបន្ថែមចំណុចកំពូល • ចុចចំណុចកំពូលចុងក្រោយម្តងទៀតដើម្បីបញ្ចប់</string>
+  <string name="surveyeditor_map_hint_start_polygon">ចុចដើម្បីចាប់ផ្តើមពហុកោណ</string>
+  <string name="surveyeditor_map_hint_continue_polygon">ចុចដើម្បីបន្ថែមចំណុចកំពូល • ចុចចំណុចកំពូលដំបូង ឬចុងក្រោយដើម្បីបញ្ចប់</string>
+  <string name="surveyeditor_map_hint_move_point">អូសចំណុចដើម្បីផ្លាស់ទីវា</string>
+  <!-- "○ handles" refers to the small circles drawn at segment midpoints. -->
+  <string name="surveyeditor_map_hint_reshape">អូសចំណុចកំពូលដើម្បីប្តូររាង • អូសចំណុចទាញ ○ ដើម្បីបន្ថែមចំណុចកំពូល • អូសខាងក្នុងដើម្បីផ្លាស់ទី</string>
+  <string name="surveyeditor_map_hint_select">អូសដើម្បីរំកិល • រមូរ ឬច្បិចដើម្បីពង្រីក • ចុចធាតុដើម្បីជ្រើសរើសវា</string>
+
+  <!-- Survey area editor dialog (SurveyAreaEditor.kt). -->
+  <string name="surveyeditor_area_tab_search">ស្វែងរក</string>
+  <string name="surveyeditor_area_tab_draw">គូរ</string>
+  <string name="surveyeditor_area_tab_upload">ផ្ទុកឡើង</string>
+  <string name="surveyeditor_area_title">តំបន់ស្ទង់មតិ</string>
+  <string name="surveyeditor_area_close_editor">បិទកម្មវិធីកែសម្រួលតំបន់ស្ទង់មតិ</string>
+  <string name="surveyeditor_area_save">រក្សាទុកតំបន់ស្ទង់មតិ</string>
+  <!-- Part of an area summary like "3 parts • 1,204 vertices • 850 ha". -->
+  <plurals name="surveyeditor_area_parts_count">
+    <item quantity="other">%1$d ផ្នែក</item>
+  </plurals>
+  <!-- Vertex count in an area summary. %1$s is the count with thousands separators. -->
+  <plurals name="surveyeditor_area_vertices_count">
+    <item quantity="other">%1$s ចំណុចកំពូល</item>
+  </plurals>
+  <string name="surveyeditor_area_search_label">ស្វែងរកទីកន្លែង ឬបញ្ចូលកូអរដោនេ</string>
+  <!-- Example place names are from the default survey region. -->
+  <string name="surveyeditor_area_search_placeholder">ឧ. Nairobi, Othaya, Chinga Dam ឬ -0.419, 36.950</string>
+  <string name="surveyeditor_area_suggested_locations">ទីតាំងស្ទង់មតិដែលបានណែនាំ៖</string>
+  <plurals name="surveyeditor_area_locations_found">
+    <item quantity="other">បានរកឃើញ %1$d ទីតាំង៖</item>
+  </plurals>
+  <string name="surveyeditor_area_searching_places">កំពុងស្វែងរកទីកន្លែង...</string>
+  <!-- %1$s is the search text the user typed. -->
+  <string name="surveyeditor_area_no_places_matching">គ្មានទីកន្លែងដែលត្រូវនឹង “%1$s” ទេ</string>
+  <!-- Category of a search result built from typed coordinates. -->
+  <string name="surveyeditor_area_custom_coordinates">កូអរដោនេផ្ទាល់ខ្លួន</string>
+  <string name="surveyeditor_area_direct_coordinates_input">ការបញ្ចូលកូអរដោនេដោយផ្ទាល់</string>
+  <!-- Source badge for results from the online places search. -->
+  <string name="surveyeditor_area_source_online">អនឡាញ</string>
+  <!-- Badge on the search result that is the current survey area. -->
+  <string name="surveyeditor_area_selected">បានជ្រើសរើស</string>
+  <string name="surveyeditor_area_name">ឈ្មោះតំបន់</string>
+  <string name="surveyeditor_area_draw_instructions">ចុចលើផែនទីដើម្បីដាក់ជ្រុងនៃព្រំដែន។ ចុចផ្នែកដែលមានស្រាប់ដើម្បីជ្រើសរើសវា បន្ទាប់មកអូសជ្រុងរបស់វាដើម្បីប្តូររាង។</string>
+  <string name="surveyeditor_area_parts">ផ្នែក</string>
+  <string name="surveyeditor_area_no_parts">មិនទាន់មានផ្នែក។ សូមគូរយ៉ាងហោចណាស់ផ្នែកមួយ ដើម្បីរក្សាទុកតំបន់ស្ទង់មតិ។</string>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_part_number">ផ្នែក %1$d</string>
+  <!-- Vertex count and area of one part. %2$s is the formatted area (e.g. "850 ha"). -->
+  <plurals name="surveyeditor_area_part_vertices_area">
+    <item quantity="other">%1$d ចំណុចកំពូល • %2$s</item>
+  </plurals>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_delete_part">លុបផ្នែក %1$d</string>
+  <string name="surveyeditor_area_draw_boundary_hint">ចុចលើផែនទីដើម្បីគូរព្រំដែន…</string>
+  <plurals name="surveyeditor_area_drawing_corners">
+    <item quantity="other">កំពុងគូរ (%1$d ជ្រុង)</item>
+  </plurals>
+  <string name="surveyeditor_area_upload_geojson_title">GeoJSON ឬ KML</string>
+  <string name="surveyeditor_area_upload_geojson_body">ពហុកោណ និងពហុកោណច្រើនក្លាយជាផ្នែកនៃតំបន់ស្ទង់មតិ។ រន្ធត្រូវបានដកចេញ។</string>
+  <string name="surveyeditor_area_choose_file">ជ្រើសរើសឯកសារ</string>
+  <string name="surveyeditor_area_upload_shapefile_title">Shapefile (.zip)</string>
+  <string name="surveyeditor_area_upload_shapefile_body">Shapefile ដែលបានបង្ហាប់ ជាមួយឯកសារ .shp, .shx, .dbf និង .prj របស់វា។</string>
+  <string name="surveyeditor_area_choose_shapefile">ជ្រើសរើស Shapefile</string>
+  <string name="surveyeditor_area_shapefile_coming_soon">ការនាំចូល Shapefile នឹងមកដល់ឆាប់ៗ។ សម្រាប់ពេលនេះ សូមបម្លែង Shapefile ទៅជា GeoJSON ឬ KML (ឧទាហរណ៍ក្នុង QGIS) ហើយផ្ទុកឡើងឯកសារនោះ។</string>
+  <string name="surveyeditor_area_upload_empty">ផ្ទុកឡើងឯកសារព្រំដែន ដើម្បីមើលវាជាមុននៅទីនេះ។</string>
+  <string name="surveyeditor_area_edit_in_draw_tab">កែសម្រួលក្នុងផ្ទាំង គូរ</string>
+  <plurals name="surveyeditor_area_ignored_features">
+    <item quantity="other">ធាតុ %1$d មិនមែនជាពហុកោណ ហើយត្រូវបានមិនអើពើ។</item>
+  </plurals>
+  <string name="surveyeditor_area_no_polygons">ឯកសារនេះគ្មានពហុកោណសម្រាប់ប្រើជាតំបន់ស្ទង់មតិទេ។</string>
+  <!-- Icon descriptions for file import issues. -->
+  <string name="surveyeditor_area_issue_error">កំហុស</string>
+  <string name="surveyeditor_area_issue_warning">ការព្រមាន</string>
+  <!-- Shown after a capped list of issues. %1$d is how many more issues are hidden. -->
+  <plurals name="surveyeditor_area_more_issues">
+    <item quantity="other">…និង %1$d ទៀត</item>
+  </plurals>
+
+  <!-- Sampling design panel (SamplingDesignPanel.kt). -->
+  <string name="surveyeditor_sampling_update_preview">ធ្វើបច្ចុប្បន្នភាពការមើលជាមុន</string>
+  <string name="surveyeditor_sampling_show_preview">បង្ហាញការមើលជាមុន</string>
+  <string name="surveyeditor_sampling_stale_title">ការមើលជាមុនហួសសម័យ — សូមធ្វើបច្ចុប្បន្នភាពការមើលជាមុន</string>
+  <string name="surveyeditor_sampling_stale_body">ការរចនា ឬតំបន់របស់វាបានផ្លាស់ប្តូរ បន្ទាប់ពីការមើលជាមុននេះត្រូវបានបង្កើត។</string>
+  <string name="surveyeditor_sampling_in_use_title">ក្បាលដីគំរូកំពុងត្រូវបានប្រើ</string>
+  <string name="surveyeditor_sampling_generate_failed_title">មិនអាចបង្កើតក្បាលដីគំរូបានទេ</string>
+  <string name="surveyeditor_sampling_method">វិធីសាស្ត្រ</string>
+  <!-- %1$s is the sampling method name, %2$s its description. -->
+  <string name="surveyeditor_sampling_method_description">%1$s៖ %2$s</string>
+  <string name="surveyeditor_sampling_plot_shape">រាងក្បាលដី</string>
+  <string name="surveyeditor_sampling_plot_diameter">អង្កត់ផ្ចិតក្បាលដី (m)</string>
+  <string name="surveyeditor_sampling_plot_side">ជ្រុងក្បាលដី (m)</string>
+  <string name="surveyeditor_sampling_sample_points">ចំណុចគំរូក្នុងក្បាលដីនីមួយៗ</string>
+  <string name="surveyeditor_sampling_sample_points_require_shape">ចំណុចគំរូនៅក្នុងក្បាលដី តម្រូវឱ្យក្បាលដីមានរាងការ៉េ ឬរង្វង់។</string>
+  <string name="surveyeditor_sampling_points_per_side">ចំណុចក្នុងមួយជ្រុង</string>
+  <!-- %1$d is the number of sample points in each plot. -->
+  <plurals name="surveyeditor_sampling_points_per_plot">
+    <item quantity="other">%1$d ចំណុចគំរូក្នុងមួយក្បាលដី</item>
+  </plurals>
+  <string name="surveyeditor_sampling_point_spacing">គម្លាតរវាងចំណុច (m)</string>
+  <string name="surveyeditor_sampling_number_of_points">ចំនួនចំណុច</string>
+  <string name="surveyeditor_sampling_shuffle">លាយលំដាប់ចុះទស្សនា</string>
+  <string name="surveyeditor_sampling_shuffle_description">ដាក់លេខក្បាលដីតាមលំដាប់ចៃដន្យ ដើម្បីកុំឱ្យក្បាលដីជិតគ្នាត្រូវបានចុះទស្សនាជាប់ៗគ្នា។</string>
+  <string name="surveyeditor_sampling_random_seed">គ្រាប់ពូជចៃដន្យ</string>
+  <string name="surveyeditor_sampling_random_seed_description">គ្រាប់ពូជដដែលតែងតែផ្តល់ក្បាលដីដូចគ្នា។</string>
+  <string name="surveyeditor_sampling_reroll_seed">ជ្រើសរើសគ្រាប់ពូជចៃដន្យថ្មី</string>
+  <!-- Progress while generating plots. %1$s is the number generated so far (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_generating">
+    <item quantity="other">កំពុងបង្កើត… %1$s ក្បាលដី</item>
+  </plurals>
+  <!-- Progress while generating plots. %1$s is the number generated so far, %2$s the expected total. -->
+  <plurals name="surveyeditor_sampling_generating_of_about">
+    <item quantity="other">កំពុងបង្កើត… %1$s នៃប្រហែល %2$s ក្បាលដី</item>
+  </plurals>
+  <!-- %1$s is the number of plots in the preview (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_previewing_plots">
+    <item quantity="other">កំពុងមើលជាមុន %1$s ក្បាលដីគំរូ</item>
+  </plurals>
+  <!-- Sample area option: the survey's own area. -->
+  <string name="surveyeditor_sampling_area_survey_area">តំបន់ស្ទង់មតិ</string>
+  <!-- Sample area option. %1$s is the name of a polygon map layer whose features are strata. -->
+  <string name="surveyeditor_sampling_area_strata_from">ក្រុមរងពី %1$s</string>
+  <string name="surveyeditor_sampling_area_deleted_layer">ស្រទាប់ផែនទីដែលបានលុប</string>
+  <string name="surveyeditor_sampling_area">តំបន់</string>
+  <string name="surveyeditor_sampling_stratum_property">លក្ខណៈសម្បត្តិក្រុមរង</string>
+  <string name="surveyeditor_sampling_choose">ជ្រើសរើស…</string>
+  <!-- %1$d is the number of strata, %2$s a comma-separated list of the first few stratum IDs. -->
+  <plurals name="surveyeditor_sampling_strata_list">
+    <item quantity="other">%1$d ក្រុមរង៖ %2$s</item>
+  </plurals>
+  <string name="surveyeditor_sampling_min_distance">ចម្ងាយអប្បបរមារវាងក្បាលដី (m)</string>
+  <string name="surveyeditor_sampling_grid_spacing">គម្លាតក្រឡាចត្រង្គ (m)</string>
+  <!-- %1$d is the target number of plots used to suggest a grid spacing. -->
+  <string name="surveyeditor_sampling_grid_spacing_auto_description">ចម្ងាយរវាងចំណុចកណ្ដាលនៃក្បាលដីជិតគ្នា។ កំណត់តាមទំហំតំបន់ (ប្រហែល %1$d ក្បាលដី) តំបន់ធំជាងមានគម្លាតធំជាង។</string>
+  <string name="surveyeditor_sampling_grid_spacing_description">ចម្ងាយរវាងចំណុចកណ្ដាលនៃក្បាលដីជិតគ្នា។</string>
+  <!-- %1$s is the suggested grid spacing in meters. -->
+  <string name="surveyeditor_sampling_match_area_size">ផ្គូផ្គងតាមទំហំតំបន់ (%1$s m)</string>
+  <string name="surveyeditor_sampling_number_of_plots">ចំនួនក្បាលដី</string>
+  <string name="surveyeditor_sampling_survey_area_one_stratum">តំបន់ស្ទង់មតិត្រូវបានរាប់ជាក្រុមរងមួយ។ ដើម្បីយកគំរូក្រុមរងដាច់ដោយឡែក សូមជ្រើសរើសស្រទាប់ផែនទីពហុកោណជាតំបន់។</string>
+  <string name="surveyeditor_sampling_allocation">ការបែងចែក</string>
+  <!-- Label of a field for the number of plots in one stratum. %1$s is the stratum ID. -->
+  <string name="surveyeditor_sampling_plots_in_stratum">ក្បាលដីក្នុង %1$s</string>
+  <!-- Label of the plot count field when there are no strata. -->
+  <string name="surveyeditor_sampling_plots_in_survey_area">ក្បាលដីក្នុងតំបន់ស្ទង់មតិ</string>
+  <!-- %1$d is the number of strata not listed. -->
+  <plurals name="surveyeditor_sampling_more_strata">
+    <item quantity="other">ក្រុមរង %1$d ផ្សេងទៀតនឹងគ្មានក្បាលដីទេ លុះត្រាតែបានកំណត់។</item>
+  </plurals>
+  <string name="surveyeditor_sampling_total_plots">ក្បាលដីសរុប</string>
+  <string name="surveyeditor_sampling_number_of_clusters">ចំនួនចង្កោម</string>
+  <string name="surveyeditor_sampling_plots_per_side">ក្បាលដីក្នុងមួយជ្រុង</string>
+  <!-- %1$d is the number of plots in each cluster. -->
+  <plurals name="surveyeditor_sampling_plots_per_cluster">
+    <item quantity="other">%1$d ក្បាលដីក្នុងចង្កោមនីមួយៗ</item>
+  </plurals>
+  <string name="surveyeditor_sampling_cluster_spacing">គម្លាតរវាងក្បាលដីក្នុងចង្កោម (m)</string>
+  <string name="surveyeditor_sampling_estimate_unavailable">មិនទាន់មានការប៉ាន់ស្មាន។</string>
+  <!-- %1$s is the formatted area (e.g. "850 ha"), %2$s the estimated plot count with thousands separators. -->
+  <plurals name="surveyeditor_sampling_estimate">
+    <item quantity="other">តំបន់ %1$s • ប្រហែល %2$s ក្បាលដី</item>
+  </plurals>
+  <string name="surveyeditor_sampling_estimate_title">ការប៉ាន់ស្មាន</string>
+  <string name="surveyeditor_sampling_large_design_warning">ការរចនាធំៗអាចយឺតក្នុងការបង្កើត និងកែសម្រួល។</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_number_at_least">សូមបញ្ចូលលេខយ៉ាងហោចណាស់ %1$s។</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_whole_number_at_least">សូមបញ្ចូលចំនួនគត់យ៉ាងហោចណាស់ %1$s។</string>
+  <!-- Validation message. %1$s and %2$s are the minimum and maximum allowed values. -->
+  <string name="surveyeditor_sampling_enter_whole_number_range">សូមបញ្ចូលចំនួនគត់ពី %1$s ដល់ %2$s។</string>
+
+  <string name="surveyeditor_plot_review">ការត្រួតពិនិត្យក្បាលដី</string>
+  <string name="surveyeditor_plot_review_description">ពិនិត្យក្បាលដីនីមួយៗលើរូបភាពផ្កាយរណបជាមុនសិន បន្ទាប់មកបញ្ជូនក្បាលដីដែលត្រូវការទៅក្រុមការងារវាល។</string>
+  <string name="surveyeditor_plot_review_desk">ពិនិត្យក្បាលដីលើរូបភាព (គេហទំព័រ)</string>
+  <string name="surveyeditor_plot_review_desk_on">អ្នកបកស្រាយបំពេញសំណុំបែបបទសម្រាប់ក្បាលដីនីមួយៗក្នុងផ្ទាំងគ្រប់គ្រងលើគេហទំព័រ។</string>
+  <string name="surveyeditor_plot_review_desk_off">បន្ថែមសំណុំបែបបទលើគេហទំព័រ ដើម្បីចាត់ថ្នាក់ក្បាលដីនីមួយៗពីរូបភាព។</string>
+  <string name="surveyeditor_plot_review_field">ផ្ទៀងផ្ទាត់ក្បាលដីនៅទីវាល (ទូរសព្ទ)</string>
+  <string name="surveyeditor_plot_review_field_on">ក្បាលដីដែលត្រូវចុះទៅពិនិត្យនឹងមានសញ្ញា !។ ក្រុមការងារវាលផ្ទៀងផ្ទាត់ក្បាលដីទាំងនោះក្នុងកម្មវិធីទូរសព្ទ។</string>
+  <string name="surveyeditor_plot_review_field_off">បន្ថែមសំណុំបែបបទលើទូរសព្ទ ដើម្បីឱ្យក្រុមការងារវាលផ្ទៀងផ្ទាត់ក្បាលដីដែលត្រូវចុះទៅពិនិត្យ។</string>
+  <string name="surveyeditor_plot_review_confidence">បញ្ជូនក្បាលដីដែលមានទំនុកចិត្តទាបជាងកម្រិតនេះ</string>
+  <string name="surveyeditor_plot_review_confidence_description">អ្នកបកស្រាយវាយតម្លៃទំនុកចិត្តពី 0 ដល់ 100។ បញ្ចូល 0 ដើម្បីបញ្ជូនតែក្បាលដីដែលពួកគេសម្គាល់។</string>
+  <string name="surveyeditor_plot_review_spot_checks">ការពិនិត្យដោយចៃដន្យ</string>
+  <string name="surveyeditor_plot_review_spot_checks_description">ក្បាលដីដែលជ្រើសរើសដោយចៃដន្យក៏ត្រូវបញ្ជូនទៅទីវាលដែរ ដើម្បីវាស់ភាពត្រឹមត្រូវនៃការពិនិត្យនៅការិយាល័យ។ បញ្ចូល 0 ប្រសិនបើមិនត្រូវការ។</string>
+  <plurals name="surveyeditor_plot_review_spot_checks_share">
+    <item quantity="other">%1$s នៃក្បាលដី %2$s។ ជ្រើសរើសដោយចៃដន្យ ដើម្បីវាស់ភាពត្រឹមត្រូវនៃការពិនិត្យនៅការិយាល័យ។</item>
+  </plurals>
+  <string name="surveyeditor_plot_review_spot_checks_unshuffled">បើក «លាយលំដាប់ចុះទស្សនា» ដើម្បីឱ្យក្បាលដីសម្រាប់ពិនិត្យត្រូវបានជ្រើសរើសដោយចៃដន្យ។</string>
+  <string name="surveyeditor_plot_review_desk_form">%1$s ក្លាយជាការពិនិត្យនៅការិយាល័យ៖ សម្រាប់គេហទំព័រតែប៉ុណ្ណោះ ជាមួយសំណួរអំពីទំនុកចិត្ត និងការសម្គាល់។</string>
+  <string name="surveyeditor_plot_review_show_desk">បង្ហាញចម្លើយពីការិយាល័យដល់ក្រុមការងារវាល</string>
+  <string name="surveyeditor_plot_review_show_desk_on">ក្រុមការងារមើលឃើញគម្របដី និងទំនុកចិត្តពីការពិនិត្យនៅការិយាល័យលើក្បាលដីនីមួយៗ។</string>
+  <string name="surveyeditor_plot_review_show_desk_off">ការពិនិត្យដោយមិនដឹងចម្លើយ៖ ក្រុមការងារមើលឃើញតែមូលហេតុដែលក្បាលដីត្រូវបានសម្គាល់។</string>
+  <string name="surveyeditor_plot_review_open_form">បើក %1$s</string>
+  <string name="surveyeditor_plot_review_remove_title">ឈប់ពិនិត្យក្បាលដីលើរូបភាព?</string>
+  <string name="surveyeditor_plot_review_remove_body">វានឹងដកសំណុំបែបបទ និងសំណួរត្រួតពិនិត្យក្បាលដីចេញពីការស្ទង់មតិ រួមទាំងការផ្លាស់ប្ដូរដែលអ្នកបានធ្វើ។</string>
+  <string name="surveyeditor_plot_review_remove_field_title">ឈប់ផ្ទៀងផ្ទាត់ក្បាលដីនៅទីវាល?</string>
+  <string name="surveyeditor_plot_review_remove_field_body">វានឹងដកសំណុំបែបបទផ្ទៀងផ្ទាត់នៅទីវាលចេញពីការស្ទង់មតិ រួមទាំងការផ្លាស់ប្ដូរដែលអ្នកបានធ្វើ។</string>
+  <string name="surveyeditor_plot_review_remove">ដកសំណុំបែបបទចេញ</string>
+  <string name="surveyeditor_plot_review_remove_field">ដកសំណុំបែបបទចេញ</string>
+  <!-- Sampling design: button that uploads a strata file. -->
+  <string name="surveyeditor_sampling_upload_strata_file">ផ្ទុកឡើងឯកសារក្រុមរង (GeoJSON / KML)</string>
+  <!-- Error under the strata file upload when the file has no polygons. %1$s = file name. -->
+  <string name="surveyeditor_sampling_strata_file_no_polygons">រកមិនឃើញលក្ខណៈពហុកោណក្នុង %1$s ទេ។</string>
+  <!-- Error under the strata file upload when the file has points or lines instead of polygons. -->
+  <string name="surveyeditor_sampling_strata_file_not_polygons">ឯកសារក្រុមរងត្រូវតែមានលក្ខណៈពហុកោណ។</string>
+
+  <!-- Problems found in an uploaded GeoJSON or KML file (GeoIssueText.kt). Shown in the survey area, map layer, and strata uploads. %1$d is the feature's number in the file, counted from 1. -->
+  <string name="geo_issue_unsupported_file_type">ប្រភេទឯកសារនេះមិនត្រូវបានគាំទ្រទេ។ សូមផ្ទុកឡើងឯកសារ GeoJSON (.geojson, .json) ឬ KML (.kml)។</string>
+  <string name="geo_issue_unreadable_geojson">ឯកសារនេះមិនមែនជា GeoJSON ត្រឹមត្រូវទេ។ សូមពិនិត្យថាវាត្រូវបាននាំចេញជា GeoJSON ហើយព្យាយាមម្ដងទៀត។</string>
+  <string name="geo_issue_geojson_not_an_object">ឯកសារនេះមិនមែនជា GeoJSON ត្រឹមត្រូវទេ។ វាគួរតែមានវត្ថុមួយ។</string>
+  <string name="geo_issue_geojson_without_type">ឯកសារនេះមិនមែនជា GeoJSON ត្រឹមត្រូវទេ។</string>
+  <string name="geo_issue_invalid_kml">ឯកសារនេះមិនមែនជា KML ត្រឹមត្រូវទេ។ សូមពិនិត្យថាវាត្រូវបាននាំចេញជា KML (មិនមែន KMZ) ហើយព្យាយាមម្ដងទៀត។</string>
+  <string name="geo_issue_no_geometry">ឯកសារនេះមិនមានធរណីមាត្រណាមួយទេ។</string>
+  <string name="geo_issue_feature_collection_without_features">FeatureCollection មិនមានធាតុទេ។</string>
+  <!-- %1$d is the number of holes removed. -->
+  <plurals name="geo_issue_holes_removed">
+    <item quantity="other">រន្ធ %1$d ត្រូវបានដកចេញពីពហុកោណ។ Collect One ប្រើតែព្រំដែនខាងក្រៅប៉ុណ្ណោះ។</item>
+  </plurals>
+  <string name="geo_issue_invalid_feature">ធាតុទី %1$d មិនមែនជា Feature GeoJSON ត្រឹមត្រូវទេ។</string>
+  <string name="geo_issue_feature_without_geometry">ធាតុទី %1$d គ្មានធរណីមាត្រ ហើយត្រូវបានរំលង។</string>
+  <string name="geo_issue_invalid_geometry">ធាតុទី %1$d មានធរណីមាត្រមិនត្រឹមត្រូវ។</string>
+  <!-- %2$s is the GeoJSON geometry type found in the file, e.g. "Circle". -->
+  <string name="geo_issue_unsupported_geometry_type">ធាតុទី %1$d មានប្រភេទធរណីមាត្រដែលមិនគាំទ្រ "%2$s"។</string>
+  <!-- Shown as %2$s of geo_issue_unsupported_geometry_type when the geometry has no type. -->
+  <string name="geo_issue_geometry_type_unknown">មិនស្គាល់</string>
+  <string name="geo_issue_invalid_coordinates">ធាតុទី %1$d មានកូអរដោនេបាត់ ឬមិនត្រឹមត្រូវ ហើយត្រូវបានរំលង។</string>
+  <string name="geo_issue_coordinates_out_of_range">ធាតុទី %1$d មានកូអរដោនេនៅក្រៅជួរត្រឹមត្រូវ ហើយត្រូវបានរំលង។ សូមប្រើដឺក្រេទសភាគ WGS 84 (រយៈទទឹង −90 ដល់ 90 រយៈបណ្ដោយ −180 ដល់ 180)។</string>
+  <string name="geo_issue_too_few_corners">ធាតុទី %1$d មានជ្រុងខុសគ្នាតិចជាង 3 ហើយត្រូវបានរំលង។</string>
+  <string name="geo_issue_outline_closed">គ្រោងរបស់ធាតុទី %1$d មិនបានបិទ ដូច្នេះវាត្រូវបានបិទដោយស្វ័យប្រវត្តិ។</string>
+  <string name="geo_issue_self_intersection">គ្រោងរបស់ធាតុទី %1$d កាត់ខ្លួនឯង។ ផ្ទៃក្រឡា និងឡូតិ៍គំរូអាចខុស សូមកែព្រំដែននៅក្នុងឧបករណ៍ GIS ហើយផ្ទុកឡើងម្ដងទៀត។</string>
+  <string name="geo_issue_may_cross_antimeridian">ធាតុទី %1$d អាចកាត់ខ្សែវង់ 180° ដែលមិនទាន់គាំទ្រនៅឡើយ។ សូមបំបែកវាជាផ្នែកនៅសងខាងខ្សែវង់។</string>
+  <!-- How a survey's area was defined, after "Source:". "Places API" is the name of the place search service. -->
+  <string name="surveyeditor_area_source_selected_boundary">ព្រំដែនដែលបានជ្រើស</string>
+  <string name="surveyeditor_area_source_drawn">បានគូរលើផែនទី</string>
+  <string name="surveyeditor_area_source_uploaded">បានផ្ទុកឡើង៖ %1$s</string>
+  <string name="surveyeditor_area_source_place_search">Places API</string>
+  <string name="surveyeditor_area_source_coordinates">កូអរដោនេ</string>
+  <plurals name="surveyeditor_area_source_collect_earth_grid">
+    <item quantity="other">ក្រឡាចត្រង្គឡូតិ៍ Collect Earth (%1$d ឡូតិ៍)</item>
+  </plurals>
+
+  <!-- Survey details: Danger zone, where organizers delete the survey. -->
+  <string name="surveyeditor_danger_zone">តំបន់គ្រោះថ្នាក់</string>
+  <string name="surveyeditor_danger_zone_body">ការលុបការស្ទង់មតិនឹងដកវាចេញពីអ្នកទាំងអស់ដែលមានសិទ្ធិចូលប្រើ រួមទាំងអ្នកប្រមូលទិន្នន័យ។ វានឹងលែងរាប់បញ្ចូលក្នុងដែនកំណត់ការស្ទង់មតិរបស់ម្ចាស់ទៀតហើយ។</string>
+  <string name="surveyeditor_delete_survey">លុបការស្ទង់មតិ</string>
+  <!-- %1$s: the survey's title. -->
+  <string name="surveyeditor_delete_survey_title">លុប “%1$s” ឬ?</string>
+  <string name="surveyeditor_delete_survey_message">អ្នកទាំងអស់នឹងបាត់បង់សិទ្ធិចូលប្រើការស្ទង់មតិនេះ និងទិន្នន័យដែលបានប្រមូល។ ការផ្លាស់ប្ដូរដែលមិនទាន់បោះពុម្ពផ្សាយនឹងត្រូវបោះបង់ ហើយការស្ទង់មតិនឹងលែងរាប់បញ្ចូលក្នុងដែនកំណត់ការស្ទង់មតិរបស់ម្ចាស់ទៀតហើយ។</string>
+  <string name="surveyeditor_add_dataset_from_template">ពីគំរូ</string>
+  <string name="surveyeditor_add_layer_from_template_body">បន្ថែមសំណុំបែបបទរបស់គំរូ។ ការដាក់ស្នើរបស់វាបន្ថែមធាតុទៅស្រទាប់ផែនទីថ្មី។</string>
+  <string name="surveyeditor_add_table_from_template_body">បន្ថែមសំណុំបែបបទរបស់គំរូ។ ការដាក់ស្នើរបស់វាបន្ថែមជួរដេកទៅតារាងទិន្នន័យថ្មី។</string>
+  <string name="surveyeditor_add_dataset_no_templates">បណ្ណាល័យរបស់អ្នកមិនមានគំរូប្រភេទនេះទេ។</string>
+</resources>

@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Impact goals: plain-language names of the goals survey data can contribute to. -->
+  <string name="wizard_goal_deforestation_free_supply_chains">Cadenas de suministro libres de deforestación</string>
+  <string name="wizard_goal_ecosystem_restoration">Restauración de ecosistemas</string>
+  <string name="wizard_goal_effective_protected_areas">Áreas protegidas</string>
+  <string name="wizard_goal_iplc_rights_and_tenure">Derechos territoriales indígenas y comunitarios</string>
+  <string name="wizard_goal_legal_timber">Madera legal</string>
+  <string name="wizard_goal_forest_carbon_and_conservation">Carbono forestal y conservación</string>
+  <string name="wizard_goal_smallholder_livelihoods">Medios de vida y acceso a mercados de pequeños productores</string>
+  <string name="wizard_goal_open_earth_data">Datos abiertos de referencia sobre cobertura del suelo y cultivos</string>
+  <!-- Heading of standard fields (shared data definitions) that don't contribute to any goal. -->
+  <string name="wizard_goal_other_standard_fields">Otros campos estándar</string>
+
+  <!-- Impact attribution levels: how directly a survey's data contributed to results (1–5). -->
+  <string name="wizard_impact_attribution_official_submission">Usados en una presentación oficial</string>
+  <string name="wizard_impact_attribution_official_submission_explanation">El organizador indicó que los datos se incluyeron en una presentación oficial, como una declaración de diligencia debida del EUDR, un informe FERM o una evaluación de un área protegida.</string>
+  <string name="wizard_impact_attribution_partner_use">Usados por un socio</string>
+  <string name="wizard_impact_attribution_partner_use_explanation">Los datos se enviaron a un socio o los usaron compradores, para titulación de tierras o para verificar un mapa o un modelo.</string>
+  <string name="wizard_impact_attribution_purpose_export">Exportados para su propósito</string>
+  <string name="wizard_impact_attribution_purpose_export_explanation">Los datos se descargaron en un formato que ofrece uno de sus propósitos, como GeoJSON del EUDR.</string>
+  <string name="wizard_impact_attribution_data_collected">Datos recolectados</string>
+  <string name="wizard_impact_attribution_data_collected_explanation">Se recolectaron datos, pero aún no sabemos cómo se usaron.</string>
+  <string name="wizard_impact_attribution_exploratory">Primeros pasos</string>
+  <string name="wizard_impact_attribution_exploratory_explanation">Una encuesta de prueba o exploratoria, o una que aún no tiene datos.</string>
+
+  <!-- Impact setup hints, shown when a summary has no numbers yet. -->
+  <string name="wizard_impact_hint_collect_data">Las cifras aparecerán aquí cuando se recolecten datos.</string>
+  <string name="wizard_impact_hint_pick_purpose">Elija para qué se usarán los datos en Detalles de la encuesta, para que los resultados se puedan agrupar por meta.</string>
+  <string name="wizard_impact_hint_link_fields">Vincule las preguntas de los formularios o las columnas de las capas a campos estándar (como Producto básico), para que sus respuestas se puedan sumar.</string>
+
+  <!-- Impact activity: kinds of "data was used" events, with their count next to them. -->
+  <string name="wizard_impact_activity_downloads">Descargas</string>
+  <string name="wizard_impact_activity_sent_to_partners">Enviados a socios</string>
+  <string name="wizard_impact_activity_receipts_created">Comprobantes creados</string>
+  <string name="wizard_impact_activity_receipts_shared">Comprobantes compartidos</string>
+  <string name="wizard_impact_activity_doi_minted">DOI generados</string>
+  <string name="wizard_impact_activity_surveys_closed">Encuestas cerradas</string>
+
+  <!-- Impact indicators. %1$s is the formatted count (e.g. "1,234"). -->
+  <plurals name="wizard_impact_map_features">
+    <item quantity="one">%1$s elemento del mapa</item>
+    <item quantity="other">%1$s elementos del mapa</item>
+  </plurals>
+  <!-- %1$s: a count of map features (e.g. "3 map features"); %2$s: their area (e.g. "5.9 ha"). -->
+  <string name="wizard_impact_value_with_area">%1$s · %2$s</string>
+  <!-- Headline of a share indicator. %1$s: a percentage (e.g. "67%"); %2$s: the most common answer (e.g. "Yes"). -->
+  <string name="wizard_impact_share_value">%1$s %2$s</string>
+  <!-- What a breakdown indicator is split by. %1$s: the indicator name in lower case (e.g. "commodity"). -->
+  <string name="wizard_impact_detail_by">Por %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_of_answered">De %1$s con respuesta</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_total_from">Total de %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_average_of">Promedio de %1$s</string>
+  <!-- %1$s: an area (e.g. "5.9 ha") or a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_covering">Abarca %1$s</string>
+
+  <!-- Impact notes on what couldn't be counted. %1$s: the standard field (shared data definition) name. -->
+  <string name="wizard_impact_note_link_unknown">Un campo está vinculado a un campo estándar que ya no existe (%1$s).</string>
+  <string name="wizard_impact_note_link_deprecated">Un campo está vinculado a un campo estándar que se retiró (%1$s).</string>
+  <string name="wizard_impact_note_link_not_in_library">Un campo está vinculado a un campo estándar de otra organización, por lo que no se cuenta aquí (%1$s).</string>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_not_a_number">
+    <item quantity="one">%1$s: %2$s valor no es un número (%3$s), por lo que se excluyó.</item>
+    <item quantity="other">%1$s: %2$s valores no son números (%3$s), por lo que se excluyeron.</item>
+  </plurals>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_unsupported_unit">
+    <item quantity="one">%1$s: %2$s valor usa una unidad que no se puede convertir (%3$s), por lo que se excluyó.</item>
+    <item quantity="other">%1$s: %2$s valores usan una unidad que no se puede convertir (%3$s), por lo que se excluyeron.</item>
+  </plurals>
+
+  <!-- Impact views (survey Impact tab, Impact page, platform-wide view) and PDF summaries. -->
+  <string name="wizard_impact_title">Impacto</string>
+  <string name="wizard_impact_survey_subtitle">Lo que suman los datos de esta encuesta y cómo se usaron. Las parcelas mapeadas más de una vez se cuentan una sola vez.</string>
+  <string name="wizard_impact_organization_subtitle">Lo que suman los datos de sus encuestas y cómo se usaron. Las parcelas mapeadas en más de una encuesta se cuentan una sola vez.</string>
+  <!-- Option of the survey filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_surveys">Todas las encuestas</string>
+  <!-- Option of the country filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_countries">Todos los países</string>
+  <!-- Label of the survey filter dropdown. -->
+  <string name="wizard_impact_filter_survey">Encuesta</string>
+  <!-- Label of the country filter dropdown. -->
+  <string name="wizard_impact_filter_country">País</string>
+  <!-- Title of the platform-wide Impact view ("Collect One" is the product name). -->
+  <string name="wizard_impact_all_of_collect_one">Todo Collect One</string>
+  <string name="wizard_impact_global_subtitle_full">Lo que suman los datos de todos, solo a partir de campos estándar globales. No se incluyen las organizaciones que optaron por no participar, y los grupos pequeños se mantienen privados. Como administrador de Todos los usuarios, también ve los campos estándar que no se publican.</string>
+  <string name="wizard_impact_global_subtitle_published">Lo que suman los datos de todos, solo a partir de campos estándar globales públicos. No se incluyen las organizaciones que optaron por no participar, y los grupos pequeños se mantienen privados.</string>
+  <!-- Title of the platform-wide impact summary (PDF) ("Collect One" is the product name). -->
+  <string name="wizard_impact_global_title">Todos los usuarios de Collect One</string>
+  <string name="wizard_impact_download_pdf">Descargar resumen en PDF</string>
+  <string name="wizard_impact_adding_up">Sumando las cifras…</string>
+  <string name="wizard_impact_no_numbers_for_this">Aún no hay cifras para esto.</string>
+  <!-- Heading of an organization's own indicators, in its published view. -->
+  <string name="wizard_impact_own_indicators">Indicadores propios</string>
+  <!-- Heading of the viewer's organization's own indicators, in its members' full view. -->
+  <string name="wizard_impact_your_indicators">Sus indicadores</string>
+  <string name="wizard_impact_own_indicators_supporting">Los campos estándar propios de la organización, publicados como totales.</string>
+  <string name="wizard_impact_your_indicators_supporting">Los campos estándar propios de su organización. Solo se publican los marcados como Totales públicos; el resto permanece en su organización.</string>
+  <string name="wizard_impact_suggested_indicators">Indicadores sugeridos por organizaciones</string>
+  <string name="wizard_impact_suggested_indicators_supporting">Campos propios que las organizaciones sugieren que cuentan para una meta. Se muestran por separado y nunca se suman a los totales anteriores.</string>
+  <string name="wizard_impact_how_data_was_used">Cómo se usaron los datos</string>
+  <string name="wizard_impact_unique_hectares_mapped">Hectáreas únicas mapeadas</string>
+  <string name="wizard_impact_unique_hectares_mapped_detail">Área de los elementos del mapa únicos</string>
+  <string name="wizard_impact_plots_and_map_features">Parcelas y elementos del mapa</string>
+  <!-- %1$s: the formatted number of duplicate map features. -->
+  <plurals name="wizard_impact_duplicates_counted_once">
+    <item quantity="one">%1$s duplicado contado una sola vez (mismo GeoID mapeado de nuevo)</item>
+    <item quantity="other">%1$s duplicados contados una sola vez (mismo GeoID mapeado de nuevo)</item>
+  </plurals>
+  <string name="wizard_impact_no_plot_mapped_twice">Ninguna parcela mapeada dos veces</string>
+  <string name="wizard_impact_producers_registered">Productores registrados</string>
+  <string name="wizard_impact_producers_registered_detail">Productores distintos nombrados en los elementos del mapa</string>
+  <string name="wizard_impact_what_happened_with_data">Qué pasó con los datos</string>
+  <string name="wizard_impact_outcomes_empty_survey">Se le preguntará cuando se cierre la encuesta.</string>
+  <string name="wizard_impact_outcomes_empty">Aún no hay respuestas. Se les pregunta a los organizadores cuando cierran una encuesta.</string>
+  <!-- Shown next to an outcome a single survey's organizer chose. -->
+  <string name="wizard_impact_outcome_yes">Sí</string>
+  <string name="wizard_impact_not_used_yet">Aún sin usar</string>
+  <string name="wizard_impact_closed_not_answered_yet">Cerrada, aún sin responder</string>
+  <string name="wizard_impact_closed_surveys_not_answered">Encuestas cerradas sin responder</string>
+  <!-- PDF summary: closed surveys whose organizer didn't say what happened with the data. -->
+  <string name="wizard_impact_closed_not_answered">Cerradas, sin responder</string>
+  <string name="wizard_impact_how_directly_contributed">Qué tan directamente contribuyeron los datos</string>
+  <!-- Attribution level on a 1–5 scale. %1$s: the level (e.g. "2"). -->
+  <string name="wizard_impact_level_of_five">%1$s de 5</string>
+  <string name="wizard_impact_no_global_purpose_surveys">Aún no hay encuestas con un propósito global.</string>
+  <string name="wizard_impact_no_surveys">Aún no hay encuestas.</string>
+  <string name="wizard_impact_global_purpose_by_level">Encuestas con un propósito global, por nivel</string>
+  <!-- %1$s: the formatted number of surveys. -->
+  <plurals name="wizard_impact_surveys">
+    <item quantity="one">%1$s encuesta</item>
+    <item quantity="other">%1$s encuestas</item>
+  </plurals>
+  <string name="wizard_impact_by_country_and_map_area">Por país y área del mapa</string>
+  <string name="wizard_impact_by_country_and_map_area_supporting">Los países necesitan al menos 10 elementos del mapa, y las áreas del mapa al menos 10 elementos del mapa de 2 organizaciones, para que se muestren sus cifras.</string>
+  <string name="wizard_impact_countries">Países</string>
+  <string name="wizard_impact_no_countries">Aún no hay países.</string>
+  <!-- Shown instead of a country's numbers when it has fewer than 10 map features. -->
+  <string name="wizard_impact_fewer_than_10">Menos de 10</string>
+  <string name="wizard_impact_map_areas_kept_private">Áreas del mapa que se mantienen privadas</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_map_areas_with_numbers">
+    <item quantity="one">%1$s área del mapa con cifras</item>
+    <item quantity="other">%1$s áreas del mapa con cifras</item>
+  </plurals>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_map_features_in_private_areas">
+    <item quantity="one">%1$s elemento del mapa en áreas privadas</item>
+    <item quantity="other">%1$s elementos del mapa en áreas privadas</item>
+  </plurals>
+  <string name="wizard_impact_organizations_not_included">Organizaciones no incluidas</string>
+  <string name="wizard_impact_organizations_not_included_detail">Excluyen sus datos de las cifras de toda la plataforma</string>
+  <string name="wizard_impact_not_enough_data_title">Aún no hay suficientes datos para publicar</string>
+  <!-- %1$d: the minimum number of map features before an organization's numbers are published. -->
+  <string name="wizard_impact_not_enough_data_body">Las cifras se publican cuando hay al menos %1$d elementos del mapa, para que no se pueda identificar a grupos pequeños.</string>
+  <string name="wizard_impact_hints_title_empty">Cómo obtener cifras aquí</string>
+  <string name="wizard_impact_hints_title">Aproveche más sus datos</string>
+  <!-- %1$s: the formatted number of linked fields. -->
+  <plurals name="wizard_impact_linked_fields_not_counted">
+    <item quantity="one">No se pudo contar %1$s campo vinculado</item>
+    <item quantity="other">No se pudieron contar %1$s campos vinculados</item>
+  </plurals>
+  <!-- Button hiding the list of what couldn't be counted. -->
+  <string name="wizard_impact_hide">Ocultar</string>
+  <!-- Button showing why some fields couldn't be counted. -->
+  <string name="wizard_impact_why">¿Por qué?</string>
+
+  <!-- PDF impact summary. -->
+  <!-- %1$s: the survey, organization, or platform-wide title. -->
+  <string name="wizard_impact_pdf_title">Resumen de impacto • %1$s</string>
+  <!-- Running header on every page ("Open Foris Collect One" is the product name). %1$s: the summary title. -->
+  <string name="wizard_impact_pdf_running_header">Open Foris Collect One • Resumen de impacto • %1$s</string>
+  <!-- %1$s: when the PDF was generated (e.g. "2026-09-18 10:14 UTC"). -->
+  <string name="wizard_impact_pdf_footer">Resumen de impacto • Generado el %1$s</string>
+  <string name="wizard_impact_pdf_subject_survey">Resumen de impacto de la encuesta</string>
+  <string name="wizard_impact_pdf_subject_organization">Resumen de impacto de la organización</string>
+  <string name="wizard_impact_pdf_subject_global">Resumen de impacto de todas las organizaciones que participan en las cifras de toda la plataforma</string>
+  <string name="wizard_impact_pdf_published_numbers">Cifras publicadas</string>
+  <string name="wizard_impact_pdf_counted_once_note">Las parcelas mapeadas más de una vez (mismo GeoID) se cuentan una sola vez.</string>
+  <string name="wizard_impact_pdf_counted_once_note_published">Las parcelas mapeadas más de una vez (mismo GeoID) se cuentan una sola vez. Las cifras publicadas son totales anónimos obtenidos solo de campos estándar públicos.</string>
+  <string name="wizard_impact_pdf_at_a_glance">Resumen rápido</string>
+  <string name="wizard_impact_pdf_unique_map_features">Elementos del mapa únicos</string>
+  <string name="wizard_impact_pdf_area_mapped">Área mapeada</string>
+  <string name="wizard_impact_pdf_counted_once">Contados una sola vez</string>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_pdf_mapped_again">
+    <item quantity="one">%1$s elemento del mapa mapeado de nuevo en otro lugar</item>
+    <item quantity="other">%1$s elementos del mapa mapeados de nuevo en otro lugar</item>
+  </plurals>
+  <string name="wizard_impact_pdf_suggested_note">Campos propios que las organizaciones sugieren que cuentan para una meta. No se suman a los totales anteriores.</string>
+  <!-- How directly the data contributed (attribution level). -->
+  <string name="wizard_impact_pdf_contribution">Contribución</string>
+  <string name="wizard_impact_pdf_by_country">Por país</string>
+  <string name="wizard_impact_pdf_fewer_than_10_features">Menos de 10 elementos del mapa</string>
+  <string name="wizard_impact_pdf_map_areas">Áreas del mapa</string>
+  <string name="wizard_impact_pdf_map_areas_with_numbers">Áreas del mapa con cifras</string>
+  <string name="wizard_impact_pdf_kept_private">Privadas</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_pdf_kept_private_areas">
+    <item quantity="one">%1$s área del mapa con menos de 10 elementos del mapa o 2 organizaciones</item>
+    <item quantity="other">%1$s áreas del mapa con menos de 10 elementos del mapa o 2 organizaciones</item>
+  </plurals>
+  <!-- %1$s: the formatted number of organizations. -->
+  <plurals name="wizard_impact_pdf_excluded_organizations">
+    <item quantity="one">%1$s organización excluye sus datos de las cifras de toda la plataforma.</item>
+    <item quantity="other">%1$s organizaciones excluyen sus datos de las cifras de toda la plataforma.</item>
+  </plurals>
+  <string name="wizard_impact_pdf_not_counted">No contados</string>
+
+  <!-- Impact page (#impact): the organizations a user follows and all of Collect One. -->
+  <string name="wizard_impact_back_to_surveys">Volver a las encuestas</string>
+  <string name="wizard_impact_page_title">Métricas en tiempo real</string>
+  <!-- Header line under "Live Metrics". %1$s: the formatted number of followed organizations. -->
+  <plurals name="wizard_impact_published_by_followed">
+    <item quantity="one">Publicado por %1$s organización que sigue</item>
+    <item quantity="other">Publicado por %1$s organizaciones que sigue</item>
+  </plurals>
+  <string name="wizard_impact_choose_organizations">Elegir organizaciones</string>
+  <!-- Navigation item of the Impact page's overview. -->
+  <string name="wizard_impact_overview">Resumen</string>
+  <!-- Section heading in the Impact page's left panel (shown in capitals). -->
+  <string name="wizard_impact_organizations_you_follow">ORGANIZACIONES QUE SIGUE</string>
+  <!-- The signed-in user is a member of this organization. -->
+  <string name="wizard_impact_member">Miembro</string>
+  <!-- The signed-in user is a Manager of this organization. -->
+  <string name="wizard_impact_you_manage">Usted administra</string>
+  <!-- Fallback description of an organization with no type or country. -->
+  <string name="wizard_impact_organization">Organización</string>
+  <string name="wizard_impact_no_followed_organizations">Aún no sigue ninguna organización.</string>
+  <string name="wizard_impact_dashboard_title">Su panel de impacto</string>
+  <string name="wizard_impact_dashboard_subtitle">Cifras publicadas de las organizaciones que sigue. Elija cualquier organización de la lista para ver lo que suman sus datos.</string>
+  <string name="wizard_impact_all_of_collect_one_supporting">Todas las organizaciones que participan en las cifras de toda la plataforma</string>
+  <string name="wizard_impact_follow_more_organizations">Seguir más organizaciones</string>
+  <!-- Screen reader label of the button removing an organization from the Impact page. %1$s: the organization name. -->
+  <string name="wizard_impact_stop_following">Dejar de seguir a %1$s</string>
+  <string name="wizard_impact_no_numbers_yet">Aún no hay cifras.</string>
+  <string name="wizard_impact_not_enough_data_short">Aún no hay suficientes datos para publicar.</string>
+  <!-- Label under a headline area number. -->
+  <string name="wizard_impact_unique_hectares">Hectáreas únicas</string>
+  <!-- Label under a headline count of map features. -->
+  <string name="wizard_impact_map_features_label">Elementos del mapa</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_organization_published_subtitle">Lo que suman las encuestas de %1$s, tal como se publica para todos en Collect One. Las parcelas mapeadas en más de una encuesta se cuentan una sola vez.</string>
+  <string name="wizard_impact_organization_page">Página de la organización</string>
+  <string name="wizard_impact_unfollow">Dejar de seguir</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_manager">Está viendo sus cifras completas como administrador de %1$s</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_member">Está viendo las cifras completas de %1$s como miembro</string>
+  <string name="wizard_impact_notice_published_member">Esto es lo que ven todos en Collect One</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_published_by">Publicado por %1$s</string>
+  <!-- %1$s: the organization name; %2$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body_manager">%1$s publica totales anónimos de sus encuestas para cualquier persona que haya iniciado sesión en Collect One. %2$s</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body">Todas las organizaciones de Collect One publican totales anónimos de sus encuestas. %1$s</string>
+  <!-- Label of the switch showing members the published view. -->
+  <string name="wizard_impact_show_published">Mostrar lo que se publica</string>
+  <!-- "All users" is the name of the platform-wide organization. -->
+  <string name="wizard_impact_platform_notice_full">Está viendo todos los campos estándar como administrador de Todos los usuarios</string>
+  <string name="wizard_impact_platform_notice_published">Publicado para todos en Collect One</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_platform_notice_body">Totales de todas las organizaciones que participan en las cifras de toda la plataforma. %1$s</string>
+  <string name="wizard_impact_explainer_title">Todas las organizaciones publican totales anónimos</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_explainer_body">Los organizadores de Collect One publican lo que suman sus encuestas, como las hectáreas mapeadas y cómo se usaron los datos, para que cualquier persona que haya iniciado sesión pueda verlo. %1$s</string>
+  <!-- What's never published. %1$d: the minimum number of map features before numbers are shown. -->
+  <string name="wizard_impact_published_rules">Nunca se publican los envíos, los elementos del mapa, las ubicaciones ni las respuestas, ni tampoco los campos estándar reservados solo para la organización o marcados como sensibles. Las organizaciones con menos de %1$d elementos del mapa no muestran cifras.</string>
+  <string name="wizard_impact_choose_organizations_body">Todas las organizaciones publican totales anónimos de sus encuestas. Elija qué cifras seguir en su página Impacto.</string>
+  <string name="wizard_impact_search_organizations">Buscar organizaciones</string>
+  <string name="wizard_impact_no_organizations_match">Ninguna organización coincide.</string>
+  <!-- Appended to an organization's description when it isn't listed publicly. -->
+  <string name="wizard_impact_unlisted">No listada, solo la ven los miembros</string>
+  <string name="wizard_impact_save">Guardar</string>
+  <string name="wizard_impact_cancel">Cancelar</string>
+  <!-- Snackbar after saving a PDF summary. %1$s: the file name; %2$s: its page count and size (e.g. "2 pages • 14 KB"). -->
+  <string name="wizard_impact_saved_pdf">Se guardó %1$s (%2$s)</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the survey title. -->
+  <string name="wizard_impact_filter_label_survey">Encuesta: %1$s</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the country name. -->
+  <string name="wizard_impact_filter_label_country">País: %1$s</string>
+
+  <!-- "What happened with this data?" card/dialog, asked after a survey is closed. -->
+  <string name="wizard_outcome_title">¿Qué pasó con estos datos?</string>
+  <string name="wizard_outcome_supporting">Elija todas las opciones que correspondan. Su respuesta ayuda a mostrar cómo se usan los datos de las encuestas.</string>
+  <string name="wizard_outcome_skip">Omitir</string>
+  <string name="wizard_outcome_save">Guardar</string>
+  <!-- Question completed by one of the chips below (e.g. "Less time and cost"). -->
+  <string name="wizard_outcome_effort_question">En comparación con su método anterior, esto requirió… (opcional)</string>
+  <string name="wizard_outcome_effort_less">Menos tiempo y costo</string>
+  <string name="wizard_outcome_effort_same">Más o menos lo mismo</string>
+  <string name="wizard_outcome_effort_more">Más tiempo y costo</string>
+
+  <!-- Purpose Pack picker ("What will this data be used for?"). -->
+  <!-- Screen reader label of the error icon in a validation banner. -->
+  <string name="wizard_purpose_error">Error</string>
+  <string name="wizard_validation_purpose_required">Seleccione un propósito (o elija "Otro" y describa su objetivo) para continuar.</string>
+  <string name="wizard_validation_other_purpose_required">Describa el propósito de esta encuesta para continuar.</string>
+  <!-- Badge of a Purpose Pack defined by an organization, when its name is unknown. -->
+  <string name="wizard_purpose_source_organization">Organización</string>
+  <!-- Badge of a Purpose Pack available to every organization. -->
+  <string name="wizard_purpose_source_global">Global</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_purpose_other_label">Describa el propósito de esta encuesta *</string>
+  <string name="wizard_purpose_other_placeholder">p. ej., Monitoreo comunitario de la restauración de cuencas</string>
+  <string name="wizard_purpose_other_supporting">Ayuda a alinear los formularios, los conceptos de la biblioteca y los informes de impacto con su objetivo.</string>
+  <!-- Screen reader label of the check mark on a selected card. -->
+  <string name="wizard_purpose_selected">Seleccionado</string>
+  <!-- Title of the card for a custom survey purpose. -->
+  <string name="wizard_purpose_other">Otro</string>
+  <string name="wizard_purpose_other_description">Un objetivo de investigación, monitoreo o comunitario personalizado que no cubren los paquetes estándar.</string>
+  <!-- Badge of the "Other" purpose card. -->
+  <string name="wizard_purpose_custom">Personalizado</string>
+  <!-- What a Purpose Pack adds. %1$d: the number of form templates. -->
+  <plurals name="wizard_purpose_forms">
+    <item quantity="one">%1$d formulario</item>
+    <item quantity="other">%1$d formularios</item>
+  </plurals>
+  <!-- What a Purpose Pack adds. %1$d: the number of questions linked to standard fields (shared data definitions). -->
+  <plurals name="wizard_purpose_standard_fields">
+    <item quantity="one">%1$d campo estándar</item>
+    <item quantity="other">%1$d campos estándar</item>
+  </plurals>
+
+  <!-- Create survey wizard (#create-survey): page chrome. -->
+  <string name="wizard_cancel_survey_creation">Cancelar la creación de la encuesta</string>
+  <!-- Page title while the survey has no title yet, and the wizard's final button. -->
+  <string name="wizard_create_survey">Crear encuesta</string>
+  <string name="wizard_saving_survey">Guardando encuesta…</string>
+  <string name="wizard_save_failed">No se pudo guardar la encuesta, así que sigue abierta aquí. %1$s</string>
+  <string name="wizard_discard_title">¿Descartar la encuesta?</string>
+  <string name="wizard_discard_body">Si sale ahora, se perderán esta encuesta y los cambios que haya hecho.</string>
+  <string name="wizard_discard">Descartar</string>
+  <string name="wizard_keep_editing">Seguir editando</string>
+  <string name="wizard_working_copy_prompt_title">¿Continuar editando el borrador sin guardar?</string>
+  <string name="wizard_working_copy_prompt_body">Tiene un borrador de encuesta sin guardar en curso. ¿Desea continuar editándolo o descartarlo y comenzar una nueva encuesta?</string>
+  <string name="wizard_working_copy_continue">Continuar editando</string>
+  <string name="wizard_working_copy_discard">Descartar borrador</string>
+  <string name="wizard_back">Volver</string>
+  <string name="wizard_cancel">Cancelar</string>
+  <string name="wizard_required_field_missing">Falta un campo obligatorio: consulte la sección resaltada</string>
+  <string name="wizard_skip_for_now">Omitir por ahora</string>
+  <string name="wizard_next">Siguiente</string>
+
+  <!-- Wizard steps: name and short description of each of the 6 steps. -->
+  <string name="wizard_step_overview">Información general</string>
+  <string name="wizard_step_overview_subtitle">Título, organización, idiomas y forma de inicio</string>
+  <string name="wizard_step_purpose">Propósito</string>
+  <string name="wizard_step_purpose_subtitle">Objetivo de la encuesta, paquete de propósitos y programas de reporte</string>
+  <string name="wizard_step_survey_area">Área de la encuesta</string>
+  <string name="wizard_step_survey_area_subtitle">Límite del estudio e imágenes del mapa base para uso sin conexión o en la web</string>
+  <string name="wizard_step_map_features">Elementos del mapa</string>
+  <string name="wizard_step_map_features_subtitle">Capa de mapa principal, parcelas de muestreo o elementos importados</string>
+  <string name="wizard_step_forms">Formularios</string>
+  <string name="wizard_step_forms_subtitle">Cuestionarios, conceptos de la biblioteca y asignación para exportación</string>
+  <string name="wizard_step_sharing">Compartir</string>
+  <string name="wizard_step_sharing_subtitle">Acceso, soberanía de datos CARE y preparación para el impacto</string>
+
+  <!-- Wizard step 1: Overview. -->
+  <string name="wizard_overview_subtitle">Asigne un nombre a su encuesta, elija la organización que la realiza, configure los idiomas y elija cómo quiere empezar.</string>
+  <string name="wizard_survey_identity">Identidad de la encuesta</string>
+  <string name="wizard_validation_title_required">Ingrese un título para la encuesta para continuar.</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_survey_title_label">Título de la encuesta *</string>
+  <string name="wizard_survey_title_placeholder">p. ej., Mapeo de parcelas de café de pequeños productores de Nyeri</string>
+  <string name="wizard_description_label">Descripción (opcional)</string>
+  <string name="wizard_description_placeholder">Describa los objetivos y las instrucciones para los recolectores de datos.</string>
+  <!-- Label of the organization dropdown. -->
+  <string name="wizard_organization">Organización</string>
+  <!-- Organization dropdown option for a survey not run by any organization. -->
+  <string name="wizard_no_organization">Ninguna (encuesta personal)</string>
+  <string name="wizard_organization_supporting">Realizar una encuesta en nombre de una organización desbloquea sus paquetes de propósitos, conceptos del diccionario, plantillas de formulario e imágenes personalizadas del mapa base compartidos.</string>
+  <string name="wizard_start_method_title">¿Cómo quiere empezar?</string>
+  <string name="wizard_start_from_scratch">Crear una encuesta nueva</string>
+  <string name="wizard_start_from_scratch_description">Configure las capas de mapa y los formularios paso a paso o a partir de paquetes de propósitos.</string>
+  <string name="wizard_start_copy_existing">Copiar una encuesta existente</string>
+  <string name="wizard_start_copy_existing_description">Clone los formularios, los esquemas de las capas de mapa, el área de la encuesta y los paquetes de propósitos, sin los datos.</string>
+  <string name="wizard_start_import">Importar desde un archivo</string>
+  <string name="wizard_start_import_description">Importe la definición de un formulario desde ODK XForms (.xml) o Collect Earth (.cep).</string>
+  <string name="wizard_no_surveys_to_copy">No hay encuestas existentes disponibles para copiar.</string>
+  <string name="wizard_copy_source_label">Encuesta de origen que se copiará</string>
+  <string name="wizard_copy_source_supporting">Copia los formularios, los esquemas de las capas de mapa, los diseños de parcelas de muestreo y los propósitos, sin copiar los registros recolectados anteriormente.</string>
+  <string name="wizard_import_supported_formats">Formatos compatibles: ODK XForms (.xml), Collect Earth (.cep, .zip)</string>
+  <string name="wizard_import_choose_another_file">Elegir otro archivo (.xml, .cep)</string>
+  <string name="wizard_import_choose_file">Elegir archivo (.xml, .cep)</string>
+  <!-- %1$d: the number of questions in the imported form. -->
+  <plurals name="wizard_import_questions">
+    <item quantity="one">%1$d pregunta</item>
+    <item quantity="other">%1$d preguntas</item>
+  </plurals>
+  <!-- %1$d: the number of sample plots in the imported Collect Earth project. -->
+  <plurals name="wizard_import_sample_plots">
+    <item quantity="one">%1$d parcela de muestreo</item>
+    <item quantity="other">%1$d parcelas de muestreo</item>
+  </plurals>
+  <!-- %1$s: the number of questions (e.g. "12 questions"). -->
+  <string name="wizard_import_parsed">%1$s analizadas · Listo para importar en el paso 5</string>
+  <!-- %1$s: the number of questions (e.g. "12 questions"); %2$s: the number of sample plots (e.g. "50 sample plots"). -->
+  <string name="wizard_import_parsed_with_plots">Analizado: %1$s · %2$s · Listo para importar en el paso 5</string>
+  <string name="wizard_import_clear_file">Quitar el archivo importado</string>
+  <!-- %1$d: the number of Collect Earth surveys found in the imported archive. -->
+  <string name="wizard_import_cep_archive_label">Encuesta de Collect Earth en el archivo (%1$d encontradas)</string>
+
+  <!-- Wizard step 2: Purpose. -->
+  <string name="wizard_purpose_subtitle">Elija qué resultados o estándares de reporte respalda esta encuesta para preconfigurar su capa de mapa y su formulario inicial.</string>
+  <!-- Section title of a required choice (* marks it required). -->
+  <string name="wizard_purpose_question">¿Para qué se usarán estos datos? *</string>
+  <string name="wizard_purpose_question_supporting">Seleccione el propósito principal para que Collect One pueda adaptar los valores predeterminados de la capa de mapa de su encuesta, el formulario inicial, los conceptos estándar de la biblioteca, las salvaguardas de gobernanza de datos (como el EUDR o la soberanía CARE) y los perfiles de exportación con un clic. Elija "Otro" si su objetivo no aparece en la lista.</string>
+  <string name="wizard_purpose_programs_title">Programas y marcos de reporte</string>
+  <string name="wizard_purpose_programs_supporting">Programas a los que contribuyen los datos de esta encuesta. Elegir una plantilla los preselecciona; se usan para seguimiento e informes de impacto y no cambian los formularios.</string>
+  <string name="wizard_purpose_loading">Cargando finalidades…</string>
+  <string name="wizard_starter_template_title">Plantilla inicial</string>
+  <string name="wizard_starter_template_supporting">Elija cómo cumple esta encuesta su finalidad. La plantilla configura los formularios iniciales, las comprobaciones y los perfiles de exportación, y preselecciona los programas a los que informa.</string>
+  <string name="wizard_starter_template_programs">Informa a: %1$s</string>
+  <string name="wizard_starter_template_replace_title">¿Reemplazar sus formularios?</string>
+  <string name="wizard_starter_template_replace_body">Ha editado los formularios creados a partir de la plantilla de esta encuesta. Al cambiar a %1$s puede reemplazarlos por sus formularios iniciales o conservar sus formularios tal como están.</string>
+  <string name="wizard_starter_template_replace_forms">Reemplazar formularios</string>
+  <string name="wizard_starter_template_keep_forms">Conservar mis formularios</string>
+  <string name="wizard_starter_template_cancel">Cancelar</string>
+
+  <!-- Wizard step 3: Survey area. -->
+  <string name="wizard_survey_area_subtitle_field">Defina el límite geográfico para encuadrar el mapa de la encuesta y preparar las imágenes del mapa base sin conexión para los recolectores en campo.</string>
+  <string name="wizard_survey_area_subtitle_visual">Defina el área de interés (AOI) donde se generarán e interpretarán las parcelas de muestreo, y verifique las imágenes satelitales del mapa base.</string>
+  <string name="wizard_imagery_title">Mapa base e imágenes de referencia</string>
+  <string name="wizard_imagery_supporting_field">Elija qué capas de imágenes satelitales y de referencia se habilitan junto con el mapa base satelital predeterminado.</string>
+  <string name="wizard_imagery_supporting_visual">Seleccione las capas de imágenes de alta resolución o temporales (como los mosaicos de NICFI Planet o Sentinel-2) que los fotointérpretes revisarán al clasificar las parcelas.</string>
+  <string name="wizard_imagery_default_only">El mapa base predeterminado Mapbox Satellite está habilitado. No hay capas de imágenes personalizadas configuradas.</string>
+  <!-- Badge of imagery available to everyone ("All users" is the name of the platform-wide organization). -->
+  <string name="wizard_imagery_source_all_users">Todos los usuarios</string>
+  <!-- Imagery layer that comes with the platform. -->
+  <string name="wizard_imagery_built_in">Imágenes integradas en la plataforma</string>
+  <!-- %1$s: the organization that added the imagery layer. -->
+  <string name="wizard_imagery_added_by">Agregada por %1$s</string>
+  <string name="wizard_imagery_offline_available">Disponible para descarga sin conexión en campo y para mapas web</string>
+  <string name="wizard_imagery_online_only">Capa de imágenes satelitales y de referencia en línea</string>
+
+  <!-- Wizard step 4: Map features. -->
+  <string name="wizard_map_features_subtitle">Configure la capa de mapa principal donde se registrarán los datos: recolección libre en campo, una cuadrícula estadística de parcelas de muestreo o elementos importados de GeoJSON / KML.</string>
+  <string name="wizard_map_features_source_title">¿Cómo se crean los elementos del mapa?</string>
+  <string name="wizard_source_field_freeform">Los recolectores de datos agregan elementos del mapa en campo</string>
+  <string name="wizard_source_field_freeform_description">Los recolectores capturan nuevos puntos o polígonos en el lugar durante las visitas de campo.</string>
+  <string name="wizard_source_sample_plots">Generar parcelas de muestreo</string>
+  <string name="wizard_source_sample_plots_description">Cree parcelas de muestreo sistemáticas o aleatorias (y cuadrículas de subparcelas) dentro del área de la encuesta.</string>
+  <string name="wizard_source_import_file">Importar elementos del mapa (GeoJSON / KML)</string>
+  <string name="wizard_source_import_file_description">Suba desde un archivo límites de parcelas, predios o puntos predefinidos.</string>
+  <!-- %1$s: the description of the chosen way of creating map features (a full sentence). -->
+  <string name="wizard_map_features_source_preselected">%1$s Preseleccionado según el propósito y el modo de recolección que eligió.</string>
+  <string name="wizard_change">Cambiar</string>
+  <string name="wizard_eudr_guardrail_title">Salvaguarda de geolocalización del artículo 9 del EUDR</string>
+  <string name="wizard_eudr_guardrail_body">El Reglamento de la UE sobre Deforestación (EUDR) exige límites de polígono para todas las parcelas de producción de más de 4 hectáreas. La geometría de polígono está seleccionada de forma predeterminada.</string>
+  <string name="wizard_eudr_plots_under_four_ha">Todas las parcelas de producción de esta encuesta tienen ≤ 4 ha (permitir ubicaciones de un solo punto)</string>
+  <string name="wizard_primary_layer_settings">Configuración de la capa de mapa principal</string>
+  <string name="wizard_map_layer_name">Nombre de la capa de mapa</string>
+  <string name="wizard_geometry_type">Tipo de geometría</string>
+  <string name="wizard_allow_field_creation">Permitir que los recolectores agreguen nuevos elementos del mapa en campo</string>
+  <string name="wizard_allow_field_creation_supporting">Si se habilita, los recolectores de datos pueden colocar marcadores o recorrer los perímetros de las parcelas para crear nuevos elementos del mapa.</string>
+  <string name="wizard_sample_design_title">Diseño estadístico del muestreo y puntos de subparcela</string>
+  <string name="wizard_sample_design_supporting">Configure parcelas en cuadrícula sistemática, aleatorias simples o aleatorias estratificadas, la forma de la parcela (punto, cuadrado, círculo) y las cuadrículas internas de puntos de muestreo de subparcela.</string>
+  <string name="wizard_import_features_title">Importar elementos del mapa desde GeoJSON o KML</string>
+  <string name="wizard_import_features_supporting">Suba límites de fincas, parcelas de monitoreo o puntos de interés existentes. Los atributos del archivo se convierten en propiedades de la capa de mapa.</string>
+  <string name="wizard_import_features_choose_file">Elegir archivo GeoJSON o KML</string>
+  <!-- %1$d: the number of imported map features; %2$s: their geometry type in lower case (e.g. "polygon"). -->
+  <plurals name="wizard_import_features_loaded">
+    <item quantity="one">Se cargó %1$d elemento de tipo %2$s</item>
+    <item quantity="other">Se cargaron %1$d elementos de tipo %2$s</item>
+  </plurals>
+  <string name="wizard_also_allow_field_creation">Permitir también que los recolectores agreguen nuevos elementos del mapa en campo</string>
+  <string name="wizard_also_allow_field_creation_supporting">Manténgalo desactivado para parcelas de monitoreo fijas; actívelo si los recolectores de datos también pueden agregar nuevos sitios.</string>
+  <!-- %1$d: the number of other map layers and data tables in the survey. -->
+  <plurals name="wizard_other_datasets_note">
+    <item quantity="one">Esta encuesta también tiene %1$d capa de mapa o tabla de datos más, vinculada a sus otros formularios. Puede revisarla en el siguiente paso.</item>
+    <item quantity="other">Esta encuesta también tiene %1$d capas de mapa y tablas de datos más, vinculadas a sus otros formularios. Puede revisarlas en el siguiente paso.</item>
+  </plurals>
+
+  <!-- Wizard validation messages. -->
+  <string name="wizard_validation_copy_source_required">Seleccione una encuesta de origen para copiar antes de continuar.</string>
+  <string name="wizard_validation_import_file_required">Elija un archivo XML de XForms válido para importar antes de continuar.</string>
+  <string name="wizard_validation_survey_area_required">Seleccione o dibuje un área de la encuesta para continuar.</string>
+  <string name="wizard_validation_form_variant_incompatible">Resuelva las preguntas del formulario que no sean compatibles con las variantes seleccionadas (Web o Google Earth) antes de continuar.</string>
+  <!-- %1$s: the name of the file that couldn't be read. -->
+  <string name="wizard_import_parse_failed">No se pudo analizar ninguna pregunta de XForms o Collect Earth en "%1$s".</string>
+
+  <!-- Collection modes: field data collection, desk-based visual classification, or both. -->
+  <string name="wizard_mode_field_survey">Encuesta de campo</string>
+  <string name="wizard_mode_field_survey_summary">Recolección de datos en campo desde dispositivos móviles, con o sin conexión, por recolectores de datos sobre el terreno.</string>
+  <string name="wizard_mode_visual_classification">Clasificación visual</string>
+  <string name="wizard_mode_visual_classification_summary">Clasificación visual de escritorio de parcelas de muestreo sobre imágenes satelitales y del mapa base.</string>
+  <!-- Collection mode combining field survey and visual classification. -->
+  <string name="wizard_mode_both">Ambos</string>
+  <string name="wizard_mode_both_summary">Clasificación visual de escritorio combinada con recolección de datos en campo desde dispositivos móviles.</string>
+
+  <!-- Wizard step 5: Forms. -->
+  <string name="wizard_show_forms_and_layers">Mostrar todos los formularios y capas</string>
+  <string name="wizard_hide_forms_and_layers">Ocultar formularios y capas</string>
+  <string name="wizard_add_another_form">Agregar otro formulario</string>
+  <string name="wizard_add_form">Agregar formulario</string>
+  <string name="wizard_untitled_form">Formulario sin título</string>
+  <!-- Name shown for a map layer or data table without a name. -->
+  <string name="wizard_untitled">Sin título</string>
+
+  <!-- Wizard step 6: Sharing. -->
+  <string name="wizard_sharing_subtitle">Revise la preparación de su encuesta para el impacto y la exportación, configure los valores predeterminados de soberanía de datos e invite a colaboradores.</string>
+  <string name="wizard_draft_mode_title">Comienza en modo borrador</string>
+  <!-- Badge of a survey that isn't published yet. -->
+  <string name="wizard_draft_badge">Borrador</string>
+  <string name="wizard_draft_mode_body">Al hacer clic en Crear encuesta, la encuesta se abre en el mapa principal en modo borrador para que pueda revisar el área de estudio y las capas, o abrir el editor de encuestas, antes de que los recolectores de datos la vean. Cuando esté listo para publicarla, abra el editor de encuestas, haga clic en la insignia de estado Borrador junto al nombre de la encuesta y seleccione Publicar encuesta.</string>
+  <string name="wizard_readiness_title">Preparación para el impacto y la exportación</string>
+  <string name="wizard_readiness_supporting">Cómo se conecta el esquema de esta encuesta con el resumen de impacto de su organización, los indicadores ambientales de la FAO y la ONU, y los perfiles de exportación con un clic.</string>
+  <!-- %1$s: the collection mode (e.g. "Field survey"). -->
+  <string name="wizard_readiness_mode">Modo: %1$s</string>
+  <!-- %1$d: questions linked to standard fields (shared data definitions); %2$d: all questions. -->
+  <string name="wizard_readiness_fields_linked">%1$d/%2$d campos estándar vinculados</string>
+  <!-- %1$s: comma-separated purpose names. -->
+  <string name="wizard_readiness_purposes">Propósitos: %1$s</string>
+  <!-- %1$s: comma-separated reporting program names. -->
+  <string name="wizard_readiness_programs">Programas: %1$s</string>
+  <!-- %1$s: comma-separated impact goal names. -->
+  <string name="wizard_readiness_goals">Metas de impacto: %1$s</string>
+  <!-- Purpose list entry for a custom purpose. %1$s: the organizer's description of it. -->
+  <string name="wizard_readiness_other_purpose">Otro: %1$s</string>
+  <string name="wizard_readiness_export_profiles">Perfiles de exportación con un clic</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped_ready">%1$d/%2$d asignados (Listo)</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped">%1$d/%2$d asignados</string>
+
+  <!-- CARE Principles for Indigenous Data Governance and FAO Free, Prior and Informed Consent (FPIC). -->
+  <string name="wizard_care_title">Principios CARE y soberanía de datos indígenas y comunitarios</string>
+  <string name="wizard_care_applied_body">El acceso restringido, la visibilidad entre pares "Solo sus propios envíos" y los términos de Consentimiento Libre, Previo e Informado (CLPI) de la FAO para los recolectores están activos para proteger los datos comunitarios y de tenencia.</string>
+  <string name="wizard_care_not_applied_body">¿Trabaja con pueblos indígenas, comunidades locales o datos sensibles de tenencia de la tierra? Aplique los valores predeterminados de soberanía CARE y CLPI de la FAO (acceso restringido + los recolectores solo ven sus propios envíos + términos de consentimiento CLPI).</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_care_excluded_from_aggregates">Nota: %1$s está excluida de los totales agregados de toda la plataforma.</string>
+  <string name="wizard_care_defaults_applied">✓ Valores predeterminados CARE aplicados</string>
+  <string name="wizard_care_apply_defaults">Aplicar valores predeterminados CARE</string>
+  <!-- CARE principle "C". -->
+  <string name="wizard_care_collective_benefit">Beneficio colectivo</string>
+  <string name="wizard_care_collective_benefit_description">Los indicadores ecosistémicos y comunitarios usan conceptos compartidos de la biblioteca para generar evidencia de propiedad comunitaria.</string>
+  <!-- CARE principle "A". -->
+  <string name="wizard_care_authority_to_control">Autoridad para controlar</string>
+  <string name="wizard_care_authority_to_control_description">El acceso es restringido para que los custodios comunitarios controlen quién puede ver o recolectar los registros de la encuesta.</string>
+  <!-- CARE principle "R". -->
+  <string name="wizard_care_responsibility">Responsabilidad</string>
+  <string name="wizard_care_responsibility_description">La visibilidad entre pares se limita a los propios envíos de cada colaborador, además de los organizadores de la encuesta.</string>
+  <!-- CARE principle "E". -->
+  <string name="wizard_care_ethics">Ética</string>
+  <string name="wizard_care_ethics_description">Los datos comunitarios sensibles están protegidos frente a agregaciones externas no aprobadas.</string>
+  <!-- CARE principle "E", as checked in the wizard. -->
+  <string name="wizard_care_ethics_aggregate_protection">Ética y protección de agregados</string>
+  <string name="wizard_care_ethics_aggregate_protection_description">Los registros individuales de tenencia y de hogares nunca se exponen en los resúmenes públicos de la plataforma.</string>
+  <string name="wizard_care_fpic">Consentimiento libre, previo e informado</string>
+  <string name="wizard_care_fpic_description">Se requiere el consentimiento explícito del recolector o participante antes de registrar datos de campo.</string>
+  <string name="wizard_care_fpic_wizard_description">Los recolectores de datos deben revisar y aceptar términos explícitos de consentimiento comunitario antes de recolectar datos.</string>
+  <!-- Standards and guidelines a CARE / FPIC criterion comes from. -->
+  <string name="wizard_care_standard_care_fao_indigenous_data_policy">CARE y política de datos indígenas de la FAO</string>
+  <string name="wizard_care_standard_care_fao_vggt">CARE y gobernanza de la tenencia según las DVGT de la FAO</string>
+  <string name="wizard_care_standard_care_principles">Principios CARE</string>
+  <string name="wizard_care_standard_fao_fpic_manual">Manual de CLPI de la FAO</string>
+  <string name="wizard_care_standard_fao_fpic_guidelines">Directrices operativas de CLPI de la FAO</string>
+  <string name="wizard_care_criterion_met">Se cumple</string>
+  <string name="wizard_care_criterion_not_met">No se cumple</string>
+  <string name="wizard_care_effect_collective_benefit_on">Las preguntas vinculadas a campos estándar permiten que los datos de esta encuesta alimenten indicadores comunitarios y de impacto compartidos, y exportaciones con un clic.</string>
+  <string name="wizard_care_effect_collective_benefit_off">Ninguna pregunta está vinculada a campos estándar, por lo que los datos de esta encuesta no alimentarán indicadores comunitarios ni de impacto compartidos. Elija un propósito o vincule preguntas a campos estándar en el paso Formularios.</string>
+  <string name="wizard_care_effect_authority_on">Solo las personas que invite pueden abrir esta encuesta y recolectar datos, de modo que los custodios comunitarios controlan quién ve sus registros.</string>
+  <string name="wizard_care_effect_authority_off">Personas que no ha invitado pueden abrir esta encuesta y sus registros. Para restringirla, establezca Quién puede recopilar datos en Personas invitadas a continuación.</string>
+  <string name="wizard_care_effect_responsibility_on">Los recolectores de datos solo ven sus propios envíos en el mapa. Los organizadores de la encuesta los ven todos.</string>
+  <string name="wizard_care_effect_responsibility_off">Los recolectores de datos pueden ver los envíos de todos en el mapa, incluidos los registros de tenencia y recursos de otros hogares. Para limitarlo, establezca Quién puede ver los datos en Colaboradores y organizadores a continuación.</string>
+  <string name="wizard_care_effect_ethics_on">Los resúmenes públicos de impacto solo muestran totales con umbrales, nunca registros individuales de tenencia ni de hogares.</string>
+  <string name="wizard_care_effect_fpic_on">Los recolectores de datos deben leer y aceptar sus términos de consentimiento antes de poder recolectar datos.</string>
+  <string name="wizard_care_effect_fpic_off">Los recolectores de datos pueden empezar a recolectar sin aceptar ningún término de consentimiento. Para exigir el consentimiento, active Términos de consentimiento y gobernanza para recolectores de datos a continuación.</string>
+  <string name="wizard_care_summary_title">CARE y CLPI</string>
+  <string name="wizard_care_summary_count">%1$d de %2$d se cumplen</string>
+  <string name="wizard_care_show_details">Mostrar detalles</string>
+  <string name="wizard_care_hide_details">Ocultar detalles</string>
+  <string name="wizard_care_state_expanded">Detalles visibles</string>
+  <string name="wizard_care_state_collapsed">Detalles ocultos</string>
+  <string name="wizard_care_sticky_chip">CARE y CLPI · %1$d/%2$d</string>
+  <string name="wizard_care_sticky_chip_a11y">CARE y CLPI: se cumplen %1$d de %2$d criterios. Ir a los detalles de CARE.</string>
+  <string name="wizard_care_learn_more">¿Qué son CARE y CLPI?</string>
+  <string name="wizard_care_auto_reason_organization">Se aplicaron automáticamente porque %1$s está registrada como organización de pueblos indígenas o comunidades locales. Puede cambiar esta configuración a continuación.</string>
+  <string name="wizard_care_auto_reason_concepts">Se aplicaron automáticamente porque esta encuesta recopila datos indígenas y comunitarios: %1$s. Puede cambiar esta configuración a continuación.</string>
+  <string name="wizard_care_auto_reason_more">%1$s y %2$d más</string>
+  <string name="wizard_care_explainer_title">CARE y CLPI en Collect One</string>
+  <string name="wizard_care_explainer_intro">Los datos sobre pueblos indígenas y comunidades locales, sus tierras y sus recursos pueden afectar los derechos sobre la tierra, los medios de vida y la seguridad. Collect One admite dos marcos ampliamente utilizados que ayudan a las comunidades a mantener el control de esos datos.</string>
+  <string name="wizard_care_explainer_care_heading">Principios CARE para la gobernanza de datos indígenas</string>
+  <string name="wizard_care_explainer_care_body">Desarrollados por la Global Indigenous Data Alliance para complementar los principios de datos FAIR, los principios CARE ponen a las personas y al propósito en el centro del uso de los datos:</string>
+  <string name="wizard_care_explainer_care_c">Beneficio colectivo: los datos deben beneficiar a las comunidades que describen.</string>
+  <string name="wizard_care_explainer_care_a">Autoridad para controlar: las comunidades deciden cómo se recopilan, consultan y usan los datos sobre ellas, sus tierras y sus recursos.</string>
+  <string name="wizard_care_explainer_care_r">Responsabilidad: quienes trabajan con los datos rinden cuentas a las comunidades y son transparentes sobre su uso.</string>
+  <string name="wizard_care_explainer_care_e">Ética: los derechos y el bienestar de las comunidades son lo primero en cada etapa del ciclo de vida de los datos.</string>
+  <string name="wizard_care_explainer_fpic_heading">Consentimiento libre, previo e informado (CLPI)</string>
+  <string name="wizard_care_explainer_fpic_body">El CLPI es el derecho de los pueblos indígenas, reconocido en la Declaración de las Naciones Unidas sobre los Derechos de los Pueblos Indígenas y aplicado en los programas de la FAO, a dar o negar su consentimiento a las actividades que les afectan. El consentimiento debe darse libremente, solicitarse antes de iniciar las actividades, basarse en información completa y puede retirarse en cualquier momento.</string>
+  <string name="wizard_care_explainer_defaults_heading">Qué cambian los valores predeterminados CARE en esta encuesta</string>
+  <string name="wizard_care_explainer_defaults_restricted">Acceso restringido: solo las personas que invite pueden abrir la encuesta y sus datos.</string>
+  <string name="wizard_care_explainer_defaults_own_only">Envíos privados: los recolectores de datos solo ven sus propios envíos en el mapa, no los de sus compañeros.</string>
+  <string name="wizard_care_explainer_defaults_consent">Términos de consentimiento: los recolectores de datos deben leer y aceptar los términos de CLPI antes de empezar a recolectar.</string>
+  <string name="wizard_care_explainer_defaults_editable">Los resúmenes públicos de impacto nunca muestran registros individuales. Puede cambiar cada opción, o editar los términos de consentimiento, a continuación.</string>
+  <string name="wizard_care_explainer_auto_heading">Cuándo Collect One los aplica por usted</string>
+  <string name="wizard_care_explainer_auto_body">Los valores predeterminados CARE se aplican automáticamente cuando la encuesta pertenece a una organización de pueblos indígenas o comunidades locales, o cuando sus preguntas están vinculadas a campos estándar indígenas y comunitarios (como el nombre de la comunidad o el tipo de tenencia de la tierra), por ejemplo mediante el propósito Mapeo de tierras y recursos comunitarios.</string>
+  <string name="wizard_care_explainer_close">Entendido</string>
+  <string name="wizard_consent_title">Términos de consentimiento y gobernanza para recolectores de datos</string>
+  <string name="wizard_consent_supporting">Exija que los recolectores de datos revisen y acepten términos personalizados de Consentimiento Libre, Previo e Informado (CLPI) o del proyecto antes de abrir la encuesta.</string>
+  <string name="wizard_consent_terms_label">Términos de consentimiento que se muestran a los recolectores de datos</string>
+</resources>

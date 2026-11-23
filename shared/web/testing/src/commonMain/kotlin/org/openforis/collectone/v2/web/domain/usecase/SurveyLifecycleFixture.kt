@@ -13,6 +13,7 @@
  */
 package org.openforis.collectone.v2.web.domain.usecase
 
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.first
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.runNow
@@ -23,12 +24,12 @@ import org.openforis.collectone.v2.app.data.repository.ImpactEventRepositoryImpl
 import org.openforis.collectone.v2.app.data.repository.SurveyEditorRepositoryImpl
 import org.openforis.collectone.v2.app.data.repository.SurveyRepositoryImpl
 import org.openforis.collectone.v2.app.domain.model.ImpactEventType
-import org.openforis.collectone.v2.app.domain.model.editor.isoUtc
 import org.openforis.collectone.v2.app.domain.usecase.RecordImpactEventUseCase
+import org.openforis.collectone.v2.app.testing.FakeClock
 
 /** A [SurveyLifecycleUseCase] over [store] with a settable clock, recording impact events. */
 class SurveyLifecycleFixture(val store: LocalStore = seededStore()) {
-  var nowMillis: Long = 1_791_331_200_000L // 2026-10-07T00:00:00Z
+  val clock = FakeClock(Instant.parse("2026-10-07T00:00:00Z"))
   val surveyRepository = SurveyRepositoryImpl(store)
   val impactEventRepository = ImpactEventRepositoryImpl(store)
   val authRepository = AuthRepositoryImpl()
@@ -43,9 +44,9 @@ class SurveyLifecycleFixture(val store: LocalStore = seededStore()) {
           surveyEditorRepository = SurveyEditorRepositoryImpl(store),
           authRepository = authRepository,
           connectivityRepository = ConnectivityRepositoryImpl(),
-          now = { isoUtc(nowMillis) },
+          clock = clock,
         ),
-      now = { nowMillis },
+      clock = clock,
     )
 
   fun survey(id: String) = runNow { surveyRepository.getSurveys().first { it.id == id } }

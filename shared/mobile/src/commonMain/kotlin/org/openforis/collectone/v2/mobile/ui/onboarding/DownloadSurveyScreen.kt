@@ -14,10 +14,12 @@
 package org.openforis.collectone.v2.mobile.ui.onboarding
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,8 +28,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
@@ -37,28 +39,23 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -80,22 +77,69 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.SurveyPreviewItem
+import org.openforis.collectone.v2.app.ui.common.ClosedSurveyThumbnailScrim
+import org.openforis.collectone.v2.app.ui.common.SurveyVisibilityIcon
 import org.openforis.collectone.v2.app.ui.common.UserAvatarButton
 import org.openforis.collectone.v2.app.ui.common.UserProfileSidePanelOverlay
+import org.openforis.collectone.v2.app.ui.common.grayscale
 import org.openforis.collectone.v2.app.ui.map.SurveyMapThumbnail
-import org.openforis.collectone.v2.app.ui.state.OnboardingUiState
-import org.openforis.collectone.v2.app.ui.viewmodel.OnboardingActions
-import org.openforis.collectone.v2.core.forms.ui.GroundAlertDialogOverlay
-import org.openforis.collectone.v2.core.forms.ui.GroundBadgeTone
-import org.openforis.collectone.v2.core.forms.ui.GroundTonalBadge
+import org.openforis.collectone.v2.app.ui.onboarding.OnboardingActions
+import org.openforis.collectone.v2.app.ui.onboarding.OnboardingUiState
+import org.openforis.collectone.v2.core.forms.ui.AlertDialogOverlay
+import org.openforis.collectone.v2.core.forms.ui.BadgeTone
+import org.openforis.collectone.v2.core.forms.ui.TonalBadge
+import org.openforis.collectone.v2.core.forms.ui.controls.AssistChip
+import org.openforis.collectone.v2.core.forms.ui.controls.Button
+import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalButton
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
+import org.openforis.collectone.v2.core.forms.ui.controls.clickable
+import org.openforis.collectone.v2.mobile.resources.Res
+import org.openforis.collectone.v2.mobile.resources.mobile_back
+import org.openforis.collectone.v2.mobile.resources.mobile_cancel
+import org.openforis.collectone.v2.mobile.resources.mobile_clear_search_content_description
+import org.openforis.collectone.v2.mobile.resources.mobile_download
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_clear_search
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_directory_header
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_empty
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_empty_hint
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_matching_header
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_no_match
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_no_match_hint
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_public_section
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_search_content_description
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_search_placeholder
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_shared_header
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_subtitle
+import org.openforis.collectone.v2.mobile.resources.mobile_download_survey_title
+import org.openforis.collectone.v2.mobile.resources.mobile_downloaded
+import org.openforis.collectone.v2.mobile.resources.mobile_open
+import org.openforis.collectone.v2.mobile.resources.mobile_remove
+import org.openforis.collectone.v2.mobile.resources.mobile_remove_survey_dialog_body
+import org.openforis.collectone.v2.mobile.resources.mobile_remove_survey_dialog_title
+import org.openforis.collectone.v2.mobile.resources.mobile_sign_out
+import org.openforis.collectone.v2.mobile.resources.mobile_sign_out_dialog_body
+import org.openforis.collectone.v2.mobile.resources.mobile_sign_out_dialog_title
+import org.openforis.collectone.v2.mobile.resources.mobile_survey_badge_private_submissions
+import org.openforis.collectone.v2.mobile.resources.mobile_survey_badge_public_data
+import org.openforis.collectone.v2.mobile.resources.mobile_survey_download_content_description
+import org.openforis.collectone.v2.mobile.resources.mobile_survey_downloaded_content_description
+import org.openforis.collectone.v2.mobile.resources.mobile_survey_open_content_description
+import org.openforis.collectone.v2.mobile.resources.mobile_unavailable
 
 /**
- * 3. "Download survey" screen where users can see a list of all surveys shared with them, or search
- *    by name or location by typing in the search bar. Each survey item includes a title,
- *    description, map thumbnail, and an indicator for surveys that have already been downloaded.
+ * Download survey: the surveys shared with the user, in one section per organization and then the
+ * public ones ([downloadSurveySections]), filtered by the search query on name, description,
+ * location, coordinates, or organization. A query also looks up matching surveys not shared with
+ * the user (public surveys, or the survey a pasted share link points to). Offline, it shows its own
+ * banner rather than the app's offline notice.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun DownloadSurveyScreen(
   uiState: OnboardingUiState,
@@ -106,6 +150,8 @@ fun DownloadSurveyScreen(
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
   val filtered = uiState.filteredSurveys
   var isUserProfileOpen by remember { mutableStateOf(false) }
+  val searchSurveysDescription =
+    stringResource(Res.string.mobile_download_survey_search_content_description)
 
   Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
@@ -114,13 +160,17 @@ fun DownloadSurveyScreen(
           title = {
             Column {
               Text(
-                text = "Download survey",
+                text = stringResource(Res.string.mobile_download_survey_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
               )
               Text(
                 text =
-                  "${uiState.surveys.size} shared with you • ${uiState.downloadedSurveyCount} downloaded",
+                  stringResource(
+                    Res.string.mobile_download_survey_subtitle,
+                    uiState.surveys.size,
+                    uiState.downloadedSurveyCount,
+                  ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
               )
@@ -130,7 +180,7 @@ fun DownloadSurveyScreen(
             IconButton(onClick = { actions.navigateBackFromDownloadSurvey() }) {
               Icon(
                 imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = stringResource(Res.string.mobile_back),
               )
             }
           },
@@ -139,6 +189,7 @@ fun DownloadSurveyScreen(
               userName = uiState.profile.displayName,
               userInitials = uiState.profile.initials,
               onClick = { isUserProfileOpen = true },
+              userPhotoUrl = uiState.profile.photoUrl,
               modifier = Modifier.padding(end = 12.dp),
             )
           },
@@ -156,6 +207,12 @@ fun DownloadSurveyScreen(
         modifier =
           Modifier.fillMaxSize().padding(innerPadding).semantics { isTraversalGroup = true }
       ) {
+        // Hides itself when the connection returns; the survey list then loads.
+        if (!uiState.isOnline) {
+          DownloadSurveyOfflineBanner(
+            modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp)
+          )
+        }
         // Search Bar for filtering by survey name or location
         Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
           OutlinedTextField(
@@ -163,15 +220,17 @@ fun DownloadSurveyScreen(
             onValueChange = { actions.updateSearchQuery(it) },
             modifier =
               Modifier.fillMaxWidth().semantics {
-                contentDescription = "Search surveys"
+                contentDescription = searchSurveysDescription
                 traversalIndex = 0f
               },
             singleLine = true,
             placeholder = {
               Text(
-                text = "Search by name or location, or paste a survey link",
+                text = stringResource(Res.string.mobile_download_survey_search_placeholder),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
               )
             },
             leadingIcon = {
@@ -187,7 +246,8 @@ fun DownloadSurveyScreen(
                 IconButton(onClick = { actions.clearSearchQuery() }) {
                   Icon(
                     imageVector = Icons.Outlined.Close,
-                    contentDescription = "Clear Search",
+                    contentDescription =
+                      stringResource(Res.string.mobile_clear_search_content_description),
                     modifier = Modifier.size(18.dp),
                   )
                 }
@@ -241,9 +301,13 @@ fun DownloadSurveyScreen(
           Text(
             text =
               if (uiState.searchQuery.isBlank()) {
-                "Surveys shared with you (${filtered.size})"
+                stringResource(Res.string.mobile_download_survey_shared_header, filtered.size)
               } else {
-                "Matching surveys (${filtered.size} of ${uiState.surveys.size})"
+                stringResource(
+                  Res.string.mobile_download_survey_matching_header,
+                  filtered.size,
+                  uiState.surveys.size,
+                )
               },
             style =
               MaterialTheme.typography.labelSmall.copy(
@@ -255,7 +319,7 @@ fun DownloadSurveyScreen(
           if (uiState.searchQuery.isNotBlank()) {
             TextButton(onClick = { actions.clearSearchQuery() }) {
               Text(
-                text = "Clear search",
+                text = stringResource(Res.string.mobile_download_survey_clear_search),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
               )
@@ -274,6 +338,7 @@ fun DownloadSurveyScreen(
             ) {
               CircularProgressIndicator()
             } else {
+              val trimmedQuery = uiState.searchQuery.trim()
               Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -285,7 +350,12 @@ fun DownloadSurveyScreen(
                   modifier = Modifier.size(36.dp),
                 )
                 Text(
-                  text = "No surveys match \"${uiState.searchQuery}\"",
+                  text =
+                    if (trimmedQuery.isEmpty()) {
+                      stringResource(Res.string.mobile_download_survey_empty)
+                    } else {
+                      stringResource(Res.string.mobile_download_survey_no_match, trimmedQuery)
+                    },
                   style = MaterialTheme.typography.titleSmall,
                   color = onSurfaceColor,
                   fontWeight = FontWeight.Bold,
@@ -293,7 +363,13 @@ fun DownloadSurveyScreen(
                 )
                 Text(
                   text =
-                    "Try searching by another survey title, keyword, or location (e.g. Brazil, Kenya, Vietnam), or paste a survey link.",
+                    stringResource(
+                      if (trimmedQuery.isEmpty()) {
+                        Res.string.mobile_download_survey_empty_hint
+                      } else {
+                        Res.string.mobile_download_survey_no_match_hint
+                      }
+                    ),
                   style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center,
@@ -305,42 +381,104 @@ fun DownloadSurveyScreen(
             }
           }
         } else {
-          Column(
+          val publicSectionLabel = stringResource(Res.string.mobile_download_survey_public_section)
+          val groupedSurveys =
+            remember(filtered, uiState.organizationNames, publicSectionLabel) {
+              downloadSurveySections(filtered, uiState.organizationNames, publicSectionLabel)
+            }
+          var collapsedGroups by remember { mutableStateOf(emptySet<String>()) }
+
+          LazyColumn(
             modifier =
-              Modifier.weight(1f)
-                .fillMaxWidth()
-                .semantics {
-                  isTraversalGroup = true
-                  traversalIndex = 1f
-                }
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 14.dp, vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+              Modifier.weight(1f).fillMaxWidth().semantics {
+                isTraversalGroup = true
+                traversalIndex = 1f
+              },
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
           ) {
-            filtered.forEachIndexed { index, survey ->
-              SurveyListItemCard(
-                survey = survey,
-                organizationName = uiState.organizationNames[survey.organizationId],
-                hasOfflineImagery = survey.id in uiState.offlineImageryDownloadedSurveyIds,
-                isDarkTheme = isDarkTheme,
-                onDownloadClick = { actions.downloadSurvey(survey.id) },
-                onToggleDownloadClick = { actions.promptRemoveDownloadedSurvey(survey.id) },
-                onOpenSurveyClick = { actions.openSurvey(survey.id) },
-                traversalIndex = index.toFloat(),
-              )
+            groupedSurveys.forEach { (groupTitle, groupSurveys) ->
+              val isExpanded = groupTitle !in collapsedGroups
+              stickyHeader(key = "header-$groupTitle") {
+                Surface(
+                  modifier =
+                    Modifier.fillMaxWidth().clickable {
+                      collapsedGroups =
+                        if (isExpanded) collapsedGroups + groupTitle
+                        else collapsedGroups - groupTitle
+                    },
+                  color = MaterialTheme.colorScheme.surface,
+                ) {
+                  Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                  ) {
+                    Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.spacedBy(6.dp),
+                      modifier = Modifier.weight(1f),
+                    ) {
+                      Icon(
+                        imageVector = Icons.Outlined.Groups,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp),
+                      )
+                      Text(
+                        text = "$groupTitle (${groupSurveys.size})",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                      )
+                    }
+                    Icon(
+                      imageVector =
+                        if (isExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                      modifier = Modifier.size(20.dp),
+                    )
+                  }
+                }
+              }
+              if (isExpanded) {
+                itemsIndexed(groupSurveys, key = { _, survey -> survey.id }) { index, survey ->
+                  SurveyListItemCard(
+                    survey = survey,
+                    organizationName = null,
+                    isDarkTheme = isDarkTheme,
+                    onDownloadClick = { actions.downloadSurvey(survey.id) },
+                    onToggleDownloadClick = { actions.promptRemoveDownloadedSurvey(survey.id) },
+                    onOpenSurveyClick = { actions.openSurvey(survey.id) },
+                    traversalIndex = index.toFloat(),
+                  )
+                }
+              }
             }
             if (uiState.directoryResults.isNotEmpty()) {
-              Text(
-                text = "Public and link-shared surveys (${uiState.directoryResults.size})",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    letterSpacing = 0.6.sp,
-                  ),
-                modifier = Modifier.padding(start = 2.dp, top = 8.dp),
-              )
-              uiState.directoryResults.forEach { survey ->
+              item(key = "directory-header") {
+                Text(
+                  text =
+                    stringResource(
+                      Res.string.mobile_download_survey_directory_header,
+                      uiState.directoryResults.size,
+                    ),
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      fontWeight = FontWeight.Bold,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      letterSpacing = 0.6.sp,
+                    ),
+                  modifier = Modifier.padding(start = 2.dp, top = 8.dp),
+                )
+              }
+              itemsIndexed(
+                uiState.directoryResults,
+                key = { _, survey -> "dir-${survey.id}" },
+              ) { _, survey ->
                 SurveyListItemCard(
                   survey = survey,
                   organizationName = uiState.organizationNames[survey.organizationId],
@@ -351,7 +489,7 @@ fun DownloadSurveyScreen(
                 )
               }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            item(key = "bottom-spacer") { Spacer(modifier = Modifier.height(12.dp)) }
           }
         }
       }
@@ -363,6 +501,7 @@ fun DownloadSurveyScreen(
         userEmail = uiState.profile.email,
         userInitials = uiState.profile.initials,
         organization = uiState.userOrganization,
+        userPhotoUrl = uiState.profile.photoUrl,
         onDismissRequest = { isUserProfileOpen = false },
         onSignOut = actions::confirmSignOut,
       )
@@ -375,57 +514,7 @@ fun DownloadSurveyScreen(
     if (uiState.pendingRemovalSurveyId != null) {
       RemoveDownloadedSurveyConfirmationDialog(uiState, actions)
     }
-
-    if (uiState.pendingOfflineImagerySurveyId != null) {
-      DownloadOfflineImageryPromptDialog(uiState, actions)
-    }
   }
-}
-
-/**
- * Prompt dialog shown after downloading a survey asking whether the collector also wants to
- * download offline basemap imagery tiles for field use without internet connectivity.
- */
-@Composable
-private fun DownloadOfflineImageryPromptDialog(
-  uiState: OnboardingUiState,
-  actions: OnboardingActions,
-) {
-  val survey = uiState.pendingOfflineImagerySurvey ?: return
-
-  GroundAlertDialogOverlay(
-    onDismissRequest = { actions.skipOfflineImageryDownload() },
-    icon = {
-      Icon(
-        imageVector = Icons.Outlined.Map,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary,
-      )
-    },
-    title = {
-      Text(
-        text = "Download offline imagery?",
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-      )
-    },
-    text = {
-      Text(
-        text =
-          "Would you like to download offline basemap imagery tiles for \"${survey.title}\" now so satellite reference layers are available in the field without internet connectivity?",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-    },
-    confirmButton = {
-      Button(onClick = { actions.confirmOfflineImageryDownload() }) {
-        Text("Download imagery", fontWeight = FontWeight.Bold)
-      }
-    },
-    dismissButton = {
-      OutlinedButton(onClick = { actions.skipOfflineImageryDownload() }) { Text("Skip for now") }
-    },
-  )
 }
 
 /** Confirmation prompt dialog shown before removing a downloaded survey from the device. */
@@ -437,7 +526,7 @@ private fun RemoveDownloadedSurveyConfirmationDialog(
   val surveyId = uiState.pendingRemovalSurveyId ?: return
   val survey = uiState.surveys.firstOrNull { it.id == surveyId } ?: return
 
-  GroundAlertDialogOverlay(
+  AlertDialogOverlay(
     onDismissRequest = { actions.dismissRemoveDownloadedSurvey() },
     icon = {
       Icon(
@@ -448,7 +537,7 @@ private fun RemoveDownloadedSurveyConfirmationDialog(
     },
     title = {
       Text(
-        text = "Remove offline survey?",
+        text = stringResource(Res.string.mobile_remove_survey_dialog_title),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
       )
@@ -456,7 +545,10 @@ private fun RemoveDownloadedSurveyConfirmationDialog(
     text = {
       Text(
         text =
-          "Removing \"${survey.title}\" will delete the offline copy (${survey.offlineSizeLabel}) from this device. You will need an internet connection to download and use it offline again.",
+          stringResource(
+            Res.string.mobile_remove_survey_dialog_body,
+            survey.title,
+          ),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -470,11 +562,13 @@ private fun RemoveDownloadedSurveyConfirmationDialog(
             contentColor = MaterialTheme.colorScheme.onError,
           ),
       ) {
-        Text("Remove", fontWeight = FontWeight.Bold)
+        Text(stringResource(Res.string.mobile_remove), fontWeight = FontWeight.Bold)
       }
     },
     dismissButton = {
-      OutlinedButton(onClick = { actions.dismissRemoveDownloadedSurvey() }) { Text("Cancel") }
+      OutlinedButton(onClick = { actions.dismissRemoveDownloadedSurvey() }) {
+        Text(stringResource(Res.string.mobile_cancel))
+      }
     },
   )
 }
@@ -488,7 +582,7 @@ private fun DownloadSurveySignOutPromptDialog(
   uiState: OnboardingUiState,
   actions: OnboardingActions,
 ) {
-  GroundAlertDialogOverlay(
+  AlertDialogOverlay(
     onDismissRequest = { actions.dismissSignOutPrompt() },
     icon = {
       Icon(
@@ -499,15 +593,14 @@ private fun DownloadSurveySignOutPromptDialog(
     },
     title = {
       Text(
-        text = "Sign out?",
+        text = stringResource(Res.string.mobile_sign_out_dialog_title),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
       )
     },
     text = {
       Text(
-        text =
-          "Going back will sign out ${uiState.profile.email} and return to the Sign In screen.",
+        text = stringResource(Res.string.mobile_sign_out_dialog_body, uiState.profile.email),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -521,11 +614,13 @@ private fun DownloadSurveySignOutPromptDialog(
             contentColor = MaterialTheme.colorScheme.onError,
           ),
       ) {
-        Text("Sign out", fontWeight = FontWeight.Bold)
+        Text(stringResource(Res.string.mobile_sign_out), fontWeight = FontWeight.Bold)
       }
     },
     dismissButton = {
-      OutlinedButton(onClick = { actions.dismissSignOutPrompt() }) { Text("Cancel") }
+      OutlinedButton(onClick = { actions.dismissSignOutPrompt() }) {
+        Text(stringResource(Res.string.mobile_cancel))
+      }
     },
   )
 }
@@ -548,7 +643,6 @@ private fun SurveyListItemCard(
   onDownloadClick: () -> Unit,
   onToggleDownloadClick: () -> Unit,
   onOpenSurveyClick: () -> Unit,
-  hasOfflineImagery: Boolean = false,
   traversalIndex: Float = 0f,
 ) {
   val cardBg =
@@ -563,11 +657,17 @@ private fun SurveyListItemCard(
     } else {
       MaterialTheme.colorScheme.outlineVariant
     }
+  val downloadedDescription =
+    stringResource(Res.string.mobile_survey_downloaded_content_description, survey.title)
+  val openDescription =
+    stringResource(Res.string.mobile_survey_open_content_description, survey.title)
+  val downloadDescription =
+    stringResource(Res.string.mobile_survey_download_content_description, survey.title)
 
   OutlinedCard(
-    onClick = onOpenSurveyClick,
+    onClick = if (survey.isDownloaded) onOpenSurveyClick else onDownloadClick,
     modifier =
-      Modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+      Modifier.fillMaxWidth().height(308.dp).semantics(mergeDescendants = true) {
         role = Role.Button
         contentDescription = survey.title
         this.traversalIndex = traversalIndex
@@ -576,28 +676,57 @@ private fun SurveyListItemCard(
     colors = CardDefaults.outlinedCardColors(containerColor = cardBg),
     border = BorderStroke(width = if (survey.isDownloaded) 1.5.dp else 1.dp, color = borderColor),
   ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().padding(12.dp),
-      verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.Top,
+    Column(modifier = Modifier.fillMaxSize()) {
+      Box(modifier = Modifier.fillMaxWidth().height(136.dp)) {
+        SurveyMapThumbnail(
+          thumbnail = survey.thumbnail,
+          isDownloaded = survey.isDownloaded,
+          modifier = Modifier.fillMaxSize().grayscale(survey.isClosed),
+        )
+        if (survey.isClosed) {
+          ClosedSurveyThumbnailScrim()
+        }
+        if (survey.isUnavailable) {
+          Box(modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
+            TonalBadge(
+              text = stringResource(Res.string.mobile_unavailable),
+              tone = BadgeTone.ERROR,
+              outlined = true,
+            )
+          }
+        }
+      }
+      HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+      Column(
+        modifier = Modifier.fillMaxWidth().weight(1f).padding(14.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
       ) {
-        // Satellite Map Thumbnail of Area of Interest & Map Features (80x80 dp)
-        SurveyMapThumbnail(thumbnail = survey.thumbnail, isDownloaded = survey.isDownloaded)
-
-        // Survey Metadata (Title, Location, Description)
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-          Text(
-            text = survey.title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-          )
+        Column(
+          modifier = Modifier.fillMaxWidth().grayscale(survey.isClosed),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Top,
+          ) {
+            Text(
+              text = survey.title,
+              style = MaterialTheme.typography.titleSmall,
+              color = MaterialTheme.colorScheme.onSurface,
+              fontWeight = FontWeight.Bold,
+              minLines = 2,
+              maxLines = 2,
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.weight(1f),
+            )
+            SurveyVisibilityIcon(
+              survey = survey,
+              publicDataLabel = stringResource(Res.string.mobile_survey_badge_public_data),
+              privateSubmissionsLabel =
+                stringResource(Res.string.mobile_survey_badge_private_submissions),
+            )
+          }
 
           Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -610,157 +739,118 @@ private fun SurveyListItemCard(
               modifier = Modifier.size(12.dp),
             )
             Text(
-              text = survey.location,
+              text =
+                if (organizationName != null) {
+                  "${survey.location} · $organizationName"
+                } else {
+                  survey.location
+                },
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.primary,
               fontWeight = FontWeight.SemiBold,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
             )
-            Text(
-              text = "• ${survey.coordinatesLabel}",
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-
-          if (organizationName != null) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(3.dp),
-            ) {
-              Icon(
-                imageVector = Icons.Outlined.Groups,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(12.dp),
-              )
-              Text(
-                text = organizationName,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-            }
           }
 
           Text(
-            text = survey.description,
+            text = survey.description.ifBlank { " " },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 16.sp,
+            minLines = 2,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
           )
         }
-      }
 
-      // Bottom Footer: Downloaded status indicator + Open Survey CTA or Download action
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
+        // Bottom Action Row: Open Survey CTA or Download action
         Row(
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.End,
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          Text(
-            text = "${survey.entityCount} locations • ${survey.offlineSizeLabel}",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-          if (survey.isUnavailable) {
-            GroundTonalBadge(text = "Unavailable", tone = GroundBadgeTone.ERROR)
-          } else if (survey.isPublicData) {
-            GroundTonalBadge(text = "Public data", tone = GroundBadgeTone.WARNING)
-          } else if (survey.isPrivateSubmissions) {
-            GroundTonalBadge(text = "Private submissions", tone = GroundBadgeTone.SECONDARY)
-          }
-          if (hasOfflineImagery) {
-            GroundTonalBadge(text = "Offline imagery", tone = GroundBadgeTone.PRIMARY)
-          }
-        }
+          if (survey.isDownloaded) {
+            Row(
+              horizontalArrangement = Arrangement.spacedBy(10.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              AssistChip(
+                onClick = onToggleDownloadClick,
+                leadingIcon = {
+                  Icon(
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                  )
+                },
+                label = {
+                  Text(
+                    text = stringResource(Res.string.mobile_downloaded),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                  )
+                },
+                modifier =
+                  Modifier.height(40.dp).semantics(mergeDescendants = true) {
+                    role = Role.Button
+                    contentDescription = downloadedDescription
+                  },
+              )
 
-        if (survey.isDownloaded) {
-          Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            AssistChip(
-              onClick = onToggleDownloadClick,
-              leadingIcon = {
-                Icon(
-                  imageVector = Icons.Outlined.Check,
-                  contentDescription = null,
-                  modifier = Modifier.size(14.dp),
-                )
-              },
-              label = {
+              FilledTonalButton(
+                onClick = onOpenSurveyClick,
+                modifier =
+                  Modifier.height(40.dp).semantics(mergeDescendants = true) {
+                    role = Role.Button
+                    contentDescription = openDescription
+                  },
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+              ) {
                 Text(
-                  text = "Downloaded",
-                  style = MaterialTheme.typography.labelSmall,
+                  text = stringResource(Res.string.mobile_open),
+                  style = MaterialTheme.typography.labelMedium,
                   fontWeight = FontWeight.Bold,
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
                   softWrap = false,
                 )
-              },
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                  imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                  contentDescription = null,
+                  modifier = Modifier.size(14.dp),
+                )
+              }
+            }
+          } else {
+            Button(
+              onClick = onDownloadClick,
               modifier =
-                Modifier.height(30.dp).semantics(mergeDescendants = true) {
+                Modifier.height(40.dp).semantics(mergeDescendants = true) {
                   role = Role.Button
-                  contentDescription = "Downloaded ${survey.title}"
+                  contentDescription = downloadDescription
                 },
-            )
-
-            FilledTonalButton(
-              onClick = onOpenSurveyClick,
-              modifier =
-                Modifier.height(30.dp).semantics(mergeDescendants = true) {
-                  role = Role.Button
-                  contentDescription = "Open ${survey.title}"
-                },
-              contentPadding = ButtonDefaults.TextButtonContentPadding,
+              contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             ) {
+              Icon(
+                imageVector = Icons.Outlined.Download,
+                contentDescription = null,
+                modifier = Modifier.size(15.dp),
+              )
+              Spacer(modifier = Modifier.width(6.dp))
               Text(
-                text = "Open",
-                style = MaterialTheme.typography.labelSmall,
+                text = stringResource(Res.string.mobile_download),
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
               )
-              Spacer(modifier = Modifier.width(3.dp))
-              Icon(
-                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                contentDescription = null,
-                modifier = Modifier.size(12.dp),
-              )
             }
-          }
-        } else {
-          Button(
-            onClick = onDownloadClick,
-            modifier =
-              Modifier.height(32.dp).semantics(mergeDescendants = true) {
-                role = Role.Button
-                contentDescription = "Download ${survey.title}"
-              },
-            contentPadding = ButtonDefaults.TextButtonContentPadding,
-          ) {
-            Icon(
-              imageVector = Icons.Outlined.Download,
-              contentDescription = null,
-              modifier = Modifier.size(13.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              text = "Download",
-              style = MaterialTheme.typography.labelSmall,
-              fontWeight = FontWeight.Bold,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-              softWrap = false,
-            )
           }
         }
       }

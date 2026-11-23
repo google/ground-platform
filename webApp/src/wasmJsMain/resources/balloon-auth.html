@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collect One — Google Earth Sign-In</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --md-sys-color-primary: #36693E;
+      --md-sys-color-on-primary: #FFFFFF;
+      --md-sys-color-primary-container: #B7F1B9;
+      --md-sys-color-on-primary-container: #1D5128;
+      --md-sys-color-secondary-container: #D4E8D1;
+      --md-sys-color-on-secondary-container: #3A4B3A;
+      --md-sys-color-error: #BA1A1A;
+      --md-sys-color-error-container: #FFDAD6;
+      --md-sys-color-on-error-container: #93000A;
+      --md-sys-color-background: #F7FBF2;
+      --md-sys-color-on-background: #181D18;
+      --md-sys-color-on-surface: #181D18;
+      --md-sys-color-on-surface-variant: #424940;
+      --md-sys-color-surface-container-lowest: #FFFFFF;
+      --md-sys-color-surface-container-low: #F1F5EC;
+      --md-sys-color-surface-container: #EBEFE7;
+      --md-sys-color-outline: #727970;
+      --md-sys-color-outline-variant: #C1C9BE;
+      --md-sys-color-shadow: #000000;
+      --card-surface: var(--md-sys-color-surface-container-lowest);
+    }
+    @media (prefers-contrast: more) {
+      :root {
+        --md-sys-color-primary: #003411;
+        --md-sys-color-on-primary: #FFFFFF;
+        --md-sys-color-primary-container: #20532A;
+        --md-sys-color-on-primary-container: #FFFFFF;
+        --md-sys-color-secondary-container: #3C4D3C;
+        --md-sys-color-on-secondary-container: #FFFFFF;
+        --md-sys-color-error: #600004;
+        --md-sys-color-error-container: #98000A;
+        --md-sys-color-on-error-container: #FFFFFF;
+        --md-sys-color-background: #F7FBF2;
+        --md-sys-color-on-background: #181D18;
+        --md-sys-color-on-surface: #000000;
+        --md-sys-color-on-surface-variant: #000000;
+        --md-sys-color-surface-container-lowest: #FFFFFF;
+        --md-sys-color-surface-container-low: #EEF2E9;
+        --md-sys-color-surface-container: #E0E4DB;
+        --md-sys-color-outline: #272E27;
+        --md-sys-color-outline-variant: #444B43;
+      }
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --md-sys-color-primary: #9CD49F;
+        --md-sys-color-on-primary: #003914;
+        --md-sys-color-primary-container: #1D5128;
+        --md-sys-color-on-primary-container: #B7F1B9;
+        --md-sys-color-secondary-container: #3A4B3A;
+        --md-sys-color-on-secondary-container: #D4E8D1;
+        --md-sys-color-error: #FFB4AB;
+        --md-sys-color-error-container: #93000A;
+        --md-sys-color-on-error-container: #FFDAD6;
+        --md-sys-color-background: #101510;
+        --md-sys-color-on-background: #E0E4DB;
+        --md-sys-color-on-surface: #E0E4DB;
+        --md-sys-color-on-surface-variant: #C1C9BE;
+        --md-sys-color-surface-container-lowest: #0B0F0B;
+        --md-sys-color-surface-container-low: #181D18;
+        --md-sys-color-surface-container: #1C211C;
+        --md-sys-color-outline: #8B9389;
+        --md-sys-color-outline-variant: #424940;
+        --card-surface: var(--md-sys-color-surface-container);
+      }
+    }
+    @media (prefers-color-scheme: dark) and (prefers-contrast: more) {
+      :root {
+        --md-sys-color-primary: #C4FEC6;
+        --md-sys-color-on-primary: #000000;
+        --md-sys-color-primary-container: #98D09B;
+        --md-sys-color-on-primary-container: #000F03;
+        --md-sys-color-secondary-container: #B4C8B2;
+        --md-sys-color-on-secondary-container: #020E03;
+        --md-sys-color-error: #FFECE9;
+        --md-sys-color-error-container: #FFAEA4;
+        --md-sys-color-on-error-container: #220001;
+        --md-sys-color-background: #101510;
+        --md-sys-color-on-background: #E0E4DB;
+        --md-sys-color-on-surface: #FFFFFF;
+        --md-sys-color-on-surface-variant: #FFFFFF;
+        --md-sys-color-surface-container-lowest: #000000;
+        --md-sys-color-surface-container-low: #1C211C;
+        --md-sys-color-surface-container: #2D322C;
+        --md-sys-color-outline: #EBF2E7;
+        --md-sys-color-outline-variant: #BDC5BA;
+      }
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: var(--md-sys-color-background);
+      color: var(--md-sys-color-on-background);
+      font-family: 'Google Sans Flex', 'Google Sans', Roboto, system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      width: min(440px, calc(100vw - 32px));
+      background: var(--card-surface);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: 0 6px 24px color-mix(in srgb, var(--md-sys-color-shadow) 8%, transparent);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--md-sys-color-primary);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      margin-bottom: 14px;
+    }
+    .badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      line-height: 1.3;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+    p {
+      margin: 0 0 18px 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+    .context-pill {
+      display: inline-block;
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .status-box {
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .status-box.ok {
+      display: block;
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      border: 1px solid var(--md-sys-color-primary);
+    }
+    .status-box.err {
+      display: block;
+      background: var(--md-sys-color-error-container);
+      color: var(--md-sys-color-on-error-container);
+      border: 1px solid var(--md-sys-color-error);
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    button {
+      appearance: none;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    .btn-primary {
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--md-sys-color-on-primary) 8%, var(--md-sys-color-primary));
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--md-sys-color-primary);
+      border-color: var(--md-sys-color-outline);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--md-sys-color-surface-container-low);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand">
+      <span class="badge">✓</span>
+      <span>Collect One · Google Earth</span>
+    </div>
+    <h1 id="title">Checking Collect One session…</h1>
+    <div id="contextPill" class="context-pill" style="display:none"></div>
+    <p id="subtitle">Connecting your browser's Collect One account so KML files never carry credentials.</p>
+    <div id="statusBox" class="status-box"></div>
+    <div class="actions">
+      <button id="signInBtn" class="btn-primary" style="display:none" type="button">
+        Sign in with Google
+      </button>
+      <button id="closeBtn" class="btn-primary" style="display:none" type="button">
+        Return to Google Earth
+      </button>
+      <button id="switchBtn" class="btn-secondary" style="display:none" type="button">
+        Use a different Google account
+      </button>
+    </div>
+  </main>
+
+  <script src="./user-data-service-config.js"></script>
+  <script src="./firebase-config.js"></script>
+  <script src="./firebase-auth-bridge.js"></script>
+  <script>
+    (function () {
+      function parseParams() {
+        const merged = new URLSearchParams(window.location.search || '');
+        const hash = (window.location.hash || '').replace(/^#/, '');
+        if (hash) {
+          const hp = new URLSearchParams(hash);
+          hp.forEach((v, k) => merged.set(k, v));
+        }
+        return merged;
+      }
+
+      function isSafeServiceUrl(url) {
+        return /^https:\/\/|^http:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/i.test(url || '');
+      }
+
+      function encodeVarint(value) {
+        const out = [];
+        let rem = value >>> 0;
+        while (true) {
+          let bits = rem & 0x7f;
+          rem >>>= 7;
+          if (rem > 0) bits |= 0x80;
+          out.push(bits);
+          if (rem === 0) break;
+        }
+        return out;
+      }
+
+      function ldField(tag, bytes) {
+        return [tag].concat(encodeVarint(bytes.length), Array.from(bytes));
+      }
+
+      function buildEarthOpenKmlUrl(kmlUrl) {
+        const uriBytes = new TextEncoder().encode(kmlUrl);
+        const openKml = ldField(0x0a, uriBytes);
+        const cmd = ldField(0x62, openKml);
+        const cmds = new Uint8Array(ldField(0x0a, cmd));
+        let bin = '';
+        for (let i = 0; i < cmds.length; i++) bin += String.fromCharCode(cmds[i]);
+        const b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        return 'https://earth.google.com/web/c/' + b64;
+      }
+
+      const params = parseParams();
+      const defaultSvc =
+        typeof window.COLLECT_ONE_USER_DATA_SERVICE_URL === 'string'
+          ? window.COLLECT_ONE_USER_DATA_SERVICE_URL
+          : window.location.origin;
+      const serviceUrl = (params.get('serviceUrl') || defaultSvc || '').replace(/\/+$/, '');
+      const mode = params.get('mode') || 'balloon-auth';
+      const sessionId = (params.get('session') || '').trim();
+      const codeChallenge = (params.get('challenge') || '').trim();
+      const surveyId = (params.get('surveyId') || '').trim();
+      const balloonUrl = (params.get('balloonUrl') || '').trim();
+      const surveyTitle = (params.get('surveyTitle') || '').trim();
+      const entityLabel = (params.get('entityLabel') || '').trim();
+
+      const titleEl = document.getElementById('title');
+      const subtitleEl = document.getElementById('subtitle');
+      const contextEl = document.getElementById('contextPill');
+      const statusEl = document.getElementById('statusBox');
+      const signInBtn = document.getElementById('signInBtn');
+      const closeBtn = document.getElementById('closeBtn');
+      const switchBtn = document.getElementById('switchBtn');
+
+      const contextParts = [entityLabel, surveyTitle].filter(Boolean);
+      if (contextParts.length > 0) {
+        contextEl.textContent = contextParts.join(' • ');
+        contextEl.style.display = 'inline-block';
+      }
+
+      function showError(msg) {
+        statusEl.className = 'status-box err';
+        statusEl.textContent = msg;
+      }
+
+      function showSuccess(msg) {
+        statusEl.className = 'status-box ok';
+        statusEl.textContent = msg;
+      }
+
+      closeBtn.addEventListener('click', function () {
+        try { window.close(); } catch (e) {}
+      });
+
+      if (!isSafeServiceUrl(serviceUrl)) {
+        titleEl.textContent = 'Invalid service configuration';
+        showError('Missing or unsafe Collect One backend URL.');
+        return;
+      }
+
+      const bridge = window.AppFirebaseAuthBridge;
+      const hasFirebase = Boolean(bridge && bridge.isConfigured && bridge.isConfigured());
+      let completedOnce = false;
+
+      if (mode === 'open-earth' && surveyId) {
+        const qp = new URLSearchParams();
+        qp.set('mode', 'networklink');
+        if (balloonUrl) qp.set('balloonUrl', balloonUrl);
+        const qs = qp.toString();
+        const kmlUrl =
+          serviceUrl + '/kml/surveys/' + encodeURIComponent(surveyId) + '.kml' + (qs ? '?' + qs : '');
+        window.location.replace(buildEarthOpenKmlUrl(kmlUrl));
+        return;
+      }
+
+      async function completePkceHandoff(token, devHeaders, displayEmail) {
+        titleEl.textContent = 'Verifying Collect One account…';
+        signInBtn.style.display = 'none';
+        const headers = Object.assign({ 'Content-Type': 'application/json' }, devHeaders || {});
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        const resp = await fetch(serviceUrl + '/balloon/auth/complete', {
+          method: 'POST',
+          mode: 'cors',
+          credentials: 'omit',
+          headers: headers,
+          body: JSON.stringify({
+            sessionId: sessionId,
+            codeChallenge: codeChallenge,
+          }),
+        });
+        const body = await resp.json().catch(() => ({}));
+        if (!resp.ok) {
+          throw new Error(body.message || ('Authorization failed (HTTP ' + resp.status + ')'));
+        }
+        completedOnce = true;
+        const who = body.email || displayEmail || body.displayName || 'your Collect One account';
+        titleEl.textContent = 'Connected to Google Earth';
+        subtitleEl.textContent =
+          'Your Google Earth form is submitting now. You can close this tab and return to Google Earth.';
+        showSuccess('Verified as ' + who + '.');
+        closeBtn.style.display = 'block';
+        if (hasFirebase) switchBtn.style.display = 'block';
+        setTimeout(function () {
+          try { window.close(); } catch (e) {}
+        }, 750);
+      }
+
+      function dispatchWithFirebaseSession(profileJson) {
+        let parsed = {};
+        try { parsed = JSON.parse(profileJson || '{}') || {}; } catch (e) {}
+        const devHeaders = {};
+        if (bridge.isDevSignIn && bridge.isDevSignIn()) {
+          devHeaders['x-dev-role'] = bridge.devRole();
+        }
+        bridge.idToken(false, function (token, err) {
+          if (err || !token) {
+            titleEl.textContent = 'Sign in to Collect One';
+            showError(err || 'Could not retrieve your Collect One ID token.');
+            signInBtn.style.display = 'block';
+            return;
+          }
+          completePkceHandoff(token, devHeaders, parsed.email).catch(function (e) {
+            titleEl.textContent = 'Could not authorize request';
+            showError(e && e.message ? e.message : String(e));
+            if (hasFirebase) switchBtn.style.display = 'block';
+          });
+        });
+      }
+
+      if (!sessionId || !codeChallenge) {
+        titleEl.textContent = 'No active Google Earth handoff';
+        subtitleEl.textContent =
+          'Open a survey placemark in Google Earth and submit a form to initiate sign-in.';
+        return;
+      }
+
+      if (!hasFirebase) {
+        const devHeaders = { 'x-dev-role': (bridge && bridge.devRole ? bridge.devRole() : 'admin') };
+        completePkceHandoff('', devHeaders, 'Development user').catch(function (e) {
+          titleEl.textContent = 'Development sign-in failed';
+          showError(e && e.message ? e.message : String(e));
+        });
+        return;
+      }
+
+      function triggerGooglePopup() {
+        signInBtn.disabled = true;
+        switchBtn.disabled = true;
+        statusEl.className = 'status-box';
+        bridge.signInWithGoogle(function (profileJson, err) {
+          signInBtn.disabled = false;
+          switchBtn.disabled = false;
+          if (err || !profileJson) {
+            showError(err || 'Google sign-in was cancelled.');
+            signInBtn.style.display = 'block';
+            return;
+          }
+          completedOnce = true;
+          dispatchWithFirebaseSession(profileJson);
+        });
+      }
+
+      signInBtn.addEventListener('click', triggerGooglePopup);
+      switchBtn.addEventListener('click', triggerGooglePopup);
+
+      bridge.observe(
+        function (profileJson) {
+          if (completedOnce) return;
+          if (profileJson) {
+            completedOnce = true;
+            dispatchWithFirebaseSession(profileJson);
+          } else {
+            titleEl.textContent = 'Sign in to Collect One';
+            subtitleEl.textContent =
+              mode === 'open-earth'
+                ? 'Sign in with your Collect One account to open this survey in Google Earth.'
+                : 'Sign in once in this browser so your Google Earth form is submitted under your account.';
+            signInBtn.style.display = 'block';
+          }
+        },
+        function (err) {
+          titleEl.textContent = 'Sign in to Collect One';
+          showError(err || 'Failed to initialize Firebase Authentication.');
+          signInBtn.style.display = 'block';
+        }
+      );
+    })();
+  </script>
+</body>
+</html>

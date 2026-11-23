@@ -35,7 +35,7 @@ data class MapContent(
   val layers: List<MapLayer> = emptyList(),
   /** Images referenced by [MapLayer.Symbol.iconId]. */
   val icons: List<MapIcon> = emptyList(),
-  /** Compose-rendered annotations, drawn above all layers (see [GroundMap]). */
+  /** Compose-rendered annotations, drawn above all layers (see [AppMap]). */
   val markers: List<MapMarker> = emptyList(),
   /** Shows the device-location puck at this position when non-null. */
   val userLocation: LatLng? = null,
@@ -67,11 +67,16 @@ sealed interface Basemap {
   /**
    * A hosted Mapbox style, e.g. `mapbox://styles/mapbox/outdoors-v12`. Needs a Mapbox access token,
    * configured by the host app for its platform.
+   *
+   * @param overlays Layers drawn on top of the style, bottom to top (e.g. imagery the user turned
+   *   on, or contour lines from another tileset), below all [MapLayer]s. Renderers add them after
+   *   each style load, so changing them reloads the style.
    */
   data class MapboxStyle(
     val styleUrl: String,
     override val attribution: String = MAPBOX_ATTRIBUTION,
     override val backgroundColor: Color = LIGHT_BACKGROUND,
+    val overlays: List<BasemapOverlay> = emptyList(),
   ) : Basemap
 
   /** XYZ raster tile layers from any tile server, bottom to top. */
@@ -101,19 +106,102 @@ sealed interface Basemap {
   }
 }
 
-/** One XYZ raster tile layer of a [Basemap.RasterTiles]. */
+/**
+ * A layer a [Basemap.MapboxStyle] draws on top of its style: a [RasterTileLayer] or a
+ * [VectorLineOverlay].
+ *
+ * Overlays have no ids of their own; renderers name their sources and layers by position.
+ */
+@Immutable sealed interface BasemapOverlay
+
+/**
+ * One raster tile layer of a [Basemap.RasterTiles], or a raster [BasemapOverlay]. Tiles come from
+ * exactly one of [urlTemplate] and [tilesetUrl].
+ */
 @Immutable
 data class RasterTileLayer(
-  /** Tile URL with `{z}`, `{x}`, and `{y}` placeholders. */
-  val urlTemplate: String,
+  /** Tile URL with `{z}`, `{x}`, and `{y}` placeholders; empty when [tilesetUrl] is set. */
+  val urlTemplate: String = "",
   val tileSize: Int = 256,
+  /** Highest zoom with tiles; the map scales up the tiles of this zoom beyond it. */
   val maxZoom: Int = 19,
   val opacity: Float = 1f,
   /** Style Specification `raster-contrast`, from -1 to 1. */
   val contrast: Float = 0f,
   /** Style Specification `raster-saturation`, from -1 to 1. */
   val saturation: Float = 0f,
-)
+  /**
+   * A tileset URL such as `mapbox://mapbox.satellite`, used instead of [urlTemplate]. Resolving
+   * `mapbox://` URLs needs the Mapbox access token.
+   */
+  val tilesetUrl: String? = null,
+  /**
+   * Where tiles exist; the map requests and draws none outside. Must not cross the antimeridian.
+   */
+  val bounds: LngLatBounds? = null,
+  /** Lowest zoom with tiles; nothing is drawn below it. */
+  val minZoom: Int = 0,
+) : BasemapOverlay {
+  init {
+    require(urlTemplate.isNotBlank() != !tilesetUrl.isNullOrBlank()) {
+      "exactly one of urlTemplate and tilesetUrl must be set"
+    }
+    require(minZoom <= maxZoom) { "minZoom $minZoom is above maxZoom $maxZoom" }
+  }
+}
+
+/**
+ * Lines drawn from one layer of a vector tileset over a [Basemap.MapboxStyle], e.g. contour lines
+ * from `mapbox://mapbox.mapbox-terrain-v2` over satellite imagery.
+ */
+@Immutable
+data class VectorLineOverlay(
+  /**
+   * The vector tileset, e.g. `mapbox://mapbox.mapbox-terrain-v2`; may list several,
+   * comma-separated.
+   */
+  val tilesetUrl: String,
+  /** The tileset layer whose features are drawn, e.g. `contour`. */
+  val sourceLayer: String,
+  val color: Color,
+  val width: Dp = 1.dp,
+  /** Features drawn; `null` draws every feature of [sourceLayer]. */
+  val filter: VectorFeatureFilter? = null,
+  /** Draws matching features wider, e.g. index contours. */
+  val emphasis: LineEmphasis? = null,
+  val opacity: Float = 1f,
+  /**
+   * Where tiles exist; the map requests and draws none outside. Must not cross the antimeridian.
+   */
+  val bounds: LngLatBounds? = null,
+  /** The lines show from [minZoom] up to, but not including, [maxZoom] (Style Specification). */
+  val minZoom: Int = 0,
+  val maxZoom: Int = 24,
+) : BasemapOverlay {
+  init {
+    require(tilesetUrl.isNotBlank()) { "tilesetUrl must not be blank" }
+    require(sourceLayer.isNotBlank()) { "sourceLayer must not be blank" }
+    require(minZoom <= maxZoom) { "minZoom $minZoom is above maxZoom $maxZoom" }
+  }
+}
+
+/** Draws the features of a [VectorLineOverlay] that match [filter] at [width] instead. */
+@Immutable data class LineEmphasis(val filter: VectorFeatureFilter, val width: Dp)
+
+/**
+ * Selects vector tile features by a property value. Unlike [FeatureFilter], whose values are
+ * strings, it keeps the value type of the tileset, which the Style Specification compares strictly.
+ */
+@Immutable
+sealed interface VectorFeatureFilter {
+  val property: String
+
+  /** Features whose numeric [property] is one of [values], e.g. contour `index` in 5 and 10. */
+  data class NumberIn(override val property: String, val values: Set<Int>) : VectorFeatureFilter
+
+  /** Features whose string [property] is one of [values]. */
+  data class StringIn(override val property: String, val values: Set<String>) : VectorFeatureFilter
+}
 
 /** A GeoJSON FeatureCollection (RFC 7946 section 3.3) addressable by [id]. */
 @Immutable data class GeoJsonSource(val id: String, val features: List<MapFeature>)
@@ -134,7 +222,7 @@ data class MapFeature(
 
 /**
  * A Compose-rendered annotation pinned to [position], used for UI that style layers can't express
- * (cluster balloons, the selected-place pin). Rendering is supplied by the caller of [GroundMap].
+ * (cluster balloons, the selected-place pin). Rendering is supplied by the caller of [AppMap].
  */
 @Immutable
 data class MapMarker(

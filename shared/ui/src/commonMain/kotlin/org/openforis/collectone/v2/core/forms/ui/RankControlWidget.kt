@@ -18,24 +18,25 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.verticalDrag
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,10 +56,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerType
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
@@ -72,7 +71,18 @@ import androidx.compose.ui.zIndex
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.core.forms.model.ComponentState
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.interactivePointerIcon
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_number_badge
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_rank_drag_to_reorder
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_rank_instructions
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_rank_move_down
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_rank_move_up
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_select_parent_first
 
 private val RankItemSpacing = 8.dp
 private val DefaultRankItemHeight = 56.dp
@@ -89,6 +99,17 @@ internal fun RankControlWidget(
   val colors = MaterialTheme.colorScheme
   val density = LocalDensity.current
   val path = control.canonicalPath
+  // A cascading rank question only ranks the choices its parent's answer allows.
+  val parentInfo =
+    remember(control, controller.formState) { controller.parentQuestionInfoFor(control) }
+  if (parentInfo != null && !parentInfo.isAnswered) {
+    Text(
+      text = stringResource(Res.string.forms_select_parent_first, parentInfo.label),
+      style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+    )
+    return
+  }
+  val options = CascadingSelects.allowedOptions(control.options, parentInfo?.selectedValues)
   val currentRankedValues: List<String> =
     (control.fieldState.value
       ?.list_value
@@ -101,11 +122,11 @@ internal fun RankControlWidget(
         ?.trim()
         ?.split(Regex("\\s+"))
         ?.filter { it.isNotEmpty() }
-        ?.takeIf { it.isNotEmpty() }) ?: control.options.map { it.value }
+        ?.takeIf { it.isNotEmpty() }) ?: options.map { it.value }
 
   val orderedOptions =
-    currentRankedValues.mapNotNull { code -> control.options.find { it.value == code } } +
-      control.options.filter { opt -> opt.value !in currentRankedValues }
+    currentRankedValues.mapNotNull { code -> options.find { it.value == code } } +
+      options.filter { opt -> opt.value !in currentRankedValues }
 
   val drag = remember { RankReorderState() }
   val defaultHeightPx = with(density) { DefaultRankItemHeight.toPx() }
@@ -121,9 +142,13 @@ internal fun RankControlWidget(
     }
   }
 
+  // Semantics blocks are not composable, so resolve the accessibility action labels up front.
+  val moveUpLabel = stringResource(Res.string.forms_rank_move_up)
+  val moveDownLabel = stringResource(Res.string.forms_rank_move_down)
+
   Column(verticalArrangement = Arrangement.spacedBy(RankItemSpacing)) {
     Text(
-      text = "Order items from highest (#1) to lowest priority:",
+      text = stringResource(Res.string.forms_rank_instructions),
       style = MaterialTheme.typography.labelMedium.copy(color = colors.onSurfaceVariant),
     )
     orderedOptions.forEachIndexed { index, option ->
@@ -135,6 +160,16 @@ internal fun RankControlWidget(
             animationSpec = if (drag.isDragging) spring() else snap(),
           )
         val displayIndex = drag.displayIndexFor(index, option.value, orderedOptions.size)
+        val choiceColor = ChoiceImageRegistry.parseChoiceColor(option.properties["color"])
+        val colorStyle = choiceColor?.let {
+          ChoiceImageRegistry.choiceOptionColorStyle(
+            choiceColor = it,
+            isSelected = isDragged,
+            surfaceColor =
+              if (isDragged) colors.surfaceContainerHighest else colors.surfaceContainerLow,
+            onSurfaceColor = colors.onSurface,
+          )
+        }
 
         OutlinedCard(
           modifier =
@@ -152,7 +187,7 @@ internal fun RankControlWidget(
                 scaleY = lift
                 shadowElevation = if (isDragged) 8.dp.toPx() else 0f
               }
-              .pointerHoverIcon(PointerIcon.Hand)
+              .interactivePointerIcon()
               .rankDragToReorder(
                 state = drag,
                 key = option.value,
@@ -165,7 +200,7 @@ internal fun RankControlWidget(
                 customActions = buildList {
                   if (index > 0) {
                     add(
-                      CustomAccessibilityAction("Move up") {
+                      CustomAccessibilityAction(moveUpLabel) {
                         moveOption(index, index - 1)
                         true
                       }
@@ -173,7 +208,7 @@ internal fun RankControlWidget(
                   }
                   if (index < orderedOptions.lastIndex) {
                     add(
-                      CustomAccessibilityAction("Move down") {
+                      CustomAccessibilityAction(moveDownLabel) {
                         moveOption(index, index + 1)
                         true
                       }
@@ -185,63 +220,62 @@ internal fun RankControlWidget(
           colors =
             CardDefaults.outlinedCardColors(
               containerColor =
-                if (isDragged) colors.surfaceContainerHighest else colors.surfaceContainerLow
+                colorStyle?.containerColor
+                  ?: if (isDragged) colors.surfaceContainerHighest else colors.surfaceContainerLow,
+              contentColor = colorStyle?.contentColor ?: colors.onSurface,
             ),
           border =
             BorderStroke(
-              width = if (isDragged) 2.dp else 1.dp,
-              color = if (isDragged) colors.primary else colors.outlineVariant,
+              width = colorStyle?.borderWidth ?: if (isDragged) 2.dp else 1.dp,
+              color =
+                colorStyle?.borderColor ?: if (isDragged) colors.primary else colors.outlineVariant,
             ),
         ) {
           Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
           ) {
-            Icon(
-              imageVector = RankDragHandleIcon,
-              contentDescription = "Drag to reorder",
-              tint = if (isDragged) colors.primary else colors.onSurfaceVariant,
-              modifier = Modifier.size(20.dp),
-            )
-            GroundTonalBadge(text = "#${displayIndex + 1}", tone = GroundBadgeTone.PRIMARY)
-            Text(
-              text = option.label.text,
-              style =
-                MaterialTheme.typography.bodyMedium.copy(
-                  fontWeight = FontWeight.Medium,
-                  color = colors.onSurface,
-                ),
-              modifier = Modifier.weight(1f),
-            )
-            OutlinedButton(
-              onClick = {
-                if (index > 0) {
-                  moveOption(index, index - 1)
-                }
-              },
-              enabled = index > 0,
-              contentPadding = PaddingValues(horizontal = 10.dp),
-            ) {
-              Icon(
-                imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = "Move up",
-                modifier = Modifier.size(18.dp),
+            if (colorStyle != null) {
+              Box(
+                modifier =
+                  Modifier.width(if (isDragged) 8.dp else 6.dp)
+                    .fillMaxHeight()
+                    .background(colorStyle.accentStripeColor)
               )
             }
-            OutlinedButton(
-              onClick = {
-                if (index < orderedOptions.lastIndex) {
-                  moveOption(index, index + 1)
-                }
-              },
-              enabled = index < orderedOptions.lastIndex,
-              contentPadding = PaddingValues(horizontal = 10.dp),
+            Row(
+              modifier = Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 12.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
               Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Move down",
-                modifier = Modifier.size(18.dp),
+                imageVector = RankDragHandleIcon,
+                contentDescription = stringResource(Res.string.forms_rank_drag_to_reorder),
+                tint =
+                  colorStyle?.contentColor
+                    ?: if (isDragged) colors.primary else colors.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+              )
+              TonalBadge(
+                text = stringResource(Res.string.forms_number_badge, displayIndex + 1),
+                tone = BadgeTone.PRIMARY,
+              )
+              if (colorStyle != null) {
+                Surface(
+                  modifier = Modifier.size(20.dp),
+                  shape = RoundedCornerShape(6.dp),
+                  color = colorStyle.swatchColor,
+                  border = BorderStroke(1.dp, colorStyle.swatchBorderColor),
+                ) {}
+              }
+              Text(
+                text = option.label.text,
+                style =
+                  MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = if (colorStyle != null) FontWeight.SemiBold else FontWeight.Medium,
+                    color = colorStyle?.contentColor ?: colors.onSurface,
+                  ),
+                modifier = Modifier.weight(1f),
               )
             }
           }
@@ -419,7 +453,7 @@ private suspend fun AwaitPointerEventScope.awaitVerticalRankDragPastSlop(
 /** Material Design `DragIndicator` (6-dot grip) icon (`24x24` viewport). */
 internal val RankDragHandleIcon: ImageVector by lazy {
   ImageVector.Builder(
-      name = "Ground.DragIndicator",
+      name = "App.DragIndicator",
       defaultWidth = 24.dp,
       defaultHeight = 24.dp,
       viewportWidth = 24f,

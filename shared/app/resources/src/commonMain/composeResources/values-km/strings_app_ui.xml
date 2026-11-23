@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Title of the development-build dialog for choosing a simulated app role. -->
+  <string name="app_dev_sign_in_title">ការចូលគណនីសម្រាប់ការអភិវឌ្ឍ</string>
+  <string name="app_dev_sign_in_real_accounts_intro">អ្នកបានចូលគណនីដោយប្រើគណនី Google របស់អ្នក។ សេវាទិន្នន័យអ្នកប្រើកំពុងដំណើរការក្នុងរបៀបអភិវឌ្ឍ ដូច្នេះសូមជ្រើសរើសតួនាទីកម្មវិធីដែលត្រូវក្លែងធ្វើ ខណៈពេលអ្នកធ្វើតេស្ត។</string>
+  <string name="app_dev_sign_in_sample_users_intro">ការចូលគណនី Firebase ត្រូវបានបិទក្នុងកំណែនេះ ដូច្នេះអ្នកនឹងចូលជាអ្នកប្រើគំរូ ជំនួសឱ្យគណនីផ្ទាល់ខ្លួនរបស់អ្នក។</string>
+  <!-- Simulated app role option. -->
+  <string name="app_dev_sign_in_role_administrator">អ្នកគ្រប់គ្រង</string>
+  <string name="app_dev_sign_in_role_administrator_real_description">មើលឃើញ និងអាចផ្លាស់ប្តូរការស្ទង់មតិគំរូ ស្ថាប័ន និងទិន្នន័យទាំងអស់។</string>
+  <!-- Adam Admin is the name of a sample user. -->
+  <string name="app_dev_sign_in_role_administrator_sample_description">ចូលជា Adam Admin ដែលមើលឃើញ និងអាចផ្លាស់ប្តូរទិន្នន័យគំរូទាំងអស់។</string>
+  <!-- Simulated app role option. -->
+  <string name="app_dev_sign_in_role_regular_user">អ្នកប្រើធម្មតា</string>
+  <string name="app_dev_sign_in_role_regular_user_real_description">មើលឃើញតែការស្ទង់មតិដែលអ្នកជាម្ចាស់ ត្រូវបានអញ្ជើញ ឬដែលស្ថាប័ន ឬតំណសាធារណៈរបស់អ្នកចែករំលែកជាមួយអ្នកប៉ុណ្ណោះ។</string>
+  <!-- Ima User is the name of a sample user; Kenya Forest Service is a sample organization. -->
+  <string name="app_dev_sign_in_role_regular_user_sample_description">ចូលជា Ima User ដែលជាអ្នកប្រមូលទិន្នន័យក្នុងស្ថាប័នគំរូ Kenya Forest Service។</string>
+  <string name="app_dev_sign_in_footer">ឧបករណ៍នេះចងចាំជម្រើសរបស់អ្នក។ ចេញពីគណនី ដើម្បីប្តូរតួនាទី។ កំណែផលិតកម្មចូលគណនីធម្មតា ដោយគ្មានប្រអប់នេះទេ។</string>
+  <!-- Generic button label to proceed. -->
+  <string name="app_continue">បន្ត</string>
+  <!-- Generic button label to cancel and close. -->
+  <string name="app_cancel">បោះបង់</string>
+  <!-- Device preview caption. %1$s = form factor (Mobile/Tablet), %2$s = orientation (Portrait/Landscape), %3$s = dimensions such as “404 × 764 dp”. -->
+  <string name="app_device_frame_viewport">ផ្ទៃបង្ហាញ៖ %1$s • %2$s (%3$s)</string>
+  <!-- Device preview form factor option. -->
+  <string name="app_device_form_factor_mobile">ទូរសព្ទ</string>
+  <!-- Device preview form factor option. -->
+  <string name="app_device_form_factor_tablet">ថេប្លេត</string>
+  <!-- Device preview orientation. -->
+  <string name="app_device_orientation_portrait">បញ្ឈរ</string>
+  <!-- Device preview orientation. -->
+  <string name="app_device_orientation_landscape">ផ្ដេក</string>
+  <!-- Accessibility label for the rotate button in the device preview. -->
+  <string name="app_device_rotate_description">បង្វិលឧបករណ៍</string>
+  <!-- Chip label to rotate the device preview. -->
+  <string name="app_device_rotate">បង្វិល</string>
+  <string name="app_device_switch_to_light_mode">ប្តូរទៅរបៀបភ្លឺ</string>
+  <string name="app_device_switch_to_dark_mode">ប្តូរទៅរបៀបងងឹត</string>
+  <!-- Chip label: the device preview currently uses the dark theme. -->
+  <string name="app_device_theme_dark">ងងឹត</string>
+  <!-- Chip label: the device preview currently uses the light theme. -->
+  <string name="app_device_theme_light">ភ្លឺ</string>
+  <string name="app_device_disable_airplane_mode">បិទរបៀបយន្តហោះ</string>
+  <string name="app_device_enable_airplane_mode">បើករបៀបយន្តហោះ</string>
+  <!-- Chip label to simulate being offline in the device preview. -->
+  <string name="app_device_airplane_mode">របៀបយន្តហោះ</string>
+  <string name="app_device_walk_closer_description">ក្លែងធ្វើការដើរឱ្យកាន់តែជិតទៅកាន់គោលដៅ</string>
+  <string name="app_device_walk_closer">ដើរទៅជិត</string>
+  <!-- Accessibility label of the icon next to a GeoID that the registry hasn't confirmed yet because the record hasn't synced. -->
+  <string name="app_geo_id_pending_sync">កំពុងរង់ចាំសមកាលកម្ម</string>
+  <!-- Error title shown when no user data service is configured. -->
+  <string name="app_user_data_service_cannot_start">កម្មវិធីមិនអាចចាប់ផ្តើមបានទេ</string>
+  <!-- Error banner title; the detailed error message follows below it. -->
+  <string name="app_user_data_sync_error_title">មិនអាចផ្ទុកទិន្នន័យពីសេវាទិន្នន័យអ្នកប្រើបានទេ</string>
+  <string name="app_backend_error_title">មិនអាចរក្សាទុកការផ្លាស់ប្ដូរបានទេ</string>
+  <!-- Generic button label to try a failed action again. -->
+  <string name="app_retry">ព្យាយាមម្តងទៀត</string>
+  <!-- Accessibility label of the avatar button. %1$s = signed-in user's name. -->
+  <string name="app_account_menu_for_user">ម៉ឺនុយគណនីសម្រាប់ %1$s</string>
+  <!-- Accessibility label of the avatar button when the user's name is unknown. -->
+  <string name="app_account_menu">ម៉ឺនុយគណនី</string>
+  <!-- Title of the account menu panel. -->
+  <string name="app_account">គណនី</string>
+  <!-- Accessibility label of the close button in the account menu. -->
+  <string name="app_close_account_menu">បិទម៉ឺនុយគណនី</string>
+  <!-- Account menu item. -->
+  <string name="app_manage_organizations">គ្រប់គ្រងស្ថាប័ន</string>
+  <!-- Account menu item. -->
+  <string name="app_admin_panel">ផ្ទាំងគ្រប់គ្រង</string>
+  <!-- Account menu item. -->
+  <string name="app_sign_out">ចេញពីគណនី</string>
+  <!-- Label before a map feature's GeoID (a registry identifier). %1$s = the GeoID. -->
+  <string name="app_geo_id_label">GeoID៖ %1$s</string>
+  <!-- Fallback title of a data collection form that has no title. -->
+  <string name="app_data_collection_form_fallback_title">សំណុំបែបបទប្រមូលទិន្នន័យ</string>
+  <!-- Accessibility label of the back button that closes a form and returns to the survey. -->
+  <string name="app_back_to_survey">ត្រឡប់ទៅការស្ទង់មតិ</string>
+  <!-- Form context banner for a submission without a map feature. %1$s = GPS coordinates. -->
+  <string name="app_standalone_field_log_with_location">កំណត់ហេតុវាលដាច់ដោយឡែក • %1$s</string>
+  <!-- Form context banner prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel), %2$s = map layer name or “Required”. -->
+  <string name="app_select_target_with_dataset">ជ្រើសរើស %1$s (%2$s)</string>
+  <!-- Fallback name of a map feature type when the form doesn't define one. -->
+  <string name="app_target_type_fallback">ធាតុ</string>
+  <!-- Marks a step or field as required. -->
+  <string name="app_required">ចាំបាច់</string>
+  <!-- Chip label that closes the form and returns to the map. -->
+  <string name="app_map">ផែនទី</string>
+  <!-- Accessibility label of the icon that cancels the form. -->
+  <string name="app_cancel_form">បោះបង់សំណុំបែបបទ</string>
+  <!-- Badge on the map feature selection step. %1$d = current step number, %2$d = total steps. -->
+  <string name="app_entity_ref_step_badge">ជំហាន %1$d នៃ %2$d • ចាំបាច់</string>
+  <!-- Title prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel). -->
+  <string name="app_select_target_type">ជ្រើសរើស %1$s</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_entity_ref_no_preselection">មិនមាន %1$s ត្រូវបានជ្រើសរើសជាមុនលើផែនទីទេ។ សូមជ្រើសរើស %1$s គោលដៅខាងក្រោម ដោយប្រើផែនទី ឬបញ្ជី ដើម្បីបន្តការប្រមូលទិន្នន័យ។</string>
+  <!-- Segmented button: pick the map feature on the map. -->
+  <string name="app_select_on_map">ជ្រើសរើសលើផែនទី</string>
+  <!-- Segmented button: pick the map feature from a list. %1$d = number of map features. -->
+  <string name="app_select_from_list">ជ្រើសរើសពីបញ្ជី (%1$d)</string>
+  <!-- Accessibility label of the check icon marking the selected map feature. -->
+  <string name="app_selected">បានជ្រើសរើស</string>
+  <!-- %1$s = name of the selected map feature. -->
+  <string name="app_selected_entity">បានជ្រើសរើស៖ %1$s</string>
+  <!-- Badge: a map feature is selected and the form can continue. -->
+  <string name="app_ready">រួចរាល់</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_entity_ref_map_hint">ចុច %1$s លើផែនទី ឬខាងក្រោម ដើម្បីជ្រើសរើស</string>
+  <!-- Heading of the list of map features shown on the map. %1$s = map layer name. -->
+  <string name="app_dataset_on_map">%1$s លើផែនទី</string>
+  <!-- Accessibility label of the search icon. -->
+  <string name="app_search_map_features">ស្វែងរកធាតុផែនទី</string>
+  <!-- Accessibility label of the button that clears the search field. -->
+  <string name="app_clear_search">សម្អាតការស្វែងរក</string>
+  <!-- Search field placeholder. %1$s = map layer name in lowercase. -->
+  <string name="app_filter_dataset_placeholder">ត្រង %1$s តាមឈ្មោះ ឬ GeoID...</string>
+  <!-- Empty search result. %1$s = map layer name in lowercase. -->
+  <string name="app_no_matching_dataset">រកមិនឃើញ %1$s ដែលត្រូវគ្នាទេ។</string>
+  <string name="app_no_dataset_items_yet">មិនទាន់មាន %1$s នៅឡើយទេ។</string>
+  <!-- Button to continue the form with the selected map feature. %1$s = map feature name. -->
+  <string name="app_continue_with_entity">បន្តជាមួយ %1$s</string>
+  <!-- Disabled button label. %1$s = map feature type in lowercase. -->
+  <string name="app_select_target_to_continue">ជ្រើសរើស %1$s ដើម្បីបន្ត</string>
+  <!-- Number of submissions for a map feature. -->
+  <plurals name="app_submission_count">
+    <item quantity="other">%1$d ការដាក់ស្នើ</item>
+  </plurals>
+  <!-- Badge on the selected map feature option. -->
+  <string name="app_selected_check">បានជ្រើសរើស ✓</string>
+  <!-- Chip label to select a map feature option. -->
+  <string name="app_select">ជ្រើសរើស</string>
+  <!-- Badge: data was already collected for this map feature. -->
+  <string name="app_completed">បានបញ្ចប់</string>
+  <string name="app_public_data_banner">ការស្ទង់មតិទិន្នន័យសាធារណៈ៖ អ្នកណាក៏អាចមើលចម្លើយ រូបថត និងទីតាំងបាន។ កុំបញ្ចូលព័ត៌មានផ្ទាល់ខ្លួន ឬព័ត៌មានរសើប។</string>
+  <!-- Title of the consent dialog for a public data survey. -->
+  <string name="app_consent_public_title">ទិន្នន័យក្នុងការស្ទង់មតិនេះជាសាធារណៈ</string>
+  <!-- Title of the consent dialog for a survey with organizer terms. -->
+  <string name="app_consent_title">មុនពេលអ្នកប្រមូលទិន្នន័យ</string>
+  <!-- %1$s = survey title. -->
+  <string name="app_consent_public_intro">អ្នកហៀបនឹងរួមចំណែកក្នុង "%1$s"។ ដោយសារការស្ទង់មតិនេះប្រើទិន្នន័យសាធារណៈ៖</string>
+  <string name="app_consent_what_is_public_title">អ្វីដែលជាសាធារណៈ</string>
+  <string name="app_consent_what_is_public_body">អ្នកណាក៏អាចមើលធាតុផែនទី កូអរដោនេ GPS ចម្លើយ និងរូបថតដែលអ្នកដាក់ស្នើបាន។</string>
+  <string name="app_consent_identity_hidden_title">អត្តសញ្ញាណរបស់អ្នកត្រូវបានលាក់</string>
+  <string name="app_consent_identity_hidden_body">ឈ្មោះ និងអាសយដ្ឋានអ៊ីមែលរបស់អ្នកត្រូវបានលាក់ពីអ្នកចូលរួមផ្សេងទៀត ហើយមើលឃើញតែដោយអ្នករៀបចំការស្ទង់មតិប៉ុណ្ណោះ។</string>
+  <string name="app_consent_protect_privacy_title">ការពារឯកជនភាព</string>
+  <string name="app_consent_protect_privacy_body">កុំបញ្ចូលមុខមនុស្ស ស្លាកលេខយានយន្ត ឬព័ត៌មានផ្ទាល់ខ្លួនក្នុងរូបថត ឬចម្លើយជាអក្សរ។</string>
+  <!-- Heading above custom consent text written by the survey organizer. -->
+  <string name="app_consent_organizer_terms">លក្ខខណ្ឌរបស់អ្នករៀបចំការស្ទង់មតិ</string>
+  <!-- Button accepting the consent terms. -->
+  <string name="app_consent_accept">ខ្ញុំយល់ហើយ បន្ត</string>
+  <!-- Accessibility label of the back button in map feature details. -->
+  <string name="app_back_to_all_map_features">ត្រឡប់ទៅធាតុផែនទីទាំងអស់</string>
+  <!-- Accessibility label. -->
+  <string name="app_collapse_details">បង្រួមព័ត៌មានលម្អិត</string>
+  <!-- Accessibility label. -->
+  <string name="app_close_details">បិទព័ត៌មានលម្អិត</string>
+  <!-- Accessibility label of the overflow (⋮) menu button. -->
+  <string name="app_more_actions">សកម្មភាពបន្ថែម</string>
+  <!-- Section heading in map feature details. -->
+  <string name="app_details_heading">ព័ត៌មានលម្អិត</string>
+  <!-- Field label: the map layer a map feature belongs to. -->
+  <string name="app_details_layer">ស្រទាប់</string>
+  <!-- Field label: the shape summary of a map feature (e.g. polygon area). -->
+  <string name="app_details_geometry">ធរណីមាត្រ</string>
+  <!-- Field label: the map feature's GeoID registry identifier. -->
+  <string name="app_details_geo_id">GeoID</string>
+  <!-- Section heading listing a map feature's attribute values. -->
+  <string name="app_details_properties">លក្ខណៈសម្បត្តិ</string>
+  <!-- Button that shows the selected map feature in the data table. -->
+  <string name="app_show_in_table">បង្ហាញក្នុងតារាង</string>
+  <!-- Action that saves a PDF report to the device. -->
+  <string name="app_download_pdf">ទាញយក PDF</string>
+  <!-- Action that creates a PDF report and opens the share sheet. -->
+  <string name="app_share_pdf">ចែករំលែក PDF</string>
+  <!-- Short chip label to stop navigating to a map feature. -->
+  <string name="app_stop_navigation_short">ឈប់នាំផ្លូវ</string>
+  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_navigate_with_distance">នាំផ្លូវ • %1$s</string>
+  <!-- Label to start straight-line navigation to a location. -->
+  <string name="app_navigate">នាំផ្លូវ</string>
+  <!-- Action that shows the map feature's QR code. -->
+  <string name="app_qr_code">កូដ QR</string>
+  <!-- Chip label: number of media uploads not yet sent. -->
+  <plurals name="app_pending_uploads">
+    <item quantity="other">%1$d ការផ្ទុកឡើងកំពុងរង់ចាំ</item>
+  </plurals>
+  <!-- Chip label opening the uploads list. %1$d = number of uploads. -->
+  <string name="app_uploads_count">ការផ្ទុកឡើង (%1$d)</string>
+  <!-- Section heading above the buttons that open data collection forms. -->
+  <string name="app_collect_data">ប្រមូលទិន្នន័យ</string>
+  <!-- Disabled form button. %1$s = the form's action label (e.g. “Visit parcel”). -->
+  <string name="app_form_action_completed">%1$s (បានបញ្ចប់)</string>
+  <!-- Heading/link with the number of submissions. %1$d = count. -->
+  <string name="app_submissions_count">ការដាក់ស្នើ (%1$d)</string>
+  <string name="app_submissions_stored_offline">បានរក្សាទុកនៅលើឧបករណ៍នេះ។ ភ្ជាប់អ៊ីនធឺណិត ដើម្បីមើលការដាក់ស្នើទាំងអស់។</string>
+  <string name="app_no_submissions_yet">មិនទាន់មានការដាក់ស្នើទេ</string>
+  <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->
+  <string name="app_view_submission_history">មើលប្រវត្តិទិន្នន័យដែលបានប្រមូលសម្រាប់ %1$s នេះ</string>
+  <!-- Accessibility label of the back button returning to map feature details. -->
+  <string name="app_back_to_details">ត្រឡប់ទៅព័ត៌មានលម្អិត</string>
+  <string name="app_offline_showing_local_submissions">អ្នកកំពុងនៅក្រៅបណ្ដាញ។ កំពុងបង្ហាញការដាក់ស្នើដែលបានរក្សាទុកនៅលើឧបករណ៍នេះ។ ភ្ជាប់អ៊ីនធឺណិត ដើម្បីមើលការដាក់ស្នើទាំងអស់។</string>
+  <!-- %1$s = map feature type in lowercase. -->
+  <string name="app_no_local_submissions_for_entity">មិនមានការដាក់ស្នើសម្រាប់ %1$s នេះ ដែលបានរក្សាទុកនៅលើឧបករណ៍នេះទេ។</string>
+  <!-- %1$s = map feature type in lowercase. -->
+  <string name="app_no_submissions_for_entity">មិនទាន់មានការដាក់ស្នើសម្រាប់ %1$s នេះទេ។</string>
+  <!-- Back button label returning to the submissions list. -->
+  <string name="app_back_to_submissions">ត្រឡប់ទៅការដាក់ស្នើ</string>
+  <!-- QR code dialog title. %1$s = map feature type (e.g. Coffee parcel). -->
+  <string name="app_entity_qr_code_title">កូដ QR %1$s</string>
+  <!-- Accessibility label of the QR code image. %1$s = map feature name. -->
+  <string name="app_entity_qr_matrix_description">ម៉ាទ្រីស QR %1$s</string>
+  <!-- %1$s = map feature type in lowercase. EUDR = EU Deforestation Regulation. -->
+  <string name="app_entity_qr_code_hint">ស្កេនដោយប្រើ Collect One ឬកម្មវិធីអានអនុលោមភាព EUDR ណាមួយ ដើម្បីផ្ទៀងផ្ទាត់ធរណីមាត្រ និង GeoID របស់ %1$s។</string>
+  <!-- Generic button label / accessibility label to close a dialog or sheet. -->
+  <string name="app_close">បិទ</string>
+  <!-- Number of pages in a generated PDF. -->
+  <plurals name="app_pdf_page_count">
+    <item quantity="other">%1$d ទំព័រ</item>
+  </plurals>
+  <!-- Accessibility label of the icon that opens a PDF preview. -->
+  <string name="app_preview_pdf">មើល PDF ជាមុន</string>
+  <string name="app_pdf_created_can_share">បានបង្កើតនៅលើឧបករណ៍នេះ ដូច្នេះអ្នកអាចចែករំលែកវាបាន សូម្បីតែពេលអ្នកនៅក្រៅបណ្ដាញ។</string>
+  <string name="app_pdf_created_download_to_send">បានបង្កើតនៅលើឧបករណ៍នេះ។ ដើម្បីផ្ញើវា សូមទាញយកវា រួចភ្ជាប់វាក្នុងកម្មវិធីណាមួយ។</string>
+  <!-- Button that opens the system share sheet. -->
+  <string name="app_share">ចែករំលែក</string>
+  <!-- Button that saves a file to the device. -->
+  <string name="app_download">ទាញយក</string>
+  <!-- Button that dismisses a message. -->
+  <string name="app_ok">យល់ព្រម</string>
+  <!-- Accessibility label of the back button returning to the map feature list. -->
+  <string name="app_back_to_searchable_list">ត្រឡប់ទៅបញ្ជីដែលអាចស្វែងរកបាន</string>
+  <!-- Form subtitle. %1$s = the form's action button label, %2$s = form version. -->
+  <string name="app_form_action_subtitle">សកម្មភាព៖ "%1$s" • %2$s</string>
+  <!-- Submission target. %1$s = map feature type (e.g. Coffee parcel), %2$s = map feature name. -->
+  <string name="app_target_with_entity">%1$s៖ %2$s</string>
+  <!-- Submission without a map feature. %1$s = map feature type, %2$s = GPS coordinates. -->
+  <string name="app_target_no_feature_with_location">%1$s • មិនមានធាតុផែនទីភ្ជាប់ (%2$s)</string>
+  <!-- Submission without a map feature. %1$s = map feature type. -->
+  <string name="app_target_no_feature">%1$s • មិនមានធាតុផែនទីភ្ជាប់</string>
+  <!-- Badge on the most recent submission (all caps). -->
+  <string name="app_latest">ថ្មីបំផុត</string>
+  <!-- Accessibility label of the button that opens a submission. -->
+  <string name="app_submission_details">ព័ត៌មានលម្អិតនៃការដាក់ស្នើ</string>
+  <!-- Search field placeholder. -->
+  <string name="app_search_placeholder">ស្វែងរក...</string>
+  <!-- Accessibility label of the search icon. -->
+  <string name="app_search">ស្វែងរក</string>
+  <!-- Accessibility label of the button that clears the list search field. -->
+  <string name="app_clear_search_title_case">សម្អាតការស្វែងរក</string>
+  <!-- Accessibility label. -->
+  <string name="app_collapse_list_sheet">បង្រួមផ្ទាំងបញ្ជីទៅផែនទី</string>
+  <!-- Accessibility label. -->
+  <string name="app_expand_list_sheet">ពង្រីកផ្ទាំងបញ្ជីដែលអាចស្វែងរកបាន</string>
+  <!-- Accessibility label of the offline icon. -->
+  <string name="app_device_offline">ឧបករណ៍នៅក្រៅបណ្ដាញ</string>
+  <!-- %1$s = plural map feature noun in lowercase (e.g. coffee parcels, map features). -->
+  <string name="app_offline_searching_local">ឧបករណ៍នៅក្រៅបណ្ដាញ • កំពុងស្វែងរកតែ %1$s ក្នុងឧបករណ៍ប៉ុណ្ណោះ</string>
+  <!-- %1$s = plural map feature noun in lowercase. -->
+  <string name="app_offline_search_local_only">ការស្វែងរកមានតែក្នុង %1$s ក្នុងឧបករណ៍ប៉ុណ្ណោះ។ ការស្វែងរកទីកន្លែងមិនអាចប្រើបាននៅក្រៅបណ្ដាញទេ។</string>
+  <!-- Generic plural noun for map features, used inside sentences. -->
+  <string name="app_map_features_lowercase">ធាតុផែនទី</string>
+  <!-- Generic plural noun used inside sentences when a map layer has no feature name. -->
+  <string name="app_features_lowercase">ធាតុ</string>
+  <!-- Section heading (all caps). -->
+  <string name="app_map_layers_heading">ស្រទាប់ផែនទី</string>
+  <!-- Accessibility label. %1$s = map layer name. -->
+  <string name="app_expand_dataset">ពង្រីក %1$s</string>
+  <!-- Accessibility label. %1$s = map layer name. -->
+  <string name="app_collapse_dataset">បង្រួម %1$s</string>
+  <!-- %1$d = number shown, %2$d = total number, %3$s = plural map feature noun, %4$s = map layer name. -->
+  <string name="app_showing_first_features">កំពុងបង្ហាញ %3$s %1$d ដំបូង នៃ %2$d ក្នុង %4$s។ ប្រើរបារស្វែងរកខាងលើ ដើម្បីត្រង %3$s ទាំង %2$d។</string>
+  <!-- Section heading listing place search results (all caps). -->
+  <string name="app_places_heading">ទីកន្លែង</string>
+  <!-- Accessibility label. -->
+  <string name="app_fly_to_place">ហោះទៅទីកន្លែងលើផែនទី</string>
+  <!-- Chip label to stop navigating to a place. -->
+  <string name="app_stop_navigation">ឈប់នាំផ្លូវ</string>
+  <!-- Accessibility label. -->
+  <string name="app_navigate_to_place">នាំផ្លូវត្រង់ទៅទីកន្លែង</string>
+  <!-- %1$s = search query. -->
+  <string name="app_no_local_layers_match">គ្មានស្រទាប់ផែនទីក្នុងឧបករណ៍ត្រូវនឹង "%1$s" ទេ។ ការស្វែងរកទីកន្លែងមិនអាចប្រើបាននៅក្រៅបណ្ដាញទេ។</string>
+  <!-- %1$s = search query. -->
+  <string name="app_no_layers_or_places_match">គ្មានស្រទាប់ផែនទី ឬទីកន្លែងត្រូវនឹង "%1$s" ទេ។</string>
+  <string name="app_no_map_layers_yet">មិនទាន់មានស្រទាប់ផែនទីនៅឡើយទេ។</string>
+  <string name="app_no_map_features_yet">មិនទាន់មានធាតុផែនទីនៅឡើយទេ។</string>
+  <!-- Accessibility label of the overflow menu. -->
+  <string name="app_more_submission_actions">សកម្មភាពការដាក់ស្នើបន្ថែម</string>
+  <!-- Accessibility label of the share icon. -->
+  <string name="app_share_submission_pdf">ចែករំលែក PDF នៃការដាក់ស្នើ</string>
+  <!-- %1$s = form version. -->
+  <string name="app_schema_version">គ្រោងការណ៍៖ %1$s</string>
+  <!-- %1$s = name of the person who collected the data. -->
+  <string name="app_data_collector">អ្នកប្រមូលទិន្នន័យ៖ %1$s</string>
+  <!-- %1$s = date and time of collection. -->
+  <string name="app_collected_at">បានប្រមូល៖ %1$s</string>
+  <!-- Sync status title. -->
+  <string name="app_sync_uploading_changes">កំពុងផ្ទុកការផ្លាស់ប្តូរឡើង</string>
+  <!-- Sync status title. -->
+  <string name="app_sync_all_changes_saved">បានរក្សាទុកការផ្លាស់ប្តូរទាំងអស់</string>
+  <!-- Sync status title / description. -->
+  <string name="app_sync_upload_failed_retry">ការផ្ទុកឡើងបរាជ័យ — ចុចដើម្បីព្យាយាមម្តងទៀត</string>
+  <!-- Sync status description. -->
+  <string name="app_sync_uploading_description">កំពុងផ្ទុកការផ្លាស់ប្តូរក្នុងឧបករណ៍ឡើងទៅម៉ាស៊ីនមេ</string>
+  <!-- Sync status description. -->
+  <string name="app_sync_synced_description">បានធ្វើសមកាលកម្មជាមួយម៉ាស៊ីនមេពពក</string>
+  <!-- Accessibility label of the basemap/layers button on the map. -->
+  <string name="app_layers">ស្រទាប់</string>
+  <!-- Section heading in the basemap selector: basemap type (Satellite / Map). -->
+  <string name="app_basemap_type_heading">ប្រភេទ</string>
+  <!-- Section heading in the basemap selector listing custom imagery layers. -->
+  <string name="app_imagery_heading">រូបភាព</string>
+  <!-- Imagery layer subtitle. -->
+  <string name="app_offline_download_permitted">អនុញ្ញាតការទាញយកសម្រាប់ក្រៅបណ្ដាញ</string>
+  <!-- Imagery layer subtitle. -->
+  <string name="app_online_only_offline_disabled">លើបណ្ដាញតែប៉ុណ្ណោះ · ការទាញយកសម្រាប់ក្រៅបណ្ដាញត្រូវបានបិទ</string>
+  <!-- Section heading in the layers sheet: the map areas saved on the device for offline use. -->
+  <string name="app_downloaded_imagery_heading">រូបភាពដែលបានទាញយក</string>
+  <!-- Switch in the layers sheet that shows the satellite imagery saved for offline use. -->
+  <string name="app_downloaded_satellite">ផ្កាយរណបដែលបានទាញយក</string>
+  <!-- Switch in the layers sheet that shows the terrain map saved for offline use. -->
+  <string name="app_downloaded_terrain">ភូមិសាស្ត្រដែលបានទាញយក</string>
+  <!-- Subtitle of a downloaded imagery switch. %1$d: number of saved areas; %2$s: the space they take, e.g. "76 MB". -->
+  <plurals name="app_downloaded_imagery_summary">
+    <item quantity="other">%1$d តំបន់ · %2$s</item>
+  </plurals>
+  <!-- Subtitle of a downloaded imagery switch when no area of that kind is saved. -->
+  <string name="app_downloaded_imagery_none">មិនមានតំបន់ដែលបានរក្សាទុក</string>
+  <!-- Button that starts framing a map area to save for offline use. -->
+  <string name="app_save_an_area">រក្សាទុកតំបន់</string>
+  <!-- Imagery layer type: a web map tile URL template. -->
+  <string name="app_imagery_type_xyz_tiles">URL ក្រឡា XYZ</string>
+  <string name="app_imagery_type_earth_engine">ស្រទាប់ Earth Engine</string>
+  <!-- Basemap type option: standard map with roads and terrain. -->
+  <string name="app_basemap_type_map">ភូមិសាស្ត្រ</string>
+  <!-- Basemap type option: satellite imagery. -->
+  <string name="app_basemap_type_satellite">ផ្កាយរណប</string>
+  <!-- Title of the basemap selection dialog. -->
+  <string name="app_basemap">ផែនទីមូលដ្ឋាន</string>
+  <!-- Generic button label to close a dialog after making changes. -->
+  <string name="app_done">រួចរាល់</string>
+  <!-- Accessibility label. -->
+  <string name="app_hide_layer">លាក់ស្រទាប់</string>
+  <!-- Accessibility label. -->
+  <string name="app_show_layer">បង្ហាញស្រទាប់</string>
+  <!-- Button on a map cluster balloon that zooms into the cluster. -->
+  <string name="app_zoom_in">ពង្រីក</string>
+  <!-- Accessibility label. -->
+  <string name="app_dismiss_cluster_balloon">បិទប៉ោងក្រុម</string>
+  <!-- Cluster balloon chip. %1$s = workflow status (e.g. Visited), %2$d = number of map features. -->
+  <string name="app_cluster_status_count">%1$s៖ %2$d</string>
+  <!-- Accessibility label. -->
+  <string name="app_clear_selected_place">សម្អាតទីកន្លែងដែលបានជ្រើសរើស</string>
+  <!-- Accessibility label of the icon marking a survey downloaded for offline use. -->
+  <string name="app_downloaded">បានទាញយក</string>
+  <!-- Map label on the navigation line once at the target. %1$s = distance and bearing. -->
+  <string name="app_map_navigation_arrived">✓ បានមកដល់ • %1$s</string>
+  <!-- Map label on the navigation line. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_map_navigation_distance">➤ %1$s</string>
+  <!-- Map label under the user's location while navigating. %1$s = bearing, e.g. “319° NW”. -->
+  <string name="app_map_user_navigating">⊕ អ្នក • %1$s</string>
+  <!-- Map label under the user's location while the map follows it. -->
+  <string name="app_map_user_centered">⊕ អ្នក (នៅកណ្ដាល)</string>
+  <!-- Map label under the user's GPS location. -->
+  <string name="app_map_user_gps">⊕ អ្នក (GPS)</string>
+  <!-- Fallback label of a place picked from search that has no name. -->
+  <string name="app_place">ទីកន្លែង</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_point">ចំណុច</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_line">បន្ទាត់</string>
+  <!-- Map feature geometry type. -->
+  <string name="app_geometry_polygon">ពហុកោណ</string>
+  <!-- Map feature geometry type: a data table row without a location. -->
+  <string name="app_geometry_none">គ្មានធរណីមាត្រ</string>
+  <!-- Name of a map pin icon in the icon picker. -->
+  <string name="app_layer_icon_place">ទីកន្លែង</string>
+  <string name="app_layer_icon_flag">ទង់</string>
+  <string name="app_layer_icon_star">ផ្កាយ</string>
+  <string name="app_layer_icon_circle">រង្វង់</string>
+  <string name="app_layer_icon_park">ដើមឈើ</string>
+  <string name="app_layer_icon_forest">ព្រៃឈើ</string>
+  <string name="app_layer_icon_eco">ស្លឹកឈើ</string>
+  <string name="app_layer_icon_grass">ស្មៅ</string>
+  <string name="app_layer_icon_agriculture">កសិកម្ម</string>
+  <string name="app_layer_icon_yard">សួនច្បារ</string>
+  <string name="app_layer_icon_emoji_nature">សត្វព្រៃ</string>
+  <string name="app_layer_icon_pets">សត្វ</string>
+  <string name="app_layer_icon_water_drop">ដំណក់ទឹក</string>
+  <string name="app_layer_icon_water">ទឹក</string>
+  <string name="app_layer_icon_waves">រលក</string>
+  <string name="app_layer_icon_plumbing">អណ្ដូង / ម៉ាស៊ីនបូមទឹក</string>
+  <string name="app_layer_icon_landscape">ទេសភាព</string>
+  <string name="app_layer_icon_terrain">ដីភូមិសាស្ត្រ</string>
+  <string name="app_layer_icon_hiking">ផ្លូវលំ</string>
+  <string name="app_layer_icon_signpost">ស្លាកសញ្ញា</string>
+  <string name="app_layer_icon_fence">របង</string>
+  <string name="app_layer_icon_home">ផ្ទះ</string>
+  <string name="app_layer_icon_cottage">ខ្ទម</string>
+  <string name="app_layer_icon_apartment">អគារ</string>
+  <string name="app_layer_icon_school">សាលារៀន</string>
+  <string name="app_layer_icon_local_hospital">មណ្ឌលសុខភាព</string>
+  <string name="app_layer_icon_church">ទីសក្ការបូជា</string>
+  <string name="app_layer_icon_storefront">ផ្សារ</string>
+  <string name="app_layer_icon_factory">រោងចក្រ</string>
+  <string name="app_layer_icon_construction">ការសាងសង់</string>
+  <string name="app_layer_icon_solar_power">ថាមពលព្រះអាទិត្យ</string>
+  <string name="app_layer_icon_cell_tower">បង្គោលអង់តែន</string>
+  <string name="app_layer_icon_sensors">ឧបករណ៍ចាប់សញ្ញា</string>
+  <string name="app_layer_icon_photo_camera">កាមេរ៉ា</string>
+  <string name="app_layer_icon_science">សំណាក</string>
+  <string name="app_layer_icon_recycling">ការកែច្នៃឡើងវិញ</string>
+  <string name="app_layer_icon_local_fire_department">ភ្លើង</string>
+  <string name="app_layer_icon_warning">គ្រោះថ្នាក់</string>
+  <string name="app_layer_icon_person">មនុស្ស</string>
+  <string name="app_layer_icon_groups">ក្រុម</string>
+  <!-- Shown instead of a data collector's name in surveys that hide contributor identities. -->
+  <string name="app_participant_identity_hidden">អ្នកចូលរួម (អត្តសញ្ញាណត្រូវបានលាក់)</string>
+  <!-- The signed-in user's own name as data collector. %1$s = name. -->
+  <string name="app_collector_you">%1$s (អ្នក)</string>
+  <!-- Data collector attribution. %1$s = name, %2$s = email address. -->
+  <string name="app_collector_with_email">%1$s (%2$s)</string>
+  <!-- Notice. %1$s = PDF file name. -->
+  <string name="app_pdf_saved">បានរក្សាទុក %1$s</string>
+  <!-- Notice. %1$s = PDF file name, %2$s = page count and file size. -->
+  <string name="app_pdf_saved_with_summary">បានរក្សាទុក %1$s (%2$s)</string>
+  <!-- Notice. %1$s = PDF file name. -->
+  <string name="app_pdf_share_failed">មិនអាចចែករំលែក %1$s បានទេ</string>
+  <!-- Attribution badge shown in the time series panel and on the map when Earth Engine layers are displayed. Keep “Google Earth Engine” untranslated. -->
+  <string name="app_powered_by_google_earth_engine">ដំណើរការដោយ Google Earth Engine</string>
+  <!-- Coordinates of a point. %1$s = latitude such as “0.4160°S”, %2$s = longitude such as “36.9470°E”. -->
+  <string name="app_coordinates">%1$s, %2$s</string>
+  <!-- Latitude north of the equator. %1$s = degrees such as “0.4160”. Use the standard abbreviation for north. -->
+  <string name="app_coordinates_latitude_north">%1$s°N</string>
+  <!-- Latitude south of the equator. %1$s = degrees such as “0.4160”. Use the standard abbreviation for south. -->
+  <string name="app_coordinates_latitude_south">%1$s°S</string>
+  <!-- Longitude east of the prime meridian. %1$s = degrees such as “36.9470”. Use the standard abbreviation for east. -->
+  <string name="app_coordinates_longitude_east">%1$s°E</string>
+  <!-- Longitude west of the prime meridian. %1$s = degrees such as “36.9470”. Use the standard abbreviation for west. -->
+  <string name="app_coordinates_longitude_west">%1$s°W</string>
+  <!-- Notice when straight-line navigation to a map feature or place starts. %1$s = its name; %2$s = distance and bearing, e.g. “495 m • 319° NW”. -->
+  <string name="app_map_navigation_started">ការណែនាំផ្លូវត្រង់ទៅ %1$s (%2$s)</string>
+  <!-- Notice when straight-line navigation to a submission starts. %1$s = form title; %2$s = its map feature, location, or “Standalone Field Log”; %3$s = distance and bearing. -->
+  <string name="app_map_navigation_started_submission">ការណែនាំផ្លូវត្រង់ទៅ %1$s • %2$s (%3$s)</string>
+  <!-- In the navigation notice, stands for a submission that has neither a map feature nor a location. -->
+  <string name="app_map_navigation_standalone_field_log">កំណត់ហេតុវាលដាច់ដោយឡែក</string>
+  <!-- Notice when the map centers on a place. %1$s = place name; %2$s = its coordinates. -->
+  <string name="app_map_centered_on_place">បានដាក់ផែនទីនៅកណ្តាល %1$s (%2$s)</string>
+  <!-- Place search result for coordinates the user typed. %1$s = the coordinates, e.g. “0.4210°S, 36.9505°E”. -->
+  <string name="app_place_coordinates_name">កូអរដោនេ (%1$s)</string>
+  <!-- Category badge of a place search result for typed coordinates. -->
+  <string name="app_place_coordinates_category">កូអរដោនេ GPS</string>
+  <!-- Region line of a place search result for typed coordinates. %1$s = the survey's location, e.g. “Nyeri County, Kenya”. -->
+  <string name="app_place_coordinates_region">%1$s • ការស្វែងរកកូអរដោនេដោយផ្ទាល់</string>
+
+  <!-- Dates in summaries (DateText.kt), e.g. "Mar 5, 2026". date_medium: %1$s is the abbreviated month name, %2$d the day of the month, %3$d the year. -->
+  <string name="date_medium">%2$d %1$s %3$d</string>
+  <string name="date_month_short_1">មករា</string>
+  <string name="date_month_short_2">កុម្ភៈ</string>
+  <string name="date_month_short_3">មីនា</string>
+  <string name="date_month_short_4">មេសា</string>
+  <string name="date_month_short_5">ឧសភា</string>
+  <string name="date_month_short_6">មិថុនា</string>
+  <string name="date_month_short_7">កក្កដា</string>
+  <string name="date_month_short_8">សីហា</string>
+  <string name="date_month_short_9">កញ្ញា</string>
+  <string name="date_month_short_10">តុលា</string>
+  <string name="date_month_short_11">វិច្ឆិកា</string>
+  <string name="date_month_short_12">ធ្នូ</string>
+  <!-- Title the system share sheet gives a PDF report: of a map feature (%1$s is its type, e.g. Coffee parcel) or of a submission (%1$s is the form title). -->
+  <string name="app_pdf_share_title_map_feature">របាយការណ៍ %1$s</string>
+  <string name="app_pdf_share_title_submission">ការដាក់ស្នើ %1$s</string>
+  <!-- Number of map features in a map cluster, when no single map layer names its features. -->
+  <plurals name="app_map_features_count">
+    <item quantity="other">ធាតុផែនទី %1$d</item>
+  </plurals>
+  <!-- Type of a map feature when the survey names none (first), and what a submission without a map feature was recorded as (second). -->
+  <string name="app_feature_type_generic">ទីតាំង</string>
+  <string name="app_target_standalone">កំណត់ហេតុវាលដាច់ដោយឡែក</string>
+  <string name="app_measurement">%1$s %2$s</string>
+  <string name="app_unit_meter">ម</string>
+  <string name="app_unit_kilometer">គ.ម</string>
+  <string name="app_unit_foot">ហ្វីត</string>
+  <string name="app_unit_mile">ម៉ាយ</string>
+  <string name="app_unit_hectare">ហិកតា</string>
+  <string name="app_unit_acre">អេក</string>
+  <string name="app_unit_square_kilometer">គ.ម²</string>
+  <string name="app_unit_kilobyte">kB</string>
+  <string name="app_unit_megabyte">MB</string>
+  <string name="app_unit_gigabyte">GB</string>
+  <string name="app_unit_terabyte">TB</string>
+  <string name="app_gnss_accuracy">±%1$s</string>
+  <string name="app_wayfinding_badge">%1$s • %2$s</string>
+</resources>

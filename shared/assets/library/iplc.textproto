@@ -21,7 +21,7 @@
 #
 # The clients embed a Kotlin copy (GlobalLibrarySeedData.kt), and its
 # GlobalLibrarySeedTest fails when the two differ. Template questions carry
-# their concept links as `ground:concept` foreign attributes on their bindings.
+# their concept links as `collectone:concept` foreign attributes on their bindings.
 
 concepts {
   id: "iplc.community_type"
@@ -661,7 +661,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "given"
@@ -687,7 +687,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "withheld"
@@ -713,7 +713,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "pending"
@@ -742,7 +742,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "indigenous_peoples"
@@ -768,7 +768,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "local_community"
@@ -794,7 +794,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "other"
@@ -823,7 +823,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "customary"
@@ -849,7 +849,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "communal"
@@ -875,7 +875,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "private"
@@ -901,7 +901,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "public"
@@ -927,7 +927,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "other"
@@ -956,7 +956,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "formally_titled"
@@ -982,7 +982,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "customary_unrecognized"
@@ -1008,7 +1008,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "in_progress"
@@ -1034,7 +1034,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "contested"
@@ -1063,7 +1063,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "agroforestry_crops"
@@ -1089,7 +1089,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "ntfp_harvesting"
@@ -1115,7 +1115,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "pastoralism_grazing"
@@ -1141,7 +1141,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "artisanal_fishing"
@@ -1167,7 +1167,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "sacred_cultural_site"
@@ -1193,7 +1193,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "community_conservation"
@@ -1207,8 +1207,8 @@ form_templates {
         type: TYPE_SELECT_ONE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "iplc.fpic_consent@1"
         }
       }
@@ -1217,8 +1217,8 @@ form_templates {
         type: TYPE_STRING
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "iplc.community_name@1"
         }
       }
@@ -1227,8 +1227,8 @@ form_templates {
         type: TYPE_SELECT_ONE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "iplc.community_type@1"
         }
       }
@@ -1236,8 +1236,8 @@ form_templates {
         field_path: "governance_institution"
         type: TYPE_STRING
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "iplc.governance_institution@1"
         }
       }
@@ -1246,8 +1246,8 @@ form_templates {
         type: TYPE_SELECT_ONE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "iplc.tenure_type@1"
         }
       }
@@ -1255,8 +1255,8 @@ form_templates {
         field_path: "legal_recognition"
         type: TYPE_SELECT_ONE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "iplc.legal_recognition@1"
         }
       }
@@ -1264,8 +1264,8 @@ form_templates {
         field_path: "resource_use"
         type: TYPE_SELECT_MULTIPLE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "iplc.resource_use@1"
         }
       }
@@ -1274,8 +1274,8 @@ form_templates {
         type: TYPE_GEOSHAPE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "iplc.territory_boundary@1"
         }
       }
@@ -1283,8 +1283,8 @@ form_templates {
         field_path: "area_ha"
         type: TYPE_DOUBLE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.area_ha@1"
         }
       }
@@ -1292,8 +1292,8 @@ form_templates {
         field_path: "site_photo"
         type: TYPE_BINARY
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.site_photo@1"
         }
       }
@@ -1433,6 +1433,7 @@ form_templates {
     }
   }
   status: STABLE
+  version: 1
 }
 purpose_packs {
   id: "iplc_land_mapping"

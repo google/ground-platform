@@ -21,6 +21,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.geo.IndexedRing
 import org.openforis.collectone.v2.core.geo.Wgs84
 
@@ -162,22 +163,55 @@ class DefaultSamplingEngineTest {
   }
 
   @Test
-  fun simpleRandom_respectsCountMinDistanceAndParts() {
-    val area = SamplingArea.fromSurveyArea(twoParts)
-    val design =
-      SampleDesign(
-        PlotLayout.SimpleRandom(count = 200, minDistanceM = 300.0),
-        plotShape = PlotShape.CIRCLE,
-        plotSizeM = 30.0,
-      )
-    val plots = success(engine.generate(area, design))
+  fun simpleRandom_placesRequestedCount() {
+    val plots = success(engine.generate(twoPartsArea, twoPartsRandomDesign))
+
     assertEquals(200, plots.size)
-    assertAllInside(area, plots)
+  }
+
+  @Test
+  fun simpleRandom_placesPlotsInsideArea() {
+    val plots = success(engine.generate(twoPartsArea, twoPartsRandomDesign))
+
+    assertAllInside(twoPartsArea, plots)
+  }
+
+  @Test
+  fun simpleRandom_respectsMinDistance() {
+    val plots = success(engine.generate(twoPartsArea, twoPartsRandomDesign))
+
     assertTrue(minPairDistance(plots) >= 300.0)
+  }
+
+  @Test
+  fun simpleRandom_samplesEveryPart() {
+    val plots = success(engine.generate(twoPartsArea, twoPartsRandomDesign))
+
     val island = ringIndex(twoParts[1])
     assertTrue(plots.any { island.contains(it.center.lat, it.center.lng) }, "no plot on the island")
-    assertEquals(engine.estimate(area, design).areaHa / 200, plots[0].inclusionWeightHa, 1e-9)
   }
+
+  @Test
+  fun simpleRandom_inclusionWeight_isAreaPerPlot() {
+    val plots = success(engine.generate(twoPartsArea, twoPartsRandomDesign))
+
+    assertEquals(
+      engine.estimate(twoPartsArea, twoPartsRandomDesign).areaHa / 200,
+      plots[0].inclusionWeightHa,
+      1e-9,
+    )
+  }
+
+  private val twoPartsArea
+    get() = SamplingArea.fromSurveyArea(twoParts)
+
+  /** 200 circular 30 m plots at least 300 m apart. */
+  private val twoPartsRandomDesign =
+    SampleDesign(
+      PlotLayout.SimpleRandom(count = 200, minDistanceM = 300.0),
+      plotShape = PlotShape.CIRCLE,
+      plotSizeM = 30.0,
+    )
 
   @Test
   fun simpleRandom_failsWithClearMessageWhenPlotsCannotFit() {
@@ -229,32 +263,49 @@ class DefaultSamplingEngineTest {
   }
 
   @Test
-  fun stratifiedRandom_equalAndCustomAllocation() {
+  fun stratifiedRandom_equalAllocation_splitsCountEvenlyWithLargestRemainder() {
     val equal =
       success(
         engine.generate(strata, SampleDesign(PlotLayout.StratifiedRandom(10, Allocation.Equal)))
       )
+
     assertEquals(
       mapOf("forest" to 4, "crop" to 3, "water" to 3),
       equal.groupingBy { it.stratum }.eachCount(),
     )
-    val custom =
-      success(
-        engine.generate(
-          strata,
-          SampleDesign(
-            PlotLayout.StratifiedRandom(
-              0,
-              Allocation.Custom(mapOf("water" to 5, "crop" to 2, "unknown" to 9)),
-              minDistanceM = 50.0,
-            )
-          ),
-        )
-      )
-    assertEquals(mapOf("crop" to 2, "water" to 5), custom.groupingBy { it.stratum }.eachCount())
-    assertAllInside(strata, custom)
-    assertTrue(minPairDistance(custom) >= 50.0)
   }
+
+  @Test
+  fun stratifiedRandom_customAllocation_placesRequestedCountPerKnownStratum() {
+    val custom = customAllocationPlots()
+
+    assertEquals(mapOf("crop" to 2, "water" to 5), custom.groupingBy { it.stratum }.eachCount())
+  }
+
+  @Test
+  fun stratifiedRandom_customAllocation_placesPlotsInsideTheirStrata() {
+    assertAllInside(strata, customAllocationPlots())
+  }
+
+  @Test
+  fun stratifiedRandom_customAllocation_respectsMinDistance() {
+    assertTrue(minPairDistance(customAllocationPlots()) >= 50.0)
+  }
+
+  /** Custom allocation of 5 water and 2 crop plots (plus an unknown stratum), 50 m apart. */
+  private fun customAllocationPlots(): List<GeneratedPlot> =
+    success(
+      engine.generate(
+        strata,
+        SampleDesign(
+          PlotLayout.StratifiedRandom(
+            0,
+            Allocation.Custom(mapOf("water" to 5, "crop" to 2, "unknown" to 9)),
+            minDistanceM = 50.0,
+          )
+        ),
+      )
+    )
 
   @Test
   fun largestRemainder_sumsToTotal() {
@@ -265,29 +316,59 @@ class DefaultSamplingEngineTest {
   }
 
   @Test
-  fun cluster_buildsPatternsAndDropsOutsidePlots() {
-    val area = SamplingArea.fromSurveyArea(listOf(lShape))
-    val design =
-      SampleDesign(
-        PlotLayout.Cluster(
-          clusterCount = 20,
-          plotsPerSide = 3,
-          plotSpacingM = 200.0,
-          minDistanceM = 1500.0,
-        ),
-        plotShape = PlotShape.POINT,
-      )
-    val plots = success(engine.generate(area, design))
+  fun cluster_dropsPlotsOutsideArea() {
+    val plots = clusterPlots()
+
     assertTrue(plots.size in 20..180)
-    assertAllInside(area, plots)
-    val byCluster = plots.groupBy { it.clusterId }
+    assertAllInside(lShapeArea, plots)
+  }
+
+  @Test
+  fun cluster_createsRequestedClusterCountWithIds() {
+    val byCluster = clusterPlots().groupBy { it.clusterId }
+
     assertEquals(20, byCluster.size)
     assertTrue(byCluster.keys.all { it.matches(Regex("C\\d{6}")) })
+  }
+
+  @Test
+  fun cluster_eachClusterHasAtMostASquarePattern() {
+    val byCluster = clusterPlots().groupBy { it.clusterId }
+
     assertTrue(byCluster.values.all { it.size <= 9 })
-    assertTrue(plots.all { it.boundary.isEmpty() })
-    val full = byCluster.values.first { it.size == 9 }
+  }
+
+  @Test
+  fun cluster_pointShape_hasNoBoundary() {
+    assertTrue(clusterPlots().all { it.boundary.isEmpty() })
+  }
+
+  @Test
+  fun cluster_fullPattern_usesPlotSpacing() {
+    val full = clusterPlots().groupBy { it.clusterId }.values.first { it.size == 9 }
+
     assertEquals(200.0, minPairDistance(full), 1.0)
   }
+
+  private val lShapeArea
+    get() = SamplingArea.fromSurveyArea(listOf(lShape))
+
+  /** 20 point clusters of 3×3 plots, 200 m apart, on the L-shaped area. */
+  private fun clusterPlots(): List<GeneratedPlot> =
+    success(
+      engine.generate(
+        lShapeArea,
+        SampleDesign(
+          PlotLayout.Cluster(
+            clusterCount = 20,
+            plotsPerSide = 3,
+            plotSpacingM = 200.0,
+            minDistanceM = 1500.0,
+          ),
+          plotShape = PlotShape.POINT,
+        ),
+      )
+    )
 
   @Test
   fun plotShapes_haveExpectedRings() {
@@ -437,20 +518,45 @@ class DefaultSamplingEngineTest {
   }
 
   @Test
-  fun generate_reportsProgressAndCancels() {
-    val area = SamplingArea.fromSurveyArea(listOf(lShape))
-    val design = SampleDesign(PlotLayout.SystematicGrid(200.0))
+  fun generate_reportsMonotonicProgressEndingAtOne() {
     val progress = mutableListOf<Double>()
-    success(engine.generate(area, design, onProgress = { progress.add(it) }))
+
+    success(
+      engine.generate(
+        lShapeArea,
+        SampleDesign(PlotLayout.SystematicGrid(200.0)),
+        onProgress = { progress.add(it) },
+      )
+    )
+
     assertTrue(progress.size > 2)
     assertEquals(progress.sorted(), progress)
     assertEquals(1.0, progress.last())
+  }
+
+  @Test
+  fun generate_cancelledMidGrid_returnsCancelled() {
     var calls = 0
-    val cancelled = engine.generate(area, design, isCancelled = { ++calls > 3 })
+
+    val cancelled =
+      engine.generate(
+        lShapeArea,
+        SampleDesign(PlotLayout.SystematicGrid(200.0)),
+        isCancelled = { ++calls > 3 },
+      )
+
     assertEquals(SamplingResult.Cancelled, cancelled)
+  }
+
+  @Test
+  fun generate_cancelledSimpleRandom_returnsCancelled() {
     assertEquals(
       SamplingResult.Cancelled,
-      engine.generate(area, SampleDesign(PlotLayout.SimpleRandom(100)), isCancelled = { true }),
+      engine.generate(
+        lShapeArea,
+        SampleDesign(PlotLayout.SimpleRandom(100)),
+        isCancelled = { true },
+      ),
     )
   }
 

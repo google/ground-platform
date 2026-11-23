@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Why an operation failed: the user data service or auth service couldn't be reached. -->
+  <string name="app_error_network">Không thể kết nối. Hãy kiểm tra kết nối Internet rồi thử lại.</string>
+  <!-- Why an operation failed: the user's session has expired. -->
+  <string name="app_error_unauthenticated">Phiên của bạn đã hết hạn. Hãy đăng nhập lại.</string>
+  <!-- Why an operation failed: the signed-in user isn't allowed to do it. -->
+  <string name="app_error_permission_denied">Bạn không có quyền thực hiện thao tác này.</string>
+  <!-- Why an operation failed: what it refers to was deleted. -->
+  <string name="app_error_not_found">Mục này không còn tồn tại.</string>
+  <!-- Why an operation failed: someone changed the same thing at the same time. -->
+  <string name="app_error_conflict">Mục này đã được thay đổi ở nơi khác. Hãy thử lại.</string>
+  <!-- Why an operation failed: what it changes no longer accepts changes, e.g. a closed or archived survey; retrying won't help. -->
+  <string name="app_error_not_editable">Hiện không thể thay đổi mục này. Khảo sát có thể đã đóng hoặc đã lưu trữ.</string>
+  <!-- Why an operation failed: the server rejected what was entered. -->
+  <string name="app_error_validation">Một số thông tin không hợp lệ. Hãy kiểm tra rồi thử lại.</string>
+  <!-- Why an operation failed: a quota or rate limit was reached. -->
+  <string name="app_error_quota_exceeded">Bạn đã đạt đến giới hạn sử dụng. Hãy thử lại sau.</string>
+  <!-- Why an operation failed: the user cancelled it. -->
+  <string name="app_error_cancelled">Đã hủy.</string>
+  <!-- Why an operation failed, when there is no more specific reason. -->
+  <string name="app_error_unknown">Đã xảy ra lỗi. Hãy thử lại.</string>
+  <!-- Notice after sign-in fails. %1$s = why, one of the app_error_* sentences. -->
+  <string name="app_sign_in_failed">Không thể đăng nhập. %1$s</string>
+</resources>

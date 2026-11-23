@@ -14,7 +14,6 @@
 package org.openforis.collectone.v2.mobile.ui.settings
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -25,9 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -38,26 +35,25 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
@@ -68,9 +64,15 @@ import org.openforis.collectone.v2.app.domain.model.LANGUAGE_OPTIONS
 import org.openforis.collectone.v2.app.domain.model.MeasurementUnitSystem
 import org.openforis.collectone.v2.app.domain.model.UserSettings
 import org.openforis.collectone.v2.app.domain.model.WEBSITE_URL
-import org.openforis.collectone.v2.app.ui.state.SettingsUiState
-import org.openforis.collectone.v2.app.ui.viewmodel.SettingsActions
-import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.app.ui.settings.SettingsActions
+import org.openforis.collectone.v2.app.ui.settings.SettingsUiState
+import org.openforis.collectone.v2.core.forms.ui.controls.DropdownMenuItem
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.Switch
+import org.openforis.collectone.v2.core.forms.ui.controls.clickable
+import org.openforis.collectone.v2.core.forms.ui.controls.toggleable
+import org.openforis.collectone.v2.core.forms.ui.resources.Res as UiRes
 import org.openforis.collectone.v2.core.forms.ui.resources.general_title
 import org.openforis.collectone.v2.core.forms.ui.resources.help_title
 import org.openforis.collectone.v2.core.forms.ui.resources.length_imperial
@@ -81,7 +83,10 @@ import org.openforis.collectone.v2.core.forms.ui.resources.select_units_title
 import org.openforis.collectone.v2.core.forms.ui.resources.settings_title
 import org.openforis.collectone.v2.core.forms.ui.resources.upload_media_title
 import org.openforis.collectone.v2.core.forms.ui.resources.visit_website_title
-import org.openforis.collectone.v2.mobile.ui.navigation.DeviceStorageBreakdownCard
+import org.openforis.collectone.v2.mobile.resources.Res
+import org.openforis.collectone.v2.mobile.resources.mobile_back
+import org.openforis.collectone.v2.mobile.resources.mobile_settings_opened_website
+import org.openforis.collectone.v2.mobile.resources.mobile_settings_storage_title
 import org.openforis.collectone.v2.mobile.ui.onboarding.SignInScreen
 
 /** Option item for [SettingsSelectItem], matching `Option` in `ground-android`. */
@@ -115,7 +120,7 @@ fun SettingsScreen(uiState: SettingsUiState, actions: SettingsActions, onBack: (
 @Composable
 fun SettingsScreen(
   settings: UserSettings,
-  storage: DeviceStorageInfo = DeviceStorageInfo(),
+  storage: DeviceStorageInfo? = null,
   onUploadMediaOverUnmeteredConnectionOnlyChange: (Boolean) -> Unit,
   onLanguageChange: (String) -> Unit,
   onMeasurementUnitsChange: (MeasurementUnitSystem) -> Unit,
@@ -126,8 +131,8 @@ fun SettingsScreen(
   val languageOptions = remember {
     LANGUAGE_OPTIONS.map { SettingsOption(label = it.label, value = it.code) }
   }
-  val metricLabel = stringResource(Res.string.length_metric)
-  val imperialLabel = stringResource(Res.string.length_imperial)
+  val metricLabel = stringResource(UiRes.string.length_metric)
+  val imperialLabel = stringResource(UiRes.string.length_imperial)
   val lengthOptions =
     remember(metricLabel, imperialLabel) {
       listOf(
@@ -139,10 +144,13 @@ fun SettingsScreen(
   Scaffold(
     topBar = {
       TopAppBar(
-        title = { Text(text = stringResource(Res.string.settings_title)) },
+        title = { Text(text = stringResource(UiRes.string.settings_title)) },
         navigationIcon = {
           IconButton(onClick = onBack) {
-            Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+            Icon(
+              imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+              contentDescription = stringResource(Res.string.mobile_back),
+            )
           }
         },
         colors =
@@ -158,12 +166,12 @@ fun SettingsScreen(
       modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState())
     ) {
       // General Section
-      SettingsCategory(title = stringResource(Res.string.general_title)) {
+      SettingsCategory(title = stringResource(UiRes.string.general_title)) {
         // Upload Media (Over Wi-Fi only)
         SettingsSwitchItem(
           icon = Icons.Outlined.CloudUpload,
-          title = stringResource(Res.string.upload_media_title),
-          summary = stringResource(Res.string.over_wifi_summary),
+          title = stringResource(UiRes.string.upload_media_title),
+          summary = stringResource(UiRes.string.over_wifi_summary),
           checked = settings.shouldUploadPhotosOnWifiOnly,
           onCheckedChange = onUploadMediaOverUnmeteredConnectionOnlyChange,
         )
@@ -171,7 +179,7 @@ fun SettingsScreen(
         // Select Language
         SettingsSelectItem(
           icon = Icons.Outlined.Language,
-          title = stringResource(Res.string.select_language_title),
+          title = stringResource(UiRes.string.select_language_title),
           options = languageOptions,
           currentValue = settings.language,
           onValueChanged = onLanguageChange,
@@ -180,7 +188,7 @@ fun SettingsScreen(
         // Measurement Units
         SettingsSelectItem(
           icon = Icons.Outlined.Straighten,
-          title = stringResource(Res.string.select_units_title),
+          title = stringResource(UiRes.string.select_units_title),
           options = lengthOptions,
           currentValue = settings.measurementUnits.name,
           onValueChanged = { onMeasurementUnitsChange(MeasurementUnitSystem.valueOf(it)) },
@@ -189,20 +197,22 @@ fun SettingsScreen(
 
       HorizontalDivider()
 
-      // Device Storage Section
-      SettingsCategory(title = "Storage") {
-        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-          DeviceStorageBreakdownCard(storage = storage)
+      // Device Storage Section, when the device can measure its storage
+      if (storage != null) {
+        SettingsCategory(title = stringResource(Res.string.mobile_settings_storage_title)) {
+          Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            DeviceStorageBreakdownCard(storage = storage)
+          }
         }
+
+        HorizontalDivider()
       }
 
-      HorizontalDivider()
-
       // Help Section
-      SettingsCategory(title = stringResource(Res.string.help_title)) {
+      SettingsCategory(title = stringResource(UiRes.string.help_title)) {
         SettingsItem(
           icon = Icons.AutoMirrored.Outlined.OpenInNew,
-          title = stringResource(Res.string.visit_website_title),
+          title = stringResource(UiRes.string.visit_website_title),
           summary = WEBSITE_URL,
           onClick = onVisitWebsiteClick,
         )
@@ -226,7 +236,8 @@ fun SettingsScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = "Opened $visitedWebsiteNotice",
+              text =
+                stringResource(Res.string.mobile_settings_opened_website, visitedWebsiteNotice),
               style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
               color = MaterialTheme.colorScheme.onSecondaryContainer,
             )
@@ -316,8 +327,10 @@ fun SettingsSelectItem(
 ) {
   val selectedOption = options.find { it.value == currentValue } ?: options.firstOrNull()
   var expanded by remember { mutableStateOf(false) }
+  var parentWidthPx by remember { mutableIntStateOf(0) }
+  val density = LocalDensity.current
 
-  Box(modifier = modifier.fillMaxWidth()) {
+  Box(modifier = modifier.fillMaxWidth().onGloballyPositioned { parentWidthPx = it.size.width }) {
     SettingsItem(
       icon = icon,
       title = title,
@@ -329,8 +342,13 @@ fun SettingsSelectItem(
     DropdownMenu(
       expanded = expanded,
       onDismissRequest = { expanded = false },
-      offset = DpOffset(16.dp, 0.dp),
-      modifier = Modifier.widthIn(min = 200.dp),
+      offset = DpOffset(0.dp, 0.dp),
+      modifier =
+        if (parentWidthPx > 0) {
+          Modifier.width(with(density) { parentWidthPx.toDp() })
+        } else {
+          Modifier.fillMaxWidth()
+        },
     ) {
       options.forEach { option ->
         val isSelected = option.value == selectedOption?.value
@@ -434,7 +452,7 @@ fun SignInLanguageSelector(
   ) {
     SettingsSelectItem(
       icon = Icons.Outlined.Language,
-      title = stringResource(Res.string.select_language_title),
+      title = stringResource(UiRes.string.select_language_title),
       options = languageOptions,
       currentValue = languageCode,
       onValueChanged = onLanguageChange,

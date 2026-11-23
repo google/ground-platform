@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="editor_default_name_text_question">Câu hỏi văn bản ngắn mới</string>
+  <string name="editor_default_name_long_text_question">Câu hỏi đoạn văn mới</string>
+  <string name="editor_default_name_number_question">Câu hỏi số mới</string>
+  <string name="editor_default_name_select_one_question">Câu hỏi chọn một mới</string>
+  <string name="editor_default_name_select_multiple_question">Câu hỏi chọn nhiều mới</string>
+  <string name="editor_default_name_date_question">Câu hỏi ngày mới</string>
+  <string name="editor_default_name_point_question">Câu hỏi điểm mới</string>
+  <string name="editor_default_name_line_question">Câu hỏi đường mới</string>
+  <string name="editor_default_name_polygon_question">Câu hỏi đa giác mới</string>
+  <string name="editor_default_name_photo_question">Câu hỏi ảnh mới</string>
+  <string name="editor_default_name_video_question">Câu hỏi video mới</string>
+  <string name="editor_default_name_audio_question">Câu hỏi âm thanh mới</string>
+  <string name="editor_default_name_note">Ghi chú mới</string>
+  <string name="editor_default_name_map_layer">Lớp bản đồ mới</string>
+  <string name="editor_default_name_data_table">Bảng dữ liệu mới</string>
+  <string name="editor_default_name_form">Biểu mẫu mới</string>
+  <string name="editor_default_name_property">Thuộc tính mới</string>
+</resources>

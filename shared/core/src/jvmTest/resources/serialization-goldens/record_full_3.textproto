@@ -1,0 +1,76 @@
+form_id: "form_id-value"
+form_version: "form_version-value"
+metadata {
+  instance_id: "instance_id-value"
+  start_time {
+    seconds: 1767225600
+    nanos: 125000000
+  }
+  end_time {
+    seconds: 1767225600
+    nanos: 125000000
+  }
+  today {
+    year: 7
+    month: 7
+    day: 7
+  }
+  device_id: "device_id-value"
+  subscriber_id: "subscriber_id-value"
+  sim_serial: "sim_serial-value"
+  phone_number: "phone_number-value"
+  audit_file_uri: "audit_file_uri-value"
+  audit_config {
+    enabled: true
+    location_min_interval_seconds: 7
+    location_max_age_seconds: 7
+    location_priority: "location_priority-value"
+    track_changes: true
+    track_changes_reasons: "track_changes_reasons-value"
+  }
+}
+data {
+  fields {
+    key: "fields-value"
+    value {
+      repeat_value {
+        nodes {
+          fields {
+            key: "fields-value"
+            value {
+              scalar_value {
+                double_value: 2.25
+              }
+            }
+          }
+          id: "id-value"
+          sort_order: 7
+        }
+      }
+    }
+  }
+  id: "id-value"
+  sort_order: 7
+}
+audit_log {
+  events {
+    event: "event-value"
+    field_path: "field_path-value"
+    start_time {
+      seconds: 1767225600
+      nanos: 125000000
+    }
+    end_time {
+      seconds: 1767225600
+      nanos: 125000000
+    }
+    location {
+      latitude: 2.25
+      longitude: 2.25
+      altitude_meters: 2.25
+      accuracy_meters: 2.25
+    }
+    old_value: "old_value-value"
+    new_value: "new_value-value"
+  }
+}

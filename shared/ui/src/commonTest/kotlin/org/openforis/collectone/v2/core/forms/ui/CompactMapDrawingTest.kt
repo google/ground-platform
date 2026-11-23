@@ -19,6 +19,10 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import openforis.collectone.v1.forms.DataType
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_no_point
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_point_placed
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_vertex_count
 
 class CompactMapDrawingTest {
 
@@ -140,11 +144,26 @@ class CompactMapDrawingTest {
 
   @Test
   fun mapDrawingSummary_describesProgressPerKind() {
-    assertEquals("No point yet", mapDrawingSummary(MapDrawingKind.POINT, 0))
-    assertEquals("Point placed", mapDrawingSummary(MapDrawingKind.POINT, 1))
-    assertEquals("1 vertex", mapDrawingSummary(MapDrawingKind.LINE, 1))
-    assertEquals("3 vertices", mapDrawingSummary(MapDrawingKind.POLYGON, 3))
-    assertEquals("0 vertices", mapDrawingSummary(MapDrawingKind.POLYGON, 0))
+    assertEquals(
+      FormUiText.Resource(Res.string.forms_map_no_point),
+      mapDrawingSummary(MapDrawingKind.POINT, 0),
+    )
+    assertEquals(
+      FormUiText.Resource(Res.string.forms_map_point_placed),
+      mapDrawingSummary(MapDrawingKind.POINT, 1),
+    )
+    assertEquals(
+      FormUiText.Plural(Res.plurals.forms_vertex_count, 1),
+      mapDrawingSummary(MapDrawingKind.LINE, 1),
+    )
+    assertEquals(
+      FormUiText.Plural(Res.plurals.forms_vertex_count, 3),
+      mapDrawingSummary(MapDrawingKind.POLYGON, 3),
+    )
+    assertEquals(
+      FormUiText.Plural(Res.plurals.forms_vertex_count, 0),
+      mapDrawingSummary(MapDrawingKind.POLYGON, 0),
+    )
   }
 
   @Test

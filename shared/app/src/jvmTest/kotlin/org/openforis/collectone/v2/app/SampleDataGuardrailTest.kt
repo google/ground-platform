@@ -16,26 +16,53 @@ package org.openforis.collectone.v2.app
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.openforis.collectone.v2.app.data.seed.SampleSurveysData
 
 /**
- * Guards the local data store as the single source of truth: only the seeder package may read the
- * hardcoded sample datasets. Everything else must read sample data from the store.
+ * Guards the server as the single source of sample data: the sample datasets are test fixtures
+ * (`shared/app/testing`), so production code must not special-case the sample forms by ID.
+ *
+ * The fixtures can't leak into production code by import (they aren't on its classpath), so this
+ * checks for the sample forms' IDs as string literals in every main source set of this module and
+ * the modules it is split into instead.
  */
 class SampleDataGuardrailTest {
+  /** The `src` directories of this module and of its split modules, relative to shared/app. */
+  private val srcRoots = listOf("src", "domain/src", "data/src").map(::File)
+
+  private val sampleFormIds: Set<String> =
+    (SampleSurveysData.defaultForms() +
+        SampleSurveysData.defaultSampleSurveys().flatMap {
+          SampleSurveysData.formsForSurvey(it.id)
+        })
+      .map { it.id }
+      .toSet()
+
   @Test
-  fun onlySeedPackageReadsSampleDatasets() {
-    val mainRoot = File("src/commonMain/kotlin")
-    assertTrue(mainRoot.isDirectory, "Run from the shared/app project directory")
-    val seedDir = "/data/seed/"
-    val sampleData = Regex("""\b(Sample\w+Data)\b""")
+  fun mainCodeDoesNotHardcodeSampleFormIds() {
+    srcRoots.forEach { assertTrue(it.isDirectory, "Run from the shared/app project directory") }
+    assertTrue(sampleFormIds.size >= 2, "Expected sample forms in the fixtures: $sampleFormIds")
     val offenders =
-      mainRoot
-        .walkTopDown()
+      srcRoots
+        .asSequence()
+        .flatMap { srcRoot ->
+          srcRoot
+            .listFiles { dir -> dir.isDirectory && dir.name.endsWith("Main") }
+            .orEmpty()
+            .asSequence()
+        }
+        .flatMap { sourceSet -> sourceSet.walkTopDown() }
         .filter { it.isFile && it.extension == "kt" }
-        .filterNot { it.invariantSeparatorsPath.contains(seedDir) }
-        .filter { sampleData.containsMatchIn(it.readText()) }
-        .map { it.invariantSeparatorsPath }
-        .toList()
-    assertTrue(offenders.isEmpty(), "Sample datasets read outside data/seed: $offenders")
+        .associate { file ->
+          val text = file.readText()
+          file.invariantSeparatorsPath to sampleFormIds.filter { "\"$it\"" in text }
+        }
+        .filterValues { it.isNotEmpty() }
+
+    assertTrue(
+      offenders.isEmpty(),
+      "Main code hardcodes sample form IDs; read forms from the store instead:\n" +
+        offenders.entries.joinToString("\n") { (path, ids) -> "$path: $ids" },
+    )
   }
 }

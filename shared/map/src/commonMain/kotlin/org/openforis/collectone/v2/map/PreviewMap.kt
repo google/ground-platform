@@ -112,10 +112,12 @@ private fun DrawScope.drawFeature(
   fun px(p: LatLng) = cameraState.project(p).toPx(this)
   when (layer) {
     is MapLayer.Fill -> {
-      if (geometry !is Geometry.Polygon) return
-      val path = Path().apply { fillType = PathFillType.EvenOdd }
-      geometry.rings.forEach { ring -> path.addRing(ring.map(::px), close = true) }
-      drawPath(path, layer.color.evaluate(props).copy(alpha = layer.opacity.evaluate(props)))
+      val color = layer.color.evaluate(props).copy(alpha = layer.opacity.evaluate(props))
+      geometry.parts.filterIsInstance<Geometry.Polygon>().forEach { polygon ->
+        val path = Path().apply { fillType = PathFillType.EvenOdd }
+        polygon.rings.forEach { ring -> path.addRing(ring.map(::px), close = true) }
+        drawPath(path, color)
+      }
     }
     is MapLayer.Line -> {
       val widthPx = layer.width.evaluate(props).toPx()
@@ -130,30 +132,34 @@ private fun DrawScope.drawFeature(
       }
     }
     is MapLayer.Circle -> {
-      if (geometry !is Geometry.Point) return
-      val center = px(geometry.position)
       val radius = layer.radius.evaluate(props).toPx()
-      drawCircle(layer.color.evaluate(props), radius, center)
-      if (layer.strokeWidth.value > 0) {
-        drawCircle(
-          layer.strokeColor.evaluate(props),
-          radius,
-          center,
-          style = Stroke(layer.strokeWidth.toPx()),
-        )
+      points(geometry).forEach { position ->
+        val center = px(position)
+        drawCircle(layer.color.evaluate(props), radius, center)
+        if (layer.strokeWidth.value > 0) {
+          drawCircle(
+            layer.strokeColor.evaluate(props),
+            radius,
+            center,
+            style = Stroke(layer.strokeWidth.toPx()),
+          )
+        }
       }
     }
     is MapLayer.Symbol -> {
-      if (geometry !is Geometry.Point) return
-      val center = px(geometry.position)
-      if (layer.iconId != null) drawCircle(Color.DarkGray, 5.dp.toPx(), center)
-      val label = layer.textProperty?.let { props[it] } ?: return
-      drawText(
-        textMeasurer,
-        label,
-        topLeft = center + Offset(8.dp.toPx(), -8.dp.toPx()),
-        style = TextStyle(color = layer.textColor.evaluate(props), fontSize = 11.sp),
-      )
+      val label = layer.textProperty?.let { props[it] }
+      points(geometry).forEach { position ->
+        val center = px(position)
+        if (layer.iconId != null) drawCircle(Color.DarkGray, 5.dp.toPx(), center)
+        if (label != null) {
+          drawText(
+            textMeasurer,
+            label,
+            topLeft = center + Offset(8.dp.toPx(), -8.dp.toPx()),
+            style = TextStyle(color = layer.textColor.evaluate(props), fontSize = 11.sp),
+          )
+        }
+      }
     }
   }
 }

@@ -400,8 +400,8 @@ internal object RecordMutator {
   }
 
   /**
-   * Writes [newValue] at [canonicalPath] into [rootNode] and/or [metadata], returning the updated
-   * pair `(RecordNode, RecordMetadata)`.
+   * Writes [newValue] at [canonicalPath] into [rootNode] and/or [metadata], returning both updated
+   * parts as a [RecordUpdate].
    */
   fun setFieldValue(
     rootNode: RecordNode,
@@ -409,7 +409,7 @@ internal object RecordMutator {
     rootAliases: Set<String>,
     canonicalPath: String,
     newValue: FieldValue?,
-  ): Pair<RecordNode, RecordMetadata?> {
+  ): RecordUpdate {
     val segments = parseSegments(canonicalPath)
     val steps =
       if (segments.isNotEmpty() && segments.first().name in rootAliases) {
@@ -417,7 +417,7 @@ internal object RecordMutator {
       } else {
         segments
       }
-    if (steps.isEmpty()) return rootNode to metadata
+    if (steps.isEmpty()) return RecordUpdate(rootNode, metadata)
 
     var updatedMetadata = metadata
     if (steps.first().name == "meta" && steps.size == 2) {
@@ -429,7 +429,7 @@ internal object RecordMutator {
     }
 
     val updatedRoot = setInRecordNode(rootNode, steps, 0, newValue)
-    return updatedRoot to updatedMetadata
+    return RecordUpdate(updatedRoot, updatedMetadata)
   }
 
   private fun updateMetadataField(
@@ -600,3 +600,10 @@ internal object RecordMutator {
     return RecordNode(fields = prunedFields)
   }
 }
+
+/**
+ * A record's data tree and metadata after a write.
+ *
+ * [metadata] is `null` only when the record being written had no metadata to begin with.
+ */
+internal data class RecordUpdate(val node: RecordNode, val metadata: RecordMetadata?)

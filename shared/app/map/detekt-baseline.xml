@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:SurveyMapViews.kt$@Composable fun SurveyMainMap( uiState: SurveyMapUiState, actions: SurveyMapActions, map: SurveyMap, camera: SurveyMapCameraController, modifier: Modifier = Modifier, collapseSheetOnBackgroundTap: Boolean = true, onDrawingTap: ((LatLng) -&gt; Unit)? = null, onFormGeometryTap: ((path: String) -&gt; Unit)? = null, )</ID>
+    <ID>LongMethod:MapOverlays.kt$@Composable internal fun SelectedClusterBalloonDetailCard( sitesCountLabel: String, cluster: MapFeatureCluster, onZoomIn: () -&gt; Unit, onDismiss: () -&gt; Unit, )</ID>
+    <ID>TooManyFunctions:SurveyMapViewModel.kt$SurveyMapActions</ID>
+    <ID>TooManyFunctions:SurveyMapViewModel.kt$SurveyMapViewModel : ViewModelSurveyMapActionsWayfindingBadges</ID>
+  </CurrentIssues>
+</SmellBaseline>

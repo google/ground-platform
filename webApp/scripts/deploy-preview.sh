@@ -20,21 +20,33 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+read_local_prop() {
+  local key="$1"
+  local props_file="${APP_DIR}/../local.properties"
+  if [[ -f "${props_file}" ]]; then
+    sed -n "s/^${key}=//p" "${props_file}" 2>/dev/null | tail -n 1 | tr -d '\r'
+  fi
+}
+
 CHANNEL="web-console"
 EXPIRES="7d"
-PROJECT_ID="gnd-dev"
-SA_EMAIL="firebase-adminsdk-tcdf1@gnd-dev.iam.gserviceaccount.com"
+PROJECT_ID="${FIREBASE_PROJECT_ID:-$(read_local_prop FIREBASE_PROJECT_ID)}"
+SA_EMAIL="${FIREBASE_SA_EMAIL:-$(read_local_prop FIREBASE_SA_EMAIL)}"
 SKIP_BUILD=false
+SKIP_APK=false
 
 usage() {
   cat <<EOF
 Usage: $(basename "$0") [options]
 
-Deploy or update webApp to a Firebase Hosting preview channel in gnd-dev.
+Deploy or update webApp to a Firebase Hosting preview channel.
 
 Options:
   --channel <name>    Channel ID (default: web-console)
   --expires <period>  Expiration duration (e.g. 7d, 14d, 30d; default: 7d)
+  --project <id>      Firebase project ID (or set FIREBASE_PROJECT_ID)
+  --sa-email <email>  Service account email (or set FIREBASE_SA_EMAIL)
+  --skip-apk          Skip building and copying the Android APK
   --skip-build        Skip running Gradle build before deploying
   -h, --help          Show this help message
 EOF
@@ -51,6 +63,18 @@ while [[ $# -gt 0 ]]; do
       EXPIRES="$2"
       shift 2
       ;;
+    --project)
+      PROJECT_ID="$2"
+      shift 2
+      ;;
+    --sa-email)
+      SA_EMAIL="$2"
+      shift 2
+      ;;
+    --skip-apk)
+      SKIP_APK=true
+      shift
+      ;;
     --skip-build)
       SKIP_BUILD=true
       shift
@@ -65,6 +89,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ -z "${PROJECT_ID}" || -z "${SA_EMAIL}" ]]; then
+  echo "Error: FIREBASE_PROJECT_ID (--project) and FIREBASE_SA_EMAIL (--sa-email) must be set via flags, environment, or local.properties." >&2
+  exit 1
+fi
+
 # Ensure node and npx are on PATH
 if ! command -v node &>/dev/null || ! command -v npx &>/dev/null; then
   GRADLE_NODE_DIR="$(ls -d "${HOME}"/.gradle/nodejs/node-*/bin 2>/dev/null | head -n 1 || true)"
@@ -74,9 +103,31 @@ if ! command -v node &>/dev/null || ! command -v npx &>/dev/null; then
 fi
 
 if [[ "${SKIP_BUILD}" != "true" ]]; then
-  echo "==> Building production Wasm bundle..."
-  (cd "${APP_DIR}" && ./gradlew wasmJsBrowserDistribution)
+  echo "==> Building staging Wasm bundle (WASM_OPT=${WASM_OPT:-fast})..."
+  "${APP_DIR}/../gradlew" -p "${APP_DIR}/.." :webApp:wasmJsBrowserDistribution \
+    -PAPP_ENV=staging \
+    -PWASM_OPT="${WASM_OPT:-fast}"
 fi
+
+if [[ "${SKIP_APK}" != "true" && "${SKIP_BUILD}" != "true" ]]; then
+  echo "==> Building Android APK..."
+  "${APP_DIR}/../gradlew" -p "${APP_DIR}/.." :androidApp:assembleRelease -PAPP_ENV=staging
+  echo "==> Copying APK to webApp distribution..."
+  cp "${APP_DIR}/../androidApp/build/outputs/apk/release/androidApp-release.apk" "${APP_DIR}/build/dist/wasmJs/productionExecutable/collect-one.apk"
+  if [[ -d "${APP_DIR}/../mobileWebApp/build/dist/wasmJs/productionExecutable" ]]; then
+    cp "${APP_DIR}/../androidApp/build/outputs/apk/release/androidApp-release.apk" "${APP_DIR}/../mobileWebApp/build/dist/wasmJs/productionExecutable/collect-one.apk"
+  fi
+fi
+
+IOS_IPA_SOURCE="${IOS_IPA_PATH:-${APP_DIR}/../iosApp/build/outputs/ipa/collect-one.ipa}"
+if [[ -f "${IOS_IPA_SOURCE}" ]]; then
+  echo "==> Staging iOS IPA into webApp distribution..."
+  cp "${IOS_IPA_SOURCE}" "${APP_DIR}/build/dist/wasmJs/productionExecutable/collect-one.ipa"
+  if [[ -d "${APP_DIR}/../mobileWebApp/build/dist/wasmJs/productionExecutable" ]]; then
+    cp "${IOS_IPA_SOURCE}" "${APP_DIR}/../mobileWebApp/build/dist/wasmJs/productionExecutable/collect-one.ipa"
+  fi
+fi
+
 
 echo "==> Acquiring short-lived credentials for ${PROJECT_ID}..."
 TEMP_KEY_FILE="$(mktemp /tmp/gnd-deploy-key-XXXXXX.json)"

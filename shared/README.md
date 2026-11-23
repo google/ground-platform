@@ -23,13 +23,14 @@ Collect One platform applications (`androidApp`, `iosApp`, `webApp`, and
 
 ## Submodules
 
-| Directory | Artifact / Module | Targets | Description |
+| Directory | Gradle project | Targets | Description |
 | :--- | :--- | :--- | :--- |
 | [`protos/`](protos/) | *(Proto3 Schemas)* | All Platforms | Canonical `.proto` definitions for forms (`openforis.collectone.v1.forms`), survey configuration (`openforis.collectone.v1.survey`), and operational records (`openforis.collectone.v1.data`). |
-| [`core/`](core/) | `org.openforis.collectone.v2:protoforms` | Android/JVM, iOS, JS, WasmJS | Pure KMP domain, serialization (XForms XML, TextProto, Proto3 JSON), XPath 1.0 + XForms evaluator, and 5-stage reactive `FormEngine` (no UI/Compose dependencies). |
-| [`ui/`](ui/) | `org.openforis.collectone.v2:protoforms-ui` | Android/JVM, iOS, JS, WasmJS | Shared Compose Multiplatform theme (`GroundTheme`), design tokens, and form rendering library (`MobileFormRunner`, `FormWizardController`, `QuestionControlCard`, and `ControlWidget`). |
-| [`map/`](map/) | `org.openforis.collectone.v2:map` | Android/JVM, iOS, WasmJS | Compose Multiplatform map (`GroundMap`): immutable `MapContent`, hoisted `MapCameraState`, typed `MapEvent`s, and per-platform native renderers behind a single `expect`. No domain dependencies. |
-| [`mobile/`](mobile/) | `org.openforis.collectone.v2:mobile` | Android/JVM, WasmJS, iOS (opt-in) | Shared mobile application module containing mobile-specific services (`services/`), local persistence (`data/`), and mobile Compose screens/ViewModels (`ui/`) shared identically between `androidApp` and `iosApp`. Exports the unified `GroundMobile` XCFramework for Xcode. |
+| [`core/`](core/) | `:shared:core` | JVM, iOS, JS, WasmJS | Pure KMP domain, serialization (XForms XML, TextProto, Proto3 JSON), XPath 1.0 + XForms evaluator, and 5-stage reactive `FormEngine` (no UI/Compose or Android dependencies; Android consumes the JVM target). |
+| [`ui/`](ui/) | `:shared:ui` | Android/JVM, iOS, JS, WasmJS | Shared Compose Multiplatform theme (`AppTheme`), design tokens, and form rendering library (`MobileFormRunner`, `FormWizardController`, `QuestionControlCard`, and `ControlWidget`). |
+| [`map/`](map/) | `:shared:map` | Android/JVM, iOS, WasmJS | Compose Multiplatform map (`AppMap`): immutable `MapContent`, hoisted `MapCameraState`, typed `MapEvent`s, and per-platform native renderers behind a single `expect`. No domain dependencies. |
+| [`map/geometry/`](map/geometry/) | `:shared:map:geometry` | Android/JVM, iOS, WasmJS | The map's geometry types (`LatLng`, `LngLatBounds`, `Geometry`) in pure Kotlin, without Compose, so `:shared:app:domain` can use them. `:shared:map` re-exports them. |
+| [`mobile/`](mobile/) | `:shared:mobile` | Android/JVM, WasmJS, iOS (opt-in) | Shared mobile application module containing mobile-specific services (`services/`), local persistence (`data/`), and mobile Compose screens/ViewModels (`ui/`) shared identically between `androidApp` and `iosApp`. Exports the unified `AppMobile` XCFramework for Xcode. |
 
 ## Dependency Layering
 
@@ -40,7 +41,7 @@ Collect One platform applications (`androidApp`, `iosApp`, `webApp`, and
                              │ (Wire codegen)
           ┌──────────────────┴───────────────────┐
           │             shared/core              │
-          │     (Android/JVM, iOS, JS, Wasm)     │
+          │        (JVM, iOS, JS, Wasm)          │
           └──────────────────▲───────────────────┘
                              │
           ┌──────────────────┴───────────────────┐

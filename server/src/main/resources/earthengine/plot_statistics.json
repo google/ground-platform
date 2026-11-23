@@ -1,0 +1,636 @@
+{
+ "expression": {
+  "result": "0",
+  "values": {
+   "0": {
+    "functionDefinitionValue": {
+     "argumentNames": [
+      "geometry",
+      "popYear"
+     ],
+     "body": "1"
+    }
+   },
+   "1": {
+    "functionInvocationValue": {
+     "arguments": {
+      "first": {
+       "functionInvocationValue": {
+        "arguments": {
+         "input": {
+          "functionInvocationValue": {
+           "arguments": {
+            "condition": {
+             "functionInvocationValue": {
+              "arguments": {
+               "left": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "collection": {
+                   "valueReference": "2"
+                  }
+                 },
+                 "functionName": "Collection.size"
+                }
+               },
+               "right": {
+                "constantValue": 0
+               }
+              },
+              "functionName": "Number.gt"
+             }
+            },
+            "falseCase": {
+             "valueReference": "5"
+            },
+            "trueCase": {
+             "dictionaryValue": {
+              "values": {
+               "elevation_max": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "dictionary": {
+                   "valueReference": "6"
+                  },
+                  "key": {
+                   "constantValue": "DEM_max"
+                  }
+                 },
+                 "functionName": "Dictionary.get"
+                }
+               },
+               "elevation_mean": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "dictionary": {
+                   "valueReference": "6"
+                  },
+                  "key": {
+                   "constantValue": "DEM_mean"
+                  }
+                 },
+                 "functionName": "Dictionary.get"
+                }
+               },
+               "elevation_min": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "dictionary": {
+                   "valueReference": "6"
+                  },
+                  "key": {
+                   "constantValue": "DEM_min"
+                  }
+                 },
+                 "functionName": "Dictionary.get"
+                }
+               }
+              }
+             }
+            }
+           },
+           "functionName": "If"
+          }
+         }
+        },
+        "functionName": "Dictionary"
+       }
+      },
+      "second": {
+       "functionInvocationValue": {
+        "arguments": {
+         "input": {
+          "functionInvocationValue": {
+           "arguments": {
+            "condition": {
+             "functionInvocationValue": {
+              "arguments": {
+               "left": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "collection": {
+                   "valueReference": "11"
+                  }
+                 },
+                 "functionName": "Collection.size"
+                }
+               },
+               "right": {
+                "constantValue": 0
+               }
+              },
+              "functionName": "Number.gt"
+             }
+            },
+            "falseCase": {
+             "valueReference": "5"
+            },
+            "trueCase": {
+             "dictionaryValue": {
+              "values": {
+               "population": {
+                "valueReference": "14"
+               },
+               "population_density_per_km2": {
+                "functionInvocationValue": {
+                 "arguments": {
+                  "condition": {
+                   "valueReference": "7"
+                  },
+                  "falseCase": {
+                   "functionInvocationValue": {
+                    "arguments": {
+                     "left": {
+                      "valueReference": "14"
+                     },
+                     "right": {
+                      "functionInvocationValue": {
+                       "arguments": {
+                        "left": {
+                         "valueReference": "8"
+                        },
+                        "right": {
+                         "constantValue": 1000000.0
+                        }
+                       },
+                       "functionName": "Number.divide"
+                      }
+                     }
+                    },
+                    "functionName": "Number.divide"
+                   }
+                  },
+                  "trueCase": {
+                   "functionInvocationValue": {
+                    "arguments": {
+                     "dictionary": {
+                      "functionInvocationValue": {
+                       "arguments": {
+                        "geometry": {
+                         "valueReference": "10"
+                        },
+                        "image": {
+                         "functionInvocationValue": {
+                          "arguments": {
+                           "image1": {
+                            "functionInvocationValue": {
+                             "arguments": {
+                              "image1": {
+                               "functionInvocationValue": {
+                                "arguments": {
+                                 "input": {
+                                  "valueReference": "15"
+                                 },
+                                 "value": {
+                                  "functionInvocationValue": {
+                                   "arguments": {
+                                    "value": {
+                                     "constantValue": 0
+                                    }
+                                   },
+                                   "functionName": "Image.constant"
+                                  }
+                                 }
+                                },
+                                "functionName": "Image.unmask"
+                               }
+                              },
+                              "image2": {
+                               "functionInvocationValue": {
+                                "arguments": {
+                                 "crs": {
+                                  "valueReference": "16"
+                                 },
+                                 "image": {
+                                  "functionInvocationValue": {
+                                   "arguments": {},
+                                   "functionName": "Image.pixelArea"
+                                  }
+                                 }
+                                },
+                                "functionName": "Image.reproject"
+                               }
+                              }
+                             },
+                             "functionName": "Image.divide"
+                            }
+                           },
+                           "image2": {
+                            "functionInvocationValue": {
+                             "arguments": {
+                              "value": {
+                               "constantValue": 1000000.0
+                              }
+                             },
+                             "functionName": "Image.constant"
+                            }
+                           }
+                          },
+                          "functionName": "Image.multiply"
+                         }
+                        },
+                        "maxPixels": {
+                         "constantValue": 1000000.0
+                        },
+                        "reducer": {
+                         "functionInvocationValue": {
+                          "arguments": {},
+                          "functionName": "Reducer.first"
+                         }
+                        }
+                       },
+                       "functionName": "Image.reduceRegion"
+                      }
+                     },
+                     "key": {
+                      "valueReference": "13"
+                     }
+                    },
+                    "functionName": "Dictionary.get"
+                   }
+                  }
+                 },
+                 "functionName": "If"
+                }
+               }
+              }
+             }
+            }
+           },
+           "functionName": "If"
+          }
+         }
+        },
+        "functionName": "Dictionary"
+       }
+      }
+     },
+     "functionName": "Dictionary.combine"
+    }
+   },
+   "10": {
+    "functionInvocationValue": {
+     "arguments": {
+      "geometry": {
+       "argumentReference": "geometry"
+      },
+      "maxError": {
+       "valueReference": "9"
+      }
+     },
+     "functionName": "Geometry.centroid"
+    }
+   },
+   "11": {
+    "functionInvocationValue": {
+     "arguments": {
+      "baseAlgorithm": {
+       "functionDefinitionValue": {
+        "argumentNames": [
+         "_MAPPING_VAR_0_0"
+        ],
+        "body": "12"
+       }
+      },
+      "collection": {
+       "functionInvocationValue": {
+        "arguments": {
+         "collection": {
+          "functionInvocationValue": {
+           "arguments": {
+            "collection": {
+             "functionInvocationValue": {
+              "arguments": {
+               "id": {
+                "constantValue": "WorldPop/GP/100m/R2025A/v1/pop"
+               }
+              },
+              "functionName": "ImageCollection.load"
+             }
+            },
+            "filter": {
+             "valueReference": "4"
+            }
+           },
+           "functionName": "Collection.filter"
+          }
+         },
+         "filter": {
+          "functionInvocationValue": {
+           "arguments": {
+            "leftField": {
+             "constantValue": "year"
+            },
+            "rightValue": {
+             "argumentReference": "popYear"
+            }
+           },
+           "functionName": "Filter.equals"
+          }
+         }
+        },
+        "functionName": "Collection.filter"
+       }
+      }
+     },
+     "functionName": "Collection.map"
+    }
+   },
+   "12": {
+    "functionInvocationValue": {
+     "arguments": {
+      "bandSelectors": {
+       "arrayValue": {
+        "values": [
+         {
+          "valueReference": "13"
+         }
+        ]
+       }
+      },
+      "input": {
+       "argumentReference": "_MAPPING_VAR_0_0"
+      }
+     },
+     "functionName": "Image.select"
+    }
+   },
+   "13": {
+    "constantValue": "population"
+   },
+   "14": {
+    "functionInvocationValue": {
+     "arguments": {
+      "dictionary": {
+       "functionInvocationValue": {
+        "arguments": {
+         "bestEffort": {
+          "constantValue": true
+         },
+         "geometry": {
+          "argumentReference": "geometry"
+         },
+         "image": {
+          "valueReference": "15"
+         },
+         "maxPixels": {
+          "constantValue": 1000000.0
+         },
+         "reducer": {
+          "functionInvocationValue": {
+           "arguments": {},
+           "functionName": "Reducer.sum"
+          }
+         }
+        },
+        "functionName": "Image.reduceRegion"
+       }
+      },
+      "key": {
+       "valueReference": "13"
+      }
+     },
+     "functionName": "Dictionary.get"
+    }
+   },
+   "15": {
+    "functionInvocationValue": {
+     "arguments": {
+      "crs": {
+       "valueReference": "16"
+      },
+      "image": {
+       "functionInvocationValue": {
+        "arguments": {
+         "collection": {
+          "valueReference": "11"
+         }
+        },
+        "functionName": "ImageCollection.mosaic"
+       }
+      }
+     },
+     "functionName": "Image.setDefaultProjection"
+    }
+   },
+   "16": {
+    "functionInvocationValue": {
+     "arguments": {
+      "image": {
+       "functionInvocationValue": {
+        "arguments": {
+         "collection": {
+          "valueReference": "11"
+         }
+        },
+        "functionName": "Collection.first"
+       }
+      }
+     },
+     "functionName": "Image.projection"
+    }
+   },
+   "2": {
+    "functionInvocationValue": {
+     "arguments": {
+      "baseAlgorithm": {
+       "functionDefinitionValue": {
+        "argumentNames": [
+         "_MAPPING_VAR_0_0"
+        ],
+        "body": "3"
+       }
+      },
+      "collection": {
+       "functionInvocationValue": {
+        "arguments": {
+         "collection": {
+          "functionInvocationValue": {
+           "arguments": {
+            "id": {
+             "constantValue": "COPERNICUS/DEM/GLO30_2024_1"
+            }
+           },
+           "functionName": "ImageCollection.load"
+          }
+         },
+         "filter": {
+          "valueReference": "4"
+         }
+        },
+        "functionName": "Collection.filter"
+       }
+      }
+     },
+     "functionName": "Collection.map"
+    }
+   },
+   "3": {
+    "functionInvocationValue": {
+     "arguments": {
+      "bandSelectors": {
+       "constantValue": [
+        "DEM"
+       ]
+      },
+      "input": {
+       "argumentReference": "_MAPPING_VAR_0_0"
+      }
+     },
+     "functionName": "Image.select"
+    }
+   },
+   "4": {
+    "functionInvocationValue": {
+     "arguments": {
+      "leftField": {
+       "constantValue": ".all"
+      },
+      "rightValue": {
+       "functionInvocationValue": {
+        "arguments": {
+         "geometry": {
+          "argumentReference": "geometry"
+         }
+        },
+        "functionName": "Feature"
+       }
+      }
+     },
+     "functionName": "Filter.intersects"
+    }
+   },
+   "5": {
+    "constantValue": {}
+   },
+   "6": {
+    "functionInvocationValue": {
+     "arguments": {
+      "bestEffort": {
+       "constantValue": true
+      },
+      "geometry": {
+       "functionInvocationValue": {
+        "arguments": {
+         "condition": {
+          "valueReference": "7"
+         },
+         "falseCase": {
+          "argumentReference": "geometry"
+         },
+         "trueCase": {
+          "valueReference": "10"
+         }
+        },
+        "functionName": "If"
+       }
+      },
+      "image": {
+       "functionInvocationValue": {
+        "arguments": {
+         "crs": {
+          "functionInvocationValue": {
+           "arguments": {
+            "image": {
+             "functionInvocationValue": {
+              "arguments": {
+               "collection": {
+                "valueReference": "2"
+               }
+              },
+              "functionName": "Collection.first"
+             }
+            }
+           },
+           "functionName": "Image.projection"
+          }
+         },
+         "image": {
+          "functionInvocationValue": {
+           "arguments": {
+            "collection": {
+             "valueReference": "2"
+            }
+           },
+           "functionName": "ImageCollection.mosaic"
+          }
+         }
+        },
+        "functionName": "Image.setDefaultProjection"
+       }
+      },
+      "maxPixels": {
+       "constantValue": 1000000.0
+      },
+      "reducer": {
+       "functionInvocationValue": {
+        "arguments": {
+         "outputPrefix": {
+          "constantValue": ""
+         },
+         "reducer1": {
+          "functionInvocationValue": {
+           "arguments": {},
+           "functionName": "Reducer.minMax"
+          }
+         },
+         "reducer2": {
+          "functionInvocationValue": {
+           "arguments": {},
+           "functionName": "Reducer.mean"
+          }
+         },
+         "sharedInputs": {
+          "constantValue": true
+         }
+        },
+        "functionName": "Reducer.combine"
+       }
+      },
+      "scale": {
+       "constantValue": 30
+      }
+     },
+     "functionName": "Image.reduceRegion"
+    }
+   },
+   "7": {
+    "functionInvocationValue": {
+     "arguments": {
+      "left": {
+       "valueReference": "8"
+      },
+      "right": {
+       "constantValue": 1800
+      }
+     },
+     "functionName": "Number.lt"
+    }
+   },
+   "8": {
+    "functionInvocationValue": {
+     "arguments": {
+      "geometry": {
+       "argumentReference": "geometry"
+      },
+      "maxError": {
+       "valueReference": "9"
+      }
+     },
+     "functionName": "Geometry.area"
+    }
+   },
+   "9": {
+    "functionInvocationValue": {
+     "arguments": {
+      "value": {
+       "constantValue": 1
+      }
+     },
+     "functionName": "ErrorMargin"
+    }
+   }
+  }
+ },
+ "templateVersion": 1
+}

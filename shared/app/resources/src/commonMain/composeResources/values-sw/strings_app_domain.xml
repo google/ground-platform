@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Kind of "data was used" event, shown in impact history. -->
+  <string name="domain_impact_event_type_export">Imehamishwa</string>
+  <string name="domain_impact_event_type_partner_push">Imetumwa kwa mshirika</string>
+  <string name="domain_impact_event_type_receipt_generated">Risiti imeundwa</string>
+  <string name="domain_impact_event_type_receipt_shared">Risiti imeshirikiwa</string>
+  <string name="domain_impact_event_type_doi_minted">DOI imetolewa</string>
+  <string name="domain_impact_event_type_survey_closed">Utafiti umefungwa</string>
+  <!-- Lifecycle state of a survey. -->
+  <string name="domain_survey_lifecycle_state_draft">Rasimu</string>
+  <string name="domain_survey_lifecycle_state_published">Umechapishwa</string>
+  <string name="domain_survey_lifecycle_state_closed">Umefungwa</string>
+  <string name="domain_survey_lifecycle_state_archived">Umehifadhiwa kwenye kumbukumbu</string>
+  <!-- Answer option to "What happened with this data?" for a closed survey. -->
+  <string name="domain_survey_outcome_kind_submitted_eudr_dds">Iliwasilishwa katika taarifa ya uangalifu unaostahili ya EUDR</string>
+  <string name="domain_survey_outcome_kind_reported_ferm">Iliripotiwa kwa FERM</string>
+  <string name="domain_survey_outcome_kind_land_titling">Ilitumika kwa utoaji wa hatimiliki za ardhi</string>
+  <string name="domain_survey_outcome_kind_shared_with_buyers">Ilishirikiwa na wanunuzi</string>
+  <string name="domain_survey_outcome_kind_trained_or_validated_model">Ilifunza au kukagua ramani au modeli</string>
+  <string name="domain_survey_outcome_kind_protected_area_management">Ilitumika kusimamia eneo lililohifadhiwa</string>
+  <string name="domain_survey_outcome_kind_not_yet">Bado</string>
+  <!-- Answer option: time and cost compared with the previous method. -->
+  <string name="domain_effort_comparison_less">Kidogo zaidi</string>
+  <string name="domain_effort_comparison_same">Karibu sawa</string>
+  <string name="domain_effort_comparison_more">Zaidi</string>
+  <!-- Upload status of a submission. -->
+  <string name="domain_sync_status_uploading">Inapakia</string>
+  <string name="domain_sync_status_uploading_description">Inapakia mabadiliko ya kifaa kwenye seva</string>
+  <string name="domain_sync_status_synced">Imesawazishwa</string>
+  <string name="domain_sync_status_synced_description">Imesawazishwa na seva ya wingu</string>
+  <string name="domain_sync_status_failed">Imeshindwa</string>
+  <string name="domain_sync_status_failed_description">Imeshindwa kupakia — gusa ili kujaribu tena</string>
+  <!-- Name of a quota tier (plan). -->
+  <string name="domain_quota_tier_unspecified">Haijabainishwa</string>
+  <string name="domain_quota_tier_basic">Msingi</string>
+  <string name="domain_quota_tier_sponsored">Inayofadhiliwa</string>
+  <!-- Measurement unit system option in Settings. -->
+  <string name="domain_measurement_unit_system_metric">Metriki (ha, m)</string>
+  <string name="domain_measurement_unit_system_metric_short">Metriki</string>
+  <string name="domain_measurement_unit_system_imperial">Imperiali (ekari, ft)</string>
+  <string name="domain_measurement_unit_system_imperial_short">Imperiali</string>
+  <!-- State of the map camera relative to the GPS location. -->
+  <string name="domain_location_lock_state_locked">GPS katikati kiotomatiki</string>
+  <string name="domain_location_lock_state_locked_3d">GPS 3D</string>
+  <string name="domain_location_lock_state_panned">Imesogezwa</string>
+  <!-- Badge shown on a map layer that comes from the survey. -->
+  <string name="domain_layer_source_type_entity_dataset">Tabaka la utafiti</string>
+  <!-- Basemap option in the map layers panel. -->
+  <string name="domain_basemap_type_normal">Ardhi</string>
+  <string name="domain_basemap_type_normal_description">Ramani ya ardhi yenye kontua, kivuli cha milima na barabara</string>
+  <string name="domain_basemap_type_satellite">Setilaiti</string>
+  <string name="domain_basemap_type_satellite_description">Picha za Mapbox Standard Satellite zenye lebo za rejea</string>
+  <!-- Layer of a map area saved for offline use: satellite imagery, or the terrain map (contours, hillshade, and roads). -->
+  <string name="domain_offline_imagery_type_satellite">Setilaiti</string>
+  <string name="domain_offline_imagery_type_terrain">Ardhi</string>
+  <!-- Role of a person in an organization. -->
+  <string name="domain_organization_role_member">Mwanachama</string>
+  <string name="domain_organization_role_member_description">Ameorodheshwa kama mshirika, anaweza kuona tafiti za shirika na kuunda mpya.</string>
+  <string name="domain_organization_role_manager">Msimamizi</string>
+  <string name="domain_organization_role_manager_description">Anaweza kuhariri shirika, kusimamia wanachama na kusimamia tafiti zake zote.</string>
+  <!-- Status of a person's membership in an organization. -->
+  <string name="domain_membership_status_invited">Amealikwa</string>
+  <string name="domain_membership_status_requested">Ameomba kujiunga</string>
+  <string name="domain_membership_status_active">Mwanachama</string>
+  <!-- Kind of custom imagery source. -->
+  <string name="domain_imagery_source_type_xyz_tiles">URL ya vigae vya XYZ</string>
+  <string name="domain_imagery_source_type_earth_engine">Safu ya Earth Engine</string>
+  <!-- Kind of organization. -->
+  <string name="domain_organization_type_government_agency">Wakala wa serikali</string>
+  <string name="domain_organization_type_cooperative">Chama cha ushirika</string>
+  <string name="domain_organization_type_iplc_organization">Shirika la Watu wa Asili au jamii ya wenyeji</string>
+  <string name="domain_organization_type_ngo">Shirika lisilo la kiserikali</string>
+  <string name="domain_organization_type_company">Kampuni</string>
+  <string name="domain_organization_type_research">Taasisi ya utafiti</string>
+  <string name="domain_organization_type_other">Nyingine</string>
+  <!-- Upload status filter and upload state of a pending change. -->
+  <string name="domain_upload_status_filter_pending">Inasubiri</string>
+  <string name="domain_upload_status_filter_in_progress">Inaendelea</string>
+  <string name="domain_upload_status_filter_uploaded">Imepakiwa</string>
+  <string name="domain_upload_status_filter_failed">Imeshindwa</string>
+  <!-- Kind of change waiting to upload or already uploaded. -->
+  <string name="domain_mutation_operation_kind_create_submission">Fomu imewasilishwa</string>
+  <string name="domain_mutation_operation_kind_update_submission">Fomu imebadilishwa</string>
+  <string name="domain_mutation_operation_kind_delete_submission">Fomu imefutwa</string>
+  <string name="domain_mutation_operation_kind_create_entity">Kipengele cha ramani kimeundwa</string>
+  <string name="domain_mutation_operation_kind_update_entity">Kipengele cha ramani kimebadilishwa</string>
+  <string name="domain_mutation_operation_kind_delete_entity">Kipengele cha ramani kimefutwa</string>
+  <string name="domain_mutation_operation_kind_upload_media">Picha imeambatishwa</string>
+  <!-- Status of an invitation to join. -->
+  <string name="domain_invitation_status_pending">Amealikwa</string>
+  <string name="domain_invitation_status_accepted">Amejiunga</string>
+  <!-- Geometry type: point, line, or polygon. -->
+  <string name="domain_geometry_point">Nukta</string>
+  <string name="domain_geometry_line">Mstari</string>
+  <string name="domain_geometry_polygon">Poligoni</string>
+  <!-- Geometry type (point, line, polygon) of a map feature or question. -->
+  <string name="domain_entity_geometry_kind_none">Hakuna jiometri</string>
+  <!-- Title or subtitle of a mobile app screen in the screen navigator. -->
+  <string name="domain_app_screen_sign_in_title">Ingia</string>
+  <string name="domain_app_screen_sign_in_subtitle">Mahali pa kuingia kwa uthibitishaji wa Google</string>
+  <string name="domain_app_screen_terms_of_service_title">Masharti ya Huduma</string>
+  <string name="domain_app_screen_terms_of_service_subtitle">Kukubali usimamizi wa data na masharti ya jukwaa</string>
+  <string name="domain_app_screen_download_survey_title">Pakua utafiti</string>
+  <string name="domain_app_screen_download_survey_subtitle">Vinjari tafiti zilizoshirikiwa au tafuta kwa jina/mahali</string>
+  <string name="domain_app_screen_main_survey_title">Utafiti mkuu (Ramani na Orodha)</string>
+  <string name="domain_app_screen_main_survey_subtitle">Ramani ya utafiti, matabaka ya ramani, paneli za chini za mahali na mawasilisho, orodha inayotafutika na droo</string>
+  <!-- Tab: show the survey as a map or as a list. -->
+  <string name="domain_main_survey_view_mode_map">Ramani</string>
+  <string name="domain_main_survey_view_mode_list">Orodha</string>
+  <!-- Lifecycle status of a library entry. -->
+  <string name="domain_library_status_draft">Rasimu</string>
+  <string name="domain_library_status_stable">Thabiti</string>
+  <string name="domain_library_status_deprecated">Imepitwa na wakati</string>
+  <!-- How dashboards roll up answers to a standard field. -->
+  <string name="domain_concept_aggregation_count_distinct_features">Hesabu vipengele vya ramani</string>
+  <string name="domain_concept_aggregation_count_distinct_features_description">Huhesabu vipengele vya ramani vyenye jibu.</string>
+  <string name="domain_concept_aggregation_count_by_code">Hesabu kwa thamani</string>
+  <string name="domain_concept_aggregation_count_by_code_description">Huhesabu vipengele vya ramani kwa kila thamani katika orodha.</string>
+  <string name="domain_concept_aggregation_sum">Jumla</string>
+  <string name="domain_concept_aggregation_sum_description">Hujumlisha majibu.</string>
+  <string name="domain_concept_aggregation_mean">Wastani</string>
+  <string name="domain_concept_aggregation_mean_description">Hukokotoa wastani wa majibu.</string>
+  <string name="domain_concept_aggregation_share_by_code">Sehemu kwa thamani</string>
+  <string name="domain_concept_aggregation_share_by_code_description">Huonyesha sehemu ya vipengele vya ramani vyenye kila thamani.</string>
+  <string name="domain_concept_aggregation_none">Haijajumlishwa</string>
+  <string name="domain_concept_aggregation_none_description">Majina, vitambulisho na majibu mengine yasiyojumlishwa.</string>
+  <!-- Privacy class of a standard field: what may leave the organization. -->
+  <string name="domain_privacy_class_aggregate_public">Jumla za umma</string>
+  <string name="domain_privacy_class_aggregate_public_description">Jumla zinaweza kuonekana katika dashibodi za jukwaa zima na za umma.</string>
+  <string name="domain_privacy_class_org_only">Shirika pekee</string>
+  <string name="domain_privacy_class_org_only_description">Jumla zinaonekana tu ndani ya shirika linalomiliki.</string>
+  <string name="domain_privacy_class_sensitive">Nyeti</string>
+  <string name="domain_privacy_class_sensitive_description">Haijumuishwi kamwe katika jumla za mashirika mbalimbali au za umma.</string>
+  <!-- Impact pillar used to group goals. -->
+  <string name="domain_impact_pillar_mitigation">Upunguzaji</string>
+  <string name="domain_impact_pillar_adaptation">Ukabilianaji</string>
+  <string name="domain_impact_pillar_protection">Ulinzi</string>
+  <!-- Data type of an answer or property. -->
+  <string name="domain_data_type_text">Maandishi</string>
+  <string name="domain_data_type_integer">Nambari kamili</string>
+  <string name="domain_data_type_decimal">Desimali</string>
+  <string name="domain_data_type_date">Tarehe</string>
+  <string name="domain_data_type_select_one">Chagua moja</string>
+  <string name="domain_data_type_select_multiple">Chagua kadhaa</string>
+  <!-- Answer data type (also used for question types and table property types). -->
+  <string name="domain_concept_data_type_media">Picha, video au sauti</string>
+  <!-- Role of a collaborator on a survey. -->
+  <string name="domain_collaborator_role_viewer">Mtazamaji</string>
+  <string name="domain_collaborator_role_viewer_description">Anaweza kuona ramani, matabaka ya ramani na mawasilisho.</string>
+  <string name="domain_collaborator_role_data_collector">Mkusanyaji data</string>
+  <string name="domain_collaborator_role_data_collector_description">Anaweza kukusanya mawasilisho na kuongeza vipengele vya ramani.</string>
+  <string name="domain_collaborator_role_survey_organizer">Mratibu wa utafiti</string>
+  <string name="domain_collaborator_role_survey_organizer_description">Anaweza kuhariri fomu, kusimamia ushiriki na kuhamisha data.</string>
+  <!-- General access option of a survey. -->
+  <string name="domain_sharing_policy_restricted">Imezuiliwa</string>
+  <string name="domain_sharing_policy_restricted_description">Ni watu walioongezwa hapo juu pekee wanaoweza kufungua utafiti huu.</string>
+  <string name="domain_sharing_policy_organization">Mtu yeyote katika shirika</string>
+  <string name="domain_sharing_policy_organization_description">Wanachama wa shirika la utafiti wanaweza kukusanya data. Wasimamizi wanaweza pia kuhariri utafiti.</string>
+  <string name="domain_sharing_policy_anyone_with_link">Kiungo au msimbo wa QR unahitajika</string>
+  <string name="domain_sharing_policy_anyone_with_link_description">Watumiaji wanahitaji kiungo au msimbo wa QR ili kufikia utafiti huu na kukusanya data.</string>
+  <string name="domain_sharing_policy_public">Umeorodheshwa kwenye saraka</string>
+  <string name="domain_sharing_policy_public_description">Umeorodheshwa kwenye saraka ili mtu yeyote aweze kupata utafiti huu na kukusanya data.</string>
+  <!-- Which data a data collector can see. -->
+  <string name="domain_peer_data_visibility_all">Data yote</string>
+  <string name="domain_peer_data_visibility_all_description">Wakusanyaji data huona mawasilisho na vipengele vya ramani vya kila mtu.</string>
+  <string name="domain_peer_data_visibility_own_only">Data yako pekee</string>
+  <string name="domain_peer_data_visibility_own_only_description">Wakusanyaji data huona tu walichokusanya wenyewe.</string>
+  <!-- Kind of survey dataset, singular and plural. -->
+  <string name="domain_dataset_kind_map_layer">Tabaka la ramani</string>
+  <string name="domain_dataset_kind_map_layer_plural">Matabaka ya ramani</string>
+  <string name="domain_dataset_kind_data_table">Jedwali la data</string>
+  <string name="domain_dataset_kind_data_table_plural">Majedwali ya data</string>
+  <!-- Geometry type of a map layer (plural). -->
+  <string name="domain_geometry_kind_point">Nukta</string>
+  <string name="domain_geometry_kind_line">Mistari</string>
+  <string name="domain_geometry_kind_polygon">Poligoni</string>
+  <string name="domain_property_type_boolean">Ndiyo / Hapana</string>
+  <!-- Sampling method option for generated sample plots. -->
+  <string name="domain_sample_method_systematic_grid">Gridi ya kimfumo</string>
+  <string name="domain_sample_method_systematic_grid_description">Viwanja kwenye gridi ya kawaida yenye sehemu ya kuanzia ya nasibu.</string>
+  <string name="domain_sample_method_simple_random">Nasibu sahili</string>
+  <string name="domain_sample_method_simple_random_description">Idadi maalum ya viwanja vilivyowekwa kwa nasibu.</string>
+  <string name="domain_sample_method_stratified_random">Nasibu kwa matabaka</string>
+  <string name="domain_sample_method_stratified_random_description">Viwanja vilivyowekwa kwa nasibu ndani ya kila tabaka.</string>
+  <string name="domain_sample_method_cluster">Kundi</string>
+  <string name="domain_sample_method_cluster_description">Makundi ya viwanja yaliyowekwa kwa nasibu.</string>
+  <!-- How sample plots are allocated across strata. -->
+  <string name="domain_allocation_mode_equal">Sawa</string>
+  <string name="domain_allocation_mode_proportional">Kulingana na eneo</string>
+  <string name="domain_allocation_mode_custom">Maalum</string>
+  <!-- Shape of a sample plot. -->
+  <string name="domain_plot_shape_option_square">Mraba</string>
+  <string name="domain_plot_shape_option_circle">Duara</string>
+  <string name="domain_plot_shape_option_point">Nukta (katikati pekee)</string>
+  <!-- How sub-plot sample points are placed within a plot. -->
+  <string name="domain_sub_plot_mode_none">Hakuna</string>
+  <string name="domain_sub_plot_mode_center">Moja katikati</string>
+  <string name="domain_sub_plot_mode_grid">Gridi</string>
+  <string name="domain_sub_plot_mode_random">Nasibu</string>
+  <!-- Device to preview a form on. -->
+  <string name="domain_form_preview_target_mobile">Simu</string>
+  <string name="domain_form_preview_target_web">Wavuti</string>
+  <!-- Question type in the form editor. -->
+  <string name="domain_editor_question_type_text">Maandishi mafupi</string>
+  <string name="domain_editor_question_type_long_text">Aya</string>
+  <string name="domain_editor_question_type_number">Nambari</string>
+  <string name="domain_editor_question_type_photo">Picha</string>
+  <string name="domain_editor_question_type_video">Video</string>
+  <string name="domain_editor_question_type_audio">Sauti</string>
+  <string name="domain_editor_question_type_note">Dokezo</string>
+  <!-- How data collectors provide a photo, video, or audio answer. -->
+  <string name="domain_media_source_capture_or_upload">Rekodi au pakia</string>
+  <string name="domain_media_source_capture_or_upload_description">Wakusanyaji wanaweza kutumia kamera au maikrofoni, au kupakia faili iliyopo kutoka kwenye kifaa chao.</string>
+  <string name="domain_media_source_capture_only">Kurekodi pekee</string>
+  <string name="domain_media_source_capture_only_description">Wakusanyaji lazima wapige picha mpya, video au rekodi ya sauti. Kupakia faili zilizopo hakuruhusiwi.</string>
+  <!-- How data collectors record a location answer. -->
+  <string name="domain_geometry_capture_gps_only">GPS pekee</string>
+  <string name="domain_geometry_capture_gps_only_description">Wakusanyaji hurekodi mahali pa GPS pa kifaa chao. Haipatikani kwenye wavuti.</string>
+  <string name="domain_geometry_capture_gps_or_map">GPS au chora kwenye ramani</string>
+  <string name="domain_geometry_capture_gps_or_map_description">Wakusanyaji wanaweza kutumia mahali pao pa GPS au kupaweka kwenye ramani. Inahitajika kwa wavuti.</string>
+  <!-- Comparison operator in display logic and status rules; read mid-sentence after a question name, e.g. "age is greater than 5". -->
+  <string name="domain_relevance_operator_equals">ni sawa na</string>
+  <string name="domain_relevance_operator_not_equals">si sawa na</string>
+  <string name="domain_relevance_operator_greater_than">ni kubwa kuliko</string>
+  <string name="domain_relevance_operator_less_than">ni ndogo kuliko</string>
+  <string name="domain_relevance_operator_includes">inajumuisha</string>
+  <string name="domain_relevance_operator_is_answered">limejibiwa</string>
+  <!-- Where a choice question's options come from. -->
+  <string name="domain_choice_source_manual">Orodha ya mkono</string>
+  <!-- Name of a status marker symbol (accessibility label). -->
+  <string name="domain_status_marker_symbol_open">Duara tupu</string>
+  <string name="domain_status_marker_symbol_half">Nusu duara</string>
+  <string name="domain_status_marker_symbol_check">Alama ya tiki</string>
+  <string name="domain_status_marker_symbol_alert">Alama ya mshangao</string>
+  <string name="domain_status_marker_symbol_cross">Alama ya kosa</string>
+  <!-- What a map feature status rule checks. -->
+  <string name="domain_status_condition_subject_submissions">Idadi ya mawasilisho</string>
+  <string name="domain_status_condition_subject_question">Jibu la swali</string>
+  <string name="domain_status_condition_subject_entity_property">Sifa ya kipengele</string>
+  <!-- Data type of a map layer or data table property. -->
+  <string name="domain_editor_property_kind_boolean">Ndiyo / hapana</string>
+  <!-- Validation rule option for a date question. -->
+  <string name="domain_date_rule_not_in_future">Si katika siku zijazo</string>
+  <string name="domain_date_rule_not_in_past">Si katika siku zilizopita</string>
+  <string name="domain_date_rule_between">Kati ya tarehe mbili</string>
+  <!-- Preset pattern option for validating a text answer. -->
+  <string name="domain_text_pattern_email">Anwani ya barua pepe</string>
+  <string name="domain_text_pattern_digits">Tarakimu pekee</string>
+  <string name="domain_text_pattern_letters">Herufi pekee</string>
+  <string name="domain_text_pattern_custom">Muundo maalum</string>
+  <!-- Form editor: validation issues shown next to questions and at the top of the form. -->
+  <string name="domain_issue_form_missing_id">Fomu haina kitambulisho chake.</string>
+  <string name="domain_issue_name_required">Jina linahitajika.</string>
+  <string name="domain_issue_name_invalid">Jina lazima lianze na herufi na litumie herufi, tarakimu, _ . - pekee</string>
+  <!-- %1$s: the question's name (an identifier). -->
+  <string name="domain_issue_name_duplicate">Jina "%1$s" limetumika zaidi ya mara moja.</string>
+  <string name="domain_issue_label_empty">Lebo ni tupu.</string>
+  <string name="domain_issue_choose_choice_data_table">Chagua jedwali la data kwa ajili ya chaguo.</string>
+  <string name="domain_issue_choose_choice_map_layer">Chagua tabaka la ramani kwa ajili ya chaguo.</string>
+  <!-- %1$s: ID of the map layer or data table that was deleted. -->
+  <string name="domain_issue_choice_dataset_missing">Tabaka la ramani au jedwali la data "%1$s" halipo tena.</string>
+  <!-- %1$s: name of a map layer of generated sample plots. -->
+  <string name="domain_issue_choice_dataset_generated">Viwanja vya sampuli katika "%1$s" vinatengenezwa kiotomatiki na haviwezi kuongezwa na wakusanyaji.</string>
+  <!-- %1$s: name of a map layer. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_map_layer">"%1$s" haina fomu ya kuongeza vipengele vipya vya ramani.</string>
+  <!-- %1$s: name of a data table. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_data_table">"%1$s" haina fomu ya kuongeza safu mpya za jedwali.</string>
+  <string name="domain_issue_add_choice">Ongeza angalau chaguo moja.</string>
+  <string name="domain_issue_choice_value_invalid">Thamani za chaguo lazima zisiwe tupu na zisiwe na nafasi.</string>
+  <string name="domain_issue_choice_value_duplicate">Thamani za chaguo lazima ziwe za kipekee.</string>
+  <string name="domain_issue_display_logic_source_deleted">Mantiki ya kuonyesha inarejelea swali lililofutwa.</string>
+  <!-- %1$s: name of the question the display logic depends on. -->
+  <string name="domain_issue_display_logic_source_later">Mantiki ya kuonyesha inategemea "%1$s", ambalo linakuja baadaye.</string>
+  <string name="domain_issue_display_logic_source_in_repeat">Mantiki ya kuonyesha inategemea "%1$s", ambalo liko ndani ya sehemu inayorudiwa.</string>
+  <string name="domain_issue_section_display_logic_source_inside">Mantiki ya kuonyesha ya sehemu haiwezi kutegemea "%1$s", ambalo liko ndani ya sehemu hiyo.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_display_logic_operator_not_applicable">"%1$s" haitumiki kwa %2$s.</string>
+  <string name="domain_issue_display_logic_value_missing">Mantiki ya kuonyesha inahitaji thamani ya kulinganisha nayo.</string>
+  <string name="domain_issue_display_logic_value_not_number">Thamani ya mantiki ya kuonyesha lazima iwe nambari.</string>
+  <string name="domain_issue_cascade_parent_deleted">Kichujio cha mfululizo kinarejelea swali lililofutwa.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_later">Kichujio cha mfululizo kinategemea "%1$s", ambalo linakuja baadaye.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_not_choice">Swali kuu la kichujio cha mfululizo, "%1$s", lazima liwe swali la chaguo.</string>
+  <!-- %1$s: comma-separated parent values set on choices; %2$s: name of the parent question. -->
+  <string name="domain_issue_cascade_choice_parent_value_unknown">Machaguo yaliyounganishwa na %1$s hayaonekani kamwe: "%2$s" halina chaguo hilo.</string>
+  <!-- %1$s: question label; %2$s: name of the "GPS or draw on map" option. "Available on web" is a form setting. -->
+  <string name="domain_issue_web_incompatible_geometry">"%1$s" ni GPS pekee, ambayo wavuti haiwezi kurekodi. Chagua "%2$s" au zima Inapatikana kwenye wavuti.</string>
+  <string name="domain_issue_google_earth_incompatible_question">"%1$s" (%2$s) haitumiki katika Google Earth. Ionoe, badilisha aina ya swali lake, au zima Washa Fungua katika Google Earth.</string>
+  <!-- Form editor: validation rule issues of a question. -->
+  <string name="domain_issue_min_not_number">Kiwango cha chini lazima kiwe nambari.</string>
+  <string name="domain_issue_max_not_number">Kiwango cha juu lazima kiwe nambari.</string>
+  <string name="domain_issue_min_more_than_max">Kiwango cha chini hakiwezi kuzidi kiwango cha juu.</string>
+  <string name="domain_issue_min_length_invalid">Urefu wa chini lazima uwe nambari kamili ya 0 au zaidi.</string>
+  <string name="domain_issue_max_length_invalid">Urefu wa juu lazima uwe nambari kamili ya 0 au zaidi.</string>
+  <string name="domain_issue_min_length_more_than_max">Urefu wa chini hauwezi kuzidi urefu wa juu.</string>
+  <string name="domain_issue_min_selections_invalid">Idadi ya chini ya machaguo lazima iwe nambari kamili ya 0 au zaidi.</string>
+  <string name="domain_issue_max_selections_invalid">Idadi ya juu ya machaguo lazima iwe nambari kamili ya 0 au zaidi.</string>
+  <string name="domain_issue_min_selections_more_than_max">Idadi ya chini ya machaguo haiwezi kuzidi idadi ya juu.</string>
+  <string name="domain_issue_min_selections_more_than_choices">Idadi ya chini ya machaguo inazidi idadi ya chaguo zilizopo.</string>
+  <string name="domain_issue_custom_pattern_missing">Weka muundo maalum.</string>
+  <string name="domain_issue_custom_pattern_invalid">Muundo maalum si sahihi.</string>
+  <string name="domain_issue_custom_pattern_quotes">Muundo maalum hauwezi kuwa na ' na " kwa pamoja.</string>
+  <string name="domain_issue_date_range_missing">Chagua tarehe ya mapema zaidi au ya hivi karibuni zaidi.</string>
+  <string name="domain_issue_date_range_reversed">Tarehe ya mapema zaidi haiwezi kuwa baada ya tarehe ya mwisho.</string>
+  <!-- Form editor: summary of a map feature status rule's condition. -->
+  <string name="domain_status_rule_when_submitted">Fomu inapowasilishwa</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="domain_status_rule_min_submissions">
+    <item quantity="one">Angalau wasilisho %1$d</item>
+    <item quantity="other">Angalau mawasilisho %1$d</item>
+  </plurals>
+  <string name="domain_status_rule_missing_question">Swali halipo</string>
+  <!-- Placeholder for a property name in a status rule summary when none is chosen. -->
+  <string name="domain_status_rule_property_fallback">sifa</string>
+  <!-- Status rule condition without a value. %1$s: question or property name; %2$s: operator (e.g. "is answered"). -->
+  <string name="domain_status_rule_condition">%1$s %2$s</string>
+  <!-- Status rule condition with a value. %1$s: question or property name; %2$s: operator (e.g. "equals"); %3$s: value. -->
+  <string name="domain_status_rule_condition_value">%1$s %2$s "%3$s"</string>
+  <!-- Form editor: issues with how a form updates map features or table rows. -->
+  <string name="domain_issue_save_to_target_missing">Chagua tabaka la ramani au jedwali la data ambalo fomu hii inasasisha.</string>
+  <!-- %1$s: ID of the deleted map layer or data table. -->
+  <string name="domain_issue_save_to_target_deleted">Tabaka la ramani au jedwali la data "%1$s" halipo tena.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_map_layer">Jina "%1$s" limehifadhiwa kwa ajili ya kipengele cha ramani kinachosasishwa.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_data_table">Jina "%1$s" limehifadhiwa kwa ajili ya safu ya jedwali inayosasishwa.</string>
+  <string name="domain_issue_save_to_id_question_missing_map_layer">Chagua swali linalotambulisha kipengele cha ramani cha kusasisha.</string>
+  <string name="domain_issue_save_to_id_question_missing_data_table">Chagua swali linalotambulisha safu ya jedwali ya kusasisha.</string>
+  <string name="domain_issue_save_to_match_property_missing">Chagua sifa ambayo jibu linalinganishwa nayo.</string>
+  <string name="domain_issue_save_to_geometry_question_required">Ni swali la Nukta, Mstari au Poligoni pekee linaloweza kusasisha jiometri ya kipengele cha ramani.</string>
+  <!-- %1$s: property name; %2$s: name of the map layer or data table. -->
+  <string name="domain_issue_save_to_unknown_property">Inasasisha "%1$s", ambayo si sifa ya %2$s.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_not_updatable">"%1$s" haiwezi kusasishwa na fomu.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_already_updated">Swali jingine tayari linasasisha "%1$s".</string>
+  <string name="domain_issue_save_to_no_fields">Chagua angalau sehemu moja ya kusasisha.</string>
+  <string name="domain_issue_save_to_type_mismatch">Majibu ya %1$s huenda yasilingane na sifa ya %2$s "%3$s".</string>
+  <string name="domain_display_logic_source_deleted">Inarejelea swali lililofutwa.</string>
+  <string name="domain_display_logic_shown_if_answered">Huonyeshwa tu ikiwa "%1$s" imejibiwa.</string>
+  <string name="domain_display_logic_shown_if">Huonyeshwa tu ikiwa "%1$s" %2$s %3$s.</string>
+  <string name="domain_issue_status_default_label_missing">Weka lebo chaguomsingi ya hali.</string>
+  <string name="domain_issue_status_rule_label_missing">Kila kanuni ya hali inahitaji lebo ya hali.</string>
+  <string name="domain_issue_status_rule_min_submissions">Idadi ya mawasilisho lazima iwe angalau 1.</string>
+  <string name="domain_issue_status_rule_question_missing">Chagua swali kwa ajili ya kanuni ya hali.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_status_rule_operator_not_applicable">"%1$s" haitumiki kwa %2$s katika kanuni ya hali.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_missing">Kanuni ya hali ya "%1$s" inahitaji thamani ya kulinganisha nayo.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_not_number">Thamani ya kanuni ya hali ya "%1$s" lazima iwe nambari.</string>
+  <string name="domain_issue_status_rule_property_missing_map_layer">Chagua sifa ya kipengele cha ramani kwa ajili ya kanuni ya hali.</string>
+  <string name="domain_issue_status_rule_property_missing_data_table">Chagua sifa ya safu ya jedwali kwa ajili ya kanuni ya hali.</string>
+  <string name="domain_issue_status_rule_property_missing">Chagua sifa ya kipengele kwa ajili ya kanuni ya hali.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_unwritten">Hakuna swali linaloandika kwenye sifa "%1$s" kwa ajili ya kanuni ya hali.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: property data type in lowercase (e.g. "text"); %3$s: property name. -->
+  <string name="domain_issue_status_rule_property_operator_not_applicable">"%1$s" haitumiki kwa sifa ya %2$s "%3$s".</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_missing">Kanuni ya hali ya sifa "%1$s" inahitaji thamani ya kulinganisha nayo.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_not_number">Thamani ya kanuni ya hali ya sifa "%1$s" lazima iwe nambari.</string>
+  <!-- Form editor: warnings about a question's link to a standard field (concept). -->
+  <!-- %1$s: ID of a standard field, e.g. "eudr.commodity". -->
+  <string name="domain_warning_concept_not_in_dictionary">Imeunganishwa na "%1$s", ambayo haimo katika kamusi ya utafiti huu.</string>
+  <!-- %1$s: standard field name; %2$s: its answer type in lowercase (e.g. "decimal"); %3$s: the question's type in lowercase (e.g. "short text"). -->
+  <string name="domain_warning_concept_type_mismatch">"%1$s" inatarajia majibu ya %2$s, lakini hili ni swali la %3$s.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_deprecated">"%1$s" imepitwa na wakati. Unganisha sehemu sanifu ya sasa.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_linked_twice">"%1$s" imeunganishwa na zaidi ya swali moja katika fomu hii.</string>
+  <!-- %1$d: number of choices; %2$s: standard field name; %3$s: comma-separated choice labels. -->
+  <plurals name="domain_warning_concept_unmapped_choices">
+    <item quantity="one">Linganisha chaguo %1$d na thamani za "%2$s" ili majibu yaweze kujumlishwa: %3$s.</item>
+    <item quantity="other">Linganisha chaguo %1$d na thamani za "%2$s" ili majibu yaweze kujumlishwa: %3$s.</item>
+  </plurals>
+  <!-- Survey editor: issues in a map layer or data table. -->
+  <string name="domain_issue_dataset_id_invalid">Kitambulisho lazima kianze na herufi na kitumie herufi, tarakimu, _ . - pekee</string>
+  <!-- %1$s: the map layer or data table ID. -->
+  <string name="domain_issue_dataset_id_duplicate">Kitambulisho "%1$s" kinatumiwa na seti nyingine ya data katika utafiti huu.</string>
+  <!-- %1$s: property name (an identifier). -->
+  <string name="domain_issue_dataset_property_name_invalid">Sifa "%1$s" ina jina lisilo sahihi.</string>
+  <string name="domain_issue_dataset_property_name_duplicate">Majina ya sifa lazima yawe ya kipekee.</string>
+  <string name="domain_issue_dataset_key_property_missing">Chagua sifa ya ufunguo.</string>
+  <string name="domain_issue_dataset_label_property_missing">Chagua sifa ya lebo.</string>
+  <!-- %1$s: row or map feature name. -->
+  <string name="domain_issue_dataset_row_key_missing">"%1$s" haina ufunguo.</string>
+  <!-- %1$s: duplicated key value. -->
+  <string name="domain_issue_dataset_row_key_duplicate">Ufunguo "%1$s" umerudiwa.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label. -->
+  <string name="domain_issue_dataset_row_value_missing">"%1$s" inakosa %2$s.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label; %3$s: expected type in lowercase (e.g. "integer"). -->
+  <string name="domain_issue_dataset_row_value_wrong_type">"%1$s": %2$s lazima iwe %3$s.</string>
+  <string name="domain_issue_sharing_organization_missing">"%1$s" inahitaji shirika. Chagua moja katika Maelezo ya utafiti au chagua chaguo jingine la ufikiaji wa jumla.</string>
+  <!-- %1$s: map feature name; %2$d: minimum number of vertices. -->
+  <plurals name="domain_issue_dataset_row_geometry_too_short">
+    <item quantity="one">"%1$s" inahitaji angalau kiwianishi %2$d.</item>
+    <item quantity="other">"%1$s" inahitaji angalau vipeo %2$d.</item>
+  </plurals>
+  <!-- Quota and budget limits: why an action is blocked. -->
+  <!-- %1$d: surveys the owner has; %2$d: the limit. -->
+  <string name="domain_quota_max_surveys_per_owner">Kikomo cha juu cha tafiti kwa kila mmiliki kimefikiwa (%1$d kati ya %2$d). Pandisha kiwango au futa tafiti za zamani.</string>
+  <!-- %1$s: budget amount in US dollars, e.g. "$50.00". -->
+  <string name="domain_quota_org_budget_exceeded">Kuunda utafiti mwingine kutazidi kikomo cha bajeti ya kila mwezi ya shirika (%1$s).</string>
+  <!-- %1$s: estimated cost in US dollars; %2$s: budget in US dollars. -->
+  <string name="domain_quota_survey_budget_exceeded">Gharama inayokadiriwa ya kila mwezi ya muundo wa utafiti (%1$s) inazidi kikomo cha bajeti ya kila mwezi ya utafiti (%2$s).</string>
+  <!-- %1$d: number of forms; %2$d: the limit; %3$s: quota tier name (e.g. "Basic"). -->
+  <plurals name="domain_quota_max_forms">
+    <item quantity="one">Utafiti una fomu %1$d, ikizidi kikomo cha %2$d kwa kiwango cha %3$s.</item>
+    <item quantity="other">Utafiti una fomu %1$d, zikizidi kikomo cha %2$d kwa kiwango cha %3$s.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_questions">
+    <item quantity="one">Fomu "%1$s" ina swali %2$d, ikizidi kikomo cha %3$d.</item>
+    <item quantity="other">Fomu "%1$s" ina maswali %2$d, ikizidi kikomo cha %3$d.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of photo questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_photo_questions">
+    <item quantity="one">Fomu "%1$s" ina swali %2$d la picha, ikizidi kikomo cha %3$d.</item>
+    <item quantity="other">Fomu "%1$s" ina maswali %2$d ya picha, ikizidi kikomo cha %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features; %2$d: the limit. -->
+  <plurals name="domain_quota_max_predefined_entities">
+    <item quantity="one">Utafiti una kipengele %1$d kilichobainishwa awali, ukizidi kikomo cha %2$d.</item>
+    <item quantity="other">Utafiti una vipengele %1$d vilivyobainishwa awali, ukizidi kikomo cha %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of generated sample plots; %2$d: the limit. -->
+  <plurals name="domain_quota_max_generated_entities">
+    <item quantity="one">Muundo wa sampuli umetengeneza kiwanja %1$d, ukizidi kikomo cha %2$d.</item>
+    <item quantity="other">Muundo wa sampuli umetengeneza viwanja %1$d, ukizidi kikomo cha %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of vertices of the survey area; %2$d: the limit. -->
+  <plurals name="domain_quota_max_area_vertices">
+    <item quantity="one">Eneo la utafiti lina kipeo %1$d, likizidi kikomo cha %2$d.</item>
+    <item quantity="other">Eneo la utafiti lina vipeo %1$d, likizidi kikomo cha %2$d.</item>
+  </plurals>
+  <plurals name="domain_quota_max_dataset_polygon_vertices">
+    <item quantity="one">Seti ya data "%1$s" ina poligoni yenye kipeo %2$d, ikizidi kikomo cha %3$d.</item>
+    <item quantity="other">Seti ya data "%1$s" ina poligoni yenye vipeo %2$d, ikizidi kikomo cha %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of collaborators; %2$d: the limit. -->
+  <plurals name="domain_quota_max_collaborators">
+    <item quantity="one">Orodha ya udhibiti wa ufikiaji ina mshirika %1$d, ikizidi kikomo cha %2$d.</item>
+    <item quantity="other">Orodha ya udhibiti wa ufikiaji ina washirika %1$d, ikizidi kikomo cha %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of surveys; %2$d: the limit. -->
+  <plurals name="domain_quota_max_surveys_per_user">
+    <item quantity="one">Mtumiaji anashiriki katika utafiti %1$d, akizidi kikomo cha %2$d.</item>
+    <item quantity="other">Mtumiaji anashiriki katika tafiti %1$d, akizidi kikomo cha %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of map features the user added in the field; %2$d: the limit. -->
+  <plurals name="domain_quota_max_adhoc_entities">
+    <item quantity="one">Mtumiaji ameunda kipengele %1$d cha papo hapo, akifikia kikomo cha %2$d.</item>
+    <item quantity="other">Mtumiaji ameunda vipengele %1$d vya papo hapo, akifikia kikomo cha %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of submissions; %2$d: the limit. -->
+  <plurals name="domain_quota_max_submissions_per_entity">
+    <item quantity="one">Mtumiaji amerekodi wasilisho %1$d kwa kipengele hiki, akifikia kikomo cha %2$d.</item>
+    <item quantity="other">Mtumiaji amerekodi mawasilisho %1$d kwa kipengele hiki, akifikia kikomo cha %2$d.</item>
+  </plurals>
+  <!-- Notices shown after a data collector submits a form. -->
+  <!-- %1$s: name of the new map feature. "save_to" is a technical term; keep it as is. -->
+  <string name="domain_notice_entity_created">Kipengele kipya "%1$s" kimeundwa kupitia save_to (✓ Imekamilika)</string>
+  <!-- %1$s: form title; %2$s: GPS coordinates. -->
+  <string name="domain_notice_standalone_submitted">Kumbukumbu huru ya uwandani "%1$s" imewasilishwa (%2$s)</string>
+  <!-- %1$s: form title; %2$s: map feature name; %3$s: previous status symbol (e.g. ○); %4$s: new status symbol (e.g. ◐); %5$s: new status label (e.g. "In progress"). -->
+  <string name="domain_notice_entity_submitted">"%1$s" imewasilishwa kwa %2$s (Alama: %3$s → %4$s %5$s)</string>
+  <!-- Geometry summary of a polygon map feature. %1$s: area with unit (e.g. "1.2 ha"); %2$s: perimeter length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_polygon">Poligoni • %1$s, mzingo %2$s</string>
+  <!-- Geometry summary of a line map feature. %1$s: length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_line">Mstari • %1$s</string>
+  <!-- Geometry summary of a point map feature. %1$s: coordinates. -->
+  <string name="domain_geometry_summary_point">Nukta • %1$s</string>
+  <!-- PDF reports of map features and submissions. -->
+  <!-- Summary of a generated PDF file. %1$d: number of pages; %2$s: file size (e.g. "14 KB"). -->
+  <plurals name="domain_pdf_summary">
+    <item quantity="one">Ukurasa %1$d • %2$s</item>
+    <item quantity="other">Kurasa %1$d • %2$s</item>
+  </plurals>
+  <!-- PDF page footer. %1$d: page number; %2$d: number of pages. -->
+  <string name="domain_pdf_page_of">Ukurasa %1$d kati ya %2$d</string>
+  <string name="domain_pdf_running_header">Open Foris Collect One • %1$s</string>
+  <!-- Caption under a point's location figure. %1$s: latitude; %2$s: longitude. -->
+  <string name="domain_pdf_location_point">Mahali %1$s, %2$s</string>
+  <!-- Caption under a location figure. %1$s/%2$s: min/max latitude; %3$s/%4$s: min/max longitude. "WGS 84" is a coordinate system name. -->
+  <string name="domain_pdf_bounds">Mipaka: latitudo %1$s hadi %2$s, longitudo %3$s hadi %4$s (WGS 84)</string>
+  <!-- PDF footer of a map feature report. %1$s: map feature type (e.g. "Coffee Parcel"); %2$s: date and time. -->
+  <string name="domain_pdf_entity_footer">Ripoti ya %1$s • Imetengenezwa %2$s</string>
+  <!-- PDF footer of a submission report. %1$s: date and time. -->
+  <string name="domain_pdf_submission_footer">Ripoti ya wasilisho • Imetengenezwa %1$s</string>
+  <!-- PDF subtitle of a submission report. %1$s: date and time collected. -->
+  <string name="domain_pdf_submission_subtitle">Wasilisho • %1$s</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_details">Maelezo</string>
+  <!-- PDF field label: map layer of a map feature. -->
+  <string name="domain_pdf_layer">Tabaka</string>
+  <!-- PDF field label: geometry summary of a map feature. -->
+  <string name="domain_pdf_geometry">Jiometri</string>
+  <!-- PDF field label: geographic identifier of a plot. -->
+  <string name="domain_pdf_geo_id">GeoID</string>
+  <string name="domain_pdf_coordinates">Viwianishi</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_location">Mahali</string>
+  <!-- PDF field label of one vertex of a line or polygon. %1$d: vertex number. -->
+  <string name="domain_pdf_vertex">Kipeo %1$d</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_properties">Sifa</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_submissions">Mawasilisho</string>
+  <string name="domain_pdf_no_submissions">Bado hakuna mawasilisho yaliyorekodiwa.</string>
+  <!-- %1$s: data collector name; %2$s: form version. -->
+  <string name="domain_pdf_collected_by">Imekusanywa na %1$s • Toleo la fomu %2$s</string>
+  <!-- Map feature a submission is attached to. %1$s: map feature name; %2$s: map feature type; %3$s: GeoID. -->
+  <string name="domain_pdf_entity_target">%1$s (%2$s • GeoID %3$s)</string>
+  <!-- %1$s: coordinates where the submission was collected. -->
+  <string name="domain_pdf_no_attached_feature_at">Hakuna kipengele cha ramani kilichoambatishwa (%1$s)</string>
+  <string name="domain_pdf_no_attached_feature">Hakuna kipengele cha ramani kilichoambatishwa</string>
+  <string name="domain_pdf_data_collector">Mkusanyaji data</string>
+  <!-- PDF field label: when a submission was collected. -->
+  <string name="domain_pdf_collected">Imekusanywa</string>
+  <string name="domain_pdf_form_version">Toleo la fomu</string>
+  <!-- PDF section heading: answers of a submission. -->
+  <string name="domain_pdf_responses">Majibu</string>
+  <string name="domain_pdf_no_responses">Hakuna majibu yaliyorekodiwa.</string>
+  <!-- Status chip of a group of map features in a map cluster, by the marker symbol they share. -->
+  <string name="domain_cluster_marker_status_completed">Imekamilika</string>
+  <string name="domain_cluster_marker_status_in_progress">Inaendelea</string>
+  <string name="domain_cluster_marker_status_pending">Inasubiri</string>
+  <string name="domain_cluster_marker_status_no_marker_symbol">Hakuna alama ya kiashiria</string>
+  <string name="domain_cluster_marker_status_other_symbol">Alama %1$s</string>
+</resources>

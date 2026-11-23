@@ -17,7 +17,6 @@ package org.openforis.collectone.v2.web.ui.dashboard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +36,7 @@ import androidx.compose.material.icons.outlined.TableRows
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,13 +47,27 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.MapLayerItem
 import org.openforis.collectone.v2.app.domain.model.hasGeometry
 import org.openforis.collectone.v2.app.ui.datacollection.EntityStatusChip
 import org.openforis.collectone.v2.app.ui.map.LayerIcons
 import org.openforis.collectone.v2.app.ui.map.contentColorOnArgb
-import org.openforis.collectone.v2.web.ui.WebAppState
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.clickable
+import org.openforis.collectone.v2.web.resources.Res
+import org.openforis.collectone.v2.web.resources.web_by_status
+import org.openforis.collectone.v2.web.resources.web_close_details
+import org.openforis.collectone.v2.web.resources.web_collapse_details
+import org.openforis.collectone.v2.web.resources.web_data_table
+import org.openforis.collectone.v2.web.resources.web_expand_details
+import org.openforis.collectone.v2.web.resources.web_map_features
+import org.openforis.collectone.v2.web.resources.web_map_layer
+import org.openforis.collectone.v2.web.resources.web_show_in_table
 
 /** Number of map features in a layer sharing one status; [example] provides the chip styling. */
 internal data class DashboardLayerStatusCount(val example: GeospatialEntityItem, val count: Int) {
@@ -75,11 +85,11 @@ internal data class DashboardLayerSummary(
   val statusCounts: List<DashboardLayerStatusCount>,
 ) {
   /** User-facing kind label: `Map layer` or `Data table`. */
-  val kindLabel: String
+  val kindLabel: StringResource
     get() =
       when (kind) {
-        DashboardDataTableKind.MAP_LAYER -> "Map layer"
-        DashboardDataTableKind.DATA_TABLE -> "Data table"
+        DashboardDataTableKind.MAP_LAYER -> Res.string.web_map_layer
+        DashboardDataTableKind.DATA_TABLE -> Res.string.web_data_table
       }
 }
 
@@ -150,19 +160,22 @@ private fun LayerSwatch(layer: MapLayerItem?, size: Int) {
  * Web dashboard's floating card for the map layer or data table selected in the left-hand panel:
  * its name and kind, total number of map features, number of map features per status, and a "Show
  * in table" button that opens the dataset's tab in the bottom data table panel.
+ *
+ * [onClose] deselects the layer; [onShowInTable] opens its tab in the bottom data table panel.
  */
 @Composable
 internal fun WebLayerDetailsCard(
   summary: DashboardLayerSummary,
   layer: MapLayerItem?,
-  state: WebAppState,
+  onClose: () -> Unit,
+  onShowInTable: () -> Unit,
   modifier: Modifier = Modifier,
   onCollapse: (() -> Unit)? = null,
 ) {
   Surface(
     modifier = modifier,
     shape = MaterialTheme.shapes.large,
-    color = MaterialTheme.colorScheme.surfaceContainerLow,
+    color = MaterialTheme.colorScheme.surfaceContainerLowest,
     shadowElevation = 6.dp,
   ) {
     Column {
@@ -182,7 +195,7 @@ internal fun WebLayerDetailsCard(
             overflow = TextOverflow.Ellipsis,
           )
           Text(
-            text = summary.kindLabel,
+            text = stringResource(summary.kindLabel),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -191,16 +204,16 @@ internal fun WebLayerDetailsCard(
           IconButton(onClick = onCollapse, modifier = Modifier.size(32.dp)) {
             Icon(
               imageVector = Icons.Outlined.CollapseContent,
-              contentDescription = "Collapse details",
+              contentDescription = stringResource(Res.string.web_collapse_details),
               tint = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.size(22.dp),
             )
           }
         }
-        IconButton(onClick = { state.selectLayer(null) }, modifier = Modifier.size(32.dp)) {
+        IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
           Icon(
             imageVector = Icons.Outlined.Close,
-            contentDescription = "Close details",
+            contentDescription = stringResource(Res.string.web_close_details),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp),
           )
@@ -218,7 +231,7 @@ internal fun WebLayerDetailsCard(
       ) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
           Text(
-            text = "Map features",
+            text = stringResource(Res.string.web_map_features),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -231,7 +244,7 @@ internal fun WebLayerDetailsCard(
 
         if (summary.statusCounts.isNotEmpty()) {
           Text(
-            text = "By status",
+            text = stringResource(Res.string.web_by_status),
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary,
           )
@@ -255,7 +268,7 @@ internal fun WebLayerDetailsCard(
         }
 
         OutlinedButton(
-          onClick = { state.showSelectedLayerInTable() },
+          onClick = onShowInTable,
           contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         ) {
           Icon(
@@ -264,7 +277,7 @@ internal fun WebLayerDetailsCard(
             modifier = Modifier.size(ButtonDefaults.IconSize),
           )
           Text(
-            text = "Show in table",
+            text = stringResource(Res.string.web_show_in_table),
             modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
           )
         }
@@ -288,21 +301,22 @@ internal fun CollapsedLayerDetailsPill(
   Surface(
     modifier = modifier,
     shape = CircleShape,
-    color = MaterialTheme.colorScheme.surfaceContainerLow,
+    color = MaterialTheme.colorScheme.surfaceContainerLowest,
     shadowElevation = 4.dp,
     tonalElevation = 2.dp,
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
   ) {
     Row(
       modifier =
-        Modifier.clickable { onExpand() }
+        Modifier.clip(CircleShape)
+          .clickable { onExpand() }
           .padding(start = 12.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Icon(
         imageVector = Icons.Outlined.ExpandContent,
-        contentDescription = "Expand details",
+        contentDescription = stringResource(Res.string.web_expand_details),
         tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(20.dp),
       )
@@ -318,7 +332,7 @@ internal fun CollapsedLayerDetailsPill(
       IconButton(onClick = onClose, modifier = Modifier.size(24.dp)) {
         Icon(
           imageVector = Icons.Outlined.Close,
-          contentDescription = "Close details",
+          contentDescription = stringResource(Res.string.web_close_details),
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(16.dp),
         )

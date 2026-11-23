@@ -105,6 +105,11 @@ distinction between stateful master tables and immutable encounter logs:
     -   `library_bundle.proto`: `LibraryBundle`, the top-level message of the
         global seed files (`shared/assets/library/<vocabulary>.textproto`) and
         of library imports and exports.
+-   **[`sync/`](sync/)** (`openforis.collectone.v1.sync`):
+    -   `sync_service.proto`: `SyncService` gRPC definition. `SyncChanges`
+        catches up several sync scopes (organizations, libraries, survey
+        overviews, each survey's entities and submissions, impact events) in one
+        call, with the same sync tokens as the `List*` RPCs.
 
 
 ## gRPC Backend Services (`SurveyService` & `DataService`)
@@ -146,14 +151,13 @@ one atomic transaction:
 
 -   **`SurveyService.MutateSurvey(MutateSurveyRequest)`**: Executes a list of
     `SurveyMutation` steps (`delete`, `upsert`, `acl_delete`, `acl_upsert`,
-    `trash_survey`, `restore_survey`, `save_working_copy`,
-    `discard_working_copy`) against `survey_id`. Because mutations run
-    sequentially in one transaction, a single request can initialize a new
-    survey (`upsert.title`, `upsert.description`, `upsert.state`), add an
-    `EntityDatasetDef` (`upsert.entity_datasets`), add a `FormDef`
-    (`upsert.forms`) referencing that dataset, bind a `FormLaunchConfig` and map
-    `LayerDef` to both, and grant collaborator roles (`acl_upsert.entries`) in
-    one atomic commit.
+    `save_working_copy`, `discard_working_copy`) against `survey_id`. Because
+    mutations run sequentially in one transaction, a single request can
+    initialize a new survey (`upsert.title`, `upsert.description`,
+    `upsert.state`), add an `EntityDatasetDef` (`upsert.entity_datasets`), add a
+    `FormDef` (`upsert.forms`) referencing that dataset, bind a
+    `FormLaunchConfig` and map `LayerDef` to both, and grant collaborator roles
+    (`acl_upsert.entries`) in one atomic commit.
 -   **`DataService.MutateData(MutateDataRequest)`**: Executes a list of
     `DataMutation` steps (`EntityMutation` and `SubmissionMutation`). When an
     offline mobile collector registers a new ad-hoc `EntityRecord` in the field
@@ -196,21 +200,23 @@ delete), upsert)`:
         recursively merged if already present or appended if new, and ordered by
         their `sort_order` field.
 
-### Deleting Surveys, Entities, and Submissions
+### Soft-Deleting Root Entities
 
--   **Surveys (Trash)**: `trash_survey = true` (in `SurveyMutation`) moves a
-    survey to Trash by setting `SurveyDef.trash_time`; `restore_survey = true`
-    brings it back. Trashed surveys disappear from survey lists and stop
-    syncing, and the server purges them 30 days after `trash_time`. Clients
-    can't hard-delete surveys, and `SurveyState.DELETED` is only a server
-    tombstone marker on `SurveyOverview`.
--   **Entities and submissions (soft delete & restore)**: Setting a leaf
-    `delete` mask (`EntityMutation.delete` or `SubmissionMutation.delete` with
-    no child fields set beyond IDs, or `delete.is_deleted = true`) or
-    `upsert.is_deleted = true` soft-deletes the record (`is_deleted = true`),
-    preserving a tombstone so delta syncs report the deletion. Setting
-    `delete.is_deleted = true` alongside `upsert` fields (or clearing
-    `is_deleted` via `delete`) restores a soft-deleted record.
+Root entities (`SurveyDef`, `Organization`, `OrganizationLibraryRecord`,
+`EntityRecord`, and `SubmissionRecord`) can only ever be soft-deleted, so root
+deletion and restoration are ordinary `upsert` and `delete` field mutations:
+
+-   **Surveys (Trash)**: Setting `upsert.trash_time` (in `SurveyMutation`) moves
+    a survey to Trash (stamped with the server's commit time when first
+    trashed); setting `delete.trash_time` clears `trash_time` and restores it.
+    Trashed surveys disappear from survey lists and stop syncing, and the server
+    purges them 30 days after `trash_time`. Clients can't hard-delete surveys,
+    and `SurveyState.DELETED` is only a server tombstone marker on
+    `SurveyOverview`.
+-   **Organizations, libraries, entities, and submissions (`is_deleted`)**:
+    Setting `upsert.is_deleted = true` soft-deletes the record into a tombstone
+    so delta syncs report the deletion. Setting `delete.is_deleted = true`
+    clears `is_deleted` to restore a soft-deleted record.
 
 
 ## Code Generation
@@ -218,6 +224,6 @@ delete), upsert)`:
 Multiplatform Kotlin data classes, builders, and suspending service interfaces
 (`SurveyServiceServer`, `DataServiceServer`) are automatically generated from
 these `.proto` files by Square Wire during the [`shared/core`](../core/) Gradle
-build (`./gradlew generateCommonMainProtos`).
+build (`./gradlew :shared:core:generateCommonMainProtos`).
 
-For full data model documentation, see [`../../docs/model/`](../../docs/model/).
+For full data model documentation, see [`docs/technical/model/`](../../docs/technical/model/).

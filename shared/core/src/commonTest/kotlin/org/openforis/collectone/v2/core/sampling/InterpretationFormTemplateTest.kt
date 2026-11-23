@@ -22,6 +22,7 @@ import org.openforis.collectone.v2.core.forms.engine.FormSession
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
 import org.openforis.collectone.v2.core.forms.xpath.InMemorySecondaryInstanceProvider
+import org.openforis.collectone.v2.core.geo.GeoCoord
 
 /**
  * Spike for decision D1: an interpretation form creates one repeat instance per sample point stored
@@ -215,32 +216,52 @@ class InterpretationFormTemplateTest {
   }
 
   @Test
-  fun sampleEncodingIsStableAndReversible() {
+  fun sampleEncoding_encodesGeopointsWithSevenDecimals() {
     assertEquals(
       "-1.0001234 37.0004321 0 0;-1.0002 37.0005 0 0;-1.0003 37.0006 0 0;-0.9999999 36.9999999 0 0",
       SampleEncoding.encodeSamples(plotSamples),
     )
+  }
+
+  @Test
+  fun sampleEncoding_writesNumbersCompactly() {
     assertEquals(
       "0 0 0 0;45 -7.5 0 0",
       SampleEncoding.encodeSamples(listOf(GeoCoord(-0.00000001, 0.0), GeoCoord(45.0, -7.5))),
     )
+  }
+
+  @Test
+  fun sampleEncoding_decodeOfEncode_isIdentity() {
     assertEquals(
       plotSamples,
       SampleEncoding.decodeSamples(SampleEncoding.encodeSamples(plotSamples)),
     )
+  }
+
+  @Test
+  fun sampleEncoding_decode_ignoresAltitudeAccuracyAndWhitespace() {
     assertEquals(
       listOf(GeoCoord(1.0, 2.0), GeoCoord(3.0, 4.0)),
       SampleEncoding.decodeSamples("1 2; 3 4 100 5"),
     )
+  }
+
+  @Test
+  fun sampleEncoding_decodeMalformedPoint_isNull() {
     assertEquals(null, SampleEncoding.decodeSamples("1 2;oops"))
+  }
+
+  @Test
+  fun sampleEncoding_decodeSampleIds_splitsOnWhitespace() {
     assertEquals(listOf("a", "b"), SampleEncoding.decodeSampleIds(" a  b "))
   }
 
   companion object {
     /**
      * Recommended interpretation form template (XLSForm equivalent in the entity dataset docs). The
-     * `plot` field holds the selected plot entity's `name`; Ground pre-fills it when the form is
-     * launched from a plot, and in ODK it is a `select_one_from_file plots.csv`.
+     * `plot` field holds the selected plot entity's `name`; Collect One pre-fills it when the form
+     * is launched from a plot, and in ODK it is a `select_one_from_file plots.csv`.
      */
     val TEMPLATE =
       """

@@ -13,7 +13,9 @@
  */
 package org.openforis.collectone.v2.workbench.ui.viewmodel
 
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -34,15 +36,16 @@ import org.openforis.collectone.v2.app.domain.model.DeviceOrientation
 import org.openforis.collectone.v2.app.domain.model.SurveyConfig
 import org.openforis.collectone.v2.app.domain.model.SurveyPreviewItem
 import org.openforis.collectone.v2.app.domain.model.SyncStatus
-import org.openforis.collectone.v2.app.domain.model.deriveEntitySyncStatus
 import org.openforis.collectone.v2.app.domain.repository.ConnectivityRepository
 import org.openforis.collectone.v2.app.domain.repository.SampleDataRepository
 import org.openforis.collectone.v2.app.domain.repository.SurveyContent
 import org.openforis.collectone.v2.app.domain.repository.SurveyRepository
+import org.openforis.collectone.v2.app.ui.viewmodel.ViewModelDispatcher
+import org.openforis.collectone.v2.app.ui.viewmodel.viewModelScopeOn
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
 import org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm
+import org.openforis.collectone.v2.workbench.ui.DEFAULT_WORKBENCH_FORM_DEF
 import org.openforis.collectone.v2.workbench.ui.DEFAULT_WORKBENCH_XFORMS_XML
-import org.openforis.collectone.v2.workbench.ui.XFormsParseCache
 import org.openforis.collectone.v2.workbench.ui.state.WorkbenchEvent
 import org.openforis.collectone.v2.workbench.ui.state.WorkbenchUiState
 
@@ -54,7 +57,7 @@ interface WorkbenchActions {
   /** Selects the simulated device preview form factor (`Mobile` vs `Tablet`). */
   fun selectDeviceFormFactor(formFactor: DeviceFormFactor)
 
-  /** Toggles between `Mobile` and `Tablet` device preview form factors. */
+  /** Switches between `Mobile` and `Tablet`, resetting the orientation to the new one's default. */
   fun toggleDeviceFormFactor()
 
   /** Rotates the simulated device between `Portrait` and `Landscape` orientation (`90°` swap). */
@@ -66,46 +69,66 @@ interface WorkbenchActions {
   /** Explicitly sets the simulated device orientation (`Portrait` or `Landscape`). */
   fun selectDeviceOrientation(orientation: DeviceOrientation)
 
-  /** Explicitly sets the workbench offline simulation (`isAirplaneMode`) state. */
+  /**
+   * Simulates the device going offline ([enabled]) or back online: sets the app's connectivity, so
+   * sync and the list search follow it, and tells the shell ([WorkbenchEvent.ConnectivityChanged])
+   * so the app shows its offline or back-online notice, as on a real device.
+   */
   fun updateAirplaneMode(enabled: Boolean)
 
-  /** Toggles the workbench offline simulation (`isAirplaneMode`) state. */
+  /** [updateAirplaneMode] with the opposite of the current state. */
   fun toggleAirplaneMode()
 
   /**
-   * Updates the workbench's custom XForms XML, parses it into a [FormDef], and notifies
-   * `DataCollectionViewModel` via [WorkbenchEvent.CustomFormDefChanged].
+   * Parses the editor's XForms [xml] and hands the result to data collection
+   * ([WorkbenchEvent.CustomFormDefChanged]): XML equal to an example form (ignoring surrounding
+   * whitespace) selects that example; blank XML clears the form; XML that doesn't parse keeps the
+   * text, shows the parser's message, and leaves an open form as it is rather than relaunching it.
    */
   fun updateCustomXFormsXml(xml: String)
 
   /**
-   * Selects a swappable example survey & form in the workbench, switching to its survey and
-   * optionally launching its form immediately.
+   * Opens the stored survey whose primary form is [example]'s (nothing happens when no survey uses
+   * it) and, when [launchImmediately], starts that form. The editor's XML follows once the survey
+   * is active (see `onSurveyActivated`).
    */
   fun selectWorkbenchExampleForm(example: WorkbenchExampleForm, launchImmediately: Boolean = false)
 
-  /** Restores the default sample XForms XML definition (`DEFAULT_WORKBENCH_XFORMS_XML`). */
+  /**
+   * Restores the default example form ([DEFAULT_WORKBENCH_XFORMS_XML]), first switching back to its
+   * survey when another survey is open.
+   */
   fun resetDefaultXFormsXml()
 
-  /** Updates the [SyncStatus] of entity [entityId] and synchronizes its submissions if `SYNCED`. */
+  /**
+   * Simulates entity [entityId]'s upload reaching [newStatus]; `SYNCED` marks its submissions
+   * synced too. Writes to the local store, so every screen shows the new status.
+   */
   fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus)
 
   /** Cycles the [SyncStatus] of entity [entityId] (`Uploading` -> `Synced` -> `Failed`). */
   fun cycleEntitySyncStatus(entityId: String)
 
-  /** Updates the [SyncStatus] of submission [submissionId] and recomputes its entity's status. */
+  /**
+   * Simulates submission [submissionId]'s upload reaching [newStatus]; its entity's status is
+   * derived again from all its submissions.
+   */
   fun updateSubmissionSyncStatus(submissionId: String, newStatus: SyncStatus)
 
   /** Cycles the [SyncStatus] of submission [submissionId] (`Uploading` -> `Synced` -> `Failed`). */
   fun cycleSubmissionSyncStatus(submissionId: String)
 
-  /** Toggles the downloaded indicator of [surveyId] in the UX workbench simulator. */
+  /** Simulates downloading survey [surveyId] for offline use, or removing its offline copy. */
   fun toggleSurveyDownloaded(surveyId: String)
 
-  /** Updates the title and description of the currently active survey. */
+  /** Renames the active survey; a blank [title] or [description] keeps the current one. */
   fun updateActiveSurveyDetails(title: String, description: String)
 
-  /** Resets the local data store to sample data and returns the mobile app to Sign In. */
+  /**
+   * Starts over: back online, the local store reset to the sample data, the mobile app back at Sign
+   * in with its ViewModels at their defaults ([WorkbenchEvent.SampleDataReset]), and the default
+   * example form. Counts the reset in [WorkbenchUiState.dataResetCount].
+   */
   fun resetSampleData()
 }
 
@@ -121,9 +144,9 @@ interface WorkbenchActions {
 class WorkbenchViewModel(
   private val surveyRepository: SurveyRepository,
   private val sampleDataRepository: SampleDataRepository,
-  private val scope: CoroutineScope,
+  dispatcher: CoroutineDispatcher = ViewModelDispatcher,
   private val connectivityRepository: ConnectivityRepository = ConnectivityRepository(),
-) : WorkbenchActions {
+) : ViewModel(viewModelScopeOn(dispatcher)), WorkbenchActions {
   private data class Data(
     val surveys: List<SurveyPreviewItem> = emptyList(),
     val activeSurveyId: String = "",
@@ -138,7 +161,7 @@ class WorkbenchViewModel(
     val customXFormsXml: String = DEFAULT_WORKBENCH_XFORMS_XML,
     val selectedWorkbenchExampleForm: WorkbenchExampleForm? = WorkbenchExampleForm.ALL_FIELD_TYPES,
     val xformsXmlError: String? = null,
-    val customFormDef: FormDef? = XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
+    val customFormDef: FormDef? = DEFAULT_WORKBENCH_FORM_DEF,
     val dataResetCount: Int = 0,
   )
 
@@ -159,7 +182,7 @@ class WorkbenchViewModel(
           isOnline = isOnline,
         )
       }
-      .stateIn(scope, SharingStarted.Eagerly, Data())
+      .stateIn(viewModelScope, SharingStarted.Eagerly, Data())
 
   private val session = MutableStateFlow(Session())
 
@@ -174,7 +197,7 @@ class WorkbenchViewModel(
 
   val uiState: StateFlow<WorkbenchUiState> =
     combine(data, session, ::buildUiState)
-      .stateIn(scope, SharingStarted.Eagerly, buildUiState(Data(), Session()))
+      .stateIn(viewModelScope, SharingStarted.Eagerly, buildUiState(Data(), Session()))
 
   private fun buildUiState(data: Data, session: Session): WorkbenchUiState =
     WorkbenchUiState(
@@ -336,8 +359,8 @@ class WorkbenchViewModel(
   }
 
   override fun resetDefaultXFormsXml() {
-    if (ui.activeSurveyId != "00000033-6b50-51cd-ac94-baea2ea06d65") {
-      emit(WorkbenchEvent.DefaultSurveyRestored("00000033-6b50-51cd-ac94-baea2ea06d65"))
+    if (ui.activeSurveyId != DEFAULT_EXAMPLE_SURVEY_ID) {
+      emit(WorkbenchEvent.DefaultSurveyRestored(DEFAULT_EXAMPLE_SURVEY_ID))
     }
     updateCustomXFormsXml(DEFAULT_WORKBENCH_XFORMS_XML)
     session.update { it.copy(selectedWorkbenchExampleForm = WorkbenchExampleForm.ALL_FIELD_TYPES) }
@@ -346,21 +369,9 @@ class WorkbenchViewModel(
   override fun updateEntitySyncStatus(entityId: String, newStatus: SyncStatus) {
     val entities = ui.entities
     val target = entities.firstOrNull { it.id == entityId } ?: return
-    val updated = entities.map { item ->
-      if (item.id == entityId) {
-        val updatedSubmissions =
-          if (newStatus == SyncStatus.SYNCED) {
-            item.submissions.map { sub -> sub.copy(syncStatus = SyncStatus.SYNCED) }
-          } else {
-            item.submissions
-          }
-        item.copy(submissions = updatedSubmissions, syncStatus = newStatus)
-      } else {
-        item
-      }
-    }
-    scope.launch { surveyRepository.setEntities(updated) }
-    emit(WorkbenchEvent.Notice("${target.label}: Sync status set to ${newStatus.label}"))
+    val updated = entities.withEntitySyncStatus(entityId, newStatus) ?: return
+    viewModelScope.launch { surveyRepository.setEntities(updated) }
+    emit(WorkbenchEvent.Notice("${target.label}: Sync status set to ${newStatus.devName}"))
   }
 
   override fun cycleEntitySyncStatus(entityId: String) {
@@ -370,48 +381,19 @@ class WorkbenchViewModel(
 
   override fun updateSubmissionSyncStatus(submissionId: String, newStatus: SyncStatus) {
     val current = ui
-    var updatedSubTitle: String? = null
-    val updatedEntities =
-      current.entities.map { item ->
-        val hasTarget = item.submissions.any { it.id == submissionId }
-        if (hasTarget) {
-          val updatedSubmissions =
-            item.submissions.map { sub ->
-              if (sub.id == submissionId) {
-                updatedSubTitle = sub.formTitle
-                sub.copy(syncStatus = newStatus)
-              } else {
-                sub
-              }
-            }
-          item.copy(
-            submissions = updatedSubmissions,
-            syncStatus =
-              deriveEntitySyncStatus(
-                updatedSubmissions,
-                fallback =
-                  if (newStatus == SyncStatus.SYNCED) SyncStatus.SYNCED else item.syncStatus,
-              ),
-          )
-        } else {
-          item
-        }
-      }
-    scope.launch { surveyRepository.setEntities(updatedEntities) }
-    if (current.standaloneSubmissions.any { it.id == submissionId }) {
-      val updatedStandalone =
-        current.standaloneSubmissions.map { sub ->
-          if (sub.id == submissionId) {
-            updatedSubTitle = sub.formTitle
-            sub.copy(syncStatus = newStatus)
-          } else {
-            sub
-          }
-        }
-      scope.launch { surveyRepository.setStandaloneSubmissions(updatedStandalone) }
+    val change =
+      withSubmissionSyncStatus(
+        current.entities,
+        current.standaloneSubmissions,
+        submissionId,
+        newStatus,
+      )
+    viewModelScope.launch { surveyRepository.setEntities(change.entities) }
+    change.standaloneSubmissions?.let { standalone ->
+      viewModelScope.launch { surveyRepository.setStandaloneSubmissions(standalone) }
     }
-    updatedSubTitle?.let { title ->
-      emit(WorkbenchEvent.Notice("$title: Sync status set to ${newStatus.label}"))
+    change.formTitle?.let { title ->
+      emit(WorkbenchEvent.Notice("$title: Sync status set to ${newStatus.devName}"))
     }
   }
 
@@ -421,47 +403,45 @@ class WorkbenchViewModel(
   }
 
   override fun toggleSurveyDownloaded(surveyId: String) {
-    val surveys = ui.surveys
-    var noticeMessage: String? = null
-    val updated = surveys.map { item ->
-      if (item.id == surveyId) {
-        val nextState = !item.isDownloaded
-        noticeMessage =
-          if (nextState) {
-            "Downloaded \"${item.title}\" (${item.offlineSizeLabel}) for offline use."
-          } else {
-            "Removed offline copy of \"${item.title}\"."
-          }
-        item.copy(isDownloaded = nextState)
-      } else {
-        item
-      }
+    val (updated, toggled) = ui.surveys.withDownloadToggled(surveyId)
+    viewModelScope.launch { surveyRepository.setSurveys(updated) }
+    toggled?.let {
+      val notice =
+        if (it.isDownloaded) {
+          "Downloaded \"${it.title}\" for offline use."
+        } else {
+          "Removed offline copy of \"${it.title}\"."
+        }
+      emit(WorkbenchEvent.Notice(notice))
     }
-    scope.launch { surveyRepository.setSurveys(updated) }
-    noticeMessage?.let { emit(WorkbenchEvent.Notice(it)) }
   }
 
   override fun updateActiveSurveyDetails(title: String, description: String) {
-    val activeId = ui.activeSurveyId
-    val updated =
-      ui.surveys.map { item ->
-        if (item.id == activeId) {
-          item.copy(
-            title = title.ifBlank { item.title },
-            description = description.ifBlank { item.description },
-          )
-        } else {
-          item
-        }
-      }
-    scope.launch { surveyRepository.setSurveys(updated) }
+    val updated = ui.surveys.withDetails(ui.activeSurveyId, title, description)
+    viewModelScope.launch { surveyRepository.setSurveys(updated) }
   }
 
   override fun resetSampleData() {
     connectivityRepository.reset()
     emit(WorkbenchEvent.SampleDataReset)
-    scope.launch { sampleDataRepository.resetToSampleData() }
+    viewModelScope.launch { sampleDataRepository.resetToSampleData() }
     session.update { it.copy(dataResetCount = it.dataResetCount + 1) }
     resetDefaultXFormsXml()
   }
 }
+
+/** ID of the sample survey whose primary form is the default example form (`All field types`). */
+private const val DEFAULT_EXAMPLE_SURVEY_ID = "00000033-6b50-51cd-ac94-baea2ea06d65"
+
+/**
+ * English name of this sync status for the workbench's notices. The workbench is developer tooling
+ * that isn't shipped, so its notices stay English (like `DeviceOrientation` and
+ * `DeviceFormFactor`).
+ */
+private val SyncStatus.devName: String
+  get() =
+    when (this) {
+      SyncStatus.UPLOADING -> "Uploading"
+      SyncStatus.SYNCED -> "Synced"
+      SyncStatus.FAILED -> "Failed"
+    }

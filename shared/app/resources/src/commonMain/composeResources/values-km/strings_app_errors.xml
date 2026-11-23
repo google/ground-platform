@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Why an operation failed: the user data service or auth service couldn't be reached. -->
+  <string name="app_error_network">មិនអាចភ្ជាប់បានទេ។ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិតរបស់អ្នក រួចព្យាយាមម្តងទៀត។</string>
+  <!-- Why an operation failed: the user's session has expired. -->
+  <string name="app_error_unauthenticated">វគ្គរបស់អ្នកបានផុតកំណត់ហើយ។ សូមចូលគណនីម្តងទៀត។</string>
+  <!-- Why an operation failed: the signed-in user isn't allowed to do it. -->
+  <string name="app_error_permission_denied">អ្នកមិនមានសិទ្ធិធ្វើសកម្មភាពនេះទេ។</string>
+  <!-- Why an operation failed: what it refers to was deleted. -->
+  <string name="app_error_not_found">ធាតុនេះលែងមានទៀតហើយ។</string>
+  <!-- Why an operation failed: someone changed the same thing at the same time. -->
+  <string name="app_error_conflict">ធាតុនេះត្រូវបានផ្លាស់ប្តូរនៅកន្លែងផ្សេង។ សូមព្យាយាមម្តងទៀត។</string>
+  <!-- Why an operation failed: what it changes no longer accepts changes, e.g. a closed or archived survey; retrying won't help. -->
+  <string name="app_error_not_editable">មិនអាចផ្លាស់ប្តូរធាតុនេះបានទេឥឡូវនេះ។ ការស្ទង់មតិអាចត្រូវបានបិទ ឬទុកក្នុងបណ្ណសារ។</string>
+  <!-- Why an operation failed: the server rejected what was entered. -->
+  <string name="app_error_validation">ព័ត៌មានមួយចំនួនមិនត្រឹមត្រូវទេ។ សូមពិនិត្យ រួចព្យាយាមម្តងទៀត។</string>
+  <!-- Why an operation failed: a quota or rate limit was reached. -->
+  <string name="app_error_quota_exceeded">អ្នកបានប្រើដល់ដែនកំណត់ហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។</string>
+  <!-- Why an operation failed: the user cancelled it. -->
+  <string name="app_error_cancelled">បានបោះបង់។</string>
+  <!-- Why an operation failed, when there is no more specific reason. -->
+  <string name="app_error_unknown">មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្តងទៀត។</string>
+  <!-- Notice after sign-in fails. %1$s = why, one of the app_error_* sentences. -->
+  <string name="app_sign_in_failed">មិនអាចចូលគណនីបានទេ។ %1$s</string>
+</resources>

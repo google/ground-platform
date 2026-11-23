@@ -25,15 +25,15 @@ At its core, the model separates **Current State** (**Map layers** and **Data ta
 ```mermaid
 flowchart TD
   SurveyDef["SurveyDef
-  Ground: Survey"]
+  Collect One: Survey"]
   EntityDatasetDef["EntityDatasetDef
-  Ground: Map layer or Data table"]
+  Collect One: Map layer or Data table"]
   EntityRecord["EntityRecord
-  Ground: Map feature or Table row"]
+  Collect One: Map feature or Table row"]
   FormDef["FormDef
-  Ground: Form"]
+  Collect One: Form"]
   SubmissionRecord["SubmissionRecord
-  Ground: Submission"]
+  Collect One: Submission"]
 
   SurveyDef -->|"1:N contains"| FormDef
   SurveyDef -->|"1:N defines"| EntityDatasetDef
@@ -55,9 +55,9 @@ flowchart TD
   class SubmissionRecord data;
 ```
 
-## Ground Concept Mapping
+## Collect One Concept Mapping
 
-| Schema Message | Ground Concept | Description |
+| Schema Message | Collect One Concept | Description |
 | :--- | :--- | :--- |
 | **`SurveyDef`** | **Survey** | Top-level project container managing survey configuration, forms, map layers, data tables, and access control. |
 | **`FormDef`** | **Form** | Questionnaire and encounter definition specifying questions, sections, skip logic, and validation rules *(replaces Ground 1.0 "Job")*. |
@@ -101,6 +101,7 @@ flowchart TD
 - **[Entity Records](data/01-entity-records.md)**: `EntityRecord` stateful instances, geometries, and properties.
 - **[Submission Records](data/02-submission-records.md)**: `SubmissionRecord` transactions, `RecordMetadata`, and `RecordInstance` payloads.
 - **[Audit Records and Provenance](data/03-audit-records.md)**: `AuditInfo`, `AuditRecord`, and `FieldDelta` mutation history.
+- **[Geometry](data/05-geometry.md)**: the canonical GeoJSON `Geometry` of entities and map layers, its derived display text, and the migration from older rows.
 - **[Impact Events and Survey Outcomes](data/04-impact-events.md)**: `ImpactEvent` "data was used" signals, `SurveyOutcome`, and export profile field mapping.
 
 ### Library & Dictionary (`openforis.collectone.v1.library`)

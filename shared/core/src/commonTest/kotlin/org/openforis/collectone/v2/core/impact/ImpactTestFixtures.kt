@@ -20,6 +20,7 @@ import kotlin.math.round
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import org.openforis.collectone.v2.core.geo.GeoCoord
 
 /** Builders and assertions shared by the impact aggregation tests. */
 internal object Fx {
@@ -33,19 +34,19 @@ internal object Fx {
     deprecated: Boolean = false,
   ) = ImpactConcept(id, owner, aggregation, privacy, unit, goals, deprecated)
 
-  fun point(lat: Double, lng: Double) = ImpactGeometry.Point(ImpactLatLng(lat, lng))
+  fun point(lat: Double, lng: Double) = ImpactGeometry.Point(GeoCoord(lat, lng))
 
   /** A closed, counter-clockwise lat/lng square with its south-west corner at ([lat], [lng]). */
   fun square(lat: Double, lng: Double, size: Double = 0.001) =
     ImpactGeometry.Polygon(listOf(ring(lat, lng, size)))
 
-  fun ring(lat: Double, lng: Double, size: Double): List<ImpactLatLng> =
+  fun ring(lat: Double, lng: Double, size: Double): List<GeoCoord> =
     listOf(
-      ImpactLatLng(lat, lng),
-      ImpactLatLng(lat, lng + size),
-      ImpactLatLng(lat + size, lng + size),
-      ImpactLatLng(lat + size, lng),
-      ImpactLatLng(lat, lng),
+      GeoCoord(lat, lng),
+      GeoCoord(lat, lng + size),
+      GeoCoord(lat + size, lng + size),
+      GeoCoord(lat + size, lng),
+      GeoCoord(lat, lng),
     )
 
   fun feature(

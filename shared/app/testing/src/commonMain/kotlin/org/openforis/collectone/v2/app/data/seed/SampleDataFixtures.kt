@@ -67,7 +67,6 @@ fun LocalStoreTransaction.writeSampleData() {
   )
   putMutations(SampleMutationsData.defaultMutations())
   putPlaces(SamplePlacesData.defaultSurveyPlaces())
-  putOfflineTilePackages(SampleMapLayersData.defaultOfflineTilePackages())
   putPreferences(
     StoredPreferences(
       activeSurveyId = SampleDataSeeder.DEFAULT_ACTIVE_SURVEY_ID,

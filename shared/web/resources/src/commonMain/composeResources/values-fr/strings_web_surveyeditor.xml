@@ -1,0 +1,893 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions shared across the survey editor. -->
+  <string name="surveyeditor_cancel">Annuler</string>
+  <!-- Button that dismisses a dialog. -->
+  <string name="surveyeditor_close">Fermer</string>
+  <!-- Button that returns to the previous step of a dialog. -->
+  <string name="surveyeditor_back">Retour</string>
+  <string name="surveyeditor_import">Importer</string>
+  <!-- Button that confirms importing a file. %1$s is the file name. -->
+  <string name="surveyeditor_import_file">Importer %1$s</string>
+  <string name="surveyeditor_select">Sélectionner</string>
+  <string name="surveyeditor_description">Description</string>
+  <string name="surveyeditor_clear_search">Effacer la recherche</string>
+  <string name="surveyeditor_delete">Supprimer</string>
+  <string name="surveyeditor_done">OK</string>
+  <!-- Header button that saves edits of a draft survey. -->
+  <string name="surveyeditor_save_changes">Enregistrer les modifications</string>
+  <!-- Header button that publishes edits of an already published survey again. -->
+  <string name="surveyeditor_republish">Republier</string>
+  <string name="surveyeditor_read_only_closed">Cette enquête est clôturée. Rouvrez-la pour la modifier.</string>
+  <string name="surveyeditor_read_only_archived">Cette enquête est archivée. Rouvrez-la pour la modifier.</string>
+  <string name="surveyeditor_survey_area_required">Une zone d’enquête est obligatoire.</string>
+  <!-- Notice after removing the survey's organization. %1$s is the name of the general access option (e.g. Restricted). -->
+  <string name="surveyeditor_access_changed_no_organization">L’accès général a été défini sur « %1$s », car l’enquête n’appartient plus à une organisation.</string>
+
+  <!-- Sharing: errors when inviting a person or accepting an invite. -->
+  <string name="surveyeditor_invite_invalid_email">Saisissez une adresse e-mail valide.</string>
+  <string name="surveyeditor_invite_is_owner">Il s’agit du propriétaire de l’enquête.</string>
+  <string name="surveyeditor_invite_enter_name">Saisissez un nom.</string>
+  <string name="surveyeditor_invite_not_invited">Non invité.</string>
+  <string name="surveyeditor_invite_already_joined">Déjà inscrit.</string>
+
+  <!-- Data table import: how numeric dates like 03/04/2025 are read. -->
+  <string name="surveyeditor_date_order_day_first">Jour en premier</string>
+  <string name="surveyeditor_date_order_month_first">Mois en premier</string>
+  <!-- Data table import notes shown before importing a CSV file. -->
+  <string name="surveyeditor_import_file_empty">Le fichier est vide.</string>
+  <string name="surveyeditor_import_no_data_rows">Le fichier contient une ligne d’en-tête, mais aucune ligne de données.</string>
+  <plurals name="surveyeditor_import_ragged_rows">
+    <item quantity="one">%1$d ligne n’a pas le même nombre de colonnes que l’en-tête. Les cellules manquantes restent vides et les cellules en trop sont ignorées.</item>
+    <item quantity="other">%1$d lignes n’ont pas le même nombre de colonnes que l’en-tête. Les cellules manquantes restent vides et les cellules en trop sont ignorées.</item>
+  </plurals>
+  <!-- "id" is the literal CSV column name; "Row ID" is the name of the column that is added. -->
+  <string name="surveyeditor_import_id_column_not_unique">La colonne id contient des valeurs vides ou en double : une nouvelle colonne Row ID est donc ajoutée.</string>
+  <!-- %1$s is a comma-separated list of quoted column names; %2$s is a date pattern such as DD/MM/YYYY. -->
+  <string name="surveyeditor_import_ambiguous_dates">Les dates de %1$s peuvent commencer par le jour ou par le mois. Elles sont lues au format %2$s.</string>
+
+  <!-- Sample plots: why plots can't be generated. -->
+  <string name="surveyeditor_sampling_area_missing">Définissez une zone d’enquête dans Détails de l’enquête, ou utilisez une couche cartographique de polygones comme strates.</string>
+  <string name="surveyeditor_sampling_strata_deleted">La couche cartographique des strates a été supprimée. Choisissez-en une autre.</string>
+  <string name="surveyeditor_sampling_strata_not_polygon">Les strates doivent provenir d’une couche cartographique de polygones.</string>
+  <!-- %1$s is the name of a map layer. -->
+  <string name="surveyeditor_sampling_strata_no_polygons">« %1$s » ne contient pas encore de polygones. Ajoutez-en pour l’utiliser comme strates.</string>
+  <string name="surveyeditor_sampling_cant_generate_design">Impossible de générer ce plan.</string>
+  <!-- %1$s is a technical error message. -->
+  <string name="surveyeditor_sampling_generate_failed_reason">Impossible de générer les placettes d’échantillonnage : %1$s</string>
+  <string name="surveyeditor_sampling_generate_failed">Impossible de générer les placettes d’échantillonnage. Vérifiez le plan et réessayez.</string>
+  <string name="surveyeditor_sampling_no_plots_fit">Aucune placette d’échantillonnage ne tient dans la zone. Essayez un espacement ou une taille de placette plus petits, ou une zone plus grande.</string>
+  <string name="surveyeditor_sampling_no_design">Cette couche cartographique n’a pas de plan d’échantillonnage.</string>
+  <string name="surveyeditor_sampling_already_generating">Les placettes d’échantillonnage sont déjà en cours de génération.</string>
+  <string name="surveyeditor_sampling_layer_missing">Cette couche cartographique n’existe plus.</string>
+  <!-- %1$d is the number of submissions. -->
+  <plurals name="surveyeditor_regenerate_blocked">
+    <item quantity="one">La régénération est désactivée, car %1$d soumission fait référence à ces placettes d’échantillonnage. Pour essayer un autre plan, ajoutez une nouvelle couche cartographique de placettes d’échantillonnage.</item>
+    <item quantity="other">La régénération est désactivée, car %1$d soumissions font référence à ces placettes d’échantillonnage. Pour essayer un autre plan, ajoutez une nouvelle couche cartographique de placettes d’échantillonnage.</item>
+  </plurals>
+
+  <!-- Survey editor page: header, lifecycle, navigation, survey details, sharing. -->
+  <!-- Survey editor page: header. -->
+  <!-- Fallback title for a survey without a title. -->
+  <string name="surveyeditor_untitled_survey">Enquête sans titre</string>
+  <!-- Header context label identifying the survey editor page. -->
+  <string name="surveyeditor_header_survey_editor">Éditeur d’enquête</string>
+  <!-- Header status for a draft survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_save">
+    <item quantity="one">Corrigez %1$d problème pour enregistrer</item>
+    <item quantity="other">Corrigez %1$d problèmes pour enregistrer</item>
+  </plurals>
+  <!-- Header status for a published survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_publish">
+    <item quantity="one">Corrigez %1$d problème pour publier</item>
+    <item quantity="other">Corrigez %1$d problèmes pour publier</item>
+  </plurals>
+  <string name="surveyeditor_header_unsaved_changes">Modifications non enregistrées</string>
+  <string name="surveyeditor_header_unpublished_changes">Modifications non publiées</string>
+  <string name="surveyeditor_header_draft_saved">Brouillon enregistré</string>
+  <string name="surveyeditor_header_all_changes_published">Toutes les modifications sont publiées</string>
+  <!-- Button that discards pending survey edits. -->
+  <string name="surveyeditor_header_discard">Abandonner</string>
+  <string name="surveyeditor_header_discard_unsaved_title">Abandonner les modifications non enregistrées ?</string>
+  <string name="surveyeditor_header_discard_unpublished_title">Abandonner les modifications non publiées ?</string>
+  <string name="surveyeditor_header_discard_unsaved_message">Les modifications apportées depuis le dernier enregistrement de ce brouillon seront perdues.</string>
+  <string name="surveyeditor_header_discard_unpublished_message">Les modifications apportées depuis la dernière publication de cette enquête seront perdues. Les collecteurs de données continueront de voir la version publiée.</string>
+  <string name="surveyeditor_header_keep_editing">Continuer les modifications</string>
+  <string name="surveyeditor_working_copy_prompt_title">Continuer à modifier le brouillon non enregistré ?</string>
+  <string name="surveyeditor_working_copy_prompt_draft_message">Vous avez des modifications non enregistrées d'une session précédente sur ce brouillon d'enquête. Souhaitez-vous continuer à modifier votre brouillon non enregistré ou abandonner ces modifications ?</string>
+  <string name="surveyeditor_working_copy_prompt_published_message">Vous avez des modifications non publiées d'une session précédente sur cette enquête. Souhaitez-vous continuer à modifier votre brouillon non enregistré ou abandonner ces modifications ?</string>
+  <string name="surveyeditor_working_copy_continue">Continuer à modifier</string>
+  <string name="surveyeditor_working_copy_discard">Abandonner le brouillon</string>
+
+  <!-- Survey lifecycle (status) controls. -->
+  <!-- Button that reopens a closed or archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen">Rouvrir</string>
+  <string name="surveyeditor_lifecycle_draft_description">Modifiable par les organisateurs. Masquée pour les collecteurs de données mobiles jusqu’à sa publication.</string>
+  <string name="surveyeditor_lifecycle_published_description">Ouverte à la collecte de données sur le terrain et sur le web.</string>
+  <string name="surveyeditor_lifecycle_closed_description">La collecte de données est terminée et l’enquête est en lecture seule jusqu’à sa réouverture.</string>
+  <string name="surveyeditor_lifecycle_archived_description">Retirée et conservée en lecture seule pour consultation à long terme.</string>
+  <string name="surveyeditor_lifecycle_publish_survey">Publier l’enquête</string>
+  <string name="surveyeditor_lifecycle_publish_survey_description">Ouvrir la collecte de données sur mobile et sur le web</string>
+  <string name="surveyeditor_lifecycle_archive_survey">Archiver l’enquête</string>
+  <string name="surveyeditor_lifecycle_archive_survey_description">Retirer et conserver en lecture seule pour consultation</string>
+  <string name="surveyeditor_lifecycle_switch_to_draft">Repasser en brouillon</string>
+  <!-- Description of switching a published survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_published_description">Suspendre la visibilité sur le terrain tout en continuant les modifications</string>
+  <!-- Description of switching a closed survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_closed_description">Déverrouiller les modifications en mode brouillon avant de republier</string>
+  <!-- Description of switching an archived survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_archived_description">Restaurer en mode brouillon pour la modifier</string>
+  <string name="surveyeditor_lifecycle_close_survey">Clôturer l’enquête</string>
+  <string name="surveyeditor_lifecycle_close_survey_description">Mettre fin à la collecte de données et passer en lecture seule</string>
+  <string name="surveyeditor_lifecycle_reopen_survey">Rouvrir l’enquête</string>
+  <!-- Description of reopening a closed survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_closed_description">Reprendre la collecte de données et les modifications</string>
+  <!-- Description of reopening an archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_archived_description">Restaurer pour reprendre la collecte de données et les modifications</string>
+  <!-- Screen reader description of the status badge. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_badge_description">Statut de l’enquête : %1$s. Cliquez pour changer de statut</string>
+  <!-- Heading of the status menu. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_label">Statut de l’enquête : %1$s</string>
+  <string name="surveyeditor_lifecycle_archive_title">Archiver cette enquête ?</string>
+  <string name="surveyeditor_lifecycle_close_title">Clôturer cette enquête ?</string>
+  <string name="surveyeditor_lifecycle_archive_message">Les enquêtes archivées sont conservées pour consultation. Personne ne peut collecter de données ni apporter de modifications. Vous pouvez la rouvrir à tout moment.</string>
+  <string name="surveyeditor_lifecycle_archive_message_discard">Les enquêtes archivées sont conservées pour consultation. Personne ne peut collecter de données ni apporter de modifications. Vous pouvez la rouvrir à tout moment. Les modifications non enregistrées seront abandonnées.</string>
+  <string name="surveyeditor_lifecycle_close_message">Les collecteurs de données ne peuvent plus ajouter de nouvelles données, et personne ne peut apporter de modifications. Vous pouvez la rouvrir à tout moment.</string>
+  <string name="surveyeditor_lifecycle_close_message_discard">Les collecteurs de données ne peuvent plus ajouter de nouvelles données, et personne ne peut apporter de modifications. Vous pouvez la rouvrir à tout moment. Les modifications non enregistrées seront abandonnées.</string>
+  <!-- Button that confirms archiving the survey. -->
+  <string name="surveyeditor_lifecycle_archive">Archiver</string>
+
+  <!-- Survey editor navigation panel. -->
+  <!-- Navigation item and pane title for the survey's basic information. -->
+  <string name="surveyeditor_nav_survey_details">Détails de l’enquête</string>
+  <!-- Navigation item and pane title for sharing settings. -->
+  <string name="surveyeditor_nav_sharing">Partage</string>
+  <!-- Navigation heading and summary card label for the survey's forms. -->
+  <string name="surveyeditor_nav_forms">Formulaires</string>
+  <string name="surveyeditor_nav_add_form">Ajouter un formulaire</string>
+  <string name="surveyeditor_nav_no_forms">Aucun formulaire pour le moment</string>
+  <!-- Fallback name for a form without a title. -->
+  <string name="surveyeditor_untitled_form">Formulaire sans titre</string>
+  <string name="surveyeditor_nav_add_map_layer">Ajouter une couche cartographique</string>
+  <string name="surveyeditor_nav_add_data_table">Ajouter une table de données</string>
+  <string name="surveyeditor_nav_no_map_layers">Aucune couche cartographique pour le moment</string>
+  <string name="surveyeditor_nav_no_data_tables">Aucune table de données pour le moment</string>
+  <!-- Fallback name for a map layer or data table without a name. -->
+  <string name="surveyeditor_untitled">Sans titre</string>
+  <!-- Screen reader action that moves a navigation item up. -->
+  <string name="surveyeditor_nav_move_up">Monter</string>
+  <!-- Screen reader action that moves a navigation item down. -->
+  <string name="surveyeditor_nav_move_down">Descendre</string>
+  <!-- Screen reader description of the warning icon on a navigation item. -->
+  <string name="surveyeditor_nav_has_issues">Comporte des problèmes</string>
+
+  <!-- Survey details pane. -->
+  <string name="surveyeditor_details_subtitle">Informations de base présentées aux collecteurs de données lorsqu’ils ouvrent l’enquête.</string>
+  <string name="surveyeditor_details_survey_title">Titre de l’enquête</string>
+  <string name="surveyeditor_details_contents">Contenu</string>
+  <string name="surveyeditor_details_map_layers">Couches cartographiques</string>
+  <string name="surveyeditor_details_data_tables">Tables de données</string>
+  <string name="surveyeditor_details_people">Personnes</string>
+  <!-- Heading of the list of survey activity events (exports, receipts, closing). -->
+  <string name="surveyeditor_details_activity">Activité</string>
+  <!-- Part of an activity event summary. %1$d is the number of map features. -->
+  <plurals name="surveyeditor_details_activity_map_features">
+    <item quantity="one">%1$d entité cartographique</item>
+    <item quantity="other">%1$d entités cartographiques</item>
+  </plurals>
+  <!-- Part of an activity event summary. %1$s is the export profile ID. -->
+  <string name="surveyeditor_details_activity_profile">Profil : %1$s</string>
+  <string name="surveyeditor_details_survey_status">Statut de l’enquête</string>
+  <!-- Section title and dropdown label for the survey's organization. -->
+  <string name="surveyeditor_details_organization">Organisation</string>
+  <!-- Organization dropdown option for a survey that doesn't belong to an organization. -->
+  <string name="surveyeditor_details_organization_none">Aucune (enquête personnelle)</string>
+  <string name="surveyeditor_details_organization_hint">Vous pouvez mener cette enquête au nom d’une organisation dont vous êtes membre. Vous en restez le propriétaire. Les gestionnaires de l’organisation peuvent aussi modifier l’enquête, gérer le partage et exporter les données, et ses membres peuvent trouver l’enquête dans leur liste.</string>
+  <!-- Selected organization that couldn't be found. %1$s is its ID. -->
+  <string name="surveyeditor_details_organization_unknown">Organisation inconnue (%1$s)</string>
+  <string name="surveyeditor_details_organization_missing">Cette organisation n’existe plus. Choisissez-en une autre ou rendez l’enquête personnelle.</string>
+  <!-- Screen reader label of the button that dismisses a notice. -->
+  <string name="surveyeditor_details_dismiss">Ignorer</string>
+  <string name="surveyeditor_details_cost_title">Contrôle des coûts et des quotas</string>
+  <string name="surveyeditor_details_cost_estimated">Coût mensuel estimé</string>
+  <!-- Part of the cost summary, e.g. "3 forms · 12 questions · …". -->
+  <plurals name="surveyeditor_details_cost_forms">
+    <item quantity="one">%1$d formulaire</item>
+    <item quantity="other">%1$d formulaires</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of questions. -->
+  <plurals name="surveyeditor_details_cost_questions">
+    <item quantity="one">%1$d question</item>
+    <item quantity="other">%1$d questions</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of predefined entities. -->
+  <plurals name="surveyeditor_details_cost_predefined">
+    <item quantity="one">%1$d prédéfinie</item>
+    <item quantity="other">%1$d prédéfinies</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of generated sample plots. -->
+  <plurals name="surveyeditor_details_cost_sample_plots">
+    <item quantity="one">%1$d placette d’échantillonnage</item>
+    <item quantity="other">%1$d placettes d’échantillonnage</item>
+  </plurals>
+  <string name="surveyeditor_details_cost_tier_override">Forcer le niveau :</string>
+  <!-- Quota tier option: inherit the tier from the organization or default. -->
+  <string name="surveyeditor_details_cost_tier_inherit">Hériter</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_basic">De base</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_sponsored">Sponsorisé</string>
+  <string name="surveyeditor_details_cost_budget_cap">Plafond budgétaire mensuel de l’enquête ($ USD)</string>
+  <string name="surveyeditor_details_cost_budget_placeholder">0.00 (illimité)</string>
+  <string name="surveyeditor_details_cost_hide_limits">Masquer les limites de ressources détaillées</string>
+  <string name="surveyeditor_details_cost_customize_limits">Personnaliser les limites de ressources détaillées</string>
+  <string name="surveyeditor_details_cost_max_forms">Formulaires max.</string>
+  <string name="surveyeditor_details_cost_max_questions_per_form">Questions max. / formulaire</string>
+  <string name="surveyeditor_details_cost_max_photo_questions_per_form">Questions photo max. / formulaire</string>
+  <string name="surveyeditor_details_cost_max_predefined_entities">Entités prédéfinies max.</string>
+  <string name="surveyeditor_details_cost_max_sample_plots">Placettes d’échantillonnage max.</string>
+  <string name="surveyeditor_details_cost_max_area_vertices">Sommets de zone max.</string>
+  <string name="surveyeditor_details_cost_max_acl_collaborators">Collaborateurs ACL max.</string>
+  <string name="surveyeditor_details_purpose_title">Finalités</string>
+  <string name="surveyeditor_details_purpose_hint">L'usage prévu des données de cette enquête ; une enquête peut avoir plusieurs finalités. Les champs standard de ses finalités sont proposés en premier lorsque vous rédigez des questions. Modifier les finalités ici n'ajoute ni ne supprime de formulaires ; pour ajouter les formulaires de départ d'une finalité, utilisez Ajouter un formulaire &gt; Pour une finalité.</string>
+  <string name="surveyeditor_details_purpose_none">Aucune finalité n’est disponible pour cette enquête.</string>
+  <string name="surveyeditor_details_purpose_unavailable">N’est plus disponible dans la bibliothèque de cette enquête :</string>
+  <!-- Screen reader label of a button that removes an item. %1$s is the item's name. -->
+  <string name="surveyeditor_details_remove_item">Retirer %1$s</string>
+
+  <!-- Survey languages. -->
+  <string name="surveyeditor_language_title">Langues</string>
+  <string name="surveyeditor_language_hint">Choisissez les langues dans lesquelles les formulaires et les questions de l’enquête peuvent être rédigés et remplis. La langue par défaut s’affiche lorsqu’aucune traduction n’est disponible.</string>
+  <string name="surveyeditor_language_supported">Langues prises en charge</string>
+  <!-- Chip for the survey's default language. %1$s is the language name. -->
+  <string name="surveyeditor_language_default_chip">%1$s • Par défaut</string>
+  <string name="surveyeditor_language_add">Ajouter une langue</string>
+  <string name="surveyeditor_language_none_selected">Aucune sélection</string>
+  <string name="surveyeditor_language_default">Langue par défaut</string>
+  <string name="surveyeditor_language_picker_title">Sélectionner une langue</string>
+  <string name="surveyeditor_language_search_label">Rechercher par nom de langue</string>
+  <string name="surveyeditor_language_search_placeholder">ex. swahili, anglais, espagnol, amharique...</string>
+  <string name="surveyeditor_language_popular">Langues populaires et aperçu du catalogue :</string>
+  <!-- %1$d is the number of languages matching the search. -->
+  <plurals name="surveyeditor_language_matches">
+    <item quantity="one">%1$d résultat trouvé :</item>
+    <item quantity="other">%1$d résultats trouvés :</item>
+  </plurals>
+  <!-- %1$s is the search query. -->
+  <string name="surveyeditor_language_no_matches">Aucune langue ne correspond à « %1$s »</string>
+  <!-- Badge on a language that is already supported by the survey. -->
+  <string name="surveyeditor_language_added">Ajoutée</string>
+
+  <!-- Survey area section of the survey details pane. -->
+  <!-- Fallback location label for an untitled survey in the survey area editor. -->
+  <string name="surveyeditor_details_area_default_location">Enquête</string>
+  <!-- Title of the required survey area section; * marks a required field. -->
+  <string name="surveyeditor_details_area_title">Zone d’enquête *</string>
+  <string name="surveyeditor_details_area_hint">Couverture géographique et limites de la collecte de données pour cette enquête.</string>
+  <!-- %1$s describes where the survey area came from, e.g. an uploaded file. -->
+  <string name="surveyeditor_details_area_source">Source : %1$s</string>
+  <string name="surveyeditor_details_area_edit">Modifier la zone d’enquête</string>
+  <string name="surveyeditor_details_area_required">Sélectionnez ou dessinez une zone d’enquête pour continuer.</string>
+  <string name="surveyeditor_details_area_empty_title">Aucune zone d’enquête définie</string>
+  <string name="surveyeditor_details_area_empty_hint">Recherchez un lieu, dessinez une limite sur la carte ou téléversez un fichier GeoJSON ou KML.</string>
+  <string name="surveyeditor_details_area_set">Définir la zone d’enquête</string>
+
+  <!-- Sharing pane. -->
+  <string name="surveyeditor_sharing_subtitle">Choisissez qui peut ouvrir cette enquête et ce que les collecteurs de données peuvent voir.</string>
+  <string name="surveyeditor_sharing_people_with_access">Personnes ayant accès</string>
+  <string name="surveyeditor_sharing_owner_detail">Propriétaire de l’enquête</string>
+  <string name="surveyeditor_sharing_owner">Propriétaire</string>
+  <string name="surveyeditor_sharing_pending_detail">En attente de l’acceptation de son lien d’invitation</string>
+  <string name="surveyeditor_sharing_joined_now">Vient de rejoindre</string>
+  <!-- %1$s is the date the person joined. -->
+  <string name="surveyeditor_sharing_joined">A rejoint le %1$s</string>
+  <!-- Dropdown label for a collaborator's role. -->
+  <string name="surveyeditor_sharing_role">Rôle</string>
+  <string name="surveyeditor_sharing_profile_note">Les noms et les photos proviennent du compte de chaque personne. Collect One les enregistre lorsqu’elle accepte son lien d’invitation et les actualise à chaque connexion.</string>
+  <string name="surveyeditor_sharing_data_access">Accès aux données et visibilité</string>
+  <string name="surveyeditor_sharing_add_by_email">Ajouter des personnes par e-mail</string>
+  <string name="surveyeditor_sharing_invite">Inviter</string>
+  <string name="surveyeditor_sharing_org_managers">Gestionnaires de l’organisation</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_org_managers_hint">Hérité de %1$s. Les gestionnaires peuvent modifier cette enquête, gérer le partage et exporter les données. Pour changer les gestionnaires de l’organisation, accédez à sa page Membres.</string>
+  <string name="surveyeditor_sharing_no_managers">Aucun gestionnaire pour le moment.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_manager_of">Gestionnaire de %1$s</string>
+  <string name="surveyeditor_sharing_share_link_title">Lien de partage et QR code</string>
+  <!-- Badge for a survey that is only reachable through its link. -->
+  <string name="surveyeditor_sharing_badge_unlisted">Non répertoriée</string>
+  <!-- Badge for a survey listed in the public survey directory. -->
+  <string name="surveyeditor_sharing_badge_public">Annuaire public</string>
+  <!-- Copy button label after the link was copied. -->
+  <string name="surveyeditor_sharing_copied">Copié</string>
+  <string name="surveyeditor_sharing_copy_link">Copier le lien</string>
+  <string name="surveyeditor_sharing_show_qr">Afficher le QR code</string>
+  <!-- QR code dialog title. %1$s is the survey title. -->
+  <string name="surveyeditor_sharing_qr_title">Partager « %1$s »</string>
+  <string name="surveyeditor_sharing_qr_title_untitled">Lien de partage et QR code de l’enquête</string>
+  <string name="surveyeditor_sharing_qr_hint">Les collecteurs de données peuvent scanner ce QR code avec l’appareil photo de leur téléphone ou l’application Collect One pour ouvrir directement l’enquête.</string>
+
+  <!-- General access sliders: audience stops. -->
+  <string name="surveyeditor_access_contributors_and_organizers">Contributeurs et organisateurs</string>
+  <string name="surveyeditor_access_invited_people">Personnes invitées</string>
+  <string name="surveyeditor_access_anyone_in_organization">Toute personne de votre organisation</string>
+  <string name="surveyeditor_access_anyone">Tout le monde</string>
+  <string name="surveyeditor_access_who_can_view">Qui peut voir les données</string>
+  <string name="surveyeditor_access_who_can_collect">Qui peut collecter des données</string>
+  <!-- Screen reader description of a slider stop. %1$s is the slider title, %2$s the audience. -->
+  <string name="surveyeditor_access_slider_stop_description">%1$s : %2$s</string>
+  <string name="surveyeditor_access_view_hint_contributors">Les collecteurs de données ne voient que leurs propres soumissions. Les organisateurs de l’enquête peuvent voir toutes les soumissions et l’identité des contributeurs.</string>
+  <string name="surveyeditor_access_view_hint_invited">Les personnes ajoutées ci-dessus peuvent voir toutes les entités cartographiques, réponses, photos et autres médias téléversés. Seuls les organisateurs de l’enquête peuvent voir l’identité des contributeurs.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_access_view_hint_organization">Toute personne de %1$s peut voir toutes les entités cartographiques, réponses, photos et autres médias téléversés. Seuls les organisateurs de l’enquête peuvent voir l’identité des contributeurs.</string>
+  <string name="surveyeditor_access_view_hint_organization_unset">Toute personne de votre organisation peut voir toutes les entités cartographiques, réponses, photos et autres médias téléversés. Choisissez une organisation dans Détails de l’enquête.</string>
+  <string name="surveyeditor_access_view_hint_anyone">Tout le monde peut voir toutes les entités cartographiques, réponses, photos et autres médias téléversés. Seuls les organisateurs de l’enquête peuvent voir l’identité des contributeurs. Les participants doivent accepter un avis de consentement avant de collecter des données.</string>
+  <string name="surveyeditor_access_collect_hint_invited">Seules les personnes ajoutées ci-dessus peuvent ouvrir cette enquête et collecter des données.</string>
+  <!-- %1$s is the organization name (used twice). -->
+  <string name="surveyeditor_access_collect_hint_organization">Les membres de %1$s peuvent ouvrir cette enquête et collecter des données. Les gestionnaires de %1$s peuvent aussi modifier l’enquête.</string>
+  <string name="surveyeditor_access_collect_hint_organization_unset">Les membres de votre organisation peuvent ouvrir cette enquête et collecter des données. Choisissez une organisation dans Détails de l’enquête.</string>
+  <string name="surveyeditor_access_collect_hint_anyone">Tout le monde peut ouvrir cette enquête et soumettre des données.</string>
+  <string name="surveyeditor_access_unlisted_option">Non répertoriée (uniquement les personnes disposant d’un lien ou d’un QR code)</string>
+  <string name="surveyeditor_access_public_option">Publique (répertoriée dans l’annuaire des enquêtes)</string>
+  <string name="surveyeditor_access_who_can_find">Qui peut trouver cette enquête</string>
+  <string name="surveyeditor_access_unlisted_hint">Non répertoriée : seules les personnes qui disposent du lien direct ou qui scannent le QR code ci-dessous peuvent trouver et ouvrir cette enquête.</string>
+  <string name="surveyeditor_access_public_hint">Publique : toute personne parcourant l’annuaire des enquêtes peut découvrir et ouvrir cette enquête, ou utiliser le lien direct et le QR code ci-dessous.</string>
+
+  <!-- Data tables, map layers, add dialogs, people. -->
+  <!-- Map layer / data table editor (EntityDatasetEditor). -->
+  <!-- Shown in place of a map layer or data table name when it is blank. -->
+  <string name="surveyeditor_dataset_untitled">Sans titre</string>
+  <!-- Count in a data table summary, e.g. "3 rows • 2 properties". -->
+  <plurals name="surveyeditor_dataset_rows_count">
+    <item quantity="one">%1$d ligne</item>
+    <item quantity="other">%1$d lignes</item>
+  </plurals>
+  <!-- Count in a map layer summary, e.g. "3 features • 2 properties". -->
+  <plurals name="surveyeditor_dataset_features_count">
+    <item quantity="one">%1$d entité</item>
+    <item quantity="other">%1$d entités</item>
+  </plurals>
+  <!-- Count of the columns (properties) of a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_properties_count">
+    <item quantity="one">%1$d propriété</item>
+    <item quantity="other">%1$d propriétés</item>
+  </plurals>
+  <!-- Number of validation issues found in a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_issues_count">
+    <item quantity="one">%1$d problème</item>
+    <item quantity="other">%1$d problèmes</item>
+  </plurals>
+  <!-- Content description of a dataset's overflow menu button. %1$s is the dataset name. -->
+  <string name="surveyeditor_dataset_more_options">Plus d’options pour %1$s</string>
+  <string name="surveyeditor_dataset_delete_map_layer_menu">Supprimer la couche cartographique…</string>
+  <string name="surveyeditor_dataset_delete_data_table_menu">Supprimer la table de données…</string>
+  <string name="surveyeditor_dataset_delete_map_layer_title">Supprimer cette couche cartographique ?</string>
+  <string name="surveyeditor_dataset_delete_data_table_title">Supprimer cette table de données ?</string>
+  <!-- %1$s is the map layer name, %2$d the number of features. -->
+  <plurals name="surveyeditor_dataset_delete_map_layer_body">
+    <item quantity="one">« %1$s » et son entité (%2$d) seront retirés de cette enquête.</item>
+    <item quantity="other">« %1$s » et ses %2$d entités seront retirés de cette enquête.</item>
+  </plurals>
+  <!-- %1$s is the data table name, %2$d the number of rows. -->
+  <plurals name="surveyeditor_dataset_delete_data_table_body">
+    <item quantity="one">« %1$s » et sa ligne (%2$d) seront retirés de cette enquête.</item>
+    <item quantity="other">« %1$s » et ses %2$d lignes seront retirés de cette enquête.</item>
+  </plurals>
+  <string name="surveyeditor_dataset_delete_map_layer">Supprimer la couche cartographique</string>
+  <string name="surveyeditor_dataset_delete_data_table">Supprimer la table de données</string>
+  <!-- Title of the table listing a map layer's features. -->
+  <string name="surveyeditor_dataset_features">Entités</string>
+  <!-- Title of the table listing a data table's rows. -->
+  <string name="surveyeditor_dataset_rows">Lignes</string>
+  <string name="surveyeditor_dataset_add_feature">Ajouter une entité</string>
+  <string name="surveyeditor_dataset_add_row">Ajouter une ligne</string>
+  <!-- Shown after the first issues of a dataset. %1$d is how many more issues there are. -->
+  <plurals name="surveyeditor_dataset_more_issues">
+    <item quantity="one">…et %1$d autre</item>
+    <item quantity="other">…et %1$d autres</item>
+  </plurals>
+  <!-- Table column header of the dataset's key property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_key">%1$s (clé)</string>
+  <!-- Table column header of the dataset's label property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_label">%1$s (libellé)</string>
+  <!-- Header of the column where feature geometry is typed as coordinates. -->
+  <string name="surveyeditor_dataset_column_geometry">Géométrie (lat, lng ; …)</string>
+  <string name="surveyeditor_dataset_empty_sample_plots">Aucune placette d’échantillonnage pour le moment. Générez-les à partir du plan d’échantillonnage.</string>
+  <string name="surveyeditor_dataset_empty_features">Aucune entité pour le moment. Ajoutez-en une ici ou sur la carte.</string>
+  <string name="surveyeditor_dataset_empty_rows">Aucune ligne pour le moment.</string>
+  <!-- Sample points of a sample plot, shown when a plot has none. -->
+  <string name="surveyeditor_dataset_samples_none">Aucun</string>
+  <!-- Number of sample points of a sample plot. -->
+  <plurals name="surveyeditor_dataset_samples_count">
+    <item quantity="one">%1$d point</item>
+    <item quantity="other">%1$d points</item>
+  </plurals>
+  <!-- Section label of the dataset settings panel. -->
+  <string name="surveyeditor_dataset_settings">Paramètres</string>
+  <string name="surveyeditor_dataset_name">Nom</string>
+  <string name="surveyeditor_dataset_geometry_type">Type de géométrie</string>
+  <string name="surveyeditor_dataset_sample_design">Plan d’échantillonnage</string>
+  <string name="surveyeditor_dataset_key_property">Propriété clé (ID unique)</string>
+  <!-- Shown in a dropdown when nothing has been chosen yet. -->
+  <string name="surveyeditor_dataset_choose">Choisir…</string>
+  <string name="surveyeditor_dataset_label_property">Propriété de libellé (affichée dans les listes)</string>
+  <string name="surveyeditor_dataset_field_collection">Collecte sur le terrain et formulaire</string>
+  <!-- %1$s is the title of the form linked to the dataset. -->
+  <string name="surveyeditor_dataset_linked_to">Lié à %1$s</string>
+  <string name="surveyeditor_dataset_linked_form_map_layer">Les collecteurs de données peuvent ajouter de nouvelles entités cartographiques à l’aide de ce formulaire. Les propriétés du schéma restent synchronisées avec les questions du formulaire.</string>
+  <string name="surveyeditor_dataset_linked_form_data_table">Les collecteurs de données peuvent ajouter de nouvelles lignes à l’aide de ce formulaire. Les propriétés du schéma restent synchronisées avec les questions du formulaire.</string>
+  <string name="surveyeditor_dataset_edit_form">Modifier le formulaire</string>
+  <string name="surveyeditor_dataset_unlink_form">Dissocier le formulaire</string>
+  <string name="surveyeditor_dataset_no_form_map_layer">Aucun formulaire n’est lié à cette couche cartographique. Les collecteurs de données peuvent seulement consulter les éléments existants.</string>
+  <string name="surveyeditor_dataset_no_form_data_table">Aucun formulaire n’est lié à cette table de données. Les collecteurs de données peuvent seulement consulter les éléments existants.</string>
+  <string name="surveyeditor_dataset_create_form_map_layer">Créer un formulaire pour la couche cartographique</string>
+  <string name="surveyeditor_dataset_create_form_data_table">Créer un formulaire pour la table de données</string>
+  <!-- Label above the list of forms that update this dataset. -->
+  <string name="surveyeditor_dataset_updated_by">Mis à jour par</string>
+  <string name="surveyeditor_dataset_map_style">Style de carte</string>
+  <!-- Section label of the dataset's schema (its properties / columns). -->
+  <string name="surveyeditor_dataset_properties">Propriétés</string>
+  <string name="surveyeditor_dataset_properties_managed_by_form">Les propriétés sont gérées par le formulaire lié. Pour modifier, ajouter ou supprimer des propriétés, modifiez le formulaire.</string>
+  <string name="surveyeditor_dataset_add_property">Ajouter une propriété</string>
+  <!-- Section label of the advanced dataset settings. -->
+  <string name="surveyeditor_dataset_advanced">Paramètres avancés</string>
+  <!-- Button that collapses the advanced section. -->
+  <string name="surveyeditor_dataset_hide">Masquer</string>
+  <!-- Button that expands the advanced section. -->
+  <string name="surveyeditor_dataset_show">Afficher</string>
+  <string name="surveyeditor_dataset_id">ID du jeu de données</string>
+  <string name="surveyeditor_dataset_id_supporting">Les formulaires utilisent cet ID pour rechercher des enregistrements dans ce jeu de données.</string>
+  <!-- Field for a map layer's color as a hex code. -->
+  <string name="surveyeditor_dataset_color">Couleur</string>
+  <!-- %1$d is the line width in pixels. -->
+  <string name="surveyeditor_dataset_stroke_width">Épaisseur du trait : %1$d px</string>
+  <!-- %1$d is the polygon fill opacity in percent; the % after it is a literal percent sign. -->
+  <string name="surveyeditor_dataset_fill_opacity">Opacité du remplissage : %1$d%</string>
+  <string name="surveyeditor_dataset_visible_by_default">Visible par défaut</string>
+  <string name="surveyeditor_dataset_visible_by_default_description">Afficher cette couche à l’ouverture de la carte.</string>
+  <!-- Field for the display label of a dataset property. -->
+  <string name="surveyeditor_dataset_property_label">Libellé</string>
+  <!-- Button that hides a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_hide_id">Masquer l’ID</string>
+  <!-- Button that shows a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_advanced">Paramètres avancés</string>
+  <string name="surveyeditor_dataset_property_internal_id">ID interne</string>
+  <string name="surveyeditor_dataset_property_internal_id_supporting">Utilisé dans les expressions XForms et les exports GeoJSON.</string>
+  <!-- Field for the data type of a dataset property. -->
+  <string name="surveyeditor_dataset_property_type">Type</string>
+  <!-- Checkbox label: the property must have a value. -->
+  <string name="surveyeditor_dataset_property_required">Obligatoire</string>
+  <string name="surveyeditor_dataset_remove_property">Retirer la propriété</string>
+
+  <!-- Add data table dialog. -->
+  <string name="surveyeditor_add_table_title">Ajouter une table de données</string>
+  <string name="surveyeditor_add_table_empty">Table de données vide</string>
+  <string name="surveyeditor_add_table_empty_body">Ajoutez des colonnes et saisissez des lignes dans la table.</string>
+  <string name="surveyeditor_add_table_import_csv">Importer depuis un fichier CSV</string>
+  <string name="surveyeditor_add_table_import_csv_body">Créez une table de données à partir des colonnes et des lignes d’un fichier CSV.</string>
+  <string name="surveyeditor_add_table_no_rows">Aucune ligne n’a pu être lue dans ce fichier.</string>
+  <!-- Number of columns found in an imported CSV file. -->
+  <plurals name="surveyeditor_add_table_columns_count">
+    <item quantity="one">%1$d colonne</item>
+    <item quantity="other">%1$d colonnes</item>
+  </plurals>
+  <!-- An imported column: %1$s is its name, %2$s its detected type. -->
+  <string name="surveyeditor_add_table_column_with_type">%1$s (%2$s)</string>
+  <!-- Date order option: %1$s is the order (e.g. "Day first"), %2$s an example date. -->
+  <string name="surveyeditor_add_table_date_order_option">%1$s (%2$s)</string>
+
+  <!-- Add map layer dialog. -->
+  <string name="surveyeditor_add_layer_title">Ajouter une couche cartographique</string>
+  <string name="surveyeditor_add_layer_empty">Couche cartographique vide</string>
+  <string name="surveyeditor_add_layer_empty_body">Ajoutez des entités en les dessinant sur la carte ou en les saisissant dans le tableau.</string>
+  <string name="surveyeditor_add_layer_import_file">Importer un fichier</string>
+  <string name="surveyeditor_add_layer_import_file_body">Créez une couche cartographique à partir des points, lignes ou polygones d’un fichier GeoJSON ou KML.</string>
+  <string name="surveyeditor_add_layer_generate_plots">Générer des placettes d’échantillonnage</string>
+  <string name="surveyeditor_add_layer_generate_plots_body">Concevez un plan d’échantillonnage et générez des placettes dans la zone d’enquête ou les strates.</string>
+  <!-- Shown when sample plots can't be generated yet. -->
+  <string name="surveyeditor_add_layer_generate_plots_need_area">Définissez d’abord une zone d’enquête ou ajoutez une couche cartographique de polygones.</string>
+  <string name="surveyeditor_add_layer_no_features">Aucune entité n’a pu être lue dans ce fichier.</string>
+  <!-- Number of features in an imported file. %1$d is the count, %2$s the lowercase geometry type (e.g. "polygon"). -->
+  <string name="surveyeditor_add_layer_feature_count">%1$d %2$s</string>
+  <!-- %1$d is the number of features that will not be imported. -->
+  <plurals name="surveyeditor_add_layer_skipped_features">
+    <item quantity="one">%1$d entité d’un autre type de géométrie sera ignorée. Une couche cartographique n’a qu’un seul type de géométrie.</item>
+    <item quantity="other">%1$d entités d’autres types de géométrie seront ignorées. Une couche cartographique n’a qu’un seul type de géométrie.</item>
+  </plurals>
+
+  <!-- Add form dialog. -->
+  <string name="surveyeditor_add_form_title">Ajouter un formulaire</string>
+  <string name="surveyeditor_add_form_empty">Formulaire vide</string>
+  <string name="surveyeditor_add_form_empty_body">Partez d’un formulaire vierge et ajoutez des questions de zéro.</string>
+  <string name="surveyeditor_add_form_from_template">À partir d’un modèle…</string>
+  <string name="surveyeditor_add_form_for_purpose">Pour une finalité…</string>
+  <string name="surveyeditor_add_form_for_purpose_body">Ajoutez les formulaires de départ du modèle d'une finalité. La finalité et ses programmes sont ajoutés à l'enquête, qui peut ainsi servir plusieurs finalités.</string>
+  <string name="surveyeditor_add_form_no_purposes">Aucune finalité n'est disponible pour cette enquête.</string>
+  <string name="surveyeditor_add_form_purpose_title">Ajouter des formulaires pour une finalité</string>
+  <string name="surveyeditor_add_form_purpose_note">Choisissez une finalité et son modèle de départ. Les formulaires du modèle sont ajoutés à l'enquête, et la finalité ainsi que les programmes sélectionnés y sont enregistrés.</string>
+  <string name="surveyeditor_add_form_purpose_add">Ajouter les formulaires</string>
+  <string name="surveyeditor_add_form_no_templates">Aucun modèle n’est encore disponible pour cette enquête.</string>
+  <string name="surveyeditor_add_form_templates_body">Partez d’un formulaire réutilisable, avec des champs standard, issu de votre organisation ou de la bibliothèque globale.</string>
+  <string name="surveyeditor_add_form_import_file">Importer depuis un fichier</string>
+  <string name="surveyeditor_add_form_import_file_body">Créez un formulaire à partir d’un fichier ODK XForms (.xml) ou Collect Earth (.cep).</string>
+  <string name="surveyeditor_add_form_no_questions">Aucune question n’a pu être lue dans ce fichier.</string>
+  <!-- Number of questions in an imported form or template. -->
+  <plurals name="surveyeditor_add_form_questions_count">
+    <item quantity="one">%1$d question</item>
+    <item quantity="other">%1$d questions</item>
+  </plurals>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it updates. -->
+  <string name="surveyeditor_add_form_updates_dataset">Met à jour %1$s</string>
+  <string name="surveyeditor_add_form_updates_existing">Met à jour des entités existantes</string>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it adds to. -->
+  <string name="surveyeditor_add_form_adds_to_dataset">Ajoute à %1$s</string>
+  <string name="surveyeditor_add_form_adds_to_new_map_layer">Ajoute à une nouvelle couche cartographique</string>
+  <string name="surveyeditor_add_form_adds_to_new_data_table">Ajoute à une nouvelle table de données</string>
+  <string name="surveyeditor_add_form_template_title">Ajouter un formulaire à partir d’un modèle</string>
+  <string name="surveyeditor_add_form_template_note">Le formulaire est copié dans cette enquête. Les modifications ultérieures du modèle ne l’affectent pas.</string>
+  <!-- Badge of a template from the user's organization (when its name is unknown). -->
+  <string name="surveyeditor_add_form_template_organization">Organisation</string>
+  <!-- Badge of a template from the global library. -->
+  <string name="surveyeditor_add_form_template_global">Global</string>
+  <!-- %1$s is the question count (e.g. "12 questions"), %2$d how many link to standard fields. -->
+  <plurals name="surveyeditor_add_form_template_linked">
+    <item quantity="one">%1$s · champs standard liés : %2$d</item>
+    <item quantity="other">%1$s · champs standard liés : %2$d</item>
+  </plurals>
+
+  <!-- Map layer pin icon picker. -->
+  <!-- %1$s is the name of the chosen icon. -->
+  <string name="surveyeditor_icon_pin_icon">Icône d’épingle : %1$s</string>
+  <!-- Shown as the pin icon name when no icon is chosen. -->
+  <string name="surveyeditor_icon_none">Aucune</string>
+  <string name="surveyeditor_icon_no_icon">Aucune icône</string>
+
+  <!-- Basemap options of the map layer editor. -->
+  <string name="surveyeditor_basemap_satellite">Satellite</string>
+  <string name="surveyeditor_basemap_terrain">Relief</string>
+  <!-- Basemap option: no basemap imagery. -->
+  <string name="surveyeditor_basemap_none">Aucune</string>
+
+  <!-- Short labels of sample design thumbnail cards. -->
+  <string name="surveyeditor_thumbnail_grid">Grille</string>
+  <string name="surveyeditor_thumbnail_random">Aléatoire</string>
+  <string name="surveyeditor_thumbnail_stratified">Stratifié</string>
+  <string name="surveyeditor_thumbnail_cluster">Grappes</string>
+  <!-- Plot shape: a single point. -->
+  <string name="surveyeditor_thumbnail_point">Point</string>
+  <!-- Sample point layout: one point at the plot center. -->
+  <string name="surveyeditor_thumbnail_center">Centre</string>
+
+  <!-- People with access and invite acceptance. -->
+  <!-- Badge of a person who was invited but hasn't joined yet. -->
+  <string name="surveyeditor_people_invited">Invité</string>
+  <!-- Shown on the copy button after the invite link was copied. -->
+  <string name="surveyeditor_people_copied">Copié</string>
+  <string name="surveyeditor_people_copy_link">Copier le lien</string>
+  <string name="surveyeditor_people_new_link">Nouveau lien</string>
+  <string name="surveyeditor_people_open_as_invitee">Ouvrir en tant qu’invité</string>
+  <!-- Name of the survey page listing people; used as %1$s in surveyeditor_people_accept_invite_note. -->
+  <string name="surveyeditor_people_sharing_page">page Partage</string>
+  <!-- Title of the invite acceptance dialog. %1$s is the survey or organization name. -->
+  <string name="surveyeditor_people_join_title">Rejoindre « %1$s »</string>
+  <!-- %1$s is the invitee's email address. -->
+  <string name="surveyeditor_people_accept_invite_preview">Aperçu de ce que %1$s voit après avoir ouvert son lien d’invitation et s’être connecté.</string>
+  <!-- %1$s is the invitee's email address, %2$s their role. -->
+  <string name="surveyeditor_people_signed_in_as">Connecté en tant que %1$s • %2$s</string>
+  <string name="surveyeditor_people_full_name">Nom complet</string>
+  <string name="surveyeditor_people_profile_photo">Photo de profil</string>
+  <!-- %1$s is the page where organizers see people, e.g. "Sharing page" or "Members page". -->
+  <string name="surveyeditor_people_accept_invite_note">Collect One enregistre votre nom et votre photo pour que les organisateurs puissent vous reconnaître sur la %1$s. Ils sont actualisés à chaque connexion.</string>
+  <string name="surveyeditor_people_accept_invite">Accepter l’invitation</string>
+
+  <!-- Interactive layer map, survey area editor, sampling design panel. -->
+  <!-- Interactive layer map (InteractiveLayerMap.kt). -->
+  <!-- Title of the map card in the map layer and survey area editors. -->
+  <string name="surveyeditor_map_title">Carte</string>
+  <string name="surveyeditor_map_generated_locked">La géométrie générée ne peut pas être modifiée</string>
+  <!-- Vertex progress while drawing. %1$d is the number of vertices placed, %2$d the minimum needed. -->
+  <string name="surveyeditor_map_draft_vertices">%1$d / %2$d+ sommets</string>
+  <string name="surveyeditor_map_undo">Annuler</string>
+  <!-- Button that completes drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_finish_point">Terminer le point</string>
+  <string name="surveyeditor_map_finish_line">Terminer la ligne</string>
+  <string name="surveyeditor_map_finish_polygon">Terminer le polygone</string>
+  <!-- Button that completes drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_finish_part">Terminer la partie</string>
+  <!-- Chip that starts drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_add_point">Ajouter un point</string>
+  <string name="surveyeditor_map_add_line">Ajouter une ligne</string>
+  <string name="surveyeditor_map_add_polygon">Ajouter un polygone</string>
+  <!-- Starts drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_add_part">Ajouter une partie</string>
+  <string name="surveyeditor_map_zoom_in">Zoom avant</string>
+  <string name="surveyeditor_map_zoom_out">Zoom arrière</string>
+  <string name="surveyeditor_map_fit_to_features">Ajuster aux entités</string>
+  <!-- Current map zoom level, shown next to the scale bar. %1$s is the zoom level (e.g. "12.5"). -->
+  <string name="surveyeditor_map_zoom_level">z %1$s</string>
+  <!-- Map hints shown in a pill at the bottom of the map. -->
+  <string name="surveyeditor_map_hint_locked">Faites glisser pour vous déplacer • Faites défiler ou pincez pour zoomer • Cliquez sur une placette pour voir ses points d’échantillonnage</string>
+  <string name="surveyeditor_map_hint_place_point">Cliquez sur la carte pour placer le point</string>
+  <string name="surveyeditor_map_hint_start_line">Cliquez pour commencer la ligne</string>
+  <string name="surveyeditor_map_hint_continue_line">Cliquez pour ajouter des sommets • Cliquez à nouveau sur le dernier sommet pour terminer</string>
+  <string name="surveyeditor_map_hint_start_polygon">Cliquez pour commencer le polygone</string>
+  <string name="surveyeditor_map_hint_continue_polygon">Cliquez pour ajouter des sommets • Cliquez sur le premier ou le dernier sommet pour terminer</string>
+  <string name="surveyeditor_map_hint_move_point">Faites glisser le point pour le déplacer</string>
+  <!-- "○ handles" refers to the small circles drawn at segment midpoints. -->
+  <string name="surveyeditor_map_hint_reshape">Faites glisser les sommets pour remodeler • Faites glisser les poignées ○ pour ajouter un sommet • Faites glisser l’intérieur pour déplacer</string>
+  <string name="surveyeditor_map_hint_select">Faites glisser pour vous déplacer • Faites défiler ou pincez pour zoomer • Cliquez sur une entité pour la sélectionner</string>
+
+  <!-- Survey area editor dialog (SurveyAreaEditor.kt). -->
+  <string name="surveyeditor_area_tab_search">Rechercher</string>
+  <string name="surveyeditor_area_tab_draw">Dessiner</string>
+  <string name="surveyeditor_area_tab_upload">Téléverser</string>
+  <string name="surveyeditor_area_title">Zone d’enquête</string>
+  <string name="surveyeditor_area_close_editor">Fermer l’éditeur de zone d’enquête</string>
+  <string name="surveyeditor_area_save">Enregistrer la zone d’enquête</string>
+  <!-- Part of an area summary like "3 parts • 1,204 vertices • 850 ha". -->
+  <plurals name="surveyeditor_area_parts_count">
+    <item quantity="one">%1$d partie</item>
+    <item quantity="other">%1$d parties</item>
+  </plurals>
+  <!-- Vertex count in an area summary. %1$s is the count with thousands separators. -->
+  <plurals name="surveyeditor_area_vertices_count">
+    <item quantity="one">%1$s sommet</item>
+    <item quantity="other">%1$s sommets</item>
+  </plurals>
+  <string name="surveyeditor_area_search_label">Rechercher des lieux ou saisir des coordonnées</string>
+  <!-- Example place names are from the default survey region. -->
+  <string name="surveyeditor_area_search_placeholder">ex. Nairobi, Othaya, Chinga Dam ou -0.419, 36.950</string>
+  <string name="surveyeditor_area_suggested_locations">Lieux d’enquête suggérés :</string>
+  <plurals name="surveyeditor_area_locations_found">
+    <item quantity="one">%1$d lieu trouvé :</item>
+    <item quantity="other">%1$d lieux trouvés :</item>
+  </plurals>
+  <string name="surveyeditor_area_searching_places">Recherche de lieux...</string>
+  <!-- %1$s is the search text the user typed. -->
+  <string name="surveyeditor_area_no_places_matching">Aucun lieu ne correspond à « %1$s »</string>
+  <!-- Category of a search result built from typed coordinates. -->
+  <string name="surveyeditor_area_custom_coordinates">Coordonnées personnalisées</string>
+  <string name="surveyeditor_area_direct_coordinates_input">Saisie directe de coordonnées</string>
+  <!-- Source badge for results from the online places search. -->
+  <string name="surveyeditor_area_source_online">En ligne</string>
+  <!-- Badge on the search result that is the current survey area. -->
+  <string name="surveyeditor_area_selected">Sélectionnée</string>
+  <string name="surveyeditor_area_name">Nom de la zone</string>
+  <string name="surveyeditor_area_draw_instructions">Cliquez sur la carte pour placer les angles de la limite. Cliquez sur une partie existante pour la sélectionner, puis faites glisser ses angles pour la remodeler.</string>
+  <string name="surveyeditor_area_parts">Parties</string>
+  <string name="surveyeditor_area_no_parts">Aucune partie pour le moment. Dessinez au moins une partie pour enregistrer la zone d’enquête.</string>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_part_number">Partie %1$d</string>
+  <!-- Vertex count and area of one part. %2$s is the formatted area (e.g. "850 ha"). -->
+  <plurals name="surveyeditor_area_part_vertices_area">
+    <item quantity="one">%1$d sommet • %2$s</item>
+    <item quantity="other">%1$d sommets • %2$s</item>
+  </plurals>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_delete_part">Supprimer la partie %1$d</string>
+  <string name="surveyeditor_area_draw_boundary_hint">Cliquez sur la carte pour dessiner la limite…</string>
+  <plurals name="surveyeditor_area_drawing_corners">
+    <item quantity="one">Dessin en cours (%1$d angle)</item>
+    <item quantity="other">Dessin en cours (%1$d angles)</item>
+  </plurals>
+  <string name="surveyeditor_area_upload_geojson_title">GeoJSON ou KML</string>
+  <string name="surveyeditor_area_upload_geojson_body">Les polygones et multipolygones deviennent des parties de la zone d’enquête. Les trous sont supprimés.</string>
+  <string name="surveyeditor_area_choose_file">Choisir un fichier</string>
+  <string name="surveyeditor_area_upload_shapefile_title">Shapefile (.zip)</string>
+  <string name="surveyeditor_area_upload_shapefile_body">Un Shapefile compressé avec ses fichiers .shp, .shx, .dbf et .prj.</string>
+  <string name="surveyeditor_area_choose_shapefile">Choisir un Shapefile</string>
+  <string name="surveyeditor_area_shapefile_coming_soon">L’import de Shapefile arrive bientôt. En attendant, convertissez le Shapefile en GeoJSON ou KML (par exemple dans QGIS) et téléversez ce fichier.</string>
+  <string name="surveyeditor_area_upload_empty">Téléversez un fichier de limites pour le prévisualiser ici.</string>
+  <string name="surveyeditor_area_edit_in_draw_tab">Modifier dans l’onglet Dessiner</string>
+  <plurals name="surveyeditor_area_ignored_features">
+    <item quantity="one">%1$d entité n’est pas un polygone et a été ignorée.</item>
+    <item quantity="other">%1$d entités ne sont pas des polygones et ont été ignorées.</item>
+  </plurals>
+  <string name="surveyeditor_area_no_polygons">Ce fichier ne contient aucun polygone utilisable comme zone d’enquête.</string>
+  <!-- Icon descriptions for file import issues. -->
+  <string name="surveyeditor_area_issue_error">Erreur</string>
+  <string name="surveyeditor_area_issue_warning">Avertissement</string>
+  <!-- Shown after a capped list of issues. %1$d is how many more issues are hidden. -->
+  <plurals name="surveyeditor_area_more_issues">
+    <item quantity="one">…et %1$d autre</item>
+    <item quantity="other">…et %1$d autres</item>
+  </plurals>
+
+  <!-- Sampling design panel (SamplingDesignPanel.kt). -->
+  <string name="surveyeditor_sampling_update_preview">Mettre à jour l’aperçu</string>
+  <string name="surveyeditor_sampling_show_preview">Afficher l’aperçu</string>
+  <string name="surveyeditor_sampling_stale_title">L’aperçu n’est plus à jour — mettez-le à jour</string>
+  <string name="surveyeditor_sampling_stale_body">Le plan ou sa zone a changé depuis la génération de cet aperçu.</string>
+  <string name="surveyeditor_sampling_in_use_title">Les placettes d’échantillonnage sont utilisées</string>
+  <string name="surveyeditor_sampling_generate_failed_title">Impossible de générer les placettes d’échantillonnage</string>
+  <string name="surveyeditor_sampling_method">Méthode</string>
+  <!-- %1$s is the sampling method name, %2$s its description. -->
+  <string name="surveyeditor_sampling_method_description">%1$s : %2$s</string>
+  <string name="surveyeditor_sampling_plot_shape">Forme des placettes</string>
+  <string name="surveyeditor_sampling_plot_diameter">Diamètre des placettes (m)</string>
+  <string name="surveyeditor_sampling_plot_side">Côté des placettes (m)</string>
+  <string name="surveyeditor_sampling_sample_points">Points d’échantillonnage par placette</string>
+  <string name="surveyeditor_sampling_sample_points_require_shape">Les points d’échantillonnage à l’intérieur des placettes nécessitent des placettes carrées ou circulaires.</string>
+  <string name="surveyeditor_sampling_points_per_side">Points par côté</string>
+  <!-- %1$d is the number of sample points in each plot. -->
+  <plurals name="surveyeditor_sampling_points_per_plot">
+    <item quantity="one">%1$d point d’échantillonnage par placette</item>
+    <item quantity="other">%1$d points d’échantillonnage par placette</item>
+  </plurals>
+  <string name="surveyeditor_sampling_point_spacing">Espacement entre les points (m)</string>
+  <string name="surveyeditor_sampling_number_of_points">Nombre de points</string>
+  <string name="surveyeditor_sampling_shuffle">Mélanger l’ordre de visite</string>
+  <string name="surveyeditor_sampling_shuffle_description">Numéroter les placettes dans un ordre aléatoire pour que des placettes voisines ne soient pas visitées l’une après l’autre.</string>
+  <string name="surveyeditor_sampling_random_seed">Graine aléatoire</string>
+  <string name="surveyeditor_sampling_random_seed_description">Une même graine donne toujours les mêmes placettes.</string>
+  <string name="surveyeditor_sampling_reroll_seed">Choisir une nouvelle graine aléatoire</string>
+  <!-- Progress while generating plots. %1$s is the number generated so far (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_generating">
+    <item quantity="one">Génération… %1$s placette</item>
+    <item quantity="other">Génération… %1$s placettes</item>
+  </plurals>
+  <!-- Progress while generating plots. %1$s is the number generated so far, %2$s the expected total. -->
+  <plurals name="surveyeditor_sampling_generating_of_about">
+    <item quantity="one">Génération… %1$s placettes sur environ %2$s</item>
+    <item quantity="other">Génération… %1$s placettes sur environ %2$s</item>
+  </plurals>
+  <!-- %1$s is the number of plots in the preview (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_previewing_plots">
+    <item quantity="one">Aperçu de %1$s placette d’échantillonnage</item>
+    <item quantity="other">Aperçu de %1$s placettes d’échantillonnage</item>
+  </plurals>
+  <!-- Sample area option: the survey's own area. -->
+  <string name="surveyeditor_sampling_area_survey_area">Zone d’enquête</string>
+  <!-- Sample area option. %1$s is the name of a polygon map layer whose features are strata. -->
+  <string name="surveyeditor_sampling_area_strata_from">Strates de %1$s</string>
+  <string name="surveyeditor_sampling_area_deleted_layer">Couche cartographique supprimée</string>
+  <string name="surveyeditor_sampling_area">Zone</string>
+  <string name="surveyeditor_sampling_stratum_property">Propriété de strate</string>
+  <string name="surveyeditor_sampling_choose">Choisir…</string>
+  <!-- %1$d is the number of strata, %2$s a comma-separated list of the first few stratum IDs. -->
+  <plurals name="surveyeditor_sampling_strata_list">
+    <item quantity="one">%1$d strate : %2$s</item>
+    <item quantity="other">%1$d strates : %2$s</item>
+  </plurals>
+  <string name="surveyeditor_sampling_min_distance">Distance minimale entre les placettes (m)</string>
+  <string name="surveyeditor_sampling_grid_spacing">Espacement de la grille (m)</string>
+  <!-- %1$d is the target number of plots used to suggest a grid spacing. -->
+  <string name="surveyeditor_sampling_grid_spacing_auto_description">Distance entre les centres de placettes voisines. Définie selon la taille de la zone (environ %1$d placettes) ; plus la zone est grande, plus l’espacement est large.</string>
+  <string name="surveyeditor_sampling_grid_spacing_description">Distance entre les centres de placettes voisines.</string>
+  <!-- %1$s is the suggested grid spacing in meters. -->
+  <string name="surveyeditor_sampling_match_area_size">Adapter à la taille de la zone (%1$s m)</string>
+  <string name="surveyeditor_sampling_number_of_plots">Nombre de placettes</string>
+  <string name="surveyeditor_sampling_survey_area_one_stratum">La zone d’enquête compte comme une seule strate. Pour échantillonner des strates séparément, choisissez une couche cartographique de polygones comme zone.</string>
+  <string name="surveyeditor_sampling_allocation">Répartition</string>
+  <!-- Label of a field for the number of plots in one stratum. %1$s is the stratum ID. -->
+  <string name="surveyeditor_sampling_plots_in_stratum">Placettes dans %1$s</string>
+  <!-- Label of the plot count field when there are no strata. -->
+  <string name="surveyeditor_sampling_plots_in_survey_area">Placettes dans la zone d’enquête</string>
+  <!-- %1$d is the number of strata not listed. -->
+  <plurals name="surveyeditor_sampling_more_strata">
+    <item quantity="one">%1$d autre strate ne reçoit aucune placette sauf si elle est définie.</item>
+    <item quantity="other">%1$d autres strates ne reçoivent aucune placette sauf si elles sont définies.</item>
+  </plurals>
+  <string name="surveyeditor_sampling_total_plots">Total des placettes</string>
+  <string name="surveyeditor_sampling_number_of_clusters">Nombre de grappes</string>
+  <string name="surveyeditor_sampling_plots_per_side">Placettes par côté</string>
+  <!-- %1$d is the number of plots in each cluster. -->
+  <plurals name="surveyeditor_sampling_plots_per_cluster">
+    <item quantity="one">%1$d placette par grappe</item>
+    <item quantity="other">%1$d placettes par grappe</item>
+  </plurals>
+  <string name="surveyeditor_sampling_cluster_spacing">Espacement entre les placettes d’une grappe (m)</string>
+  <string name="surveyeditor_sampling_estimate_unavailable">Estimation pas encore disponible.</string>
+  <!-- %1$s is the formatted area (e.g. "850 ha"), %2$s the estimated plot count with thousands separators. -->
+  <plurals name="surveyeditor_sampling_estimate">
+    <item quantity="one">Zone %1$s • environ %2$s placette</item>
+    <item quantity="other">Zone %1$s • environ %2$s placettes</item>
+  </plurals>
+  <string name="surveyeditor_sampling_estimate_title">Estimation</string>
+  <string name="surveyeditor_sampling_large_design_warning">Les plans de grande taille peuvent être lents à générer et à modifier.</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_number_at_least">Saisissez un nombre supérieur ou égal à %1$s.</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_whole_number_at_least">Saisissez un nombre entier supérieur ou égal à %1$s.</string>
+  <!-- Validation message. %1$s and %2$s are the minimum and maximum allowed values. -->
+  <string name="surveyeditor_sampling_enter_whole_number_range">Saisissez un nombre entier compris entre %1$s et %2$s.</string>
+
+  <string name="surveyeditor_plot_review">Révision des placettes</string>
+  <string name="surveyeditor_plot_review_description">Vérifiez d’abord chaque placette sur l’imagerie satellitaire, puis envoyez aux équipes de terrain les placettes qui le nécessitent.</string>
+  <string name="surveyeditor_plot_review_desk">Vérifier les placettes sur l’imagerie (web)</string>
+  <string name="surveyeditor_plot_review_desk_on">Les interprètes remplissent un formulaire pour chaque placette dans le tableau de bord web.</string>
+  <string name="surveyeditor_plot_review_desk_off">Ajoute un formulaire web pour classer chaque placette à partir de l’imagerie.</string>
+  <string name="surveyeditor_plot_review_field">Vérifier les placettes sur le terrain (mobile)</string>
+  <string name="surveyeditor_plot_review_field_on">Les placettes à visiter reçoivent un marqueur !. Les équipes de terrain les vérifient dans l’application mobile.</string>
+  <string name="surveyeditor_plot_review_field_off">Ajoute un formulaire mobile pour que les équipes de terrain vérifient les placettes à visiter.</string>
+  <string name="surveyeditor_plot_review_confidence">Envoyer les placettes sous ce niveau de confiance</string>
+  <string name="surveyeditor_plot_review_confidence_description">Les interprètes notent leur confiance de 0 à 100. Saisissez 0 pour n’envoyer que les placettes qu’ils signalent.</string>
+  <string name="surveyeditor_plot_review_spot_checks">Contrôles aléatoires</string>
+  <string name="surveyeditor_plot_review_spot_checks_description">Des placettes choisies au hasard sont aussi envoyées sur le terrain pour mesurer la précision des vérifications au bureau. Saisissez 0 pour aucune.</string>
+  <plurals name="surveyeditor_plot_review_spot_checks_share">
+    <item quantity="one">%1$s de %2$s placette. Choisie au hasard pour mesurer la précision des vérifications au bureau.</item>
+    <item quantity="other">%1$s des %2$s placettes. Choisies au hasard pour mesurer la précision des vérifications au bureau.</item>
+  </plurals>
+  <string name="surveyeditor_plot_review_spot_checks_unshuffled">Activez Mélanger l’ordre de visite pour que les contrôles soient choisis au hasard.</string>
+  <string name="surveyeditor_plot_review_desk_form">%1$s devient la vérification au bureau : web uniquement, avec des questions de confiance et de signalement.</string>
+  <string name="surveyeditor_plot_review_show_desk">Montrer les réponses du bureau aux équipes de terrain</string>
+  <string name="surveyeditor_plot_review_show_desk_on">Les équipes voient sur chaque placette l’occupation du sol et la confiance issues de la vérification au bureau.</string>
+  <string name="surveyeditor_plot_review_show_desk_off">Contrôle à l’aveugle : les équipes voient seulement pourquoi une placette a été signalée.</string>
+  <string name="surveyeditor_plot_review_open_form">Ouvrir %1$s</string>
+  <string name="surveyeditor_plot_review_remove_title">Arrêter de vérifier les placettes sur l’imagerie ?</string>
+  <string name="surveyeditor_plot_review_remove_body">Les formulaires et questions de révision des placettes seront retirés de l’enquête, y compris les modifications que vous y avez apportées.</string>
+  <string name="surveyeditor_plot_review_remove_field_title">Arrêter de vérifier les placettes sur le terrain ?</string>
+  <string name="surveyeditor_plot_review_remove_field_body">Le formulaire de vérification sur le terrain sera retiré de l’enquête, y compris les modifications que vous y avez apportées.</string>
+  <string name="surveyeditor_plot_review_remove">Retirer les formulaires</string>
+  <string name="surveyeditor_plot_review_remove_field">Retirer le formulaire</string>
+  <!-- Sampling design: button that uploads a strata file. -->
+  <string name="surveyeditor_sampling_upload_strata_file">Téléverser un fichier de strates (GeoJSON / KML)</string>
+  <!-- Error under the strata file upload when the file has no polygons. %1$s = file name. -->
+  <string name="surveyeditor_sampling_strata_file_no_polygons">Aucune entité polygonale trouvée dans %1$s.</string>
+  <!-- Error under the strata file upload when the file has points or lines instead of polygons. -->
+  <string name="surveyeditor_sampling_strata_file_not_polygons">Le fichier de strates doit contenir des entités polygonales.</string>
+
+  <!-- Problems found in an uploaded GeoJSON or KML file (GeoIssueText.kt). Shown in the survey area, map layer, and strata uploads. %1$d is the feature's number in the file, counted from 1. -->
+  <string name="geo_issue_unsupported_file_type">Ce type de fichier n'est pas pris en charge. Importez un fichier GeoJSON (.geojson, .json) ou KML (.kml).</string>
+  <string name="geo_issue_unreadable_geojson">Ce fichier n'est pas un GeoJSON valide. Vérifiez qu'il a été exporté au format GeoJSON, puis réessayez.</string>
+  <string name="geo_issue_geojson_not_an_object">Ce fichier n'est pas un GeoJSON valide. Il doit contenir un objet.</string>
+  <string name="geo_issue_geojson_without_type">Ce fichier n'est pas un GeoJSON valide.</string>
+  <string name="geo_issue_invalid_kml">Ce fichier n'est pas un KML valide. Vérifiez qu'il a été exporté au format KML (et non KMZ), puis réessayez.</string>
+  <string name="geo_issue_no_geometry">Ce fichier ne contient aucune géométrie.</string>
+  <string name="geo_issue_feature_collection_without_features">La FeatureCollection ne contient aucune entité.</string>
+  <!-- %1$d is the number of holes removed. -->
+  <plurals name="geo_issue_holes_removed">
+    <item quantity="one">%1$d trou a été retiré des polygones. Collect One n'utilise que les limites extérieures.</item>
+    <item quantity="other">%1$d trous ont été retirés des polygones. Collect One n'utilise que les limites extérieures.</item>
+  </plurals>
+  <string name="geo_issue_invalid_feature">L'entité %1$d n'est pas une Feature GeoJSON valide.</string>
+  <string name="geo_issue_feature_without_geometry">L'entité %1$d n'a pas de géométrie et a été ignorée.</string>
+  <string name="geo_issue_invalid_geometry">L'entité %1$d a une géométrie non valide.</string>
+  <!-- %2$s is the GeoJSON geometry type found in the file, e.g. "Circle". -->
+  <string name="geo_issue_unsupported_geometry_type">L'entité %1$d a un type de géométrie non pris en charge : « %2$s ».</string>
+  <!-- Shown as %2$s of geo_issue_unsupported_geometry_type when the geometry has no type. -->
+  <string name="geo_issue_geometry_type_unknown">inconnu</string>
+  <string name="geo_issue_invalid_coordinates">L'entité %1$d a des coordonnées manquantes ou non valides et a été ignorée.</string>
+  <string name="geo_issue_coordinates_out_of_range">L'entité %1$d a des coordonnées hors de la plage valide et a été ignorée. Utilisez des degrés décimaux WGS 84 (latitude de −90 à 90, longitude de −180 à 180).</string>
+  <string name="geo_issue_too_few_corners">L'entité %1$d a moins de 3 sommets distincts et a été ignorée.</string>
+  <string name="geo_issue_outline_closed">Le contour de l'entité %1$d n'était pas fermé ; il a été fermé automatiquement.</string>
+  <string name="geo_issue_self_intersection">Le contour de l'entité %1$d se recoupe. Les surfaces et les placettes d'échantillonnage peuvent être fausses ; corrigez la limite dans un outil SIG et importez-la à nouveau.</string>
+  <string name="geo_issue_may_cross_antimeridian">L'entité %1$d traverse peut-être le méridien de 180°, ce qui n'est pas encore pris en charge. Divisez-la en parties de chaque côté du méridien.</string>
+  <!-- How a survey's area was defined, after "Source:". "Places API" is the name of the place search service. -->
+  <string name="surveyeditor_area_source_selected_boundary">Limite sélectionnée</string>
+  <string name="surveyeditor_area_source_drawn">Dessinée sur la carte</string>
+  <string name="surveyeditor_area_source_uploaded">Importée : %1$s</string>
+  <string name="surveyeditor_area_source_place_search">Places API</string>
+  <string name="surveyeditor_area_source_coordinates">Coordonnées</string>
+  <plurals name="surveyeditor_area_source_collect_earth_grid">
+    <item quantity="one">Grille de placettes Collect Earth (%1$d placette)</item>
+    <item quantity="other">Grille de placettes Collect Earth (%1$d placettes)</item>
+  </plurals>
+
+  <!-- Survey details: Danger zone, where organizers delete the survey. -->
+  <string name="surveyeditor_danger_zone">Zone de danger</string>
+  <string name="surveyeditor_danger_zone_body">La suppression de l’enquête la retire pour toutes les personnes qui y ont accès, y compris ses collecteurs de données. Elle n’est plus comptée dans la limite d’enquêtes de son propriétaire.</string>
+  <string name="surveyeditor_delete_survey">Supprimer l’enquête</string>
+  <!-- %1$s: the survey's title. -->
+  <string name="surveyeditor_delete_survey_title">Supprimer « %1$s » ?</string>
+  <string name="surveyeditor_delete_survey_message">Tout le monde perd l’accès à cette enquête et aux données qui y ont été collectées. Les modifications non publiées sont supprimées, et l’enquête n’est plus comptée dans la limite d’enquêtes de son propriétaire.</string>
+  <string name="surveyeditor_add_dataset_from_template">À partir d’un modèle</string>
+  <string name="surveyeditor_add_layer_from_template_body">Ajoutez le formulaire d’un modèle. Ses soumissions ajoutent des entités à une nouvelle couche cartographique.</string>
+  <string name="surveyeditor_add_table_from_template_body">Ajoutez le formulaire d’un modèle. Ses soumissions ajoutent des lignes à une nouvelle table de données.</string>
+  <string name="surveyeditor_add_dataset_no_templates">Votre bibliothèque ne contient aucun modèle de ce type.</string>
+</resources>

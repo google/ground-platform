@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:ConfigureWizardSurveyDraftUseCase.kt$ConfigureWizardSurveyDraftUseCase$index == 0 &amp;&amp; !usesUpdateMode &amp;&amp; startMethod == WizardStartMethod.FROM_SCRATCH &amp;&amp; !updatedForm.hasGeometry</ID>
+    <ID>ComplexCondition:SuggestedGridSpacing.kt$SuggestedGridSpacing$previous == null || previous.gridSpacingAuto &amp;&amp; previous.areaSource == config.areaSource &amp;&amp; areaGeometry(before, config) == areaGeometry(after, config)</ID>
+    <ID>CyclomaticComplexMethod:ConfigureWizardSurveyDraftUseCase.kt$ConfigureWizardSurveyDraftUseCase$fun synchronizePrimaryLayerAndForms( current: SurveyEditorDraft, library: ResolvedLibrary, startMethod: WizardStartMethod, effectiveMode: SurveyCollectionMode, mapFeatureSource: WizardMapFeatureSource, isGeometryTypeOverridden: Boolean, isEudrPlotsUnderFourHaConfirmed: Boolean, hasPurposeSelectionChanged: Boolean, previousSeededFormKeys: Set&lt;String&gt;, /** Starter template chosen per selected purpose (others use their default). */ starterTemplateIds: Map&lt;String, String&gt; = emptyMap(), ): WizardDraftSyncResult</ID>
+    <ID>CyclomaticComplexMethod:DataTableImporter.kt$DataTableImporter$fun plan( fileName: String, text: String, dateOrder: DateOrder = DateOrder.DAY_FIRST, ): DataTableImportResult</ID>
+    <ID>CyclomaticComplexMethod:GenerateSamplePlotsUseCase.kt$GenerateSamplePlotsUseCase$suspend operator fun invoke( dataset: EntityDataset, surveyArea: SurveyArea?, datasets: List&lt;EntityDataset&gt;, onProgress: (plotsSoFar: Int, expectedPlots: Int) -&gt; Unit = { _, _ -&gt; }, ): Result</ID>
+    <ID>CyclomaticComplexMethod:ManageLibraryUseCase.kt$ManageLibraryUseCase$fun conceptError(concept: LibraryConcept, library: OrganizationLibrary, isNew: Boolean): String?</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:ImportDates.kt$ImportDates$val (a, sep, b, y) = m.destructured</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:ImportDates.kt$ImportDates$val (y, _, mo, d) = m.destructured</ID>
+    <ID>LongMethod:ComputeImpactUseCase.kt$ComputeImpactUseCase$private fun indicator( snapshot: ImpactSnapshot, conceptId: String, rows: List&lt;ImpactAggregateRow&gt;, ): ImpactIndicator?</ID>
+    <ID>LongMethod:ConfigureWizardSurveyDraftUseCase.kt$ConfigureWizardSurveyDraftUseCase$fun synchronizePrimaryLayerAndForms( current: SurveyEditorDraft, library: ResolvedLibrary, startMethod: WizardStartMethod, effectiveMode: SurveyCollectionMode, mapFeatureSource: WizardMapFeatureSource, isGeometryTypeOverridden: Boolean, isEudrPlotsUnderFourHaConfirmed: Boolean, hasPurposeSelectionChanged: Boolean, previousSeededFormKeys: Set&lt;String&gt;, /** Starter template chosen per selected purpose (others use their default). */ starterTemplateIds: Map&lt;String, String&gt; = emptyMap(), ): WizardDraftSyncResult</ID>
+    <ID>LongMethod:DataTableImporter.kt$DataTableImporter$fun plan( fileName: String, text: String, dateOrder: DateOrder = DateOrder.DAY_FIRST, ): DataTableImportResult</ID>
+    <ID>LongParameterList:ConfigureWizardSurveyDraftUseCase.kt$ConfigureWizardSurveyDraftUseCase$( current: SurveyEditorDraft, library: ResolvedLibrary, startMethod: WizardStartMethod, effectiveMode: SurveyCollectionMode, mapFeatureSource: WizardMapFeatureSource, isGeometryTypeOverridden: Boolean, isEudrPlotsUnderFourHaConfirmed: Boolean, hasPurposeSelectionChanged: Boolean, previousSeededFormKeys: Set&lt;String&gt;, /** Starter template chosen per selected purpose (others use their default). */ starterTemplateIds: Map&lt;String, String&gt; = emptyMap(), )</ID>
+    <ID>ReturnCount:DataTableImporter.kt$DataTableImporter$internal fun guessColumn(values: List&lt;String&gt;, dateOrder: DateOrder): ColumnGuess</ID>
+    <ID>ReturnCount:GenerateSamplePlotsUseCase.kt$GenerateSamplePlotsUseCase$suspend operator fun invoke( dataset: EntityDataset, surveyArea: SurveyArea?, datasets: List&lt;EntityDataset&gt;, onProgress: (plotsSoFar: Int, expectedPlots: Int) -&gt; Unit = { _, _ -&gt; }, ): Result</ID>
+    <ID>ReturnCount:ImportDates.kt$ImportDates$private fun shape(v: String): Shape?</ID>
+    <ID>ReturnCount:InviteCollaboratorUseCase.kt$InviteCollaboratorUseCase$fun acceptInvite( sharing: SharingSettings, email: String, displayName: String, photoUrl: String?, cachedOn: String = "", ): Outcome</ID>
+    <ID>ReturnCount:InviteOrganizationMemberUseCase.kt$InviteOrganizationMemberUseCase$fun inviteError( organization: Organization?, email: String, role: OrganizationRole = OrganizationRole.MEMBER, ): DomainMessage?</ID>
+    <ID>ReturnCount:ManageLibraryUseCase.kt$ManageLibraryUseCase$fun conceptError(concept: LibraryConcept, library: OrganizationLibrary, isNew: Boolean): String?</ID>
+    <ID>SwallowedException:GenerateSamplePlotsUseCase.kt$GenerateSamplePlotsUseCase$e: Throwable</ID>
+    <ID>TooGenericExceptionCaught:GenerateSamplePlotsUseCase.kt$GenerateSamplePlotsUseCase$e: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

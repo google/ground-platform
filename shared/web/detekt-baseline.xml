@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:WebDashboardPage.kt$@Composable private fun DashboardDataTableView( table: DashboardDataTable, onRowClick: (DashboardDataTableRow) -&gt; Unit, isLoading: Boolean = false, modifier: Modifier = Modifier, )</ID>
+    <ID>CyclomaticComplexMethod:WebDashboardPage.kt$@Composable private fun DashboardMapArea( uiState: WebDashboardUiState, actions: WebDashboardActions, entityDetailsCard: DashboardRecordCard&lt;GeospatialEntityItem&gt;, submissionDetailsCard: DashboardRecordCard&lt;SubmissionPreviewItem&gt;, modifier: Modifier = Modifier, )</ID>
+    <ID>LargeClass:CreateSurveyWizardViewModelTest.kt$CreateSurveyWizardViewModelTest</ID>
+    <ID>LongMethod:CreateSurveyWizardViewModelTest.kt$CreateSurveyWizardViewModelTest$@Test fun finishWizard_withSyncEngineAndSyncedWorkingCopy_savesPurposePackFormsAndMapLayers()</ID>
+    <ID>LongMethod:CreateSurveyWizardViewModelTest.kt$CreateSurveyWizardViewModelTest$@Test fun importCollectEarthCepBundle_parsesQuestionsRelevancePlotsAndAllowsProjectSwitch()</ID>
+    <ID>LongMethod:CreateSurveyWizardViewModelTest.kt$CreateSurveyWizardViewModelTest$@Test fun sampleDesignPreview_withSyncEngineAndWorkingCopyAutosave_preservesAreaAndEnablesRegenerate()</ID>
+    <ID>LongMethod:DashboardExportMenu.kt$@Composable internal fun DashboardExportButton( table: DashboardDataTable, options: DatasetExportOptions?, actions: DashboardActions, download: (ExportFile) -&gt; Unit = { file -&gt; downloadTextFile(fileName = file.fileName, mimeType = file.mimeType, content = file.content) }, )</ID>
+    <ID>LongMethod:WebAppStateMapDrawingTest.kt$WebAppStateMapDrawingTest$@Test fun webFormGeometries_followTheOpenForm_andSkipTheOneBeingDrawn()</ID>
+    <ID>LongMethod:WebDashboardPage.kt$@Composable private fun DashboardDataTableView( table: DashboardDataTable, onRowClick: (DashboardDataTableRow) -&gt; Unit, isLoading: Boolean = false, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:WebDashboardPage.kt$@Composable private fun DashboardMapArea( uiState: WebDashboardUiState, actions: WebDashboardActions, entityDetailsCard: DashboardRecordCard&lt;GeospatialEntityItem&gt;, submissionDetailsCard: DashboardRecordCard&lt;SubmissionPreviewItem&gt;, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:WebDashboardPage.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DashboardDataTablesPanel( uiState: DashboardUiState, actions: DashboardActions, selectedEntityId: String?, onRowClick: (DashboardDataTableRow) -&gt; Unit, expandedTableHeight: Dp, isLoading: Boolean = false, modifier: Modifier = Modifier, /** State of the "Time series &amp; imagery" tab, shown after the tables when given. */ timeSeries: TimeSeriesUiState? = null, timeSeriesActions: TimeSeriesActions? = null, )</ID>
+    <ID>LongMethod:WebDataCollectionCard.kt$@Composable internal fun WebCollectDataMenuButton( uiState: DataCollectionUiState, actions: DataCollectionActions, )</ID>
+    <ID>LongMethod:WebDataCollectionCard.kt$@Composable private fun WebEntityRefPicker( uiState: DataCollectionUiState, actions: DataCollectionActions, form: FormPreviewItem, )</ID>
+    <ID>LongMethod:WebEntityDetailsCards.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun WebEntityDetailsCard( details: EntityDetailsUiState, actions: EntityDetailsActions, dashboard: DashboardActions, dataCollection: DataCollectionActions, modifier: Modifier = Modifier, onCollapse: (() -&gt; Unit)? = null, )</ID>
+    <ID>LongMethod:WebLayerDetailsCard.kt$@Composable internal fun WebLayerDetailsCard( summary: DashboardLayerSummary, layer: MapLayerItem?, onClose: () -&gt; Unit, onShowInTable: () -&gt; Unit, modifier: Modifier = Modifier, onCollapse: (() -&gt; Unit)? = null, )</ID>
+    <ID>LongMethod:WebSignInPage.kt$@Composable internal fun WebSignInPage( uiState: OnboardingUiState, actions: OnboardingActions, languageCode: String, notice: String?, onSignIn: () -&gt; Unit, onLanguageChange: (String) -&gt; Unit, header: @Composable (headerActions: @Composable RowScope.() -&gt; Unit) -&gt; Unit, )</ID>
+    <ID>LongMethod:WebTopToolbar.kt$@Composable internal fun WebAppHeader( uiState: WebAppHeaderUiState, headerActions: WebAppHeaderActions, onSignOut: (() -&gt; Unit)?, modifier: Modifier = Modifier, onLogoClick: (() -&gt; Unit)? = headerActions::openSurveys, showLanguageSelector: Boolean = true, showSaveStatus: Boolean = true, navigationIcon: (@Composable () -&gt; Unit)? = null, context: @Composable () -&gt; Unit = {}, actions: (@Composable RowScope.() -&gt; Unit)? = null, )</ID>
+    <ID>UnusedPrivateMember:WebAppStateTest.kt$WebAppStateTest$private fun SurveyMap.overlayIds()</ID>
+  </CurrentIssues>
+</SmellBaseline>

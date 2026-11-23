@@ -26,8 +26,19 @@ import org.openforis.collectone.v2.core.forms.xpath.model.XPathValue
  * resolution, deterministic clocks, and UUID/PRNG generation.
  */
 data class FormEnvironment(
-  /** Supplier for current UTC epoch milliseconds (`today()`, `now()`, `PRELOAD_TIMESTAMP`). */
+  /**
+   * Supplier for current UTC epoch milliseconds (`today()`, `now()`, `PRELOAD_TIMESTAMP`). Defaults
+   * to a fixed instant (2026-09-17T00:00:00Z) for deterministic tests, so apps collecting data must
+   * supply the device clock.
+   */
   val clockEpochMillis: () -> Long = { EvaluationContext.DEFAULT_EPOCH_MILLIS },
+  /**
+   * Offset in milliseconds of the local time zone from UTC at a UTC epoch-millisecond instant.
+   * `today()`, the `date` and `time` preloads, and `<meta><today>` take the local calendar day and
+   * time of day, as in ODK Collect; timestamps (`now()`, `start`, `end`) stay instants. Defaults to
+   * UTC.
+   */
+  val utcOffsetMillis: (epochMillis: Long) -> Long = { 0L },
   /** Optional deterministic seed for `random()`, `uuid()`, and `ItemsetDef.randomize`. */
   val randomSeed: Long? = null,
   /**
@@ -56,7 +67,17 @@ data class FormEnvironment(
    * a [ org.openforis.collectone.v2.core.forms.model.PlatformEffectRequest.SetGeopointRequest ].
    */
   val locationProvider: (() -> GeoPoint?)? = null,
+  /**
+   * Relative or canonical field paths that are skipped on the active form variant (for example,
+   * GPS-only geometry fields on web, or geometry and media upload fields inside Google Earth map
+   * balloons) so they do not fail `required` or `constraint` validation during navigation or
+   * finalization.
+   */
+  val skippedFieldPaths: Set<String> = emptySet(),
 ) {
+  /** The local wall-clock time now: [clockEpochMillis] shifted by [utcOffsetMillis]. */
+  fun localClockEpochMillis(): Long = clockEpochMillis().let { it + utcOffsetMillis(it) }
+
   /** Resolves a device property case-insensitively (supporting aliases like `device_id`). */
   fun getDeviceProperty(param: String): String? {
     val normalized = param.trim().lowercase().replace("_", "")

@@ -32,7 +32,7 @@ message LocalizedText {
 }
 
 // A standard field definition (dictionary entry) in an organization's library.
-// Linking a form question to a concept tells Ground what the answer means, so
+// Linking a form question to a concept tells Collect One what the answer means, so
 // answers can be validated, exported, and aggregated consistently.
 message ConceptDef {
   // Stable ID. Global concepts use `<vocabulary>.<name>` (e.g.,

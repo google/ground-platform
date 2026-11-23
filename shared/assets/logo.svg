@@ -22,22 +22,22 @@
     - Tree & Base Arch Silhouette (Deep Forest-Slate): #14261E
   -->
   <defs>
-    <clipPath id="ground-1c4-above-ground" clipPathUnits="userSpaceOnUse">
+    <clipPath id="c1-logo-above-ground" clipPathUnits="userSpaceOnUse">
       <path d="M0 0 L512 0 L512 436 C340 398, 172 402, 0 444 Z" />
     </clipPath>
-    <clipPath id="ground-1c4-lens-clip" clipPathUnits="userSpaceOnUse">
+    <clipPath id="c1-logo-lens-clip" clipPathUnits="userSpaceOnUse">
       <circle cx="256" cy="256" r="216" />
     </clipPath>
   </defs>
 
-  <g clip-path="url(#ground-1c4-above-ground)">
+  <g clip-path="url(#c1-logo-above-ground)">
     <!-- 1. Outer World Lens Ring (#2C536E, cx=256, cy=256, r=236, 20px border around r=216 lens) -->
     <path
       d="M103.37 436 A236 236 0 1 1 408.63 436 Z"
       fill="#2C536E"
     />
 
-    <g clip-path="url(#ground-1c4-lens-clip)">
+    <g clip-path="url(#c1-logo-lens-clip)">
       <!-- 2. Inner Green Sky Lens (#AEC66B, cx=256, cy=256, r=216) -->
       <path
         d="M128.02 430 A216 216 0 1 1 383.98 430 Z"

@@ -19,7 +19,7 @@
 `ImpactAggregator.run` turns survey snapshots (map features, concept links, impact events, and
 survey outcomes) into privacy-safe aggregate rows at survey, organization, country, global, and S2
 grid cell scope. It implements the aggregation job designed in
-[Impact Aggregation and Spatial Overlays](../../../../../../../../../../docs/technical/backend/impact-aggregation.md);
+[Impact Aggregation and Spatial Overlays](../../../../../../../../../../../docs/technical/backend/impact-aggregation.md);
 rows correspond to `openforis.collectone.v1.data.ImpactAggregate`.
 
 The same pure, deterministic code runs in the backend job (JVM) and in clients, so dashboards

@@ -1,0 +1,111 @@
+-- Copyright 2026 The Collect One Authors.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     https://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
+-- Server bases: the last server copy of every synced record. Pending mutations are re-applied on
+-- top of them to rebuild the local copy the UI shows (docs/technical/sync-engine.md, "Rebase on
+-- Remote Changes"). Records are opaque encoded protos; only their keys are columns.
+
+-- openforis.collectone.v1.userdata.SurveyBaseRecord: a survey's saved revision, working copy, and
+-- ACL.
+CREATE TABLE survey_base (
+  survey_id TEXT NOT NULL PRIMARY KEY,
+  record BLOB NOT NULL
+);
+
+-- openforis.collectone.v1.data.EntityRecord.
+CREATE TABLE entity_base (
+  survey_id TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  record BLOB NOT NULL,
+  PRIMARY KEY (survey_id, entity_id)
+);
+
+-- openforis.collectone.v1.data.SubmissionRecord.
+CREATE TABLE submission_base (
+  survey_id TEXT NOT NULL,
+  submission_id TEXT NOT NULL,
+  record BLOB NOT NULL,
+  PRIMARY KEY (survey_id, submission_id)
+);
+
+-- openforis.collectone.v1.survey.Organization.
+CREATE TABLE organization_base (
+  organization_id TEXT NOT NULL PRIMARY KEY,
+  record BLOB NOT NULL
+);
+
+-- openforis.collectone.v1.library.OrganizationLibraryRecord.
+CREATE TABLE library_base (
+  organization_id TEXT NOT NULL PRIMARY KEY,
+  record BLOB NOT NULL
+);
+
+selectSurveyBases:
+SELECT record FROM survey_base ORDER BY survey_id;
+
+upsertSurveyBase:
+INSERT OR REPLACE INTO survey_base(survey_id, record) VALUES (?, ?);
+
+deleteSurveyBase:
+DELETE FROM survey_base WHERE survey_id = ?;
+
+selectEntityBases:
+SELECT record FROM entity_base ORDER BY survey_id, entity_id;
+
+upsertEntityBase:
+INSERT OR REPLACE INTO entity_base(survey_id, entity_id, record) VALUES (?, ?, ?);
+
+deleteEntityBase:
+DELETE FROM entity_base WHERE survey_id = ? AND entity_id = ?;
+
+deleteEntityBasesOfSurvey:
+DELETE FROM entity_base WHERE survey_id = ?;
+
+selectSubmissionBases:
+SELECT record FROM submission_base ORDER BY survey_id, submission_id;
+
+upsertSubmissionBase:
+INSERT OR REPLACE INTO submission_base(survey_id, submission_id, record) VALUES (?, ?, ?);
+
+deleteSubmissionBase:
+DELETE FROM submission_base WHERE survey_id = ? AND submission_id = ?;
+
+deleteSubmissionBasesOfSurvey:
+DELETE FROM submission_base WHERE survey_id = ?;
+
+selectOrganizationBases:
+SELECT record FROM organization_base ORDER BY organization_id;
+
+upsertOrganizationBase:
+INSERT OR REPLACE INTO organization_base(organization_id, record) VALUES (?, ?);
+
+deleteOrganizationBase:
+DELETE FROM organization_base WHERE organization_id = ?;
+
+selectLibraryBases:
+SELECT record FROM library_base ORDER BY organization_id;
+
+upsertLibraryBase:
+INSERT OR REPLACE INTO library_base(organization_id, record) VALUES (?, ?);
+
+deleteLibraryBase:
+DELETE FROM library_base WHERE organization_id = ?;
+
+deleteAll {
+  DELETE FROM survey_base;
+  DELETE FROM entity_base;
+  DELETE FROM submission_base;
+  DELETE FROM organization_base;
+  DELETE FROM library_base;
+}

@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions shared across the survey editor. -->
+  <string name="surveyeditor_cancel">ຍົກເລີກ</string>
+  <!-- Button that dismisses a dialog. -->
+  <string name="surveyeditor_close">ປິດ</string>
+  <!-- Button that returns to the previous step of a dialog. -->
+  <string name="surveyeditor_back">ກັບຄືນ</string>
+  <string name="surveyeditor_import">ນຳເຂົ້າ</string>
+  <!-- Button that confirms importing a file. %1$s is the file name. -->
+  <string name="surveyeditor_import_file">ນຳເຂົ້າ %1$s</string>
+  <string name="surveyeditor_select">ເລືອກ</string>
+  <string name="surveyeditor_description">ຄຳອະທິບາຍ</string>
+  <string name="surveyeditor_clear_search">ລ້າງການຊອກຫາ</string>
+  <string name="surveyeditor_delete">ລຶບ</string>
+  <string name="surveyeditor_done">ແລ້ວເສັດ</string>
+  <!-- Header button that saves edits of a draft survey. -->
+  <string name="surveyeditor_save_changes">ບັນທຶກການປ່ຽນແປງ</string>
+  <!-- Header button that publishes edits of an already published survey again. -->
+  <string name="surveyeditor_republish">ເຜີຍແຜ່ຄືນ</string>
+  <string name="surveyeditor_read_only_closed">ແບບສຳຫຼວດນີ້ຖືກປິດແລ້ວ. ເປີດຄືນເພື່ອແກ້ໄຂ.</string>
+  <string name="surveyeditor_read_only_archived">ແບບສຳຫຼວດນີ້ຖືກຈັດເກັບແລ້ວ. ເປີດຄືນເພື່ອແກ້ໄຂ.</string>
+  <string name="surveyeditor_survey_area_required">ຈຳເປັນຕ້ອງມີພື້ນທີ່ສຳຫຼວດ.</string>
+  <!-- Notice after removing the survey's organization. %1$s is the name of the general access option (e.g. Restricted). -->
+  <string name="surveyeditor_access_changed_no_organization">ການເຂົ້າເຖິງທົ່ວໄປຖືກປ່ຽນເປັນ “%1$s” ເນື່ອງຈາກແບບສຳຫຼວດບໍ່ໄດ້ຂຶ້ນກັບອົງກອນໃດອີກແລ້ວ.</string>
+
+  <!-- Sharing: errors when inviting a person or accepting an invite. -->
+  <string name="surveyeditor_invite_invalid_email">ປ້ອນທີ່ຢູ່ອີເມວທີ່ຖືກຕ້ອງ.</string>
+  <string name="surveyeditor_invite_is_owner">ນີ້ແມ່ນເຈົ້າຂອງແບບສຳຫຼວດ.</string>
+  <string name="surveyeditor_invite_enter_name">ປ້ອນຊື່.</string>
+  <string name="surveyeditor_invite_not_invited">ບໍ່ໄດ້ຮັບເຊີນ.</string>
+  <string name="surveyeditor_invite_already_joined">ເຂົ້າຮ່ວມແລ້ວ.</string>
+
+  <!-- Data table import: how numeric dates like 03/04/2025 are read. -->
+  <string name="surveyeditor_date_order_day_first">ວັນກ່ອນ</string>
+  <string name="surveyeditor_date_order_month_first">ເດືອນກ່ອນ</string>
+  <!-- Data table import notes shown before importing a CSV file. -->
+  <string name="surveyeditor_import_file_empty">ໄຟລ໌ນີ້ຫວ່າງເປົ່າ.</string>
+  <string name="surveyeditor_import_no_data_rows">ໄຟລ໌ມີແຖວຫົວຂໍ້ ແຕ່ບໍ່ມີແຖວຂໍ້ມູນ.</string>
+  <plurals name="surveyeditor_import_ragged_rows">
+    <item quantity="other">%1$d ແຖວມີຈຳນວນຖັນບໍ່ກົງກັບແຖວຫົວຂໍ້. ຕາລາງທີ່ຂາດຈະຖືກປະຫວ່າງໄວ້ ແລະ ຕາລາງທີ່ເກີນຈະຖືກຕັດອອກ.</item>
+  </plurals>
+  <!-- "id" is the literal CSV column name; "Row ID" is the name of the column that is added. -->
+  <string name="surveyeditor_import_id_column_not_unique">ຖັນ id ມີຄ່າຫວ່າງ ຫຼື ຊ້ຳກັນ, ສະນັ້ນຈະເພີ່ມຖັນ ID ແຖວ ໃໝ່.</string>
+  <!-- %1$s is a comma-separated list of quoted column names; %2$s is a date pattern such as DD/MM/YYYY. -->
+  <string name="surveyeditor_import_ambiguous_dates">ວັນທີໃນ %1$s ອາດເປັນວັນກ່ອນ ຫຼື ເດືອນກ່ອນ. ລະບົບຈະອ່ານເປັນ %2$s.</string>
+
+  <!-- Sample plots: why plots can't be generated. -->
+  <string name="surveyeditor_sampling_area_missing">ກຳນົດພື້ນທີ່ສຳຫຼວດໃນ ລາຍລະອຽດແບບສຳຫຼວດ, ຫຼື ໃຊ້ຊັ້ນແຜນທີ່ຮູບຫຼາຍແຈເປັນຊັ້ນພູມ.</string>
+  <string name="surveyeditor_sampling_strata_deleted">ຊັ້ນແຜນທີ່ຂອງຊັ້ນພູມຖືກລຶບແລ້ວ. ເລືອກຊັ້ນອື່ນ.</string>
+  <string name="surveyeditor_sampling_strata_not_polygon">ຊັ້ນພູມຕ້ອງມາຈາກຊັ້ນແຜນທີ່ຮູບຫຼາຍແຈ.</string>
+  <!-- %1$s is the name of a map layer. -->
+  <string name="surveyeditor_sampling_strata_no_polygons">“%1$s” ຍັງບໍ່ມີຮູບຫຼາຍແຈ. ເພີ່ມຮູບຫຼາຍແຈເພື່ອໃຊ້ເປັນຊັ້ນພູມ.</string>
+  <string name="surveyeditor_sampling_cant_generate_design">ບໍ່ສາມາດສ້າງແບບແຜນນີ້ໄດ້.</string>
+  <!-- %1$s is a technical error message. -->
+  <string name="surveyeditor_sampling_generate_failed_reason">ບໍ່ສາມາດສ້າງແປງຕົວຢ່າງໄດ້: %1$s</string>
+  <string name="surveyeditor_sampling_generate_failed">ບໍ່ສາມາດສ້າງແປງຕົວຢ່າງໄດ້. ກວດສອບແບບແຜນ ແລ້ວລອງໃໝ່.</string>
+  <string name="surveyeditor_sampling_no_plots_fit">ບໍ່ມີແປງຕົວຢ່າງໃດພໍດີກັບພື້ນທີ່. ລອງຫຼຸດໄລຍະຫ່າງ ຫຼື ຂະໜາດແປງ, ຫຼື ໃຊ້ພື້ນທີ່ທີ່ໃຫຍ່ກວ່າ.</string>
+  <string name="surveyeditor_sampling_no_design">ຊັ້ນແຜນທີ່ນີ້ບໍ່ມີແບບແຜນການສຸ່ມຕົວຢ່າງ.</string>
+  <string name="surveyeditor_sampling_already_generating">ກຳລັງສ້າງແປງຕົວຢ່າງຢູ່ແລ້ວ.</string>
+  <string name="surveyeditor_sampling_layer_missing">ຊັ້ນແຜນທີ່ນີ້ບໍ່ມີຢູ່ອີກແລ້ວ.</string>
+  <!-- %1$d is the number of submissions. -->
+  <plurals name="surveyeditor_regenerate_blocked">
+    <item quantity="other">ການສ້າງຄືນໃໝ່ຖືກປິດໄວ້ ເນື່ອງຈາກມີ %1$d ການສົ່ງຂໍ້ມູນອ້າງອີງເຖິງແປງຕົວຢ່າງເຫຼົ່ານີ້. ເພື່ອລອງແບບແຜນອື່ນ, ໃຫ້ເພີ່ມຊັ້ນແຜນທີ່ແປງຕົວຢ່າງໃໝ່.</item>
+  </plurals>
+
+  <!-- Survey editor page: header, lifecycle, navigation, survey details, sharing. -->
+  <!-- Survey editor page: header. -->
+  <!-- Fallback title for a survey without a title. -->
+  <string name="surveyeditor_untitled_survey">ແບບສຳຫຼວດທີ່ບໍ່ມີຊື່</string>
+  <!-- Header context label identifying the survey editor page. -->
+  <string name="surveyeditor_header_survey_editor">ຕົວແກ້ໄຂແບບສຳຫຼວດ</string>
+  <!-- Header status for a draft survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_save">
+    <item quantity="other">ແກ້ໄຂ %1$d ບັນຫາເພື່ອບັນທຶກ</item>
+  </plurals>
+  <!-- Header status for a published survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_publish">
+    <item quantity="other">ແກ້ໄຂ %1$d ບັນຫາເພື່ອເຜີຍແຜ່</item>
+  </plurals>
+  <string name="surveyeditor_header_unsaved_changes">ມີການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ</string>
+  <string name="surveyeditor_header_unpublished_changes">ມີການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ເຜີຍແຜ່</string>
+  <string name="surveyeditor_header_draft_saved">ບັນທຶກສະບັບຮ່າງແລ້ວ</string>
+  <string name="surveyeditor_header_all_changes_published">ເຜີຍແຜ່ການປ່ຽນແປງທັງໝົດແລ້ວ</string>
+  <!-- Button that discards pending survey edits. -->
+  <string name="surveyeditor_header_discard">ຍົກເລີກການປ່ຽນແປງ</string>
+  <string name="surveyeditor_header_discard_unsaved_title">ຍົກເລີກການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກບໍ?</string>
+  <string name="surveyeditor_header_discard_unpublished_title">ຍົກເລີກການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ເຜີຍແຜ່ບໍ?</string>
+  <string name="surveyeditor_header_discard_unsaved_message">ການປ່ຽນແປງທີ່ທ່ານເຮັດນັບຕັ້ງແຕ່ບັນທຶກສະບັບຮ່າງນີ້ຄັ້ງຫຼ້າສຸດຈະສູນເສຍ.</string>
+  <string name="surveyeditor_header_discard_unpublished_message">ການປ່ຽນແປງທີ່ທ່ານເຮັດນັບຕັ້ງແຕ່ເຜີຍແຜ່ແບບສຳຫຼວດນີ້ຄັ້ງຫຼ້າສຸດຈະສູນເສຍ. ຜູ້ເກັບຂໍ້ມູນຈະຍັງເຫັນສະບັບທີ່ເຜີຍແຜ່ແລ້ວ.</string>
+  <string name="surveyeditor_header_keep_editing">ແກ້ໄຂຕໍ່</string>
+  <string name="surveyeditor_working_copy_prompt_title">ສືບຕໍ່ແກ້ໄຂສະບັບຮ່າງທີ່ຍັງບໍ່ໄດ້ບັນທຶກບໍ?</string>
+  <string name="surveyeditor_working_copy_prompt_draft_message">ທ່ານມີການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກຈາກເຊດຊັນກ່ອນໜ້ານີ້ໃນສະບັບຮ່າງແບບສຳຫຼວດນີ້. ທ່ານຕ້ອງການສືບຕໍ່ແກ້ໄຂສະບັບຮ່າງທີ່ຍັງບໍ່ໄດ້ບັນທຶກຂອງທ່ານ ຫຼື ຍົກເລີກການປ່ຽນແປງເຫຼົ່ານັ້ນບໍ?</string>
+  <string name="surveyeditor_working_copy_prompt_published_message">ທ່ານມີການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ເຜີຍແຜ່ຈາກເຊດຊັນກ່ອນໜ້ານີ້ໃນແບບສຳຫຼວດນີ້. ທ່ານຕ້ອງການສືບຕໍ່ແກ້ໄຂສະບັບຮ່າງທີ່ຍັງບໍ່ໄດ້ບັນທຶກຂອງທ່ານ ຫຼື ຍົກເລີກການປ່ຽນແປງເຫຼົ່ານັ້ນບໍ?</string>
+  <string name="surveyeditor_working_copy_continue">ສືບຕໍ່ແກ້ໄຂ</string>
+  <string name="surveyeditor_working_copy_discard">ຍົກເລີກສະບັບຮ່າງ</string>
+
+  <!-- Survey lifecycle (status) controls. -->
+  <!-- Button that reopens a closed or archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen">ເປີດຄືນ</string>
+  <string name="surveyeditor_lifecycle_draft_description">ຜູ້ຈັດການແກ້ໄຂໄດ້. ເຊື່ອງໄວ້ຈາກຜູ້ເກັບຂໍ້ມູນໃນແອັບມືຖືຈົນກວ່າຈະເຜີຍແຜ່.</string>
+  <string name="surveyeditor_lifecycle_published_description">ເປີດໃຊ້ງານສຳລັບການເກັບຂໍ້ມູນພາກສະໜາມ ແລະ ຜ່ານເວັບ.</string>
+  <string name="surveyeditor_lifecycle_closed_description">ການເກັບຂໍ້ມູນສິ້ນສຸດແລ້ວ ແລະ ແບບສຳຫຼວດເປັນແບບເບິ່ງຢ່າງດຽວຈົນກວ່າຈະເປີດຄືນ.</string>
+  <string name="surveyeditor_lifecycle_archived_description">ເຊົາໃຊ້ງານ ແລະ ເກັບໄວ້ແບບເບິ່ງຢ່າງດຽວເພື່ອອ້າງອີງໃນໄລຍະຍາວ.</string>
+  <string name="surveyeditor_lifecycle_publish_survey">ເຜີຍແຜ່ແບບສຳຫຼວດ</string>
+  <string name="surveyeditor_lifecycle_publish_survey_description">ເປີດໃຊ້ງານສຳລັບການເກັບຂໍ້ມູນໃນມືຖື ແລະ ເວັບ</string>
+  <string name="surveyeditor_lifecycle_archive_survey">ຈັດເກັບແບບສຳຫຼວດ</string>
+  <string name="surveyeditor_lifecycle_archive_survey_description">ເຊົາໃຊ້ງານ ແລະ ເກັບໄວ້ແບບເບິ່ງຢ່າງດຽວເພື່ອອ້າງອີງ</string>
+  <string name="surveyeditor_lifecycle_switch_to_draft">ປ່ຽນເປັນສະບັບຮ່າງ</string>
+  <!-- Description of switching a published survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_published_description">ຢຸດການສະແດງໃນພາກສະໜາມຊົ່ວຄາວ ໃນຂະນະທີ່ແກ້ໄຂຕໍ່</string>
+  <!-- Description of switching a closed survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_closed_description">ປົດລັອກການແກ້ໄຂໃນໂໝດສະບັບຮ່າງກ່ອນເຜີຍແຜ່ຄືນ</string>
+  <!-- Description of switching an archived survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_archived_description">ກູ້ຄືນເປັນໂໝດສະບັບຮ່າງເພື່ອແກ້ໄຂ</string>
+  <string name="surveyeditor_lifecycle_close_survey">ປິດແບບສຳຫຼວດ</string>
+  <string name="surveyeditor_lifecycle_close_survey_description">ສິ້ນສຸດການເກັບຂໍ້ມູນ ແລະ ປ່ຽນເປັນແບບເບິ່ງຢ່າງດຽວ</string>
+  <string name="surveyeditor_lifecycle_reopen_survey">ເປີດແບບສຳຫຼວດຄືນ</string>
+  <!-- Description of reopening a closed survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_closed_description">ສືບຕໍ່ການເກັບຂໍ້ມູນ ແລະ ການແກ້ໄຂ</string>
+  <!-- Description of reopening an archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_archived_description">ກູ້ຄືນເພື່ອເກັບຂໍ້ມູນ ແລະ ແກ້ໄຂ</string>
+  <!-- Screen reader description of the status badge. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_badge_description">ສະຖານະແບບສຳຫຼວດ: %1$s. ຄລິກເພື່ອປ່ຽນສະຖານະ</string>
+  <!-- Heading of the status menu. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_label">ສະຖານະແບບສຳຫຼວດ: %1$s</string>
+  <string name="surveyeditor_lifecycle_archive_title">ຈັດເກັບແບບສຳຫຼວດນີ້ບໍ?</string>
+  <string name="surveyeditor_lifecycle_close_title">ປິດແບບສຳຫຼວດນີ້ບໍ?</string>
+  <string name="surveyeditor_lifecycle_archive_message">ແບບສຳຫຼວດທີ່ຈັດເກັບແລ້ວຈະຖືກເກັບໄວ້ເພື່ອອ້າງອີງ. ບໍ່ມີໃຜສາມາດເກັບຂໍ້ມູນ ຫຼື ແກ້ໄຂໄດ້. ທ່ານສາມາດເປີດຄືນໄດ້ທຸກເວລາ.</string>
+  <string name="surveyeditor_lifecycle_archive_message_discard">ແບບສຳຫຼວດທີ່ຈັດເກັບແລ້ວຈະຖືກເກັບໄວ້ເພື່ອອ້າງອີງ. ບໍ່ມີໃຜສາມາດເກັບຂໍ້ມູນ ຫຼື ແກ້ໄຂໄດ້. ທ່ານສາມາດເປີດຄືນໄດ້ທຸກເວລາ. ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກຈະຖືກລຶບທິ້ງ.</string>
+  <string name="surveyeditor_lifecycle_close_message">ຜູ້ເກັບຂໍ້ມູນບໍ່ສາມາດເພີ່ມຂໍ້ມູນໃໝ່ໄດ້ ແລະ ບໍ່ມີໃຜສາມາດແກ້ໄຂໄດ້. ທ່ານສາມາດເປີດຄືນໄດ້ທຸກເວລາ.</string>
+  <string name="surveyeditor_lifecycle_close_message_discard">ຜູ້ເກັບຂໍ້ມູນບໍ່ສາມາດເພີ່ມຂໍ້ມູນໃໝ່ໄດ້ ແລະ ບໍ່ມີໃຜສາມາດແກ້ໄຂໄດ້. ທ່ານສາມາດເປີດຄືນໄດ້ທຸກເວລາ. ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກຈະຖືກລຶບທິ້ງ.</string>
+  <!-- Button that confirms archiving the survey. -->
+  <string name="surveyeditor_lifecycle_archive">ຈັດເກັບ</string>
+
+  <!-- Survey editor navigation panel. -->
+  <!-- Navigation item and pane title for the survey's basic information. -->
+  <string name="surveyeditor_nav_survey_details">ລາຍລະອຽດແບບສຳຫຼວດ</string>
+  <!-- Navigation item and pane title for sharing settings. -->
+  <string name="surveyeditor_nav_sharing">ການແບ່ງປັນ</string>
+  <!-- Navigation heading and summary card label for the survey's forms. -->
+  <string name="surveyeditor_nav_forms">ແບບຟອມ</string>
+  <string name="surveyeditor_nav_add_form">ເພີ່ມແບບຟອມ</string>
+  <string name="surveyeditor_nav_no_forms">ຍັງບໍ່ມີແບບຟອມ</string>
+  <!-- Fallback name for a form without a title. -->
+  <string name="surveyeditor_untitled_form">ແບບຟອມທີ່ບໍ່ມີຊື່</string>
+  <string name="surveyeditor_nav_add_map_layer">ເພີ່ມຊັ້ນແຜນທີ່</string>
+  <string name="surveyeditor_nav_add_data_table">ເພີ່ມຕາຕະລາງຂໍ້ມູນ</string>
+  <string name="surveyeditor_nav_no_map_layers">ຍັງບໍ່ມີຊັ້ນແຜນທີ່</string>
+  <string name="surveyeditor_nav_no_data_tables">ຍັງບໍ່ມີຕາຕະລາງຂໍ້ມູນ</string>
+  <!-- Fallback name for a map layer or data table without a name. -->
+  <string name="surveyeditor_untitled">ບໍ່ມີຊື່</string>
+  <!-- Screen reader action that moves a navigation item up. -->
+  <string name="surveyeditor_nav_move_up">ຍ້າຍຂຶ້ນ</string>
+  <!-- Screen reader action that moves a navigation item down. -->
+  <string name="surveyeditor_nav_move_down">ຍ້າຍລົງ</string>
+  <!-- Screen reader description of the warning icon on a navigation item. -->
+  <string name="surveyeditor_nav_has_issues">ມີບັນຫາ</string>
+
+  <!-- Survey details pane. -->
+  <string name="surveyeditor_details_subtitle">ຂໍ້ມູນພື້ນຖານທີ່ສະແດງໃຫ້ຜູ້ເກັບຂໍ້ມູນເຫັນເມື່ອເປີດແບບສຳຫຼວດ.</string>
+  <string name="surveyeditor_details_survey_title">ຊື່ແບບສຳຫຼວດ</string>
+  <string name="surveyeditor_details_contents">ເນື້ອໃນ</string>
+  <string name="surveyeditor_details_map_layers">ຊັ້ນແຜນທີ່</string>
+  <string name="surveyeditor_details_data_tables">ຕາຕະລາງຂໍ້ມູນ</string>
+  <string name="surveyeditor_details_people">ບຸກຄົນ</string>
+  <!-- Heading of the list of survey activity events (exports, receipts, closing). -->
+  <string name="surveyeditor_details_activity">ກິດຈະກຳ</string>
+  <!-- Part of an activity event summary. %1$d is the number of map features. -->
+  <plurals name="surveyeditor_details_activity_map_features">
+    <item quantity="other">%1$d ອົງປະກອບແຜນທີ່</item>
+  </plurals>
+  <!-- Part of an activity event summary. %1$s is the export profile ID. -->
+  <string name="surveyeditor_details_activity_profile">ໂປຣໄຟລ໌: %1$s</string>
+  <string name="surveyeditor_details_survey_status">ສະຖານະແບບສຳຫຼວດ</string>
+  <!-- Section title and dropdown label for the survey's organization. -->
+  <string name="surveyeditor_details_organization">ອົງກອນ</string>
+  <!-- Organization dropdown option for a survey that doesn't belong to an organization. -->
+  <string name="surveyeditor_details_organization_none">ບໍ່ມີ (ແບບສຳຫຼວດສ່ວນຕົວ)</string>
+  <string name="surveyeditor_details_organization_hint">ທ່ານສາມາດດຳເນີນແບບສຳຫຼວດນີ້ໃນນາມຂອງອົງກອນທີ່ທ່ານເປັນສະມາຊິກ (ບໍ່ບັງຄັບ). ທ່ານຍັງເປັນເຈົ້າຂອງຢູ່. ຜູ້ຈັດການຂອງອົງກອນສາມາດແກ້ໄຂແບບສຳຫຼວດ, ຈັດການການແບ່ງປັນ ແລະ ສົ່ງອອກຂໍ້ມູນໄດ້ເຊັ່ນກັນ, ແລະ ສະມາຊິກຂອງອົງກອນສາມາດເຫັນແບບສຳຫຼວດໃນລາຍການຂອງເຂົາເຈົ້າ.</string>
+  <!-- Selected organization that couldn't be found. %1$s is its ID. -->
+  <string name="surveyeditor_details_organization_unknown">ອົງກອນທີ່ບໍ່ຮູ້ຈັກ (%1$s)</string>
+  <string name="surveyeditor_details_organization_missing">ອົງກອນນີ້ບໍ່ມີຢູ່ອີກແລ້ວ. ເລືອກອົງກອນອື່ນ ຫຼື ປ່ຽນແບບສຳຫຼວດເປັນສ່ວນຕົວ.</string>
+  <!-- Screen reader label of the button that dismisses a notice. -->
+  <string name="surveyeditor_details_dismiss">ປິດແຈ້ງເຕືອນ</string>
+  <string name="surveyeditor_details_cost_title">ການຄວບຄຸມຄ່າໃຊ້ຈ່າຍ ແລະ ໂຄຕ້າ</string>
+  <string name="surveyeditor_details_cost_estimated">ຄ່າໃຊ້ຈ່າຍຕໍ່ເດືອນໂດຍປະມານ</string>
+  <!-- Part of the cost summary, e.g. "3 forms · 12 questions · …". -->
+  <plurals name="surveyeditor_details_cost_forms">
+    <item quantity="other">%1$d ແບບຟອມ</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of questions. -->
+  <plurals name="surveyeditor_details_cost_questions">
+    <item quantity="other">%1$d ຄຳຖາມ</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of predefined entities. -->
+  <plurals name="surveyeditor_details_cost_predefined">
+    <item quantity="other">%1$d ລາຍການທີ່ກຳນົດໄວ້ລ່ວງໜ້າ</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of generated sample plots. -->
+  <plurals name="surveyeditor_details_cost_sample_plots">
+    <item quantity="other">%1$d ແປງຕົວຢ່າງ</item>
+  </plurals>
+  <string name="surveyeditor_details_cost_tier_override">ກຳນົດລະດັບແທນ:</string>
+  <!-- Quota tier option: inherit the tier from the organization or default. -->
+  <string name="surveyeditor_details_cost_tier_inherit">ສືບທອດ</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_basic">ພື້ນຖານ</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_sponsored">ໄດ້ຮັບການສະໜັບສະໜູນ</string>
+  <string name="surveyeditor_details_cost_budget_cap">ເພດານງົບປະມານຕໍ່ເດືອນຂອງແບບສຳຫຼວດ ($ USD)</string>
+  <string name="surveyeditor_details_cost_budget_placeholder">0.00 (ບໍ່ຈຳກັດ)</string>
+  <string name="surveyeditor_details_cost_hide_limits">ເຊື່ອງຂີດຈຳກັດຊັບພະຍາກອນແບບລະອຽດ</string>
+  <string name="surveyeditor_details_cost_customize_limits">ປັບແຕ່ງຂີດຈຳກັດຊັບພະຍາກອນແບບລະອຽດ</string>
+  <string name="surveyeditor_details_cost_max_forms">ແບບຟອມສູງສຸດ</string>
+  <string name="surveyeditor_details_cost_max_questions_per_form">ຄຳຖາມສູງສຸດ / ແບບຟອມ</string>
+  <string name="surveyeditor_details_cost_max_photo_questions_per_form">ຄຳຖາມຮູບພາບສູງສຸດ / ແບບຟອມ</string>
+  <string name="surveyeditor_details_cost_max_predefined_entities">ລາຍການທີ່ກຳນົດໄວ້ລ່ວງໜ້າສູງສຸດ</string>
+  <string name="surveyeditor_details_cost_max_sample_plots">ແປງຕົວຢ່າງສູງສຸດ</string>
+  <string name="surveyeditor_details_cost_max_area_vertices">ຈຸດຍອດຂອງພື້ນທີ່ສູງສຸດ</string>
+  <string name="surveyeditor_details_cost_max_acl_collaborators">ຜູ້ຮ່ວມງານ ACL ສູງສຸດ</string>
+  <string name="surveyeditor_details_purpose_title">ຈຸດປະສົງ</string>
+  <string name="surveyeditor_details_purpose_hint">ຂໍ້ມູນຂອງການສຳຫຼວດນີ້ຈະຖືກນຳໃຊ້ເພື່ອຫຍັງ; ການສຳຫຼວດໜຶ່ງສາມາດມີຫຼາຍຈຸດປະສົງ. ຊ່ອງມາດຕະຖານຂອງຈຸດປະສົງເຫຼົ່ານັ້ນຈະຖືກແນະນຳກ່ອນເມື່ອທ່ານຂຽນຄຳຖາມ. ການປ່ຽນຈຸດປະສົງຢູ່ທີ່ນີ້ບໍ່ໄດ້ເພີ່ມ ຫຼື ລຶບແບບຟອມ; ເພື່ອເພີ່ມແບບຟອມເລີ່ມຕົ້ນຂອງຈຸດປະສົງ, ໃຫ້ໃຊ້ ເພີ່ມແບບຟອມ &gt; ສຳລັບຈຸດປະສົງ.</string>
+  <string name="surveyeditor_details_purpose_none">ບໍ່ມີຈຸດປະສົງໃຫ້ເລືອກສຳລັບແບບສຳຫຼວດນີ້.</string>
+  <string name="surveyeditor_details_purpose_unavailable">ບໍ່ມີໃນຄັງຂອງແບບສຳຫຼວດນີ້ອີກແລ້ວ:</string>
+  <!-- Screen reader label of a button that removes an item. %1$s is the item's name. -->
+  <string name="surveyeditor_details_remove_item">ລຶບ %1$s ອອກ</string>
+
+  <!-- Survey languages. -->
+  <string name="surveyeditor_language_title">ພາສາ</string>
+  <string name="surveyeditor_language_hint">ເລືອກພາສາທີ່ສາມາດໃຊ້ຂຽນ ແລະ ເກັບຂໍ້ມູນແບບຟອມ ແລະ ຄຳຖາມຂອງແບບສຳຫຼວດ. ພາສາເລີ່ມຕົ້ນຈະຖືກສະແດງເມື່ອບໍ່ມີຄຳແປສະເພາະ.</string>
+  <string name="surveyeditor_language_supported">ພາສາທີ່ຮອງຮັບ</string>
+  <!-- Chip for the survey's default language. %1$s is the language name. -->
+  <string name="surveyeditor_language_default_chip">%1$s • ເລີ່ມຕົ້ນ</string>
+  <string name="surveyeditor_language_add">ເພີ່ມພາສາ</string>
+  <string name="surveyeditor_language_none_selected">ບໍ່ໄດ້ເລືອກ</string>
+  <string name="surveyeditor_language_default">ພາສາເລີ່ມຕົ້ນ</string>
+  <string name="surveyeditor_language_picker_title">ເລືອກພາສາ</string>
+  <string name="surveyeditor_language_search_label">ຊອກຫາຕາມຊື່ພາສາ</string>
+  <string name="surveyeditor_language_search_placeholder">ຕົວຢ່າງ: ສະວາຮີລີ, ອັງກິດ, ສະເປນ, ອຳຮາຣິກ...</string>
+  <string name="surveyeditor_language_popular">ພາສາຍອດນິຍົມ ແລະ ຕົວຢ່າງລາຍການ:</string>
+  <!-- %1$d is the number of languages matching the search. -->
+  <plurals name="surveyeditor_language_matches">
+    <item quantity="other">ພົບ %1$d ລາຍການທີ່ກົງກັນ:</item>
+  </plurals>
+  <!-- %1$s is the search query. -->
+  <string name="surveyeditor_language_no_matches">ບໍ່ມີພາສາທີ່ກົງກັບ “%1$s”</string>
+  <!-- Badge on a language that is already supported by the survey. -->
+  <string name="surveyeditor_language_added">ເພີ່ມແລ້ວ</string>
+
+  <!-- Survey area section of the survey details pane. -->
+  <!-- Fallback location label for an untitled survey in the survey area editor. -->
+  <string name="surveyeditor_details_area_default_location">ແບບສຳຫຼວດ</string>
+  <!-- Title of the required survey area section; * marks a required field. -->
+  <string name="surveyeditor_details_area_title">ພື້ນທີ່ສຳຫຼວດ *</string>
+  <string name="surveyeditor_details_area_hint">ຂອບເຂດທາງພູມສາດ ແລະ ເສັ້ນຂອບເຂດສຳລັບການເກັບຂໍ້ມູນໃນແບບສຳຫຼວດນີ້.</string>
+  <!-- %1$s describes where the survey area came from, e.g. an uploaded file. -->
+  <string name="surveyeditor_details_area_source">ແຫຼ່ງທີ່ມາ: %1$s</string>
+  <string name="surveyeditor_details_area_edit">ແກ້ໄຂພື້ນທີ່ສຳຫຼວດ</string>
+  <string name="surveyeditor_details_area_required">ເລືອກ ຫຼື ແຕ້ມພື້ນທີ່ສຳຫຼວດເພື່ອສືບຕໍ່.</string>
+  <string name="surveyeditor_details_area_empty_title">ຍັງບໍ່ໄດ້ກຳນົດພື້ນທີ່ສຳຫຼວດ</string>
+  <string name="surveyeditor_details_area_empty_hint">ຊອກຫາສະຖານທີ່, ແຕ້ມເສັ້ນຂອບເຂດໃນແຜນທີ່, ຫຼື ອັບໂຫຼດໄຟລ໌ GeoJSON ຫຼື KML.</string>
+  <string name="surveyeditor_details_area_set">ກຳນົດພື້ນທີ່ສຳຫຼວດ</string>
+
+  <!-- Sharing pane. -->
+  <string name="surveyeditor_sharing_subtitle">ເລືອກວ່າໃຜສາມາດເປີດແບບສຳຫຼວດນີ້ ແລະ ຜູ້ເກັບຂໍ້ມູນສາມາດເຫັນຫຍັງໄດ້ແດ່.</string>
+  <string name="surveyeditor_sharing_people_with_access">ຜູ້ທີ່ມີສິດເຂົ້າໃຊ້</string>
+  <string name="surveyeditor_sharing_owner_detail">ເຈົ້າຂອງແບບສຳຫຼວດ</string>
+  <string name="surveyeditor_sharing_owner">ເຈົ້າຂອງ</string>
+  <string name="surveyeditor_sharing_pending_detail">ລໍຖ້າໃຫ້ເຂົາເຈົ້າຍອມຮັບລິ້ງຄຳເຊີນ</string>
+  <string name="surveyeditor_sharing_joined_now">ຫາກໍເຂົ້າຮ່ວມ</string>
+  <!-- %1$s is the date the person joined. -->
+  <string name="surveyeditor_sharing_joined">ເຂົ້າຮ່ວມເມື່ອ %1$s</string>
+  <!-- Dropdown label for a collaborator's role. -->
+  <string name="surveyeditor_sharing_role">ບົດບາດ</string>
+  <string name="surveyeditor_sharing_profile_note">ຊື່ ແລະ ຮູບພາບມາຈາກບັນຊີຂອງແຕ່ລະຄົນ. Collect One ຈະບັນທຶກໄວ້ເມື່ອເຂົາເຈົ້າຍອມຮັບລິ້ງຄຳເຊີນ ແລະ ອັບເດດເມື່ອເຂົາເຈົ້າເຂົ້າລະບົບ.</string>
+  <string name="surveyeditor_sharing_data_access">ການເຂົ້າເຖິງ ແລະ ການເບິ່ງເຫັນຂໍ້ມູນ</string>
+  <string name="surveyeditor_sharing_add_by_email">ເພີ່ມບຸກຄົນດ້ວຍອີເມວ</string>
+  <string name="surveyeditor_sharing_invite">ເຊີນ</string>
+  <string name="surveyeditor_sharing_org_managers">ຜູ້ຈັດການອົງກອນ</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_org_managers_hint">ສືບທອດມາຈາກ %1$s. ຜູ້ຈັດການສາມາດແກ້ໄຂແບບສຳຫຼວດນີ້, ຈັດການການແບ່ງປັນ ແລະ ສົ່ງອອກຂໍ້ມູນ. ປ່ຽນຜູ້ຈັດການອົງກອນໄດ້ຈາກໜ້າ ສະມາຊິກ ຂອງອົງກອນ.</string>
+  <string name="surveyeditor_sharing_no_managers">ຍັງບໍ່ມີຜູ້ຈັດການ.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_manager_of">ຜູ້ຈັດການຂອງ %1$s</string>
+  <string name="surveyeditor_sharing_share_link_title">ລິ້ງແບ່ງປັນ ແລະ QR code</string>
+  <!-- Badge for a survey that is only reachable through its link. -->
+  <string name="surveyeditor_sharing_badge_unlisted">ບໍ່ສະແດງໃນລາຍການ</string>
+  <!-- Badge for a survey listed in the public survey directory. -->
+  <string name="surveyeditor_sharing_badge_public">ລາຍຊື່ສາທາລະນະ</string>
+  <!-- Copy button label after the link was copied. -->
+  <string name="surveyeditor_sharing_copied">ສຳເນົາແລ້ວ</string>
+  <string name="surveyeditor_sharing_copy_link">ສຳເນົາລິ້ງ</string>
+  <string name="surveyeditor_sharing_show_qr">ສະແດງ QR code</string>
+  <!-- QR code dialog title. %1$s is the survey title. -->
+  <string name="surveyeditor_sharing_qr_title">ແບ່ງປັນ “%1$s”</string>
+  <string name="surveyeditor_sharing_qr_title_untitled">ລິ້ງແບ່ງປັນ ແລະ QR code ຂອງແບບສຳຫຼວດ</string>
+  <string name="surveyeditor_sharing_qr_hint">ຜູ້ເກັບຂໍ້ມູນສາມາດສະແກນ QR code ນີ້ດ້ວຍກ້ອງໂທລະສັບ ຫຼື ແອັບ Collect One ເພື່ອເປີດແບບສຳຫຼວດໂດຍກົງ.</string>
+
+  <!-- General access sliders: audience stops. -->
+  <string name="surveyeditor_access_contributors_and_organizers">ຜູ້ປະກອບສ່ວນ ແລະ ຜູ້ຈັດການ</string>
+  <string name="surveyeditor_access_invited_people">ຜູ້ທີ່ໄດ້ຮັບເຊີນ</string>
+  <string name="surveyeditor_access_anyone_in_organization">ທຸກຄົນໃນອົງກອນຂອງທ່ານ</string>
+  <string name="surveyeditor_access_anyone">ທຸກຄົນ</string>
+  <string name="surveyeditor_access_who_can_view">ໃຜສາມາດເບິ່ງຂໍ້ມູນ</string>
+  <string name="surveyeditor_access_who_can_collect">ໃຜສາມາດເກັບຂໍ້ມູນ</string>
+  <!-- Screen reader description of a slider stop. %1$s is the slider title, %2$s the audience. -->
+  <string name="surveyeditor_access_slider_stop_description">%1$s: %2$s</string>
+  <string name="surveyeditor_access_view_hint_contributors">ຜູ້ເກັບຂໍ້ມູນເຫັນສະເພາະການສົ່ງຂໍ້ມູນຂອງຕົນເອງ. ຜູ້ຈັດການແບບສຳຫຼວດສາມາດເບິ່ງການສົ່ງຂໍ້ມູນທັງໝົດ ແລະ ຕົວຕົນຂອງຜູ້ປະກອບສ່ວນ.</string>
+  <string name="surveyeditor_access_view_hint_invited">ບຸກຄົນທີ່ເພີ່ມໄວ້ຂ້າງເທິງສາມາດເບິ່ງອົງປະກອບແຜນທີ່, ຄຳຕອບ, ຮູບພາບ ແລະ ສື່ອື່ນໆທີ່ອັບໂຫຼດທັງໝົດ. ສະເພາະຜູ້ຈັດການແບບສຳຫຼວດເທົ່ານັ້ນທີ່ສາມາດເບິ່ງຕົວຕົນຂອງຜູ້ປະກອບສ່ວນ.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_access_view_hint_organization">ທຸກຄົນໃນ %1$s ສາມາດເບິ່ງອົງປະກອບແຜນທີ່, ຄຳຕອບ, ຮູບພາບ ແລະ ສື່ອື່ນໆທີ່ອັບໂຫຼດທັງໝົດ. ສະເພາະຜູ້ຈັດການແບບສຳຫຼວດເທົ່ານັ້ນທີ່ສາມາດເບິ່ງຕົວຕົນຂອງຜູ້ປະກອບສ່ວນ.</string>
+  <string name="surveyeditor_access_view_hint_organization_unset">ທຸກຄົນໃນອົງກອນຂອງທ່ານສາມາດເບິ່ງອົງປະກອບແຜນທີ່, ຄຳຕອບ, ຮູບພາບ ແລະ ສື່ອື່ນໆທີ່ອັບໂຫຼດທັງໝົດ. ເລືອກອົງກອນໃນ ລາຍລະອຽດແບບສຳຫຼວດ.</string>
+  <string name="surveyeditor_access_view_hint_anyone">ທຸກຄົນສາມາດເບິ່ງອົງປະກອບແຜນທີ່, ຄຳຕອບ, ຮູບພາບ ແລະ ສື່ອື່ນໆທີ່ອັບໂຫຼດທັງໝົດ. ສະເພາະຜູ້ຈັດການແບບສຳຫຼວດເທົ່ານັ້ນທີ່ສາມາດເບິ່ງຕົວຕົນຂອງຜູ້ປະກອບສ່ວນ. ຜູ້ເຂົ້າຮ່ວມຕ້ອງຍອມຮັບແຈ້ງການຍິນຍອມກ່ອນເກັບຂໍ້ມູນ.</string>
+  <string name="surveyeditor_access_collect_hint_invited">ສະເພາະບຸກຄົນທີ່ເພີ່ມໄວ້ຂ້າງເທິງເທົ່ານັ້ນທີ່ສາມາດເປີດແບບສຳຫຼວດນີ້ ແລະ ເກັບຂໍ້ມູນໄດ້.</string>
+  <!-- %1$s is the organization name (used twice). -->
+  <string name="surveyeditor_access_collect_hint_organization">ສະມາຊິກຂອງ %1$s ສາມາດເປີດແບບສຳຫຼວດນີ້ ແລະ ເກັບຂໍ້ມູນໄດ້. ຜູ້ຈັດການຂອງ %1$s ສາມາດແກ້ໄຂແບບສຳຫຼວດໄດ້ເຊັ່ນກັນ.</string>
+  <string name="surveyeditor_access_collect_hint_organization_unset">ສະມາຊິກໃນອົງກອນຂອງທ່ານສາມາດເປີດແບບສຳຫຼວດນີ້ ແລະ ເກັບຂໍ້ມູນໄດ້. ເລືອກອົງກອນໃນ ລາຍລະອຽດແບບສຳຫຼວດ.</string>
+  <string name="surveyeditor_access_collect_hint_anyone">ທຸກຄົນສາມາດເປີດແບບສຳຫຼວດນີ້ ແລະ ສົ່ງຂໍ້ມູນໄດ້.</string>
+  <string name="surveyeditor_access_unlisted_option">ບໍ່ສະແດງໃນລາຍການ (ສະເພາະຜູ້ທີ່ມີລິ້ງ ຫຼື QR code)</string>
+  <string name="surveyeditor_access_public_option">ສາທາລະນະ (ສະແດງໃນລາຍຊື່ແບບສຳຫຼວດ)</string>
+  <string name="surveyeditor_access_who_can_find">ໃຜສາມາດຊອກຫາແບບສຳຫຼວດນີ້</string>
+  <string name="surveyeditor_access_unlisted_hint">ບໍ່ສະແດງໃນລາຍການ: ສະເພາະຜູ້ທີ່ມີລິ້ງໂດຍກົງ ຫຼື ສະແກນ QR code ຂ້າງລຸ່ມເທົ່ານັ້ນທີ່ສາມາດຊອກຫາ ແລະ ເປີດແບບສຳຫຼວດນີ້ໄດ້.</string>
+  <string name="surveyeditor_access_public_hint">ສາທາລະນະ: ທຸກຄົນທີ່ເບິ່ງລາຍຊື່ແບບສຳຫຼວດສາມາດຄົ້ນພົບ ແລະ ເປີດແບບສຳຫຼວດນີ້ ຫຼື ໃຊ້ລິ້ງໂດຍກົງ ແລະ QR code ຂ້າງລຸ່ມໄດ້.</string>
+
+  <!-- Data tables, map layers, add dialogs, people. -->
+  <!-- Map layer / data table editor (EntityDatasetEditor). -->
+  <!-- Shown in place of a map layer or data table name when it is blank. -->
+  <string name="surveyeditor_dataset_untitled">ບໍ່ມີຊື່</string>
+  <!-- Count in a data table summary, e.g. "3 rows • 2 properties". -->
+  <plurals name="surveyeditor_dataset_rows_count">
+    <item quantity="other">%1$d ແຖວ</item>
+  </plurals>
+  <!-- Count in a map layer summary, e.g. "3 features • 2 properties". -->
+  <plurals name="surveyeditor_dataset_features_count">
+    <item quantity="other">%1$d ອົງປະກອບ</item>
+  </plurals>
+  <!-- Count of the columns (properties) of a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_properties_count">
+    <item quantity="other">%1$d ຄຸນສົມບັດ</item>
+  </plurals>
+  <!-- Number of validation issues found in a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_issues_count">
+    <item quantity="other">%1$d ບັນຫາ</item>
+  </plurals>
+  <!-- Content description of a dataset's overflow menu button. %1$s is the dataset name. -->
+  <string name="surveyeditor_dataset_more_options">ຕົວເລືອກເພີ່ມເຕີມສຳລັບ %1$s</string>
+  <string name="surveyeditor_dataset_delete_map_layer_menu">ລຶບຊັ້ນແຜນທີ່…</string>
+  <string name="surveyeditor_dataset_delete_data_table_menu">ລຶບຕາຕະລາງຂໍ້ມູນ…</string>
+  <string name="surveyeditor_dataset_delete_map_layer_title">ລຶບຊັ້ນແຜນທີ່ນີ້ບໍ?</string>
+  <string name="surveyeditor_dataset_delete_data_table_title">ລຶບຕາຕະລາງຂໍ້ມູນນີ້ບໍ?</string>
+  <!-- %1$s is the map layer name, %2$d the number of features. -->
+  <plurals name="surveyeditor_dataset_delete_map_layer_body">
+    <item quantity="other">“%1$s” ແລະ %2$d ອົງປະກອບຂອງມັນຈະຖືກລຶບອອກຈາກແບບສຳຫຼວດນີ້.</item>
+  </plurals>
+  <!-- %1$s is the data table name, %2$d the number of rows. -->
+  <plurals name="surveyeditor_dataset_delete_data_table_body">
+    <item quantity="other">“%1$s” ແລະ %2$d ແຖວຂອງມັນຈະຖືກລຶບອອກຈາກແບບສຳຫຼວດນີ້.</item>
+  </plurals>
+  <string name="surveyeditor_dataset_delete_map_layer">ລຶບຊັ້ນແຜນທີ່</string>
+  <string name="surveyeditor_dataset_delete_data_table">ລຶບຕາຕະລາງຂໍ້ມູນ</string>
+  <!-- Title of the table listing a map layer's features. -->
+  <string name="surveyeditor_dataset_features">ອົງປະກອບ</string>
+  <!-- Title of the table listing a data table's rows. -->
+  <string name="surveyeditor_dataset_rows">ແຖວ</string>
+  <string name="surveyeditor_dataset_add_feature">ເພີ່ມອົງປະກອບ</string>
+  <string name="surveyeditor_dataset_add_row">ເພີ່ມແຖວ</string>
+  <!-- Shown after the first issues of a dataset. %1$d is how many more issues there are. -->
+  <plurals name="surveyeditor_dataset_more_issues">
+    <item quantity="other">…ແລະ ອີກ %1$d ລາຍການ</item>
+  </plurals>
+  <!-- Table column header of the dataset's key property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_key">%1$s (ຄີ)</string>
+  <!-- Table column header of the dataset's label property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_label">%1$s (ປ້າຍຊື່)</string>
+  <!-- Header of the column where feature geometry is typed as coordinates. -->
+  <string name="surveyeditor_dataset_column_geometry">ຮູບເລຂາຄະນິດ (lat, lng; …)</string>
+  <string name="surveyeditor_dataset_empty_sample_plots">ຍັງບໍ່ມີແປງຕົວຢ່າງ. ສ້າງແປງຈາກແບບແຜນການສຸ່ມຕົວຢ່າງ.</string>
+  <string name="surveyeditor_dataset_empty_features">ຍັງບໍ່ມີອົງປະກອບ. ເພີ່ມໄດ້ທີ່ນີ້ ຫຼື ໃນແຜນທີ່.</string>
+  <string name="surveyeditor_dataset_empty_rows">ຍັງບໍ່ມີແຖວ.</string>
+  <!-- Sample points of a sample plot, shown when a plot has none. -->
+  <string name="surveyeditor_dataset_samples_none">ບໍ່ມີ</string>
+  <!-- Number of sample points of a sample plot. -->
+  <plurals name="surveyeditor_dataset_samples_count">
+    <item quantity="other">%1$d ຈຸດ</item>
+  </plurals>
+  <!-- Section label of the dataset settings panel. -->
+  <string name="surveyeditor_dataset_settings">ການຕັ້ງຄ່າ</string>
+  <string name="surveyeditor_dataset_name">ຊື່</string>
+  <string name="surveyeditor_dataset_geometry_type">ປະເພດຮູບເລຂາຄະນິດ</string>
+  <string name="surveyeditor_dataset_sample_design">ແບບແຜນການສຸ່ມຕົວຢ່າງ</string>
+  <string name="surveyeditor_dataset_key_property">ຄຸນສົມບັດຄີ (ID ທີ່ບໍ່ຊ້ຳກັນ)</string>
+  <!-- Shown in a dropdown when nothing has been chosen yet. -->
+  <string name="surveyeditor_dataset_choose">ເລືອກ…</string>
+  <string name="surveyeditor_dataset_label_property">ຄຸນສົມບັດປ້າຍຊື່ (ສະແດງໃນລາຍການ)</string>
+  <string name="surveyeditor_dataset_field_collection">ການເກັບຂໍ້ມູນພາກສະໜາມ ແລະ ແບບຟອມ</string>
+  <!-- %1$s is the title of the form linked to the dataset. -->
+  <string name="surveyeditor_dataset_linked_to">ເຊື່ອມໂຍງກັບ %1$s</string>
+  <string name="surveyeditor_dataset_linked_form_map_layer">ຜູ້ເກັບຂໍ້ມູນສາມາດເພີ່ມອົງປະກອບແຜນທີ່ໃໝ່ໂດຍໃຊ້ແບບຟອມນີ້. ຄຸນສົມບັດຂອງໂຄງສ້າງຂໍ້ມູນຈະຊິງກັບຄຳຖາມໃນແບບຟອມສະເໝີ.</string>
+  <string name="surveyeditor_dataset_linked_form_data_table">ຜູ້ເກັບຂໍ້ມູນສາມາດເພີ່ມແຖວໃໝ່ໂດຍໃຊ້ແບບຟອມນີ້. ຄຸນສົມບັດຂອງໂຄງສ້າງຂໍ້ມູນຈະຊິງກັບຄຳຖາມໃນແບບຟອມສະເໝີ.</string>
+  <string name="surveyeditor_dataset_edit_form">ແກ້ໄຂແບບຟອມ</string>
+  <string name="surveyeditor_dataset_unlink_form">ຍົກເລີກການເຊື່ອມໂຍງແບບຟອມ</string>
+  <string name="surveyeditor_dataset_no_form_map_layer">ບໍ່ມີແບບຟອມເຊື່ອມໂຍງກັບຊັ້ນແຜນທີ່ນີ້. ຜູ້ເກັບຂໍ້ມູນສາມາດເບິ່ງໄດ້ສະເພາະລາຍການທີ່ມີຢູ່ແລ້ວ.</string>
+  <string name="surveyeditor_dataset_no_form_data_table">ບໍ່ມີແບບຟອມເຊື່ອມໂຍງກັບຕາຕະລາງຂໍ້ມູນນີ້. ຜູ້ເກັບຂໍ້ມູນສາມາດເບິ່ງໄດ້ສະເພາະລາຍການທີ່ມີຢູ່ແລ້ວ.</string>
+  <string name="surveyeditor_dataset_create_form_map_layer">ສ້າງແບບຟອມສຳລັບຊັ້ນແຜນທີ່</string>
+  <string name="surveyeditor_dataset_create_form_data_table">ສ້າງແບບຟອມສຳລັບຕາຕະລາງຂໍ້ມູນ</string>
+  <!-- Label above the list of forms that update this dataset. -->
+  <string name="surveyeditor_dataset_updated_by">ອັບເດດໂດຍ</string>
+  <string name="surveyeditor_dataset_map_style">ຮູບແບບແຜນທີ່</string>
+  <!-- Section label of the dataset's schema (its properties / columns). -->
+  <string name="surveyeditor_dataset_properties">ຄຸນສົມບັດ</string>
+  <string name="surveyeditor_dataset_properties_managed_by_form">ຄຸນສົມບັດຖືກຈັດການໂດຍແບບຟອມທີ່ເຊື່ອມໂຍງ. ເພື່ອແກ້ໄຂ, ເພີ່ມ ຫຼື ລຶບຄຸນສົມບັດ, ໃຫ້ແກ້ໄຂແບບຟອມ.</string>
+  <string name="surveyeditor_dataset_add_property">ເພີ່ມຄຸນສົມບັດ</string>
+  <!-- Section label of the advanced dataset settings. -->
+  <string name="surveyeditor_dataset_advanced">ຂັ້ນສູງ</string>
+  <!-- Button that collapses the advanced section. -->
+  <string name="surveyeditor_dataset_hide">ເຊື່ອງ</string>
+  <!-- Button that expands the advanced section. -->
+  <string name="surveyeditor_dataset_show">ສະແດງ</string>
+  <string name="surveyeditor_dataset_id">ID ຊຸດຂໍ້ມູນ</string>
+  <string name="surveyeditor_dataset_id_supporting">ແບບຟອມໃຊ້ ID ນີ້ເພື່ອຊອກຫາບັນທຶກຈາກຊຸດຂໍ້ມູນນີ້.</string>
+  <!-- Field for a map layer's color as a hex code. -->
+  <string name="surveyeditor_dataset_color">ສີ</string>
+  <!-- %1$d is the line width in pixels. -->
+  <string name="surveyeditor_dataset_stroke_width">ຄວາມກວ້າງເສັ້ນ: %1$d px</string>
+  <!-- %1$d is the polygon fill opacity in percent; the % after it is a literal percent sign. -->
+  <string name="surveyeditor_dataset_fill_opacity">ຄວາມທຶບຂອງສີພື້ນ: %1$d%</string>
+  <string name="surveyeditor_dataset_visible_by_default">ສະແດງໂດຍຄ່າເລີ່ມຕົ້ນ</string>
+  <string name="surveyeditor_dataset_visible_by_default_description">ສະແດງຊັ້ນນີ້ເມື່ອເປີດແຜນທີ່ຄັ້ງທຳອິດ.</string>
+  <!-- Field for the display label of a dataset property. -->
+  <string name="surveyeditor_dataset_property_label">ປ້າຍຊື່</string>
+  <!-- Button that hides a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_hide_id">ເຊື່ອງ ID</string>
+  <!-- Button that shows a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_advanced">ຂັ້ນສູງ</string>
+  <string name="surveyeditor_dataset_property_internal_id">ID ພາຍໃນ</string>
+  <string name="surveyeditor_dataset_property_internal_id_supporting">ໃຊ້ໃນສຳນວນ XForms ແລະ ການສົ່ງອອກ GeoJSON.</string>
+  <!-- Field for the data type of a dataset property. -->
+  <string name="surveyeditor_dataset_property_type">ປະເພດ</string>
+  <!-- Checkbox label: the property must have a value. -->
+  <string name="surveyeditor_dataset_property_required">ຈຳເປັນ</string>
+  <string name="surveyeditor_dataset_remove_property">ລຶບຄຸນສົມບັດອອກ</string>
+
+  <!-- Add data table dialog. -->
+  <string name="surveyeditor_add_table_title">ເພີ່ມຕາຕະລາງຂໍ້ມູນ</string>
+  <string name="surveyeditor_add_table_empty">ຕາຕະລາງຂໍ້ມູນເປົ່າ</string>
+  <string name="surveyeditor_add_table_empty_body">ເພີ່ມຖັນ ແລະ ປ້ອນແຖວໃນຕາຕະລາງ.</string>
+  <string name="surveyeditor_add_table_import_csv">ນຳເຂົ້າຈາກ CSV</string>
+  <string name="surveyeditor_add_table_import_csv_body">ສ້າງຕາຕະລາງຂໍ້ມູນຈາກຖັນ ແລະ ແຖວໃນໄຟລ໌ CSV.</string>
+  <string name="surveyeditor_add_table_no_rows">ບໍ່ສາມາດອ່ານແຖວໃດໆຈາກໄຟລ໌ນີ້ໄດ້.</string>
+  <!-- Number of columns found in an imported CSV file. -->
+  <plurals name="surveyeditor_add_table_columns_count">
+    <item quantity="other">%1$d ຖັນ</item>
+  </plurals>
+  <!-- An imported column: %1$s is its name, %2$s its detected type. -->
+  <string name="surveyeditor_add_table_column_with_type">%1$s (%2$s)</string>
+  <!-- Date order option: %1$s is the order (e.g. "Day first"), %2$s an example date. -->
+  <string name="surveyeditor_add_table_date_order_option">%1$s (%2$s)</string>
+
+  <!-- Add map layer dialog. -->
+  <string name="surveyeditor_add_layer_title">ເພີ່ມຊັ້ນແຜນທີ່</string>
+  <string name="surveyeditor_add_layer_empty">ຊັ້ນແຜນທີ່ເປົ່າ</string>
+  <string name="surveyeditor_add_layer_empty_body">ເພີ່ມອົງປະກອບໂດຍການແຕ້ມໃນແຜນທີ່ ຫຼື ປ້ອນໃນຕາຕະລາງ.</string>
+  <string name="surveyeditor_add_layer_import_file">ນຳເຂົ້າໄຟລ໌</string>
+  <string name="surveyeditor_add_layer_import_file_body">ສ້າງຊັ້ນແຜນທີ່ຈາກຈຸດ, ເສັ້ນ ຫຼື ຮູບຫຼາຍແຈໃນໄຟລ໌ GeoJSON ຫຼື KML.</string>
+  <string name="surveyeditor_add_layer_generate_plots">ສ້າງແປງຕົວຢ່າງ</string>
+  <string name="surveyeditor_add_layer_generate_plots_body">ອອກແບບການສຸ່ມຕົວຢ່າງ ແລະ ສ້າງແປງພາຍໃນພື້ນທີ່ສຳຫຼວດ ຫຼື ຊັ້ນພູມ.</string>
+  <!-- Shown when sample plots can't be generated yet. -->
+  <string name="surveyeditor_add_layer_generate_plots_need_area">ກຳນົດພື້ນທີ່ສຳຫຼວດ ຫຼື ເພີ່ມຊັ້ນແຜນທີ່ຮູບຫຼາຍແຈກ່ອນ.</string>
+  <string name="surveyeditor_add_layer_no_features">ບໍ່ສາມາດອ່ານອົງປະກອບໃດໆຈາກໄຟລ໌ນີ້ໄດ້.</string>
+  <!-- Number of features in an imported file. %1$d is the count, %2$s the lowercase geometry type (e.g. "polygon"). -->
+  <string name="surveyeditor_add_layer_feature_count">%1$d %2$s</string>
+  <!-- %1$d is the number of features that will not be imported. -->
+  <plurals name="surveyeditor_add_layer_skipped_features">
+    <item quantity="other">%1$d ອົງປະກອບທີ່ມີປະເພດຮູບເລຂາຄະນິດອື່ນຈະຖືກຂ້າມ. ຊັ້ນແຜນທີ່ໜຶ່ງມີປະເພດຮູບເລຂາຄະນິດດຽວ.</item>
+  </plurals>
+
+  <!-- Add form dialog. -->
+  <string name="surveyeditor_add_form_title">ເພີ່ມແບບຟອມ</string>
+  <string name="surveyeditor_add_form_empty">ແບບຟອມເປົ່າ</string>
+  <string name="surveyeditor_add_form_empty_body">ເລີ່ມຈາກແບບຟອມເປົ່າ ແລະ ເພີ່ມຄຳຖາມໃໝ່ທັງໝົດ.</string>
+  <string name="surveyeditor_add_form_from_template">ຈາກແມ່ແບບ…</string>
+  <string name="surveyeditor_add_form_for_purpose">ສຳລັບຈຸດປະສົງ…</string>
+  <string name="surveyeditor_add_form_for_purpose_body">ເພີ່ມແບບຟອມເລີ່ມຕົ້ນຂອງແມ່ແບບຂອງຈຸດປະສົງ. ຈຸດປະສົງ ແລະ ໂຄງການຂອງມັນຈະຖືກເພີ່ມເຂົ້າໃນການສຳຫຼວດ, ດັ່ງນັ້ນການສຳຫຼວດໜຶ່ງສາມາດຮັບໃຊ້ຫຼາຍຈຸດປະສົງ.</string>
+  <string name="surveyeditor_add_form_no_purposes">ບໍ່ມີຈຸດປະສົງສຳລັບການສຳຫຼວດນີ້.</string>
+  <string name="surveyeditor_add_form_purpose_title">ເພີ່ມແບບຟອມສຳລັບຈຸດປະສົງ</string>
+  <string name="surveyeditor_add_form_purpose_note">ເລືອກຈຸດປະສົງ ແລະ ແມ່ແບບເລີ່ມຕົ້ນຂອງມັນ. ແບບຟອມຂອງແມ່ແບບຈະຖືກເພີ່ມເຂົ້າໃນການສຳຫຼວດ, ແລະ ຈຸດປະສົງ ພ້ອມໂຄງການທີ່ເລືອກຈະຖືກບັນທຶກໄວ້.</string>
+  <string name="surveyeditor_add_form_purpose_add">ເພີ່ມແບບຟອມ</string>
+  <string name="surveyeditor_add_form_no_templates">ຍັງບໍ່ມີແມ່ແບບໃຫ້ໃຊ້ສຳລັບແບບສຳຫຼວດນີ້.</string>
+  <string name="surveyeditor_add_form_templates_body">ເລີ່ມຈາກແບບຟອມທີ່ນຳໃຊ້ຄືນໄດ້ ພ້ອມຊ່ອງຂໍ້ມູນມາດຕະຖານ ຈາກອົງກອນຂອງທ່ານ ຫຼື ຄັງສ່ວນກາງ.</string>
+  <string name="surveyeditor_add_form_import_file">ນຳເຂົ້າຈາກໄຟລ໌</string>
+  <string name="surveyeditor_add_form_import_file_body">ສ້າງແບບຟອມຈາກໄຟລ໌ ODK XForms (.xml) ຫຼື Collect Earth (.cep).</string>
+  <string name="surveyeditor_add_form_no_questions">ບໍ່ສາມາດອ່ານຄຳຖາມໃດໆຈາກໄຟລ໌ນີ້ໄດ້.</string>
+  <!-- Number of questions in an imported form or template. -->
+  <plurals name="surveyeditor_add_form_questions_count">
+    <item quantity="other">%1$d ຄຳຖາມ</item>
+  </plurals>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it updates. -->
+  <string name="surveyeditor_add_form_updates_dataset">ອັບເດດ %1$s</string>
+  <string name="surveyeditor_add_form_updates_existing">ອັບເດດອົງປະກອບທີ່ມີຢູ່ແລ້ວ</string>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it adds to. -->
+  <string name="surveyeditor_add_form_adds_to_dataset">ເພີ່ມເຂົ້າ %1$s</string>
+  <string name="surveyeditor_add_form_adds_to_new_map_layer">ເພີ່ມເຂົ້າຊັ້ນແຜນທີ່ໃໝ່</string>
+  <string name="surveyeditor_add_form_adds_to_new_data_table">ເພີ່ມເຂົ້າຕາຕະລາງຂໍ້ມູນໃໝ່</string>
+  <string name="surveyeditor_add_form_template_title">ເພີ່ມແບບຟອມຈາກແມ່ແບບ</string>
+  <string name="surveyeditor_add_form_template_note">ແບບຟອມຈະຖືກສຳເນົາເຂົ້າໃນແບບສຳຫຼວດນີ້. ການປ່ຽນແປງແມ່ແບບໃນພາຍຫຼັງຈະບໍ່ມີຜົນຕໍ່ແບບຟອມນີ້.</string>
+  <!-- Badge of a template from the user's organization (when its name is unknown). -->
+  <string name="surveyeditor_add_form_template_organization">ອົງກອນ</string>
+  <!-- Badge of a template from the global library. -->
+  <string name="surveyeditor_add_form_template_global">ສ່ວນກາງ</string>
+  <!-- %1$s is the question count (e.g. "12 questions"), %2$d how many link to standard fields. -->
+  <plurals name="surveyeditor_add_form_template_linked">
+    <item quantity="other">%1$s · %2$d ເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນມາດຕະຖານ</item>
+  </plurals>
+
+  <!-- Map layer pin icon picker. -->
+  <!-- %1$s is the name of the chosen icon. -->
+  <string name="surveyeditor_icon_pin_icon">ໄອຄອນໝຸດ: %1$s</string>
+  <!-- Shown as the pin icon name when no icon is chosen. -->
+  <string name="surveyeditor_icon_none">ບໍ່ມີ</string>
+  <string name="surveyeditor_icon_no_icon">ບໍ່ມີໄອຄອນ</string>
+
+  <!-- Basemap options of the map layer editor. -->
+  <string name="surveyeditor_basemap_satellite">ດາວທຽມ</string>
+  <string name="surveyeditor_basemap_terrain">ພູມສັນຖານ</string>
+  <!-- Basemap option: no basemap imagery. -->
+  <string name="surveyeditor_basemap_none">ບໍ່ມີ</string>
+
+  <!-- Short labels of sample design thumbnail cards. -->
+  <string name="surveyeditor_thumbnail_grid">ຕາຂ່າຍ</string>
+  <string name="surveyeditor_thumbnail_random">ສຸ່ມ</string>
+  <string name="surveyeditor_thumbnail_stratified">ແບ່ງຊັ້ນພູມ</string>
+  <string name="surveyeditor_thumbnail_cluster">ກຸ່ມ</string>
+  <!-- Plot shape: a single point. -->
+  <string name="surveyeditor_thumbnail_point">ຈຸດ</string>
+  <!-- Sample point layout: one point at the plot center. -->
+  <string name="surveyeditor_thumbnail_center">ກາງ</string>
+
+  <!-- People with access and invite acceptance. -->
+  <!-- Badge of a person who was invited but hasn't joined yet. -->
+  <string name="surveyeditor_people_invited">ໄດ້ຮັບເຊີນ</string>
+  <!-- Shown on the copy button after the invite link was copied. -->
+  <string name="surveyeditor_people_copied">ສຳເນົາແລ້ວ</string>
+  <string name="surveyeditor_people_copy_link">ສຳເນົາລິ້ງ</string>
+  <string name="surveyeditor_people_new_link">ລິ້ງໃໝ່</string>
+  <string name="surveyeditor_people_open_as_invitee">ເປີດໃນຖານະຜູ້ໄດ້ຮັບເຊີນ</string>
+  <!-- Name of the survey page listing people; used as %1$s in surveyeditor_people_accept_invite_note. -->
+  <string name="surveyeditor_people_sharing_page">ໜ້າການແບ່ງປັນ</string>
+  <!-- Title of the invite acceptance dialog. %1$s is the survey or organization name. -->
+  <string name="surveyeditor_people_join_title">ເຂົ້າຮ່ວມ “%1$s”</string>
+  <!-- %1$s is the invitee's email address. -->
+  <string name="surveyeditor_people_accept_invite_preview">ຕົວຢ່າງສິ່ງທີ່ %1$s ເຫັນຫຼັງຈາກເປີດລິ້ງຄຳເຊີນ ແລະ ເຂົ້າລະບົບ.</string>
+  <!-- %1$s is the invitee's email address, %2$s their role. -->
+  <string name="surveyeditor_people_signed_in_as">ເຂົ້າລະບົບເປັນ %1$s • %2$s</string>
+  <string name="surveyeditor_people_full_name">ຊື່ ແລະ ນາມສະກຸນ</string>
+  <string name="surveyeditor_people_profile_photo">ຮູບໂປຣໄຟລ໌</string>
+  <!-- %1$s is the page where organizers see people, e.g. "Sharing page" or "Members page". -->
+  <string name="surveyeditor_people_accept_invite_note">Collect One ຈະບັນທຶກຊື່ ແລະ ຮູບພາບຂອງທ່ານ ເພື່ອໃຫ້ຜູ້ຈັດການຈື່ທ່ານໄດ້ໃນ %1$s. ຂໍ້ມູນເຫຼົ່ານີ້ຈະຖືກອັບເດດທຸກຄັ້ງທີ່ທ່ານເຂົ້າລະບົບ.</string>
+  <string name="surveyeditor_people_accept_invite">ຍອມຮັບຄຳເຊີນ</string>
+
+  <!-- Interactive layer map, survey area editor, sampling design panel. -->
+  <!-- Interactive layer map (InteractiveLayerMap.kt). -->
+  <!-- Title of the map card in the map layer and survey area editors. -->
+  <string name="surveyeditor_map_title">ແຜນທີ່</string>
+  <string name="surveyeditor_map_generated_locked">ບໍ່ສາມາດແກ້ໄຂຮູບເລຂາຄະນິດທີ່ສ້າງຂຶ້ນອັດຕະໂນມັດໄດ້</string>
+  <!-- Vertex progress while drawing. %1$d is the number of vertices placed, %2$d the minimum needed. -->
+  <string name="surveyeditor_map_draft_vertices">%1$d / %2$d+ ຈຸດຍອດ</string>
+  <string name="surveyeditor_map_undo">ຍ້ອນກັບ</string>
+  <!-- Button that completes drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_finish_point">ສຳເລັດຈຸດ</string>
+  <string name="surveyeditor_map_finish_line">ສຳເລັດເສັ້ນ</string>
+  <string name="surveyeditor_map_finish_polygon">ສຳເລັດຮູບຫຼາຍແຈ</string>
+  <!-- Button that completes drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_finish_part">ສຳເລັດສ່ວນ</string>
+  <!-- Chip that starts drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_add_point">ເພີ່ມຈຸດ</string>
+  <string name="surveyeditor_map_add_line">ເພີ່ມເສັ້ນ</string>
+  <string name="surveyeditor_map_add_polygon">ເພີ່ມຮູບຫຼາຍແຈ</string>
+  <!-- Starts drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_add_part">ເພີ່ມສ່ວນ</string>
+  <string name="surveyeditor_map_zoom_in">ຊູມເຂົ້າ</string>
+  <string name="surveyeditor_map_zoom_out">ຊູມອອກ</string>
+  <string name="surveyeditor_map_fit_to_features">ພໍດີກັບອົງປະກອບ</string>
+  <!-- Current map zoom level, shown next to the scale bar. %1$s is the zoom level (e.g. "12.5"). -->
+  <string name="surveyeditor_map_zoom_level">z %1$s</string>
+  <!-- Map hints shown in a pill at the bottom of the map. -->
+  <string name="surveyeditor_map_hint_locked">ລາກເພື່ອເລື່ອນ • ເລື່ອນລໍ້ ຫຼື ບີບເພື່ອຊູມ • ຄລິກແປງເພື່ອເບິ່ງຈຸດຕົວຢ່າງ</string>
+  <string name="surveyeditor_map_hint_place_point">ຄລິກແຜນທີ່ເພື່ອວາງຈຸດ</string>
+  <string name="surveyeditor_map_hint_start_line">ຄລິກເພື່ອເລີ່ມເສັ້ນ</string>
+  <string name="surveyeditor_map_hint_continue_line">ຄລິກເພື່ອເພີ່ມຈຸດຍອດ • ຄລິກຈຸດຍອດສຸດທ້າຍອີກຄັ້ງເພື່ອສຳເລັດ</string>
+  <string name="surveyeditor_map_hint_start_polygon">ຄລິກເພື່ອເລີ່ມຮູບຫຼາຍແຈ</string>
+  <string name="surveyeditor_map_hint_continue_polygon">ຄລິກເພື່ອເພີ່ມຈຸດຍອດ • ຄລິກຈຸດຍອດທຳອິດ ຫຼື ສຸດທ້າຍເພື່ອສຳເລັດ</string>
+  <string name="surveyeditor_map_hint_move_point">ລາກຈຸດເພື່ອຍ້າຍ</string>
+  <!-- "○ handles" refers to the small circles drawn at segment midpoints. -->
+  <string name="surveyeditor_map_hint_reshape">ລາກຈຸດຍອດເພື່ອປັບຮູບຮ່າງ • ລາກຈຸດຈັບ ○ ເພື່ອເພີ່ມຈຸດຍອດ • ລາກພາຍໃນເພື່ອຍ້າຍ</string>
+  <string name="surveyeditor_map_hint_select">ລາກເພື່ອເລື່ອນ • ເລື່ອນລໍ້ ຫຼື ບີບເພື່ອຊູມ • ຄລິກອົງປະກອບເພື່ອເລືອກ</string>
+
+  <!-- Survey area editor dialog (SurveyAreaEditor.kt). -->
+  <string name="surveyeditor_area_tab_search">ຊອກຫາ</string>
+  <string name="surveyeditor_area_tab_draw">ແຕ້ມ</string>
+  <string name="surveyeditor_area_tab_upload">ອັບໂຫຼດ</string>
+  <string name="surveyeditor_area_title">ພື້ນທີ່ສຳຫຼວດ</string>
+  <string name="surveyeditor_area_close_editor">ປິດຕົວແກ້ໄຂພື້ນທີ່ສຳຫຼວດ</string>
+  <string name="surveyeditor_area_save">ບັນທຶກພື້ນທີ່ສຳຫຼວດ</string>
+  <!-- Part of an area summary like "3 parts • 1,204 vertices • 850 ha". -->
+  <plurals name="surveyeditor_area_parts_count">
+    <item quantity="other">%1$d ສ່ວນ</item>
+  </plurals>
+  <!-- Vertex count in an area summary. %1$s is the count with thousands separators. -->
+  <plurals name="surveyeditor_area_vertices_count">
+    <item quantity="other">%1$s ຈຸດຍອດ</item>
+  </plurals>
+  <string name="surveyeditor_area_search_label">ຊອກຫາສະຖານທີ່ ຫຼື ປ້ອນພິກັດ</string>
+  <!-- Example place names are from the default survey region. -->
+  <string name="surveyeditor_area_search_placeholder">ຕົວຢ່າງ: Nairobi, Othaya, Chinga Dam, ຫຼື -0.419, 36.950</string>
+  <string name="surveyeditor_area_suggested_locations">ສະຖານທີ່ສຳຫຼວດທີ່ແນະນຳ:</string>
+  <plurals name="surveyeditor_area_locations_found">
+    <item quantity="other">ພົບ %1$d ສະຖານທີ່:</item>
+  </plurals>
+  <string name="surveyeditor_area_searching_places">ກຳລັງຊອກຫາສະຖານທີ່...</string>
+  <!-- %1$s is the search text the user typed. -->
+  <string name="surveyeditor_area_no_places_matching">ບໍ່ມີສະຖານທີ່ທີ່ກົງກັບ “%1$s”</string>
+  <!-- Category of a search result built from typed coordinates. -->
+  <string name="surveyeditor_area_custom_coordinates">ພິກັດທີ່ກຳນົດເອງ</string>
+  <string name="surveyeditor_area_direct_coordinates_input">ປ້ອນພິກັດໂດຍກົງ</string>
+  <!-- Source badge for results from the online places search. -->
+  <string name="surveyeditor_area_source_online">ອອນລາຍ</string>
+  <!-- Badge on the search result that is the current survey area. -->
+  <string name="surveyeditor_area_selected">ເລືອກແລ້ວ</string>
+  <string name="surveyeditor_area_name">ຊື່ພື້ນທີ່</string>
+  <string name="surveyeditor_area_draw_instructions">ຄລິກແຜນທີ່ເພື່ອວາງມຸມຂອງເສັ້ນຂອບເຂດ. ຄລິກສ່ວນທີ່ມີຢູ່ແລ້ວເພື່ອເລືອກ, ຈາກນັ້ນລາກມຸມຂອງມັນເພື່ອປັບຮູບຮ່າງ.</string>
+  <string name="surveyeditor_area_parts">ສ່ວນ</string>
+  <string name="surveyeditor_area_no_parts">ຍັງບໍ່ມີສ່ວນໃດ. ແຕ້ມຢ່າງໜ້ອຍໜຶ່ງສ່ວນເພື່ອບັນທຶກພື້ນທີ່ສຳຫຼວດ.</string>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_part_number">ສ່ວນທີ %1$d</string>
+  <!-- Vertex count and area of one part. %2$s is the formatted area (e.g. "850 ha"). -->
+  <plurals name="surveyeditor_area_part_vertices_area">
+    <item quantity="other">%1$d ຈຸດຍອດ • %2$s</item>
+  </plurals>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_delete_part">ລຶບສ່ວນທີ %1$d</string>
+  <string name="surveyeditor_area_draw_boundary_hint">ຄລິກແຜນທີ່ເພື່ອແຕ້ມເສັ້ນຂອບເຂດ…</string>
+  <plurals name="surveyeditor_area_drawing_corners">
+    <item quantity="other">ກຳລັງແຕ້ມ (%1$d ມຸມ)</item>
+  </plurals>
+  <string name="surveyeditor_area_upload_geojson_title">GeoJSON ຫຼື KML</string>
+  <string name="surveyeditor_area_upload_geojson_body">ຮູບຫຼາຍແຈ ແລະ ຮູບຫຼາຍແຈຫຼາຍຊຸດຈະກາຍເປັນສ່ວນຂອງພື້ນທີ່ສຳຫຼວດ. ຮູພາຍໃນຈະຖືກລຶບອອກ.</string>
+  <string name="surveyeditor_area_choose_file">ເລືອກໄຟລ໌</string>
+  <string name="surveyeditor_area_upload_shapefile_title">Shapefile (.zip)</string>
+  <string name="surveyeditor_area_upload_shapefile_body">Shapefile ທີ່ບີບອັດເປັນ zip ພ້ອມໄຟລ໌ .shp, .shx, .dbf ແລະ .prj.</string>
+  <string name="surveyeditor_area_choose_shapefile">ເລືອກ Shapefile</string>
+  <string name="surveyeditor_area_shapefile_coming_soon">ການນຳເຂົ້າ Shapefile ຈະມີໄວໆນີ້. ໃນຕອນນີ້, ໃຫ້ແປງ Shapefile ເປັນ GeoJSON ຫຼື KML (ຕົວຢ່າງ: ໃນ QGIS) ແລ້ວອັບໂຫຼດໄຟລ໌ນັ້ນ.</string>
+  <string name="surveyeditor_area_upload_empty">ອັບໂຫຼດໄຟລ໌ເສັ້ນຂອບເຂດເພື່ອສະແດງຕົວຢ່າງທີ່ນີ້.</string>
+  <string name="surveyeditor_area_edit_in_draw_tab">ແກ້ໄຂໃນແຖບ ແຕ້ມ</string>
+  <plurals name="surveyeditor_area_ignored_features">
+    <item quantity="other">%1$d ອົງປະກອບບໍ່ແມ່ນຮູບຫຼາຍແຈ ແລະ ຖືກລະເລີຍ.</item>
+  </plurals>
+  <string name="surveyeditor_area_no_polygons">ໄຟລ໌ນີ້ບໍ່ມີຮູບຫຼາຍແຈທີ່ຈະໃຊ້ເປັນພື້ນທີ່ສຳຫຼວດ.</string>
+  <!-- Icon descriptions for file import issues. -->
+  <string name="surveyeditor_area_issue_error">ຂໍ້ຜິດພາດ</string>
+  <string name="surveyeditor_area_issue_warning">ຄຳເຕືອນ</string>
+  <!-- Shown after a capped list of issues. %1$d is how many more issues are hidden. -->
+  <plurals name="surveyeditor_area_more_issues">
+    <item quantity="other">…ແລະ ອີກ %1$d ລາຍການ</item>
+  </plurals>
+
+  <!-- Sampling design panel (SamplingDesignPanel.kt). -->
+  <string name="surveyeditor_sampling_update_preview">ອັບເດດການສະແດງຕົວຢ່າງ</string>
+  <string name="surveyeditor_sampling_show_preview">ສະແດງຕົວຢ່າງ</string>
+  <string name="surveyeditor_sampling_stale_title">ການສະແດງຕົວຢ່າງບໍ່ເປັນປັດຈຸບັນ — ອັບເດດການສະແດງຕົວຢ່າງ</string>
+  <string name="surveyeditor_sampling_stale_body">ແບບແຜນ ຫຼື ພື້ນທີ່ຂອງມັນມີການປ່ຽນແປງຫຼັງຈາກສ້າງການສະແດງຕົວຢ່າງນີ້.</string>
+  <string name="surveyeditor_sampling_in_use_title">ແປງຕົວຢ່າງກຳລັງຖືກນຳໃຊ້</string>
+  <string name="surveyeditor_sampling_generate_failed_title">ບໍ່ສາມາດສ້າງແປງຕົວຢ່າງໄດ້</string>
+  <string name="surveyeditor_sampling_method">ວິທີການ</string>
+  <!-- %1$s is the sampling method name, %2$s its description. -->
+  <string name="surveyeditor_sampling_method_description">%1$s: %2$s</string>
+  <string name="surveyeditor_sampling_plot_shape">ຮູບຮ່າງແປງ</string>
+  <string name="surveyeditor_sampling_plot_diameter">ເສັ້ນຜ່າສູນກາງແປງ (m)</string>
+  <string name="surveyeditor_sampling_plot_side">ດ້ານຂອງແປງ (m)</string>
+  <string name="surveyeditor_sampling_sample_points">ຈຸດຕົວຢ່າງໃນແຕ່ລະແປງ</string>
+  <string name="surveyeditor_sampling_sample_points_require_shape">ຈຸດຕົວຢ່າງພາຍໃນແປງຕ້ອງໃຊ້ແປງຮູບສີ່ຫຼ່ຽມຈະຕຸລັດ ຫຼື ຮູບວົງມົນ.</string>
+  <string name="surveyeditor_sampling_points_per_side">ຈຸດຕໍ່ດ້ານ</string>
+  <!-- %1$d is the number of sample points in each plot. -->
+  <plurals name="surveyeditor_sampling_points_per_plot">
+    <item quantity="other">%1$d ຈຸດຕົວຢ່າງຕໍ່ແປງ</item>
+  </plurals>
+  <string name="surveyeditor_sampling_point_spacing">ໄລຍະຫ່າງລະຫວ່າງຈຸດ (m)</string>
+  <string name="surveyeditor_sampling_number_of_points">ຈຳນວນຈຸດ</string>
+  <string name="surveyeditor_sampling_shuffle">ສັບລຳດັບການຢ້ຽມຢາມ</string>
+  <string name="surveyeditor_sampling_shuffle_description">ລຽງເລກແປງແບບສຸ່ມ ເພື່ອບໍ່ໃຫ້ແປງທີ່ຢູ່ໃກ້ກັນຖືກຢ້ຽມຢາມຕໍ່ເນື່ອງກັນ.</string>
+  <string name="surveyeditor_sampling_random_seed">ຄ່າເລີ່ມຕົ້ນການສຸ່ມ</string>
+  <string name="surveyeditor_sampling_random_seed_description">ຄ່າເລີ່ມຕົ້ນດຽວກັນຈະໃຫ້ແປງດຽວກັນສະເໝີ.</string>
+  <string name="surveyeditor_sampling_reroll_seed">ເລືອກຄ່າເລີ່ມຕົ້ນການສຸ່ມໃໝ່</string>
+  <!-- Progress while generating plots. %1$s is the number generated so far (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_generating">
+    <item quantity="other">ກຳລັງສ້າງ… %1$s ແປງ</item>
+  </plurals>
+  <!-- Progress while generating plots. %1$s is the number generated so far, %2$s the expected total. -->
+  <plurals name="surveyeditor_sampling_generating_of_about">
+    <item quantity="other">ກຳລັງສ້າງ… %1$s ຈາກປະມານ %2$s ແປງ</item>
+  </plurals>
+  <!-- %1$s is the number of plots in the preview (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_previewing_plots">
+    <item quantity="other">ກຳລັງສະແດງຕົວຢ່າງ %1$s ແປງຕົວຢ່າງ</item>
+  </plurals>
+  <!-- Sample area option: the survey's own area. -->
+  <string name="surveyeditor_sampling_area_survey_area">ພື້ນທີ່ສຳຫຼວດ</string>
+  <!-- Sample area option. %1$s is the name of a polygon map layer whose features are strata. -->
+  <string name="surveyeditor_sampling_area_strata_from">ຊັ້ນພູມຈາກ %1$s</string>
+  <string name="surveyeditor_sampling_area_deleted_layer">ຊັ້ນແຜນທີ່ທີ່ຖືກລຶບ</string>
+  <string name="surveyeditor_sampling_area">ພື້ນທີ່</string>
+  <string name="surveyeditor_sampling_stratum_property">ຄຸນສົມບັດຊັ້ນພູມ</string>
+  <string name="surveyeditor_sampling_choose">ເລືອກ…</string>
+  <!-- %1$d is the number of strata, %2$s a comma-separated list of the first few stratum IDs. -->
+  <plurals name="surveyeditor_sampling_strata_list">
+    <item quantity="other">%1$d ຊັ້ນພູມ: %2$s</item>
+  </plurals>
+  <string name="surveyeditor_sampling_min_distance">ໄລຍະຫ່າງຕ່ຳສຸດລະຫວ່າງແປງ (m)</string>
+  <string name="surveyeditor_sampling_grid_spacing">ໄລຍະຫ່າງຕາຂ່າຍ (m)</string>
+  <!-- %1$d is the target number of plots used to suggest a grid spacing. -->
+  <string name="surveyeditor_sampling_grid_spacing_auto_description">ໄລຍະຫ່າງລະຫວ່າງຈຸດກາງຂອງແປງທີ່ຢູ່ຕິດກັນ. ກຳນົດຕາມຂະໜາດຂອງພື້ນທີ່ (ປະມານ %1$d ແປງ); ພື້ນທີ່ໃຫຍ່ຂຶ້ນຈະມີໄລຍະຫ່າງກວ້າງຂຶ້ນ.</string>
+  <string name="surveyeditor_sampling_grid_spacing_description">ໄລຍະຫ່າງລະຫວ່າງຈຸດກາງຂອງແປງທີ່ຢູ່ຕິດກັນ.</string>
+  <!-- %1$s is the suggested grid spacing in meters. -->
+  <string name="surveyeditor_sampling_match_area_size">ໃຫ້ກົງກັບຂະໜາດພື້ນທີ່ (%1$s m)</string>
+  <string name="surveyeditor_sampling_number_of_plots">ຈຳນວນແປງ</string>
+  <string name="surveyeditor_sampling_survey_area_one_stratum">ພື້ນທີ່ສຳຫຼວດຖືກນັບເປັນໜຶ່ງຊັ້ນພູມ. ເພື່ອສຸ່ມຕົວຢ່າງແຕ່ລະຊັ້ນພູມແຍກກັນ, ໃຫ້ເລືອກຊັ້ນແຜນທີ່ຮູບຫຼາຍແຈເປັນພື້ນທີ່.</string>
+  <string name="surveyeditor_sampling_allocation">ການຈັດສັນ</string>
+  <!-- Label of a field for the number of plots in one stratum. %1$s is the stratum ID. -->
+  <string name="surveyeditor_sampling_plots_in_stratum">ແປງໃນ %1$s</string>
+  <!-- Label of the plot count field when there are no strata. -->
+  <string name="surveyeditor_sampling_plots_in_survey_area">ແປງໃນພື້ນທີ່ສຳຫຼວດ</string>
+  <!-- %1$d is the number of strata not listed. -->
+  <plurals name="surveyeditor_sampling_more_strata">
+    <item quantity="other">ອີກ %1$d ຊັ້ນພູມຈະບໍ່ມີແປງ ຖ້າບໍ່ໄດ້ກຳນົດ.</item>
+  </plurals>
+  <string name="surveyeditor_sampling_total_plots">ແປງທັງໝົດ</string>
+  <string name="surveyeditor_sampling_number_of_clusters">ຈຳນວນກຸ່ມ</string>
+  <string name="surveyeditor_sampling_plots_per_side">ແປງຕໍ່ດ້ານ</string>
+  <!-- %1$d is the number of plots in each cluster. -->
+  <plurals name="surveyeditor_sampling_plots_per_cluster">
+    <item quantity="other">%1$d ແປງໃນແຕ່ລະກຸ່ມ</item>
+  </plurals>
+  <string name="surveyeditor_sampling_cluster_spacing">ໄລຍະຫ່າງລະຫວ່າງແປງໃນກຸ່ມ (m)</string>
+  <string name="surveyeditor_sampling_estimate_unavailable">ຍັງບໍ່ມີການປະເມີນ.</string>
+  <!-- %1$s is the formatted area (e.g. "850 ha"), %2$s the estimated plot count with thousands separators. -->
+  <plurals name="surveyeditor_sampling_estimate">
+    <item quantity="other">ພື້ນທີ່ %1$s • ປະມານ %2$s ແປງ</item>
+  </plurals>
+  <string name="surveyeditor_sampling_estimate_title">ການປະເມີນ</string>
+  <string name="surveyeditor_sampling_large_design_warning">ແບບແຜນຂະໜາດໃຫຍ່ອາດໃຊ້ເວລາດົນໃນການສ້າງ ແລະ ແກ້ໄຂ.</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_number_at_least">ປ້ອນຕົວເລກຢ່າງໜ້ອຍ %1$s.</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_whole_number_at_least">ປ້ອນຈຳນວນຖ້ວນຢ່າງໜ້ອຍ %1$s.</string>
+  <!-- Validation message. %1$s and %2$s are the minimum and maximum allowed values. -->
+  <string name="surveyeditor_sampling_enter_whole_number_range">ປ້ອນຈຳນວນຖ້ວນຕັ້ງແຕ່ %1$s ຫາ %2$s.</string>
+
+  <string name="surveyeditor_plot_review">ການກວດທານແປງ</string>
+  <string name="surveyeditor_plot_review_description">ກວດແຕ່ລະແປງເທິງພາບຖ່າຍດາວທຽມກ່ອນ ແລ້ວສົ່ງແປງທີ່ຈຳເປັນໃຫ້ທີມງານພາກສະໜາມ.</string>
+  <string name="surveyeditor_plot_review_desk">ກວດແປງເທິງພາບຖ່າຍ (ເວັບ)</string>
+  <string name="surveyeditor_plot_review_desk_on">ຜູ້ແປພາບຕື່ມແບບຟອມສຳລັບແຕ່ລະແປງໃນແດຊບອດເວັບ.</string>
+  <string name="surveyeditor_plot_review_desk_off">ເພີ່ມແບບຟອມເວັບເພື່ອຈັດປະເພດແຕ່ລະແປງຈາກພາບຖ່າຍ.</string>
+  <string name="surveyeditor_plot_review_field">ຢືນຢັນແປງໃນພາກສະໜາມ (ມືຖື)</string>
+  <string name="surveyeditor_plot_review_field_on">ແປງທີ່ຕ້ອງລົງພື້ນທີ່ຈະມີເຄື່ອງໝາຍ !. ທີມງານພາກສະໜາມຢືນຢັນແປງເຫຼົ່ານີ້ໃນແອັບມືຖື.</string>
+  <string name="surveyeditor_plot_review_field_off">ເພີ່ມແບບຟອມມືຖືໃຫ້ທີມງານພາກສະໜາມຢືນຢັນແປງທີ່ຕ້ອງລົງພື້ນທີ່.</string>
+  <string name="surveyeditor_plot_review_confidence">ສົ່ງແປງທີ່ມີຄວາມໝັ້ນໃຈຕ່ຳກວ່າຄ່ານີ້</string>
+  <string name="surveyeditor_plot_review_confidence_description">ຜູ້ແປພາບໃຫ້ຄະແນນຄວາມໝັ້ນໃຈແຕ່ 0 ຫາ 100. ປ້ອນ 0 ເພື່ອສົ່ງສະເພາະແປງທີ່ພວກເຂົາໝາຍໄວ້.</string>
+  <string name="surveyeditor_plot_review_spot_checks">ການສຸ່ມກວດ</string>
+  <string name="surveyeditor_plot_review_spot_checks_description">ແປງທີ່ສຸ່ມເລືອກຈະຖືກສົ່ງໄປພາກສະໜາມນຳ ເພື່ອວັດແທກຄວາມຖືກຕ້ອງຂອງການກວດໃນຫ້ອງການ. ປ້ອນ 0 ຖ້າບໍ່ຕ້ອງການ.</string>
+  <plurals name="surveyeditor_plot_review_spot_checks_share">
+    <item quantity="other">%1$s ຈາກ %2$s ແປງ. ສຸ່ມເລືອກເພື່ອວັດແທກຄວາມຖືກຕ້ອງຂອງການກວດໃນຫ້ອງການ.</item>
+  </plurals>
+  <string name="surveyeditor_plot_review_spot_checks_unshuffled">ເປີດ “ສັບລຳດັບການຢ້ຽມຢາມ” ເພື່ອໃຫ້ສຸ່ມເລືອກແປງທີ່ຈະກວດ.</string>
+  <string name="surveyeditor_plot_review_desk_form">%1$s ຈະເປັນການກວດໃນຫ້ອງການ: ໃຊ້ເທິງເວັບເທົ່ານັ້ນ ພ້ອມຄຳຖາມກ່ຽວກັບຄວາມໝັ້ນໃຈ ແລະ ການໝາຍໄວ້.</string>
+  <string name="surveyeditor_plot_review_show_desk">ສະແດງຄຳຕອບຈາກຫ້ອງການໃຫ້ທີມງານພາກສະໜາມ</string>
+  <string name="surveyeditor_plot_review_show_desk_on">ທີມງານເຫັນສິ່ງປົກຄຸມດິນ ແລະ ຄວາມໝັ້ນໃຈຈາກການກວດໃນຫ້ອງການເທິງແຕ່ລະແປງ.</string>
+  <string name="surveyeditor_plot_review_show_desk_off">ກວດແບບປິດຕາ: ທີມງານເຫັນພຽງເຫດຜົນທີ່ແປງຖືກໝາຍໄວ້.</string>
+  <string name="surveyeditor_plot_review_open_form">ເປີດ %1$s</string>
+  <string name="surveyeditor_plot_review_remove_title">ຢຸດກວດແປງເທິງພາບຖ່າຍບໍ?</string>
+  <string name="surveyeditor_plot_review_remove_body">ການດຳເນີນການນີ້ຈະເອົາແບບຟອມ ແລະ ຄຳຖາມກວດທານແປງອອກຈາກແບບສຳຫຼວດ ລວມທັງການປ່ຽນແປງທີ່ທ່ານໄດ້ເຮັດ.</string>
+  <string name="surveyeditor_plot_review_remove_field_title">ຢຸດຢືນຢັນແປງໃນພາກສະໜາມບໍ?</string>
+  <string name="surveyeditor_plot_review_remove_field_body">ການດຳເນີນການນີ້ຈະເອົາແບບຟອມຢືນຢັນພາກສະໜາມອອກຈາກແບບສຳຫຼວດ ລວມທັງການປ່ຽນແປງທີ່ທ່ານໄດ້ເຮັດ.</string>
+  <string name="surveyeditor_plot_review_remove">ເອົາແບບຟອມອອກ</string>
+  <string name="surveyeditor_plot_review_remove_field">ເອົາແບບຟອມອອກ</string>
+  <!-- Sampling design: button that uploads a strata file. -->
+  <string name="surveyeditor_sampling_upload_strata_file">ອັບໂຫຼດໄຟລ໌ຊັ້ນພູມ (GeoJSON / KML)</string>
+  <!-- Error under the strata file upload when the file has no polygons. %1$s = file name. -->
+  <string name="surveyeditor_sampling_strata_file_no_polygons">ບໍ່ພົບລັກສະນະຮູບຫຼາຍຫຼ່ຽມໃນ %1$s.</string>
+  <!-- Error under the strata file upload when the file has points or lines instead of polygons. -->
+  <string name="surveyeditor_sampling_strata_file_not_polygons">ໄຟລ໌ຊັ້ນພູມຕ້ອງມີລັກສະນະຮູບຫຼາຍຫຼ່ຽມ.</string>
+
+  <!-- Problems found in an uploaded GeoJSON or KML file (GeoIssueText.kt). Shown in the survey area, map layer, and strata uploads. %1$d is the feature's number in the file, counted from 1. -->
+  <string name="geo_issue_unsupported_file_type">ບໍ່ຮອງຮັບປະເພດໄຟລ໌ນີ້. ກະລຸນາອັບໂຫຼດໄຟລ໌ GeoJSON (.geojson, .json) ຫຼື KML (.kml).</string>
+  <string name="geo_issue_unreadable_geojson">ໄຟລ໌ນີ້ບໍ່ແມ່ນ GeoJSON ທີ່ຖືກຕ້ອງ. ກວດເບິ່ງວ່າໄດ້ສົ່ງອອກເປັນ GeoJSON ແລ້ວລອງໃໝ່.</string>
+  <string name="geo_issue_geojson_not_an_object">ໄຟລ໌ນີ້ບໍ່ແມ່ນ GeoJSON ທີ່ຖືກຕ້ອງ. ມັນຄວນມີອອບເຈັກ.</string>
+  <string name="geo_issue_geojson_without_type">ໄຟລ໌ນີ້ບໍ່ແມ່ນ GeoJSON ທີ່ຖືກຕ້ອງ.</string>
+  <string name="geo_issue_invalid_kml">ໄຟລ໌ນີ້ບໍ່ແມ່ນ KML ທີ່ຖືກຕ້ອງ. ກວດເບິ່ງວ່າໄດ້ສົ່ງອອກເປັນ KML (ບໍ່ແມ່ນ KMZ) ແລ້ວລອງໃໝ່.</string>
+  <string name="geo_issue_no_geometry">ໄຟລ໌ນີ້ບໍ່ມີເລຂາຄະນິດໃດໆ.</string>
+  <string name="geo_issue_feature_collection_without_features">FeatureCollection ບໍ່ມີອົງປະກອບ.</string>
+  <!-- %1$d is the number of holes removed. -->
+  <plurals name="geo_issue_holes_removed">
+    <item quantity="other">ໄດ້ລຶບຮູ %1$d ອອກຈາກຮູບຫຼາຍແຈ. Collect One ໃຊ້ສະເພາະຂອບເຂດດ້ານນອກເທົ່ານັ້ນ.</item>
+  </plurals>
+  <string name="geo_issue_invalid_feature">ອົງປະກອບທີ %1$d ບໍ່ແມ່ນ Feature GeoJSON ທີ່ຖືກຕ້ອງ.</string>
+  <string name="geo_issue_feature_without_geometry">ອົງປະກອບທີ %1$d ບໍ່ມີເລຂາຄະນິດ ແລະ ຖືກຂ້າມໄປ.</string>
+  <string name="geo_issue_invalid_geometry">ອົງປະກອບທີ %1$d ມີເລຂາຄະນິດບໍ່ຖືກຕ້ອງ.</string>
+  <!-- %2$s is the GeoJSON geometry type found in the file, e.g. "Circle". -->
+  <string name="geo_issue_unsupported_geometry_type">ອົງປະກອບທີ %1$d ມີປະເພດເລຂາຄະນິດທີ່ບໍ່ຮອງຮັບ "%2$s".</string>
+  <!-- Shown as %2$s of geo_issue_unsupported_geometry_type when the geometry has no type. -->
+  <string name="geo_issue_geometry_type_unknown">ບໍ່ຮູ້ຈັກ</string>
+  <string name="geo_issue_invalid_coordinates">ອົງປະກອບທີ %1$d ມີພິກັດທີ່ຂາດຫາຍ ຫຼື ບໍ່ຖືກຕ້ອງ ແລະ ຖືກຂ້າມໄປ.</string>
+  <string name="geo_issue_coordinates_out_of_range">ອົງປະກອບທີ %1$d ມີພິກັດຢູ່ນອກຂອບເຂດທີ່ຖືກຕ້ອງ ແລະ ຖືກຂ້າມໄປ. ໃຊ້ອົງສາທົດສະນິຍົມ WGS 84 (ເສັ້ນຂະໜານ −90 ຫາ 90, ເສັ້ນແວງ −180 ຫາ 180).</string>
+  <string name="geo_issue_too_few_corners">ອົງປະກອບທີ %1$d ມີມຸມທີ່ແຕກຕ່າງກັນໜ້ອຍກວ່າ 3 ແລະ ຖືກຂ້າມໄປ.</string>
+  <string name="geo_issue_outline_closed">ເສັ້ນຂອບຂອງອົງປະກອບທີ %1$d ບໍ່ໄດ້ປິດ, ຈຶ່ງຖືກປິດອັດຕະໂນມັດ.</string>
+  <string name="geo_issue_self_intersection">ເສັ້ນຂອບຂອງອົງປະກອບທີ %1$d ຕັດກັນເອງ. ເນື້ອທີ່ ແລະ ແປງຕົວຢ່າງອາດບໍ່ຖືກຕ້ອງ; ແກ້ໄຂຂອບເຂດໃນເຄື່ອງມື GIS ແລ້ວອັບໂຫຼດໃໝ່.</string>
+  <string name="geo_issue_may_cross_antimeridian">ອົງປະກອບທີ %1$d ອາດຂ້າມເສັ້ນແວງ 180° ເຊິ່ງຍັງບໍ່ຮອງຮັບ. ແບ່ງມັນເປັນສ່ວນຢູ່ທັງສອງຂ້າງຂອງເສັ້ນແວງ.</string>
+  <!-- How a survey's area was defined, after "Source:". "Places API" is the name of the place search service. -->
+  <string name="surveyeditor_area_source_selected_boundary">ຂອບເຂດທີ່ເລືອກ</string>
+  <string name="surveyeditor_area_source_drawn">ແຕ້ມໃສ່ແຜນທີ່</string>
+  <string name="surveyeditor_area_source_uploaded">ອັບໂຫຼດແລ້ວ: %1$s</string>
+  <string name="surveyeditor_area_source_place_search">Places API</string>
+  <string name="surveyeditor_area_source_coordinates">ພິກັດ</string>
+  <plurals name="surveyeditor_area_source_collect_earth_grid">
+    <item quantity="other">ຕາຂ່າຍແປງຕົວຢ່າງ Collect Earth (%1$d ແປງ)</item>
+  </plurals>
+
+  <!-- Survey details: Danger zone, where organizers delete the survey. -->
+  <string name="surveyeditor_danger_zone">ເຂດອັນຕະລາຍ</string>
+  <string name="surveyeditor_danger_zone_body">ການລຶບແບບສຳຫຼວດຈະເອົາມັນອອກຈາກທຸກຄົນທີ່ມີສິດເຂົ້າເຖິງ ລວມທັງຜູ້ເກັບກຳຂໍ້ມູນ. ມັນຈະບໍ່ຖືກນັບເຂົ້າໃນຂີດຈຳກັດແບບສຳຫຼວດຂອງເຈົ້າຂອງອີກຕໍ່ໄປ.</string>
+  <string name="surveyeditor_delete_survey">ລຶບແບບສຳຫຼວດ</string>
+  <!-- %1$s: the survey's title. -->
+  <string name="surveyeditor_delete_survey_title">ລຶບ “%1$s” ບໍ?</string>
+  <string name="surveyeditor_delete_survey_message">ທຸກຄົນຈະສູນເສຍສິດເຂົ້າເຖິງແບບສຳຫຼວດນີ້ ແລະ ຂໍ້ມູນທີ່ເກັບກຳໄວ້. ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ເຜີຍແຜ່ຈະຖືກຍົກເລີກ ແລະ ແບບສຳຫຼວດຈະບໍ່ຖືກນັບເຂົ້າໃນຂີດຈຳກັດແບບສຳຫຼວດຂອງເຈົ້າຂອງອີກຕໍ່ໄປ.</string>
+  <string name="surveyeditor_add_dataset_from_template">ຈາກແມ່ແບບ</string>
+  <string name="surveyeditor_add_layer_from_template_body">ເພີ່ມແບບຟອມຂອງແມ່ແບບ. ການສົ່ງຂໍ້ມູນຂອງມັນຈະເພີ່ມອົງປະກອບເຂົ້າຊັ້ນແຜນທີ່ໃໝ່.</string>
+  <string name="surveyeditor_add_table_from_template_body">ເພີ່ມແບບຟອມຂອງແມ່ແບບ. ການສົ່ງຂໍ້ມູນຂອງມັນຈະເພີ່ມແຖວເຂົ້າຕາຕະລາງຂໍ້ມູນໃໝ່.</string>
+  <string name="surveyeditor_add_dataset_no_templates">ຄັງຂອງທ່ານບໍ່ມີແມ່ແບບປະເພດນີ້.</string>
+</resources>

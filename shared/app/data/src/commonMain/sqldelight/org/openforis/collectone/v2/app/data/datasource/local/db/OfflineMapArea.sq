@@ -1,0 +1,66 @@
+-- Copyright 2026 The Collect One Authors.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     https://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
+-- Map areas saved on this device for offline use (docs/technical/client/local-data-store.md,
+-- "Offline Map Areas"). They belong to the device, not the account: signing out, switching users,
+-- and resetting the sync state keep them, because the imagery they describe stays on the device.
+CREATE TABLE offline_map_area (
+  id TEXT NOT NULL PRIMARY KEY,
+  -- The place name (OfflineAreaName.Named), or NULL when the area is named after the position in
+  -- name_lat and name_lng (OfflineAreaName.NearCoordinates).
+  name TEXT,
+  name_lat REAL,
+  name_lng REAL,
+  west REAL NOT NULL,
+  south REAL NOT NULL,
+  east REAL NOT NULL,
+  north REAL NOT NULL,
+  -- When the user saved the area, in milliseconds since the epoch.
+  created_at INTEGER NOT NULL
+);
+
+-- One imagery layer of a saved area (OfflineAreaLayer), backed by its own tile region.
+CREATE TABLE offline_map_area_layer (
+  area_id TEXT NOT NULL REFERENCES offline_map_area(id) ON DELETE CASCADE,
+  -- OfflineImageryType: SATELLITE or TERRAIN.
+  imagery_type TEXT NOT NULL,
+  -- OfflineAreaLayerStatus: SAVING, READY, PAUSED, or FAILED.
+  status TEXT NOT NULL,
+  -- The size on the device once saved, or the estimate while saving; NULL when unknown.
+  size_bytes INTEGER,
+  PRIMARY KEY (area_id, imagery_type)
+);
+
+selectAreas:
+SELECT * FROM offline_map_area ORDER BY created_at DESC;
+
+selectLayers:
+SELECT * FROM offline_map_area_layer;
+
+insertArea:
+INSERT INTO offline_map_area(id, name, name_lat, name_lng, west, south, east, north, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+putLayer:
+INSERT OR REPLACE INTO offline_map_area_layer(area_id, imagery_type, status, size_bytes)
+VALUES (?, ?, ?, ?);
+
+deleteLayer:
+DELETE FROM offline_map_area_layer WHERE area_id = ? AND imagery_type = ?;
+
+deleteLayersOfArea:
+DELETE FROM offline_map_area_layer WHERE area_id = ?;
+
+deleteArea:
+DELETE FROM offline_map_area WHERE id = ?;

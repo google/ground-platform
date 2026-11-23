@@ -17,6 +17,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.geo.IndexedRing
 import org.openforis.collectone.v2.core.geo.LambertAzimuthalEqualArea
 import org.openforis.collectone.v2.core.geo.PointSpatialHash
@@ -63,6 +64,10 @@ object DefaultSamplingEngine : SamplingEngine {
   private const val STREAM_SHUFFLE = 5L
   private const val STREAM_SUBPLOT = 6L
   private const val CHECK_INTERVAL = 256
+
+  /** Deterministic per-plot RNG seed used by [PlotGeometry.subPlotSamples] for [plotId]. */
+  fun subPlotSeed(designSeed: Long, plotId: String): Long =
+    SplitMix64.derive(SplitMix64.derive(designSeed, STREAM_SUBPLOT), plotId)
 
   override fun estimate(area: SamplingArea, design: SampleDesign): SampleEstimate {
     val areaHa = area.strata.sumOf { ringAreaHa(it.ring) }

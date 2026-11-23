@@ -1,0 +1,819 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Shared across the form editor. -->
+  <string name="formeditor_cancel">Hủy</string>
+  <string name="formeditor_delete">Xóa</string>
+  <!-- Shown in place of a form title the designer hasn't entered yet. -->
+  <string name="formeditor_untitled_form">Biểu mẫu chưa đặt tên</string>
+  <!-- Field label: the value a condition compares against. -->
+  <string name="formeditor_value">Giá trị</string>
+  <!-- Field label: comparison operator of a display-logic or status rule (e.g. "is equal to"). -->
+  <string name="formeditor_condition">Điều kiện</string>
+  <!-- Field label: which form question a rule refers to. -->
+  <string name="formeditor_question">Câu hỏi</string>
+  <!-- Dropdown placeholder when nothing is selected yet. -->
+  <string name="formeditor_choose">Chọn</string>
+  <!-- Dropdown placeholder for picking one of a question's answer choices. -->
+  <string name="formeditor_pick_a_choice">Chọn một lựa chọn</string>
+  <!-- Dropdown option meaning "no selection". -->
+  <string name="formeditor_none">Không có</string>
+  <!-- Button that fixes every listed problem at once. -->
+  <string name="formeditor_fix_all">Sửa tất cả</string>
+  <!-- Heading of a collapsible section with advanced settings. -->
+  <string name="formeditor_advanced">Nâng cao</string>
+  <!-- Last screen of a form, where the collector reviews answers and submits. -->
+  <string name="formeditor_review_and_submit">Xem lại và gửi</string>
+  <!-- Question has no display logic, so it is always shown. -->
+  <string name="formeditor_always_shown">Luôn hiển thị</string>
+  <!-- Shown in place of a question label the designer hasn't entered yet. -->
+  <string name="formeditor_no_label">(không có nhãn)</string>
+  <!-- Icon description: the question is linked to a standard (dictionary) field. -->
+  <string name="formeditor_linked_to_standard_field">Đã liên kết với trường chuẩn</string>
+  <!-- Icon description: the question has validation issues. -->
+  <string name="formeditor_has_issues">Có vấn đề</string>
+  <!-- Preview map button that zooms in to the selected feature. -->
+  <string name="formeditor_adjust_view">Điều chỉnh chế độ xem</string>
+  <!-- Preview map button that zooms back out. -->
+  <string name="formeditor_reset_view">Đặt lại chế độ xem</string>
+  <!-- Subtitle of the data-collection screen in previews. -->
+  <string name="formeditor_collect_data">Thu thập dữ liệu</string>
+  <string name="formeditor_add_a_question">Thêm câu hỏi</string>
+  <string name="formeditor_next">Tiếp theo</string>
+  <string name="formeditor_form_settings">Cài đặt biểu mẫu</string>
+  <!-- Field label for a question or choice label. -->
+  <string name="formeditor_label">Nhãn</string>
+  <!-- Field label for a question or choice label in a non-default language. %1$s: language name. -->
+  <string name="formeditor_label_in_language">Nhãn (%1$s)</string>
+  <!-- Short question number badge. %1$d: question number (Q1, Q2, …). -->
+  <string name="formeditor_question_number_badge">C%1$d</string>
+  <!-- Language menu entry for the survey's default language. %1$s: language name. -->
+  <string name="formeditor_language_default">%1$s • Mặc định</string>
+  <!-- Title of the form preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title">Xem trước • %1$s</string>
+
+  <!-- Errors when adding a question's label to the organization's dictionary. -->
+  <string name="formeditor_error_question_not_found">Không tìm thấy câu hỏi.</string>
+  <string name="formeditor_error_dictionary_managers_only">Chỉ Người quản lý của tổ chức sở hữu khảo sát này mới có thể thêm vào từ điển của tổ chức.</string>
+  <string name="formeditor_error_enter_label">Hãy nhập nhãn trước.</string>
+  <string name="formeditor_error_notes_cant_be_linked">Không thể liên kết ghi chú.</string>
+
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: list of impact purposes (e.g. "EUDR due diligence"). -->
+  <string name="formeditor_delete_warning_feeds_impact_report">Trường này cung cấp dữ liệu cho báo cáo tác động của bạn về %1$s.</string>
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: standard field name. -->
+  <string name="formeditor_delete_warning_linked_standard_field">Trường này được liên kết với trường chuẩn "%1$s", nên các câu trả lời của nó được tính vào báo cáo tác động.</string>
+  <!-- Joins two items of a list: "A and B" (applied repeatedly for longer lists: "A and B and C"). -->
+  <string name="formeditor_list_and">%1$s và %2$s</string>
+
+  <!-- Form editor page: header, menus, flow canvas, and question cards. -->
+  <!-- Floating button that opens the menu of question types to add. -->
+  <string name="formeditor_add_question">Thêm câu hỏi</string>
+  <!-- Title of the dialog confirming deletion of a form. -->
+  <string name="formeditor_delete_form_title">Xóa biểu mẫu?</string>
+  <!-- Body of the delete-form confirmation dialog. %1$s: form title. -->
+  <string name="formeditor_delete_form_message">Xóa "%1$s"? Không thể hoàn tác thao tác này.</string>
+  <!-- Button / menu item that deletes the form. -->
+  <string name="formeditor_delete_form">Xóa biểu mẫu</string>
+  <!-- Subtitle under the form title in the form editor toolbar. -->
+  <string name="formeditor_editor_subtitle">Thiết kế câu hỏi, logic hiển thị và luồng.</string>
+  <!-- Icon description: undo the last edit. -->
+  <string name="formeditor_undo">Hoàn tác</string>
+  <!-- Icon description: redo the last undone edit. -->
+  <string name="formeditor_redo">Làm lại</string>
+  <!-- Button that creates a map layer from this form's submissions. -->
+  <string name="formeditor_create_map_layer">Tạo lớp bản đồ</string>
+  <!-- Button that creates a data table from this form's submissions. -->
+  <string name="formeditor_create_data_table">Tạo bảng dữ liệu</string>
+  <!-- Toolbar button (verb) that opens the form preview. -->
+  <string name="formeditor_preview">Xem trước</string>
+  <!-- Icon description of the overflow menu button. -->
+  <string name="formeditor_more_options">Thêm tùy chọn</string>
+  <!-- Menu item that downloads the form as an XForms XML file. -->
+  <string name="formeditor_download_xforms_xml">Tải xuống XForms XML</string>
+  <!-- Menu item that opens the save-as-template dialog. -->
+  <string name="formeditor_save_as_template_menu">Lưu dưới dạng mẫu…</string>
+  <!-- Screen reader description of the language selector. %1$s: active language name. -->
+  <string name="formeditor_form_language_description">Ngôn ngữ biểu mẫu: %1$s</string>
+  <!-- Add-question menu item that adds a new section (group of questions). -->
+  <string name="formeditor_add_menu_section">Phần</string>
+  <!-- Flow summary for the mobile preview. %1$s: screen count (e.g. "5 screens"); %2$s: path count (e.g. "3 potential paths"). -->
+  <string name="formeditor_flow_summary_mobile">%1$s • %2$s</string>
+  <!-- Number of question screens in the mobile flow. -->
+  <plurals name="formeditor_screen_count">
+    <item quantity="other">%1$d màn hình</item>
+  </plurals>
+  <!-- Number of distinct paths a collector may take through the form. -->
+  <plurals name="formeditor_potential_path_count">
+    <item quantity="other">%1$d lộ trình có thể</item>
+  </plurals>
+  <!-- Flow summary for the web preview. %1$d: number of questions. -->
+  <plurals name="formeditor_flow_summary_web">
+    <item quantity="other">%1$d câu hỏi • Bố cục web</item>
+  </plurals>
+  <!-- Badge counting the form's validation issues. -->
+  <plurals name="formeditor_issue_count">
+    <item quantity="other">%1$d vấn đề</item>
+  </plurals>
+  <!-- Tooltip explaining the completion time estimate. %1$d: number of questions on the longest path. -->
+  <plurals name="formeditor_duration_estimate">
+    <item quantity="other">Ước tính khoảng 2 phút cho mỗi câu hỏi theo lộ trình dài nhất (%1$d câu hỏi).</item>
+  </plurals>
+  <!-- Tooltip sentence appended to the estimate when the survey is long. -->
+  <string name="formeditor_duration_fatigue_warning">Khảo sát có hơn 10 câu hỏi (~20 phút) có thể khiến người trả lời mệt mỏi.</string>
+  <!-- Estimated completion time badge. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes">~%1$d phút</string>
+  <!-- Estimated completion time badge for a long survey. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes_long">~%1$d phút • Khảo sát dài</string>
+  <!-- Flow legend: solid arrow to the next screen. -->
+  <string name="formeditor_legend_always_next">Luôn chuyển tiếp</string>
+  <!-- Flow legend: dashed arrow taken only when a condition holds. -->
+  <string name="formeditor_legend_if_condition_true">Nếu điều kiện đúng</string>
+  <!-- Badge on a repeated section in the flow. %1$s: section title. -->
+  <string name="formeditor_repeated_section_badge">Phần lặp lại: %1$s</string>
+  <!-- Badge on a repeated section that has no title yet. -->
+  <string name="formeditor_repeated_section_badge_untitled">Phần lặp lại: Chưa đặt tên</string>
+  <!-- Badge on a section in the flow. %1$s: section title. -->
+  <string name="formeditor_section_badge">Phần: %1$s</string>
+  <!-- Badge on a section that has no title yet. -->
+  <string name="formeditor_section_badge_untitled">Phần: Chưa đặt tên</string>
+  <!-- Badge: the section has display logic. -->
+  <string name="formeditor_conditional">Có điều kiện</string>
+  <!-- Repeat count expression of a repeated section. %1$s: expression. -->
+  <string name="formeditor_repeat_count_expression">Số lần: %1$s</string>
+  <!-- Ghost card title for appending a question to an untitled section. -->
+  <string name="formeditor_add_to_section">Thêm vào phần</string>
+  <!-- Ghost card title for appending a question to a section. %1$s: section title. -->
+  <string name="formeditor_add_to_named_section">Thêm vào %1$s</string>
+  <!-- Ghost card subtitle inside a section. -->
+  <string name="formeditor_append_question_in_section">Thêm câu hỏi vào cuối phần này</string>
+  <!-- Screen reader description of the ghost card inside an untitled section. -->
+  <string name="formeditor_add_question_inside_section">Thêm câu hỏi trong phần</string>
+  <!-- Screen reader description of the ghost card inside a section. %1$s: section title. -->
+  <string name="formeditor_add_question_inside_named_section">Thêm câu hỏi trong %1$s</string>
+  <!-- Condition pill on a flow edge. %1$s: operator (e.g. "is equal to"); %2$s: compared value. -->
+  <string name="formeditor_condition_pill">%1$s '%2$s'</string>
+  <!-- Icon description of the "+" button between flow cards. -->
+  <string name="formeditor_add_question_here">Thêm câu hỏi tại đây</string>
+  <!-- Screen reader description of the flow's start node. %1$s: launch button label. -->
+  <string name="formeditor_start_node_description">Bắt đầu: %1$s</string>
+  <!-- Subtitle of the ghost card at the end of the flow. -->
+  <string name="formeditor_ghost_card_subtitle">Nhấp để thêm màn hình trước bước Xem lại và gửi</string>
+  <!-- Screen reader description of the ghost card at the end of the flow. -->
+  <string name="formeditor_add_question_at_end_of_flow">Thêm câu hỏi vào cuối luồng</string>
+  <!-- Icon description of the drag handle on a question card. -->
+  <string name="formeditor_drag_to_reorder">Kéo để sắp xếp lại</string>
+  <!-- Caption of a required question's type. %1$s: question type (e.g. "Text"). -->
+  <string name="formeditor_question_type_required">%1$s • Bắt buộc</string>
+  <!-- Back button in the mini screen preview. -->
+  <string name="formeditor_back">Quay lại</string>
+  <!-- Placeholder of a text field in the mini screen preview. -->
+  <string name="formeditor_answer">Câu trả lời</string>
+  <!-- Placeholder when a choice question's data table isn't chosen yet. -->
+  <string name="formeditor_choose_data_table">Chọn bảng dữ liệu</string>
+  <!-- Placeholder when a choice question's map layer isn't chosen yet. -->
+  <string name="formeditor_choose_map_layer">Chọn lớp bản đồ</string>
+  <!-- Number of additional choices not shown in the mini preview. %1$d: count. -->
+  <string name="formeditor_more_choices">+%1$d lựa chọn khác</string>
+  <!-- Mini preview action to add a new entity. %1$s: feature noun (e.g. "plot"). -->
+  <string name="formeditor_add_new_feature">+ Thêm %1$s mới</string>
+  <!-- Mini preview action to add a new entity of unknown kind. -->
+  <string name="formeditor_add_new_item">+ Thêm mục mới</string>
+  <!-- Mini preview caption: capture a point with GPS only. -->
+  <string name="formeditor_capture_point_gps">Ghi lại điểm (GPS)</string>
+  <!-- Mini preview caption: capture a point with GPS or by drawing on the map. -->
+  <string name="formeditor_capture_point_or_draw">Ghi lại điểm hoặc vẽ trên bản đồ</string>
+  <!-- Mini preview caption: walk a line with GPS only. -->
+  <string name="formeditor_walk_line_gps">Đi theo đường (GPS)</string>
+  <!-- Mini preview caption: walk a line with GPS or draw it on the map. -->
+  <string name="formeditor_walk_line_or_draw">Đi theo đường hoặc vẽ trên bản đồ</string>
+  <!-- Mini preview caption: walk a polygon with GPS only. -->
+  <string name="formeditor_walk_polygon_gps">Đi vòng đa giác (GPS)</string>
+  <!-- Mini preview caption: walk a polygon with GPS or draw it on the map. -->
+  <string name="formeditor_walk_polygon_or_draw">Đi vòng đa giác hoặc vẽ trên bản đồ</string>
+  <!-- Mini preview caption: take a photo with the camera. -->
+  <string name="formeditor_take_photo">Chụp ảnh</string>
+  <!-- Mini preview caption: take a photo or upload one. -->
+  <string name="formeditor_take_photo_or_upload">Chụp ảnh hoặc tải lên</string>
+  <!-- Mini preview caption: record a video. -->
+  <string name="formeditor_record_video">Quay video</string>
+  <!-- Mini preview caption: record a video or upload one. -->
+  <string name="formeditor_record_video_or_upload">Quay video hoặc tải lên</string>
+  <!-- Mini preview caption: record audio. -->
+  <string name="formeditor_record_audio">Ghi âm</string>
+  <!-- Mini preview caption: record audio or upload a file. -->
+  <string name="formeditor_record_audio_or_upload">Ghi âm hoặc tải lên</string>
+  <!-- Mini preview caption of a note question (display-only text). -->
+  <string name="formeditor_read_only_note">Ghi chú chỉ đọc</string>
+
+  <!-- Question and section properties, choices, display logic, and flow preview. -->
+  <!-- Question properties panel. -->
+  <!-- Panel title. %1$d: position of the selected question; %2$d: total number of questions. -->
+  <string name="formeditor_question_position">Câu hỏi %1$d/%2$d</string>
+  <!-- Button that selects the previous question. -->
+  <string name="formeditor_previous">Trước</string>
+  <!-- Icon description: opens the menu of actions for the selected question. -->
+  <string name="formeditor_question_options">Tùy chọn câu hỏi</string>
+  <!-- Menu action that duplicates the selected question. -->
+  <string name="formeditor_duplicate">Nhân bản</string>
+  <string name="formeditor_question_type">Loại câu hỏi</string>
+  <!-- Field label for a question's optional hint text. -->
+  <string name="formeditor_hint_optional">Gợi ý (không bắt buộc)</string>
+  <!-- Field label for a question's optional hint in a non-default language. %1$s: language name. -->
+  <string name="formeditor_hint_in_language_optional">Gợi ý (%1$s, không bắt buộc)</string>
+  <!-- Toggle: the question must be answered. -->
+  <string name="formeditor_required">Bắt buộc</string>
+  <!-- Explains why a note (read-only) question can't be made required. -->
+  <string name="formeditor_notes_cant_be_required">Không thể đặt ghi chú là bắt buộc.</string>
+  <string name="formeditor_required_description">Người thu thập dữ liệu phải trả lời trước khi tiếp tục.</string>
+
+  <!-- Section properties panel. -->
+  <!-- Section that collectors can fill in multiple times. -->
+  <string name="formeditor_repeated_section">Phần lặp lại</string>
+  <!-- Panel title for a (non-repeated) group of questions. -->
+  <string name="formeditor_section">Phần</string>
+  <string name="formeditor_section_description">Nhóm câu hỏi trong luồng biểu mẫu</string>
+  <string name="formeditor_delete_section">Xóa phần</string>
+  <!-- Icon description: closes the properties panel. -->
+  <string name="formeditor_close_properties">Đóng thuộc tính</string>
+  <string name="formeditor_section_title">Tiêu đề phần</string>
+  <!-- Section that is filled in once (not repeated). -->
+  <string name="formeditor_single_section">Phần đơn</string>
+  <string name="formeditor_repeated_section_description">Người thu thập dữ liệu có thể thêm nhiều mục.</string>
+  <string name="formeditor_single_section_description">Các câu hỏi được nhóm lại về mặt hiển thị và logic.</string>
+  <!-- Field label: how many times a repeated section repeats, as an optional XForms expression. -->
+  <string name="formeditor_repeat_count_optional">Số lần lặp (biểu thức, không bắt buộc)</string>
+  <!-- Placeholder example for the repeat count field; keep the number and the path unchanged. -->
+  <string name="formeditor_repeat_count_placeholder">VD: 3 hoặc /data/number_of_plots</string>
+  <!-- Toggle: the section is shown only when a condition is met. -->
+  <string name="formeditor_section_condition">Điều kiện của phần</string>
+  <string name="formeditor_section_condition_on">Phần chỉ hiển thị khi đáp ứng điều kiện.</string>
+  <string name="formeditor_section_condition_off">Phần luôn được hiển thị.</string>
+  <string name="formeditor_section_condition_no_sources">Thêm một câu hỏi trước phần này để đặt điều kiện cho phần.</string>
+  <string name="formeditor_move_section_up">Di chuyển phần lên</string>
+  <string name="formeditor_move_section_down">Di chuyển phần xuống</string>
+  <string name="formeditor_no_section">Không thuộc phần nào</string>
+  <string name="formeditor_in_conditional_section">Cũng bị ẩn khi phần "%1$s" chứa nó bị ẩn.</string>
+  <!-- Field label: the question the section condition depends on. -->
+  <string name="formeditor_depends_on_question">Phụ thuộc vào câu hỏi</string>
+  <!-- Shown when the question a condition refers to no longer exists. -->
+  <string name="formeditor_missing">(không tồn tại)</string>
+  <!-- Dropdown placeholder when no value is selected for a condition. -->
+  <string name="formeditor_select_value">(chọn giá trị)</string>
+
+  <!-- Number question settings. -->
+  <string name="formeditor_decimal_places">Số chữ số thập phân</string>
+  <string name="formeditor_decimal_places_zero">0 cho số nguyên.</string>
+  <!-- %1$d: maximum number of decimal places. -->
+  <plurals name="formeditor_decimal_places_up_to">
+    <item quantity="other">Tối đa %1$d chữ số thập phân.</item>
+  </plurals>
+
+  <!-- Geometry question settings. -->
+  <!-- Field label: how a geometry (location) answer is captured. -->
+  <string name="formeditor_capture">Cách ghi nhận</string>
+  <!-- Capture mode of a polygon question: the collector walks the boundary while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_boundary">Đi quanh ranh giới (GPS mỗi 5 giây)</string>
+  <!-- Capture mode of a line question: the collector walks the path while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_path">Đi theo đường (GPS mỗi 5 giây)</string>
+  <string name="formeditor_capture_walk_boundary_description">Người thu thập dữ liệu đi quanh chu vi tại thực địa; các đỉnh GPS được ghi lại mỗi 5 giây.</string>
+  <string name="formeditor_capture_walk_path_description">Người thu thập dữ liệu đi theo đường tại thực địa; các đỉnh GPS được ghi lại mỗi 5 giây.</string>
+  <!-- Field label: whether a photo/video/audio is captured or uploaded. -->
+  <string name="formeditor_media_source">Nguồn phương tiện</string>
+
+  <!-- Advanced section. -->
+  <string name="formeditor_advanced_has_errors">Cài đặt nâng cao có lỗi</string>
+  <string name="formeditor_collapse_advanced">Thu gọn phần nâng cao</string>
+  <string name="formeditor_expand_advanced">Mở rộng phần nâng cao</string>
+  <!-- Field label: the question's data column name. -->
+  <string name="formeditor_name">Tên</string>
+  <!-- Help text for the question name field; keep the characters "_ . -" unchanged. -->
+  <string name="formeditor_name_supporting_text">Tên cột dữ liệu. Chữ cái, chữ số, _ . -</string>
+
+  <!-- Validation rules. -->
+  <string name="formeditor_validation">Xác thực</string>
+  <string name="formeditor_no_validation_rules">Loại câu hỏi này không có quy tắc xác thực.</string>
+  <!-- Field label: minimum allowed number. -->
+  <string name="formeditor_minimum">Tối thiểu</string>
+  <!-- Field label: maximum allowed number. -->
+  <string name="formeditor_maximum">Tối đa</string>
+  <string name="formeditor_min_length">Độ dài tối thiểu</string>
+  <string name="formeditor_max_length">Độ dài tối đa</string>
+  <!-- Field label: text pattern (e.g. email, digits only) the answer must match. -->
+  <string name="formeditor_pattern">Mẫu định dạng</string>
+  <string name="formeditor_regular_expression">Biểu thức chính quy</string>
+  <string name="formeditor_allowed_dates">Ngày được phép</string>
+  <!-- Allowed dates option: no restriction. -->
+  <string name="formeditor_any_date">Ngày bất kỳ</string>
+  <string name="formeditor_minimum_selections">Số lựa chọn tối thiểu</string>
+  <string name="formeditor_maximum_selections">Số lựa chọn tối đa</string>
+  <!-- Field label: custom message shown when the answer fails validation. -->
+  <string name="formeditor_error_message_optional">Thông báo lỗi (không bắt buộc)</string>
+  <string name="formeditor_earliest_date">Ngày sớm nhất</string>
+  <string name="formeditor_latest_date">Ngày muộn nhất</string>
+  <!-- Placeholder for a date field with no date. -->
+  <string name="formeditor_not_set">Chưa đặt</string>
+  <!-- Icon description: clears a date field. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_clear_field">Xóa %1$s</string>
+  <!-- Icon description: opens a date picker. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_pick_field">Chọn %1$s</string>
+  <!-- Date picker confirmation button. -->
+  <string name="formeditor_ok">OK</string>
+
+  <!-- Choices editor. -->
+  <!-- Heading and field label: the answer choices of a select question, and where they come from. -->
+  <string name="formeditor_choices">Lựa chọn</string>
+  <!-- Visual style of choices: plain text. -->
+  <string name="formeditor_visual_text_only">Chỉ văn bản</string>
+  <!-- Visual style of choices: each choice has a color. -->
+  <string name="formeditor_visual_colors">Màu sắc</string>
+  <!-- Visual style of choices: each choice has an image. -->
+  <string name="formeditor_visual_images">Hình ảnh</string>
+  <!-- Button that imports choices from a file; keep the file extensions unchanged. -->
+  <string name="formeditor_import_choices_file">Nhập (.csv / .txt)</string>
+  <!-- Title of the dialog shown after picking a choices file. -->
+  <string name="formeditor_import_choices">Nhập lựa chọn</string>
+  <!-- %1$d: number of choices found in the file; %2$d: number of current choices. -->
+  <plurals name="formeditor_import_choices_message">
+    <item quantity="other">Tìm thấy %1$d lựa chọn trong tệp. Bạn muốn thay thế các lựa chọn hiện tại (%2$d) hay thêm vào sau chúng?</item>
+  </plurals>
+  <!-- Button: replace the current choices with the imported ones. -->
+  <string name="formeditor_replace">Thay thế</string>
+  <!-- Button: add the imported choices after the current ones. -->
+  <string name="formeditor_append">Thêm vào sau</string>
+  <!-- Field label: how choices are displayed (text, colors, or images). -->
+  <string name="formeditor_visual_style">Kiểu hiển thị</string>
+  <!-- Field label: an earlier question whose answer filters this question's choices. -->
+  <string name="formeditor_cascading_filter">Bộ lọc phân cấp (câu hỏi cha)</string>
+  <!-- Label before chips that filter the choice list by parent choice. -->
+  <string name="formeditor_filter_label">Lọc:</string>
+  <!-- Filter chip that shows all choices. -->
+  <string name="formeditor_filter_all">Tất cả</string>
+  <!-- Error when a choice image is too large. %1$d: maximum size in kilobytes. -->
+  <string name="formeditor_choice_image_too_large">Hãy chọn tệp hình ảnh nhỏ hơn %1$d KB.</string>
+  <!-- Field label: the parent question's choice this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_choice">Lựa chọn cha (%1$s)</string>
+  <!-- Parent choice option meaning the choice is shown regardless of the parent answer. -->
+  <string name="formeditor_any_unfiltered">Bất kỳ (không lọc)</string>
+  <!-- Field label: the parent question's value this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_value">Giá trị cha (%1$s)</string>
+  <string name="formeditor_remove_choice">Gỡ bỏ lựa chọn</string>
+  <string name="formeditor_add_choice">Thêm lựa chọn</string>
+  <string name="formeditor_no_map_layers_available">Khảo sát này chưa có lớp bản đồ nào.</string>
+  <string name="formeditor_no_data_tables_available">Khảo sát này chưa có bảng dữ liệu nào.</string>
+  <!-- Button that creates a new map layer for the question's choices. -->
+  <string name="formeditor_new_map_layer">Lớp bản đồ mới</string>
+  <!-- Button that creates a new data table for the question's choices. -->
+  <string name="formeditor_new_data_table">Bảng dữ liệu mới</string>
+  <!-- %1$d: number of features/rows; %2$s: feature noun matching the count (e.g. "plot"/"plots"); %3$s: map layer or data table name. -->
+  <plurals name="formeditor_collectors_choose_from">
+    <item quantity="other">Người thu thập dữ liệu chọn từ %1$d %2$s trong %3$s.</item>
+  </plurals>
+  <!-- %1$s: identifier of an external choice list. -->
+  <string name="formeditor_choices_from_external_list">Các lựa chọn được tải từ danh sách bên ngoài "%1$s".</string>
+  <string name="formeditor_sample_plots_cant_be_added">Các lô mẫu được tạo từ thiết kế lấy mẫu và người thu thập dữ liệu không thể thêm.</string>
+  <!-- Toggle. %1$s: plural feature noun (e.g. "plots", "trees"). -->
+  <string name="formeditor_allow_add_new">Cho phép người thu thập dữ liệu thêm %1$s mới</string>
+  <!-- %1$s: form title; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_uses_form_to_add_new">Dùng %1$s để thêm %2$s mới.</string>
+  <!-- %1$s: singular feature noun (e.g. "plot"). -->
+  <string name="formeditor_collectors_can_add_new">Người thu thập dữ liệu có thể thêm %1$s mới khi chọn.</string>
+  <!-- Chip that opens the linked form. -->
+  <string name="formeditor_open_form">Mở biểu mẫu</string>
+  <!-- %1$s: map layer or data table name; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_dataset_has_no_form">%1$s chưa có biểu mẫu để thêm %2$s mới.</string>
+  <!-- Button. %1$s: map layer or data table name. -->
+  <string name="formeditor_create_form_for">Tạo biểu mẫu cho %1$s</string>
+  <!-- Accessibility description of the marker beside a text-only choice. -->
+  <string name="formeditor_text_choice">Lựa chọn văn bản</string>
+  <!-- Chip text for a choice linked to a standard code that isn't in the code list. %1$s: code. -->
+  <string name="formeditor_code_value">Mã: %1$s</string>
+  <string name="formeditor_link_to_standard_choice">Liên kết với lựa chọn chuẩn…</string>
+  <!-- Menu option: the choice isn't linked to a standard choice. -->
+  <string name="formeditor_not_linked">Chưa liên kết</string>
+  <!-- Icon description. %1$s: color name or hex code. -->
+  <string name="formeditor_choice_color_named">Màu lựa chọn: %1$s</string>
+  <!-- Icon description for a choice with no color. -->
+  <string name="formeditor_choice_color_none">Màu lựa chọn: không có</string>
+  <!-- Heading of the choice color palette. -->
+  <string name="formeditor_choice_color">Màu lựa chọn</string>
+  <string name="formeditor_add_choice_image">Thêm hình ảnh lựa chọn</string>
+  <string name="formeditor_choice_image">Hình ảnh lựa chọn</string>
+  <string name="formeditor_replace_image">Thay thế hình ảnh</string>
+  <string name="formeditor_remove_image">Gỡ bỏ hình ảnh</string>
+
+  <!-- Display logic editor. -->
+  <string name="formeditor_display_logic">Logic hiển thị</string>
+  <!-- Segmented button: the question is always shown. -->
+  <string name="formeditor_always_show">Luôn hiển thị</string>
+  <!-- Segmented button: the question is shown only if a condition is met. -->
+  <string name="formeditor_show_only_if">Chỉ hiển thị nếu…</string>
+  <string name="formeditor_first_screen_in_form">Màn hình đầu tiên trong biểu mẫu</string>
+  <string name="formeditor_first_screen_display_logic_notice">Logic hiển thị có thể phụ thuộc vào các câu hỏi trước đó. Hãy chuyển câu hỏi này xuống sau hoặc chọn một câu hỏi phía sau để thiết lập hiển thị có điều kiện.</string>
+  <string name="formeditor_select_question_2">Chọn Câu hỏi 2 →</string>
+  <string name="formeditor_move_question_down">Chuyển câu hỏi xuống</string>
+  <string name="formeditor_add_question_2">Thêm Câu hỏi 2</string>
+  <!-- Shown when the question a display-logic rule refers to no longer exists. -->
+  <string name="formeditor_missing_question">(câu hỏi không tồn tại)</string>
+
+  <!-- Flow preview side panel. -->
+  <string name="formeditor_flow_preview">Xem trước luồng</string>
+  <string name="formeditor_close_preview">Đóng bản xem trước</string>
+  <!-- Field label: language used in the preview. -->
+  <string name="formeditor_language">Ngôn ngữ</string>
+  <!-- %1$s: technical error message. -->
+  <string name="formeditor_preview_load_error">Không thể tải XForms đã tạo:\n%1$s</string>
+  <string name="formeditor_preview_web_description">Câu hỏi cập nhật trực tiếp khi bạn trả lời: các thẻ có điều kiện xuất hiện hoặc biến mất dựa trên logic hiển thị.</string>
+  <string name="formeditor_preview_mobile_description">Màn hình cập nhật trực tiếp khi bạn trả lời: các câu hỏi có điều kiện xuất hiện hoặc biến mất dựa trên logic hiển thị.</string>
+  <string name="formeditor_submission_passed_validation">Bài gửi đã vượt qua xác thực.</string>
+  <!-- Heading of the list of screens the collector is going through. -->
+  <string name="formeditor_current_path">Lộ trình hiện tại</string>
+  <!-- Button that restarts the form preview. -->
+  <string name="formeditor_restart">Bắt đầu lại</string>
+  <string name="formeditor_back_to_editor">Quay lại trình chỉnh sửa</string>
+
+  <!-- Form properties: availability, where submissions are saved, and status markers. -->
+  <!-- Form properties panel (form-level settings, availability, and where submissions are saved). -->
+  <string name="formeditor_form_properties">Thuộc tính biểu mẫu</string>
+  <!-- Part of the form properties subtitle. %1$d: number of questions in the form. -->
+  <plurals name="formeditor_form_properties_question_count">
+    <item quantity="other">%1$d câu hỏi</item>
+  </plurals>
+  <!-- Part of the form properties subtitle. %1$d: number of distinct paths through the form's display logic. -->
+  <plurals name="formeditor_form_properties_path_count">
+    <item quantity="other">%1$d lộ trình có thể</item>
+  </plurals>
+  <!-- Form properties subtitle. %1$s: question count (e.g. "3 questions"); %2$s: path count (e.g. "4 potential paths"). -->
+  <string name="formeditor_form_properties_counts">%1$s • %2$s</string>
+  <string name="formeditor_form_title">Tiêu đề biểu mẫu</string>
+  <!-- Field label: text of the buttons that start data collection for this form. -->
+  <string name="formeditor_button_label">Nhãn nút</string>
+  <string name="formeditor_button_label_help">Hiển thị trên các nút bắt đầu thu thập dữ liệu cho biểu mẫu này. Mặc định là tiêu đề biểu mẫu.</string>
+  <string name="formeditor_form_no_questions_yet">Biểu mẫu này chưa có câu hỏi nào. Dùng "+" trên khung vẽ để thêm.</string>
+  <!-- Section heading: on which platforms (mobile app, web dashboard) collectors can open the form. -->
+  <string name="formeditor_availability">Khả dụng</string>
+  <!-- Section heading: what happens to data when the form is submitted. -->
+  <string name="formeditor_submissions">Bài gửi</string>
+  <!-- %1$s: name of the map layer or data table the form's submissions are added to. -->
+  <string name="formeditor_linked_to_dataset">Đã liên kết với %1$s</string>
+  <string name="formeditor_linked_map_layer_description">Mỗi bài gửi thêm một đối tượng bản đồ mới vào lớp bản đồ này. Các thuộc tính lược đồ luôn đồng bộ với câu hỏi trong biểu mẫu.</string>
+  <string name="formeditor_linked_data_table_description">Mỗi bài gửi thêm một hàng mới vào bảng dữ liệu này. Các thuộc tính lược đồ luôn đồng bộ với câu hỏi trong biểu mẫu.</string>
+  <string name="formeditor_edit_map_layer">Chỉnh sửa lớp bản đồ</string>
+  <string name="formeditor_edit_data_table">Chỉnh sửa bảng dữ liệu</string>
+  <string name="formeditor_unlink_map_layer">Hủy liên kết lớp bản đồ</string>
+  <string name="formeditor_unlink_data_table">Hủy liên kết bảng dữ liệu</string>
+  <string name="formeditor_create_map_layer_for_form">Tạo lớp bản đồ cho biểu mẫu</string>
+  <string name="formeditor_create_data_table_for_form">Tạo bảng dữ liệu cho biểu mẫu</string>
+  <!-- Icon description: opens a map layer or data table. %1$s: its name. -->
+  <string name="formeditor_open_dataset">Mở %1$s</string>
+  <string name="formeditor_available_on_mobile">Khả dụng trên di động</string>
+  <string name="formeditor_available_on_web">Khả dụng trên web</string>
+  <string name="formeditor_availability_mobile_on">Người thu thập dữ liệu có thể mở biểu mẫu này trong ứng dụng di động.</string>
+  <string name="formeditor_availability_mobile_off">Ẩn với người thu thập dữ liệu trong ứng dụng di động.</string>
+  <string name="formeditor_availability_web_on">Người thu thập dữ liệu có thể mở biểu mẫu này trong bảng điều khiển web.</string>
+  <string name="formeditor_availability_web_off">Ẩn với người thu thập dữ liệu trong bảng điều khiển web.</string>
+  <string name="formeditor_availability_none_warning">Người thu thập dữ liệu không thể mở biểu mẫu này ở bất kỳ đâu cho đến khi bạn bật một trong các tùy chọn này.</string>
+  <!-- Error: some location questions can only use GPS, which the web dashboard can't capture. %1$d: number of such questions; %2$s: name of the capture option that also allows drawing on the map (e.g. "GPS or map"). -->
+  <plurals name="formeditor_web_incompatible_geometry_summary">
+    <item quantity="other">%1$d câu hỏi hình học chỉ dùng GPS và không thể trả lời trên web. Hãy chuyển chúng sang "%2$s".</item>
+  </plurals>
+  <!-- Accessibility action label for expanding a collapsible section. -->
+  <string name="formeditor_expand_section">Mở rộng</string>
+  <!-- Accessibility action label for collapsing a collapsible section. -->
+  <string name="formeditor_collapse_section">Thu gọn</string>
+  <string name="formeditor_when_form_submitted">Khi biểu mẫu được gửi</string>
+  <!-- %1$s: name of the map layer or data table submissions are added to. -->
+  <string name="formeditor_save_to_create_linked_description">Mỗi bài gửi được thêm vào %1$s.</string>
+  <string name="formeditor_save_to_create_map_layer_description">Một lớp bản đồ sẽ được tạo cho biểu mẫu này.</string>
+  <string name="formeditor_save_to_create_data_table_description">Một bảng dữ liệu sẽ được tạo cho biểu mẫu này.</string>
+  <string name="formeditor_save_to_update_unavailable">Thêm một lớp bản đồ hoặc bảng dữ liệu khác vào khảo sát để dùng tùy chọn này.</string>
+  <string name="formeditor_save_to_update_description">Mỗi bài gửi thay đổi thuộc tính của một đối tượng đã có.</string>
+  <string name="formeditor_submissions_always_kept">Bài gửi luôn được giữ lại, nên mọi thay đổi đều có bản ghi về người thực hiện và thời điểm thực hiện.</string>
+  <string name="formeditor_update_target_label">Lớp bản đồ hoặc bảng dữ liệu cần cập nhật</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_map_layer">Lớp bản đồ</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_data_table">Bảng dữ liệu</string>
+  <!-- Section heading, followed by the ways to identify which map feature a submission updates. -->
+  <string name="formeditor_find_map_feature_by">Tìm đối tượng bản đồ theo</string>
+  <!-- Section heading, followed by the ways to identify which table row a submission updates. -->
+  <string name="formeditor_find_table_row_by">Tìm hàng trong bảng theo</string>
+  <string name="formeditor_selected_on_map">Chọn trên bản đồ</string>
+  <string name="formeditor_picked_from_list">Chọn từ danh sách</string>
+  <!-- The answer a collector gives to a question (used as an option for identifying features and in status rules). -->
+  <string name="formeditor_question_answer">Câu trả lời của câu hỏi</string>
+  <string name="formeditor_find_by_selected_map_feature_help">Người thu thập dữ liệu mở biểu mẫu từ một đối tượng trên bản đồ. Biểu mẫu bắt đầu bằng màn hình "Đối tượng bản đồ cần cập nhật" được điền tự động, nên cũng có thể chọn đối tượng từ danh sách.</string>
+  <!-- %1$s: name of the data table. -->
+  <string name="formeditor_find_by_selected_table_row_help">Biểu mẫu bắt đầu bằng màn hình "Hàng cần cập nhật" liệt kê các hàng của %1$s.</string>
+  <!-- Field label: the dataset property the question's answer is matched against. -->
+  <string name="formeditor_matches_property">Khớp với thuộc tính</string>
+  <string name="formeditor_fields_to_update">Các trường cần cập nhật</string>
+  <string name="formeditor_fields_to_update_empty">Thêm câu hỏi để chọn những thuộc tính mà chúng cập nhật.</string>
+  <!-- %1$s: property name. -->
+  <string name="formeditor_property_already_updated">Một câu hỏi khác đã cập nhật "%1$s".</string>
+  <!-- Field label: which property a question's answer updates. -->
+  <string name="formeditor_updates">Cập nhật</string>
+  <!-- Dropdown option: the question's answer doesn't update any property. -->
+  <string name="formeditor_dont_update">Không cập nhật</string>
+  <!-- Dropdown option: the question's answer updates the feature's geometry. -->
+  <string name="formeditor_geometry_location">Hình học (vị trí)</string>
+  <string name="formeditor_status_marker">Điểm đánh dấu trạng thái</string>
+  <string name="formeditor_set_status_marker">Đặt điểm đánh dấu trạng thái</string>
+  <string name="formeditor_status_marker_on_map_feature">Đặt biểu tượng, màu và nhãn của điểm đánh dấu trạng thái cho đối tượng bản đồ khi gửi.</string>
+  <string name="formeditor_status_marker_on_table_row">Đặt biểu tượng, màu và nhãn của điểm đánh dấu trạng thái cho hàng trong bảng khi gửi.</string>
+  <string name="formeditor_status_marker_off_map_features">Tắt theo mặc định. Bật để đánh dấu các đối tượng bản đồ (ví dụ: ✓ Đã khảo sát hoặc ○ Đang chờ).</string>
+  <string name="formeditor_status_marker_off_table_rows">Tắt theo mặc định. Bật để đánh dấu các hàng trong bảng (ví dụ: ✓ Đã khảo sát hoặc ○ Đang chờ).</string>
+  <string name="formeditor_status_rules_help">Các quy tắc được kiểm tra theo thứ tự. Quy tắc khớp đầu tiên sẽ đặt điểm đánh dấu và nhãn trạng thái.</string>
+  <string name="formeditor_add_status_rule">Thêm quy tắc trạng thái</string>
+  <!-- Heading of the fallback status used when no status rule matches. -->
+  <string name="formeditor_otherwise">Nếu không</string>
+  <string name="formeditor_otherwise_help">Trạng thái mặc định khi không có quy tắc nào ở trên khớp.</string>
+  <string name="formeditor_default_status_color">Màu trạng thái mặc định</string>
+  <!-- Status rule subject: a property of the data table row. -->
+  <string name="formeditor_row_property">Thuộc tính hàng</string>
+  <!-- Status rule subject: a property of the map feature. -->
+  <string name="formeditor_feature_property">Thuộc tính đối tượng</string>
+  <!-- Status rule subject: number of submissions for the feature. -->
+  <string name="formeditor_submission_count">Số bài gửi</string>
+  <!-- %1$d: status rule number. -->
+  <string name="formeditor_status_rule_title">Quy tắc %1$d</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_up">Chuyển quy tắc trạng thái %1$d lên</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_down">Chuyển quy tắc trạng thái %1$d xuống</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_remove_status_rule">Gỡ bỏ quy tắc trạng thái %1$d</string>
+  <!-- Field label: what a status rule's condition is about (submission count, question answer, property). -->
+  <string name="formeditor_status_rule_when">Khi</string>
+  <!-- Field label: minimum number of submissions for a status rule to match. -->
+  <string name="formeditor_at_least_submissions">Tối thiểu (bài gửi)</string>
+  <string name="formeditor_matches_when_submitted">Khớp khi biểu mẫu này được gửi.</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_feature">
+    <item quantity="other">Khớp khi đối tượng có ít nhất %1$d bài gửi.</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_map_feature">
+    <item quantity="other">Khớp khi đối tượng bản đồ có ít nhất %1$d bài gửi.</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_table_row">
+    <item quantity="other">Khớp khi hàng trong bảng có ít nhất %1$d bài gửi.</item>
+  </plurals>
+  <!-- Button description for a status rule's color picker. %1$d: status rule number. -->
+  <string name="formeditor_status_color_for_rule">Màu trạng thái cho quy tắc %1$d</string>
+  <!-- Field label: status marker symbol (e.g. ✓, ○). -->
+  <string name="formeditor_symbol">Biểu tượng</string>
+  <string name="formeditor_status_label">Nhãn trạng thái</string>
+  <string name="formeditor_marker_color">Màu điểm đánh dấu</string>
+  <!-- Placeholder text in a status pill when the designer hasn't entered a status label. -->
+  <string name="formeditor_status_placeholder">Trạng thái</string>
+  <string name="formeditor_submission_updates_unchosen">Mỗi bài gửi cập nhật một đối tượng đã có. Chọn đối tượng trong phần Nâng cao.</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_updates_map_feature_in">Mỗi bài gửi cập nhật một đối tượng bản đồ đã có trong:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_updates_table_row_in">Mỗi bài gửi cập nhật một hàng đã có trong:</string>
+  <string name="formeditor_submission_saved_without_dataset">Bài gửi được lưu mà không thêm đối tượng bản đồ hoặc hàng trong bảng.</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_adds_map_feature_to">Mỗi bài gửi thêm một đối tượng bản đồ mới vào:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_adds_table_row_to">Mỗi bài gửi thêm một hàng mới vào:</string>
+  <!-- Summary of the save-to setting. %1$s: update option label (e.g. "Update existing map features"); %2$s: map layer or data table name. -->
+  <string name="formeditor_save_to_summary_update_in">%1$s trong %2$s</string>
+  <!-- Summary of the save-to setting plus status markers. %1$s: save-to summary; %2$s: status badges separated by " / " (e.g. "✓ Surveyed / ○ Pending"). -->
+  <string name="formeditor_save_to_summary_with_status">%1$s • Trạng thái: %2$s</string>
+
+  <!-- Web preview, Save as template, and standard-field (concept) linking. -->
+  <!-- Web preview: platform banners. -->
+  <!-- Short name of the mobile platform, used inside sentences. -->
+  <string name="formeditor_preview_target_mobile_sentence">ứng dụng di động</string>
+  <!-- Short name of the web platform, used inside sentences. -->
+  <string name="formeditor_preview_target_web_sentence">bảng điều khiển web</string>
+  <!-- Banner title when the form is switched off for the mobile app. -->
+  <string name="formeditor_not_available_on_mobile">Không khả dụng trên di động</string>
+  <!-- Banner title when the form is switched off for the web dashboard. -->
+  <string name="formeditor_not_available_on_web">Không khả dụng trên web</string>
+  <string name="formeditor_not_available_on_mobile_body">Người thu thập dữ liệu sẽ không thấy biểu mẫu này trong ứng dụng di động. Hãy bật để cung cấp biểu mẫu tại đó (cũng có trong Cài đặt biểu mẫu).</string>
+  <string name="formeditor_not_available_on_web_body">Người thu thập dữ liệu sẽ không thấy biểu mẫu này trong bảng điều khiển web. Hãy bật để cung cấp biểu mẫu tại đó (cũng có trong Cài đặt biểu mẫu).</string>
+  <!-- Banner action that turns the form on for the previewed platform. -->
+  <string name="formeditor_enable_on_platform">Bật</string>
+  <string name="formeditor_cant_be_used_on_web_title">Chưa thể dùng trên web</string>
+  <!-- %1$s: sentence summarizing how many geometry questions are GPS only. -->
+  <string name="formeditor_cant_be_used_on_web_body">Không thể dùng biểu mẫu này trên web cho đến khi các câu hỏi chỉ dùng GPS cho phép vẽ trên bản đồ. %1$s</string>
+
+  <!-- Web preview: wireframe and mock dashboard. -->
+  <!-- Wireframe summary of a whole-number question's input. -->
+  <string name="formeditor_integer_input">Nhập số nguyên</string>
+  <!-- Wireframe summary of a decimal question's input. %1$d: number of decimal places ("dp"). -->
+  <string name="formeditor_decimal_input">Số thập phân (%1$d chữ số)</string>
+  <!-- Accessibility label of the ghost card that adds a question at the end of the web form. -->
+  <string name="formeditor_add_question_at_end_of_web_form">Thêm câu hỏi vào cuối biểu mẫu web</string>
+  <!-- Progress line in the web form wireframe footer. %1$d: number of questions. -->
+  <string name="formeditor_answered_progress">Đã trả lời 0/%1$d</string>
+  <!-- Fallback name of the dataset shown in the mock web dashboard. -->
+  <string name="formeditor_sample_plots">Lô mẫu</string>
+  <!-- Placeholder of the mock feature search box in the web preview. -->
+  <string name="formeditor_search_features">Tìm kiếm đối tượng…</string>
+  <!-- Title of the web preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title_web">Xem trước • %1$s • Web</string>
+  <!-- Web preview button that zooms the map back out. -->
+  <string name="formeditor_reset_map_view">Đặt lại chế độ xem bản đồ</string>
+
+  <!-- Save as template. -->
+  <string name="formeditor_save_template_needs_organization">Hãy chuyển khảo sát này vào một tổ chức để lưu các biểu mẫu của nó dưới dạng mẫu.</string>
+  <!-- %1$s: organization name. -->
+  <string name="formeditor_save_template_managers_only">Chỉ Người quản lý của %1$s mới có thể lưu mẫu.</string>
+  <string name="formeditor_save_template_managers_only_this_organization">Chỉ Người quản lý của tổ chức này mới có thể lưu mẫu.</string>
+  <string name="formeditor_template_saved_title">Đã lưu mẫu</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_global">"%1$s" đã có trong thư viện chung. Mẫu này có sẵn trong "Từ mẫu…" khi thêm biểu mẫu và được liệt kê trong thẻ Mẫu của tổ chức.</string>
+  <!-- %1$s: template name. %2$s: organization name. -->
+  <string name="formeditor_template_saved_organization">"%1$s" đã có trong mẫu của %2$s. Mẫu này có sẵn trong "Từ mẫu…" khi thêm biểu mẫu và được liệt kê trong thẻ Mẫu của tổ chức.</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_your_organization">"%1$s" đã có trong mẫu của tổ chức bạn. Mẫu này có sẵn trong "Từ mẫu…" khi thêm biểu mẫu và được liệt kê trong thẻ Mẫu của tổ chức.</string>
+  <!-- Button that closes a confirmation dialog. -->
+  <string name="formeditor_done">Xong</string>
+  <string name="formeditor_save_as_template_title">Lưu dưới dạng mẫu</string>
+  <string name="formeditor_save_as_template_intro">Lưu bản sao của biểu mẫu này để có thể thêm vào các khảo sát khác. Liên kết trường chuẩn và mã lựa chọn được giữ lại; nơi lưu dữ liệu thì không.</string>
+  <string name="formeditor_template_name">Tên mẫu</string>
+  <string name="formeditor_template_description_optional">Mô tả (không bắt buộc)</string>
+  <!-- Template destination option. %1$s: organization name. -->
+  <string name="formeditor_template_destination_organization">Mẫu của %1$s</string>
+  <!-- Template destination option when the organization name is unknown. -->
+  <string name="formeditor_template_destination_your_organization">mẫu của tổ chức bạn</string>
+  <string name="formeditor_template_destination_global">Thư viện chung (tất cả tổ chức)</string>
+  <!-- Template summary. %1$d: number of questions. -->
+  <plurals name="formeditor_template_question_summary">
+    <item quantity="other">%1$d câu hỏi.</item>
+  </plurals>
+  <!-- Template summary. %1$d: number of questions. %2$d: number of them linked to standard fields. -->
+  <plurals name="formeditor_template_question_summary_linked">
+    <item quantity="other">%1$d câu hỏi, %2$d câu được liên kết với trường chuẩn.</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. %2$s: organization name. -->
+  <plurals name="formeditor_template_dropped_links">
+    <item quantity="other">Mẫu chung chỉ có thể dùng trường chuẩn chung, nên %1$d liên kết tới trường của %2$s sẽ bị gỡ khỏi mẫu.</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. -->
+  <plurals name="formeditor_template_dropped_links_your_organization">
+    <item quantity="other">Mẫu chung chỉ có thể dùng trường chuẩn chung, nên %1$d liên kết tới trường của tổ chức bạn sẽ bị gỡ khỏi mẫu.</item>
+  </plurals>
+  <string name="formeditor_save_template">Lưu mẫu</string>
+
+  <!-- Concept (standard field) linking. -->
+  <!-- Field label for the text of a note question. -->
+  <string name="formeditor_note_text">Nội dung ghi chú</string>
+  <!-- Field label for the text of a note question in a non-default language. %1$s: language name. -->
+  <string name="formeditor_note_text_in_language">Nội dung ghi chú (%1$s)</string>
+  <!-- Heading of the standard-field suggestions under the Label field. -->
+  <string name="formeditor_standard_fields">Trường chuẩn</string>
+  <!-- %1$s: question label. %2$s: organization name. -->
+  <string name="formeditor_add_label_to_dictionary">Thêm "%1$s" vào từ điển của %2$s</string>
+  <!-- %1$s: question label. Used when the organization name is unknown. -->
+  <string name="formeditor_add_label_to_organization_dictionary">Thêm "%1$s" vào từ điển của tổ chức</string>
+  <!-- Suggestion detail for a standard field of an incompatible type. %1$s: data type (e.g. "Number"). -->
+  <string name="formeditor_concept_type_answers">Câu trả lời dạng %1$s</string>
+  <string name="formeditor_unlink_standard_field">Hủy liên kết trường chuẩn</string>
+  <!-- %1$s: the standard field's label. -->
+  <string name="formeditor_use_standard_label">Dùng nhãn chuẩn "%1$s"</string>
+  <!-- %1$s: standard field ID. -->
+  <string name="formeditor_concept_not_in_dictionary">%1$s không có trong từ điển của khảo sát này.</string>
+  <!-- %1$s: unit of measure. -->
+  <string name="formeditor_concept_unit">Đơn vị: %1$s</string>
+  <!-- %1$s: comma-separated list of references. -->
+  <string name="formeditor_concept_reference">Tham chiếu: %1$s</string>
+  <!-- %1$s: standard field ID. %2$s: version. -->
+  <string name="formeditor_concept_id_version">%1$s · phiên bản %2$s</string>
+  <!-- Button that opens the standard field search dialog. -->
+  <string name="formeditor_link_to_standard_field_button">Liên kết với trường chuẩn…</string>
+  <string name="formeditor_link_to_standard_field_title">Liên kết với trường chuẩn</string>
+  <string name="formeditor_search_the_dictionary">Tìm kiếm trong từ điển</string>
+  <string name="formeditor_no_dictionary_yet">Khảo sát này chưa có từ điển.</string>
+  <string name="formeditor_no_standard_fields_available">Chưa có trường chuẩn nào trong từ điển này.</string>
+  <!-- %1$s: search text. -->
+  <string name="formeditor_no_standard_fields_match">Không có trường chuẩn nào khớp với "%1$s".</string>
+  <!-- Field label: the standard code-list value a choice maps to. -->
+  <string name="formeditor_standard_value">Giá trị chuẩn</string>
+  <!-- A choice not mapped to any standard code-list value. -->
+  <string name="formeditor_not_matched">Chưa khớp</string>
+  <string name="formeditor_delete_question">Xóa câu hỏi</string>
+  <string name="formeditor_delete_question_title">Xóa câu hỏi?</string>
+  <string name="formeditor_delete_question_message">Câu hỏi này sẽ được đánh dấu là đã xóa. Người dùng sẽ không còn thấy câu hỏi này sau khi thiết bị của họ đồng bộ hóa và mọi dữ liệu đã thu thập sẽ được giữ nguyên.</string>
+  <string name="formeditor_delete_linked_question_title">Xóa câu hỏi đã liên kết?</string>
+  <!-- %1$s: sentence saying what the question's answers feed. -->
+  <string name="formeditor_delete_linked_question_message">%1$s Việc xóa sẽ loại bỏ các câu trả lời này khỏi báo cáo.</string>
+  <!-- %1$d: number of imported fields matching standard definitions. -->
+  <plurals name="formeditor_import_matches_title">
+    <item quantity="other">Chúng tôi tìm thấy %1$d trường khớp với định nghĩa chuẩn</item>
+  </plurals>
+  <!-- Icon description: closes a card. -->
+  <string name="formeditor_dismiss">Đóng lại</string>
+  <string name="formeditor_linked_fields_explainer">Các trường đã liên kết có thể được so sánh và cộng dồn giữa các khảo sát.</string>
+  <string name="formeditor_link_all">Liên kết tất cả</string>
+  <!-- %1$d: number of selected matches. -->
+  <string name="formeditor_link_selected">Liên kết %1$d mục đã chọn</string>
+  <string name="formeditor_not_now">Để sau</string>
+  <string name="formeditor_saving_to_global_library">Đang lưu vào Thư viện chung (tất cả tổ chức)</string>
+  <!-- Banner title when the template a form was built from has changed. %1$s: template title. -->
+  <string name="formeditor_template_update_available">Có bản cập nhật mẫu: %1$s</string>
+  <!-- Banner body. %1$d: number of suggested additions; %2$d: number of suggested removals. -->
+  <string name="formeditor_template_update_summary">Xem lại %1$d nội dung bổ sung được đề xuất và %2$d nội dung cần xóa trước khi áp dụng cho biểu mẫu này.</string>
+  <!-- Button that opens the template update review dialog. -->
+  <string name="formeditor_template_review_changes">Xem lại thay đổi</string>
+  <!-- Template update review dialog title. %1$s: template title. -->
+  <string name="formeditor_template_review_title">Xem lại bản cập nhật mẫu: %1$s</string>
+  <!-- Template update review dialog explanation. -->
+  <string name="formeditor_template_review_description">Chọn các bản cập nhật quy định hoặc mẫu để áp dụng cho biểu mẫu của bạn. Các mục không được chọn sẽ giữ nguyên.</string>
+  <!-- Template update review dialog: heading above questions the template added. -->
+  <string name="formeditor_template_suggested_additions">Nội dung bổ sung được đề xuất</string>
+  <!-- Template update review dialog: heading above questions the template no longer has. -->
+  <string name="formeditor_template_removed_questions">Câu hỏi không còn trong mẫu</string>
+  <!-- Template update review dialog: checkbox label to remove a question. %1$s: question label. -->
+  <string name="formeditor_template_remove_question">Xóa: %1$s</string>
+  <!-- Template update review dialog: applies the checked additions and removals. -->
+  <string name="formeditor_template_apply_selected">Áp dụng mục đã chọn</string>
+  <!-- Menu action that duplicates the selected question together with the questions that depend on it. -->
+  <string name="formeditor_duplicate_branch">Nhân bản nhánh</string>
+  <!-- Summary of a question's validation rules. %1$s = one or more conditions, e.g. “be between 0 and 120”. -->
+  <string name="formeditor_validation_must">Phải %1$s.</string>
+  <!-- Joins two validation conditions. %1$s, %2$s = conditions. -->
+  <string name="formeditor_validation_and">%1$s và %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number from %1$s to %2$s. -->
+  <string name="formeditor_validation_number_between">nằm trong khoảng %1$s đến %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at least %1$s. -->
+  <string name="formeditor_validation_number_at_least">tối thiểu là %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at most %1$s. -->
+  <string name="formeditor_validation_number_at_most">tối đa là %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has %1$d to %2$d characters. -->
+  <string name="formeditor_validation_length_between">dài %1$d–%2$d ký tự</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at least %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_least">
+    <item quantity="other">dài ít nhất %1$d ký tự</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at most %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_most">
+    <item quantity="other">dài tối đa %1$d ký tự</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is an email address. -->
+  <string name="formeditor_validation_pattern_email">là địa chỉ email</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only digits. -->
+  <string name="formeditor_validation_pattern_digits">chỉ chứa chữ số</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only the Latin letters A to Z. -->
+  <string name="formeditor_validation_pattern_letters">chỉ chứa chữ cái A–Z</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer matches the organizer's own pattern. -->
+  <string name="formeditor_validation_pattern_custom">khớp với mẫu</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or earlier. -->
+  <string name="formeditor_validation_date_not_in_future">không phải là ngày trong tương lai</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or later. -->
+  <string name="formeditor_validation_date_not_in_past">không phải là ngày trong quá khứ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or later. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_after">vào hoặc sau %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or earlier. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_before">vào hoặc trước %1$s</string>
+  <!-- Validation summary of a select multiple question. %1$d, %2$d = fewest and most options. -->
+  <string name="formeditor_validation_selections_between">Chọn từ %1$d đến %2$d tùy chọn.</string>
+  <!-- Validation summary of a select multiple question. %1$d = fewest options. -->
+  <plurals name="formeditor_validation_selections_at_least">
+    <item quantity="other">Chọn ít nhất %1$d tùy chọn.</item>
+  </plurals>
+  <!-- Validation summary of a select multiple question. %1$d = most options. -->
+  <plurals name="formeditor_validation_selections_at_most">
+    <item quantity="other">Chọn tối đa %1$d tùy chọn.</item>
+  </plurals>
+  <!-- Lowercase name of one or several records of a dataset, used inside sentences: map features of a map layer, rows of a data table. -->
+  <string name="formeditor_feature_noun_map_feature">đối tượng bản đồ</string>
+  <string name="formeditor_feature_noun_map_features">đối tượng bản đồ</string>
+  <string name="formeditor_feature_noun_table_row">hàng bảng</string>
+  <string name="formeditor_feature_noun_table_rows">hàng bảng</string>
+  <string name="formeditor_template_subtitle">Mẫu thư viện: câu hỏi, logic hiển thị và luồng.</string>
+  <string name="formeditor_template_section">Mẫu</string>
+  <string name="formeditor_template_title">Tiêu đề mẫu</string>
+  <string name="formeditor_template_adds_map_layer">Các khảo sát thêm mẫu này sẽ có một lớp bản đồ %1$s mới cho các bài gửi. Câu hỏi hình học đầu tiên xác định vị trí của từng đối tượng.</string>
+  <string name="formeditor_template_adds_data_table">Các khảo sát thêm mẫu này sẽ có một bảng dữ liệu mới cho các bài gửi. Thêm câu hỏi vị trí, đường hoặc đa giác để thu thập đối tượng bản đồ.</string>
+  <string name="formeditor_enable_open_in_google_earth">Bật Mở trong Google Earth</string>
+  <string name="formeditor_availability_google_earth_on">Người thu thập có thể mở các đối tượng bản đồ và biểu mẫu nhúng trong Google Earth.</string>
+  <string name="formeditor_availability_google_earth_off">Bật để cho phép người thu thập mở biểu mẫu này bên trong bong bóng bản đồ của Google Earth.</string>
+  <string name="formeditor_availability_google_earth_unavailable">Chỉ khả dụng cho các biểu mẫu cập nhật đối tượng bản đồ đã có.</string>
+  <string name="formeditor_availability_google_earth_needs_map_selection">Chỉ khả dụng khi &quot;%1$s&quot; được đặt thành &quot;%2$s&quot;.</string>
+  <string name="formeditor_enable_web_confirm_title">Bật trên web?</string>
+  <string name="formeditor_enable_web_confirm_message">Một số loại câu hỏi không được hỗ trợ trên web và sẽ không khả dụng.</string>
+  <string name="formeditor_enable_google_earth_confirm_title">Bật Mở trong Google Earth?</string>
+  <string name="formeditor_enable_google_earth_confirm_message">Một số loại câu hỏi không được hỗ trợ trong Google Earth và sẽ không khả dụng.</string>
+  <plurals name="formeditor_google_earth_incompatible_questions_summary">
+    <item quantity="one">%1$d câu hỏi sử dụng loại trường không được hỗ trợ trong Google Earth.</item>
+    <item quantity="other">%1$d câu hỏi sử dụng các loại trường không được hỗ trợ trong Google Earth.</item>
+  </plurals>
+</resources>

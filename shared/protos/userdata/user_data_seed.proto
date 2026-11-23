@@ -26,13 +26,13 @@ import "shared/protos/survey/acl.proto";
 import "shared/protos/survey/organization.proto";
 import "shared/protos/survey/survey_def.proto";
 
-// Initial state of the user data service (`server/userDataService`), loaded
-// at startup. Records carry their `commit_timestamp`, so the service resumes its
-// server clock after the latest one.
+// Initial state of the Collect One server (`server/`), loaded at startup.
+// Records carry their `commit_timestamp`, so the service resumes its server
+// clock after the latest one.
 //
 // The sample snapshot is generated from the Kotlin fixtures in
 // `shared/app/testing` (see `UserDataSeedGenerator`) and checked in as
-// `server/userDataService/src/main/resources/seed/user_data_seed.json`.
+// `server/src/main/resources/seed/user_data_seed.json`.
 message UserDataSeed {
   repeated openforis.collectone.v1.survey.Organization organizations = 1;
   repeated openforis.collectone.v1.library.OrganizationLibraryRecord libraries = 2;

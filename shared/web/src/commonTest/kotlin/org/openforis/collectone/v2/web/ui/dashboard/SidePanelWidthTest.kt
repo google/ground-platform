@@ -17,15 +17,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
-import org.openforis.collectone.v2.app.ui.AppSession.Companion.DEFAULT_SIDE_PANEL_WIDTH_DP
-import org.openforis.collectone.v2.app.ui.AppSession.Companion.MAX_SIDE_PANEL_WIDTH_DP
-import org.openforis.collectone.v2.app.ui.AppSession.Companion.MIN_SIDE_PANEL_WIDTH_DP
+import org.openforis.collectone.v2.app.ui.dashboard.DashboardUiState.Companion.DEFAULT_SIDE_PANEL_WIDTH_DP
+import org.openforis.collectone.v2.app.ui.dashboard.DashboardUiState.Companion.MAX_SIDE_PANEL_WIDTH_DP
+import org.openforis.collectone.v2.app.ui.dashboard.DashboardUiState.Companion.MIN_SIDE_PANEL_WIDTH_DP
 import org.openforis.collectone.v2.web.ui.WebAppState
-import org.openforis.collectone.v2.web.ui.state.FormEditorUiState
-import org.openforis.collectone.v2.web.ui.state.SurveyEditorUiState
-import org.openforis.collectone.v2.web.ui.viewmodel.formEditorViewModel
-import org.openforis.collectone.v2.web.ui.viewmodel.surveyEditorViewModel
-import org.openforis.collectone.v2.web.ui.viewmodel.ui
+import org.openforis.collectone.v2.web.ui.formeditor.FormEditorUiState
+import org.openforis.collectone.v2.web.ui.surveyeditor.SurveyEditorUiState
+import org.openforis.collectone.v2.web.ui.surveyeditor.formEditorViewModel
+import org.openforis.collectone.v2.web.ui.surveyeditor.surveyEditorViewModel
+import org.openforis.collectone.v2.web.ui.surveyeditor.ui
 
 /** Width of the web dashboard's, Survey editor's, and Form editor's resizable side panels. */
 class SidePanelWidthTest {
@@ -34,7 +34,12 @@ class SidePanelWidthTest {
   fun sidePanelWidth_startsAtDefault() {
     assertEquals(
       DEFAULT_SIDE_PANEL_WIDTH_DP,
-      WebAppState(dataHolder = sampleDataHolder()).sidePanelWidthDp,
+      WebAppState(dataHolder = sampleDataHolder())
+        .viewModels
+        .dashboard
+        .uiState
+        .value
+        .sidePanelWidthDp,
     )
   }
 
@@ -42,53 +47,56 @@ class SidePanelWidthTest {
   fun updateSidePanelWidth_acceptsWidthWithinBounds() {
     val state = WebAppState(dataHolder = sampleDataHolder())
 
-    state.updateSidePanelWidth(420f)
+    state.viewModels.dashboard.updateSidePanelWidth(420f)
 
-    assertEquals(420f, state.sidePanelWidthDp)
+    assertEquals(420f, state.viewModels.dashboard.uiState.value.sidePanelWidthDp)
   }
 
   @Test
   fun updateSidePanelWidth_clampsToBounds() {
     val state = WebAppState(dataHolder = sampleDataHolder())
 
-    state.updateSidePanelWidth(MIN_SIDE_PANEL_WIDTH_DP - 100f)
-    assertEquals(MIN_SIDE_PANEL_WIDTH_DP, state.sidePanelWidthDp)
+    state.viewModels.dashboard.updateSidePanelWidth(MIN_SIDE_PANEL_WIDTH_DP - 100f)
+    assertEquals(MIN_SIDE_PANEL_WIDTH_DP, state.viewModels.dashboard.uiState.value.sidePanelWidthDp)
 
-    state.updateSidePanelWidth(MAX_SIDE_PANEL_WIDTH_DP + 100f)
-    assertEquals(MAX_SIDE_PANEL_WIDTH_DP, state.sidePanelWidthDp)
+    state.viewModels.dashboard.updateSidePanelWidth(MAX_SIDE_PANEL_WIDTH_DP + 100f)
+    assertEquals(MAX_SIDE_PANEL_WIDTH_DP, state.viewModels.dashboard.uiState.value.sidePanelWidthDp)
   }
 
   @Test
   fun updateSidePanelWidth_ignoresNonFiniteValues() {
     val state = WebAppState(dataHolder = sampleDataHolder())
-    state.updateSidePanelWidth(400f)
+    state.viewModels.dashboard.updateSidePanelWidth(400f)
 
-    state.updateSidePanelWidth(Float.NaN)
-    state.updateSidePanelWidth(Float.POSITIVE_INFINITY)
+    state.viewModels.dashboard.updateSidePanelWidth(Float.NaN)
+    state.viewModels.dashboard.updateSidePanelWidth(Float.POSITIVE_INFINITY)
 
-    assertEquals(400f, state.sidePanelWidthDp)
+    assertEquals(400f, state.viewModels.dashboard.uiState.value.sidePanelWidthDp)
   }
 
   @Test
   fun sidePanelWidth_isKeptWhileCollapsed() {
     val state = WebAppState(dataHolder = sampleDataHolder())
-    state.updateSidePanelWidth(480f)
+    state.viewModels.dashboard.updateSidePanelWidth(480f)
 
-    state.collapseSidePanel()
-    assertFalse(state.isSidePanelExpanded)
-    state.expandSidePanel()
+    state.viewModels.dashboard.collapseSidePanel()
+    assertFalse(state.viewModels.dashboard.uiState.value.isSidePanelExpanded)
+    state.viewModels.dashboard.expandSidePanel()
 
-    assertEquals(480f, state.sidePanelWidthDp)
+    assertEquals(480f, state.viewModels.dashboard.uiState.value.sidePanelWidthDp)
   }
 
   @Test
   fun reset_restoresDefaultWidth() {
     val state = WebAppState(dataHolder = sampleDataHolder())
-    state.updateSidePanelWidth(480f)
+    state.viewModels.dashboard.updateSidePanelWidth(480f)
 
     state.reset()
 
-    assertEquals(DEFAULT_SIDE_PANEL_WIDTH_DP, state.sidePanelWidthDp)
+    assertEquals(
+      DEFAULT_SIDE_PANEL_WIDTH_DP,
+      state.viewModels.dashboard.uiState.value.sidePanelWidthDp,
+    )
   }
 
   @Test

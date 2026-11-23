@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_time_series_tab">ស៊េរីពេលវេលា &amp; រូបភាព</string>
+  <string name="web_time_series_open">វិភាគរូបភាព</string>
+  <string name="web_time_series_select_feature">ជ្រើសរើសចំណុច ឬពហុកោណនៅលើផែនទី ដើម្បីមើលស៊េរីពេលវេលាផ្កាយរណបរបស់វា។</string>
+  <string name="web_time_series_unsupported">ស៊េរីពេលវេលាអាចប្រើបានសម្រាប់ចំណុច និងពហុកោណ។</string>
+  <string name="web_time_series_unavailable">ស៊េរីពេលវេលាត្រូវការការតភ្ជាប់ទៅកាន់សេវាកម្ម Collect One។</string>
+  <string name="web_time_series_loading">កំពុងផ្ទុកការសង្កេតផ្កាយរណប…</string>
+  <string name="web_time_series_no_observations">គ្មានការសង្កេតដែលគ្មានពពកនៃ %1$s ក្នុងកំឡុងពេលនេះទេ។</string>
+  <string name="web_time_series_retry">ព្យាយាមម្តងទៀត</string>
+  <string name="web_time_series_error_not_uploaded">ការស្ទង់មតិនេះមិនទាន់មាននៅលើម៉ាស៊ីនបម្រើនៅឡើយទេ។ ស៊េរីពេលវេលានឹងបង្ហាញនៅពេលដែលវាត្រូវបានផ្ទុកឡើង។</string>
+  <string name="web_time_series_error_unsupported">ធាតុផែនទីនេះមិនអាចវិភាគបានទេ។</string>
+  <string name="web_time_series_error_busy">សំណើច្រើនពេក។ សូមព្យាយាមម្តងទៀតក្នុងរយៈពេលមួយនាទី។</string>
+  <string name="web_time_series_error_timeout">Earth Engine ចំណាយពេលយូរពេកក្នុងការឆ្លើយតប។ សូមព្យាយាមម្តងទៀត។</string>
+  <string name="web_time_series_error_unavailable">Earth Engine មិនអាចប្រើបានទេនៅពេលនេះ។</string>
+  <string name="web_time_series_error_denied">អ្នកមិនមានសិទ្ធិចូលប្រើការស្ទង់មតិនេះទេ។</string>
+  <string name="web_time_series_error_other">មិនអាចផ្ទុកទិន្នន័យបានទេ។</string>
+  <string name="web_time_series_area">%1$s ha</string>
+  <string name="web_time_series_elevation_range">រយៈកម្ពស់ %1$s–%2$s m</string>
+  <string name="web_time_series_elevation">រយៈកម្ពស់ %1$s m</string>
+  <string name="web_time_series_population">ចំនួនប្រជាជន %1$s (%2$s/km², %3$d)</string>
+  <string name="web_time_series_population_density">%1$s នាក់/km² (%2$d)</string>
+  <string name="web_time_series_source_landsat">Landsat</string>
+  <string name="web_time_series_source_sentinel2">Sentinel-2</string>
+  <string name="web_time_series_source_sentinel1">Sentinel-1</string>
+  <string name="web_time_series_source_picker">ប្រភពរូបភាព</string>
+  <string name="web_time_series_band_picker">ប៊ែន</string>
+  <string name="web_time_series_picker_selection">%1$s: %2$s</string>
+  <string name="web_time_series_source_landsat_detail">អុបទិក · 30 m · រៀងរាល់ 8–16 ថ្ងៃ</string>
+  <string name="web_time_series_source_sentinel2_detail">អុបទិក · 10 m · រៀងរាល់ 5 ថ្ងៃ</string>
+  <string name="web_time_series_source_sentinel1_detail">រ៉ាដា · 10 m · មើលធ្លុះពពក</string>
+  <string name="web_time_series_band_group_indices">សន្ទស្សន៍</string>
+  <string name="web_time_series_band_group_reflectance">ចំណាំងផ្លាត</string>
+  <string name="web_time_series_band_group_backscatter">ការខ្ចាត់ខ្ចាយត្រឡប់</string>
+  <string name="web_time_series_band_blue">ខៀវ</string>
+  <string name="web_time_series_band_green">បៃតង</string>
+  <string name="web_time_series_band_red">ក្រហម</string>
+  <string name="web_time_series_band_nir">NIR</string>
+  <string name="web_time_series_band_swir1">SWIR 1</string>
+  <string name="web_time_series_band_swir2">SWIR 2</string>
+  <string name="web_time_series_band_ndvi_detail">ភាពបៃតងនៃរុក្ខជាតិ</string>
+  <string name="web_time_series_band_ndfi_detail">ការថយចុះនៃគម្របព្រៃឈើ</string>
+  <string name="web_time_series_band_evi_detail">ភាពបៃតងក្នុងគម្របព្រៃក្រាស់</string>
+  <string name="web_time_series_band_evi2_detail">EVI កម្រិតពីរ ដោយគ្មានពណ៌ខៀវ</string>
+  <string name="web_time_series_band_nbr_detail">ស្លាកស្នាមឆេះ និងការបាត់បង់គម្របព្រៃ</string>
+  <string name="web_time_series_band_ndmi_detail">បរិមាណទឹកក្នុងគម្របព្រៃ</string>
+  <string name="web_time_series_band_ndwi_detail">ផ្ទៃទឹកចំហ</string>
+  <string name="web_time_series_band_blue_detail">ពន្លឺពណ៌ខៀវមើលឃើញ</string>
+  <string name="web_time_series_band_green_detail">ពន្លឺពណ៌បៃតងមើលឃើញ</string>
+  <string name="web_time_series_band_red_detail">ពន្លឺក្រហមមើលឃើញ ស្រូបយកដោយរុក្ខជាតិ</string>
+  <string name="web_time_series_band_nir_detail">អ៊ីនហ្វ្រារ៉េដជិត ជះត្រឡប់ដោយស្លឹកឈើ</string>
+  <string name="web_time_series_band_swir1_detail">អ៊ីនហ្វ្រារ៉េដរលកខ្លី៖ សំណើម</string>
+  <string name="web_time_series_band_swir2_detail">អ៊ីនហ្វ្រារ៉េដរលកខ្លី៖ ដី និងការឆេះ</string>
+  <string name="web_time_series_band_vv_detail">ការខ្ចាត់ខ្ចាយត្រឡប់លើផ្ទៃ (dB)</string>
+  <string name="web_time_series_band_vh_detail">ការខ្ចាត់ខ្ចាយត្រឡប់នៃគម្របព្រៃ (dB)</string>
+  <string name="web_time_series_band_vv_vh_detail">សមាមាត្ររវាង VV និង VH</string>
+  <string name="web_time_series_band_rfdi_detail">សន្ទស្សន៍ការថយចុះនៃព្រៃឈើតាមរ៉ាដា</string>
+  <string name="web_time_series_observations">%1$d ការសង្កេត · %2$s</string>
+  <string name="web_time_series_selected">%1$s · %2$s · %3$s %4$s</string>
+  <string name="web_time_series_chart_hint">ចុចលើចំណុចមួយ (ឬប្រើ ← →) ដើម្បីបង្ហាញទិដ្ឋភាពនៃថ្ងៃនោះនៅលើផែនទី។</string>
+  <string name="web_time_series_chart_description">គំនូសតាងស៊េរីពេលវេលា %1$s ជាមួយការសង្កេត %2$d</string>
+  <string name="web_time_series_scene_loading">កំពុងផ្ទុកទិដ្ឋភាព…</string>
+  <string name="web_time_series_scene_failed">មិនអាចផ្ទុកទិដ្ឋភាពនេះបានទេ។</string>
+  <string name="web_time_series_scene_clear">ដកទិដ្ឋភាពចេញពីផែនទី</string>
+  <string name="web_time_series_stretch_true_color">ពណ៌ពិត</string>
+  <string name="web_time_series_stretch_swir_nir_red">SWIR · NIR · ក្រហម</string>
+  <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · ក្រហម</string>
+  <string name="web_time_series_stretch_sar">VV · VH · សមាមាត្រ</string>
+  <string name="web_time_series_close">បិទស៊េរីពេលវេលា</string>
+</resources>

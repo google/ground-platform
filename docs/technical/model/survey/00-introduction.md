@@ -25,7 +25,7 @@ for both **data storage** (persistent server database records and offline client
 caches) and **RPCs** (client-server synchronization and service-to-service
 communication).
 
-While [ProtoForms](docs/model/forms/00-introduction.md)
+While [ProtoForms](../forms/00-introduction.md)
 (`openforis.collectone.v1.forms`) defines individual form definitions (`FormDef`) and
 form submission records (`RecordInstance`) with full XForms round-trip
 compatibility, the `openforis.collectone.v1.survey` and `openforis.collectone.v1.data`

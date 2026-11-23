@@ -22,6 +22,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import openforis.collectone.v1.forms.ControlType
 import org.openforis.collectone.v2.core.forms.engine.FormSession
+import org.openforis.collectone.v2.core.forms.media.ChoiceImages
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 
 class ExampleFormsCatalogTest {
@@ -126,7 +127,7 @@ class ExampleFormsCatalogTest {
           }
           if (imageUri != null) {
             hasImageControl = true
-            val media = ChoiceImageRegistry.lookup(imageUri)
+            val media = ChoiceImages.lookup(imageUri)
             assertNotNull(
               media,
               "Expected registered image for '$imageUri' in ${example.name} (${control.canonicalPath}/${option.value})",

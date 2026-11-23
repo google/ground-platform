@@ -49,8 +49,6 @@ The mission of **Open Foris Collect One** (referred to as **Collect One** for sh
 *   **[Global Impact & Deployments](impacts.md)**: Case studies, field metrics, and partner pipelines across Ghana, Burundi, Kenya, and Viet Nam.
 *   **[Impact Measurement](impact-measurement.md)**: Proposed approach for measuring MAP impact with minimal field burden—Purpose Packs, semantic indicator tags, spatial overlays, outcome events, partner ledgers, and an attribution rubric.
 *   **[Open Foris Ground Community Charter](https://docs.google.com/document/d/1pjllfws_HMuHrDDbGokPZCATgok_8vxufkSmyVM4p_Q/edit#heading=h.14535shxk14t)**: Governance model, steering committee bylaws, and institutional partnership charter.
-*   **[Ground 1.0 PRD](https://docs.google.com/document/u/0/d/1-ARlIjK4VImSrWju_5D_wZiMMCl4vAGMm4Bozdnwj30/edit)**: Baseline Ground 1.0 workflows and task model.
-*   **[Ground 2026 Strategic Priorities](https://docs.google.com/document/u/0/d/18PKj2Qu3wRLwVS2Y8y3pdf7Zse1egIfu9JjvBX5wwR4/edit)**: Strategic roadmap for multiplatform parity, XLSForm alignment, and institutional scale.
 
 ### Guiding Product Principles
 
@@ -194,7 +192,7 @@ Open Foris Collect One integrates **Collect Earth Online (CEO)** directly into t
     *   **Google Drive-Style Access Controls**: Share surveys as **`Restricted`** (explicit email ACL with bulk paste and automated email invites), **`Accessible via Link / QR Code`** (instant onboarding by scanning a QR code in the field), or **`Public`** (open directory for citizen science).
     *   **Peer Visibility & Consent**: Organizers control whether collectors can see peers' submissions on the map or only their own, and can embed custom informed-consent questions directly inside forms without rigid app-level onboarding hurdles.
 *   **Built-In Impact Measurement (MAP Framework)**:
-    *   Organizers choose one or more **purposes** when creating a survey (e.g., *EUDR due diligence*, *Restoration monitoring (FERM)*, *Producer registration*). Each purpose (*Purpose Pack*) seeds starter forms whose questions are linked to standard **dictionary concepts**, and Ground maps purposes and concepts to the **MAP pillars** behind the scenes:
+    *   Organizers choose one or more **purposes** when creating a survey (e.g., *EUDR due diligence*, *Restoration monitoring (FERM)*, *Producer registration*). Each purpose (*Purpose Pack*) seeds starter forms whose questions are linked to standard **dictionary concepts**, and Collect One maps purposes and concepts to the **MAP pillars** behind the scenes:
         *   **Mitigation**: Hectares under restoration/afforestation, multi-wave tree survival rates, canopy density, and carbon/biomass indicators.
         *   **Adaptation**: Smallholder farmers and cooperatives registered, climate-resilient agroforestry adoption, and market-access readiness.
         *   **Protection**: Intact forest and buffer hectares monitored, deforestation-free plot boundaries verified (e.g., EUDR), disturbance alerts ground-truthed, and community tenure mapped.

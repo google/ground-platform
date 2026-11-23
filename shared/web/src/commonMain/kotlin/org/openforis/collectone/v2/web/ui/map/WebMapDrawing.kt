@@ -19,18 +19,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.ui.map.DraftGeometry
 import org.openforis.collectone.v2.core.forms.ui.MapDrawingKind
+import org.openforis.collectone.v2.core.forms.ui.controls.Button
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
+import org.openforis.collectone.v2.web.resources.Res
+import org.openforis.collectone.v2.web.resources.web_cancel_drawing
+import org.openforis.collectone.v2.web.resources.web_done
+import org.openforis.collectone.v2.web.resources.web_map_drawing_add_vertices
+import org.openforis.collectone.v2.web.resources.web_map_drawing_place_point
+import org.openforis.collectone.v2.web.resources.web_undo
 
 /**
  * Floating instructions over the dashboard map while a geometry is being drawn: what to click, how
@@ -49,8 +56,8 @@ fun WebMapDrawingHint(
   val count = draft.vertices.size
   val progress =
     when (kind) {
-      MapDrawingKind.POINT -> "Click the map to place the point"
-      else -> "Click the map to add vertices • $count of at least ${kind.minVertices}"
+      MapDrawingKind.POINT -> stringResource(Res.string.web_map_drawing_place_point)
+      else -> stringResource(Res.string.web_map_drawing_add_vertices, count, kind.minVertices)
     }
   Surface(
     shape = MaterialTheme.shapes.extraLarge,
@@ -72,10 +79,14 @@ fun WebMapDrawingHint(
       )
       Text(text = progress, style = MaterialTheme.typography.labelLarge)
       if (kind != MapDrawingKind.POINT) {
-        TextButton(onClick = onUndo, enabled = count > 0) { Text("Undo") }
-        Button(onClick = onDone, enabled = draft.isComplete) { Text("Done") }
+        TextButton(onClick = onUndo, enabled = count > 0) {
+          Text(stringResource(Res.string.web_undo))
+        }
+        Button(onClick = onDone, enabled = draft.isComplete) {
+          Text(stringResource(Res.string.web_done))
+        }
       }
-      TextButton(onClick = onCancel) { Text("Cancel drawing") }
+      TextButton(onClick = onCancel) { Text(stringResource(Res.string.web_cancel_drawing)) }
     }
   }
 }

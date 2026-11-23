@@ -51,9 +51,9 @@ proxy URL; links to the other services follow whichever host you used).
 
 | Service | Port | Directory | Started with |
 | :--- | :--- | :--- | :--- |
-| Server (user data service) | 8080 | `server/userDataService` | `./gradlew run` |
-| Web console | 8092 | `webApp` | `./gradlew wasmJsBrowserDevelopmentRun` |
-| Mobile app | 8093 | `mobileWebApp` | `./gradlew wasmJsBrowserDevelopmentRun` |
+| Server | 8080 | `.` | `./gradlew :server:run` |
+| Web console | 8092 | `.` | `./gradlew :webApp:wasmJsBrowserDevelopmentRun` |
+| Mobile app | 8093 | `.` | `./gradlew :mobileWebApp:wasmJsBrowserDevelopmentRun` |
 | Spanner emulator | 9010, 9020 | `.` | `scripts/spanner-emulator.sh` |
 
 The server stores its data in Spanner. Starting the server starts the Spanner
@@ -65,9 +65,9 @@ data (the launchpad restarts the server to set up the database again);
 restarting only the server keeps it. To use another database, set
 `SPANNER_EMULATOR_HOST` or `SPANNER_INSTANCE_ID` when starting the launchpad.
 
-The server, web console, and mobile app are separate Gradle builds that all
-include the `shared/` builds, so building two at once makes them overwrite each
-other's `shared/*/build` outputs mid-compile. The launchpad builds them one at a
+The server, web console, and mobile app are modules of the same Gradle build
+and depend on the same `shared/` modules, so two Gradle runs building at once
+would compete for the same `shared/*/build` outputs. The launchpad builds them one at a
 time: a service started while another is building shows **Starting** and
 waits for it to finish.
 
@@ -130,5 +130,5 @@ The page uses this HTTP API, which you can also call directly:
 | `POST /api/fleet/stop-all` | Stops every service |
 | `POST /api/config/sync-local-properties` | Sets `USER_DATA_SERVICE_URL`; body `{"url": "..."}` |
 
-Service IDs: `user-data-service`, `web-console`, `mobile-app`,
+Service IDs: `server`, `web-console`, `mobile-app`,
 `spanner-emulator`.

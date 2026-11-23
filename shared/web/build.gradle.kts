@@ -13,59 +13,53 @@
  * limitations under the License.
  */
 plugins {
-  kotlin("multiplatform") version "2.4.20"
-  id("org.jetbrains.compose") version "1.12.0"
-  id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
-  id("com.ncorti.ktfmt.gradle") version "0.27.0"
+  id("collectone.kmp.library")
+  id("collectone.kmp.compose")
+  id("collectone.detekt")
+  id("collectone.kover")
+  alias(libs.plugins.kotlin.serialization)
 }
 
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
-// Formats Kotlin sources with ktfmt (Google style, 2-space indent).
-// Run `./gradlew ktfmtFormat` to format or `./gradlew ktfmtCheck` to verify.
-ktfmt { googleStyle() }
-
 kotlin {
-  jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
-
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
-  }
-
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api("org.openforis.collectone.v2:protoforms:2.0.0-SNAPSHOT")
-        api("org.openforis.collectone.v2:protoforms-ui:2.0.0-SNAPSHOT")
-        api("org.openforis.collectone.v2:map:2.0.0-SNAPSHOT")
-        api("org.openforis.collectone.v2:app:2.0.0-SNAPSHOT")
+        api(projects.shared.core)
+        api(projects.shared.ui)
+        api(projects.shared.map)
+        api(projects.shared.app)
+        api(projects.shared.web.domain)
+        api(projects.shared.web.resources)
+        api(projects.shared.web.uiCommon)
+        api(projects.shared.web.wizard)
+        api(projects.shared.web.surveyeditor)
+        api(projects.shared.web.formeditor)
+        api(projects.shared.web.organization)
+        api(projects.shared.web.surveys)
+        api(projects.shared.web.impact)
+        api(projects.shared.web.timeseries)
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
-        implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
-        implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+        implementation(libs.compose.material.icons.core)
+        implementation(libs.compose.material.icons.extended)
         implementation(compose.ui)
         implementation(compose.components.resources)
+        // Type-safe navigation between the console's pages; routes are @Serializable classes.
+        implementation(libs.jetbrains.navigation.compose)
       }
     }
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation("org.openforis.collectone.v2:app-testing:2.0.0-SNAPSHOT")
-        implementation(project(":web-testing"))
+        implementation(projects.shared.app.uiTesting)
+        implementation(projects.shared.web.testing)
       }
     }
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
+        implementation(libs.konsist)
         // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
         @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
         implementation(compose.uiTest)
@@ -74,3 +68,6 @@ kotlin {
     }
   }
 }
+
+// The strings and their `Res` accessors come from :shared:web:resources.
+compose.resources { generateResClass = never }

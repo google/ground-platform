@@ -12,31 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// Test fixtures for `org.openforis.collectone.v2:web`: Survey editor and Form editor ViewModel
-// builders
-// and fakes. Depend on this from `commonTest` only.
-plugins {
-  kotlin("multiplatform")
-  id("com.ncorti.ktfmt.gradle")
-}
-
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
-ktfmt { googleStyle() }
+// Test fixtures for the web console: Survey editor and Form editor ViewModel builders and fakes,
+// and the survey lifecycle fixture.
+// Depend on this from `commonTest` only.
+plugins { id("collectone.kmp.library") }
 
 kotlin {
-  jvm()
-
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class) wasmJs { browser() }
-
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api(project(":"))
-        api("org.openforis.collectone.v2:app-testing:2.0.0-SNAPSHOT")
+        api(projects.shared.web.surveyeditor)
+        api(projects.shared.app.testing)
         implementation(kotlin("test"))
       }
     }

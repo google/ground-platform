@@ -13,80 +13,147 @@
  */
 package org.openforis.collectone.v2.android
 
+import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import java.io.File
-import org.openforis.collectone.v2.app.client.storage.SYNC_STATE_FILE_PROPERTY
-import org.openforis.collectone.v2.app.di.AppDataHolder
-import org.openforis.collectone.v2.app.di.requireUserDataServiceUrl
-import org.openforis.collectone.v2.app.ui.common.RequireUserDataService
-import org.openforis.collectone.v2.core.forms.ui.GroundTheme
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import org.openforis.collectone.v2.app.ui.session.RequireUserDataService
+import org.openforis.collectone.v2.core.forms.ui.LocalGeoLocationSource
+import org.openforis.collectone.v2.mobile.MobileApp
+import org.openforis.collectone.v2.mobile.MobileAppSession
+import org.openforis.collectone.v2.mobile.services.MonitorDeviceConnectivity
 import org.openforis.collectone.v2.mobile.ui.MobileAppState
-import org.openforis.collectone.v2.mobile.ui.onboarding.MobileScreenHost
+import org.openforis.collectone.v2.mobile.ui.permissions.LocationPermissionRationaleDialog
 
+/**
+ * The Android app's only activity. Hosts the shared mobile app ([MobileAppSession] over the
+ * process-wide graph of [MobileSyncRuntime]) and owns what needs an activity: the location
+ * permission, asked when the first location question opens rather than at launch, and the GNSS
+ * updates, which run only while a location question is on screen and the app is visible.
+ */
 class MainActivity : ComponentActivity() {
+  private val geoLocationSource by lazy { AndroidGeoLocationSource(this, lifecycleScope) }
+
+  /** Whether the app asked for location permission (or explained why) in this session. */
+  private var hasAskedForLocation = false
+
+  /** Whether the location rationale is showing, before asking again a user who denied it. */
+  private var isLocationRationaleShowing by mutableStateOf(false)
+
+  private val locationPermissionRequest =
+    registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+      if (geoLocationSource.isLocationNeeded.value) geoLocationSource.start()
+    }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val token = getString(R.string.mapbox_access_token).trim()
-    if (token.isNotEmpty()) {
-      System.setProperty("ground.mapbox.accessToken", token)
-    }
-    // Read by platformUserDataServiceUrl(); see USER_DATA_SERVICE_URL in build.gradle.kts.
-    val userDataServiceUrl = getString(R.string.user_data_service_url).trim()
-    if (userDataServiceUrl.isNotEmpty()) {
-      System.setProperty("groundplatform.userDataServiceUrl", userDataServiceUrl)
-    }
-    // Read by platformSyncStateFile(): offline edits and synced data survive restarts.
-    System.setProperty(SYNC_STATE_FILE_PROPERTY, File(filesDir, "sync_state.binpb").absolutePath)
+    MobileSyncRuntime.initialize(this)
     enableEdgeToEdge()
+    hasAskedForLocation = savedInstanceState?.getBoolean(HAS_ASKED_FOR_LOCATION) ?: false
+    followLocationQuestions()
     setContent {
-      RequireUserDataService { serviceUrl ->
-        MainActivityContent(
-          state =
-            remember {
-              MobileAppState(
-                dataHolder =
-                  AppDataHolder(userDataServiceUrl = serviceUrl, syncDownloadedSurveysOnly = true)
+      CompositionLocalProvider(LocalGeoLocationSource provides geoLocationSource) {
+        RequireUserDataService { serviceUrl ->
+          val dataHolder =
+            remember(serviceUrl) {
+              requireNotNull(MobileSyncRuntime.getOrCreateDataHolder(this, serviceUrl))
+            }
+          MobileAppSession(dataHolder) { state ->
+            MainActivityContent(state)
+            if (isLocationRationaleShowing) {
+              LocationPermissionRationaleDialog(
+                state = state,
+                onContinue = {
+                  isLocationRationaleShowing = false
+                  requestLocationPermission()
+                },
+                onDismiss = { isLocationRationaleShowing = false },
               )
             }
-        )
+          }
+        }
       }
     }
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putBoolean(HAS_ASKED_FOR_LOCATION, hasAskedForLocation)
+  }
+
+  /**
+   * Receives location fixes while a location question is on screen and the app is visible, asking
+   * for the permission when the first one opens (rather than at launch).
+   */
+  private fun followLocationQuestions() {
+    lifecycleScope.launch {
+      repeatOnLifecycle(Lifecycle.State.STARTED) {
+        try {
+          geoLocationSource.isLocationNeeded.collect { isNeeded ->
+            if (isNeeded) {
+              askForLocationIfNeeded()
+              geoLocationSource.start()
+            } else {
+              geoLocationSource.stop()
+            }
+          }
+        } finally {
+          geoLocationSource.stop()
+        }
+      }
+    }
+  }
+
+  private fun askForLocationIfNeeded() {
+    val step =
+      LocationPermissionStep.of(
+        isGranted = geoLocationSource.hasLocationPermission(),
+        hasAsked = hasAskedForLocation,
+        shouldShowRationale = shouldShowRequestPermissionRationale(FINE_LOCATION),
+      )
+    when (step) {
+      LocationPermissionStep.NONE -> Unit
+      LocationPermissionStep.REQUEST -> requestLocationPermission()
+      LocationPermissionStep.SHOW_RATIONALE -> isLocationRationaleShowing = true
+    }
+    if (step != LocationPermissionStep.NONE) hasAskedForLocation = true
+  }
+
+  // Android 12+ ignores a precise location request that doesn't also ask for approximate location.
+  private fun requestLocationPermission() {
+    locationPermissionRequest.launch(
+      arrayOf(FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+    )
+  }
+
+  private companion object {
+    const val HAS_ASKED_FOR_LOCATION = "hasAskedForLocation"
+    const val FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
   }
 }
 
 /**
- * Android launcher entry point hosting the full-screen Collect One mobile app UI
- * ([MobileScreenHost]).
+ * The mobile app ([MobileApp]) fed with the device's connectivity, which the shell turns into the
+ * offline and back-online notices.
  */
 @Composable
-fun MainActivityContent(
-  state: MobileAppState = remember {
-    MobileAppState(
-      dataHolder =
-        AppDataHolder(
-          userDataServiceUrl = requireUserDataServiceUrl(),
-          syncDownloadedSurveysOnly = true,
-        )
-    )
-  }
-) {
-  BackHandler(enabled = state.canHandleBack) { state.handleBack() }
+fun MainActivityContent(state: MobileAppState) {
+  val context = LocalContext.current
+  val connectivityMonitor = remember(context) { AndroidConnectivityMonitor(context) }
+  MonitorDeviceConnectivity(state, connectivityMonitor)
 
-  GroundTheme(darkTheme = state.isDarkTheme) {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-      Box(modifier = Modifier.fillMaxSize().safeDrawingPadding()) { MobileScreenHost(state) }
-    }
-  }
+  MobileApp(state)
 }

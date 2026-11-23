@@ -17,7 +17,6 @@ package org.openforis.collectone.v2.core.forms.ui
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import okio.ByteString.Companion.encodeUtf8
@@ -28,6 +27,15 @@ import org.openforis.collectone.v2.core.forms.media.MediaCaptureKind
 import org.openforis.collectone.v2.core.forms.media.MediaCaptureSpec
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_capture_only
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_capture_or_upload
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_front_camera
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_live_unavailable_audio
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_max_pixels
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_record_audio
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_take_photo
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_media_unavailable_photo
 
 class MediaCaptureWidgetsTest {
 
@@ -111,8 +119,8 @@ class MediaCaptureWidgetsTest {
     val controller = controllerForExampleForm()
     val wrongType = MediaAttachment("note.m4a", "audio/mp4", "x".encodeUtf8())
     val error = controller.attachMedia("/data/leaf_voucher_photo", wrongType)
-    assertNotNull(error)
-    assertTrue(error.contains("image/*"), error)
+    val reason = assertIs<FormUiText.Verbatim>(error).text
+    assertTrue(reason.contains("image/*"), reason)
 
     val audio = MediaAttachment("note.m4a", "audio/mp4", "x".encodeUtf8())
     assertNull(controller.attachMedia("/data/farmer_interview_audio", audio))
@@ -129,7 +137,11 @@ class MediaCaptureWidgetsTest {
     assertEquals("0:05", formatMediaDuration(4_600))
     assertEquals("1:02:03", formatMediaDuration(3_723_000))
     assertEquals(
-      "Max 1024 px · Capture only · Front camera",
+      listOf(
+        FormUiText.Resource(Res.string.forms_media_max_pixels, 1024),
+        FormUiText.Resource(Res.string.forms_media_capture_only),
+        FormUiText.Resource(Res.string.forms_media_front_camera),
+      ),
       describeMediaConstraints(
         MediaCaptureSpec(
           kind = MediaCaptureKind.PHOTO,
@@ -141,17 +153,20 @@ class MediaCaptureWidgetsTest {
       ),
     )
     assertEquals(
-      "",
+      emptyList(),
       describeMediaConstraints(MediaCaptureSpec(MediaCaptureKind.VIDEO, "video/*")),
     )
-    assertEquals("Capture only", mediaSourceModeLabel(captureOnly = true))
-    assertEquals("Capture or upload", mediaSourceModeLabel(captureOnly = false))
+    assertEquals(Res.string.forms_media_capture_only, mediaSourceModeLabel(captureOnly = true))
     assertEquals(
-      "This question needs a live audio recording, which this device/browser can't capture.",
+      Res.string.forms_media_capture_or_upload,
+      mediaSourceModeLabel(captureOnly = false),
+    )
+    assertEquals(
+      Res.string.forms_media_live_unavailable_audio,
       captureUnavailableMessage(MediaCaptureKind.AUDIO, captureOnly = true),
     )
     assertEquals(
-      "This device can't capture or choose a photo.",
+      Res.string.forms_media_unavailable_photo,
       captureUnavailableMessage(MediaCaptureKind.PHOTO, captureOnly = false),
     )
     assertEquals(
@@ -160,7 +175,7 @@ class MediaCaptureWidgetsTest {
         MediaAttachment("a.jpg", "image/jpeg", "abc".encodeUtf8(), widthPx = 4, heightPx = 3)
       ),
     )
-    assertEquals("Take photo", captureActionLabel(MediaCaptureKind.PHOTO))
-    assertEquals("Record audio", captureActionLabel(MediaCaptureKind.AUDIO))
+    assertEquals(Res.string.forms_media_take_photo, captureActionLabel(MediaCaptureKind.PHOTO))
+    assertEquals(Res.string.forms_media_record_audio, captureActionLabel(MediaCaptureKind.AUDIO))
   }
 }

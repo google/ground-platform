@@ -17,6 +17,7 @@ package org.openforis.collectone.v2.core.impact
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.impact.Fx.concept
 import org.openforis.collectone.v2.core.impact.Fx.feature
 import org.openforis.collectone.v2.core.impact.Fx.plot
@@ -90,25 +91,23 @@ class ImpactDedupTest {
   }
 
   @Test
-  fun geoIdIsTrimmed_andBlankGeoIdsCountIndividually() {
+  fun geoIdIsTrimmed_beforeDeduplication() {
+    val result =
+      run(listOf(survey("s1", "o1", features = listOf(plot("a", " G "), plot("b", "G")))))
+
+    assertFeatures(result.row(SURVEY, "s1", FEATURES), 1, 1.0)
+  }
+
+  @Test
+  fun blankGeoIds_countIndividually() {
     val result =
       run(
         listOf(
-          survey(
-            "s1",
-            "o1",
-            features =
-              listOf(
-                plot("a", " G "),
-                plot("b", "G"),
-                plot("c", null),
-                plot("d", ""),
-                plot("e", "   "),
-              ),
-          )
+          survey("s1", "o1", features = listOf(plot("c", null), plot("d", ""), plot("e", "   ")))
         )
       )
-    assertFeatures(result.row(SURVEY, "s1", FEATURES), 4, 4.0)
+
+    assertFeatures(result.row(SURVEY, "s1", FEATURES), 3, 3.0)
   }
 
   @Test
@@ -218,8 +217,7 @@ class ImpactDedupTest {
       featureAreaHa(feature("a", geometry = square, areaHa = 99.0)),
     )
     // A degenerate polygon has no area.
-    val degenerate =
-      ImpactGeometry.Polygon(listOf(listOf(ImpactLatLng(0.0, 0.0), ImpactLatLng(0.0, 1.0))))
+    val degenerate = ImpactGeometry.Polygon(listOf(listOf(GeoCoord(0.0, 0.0), GeoCoord(0.0, 1.0))))
     assertEquals(5.0, featureAreaHa(feature("a", geometry = degenerate, areaHa = 5.0)))
     // Negative or non-finite precomputed areas are ignored.
     assertEquals(0.0, featureAreaHa(feature("a", areaHa = -1.0)))
@@ -231,13 +229,13 @@ class ImpactDedupTest {
 
   @Test
   fun representativePoint_perGeometryType() {
-    assertEquals(ImpactLatLng(1.0, 2.0), representativePoint(Fx.point(1.0, 2.0)))
+    assertEquals(GeoCoord(1.0, 2.0), representativePoint(Fx.point(1.0, 2.0)))
     // The closing vertex is not double-counted.
     val center = representativePoint(Fx.square(0.0, 0.0, 0.02))!!
     assertNear(0.01, center.lat)
     assertNear(0.01, center.lng)
-    val line = ImpactGeometry.LineString(listOf(ImpactLatLng(0.0, 0.0), ImpactLatLng(2.0, 4.0)))
-    assertEquals(ImpactLatLng(1.0, 2.0), representativePoint(line))
+    val line = ImpactGeometry.LineString(listOf(GeoCoord(0.0, 0.0), GeoCoord(2.0, 4.0)))
+    assertEquals(GeoCoord(1.0, 2.0), representativePoint(line))
     assertEquals(null, representativePoint(ImpactGeometry.LineString(emptyList())))
     assertEquals(null, representativePoint(null))
   }

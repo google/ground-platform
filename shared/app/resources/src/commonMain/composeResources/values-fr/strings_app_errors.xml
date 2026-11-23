@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Why an operation failed: the user data service or auth service couldn't be reached. -->
+  <string name="app_error_network">Connexion impossible. Vérifiez votre connexion Internet et réessayez.</string>
+  <!-- Why an operation failed: the user's session has expired. -->
+  <string name="app_error_unauthenticated">Votre session a expiré. Reconnectez-vous.</string>
+  <!-- Why an operation failed: the signed-in user isn't allowed to do it. -->
+  <string name="app_error_permission_denied">Vous n’êtes pas autorisé à effectuer cette action.</string>
+  <!-- Why an operation failed: what it refers to was deleted. -->
+  <string name="app_error_not_found">Cet élément n’existe plus.</string>
+  <!-- Why an operation failed: someone changed the same thing at the same time. -->
+  <string name="app_error_conflict">Cet élément a été modifié ailleurs. Réessayez.</string>
+  <!-- Why an operation failed: what it changes no longer accepts changes, e.g. a closed or archived survey; retrying won't help. -->
+  <string name="app_error_not_editable">Impossible de modifier cet élément pour le moment. L’enquête est peut-être clôturée ou archivée.</string>
+  <!-- Why an operation failed: the server rejected what was entered. -->
+  <string name="app_error_validation">Certaines informations ne sont pas valides. Vérifiez-les et réessayez.</string>
+  <!-- Why an operation failed: a quota or rate limit was reached. -->
+  <string name="app_error_quota_exceeded">Vous avez atteint une limite d’utilisation. Réessayez plus tard.</string>
+  <!-- Why an operation failed: the user cancelled it. -->
+  <string name="app_error_cancelled">Annulé.</string>
+  <!-- Why an operation failed, when there is no more specific reason. -->
+  <string name="app_error_unknown">Une erreur s’est produite. Réessayez.</string>
+  <!-- Notice after sign-in fails. %1$s = why, one of the app_error_* sentences. -->
+  <string name="app_sign_in_failed">Connexion impossible. %1$s</string>
+</resources>

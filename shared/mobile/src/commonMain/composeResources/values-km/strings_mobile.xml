@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions and labels shared across mobile screens -->
+  <!-- Back navigation button label and accessibility description. -->
+  <string name="mobile_back">ថយក្រោយ</string>
+  <string name="mobile_cancel">បោះបង់</string>
+  <!-- Confirm button of dialogs that remove offline data from the device. -->
+  <string name="mobile_remove">លុបចេញ</string>
+  <!-- Button that opens a downloaded survey. -->
+  <string name="mobile_open">បើក</string>
+  <!-- Button that downloads a survey or offline map to the device. -->
+  <string name="mobile_download">ទាញយក</string>
+  <!-- Status chip on a survey or offline map already stored on the device. -->
+  <string name="mobile_downloaded">បានទាញយក</string>
+  <!-- Badge on a survey that is no longer available to the user. -->
+  <string name="mobile_unavailable">មិនអាចប្រើបាន</string>
+  <!-- Accessibility description of the button that clears the search field. -->
+  <string name="mobile_clear_search_content_description">សម្អាតការស្វែងរក</string>
+  <string name="mobile_terms_of_service_title">លក្ខខណ្ឌនៃសេវាកម្ម</string>
+  <!-- Title of the Uploads screen (list of local changes waiting to sync or already synced). -->
+  <string name="mobile_uploads_title">ការផ្ទុកឡើង</string>
+
+  <!-- Sign-in screen -->
+  <string name="mobile_sign_in_tagline">ប្រមូលការសង្កេតនៅវាល គូសផែនទីព្រំដែន និងធ្វើសមកាលកម្មកំណត់ត្រាការស្ទង់មតិក្រៅបណ្ដាញ។</string>
+  <string name="mobile_sign_in_prompt">ចូលគណនី ដើម្បីចូលប្រើការស្ទង់មតិដែលបានចែករំលែកជាមួយគណនីរបស់អ្នក។</string>
+  <!-- Sign-in button label while sign-in is in progress. -->
+  <string name="mobile_sign_in_signing_in">កំពុងចូលគណនី…</string>
+  <string name="mobile_sign_in_google_accounts_only">បច្ចុប្បន្ន ការផ្ទៀងផ្ទាត់ត្រូវបានកំណត់ត្រឹមគណនី Google ប៉ុណ្ណោះ។</string>
+
+  <!-- Terms of Service screen -->
+  <!-- %1$s: email address of the signed-in user. -->
+  <string name="mobile_tos_signed_in_as">បានចូលជា %1$s</string>
+  <string name="mobile_tos_decline">បដិសេធ</string>
+  <string name="mobile_tos_continue">បន្ត</string>
+  <string name="mobile_tos_intro">សូមពិនិត្យ និងទទួលយកលក្ខខណ្ឌនៃសេវាកម្មរបស់ Collect One មុនពេលទាញយកការស្ទង់មតិ។</string>
+  <!-- Label of the checkbox that must be checked before accepting the Terms of Service. -->
+  <string name="mobile_tos_agree_checkbox">ខ្ញុំបានអាន និងយល់ព្រមនឹងលក្ខខណ្ឌនៃសេវាកម្មរបស់ Collect One។</string>
+
+  <!-- Settings screen -->
+  <!-- Title of the device storage section in Settings. -->
+  <string name="mobile_settings_storage_title">ទំហំផ្ទុក</string>
+  <!-- Confirmation after opening the project website. %1$s: website URL. -->
+  <string name="mobile_settings_opened_website">បានបើក %1$s</string>
+
+  <!-- Download survey screen -->
+  <string name="mobile_download_survey_title">ទាញយកការស្ទង់មតិ</string>
+  <!-- Subtitle. %1$d: number of surveys shared with the user; %2$d: number of those downloaded. -->
+  <string name="mobile_download_survey_subtitle">ចែករំលែកជាមួយអ្នក %1$d • បានទាញយក %2$d</string>
+  <string name="mobile_download_survey_offline_banner">អ្នកកំពុងក្រៅបណ្ដាញ។ សូមភ្ជាប់អ៊ីនធឺណិត ដើម្បីទាញយកការស្ទង់មតិសម្រាប់ប្រើក្រៅបណ្ដាញ។</string>
+  <string name="mobile_download_survey_search_content_description">ស្វែងរកការស្ទង់មតិ</string>
+  <string name="mobile_download_survey_search_placeholder">ស្វែងរកតាមឈ្មោះ ឬទីតាំង ឬបិទភ្ជាប់តំណការស្ទង់មតិ</string>
+  <string name="mobile_download_survey_public_section">ការស្ទង់មតិសាធារណៈ</string>
+  <!-- List header. %1$d: number of surveys shared with the user. -->
+  <string name="mobile_download_survey_shared_header">ការស្ទង់មតិដែលបានចែករំលែកជាមួយអ្នក (%1$d)</string>
+  <!-- List header while searching. %1$d: number of matching surveys; %2$d: total surveys. -->
+  <string name="mobile_download_survey_matching_header">ការស្ទង់មតិដែលត្រូវគ្នា (%1$d នៃ %2$d)</string>
+  <string name="mobile_download_survey_clear_search">សម្អាតការស្វែងរក</string>
+  <!-- Empty search result. %1$s: the search text typed by the user. -->
+  <string name="mobile_download_survey_no_match">គ្មានការស្ទង់មតិត្រូវនឹង "%1$s" ទេ</string>
+  <string name="mobile_download_survey_no_match_hint">សាកល្បងស្វែងរកតាមចំណងជើងការស្ទង់មតិ ពាក្យគន្លឹះ ឬទីតាំងផ្សេង (ឧ. Brazil, Kenya, Vietnam) ឬបិទភ្ជាប់តំណការស្ទង់មតិ។</string>
+  <string name="mobile_download_survey_empty">មិនទាន់មានការស្ទង់មតិណាមួយត្រូវបានចែករំលែកជាមួយអ្នកនៅឡើយទេ</string>
+  <string name="mobile_download_survey_empty_hint">ស្វែងរកតាមចំណងជើងការស្ទង់មតិ ពាក្យគន្លឹះ ឬទីតាំង (ឧ. Brazil, Kenya, Vietnam) ឬបិទភ្ជាប់តំណការស្ទង់មតិ។</string>
+  <!-- List header for surveys found in the public directory. %1$d: number of surveys. -->
+  <string name="mobile_download_survey_directory_header">ការស្ទង់មតិសាធារណៈ និងចែករំលែកតាមតំណ (%1$d)</string>
+  <!-- Survey card footer. %1$d: number of map locations in the survey; %2$s: offline download size (e.g. "12 MB"). -->
+  <plurals name="mobile_survey_location_count_and_size">
+    <item quantity="other">%1$d ទីតាំង • %2$s</item>
+  </plurals>
+  <!-- Badge on a survey whose submissions are visible to the public. -->
+  <string name="mobile_survey_badge_public_data">ទិន្នន័យសាធារណៈ</string>
+  <!-- Badge on a survey where each collector sees only their own submissions. -->
+  <string name="mobile_survey_badge_private_submissions">ការដាក់ស្នើឯកជន</string>
+  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
+  <string name="mobile_survey_downloaded_content_description">បានទាញយក %1$s</string>
+  <!-- Accessibility description of the Open button. %1$s: survey title. -->
+  <string name="mobile_survey_open_content_description">បើក %1$s</string>
+  <!-- Accessibility description of the Download button. %1$s: survey title. -->
+  <string name="mobile_survey_download_content_description">ទាញយក %1$s</string>
+  <!-- %1$s: survey title. -->
+  <string name="mobile_remove_survey_dialog_title">លុបការស្ទង់មតិក្រៅបណ្ដាញ?</string>
+  <!-- %1$s: survey title. -->
+  <string name="mobile_remove_survey_dialog_body">ការលុប "%1$s" នឹងលុបច្បាប់ចម្លងក្រៅបណ្ដាញចេញពីឧបករណ៍នេះ។ អ្នកនឹងត្រូវការការតភ្ជាប់អ៊ីនធឺណិត ដើម្បីទាញយក និងប្រើវាក្រៅបណ្ដាញម្តងទៀត។</string>
+  <string name="mobile_sign_out_dialog_title">ចេញពីគណនី?</string>
+  <!-- %1$s: email address of the signed-in user. -->
+  <string name="mobile_sign_out_dialog_body">ការថយក្រោយនឹងចេញពីគណនី %1$s ហើយត្រឡប់ទៅអេក្រង់ចូលគណនី។</string>
+  <string name="mobile_sign_out">ចេញពីគណនី</string>
+
+  <!-- Main survey screen: top bar and upload status -->
+  <string name="mobile_open_navigation_drawer">បើកថតម៉ឺនុយរុករក</string>
+  <!-- Placeholder of the map/list search field. -->
+  <string name="mobile_search_placeholder">ស្វែងរក...</string>
+  <!-- Upload status. %1$d: number of items that failed to upload. -->
+  <plurals name="mobile_upload_status_failed">
+    <item quantity="other">%1$d ផ្ទុកឡើងបរាជ័យ</item>
+  </plurals>
+  <!-- Upload status. %1$d: number of items currently uploading. -->
+  <plurals name="mobile_upload_status_uploading">
+    <item quantity="other">កំពុងផ្ទុកឡើង %1$d ធាតុ</item>
+  </plurals>
+  <string name="mobile_upload_status_all_saved">បានរក្សាទុកការផ្លាស់ប្តូរទាំងអស់</string>
+  <!-- Upload statistics. %1$d: synced items; %2$d: uploading items; %3$d: failed items. -->
+  <string name="mobile_upload_status_summary">បានធ្វើសមកាលកម្ម %1$d • កំពុងផ្ទុកឡើង %2$d • បរាជ័យ %3$d</string>
+  <string name="mobile_upload_status_syncing_now">កំពុងធ្វើសមកាលកម្ម…</string>
+  <string name="mobile_upload_status_last_synced_just_now">ធ្វើសមកាលកម្មចុងក្រោយ៖ អម្បាញ់មិញ</string>
+  <string name="mobile_retry_failed_uploads">ព្យាយាមផ្ទុកឡើងដែលបរាជ័យម្តងទៀត</string>
+  <!-- Time of the last successful sync. %1$d: minutes since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_minutes_ago">
+    <item quantity="other">ធ្វើសមកាលកម្មចុងក្រោយ៖ %1$d នាទីមុន</item>
+  </plurals>
+  <!-- Time of the last successful sync. %1$d: hours since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_hours_ago">
+    <item quantity="other">ធ្វើសមកាលកម្មចុងក្រោយ៖ %1$d ម៉ោងមុន</item>
+  </plurals>
+  <!-- Time of the last successful sync. %1$d: days since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_days_ago">
+    <item quantity="other">ធ្វើសមកាលកម្មចុងក្រោយ៖ %1$d ថ្ងៃមុន</item>
+  </plurals>
+  <!-- Notice when the device goes offline. %1$s: plural noun of the survey's map features. -->
+  <string name="mobile_notice_device_offline">ឧបករណ៍គ្មានអ៊ីនធឺណិត៖ ការស្វែងរកទីកន្លែងត្រូវបានបិទ។ កំពុងស្វែងរកតែ %1$s ក្នុងឧបករណ៍ប៉ុណ្ណោះ។</string>
+  <!-- Notice when the device comes back online. -->
+  <string name="mobile_notice_device_online">ឧបករណ៍មានអ៊ីនធឺណិត៖ ការស្វែងរកទីកន្លែងត្រូវបានបើក។</string>
+  <!-- Notice when selecting the Places list tab offline. %1$s: plural noun of the survey's map features. -->
+
+  <!-- Main survey screen: map controls -->
+  <string name="mobile_recenter_content_description">កំណត់ផែនទីឱ្យនៅកណ្ដាលលើទីតាំង GPS ឡើងវិញ</string>
+  <!-- Button that recenters the map on the user's GPS location. -->
+  <string name="mobile_recenter">កំណត់ទីតាំងឡើងវិញ</string>
+  <!-- Accessibility description of the map chip when the camera follows the user's GPS location. -->
+  <string name="mobile_gps_auto_center">GPS កំណត់កណ្ដាលស្វ័យប្រវត្តិ</string>
+  <!-- Map chip shown when the user has panned the map away from their GPS location. -->
+  <string name="mobile_gps_panned">បានរំកិល</string>
+  <!-- Map chip. %1$s: GPS signal status (e.g. "High accuracy"). -->
+  <string name="mobile_gps_status">GPS៖ %1$s</string>
+  <!-- Accessibility description of the floating button that opens the list of forms. -->
+  <string name="mobile_collect_data">ប្រមូលទិន្នន័យ</string>
+  <string name="mobile_available_forms_title">សំណុំបែបបទប្រមូលទិន្នន័យដែលមាន</string>
+  <string name="mobile_available_forms_subtitle">ជ្រើសរើសសំណុំបែបបទ ដើម្បីចាប់ផ្តើមប្រមូលទិន្នន័យ។</string>
+  <string name="mobile_available_forms_close">បិទសំណុំបែបបទដែលមាន</string>
+  <!-- Badge on a form. %1$d: number of questions in the form. -->
+  <plurals name="mobile_form_question_count">
+    <item quantity="other">%1$d សំណួរ</item>
+  </plurals>
+
+  <!-- Main survey screen: straight-line navigation (wayfinding) banner -->
+  <!-- Navigation target type pill. %1$s: map feature type (e.g. "Plot"). -->
+  <string name="mobile_wayfinding_entity">នាំផ្លូវទៅ %1$s</string>
+  <!-- Navigation target type pill when navigating to a place found by search. -->
+  <string name="mobile_wayfinding_place">នាំផ្លូវទៅទីកន្លែង</string>
+  <!-- Navigation target type pill when navigating to a form submission. -->
+  <string name="mobile_wayfinding_submission">នាំផ្លូវទៅការដាក់ស្នើ</string>
+  <string name="mobile_compass_bearing_arrow">ព្រួញទិសត្រីវិស័យ</string>
+  <!-- Compass bearing to the target. %1$s: formatted bearing (e.g. "321° NW"). -->
+  <string name="mobile_bearing">ទិស %1$s</string>
+  <!-- Shown when the user is within 8 meters of the navigation target. -->
+  <string name="mobile_arrived">បានមកដល់ (≤ 8 m)</string>
+  <!-- Estimated walking time. %1$d: number of minutes. -->
+  <plurals name="mobile_walk_minutes">
+    <item quantity="other">ដើរ ~%1$d នាទី</item>
+  </plurals>
+  <string name="mobile_wayfinding_subtitle">វ៉ិចទ័រភូមិសាស្ត្របន្ទាត់ត្រង់ពីទីតាំង GPS របស់អ្នក</string>
+  <string name="mobile_walk_closer_content_description">ក្លែងធ្វើការដើរកាន់តែជិតគោលដៅ</string>
+  <!-- Demo button that simulates walking closer to the navigation target. -->
+  <string name="mobile_walk_closer">ដើរកាន់តែជិត</string>
+  <string name="mobile_stop_navigation_content_description">ឈប់ការនាំផ្លូវបន្ទាត់ត្រង់</string>
+  <!-- Button that stops straight-line navigation. -->
+  <string name="mobile_stop">ឈប់</string>
+
+  <!-- Main survey screen: basemap / layers sheet -->
+  <string name="mobile_basemap_title">ផែនទីមូលដ្ឋាន</string>
+  <string name="mobile_basemap_subtitle">ជ្រើសរើសប្រភេទផែនទីមូលដ្ឋាន រូបភាព និងស្រទាប់ក្រឡាក្រៅបណ្ដាញ</string>
+  <string name="mobile_close_layers">បិទស្រទាប់</string>
+
+  <!-- Navigation drawer -->
+  <string name="mobile_close_drawer">បិទថតម៉ឺនុយ</string>
+  <!-- Label above the title of the currently open survey. -->
+  <string name="mobile_drawer_active_survey">ការស្ទង់មតិសកម្ម</string>
+  <!-- Drawer item that lists downloaded surveys. -->
+  <string name="mobile_drawer_surveys">ការស្ទង់មតិ</string>
+  <!-- Drawer item subtitle. %1$d: number of surveys downloaded on the device. -->
+  <plurals name="mobile_drawer_surveys_downloaded">
+    <item quantity="other">បានទាញយក %1$d នៅលើឧបករណ៍</item>
+  </plurals>
+  <string name="mobile_drawer_offline_maps">ផែនទីក្រៅបណ្ដាញ</string>
+  <string name="mobile_drawer_offline_maps_subtitle">ឃ្លាំងសម្ងាត់ក្រឡាវ៉ិចទ័រ និងរ៉ាស្ទ័រផ្កាយរណប</string>
+  <string name="mobile_drawer_settings">ការកំណត់</string>
+  <!-- Drawer item subtitle. %1$s: area unit symbol (e.g. "ha"). -->
+  <string name="mobile_drawer_settings_subtitle">ឯកតា (%1$s) ភាសា និងឃ្លាំងសម្ងាត់មេឌៀ</string>
+  <string name="mobile_drawer_tos_subtitle">លក្ខខណ្ឌអភិបាលកិច្ចទិន្នន័យ និងឯកជនភាពរបស់វេទិកា</string>
+  <string name="mobile_brand_organization">Open Foris</string>
+  <string name="mobile_brand_product">Collect One</string>
+  <!-- Drawer footer shown after the product name "Open Foris Collect One". -->
+  <string name="mobile_drawer_footer_tagline">• ស្នូលអាទិភាពក្រៅបណ្ដាញ</string>
+
+  <!-- Uploads screen -->
+  <!-- Button that syncs all pending uploads. %1$d: number of pending uploads. -->
+  <string name="mobile_uploads_sync_all_count">ធ្វើសមកាលកម្មទាំងអស់ (%1$d)</string>
+  <string name="mobile_uploads_sync_all">ធ្វើសមកាលកម្មទាំងអស់</string>
+  <!-- %1$d: number of activity records (e.g. PDF receipts) waiting to sync. -->
+  <plurals name="mobile_uploads_pending_activity_records">
+    <item quantity="other">%1$d កំណត់ត្រាសកម្មភាព កំពុងរង់ចាំធ្វើសមកាលកម្ម</item>
+  </plurals>
+  <!-- Upload status filter chip. %1$s: status name (e.g. "Pending"); %2$d: number of uploads with that status. -->
+  <string name="mobile_upload_filter_chip">%1$s (%2$d)</string>
+  <!-- Upload status: waiting to be uploaded. -->
+  <string name="mobile_upload_status_pending">កំពុងរង់ចាំ</string>
+  <!-- Upload status: currently uploading. -->
+  <string name="mobile_upload_status_in_progress">កំពុងដំណើរការ</string>
+  <!-- Upload status: successfully uploaded. -->
+  <string name="mobile_upload_status_uploaded">បានផ្ទុកឡើងរួច</string>
+  <!-- Upload status: upload failed. -->
+  <string name="mobile_upload_status_failed_label">បរាជ័យ</string>
+  <string name="mobile_uploads_empty_pending">គ្មានការផ្ទុកឡើងកំពុងរង់ចាំទេ។</string>
+  <string name="mobile_uploads_empty_in_progress">គ្មានការផ្ទុកឡើងកំពុងដំណើរការទេ។</string>
+  <string name="mobile_uploads_empty_uploaded">គ្មានការផ្ទុកឡើងដែលបានបញ្ចប់ទេ។</string>
+  <string name="mobile_uploads_empty_failed">គ្មានការផ្ទុកឡើងបរាជ័យទេ។</string>
+  <string name="mobile_uploads_empty_for_feature">គ្មានការផ្ទុកឡើងសម្រាប់ធាតុផែនទីនេះទេ។</string>
+  <string name="mobile_uploads_empty">មិនទាន់មានការផ្ទុកឡើងទេ។</string>
+  <!-- Accessibility description of the button that removes the map feature filter from Uploads. -->
+  <string name="mobile_uploads_show_all_features">បង្ហាញការផ្ទុកឡើងសម្រាប់ធាតុផែនទីទាំងអស់</string>
+  <!-- Button that retries a failed upload. -->
+  <string name="mobile_retry">ព្យាយាមម្តងទៀត</string>
+  <!-- Button that uploads a pending change now. -->
+  <string name="mobile_upload">ផ្ទុកឡើង</string>
+
+  <!-- Downloaded surveys screen -->
+  <string name="mobile_downloaded_surveys_title">ការស្ទង់មតិដែលបានទាញយក</string>
+  <!-- %1$d: number of surveys downloaded on the device. -->
+  <plurals name="mobile_downloaded_surveys_count">
+    <item quantity="other">%1$d ការស្ទង់មតិរួចរាល់សម្រាប់ក្រៅបណ្ដាញនៅលើឧបករណ៍នេះ</item>
+  </plurals>
+  <!-- Badge on the currently open survey. -->
+  <string name="mobile_survey_badge_active">សកម្ម</string>
+  <!-- Survey card details. %1$s: survey location (e.g. "Kenya"); %2$d: number of map locations. -->
+  <plurals name="mobile_survey_location_entity_count">
+    <item quantity="other">%1$s • %2$d ទីតាំង</item>
+  </plurals>
+  <!-- Button that switches to another downloaded survey. -->
+  <string name="mobile_switch">ប្តូរ</string>
+  <string name="mobile_browse_more_surveys">រុករក និងទាញយកការស្ទង់មតិបន្ថែម</string>
+
+  <!-- Offline maps screen -->
+  <string name="mobile_offline_maps_title">ផែនទីក្រៅបណ្តាញ</string>
+
+  <!-- Device storage card -->
+  <string name="mobile_device_storage_title">ទំហំផ្ទុកឧបករណ៍</string>
+  <!-- %1$s: free storage (e.g. "12 GB"); %2$s: total storage (e.g. "64 GB"). -->
+  <string name="mobile_device_storage_free_of_total">ទំនេរ %1$s នៃ %2$s</string>
+  <string name="mobile_device_storage_downloaded_imagery">រូបភាពដែលបានទាញយក</string>
+  <string name="mobile_device_storage_data">សំណុំបែបបទដែលបានដាក់ស្នើ រូបថត ។ល។</string>
+  <string name="mobile_device_storage_other">ប្រព័ន្ធ និងកម្មវិធីផ្សេងទៀត</string>
+  <string name="mobile_device_storage_free">ទំហំផ្ទុកទំនេរ</string>
+  <string name="mobile_device_storage_safeguard_notice">ការទាញយកក្រៅបណ្ដាញនឹងផ្អាកដោយស្វ័យប្រវត្តិ ប្រសិនបើទំហំផ្ទុកឧបករណ៍ធ្លាក់ចុះក្រោម 500 MB ដើម្បីការពារស្ថិរភាពប្រព័ន្ធ។</string>
+  <!-- Title of the map mode where the user frames an area to save for offline use. -->
+  <string name="mobile_offline_area_title">រក្សាទុកតំបន់សម្រាប់ប្រើក្រៅបណ្តាញ</string>
+  <!-- Hint under the title while framing an area to save for offline use. -->
+  <string name="mobile_offline_area_hint">អូស និងពង្រីកផែនទី ដើម្បីដាក់តំបន់ការងាររបស់អ្នកក្នុងស៊ុម</string>
+  <!-- Accessibility label of the button that leaves the area framing mode. -->
+  <string name="mobile_offline_area_close">បិទ</string>
+  <!-- Shown while the name of the framed place is looked up. -->
+  <string name="mobile_offline_area_finding_name">កំពុងស្វែងរកឈ្មោះទីកន្លែង…</string>
+  <!-- Name of a saved map area when no place name was found. %1$s: coordinates of its center, e.g. "0.4160°S, 36.9470°E". -->
+  <string name="mobile_offline_area_near">តំបន់ជិត %1$s</string>
+  <!-- Shown while the download size of the framed area is estimated. -->
+  <string name="mobile_offline_area_estimating">កំពុងប៉ាន់ស្មានទំហំ…</string>
+  <!-- Estimated download size of the framed area and the free space on the device. %1$s: size, e.g. "48 MB"; %2$s: free space, e.g. "12.4 GB". -->
+  <string name="mobile_offline_area_estimate">ប្រហែល %1$s · ទំនេរ %2$s</string>
+  <!-- Estimated download size of the framed area when the free space is unknown. %1$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_area_estimate_size">ប្រហែល %1$s</string>
+  <!-- The framed area is too large to save. %1$s: its area, e.g. "140 km²"; %2$s: the largest area, e.g. "50 km²". -->
+  <string name="mobile_offline_area_too_large">តំបន់នេះមានប្រហែល %1$s។ សូមពង្រីកដើម្បីជ្រើសរើស %2$s ឬតិចជាងនេះ។</string>
+  <!-- The device lacks space to save the framed area. %1$s: space to free, e.g. "120 MB". -->
+  <string name="mobile_offline_area_not_enough_space">ទំហំផ្ទុកមិនគ្រប់គ្រាន់។ សូមបង្កើនទំហំទំនេរ %1$s ដើម្បីរក្សាទុកតំបន់នេះ។</string>
+  <!-- The device is offline, so the framed area can't be estimated or saved. -->
+  <string name="mobile_offline_area_offline">អ្នកកំពុងនៅក្រៅបណ្តាញ។ សូមភ្ជាប់អ៊ីនធឺណិត ដើម្បីរក្សាទុកតំបន់នេះ។</string>
+  <!-- The framed area spans the 180° meridian, which saved areas can't. -->
+  <string name="mobile_offline_area_crosses_antimeridian">តំបន់នេះកាត់ខ្សែបណ្តោយ 180°។ សូមរំកិលផែនទី ដើម្បីជ្រើសរើសតំបន់នៅម្ខាងរបស់វា។</string>
+  <!-- This build of the app can't save map areas. -->
+  <string name="mobile_offline_area_unavailable">មិនអាចរក្សាទុកតំបន់ផែនទីនៅលើឧបករណ៍នេះបានទេ។</string>
+  <!-- The size of the framed area couldn't be estimated, for a reason other than the connection. -->
+  <string name="mobile_offline_area_estimate_failed">មិនអាចប៉ាន់ស្មានទំហំនៃតំបន់នេះបានទេ។</string>
+  <!-- Primary button that saves the framed area for offline use. -->
+  <string name="mobile_offline_area_save">រក្សាទុកសម្រាប់ក្រៅបណ្តាញ</string>
+  <!-- Progress of saving an area for offline use. %1$d: percent done, e.g. 27. -->
+  <string name="mobile_offline_area_saving">កំពុងរក្សាទុកសម្រាប់ក្រៅបណ្តាញ… %1$d%</string>
+  <!-- How much of an area was saved so far. %1$s: saved, e.g. "13 MB"; %2$s: estimated total, e.g. "48 MB". -->
+  <string name="mobile_offline_area_saving_size">%1$s នៃប្រហែល %2$s</string>
+  <!-- Shown when an area finished saving for offline use. -->
+  <string name="mobile_offline_area_saved">បានរក្សាទុកសម្រាប់ក្រៅបណ្តាញ</string>
+  <!-- Saving an area stopped because the device reached its limit of offline imagery. -->
+  <string name="mobile_offline_area_tile_limit">ឧបករណ៍នេះបានដល់ដែនកំណត់រូបភាពក្រៅបណ្តាញហើយ។ សូមលុបតំបន់មួយ ដើម្បីរក្សាទុកបន្ថែម។</string>
+  <!-- Saving an area stopped because of an error. -->
+  <string name="mobile_offline_area_failed">មិនអាចរក្សាទុកតំបន់នេះបានទេ។</string>
+  <!-- Button that hides the saving progress while the area keeps saving. -->
+  <string name="mobile_hide">លាក់</string>
+  <!-- Button that closes the area framing mode after an area was saved. -->
+  <string name="mobile_done">រួចរាល់</string>
+  <!-- Button that tries a failed estimate or save again. -->
+  <string name="mobile_try_again">ព្យាយាមម្តងទៀត</string>
+  <!-- Button that resumes saving a paused layer of a saved area. -->
+  <string name="mobile_resume">បន្ត</string>
+  <!-- Notice in the mobile app in a web browser, where saving map areas is only simulated. -->
+  <string name="mobile_offline_area_simulated_notice">ការទាញយកសាកល្បង។ ផែនទីក្រៅបណ្តាញដំណើរការតែក្នុងកម្មវិធី Android និង iOS ប៉ុណ្ណោះ។</string>
+  <!-- Banner on Offline maps in the mobile app in a web browser, where saving map areas is only simulated. -->
+  <string name="mobile_offline_maps_simulated_banner">ការទាញយកនៅទីនេះគឺសាកល្បង៖ គ្មានរូបភាពត្រូវបានរក្សាទុកទេ ហើយឈ្មោះតំបន់គ្រាន់តែជាឈ្មោះគំរូ។ ដើម្បីប្រើផែនទីដោយគ្មានអ៊ីនធឺណិត សូមរក្សាទុកតំបន់ក្នុងកម្មវិធី Android ឬ iOS។</string>
+  <!-- Label on a saved area or layer that was only simulated (mobile app in a web browser). -->
+  <string name="mobile_offline_maps_simulated_label">សាកល្បង</string>
+  <!-- Empty state of Offline maps when no area is saved. -->
+  <string name="mobile_offline_maps_empty_title">មិនមានតំបន់ដែលបានរក្សាទុកសម្រាប់ក្រៅបណ្តាញ</string>
+  <string name="mobile_offline_maps_empty_body">រក្សាទុកតំបន់ដែលអ្នកធ្វើការ ដើម្បីមើលផែនទីរបស់វាដោយគ្មានអ៊ីនធឺណិត។</string>
+  <!-- When a saved area was saved and what removing it frees. %1$s: date, e.g. "Oct 30, 2026"; %2$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_maps_area_summary">បានរក្សាទុក %1$s · រហូតដល់ %2$s</string>
+  <!-- Percent saved of a layer of a saved area. %1$d: percent, e.g. 62. -->
+  <string name="mobile_offline_maps_layer_percent">%1$d%</string>
+  <!-- Status of a layer of a saved area whose download stopped before it finished. -->
+  <string name="mobile_offline_maps_layer_paused">បានផ្អាក</string>
+  <!-- Status of a layer of a saved area whose download failed. -->
+  <string name="mobile_offline_maps_layer_failed">មិនអាចរក្សាទុកបាន</string>
+  <!-- Accessibility label of the menu of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_area_options">ជម្រើសសម្រាប់ %1$s</string>
+  <!-- Accessibility label of the menu of a layer of a saved area. %1$s: layer, e.g. "Satellite". -->
+  <string name="mobile_offline_maps_layer_options">ជម្រើសសម្រាប់ %1$s</string>
+  <!-- Menu item that shows a saved area on the map. -->
+  <string name="mobile_offline_maps_show_on_map">បង្ហាញលើផែនទី</string>
+  <!-- Menu item and confirmation button that remove a saved area. -->
+  <string name="mobile_offline_maps_remove_area">លុបតំបន់</string>
+  <!-- Title of the confirmation before removing a saved area. -->
+  <string name="mobile_offline_maps_remove_area_title">លុបតំបន់ដែលបានរក្សាទុក?</string>
+  <!-- Body of the confirmation before removing a saved area. %1$s: area name; %2$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_maps_remove_area_body">ការលុប "%1$s" នឹងបង្កើនទំហំទំនេររហូតដល់ %2$s។ អ្នកនឹងត្រូវការអ៊ីនធឺណិត ដើម្បីមើលតំបន់នេះក្រៅបណ្តាញម្តងទៀត។</string>
+  <!-- Menu item and confirmation button that remove the satellite layer of a saved area. -->
+  <string name="mobile_offline_maps_remove_satellite">លុបផ្កាយរណប</string>
+  <!-- Menu item and confirmation button that remove the terrain layer of a saved area. -->
+  <string name="mobile_offline_maps_remove_terrain">លុបភូមិសាស្ត្រ</string>
+  <!-- Title of the confirmation before removing the satellite layer of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_remove_satellite_title">លុបផ្កាយរណបចេញពី "%1$s"?</string>
+  <!-- Title of the confirmation before removing the terrain layer of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_remove_terrain_title">លុបភូមិសាស្ត្រចេញពី "%1$s"?</string>
+  <!-- Body of the confirmation before removing a layer of a saved area. %1$s: size, e.g. "38 MB". -->
+  <string name="mobile_offline_maps_remove_layer_body">វានឹងបង្កើនទំហំទំនេររហូតដល់ %1$s។ អ្នកនឹងត្រូវការអ៊ីនធឺណិត ដើម្បីមើលរូបភាពនេះម្តងទៀត។</string>
+
+  <!-- Mobile client version update prompts -->
+  <string name="mobile_update_available_title">មានកំណែថ្មី</string>
+  <string name="mobile_update_available_body">មានកំណែថ្មីជាង (%1$s) នៃ Collect One។</string>
+  <string name="mobile_update_required_title">តម្រូវឱ្យធ្វើបច្ចុប្បន្នភាព</string>
+  <string name="mobile_update_required_body">កំណែ Collect One នេះ (%1$s) លែងត្រូវបានគាំទ្រទៀតហើយ។ សូមធ្វើបច្ចុប្បន្នភាពទៅ %2$s ឬខ្ពស់ជាងនេះដើម្បីបន្ត។</string>
+  <string name="mobile_update_now">ធ្វើបច្ចុប្បន្នភាពឥឡូវ</string>
+  <string name="mobile_update_later">ពេលក្រោយ</string>
+  <string name="mobile_update_check_again">ពិនិត្យម្តងទៀត</string>
+</resources>

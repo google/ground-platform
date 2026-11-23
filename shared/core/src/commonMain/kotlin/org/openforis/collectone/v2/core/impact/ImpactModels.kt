@@ -15,6 +15,8 @@
  */
 package org.openforis.collectone.v2.core.impact
 
+import org.openforis.collectone.v2.core.geo.GeoCoord
+
 /*
  * Inputs and outputs of the impact aggregation job (docs/technical/backend/impact-aggregation.md).
  *
@@ -105,17 +107,14 @@ data class ImpactConcept(
     get() = ownerOrganizationId == ALL_USERS_ORGANIZATION_ID
 }
 
-/** A point on the WGS84 ellipsoid in degrees. */
-data class ImpactLatLng(val lat: Double, val lng: Double)
-
 /** Geometry of a map feature, used for area and grid cells. */
 sealed interface ImpactGeometry {
-  data class Point(val position: ImpactLatLng) : ImpactGeometry
+  data class Point(val position: GeoCoord) : ImpactGeometry
 
-  data class LineString(val positions: List<ImpactLatLng>) : ImpactGeometry
+  data class LineString(val positions: List<GeoCoord>) : ImpactGeometry
 
   /** A polygon: the first ring is the exterior, the rest are holes (open or closed rings). */
-  data class Polygon(val rings: List<List<ImpactLatLng>>) : ImpactGeometry
+  data class Polygon(val rings: List<List<GeoCoord>>) : ImpactGeometry
 }
 
 /**

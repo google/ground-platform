@@ -229,7 +229,7 @@ Supported external formats include:
 
 #### Hosted Entity Datasets and Database-Backed Runtimes
 
-In hosted, database-backed survey platforms (such as Ground), secondary
+In hosted, database-backed survey platforms (such as Collect One), secondary
 instances are **not stored as static CSV or GeoJSON files**. Instead, external
 datasets are managed at the survey level as structured **Entity Datasets**
 (`EntityDatasetDef` populated with versioned `EntityRecord` rows).

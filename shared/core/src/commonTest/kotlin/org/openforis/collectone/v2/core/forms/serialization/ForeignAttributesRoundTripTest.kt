@@ -33,7 +33,7 @@ import org.openforis.collectone.v2.core.library.LibraryTextProtoSerializer
 
 /**
  * Round trips of `FieldBinding.foreign_attributes`: `<bind>` attributes in namespaces ProtoForms
- * doesn't model (e.g. `ground:concept`, see `docs/technical/model/library/01-concepts.md`).
+ * doesn't model (e.g. `collectone:concept`, see `docs/technical/model/library/01-concepts.md`).
  */
 class ForeignAttributesRoundTripTest {
 
@@ -129,13 +129,13 @@ class ForeignAttributesRoundTripTest {
   }
 
   @Test
-  fun testGroundConceptRoundTrips() {
+  fun testCollectOneConceptRoundTrips() {
     val xml =
       form(
-        rootNamespaces = """xmlns:ground="$GROUND_XFORMS_NAMESPACE"""",
+        rootNamespaces = """xmlns:collectone="$COLLECT_ONE_XFORMS_NAMESPACE"""",
         binds =
           """
-          <bind nodeset="/data/commodity" type="string" required="true()" ground:concept="eudr.commodity@1"/>
+          <bind nodeset="/data/commodity" type="string" required="true()" collectone:concept="eudr.commodity@1"/>
           <bind nodeset="/data/notes" type="string"/>
           """,
       )
@@ -143,7 +143,9 @@ class ForeignAttributesRoundTripTest {
     val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
     val commodity = formDef.binding("commodity")
     assertEquals(
-      listOf(ForeignAttribute(GROUND_XFORMS_NAMESPACE, "ground:concept", "eudr.commodity@1")),
+      listOf(
+        ForeignAttribute(COLLECT_ONE_XFORMS_NAMESPACE, "collectone:concept", "eudr.commodity@1")
+      ),
       commodity.foreign_attributes,
     )
     assertEquals("true()", commodity.required_expression)
@@ -151,28 +153,30 @@ class ForeignAttributesRoundTripTest {
 
     val outXml = assertStableRoundTrip(formDef)
     val root = parseXml(outXml)
-    assertEquals(GROUND_XFORMS_NAMESPACE, root.attrExact("xmlns:$GROUND_XFORMS_PREFIX"))
-    assertEquals("eudr.commodity@1", root.bind("/data/commodity").attrExact("ground:concept"))
-    assertNull(root.bind("/data/notes").attrExact("ground:concept"))
+    assertEquals(COLLECT_ONE_XFORMS_NAMESPACE, root.attrExact("xmlns:$COLLECT_ONE_XFORMS_PREFIX"))
+    assertEquals("eudr.commodity@1", root.bind("/data/commodity").attrExact("collectone:concept"))
+    assertNull(root.bind("/data/notes").attrExact("collectone:concept"))
     // Declared once, on the root element only.
-    assertEquals(1, Regex("xmlns:ground=").findAll(outXml).count())
+    assertEquals(1, Regex("xmlns:collectone=").findAll(outXml).count())
   }
 
   @Test
   fun testNamespacesDeclaredOnModelOrBindAreResolvedAndMovedToRoot() {
     val xml =
       form(
-        modelAttrs = """xmlns:ground="$GROUND_XFORMS_NAMESPACE"""",
+        modelAttrs = """xmlns:collectone="$COLLECT_ONE_XFORMS_NAMESPACE"""",
         binds =
           """
-          <bind nodeset="/data/commodity" type="string" ground:concept="eudr.commodity@1"/>
+          <bind nodeset="/data/commodity" type="string" collectone:concept="eudr.commodity@1"/>
           <bind xmlns:acme="$acmeNamespace" nodeset="/data/notes" type="string" acme:hint-style="bold"/>
           """,
       )
 
     val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
     assertEquals(
-      listOf(ForeignAttribute(GROUND_XFORMS_NAMESPACE, "ground:concept", "eudr.commodity@1")),
+      listOf(
+        ForeignAttribute(COLLECT_ONE_XFORMS_NAMESPACE, "collectone:concept", "eudr.commodity@1")
+      ),
       formDef.binding("commodity").foreign_attributes,
     )
     // The `xmlns:acme` declaration itself is not a foreign attribute.
@@ -182,7 +186,7 @@ class ForeignAttributesRoundTripTest {
     )
 
     val root = parseXml(assertStableRoundTrip(formDef))
-    assertEquals(GROUND_XFORMS_NAMESPACE, root.attrExact("xmlns:ground"))
+    assertEquals(COLLECT_ONE_XFORMS_NAMESPACE, root.attrExact("xmlns:collectone"))
     assertEquals(acmeNamespace, root.attrExact("xmlns:acme"))
     assertNull(root.bind("/data/notes").attrExact("xmlns:acme"))
   }
@@ -330,7 +334,7 @@ class ForeignAttributesRoundTripTest {
       required_expression = "true()",
       foreign_attributes =
         listOf(
-          ForeignAttribute(GROUND_XFORMS_NAMESPACE, "ground:concept", "eudr.commodity@1"),
+          ForeignAttribute(COLLECT_ONE_XFORMS_NAMESPACE, "collectone:concept", "eudr.commodity@1"),
           ForeignAttribute(acmeNamespace, "acme:hint-style", ""),
         ),
     )
@@ -350,8 +354,8 @@ class ForeignAttributesRoundTripTest {
   fun testForeignAttributesTextProtoRoundTrip() {
     val textproto = TextProtoSerializer.serializeFormDef(conceptForm)
     assertTrue(textproto.contains("foreign_attributes {"), textproto)
-    assertTrue(textproto.contains("namespace_uri: \"$GROUND_XFORMS_NAMESPACE\""), textproto)
-    assertTrue(textproto.contains("qualified_name: \"ground:concept\""), textproto)
+    assertTrue(textproto.contains("namespace_uri: \"$COLLECT_ONE_XFORMS_NAMESPACE\""), textproto)
+    assertTrue(textproto.contains("qualified_name: \"collectone:concept\""), textproto)
     assertTrue(textproto.contains("value: \"eudr.commodity@1\""), textproto)
     assertEquals(conceptForm, TextProtoSerializer.deserializeFormDef(textproto))
   }
@@ -361,7 +365,7 @@ class ForeignAttributesRoundTripTest {
     val bundle =
       LibraryBundle(form_templates = listOf(FormTemplateDef(id = "template", form = conceptForm)))
     val textproto = LibraryTextProtoSerializer.serializeBundle(bundle)
-    assertTrue(textproto.contains("qualified_name: \"ground:concept\""), textproto)
+    assertTrue(textproto.contains("qualified_name: \"collectone:concept\""), textproto)
     assertEquals(bundle, LibraryTextProtoSerializer.deserializeBundle(textproto))
   }
 
@@ -369,12 +373,12 @@ class ForeignAttributesRoundTripTest {
   fun testForeignAttributesJsonRoundTrip() {
     val camel = ProtoJsonSerializer.serializeFormDef(conceptForm)
     assertTrue(camel.contains("\"foreignAttributes\""), camel)
-    assertTrue(camel.contains("\"qualifiedName\": \"ground:concept\""), camel)
+    assertTrue(camel.contains("\"qualifiedName\": \"collectone:concept\""), camel)
     assertEquals(conceptForm, ProtoJsonSerializer.deserializeFormDef(camel))
 
     val snake = ProtoJsonSerializer.serializeFormDef(conceptForm, preserveProtoFieldNames = true)
     assertTrue(snake.contains("\"foreign_attributes\""), snake)
-    assertTrue(snake.contains("\"namespace_uri\": \"$GROUND_XFORMS_NAMESPACE\""), snake)
+    assertTrue(snake.contains("\"namespace_uri\": \"$COLLECT_ONE_XFORMS_NAMESPACE\""), snake)
     assertEquals(conceptForm, ProtoJsonSerializer.deserializeFormDef(snake))
   }
 
@@ -382,9 +386,9 @@ class ForeignAttributesRoundTripTest {
   fun testForeignAttributesSurviveXmlTextProtoJsonChain() {
     val xml =
       form(
-        rootNamespaces = """xmlns:ground="$GROUND_XFORMS_NAMESPACE"""",
+        rootNamespaces = """xmlns:collectone="$COLLECT_ONE_XFORMS_NAMESPACE"""",
         binds =
-          """<bind nodeset="/data/commodity" type="string" ground:concept="eudr.commodity@1"/>""",
+          """<bind nodeset="/data/commodity" type="string" collectone:concept="eudr.commodity@1"/>""",
       )
     val formDef = XFormsXmlSerializer.deserializeFormDef(xml)
     val viaTextProto =

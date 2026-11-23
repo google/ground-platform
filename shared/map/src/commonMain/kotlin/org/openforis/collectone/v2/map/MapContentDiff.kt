@@ -48,7 +48,7 @@ sealed interface MapOp {
  *
  * Ops are ordered so each is valid when applied in sequence: layers are removed before their
  * sources, and sources and icons exist before layers that use them. [MapContent.markers] are not
- * included because [GroundMap] renders them in Compose.
+ * included because [AppMap] renders them in Compose.
  */
 fun diffMapContent(old: MapContent?, new: MapContent): List<MapOp> {
   if (old == null || old.basemap != new.basemap) return fullBuild(new)

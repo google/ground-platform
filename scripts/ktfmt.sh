@@ -17,9 +17,9 @@
 # Checks or applies ktfmt (Google style) formatting to every Kotlin source and
 # Gradle script under the repository root.
 #
-# The repository is split into several independent Gradle builds, so this script runs a
-# single pinned ktfmt release across all of them instead of relying on each
-# build applying the ktfmt Gradle plugin.
+# Runs a single pinned ktfmt release over the whole repository (the Gradle build,
+# build-logic, and any other Kotlin files) instead of applying the ktfmt Gradle
+# plugin.
 #
 # Usage:
 #   scripts/ktfmt.sh           # Check only; exits non-zero if any file would change.
@@ -48,7 +48,7 @@ if ! command -v java > /dev/null 2>&1; then
   exit 1
 fi
 
-cache_dir="${KTFMT_CACHE_DIR:-${XDG_CACHE_HOME:-${HOME}/.cache}/ground/ktfmt}"
+cache_dir="${KTFMT_CACHE_DIR:-${XDG_CACHE_HOME:-${HOME}/.cache}/collect-one/ktfmt}"
 jar="${cache_dir}/${KTFMT_JAR_NAME}"
 
 sha256() {

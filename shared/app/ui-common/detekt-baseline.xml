@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:Branding.kt$@Composable fun CloudAcaciaLogo(modifier: Modifier = Modifier)</ID>
+    <ID>LongMethod:MissionGraphic.kt$@Composable fun MissionGraphic(modifier: Modifier = Modifier)</ID>
+    <ID>LongMethod:DeviceFrame.kt$@Composable fun DeviceFrame( isDarkTheme: Boolean, formFactor: DeviceFormFactor = DeviceFormFactor.MOBILE, orientation: DeviceOrientation = formFactor.defaultOrientation, isScreenTransparent: Boolean = false, isTopInsetTransparent: Boolean = isScreenTransparent, modifier: Modifier = Modifier, content: @Composable () -&gt; Unit, )</ID>
+    <ID>LongMethod:UserAvatarProfileMenu.kt$@Composable fun UserProfileCard( userName: String, userEmail: String, userInitials: String, organization: String, onSignOut: () -&gt; Unit, modifier: Modifier = Modifier, userPhotoUrl: String? = null, onOpenOrganizations: (() -&gt; Unit)? = null, onOpenAdminPanel: (() -&gt; Unit)? = null, )</ID>
+    <ID>MatchingDeclarationName:AppLocale.android.kt$LocalAppLocale</ID>
+    <ID>MatchingDeclarationName:AppLocale.jvm.kt$LocalAppLocale</ID>
+    <ID>MatchingDeclarationName:AppLocale.kt$LocalAppLocale</ID>
+    <ID>MatchingDeclarationName:AppLocale.wasmJs.kt$LocalAppLocale</ID>
+    <ID>MatchingDeclarationName:DragGestures.kt$DragAxis</ID>
+    <ID>SpreadOperator:UiText.kt$UiText$(resource, *args.map { resolveArg(it) }.toTypedArray())</ID>
+    <ID>SpreadOperator:UiText.kt$UiText$(resource, *args.map { resolveArgString(it) }.toTypedArray())</ID>
+    <ID>SpreadOperator:UiText.kt$UiText$(resource, quantity, *args.map { resolveArg(it) }.toTypedArray())</ID>
+    <ID>SpreadOperator:UiText.kt$UiText$(resource, quantity, *args.map { resolveArgString(it) }.toTypedArray())</ID>
+    <ID>TopLevelPropertyNaming:GeoIdText.kt$/** Inline content ID of the pending-sync icon that [appendGeoId] places after a GeoID. */ const val GeoIdPendingSyncIconId = "geoIdPendingSync"</ID>
+    <ID>UnusedParameter:AppLocale.wasmJs.kt$tag: String?</ID>
+  </CurrentIssues>
+</SmellBaseline>

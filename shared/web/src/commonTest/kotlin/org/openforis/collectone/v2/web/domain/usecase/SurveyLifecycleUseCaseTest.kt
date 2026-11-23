@@ -18,6 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.days
 import org.openforis.collectone.v2.app.data.datasource.local.store.runNow
 import org.openforis.collectone.v2.app.data.seed.SampleOrganizationsData
 import org.openforis.collectone.v2.app.domain.model.EffortComparison
@@ -38,7 +39,7 @@ class SurveyLifecycleUseCaseTest {
     assertTrue(stopped)
     val survey = f.survey(surveyId)
     assertEquals(SurveyLifecycleState.CLOSED, survey.state)
-    assertEquals(isoUtc(f.nowMillis), survey.closedAt)
+    assertEquals(isoUtc(f.clock.now()), survey.closedAt)
     val event = f.closedEvents(surveyId).single()
     assertEquals(ImpactEventType.SURVEY_CLOSED, event.type)
     assertEquals(surveyId, event.surveyId)
@@ -54,7 +55,7 @@ class SurveyLifecycleUseCaseTest {
     val f = SurveyLifecycleFixture()
     runNow { f.lifecycle.setState(surveyId, SurveyLifecycleState.CLOSED) }
     val closedAt = f.survey(surveyId).closedAt
-    f.nowMillis += 86_400_000L
+    f.clock.advanceBy(1.days)
 
     val stopped = runNow { f.lifecycle.setState(surveyId, SurveyLifecycleState.ARCHIVED) }
 
@@ -68,7 +69,7 @@ class SurveyLifecycleUseCaseTest {
   fun archivePublished_stopsCollecting() {
     val f = SurveyLifecycleFixture()
     assertTrue(runNow { f.lifecycle.setState(surveyId, SurveyLifecycleState.ARCHIVED) })
-    assertEquals(isoUtc(f.nowMillis), f.survey(surveyId).closedAt)
+    assertEquals(isoUtc(f.clock.now()), f.survey(surveyId).closedAt)
     assertEquals(ImpactEventType.SURVEY_CLOSED, f.closedEvents(surveyId).single().type)
   }
 
@@ -101,7 +102,7 @@ class SurveyLifecycleUseCaseTest {
 
     assertEquals(setOf(SurveyOutcomeKind.SUBMITTED_EUDR_DDS), saved.outcomes)
     assertEquals(EffortComparison.LESS, saved.effortComparison)
-    assertEquals(isoUtc(f.nowMillis), saved.answeredAt)
+    assertEquals(isoUtc(f.clock.now()), saved.answeredAt)
     assertEquals(SampleOrganizationsData.SIGNED_IN_EMAIL, saved.answeredBy)
     assertEquals(saved, f.survey(surveyId).outcome)
 

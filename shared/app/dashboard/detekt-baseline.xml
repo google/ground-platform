@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooManyFunctions:DashboardViewModel.kt$DashboardActions</ID>
+    <ID>TooManyFunctions:DashboardViewModel.kt$DashboardViewModel : ViewModelDashboardActions</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -13,36 +13,30 @@
  */
 package org.openforis.collectone.v2.mobile.ui.onboarding
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,10 +49,35 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.openforis.collectone.v2.app.ui.state.OnboardingUiState
-import org.openforis.collectone.v2.app.ui.viewmodel.OnboardingActions
+import org.jetbrains.compose.resources.stringResource
+import org.openforis.collectone.v2.app.ui.common.VerticalScrollBar
+import org.openforis.collectone.v2.app.ui.common.rememberHasScrolledToBottom
+import org.openforis.collectone.v2.app.ui.onboarding.OnboardingActions
+import org.openforis.collectone.v2.app.ui.onboarding.OnboardingUiState
+import org.openforis.collectone.v2.app.ui.onboarding.TermsOfServiceParagraphs
+import org.openforis.collectone.v2.core.forms.ui.controls.Button
+import org.openforis.collectone.v2.core.forms.ui.controls.Checkbox
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.toggleable
+import org.openforis.collectone.v2.mobile.resources.Res
+import org.openforis.collectone.v2.mobile.resources.mobile_back
+import org.openforis.collectone.v2.mobile.resources.mobile_terms_of_service_title
+import org.openforis.collectone.v2.mobile.resources.mobile_tos_agree_checkbox
+import org.openforis.collectone.v2.mobile.resources.mobile_tos_continue
+import org.openforis.collectone.v2.mobile.resources.mobile_tos_decline
+import org.openforis.collectone.v2.mobile.resources.mobile_tos_intro
+import org.openforis.collectone.v2.mobile.resources.mobile_tos_signed_in_as
 
-/** 2. Terms of Service screen. */
+private const val DISABLED_CONTENT_ALPHA = 0.38f
+
+/**
+ * Terms of Service, shown after the first sign-in. The agreement checkbox starts unchecked and
+ * disabled until the user scrolls to the bottom of the terms, and Continue stays disabled until the
+ * checkbox is ticked; declining (or closing) signs the user out and returns to Sign in.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TermsOfServiceScreen(
@@ -66,6 +85,13 @@ fun TermsOfServiceScreen(
   actions: OnboardingActions,
 ) {
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+  val declineLabel = stringResource(Res.string.mobile_tos_decline)
+  val continueLabel = stringResource(Res.string.mobile_tos_continue)
+  val agreeCheckboxLabel = stringResource(Res.string.mobile_tos_agree_checkbox)
+  val termsScrollState =
+    rememberSaveable(uiState.profile.email, saver = ScrollState.Saver) { ScrollState(0) }
+  val hasScrolledToBottom =
+    rememberHasScrolledToBottom(termsScrollState, resetKey = uiState.profile.email)
 
   Scaffold(
     topBar = {
@@ -73,12 +99,12 @@ fun TermsOfServiceScreen(
         title = {
           Column {
             Text(
-              text = "Terms of Service",
+              text = stringResource(Res.string.mobile_terms_of_service_title),
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.Bold,
             )
             Text(
-              text = "Signed in as ${uiState.profile.email}",
+              text = stringResource(Res.string.mobile_tos_signed_in_as, uiState.profile.email),
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -86,7 +112,10 @@ fun TermsOfServiceScreen(
         },
         navigationIcon = {
           IconButton(onClick = { actions.declineTermsOfService() }) {
-            Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+            Icon(
+              imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+              contentDescription = stringResource(Res.string.mobile_back),
+            )
           }
         },
         colors =
@@ -98,139 +127,92 @@ fun TermsOfServiceScreen(
       )
     },
     bottomBar = {
-      Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 3.dp,
-        shadowElevation = 4.dp,
-      ) {
-        Row(
-          modifier =
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp).semantics {
-              isTraversalGroup = true
-              traversalIndex = 2f
-            },
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          OutlinedButton(
-            onClick = { actions.declineTermsOfService() },
-            modifier =
-              Modifier.weight(0.42f).semantics(mergeDescendants = true) {
-                role = Role.Button
-                contentDescription = "Decline"
-                traversalIndex = 0f
-              },
-            shape = MaterialTheme.shapes.medium,
-          ) {
-            Text("Decline")
-          }
-          Button(
-            onClick = { actions.acceptTermsOfService() },
-            enabled = uiState.termsCheckboxChecked,
-            modifier =
-              Modifier.weight(0.58f).semantics(mergeDescendants = true) {
-                role = Role.Button
-                contentDescription = "Agree & continue"
-                traversalIndex = 1f
-              },
-            shape = MaterialTheme.shapes.medium,
-          ) {
-            Text(
-              text = "Agree & continue",
-              style = MaterialTheme.typography.labelLarge,
-              fontWeight = FontWeight.Bold,
-            )
-          }
-        }
-      }
+      TermsOfServiceBottomBar(
+        declineLabel = declineLabel,
+        continueLabel = continueLabel,
+        continueEnabled = hasScrolledToBottom && uiState.termsCheckboxChecked,
+        onDecline = actions::declineTermsOfService,
+        onContinue = actions::acceptTermsOfService,
+      )
     },
     containerColor = MaterialTheme.colorScheme.surface,
   ) { innerPadding ->
-    // Scrollable Terms of Service Body
     Column(
       modifier =
-        Modifier.fillMaxSize()
-          .padding(innerPadding)
-          .verticalScroll(rememberScrollState())
-          .padding(horizontal = 18.dp, vertical = 12.dp),
+        Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 18.dp, vertical = 12.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
       Text(
-        text =
-          "Please review and accept the Collect One Terms of Service before downloading surveys.",
+        text = stringResource(Res.string.mobile_tos_intro),
         style = MaterialTheme.typography.bodyMedium,
         color = onSurfaceColor,
         fontWeight = FontWeight.SemiBold,
       )
 
-      OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        colors =
-          CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-          ),
-      ) {
-        Column(
-          modifier = Modifier.padding(16.dp),
-          verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          TermsSectionItem(
-            number = "1",
-            title = "Survey data collection & sharing",
-            body =
-              "Field observations, GPS coordinates, geometries, and photos collected in Collect One are shared with the survey organizers who granted you access to each survey.",
-          )
-          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-          TermsSectionItem(
-            number = "2",
-            title = "Offline storage & synchronization",
-            body =
-              "Downloaded survey definitions and map tiles are cached locally on your device for offline field work and automatically synchronized when connectivity is restored.",
-          )
-          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-          TermsSectionItem(
-            number = "3",
-            title = "Location & sensor permissions",
-            body =
-              "Collect One uses device location services when capturing points, polygons, or transects during active data collection tasks.",
-          )
-          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-          TermsSectionItem(
-            number = "4",
-            title = "Privacy & responsible use",
-            body =
-              "Do not record sensitive personal data unless explicitly authorized and consented to under your organization's survey governance protocol.",
-          )
-        }
-      }
+      TermsOfServiceCard(
+        scrollState = termsScrollState,
+        modifier = Modifier.fillMaxWidth().weight(1f),
+      )
 
-      // Checkbox row
-      Row(
+      TermsOfServiceAgreeCheckbox(
+        checked = uiState.termsCheckboxChecked,
+        enabled = hasScrolledToBottom,
+        label = agreeCheckboxLabel,
+        onCheckedChange = actions::setTermsChecked,
+      )
+    }
+  }
+}
+
+@Composable
+private fun TermsOfServiceBottomBar(
+  declineLabel: String,
+  continueLabel: String,
+  continueEnabled: Boolean,
+  onDecline: () -> Unit,
+  onContinue: () -> Unit,
+) {
+  Surface(
+    modifier = Modifier.fillMaxWidth(),
+    color = MaterialTheme.colorScheme.surfaceContainer,
+    tonalElevation = 3.dp,
+    shadowElevation = 4.dp,
+  ) {
+    Row(
+      modifier =
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp).semantics {
+          isTraversalGroup = true
+          traversalIndex = 2f
+        },
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      OutlinedButton(
+        onClick = onDecline,
         modifier =
-          Modifier.fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .toggleable(
-              value = uiState.termsCheckboxChecked,
-              role = Role.Checkbox,
-              onValueChange = { actions.setTermsChecked(it) },
-            )
-            .semantics(mergeDescendants = true) {
-              contentDescription = "I have read and agree to the Collect One Terms of Service."
-              traversalIndex = 1f
-            }
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+          Modifier.weight(0.42f).semantics(mergeDescendants = true) {
+            role = Role.Button
+            contentDescription = declineLabel
+            traversalIndex = 0f
+          },
+        shape = MaterialTheme.shapes.medium,
       ) {
-        Checkbox(
-          checked = uiState.termsCheckboxChecked,
-          onCheckedChange = null,
-        )
-        Spacer(modifier = Modifier.width(6.dp))
+        Text(declineLabel)
+      }
+      Button(
+        onClick = onContinue,
+        enabled = continueEnabled,
+        modifier =
+          Modifier.weight(0.58f).semantics(mergeDescendants = true) {
+            role = Role.Button
+            contentDescription = continueLabel
+            traversalIndex = 1f
+          },
+        shape = MaterialTheme.shapes.medium,
+      ) {
         Text(
-          text = "I have read and agree to the Collect One Terms of Service.",
-          style = MaterialTheme.typography.bodySmall,
-          color = onSurfaceColor,
+          text = continueLabel,
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
         )
       }
     }
@@ -238,22 +220,78 @@ fun TermsOfServiceScreen(
 }
 
 @Composable
-private fun TermsSectionItem(number: String, title: String, body: String) {
-  Column(
-    modifier = Modifier.semantics(mergeDescendants = true) {},
-    verticalArrangement = Arrangement.spacedBy(4.dp),
+private fun TermsOfServiceCard(scrollState: ScrollState, modifier: Modifier = Modifier) {
+  OutlinedCard(
+    modifier = modifier,
+    shape = MaterialTheme.shapes.medium,
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+      ),
   ) {
-    Text(
-      text = "$number. $title",
-      style = MaterialTheme.typography.titleSmall,
-      color = MaterialTheme.colorScheme.primary,
-      fontWeight = FontWeight.Bold,
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(
+        modifier =
+          Modifier.fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(start = 16.dp, top = 16.dp, end = 22.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        TermsOfServiceParagraphs.forEach { paragraph ->
+          Text(
+            text = paragraph,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 18.sp,
+          )
+        }
+      }
+      VerticalScrollBar(
+        scrollState = scrollState,
+        modifier =
+          Modifier.align(Alignment.CenterEnd)
+            .fillMaxHeight()
+            .padding(vertical = 8.dp, horizontal = 2.dp),
+      )
+    }
+  }
+}
+
+@Composable
+private fun TermsOfServiceAgreeCheckbox(
+  checked: Boolean,
+  enabled: Boolean,
+  label: String,
+  onCheckedChange: (Boolean) -> Unit,
+) {
+  val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clip(MaterialTheme.shapes.medium)
+        .toggleable(
+          value = checked,
+          enabled = enabled,
+          role = Role.Checkbox,
+          onValueChange = onCheckedChange,
+        )
+        .semantics(mergeDescendants = true) {
+          contentDescription = label
+          traversalIndex = 1f
+        }
+        .padding(vertical = 4.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Checkbox(
+      checked = checked,
+      onCheckedChange = null,
+      enabled = enabled,
     )
+    Spacer(modifier = Modifier.width(6.dp))
     Text(
-      text = body,
+      text = label,
       style = MaterialTheme.typography.bodySmall,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
-      lineHeight = 18.sp,
+      color = if (enabled) onSurfaceColor else onSurfaceColor.copy(alpha = DISABLED_CONTENT_ALPHA),
     )
   }
 }

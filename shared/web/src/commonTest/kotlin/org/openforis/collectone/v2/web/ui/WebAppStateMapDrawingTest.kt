@@ -26,6 +26,7 @@ import org.openforis.collectone.v2.app.ui.map.SurveyMap
 import org.openforis.collectone.v2.app.ui.map.SurveyMapContent
 import org.openforis.collectone.v2.app.ui.map.SurveyMapIds
 import org.openforis.collectone.v2.app.ui.map.SurveyMarker
+import org.openforis.collectone.v2.app.ui.map.mainSurveyMap
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
 import org.openforis.collectone.v2.core.forms.ui.MapDrawingKind
 import org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm
@@ -38,7 +39,7 @@ class WebAppStateMapDrawingTest {
   /** A web app whose forms launch with the all-field-types example XForms. */
   private fun webAppWithWorkbenchForms(): WebAppState =
     WebAppState(dataHolder = sampleDataHolder()).also { web ->
-      web.dataCollection.updateCustomFormDef(
+      web.viewModels.dataCollection.updateCustomFormDef(
         XFormsXmlSerializer.deserializeFormDef(WorkbenchExampleForm.ALL_FIELD_TYPES.xformsXml),
         isPreset = true,
       )
@@ -50,18 +51,19 @@ class WebAppStateMapDrawingTest {
   @Test
   fun webMapDrawing_pointIsPlacedByOneClick_andDrawingStopsWithTheForm() {
     val state = webAppWithWorkbenchForms()
-    val host = state.webMapDrawing
+    val host = state.viewModels.dataCollection.webMapDrawing
     assertFalse(host.isDrawing)
 
     // Clicks do nothing until a question asks to be drawn.
-    state.addWebMapDrawingVertex(LatLng(-1.29, 36.82))
-    assertNull(state.webMapDraftGeometry)
+    state.viewModels.dataCollection.addWebMapDrawingVertex(LatLng(-1.29, 36.82))
+    assertNull(state.viewModels.dataCollection.uiState.value.webMapDraftGeometry)
 
-    state.launchFormForEntity(
+    state.viewModels.dataCollection.launchFormForEntity(
       entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
       formId = "form-shade-canopy-audit",
     )
-    val controller = assertNotNull(state.activeFormWizardController)
+    val controller =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.activeFormWizardController)
     val path = "/data/plot_center_gps"
     assertTrue(controller.formState.fieldStates.containsKey(path))
 
@@ -69,9 +71,12 @@ class WebAppStateMapDrawingTest {
     assertTrue(host.isDrawing)
     assertEquals(path, host.activeDrawingPath)
     assertEquals(MapDrawingKind.POINT, host.activeDrawingKind)
-    assertEquals(MapDrawingKind.POINT, state.webMapDraftGeometry?.kind)
+    assertEquals(
+      MapDrawingKind.POINT,
+      state.viewModels.dataCollection.uiState.value.webMapDraftGeometry?.kind,
+    )
 
-    state.addWebMapDrawingVertex(LatLng(-1.29, 36.82))
+    state.viewModels.dataCollection.addWebMapDrawingVertex(LatLng(-1.29, 36.82))
     val placed =
       mapDrawingVertices(controller.formState.fieldStates.getValue(path), MapDrawingKind.POINT)
     assertEquals(1, placed.size)
@@ -79,42 +84,47 @@ class WebAppStateMapDrawingTest {
     assertEquals(36.82, placed.single().longitude)
     // One click places a point and ends the drawing.
     assertFalse(host.isDrawing)
-    assertNull(state.webMapDraftGeometry)
+    assertNull(state.viewModels.dataCollection.uiState.value.webMapDraftGeometry)
 
     // Closing the form while a line is being drawn cancels the drawing.
     host.startDrawing("/data/riparian_transect", MapDrawingKind.LINE)
     assertTrue(host.isDrawing)
-    state.closeActiveFormRunner()
+    state.viewModels.dataCollection.closeActiveFormRunner()
     assertFalse(host.isDrawing)
-    assertNull(state.webMapDraftGeometry)
+    assertNull(state.viewModels.dataCollection.uiState.value.webMapDraftGeometry)
   }
 
   @Test
   fun webMapDrawing_polygonCollectsVertices_rendersDraftOverlay_andRoutesAroundSelection() {
     val state = webAppWithWorkbenchForms()
-    state.launchFormForEntity(
+    state.viewModels.dataCollection.launchFormForEntity(
       entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
       formId = "form-shade-canopy-audit",
     )
-    val controller = assertNotNull(state.activeFormWizardController)
+    val controller =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.activeFormWizardController)
     val path = "/data/plot_boundary"
-    val host = state.webMapDrawing
+    val host = state.viewModels.dataCollection.webMapDrawing
     val before =
       mapDrawingVertices(controller.formState.fieldStates.getValue(path), MapDrawingKind.POLYGON)
 
     // Redrawing starts from the stored answer; Clear in the widget empties it first.
     host.startDrawing(path, MapDrawingKind.POLYGON)
     controller.setMapDrawingVertices(path, MapDrawingKind.POLYGON, emptyList())
-    assertEquals(0, state.webMapDraftGeometry?.vertices?.size)
+    assertEquals(
+      0,
+      state.viewModels.dataCollection.uiState.value.webMapDraftGeometry?.vertices?.size,
+    )
 
-    state.addWebMapDrawingVertex(LatLng(0.0, 0.0))
-    state.addWebMapDrawingVertex(LatLng(0.0, 1.0))
+    state.viewModels.dataCollection.addWebMapDrawingVertex(LatLng(0.0, 0.0))
+    state.viewModels.dataCollection.addWebMapDrawingVertex(LatLng(0.0, 1.0))
     assertTrue(host.isDrawing)
-    val twoVertices = assertNotNull(state.webMapDraftGeometry)
+    val twoVertices =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.webMapDraftGeometry)
     assertEquals(2, twoVertices.vertices.size)
     assertFalse(twoVertices.isComplete)
     // Two vertices draw as a line, not a polygon.
-    val lineOverlay = SurveyMapContent.main(state, showNavigation = false).overlayIds()
+    val lineOverlay = state.viewModels.mainSurveyMap(showNavigation = false).overlayIds()
     assertTrue(SurveyMapContent.DRAFT_SHAPE_ID in lineOverlay)
     assertEquals(
       SurveyMapContent.KIND_DRAFT_LINE,
@@ -123,8 +133,9 @@ class WebAppStateMapDrawingTest {
         .properties[SurveyMapContent.PROP_KIND],
     )
 
-    state.addWebMapDrawingVertex(LatLng(1.0, 1.0))
-    val threeVertices = assertNotNull(state.webMapDraftGeometry)
+    state.viewModels.dataCollection.addWebMapDrawingVertex(LatLng(1.0, 1.0))
+    val threeVertices =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.webMapDraftGeometry)
     assertTrue(threeVertices.isComplete)
     val draft = SurveyMapContent.draftFeatures(threeVertices)
     assertEquals(
@@ -139,11 +150,14 @@ class WebAppStateMapDrawingTest {
         it.properties[SurveyMapContent.PROP_KIND] == SurveyMapContent.KIND_DRAFT_VERTEX
       },
     )
-    val overlayIds = SurveyMapContent.main(state, showNavigation = false).overlayIds()
+    val overlayIds = state.viewModels.mainSurveyMap(showNavigation = false).overlayIds()
     assertTrue(SurveyMapContent.draftVertexId(2) in overlayIds)
 
     host.undoVertex()
-    assertEquals(2, state.webMapDraftGeometry?.vertices?.size)
+    assertEquals(
+      2,
+      state.viewModels.dataCollection.uiState.value.webMapDraftGeometry?.vertices?.size,
+    )
 
     // Cancelling puts the question back the way it was before drawing started.
     host.cancelDrawing()
@@ -155,7 +169,7 @@ class WebAppStateMapDrawingTest {
 
     // Done keeps what was drawn.
     host.startDrawing(path, MapDrawingKind.POLYGON)
-    state.addWebMapDrawingVertex(LatLng(5.0, 5.0))
+    state.viewModels.dataCollection.addWebMapDrawingVertex(LatLng(5.0, 5.0))
     host.stopDrawing()
     assertFalse(host.isDrawing)
     assertEquals(
@@ -168,15 +182,16 @@ class WebAppStateMapDrawingTest {
   @Test
   fun webFormGeometries_followTheOpenForm_andSkipTheOneBeingDrawn() {
     val state = webAppWithWorkbenchForms()
-    assertTrue(state.webFormGeometries.isEmpty())
+    assertTrue(state.viewModels.dataCollection.uiState.value.webFormGeometries.isEmpty())
 
     // Launching a new form starts with empty geometry answers until populated.
-    state.launchFormForEntity(
+    state.viewModels.dataCollection.launchFormForEntity(
       entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
       formId = "form-shade-canopy-audit",
     )
-    val controller = assertNotNull(state.activeFormWizardController)
-    assertTrue(state.webFormGeometries.isEmpty())
+    val controller =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.activeFormWizardController)
+    assertTrue(state.viewModels.dataCollection.uiState.value.webFormGeometries.isEmpty())
 
     // Populate a point, a line, and a polygon.
     controller.setMapDrawingVertices(
@@ -202,7 +217,8 @@ class WebAppStateMapDrawingTest {
       ),
     )
 
-    val byPath = state.webFormGeometries.associateBy { it.path }
+    val byPath =
+      state.viewModels.dataCollection.uiState.value.webFormGeometries.associateBy { it.path }
     val point = assertNotNull(byPath["/data/plot_center_gps"])
     val line = assertNotNull(byPath["/data/riparian_transect"])
     val polygon = assertNotNull(byPath["/data/plot_boundary"])
@@ -213,27 +229,33 @@ class WebAppStateMapDrawingTest {
     assertEquals(LatLng(-1.292066, 36.821946), point.vertices.single())
     assertEquals(2, line.vertices.size)
     assertTrue(polygon.vertices.size >= 3)
-    assertEquals(controller.questionTitleFor("/data/plot_boundary"), polygon.title)
+    assertEquals(controller.questionTitleOrNull("/data/plot_boundary"), polygon.title)
     assertTrue(polygon.title.isNotBlank())
 
     // Only geometry fields with a value are listed.
     controller.setMapDrawingVertices("/data/riparian_transect", MapDrawingKind.LINE, emptyList())
     assertEquals(
       setOf("/data/plot_center_gps", "/data/plot_boundary"),
-      state.webFormGeometries.map { it.path }.toSet(),
+      state.viewModels.dataCollection.uiState.value.webFormGeometries.map { it.path }.toSet(),
     )
 
     // The question being drawn is left to the draft overlay, and comes back after Done.
-    state.webMapDrawing.startDrawing("/data/plot_boundary", MapDrawingKind.POLYGON)
-    assertEquals(listOf("/data/plot_center_gps"), state.webFormGeometries.map { it.path })
-    state.webMapDrawing.stopDrawing()
+    state.viewModels.dataCollection.webMapDrawing.startDrawing(
+      "/data/plot_boundary",
+      MapDrawingKind.POLYGON,
+    )
+    assertEquals(
+      listOf("/data/plot_center_gps"),
+      state.viewModels.dataCollection.uiState.value.webFormGeometries.map { it.path },
+    )
+    state.viewModels.dataCollection.webMapDrawing.stopDrawing()
     assertEquals(
       setOf("/data/plot_center_gps", "/data/plot_boundary"),
-      state.webFormGeometries.map { it.path }.toSet(),
+      state.viewModels.dataCollection.uiState.value.webFormGeometries.map { it.path }.toSet(),
     )
 
     // The main map shows them as form-geometry features (above entities) with a title label.
-    val map = SurveyMapContent.main(state, showNavigation = false)
+    val map = state.viewModels.mainSurveyMap(showNavigation = false)
     val overlay =
       map.content.sources
         .first { it.id == SurveyMapContent.OVERLAY_SOURCE }
@@ -257,26 +279,27 @@ class WebAppStateMapDrawingTest {
     assertTrue(layerIds.indexOf("form-geometry-outline") < layerIds.indexOf("draft-outline"))
 
     // Closing the form clears the overlay.
-    state.closeActiveFormRunner()
-    assertTrue(state.webFormGeometries.isEmpty())
+    state.viewModels.dataCollection.closeActiveFormRunner()
+    assertTrue(state.viewModels.dataCollection.uiState.value.webFormGeometries.isEmpty())
   }
 
   @Test
   fun frameGeometry_requestsBoundsContainingEveryVertex_withIncreasingTokens() {
     val state = webAppWithWorkbenchForms()
-    val host = state.webMapDrawing
+    val host = state.viewModels.dataCollection.webMapDrawing
     assertTrue(host.canFrameGeometry)
-    assertNull(state.webMapFramingRequest)
+    assertNull(state.viewModels.dataCollection.uiState.value.webMapFramingRequest)
 
     // No form open: nothing to frame.
     host.frameGeometry("/data/plot_boundary", MapDrawingKind.POLYGON)
-    assertNull(state.webMapFramingRequest)
+    assertNull(state.viewModels.dataCollection.uiState.value.webMapFramingRequest)
 
-    state.launchFormForEntity(
+    state.viewModels.dataCollection.launchFormForEntity(
       entityId = "0000000a-56d7-5c1d-9457-7457267120a3",
       formId = "form-shade-canopy-audit",
     )
-    val controller = assertNotNull(state.activeFormWizardController)
+    val controller =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.activeFormWizardController)
     controller.setMapDrawingVertices(
       "/data/plot_center_gps",
       MapDrawingKind.POINT,
@@ -299,7 +322,8 @@ class WebAppStateMapDrawingTest {
     assertTrue(polygonVertices.size >= 3)
 
     host.frameGeometry("/data/plot_boundary", MapDrawingKind.POLYGON)
-    val polygonRequest = assertNotNull(state.webMapFramingRequest)
+    val polygonRequest =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.webMapFramingRequest)
     polygonVertices.forEach { vertex ->
       assertTrue(LatLng(vertex.latitude, vertex.longitude) in polygonRequest.bounds, "$vertex")
     }
@@ -308,20 +332,21 @@ class WebAppStateMapDrawingTest {
 
     // A point frames as zero-size bounds at the point, zoomed in less far.
     host.frameGeometry("/data/plot_center_gps", MapDrawingKind.POINT)
-    val pointRequest = assertNotNull(state.webMapFramingRequest)
+    val pointRequest =
+      assertNotNull(state.viewModels.dataCollection.uiState.value.webMapFramingRequest)
     assertTrue(pointRequest.token > polygonRequest.token)
     assertEquals(LatLng(-1.292066, 36.821946), pointRequest.bounds.center)
     assertEquals(16.0, pointRequest.maxZoom)
 
     // Framing the same geometry again re-fires with a new token.
     host.frameGeometry("/data/plot_center_gps", MapDrawingKind.POINT)
-    val again = assertNotNull(state.webMapFramingRequest)
+    val again = assertNotNull(state.viewModels.dataCollection.uiState.value.webMapFramingRequest)
     assertTrue(again.token > pointRequest.token)
     assertEquals(pointRequest.bounds, again.bounds)
 
     // An empty answer has nothing to frame and leaves the last request alone.
     controller.setMapDrawingVertices("/data/riparian_transect", MapDrawingKind.LINE, emptyList())
     host.frameGeometry("/data/riparian_transect", MapDrawingKind.LINE)
-    assertEquals(again, state.webMapFramingRequest)
+    assertEquals(again, state.viewModels.dataCollection.uiState.value.webMapFramingRequest)
   }
 }

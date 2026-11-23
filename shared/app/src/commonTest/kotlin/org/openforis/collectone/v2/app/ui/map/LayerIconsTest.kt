@@ -21,6 +21,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.seed.SampleMapLayersData
 import org.openforis.collectone.v2.app.data.seed.SurveyEditorSamples
+import org.openforis.collectone.v2.map.GeometryType
 
 class LayerIconsTest {
   @Test
@@ -73,13 +74,15 @@ class LayerIconsTest {
   fun pinIconName_isOnlyShownForPointLayers() {
     val layers = SampleMapLayersData.defaultMapLayers()
     layers.forEach { layer ->
-      if (layer.geometryTypeLabel == "Point") {
+      if (layer.geometryType == GeometryType.POINT) {
         assertEquals(layer.iconName, layer.pinIconName, layer.id)
       } else {
         assertNull(layer.pinIconName, layer.id)
       }
     }
-    assertNull(layers.first().copy(geometryTypeLabel = "Polygon", iconName = "park").pinIconName)
+    assertNull(
+      layers.first().copy(geometryType = GeometryType.POLYGON, iconName = "park").pinIconName
+    )
   }
 
   @Test

@@ -16,8 +16,13 @@ package org.openforis.collectone.v2.core.geo.geoid
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import openforis.collectone.v1.data.Geometry
 import openforis.collectone.v1.forms.GeoPoint
+import org.openforis.collectone.v2.core.geo.GeometryProtos
 
 /** A golden covering produced by the AgStack reference code at one S2 level. */
 internal data class GoldenCase(
@@ -152,5 +157,99 @@ class AgStackGeoIdTest {
     assertFailsWith<IllegalArgumentException> {
       AgStackGeoId.cellTokens(listOf(point(0.0, 0.0)), 31)
     }
+  }
+
+  @Test
+  fun forGeometry_andMatchesGeometry_supportPointPolygonAndLineString() {
+    val pointGeometry = GeometryProtos.point(30.90706, 74.78209)
+    val pointCandidates = assertNotNull(AgStackGeoId.forGeometry(pointGeometry))
+    assertEquals(
+      "8c5c1d6ae4c50c574a05b44c0af6797c2001f518a35116c4642bd48edf769024",
+      pointCandidates.primary,
+    )
+    assertEquals(pointCandidates.primary, pointCandidates.fallback)
+    assertTrue(AgStackGeoId.matchesGeometry(pointCandidates.primary, pointGeometry))
+
+    val polygonGeometry =
+      GeometryProtos.polygon(
+        listOf(
+          listOf(
+            GeometryProtos.position(30.311450431756946, 76.88855767250062),
+            GeometryProtos.position(30.310732833916543, 76.88841819763184),
+            GeometryProtos.position(30.31070505582999, 76.88945889472961),
+            GeometryProtos.position(30.311399505631794, 76.8894535303116),
+          )
+        )
+      )
+    val polygonCandidates = assertNotNull(AgStackGeoId.forGeometry(polygonGeometry))
+    assertEquals(
+      "0d8b4afb3b3332f75cf5b1889b0564a9e7a80f4bad239a9a593e1665210c3079",
+      polygonCandidates.primary,
+    )
+    assertTrue(AgStackGeoId.matchesGeometry(polygonCandidates.primary, polygonGeometry))
+    assertTrue(AgStackGeoId.matchesGeometry(polygonCandidates.fallback, polygonGeometry))
+    assertFalse(AgStackGeoId.matchesGeometry(pointCandidates.primary, polygonGeometry))
+    assertFalse(AgStackGeoId.matchesGeometry("P001", polygonGeometry))
+
+    val lineGeometry =
+      GeometryProtos.lineString(
+        listOf(
+          GeometryProtos.position(1.0, 2.0),
+          GeometryProtos.position(1.001, 2.001),
+        )
+      )
+    val lineCandidates = assertNotNull(AgStackGeoId.forGeometry(lineGeometry))
+    assertTrue(AgStackGeoId.isValidFormat(lineCandidates.primary))
+    assertTrue(AgStackGeoId.matchesGeometry(lineCandidates.primary, lineGeometry))
+
+    assertNull(AgStackGeoId.forGeometry(Geometry()))
+  }
+
+  @Test
+  fun level20OverlapFraction_distinguishesAdjacentSmallPlotsFromDuplicateBoundaries() {
+    val plotA =
+      GeometryProtos.polygon(
+        listOf(
+          listOf(
+            GeometryProtos.position(30.31080, 76.88850),
+            GeometryProtos.position(30.31080, 76.88880),
+            GeometryProtos.position(30.31100, 76.88880),
+            GeometryProtos.position(30.31100, 76.88850),
+          )
+        )
+      )
+    val adjacentPlotB =
+      GeometryProtos.polygon(
+        listOf(
+          listOf(
+            GeometryProtos.position(30.31110, 76.88900),
+            GeometryProtos.position(30.31110, 76.88930),
+            GeometryProtos.position(30.31130, 76.88930),
+            GeometryProtos.position(30.31130, 76.88900),
+          )
+        )
+      )
+    val duplicatePlotA =
+      GeometryProtos.polygon(
+        listOf(
+          listOf(
+            GeometryProtos.position(30.3108001, 76.8885001),
+            GeometryProtos.position(30.3108001, 76.8888001),
+            GeometryProtos.position(30.3110001, 76.8888001),
+            GeometryProtos.position(30.3110001, 76.8885001),
+          )
+        )
+      )
+
+    assertEquals(AgStackGeoId.computeCandidate(plotA), AgStackGeoId.computeCandidate(adjacentPlotB))
+    assertTrue(
+      AgStackGeoId.level20OverlapFraction(plotA, adjacentPlotB) <
+        AgStackGeoId.DUPLICATE_OVERLAP_THRESHOLD
+    )
+    assertTrue(
+      AgStackGeoId.level20OverlapFraction(plotA, duplicatePlotA) >=
+        AgStackGeoId.DUPLICATE_OVERLAP_THRESHOLD
+    )
+    assertTrue(AgStackGeoId.s2CellToken(plotA).isNotEmpty())
   }
 }

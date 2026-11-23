@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Kind of "data was used" event, shown in impact history. -->
+  <string name="domain_impact_event_type_export">ส่งออกแล้ว</string>
+  <string name="domain_impact_event_type_partner_push">ส่งให้พาร์ทเนอร์แล้ว</string>
+  <string name="domain_impact_event_type_receipt_generated">สร้างใบรับแล้ว</string>
+  <string name="domain_impact_event_type_receipt_shared">แชร์ใบรับแล้ว</string>
+  <string name="domain_impact_event_type_doi_minted">ออก DOI แล้ว</string>
+  <string name="domain_impact_event_type_survey_closed">ปิดแบบสำรวจแล้ว</string>
+  <!-- Lifecycle state of a survey. -->
+  <string name="domain_survey_lifecycle_state_draft">ฉบับร่าง</string>
+  <string name="domain_survey_lifecycle_state_published">เผยแพร่แล้ว</string>
+  <string name="domain_survey_lifecycle_state_closed">ปิดแล้ว</string>
+  <string name="domain_survey_lifecycle_state_archived">เก็บถาวรแล้ว</string>
+  <!-- Answer option to "What happened with this data?" for a closed survey. -->
+  <string name="domain_survey_outcome_kind_submitted_eudr_dds">ส่งในแถลงการณ์การตรวจสอบสถานะ (DDS) ตาม EUDR</string>
+  <string name="domain_survey_outcome_kind_reported_ferm">รายงานต่อ FERM</string>
+  <string name="domain_survey_outcome_kind_land_titling">ใช้ในการออกเอกสารสิทธิ์ที่ดิน</string>
+  <string name="domain_survey_outcome_kind_shared_with_buyers">แชร์กับผู้ซื้อ</string>
+  <string name="domain_survey_outcome_kind_trained_or_validated_model">ใช้ฝึกหรือตรวจสอบแผนที่หรือโมเดล</string>
+  <string name="domain_survey_outcome_kind_protected_area_management">ใช้จัดการพื้นที่คุ้มครอง</string>
+  <string name="domain_survey_outcome_kind_not_yet">ยังไม่มี</string>
+  <!-- Answer option: time and cost compared with the previous method. -->
+  <string name="domain_effort_comparison_less">น้อยกว่า</string>
+  <string name="domain_effort_comparison_same">ใกล้เคียงกัน</string>
+  <string name="domain_effort_comparison_more">มากกว่า</string>
+  <!-- Upload status of a submission. -->
+  <string name="domain_sync_status_uploading">กำลังอัปโหลด</string>
+  <string name="domain_sync_status_uploading_description">กำลังอัปโหลดการเปลี่ยนแปลงในเครื่องไปยังเซิร์ฟเวอร์</string>
+  <string name="domain_sync_status_synced">ซิงค์แล้ว</string>
+  <string name="domain_sync_status_synced_description">ซิงค์กับเซิร์ฟเวอร์คลาวด์แล้ว</string>
+  <string name="domain_sync_status_failed">ล้มเหลว</string>
+  <string name="domain_sync_status_failed_description">อัปโหลดล้มเหลว — แตะเพื่อลองใหม่</string>
+  <!-- Name of a quota tier (plan). -->
+  <string name="domain_quota_tier_unspecified">ไม่ระบุ</string>
+  <string name="domain_quota_tier_basic">พื้นฐาน</string>
+  <string name="domain_quota_tier_sponsored">ได้รับการสนับสนุน</string>
+  <!-- Measurement unit system option in Settings. -->
+  <string name="domain_measurement_unit_system_metric">เมตริก (ha, m)</string>
+  <string name="domain_measurement_unit_system_metric_short">เมตริก</string>
+  <string name="domain_measurement_unit_system_imperial">อิมพีเรียล (acres, ft)</string>
+  <string name="domain_measurement_unit_system_imperial_short">อิมพีเรียล</string>
+  <!-- State of the map camera relative to the GPS location. -->
+  <string name="domain_location_lock_state_locked">GPS จัดกึ่งกลางอัตโนมัติ</string>
+  <string name="domain_location_lock_state_locked_3d">GPS 3 มิติ</string>
+  <string name="domain_location_lock_state_panned">เลื่อนแผนที่แล้ว</string>
+  <!-- Badge shown on a map layer that comes from the survey. -->
+  <string name="domain_layer_source_type_entity_dataset">ชั้นข้อมูลแบบสำรวจ</string>
+  <!-- Basemap option in the map layers panel. -->
+  <string name="domain_basemap_type_normal">ภูมิประเทศ</string>
+  <string name="domain_basemap_type_normal_description">แผนที่ภูมิประเทศพร้อมเส้นชั้นความสูง เงาภูเขา และถนน</string>
+  <string name="domain_basemap_type_satellite">ภาพถ่ายดาวเทียม</string>
+  <string name="domain_basemap_type_satellite_description">ภาพถ่ายดาวเทียม Mapbox Standard Satellite พร้อมป้ายกำกับอ้างอิง</string>
+  <!-- Layer of a map area saved for offline use: satellite imagery, or the terrain map (contours, hillshade, and roads). -->
+  <string name="domain_offline_imagery_type_satellite">ดาวเทียม</string>
+  <string name="domain_offline_imagery_type_terrain">ภูมิประเทศ</string>
+  <!-- Role of a person in an organization. -->
+  <string name="domain_organization_role_member">สมาชิก</string>
+  <string name="domain_organization_role_member_description">แสดงเป็นผู้มีสังกัด ดูแบบสำรวจขององค์กรและสร้างแบบสำรวจใหม่ได้</string>
+  <string name="domain_organization_role_manager">ผู้จัดการ</string>
+  <string name="domain_organization_role_manager_description">แก้ไของค์กร จัดการสมาชิก และจัดการแบบสำรวจทั้งหมดขององค์กรได้</string>
+  <!-- Status of a person's membership in an organization. -->
+  <string name="domain_membership_status_invited">ได้รับเชิญแล้ว</string>
+  <string name="domain_membership_status_requested">ขอเข้าร่วมแล้ว</string>
+  <string name="domain_membership_status_active">สมาชิก</string>
+  <!-- Kind of custom imagery source. -->
+  <string name="domain_imagery_source_type_xyz_tiles">URL ไทล์ XYZ</string>
+  <string name="domain_imagery_source_type_earth_engine">เลเยอร์ Earth Engine</string>
+  <!-- Kind of organization. -->
+  <string name="domain_organization_type_government_agency">หน่วยงานภาครัฐ</string>
+  <string name="domain_organization_type_cooperative">สหกรณ์</string>
+  <string name="domain_organization_type_iplc_organization">องค์กรชนพื้นเมืองหรือชุมชนท้องถิ่น</string>
+  <string name="domain_organization_type_ngo">องค์กรพัฒนาเอกชน (NGO)</string>
+  <string name="domain_organization_type_company">บริษัท</string>
+  <string name="domain_organization_type_research">สถาบันวิจัย</string>
+  <string name="domain_organization_type_other">อื่น ๆ</string>
+  <!-- Upload status filter and upload state of a pending change. -->
+  <string name="domain_upload_status_filter_pending">รอดำเนินการ</string>
+  <string name="domain_upload_status_filter_in_progress">กำลังดำเนินการ</string>
+  <string name="domain_upload_status_filter_uploaded">อัปโหลดแล้ว</string>
+  <string name="domain_upload_status_filter_failed">ล้มเหลว</string>
+  <!-- Kind of change waiting to upload or already uploaded. -->
+  <string name="domain_mutation_operation_kind_create_submission">ส่งแบบฟอร์มแล้ว</string>
+  <string name="domain_mutation_operation_kind_update_submission">แก้ไขแบบฟอร์มแล้ว</string>
+  <string name="domain_mutation_operation_kind_delete_submission">ลบแบบฟอร์มแล้ว</string>
+  <string name="domain_mutation_operation_kind_create_entity">สร้างฟีเจอร์แผนที่แล้ว</string>
+  <string name="domain_mutation_operation_kind_update_entity">แก้ไขฟีเจอร์แผนที่แล้ว</string>
+  <string name="domain_mutation_operation_kind_delete_entity">ลบฟีเจอร์แผนที่แล้ว</string>
+  <string name="domain_mutation_operation_kind_upload_media">แนบรูปภาพแล้ว</string>
+  <!-- Status of an invitation to join. -->
+  <string name="domain_invitation_status_pending">ได้รับเชิญแล้ว</string>
+  <string name="domain_invitation_status_accepted">เข้าร่วมแล้ว</string>
+  <!-- Geometry type: point, line, or polygon. -->
+  <string name="domain_geometry_point">จุด</string>
+  <string name="domain_geometry_line">เส้น</string>
+  <string name="domain_geometry_polygon">รูปหลายเหลี่ยม</string>
+  <!-- Geometry type (point, line, polygon) of a map feature or question. -->
+  <string name="domain_entity_geometry_kind_none">ไม่มีรูปทรงเรขาคณิต</string>
+  <!-- Title or subtitle of a mobile app screen in the screen navigator. -->
+  <string name="domain_app_screen_sign_in_title">ลงชื่อเข้าใช้</string>
+  <string name="domain_app_screen_sign_in_subtitle">จุดเริ่มต้นการยืนยันตัวตนด้วย Google</string>
+  <string name="domain_app_screen_terms_of_service_title">ข้อกำหนดในการให้บริการ</string>
+  <string name="domain_app_screen_terms_of_service_subtitle">การยอมรับข้อกำหนดด้านธรรมาภิบาลข้อมูลและแพลตฟอร์ม</string>
+  <string name="domain_app_screen_download_survey_title">ดาวน์โหลดแบบสำรวจ</string>
+  <string name="domain_app_screen_download_survey_subtitle">เรียกดูแบบสำรวจที่แชร์ หรือค้นหาตามชื่อ/ตำแหน่ง</string>
+  <string name="domain_app_screen_main_survey_title">แบบสำรวจหลัก (แผนที่และรายการ)</string>
+  <string name="domain_app_screen_main_survey_subtitle">แผนที่แบบสำรวจ ชั้นข้อมูลแผนที่ ชีตด้านล่างของตำแหน่งและการส่งข้อมูล รายการที่ค้นหาได้ และลิ้นชักเมนู</string>
+  <!-- Tab: show the survey as a map or as a list. -->
+  <string name="domain_main_survey_view_mode_map">แผนที่</string>
+  <string name="domain_main_survey_view_mode_list">รายการ</string>
+  <!-- Lifecycle status of a library entry. -->
+  <string name="domain_library_status_draft">ฉบับร่าง</string>
+  <string name="domain_library_status_stable">เสถียร</string>
+  <string name="domain_library_status_deprecated">เลิกใช้แล้ว</string>
+  <!-- How dashboards roll up answers to a standard field. -->
+  <string name="domain_concept_aggregation_count_distinct_features">นับฟีเจอร์แผนที่</string>
+  <string name="domain_concept_aggregation_count_distinct_features_description">นับฟีเจอร์แผนที่ที่มีคำตอบ</string>
+  <string name="domain_concept_aggregation_count_by_code">นับตามค่า</string>
+  <string name="domain_concept_aggregation_count_by_code_description">นับฟีเจอร์แผนที่สำหรับแต่ละค่าในรายการ</string>
+  <string name="domain_concept_aggregation_sum">ผลรวม</string>
+  <string name="domain_concept_aggregation_sum_description">รวมคำตอบเข้าด้วยกัน</string>
+  <string name="domain_concept_aggregation_mean">ค่าเฉลี่ย</string>
+  <string name="domain_concept_aggregation_mean_description">หาค่าเฉลี่ยของคำตอบ</string>
+  <string name="domain_concept_aggregation_share_by_code">สัดส่วนตามค่า</string>
+  <string name="domain_concept_aggregation_share_by_code_description">แสดงสัดส่วนของฟีเจอร์แผนที่ที่มีแต่ละค่า</string>
+  <string name="domain_concept_aggregation_none">ไม่รวมยอด</string>
+  <string name="domain_concept_aggregation_none_description">ชื่อ ตัวระบุ และคำตอบอื่น ๆ ที่ไม่นำมารวมยอด</string>
+  <!-- Privacy class of a standard field: what may leave the organization. -->
+  <string name="domain_privacy_class_aggregate_public">ยอดรวมสาธารณะ</string>
+  <string name="domain_privacy_class_aggregate_public_description">ยอดรวมแสดงในแดชบอร์ดทั้งแพลตฟอร์มและแดชบอร์ดสาธารณะได้</string>
+  <string name="domain_privacy_class_org_only">เฉพาะองค์กร</string>
+  <string name="domain_privacy_class_org_only_description">ยอดรวมจะเห็นได้เฉพาะภายในองค์กรที่เป็นเจ้าของ</string>
+  <string name="domain_privacy_class_sensitive">ละเอียดอ่อน</string>
+  <string name="domain_privacy_class_sensitive_description">ไม่นำไปรวมในยอดรวมข้ามองค์กรหรือยอดรวมสาธารณะ</string>
+  <!-- Impact pillar used to group goals. -->
+  <string name="domain_impact_pillar_mitigation">การลดผลกระทบ</string>
+  <string name="domain_impact_pillar_adaptation">การปรับตัว</string>
+  <string name="domain_impact_pillar_protection">การคุ้มครอง</string>
+  <!-- Data type of an answer or property. -->
+  <string name="domain_data_type_text">ข้อความ</string>
+  <string name="domain_data_type_integer">จำนวนเต็ม</string>
+  <string name="domain_data_type_decimal">ทศนิยม</string>
+  <string name="domain_data_type_date">วันที่</string>
+  <string name="domain_data_type_select_one">เลือกหนึ่งข้อ</string>
+  <string name="domain_data_type_select_multiple">เลือกหลายข้อ</string>
+  <!-- Answer data type (also used for question types and table property types). -->
+  <string name="domain_concept_data_type_media">รูปภาพ วิดีโอ หรือเสียง</string>
+  <!-- Role of a collaborator on a survey. -->
+  <string name="domain_collaborator_role_viewer">ผู้ดูข้อมูล</string>
+  <string name="domain_collaborator_role_viewer_description">ดูแผนที่ ชั้นข้อมูลแผนที่ และการส่งข้อมูลได้</string>
+  <string name="domain_collaborator_role_data_collector">ผู้เก็บข้อมูล</string>
+  <string name="domain_collaborator_role_data_collector_description">เก็บข้อมูลและเพิ่มฟีเจอร์แผนที่ได้</string>
+  <string name="domain_collaborator_role_survey_organizer">ผู้จัดทำแบบสำรวจ</string>
+  <string name="domain_collaborator_role_survey_organizer_description">แก้ไขแบบฟอร์ม จัดการการแชร์ และส่งออกข้อมูลได้</string>
+  <!-- General access option of a survey. -->
+  <string name="domain_sharing_policy_restricted">จำกัด</string>
+  <string name="domain_sharing_policy_restricted_description">เฉพาะผู้ที่เพิ่มไว้ด้านบนเท่านั้นที่เปิดแบบสำรวจนี้ได้</string>
+  <string name="domain_sharing_policy_organization">ทุกคนในองค์กร</string>
+  <string name="domain_sharing_policy_organization_description">สมาชิกขององค์กรเจ้าของแบบสำรวจเก็บข้อมูลได้ ผู้จัดการแก้ไขแบบสำรวจได้ด้วย</string>
+  <string name="domain_sharing_policy_anyone_with_link">ต้องใช้ลิงก์หรือรหัส QR</string>
+  <string name="domain_sharing_policy_anyone_with_link_description">ผู้ใช้ต้องมีลิงก์หรือรหัส QR เพื่อเข้าถึงแบบสำรวจนี้และเก็บข้อมูล</string>
+  <string name="domain_sharing_policy_public">แสดงในไดเรกทอรี</string>
+  <string name="domain_sharing_policy_public_description">แสดงในไดเรกทอรีเพื่อให้ทุกคนค้นหาแบบสำรวจนี้และเก็บข้อมูลได้</string>
+  <!-- Which data a data collector can see. -->
+  <string name="domain_peer_data_visibility_all">ข้อมูลทั้งหมด</string>
+  <string name="domain_peer_data_visibility_all_description">ผู้เก็บข้อมูลเห็นการส่งข้อมูลและฟีเจอร์แผนที่ของทุกคน</string>
+  <string name="domain_peer_data_visibility_own_only">เฉพาะข้อมูลของตนเอง</string>
+  <string name="domain_peer_data_visibility_own_only_description">ผู้เก็บข้อมูลเห็นเฉพาะข้อมูลที่ตนเก็บ</string>
+  <!-- Kind of survey dataset, singular and plural. -->
+  <string name="domain_dataset_kind_map_layer">ชั้นข้อมูลแผนที่</string>
+  <string name="domain_dataset_kind_map_layer_plural">ชั้นข้อมูลแผนที่</string>
+  <string name="domain_dataset_kind_data_table">ตารางข้อมูล</string>
+  <string name="domain_dataset_kind_data_table_plural">ตารางข้อมูล</string>
+  <!-- Geometry type of a map layer (plural). -->
+  <string name="domain_geometry_kind_point">จุด</string>
+  <string name="domain_geometry_kind_line">เส้น</string>
+  <string name="domain_geometry_kind_polygon">รูปหลายเหลี่ยม</string>
+  <string name="domain_property_type_boolean">ใช่ / ไม่ใช่</string>
+  <!-- Sampling method option for generated sample plots. -->
+  <string name="domain_sample_method_systematic_grid">ตารางกริดอย่างเป็นระบบ</string>
+  <string name="domain_sample_method_systematic_grid_description">แปลงบนตารางกริดสม่ำเสมอ โดยมีจุดเริ่มต้นแบบสุ่ม</string>
+  <string name="domain_sample_method_simple_random">สุ่มอย่างง่าย</string>
+  <string name="domain_sample_method_simple_random_description">แปลงตามจำนวนที่กำหนดซึ่งวางแบบสุ่ม</string>
+  <string name="domain_sample_method_stratified_random">สุ่มแบบแบ่งชั้น</string>
+  <string name="domain_sample_method_stratified_random_description">แปลงที่วางแบบสุ่มภายในแต่ละชั้นภูมิ</string>
+  <string name="domain_sample_method_cluster">แบบกลุ่ม</string>
+  <string name="domain_sample_method_cluster_description">กลุ่มของแปลงที่วางแบบสุ่ม</string>
+  <!-- How sample plots are allocated across strata. -->
+  <string name="domain_allocation_mode_equal">เท่ากัน</string>
+  <string name="domain_allocation_mode_proportional">ตามสัดส่วนพื้นที่</string>
+  <string name="domain_allocation_mode_custom">กำหนดเอง</string>
+  <!-- Shape of a sample plot. -->
+  <string name="domain_plot_shape_option_square">สี่เหลี่ยมจัตุรัส</string>
+  <string name="domain_plot_shape_option_circle">วงกลม</string>
+  <string name="domain_plot_shape_option_point">จุด (เฉพาะจุดศูนย์กลาง)</string>
+  <!-- How sub-plot sample points are placed within a plot. -->
+  <string name="domain_sub_plot_mode_none">ไม่มี</string>
+  <string name="domain_sub_plot_mode_center">หนึ่งจุดที่ศูนย์กลาง</string>
+  <string name="domain_sub_plot_mode_grid">ตารางกริด</string>
+  <string name="domain_sub_plot_mode_random">สุ่ม</string>
+  <!-- Device to preview a form on. -->
+  <string name="domain_form_preview_target_mobile">มือถือ</string>
+  <string name="domain_form_preview_target_web">เว็บ</string>
+  <!-- Question type in the form editor. -->
+  <string name="domain_editor_question_type_text">ข้อความสั้น</string>
+  <string name="domain_editor_question_type_long_text">ย่อหน้า</string>
+  <string name="domain_editor_question_type_number">ตัวเลข</string>
+  <string name="domain_editor_question_type_photo">รูปภาพ</string>
+  <string name="domain_editor_question_type_video">วิดีโอ</string>
+  <string name="domain_editor_question_type_audio">เสียง</string>
+  <string name="domain_editor_question_type_note">หมายเหตุ</string>
+  <!-- How data collectors provide a photo, video, or audio answer. -->
+  <string name="domain_media_source_capture_or_upload">บันทึกหรืออัปโหลด</string>
+  <string name="domain_media_source_capture_or_upload_description">ผู้เก็บข้อมูลใช้กล้องหรือไมโครโฟน หรืออัปโหลดไฟล์ที่มีอยู่จากอุปกรณ์ได้</string>
+  <string name="domain_media_source_capture_only">บันทึกเท่านั้น</string>
+  <string name="domain_media_source_capture_only_description">ผู้เก็บข้อมูลต้องถ่ายรูปภาพ วิดีโอ หรือบันทึกเสียงใหม่ ไม่อนุญาตให้อัปโหลดไฟล์ที่มีอยู่</string>
+  <!-- How data collectors record a location answer. -->
+  <string name="domain_geometry_capture_gps_only">GPS เท่านั้น</string>
+  <string name="domain_geometry_capture_gps_only_description">ผู้เก็บข้อมูลบันทึกตำแหน่ง GPS ของอุปกรณ์ ไม่พร้อมใช้งานบนเว็บ</string>
+  <string name="domain_geometry_capture_gps_or_map">GPS หรือวาดบนแผนที่</string>
+  <string name="domain_geometry_capture_gps_or_map_description">ผู้เก็บข้อมูลใช้ตำแหน่ง GPS หรือวางตำแหน่งบนแผนที่ได้ จำเป็นสำหรับเว็บ</string>
+  <!-- Comparison operator in display logic and status rules; read mid-sentence after a question name, e.g. "age is greater than 5". -->
+  <string name="domain_relevance_operator_equals">เท่ากับ</string>
+  <string name="domain_relevance_operator_not_equals">ไม่เท่ากับ</string>
+  <string name="domain_relevance_operator_greater_than">มากกว่า</string>
+  <string name="domain_relevance_operator_less_than">น้อยกว่า</string>
+  <string name="domain_relevance_operator_includes">มี</string>
+  <string name="domain_relevance_operator_is_answered">ได้รับคำตอบแล้ว</string>
+  <!-- Where a choice question's options come from. -->
+  <string name="domain_choice_source_manual">รายการที่กำหนดเอง</string>
+  <!-- Name of a status marker symbol (accessibility label). -->
+  <string name="domain_status_marker_symbol_open">วงกลมโปร่ง</string>
+  <string name="domain_status_marker_symbol_half">ครึ่งวงกลม</string>
+  <string name="domain_status_marker_symbol_check">เครื่องหมายถูก</string>
+  <string name="domain_status_marker_symbol_alert">เครื่องหมายอัศเจรีย์</string>
+  <string name="domain_status_marker_symbol_cross">เครื่องหมายกากบาท</string>
+  <!-- What a map feature status rule checks. -->
+  <string name="domain_status_condition_subject_submissions">จำนวนการส่งข้อมูล</string>
+  <string name="domain_status_condition_subject_question">คำตอบของคำถาม</string>
+  <string name="domain_status_condition_subject_entity_property">คุณสมบัติของฟีเจอร์</string>
+  <!-- Data type of a map layer or data table property. -->
+  <string name="domain_editor_property_kind_boolean">ใช่ / ไม่ใช่</string>
+  <!-- Validation rule option for a date question. -->
+  <string name="domain_date_rule_not_in_future">ไม่เป็นวันในอนาคต</string>
+  <string name="domain_date_rule_not_in_past">ไม่เป็นวันในอดีต</string>
+  <string name="domain_date_rule_between">ระหว่างวันที่สองวัน</string>
+  <!-- Preset pattern option for validating a text answer. -->
+  <string name="domain_text_pattern_email">ที่อยู่อีเมล</string>
+  <string name="domain_text_pattern_digits">ตัวเลขเท่านั้น</string>
+  <string name="domain_text_pattern_letters">ตัวอักษรเท่านั้น</string>
+  <string name="domain_text_pattern_custom">รูปแบบที่กำหนดเอง</string>
+  <!-- Form editor: validation issues shown next to questions and at the top of the form. -->
+  <string name="domain_issue_form_missing_id">แบบฟอร์มไม่มีรหัส</string>
+  <string name="domain_issue_name_required">จำเป็นต้องระบุชื่อ</string>
+  <string name="domain_issue_name_invalid">ชื่อต้องขึ้นต้นด้วยตัวอักษร และใช้ได้เฉพาะตัวอักษร ตัวเลข _ . -</string>
+  <!-- %1$s: the question's name (an identifier). -->
+  <string name="domain_issue_name_duplicate">ชื่อ “%1$s” ถูกใช้มากกว่าหนึ่งครั้ง</string>
+  <string name="domain_issue_label_empty">ป้ายกำกับว่างเปล่า</string>
+  <string name="domain_issue_choose_choice_data_table">เลือกตารางข้อมูลสำหรับตัวเลือก</string>
+  <string name="domain_issue_choose_choice_map_layer">เลือกชั้นข้อมูลแผนที่สำหรับตัวเลือก</string>
+  <!-- %1$s: ID of the map layer or data table that was deleted. -->
+  <string name="domain_issue_choice_dataset_missing">ไม่มีชั้นข้อมูลแผนที่หรือตารางข้อมูล “%1$s” แล้ว</string>
+  <!-- %1$s: name of a map layer of generated sample plots. -->
+  <string name="domain_issue_choice_dataset_generated">แปลงตัวอย่างใน “%1$s” ถูกสร้างโดยระบบ ผู้เก็บข้อมูลจึงเพิ่มไม่ได้</string>
+  <!-- %1$s: name of a map layer. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_map_layer">“%1$s” ไม่มีแบบฟอร์มสำหรับเพิ่มฟีเจอร์แผนที่ใหม่</string>
+  <!-- %1$s: name of a data table. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_data_table">“%1$s” ไม่มีแบบฟอร์มสำหรับเพิ่มระเบียนใหม่</string>
+  <string name="domain_issue_add_choice">เพิ่มตัวเลือกอย่างน้อยหนึ่งรายการ</string>
+  <string name="domain_issue_choice_value_invalid">ค่าของตัวเลือกต้องไม่ว่างและไม่มีช่องว่าง</string>
+  <string name="domain_issue_choice_value_duplicate">ค่าของตัวเลือกต้องไม่ซ้ำกัน</string>
+  <string name="domain_issue_display_logic_source_deleted">ตรรกะการแสดงผลอ้างอิงคำถามที่ถูกลบแล้ว</string>
+  <!-- %1$s: name of the question the display logic depends on. -->
+  <string name="domain_issue_display_logic_source_later">ตรรกะการแสดงผลขึ้นอยู่กับ “%1$s” ซึ่งอยู่ถัดไปภายหลัง</string>
+  <string name="domain_issue_display_logic_source_in_repeat">ตรรกะการแสดงผลขึ้นอยู่กับ “%1$s” ซึ่งอยู่ในส่วนที่ทำซ้ำ</string>
+  <string name="domain_issue_section_display_logic_source_inside">ตรรกะการแสดงผลของส่วนไม่สามารถขึ้นอยู่กับ “%1$s” ซึ่งอยู่ภายในส่วนนี้ได้</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_display_logic_operator_not_applicable">“%1$s” ใช้กับ %2$s ไม่ได้</string>
+  <string name="domain_issue_display_logic_value_missing">ตรรกะการแสดงผลต้องมีค่าสำหรับเปรียบเทียบ</string>
+  <string name="domain_issue_display_logic_value_not_number">ค่าของตรรกะการแสดงผลต้องเป็นตัวเลข</string>
+  <string name="domain_issue_cascade_parent_deleted">ตัวกรองแบบลำดับขั้นอ้างอิงถึงคำถามที่ถูกลบแล้ว</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_later">ตัวกรองแบบลำดับขั้นขึ้นอยู่กับ “%1$s” ซึ่งอยู่ถัดไป</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_not_choice">คำถามหลักของตัวกรองแบบลำดับขั้น “%1$s” ต้องเป็นคำถามแบบตัวเลือก</string>
+  <!-- %1$s: comma-separated parent values set on choices; %2$s: name of the parent question. -->
+  <string name="domain_issue_cascade_choice_parent_value_unknown">ตัวเลือกที่ผูกกับ %1$s จะไม่แสดง: “%2$s” ไม่มีตัวเลือกนั้น</string>
+  <!-- %1$s: question label; %2$s: name of the "GPS or draw on map" option. "Available on web" is a form setting. -->
+  <string name="domain_issue_web_incompatible_geometry">“%1$s” ใช้ GPS เท่านั้น ซึ่งเว็บบันทึกไม่ได้ กรุณาเลือก “%2$s” หรือปิด “พร้อมใช้งานบนเว็บ”</string>
+  <string name="domain_issue_google_earth_incompatible_question">“%1$s” (%2$s) ไม่รองรับใน Google Earth กรุณาลบออก เปลี่ยนประเภทคำถาม หรือปิด “เปิดใช้ เปิดใน Google Earth”</string>
+  <!-- Form editor: validation rule issues of a question. -->
+  <string name="domain_issue_min_not_number">ค่าต่ำสุดต้องเป็นตัวเลข</string>
+  <string name="domain_issue_max_not_number">ค่าสูงสุดต้องเป็นตัวเลข</string>
+  <string name="domain_issue_min_more_than_max">ค่าต่ำสุดต้องไม่มากกว่าค่าสูงสุด</string>
+  <string name="domain_issue_min_length_invalid">ความยาวต่ำสุดต้องเป็นจำนวนเต็มตั้งแต่ 0 ขึ้นไป</string>
+  <string name="domain_issue_max_length_invalid">ความยาวสูงสุดต้องเป็นจำนวนเต็มตั้งแต่ 0 ขึ้นไป</string>
+  <string name="domain_issue_min_length_more_than_max">ความยาวต่ำสุดต้องไม่มากกว่าความยาวสูงสุด</string>
+  <string name="domain_issue_min_selections_invalid">จำนวนตัวเลือกต่ำสุดต้องเป็นจำนวนเต็มตั้งแต่ 0 ขึ้นไป</string>
+  <string name="domain_issue_max_selections_invalid">จำนวนตัวเลือกสูงสุดต้องเป็นจำนวนเต็มตั้งแต่ 0 ขึ้นไป</string>
+  <string name="domain_issue_min_selections_more_than_max">จำนวนตัวเลือกต่ำสุดต้องไม่มากกว่าจำนวนสูงสุด</string>
+  <string name="domain_issue_min_selections_more_than_choices">จำนวนตัวเลือกต่ำสุดมากกว่าจำนวนตัวเลือกที่มี</string>
+  <string name="domain_issue_custom_pattern_missing">กรอกรูปแบบที่กำหนดเอง</string>
+  <string name="domain_issue_custom_pattern_invalid">รูปแบบที่กำหนดเองไม่ถูกต้อง</string>
+  <string name="domain_issue_custom_pattern_quotes">รูปแบบที่กำหนดเองต้องไม่มีทั้ง ' และ " พร้อมกัน</string>
+  <string name="domain_issue_date_range_missing">เลือกวันที่เร็วที่สุดหรือช้าที่สุด</string>
+  <string name="domain_issue_date_range_reversed">วันที่เร็วที่สุดต้องไม่อยู่หลังวันที่ช้าที่สุด</string>
+  <!-- Form editor: summary of a map feature status rule's condition. -->
+  <string name="domain_status_rule_when_submitted">เมื่อส่งแบบฟอร์ม</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="domain_status_rule_min_submissions">
+    <item quantity="other">การส่งข้อมูลอย่างน้อย %1$d รายการ</item>
+  </plurals>
+  <string name="domain_status_rule_missing_question">ไม่มีคำถาม</string>
+  <!-- Placeholder for a property name in a status rule summary when none is chosen. -->
+  <string name="domain_status_rule_property_fallback">คุณสมบัติ</string>
+  <!-- Status rule condition without a value. %1$s: question or property name; %2$s: operator (e.g. "is answered"). -->
+  <string name="domain_status_rule_condition">%1$s %2$s</string>
+  <!-- Status rule condition with a value. %1$s: question or property name; %2$s: operator (e.g. "equals"); %3$s: value. -->
+  <string name="domain_status_rule_condition_value">%1$s %2$s “%3$s”</string>
+  <!-- Form editor: issues with how a form updates map features or table rows. -->
+  <string name="domain_issue_save_to_target_missing">เลือกชั้นข้อมูลแผนที่หรือตารางข้อมูลที่แบบฟอร์มนี้อัปเดต</string>
+  <!-- %1$s: ID of the deleted map layer or data table. -->
+  <string name="domain_issue_save_to_target_deleted">ไม่มีชั้นข้อมูลแผนที่หรือตารางข้อมูล “%1$s” แล้ว</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_map_layer">ชื่อ “%1$s” สงวนไว้สำหรับฟีเจอร์แผนที่ที่กำลังอัปเดต</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_data_table">ชื่อ “%1$s” สงวนไว้สำหรับระเบียนที่กำลังอัปเดต</string>
+  <string name="domain_issue_save_to_id_question_missing_map_layer">เลือกคำถามที่ระบุฟีเจอร์แผนที่ที่จะอัปเดต</string>
+  <string name="domain_issue_save_to_id_question_missing_data_table">เลือกคำถามที่ระบุระเบียนที่จะอัปเดต</string>
+  <string name="domain_issue_save_to_match_property_missing">เลือกคุณสมบัติที่จะใช้จับคู่กับคำตอบ</string>
+  <string name="domain_issue_save_to_geometry_question_required">มีเพียงคำถามประเภทจุด เส้น หรือรูปหลายเหลี่ยมเท่านั้นที่อัปเดตรูปทรงเรขาคณิตของฟีเจอร์แผนที่ได้</string>
+  <!-- %1$s: property name; %2$s: name of the map layer or data table. -->
+  <string name="domain_issue_save_to_unknown_property">อัปเดต “%1$s” ซึ่งไม่ใช่คุณสมบัติของ %2$s</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_not_updatable">แบบฟอร์มอัปเดต “%1$s” ไม่ได้</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_already_updated">มีคำถามอื่นอัปเดต “%1$s” อยู่แล้ว</string>
+  <string name="domain_issue_save_to_no_fields">เลือกฟิลด์ที่จะอัปเดตอย่างน้อยหนึ่งฟิลด์</string>
+  <string name="domain_issue_save_to_type_mismatch">คำตอบประเภท %1$s อาจไม่ตรงกับพร็อพเพอร์ตี้ประเภท %2$s “%3$s”</string>
+  <string name="domain_display_logic_source_deleted">อ้างอิงถึงคำถามที่ถูกลบแล้ว</string>
+  <string name="domain_display_logic_shown_if_answered">แสดงเฉพาะเมื่อตอบ “%1$s” แล้ว</string>
+  <string name="domain_display_logic_shown_if">แสดงเฉพาะเมื่อ “%1$s” %2$s %3$s</string>
+  <string name="domain_issue_status_default_label_missing">กรอกป้ายกำกับสถานะเริ่มต้น</string>
+  <string name="domain_issue_status_rule_label_missing">กฎสถานะทุกข้อต้องมีป้ายกำกับสถานะ</string>
+  <string name="domain_issue_status_rule_min_submissions">จำนวนการส่งข้อมูลต้องมีอย่างน้อย 1</string>
+  <string name="domain_issue_status_rule_question_missing">เลือกคำถามสำหรับกฎสถานะ</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_status_rule_operator_not_applicable">“%1$s” ใช้กับ %2$s ในกฎสถานะไม่ได้</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_missing">กฎสถานะของ “%1$s” ต้องมีค่าสำหรับเปรียบเทียบ</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_not_number">ค่าของกฎสถานะสำหรับ “%1$s” ต้องเป็นตัวเลข</string>
+  <string name="domain_issue_status_rule_property_missing_map_layer">เลือกคุณสมบัติของฟีเจอร์แผนที่สำหรับกฎสถานะ</string>
+  <string name="domain_issue_status_rule_property_missing_data_table">เลือกคุณสมบัติของระเบียนสำหรับกฎสถานะ</string>
+  <string name="domain_issue_status_rule_property_missing">เลือกคุณสมบัติของฟีเจอร์สำหรับกฎสถานะ</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_unwritten">ไม่มีคำถามใดเขียนค่าลงในคุณสมบัติ “%1$s” สำหรับกฎสถานะ</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: property data type in lowercase (e.g. "text"); %3$s: property name. -->
+  <string name="domain_issue_status_rule_property_operator_not_applicable">“%1$s” ใช้กับคุณสมบัติประเภท %2$s “%3$s” ไม่ได้</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_missing">กฎสถานะของคุณสมบัติ “%1$s” ต้องมีค่าสำหรับเปรียบเทียบ</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_not_number">ค่าของกฎสถานะสำหรับคุณสมบัติ “%1$s” ต้องเป็นตัวเลข</string>
+  <!-- Form editor: warnings about a question's link to a standard field (concept). -->
+  <!-- %1$s: ID of a standard field, e.g. "eudr.commodity". -->
+  <string name="domain_warning_concept_not_in_dictionary">ลิงก์กับ “%1$s” ซึ่งไม่อยู่ในพจนานุกรมของแบบสำรวจนี้</string>
+  <!-- %1$s: standard field name; %2$s: its answer type in lowercase (e.g. "decimal"); %3$s: the question's type in lowercase (e.g. "short text"). -->
+  <string name="domain_warning_concept_type_mismatch">“%1$s” ต้องการคำตอบประเภท %2$s แต่คำถามนี้เป็นประเภท %3$s</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_deprecated">“%1$s” เลิกใช้แล้ว กรุณาลิงก์กับฟิลด์มาตรฐานที่ใช้อยู่ปัจจุบัน</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_linked_twice">“%1$s” ลิงก์กับคำถามมากกว่าหนึ่งข้อในแบบฟอร์มนี้</string>
+  <!-- %1$d: number of choices; %2$s: standard field name; %3$s: comma-separated choice labels. -->
+  <plurals name="domain_warning_concept_unmapped_choices">
+    <item quantity="other">จับคู่ตัวเลือก %1$d รายการกับค่าของ “%2$s” เพื่อให้รวมยอดคำตอบได้: %3$s</item>
+  </plurals>
+  <!-- Survey editor: issues in a map layer or data table. -->
+  <string name="domain_issue_dataset_id_invalid">รหัสต้องขึ้นต้นด้วยตัวอักษร และใช้ได้เฉพาะตัวอักษร ตัวเลข _ . -</string>
+  <!-- %1$s: the map layer or data table ID. -->
+  <string name="domain_issue_dataset_id_duplicate">รหัส “%1$s” ถูกใช้โดยชุดข้อมูลอื่นในแบบสำรวจนี้</string>
+  <!-- %1$s: property name (an identifier). -->
+  <string name="domain_issue_dataset_property_name_invalid">คุณสมบัติ “%1$s” มีชื่อไม่ถูกต้อง</string>
+  <string name="domain_issue_dataset_property_name_duplicate">ชื่อคุณสมบัติต้องไม่ซ้ำกัน</string>
+  <string name="domain_issue_dataset_key_property_missing">เลือกคุณสมบัติคีย์</string>
+  <string name="domain_issue_dataset_label_property_missing">เลือกคุณสมบัติป้ายกำกับ</string>
+  <!-- %1$s: row or map feature name. -->
+  <string name="domain_issue_dataset_row_key_missing">“%1$s” ไม่มีคีย์</string>
+  <!-- %1$s: duplicated key value. -->
+  <string name="domain_issue_dataset_row_key_duplicate">คีย์ “%1$s” ซ้ำกัน</string>
+  <!-- %1$s: row or map feature name; %2$s: property label. -->
+  <string name="domain_issue_dataset_row_value_missing">“%1$s” ไม่มี %2$s</string>
+  <!-- %1$s: row or map feature name; %2$s: property label; %3$s: expected type in lowercase (e.g. "integer"). -->
+  <string name="domain_issue_dataset_row_value_wrong_type">“%1$s”: %2$s ต้องเป็น %3$s</string>
+  <string name="domain_issue_sharing_organization_missing">“%1$s” ต้องมีองค์กร เลือกองค์กรในรายละเอียดแบบสำรวจ หรือเลือกตัวเลือกการเข้าถึงทั่วไปอื่น</string>
+  <!-- %1$s: map feature name; %2$d: minimum number of vertices. -->
+  <plurals name="domain_issue_dataset_row_geometry_too_short">
+    <item quantity="other">“%1$s” ต้องมีจุดยอดอย่างน้อย %2$d จุด</item>
+  </plurals>
+  <!-- Quota and budget limits: why an action is blocked. -->
+  <!-- %1$d: surveys the owner has; %2$d: the limit. -->
+  <string name="domain_quota_max_surveys_per_owner">ถึงขีดจำกัดจำนวนแบบสำรวจสูงสุดต่อเจ้าของแล้ว (%1$d จาก %2$d) กรุณาอัปเกรดระดับหรือลบแบบสำรวจเก่า</string>
+  <!-- %1$s: budget amount in US dollars, e.g. "$50.00". -->
+  <string name="domain_quota_org_budget_exceeded">การสร้างแบบสำรวจเพิ่มจะเกินเพดานงบประมาณรายเดือนขององค์กร (%1$s)</string>
+  <!-- %1$s: estimated cost in US dollars; %2$s: budget in US dollars. -->
+  <string name="domain_quota_survey_budget_exceeded">ค่าใช้จ่ายรายเดือนโดยประมาณของการออกแบบแบบสำรวจ (%1$s) เกินเพดานงบประมาณรายเดือนของแบบสำรวจ (%2$s)</string>
+  <!-- %1$d: number of forms; %2$d: the limit; %3$s: quota tier name (e.g. "Basic"). -->
+  <plurals name="domain_quota_max_forms">
+    <item quantity="other">แบบสำรวจมีแบบฟอร์ม %1$d รายการ ซึ่งเกินขีดจำกัด %2$d รายการของระดับ %3$s</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_questions">
+    <item quantity="other">แบบฟอร์ม “%1$s” มีคำถาม %2$d ข้อ ซึ่งเกินขีดจำกัด %3$d ข้อ</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of photo questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_photo_questions">
+    <item quantity="other">แบบฟอร์ม “%1$s” มีคำถามรูปภาพ %2$d ข้อ ซึ่งเกินขีดจำกัด %3$d ข้อ</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features; %2$d: the limit. -->
+  <plurals name="domain_quota_max_predefined_entities">
+    <item quantity="other">แบบสำรวจมีฟีเจอร์แผนที่ที่กำหนดไว้ล่วงหน้า %1$d รายการ ซึ่งเกินขีดจำกัด %2$d รายการ</item>
+  </plurals>
+  <!-- %1$d: number of generated sample plots; %2$d: the limit. -->
+  <plurals name="domain_quota_max_generated_entities">
+    <item quantity="other">การออกแบบตัวอย่างสร้างแปลง %1$d แปลง ซึ่งเกินขีดจำกัด %2$d แปลง</item>
+  </plurals>
+  <!-- %1$d: number of vertices of the survey area; %2$d: the limit. -->
+  <plurals name="domain_quota_max_area_vertices">
+    <item quantity="other">พื้นที่สำรวจมีจุดยอด %1$d จุด ซึ่งเกินขีดจำกัด %2$d จุด</item>
+  </plurals>
+  <plurals name="domain_quota_max_dataset_polygon_vertices">
+    <item quantity="other">ชุดข้อมูล “%1$s” มีรูปหลายเหลี่ยมที่มีจุดยอด %2$d จุด ซึ่งเกินขีดจำกัด %3$d จุด</item>
+  </plurals>
+  <!-- %1$d: number of collaborators; %2$d: the limit. -->
+  <plurals name="domain_quota_max_collaborators">
+    <item quantity="other">รายการควบคุมการเข้าถึงมีผู้ทำงานร่วมกัน %1$d คน ซึ่งเกินขีดจำกัด %2$d คน</item>
+  </plurals>
+  <!-- %1$d: number of surveys; %2$d: the limit. -->
+  <plurals name="domain_quota_max_surveys_per_user">
+    <item quantity="other">ผู้ใช้กำลังใช้งานแบบสำรวจ %1$d รายการ ซึ่งเกินขีดจำกัด %2$d รายการ</item>
+  </plurals>
+  <!-- %1$d: number of map features the user added in the field; %2$d: the limit. -->
+  <plurals name="domain_quota_max_adhoc_entities">
+    <item quantity="other">ผู้ใช้สร้างฟีเจอร์แผนที่ระหว่างภาคสนาม %1$d รายการ ซึ่งถึงขีดจำกัด %2$d รายการแล้ว</item>
+  </plurals>
+  <!-- %1$d: number of submissions; %2$d: the limit. -->
+  <plurals name="domain_quota_max_submissions_per_entity">
+    <item quantity="other">ผู้ใช้บันทึกการส่งข้อมูลสำหรับฟีเจอร์แผนที่นี้ %1$d รายการ ซึ่งถึงขีดจำกัด %2$d รายการแล้ว</item>
+  </plurals>
+  <!-- Notices shown after a data collector submits a form. -->
+  <!-- %1$s: name of the new map feature. "save_to" is a technical term; keep it as is. -->
+  <string name="domain_notice_entity_created">สร้างฟีเจอร์แผนที่ใหม่ “%1$s” ผ่าน save_to แล้ว (✓ เสร็จสมบูรณ์)</string>
+  <!-- %1$s: form title; %2$s: GPS coordinates. -->
+  <string name="domain_notice_standalone_submitted">ส่งบันทึกภาคสนามแบบเดี่ยว “%1$s” แล้ว (%2$s)</string>
+  <!-- %1$s: form title; %2$s: map feature name; %3$s: previous status symbol (e.g. ○); %4$s: new status symbol (e.g. ◐); %5$s: new status label (e.g. "In progress"). -->
+  <string name="domain_notice_entity_submitted">ส่ง “%1$s” สำหรับ %2$s แล้ว (เครื่องหมาย: %3$s → %4$s %5$s)</string>
+  <!-- Geometry summary of a polygon map feature. %1$s: area with unit (e.g. "1.2 ha"); %2$s: perimeter length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_polygon">รูปหลายเหลี่ยม • %1$s, เส้นรอบรูป %2$s</string>
+  <!-- Geometry summary of a line map feature. %1$s: length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_line">เส้น • %1$s</string>
+  <!-- Geometry summary of a point map feature. %1$s: coordinates. -->
+  <string name="domain_geometry_summary_point">จุด • %1$s</string>
+  <!-- PDF reports of map features and submissions. -->
+  <!-- Summary of a generated PDF file. %1$d: number of pages; %2$s: file size (e.g. "14 KB"). -->
+  <plurals name="domain_pdf_summary">
+    <item quantity="other">%1$d หน้า • %2$s</item>
+  </plurals>
+  <!-- PDF page footer. %1$d: page number; %2$d: number of pages. -->
+  <string name="domain_pdf_page_of">หน้า %1$d จาก %2$d</string>
+  <string name="domain_pdf_running_header">Open Foris Collect One • %1$s</string>
+  <!-- Caption under a point's location figure. %1$s: latitude; %2$s: longitude. -->
+  <string name="domain_pdf_location_point">ตำแหน่ง %1$s, %2$s</string>
+  <!-- Caption under a location figure. %1$s/%2$s: min/max latitude; %3$s/%4$s: min/max longitude. "WGS 84" is a coordinate system name. -->
+  <string name="domain_pdf_bounds">ขอบเขต: ละติจูด %1$s ถึง %2$s, ลองจิจูด %3$s ถึง %4$s (WGS 84)</string>
+  <!-- PDF footer of a map feature report. %1$s: map feature type (e.g. "Coffee Parcel"); %2$s: date and time. -->
+  <string name="domain_pdf_entity_footer">รายงาน %1$s • สร้างเมื่อ %2$s</string>
+  <!-- PDF footer of a submission report. %1$s: date and time. -->
+  <string name="domain_pdf_submission_footer">รายงานการส่งข้อมูล • สร้างเมื่อ %1$s</string>
+  <!-- PDF subtitle of a submission report. %1$s: date and time collected. -->
+  <string name="domain_pdf_submission_subtitle">การส่งข้อมูล • %1$s</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_details">รายละเอียด</string>
+  <!-- PDF field label: map layer of a map feature. -->
+  <string name="domain_pdf_layer">ชั้นข้อมูล</string>
+  <!-- PDF field label: geometry summary of a map feature. -->
+  <string name="domain_pdf_geometry">รูปทรงเรขาคณิต</string>
+  <!-- PDF field label: geographic identifier of a plot. -->
+  <string name="domain_pdf_geo_id">GeoID</string>
+  <string name="domain_pdf_coordinates">พิกัด</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_location">ตำแหน่ง</string>
+  <!-- PDF field label of one vertex of a line or polygon. %1$d: vertex number. -->
+  <string name="domain_pdf_vertex">จุดยอด %1$d</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_properties">คุณสมบัติ</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_submissions">การส่งข้อมูล</string>
+  <string name="domain_pdf_no_submissions">ยังไม่มีการบันทึกการส่งข้อมูล</string>
+  <!-- %1$s: data collector name; %2$s: form version. -->
+  <string name="domain_pdf_collected_by">เก็บโดย %1$s • แบบฟอร์มเวอร์ชัน %2$s</string>
+  <!-- Map feature a submission is attached to. %1$s: map feature name; %2$s: map feature type; %3$s: GeoID. -->
+  <string name="domain_pdf_entity_target">%1$s (%2$s • GeoID %3$s)</string>
+  <!-- %1$s: coordinates where the submission was collected. -->
+  <string name="domain_pdf_no_attached_feature_at">ไม่มีฟีเจอร์แผนที่ที่แนบ (%1$s)</string>
+  <string name="domain_pdf_no_attached_feature">ไม่มีฟีเจอร์แผนที่ที่แนบ</string>
+  <string name="domain_pdf_data_collector">ผู้เก็บข้อมูล</string>
+  <!-- PDF field label: when a submission was collected. -->
+  <string name="domain_pdf_collected">เก็บเมื่อ</string>
+  <string name="domain_pdf_form_version">เวอร์ชันแบบฟอร์ม</string>
+  <!-- PDF section heading: answers of a submission. -->
+  <string name="domain_pdf_responses">คำตอบ</string>
+  <string name="domain_pdf_no_responses">ไม่มีการบันทึกคำตอบ</string>
+  <!-- Status chip of a group of map features in a map cluster, by the marker symbol they share. -->
+  <string name="domain_cluster_marker_status_completed">เสร็จสิ้นแล้ว</string>
+  <string name="domain_cluster_marker_status_in_progress">กำลังดำเนินการ</string>
+  <string name="domain_cluster_marker_status_pending">รอดำเนินการ</string>
+  <string name="domain_cluster_marker_status_no_marker_symbol">ไม่มีสัญลักษณ์เครื่องหมาย</string>
+  <string name="domain_cluster_marker_status_other_symbol">สัญลักษณ์ %1$s</string>
+</resources>

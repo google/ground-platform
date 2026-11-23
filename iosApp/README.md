@@ -22,50 +22,73 @@ Collect One.
 ## Architecture
 
 Like [`../androidApp/`](../androidApp/), `iosApp` is a thin native host. It
-embeds the `GroundMobile` framework compiled from [`../shared/mobile/`](../shared/mobile/)
+embeds the `AppMobile` framework compiled from [`../shared/mobile/`](../shared/mobile/)
 and mounts `MainViewController()` inside a SwiftUI `UIViewControllerRepresentable`
 view (`ContentView.swift`).
 
 ## Contents
 
 -   **`iosApp/iOSApp.swift`**: `@main` SwiftUI application lifecycle entry
-    point.
+    point and `UIApplicationDelegate` adapter for silent APNs/FCM remote
+    notifications and `BGAppRefreshTask` catch-up sync.
 -   **`iosApp/ContentView.swift`**: SwiftUI host view wrapping
-    `MainViewController()` from `GroundMobile.framework`.
--   **`iosApp/GroundMapboxView.swift`**: the Mapbox map behind `GroundMap`
+    `MainViewController()` from `AppMobile.framework`.
+-   **`iosApp/AppMapboxView.swift`**: the Mapbox map behind `AppMap`
     (`shared/map`). Implements the Kotlin `MapboxIosView` interface on the
     Mapbox Maps SDK for iOS; registered in `iOSApp.swift`.
--   **`iosApp/Info.plist`**: iOS bundle metadata, location/camera usage
-    descriptions, and the Mapbox access token (`MBXAccessToken`).
+-   **`iosApp/Info.plist`**: iOS bundle metadata, background modes
+    (`remote-notification`, `fetch`), `BGTaskSchedulerPermittedIdentifiers`,
+    `USER_DATA_SERVICE_URL`, and the Mapbox access token (`MBXAccessToken`).
 -   **`project.yml`**: XcodeGen configuration for generating `iosApp.xcodeproj`.
 
 ## How to Build and Run (macOS only)
 
-> [!NOTE]
-> iOS work is paused. `shared/mobile` now depends on `shared/app`, which has no
-> iOS targets yet, so the `-Pground.ios=true` builds below fail until it does.
-
 1.  **Build the Kotlin native framework**:
-    You need to compile the Kotlin multiplatform code into an iOS framework first.
+    Compile the Kotlin multiplatform code into an iOS framework first (`-Pcollectone.ios=true` enables the iOS targets in `shared/app` and `shared/mobile`):
     ```sh
-    cd ../shared/mobile
-    ./gradlew -Pground.ios=true linkDebugFrameworkIosSimulatorArm64 --offline
+    # From the repository root:
+    ./gradlew -Pcollectone.ios=true :shared:mobile:linkDebugFrameworkIosSimulatorArm64
     ```
 2.  **Generate the Xcode project**:
     Use [XcodeGen](https://github.com/yonaskolb/XcodeGen) to generate the project file.
     ```sh
-    cd ../iosApp
+    cd iosApp
     xcodegen generate
     ```
 3.  **Open in Xcode**:
     ```sh
     open iosApp.xcodeproj
     ```
-    Select a simulator (e.g., iPhone 15 Pro) and run (Cmd+R).
+    Set `USER_DATA_SERVICE_URL` (e.g., `http://localhost:8080`) in the scheme's environment variables or Xcode build settings, select a simulator (e.g., iPhone 15 Pro), and run (Cmd+R).
+
+### Build a Development `.ipa` for the Mobile Web Workbench
+
+To package a development `.ipa` (and optional Apple OTA manifest `collect-one-ios.plist` served at `/collect-one-ios.html` in the mobile web workbench):
+
+```sh
+# Ad-hoc signed build for one-tap Safari install over HTTPS:
+./iosApp/scripts/build-ipa.sh \
+  --method ad-hoc \
+  --team-id <APPLE_TEAM_ID> \
+  --stage-base-url https://mobile.example.org
+
+# Unsigned build (no Apple Developer certificate; sideload via AltStore, SideStore, Sideloadly, or Xcode):
+./iosApp/scripts/build-ipa.sh --method unsigned
+```
+
+Output: `iosApp/build/outputs/ipa/collect-one.ipa` (staged automatically by the Firebase deploy scripts when present).
+
+## Push Notifications & Background Sync
+
+`AppMobileSyncIos` (`shared/mobile/src/iosMain/`) bridges iOS push notifications and background tasks into the shared `SyncCoordinator`:
+
+-   **Topic subscriptions (`IosPushTopicBridge`)**: When `FirebaseMessaging` is configured in the host app, assign an `IosPushTopicBridge` implementation to `AppMobileSyncIos.shared.topicBridge` at startup. `SurveyTopicSubscriptionManager` automatically subscribes downloaded surveys to `survey_<survey_id>_def` and `survey_<survey_id>_entities` and suppresses idle 3-second foreground polling. Without a bridge, the app automatically falls back to foreground polling.
+-   **Silent push wakeups (`content-available: 1`)**: `AppDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:)` forwards the data payload (`survey_id`, `scope`, `record_version`) to `AppMobileSyncIos.shared.handleRemoteNotification`, which runs a scoped delta sync before invoking the UIKit completion handler.
+-   **Opportunistic background refresh (`BGAppRefreshTask`)**: Registered for `org.openforis.collectone.v2.sync.refresh` and forwarded to `AppMobileSyncIos.shared.runBackgroundCatchUp`.
 
 ## Mapbox
 
-Maps in the shared UI are drawn by `GroundMap` from
+Maps in the shared UI are drawn by `AppMap` from
 [`../shared/map/`](../shared/map/). On iOS it renders with the Mapbox Maps SDK
 for iOS, which XcodeGen adds as a Swift package (`project.yml`, pinned to the
 same version as the Android SDK in `shared/map`).
@@ -80,19 +103,19 @@ the work is split:
     diff, follows `MapCameraState`, and handles all gestures in Compose. It
     hosts the native view in a non-interactive `UIKitView`, so touches always
     go to Compose. SVG icons are rasterized to PNG with Skia.
--   **Swift** (`iosApp/GroundMapboxView.swift`): implements the small Kotlin
+-   **Swift** (`iosApp/AppMapboxView.swift`): implements the small Kotlin
     `MapboxIosView` interface (`MapboxIos.kt`). Each method passes JSON straight
     to one Mapbox call (`loadStyle`, `addSource`, `addLayer`, `addImage`,
     `setCamera`, `queryRenderedFeatures`) and logs failures instead of
     throwing. It also forwards taps on Mapbox's attribution button, which the
     Compose gesture layer would otherwise swallow.
 -   **Registration**: `iOSApp.swift` sets
-    `GroundMapIos.shared.viewFactory = GroundMapboxViewFactory()` at launch.
-    The `GroundMobile` framework exports `shared/map` so Swift can see these
+    `AppMapIos.shared.viewFactory = AppMapboxViewFactory()` at launch.
+    The `AppMobile` framework exports `shared/map` so Swift can see these
     types (`shared/mobile/build.gradle.kts`).
 
 If no factory is registered, or the factory returns `nil` because there is no
-token, `GroundMap` falls back to its preview renderer: the app still runs, just
+token, `AppMap` falls back to its preview renderer: the app still runs, just
 without basemap imagery.
 
 ### Access token
@@ -113,8 +136,10 @@ Kotlin/Native can compile iOS klibs on Linux, which type-checks the Kotlin
 renderer and its UIKit and Skia calls (it can't link the framework):
 
 ```sh
-cd ../shared/map && ./gradlew compileKotlinIosSimulatorArm64 compileKotlinIosArm64
-cd ../mobile && ./gradlew -Pground.ios=true compileKotlinIosSimulatorArm64
+# From the repository root:
+./gradlew :shared:map:compileKotlinIosSimulatorArm64 :shared:map:compileKotlinIosArm64
+./gradlew -Pcollectone.ios=true :shared:app:compileKotlinIosSimulatorArm64 :shared:app:compileKotlinIosArm64
+./gradlew -Pcollectone.ios=true :shared:mobile:compileKotlinIosSimulatorArm64 :shared:mobile:compileKotlinIosArm64
 ```
 
 ### Status and first run on a Mac
@@ -124,16 +149,16 @@ yet:
 
 1.  **Regenerate the Xcode project.** The committed
     `iosApp.xcodeproj/project.pbxproj` predates the Mapbox package and
-    `GroundMapboxView.swift`; run `xcodegen generate` and commit the result.
-2.  **Compile the Swift.** `GroundMapboxView.swift` targets the Mapbox Maps SDK
+    `AppMapboxView.swift`; run `xcodegen generate` and commit the result.
+2.  **Compile the Swift.** `AppMapboxView.swift` targets the Mapbox Maps SDK
     for iOS v11 but hasn't been built. The APIs most likely to need small fixes
     are `MapboxMap.loadStyle(_:completion:)` (URL and JSON overloads),
     `QueriedRenderedFeature.layers`, and `ornaments.attributionButton`.
 3.  **Link the framework.** `linkDebugFrameworkIosSimulatorArm64` should now
-    export `shared/map`; check that Swift sees `GroundMapIos`,
+    export `shared/map`; check that Swift sees `AppMapIos`,
     `MapboxIosViewFactory`, and `MapboxIosView`. The first build after this
     change may need network access, so drop `--offline` if it fails.
-4.  **See a map.** No screen in `GroundMobileApp` uses `GroundMap` yet, so a
+4.  **See a map.** No screen in `MobileApp` uses `AppMap` yet, so a
     map only appears once one does. When it does, check that the basemap
     loads, Compose markers stay aligned while panning and zooming, feature
     taps are reported, and the attribution button opens Mapbox's dialog.

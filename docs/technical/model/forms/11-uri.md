@@ -38,12 +38,12 @@ or runtime sandbox:
 | `jr://file/<asset_path>.xml`             | Legacy XML resource (supported   |
 :                                          : for backward compatibility)      :
 
-In hosted, database-backed survey runtimes (such as Ground), dataset URIs like
-`jr://file-csv/<id>.csv` and `jr://file-geojson/<id>.geojson` act as logical
-serialization bindings for XForms round-tripping; at runtime, expressions
-referencing `instance('<id>')` resolve directly against the local indexed Entity
-Dataset (`EntityDatasetDef` / `EntityRecord`) without reading static files from
-disk.
+In hosted, database-backed survey runtimes (such as Collect One), dataset URIs
+like `jr://file-csv/<id>.csv` and `jr://file-geojson/<id>.geojson` act as
+logical serialization bindings for XForms round-tripping; at runtime,
+expressions referencing `instance('<id>')` resolve directly against the local
+indexed Entity Dataset (`EntityDatasetDef` / `EntityRecord`) without reading
+static files from disk.
 
 ## Virtual Endpoints
 

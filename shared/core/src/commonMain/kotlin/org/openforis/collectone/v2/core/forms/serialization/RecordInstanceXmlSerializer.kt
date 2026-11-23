@@ -38,14 +38,16 @@ import org.openforis.collectone.v2.core.forms.serialization.xml.XmlElement
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlParser
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlText
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlWriter
+import org.openforis.collectone.v2.core.forms.temporal.formatIsoInstantWithMillis
+import org.openforis.collectone.v2.core.forms.temporal.formatIsoTime
+import org.openforis.collectone.v2.core.forms.temporal.parseIsoOffsetSeconds
+import org.openforis.collectone.v2.core.forms.temporal.toCivilDate
 
 /**
  * Serializes and deserializes XForms submission instance XML (`<data id="...">...</data>`) to and
  * from `openforis.collectone.v1.forms.RecordInstance`.
  */
 internal object RecordInstanceXmlSerializer {
-
-  private data class CivilDate(val year: Int, val month: Int, val day: Int)
 
   private data class ParsedTimeAndOffset(val timePart: String, val offsetSeconds: Long)
 
@@ -580,12 +582,7 @@ internal object RecordInstanceXmlSerializer {
 
   // --- Date / Time / Instant Pure-Kotlin Formatting & Parsing ---
 
-  private fun formatDate(date: Date): String {
-    val y = date.year.toString().padStart(4, '0')
-    val m = date.month.toString().padStart(2, '0')
-    val d = date.day.toString().padStart(2, '0')
-    return "$y-$m-$d"
-  }
+  private fun formatDate(date: Date): String = date.toCivilDate().toIsoString()
 
   private fun parseDate(text: String): Date {
     val parts = text.trim().split('-')
@@ -599,17 +596,7 @@ internal object RecordInstanceXmlSerializer {
     )
   }
 
-  private fun formatTimeOfDay(time: TimeOfDay): String {
-    val h = time.hours.toString().padStart(2, '0')
-    val m = time.minutes.toString().padStart(2, '0')
-    val s = time.seconds.toString().padStart(2, '0')
-    return if (time.nanos > 0) {
-      val millis = (time.nanos / 1_000_000).toString().padStart(3, '0')
-      "$h:$m:$s.$millis"
-    } else {
-      "$h:$m:$s"
-    }
-  }
+  private fun formatTimeOfDay(time: TimeOfDay): String = formatIsoTime(time)
 
   private fun parseTimeOfDay(text: String): TimeOfDay {
     val clean = text.trim().substringBefore('Z').substringBefore('+').substringBefore('-')
@@ -625,43 +612,7 @@ internal object RecordInstanceXmlSerializer {
     return TimeOfDay(hours = hours, minutes = minutes, seconds = seconds, nanos = nanos)
   }
 
-  internal fun formatIsoInstant(instant: Instant): String {
-    val epochSec = instant.getEpochSecond()
-    val nano = instant.getNano()
-
-    val days = epochSec.floorDiv(86400L)
-    val remSec = epochSec.mod(86400L)
-    val hour = (remSec / 3600L).toInt()
-    val minute = ((remSec % 3600L) / 60L).toInt()
-    val second = (remSec % 60L).toInt()
-
-    val civil = civilFromDays(days)
-    val yearStr = civil.year.toString().padStart(4, '0')
-    val monthStr = civil.month.toString().padStart(2, '0')
-    val dayStr = civil.day.toString().padStart(2, '0')
-    val hourStr = hour.toString().padStart(2, '0')
-    val minStr = minute.toString().padStart(2, '0')
-    val secStr = second.toString().padStart(2, '0')
-
-    val millis = nano / 1_000_000
-    val fracStr = if (millis > 0) ".${millis.toString().padStart(3, '0')}" else ".000"
-    return "$yearStr-$monthStr-${dayStr}T$hourStr:$minStr:$secStr${fracStr}Z"
-  }
-
-  private fun civilFromDays(days: Long): CivilDate {
-    // Civil date from days since 1970-01-01 (Howard Hinnant algorithm)
-    val z = days + 719468L
-    val era = (if (z >= 0L) z else z - 146096L) / 146097L
-    val doe = z - era * 146097L
-    val yoe = (doe - doe / 1460L + doe / 36524L - doe / 146096L) / 365L
-    val y = yoe + era * 400L
-    val doy = doe - (365L * yoe + yoe / 4L - yoe / 100L)
-    val mp = (5L * doy + 2L) / 153L
-    val d = (doy - (153L * mp + 2L) / 5L + 1L).toInt()
-    val m = (mp + (if (mp < 10L) 3L else -9L)).toInt()
-    val year = (y + (if (m <= 2) 1L else 0L)).toInt()
-    return CivilDate(year, m, d)
-  }
+  internal fun formatIsoInstant(instant: Instant): String = formatIsoInstantWithMillis(instant)
 
   internal fun parseIsoInstant(text: String): Instant {
     val clean = text.trim()
@@ -674,7 +625,7 @@ internal object RecordInstanceXmlSerializer {
 
     val date = parseDate(datePart)
     val time = parseTimeOfDay(parsedTimeAndOffset.timePart)
-    val days = daysFromCivil(date.year, date.month, date.day)
+    val days = date.toCivilDate().toEpochDays()
     val totalSeconds =
       days * 86400L + time.hours * 3600L + time.minutes * 60L + time.seconds -
         parsedTimeAndOffset.offsetSeconds
@@ -691,10 +642,7 @@ internal object RecordInstanceXmlSerializer {
     if (signIdx > 0) {
       val sign = if (rawTimeAndZone[signIdx] == '+') 1 else -1
       val offsetStr = rawTimeAndZone.substring(signIdx + 1)
-      val offsetParts = offsetStr.split(':')
-      val offHours = offsetParts.getOrNull(0)?.toLongOrNull() ?: 0L
-      val offMins = offsetParts.getOrNull(1)?.toLongOrNull() ?: 0L
-      val offsetSeconds = sign * (offHours * 3600L + offMins * 60L)
+      val offsetSeconds = sign * parseIsoOffsetSeconds(offsetStr)
       return ParsedTimeAndOffset(rawTimeAndZone.substring(0, signIdx), offsetSeconds)
     }
     return ParsedTimeAndOffset(rawTimeAndZone, 0L)
@@ -705,18 +653,8 @@ internal object RecordInstanceXmlSerializer {
       return parseIsoInstant(text)
     }
     val date = parseDate(text)
-    val days = daysFromCivil(date.year, date.month, date.day)
+    val days = date.toCivilDate().toEpochDays()
     return ofEpochSecond(days * 86400L, 0L)
-  }
-
-  private fun daysFromCivil(year: Int, month: Int, day: Int): Long {
-    val y = year.toLong() - (if (month <= 2) 1L else 0L)
-    val era = (if (y >= 0L) y else y - 399L) / 400L
-    val yoe = y - era * 400L
-    val m = month.toLong()
-    val doy = (153L * (m + (if (m > 2L) -3L else 9L)) + 2L) / 5L + day - 1L
-    val doe = yoe * 365L + yoe / 4L - yoe / 100L + doy
-    return era * 146097L + doe - 719468L
   }
 
   private val WHITESPACE_REGEX = Regex("\\s+")

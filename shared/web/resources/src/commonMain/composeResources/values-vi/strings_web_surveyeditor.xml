@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions shared across the survey editor. -->
+  <string name="surveyeditor_cancel">Hủy</string>
+  <!-- Button that dismisses a dialog. -->
+  <string name="surveyeditor_close">Đóng</string>
+  <!-- Button that returns to the previous step of a dialog. -->
+  <string name="surveyeditor_back">Quay lại</string>
+  <string name="surveyeditor_import">Nhập</string>
+  <!-- Button that confirms importing a file. %1$s is the file name. -->
+  <string name="surveyeditor_import_file">Nhập %1$s</string>
+  <string name="surveyeditor_select">Chọn</string>
+  <string name="surveyeditor_description">Mô tả</string>
+  <string name="surveyeditor_clear_search">Xóa nội dung tìm kiếm</string>
+  <string name="surveyeditor_delete">Xóa</string>
+  <string name="surveyeditor_done">Xong</string>
+  <!-- Header button that saves edits of a draft survey. -->
+  <string name="surveyeditor_save_changes">Lưu thay đổi</string>
+  <!-- Header button that publishes edits of an already published survey again. -->
+  <string name="surveyeditor_republish">Xuất bản lại</string>
+  <string name="surveyeditor_read_only_closed">Khảo sát này đã đóng. Hãy mở lại để thực hiện thay đổi.</string>
+  <string name="surveyeditor_read_only_archived">Khảo sát này đã được lưu trữ. Hãy mở lại để thực hiện thay đổi.</string>
+  <string name="surveyeditor_survey_area_required">Bắt buộc phải có khu vực khảo sát.</string>
+  <!-- Notice after removing the survey's organization. %1$s is the name of the general access option (e.g. Restricted). -->
+  <string name="surveyeditor_access_changed_no_organization">Quyền truy cập chung đã được đổi thành "%1$s" vì khảo sát không còn thuộc về tổ chức nào.</string>
+
+  <!-- Sharing: errors when inviting a person or accepting an invite. -->
+  <string name="surveyeditor_invite_invalid_email">Hãy nhập địa chỉ email hợp lệ.</string>
+  <string name="surveyeditor_invite_is_owner">Đó là chủ sở hữu khảo sát.</string>
+  <string name="surveyeditor_invite_enter_name">Hãy nhập tên.</string>
+  <string name="surveyeditor_invite_not_invited">Chưa được mời.</string>
+  <string name="surveyeditor_invite_already_joined">Đã tham gia.</string>
+
+  <!-- Data table import: how numeric dates like 03/04/2025 are read. -->
+  <string name="surveyeditor_date_order_day_first">Ngày trước</string>
+  <string name="surveyeditor_date_order_month_first">Tháng trước</string>
+  <!-- Data table import notes shown before importing a CSV file. -->
+  <string name="surveyeditor_import_file_empty">Tệp trống.</string>
+  <string name="surveyeditor_import_no_data_rows">Tệp có hàng tiêu đề nhưng không có hàng dữ liệu nào.</string>
+  <plurals name="surveyeditor_import_ragged_rows">
+    <item quantity="other">%1$d hàng có số cột khác với hàng tiêu đề. Các ô còn thiếu sẽ để trống và các ô thừa sẽ bị bỏ.</item>
+  </plurals>
+  <!-- "id" is the literal CSV column name; "Row ID" is the name of the column that is added. -->
+  <string name="surveyeditor_import_id_column_not_unique">Cột id có giá trị trống hoặc trùng lặp, nên một cột Row ID mới sẽ được thêm.</string>
+  <!-- %1$s is a comma-separated list of quoted column names; %2$s is a date pattern such as DD/MM/YYYY. -->
+  <string name="surveyeditor_import_ambiguous_dates">Ngày trong %1$s có thể là ngày trước hoặc tháng trước. Chúng sẽ được đọc theo dạng %2$s.</string>
+
+  <!-- Sample plots: why plots can't be generated. -->
+  <string name="surveyeditor_sampling_area_missing">Hãy đặt khu vực khảo sát trong Chi tiết khảo sát, hoặc dùng một lớp bản đồ đa giác làm các tầng.</string>
+  <string name="surveyeditor_sampling_strata_deleted">Lớp bản đồ dùng làm tầng đã bị xóa. Hãy chọn lớp khác.</string>
+  <string name="surveyeditor_sampling_strata_not_polygon">Các tầng phải lấy từ một lớp bản đồ đa giác.</string>
+  <!-- %1$s is the name of a map layer. -->
+  <string name="surveyeditor_sampling_strata_no_polygons">"%1$s" chưa có đa giác nào. Hãy thêm đa giác để dùng lớp này làm các tầng.</string>
+  <string name="surveyeditor_sampling_cant_generate_design">Không thể tạo thiết kế này.</string>
+  <!-- %1$s is a technical error message. -->
+  <string name="surveyeditor_sampling_generate_failed_reason">Không thể tạo lô mẫu: %1$s</string>
+  <string name="surveyeditor_sampling_generate_failed">Không thể tạo lô mẫu. Hãy kiểm tra thiết kế và thử lại.</string>
+  <string name="surveyeditor_sampling_no_plots_fit">Không có lô mẫu nào vừa trong khu vực. Hãy thử khoảng cách hoặc kích thước lô nhỏ hơn, hoặc khu vực lớn hơn.</string>
+  <string name="surveyeditor_sampling_no_design">Lớp bản đồ này không có thiết kế lấy mẫu.</string>
+  <string name="surveyeditor_sampling_already_generating">Lô mẫu đang được tạo.</string>
+  <string name="surveyeditor_sampling_layer_missing">Lớp bản đồ này không còn tồn tại.</string>
+  <!-- %1$d is the number of submissions. -->
+  <plurals name="surveyeditor_regenerate_blocked">
+    <item quantity="other">Tính năng tạo lại đã bị tắt vì có %1$d bài gửi tham chiếu đến các lô mẫu này. Để thử thiết kế khác, hãy thêm một lớp bản đồ lô mẫu mới.</item>
+  </plurals>
+
+  <!-- Survey editor page: header, lifecycle, navigation, survey details, sharing. -->
+  <!-- Survey editor page: header. -->
+  <!-- Fallback title for a survey without a title. -->
+  <string name="surveyeditor_untitled_survey">Khảo sát chưa đặt tên</string>
+  <!-- Header context label identifying the survey editor page. -->
+  <string name="surveyeditor_header_survey_editor">Trình chỉnh sửa khảo sát</string>
+  <!-- Header status for a draft survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_save">
+    <item quantity="other">Sửa %1$d vấn đề để lưu</item>
+  </plurals>
+  <!-- Header status for a published survey with validation issues. %1$d is the number of issues. -->
+  <plurals name="surveyeditor_header_fix_issues_to_publish">
+    <item quantity="other">Sửa %1$d vấn đề để xuất bản</item>
+  </plurals>
+  <string name="surveyeditor_header_unsaved_changes">Thay đổi chưa lưu</string>
+  <string name="surveyeditor_header_unpublished_changes">Thay đổi chưa được xuất bản</string>
+  <string name="surveyeditor_header_draft_saved">Đã lưu bản nháp</string>
+  <string name="surveyeditor_header_all_changes_published">Đã xuất bản tất cả thay đổi</string>
+  <!-- Button that discards pending survey edits. -->
+  <string name="surveyeditor_header_discard">Hủy bỏ</string>
+  <string name="surveyeditor_header_discard_unsaved_title">Hủy bỏ các thay đổi chưa lưu?</string>
+  <string name="surveyeditor_header_discard_unpublished_title">Hủy bỏ các thay đổi chưa xuất bản?</string>
+  <string name="surveyeditor_header_discard_unsaved_message">Các thay đổi bạn thực hiện kể từ lần lưu bản nháp gần nhất sẽ bị mất.</string>
+  <string name="surveyeditor_header_discard_unpublished_message">Các thay đổi bạn thực hiện kể từ lần xuất bản khảo sát gần nhất sẽ bị mất. Người thu thập dữ liệu vẫn sẽ thấy phiên bản đã xuất bản.</string>
+  <string name="surveyeditor_header_keep_editing">Tiếp tục chỉnh sửa</string>
+  <string name="surveyeditor_working_copy_prompt_title">Tiếp tục chỉnh sửa bản nháp chưa lưu?</string>
+  <string name="surveyeditor_working_copy_prompt_draft_message">Bạn có các thay đổi chưa lưu từ phiên trước trong bản nháp khảo sát này. Bạn có muốn tiếp tục chỉnh sửa bản nháp chưa lưu hay hủy bỏ các thay đổi đó?</string>
+  <string name="surveyeditor_working_copy_prompt_published_message">Bạn có các thay đổi chưa xuất bản từ phiên trước trong khảo sát này. Bạn có muốn tiếp tục chỉnh sửa bản nháp chưa lưu hay hủy bỏ các thay đổi đó?</string>
+  <string name="surveyeditor_working_copy_continue">Tiếp tục chỉnh sửa</string>
+  <string name="surveyeditor_working_copy_discard">Hủy bỏ bản nháp</string>
+
+  <!-- Survey lifecycle (status) controls. -->
+  <!-- Button that reopens a closed or archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen">Mở lại</string>
+  <string name="surveyeditor_lifecycle_draft_description">Người tổ chức có thể chỉnh sửa. Ẩn với người thu thập dữ liệu trên di động cho đến khi xuất bản.</string>
+  <string name="surveyeditor_lifecycle_published_description">Đang hoạt động để thu thập dữ liệu tại thực địa và trên web.</string>
+  <string name="surveyeditor_lifecycle_closed_description">Việc thu thập dữ liệu đã kết thúc và khảo sát ở chế độ chỉ đọc cho đến khi được mở lại.</string>
+  <string name="surveyeditor_lifecycle_archived_description">Đã ngừng sử dụng và được giữ ở chế độ chỉ đọc để tham khảo lâu dài.</string>
+  <string name="surveyeditor_lifecycle_publish_survey">Xuất bản khảo sát</string>
+  <string name="surveyeditor_lifecycle_publish_survey_description">Kích hoạt để thu thập dữ liệu trên di động và web</string>
+  <string name="surveyeditor_lifecycle_archive_survey">Lưu trữ khảo sát</string>
+  <string name="surveyeditor_lifecycle_archive_survey_description">Ngừng sử dụng và giữ ở chế độ chỉ đọc để tham khảo</string>
+  <string name="surveyeditor_lifecycle_switch_to_draft">Chuyển sang bản nháp</string>
+  <!-- Description of switching a published survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_published_description">Tạm ẩn tại thực địa trong khi tiếp tục chỉnh sửa</string>
+  <!-- Description of switching a closed survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_closed_description">Mở khóa chỉnh sửa ở chế độ nháp trước khi xuất bản lại</string>
+  <!-- Description of switching an archived survey back to draft. -->
+  <string name="surveyeditor_lifecycle_switch_to_draft_from_archived_description">Khôi phục ở chế độ nháp để chỉnh sửa</string>
+  <string name="surveyeditor_lifecycle_close_survey">Đóng khảo sát</string>
+  <string name="surveyeditor_lifecycle_close_survey_description">Kết thúc thu thập dữ liệu và chuyển sang chỉ đọc</string>
+  <string name="surveyeditor_lifecycle_reopen_survey">Mở lại khảo sát</string>
+  <!-- Description of reopening a closed survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_closed_description">Tiếp tục thu thập dữ liệu và chỉnh sửa</string>
+  <!-- Description of reopening an archived survey. -->
+  <string name="surveyeditor_lifecycle_reopen_from_archived_description">Khôi phục để tiếp tục thu thập dữ liệu và chỉnh sửa</string>
+  <!-- Screen reader description of the status badge. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_badge_description">Trạng thái khảo sát: %1$s. Nhấp để thay đổi trạng thái</string>
+  <!-- Heading of the status menu. %1$s is the status, e.g. "Draft". -->
+  <string name="surveyeditor_lifecycle_status_label">Trạng thái khảo sát: %1$s</string>
+  <string name="surveyeditor_lifecycle_archive_title">Lưu trữ khảo sát này?</string>
+  <string name="surveyeditor_lifecycle_close_title">Đóng khảo sát này?</string>
+  <string name="surveyeditor_lifecycle_archive_message">Khảo sát đã lưu trữ được giữ lại để tham khảo. Không ai có thể thu thập dữ liệu hoặc thực hiện thay đổi. Bạn có thể mở lại bất cứ lúc nào.</string>
+  <string name="surveyeditor_lifecycle_archive_message_discard">Khảo sát đã lưu trữ được giữ lại để tham khảo. Không ai có thể thu thập dữ liệu hoặc thực hiện thay đổi. Bạn có thể mở lại bất cứ lúc nào. Các thay đổi chưa lưu sẽ bị hủy bỏ.</string>
+  <string name="surveyeditor_lifecycle_close_message">Người thu thập dữ liệu không thể thêm dữ liệu mới và không ai có thể thực hiện thay đổi. Bạn có thể mở lại bất cứ lúc nào.</string>
+  <string name="surveyeditor_lifecycle_close_message_discard">Người thu thập dữ liệu không thể thêm dữ liệu mới và không ai có thể thực hiện thay đổi. Bạn có thể mở lại bất cứ lúc nào. Các thay đổi chưa lưu sẽ bị hủy bỏ.</string>
+  <!-- Button that confirms archiving the survey. -->
+  <string name="surveyeditor_lifecycle_archive">Lưu trữ</string>
+
+  <!-- Survey editor navigation panel. -->
+  <!-- Navigation item and pane title for the survey's basic information. -->
+  <string name="surveyeditor_nav_survey_details">Chi tiết khảo sát</string>
+  <!-- Navigation item and pane title for sharing settings. -->
+  <string name="surveyeditor_nav_sharing">Chia sẻ</string>
+  <!-- Navigation heading and summary card label for the survey's forms. -->
+  <string name="surveyeditor_nav_forms">Biểu mẫu</string>
+  <string name="surveyeditor_nav_add_form">Thêm biểu mẫu</string>
+  <string name="surveyeditor_nav_no_forms">Chưa có biểu mẫu nào</string>
+  <!-- Fallback name for a form without a title. -->
+  <string name="surveyeditor_untitled_form">Biểu mẫu chưa đặt tên</string>
+  <string name="surveyeditor_nav_add_map_layer">Thêm lớp bản đồ</string>
+  <string name="surveyeditor_nav_add_data_table">Thêm bảng dữ liệu</string>
+  <string name="surveyeditor_nav_no_map_layers">Chưa có lớp bản đồ nào</string>
+  <string name="surveyeditor_nav_no_data_tables">Chưa có bảng dữ liệu nào</string>
+  <!-- Fallback name for a map layer or data table without a name. -->
+  <string name="surveyeditor_untitled">Chưa đặt tên</string>
+  <!-- Screen reader action that moves a navigation item up. -->
+  <string name="surveyeditor_nav_move_up">Di chuyển lên</string>
+  <!-- Screen reader action that moves a navigation item down. -->
+  <string name="surveyeditor_nav_move_down">Di chuyển xuống</string>
+  <!-- Screen reader description of the warning icon on a navigation item. -->
+  <string name="surveyeditor_nav_has_issues">Có vấn đề</string>
+
+  <!-- Survey details pane. -->
+  <string name="surveyeditor_details_subtitle">Thông tin cơ bản hiển thị cho người thu thập dữ liệu khi họ mở khảo sát.</string>
+  <string name="surveyeditor_details_survey_title">Tiêu đề khảo sát</string>
+  <string name="surveyeditor_details_contents">Nội dung</string>
+  <string name="surveyeditor_details_map_layers">Lớp bản đồ</string>
+  <string name="surveyeditor_details_data_tables">Bảng dữ liệu</string>
+  <string name="surveyeditor_details_people">Mọi người</string>
+  <!-- Heading of the list of survey activity events (exports, receipts, closing). -->
+  <string name="surveyeditor_details_activity">Hoạt động</string>
+  <!-- Part of an activity event summary. %1$d is the number of map features. -->
+  <plurals name="surveyeditor_details_activity_map_features">
+    <item quantity="other">%1$d đối tượng bản đồ</item>
+  </plurals>
+  <!-- Part of an activity event summary. %1$s is the export profile ID. -->
+  <string name="surveyeditor_details_activity_profile">Hồ sơ: %1$s</string>
+  <string name="surveyeditor_details_survey_status">Trạng thái khảo sát</string>
+  <!-- Section title and dropdown label for the survey's organization. -->
+  <string name="surveyeditor_details_organization">Tổ chức</string>
+  <!-- Organization dropdown option for a survey that doesn't belong to an organization. -->
+  <string name="surveyeditor_details_organization_none">Không có (khảo sát cá nhân)</string>
+  <string name="surveyeditor_details_organization_hint">Bạn có thể tùy chọn chạy khảo sát này thay mặt cho một tổ chức mà bạn là thành viên. Bạn vẫn là chủ sở hữu. Người quản lý của tổ chức cũng có thể chỉnh sửa khảo sát, quản lý việc chia sẻ và xuất dữ liệu, và các thành viên của tổ chức có thể tìm thấy khảo sát trong danh sách của họ.</string>
+  <!-- Selected organization that couldn't be found. %1$s is its ID. -->
+  <string name="surveyeditor_details_organization_unknown">Tổ chức không xác định (%1$s)</string>
+  <string name="surveyeditor_details_organization_missing">Tổ chức này không còn tồn tại. Hãy chọn tổ chức khác hoặc chuyển khảo sát thành khảo sát cá nhân.</string>
+  <!-- Screen reader label of the button that dismisses a notice. -->
+  <string name="surveyeditor_details_dismiss">Đóng lại</string>
+  <string name="surveyeditor_details_cost_title">Kiểm soát chi phí và hạn mức</string>
+  <string name="surveyeditor_details_cost_estimated">Chi phí ước tính hằng tháng</string>
+  <!-- Part of the cost summary, e.g. "3 forms · 12 questions · …". -->
+  <plurals name="surveyeditor_details_cost_forms">
+    <item quantity="other">%1$d biểu mẫu</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of questions. -->
+  <plurals name="surveyeditor_details_cost_questions">
+    <item quantity="other">%1$d câu hỏi</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of predefined entities. -->
+  <plurals name="surveyeditor_details_cost_predefined">
+    <item quantity="other">%1$d mục định sẵn</item>
+  </plurals>
+  <!-- Part of the cost summary. %1$d is the number of generated sample plots. -->
+  <plurals name="surveyeditor_details_cost_sample_plots">
+    <item quantity="other">%1$d lô mẫu</item>
+  </plurals>
+  <string name="surveyeditor_details_cost_tier_override">Ghi đè cấp:</string>
+  <!-- Quota tier option: inherit the tier from the organization or default. -->
+  <string name="surveyeditor_details_cost_tier_inherit">Kế thừa</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_basic">Cơ bản</string>
+  <!-- Quota tier option. -->
+  <string name="surveyeditor_details_cost_tier_sponsored">Được tài trợ</string>
+  <string name="surveyeditor_details_cost_budget_cap">Ngân sách tối đa hằng tháng của khảo sát ($ USD)</string>
+  <string name="surveyeditor_details_cost_budget_placeholder">0.00 (Không giới hạn)</string>
+  <string name="surveyeditor_details_cost_hide_limits">Ẩn giới hạn tài nguyên chi tiết</string>
+  <string name="surveyeditor_details_cost_customize_limits">Tùy chỉnh giới hạn tài nguyên chi tiết</string>
+  <string name="surveyeditor_details_cost_max_forms">Số biểu mẫu tối đa</string>
+  <string name="surveyeditor_details_cost_max_questions_per_form">Số câu hỏi tối đa / biểu mẫu</string>
+  <string name="surveyeditor_details_cost_max_photo_questions_per_form">Số câu hỏi ảnh tối đa / biểu mẫu</string>
+  <string name="surveyeditor_details_cost_max_predefined_entities">Số mục định sẵn tối đa</string>
+  <string name="surveyeditor_details_cost_max_sample_plots">Số lô mẫu tối đa</string>
+  <string name="surveyeditor_details_cost_max_area_vertices">Số đỉnh khu vực tối đa</string>
+  <string name="surveyeditor_details_cost_max_acl_collaborators">Số cộng tác viên ACL tối đa</string>
+  <string name="surveyeditor_details_purpose_title">Mục đích</string>
+  <string name="surveyeditor_details_purpose_hint">Dữ liệu của khảo sát này sẽ được dùng để làm gì; một khảo sát có thể có nhiều mục đích. Các trường chuẩn của những mục đích này được gợi ý trước khi bạn viết câu hỏi. Thay đổi mục đích ở đây không thêm hay xóa biểu mẫu; để thêm biểu mẫu khởi đầu của một mục đích, hãy dùng Thêm biểu mẫu &gt; Cho một mục đích.</string>
+  <string name="surveyeditor_details_purpose_none">Không có mục đích nào cho khảo sát này.</string>
+  <string name="surveyeditor_details_purpose_unavailable">Không còn có trong thư viện của khảo sát này:</string>
+  <!-- Screen reader label of a button that removes an item. %1$s is the item's name. -->
+  <string name="surveyeditor_details_remove_item">Gỡ bỏ %1$s</string>
+
+  <!-- Survey languages. -->
+  <string name="surveyeditor_language_title">Ngôn ngữ</string>
+  <string name="surveyeditor_language_hint">Chọn các ngôn ngữ dùng để soạn và thu thập biểu mẫu cũng như câu hỏi khảo sát. Ngôn ngữ mặc định sẽ hiển thị khi không có bản dịch cụ thể.</string>
+  <string name="surveyeditor_language_supported">Ngôn ngữ được hỗ trợ</string>
+  <!-- Chip for the survey's default language. %1$s is the language name. -->
+  <string name="surveyeditor_language_default_chip">%1$s • Mặc định</string>
+  <string name="surveyeditor_language_add">Thêm ngôn ngữ</string>
+  <string name="surveyeditor_language_none_selected">Chưa chọn ngôn ngữ nào</string>
+  <string name="surveyeditor_language_default">Ngôn ngữ mặc định</string>
+  <string name="surveyeditor_language_picker_title">Chọn ngôn ngữ</string>
+  <string name="surveyeditor_language_search_label">Tìm theo tên ngôn ngữ</string>
+  <string name="surveyeditor_language_search_placeholder">VD: Tiếng Swahili, Tiếng Anh, Tiếng Tây Ban Nha, Tiếng Amhara...</string>
+  <string name="surveyeditor_language_popular">Ngôn ngữ phổ biến và xem trước danh mục:</string>
+  <!-- %1$d is the number of languages matching the search. -->
+  <plurals name="surveyeditor_language_matches">
+    <item quantity="other">Tìm thấy %1$d kết quả khớp:</item>
+  </plurals>
+  <!-- %1$s is the search query. -->
+  <string name="surveyeditor_language_no_matches">Không có ngôn ngữ nào khớp với “%1$s”</string>
+  <!-- Badge on a language that is already supported by the survey. -->
+  <string name="surveyeditor_language_added">Đã thêm</string>
+
+  <!-- Survey area section of the survey details pane. -->
+  <!-- Fallback location label for an untitled survey in the survey area editor. -->
+  <string name="surveyeditor_details_area_default_location">Khảo sát</string>
+  <!-- Title of the required survey area section; * marks a required field. -->
+  <string name="surveyeditor_details_area_title">Khu vực khảo sát *</string>
+  <string name="surveyeditor_details_area_hint">Phạm vi địa lý và ranh giới thu thập dữ liệu của khảo sát này.</string>
+  <!-- %1$s describes where the survey area came from, e.g. an uploaded file. -->
+  <string name="surveyeditor_details_area_source">Nguồn: %1$s</string>
+  <string name="surveyeditor_details_area_edit">Chỉnh sửa khu vực khảo sát</string>
+  <string name="surveyeditor_details_area_required">Hãy chọn hoặc vẽ khu vực khảo sát để tiếp tục.</string>
+  <string name="surveyeditor_details_area_empty_title">Chưa đặt khu vực khảo sát</string>
+  <string name="surveyeditor_details_area_empty_hint">Tìm kiếm một địa điểm, vẽ ranh giới trên bản đồ hoặc tải lên tệp GeoJSON hay KML.</string>
+  <string name="surveyeditor_details_area_set">Đặt khu vực khảo sát</string>
+
+  <!-- Sharing pane. -->
+  <string name="surveyeditor_sharing_subtitle">Chọn những người có thể mở khảo sát này và những gì người thu thập dữ liệu có thể xem.</string>
+  <string name="surveyeditor_sharing_people_with_access">Những người có quyền truy cập</string>
+  <string name="surveyeditor_sharing_owner_detail">Chủ sở hữu khảo sát</string>
+  <string name="surveyeditor_sharing_owner">Chủ sở hữu</string>
+  <string name="surveyeditor_sharing_pending_detail">Đang chờ người này chấp nhận liên kết mời</string>
+  <string name="surveyeditor_sharing_joined_now">Vừa tham gia</string>
+  <!-- %1$s is the date the person joined. -->
+  <string name="surveyeditor_sharing_joined">Đã tham gia %1$s</string>
+  <!-- Dropdown label for a collaborator's role. -->
+  <string name="surveyeditor_sharing_role">Vai trò</string>
+  <string name="surveyeditor_sharing_profile_note">Tên và ảnh lấy từ tài khoản của mỗi người. Collect One lưu chúng khi người đó chấp nhận liên kết mời và làm mới khi họ đăng nhập.</string>
+  <string name="surveyeditor_sharing_data_access">Quyền truy cập và khả năng hiển thị dữ liệu</string>
+  <string name="surveyeditor_sharing_add_by_email">Thêm người bằng email</string>
+  <string name="surveyeditor_sharing_invite">Mời</string>
+  <string name="surveyeditor_sharing_org_managers">Người quản lý tổ chức</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_org_managers_hint">Kế thừa từ %1$s. Người quản lý có thể chỉnh sửa khảo sát này, quản lý việc chia sẻ và xuất dữ liệu. Thay đổi người quản lý tổ chức trên trang Thành viên của tổ chức.</string>
+  <string name="surveyeditor_sharing_no_managers">Chưa có người quản lý nào.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_sharing_manager_of">Người quản lý của %1$s</string>
+  <string name="surveyeditor_sharing_share_link_title">Liên kết chia sẻ và mã QR</string>
+  <!-- Badge for a survey that is only reachable through its link. -->
+  <string name="surveyeditor_sharing_badge_unlisted">Không công khai</string>
+  <!-- Badge for a survey listed in the public survey directory. -->
+  <string name="surveyeditor_sharing_badge_public">Danh bạ công khai</string>
+  <!-- Copy button label after the link was copied. -->
+  <string name="surveyeditor_sharing_copied">Đã sao chép</string>
+  <string name="surveyeditor_sharing_copy_link">Sao chép liên kết</string>
+  <string name="surveyeditor_sharing_show_qr">Hiển thị mã QR</string>
+  <!-- QR code dialog title. %1$s is the survey title. -->
+  <string name="surveyeditor_sharing_qr_title">Chia sẻ “%1$s”</string>
+  <string name="surveyeditor_sharing_qr_title_untitled">Liên kết chia sẻ khảo sát và mã QR</string>
+  <string name="surveyeditor_sharing_qr_hint">Người thu thập dữ liệu có thể quét mã QR này bằng máy ảnh điện thoại hoặc ứng dụng Collect One để mở trực tiếp khảo sát.</string>
+
+  <!-- General access sliders: audience stops. -->
+  <string name="surveyeditor_access_contributors_and_organizers">Người đóng góp và người tổ chức</string>
+  <string name="surveyeditor_access_invited_people">Người được mời</string>
+  <string name="surveyeditor_access_anyone_in_organization">Mọi người trong tổ chức của bạn</string>
+  <string name="surveyeditor_access_anyone">Bất kỳ ai</string>
+  <string name="surveyeditor_access_who_can_view">Ai có thể xem dữ liệu</string>
+  <string name="surveyeditor_access_who_can_collect">Ai có thể thu thập dữ liệu</string>
+  <!-- Screen reader description of a slider stop. %1$s is the slider title, %2$s the audience. -->
+  <string name="surveyeditor_access_slider_stop_description">%1$s: %2$s</string>
+  <string name="surveyeditor_access_view_hint_contributors">Người thu thập dữ liệu chỉ thấy bài gửi của chính mình. Người tổ chức khảo sát có thể xem tất cả bài gửi và danh tính người đóng góp.</string>
+  <string name="surveyeditor_access_view_hint_invited">Những người được thêm ở trên có thể xem tất cả đối tượng bản đồ, câu trả lời, ảnh và các nội dung đa phương tiện đã tải lên khác. Chỉ người tổ chức khảo sát mới có thể xem danh tính người đóng góp.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="surveyeditor_access_view_hint_organization">Mọi người trong %1$s có thể xem tất cả đối tượng bản đồ, câu trả lời, ảnh và các nội dung đa phương tiện đã tải lên khác. Chỉ người tổ chức khảo sát mới có thể xem danh tính người đóng góp.</string>
+  <string name="surveyeditor_access_view_hint_organization_unset">Mọi người trong tổ chức của bạn có thể xem tất cả đối tượng bản đồ, câu trả lời, ảnh và các nội dung đa phương tiện đã tải lên khác. Hãy chọn một tổ chức trong Chi tiết khảo sát.</string>
+  <string name="surveyeditor_access_view_hint_anyone">Bất kỳ ai cũng có thể xem tất cả đối tượng bản đồ, câu trả lời, ảnh và các nội dung đa phương tiện đã tải lên khác. Chỉ người tổ chức khảo sát mới có thể xem danh tính người đóng góp. Người tham gia phải chấp nhận thông báo đồng ý trước khi thu thập dữ liệu.</string>
+  <string name="surveyeditor_access_collect_hint_invited">Chỉ những người được thêm ở trên mới có thể mở khảo sát này và thu thập dữ liệu.</string>
+  <!-- %1$s is the organization name (used twice). -->
+  <string name="surveyeditor_access_collect_hint_organization">Thành viên của %1$s có thể mở khảo sát này và thu thập dữ liệu. Người quản lý của %1$s cũng có thể chỉnh sửa khảo sát.</string>
+  <string name="surveyeditor_access_collect_hint_organization_unset">Thành viên trong tổ chức của bạn có thể mở khảo sát này và thu thập dữ liệu. Hãy chọn một tổ chức trong Chi tiết khảo sát.</string>
+  <string name="surveyeditor_access_collect_hint_anyone">Bất kỳ ai cũng có thể mở khảo sát này và gửi dữ liệu.</string>
+  <string name="surveyeditor_access_unlisted_option">Không công khai (chỉ những người có liên kết hoặc mã QR)</string>
+  <string name="surveyeditor_access_public_option">Công khai (được liệt kê trong danh bạ khảo sát)</string>
+  <string name="surveyeditor_access_who_can_find">Ai có thể tìm thấy khảo sát này</string>
+  <string name="surveyeditor_access_unlisted_hint">Không công khai: chỉ những người có liên kết trực tiếp hoặc quét mã QR bên dưới mới có thể tìm và mở khảo sát này.</string>
+  <string name="surveyeditor_access_public_hint">Công khai: bất kỳ ai duyệt danh bạ khảo sát đều có thể tìm thấy và mở khảo sát này, hoặc dùng liên kết trực tiếp và mã QR bên dưới.</string>
+
+  <!-- Data tables, map layers, add dialogs, people. -->
+  <!-- Map layer / data table editor (EntityDatasetEditor). -->
+  <!-- Shown in place of a map layer or data table name when it is blank. -->
+  <string name="surveyeditor_dataset_untitled">Chưa đặt tên</string>
+  <!-- Count in a data table summary, e.g. "3 rows • 2 properties". -->
+  <plurals name="surveyeditor_dataset_rows_count">
+    <item quantity="other">%1$d hàng</item>
+  </plurals>
+  <!-- Count in a map layer summary, e.g. "3 features • 2 properties". -->
+  <plurals name="surveyeditor_dataset_features_count">
+    <item quantity="other">%1$d đối tượng</item>
+  </plurals>
+  <!-- Count of the columns (properties) of a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_properties_count">
+    <item quantity="other">%1$d thuộc tính</item>
+  </plurals>
+  <!-- Number of validation issues found in a map layer or data table. -->
+  <plurals name="surveyeditor_dataset_issues_count">
+    <item quantity="other">%1$d vấn đề</item>
+  </plurals>
+  <!-- Content description of a dataset's overflow menu button. %1$s is the dataset name. -->
+  <string name="surveyeditor_dataset_more_options">Thêm tùy chọn cho %1$s</string>
+  <string name="surveyeditor_dataset_delete_map_layer_menu">Xóa lớp bản đồ…</string>
+  <string name="surveyeditor_dataset_delete_data_table_menu">Xóa bảng dữ liệu…</string>
+  <string name="surveyeditor_dataset_delete_map_layer_title">Xóa lớp bản đồ này?</string>
+  <string name="surveyeditor_dataset_delete_data_table_title">Xóa bảng dữ liệu này?</string>
+  <!-- %1$s is the map layer name, %2$d the number of features. -->
+  <plurals name="surveyeditor_dataset_delete_map_layer_body">
+    <item quantity="other">“%1$s” và %2$d đối tượng của lớp này sẽ bị xóa khỏi khảo sát.</item>
+  </plurals>
+  <!-- %1$s is the data table name, %2$d the number of rows. -->
+  <plurals name="surveyeditor_dataset_delete_data_table_body">
+    <item quantity="other">“%1$s” và %2$d hàng của bảng này sẽ bị xóa khỏi khảo sát.</item>
+  </plurals>
+  <string name="surveyeditor_dataset_delete_map_layer">Xóa lớp bản đồ</string>
+  <string name="surveyeditor_dataset_delete_data_table">Xóa bảng dữ liệu</string>
+  <!-- Title of the table listing a map layer's features. -->
+  <string name="surveyeditor_dataset_features">Đối tượng</string>
+  <!-- Title of the table listing a data table's rows. -->
+  <string name="surveyeditor_dataset_rows">Hàng</string>
+  <string name="surveyeditor_dataset_add_feature">Thêm đối tượng</string>
+  <string name="surveyeditor_dataset_add_row">Thêm hàng</string>
+  <!-- Shown after the first issues of a dataset. %1$d is how many more issues there are. -->
+  <plurals name="surveyeditor_dataset_more_issues">
+    <item quantity="other">…và %1$d vấn đề khác</item>
+  </plurals>
+  <!-- Table column header of the dataset's key property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_key">%1$s (khóa)</string>
+  <!-- Table column header of the dataset's label property. %1$s is the property label. -->
+  <string name="surveyeditor_dataset_column_label">%1$s (nhãn)</string>
+  <!-- Header of the column where feature geometry is typed as coordinates. -->
+  <string name="surveyeditor_dataset_column_geometry">Hình học (vĩ độ, kinh độ; …)</string>
+  <string name="surveyeditor_dataset_empty_sample_plots">Chưa có lô mẫu nào. Hãy tạo từ thiết kế lấy mẫu.</string>
+  <string name="surveyeditor_dataset_empty_features">Chưa có đối tượng nào. Hãy thêm tại đây hoặc trên bản đồ.</string>
+  <string name="surveyeditor_dataset_empty_rows">Chưa có hàng nào.</string>
+  <!-- Sample points of a sample plot, shown when a plot has none. -->
+  <string name="surveyeditor_dataset_samples_none">Không có</string>
+  <!-- Number of sample points of a sample plot. -->
+  <plurals name="surveyeditor_dataset_samples_count">
+    <item quantity="other">%1$d điểm</item>
+  </plurals>
+  <!-- Section label of the dataset settings panel. -->
+  <string name="surveyeditor_dataset_settings">Cài đặt</string>
+  <string name="surveyeditor_dataset_name">Tên</string>
+  <string name="surveyeditor_dataset_geometry_type">Loại hình học</string>
+  <string name="surveyeditor_dataset_sample_design">Thiết kế lấy mẫu</string>
+  <string name="surveyeditor_dataset_key_property">Thuộc tính khóa (ID duy nhất)</string>
+  <!-- Shown in a dropdown when nothing has been chosen yet. -->
+  <string name="surveyeditor_dataset_choose">Chọn…</string>
+  <string name="surveyeditor_dataset_label_property">Thuộc tính nhãn (hiển thị trong danh sách)</string>
+  <string name="surveyeditor_dataset_field_collection">Thu thập thực địa và biểu mẫu</string>
+  <!-- %1$s is the title of the form linked to the dataset. -->
+  <string name="surveyeditor_dataset_linked_to">Đã liên kết với %1$s</string>
+  <string name="surveyeditor_dataset_linked_form_map_layer">Người thu thập dữ liệu có thể thêm đối tượng bản đồ mới bằng biểu mẫu này. Các thuộc tính lược đồ luôn đồng bộ với câu hỏi trong biểu mẫu.</string>
+  <string name="surveyeditor_dataset_linked_form_data_table">Người thu thập dữ liệu có thể thêm hàng mới bằng biểu mẫu này. Các thuộc tính lược đồ luôn đồng bộ với câu hỏi trong biểu mẫu.</string>
+  <string name="surveyeditor_dataset_edit_form">Chỉnh sửa biểu mẫu</string>
+  <string name="surveyeditor_dataset_unlink_form">Hủy liên kết biểu mẫu</string>
+  <string name="surveyeditor_dataset_no_form_map_layer">Chưa có biểu mẫu nào được liên kết với lớp bản đồ này. Người thu thập dữ liệu chỉ có thể xem các mục hiện có.</string>
+  <string name="surveyeditor_dataset_no_form_data_table">Chưa có biểu mẫu nào được liên kết với bảng dữ liệu này. Người thu thập dữ liệu chỉ có thể xem các mục hiện có.</string>
+  <string name="surveyeditor_dataset_create_form_map_layer">Tạo biểu mẫu cho lớp bản đồ</string>
+  <string name="surveyeditor_dataset_create_form_data_table">Tạo biểu mẫu cho bảng dữ liệu</string>
+  <!-- Label above the list of forms that update this dataset. -->
+  <string name="surveyeditor_dataset_updated_by">Được cập nhật bởi</string>
+  <string name="surveyeditor_dataset_map_style">Kiểu bản đồ</string>
+  <!-- Section label of the dataset's schema (its properties / columns). -->
+  <string name="surveyeditor_dataset_properties">Thuộc tính</string>
+  <string name="surveyeditor_dataset_properties_managed_by_form">Các thuộc tính do biểu mẫu được liên kết quản lý. Để chỉnh sửa, thêm hoặc xóa thuộc tính, hãy chỉnh sửa biểu mẫu.</string>
+  <string name="surveyeditor_dataset_add_property">Thêm thuộc tính</string>
+  <!-- Section label of the advanced dataset settings. -->
+  <string name="surveyeditor_dataset_advanced">Nâng cao</string>
+  <!-- Button that collapses the advanced section. -->
+  <string name="surveyeditor_dataset_hide">Ẩn</string>
+  <!-- Button that expands the advanced section. -->
+  <string name="surveyeditor_dataset_show">Hiện</string>
+  <string name="surveyeditor_dataset_id">ID tập dữ liệu</string>
+  <string name="surveyeditor_dataset_id_supporting">Biểu mẫu dùng ID này để tra cứu bản ghi từ tập dữ liệu này.</string>
+  <!-- Field for a map layer's color as a hex code. -->
+  <string name="surveyeditor_dataset_color">Màu</string>
+  <!-- %1$d is the line width in pixels. -->
+  <string name="surveyeditor_dataset_stroke_width">Độ rộng nét: %1$d px</string>
+  <!-- %1$d is the polygon fill opacity in percent; the % after it is a literal percent sign. -->
+  <string name="surveyeditor_dataset_fill_opacity">Độ mờ đục của vùng tô: %1$d%</string>
+  <string name="surveyeditor_dataset_visible_by_default">Hiển thị theo mặc định</string>
+  <string name="surveyeditor_dataset_visible_by_default_description">Hiển thị lớp này khi bản đồ mở lần đầu.</string>
+  <!-- Field for the display label of a dataset property. -->
+  <string name="surveyeditor_dataset_property_label">Nhãn</string>
+  <!-- Button that hides a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_hide_id">Ẩn ID</string>
+  <!-- Button that shows a property's internal ID field. -->
+  <string name="surveyeditor_dataset_property_advanced">Nâng cao</string>
+  <string name="surveyeditor_dataset_property_internal_id">ID nội bộ</string>
+  <string name="surveyeditor_dataset_property_internal_id_supporting">Được dùng trong biểu thức XForms và tệp xuất GeoJSON.</string>
+  <!-- Field for the data type of a dataset property. -->
+  <string name="surveyeditor_dataset_property_type">Loại</string>
+  <!-- Checkbox label: the property must have a value. -->
+  <string name="surveyeditor_dataset_property_required">Bắt buộc</string>
+  <string name="surveyeditor_dataset_remove_property">Gỡ bỏ thuộc tính</string>
+
+  <!-- Add data table dialog. -->
+  <string name="surveyeditor_add_table_title">Thêm bảng dữ liệu</string>
+  <string name="surveyeditor_add_table_empty">Bảng dữ liệu trống</string>
+  <string name="surveyeditor_add_table_empty_body">Thêm cột và nhập hàng vào bảng.</string>
+  <string name="surveyeditor_add_table_import_csv">Nhập từ CSV</string>
+  <string name="surveyeditor_add_table_import_csv_body">Tạo bảng dữ liệu từ các cột và hàng trong tệp CSV.</string>
+  <string name="surveyeditor_add_table_no_rows">Không đọc được hàng nào từ tệp này.</string>
+  <!-- Number of columns found in an imported CSV file. -->
+  <plurals name="surveyeditor_add_table_columns_count">
+    <item quantity="other">%1$d cột</item>
+  </plurals>
+  <!-- An imported column: %1$s is its name, %2$s its detected type. -->
+  <string name="surveyeditor_add_table_column_with_type">%1$s (%2$s)</string>
+  <!-- Date order option: %1$s is the order (e.g. "Day first"), %2$s an example date. -->
+  <string name="surveyeditor_add_table_date_order_option">%1$s (%2$s)</string>
+
+  <!-- Add map layer dialog. -->
+  <string name="surveyeditor_add_layer_title">Thêm lớp bản đồ</string>
+  <string name="surveyeditor_add_layer_empty">Lớp bản đồ trống</string>
+  <string name="surveyeditor_add_layer_empty_body">Thêm đối tượng bằng cách vẽ trên bản đồ hoặc nhập vào bảng.</string>
+  <string name="surveyeditor_add_layer_import_file">Nhập tệp</string>
+  <string name="surveyeditor_add_layer_import_file_body">Tạo lớp bản đồ từ các điểm, đường hoặc đa giác trong tệp GeoJSON hay KML.</string>
+  <string name="surveyeditor_add_layer_generate_plots">Tạo lô mẫu</string>
+  <string name="surveyeditor_add_layer_generate_plots_body">Thiết kế mẫu và tạo các lô bên trong khu vực khảo sát hoặc các tầng.</string>
+  <!-- Shown when sample plots can't be generated yet. -->
+  <string name="surveyeditor_add_layer_generate_plots_need_area">Hãy đặt khu vực khảo sát hoặc thêm một lớp bản đồ đa giác trước.</string>
+  <string name="surveyeditor_add_layer_no_features">Không đọc được đối tượng nào từ tệp này.</string>
+  <!-- Number of features in an imported file. %1$d is the count, %2$s the lowercase geometry type (e.g. "polygon"). -->
+  <string name="surveyeditor_add_layer_feature_count">%1$d %2$s</string>
+  <!-- %1$d is the number of features that will not be imported. -->
+  <plurals name="surveyeditor_add_layer_skipped_features">
+    <item quantity="other">%1$d đối tượng có loại hình học khác sẽ bị bỏ qua. Mỗi lớp bản đồ chỉ có một loại hình học.</item>
+  </plurals>
+
+  <!-- Add form dialog. -->
+  <string name="surveyeditor_add_form_title">Thêm biểu mẫu</string>
+  <string name="surveyeditor_add_form_empty">Biểu mẫu trống</string>
+  <string name="surveyeditor_add_form_empty_body">Bắt đầu với một biểu mẫu trống và thêm câu hỏi từ đầu.</string>
+  <string name="surveyeditor_add_form_from_template">Từ mẫu…</string>
+  <string name="surveyeditor_add_form_for_purpose">Cho một mục đích…</string>
+  <string name="surveyeditor_add_form_for_purpose_body">Thêm các biểu mẫu khởi đầu từ mẫu của một mục đích. Mục đích và các chương trình của nó được thêm vào khảo sát, nhờ đó một khảo sát có thể phục vụ nhiều mục đích.</string>
+  <string name="surveyeditor_add_form_no_purposes">Không có mục đích nào cho khảo sát này.</string>
+  <string name="surveyeditor_add_form_purpose_title">Thêm biểu mẫu cho một mục đích</string>
+  <string name="surveyeditor_add_form_purpose_note">Chọn một mục đích và mẫu khởi đầu của nó. Các biểu mẫu của mẫu được thêm vào khảo sát, và mục đích cùng các chương trình đã chọn được ghi lại.</string>
+  <string name="surveyeditor_add_form_purpose_add">Thêm biểu mẫu</string>
+  <string name="surveyeditor_add_form_no_templates">Chưa có mẫu nào cho khảo sát này.</string>
+  <string name="surveyeditor_add_form_templates_body">Bắt đầu từ một biểu mẫu có thể tái sử dụng, có các trường chuẩn, từ tổ chức của bạn hoặc thư viện chung.</string>
+  <string name="surveyeditor_add_form_import_file">Nhập từ tệp</string>
+  <string name="surveyeditor_add_form_import_file_body">Tạo biểu mẫu từ tệp ODK XForms (.xml) hoặc Collect Earth (.cep).</string>
+  <string name="surveyeditor_add_form_no_questions">Không đọc được câu hỏi nào từ tệp này.</string>
+  <!-- Number of questions in an imported form or template. -->
+  <plurals name="surveyeditor_add_form_questions_count">
+    <item quantity="other">%1$d câu hỏi</item>
+  </plurals>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it updates. -->
+  <string name="surveyeditor_add_form_updates_dataset">Cập nhật %1$s</string>
+  <string name="surveyeditor_add_form_updates_existing">Cập nhật các đối tượng hiện có</string>
+  <!-- Where an imported form saves its data. %1$s is the ID of the dataset it adds to. -->
+  <string name="surveyeditor_add_form_adds_to_dataset">Thêm vào %1$s</string>
+  <string name="surveyeditor_add_form_adds_to_new_map_layer">Thêm vào một lớp bản đồ mới</string>
+  <string name="surveyeditor_add_form_adds_to_new_data_table">Thêm vào một bảng dữ liệu mới</string>
+  <string name="surveyeditor_add_form_template_title">Thêm biểu mẫu từ mẫu</string>
+  <string name="surveyeditor_add_form_template_note">Biểu mẫu được sao chép vào khảo sát này. Những thay đổi sau này đối với mẫu sẽ không ảnh hưởng đến biểu mẫu.</string>
+  <!-- Badge of a template from the user's organization (when its name is unknown). -->
+  <string name="surveyeditor_add_form_template_organization">Tổ chức</string>
+  <!-- Badge of a template from the global library. -->
+  <string name="surveyeditor_add_form_template_global">Chung</string>
+  <!-- %1$s is the question count (e.g. "12 questions"), %2$d how many link to standard fields. -->
+  <plurals name="surveyeditor_add_form_template_linked">
+    <item quantity="other">%1$s · %2$d câu được liên kết với trường chuẩn</item>
+  </plurals>
+
+  <!-- Map layer pin icon picker. -->
+  <!-- %1$s is the name of the chosen icon. -->
+  <string name="surveyeditor_icon_pin_icon">Biểu tượng ghim: %1$s</string>
+  <!-- Shown as the pin icon name when no icon is chosen. -->
+  <string name="surveyeditor_icon_none">Không có</string>
+  <string name="surveyeditor_icon_no_icon">Không có biểu tượng</string>
+
+  <!-- Basemap options of the map layer editor. -->
+  <string name="surveyeditor_basemap_satellite">Vệ tinh</string>
+  <string name="surveyeditor_basemap_terrain">Địa hình</string>
+  <!-- Basemap option: no basemap imagery. -->
+  <string name="surveyeditor_basemap_none">Không có</string>
+
+  <!-- Short labels of sample design thumbnail cards. -->
+  <string name="surveyeditor_thumbnail_grid">Lưới</string>
+  <string name="surveyeditor_thumbnail_random">Ngẫu nhiên</string>
+  <string name="surveyeditor_thumbnail_stratified">Phân tầng</string>
+  <string name="surveyeditor_thumbnail_cluster">Cụm</string>
+  <!-- Plot shape: a single point. -->
+  <string name="surveyeditor_thumbnail_point">Điểm</string>
+  <!-- Sample point layout: one point at the plot center. -->
+  <string name="surveyeditor_thumbnail_center">Tâm</string>
+
+  <!-- People with access and invite acceptance. -->
+  <!-- Badge of a person who was invited but hasn't joined yet. -->
+  <string name="surveyeditor_people_invited">Đã mời</string>
+  <!-- Shown on the copy button after the invite link was copied. -->
+  <string name="surveyeditor_people_copied">Đã sao chép</string>
+  <string name="surveyeditor_people_copy_link">Sao chép liên kết</string>
+  <string name="surveyeditor_people_new_link">Liên kết mới</string>
+  <string name="surveyeditor_people_open_as_invitee">Mở với tư cách người được mời</string>
+  <!-- Name of the survey page listing people; used as %1$s in surveyeditor_people_accept_invite_note. -->
+  <string name="surveyeditor_people_sharing_page">trang Chia sẻ</string>
+  <!-- Title of the invite acceptance dialog. %1$s is the survey or organization name. -->
+  <string name="surveyeditor_people_join_title">Tham gia “%1$s”</string>
+  <!-- %1$s is the invitee's email address. -->
+  <string name="surveyeditor_people_accept_invite_preview">Xem trước những gì %1$s thấy sau khi mở liên kết mời và đăng nhập.</string>
+  <!-- %1$s is the invitee's email address, %2$s their role. -->
+  <string name="surveyeditor_people_signed_in_as">Đã đăng nhập với tư cách %1$s • %2$s</string>
+  <string name="surveyeditor_people_full_name">Họ và tên</string>
+  <string name="surveyeditor_people_profile_photo">Ảnh hồ sơ</string>
+  <!-- %1$s is the page where organizers see people, e.g. "Sharing page" or "Members page". -->
+  <string name="surveyeditor_people_accept_invite_note">Collect One lưu tên và ảnh của bạn để người tổ chức có thể nhận ra bạn trên %1$s. Thông tin này được làm mới mỗi khi bạn đăng nhập.</string>
+  <string name="surveyeditor_people_accept_invite">Chấp nhận lời mời</string>
+
+  <!-- Interactive layer map, survey area editor, sampling design panel. -->
+  <!-- Interactive layer map (InteractiveLayerMap.kt). -->
+  <!-- Title of the map card in the map layer and survey area editors. -->
+  <string name="surveyeditor_map_title">Bản đồ</string>
+  <string name="surveyeditor_map_generated_locked">Không thể chỉnh sửa hình học được tạo tự động</string>
+  <!-- Vertex progress while drawing. %1$d is the number of vertices placed, %2$d the minimum needed. -->
+  <string name="surveyeditor_map_draft_vertices">%1$d / %2$d+ đỉnh</string>
+  <string name="surveyeditor_map_undo">Hoàn tác</string>
+  <!-- Button that completes drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_finish_point">Hoàn tất điểm</string>
+  <string name="surveyeditor_map_finish_line">Hoàn tất đường</string>
+  <string name="surveyeditor_map_finish_polygon">Hoàn tất đa giác</string>
+  <!-- Button that completes drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_finish_part">Hoàn tất phần</string>
+  <!-- Chip that starts drawing a new map feature of the given geometry type. -->
+  <string name="surveyeditor_map_add_point">Thêm điểm</string>
+  <string name="surveyeditor_map_add_line">Thêm đường</string>
+  <string name="surveyeditor_map_add_polygon">Thêm đa giác</string>
+  <!-- Starts drawing a new part of the survey area. -->
+  <string name="surveyeditor_map_add_part">Thêm phần</string>
+  <string name="surveyeditor_map_zoom_in">Phóng to</string>
+  <string name="surveyeditor_map_zoom_out">Thu nhỏ</string>
+  <string name="surveyeditor_map_fit_to_features">Vừa với các đối tượng</string>
+  <!-- Current map zoom level, shown next to the scale bar. %1$s is the zoom level (e.g. "12.5"). -->
+  <string name="surveyeditor_map_zoom_level">z %1$s</string>
+  <!-- Map hints shown in a pill at the bottom of the map. -->
+  <string name="surveyeditor_map_hint_locked">Kéo để di chuyển • Cuộn hoặc chụm để thu phóng • Nhấp vào một lô để xem các điểm mẫu</string>
+  <string name="surveyeditor_map_hint_place_point">Nhấp vào bản đồ để đặt điểm</string>
+  <string name="surveyeditor_map_hint_start_line">Nhấp để bắt đầu vẽ đường</string>
+  <string name="surveyeditor_map_hint_continue_line">Nhấp để thêm đỉnh • Nhấp lại vào đỉnh cuối để hoàn tất</string>
+  <string name="surveyeditor_map_hint_start_polygon">Nhấp để bắt đầu vẽ đa giác</string>
+  <string name="surveyeditor_map_hint_continue_polygon">Nhấp để thêm đỉnh • Nhấp vào đỉnh đầu hoặc đỉnh cuối để hoàn tất</string>
+  <string name="surveyeditor_map_hint_move_point">Kéo điểm để di chuyển</string>
+  <!-- "○ handles" refers to the small circles drawn at segment midpoints. -->
+  <string name="surveyeditor_map_hint_reshape">Kéo các đỉnh để thay đổi hình dạng • Kéo tay nắm ○ để thêm đỉnh • Kéo bên trong để di chuyển</string>
+  <string name="surveyeditor_map_hint_select">Kéo để di chuyển • Cuộn hoặc chụm để thu phóng • Nhấp vào một đối tượng để chọn</string>
+
+  <!-- Survey area editor dialog (SurveyAreaEditor.kt). -->
+  <string name="surveyeditor_area_tab_search">Tìm kiếm</string>
+  <string name="surveyeditor_area_tab_draw">Vẽ</string>
+  <string name="surveyeditor_area_tab_upload">Tải lên</string>
+  <string name="surveyeditor_area_title">Khu vực khảo sát</string>
+  <string name="surveyeditor_area_close_editor">Đóng trình chỉnh sửa khu vực khảo sát</string>
+  <string name="surveyeditor_area_save">Lưu khu vực khảo sát</string>
+  <!-- Part of an area summary like "3 parts • 1,204 vertices • 850 ha". -->
+  <plurals name="surveyeditor_area_parts_count">
+    <item quantity="other">%1$d phần</item>
+  </plurals>
+  <!-- Vertex count in an area summary. %1$s is the count with thousands separators. -->
+  <plurals name="surveyeditor_area_vertices_count">
+    <item quantity="other">%1$s đỉnh</item>
+  </plurals>
+  <string name="surveyeditor_area_search_label">Tìm địa điểm hoặc nhập tọa độ</string>
+  <!-- Example place names are from the default survey region. -->
+  <string name="surveyeditor_area_search_placeholder">VD: Nairobi, Othaya, Chinga Dam hoặc -0.419, 36.950</string>
+  <string name="surveyeditor_area_suggested_locations">Địa điểm khảo sát được đề xuất:</string>
+  <plurals name="surveyeditor_area_locations_found">
+    <item quantity="other">Tìm thấy %1$d địa điểm:</item>
+  </plurals>
+  <string name="surveyeditor_area_searching_places">Đang tìm địa điểm...</string>
+  <!-- %1$s is the search text the user typed. -->
+  <string name="surveyeditor_area_no_places_matching">Không có địa điểm nào khớp với “%1$s”</string>
+  <!-- Category of a search result built from typed coordinates. -->
+  <string name="surveyeditor_area_custom_coordinates">Tọa độ tùy chỉnh</string>
+  <string name="surveyeditor_area_direct_coordinates_input">Nhập tọa độ trực tiếp</string>
+  <!-- Source badge for results from the online places search. -->
+  <string name="surveyeditor_area_source_online">Trực tuyến</string>
+  <!-- Badge on the search result that is the current survey area. -->
+  <string name="surveyeditor_area_selected">Đã chọn</string>
+  <string name="surveyeditor_area_name">Tên khu vực</string>
+  <string name="surveyeditor_area_draw_instructions">Nhấp vào bản đồ để đặt các góc của ranh giới. Nhấp vào một phần hiện có để chọn, sau đó kéo các góc để thay đổi hình dạng.</string>
+  <string name="surveyeditor_area_parts">Các phần</string>
+  <string name="surveyeditor_area_no_parts">Chưa có phần nào. Hãy vẽ ít nhất một phần để lưu khu vực khảo sát.</string>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_part_number">Phần %1$d</string>
+  <!-- Vertex count and area of one part. %2$s is the formatted area (e.g. "850 ha"). -->
+  <plurals name="surveyeditor_area_part_vertices_area">
+    <item quantity="other">%1$d đỉnh • %2$s</item>
+  </plurals>
+  <!-- %1$d is the 1-based number of the part. -->
+  <string name="surveyeditor_area_delete_part">Xóa phần %1$d</string>
+  <string name="surveyeditor_area_draw_boundary_hint">Nhấp vào bản đồ để vẽ ranh giới…</string>
+  <plurals name="surveyeditor_area_drawing_corners">
+    <item quantity="other">Đang vẽ (%1$d góc)</item>
+  </plurals>
+  <string name="surveyeditor_area_upload_geojson_title">GeoJSON hoặc KML</string>
+  <string name="surveyeditor_area_upload_geojson_body">Đa giác và đa giác bội sẽ trở thành các phần của khu vực khảo sát. Các lỗ hổng sẽ bị loại bỏ.</string>
+  <string name="surveyeditor_area_choose_file">Chọn tệp</string>
+  <string name="surveyeditor_area_upload_shapefile_title">Shapefile (.zip)</string>
+  <string name="surveyeditor_area_upload_shapefile_body">Shapefile đã nén cùng các tệp .shp, .shx, .dbf và .prj.</string>
+  <string name="surveyeditor_area_choose_shapefile">Chọn Shapefile</string>
+  <string name="surveyeditor_area_shapefile_coming_soon">Tính năng nhập Shapefile sắp ra mắt. Hiện tại, hãy chuyển đổi Shapefile sang GeoJSON hoặc KML (ví dụ: trong QGIS) rồi tải tệp đó lên.</string>
+  <string name="surveyeditor_area_upload_empty">Tải lên tệp ranh giới để xem trước tại đây.</string>
+  <string name="surveyeditor_area_edit_in_draw_tab">Chỉnh sửa trong thẻ Vẽ</string>
+  <plurals name="surveyeditor_area_ignored_features">
+    <item quantity="other">%1$d đối tượng không phải đa giác và đã bị bỏ qua.</item>
+  </plurals>
+  <string name="surveyeditor_area_no_polygons">Tệp này không có đa giác nào để dùng làm khu vực khảo sát.</string>
+  <!-- Icon descriptions for file import issues. -->
+  <string name="surveyeditor_area_issue_error">Lỗi</string>
+  <string name="surveyeditor_area_issue_warning">Cảnh báo</string>
+  <!-- Shown after a capped list of issues. %1$d is how many more issues are hidden. -->
+  <plurals name="surveyeditor_area_more_issues">
+    <item quantity="other">…và %1$d vấn đề khác</item>
+  </plurals>
+
+  <!-- Sampling design panel (SamplingDesignPanel.kt). -->
+  <string name="surveyeditor_sampling_update_preview">Cập nhật bản xem trước</string>
+  <string name="surveyeditor_sampling_show_preview">Hiển thị bản xem trước</string>
+  <string name="surveyeditor_sampling_stale_title">Bản xem trước đã cũ — hãy cập nhật bản xem trước</string>
+  <string name="surveyeditor_sampling_stale_body">Thiết kế hoặc khu vực của nó đã thay đổi sau khi bản xem trước này được tạo.</string>
+  <string name="surveyeditor_sampling_in_use_title">Lô mẫu đang được sử dụng</string>
+  <string name="surveyeditor_sampling_generate_failed_title">Không thể tạo lô mẫu</string>
+  <string name="surveyeditor_sampling_method">Phương pháp</string>
+  <!-- %1$s is the sampling method name, %2$s its description. -->
+  <string name="surveyeditor_sampling_method_description">%1$s: %2$s</string>
+  <string name="surveyeditor_sampling_plot_shape">Hình dạng lô</string>
+  <string name="surveyeditor_sampling_plot_diameter">Đường kính lô (m)</string>
+  <string name="surveyeditor_sampling_plot_side">Cạnh lô (m)</string>
+  <string name="surveyeditor_sampling_sample_points">Điểm mẫu trong mỗi lô</string>
+  <string name="surveyeditor_sampling_sample_points_require_shape">Điểm mẫu bên trong lô yêu cầu lô hình vuông hoặc hình tròn.</string>
+  <string name="surveyeditor_sampling_points_per_side">Số điểm mỗi cạnh</string>
+  <!-- %1$d is the number of sample points in each plot. -->
+  <plurals name="surveyeditor_sampling_points_per_plot">
+    <item quantity="other">%1$d điểm mẫu mỗi lô</item>
+  </plurals>
+  <string name="surveyeditor_sampling_point_spacing">Khoảng cách giữa các điểm (m)</string>
+  <string name="surveyeditor_sampling_number_of_points">Số điểm</string>
+  <string name="surveyeditor_sampling_shuffle">Xáo trộn thứ tự thăm</string>
+  <string name="surveyeditor_sampling_shuffle_description">Đánh số các lô theo thứ tự ngẫu nhiên để các lô lân cận không được thăm liên tiếp nhau.</string>
+  <string name="surveyeditor_sampling_random_seed">Hạt giống ngẫu nhiên</string>
+  <string name="surveyeditor_sampling_random_seed_description">Cùng một hạt giống luôn cho ra cùng các lô.</string>
+  <string name="surveyeditor_sampling_reroll_seed">Chọn hạt giống ngẫu nhiên mới</string>
+  <!-- Progress while generating plots. %1$s is the number generated so far (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_generating">
+    <item quantity="other">Đang tạo… %1$s lô</item>
+  </plurals>
+  <!-- Progress while generating plots. %1$s is the number generated so far, %2$s the expected total. -->
+  <plurals name="surveyeditor_sampling_generating_of_about">
+    <item quantity="other">Đang tạo… %1$s trên khoảng %2$s lô</item>
+  </plurals>
+  <!-- %1$s is the number of plots in the preview (with thousands separators). -->
+  <plurals name="surveyeditor_sampling_previewing_plots">
+    <item quantity="other">Đang xem trước %1$s lô mẫu</item>
+  </plurals>
+  <!-- Sample area option: the survey's own area. -->
+  <string name="surveyeditor_sampling_area_survey_area">Khu vực khảo sát</string>
+  <!-- Sample area option. %1$s is the name of a polygon map layer whose features are strata. -->
+  <string name="surveyeditor_sampling_area_strata_from">Các tầng từ %1$s</string>
+  <string name="surveyeditor_sampling_area_deleted_layer">Lớp bản đồ đã xóa</string>
+  <string name="surveyeditor_sampling_area">Khu vực</string>
+  <string name="surveyeditor_sampling_stratum_property">Thuộc tính tầng</string>
+  <string name="surveyeditor_sampling_choose">Chọn…</string>
+  <!-- %1$d is the number of strata, %2$s a comma-separated list of the first few stratum IDs. -->
+  <plurals name="surveyeditor_sampling_strata_list">
+    <item quantity="other">%1$d tầng: %2$s</item>
+  </plurals>
+  <string name="surveyeditor_sampling_min_distance">Khoảng cách tối thiểu giữa các lô (m)</string>
+  <string name="surveyeditor_sampling_grid_spacing">Khoảng cách lưới (m)</string>
+  <!-- %1$d is the target number of plots used to suggest a grid spacing. -->
+  <string name="surveyeditor_sampling_grid_spacing_auto_description">Khoảng cách giữa tâm các lô lân cận. Được đặt theo kích thước khu vực (khoảng %1$d lô); khu vực lớn hơn sẽ có khoảng cách rộng hơn.</string>
+  <string name="surveyeditor_sampling_grid_spacing_description">Khoảng cách giữa tâm các lô lân cận.</string>
+  <!-- %1$s is the suggested grid spacing in meters. -->
+  <string name="surveyeditor_sampling_match_area_size">Khớp với kích thước khu vực (%1$s m)</string>
+  <string name="surveyeditor_sampling_number_of_plots">Số lô</string>
+  <string name="surveyeditor_sampling_survey_area_one_stratum">Khu vực khảo sát được tính là một tầng. Để lấy mẫu riêng cho từng tầng, hãy chọn một lớp bản đồ đa giác làm khu vực.</string>
+  <string name="surveyeditor_sampling_allocation">Phân bổ</string>
+  <!-- Label of a field for the number of plots in one stratum. %1$s is the stratum ID. -->
+  <string name="surveyeditor_sampling_plots_in_stratum">Số lô trong %1$s</string>
+  <!-- Label of the plot count field when there are no strata. -->
+  <string name="surveyeditor_sampling_plots_in_survey_area">Số lô trong khu vực khảo sát</string>
+  <!-- %1$d is the number of strata not listed. -->
+  <plurals name="surveyeditor_sampling_more_strata">
+    <item quantity="other">%1$d tầng khác sẽ không có lô nào trừ khi được thiết lập.</item>
+  </plurals>
+  <string name="surveyeditor_sampling_total_plots">Tổng số lô</string>
+  <string name="surveyeditor_sampling_number_of_clusters">Số cụm</string>
+  <string name="surveyeditor_sampling_plots_per_side">Số lô mỗi cạnh</string>
+  <!-- %1$d is the number of plots in each cluster. -->
+  <plurals name="surveyeditor_sampling_plots_per_cluster">
+    <item quantity="other">%1$d lô trong mỗi cụm</item>
+  </plurals>
+  <string name="surveyeditor_sampling_cluster_spacing">Khoảng cách giữa các lô trong một cụm (m)</string>
+  <string name="surveyeditor_sampling_estimate_unavailable">Chưa có ước tính.</string>
+  <!-- %1$s is the formatted area (e.g. "850 ha"), %2$s the estimated plot count with thousands separators. -->
+  <plurals name="surveyeditor_sampling_estimate">
+    <item quantity="other">Diện tích %1$s • khoảng %2$s lô</item>
+  </plurals>
+  <string name="surveyeditor_sampling_estimate_title">Ước tính</string>
+  <string name="surveyeditor_sampling_large_design_warning">Thiết kế lớn có thể mất nhiều thời gian để tạo và chỉnh sửa.</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_number_at_least">Hãy nhập một số tối thiểu là %1$s.</string>
+  <!-- Validation message. %1$s is the minimum allowed value. -->
+  <string name="surveyeditor_sampling_enter_whole_number_at_least">Hãy nhập một số nguyên tối thiểu là %1$s.</string>
+  <!-- Validation message. %1$s and %2$s are the minimum and maximum allowed values. -->
+  <string name="surveyeditor_sampling_enter_whole_number_range">Hãy nhập một số nguyên từ %1$s đến %2$s.</string>
+
+  <string name="surveyeditor_plot_review">Rà soát lô</string>
+  <string name="surveyeditor_plot_review_description">Trước tiên, kiểm tra từng lô trên ảnh vệ tinh, sau đó gửi các lô cần thiết cho tổ thực địa.</string>
+  <string name="surveyeditor_plot_review_desk">Kiểm tra lô trên ảnh (web)</string>
+  <string name="surveyeditor_plot_review_desk_on">Người giải đoán điền biểu mẫu cho từng lô trong bảng điều khiển web.</string>
+  <string name="surveyeditor_plot_review_desk_off">Thêm biểu mẫu web để phân loại từng lô từ ảnh.</string>
+  <string name="surveyeditor_plot_review_field">Xác minh lô tại thực địa (di động)</string>
+  <string name="surveyeditor_plot_review_field_on">Các lô cần đến kiểm tra sẽ có dấu !. Tổ thực địa xác minh các lô này trong ứng dụng di động.</string>
+  <string name="surveyeditor_plot_review_field_off">Thêm biểu mẫu di động để tổ thực địa xác minh các lô cần đến kiểm tra.</string>
+  <string name="surveyeditor_plot_review_confidence">Gửi các lô có độ tin cậy dưới mức này</string>
+  <string name="surveyeditor_plot_review_confidence_description">Người giải đoán đánh giá độ tin cậy từ 0 đến 100. Nhập 0 để chỉ gửi các lô họ gắn cờ.</string>
+  <string name="surveyeditor_plot_review_spot_checks">Kiểm tra ngẫu nhiên</string>
+  <string name="surveyeditor_plot_review_spot_checks_description">Các lô được chọn ngẫu nhiên cũng được gửi ra thực địa để đo độ chính xác của việc kiểm tra trong phòng. Nhập 0 nếu không cần.</string>
+  <plurals name="surveyeditor_plot_review_spot_checks_share">
+    <item quantity="other">%1$s trong số %2$s lô. Được chọn ngẫu nhiên để đo độ chính xác của việc kiểm tra trong phòng.</item>
+  </plurals>
+  <string name="surveyeditor_plot_review_spot_checks_unshuffled">Bật Xáo trộn thứ tự thăm để các lô kiểm tra được chọn ngẫu nhiên.</string>
+  <string name="surveyeditor_plot_review_desk_form">%1$s trở thành biểu mẫu kiểm tra trong phòng: chỉ trên web, có câu hỏi về độ tin cậy và gắn cờ.</string>
+  <string name="surveyeditor_plot_review_show_desk">Hiển thị câu trả lời trong phòng cho tổ thực địa</string>
+  <string name="surveyeditor_plot_review_show_desk_on">Tổ thực địa thấy lớp phủ đất và độ tin cậy từ kiểm tra trong phòng trên từng lô.</string>
+  <string name="surveyeditor_plot_review_show_desk_off">Kiểm tra mù: tổ thực địa chỉ thấy lý do lô bị gắn cờ.</string>
+  <string name="surveyeditor_plot_review_open_form">Mở %1$s</string>
+  <string name="surveyeditor_plot_review_remove_title">Ngừng kiểm tra lô trên ảnh?</string>
+  <string name="surveyeditor_plot_review_remove_body">Thao tác này xóa các biểu mẫu và câu hỏi rà soát lô khỏi khảo sát, kể cả các thay đổi bạn đã thực hiện.</string>
+  <string name="surveyeditor_plot_review_remove_field_title">Ngừng xác minh lô tại thực địa?</string>
+  <string name="surveyeditor_plot_review_remove_field_body">Thao tác này xóa biểu mẫu xác minh thực địa khỏi khảo sát, kể cả các thay đổi bạn đã thực hiện.</string>
+  <string name="surveyeditor_plot_review_remove">Xóa biểu mẫu</string>
+  <string name="surveyeditor_plot_review_remove_field">Xóa biểu mẫu</string>
+  <!-- Sampling design: button that uploads a strata file. -->
+  <string name="surveyeditor_sampling_upload_strata_file">Tải lên tệp các tầng (GeoJSON / KML)</string>
+  <!-- Error under the strata file upload when the file has no polygons. %1$s = file name. -->
+  <string name="surveyeditor_sampling_strata_file_no_polygons">Không tìm thấy đối tượng đa giác nào trong %1$s.</string>
+  <!-- Error under the strata file upload when the file has points or lines instead of polygons. -->
+  <string name="surveyeditor_sampling_strata_file_not_polygons">Tệp các tầng phải chứa đối tượng đa giác.</string>
+
+  <!-- Problems found in an uploaded GeoJSON or KML file (GeoIssueText.kt). Shown in the survey area, map layer, and strata uploads. %1$d is the feature's number in the file, counted from 1. -->
+  <string name="geo_issue_unsupported_file_type">Loại tệp này không được hỗ trợ. Hãy tải lên tệp GeoJSON (.geojson, .json) hoặc KML (.kml).</string>
+  <string name="geo_issue_unreadable_geojson">Tệp này không phải GeoJSON hợp lệ. Hãy kiểm tra tệp đã được xuất dưới dạng GeoJSON rồi thử lại.</string>
+  <string name="geo_issue_geojson_not_an_object">Tệp này không phải GeoJSON hợp lệ. Tệp phải chứa một đối tượng.</string>
+  <string name="geo_issue_geojson_without_type">Tệp này không phải GeoJSON hợp lệ.</string>
+  <string name="geo_issue_invalid_kml">Tệp này không phải KML hợp lệ. Hãy kiểm tra tệp đã được xuất dưới dạng KML (không phải KMZ) rồi thử lại.</string>
+  <string name="geo_issue_no_geometry">Tệp này không chứa hình học nào.</string>
+  <string name="geo_issue_feature_collection_without_features">FeatureCollection không có đối tượng nào.</string>
+  <!-- %1$d is the number of holes removed. -->
+  <plurals name="geo_issue_holes_removed">
+    <item quantity="other">Đã xóa %1$d lỗ khỏi các đa giác. Collect One chỉ dùng ranh giới bên ngoài.</item>
+  </plurals>
+  <string name="geo_issue_invalid_feature">Đối tượng %1$d không phải Feature GeoJSON hợp lệ.</string>
+  <string name="geo_issue_feature_without_geometry">Đối tượng %1$d không có hình học và đã bị bỏ qua.</string>
+  <string name="geo_issue_invalid_geometry">Đối tượng %1$d có hình học không hợp lệ.</string>
+  <!-- %2$s is the GeoJSON geometry type found in the file, e.g. "Circle". -->
+  <string name="geo_issue_unsupported_geometry_type">Đối tượng %1$d có loại hình học không được hỗ trợ "%2$s".</string>
+  <!-- Shown as %2$s of geo_issue_unsupported_geometry_type when the geometry has no type. -->
+  <string name="geo_issue_geometry_type_unknown">không xác định</string>
+  <string name="geo_issue_invalid_coordinates">Đối tượng %1$d thiếu tọa độ hoặc có tọa độ không hợp lệ và đã bị bỏ qua.</string>
+  <string name="geo_issue_coordinates_out_of_range">Đối tượng %1$d có tọa độ nằm ngoài phạm vi hợp lệ và đã bị bỏ qua. Hãy dùng độ thập phân WGS 84 (vĩ độ −90 đến 90, kinh độ −180 đến 180).</string>
+  <string name="geo_issue_too_few_corners">Đối tượng %1$d có ít hơn 3 đỉnh phân biệt và đã bị bỏ qua.</string>
+  <string name="geo_issue_outline_closed">Đường viền của đối tượng %1$d chưa khép kín nên đã được tự động khép lại.</string>
+  <string name="geo_issue_self_intersection">Đường viền của đối tượng %1$d tự cắt nhau. Diện tích và ô mẫu có thể sai; hãy sửa ranh giới trong công cụ GIS rồi tải lên lại.</string>
+  <string name="geo_issue_may_cross_antimeridian">Đối tượng %1$d có thể cắt qua kinh tuyến 180°, điều này chưa được hỗ trợ. Hãy chia nó thành các phần ở hai bên kinh tuyến.</string>
+  <!-- How a survey's area was defined, after "Source:". "Places API" is the name of the place search service. -->
+  <string name="surveyeditor_area_source_selected_boundary">Ranh giới đã chọn</string>
+  <string name="surveyeditor_area_source_drawn">Vẽ trên bản đồ</string>
+  <string name="surveyeditor_area_source_uploaded">Đã tải lên: %1$s</string>
+  <string name="surveyeditor_area_source_place_search">Places API</string>
+  <string name="surveyeditor_area_source_coordinates">Tọa độ</string>
+  <plurals name="surveyeditor_area_source_collect_earth_grid">
+    <item quantity="other">Lưới ô mẫu Collect Earth (%1$d ô)</item>
+  </plurals>
+
+  <!-- Survey details: Danger zone, where organizers delete the survey. -->
+  <string name="surveyeditor_danger_zone">Vùng nguy hiểm</string>
+  <string name="surveyeditor_danger_zone_body">Xóa khảo sát sẽ gỡ khảo sát khỏi mọi người có quyền truy cập, kể cả người thu thập dữ liệu. Khảo sát sẽ không còn được tính vào giới hạn khảo sát của chủ sở hữu.</string>
+  <string name="surveyeditor_delete_survey">Xóa khảo sát</string>
+  <!-- %1$s: the survey's title. -->
+  <string name="surveyeditor_delete_survey_title">Xóa “%1$s”?</string>
+  <string name="surveyeditor_delete_survey_message">Mọi người sẽ mất quyền truy cập vào khảo sát này và dữ liệu đã thu thập. Các thay đổi chưa xuất bản sẽ bị hủy, và khảo sát không còn được tính vào giới hạn khảo sát của chủ sở hữu.</string>
+  <string name="surveyeditor_add_dataset_from_template">Từ mẫu</string>
+  <string name="surveyeditor_add_layer_from_template_body">Thêm biểu mẫu của một mẫu. Các bài gửi sẽ thêm đối tượng vào một lớp bản đồ mới.</string>
+  <string name="surveyeditor_add_table_from_template_body">Thêm biểu mẫu của một mẫu. Các bài gửi sẽ thêm hàng vào một bảng dữ liệu mới.</string>
+  <string name="surveyeditor_add_dataset_no_templates">Thư viện của bạn không có mẫu nào thuộc loại này.</string>
+</resources>

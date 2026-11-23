@@ -21,7 +21,7 @@
 #
 # The clients embed a Kotlin copy (GlobalLibrarySeedData.kt), and its
 # GlobalLibrarySeedTest fails when the two differ. Template questions carry
-# their concept links as `ground:concept` foreign attributes on their bindings.
+# their concept links as `collectone:concept` foreign attributes on their bindings.
 
 concepts {
   id: "timber.species"
@@ -537,8 +537,8 @@ form_templates {
         type: TYPE_DATE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.felling_date@1"
         }
       }
@@ -547,8 +547,8 @@ form_templates {
         type: TYPE_STRING
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.felling_permit_id@1"
         }
       }
@@ -557,8 +557,8 @@ form_templates {
         type: TYPE_STRING
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.harvest_unit@1"
         }
       }
@@ -567,8 +567,8 @@ form_templates {
         type: TYPE_GEOPOINT
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.stump_location@1"
         }
       }
@@ -577,8 +577,8 @@ form_templates {
         type: TYPE_STRING
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.species@1"
         }
       }
@@ -587,8 +587,8 @@ form_templates {
         type: TYPE_STRING
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.log_id@1"
         }
       }
@@ -596,8 +596,8 @@ form_templates {
         field_path: "diameter_cm"
         type: TYPE_DOUBLE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.diameter_cm@1"
         }
       }
@@ -605,8 +605,8 @@ form_templates {
         field_path: "length_m"
         type: TYPE_DOUBLE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.length_m@1"
         }
       }
@@ -615,8 +615,8 @@ form_templates {
         type: TYPE_DOUBLE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "timber.volume_m3@1"
         }
       }
@@ -624,8 +624,8 @@ form_templates {
         field_path: "site_photo"
         type: TYPE_BINARY
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.site_photo@1"
         }
       }
@@ -740,6 +740,7 @@ form_templates {
     }
   }
   status: STABLE
+  version: 1
 }
 purpose_packs {
   id: "timber_traceability"

@@ -19,6 +19,12 @@ import com.squareup.wire.Instant
 import com.squareup.wire.ofEpochSecond
 import kotlin.math.floor
 import kotlin.math.roundToLong
+import org.openforis.collectone.v2.core.forms.temporal.CivilDate
+import org.openforis.collectone.v2.core.forms.temporal.formatIsoInstant
+import org.openforis.collectone.v2.core.forms.temporal.formatIsoTime
+import org.openforis.collectone.v2.core.forms.temporal.parseIsoOffsetSeconds
+import org.openforis.collectone.v2.core.forms.temporal.toCivilDate
+import org.openforis.collectone.v2.core.forms.temporal.toProtoDate
 
 /**
  * Pure Kotlin Multiplatform civil calendar and ISO-8601 date/time utilities for XPath temporal
@@ -33,34 +39,12 @@ internal object TemporalUtils {
   // 1970-01-01 was a Thursday (day of week index 4 if Sun=0..Sat=6)
   private val SHORT_WEEKDAY_NAMES = arrayOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
 
-  /**
-   * Converts a proleptic Gregorian calendar date to epoch days since 1970-01-01 (Howard Hinnant
-   * algorithm).
-   */
-  fun dateToEpochDays(year: Int, month: Int, day: Int): Long {
-    val y = if (month <= 2) year.toLong() - 1L else year.toLong()
-    val era = if (y >= 0) y / 400L else (y - 399L) / 400L
-    val yoe = y - era * 400L
-    val m = month.toLong()
-    val doy = (153L * (if (m > 2) m - 3L else m + 9L) + 2L) / 5L + day.toLong() - 1L
-    val doe = yoe * 365L + yoe / 4L - yoe / 100L + doy
-    return era * 146097L + doe - 719468L
-  }
+  /** Converts a proleptic Gregorian calendar date to epoch days since 1970-01-01. */
+  fun dateToEpochDays(year: Int, month: Int, day: Int): Long =
+    CivilDate(year, month, day).toEpochDays()
 
   /** Converts epoch days since 1970-01-01 to a [Date] message. */
-  fun epochDaysToDate(epochDays: Long): Date {
-    val z = epochDays + 719468L
-    val era = if (z >= 0) z / 146097L else (z - 146096L) / 146097L
-    val doe = z - era * 146097L
-    val yoe = (doe - doe / 1460L + doe / 36524L - doe / 146096L) / 365L
-    val y = yoe + era * 400L
-    val doy = doe - (365L * yoe + yoe / 4L - yoe / 100L)
-    val mp = (5L * doy + 2L) / 153L
-    val d = doy - (153L * mp + 2L) / 5L + 1L
-    val m = if (mp < 10L) mp + 3L else mp - 9L
-    val year = if (m <= 2L) y + 1L else y
-    return Date(year = year.toInt(), month = m.toInt(), day = d.toInt())
-  }
+  fun epochDaysToDate(epochDays: Long): Date = CivilDate.fromEpochDays(epochDays).toProtoDate()
 
   /** Returns the day of week name (`Sun`..`Sat`) for epoch days since 1970-01-01. */
   fun dayOfWeekShortName(epochDays: Long): String {
@@ -69,51 +53,32 @@ internal object TemporalUtils {
     return SHORT_WEEKDAY_NAMES[idx]
   }
 
+  /**
+   * A date as the number XForms uses for date arithmetic: whole days since 1970-01-01 (ODK XForms
+   * spec, "Data Types": dates convert to numbers of days since the epoch).
+   */
   fun dateToEpochDays(date: Date): Double =
     dateToEpochDays(date.year, date.month, date.day).toDouble()
 
+  /** An instant as fractional days since 1970-01-01T00:00Z, so `decimal-date-time()` math works. */
   fun timestampToEpochDays(instant: Instant): Double =
     (instant.getEpochSecond().toDouble() + instant.getNano().toDouble() / 1_000_000_000.0) / 86400.0
 
+  /**
+   * A time of day as the fraction of a day elapsed since midnight (`0.5` is noon), matching
+   * `decimal-time()` in the ODK XForms spec.
+   */
   fun timeOfDayToDecimal(time: TimeOfDay): Double =
     (time.hours * 3600.0 +
       time.minutes * 60.0 +
       time.seconds.toDouble() +
       time.nanos / 1_000_000_000.0) / 86400.0
 
-  fun formatDate(date: Date): String =
-    "${date.year.toString().padStart(4, '0')}-${date.month.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}"
+  fun formatDate(date: Date): String = date.toCivilDate().toIsoString()
 
-  fun formatTime(time: TimeOfDay): String {
-    val base =
-      "${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:${time.seconds.toString().padStart(2, '0')}"
-    return if (time.nanos > 0) {
-      val millis = (time.nanos / 1_000_000).toString().padStart(3, '0')
-      "$base.$millis"
-    } else {
-      base
-    }
-  }
+  fun formatTime(time: TimeOfDay): String = formatIsoTime(time)
 
-  fun formatTimestamp(instant: Instant): String {
-    val epochSec = instant.getEpochSecond()
-    val nano = instant.getNano()
-    val days = floor(epochSec.toDouble() / 86400.0).toLong()
-    val remSec = ((epochSec % 86400L) + 86400L) % 86400L
-    val date = epochDaysToDate(days)
-    val hours = (remSec / 3600L).toInt()
-    val minutes = ((remSec % 3600L) / 60L).toInt()
-    val seconds = (remSec % 60L).toInt()
-    val timeStr =
-      "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-    val nanosStr =
-      if (nano > 0) {
-        "." + (nano / 1_000_000).toString().padStart(3, '0')
-      } else {
-        ""
-      }
-    return "${formatDate(date)}T$timeStr${nanosStr}Z"
-  }
+  fun formatTimestamp(instant: Instant): String = formatIsoInstant(instant)
 
   /** Parses an ISO-8601 date (`YYYY-MM-DD`) or date-time string into a [Date] if valid, or null. */
   fun tryParseDate(str: String): Date? {
@@ -173,11 +138,11 @@ internal object TemporalUtils {
       timePart = afterT.dropLast(1)
     } else if (afterT.contains('+')) {
       timePart = afterT.substringBefore('+')
-      offsetSeconds = parseTzOffsetSeconds(afterT.substringAfter('+'))
+      offsetSeconds = parseIsoOffsetSeconds(afterT.substringAfter('+'))
     } else if (afterT.lastIndexOf('-') > 0) {
       val idx = afterT.lastIndexOf('-')
       timePart = afterT.substring(0, idx)
-      offsetSeconds = -parseTzOffsetSeconds(afterT.substring(idx + 1))
+      offsetSeconds = -parseIsoOffsetSeconds(afterT.substring(idx + 1))
     } else {
       timePart = afterT
     }
@@ -189,13 +154,6 @@ internal object TemporalUtils {
         time.nanos / 1_000_000_000.0
     val utcSec = timeSec - offsetSeconds.toDouble()
     return baseDays + utcSec / 86400.0
-  }
-
-  private fun parseTzOffsetSeconds(tz: String): Long {
-    val parts = tz.split(':')
-    val h = parts.getOrNull(0)?.toLongOrNull() ?: 0L
-    val m = parts.getOrNull(1)?.toLongOrNull() ?: 0L
-    return h * 3600L + m * 60L
   }
 
   /**
@@ -260,6 +218,10 @@ internal object TemporalUtils {
     return sb.toString()
   }
 
+  /**
+   * The instant [epochDays] fractional days after 1970-01-01T00:00Z; the inverse of
+   * [timestampToEpochDays], rounded to the nearest nanosecond.
+   */
   fun epochDaysToInstant(epochDays: Double): Instant {
     val totalSeconds = floor(epochDays * 86400.0).toLong()
     val nanos = ((epochDays * 86400.0 - totalSeconds.toDouble()) * 1_000_000_000.0).roundToLong()

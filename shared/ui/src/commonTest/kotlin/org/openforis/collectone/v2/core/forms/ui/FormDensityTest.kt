@@ -22,10 +22,10 @@ import kotlin.test.assertTrue
 class FormDensityTest {
 
   @Test
-  fun numericSteppers_shownOnlyInComfortableDensity() {
-    // The mobile runner keeps the -1/+1 and -0.5/+0.5 buttons; the compact web layout drops them
-    // and gives the text field the full width.
-    assertTrue(showNumericSteppers(FormDensity.COMFORTABLE))
+  fun numericSteppers_disabledAcrossAllDensities() {
+    // Both mobile and compact web layouts rely on standard numeric keyboard input or slider drag
+    // directly without extra -1/+1 or -0.5/+0.5 stepper buttons.
+    assertFalse(showNumericSteppers(FormDensity.COMFORTABLE))
     assertFalse(showNumericSteppers(FormDensity.COMPACT))
   }
 

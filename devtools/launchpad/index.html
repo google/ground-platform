@@ -575,7 +575,7 @@
           <span class="toolbar-title">RPC inspector</span>
           <span class="toolbar-sub" data-server-path="/debug">Live calls to the server · /debug</span>
           <button class="act restart push" onclick="reloadFrame('rpcFrame')">Reload</button>
-          <button class="act logs" style="margin-left: 0;" data-requires="user-data-service" onclick="openServerPage('/debug')">New tab ↗</button>
+          <button class="act logs" style="margin-left: 0;" data-requires="server" onclick="openServerPage('/debug')">New tab ↗</button>
         </div>
         <iframe id="rpcFrame" class="frame" src="about:blank" title="RPC inspector"></iframe>
       </section>
@@ -586,7 +586,7 @@
           <span class="toolbar-title">Spanner data</span>
           <span class="toolbar-sub" data-server-path="/debug/spanner">Tables and queries · /debug/spanner</span>
           <button class="act restart push" onclick="reloadFrame('spannerFrame')">Reload</button>
-          <button class="act logs" style="margin-left: 0;" data-requires="user-data-service" onclick="openServerPage('/debug/spanner')">New tab ↗</button>
+          <button class="act logs" style="margin-left: 0;" data-requires="server" onclick="openServerPage('/debug/spanner')">New tab ↗</button>
         </div>
         <iframe id="spannerFrame" class="frame" src="about:blank" title="Spanner data"></iframe>
       </section>
@@ -597,7 +597,7 @@
           <span class="toolbar-title">Logs</span>
           <div class="filters">
             <button class="filter active" data-filter="all" onclick="setLogFilter('all')">All</button>
-            <button class="filter" data-filter="user-data-service" onclick="setLogFilter('user-data-service')">Server</button>
+            <button class="filter" data-filter="server" onclick="setLogFilter('server')">Server</button>
             <button class="filter" data-filter="web-console" onclick="setLogFilter('web-console')">Web</button>
             <button class="filter" data-filter="mobile-app" onclick="setLogFilter('mobile-app')">Mobile</button>
             <button class="filter" data-filter="spanner-emulator" onclick="setLogFilter('spanner-emulator')">Spanner</button>
@@ -664,6 +664,17 @@
     // including port-prefixed proxy hosts (e.g. 8099-host.proxy.example.com).
     // ---------------------------------------------------------------
     const SERVER_PORT = 8080;
+    const LOOPBACK_HOSTS = new Set(['', 'localhost', '127.0.0.1', '::1', '[::1]']);
+
+    function hostServiceUrl(port, pathAndHash = '') {
+      const loc = window.location;
+      const proxyMatch = loc.hostname.match(/^(\d+)-(.*\..*)$/);
+      if (proxyMatch) {
+        const portSuffix = loc.port ? `:${loc.port}` : '';
+        return `${loc.protocol}//${port}-${proxyMatch[2]}${portSuffix}${pathAndHash}`;
+      }
+      return `${loc.protocol}//${loc.hostname}:${port}${pathAndHash}`;
+    }
 
     /** The configured server URL without a trailing slash, or null if unset or invalid. */
     function configuredServerBase() {
@@ -671,7 +682,13 @@
       if (!configured) return null;
       try {
         const url = new URL(configured.includes('://') ? configured : `http://${configured}`);
-        return `${url.origin}${url.pathname.replace(/\/+$/, '')}`;
+        const basePath = url.pathname.replace(/\/+$/, '');
+        const browserHost = (window.location?.hostname || '').toLowerCase();
+        if (LOOPBACK_HOSTS.has(url.hostname.toLowerCase()) && !LOOPBACK_HOSTS.has(browserHost)) {
+          const targetPort = Number(url.port) || (url.protocol === 'https:' ? 443 : SERVER_PORT);
+          return hostServiceUrl(targetPort, basePath);
+        }
+        return `${url.origin}${basePath}`;
       } catch (_) {
         return null;
       }
@@ -680,13 +697,7 @@
     function resolveServiceUrl(port, pathAndHash = '') {
       const serverBase = port === SERVER_PORT ? configuredServerBase() : null;
       if (serverBase) return `${serverBase}${pathAndHash}`;
-      const loc = window.location;
-      const proxyMatch = loc.hostname.match(/^(\d+)-(.*\..*)$/);
-      if (proxyMatch) {
-        const portSuffix = loc.port ? `:${loc.port}` : '';
-        return `${loc.protocol}//${port}-${proxyMatch[2]}${portSuffix}${pathAndHash}`;
-      }
-      return `${loc.protocol}//${loc.hostname}:${port}${pathAndHash}`;
+      return hostServiceUrl(port, pathAndHash);
     }
 
     /**
@@ -822,7 +833,7 @@
     // ---------------------------------------------------------------
     // Status.
     // ---------------------------------------------------------------
-    const CORE_IDS = ['user-data-service', 'web-console', 'mobile-app'];
+    const CORE_IDS = ['server', 'web-console', 'mobile-app'];
     let lastStatus = null;
 
     // Actions clicked but not yet reflected in the status (service ID -> {action, until}), so their
@@ -891,10 +902,9 @@
       document.getElementById('totalMemory').textContent =
         `${online.reduce((sum, s) => sum + (s.rssMb || 0), 0).toLocaleString()} MB`;
       document.getElementById('serverUrl').textContent = status.localProperties.userDataServiceUrl || 'Not set';
-      const serverBase = configuredServerBase() || 'http://localhost:8080';
       for (const el of document.querySelectorAll('[data-server-path]')) {
         const label = el.textContent.split(' · ')[0];
-        el.textContent = `${label} · ${serverBase}${el.dataset.serverPath}`;
+        el.textContent = `${label} · ${serverPageUrl(el.dataset.serverPath)}`;
       }
       document.getElementById('hostLabel').textContent = status.host.hostname.split('.')[0];
 

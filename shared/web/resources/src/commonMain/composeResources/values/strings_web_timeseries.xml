@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Tab of the dashboard's bottom panel with satellite time series of the selected map feature. -->
+  <string name="web_time_series_tab">Time series &amp; imagery</string>
+  <!-- Button on a map feature's details card that opens the time series tab. -->
+  <string name="web_time_series_open">Analyze imagery</string>
+  <string name="web_time_series_select_feature">Select a point or polygon on the map to see its satellite time series.</string>
+  <string name="web_time_series_unsupported">Time series are available for points and polygons.</string>
+  <string name="web_time_series_unavailable">Time series need a connection to the Collect One service.</string>
+  <string name="web_time_series_loading">Loading satellite observations…</string>
+  <string name="web_time_series_no_observations">No cloud-free observations of %1$s in this period.</string>
+  <string name="web_time_series_retry">Retry</string>
+  <string name="web_time_series_error_not_uploaded">This survey isn't on the server yet. Time series appear once it has been uploaded.</string>
+  <string name="web_time_series_error_unsupported">This map feature can't be analyzed.</string>
+  <string name="web_time_series_error_busy">Too many requests. Try again in a minute.</string>
+  <string name="web_time_series_error_timeout">Earth Engine took too long to answer. Try again.</string>
+  <string name="web_time_series_error_unavailable">Earth Engine isn't available right now.</string>
+  <string name="web_time_series_error_denied">You don't have access to this survey.</string>
+  <string name="web_time_series_error_other">Couldn't load the data.</string>
+  <!-- Plot area chip; %1$s is the formatted area in hectares. -->
+  <string name="web_time_series_area">%1$s ha</string>
+  <!-- Elevation range chip; %1$s and %2$s are the lowest and highest elevation in meters. -->
+  <string name="web_time_series_elevation_range">Elevation %1$s–%2$s m</string>
+  <!-- Elevation chip for a point; %1$s is the elevation in meters. -->
+  <string name="web_time_series_elevation">Elevation %1$s m</string>
+  <!-- Population chip; %1$s is the estimated number of residents, %2$s the density per km², %3$d the year. -->
+  <string name="web_time_series_population">Population %1$s (%2$s/km², %3$d)</string>
+  <!-- Population chip for a point; %1$s is the density per km², %2$d the year. -->
+  <string name="web_time_series_population_density">%1$s people/km² (%2$d)</string>
+  <string name="web_time_series_source_landsat">Landsat</string>
+  <string name="web_time_series_source_sentinel2">Sentinel-2</string>
+  <string name="web_time_series_source_sentinel1">Sentinel-1</string>
+  <!-- Menus of the time series tab: the satellite to chart, and the band or index. -->
+  <string name="web_time_series_source_picker">Imagery source</string>
+  <string name="web_time_series_band_picker">Band</string>
+  <!-- Accessible name of a menu button; %1$s is the menu (e.g. "Band"), %2$s the selected option. -->
+  <string name="web_time_series_picker_selection">%1$s: %2$s</string>
+  <!-- Imagery source details: sensor type, resolution, and how often it revisits a place. -->
+  <string name="web_time_series_source_landsat_detail">Optical · 30 m · every 8–16 days</string>
+  <string name="web_time_series_source_sentinel2_detail">Optical · 10 m · every 5 days</string>
+  <string name="web_time_series_source_sentinel1_detail">Radar · 10 m · sees through clouds</string>
+  <!-- Section headings of the band menu. -->
+  <string name="web_time_series_band_group_indices">Indices</string>
+  <string name="web_time_series_band_group_reflectance">Reflectance</string>
+  <string name="web_time_series_band_group_backscatter">Backscatter</string>
+  <!-- Names of reflectance bands (index acronyms such as NDVI aren't translated). -->
+  <string name="web_time_series_band_blue">Blue</string>
+  <string name="web_time_series_band_green">Green</string>
+  <string name="web_time_series_band_red">Red</string>
+  <string name="web_time_series_band_nir">NIR</string>
+  <string name="web_time_series_band_swir1">SWIR 1</string>
+  <string name="web_time_series_band_swir2">SWIR 2</string>
+  <!-- One-line explanations of each band in the band menu. -->
+  <string name="web_time_series_band_ndvi_detail">Vegetation greenness</string>
+  <string name="web_time_series_band_ndfi_detail">Forest canopy degradation</string>
+  <string name="web_time_series_band_evi_detail">Greenness in dense canopy</string>
+  <string name="web_time_series_band_evi2_detail">Two-band EVI, without blue</string>
+  <string name="web_time_series_band_nbr_detail">Burn scars and canopy loss</string>
+  <string name="web_time_series_band_ndmi_detail">Canopy water content</string>
+  <string name="web_time_series_band_ndwi_detail">Open water</string>
+  <string name="web_time_series_band_blue_detail">Visible blue light</string>
+  <string name="web_time_series_band_green_detail">Visible green light</string>
+  <string name="web_time_series_band_red_detail">Visible red, absorbed by plants</string>
+  <string name="web_time_series_band_nir_detail">Near infrared, reflected by leaves</string>
+  <string name="web_time_series_band_swir1_detail">Shortwave infrared: moisture</string>
+  <string name="web_time_series_band_swir2_detail">Shortwave infrared: soil and burns</string>
+  <string name="web_time_series_band_vv_detail">Surface backscatter (dB)</string>
+  <string name="web_time_series_band_vh_detail">Canopy backscatter (dB)</string>
+  <string name="web_time_series_band_vv_vh_detail">Ratio of VV to VH</string>
+  <string name="web_time_series_band_rfdi_detail">Radar forest degradation index</string>
+  <!-- Observation count; %1$d is the number of observations with a value, %2$s the date range. -->
+  <string name="web_time_series_observations">%1$d observations · %2$s</string>
+  <!-- Selected observation; %1$s is the date, %2$s the satellite, %3$s the band, %4$s the value. -->
+  <string name="web_time_series_selected">%1$s · %2$s · %3$s %4$s</string>
+  <string name="web_time_series_chart_hint">Click a point (or use ← →) to show that day's scene on the map.</string>
+  <!-- Screen reader description of the chart; %1$s is the band, %2$d the number of observations. -->
+  <string name="web_time_series_chart_description">%1$s time series chart with %2$d observations</string>
+  <string name="web_time_series_scene_loading">Loading scene…</string>
+  <string name="web_time_series_scene_failed">Couldn't load this scene.</string>
+  <string name="web_time_series_scene_clear">Remove scene from map</string>
+  <string name="web_time_series_stretch_true_color">True color</string>
+  <string name="web_time_series_stretch_swir_nir_red">SWIR · NIR · Red</string>
+  <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · Red</string>
+  <string name="web_time_series_stretch_sar">VV · VH · Ratio</string>
+  <string name="web_time_series_close">Close time series</string>
+  <string name="web_time_series_expand">Expand imagery analysis</string>
+  <string name="web_time_series_collapse">Collapse imagery analysis</string>
+</resources>

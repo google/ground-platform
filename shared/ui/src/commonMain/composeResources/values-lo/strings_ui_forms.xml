@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Strings for the field-facing form runner (mobile wizard and compact web layout) and its
+     question widgets. -->
+<resources>
+  <!-- Common actions -->
+  <string name="forms_cancel">ຍົກເລີກ</string>
+  <string name="forms_submit">ສົ່ງ</string>
+  <!-- Button that skips an optional question without answering it. -->
+  <string name="forms_skip">ຂ້າມ</string>
+  <!-- Button / badge that opens an answer or repeat entry for editing. -->
+  <string name="forms_edit">ແກ້ໄຂ</string>
+  <string name="forms_delete">ລຶບ</string>
+  <!-- Button that clears the current answer. -->
+  <string name="forms_clear">ລ້າງ</string>
+  <string name="forms_undo">ຍ້ອນກັບ</string>
+  <string name="forms_redo">ເຮັດຊ້ຳ</string>
+  <!-- Button that finishes drawing a geometry on the map. -->
+  <string name="forms_done">ແລ້ວເສັດ</string>
+  <!-- Confirm button of the date picker dialog. -->
+  <string name="forms_ok">ຕົກລົງ</string>
+  <!-- Confirms adding a new choice option typed by the collector. -->
+  <string name="forms_add">ເພີ່ມ</string>
+  <string name="forms_yes">ແມ່ນ</string>
+  <string name="forms_no">ບໍ່</string>
+
+  <!-- Form header, navigation, and progress -->
+  <!-- Fallback title of a form that has no title in the compact (web) layout. -->
+  <string name="forms_untitled_form">ແບບຟອມ</string>
+  <!-- Fallback title of a form that has no title in the mobile runner. -->
+  <string name="forms_untitled_survey_form">ແບບຟອມສຳຫຼວດ</string>
+  <!-- Title of the final review step; also the submit button label while answers still need review. -->
+  <string name="forms_review_and_submit">ກວດສອບ ແລະ ສົ່ງ</string>
+  <!-- Compact layout progress. %1$d = settled (answered or skipped) questions, %2$d = total questions. -->
+  <string name="forms_progress_answered_of_total">ຕອບແລ້ວ %1$d ຈາກ %2$d</string>
+  <string name="forms_expand_all">ຂະຫຍາຍທັງໝົດ</string>
+  <string name="forms_collapse_all">ຫຍໍ້ທັງໝົດ</string>
+  <!-- Footer progress segments, joined with " • ". %1$d = number of questions. -->
+  <string name="forms_progress_answered_count">ຕອບແລ້ວ %1$d</string>
+  <string name="forms_progress_skipped_count">ຂ້າມ %1$d</string>
+  <string name="forms_progress_pending_count">ລໍຖ້າ %1$d</string>
+  <!-- Mobile app bar subtitle on the final review step. %1$d = number of questions in the form. -->
+  <plurals name="forms_review_and_finalize_summary">
+    <item quantity="other">ກວດສອບ ແລະ ສະຫຼຸບ (%1$d ຄຳຖາມ)</item>
+  </plurals>
+  <!-- Mobile app bar subtitle. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_of_total">ຂັ້ນຕອນ %1$d ຈາກ %2$d</string>
+  <!-- Compact step counter in the bottom bar. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_counter">%1$d / %2$d</string>
+  <!-- Toggle that closes the list of all form steps. -->
+  <string name="forms_close_step_list">ປິດລາຍການ</string>
+  <!-- Toggle that opens the list of all form steps. %1$d = number of steps. -->
+  <string name="forms_steps_count">ຂັ້ນຕອນ (%1$d)</string>
+  <string name="forms_close_form">ປິດແບບຟອມ</string>
+  <!-- Content description of the icon in front of the form's language selector. -->
+  <string name="forms_language">ພາສາ</string>
+  <!-- Button that goes back to the previous question. -->
+  <string name="forms_back">ກັບຄືນ</string>
+  <!-- Button that moves on to the final review step. -->
+  <string name="forms_review">ກວດສອບ</string>
+  <!-- Button that moves on to the next question. -->
+  <string name="forms_next">ຕໍ່ໄປ</string>
+  <!-- Heading of the step overview list. %1$d = number of steps. -->
+  <string name="forms_all_form_steps">ຂັ້ນຕອນທັງໝົດຂອງແບບຟອມ (%1$d)</string>
+  <!-- Row of the step overview list. %1$d = step number, %2$s = step title. -->
+  <string name="forms_step_list_item">%1$d. %2$s</string>
+  <!-- Banner shown when Next is tapped before capturing a required location. -->
+  <string name="forms_blocker_location">ກະລຸນາບັນທຶກຕຳແໜ່ງ ຫຼື ປັກໝຸດກ່ອນດຳເນີນການຕໍ່.</string>
+  <string name="forms_blocker_optional">ກະລຸນາແກ້ໄຂຂໍ້ຜິດພາດການກວດສອບຂ້າງເທິງ ຫຼື ຂ້າມເພື່ອສືບຕໍ່.</string>
+  <string name="forms_blocker_required">ກະລຸນາແກ້ໄຂຂໍ້ຜິດພາດການກວດສອບຂ້າງເທິງເພື່ອສືບຕໍ່.</string>
+
+  <!-- Question cards -->
+  <!-- Question label with a required marker. %1$s = question label. -->
+  <string name="forms_required_label">%1$s *</string>
+  <!-- Badge on a required question. -->
+  <string name="forms_badge_required">ຈຳເປັນ *</string>
+  <!-- Badge on a question whose value is computed by the form. -->
+  <string name="forms_badge_calculated">ຄຳນວນອັດຕະໂນມັດ</string>
+  <string name="forms_badge_read_only">ອ່ານຢ່າງດຽວ</string>
+  <!-- Toggle for the extra instructions written for enumerators (data collectors). -->
+  <string name="forms_hide_guidance">ເຊື່ອງຄຳແນະນຳສຳລັບຜູ້ເກັບຂໍ້ມູນ</string>
+  <string name="forms_show_guidance">ສະແດງຄຳແນະນຳສຳລັບຜູ້ເກັບຂໍ້ມູນ</string>
+  <!-- Collapsed card summary of a question the collector skipped. -->
+  <string name="forms_status_skipped">ຂ້າມແລ້ວ</string>
+  <!-- Collapsed card summary of a question with no answer yet. -->
+  <string name="forms_status_not_answered">ຍັງບໍ່ໄດ້ຕອບ</string>
+  <!-- Screen reader descriptions of a question's status icon. -->
+  <string name="forms_status_answered">ຕອບແລ້ວ</string>
+  <string name="forms_status_pending">ລໍຖ້າ</string>
+  <string name="forms_status_needs_attention">ຕ້ອງກວດເບິ່ງ</string>
+  <string name="forms_collapse_question">ຫຍໍ້ຄຳຖາມ</string>
+  <string name="forms_expand_question">ຂະຫຍາຍຄຳຖາມ</string>
+  <!-- Generic stand-in for a question that has no label. -->
+  <string name="forms_this_question">ຄຳຖາມນີ້</string>
+  <!-- Title of a group of questions shown on one screen when the group has no label. -->
+  <string name="forms_untitled_question_group">ກຸ່ມຄຳຖາມ</string>
+  <!-- Shown when a photo, video, or audio file can't answer the question and no reason is given. -->
+  <string name="forms_attachment_rejected">ໄຟລ໌ແນບຖືກປະຕິເສດ</string>
+  <!-- %1$d = number of questions with validation errors. -->
+  <plurals name="forms_questions_need_attention">
+    <item quantity="other">ມີ %1$d ຄຳຖາມທີ່ຕ້ອງກວດເບິ່ງກ່ອນສົ່ງ.</item>
+  </plurals>
+
+  <!-- Repeated sections -->
+  <!-- Number of entries of a repeated section. %1$d = number of entries. -->
+  <plurals name="forms_repeat_section_entries">
+    <item quantity="other">%1$d ລາຍການ</item>
+  </plurals>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entries_hint">ເພີ່ມລາຍການ '%1$s' ໜຶ່ງລາຍການ ຫຼື ຫຼາຍກວ່ານັ້ນຂ້າງລຸ່ມ.</string>
+  <string name="forms_repeat_no_entries">ຍັງບໍ່ມີລາຍການທີ່ເຮັດຊ້ຳ.</string>
+  <!-- Fallback title of one repeat entry. %1$s = repeated section label, %2$d = entry number. -->
+  <string name="forms_repeat_instance_title">%1$s #%2$d</string>
+  <!-- Preview of a repeat entry that has no answers yet. -->
+  <string name="forms_repeat_tap_to_fill">ແຕະເພື່ອປ້ອນລາຍລະອຽດ</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entry">ເພີ່ມລາຍການ %1$s</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_named">ເພີ່ມ %1$s</string>
+  <!-- Delete action of one repeat entry. %1$s = entry title. -->
+  <string name="forms_repeat_delete_entry">ລຶບ %1$s</string>
+  <!-- Ordinal number badge of a repeat entry or ranked item. %1$d = number. -->
+  <string name="forms_number_badge">#%1$d</string>
+  <!-- %1$d = current entry number, %2$d = number of entries. -->
+  <string name="forms_repeat_entry_position">ລາຍການ #%1$d ຈາກ %2$d</string>
+  <!-- Button that opens the list of all entries of a repeated section. -->
+  <string name="forms_all_entries">ລາຍການທັງໝົດ</string>
+  <!-- Buttons that jump to the previous or next entry of a repeated section. -->
+  <string name="forms_repeat_previous_entry">ລາຍການກ່ອນໜ້າ</string>
+  <string name="forms_repeat_next_entry">ລາຍການຖັດໄປ</string>
+  <!-- Badge with the number of entries a repeated section requires. %1$d = number of entries. -->
+  <string name="forms_repeat_required_count">ຈຳເປັນ %1$d</string>
+  <!-- %1$s = repeated section label. Shown once a section has entries. -->
+  <string name="forms_repeat_add_another">ເພີ່ມລາຍການ %1$s ອີກ</string>
+  <!-- Title of the dialog confirming an entry deletion. %1$s = entry title. -->
+  <string name="forms_repeat_delete_title">ລຶບ %1$s ບໍ?</string>
+  <!-- Body of the dialog confirming an entry deletion. %1$d = answers in the entry. -->
+  <plurals name="forms_repeat_delete_message">
+    <item quantity="other">ຄຳຕອບ %1$d ລາຍການຂອງມັນຈະຖືກລຶບນຳ. ບໍ່ສາມາດຍົກເລີກໄດ້.</item>
+  </plurals>
+  <!-- Status of a repeat entry. -->
+  <string name="forms_repeat_status_not_started">ຍັງບໍ່ໄດ້ເລີ່ມ</string>
+  <string name="forms_repeat_status_in_progress">ກຳລັງດຳເນີນການ</string>
+  <string name="forms_repeat_status_complete">ສຳເລັດ</string>
+
+  <!-- Review step -->
+  <string name="forms_review_answers">ກວດສອບຄຳຕອບ</string>
+  <string name="forms_review_answers_hint">ແຕະຄຳຖາມໃດໜຶ່ງຂ້າງລຸ່ມ ເພື່ອກັບໄປແກ້ໄຂຄຳຕອບ.</string>
+  <string name="forms_ready_to_submit">✓ ພ້ອມສົ່ງ</string>
+  <!-- Badge with the number of validation issues. %1$d = number of issues. -->
+  <plurals name="forms_issue_count">
+    <item quantity="other">%1$d ບັນຫາ</item>
+  </plurals>
+  <string name="forms_form_finalized">✓ ສະຫຼຸບແບບຟອມສຳເລັດແລ້ວ</string>
+  <!-- %1$d = number of validation errors; the list of errors follows. -->
+  <plurals name="forms_cannot_submit_errors">
+    <item quantity="other">⚠ ບໍ່ສາມາດສົ່ງໄດ້: ມີຂໍ້ຜິດພາດການກວດສອບ %1$d ຂໍ້:</item>
+  </plurals>
+  <!-- One validation error in a list. %1$s = question label, %2$s = error message. -->
+  <string name="forms_validation_error_item">• %1$s: %2$s</string>
+  <!-- Badge on a review card whose answer is invalid. -->
+  <string name="forms_invalid_badge">ບໍ່ຖືກຕ້ອງ</string>
+  <!-- Heading of the data table records the submission creates or updates. %1$d = number of records. -->
+  <string name="forms_updated_records">ລາຍການຂໍ້ມູນທີ່ອັບເດດ (%1$d)</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_new_in_dataset">ລາຍການຂໍ້ມູນໃໝ່ໃນ %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_updated_in_dataset">ລາຍການຂໍ້ມູນທີ່ອັບເດດໃນ %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_unchanged_in_dataset">ລາຍການຂໍ້ມູນທີ່ບໍ່ປ່ຽນແປງໃນ %1$s</string>
+
+  <!-- Answer summaries -->
+  <!-- Shown in place of an answer for a question that has none. -->
+  <string name="forms_unanswered">(ຍັງບໍ່ໄດ້ຕອບ)</string>
+  <!-- Summary of a line (geotrace) answer. %1$d = number of points. -->
+  <plurals name="forms_trace_point_count">
+    <item quantity="other">%1$d ຈຸດເສັ້ນທາງ</item>
+  </plurals>
+  <!-- Summary of a polygon (geoshape) answer. %1$d = number of vertices. -->
+  <plurals name="forms_polygon_vertex_count">
+    <item quantity="other">%1$d ຈຸດຍອດຂອງຮູບຫຼາຍແຫຼ່ຽມ</item>
+  </plurals>
+  <!-- Repeat entry previews of location, line, and polygon answers. -->
+  <string name="forms_preview_location_recorded">ບັນທຶກຕຳແໜ່ງແລ້ວ</string>
+  <string name="forms_preview_trace_recorded">ບັນທຶກເສັ້ນທາງແລ້ວ</string>
+  <string name="forms_preview_shape_recorded">ບັນທຶກຮູບຮ່າງແລ້ວ</string>
+
+  <!-- Text, number, date, and time inputs -->
+  <string name="forms_text_placeholder">ປ້ອນຄຳຕອບ...</string>
+  <!-- Character count of a text answer. %1$d = number of characters. -->
+  <plurals name="forms_text_char_count">
+    <item quantity="other">%1$d ຕົວອັກສອນ</item>
+  </plurals>
+  <string name="forms_decimal_invalid">ປ້ອນຕົວເລກທົດສະນິຍົມທີ່ຖືກຕ້ອງ</string>
+  <string name="forms_integer_invalid">ປ້ອນຕົວເລກຈຳນວນເຕັມ</string>
+  <!-- %1$d = smallest allowed value, %2$d = largest allowed value. -->
+  <string name="forms_integer_out_of_range">ປ້ອນຄ່າລະຫວ່າງ %1$d ຫາ %2$d</string>
+  <!-- Placeholder showing the required ISO date format (year-month-day); typed dates must use it. -->
+  <string name="forms_date_placeholder">YYYY-MM-DD</string>
+  <string name="forms_date_invalid">ປ້ອນວັນທີທີ່ຖືກຕ້ອງໃນຮູບແບບ YYYY-MM-DD</string>
+  <string name="forms_clear_date">ລ້າງວັນທີ</string>
+  <string name="forms_select_date">ເລືອກວັນທີ</string>
+  <!-- Placeholder showing the required 24-hour time format (hours:minutes:seconds). -->
+  <string name="forms_time_placeholder">HH:MM:SS</string>
+  <!-- Button that fills a time question with the current time. -->
+  <string name="forms_now">ດຽວນີ້</string>
+  <string name="forms_no_timestamp">(ບໍ່ມີການບັນທຶກເວລາ)</string>
+  <string name="forms_capture_timestamp">ບັນທຶກເວລາ</string>
+
+  <!-- Location (geopoint) questions -->
+  <!-- Button that records the point under the map crosshair. -->
+  <string name="forms_add_point">ເພີ່ມຈຸດ</string>
+  <!-- Button that records the device's current GPS position. -->
+  <string name="forms_capture_location">ບັນທຶກຕຳແໜ່ງ</string>
+  <string name="forms_map_pan_allowed">ອະນຸຍາດໃຫ້ເລື່ອນແຜນທີ່</string>
+  <string name="forms_gps_only_no_pan">GPS ເທົ່ານັ້ນ (ບໍ່ເລື່ອນແຜນທີ່)</string>
+  <!-- Required GPS accuracy. %1$s = accuracy in meters. -->
+  <string name="forms_accuracy_required">ຕ້ອງການ ≤ %1$s m</string>
+  <!-- Location capture status badges. -->
+  <string name="forms_geo_status_panned">ເລື່ອນແຜນທີ່ແລ້ວ</string>
+  <string name="forms_geo_status_captured">ບັນທຶກແລ້ວ</string>
+  <string name="forms_geo_status_ready">ພ້ອມ</string>
+  <string name="forms_geo_target_coordinates">ພິກັດເປົ້າໝາຍ (ເຄື່ອງໝາຍກາກບາດທີ່ເລື່ອນ)</string>
+  <string name="forms_geo_captured_coordinates">ພິກັດທີ່ບັນທຶກແລ້ວ</string>
+  <string name="forms_geo_current_coordinates">ພິກັດ GPS ປັດຈຸບັນ</string>
+  <!-- Raw coordinates with altitude. %1$s = latitude, %2$s = longitude, %3$d = altitude in meters. -->
+  <string name="forms_geo_coordinates_with_altitude">%1$s, %2$s • ລະດັບຄວາມສູງ %3$d m</string>
+  <!-- Label of the GPS accuracy readout. -->
+  <string name="forms_accuracy">ຄວາມແມ່ນຍຳ</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m), %4$s = label of the Add point button. -->
+  <string name="forms_geo_saved_point">ຈຸດທີ່ບັນທຶກແລ້ວ: %1$s, %2$s (%3$s) — ແຕະ "%4$s" ເພື່ອອັບເດດ ຫຼື ໃຊ້ ຍ້ອນກັບ / ເຮັດຊ້ຳ</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m). "Next →" is the Next button. -->
+  <string name="forms_geo_location_captured">ບັນທຶກຕຳແໜ່ງແລ້ວ: %1$s, %2$s (%3$s) — ແຕະ "ຕໍ່ໄປ →" ເພື່ອສືບຕໍ່ ຫຼື ໃຊ້ ຍ້ອນກັບ / ເຮັດຊ້ຳ</string>
+  <!-- %1$s = label of the Add point button. -->
+  <string name="forms_geo_map_panned_hint">ເລື່ອນແຜນທີ່ແລ້ວ — ແຕະ "%1$s" ຂ້າງລຸ່ມເພື່ອບັນທຶກຈຸດນີ້</string>
+  <!-- %1$s = label of the Capture location button. -->
+  <string name="forms_geo_capture_hint">ແຕະ "%1$s" ຂ້າງລຸ່ມເພື່ອບັນທຶກພິກັດ GPS ປັດຈຸບັນຂອງທ່ານ</string>
+  <string name="forms_recenter_on_gps">ຈັດກາງໃໝ່ຕາມ GPS</string>
+  <string name="forms_geo_pan_disabled">ການເລື່ອນແຜນທີ່ຖືກປິດສຳລັບຄຳຖາມນີ້. ພິກັດຈະຖືກບັນທຶກໂດຍກົງຈາກຕຳແໜ່ງ GPS ຂອງທ່ານ.</string>
+  <!-- %1$s = required accuracy in meters. -->
+  <string name="forms_geo_pan_disabled_with_accuracy">ການເລື່ອນແຜນທີ່ຖືກປິດສຳລັບຄຳຖາມນີ້. ພິກັດຈະຖືກບັນທຶກໂດຍກົງຈາກຕຳແໜ່ງ GPS ຂອງທ່ານ (ຕ້ອງການຄວາມແມ່ນຍຳ ≤ %1$s m).</string>
+  <!-- Map overlay status. -->
+  <string name="forms_gps_locked">ລັອກ GPS ແລ້ວ</string>
+  <string name="forms_geo_waiting_for_location">ກຳລັງລໍຖ້າຕຳແໜ່ງ GPS…</string>
+  <string name="forms_map_panned_crosshair">ເລື່ອນແຜນທີ່ແລ້ວ • ເຄື່ອງໝາຍກາກບາດເປີດຢູ່</string>
+  <string name="forms_map_centered_on_gps">ຈັດກາງຕາມ GPS (ລາກແຜນທີ່ເພື່ອເລື່ອນ)</string>
+  <string name="forms_zoom_in">ຂະຫຍາຍເຂົ້າ</string>
+  <string name="forms_zoom_out">ຫຍໍ້ອອກ</string>
+  <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->
+  <string name="forms_gps_accuracy_zoom">GPS %1$s • %2$sz</string>
+
+  <!-- Line (geotrace) and polygon (geoshape) questions -->
+  <!-- Button that records the device's current GPS position as a new vertex. -->
+  <string name="forms_capture_vertex">ບັນທຶກຈຸດຍອດ</string>
+  <!-- "pts" abbreviates points. -->
+  <string name="forms_geometry_polygon_min">ຮູບຫຼາຍແຫຼ່ຽມ (≥3 ຈຸດ)</string>
+  <string name="forms_geometry_line_min">ເສັ້ນ (≥2 ຈຸດ)</string>
+  <string name="forms_geometry_walk_or_draw">ຍ່າງ ຫຼື ວາດ (ອະນຸຍາດໃຫ້ເລື່ອນແຜນທີ່)</string>
+  <string name="forms_geometry_gps_walk_only">ຍ່າງດ້ວຍ GPS ເທົ່ານັ້ນ (ລັອກ)</string>
+  <string name="forms_geometry_gps_stream_only">ສະຕຣີມ GPS ເທົ່ານັ້ນ (ລັອກການເລື່ອນແຜນທີ່)</string>
+  <!-- %1$d = number of vertices. -->
+  <plurals name="forms_vertex_count">
+    <item quantity="other">%1$d ຈຸດຍອດ</item>
+  </plurals>
+  <!-- Status while walking a line or polygon. %1$d = number of points logged so far ("pts" abbreviates points). -->
+  <plurals name="forms_geometry_walking">
+    <item quantity="other">ກຳລັງຍ່າງ • ບັນທຶກຈຸດ GPS ທຸກໆ 5 ວິນາທີ (%1$d ຈຸດ)</item>
+  </plurals>
+  <!-- %1$d = number of points logged so far, %2$s = label of the Stop walking button. -->
+  <plurals name="forms_geometry_walking_stop_hint">
+    <item quantity="other">ກຳລັງຍ່າງ • ບັນທຶກຈຸດ GPS ທຸກໆ 5 ວິນາທີ (%1$d ຈຸດ). ແຕະ "%2$s" ເມື່ອສຳເລັດ.</item>
+  </plurals>
+  <string name="forms_geo_target_point_coordinates">ພິກັດຈຸດເປົ້າໝາຍ</string>
+  <string name="forms_gps_location">ຕຳແໜ່ງ GPS</string>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_polygon_ready">
+    <item quantity="other">ບັນທຶກແລ້ວ %1$d ຈຸດຍອດ • ຮູບຫຼາຍແຫຼ່ຽມປິດພ້ອມແລ້ວ — ແຕະ "ຕໍ່ໄປ →" ເພື່ອສືບຕໍ່ ຫຼື ເພີ່ມຈຸດຍອດອີກ</item>
+  </plurals>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_line_ready">
+    <item quantity="other">ບັນທຶກແລ້ວ %1$d ຈຸດຍອດ • ເສັ້ນພ້ອມແລ້ວ — ແຕະ "ຕໍ່ໄປ →" ເພື່ອສືບຕໍ່ ຫຼື ເພີ່ມຈຸດຍອດອີກ</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_polygon_need_more">
+    <item quantity="other">ຕ້ອງການອີກ %1$d ຈຸດຍອດເພື່ອໃຫ້ຮູບຫຼາຍແຫຼ່ຽມສົມບູນ. ແຕະ "%2$s" ຂ້າງລຸ່ມເພື່ອບັນທຶກ.</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_line_need_more">
+    <item quantity="other">ຕ້ອງການອີກ %1$d ຈຸດຍອດເພື່ອໃຫ້ເສັ້ນສົມບູນ. ແຕະ "%2$s" ຂ້າງລຸ່ມເພື່ອບັນທຶກ.</item>
+  </plurals>
+  <string name="forms_stop_walking">ຢຸດຍ່າງ</string>
+  <string name="forms_start_walking">ເລີ່ມຍ່າງ</string>
+  <string name="forms_clear_all_vertices">ລ້າງຈຸດຍອດທັງໝົດ</string>
+  <!-- %1$s = label of the Start walking button, %2$s = label of the Add point button. -->
+  <string name="forms_geometry_pan_disabled_hint">ການເລື່ອນແຜນທີ່ຖືກປິດສຳລັບຄຳຖາມນີ້. ແຕະ "%1$s" ເພື່ອບັນທຶກຈຸດ GPS ທຸກໆ 5 ວິນາທີ ຫຼື "%2$s" ເພື່ອບັນທຶກດ້ວຍຕົນເອງ.</string>
+
+  <!-- Drawing geometry on the host's map (web) -->
+  <string name="forms_map_instruction_point">ຄລິກແຜນທີ່ເພື່ອວາງຈຸດນີ້.</string>
+  <string name="forms_map_instruction_line">ຄລິກແຜນທີ່ເພື່ອເພີ່ມຈຸດຍອດຂອງເສັ້ນຕາມລຳດັບ (ຢ່າງໜ້ອຍ 2).</string>
+  <string name="forms_map_instruction_polygon">ຄລິກແຜນທີ່ເພື່ອເພີ່ມມຸມຂອງຮູບຫຼາຍແຫຼ່ຽມຕາມລຳດັບ (ຢ່າງໜ້ອຍ 3).</string>
+  <!-- "Draw on map" is the label of the button that starts drawing. -->
+  <string name="forms_map_drawn_point">ວາດເທິງແຜນທີ່: ຈຸດ. ໃຊ້ ວາດເທິງແຜນທີ່ ເພື່ອເລີ່ມຕົ້ນ.</string>
+  <string name="forms_map_drawn_line">ວາດເທິງແຜນທີ່: ເສັ້ນ. ໃຊ້ ວາດເທິງແຜນທີ່ ເພື່ອເລີ່ມຕົ້ນ.</string>
+  <string name="forms_map_drawn_polygon">ວາດເທິງແຜນທີ່: ຮູບຫຼາຍແຫຼ່ຽມ. ໃຊ້ ວາດເທິງແຜນທີ່ ເພື່ອເລີ່ມຕົ້ນ.</string>
+  <string name="forms_map_no_point">ຍັງບໍ່ມີຈຸດ</string>
+  <string name="forms_map_point_placed">ວາງຈຸດແລ້ວ</string>
+  <string name="forms_drawing_on_map">ກຳລັງວາດເທິງແຜນທີ່</string>
+  <string name="forms_draw_on_map">ວາດເທິງແຜນທີ່</string>
+  <string name="forms_redraw">ວາດໃໝ່</string>
+  <string name="forms_zoom_to_fit">ຊູມໃຫ້ພໍດີ</string>
+
+  <!-- Choice questions -->
+  <!-- Shown on a cascading choice question. %1$s = label of the question it depends on. -->
+  <string name="forms_select_parent_first">ເລືອກຄຳຕອບສຳລັບ '%1$s' ກ່ອນ</string>
+  <string name="forms_no_matching_options">(ບໍ່ມີຕົວເລືອກທີ່ກົງກັບຕົວກອງປັດຈຸບັນ)</string>
+  <!-- Button that adds a choice option typed by the collector. -->
+  <string name="forms_add_new">ເພີ່ມໃໝ່</string>
+  <string name="forms_new_item_placeholder">ປ້າຍຊື່ລາຍການໃໝ່</string>
+
+  <!-- Range, rank, and acknowledge questions -->
+  <!-- %1$s = minimum value of the range. -->
+  <string name="forms_range_min">ຕ່ຳສຸດ: %1$s</string>
+  <!-- %1$s = currently selected value. -->
+  <string name="forms_range_selected">ເລືອກແລ້ວ: %1$s</string>
+  <!-- %1$s = maximum value of the range. -->
+  <string name="forms_range_max">ສູງສຸດ: %1$s</string>
+  <string name="forms_rank_instructions">ຈັດລຳດັບລາຍການຈາກຄວາມສຳຄັນສູງສຸດ (#1) ຫາຕ່ຳສຸດ:</string>
+  <string name="forms_rank_move_up">ຍ້າຍຂຶ້ນ</string>
+  <string name="forms_rank_move_down">ຍ້າຍລົງ</string>
+  <string name="forms_rank_drag_to_reorder">ລາກເພື່ອຈັດລຳດັບໃໝ່</string>
+  <string name="forms_trigger_acknowledged">ຮັບຊາບແລ້ວ (ຕົກລົງ)</string>
+  <string name="forms_trigger_acknowledge">ຮັບຊາບ / ຢືນຢັນ</string>
+
+  <!-- Photo, video, audio, and file questions -->
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_capture">%1$s\nໄຟລ໌ນີ້ບໍ່ມີຢູ່ໃນອຸປະກອນນີ້. ບັນທຶກໃໝ່ອີກຄັ້ງເພື່ອແທນທີ່.</string>
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_choose">%1$s\nໄຟລ໌ນີ້ບໍ່ມີຢູ່ໃນອຸປະກອນນີ້. ເລືອກໃໝ່ອີກຄັ້ງເພື່ອແທນທີ່.</string>
+  <!-- Secondary button that uploads an existing file instead of capturing a new one. -->
+  <string name="forms_media_choose_from_device">ເລືອກຈາກອຸປະກອນ</string>
+  <string name="forms_media_choose_file">ເລືອກໄຟລ໌</string>
+  <string name="forms_media_replace_file">ແທນທີ່ໄຟລ໌</string>
+  <string name="forms_media_upload">ອັບໂຫຼດ</string>
+  <string name="forms_media_remove">ລຶບອອກ</string>
+  <!-- Screen reader description of a captured photo. %1$s = file name. -->
+  <string name="forms_media_captured_photo_description">ຮູບພາບທີ່ຖ່າຍ %1$s</string>
+  <string name="forms_media_photo_attached">ແນບຮູບພາບແລ້ວ</string>
+  <string name="forms_media_video_attached">ແນບວິດີໂອແລ້ວ</string>
+  <string name="forms_media_audio_attached">ແນບສຽງທີ່ບັນທຶກແລ້ວ</string>
+  <string name="forms_media_file_attached">ແນບໄຟລ໌ແລ້ວ</string>
+  <!-- Attachment status with its length. %1$s = status (e.g. Video attached), %2$s = duration (e.g. 0:05). -->
+  <string name="forms_media_attached_with_duration">%1$s · %2$s</string>
+  <!-- Titles of media questions. -->
+  <string name="forms_media_kind_photo">ຮູບພາບ</string>
+  <string name="forms_media_kind_video">ວິດີໂອ</string>
+  <string name="forms_media_kind_audio">ການບັນທຶກສຽງ</string>
+  <string name="forms_media_kind_file">ໄຟລ໌</string>
+  <string name="forms_media_take_photo">ຖ່າຍຮູບ</string>
+  <string name="forms_media_record_video">ບັນທຶກວິດີໂອ</string>
+  <string name="forms_media_record_audio">ບັນທຶກສຽງ</string>
+  <string name="forms_media_retake_photo">ຖ່າຍຮູບໃໝ່</string>
+  <!-- Re-records a video or audio answer. -->
+  <string name="forms_media_record_again">ບັນທຶກໃໝ່</string>
+  <!-- Badge: the question only accepts media captured live, not uploaded files. -->
+  <string name="forms_media_capture_only">ບັນທຶກສົດເທົ່ານັ້ນ</string>
+  <!-- Badge: the question accepts live capture or an uploaded file. -->
+  <string name="forms_media_capture_or_upload">ບັນທຶກ ຫຼື ອັບໂຫຼດ</string>
+  <string name="forms_media_live_unavailable_photo">ຄຳຖາມນີ້ຕ້ອງການຮູບພາບທີ່ຖ່າຍສົດ ເຊິ່ງອຸປະກອນ/ບຣາວເຊີນີ້ບໍ່ສາມາດຖ່າຍໄດ້.</string>
+  <string name="forms_media_live_unavailable_video">ຄຳຖາມນີ້ຕ້ອງການວິດີໂອທີ່ບັນທຶກສົດ ເຊິ່ງອຸປະກອນ/ບຣາວເຊີນີ້ບໍ່ສາມາດບັນທຶກໄດ້.</string>
+  <string name="forms_media_live_unavailable_audio">ຄຳຖາມນີ້ຕ້ອງການສຽງທີ່ບັນທຶກສົດ ເຊິ່ງອຸປະກອນ/ບຣາວເຊີນີ້ບໍ່ສາມາດບັນທຶກໄດ້.</string>
+  <string name="forms_media_live_unavailable_file">ຄຳຖາມນີ້ຕ້ອງການໄຟລ໌ທີ່ບັນທຶກສົດ ເຊິ່ງອຸປະກອນ/ບຣາວເຊີນີ້ບໍ່ສາມາດບັນທຶກໄດ້.</string>
+  <string name="forms_media_unavailable_photo">ອຸປະກອນນີ້ບໍ່ສາມາດຖ່າຍ ຫຼື ເລືອກຮູບພາບໄດ້.</string>
+  <string name="forms_media_unavailable_video">ອຸປະກອນນີ້ບໍ່ສາມາດບັນທຶກ ຫຼື ເລືອກວິດີໂອໄດ້.</string>
+  <string name="forms_media_unavailable_audio">ອຸປະກອນນີ້ບໍ່ສາມາດບັນທຶກ ຫຼື ເລືອກສຽງທີ່ບັນທຶກໄດ້.</string>
+  <string name="forms_media_unavailable_file">ອຸປະກອນນີ້ບໍ່ສາມາດບັນທຶກ ຫຼື ເລືອກໄຟລ໌ໄດ້.</string>
+  <!-- Photo size limit. %1$d = maximum long edge in pixels. -->
+  <string name="forms_media_max_pixels">ສູງສຸດ %1$d px</string>
+  <!-- The question prefers the front (selfie) camera. -->
+  <string name="forms_media_front_camera">ກ້ອງໜ້າ</string>
+
+  <!-- Variant-incompatible question fallback warnings -->
+  <string name="forms_variant_web">ເວັບ</string>
+  <string name="forms_variant_google_earth">Google Earth</string>
+  <string name="forms_incompatible_type_gps_location">ຕຳແໜ່ງ GPS ເທົ່ານັ້ນ</string>
+  <string name="forms_incompatible_type_gps_line">ເສັ້ນ GPS ເທົ່ານັ້ນ</string>
+  <string name="forms_incompatible_type_gps_polygon">ຮູບຫຼາຍແຈ GPS ເທົ່ານັ້ນ</string>
+  <string name="forms_incompatible_type_location">ຕຳແໜ່ງ</string>
+  <string name="forms_incompatible_type_line">ເສັ້ນ</string>
+  <string name="forms_incompatible_type_polygon">ຮູບຫຼາຍແຈ</string>
+  <string name="forms_incompatible_type_photo">ຮູບພາບ</string>
+  <string name="forms_incompatible_type_video">ວິດີໂອ</string>
+  <string name="forms_incompatible_type_audio">ສຽງ</string>
+  <string name="forms_incompatible_type_file">ໄຟລ໌</string>
+  <!-- %1$s = question type; %2$s = variant name. -->
+  <string name="forms_variant_incompatible_warning">ຄຳຖາມປະເພດ %1$s ບໍ່ສາມາດໃຊ້ໄດ້ໃນ %2$s. ຄຳຖາມນີ້ຈະຖືກຂ້າມໄປ. ກະລຸນາຕິດຕໍ່ຜູ້ຈັດການສຳຫຼວດເພື່ອແກ້ໄຂບັນຫານີ້.</string>
+</resources>

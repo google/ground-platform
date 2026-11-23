@@ -15,52 +15,35 @@
 // The workbench around the mobile app: simulated device chrome, XForms presets, and
 // simulation and reset tools. Used by the Wasm mobile build.
 plugins {
-  kotlin("multiplatform")
-  id("org.jetbrains.compose")
-  id("org.jetbrains.kotlin.plugin.compose")
-  id("com.ncorti.ktfmt.gradle")
+  id("collectone.kmp.library")
+  id("collectone.kmp.compose")
+  id("collectone.kover")
 }
 
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
-ktfmt { googleStyle() }
-
 kotlin {
-  jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
-
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
-  }
-
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api("org.openforis.collectone.v2:mobile:2.0.0-SNAPSHOT")
+        api(projects.shared.mobile)
+        implementation(projects.shared.ui.testing)
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
         implementation(compose.ui)
-        implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
-        implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+        implementation(libs.compose.material.icons.core)
+        implementation(libs.compose.material.icons.extended)
       }
     }
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation("org.openforis.collectone.v2:app-testing:2.0.0-SNAPSHOT")
+        implementation(projects.shared.app.uiTesting)
       }
     }
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
+        implementation(libs.konsist)
         implementation(compose.desktop.currentOs)
       }
     }

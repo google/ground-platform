@@ -17,12 +17,12 @@
 # Golden-Screenshot Integration Tests
 
 End-to-end tests that drive the real web console (`webApp`) and mobile app (`mobileWebApp`) in
-headless Chromium against a local user data service (`server/userDataService`), and compare each
+headless Chromium against a local server (`server/`), and compare each
 screen with a checked-in golden image.
 
 ## Running the tests
 
-You need Node.js 22 or later and what the Gradle builds need (a JDK and the Android SDK; see the
+You need Node.js 22 or later and what the Gradle build needs (a JDK and the Android SDK; see the
 apps' READMEs). From this directory:
 
 ```bash
@@ -32,12 +32,15 @@ npm test            # Builds the apps and the service, then runs the tests
 npm run report      # Opens the HTML report, with diffs for any failed screenshots
 ```
 
-`npm test` runs the Gradle builds first (`installDist` for the service, `wasmJsBrowserDistribution`
+`npm test` runs the Gradle build first (`:server:installDist` for the service, `wasmJsBrowserDistribution`
 for both apps), which can take several minutes even when little changed. Run `npx playwright test`
 instead to reuse the last builds.
 
 CI runs the same `npm test` in the `e2e` job of
-[`.github/workflows/check.yml`](../.github/workflows/check.yml) and uploads the report when it fails.
+[`.github/workflows/goldens.yml`](../.github/workflows/goldens.yml) and uploads the report when it
+fails. It runs on pushes to `main` and on pull requests that are ready for review, but not on
+drafts: add the `run-goldens` label to run it on a draft (on that push and every later one), or
+start the workflow from the Actions tab to run it on any branch.
 
 ## Running tests manually
 
@@ -52,7 +55,7 @@ npx playwright test --ui                        # Interactive runner: pick tests
 npx playwright test --debug -g "sign-in page"   # Steps through one test in the Playwright Inspector
 ```
 
-Each run starts its own Spanner emulator, user data service, and bundle server, and stops them when
+Each run starts its own Spanner emulator, Collect One server, and bundle server, and stops them when
 it ends.
 
 To try the apps by hand with the exact setup the tests use, start the servers yourself, from this
@@ -62,9 +65,9 @@ directory, in three terminals:
 # Terminal 1: the Spanner emulator that stores the service's data
 SPANNER_EMULATOR_GRPC_PORT=18110 SPANNER_EMULATOR_REST_PORT=18120 bash ../scripts/spanner-emulator.sh
 
-# Terminal 2: the user data service, which loads its sample data into the emulator
+# Terminal 2: the Collect One server, which loads its sample data into the emulator
 PORT=18180 SPANNER_EMULATOR_HOST=localhost:18110 AUTH_MODE=dev \
-  ../server/userDataService/build/install/user-data-service/bin/user-data-service
+  ../server/build/install/c1-server/bin/c1-server
 
 # Terminal 3: the web console and the mobile app bundles
 node harness/serve-apps.mjs
@@ -75,7 +78,7 @@ The emulator script needs Bash, and Docker on platforms other than Linux x86_64.
 Then open the web console at <http://127.0.0.1:18192/> and the mobile app at
 <http://127.0.0.1:18193/?chrome=0> (leave out `?chrome=0` to see it in the workbench's simulated
 device). Stop the servers before running the tests, which need the same ports. Set
-`E2E_USER_DATA_SERVICE_PORT`, `E2E_WEB_CONSOLE_PORT`, `E2E_MOBILE_APP_PORT`,
+`E2E_SERVER_PORT`, `E2E_WEB_CONSOLE_PORT`, `E2E_MOBILE_APP_PORT`,
 `E2E_SPANNER_EMULATOR_PORT`, or `E2E_SPANNER_EMULATOR_REST_PORT` to use other ports (and the
 matching variables above when starting the servers yourself).
 
@@ -95,10 +98,10 @@ Goldens are in [`goldens/`](goldens/), one directory per test file.
 
 - **Real builds.** The tests run the production bundles that `wasmJsBrowserDistribution` builds for
   deployment. [`harness/serve-apps.mjs`](harness/serve-apps.mjs) serves them and supplies the two
-  generated config scripts: one points the apps at the test's user data service, and the other
+  generated config scripts: one points the apps at the test's server, and the other
   turns Firebase and the development sign-in dialog off, so signing in uses the service's
   development user.
-- **Real service.** Playwright starts a Spanner emulator and the user data service binary
+- **Real service.** Playwright starts a Spanner emulator and the server binary
   (`AUTH_MODE=dev`) on their own ports, so the tests can run alongside the launchpad. The service
   loads its bundled sample data into the emulator. Before each test,
   [`tests/fixtures.ts`](tests/fixtures.ts) calls `POST /debug/reset` to restore the database to
@@ -114,8 +117,13 @@ Goldens are in [`goldens/`](goldens/), one directory per test file.
   traversal indices (`isTraversalGroup` / `traversalIndex`) so tests can find controls by role and
   name (`getByRole`) and click where they are drawn ([`tap`](tests/fixtures.ts)).
 - **Waiting for the app.** [`expectScreen`](tests/fixtures.ts) waits until the app has stopped
-  calling the user data service, then retries the screenshot comparison until it matches or times
+  calling the server, then retries the screenshot comparison until it matches or times
   out.
+- **Offline behavior.** [`tests/mobileAppOffline.spec.ts`](tests/mobileAppOffline.spec.ts) checks
+  the mobile app without goldens: it takes the browser offline (`context.setOffline`) or makes the
+  local server unreachable (`page.route`), and checks that unsent edits upload within seconds of
+  the connection returning and that a reload without the server goes straight back into the app.
+  The mobile project runs every `mobileApp*.spec.ts` file.
 
 ## Adding a test
 

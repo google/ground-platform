@@ -1,0 +1,397 @@
+form_id: "f"
+metadata {
+  instance_id: "uuid:1"
+  start_time {
+    seconds: 0
+  }
+  end_time {
+    seconds: -1
+    nanos: 500
+  }
+  today {
+    year: 2026
+    month: 2
+    day: 3
+  }
+  audit_config {
+    enabled: true
+    location_priority: "high"
+  }
+}
+data {
+  fields {
+    key: "s"
+    value {
+      scalar_value {
+        string_value: "say \"hi\" \\ back\nslash\ttab ünïcødé 🌳"
+      }
+    }
+  }
+  fields {
+    key: "temporal"
+    value {
+      scalar_value {
+        string_value: "2026-01-02"
+      }
+    }
+  }
+  fields {
+    key: "empty"
+    value {
+      scalar_value {
+        string_value: ""
+      }
+    }
+  }
+  fields {
+    key: "i32"
+    value {
+      scalar_value {
+        int32_value: 0
+      }
+    }
+  }
+  fields {
+    key: "i64small"
+    value {
+      scalar_value {
+        int64_value: 5
+      }
+    }
+  }
+  fields {
+    key: "i64mid"
+    value {
+      scalar_value {
+        int64_value: 3000000000
+      }
+    }
+  }
+  fields {
+    key: "i64big"
+    value {
+      scalar_value {
+        int64_value: 9223372036854775807
+      }
+    }
+  }
+  fields {
+    key: "d"
+    value {
+      scalar_value {
+        double_value: 1.0
+      }
+    }
+  }
+  fields {
+    key: "dneg0"
+    value {
+      scalar_value {
+        double_value: -0.0
+      }
+    }
+  }
+  fields {
+    key: "dnan"
+    value {
+      scalar_value {
+        double_value: nan
+      }
+    }
+  }
+  fields {
+    key: "dinf"
+    value {
+      scalar_value {
+        double_value: -inf
+      }
+    }
+  }
+  fields {
+    key: "dexp"
+    value {
+      scalar_value {
+        double_value: 1.0E-7
+      }
+    }
+  }
+  fields {
+    key: "b"
+    value {
+      scalar_value {
+        bool_value: false
+      }
+    }
+  }
+  fields {
+    key: "date"
+    value {
+      scalar_value {
+        date_value {
+          year: 2026
+          month: 1
+          day: 2
+        }
+      }
+    }
+  }
+  fields {
+    key: "time"
+    value {
+      scalar_value {
+        time_value {
+          hours: 1
+          minutes: 2
+          seconds: 3
+          nanos: 4000000
+        }
+      }
+    }
+  }
+  fields {
+    key: "time_ns"
+    value {
+      scalar_value {
+        time_value {
+          hours: 23
+          nanos: 5
+        }
+      }
+    }
+  }
+  fields {
+    key: "ts"
+    value {
+      scalar_value {
+        timestamp_value {
+          seconds: 1789733415
+          nanos: 123456789
+        }
+      }
+    }
+  }
+  fields {
+    key: "gp"
+    value {
+      scalar_value {
+        geopoint_value {
+          latitude: 1.5
+          longitude: -2.0
+        }
+      }
+    }
+  }
+  fields {
+    key: "gp_acc"
+    value {
+      scalar_value {
+        geopoint_value {
+          latitude: 1.0
+          longitude: 2.0
+          accuracy_meters: 3.0
+        }
+      }
+    }
+  }
+  fields {
+    key: "gp_alt"
+    value {
+      scalar_value {
+        geopoint_value {
+          latitude: 0.0
+          longitude: 0.0
+          altitude_meters: 7.0
+        }
+      }
+    }
+  }
+  fields {
+    key: "bin"
+    value {
+      scalar_value {
+        binary_value: "\x00\xFF\n\"a"
+      }
+    }
+  }
+  fields {
+    key: "trace"
+    value {
+      scalar_value {
+        geotrace_value {
+          points {
+            latitude: 1.0
+            longitude: 2.0
+          }
+          points {
+            latitude: 3.0
+            longitude: 4.0
+          }
+        }
+      }
+    }
+  }
+  fields {
+    key: "trace_closed"
+    value {
+      scalar_value {
+        geotrace_value {
+          points {
+            latitude: 0.0
+            longitude: 0.0
+          }
+          points {
+            latitude: 0.0
+            longitude: 1.0
+          }
+          points {
+            latitude: 1.0
+            longitude: 1.0
+          }
+          points {
+            latitude: 0.0
+            longitude: 0.0
+          }
+        }
+      }
+    }
+  }
+  fields {
+    key: "shape"
+    value {
+      scalar_value {
+        geoshape_value {
+          points {
+            latitude: 0.0
+            longitude: 0.0
+          }
+          points {
+            latitude: 0.0
+            longitude: 1.0
+          }
+          points {
+            latitude: 1.0
+            longitude: 1.0
+          }
+          points {
+            latitude: 0.0
+            longitude: 0.0
+          }
+        }
+      }
+    }
+  }
+  fields {
+    key: "shape_open"
+    value {
+      scalar_value {
+        geoshape_value {
+          points {
+            latitude: 0.0
+            longitude: 0.0
+          }
+          points {
+            latitude: 0.0
+            longitude: 1.0
+          }
+          points {
+            latitude: 1.0
+            longitude: 1.0
+          }
+        }
+      }
+    }
+  }
+  fields {
+    key: "shape_empty"
+    value {
+      scalar_value {
+        geoshape_value {
+        }
+      }
+    }
+  }
+  fields {
+    key: "list"
+    value {
+      list_value {
+        values {
+          string_value: "a"
+        }
+        values {
+          int32_value: 1
+        }
+      }
+    }
+  }
+  fields {
+    key: "list_empty"
+    value {
+      list_value {
+      }
+    }
+  }
+  fields {
+    key: "group"
+    value {
+      node_value {
+        fields {
+          key: "x"
+          value {
+            scalar_value {
+              bool_value: true
+            }
+          }
+        }
+      }
+    }
+  }
+  fields {
+    key: "repeat"
+    value {
+      repeat_value {
+        nodes {
+          fields {
+            key: "n"
+            value {
+              scalar_value {
+                int32_value: 1
+              }
+            }
+          }
+        }
+        nodes {
+          id: "second"
+          sort_order: 1
+        }
+      }
+    }
+  }
+  fields {
+    key: "repeat_empty"
+    value {
+      repeat_value {
+      }
+    }
+  }
+  fields {
+    key: "unset"
+    value {
+    }
+  }
+  id: "root"
+  sort_order: 4
+}
+audit_log {
+  events {
+    event: "e"
+    start_time {
+      seconds: 10
+    }
+    location {
+      latitude: 0.0
+      longitude: 0.0
+    }
+  }
+  events {
+  }
+}

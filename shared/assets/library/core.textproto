@@ -21,7 +21,7 @@
 #
 # The clients embed a Kotlin copy (GlobalLibrarySeedData.kt), and its
 # GlobalLibrarySeedTest fails when the two differ. Template questions carry
-# their concept links as `ground:concept` foreign attributes on their bindings.
+# their concept links as `collectone:concept` foreign attributes on their bindings.
 
 concepts {
   id: "core.area_ha"
@@ -1215,7 +1215,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "yes"
@@ -1241,7 +1241,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "no"
@@ -1270,7 +1270,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "female"
@@ -1296,7 +1296,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "male"
@@ -1322,7 +1322,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "other"
@@ -1348,7 +1348,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "prefer_not_to_say"
@@ -1377,7 +1377,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "certified"
@@ -1403,7 +1403,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "in_transition"
@@ -1429,7 +1429,7 @@ form_templates {
             }
           }
           fields {
-            key: "ground_code"
+            key: "collectone_code"
             value {
               scalar_value {
                 string_value: "conventional"
@@ -1443,8 +1443,8 @@ form_templates {
         type: TYPE_SELECT_ONE
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.data_consent@1"
         }
       }
@@ -1453,8 +1453,8 @@ form_templates {
         type: TYPE_STRING
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.producer_name@1"
         }
       }
@@ -1463,8 +1463,8 @@ form_templates {
         type: TYPE_STRING
         required_expression: "true()"
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.producer_id@1"
         }
       }
@@ -1472,8 +1472,8 @@ form_templates {
         field_path: "cooperative_name"
         type: TYPE_STRING
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.cooperative_name@1"
         }
       }
@@ -1481,8 +1481,8 @@ form_templates {
         field_path: "producer_gender"
         type: TYPE_SELECT_ONE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.producer_gender@1"
         }
       }
@@ -1490,8 +1490,8 @@ form_templates {
         field_path: "household_size"
         type: TYPE_INT32
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.household_size@1"
         }
       }
@@ -1499,8 +1499,8 @@ form_templates {
         field_path: "country"
         type: TYPE_STRING
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.country@1"
         }
       }
@@ -1508,8 +1508,8 @@ form_templates {
         field_path: "admin_area"
         type: TYPE_STRING
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.admin_area@1"
         }
       }
@@ -1517,8 +1517,8 @@ form_templates {
         field_path: "certification_status"
         type: TYPE_SELECT_ONE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.certification_status@1"
         }
       }
@@ -1526,8 +1526,8 @@ form_templates {
         field_path: "annual_yield_kg"
         type: TYPE_DOUBLE
         foreign_attributes {
-          namespace_uri: "http://groundplatform.org/xforms"
-          qualified_name: "ground:concept"
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
           value: "core.annual_yield_kg@1"
         }
       }
@@ -1653,6 +1653,7 @@ form_templates {
     }
   }
   status: STABLE
+  version: 1
 }
 purpose_packs {
   id: "producer_registration"

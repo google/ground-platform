@@ -62,6 +62,8 @@ import openforis.collectone.v1.forms.ViewDef
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlElement
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlParser
 import org.openforis.collectone.v2.core.forms.serialization.xml.XmlText
+import org.openforis.collectone.v2.core.forms.temporal.parseIsoOffsetSeconds
+import org.openforis.collectone.v2.core.forms.temporal.toCivilDate
 
 /** Deserializes XForms XML form definitions into [FormDef] protocol buffer models. */
 internal object FormDefXmlDeserializer {
@@ -444,7 +446,7 @@ internal object FormDefXmlDeserializer {
 
   /**
    * Returns [bindEl]'s attributes in namespaces ProtoForms doesn't model, in document order, so
-   * they round-trip as `FieldBinding.foreign_attributes` (e.g. `ground:concept`, see
+   * they round-trip as `FieldBinding.foreign_attributes` (e.g. `collectone:concept`, see
    * `docs/technical/model/library/01-concepts.md`, "Linking Form Fields").
    *
    * Not foreign:
@@ -1143,6 +1145,11 @@ internal object FormDefXmlDeserializer {
     return IntentConfig(intent_uri = uri, parameters = params)
   }
 
+  /**
+   * [path] relative to the primary instance root `/<rootName>`: drops a leading `current()/` or
+   * `./` and the root itself, so `/data/plot/tree`, `./plot/tree`, and `plot/tree` all become
+   * `plot/tree` (the root alone becomes `""`).
+   */
   internal fun stripRootPrefix(path: String, rootName: String): String {
     var trimmed = path.trim()
     if (trimmed.startsWith("current()/")) {
@@ -1189,6 +1196,11 @@ internal object FormDefXmlDeserializer {
   private fun relativizePath(fullPath: String, enclosingPath: String): String =
     if (enclosingPath.isNotEmpty()) fullPath.removePrefix("$enclosingPath/") else fullPath
 
+  /**
+   * Maps a bind `type` (ODK XForms spec "Data Types"; an optional `xsd:` or other prefix is
+   * ignored) to its [DataType]. Aliases seen in real forms (`integer`, `decimal`, `barcode`,
+   * `dateTime`) are accepted; unknown types become [DataType.DATA_TYPE_UNSPECIFIED].
+   */
   internal fun mapXFormsTypeToDataType(typeStr: String): DataType {
     val clean = typeStr.substringAfter(':').lowercase()
     return when (clean) {
@@ -1263,6 +1275,11 @@ internal object FormDefXmlDeserializer {
       else -> false
     }
 
+  /**
+   * Parses a default value from the primary instance as [dataType]. Unparsable numbers become 0 and
+   * booleans false, but unparsable dates, times, and geometry are kept as the original string so no
+   * authored text is lost on the round trip.
+   */
   internal fun parseTypedLiteral(text: String, dataType: DataType): TypedValue =
     when (dataType) {
       DataType.TYPE_INT32 -> TypedValue(int32_value = text.toIntOrNull() ?: 0)
@@ -1290,6 +1307,10 @@ internal object FormDefXmlDeserializer {
       else -> TypedValue(string_value = text)
     }
 
+  /**
+   * Parses `YYYY-MM-DD` (XML Schema `date`), ignoring anything after the day such as a time zone or
+   * a `T...` time. Doesn't check that the date exists.
+   */
   internal fun parseDateLiteral(text: String): Date? {
     val parts = text.trim().split('-')
     if (parts.size < 3) return null
@@ -1299,6 +1320,10 @@ internal object FormDefXmlDeserializer {
     return Date(year = y, month = m, day = d)
   }
 
+  /**
+   * Parses `HH:MM[:SS[.fraction]]` (XML Schema `time`), dropping any zone designator: a time of day
+   * has no date to apply an offset to. Fractions keep up to nanosecond precision.
+   */
   internal fun parseTimeLiteral(text: String): TimeOfDay? {
     val clean = text.trim().substringBefore('Z').substringBefore('+').substringBefore('-')
     val parts = clean.split(':')
@@ -1316,32 +1341,45 @@ internal object FormDefXmlDeserializer {
     return TimeOfDay(hours = h, minutes = m, seconds = s, nanos = nanos)
   }
 
+  /**
+   * Parses an XML Schema `dateTime` (`YYYY-MM-DDTHH:MM:SS[.fraction][Z|±HH:MM]`) as an instant; a
+   * value without a zone designator is read as UTC. Returns `null` for anything else, including a
+   * bare date.
+   */
   internal fun parseTimestampLiteral(text: String): Instant? {
-    // Parse standard ISO-8601 string YYYY-MM-DDTHH:MM:SS(.sss)Z
     return try {
-      // Simple ISO-8601 UTC / offset parser for KMP commonMain
       val datePart = text.substringBefore('T')
       val timePart = text.substringAfter('T', "")
       if (timePart.isEmpty()) return null
       val date = parseDateLiteral(datePart) ?: return null
       val time = parseTimeLiteral(timePart) ?: return null
-      val epochDays = daysFromCivil(date.year, date.month, date.day)
+      val epochDays = date.toCivilDate().toEpochDays()
       val epochSeconds = epochDays * 86400L + time.hours * 3600L + time.minutes * 60L + time.seconds
-      ofEpochSecond(epochSeconds, time.nanos.toLong())
+      ofEpochSecond(epochSeconds - zoneOffsetSeconds(timePart), time.nanos.toLong())
     } catch (_: Exception) {
       null
     }
   }
 
-  private fun daysFromCivil(y: Int, m: Int, d: Int): Long {
-    val year = if (m <= 2) y - 1L else y.toLong()
-    val era = if (year >= 0) year / 400 else (year - 399) / 400
-    val yoe = year - era * 400
-    val doy = (153 * (if (m > 2) m - 3 else m + 9) + 2) / 5 + d - 1
-    val doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
-    return era * 146097 + doe - 719468
+  /**
+   * Signed seconds of the zone designator ending [timeAndZone] (`Z`, `+HH:MM` or `-HH:MM`; XML
+   * Schema 1.0 part 2, section 3.2.7), or 0 when it has none. Matches how record values are read
+   * (`RecordInstanceXmlSerializer.parseIsoInstant`), so a default and an answer written with the
+   * same offset name the same instant.
+   */
+  private fun zoneOffsetSeconds(timeAndZone: String): Long {
+    if (timeAndZone.endsWith("Z", ignoreCase = true)) return 0L
+    val signIdx = maxOf(timeAndZone.indexOf('+'), timeAndZone.lastIndexOf('-'))
+    if (signIdx <= 0) return 0L
+    val sign = if (timeAndZone[signIdx] == '+') 1 else -1
+    return sign * parseIsoOffsetSeconds(timeAndZone.substring(signIdx + 1))
   }
 
+  /**
+   * Parses ODK geopoint text, `lat lon [altitude [accuracy]]` separated by whitespace. Missing
+   * altitude and accuracy stay `null` here, unlike `XPathValue.parseGeoPointString`, which reads
+   * them as 0 for computed values.
+   */
   internal fun parseGeoPointString(text: String): GeoPoint? {
     val parts = text.trim().split(WHITESPACE_REGEX).filter { it.isNotEmpty() }
     if (parts.size < 2) return null
@@ -1352,6 +1390,7 @@ internal object FormDefXmlDeserializer {
     return GeoPoint(latitude = lat, longitude = lon, altitude_meters = alt, accuracy_meters = acc)
   }
 
+  /** Parses ODK geotrace text: geopoints separated by `;`, skipping unparsable points. */
   internal fun parseGeoTraceString(text: String): GeoTrace? {
     val points =
       text
@@ -1363,6 +1402,10 @@ internal object FormDefXmlDeserializer {
     return GeoTrace(points = points)
   }
 
+  /**
+   * Parses ODK geoshape text like [parseGeoTraceString]; the closing point that repeats the first
+   * one is kept as written.
+   */
   internal fun parseGeoShapeString(text: String): GeoShape? {
     val points =
       text

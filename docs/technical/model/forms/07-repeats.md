@@ -173,3 +173,27 @@ Whenever a user or expression adds a new `Person` instance, `relationship`
 initializes to `"spouse"` and `name` initializes empty. Actions triggered by
 `EVENT_NEW_REPEAT` can also dynamically calculate initial values (see
 [Events and Actions](#events-and-actions)).
+
+## Conditional Repeats and References Within an Entry
+
+A `relevant_expr` binding on the repeat node applies to every entry: when it is
+`false`, all entries and their questions are non-relevant and excluded from the
+submission. Display logic inside a repeat that depends on another question of
+the same repeat refers to it relatively, so each entry tests its own answer (the
+bind's context node is the node it binds, and this is what pyxform writes for
+`${name}` inside a repeat):
+
+```textproto
+bindings {
+  field_path: "trees"
+  relevant_expr: "/data/has_trees = 'yes'"
+}
+bindings {
+  field_path: "trees/tree_notes"
+  relevant_expr: "../tree_kind = 'yes'"
+}
+```
+
+Display logic outside a repeat can't depend on a question inside it, because
+each entry has its own answer; the Form editor doesn't offer such questions and
+reports existing references.

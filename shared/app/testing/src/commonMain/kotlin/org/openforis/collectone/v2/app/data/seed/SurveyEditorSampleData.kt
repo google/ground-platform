@@ -22,8 +22,6 @@ import org.openforis.collectone.v2.app.domain.model.editor.EditorRelevance
 import org.openforis.collectone.v2.app.domain.model.editor.EntityDataset
 import org.openforis.collectone.v2.app.domain.model.editor.EntityProperty
 import org.openforis.collectone.v2.app.domain.model.editor.EntityRow
-import org.openforis.collectone.v2.app.domain.model.editor.GeometryKind
-import org.openforis.collectone.v2.app.domain.model.editor.LatLng
 import org.openforis.collectone.v2.app.domain.model.editor.LayerStyle
 import org.openforis.collectone.v2.app.domain.model.editor.PropertyType
 import org.openforis.collectone.v2.app.domain.model.editor.RelevanceOperator
@@ -31,7 +29,8 @@ import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyDetails
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorForm
-import org.openforis.collectone.v2.app.domain.model.geometryKind
+import org.openforis.collectone.v2.map.GeometryType
+import org.openforis.collectone.v2.map.LatLng
 
 /** Hand-authored Survey editor fixtures used by tests (fictional sample data). */
 object SurveyEditorSamples {
@@ -89,7 +88,7 @@ object SurveyEditorSamples {
       id = "coffee_parcels",
       displayName = "Coffee parcels",
       description = "Registered smallholder parcel boundaries.",
-      geometryKind = GeometryKind.POLYGON,
+      geometryType = GeometryType.POLYGON,
       keyProperty = "parcel_id",
       labelProperty = "parcel_name",
       properties =
@@ -143,7 +142,7 @@ object SurveyEditorSamples {
       id = "shade_monitoring_plots",
       displayName = "Shade monitoring plots",
       description = "Permanent 20 m radius plots for shade tree measurements.",
-      geometryKind = GeometryKind.POINT,
+      geometryType = GeometryType.POINT,
       keyProperty = "plot_id",
       labelProperty = "plot_id",
       fieldCreationEnabled = true,

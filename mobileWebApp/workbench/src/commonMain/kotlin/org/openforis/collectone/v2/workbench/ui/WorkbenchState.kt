@@ -14,24 +14,19 @@
  */
 package org.openforis.collectone.v2.workbench.ui
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
-import org.openforis.collectone.v2.app.domain.model.DeviceFormFactor
-import org.openforis.collectone.v2.app.domain.model.DeviceOrientation
-import org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm
+import org.openforis.collectone.v2.app.domain.model.MutationSyncState
+import org.openforis.collectone.v2.app.domain.model.SyncStatus
 import org.openforis.collectone.v2.mobile.ui.MobileAppState
-import org.openforis.collectone.v2.mobile.ui.state.SyncStatusSimulator
+import org.openforis.collectone.v2.mobile.ui.state.MobileWorkbenchHooks
 import org.openforis.collectone.v2.workbench.ui.state.WorkbenchEvent
-import org.openforis.collectone.v2.workbench.ui.state.WorkbenchUiState
 import org.openforis.collectone.v2.workbench.ui.viewmodel.WorkbenchActions
 import org.openforis.collectone.v2.workbench.ui.viewmodel.WorkbenchViewModel
 
 /**
- * State holder of the workbench around the [mobile] app preview: the simulated device (form factor,
- * orientation, airplane mode), the live XForms editor and example survey switcher, and the
- * simulation and reset tools ([WorkbenchViewModel]).
+ * The workbench around the [mobile] app preview: its chrome's [viewModel] (the simulated device's
+ * form factor, orientation, and airplane mode, the live XForms editor and example survey switcher,
+ * and the simulation and reset tools), whose views observe [WorkbenchViewModel.uiState] directly.
  *
  * The workbench drives the [mobile] app: it applies its form definition, upload simulator, and
  * resets to it.
@@ -51,104 +46,87 @@ private constructor(
       WorkbenchViewModel(
         surveyRepository = mobile.dataHolder.surveyRepository,
         sampleDataRepository = mobile.dataHolder.sampleDataRepository,
-        scope = mobile.dataHolder.scope,
         connectivityRepository = mobile.dataHolder.connectivityRepository,
       ),
   )
 
-  private var state by mutableStateOf(viewModel.uiState.value)
+  private val dataCollection = mobile.viewModels.dataCollection
 
-  /** Latest [WorkbenchUiState], for views that build the workbench chrome. */
-  val uiState: WorkbenchUiState
-    get() = state
+  /** Simulates uploads (when the sync engine is off) and follows survey activation in [mobile]. */
+  private val mobileHooks =
+    object : MobileWorkbenchHooks {
+      override fun onSurveyActivated(surveyId: String) = viewModel.onSurveyActivated(surveyId)
 
-  private val syncStatusSimulator =
-    object : SyncStatusSimulator {
-      override fun cycleEntitySyncStatus(entityId: String) =
-        viewModel.cycleEntitySyncStatus(entityId)
+      override fun cycleEntitySyncStatus(entityId: String) {
+        if (!mobile.dataHolder.enableSyncEngine) viewModel.cycleEntitySyncStatus(entityId)
+      }
 
-      override fun cycleSubmissionSyncStatus(submissionId: String) =
-        viewModel.cycleSubmissionSyncStatus(submissionId)
+      override fun cycleSubmissionSyncStatus(submissionId: String) {
+        if (!mobile.dataHolder.enableSyncEngine) viewModel.cycleSubmissionSyncStatus(submissionId)
+      }
+
+      override fun retryFailedUploads() {
+        if (mobile.dataHolder.enableSyncEngine) {
+          mobile.viewModels.dashboard.syncAllOutboxMutations()
+          return
+        }
+        val records = dataCollection.uiState.value
+        records.entities
+          .filter { it.syncStatus == SyncStatus.FAILED }
+          .forEach { viewModel.cycleEntitySyncStatus(it.id) }
+        records.allSubmissions
+          .filter { it.syncStatus == SyncStatus.FAILED }
+          .forEach { viewModel.cycleSubmissionSyncStatus(it.id) }
+        val activeSurveyId = mobile.viewModels.dashboard.uiState.value.activeSurveyId
+        val mutationRepository = mobile.dataHolder.mutationRepository
+        mobile.dataHolder.launch {
+          val current = mutationRepository.getMutations()
+          if (
+            current.any { it.surveyId == activeSurveyId && it.state == MutationSyncState.FAILED }
+          ) {
+            mutationRepository.setMutations(
+              current.map { item ->
+                if (item.surveyId == activeSurveyId && item.state == MutationSyncState.FAILED) {
+                  item.copy(state = MutationSyncState.UPLOADING, stateDetail = "Retrying upload")
+                } else {
+                  item
+                }
+              }
+            )
+          }
+        }
+      }
     }
 
   init {
-    val scope = mobile.dataHolder.scope
-    scope.launch { viewModel.uiState.collect { state = it } }
-    scope.launch { viewModel.events.collect(::onWorkbenchEvent) }
-    mobile.surveyActivationListener = viewModel::onSurveyActivated
-    mobile.syncStatusSimulator = syncStatusSimulator
-    mobile.dataCollection.updateCustomFormDef(
-      XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
+    mobile.dataHolder.scope.launch { viewModel.events.collect(::onWorkbenchEvent) }
+    mobile.workbenchHooks = mobileHooks
+    dataCollection.updateCustomFormDef(
+      DEFAULT_WORKBENCH_FORM_DEF,
       isPreset = true,
     )
   }
 
   /** Applies a workbench outcome to the driven sessions. */
   private fun onWorkbenchEvent(event: WorkbenchEvent) {
+    val onboarding = mobile.viewModels.onboarding
     when (event) {
       is WorkbenchEvent.CustomFormDefChanged ->
-        mobile.dataCollection.updateCustomFormDef(
+        dataCollection.updateCustomFormDef(
           formDef = event.formDef,
           isPreset = event.isPreset,
           relaunchOpenForm = event.relaunchOpenForm,
         )
       is WorkbenchEvent.ExampleSurveySelected -> {
-        mobile.openSurvey(event.surveyId)
+        onboarding.openSurvey(event.surveyId)
         if (event.launchImmediately) {
-          mobile.launchActiveOrDefaultFormForTesting()
+          dataCollection.launchActiveOrDefaultFormForTesting()
         }
       }
-      is WorkbenchEvent.DefaultSurveyRestored -> mobile.openSurvey(event.surveyId)
+      is WorkbenchEvent.DefaultSurveyRestored -> onboarding.openSurvey(event.surveyId)
       WorkbenchEvent.SampleDataReset -> mobile.reset()
       is WorkbenchEvent.ConnectivityChanged -> mobile.onConnectivityChanged(event.isOnline)
-      is WorkbenchEvent.Notice -> mobile.showNotice(event.message)
+      is WorkbenchEvent.Notice -> mobile.notices.show(event.message)
     }
   }
-
-  /** Active hardware preview bezel form factor (`Mobile` vs `Tablet`). */
-  val deviceFormFactor: DeviceFormFactor
-    get() = state.deviceFormFactor
-
-  /** Active screen orientation of the hardware preview bezel (`Portrait` vs `Landscape`). */
-  val deviceOrientation: DeviceOrientation
-    get() = state.deviceOrientation
-
-  /** True when the active device is rotated away from its form factor's default orientation. */
-  val isDeviceRotated: Boolean
-    get() = state.isDeviceRotated
-
-  /** Effective width in `dp` of the hardware bezel for the current form factor and orientation. */
-  val effectiveFrameWidthDp: Int
-    get() = state.effectiveFrameWidthDp
-
-  /** Effective height in `dp` of the hardware bezel for the current form factor and orientation. */
-  val effectiveFrameHeightDp: Int
-    get() = state.effectiveFrameHeightDp
-
-  /** Formatted `W × H dp` label for the current form factor and orientation. */
-  val effectiveDimensionsLabel: String
-    get() = state.effectiveDimensionsLabel
-
-  /** Whether the simulated device is in airplane mode (offline). */
-  val isAirplaneMode: Boolean
-    get() = state.isAirplaneMode
-
-  /**
-   * Currently selected swappable example form ([WorkbenchExampleForm]), or `null` when custom XML
-   * has been manually edited.
-   */
-  val selectedWorkbenchExampleForm: WorkbenchExampleForm?
-    get() = state.selectedWorkbenchExampleForm
-
-  /** Custom XForms `<h:html>` definition in the workbench's XForms editor. */
-  val customXFormsXml: String
-    get() = state.customXFormsXml
-
-  /** Parse error of [customXFormsXml], or `null` when it is valid. */
-  val xformsXmlError: String?
-    get() = state.xformsXmlError
-
-  /** Incremented when the sample data is reset, so views holding local copies reload them. */
-  val dataResetCount: Int
-    get() = state.dataResetCount
 }

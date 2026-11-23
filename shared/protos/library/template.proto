@@ -46,4 +46,8 @@ message FormTemplateDef {
 
   // Display order of this template within the library (0-based).
   int32 sort_order = 9;
+
+  // Version of the template, increased when its form changes. Surveys record
+  // the version their forms were copied from (`FormTemplateOrigin`).
+  int32 version = 10;
 }

@@ -180,7 +180,7 @@ The following fields are supported on `FieldBinding`:
 | `foreign_attributes` | `repeated         | `<bind>` attributes in      |
 :                      : ForeignAttribute` : namespaces ProtoForms       :
 :                      :                   : doesn't model (e.g.,        :
-:                      :                   : `ground:concept`), kept for :
+:                      :                   : `collectone:concept`), kept for :
 :                      :                   : round-trip fidelity. See    :
 :                      :                   : Foreign Attributes below.   :
 
@@ -188,10 +188,10 @@ The following fields are supported on `FieldBinding`:
 
 `FieldBinding.foreign_attributes` (field 17) preserves every `<bind>` attribute
 in a namespace ProtoForms doesn't model, so another tool's extensions (and
-Ground's own `ground:concept`, see
+Collect One's own `collectone:concept`, see
 [Concepts](../library/01-concepts.md#xforms-and-xlsform-serialization)) survive
 XForms → ProtoForms → XForms. Each `ForeignAttribute` records the namespace URI,
-the qualified name as written (e.g., `ground:concept`), and the value.
+the qualified name as written (e.g., `collectone:concept`), and the value.
 
 *   **Modeled namespaces are not foreign**: unprefixed attributes, namespace
     declarations, and attributes in the XForms, XHTML, `jr`, `odk`, `orx`,
@@ -208,9 +208,9 @@ the qualified name as written (e.g., `ground:concept`), and the value.
     `<prefix>3`, and so on; the attribute's namespace and value are unchanged.
 
 ```xml
-<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ground="http://groundplatform.org/xforms" ...>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:collectone="http://openforis.org/collect-one/xforms" ...>
   ...
-  <bind nodeset="/data/commodity" type="string" ground:concept="eudr.commodity@1"/>
+  <bind nodeset="/data/commodity" type="string" collectone:concept="eudr.commodity@1"/>
 ```
 
 ```textproto
@@ -218,8 +218,8 @@ bindings {
   field_path: "commodity"
   type: STRING
   foreign_attributes {
-    namespace_uri: "http://groundplatform.org/xforms"
-    qualified_name: "ground:concept"
+    namespace_uri: "http://openforis.org/collect-one/xforms"
+    qualified_name: "collectone:concept"
     value: "eudr.commodity@1"
   }
 }

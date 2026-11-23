@@ -19,7 +19,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.openforis.collectone.v2.core.sampling.GeoCoord
+import org.openforis.collectone.v2.core.geo.GeoCoord
 
 /** Hand-written fixtures; coordinates are arbitrary small squares, not real boundaries. */
 class GeoJsonReaderTest {
@@ -28,38 +28,114 @@ class GeoJsonReaderTest {
     "[[36.90, -0.40], [36.95, -0.40], [36.95, -0.45], [36.90, -0.45], [36.90, -0.40]]"
 
   @Test
-  fun polygon_isReadAsOpenExteriorRing() {
+  fun polygon_valid_hasNoIssues() {
     val result = GeoJsonReader.read("""{"type": "Polygon", "coordinates": [$square]}""")
+
     assertEquals(emptyList(), result.issues)
-    val ring = result.polygonRings.single()
-    assertEquals(4, ring.size)
-    assertEquals(GeoCoord(lat = -0.40, lng = 36.90), ring.first())
   }
 
   @Test
-  fun multiPolygon_isSplitIntoParts_andHolesAreDroppedWithWarning() {
-    val hole = "[[36.91, -0.41], [36.92, -0.41], [36.92, -0.42], [36.91, -0.41]]"
-    val other = "[[37.0, -0.5], [37.1, -0.5], [37.1, -0.6], [37.0, -0.5]]"
-    val text =
-      """
-      {"type": "Feature", "id": 7, "properties": {"name": "Two islands", "zone": 3},
-       "geometry": {"type": "MultiPolygon", "coordinates": [[$square, $hole], [$other]]}}
-      """
-    val result = GeoJsonReader.read(text)
+  fun polygon_isReadAsOpenExteriorRing() {
+    val result = GeoJsonReader.read("""{"type": "Polygon", "coordinates": [$square]}""")
+
+    assertEquals(4, result.polygonRings.single().size)
+  }
+
+  @Test
+  fun polygon_coordinates_areReadInLngLatOrder() {
+    val result = GeoJsonReader.read("""{"type": "Polygon", "coordinates": [$square]}""")
+
+    assertEquals(GeoCoord(lat = -0.40, lng = 36.90), result.polygonRings.single().first())
+  }
+
+  @Test
+  fun multiPolygon_isSplitIntoParts() {
+    val result = GeoJsonReader.read(twoIslandsFeature)
+
     assertEquals(2, result.polygonRings.size)
+  }
+
+  @Test
+  fun multiPolygon_holes_areDroppedWithWarning() {
+    val result = GeoJsonReader.read(twoIslandsFeature)
+
     assertEquals(1, result.droppedHoleCount)
     assertEquals(1, result.warnings.size)
-    assertTrue(result.warnings.single().message.contains("hole"))
-    val props = result.features.first().properties
-    assertEquals("Two islands", props["name"])
-    assertEquals("3", props["zone"])
-    assertEquals("7", props["id"])
+    assertEquals(GeoIssue.HolesRemoved(count = 1), result.warnings.single())
+  }
+
+  @Test
+  fun multiPolygon_parts_keepTheirFeatureSourceIndex() {
+    val result = GeoJsonReader.read(twoIslandsFeature)
+
     assertTrue(result.features.all { it.sourceIndex == 0 })
   }
 
   @Test
-  fun featureCollection_keepsPropertiesPerFeature_andMixedGeometry() {
-    val text =
+  fun feature_properties_areReadAsStrings() {
+    val result = GeoJsonReader.read(twoIslandsFeature)
+
+    val props = result.features.first().properties
+    assertEquals("Two islands", props["name"])
+    assertEquals("3", props["zone"])
+  }
+
+  @Test
+  fun feature_id_isKeptAsIdProperty() {
+    val result = GeoJsonReader.read(twoIslandsFeature)
+
+    assertEquals("7", result.features.first().properties["id"])
+  }
+
+  private val twoIslandsFeature: String
+    get() {
+      val hole = "[[36.91, -0.41], [36.92, -0.41], [36.92, -0.42], [36.91, -0.41]]"
+      val other = "[[37.0, -0.5], [37.1, -0.5], [37.1, -0.6], [37.0, -0.5]]"
+      return """
+        {"type": "Feature", "id": 7, "properties": {"name": "Two islands", "zone": 3},
+         "geometry": {"type": "MultiPolygon", "coordinates": [[$square, $hole], [$other]]}}
+        """
+    }
+
+  @Test
+  fun featureCollection_featureWithoutGeometry_isSkippedWithWarning() {
+    val result = GeoJsonReader.read(mixedFeatureCollection)
+
+    assertEquals(2, result.features.size)
+    assertEquals(listOf(2), result.warnings.mapNotNull { it.featureIndex })
+  }
+
+  @Test
+  fun featureCollection_keepsPropertiesPerFeature() {
+    val result = GeoJsonReader.read(mixedFeatureCollection)
+
+    assertEquals("forest", result.features[0].properties["stratum"])
+  }
+
+  @Test
+  fun featureCollection_pointFeature_isReadAsPoint() {
+    val result = GeoJsonReader.read(mixedFeatureCollection)
+
+    val point = assertIs<GeoGeometry.Point>(result.features[1].geometry)
+    assertEquals(GeoCoord(-0.42, 36.92), point.coord)
+  }
+
+  @Test
+  fun featureCollection_nestedObjectProperty_isKeptAsJson() {
+    val result = GeoJsonReader.read(mixedFeatureCollection)
+
+    assertEquals("""{"a":1}""", result.features[1].properties["tags"])
+  }
+
+  @Test
+  fun featureCollection_features_keepTheirSourceIndex() {
+    val result = GeoJsonReader.read(mixedFeatureCollection)
+
+    assertEquals(1, result.features[1].sourceIndex)
+  }
+
+  private val mixedFeatureCollection: String
+    get() =
       """
       {"type": "FeatureCollection", "features": [
         {"type": "Feature", "properties": {"stratum": "forest"},
@@ -69,48 +145,57 @@ class GeoJsonReaderTest {
         {"type": "Feature", "properties": {}, "geometry": null}
       ]}
       """
-    val result = GeoJsonReader.read(text)
-    assertEquals(2, result.features.size)
-    assertEquals("forest", result.features[0].properties["stratum"])
-    val point = assertIs<GeoGeometry.Point>(result.features[1].geometry)
-    assertEquals(GeoCoord(-0.42, 36.92), point.coord)
-    assertEquals("""{"a":1}""", result.features[1].properties["tags"])
-    assertEquals(1, result.features[1].sourceIndex)
-    // The feature without geometry is skipped with a warning.
-    assertEquals(listOf(2), result.warnings.mapNotNull { it.featureIndex })
-  }
 
   @Test
-  fun unclosedRing_isClosedWithWarning() {
-    val text = """{"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1]]]}"""
-    val result = GeoJsonReader.read(text)
+  fun unclosedRing_isClosed() {
+    val result = GeoJsonReader.read(UNCLOSED_SQUARE)
+
     assertEquals(4, result.polygonRings.single().size)
-    assertTrue(result.warnings.single().message.contains("wasn't closed"))
   }
 
   @Test
-  fun degenerateAndOutOfRangeRings_areErrors() {
-    val text =
-      """
-      {"type": "FeatureCollection", "features": [
-        {"type": "Feature", "properties": {},
-         "geometry": {"type": "Polygon", "coordinates": [[[0, 0], [1, 1], [0, 0]]]}},
-        {"type": "Feature", "properties": {},
-         "geometry": {"type": "Polygon", "coordinates": [[[0, 0], [200, 0], [1, 1], [0, 0]]]}}
-      ]}
-      """
-    val result = GeoJsonReader.read(text)
+  fun unclosedRing_isWarned() {
+    val result = GeoJsonReader.read(UNCLOSED_SQUARE)
+
+    assertEquals(GeoIssue.OutlineClosed(featureIndex = 0), result.warnings.single())
+  }
+
+  @Test
+  fun degenerateRing_isAnError() {
+    val result = GeoJsonReader.read(singlePolygonCollection("[[[0, 0], [1, 1], [0, 0]]]"))
+
     assertTrue(result.features.isEmpty())
-    assertEquals(listOf(0, 1), result.errors.mapNotNull { it.featureIndex })
+    assertEquals(listOf(0), result.errors.mapNotNull { it.featureIndex })
   }
 
   @Test
-  fun selfIntersectingRing_isKeptButReported() {
-    // A bow tie: (0,0) → (1,1) → (1,0) → (0,1) crosses itself.
-    val text = """{"type": "Polygon", "coordinates": [[[0, 0], [1, 1], [1, 0], [0, 1], [0, 0]]]}"""
-    val result = GeoJsonReader.read(text)
+  fun outOfRangeRing_isAnError() {
+    val result = GeoJsonReader.read(singlePolygonCollection("[[[0, 0], [200, 0], [1, 1], [0, 0]]]"))
+
+    assertTrue(result.features.isEmpty())
+    assertEquals(listOf(0), result.errors.mapNotNull { it.featureIndex })
+  }
+
+  private fun singlePolygonCollection(coordinates: String) =
+    """
+    {"type": "FeatureCollection", "features": [
+      {"type": "Feature", "properties": {},
+       "geometry": {"type": "Polygon", "coordinates": $coordinates}}
+    ]}
+    """
+
+  @Test
+  fun selfIntersectingRing_isKept() {
+    val result = GeoJsonReader.read(BOW_TIE)
+
     assertEquals(1, result.polygonRings.size)
-    assertTrue(result.warnings.any { it.message.contains("crosses itself") })
+  }
+
+  @Test
+  fun selfIntersectingRing_isReported() {
+    val result = GeoJsonReader.read(BOW_TIE)
+
+    assertTrue(result.warnings.any { it is GeoIssue.SelfIntersection })
   }
 
   @Test
@@ -121,13 +206,42 @@ class GeoJsonReaderTest {
   }
 
   @Test
-  fun fileReader_detectsFormatByExtensionOrContent() {
+  fun detect_geojsonExtension_isGeoJson() {
     assertEquals(GeoFileFormat.GEOJSON, GeoFileFormat.detect("area.geojson", ""))
+  }
+
+  @Test
+  fun detect_kmlExtension_isKmlIgnoringCase() {
     assertEquals(GeoFileFormat.KML, GeoFileFormat.detect("area.KML", ""))
+  }
+
+  @Test
+  fun detect_jsonContentWithoutExtension_isGeoJson() {
     assertEquals(GeoFileFormat.GEOJSON, GeoFileFormat.detect("download", " {\"type\": 1}"))
+  }
+
+  @Test
+  fun detect_xmlContentWithoutExtension_isKml() {
     assertEquals(GeoFileFormat.KML, GeoFileFormat.detect("download", "<?xml version=\"1.0\"?>"))
+  }
+
+  @Test
+  fun detect_unsupportedFile_isNull() {
     assertNull(GeoFileFormat.detect("area.shp", "binary"))
+  }
+
+  @Test
+  fun fileReader_unsupportedFile_isAnError() {
     assertEquals(1, GeoFileReader.read("area.shp", "binary").errors.size)
+  }
+
+  private companion object {
+    const val UNCLOSED_SQUARE =
+      """{"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1]]]}"""
+
+    /** A bow tie: (0,0) → (1,1) → (1,0) → (0,1) crosses itself. */
+    const val BOW_TIE =
+      """{"type": "Polygon", "coordinates": [[[0, 0], [1, 1], [1, 0], [0, 1], [0, 0]]]}"""
   }
 }
 
@@ -175,16 +289,41 @@ class KmlReaderTest {
       .trimIndent()
 
   @Test
-  fun placemarks_areReadWithPropertiesAndParts() {
+  fun placemarks_multiGeometry_isSplitIntoOneFeaturePerPart() {
     val result = KmlReader.read(kml)
+
     assertEquals(4, result.features.size)
     assertEquals(3, result.polygonRings.size)
-    val first = result.features.first()
-    assertEquals("North block & ridge", first.properties["name"])
-    assertEquals("forest", first.properties["stratum"])
-    assertEquals("N1", first.properties["code"])
-    assertEquals(4, (first.geometry as GeoGeometry.Polygon).ring.size)
     assertEquals(listOf(0, 1, 1, 2), result.features.map { it.sourceIndex })
+  }
+
+  @Test
+  fun placemark_name_isEntityDecoded() {
+    val result = KmlReader.read(kml)
+
+    assertEquals("North block & ridge", result.features.first().properties["name"])
+  }
+
+  @Test
+  fun placemark_extendedData_readsDataAndSimpleDataProperties() {
+    val result = KmlReader.read(kml)
+
+    val properties = result.features.first().properties
+    assertEquals("forest", properties["stratum"])
+    assertEquals("N1", properties["code"])
+  }
+
+  @Test
+  fun placemark_polygon_isReadAsOpenRing() {
+    val result = KmlReader.read(kml)
+
+    assertEquals(4, (result.features.first().geometry as GeoGeometry.Polygon).ring.size)
+  }
+
+  @Test
+  fun placemark_point_isReadInLngLatOrder() {
+    val result = KmlReader.read(kml)
+
     val well = assertIs<GeoGeometry.Point>(result.features.last().geometry)
     assertEquals(GeoCoord(-0.43, 36.93), well.coord)
   }
@@ -192,8 +331,15 @@ class KmlReaderTest {
   @Test
   fun innerBoundaries_areDroppedWithWarning() {
     val result = KmlReader.read(kml)
+
     assertEquals(1, result.droppedHoleCount)
-    assertTrue(result.warnings.any { it.message.contains("hole") })
+    assertTrue(result.warnings.any { it is GeoIssue.HolesRemoved })
+  }
+
+  @Test
+  fun validDocument_hasNoErrors() {
+    val result = KmlReader.read(kml)
+
     assertEquals(emptyList(), result.errors)
   }
 
@@ -221,57 +367,92 @@ class KmlReaderTest {
 class RingValidatorTest {
 
   @Test
-  fun findSelfIntersection_detectsCrossingInLargeRing() {
-    // A 400-vertex circle-ish ring is simple...
-    val n = 400
-    val circle =
-      (0 until n).map { i ->
-        val a = 2 * kotlin.math.PI * i / n
-        GeoCoord(lat = kotlin.math.sin(a), lng = kotlin.math.cos(a))
-      }
-    assertNull(RingValidator.findSelfIntersection(circle))
-    // ...until two vertices are swapped, which makes edges cross.
-    val crossed = circle.toMutableList().apply { add(10, removeAt(200)) }
-    assertNotNull(RingValidator.findSelfIntersection(crossed))
+  fun findSelfIntersection_simpleLargeRing_findsNone() {
+    assertNull(RingValidator.findSelfIntersection(circle(vertexCount = 400)))
   }
 
   @Test
-  fun isCounterClockwise() {
-    val ccw = listOf(GeoCoord(0.0, 0.0), GeoCoord(0.0, 1.0), GeoCoord(1.0, 1.0))
-    assertTrue(RingValidator.isCounterClockwise(ccw))
-    assertTrue(!RingValidator.isCounterClockwise(ccw.reversed()))
+  fun findSelfIntersection_largeRingWithSwappedVertices_detectsCrossing() {
+    // Swapping two vertices of a simple ring makes its edges cross.
+    val crossed = circle(vertexCount = 400).toMutableList().apply { add(10, removeAt(200)) }
+
+    assertNotNull(RingValidator.findSelfIntersection(crossed))
+  }
+
+  private fun circle(vertexCount: Int): List<GeoCoord> =
+    (0 until vertexCount).map { i ->
+      val a = 2 * kotlin.math.PI * i / vertexCount
+      GeoCoord(lat = kotlin.math.sin(a), lng = kotlin.math.cos(a))
+    }
+
+  @Test
+  fun isCounterClockwise_counterClockwiseRing_isTrue() {
+    assertTrue(RingValidator.isCounterClockwise(counterClockwiseTriangle))
+  }
+
+  @Test
+  fun isCounterClockwise_clockwiseRing_isFalse() {
+    assertTrue(!RingValidator.isCounterClockwise(counterClockwiseTriangle.reversed()))
+  }
+
+  private val counterClockwiseTriangle =
+    listOf(GeoCoord(0.0, 0.0), GeoCoord(0.0, 1.0), GeoCoord(1.0, 1.0))
+
+  @Test
+  fun antimeridianCrossing_keepsRing() {
+    val result = RingValidator.normalize(antimeridianRing, featureIndex = 0)
+
+    assertNotNull(result.ring)
   }
 
   @Test
   fun antimeridianCrossing_isWarned() {
-    val ring = listOf(GeoCoord(0.0, 179.0), GeoCoord(0.0, -179.0), GeoCoord(1.0, -179.0))
-    val result = RingValidator.normalize(ring + ring.first())
-    assertNotNull(result.ring)
-    assertTrue(result.issues.any { it.message.contains("180°") })
+    val result = RingValidator.normalize(antimeridianRing, featureIndex = 0)
+
+    assertEquals(listOf(GeoIssue.MayCrossAntimeridian(featureIndex = 0)), result.issues)
   }
+
+  private val antimeridianRing =
+    listOf(GeoCoord(0.0, 179.0), GeoCoord(0.0, -179.0), GeoCoord(1.0, -179.0), GeoCoord(0.0, 179.0))
 }
 
 class GeoSimplifierTest {
 
+  /** A straight line along the equator with one tiny bump at its middle point. */
+  private val lineWithBump =
+    (0..10).map { GeoCoord(lat = if (it == 5) 0.00001 else 0.0, lng = it * 0.1) }
+
   @Test
-  fun simplifyLine_removesNearlyCollinearPoints() {
-    val line = (0..10).map { GeoCoord(lat = if (it == 5) 0.00001 else 0.0, lng = it * 0.1) }
-    assertEquals(2, GeoSimplifier.simplifyLine(line, 0.001).size)
+  fun simplifyLine_toleranceAboveBump_keepsOnlyEndpoints() {
+    assertEquals(2, GeoSimplifier.simplifyLine(lineWithBump, 0.001).size)
+  }
+
+  @Test
+  fun simplifyLine_toleranceBelowBump_keepsOnlyTheBump() {
     // Points next to the bump are ~8e-6° off the simplified segments, so keep them out too.
-    assertEquals(3, GeoSimplifier.simplifyLine(line, 0.000009).size)
+    assertEquals(3, GeoSimplifier.simplifyLine(lineWithBump, 0.000009).size)
   }
 
   @Test
   fun simplifyRingToMaxVertices_capsVertexCountAndKeepsAPolygon() {
-    val n = 5000
-    val ring =
-      (0 until n).map { i ->
-        val a = 2 * kotlin.math.PI * i / n
-        val r = 1.0 + 0.01 * kotlin.math.sin(a * 50)
-        GeoCoord(lat = r * kotlin.math.sin(a), lng = r * kotlin.math.cos(a))
-      }
-    val simplified = GeoSimplifier.simplifyRingToMaxVertices(ring, 200)
+    val simplified = GeoSimplifier.simplifyRingToMaxVertices(wavyRing, 200)
+
     assertTrue(simplified.size in 3..200, "size ${simplified.size}")
-    assertEquals(ring, GeoSimplifier.simplifyRingToMaxVertices(ring, n))
+  }
+
+  @Test
+  fun simplifyRingToMaxVertices_ringWithinCap_isUnchanged() {
+    assertEquals(wavyRing, GeoSimplifier.simplifyRingToMaxVertices(wavyRing, WAVY_RING_VERTICES))
+  }
+
+  private val wavyRing =
+    (0 until WAVY_RING_VERTICES).map { i ->
+      val a = 2 * kotlin.math.PI * i / WAVY_RING_VERTICES
+      val r = 1.0 + 0.01 * kotlin.math.sin(a * 50)
+      GeoCoord(lat = r * kotlin.math.sin(a), lng = r * kotlin.math.cos(a))
+    }
+
+  private companion object {
+    const val WAVY_RING_VERTICES = 5000
   }
 }

@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Kind of "data was used" event, shown in impact history. -->
+  <string name="domain_impact_event_type_export">Export</string>
+  <string name="domain_impact_event_type_partner_push">Envoi à un partenaire</string>
+  <string name="domain_impact_event_type_receipt_generated">Reçu créé</string>
+  <string name="domain_impact_event_type_receipt_shared">Reçu partagé</string>
+  <string name="domain_impact_event_type_doi_minted">DOI attribué</string>
+  <string name="domain_impact_event_type_survey_closed">Enquête clôturée</string>
+  <!-- Lifecycle state of a survey. -->
+  <string name="domain_survey_lifecycle_state_draft">Brouillon</string>
+  <string name="domain_survey_lifecycle_state_published">Publiée</string>
+  <string name="domain_survey_lifecycle_state_closed">Clôturée</string>
+  <string name="domain_survey_lifecycle_state_archived">Archivée</string>
+  <!-- Answer option to "What happened with this data?" for a closed survey. -->
+  <string name="domain_survey_outcome_kind_submitted_eudr_dds">Soumises dans une déclaration de diligence raisonnée RDUE</string>
+  <string name="domain_survey_outcome_kind_reported_ferm">Déclarées au FERM</string>
+  <string name="domain_survey_outcome_kind_land_titling">Utilisées pour l’attribution de titres fonciers</string>
+  <string name="domain_survey_outcome_kind_shared_with_buyers">Partagées avec des acheteurs</string>
+  <string name="domain_survey_outcome_kind_trained_or_validated_model">Ont servi à entraîner ou vérifier une carte ou un modèle</string>
+  <string name="domain_survey_outcome_kind_protected_area_management">Utilisées pour gérer une aire protégée</string>
+  <string name="domain_survey_outcome_kind_not_yet">Pas encore</string>
+  <!-- Answer option: time and cost compared with the previous method. -->
+  <string name="domain_effort_comparison_less">Moins</string>
+  <string name="domain_effort_comparison_same">À peu près pareil</string>
+  <string name="domain_effort_comparison_more">Plus</string>
+  <!-- Upload status of a submission. -->
+  <string name="domain_sync_status_uploading">Téléversement</string>
+  <string name="domain_sync_status_uploading_description">Téléversement des modifications locales vers le serveur</string>
+  <string name="domain_sync_status_synced">Synchronisée</string>
+  <string name="domain_sync_status_synced_description">Synchronisé avec le serveur cloud</string>
+  <string name="domain_sync_status_failed">Échec</string>
+  <string name="domain_sync_status_failed_description">Échec du téléversement — appuyez pour réessayer</string>
+  <!-- Name of a quota tier (plan). -->
+  <string name="domain_quota_tier_unspecified">Non spécifié</string>
+  <string name="domain_quota_tier_basic">Basique</string>
+  <string name="domain_quota_tier_sponsored">Parrainé</string>
+  <!-- Measurement unit system option in Settings. -->
+  <string name="domain_measurement_unit_system_metric">Métrique (ha, m)</string>
+  <string name="domain_measurement_unit_system_metric_short">Métrique</string>
+  <string name="domain_measurement_unit_system_imperial">Impérial (acres, ft)</string>
+  <string name="domain_measurement_unit_system_imperial_short">Impérial</string>
+  <!-- State of the map camera relative to the GPS location. -->
+  <string name="domain_location_lock_state_locked">Centrage GPS auto</string>
+  <string name="domain_location_lock_state_locked_3d">GPS 3D</string>
+  <string name="domain_location_lock_state_panned">Déplacée</string>
+  <!-- Badge shown on a map layer that comes from the survey. -->
+  <string name="domain_layer_source_type_entity_dataset">Couche de l’enquête</string>
+  <!-- Basemap option in the map layers panel. -->
+  <string name="domain_basemap_type_normal">Relief</string>
+  <string name="domain_basemap_type_normal_description">Carte du relief avec courbes de niveau, ombrage et routes</string>
+  <string name="domain_basemap_type_satellite">Satellite</string>
+  <string name="domain_basemap_type_satellite_description">Imagerie Mapbox Standard Satellite avec libellés de référence</string>
+  <!-- Layer of a map area saved for offline use: satellite imagery, or the terrain map (contours, hillshade, and roads). -->
+  <string name="domain_offline_imagery_type_satellite">Satellite</string>
+  <string name="domain_offline_imagery_type_terrain">Relief</string>
+  <!-- Role of a person in an organization. -->
+  <string name="domain_organization_role_member">Membre</string>
+  <string name="domain_organization_role_member_description">Affilié à l’organisation, peut voir ses enquêtes et en créer de nouvelles.</string>
+  <string name="domain_organization_role_manager">Gestionnaire</string>
+  <string name="domain_organization_role_manager_description">Peut modifier l’organisation, gérer ses membres et gérer toutes ses enquêtes.</string>
+  <!-- Status of a person's membership in an organization. -->
+  <string name="domain_membership_status_invited">Invité</string>
+  <string name="domain_membership_status_requested">Demande d’adhésion envoyée</string>
+  <string name="domain_membership_status_active">Membre</string>
+  <!-- Kind of custom imagery source. -->
+  <string name="domain_imagery_source_type_xyz_tiles">URL de tuiles XYZ</string>
+  <string name="domain_imagery_source_type_earth_engine">Couche Earth Engine</string>
+  <!-- Kind of organization. -->
+  <string name="domain_organization_type_government_agency">Organisme public</string>
+  <string name="domain_organization_type_cooperative">Coopérative</string>
+  <string name="domain_organization_type_iplc_organization">Organisation de peuples autochtones ou de communautés locales</string>
+  <string name="domain_organization_type_ngo">ONG</string>
+  <string name="domain_organization_type_company">Entreprise</string>
+  <string name="domain_organization_type_research">Institution de recherche</string>
+  <string name="domain_organization_type_other">Autre</string>
+  <!-- Upload status filter and upload state of a pending change. -->
+  <string name="domain_upload_status_filter_pending">En attente</string>
+  <string name="domain_upload_status_filter_in_progress">En cours</string>
+  <string name="domain_upload_status_filter_uploaded">Téléversé</string>
+  <string name="domain_upload_status_filter_failed">Échec</string>
+  <!-- Kind of change waiting to upload or already uploaded. -->
+  <string name="domain_mutation_operation_kind_create_submission">Formulaire soumis</string>
+  <string name="domain_mutation_operation_kind_update_submission">Formulaire modifié</string>
+  <string name="domain_mutation_operation_kind_delete_submission">Formulaire supprimé</string>
+  <string name="domain_mutation_operation_kind_create_entity">Entité cartographique créée</string>
+  <string name="domain_mutation_operation_kind_update_entity">Entité cartographique modifiée</string>
+  <string name="domain_mutation_operation_kind_delete_entity">Entité cartographique supprimée</string>
+  <string name="domain_mutation_operation_kind_upload_media">Photo jointe</string>
+  <!-- Status of an invitation to join. -->
+  <string name="domain_invitation_status_pending">Invité</string>
+  <string name="domain_invitation_status_accepted">A rejoint</string>
+  <!-- Geometry type: point, line, or polygon. -->
+  <string name="domain_geometry_point">Point</string>
+  <string name="domain_geometry_line">Ligne</string>
+  <string name="domain_geometry_polygon">Polygone</string>
+  <!-- Geometry type (point, line, polygon) of a map feature or question. -->
+  <string name="domain_entity_geometry_kind_none">Aucune géométrie</string>
+  <!-- Title or subtitle of a mobile app screen in the screen navigator. -->
+  <string name="domain_app_screen_sign_in_title">Connexion</string>
+  <string name="domain_app_screen_sign_in_subtitle">Point d’entrée de l’authentification Google</string>
+  <string name="domain_app_screen_terms_of_service_title">Conditions d’utilisation</string>
+  <string name="domain_app_screen_terms_of_service_subtitle">Acceptation des conditions de gouvernance des données et de la plateforme</string>
+  <string name="domain_app_screen_download_survey_title">Télécharger une enquête</string>
+  <string name="domain_app_screen_download_survey_subtitle">Parcourir les enquêtes partagées ou rechercher par nom/lieu</string>
+  <string name="domain_app_screen_main_survey_title">Enquête principale (carte et liste)</string>
+  <string name="domain_app_screen_main_survey_subtitle">Carte de l’enquête, couches cartographiques, volets d’emplacement et de soumission, liste consultable et tiroir</string>
+  <!-- Tab: show the survey as a map or as a list. -->
+  <string name="domain_main_survey_view_mode_map">Carte</string>
+  <string name="domain_main_survey_view_mode_list">Liste</string>
+  <!-- Lifecycle status of a library entry. -->
+  <string name="domain_library_status_draft">Brouillon</string>
+  <string name="domain_library_status_stable">Stable</string>
+  <string name="domain_library_status_deprecated">Obsolète</string>
+  <!-- How dashboards roll up answers to a standard field. -->
+  <string name="domain_concept_aggregation_count_distinct_features">Nombre d’entités cartographiques</string>
+  <string name="domain_concept_aggregation_count_distinct_features_description">Compte les entités cartographiques ayant une réponse.</string>
+  <string name="domain_concept_aggregation_count_by_code">Nombre par valeur</string>
+  <string name="domain_concept_aggregation_count_by_code_description">Compte les entités cartographiques pour chaque valeur de la liste.</string>
+  <string name="domain_concept_aggregation_sum">Somme</string>
+  <string name="domain_concept_aggregation_sum_description">Additionne les réponses.</string>
+  <string name="domain_concept_aggregation_mean">Moyenne</string>
+  <string name="domain_concept_aggregation_mean_description">Calcule la moyenne des réponses.</string>
+  <string name="domain_concept_aggregation_share_by_code">Proportion par valeur</string>
+  <string name="domain_concept_aggregation_share_by_code_description">Affiche la proportion d’entités cartographiques pour chaque valeur.</string>
+  <string name="domain_concept_aggregation_none">Non agrégé</string>
+  <string name="domain_concept_aggregation_none_description">Noms, identifiants et autres réponses qui ne sont pas agrégées.</string>
+  <!-- Privacy class of a standard field: what may leave the organization. -->
+  <string name="domain_privacy_class_aggregate_public">Totaux publics</string>
+  <string name="domain_privacy_class_aggregate_public_description">Les totaux peuvent figurer dans les tableaux de bord publics et à l’échelle de la plateforme.</string>
+  <string name="domain_privacy_class_org_only">Organisation uniquement</string>
+  <string name="domain_privacy_class_org_only_description">Les totaux ne sont visibles qu’au sein de l’organisation propriétaire.</string>
+  <string name="domain_privacy_class_sensitive">Sensible</string>
+  <string name="domain_privacy_class_sensitive_description">Jamais inclus dans les totaux publics ou inter-organisations.</string>
+  <!-- Impact pillar used to group goals. -->
+  <string name="domain_impact_pillar_mitigation">Atténuation</string>
+  <string name="domain_impact_pillar_adaptation">Adaptation</string>
+  <string name="domain_impact_pillar_protection">Protection</string>
+  <!-- Data type of an answer or property. -->
+  <string name="domain_data_type_text">Texte</string>
+  <string name="domain_data_type_integer">Entier</string>
+  <string name="domain_data_type_decimal">Décimal</string>
+  <string name="domain_data_type_date">Date</string>
+  <string name="domain_data_type_select_one">Choix unique</string>
+  <string name="domain_data_type_select_multiple">Choix multiple</string>
+  <!-- Answer data type (also used for question types and table property types). -->
+  <string name="domain_concept_data_type_media">Photo, vidéo ou audio</string>
+  <!-- Role of a collaborator on a survey. -->
+  <string name="domain_collaborator_role_viewer">Lecteur</string>
+  <string name="domain_collaborator_role_viewer_description">Peut voir la carte, les couches cartographiques et les soumissions.</string>
+  <string name="domain_collaborator_role_data_collector">Collecteur de données</string>
+  <string name="domain_collaborator_role_data_collector_description">Peut collecter des soumissions et ajouter des entités cartographiques.</string>
+  <string name="domain_collaborator_role_survey_organizer">Organisateur de l’enquête</string>
+  <string name="domain_collaborator_role_survey_organizer_description">Peut modifier les formulaires, gérer le partage et exporter les données.</string>
+  <!-- General access option of a survey. -->
+  <string name="domain_sharing_policy_restricted">Restreint</string>
+  <string name="domain_sharing_policy_restricted_description">Seules les personnes ajoutées ci-dessus peuvent ouvrir cette enquête.</string>
+  <string name="domain_sharing_policy_organization">Toute personne de l’organisation</string>
+  <string name="domain_sharing_policy_organization_description">Les membres de l’organisation de l’enquête peuvent collecter des données. Les gestionnaires peuvent aussi modifier l’enquête.</string>
+  <string name="domain_sharing_policy_anyone_with_link">Lien ou code QR requis</string>
+  <string name="domain_sharing_policy_anyone_with_link_description">Les utilisateurs ont besoin d’un lien ou d’un code QR pour accéder à cette enquête et collecter des données.</string>
+  <string name="domain_sharing_policy_public">Répertoriée dans l’annuaire</string>
+  <string name="domain_sharing_policy_public_description">Répertoriée dans l’annuaire : tout le monde peut trouver cette enquête et collecter des données.</string>
+  <!-- Which data a data collector can see. -->
+  <string name="domain_peer_data_visibility_all">Toutes les données</string>
+  <string name="domain_peer_data_visibility_all_description">Les collecteurs de données voient les soumissions et les entités cartographiques de tous.</string>
+  <string name="domain_peer_data_visibility_own_only">Ses propres données uniquement</string>
+  <string name="domain_peer_data_visibility_own_only_description">Les collecteurs de données ne voient que ce qu’ils ont collecté.</string>
+  <!-- Kind of survey dataset, singular and plural. -->
+  <string name="domain_dataset_kind_map_layer">Couche cartographique</string>
+  <string name="domain_dataset_kind_map_layer_plural">Couches cartographiques</string>
+  <string name="domain_dataset_kind_data_table">Table de données</string>
+  <string name="domain_dataset_kind_data_table_plural">Tables de données</string>
+  <!-- Geometry type of a map layer (plural). -->
+  <string name="domain_geometry_kind_point">Points</string>
+  <string name="domain_geometry_kind_line">Lignes</string>
+  <string name="domain_geometry_kind_polygon">Polygones</string>
+  <string name="domain_property_type_boolean">Oui / Non</string>
+  <!-- Sampling method option for generated sample plots. -->
+  <string name="domain_sample_method_systematic_grid">Grille systématique</string>
+  <string name="domain_sample_method_systematic_grid_description">Placettes sur une grille régulière avec un point de départ aléatoire.</string>
+  <string name="domain_sample_method_simple_random">Aléatoire simple</string>
+  <string name="domain_sample_method_simple_random_description">Un nombre défini de placettes placées au hasard.</string>
+  <string name="domain_sample_method_stratified_random">Aléatoire stratifié</string>
+  <string name="domain_sample_method_stratified_random_description">Placettes placées au hasard dans chaque strate.</string>
+  <string name="domain_sample_method_cluster">Par grappes</string>
+  <string name="domain_sample_method_cluster_description">Groupes de placettes placés au hasard.</string>
+  <!-- How sample plots are allocated across strata. -->
+  <string name="domain_allocation_mode_equal">Égale</string>
+  <string name="domain_allocation_mode_proportional">Proportionnelle à la surface</string>
+  <string name="domain_allocation_mode_custom">Personnalisée</string>
+  <!-- Shape of a sample plot. -->
+  <string name="domain_plot_shape_option_square">Carré</string>
+  <string name="domain_plot_shape_option_circle">Cercle</string>
+  <string name="domain_plot_shape_option_point">Point (centre uniquement)</string>
+  <!-- How sub-plot sample points are placed within a plot. -->
+  <string name="domain_sub_plot_mode_none">Aucun</string>
+  <string name="domain_sub_plot_mode_center">Un au centre</string>
+  <string name="domain_sub_plot_mode_grid">Grille</string>
+  <string name="domain_sub_plot_mode_random">Aléatoire</string>
+  <!-- Device to preview a form on. -->
+  <string name="domain_form_preview_target_mobile">Mobile</string>
+  <string name="domain_form_preview_target_web">Web</string>
+  <!-- Question type in the form editor. -->
+  <string name="domain_editor_question_type_text">Texte court</string>
+  <string name="domain_editor_question_type_long_text">Paragraphe</string>
+  <string name="domain_editor_question_type_number">Nombre</string>
+  <string name="domain_editor_question_type_photo">Photo</string>
+  <string name="domain_editor_question_type_video">Vidéo</string>
+  <string name="domain_editor_question_type_audio">Audio</string>
+  <string name="domain_editor_question_type_note">Remarque</string>
+  <!-- How data collectors provide a photo, video, or audio answer. -->
+  <string name="domain_media_source_capture_or_upload">Capture ou téléversement</string>
+  <string name="domain_media_source_capture_or_upload_description">Les collecteurs peuvent utiliser la caméra ou le micro, ou téléverser un fichier existant depuis leur appareil.</string>
+  <string name="domain_media_source_capture_only">Capture uniquement</string>
+  <string name="domain_media_source_capture_only_description">Les collecteurs doivent prendre une nouvelle photo, vidéo ou un nouvel enregistrement. Le téléversement de fichiers existants n’est pas autorisé.</string>
+  <!-- How data collectors record a location answer. -->
+  <string name="domain_geometry_capture_gps_only">GPS uniquement</string>
+  <string name="domain_geometry_capture_gps_only_description">Les collecteurs enregistrent la position GPS de leur appareil. Non disponible sur le Web.</string>
+  <string name="domain_geometry_capture_gps_or_map">GPS ou dessin sur la carte</string>
+  <string name="domain_geometry_capture_gps_or_map_description">Les collecteurs peuvent utiliser leur position GPS ou la placer sur la carte. Obligatoire pour le Web.</string>
+  <!-- Comparison operator in display logic and status rules; read mid-sentence after a question name, e.g. "age is greater than 5". -->
+  <string name="domain_relevance_operator_equals">est égal à</string>
+  <string name="domain_relevance_operator_not_equals">est différent de</string>
+  <string name="domain_relevance_operator_greater_than">est supérieur à</string>
+  <string name="domain_relevance_operator_less_than">est inférieur à</string>
+  <string name="domain_relevance_operator_includes">inclut</string>
+  <string name="domain_relevance_operator_is_answered">a une réponse</string>
+  <!-- Where a choice question's options come from. -->
+  <string name="domain_choice_source_manual">Liste manuelle</string>
+  <!-- Name of a status marker symbol (accessibility label). -->
+  <string name="domain_status_marker_symbol_open">Cercle vide</string>
+  <string name="domain_status_marker_symbol_half">Demi-cercle</string>
+  <string name="domain_status_marker_symbol_check">Coche</string>
+  <string name="domain_status_marker_symbol_alert">Point d’exclamation</string>
+  <string name="domain_status_marker_symbol_cross">Croix</string>
+  <!-- What a map feature status rule checks. -->
+  <string name="domain_status_condition_subject_submissions">Nombre de soumissions</string>
+  <string name="domain_status_condition_subject_question">Réponse à une question</string>
+  <string name="domain_status_condition_subject_entity_property">Propriété de l’entité</string>
+  <!-- Data type of a map layer or data table property. -->
+  <string name="domain_editor_property_kind_boolean">Oui / non</string>
+  <!-- Validation rule option for a date question. -->
+  <string name="domain_date_rule_not_in_future">Pas dans le futur</string>
+  <string name="domain_date_rule_not_in_past">Pas dans le passé</string>
+  <string name="domain_date_rule_between">Entre deux dates</string>
+  <!-- Preset pattern option for validating a text answer. -->
+  <string name="domain_text_pattern_email">Adresse e-mail</string>
+  <string name="domain_text_pattern_digits">Chiffres uniquement</string>
+  <string name="domain_text_pattern_letters">Lettres uniquement</string>
+  <string name="domain_text_pattern_custom">Modèle personnalisé</string>
+  <!-- Form editor: validation issues shown next to questions and at the top of the form. -->
+  <string name="domain_issue_form_missing_id">L’ID du formulaire est manquant.</string>
+  <string name="domain_issue_name_required">Le nom est obligatoire.</string>
+  <string name="domain_issue_name_invalid">Le nom doit commencer par une lettre et ne contenir que des lettres, des chiffres et _ . -</string>
+  <!-- %1$s: the question's name (an identifier). -->
+  <string name="domain_issue_name_duplicate">Le nom « %1$s » est utilisé plusieurs fois.</string>
+  <string name="domain_issue_label_empty">Le libellé est vide.</string>
+  <string name="domain_issue_choose_choice_data_table">Choisissez une table de données pour les options.</string>
+  <string name="domain_issue_choose_choice_map_layer">Choisissez une couche cartographique pour les options.</string>
+  <!-- %1$s: ID of the map layer or data table that was deleted. -->
+  <string name="domain_issue_choice_dataset_missing">La couche cartographique ou la table de données « %1$s » n’existe plus.</string>
+  <!-- %1$s: name of a map layer of generated sample plots. -->
+  <string name="domain_issue_choice_dataset_generated">Les placettes d’échantillonnage de « %1$s » sont générées et ne peuvent pas être ajoutées par les collecteurs.</string>
+  <!-- %1$s: name of a map layer. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_map_layer">« %1$s » n’a aucun formulaire pour ajouter de nouvelles entités cartographiques.</string>
+  <!-- %1$s: name of a data table. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_data_table">« %1$s » n’a aucun formulaire pour ajouter de nouvelles lignes.</string>
+  <string name="domain_issue_add_choice">Ajoutez au moins un choix.</string>
+  <string name="domain_issue_choice_value_invalid">Les valeurs des choix ne doivent pas être vides ni contenir d’espaces.</string>
+  <string name="domain_issue_choice_value_duplicate">Les valeurs des choix doivent être uniques.</string>
+  <string name="domain_issue_display_logic_source_deleted">La logique d’affichage fait référence à une question supprimée.</string>
+  <!-- %1$s: name of the question the display logic depends on. -->
+  <string name="domain_issue_display_logic_source_later">La logique d’affichage dépend de « %1$s », qui vient plus loin.</string>
+  <string name="domain_issue_display_logic_source_in_repeat">La logique d’affichage dépend de « %1$s », qui se trouve dans une section répétée.</string>
+  <string name="domain_issue_section_display_logic_source_inside">La logique d’affichage de la section ne peut pas dépendre de « %1$s », qui se trouve dans la section.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_display_logic_operator_not_applicable">« %1$s » ne s’applique pas au type %2$s.</string>
+  <string name="domain_issue_display_logic_value_missing">La logique d’affichage nécessite une valeur de comparaison.</string>
+  <string name="domain_issue_display_logic_value_not_number">La valeur de la logique d’affichage doit être un nombre.</string>
+  <string name="domain_issue_cascade_parent_deleted">Le filtre en cascade fait référence à une question supprimée.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_later">Le filtre en cascade dépend de « %1$s », qui vient plus loin.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_not_choice">La question parente du filtre en cascade, « %1$s », doit être une question à choix.</string>
+  <!-- %1$s: comma-separated parent values set on choices; %2$s: name of the parent question. -->
+  <string name="domain_issue_cascade_choice_parent_value_unknown">Les choix liés à %1$s ne s’affichent jamais : « %2$s » n’a pas ce choix.</string>
+  <!-- %1$s: question label; %2$s: name of the "GPS or draw on map" option. "Available on web" is a form setting. -->
+  <string name="domain_issue_web_incompatible_geometry">« %1$s » est en mode GPS uniquement, ce que le Web ne peut pas capturer. Choisissez « %2$s » ou désactivez « Disponible sur le Web ».</string>
+  <string name="domain_issue_google_earth_incompatible_question">« %1$s » (%2$s) n’est pas pris en charge dans Google Earth. Supprimez-la, changez son type de question ou désactivez « Activer Ouvrir dans Google Earth ».</string>
+  <!-- Form editor: validation rule issues of a question. -->
+  <string name="domain_issue_min_not_number">Le minimum doit être un nombre.</string>
+  <string name="domain_issue_max_not_number">Le maximum doit être un nombre.</string>
+  <string name="domain_issue_min_more_than_max">Le minimum ne peut pas dépasser le maximum.</string>
+  <string name="domain_issue_min_length_invalid">La longueur minimale doit être un nombre entier supérieur ou égal à 0.</string>
+  <string name="domain_issue_max_length_invalid">La longueur maximale doit être un nombre entier supérieur ou égal à 0.</string>
+  <string name="domain_issue_min_length_more_than_max">La longueur minimale ne peut pas dépasser la longueur maximale.</string>
+  <string name="domain_issue_min_selections_invalid">Le nombre minimal de sélections doit être un nombre entier supérieur ou égal à 0.</string>
+  <string name="domain_issue_max_selections_invalid">Le nombre maximal de sélections doit être un nombre entier supérieur ou égal à 0.</string>
+  <string name="domain_issue_min_selections_more_than_max">Le nombre minimal de sélections ne peut pas dépasser le maximum.</string>
+  <string name="domain_issue_min_selections_more_than_choices">Le nombre minimal de sélections dépasse le nombre de choix.</string>
+  <string name="domain_issue_custom_pattern_missing">Saisissez un modèle personnalisé.</string>
+  <string name="domain_issue_custom_pattern_invalid">Le modèle personnalisé n’est pas valide.</string>
+  <string name="domain_issue_custom_pattern_quotes">Le modèle personnalisé ne peut pas contenir à la fois ' et ".</string>
+  <string name="domain_issue_date_range_missing">Choisissez une date au plus tôt ou au plus tard.</string>
+  <string name="domain_issue_date_range_reversed">La date au plus tôt ne peut pas être postérieure à la date au plus tard.</string>
+  <!-- Form editor: summary of a map feature status rule's condition. -->
+  <string name="domain_status_rule_when_submitted">Lorsque le formulaire est soumis</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="domain_status_rule_min_submissions">
+    <item quantity="one">Au moins %1$d soumission</item>
+    <item quantity="other">Au moins %1$d soumissions</item>
+  </plurals>
+  <string name="domain_status_rule_missing_question">Question manquante</string>
+  <!-- Placeholder for a property name in a status rule summary when none is chosen. -->
+  <string name="domain_status_rule_property_fallback">propriété</string>
+  <!-- Status rule condition without a value. %1$s: question or property name; %2$s: operator (e.g. "is answered"). -->
+  <string name="domain_status_rule_condition">%1$s %2$s</string>
+  <!-- Status rule condition with a value. %1$s: question or property name; %2$s: operator (e.g. "equals"); %3$s: value. -->
+  <string name="domain_status_rule_condition_value">%1$s %2$s « %3$s »</string>
+  <!-- Form editor: issues with how a form updates map features or table rows. -->
+  <string name="domain_issue_save_to_target_missing">Choisissez la couche cartographique ou la table de données que ce formulaire met à jour.</string>
+  <!-- %1$s: ID of the deleted map layer or data table. -->
+  <string name="domain_issue_save_to_target_deleted">La couche cartographique ou la table de données « %1$s » n’existe plus.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_map_layer">Le nom « %1$s » est réservé à l’entité cartographique mise à jour.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_data_table">Le nom « %1$s » est réservé à la ligne de table mise à jour.</string>
+  <string name="domain_issue_save_to_id_question_missing_map_layer">Choisissez la question qui identifie l’entité cartographique à mettre à jour.</string>
+  <string name="domain_issue_save_to_id_question_missing_data_table">Choisissez la question qui identifie la ligne de table à mettre à jour.</string>
+  <string name="domain_issue_save_to_match_property_missing">Choisissez la propriété à laquelle la réponse est comparée.</string>
+  <string name="domain_issue_save_to_geometry_question_required">Seule une question Point, Ligne ou Polygone peut mettre à jour la géométrie d’une entité cartographique.</string>
+  <!-- %1$s: property name; %2$s: name of the map layer or data table. -->
+  <string name="domain_issue_save_to_unknown_property">Met à jour « %1$s », qui n’est pas une propriété de %2$s.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_not_updatable">« %1$s » ne peut pas être mis à jour par un formulaire.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_already_updated">Une autre question met déjà à jour « %1$s ».</string>
+  <string name="domain_issue_save_to_no_fields">Choisissez au moins un champ à mettre à jour.</string>
+  <string name="domain_issue_save_to_type_mismatch">Les réponses de type %1$s risquent de ne pas convenir à la propriété de type %2$s « %3$s ».</string>
+  <string name="domain_display_logic_source_deleted">Fait référence à une question supprimée.</string>
+  <string name="domain_display_logic_shown_if_answered">Affichée uniquement si « %1$s » a une réponse.</string>
+  <string name="domain_display_logic_shown_if">Affichée uniquement si « %1$s » %2$s %3$s.</string>
+  <string name="domain_issue_status_default_label_missing">Saisissez un libellé de statut par défaut.</string>
+  <string name="domain_issue_status_rule_label_missing">Chaque règle de statut nécessite un libellé de statut.</string>
+  <string name="domain_issue_status_rule_min_submissions">Le nombre de soumissions doit être d’au moins 1.</string>
+  <string name="domain_issue_status_rule_question_missing">Choisissez une question pour la règle de statut.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_status_rule_operator_not_applicable">« %1$s » ne s’applique pas au type %2$s dans la règle de statut.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_missing">La règle de statut pour « %1$s » nécessite une valeur de comparaison.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_not_number">La valeur de la règle de statut pour « %1$s » doit être un nombre.</string>
+  <string name="domain_issue_status_rule_property_missing_map_layer">Choisissez une propriété d’entité cartographique pour la règle de statut.</string>
+  <string name="domain_issue_status_rule_property_missing_data_table">Choisissez une propriété de ligne de table pour la règle de statut.</string>
+  <string name="domain_issue_status_rule_property_missing">Choisissez une propriété d’entité pour la règle de statut.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_unwritten">Aucune question n’écrit dans la propriété « %1$s » utilisée par la règle de statut.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: property data type in lowercase (e.g. "text"); %3$s: property name. -->
+  <string name="domain_issue_status_rule_property_operator_not_applicable">« %1$s » ne s’applique pas à la propriété « %3$s » de type %2$s.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_missing">La règle de statut pour la propriété « %1$s » nécessite une valeur de comparaison.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_not_number">La valeur de la règle de statut pour la propriété « %1$s » doit être un nombre.</string>
+  <!-- Form editor: warnings about a question's link to a standard field (concept). -->
+  <!-- %1$s: ID of a standard field, e.g. "eudr.commodity". -->
+  <string name="domain_warning_concept_not_in_dictionary">Associée à « %1$s », qui ne figure pas dans le dictionnaire de cette enquête.</string>
+  <!-- %1$s: standard field name; %2$s: its answer type in lowercase (e.g. "decimal"); %3$s: the question's type in lowercase (e.g. "short text"). -->
+  <string name="domain_warning_concept_type_mismatch">« %1$s » attend des réponses de type %2$s, mais cette question est de type %3$s.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_deprecated">« %1$s » est obsolète. Associez un champ standard actuel.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_linked_twice">« %1$s » est associé à plusieurs questions de ce formulaire.</string>
+  <!-- %1$d: number of choices; %2$s: standard field name; %3$s: comma-separated choice labels. -->
+  <plurals name="domain_warning_concept_unmapped_choices">
+    <item quantity="one">Faites correspondre %1$d choix aux valeurs de « %2$s » pour que les réponses puissent être additionnées : %3$s.</item>
+    <item quantity="other">Faites correspondre %1$d choix aux valeurs de « %2$s » pour que les réponses puissent être additionnées : %3$s.</item>
+  </plurals>
+  <!-- Survey editor: issues in a map layer or data table. -->
+  <string name="domain_issue_dataset_id_invalid">L’ID doit commencer par une lettre et ne contenir que des lettres, des chiffres et _ . -</string>
+  <!-- %1$s: the map layer or data table ID. -->
+  <string name="domain_issue_dataset_id_duplicate">L’ID « %1$s » est déjà utilisé par un autre jeu de données de cette enquête.</string>
+  <!-- %1$s: property name (an identifier). -->
+  <string name="domain_issue_dataset_property_name_invalid">Le nom de la propriété « %1$s » n’est pas valide.</string>
+  <string name="domain_issue_dataset_property_name_duplicate">Les noms de propriétés doivent être uniques.</string>
+  <string name="domain_issue_dataset_key_property_missing">Choisissez une propriété clé.</string>
+  <string name="domain_issue_dataset_label_property_missing">Choisissez une propriété de libellé.</string>
+  <!-- %1$s: row or map feature name. -->
+  <string name="domain_issue_dataset_row_key_missing">« %1$s » n’a pas de clé.</string>
+  <!-- %1$s: duplicated key value. -->
+  <string name="domain_issue_dataset_row_key_duplicate">La clé « %1$s » est en double.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label. -->
+  <string name="domain_issue_dataset_row_value_missing">« %1$s » : valeur manquante pour %2$s.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label; %3$s: expected type in lowercase (e.g. "integer"). -->
+  <string name="domain_issue_dataset_row_value_wrong_type">« %1$s » : %2$s doit être de type %3$s.</string>
+  <string name="domain_issue_sharing_organization_missing">« %1$s » nécessite une organisation. Choisissez-en une dans Détails de l’enquête ou sélectionnez une autre option d’accès général.</string>
+  <!-- %1$s: map feature name; %2$d: minimum number of vertices. -->
+  <plurals name="domain_issue_dataset_row_geometry_too_short">
+    <item quantity="one">« %1$s » nécessite au moins %2$d coordonnée.</item>
+    <item quantity="other">« %1$s » nécessite au moins %2$d sommets.</item>
+  </plurals>
+  <!-- Quota and budget limits: why an action is blocked. -->
+  <!-- %1$d: surveys the owner has; %2$d: the limit. -->
+  <string name="domain_quota_max_surveys_per_owner">Nombre maximal d’enquêtes par propriétaire atteint (%1$d sur %2$d). Passez à un niveau supérieur ou supprimez d’anciennes enquêtes.</string>
+  <!-- %1$s: budget amount in US dollars, e.g. "$50.00". -->
+  <string name="domain_quota_org_budget_exceeded">La création d’une autre enquête dépasserait le plafond budgétaire mensuel de l’organisation (%1$s).</string>
+  <!-- %1$s: estimated cost in US dollars; %2$s: budget in US dollars. -->
+  <string name="domain_quota_survey_budget_exceeded">Le coût mensuel estimé de la conception de l’enquête (%1$s) dépasse son plafond budgétaire mensuel (%2$s).</string>
+  <!-- %1$d: number of forms; %2$d: the limit; %3$s: quota tier name (e.g. "Basic"). -->
+  <plurals name="domain_quota_max_forms">
+    <item quantity="one">L’enquête contient %1$d formulaire, ce qui dépasse la limite de %2$d pour le niveau %3$s.</item>
+    <item quantity="other">L’enquête contient %1$d formulaires, ce qui dépasse la limite de %2$d pour le niveau %3$s.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_questions">
+    <item quantity="one">Le formulaire « %1$s » contient %2$d question, ce qui dépasse la limite de %3$d.</item>
+    <item quantity="other">Le formulaire « %1$s » contient %2$d questions, ce qui dépasse la limite de %3$d.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of photo questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_photo_questions">
+    <item quantity="one">Le formulaire « %1$s » contient %2$d question photo, ce qui dépasse la limite de %3$d.</item>
+    <item quantity="other">Le formulaire « %1$s » contient %2$d questions photo, ce qui dépasse la limite de %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features; %2$d: the limit. -->
+  <plurals name="domain_quota_max_predefined_entities">
+    <item quantity="one">L’enquête contient %1$d entité prédéfinie, ce qui dépasse la limite de %2$d.</item>
+    <item quantity="other">L’enquête contient %1$d entités prédéfinies, ce qui dépasse la limite de %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of generated sample plots; %2$d: the limit. -->
+  <plurals name="domain_quota_max_generated_entities">
+    <item quantity="one">Le plan d’échantillonnage a généré %1$d placette, ce qui dépasse la limite de %2$d.</item>
+    <item quantity="other">Le plan d’échantillonnage a généré %1$d placettes, ce qui dépasse la limite de %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of vertices of the survey area; %2$d: the limit. -->
+  <plurals name="domain_quota_max_area_vertices">
+    <item quantity="one">La zone d’enquête compte %1$d sommet, ce qui dépasse la limite de %2$d.</item>
+    <item quantity="other">La zone d’enquête compte %1$d sommets, ce qui dépasse la limite de %2$d.</item>
+  </plurals>
+  <plurals name="domain_quota_max_dataset_polygon_vertices">
+    <item quantity="one">Le jeu de données « %1$s » contient un polygone de %2$d sommet, ce qui dépasse la limite de %3$d.</item>
+    <item quantity="other">Le jeu de données « %1$s » contient un polygone de %2$d sommets, ce qui dépasse la limite de %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of collaborators; %2$d: the limit. -->
+  <plurals name="domain_quota_max_collaborators">
+    <item quantity="one">La liste de contrôle d’accès compte %1$d collaborateur, ce qui dépasse la limite de %2$d.</item>
+    <item quantity="other">La liste de contrôle d’accès compte %1$d collaborateurs, ce qui dépasse la limite de %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of surveys; %2$d: the limit. -->
+  <plurals name="domain_quota_max_surveys_per_user">
+    <item quantity="one">L’utilisateur participe activement à %1$d enquête, ce qui dépasse la limite de %2$d.</item>
+    <item quantity="other">L’utilisateur participe activement à %1$d enquêtes, ce qui dépasse la limite de %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of map features the user added in the field; %2$d: the limit. -->
+  <plurals name="domain_quota_max_adhoc_entities">
+    <item quantity="one">L’utilisateur a créé %1$d entité sur le terrain, ce qui atteint la limite de %2$d.</item>
+    <item quantity="other">L’utilisateur a créé %1$d entités sur le terrain, ce qui atteint la limite de %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of submissions; %2$d: the limit. -->
+  <plurals name="domain_quota_max_submissions_per_entity">
+    <item quantity="one">L’utilisateur a enregistré %1$d soumission pour cette entité, ce qui atteint la limite de %2$d.</item>
+    <item quantity="other">L’utilisateur a enregistré %1$d soumissions pour cette entité, ce qui atteint la limite de %2$d.</item>
+  </plurals>
+  <!-- Notices shown after a data collector submits a form. -->
+  <!-- %1$s: name of the new map feature. "save_to" is a technical term; keep it as is. -->
+  <string name="domain_notice_entity_created">Nouvelle entité « %1$s » créée via save_to (✓ Terminé)</string>
+  <!-- %1$s: form title; %2$s: GPS coordinates. -->
+  <string name="domain_notice_standalone_submitted">Relevé de terrain autonome « %1$s » soumis (%2$s)</string>
+  <!-- %1$s: form title; %2$s: map feature name; %3$s: previous status symbol (e.g. ○); %4$s: new status symbol (e.g. ◐); %5$s: new status label (e.g. "In progress"). -->
+  <string name="domain_notice_entity_submitted">« %1$s » soumis pour %2$s (marqueur : %3$s → %4$s %5$s)</string>
+  <!-- Geometry summary of a polygon map feature. %1$s: area with unit (e.g. "1.2 ha"); %2$s: perimeter length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_polygon">Polygone • %1$s, périmètre de %2$s</string>
+  <!-- Geometry summary of a line map feature. %1$s: length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_line">Ligne • %1$s</string>
+  <!-- Geometry summary of a point map feature. %1$s: coordinates. -->
+  <string name="domain_geometry_summary_point">Point • %1$s</string>
+  <!-- PDF reports of map features and submissions. -->
+  <!-- Summary of a generated PDF file. %1$d: number of pages; %2$s: file size (e.g. "14 KB"). -->
+  <plurals name="domain_pdf_summary">
+    <item quantity="one">%1$d page • %2$s</item>
+    <item quantity="other">%1$d pages • %2$s</item>
+  </plurals>
+  <!-- PDF page footer. %1$d: page number; %2$d: number of pages. -->
+  <string name="domain_pdf_page_of">Page %1$d sur %2$d</string>
+  <string name="domain_pdf_running_header">Open Foris Collect One • %1$s</string>
+  <!-- Caption under a point's location figure. %1$s: latitude; %2$s: longitude. -->
+  <string name="domain_pdf_location_point">Emplacement %1$s, %2$s</string>
+  <!-- Caption under a location figure. %1$s/%2$s: min/max latitude; %3$s/%4$s: min/max longitude. "WGS 84" is a coordinate system name. -->
+  <string name="domain_pdf_bounds">Limites : lat. %1$s à %2$s, long. %3$s à %4$s (WGS 84)</string>
+  <!-- PDF footer of a map feature report. %1$s: map feature type (e.g. "Coffee Parcel"); %2$s: date and time. -->
+  <string name="domain_pdf_entity_footer">Rapport – %1$s • Généré le %2$s</string>
+  <!-- PDF footer of a submission report. %1$s: date and time. -->
+  <string name="domain_pdf_submission_footer">Rapport de soumission • Généré le %1$s</string>
+  <!-- PDF subtitle of a submission report. %1$s: date and time collected. -->
+  <string name="domain_pdf_submission_subtitle">Soumission • %1$s</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_details">Détails</string>
+  <!-- PDF field label: map layer of a map feature. -->
+  <string name="domain_pdf_layer">Couche</string>
+  <!-- PDF field label: geometry summary of a map feature. -->
+  <string name="domain_pdf_geometry">Géométrie</string>
+  <!-- PDF field label: geographic identifier of a plot. -->
+  <string name="domain_pdf_geo_id">GeoID</string>
+  <string name="domain_pdf_coordinates">Coordonnées</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_location">Emplacement</string>
+  <!-- PDF field label of one vertex of a line or polygon. %1$d: vertex number. -->
+  <string name="domain_pdf_vertex">Sommet %1$d</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_properties">Propriétés</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_submissions">Soumissions</string>
+  <string name="domain_pdf_no_submissions">Aucune soumission enregistrée pour l’instant.</string>
+  <!-- %1$s: data collector name; %2$s: form version. -->
+  <string name="domain_pdf_collected_by">Collecté par %1$s • Version du formulaire %2$s</string>
+  <!-- Map feature a submission is attached to. %1$s: map feature name; %2$s: map feature type; %3$s: GeoID. -->
+  <string name="domain_pdf_entity_target">%1$s (%2$s • GeoID %3$s)</string>
+  <!-- %1$s: coordinates where the submission was collected. -->
+  <string name="domain_pdf_no_attached_feature_at">Aucune entité cartographique associée (%1$s)</string>
+  <string name="domain_pdf_no_attached_feature">Aucune entité cartographique associée</string>
+  <string name="domain_pdf_data_collector">Collecteur de données</string>
+  <!-- PDF field label: when a submission was collected. -->
+  <string name="domain_pdf_collected">Collecté le</string>
+  <string name="domain_pdf_form_version">Version du formulaire</string>
+  <!-- PDF section heading: answers of a submission. -->
+  <string name="domain_pdf_responses">Réponses</string>
+  <string name="domain_pdf_no_responses">Aucune réponse enregistrée.</string>
+  <!-- Status chip of a group of map features in a map cluster, by the marker symbol they share. -->
+  <string name="domain_cluster_marker_status_completed">Terminé</string>
+  <string name="domain_cluster_marker_status_in_progress">En cours</string>
+  <string name="domain_cluster_marker_status_pending">En attente</string>
+  <string name="domain_cluster_marker_status_no_marker_symbol">Aucun symbole de marqueur</string>
+  <string name="domain_cluster_marker_status_other_symbol">Symbole %1$s</string>
+</resources>

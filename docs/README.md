@@ -48,6 +48,9 @@ open-source platform.
     -   [`terminology.md`](product/terminology.md): Open Foris Collect One
         terminology and cross-platform parity with CEO, ODK, KoboToolbox,
         XLSForm, Survey123, and Open Foris Arena.
+    -   [`personas-and-cujs.md`](product/personas-and-cujs.md): User personas,
+        the roles they act through, and the Critical User Journeys with their
+        implementation status.
     -   [`impacts.md`](product/impacts.md): Platform impact analysis.
     -   [`impact-measurement.md`](product/impact-measurement.md): Proposed MAP
         impact measurement approach (Purpose Packs, indicator tags, spatial
@@ -62,7 +65,7 @@ open-source platform.
         spatial overlay pipeline (deduplication, thresholds, attribution score,
         hosting options, and reference-layer licensing).
     -   [`backend/spanner-schema.md`](technical/backend/spanner-schema.md):
-        Cloud Spanner schema for the user data service (PROTO columns,
+        Cloud Spanner schema for the server (PROTO columns,
         client-generated UUID keys, gap-free sync tokens, permanent tombstones,
         survey trash, policy-based sharing, and per-survey sync scope).
     -   [`client/architecture.md`](technical/client/architecture.md): Open Foris

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_language">Language</string>
+  <!-- Content description of the language selector; %1$s is the current language's native name. -->
+  <string name="web_language_with_current">Language: %1$s</string>
+  <string name="web_manage_survey">Manage survey</string>
+  <string name="web_switch_survey">Switch survey</string>
+  <string name="web_recent_surveys">Recent surveys</string>
+  <!-- Survey switcher menu item linking to the full surveys page. -->
+  <string name="web_all_surveys_menu_item">All surveys…</string>
+  <string name="web_saving">Saving…</string>
+  <string name="web_saved">Saved</string>
+  <!-- Header save status while edits wait to retry a failed save, or after the server rejected one. -->
+  <string name="web_not_saved">Not saved</string>
+  <string name="web_create_survey">Create survey</string>
+  <!-- Create survey dialog title; %1$s is the organization name. -->
+  <string name="web_create_survey_in_organization">Create survey in %1$s</string>
+  <string name="web_survey_title_label">Survey title</string>
+  <string name="web_organization">Organization</string>
+  <!-- Organization picker option for a survey that belongs to no organization. -->
+  <string name="web_no_organization_personal">None (personal survey)</string>
+  <string name="web_personal_survey_access_hint">Only people you share it with can open a personal survey.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="web_organization_survey_access_hint">You stay the owner. Managers of %1$s can also edit this survey, manage sharing, and export data.</string>
+  <string name="web_create">Create</string>
+  <string name="web_next">Next</string>
+  <string name="web_cancel">Cancel</string>
+  <string name="web_create_survey_purposes_title">What will this data be used for?</string>
+  <string name="web_create_survey_purposes_description">Select the primary purpose for this survey. We'll add its forms, with standard fields, so your data can be compared and reported. You can change this later in Survey details.</string>
+  <string name="web_programs_optional">Programs (optional)</string>
+  <string name="web_programs_description">Programs you report to with this survey.</string>
+  <string name="web_back">Back</string>
+  <string name="web_skip">Skip</string>
+  <string name="web_download">Download</string>
+  <string name="web_download_csv">Download CSV</string>
+  <string name="web_download_geojson">Download GeoJSON</string>
+  <!-- Download menu item exporting a map layer as KML with embedded web forms for Google Earth. -->
+  <string name="web_download_kml">Download KML (Google Earth)</string>
+  <string name="web_download_survey_kml">Download survey KML (all layers)</string>
+  <string name="web_open_in_google_earth">Open in Google Earth</string>
+  <!-- Subtitle of an export profile menu item that has no warnings. -->
+  <string name="web_export_profile_for_survey_purposes">For your survey's purposes</string>
+  <!-- Export warnings dialog title; %1$s is the export profile name (e.g. "EUDR GeoJSON"). -->
+  <string name="web_export_profile_title">Export %1$s?</string>
+  <!-- %1$s is a comma-separated list of included standard fields. -->
+  <string name="web_export_profile_included">Included: %1$s.</string>
+  <string name="web_export_profile_link_missing_hint">Link the missing questions to standard fields in the Form editor to include them next time.</string>
+  <string name="web_export_anyway">Export anyway</string>
+  <!-- Data table column header: the record's workflow status. -->
+  <string name="web_column_status">Status</string>
+  <!-- Data table column header: the record's label. -->
+  <string name="web_column_label">Label</string>
+  <!-- Data table column header: number of submissions for the record. -->
+  <string name="web_column_submissions">Submissions</string>
+  <!-- Data table column header: the record's GeoID identifier. -->
+  <string name="web_column_geo_id">GeoID</string>
+  <string name="web_dismiss">Dismiss</string>
+  <string name="web_resize_side_panel">Resize side panel</string>
+  <string name="web_collapse_side_panel">Collapse side panel</string>
+  <string name="web_expand_side_panel">Expand side panel</string>
+  <string name="web_expand_details">Expand details</string>
+  <string name="web_close_details">Close details</string>
+  <!-- Data table tab title; %1$s is the table name, %2$d the number of rows. -->
+  <string name="web_table_tab_title">%1$s (%2$d)</string>
+  <string name="web_collapse_table">Collapse table</string>
+  <string name="web_expand_table">Expand table</string>
+  <!-- Content description on a collapsed table column group header/chip; %1$d is column count, %2$s is the prefix wildcard (e.g. "whisp_*"). -->
+  <string name="web_expand_column_group">Expand %1$d %2$s columns</string>
+  <!-- Content description on an expanded table column group header/chip; %1$d is column count, %2$s is the prefix wildcard (e.g. "whisp_*"). -->
+  <string name="web_collapse_column_group">Collapse %1$d %2$s columns</string>
+  <string name="web_no_rows_yet">No rows yet.</string>
+  <string name="web_map_layer">Map layer</string>
+  <string name="web_data_table">Data table</string>
+  <string name="web_collapse_details">Collapse details</string>
+  <!-- Label above the number of map features in a layer. -->
+  <string name="web_map_features">Map features</string>
+  <!-- Section heading: map feature counts grouped by status. -->
+  <string name="web_by_status">By status</string>
+  <string name="web_show_in_table">Show in table</string>
+  <!-- Surveys page filter chip: show every survey. -->
+  <string name="web_survey_filter_all">All</string>
+  <!-- Surveys page filter chip: show surveys the user owns. -->
+  <string name="web_survey_filter_mine">My surveys</string>
+  <!-- Survey card chip: the signed-in user owns the survey. -->
+  <string name="web_survey_access_owner">Owner</string>
+  <!-- Survey card chip: the user manages the survey's organization. -->
+  <string name="web_survey_access_organization_manager">Organization manager</string>
+  <!-- Survey card chip: the user is a member of the survey's organization. -->
+  <string name="web_survey_access_organization_member">Organization member</string>
+  <!-- Survey card chip: the survey was shared with the user. -->
+  <string name="web_survey_access_shared">Shared with you</string>
+  <!-- Heading of the group of surveys that belong to no organization. -->
+  <string name="web_personal_surveys">Personal surveys</string>
+  <string name="web_surveys">Surveys</string>
+  <!-- Surveys page header summary; %1$s is the survey count phrase (e.g. "3 surveys"), %2$s the organization count phrase (e.g. "2 organizations"). -->
+  <string name="web_surveys_header_summary">%1$s · %2$s</string>
+  <string name="web_impact">Live metrics</string>
+  <string name="web_search_surveys_placeholder">Search surveys by name, location, or organization</string>
+  <string name="web_clear_search">Clear search</string>
+  <string name="web_search_surveys">Search surveys</string>
+  <string name="web_no_surveys_match_search">No surveys match your search.</string>
+  <string name="web_no_surveys_yet">No surveys yet. Create one to get started.</string>
+  <!-- Badge next to an organization heading: the signed-in user is a manager of it. -->
+  <string name="web_organization_role_you_manage">You manage</string>
+  <!-- Badge next to an organization heading: the signed-in user is a member of it. -->
+  <string name="web_organization_role_member">Member</string>
+  <string name="web_no_description_yet">No description yet.</string>
+  <string name="web_public_data">Public data</string>
+  <string name="web_private_submissions">Private submissions</string>
+  <!-- Survey card label: this survey is the one currently open. -->
+  <string name="web_survey_open_now">Open now</string>
+  <!-- Badge on closed surveys asking whether their data was used. -->
+  <string name="web_outcome_prompt_label">Was this data used?</string>
+  <string name="web_collect_data">Collect data</string>
+  <!-- Data collection panel subtitle for a new standalone record; %1$s is the user's GPS coordinates. -->
+  <string name="web_new_record_at_location">New record • %1$s</string>
+  <!-- Data collection panel subtitle; %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_select_target_to_begin">Select %1$s to begin</string>
+  <!-- %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_entity_ref_picker_instructions">Click a %1$s on the map or in the list to start this form, or pick one below.</string>
+  <string name="web_search_map_features">Search map features</string>
+  <!-- Search field placeholder; %1$s is the lowercase name of the map layer or data table (e.g. "plots"), %2$d the total number of its map features. -->
+  <string name="web_entity_ref_filter_placeholder">Filter %1$s (%2$d)</string>
+  <!-- %1$s is the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_entity_ref_no_matches">No matching %1$s found.</string>
+  <!-- %1$s is the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_entity_ref_empty">No %1$s yet.</string>
+  <!-- Badge on a map feature whose form is already completed. -->
+  <string name="web_completed">Completed</string>
+  <string name="web_start_a_form">Start a form</string>
+  <!-- Collect data menu item subtitle; %1$s is the question count phrase (e.g. "5 questions"), %2$d the number of map features left, %3$s the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_form_menu_summary_remaining">%1$s • %2$d %3$s remaining</string>
+  <!-- Collect data menu item subtitle for a standalone form; %1$s is the question count phrase (e.g. "5 questions"). -->
+  <string name="web_form_menu_summary_new_record">%1$s • new record</string>
+  <string name="web_survey_has_no_forms">This survey has no forms yet.</string>
+  <string name="web_no_forms_available_on_web">No forms in this survey are available on web.</string>
+  <string name="web_qr_code">QR code</string>
+  <!-- Overflow menu button description; %1$s is the lowercase map feature type (e.g. "plot"). -->
+  <string name="web_more_entity_actions">More %1$s actions</string>
+  <!-- Map feature details tab showing the feature's current properties. -->
+  <string name="web_entity_tab_data">Data</string>
+  <!-- Map feature details tab listing the feature's submissions. -->
+  <string name="web_entity_tab_history">History</string>
+  <!-- Map feature details tab showing Open Foris Whisp risk analysis. -->
+  <string name="web_entity_tab_risk_analysis">Risk analysis</string>
+  <!-- Data table header toggle for expanding or collapsing Whisp columns. %1$d = count of Whisp columns. -->
+  <string name="web_table_whisp_expand">Show Whisp columns (%1$d)</string>
+  <string name="web_table_whisp_collapse">Roll up Whisp columns</string>
+  <string name="web_table_whisp_fields_count">%1$d Whisp fields</string>
+  <string name="web_back_to_submissions">Back to submissions</string>
+  <string name="web_more_submission_actions">More submission actions</string>
+  <string name="web_close_form">Close form</string>
+  <string name="web_discard_form_title">Discard form responses?</string>
+  <string name="web_discard_form_message">You are currently filling out a form. Leaving now will discard any unsaved answers.</string>
+  <string name="web_discard_form_confirm">Discard</string>
+  <string name="web_discard_form_cancel">Keep editing</string>
+  <string name="web_map_drawing_place_point">Click the map to place the point</string>
+  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
+  <string name="web_map_drawing_add_vertices">Click the map to add vertices • %1$d of at least %2$d</string>
+  <string name="web_undo">Undo</string>
+  <string name="web_done">Done</string>
+  <string name="web_cancel_drawing">Cancel drawing</string>
+  <string name="web_sign_in">Sign in</string>
+  <string name="web_sign_in_tagline">Map ecosystems, design field surveys, and verify ground observations with your organization.</string>
+  <string name="web_sign_in_description">Sign in to see the surveys and organizations shared with your account.</string>
+  <string name="web_signing_in">Signing in…</string>
+  <string name="web_sign_in_with_google">Sign in with Google</string>
+  <string name="web_sign_in_google_accounts_only">Authentication is currently limited to Google Accounts.</string>
+  <string name="web_terms_of_service_title">Terms of Service</string>
+  <string name="web_tos_signed_in_as">Signed in as %1$s</string>
+  <string name="web_tos_decline">Decline</string>
+  <string name="web_tos_continue">Continue</string>
+  <string name="web_tos_intro">Please review and accept the Collect One Terms of Service to continue.</string>
+  <string name="web_tos_agree_checkbox">I have read and agree to the Collect One Terms of Service.</string>
+  <!-- Shown when a link names a console page that doesn't exist or that the user can't open. -->
+  <string name="web_link_unavailable">That page isn't available. It may have been deleted, or you may not have access to it.</string>
+  <!-- Error shown when an uploaded file can't be read; %1$s is the file name. -->
+  <string name="web_file_read_failed">Couldn't read %1$s. Try again.</string>
+  <!-- Subtitle of an export profile menu item; %1$d is the number of warnings to review. -->
+  <plurals name="web_export_profile_warnings_to_review">
+    <item quantity="one">%1$d to review before export</item>
+    <item quantity="other">%1$d to review before export</item>
+  </plurals>
+  <plurals name="web_survey_count">
+    <item quantity="one">%1$d survey</item>
+    <item quantity="other">%1$d surveys</item>
+  </plurals>
+  <plurals name="web_organization_count">
+    <item quantity="one">%1$d organization</item>
+    <item quantity="other">%1$d organizations</item>
+  </plurals>
+  <!-- Survey card: number of locations (map features) in the survey. -->
+  <plurals name="web_survey_location_count">
+    <item quantity="one">%1$d location</item>
+    <item quantity="other">%1$d locations</item>
+  </plurals>
+  <plurals name="web_form_question_count">
+    <item quantity="one">%1$d question</item>
+    <item quantity="other">%1$d questions</item>
+  </plurals>
+
+  <!-- Shown when this build of the console can't open a file picker. -->
+  <string name="web_file_upload_unavailable">Uploading files isn't available here.</string>
+  <string name="web_collapse_form">Collapse form</string>
+  <string name="web_expand_form">Expand form</string>
+</resources>

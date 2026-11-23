@@ -98,6 +98,31 @@ class MapCameraStateTest {
   }
 
   @Test
+  fun hitTest_findsEveryPartOfAMultiPartFeature() {
+    fun square(at: Double) =
+      Geometry.Polygon(
+        listOf(
+          listOf(LatLng(at, at), LatLng(at, at + 1), LatLng(at + 1, at + 1), LatLng(at + 1, at))
+        )
+      )
+    val islands = Geometry.MultiPolygon(listOf(square(0.0), square(3.0)))
+    val content =
+      MapContent(
+        sources = listOf(GeoJsonSource("s", listOf(MapFeature("islands", islands)))),
+        layers = listOf(MapLayer.Fill("fill", "s", color = StyleValue.Constant(Color.Green))),
+      )
+    val camera = CameraPosition(LatLng(2.0, 2.0), 5.0)
+    val project = { p: LatLng -> WebMercator.project(p, camera, viewport) }
+    val here = LatLng(3.5, 3.5)
+
+    assertEquals(
+      MapEvent.FeatureTapped("fill", "islands", here),
+      hitTest(content, project(LatLng(3.5, 3.5)), project, here),
+    )
+    assertNull(hitTest(content, project(LatLng(2.0, 2.0)), project, here))
+  }
+
+  @Test
   fun hitTest_prefersTopmostLayer_andFallsBackToBackground() {
     val square =
       Geometry.Polygon(

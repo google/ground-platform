@@ -16,6 +16,7 @@ package org.openforis.collectone.v2.core.forms.serialization
 import com.google.type.Date
 import com.google.type.TimeOfDay
 import com.squareup.wire.Instant
+import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.ofEpochSecond
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -29,56 +30,28 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.longOrNull
+import okio.ByteString
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.encodeUtf8
-import openforis.collectone.v1.forms.ActionDef
-import openforis.collectone.v1.forms.ActionType
-import openforis.collectone.v1.forms.AuditConfig
-import openforis.collectone.v1.forms.AuditEvent
-import openforis.collectone.v1.forms.AuditLog
-import openforis.collectone.v1.forms.ChoiceItem
-import openforis.collectone.v1.forms.ControlDef
-import openforis.collectone.v1.forms.ControlType
 import openforis.collectone.v1.forms.DataType
-import openforis.collectone.v1.forms.EntityDeclaration
-import openforis.collectone.v1.forms.EntityPropertyMapping
-import openforis.collectone.v1.forms.EntitySyncMetadata
-import openforis.collectone.v1.forms.EventType
-import openforis.collectone.v1.forms.FieldBinding
 import openforis.collectone.v1.forms.FieldDefinition
 import openforis.collectone.v1.forms.FieldValue
-import openforis.collectone.v1.forms.ForeignAttribute
 import openforis.collectone.v1.forms.FormDef
-import openforis.collectone.v1.forms.GeoConfig
 import openforis.collectone.v1.forms.GeoPoint
 import openforis.collectone.v1.forms.GeoShape
 import openforis.collectone.v1.forms.GeoTrace
-import openforis.collectone.v1.forms.GroupDef
-import openforis.collectone.v1.forms.IntentConfig
-import openforis.collectone.v1.forms.ItemsetDef
-import openforis.collectone.v1.forms.LabelDef
-import openforis.collectone.v1.forms.LanguageTranslation
-import openforis.collectone.v1.forms.LocalizedString
-import openforis.collectone.v1.forms.MediaRef
-import openforis.collectone.v1.forms.ModelDef
-import openforis.collectone.v1.forms.OutputFragment
-import openforis.collectone.v1.forms.PreloadType
-import openforis.collectone.v1.forms.PrimaryInstance
-import openforis.collectone.v1.forms.RangeConfig
 import openforis.collectone.v1.forms.RecordInstance
-import openforis.collectone.v1.forms.RecordMetadata
 import openforis.collectone.v1.forms.RecordNode
 import openforis.collectone.v1.forms.RecordNodeList
 import openforis.collectone.v1.forms.RecordSchema
-import openforis.collectone.v1.forms.RepeatDef
-import openforis.collectone.v1.forms.SecondaryInstance
-import openforis.collectone.v1.forms.SubmissionConfig
-import openforis.collectone.v1.forms.TranslationCatalog
 import openforis.collectone.v1.forms.TypedValue
 import openforis.collectone.v1.forms.TypedValueList
-import openforis.collectone.v1.forms.ViewComponent
-import openforis.collectone.v1.forms.ViewDef
+import org.openforis.collectone.v2.core.forms.serialization.json.ProtoJsonCodec
+import org.openforis.collectone.v2.core.forms.serialization.json.ProtoJsonFieldReader
+import org.openforis.collectone.v2.core.forms.serialization.json.ProtoJsonTypeMapping
+import org.openforis.collectone.v2.core.forms.serialization.json.getProtoElement
 import org.openforis.collectone.v2.core.forms.xpath.model.TemporalUtils
+import org.openforis.collectone.v2.core.proto.schema.CoreProtoSchema
 
 /**
  * Serializer and deserializer between ProtoForms Protocol Buffer models ([FormDef] and
@@ -100,6 +73,10 @@ import org.openforis.collectone.v2.core.forms.xpath.model.TemporalUtils
  * - Deserialization accepts both the flattened representation and legacy canonical ProtoJSON
  *   wrapper objects (`fields`, `scalarValue`, `stringValue`, `{"latitude": ..., "longitude":
  *   ...}`).
+ * - Timestamps are RFC 3339 strings and dates `YYYY-MM-DD` strings.
+ *
+ * Every other message maps field by field through [ProtoJsonCodec], from the schema generated out
+ * of the `.proto` files; [FormCodecRules] lists where the format departs from the plain mapping.
  */
 object ProtoJsonSerializer {
 
@@ -118,36 +95,19 @@ object ProtoJsonSerializer {
     formDef: FormDef,
     prettyPrint: Boolean = true,
     preserveProtoFieldNames: Boolean = false,
-  ): String {
-    val obj = encodeFormDef(formDef, preserveProtoFieldNames)
-    return if (prettyPrint) prettyJson.encodeToString(JsonObject.serializer(), obj)
-    else compactJson.encodeToString(JsonObject.serializer(), obj)
-  }
+  ): String = format(codec.write(FormDef.ADAPTER, formDef, preserveProtoFieldNames), prettyPrint)
 
   /** Parses a JSON string into a [FormDef] protobuf message. */
-  fun deserializeFormDef(json: String): FormDef {
-    val element =
-      try {
-        compactJson.parseToJsonElement(json)
-      } catch (e: Exception) {
-        throw IllegalArgumentException("Invalid JSON: ${e.message}", e)
-      }
-    val obj =
-      element as? JsonObject
-        ?: throw IllegalArgumentException("Expected JSON object at root for FormDef")
-    return decodeFormDef(obj)
-  }
+  fun deserializeFormDef(json: String): FormDef =
+    codec.read(FormDef.ADAPTER, parseObject(json, "FormDef"), formFieldReaders)
 
   /** Formats a [RecordInstance] protobuf message into a JSON string. */
   fun serializeRecordInstance(
     record: RecordInstance,
     prettyPrint: Boolean = true,
     preserveProtoFieldNames: Boolean = false,
-  ): String {
-    val obj = encodeRecordInstance(record, preserveProtoFieldNames)
-    return if (prettyPrint) prettyJson.encodeToString(JsonObject.serializer(), obj)
-    else compactJson.encodeToString(JsonObject.serializer(), obj)
-  }
+  ): String =
+    format(codec.write(RecordInstance.ADAPTER, record, preserveProtoFieldNames), prettyPrint)
 
   /**
    * Parses a JSON string into a [RecordInstance] protobuf message.
@@ -160,375 +120,107 @@ object ProtoJsonSerializer {
     formDef: FormDef? = null,
     schema: RecordSchema? = formDef?.model?.primary_instance?.record_schema,
   ): RecordInstance {
+    val schemaFields = buildSchemaFieldMap(formDef, schema)
+    val dataReader = ProtoJsonFieldReader { element, _ ->
+      (element as? JsonObject)?.let {
+        RecordNode.ADAPTER.encodeByteString(decodeRecordNode(it, schemaFields))
+      }
+    }
+    return codec.read(
+      RecordInstance.ADAPTER,
+      parseObject(json, "RecordInstance"),
+      formFieldReaders + ("RecordInstance.data" to dataReader),
+    )
+  }
+
+  private fun format(json: JsonObject, prettyPrint: Boolean): String =
+    if (prettyPrint) prettyJson.encodeToString(JsonObject.serializer(), json)
+    else compactJson.encodeToString(JsonObject.serializer(), json)
+
+  private fun parseObject(json: String, messageName: String): JsonObject {
     val element =
       try {
         compactJson.parseToJsonElement(json)
       } catch (e: Exception) {
         throw IllegalArgumentException("Invalid JSON: ${e.message}", e)
       }
-    val obj =
-      element as? JsonObject
-        ?: throw IllegalArgumentException("Expected JSON object at root for RecordInstance")
-    return decodeRecordInstance(obj, formDef, schema)
+    return element as? JsonObject
+      ?: throw IllegalArgumentException("Expected JSON object at root for $messageName")
   }
 
   // ===========================================================================
-  // FormDef Encoding
+  // Schema-driven mapping
   // ===========================================================================
 
-  private fun encodeFormDef(msg: FormDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("form_id", msg.form_id)
-      addString("title", msg.title)
-      addString("version", msg.version)
-      addString("default_language", msg.default_language)
-      msg.model?.let { addObject("model", encodeModelDef(it, snake)) }
-      msg.view?.let { addObject("view", encodeViewDef(it, snake)) }
-    }
+  /** Message types with their own JSON shape (see the class documentation). */
+  private val typeMappings: Map<String, ProtoJsonTypeMapping> =
+    mapOf(
+      "openforis.collectone.v1.forms.RecordNode" to
+        typeMapping(
+          RecordNode.ADAPTER,
+          toJson = ::encodeRecordNode,
+          fromJson = { (it as? JsonObject)?.let { node -> decodeRecordNode(node) } },
+        ),
+      "openforis.collectone.v1.forms.TypedValue" to
+        typeMapping(
+          TypedValue.ADAPTER,
+          toJson = ::encodeTypedValueElement,
+          fromJson = { decodeTypedValueElement(it) },
+        ),
+      "openforis.collectone.v1.forms.GeoPoint" to
+        typeMapping(
+          GeoPoint.ADAPTER,
+          toJson = { point, _ -> encodeGeoPointArray(point) },
+          fromJson = ::decodeGeoPointElement,
+        ),
+      "google.protobuf.Timestamp" to
+        typeMapping(
+          ProtoAdapter.INSTANT,
+          toJson = { instant, _ -> JsonPrimitive(formatRfc3339Timestamp(instant)) },
+          fromJson = ::decodeTimestampElement,
+        ),
+      "google.type.Date" to
+        typeMapping(
+          Date.ADAPTER,
+          toJson = { date, _ -> JsonPrimitive(TemporalUtils.formatDate(date)) },
+          fromJson = ::decodeDateElement,
+        ),
+    )
 
-  private fun encodeModelDef(msg: ModelDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      msg.primary_instance?.let { addObject("primary_instance", encodePrimaryInstance(it, snake)) }
-      addObjectList("secondary_instances", msg.secondary_instances) {
-        encodeSecondaryInstance(it, snake)
-      }
-      addObjectList("bindings", msg.bindings) { encodeFieldBinding(it, snake) }
-      msg.translations?.let { addObject("translations", encodeTranslationCatalog(it, snake)) }
-      addObjectList("actions", msg.actions) { encodeActionDef(it, snake) }
-      addObjectList("entities", msg.entities) { encodeEntityDeclaration(it, snake) }
-      msg.metadata?.let { addObject("metadata", encodeRecordMetadata(it, snake)) }
-      msg.submission?.let { addObject("submission", encodeSubmissionConfig(it, snake)) }
-    }
-
-  private fun encodePrimaryInstance(msg: PrimaryInstance, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      msg.record_schema?.let { addObject("record_schema", encodeRecordSchema(it, snake)) }
-      msg.default_values?.let {
-        if (it.fields.isNotEmpty()) {
-          addObject("default_values", encodeRecordNode(it, snake))
+  /** Default values are typed by the record schema read before them. */
+  private val formFieldReaders =
+    mapOf(
+      "PrimaryInstance.default_values" to
+        ProtoJsonFieldReader { element, primaryInstance ->
+          val schema =
+            (primaryInstance.values("record_schema").singleOrNull() as ByteString?)?.let(
+              RecordSchema.ADAPTER::decode
+            )
+          (element as? JsonObject)?.let {
+            val schemaFields = schema?.fields?.associateBy { f -> f.name } ?: emptyMap()
+            RecordNode.ADAPTER.encodeByteString(decodeRecordNode(it, schemaFields))
+          }
         }
-      }
-      addString("message_type_name", msg.message_type_name)
-    }
+    )
 
-  private fun encodeRecordSchema(msg: RecordSchema, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("name", msg.name)
-      addString("title", msg.title)
-      addObjectList("fields", msg.fields) { encodeFieldDefinition(it, snake) }
-      addString("sms_prefix", msg.sms_prefix)
-      addString("sms_delimiter", msg.sms_delimiter)
-    }
+  private val codec = ProtoJsonCodec(CoreProtoSchema, FormCodecRules, typeMappings)
 
-  private fun encodeFieldDefinition(msg: FieldDefinition, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("name", msg.name)
-      if (msg.type != DataType.DATA_TYPE_UNSPECIFIED) {
-        addEnum("type", msg.type.name)
-      }
-      addBoolean("is_repeated", msg.is_repeated)
-      addObjectList("fields", msg.fields) { encodeFieldDefinition(it, snake) }
-      addString("type_name", msg.type_name)
-    }
+  private fun <M : Any> typeMapping(
+    adapter: ProtoAdapter<M>,
+    toJson: (M, Boolean) -> JsonElement?,
+    fromJson: (JsonElement) -> M?,
+  ): ProtoJsonTypeMapping =
+    object : ProtoJsonTypeMapping {
+      override fun write(message: ByteString, preserveProtoFieldNames: Boolean): JsonElement? =
+        toJson(adapter.decode(message), preserveProtoFieldNames)
 
-  private fun encodeSecondaryInstance(msg: SecondaryInstance, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("id", msg.id)
-      addString("uri", msg.uri)
-      addString("root_name", msg.root_name)
-      addString("item_name", msg.item_name)
-      addObjectList("rows", msg.rows) { encodeRecordNode(it, snake) }
-    }
-
-  private fun encodeFieldBinding(msg: FieldBinding, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("field_path", msg.field_path)
-      if (msg.type != DataType.DATA_TYPE_UNSPECIFIED) {
-        addEnum("type", msg.type.name)
-      }
-      addBoolean("read_only", msg.read_only)
-      addString("relevant_expression", msg.relevant_expression)
-      addString("calculate_expression", msg.calculate_expression)
-      addString("constraint_expression", msg.constraint_expression)
-      addString("required_expression", msg.required_expression)
-      addString("constraint_message", msg.constraint_message)
-      addString("required_message", msg.required_message)
-      addString("sms_tag", msg.sms_tag)
-      addString("entity_saveto", msg.entity_saveto)
-      addInt("max_pixels", msg.max_pixels)
-      if (msg.preload != PreloadType.PRELOAD_UNSPECIFIED) {
-        addEnum("preload", msg.preload.name)
-      }
-      addString("preload_param", msg.preload_param)
-      addString("read_only_expression", msg.read_only_expression)
-      addObjectList("foreign_attributes", msg.foreign_attributes) {
-        encodeForeignAttribute(it, snake)
-      }
-    }
-
-  private fun encodeForeignAttribute(msg: ForeignAttribute, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("namespace_uri", msg.namespace_uri)
-      addString("qualified_name", msg.qualified_name)
-      addString("value", msg.value_)
-    }
-
-  private fun encodeTranslationCatalog(msg: TranslationCatalog, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addObjectList("languages", msg.languages) { encodeLanguageTranslation(it, snake) }
-    }
-
-  private fun encodeLanguageTranslation(msg: LanguageTranslation, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("language", msg.language)
-      addBoolean("is_default", msg.is_default)
-      if (msg.strings.isNotEmpty()) {
-        val mapEntries = linkedMapOf<String, JsonElement>()
-        msg.strings.forEach { (k, v) -> mapEntries[k] = encodeLocalizedString(v, snake) }
-        addObject("strings", JsonObject(mapEntries))
-      }
-    }
-
-  private fun encodeLocalizedString(msg: LocalizedString, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("value", msg.value_)
-      addString("short_value", msg.short_value)
-      addString("guidance_value", msg.guidance_value)
-      msg.media?.let { addObject("media", encodeMediaRef(it, snake)) }
-    }
-
-  private fun encodeMediaRef(msg: MediaRef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("image_uri", msg.image_uri)
-      addString("big_image_uri", msg.big_image_uri)
-      addString("audio_uri", msg.audio_uri)
-      addString("video_uri", msg.video_uri)
-    }
-
-  private fun encodeActionDef(msg: ActionDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      val activeEvents =
-        msg.events.filter { it != EventType.EVENT_TYPE_UNSPECIFIED }.map { JsonPrimitive(it.name) }
-      if (activeEvents.isNotEmpty()) {
-        addElement("events", JsonArray(activeEvents))
-      }
-      if (msg.type != ActionType.ACTION_TYPE_UNSPECIFIED) {
-        addEnum("type", msg.type.name)
-      }
-      addString("target_field", msg.target_field)
-      if (msg.value_expression != null) {
-        addString("value_expression", msg.value_expression)
-      }
-      msg.literal_value?.let {
-        encodeTypedValueElement(it, snake)?.let { el -> addElement("literal_value", el) }
-      }
-    }
-
-  private fun encodeEntityDeclaration(msg: EntityDeclaration, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("dataset", msg.dataset)
-      addString("entity_id_expression", msg.entity_id_expression)
-      addString("label_expression", msg.label_expression)
-      addString("create_condition", msg.create_condition)
-      addString("update_condition", msg.update_condition)
-      msg.sync_metadata?.let { addObject("sync_metadata", encodeEntitySyncMetadata(it, snake)) }
-      addObjectList("property_mappings", msg.property_mappings) {
-        encodeEntityPropertyMapping(it, snake)
-      }
-    }
-
-  private fun encodeEntitySyncMetadata(msg: EntitySyncMetadata, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("base_version_expression", msg.base_version_expression)
-      addString("trunk_version_expression", msg.trunk_version_expression)
-      addString("branch_id_expression", msg.branch_id_expression)
-    }
-
-  private fun encodeEntityPropertyMapping(msg: EntityPropertyMapping, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("entity_property", msg.entity_property)
-      addString("source_field_path", msg.source_field_path)
-    }
-
-  private fun encodeSubmissionConfig(msg: SubmissionConfig, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("action_url", msg.action_url)
-      addString("method", msg.method)
-      addString("base64_rsa_public_key", msg.base64_rsa_public_key)
-      addBoolean("auto_send", msg.auto_send)
-      addBoolean("auto_delete", msg.auto_delete)
-      addBoolean("client_editable", msg.client_editable)
-    }
-
-  private fun encodeViewDef(msg: ViewDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addObjectList("components", msg.components) { encodeViewComponent(it, snake) }
-    }
-
-  private fun encodeViewComponent(msg: ViewComponent, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      msg.control?.let { addObject("control", encodeControlDef(it, snake)) }
-      msg.group?.let { addObject("group", encodeGroupDef(it, snake)) }
-      msg.repeat?.let { addObject("repeat", encodeRepeatDef(it, snake)) }
-    }
-
-  private fun encodeControlDef(msg: ControlDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("field_ref", msg.field_ref)
-      if (msg.type != ControlType.CONTROL_TYPE_UNSPECIFIED) {
-        addEnum("type", msg.type.name)
-      }
-      msg.label?.let { addObject("label", encodeLabelDef(it, snake)) }
-      msg.hint?.let { addObject("hint", encodeLabelDef(it, snake)) }
-      addString("appearance", msg.appearance)
-      addObjectList("choices", msg.choices) { encodeChoiceItem(it, snake) }
-      msg.itemset?.let { addObject("itemset", encodeItemsetDef(it, snake)) }
-      msg.range_config?.let { addObject("range_config", encodeRangeConfig(it, snake)) }
-      addString("media_type", msg.media_type)
-      msg.intent?.let { addObject("intent", encodeIntentConfig(it, snake)) }
-      addObjectList("actions", msg.actions) { encodeActionDef(it, snake) }
-      msg.geo_config?.let { addObject("geo_config", encodeGeoConfig(it, snake)) }
-    }
-
-  private fun encodeLabelDef(msg: LabelDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("text", msg.text)
-      addString("text_id", msg.text_id)
-      addObjectList("outputs", msg.outputs) { encodeOutputFragment(it, snake) }
-    }
-
-  private fun encodeOutputFragment(msg: OutputFragment, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("placeholder_id", msg.placeholder_id)
-      addString("value_expression", msg.value_expression)
-    }
-
-  private fun encodeChoiceItem(msg: ChoiceItem, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("value", msg.value_)
-      msg.label?.let { addObject("label", encodeLabelDef(it, snake)) }
-      addStringMap("properties", msg.properties)
-    }
-
-  private fun encodeItemsetDef(msg: ItemsetDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("instance_id", msg.instance_id)
-      addString("nodeset_filter", msg.nodeset_filter)
-      addString("value_ref", msg.value_ref)
-      addString("label_ref", msg.label_ref)
-      addBoolean("randomize", msg.randomize)
-      addString("random_seed_expression", msg.random_seed_expression)
-      addString("nodeset_path", msg.nodeset_path)
-    }
-
-  private fun encodeRangeConfig(msg: RangeConfig, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addDouble("start", msg.start)
-      addDouble("end", msg.end)
-      addDouble("step", msg.step)
-      addDouble("tick_interval", msg.tick_interval)
-    }
-
-  private fun encodeGeoConfig(msg: GeoConfig, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addDouble("accuracy_threshold_meters", msg.accuracy_threshold_meters)
-      addDouble("warning_threshold_meters", msg.warning_threshold_meters)
-      addBoolean("allow_mock_accuracy", msg.allow_mock_accuracy)
-    }
-
-  private fun encodeIntentConfig(msg: IntentConfig, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("intent_uri", msg.intent_uri)
-      addStringMap("parameters", msg.parameters)
-      addStringMap("response_mappings", msg.response_mappings)
-    }
-
-  private fun encodeGroupDef(msg: GroupDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("field_ref", msg.field_ref)
-      msg.label?.let { addObject("label", encodeLabelDef(it, snake)) }
-      addString("appearance", msg.appearance)
-      msg.intent?.let { addObject("intent", encodeIntentConfig(it, snake)) }
-      addObjectList("components", msg.components) { encodeViewComponent(it, snake) }
-    }
-
-  private fun encodeRepeatDef(msg: RepeatDef, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("field_ref", msg.field_ref)
-      msg.label?.let { addObject("label", encodeLabelDef(it, snake)) }
-      addString("appearance", msg.appearance)
-      addString("count_expression", msg.count_expression)
-      addBoolean("no_add_remove", msg.no_add_remove)
-      addObjectList("components", msg.components) { encodeViewComponent(it, snake) }
-      addObjectList("actions", msg.actions) { encodeActionDef(it, snake) }
+      override fun read(element: JsonElement): ByteString? =
+        fromJson(element)?.let(adapter::encodeByteString)
     }
 
   // ===========================================================================
-  // RecordInstance Encoding
+  // RecordNode, TypedValue, and geometry mapping
   // ===========================================================================
-
-  private fun encodeRecordInstance(msg: RecordInstance, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("form_id", msg.form_id)
-      addString("form_version", msg.form_version)
-      msg.metadata?.let {
-        val metaObj = encodeRecordMetadata(it, snake)
-        if (metaObj.isNotEmpty()) {
-          addObject("metadata", metaObj)
-        }
-      }
-      msg.data_?.let {
-        val dataObj = encodeRecordNode(it, snake)
-        if (dataObj.isNotEmpty()) {
-          addObject("data", dataObj)
-        }
-      }
-      msg.audit_log?.let {
-        if (it.events.isNotEmpty()) {
-          addObject("audit_log", encodeAuditLog(it, snake))
-        }
-      }
-    }
-
-  private fun encodeRecordMetadata(msg: RecordMetadata, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("instance_id", msg.instance_id)
-      msg.start_time?.let { addStringAlways("start_time", formatRfc3339Timestamp(it)) }
-      msg.end_time?.let { addStringAlways("end_time", formatRfc3339Timestamp(it)) }
-      msg.today?.let { addStringAlways("today", TemporalUtils.formatDate(it)) }
-      addString("device_id", msg.device_id)
-      addString("subscriber_id", msg.subscriber_id)
-      addString("sim_serial", msg.sim_serial)
-      addString("phone_number", msg.phone_number)
-      addString("audit_file_uri", msg.audit_file_uri)
-      msg.audit_config?.let { addObject("audit_config", encodeAuditConfig(it, snake)) }
-    }
-
-  private fun encodeAuditConfig(msg: AuditConfig, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addBoolean("enabled", msg.enabled)
-      addInt("location_min_interval_seconds", msg.location_min_interval_seconds)
-      addInt("location_max_age_seconds", msg.location_max_age_seconds)
-      addString("location_priority", msg.location_priority)
-      addBoolean("track_changes", msg.track_changes)
-      addString("track_changes_reasons", msg.track_changes_reasons)
-    }
-
-  private fun encodeAuditLog(msg: AuditLog, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addObjectList("events", msg.events) { encodeAuditEvent(it, snake) }
-    }
-
-  private fun encodeAuditEvent(msg: AuditEvent, snake: Boolean): JsonObject =
-    buildProtoJsonObject(snake) {
-      addString("event", msg.event)
-      addString("field_path", msg.field_path)
-      msg.start_time?.let { addStringAlways("start_time", formatRfc3339Timestamp(it)) }
-      msg.end_time?.let { addStringAlways("end_time", formatRfc3339Timestamp(it)) }
-      msg.location?.let { addElement("location", encodeGeoPointArray(it)) }
-      addString("old_value", msg.old_value)
-      addString("new_value", msg.new_value)
-    }
 
   private fun encodeRecordNode(msg: RecordNode, snake: Boolean): JsonObject {
     val mapObj = linkedMapOf<String, JsonElement>()
@@ -636,318 +328,6 @@ object ProtoJsonSerializer {
     return JsonArray(elements)
   }
 
-  // ===========================================================================
-  // FormDef Decoding
-  // ===========================================================================
-
-  private fun decodeFormDef(obj: JsonObject): FormDef =
-    FormDef(
-      form_id = obj.getProtoString("form_id"),
-      title = obj.getProtoString("title"),
-      version = obj.getProtoString("version"),
-      default_language = obj.getProtoString("default_language"),
-      model = obj.getProtoObject("model")?.let { decodeModelDef(it) },
-      view = obj.getProtoObject("view")?.let { decodeViewDef(it) },
-    )
-
-  private fun decodeModelDef(obj: JsonObject): ModelDef =
-    ModelDef(
-      primary_instance = obj.getProtoObject("primary_instance")?.let { decodePrimaryInstance(it) },
-      secondary_instances =
-        obj.getProtoObjects("secondary_instances").map { decodeSecondaryInstance(it) },
-      bindings = obj.getProtoObjects("bindings").map { decodeFieldBinding(it) },
-      translations = obj.getProtoObject("translations")?.let { decodeTranslationCatalog(it) },
-      actions = obj.getProtoObjects("actions").map { decodeActionDef(it) },
-      entities = obj.getProtoObjects("entities").map { decodeEntityDeclaration(it) },
-      metadata = obj.getProtoObject("metadata")?.let { decodeRecordMetadata(it) },
-      submission = obj.getProtoObject("submission")?.let { decodeSubmissionConfig(it) },
-    )
-
-  private fun decodePrimaryInstance(obj: JsonObject): PrimaryInstance {
-    val schema = obj.getProtoObject("record_schema")?.let { decodeRecordSchema(it) }
-    return PrimaryInstance(
-      record_schema = schema,
-      default_values =
-        obj.getProtoObject("default_values")?.let {
-          decodeRecordNode(
-            it,
-            schemaFields = schema?.fields?.associateBy { f -> f.name } ?: emptyMap(),
-          )
-        },
-      message_type_name = obj.getProtoString("message_type_name"),
-    )
-  }
-
-  private fun decodeRecordSchema(obj: JsonObject): RecordSchema =
-    RecordSchema(
-      name = obj.getProtoString("name"),
-      title = obj.getProtoString("title"),
-      fields = obj.getProtoObjects("fields").map { decodeFieldDefinition(it) },
-      sms_prefix = obj.getProtoString("sms_prefix"),
-      sms_delimiter = obj.getProtoString("sms_delimiter"),
-    )
-
-  private fun decodeFieldDefinition(obj: JsonObject): FieldDefinition =
-    FieldDefinition(
-      name = obj.getProtoString("name"),
-      type = parseEnum(obj.getProtoStringOrNull("type"), DataType.DATA_TYPE_UNSPECIFIED),
-      is_repeated = obj.getProtoBoolean("is_repeated"),
-      fields = obj.getProtoObjects("fields").map { decodeFieldDefinition(it) },
-      type_name = obj.getProtoString("type_name"),
-    )
-
-  private fun decodeSecondaryInstance(obj: JsonObject): SecondaryInstance =
-    SecondaryInstance(
-      id = obj.getProtoString("id"),
-      uri = obj.getProtoString("uri"),
-      root_name = obj.getProtoString("root_name"),
-      item_name = obj.getProtoString("item_name"),
-      rows = obj.getProtoObjects("rows").map { decodeRecordNode(it, emptyMap()) },
-    )
-
-  private fun decodeFieldBinding(obj: JsonObject): FieldBinding =
-    FieldBinding(
-      field_path = obj.getProtoString("field_path"),
-      type = parseEnum(obj.getProtoStringOrNull("type"), DataType.DATA_TYPE_UNSPECIFIED),
-      read_only = obj.getProtoBoolean("read_only"),
-      relevant_expression = obj.getProtoString("relevant_expression"),
-      calculate_expression = obj.getProtoString("calculate_expression"),
-      constraint_expression = obj.getProtoString("constraint_expression"),
-      required_expression = obj.getProtoString("required_expression"),
-      constraint_message = obj.getProtoString("constraint_message"),
-      required_message = obj.getProtoString("required_message"),
-      sms_tag = obj.getProtoString("sms_tag"),
-      entity_saveto = obj.getProtoString("entity_saveto"),
-      max_pixels = obj.getProtoInt("max_pixels"),
-      preload = parseEnum(obj.getProtoStringOrNull("preload"), PreloadType.PRELOAD_UNSPECIFIED),
-      preload_param = obj.getProtoString("preload_param"),
-      read_only_expression = obj.getProtoString("read_only_expression"),
-      foreign_attributes =
-        obj.getProtoObjects("foreign_attributes").map { decodeForeignAttribute(it) },
-    )
-
-  private fun decodeForeignAttribute(obj: JsonObject): ForeignAttribute =
-    ForeignAttribute(
-      namespace_uri = obj.getProtoString("namespace_uri"),
-      qualified_name = obj.getProtoString("qualified_name"),
-      value_ = obj.getProtoString("value"),
-    )
-
-  private fun decodeTranslationCatalog(obj: JsonObject): TranslationCatalog =
-    TranslationCatalog(
-      languages = obj.getProtoObjects("languages").map { decodeLanguageTranslation(it) }
-    )
-
-  private fun decodeLanguageTranslation(obj: JsonObject): LanguageTranslation {
-    val stringsMap = linkedMapOf<String, LocalizedString>()
-    val rawStrings = obj.getProtoElement("strings")
-    when (rawStrings) {
-      is JsonObject -> {
-        rawStrings.forEach { (k, v) ->
-          (v as? JsonObject)?.let { stringsMap[k] = decodeLocalizedString(it) }
-        }
-      }
-      is JsonArray -> {
-        rawStrings.forEach { entryEl ->
-          val entry = entryEl as? JsonObject ?: return@forEach
-          val k = entry.getProtoString("key")
-          val v = entry.getProtoObject("value")
-          if (v != null) {
-            stringsMap[k] = decodeLocalizedString(v)
-          }
-        }
-      }
-      else -> {}
-    }
-    return LanguageTranslation(
-      language = obj.getProtoString("language"),
-      is_default = obj.getProtoBoolean("is_default"),
-      strings = stringsMap,
-    )
-  }
-
-  private fun decodeLocalizedString(obj: JsonObject): LocalizedString =
-    LocalizedString(
-      value_ = obj.getProtoString("value"),
-      short_value = obj.getProtoString("short_value"),
-      guidance_value = obj.getProtoString("guidance_value"),
-      media = obj.getProtoObject("media")?.let { decodeMediaRef(it) },
-    )
-
-  private fun decodeMediaRef(obj: JsonObject): MediaRef =
-    MediaRef(
-      image_uri = obj.getProtoString("image_uri"),
-      big_image_uri = obj.getProtoString("big_image_uri"),
-      audio_uri = obj.getProtoString("audio_uri"),
-      video_uri = obj.getProtoString("video_uri"),
-    )
-
-  private fun decodeActionDef(obj: JsonObject): ActionDef {
-    val literal = obj.getProtoElement("literal_value")?.let { decodeTypedValueElement(it) }
-    val valueExpr = if (literal != null) null else obj.getProtoStringOrNull("value_expression")
-    return ActionDef(
-      events =
-        obj.getProtoStrings("events").map { parseEnum(it, EventType.EVENT_TYPE_UNSPECIFIED) },
-      type = parseEnum(obj.getProtoStringOrNull("type"), ActionType.ACTION_TYPE_UNSPECIFIED),
-      target_field = obj.getProtoString("target_field"),
-      value_expression = valueExpr,
-      literal_value = literal,
-    )
-  }
-
-  private fun decodeEntityDeclaration(obj: JsonObject): EntityDeclaration =
-    EntityDeclaration(
-      dataset = obj.getProtoString("dataset"),
-      entity_id_expression = obj.getProtoString("entity_id_expression"),
-      label_expression = obj.getProtoString("label_expression"),
-      create_condition = obj.getProtoString("create_condition"),
-      update_condition = obj.getProtoString("update_condition"),
-      sync_metadata = obj.getProtoObject("sync_metadata")?.let { decodeEntitySyncMetadata(it) },
-      property_mappings =
-        obj.getProtoObjects("property_mappings").map { decodeEntityPropertyMapping(it) },
-    )
-
-  private fun decodeEntitySyncMetadata(obj: JsonObject): EntitySyncMetadata =
-    EntitySyncMetadata(
-      base_version_expression = obj.getProtoString("base_version_expression"),
-      trunk_version_expression = obj.getProtoString("trunk_version_expression"),
-      branch_id_expression = obj.getProtoString("branch_id_expression"),
-    )
-
-  private fun decodeEntityPropertyMapping(obj: JsonObject): EntityPropertyMapping =
-    EntityPropertyMapping(
-      entity_property = obj.getProtoString("entity_property"),
-      source_field_path = obj.getProtoString("source_field_path"),
-    )
-
-  private fun decodeSubmissionConfig(obj: JsonObject): SubmissionConfig =
-    SubmissionConfig(
-      action_url = obj.getProtoString("action_url"),
-      method = obj.getProtoString("method"),
-      base64_rsa_public_key = obj.getProtoString("base64_rsa_public_key"),
-      auto_send = obj.getProtoBoolean("auto_send"),
-      auto_delete = obj.getProtoBoolean("auto_delete"),
-      client_editable = obj.getProtoBoolean("client_editable"),
-    )
-
-  private fun decodeViewDef(obj: JsonObject): ViewDef =
-    ViewDef(components = obj.getProtoObjects("components").map { decodeViewComponent(it) })
-
-  private fun decodeViewComponent(obj: JsonObject): ViewComponent =
-    ViewComponent(
-      control = obj.getProtoObject("control")?.let { decodeControlDef(it) },
-      group = obj.getProtoObject("group")?.let { decodeGroupDef(it) },
-      repeat = obj.getProtoObject("repeat")?.let { decodeRepeatDef(it) },
-    )
-
-  private fun decodeControlDef(obj: JsonObject): ControlDef =
-    ControlDef(
-      field_ref = obj.getProtoString("field_ref"),
-      type = parseEnum(obj.getProtoStringOrNull("type"), ControlType.CONTROL_TYPE_UNSPECIFIED),
-      label = obj.getProtoObject("label")?.let { decodeLabelDef(it) },
-      hint = obj.getProtoObject("hint")?.let { decodeLabelDef(it) },
-      appearance = obj.getProtoString("appearance"),
-      choices = obj.getProtoObjects("choices").map { decodeChoiceItem(it) },
-      itemset = obj.getProtoObject("itemset")?.let { decodeItemsetDef(it) },
-      range_config = obj.getProtoObject("range_config")?.let { decodeRangeConfig(it) },
-      media_type = obj.getProtoString("media_type"),
-      intent = obj.getProtoObject("intent")?.let { decodeIntentConfig(it) },
-      actions = obj.getProtoObjects("actions").map { decodeActionDef(it) },
-      geo_config = obj.getProtoObject("geo_config")?.let { decodeGeoConfig(it) },
-    )
-
-  private fun decodeLabelDef(obj: JsonObject): LabelDef =
-    LabelDef(
-      text = obj.getProtoString("text"),
-      text_id = obj.getProtoString("text_id"),
-      outputs = obj.getProtoObjects("outputs").map { decodeOutputFragment(it) },
-    )
-
-  private fun decodeOutputFragment(obj: JsonObject): OutputFragment =
-    OutputFragment(
-      placeholder_id = obj.getProtoString("placeholder_id"),
-      value_expression = obj.getProtoString("value_expression"),
-    )
-
-  private fun decodeChoiceItem(obj: JsonObject): ChoiceItem =
-    ChoiceItem(
-      value_ = obj.getProtoString("value"),
-      label = obj.getProtoObject("label")?.let { decodeLabelDef(it) },
-      properties = obj.getProtoStringMap("properties"),
-    )
-
-  private fun decodeItemsetDef(obj: JsonObject): ItemsetDef =
-    ItemsetDef(
-      instance_id = obj.getProtoString("instance_id"),
-      nodeset_filter = obj.getProtoString("nodeset_filter"),
-      value_ref = obj.getProtoString("value_ref"),
-      label_ref = obj.getProtoString("label_ref"),
-      randomize = obj.getProtoBoolean("randomize"),
-      random_seed_expression = obj.getProtoString("random_seed_expression"),
-      nodeset_path = obj.getProtoString("nodeset_path"),
-    )
-
-  private fun decodeRangeConfig(obj: JsonObject): RangeConfig =
-    RangeConfig(
-      start = obj.getProtoDouble("start"),
-      end = obj.getProtoDouble("end"),
-      step = obj.getProtoDouble("step"),
-      tick_interval = obj.getProtoDouble("tick_interval"),
-    )
-
-  private fun decodeGeoConfig(obj: JsonObject): GeoConfig =
-    GeoConfig(
-      accuracy_threshold_meters = obj.getProtoDouble("accuracy_threshold_meters"),
-      warning_threshold_meters = obj.getProtoDouble("warning_threshold_meters"),
-      allow_mock_accuracy = obj.getProtoBoolean("allow_mock_accuracy"),
-    )
-
-  private fun decodeIntentConfig(obj: JsonObject): IntentConfig =
-    IntentConfig(
-      intent_uri = obj.getProtoString("intent_uri"),
-      parameters = obj.getProtoStringMap("parameters"),
-      response_mappings = obj.getProtoStringMap("response_mappings"),
-    )
-
-  private fun decodeGroupDef(obj: JsonObject): GroupDef =
-    GroupDef(
-      field_ref = obj.getProtoString("field_ref"),
-      label = obj.getProtoObject("label")?.let { decodeLabelDef(it) },
-      appearance = obj.getProtoString("appearance"),
-      intent = obj.getProtoObject("intent")?.let { decodeIntentConfig(it) },
-      components = obj.getProtoObjects("components").map { decodeViewComponent(it) },
-    )
-
-  private fun decodeRepeatDef(obj: JsonObject): RepeatDef =
-    RepeatDef(
-      field_ref = obj.getProtoString("field_ref"),
-      label = obj.getProtoObject("label")?.let { decodeLabelDef(it) },
-      appearance = obj.getProtoString("appearance"),
-      count_expression = obj.getProtoString("count_expression"),
-      no_add_remove = obj.getProtoBoolean("no_add_remove"),
-      components = obj.getProtoObjects("components").map { decodeViewComponent(it) },
-      actions = obj.getProtoObjects("actions").map { decodeActionDef(it) },
-    )
-
-  // ===========================================================================
-  // RecordInstance Decoding
-  // ===========================================================================
-
-  private fun decodeRecordInstance(
-    obj: JsonObject,
-    formDef: FormDef? = null,
-    schema: RecordSchema? = formDef?.model?.primary_instance?.record_schema,
-  ): RecordInstance {
-    val schemaFields = buildSchemaFieldMap(formDef, schema)
-    return RecordInstance(
-      form_id = obj.getProtoString("form_id"),
-      form_version = obj.getProtoString("form_version"),
-      metadata = obj.getProtoObject("metadata")?.let { decodeRecordMetadata(it) },
-      data_ = obj.getProtoObject("data")?.let { decodeRecordNode(it, schemaFields) },
-      audit_log = obj.getProtoObject("audit_log")?.let { decodeAuditLog(it) },
-    )
-  }
-
   private fun buildSchemaFieldMap(
     formDef: FormDef?,
     schema: RecordSchema?,
@@ -964,44 +344,6 @@ object ProtoJsonSerializer {
     }
     return result
   }
-
-  private fun decodeRecordMetadata(obj: JsonObject): RecordMetadata =
-    RecordMetadata(
-      instance_id = obj.getProtoString("instance_id"),
-      start_time = obj.getProtoTimestamp("start_time"),
-      end_time = obj.getProtoTimestamp("end_time"),
-      today = obj.getProtoDate("today"),
-      device_id = obj.getProtoString("device_id"),
-      subscriber_id = obj.getProtoString("subscriber_id"),
-      sim_serial = obj.getProtoString("sim_serial"),
-      phone_number = obj.getProtoString("phone_number"),
-      audit_file_uri = obj.getProtoString("audit_file_uri"),
-      audit_config = obj.getProtoObject("audit_config")?.let { decodeAuditConfig(it) },
-    )
-
-  private fun decodeAuditConfig(obj: JsonObject): AuditConfig =
-    AuditConfig(
-      enabled = obj.getProtoBoolean("enabled"),
-      location_min_interval_seconds = obj.getProtoInt("location_min_interval_seconds"),
-      location_max_age_seconds = obj.getProtoInt("location_max_age_seconds"),
-      location_priority = obj.getProtoString("location_priority"),
-      track_changes = obj.getProtoBoolean("track_changes"),
-      track_changes_reasons = obj.getProtoString("track_changes_reasons"),
-    )
-
-  private fun decodeAuditLog(obj: JsonObject): AuditLog =
-    AuditLog(events = obj.getProtoObjects("events").map { decodeAuditEvent(it) })
-
-  private fun decodeAuditEvent(obj: JsonObject): AuditEvent =
-    AuditEvent(
-      event = obj.getProtoString("event"),
-      field_path = obj.getProtoString("field_path"),
-      start_time = obj.getProtoTimestamp("start_time"),
-      end_time = obj.getProtoTimestamp("end_time"),
-      location = obj.getProtoElement("location")?.let { decodeGeoPointElement(it) },
-      old_value = obj.getProtoString("old_value"),
-      new_value = obj.getProtoString("new_value"),
-    )
 
   private fun isLegacyFieldValueObject(obj: JsonObject): Boolean =
     obj.containsKey("scalarValue") ||
@@ -1379,11 +721,6 @@ object ProtoJsonSerializer {
           ?: emptyList()
     )
 
-  private inline fun <reified E : Enum<E>> parseEnum(name: String?, default: E): E {
-    if (name == null) return default
-    return enumValues<E>().firstOrNull { it.name.equals(name, ignoreCase = true) } ?: default
-  }
-
   // ===========================================================================
   // RFC 3339 Timestamp & Temporal Helpers
   // ===========================================================================
@@ -1482,109 +819,8 @@ object ProtoJsonSerializer {
   }
 
   // ===========================================================================
-  // JSON Object Builder & Lookup Helpers
+  // JSON lookup helpers
   // ===========================================================================
-
-  private fun snakeToCamel(snake: String): String {
-    if (!snake.contains('_')) return snake
-    val sb = StringBuilder(snake.length)
-    var capitalizeNext = false
-    for (c in snake) {
-      if (c == '_') {
-        capitalizeNext = true
-      } else if (capitalizeNext) {
-        sb.append(c.uppercaseChar())
-        capitalizeNext = false
-      } else {
-        sb.append(c)
-      }
-    }
-    return sb.toString()
-  }
-
-  private class ProtoJsonBuilder(private val preserveProtoFieldNames: Boolean) {
-    val entries = linkedMapOf<String, JsonElement>()
-
-    private fun key(snakeName: String): String =
-      if (preserveProtoFieldNames) snakeName else snakeToCamel(snakeName)
-
-    fun addString(snakeName: String, value: String) {
-      if (value.isNotEmpty()) {
-        entries[key(snakeName)] = JsonPrimitive(value)
-      }
-    }
-
-    fun addStringAlways(snakeName: String, value: String) {
-      entries[key(snakeName)] = JsonPrimitive(value)
-    }
-
-    fun addInt(snakeName: String, value: Int) {
-      if (value != 0) {
-        entries[key(snakeName)] = JsonPrimitive(value)
-      }
-    }
-
-    fun addIntAlways(snakeName: String, value: Int) {
-      entries[key(snakeName)] = JsonPrimitive(value)
-    }
-
-    fun addDouble(snakeName: String, value: Double) {
-      if (value != 0.0) {
-        entries[key(snakeName)] = JsonPrimitive(value)
-      }
-    }
-
-    fun addDoubleAlways(snakeName: String, value: Double) {
-      entries[key(snakeName)] = JsonPrimitive(value)
-    }
-
-    fun addBoolean(snakeName: String, value: Boolean) {
-      if (value) {
-        entries[key(snakeName)] = JsonPrimitive(true)
-      }
-    }
-
-    fun addBooleanAlways(snakeName: String, value: Boolean) {
-      entries[key(snakeName)] = JsonPrimitive(value)
-    }
-
-    fun addEnum(snakeName: String, enumName: String) {
-      entries[key(snakeName)] = JsonPrimitive(enumName)
-    }
-
-    fun addObject(snakeName: String, obj: JsonObject) {
-      entries[key(snakeName)] = obj
-    }
-
-    fun addElement(snakeName: String, element: JsonElement) {
-      entries[key(snakeName)] = element
-    }
-
-    fun <T> addObjectList(snakeName: String, items: List<T>, mapper: (T) -> JsonObject) {
-      if (items.isNotEmpty()) {
-        entries[key(snakeName)] = JsonArray(items.map(mapper))
-      }
-    }
-
-    fun addStringMap(snakeName: String, map: Map<String, String>) {
-      if (map.isNotEmpty()) {
-        val objMap = linkedMapOf<String, JsonElement>()
-        map.forEach { (k, v) -> objMap[k] = JsonPrimitive(v) }
-        entries[key(snakeName)] = JsonObject(objMap)
-      }
-    }
-  }
-
-  private inline fun buildProtoJsonObject(
-    preserveProtoFieldNames: Boolean,
-    block: ProtoJsonBuilder.() -> Unit,
-  ): JsonObject = JsonObject(ProtoJsonBuilder(preserveProtoFieldNames).apply(block).entries)
-
-  private fun JsonObject.getProtoElement(snakeName: String): JsonElement? {
-    val camelName = snakeToCamel(snakeName)
-    return this[camelName]?.takeIf { it !is JsonNull }
-      ?: this[snakeName]?.takeIf { it !is JsonNull }
-  }
 
   private fun JsonObject.getProtoStringOrNull(snakeName: String): String? =
     (getProtoElement(snakeName) as? JsonPrimitive)?.content
@@ -1617,38 +853,17 @@ object ProtoJsonSerializer {
     return prim.booleanOrNull ?: prim.content.toBooleanStrictOrNull()
   }
 
-  private fun JsonObject.getProtoBoolean(snakeName: String): Boolean =
-    getProtoBooleanOrNull(snakeName) ?: false
-
   private fun JsonObject.getProtoObject(snakeName: String): JsonObject? =
     getProtoElement(snakeName) as? JsonObject
 
   private fun JsonObject.getProtoObjects(snakeName: String): List<JsonObject> =
     (getProtoElement(snakeName) as? JsonArray)?.mapNotNull { it as? JsonObject } ?: emptyList()
 
-  private fun JsonObject.getProtoStrings(snakeName: String): List<String> =
-    (getProtoElement(snakeName) as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.content }
-      ?: emptyList()
+  private fun JsonObject.getProtoTimestamp(snakeName: String): Instant? =
+    getProtoElement(snakeName)?.let(::decodeTimestampElement)
 
-  private fun JsonObject.getProtoStringMap(snakeName: String): Map<String, String> {
-    val result = linkedMapOf<String, String>()
-    when (val el = getProtoElement(snakeName)) {
-      is JsonObject -> {
-        el.forEach { (k, v) -> (v as? JsonPrimitive)?.content?.let { result[k] = it } }
-      }
-      is JsonArray -> {
-        el.forEach { item ->
-          val entry = item as? JsonObject ?: return@forEach
-          result[entry.getProtoString("key")] = entry.getProtoString("value")
-        }
-      }
-      else -> {}
-    }
-    return result
-  }
-
-  private fun JsonObject.getProtoTimestamp(snakeName: String): Instant? {
-    return when (val el = getProtoElement(snakeName)) {
+  private fun decodeTimestampElement(element: JsonElement): Instant? {
+    return when (val el = element) {
       is JsonPrimitive -> parseRfc3339Timestamp(el.content)
       is JsonObject ->
         ofEpochSecond(el.getProtoLongOrNull("seconds") ?: 0L, (el.getProtoInt("nanos")).toLong())
@@ -1656,8 +871,11 @@ object ProtoJsonSerializer {
     }
   }
 
-  private fun JsonObject.getProtoDate(snakeName: String): Date? {
-    return when (val el = getProtoElement(snakeName)) {
+  private fun JsonObject.getProtoDate(snakeName: String): Date? =
+    getProtoElement(snakeName)?.let(::decodeDateElement)
+
+  private fun decodeDateElement(element: JsonElement): Date? {
+    return when (val el = element) {
       is JsonObject -> decodeDate(el)
       is JsonPrimitive -> TemporalUtils.tryParseDate(el.content)
       else -> null

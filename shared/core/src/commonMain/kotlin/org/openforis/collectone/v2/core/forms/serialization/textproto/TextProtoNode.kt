@@ -119,16 +119,25 @@ internal data class TextProtoMessage(val fields: List<TextProtoField> = emptyLis
 /** Single `name: value` or `name { ... }` entry in a textproto message. */
 internal data class TextProtoField(val name: String, val value: TextProtoValue)
 
-/** Value node within a textproto AST. */
+/**
+ * Value node within a textproto AST.
+ *
+ * The parser doesn't know the schema, so it keeps literals as written and the `as*OrNull` accessors
+ * coerce them for the field being read, leniently, like protobuf's text format parser: numbers and
+ * enum identifiers may also arrive quoted, and `null` means the literal doesn't fit.
+ */
 internal sealed class TextProtoValue {
   data class StringVal(val value: String) : TextProtoValue()
 
+  /** A numeric literal, kept as written so 64-bit integers and doubles don't lose precision. */
   data class NumberVal(val raw: String) : TextProtoValue()
 
+  /** A bare identifier: an enum value, `true` / `false`, or `inf` / `nan`. */
   data class IdentifierVal(val name: String) : TextProtoValue()
 
   data class MessageVal(val message: TextProtoMessage) : TextProtoValue()
 
+  /** A `[a, b]` list, the short form of a repeated field. */
   data class ListVal(val elements: List<TextProtoValue>) : TextProtoValue()
 
   /**
@@ -172,6 +181,7 @@ internal sealed class TextProtoValue {
       else -> null
     }
 
+  /** Also accepts the text format's `nan`, `inf`, and `infinity` identifiers, in any case. */
   fun asDoubleOrNull(): Double? =
     when (this) {
       is NumberVal -> raw.toDoubleOrNull()
@@ -188,6 +198,10 @@ internal sealed class TextProtoValue {
       else -> null
     }
 
+  /**
+   * Accepts the text format's boolean spellings: `true` / `t` / `1` and `false` / `f` / `0` as
+   * identifiers or numbers, and exactly `true` or `false` when quoted.
+   */
   fun asBooleanOrNull(): Boolean? =
     when (this) {
       is IdentifierVal ->

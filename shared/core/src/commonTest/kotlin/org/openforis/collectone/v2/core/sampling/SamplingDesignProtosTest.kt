@@ -17,12 +17,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import openforis.collectone.v1.forms.GeoPoint
-import openforis.collectone.v1.forms.GeoShape
 import openforis.collectone.v1.survey.EntityDatasetDef
 import openforis.collectone.v1.survey.MapConfig
 import openforis.collectone.v1.survey.SamplingDesign
 import openforis.collectone.v1.survey.SurveyArea
+import openforis.collectone.v1.survey.SurveyAreaSource
+import org.openforis.collectone.v2.core.geo.GeoCoord
+import org.openforis.collectone.v2.core.geo.GeometryProtos
 
 class SamplingDesignProtosTest {
   private val designs =
@@ -83,9 +84,14 @@ class SamplingDesignProtosTest {
     val area =
       SurveyArea(
         name = "Test area",
-        parts =
-          listOf(GeoShape(points = ring.map { GeoPoint(latitude = it.lat, longitude = it.lng) })),
-        source = "uploaded:area.geojson",
+        boundary =
+          GeometryProtos.multiPolygon(
+            listOf(
+              listOf(ring.map { GeometryProtos.position(latitude = it.lat, longitude = it.lng) })
+            )
+          ),
+        area_source =
+          SurveyAreaSource(kind = SurveyAreaSource.Kind.UPLOADED, file_name = "area.geojson"),
       )
     val mapConfig = MapConfig(survey_area = area)
     assertEquals(mapConfig, MapConfig.ADAPTER.decode(MapConfig.ADAPTER.encode(mapConfig)))

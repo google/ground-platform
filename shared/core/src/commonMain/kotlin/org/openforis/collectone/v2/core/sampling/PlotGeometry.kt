@@ -16,8 +16,10 @@ package org.openforis.collectone.v2.core.sampling
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.geo.IndexedRing
 import org.openforis.collectone.v2.core.geo.LocalMetricFrame
+import org.openforis.collectone.v2.core.geo.Wgs84
 import org.openforis.collectone.v2.core.geo.quantizeDegrees
 
 /**
@@ -25,6 +27,12 @@ import org.openforis.collectone.v2.core.geo.quantizeDegrees
  * center. Rings are counter-clockwise (RFC 7946 section 3.1.6) and closed (first == last).
  */
 object PlotGeometry {
+  /** Default ground side length in meters of a hollow square sub-plot box (Collect Earth 2 m). */
+  const val DEFAULT_SUBPLOT_SIZE_M = 2.0
+
+  private const val MIN_SUBPLOT_SIZE_M = 0.5
+  private const val MAX_SUBPLOT_SIZE_M = 4.0
+  private const val MAX_PAIRWISE_SAMPLES = 100
   private const val CIRCLE_VERTICES = DefaultSamplingEngine.CIRCLE_VERTICES
   private const val MAX_RANDOM_ATTEMPTS_PER_SAMPLE = 1000
 
@@ -99,6 +107,55 @@ object PlotGeometry {
       is SubPlotLayout.Random ->
         randomSamples(center, boundary, shape, sizeM, layout.count, plotSeed)
     }
+
+  /**
+   * Ground side length in meters of each hollow square sub-plot box: 10% of the plot size, capped
+   * at half the grid spacing so neighboring boxes never touch, and clamped to 0.5–4.0 m (defaulting
+   * to Collect Earth's 2 m × 2 m box when [design] is absent or non-finite). When [design] is
+   * absent and [samples] has at least two points, also caps at half the smallest pairwise spacing.
+   */
+  fun subPlotSizeM(design: SampleDesign?, samples: List<GeoCoord> = emptyList()): Double {
+    if (design != null) {
+      val fromPlot = design.plotSizeM * 0.10
+      val spaced =
+        when (val sub = design.subPlot) {
+          is SubPlotLayout.Grid -> minOf(fromPlot, sub.spacingM * 0.5)
+          else -> fromPlot
+        }
+      return spaced
+        .takeIf { it.isFinite() && it > 0.0 }
+        ?.coerceIn(MIN_SUBPLOT_SIZE_M, MAX_SUBPLOT_SIZE_M) ?: DEFAULT_SUBPLOT_SIZE_M
+    }
+    val minSpacingM = minSampleSpacingM(samples)
+    val spaced =
+      if (minSpacingM != null && minSpacingM > 0.0) {
+        minOf(DEFAULT_SUBPLOT_SIZE_M, minSpacingM * 0.5)
+      } else {
+        DEFAULT_SUBPLOT_SIZE_M
+      }
+    return spaced.coerceIn(MIN_SUBPLOT_SIZE_M, MAX_SUBPLOT_SIZE_M)
+  }
+
+  /**
+   * Closed 5-vertex ground-scaled square frame ([PlotShape.SQUARE]) of side [sizeM] meters centered
+   * on [center]. Used consistently across Collect One maps and Google Earth KML export.
+   */
+  fun subPlotBox(center: GeoCoord, sizeM: Double): Ring = boundary(center, PlotShape.SQUARE, sizeM)
+
+  private fun minSampleSpacingM(samples: List<GeoCoord>): Double? {
+    if (samples.size < 2) return null
+    val capped = samples.take(MAX_PAIRWISE_SAMPLES)
+    var best = Double.POSITIVE_INFINITY
+    for (i in capped.indices) {
+      val a = capped[i]
+      for (j in i + 1 until capped.size) {
+        val b = capped[j]
+        val d = Wgs84.localDistanceM(a.lat, a.lng, b.lat, b.lng)
+        if (d > 0.0 && d < best) best = d
+      }
+    }
+    return best.takeIf { it.isFinite() }
+  }
 
   private fun randomSamples(
     center: GeoCoord,

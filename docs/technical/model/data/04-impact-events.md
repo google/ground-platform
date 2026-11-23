@@ -16,9 +16,9 @@
 
 # Impact Events and Survey Outcomes
 
-Ground records when data collected with it is used ("data was used" signals)
-so impact can be measured without asking organizers to fill in reports (see
-[Impact Measurement](../../../product/impact-measurement.md)). Two records
+Collect One records when data collected with it is used ("data was used"
+signals) so impact can be measured without asking organizers to fill in reports
+(see [Impact Measurement](../../../product/impact-measurement.md)). Two records
 carry these signals:
 
 *   **`ImpactEvent`** (`impact_event.proto`): an append-only log entry for an

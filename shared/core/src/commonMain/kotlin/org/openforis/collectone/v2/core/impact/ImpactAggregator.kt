@@ -98,8 +98,8 @@ object ImpactAggregator {
     // Organization scope: all the organization's surveys, deduplicated together.
     val surveyIndicesByOrganization =
       surveys.indices
-        .filter { surveys[it].survey.organizationId != null }
-        .groupBy { surveys[it].survey.organizationId!! }
+        .mapNotNull { index -> surveys[index].survey.organizationId?.let { it to index } }
+        .groupBy(keySelector = { it.first }, valueTransform = { it.second })
     val organizationWinners = HashMap<String, List<FeatureRef>>()
     val organizationConcepts = HashMap<String, Map<String, ImpactConcept>>()
     for (organizationId in surveyIndicesByOrganization.keys.sorted()) {

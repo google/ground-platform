@@ -1,0 +1,170 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$!isTemplateNode &amp;&amp; (hasTemplate || elements.size &gt; 1 || childParsed.defaultNode.fields.isNotEmpty())</ID>
+    <ID>ComplexCondition:FormDefXmlSerializer.kt$FormDefXmlSerializer$subName.isNotEmpty() &amp;&amp; subName !in addedTags &amp;&amp; !subName.startsWith("entity") &amp;&amp; !subName.startsWith("entities:entity")</ID>
+    <ID>ComplexCondition:FormEnvironment.kt$FormEnvironment.Companion$i == 4 || i == 6 || i == 8 || i == 10</ID>
+    <ID>ComplexCondition:GeoUtils.kt$GeoUtils$((d1 &gt; 0 &amp;&amp; d2 &lt; 0) || (d1 &lt; 0 &amp;&amp; d2 &gt; 0)) &amp;&amp; ((d3 &gt; 0 &amp;&amp; d4 &lt; 0) || (d3 &lt; 0 &amp;&amp; d4 &gt; 0))</ID>
+    <ID>ComplexCondition:LabelResolver.kt$LabelResolver$rawPrimary.isEmpty() &amp;&amp; rawShort == null &amp;&amp; rawGuidance == null &amp;&amp; media == null &amp;&amp; labelDef.outputs.isEmpty()</ID>
+    <ID>ComplexCondition:LookupFunctions.kt$LookupFunctions$controls.any { it.field_ref == s1 || it.field_ref.substringAfterLast('/') == s1 } &amp;&amp; controls.none { it.field_ref == s0 || it.field_ref.substringAfterLast('/') == s0 }</ID>
+    <ID>ComplexCondition:NodeSetFunctions.kt$NodeSetFunctions$target is XPathNode.InstanceRootElementNode &amp;&amp; context.contextNode.parent === target &amp;&amp; (context.contextNode.siblingRepeatCount &gt; 1 || context.contextPosition &gt; 1)</ID>
+    <ID>ComplexCondition:ProtoJsonSerializer.kt$ProtoJsonSerializer$expectedType == DataType.TYPE_GEOSHAPE || (expectedType != DataType.TYPE_GEOTRACE &amp;&amp; pts.size &gt;= 4 &amp;&amp; pts.first() == pts.last())</ID>
+    <ID>ComplexCondition:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$instanceId.isNotEmpty() || startTimeStr.isNotEmpty() || endTimeStr.isNotEmpty() || todayStr.isNotEmpty() || deviceId.isNotEmpty() || subscriberId.isNotEmpty() || simSerial.isNotEmpty() || phoneNumber.isNotEmpty() || auditUri.isNotEmpty()</ID>
+    <ID>ComplexCondition:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$lat &lt; -90.0 || lat &gt; 90.0 || lon &lt; -180.0 || lon &gt; 180.0</ID>
+    <ID>ComplexCondition:RecordMutator.kt$RecordMutator$parsed.repeatIndex == null &amp;&amp; depthIndex &lt; contextSegments.size &amp;&amp; contextSegments[depthIndex].name == parsed.name &amp;&amp; prefixMatches(stack, contextSegments, depthIndex)</ID>
+    <ID>ComplexCondition:RingValidator.kt$RingValidator$((d1 &gt; 0 &amp;&amp; d2 &lt; 0) || (d1 &lt; 0 &amp;&amp; d2 &gt; 0)) &amp;&amp; ((d3 &gt; 0 &amp;&amp; d4 &lt; 0) || (d3 &lt; 0 &amp;&amp; d4 &gt; 0))</ID>
+    <ID>ComplexCondition:TextProtoParser.kt$TextProtoParser$c.isLetterOrDigit() || c == '_' || c == '-' || c == '/' || c == '.'</ID>
+    <ID>ComplexCondition:TextProtoParser.kt$TextProtoParser$c.isWhitespace() || c == '#' || c == '{' || c == '}' || c == '&lt;' || c == '&gt;' || c == '[' || c == ']' || c == ':' || c == ',' || c == ';'</ID>
+    <ID>ComplexCondition:TextProtoParser.kt$TextProtoParser$firstChar.isDigit() || ((firstChar == '-' || firstChar == '+' || firstChar == '.') &amp;&amp; token.length &gt; 1 &amp;&amp; (token[1].isDigit() || token.lowercase() == "-inf" || token.lowercase() == "-infinity"))</ID>
+    <ID>ComplexCondition:XPathEvaluator.kt$XPathEvaluator$(a is XPathValue.Bool &amp;&amp; b is XPathValue.Str) || (a is XPathValue.Str &amp;&amp; b is XPathValue.Bool)</ID>
+    <ID>ComplexCondition:XPathEvaluator.kt$XPathEvaluator$a is XPathValue.DateVal || b is XPathValue.DateVal || a is XPathValue.TimestampVal || b is XPathValue.TimestampVal</ID>
+    <ID>ComplexCondition:XPathEvaluator.kt$XPathEvaluator$op == BinaryOp.LT || op == BinaryOp.LTE || op == BinaryOp.GT || op == BinaryOp.GTE</ID>
+    <ID>ComplexCondition:XPathNode.kt$XPathNode.InstanceRootElementNode$metadata != null &amp;&amp; (nameFilter == null || nameFilter == "meta" || nameFilter == "orx:meta")</ID>
+    <ID>ComplexCondition:XmlParser.kt$XmlTokenizer$c.isWhitespace() || c == '=' || c == '/' || c == '&gt;' || c == '&lt;'</ID>
+    <ID>ComplexCondition:XmlParser.kt$XmlTokenizer$pos &lt; len &amp;&amp; !src[pos].isWhitespace() &amp;&amp; src[pos] != '&gt;' &amp;&amp; src[pos] != '/'</ID>
+    <ID>ComplexCondition:XmlWriter.kt$XmlWriter.Companion$value.none { it == '&amp;' || it == '&lt;' || it == '&gt;' || it == '"' }</ID>
+    <ID>CyclomaticComplexMethod:ChoiceOptionsResolver.kt$ChoiceOptionsResolver$private fun evaluateItemsetOptions( itemset: ItemsetDef, controlContext: EvaluationContext, ): List&lt;ResolvedChoiceOption&gt;</ID>
+    <ID>CyclomaticComplexMethod:CompiledForm.kt$CompiledForm$private fun buildRepeatInsertActionIndex(): Map&lt;String, List&lt;ActionDef&gt;&gt;</ID>
+    <ID>CyclomaticComplexMethod:CompiledForm.kt$CompiledForm$private fun buildStartupActionIndex(): List&lt;ActionDef&gt;</ID>
+    <ID>CyclomaticComplexMethod:CompiledForm.kt$CompiledForm$private fun computeTopologicalOrder(): List&lt;CompiledFieldBinding&gt;</ID>
+    <ID>CyclomaticComplexMethod:DataMutations.kt$DataMutations$fun applyEntityDelete(record: EntityRecord, delete: EntityRecord): EntityRecord</ID>
+    <ID>CyclomaticComplexMethod:DataMutations.kt$DataMutations$fun applySubmissionDelete(record: SubmissionRecord, delete: SubmissionRecord): SubmissionRecord</ID>
+    <ID>CyclomaticComplexMethod:DataMutations.kt$DataMutations$fun mergeEntity(base: EntityRecord, upsert: EntityRecord): EntityRecord</ID>
+    <ID>CyclomaticComplexMethod:DataMutations.kt$DataMutations$fun mergeSubmission(base: SubmissionRecord, upsert: SubmissionRecord): SubmissionRecord</ID>
+    <ID>CyclomaticComplexMethod:DefaultSamplingEngine.kt$DefaultSamplingEngine$private fun validate(area: SamplingArea, design: SampleDesign): String?</ID>
+    <ID>CyclomaticComplexMethod:DependencyAnalyzer.kt$DependencyAnalyzer$private fun visit(expr: XPathExpr, out: MutableSet&lt;XPathDependency&gt;)</ID>
+    <ID>CyclomaticComplexMethod:EntityStateEvaluator.kt$EntityStateEvaluator$fun evaluate( fieldStates: Map&lt;String, FieldState&gt;, rootEvalContext: EvaluationContext, ): List&lt;EntityState&gt;</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$fun deserialize(xml: String): FormDef</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$internal fun parseTypedLiteral(text: String, dataType: DataType): TypedValue</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun parseControlDef( controlEl: XmlElement, rootName: String, enclosingPath: String, bindIdToNodeset: Map&lt;String, String&gt;, selectOnePaths: MutableSet&lt;String&gt;, selectMultiplePaths: MutableSet&lt;String&gt;, ): ControlDef</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun parseFieldBinding( rawBindEl: XmlElement, rootName: String, inheritedNamespaces: Map&lt;String, String&gt;, ): FieldBinding</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun parsePrimaryInstanceTree( parentEl: XmlElement, parentPath: String, bindingTypeMap: Map&lt;String, DataType&gt;, repeatPaths: Set&lt;String&gt;, ): ParsedInstanceTree</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun parseTranslations(itextEl: XmlElement): TranslationCatalog</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun parseViewComponents( containerEl: XmlElement, rootName: String, enclosingPath: String, bindIdToNodeset: Map&lt;String, String&gt;, repeatPaths: MutableSet&lt;String&gt;, selectOnePaths: MutableSet&lt;String&gt;, selectMultiplePaths: MutableSet&lt;String&gt;, ): List&lt;ViewComponent&gt;</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlSerializer.kt$FormDefXmlSerializer$private fun buildBindElement( binding: FieldBinding, rootName: String, foreignNamespaces: ForeignNamespaceDeclarations, ): XmlElement</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlSerializer.kt$FormDefXmlSerializer$private fun buildControlElement( control: ControlDef, rootName: String, enclosingPath: String, ): XmlElement</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlSerializer.kt$FormDefXmlSerializer$private fun buildItextElement(catalog: TranslationCatalog, defaultLang: String): XmlElement</ID>
+    <ID>CyclomaticComplexMethod:FormDefXmlSerializer.kt$FormDefXmlSerializer$private fun buildMetaElement( metaBindings: List&lt;FieldBinding&gt;, entities: List&lt;EntityDeclaration&gt;, ): XmlElement</ID>
+    <ID>CyclomaticComplexMethod:GeoUtils.kt$GeoUtils$private fun segmentsIntersect(a: GeoPoint, b: GeoPoint, c: GeoPoint, d: GeoPoint): Boolean</ID>
+    <ID>CyclomaticComplexMethod:ImpactConceptAggregation.kt$internal fun conceptRows( scopeType: ImpactScopeType, scopeId: String, winners: List&lt;FeatureRef&gt;, concept: ImpactConcept, ): List&lt;ImpactAggregateRow&gt;</ID>
+    <ID>CyclomaticComplexMethod:KmlReader.kt$KmlReader$fun read(text: String): GeoReadResult</ID>
+    <ID>CyclomaticComplexMethod:LibraryMutations.kt$LibraryMutations$fun applyDelete( record: OrganizationLibraryRecord, delete: OrganizationLibraryRecord, ): OrganizationLibraryRecord</ID>
+    <ID>CyclomaticComplexMethod:LookupFunctions.kt$LookupFunctions$private fun evaluateChoiceName( arg0: XPathValue, arg1: XPathValue, context: EvaluationContext, ): XPathValue</ID>
+    <ID>CyclomaticComplexMethod:OrganizationMutations.kt$OrganizationMutations$fun applyDelete(org: Organization, delete: Organization): Organization</ID>
+    <ID>CyclomaticComplexMethod:OrganizationMutations.kt$OrganizationMutations$fun merge(base: Organization, upsert: Organization): Organization</ID>
+    <ID>CyclomaticComplexMethod:PreloadExecutor.kt$PreloadExecutor$fun execute( rawNode: RecordNode, metadata: RecordMetadata, isFirstLoad: Boolean, isFinalize: Boolean, ): Pair&lt;RecordNode, RecordMetadata&gt;</ID>
+    <ID>CyclomaticComplexMethod:ProtoJsonSerializer.kt$ProtoJsonSerializer$private fun decodeFieldValueElement( element: JsonElement, fieldDef: FieldDefinition? = null, ): FieldValue?</ID>
+    <ID>CyclomaticComplexMethod:ProtoJsonSerializer.kt$ProtoJsonSerializer$private fun decodeObjectTypedValue(obj: JsonObject): TypedValue</ID>
+    <ID>CyclomaticComplexMethod:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$fun deserializeFromElement( root: XmlElement, schema: RecordSchema? = null, formDef: FormDef? = null, ): RecordInstance</ID>
+    <ID>CyclomaticComplexMethod:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$fun serializeToElement(record: RecordInstance, rootElementName: String = "data"): XmlElement</ID>
+    <ID>CyclomaticComplexMethod:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$private fun parseRecordNode( parentElement: XmlElement, currentPath: String, fieldDefs: Map&lt;String, FieldDefinition&gt;, bindingTypes: Map&lt;String, DataType&gt;, isRoot: Boolean, ): RecordNode</ID>
+    <ID>CyclomaticComplexMethod:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$private fun parseScalarValue(text: String, explicitType: DataType?): TypedValue</ID>
+    <ID>CyclomaticComplexMethod:RecordMutator.kt$RecordMutator$fun resolveCanonicalPath( rawPath: String, rootName: String, rootAliases: Set&lt;String&gt;, contextCanonicalPath: String = "/$rootName", ): String</ID>
+    <ID>CyclomaticComplexMethod:RingValidator.kt$RingValidator$fun findSelfIntersection(ring: Ring): Pair&lt;Int, Int&gt;?</ID>
+    <ID>CyclomaticComplexMethod:RingValidator.kt$RingValidator$internal fun segmentsIntersect(p1: GeoCoord, p2: GeoCoord, q1: GeoCoord, q2: GeoCoord): Boolean</ID>
+    <ID>CyclomaticComplexMethod:SecondaryInstanceProvider.kt$InMemorySecondaryInstanceProvider.Companion$private fun formatGeoJsonGeometryToOdk(geomObj: JsonObject): String</ID>
+    <ID>CyclomaticComplexMethod:SurveyMutations.kt$SurveyMutations$fun applyAclDelete(acl: SurveyAcl, delete: SurveyAcl): SurveyAcl</ID>
+    <ID>CyclomaticComplexMethod:SurveyMutations.kt$SurveyMutations$fun applyDelete(survey: SurveyDef, delete: SurveyDef): SurveyDef</ID>
+    <ID>CyclomaticComplexMethod:SurveyMutations.kt$SurveyMutations$fun merge(base: SurveyDef, upsert: SurveyDef): SurveyDef</ID>
+    <ID>CyclomaticComplexMethod:SurveyMutations.kt$SurveyMutations$fun mergeAcl(base: SurveyAcl, upsert: SurveyAcl): SurveyAcl</ID>
+    <ID>CyclomaticComplexMethod:TextProtoParser.kt$TextProtoParser$private fun parseScalarValue(): TextProtoValue</ID>
+    <ID>CyclomaticComplexMethod:XPathEvaluator.kt$XPathEvaluator$private fun compareScalars(a: XPathValue, b: XPathValue, op: BinaryOp): Boolean</ID>
+    <ID>CyclomaticComplexMethod:XPathLexer.kt$XPathLexer$fun tokenize(): List&lt;XPathToken&gt;</ID>
+    <ID>CyclomaticComplexMethod:XPathValue.kt$XPathValue$fun toTypedValue(targetType: DataType? = null): TypedValue?</ID>
+    <ID>CyclomaticComplexMethod:XmlParser.kt$XmlTokenizer$private fun parseElement(): XmlElement</ID>
+    <ID>CyclomaticComplexMethod:XmlWriter.kt$XmlWriter$private fun StringBuilder.appendElement(element: XmlElement, level: Int)</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:S2CellId.kt$S2CellId$val (_, i, j, _) = toFaceIjOrientation()</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:S2CellId.kt$S2CellId$val (face, i, j, _) = toFaceIjOrientation()</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:S2Regions.kt$S2Cell.Companion$val (face, i, j, orientation) = id.toFaceIjOrientation()</ID>
+    <ID>LargeClass:FormDefXmlDeserializer.kt$FormDefXmlDeserializer</ID>
+    <ID>LargeClass:FormDefXmlSerializer.kt$FormDefXmlSerializer</ID>
+    <ID>LargeClass:ProtoJsonSerializer.kt$ProtoJsonSerializer</ID>
+    <ID>LargeClass:XPathParameterizedTest.kt$XPathParameterizedTest$Companion</ID>
+    <ID>LongMethod:ChoiceOptionsResolver.kt$ChoiceOptionsResolver$private fun evaluateItemsetOptions( itemset: ItemsetDef, controlContext: EvaluationContext, ): List&lt;ResolvedChoiceOption&gt;</ID>
+    <ID>LongMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$fun deserialize(xml: String): FormDef</ID>
+    <ID>LongMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun parseControlDef( controlEl: XmlElement, rootName: String, enclosingPath: String, bindIdToNodeset: Map&lt;String, String&gt;, selectOnePaths: MutableSet&lt;String&gt;, selectMultiplePaths: MutableSet&lt;String&gt;, ): ControlDef</ID>
+    <ID>LongMethod:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun parseViewComponents( containerEl: XmlElement, rootName: String, enclosingPath: String, bindIdToNodeset: Map&lt;String, String&gt;, repeatPaths: MutableSet&lt;String&gt;, selectOnePaths: MutableSet&lt;String&gt;, selectMultiplePaths: MutableSet&lt;String&gt;, ): List&lt;ViewComponent&gt;</ID>
+    <ID>LongMethod:ImpactAggregator.kt$ImpactAggregator$fun run(input: ImpactInput, config: ImpactConfig = ImpactConfig()): ImpactRunResult</ID>
+    <ID>LongMethod:LibraryMutations.kt$LibraryMutations$fun applyDelete( record: OrganizationLibraryRecord, delete: OrganizationLibraryRecord, ): OrganizationLibraryRecord</ID>
+    <ID>LongMethod:ListBackedSyncService.kt$ListBackedSyncService$private suspend fun page( scope: SyncScope, cursor: ScopeCursor, request: SyncChangesRequest, ): ScopeChanges</ID>
+    <ID>LongMethod:LookupFunctions.kt$LookupFunctions$private fun evaluateChoiceName( arg0: XPathValue, arg1: XPathValue, context: EvaluationContext, ): XPathValue</ID>
+    <ID>LongMethod:PreloadExecutor.kt$PreloadExecutor$fun execute( rawNode: RecordNode, metadata: RecordMetadata, isFirstLoad: Boolean, isFinalize: Boolean, ): Pair&lt;RecordNode, RecordMetadata&gt;</ID>
+    <ID>LongMethod:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$fun deserializeFromElement( root: XmlElement, schema: RecordSchema? = null, formDef: FormDef? = null, ): RecordInstance</ID>
+    <ID>LongMethod:RepeatCountReconciler.kt$RepeatCountReconciler$fun reconcile( rawNode: RecordNode, prunedNode: RecordNode, metadata: RecordMetadata, baseRecord: RecordInstance, ): RepeatReconciliationResult</ID>
+    <ID>LongMethod:SurveyMutations.kt$SurveyMutations$fun applyDelete(survey: SurveyDef, delete: SurveyDef): SurveyDef</ID>
+    <ID>LongMethod:SurveyMutations.kt$SurveyMutations$fun merge(base: SurveyDef, upsert: SurveyDef): SurveyDef</ID>
+    <ID>LongMethod:XPathLexer.kt$XPathLexer$fun tokenize(): List&lt;XPathToken&gt;</ID>
+    <ID>LongMethod:XPathValue.kt$XPathValue$fun toTypedValue(targetType: DataType? = null): TypedValue?</ID>
+    <ID>LongParameterList:DefaultSamplingEngine.kt$DefaultSamplingEngine$( area: PreparedArea, bb: XyBounds, count: Int, rng: SplitMix64, hash: PointSpatialHash, minDistanceM: Double, isCancelled: () -&gt; Boolean, onPlaced: (placed: Int) -&gt; Unit, accept: (lat: Double, lng: Double) -&gt; Int, emit: (lat: Double, lng: Double, stratum: Int) -&gt; Unit, )</ID>
+    <ID>LongParameterList:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$( repeatEl: XmlElement, wrapperLabel: LabelDef?, wrapperAppearance: String, wrapperRef: String, rootName: String, enclosingPath: String, bindIdToNodeset: Map&lt;String, String&gt;, repeatPaths: MutableSet&lt;String&gt;, selectOnePaths: MutableSet&lt;String&gt;, selectMultiplePaths: MutableSet&lt;String&gt;, )</ID>
+    <ID>LoopWithTooManyJumpStatements:EntityStateEvaluator.kt$EntityStateEvaluator$for</ID>
+    <ID>LoopWithTooManyJumpStatements:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$for</ID>
+    <ID>LoopWithTooManyJumpStatements:ImpactAggregator.kt$ImpactAggregator$for</ID>
+    <ID>LoopWithTooManyJumpStatements:PlotGeometry.kt$PlotGeometry$while</ID>
+    <ID>LoopWithTooManyJumpStatements:XmlParser.kt$XmlTokenizer$while</ID>
+    <ID>MatchingDeclarationName:ImpactCells.kt$CellAggregation</ID>
+    <ID>MatchingDeclarationName:ImpactTestFixtures.kt$Fx</ID>
+    <ID>MayBeConst:GeoMath.kt$Wgs84$// Snyder eq. 3-18 series coefficients (authalic → geodetic latitude). private val C2: Double = E2 / 3 + 31 * E2 * E2 / 180 + 517 * E2 * E2 * E2 / 5040</ID>
+    <ID>MayBeConst:GeoMath.kt$Wgs84$private val C4: Double = 23 * E2 * E2 / 360 + 251 * E2 * E2 * E2 / 3780</ID>
+    <ID>MayBeConst:GeoMath.kt$Wgs84$private val C6: Double = 761 * E2 * E2 * E2 / 45360</ID>
+    <ID>NestedBlockDepth:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun parsePrimaryInstanceTree( parentEl: XmlElement, parentPath: String, bindingTypeMap: Map&lt;String, DataType&gt;, repeatPaths: Set&lt;String&gt;, ): ParsedInstanceTree</ID>
+    <ID>NestedBlockDepth:RepeatCountReconciler.kt$RepeatCountReconciler$fun reconcile( rawNode: RecordNode, prunedNode: RecordNode, metadata: RecordMetadata, baseRecord: RecordInstance, ): RepeatReconciliationResult</ID>
+    <ID>NestedBlockDepth:XPathLexer.kt$XPathLexer$fun tokenize(): List&lt;XPathToken&gt;</ID>
+    <ID>ReturnCount:CompiledForm.kt$CompiledForm$internal fun resolveComponentRelativePath(fieldRef: String, parentRelativePath: String): String</ID>
+    <ID>ReturnCount:DefaultSamplingEngine.kt$DefaultSamplingEngine$override fun generate( area: SamplingArea, design: SampleDesign, onProgress: (Double) -&gt; Unit, isCancelled: () -&gt; Boolean, ): SamplingResult</ID>
+    <ID>ReturnCount:DefaultSamplingEngine.kt$DefaultSamplingEngine$private fun validate(area: SamplingArea, design: SampleDesign): String?</ID>
+    <ID>ReturnCount:FieldStateEvaluator.kt$FieldStateEvaluator$private fun resolveBindingMessage( rawMessage: String, defaultMessage: String, relPath: String, messageTypeSuffix: String, evalContext: EvaluationContext, ): String</ID>
+    <ID>ReturnCount:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$internal fun parseDateLiteral(text: String): Date?</ID>
+    <ID>ReturnCount:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$internal fun parseGeoPointString(text: String): GeoPoint?</ID>
+    <ID>ReturnCount:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$internal fun parseTimeLiteral(text: String): TimeOfDay?</ID>
+    <ID>ReturnCount:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$internal fun parseTimestampLiteral(text: String): Instant?</ID>
+    <ID>ReturnCount:FormDefXmlDeserializer.kt$FormDefXmlDeserializer$private fun extractInstanceId(nodeset: String): String</ID>
+    <ID>ReturnCount:FormDefXmlSerializer.kt$FormDefXmlSerializer$private fun resolveFullPath(fieldRef: String, enclosingPath: String): String</ID>
+    <ID>ReturnCount:FormDefXmlSerializer.kt$FormDefXmlSerializer.ForeignNamespaceDeclarations$private fun assignPrefix(prefix: String, uri: String): String</ID>
+    <ID>ReturnCount:FormStateModels.kt$FormState$fun findFieldState(path: String): FieldState?</ID>
+    <ID>ReturnCount:GeoUtils.kt$GeoUtils$private fun segmentsIntersect(a: GeoPoint, b: GeoPoint, c: GeoPoint, d: GeoPoint): Boolean</ID>
+    <ID>ReturnCount:ImpactAttributionRules.kt$internal fun attributionBasis(survey: ImpactSurvey, config: ImpactConfig): AttributionBasis</ID>
+    <ID>ReturnCount:LookupFunctions.kt$LookupFunctions$private fun evaluateChoiceName( arg0: XPathValue, arg1: XPathValue, context: EvaluationContext, ): XPathValue</ID>
+    <ID>ReturnCount:LookupFunctions.kt$LookupFunctions$private fun evaluatePullData( instanceId: String, returnField: String, keyField: String, keyVal: String, context: EvaluationContext, ): XPathValue</ID>
+    <ID>ReturnCount:MediaCapture.kt$MediaCapture$fun visit(components: List&lt;ComponentState&gt;): ComponentState.ControlState?</ID>
+    <ID>ReturnCount:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$private fun parseScalarValue(text: String, explicitType: DataType?): TypedValue</ID>
+    <ID>ReturnCount:RecordInstanceXmlSerializer.kt$RecordInstanceXmlSerializer$private fun tryParseGeoPoint(text: String): GeoPoint?</ID>
+    <ID>ReturnCount:RecordMutator.kt$RecordMutator$private fun getFromRecordNode( node: RecordNode, steps: List&lt;PathSegment&gt;, index: Int, ): FieldValue?</ID>
+    <ID>ReturnCount:RingValidator.kt$RingValidator$fun findSelfIntersection(ring: Ring): Pair&lt;Int, Int&gt;?</ID>
+    <ID>ReturnCount:S2Geometry.kt$S2$fun remainderNear(x: Double, y: Double): Double</ID>
+    <ID>ReturnCount:SampleEncoding.kt$SampleEncoding$fun decodeSamples(value: String): List&lt;GeoCoord&gt;?</ID>
+    <ID>ReturnCount:TemporalUtils.kt$TemporalUtils$fun tryParseDate(str: String): Date?</ID>
+    <ID>ReturnCount:TemporalUtils.kt$TemporalUtils$fun tryParseTime(str: String): TimeOfDay?</ID>
+    <ID>ReturnCount:TemporalUtils.kt$TemporalUtils$fun tryParseToEpochDays(str: String): Double?</ID>
+    <ID>ReturnCount:XPathEvaluator.kt$XPathEvaluator$private fun compareScalars(a: XPathValue, b: XPathValue, op: BinaryOp): Boolean</ID>
+    <ID>ReturnCount:XPathEvaluator.kt$XPathEvaluator$private fun evaluateBinary(expr: XPathExpr.BinaryExpr, context: EvaluationContext): XPathValue</ID>
+    <ID>ReturnCount:XPathEvaluator.kt$XPathEvaluator$private fun evaluateComparison(left: XPathValue, right: XPathValue, op: BinaryOp): Boolean</ID>
+    <ID>ReturnCount:XPathFunctionRegistry.kt$XPathFunctionRegistry$fun invoke( name: String, args: List&lt;XPathExpr&gt;, context: EvaluationContext, evaluator: XPathEvaluator, ): XPathValue</ID>
+    <ID>ReturnCount:XPathNode.kt$XPathNode.Companion$internal fun createChildNodes( parent: XPathNode, name: String, fieldValue: FieldValue?, fieldDef: FieldDefinition?, ): List&lt;XPathNode&gt;</ID>
+    <ID>ReturnCount:XPathValue.kt$XPathValue.Companion$fun parseGeoPointString(str: String): GeoPoint?</ID>
+    <ID>ReturnCount:XPathValue.kt$XPathValue.Str$override fun toNumber(): Double</ID>
+    <ID>SpreadOperator:MediaCapture.kt$MediaAttachment.Companion$(*bytes)</ID>
+    <ID>SwallowedException:BooleanFunctions.kt$BooleanFunctions$e: Exception</ID>
+    <ID>SwallowedException:GeoJsonReader.kt$GeoJsonReader$e: Exception</ID>
+    <ID>ThrowsCount:FormSession.kt$FormSession$fun attachMedia(path: String, attachment: MediaAttachment): FormState</ID>
+    <ID>ThrowsCount:TextProtoParser.kt$TextProtoParser$private fun parseField(): TextProtoField</ID>
+    <ID>ThrowsCount:XPathLexer.kt$XPathLexer$fun tokenize(): List&lt;XPathToken&gt;</ID>
+    <ID>TooGenericExceptionCaught:BooleanFunctions.kt$BooleanFunctions$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GeoJsonReader.kt$GeoJsonReader$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ListBackedSyncService.kt$ListBackedSyncService$e: Throwable</ID>
+    <ID>TooGenericExceptionCaught:ProtoJsonSerializer.kt$ProtoJsonSerializer$e: Exception</ID>
+    <ID>UnusedParameter:ProtoFormsDsl.kt$schemaName: String = formId</ID>
+    <ID>UnusedPrivateMember:SecondaryInstanceProvider.kt$InMemorySecondaryInstanceProvider.Companion$private fun splitCsvLine(line: String, delimiter: Char): List&lt;String&gt;</ID>
+    <ID>UseRequire:TextProtoParser.kt$TextProtoParser$throw IllegalArgumentException( "Expected '$close' to close message block at line ${currentLine()}, col ${currentCol()}" )</ID>
+    <ID>UseRequire:TextProtoParser.kt$TextProtoParser$throw IllegalArgumentException( "Expected ':' or '{' after field name '$name' at line ${currentLine()}, col ${currentCol()}" )</ID>
+    <ID>UseRequire:TextProtoParser.kt$TextProtoParser$throw IllegalArgumentException( "Expected ']' to close list at line ${currentLine()}, col ${currentCol()}" )</ID>
+    <ID>UseRequire:TextProtoParser.kt$TextProtoParser$throw IllegalArgumentException( "Expected field name at line ${currentLine()}, col ${currentCol()} near '${snippet()}'" )</ID>
+    <ID>UseRequire:TextProtoParser.kt$TextProtoParser$throw IllegalArgumentException( "Unexpected character '${peek()}' at line ${currentLine()}, col ${currentCol()}" )</ID>
+    <ID>UseRequire:TextProtoParser.kt$TextProtoParser$throw IllegalArgumentException("Unexpected end of input after field '$name'")</ID>
+    <ID>UseRequire:TextProtoParser.kt$TextProtoParser$throw IllegalArgumentException("Unexpected end of input while parsing value")</ID>
+    <ID>UseRequire:TextProtoParser.kt$TextProtoParser$throw IllegalArgumentException("Unterminated escape sequence in string")</ID>
+    <ID>UseRequire:XmlParser.kt$XmlTokenizer$throw IllegalArgumentException( "Expected XML name at position $pos near '${src.substring(pos, minOf(len, pos + 20))}'" )</ID>
+    <ID>UseRequire:XmlParser.kt$XmlTokenizer$throw IllegalArgumentException( "Mismatched XML closing tag: expected &lt;/$name&gt; but found &lt;/$closeName&gt;" )</ID>
+  </CurrentIssues>
+</SmellBaseline>

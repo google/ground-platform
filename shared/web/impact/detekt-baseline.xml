@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:ImpactPdfReports.kt$ImpactPdfReports$suspend fun summary( summary: ImpactSummary, generatedAt: Instant, filterLabel: String? = null, ): GeneratedPdf</ID>
+    <ID>EmptyFunctionBlock:ImpactViewModelTest.kt$ImpactViewModelTest.FixedAuthRepository${}</ID>
+    <ID>LongMethod:ImpactPanes.kt$@OptIn(ExperimentalLayoutApi::class) @Composable internal fun ImpactSummaryContent(summary: ImpactSummary)</ID>
+    <ID>LongMethod:ImpactPdfReports.kt$ImpactPdfReports$suspend fun summary( summary: ImpactSummary, generatedAt: Instant, filterLabel: String? = null, ): GeneratedPdf</ID>
+  </CurrentIssues>
+</SmellBaseline>

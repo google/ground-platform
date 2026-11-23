@@ -26,17 +26,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -51,17 +45,42 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import openforis.collectone.v1.forms.DataType
 import openforis.collectone.v1.forms.GeoPoint
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.core.forms.model.ComponentState
 import org.openforis.collectone.v2.core.forms.model.FieldState
+import org.openforis.collectone.v2.core.forms.ui.controls.Button
+import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalButton
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_clear
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_done
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_draw_on_map
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_drawing_on_map
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_drawn_line
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_drawn_point
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_drawn_polygon
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_instruction_line
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_instruction_point
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_instruction_polygon
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_no_point
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_point_placed
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_redraw
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_undo
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_vertex_count
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_zoom_to_fit
 
 /**
  * Geometry a compact-layout question can ask the collector to draw on the host's map, with the
  * number of vertices needed for a complete answer.
  */
-enum class MapDrawingKind(val label: String, val minVertices: Int) {
-  POINT("Point", 1),
-  LINE("Line", 2),
-  POLYGON("Polygon", 3),
+enum class MapDrawingKind(val minVertices: Int) {
+  POINT(1),
+  LINE(2),
+  POLYGON(3),
 }
 
 /** Returns the [MapDrawingKind] for [dataType], or `null` when it isn't a geometry type. */
@@ -177,20 +196,28 @@ fun FormWizardController.undoMapDrawingVertex(path: String, kind: MapDrawingKind
 }
 
 /** Collector-facing instruction for drawing a geometry of [kind] on the map. */
-fun mapDrawingInstruction(kind: MapDrawingKind): String =
+fun mapDrawingInstruction(kind: MapDrawingKind): StringResource =
   when (kind) {
-    MapDrawingKind.POINT -> "Click the map to place this point."
-    MapDrawingKind.LINE -> "Click the map to add the line's vertices, in order (at least 2)."
-    MapDrawingKind.POLYGON -> "Click the map to add the polygon's corners, in order (at least 3)."
+    MapDrawingKind.POINT -> Res.string.forms_map_instruction_point
+    MapDrawingKind.LINE -> Res.string.forms_map_instruction_line
+    MapDrawingKind.POLYGON -> Res.string.forms_map_instruction_polygon
+  }
+
+/** Hint shown while a geometry of [kind] is not being drawn, pointing to **Draw on map**. */
+private fun mapDrawingIdleHint(kind: MapDrawingKind): StringResource =
+  when (kind) {
+    MapDrawingKind.POINT -> Res.string.forms_map_drawn_point
+    MapDrawingKind.LINE -> Res.string.forms_map_drawn_line
+    MapDrawingKind.POLYGON -> Res.string.forms_map_drawn_polygon
   }
 
 /** One-line summary of what has been drawn so far, e.g. `"3 vertices"` or `"No point yet"`. */
-fun mapDrawingSummary(kind: MapDrawingKind, vertexCount: Int): String =
+fun mapDrawingSummary(kind: MapDrawingKind, vertexCount: Int): FormUiText =
   when {
-    kind == MapDrawingKind.POINT && vertexCount == 0 -> "No point yet"
-    kind == MapDrawingKind.POINT -> "Point placed"
-    vertexCount == 1 -> "1 vertex"
-    else -> "$vertexCount vertices"
+    kind == MapDrawingKind.POINT && vertexCount == 0 ->
+      FormUiText.Resource(Res.string.forms_map_no_point)
+    kind == MapDrawingKind.POINT -> FormUiText.Resource(Res.string.forms_map_point_placed)
+    else -> FormUiText.Plural(Res.plurals.forms_vertex_count, vertexCount)
   }
 
 /**
@@ -240,8 +267,9 @@ fun MapDrawingRequestWidget(
         )
         Text(
           text =
-            if (isDrawing) mapDrawingInstruction(kind)
-            else "Drawn on the map: ${kind.label.lowercase()}. Use Draw on map to start.",
+            stringResource(
+              if (isDrawing) mapDrawingInstruction(kind) else mapDrawingIdleHint(kind)
+            ),
           style = MaterialTheme.typography.bodySmall,
         )
       }
@@ -253,28 +281,28 @@ fun MapDrawingRequestWidget(
       horizontalArrangement = Arrangement.spacedBy(6.dp),
       verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-      GroundTonalBadge(
-        text = mapDrawingSummary(kind, vertices.size),
+      TonalBadge(
+        text = mapDrawingSummary(kind, vertices.size).resolve(),
         icon = if (isComplete) Icons.Default.Check else null,
         tone =
           when {
-            isComplete -> GroundBadgeTone.PRIMARY
-            vertices.isNotEmpty() -> GroundBadgeTone.WARNING
-            else -> GroundBadgeTone.NEUTRAL
+            isComplete -> BadgeTone.PRIMARY
+            vertices.isNotEmpty() -> BadgeTone.WARNING
+            else -> BadgeTone.NEUTRAL
           },
       )
       if (isDrawing) {
-        GroundTonalBadge(
-          text = "Drawing on map",
+        TonalBadge(
+          text = stringResource(Res.string.forms_drawing_on_map),
           icon = Icons.Outlined.Edit,
-          tone = GroundBadgeTone.TERTIARY,
+          tone = BadgeTone.TERTIARY,
         )
       }
       if (kind == MapDrawingKind.POINT && vertices.isNotEmpty()) {
         val point = vertices.first()
-        GroundTonalBadge(
+        TonalBadge(
           text = formatGeoPointCoordinates(point.latitude, point.longitude),
-          tone = GroundBadgeTone.NEUTRAL,
+          tone = BadgeTone.NEUTRAL,
           monospace = true,
         )
       }
@@ -287,13 +315,13 @@ fun MapDrawingRequestWidget(
     ) {
       if (isDrawing) {
         Button(onClick = { host?.stopDrawing() }, enabled = interactive && isComplete) {
-          Text("Done")
+          Text(stringResource(Res.string.forms_done))
         }
         OutlinedButton(
           onClick = { controller.undoMapDrawingVertex(path, kind) },
           enabled = interactive && vertices.isNotEmpty(),
         ) {
-          Text("Undo")
+          Text(stringResource(Res.string.forms_undo))
         }
       } else {
         FilledTonalButton(onClick = { host?.startDrawing(path, kind) }, enabled = interactive) {
@@ -303,7 +331,10 @@ fun MapDrawingRequestWidget(
             modifier = Modifier.size(16.dp),
           )
           Text(
-            text = if (vertices.isEmpty()) "Draw on map" else "Redraw",
+            text =
+              stringResource(
+                if (vertices.isEmpty()) Res.string.forms_draw_on_map else Res.string.forms_redraw
+              ),
             modifier = Modifier.padding(start = 6.dp),
           )
         }
@@ -313,7 +344,7 @@ fun MapDrawingRequestWidget(
           onClick = { controller.setMapDrawingVertices(path, kind, emptyList()) },
           enabled = interactive,
         ) {
-          Text("Clear")
+          Text(stringResource(Res.string.forms_clear))
         }
       }
       // Zoom to fit: centre whatever has been drawn in the host's map, for any geometry kind (a
@@ -324,11 +355,14 @@ fun MapDrawingRequestWidget(
         TooltipBox(
           positionProvider =
             TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-          tooltip = { PlainTooltip { Text("Zoom to fit") } },
+          tooltip = { PlainTooltip { Text(stringResource(Res.string.forms_zoom_to_fit)) } },
           state = rememberTooltipState(),
         ) {
           IconButton(onClick = { host.frameGeometry(path, kind) }) {
-            Icon(imageVector = FitScreenIcon, contentDescription = "Zoom to fit")
+            Icon(
+              imageVector = FitScreenIcon,
+              contentDescription = stringResource(Res.string.forms_zoom_to_fit),
+            )
           }
         }
       }

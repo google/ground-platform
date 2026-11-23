@@ -1,0 +1,135 @@
+{
+  "form_id": "say \"hi\" \\ back\nslash\ttab ünïcødé 🌳",
+  "version": "v1",
+  "default_language": "en",
+  "model": {
+    "primary_instance": {
+      "record_schema": {
+        "name": "data",
+        "fields": [
+          {
+            "name": "height",
+            "type": "TYPE_DOUBLE"
+          },
+          {
+            "name": "trees",
+            "type": "TYPE_MESSAGE",
+            "is_repeated": true,
+            "fields": [
+              {
+                "name": "dbh",
+                "type": "TYPE_INT64"
+              }
+            ]
+          }
+        ]
+      },
+      "message_type_name": "m"
+    },
+    "secondary_instances": [
+      {
+        "id": "list",
+        "rows": [
+          {
+            "name": "a"
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "field_path": "/data/height",
+        "type": "TYPE_DOUBLE",
+        "max_pixels": -5,
+        "preload": "PRELOAD_UID"
+      },
+      {}
+    ],
+    "translations": {
+      "languages": [
+        {
+          "language": "fr",
+          "strings": {
+            "b": {
+              "value": "B"
+            },
+            "a": {},
+            "c": {
+              "media": {
+                "image_uri": "x.png"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "actions": [
+      {
+        "events": [
+          "EVENT_VALUE_CHANGED"
+        ]
+      },
+      {},
+      {
+        "literal_value": 0
+      },
+      {
+        "literal_value": {
+          "string": "2026-01-02"
+        }
+      },
+      {
+        "literal_value": ""
+      }
+    ],
+    "metadata": {},
+    "submission": {
+      "auto_send": true
+    }
+  },
+  "view": {
+    "components": [
+      {
+        "control": {
+          "type": "CONTROL_RANGE",
+          "choices": [
+            {
+              "value": "v",
+              "properties": {
+                "z": "",
+                "a": "1"
+              }
+            }
+          ],
+          "range_config": {
+            "end": 1.0E21,
+            "step": 0.1,
+            "tick_interval": -2.5
+          },
+          "intent": {
+            "parameters": {
+              "k": "v"
+            }
+          },
+          "geo_config": {
+            "accuracy_threshold_meters": 5.0
+          }
+        },
+        "id": "c1"
+      },
+      {
+        "group": {
+          "components": [
+            {
+              "repeat": {
+                "no_add_remove": true
+              }
+            }
+          ]
+        }
+      },
+      {}
+    ]
+  },
+  "sort_order": -3
+}

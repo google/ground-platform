@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -55,11 +56,11 @@ class MapboxStyleSpecTest {
     assertEquals('{', json.first())
     val style = MapboxStyleSpec.styleJson(basemap)
     val sources = style.obj("sources")
-    assertEquals(listOf("ground-map-raster-0", "ground-map-raster-1"), sources.keys.toList())
-    assertEquals(512, sources.obj("ground-map-raster-1").str("tileSize").toInt())
+    assertEquals(listOf("app-map-raster-0", "app-map-raster-1"), sources.keys.toList())
+    assertEquals(512, sources.obj("app-map-raster-1").str("tileSize").toInt())
     val layers = style.arr("layers").map { it.jsonObject }
     assertEquals(
-      listOf("ground-map-background", "ground-map-raster-0", "ground-map-raster-1"),
+      listOf("app-map-background", "app-map-raster-0", "app-map-raster-1"),
       layers.map { it.str("id") },
     )
     assertEquals("rgba(0, 0, 0, 1.0)", layers[0].obj("paint").str("background-color"))
@@ -71,6 +72,171 @@ class MapboxStyleSpecTest {
     val style = MapboxStyleSpec.styleJson(Basemap.None())
     assertEquals(emptySet(), style.obj("sources").keys)
     assertEquals(1, style.arr("layers").size)
+  }
+
+  @Test
+  fun overlays_mapboxStyleOverlaysBecomeRasterSourcesAndLayersInOrder() {
+    val basemap =
+      Basemap.MapboxSatelliteStreets.copy(
+        overlays =
+          listOf(
+            RasterTileLayer("https://tiles.example/a/{z}/{x}/{y}.png", opacity = 0.5f),
+            RasterTileLayer("https://tiles.example/b/{z}/{x}/{y}.png"),
+          )
+      )
+    assertEquals(
+      "mapbox://styles/mapbox/satellite-streets-v12",
+      MapboxStyleSpec.style(basemap),
+    )
+    val overlays = MapboxStyleSpec.overlays(basemap)
+    assertEquals(
+      listOf("app-map-overlay-0", "app-map-overlay-1"),
+      overlays.map { it.sourceId },
+    )
+    assertEquals("raster", overlays[0].source.str("type"))
+    assertEquals(
+      "https://tiles.example/a/{z}/{x}/{y}.png",
+      overlays[0].source.arr("tiles").single().jsonPrimitive.content,
+    )
+    assertEquals("app-map-overlay-0", overlays[0].layer.str("source"))
+    assertEquals(0.5, overlays[0].layer.obj("paint").str("raster-opacity").toDouble())
+  }
+
+  @Test
+  fun overlays_emptyForRasterTilesAndMapboxStyleWithoutOverlays() {
+    assertEquals(emptyList(), MapboxStyleSpec.overlays(Basemap.MapboxOutdoors))
+    assertEquals(
+      emptyList(),
+      MapboxStyleSpec.overlays(
+        Basemap.RasterTiles(listOf(RasterTileLayer("https://t/{z}/{x}/{y}")), attribution = "")
+      ),
+    )
+  }
+
+  @Test
+  fun overlays_boundedTilesetRasterUsesUrlBoundsAndZoomRange() {
+    val basemap =
+      Basemap.MapboxOutdoors.copy(
+        overlays =
+          listOf(
+            RasterTileLayer(
+              tilesetUrl = "mapbox://mapbox.satellite",
+              maxZoom = 16,
+              minZoom = 6,
+              bounds = LngLatBounds(36.9, -0.45, 36.97, -0.4),
+            )
+          )
+      )
+    val overlay = MapboxStyleSpec.overlays(basemap).single()
+    assertEquals(
+      """{"type":"raster","url":"mapbox://mapbox.satellite","tileSize":256,"minzoom":6,""" +
+        """"maxzoom":16,"bounds":[36.9,-0.45,36.97,-0.4]}""",
+      overlay.source.toString(),
+    )
+    assertEquals("raster", overlay.layer.str("type"))
+    assertEquals("app-map-overlay-0", overlay.layer.str("source"))
+  }
+
+  @Test
+  fun overlays_unboundedTemplateRasterKeepsItsSourceJson() {
+    val overlay =
+      MapboxStyleSpec.overlays(
+          Basemap.MapboxOutdoors.copy(overlays = listOf(RasterTileLayer("https://t/{z}/{x}/{y}")))
+        )
+        .single()
+    assertEquals(
+      """{"type":"raster","tiles":["https://t/{z}/{x}/{y}"],"tileSize":256,"maxzoom":19}""",
+      overlay.source.toString(),
+    )
+  }
+
+  @Test
+  fun overlays_vectorLineOverlayBecomesVectorSourceAndLineLayer() {
+    val basemap =
+      Basemap.MapboxSatelliteStreets.copy(
+        overlays =
+          listOf(
+            RasterTileLayer("https://t/{z}/{x}/{y}"),
+            VectorLineOverlay(
+              tilesetUrl = "mapbox://mapbox.mapbox-terrain-v2",
+              sourceLayer = "contour",
+              color = Color(0xFFFFFFFF),
+              width = 0.8.dp,
+              filter = VectorFeatureFilter.StringIn("kind", setOf("b", "a")),
+              emphasis = LineEmphasis(VectorFeatureFilter.NumberIn("index", setOf(10, 5)), 1.6.dp),
+              opacity = 0.7f,
+              bounds = LngLatBounds(36.9, -0.45, 36.97, -0.4),
+              minZoom = 6,
+              maxZoom = 20,
+            ),
+          )
+      )
+    val overlay = MapboxStyleSpec.overlays(basemap)[1]
+    assertEquals("app-map-overlay-1", overlay.sourceId)
+    assertEquals(
+      """{"type":"vector","url":"mapbox://mapbox.mapbox-terrain-v2",""" +
+        """"bounds":[36.9,-0.45,36.97,-0.4]}""",
+      overlay.source.toString(),
+    )
+    assertEquals(
+      """{"id":"app-map-overlay-1","type":"line","source":"app-map-overlay-1",""" +
+        """"source-layer":"contour","minzoom":6,"maxzoom":20,""" +
+        """"filter":["match",["get","kind"],["a","b"],true,false],""" +
+        """"paint":{"line-color":"rgba(255, 255, 255, 1.0)",""" +
+        """"line-width":["case",["match",["get","index"],[5,10],true,false],1.6,0.8],""" +
+        """"line-opacity":0.7}}""",
+      overlay.layer.toString(),
+    )
+  }
+
+  @Test
+  fun overlays_plainVectorLineOverlayHasNoFilterZoomOrBounds() {
+    val overlay =
+      MapboxStyleSpec.overlays(
+          Basemap.MapboxOutdoors.copy(
+            overlays =
+              listOf(VectorLineOverlay("mapbox://example.lines", "lines", Color(0xFF000000)))
+          )
+        )
+        .single()
+    assertEquals("""{"type":"vector","url":"mapbox://example.lines"}""", overlay.source.toString())
+    assertEquals(
+      """{"id":"app-map-overlay-0","type":"line","source":"app-map-overlay-0",""" +
+        """"source-layer":"lines","paint":{"line-color":"rgba(0, 0, 0, 1.0)",""" +
+        """"line-width":1.0,"line-opacity":1.0}}""",
+      overlay.layer.toString(),
+    )
+  }
+
+  @Test
+  fun overlays_emptyVectorFilterMatchesNothing() {
+    val overlay =
+      MapboxStyleSpec.overlays(
+          Basemap.MapboxOutdoors.copy(
+            overlays =
+              listOf(
+                VectorLineOverlay(
+                  "mapbox://example.lines",
+                  "lines",
+                  Color(0xFF000000),
+                  filter = VectorFeatureFilter.NumberIn("index", emptySet()),
+                )
+              )
+          )
+        )
+        .single()
+    assertEquals(JsonPrimitive(false), overlay.layer["filter"])
+  }
+
+  @Test
+  fun rasterTileLayer_needsExactlyOneTileSource() {
+    assertFailsWith<IllegalArgumentException> { RasterTileLayer() }
+    assertFailsWith<IllegalArgumentException> {
+      RasterTileLayer("https://t/{z}/{x}/{y}", tilesetUrl = "mapbox://mapbox.satellite")
+    }
+    assertFailsWith<IllegalArgumentException> {
+      RasterTileLayer(tilesetUrl = "mapbox://mapbox.satellite", minZoom = 17, maxZoom = 16)
+    }
   }
 
   @Test
@@ -100,6 +266,45 @@ class MapboxStyleSpecTest {
     val properties = json.obj("properties")
     assertEquals("entity:1", properties.str(MapboxStyleSpec.FEATURE_ID_PROPERTY))
     assertEquals("plot", properties.str("kind"))
+  }
+
+  @Test
+  fun geoJson_writesEveryPartOfAMultiPolygon() {
+    fun square(at: Double) =
+      Geometry.Polygon(
+        listOf(
+          listOf(LatLng(at, at), LatLng(at, at + 1), LatLng(at + 1, at + 1), LatLng(at + 1, at))
+        )
+      )
+    val feature = MapFeature("entity:1", Geometry.MultiPolygon(listOf(square(0.0), square(5.0))))
+
+    val geometry =
+      MapboxStyleSpec.geoJson(listOf(feature)).arr("features").single().jsonObject.obj("geometry")
+
+    assertEquals("MultiPolygon", geometry.str("type"))
+    val polygons = geometry.arr("coordinates")
+    assertEquals(2, polygons.size)
+    val secondRing = polygons[1].jsonArray.single().jsonArray
+    assertEquals(5, secondRing.size)
+    assertEquals(JsonArray(listOf(JsonPrimitive(5.0), JsonPrimitive(5.0))), secondRing.first())
+  }
+
+  @Test
+  fun geoJson_writesMultiPointsAndMultiLineStrings() {
+    val a = LatLng(0.0, 0.0)
+    val b = LatLng(1.0, 1.0)
+    val features =
+      listOf(
+        MapFeature("points", Geometry.MultiPoint(listOf(Geometry.Point(a), Geometry.Point(b)))),
+        MapFeature("lines", Geometry.MultiLineString(listOf(Geometry.LineString(listOf(a, b))))),
+      )
+
+    val geometries =
+      MapboxStyleSpec.geoJson(features).arr("features").map { it.jsonObject.obj("geometry") }
+
+    assertEquals(listOf("MultiPoint", "MultiLineString"), geometries.map { it.str("type") })
+    assertEquals(2, geometries[0].arr("coordinates").size)
+    assertEquals(2, geometries[1].arr("coordinates").single().jsonArray.size)
   }
 
   @Test

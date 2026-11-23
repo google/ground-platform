@@ -1,0 +1,61 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package google.earthengine.v1main;
+
+import "google/protobuf/struct.proto";
+
+message ValueNode {
+  oneof kind {
+    google.protobuf.Value constant_value = 1;
+    int64 integer_value = 2;
+    bytes bytes_value = 3;
+    ArrayValue array_value = 4;
+    DictionaryValue dictionary_value = 5;
+    FunctionDefinition function_definition_value = 6;
+    FunctionInvocation function_invocation_value = 7;
+    string argument_reference = 8;
+    string value_reference = 9;
+  }
+}
+
+message ArrayValue {
+  repeated ValueNode values = 1;
+}
+
+message DictionaryValue {
+  map<string, ValueNode> values = 1;
+}
+
+message FunctionDefinition {
+  repeated string argument_names = 1;
+  string body = 2;
+}
+
+message FunctionInvocation {
+  oneof function {
+    string function_name = 1;
+    string function_reference = 2;
+  }
+  map<string, ValueNode> arguments = 3;
+}
+
+message Expression {
+  map<string, ValueNode> values = 1;
+  string result = 2;
+}

@@ -1,0 +1,819 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Shared across the form editor. -->
+  <string name="formeditor_cancel">ຍົກເລີກ</string>
+  <string name="formeditor_delete">ລຶບ</string>
+  <!-- Shown in place of a form title the designer hasn't entered yet. -->
+  <string name="formeditor_untitled_form">ແບບຟອມທີ່ບໍ່ມີຊື່</string>
+  <!-- Field label: the value a condition compares against. -->
+  <string name="formeditor_value">ຄ່າ</string>
+  <!-- Field label: comparison operator of a display-logic or status rule (e.g. "is equal to"). -->
+  <string name="formeditor_condition">ເງື່ອນໄຂ</string>
+  <!-- Field label: which form question a rule refers to. -->
+  <string name="formeditor_question">ຄຳຖາມ</string>
+  <!-- Dropdown placeholder when nothing is selected yet. -->
+  <string name="formeditor_choose">ເລືອກ</string>
+  <!-- Dropdown placeholder for picking one of a question's answer choices. -->
+  <string name="formeditor_pick_a_choice">ເລືອກຕົວເລືອກ</string>
+  <!-- Dropdown option meaning "no selection". -->
+  <string name="formeditor_none">ບໍ່ມີ</string>
+  <!-- Button that fixes every listed problem at once. -->
+  <string name="formeditor_fix_all">ແກ້ໄຂທັງໝົດ</string>
+  <!-- Heading of a collapsible section with advanced settings. -->
+  <string name="formeditor_advanced">ຂັ້ນສູງ</string>
+  <!-- Last screen of a form, where the collector reviews answers and submits. -->
+  <string name="formeditor_review_and_submit">ກວດສອບ ແລະ ສົ່ງ</string>
+  <!-- Question has no display logic, so it is always shown. -->
+  <string name="formeditor_always_shown">ສະແດງສະເໝີ</string>
+  <!-- Shown in place of a question label the designer hasn't entered yet. -->
+  <string name="formeditor_no_label">(ບໍ່ມີປ້າຍກຳກັບ)</string>
+  <!-- Icon description: the question is linked to a standard (dictionary) field. -->
+  <string name="formeditor_linked_to_standard_field">ເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນມາດຕະຖານ</string>
+  <!-- Icon description: the question has validation issues. -->
+  <string name="formeditor_has_issues">ມີບັນຫາ</string>
+  <!-- Preview map button that zooms in to the selected feature. -->
+  <string name="formeditor_adjust_view">ປັບມຸມມອງ</string>
+  <!-- Preview map button that zooms back out. -->
+  <string name="formeditor_reset_view">ຣີເຊັດມຸມມອງ</string>
+  <!-- Subtitle of the data-collection screen in previews. -->
+  <string name="formeditor_collect_data">ເກັບຂໍ້ມູນ</string>
+  <string name="formeditor_add_a_question">ເພີ່ມຄຳຖາມ</string>
+  <string name="formeditor_next">ຕໍ່ໄປ</string>
+  <string name="formeditor_form_settings">ການຕັ້ງຄ່າແບບຟອມ</string>
+  <!-- Field label for a question or choice label. -->
+  <string name="formeditor_label">ປ້າຍກຳກັບ</string>
+  <!-- Field label for a question or choice label in a non-default language. %1$s: language name. -->
+  <string name="formeditor_label_in_language">ປ້າຍກຳກັບ (%1$s)</string>
+  <!-- Short question number badge. %1$d: question number (Q1, Q2, …). -->
+  <string name="formeditor_question_number_badge">ຄ%1$d</string>
+  <!-- Language menu entry for the survey's default language. %1$s: language name. -->
+  <string name="formeditor_language_default">%1$s • ຄ່າເລີ່ມຕົ້ນ</string>
+  <!-- Title of the form preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title">ສະແດງຕົວຢ່າງ • %1$s</string>
+
+  <!-- Errors when adding a question's label to the organization's dictionary. -->
+  <string name="formeditor_error_question_not_found">ບໍ່ພົບຄຳຖາມ.</string>
+  <string name="formeditor_error_dictionary_managers_only">ສະເພາະຜູ້ຈັດການຂອງອົງກອນຂອງແບບສຳຫຼວດນີ້ເທົ່ານັ້ນທີ່ສາມາດເພີ່ມເຂົ້າວັດຈະນານຸກົມໄດ້.</string>
+  <string name="formeditor_error_enter_label">ກະລຸນາປ້ອນປ້າຍກຳກັບກ່ອນ.</string>
+  <string name="formeditor_error_notes_cant_be_linked">ບໍ່ສາມາດເຊື່ອມໂຍງບັນທຶກໄດ້.</string>
+
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: list of impact purposes (e.g. "EUDR due diligence"). -->
+  <string name="formeditor_delete_warning_feeds_impact_report">ຊ່ອງຂໍ້ມູນນີ້ສະໜອງຂໍ້ມູນໃຫ້ລາຍງານຜົນກະທົບຂອງທ່ານສຳລັບ %1$s.</string>
+  <!-- Confirmation shown before deleting a question linked to a standard field. %1$s: standard field name. -->
+  <string name="formeditor_delete_warning_linked_standard_field">ຊ່ອງຂໍ້ມູນນີ້ເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນມາດຕະຖານ "%1$s" ດັ່ງນັ້ນຄຳຕອບຂອງມັນຈະຖືກນັບລວມໃນລາຍງານຜົນກະທົບ.</string>
+  <!-- Joins two items of a list: "A and B" (applied repeatedly for longer lists: "A and B and C"). -->
+  <string name="formeditor_list_and">%1$s ແລະ %2$s</string>
+
+  <!-- Form editor page: header, menus, flow canvas, and question cards. -->
+  <!-- Floating button that opens the menu of question types to add. -->
+  <string name="formeditor_add_question">ເພີ່ມຄຳຖາມ</string>
+  <!-- Title of the dialog confirming deletion of a form. -->
+  <string name="formeditor_delete_form_title">ລຶບແບບຟອມບໍ?</string>
+  <!-- Body of the delete-form confirmation dialog. %1$s: form title. -->
+  <string name="formeditor_delete_form_message">ລຶບ "%1$s" ບໍ? ການກະທຳນີ້ບໍ່ສາມາດຍ້ອນຄືນໄດ້.</string>
+  <!-- Button / menu item that deletes the form. -->
+  <string name="formeditor_delete_form">ລຶບແບບຟອມ</string>
+  <!-- Subtitle under the form title in the form editor toolbar. -->
+  <string name="formeditor_editor_subtitle">ອອກແບບຄຳຖາມ, ເງື່ອນໄຂການສະແດງ ແລະ ລຳດັບຂັ້ນຕອນ.</string>
+  <!-- Icon description: undo the last edit. -->
+  <string name="formeditor_undo">ຍ້ອນກັບ</string>
+  <!-- Icon description: redo the last undone edit. -->
+  <string name="formeditor_redo">ເຮັດຊ້ຳ</string>
+  <!-- Button that creates a map layer from this form's submissions. -->
+  <string name="formeditor_create_map_layer">ສ້າງຊັ້ນແຜນທີ່</string>
+  <!-- Button that creates a data table from this form's submissions. -->
+  <string name="formeditor_create_data_table">ສ້າງຕາຕະລາງຂໍ້ມູນ</string>
+  <!-- Toolbar button (verb) that opens the form preview. -->
+  <string name="formeditor_preview">ສະແດງຕົວຢ່າງ</string>
+  <!-- Icon description of the overflow menu button. -->
+  <string name="formeditor_more_options">ຕົວເລືອກເພີ່ມເຕີມ</string>
+  <!-- Menu item that downloads the form as an XForms XML file. -->
+  <string name="formeditor_download_xforms_xml">ດາວໂຫຼດ XForms XML</string>
+  <!-- Menu item that opens the save-as-template dialog. -->
+  <string name="formeditor_save_as_template_menu">ບັນທຶກເປັນແມ່ແບບ…</string>
+  <!-- Screen reader description of the language selector. %1$s: active language name. -->
+  <string name="formeditor_form_language_description">ພາສາຂອງແບບຟອມ: %1$s</string>
+  <!-- Add-question menu item that adds a new section (group of questions). -->
+  <string name="formeditor_add_menu_section">ພາກສ່ວນ</string>
+  <!-- Flow summary for the mobile preview. %1$s: screen count (e.g. "5 screens"); %2$s: path count (e.g. "3 potential paths"). -->
+  <string name="formeditor_flow_summary_mobile">%1$s • %2$s</string>
+  <!-- Number of question screens in the mobile flow. -->
+  <plurals name="formeditor_screen_count">
+    <item quantity="other">%1$d ໜ້າຈໍ</item>
+  </plurals>
+  <!-- Number of distinct paths a collector may take through the form. -->
+  <plurals name="formeditor_potential_path_count">
+    <item quantity="other">%1$d ເສັ້ນທາງທີ່ເປັນໄປໄດ້</item>
+  </plurals>
+  <!-- Flow summary for the web preview. %1$d: number of questions. -->
+  <plurals name="formeditor_flow_summary_web">
+    <item quantity="other">%1$d ຄຳຖາມ • ໂຄງຮ່າງເວັບ</item>
+  </plurals>
+  <!-- Badge counting the form's validation issues. -->
+  <plurals name="formeditor_issue_count">
+    <item quantity="other">%1$d ບັນຫາ</item>
+  </plurals>
+  <!-- Tooltip explaining the completion time estimate. %1$d: number of questions on the longest path. -->
+  <plurals name="formeditor_duration_estimate">
+    <item quantity="other">ປະເມີນປະມານ ~2 ນາທີຕໍ່ຄຳຖາມ ຕາມເສັ້ນທາງທີ່ຍາວທີ່ສຸດ (%1$d ຄຳຖາມ).</item>
+  </plurals>
+  <!-- Tooltip sentence appended to the estimate when the survey is long. -->
+  <string name="formeditor_duration_fatigue_warning">ແບບສຳຫຼວດທີ່ມີຫຼາຍກວ່າ 10 ຄຳຖາມ (~20 ນາທີ) ອາດເຮັດໃຫ້ຜູ້ຕອບເມື່ອຍລ້າ.</string>
+  <!-- Estimated completion time badge. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes">~%1$d ນາທີ</string>
+  <!-- Estimated completion time badge for a long survey. %1$d: minutes. -->
+  <string name="formeditor_duration_minutes_long">~%1$d ນາທີ • ແບບສຳຫຼວດຍາວ</string>
+  <!-- Flow legend: solid arrow to the next screen. -->
+  <string name="formeditor_legend_always_next">ໄປຕໍ່ສະເໝີ</string>
+  <!-- Flow legend: dashed arrow taken only when a condition holds. -->
+  <string name="formeditor_legend_if_condition_true">ຖ້າເງື່ອນໄຂເປັນຈິງ</string>
+  <!-- Badge on a repeated section in the flow. %1$s: section title. -->
+  <string name="formeditor_repeated_section_badge">ພາກສ່ວນທີ່ເຮັດຊ້ຳ: %1$s</string>
+  <!-- Badge on a repeated section that has no title yet. -->
+  <string name="formeditor_repeated_section_badge_untitled">ພາກສ່ວນທີ່ເຮັດຊ້ຳ: ບໍ່ມີຊື່</string>
+  <!-- Badge on a section in the flow. %1$s: section title. -->
+  <string name="formeditor_section_badge">ພາກສ່ວນ: %1$s</string>
+  <!-- Badge on a section that has no title yet. -->
+  <string name="formeditor_section_badge_untitled">ພາກສ່ວນ: ບໍ່ມີຊື່</string>
+  <!-- Badge: the section has display logic. -->
+  <string name="formeditor_conditional">ມີເງື່ອນໄຂ</string>
+  <!-- Repeat count expression of a repeated section. %1$s: expression. -->
+  <string name="formeditor_repeat_count_expression">ຈຳນວນ: %1$s</string>
+  <!-- Ghost card title for appending a question to an untitled section. -->
+  <string name="formeditor_add_to_section">ເພີ່ມໃສ່ພາກສ່ວນ</string>
+  <!-- Ghost card title for appending a question to a section. %1$s: section title. -->
+  <string name="formeditor_add_to_named_section">ເພີ່ມໃສ່ %1$s</string>
+  <!-- Ghost card subtitle inside a section. -->
+  <string name="formeditor_append_question_in_section">ເພີ່ມຄຳຖາມຕໍ່ທ້າຍໃນພາກສ່ວນນີ້</string>
+  <!-- Screen reader description of the ghost card inside an untitled section. -->
+  <string name="formeditor_add_question_inside_section">ເພີ່ມຄຳຖາມໃນພາກສ່ວນ</string>
+  <!-- Screen reader description of the ghost card inside a section. %1$s: section title. -->
+  <string name="formeditor_add_question_inside_named_section">ເພີ່ມຄຳຖາມໃນ %1$s</string>
+  <!-- Condition pill on a flow edge. %1$s: operator (e.g. "is equal to"); %2$s: compared value. -->
+  <string name="formeditor_condition_pill">%1$s '%2$s'</string>
+  <!-- Icon description of the "+" button between flow cards. -->
+  <string name="formeditor_add_question_here">ເພີ່ມຄຳຖາມທີ່ນີ້</string>
+  <!-- Screen reader description of the flow's start node. %1$s: launch button label. -->
+  <string name="formeditor_start_node_description">ເລີ່ມຕົ້ນ: %1$s</string>
+  <!-- Subtitle of the ghost card at the end of the flow. -->
+  <string name="formeditor_ghost_card_subtitle">ກົດເພື່ອເພີ່ມໜ້າຈໍກ່ອນ ກວດສອບ ແລະ ສົ່ງ</string>
+  <!-- Screen reader description of the ghost card at the end of the flow. -->
+  <string name="formeditor_add_question_at_end_of_flow">ເພີ່ມຄຳຖາມໃນທ້າຍລຳດັບຂັ້ນຕອນ</string>
+  <!-- Icon description of the drag handle on a question card. -->
+  <string name="formeditor_drag_to_reorder">ລາກເພື່ອຈັດລຳດັບໃໝ່</string>
+  <!-- Caption of a required question's type. %1$s: question type (e.g. "Text"). -->
+  <string name="formeditor_question_type_required">%1$s • ຈຳເປັນ</string>
+  <!-- Back button in the mini screen preview. -->
+  <string name="formeditor_back">ກັບຄືນ</string>
+  <!-- Placeholder of a text field in the mini screen preview. -->
+  <string name="formeditor_answer">ຄຳຕອບ</string>
+  <!-- Placeholder when a choice question's data table isn't chosen yet. -->
+  <string name="formeditor_choose_data_table">ເລືອກຕາຕະລາງຂໍ້ມູນ</string>
+  <!-- Placeholder when a choice question's map layer isn't chosen yet. -->
+  <string name="formeditor_choose_map_layer">ເລືອກຊັ້ນແຜນທີ່</string>
+  <!-- Number of additional choices not shown in the mini preview. %1$d: count. -->
+  <string name="formeditor_more_choices">+%1$d ເພີ່ມເຕີມ</string>
+  <!-- Mini preview action to add a new entity. %1$s: feature noun (e.g. "plot"). -->
+  <string name="formeditor_add_new_feature">+ ເພີ່ມ %1$s ໃໝ່</string>
+  <!-- Mini preview action to add a new entity of unknown kind. -->
+  <string name="formeditor_add_new_item">+ ເພີ່ມລາຍການໃໝ່</string>
+  <!-- Mini preview caption: capture a point with GPS only. -->
+  <string name="formeditor_capture_point_gps">ບັນທຶກຈຸດ (GPS)</string>
+  <!-- Mini preview caption: capture a point with GPS or by drawing on the map. -->
+  <string name="formeditor_capture_point_or_draw">ບັນທຶກຈຸດ ຫຼື ວາດເທິງແຜນທີ່</string>
+  <!-- Mini preview caption: walk a line with GPS only. -->
+  <string name="formeditor_walk_line_gps">ຍ່າງຕາມເສັ້ນ (GPS)</string>
+  <!-- Mini preview caption: walk a line with GPS or draw it on the map. -->
+  <string name="formeditor_walk_line_or_draw">ຍ່າງຕາມເສັ້ນ ຫຼື ວາດເທິງແຜນທີ່</string>
+  <!-- Mini preview caption: walk a polygon with GPS only. -->
+  <string name="formeditor_walk_polygon_gps">ຍ່າງຮອບຮູບຫຼາຍແຈ (GPS)</string>
+  <!-- Mini preview caption: walk a polygon with GPS or draw it on the map. -->
+  <string name="formeditor_walk_polygon_or_draw">ຍ່າງຮອບຮູບຫຼາຍແຈ ຫຼື ວາດເທິງແຜນທີ່</string>
+  <!-- Mini preview caption: take a photo with the camera. -->
+  <string name="formeditor_take_photo">ຖ່າຍຮູບ</string>
+  <!-- Mini preview caption: take a photo or upload one. -->
+  <string name="formeditor_take_photo_or_upload">ຖ່າຍຮູບ ຫຼື ອັບໂຫຼດ</string>
+  <!-- Mini preview caption: record a video. -->
+  <string name="formeditor_record_video">ບັນທຶກວິດີໂອ</string>
+  <!-- Mini preview caption: record a video or upload one. -->
+  <string name="formeditor_record_video_or_upload">ບັນທຶກວິດີໂອ ຫຼື ອັບໂຫຼດ</string>
+  <!-- Mini preview caption: record audio. -->
+  <string name="formeditor_record_audio">ບັນທຶກສຽງ</string>
+  <!-- Mini preview caption: record audio or upload a file. -->
+  <string name="formeditor_record_audio_or_upload">ບັນທຶກສຽງ ຫຼື ອັບໂຫຼດ</string>
+  <!-- Mini preview caption of a note question (display-only text). -->
+  <string name="formeditor_read_only_note">ບັນທຶກແບບອ່ານຢ່າງດຽວ</string>
+
+  <!-- Question and section properties, choices, display logic, and flow preview. -->
+  <!-- Question properties panel. -->
+  <!-- Panel title. %1$d: position of the selected question; %2$d: total number of questions. -->
+  <string name="formeditor_question_position">ຄຳຖາມ %1$d ຈາກ %2$d</string>
+  <!-- Button that selects the previous question. -->
+  <string name="formeditor_previous">ກ່ອນໜ້າ</string>
+  <!-- Icon description: opens the menu of actions for the selected question. -->
+  <string name="formeditor_question_options">ຕົວເລືອກຄຳຖາມ</string>
+  <!-- Menu action that duplicates the selected question. -->
+  <string name="formeditor_duplicate">ສຳເນົາ</string>
+  <string name="formeditor_question_type">ປະເພດຄຳຖາມ</string>
+  <!-- Field label for a question's optional hint text. -->
+  <string name="formeditor_hint_optional">ຄຳແນະນຳ (ບໍ່ບັງຄັບ)</string>
+  <!-- Field label for a question's optional hint in a non-default language. %1$s: language name. -->
+  <string name="formeditor_hint_in_language_optional">ຄຳແນະນຳ (%1$s, ບໍ່ບັງຄັບ)</string>
+  <!-- Toggle: the question must be answered. -->
+  <string name="formeditor_required">ຈຳເປັນ</string>
+  <!-- Explains why a note (read-only) question can't be made required. -->
+  <string name="formeditor_notes_cant_be_required">ບັນທຶກບໍ່ສາມາດຕັ້ງເປັນຈຳເປັນໄດ້.</string>
+  <string name="formeditor_required_description">ຜູ້ເກັບຂໍ້ມູນຕ້ອງຕອບກ່ອນດຳເນີນການຕໍ່.</string>
+
+  <!-- Section properties panel. -->
+  <!-- Section that collectors can fill in multiple times. -->
+  <string name="formeditor_repeated_section">ພາກສ່ວນທີ່ເຮັດຊ້ຳ</string>
+  <!-- Panel title for a (non-repeated) group of questions. -->
+  <string name="formeditor_section">ພາກສ່ວນ</string>
+  <string name="formeditor_section_description">ກຸ່ມຄຳຖາມໃນລຳດັບຂັ້ນຕອນຂອງແບບຟອມ</string>
+  <string name="formeditor_delete_section">ລຶບພາກສ່ວນ</string>
+  <!-- Icon description: closes the properties panel. -->
+  <string name="formeditor_close_properties">ປິດຄຸນສົມບັດ</string>
+  <string name="formeditor_section_title">ຫົວຂໍ້ພາກສ່ວນ</string>
+  <!-- Section that is filled in once (not repeated). -->
+  <string name="formeditor_single_section">ພາກສ່ວນດຽວ</string>
+  <string name="formeditor_repeated_section_description">ຜູ້ເກັບຂໍ້ມູນສາມາດເພີ່ມໄດ້ຫຼາຍລາຍການ.</string>
+  <string name="formeditor_single_section_description">ຄຳຖາມຖືກຈັດກຸ່ມທັງທາງສາຍຕາ ແລະ ທາງເຫດຜົນ.</string>
+  <!-- Field label: how many times a repeated section repeats, as an optional XForms expression. -->
+  <string name="formeditor_repeat_count_optional">ຈຳນວນການເຮັດຊ້ຳ (ສຳນວນ, ບໍ່ບັງຄັບ)</string>
+  <!-- Placeholder example for the repeat count field; keep the number and the path unchanged. -->
+  <string name="formeditor_repeat_count_placeholder">ຕົວຢ່າງ: 3 ຫຼື /data/number_of_plots</string>
+  <!-- Toggle: the section is shown only when a condition is met. -->
+  <string name="formeditor_section_condition">ເງື່ອນໄຂຂອງພາກສ່ວນ</string>
+  <string name="formeditor_section_condition_on">ພາກສ່ວນຈະສະແດງສະເພາະເມື່ອເງື່ອນໄຂເປັນຈິງ.</string>
+  <string name="formeditor_section_condition_off">ພາກສ່ວນຈະສະແດງສະເໝີ.</string>
+  <string name="formeditor_section_condition_no_sources">ເພີ່ມຄຳຖາມກ່ອນພາກສ່ວນນີ້ເພື່ອກຳນົດເງື່ອນໄຂໃຫ້ມັນ.</string>
+  <string name="formeditor_move_section_up">ຍ້າຍພາກສ່ວນຂຶ້ນ</string>
+  <string name="formeditor_move_section_down">ຍ້າຍພາກສ່ວນລົງ</string>
+  <string name="formeditor_no_section">ບໍ່ມີພາກສ່ວນ</string>
+  <string name="formeditor_in_conditional_section">ຍັງຖືກເຊື່ອງເມື່ອພາກສ່ວນ "%1$s" ຂອງມັນຖືກເຊື່ອງ.</string>
+  <!-- Field label: the question the section condition depends on. -->
+  <string name="formeditor_depends_on_question">ຂຶ້ນກັບຄຳຖາມ</string>
+  <!-- Shown when the question a condition refers to no longer exists. -->
+  <string name="formeditor_missing">(ບໍ່ພົບ)</string>
+  <!-- Dropdown placeholder when no value is selected for a condition. -->
+  <string name="formeditor_select_value">(ເລືອກຄ່າ)</string>
+
+  <!-- Number question settings. -->
+  <string name="formeditor_decimal_places">ຕຳແໜ່ງທົດສະນິຍົມ</string>
+  <string name="formeditor_decimal_places_zero">0 ສຳລັບຈຳນວນເຕັມ.</string>
+  <!-- %1$d: maximum number of decimal places. -->
+  <plurals name="formeditor_decimal_places_up_to">
+    <item quantity="other">ສູງສຸດ %1$d ຕຳແໜ່ງທົດສະນິຍົມ.</item>
+  </plurals>
+
+  <!-- Geometry question settings. -->
+  <!-- Field label: how a geometry (location) answer is captured. -->
+  <string name="formeditor_capture">ວິທີບັນທຶກ</string>
+  <!-- Capture mode of a polygon question: the collector walks the boundary while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_boundary">ຍ່າງຮອບຂອບເຂດ (GPS ທຸກ 5 ວິ)</string>
+  <!-- Capture mode of a line question: the collector walks the path while GPS points are recorded every 5 seconds. -->
+  <string name="formeditor_capture_walk_path">ຍ່າງຕາມເສັ້ນທາງ (GPS ທຸກ 5 ວິ)</string>
+  <string name="formeditor_capture_walk_boundary_description">ຜູ້ເກັບຂໍ້ມູນຍ່າງຮອບຂອບເຂດໃນພື້ນທີ່ຈິງ; ຈຸດ GPS ຈະຖືກບັນທຶກທຸກ 5 ວິນາທີ.</string>
+  <string name="formeditor_capture_walk_path_description">ຜູ້ເກັບຂໍ້ມູນຍ່າງຕາມເສັ້ນທາງໃນພື້ນທີ່ຈິງ; ຈຸດ GPS ຈະຖືກບັນທຶກທຸກ 5 ວິນາທີ.</string>
+  <!-- Field label: whether a photo/video/audio is captured or uploaded. -->
+  <string name="formeditor_media_source">ແຫຼ່ງສື່</string>
+
+  <!-- Advanced section. -->
+  <string name="formeditor_advanced_has_errors">ການຕັ້ງຄ່າຂັ້ນສູງມີຂໍ້ຜິດພາດ</string>
+  <string name="formeditor_collapse_advanced">ຫຍໍ້ຂັ້ນສູງ</string>
+  <string name="formeditor_expand_advanced">ຂະຫຍາຍຂັ້ນສູງ</string>
+  <!-- Field label: the question's data column name. -->
+  <string name="formeditor_name">ຊື່</string>
+  <!-- Help text for the question name field; keep the characters "_ . -" unchanged. -->
+  <string name="formeditor_name_supporting_text">ຊື່ຖັນຂໍ້ມູນ. ຕົວອັກສອນ, ຕົວເລກ, _ . -</string>
+
+  <!-- Validation rules. -->
+  <string name="formeditor_validation">ການກວດສອບຄວາມຖືກຕ້ອງ</string>
+  <string name="formeditor_no_validation_rules">ບໍ່ມີກົດການກວດສອບສຳລັບປະເພດຄຳຖາມນີ້.</string>
+  <!-- Field label: minimum allowed number. -->
+  <string name="formeditor_minimum">ຕ່ຳສຸດ</string>
+  <!-- Field label: maximum allowed number. -->
+  <string name="formeditor_maximum">ສູງສຸດ</string>
+  <string name="formeditor_min_length">ຄວາມຍາວຕ່ຳສຸດ</string>
+  <string name="formeditor_max_length">ຄວາມຍາວສູງສຸດ</string>
+  <!-- Field label: text pattern (e.g. email, digits only) the answer must match. -->
+  <string name="formeditor_pattern">ຮູບແບບ</string>
+  <string name="formeditor_regular_expression">ສຳນວນປົກກະຕິ (regex)</string>
+  <string name="formeditor_allowed_dates">ວັນທີທີ່ອະນຸຍາດ</string>
+  <!-- Allowed dates option: no restriction. -->
+  <string name="formeditor_any_date">ວັນທີໃດກໍໄດ້</string>
+  <string name="formeditor_minimum_selections">ຈຳນວນການເລືອກຕ່ຳສຸດ</string>
+  <string name="formeditor_maximum_selections">ຈຳນວນການເລືອກສູງສຸດ</string>
+  <!-- Field label: custom message shown when the answer fails validation. -->
+  <string name="formeditor_error_message_optional">ຂໍ້ຄວາມຂໍ້ຜິດພາດ (ບໍ່ບັງຄັບ)</string>
+  <string name="formeditor_earliest_date">ວັນທີທຳອິດທີ່ອະນຸຍາດ</string>
+  <string name="formeditor_latest_date">ວັນທີສຸດທ້າຍທີ່ອະນຸຍາດ</string>
+  <!-- Placeholder for a date field with no date. -->
+  <string name="formeditor_not_set">ບໍ່ໄດ້ກຳນົດ</string>
+  <!-- Icon description: clears a date field. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_clear_field">ລ້າງ %1$s</string>
+  <!-- Icon description: opens a date picker. %1$s: field label (e.g. "Earliest date"). -->
+  <string name="formeditor_pick_field">ເລືອກ %1$s</string>
+  <!-- Date picker confirmation button. -->
+  <string name="formeditor_ok">ຕົກລົງ</string>
+
+  <!-- Choices editor. -->
+  <!-- Heading and field label: the answer choices of a select question, and where they come from. -->
+  <string name="formeditor_choices">ຕົວເລືອກ</string>
+  <!-- Visual style of choices: plain text. -->
+  <string name="formeditor_visual_text_only">ຂໍ້ຄວາມເທົ່ານັ້ນ</string>
+  <!-- Visual style of choices: each choice has a color. -->
+  <string name="formeditor_visual_colors">ສີ</string>
+  <!-- Visual style of choices: each choice has an image. -->
+  <string name="formeditor_visual_images">ຮູບພາບ</string>
+  <!-- Button that imports choices from a file; keep the file extensions unchanged. -->
+  <string name="formeditor_import_choices_file">ນຳເຂົ້າ (.csv / .txt)</string>
+  <!-- Title of the dialog shown after picking a choices file. -->
+  <string name="formeditor_import_choices">ນຳເຂົ້າຕົວເລືອກ</string>
+  <!-- %1$d: number of choices found in the file; %2$d: number of current choices. -->
+  <plurals name="formeditor_import_choices_message">
+    <item quantity="other">ພົບ %1$d ຕົວເລືອກໃນໄຟລ໌. ທ່ານຕ້ອງການແທນທີ່ຕົວເລືອກປັດຈຸບັນ (%2$d) ຫຼື ເພີ່ມຕໍ່ທ້າຍ?</item>
+  </plurals>
+  <!-- Button: replace the current choices with the imported ones. -->
+  <string name="formeditor_replace">ແທນທີ່</string>
+  <!-- Button: add the imported choices after the current ones. -->
+  <string name="formeditor_append">ເພີ່ມຕໍ່ທ້າຍ</string>
+  <!-- Field label: how choices are displayed (text, colors, or images). -->
+  <string name="formeditor_visual_style">ຮູບແບບການສະແດງ</string>
+  <!-- Field label: an earlier question whose answer filters this question's choices. -->
+  <string name="formeditor_cascading_filter">ຕົວກອງແບບລຳດັບ (ຄຳຖາມຫຼັກ)</string>
+  <!-- Label before chips that filter the choice list by parent choice. -->
+  <string name="formeditor_filter_label">ກອງ:</string>
+  <!-- Filter chip that shows all choices. -->
+  <string name="formeditor_filter_all">ທັງໝົດ</string>
+  <!-- Error when a choice image is too large. %1$d: maximum size in kilobytes. -->
+  <string name="formeditor_choice_image_too_large">ກະລຸນາເລືອກໄຟລ໌ຮູບພາບທີ່ນ້ອຍກວ່າ %1$d KB.</string>
+  <!-- Field label: the parent question's choice this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_choice">ຕົວເລືອກຫຼັກ (%1$s)</string>
+  <!-- Parent choice option meaning the choice is shown regardless of the parent answer. -->
+  <string name="formeditor_any_unfiltered">ທັງໝົດ (ບໍ່ກອງ)</string>
+  <!-- Field label: the parent question's value this choice belongs to. %1$s: parent question label. -->
+  <string name="formeditor_parent_value">ຄ່າຫຼັກ (%1$s)</string>
+  <string name="formeditor_remove_choice">ລຶບຕົວເລືອກອອກ</string>
+  <string name="formeditor_add_choice">ເພີ່ມຕົວເລືອກ</string>
+  <string name="formeditor_no_map_layers_available">ຍັງບໍ່ມີຊັ້ນແຜນທີ່ໃນແບບສຳຫຼວດນີ້.</string>
+  <string name="formeditor_no_data_tables_available">ຍັງບໍ່ມີຕາຕະລາງຂໍ້ມູນໃນແບບສຳຫຼວດນີ້.</string>
+  <!-- Button that creates a new map layer for the question's choices. -->
+  <string name="formeditor_new_map_layer">ຊັ້ນແຜນທີ່ໃໝ່</string>
+  <!-- Button that creates a new data table for the question's choices. -->
+  <string name="formeditor_new_data_table">ຕາຕະລາງຂໍ້ມູນໃໝ່</string>
+  <!-- %1$d: number of features/rows; %2$s: feature noun matching the count (e.g. "plot"/"plots"); %3$s: map layer or data table name. -->
+  <plurals name="formeditor_collectors_choose_from">
+    <item quantity="other">ຜູ້ເກັບຂໍ້ມູນເລືອກຈາກ %1$d %2$s ໃນ %3$s.</item>
+  </plurals>
+  <!-- %1$s: identifier of an external choice list. -->
+  <string name="formeditor_choices_from_external_list">ຕົວເລືອກຖືກໂຫຼດຈາກລາຍການພາຍນອກ "%1$s".</string>
+  <string name="formeditor_sample_plots_cant_be_added">ແປງຕົວຢ່າງຖືກສ້າງຂຶ້ນຈາກການອອກແບບຕົວຢ່າງ ແລະ ຜູ້ເກັບຂໍ້ມູນບໍ່ສາມາດເພີ່ມໄດ້.</string>
+  <!-- Toggle. %1$s: plural feature noun (e.g. "plots", "trees"). -->
+  <string name="formeditor_allow_add_new">ອະນຸຍາດໃຫ້ຜູ້ເກັບຂໍ້ມູນເພີ່ມ %1$s ໃໝ່</string>
+  <!-- %1$s: form title; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_uses_form_to_add_new">ໃຊ້ %1$s ເພື່ອເພີ່ມ %2$s ໃໝ່.</string>
+  <!-- %1$s: singular feature noun (e.g. "plot"). -->
+  <string name="formeditor_collectors_can_add_new">ຜູ້ເກັບຂໍ້ມູນສາມາດເພີ່ມ %1$s ໃໝ່ໄດ້ໃນຂະນະເລືອກ.</string>
+  <!-- Chip that opens the linked form. -->
+  <string name="formeditor_open_form">ເປີດແບບຟອມ</string>
+  <!-- %1$s: map layer or data table name; %2$s: plural feature noun (e.g. "plots"). -->
+  <string name="formeditor_dataset_has_no_form">%1$s ຍັງບໍ່ມີແບບຟອມສຳລັບເພີ່ມ %2$s ໃໝ່.</string>
+  <!-- Button. %1$s: map layer or data table name. -->
+  <string name="formeditor_create_form_for">ສ້າງແບບຟອມສຳລັບ %1$s</string>
+  <!-- Accessibility description of the marker beside a text-only choice. -->
+  <string name="formeditor_text_choice">ຕົວເລືອກຂໍ້ຄວາມ</string>
+  <!-- Chip text for a choice linked to a standard code that isn't in the code list. %1$s: code. -->
+  <string name="formeditor_code_value">ລະຫັດ: %1$s</string>
+  <string name="formeditor_link_to_standard_choice">ເຊື່ອມໂຍງກັບຕົວເລືອກມາດຕະຖານ…</string>
+  <!-- Menu option: the choice isn't linked to a standard choice. -->
+  <string name="formeditor_not_linked">ບໍ່ໄດ້ເຊື່ອມໂຍງ</string>
+  <!-- Icon description. %1$s: color name or hex code. -->
+  <string name="formeditor_choice_color_named">ສີຂອງຕົວເລືອກ: %1$s</string>
+  <!-- Icon description for a choice with no color. -->
+  <string name="formeditor_choice_color_none">ສີຂອງຕົວເລືອກ: ບໍ່ມີ</string>
+  <!-- Heading of the choice color palette. -->
+  <string name="formeditor_choice_color">ສີຂອງຕົວເລືອກ</string>
+  <string name="formeditor_add_choice_image">ເພີ່ມຮູບພາບຕົວເລືອກ</string>
+  <string name="formeditor_choice_image">ຮູບພາບຕົວເລືອກ</string>
+  <string name="formeditor_replace_image">ແທນທີ່ຮູບພາບ</string>
+  <string name="formeditor_remove_image">ລຶບຮູບພາບອອກ</string>
+
+  <!-- Display logic editor. -->
+  <string name="formeditor_display_logic">ເງື່ອນໄຂການສະແດງ</string>
+  <!-- Segmented button: the question is always shown. -->
+  <string name="formeditor_always_show">ສະແດງສະເໝີ</string>
+  <!-- Segmented button: the question is shown only if a condition is met. -->
+  <string name="formeditor_show_only_if">ສະແດງສະເພາະຖ້າ…</string>
+  <string name="formeditor_first_screen_in_form">ໜ້າຈໍທຳອິດໃນແບບຟອມ</string>
+  <string name="formeditor_first_screen_display_logic_notice">ເງື່ອນໄຂການສະແດງສາມາດຂຶ້ນກັບຄຳຖາມກ່ອນໜ້າເທົ່ານັ້ນ. ຍ້າຍຄຳຖາມນີ້ໄປໄວ້ທາງຫຼັງ ຫຼື ເລືອກຄຳຖາມທີ່ຢູ່ທາງຫຼັງ ເພື່ອຕັ້ງຄ່າການສະແດງແບບມີເງື່ອນໄຂ.</string>
+  <string name="formeditor_select_question_2">ເລືອກຄຳຖາມທີ 2 →</string>
+  <string name="formeditor_move_question_down">ຍ້າຍຄຳຖາມລົງ</string>
+  <string name="formeditor_add_question_2">ເພີ່ມຄຳຖາມທີ 2</string>
+  <!-- Shown when the question a display-logic rule refers to no longer exists. -->
+  <string name="formeditor_missing_question">(ບໍ່ພົບຄຳຖາມ)</string>
+
+  <!-- Flow preview side panel. -->
+  <string name="formeditor_flow_preview">ສະແດງຕົວຢ່າງລຳດັບຂັ້ນຕອນ</string>
+  <string name="formeditor_close_preview">ປິດການສະແດງຕົວຢ່າງ</string>
+  <!-- Field label: language used in the preview. -->
+  <string name="formeditor_language">ພາສາ</string>
+  <!-- %1$s: technical error message. -->
+  <string name="formeditor_preview_load_error">ບໍ່ສາມາດໂຫຼດ XForms ທີ່ສ້າງຂຶ້ນໄດ້:\n%1$s</string>
+  <string name="formeditor_preview_web_description">ຄຳຖາມຈະອັບເດດທັນທີໃນຂະນະທີ່ທ່ານຕອບ: ບັດທີ່ມີເງື່ອນໄຂຈະປາກົດ ຫຼື ຫາຍໄປຕາມເງື່ອນໄຂການສະແດງ.</string>
+  <string name="formeditor_preview_mobile_description">ໜ້າຈໍຈະອັບເດດທັນທີໃນຂະນະທີ່ທ່ານຕອບ: ຄຳຖາມທີ່ມີເງື່ອນໄຂຈະປາກົດ ຫຼື ຫາຍໄປຕາມເງື່ອນໄຂການສະແດງ.</string>
+  <string name="formeditor_submission_passed_validation">ການສົ່ງຂໍ້ມູນຜ່ານການກວດສອບແລ້ວ.</string>
+  <!-- Heading of the list of screens the collector is going through. -->
+  <string name="formeditor_current_path">ເສັ້ນທາງປັດຈຸບັນ</string>
+  <!-- Button that restarts the form preview. -->
+  <string name="formeditor_restart">ເລີ່ມໃໝ່</string>
+  <string name="formeditor_back_to_editor">ກັບໄປຫາຕົວແກ້ໄຂ</string>
+
+  <!-- Form properties: availability, where submissions are saved, and status markers. -->
+  <!-- Form properties panel (form-level settings, availability, and where submissions are saved). -->
+  <string name="formeditor_form_properties">ຄຸນສົມບັດແບບຟອມ</string>
+  <!-- Part of the form properties subtitle. %1$d: number of questions in the form. -->
+  <plurals name="formeditor_form_properties_question_count">
+    <item quantity="other">%1$d ຄຳຖາມ</item>
+  </plurals>
+  <!-- Part of the form properties subtitle. %1$d: number of distinct paths through the form's display logic. -->
+  <plurals name="formeditor_form_properties_path_count">
+    <item quantity="other">%1$d ເສັ້ນທາງທີ່ເປັນໄປໄດ້</item>
+  </plurals>
+  <!-- Form properties subtitle. %1$s: question count (e.g. "3 questions"); %2$s: path count (e.g. "4 potential paths"). -->
+  <string name="formeditor_form_properties_counts">%1$s • %2$s</string>
+  <string name="formeditor_form_title">ຫົວຂໍ້ແບບຟອມ</string>
+  <!-- Field label: text of the buttons that start data collection for this form. -->
+  <string name="formeditor_button_label">ປ້າຍກຳກັບປຸ່ມ</string>
+  <string name="formeditor_button_label_help">ສະແດງເທິງປຸ່ມທີ່ເລີ່ມການເກັບຂໍ້ມູນສຳລັບແບບຟອມນີ້. ຄ່າເລີ່ມຕົ້ນແມ່ນຫົວຂໍ້ແບບຟອມ.</string>
+  <string name="formeditor_form_no_questions_yet">ແບບຟອມນີ້ຍັງບໍ່ມີຄຳຖາມ. ໃຊ້ "+" ເທິງພື້ນທີ່ອອກແບບເພື່ອເພີ່ມ.</string>
+  <!-- Section heading: on which platforms (mobile app, web dashboard) collectors can open the form. -->
+  <string name="formeditor_availability">ການໃຫ້ບໍລິການ</string>
+  <!-- Section heading: what happens to data when the form is submitted. -->
+  <string name="formeditor_submissions">ການສົ່ງຂໍ້ມູນ</string>
+  <!-- %1$s: name of the map layer or data table the form's submissions are added to. -->
+  <string name="formeditor_linked_to_dataset">ເຊື່ອມໂຍງກັບ %1$s</string>
+  <string name="formeditor_linked_map_layer_description">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະເພີ່ມອົງປະກອບແຜນທີ່ໃໝ່ໃສ່ຊັ້ນແຜນທີ່ນີ້. ຄຸນສົມບັດຂອງໂຄງສ້າງຂໍ້ມູນຈະຊິງກັບຄຳຖາມຂອງແບບຟອມ.</string>
+  <string name="formeditor_linked_data_table_description">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະເພີ່ມແຖວໃໝ່ໃສ່ຕາຕະລາງຂໍ້ມູນນີ້. ຄຸນສົມບັດຂອງໂຄງສ້າງຂໍ້ມູນຈະຊິງກັບຄຳຖາມຂອງແບບຟອມ.</string>
+  <string name="formeditor_edit_map_layer">ແກ້ໄຂຊັ້ນແຜນທີ່</string>
+  <string name="formeditor_edit_data_table">ແກ້ໄຂຕາຕະລາງຂໍ້ມູນ</string>
+  <string name="formeditor_unlink_map_layer">ຍົກເລີກການເຊື່ອມໂຍງຊັ້ນແຜນທີ່</string>
+  <string name="formeditor_unlink_data_table">ຍົກເລີກການເຊື່ອມໂຍງຕາຕະລາງຂໍ້ມູນ</string>
+  <string name="formeditor_create_map_layer_for_form">ສ້າງຊັ້ນແຜນທີ່ສຳລັບແບບຟອມ</string>
+  <string name="formeditor_create_data_table_for_form">ສ້າງຕາຕະລາງຂໍ້ມູນສຳລັບແບບຟອມ</string>
+  <!-- Icon description: opens a map layer or data table. %1$s: its name. -->
+  <string name="formeditor_open_dataset">ເປີດ %1$s</string>
+  <string name="formeditor_available_on_mobile">ໃຊ້ໄດ້ໃນມືຖື</string>
+  <string name="formeditor_available_on_web">ໃຊ້ໄດ້ໃນເວັບ</string>
+  <string name="formeditor_availability_mobile_on">ຜູ້ເກັບຂໍ້ມູນສາມາດເປີດແບບຟອມນີ້ໃນແອັບມືຖືໄດ້.</string>
+  <string name="formeditor_availability_mobile_off">ເຊື່ອງຈາກຜູ້ເກັບຂໍ້ມູນໃນແອັບມືຖື.</string>
+  <string name="formeditor_availability_web_on">ຜູ້ເກັບຂໍ້ມູນສາມາດເປີດແບບຟອມນີ້ໃນແດຊບອດເວັບໄດ້.</string>
+  <string name="formeditor_availability_web_off">ເຊື່ອງຈາກຜູ້ເກັບຂໍ້ມູນໃນແດຊບອດເວັບ.</string>
+  <string name="formeditor_availability_none_warning">ຜູ້ເກັບຂໍ້ມູນຈະບໍ່ສາມາດເປີດແບບຟອມນີ້ໄດ້ຢູ່ບ່ອນໃດເລີຍ ຈົນກວ່າຈະເປີດໃຊ້ຕົວເລືອກໃດໜຶ່ງເຫຼົ່ານີ້.</string>
+  <!-- Error: some location questions can only use GPS, which the web dashboard can't capture. %1$d: number of such questions; %2$s: name of the capture option that also allows drawing on the map (e.g. "GPS or map"). -->
+  <plurals name="formeditor_web_incompatible_geometry_summary">
+    <item quantity="other">%1$d ຄຳຖາມຮູບເລຂາຄະນິດໃຊ້ໄດ້ສະເພາະ GPS ແລະ ບໍ່ສາມາດຕອບໃນເວັບໄດ້. ກະລຸນາປ່ຽນເປັນ "%2$s".</item>
+  </plurals>
+  <!-- Accessibility action label for expanding a collapsible section. -->
+  <string name="formeditor_expand_section">ຂະຫຍາຍ</string>
+  <!-- Accessibility action label for collapsing a collapsible section. -->
+  <string name="formeditor_collapse_section">ຫຍໍ້</string>
+  <string name="formeditor_when_form_submitted">ເມື່ອສົ່ງແບບຟອມ</string>
+  <!-- %1$s: name of the map layer or data table submissions are added to. -->
+  <string name="formeditor_save_to_create_linked_description">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະຖືກເພີ່ມໃສ່ %1$s.</string>
+  <string name="formeditor_save_to_create_map_layer_description">ຊັ້ນແຜນທີ່ຈະຖືກສ້າງຂຶ້ນສຳລັບແບບຟອມນີ້.</string>
+  <string name="formeditor_save_to_create_data_table_description">ຕາຕະລາງຂໍ້ມູນຈະຖືກສ້າງຂຶ້ນສຳລັບແບບຟອມນີ້.</string>
+  <string name="formeditor_save_to_update_unavailable">ເພີ່ມຊັ້ນແຜນທີ່ ຫຼື ຕາຕະລາງຂໍ້ມູນອື່ນໃສ່ແບບສຳຫຼວດເພື່ອໃຊ້ຕົວເລືອກນີ້.</string>
+  <string name="formeditor_save_to_update_description">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະປ່ຽນຄຸນສົມບັດຂອງອົງປະກອບທີ່ມີຢູ່ແລ້ວ.</string>
+  <string name="formeditor_submissions_always_kept">ການສົ່ງຂໍ້ມູນຈະຖືກເກັບໄວ້ສະເໝີ ດັ່ງນັ້ນທຸກການປ່ຽນແປງຈະມີບັນທຶກວ່າໃຜເປັນຜູ້ປ່ຽນ ແລະ ປ່ຽນເມື່ອໃດ.</string>
+  <string name="formeditor_update_target_label">ຊັ້ນແຜນທີ່ ຫຼື ຕາຕະລາງຂໍ້ມູນທີ່ຈະອັບເດດ</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_map_layer">ຊັ້ນແຜນທີ່</string>
+  <!-- Kind of dataset, shown after its name in a dropdown. -->
+  <string name="formeditor_dataset_kind_data_table">ຕາຕະລາງຂໍ້ມູນ</string>
+  <!-- Section heading, followed by the ways to identify which map feature a submission updates. -->
+  <string name="formeditor_find_map_feature_by">ຊອກຫາອົງປະກອບແຜນທີ່ໂດຍ</string>
+  <!-- Section heading, followed by the ways to identify which table row a submission updates. -->
+  <string name="formeditor_find_table_row_by">ຊອກຫາແຖວຕາຕະລາງໂດຍ</string>
+  <string name="formeditor_selected_on_map">ເລືອກເທິງແຜນທີ່</string>
+  <string name="formeditor_picked_from_list">ເລືອກຈາກລາຍການ</string>
+  <!-- The answer a collector gives to a question (used as an option for identifying features and in status rules). -->
+  <string name="formeditor_question_answer">ຄຳຕອບຂອງຄຳຖາມ</string>
+  <string name="formeditor_find_by_selected_map_feature_help">ຜູ້ເກັບຂໍ້ມູນເປີດແບບຟອມຈາກອົງປະກອບໃນແຜນທີ່. ແບບຟອມຈະເລີ່ມດ້ວຍໜ້າຈໍ "ອົງປະກອບແຜນທີ່ທີ່ຈະອັບເດດ" ທີ່ຖືກຕື່ມອັດຕະໂນມັດ ດັ່ງນັ້ນຈຶ່ງສາມາດເລືອກອົງປະກອບຈາກລາຍການໄດ້ເຊັ່ນກັນ.</string>
+  <!-- %1$s: name of the data table. -->
+  <string name="formeditor_find_by_selected_table_row_help">ແບບຟອມຈະເລີ່ມດ້ວຍໜ້າຈໍ "ແຖວທີ່ຈະອັບເດດ" ທີ່ສະແດງລາຍການແຖວຂອງ %1$s.</string>
+  <!-- Field label: the dataset property the question's answer is matched against. -->
+  <string name="formeditor_matches_property">ກົງກັບຄຸນສົມບັດ</string>
+  <string name="formeditor_fields_to_update">ຊ່ອງຂໍ້ມູນທີ່ຈະອັບເດດ</string>
+  <string name="formeditor_fields_to_update_empty">ເພີ່ມຄຳຖາມເພື່ອເລືອກຄຸນສົມບັດທີ່ຄຳຖາມເຫຼົ່ານັ້ນຈະອັບເດດ.</string>
+  <!-- %1$s: property name. -->
+  <string name="formeditor_property_already_updated">ມີຄຳຖາມອື່ນອັບເດດ "%1$s" ຢູ່ແລ້ວ.</string>
+  <!-- Field label: which property a question's answer updates. -->
+  <string name="formeditor_updates">ອັບເດດ</string>
+  <!-- Dropdown option: the question's answer doesn't update any property. -->
+  <string name="formeditor_dont_update">ບໍ່ອັບເດດ</string>
+  <!-- Dropdown option: the question's answer updates the feature's geometry. -->
+  <string name="formeditor_geometry_location">ຮູບເລຂາຄະນິດ (ຕຳແໜ່ງ)</string>
+  <string name="formeditor_status_marker">ເຄື່ອງໝາຍສະຖານະ</string>
+  <string name="formeditor_set_status_marker">ຕັ້ງເຄື່ອງໝາຍສະຖານະ</string>
+  <string name="formeditor_status_marker_on_map_feature">ຕັ້ງສັນຍາລັກ, ສີ ແລະ ປ້າຍກຳກັບຂອງເຄື່ອງໝາຍສະຖານະຂອງອົງປະກອບແຜນທີ່ເມື່ອສົ່ງ.</string>
+  <string name="formeditor_status_marker_on_table_row">ຕັ້ງສັນຍາລັກ, ສີ ແລະ ປ້າຍກຳກັບຂອງເຄື່ອງໝາຍສະຖານະຂອງແຖວຕາຕະລາງເມື່ອສົ່ງ.</string>
+  <string name="formeditor_status_marker_off_map_features">ປິດເປັນຄ່າເລີ່ມຕົ້ນ. ເປີດເພື່ອໝາຍອົງປະກອບແຜນທີ່ (ຕົວຢ່າງ: ✓ ສຳຫຼວດແລ້ວ ຫຼື ○ ລໍຖ້າ).</string>
+  <string name="formeditor_status_marker_off_table_rows">ປິດເປັນຄ່າເລີ່ມຕົ້ນ. ເປີດເພື່ອໝາຍແຖວຕາຕະລາງ (ຕົວຢ່າງ: ✓ ສຳຫຼວດແລ້ວ ຫຼື ○ ລໍຖ້າ).</string>
+  <string name="formeditor_status_rules_help">ກົດຈະຖືກກວດສອບຕາມລຳດັບ. ກົດທຳອິດທີ່ກົງກັນຈະກຳນົດເຄື່ອງໝາຍສະຖານະ ແລະ ປ້າຍກຳກັບ.</string>
+  <string name="formeditor_add_status_rule">ເພີ່ມກົດສະຖານະ</string>
+  <!-- Heading of the fallback status used when no status rule matches. -->
+  <string name="formeditor_otherwise">ນອກຈາກນັ້ນ</string>
+  <string name="formeditor_otherwise_help">ສະຖານະເລີ່ມຕົ້ນເມື່ອບໍ່ມີກົດໃດຂ້າງເທິງກົງກັນ.</string>
+  <string name="formeditor_default_status_color">ສີສະຖານະເລີ່ມຕົ້ນ</string>
+  <!-- Status rule subject: a property of the data table row. -->
+  <string name="formeditor_row_property">ຄຸນສົມບັດຂອງແຖວ</string>
+  <!-- Status rule subject: a property of the map feature. -->
+  <string name="formeditor_feature_property">ຄຸນສົມບັດຂອງອົງປະກອບ</string>
+  <!-- Status rule subject: number of submissions for the feature. -->
+  <string name="formeditor_submission_count">ຈຳນວນການສົ່ງຂໍ້ມູນ</string>
+  <!-- %1$d: status rule number. -->
+  <string name="formeditor_status_rule_title">ກົດ %1$d</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_up">ຍ້າຍກົດສະຖານະ %1$d ຂຶ້ນ</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_move_status_rule_down">ຍ້າຍກົດສະຖານະ %1$d ລົງ</string>
+  <!-- Button description. %1$d: status rule number. -->
+  <string name="formeditor_remove_status_rule">ລຶບກົດສະຖານະ %1$d ອອກ</string>
+  <!-- Field label: what a status rule's condition is about (submission count, question answer, property). -->
+  <string name="formeditor_status_rule_when">ເມື່ອ</string>
+  <!-- Field label: minimum number of submissions for a status rule to match. -->
+  <string name="formeditor_at_least_submissions">ຢ່າງໜ້ອຍ (ການສົ່ງຂໍ້ມູນ)</string>
+  <string name="formeditor_matches_when_submitted">ກົງກັນເມື່ອສົ່ງແບບຟອມນີ້.</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_feature">
+    <item quantity="other">ກົງກັນເມື່ອອົງປະກອບມີການສົ່ງຂໍ້ມູນຢ່າງໜ້ອຍ %1$d ຄັ້ງ.</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_map_feature">
+    <item quantity="other">ກົງກັນເມື່ອອົງປະກອບແຜນທີ່ມີການສົ່ງຂໍ້ມູນຢ່າງໜ້ອຍ %1$d ຄັ້ງ.</item>
+  </plurals>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="formeditor_matches_min_submissions_table_row">
+    <item quantity="other">ກົງກັນເມື່ອແຖວຕາຕະລາງມີການສົ່ງຂໍ້ມູນຢ່າງໜ້ອຍ %1$d ຄັ້ງ.</item>
+  </plurals>
+  <!-- Button description for a status rule's color picker. %1$d: status rule number. -->
+  <string name="formeditor_status_color_for_rule">ສີສະຖານະສຳລັບກົດ %1$d</string>
+  <!-- Field label: status marker symbol (e.g. ✓, ○). -->
+  <string name="formeditor_symbol">ສັນຍາລັກ</string>
+  <string name="formeditor_status_label">ປ້າຍກຳກັບສະຖານະ</string>
+  <string name="formeditor_marker_color">ສີເຄື່ອງໝາຍ</string>
+  <!-- Placeholder text in a status pill when the designer hasn't entered a status label. -->
+  <string name="formeditor_status_placeholder">ສະຖານະ</string>
+  <string name="formeditor_submission_updates_unchosen">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະອັບເດດອົງປະກອບທີ່ມີຢູ່ແລ້ວ. ເລືອກອົງປະກອບໃນສ່ວນຂັ້ນສູງ.</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_updates_map_feature_in">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະອັບເດດອົງປະກອບແຜນທີ່ທີ່ມີຢູ່ແລ້ວໃນ:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_updates_table_row_in">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະອັບເດດແຖວຕາຕະລາງທີ່ມີຢູ່ແລ້ວໃນ:</string>
+  <string name="formeditor_submission_saved_without_dataset">ການສົ່ງຂໍ້ມູນຈະຖືກບັນທຶກໂດຍບໍ່ເພີ່ມອົງປະກອບແຜນທີ່ ຫຼື ແຖວຕາຕະລາງ.</string>
+  <!-- Followed by the name of the map layer. -->
+  <string name="formeditor_submission_adds_map_feature_to">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະເພີ່ມອົງປະກອບແຜນທີ່ໃໝ່ໃສ່:</string>
+  <!-- Followed by the name of the data table. -->
+  <string name="formeditor_submission_adds_table_row_to">ການສົ່ງຂໍ້ມູນແຕ່ລະຄັ້ງຈະເພີ່ມແຖວໃໝ່ໃສ່:</string>
+  <!-- Summary of the save-to setting. %1$s: update option label (e.g. "Update existing map features"); %2$s: map layer or data table name. -->
+  <string name="formeditor_save_to_summary_update_in">%1$s ໃນ %2$s</string>
+  <!-- Summary of the save-to setting plus status markers. %1$s: save-to summary; %2$s: status badges separated by " / " (e.g. "✓ Surveyed / ○ Pending"). -->
+  <string name="formeditor_save_to_summary_with_status">%1$s • ສະຖານະ: %2$s</string>
+
+  <!-- Web preview, Save as template, and standard-field (concept) linking. -->
+  <!-- Web preview: platform banners. -->
+  <!-- Short name of the mobile platform, used inside sentences. -->
+  <string name="formeditor_preview_target_mobile_sentence">ແອັບມືຖື</string>
+  <!-- Short name of the web platform, used inside sentences. -->
+  <string name="formeditor_preview_target_web_sentence">ແດຊບອດເວັບ</string>
+  <!-- Banner title when the form is switched off for the mobile app. -->
+  <string name="formeditor_not_available_on_mobile">ບໍ່ສາມາດໃຊ້ໃນມືຖືໄດ້</string>
+  <!-- Banner title when the form is switched off for the web dashboard. -->
+  <string name="formeditor_not_available_on_web">ບໍ່ສາມາດໃຊ້ໃນເວັບໄດ້</string>
+  <string name="formeditor_not_available_on_mobile_body">ຜູ້ເກັບຂໍ້ມູນຈະບໍ່ພົບແບບຟອມນີ້ໃນແອັບມືຖື. ເປີດໃຊ້ເພື່ອໃຫ້ມີຢູ່ໃນນັ້ນ (ຫຼື ໃນການຕັ້ງຄ່າແບບຟອມ).</string>
+  <string name="formeditor_not_available_on_web_body">ຜູ້ເກັບຂໍ້ມູນຈະບໍ່ພົບແບບຟອມນີ້ໃນແດຊບອດເວັບ. ເປີດໃຊ້ເພື່ອໃຫ້ມີຢູ່ໃນນັ້ນ (ຫຼື ໃນການຕັ້ງຄ່າແບບຟອມ).</string>
+  <!-- Banner action that turns the form on for the previewed platform. -->
+  <string name="formeditor_enable_on_platform">ເປີດໃຊ້</string>
+  <string name="formeditor_cant_be_used_on_web_title">ຍັງບໍ່ສາມາດໃຊ້ໃນເວັບໄດ້</string>
+  <!-- %1$s: sentence summarizing how many geometry questions are GPS only. -->
+  <string name="formeditor_cant_be_used_on_web_body">ແບບຟອມນີ້ບໍ່ສາມາດໃຊ້ໃນເວັບໄດ້ ຈົນກວ່າຄຳຖາມທີ່ໃຊ້ສະເພາະ GPS ຈະອະນຸຍາດໃຫ້ວາດເທິງແຜນທີ່. %1$s</string>
+
+  <!-- Web preview: wireframe and mock dashboard. -->
+  <!-- Wireframe summary of a whole-number question's input. -->
+  <string name="formeditor_integer_input">ປ້ອນຈຳນວນເຕັມ</string>
+  <!-- Wireframe summary of a decimal question's input. %1$d: number of decimal places ("dp"). -->
+  <string name="formeditor_decimal_input">ທົດສະນິຍົມ (%1$d ຕຳແໜ່ງ)</string>
+  <!-- Accessibility label of the ghost card that adds a question at the end of the web form. -->
+  <string name="formeditor_add_question_at_end_of_web_form">ເພີ່ມຄຳຖາມໃນທ້າຍແບບຟອມເວັບ</string>
+  <!-- Progress line in the web form wireframe footer. %1$d: number of questions. -->
+  <string name="formeditor_answered_progress">ຕອບແລ້ວ 0 ຈາກ %1$d</string>
+  <!-- Fallback name of the dataset shown in the mock web dashboard. -->
+  <string name="formeditor_sample_plots">ແປງຕົວຢ່າງ</string>
+  <!-- Placeholder of the mock feature search box in the web preview. -->
+  <string name="formeditor_search_features">ຊອກຫາອົງປະກອບ…</string>
+  <!-- Title of the web preview window. %1$s: form title. -->
+  <string name="formeditor_preview_title_web">ສະແດງຕົວຢ່າງ • %1$s • ເວັບ</string>
+  <!-- Web preview button that zooms the map back out. -->
+  <string name="formeditor_reset_map_view">ຣີເຊັດມຸມມອງແຜນທີ່</string>
+
+  <!-- Save as template. -->
+  <string name="formeditor_save_template_needs_organization">ຍ້າຍແບບສຳຫຼວດນີ້ເຂົ້າໄປໃນອົງກອນ ເພື່ອບັນທຶກແບບຟອມຂອງມັນເປັນແມ່ແບບ.</string>
+  <!-- %1$s: organization name. -->
+  <string name="formeditor_save_template_managers_only">ສະເພາະຜູ້ຈັດການຂອງ %1$s ເທົ່ານັ້ນທີ່ສາມາດບັນທຶກແມ່ແບບໄດ້.</string>
+  <string name="formeditor_save_template_managers_only_this_organization">ສະເພາະຜູ້ຈັດການຂອງອົງກອນນີ້ເທົ່ານັ້ນທີ່ສາມາດບັນທຶກແມ່ແບບໄດ້.</string>
+  <string name="formeditor_template_saved_title">ບັນທຶກແມ່ແບບແລ້ວ</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_global">"%1$s" ຢູ່ໃນຄັງສ່ວນກາງແລ້ວ. ສາມາດໃຊ້ໄດ້ໃນ "ຈາກແມ່ແບບ…" ເມື່ອເພີ່ມແບບຟອມ ແລະ ສະແດງຢູ່ໃນແຖບແມ່ແບບຂອງອົງກອນ.</string>
+  <!-- %1$s: template name. %2$s: organization name. -->
+  <string name="formeditor_template_saved_organization">"%1$s" ຢູ່ໃນແມ່ແບບຂອງ %2$s ແລ້ວ. ສາມາດໃຊ້ໄດ້ໃນ "ຈາກແມ່ແບບ…" ເມື່ອເພີ່ມແບບຟອມ ແລະ ສະແດງຢູ່ໃນແຖບແມ່ແບບຂອງອົງກອນ.</string>
+  <!-- %1$s: template name. -->
+  <string name="formeditor_template_saved_your_organization">"%1$s" ຢູ່ໃນແມ່ແບບຂອງອົງກອນທ່ານແລ້ວ. ສາມາດໃຊ້ໄດ້ໃນ "ຈາກແມ່ແບບ…" ເມື່ອເພີ່ມແບບຟອມ ແລະ ສະແດງຢູ່ໃນແຖບແມ່ແບບຂອງອົງກອນ.</string>
+  <!-- Button that closes a confirmation dialog. -->
+  <string name="formeditor_done">ແລ້ວເສັດ</string>
+  <string name="formeditor_save_as_template_title">ບັນທຶກເປັນແມ່ແບບ</string>
+  <string name="formeditor_save_as_template_intro">ບັນທຶກສຳເນົາຂອງແບບຟອມນີ້ ເພື່ອໃຫ້ສາມາດເພີ່ມໃສ່ແບບສຳຫຼວດອື່ນໄດ້. ການເຊື່ອມໂຍງຊ່ອງຂໍ້ມູນມາດຕະຖານ ແລະ ລະຫັດຕົວເລືອກຈະຖືກເກັບໄວ້; ແຕ່ບ່ອນບັນທຶກຂໍ້ມູນຈະບໍ່ຖືກເກັບໄວ້.</string>
+  <string name="formeditor_template_name">ຊື່ແມ່ແບບ</string>
+  <string name="formeditor_template_description_optional">ຄຳອະທິບາຍ (ບໍ່ບັງຄັບ)</string>
+  <!-- Template destination option. %1$s: organization name. -->
+  <string name="formeditor_template_destination_organization">ແມ່ແບບຂອງ %1$s</string>
+  <!-- Template destination option when the organization name is unknown. -->
+  <string name="formeditor_template_destination_your_organization">ແມ່ແບບຂອງອົງກອນທ່ານ</string>
+  <string name="formeditor_template_destination_global">ຄັງສ່ວນກາງ (ທຸກອົງກອນ)</string>
+  <!-- Template summary. %1$d: number of questions. -->
+  <plurals name="formeditor_template_question_summary">
+    <item quantity="other">%1$d ຄຳຖາມ.</item>
+  </plurals>
+  <!-- Template summary. %1$d: number of questions. %2$d: number of them linked to standard fields. -->
+  <plurals name="formeditor_template_question_summary_linked">
+    <item quantity="other">%1$d ຄຳຖາມ, %2$d ເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນມາດຕະຖານ.</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. %2$s: organization name. -->
+  <plurals name="formeditor_template_dropped_links">
+    <item quantity="other">ແມ່ແບບສ່ວນກາງສາມາດໃຊ້ໄດ້ສະເພາະຊ່ອງຂໍ້ມູນມາດຕະຖານສ່ວນກາງ ດັ່ງນັ້ນ %1$d ການເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນຂອງ %2$s ຈະຖືກລຶບອອກຈາກແມ່ແບບ.</item>
+  </plurals>
+  <!-- %1$d: number of links that will be removed. -->
+  <plurals name="formeditor_template_dropped_links_your_organization">
+    <item quantity="other">ແມ່ແບບສ່ວນກາງສາມາດໃຊ້ໄດ້ສະເພາະຊ່ອງຂໍ້ມູນມາດຕະຖານສ່ວນກາງ ດັ່ງນັ້ນ %1$d ການເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນຂອງອົງກອນທ່ານຈະຖືກລຶບອອກຈາກແມ່ແບບ.</item>
+  </plurals>
+  <string name="formeditor_save_template">ບັນທຶກແມ່ແບບ</string>
+
+  <!-- Concept (standard field) linking. -->
+  <!-- Field label for the text of a note question. -->
+  <string name="formeditor_note_text">ຂໍ້ຄວາມບັນທຶກ</string>
+  <!-- Field label for the text of a note question in a non-default language. %1$s: language name. -->
+  <string name="formeditor_note_text_in_language">ຂໍ້ຄວາມບັນທຶກ (%1$s)</string>
+  <!-- Heading of the standard-field suggestions under the Label field. -->
+  <string name="formeditor_standard_fields">ຊ່ອງຂໍ້ມູນມາດຕະຖານ</string>
+  <!-- %1$s: question label. %2$s: organization name. -->
+  <string name="formeditor_add_label_to_dictionary">ເພີ່ມ "%1$s" ໃສ່ວັດຈະນານຸກົມຂອງ %2$s</string>
+  <!-- %1$s: question label. Used when the organization name is unknown. -->
+  <string name="formeditor_add_label_to_organization_dictionary">ເພີ່ມ "%1$s" ໃສ່ວັດຈະນານຸກົມຂອງອົງກອນ</string>
+  <!-- Suggestion detail for a standard field of an incompatible type. %1$s: data type (e.g. "Number"). -->
+  <string name="formeditor_concept_type_answers">ຄຳຕອບປະເພດ %1$s</string>
+  <string name="formeditor_unlink_standard_field">ຍົກເລີກການເຊື່ອມໂຍງຊ່ອງຂໍ້ມູນມາດຕະຖານ</string>
+  <!-- %1$s: the standard field's label. -->
+  <string name="formeditor_use_standard_label">ໃຊ້ປ້າຍກຳກັບມາດຕະຖານ "%1$s"</string>
+  <!-- %1$s: standard field ID. -->
+  <string name="formeditor_concept_not_in_dictionary">%1$s ບໍ່ມີຢູ່ໃນວັດຈະນານຸກົມຂອງແບບສຳຫຼວດນີ້.</string>
+  <!-- %1$s: unit of measure. -->
+  <string name="formeditor_concept_unit">ຫົວໜ່ວຍ: %1$s</string>
+  <!-- %1$s: comma-separated list of references. -->
+  <string name="formeditor_concept_reference">ເອກະສານອ້າງອີງ: %1$s</string>
+  <!-- %1$s: standard field ID. %2$s: version. -->
+  <string name="formeditor_concept_id_version">%1$s · ເວີຊັນ %2$s</string>
+  <!-- Button that opens the standard field search dialog. -->
+  <string name="formeditor_link_to_standard_field_button">ເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນມາດຕະຖານ…</string>
+  <string name="formeditor_link_to_standard_field_title">ເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນມາດຕະຖານ</string>
+  <string name="formeditor_search_the_dictionary">ຊອກຫາໃນວັດຈະນານຸກົມ</string>
+  <string name="formeditor_no_dictionary_yet">ແບບສຳຫຼວດນີ້ຍັງບໍ່ມີວັດຈະນານຸກົມ.</string>
+  <string name="formeditor_no_standard_fields_available">ຍັງບໍ່ມີຊ່ອງຂໍ້ມູນມາດຕະຖານໃນວັດຈະນານຸກົມນີ້.</string>
+  <!-- %1$s: search text. -->
+  <string name="formeditor_no_standard_fields_match">ບໍ່ມີຊ່ອງຂໍ້ມູນມາດຕະຖານທີ່ກົງກັບ "%1$s".</string>
+  <!-- Field label: the standard code-list value a choice maps to. -->
+  <string name="formeditor_standard_value">ຄ່າມາດຕະຖານ</string>
+  <!-- A choice not mapped to any standard code-list value. -->
+  <string name="formeditor_not_matched">ບໍ່ກົງກັນ</string>
+  <string name="formeditor_delete_question">ລຶບຄຳຖາມ</string>
+  <string name="formeditor_delete_question_title">ລຶບຄຳຖາມບໍ?</string>
+  <string name="formeditor_delete_question_message">ຄຳຖາມນີ້ຈະຖືກໝາຍວ່າລຶບແລ້ວ. ຜູ້ໃຊ້ຈະບໍ່ເຫັນມັນອີກເມື່ອອຸປະກອນຂອງເຂົາເຈົ້າຊິ້ງຂໍ້ມູນ, ແລະຂໍ້ມູນໃດໆທີ່ເກັບກຳມາແລ້ວຈະຖືກຮັກສາໄວ້.</string>
+  <string name="formeditor_delete_linked_question_title">ລຶບຄຳຖາມທີ່ເຊື່ອມໂຍງແລ້ວບໍ?</string>
+  <!-- %1$s: sentence saying what the question's answers feed. -->
+  <string name="formeditor_delete_linked_question_message">%1$s ການລຶບຈະເຮັດໃຫ້ຄຳຕອບເຫຼົ່ານີ້ຖືກລຶບອອກຈາກລາຍງານ.</string>
+  <!-- %1$d: number of imported fields matching standard definitions. -->
+  <plurals name="formeditor_import_matches_title">
+    <item quantity="other">ພວກເຮົາພົບ %1$d ຊ່ອງຂໍ້ມູນທີ່ກົງກັບຄຳນິຍາມມາດຕະຖານ</item>
+  </plurals>
+  <!-- Icon description: closes a card. -->
+  <string name="formeditor_dismiss">ປິດ</string>
+  <string name="formeditor_linked_fields_explainer">ຊ່ອງຂໍ້ມູນທີ່ເຊື່ອມໂຍງສາມາດປຽບທຽບ ແລະ ລວມຍອດກັນໄດ້ລະຫວ່າງແບບສຳຫຼວດ.</string>
+  <string name="formeditor_link_all">ເຊື່ອມໂຍງທັງໝົດ</string>
+  <!-- %1$d: number of selected matches. -->
+  <string name="formeditor_link_selected">ເຊື່ອມໂຍງ %1$d ລາຍການທີ່ເລືອກ</string>
+  <string name="formeditor_not_now">ບໍ່ແມ່ນຕອນນີ້</string>
+  <string name="formeditor_saving_to_global_library">ກຳລັງບັນທຶກໃສ່ຄັງສ່ວນກາງ (ທຸກອົງກອນ)</string>
+  <!-- Banner title when the template a form was built from has changed. %1$s: template title. -->
+  <string name="formeditor_template_update_available">ມີການອັບເດດແມ່ແບບ: %1$s</string>
+  <!-- Banner body. %1$d: number of suggested additions; %2$d: number of suggested removals. -->
+  <string name="formeditor_template_update_summary">ກວດເບິ່ງລາຍການທີ່ແນະນຳໃຫ້ເພີ່ມ %1$d ລາຍການ ແລະ ລາຍການທີ່ຈະລຶບ %2$d ລາຍການ ກ່ອນນຳໃຊ້ກັບແບບຟອມນີ້.</string>
+  <!-- Button that opens the template update review dialog. -->
+  <string name="formeditor_template_review_changes">ກວດເບິ່ງການປ່ຽນແປງ</string>
+  <!-- Template update review dialog title. %1$s: template title. -->
+  <string name="formeditor_template_review_title">ກວດເບິ່ງການອັບເດດແມ່ແບບ: %1$s</string>
+  <!-- Template update review dialog explanation. -->
+  <string name="formeditor_template_review_description">ເລືອກການອັບເດດຕາມລະບຽບ ຫຼື ແມ່ແບບທີ່ຈະນຳໃຊ້ກັບແບບຟອມຂອງທ່ານ. ລາຍການທີ່ບໍ່ໄດ້ໝາຍໄວ້ຈະບໍ່ປ່ຽນແປງ.</string>
+  <!-- Template update review dialog: heading above questions the template added. -->
+  <string name="formeditor_template_suggested_additions">ລາຍການທີ່ແນະນຳໃຫ້ເພີ່ມ</string>
+  <!-- Template update review dialog: heading above questions the template no longer has. -->
+  <string name="formeditor_template_removed_questions">ຄຳຖາມທີ່ບໍ່ມີໃນແມ່ແບບແລ້ວ</string>
+  <!-- Template update review dialog: checkbox label to remove a question. %1$s: question label. -->
+  <string name="formeditor_template_remove_question">ລຶບ: %1$s</string>
+  <!-- Template update review dialog: applies the checked additions and removals. -->
+  <string name="formeditor_template_apply_selected">ນຳໃຊ້ລາຍການທີ່ເລືອກ</string>
+  <!-- Menu action that duplicates the selected question together with the questions that depend on it. -->
+  <string name="formeditor_duplicate_branch">ສຳເນົາກິ່ງ</string>
+  <!-- Summary of a question's validation rules. %1$s = one or more conditions, e.g. “be between 0 and 120”. -->
+  <string name="formeditor_validation_must">ຕ້ອງ%1$s.</string>
+  <!-- Joins two validation conditions. %1$s, %2$s = conditions. -->
+  <string name="formeditor_validation_and">%1$s ແລະ %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number from %1$s to %2$s. -->
+  <string name="formeditor_validation_number_between">ຢູ່ລະຫວ່າງ %1$s ຫາ %2$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at least %1$s. -->
+  <string name="formeditor_validation_number_at_least">ຢ່າງໜ້ອຍ %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is a number of at most %1$s. -->
+  <string name="formeditor_validation_number_at_most">ບໍ່ເກີນ %1$s</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has %1$d to %2$d characters. -->
+  <string name="formeditor_validation_length_between">ມີຄວາມຍາວ %1$d–%2$d ຕົວອັກສອນ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at least %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_least">
+    <item quantity="other">ມີຄວາມຍາວຢ່າງໜ້ອຍ %1$d ຕົວອັກສອນ</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has at most %1$d characters. -->
+  <plurals name="formeditor_validation_length_at_most">
+    <item quantity="other">ມີຄວາມຍາວບໍ່ເກີນ %1$d ຕົວອັກສອນ</item>
+  </plurals>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer is an email address. -->
+  <string name="formeditor_validation_pattern_email">ເປັນທີ່ຢູ່ອີເມວ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only digits. -->
+  <string name="formeditor_validation_pattern_digits">ມີແຕ່ຕົວເລກ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer has only the Latin letters A to Z. -->
+  <string name="formeditor_validation_pattern_letters">ມີແຕ່ຕົວອັກສອນ A–Z</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the answer matches the organizer's own pattern. -->
+  <string name="formeditor_validation_pattern_custom">ກົງກັບຮູບແບບ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or earlier. -->
+  <string name="formeditor_validation_date_not_in_future">ບໍ່ແມ່ນວັນທີໃນອະນາຄົດ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is today or later. -->
+  <string name="formeditor_validation_date_not_in_past">ບໍ່ແມ່ນວັນທີໃນອະດີດ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or later. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_after">ເປັນວັນທີ %1$s ຫຼືຫຼັງຈາກນັ້ນ</string>
+  <!-- Validation summary phrase, shown inside “Must %1$s.”: the date is %1$s or earlier. %1$s = a date. -->
+  <string name="formeditor_validation_date_on_or_before">ເປັນວັນທີ %1$s ຫຼືກ່ອນນັ້ນ</string>
+  <!-- Validation summary of a select multiple question. %1$d, %2$d = fewest and most options. -->
+  <string name="formeditor_validation_selections_between">ເລືອກລະຫວ່າງ %1$d ຫາ %2$d ຕົວເລືອກ.</string>
+  <!-- Validation summary of a select multiple question. %1$d = fewest options. -->
+  <plurals name="formeditor_validation_selections_at_least">
+    <item quantity="other">ເລືອກຢ່າງໜ້ອຍ %1$d ຕົວເລືອກ.</item>
+  </plurals>
+  <!-- Validation summary of a select multiple question. %1$d = most options. -->
+  <plurals name="formeditor_validation_selections_at_most">
+    <item quantity="other">ເລືອກບໍ່ເກີນ %1$d ຕົວເລືອກ.</item>
+  </plurals>
+  <!-- Lowercase name of one or several records of a dataset, used inside sentences: map features of a map layer, rows of a data table. -->
+  <string name="formeditor_feature_noun_map_feature">ອົງປະກອບແຜນທີ່</string>
+  <string name="formeditor_feature_noun_map_features">ອົງປະກອບແຜນທີ່</string>
+  <string name="formeditor_feature_noun_table_row">ແຖວຕາຕະລາງ</string>
+  <string name="formeditor_feature_noun_table_rows">ແຖວຕາຕະລາງ</string>
+  <string name="formeditor_template_subtitle">ແມ່ແບບໃນຄັງ: ຄຳຖາມ, ເງື່ອນໄຂການສະແດງ ແລະ ລຳດັບຂັ້ນຕອນ.</string>
+  <string name="formeditor_template_section">ແມ່ແບບ</string>
+  <string name="formeditor_template_title">ຫົວຂໍ້ແມ່ແບບ</string>
+  <string name="formeditor_template_adds_map_layer">ແບບສຳຫຼວດທີ່ເພີ່ມແມ່ແບບນີ້ຈະໄດ້ຊັ້ນແຜນທີ່ໃໝ່ຂອງ %1$s ສຳລັບການສົ່ງຂໍ້ມູນ. ຄຳຖາມເລຂາຄະນິດທຳອິດກຳນົດຕຳແໜ່ງຂອງແຕ່ລະອົງປະກອບ.</string>
+  <string name="formeditor_template_adds_data_table">ແບບສຳຫຼວດທີ່ເພີ່ມແມ່ແບບນີ້ຈະໄດ້ຕາຕະລາງຂໍ້ມູນໃໝ່ສຳລັບການສົ່ງຂໍ້ມູນ. ເພີ່ມຄຳຖາມຕຳແໜ່ງ, ເສັ້ນ ຫຼື ຮູບຫຼາຍແຈ ເພື່ອເກັບອົງປະກອບແຜນທີ່ແທນ.</string>
+  <string name="formeditor_enable_open_in_google_earth">ເປີດໃຊ້ ເປີດໃນ Google Earth</string>
+  <string name="formeditor_availability_google_earth_on">ຜູ້ເກັບຂໍ້ມູນສາມາດເປີດອົງປະກອບແຜນທີ່ ແລະ ແບບຟອມທີ່ຝັງໄວ້ໃນ Google Earth ໄດ້.</string>
+  <string name="formeditor_availability_google_earth_off">ເປີດເພື່ອໃຫ້ຜູ້ເກັບຂໍ້ມູນສາມາດເປີດແບບຟອມນີ້ພາຍໃນປ່ອງແຜນທີ່ຂອງ Google Earth.</string>
+  <string name="formeditor_availability_google_earth_unavailable">ໃຊ້ໄດ້ສະເພາະກັບແບບຟອມທີ່ອັບເດດອົງປະກອບແຜນທີ່ທີ່ມີຢູ່ແລ້ວເທົ່ານັ້ນ.</string>
+  <string name="formeditor_availability_google_earth_needs_map_selection">ໃຊ້ໄດ້ສະເພາະເມື່ອຕັ້ງ &quot;%1$s&quot; ເປັນ &quot;%2$s&quot; ເທົ່ານັ້ນ.</string>
+  <string name="formeditor_enable_web_confirm_title">ເປີດໃຊ້ໃນເວັບບໍ?</string>
+  <string name="formeditor_enable_web_confirm_message">ບາງປະເພດຄຳຖາມບໍ່ຮອງຮັບໃນເວັບ ແລະ ຈະບໍ່ສາມາດໃຊ້ໄດ້.</string>
+  <string name="formeditor_enable_google_earth_confirm_title">ເປີດໃຊ້ ເປີດໃນ Google Earth ບໍ?</string>
+  <string name="formeditor_enable_google_earth_confirm_message">ບາງປະເພດຄຳຖາມບໍ່ຮອງຮັບໃນ Google Earth ແລະ ຈະບໍ່ສາມາດໃຊ້ໄດ້.</string>
+  <plurals name="formeditor_google_earth_incompatible_questions_summary">
+    <item quantity="one">%1$d ຄຳຖາມໃຊ້ປະເພດຊ່ອງຂໍ້ມູນທີ່ບໍ່ຮອງຮັບໃນ Google Earth.</item>
+    <item quantity="other">%1$d ຄຳຖາມໃຊ້ປະເພດຊ່ອງຂໍ້ມູນທີ່ບໍ່ຮອງຮັບໃນ Google Earth.</item>
+  </plurals>
+</resources>

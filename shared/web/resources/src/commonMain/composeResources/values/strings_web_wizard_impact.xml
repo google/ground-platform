@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Impact goals: plain-language names of the goals survey data can contribute to. -->
+  <string name="wizard_goal_deforestation_free_supply_chains">Deforestation-free supply chains</string>
+  <string name="wizard_goal_ecosystem_restoration">Ecosystem restoration</string>
+  <string name="wizard_goal_effective_protected_areas">Protected areas</string>
+  <string name="wizard_goal_iplc_rights_and_tenure">Indigenous and community land rights</string>
+  <string name="wizard_goal_legal_timber">Legal timber</string>
+  <string name="wizard_goal_forest_carbon_and_conservation">Forest carbon and conservation</string>
+  <string name="wizard_goal_smallholder_livelihoods">Smallholder livelihoods and market access</string>
+  <string name="wizard_goal_open_earth_data">Open land cover and crop reference data</string>
+  <!-- Heading of standard fields (shared data definitions) that don't contribute to any goal. -->
+  <string name="wizard_goal_other_standard_fields">Other standard fields</string>
+
+  <!-- Impact attribution levels: how directly a survey's data contributed to results (1–5). -->
+  <string name="wizard_impact_attribution_official_submission">Used in an official submission</string>
+  <string name="wizard_impact_attribution_official_submission_explanation">The organizer said the data went into an official submission, such as an EUDR due diligence statement, a FERM report, or a protected area assessment.</string>
+  <string name="wizard_impact_attribution_partner_use">Used by a partner</string>
+  <string name="wizard_impact_attribution_partner_use_explanation">The data was sent to a partner, or used by buyers, for land titling, or to check a map or model.</string>
+  <string name="wizard_impact_attribution_purpose_export">Exported for its purpose</string>
+  <string name="wizard_impact_attribution_purpose_export_explanation">The data was downloaded in a format one of its purposes provides, such as EUDR GeoJSON.</string>
+  <string name="wizard_impact_attribution_data_collected">Data collected</string>
+  <string name="wizard_impact_attribution_data_collected_explanation">Data was collected, but we don't know yet how it was used.</string>
+  <string name="wizard_impact_attribution_exploratory">Getting started</string>
+  <string name="wizard_impact_attribution_exploratory_explanation">A test or exploratory survey, or one with no data yet.</string>
+
+  <!-- Impact setup hints, shown when a summary has no numbers yet. -->
+  <string name="wizard_impact_hint_collect_data">Numbers appear here once data is collected.</string>
+  <string name="wizard_impact_hint_pick_purpose">Pick what the data will be used for in Survey details, so results can be grouped by goal.</string>
+  <string name="wizard_impact_hint_link_fields">Link form questions or layer columns to standard fields (like Commodity), so their answers can be added up.</string>
+
+  <!-- Impact activity: kinds of "data was used" events, with their count next to them. -->
+  <string name="wizard_impact_activity_downloads">Downloads</string>
+  <string name="wizard_impact_activity_sent_to_partners">Sent to partners</string>
+  <string name="wizard_impact_activity_receipts_created">Receipts created</string>
+  <string name="wizard_impact_activity_receipts_shared">Receipts shared</string>
+  <string name="wizard_impact_activity_doi_minted">DOIs minted</string>
+  <string name="wizard_impact_activity_surveys_closed">Surveys closed</string>
+
+  <!-- Impact indicators. %1$s is the formatted count (e.g. "1,234"). -->
+  <plurals name="wizard_impact_map_features">
+    <item quantity="one">%1$s map feature</item>
+    <item quantity="other">%1$s map features</item>
+  </plurals>
+  <!-- %1$s: a count of map features (e.g. "3 map features"); %2$s: their area (e.g. "5.9 ha"). -->
+  <string name="wizard_impact_value_with_area">%1$s · %2$s</string>
+  <!-- Headline of a share indicator. %1$s: a percentage (e.g. "67%"); %2$s: the most common answer (e.g. "Yes"). -->
+  <string name="wizard_impact_share_value">%1$s %2$s</string>
+  <!-- What a breakdown indicator is split by. %1$s: the indicator name in lower case (e.g. "commodity"). -->
+  <string name="wizard_impact_detail_by">By %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_of_answered">Of %1$s with an answer</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_total_from">Total from %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_average_of">Average of %1$s</string>
+  <!-- %1$s: an area (e.g. "5.9 ha") or a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_covering">Covering %1$s</string>
+
+  <!-- Impact notes on what couldn't be counted. %1$s: the standard field (shared data definition) name. -->
+  <string name="wizard_impact_note_link_unknown">A field links to a standard field that no longer exists (%1$s).</string>
+  <string name="wizard_impact_note_link_deprecated">A field links to a standard field that was retired (%1$s).</string>
+  <string name="wizard_impact_note_link_not_in_library">A field links to another organization's standard field, so it isn't counted here (%1$s).</string>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_not_a_number">
+    <item quantity="one">%1$s: %2$s value isn't a number (%3$s), so left out.</item>
+    <item quantity="other">%1$s: %2$s values aren't numbers (%3$s), so left out.</item>
+  </plurals>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_unsupported_unit">
+    <item quantity="one">%1$s: %2$s value use a unit that can't be converted (%3$s), so left out.</item>
+    <item quantity="other">%1$s: %2$s values use a unit that can't be converted (%3$s), so left out.</item>
+  </plurals>
+
+  <!-- Impact views (survey Impact tab, Impact page, platform-wide view) and PDF summaries. -->
+  <string name="wizard_impact_title">Impact</string>
+  <string name="wizard_impact_survey_subtitle">What this survey's data adds up to, and how it was used. Plots mapped more than once count once.</string>
+  <string name="wizard_impact_organization_subtitle">What your surveys' data adds up to, and how it was used. Plots mapped in more than one survey count once.</string>
+  <!-- Option of the survey filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_surveys">All surveys</string>
+  <!-- Option of the country filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_countries">All countries</string>
+  <!-- Label of the survey filter dropdown. -->
+  <string name="wizard_impact_filter_survey">Survey</string>
+  <!-- Label of the country filter dropdown. -->
+  <string name="wizard_impact_filter_country">Country</string>
+  <!-- Title of the platform-wide Impact view ("Collect One" is the product name). -->
+  <string name="wizard_impact_all_of_collect_one">All of Collect One</string>
+  <string name="wizard_impact_global_subtitle_full">What everyone's data adds up to, from global standard fields only. Organizations that opted out aren't included, and small groups are kept private. As a Manager of All users you also see standard fields that aren't published.</string>
+  <string name="wizard_impact_global_subtitle_published">What everyone's data adds up to, from public global standard fields only. Organizations that opted out aren't included, and small groups are kept private.</string>
+  <!-- Title of the platform-wide impact summary (PDF) ("Collect One" is the product name). -->
+  <string name="wizard_impact_global_title">All Collect One users</string>
+  <string name="wizard_impact_download_pdf">Download PDF summary</string>
+  <string name="wizard_impact_adding_up">Adding up the numbers…</string>
+  <string name="wizard_impact_no_numbers_for_this">No numbers for this yet.</string>
+  <!-- Heading of an organization's own indicators, in its published view. -->
+  <string name="wizard_impact_own_indicators">Own indicators</string>
+  <!-- Heading of the viewer's organization's own indicators, in its members' full view. -->
+  <string name="wizard_impact_your_indicators">Your indicators</string>
+  <string name="wizard_impact_own_indicators_supporting">The organization's own standard fields, published as totals.</string>
+  <string name="wizard_impact_your_indicators_supporting">Your organization's own standard fields. Only those marked Public totals are published; the rest stay with your organization.</string>
+  <string name="wizard_impact_suggested_indicators">Organization-suggested indicators</string>
+  <string name="wizard_impact_suggested_indicators_supporting">Organizations' own fields they suggest count toward a goal. Shown separately and never added to the totals above.</string>
+  <string name="wizard_impact_how_data_was_used">How the data was used</string>
+  <string name="wizard_impact_unique_hectares_mapped">Unique hectares mapped</string>
+  <string name="wizard_impact_unique_hectares_mapped_detail">Area of the unique map features</string>
+  <string name="wizard_impact_plots_and_map_features">Plots and map features</string>
+  <!-- %1$s: the formatted number of duplicate map features. -->
+  <plurals name="wizard_impact_duplicates_counted_once">
+    <item quantity="one">%1$s duplicate counted once (same GeoID mapped again)</item>
+    <item quantity="other">%1$s duplicates counted once (same GeoID mapped again)</item>
+  </plurals>
+  <string name="wizard_impact_no_plot_mapped_twice">No plot mapped twice</string>
+  <string name="wizard_impact_producers_registered">Producers registered</string>
+  <string name="wizard_impact_producers_registered_detail">Different producers named on map features</string>
+  <string name="wizard_impact_what_happened_with_data">What happened with the data</string>
+  <string name="wizard_impact_outcomes_empty_survey">You'll be asked when the survey is closed.</string>
+  <string name="wizard_impact_outcomes_empty">No answers yet. Organizers are asked when they close a survey.</string>
+  <!-- Shown next to an outcome a single survey's organizer chose. -->
+  <string name="wizard_impact_outcome_yes">Yes</string>
+  <string name="wizard_impact_not_used_yet">Not used yet</string>
+  <string name="wizard_impact_closed_not_answered_yet">Closed, not answered yet</string>
+  <string name="wizard_impact_closed_surveys_not_answered">Closed surveys not answered</string>
+  <!-- PDF summary: closed surveys whose organizer didn't say what happened with the data. -->
+  <string name="wizard_impact_closed_not_answered">Closed, not answered</string>
+  <string name="wizard_impact_how_directly_contributed">How directly the data contributed</string>
+  <!-- Attribution level on a 1–5 scale. %1$s: the level (e.g. "2"). -->
+  <string name="wizard_impact_level_of_five">%1$s of 5</string>
+  <string name="wizard_impact_no_global_purpose_surveys">No surveys with a global purpose yet.</string>
+  <string name="wizard_impact_no_surveys">No surveys yet.</string>
+  <string name="wizard_impact_global_purpose_by_level">Surveys with a global purpose, by level</string>
+  <!-- %1$s: the formatted number of surveys. -->
+  <plurals name="wizard_impact_surveys">
+    <item quantity="one">%1$s survey</item>
+    <item quantity="other">%1$s surveys</item>
+  </plurals>
+  <string name="wizard_impact_by_country_and_map_area">By country and map area</string>
+  <string name="wizard_impact_by_country_and_map_area_supporting">Countries need at least 10 map features, and map areas at least 10 map features from 2 organizations, before their numbers are shown.</string>
+  <string name="wizard_impact_countries">Countries</string>
+  <string name="wizard_impact_no_countries">No countries yet.</string>
+  <!-- Shown instead of a country's numbers when it has fewer than 10 map features. -->
+  <string name="wizard_impact_fewer_than_10">Fewer than 10</string>
+  <string name="wizard_impact_map_areas_kept_private">Map areas kept private</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_map_areas_with_numbers">
+    <item quantity="one">%1$s map area with numbers</item>
+    <item quantity="other">%1$s map areas with numbers</item>
+  </plurals>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_map_features_in_private_areas">
+    <item quantity="one">%1$s map feature in private areas</item>
+    <item quantity="other">%1$s map features in private areas</item>
+  </plurals>
+  <string name="wizard_impact_organizations_not_included">Organizations not included</string>
+  <string name="wizard_impact_organizations_not_included_detail">They keep their data out of platform-wide numbers</string>
+  <string name="wizard_impact_not_enough_data_title">Not enough data to publish yet</string>
+  <!-- %1$d: the minimum number of map features before an organization's numbers are published. -->
+  <string name="wizard_impact_not_enough_data_body">Numbers are published once there are at least %1$d map features, so small groups can't be singled out.</string>
+  <string name="wizard_impact_hints_title_empty">How to get numbers here</string>
+  <string name="wizard_impact_hints_title">Get more out of your data</string>
+  <!-- %1$s: the formatted number of linked fields. -->
+  <plurals name="wizard_impact_linked_fields_not_counted">
+    <item quantity="one">%1$s linked field couldn't be counted</item>
+    <item quantity="other">%1$s linked fields couldn't be counted</item>
+  </plurals>
+  <!-- Button hiding the list of what couldn't be counted. -->
+  <string name="wizard_impact_hide">Hide</string>
+  <!-- Button showing why some fields couldn't be counted. -->
+  <string name="wizard_impact_why">Why?</string>
+
+  <!-- PDF impact summary. -->
+  <!-- %1$s: the survey, organization, or platform-wide title. -->
+  <string name="wizard_impact_pdf_title">Impact summary • %1$s</string>
+  <!-- Running header on every page ("Open Foris Collect One" is the product name). %1$s: the summary title. -->
+  <string name="wizard_impact_pdf_running_header">Open Foris Collect One • Impact summary • %1$s</string>
+  <!-- %1$s: when the PDF was generated (e.g. "2026-09-18 10:14 UTC"). -->
+  <string name="wizard_impact_pdf_footer">Impact summary • Generated %1$s</string>
+  <string name="wizard_impact_pdf_subject_survey">Survey impact summary</string>
+  <string name="wizard_impact_pdf_subject_organization">Organization impact summary</string>
+  <string name="wizard_impact_pdf_subject_global">All organizations taking part in platform-wide numbers impact summary</string>
+  <string name="wizard_impact_pdf_published_numbers">Published numbers</string>
+  <string name="wizard_impact_pdf_counted_once_note">Plots mapped more than once (same GeoID) are counted once.</string>
+  <string name="wizard_impact_pdf_counted_once_note_published">Plots mapped more than once (same GeoID) are counted once. Published numbers are anonymous totals from public standard fields only.</string>
+  <string name="wizard_impact_pdf_at_a_glance">At a glance</string>
+  <string name="wizard_impact_pdf_unique_map_features">Unique map features</string>
+  <string name="wizard_impact_pdf_area_mapped">Area mapped</string>
+  <string name="wizard_impact_pdf_counted_once">Counted once</string>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_pdf_mapped_again">
+    <item quantity="one">%1$s map feature mapped again elsewhere</item>
+    <item quantity="other">%1$s map features mapped again elsewhere</item>
+  </plurals>
+  <string name="wizard_impact_pdf_suggested_note">Organizations' own fields they suggest count toward a goal. Not added to the totals above.</string>
+  <!-- How directly the data contributed (attribution level). -->
+  <string name="wizard_impact_pdf_contribution">Contribution</string>
+  <string name="wizard_impact_pdf_by_country">By country</string>
+  <string name="wizard_impact_pdf_fewer_than_10_features">Fewer than 10 map features</string>
+  <string name="wizard_impact_pdf_map_areas">Map areas</string>
+  <string name="wizard_impact_pdf_map_areas_with_numbers">Map areas with numbers</string>
+  <string name="wizard_impact_pdf_kept_private">Kept private</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_pdf_kept_private_areas">
+    <item quantity="one">%1$s map area with fewer than 10 map features or 2 organizations</item>
+    <item quantity="other">%1$s map areas with fewer than 10 map features or 2 organizations</item>
+  </plurals>
+  <!-- %1$s: the formatted number of organizations. -->
+  <plurals name="wizard_impact_pdf_excluded_organizations">
+    <item quantity="one">%1$s organization keep their data out of platform-wide numbers.</item>
+    <item quantity="other">%1$s organizations keep their data out of platform-wide numbers.</item>
+  </plurals>
+  <string name="wizard_impact_pdf_not_counted">Not counted</string>
+
+  <!-- Impact page (#impact): the organizations a user follows and all of Collect One. -->
+  <string name="wizard_impact_back_to_surveys">Back to surveys</string>
+  <string name="wizard_impact_page_title">Live Metrics</string>
+  <!-- Header line under "Live Metrics". %1$s: the formatted number of followed organizations. -->
+  <plurals name="wizard_impact_published_by_followed">
+    <item quantity="one">Published by %1$s organization you follow</item>
+    <item quantity="other">Published by %1$s organizations you follow</item>
+  </plurals>
+  <string name="wizard_impact_choose_organizations">Choose organizations</string>
+  <!-- Navigation item of the Impact page's overview. -->
+  <string name="wizard_impact_overview">Overview</string>
+  <!-- Section heading in the Impact page's left panel (shown in capitals). -->
+  <string name="wizard_impact_organizations_you_follow">ORGANIZATIONS YOU FOLLOW</string>
+  <!-- The signed-in user is a member of this organization. -->
+  <string name="wizard_impact_member">Member</string>
+  <!-- The signed-in user is a Manager of this organization. -->
+  <string name="wizard_impact_you_manage">You manage</string>
+  <!-- Fallback description of an organization with no type or country. -->
+  <string name="wizard_impact_organization">Organization</string>
+  <string name="wizard_impact_no_followed_organizations">You don't follow any organizations yet.</string>
+  <string name="wizard_impact_dashboard_title">Your impact dashboard</string>
+  <string name="wizard_impact_dashboard_subtitle">Published numbers of the organizations you follow. Pick any listed organization to see what its data adds up to.</string>
+  <string name="wizard_impact_all_of_collect_one_supporting">Every organization taking part in platform-wide numbers</string>
+  <string name="wizard_impact_follow_more_organizations">Follow more organizations</string>
+  <!-- Screen reader label of the button removing an organization from the Impact page. %1$s: the organization name. -->
+  <string name="wizard_impact_stop_following">Stop following %1$s</string>
+  <string name="wizard_impact_no_numbers_yet">No numbers yet.</string>
+  <string name="wizard_impact_not_enough_data_short">Not enough data to publish yet.</string>
+  <!-- Label under a headline area number. -->
+  <string name="wizard_impact_unique_hectares">Unique hectares</string>
+  <!-- Label under a headline count of map features. -->
+  <string name="wizard_impact_map_features_label">Map features</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_organization_published_subtitle">What %1$s's surveys add up to, as published to everyone on Collect One. Plots mapped in more than one survey count once.</string>
+  <string name="wizard_impact_organization_page">Organization page</string>
+  <string name="wizard_impact_unfollow">Unfollow</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_manager">You're seeing your full numbers as a Manager of %1$s</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_member">You're seeing %1$s's full numbers as a member</string>
+  <string name="wizard_impact_notice_published_member">This is what everyone on Collect One sees</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_published_by">Published by %1$s</string>
+  <!-- %1$s: the organization name; %2$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body_manager">%1$s publishes anonymous totals from its surveys for anyone signed in to Collect One. %2$s</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body">Every organization on Collect One publishes anonymous totals from its surveys. %1$s</string>
+  <!-- Label of the switch showing members the published view. -->
+  <string name="wizard_impact_show_published">Show what's published</string>
+  <!-- "All users" is the name of the platform-wide organization. -->
+  <string name="wizard_impact_platform_notice_full">You're seeing every standard field as a Manager of All users</string>
+  <string name="wizard_impact_platform_notice_published">Published for everyone on Collect One</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_platform_notice_body">Totals across every organization that takes part in platform-wide numbers. %1$s</string>
+  <string name="wizard_impact_explainer_title">Every organization publishes anonymous totals</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_explainer_body">Organizers on Collect One publish what their surveys add up to, like hectares mapped and how the data was used, for anyone signed in to see. %1$s</string>
+  <!-- What's never published. %1$d: the minimum number of map features before numbers are shown. -->
+  <string name="wizard_impact_published_rules">Submissions, map features, locations, and answers are never published, nor are standard fields kept for the organization only or marked sensitive. Organizations with fewer than %1$d map features show no numbers.</string>
+  <string name="wizard_impact_choose_organizations_body">Every organization publishes anonymous totals from its surveys. Pick whose numbers to follow on your Impact page.</string>
+  <string name="wizard_impact_search_organizations">Search organizations</string>
+  <string name="wizard_impact_no_organizations_match">No organizations match.</string>
+  <!-- Appended to an organization's description when it isn't listed publicly. -->
+  <string name="wizard_impact_unlisted">Unlisted, only members see it</string>
+  <string name="wizard_impact_save">Save</string>
+  <string name="wizard_impact_cancel">Cancel</string>
+  <!-- Snackbar after saving a PDF summary. %1$s: the file name; %2$s: its page count and size (e.g. "2 pages • 14 KB"). -->
+  <string name="wizard_impact_saved_pdf">Saved %1$s (%2$s)</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the survey title. -->
+  <string name="wizard_impact_filter_label_survey">Survey: %1$s</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the country name. -->
+  <string name="wizard_impact_filter_label_country">Country: %1$s</string>
+
+  <!-- "What happened with this data?" card/dialog, asked after a survey is closed. -->
+  <string name="wizard_outcome_title">What happened with this data?</string>
+  <string name="wizard_outcome_supporting">Choose all that apply. Your answer helps show how survey data gets used.</string>
+  <string name="wizard_outcome_skip">Skip</string>
+  <string name="wizard_outcome_save">Save</string>
+  <!-- Question completed by one of the chips below (e.g. "Less time and cost"). -->
+  <string name="wizard_outcome_effort_question">Compared with your previous method, this took… (optional)</string>
+  <string name="wizard_outcome_effort_less">Less time and cost</string>
+  <string name="wizard_outcome_effort_same">About the same</string>
+  <string name="wizard_outcome_effort_more">More time and cost</string>
+
+  <!-- Purpose Pack picker ("What will this data be used for?"). -->
+  <!-- Screen reader label of the error icon in a validation banner. -->
+  <string name="wizard_purpose_error">Error</string>
+  <string name="wizard_validation_purpose_required">Select a purpose (or choose "Other" and describe your goal) to continue.</string>
+  <string name="wizard_validation_other_purpose_required">Please describe the purpose of this survey to continue.</string>
+  <!-- Badge of a Purpose Pack defined by an organization, when its name is unknown. -->
+  <string name="wizard_purpose_source_organization">Organization</string>
+  <!-- Badge of a Purpose Pack available to every organization. -->
+  <string name="wizard_purpose_source_global">Global</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_purpose_other_label">Describe the purpose of this survey *</string>
+  <string name="wizard_purpose_other_placeholder">e.g., Community watershed restoration monitoring</string>
+  <string name="wizard_purpose_other_supporting">Helps align forms, library concepts, and impact reporting with your goal.</string>
+  <!-- Screen reader label of the check mark on a selected card. -->
+  <string name="wizard_purpose_selected">Selected</string>
+  <!-- Title of the card for a custom survey purpose. -->
+  <string name="wizard_purpose_other">Other</string>
+  <string name="wizard_purpose_other_description">A custom research, monitoring, or community goal not covered by the standard packs.</string>
+  <!-- Badge of the "Other" purpose card. -->
+  <string name="wizard_purpose_custom">Custom</string>
+  <!-- What a Purpose Pack adds. %1$d: the number of form templates. -->
+  <plurals name="wizard_purpose_forms">
+    <item quantity="one">%1$d form</item>
+    <item quantity="other">%1$d forms</item>
+  </plurals>
+  <!-- What a Purpose Pack adds. %1$d: the number of questions linked to standard fields (shared data definitions). -->
+  <plurals name="wizard_purpose_standard_fields">
+    <item quantity="one">%1$d standard field</item>
+    <item quantity="other">%1$d standard fields</item>
+  </plurals>
+
+  <!-- Create survey wizard (#create-survey): page chrome. -->
+  <string name="wizard_cancel_survey_creation">Cancel survey creation</string>
+  <!-- Page title while the survey has no title yet, and the wizard's final button. -->
+  <string name="wizard_create_survey">Create survey</string>
+  <string name="wizard_saving_survey">Saving survey…</string>
+  <string name="wizard_save_failed">Couldn't save your survey, so it's still open here. %1$s</string>
+  <string name="wizard_discard_title">Discard survey?</string>
+  <string name="wizard_discard_body">If you leave now, this survey and any changes you've made will be lost.</string>
+  <string name="wizard_discard">Discard</string>
+  <string name="wizard_keep_editing">Keep editing</string>
+  <string name="wizard_working_copy_prompt_title">Continue editing unsaved draft?</string>
+  <string name="wizard_working_copy_prompt_body">You have an unsaved survey draft in progress. Would you like to continue editing it or discard it and start a new survey?</string>
+  <string name="wizard_working_copy_continue">Continue editing</string>
+  <string name="wizard_working_copy_discard">Discard draft</string>
+  <string name="wizard_back">Back</string>
+  <string name="wizard_cancel">Cancel</string>
+  <string name="wizard_required_field_missing">Required field missing — see highlighted section</string>
+  <string name="wizard_skip_for_now">Skip for now</string>
+  <string name="wizard_next">Next</string>
+
+  <!-- Wizard steps: name and short description of each of the 6 steps. -->
+  <string name="wizard_step_overview">Overview</string>
+  <string name="wizard_step_overview_subtitle">Title, organization, languages, and start method</string>
+  <string name="wizard_step_purpose">Purpose</string>
+  <string name="wizard_step_purpose_subtitle">Survey goal, purpose pack, and reporting programs</string>
+  <string name="wizard_step_survey_area">Survey area</string>
+  <string name="wizard_step_survey_area_subtitle">Study boundary and offline/web basemap imagery</string>
+  <string name="wizard_step_map_features">Map features</string>
+  <string name="wizard_step_map_features_subtitle">Primary map layer, sample plots, or imported features</string>
+  <string name="wizard_step_forms">Forms</string>
+  <string name="wizard_step_forms_subtitle">Questionnaires, library concepts, and export mapping</string>
+  <string name="wizard_step_sharing">Sharing</string>
+  <string name="wizard_step_sharing_subtitle">Access, CARE data sovereignty, and impact readiness</string>
+
+  <!-- Wizard step 1: Overview. -->
+  <string name="wizard_overview_subtitle">Name your survey, choose the organization running it, configure languages, and pick how you'd like to start.</string>
+  <string name="wizard_survey_identity">Survey details</string>
+  <string name="wizard_validation_title_required">Enter a survey title to continue.</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_survey_title_label">Survey title *</string>
+  <string name="wizard_survey_title_placeholder">e.g. Nyeri Smallholder Coffee Plot Mapping</string>
+  <string name="wizard_description_label">Description (optional)</string>
+  <string name="wizard_description_placeholder">Describe the goals and instructions for data collectors.</string>
+  <!-- Label of the organization dropdown. -->
+  <string name="wizard_organization">Organization</string>
+  <!-- Organization dropdown option for a survey not run by any organization. -->
+  <string name="wizard_no_organization">None (personal survey)</string>
+  <string name="wizard_organization_supporting">Running a survey under an organization unlocks its shared Purpose Packs, Dictionary concepts, Form templates, and custom basemap imagery.</string>
+  <string name="wizard_start_method_title">How would you like to start?</string>
+  <string name="wizard_start_from_scratch">Build a new survey</string>
+  <string name="wizard_start_from_scratch_description">Configure map layers and forms step by step or from purpose packs.</string>
+  <string name="wizard_start_copy_existing">Copy an existing survey</string>
+  <string name="wizard_start_copy_existing_description">Clone forms, map layer schemas, survey area, and purpose packs without data.</string>
+  <string name="wizard_start_import">Import from file</string>
+  <string name="wizard_start_import_description">Import a form definition from ODK XForms (.xml) or Collect Earth (.cep).</string>
+  <string name="wizard_no_surveys_to_copy">No existing surveys available to copy.</string>
+  <string name="wizard_copy_source_label">Source survey to copy</string>
+  <string name="wizard_copy_source_supporting">Copies Forms, Map layer schemas, sample plot designs, and Purposes without copying previously collected records.</string>
+  <string name="wizard_import_supported_formats">Supported formats: ODK XForms (.xml), Collect Earth (.cep, .zip)</string>
+  <string name="wizard_import_choose_another_file">Choose another file (.xml, .cep)</string>
+  <string name="wizard_import_choose_file">Choose file (.xml, .cep)</string>
+  <!-- %1$d: the number of questions in the imported form. -->
+  <plurals name="wizard_import_questions">
+    <item quantity="one">%1$d question</item>
+    <item quantity="other">%1$d questions</item>
+  </plurals>
+  <!-- %1$d: the number of sample plots in the imported Collect Earth project. -->
+  <plurals name="wizard_import_sample_plots">
+    <item quantity="one">%1$d sample plot</item>
+    <item quantity="other">%1$d sample plots</item>
+  </plurals>
+  <!-- %1$s: the number of questions (e.g. "12 questions"). -->
+  <string name="wizard_import_parsed">%1$s parsed · Ready to import into Step 5</string>
+  <!-- %1$s: the number of questions (e.g. "12 questions"); %2$s: the number of sample plots (e.g. "50 sample plots"). -->
+  <string name="wizard_import_parsed_with_plots">%1$s · %2$s parsed · Ready to import into Step 5</string>
+  <string name="wizard_import_clear_file">Clear imported file</string>
+  <!-- %1$d: the number of Collect Earth surveys found in the imported archive. -->
+  <string name="wizard_import_cep_archive_label">Collect Earth survey in archive (%1$d found)</string>
+
+  <!-- Wizard step 2: Purpose. -->
+  <string name="wizard_purpose_subtitle">Choose what outcomes or reporting standards this survey supports to pre-configure its map layer and starting form.</string>
+  <!-- Section title of a required choice (* marks it required). -->
+  <string name="wizard_purpose_question">What will this data be used for? *</string>
+  <string name="wizard_purpose_question_supporting">Select the primary purpose so Collect One can tailor your survey's map layer defaults, starting form, standard library concepts, data governance guardrails (such as EUDR or CARE sovereignty), and one-click export profiles. Choose "Other" if your goal isn't listed.</string>
+  <string name="wizard_starter_template_title">Starting template</string>
+  <string name="wizard_starter_template_supporting">Choose how this survey meets its purpose. The template sets up the starting forms, checks, and export profiles, and preselects the programs it reports to.</string>
+  <!-- %1$s lists programs, for example "EU Deforestation Regulation (EUDR)". -->
+  <string name="wizard_starter_template_programs">Reports to: %1$s</string>
+  <string name="wizard_purpose_programs_title">Reporting programs &amp; frameworks</string>
+  <string name="wizard_purpose_programs_supporting">Programs this survey's data contributes to. Choosing a template preselects them; they're used for tracking and impact reporting and don't change the survey's forms.</string>
+  <!-- Dialog shown when choosing another starting template after editing the forms it created. -->
+  <string name="wizard_starter_template_replace_title">Replace your forms?</string>
+  <!-- %1$s is the newly chosen template, for example "UK Forest Risk Commodities". -->
+  <string name="wizard_starter_template_replace_body">You've edited the forms created from this survey's template. Switching to %1$s can replace them with its starting forms, or keep your forms as they are.</string>
+  <string name="wizard_starter_template_replace_forms">Replace forms</string>
+  <string name="wizard_starter_template_keep_forms">Keep my forms</string>
+  <string name="wizard_starter_template_cancel">Cancel</string>
+  <!-- Shown with a spinner while the list of purposes is loading. -->
+  <string name="wizard_purpose_loading">Loading purposes…</string>
+
+  <!-- Wizard step 3: Survey area. -->
+  <string name="wizard_survey_area_subtitle_field">Define the geographic boundary to frame the survey map and pre-stage offline basemap imagery for field collectors.</string>
+  <string name="wizard_survey_area_subtitle_visual">Define the area of interest (AOI) where sample plots will be generated and interpreted, and verify the satellite basemap imagery.</string>
+  <string name="wizard_imagery_title">Basemap &amp; reference imagery</string>
+  <string name="wizard_imagery_supporting_field">Choose which satellite and reference imagery layers are enabled alongside the default satellite basemap.</string>
+  <string name="wizard_imagery_supporting_visual">Select the high-resolution or temporal imagery layers (such as NICFI Planet or Sentinel-2 mosaics) that photo-interpreters will inspect when classifying plots.</string>
+  <string name="wizard_imagery_default_only">Default Mapbox Satellite basemap is enabled. No custom imagery layers configured.</string>
+  <!-- Badge of imagery available to everyone ("All users" is the name of the platform-wide organization). -->
+  <string name="wizard_imagery_source_all_users">All users</string>
+  <!-- Imagery layer that comes with the platform. -->
+  <string name="wizard_imagery_built_in">Built-in platform imagery</string>
+  <!-- %1$s: the organization that added the imagery layer. -->
+  <string name="wizard_imagery_added_by">Added by %1$s</string>
+  <string name="wizard_imagery_offline_available">Available for offline field download and web mapping</string>
+  <string name="wizard_imagery_online_only">Online satellite &amp; reference imagery layer</string>
+
+  <!-- Wizard step 4: Map features. -->
+  <string name="wizard_map_features_subtitle">Configure the primary Map layer where data will be recorded: free-form field collection, a statistical sample plot grid, or imported GeoJSON / KML features.</string>
+  <string name="wizard_map_features_source_title">How are map features created?</string>
+  <string name="wizard_source_field_freeform">Data collectors add map features in the field</string>
+  <string name="wizard_source_field_freeform_description">Collectors capture new points or polygons on site during field visits.</string>
+  <string name="wizard_source_sample_plots">Generate sample plots</string>
+  <string name="wizard_source_sample_plots_description">Create systematic or random sample plots (and sub-plot grids) inside the survey area.</string>
+  <string name="wizard_source_import_file">Import map features (GeoJSON / KML)</string>
+  <string name="wizard_source_import_file_description">Upload pre-defined plot boundaries, parcels, or points from a file.</string>
+  <!-- %1$s: the description of the chosen way of creating map features (a full sentence). -->
+  <string name="wizard_map_features_source_preselected">%1$s Preselected for the purpose and collection mode you chose.</string>
+  <string name="wizard_change">Change</string>
+  <string name="wizard_eudr_guardrail_title">EUDR Article 9 geolocation guardrail</string>
+  <string name="wizard_eudr_guardrail_body">EU Deforestation Regulation (EUDR) requires polygon boundaries for all production plots larger than 4 hectares. Polygon geometry is selected by default.</string>
+  <string name="wizard_eudr_plots_under_four_ha">All production plots in this survey are ≤ 4 ha (allow single-point locations)</string>
+  <string name="wizard_primary_layer_settings">Primary map layer settings</string>
+  <string name="wizard_map_layer_name">Map layer name</string>
+  <string name="wizard_geometry_type">Geometry type</string>
+  <string name="wizard_allow_field_creation">Allow collectors to add new map features in the field</string>
+  <string name="wizard_allow_field_creation_supporting">When enabled, data collectors can drop pins or walk plot perimeters to create new map features.</string>
+  <string name="wizard_sample_design_title">Statistical sample design &amp; sub-plot points</string>
+  <string name="wizard_sample_design_supporting">Configure Systematic grid, Simple random, or Stratified random plots, plot shape (Point, Square, Circle), and internal sub-plot sample point grids.</string>
+  <string name="wizard_import_features_title">Import map features from GeoJSON or KML</string>
+  <string name="wizard_import_features_supporting">Upload existing farm boundaries, monitoring plots, or points of interest. Attributes in the file become Map layer properties.</string>
+  <string name="wizard_import_features_choose_file">Choose GeoJSON or KML file</string>
+  <!-- %1$d: the number of imported map features; %2$s: their geometry type in lower case (e.g. "polygon"). -->
+  <plurals name="wizard_import_features_loaded">
+    <item quantity="one">%1$d %2$s feature loaded</item>
+    <item quantity="other">%1$d %2$s features loaded</item>
+  </plurals>
+  <string name="wizard_also_allow_field_creation">Also allow collectors to add new map features in the field</string>
+  <string name="wizard_also_allow_field_creation_supporting">Keep off for fixed monitoring plots; turn on if data collectors can also add new sites.</string>
+  <!-- %1$d: the number of other map layers and data tables in the survey. -->
+  <plurals name="wizard_other_datasets_note">
+    <item quantity="one">This survey also has %1$d more map layer or data table, linked to its other forms. You can review them in the next step.</item>
+    <item quantity="other">This survey also has %1$d more map layers and data tables, linked to its other forms. You can review them in the next step.</item>
+  </plurals>
+
+  <!-- Wizard validation messages. -->
+  <string name="wizard_validation_copy_source_required">Select a source survey to copy before continuing.</string>
+  <string name="wizard_validation_import_file_required">Choose a valid XForms XML file to import before continuing.</string>
+  <string name="wizard_validation_survey_area_required">Select or draw a survey area to continue.</string>
+  <string name="wizard_validation_form_variant_incompatible">Resolve form questions that aren't compatible with the selected form variants (Web or Google Earth) before continuing.</string>
+  <!-- %1$s: the name of the file that couldn't be read. -->
+  <string name="wizard_import_parse_failed">Could not parse any XForms or Collect Earth questions from "%1$s".</string>
+
+  <!-- Collection modes: field data collection, desk-based visual classification, or both. -->
+  <string name="wizard_mode_field_survey">Field survey</string>
+  <string name="wizard_mode_field_survey_summary">Mobile offline/online field data collection by data collectors on the ground.</string>
+  <string name="wizard_mode_visual_classification">Visual classification</string>
+  <string name="wizard_mode_visual_classification_summary">Desk-based visual classification of sample plots over satellite and basemap imagery.</string>
+  <!-- Collection mode combining field survey and visual classification. -->
+  <string name="wizard_mode_both">Both</string>
+  <string name="wizard_mode_both_summary">Combined desk-based visual classification and mobile field data collection.</string>
+
+  <!-- Wizard step 5: Forms. -->
+  <string name="wizard_show_forms_and_layers">Show all forms &amp; layers</string>
+  <string name="wizard_hide_forms_and_layers">Hide forms &amp; layers</string>
+  <string name="wizard_add_another_form">Add another form</string>
+  <string name="wizard_add_form">Add form</string>
+  <string name="wizard_untitled_form">Untitled form</string>
+  <!-- Name shown for a map layer or data table without a name. -->
+  <string name="wizard_untitled">Untitled</string>
+
+  <!-- Wizard step 6: Sharing. -->
+  <string name="wizard_sharing_subtitle">Review your survey's impact and export readiness, configure data sovereignty defaults, and invite collaborators.</string>
+  <string name="wizard_draft_mode_title">Starts in Draft mode</string>
+  <!-- Badge of a survey that isn't published yet. -->
+  <string name="wizard_draft_badge">Draft</string>
+  <string name="wizard_draft_mode_body">Clicking Create survey opens the survey on the main map in Draft mode so you can inspect your study area and layers or open the Survey editor before data collectors see it. When you're ready to go live, open the Survey editor, click the Draft status badge next to the survey name, and select Publish survey.</string>
+  <string name="wizard_readiness_title">Impact &amp; export readiness</string>
+  <string name="wizard_readiness_supporting">How this survey's schema connects to your organization's impact rollup, FAO/UN environmental indicators, and one-click export profiles.</string>
+  <!-- %1$s: the collection mode (e.g. "Field survey"). -->
+  <string name="wizard_readiness_mode">Mode: %1$s</string>
+  <!-- %1$d: questions linked to standard fields (shared data definitions); %2$d: all questions. -->
+  <string name="wizard_readiness_fields_linked">%1$d/%2$d standard fields linked</string>
+  <!-- %1$s: comma-separated purpose names. -->
+  <string name="wizard_readiness_purposes">Purposes: %1$s</string>
+  <!-- %1$s: comma-separated reporting program names. -->
+  <string name="wizard_readiness_programs">Programs: %1$s</string>
+  <!-- %1$s: comma-separated impact goal names. -->
+  <string name="wizard_readiness_goals">Impact goals: %1$s</string>
+  <!-- Purpose list entry for a custom purpose. %1$s: the organizer's description of it. -->
+  <string name="wizard_readiness_other_purpose">Other: %1$s</string>
+  <string name="wizard_readiness_export_profiles">One-click export profiles</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped_ready">%1$d/%2$d mapped (Ready)</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped">%1$d/%2$d mapped</string>
+
+  <!-- CARE Principles for Indigenous Data Governance and FAO Free, Prior and Informed Consent (FPIC). -->
+  <string name="wizard_care_title">CARE Principles &amp; Indigenous / community data sovereignty</string>
+  <string name="wizard_care_applied_body">Restricted access, 'Only their own submissions' peer visibility, and FAO Free, Prior and Informed Consent (FPIC) collector terms are active to protect community and tenure data.</string>
+  <string name="wizard_care_not_applied_body">Working with Indigenous Peoples, local communities, or sensitive land-tenure data? Apply CARE &amp; FAO FPIC sovereignty defaults (Restricted access + Collectors see only their own submissions + FPIC consent terms).</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_care_excluded_from_aggregates">Note: %1$s is excluded from platform-wide aggregate totals.</string>
+  <string name="wizard_care_defaults_applied">✓ CARE defaults applied</string>
+  <string name="wizard_care_apply_defaults">Apply CARE defaults</string>
+  <!-- CARE principle "C". -->
+  <string name="wizard_care_collective_benefit">Collective Benefit</string>
+  <string name="wizard_care_collective_benefit_description">Ecosystem and community indicators use shared library concepts for community-owned evidence.</string>
+  <!-- CARE principle "A". -->
+  <string name="wizard_care_authority_to_control">Authority to Control</string>
+  <string name="wizard_care_authority_to_control_description">Access is Restricted so community stewards control who can view or collect survey records.</string>
+  <!-- CARE principle "R". -->
+  <string name="wizard_care_responsibility">Responsibility</string>
+  <string name="wizard_care_responsibility_description">Peer visibility is limited to each contributor's own submissions plus survey organizers.</string>
+  <!-- CARE principle "E". -->
+  <string name="wizard_care_ethics">Ethics</string>
+  <string name="wizard_care_ethics_description">Sensitive community data is protected from unapproved external aggregation.</string>
+  <!-- CARE principle "E", as checked in the wizard. -->
+  <string name="wizard_care_ethics_aggregate_protection">Ethics &amp; Aggregate Protection</string>
+  <string name="wizard_care_ethics_aggregate_protection_description">Individual tenure and household records are never exposed in public platform rollups.</string>
+  <string name="wizard_care_fpic">Free, Prior and Informed Consent</string>
+  <string name="wizard_care_fpic_description">Explicit collector/participant consent is required before recording field data.</string>
+  <string name="wizard_care_fpic_wizard_description">Data collectors must review and accept explicit community consent terms before collecting data.</string>
+  <!-- Standards and guidelines a CARE / FPIC criterion comes from. -->
+  <string name="wizard_care_standard_care_fao_indigenous_data_policy">CARE &amp; FAO Indigenous Data Policy</string>
+  <string name="wizard_care_standard_care_fao_vggt">CARE &amp; FAO VGGT Tenure Governance</string>
+  <string name="wizard_care_standard_care_principles">CARE Principles</string>
+  <string name="wizard_care_standard_fao_fpic_manual">FAO FPIC Manual</string>
+  <string name="wizard_care_standard_fao_fpic_guidelines">FAO FPIC Operational Guidelines</string>
+  <!-- Link opening the dialog that explains CARE and FPIC. -->
+  <!-- Screen reader description of the icon of a CARE / FPIC criterion this survey meets. -->
+  <string name="wizard_care_criterion_met">Met</string>
+  <!-- Screen reader description of the warning icon of a CARE / FPIC criterion this survey doesn't meet. -->
+  <string name="wizard_care_criterion_not_met">Not met</string>
+  <!-- What each CARE / FPIC criterion means for the survey, when met (_on) or not (_off). -->
+  <string name="wizard_care_effect_collective_benefit_on">Questions linked to standard fields let this survey's data feed shared community and impact indicators, and one-click exports.</string>
+  <string name="wizard_care_effect_collective_benefit_off">No questions are linked to standard fields, so this survey's data won't feed shared community or impact indicators. Choose a purpose, or link questions to standard fields in the Forms step.</string>
+  <string name="wizard_care_effect_authority_on">Only people you invite can open this survey and collect data, so community stewards control who sees its records.</string>
+  <string name="wizard_care_effect_authority_off">People you haven't invited can open this survey and its records. To restrict it, set Who can collect data to Invited people below.</string>
+  <string name="wizard_care_effect_responsibility_on">Data collectors see only their own submissions on the map. Survey organizers see all of them.</string>
+  <string name="wizard_care_effect_responsibility_off">Data collectors can see everyone's submissions on the map, including other households' tenure and resource records. To limit this, set Who can view data to Contributors &amp; organizers below.</string>
+  <string name="wizard_care_effect_ethics_on">Public impact summaries show only thresholded totals, never individual tenure or household records.</string>
+  <string name="wizard_care_effect_fpic_on">Data collectors must read and accept your consent terms before they can collect data.</string>
+  <string name="wizard_care_effect_fpic_off">Data collectors can start collecting without accepting any consent terms. To require consent, turn on Data collector consent &amp; governance terms below.</string>
+  <!-- Short title of the collapsible CARE card's summary row. -->
+  <string name="wizard_care_summary_title">CARE &amp; FPIC</string>
+  <!-- How many of the CARE / FPIC criteria the survey meets, e.g. 3 of 5 met. -->
+  <string name="wizard_care_summary_count">%1$d of %2$d met</string>
+  <!-- Expands or collapses the CARE card's full analysis. -->
+  <string name="wizard_care_show_details">Show details</string>
+  <string name="wizard_care_hide_details">Hide details</string>
+  <!-- Screen reader state of the CARE card's expand/collapse control. -->
+  <string name="wizard_care_state_expanded">Details shown</string>
+  <string name="wizard_care_state_collapsed">Details hidden</string>
+  <!-- Compact chip shown while the CARE card is scrolled away, e.g. CARE & FPIC · 3/5. -->
+  <string name="wizard_care_sticky_chip">CARE &amp; FPIC · %1$d/%2$d</string>
+  <!-- Screen reader description of the sticky CARE chip. -->
+  <string name="wizard_care_sticky_chip_a11y">CARE &amp; FPIC: %1$d of %2$d criteria met. Go to CARE details.</string>
+  <string name="wizard_care_learn_more">What are CARE &amp; FPIC?</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_care_auto_reason_organization">Applied automatically because %1$s is registered as an Indigenous Peoples or local community organization. You can change these settings below.</string>
+  <!-- %1$s: comma-separated names of standard fields (e.g. "Community name, Land tenure type"). -->
+  <string name="wizard_care_auto_reason_concepts">Applied automatically because this survey collects Indigenous and community data: %1$s. You can change these settings below.</string>
+  <!-- %1$s: comma-separated field names; %2$d: how many more fields are not named. -->
+  <string name="wizard_care_auto_reason_more">%1$s, and %2$d more</string>
+  <!-- Dialog explaining the CARE Principles and Free, Prior and Informed Consent (FPIC). -->
+  <string name="wizard_care_explainer_title">CARE &amp; FPIC in Collect One</string>
+  <string name="wizard_care_explainer_intro">Data about Indigenous Peoples and local communities, their lands, and their resources can affect land rights, livelihoods, and safety. Collect One supports two widely used frameworks that help communities stay in control of that data.</string>
+  <string name="wizard_care_explainer_care_heading">CARE Principles for Indigenous Data Governance</string>
+  <string name="wizard_care_explainer_care_body">Developed by the Global Indigenous Data Alliance to complement the FAIR data principles, CARE puts people and purpose at the center of how data is used:</string>
+  <string name="wizard_care_explainer_care_c">Collective Benefit: data should benefit the communities it describes.</string>
+  <string name="wizard_care_explainer_care_a">Authority to Control: communities decide how data about them, their lands, and their resources is collected, accessed, and used.</string>
+  <string name="wizard_care_explainer_care_r">Responsibility: people who work with the data are accountable to the communities and are open about how it is used.</string>
+  <string name="wizard_care_explainer_care_e">Ethics: the rights and wellbeing of communities come first at every stage of the data life cycle.</string>
+  <string name="wizard_care_explainer_fpic_heading">Free, Prior and Informed Consent (FPIC)</string>
+  <string name="wizard_care_explainer_fpic_body">FPIC is the right of Indigenous Peoples, recognized in the UN Declaration on the Rights of Indigenous Peoples and applied in FAO programs, to give or withhold consent to activities that affect them. Consent must be given freely, sought before activities start, based on full information, and can be withdrawn at any time.</string>
+  <string name="wizard_care_explainer_defaults_heading">What CARE defaults change in this survey</string>
+  <string name="wizard_care_explainer_defaults_restricted">Restricted access: only people you invite can open the survey and its data.</string>
+  <string name="wizard_care_explainer_defaults_own_only">Private submissions: data collectors see only their own submissions on the map, not their peers'.</string>
+  <string name="wizard_care_explainer_defaults_consent">Consent terms: data collectors must read and accept FPIC terms before they start collecting.</string>
+  <string name="wizard_care_explainer_defaults_editable">Public impact summaries never show individual records. You can change each setting, or edit the consent terms, below.</string>
+  <string name="wizard_care_explainer_auto_heading">When Collect One applies them for you</string>
+  <string name="wizard_care_explainer_auto_body">CARE defaults are applied automatically when the survey belongs to an Indigenous Peoples or local community organization, or when its questions are linked to Indigenous and community standard fields (such as community name or land tenure type), for example through the Community land &amp; resource mapping purpose.</string>
+  <string name="wizard_care_explainer_close">Got it</string>
+  <string name="wizard_consent_title">Data collector consent &amp; governance terms</string>
+  <string name="wizard_consent_supporting">Require data collectors to review and accept custom Free, Prior and Informed Consent (FPIC) or project terms before opening the survey.</string>
+  <string name="wizard_consent_terms_label">Consent terms shown to data collectors</string>
+</resources>

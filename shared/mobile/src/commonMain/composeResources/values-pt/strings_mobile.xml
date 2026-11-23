@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions and labels shared across mobile screens -->
+  <!-- Back navigation button label and accessibility description. -->
+  <string name="mobile_back">Voltar</string>
+  <string name="mobile_cancel">Cancelar</string>
+  <!-- Confirm button of dialogs that remove offline data from the device. -->
+  <string name="mobile_remove">Remover</string>
+  <!-- Button that opens a downloaded survey. -->
+  <string name="mobile_open">Abrir</string>
+  <!-- Button that downloads a survey or offline map to the device. -->
+  <string name="mobile_download">Baixar</string>
+  <!-- Status chip on a survey or offline map already stored on the device. -->
+  <string name="mobile_downloaded">Baixado</string>
+  <!-- Badge on a survey that is no longer available to the user. -->
+  <string name="mobile_unavailable">Indisponível</string>
+  <!-- Accessibility description of the button that clears the search field. -->
+  <string name="mobile_clear_search_content_description">Limpar busca</string>
+  <string name="mobile_terms_of_service_title">Termos de serviço</string>
+  <!-- Title of the Uploads screen (list of local changes waiting to sync or already synced). -->
+  <string name="mobile_uploads_title">Envios</string>
+
+  <!-- Sign-in screen -->
+  <string name="mobile_sign_in_tagline">Colete observações de campo, mapeie limites e sincronize registros de pesquisas offline.</string>
+  <string name="mobile_sign_in_prompt">Entre para acessar as pesquisas compartilhadas com sua conta.</string>
+  <!-- Sign-in button label while sign-in is in progress. -->
+  <string name="mobile_sign_in_signing_in">Entrando…</string>
+  <string name="mobile_sign_in_google_accounts_only">No momento, a autenticação está limitada a Contas do Google.</string>
+
+  <!-- Terms of Service screen -->
+  <!-- %1$s: email address of the signed-in user. -->
+  <string name="mobile_tos_signed_in_as">Conectado como %1$s</string>
+  <string name="mobile_tos_decline">Recusar</string>
+  <string name="mobile_tos_continue">Continuar</string>
+  <string name="mobile_tos_intro">Leia e aceite os Termos de serviço do Collect One antes de baixar pesquisas.</string>
+  <!-- Label of the checkbox that must be checked before accepting the Terms of Service. -->
+  <string name="mobile_tos_agree_checkbox">Li e concordo com os Termos de serviço do Collect One.</string>
+
+  <!-- Settings screen -->
+  <!-- Title of the device storage section in Settings. -->
+  <string name="mobile_settings_storage_title">Armazenamento</string>
+  <!-- Confirmation after opening the project website. %1$s: website URL. -->
+  <string name="mobile_settings_opened_website">%1$s aberto</string>
+
+  <!-- Download survey screen -->
+  <string name="mobile_download_survey_title">Baixar pesquisa</string>
+  <!-- Subtitle. %1$d: number of surveys shared with the user; %2$d: number of those downloaded. -->
+  <string name="mobile_download_survey_subtitle">%1$d compartilhadas com você • %2$d baixadas</string>
+  <string name="mobile_download_survey_offline_banner">Você está offline. Conecte-se à internet para baixar pesquisas e usá-las offline.</string>
+  <string name="mobile_download_survey_search_content_description">Buscar pesquisas</string>
+  <string name="mobile_download_survey_search_placeholder">Busque por nome ou local, ou cole um link de pesquisa</string>
+  <string name="mobile_download_survey_public_section">Pesquisas públicas</string>
+  <!-- List header. %1$d: number of surveys shared with the user. -->
+  <string name="mobile_download_survey_shared_header">Pesquisas compartilhadas com você (%1$d)</string>
+  <!-- List header while searching. %1$d: number of matching surveys; %2$d: total surveys. -->
+  <string name="mobile_download_survey_matching_header">Pesquisas correspondentes (%1$d de %2$d)</string>
+  <string name="mobile_download_survey_clear_search">Limpar busca</string>
+  <!-- Empty search result. %1$s: the search text typed by the user. -->
+  <string name="mobile_download_survey_no_match">Nenhuma pesquisa corresponde a "%1$s"</string>
+  <string name="mobile_download_survey_no_match_hint">Tente buscar por outro título de pesquisa, palavra-chave ou local (por exemplo, Brasil, Quênia, Vietnã) ou cole um link de pesquisa.</string>
+  <string name="mobile_download_survey_empty">Nenhuma pesquisa compartilhada com você ainda</string>
+  <string name="mobile_download_survey_empty_hint">Busque por título de pesquisa, palavra-chave ou local (por exemplo, Brasil, Quênia, Vietnã) ou cole um link de pesquisa.</string>
+  <!-- List header for surveys found in the public directory. %1$d: number of surveys. -->
+  <string name="mobile_download_survey_directory_header">Pesquisas públicas e compartilhadas por link (%1$d)</string>
+  <!-- Survey card footer. %1$d: number of map locations in the survey; %2$s: offline download size (e.g. "12 MB"). -->
+  <plurals name="mobile_survey_location_count_and_size">
+    <item quantity="one">%1$d local • %2$s</item>
+    <item quantity="many">%1$d locais • %2$s</item>
+    <item quantity="other">%1$d locais • %2$s</item>
+  </plurals>
+  <!-- Badge on a survey whose submissions are visible to the public. -->
+  <string name="mobile_survey_badge_public_data">Dados públicos</string>
+  <!-- Badge on a survey where each collector sees only their own submissions. -->
+  <string name="mobile_survey_badge_private_submissions">Submissões privadas</string>
+  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
+  <string name="mobile_survey_downloaded_content_description">%1$s baixada</string>
+  <!-- Accessibility description of the Open button. %1$s: survey title. -->
+  <string name="mobile_survey_open_content_description">Abrir %1$s</string>
+  <!-- Accessibility description of the Download button. %1$s: survey title. -->
+  <string name="mobile_survey_download_content_description">Baixar %1$s</string>
+  <!-- %1$s: survey title. -->
+  <string name="mobile_remove_survey_dialog_title">Remover pesquisa offline?</string>
+  <!-- %1$s: survey title. -->
+  <string name="mobile_remove_survey_dialog_body">Remover "%1$s" excluirá a cópia offline deste dispositivo. Você precisará de uma conexão com a internet para baixá-la e usá-la offline novamente.</string>
+  <string name="mobile_sign_out_dialog_title">Sair?</string>
+  <!-- %1$s: email address of the signed-in user. -->
+  <string name="mobile_sign_out_dialog_body">Ao voltar, a conta %1$s será desconectada e você retornará à tela de login.</string>
+  <string name="mobile_sign_out">Sair</string>
+
+  <!-- Main survey screen: top bar and upload status -->
+  <string name="mobile_open_navigation_drawer">Abrir menu de navegação</string>
+  <!-- Placeholder of the map/list search field. -->
+  <string name="mobile_search_placeholder">Buscar...</string>
+  <!-- Upload status. %1$d: number of items that failed to upload. -->
+  <plurals name="mobile_upload_status_failed">
+    <item quantity="one">Falha no envio de %1$d item</item>
+    <item quantity="many">Falha no envio de %1$d itens</item>
+    <item quantity="other">Falha no envio de %1$d itens</item>
+  </plurals>
+  <!-- Upload status. %1$d: number of items currently uploading. -->
+  <plurals name="mobile_upload_status_uploading">
+    <item quantity="one">Enviando %1$d item</item>
+    <item quantity="many">Enviando %1$d itens</item>
+    <item quantity="other">Enviando %1$d itens</item>
+  </plurals>
+  <string name="mobile_upload_status_all_saved">Todas as alterações foram salvas</string>
+  <!-- Upload statistics. %1$d: synced items; %2$d: uploading items; %3$d: failed items. -->
+  <string name="mobile_upload_status_summary">%1$d sincronizados • %2$d enviando • %3$d com falha</string>
+  <string name="mobile_upload_status_syncing_now">Sincronizando…</string>
+  <string name="mobile_upload_status_last_synced_just_now">Última sincronização: agora mesmo</string>
+  <string name="mobile_retry_failed_uploads">Tentar novamente os envios com falha</string>
+  <!-- Time of the last successful sync. %1$d: minutes since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_minutes_ago">
+    <item quantity="one">Última sincronização: há %1$d minuto</item>
+    <item quantity="many">Última sincronização: há %1$d minutos</item>
+    <item quantity="other">Última sincronização: há %1$d minutos</item>
+  </plurals>
+  <!-- Time of the last successful sync. %1$d: hours since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_hours_ago">
+    <item quantity="one">Última sincronização: há %1$d hora</item>
+    <item quantity="many">Última sincronização: há %1$d horas</item>
+    <item quantity="other">Última sincronização: há %1$d horas</item>
+  </plurals>
+  <!-- Time of the last successful sync. %1$d: days since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_days_ago">
+    <item quantity="one">Última sincronização: há %1$d dia</item>
+    <item quantity="many">Última sincronização: há %1$d dias</item>
+    <item quantity="other">Última sincronização: há %1$d dias</item>
+  </plurals>
+  <!-- Notice when the device goes offline. %1$s: plural noun of the survey's map features. -->
+  <string name="mobile_notice_device_offline">Dispositivo off-line: pesquisa de lugares desativada. Pesquisando apenas %1$s locais.</string>
+  <!-- Notice when the device comes back online. -->
+  <string name="mobile_notice_device_online">Dispositivo on-line: pesquisa de lugares ativada.</string>
+  <!-- Notice when selecting the Places list tab offline. %1$s: plural noun of the survey's map features. -->
+
+  <!-- Main survey screen: map controls -->
+  <string name="mobile_recenter_content_description">Centralizar o mapa na localização GPS</string>
+  <!-- Button that recenters the map on the user's GPS location. -->
+  <string name="mobile_recenter">Centralizar</string>
+  <!-- Accessibility description of the map chip when the camera follows the user's GPS location. -->
+  <string name="mobile_gps_auto_center">Centralização automática no GPS</string>
+  <!-- Map chip shown when the user has panned the map away from their GPS location. -->
+  <string name="mobile_gps_panned">Mapa movido</string>
+  <!-- Map chip. %1$s: GPS signal status (e.g. "High accuracy"). -->
+  <string name="mobile_gps_status">GPS: %1$s</string>
+  <!-- Accessibility description of the floating button that opens the list of forms. -->
+  <string name="mobile_collect_data">Coletar dados</string>
+  <string name="mobile_available_forms_title">Formulários de coleta de dados disponíveis</string>
+  <string name="mobile_available_forms_subtitle">Selecione um formulário para iniciar a coleta de dados.</string>
+  <string name="mobile_available_forms_close">Fechar formulários disponíveis</string>
+  <!-- Badge on a form. %1$d: number of questions in the form. -->
+  <plurals name="mobile_form_question_count">
+    <item quantity="one">%1$d pergunta</item>
+    <item quantity="many">%1$d perguntas</item>
+    <item quantity="other">%1$d perguntas</item>
+  </plurals>
+
+  <!-- Main survey screen: straight-line navigation (wayfinding) banner -->
+  <!-- Navigation target type pill. %1$s: map feature type (e.g. "Plot"). -->
+  <string name="mobile_wayfinding_entity">Navegação até: %1$s</string>
+  <!-- Navigation target type pill when navigating to a place found by search. -->
+  <string name="mobile_wayfinding_place">Navegação até o lugar</string>
+  <!-- Navigation target type pill when navigating to a form submission. -->
+  <string name="mobile_wayfinding_submission">Navegação até a submissão</string>
+  <string name="mobile_compass_bearing_arrow">Seta de direção da bússola</string>
+  <!-- Compass bearing to the target. %1$s: formatted bearing (e.g. "321° NW"). -->
+  <string name="mobile_bearing">Direção %1$s</string>
+  <!-- Shown when the user is within 8 meters of the navigation target. -->
+  <string name="mobile_arrived">Chegou (≤ 8 m)</string>
+  <!-- Estimated walking time. %1$d: number of minutes. -->
+  <plurals name="mobile_walk_minutes">
+    <item quantity="one">~%1$d min a pé</item>
+    <item quantity="many">~%1$d min a pé</item>
+    <item quantity="other">~%1$d min a pé</item>
+  </plurals>
+  <string name="mobile_wayfinding_subtitle">Vetor geodésico em linha reta a partir da sua localização GPS</string>
+  <string name="mobile_walk_closer_content_description">Simular aproximação do destino</string>
+  <!-- Demo button that simulates walking closer to the navigation target. -->
+  <string name="mobile_walk_closer">Aproximar-se</string>
+  <string name="mobile_stop_navigation_content_description">Parar navegação em linha reta</string>
+  <!-- Button that stops straight-line navigation. -->
+  <string name="mobile_stop">Parar</string>
+
+  <!-- Main survey screen: basemap / layers sheet -->
+  <string name="mobile_basemap_title">Mapa base</string>
+  <string name="mobile_basemap_subtitle">Selecione o tipo de mapa base, as imagens e as sobreposições de blocos offline</string>
+  <string name="mobile_close_layers">Fechar camadas</string>
+
+  <!-- Navigation drawer -->
+  <string name="mobile_close_drawer">Fechar menu</string>
+  <!-- Label above the title of the currently open survey. -->
+  <string name="mobile_drawer_active_survey">PESQUISA ATIVA</string>
+  <!-- Drawer item that lists downloaded surveys. -->
+  <string name="mobile_drawer_surveys">Pesquisas</string>
+  <!-- Drawer item subtitle. %1$d: number of surveys downloaded on the device. -->
+  <plurals name="mobile_drawer_surveys_downloaded">
+    <item quantity="one">%1$d baixada no dispositivo</item>
+    <item quantity="many">%1$d baixadas no dispositivo</item>
+    <item quantity="other">%1$d baixadas no dispositivo</item>
+  </plurals>
+  <string name="mobile_drawer_offline_maps">Mapas offline</string>
+  <string name="mobile_drawer_offline_maps_subtitle">Cache de blocos vetoriais e raster de satélite</string>
+  <string name="mobile_drawer_settings">Configurações</string>
+  <!-- Drawer item subtitle. %1$s: area unit symbol (e.g. "ha"). -->
+  <string name="mobile_drawer_settings_subtitle">Unidades (%1$s), idioma e cache de mídia</string>
+  <string name="mobile_drawer_tos_subtitle">Termos de privacidade e governança de dados da plataforma</string>
+  <string name="mobile_brand_organization">Open Foris</string>
+  <string name="mobile_brand_product">Collect One</string>
+  <!-- Drawer footer shown after the product name "Open Foris Collect One". -->
+  <string name="mobile_drawer_footer_tagline">• Núcleo offline-first</string>
+
+  <!-- Uploads screen -->
+  <!-- Button that syncs all pending uploads. %1$d: number of pending uploads. -->
+  <string name="mobile_uploads_sync_all_count">Sincronizar tudo (%1$d)</string>
+  <string name="mobile_uploads_sync_all">Sincronizar tudo</string>
+  <!-- %1$d: number of activity records (e.g. PDF receipts) waiting to sync. -->
+  <plurals name="mobile_uploads_pending_activity_records">
+    <item quantity="one">%1$d registro de atividade aguardando sincronização</item>
+    <item quantity="many">%1$d registros de atividade aguardando sincronização</item>
+    <item quantity="other">%1$d registros de atividade aguardando sincronização</item>
+  </plurals>
+  <!-- Upload status filter chip. %1$s: status name (e.g. "Pending"); %2$d: number of uploads with that status. -->
+  <string name="mobile_upload_filter_chip">%1$s (%2$d)</string>
+  <!-- Upload status: waiting to be uploaded. -->
+  <string name="mobile_upload_status_pending">Pendente</string>
+  <!-- Upload status: currently uploading. -->
+  <string name="mobile_upload_status_in_progress">Em andamento</string>
+  <!-- Upload status: successfully uploaded. -->
+  <string name="mobile_upload_status_uploaded">Enviado</string>
+  <!-- Upload status: upload failed. -->
+  <string name="mobile_upload_status_failed_label">Falha</string>
+  <string name="mobile_uploads_empty_pending">Nenhum envio pendente.</string>
+  <string name="mobile_uploads_empty_in_progress">Nenhum envio em andamento.</string>
+  <string name="mobile_uploads_empty_uploaded">Nenhum item enviado.</string>
+  <string name="mobile_uploads_empty_failed">Nenhum envio com falha.</string>
+  <string name="mobile_uploads_empty_for_feature">Nenhum envio para este elemento do mapa.</string>
+  <string name="mobile_uploads_empty">Nenhum envio ainda.</string>
+  <!-- Accessibility description of the button that removes the map feature filter from Uploads. -->
+  <string name="mobile_uploads_show_all_features">Mostrar envios de todos os elementos do mapa</string>
+  <!-- Button that retries a failed upload. -->
+  <string name="mobile_retry">Tentar novamente</string>
+  <!-- Button that uploads a pending change now. -->
+  <string name="mobile_upload">Enviar</string>
+
+  <!-- Downloaded surveys screen -->
+  <string name="mobile_downloaded_surveys_title">Pesquisas baixadas</string>
+  <!-- %1$d: number of surveys downloaded on the device. -->
+  <plurals name="mobile_downloaded_surveys_count">
+    <item quantity="one">%1$d pesquisa pronta para uso offline neste dispositivo</item>
+    <item quantity="many">%1$d pesquisas prontas para uso offline neste dispositivo</item>
+    <item quantity="other">%1$d pesquisas prontas para uso offline neste dispositivo</item>
+  </plurals>
+  <!-- Badge on the currently open survey. -->
+  <string name="mobile_survey_badge_active">ATIVA</string>
+  <!-- Survey card details. %1$s: survey location (e.g. "Kenya"); %2$d: number of map locations. -->
+  <plurals name="mobile_survey_location_entity_count">
+    <item quantity="one">%1$s • %2$d local</item>
+    <item quantity="many">%1$s • %2$d locais</item>
+    <item quantity="other">%1$s • %2$d locais</item>
+  </plurals>
+  <!-- Button that switches to another downloaded survey. -->
+  <string name="mobile_switch">Alternar</string>
+  <string name="mobile_browse_more_surveys">Procurar e baixar mais pesquisas</string>
+
+  <!-- Offline maps screen -->
+  <string name="mobile_offline_maps_title">Mapas offline</string>
+
+  <!-- Device storage card -->
+  <string name="mobile_device_storage_title">Armazenamento do dispositivo</string>
+  <!-- %1$s: free storage (e.g. "12 GB"); %2$s: total storage (e.g. "64 GB"). -->
+  <string name="mobile_device_storage_free_of_total">%1$s livres de %2$s</string>
+  <string name="mobile_device_storage_downloaded_imagery">Imagens baixadas</string>
+  <string name="mobile_device_storage_data">Formulários enviados, fotos etc.</string>
+  <string name="mobile_device_storage_other">Sistema e outros apps</string>
+  <string name="mobile_device_storage_free">Armazenamento livre</string>
+  <string name="mobile_device_storage_safeguard_notice">Os downloads offline são pausados automaticamente se o armazenamento do dispositivo ficar abaixo de 500 MB, para proteger a estabilidade do sistema.</string>
+  <!-- Title of the map mode where the user frames an area to save for offline use. -->
+  <string name="mobile_offline_area_title">Salvar área para uso offline</string>
+  <!-- Hint under the title while framing an area to save for offline use. -->
+  <string name="mobile_offline_area_hint">Mova e aproxime o mapa para que sua área de trabalho caiba no quadro</string>
+  <!-- Accessibility label of the button that leaves the area framing mode. -->
+  <string name="mobile_offline_area_close">Fechar</string>
+  <!-- Shown while the name of the framed place is looked up. -->
+  <string name="mobile_offline_area_finding_name">Procurando o nome do lugar…</string>
+  <!-- Name of a saved map area when no place name was found. %1$s: coordinates of its center, e.g. "0.4160°S, 36.9470°E". -->
+  <string name="mobile_offline_area_near">Área perto de %1$s</string>
+  <!-- Shown while the download size of the framed area is estimated. -->
+  <string name="mobile_offline_area_estimating">Estimando o tamanho…</string>
+  <!-- Estimated download size of the framed area and the free space on the device. %1$s: size, e.g. "48 MB"; %2$s: free space, e.g. "12.4 GB". -->
+  <string name="mobile_offline_area_estimate">Cerca de %1$s · %2$s livres</string>
+  <!-- Estimated download size of the framed area when the free space is unknown. %1$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_area_estimate_size">Cerca de %1$s</string>
+  <!-- The framed area is too large to save. %1$s: its area, e.g. "140 km²"; %2$s: the largest area, e.g. "50 km²". -->
+  <string name="mobile_offline_area_too_large">Esta área tem cerca de %1$s. Aproxime para escolher %2$s ou menos.</string>
+  <!-- The device lacks space to save the framed area. %1$s: space to free, e.g. "120 MB". -->
+  <string name="mobile_offline_area_not_enough_space">Não há espaço suficiente. Libere %1$s para salvar esta área.</string>
+  <!-- The device is offline, so the framed area can't be estimated or saved. -->
+  <string name="mobile_offline_area_offline">Você está offline. Conecte-se à internet para salvar esta área.</string>
+  <!-- The framed area spans the 180° meridian, which saved areas can't. -->
+  <string name="mobile_offline_area_crosses_antimeridian">Esta área cruza o meridiano de 180°. Mova o mapa para escolher uma área de um só lado.</string>
+  <!-- This build of the app can't save map areas. -->
+  <string name="mobile_offline_area_unavailable">Não é possível salvar áreas do mapa neste dispositivo.</string>
+  <!-- The size of the framed area couldn't be estimated, for a reason other than the connection. -->
+  <string name="mobile_offline_area_estimate_failed">Não foi possível estimar o tamanho desta área.</string>
+  <!-- Primary button that saves the framed area for offline use. -->
+  <string name="mobile_offline_area_save">Salvar para uso offline</string>
+  <!-- Progress of saving an area for offline use. %1$d: percent done, e.g. 27. -->
+  <string name="mobile_offline_area_saving">Salvando para uso offline… %1$d%</string>
+  <!-- How much of an area was saved so far. %1$s: saved, e.g. "13 MB"; %2$s: estimated total, e.g. "48 MB". -->
+  <string name="mobile_offline_area_saving_size">%1$s de cerca de %2$s</string>
+  <!-- Shown when an area finished saving for offline use. -->
+  <string name="mobile_offline_area_saved">Salvo para uso offline</string>
+  <!-- Saving an area stopped because the device reached its limit of offline imagery. -->
+  <string name="mobile_offline_area_tile_limit">Este dispositivo atingiu o limite de imagens offline. Remova uma área para salvar mais.</string>
+  <!-- Saving an area stopped because of an error. -->
+  <string name="mobile_offline_area_failed">Não foi possível salvar esta área.</string>
+  <!-- Button that hides the saving progress while the area keeps saving. -->
+  <string name="mobile_hide">Ocultar</string>
+  <!-- Button that closes the area framing mode after an area was saved. -->
+  <string name="mobile_done">Concluído</string>
+  <!-- Button that tries a failed estimate or save again. -->
+  <string name="mobile_try_again">Tentar novamente</string>
+  <!-- Button that resumes saving a paused layer of a saved area. -->
+  <string name="mobile_resume">Retomar</string>
+  <!-- Notice in the mobile app in a web browser, where saving map areas is only simulated. -->
+  <string name="mobile_offline_area_simulated_notice">Download simulado. Os mapas offline só funcionam nos apps para Android e iOS.</string>
+  <!-- Banner on Offline maps in the mobile app in a web browser, where saving map areas is only simulated. -->
+  <string name="mobile_offline_maps_simulated_banner">Aqui os downloads são simulados: nenhuma imagem é salva e os nomes das áreas são fictícios. Para usar mapas sem internet, salve áreas no app para Android ou iOS.</string>
+  <!-- Label on a saved area or layer that was only simulated (mobile app in a web browser). -->
+  <string name="mobile_offline_maps_simulated_label">Simulado</string>
+  <!-- Empty state of Offline maps when no area is saved. -->
+  <string name="mobile_offline_maps_empty_title">Nenhuma área salva para uso offline</string>
+  <string name="mobile_offline_maps_empty_body">Salve as áreas onde você trabalha para ver o mapa delas sem internet.</string>
+  <!-- When a saved area was saved and what removing it frees. %1$s: date, e.g. "Oct 30, 2026"; %2$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_maps_area_summary">Salvo em %1$s · até %2$s</string>
+  <!-- Percent saved of a layer of a saved area. %1$d: percent, e.g. 62. -->
+  <string name="mobile_offline_maps_layer_percent">%1$d%</string>
+  <!-- Status of a layer of a saved area whose download stopped before it finished. -->
+  <string name="mobile_offline_maps_layer_paused">Pausado</string>
+  <!-- Status of a layer of a saved area whose download failed. -->
+  <string name="mobile_offline_maps_layer_failed">Não foi possível salvar</string>
+  <!-- Accessibility label of the menu of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_area_options">Opções de %1$s</string>
+  <!-- Accessibility label of the menu of a layer of a saved area. %1$s: layer, e.g. "Satellite". -->
+  <string name="mobile_offline_maps_layer_options">Opções de %1$s</string>
+  <!-- Menu item that shows a saved area on the map. -->
+  <string name="mobile_offline_maps_show_on_map">Mostrar no mapa</string>
+  <!-- Menu item and confirmation button that remove a saved area. -->
+  <string name="mobile_offline_maps_remove_area">Remover área</string>
+  <!-- Title of the confirmation before removing a saved area. -->
+  <string name="mobile_offline_maps_remove_area_title">Remover a área salva?</string>
+  <!-- Body of the confirmation before removing a saved area. %1$s: area name; %2$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_maps_remove_area_body">Remover "%1$s" libera até %2$s. Você vai precisar de internet para ver esta área offline novamente.</string>
+  <!-- Menu item and confirmation button that remove the satellite layer of a saved area. -->
+  <string name="mobile_offline_maps_remove_satellite">Remover satélite</string>
+  <!-- Menu item and confirmation button that remove the terrain layer of a saved area. -->
+  <string name="mobile_offline_maps_remove_terrain">Remover terreno</string>
+  <!-- Title of the confirmation before removing the satellite layer of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_remove_satellite_title">Remover o satélite de "%1$s"?</string>
+  <!-- Title of the confirmation before removing the terrain layer of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_remove_terrain_title">Remover o terreno de "%1$s"?</string>
+  <!-- Body of the confirmation before removing a layer of a saved area. %1$s: size, e.g. "38 MB". -->
+  <string name="mobile_offline_maps_remove_layer_body">Isso libera até %1$s. Você vai precisar de internet para ver estas imagens novamente.</string>
+
+  <!-- Mobile client version update prompts -->
+  <string name="mobile_update_available_title">Atualização disponível</string>
+  <string name="mobile_update_available_body">Uma versão mais recente (%1$s) do Collect One está disponível.</string>
+  <string name="mobile_update_required_title">Atualização obrigatória</string>
+  <string name="mobile_update_required_body">Esta versão do Collect One (%1$s) não é mais compatível. Atualize para %2$s ou superior para continuar.</string>
+  <string name="mobile_update_now">Atualizar agora</string>
+  <string name="mobile_update_later">Mais tarde</string>
+  <string name="mobile_update_check_again">Verificar novamente</string>
+</resources>

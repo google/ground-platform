@@ -37,9 +37,9 @@ This document expands on the **Built-In Impact Measurement (MAP Framework)** req
 
 ## Design Principles
 
-*   **Purposes, not pillars, in the UI.** Organizers think "EUDR due diligence" or "FERM restoration report", not "Mitigation". Ground maps each purpose to a MAP pillar behind the scenes.
+*   **Purposes, not pillars, in the UI.** Organizers think "EUDR due diligence" or "FERM restoration report", not "Mitigation". Collect One maps each purpose to a MAP pillar behind the scenes.
 *   **Tagging must pay for itself.** Choosing a purpose unlocks something the organizer wants anyway: a starter form, compliance checks, a partner export, a funder report. If it feels like a tax, people will pick "Other".
-*   **Field collectors never answer Ground's questions.** Field-side signals come only from questions the organizer wanted anyway (via templates) or from passive metadata.
+*   **Field collectors never answer Collect One's questions.** Field-side signals come only from questions the organizer wanted anyway (via templates) or from passive metadata.
 *   **Count unique hectares, not cumulative ones.** Use GeoID to remove duplicates across monitoring waves, surveys, and organizations so the same plot is never counted twice.
 *   **Aggregate before data leaves the organization.** Only cell-level areas and counts (S2 cells) feed platform-wide metrics. Raw geometries stay with the organization.
 
@@ -67,7 +67,8 @@ One multi-select step in the Survey Designer: **"What will this data be used for
 | :--- | :--- | :--- |
 | EUDR / UK FRC due diligence | Plot template (commodity, producer, harvest year), check that plots over 4 ha are polygons, 6-decimal coordinates, TRACES-ready GeoJSON, Whisp risk check | Mitigation (sustainable supply chains) |
 | Timber traceability | Concession and harvest-unit layers, chain-of-custody forms, link from log or stump to plot | Mitigation (sustainable supply chains) |
-| Jurisdictional REDD+ / TFFF | CEO sample design plus field verification forms, activity-data export | Mitigation (reported separately; see below) |
+| Deforestation & land-use change (Activity Data) | Stratified sample design, IPCC land-use transition & disturbance interpretation form, ART-TREES Activity Data GeoJSON export | Mitigation (reported separately; see below) |
+| Forest carbon & biomass inventory (Emission Factors) | Ground sample plot form (stratum, stand age, species, DBH, tree height, basal area, deadwood, peat depth), ART-TREES Biomass Inventory GeoJSON export | Mitigation / Protection |
 | Restoration monitoring (FERM) | Intervention-area template, multi-wave survival forms, FERM API push | Target 2 / Mitigation |
 | Protected area management (PAME) | Patrol and threat forms, METT-4 / IMET-style assessment, export ready for GD-PAME | Protection |
 | Community land and resource mapping | Boundary, tenure, and resource-use templates, FPIC consent block, data-sovereignty defaults | Adaptation / IPLC |
@@ -78,10 +79,10 @@ One multi-select step in the Survey Designer: **"What will this data be used for
 
 ### Dictionary-Linked Questions
 
-*   Template questions are linked to **concepts** in the dictionary (e.g., `eudr.commodity`, `ferm.area_under_restoration_ha`, `pame.threat_type`, `ferm.trees_surviving`). In forms, a link is a `ground:concept` bind attribute (XLSForm column `bind::ground:concept`); other XForms tools ignore it, so forms stay portable.
-*   Organizers can change labels, languages, and logic freely. As long as the link stays, Ground can roll answers up across thousands of different surveys without asking anything new.
+*   Template questions are linked to **concepts** in the dictionary (e.g., `eudr.commodity`, `ferm.area_under_restoration_ha`, `pame.threat_type`, `ferm.trees_surviving`). In forms, a link is a `collectone:concept` bind attribute (XLSForm column `bind::collectone:concept`); other XForms tools ignore it, so forms stay portable.
+*   Organizers can change labels, languages, and logic freely. As long as the link stays, Collect One can roll answers up across thousands of different surveys without asking anything new.
 *   Organizers can also link their own questions: typing a question label shows non-intrusive suggestions from the dictionary, and selecting one links the question (and, for new questions, fills in the type and choices).
-*   Concepts line up with external vocabularies so they mean something outside Ground: FERM indicators, EUDR Article 9 fields, METT-4 items, FAO LCCS / FRA classes, HS codes, and AGROVOC.
+*   Concepts line up with external vocabularies so they mean something outside Collect One: FERM indicators, EUDR Article 9 fields, METT-4 items, FAO LCCS / FRA classes, HS codes, and AGROVOC.
 
 See [Concepts and the Dictionary](../technical/model/library/01-concepts.md) for the schema.
 
@@ -103,11 +104,11 @@ Intersect each map feature's footprint (with duplicates removed by GeoID) with a
 
 | Overlay | Metric it produces |
 | :--- | :--- |
-| WDPA / WDCA (protectedplanet.net) | ha monitored inside protected or conserved areas; protected areas with active Ground monitoring (protection tier 2) |
+| WDPA / WDCA (protectedplanet.net) | ha monitored inside protected or conserved areas; protected areas with active Collect One monitoring (protection tier 2) |
 | JRC TMF / Hansen GFC / Forest Data Partnership commodity models / Natural Forests 2020 | Plots and ha in high-risk forest frontiers; share verified deforestation-free after the 2020 cutoff |
 | LandMark / IPLC territories | ha of IPLC land mapped by IPLC-led organizations |
 | Restoration opportunity / degraded land maps | ha of restoration in priority areas |
-| UNEP-WCMC Ecosystem Integrity Index (EII) | EII trend inside Ground-monitored areas vs matched controls (protection tier 3) |
+| UNEP-WCMC Ecosystem Integrity Index (EII) | EII trend inside Collect One-monitored areas vs matched controls (protection tier 3) |
 | FAO GAUL admin boundaries | Country and subnational breakdowns for every metric |
 
 <!-- mdformat on -->
@@ -124,7 +125,7 @@ These are the strongest passive outcome signals. Log each one with purpose, area
 
 ### Productivity and Quality (MRV Cost Savings)
 
-The [client audit logs](../technical/model/forms/17-client-audit-logs.md) and submission metadata already let Ground estimate the following without asking anyone:
+The [client audit logs](../technical/model/forms/17-client-audit-logs.md) and submission metadata already let Collect One estimate the following without asking anyone:
 
 *   Time per plot, plots per data-collector-day, and rework rate. Comparing against a paper or ODK baseline gives MRV cost and time savings.
 *   Share of plots passing EUDR geometry checks, plus the GPS accuracy distribution. This shows the data is good enough to win market access.
@@ -146,12 +147,12 @@ The [client audit logs](../technical/model/forms/17-client-audit-logs.md) and su
 
 ## Measurement Outside the App (Partner Ledgers)
 
-*   **FERM**: restoration initiatives and hectares registered with `source = Ground`. FAO is the custodian of GBF Target 2, so this is the cleanest attribution path for Target 2.
-*   **Whisp**: plots analyzed that originated in Ground.
-*   **UNFCCC REDD+ / FRA**: countries citing CEO or Ground in FREL/FRL, BTR, or FRA Remote Sensing Survey submissions (desk review, done each year).
-*   **GD-PAME**: PAME assessments filed through the Ground PAME pack, and the protected area they cover.
-*   **ML pipelines**: reference samples used in Forest Data Partnership commodity models or national LULC maps, plus the accuracy gain from adding Ground samples.
-*   **Funding**: letters of agreement and grants that name Ground (e.g., the DRSRS Kenya LoA). Count the funding and the hectares those agreements fund.
+*   **FERM**: restoration initiatives and hectares registered with `source = Collect One`. FAO is the custodian of GBF Target 2, so this is the cleanest attribution path for Target 2.
+*   **Whisp**: plots analyzed that originated in Collect One.
+*   **UNFCCC REDD+ / FRA**: countries citing CEO, Ground, or Collect One in FREL/FRL, BTR, or FRA Remote Sensing Survey submissions (desk review, done each year).
+*   **GD-PAME**: PAME assessments filed through the Collect One PAME pack, and the protected area they cover.
+*   **ML pipelines**: reference samples used in Forest Data Partnership commodity models or national LULC maps, plus the accuracy gain from adding Collect One samples.
+*   **Funding**: letters of agreement and grants that name Ground or Collect One (e.g., the DRSRS Kenya LoA). Count the funding and the hectares those agreements fund.
 *   **Capacity**: training → activation funnel. Share of trainees whose organization creates its own survey within 90 days (in Nandi County, Kenya, 4 trained coordinators led cooperatives to map 2,000+ additional plots independently, about 60% coverage).
 
 ## From Outcomes to MAP Impact
@@ -166,7 +167,7 @@ The [client audit logs](../technical/model/forms/17-client-audit-logs.md) and su
 | Timber supply chains | Harvest units and logs traced | Chain-of-custody exports | Volume or ha under traceable, legal harvest | |
 | IPLC | IPLC-led organizations, ha of community land mapped, producers with receipts | Receipts shared, land titling, market listings | Producers with market access; income or price premium (sampled case studies) | Respect CARE and data-sovereignty defaults |
 | LULC maps | Reference samples (desk and field) | DOI minted, model trained | Accuracy gain in Forest Data Partnership or national maps | |
-| GD-PAME / Protection | ha of protected area with recurring patrols or monitoring | PAME assessment filed | Tier 1: WDPCA ha designated · Tier 2: active management via Ground · Tier 3: EII vs counterfactual | Follows a three-tier protection rubric (designation → management → ecological outcome) |
+| GD-PAME / Protection | ha of protected area with recurring patrols or monitoring | PAME assessment filed | Tier 1: WDPCA ha designated · Tier 2: active management via Collect One · Tier 3: EII vs counterfactual | Follows a three-tier protection rubric (designation → management → ecological outcome) |
 
 <!-- mdformat on -->
 
@@ -178,11 +179,11 @@ Give each survey a 1–5 score automatically, using its purpose, outcome signals
 
 | Score | Meaning |
 | :--- | :--- |
-| 1 | Ground used for an exploratory or test survey |
-| 2 | Ground used to collect data, outcome unknown |
+| 1 | Collect One used for an exploratory or test survey |
+| 2 | Collect One used to collect data, outcome unknown |
 | 3 | Data exported for a declared purpose |
 | 4 | Data pushed to or confirmed in a partner system (FERM, Whisp, registry) |
-| 5 | Ground is the system of record for a regulatory or official submission (DDS, FERM, FREL, PAME) |
+| 5 | Collect One is the system of record for a regulatory or official submission (DDS, FERM, FREL, PAME) |
 
 <!-- mdformat on -->
 
@@ -213,4 +214,4 @@ The exact conditions, and how scores are counted platform-wide (only surveys wit
 *   **Primary audience**: institutional sustainability goals, FAO / Open Foris reporting, or funders? Attribution rules and how conservative the numbers are depend on the answer.
 *   **Telemetry posture**: is the Open Foris steering committee comfortable with aggregate impact telemetry being on by default, or should it be opt-in?
 *   **Pillar visibility**: should pillar labels appear anywhere in the open-source UI, or only in partner-side reporting?
-*   **Counterfactuals**: which goal deserves a rigorous evaluation (e.g., EII or matched-control deforestation for Ground-monitored protected areas) as a flagship evidence case?
+*   **Counterfactuals**: which goal deserves a rigorous evaluation (e.g., EII or matched-control deforestation for Collect One-monitored protected areas) as a flagship evidence case?

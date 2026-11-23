@@ -18,23 +18,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
-import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.koin.core.context.startKoin
 import org.openforis.collectone.v2.app.client.auth.AuthClient
 import org.openforis.collectone.v2.app.client.auth.defaultAuthClient
+import org.openforis.collectone.v2.app.client.auth.platformDevSignIn
+import org.openforis.collectone.v2.app.data.datasource.local.session.webConsoleSignedInSessionStore
+import org.openforis.collectone.v2.app.di.AppConfig
 import org.openforis.collectone.v2.app.di.AppDataHolder
-import org.openforis.collectone.v2.app.ui.common.RequireUserDataService
-import org.openforis.collectone.v2.web.ui.WebAppState
-import org.openforis.collectone.v2.web.ui.WebPage
+import org.openforis.collectone.v2.app.di.platformModule
+import org.openforis.collectone.v2.app.logging.configureAppLogging
+import org.openforis.collectone.v2.app.ui.session.RequireUserDataService
+import org.openforis.collectone.v2.web.di.webModules
+import org.openforis.collectone.v2.web.navigation.WindowBrowserHistory
 
 /**
- * Mounts the web console ([WebConsoleApp]) and keeps the page in sync with the URL hash. Waits for
- * the auth client to restore the signed-in session first, so signed-in users don't see the sign-in
- * page flash.
+ * Mounts the web console ([WebConsoleApp]) on the browser window's URL and history. Waits for the
+ * auth client to restore the signed-in session first, so signed-in users don't see the sign-in page
+ * flash.
+ *
+ * Logs at debug level in development builds, which offer development sign-in (`DEV_SIGN_IN`), and
+ * from info level in the builds served to real users.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+  configureAppLogging(isDevelopmentBuild = platformDevSignIn())
   val container = document.getElementById("ComposeTarget") ?: document.body!!
   val authClient = defaultAuthClient()
   MainScope().launch {
@@ -48,17 +57,20 @@ private fun mount(container: org.w3c.dom.Element, authClient: AuthClient) {
   ComposeViewport(container) {
     // Without a configured user data service, shows setup instructions instead of the console.
     RequireUserDataService { serviceUrl ->
-      WebConsoleApp(
-        state =
-          remember {
-            WebAppState(
-              dataHolder = AppDataHolder(userDataServiceUrl = serviceUrl, authClient = authClient)
+      val dataHolder =
+        remember(serviceUrl) {
+          val config = AppConfig(userDataServiceUrl = serviceUrl, lazyLoadEntityProperties = true)
+          val platform =
+            platformModule(
+              authClient = { authClient },
+              // Keeps the Terms of Service acceptance across page reloads, until signing out.
+              signedInSessionStore = ::webConsoleSignedInSessionStore,
             )
-          },
-        initialPage = WebPage.fromHash(window.location.hash),
-        initialOrganizationId = WebPage.organizationIdFromHash(window.location.hash),
-        onHashChanged = { window.location.hash = it },
-      )
+          startKoin { modules(webModules(config, platform)) }.koin.get<AppDataHolder>()
+        }
+      WebAppSession(dataHolder) { state ->
+        WebConsoleApp(state = state, browserHistory = remember { WindowBrowserHistory() })
+      }
     }
   }
 }

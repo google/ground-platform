@@ -53,6 +53,30 @@ message PurposePackDef {
 
   // Display order of this purpose pack within the library (0-based).
   int32 sort_order = 13;
+
+  // Starter templates the organizer chooses from after picking this purpose
+  // (e.g., EUDR or UK FRC), each with its own forms, export profiles, and
+  // preset programs. When empty, the pack's own `form_template_ids` and
+  // `export_profile_ids` are its only (default) template.
+  repeated StarterTemplateDef starter_templates = 14;
+}
+
+// One starter template of a Purpose Pack.
+message StarterTemplateDef {
+  // Unique within the pack (e.g., "eudr").
+  string id = 1;
+
+  LocalizedText title = 2;
+  LocalizedText description = 3;
+
+  // Form templates added to a new survey that chooses this starter template.
+  repeated string form_template_ids = 4;
+
+  // Export profiles enabled by default for surveys with this starter template.
+  repeated string export_profile_ids = 5;
+
+  // Programs (of the pack's `program_ids`) preselected when it is chosen.
+  repeated string program_ids = 6;
 }
 
 // A named export with a fixed output schema. Using a profile records an impact

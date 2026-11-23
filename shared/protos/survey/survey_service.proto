@@ -168,25 +168,27 @@ message GetSurveyAclResponse {
 // A single idempotent mutation step within a batched `MutateSurveyRequest`.
 //
 // Carries sparse instances of `SurveyDef` (`delete` / `upsert`) and/or
-// `SurveyAcl` (`acl_delete` / `acl_upsert`), or a lifecycle operation
-// (`trash_survey`, `restore_survey`, `save_working_copy`,
-// `discard_working_copy`). For each target (`SurveyDef` and `SurveyAcl`), the
-// structural `delete` mask is applied first (where any non-default scalar/list
-// or leaf item clears/removes that target) followed by recursively merging
-// `upsert`.
+// `SurveyAcl` (`acl_delete` / `acl_upsert`), or a working-copy operation
+// (`save_working_copy`, `discard_working_copy`). For each target (`SurveyDef`
+// and `SurveyAcl`), the structural `delete` mask is applied first (where any
+// non-default scalar/list or leaf item clears/removes that target) followed by
+// recursively merging `upsert`. Moving a survey to Trash sets
+// `upsert.trash_time` (the server stamps the commit time when first trashed),
+// and restoring it from Trash sets `delete.trash_time` (clearing `trash_time`).
 message SurveyMutation {
   // Structural deletion mask for `SurveyDef`: any non-default scalar or
   // repeated value list clears that field to default/empty, and any keyed item
   // (`FormDef`, `EntityDatasetDef`, `LayerDef`, etc.) with only its ID set
   // removes that item (or recurses into its child fields if child fields are
-  // populated).
+  // populated). Setting `delete.trash_time` restores a trashed survey.
   SurveyDef delete = 1;
 
   // Sparse `SurveyDef` fields and keyed sub-resources (`forms`,
   // `entity_datasets`, `form_launch_configs`, `form_concept_links`,
   // `map_config`, `translations`, etc.) to create or update on the target
   // revision (the working copy when `MutateSurveyRequest.working_copy` is true,
-  // otherwise the saved revision).
+  // otherwise the saved revision). Setting `upsert.trash_time` moves the survey
+  // to Trash (stamped with the server's commit time when first trashed).
   SurveyDef upsert = 2;
 
   // Structural deletion mask for `SurveyAcl`: any non-default scalar or
@@ -206,29 +208,19 @@ message SurveyMutation {
   // revision.
   bool discard_working_copy = 6;
 
-  // Moves the survey to Trash (sets `SurveyDef.trash_time`). Trashed surveys
-  // disappear from every user's survey list and stop syncing; they can be
-  // restored with `restore_survey` until they are purged automatically
-  // after the retention period (30 days). Doesn't change `SurveyDef.state`.
-  bool trash_survey = 7;
-
-  // Restores a trashed survey (clears `SurveyDef.trash_time`). A no-op when
-  // the survey isn't in Trash.
-  bool restore_survey = 8;
-
   // Client-generated UUID from the offline outbox, identifying the mutation in
   // client logs. Replays are detected by `client_seq`, not by this ID.
-  string mutation_id = 9;
+  string mutation_id = 7;
 
   // Stable identifier of the client install that recorded the mutation.
-  string client_id = 10;
+  string client_id = 8;
 
   // Monotonically increasing sequence number of the mutation within
   // `client_id` (`GetAppliedMutations`, scope `"surveys/<survey_id>"`).
-  int64 client_seq = 11;
+  int64 client_seq = 9;
 
   // Client-side timestamp when the mutation was recorded.
-  google.protobuf.Timestamp client_timestamp = 12;
+  google.protobuf.Timestamp client_timestamp = 10;
 }
 
 // Request to atomically and idempotently apply an ordered sequence of mutations

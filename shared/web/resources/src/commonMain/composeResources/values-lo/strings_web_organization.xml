@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Web console: organizations directory, organization page, and organization library. -->
+<resources>
+  <!-- Common actions -->
+  <string name="org_cancel">ຍົກເລີກ</string>
+  <string name="org_save">ບັນທຶກ</string>
+  <string name="org_close">ປິດ</string>
+  <string name="org_ok">ຕົກລົງ</string>
+  <string name="org_discard">ຍົກເລີກການປ່ຽນແປງ</string>
+  <string name="org_dismiss">ປິດແຈ້ງເຕືອນ</string>
+  <string name="org_show">ສະແດງ</string>
+  <string name="org_hide">ເຊື່ອງ</string>
+  <!-- Empty choice in a dropdown, e.g. no impact pillar. -->
+  <string name="org_none">ບໍ່ມີ</string>
+  <string name="org_clear_search">ລ້າງການຊອກຫາ</string>
+  <!-- Screen reader label of an edit button. %1$s: name of the item, e.g. an imagery source or template. -->
+  <string name="org_edit_item">ແກ້ໄຂ %1$s</string>
+  <!-- Screen reader label of a delete button. %1$s: name of the library item. -->
+  <string name="org_delete_item">ລຶບ %1$s</string>
+  <!-- Confirmation dialog title. %1$s: name of the organization, template, or purpose. -->
+  <string name="org_delete_item_title">ລຶບ %1$s ບໍ?</string>
+
+  <!-- Relation badges on organization cards -->
+  <string name="org_relation_manager">ທ່ານເປັນຜູ້ຈັດການ</string>
+  <string name="org_relation_member">ສະມາຊິກ</string>
+  <string name="org_relation_invited">ໄດ້ຮັບເຊີນ</string>
+  <string name="org_relation_requested">ຂໍເຂົ້າຮ່ວມແລ້ວ</string>
+  <string name="org_badge_synthetic">ຂໍ້ມູນຈຳລອງ</string>
+
+  <!-- Organization counts, joined with " · " -->
+  <plurals name="org_count_members">
+    <item quantity="other">%1$d ສະມາຊິກ</item>
+  </plurals>
+  <plurals name="org_count_surveys">
+    <item quantity="other">%1$d ແບບສຳຫຼວດ</item>
+  </plurals>
+  <!-- %1$d: number of imagery sources. -->
+  <string name="org_count_imagery">%1$d ຮູບແຜນທີ່</string>
+  <!-- Pending requests to join the organization. -->
+  <plurals name="org_count_requests">
+    <item quantity="other">%1$d ຄຳຂໍ</item>
+  </plurals>
+  <!-- Shown after the counts when the organization isn't listed in the directory. -->
+  <string name="org_unlisted">ບໍ່ສະແດງໃນລາຍການ</string>
+
+  <!-- Organizations directory -->
+  <string name="org_back_to_surveys">ກັບໄປທີ່ແບບສຳຫຼວດ</string>
+  <string name="org_organizations_title">ອົງກອນ</string>
+  <!-- Header summary. %1$d: organizations the user belongs to; %2$d: all organizations. -->
+  <string name="org_directory_summary">ຂອງທ່ານ %1$d · ທັງໝົດ %2$d</string>
+  <string name="org_admin_panel">ແຜງຜູ້ດູແລລະບົບ</string>
+  <!-- Header button that opens the Impact page. -->
+  <string name="org_impact">ຜົນກະທົບ</string>
+  <string name="org_create_organization">ສ້າງອົງກອນ</string>
+  <string name="org_search_placeholder">ຊອກຫາອົງກອນ</string>
+  <string name="org_section_yours">ອົງກອນຂອງທ່ານ</string>
+  <string name="org_section_yours_empty">ທ່ານຍັງບໍ່ໄດ້ເປັນສະມາຊິກຂອງອົງກອນໃດ. ສ້າງອົງກອນໃໝ່ ຫຼື ຂໍເຂົ້າຮ່ວມອົງກອນຂ້າງລຸ່ມນີ້.</string>
+  <string name="org_section_yours_no_matches">ບໍ່ມີອົງກອນຂອງທ່ານທີ່ກົງກັບການຊອກຫາ.</string>
+  <string name="org_section_others">ອົງກອນອື່ນໆ</string>
+  <string name="org_section_others_empty">ບໍ່ມີອົງກອນອື່ນທີ່ສະແດງໃນລາຍການ.</string>
+  <string name="org_section_others_no_matches">ບໍ່ມີອົງກອນອື່ນທີ່ກົງກັບການຊອກຫາ.</string>
+  <string name="org_no_description">ຍັງບໍ່ມີຄຳອະທິບາຍ.</string>
+  <!-- Card summary of the platform-wide "All users" organization. %1$d: number of imagery sources. -->
+  <plurals name="org_card_all_users_summary">
+    <item quantity="other">ຜູ້ໃຊ້ທັງໝົດ · %1$d ແຫຼ່ງຮູບແຜນທີ່</item>
+  </plurals>
+  <string name="org_request_to_join">ຂໍເຂົ້າຮ່ວມ</string>
+
+  <!-- Create organization dialog -->
+  <string name="org_field_name">ຊື່ອົງກອນ</string>
+  <string name="org_field_description">ຄຳອະທິບາຍ</string>
+  <string name="org_list_in_directory">ສະແດງໃນລາຍຊື່ອົງກອນ</string>
+  <string name="org_create_listed_help">ທຸກຄົນສາມາດຊອກຫາອົງກອນ, ຂໍເຂົ້າຮ່ວມ ແລະ ຕິດຕາມຕົວເລກຜົນກະທົບທີ່ເຜີຍແຜ່ໄດ້. ອົງກອນທີ່ບໍ່ສະແດງໃນລາຍການຈະເຂົ້າຮ່ວມໄດ້ສະເພາະຜູ້ທີ່ໄດ້ຮັບເຊີນເທົ່ານັ້ນ.</string>
+  <string name="org_create_manager_help">ທ່ານຈະເປັນຜູ້ຈັດການຄົນທຳອິດ. ຜູ້ຈັດການສາມາດແກ້ໄຂອົງກອນ, ຈັດການສະມາຊິກ ແລະ ຈັດການແບບສຳຫຼວດທັງໝົດຂອງອົງກອນ.</string>
+  <string name="org_create_publish_help">ທຸກອົງກອນຈະເຜີຍແຜ່ຍອດລວມແບບບໍ່ລະບຸຕົວຕົນຈາກແບບສຳຫຼວດຂອງຕົນ ເຊັ່ນ ຈຳນວນເຮັກຕາທີ່ໄດ້ທຳແຜນທີ່ ໃຫ້ທຸກຄົນທີ່ເຂົ້າລະບົບ Collect One ເຫັນ. ການສົ່ງຂໍ້ມູນ, ອົງປະກອບແຜນທີ່, ຕຳແໜ່ງ ແລະ ຄຳຕອບ ຈະບໍ່ຖືກເຜີຍແຜ່ເດັດຂາດ.</string>
+  <string name="org_create">ສ້າງ</string>
+
+  <!-- Organization type and country fields -->
+  <!-- Organization type field label. -->
+  <string name="org_field_type">ປະເພດ</string>
+  <string name="org_field_country">ປະເທດ</string>
+  <string name="org_country_search_placeholder">ຊອກຫາຕາມຊື່ ຫຼື ລະຫັດ</string>
+  <string name="org_country_no_matches">ບໍ່ມີປະເທດທີ່ກົງກັນ</string>
+  <!-- Value of an optional organization type or country that hasn't been set. -->
+  <string name="org_not_specified">ບໍ່ໄດ້ລະບຸ</string>
+
+  <!-- Organization page sections (left panel) -->
+  <string name="org_tab_details">ລາຍລະອຽດອົງກອນ</string>
+  <string name="org_tab_surveys">ແບບສຳຫຼວດ</string>
+  <string name="org_tab_members">ສະມາຊິກ</string>
+  <string name="org_tab_imagery">ຮູບແຜນທີ່</string>
+  <string name="org_tab_purposes">ຈຸດປະສົງ</string>
+  <string name="org_tab_dictionary">ວັດຈະນານຸກົມ</string>
+  <string name="org_tab_templates">ແມ່ແບບ</string>
+  <string name="org_tab_cost_controls">ການຄວບຄຸມຄ່າໃຊ້ຈ່າຍ</string>
+  <string name="org_tab_cost_tracking">ການຕິດຕາມຄ່າໃຊ້ຈ່າຍ</string>
+  <!-- Members section of the platform-wide "All users" organization. -->
+  <string name="org_platform_admins">ຜູ້ດູແລແພລັດຟອມ</string>
+  <string name="org_nav_global_library">ຄັງສ່ວນກາງ</string>
+  <string name="org_nav_cost_quotas">ຄ່າໃຊ້ຈ່າຍ ແລະ ໂຄຕ້າ</string>
+  <string name="org_nav_governance">ການກຳກັບດູແລ</string>
+
+  <!-- Organization page header -->
+  <string name="org_back_to_organizations">ກັບໄປທີ່ອົງກອນ</string>
+  <!-- Label saying that the page is an organization. -->
+  <string name="org_organization_label">ອົງກອນ</string>
+  <string name="org_view_impact">ເບິ່ງຜົນກະທົບ</string>
+  <string name="org_create_survey">ສ້າງແບບສຳຫຼວດ</string>
+  <string name="org_admin_panel_subtitle">ການບໍລິຫານແພລັດຟອມ ແລະ ຄັງສ່ວນກາງ</string>
+
+  <!-- Section subtitles. %1$s: organization name. -->
+  <string name="org_details_subtitle_manager">ວິທີທີ່ %1$s ສະແດງຕໍ່ສະມາຊິກ ແລະ ໃນລາຍຊື່ອົງກອນ. ສະເພາະຜູ້ຈັດການເທົ່ານັ້ນທີ່ປ່ຽນແປງໄດ້.</string>
+  <string name="org_details_subtitle_member">ວິທີທີ່ %1$s ສະແດງຕໍ່ສະມາຊິກ ແລະ ໃນລາຍຊື່ອົງກອນ. ຂໍໃຫ້ຜູ້ຈັດການເປັນຜູ້ປ່ຽນແປງ.</string>
+  <string name="org_surveys_subtitle_manager">ແບບສຳຫຼວດທີ່ດຳເນີນໃນນາມຂອງ %1$s. ໃນຖານະຜູ້ຈັດການ ທ່ານສາມາດແກ້ໄຂທຸກແບບສຳຫຼວດ, ຈັດການການແບ່ງປັນ ແລະ ສົ່ງອອກຂໍ້ມູນໄດ້.</string>
+  <string name="org_surveys_subtitle_member">ແບບສຳຫຼວດທີ່ດຳເນີນໃນນາມຂອງ %1$s. ເປີດແບບສຳຫຼວດເພື່ອເບິ່ງວ່າທ່ານເຮັດຫຍັງໄດ້ແດ່.</string>
+  <string name="org_members_subtitle_admins">ຜູ້ດູແລແພລັດຟອມທີ່ຈັດການຮູບແຜນທີ່, ຈຸດປະສົງ, ແມ່ແບບ ແລະ ແນວຄິດໃນວັດຈະນານຸກົມສ່ວນກາງ.</string>
+  <string name="org_members_subtitle">ບຸກຄົນທີ່ສັງກັດ %1$s. ຜູ້ຈັດການດູແລອົງກອນ ແລະ ແບບສຳຫຼວດທັງໝົດ; ສະມາຊິກສາມາດສ້າງແບບສຳຫຼວດໃນອົງກອນໄດ້.</string>
+  <string name="org_imagery_subtitle_admins">ຊັ້ນຮູບແຜນທີ່ພື້ນຖານແບບກຳນົດເອງ ທີ່ຜູ້ໃຊ້ Collect One ທຸກຄົນໃຊ້ໄດ້ໃນທຸກແບບສຳຫຼວດ ຜ່ານກ່ອງໂຕ້ຕອບຊັ້ນແຜນທີ່ພື້ນຖານໃນມືຖື ແລະ ເວັບ.</string>
+  <string name="org_imagery_subtitle_manager">ຊັ້ນຮູບແຜນທີ່ພື້ນຖານແບບກຳນົດເອງ ທີ່ໃຊ້ໄດ້ໃນກ່ອງໂຕ້ຕອບຊັ້ນແຜນທີ່ພື້ນຖານໃນມືຖື ແລະ ເວັບ ສຳລັບແບບສຳຫຼວດໃນ %1$s.</string>
+  <string name="org_imagery_subtitle_member">ຊັ້ນຮູບແຜນທີ່ພື້ນຖານແບບກຳນົດເອງ ທີ່ຕັ້ງຄ່າໄວ້ສຳລັບແບບສຳຫຼວດໃນ %1$s. ຂໍໃຫ້ຜູ້ຈັດການເພີ່ມ ຫຼື ປ່ຽນແຫຼ່ງຮູບແຜນທີ່.</string>
+  <string name="org_purposes_subtitle_admins">ຕົວເລືອກທີ່ທຸກອົງກອນເຫັນສຳລັບ "ຂໍ້ມູນນີ້ຈະຖືກນຳໃຊ້ເພື່ອຫຍັງ?" ເມື່ອສ້າງແບບສຳຫຼວດ. ແຕ່ລະຈຸດປະສົງຈະເພີ່ມແມ່ແບບຂອງຕົນເຂົ້າໃນແບບສຳຫຼວດໃໝ່.</string>
+  <string name="org_purposes_subtitle">ຕົວເລືອກສຳລັບ "ຂໍ້ມູນນີ້ຈະຖືກນຳໃຊ້ເພື່ອຫຍັງ?" ເມື່ອສ້າງແບບສຳຫຼວດໃນ %1$s: ຈຸດປະສົງຂອງອົງກອນກ່ອນ, ຈາກນັ້ນຈຸດປະສົງສ່ວນກາງ.</string>
+  <string name="org_dictionary_subtitle_admins">ແນວຄິດສ່ວນກາງ: ຊ່ອງຂໍ້ມູນມາດຕະຖານທີ່ເຊື່ອມໂຍງຄຳຖາມໃນແບບຟອມກັບຄວາມໝາຍດຽວກັນ ເພື່ອໃຫ້ສາມາດປຽບທຽບ ແລະ ລວມຄຳຕອບຂ້າມແບບສຳຫຼວດ ແລະ ພາສາໄດ້.</string>
+  <string name="org_dictionary_subtitle">ແນວຄິດທີ່ແບບສຳຫຼວດໃນ %1$s ໃຊ້ໄດ້: ຊ່ອງຂໍ້ມູນມາດຕະຖານທີ່ໃຫ້ຄຳຖາມໃນແບບຟອມມີຄວາມໝາຍດຽວກັນ ເພື່ອໃຫ້ສາມາດປຽບທຽບ ແລະ ລວມຄຳຕອບໄດ້.</string>
+  <string name="org_templates_subtitle_admins">ແມ່ແບບແບບຟອມສ່ວນກາງທີ່ທຸກອົງກອນສາມາດເພີ່ມເຂົ້າໃນແບບສຳຫຼວດຂອງຕົນໄດ້.</string>
+  <string name="org_templates_subtitle">ແມ່ແບບແບບຟອມທີ່ແບບສຳຫຼວດໃນ %1$s ໃຊ້ໄດ້: ແມ່ແບບຂອງອົງກອນກ່ອນ, ຈາກນັ້ນແມ່ແບບສ່ວນກາງ.</string>
+  <string name="org_cost_controls_title_global">ການຄວບຄຸມຄ່າໃຊ້ຈ່າຍ ແລະ ໂຄຕ້າສ່ວນກາງ</string>
+  <string name="org_cost_controls_subtitle_global">ຂີດຈຳກັດໂຄຕ້າເລີ່ມຕົ້ນ ແລະ ນ້ຳໜັກຕົ້ນທຶນຕໍ່ໜ່ວຍທົ່ວແພລັດຟອມ ທີ່ໃຊ້ກັບອົງກອນ ແລະ ແບບສຳຫຼວດ.</string>
+  <string name="org_cost_controls_subtitle_manager">ເພດານງົບປະມານ ແລະ ຂີດຈຳກັດໂຄຕ້າສຳລັບ %1$s. ຕັ້ງຄ່າລະດັບທີ່ກຳນົດໄວ້ລ່ວງໜ້າ ຫຼື ຂີດຈຳກັດຊັບພະຍາກອນແບບລະອຽດ.</string>
+  <string name="org_cost_controls_subtitle_member">ເພດານງົບປະມານ ແລະ ຂີດຈຳກັດໂຄຕ້າສຳລັບ %1$s. ຂໍໃຫ້ຜູ້ຈັດການອົງກອນປັບຂີດຈຳກັດເຫຼົ່ານີ້.</string>
+  <string name="org_cost_tracking_title">ການຕິດຕາມຄ່າໃຊ້ຈ່າຍແພລັດຟອມ</string>
+  <string name="org_cost_tracking_subtitle">ການບັນຊີຄ່າໃຊ້ຈ່າຍແບບສົດ, ສະຫຼຸບການໃຊ້ຊັບພະຍາກອນ ແລະ ການແຍກລາຍລະອຽດການປະຕິບັດຕາມງົບປະມານ ຕາມອົງກອນ, ແບບສຳຫຼວດ ແລະ ຜູ້ໃຊ້.</string>
+
+  <!-- Missing organization -->
+  <string name="org_missing_title">ອົງກອນນີ້ບໍ່ມີຢູ່</string>
+  <string name="org_missing_body">ອາດຖືກລຶບແລ້ວ ຫຼື ລິ້ງບໍ່ຖືກຕ້ອງ.</string>
+
+  <!-- Surveys section -->
+  <!-- %1$s: organization name. -->
+  <string name="org_surveys_empty_member">ຍັງບໍ່ມີແບບສຳຫຼວດ. ສ້າງແບບສຳຫຼວດທຳອິດສຳລັບ %1$s.</string>
+  <string name="org_surveys_empty">ຍັງບໍ່ມີແບບສຳຫຼວດ.</string>
+
+  <!-- Members section -->
+  <!-- Name of the list where Managers see the name and photo an invitee accepts with; completes "…shown on the <list>". -->
+  <string name="org_members_page_name">ໜ້າສະມາຊິກ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_leave_title">ອອກຈາກ %1$s ບໍ?</string>
+  <string name="org_leave_body">ທ່ານຈະເສຍສິດເຂົ້າເຖິງແບບສຳຫຼວດຂອງອົງກອນ ເວັ້ນເສຍແຕ່ໄດ້ຮັບການແບ່ງປັນໃຫ້ທ່ານໂດຍກົງ. ແບບສຳຫຼວດທີ່ທ່ານເປັນເຈົ້າຂອງຍັງເປັນຂອງທ່ານ.</string>
+  <string name="org_leave">ອອກ</string>
+  <string name="org_leave_organization">ອອກຈາກອົງກອນ</string>
+  <string name="org_members_requests_title">ຄຳຂໍເຂົ້າຮ່ວມ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_members_requests_body">ບຸກຄົນທີ່ພົບ %1$s ໃນລາຍຊື່ອົງກອນ ແລະ ຂໍເຂົ້າຮ່ວມ.</string>
+  <string name="org_members_asked_to_join">ຂໍເຂົ້າຮ່ວມ</string>
+  <!-- Badge on a person who asked to join. -->
+  <string name="org_members_requested">ຂໍແລ້ວ</string>
+  <string name="org_decline">ປະຕິເສດ</string>
+  <string name="org_approve">ອະນຸມັດ</string>
+  <string name="org_members_admins_help">ຜູ້ດູແລແພລັດຟອມຈັດການຄັງສ່ວນກາງ, ແຫຼ່ງຮູບແຜນທີ່ຂອງແພລັດຟອມ ແລະ ການຕັ້ງຄ່າແພລັດຟອມ.</string>
+  <!-- The signed-in user in the members list. %1$s: their name. -->
+  <string name="org_member_you">%1$s (ທ່ານ)</string>
+  <!-- Member role field label. -->
+  <string name="org_field_role">ບົດບາດ</string>
+  <!-- Screen reader label. %1$s: name of the member to remove. -->
+  <string name="org_remove_member">ລຶບ %1$s ອອກ</string>
+  <string name="org_members_manager_help">ອົງກອນຕ້ອງມີຜູ້ຈັດການຢ່າງໜ້ອຍໜຶ່ງຄົນສະເໝີ. ຊື່ ແລະ ຮູບພາບມາຈາກບັນຊີຂອງແຕ່ລະຄົນເມື່ອພວກເຂົາຍອມຮັບຄຳເຊີນ.</string>
+  <!-- Section heading listing pending invites. -->
+  <string name="org_members_invited_title">ໄດ້ຮັບເຊີນ</string>
+  <!-- %1$s: the invited role, e.g. Manager. -->
+  <string name="org_members_invite_pending">ລໍຖ້າໃຫ້ພວກເຂົາຍອມຮັບລິ້ງຄຳເຊີນ · %1$s</string>
+  <!-- Screen reader label. %1$s: email address of the invitee. -->
+  <string name="org_revoke_invite">ຖອນຄຳເຊີນສຳລັບ %1$s</string>
+  <string name="org_invite_label">ເຊີນບຸກຄົນທາງອີເມວ</string>
+  <string name="org_invite">ເຊີນ</string>
+
+  <!-- Details section -->
+  <string name="org_published_title">ຕົວເລກຜົນກະທົບທີ່ເຜີຍແຜ່</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_manager">ໃນຖານະຜູ້ຈັດການຂອງ %1$s ທ່ານເຜີຍແຜ່ຍອດລວມແບບບໍ່ລະບຸຕົວຕົນຈາກແບບສຳຫຼວດຂອງອົງກອນ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_member">%1$s ເຜີຍແຜ່ຍອດລວມແບບບໍ່ລະບຸຕົວຕົນຈາກແບບສຳຫຼວດຂອງຕົນ</string>
+  <!-- %1$s: a sentence stating what is never published. -->
+  <string name="org_published_body">ທຸກຄົນທີ່ເຂົ້າລະບົບ Collect One ສາມາດຕິດຕາມຜົນລວມຂອງແບບສຳຫຼວດຂອງທ່ານ ເຊັ່ນ ຈຳນວນເຮັກຕາທີ່ໄດ້ທຳແຜນທີ່ ແລະ ວິທີນຳໃຊ້ຂໍ້ມູນ ໃນໜ້າຜົນກະທົບ. %1$s</string>
+  <string name="org_published_see">ເບິ່ງສິ່ງທີ່ເຜີຍແຜ່</string>
+  <string name="org_platform_numbers_title">ຕົວເລກທົ່ວແພລັດຟອມ</string>
+  <string name="org_platform_numbers_exclude">ບໍ່ລວມຂໍ້ມູນຂອງພວກເຮົາໃນຍອດລວມຂອງແພລັດຟອມ</string>
+  <string name="org_platform_numbers_help">ແບບສຳຫຼວດຂອງທ່ານຍັງຖືກນັບໃນຕົວເລກຜົນກະທົບຂອງທ່ານເອງ; ມີແຕ່ຍອດລວມທົ່ວ Collect One ເທົ່ານັ້ນທີ່ບໍ່ລວມ.</string>
+  <string name="org_ask_manager_change">ຂໍໃຫ້ຜູ້ຈັດການປ່ຽນແປງສິ່ງນີ້.</string>
+  <string name="org_profile_title">ໂປຣໄຟລ໌</string>
+  <string name="org_field_logo">ໂລໂກ້ອົງການ</string>
+  <string name="org_details_logo_help">PNG, JPG, WebP ຫຼື SVG. ສະແດງໃນບັດ ແລະ ສ່ວນຫົວຂອງອົງການ.</string>
+  <string name="org_logo_upload">ອັບໂຫຼດໂລໂກ້</string>
+  <string name="org_logo_change">ປ່ຽນໂລໂກ້</string>
+  <string name="org_logo_remove">ລຶບອອກ</string>
+  <!-- Shown under an empty organization name field. -->
+  <string name="org_details_name_required">ປ້ອນຊື່</string>
+  <string name="org_details_description_help">ສະແດງໃນລາຍຊື່ອົງກອນ ແລະ ໃນໜ້າແບບສຳຫຼວດ.</string>
+  <string name="org_field_website">ເວັບໄຊ</string>
+  <string name="org_details_listed_help">ທຸກຄົນສາມາດຊອກຫາອົງກອນ ແລະ ຂໍເຂົ້າຮ່ວມໄດ້. ອົງກອນທີ່ບໍ່ສະແດງໃນລາຍການຈະເຂົ້າຮ່ວມໄດ້ສະເພາະຜູ້ທີ່ໄດ້ຮັບເຊີນເທົ່ານັ້ນ.</string>
+  <string name="org_unsaved_changes">ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ</string>
+  <!-- Organization name label on the read-only details. -->
+  <string name="org_field_name_short">ຊື່</string>
+  <!-- Shown when the organization has no website. -->
+  <string name="org_not_provided">ບໍ່ໄດ້ລະບຸ.</string>
+  <!-- Directory listing label on the read-only details. -->
+  <string name="org_field_directory">ລາຍຊື່ອົງກອນ</string>
+  <string name="org_directory_listed">ສະແດງໃນລາຍການ · ທຸກຄົນສາມາດຊອກຫາ ແລະ ຂໍເຂົ້າຮ່ວມໄດ້</string>
+  <string name="org_directory_unlisted">ບໍ່ສະແດງໃນລາຍການ · ສະເພາະຜູ້ໄດ້ຮັບເຊີນ</string>
+  <!-- %1$d: number of surveys in the organization. -->
+  <plurals name="org_delete_body_surveys">
+    <item quantity="other">ສະມາຊິກຈະເສຍການສັງກັດ. ແບບສຳຫຼວດ %1$d ລາຍການຂອງອົງກອນຈະກາຍເປັນແບບສຳຫຼວດສ່ວນຕົວຂອງເຈົ້າຂອງ; ບໍ່ມີຂໍ້ມູນໃດຖືກລຶບ.</item>
+  </plurals>
+  <string name="org_delete_body_no_surveys">ສະມາຊິກຈະເສຍການສັງກັດ. ອົງກອນນີ້ບໍ່ມີແບບສຳຫຼວດ.</string>
+  <string name="org_delete_organization">ລຶບອົງກອນ</string>
+  <string name="org_danger_zone">ເຂດອັນຕະລາຍ</string>
+  <string name="org_danger_zone_body">ການລຶບອົງກອນຈະລຶບການສັງກັດຂອງທຸກຄົນ. ແບບສຳຫຼວດຂອງອົງກອນຈະກາຍເປັນແບບສຳຫຼວດສ່ວນຕົວຂອງເຈົ້າຂອງ ແລະ ເກັບຮັກສາຂໍ້ມູນທັງໝົດໄວ້.</string>
+
+  <!-- Imagery section -->
+  <string name="org_imagery_configured_title">ແຫຼ່ງຮູບແຜນທີ່ທີ່ຕັ້ງຄ່າໄວ້</string>
+  <string name="org_imagery_empty_manager">ຍັງບໍ່ມີແຫຼ່ງຮູບແຜນທີ່ທີ່ຕັ້ງຄ່າໄວ້. ເພີ່ມ URL ໄທລ໌ XYZ ຂ້າງລຸ່ມນີ້ ເພື່ອໃຫ້ເປີດ/ປິດໄດ້ໃນກ່ອງໂຕ້ຕອບຊັ້ນແຜນທີ່ພື້ນຖານ.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_imagery_empty_member">ບໍ່ມີແຫຼ່ງຮູບແຜນທີ່ທີ່ຕັ້ງຄ່າໄວ້ສຳລັບ %1$s.</string>
+  <string name="org_imagery_source_name">ຊື່ແຫຼ່ງ</string>
+  <!-- Example imagery source name. -->
+  <string name="org_imagery_source_name_placeholder">ຕົວຢ່າງ: OpenTopoMap Contours</string>
+  <string name="org_imagery_url">URL ໄທລ໌ XYZ</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_edit">ຕ້ອງມີຕົວແທນໄທລ໌ {z}, {x} ແລະ {y}.</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_add">ແມ່ແບບ URL ໄທລ໌ແຣສເຕີ Web Mercator ທີ່ມີຕົວແທນ {z}, {x} ແລະ {y}.</string>
+  <string name="org_imagery_offline_title">ອະນຸຍາດໃຫ້ດາວໂຫຼດອອບລາຍໃນມືຖື</string>
+  <string name="org_imagery_offline_help_edit">ອະນຸຍາດໃຫ້ຜູ້ເກັບຂໍ້ມູນດາວໂຫຼດໄທລ໌ຈາກແຫຼ່ງນີ້ ເພື່ອໃຊ້ອອບລາຍໃນພາກສະໜາມ.</string>
+  <string name="org_imagery_offline_help_add">ອະນຸຍາດໃຫ້ຜູ້ເກັບຂໍ້ມູນໃນອຸປະກອນມືຖືດາວໂຫຼດໄທລ໌ຈາກແຫຼ່ງ XYZ ນີ້ ເພື່ອໃຊ້ອອບລາຍໃນພາກສະໜາມ.</string>
+  <string name="org_imagery_offline_allowed">ຜູ້ເກັບຂໍ້ມູນສາມາດດາວໂຫຼດໄທລ໌ຈາກແຫຼ່ງນີ້ລົງໃນອຸປະກອນມືຖືໄດ້.</string>
+  <string name="org_imagery_offline_disabled">ສະຕຣີມອອນລາຍເທົ່ານັ້ນ; ການດາວໂຫຼດໄທລ໌ອອບລາຍຖືກປິດໃນມືຖື.</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_permitted">ອະນຸຍາດ</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_not_permitted">ບໍ່ອະນຸຍາດ</string>
+  <!-- Screen reader label. %1$s: name of the imagery source to remove. -->
+  <string name="org_remove_imagery_source">ລຶບ %1$s ອອກ</string>
+  <string name="org_imagery_add">ເພີ່ມແຫຼ່ງຮູບແຜນທີ່</string>
+  <string name="org_imagery_add_body">ເພີ່ມບໍລິການໄທລ໌ແຣສເຕີ ທີ່ຜູ້ເກັບຂໍ້ມູນ ແລະ ຜູ້ຈັດການສາມາດເປີດໃຊ້ໃນກ່ອງໂຕ້ຕອບຊັ້ນແຜນທີ່ພື້ນຖານ.</string>
+  <string name="org_imagery_source_type">ປະເພດແຫຼ່ງ</string>
+  <string name="org_imagery_ee_preset">ການຕັ້ງຄ່າລ່ວງໜ້າ Earth Engine</string>
+  <string name="org_imagery_ee_preset_placeholder">ເລືອກການຕັ້ງຄ່າລ່ວງໜ້າ…</string>
+  <string name="org_imagery_ee_description">ຄຳນວນໂດຍ Earth Engine · ໄທລ໌ຣີເຟຣຊອັດຕະໂນມັດ</string>
+
+  <!-- Cost controls section -->
+  <string name="org_quota_tier_title">ລະດັບໂຄຕ້າທີ່ກຳນົດໄວ້ລ່ວງໜ້າ</string>
+  <string name="org_quota_tier_body">ນຳໃຊ້ຄ່າເລີ່ມຕົ້ນຂອງລະດັບບໍລິການມາດຕະຖານ ຫຼື ປັບແຕ່ງໂຄຕ້າຊັບພະຍາກອນແຕ່ລະລາຍການຂ້າງລຸ່ມນີ້.</string>
+  <string name="org_quota_tier_inherit">ສືບທອດຈາກສ່ວນກາງ</string>
+  <string name="org_quota_tier_basic">ລະດັບພື້ນຖານ</string>
+  <string name="org_quota_tier_sponsored">ລະດັບທີ່ໄດ້ຮັບການສະໜັບສະໜູນ</string>
+  <string name="org_budget_title">ເພດານງົບປະມານລາຍເດືອນ</string>
+  <string name="org_budget_body">ຂີດຈຳກັດສູງສຸດເປັນ USD ສຳລັບຄ່າໃຊ້ຈ່າຍໂດຍປະມານຂອງແບບສຳຫຼວດ ແລະ ການເກັບຂໍ້ມູນ. ປ້ອນ 0 ສຳລັບງົບປະມານບໍ່ຈຳກັດ.</string>
+  <string name="org_budget_field">ເພດານງົບປະມານລາຍເດືອນ ($ USD)</string>
+  <string name="org_budget_placeholder">0.00 (ບໍ່ຈຳກັດ)</string>
+  <string name="org_limits_survey_title">ຂີດຈຳກັດແບບສຳຫຼວດ ແລະ ແບບຟອມ</string>
+  <string name="org_limit_surveys_per_owner">ແບບສຳຫຼວດສູງສຸດ / ເຈົ້າຂອງ</string>
+  <string name="org_limit_forms_per_survey">ແບບຟອມສູງສຸດ / ແບບສຳຫຼວດ</string>
+  <string name="org_limit_questions_per_form">ຄຳຖາມສູງສຸດ / ແບບຟອມ</string>
+  <string name="org_limit_photo_questions_per_form">ຄຳຖາມຮູບພາບສູງສຸດ / ແບບຟອມ</string>
+  <string name="org_limit_predefined_entities">ລາຍການທີ່ກຳນົດໄວ້ລ່ວງໜ້າສູງສຸດ</string>
+  <string name="org_limit_sample_plots">ແປງຕົວຢ່າງສູງສຸດ</string>
+  <string name="org_limit_boundary_vertices">ຈຸດຍອດຂອບເຂດສູງສຸດ</string>
+  <string name="org_limit_acl_collaborators">ຜູ້ຮ່ວມງານ ACL ສູງສຸດ</string>
+  <string name="org_limits_collector_title">ຂີດຈຳກັດຜູ້ເກັບຂໍ້ມູນ ແລະ ການສົ່ງຂໍ້ມູນ</string>
+  <string name="org_limit_active_surveys_per_user">ແບບສຳຫຼວດທີ່ໃຊ້ງານສູງສຸດ / ຜູ້ໃຊ້</string>
+  <string name="org_limit_adhoc_features_per_user">ອົງປະກອບທີ່ເພີ່ມເອງສູງສຸດ / ຜູ້ໃຊ້</string>
+  <string name="org_limit_submissions_per_feature">ການສົ່ງຂໍ້ມູນສູງສຸດ / ອົງປະກອບ / ຜູ້ໃຊ້</string>
+  <string name="org_cost_weights_title">ນ້ຳໜັກຕົ້ນທຶນຕໍ່ໜ່ວຍຂອງແພລັດຟອມ ($ USD)</string>
+  <string name="org_cost_weight_survey_month">USD / ແບບສຳຫຼວດ / ເດືອນ</string>
+  <string name="org_cost_weight_entities">USD / 1 ພັນລາຍການ</string>
+  <string name="org_cost_weight_submissions">USD / 1 ພັນການສົ່ງຂໍ້ມູນ</string>
+  <string name="org_cost_weight_photo">USD / ຮູບພາບ</string>
+  <string name="org_cost_controls_save">ບັນທຶກການຄວບຄຸມຄ່າໃຊ້ຈ່າຍ</string>
+  <string name="org_cost_controls_saved">ບັນທຶກການຄວບຄຸມຄ່າໃຊ້ຈ່າຍແລ້ວ.</string>
+
+  <!-- Cost tracking section -->
+  <string name="org_cost_total">ຄ່າໃຊ້ຈ່າຍທັງໝົດໂດຍປະມານ</string>
+  <!-- Monthly cost. %1$s: formatted amount, e.g. $12.50. -->
+  <string name="org_cost_per_month">%1$s / ເດືອນ</string>
+  <!-- %1$s: formatted monthly budget, e.g. $100.00. -->
+  <string name="org_cost_budget_cap">ເພດານງົບປະມານ: %1$s / ເດືອນ</string>
+  <string name="org_cost_tracked_surveys">ແບບສຳຫຼວດທີ່ຕິດຕາມ</string>
+  <string name="org_cost_total_entities">ລາຍການທັງໝົດ</string>
+  <string name="org_cost_submissions">ການສົ່ງຂໍ້ມູນ</string>
+  <string name="org_cost_photos">ຮູບພາບທີ່ບັນທຶກ</string>
+  <!-- %1$d: number of alerts. -->
+  <string name="org_cost_budget_alerts">ການແຈ້ງເຕືອນງົບປະມານ (%1$d)</string>
+  <!-- %1$s: organization or survey name; %2$s: estimated monthly cost; %3$s: monthly budget. -->
+  <string name="org_cost_budget_alert">%1$s ເກີນງົບປະມານລາຍເດືອນ (%2$s &gt; %3$s)</string>
+  <!-- Filter chips. %1$d: number of rows. -->
+  <string name="org_cost_by_organization">ຕາມອົງກອນ (%1$d)</string>
+  <string name="org_cost_by_survey">ຕາມແບບສຳຫຼວດ (%1$d)</string>
+  <string name="org_cost_by_collector">ຕາມຜູ້ເກັບຂໍ້ມູນ (%1$d)</string>
+  <string name="org_cost_exceeded">ເກີນງົບປະມານ</string>
+  <string name="org_cost_within">ຢູ່ໃນງົບປະມານ</string>
+  <plurals name="org_count_entities">
+    <item quantity="other">%1$d ລາຍການ</item>
+  </plurals>
+  <plurals name="org_count_submissions">
+    <item quantity="other">%1$d ການສົ່ງຂໍ້ມູນ</item>
+  </plurals>
+  <plurals name="org_count_photos">
+    <item quantity="other">%1$d ຮູບພາບ</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features. -->
+  <string name="org_count_predefined">ກຳນົດໄວ້ລ່ວງໜ້າ %1$d</string>
+  <!-- %1$d: number of generated map features (sample plots). -->
+  <string name="org_count_generated">ສ້າງອັດຕະໂນມັດ %1$d</string>
+  <!-- A collector's activity. %1$d: number of surveys. -->
+  <plurals name="org_count_active_in_surveys">
+    <item quantity="other">ເຄື່ອນໄຫວໃນ %1$d ແບບສຳຫຼວດ</item>
+  </plurals>
+
+  <!-- Notices -->
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed">ບໍ່ສາມາດສ້າງ "%1$s" ໄດ້.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed_country">ບໍ່ສາມາດສ້າງ "%1$s" ໄດ້. ເລືອກປະເທດຈາກລາຍການ.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_created">ສ້າງອົງກອນ "%1$s" ແລ້ວ.</string>
+  <string name="org_notice_save_failed_country">ບໍ່ສາມາດບັນທຶກໄດ້. ເລືອກປະເທດຈາກລາຍການ.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_deleted">ລຶບອົງກອນ "%1$s" ແລ້ວ.</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_notice_role_all_users">ທຸກຄົນເປັນສະມາຊິກຂອງ %1$s ຢູ່ແລ້ວ. ໃຫ້ລຶບຜູ້ຈັດການອອກແທນ.</string>
+  <string name="org_notice_last_manager_role">ອົງກອນຕ້ອງມີຜູ້ຈັດການຢ່າງໜ້ອຍໜຶ່ງຄົນ. ແຕ່ງຕັ້ງຄົນອື່ນເປັນຜູ້ຈັດການກ່ອນ.</string>
+  <string name="org_notice_last_manager_leave">ອົງກອນຕ້ອງມີຜູ້ຈັດການຢ່າງໜ້ອຍໜຶ່ງຄົນ. ແຕ່ງຕັ້ງຄົນອື່ນເປັນຜູ້ຈັດການກ່ອນອອກ.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_left">ທ່ານໄດ້ອອກຈາກ "%1$s" ແລ້ວ.</string>
+
+  <!-- Validation errors -->
+  <string name="org_error_invalid_email">ປ້ອນທີ່ຢູ່ອີເມວທີ່ຖືກຕ້ອງ.</string>
+  <string name="org_error_not_found">ບໍ່ພົບອົງກອນ.</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_error_invite_all_users">ທຸກຄົນເປັນສະມາຊິກຂອງ %1$s ຢູ່ແລ້ວ. ໃຫ້ເຊີນບຸກຄົນເປັນຜູ້ຈັດການ.</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_member">%1$s ເປັນສະມາຊິກຢູ່ແລ້ວ.</string>
+  <!-- %1$s: the person's email address. -->
+  <string name="org_error_already_invited">%1$s ໄດ້ຮັບເຊີນແລ້ວ.</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_requested">%1$s ໄດ້ຂໍເຂົ້າຮ່ວມແລ້ວ. ໃຫ້ອະນຸມັດຄຳຂໍຂອງພວກເຂົາແທນ.</string>
+  <!-- An invitee accepting without a name. -->
+  <string name="org_error_enter_name">ປ້ອນຊື່.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_error_library_managers_only">ສະເພາະຜູ້ຈັດການຂອງ %1$s ເທົ່ານັ້ນທີ່ສາມາດປ່ຽນແປງຄັງຂອງອົງກອນໄດ້.</string>
+  <string name="org_error_question_labels">ປ້ອນປ້າຍກຳກັບສຳລັບທຸກຄຳຖາມ.</string>
+  <string name="org_error_concept_missing">ແນວຄິດນີ້ບໍ່ມີຢູ່ແລ້ວ.</string>
+  <string name="org_error_concept_not_draft">ສາມາດລຶບໄດ້ສະເພາະແນວຄິດທີ່ເປັນສະບັບຮ່າງເທົ່ານັ້ນ. ໃຫ້ເລີກໃຊ້ແທນ ເພື່ອໃຫ້ການເຊື່ອມໂຍງທີ່ມີຢູ່ຍັງໃຊ້ງານໄດ້.</string>
+
+  <!-- Dictionary (concepts) -->
+  <string name="org_concept_delete_error_title">ບໍ່ສາມາດລຶບແນວຄິດນີ້ໄດ້</string>
+  <string name="org_concept_search_label">ຊອກຫາແນວຄິດ</string>
+  <!-- "cultivo" is an example search term in Spanish; keep it as is. -->
+  <string name="org_concept_search_placeholder">ປ້າຍກຳກັບ ຫຼື ຄຳສຳຄັນໃນພາສາໃດກໍໄດ້ ເຊັ່ນ cultivo</string>
+  <!-- %1$d: concepts shown; %2$d: all concepts (selects the plural form). -->
+  <plurals name="org_concept_search_count">
+    <item quantity="other">%1$d ຈາກ %2$d ແນວຄິດ</item>
+  </plurals>
+  <string name="org_concepts_global_title">ແນວຄິດສ່ວນກາງ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_concepts_org_title">ແນວຄິດຂອງ %1$s</string>
+  <string name="org_concepts_global_body">ຊ່ອງຂໍ້ມູນມາດຕະຖານທີ່ທຸກແບບສຳຫຼວດໃຊ້ໄດ້. ການປ່ຽນແປງຈະມີຜົນກັບທຸກອົງກອນ.</string>
+  <!-- %1$s: organization ID, part of the concept ID prefix. -->
+  <string name="org_concepts_org_body">ຊ່ອງຂໍ້ມູນມາດຕະຖານທີ່ມີແຕ່ອົງກອນນີ້ໃຊ້. ID ຂອງພວກມັນເລີ່ມຕົ້ນດ້ວຍ org.%1$s.</string>
+  <string name="org_concepts_no_matches">ບໍ່ມີແນວຄິດທີ່ກົງກັນ.</string>
+  <string name="org_concepts_global_empty">ຍັງບໍ່ມີແນວຄິດສ່ວນກາງ.</string>
+  <string name="org_concepts_empty">ຍັງບໍ່ມີແນວຄິດ.</string>
+  <string name="org_concepts_global_shared_body">ແບ່ງປັນໃຫ້ທຸກອົງກອນໂດຍ ຜູ້ໃຊ້ທັງໝົດ. ສະເພາະຜູ້ດູແລແພລັດຟອມເທົ່ານັ້ນທີ່ປ່ຽນແປງໄດ້.</string>
+  <string name="org_concept_add">ເພີ່ມແນວຄິດ</string>
+  <string name="org_concept_edit_title">ແກ້ໄຂແນວຄິດ</string>
+  <!-- %1$s: unit code, e.g. kg. -->
+  <string name="org_concept_unit">ຫົວໜ່ວຍ %1$s</string>
+  <!-- %1$d: number of list values; %2$s: the first few value labels. -->
+  <plurals name="org_concept_values">
+    <item quantity="other">%1$d ຄ່າ: %2$s</item>
+  </plurals>
+  <!-- Like org_concept_values, when only some of the values are listed. -->
+  <plurals name="org_concept_values_truncated">
+    <item quantity="other">%1$d ຄ່າ: %2$s…</item>
+  </plurals>
+  <!-- Short concept version. %1$d: version number. -->
+  <string name="org_concept_version_short">v%1$d</string>
+  <string name="org_field_label_english">ປ້າຍກຳກັບ (ພາສາອັງກິດ)</string>
+  <string name="org_concept_label_help">ຍັງເປັນປ້າຍກຳກັບຄຳຖາມເລີ່ມຕົ້ນເມື່ອເຊື່ອມໂຍງ</string>
+  <string name="org_concept_vocabulary">ຄຳສັບ</string>
+  <!-- Concept name, the last part of its ID. -->
+  <string name="org_concept_name">ຊື່</string>
+  <!-- %1$s: the concept ID. -->
+  <string name="org_concept_id">ID: %1$s</string>
+  <!-- %1$s: the concept ID; %2$d: version number. -->
+  <string name="org_concept_id_version">%1$s · ເວີຊັນ %2$d</string>
+  <!-- %1$s: list of language codes and labels. -->
+  <string name="org_concept_translations">ການແປ: %1$s</string>
+  <string name="org_field_description_english">ຄຳອະທິບາຍ (ພາສາອັງກິດ)</string>
+  <string name="org_concept_data_type">ປະເພດຂໍ້ມູນ</string>
+  <string name="org_concept_unit_label">ຫົວໜ່ວຍ (ບໍ່ບັງຄັບ)</string>
+  <string name="org_concept_unit_help">ລະຫັດ UCUM</string>
+  <string name="org_concept_list_values">ຄ່າໃນລາຍການ</string>
+  <!-- Code of a list value. -->
+  <string name="org_concept_value">ຄ່າ</string>
+  <string name="org_concept_remove_value">ລຶບຄ່າອອກ</string>
+  <string name="org_concept_add_value">ເພີ່ມຄ່າ</string>
+  <string name="org_concept_aggregation">ການລວມຂໍ້ມູນ</string>
+  <string name="org_concept_privacy">ຄວາມເປັນສ່ວນຕົວ</string>
+  <string name="org_concept_goals">ເປົ້າໝາຍ (ບໍ່ບັງຄັບ)</string>
+  <string name="org_concept_suggested_goals">ເປົ້າໝາຍທີ່ແນະນຳ (ບໍ່ບັງຄັບ)</string>
+  <string name="org_concept_goals_help">ແຍກ ID ເປົ້າໝາຍດ້ວຍເຄື່ອງໝາຍຈຸດ</string>
+  <!-- Impact pillar of a concept. -->
+  <string name="org_concept_pillar">ເສົາຫຼັກ</string>
+  <!-- Lifecycle status of a concept. -->
+  <string name="org_concept_status">ສະຖານະ</string>
+  <!-- %1$s: list of references. -->
+  <string name="org_concept_references">ເອກະສານອ້າງອີງ: %1$s</string>
+
+  <!-- Library entries -->
+  <string name="org_badge_hidden">ເຊື່ອງແລ້ວ</string>
+  <string name="org_badge_hidden_with_templates">ເຊື່ອງພ້ອມແມ່ແບບແລ້ວ</string>
+  <string name="org_field_title_english">ຫົວຂໍ້ (ພາສາອັງກິດ)</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_library_global_body_member">ແບ່ງປັນໂດຍ ຜູ້ໃຊ້ທັງໝົດ. ຂໍໃຫ້ຜູ້ຈັດການເຊື່ອງລາຍການທີ່ %1$s ບໍ່ໄດ້ໃຊ້.</string>
+
+  <!-- Templates -->
+  <string name="org_template_new_title">ແມ່ແບບໃໝ່</string>
+  <string name="org_template_edit_title">ແກ້ໄຂແມ່ແບບ</string>
+  <string name="org_template_delete_body">ແມ່ແບບຈະຖືກລຶບອອກຈາກຄັງ ແລະ ຈາກຊຸດຈຸດປະສົງທີ່ໃຊ້ມັນ. ແບບສຳຫຼວດທີ່ສ້າງຈາກແມ່ແບບນີ້ແລ້ວຈະຍັງຄົງມີແບບຟອມຢູ່.</string>
+  <string name="org_template_delete">ລຶບແມ່ແບບ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_org_title">ແມ່ແບບຂອງ %1$s</string>
+  <string name="org_templates_empty">ຍັງບໍ່ມີແມ່ແບບ. ແມ່ແບບທີ່ບັນທຶກຈາກແບບຟອມຂອງອົງກອນນີ້ຈະສະແດງຢູ່ບ່ອນນີ້.</string>
+  <string name="org_template_new_button">ແມ່ແບບໃໝ່</string>
+  <string name="org_templates_global_title">ແມ່ແບບສ່ວນກາງ</string>
+  <string name="org_templates_global_body_admins">ແບບຟອມທີ່ທຸກອົງກອນສາມາດເພີ່ມເຂົ້າໃນແບບສຳຫຼວດຂອງຕົນໄດ້.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_global_body_manager">ແບ່ງປັນໂດຍ ຜູ້ໃຊ້ທັງໝົດ. ເຊື່ອງລາຍການທີ່ %1$s ບໍ່ໄດ້ໃຊ້; ແບບສຳຫຼວດທີ່ສ້າງຈາກພວກມັນແລ້ວຈະບໍ່ໄດ້ຮັບຜົນກະທົບ.</string>
+  <string name="org_templates_global_empty">ຍັງບໍ່ມີແມ່ແບບສ່ວນກາງ.</string>
+  <!-- %1$d: number of questions; %2$d: questions linked to dictionary concepts. -->
+  <plurals name="org_template_summary">
+    <item quantity="other">%1$d ຄຳຖາມ · %2$d ເຊື່ອມໂຍງກັບແນວຄິດ</item>
+  </plurals>
+  <!-- Label before the purposes a template belongs to. -->
+  <string name="org_template_purposes_label">ຈຸດປະສົງ:</string>
+  <string name="org_template_associated_purposes">ຈຸດປະສົງທີ່ກ່ຽວຂ້ອງ</string>
+
+  <!-- Template questions dialog -->
+  <!-- %1$s: template title. -->
+  <!-- Default label of a new question. %1$d: its position. -->
+  <!-- Heading of a question card. %1$d: its position. -->
+  <!-- Code of a choice. -->
+  <!-- Label of a choice. -->
+  <!-- Default label of a new choice. %1$d: its position. -->
+
+  <!-- Purposes -->
+  <string name="org_purpose_new_title">ຈຸດປະສົງໃໝ່</string>
+  <string name="org_purpose_edit_title">ແກ້ໄຂຈຸດປະສົງ</string>
+  <string name="org_purpose_delete_body">ຈຸດປະສົງນີ້ຈະບໍ່ຖືກສະເໜີອີກເມື່ອສ້າງແບບສຳຫຼວດ. ແບບສຳຫຼວດທີ່ມີຢູ່ຈະຍັງຄົງມີແບບຟອມຢູ່.</string>
+  <string name="org_purpose_delete">ລຶບຈຸດປະສົງ</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_purposes_org_title">ຈຸດປະສົງຂອງ %1$s</string>
+  <string name="org_purposes_empty">ຍັງບໍ່ມີຈຸດປະສົງ.</string>
+  <string name="org_purpose_new_button">ຈຸດປະສົງໃໝ່</string>
+  <string name="org_purposes_global_title">ຈຸດປະສົງສ່ວນກາງ</string>
+  <string name="org_purposes_global_body_admins">ຈຸດປະສົງທີ່ທຸກອົງກອນສາມາດເລືອກໄດ້ເມື່ອສ້າງແບບສຳຫຼວດ.</string>
+  <string name="org_purposes_global_body_manager">ແບ່ງປັນໂດຍ ຜູ້ໃຊ້ທັງໝົດ. ການເຊື່ອງແມ່ແບບຈະເຊື່ອງຈຸດປະສົງທີ່ໃຊ້ສະເພາະແມ່ແບບທີ່ຖືກເຊື່ອງນຳ.</string>
+  <string name="org_purposes_global_empty">ຍັງບໍ່ມີຈຸດປະສົງສ່ວນກາງ.</string>
+  <!-- %1$s: list of reporting programs and frameworks. -->
+  <string name="org_purpose_programs">ໂຄງການລາຍງານ ແລະ ກອບວຽກ: %1$s</string>
+  <!-- %1$s: list of export profile IDs. -->
+  <string name="org_purpose_exports">ການສົ່ງອອກ: %1$s</string>
+  <!-- Label before the templates of a purpose. -->
+  <string name="org_purpose_templates_label">ແມ່ແບບ:</string>
+  <!-- Impact pillar of the MAP framework. -->
+  <string name="org_purpose_pillar">ເສົາຫຼັກ MAP</string>
+  <string name="org_purpose_associated_templates">ແມ່ແບບທີ່ກ່ຽວຂ້ອງ</string>
+  <!-- A country in pickers and on the organization page: %1$s is its name, %2$s its ISO code, e.g. Kenya (KE). -->
+  <string name="org_country_with_code">%1$s (%2$s)</string>
+  <string name="org_template_discard_title">ຍົກເລີກການປ່ຽນແປງແມ່ແບບນີ້ບໍ?</string>
+  <string name="org_template_discard_body">ການແກ້ໄຂແບບຟອມ, ຄຳອະທິບາຍ ແລະ ຈຸດປະສົງຂອງມັນຍັງບໍ່ໄດ້ບັນທຶກ.</string>
+  <string name="org_template_discard">ຍົກເລີກການປ່ຽນແປງ</string>
+  <string name="org_template_keep_editing">ແກ້ໄຂຕໍ່</string>
+
+  <!-- Admin panel: mobile client version policy -->
+  <string name="org_tab_mobile_app">ແອັບມືຖື</string>
+  <string name="org_mobile_version_title">ເວີຊັນແອັບມືຖື</string>
+  <string name="org_mobile_version_subtitle">ແນະນຳການອັບເດດເມື່ອມີເວີຊັນໃໝ່ ຫຼືກຳນົດເວີຊັນຂັ້ນຕ່ຳກ່ອນການຊິງຄ໌.</string>
+  <string name="org_mobile_version_latest_label">ເວີຊັນຫຼ້າສຸດ</string>
+  <string name="org_mobile_version_latest_help">ແອັບມືຖືທີ່ເກົ່າກວ່າ SemVer ນີ້ (ເຊັ່ນ 2.1.0) ຈະເຫັນແຈ້ງເຕືອນອັບເດດ. ປະຫວ່າງໄວ້ເພື່ອປິດ.</string>
+  <string name="org_mobile_version_min_label">ເວີຊັນຂັ້ນຕ່ຳທີ່ຕ້ອງການ</string>
+  <string name="org_mobile_version_min_help">ແອັບມືຖືທີ່ເກົ່າກວ່າ SemVer ນີ້ (ເຊັ່ນ 2.0.0) ຈະຖືກບລັອກຈົນກວ່າຈະອັບເດດ.</string>
+  <string name="org_mobile_version_url_label">URL ອັບເດດ</string>
+  <string name="org_mobile_version_url_help">ລິ້ງຮ້ານຄ້າ ຫຼືດາວໂຫຼດທາງເລືອກ (ຕ້ອງຂຶ້ນຕົ້ນດ້ວຍ https:// ຫຼື http://).</string>
+  <string name="org_mobile_version_save">ບັນທຶກນະໂຍບາຍ</string>
+  <string name="org_mobile_version_saved">ບັນທຶກນະໂຍບາຍເວີຊັນມືຖືແລ້ວ.</string>
+  <string name="org_mobile_version_unavailable">ເຊື່ອມຕໍ່ກັບເຊີບເວີເພື່ອຈັດການນະໂຍບາຍເວີຊັນມືຖື.</string>
+</resources>

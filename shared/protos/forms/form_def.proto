@@ -126,7 +126,7 @@ message PrimaryInstance {
 // (https://getodk.github.io/xforms-spec/#secondary-instances).
 message SecondaryInstance {
   // Unique instance identifier referenced in expressions via instance('id').
-  // In hosted, database-backed runtimes (such as Ground), this id implicitly
+  // In hosted, database-backed runtimes (such as Collect One), this id implicitly
   // binds to a managed Entity Dataset (EntityDatasetDef).
   string id = 1;
 
@@ -217,6 +217,9 @@ message FieldBinding {
 
   // Typed extension messages for proprietary, vendor, or experimental binding
   // attributes.
+  // Not yet supported by the client codecs: reading and writing `Any` payloads
+  // needs a type registry, so ProtoJSON and textproto drop them, and
+  // `ProtoFieldCoverageTest` excludes them from field coverage.
   repeated google.protobuf.Any custom_extensions = 15;
 
   // Dynamic boolean expression determining whether user editing is disabled
@@ -225,7 +228,7 @@ message FieldBinding {
   string read_only_expression = 16;
 
   // Attributes of the `<bind>` element in namespaces ProtoForms doesn't model
-  // (e.g., `ground:concept`, or another tool's extension), preserved so they
+  // (e.g., `collectone:concept`, or another tool's extension), preserved so they
   // round-trip through XForms and XLSForm (`bind::<prefix>:<name>` columns).
   repeated ForeignAttribute foreign_attributes = 17;
 
@@ -237,10 +240,10 @@ message FieldBinding {
 // An XML attribute in a namespace ProtoForms doesn't model, preserved as
 // written for round-trip fidelity.
 message ForeignAttribute {
-  // Namespace URI (e.g., "http://groundplatform.org/xforms").
+  // Namespace URI (e.g., "http://openforis.org/collect-one/xforms").
   string namespace_uri = 1;
 
-  // Qualified name as written in the source document (e.g., "ground:concept").
+  // Qualified name as written in the source document (e.g., "collectone:concept").
   string qualified_name = 2;
 
   string value = 3;
@@ -507,6 +510,9 @@ message ModelDef {
 
   // Typed extension payloads for custom, vendor, or experimental model
   // properties.
+  // Not yet supported by the client codecs: reading and writing `Any` payloads
+  // needs a type registry, so ProtoJSON and textproto drop them, and
+  // `ProtoFieldCoverageTest` excludes them from field coverage.
   repeated google.protobuf.Any custom_extensions = 9;
 }
 
@@ -737,6 +743,9 @@ message ControlDef {
   repeated ActionDef actions = 11;
 
   // Typed extension payloads for custom UI widget configurations.
+  // Not yet supported by the client codecs: reading and writing `Any` payloads
+  // needs a type registry, so ProtoJSON and textproto drop them, and
+  // `ProtoFieldCoverageTest` excludes them from field coverage.
   repeated google.protobuf.Any custom_extensions = 12;
 
   // Geospatial capture parameters (when bound to a GEOPOINT, GEOTRACE, or
@@ -863,6 +872,9 @@ message FormDef {
   // Typed extension payloads for custom, vendor, or experimental form-level
   // metadata. Clients are expected to preserve all metadata and extension
   // payloads even if they do not support all features of the XForms specification.
+  // Not yet supported by the client codecs: reading and writing `Any` payloads
+  // needs a type registry, so ProtoJSON and textproto drop them, and
+  // `ProtoFieldCoverageTest` excludes them from field coverage.
   repeated google.protobuf.Any custom_extensions = 7;
 
   // Display order of this form within its parent survey (0-based).

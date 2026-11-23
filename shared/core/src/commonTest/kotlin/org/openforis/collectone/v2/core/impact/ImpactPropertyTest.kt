@@ -19,6 +19,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.openforis.collectone.v2.core.geo.GeoCoord
 import org.openforis.collectone.v2.core.geo.s2.s2CellToken
 import org.openforis.collectone.v2.core.impact.ImpactScopeType.CELL
 import org.openforis.collectone.v2.core.impact.ImpactScopeType.COUNTRY
@@ -187,7 +188,7 @@ class ImpactPropertyTest {
 
       // Distinct located plots of eligible surveys, computed independently of the aggregator: all
       // duplicates of a GeoID share one geometry, and GeoID-less features are unique.
-      val points = HashMap<String, ImpactLatLng>()
+      val points = HashMap<String, GeoCoord>()
       for (survey in input.surveys.filter { it.organizationId !in optedOut }) {
         for (feature in survey.features) {
           val point = representativePoint(feature.geometry) ?: continue

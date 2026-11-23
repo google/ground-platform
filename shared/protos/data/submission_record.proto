@@ -20,6 +20,7 @@ package openforis.collectone.v1.data;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
+import "shared/protos/data/geometry.proto";
 import "shared/protos/forms/record_instance.proto";
 
 // Organizer QA/QC review status for a submission.
@@ -51,14 +52,24 @@ message SubmissionGeometryPolygonDef {
   string question_label = 8;
   string short_map_badge = 9;
   string collector_name = 10;
-  string timestamp_label = 11;
+  // Formerly a stored display time; derived from the parent submission's
+  // `client_updated_at` / `server_updated_at` instead.
+  reserved 11;
+  reserved "timestamp_label";
   double area_hectares = 12;
   int32 vertex_count = 13;
-  float normalized_x = 14;
-  float normalized_y = 15;
-  float width_fraction = 16;
-  float height_fraction = 17;
+
+  // Formerly a rectangle on the survey's sample map: its normalized center
+  // (`normalized_x`, `normalized_y`) and size (`width_fraction`,
+  // `height_fraction`). Clients read rows that still carry it as described in
+  // `docs/technical/model/data/05-geometry.md`.
+  reserved 14 to 17;
+  reserved "normalized_x", "normalized_y", "width_fraction", "height_fraction";
+
   int64 color_hex = 18;
+
+  // The recorded geometry in WGS 84.
+  Geometry geometry = 19;
 }
 
 // A finalized, versioned submission transaction record.
@@ -100,6 +111,9 @@ message SubmissionRecord {
   }
 
   // Audit metadata recording creation, collector identity, and sync timestamps.
+  // Server-owned: the server stamps it on each write that creates or changes
+  // the submission (who from the authenticated caller, when from its clock) and
+  // ignores any value a mutation carries.
   AuditInfo audit_info = 11;
 
   // Soft deletion status flag.
@@ -129,27 +143,47 @@ message SubmissionRecord {
   // Email address of the collector who recorded this submission.
   string collector_email = 19;
 
-  // Formatted display timestamp (e.g., "2026-09-24 14:22 UTC").
-  string timestamp_label = 20;
+  // Formerly a stored display time (e.g., "2026-09-24 14:22 UTC"). Clients
+  // derive it from `client_updated_at`, falling back to `server_updated_at`.
+  reserved 20;
+  reserved "timestamp_label";
 
-  // Singular domain noun of the target entity (e.g., "Coffee Parcel").
+  // The survey author's singular noun for the type of the target entity (e.g.,
+  // "Coffee Parcel"), or empty for a standalone submission (no `entity_id`)
+  // or when the author gave none; clients name those in the user's language.
+  // Rows written by older clients may hold their English texts "Location" or
+  // "Standalone Field Log", which clients read as empty.
   string target_type_label = 21;
 
   // Synchronization status key (`"SYNCED"`, `"UPLOADING"`, `"FAILED"`).
   string sync_status_key = 22;
 
-  // Formatted coordinates label for standalone submissions.
-  string coordinates_label = 23;
-
-  // Optional normalized canvas X coordinate for standalone map pin preview.
-  optional float normalized_x = 24;
-
-  // Optional normalized canvas Y coordinate for standalone map pin preview.
-  optional float normalized_y = 25;
+  // Formerly the collector's position as display text (`coordinates_label`)
+  // and as a normalized position on the survey's sample map (`normalized_x`,
+  // `normalized_y`); replaced by `location`. Clients read rows that still carry
+  // them as described in `docs/technical/model/data/05-geometry.md`.
+  reserved 23 to 25;
+  reserved "coordinates_label", "normalized_x", "normalized_y";
 
   // Denormalized question-and-answer entries for preview cards and lists.
   repeated SubmissionFieldEntryDef field_entries = 26;
 
   // Polygon geometry overlays captured within this submission.
   repeated SubmissionGeometryPolygonDef geometry_polygons = 27;
+
+  // When the collector last saved this submission, in the client device's
+  // clock. Set by the client on every create or edit; display text prefers it
+  // because it is when the work happened, even if the upload was later.
+  google.protobuf.Timestamp client_updated_at = 28;
+
+  // When the server accepted the last mutation of this submission, in the
+  // server's clock. Server-owned: the server stamps it on every accepted
+  // `SubmissionMutation` and ignores any value a client sends. Unlike
+  // `commit_timestamp`, it is stored in the record.
+  google.protobuf.Timestamp server_updated_at = 29;
+
+  // Where the collector was when they recorded this submission: a WGS 84
+  // point, or unset when unknown. Clients show it for submissions without a
+  // map feature and navigate to it.
+  Geometry location = 30;
 }

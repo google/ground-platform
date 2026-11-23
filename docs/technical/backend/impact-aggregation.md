@@ -22,14 +22,15 @@ Last modified: 2026-10-10
 
 ## Summary
 
-This document designs the backend that turns Ground's field data into impact
-figures: a scheduled **aggregation job** that rolls up dictionary-linked answers,
-impact events, and survey outcomes into privacy-safe aggregates, and an optional
-**spatial overlay pipeline** that intersects deduplicated map features with
-authoritative reference layers (protected areas, forest baselines, Indigenous
-and community lands, administrative boundaries, ecosystem integrity) using
-Google Earth Engine. Aggregates power the organization, survey, and global
-impact dashboards described in [Impact Measurement](../../product/impact-measurement.md).
+This document designs the backend that turns Collect One's field data into
+impact figures: a scheduled **aggregation job** that rolls up dictionary-linked
+answers, impact events, and survey outcomes into privacy-safe aggregates, and an
+optional **spatial overlay pipeline** that intersects deduplicated map features
+with authoritative reference layers (protected areas, forest baselines,
+Indigenous and community lands, administrative boundaries, ecosystem integrity)
+using Google Earth Engine. Aggregates power the organization, survey, and global
+impact dashboards described in
+[Impact Measurement](../../product/impact-measurement.md).
 
 The design keeps raw geometries and answers inside each organization's scope,
 publishes only thresholded aggregates beyond it, and leaves hosting, data
@@ -88,7 +89,7 @@ which every organization publishes.
 
 ```mermaid
 flowchart LR
-  subgraph Store["Ground data store (per deployment)"]
+  subgraph Store["Collect One data store (per deployment)"]
     E["Entity records"]
     S["Surveys and libraries"]
     I["Impact events"]
@@ -169,7 +170,7 @@ Each concept's `aggregation` rule determines the computation:
 | Rule | Computation | Output |
 | :--- | :--- | :--- |
 | `COUNT_DISTINCT_FEATURES` | Deduplicated features with a non-empty value | `feature_count`, `area_ha` |
-| `COUNT_BY_CODE` | Deduplicated features per code-list value (`ground_code`); a select-multiple value counts once for each of its space-separated codes | One row per code (`feature_count`, `area_ha`), ordered by code |
+| `COUNT_BY_CODE` | Deduplicated features per code-list value (`collectone_code`); a select-multiple value counts once for each of its space-separated codes | One row per code (`feature_count`, `area_ha`), ordered by code |
 | `SHARE_BY_CODE` | As above, divided by features with any value | One row per code; `value` is the share (0–1) |
 | `SUM` | Sum of numeric values over deduplicated features | `value`; `feature_count` and `area_ha` of contributing features |
 | `MEAN` | Mean of numeric values over deduplicated features | `value` (0 without values), `feature_count` |
@@ -348,7 +349,7 @@ concept ID and code), organization-suggested rows, `DISTINCT_VALUES`, events
 4.  **Per-feature flags**: results return to the job keyed by the opaque hash
     and are joined back to features in memory.
 5.  **Cleanup**: the transient footprint asset is deleted at the end of the
-    run. No footprint is retained outside the Ground data store.
+    run. No footprint is retained outside the Collect One data store.
 
 ### Overlay Metrics
 
@@ -356,7 +357,7 @@ concept ID and code), organization-suggested rows, `DISTINCT_VALUES`, events
 
 | Layer | Metric per feature | Aggregate |
 | :--- | :--- | :--- |
-| Protected and conserved areas (WDPA / WDOECM) | Overlap area | ha of monitored features inside protected or conserved areas; count of areas with active Ground monitoring |
+| Protected and conserved areas (WDPA / WDOECM) | Overlap area | ha of monitored features inside protected or conserved areas; count of areas with active Collect One monitoring |
 | Natural forest baseline (2020) | Overlap fraction | Plots overlapping natural forest at the EUDR cutoff |
 | Tropical moist forest change (JRC TMF) / tree cover loss | Post-2020 disturbance area | Plots with post-cutoff disturbance; share verified deforestation-free |
 | Indigenous and community lands | Overlap area | ha of IPLC land mapped (only when the mapping organization is an IPLC organization or has consent) |
@@ -422,7 +423,7 @@ redistribution of derived products.
 
 | Option | Description | Pros | Cons |
 | :--- | :--- | :--- | :--- |
-| **Per-deployment (default)** | Aggregation runs inside each Ground deployment; overlays use the deployment's own Earth Engine project | Data never leaves the deployment; works for self-hosters | Each deployment needs Earth Engine access and configuration; no cross-deployment totals |
+| **Per-deployment (default)** | Aggregation runs inside each Collect One deployment; overlays use the deployment's own Earth Engine project | Data never leaves the deployment; works for self-hosters | Each deployment needs Earth Engine access and configuration; no cross-deployment totals |
 | **Steward-hosted reference deployment** | The reference deployment's processing project is owned under Open Foris governance (for example, by FAO) | Neutral stewardship; aligns with FAO's custodian role for GBF Target 2 | Requires data processing terms between the steward and organizations; staffing and cost |
 | **Partner-provided processing** | A technology partner hosts the processing project under agreed terms | Fast to start; Earth Engine expertise | Perceived neutrality; terms and exit plan needed |
 

@@ -27,6 +27,7 @@ import org.openforis.collectone.v2.app.domain.model.Organization
 import org.openforis.collectone.v2.app.domain.model.OrganizationLibrary
 import org.openforis.collectone.v2.app.domain.model.PrivacyClass
 import org.openforis.collectone.v2.app.domain.model.PurposePack
+import org.openforis.collectone.v2.app.domain.model.StarterTemplate
 import org.openforis.collectone.v2.app.domain.model.editor.EditorChoice
 import org.openforis.collectone.v2.app.domain.model.editor.EditorForm
 import org.openforis.collectone.v2.app.domain.model.editor.EditorQuestion
@@ -42,8 +43,8 @@ import org.openforis.collectone.v2.app.domain.model.editor.GeometryCapture
  * `GlobalLibrarySeedTest` (jvmTest) parses the seed files and fails if they differ. Run it with
  * `-PregenerateLibrarySeed` to rewrite them from this file.
  *
- * Template questions carry their concept links, which the seed files store as `ground:concept` bind
- * attributes.
+ * Template questions carry their concept links, which the seed files store as `collectone:concept`
+ * bind attributes.
  */
 object GlobalLibrarySeedData {
   private const val GLOBAL = Organization.ALL_USERS_ID
@@ -88,7 +89,7 @@ object GlobalLibrarySeedData {
         OrganizationLibrary(
           GLOBAL,
           concepts = eudrConcepts(),
-          formTemplates = listOf(eudrPlotRegistrationTemplate()),
+          formTemplates = listOf(eudrPlotRegistrationTemplate(), ukFrcPlotRegistrationTemplate()),
           purposePacks = listOf(eudrDueDiligencePack()),
           exportProfiles = listOf(eudrGeoJsonProfile()),
         )
@@ -117,8 +118,23 @@ object GlobalLibrarySeedData {
         OrganizationLibrary(
           GLOBAL,
           concepts = lulcConcepts(),
-          formTemplates = listOf(lulcGroundTruthTemplate(), reddPlusForestAssessmentTemplate()),
-          purposePacks = listOf(lulcTrainingDataPack(), reddPlusTfffPack()),
+          formTemplates =
+            listOf(
+              lulcGroundTruthTemplate(),
+              deforestationActivityAssessmentTemplate(),
+              forestCarbonInventoryPlotTemplate(),
+            ),
+          purposePacks =
+            listOf(
+              lulcTrainingDataPack(),
+              deforestationActivityDataPack(),
+              forestCarbonInventoryPack(),
+            ),
+          exportProfiles =
+            listOf(
+              artTreesActivityDataGeoJsonProfile(),
+              artTreesBiomassInventoryGeoJsonProfile(),
+            ),
         )
       "timber" ->
         OrganizationLibrary(
@@ -938,6 +954,61 @@ object GlobalLibrarySeedData {
     )
   }
 
+  /**
+   * UK Forest Risk Commodities plot check: the UK rules ask whether the commodity was produced in
+   * line with local land-use laws, not whether the land was deforested after a cutoff date, and
+   * have no rule on boundaries for large plots, so legality is required and the deforestation-free
+   * and over-4-ha questions are left out.
+   */
+  private fun ukFrcPlotRegistrationTemplate(): FormTemplate {
+    val e = eudrConcepts()
+    val c = coreConcepts()
+    return template(
+      id = "uk_frc_plot_registration",
+      title =
+        text(
+          "UK forest risk commodity legality check",
+          "Contrôle de légalité des produits à risque forestier (Royaume-Uni)",
+          "Verificación de legalidad de productos de riesgo forestal (Reino Unido)",
+          "Kiểm tra tính hợp pháp hàng hóa rủi ro rừng (Vương quốc Anh)",
+          "Ukaguzi wa uhalali wa bidhaa za hatari ya misitu (Uingereza)",
+        ),
+      description =
+        text(
+          "Records plot location, commodity, producer ID, harvest period, and evidence that the commodity was produced in line with relevant local land-use laws."
+        ),
+      questions =
+        listOf(
+          question(e.byId("eudr.commodity"), "commodity", EditorQuestionType.SELECT_ONE, true) to
+            e.byId("eudr.commodity"),
+          question(
+            e.byId("eudr.production_place"),
+            "production_place",
+            EditorQuestionType.POLYGON,
+            required = true,
+            hint = "Walk or draw the area where the commodity was produced.",
+            capture = GeometryCapture.GPS_OR_MAP,
+          ) to e.byId("eudr.production_place"),
+          question(c.byId("core.area_ha"), "area_ha", EditorQuestionType.NUMBER) to
+            c.byId("core.area_ha"),
+          question(c.byId("core.producer_id"), "producer_id", EditorQuestionType.TEXT, true) to
+            c.byId("core.producer_id"),
+          question(
+            e.byId("eudr.harvest_date_range"),
+            "harvest_date_range",
+            EditorQuestionType.TEXT,
+            hint = "For example 2026-01-01/2026-03-31.",
+          ) to e.byId("eudr.harvest_date_range"),
+          question(
+            e.byId("eudr.legal_land_use"),
+            "legal_land_use",
+            EditorQuestionType.SELECT_ONE,
+            required = true,
+          ) to e.byId("eudr.legal_land_use"),
+        ),
+    )
+  }
+
   private fun eudrDueDiligencePack() =
     PurposePack(
       id = "eudr_due_diligence",
@@ -961,6 +1032,44 @@ object GlobalLibrarySeedData {
       goals = listOf(GOAL_DEFORESTATION_FREE),
       pillar = ImpactPillar.MITIGATION,
       status = LibraryStatus.STABLE,
+      starterTemplates =
+        listOf(
+          StarterTemplate(
+            id = "eudr",
+            title =
+              text(
+                "EU Deforestation Regulation (EUDR)",
+                "Règlement européen sur la déforestation (RDUE)",
+                "Reglamento europeo contra la deforestación (EUDR)",
+                "Quy định chống phá rừng của EU (EUDR)",
+                "Kanuni ya EU ya Ukataji Misitu (EUDR)",
+              ),
+            description =
+              text(
+                "Plot check for EU due diligence statements: plot boundaries (polygons for plots over 4 ha), deforestation-free status after 31 December 2020, legality, and a TRACES-ready GeoJSON export."
+              ),
+            formTemplateIds = listOf("eudr_plot_registration"),
+            exportProfileIds = listOf("eudr_geojson"),
+            programIds = listOf("eudr"),
+          ),
+          StarterTemplate(
+            id = "uk_frc",
+            title =
+              text(
+                "UK Forest Risk Commodities",
+                "Produits à risque forestier (Royaume-Uni)",
+                "Productos de riesgo forestal (Reino Unido)",
+                "Hàng hóa rủi ro rừng (Vương quốc Anh)",
+                "Bidhaa za hatari ya misitu (Uingereza)",
+              ),
+            description =
+              text(
+                "Legality check for UK due diligence: where the commodity was produced and evidence that it complied with relevant local land-use laws."
+              ),
+            formTemplateIds = listOf("uk_frc_plot_registration"),
+            programIds = listOf("uk_frc"),
+          ),
+        ),
     )
 
   private fun eudrGeoJsonProfile() =
@@ -2018,6 +2127,182 @@ object GlobalLibrarySeedData {
         ConceptAggregation.NONE,
         PrivacyClass.AGGREGATE_PUBLIC,
       ),
+      concept(
+        "lulc.forest_change_class",
+        text(
+          "Forest change & transition class",
+          "Catégorie de changement et transition forestière",
+          "Clase de cambio y transición forestal",
+          "Phân loại biến động và chuyển đổi rừng",
+          "Aina ya mabadiliko na mpito wa msitu",
+        ),
+        ConceptDataType.SELECT_ONE,
+        text(
+          "Sample-plot forest cover transition across the accounting period for ART-TREES activity data."
+        ),
+        ConceptAggregation.COUNT_BY_CODE,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        codeList =
+          listOf(
+            item("stable_forest", text("Stable forest")),
+            item("deforestation", text("Deforestation (forest to non-forest)")),
+            item("degradation", text("Forest degradation (canopy or stock loss)")),
+            item("reforestation_removals", text("Reforestation / removals on non-forest land")),
+            item("stable_non_forest", text("Stable non-forest")),
+          ),
+        goals = listOf(GOAL_FOREST_CARBON, GOAL_DEFORESTATION_FREE),
+        pillar = ImpactPillar.MITIGATION,
+      ),
+      concept(
+        "lulc.baseline_land_use_ipcc",
+        text(
+          "Baseline IPCC land-use category",
+          "Catégorie d'utilisation des terres GIEC de référence",
+          "Categoría de uso del suelo IPCC de referencia",
+          "Phân loại sử dụng đất IPCC kỳ gốc",
+          "Kundi la msingi la matumizi ya ardhi la IPCC",
+        ),
+        ConceptDataType.SELECT_ONE,
+        text("IPCC land-use category at the start of the reference or crediting period."),
+        ConceptAggregation.COUNT_BY_CODE,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        codeList = ipccLandUseCategories(),
+        goals = listOf(GOAL_FOREST_CARBON, GOAL_DEFORESTATION_FREE),
+        pillar = ImpactPillar.MITIGATION,
+      ),
+      concept(
+        "lulc.current_land_use_ipcc",
+        text(
+          "Current IPCC land-use category",
+          "Catégorie actuelle d'utilisation des terres GIEC",
+          "Categoría actual de uso del suelo IPCC",
+          "Phân loại sử dụng đất IPCC hiện tại",
+          "Kundi la sasa la matumizi ya ardhi la IPCC",
+        ),
+        ConceptDataType.SELECT_ONE,
+        text(
+          "IPCC land-use category at the end of the monitoring period, defining the land-use transition matrix cell."
+        ),
+        ConceptAggregation.COUNT_BY_CODE,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        codeList = ipccLandUseCategories(),
+        goals = listOf(GOAL_FOREST_CARBON, GOAL_DEFORESTATION_FREE),
+        pillar = ImpactPillar.MITIGATION,
+      ),
+      concept(
+        "lulc.disturbance_year",
+        text(
+          "Disturbance or transition year",
+          "Année de perturbation ou de transition",
+          "Año de perturbación o transición",
+          "Năm xảy ra suy thoái hoặc chuyển đổi",
+          "Mwaka wa uharibifu au mpito",
+        ),
+        ConceptDataType.INTEGER,
+        text(
+          "Calendar year when deforestation, forest degradation, or reforestation establishment occurred."
+        ),
+        ConceptAggregation.COUNT_DISTINCT_FEATURES,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        goals = listOf(GOAL_FOREST_CARBON, GOAL_DEFORESTATION_FREE),
+        pillar = ImpactPillar.MITIGATION,
+      ),
+      concept(
+        "lulc.interpretation_confidence",
+        text(
+          "Interpretation confidence",
+          "Confiance d'interprétation",
+          "Confianza de interpretación",
+          "Độ tin cậy giải đoán",
+          "Uhakika wa tafsiri",
+        ),
+        ConceptDataType.SELECT_ONE,
+        text(
+          "Analyst confidence in the plot classification, used for ART-TREES Monte Carlo uncertainty assessment and flagging plots for field verification."
+        ),
+        ConceptAggregation.SHARE_BY_CODE,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        codeList =
+          listOf(
+            item("high", text("High confidence")),
+            item("medium", text("Medium confidence")),
+            item("low_needs_field_check", text("Low — requires field verification")),
+          ),
+        goals = listOf(GOAL_FOREST_CARBON, GOAL_OPEN_EARTH_DATA),
+        pillar = ImpactPillar.MITIGATION,
+      ),
+      concept(
+        "lulc.stand_age_years",
+        text(
+          "Stand age / regeneration years",
+          "Âge du peuplement / années de régénération",
+          "Edad del rodal / años de regeneración",
+          "Tuổi lâm phần / số năm tái sinh",
+          "Umri wa msitu / miaka ya uoto upya",
+        ),
+        ConceptDataType.INTEGER,
+        text(
+          "Estimated age of regenerating or reforested tree cohort in years, used to parameterize ART-TREES carbon removal factors."
+        ),
+        ConceptAggregation.MEAN,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        unit = "a",
+        goals = listOf(GOAL_FOREST_CARBON, GOAL_RESTORATION),
+        pillar = ImpactPillar.MITIGATION,
+      ),
+      concept(
+        "lulc.deadwood_pool_level",
+        text(
+          "Dead wood & litter pool status",
+          "État du réservoir de bois mort et litière",
+          "Estado del reservorio de madera muerta y hojarasca",
+          "Trạng thái bể chứa gỗ chết và thảm mục",
+          "Hali ya mabaki ya miti iliyokufa na matandazo",
+        ),
+        ConceptDataType.SELECT_ONE,
+        text(
+          "Abundance of standing and lying coarse woody debris and forest floor litter for non-tree carbon pool accounting."
+        ),
+        ConceptAggregation.COUNT_BY_CODE,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        codeList =
+          listOf(
+            item("low_absent", text("Low or absent")),
+            item("moderate", text("Moderate (typical undisturbed stand)")),
+            item("high_post_disturbance", text("High (recent logging slash, fire, or blowdown)")),
+          ),
+        goals = listOf(GOAL_FOREST_CARBON),
+        pillar = ImpactPillar.MITIGATION,
+      ),
+      concept(
+        "lulc.peat_depth_cm",
+        text(
+          "Peat / organic soil depth (cm)",
+          "Profondeur de tourbe / sol organique (cm)",
+          "Profundidad de turba / suelo orgánico (cm)",
+          "Độ sâu tầng than bùn / đất hữu cơ (cm)",
+          "Kina cha udongo wa mboji (cm)",
+        ),
+        ConceptDataType.DECIMAL,
+        text(
+          "Measured depth of peat or organic soil horizon in centimeters, used for wetland, mangrove, and peatland soil organic carbon emission factors."
+        ),
+        ConceptAggregation.MEAN,
+        PrivacyClass.AGGREGATE_PUBLIC,
+        unit = "cm",
+        goals = listOf(GOAL_FOREST_CARBON),
+        pillar = ImpactPillar.MITIGATION,
+      ),
+    )
+
+  private fun ipccLandUseCategories(): List<CodeListItem> =
+    listOf(
+      item("forest_land", text("Forest land")),
+      item("cropland", text("Cropland")),
+      item("grassland", text("Grassland")),
+      item("wetlands", text("Wetlands")),
+      item("settlements", text("Settlements")),
+      item("other_land", text("Other land")),
     )
 
   private fun lulcGroundTruthTemplate(): FormTemplate {
@@ -2070,31 +2355,42 @@ object GlobalLibrarySeedData {
     )
   }
 
-  private fun reddPlusForestAssessmentTemplate(): FormTemplate {
+  private fun deforestationActivityAssessmentTemplate(): FormTemplate {
     val l = lulcConcepts()
-    val c = coreConcepts()
     return template(
-      id = "redd_plus_forest_assessment",
+      id = "deforestation_activity_assessment",
       title =
         text(
-          "Forest inventory & disturbance plot",
-          "Parcelle d'inventaire forestier et de perturbation",
-          "Parcela de inventario y perturbación forestal",
-          "Ô tiêu chuẩn kiểm kê và giám sát suy thoái rừng",
-          "Ploti ya hesabu ya msitu na uharibifu",
+          "Forest change & activity data plot",
+          "Parcelle de changement forestier et données d'activité",
+          "Parcela de cambio forestal y datos de actividad",
+          "Ô mẫu biến động rừng và dữ liệu hoạt động",
+          "Ploti ya mabadiliko ya msitu na data ya shughuli",
         ),
       description =
         text(
-          "Permanent sample plot or visual verification form capturing forest stratum, canopy cover, tree height, stand basal area, and degradation drivers."
+          "Sample-plot classification of IPCC land-use transitions, deforestation, forest degradation, reforestation removals, disturbance year, drivers, and interpreter confidence for ART-TREES activity data."
         ),
       questions =
         listOf(
           question(
-            l.byId("lulc.land_cover_class"),
-            "land_cover_class",
+            l.byId("lulc.forest_change_class"),
+            "forest_change_class",
             EditorQuestionType.SELECT_ONE,
             true,
-          ) to l.byId("lulc.land_cover_class"),
+          ) to l.byId("lulc.forest_change_class"),
+          question(
+            l.byId("lulc.baseline_land_use_ipcc"),
+            "baseline_land_use_ipcc",
+            EditorQuestionType.SELECT_ONE,
+            true,
+          ) to l.byId("lulc.baseline_land_use_ipcc"),
+          question(
+            l.byId("lulc.current_land_use_ipcc"),
+            "current_land_use_ipcc",
+            EditorQuestionType.SELECT_ONE,
+            true,
+          ) to l.byId("lulc.current_land_use_ipcc"),
           question(
             l.byId("lulc.forest_stratum"),
             "forest_stratum",
@@ -2107,24 +2403,119 @@ object GlobalLibrarySeedData {
             EditorQuestionType.NUMBER,
             true,
           ) to l.byId("lulc.canopy_cover_pct"),
-          question(l.byId("lulc.tree_height_m"), "tree_height_m", EditorQuestionType.NUMBER) to
-            l.byId("lulc.tree_height_m"),
           question(
-            l.byId("lulc.basal_area_m2_ha"),
-            "basal_area_m2_ha",
+            l.byId("lulc.disturbance_year"),
+            "disturbance_year",
             EditorQuestionType.NUMBER,
-            hint = "Stand basal area in m²/ha.",
-          ) to l.byId("lulc.basal_area_m2_ha"),
+            hint = "Year of deforestation, degradation, or reforestation establishment.",
+          ) to l.byId("lulc.disturbance_year"),
           question(
             l.byId("lulc.disturbance_driver"),
             "disturbance_driver",
             EditorQuestionType.SELECT_MULTIPLE,
           ) to l.byId("lulc.disturbance_driver"),
           question(
+            l.byId("lulc.interpretation_confidence"),
+            "interpretation_confidence",
+            EditorQuestionType.SELECT_ONE,
+            true,
+          ) to l.byId("lulc.interpretation_confidence"),
+          question(
             l.byId("lulc.observation_date"),
             "observation_date",
             EditorQuestionType.DATE,
           ) to l.byId("lulc.observation_date"),
+        ),
+    )
+  }
+
+  private fun forestCarbonInventoryPlotTemplate(): FormTemplate {
+    val l = lulcConcepts()
+    val t = timberConcepts()
+    val c = coreConcepts()
+    return template(
+      id = "forest_carbon_inventory_plot",
+      title =
+        text(
+          "Forest carbon & biomass inventory plot",
+          "Parcelle d'inventaire du carbone et de la biomasse forestière",
+          "Parcela de inventario de carbono y biomasa forestal",
+          "Ô tiêu chuẩn kiểm kê carbon và sinh khối rừng",
+          "Ploti ya hesabu ya kaboni na tungamo hai ya msitu",
+        ),
+      description =
+        text(
+          "Ground sample plot capturing forest stratum, stand age, dominant species, DBH, tree height, stand basal area, deadwood pool, and peat depth for ART-TREES emission and removal factors."
+        ),
+      questions =
+        listOf(
+          question(
+            l.byId("lulc.forest_stratum"),
+            "forest_stratum",
+            EditorQuestionType.SELECT_ONE,
+            true,
+          ) to l.byId("lulc.forest_stratum"),
+          question(
+            l.byId("lulc.stand_age_years"),
+            "stand_age_years",
+            EditorQuestionType.NUMBER,
+            hint = "Stand or regeneration cohort age in years (for removal factors).",
+          ) to l.byId("lulc.stand_age_years"),
+          question(
+            t.byId("timber.species"),
+            "species",
+            EditorQuestionType.TEXT,
+            required = true,
+            hint = "Dominant tree species scientific or common name (for wood density).",
+          ) to t.byId("timber.species"),
+          question(
+            t.byId("timber.diameter_cm"),
+            "diameter_cm",
+            EditorQuestionType.NUMBER,
+            required = true,
+            hint = "Mean stem diameter at breast height (1.3 m) in centimeters.",
+          ) to t.byId("timber.diameter_cm"),
+          question(
+            l.byId("lulc.tree_height_m"),
+            "tree_height_m",
+            EditorQuestionType.NUMBER,
+            required = true,
+            hint = "Dominant tree height in meters.",
+          ) to l.byId("lulc.tree_height_m"),
+          question(
+            l.byId("lulc.basal_area_m2_ha"),
+            "basal_area_m2_ha",
+            EditorQuestionType.NUMBER,
+            required = true,
+            hint = "Stand basal area in m²/ha.",
+          ) to l.byId("lulc.basal_area_m2_ha"),
+          question(
+            l.byId("lulc.canopy_cover_pct"),
+            "canopy_cover_pct",
+            EditorQuestionType.NUMBER,
+            required = true,
+          ) to l.byId("lulc.canopy_cover_pct"),
+          question(
+            l.byId("lulc.deadwood_pool_level"),
+            "deadwood_pool_level",
+            EditorQuestionType.SELECT_ONE,
+          ) to l.byId("lulc.deadwood_pool_level"),
+          question(
+            l.byId("lulc.peat_depth_cm"),
+            "peat_depth_cm",
+            EditorQuestionType.NUMBER,
+            hint = "Peat or organic soil horizon depth in cm (wetlands and mangroves).",
+          ) to l.byId("lulc.peat_depth_cm"),
+          question(
+            l.byId("lulc.disturbance_driver"),
+            "disturbance_driver",
+            EditorQuestionType.SELECT_MULTIPLE,
+          ) to l.byId("lulc.disturbance_driver"),
+          question(
+            c.byId("core.collection_date"),
+            "collection_date",
+            EditorQuestionType.DATE,
+          ) to c.byId("core.collection_date"),
           question(c.byId("core.site_photo"), "site_photo", EditorQuestionType.PHOTO) to
             c.byId("core.site_photo"),
         ),
@@ -2155,27 +2546,96 @@ object GlobalLibrarySeedData {
       status = LibraryStatus.STABLE,
     )
 
-  private fun reddPlusTfffPack() =
+  private fun deforestationActivityDataPack() =
     PurposePack(
-      id = "redd_plus_tfff",
+      id = "deforestation_activity_data",
       organizationId = GLOBAL,
       title =
         text(
-          "Forest carbon & conservation monitoring",
-          "Suivi du carbone et de la conservation des forêts",
-          "Monitoreo de carbono y conservación forestal",
-          "Giám sát carbon và bảo tồn rừng",
-          "Ufuatiliaji wa kaboni na uhifadhi wa misitu",
+          "Deforestation & land-use change (Activity Data)",
+          "Déforestation et changement d'affectation des terres (données d'activité)",
+          "Deforestación y cambio de uso del suelo (datos de actividad)",
+          "Mất rừng và thay đổi sử dụng đất (dữ liệu hoạt động)",
+          "Ukataji miti na mabadiliko ya matumizi ardhi (data ya shughuli)",
         ),
       description =
         text(
-          "Measure forest sample plots, canopy cover, stand basal area, tree height, and degradation disturbances for carbon accounting and tropical forest conservation finance."
+          "Classify sample plots across multi-temporal satellite imagery and field checks to quantify deforestation, forest degradation, and reforestation areas with ART-TREES Monte Carlo uncertainty bounds."
         ),
-      icon = "public",
-      formTemplateIds = listOf("redd_plus_forest_assessment"),
-      programIds = listOf("redd_plus", "tfff", "art_trees", "vcs", "fao_fra"),
-      goals = listOf(GOAL_FOREST_CARBON, GOAL_DEFORESTATION_FREE, GOAL_PROTECTED_AREAS),
+      icon = "satellite_alt",
+      formTemplateIds = listOf("deforestation_activity_assessment"),
+      exportProfileIds = listOf("art_trees_activity_data_geojson"),
+      programIds = listOf("art_trees"),
+      goals = listOf(GOAL_FOREST_CARBON, GOAL_DEFORESTATION_FREE),
       pillar = ImpactPillar.MITIGATION,
+      status = LibraryStatus.STABLE,
+    )
+
+  private fun forestCarbonInventoryPack() =
+    PurposePack(
+      id = "forest_carbon_inventory",
+      organizationId = GLOBAL,
+      title =
+        text(
+          "Forest carbon & biomass inventory (Emission Factors)",
+          "Inventaire du carbone et de la biomasse forestière (facteurs d'émission)",
+          "Inventario de carbono y biomasa forestal (factores de emisión)",
+          "Kiểm kê carbon và sinh khối rừng (hệ số phát thải)",
+          "Hesabu ya kaboni na tungamo hai ya msitu (viwango vya uzalishaji)",
+        ),
+      description =
+        text(
+          "Measure ground sample plots for tree species, DBH, height, stand basal area, deadwood, and peat depth to calculate stratum-specific carbon stocks and ART-TREES emission and removal factors."
+        ),
+      icon = "forest",
+      formTemplateIds = listOf("forest_carbon_inventory_plot"),
+      exportProfileIds = listOf("art_trees_biomass_inventory_geojson"),
+      programIds = listOf("art_trees"),
+      goals = listOf(GOAL_FOREST_CARBON, GOAL_PROTECTED_AREAS),
+      pillar = ImpactPillar.MITIGATION,
+      status = LibraryStatus.STABLE,
+    )
+
+  private fun artTreesActivityDataGeoJsonProfile() =
+    ExportProfile(
+      id = "art_trees_activity_data_geojson",
+      organizationId = GLOBAL,
+      title = text("ART-TREES Activity Data GeoJSON"),
+      format = "geojson",
+      fieldConcepts =
+        linkedMapOf(
+          "area_ha" to "core.area_ha",
+          "forest_change_class" to "lulc.forest_change_class",
+          "baseline_land_use_ipcc" to "lulc.baseline_land_use_ipcc",
+          "current_land_use_ipcc" to "lulc.current_land_use_ipcc",
+          "forest_stratum" to "lulc.forest_stratum",
+          "canopy_cover_pct" to "lulc.canopy_cover_pct",
+          "disturbance_year" to "lulc.disturbance_year",
+          "disturbance_driver" to "lulc.disturbance_driver",
+          "interpretation_confidence" to "lulc.interpretation_confidence",
+        ),
+      status = LibraryStatus.STABLE,
+    )
+
+  private fun artTreesBiomassInventoryGeoJsonProfile() =
+    ExportProfile(
+      id = "art_trees_biomass_inventory_geojson",
+      organizationId = GLOBAL,
+      title = text("ART-TREES Biomass Inventory GeoJSON"),
+      format = "geojson",
+      fieldConcepts =
+        linkedMapOf(
+          "area_ha" to "core.area_ha",
+          "forest_stratum" to "lulc.forest_stratum",
+          "stand_age_years" to "lulc.stand_age_years",
+          "species" to "timber.species",
+          "diameter_cm" to "timber.diameter_cm",
+          "tree_height_m" to "lulc.tree_height_m",
+          "basal_area_m2_ha" to "lulc.basal_area_m2_ha",
+          "canopy_cover_pct" to "lulc.canopy_cover_pct",
+          "deadwood_pool_level" to "lulc.deadwood_pool_level",
+          "peat_depth_cm" to "lulc.peat_depth_cm",
+        ),
       status = LibraryStatus.STABLE,
     )
 

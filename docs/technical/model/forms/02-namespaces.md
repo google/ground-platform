@@ -87,7 +87,10 @@ fields.
 ## Foreign Namespaces
 
 Attributes on `<bind>` in any other XML namespace (another tool's extension, or
-Ground's own `http://groundplatform.org/xforms` namespace with prefix `ground:`)
-are not dropped: they are preserved as `FieldBinding.foreign_attributes` and
-re-declared on the root element on serialization. See
-[Foreign Attributes](04-bindings.md#foreign-attributes).
+Collect One's own `http://openforis.org/collect-one/xforms` namespace with
+prefix `collectone:`) are not dropped: they are preserved as
+`FieldBinding.foreign_attributes` and re-declared on the root element on
+serialization. See [Foreign Attributes](04-bindings.md#foreign-attributes).
+Collect One always writes the `collectone:` namespace; on import it also accepts
+the legacy Ground namespace (`http://groundplatform.org/xforms`, prefix
+`ground:`) so forms exported by Ground keep working.

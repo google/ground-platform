@@ -20,6 +20,7 @@ package openforis.collectone.v1.data;
 
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
+import "shared/protos/data/geometry.proto";
 import "shared/protos/forms/types.proto";
 
 // Active 5-minute plot lease acquired by a desk interpreter in the Web Console.
@@ -67,11 +68,9 @@ message EntityRecord {
   // Human-readable entity label.
   string label = 4;
 
-  // Spatial geometry associated with this geospatial entity (if type is
-  // GEOSPATIAL). Exposed to XForms / ProtoForms XPath expressions and
-  // `entity_saveto` bindings under the reserved system property name
-  // `"geometry"`.
-  oneof geometry {
+  // Legacy geometry, superseded by `geometry` (field 30). Readers fall back to
+  // it for rows written before `geometry` existed; writers leave it unset.
+  oneof legacy_geometry {
     openforis.collectone.v1.forms.GeoPoint point = 5;
     openforis.collectone.v1.forms.GeoTrace trace = 6;
     openforis.collectone.v1.forms.GeoShape shape = 7;
@@ -81,6 +80,9 @@ message EntityRecord {
   map<string, openforis.collectone.v1.forms.TypedValue> properties = 8;
 
   // Audit metadata recording creation and last modification.
+  // Server-owned: the server stamps it on each write that creates or changes
+  // the entity (who from the authenticated caller, when from its clock) and
+  // ignores any value a mutation carries.
   AuditInfo audit_info = 9;
 
   // True if registered opportunistically by a field collector on mobile.
@@ -120,8 +122,11 @@ message EntityRecord {
   // AgStack GeoID or spatial asset hash identifier.
   string geo_id = 20;
 
-  // Human-readable geometry kind label (e.g., "Polygon", "Point").
-  string geometry_type_label = 21;
+  // Formerly a stored geometry kind label (e.g., "Polygon"). Clients name the
+  // type of `geometry` in the user's language; rows that still carry it are
+  // decoded as described in `docs/technical/model/data/05-geometry.md`.
+  reserved 21;
+  reserved "geometry_type_label";
 
   // Computed or recorded area in hectares.
   double area_hectares = 22;
@@ -129,21 +134,33 @@ message EntityRecord {
   // Computed or recorded perimeter in meters.
   int32 perimeter_meters = 23;
 
-  // Formatted coordinate summary string (e.g., "0.4182°S, 36.9481°E").
-  string coordinates_label = 24;
+  // Formerly a stored coordinates label (e.g., "0.4182°S, 36.9481°E"). Clients
+  // format the coordinates of `geometry` instead.
+  reserved 24;
+  reserved "coordinates_label";
 
-  // Normalized canvas X coordinate (`[0.0, 1.0]`) for map preview rendering.
-  float normalized_x = 25;
-
-  // Normalized canvas Y coordinate (`[0.0, 1.0]`) for map preview rendering.
-  float normalized_y = 26;
+  // Formerly the feature's normalized position (`[0.0, 1.0]`) in its survey's
+  // sample map. Clients place features by `geometry`; rows that still carry it
+  // are decoded as described in `docs/technical/model/data/05-geometry.md`.
+  reserved 25, 26;
+  reserved "normalized_x", "normalized_y";
 
   // Default ARGB color hex (`0xFFRRGGBB`) for map rendering.
   int64 color_hex = 27;
 
-  // Singular domain noun for this entity (e.g., "Coffee Parcel").
+  // The survey author's singular noun for this entity's type (e.g., "Coffee
+  // Parcel"), or empty when the author gave none; clients then use a generic
+  // noun in the user's language. Rows written by older clients may hold their
+  // English fallback "Location", which clients read as empty.
   string singular_type_label = 28;
 
   // Synchronization status key (`"SYNCED"`, `"UPLOADING"`, `"FAILED"`).
   string sync_status_key = 29;
+
+  // Spatial geometry of this geospatial entity (if type is GEOSPATIAL), in the
+  // canonical GeoJSON form (`docs/technical/model/data/05-geometry.md`). Unset
+  // for records without geometry (rows of a Data table). Exposed to XForms /
+  // ProtoForms XPath expressions and `entity_saveto` bindings under the
+  // reserved system property name `"geometry"`.
+  Geometry geometry = 30;
 }

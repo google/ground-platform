@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="editor_default_name_text_question">Swali jipya la maandishi mafupi</string>
+  <string name="editor_default_name_long_text_question">Swali jipya la aya</string>
+  <string name="editor_default_name_number_question">Swali jipya la nambari</string>
+  <string name="editor_default_name_select_one_question">Swali jipya la kuchagua kimoja</string>
+  <string name="editor_default_name_select_multiple_question">Swali jipya la kuchagua vingi</string>
+  <string name="editor_default_name_date_question">Swali jipya la tarehe</string>
+  <string name="editor_default_name_point_question">Swali jipya la nukta</string>
+  <string name="editor_default_name_line_question">Swali jipya la mstari</string>
+  <string name="editor_default_name_polygon_question">Swali jipya la poligoni</string>
+  <string name="editor_default_name_photo_question">Swali jipya la picha</string>
+  <string name="editor_default_name_video_question">Swali jipya la video</string>
+  <string name="editor_default_name_audio_question">Swali jipya la sauti</string>
+  <string name="editor_default_name_note">Dokezo jipya</string>
+  <string name="editor_default_name_map_layer">Tabaka jipya la ramani</string>
+  <string name="editor_default_name_data_table">Jedwali jipya la data</string>
+  <string name="editor_default_name_form">Fomu mpya</string>
+  <string name="editor_default_name_property">Sifa mpya</string>
+</resources>

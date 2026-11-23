@@ -104,6 +104,21 @@ message PendingMutationRecord {
     REJECTED = 4;
   }
 
+  // Why the last send failed, mirroring the client's `DomainError` reasons.
+  enum ErrorKind {
+    ERROR_KIND_UNSPECIFIED = 0;
+    ERROR_KIND_NETWORK = 1;
+    ERROR_KIND_UNAUTHENTICATED = 2;
+    ERROR_KIND_PERMISSION_DENIED = 3;
+    ERROR_KIND_NOT_FOUND = 4;
+    ERROR_KIND_CONFLICT = 5;
+    ERROR_KIND_VALIDATION = 6;
+    ERROR_KIND_QUOTA_EXCEEDED = 7;
+    ERROR_KIND_CANCELLED = 8;
+    ERROR_KIND_UNKNOWN = 9;
+    ERROR_KIND_NOT_EDITABLE = 10;
+  }
+
   string mutation_id = 1;
   int64 client_seq = 2;
 
@@ -132,6 +147,9 @@ message PendingMutationRecord {
   google.protobuf.Timestamp client_timestamp = 11;
   State state = 12;
   int32 attempts = 13;
+  // The last failure's raw message (from the server or the exception), for logs only.
   string last_error = 14;
   google.protobuf.Timestamp not_before = 15;
+  // Why the last send failed, shown to the user; unspecified before any failure.
+  ErrorKind last_error_kind = 16;
 }

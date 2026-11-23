@@ -144,20 +144,20 @@ submissions:
 Providing seamless, low-friction spreadsheet interoperability for project
 stakeholders, non-technical coordinators, and automated operational pipelines:
 
-*   **One-Way Streaming Sync (Ground to Sheets)**: Automated, near-real-time
-    streaming of incoming field submissions, entity state transitions, and audit
-    logs directly into designated Google Sheets workbooks. Enables instant
-    stakeholder visibility, collaborative field tracking, and live reporting
-    dashboards (via Looker Studio or native Sheets charts) without manual CSV or
-    GeoJSON exports.
+*   **One-Way Streaming Sync (Collect One to Sheets)**: Automated,
+    near-real-time streaming of incoming field submissions, entity state
+    transitions, and audit logs directly into designated Google Sheets
+    workbooks. Enables instant stakeholder visibility, collaborative field
+    tracking, and live reporting dashboards (via Looker Studio or native Sheets
+    charts) without manual CSV or GeoJSON exports.
 *   **Two-Way Synchronization (Collaborative Curation & Registry Management)**:
     Bi-directional synchronization allowing survey supervisors to review, clean,
     and update collected submission data directly within Google Sheets, with
-    modifications propagating back to the Ground backend under strict schema
-    validation and immutable audit logging. Also enables managing tabular entity
-    registries and lookup tables (e.g., farmer rosters, plot IDs, cooperative
-    registries) in Google Sheets with automatic, versioned synchronization to
-    mobile field devices.
+    modifications propagating back to the Collect One backend under strict
+    schema validation and immutable audit logging. Also enables managing tabular
+    entity registries and lookup tables (e.g., farmer rosters, plot IDs,
+    cooperative registries) in Google Sheets with automatic, versioned
+    synchronization to mobile field devices.
 
 ## Paid Quota Expansion & Foundation Payment Model
 

@@ -17,7 +17,7 @@
 # ProtoForms Compose Multiplatform UI Package (`org.openforis.collectone.v2.core.forms.ui`)
 
 This package implements the **Compose Multiplatform** UI component library
-(`org.openforis.collectone.v2:protoforms-ui`) for executing ProtoForms and XForms
+(`:shared:ui`) for executing ProtoForms and XForms
 surveys across **Android (`jvm`)**, **iOS (`iosArm64`, `iosSimulatorArm64`)**,
 and **Web (`js`, `wasmJs`)**.
 
@@ -31,13 +31,13 @@ embedded inside web previews and the mobile workbench.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│                org.openforis.collectone.v2:protoforms (shared/core)              │
+│                         :shared:core (shared/core)                         │
 │   • FormDef, RecordInstance, ComponentState, FormState, FormSession        │
 │   • FormEngine (5-stage reactive pipeline: repeats, relevance, calc, etc.) │
 └──────────────────────────────────────▲─────────────────────────────────────┘
                                        │
 ┌──────────────────────────────────────┴─────────────────────────────────────┐
-│             org.openforis.collectone.v2:protoforms-ui (shared/ui)                │
+│                           :shared:ui (shared/ui)                           │
 │                                                                            │
 │  1. FormWizardController                                                   │
 │     • Flattens FormState.rootComponents into List<FormWizardStep>          │
@@ -73,10 +73,17 @@ embedded inside web previews and the mobile workbench.
     -   **`FormWizardStep.FieldListGroupStep`**: A group with
         `appearance="field-list"`, which per the XForms specification renders
         all of its relevant child questions together on a single screen.
-    -   **`FormWizardStep.RepeatHubStep`**: A repeat management card placed at
-        the end of each `RepeatGroupState` that lets the user inspect existing
-        repeat instances, delete an instance, or tap **`+ Add Another ...`** to
-        append a new repeat instance and jump directly to its first question.
+    -   **`FormWizardStep.RepeatHubStep`**: A repeat's list of entries, placed
+        after its entries' screens. Each entry shows its status (not started,
+        in progress, complete, needs attention), its title, and an answer
+        preview; tapping it opens the entry. **Add … entry** (or **Add another
+        … entry** once there are entries) appends an entry and jumps to its
+        first question. Deleting an entry that holds answers asks for
+        confirmation first. Inside an entry, the mobile runner's header names
+        the entry ("Entry #2 of 3"), lets collectors step directly to the
+        previous or next entry, and offers **All entries** and Delete; the
+        web runner (`CompactFormRunner`) instead frames each entry's question
+        cards inline under the entry's header (`buildCompactFormBlocks`).
     -   **`FormWizardStep.SummaryStep`**: The final review screen listing all
         relevant questions and their current answers (with tap-to-edit jump
         links), evaluated XForms Entities (`EntityState`), and whole-form
@@ -238,12 +245,12 @@ val result = controller.finalizeForm()
 
 ## Building and Running Tests
 
-From `shared/ui/`:
+From the repository root:
 
 ```bash
 # Run JVM unit tests for FormWizardController and step navigation
-./gradlew jvmTest
+./gradlew :shared:ui:jvmTest
 
 # Compile JavaScript (IR) and WebAssembly (WasmJS) targets
-./gradlew compileKotlinJs compileKotlinWasmJs
+./gradlew :shared:ui:compileKotlinJs :shared:ui:compileKotlinWasmJs
 ```

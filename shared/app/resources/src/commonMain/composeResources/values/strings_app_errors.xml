@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Why an operation failed: the user data service or auth service couldn't be reached. -->
+  <string name="app_error_network">Couldn't connect. Check your internet connection and try again.</string>
+  <!-- Why an operation failed: the user's session has expired. -->
+  <string name="app_error_unauthenticated">Your session has expired. Sign in again.</string>
+  <!-- Why an operation failed: the signed-in user isn't allowed to do it. -->
+  <string name="app_error_permission_denied">You don't have permission to do this.</string>
+  <!-- Why an operation failed: what it refers to was deleted. -->
+  <string name="app_error_not_found">This item no longer exists.</string>
+  <!-- Why an operation failed: someone changed the same thing at the same time. -->
+  <string name="app_error_conflict">This was changed somewhere else. Try again.</string>
+  <!-- Why an operation failed: what it changes no longer accepts changes, e.g. a closed or archived survey; retrying won't help. -->
+  <string name="app_error_not_editable">This can't be changed right now. The survey may be closed or archived.</string>
+  <!-- Why an operation failed: the server rejected what was entered. -->
+  <string name="app_error_validation">Some of the information isn't valid. Check it and try again.</string>
+  <!-- Why an operation failed: a quota or rate limit was reached. -->
+  <string name="app_error_quota_exceeded">You've reached a usage limit. Try again later.</string>
+  <!-- Why an operation failed: the user cancelled it. -->
+  <string name="app_error_cancelled">Cancelled.</string>
+  <!-- Why an operation failed, when there is no more specific reason. -->
+  <string name="app_error_unknown">Something went wrong. Try again.</string>
+  <!-- Notice after sign-in fails. %1$s = why, one of the app_error_* sentences. -->
+  <string name="app_sign_in_failed">Couldn't sign in. %1$s</string>
+</resources>

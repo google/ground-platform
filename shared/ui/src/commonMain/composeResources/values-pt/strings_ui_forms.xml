@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Strings for the field-facing form runner (mobile wizard and compact web layout) and its
+     question widgets. -->
+<resources>
+  <!-- Common actions -->
+  <string name="forms_cancel">Cancelar</string>
+  <string name="forms_submit">Enviar</string>
+  <!-- Button that skips an optional question without answering it. -->
+  <string name="forms_skip">Pular</string>
+  <!-- Button / badge that opens an answer or repeat entry for editing. -->
+  <string name="forms_edit">Editar</string>
+  <string name="forms_delete">Excluir</string>
+  <!-- Button that clears the current answer. -->
+  <string name="forms_clear">Limpar</string>
+  <string name="forms_undo">Desfazer</string>
+  <string name="forms_redo">Refazer</string>
+  <!-- Button that finishes drawing a geometry on the map. -->
+  <string name="forms_done">Concluído</string>
+  <!-- Confirm button of the date picker dialog. -->
+  <string name="forms_ok">OK</string>
+  <!-- Confirms adding a new choice option typed by the collector. -->
+  <string name="forms_add">Adicionar</string>
+  <string name="forms_yes">Sim</string>
+  <string name="forms_no">Não</string>
+
+  <!-- Form header, navigation, and progress -->
+  <!-- Fallback title of a form that has no title in the compact (web) layout. -->
+  <string name="forms_untitled_form">Formulário</string>
+  <!-- Fallback title of a form that has no title in the mobile runner. -->
+  <string name="forms_untitled_survey_form">Formulário da pesquisa</string>
+  <!-- Title of the final review step; also the submit button label while answers still need review. -->
+  <string name="forms_review_and_submit">Revisar e enviar</string>
+  <!-- Compact layout progress. %1$d = settled (answered or skipped) questions, %2$d = total questions. -->
+  <string name="forms_progress_answered_of_total">%1$d de %2$d respondidas</string>
+  <string name="forms_expand_all">Expandir tudo</string>
+  <string name="forms_collapse_all">Recolher tudo</string>
+  <!-- Footer progress segments, joined with " • ". %1$d = number of questions. -->
+  <string name="forms_progress_answered_count">%1$d respondidas</string>
+  <string name="forms_progress_skipped_count">%1$d puladas</string>
+  <string name="forms_progress_pending_count">%1$d pendentes</string>
+  <!-- Mobile app bar subtitle on the final review step. %1$d = number of questions in the form. -->
+  <plurals name="forms_review_and_finalize_summary">
+    <item quantity="one">Revisar e finalizar (%1$d pergunta)</item>
+    <item quantity="many">Revisar e finalizar (%1$d perguntas)</item>
+    <item quantity="other">Revisar e finalizar (%1$d perguntas)</item>
+  </plurals>
+  <!-- Mobile app bar subtitle. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_of_total">Etapa %1$d de %2$d</string>
+  <!-- Compact step counter in the bottom bar. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_counter">%1$d / %2$d</string>
+  <!-- Toggle that closes the list of all form steps. -->
+  <string name="forms_close_step_list">Fechar lista</string>
+  <!-- Toggle that opens the list of all form steps. %1$d = number of steps. -->
+  <string name="forms_steps_count">Etapas (%1$d)</string>
+  <string name="forms_close_form">Fechar formulário</string>
+  <!-- Content description of the icon in front of the form's language selector. -->
+  <string name="forms_language">Idioma</string>
+  <!-- Button that goes back to the previous question. -->
+  <string name="forms_back">Voltar</string>
+  <!-- Button that moves on to the final review step. -->
+  <string name="forms_review">Revisar</string>
+  <!-- Button that moves on to the next question. -->
+  <string name="forms_next">Próximo</string>
+  <!-- Heading of the step overview list. %1$d = number of steps. -->
+  <string name="forms_all_form_steps">Todas as etapas do formulário (%1$d)</string>
+  <!-- Row of the step overview list. %1$d = step number, %2$s = step title. -->
+  <string name="forms_step_list_item">%1$d. %2$s</string>
+  <!-- Banner shown when Next is tapped before capturing a required location. -->
+  <string name="forms_blocker_location">Capture uma localização ou marque um ponto antes de continuar.</string>
+  <string name="forms_blocker_optional">Corrija os erros de validação acima ou pule para continuar.</string>
+  <string name="forms_blocker_required">Corrija os erros de validação acima para continuar.</string>
+
+  <!-- Question cards -->
+  <!-- Question label with a required marker. %1$s = question label. -->
+  <string name="forms_required_label">%1$s *</string>
+  <!-- Badge on a required question. -->
+  <string name="forms_badge_required">Obrigatório *</string>
+  <!-- Badge on a question whose value is computed by the form. -->
+  <string name="forms_badge_calculated">Calculado</string>
+  <string name="forms_badge_read_only">Somente leitura</string>
+  <!-- Toggle for the extra instructions written for enumerators (data collectors). -->
+  <string name="forms_hide_guidance">Ocultar orientações para o coletor</string>
+  <string name="forms_show_guidance">Mostrar orientações para o coletor</string>
+  <!-- Collapsed card summary of a question the collector skipped. -->
+  <string name="forms_status_skipped">Pulada</string>
+  <!-- Collapsed card summary of a question with no answer yet. -->
+  <string name="forms_status_not_answered">Não respondida</string>
+  <!-- Screen reader descriptions of a question's status icon. -->
+  <string name="forms_status_answered">Respondida</string>
+  <string name="forms_status_pending">Pendente</string>
+  <string name="forms_status_needs_attention">Requer atenção</string>
+  <string name="forms_collapse_question">Recolher pergunta</string>
+  <string name="forms_expand_question">Expandir pergunta</string>
+  <!-- Generic stand-in for a question that has no label. -->
+  <string name="forms_this_question">Esta pergunta</string>
+  <!-- Title of a group of questions shown on one screen when the group has no label. -->
+  <string name="forms_untitled_question_group">Grupo de perguntas</string>
+  <!-- Shown when a photo, video, or audio file can't answer the question and no reason is given. -->
+  <string name="forms_attachment_rejected">Anexo recusado</string>
+  <!-- %1$d = number of questions with validation errors. -->
+  <plurals name="forms_questions_need_attention">
+    <item quantity="one">%1$d pergunta requer atenção antes do envio.</item>
+    <item quantity="many">%1$d perguntas requerem atenção antes do envio.</item>
+    <item quantity="other">%1$d perguntas requerem atenção antes do envio.</item>
+  </plurals>
+
+  <!-- Repeated sections -->
+  <!-- Number of entries of a repeated section. %1$d = number of entries. -->
+  <plurals name="forms_repeat_section_entries">
+    <item quantity="one">%1$d entrada</item>
+    <item quantity="many">%1$d entradas</item>
+    <item quantity="other">%1$d entradas</item>
+  </plurals>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entries_hint">Adicione uma ou mais entradas de "%1$s" abaixo.</string>
+  <string name="forms_repeat_no_entries">Nenhuma entrada adicionada ainda.</string>
+  <!-- Fallback title of one repeat entry. %1$s = repeated section label, %2$d = entry number. -->
+  <string name="forms_repeat_instance_title">%1$s nº %2$d</string>
+  <!-- Preview of a repeat entry that has no answers yet. -->
+  <string name="forms_repeat_tap_to_fill">Toque para preencher os detalhes</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entry">Adicionar entrada de %1$s</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_named">Adicionar %1$s</string>
+  <!-- Delete action of one repeat entry. %1$s = entry title. -->
+  <string name="forms_repeat_delete_entry">Excluir %1$s</string>
+  <!-- Ordinal number badge of a repeat entry or ranked item. %1$d = number. -->
+  <string name="forms_number_badge">#%1$d</string>
+  <!-- %1$d = current entry number, %2$d = number of entries. -->
+  <string name="forms_repeat_entry_position">Entrada nº %1$d de %2$d</string>
+  <!-- Button that opens the list of all entries of a repeated section. -->
+  <string name="forms_all_entries">Todas as entradas</string>
+  <!-- Buttons that jump to the previous or next entry of a repeated section. -->
+  <string name="forms_repeat_previous_entry">Entrada anterior</string>
+  <string name="forms_repeat_next_entry">Próxima entrada</string>
+  <!-- Badge with the number of entries a repeated section requires. %1$d = number of entries. -->
+  <string name="forms_repeat_required_count">%1$d obrigatórias</string>
+  <!-- %1$s = repeated section label. Shown once a section has entries. -->
+  <string name="forms_repeat_add_another">Adicionar outra entrada de %1$s</string>
+  <!-- Title of the dialog confirming an entry deletion. %1$s = entry title. -->
+  <string name="forms_repeat_delete_title">Excluir %1$s?</string>
+  <!-- Body of the dialog confirming an entry deletion. %1$d = answers in the entry. -->
+  <plurals name="forms_repeat_delete_message">
+    <item quantity="one">Sua %1$d resposta também será excluída. Não é possível desfazer.</item>
+    <item quantity="many">Suas %1$d respostas também serão excluídas. Não é possível desfazer.</item>
+    <item quantity="other">Suas %1$d respostas também serão excluídas. Não é possível desfazer.</item>
+  </plurals>
+  <!-- Status of a repeat entry. -->
+  <string name="forms_repeat_status_not_started">Não iniciada</string>
+  <string name="forms_repeat_status_in_progress">Em andamento</string>
+  <string name="forms_repeat_status_complete">Concluída</string>
+
+  <!-- Review step -->
+  <string name="forms_review_answers">Revisar respostas</string>
+  <string name="forms_review_answers_hint">Toque em qualquer pergunta abaixo para voltar e editar a resposta.</string>
+  <string name="forms_ready_to_submit">✓ Pronto para enviar</string>
+  <!-- Badge with the number of validation issues. %1$d = number of issues. -->
+  <plurals name="forms_issue_count">
+    <item quantity="one">%1$d problema</item>
+    <item quantity="many">%1$d problemas</item>
+    <item quantity="other">%1$d problemas</item>
+  </plurals>
+  <string name="forms_form_finalized">✓ Formulário finalizado com sucesso</string>
+  <!-- %1$d = number of validation errors; the list of errors follows. -->
+  <plurals name="forms_cannot_submit_errors">
+    <item quantity="one">⚠ Não é possível enviar: %1$d erro de validação:</item>
+    <item quantity="many">⚠ Não é possível enviar: %1$d erros de validação:</item>
+    <item quantity="other">⚠ Não é possível enviar: %1$d erros de validação:</item>
+  </plurals>
+  <!-- One validation error in a list. %1$s = question label, %2$s = error message. -->
+  <string name="forms_validation_error_item">• %1$s: %2$s</string>
+  <!-- Badge on a review card whose answer is invalid. -->
+  <string name="forms_invalid_badge">Inválida</string>
+  <!-- Heading of the data table records the submission creates or updates. %1$d = number of records. -->
+  <string name="forms_updated_records">Registros atualizados (%1$d)</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_new_in_dataset">Novo registro em %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_updated_in_dataset">Registro atualizado em %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_unchanged_in_dataset">Registro inalterado em %1$s</string>
+
+  <!-- Answer summaries -->
+  <!-- Shown in place of an answer for a question that has none. -->
+  <string name="forms_unanswered">(Sem resposta)</string>
+  <!-- Summary of a line (geotrace) answer. %1$d = number of points. -->
+  <plurals name="forms_trace_point_count">
+    <item quantity="one">%1$d ponto do traçado</item>
+    <item quantity="many">%1$d pontos do traçado</item>
+    <item quantity="other">%1$d pontos do traçado</item>
+  </plurals>
+  <!-- Summary of a polygon (geoshape) answer. %1$d = number of vertices. -->
+  <plurals name="forms_polygon_vertex_count">
+    <item quantity="one">%1$d vértice do polígono</item>
+    <item quantity="many">%1$d vértices do polígono</item>
+    <item quantity="other">%1$d vértices do polígono</item>
+  </plurals>
+  <!-- Repeat entry previews of location, line, and polygon answers. -->
+  <string name="forms_preview_location_recorded">Localização registrada</string>
+  <string name="forms_preview_trace_recorded">Traçado registrado</string>
+  <string name="forms_preview_shape_recorded">Forma registrada</string>
+
+  <!-- Text, number, date, and time inputs -->
+  <string name="forms_text_placeholder">Digite a resposta...</string>
+  <!-- Character count of a text answer. %1$d = number of characters. -->
+  <plurals name="forms_text_char_count">
+    <item quantity="one">%1$d caractere</item>
+    <item quantity="many">%1$d caracteres</item>
+    <item quantity="other">%1$d caracteres</item>
+  </plurals>
+  <string name="forms_decimal_invalid">Digite um número decimal válido</string>
+  <string name="forms_integer_invalid">Digite um número inteiro</string>
+  <!-- %1$d = smallest allowed value, %2$d = largest allowed value. -->
+  <string name="forms_integer_out_of_range">Digite um valor entre %1$d e %2$d</string>
+  <!-- Placeholder showing the required ISO date format (year-month-day); typed dates must use it. -->
+  <string name="forms_date_placeholder">AAAA-MM-DD</string>
+  <string name="forms_date_invalid">Digite uma data válida no formato AAAA-MM-DD</string>
+  <string name="forms_clear_date">Limpar data</string>
+  <string name="forms_select_date">Selecionar data</string>
+  <!-- Placeholder showing the required 24-hour time format (hours:minutes:seconds). -->
+  <string name="forms_time_placeholder">HH:MM:SS</string>
+  <!-- Button that fills a time question with the current time. -->
+  <string name="forms_now">Agora</string>
+  <string name="forms_no_timestamp">(Nenhum horário registrado)</string>
+  <string name="forms_capture_timestamp">Registrar horário</string>
+
+  <!-- Location (geopoint) questions -->
+  <!-- Button that records the point under the map crosshair. -->
+  <string name="forms_add_point">Adicionar ponto</string>
+  <!-- Button that records the device's current GPS position. -->
+  <string name="forms_capture_location">Capturar localização</string>
+  <string name="forms_map_pan_allowed">Movimento do mapa permitido</string>
+  <string name="forms_gps_only_no_pan">Somente GPS (sem mover o mapa)</string>
+  <!-- Required GPS accuracy. %1$s = accuracy in meters. -->
+  <string name="forms_accuracy_required">Exigido ≤ %1$s m</string>
+  <!-- Location capture status badges. -->
+  <string name="forms_geo_status_panned">Mapa movido</string>
+  <string name="forms_geo_status_captured">Capturada</string>
+  <string name="forms_geo_status_ready">Pronto</string>
+  <string name="forms_geo_target_coordinates">Coordenadas do alvo (mira deslocada)</string>
+  <string name="forms_geo_captured_coordinates">Coordenadas capturadas</string>
+  <string name="forms_geo_current_coordinates">Coordenadas atuais do GPS</string>
+  <!-- Raw coordinates with altitude. %1$s = latitude, %2$s = longitude, %3$d = altitude in meters. -->
+  <string name="forms_geo_coordinates_with_altitude">%1$s, %2$s • Alt. %3$d m</string>
+  <!-- Label of the GPS accuracy readout. -->
+  <string name="forms_accuracy">Precisão</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m), %4$s = label of the Add point button. -->
+  <string name="forms_geo_saved_point">Ponto salvo: %1$s, %2$s (%3$s) — toque em "%4$s" para atualizar ou use Desfazer / Refazer</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m). "Next →" is the Next button. -->
+  <string name="forms_geo_location_captured">Localização capturada: %1$s, %2$s (%3$s) — toque em "Próximo →" para continuar ou use Desfazer / Refazer</string>
+  <!-- %1$s = label of the Add point button. -->
+  <string name="forms_geo_map_panned_hint">Mapa movido — toque em "%1$s" abaixo para registrar este ponto</string>
+  <!-- %1$s = label of the Capture location button. -->
+  <string name="forms_geo_capture_hint">Toque em "%1$s" abaixo para registrar suas coordenadas atuais do GPS</string>
+  <string name="forms_recenter_on_gps">Centralizar no GPS</string>
+  <string name="forms_geo_pan_disabled">O movimento do mapa está desativado para esta pergunta. As coordenadas são capturadas diretamente da sua localização GPS.</string>
+  <!-- %1$s = required accuracy in meters. -->
+  <string name="forms_geo_pan_disabled_with_accuracy">O movimento do mapa está desativado para esta pergunta. As coordenadas são capturadas diretamente da sua localização GPS (exige precisão ≤ %1$s m).</string>
+  <!-- Map overlay status. -->
+  <string name="forms_gps_locked">GPS fixado</string>
+  <string name="forms_geo_waiting_for_location">Aguardando a localização GPS…</string>
+  <string name="forms_map_panned_crosshair">Mapa movido • Mira ativa</string>
+  <string name="forms_map_centered_on_gps">Centralizado no GPS (arraste o mapa para mover)</string>
+  <string name="forms_zoom_in">Aumentar zoom</string>
+  <string name="forms_zoom_out">Diminuir zoom</string>
+  <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->
+  <string name="forms_gps_accuracy_zoom">GPS %1$s • %2$sz</string>
+
+  <!-- Line (geotrace) and polygon (geoshape) questions -->
+  <!-- Button that records the device's current GPS position as a new vertex. -->
+  <string name="forms_capture_vertex">Capturar vértice</string>
+  <!-- "pts" abbreviates points. -->
+  <string name="forms_geometry_polygon_min">Polígono (≥3 pts)</string>
+  <string name="forms_geometry_line_min">Linha (≥2 pts)</string>
+  <string name="forms_geometry_walk_or_draw">Caminhar ou desenhar (mover mapa permitido)</string>
+  <string name="forms_geometry_gps_walk_only">Somente caminhada com GPS (bloqueado)</string>
+  <string name="forms_geometry_gps_stream_only">Somente fluxo de GPS (mapa bloqueado)</string>
+  <!-- %1$d = number of vertices. -->
+  <plurals name="forms_vertex_count">
+    <item quantity="one">%1$d vértice</item>
+    <item quantity="many">%1$d vértices</item>
+    <item quantity="other">%1$d vértices</item>
+  </plurals>
+  <!-- Status while walking a line or polygon. %1$d = number of points logged so far ("pts" abbreviates points). -->
+  <plurals name="forms_geometry_walking">
+    <item quantity="one">Caminhando • Registrando ponto GPS a cada 5 s (%1$d pt)</item>
+    <item quantity="many">Caminhando • Registrando ponto GPS a cada 5 s (%1$d pts)</item>
+    <item quantity="other">Caminhando • Registrando ponto GPS a cada 5 s (%1$d pts)</item>
+  </plurals>
+  <!-- %1$d = number of points logged so far, %2$s = label of the Stop walking button. -->
+  <plurals name="forms_geometry_walking_stop_hint">
+    <item quantity="one">Caminhando • Registrando ponto GPS a cada 5 s (%1$d pt). Toque em "%2$s" ao terminar.</item>
+    <item quantity="many">Caminhando • Registrando ponto GPS a cada 5 s (%1$d pts). Toque em "%2$s" ao terminar.</item>
+    <item quantity="other">Caminhando • Registrando ponto GPS a cada 5 s (%1$d pts). Toque em "%2$s" ao terminar.</item>
+  </plurals>
+  <string name="forms_geo_target_point_coordinates">Coordenadas do ponto-alvo</string>
+  <string name="forms_gps_location">Localização GPS</string>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_polygon_ready">
+    <item quantity="one">%1$d vértice capturado • Polígono fechado pronto — toque em "Próximo →" para continuar ou adicione mais vértices</item>
+    <item quantity="many">%1$d vértices capturados • Polígono fechado pronto — toque em "Próximo →" para continuar ou adicione mais vértices</item>
+    <item quantity="other">%1$d vértices capturados • Polígono fechado pronto — toque em "Próximo →" para continuar ou adicione mais vértices</item>
+  </plurals>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_line_ready">
+    <item quantity="one">%1$d vértice capturado • Linha pronta — toque em "Próximo →" para continuar ou adicione mais vértices</item>
+    <item quantity="many">%1$d vértices capturados • Linha pronta — toque em "Próximo →" para continuar ou adicione mais vértices</item>
+    <item quantity="other">%1$d vértices capturados • Linha pronta — toque em "Próximo →" para continuar ou adicione mais vértices</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_polygon_need_more">
+    <item quantity="one">Falta %1$d vértice para completar o polígono. Toque em "%2$s" abaixo para registrar.</item>
+    <item quantity="many">Faltam %1$d vértices para completar o polígono. Toque em "%2$s" abaixo para registrar.</item>
+    <item quantity="other">Faltam %1$d vértices para completar o polígono. Toque em "%2$s" abaixo para registrar.</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_line_need_more">
+    <item quantity="one">Falta %1$d vértice para completar a linha. Toque em "%2$s" abaixo para registrar.</item>
+    <item quantity="many">Faltam %1$d vértices para completar a linha. Toque em "%2$s" abaixo para registrar.</item>
+    <item quantity="other">Faltam %1$d vértices para completar a linha. Toque em "%2$s" abaixo para registrar.</item>
+  </plurals>
+  <string name="forms_stop_walking">Parar caminhada</string>
+  <string name="forms_start_walking">Iniciar caminhada</string>
+  <string name="forms_clear_all_vertices">Limpar todos os vértices</string>
+  <!-- %1$s = label of the Start walking button, %2$s = label of the Add point button. -->
+  <string name="forms_geometry_pan_disabled_hint">O movimento do mapa está desativado para esta pergunta. Toque em "%1$s" para registrar pontos GPS a cada 5 s ou em "%2$s" para capturar manualmente.</string>
+
+  <!-- Drawing geometry on the host's map (web) -->
+  <string name="forms_map_instruction_point">Clique no mapa para posicionar este ponto.</string>
+  <string name="forms_map_instruction_line">Clique no mapa para adicionar os vértices da linha, em ordem (pelo menos 2).</string>
+  <string name="forms_map_instruction_polygon">Clique no mapa para adicionar os cantos do polígono, em ordem (pelo menos 3).</string>
+  <!-- "Draw on map" is the label of the button that starts drawing. -->
+  <string name="forms_map_drawn_point">Desenhado no mapa: ponto. Use Desenhar no mapa para começar.</string>
+  <string name="forms_map_drawn_line">Desenhado no mapa: linha. Use Desenhar no mapa para começar.</string>
+  <string name="forms_map_drawn_polygon">Desenhado no mapa: polígono. Use Desenhar no mapa para começar.</string>
+  <string name="forms_map_no_point">Nenhum ponto ainda</string>
+  <string name="forms_map_point_placed">Ponto posicionado</string>
+  <string name="forms_drawing_on_map">Desenhando no mapa</string>
+  <string name="forms_draw_on_map">Desenhar no mapa</string>
+  <string name="forms_redraw">Redesenhar</string>
+  <string name="forms_zoom_to_fit">Ajustar zoom</string>
+
+  <!-- Choice questions -->
+  <!-- Shown on a cascading choice question. %1$s = label of the question it depends on. -->
+  <string name="forms_select_parent_first">Primeiro selecione uma resposta para "%1$s"</string>
+  <string name="forms_no_matching_options">(Nenhuma opção selecionável corresponde ao filtro atual)</string>
+  <!-- Button that adds a choice option typed by the collector. -->
+  <string name="forms_add_new">Adicionar novo</string>
+  <string name="forms_new_item_placeholder">Rótulo do novo item</string>
+
+  <!-- Range, rank, and acknowledge questions -->
+  <!-- %1$s = minimum value of the range. -->
+  <string name="forms_range_min">Mín.: %1$s</string>
+  <!-- %1$s = currently selected value. -->
+  <string name="forms_range_selected">Selecionado: %1$s</string>
+  <!-- %1$s = maximum value of the range. -->
+  <string name="forms_range_max">Máx.: %1$s</string>
+  <string name="forms_rank_instructions">Ordene os itens da maior (nº 1) para a menor prioridade:</string>
+  <string name="forms_rank_move_up">Mover para cima</string>
+  <string name="forms_rank_move_down">Mover para baixo</string>
+  <string name="forms_rank_drag_to_reorder">Arraste para reordenar</string>
+  <string name="forms_trigger_acknowledged">Confirmado (OK)</string>
+  <string name="forms_trigger_acknowledge">Reconhecer / Confirmar</string>
+
+  <!-- Photo, video, audio, and file questions -->
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_capture">%1$s\nEste arquivo não está disponível neste dispositivo. Capture-o novamente para substituí-lo.</string>
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_choose">%1$s\nEste arquivo não está disponível neste dispositivo. Escolha-o novamente para substituí-lo.</string>
+  <!-- Secondary button that uploads an existing file instead of capturing a new one. -->
+  <string name="forms_media_choose_from_device">Escolher do dispositivo</string>
+  <string name="forms_media_choose_file">Escolher arquivo</string>
+  <string name="forms_media_replace_file">Substituir arquivo</string>
+  <string name="forms_media_upload">Enviar</string>
+  <string name="forms_media_remove">Remover</string>
+  <!-- Screen reader description of a captured photo. %1$s = file name. -->
+  <string name="forms_media_captured_photo_description">Foto capturada %1$s</string>
+  <string name="forms_media_photo_attached">Foto anexada</string>
+  <string name="forms_media_video_attached">Vídeo anexado</string>
+  <string name="forms_media_audio_attached">Gravação de áudio anexada</string>
+  <string name="forms_media_file_attached">Arquivo anexado</string>
+  <!-- Attachment status with its length. %1$s = status (e.g. Video attached), %2$s = duration (e.g. 0:05). -->
+  <string name="forms_media_attached_with_duration">%1$s · %2$s</string>
+  <!-- Titles of media questions. -->
+  <string name="forms_media_kind_photo">Foto</string>
+  <string name="forms_media_kind_video">Vídeo</string>
+  <string name="forms_media_kind_audio">Gravação de áudio</string>
+  <string name="forms_media_kind_file">Arquivo</string>
+  <string name="forms_media_take_photo">Tirar foto</string>
+  <string name="forms_media_record_video">Gravar vídeo</string>
+  <string name="forms_media_record_audio">Gravar áudio</string>
+  <string name="forms_media_retake_photo">Tirar outra foto</string>
+  <!-- Re-records a video or audio answer. -->
+  <string name="forms_media_record_again">Gravar novamente</string>
+  <!-- Badge: the question only accepts media captured live, not uploaded files. -->
+  <string name="forms_media_capture_only">Somente captura</string>
+  <!-- Badge: the question accepts live capture or an uploaded file. -->
+  <string name="forms_media_capture_or_upload">Capturar ou enviar</string>
+  <string name="forms_media_live_unavailable_photo">Esta pergunta exige uma foto ao vivo, que este dispositivo/navegador não consegue capturar.</string>
+  <string name="forms_media_live_unavailable_video">Esta pergunta exige um vídeo ao vivo, que este dispositivo/navegador não consegue capturar.</string>
+  <string name="forms_media_live_unavailable_audio">Esta pergunta exige uma gravação de áudio ao vivo, que este dispositivo/navegador não consegue capturar.</string>
+  <string name="forms_media_live_unavailable_file">Esta pergunta exige um arquivo ao vivo, que este dispositivo/navegador não consegue capturar.</string>
+  <string name="forms_media_unavailable_photo">Este dispositivo não consegue capturar nem escolher uma foto.</string>
+  <string name="forms_media_unavailable_video">Este dispositivo não consegue capturar nem escolher um vídeo.</string>
+  <string name="forms_media_unavailable_audio">Este dispositivo não consegue capturar nem escolher uma gravação de áudio.</string>
+  <string name="forms_media_unavailable_file">Este dispositivo não consegue capturar nem escolher um arquivo.</string>
+  <!-- Photo size limit. %1$d = maximum long edge in pixels. -->
+  <string name="forms_media_max_pixels">Máx. %1$d px</string>
+  <!-- The question prefers the front (selfie) camera. -->
+  <string name="forms_media_front_camera">Câmera frontal</string>
+
+  <!-- Variant-incompatible question fallback warnings -->
+  <string name="forms_variant_web">a web</string>
+  <string name="forms_variant_google_earth">Google Earth</string>
+  <string name="forms_incompatible_type_gps_location">Localização somente por GPS</string>
+  <string name="forms_incompatible_type_gps_line">Linha somente por GPS</string>
+  <string name="forms_incompatible_type_gps_polygon">Polígono somente por GPS</string>
+  <string name="forms_incompatible_type_location">Localização</string>
+  <string name="forms_incompatible_type_line">Linha</string>
+  <string name="forms_incompatible_type_polygon">Polígono</string>
+  <string name="forms_incompatible_type_photo">Foto</string>
+  <string name="forms_incompatible_type_video">Vídeo</string>
+  <string name="forms_incompatible_type_audio">Áudio</string>
+  <string name="forms_incompatible_type_file">Arquivo</string>
+  <!-- %1$s = question type; %2$s = variant name. -->
+  <string name="forms_variant_incompatible_warning">Perguntas do tipo %1$s não estão disponíveis em %2$s. Esta pergunta será ignorada. Entre em contato com a organização da pesquisa para resolver isso.</string>
+</resources>

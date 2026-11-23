@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_language">ພາສາ</string>
+  <!-- Content description of the language selector; %1$s is the current language's native name. -->
+  <string name="web_language_with_current">ພາສາ: %1$s</string>
+  <string name="web_manage_survey">ຈັດການແບບສຳຫຼວດ</string>
+  <string name="web_switch_survey">ປ່ຽນແບບສຳຫຼວດ</string>
+  <string name="web_recent_surveys">ແບບສຳຫຼວດຫຼ້າສຸດ</string>
+  <!-- Survey switcher menu item linking to the full surveys page. -->
+  <string name="web_all_surveys_menu_item">ແບບສຳຫຼວດທັງໝົດ…</string>
+  <string name="web_saving">ກຳລັງບັນທຶກ…</string>
+  <string name="web_saved">ບັນທຶກແລ້ວ</string>
+  <string name="web_not_saved">ຍັງບໍ່ໄດ້ບັນທຶກ</string>
+  <string name="web_create_survey">ສ້າງແບບສຳຫຼວດ</string>
+  <!-- Create survey dialog title; %1$s is the organization name. -->
+  <string name="web_create_survey_in_organization">ສ້າງແບບສຳຫຼວດໃນ %1$s</string>
+  <string name="web_survey_title_label">ຊື່ແບບສຳຫຼວດ</string>
+  <string name="web_organization">ອົງກອນ</string>
+  <!-- Organization picker option for a survey that belongs to no organization. -->
+  <string name="web_no_organization_personal">ບໍ່ມີ (ແບບສຳຫຼວດສ່ວນຕົວ)</string>
+  <string name="web_personal_survey_access_hint">ສະເພາະຜູ້ທີ່ທ່ານແບ່ງປັນໃຫ້ເທົ່ານັ້ນທີ່ສາມາດເປີດແບບສຳຫຼວດສ່ວນຕົວໄດ້.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="web_organization_survey_access_hint">ທ່ານຍັງເປັນເຈົ້າຂອງ. ຜູ້ຈັດການຂອງ %1$s ກໍສາມາດແກ້ໄຂແບບສຳຫຼວດນີ້, ຈັດການການແບ່ງປັນ ແລະ ສົ່ງອອກຂໍ້ມູນໄດ້ເຊັ່ນກັນ.</string>
+  <string name="web_create">ສ້າງ</string>
+  <string name="web_next">ຕໍ່ໄປ</string>
+  <string name="web_cancel">ຍົກເລີກ</string>
+  <string name="web_create_survey_purposes_title">ຂໍ້ມູນນີ້ຈະຖືກນຳໃຊ້ເພື່ອຫຍັງ?</string>
+  <string name="web_create_survey_purposes_description">ເລືອກຈຸດປະສົງຫຼັກຂອງແບບສຳຫຼວດນີ້. ພວກເຮົາຈະເພີ່ມແບບຟອມທີ່ກ່ຽວຂ້ອງພ້ອມຊ່ອງຂໍ້ມູນມາດຕະຖານ ເພື່ອໃຫ້ຂໍ້ມູນຂອງທ່ານສາມາດປຽບທຽບ ແລະ ລາຍງານໄດ້. ທ່ານສາມາດປ່ຽນແປງໄດ້ພາຍຫຼັງໃນ ລາຍລະອຽດແບບສຳຫຼວດ.</string>
+  <string name="web_programs_optional">ໂຄງການ (ບໍ່ບັງຄັບ)</string>
+  <string name="web_programs_description">ໂຄງການທີ່ທ່ານລາຍງານດ້ວຍແບບສຳຫຼວດນີ້.</string>
+  <string name="web_back">ກັບຄືນ</string>
+  <string name="web_skip">ຂ້າມ</string>
+  <string name="web_download">ດາວໂຫຼດ</string>
+  <string name="web_download_csv">ດາວໂຫຼດ CSV</string>
+  <string name="web_download_geojson">ດາວໂຫຼດ GeoJSON</string>
+  <string name="web_download_kml">ດາວໂຫຼດ KML (Google Earth)</string>
+  <string name="web_download_survey_kml">ດາວໂຫຼດ KML ແບບສຳຫຼວດ (ທຸກຊັ້ນຂໍ້ມູນ)</string>
+  <string name="web_open_in_google_earth">ເປີດໃນ Google Earth</string>
+  <!-- Subtitle of an export profile menu item that has no warnings. -->
+  <string name="web_export_profile_for_survey_purposes">ສຳລັບຈຸດປະສົງຂອງແບບສຳຫຼວດທ່ານ</string>
+  <!-- Export warnings dialog title; %1$s is the export profile name (e.g. "EUDR GeoJSON"). -->
+  <string name="web_export_profile_title">ສົ່ງອອກ %1$s ບໍ?</string>
+  <!-- %1$s is a comma-separated list of included standard fields. -->
+  <string name="web_export_profile_included">ລວມມີ: %1$s.</string>
+  <string name="web_export_profile_link_missing_hint">ເຊື່ອມໂຍງຄຳຖາມທີ່ຂາດຫາຍກັບຊ່ອງຂໍ້ມູນມາດຕະຖານໃນຕົວແກ້ໄຂແບບຟອມ ເພື່ອລວມເອົາໃນຄັ້ງຕໍ່ໄປ.</string>
+  <string name="web_export_anyway">ສົ່ງອອກຕໍ່ໄປ</string>
+  <!-- Data table column header: the record's workflow status. -->
+  <string name="web_column_status">ສະຖານະ</string>
+  <!-- Data table column header: the record's label. -->
+  <string name="web_column_label">ປ້າຍຊື່</string>
+  <!-- Data table column header: number of submissions for the record. -->
+  <string name="web_column_submissions">ການສົ່ງຂໍ້ມູນ</string>
+  <!-- Data table column header: the record's GeoID identifier. -->
+  <string name="web_column_geo_id">GeoID</string>
+  <string name="web_dismiss">ປິດແຈ້ງເຕືອນ</string>
+  <string name="web_resize_side_panel">ປັບຂະໜາດແຖບດ້ານຂ້າງ</string>
+  <string name="web_collapse_side_panel">ຫຍໍ້ແຖບດ້ານຂ້າງ</string>
+  <string name="web_expand_side_panel">ຂະຫຍາຍແຖບດ້ານຂ້າງ</string>
+  <string name="web_expand_details">ຂະຫຍາຍລາຍລະອຽດ</string>
+  <string name="web_close_details">ປິດລາຍລະອຽດ</string>
+  <!-- Data table tab title; %1$s is the table name, %2$d the number of rows. -->
+  <string name="web_table_tab_title">%1$s (%2$d)</string>
+  <string name="web_collapse_table">ຫຍໍ້ຕາຕະລາງ</string>
+  <string name="web_expand_table">ຂະຫຍາຍຕາຕະລາງ</string>
+  <string name="web_no_rows_yet">ຍັງບໍ່ມີແຖວ.</string>
+  <string name="web_map_layer">ຊັ້ນແຜນທີ່</string>
+  <string name="web_data_table">ຕາຕະລາງຂໍ້ມູນ</string>
+  <string name="web_collapse_details">ຫຍໍ້ລາຍລະອຽດ</string>
+  <!-- Label above the number of map features in a layer. -->
+  <string name="web_map_features">ອົງປະກອບແຜນທີ່</string>
+  <!-- Section heading: map feature counts grouped by status. -->
+  <string name="web_by_status">ຕາມສະຖານະ</string>
+  <string name="web_show_in_table">ສະແດງໃນຕາຕະລາງ</string>
+  <!-- Surveys page filter chip: show every survey. -->
+  <string name="web_survey_filter_all">ທັງໝົດ</string>
+  <!-- Surveys page filter chip: show surveys the user owns. -->
+  <string name="web_survey_filter_mine">ແບບສຳຫຼວດຂອງຂ້ອຍ</string>
+  <!-- Survey card chip: the signed-in user owns the survey. -->
+  <string name="web_survey_access_owner">ເຈົ້າຂອງ</string>
+  <!-- Survey card chip: the user manages the survey's organization. -->
+  <string name="web_survey_access_organization_manager">ຜູ້ຈັດການອົງກອນ</string>
+  <!-- Survey card chip: the user is a member of the survey's organization. -->
+  <string name="web_survey_access_organization_member">ສະມາຊິກອົງກອນ</string>
+  <!-- Survey card chip: the survey was shared with the user. -->
+  <string name="web_survey_access_shared">ແບ່ງປັນໃຫ້ທ່ານ</string>
+  <!-- Heading of the group of surveys that belong to no organization. -->
+  <string name="web_personal_surveys">ແບບສຳຫຼວດສ່ວນຕົວ</string>
+  <string name="web_surveys">ແບບສຳຫຼວດ</string>
+  <!-- Surveys page header summary; %1$s is the survey count phrase (e.g. "3 surveys"), %2$s the organization count phrase (e.g. "2 organizations"). -->
+  <string name="web_surveys_header_summary">%1$s · %2$s</string>
+  <string name="web_impact">ຜົນກະທົບ</string>
+  <string name="web_search_surveys_placeholder">ຊອກຫາແບບສຳຫຼວດຕາມຊື່, ສະຖານທີ່ ຫຼື ອົງກອນ</string>
+  <string name="web_clear_search">ລ້າງການຊອກຫາ</string>
+  <string name="web_search_surveys">ຊອກຫາແບບສຳຫຼວດ</string>
+  <string name="web_no_surveys_match_search">ບໍ່ມີແບບສຳຫຼວດທີ່ກົງກັບການຊອກຫາຂອງທ່ານ.</string>
+  <string name="web_no_surveys_yet">ຍັງບໍ່ມີແບບສຳຫຼວດ. ສ້າງແບບສຳຫຼວດເພື່ອເລີ່ມຕົ້ນ.</string>
+  <!-- Badge next to an organization heading: the signed-in user is a manager of it. -->
+  <string name="web_organization_role_you_manage">ທ່ານເປັນຜູ້ຈັດການ</string>
+  <!-- Badge next to an organization heading: the signed-in user is a member of it. -->
+  <string name="web_organization_role_member">ສະມາຊິກ</string>
+  <string name="web_no_description_yet">ຍັງບໍ່ມີຄຳອະທິບາຍ.</string>
+  <string name="web_public_data">ຂໍ້ມູນສາທາລະນະ</string>
+  <string name="web_private_submissions">ການສົ່ງຂໍ້ມູນແບບສ່ວນຕົວ</string>
+  <!-- Survey card label: this survey is the one currently open. -->
+  <string name="web_survey_open_now">ເປີດຢູ່</string>
+  <!-- Badge on closed surveys asking whether their data was used. -->
+  <string name="web_outcome_prompt_label">ຂໍ້ມູນນີ້ຖືກນຳໃຊ້ບໍ?</string>
+  <string name="web_collect_data">ເກັບຂໍ້ມູນ</string>
+  <!-- Data collection panel subtitle for a new standalone record; %1$s is the user's GPS coordinates. -->
+  <string name="web_new_record_at_location">ລາຍການຂໍ້ມູນໃໝ່ • %1$s</string>
+  <!-- Data collection panel subtitle; %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_select_target_to_begin">ເລືອກ %1$s ເພື່ອເລີ່ມຕົ້ນ</string>
+  <!-- %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_entity_ref_picker_instructions">ຄລິກ %1$s ເທິງແຜນທີ່ ຫຼື ໃນລາຍການເພື່ອເລີ່ມແບບຟອມນີ້ ຫຼື ເລືອກຈາກຂ້າງລຸ່ມ.</string>
+  <string name="web_search_map_features">ຊອກຫາອົງປະກອບແຜນທີ່</string>
+  <!-- Search field placeholder; %1$s is the lowercase name of the map layer or data table (e.g. "plots"), %2$d the total number of its map features. -->
+  <string name="web_entity_ref_filter_placeholder">ກອງ %1$s (%2$d)</string>
+  <!-- %1$s is the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_entity_ref_no_matches">ບໍ່ພົບ %1$s ທີ່ກົງກັນ.</string>
+  <string name="web_entity_ref_empty">ຍັງບໍ່ມີ %1$s.</string>
+  <!-- Badge on a map feature whose form is already completed. -->
+  <string name="web_completed">ສຳເລັດແລ້ວ</string>
+  <string name="web_start_a_form">ເລີ່ມແບບຟອມ</string>
+  <!-- Collect data menu item subtitle; %1$s is the question count phrase (e.g. "5 questions"), %2$d the number of map features left, %3$s the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_form_menu_summary_remaining">%1$s • ເຫຼືອ %2$d %3$s</string>
+  <!-- Collect data menu item subtitle for a standalone form; %1$s is the question count phrase (e.g. "5 questions"). -->
+  <string name="web_form_menu_summary_new_record">%1$s • ລາຍການຂໍ້ມູນໃໝ່</string>
+  <string name="web_survey_has_no_forms">ແບບສຳຫຼວດນີ້ຍັງບໍ່ມີແບບຟອມ.</string>
+  <string name="web_no_forms_available_on_web">ບໍ່ມີແບບຟອມໃດໃນແບບສຳຫຼວດນີ້ທີ່ໃຊ້ໄດ້ເທິງເວັບ.</string>
+  <string name="web_qr_code">QR code</string>
+  <!-- Overflow menu button description; %1$s is the lowercase map feature type (e.g. "plot"). -->
+  <string name="web_more_entity_actions">ການດຳເນີນການເພີ່ມເຕີມສຳລັບ %1$s</string>
+  <!-- Map feature details tab showing the feature's current properties. -->
+  <string name="web_entity_tab_data">ຂໍ້ມູນ</string>
+  <!-- Map feature details tab listing the feature's submissions. -->
+  <string name="web_entity_tab_history">ປະຫວັດ</string>
+  <string name="web_back_to_submissions">ກັບໄປທີ່ການສົ່ງຂໍ້ມູນ</string>
+  <string name="web_more_submission_actions">ການດຳເນີນການເພີ່ມເຕີມສຳລັບການສົ່ງຂໍ້ມູນ</string>
+  <string name="web_close_form">ປິດແບບຟອມ</string>
+  <string name="web_map_drawing_place_point">ຄລິກແຜນທີ່ເພື່ອວາງຈຸດ</string>
+  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
+  <string name="web_map_drawing_add_vertices">ຄລິກແຜນທີ່ເພື່ອເພີ່ມຈຸດຍອດ • %1$d ຈາກຢ່າງໜ້ອຍ %2$d</string>
+  <string name="web_undo">ຍ້ອນກັບ</string>
+  <string name="web_done">ແລ້ວເສັດ</string>
+  <string name="web_cancel_drawing">ຍົກເລີກການວາດ</string>
+  <string name="web_sign_in">ເຂົ້າລະບົບ</string>
+  <string name="web_sign_in_tagline">ທຳແຜນທີ່ລະບົບນິເວດ, ອອກແບບແບບສຳຫຼວດພາກສະໜາມ ແລະ ຢັ້ງຢືນຂໍ້ມູນສັງເກດການພາກພື້ນດິນຮ່ວມກັບອົງກອນຂອງທ່ານ.</string>
+  <string name="web_sign_in_description">ເຂົ້າລະບົບເພື່ອເບິ່ງແບບສຳຫຼວດ ແລະ ອົງກອນທີ່ແບ່ງປັນກັບບັນຊີຂອງທ່ານ.</string>
+  <string name="web_signing_in">ກຳລັງເຂົ້າລະບົບ…</string>
+  <string name="web_sign_in_with_google">ເຂົ້າລະບົບດ້ວຍ Google</string>
+  <string name="web_sign_in_google_accounts_only">ປັດຈຸບັນການຢືນຢັນຕົວຕົນຈຳກັດສະເພາະບັນຊີ Google ເທົ່ານັ້ນ.</string>
+  <string name="web_terms_of_service_title">ເງື່ອນໄຂການໃຫ້ບໍລິການ</string>
+  <string name="web_tos_signed_in_as">ເຂົ້າລະບົບເປັນ %1$s</string>
+  <string name="web_tos_decline">ປະຕິເສດ</string>
+  <string name="web_tos_continue">ສືບຕໍ່</string>
+  <string name="web_tos_intro">ກະລຸນາອ່ານ ແລະ ຍອມຮັບເງື່ອນໄຂການໃຫ້ບໍລິການຂອງ Collect One ເພື່ອສືບຕໍ່.</string>
+  <string name="web_tos_agree_checkbox">ຂ້ອຍໄດ້ອ່ານ ແລະ ຍອມຮັບເງື່ອນໄຂການໃຫ້ບໍລິການຂອງ Collect One.</string>
+  <!-- Shown when a link names a console page that doesn't exist or that the user can't open. -->
+  <string name="web_link_unavailable">ໜ້ານັ້ນບໍ່ສາມາດໃຊ້ໄດ້. ມັນອາດຈະຖືກລຶບແລ້ວ ຫຼື ທ່ານອາດຈະບໍ່ມີສິດເຂົ້າເຖິງມັນ.</string>
+  <!-- Error shown when an uploaded file can't be read; %1$s is the file name. -->
+  <string name="web_file_read_failed">ບໍ່ສາມາດອ່ານ %1$s ໄດ້. ກະລຸນາລອງໃໝ່.</string>
+  <!-- Subtitle of an export profile menu item; %1$d is the number of warnings to review. -->
+  <plurals name="web_export_profile_warnings_to_review">
+    <item quantity="other">ມີ %1$d ລາຍການທີ່ຕ້ອງກວດສອບກ່ອນສົ່ງອອກ</item>
+  </plurals>
+  <plurals name="web_survey_count">
+    <item quantity="other">%1$d ແບບສຳຫຼວດ</item>
+  </plurals>
+  <plurals name="web_organization_count">
+    <item quantity="other">%1$d ອົງກອນ</item>
+  </plurals>
+  <!-- Survey card: number of locations (map features) in the survey. -->
+  <plurals name="web_survey_location_count">
+    <item quantity="other">%1$d ສະຖານທີ່</item>
+  </plurals>
+  <plurals name="web_form_question_count">
+    <item quantity="other">%1$d ຄຳຖາມ</item>
+  </plurals>
+
+  <!-- Shown when this build of the console can't open a file picker. -->
+  <string name="web_file_upload_unavailable">ບໍ່ສາມາດອັບໂຫຼດໄຟລ໌ຢູ່ບ່ອນນີ້ໄດ້.</string>
+  <string name="web_collapse_form">ຫຍໍ້ແບບຟອມ</string>
+  <string name="web_expand_form">ຂະຫຍາຍແບບຟອມ</string>
+</resources>

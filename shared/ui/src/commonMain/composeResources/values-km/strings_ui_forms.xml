@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Strings for the field-facing form runner (mobile wizard and compact web layout) and its
+     question widgets. -->
+<resources>
+  <!-- Common actions -->
+  <string name="forms_cancel">បោះបង់</string>
+  <string name="forms_submit">ដាក់ស្នើ</string>
+  <!-- Button that skips an optional question without answering it. -->
+  <string name="forms_skip">រំលង</string>
+  <!-- Button / badge that opens an answer or repeat entry for editing. -->
+  <string name="forms_edit">កែសម្រួល</string>
+  <string name="forms_delete">លុប</string>
+  <!-- Button that clears the current answer. -->
+  <string name="forms_clear">សម្អាត</string>
+  <string name="forms_undo">មិនធ្វើវិញ</string>
+  <string name="forms_redo">ធ្វើឡើងវិញ</string>
+  <!-- Button that finishes drawing a geometry on the map. -->
+  <string name="forms_done">រួចរាល់</string>
+  <!-- Confirm button of the date picker dialog. -->
+  <string name="forms_ok">យល់ព្រម</string>
+  <!-- Confirms adding a new choice option typed by the collector. -->
+  <string name="forms_add">បន្ថែម</string>
+  <string name="forms_yes">បាទ/ចាស</string>
+  <string name="forms_no">ទេ</string>
+
+  <!-- Form header, navigation, and progress -->
+  <!-- Fallback title of a form that has no title in the compact (web) layout. -->
+  <string name="forms_untitled_form">សំណុំបែបបទ</string>
+  <!-- Fallback title of a form that has no title in the mobile runner. -->
+  <string name="forms_untitled_survey_form">សំណុំបែបបទស្ទង់មតិ</string>
+  <!-- Title of the final review step; also the submit button label while answers still need review. -->
+  <string name="forms_review_and_submit">ពិនិត្យ និងដាក់ស្នើ</string>
+  <!-- Compact layout progress. %1$d = settled (answered or skipped) questions, %2$d = total questions. -->
+  <string name="forms_progress_answered_of_total">បានឆ្លើយ %1$d នៃ %2$d</string>
+  <string name="forms_expand_all">ពង្រីកទាំងអស់</string>
+  <string name="forms_collapse_all">បង្រួមទាំងអស់</string>
+  <!-- Footer progress segments, joined with " • ". %1$d = number of questions. -->
+  <string name="forms_progress_answered_count">បានឆ្លើយ %1$d</string>
+  <string name="forms_progress_skipped_count">បានរំលង %1$d</string>
+  <string name="forms_progress_pending_count">កំពុងរង់ចាំ %1$d</string>
+  <!-- Mobile app bar subtitle on the final review step. %1$d = number of questions in the form. -->
+  <plurals name="forms_review_and_finalize_summary">
+    <item quantity="other">ពិនិត្យ និងបញ្ចប់ (%1$d សំណួរ)</item>
+  </plurals>
+  <!-- Mobile app bar subtitle. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_of_total">ជំហាន %1$d នៃ %2$d</string>
+  <!-- Compact step counter in the bottom bar. %1$d = current step number, %2$d = total steps. -->
+  <string name="forms_step_counter">%1$d / %2$d</string>
+  <!-- Toggle that closes the list of all form steps. -->
+  <string name="forms_close_step_list">បិទបញ្ជី</string>
+  <!-- Toggle that opens the list of all form steps. %1$d = number of steps. -->
+  <string name="forms_steps_count">ជំហាន (%1$d)</string>
+  <string name="forms_close_form">បិទសំណុំបែបបទ</string>
+  <!-- Content description of the icon in front of the form's language selector. -->
+  <string name="forms_language">ភាសា</string>
+  <!-- Button that goes back to the previous question. -->
+  <string name="forms_back">ថយក្រោយ</string>
+  <!-- Button that moves on to the final review step. -->
+  <string name="forms_review">ពិនិត្យ</string>
+  <!-- Button that moves on to the next question. -->
+  <string name="forms_next">បន្ទាប់</string>
+  <!-- Heading of the step overview list. %1$d = number of steps. -->
+  <string name="forms_all_form_steps">ជំហានទាំងអស់នៃសំណុំបែបបទ (%1$d)</string>
+  <!-- Row of the step overview list. %1$d = step number, %2$s = step title. -->
+  <string name="forms_step_list_item">%1$d. %2$s</string>
+  <!-- Banner shown when Next is tapped before capturing a required location. -->
+  <string name="forms_blocker_location">សូមកត់ត្រាទីតាំង ឬកំណត់ទីតាំងលើផែនទី មុនពេលបន្ត។</string>
+  <string name="forms_blocker_optional">សូមដោះស្រាយកំហុសផ្ទៀងផ្ទាត់ខាងលើ ឬរំលងដើម្បីបន្ត។</string>
+  <string name="forms_blocker_required">សូមដោះស្រាយកំហុសផ្ទៀងផ្ទាត់ខាងលើ ដើម្បីបន្ត។</string>
+
+  <!-- Question cards -->
+  <!-- Question label with a required marker. %1$s = question label. -->
+  <string name="forms_required_label">%1$s *</string>
+  <!-- Badge on a required question. -->
+  <string name="forms_badge_required">ចាំបាច់ *</string>
+  <!-- Badge on a question whose value is computed by the form. -->
+  <string name="forms_badge_calculated">បានគណនា</string>
+  <string name="forms_badge_read_only">សម្រាប់តែមើល</string>
+  <!-- Toggle for the extra instructions written for enumerators (data collectors). -->
+  <string name="forms_hide_guidance">លាក់ការណែនាំសម្រាប់អ្នកប្រមូលទិន្នន័យ</string>
+  <string name="forms_show_guidance">បង្ហាញការណែនាំសម្រាប់អ្នកប្រមូលទិន្នន័យ</string>
+  <!-- Collapsed card summary of a question the collector skipped. -->
+  <string name="forms_status_skipped">បានរំលង</string>
+  <!-- Collapsed card summary of a question with no answer yet. -->
+  <string name="forms_status_not_answered">មិនទាន់ឆ្លើយ</string>
+  <!-- Screen reader descriptions of a question's status icon. -->
+  <string name="forms_status_answered">បានឆ្លើយ</string>
+  <string name="forms_status_pending">កំពុងរង់ចាំ</string>
+  <string name="forms_status_needs_attention">ត្រូវការការយកចិត្តទុកដាក់</string>
+  <string name="forms_collapse_question">បង្រួមសំណួរ</string>
+  <string name="forms_expand_question">ពង្រីកសំណួរ</string>
+  <!-- Generic stand-in for a question that has no label. -->
+  <string name="forms_this_question">សំណួរនេះ</string>
+  <!-- Title of a group of questions shown on one screen when the group has no label. -->
+  <string name="forms_untitled_question_group">ក្រុមសំណួរ</string>
+  <!-- Shown when a photo, video, or audio file can't answer the question and no reason is given. -->
+  <string name="forms_attachment_rejected">ឯកសារភ្ជាប់ត្រូវបានបដិសេធ</string>
+  <!-- %1$d = number of questions with validation errors. -->
+  <plurals name="forms_questions_need_attention">
+    <item quantity="other">មាន %1$d សំណួរ ត្រូវការការយកចិត្តទុកដាក់ មុនពេលដាក់ស្នើ។</item>
+  </plurals>
+
+  <!-- Repeated sections -->
+  <!-- Number of entries of a repeated section. %1$d = number of entries. -->
+  <plurals name="forms_repeat_section_entries">
+    <item quantity="other">%1$d ធាតុបញ្ចូល</item>
+  </plurals>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entries_hint">បន្ថែមធាតុបញ្ចូល '%1$s' មួយ ឬច្រើនខាងក្រោម។</string>
+  <string name="forms_repeat_no_entries">មិនទាន់មានធាតុបញ្ចូលដដែលៗទេ។</string>
+  <!-- Fallback title of one repeat entry. %1$s = repeated section label, %2$d = entry number. -->
+  <string name="forms_repeat_instance_title">%1$s #%2$d</string>
+  <!-- Preview of a repeat entry that has no answers yet. -->
+  <string name="forms_repeat_tap_to_fill">ចុចដើម្បីបំពេញព័ត៌មានលម្អិត</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_entry">បន្ថែមធាតុបញ្ចូល %1$s</string>
+  <!-- %1$s = repeated section label. -->
+  <string name="forms_repeat_add_named">បន្ថែម %1$s</string>
+  <!-- Delete action of one repeat entry. %1$s = entry title. -->
+  <string name="forms_repeat_delete_entry">លុប %1$s</string>
+  <!-- Ordinal number badge of a repeat entry or ranked item. %1$d = number. -->
+  <string name="forms_number_badge">#%1$d</string>
+  <!-- %1$d = current entry number, %2$d = number of entries. -->
+  <string name="forms_repeat_entry_position">ធាតុបញ្ចូល #%1$d នៃ %2$d</string>
+  <!-- Button that opens the list of all entries of a repeated section. -->
+  <string name="forms_all_entries">ធាតុបញ្ចូលទាំងអស់</string>
+  <!-- Buttons that jump to the previous or next entry of a repeated section. -->
+  <string name="forms_repeat_previous_entry">ធាតុបញ្ចូលមុន</string>
+  <string name="forms_repeat_next_entry">ធាតុបញ្ចូលបន្ទាប់</string>
+  <!-- Badge with the number of entries a repeated section requires. %1$d = number of entries. -->
+  <string name="forms_repeat_required_count">ចាំបាច់ %1$d</string>
+  <!-- %1$s = repeated section label. Shown once a section has entries. -->
+  <string name="forms_repeat_add_another">បន្ថែមធាតុបញ្ចូល %1$s មួយទៀត</string>
+  <!-- Title of the dialog confirming an entry deletion. %1$s = entry title. -->
+  <string name="forms_repeat_delete_title">លុប %1$s?</string>
+  <!-- Body of the dialog confirming an entry deletion. %1$d = answers in the entry. -->
+  <plurals name="forms_repeat_delete_message">
+    <item quantity="other">ចម្លើយ %1$d របស់វាក៏នឹងត្រូវលុបដែរ។ សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។</item>
+  </plurals>
+  <!-- Status of a repeat entry. -->
+  <string name="forms_repeat_status_not_started">មិនទាន់ចាប់ផ្ដើម</string>
+  <string name="forms_repeat_status_in_progress">កំពុងដំណើរការ</string>
+  <string name="forms_repeat_status_complete">បានបញ្ចប់</string>
+
+  <!-- Review step -->
+  <string name="forms_review_answers">ពិនិត្យចម្លើយ</string>
+  <string name="forms_review_answers_hint">ចុចសំណួរណាមួយខាងក្រោម ដើម្បីត្រឡប់ទៅកែសម្រួលចម្លើយរបស់វា។</string>
+  <string name="forms_ready_to_submit">✓ រួចរាល់សម្រាប់ដាក់ស្នើ</string>
+  <!-- Badge with the number of validation issues. %1$d = number of issues. -->
+  <plurals name="forms_issue_count">
+    <item quantity="other">%1$d បញ្ហា</item>
+  </plurals>
+  <string name="forms_form_finalized">✓ បានបញ្ចប់សំណុំបែបបទដោយជោគជ័យ</string>
+  <!-- %1$d = number of validation errors; the list of errors follows. -->
+  <plurals name="forms_cannot_submit_errors">
+    <item quantity="other">⚠ មិនអាចដាក់ស្នើបានទេ៖ មានកំហុសផ្ទៀងផ្ទាត់ %1$d៖</item>
+  </plurals>
+  <!-- One validation error in a list. %1$s = question label, %2$s = error message. -->
+  <string name="forms_validation_error_item">• %1$s៖ %2$s</string>
+  <!-- Badge on a review card whose answer is invalid. -->
+  <string name="forms_invalid_badge">មិនត្រឹមត្រូវ</string>
+  <!-- Heading of the data table records the submission creates or updates. %1$d = number of records. -->
+  <string name="forms_updated_records">កំណត់ត្រាដែលបានធ្វើបច្ចុប្បន្នភាព (%1$d)</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_new_in_dataset">កំណត់ត្រាថ្មីក្នុង %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_updated_in_dataset">កំណត់ត្រាដែលបានធ្វើបច្ចុប្បន្នភាពក្នុង %1$s</string>
+  <!-- %1$s = data table name. -->
+  <string name="forms_record_unchanged_in_dataset">កំណត់ត្រាមិនផ្លាស់ប្តូរក្នុង %1$s</string>
+
+  <!-- Answer summaries -->
+  <!-- Shown in place of an answer for a question that has none. -->
+  <string name="forms_unanswered">(មិនទាន់ឆ្លើយ)</string>
+  <!-- Summary of a line (geotrace) answer. %1$d = number of points. -->
+  <plurals name="forms_trace_point_count">
+    <item quantity="other">%1$d ចំណុចផ្លូវ</item>
+  </plurals>
+  <!-- Summary of a polygon (geoshape) answer. %1$d = number of vertices. -->
+  <plurals name="forms_polygon_vertex_count">
+    <item quantity="other">%1$d ចំណុចកំពូលពហុកោណ</item>
+  </plurals>
+  <!-- Repeat entry previews of location, line, and polygon answers. -->
+  <string name="forms_preview_location_recorded">បានកត់ត្រាទីតាំង</string>
+  <string name="forms_preview_trace_recorded">បានកត់ត្រាផ្លូវ</string>
+  <string name="forms_preview_shape_recorded">បានកត់ត្រារាង</string>
+
+  <!-- Text, number, date, and time inputs -->
+  <string name="forms_text_placeholder">បញ្ចូលចម្លើយ...</string>
+  <!-- Character count of a text answer. %1$d = number of characters. -->
+  <plurals name="forms_text_char_count">
+    <item quantity="other">%1$d តួអក្សរ</item>
+  </plurals>
+  <string name="forms_decimal_invalid">បញ្ចូលលេខទសភាគត្រឹមត្រូវ</string>
+  <string name="forms_integer_invalid">បញ្ចូលចំនួនគត់</string>
+  <!-- %1$d = smallest allowed value, %2$d = largest allowed value. -->
+  <string name="forms_integer_out_of_range">បញ្ចូលតម្លៃចន្លោះពី %1$d ដល់ %2$d</string>
+  <!-- Placeholder showing the required ISO date format (year-month-day); typed dates must use it. -->
+  <string name="forms_date_placeholder">YYYY-MM-DD</string>
+  <string name="forms_date_invalid">បញ្ចូលកាលបរិច្ឆេទត្រឹមត្រូវតាមទម្រង់ YYYY-MM-DD</string>
+  <string name="forms_clear_date">សម្អាតកាលបរិច្ឆេទ</string>
+  <string name="forms_select_date">ជ្រើសរើសកាលបរិច្ឆេទ</string>
+  <!-- Placeholder showing the required 24-hour time format (hours:minutes:seconds). -->
+  <string name="forms_time_placeholder">HH:MM:SS</string>
+  <!-- Button that fills a time question with the current time. -->
+  <string name="forms_now">ឥឡូវនេះ</string>
+  <string name="forms_no_timestamp">(មិនបានកត់ត្រាត្រាពេលវេលា)</string>
+  <string name="forms_capture_timestamp">កត់ត្រាត្រាពេលវេលា</string>
+
+  <!-- Location (geopoint) questions -->
+  <!-- Button that records the point under the map crosshair. -->
+  <string name="forms_add_point">បន្ថែមចំណុច</string>
+  <!-- Button that records the device's current GPS position. -->
+  <string name="forms_capture_location">កត់ត្រាទីតាំង</string>
+  <string name="forms_map_pan_allowed">អនុញ្ញាតឱ្យរំកិលផែនទី</string>
+  <string name="forms_gps_only_no_pan">GPS តែប៉ុណ្ណោះ (មិនអាចរំកិល)</string>
+  <!-- Required GPS accuracy. %1$s = accuracy in meters. -->
+  <string name="forms_accuracy_required">ត្រូវការ ≤ %1$s m</string>
+  <!-- Location capture status badges. -->
+  <string name="forms_geo_status_panned">បានរំកិល</string>
+  <string name="forms_geo_status_captured">បានកត់ត្រា</string>
+  <string name="forms_geo_status_ready">រួចរាល់</string>
+  <string name="forms_geo_target_coordinates">កូអរដោនេគោលដៅ (សញ្ញាកាកបាទដែលបានរំកិល)</string>
+  <string name="forms_geo_captured_coordinates">កូអរដោនេដែលបានកត់ត្រា</string>
+  <string name="forms_geo_current_coordinates">កូអរដោនេ GPS បច្ចុប្បន្ន</string>
+  <!-- Raw coordinates with altitude. %1$s = latitude, %2$s = longitude, %3$d = altitude in meters. -->
+  <string name="forms_geo_coordinates_with_altitude">%1$s, %2$s • រយៈកម្ពស់ %3$d m</string>
+  <!-- Label of the GPS accuracy readout. -->
+  <string name="forms_accuracy">ភាពត្រឹមត្រូវ</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m), %4$s = label of the Add point button. -->
+  <string name="forms_geo_saved_point">ចំណុចដែលបានរក្សាទុក៖ %1$s, %2$s (%3$s) — ចុច "%4$s" ដើម្បីធ្វើបច្ចុប្បន្នភាព ឬប្រើ មិនធ្វើវិញ / ធ្វើឡើងវិញ</string>
+  <!-- %1$s = latitude, %2$s = longitude, %3$s = accuracy (e.g. ±3.2 m). "Next →" is the Next button. -->
+  <string name="forms_geo_location_captured">បានកត់ត្រាទីតាំង៖ %1$s, %2$s (%3$s) — ចុច "បន្ទាប់ →" ដើម្បីបន្ត ឬប្រើ មិនធ្វើវិញ / ធ្វើឡើងវិញ</string>
+  <!-- %1$s = label of the Add point button. -->
+  <string name="forms_geo_map_panned_hint">បានរំកិលផែនទី — ចុច "%1$s" ខាងក្រោម ដើម្បីកត់ត្រាចំណុចនេះ</string>
+  <!-- %1$s = label of the Capture location button. -->
+  <string name="forms_geo_capture_hint">ចុច "%1$s" ខាងក្រោម ដើម្បីកត់ត្រាកូអរដោនេ GPS បច្ចុប្បន្នរបស់អ្នក</string>
+  <string name="forms_recenter_on_gps">កំណត់កណ្ដាលលើ GPS ឡើងវិញ</string>
+  <string name="forms_geo_pan_disabled">ការរំកិលផែនទីត្រូវបានបិទសម្រាប់សំណួរនេះ។ កូអរដោនេត្រូវបានកត់ត្រាដោយផ្ទាល់ពីទីតាំង GPS របស់អ្នក។</string>
+  <!-- %1$s = required accuracy in meters. -->
+  <string name="forms_geo_pan_disabled_with_accuracy">ការរំកិលផែនទីត្រូវបានបិទសម្រាប់សំណួរនេះ។ កូអរដោនេត្រូវបានកត់ត្រាដោយផ្ទាល់ពីទីតាំង GPS របស់អ្នក (ត្រូវការភាពត្រឹមត្រូវ ≤ %1$s m)។</string>
+  <!-- Map overlay status. -->
+  <string name="forms_gps_locked">GPS បានចាក់សោ</string>
+  <string name="forms_geo_waiting_for_location">កំពុងរង់ចាំទីតាំង GPS…</string>
+  <string name="forms_map_panned_crosshair">បានរំកិល • សញ្ញាកាកបាទសកម្ម</string>
+  <string name="forms_map_centered_on_gps">នៅកណ្ដាលលើ GPS (អូសផែនទីដើម្បីរំកិល)</string>
+  <string name="forms_zoom_in">ពង្រីក</string>
+  <string name="forms_zoom_out">បង្រួម</string>
+  <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->
+  <string name="forms_gps_accuracy_zoom">GPS %1$s • %2$sz</string>
+
+  <!-- Line (geotrace) and polygon (geoshape) questions -->
+  <!-- Button that records the device's current GPS position as a new vertex. -->
+  <string name="forms_capture_vertex">កត់ត្រាចំណុចកំពូល</string>
+  <!-- "pts" abbreviates points. -->
+  <string name="forms_geometry_polygon_min">ពហុកោណ (≥3 ចំណុច)</string>
+  <string name="forms_geometry_line_min">បន្ទាត់ (≥2 ចំណុច)</string>
+  <string name="forms_geometry_walk_or_draw">ដើរ ឬគូរ (អនុញ្ញាតឱ្យរំកិល)</string>
+  <string name="forms_geometry_gps_walk_only">ដើរជាមួយ GPS តែប៉ុណ្ណោះ (បានចាក់សោ)</string>
+  <string name="forms_geometry_gps_stream_only">ស្ទ្រីម GPS តែប៉ុណ្ណោះ (ការរំកិលបានចាក់សោ)</string>
+  <!-- %1$d = number of vertices. -->
+  <plurals name="forms_vertex_count">
+    <item quantity="other">%1$d ចំណុចកំពូល</item>
+  </plurals>
+  <!-- Status while walking a line or polygon. %1$d = number of points logged so far ("pts" abbreviates points). -->
+  <plurals name="forms_geometry_walking">
+    <item quantity="other">កំពុងដើរ • កត់ត្រាចំណុច GPS រៀងរាល់ 5s (%1$d ចំណុច)</item>
+  </plurals>
+  <!-- %1$d = number of points logged so far, %2$s = label of the Stop walking button. -->
+  <plurals name="forms_geometry_walking_stop_hint">
+    <item quantity="other">កំពុងដើរ • កត់ត្រាចំណុច GPS រៀងរាល់ 5s (%1$d ចំណុច)។ ចុច "%2$s" នៅពេលរួចរាល់។</item>
+  </plurals>
+  <string name="forms_geo_target_point_coordinates">កូអរដោនេចំណុចគោលដៅ</string>
+  <string name="forms_gps_location">ទីតាំង GPS</string>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_polygon_ready">
+    <item quantity="other">បានកត់ត្រា %1$d ចំណុចកំពូល • ពហុកោណបិទជិតរួចរាល់ — ចុច "បន្ទាប់ →" ដើម្បីបន្ត ឬបន្ថែមចំណុចកំពូលទៀត</item>
+  </plurals>
+  <!-- %1$d = number of vertices captured. "Next →" is the Next button. -->
+  <plurals name="forms_geometry_line_ready">
+    <item quantity="other">បានកត់ត្រា %1$d ចំណុចកំពូល • បន្ទាត់រួចរាល់ — ចុច "បន្ទាប់ →" ដើម្បីបន្ត ឬបន្ថែមចំណុចកំពូលទៀត</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_polygon_need_more">
+    <item quantity="other">ត្រូវការ %1$d ចំណុចកំពូលទៀត ដើម្បីបញ្ចប់ពហុកោណ។ ចុច "%2$s" ខាងក្រោម ដើម្បីកត់ត្រា។</item>
+  </plurals>
+  <!-- %1$d = number of vertices still needed, %2$s = label of the button that records a vertex. -->
+  <plurals name="forms_geometry_line_need_more">
+    <item quantity="other">ត្រូវការ %1$d ចំណុចកំពូលទៀត ដើម្បីបញ្ចប់បន្ទាត់។ ចុច "%2$s" ខាងក្រោម ដើម្បីកត់ត្រា។</item>
+  </plurals>
+  <string name="forms_stop_walking">ឈប់ដើរ</string>
+  <string name="forms_start_walking">ចាប់ផ្តើមដើរ</string>
+  <string name="forms_clear_all_vertices">សម្អាតចំណុចកំពូលទាំងអស់</string>
+  <!-- %1$s = label of the Start walking button, %2$s = label of the Add point button. -->
+  <string name="forms_geometry_pan_disabled_hint">ការរំកិលផែនទីត្រូវបានបិទសម្រាប់សំណួរនេះ។ ចុច "%1$s" ដើម្បីកត់ត្រាចំណុច GPS រៀងរាល់ 5s ឬ "%2$s" ដើម្បីកត់ត្រាដោយដៃ។</string>
+
+  <!-- Drawing geometry on the host's map (web) -->
+  <string name="forms_map_instruction_point">ចុចលើផែនទី ដើម្បីដាក់ចំណុចនេះ។</string>
+  <string name="forms_map_instruction_line">ចុចលើផែនទី ដើម្បីបន្ថែមចំណុចកំពូលនៃបន្ទាត់តាមលំដាប់ (យ៉ាងហោចណាស់ 2)។</string>
+  <string name="forms_map_instruction_polygon">ចុចលើផែនទី ដើម្បីបន្ថែមជ្រុងនៃពហុកោណតាមលំដាប់ (យ៉ាងហោចណាស់ 3)។</string>
+  <!-- "Draw on map" is the label of the button that starts drawing. -->
+  <string name="forms_map_drawn_point">គូរលើផែនទី៖ ចំណុច។ ប្រើ គូរលើផែនទី ដើម្បីចាប់ផ្តើម។</string>
+  <string name="forms_map_drawn_line">គូរលើផែនទី៖ បន្ទាត់។ ប្រើ គូរលើផែនទី ដើម្បីចាប់ផ្តើម។</string>
+  <string name="forms_map_drawn_polygon">គូរលើផែនទី៖ ពហុកោណ។ ប្រើ គូរលើផែនទី ដើម្បីចាប់ផ្តើម។</string>
+  <string name="forms_map_no_point">មិនទាន់មានចំណុច</string>
+  <string name="forms_map_point_placed">បានដាក់ចំណុច</string>
+  <string name="forms_drawing_on_map">កំពុងគូរលើផែនទី</string>
+  <string name="forms_draw_on_map">គូរលើផែនទី</string>
+  <string name="forms_redraw">គូរឡើងវិញ</string>
+  <string name="forms_zoom_to_fit">ពង្រីកឱ្យសមល្មម</string>
+
+  <!-- Choice questions -->
+  <!-- Shown on a cascading choice question. %1$s = label of the question it depends on. -->
+  <string name="forms_select_parent_first">ជ្រើសរើសចម្លើយសម្រាប់ '%1$s' ជាមុនសិន</string>
+  <string name="forms_no_matching_options">(គ្មានជម្រើសដែលអាចជ្រើសរើសបាន ត្រូវនឹងតម្រងបច្ចុប្បន្នទេ)</string>
+  <!-- Button that adds a choice option typed by the collector. -->
+  <string name="forms_add_new">បន្ថែមថ្មី</string>
+  <string name="forms_new_item_placeholder">ស្លាកធាតុថ្មី</string>
+
+  <!-- Range, rank, and acknowledge questions -->
+  <!-- %1$s = minimum value of the range. -->
+  <string name="forms_range_min">អប្បបរមា៖ %1$s</string>
+  <!-- %1$s = currently selected value. -->
+  <string name="forms_range_selected">បានជ្រើសរើស៖ %1$s</string>
+  <!-- %1$s = maximum value of the range. -->
+  <string name="forms_range_max">អតិបរមា៖ %1$s</string>
+  <string name="forms_rank_instructions">តម្រៀបធាតុពីអាទិភាពខ្ពស់បំផុត (#1) ទៅទាបបំផុត៖</string>
+  <string name="forms_rank_move_up">ផ្លាស់ទីឡើងលើ</string>
+  <string name="forms_rank_move_down">ផ្លាស់ទីចុះក្រោម</string>
+  <string name="forms_rank_drag_to_reorder">អូសដើម្បីតម្រៀបឡើងវិញ</string>
+  <string name="forms_trigger_acknowledged">បានទទួលស្គាល់ (យល់ព្រម)</string>
+  <string name="forms_trigger_acknowledge">ទទួលស្គាល់ / បញ្ជាក់</string>
+
+  <!-- Photo, video, audio, and file questions -->
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_capture">%1$s\nឯកសារនេះមិនមាននៅលើឧបករណ៍នេះទេ។ សូមថតវាម្តងទៀត ដើម្បីជំនួស។</string>
+  <!-- %1$s = file name of the missing attachment, on its own line. -->
+  <string name="forms_media_file_unavailable_choose">%1$s\nឯកសារនេះមិនមាននៅលើឧបករណ៍នេះទេ។ សូមជ្រើសរើសវាម្តងទៀត ដើម្បីជំនួស។</string>
+  <!-- Secondary button that uploads an existing file instead of capturing a new one. -->
+  <string name="forms_media_choose_from_device">ជ្រើសរើសពីឧបករណ៍</string>
+  <string name="forms_media_choose_file">ជ្រើសរើសឯកសារ</string>
+  <string name="forms_media_replace_file">ជំនួសឯកសារ</string>
+  <string name="forms_media_upload">ផ្ទុកឡើង</string>
+  <string name="forms_media_remove">លុបចេញ</string>
+  <!-- Screen reader description of a captured photo. %1$s = file name. -->
+  <string name="forms_media_captured_photo_description">រូបថតដែលបានថត %1$s</string>
+  <string name="forms_media_photo_attached">បានភ្ជាប់រូបថត</string>
+  <string name="forms_media_video_attached">បានភ្ជាប់វីដេអូ</string>
+  <string name="forms_media_audio_attached">បានភ្ជាប់ការថតសំឡេង</string>
+  <string name="forms_media_file_attached">បានភ្ជាប់ឯកសារ</string>
+  <!-- Attachment status with its length. %1$s = status (e.g. Video attached), %2$s = duration (e.g. 0:05). -->
+  <string name="forms_media_attached_with_duration">%1$s · %2$s</string>
+  <!-- Titles of media questions. -->
+  <string name="forms_media_kind_photo">រូបថត</string>
+  <string name="forms_media_kind_video">វីដេអូ</string>
+  <string name="forms_media_kind_audio">ការថតសំឡេង</string>
+  <string name="forms_media_kind_file">ឯកសារ</string>
+  <string name="forms_media_take_photo">ថតរូប</string>
+  <string name="forms_media_record_video">ថតវីដេអូ</string>
+  <string name="forms_media_record_audio">ថតសំឡេង</string>
+  <string name="forms_media_retake_photo">ថតរូបម្តងទៀត</string>
+  <!-- Re-records a video or audio answer. -->
+  <string name="forms_media_record_again">ថតម្តងទៀត</string>
+  <!-- Badge: the question only accepts media captured live, not uploaded files. -->
+  <string name="forms_media_capture_only">ថតផ្ទាល់តែប៉ុណ្ណោះ</string>
+  <!-- Badge: the question accepts live capture or an uploaded file. -->
+  <string name="forms_media_capture_or_upload">ថត ឬផ្ទុកឡើង</string>
+  <string name="forms_media_live_unavailable_photo">សំណួរនេះត្រូវការរូបថតផ្ទាល់ ដែលឧបករណ៍/កម្មវិធីរុករកនេះមិនអាចថតបាន។</string>
+  <string name="forms_media_live_unavailable_video">សំណួរនេះត្រូវការវីដេអូផ្ទាល់ ដែលឧបករណ៍/កម្មវិធីរុករកនេះមិនអាចថតបាន។</string>
+  <string name="forms_media_live_unavailable_audio">សំណួរនេះត្រូវការការថតសំឡេងផ្ទាល់ ដែលឧបករណ៍/កម្មវិធីរុករកនេះមិនអាចថតបាន។</string>
+  <string name="forms_media_live_unavailable_file">សំណួរនេះត្រូវការឯកសារផ្ទាល់ ដែលឧបករណ៍/កម្មវិធីរុករកនេះមិនអាចថតបាន។</string>
+  <string name="forms_media_unavailable_photo">ឧបករណ៍នេះមិនអាចថត ឬជ្រើសរើសរូបថតបានទេ។</string>
+  <string name="forms_media_unavailable_video">ឧបករណ៍នេះមិនអាចថត ឬជ្រើសរើសវីដេអូបានទេ។</string>
+  <string name="forms_media_unavailable_audio">ឧបករណ៍នេះមិនអាចថត ឬជ្រើសរើសការថតសំឡេងបានទេ។</string>
+  <string name="forms_media_unavailable_file">ឧបករណ៍នេះមិនអាចថត ឬជ្រើសរើសឯកសារបានទេ។</string>
+  <!-- Photo size limit. %1$d = maximum long edge in pixels. -->
+  <string name="forms_media_max_pixels">អតិបរមា %1$d px</string>
+  <!-- The question prefers the front (selfie) camera. -->
+  <string name="forms_media_front_camera">កាមេរ៉ាមុខ</string>
+
+  <!-- Variant-incompatible question fallback warnings -->
+  <string name="forms_variant_web">គេហទំព័រ</string>
+  <string name="forms_variant_google_earth">Google Earth</string>
+  <string name="forms_incompatible_type_gps_location">ទីតាំង GPS តែប៉ុណ្ណោះ</string>
+  <string name="forms_incompatible_type_gps_line">បន្ទាត់ GPS តែប៉ុណ្ណោះ</string>
+  <string name="forms_incompatible_type_gps_polygon">ពហុកោណ GPS តែប៉ុណ្ណោះ</string>
+  <string name="forms_incompatible_type_location">ទីតាំង</string>
+  <string name="forms_incompatible_type_line">បន្ទាត់</string>
+  <string name="forms_incompatible_type_polygon">ពហុកោណ</string>
+  <string name="forms_incompatible_type_photo">រូបថត</string>
+  <string name="forms_incompatible_type_video">វីដេអូ</string>
+  <string name="forms_incompatible_type_audio">សំឡេង</string>
+  <string name="forms_incompatible_type_file">ឯកសារ</string>
+  <!-- %1$s = question type; %2$s = variant name. -->
+  <string name="forms_variant_incompatible_warning">សំណួរប្រភេទ %1$s មិនអាចប្រើបាននៅលើ %2$s ទេ។ សំណួរនេះនឹងត្រូវរំលង។ សូមទាក់ទងអ្នករៀបចំការស្ទង់មតិដើម្បីដោះស្រាយបញ្ហានេះ។</string>
+</resources>

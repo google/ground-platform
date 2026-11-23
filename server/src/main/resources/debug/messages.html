@@ -1,0 +1,485 @@
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Collect One — Message Inspector</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22 fill=%22none%22%3E%3Cdefs%3E%3CclipPath id=%22g%22%3E%3Cpath d=%22M0 0L512 0L512 436C340 398 172 402 0 444Z%22/%3E%3C/clipPath%3E%3CclipPath id=%22l%22%3E%3Ccircle cx=%22256%22 cy=%22256%22 r=%22216%22/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path=%22url%28%23g%29%22%3E%3Cpath d=%22M103.37 436A236 236 0 1 1 408.63 436Z%22 fill=%22%232C536E%22/%3E%3Cg clip-path=%22url%28%23l%29%22%3E%3Cpath d=%22M128.02 430A216 216 0 1 1 383.98 430Z%22 fill=%22%23AEC66B%22/%3E%3Ccircle cx=%22256%22 cy=%22288%22 r=%22142%22 fill=%22%23FFE082%22/%3E%3Cpath d=%22M94 186C88 168 120 122 180 126C208 94 272 90 310 122C354 110 416 134 430 174C434 186 420 194 394 192C330 184 206 186 124 194C104 196 96 194 94 186Z%22 fill=%22%2314261E%22/%3E%3Cpath d=%22M68 260C64 242 92 212 136 216C172 208 210 226 218 250C222 264 206 272 184 270C152 266 116 268 88 272C74 274 70 268 68 260Z%22 fill=%22%2314261E%22/%3E%3Cpath d=%22M200 412C222 376 235 340 240 308C200 302 164 288 138 264L154 264C178 280 212 286 246 286C254 250 266 214 278 182L296 182C282 218 273 256 271 298C269 340 278 376 300 412Z%22 fill=%22%2314261E%22/%3E%3C/g%3E%3C/g%3E%3Cpath d=%22M16 458C16 442 156 384 256 382C356 380 496 434 496 450C496 464 472 468 436 462C340 444 172 448 76 468C40 474 16 470 16 458Z%22 fill=%22%2314261E%22/%3E%3Cpath d=%22M96 446C186 408 322 404 412 438C322 420 188 424 96 446Z%22 fill=%22%23AEC66B%22/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0f1412;
+      --surface: #161d1a;
+      --surface-elevated: #1d2622;
+      --surface-hover: #232e29;
+      --surface-selected: #1e3528;
+      --border: #2a3630;
+      --text: #e6efe9;
+      --text-muted: #95a79c;
+      --accent: #52c478;
+      --accent-dim: rgba(82, 196, 120, 0.16);
+      --ok-bg: rgba(82, 196, 120, 0.16);
+      --ok-text: #6ee092;
+      --err-bg: rgba(244, 96, 96, 0.18);
+      --err-text: #ff8080;
+      --warn-bg: rgba(245, 185, 66, 0.18);
+      --warn-text: #f7c96e;
+      --info-bg: rgba(100, 181, 246, 0.16);
+      --info-text: #82c4f8;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f8f7;
+        --surface: #ffffff;
+        --surface-elevated: #eef3f0;
+        --surface-hover: #e6eee9;
+        --surface-selected: #d8ece0;
+        --border: #d2ddd6;
+        --text: #16211b;
+        --text-muted: #56695e;
+        --accent: #1f7a42;
+        --accent-dim: rgba(31, 122, 66, 0.12);
+        --ok-bg: rgba(31, 122, 66, 0.12);
+        --ok-text: #166534;
+        --err-bg: rgba(211, 47, 47, 0.12);
+        --err-text: #b91c1c;
+        --warn-bg: rgba(217, 119, 6, 0.14);
+        --warn-text: #92400e;
+        --info-bg: rgba(2, 132, 199, 0.12);
+        --info-text: #0369a1;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    .app { display: flex; flex-direction: column; height: 100vh; }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--ok-bg);
+      color: var(--ok-text);
+    }
+
+    .status-pill.paused { background: var(--warn-bg); color: var(--warn-text); }
+    .status-pill.disconnected { background: var(--err-bg); color: var(--err-text); }
+
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+
+    .stats-label {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    a.nav-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-elevated);
+    }
+
+    a.nav-link:hover { background: var(--surface-hover); }
+
+    button {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 11px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--surface-hover); }
+    button.active {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      border-color: var(--warn-text);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .toolbar input[type="search"] {
+      flex: 1;
+      max-width: 480px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12.5px;
+      outline: none;
+    }
+
+    .toolbar input[type="search"]:focus { border-color: var(--accent); }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) 1fr;
+      min-height: 0;
+    }
+
+    .list-pane {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      background: var(--surface);
+    }
+
+    .detail-pane {
+      overflow-y: auto;
+      padding: 18px 22px;
+      background: var(--bg);
+    }
+
+    .row {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .row:hover { background: var(--surface-hover); }
+    .row.selected { background: var(--surface-selected); }
+
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .badge.SENT { background: var(--ok-bg); color: var(--ok-text); }
+    .badge.LOGGED { background: var(--info-bg); color: var(--info-text); }
+    .badge.SKIPPED_DUPLICATE { background: var(--warn-bg); color: var(--warn-text); }
+    .badge.FAILED { background: var(--err-bg); color: var(--err-text); }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px 14px;
+      margin: 12px 0 18px 0;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 12.5px;
+    }
+
+    .meta-label { color: var(--text-muted); font-weight: 600; }
+
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    iframe.email-preview {
+      width: 100%;
+      height: 460px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .empty {
+      padding: 36px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    a.cta-link { color: var(--accent); word-break: break-all; }
+    code { font-family: var(--font-mono); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <span class="brand-icon">C1</span>
+        <span>Collect One Message Inspector</span>
+        <span id="connectionPill" class="status-pill">● Live</span>
+      </div>
+      <div class="header-actions">
+        <span id="statsLabel" class="stats-label">0 emails</span>
+        <button id="pauseBtn" type="button" title="Pause or resume live stream">⏸ Pause</button>
+        <button id="clearBtn" type="button" title="Clear recorded email log">🗑 Clear</button>
+        <a class="nav-link" href="/debug" title="Open the RPC Inspector">RPC Inspector ↗</a>
+        <a class="nav-link" href="/debug/spanner" title="Browse Spanner tables and database operations">Spanner Inspector ↗</a>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Filter by recipient email, subject, invite link, status, or body…"
+        autocomplete="off"
+      />
+    </section>
+
+    <main>
+      <div id="listPane" class="list-pane"></div>
+      <div id="detailPane" class="detail-pane">
+        <div class="empty">Select an invitation email to inspect its HTML preview, plain text, and deep link.</div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let messages = [];
+    let selectedId = null;
+    let paused = false;
+
+    const listPane = document.getElementById('listPane');
+    const detailPane = document.getElementById('detailPane');
+    const statsLabel = document.getElementById('statsLabel');
+    const searchInput = document.getElementById('searchInput');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const connectionPill = document.getElementById('connectionPill');
+
+    async function loadInitial() {
+      try {
+        const res = await fetch('/debug/messages/api/messages');
+        const items = await res.json();
+        messages = Array.isArray(items) ? items.slice().reverse() : [];
+        if (messages.length > 0 && selectedId === null) {
+          selectedId = messages[0].id;
+        }
+        render();
+      } catch (_) {
+        render();
+      }
+    }
+
+    function connectStream() {
+      const stream = new EventSource('/debug/messages/api/stream');
+      stream.onopen = () => {
+        if (!paused) {
+          connectionPill.className = 'status-pill';
+          connectionPill.textContent = '● Live';
+        }
+      };
+      stream.onerror = () => {
+        if (!paused) {
+          connectionPill.className = 'status-pill disconnected';
+          connectionPill.textContent = '● Reconnecting…';
+        }
+      };
+      stream.addEventListener('message', e => {
+        if (paused) return;
+        const entry = JSON.parse(e.data);
+        messages.unshift(entry);
+        if (selectedId === null) selectedId = entry.id;
+        render();
+      });
+      stream.addEventListener('clear', () => {
+        messages = [];
+        selectedId = null;
+        render();
+      });
+    }
+
+    pauseBtn.addEventListener('click', () => {
+      paused = !paused;
+      pauseBtn.classList.toggle('active', paused);
+      pauseBtn.textContent = paused ? '▶ Resume' : '⏸ Pause';
+      connectionPill.className = paused ? 'status-pill paused' : 'status-pill';
+      connectionPill.textContent = paused ? '⏸ Paused' : '● Live';
+    });
+
+    clearBtn.addEventListener('click', async () => {
+      await fetch('/debug/messages/api/clear', { method: 'POST' });
+      messages = [];
+      selectedId = null;
+      render();
+    });
+
+    searchInput.addEventListener('input', render);
+
+    function filteredMessages() {
+      const q = searchInput.value.trim().toLowerCase();
+      if (!q) return messages;
+      return messages.filter(m =>
+        [m.recipientEmail, m.subject, m.kind, m.status, m.ctaUrl, m.textBody, m.idempotencyKey]
+          .some(v => String(v || '').toLowerCase().includes(q))
+      );
+    }
+
+    function render() {
+      const visible = filteredMessages();
+      statsLabel.textContent =
+        visible.length === messages.length
+          ? `${messages.length} email${messages.length === 1 ? '' : 's'}`
+          : `${visible.length} / ${messages.length} emails`;
+
+      if (visible.length === 0) {
+        listPane.innerHTML = '<div class="empty">No invitation emails recorded yet.</div>';
+        detailPane.innerHTML =
+          '<div class="empty">Invite a survey collaborator or organization member to inspect the generated email here.</div>';
+        return;
+      }
+
+      listPane.innerHTML = visible.map(m => {
+        const isSel = m.id === selectedId;
+        return `<div class="row ${isSel ? 'selected' : ''}" data-id="${m.id}">
+          <div class="row-top">
+            <strong>${escapeHtml(m.recipientEmail)}</strong>
+            <span class="badge ${escapeHtml(m.status)}">${escapeHtml(m.status)}</span>
+          </div>
+          <div>${escapeHtml(m.subject)}</div>
+          <div style="color:var(--text-muted);font-size:11px;">${escapeHtml(m.timestamp)} · ${escapeHtml(m.kind)}</div>
+        </div>`;
+      }).join('');
+
+      listPane.querySelectorAll('.row').forEach(el => {
+        el.addEventListener('click', () => {
+          selectedId = Number(el.dataset.id);
+          render();
+        });
+      });
+
+      const selected = visible.find(m => m.id === selectedId) || visible[0];
+      selectedId = selected.id;
+      renderDetail(selected);
+    }
+
+    function renderDetail(m) {
+      detailPane.innerHTML = `
+        <h3 style="margin:0 0 8px 0;font-size:16px;">${escapeHtml(m.subject)}</h3>
+        <div class="meta-grid">
+          <div class="meta-label">To</div>
+          <div>${escapeHtml(m.recipientEmail)}</div>
+          <div class="meta-label">Status</div>
+          <div><span class="badge ${escapeHtml(m.status)}">${escapeHtml(m.status)}</span></div>
+          <div class="meta-label">Kind</div>
+          <div><code>${escapeHtml(m.kind)}</code></div>
+          <div class="meta-label">CTA Deep Link</div>
+          <div><a class="cta-link" href="${escapeHtml(m.ctaUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(m.ctaUrl)}</a></div>
+          <div class="meta-label">Idempotency Key</div>
+          <div><code>${escapeHtml(m.idempotencyKey)}</code></div>
+          ${m.providerMessageId ? `<div class="meta-label">Provider ID</div><div><code>${escapeHtml(m.providerMessageId)}</code></div>` : ''}
+          ${m.errorMessage ? `<div class="meta-label">Error</div><div style="color:var(--err-text);">${escapeHtml(m.errorMessage)}</div>` : ''}
+        </div>
+        <h4 style="margin:14px 0 8px 0;">HTML Preview</h4>
+        <iframe class="email-preview" sandbox="" srcdoc="${escapeAttr(m.htmlBody)}"></iframe>
+        <h4 style="margin:16px 0 8px 0;">Plain Text</h4>
+        <pre>${escapeHtml(m.textBody)}</pre>
+      `;
+    }
+
+    function escapeHtml(s) {
+      return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/'/g, '&#39;');
+    }
+
+    loadInitial();
+    connectStream();
+  </script>
+</body>
+</html>

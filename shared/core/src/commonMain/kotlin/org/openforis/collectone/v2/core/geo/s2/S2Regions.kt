@@ -20,6 +20,12 @@ import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+/*
+ * Minimal ports of the S2 Geometry Library's region types (the names in parentheses), keeping its
+ * conventions (radians, closed intervals, empty and full sentinels) so the S2 coverer code that
+ * uses them can be checked against the reference implementation.
+ */
+
 /** A closed interval on the real line; empty when `lo > hi` (`R1Interval`). */
 internal data class R1Interval(val lo: Double, val hi: Double) {
   fun isEmpty(): Boolean = lo > hi

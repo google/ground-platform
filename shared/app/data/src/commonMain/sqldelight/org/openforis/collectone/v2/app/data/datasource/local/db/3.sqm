@@ -1,0 +1,37 @@
+-- Copyright 2026 The Collect One Authors.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     https://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
+-- Version 3 to 4: ties the Terms of Service acceptance to the account that accepted them
+-- (SignedInSession.sq). The signed-in session's has_accepted_terms flag becomes
+-- terms_accepted_email: a stored acceptance carries over to the stored account. Every other table,
+-- including the outbox and the server bases, is kept as is.
+CREATE TABLE signed_in_session_v4 (
+  id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+  email TEXT NOT NULL,
+  display_name TEXT NOT NULL,
+  organization TEXT NOT NULL,
+  photo_url TEXT,
+  -- The email of the account that accepted the Terms of Service after signing in, else NULL. The
+  -- acceptance applies only to that account.
+  terms_accepted_email TEXT
+);
+
+INSERT INTO signed_in_session_v4(id, email, display_name, organization, photo_url, terms_accepted_email)
+SELECT id, email, display_name, organization, photo_url,
+  CASE WHEN has_accepted_terms != 0 THEN email ELSE NULL END
+FROM signed_in_session;
+
+DROP TABLE signed_in_session;
+
+ALTER TABLE signed_in_session_v4 RENAME TO signed_in_session;

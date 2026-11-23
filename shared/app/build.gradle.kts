@@ -13,76 +13,63 @@
  * limitations under the License.
  */
 plugins {
-  kotlin("multiplatform") version "2.4.20"
-  id("org.jetbrains.compose") version "1.12.0"
-  id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
-  id("com.android.library") version "8.5.2"
-  id("com.ncorti.ktfmt.gradle") version "0.27.0"
+  id("collectone.kmp.android")
+  id("collectone.kmp.compose")
+  id("collectone.detekt")
+  id("collectone.kover")
 }
 
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
-// Formats Kotlin sources with ktfmt (Google style, 2-space indent).
-// Run `./gradlew ktfmtFormat` to format or `./gradlew ktfmtCheck` to verify.
-ktfmt { googleStyle() }
+val iosEnabled = providers.gradleProperty("collectone.ios").orNull == "true"
 
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
-
-  jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
-
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
+  if (iosEnabled) {
+    iosArm64()
+    iosSimulatorArm64()
   }
 
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api("org.openforis.collectone.v2:protoforms:2.0.0-SNAPSHOT")
-        api("org.openforis.collectone.v2:protoforms-ui:2.0.0-SNAPSHOT")
-        api("org.openforis.collectone.v2:map:2.0.0-SNAPSHOT")
+        api(projects.shared.app.data)
+        api(projects.shared.app.resources)
+        api(projects.shared.app.uiCommon)
+        api(projects.shared.app.map)
+        api(projects.shared.app.datacollection)
+        api(projects.shared.app.dashboard)
+        api(projects.shared.app.onboarding)
+        api(projects.shared.app.listsearch)
+        api(projects.shared.app.settings)
+        api(projects.shared.core)
+        api(projects.shared.ui)
+        api(projects.shared.map)
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
-        implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
-        implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+        implementation(libs.compose.material.icons.core)
+        implementation(libs.compose.material.icons.extended)
         implementation(compose.ui)
         implementation(compose.components.resources)
-        implementation("io.ktor:ktor-client-core:3.6.0")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+        // Lifecycle-aware ViewModels (viewModelScope, SavedStateHandle) and Koin dependency
+        // injection, exposed to the clients and hosts that build on this module.
+        api(libs.jetbrains.lifecycle.viewmodel)
+        api(libs.jetbrains.lifecycle.viewmodel.compose)
+        api(libs.jetbrains.lifecycle.viewmodel.savedstate)
+        api(libs.koin.compose)
+        api(libs.koin.compose.viewmodel)
       }
     }
-    val androidMain by getting {
-      dependencies {
-        implementation("io.ktor:ktor-client-cio:3.6.0")
-        implementation("androidx.lifecycle:lifecycle-process:2.8.7")
-      }
-    }
-    val jvmMain by getting { dependencies { implementation("io.ktor:ktor-client-cio:3.6.0") } }
-    val wasmJsMain by getting { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation(project(":app-testing"))
+        implementation(projects.shared.app.uiTesting)
       }
     }
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
+        implementation(libs.konsist)
         implementation(kotlin("reflect"))
-        implementation("io.ktor:ktor-client-mock:3.6.0")
-        // Writes the user data service's proto JSON seed (see UserDataSeedSnapshotTest).
-        implementation("com.squareup.wire:wire-moshi-adapter:7.0.3")
+        implementation(libs.koin.test)
         // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
         @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
         implementation(compose.uiTest)
@@ -92,26 +79,8 @@ kotlin {
   }
 }
 
-// `./gradlew jvmTest -PregenerateLibrarySeed` rewrites the global library seed files
-// (shared/assets/library/*.textproto) from the app's Kotlin copy; see GlobalLibrarySeedTest.
-// `./gradlew jvmTest -PregenerateUserDataSeed` rewrites the user data service's sample seed
-// (server/userDataService/src/main/resources/seed/user_data_seed.json) from the fixtures in
-// app-testing; see UserDataSeedSnapshotTest.
-tasks.withType<Test>().configureEach {
-  for (flag in listOf("regenerateLibrarySeed", "regenerateUserDataSeed")) {
-    if (project.hasProperty(flag)) {
-      systemProperty(flag, "true")
-      outputs.upToDateWhen { false }
-    }
-  }
-}
+android { namespace = "org.openforis.collectone.v2.app" }
 
-android {
-  namespace = "org.openforis.collectone.v2.app"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
-}
+// The UI strings and their `Res` accessors live in :shared:app:resources; this module generates
+// none, so its `Res` doesn't clash with that module's.
+compose.resources { generateResClass = never }

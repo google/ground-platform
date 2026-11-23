@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_time_series_tab">อนุกรมเวลาและภาพถ่าย</string>
+  <string name="web_time_series_open">วิเคราะห์ภาพถ่าย</string>
+  <string name="web_time_series_select_feature">เลือกจุดหรือรูปหลายเหลี่ยมบนแผนที่เพื่อดูอนุกรมเวลาจากดาวเทียม</string>
+  <string name="web_time_series_unsupported">อนุกรมเวลามีให้ใช้งานสำหรับจุดและรูปหลายเหลี่ยม</string>
+  <string name="web_time_series_unavailable">อนุกรมเวลาจำเป็นต้องเชื่อมต่อกับบริการ Collect One</string>
+  <string name="web_time_series_loading">กำลังโหลดข้อมูลการสังเกตจากดาวเทียม…</string>
+  <string name="web_time_series_no_observations">ไม่มีข้อมูลการสังเกตที่ปลอดเมฆของ %1$s ในช่วงเวลานี้</string>
+  <string name="web_time_series_retry">ลองอีกครั้ง</string>
+  <string name="web_time_series_error_not_uploaded">แบบสำรวจนี้ยังไม่ได้อยู่บนเซิร์ฟเวอร์ อนุกรมเวลาจะปรากฏขึ้นหลังจากอัปโหลดแล้ว</string>
+  <string name="web_time_series_error_unsupported">ไม่สามารถวิเคราะห์องค์ประกอบบนแผนที่นี้ได้</string>
+  <string name="web_time_series_error_busy">มีคำขอมากเกินไป โปรดลองอีกครั้งในอีก 1 นาที</string>
+  <string name="web_time_series_error_timeout">Earth Engine ใช้เวลาตอบกลับนานเกินไป โปรดลองอีกครั้ง</string>
+  <string name="web_time_series_error_unavailable">Earth Engine ไม่พร้อมใช้งานในขณะนี้</string>
+  <string name="web_time_series_error_denied">คุณไม่มีสิทธิ์เข้าถึงแบบสำรวจนี้</string>
+  <string name="web_time_series_error_other">ไม่สามารถโหลดข้อมูลได้</string>
+  <string name="web_time_series_area">%1$s ha</string>
+  <string name="web_time_series_elevation_range">ระดับความสูง %1$s–%2$s ม.</string>
+  <string name="web_time_series_elevation">ระดับความสูง %1$s ม.</string>
+  <string name="web_time_series_population">ประชากร %1$s (%2$s/km², %3$d)</string>
+  <string name="web_time_series_population_density">%1$s คน/km² (%2$d)</string>
+  <string name="web_time_series_source_landsat">Landsat</string>
+  <string name="web_time_series_source_sentinel2">Sentinel-2</string>
+  <string name="web_time_series_source_sentinel1">Sentinel-1</string>
+  <string name="web_time_series_source_picker">แหล่งที่มาของภาพ</string>
+  <string name="web_time_series_band_picker">แบนด์</string>
+  <string name="web_time_series_picker_selection">%1$s: %2$s</string>
+  <string name="web_time_series_source_landsat_detail">ออปติคัล · 30 ม. · ทุก 8–16 วัน</string>
+  <string name="web_time_series_source_sentinel2_detail">ออปติคัล · 10 ม. · ทุก 5 วัน</string>
+  <string name="web_time_series_source_sentinel1_detail">เรดาร์ · 10 ม. · มองทะลุเมฆได้</string>
+  <string name="web_time_series_band_group_indices">ดัชนี</string>
+  <string name="web_time_series_band_group_reflectance">การสะท้อนแสง</string>
+  <string name="web_time_series_band_group_backscatter">การกระเจิงกลับ</string>
+  <string name="web_time_series_band_blue">น้ำเงิน</string>
+  <string name="web_time_series_band_green">เขียว</string>
+  <string name="web_time_series_band_red">แดง</string>
+  <string name="web_time_series_band_nir">NIR</string>
+  <string name="web_time_series_band_swir1">SWIR 1</string>
+  <string name="web_time_series_band_swir2">SWIR 2</string>
+  <string name="web_time_series_band_ndvi_detail">ความเขียวขจีของพืชพรรณ</string>
+  <string name="web_time_series_band_ndfi_detail">ความเสื่อมโทรมของเรือนยอดป่า</string>
+  <string name="web_time_series_band_evi_detail">ความเขียวขจีในเรือนยอดหนาแน่น</string>
+  <string name="web_time_series_band_evi2_detail">EVI แบบสองแบนด์ ไม่รวมสีน้ำเงิน</string>
+  <string name="web_time_series_band_nbr_detail">ร่องรอยการเผาไหม้และการสูญเสียเรือนยอด</string>
+  <string name="web_time_series_band_ndmi_detail">ปริมาณน้ำในเรือนยอด</string>
+  <string name="web_time_series_band_ndwi_detail">แหล่งน้ำเปิด</string>
+  <string name="web_time_series_band_blue_detail">แสงสีน้ำเงินที่ตามองเห็น</string>
+  <string name="web_time_series_band_green_detail">แสงสีเขียวที่ตามองเห็น</string>
+  <string name="web_time_series_band_red_detail">แสงสีแดงที่ตามองเห็น พืชดูดกลืนได้</string>
+  <string name="web_time_series_band_nir_detail">อินฟราเรดย่านใกล้ สะท้อนโดยใบไม้</string>
+  <string name="web_time_series_band_swir1_detail">อินฟราเรดย่านคลื่นสั้น: ความชื้น</string>
+  <string name="web_time_series_band_swir2_detail">อินฟราเรดย่านคลื่นสั้น: ดินและรอยเผาไหม้</string>
+  <string name="web_time_series_band_vv_detail">การกระเจิงกลับของพื้นผิว (dB)</string>
+  <string name="web_time_series_band_vh_detail">การกระเจิงกลับของเรือนยอด (dB)</string>
+  <string name="web_time_series_band_vv_vh_detail">อัตราส่วนของ VV ต่อ VH</string>
+  <string name="web_time_series_band_rfdi_detail">ดัชนีความเสื่อมโทรมของป่าไม้จากเรดาร์</string>
+  <string name="web_time_series_observations">การสังเกต %1$d ครั้ง · %2$s</string>
+  <string name="web_time_series_selected">%1$s · %2$s · %3$s %4$s</string>
+  <string name="web_time_series_chart_hint">คลิกที่จุด (หรือใช้ ← →) เพื่อแสดงภาพของวันนั้นบนแผนที่</string>
+  <string name="web_time_series_chart_description">แผนภูมิอนุกรมเวลา %1$s พร้อมการสังเกต %2$d ครั้ง</string>
+  <string name="web_time_series_scene_loading">กำลังโหลดภาพ…</string>
+  <string name="web_time_series_scene_failed">ไม่สามารถโหลดภาพนี้ได้</string>
+  <string name="web_time_series_scene_clear">ลบภาพออกจากแผนที่</string>
+  <string name="web_time_series_stretch_true_color">สีจริง</string>
+  <string name="web_time_series_stretch_swir_nir_red">SWIR · NIR · แดง</string>
+  <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · แดง</string>
+  <string name="web_time_series_stretch_sar">VV · VH · อัตราส่วน</string>
+  <string name="web_time_series_close">ปิดอนุกรมเวลา</string>
+</resources>

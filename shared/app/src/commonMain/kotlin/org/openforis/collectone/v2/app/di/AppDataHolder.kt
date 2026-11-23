@@ -13,79 +13,59 @@
  */
 package org.openforis.collectone.v2.app.di
 
-import kotlin.coroutines.cancellation.CancellationException
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.Koin
+import org.koin.core.module.Module
+import org.koin.core.parameter.parametersOf
+import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 import org.openforis.collectone.v2.app.client.auth.AuthClient
 import org.openforis.collectone.v2.app.client.auth.defaultAuthClient
 import org.openforis.collectone.v2.app.client.grpc.CollectOneGrpcClient
-import org.openforis.collectone.v2.app.client.grpc.GrpcWebException
-import org.openforis.collectone.v2.app.client.grpc.GrpcWebTransport
-import org.openforis.collectone.v2.app.client.grpc.remoteUserDataGrpcClient
-import org.openforis.collectone.v2.app.client.lifecycle.guardUnsentChangesOnUnload
-import org.openforis.collectone.v2.app.client.lifecycle.observeAppForeground
-import org.openforis.collectone.v2.app.client.storage.platformSyncStateFile
-import org.openforis.collectone.v2.app.data.datasource.device.AuthDataSource
+import org.openforis.collectone.v2.app.client.offline.OfflineRegionClient
+import org.openforis.collectone.v2.app.client.offline.defaultOfflineRegionClient
+import org.openforis.collectone.v2.app.client.pdf.PdfExportClient
+import org.openforis.collectone.v2.app.client.push.PushSubscriptionClient
+import org.openforis.collectone.v2.app.client.storage.DeviceStorageClient
+import org.openforis.collectone.v2.app.client.storage.defaultDeviceStorageClient
+import org.openforis.collectone.v2.app.data.datasource.local.session.SignedInSessionStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.InMemoryLocalStore
 import org.openforis.collectone.v2.app.data.datasource.local.store.LocalStore
-import org.openforis.collectone.v2.app.data.datasource.local.store.OutboxState
 import org.openforis.collectone.v2.app.data.datasource.remote.GrpcSyncDataSource
-import org.openforis.collectone.v2.app.data.datasource.remote.MapboxPlacesDataSource
-import org.openforis.collectone.v2.app.data.repository.AuthRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.ConnectivityRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.ImpactEventRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.LibraryRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.LocalStoreTransactionRunner
-import org.openforis.collectone.v2.app.data.repository.LocationRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.MutationRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.OrganizationRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.OutboxSyncRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.PlaceRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.SampleDataRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.SettingsRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.SurveyDirectoryRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.SurveyEditorRepositoryImpl
-import org.openforis.collectone.v2.app.data.repository.SurveyRepositoryImpl
-import org.openforis.collectone.v2.app.data.sync.OutboxDrainer
-import org.openforis.collectone.v2.app.data.sync.RecordingLocalStore
+import org.openforis.collectone.v2.app.data.sync.SurveyTopicSubscriptionManager
 import org.openforis.collectone.v2.app.data.sync.SyncCoordinator
-import org.openforis.collectone.v2.app.data.sync.SyncStatePersistence
-import org.openforis.collectone.v2.app.data.sync.WorkingCopyRecorder
 import org.openforis.collectone.v2.app.domain.model.MutationLogItem
-import org.openforis.collectone.v2.app.domain.model.OfflineTilePackageItem
 import org.openforis.collectone.v2.app.domain.model.Organization
+import org.openforis.collectone.v2.app.domain.model.SaveStatus
 import org.openforis.collectone.v2.app.domain.model.SurveyConfig
 import org.openforis.collectone.v2.app.domain.model.SurveyPlaceItem
 import org.openforis.collectone.v2.app.domain.model.SurveyPreviewItem
 import org.openforis.collectone.v2.app.domain.model.SurveyStats
 import org.openforis.collectone.v2.app.domain.model.UserSettings
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
-import org.openforis.collectone.v2.app.domain.model.editor.isoUtc
 import org.openforis.collectone.v2.app.domain.repository.AuthRepository
+import org.openforis.collectone.v2.app.domain.repository.ClientVersionRepository
 import org.openforis.collectone.v2.app.domain.repository.ConnectivityRepository
 import org.openforis.collectone.v2.app.domain.repository.ImpactEventRepository
+import org.openforis.collectone.v2.app.domain.repository.InviteRepository
 import org.openforis.collectone.v2.app.domain.repository.LibraryRepository
 import org.openforis.collectone.v2.app.domain.repository.LocationRepository
 import org.openforis.collectone.v2.app.domain.repository.MediaCacheInfo
 import org.openforis.collectone.v2.app.domain.repository.MutationRepository
 import org.openforis.collectone.v2.app.domain.repository.OrganizationRepository
 import org.openforis.collectone.v2.app.domain.repository.OutboxSyncRepository
+import org.openforis.collectone.v2.app.domain.repository.OverlayTileUrlRepository
 import org.openforis.collectone.v2.app.domain.repository.PlaceRepository
 import org.openforis.collectone.v2.app.domain.repository.SampleDataRepository
 import org.openforis.collectone.v2.app.domain.repository.SettingsRepository
@@ -98,6 +78,7 @@ import org.openforis.collectone.v2.app.domain.usecase.ClusterMapFeaturesUseCase
 import org.openforis.collectone.v2.app.domain.usecase.CompleteFormSubmissionUseCase
 import org.openforis.collectone.v2.app.domain.usecase.ComputeWayfindingNavigationUseCase
 import org.openforis.collectone.v2.app.domain.usecase.CreateSurveyUseCase
+import org.openforis.collectone.v2.app.domain.usecase.EstimateDeviceStorageUseCase
 import org.openforis.collectone.v2.app.domain.usecase.ExportSurveyDataUseCase
 import org.openforis.collectone.v2.app.domain.usecase.LaunchFormUseCase
 import org.openforis.collectone.v2.app.domain.usecase.RecordImpactEventUseCase
@@ -105,7 +86,6 @@ import org.openforis.collectone.v2.app.domain.usecase.ResolveFormDefForLaunchUse
 import org.openforis.collectone.v2.app.domain.usecase.ResolveLibraryUseCase
 import org.openforis.collectone.v2.app.domain.usecase.SearchPlacesUseCase
 import org.openforis.collectone.v2.app.domain.usecase.SyncMutationsUseCase
-import org.openforis.collectone.v2.app.ui.common.platformEpochMillis
 
 /**
  * Snapshot of everything the UI reads from the local data store: all surveys, the active survey's
@@ -120,7 +100,6 @@ data class AppData(
   val editorDraft: SurveyEditorDraft = SurveyEditorDraft.blank(surveyId = ""),
   val surveyStats: Map<String, SurveyStats> = emptyMap(),
   val surveyConfigs: Map<String, SurveyConfig> = emptyMap(),
-  val offlineTilePackages: List<OfflineTilePackageItem> = emptyList(),
   val mutations: List<MutationLogItem> = emptyList(),
   val places: List<SurveyPlaceItem> = emptyList(),
   val userSettings: UserSettings = UserSettings(),
@@ -128,300 +107,153 @@ data class AppData(
 )
 
 /**
- * Dependency container and reactive data holder of the mobile app and the web console per
- * `docs/technical/client/architecture.md`:
- * - Owns the [LocalStore] (single source of truth), Domain Repository instances, the Domain Use
- *   Cases both the mobile app and the web console use, and the shared [scope]. Use cases only one
- *   client uses are wired by that client (`WebUseCases` in `shared/web`, `WorkbenchState` in the
- *   workbench) from the repositories exposed here.
- * - Combines repository flows into a single immutable [appData] [StateFlow].
- * - Holds no UI session state; each feature ViewModel (`OnboardingViewModel`, `SettingsViewModel`,
- *   `SurveyMapViewModel`, `DashboardViewModel`, `OrganizationViewModel`, `SurveyEditorViewModel`,
- *   `DataCollectionViewModel`, `WorkbenchViewModel`) owns its own session state and exposes its own
- *   `uiState` [StateFlow].
+ * Compatibility facade over the app's Koin graph ([appModules]) for the code that still reads its
+ * dependencies from one object (`MobileAppState`, `WebAppState`, `WorkbenchState`, and their
+ * tests). It wires nothing itself: every member is resolved from [koin]. New code takes its
+ * dependencies through its constructor instead, and the hosts get ViewModels with
+ * `koinViewModel()`.
  *
- * Writes run in [scope]. By default it uses an immediate dispatcher, so writes to the in-memory
- * store (which never suspend) complete, and their results reach [appData], before [launch] returns.
+ * Besides the dependencies it exposes, it combines repository flows into a single immutable
+ * [appData] [StateFlow], and starts the initial sync from the user data service when the graph is
+ * created.
+ *
+ * Writes run in [scope], which uses an immediate dispatcher, so writes to the in-memory store
+ * (which never suspend) complete, and their results reach [appData], before [launch] returns.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppDataHolder(
-  val localStore: LocalStore = InMemoryLocalStore(),
-  val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined),
+  /** The Koin graph this facade reads from. */
+  val koin: Koin
+) {
+  private val config: AppConfig = koin.get()
+  /** The device's local data store: the single source of truth the repositories read and write. */
+  val localStore: LocalStore = koin.get()
   /**
-   * Base URL of the user data service (`server/userDataService`), e.g. `http://localhost:8080`.
-   * When null, nothing is synced and the store keeps whatever it holds (empty for a new store).
+   * The graph's app scope ([AppScope]): it lives as long as the graph, so work launched in it
+   * outlives any one screen or session.
    */
-  val userDataServiceUrl: String? = null,
-  /**
-   * Signs the user in and supplies the ID tokens user data service calls carry: Firebase in
-   * browsers when configured, otherwise a
-   * [org.openforis.collectone.v2.app.client.auth.FakeAuthClient].
-   */
-  val authClient: AuthClient = defaultAuthClient(),
-  val grpcClient: CollectOneGrpcClient? = userDataServiceUrl?.let {
-    remoteUserDataGrpcClient(
-      GrpcWebTransport(it, authToken = authClient::idToken, headers = authClient::requestHeaders)
-    )
-  },
-  /**
-   * Whether to keep only the surveys the user downloaded offline (the mobile app), instead of every
-   * survey the user can list (the web console). See [GrpcSyncDataSource.downloadedSurveysOnly].
-   */
-  val syncDownloadedSurveysOnly: Boolean = false,
-  val grpcSyncDataSource: GrpcSyncDataSource? = grpcClient?.let {
-    GrpcSyncDataSource(it, downloadedSurveysOnly = syncDownloadedSurveysOnly)
-  },
-  /**
-   * Whether local edits are queued in the outbox and synced continuously (drain, then pull). On by
-   * default when connected to a real service ([userDataServiceUrl]); tests that pass an in-memory
-   * [grpcClient] keep the simulated uploads unless they turn it on.
-   */
-  val enableSyncEngine: Boolean = userDataServiceUrl != null,
-  val connectivityRepository: ConnectivityRepository = ConnectivityRepositoryImpl(),
+  val scope: CoroutineScope = koin.get(AppScope)
+  /** See [AppConfig.userDataServiceUrl]. */
+  val userDataServiceUrl: String?
+    get() = config.userDataServiceUrl
+
+  /** See [AppConfig.syncDownloadedSurveysOnly]. */
+  val syncDownloadedSurveysOnly: Boolean
+    get() = config.syncDownloadedSurveysOnly
+
+  /** See [AppConfig.enableSyncEngine]. */
+  val enableSyncEngine: Boolean
+    get() = config.enableSyncEngine
+
+  val authClient: AuthClient = koin.get()
+  val grpcClient: CollectOneGrpcClient? = koin.getOrNull()
+  val grpcSyncDataSource: GrpcSyncDataSource? = koin.getOrNull()
+  val connectivityRepository: ConnectivityRepository = koin.get()
+  val pushSubscriptionClient: PushSubscriptionClient = koin.get()
   /**
    * Sync engine scheduler (outbox drain, then delta pull), when connected to the user data service.
    * Started after the initial sync succeeds.
    */
-  val syncCoordinator: SyncCoordinator? =
-    if (enableSyncEngine && grpcClient != null && grpcSyncDataSource != null) {
-      SyncCoordinator(
-        store = localStore,
-        syncDataSource = grpcSyncDataSource,
-        drainer = OutboxDrainer(localStore, grpcClient),
-        connectivity = connectivityRepository,
-        scope = scope,
-      )
-    } else {
-      null
-    },
-  val outboxSyncRepository: OutboxSyncRepository? = syncCoordinator?.let {
-    OutboxSyncRepositoryImpl(localStore, it)
-  },
-  /**
-   * The store repositories write user edits to. With the sync engine, a [RecordingLocalStore] that
-   * records each edit as fine-grained mutations in the outbox; otherwise [localStore] itself.
-   */
-  val editStore: LocalStore =
-    if (syncCoordinator != null) RecordingLocalStore(localStore) else localStore,
-  val surveyRepository: SurveyRepository = SurveyRepositoryImpl(editStore),
-  val mutationRepository: MutationRepository =
-    MutationRepositoryImpl(localStore, trackOutbox = syncCoordinator != null),
-  val settingsRepository: SettingsRepository = SettingsRepositoryImpl(localStore),
-  val placeRepository: PlaceRepository =
-    PlaceRepositoryImpl(store = localStore, remoteDataSource = MapboxPlacesDataSource()),
-  val organizationRepository: OrganizationRepository = OrganizationRepositoryImpl(editStore),
-  val libraryRepository: LibraryRepository = LibraryRepositoryImpl(editStore),
+  val syncCoordinator: SyncCoordinator? = koin.getOrNull()
+  val topicSubscriptionManager: SurveyTopicSubscriptionManager? = koin.getOrNull()
+  val outboxSyncRepository: OutboxSyncRepository? = koin.getOrNull()
+  /** See [EditStore]. */
+  val editStore: LocalStore = koin.get(EditStore)
+  val surveyRepository: SurveyRepository = koin.get()
+  val mutationRepository: MutationRepository = koin.get()
+  val settingsRepository: SettingsRepository = koin.get()
+  val placeRepository: PlaceRepository = koin.get()
+  val organizationRepository: OrganizationRepository = koin.get()
+  val libraryRepository: LibraryRepository = koin.get()
   /** Finds public and link-shared surveys to download; null without a user data service. */
-  val surveyDirectoryRepository: SurveyDirectoryRepository? = grpcClient?.let {
-    SurveyDirectoryRepositoryImpl(localStore, it)
-  },
-  val locationRepository: LocationRepository = LocationRepositoryImpl(),
-  val authRepository: AuthRepository = AuthRepositoryImpl(AuthDataSource(authClient, scope)),
-  val sampleDataRepository: SampleDataRepository =
-    SampleDataRepositoryImpl(localStore, grpcSyncDataSource),
-  val surveyEditorRepository: SurveyEditorRepository =
-    SurveyEditorRepositoryImpl(
-      store = editStore,
-      workingCopyRecorder = syncCoordinator?.let { WorkingCopyRecorder(localStore) },
-    ),
-  val transactionRunner: TransactionRunner = LocalStoreTransactionRunner(editStore),
-  val impactEventRepository: ImpactEventRepository = ImpactEventRepositoryImpl(localStore),
-  val recordImpactEventUseCase: RecordImpactEventUseCase =
-    RecordImpactEventUseCase(
-      impactEventRepository = impactEventRepository,
-      surveyRepository = surveyRepository,
-      surveyEditorRepository = surveyEditorRepository,
-      authRepository = authRepository,
-      connectivityRepository = connectivityRepository,
-      now = { isoUtc(platformEpochMillis()) },
-    ),
-  val exportSurveyDataUseCase: ExportSurveyDataUseCase =
-    ExportSurveyDataUseCase(recordImpactEventUseCase),
-  val resolveFormDefForLaunchUseCase: ResolveFormDefForLaunchUseCase =
-    ResolveFormDefForLaunchUseCase(),
-  val launchFormUseCase: LaunchFormUseCase = LaunchFormUseCase(resolveFormDefForLaunchUseCase),
-  val completeFormSubmissionUseCase: CompleteFormSubmissionUseCase =
-    CompleteFormSubmissionUseCase(
-      surveyRepository = surveyRepository,
-      mutationRepository = mutationRepository,
-      transactionRunner = transactionRunner,
-      resolveFormDefForLaunchUseCase = resolveFormDefForLaunchUseCase,
-    ),
-  val syncMutationsUseCase: SyncMutationsUseCase =
-    SyncMutationsUseCase(
-      mutationRepository = mutationRepository,
-      surveyRepository = surveyRepository,
-      transactionRunner = transactionRunner,
-      connectivityRepository = connectivityRepository,
-      impactEventRepository = impactEventRepository,
-      outboxSyncRepository = outboxSyncRepository,
-    ),
-  val createSurveyUseCase: CreateSurveyUseCase =
-    CreateSurveyUseCase(
-      surveyRepository = surveyRepository,
-      surveyEditorRepository = surveyEditorRepository,
-      transactionRunner = transactionRunner,
-      libraryRepository = libraryRepository,
-    ),
-  val resolveLibraryUseCase: ResolveLibraryUseCase = ResolveLibraryUseCase(),
-  val computeWayfindingNavigationUseCase: ComputeWayfindingNavigationUseCase =
-    ComputeWayfindingNavigationUseCase(),
-  val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = ClusterMapFeaturesUseCase(),
-  val searchPlacesUseCase: SearchPlacesUseCase = SearchPlacesUseCase(),
-) {
-  /**
-   * Keeps the sync state on the device between launches (mobile only; see [platformSyncStateFile]).
-   */
-  private val syncStatePersistence: SyncStatePersistence? by lazy {
-    if (syncCoordinator == null) null
-    else platformSyncStateFile()?.let { SyncStatePersistence(localStore, it, scope) }
-  }
-
-  /** Disconnects the sync engine from platform lifecycle hooks, once started. */
-  private var stopSyncLifecycle: (() -> Unit)? = null
-
-  private val mutableUserDataSyncState =
-    MutableStateFlow(
-      if (grpcSyncDataSource == null) UserDataSyncState.NotConfigured else UserDataSyncState.Syncing
-    )
-
-  /** Progress of the initial sync from the user data service, for reporting failures. */
-  val userDataSyncState: StateFlow<UserDataSyncState> = mutableUserDataSyncState.asStateFlow()
-
-  private val mutableHasCompletedInitialSync = MutableStateFlow(grpcSyncDataSource == null)
+  val surveyDirectoryRepository: SurveyDirectoryRepository? = koin.getOrNull()
+  val locationRepository: LocationRepository = koin.get()
+  val authRepository: AuthRepository = koin.get()
+  val clientVersionRepository: ClientVersionRepository = koin.get()
+  val sampleDataRepository: SampleDataRepository = koin.get()
+  val surveyEditorRepository: SurveyEditorRepository = koin.get()
+  val transactionRunner: TransactionRunner = koin.get()
+  val impactEventRepository: ImpactEventRepository = koin.get()
+  /** Tile URLs of Earth Engine imagery overlays, when connected to the user data service. */
+  val overlayTileUrlRepository: OverlayTileUrlRepository? = koin.getOrNull()
+  /** Redeems survey and organization invitations with the user data service. */
+  val inviteRepository: InviteRepository = koin.get()
+  val recordImpactEventUseCase: RecordImpactEventUseCase = koin.get()
+  val exportSurveyDataUseCase: ExportSurveyDataUseCase = koin.get()
+  val resolveFormDefForLaunchUseCase: ResolveFormDefForLaunchUseCase = koin.get()
+  val launchFormUseCase: LaunchFormUseCase = koin.get()
+  val completeFormSubmissionUseCase: CompleteFormSubmissionUseCase = koin.get()
+  val syncMutationsUseCase: SyncMutationsUseCase = koin.get()
+  val createSurveyUseCase: CreateSurveyUseCase = koin.get()
+  val resolveLibraryUseCase: ResolveLibraryUseCase = koin.get()
+  val computeWayfindingNavigationUseCase: ComputeWayfindingNavigationUseCase = koin.get()
+  val clusterMapFeaturesUseCase: ClusterMapFeaturesUseCase = koin.get()
+  val searchPlacesUseCase: SearchPlacesUseCase = koin.get()
+  val estimateDeviceStorageUseCase: EstimateDeviceStorageUseCase = koin.get()
+  /** Delivers generated PDFs (records and receipts) on this platform. */
+  val pdfExportClient: PdfExportClient = koin.get()
 
   /**
-   * Whether the initial sync has finished (either successfully or with a failure). True ensures UI
-   * spinners only appear on the first load when data is empty, not during periodic background
-   * refreshes.
+   * Runs the initial sync from the user data service, retries it, and starts the sync engine. Its
+   * state is also exposed below for existing callers.
    */
-  val hasCompletedInitialSync: StateFlow<Boolean> = mutableHasCompletedInitialSync.asStateFlow()
+  val userDataSync: UserDataSyncController = koin.get()
 
-  /**
-   * Whether the sync engine is actively draining unsent local mutations from the outbox. False
-   * during background polling when the outbox has no pending mutations.
-   */
-  val isDrainingOutbox: StateFlow<Boolean> =
-    if (syncCoordinator == null) {
-      MutableStateFlow(false)
-    } else {
-      combine(
-          syncCoordinator.activity.map { it.isSyncing },
-          localStore.observeOutbox().map { outbox ->
-            outbox.count { it.state != OutboxState.REJECTED }
-          },
-        ) { isSyncing, pendingCount ->
-          isSyncing && pendingCount > 0
-        }
-        .stateIn(scope, SharingStarted.Eagerly, false)
-    }
+  /** See [UserDataSyncController.state]. */
+  val userDataSyncState: StateFlow<UserDataSyncState>
+    get() = userDataSync.state
+
+  /** See [UserDataSyncController.hasCompletedInitialSync]. */
+  val hasCompletedInitialSync: StateFlow<Boolean>
+    get() = userDataSync.hasCompletedInitialSync
+
+  /** See [UserDataSyncController.saveStatus]. */
+  val saveStatus: StateFlow<SaveStatus>
+    get() = userDataSync.saveStatus
+
+  /** See [UserDataSyncController.lastSyncedAt]. */
+  val lastSyncedAt: StateFlow<Instant?>
+    get() = userDataSync.lastSyncedAt
+
+  /** Surfaces backend errors to the UI; see [BackendErrorMonitor]. */
+  val backendErrors: BackendErrorMonitor = koin.get()
+
+  /** See [BackendErrorMonitor.error]. */
+  val backendError: StateFlow<BackendOperationError?>
+    get() = backendErrors.error
 
   init {
-    launch { syncFromUserDataService() }
+    // The initial sync syncs the restored account's data (or none when nobody is signed in).
+    scope.launch {
+      authRepository.restoreSession()
+      userDataSync.start()
+    }
   }
 
   /** Retries the initial sync after a [UserDataSyncState.Failed]. */
-  fun retryUserDataSync() {
-    launch { syncFromUserDataService() }
-  }
+  fun retryUserDataSync() = userDataSync.retry()
 
-  private suspend fun syncFromUserDataService() {
-    if (grpcSyncDataSource == null) {
-      sampleDataRepository.seedIfNeeded()
-      mutableHasCompletedInitialSync.value = true
-      return
-    }
-    mutableUserDataSyncState.value = UserDataSyncState.Syncing
-    // Offline edits and the last synced data saved on the device replace the initial download;
-    // the sync engine then catches up from the saved sync tokens.
-    val coordinator = syncCoordinator
-    if (coordinator != null && syncStatePersistence?.restore() == true) {
-      syncStatePersistence?.start()
-      startSyncEngine(coordinator)
-      mutableUserDataSyncState.value = UserDataSyncState.Synced
-      mutableHasCompletedInitialSync.value = true
-      return
-    }
-    mutableUserDataSyncState.value =
-      try {
-        sampleDataRepository.seedIfNeeded()
-        syncStatePersistence?.start()
-        syncCoordinator?.let(::startSyncEngine)
-        mutableHasCompletedInitialSync.value = true
-        UserDataSyncState.Synced
-      } catch (e: CancellationException) {
-        throw e
-      } catch (e: Exception) {
-        println("Couldn't sync from the user data service at $userDataServiceUrl: $e")
-        val message =
-          (e as? GrpcWebException)?.description
-            ?: e.message
-            ?: e::class.simpleName
-            ?: "Unknown error"
-        mutableHasCompletedInitialSync.value = true
-        UserDataSyncState.Failed(serviceUrl = userDataServiceUrl, message = message)
-      }
-  }
+  /** See [BackendErrorMonitor.dismiss]. */
+  fun dismissBackendError() = backendErrors.dismiss()
+
+  /** See [BackendErrorMonitor.retry]. */
+  fun retryBackendSync() = backendErrors.retry()
+
+  /** See [UserDataSyncController.setCollaborativeView]. */
+  fun setCollaborativeView(isCollaborative: Boolean) =
+    userDataSync.setCollaborativeView(isCollaborative)
+
+  /** See [UserDataSyncController.setSurveyListOpen]. */
+  fun setSurveyListOpen(isOpen: Boolean) = userDataSync.setSurveyListOpen(isOpen)
 
   /**
-   * Starts [coordinator] and connects it to the platform: polling while the app is in the
-   * foreground, and (on the web) a leave-page confirmation while the outbox has unsent changes.
+   * Everything the UI reads from the local data store, kept current as the store changes.
+   *
+   * Switching the active survey cancels the previous survey's content and draft subscriptions
+   * (`flatMapLatest`), so a slow emission of the old survey never overwrites the new one. Shared
+   * [SharingStarted.Eagerly], because the shells read `.value` outside composition and must not see
+   * the empty initial [AppData] once the store has data.
    */
-  private fun startSyncEngine(coordinator: SyncCoordinator) {
-    coordinator.start()
-    if (stopSyncLifecycle != null) return
-    // Each sync may store new bases and sync tokens; save them.
-    syncStatePersistence?.let { persistence ->
-      coordinator.activity
-        .map { it.isSyncing }
-        .distinctUntilChanged()
-        .onEach { syncing -> if (!syncing) persistence.saveSoon() }
-        .launchIn(scope)
-    }
-    // Signing in or switching the simulated development role changes what the server returns.
-    authClient.currentUser
-      .drop(1)
-      .distinctUntilChanged()
-      .onEach { if (it != null) coordinator.requestSync() }
-      .launchIn(scope)
-    // Downloading a survey (or removing a download) fetches (or drops) its definition and data.
-    localStore
-      .observeSurveys()
-      .map { surveys -> surveys.filter { it.isDownloaded }.map { it.id }.toSet() }
-      .distinctUntilChanged()
-      .drop(1)
-      .onEach { coordinator.requestSync() }
-      .launchIn(scope)
-    val hasUnsentChanges =
-      localStore
-        .observeOutbox()
-        .map { outbox -> outbox.any { it.state != OutboxState.REJECTED } }
-        .stateIn(scope, SharingStarted.Eagerly, false)
-    val stopForeground = observeAppForeground(coordinator::setForeground)
-    val stopGuard = guardUnsentChangesOnUnload { hasUnsentChanges.value }
-    stopSyncLifecycle = {
-      stopForeground()
-      stopGuard()
-    }
-  }
-
-  /**
-   * Whether a collaborative view (survey editor, live data table) is on screen; the sync engine
-   * polls more often while one is.
-   */
-  fun setCollaborativeView(isCollaborative: Boolean) {
-    syncCoordinator?.setCollaborativeView(isCollaborative)
-  }
-
-  /**
-   * Whether the mobile survey list is on screen. With [syncDownloadedSurveysOnly], the list of
-   * surveys the user can download is only kept current while it is.
-   */
-  fun setSurveyListOpen(isOpen: Boolean) {
-    syncCoordinator?.setSurveyListOpen(isOpen)
-  }
-
-  /** Everything the UI reads from the local data store, kept current as the store changes. */
   val appData: StateFlow<AppData> =
     combine(
         surveyRepository.observeSurveys(),
@@ -436,7 +268,6 @@ class AppDataHolder(
         combine(
           surveyRepository.observeSurveyStats(),
           surveyRepository.observeSurveyConfigs(),
-          surveyRepository.observeOfflineTilePackages(),
           mutationRepository.observeMutations(),
           organizationRepository.observeOrganizations(),
           ::DeviceData,
@@ -447,28 +278,31 @@ class AppDataHolder(
           settingsRepository.observeMediaCache(),
           ::Pair,
         ),
-      ) {
-        surveys,
-        (activeId, content, draft),
-        (stats, configs, tiles, mutations, organizations),
-        places,
-        (settings, media) ->
+      ) { surveys, (activeId, content, draft), device, places, (settings, media) ->
         AppData(
           surveys = surveys,
-          organizations = organizations,
+          organizations = device.organizations,
           activeSurveyId = activeId,
           content = content,
           editorDraft = draft,
-          surveyStats = stats,
-          surveyConfigs = configs,
-          offlineTilePackages = tiles,
-          mutations = mutations,
+          surveyStats = device.stats,
+          surveyConfigs = device.configs,
+          mutations = device.mutations,
           places = places,
           userSettings = settings,
           mediaCache = media,
         )
       }
       .stateIn(scope, SharingStarted.Eagerly, AppData())
+
+  /**
+   * Creates a ViewModel of type [T] from the graph with an empty `SavedStateHandle` and
+   * [parameters], for owners outside composition (tests and the workbench). Views use
+   * `koinViewModel()` instead.
+   */
+  inline fun <reified T : ViewModel> newViewModel(vararg parameters: Any): T = koin.get {
+    parametersOf(SavedStateHandle(), *parameters)
+  }
 
   /** Launches [block] (typically a repository write or use case) in [scope]. */
   fun launch(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(block = block)
@@ -477,7 +311,56 @@ class AppDataHolder(
 private data class DeviceData(
   val stats: Map<String, SurveyStats>,
   val configs: Map<String, SurveyConfig>,
-  val tiles: List<OfflineTilePackageItem>,
   val mutations: List<MutationLogItem>,
   val organizations: List<Organization>,
 )
+
+/**
+ * Creates the app's dependency graph for [config] in its own Koin application (not the global one)
+ * and returns its [AppDataHolder]: for tests and hosts that don't start Koin themselves.
+ * [overrides] replace definitions of the graph, for example the [LocalStore].
+ */
+fun createAppDataHolder(
+  config: AppConfig = AppConfig(),
+  platform: Module = platformModule(),
+  overrides: Module = module {},
+): AppDataHolder = koinApplication { modules(appModules(config, platform) + overrides) }.koin.get()
+
+/**
+ * Creates an [AppDataHolder] over [localStore], in its own Koin application. A [grpcClient] stands
+ * in for the user data service at [userDataServiceUrl] (tests pass an in-memory service);
+ * [offlineRegionClient] and [deviceStorageClient] replace the platform's (tests pass fixed ones).
+ */
+@Suppress("FunctionNaming") // Keeps the constructor-style call sites of tests and hosts.
+fun AppDataHolder(
+  localStore: LocalStore = InMemoryLocalStore(),
+  userDataServiceUrl: String? = null,
+  authClient: AuthClient = defaultAuthClient(),
+  grpcClient: CollectOneGrpcClient? = null,
+  syncDownloadedSurveysOnly: Boolean = false,
+  enableSyncEngine: Boolean = userDataServiceUrl != null,
+  offlineRegionClient: (isOnline: () -> Boolean) -> OfflineRegionClient =
+    ::defaultOfflineRegionClient,
+  deviceStorageClient: () -> DeviceStorageClient = ::defaultDeviceStorageClient,
+  /** See the `platformModule` parameter of the same name. */
+  signedInSessionStore: (() -> SignedInSessionStore)? = null,
+): AppDataHolder =
+  createAppDataHolder(
+    config =
+      AppConfig(
+        userDataServiceUrl = userDataServiceUrl,
+        syncDownloadedSurveysOnly = syncDownloadedSurveysOnly,
+        userDataClient =
+          grpcClient?.let { client -> { _ -> client } }
+            ?: AppConfig(userDataServiceUrl).userDataClient,
+        enableSyncEngine = enableSyncEngine,
+      ),
+    platform =
+      platformModule(
+        authClient = { authClient },
+        offlineRegionClient = offlineRegionClient,
+        deviceStorageClient = deviceStorageClient,
+        signedInSessionStore = signedInSessionStore,
+      ),
+    overrides = module { single { localStore } },
+  )

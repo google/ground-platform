@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Web console: organizations directory, organization page, and organization library. -->
+<resources>
+  <!-- Common actions -->
+  <string name="org_cancel">Ghairi</string>
+  <string name="org_save">Hifadhi</string>
+  <string name="org_close">Funga</string>
+  <string name="org_ok">Sawa</string>
+  <string name="org_discard">Tupa</string>
+  <string name="org_dismiss">Ondoa</string>
+  <string name="org_show">Onyesha</string>
+  <string name="org_hide">Ficha</string>
+  <!-- Empty choice in a dropdown, e.g. no impact pillar. -->
+  <string name="org_none">Hakuna</string>
+  <string name="org_clear_search">Futa utafutaji</string>
+  <!-- Screen reader label of an edit button. %1$s: name of the item, e.g. an imagery source or template. -->
+  <string name="org_edit_item">Hariri %1$s</string>
+  <!-- Screen reader label of a delete button. %1$s: name of the library item. -->
+  <string name="org_delete_item">Futa %1$s</string>
+  <!-- Confirmation dialog title. %1$s: name of the organization, template, or purpose. -->
+  <string name="org_delete_item_title">Ungependa kufuta %1$s?</string>
+
+  <!-- Relation badges on organization cards -->
+  <string name="org_relation_manager">Unasimamia</string>
+  <string name="org_relation_member">Mwanachama</string>
+  <string name="org_relation_invited">Umealikwa</string>
+  <string name="org_relation_requested">Umeomba kujiunga</string>
+  <string name="org_badge_synthetic">Bandia</string>
+
+  <!-- Organization counts, joined with " · " -->
+  <plurals name="org_count_members">
+    <item quantity="one">Mwanachama %1$d</item>
+    <item quantity="other">Wanachama %1$d</item>
+  </plurals>
+  <plurals name="org_count_surveys">
+    <item quantity="one">Utafiti %1$d</item>
+    <item quantity="other">Tafiti %1$d</item>
+  </plurals>
+  <!-- %1$d: number of imagery sources. -->
+  <string name="org_count_imagery">Taswira %1$d</string>
+  <!-- Pending requests to join the organization. -->
+  <plurals name="org_count_requests">
+    <item quantity="one">Ombi %1$d</item>
+    <item quantity="other">Maombi %1$d</item>
+  </plurals>
+  <!-- Shown after the counts when the organization isn't listed in the directory. -->
+  <string name="org_unlisted">Haijaorodheshwa</string>
+
+  <!-- Organizations directory -->
+  <string name="org_back_to_surveys">Rudi kwenye tafiti</string>
+  <string name="org_organizations_title">Mashirika</string>
+  <!-- Header summary. %1$d: organizations the user belongs to; %2$d: all organizations. -->
+  <string name="org_directory_summary">Yako %1$d · Jumla %2$d</string>
+  <string name="org_admin_panel">Paneli ya usimamizi</string>
+  <!-- Header button that opens the Impact page. -->
+  <string name="org_impact">Athari</string>
+  <string name="org_create_organization">Unda shirika</string>
+  <string name="org_search_placeholder">Tafuta mashirika</string>
+  <string name="org_section_yours">Mashirika yako</string>
+  <string name="org_section_yours_empty">Bado wewe si mwanachama wa shirika lolote. Unda moja, au omba kujiunga na mojawapo hapa chini.</string>
+  <string name="org_section_yours_no_matches">Hakuna shirika lako linalolingana na utafutaji wako.</string>
+  <string name="org_section_others">Mashirika mengine</string>
+  <string name="org_section_others_empty">Hakuna mashirika mengine yaliyoorodheshwa.</string>
+  <string name="org_section_others_no_matches">Hakuna mashirika mengine yanayolingana na utafutaji wako.</string>
+  <string name="org_no_description">Bado hakuna maelezo.</string>
+  <!-- Card summary of the platform-wide "All users" organization. %1$d: number of imagery sources. -->
+  <plurals name="org_card_all_users_summary">
+    <item quantity="one">Watumiaji wote · Chanzo %1$d cha taswira</item>
+    <item quantity="other">Watumiaji wote · Vyanzo %1$d vya taswira</item>
+  </plurals>
+  <string name="org_request_to_join">Omba kujiunga</string>
+
+  <!-- Create organization dialog -->
+  <string name="org_field_name">Jina la shirika</string>
+  <string name="org_field_description">Maelezo</string>
+  <string name="org_list_in_directory">Orodhesha kwenye saraka</string>
+  <string name="org_create_listed_help">Mtu yeyote anaweza kupata shirika, kuomba kujiunga, na kufuatilia takwimu zake za athari zilizochapishwa. Mashirika ambayo hayajaorodheshwa ni kwa mwaliko pekee.</string>
+  <string name="org_create_manager_help">Utakuwa Msimamizi wake wa kwanza. Wasimamizi wanaweza kuhariri shirika, kusimamia wanachama, na kusimamia tafiti zake zote.</string>
+  <string name="org_create_publish_help">Kila shirika huchapisha jumla zisizo na utambulisho kutoka kwa tafiti zake, kama hekta zilizochorwa kwenye ramani, kwa yeyote aliyeingia kwenye Collect One. Mawasilisho, vipengele vya ramani, maeneo, na majibu hayachapishwi kamwe.</string>
+  <string name="org_create">Unda</string>
+
+  <!-- Organization type and country fields -->
+  <!-- Organization type field label. -->
+  <string name="org_field_type">Aina</string>
+  <string name="org_field_country">Nchi</string>
+  <string name="org_country_search_placeholder">Tafuta kwa jina au msimbo</string>
+  <string name="org_country_no_matches">Hakuna nchi zinazolingana</string>
+  <!-- Value of an optional organization type or country that hasn't been set. -->
+  <string name="org_not_specified">Haijabainishwa</string>
+
+  <!-- Organization page sections (left panel) -->
+  <string name="org_tab_details">Maelezo ya shirika</string>
+  <string name="org_tab_surveys">Tafiti</string>
+  <string name="org_tab_members">Wanachama</string>
+  <string name="org_tab_imagery">Taswira</string>
+  <string name="org_tab_purposes">Madhumuni</string>
+  <string name="org_tab_dictionary">Kamusi</string>
+  <string name="org_tab_templates">Violezo</string>
+  <string name="org_tab_cost_controls">Udhibiti wa gharama</string>
+  <string name="org_tab_cost_tracking">Ufuatiliaji wa gharama</string>
+  <!-- Members section of the platform-wide "All users" organization. -->
+  <string name="org_platform_admins">Wasimamizi wakuu wa jukwaa</string>
+  <string name="org_nav_global_library">Maktaba ya kimataifa</string>
+  <string name="org_nav_cost_quotas">Gharama na vikomo</string>
+  <string name="org_nav_governance">Utawala</string>
+
+  <!-- Organization page header -->
+  <string name="org_back_to_organizations">Rudi kwenye mashirika</string>
+  <!-- Label saying that the page is an organization. -->
+  <string name="org_organization_label">Shirika</string>
+  <string name="org_view_impact">Angalia athari</string>
+  <string name="org_create_survey">Unda utafiti</string>
+  <string name="org_admin_panel_subtitle">Usimamizi wa jukwaa na maktaba ya kimataifa</string>
+
+  <!-- Section subtitles. %1$s: organization name. -->
+  <string name="org_details_subtitle_manager">Jinsi %1$s linavyoonekana kwa wanachama na kwenye saraka. Wasimamizi pekee ndio wanaweza kubadilisha haya.</string>
+  <string name="org_details_subtitle_member">Jinsi %1$s linavyoonekana kwa wanachama na kwenye saraka. Muombe Msimamizi abadilishe haya.</string>
+  <string name="org_surveys_subtitle_manager">Tafiti zinazoendeshwa kwa niaba ya %1$s. Kama Msimamizi, unaweza kuhariri kila moja, kusimamia ushiriki wake, na kuhamisha data yake.</string>
+  <string name="org_surveys_subtitle_member">Tafiti zinazoendeshwa kwa niaba ya %1$s. Fungua mojawapo kuona unachoweza kufanya ndani yake.</string>
+  <string name="org_members_subtitle_admins">Wasimamizi wakuu wa jukwaa wanaosimamia taswira, madhumuni, violezo, na dhana za kamusi za kimataifa.</string>
+  <string name="org_members_subtitle">Watu wanaohusishwa na %1$s. Wasimamizi huendesha shirika na tafiti zake zote; Wanachama wanaweza kuunda tafiti ndani yake.</string>
+  <string name="org_imagery_subtitle_admins">Matabaka maalum ya taswira ya ramani ya msingi yanayopatikana kwa watumiaji wote wa Collect One katika kila utafiti, kwenye kidirisha cha matabaka ya ramani ya msingi kwenye simu na wavuti.</string>
+  <string name="org_imagery_subtitle_manager">Matabaka maalum ya taswira ya ramani ya msingi yanayopatikana kwenye kidirisha cha matabaka ya ramani ya msingi kwenye simu na wavuti kwa tafiti za %1$s.</string>
+  <string name="org_imagery_subtitle_member">Matabaka maalum ya taswira ya ramani ya msingi yaliyowekwa kwa tafiti za %1$s. Muombe Msimamizi aongeze au abadilishe vyanzo vya taswira.</string>
+  <string name="org_purposes_subtitle_admins">Chaguo ambazo kila shirika huona kwa swali "Data hii itatumika kwa nini?" wakati wa kuunda utafiti. Kila madhumuni huongeza violezo vyake kwenye utafiti mpya.</string>
+  <string name="org_purposes_subtitle">Chaguo zinazotolewa kwa swali "Data hii itatumika kwa nini?" wakati wa kuunda utafiti katika %1$s: madhumuni yake yenyewe kwanza, kisha ya kimataifa.</string>
+  <string name="org_dictionary_subtitle_admins">Dhana za kimataifa: sehemu sanifu zinazounganisha maswali ya fomu na maana moja ya pamoja, ili majibu yaweze kulinganishwa na kujumlishwa katika tafiti na lugha mbalimbali.</string>
+  <string name="org_dictionary_subtitle">Dhana zinazopatikana kwa tafiti za %1$s: sehemu sanifu zinazoyapa maswali ya fomu maana moja ya pamoja, ili majibu yaweze kulinganishwa na kujumlishwa.</string>
+  <string name="org_templates_subtitle_admins">Violezo vya fomu vya kimataifa ambavyo kila shirika linaweza kuongeza kwenye tafiti zake.</string>
+  <string name="org_templates_subtitle">Violezo vya fomu vinavyopatikana kwa tafiti za %1$s: violezo vyake yenyewe kwanza, kisha vya kimataifa.</string>
+  <string name="org_cost_controls_title_global">Udhibiti wa gharama na vikomo vya kimataifa</string>
+  <string name="org_cost_controls_subtitle_global">Vikomo chaguomsingi vya jukwaa zima na uzito wa gharama kwa kila kipimo vinavyotumika kwa mashirika na tafiti.</string>
+  <string name="org_cost_controls_subtitle_manager">Vikomo vya bajeti na vikomo vya matumizi kwa %1$s. Weka viwango vilivyowekwa awali au vikomo mahususi vya rasilimali.</string>
+  <string name="org_cost_controls_subtitle_member">Vikomo vya bajeti na vikomo vya matumizi kwa %1$s. Muombe msimamizi wa shirika arekebishe vikomo hivi.</string>
+  <string name="org_cost_tracking_title">Ufuatiliaji wa gharama za jukwaa</string>
+  <string name="org_cost_tracking_subtitle">Uhasibu wa gharama wa moja kwa moja, muhtasari wa matumizi ya rasilimali, na uchanganuzi wa uzingatiaji wa bajeti katika mashirika, tafiti, na watumiaji.</string>
+
+  <!-- Missing organization -->
+  <string name="org_missing_title">Shirika hili halipo</string>
+  <string name="org_missing_body">Huenda limefutwa, au kiungo si sahihi.</string>
+
+  <!-- Surveys section -->
+  <!-- %1$s: organization name. -->
+  <string name="org_surveys_empty_member">Bado hakuna tafiti. Unda utafiti wa kwanza wa %1$s.</string>
+  <string name="org_surveys_empty">Bado hakuna tafiti.</string>
+
+  <!-- Members section -->
+  <!-- Name of the list where Managers see the name and photo an invitee accepts with; completes "…shown on the <list>". -->
+  <string name="org_members_page_name">Ukurasa wa Wanachama</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_leave_title">Ungependa kuondoka %1$s?</string>
+  <string name="org_leave_body">Utapoteza ufikiaji wa tafiti zake isipokuwa zimeshirikiwa nawe moja kwa moja. Tafiti unazomiliki zitabaki kuwa zako.</string>
+  <string name="org_leave">Ondoka</string>
+  <string name="org_leave_organization">Ondoka kwenye shirika</string>
+  <string name="org_members_requests_title">Maombi ya kujiunga</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_members_requests_body">Watu waliopata %1$s kwenye saraka na kuomba kujiunga.</string>
+  <string name="org_members_asked_to_join">Ameomba kujiunga</string>
+  <!-- Badge on a person who asked to join. -->
+  <string name="org_members_requested">Ameomba</string>
+  <string name="org_decline">Kataa</string>
+  <string name="org_approve">Idhinisha</string>
+  <string name="org_members_admins_help">Wasimamizi wakuu wa jukwaa husimamia maktaba ya kimataifa, vyanzo vya taswira vya jukwaa, na mipangilio ya jukwaa.</string>
+  <!-- The signed-in user in the members list. %1$s: their name. -->
+  <string name="org_member_you">%1$s (wewe)</string>
+  <!-- Member role field label. -->
+  <string name="org_field_role">Jukumu</string>
+  <!-- Screen reader label. %1$s: name of the member to remove. -->
+  <string name="org_remove_member">Ondoa %1$s</string>
+  <string name="org_members_manager_help">Shirika huwa na angalau Msimamizi mmoja kila wakati. Majina na picha hutoka kwenye akaunti ya kila mtu anapokubali mwaliko wake.</string>
+  <!-- Section heading listing pending invites. -->
+  <string name="org_members_invited_title">Walioalikwa</string>
+  <!-- %1$s: the invited role, e.g. Manager. -->
+  <string name="org_members_invite_pending">Inasubiri wakubali kiungo cha mwaliko · %1$s</string>
+  <!-- Screen reader label. %1$s: email address of the invitee. -->
+  <string name="org_revoke_invite">Batilisha mwaliko wa %1$s</string>
+  <string name="org_invite_label">Alika watu kwa barua pepe</string>
+  <string name="org_invite">Alika</string>
+
+  <!-- Details section -->
+  <string name="org_published_title">Takwimu za athari zilizochapishwa</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_manager">Kama Msimamizi wa %1$s, unachapisha jumla zisizo na utambulisho kutoka kwa tafiti zake</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_member">%1$s huchapisha jumla zisizo na utambulisho kutoka kwa tafiti zake</string>
+  <!-- %1$s: a sentence stating what is never published. -->
+  <string name="org_published_body">Mtu yeyote aliyeingia kwenye Collect One anaweza kufuatilia jumla za tafiti zako, kama hekta zilizochorwa na jinsi data ilivyotumika, kwenye ukurasa wa Athari. %1$s</string>
+  <string name="org_published_see">Angalia kilichochapishwa</string>
+  <string name="org_platform_numbers_title">Takwimu za jukwaa zima</string>
+  <string name="org_platform_numbers_exclude">Usijumuishe data yetu kwenye jumla za jukwaa</string>
+  <string name="org_platform_numbers_help">Tafiti zako bado zinahesabiwa katika takwimu zako za Athari; ni jumla za Collect One nzima pekee ndizo hazitazijumuisha.</string>
+  <string name="org_ask_manager_change">Muombe Msimamizi abadilishe hili.</string>
+  <string name="org_profile_title">Wasifu</string>
+  <string name="org_field_logo">Nembo ya shirika</string>
+  <string name="org_details_logo_help">PNG, JPG, WebP, au SVG. Huonyeshwa kwenye kadi na vichwa vya shirika.</string>
+  <string name="org_logo_upload">Pakia nembo</string>
+  <string name="org_logo_change">Badilisha nembo</string>
+  <string name="org_logo_remove">Ondoa</string>
+  <!-- Shown under an empty organization name field. -->
+  <string name="org_details_name_required">Weka jina</string>
+  <string name="org_details_description_help">Huonyeshwa kwenye saraka na kwenye ukurasa wa Tafiti.</string>
+  <string name="org_field_website">Tovuti</string>
+  <string name="org_details_listed_help">Mtu yeyote anaweza kupata shirika na kuomba kujiunga. Mashirika ambayo hayajaorodheshwa ni kwa mwaliko pekee.</string>
+  <string name="org_unsaved_changes">Mabadiliko ambayo hayajahifadhiwa</string>
+  <!-- Organization name label on the read-only details. -->
+  <string name="org_field_name_short">Jina</string>
+  <!-- Shown when the organization has no website. -->
+  <string name="org_not_provided">Haijatolewa.</string>
+  <!-- Directory listing label on the read-only details. -->
+  <string name="org_field_directory">Saraka</string>
+  <string name="org_directory_listed">Imeorodheshwa · yeyote anaweza kulipata na kuomba kujiunga</string>
+  <string name="org_directory_unlisted">Haijaorodheshwa · kwa mwaliko pekee</string>
+  <!-- %1$d: number of surveys in the organization. -->
+  <plurals name="org_delete_body_surveys">
+    <item quantity="one">Wanachama watapoteza uhusiano wao. Utafiti wake %1$d utakuwa utafiti binafsi wa mmiliki wake; hakuna data itakayofutwa.</item>
+    <item quantity="other">Wanachama watapoteza uhusiano wao. Tafiti zake %1$d zitakuwa tafiti binafsi za wamiliki wake; hakuna data itakayofutwa.</item>
+  </plurals>
+  <string name="org_delete_body_no_surveys">Wanachama watapoteza uhusiano wao. Halina tafiti.</string>
+  <string name="org_delete_organization">Futa shirika</string>
+  <string name="org_danger_zone">Eneo la hatari</string>
+  <string name="org_danger_zone_body">Kufuta shirika kunaondoa uhusiano wa kila mtu. Tafiti zake zitakuwa tafiti binafsi za wamiliki wake na zitabaki na data yao yote.</string>
+
+  <!-- Imagery section -->
+  <string name="org_imagery_configured_title">Vyanzo vya taswira vilivyowekwa</string>
+  <string name="org_imagery_empty_manager">Bado hakuna vyanzo vya taswira vilivyowekwa. Ongeza URL ya vigae vya XYZ hapa chini ili kiweze kuwashwa kwenye kidirisha cha matabaka ya ramani ya msingi.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_imagery_empty_member">Hakuna vyanzo vya taswira vilivyowekwa kwa %1$s.</string>
+  <string name="org_imagery_source_name">Jina la chanzo</string>
+  <!-- Example imagery source name. -->
+  <string name="org_imagery_source_name_placeholder">k.m. OpenTopoMap Contours</string>
+  <string name="org_imagery_url">URL ya vigae vya XYZ</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_edit">Lazima iwe na vishika nafasi vya vigae {z}, {x}, na {y}.</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_add">Kiolezo cha URL ya vigae vya raster vya Web Mercator chenye vishika nafasi {z}, {x}, na {y}.</string>
+  <string name="org_imagery_offline_title">Ruhusu kupakua nje ya mtandao kwenye simu</string>
+  <string name="org_imagery_offline_help_edit">Ruhusu wakusanyaji kupakua vigae kutoka kwenye chanzo hiki kwa matumizi ya uwandani nje ya mtandao.</string>
+  <string name="org_imagery_offline_help_add">Ruhusu wakusanyaji kwenye vifaa vya mkononi kupakua vigae kutoka kwenye chanzo hiki cha XYZ kwa matumizi ya uwandani nje ya mtandao.</string>
+  <string name="org_imagery_offline_allowed">Wakusanyaji wanaweza kupakua vigae kutoka kwenye chanzo hiki kwenye kifaa chao cha mkononi.</string>
+  <string name="org_imagery_offline_disabled">Utiririshaji mtandaoni pekee; kupakua vigae nje ya mtandao kumezimwa kwenye simu.</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_permitted">Imeruhusiwa</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_not_permitted">Hairuhusiwi</string>
+  <!-- Screen reader label. %1$s: name of the imagery source to remove. -->
+  <string name="org_remove_imagery_source">Ondoa %1$s</string>
+  <string name="org_imagery_add">Ongeza chanzo cha taswira</string>
+  <string name="org_imagery_add_body">Ongeza huduma ya vigae vya raster ambayo wakusanyaji na waratibu wanaweza kuiwasha kwenye kidirisha cha matabaka ya ramani ya msingi.</string>
+  <string name="org_imagery_source_type">Aina ya chanzo</string>
+  <string name="org_imagery_ee_preset">Mpangilio wa awali wa Earth Engine</string>
+  <string name="org_imagery_ee_preset_placeholder">Chagua mpangilio wa awali…</string>
+  <string name="org_imagery_ee_description">Inakokotolewa na Earth Engine · vigae husasishwa kiotomatiki</string>
+
+  <!-- Cost controls section -->
+  <string name="org_quota_tier_title">Kiwango cha vikomo kilichowekwa awali</string>
+  <string name="org_quota_tier_body">Tumia chaguomsingi za kiwango cha huduma au weka vikomo vya kila rasilimali hapa chini.</string>
+  <string name="org_quota_tier_inherit">Rithi za Kimataifa</string>
+  <string name="org_quota_tier_basic">Kiwango cha Msingi</string>
+  <string name="org_quota_tier_sponsored">Kiwango Kinachofadhiliwa</string>
+  <string name="org_budget_title">Kikomo cha bajeti ya mwezi</string>
+  <string name="org_budget_body">Kikomo thabiti kwa USD cha gharama zinazokadiriwa za utafiti na ukusanyaji wa data. Weka 0 kwa bajeti isiyo na kikomo.</string>
+  <string name="org_budget_field">Kikomo cha bajeti ya mwezi ($ USD)</string>
+  <string name="org_budget_placeholder">0.00 (Bila kikomo)</string>
+  <string name="org_limits_survey_title">Vikomo vya tafiti na fomu</string>
+  <string name="org_limit_surveys_per_owner">Upeo wa tafiti / mmiliki</string>
+  <string name="org_limit_forms_per_survey">Upeo wa fomu / utafiti</string>
+  <string name="org_limit_questions_per_form">Upeo wa maswali / fomu</string>
+  <string name="org_limit_photo_questions_per_form">Upeo wa maswali ya picha / fomu</string>
+  <string name="org_limit_predefined_entities">Upeo wa huluki zilizobainishwa awali</string>
+  <string name="org_limit_sample_plots">Upeo wa viwanja vya sampuli</string>
+  <string name="org_limit_boundary_vertices">Upeo wa vipeo vya mpaka</string>
+  <string name="org_limit_acl_collaborators">Upeo wa washirika wa ACL</string>
+  <string name="org_limits_collector_title">Vikomo vya wakusanyaji na mawasilisho</string>
+  <string name="org_limit_active_surveys_per_user">Upeo wa tafiti amilifu / mtumiaji</string>
+  <string name="org_limit_adhoc_features_per_user">Upeo wa vipengele vya papo hapo / mtumiaji</string>
+  <string name="org_limit_submissions_per_feature">Upeo wa mawasilisho / kipengele / mtumiaji</string>
+  <string name="org_cost_weights_title">Uzito wa gharama kwa kipimo wa jukwaa ($ USD)</string>
+  <string name="org_cost_weight_survey_month">USD / utafiti / mwezi</string>
+  <string name="org_cost_weight_entities">USD / huluki 1k</string>
+  <string name="org_cost_weight_submissions">USD / mawasilisho 1k</string>
+  <string name="org_cost_weight_photo">USD / picha</string>
+  <string name="org_cost_controls_save">Hifadhi udhibiti wa gharama</string>
+  <string name="org_cost_controls_saved">Udhibiti wa gharama umehifadhiwa.</string>
+
+  <!-- Cost tracking section -->
+  <string name="org_cost_total">Jumla ya gharama inayokadiriwa</string>
+  <!-- Monthly cost. %1$s: formatted amount, e.g. $12.50. -->
+  <string name="org_cost_per_month">%1$s / mwezi</string>
+  <!-- %1$s: formatted monthly budget, e.g. $100.00. -->
+  <string name="org_cost_budget_cap">Kikomo cha bajeti: %1$s / mwezi</string>
+  <string name="org_cost_tracked_surveys">Tafiti zinazofuatiliwa</string>
+  <string name="org_cost_total_entities">Jumla ya huluki</string>
+  <string name="org_cost_submissions">Mawasilisho</string>
+  <string name="org_cost_photos">Picha zilizorekodiwa</string>
+  <!-- %1$d: number of alerts. -->
+  <string name="org_cost_budget_alerts">Arifa za bajeti (%1$d)</string>
+  <!-- %1$s: organization or survey name; %2$s: estimated monthly cost; %3$s: monthly budget. -->
+  <string name="org_cost_budget_alert">%1$s imezidi bajeti ya mwezi (%2$s > %3$s)</string>
+  <!-- Filter chips. %1$d: number of rows. -->
+  <string name="org_cost_by_organization">Kwa Shirika (%1$d)</string>
+  <string name="org_cost_by_survey">Kwa Utafiti (%1$d)</string>
+  <string name="org_cost_by_collector">Kwa Mkusanyaji (%1$d)</string>
+  <string name="org_cost_exceeded">Imezidi bajeti</string>
+  <string name="org_cost_within">Ndani ya bajeti</string>
+  <plurals name="org_count_entities">
+    <item quantity="one">Huluki %1$d</item>
+    <item quantity="other">Huluki %1$d</item>
+  </plurals>
+  <plurals name="org_count_submissions">
+    <item quantity="one">Wasilisho %1$d</item>
+    <item quantity="other">Mawasilisho %1$d</item>
+  </plurals>
+  <plurals name="org_count_photos">
+    <item quantity="one">Picha %1$d</item>
+    <item quantity="other">Picha %1$d</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features. -->
+  <string name="org_count_predefined">%1$d vilivyobainishwa awali</string>
+  <!-- %1$d: number of generated map features (sample plots). -->
+  <string name="org_count_generated">%1$d vilivyozalishwa</string>
+  <!-- A collector's activity. %1$d: number of surveys. -->
+  <plurals name="org_count_active_in_surveys">
+    <item quantity="one">Amilifu katika utafiti %1$d</item>
+    <item quantity="other">Amilifu katika tafiti %1$d</item>
+  </plurals>
+
+  <!-- Notices -->
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed">Imeshindwa kuunda "%1$s".</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed_country">Imeshindwa kuunda "%1$s". Chagua nchi kutoka kwenye orodha.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_created">Shirika "%1$s" limeundwa.</string>
+  <string name="org_notice_save_failed_country">Imeshindwa kuhifadhi. Chagua nchi kutoka kwenye orodha.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_deleted">Shirika "%1$s" limefutwa.</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_notice_role_all_users">Kila mtu tayari ni mwanachama wa %1$s. Badala yake, ondoa Msimamizi.</string>
+  <string name="org_notice_last_manager_role">Shirika linahitaji angalau Msimamizi mmoja. Mfanye mtu mwingine kuwa Msimamizi kwanza.</string>
+  <string name="org_notice_last_manager_leave">Shirika linahitaji angalau Msimamizi mmoja. Mfanye mtu mwingine kuwa Msimamizi kabla ya kuondoka.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_left">Umeondoka kwenye "%1$s".</string>
+
+  <!-- Validation errors -->
+  <string name="org_error_invalid_email">Weka anwani sahihi ya barua pepe.</string>
+  <string name="org_error_not_found">Shirika halijapatikana.</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_error_invite_all_users">Kila mtu tayari ni mwanachama wa %1$s. Alika watu kama Wasimamizi.</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_member">%1$s tayari ni mwanachama.</string>
+  <!-- %1$s: the person's email address. -->
+  <string name="org_error_already_invited">%1$s tayari amealikwa.</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_requested">%1$s ameomba kujiunga. Badala yake, idhinisha ombi lake.</string>
+  <!-- An invitee accepting without a name. -->
+  <string name="org_error_enter_name">Weka jina.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_error_library_managers_only">Wasimamizi wa %1$s pekee ndio wanaweza kubadilisha maktaba yake.</string>
+  <string name="org_error_question_labels">Weka lebo kwa kila swali.</string>
+  <string name="org_error_concept_missing">Dhana hii haipo tena.</string>
+  <string name="org_error_concept_not_draft">Dhana za rasimu pekee ndizo zinaweza kufutwa. Badala yake, iache kutumika, ili viungo vilivyopo viendelee kufanya kazi.</string>
+
+  <!-- Dictionary (concepts) -->
+  <string name="org_concept_delete_error_title">Haiwezekani kufuta dhana hii</string>
+  <string name="org_concept_search_label">Tafuta dhana</string>
+  <!-- "cultivo" is an example search term in Spanish; keep it as is. -->
+  <string name="org_concept_search_placeholder">Lebo au neno kuu katika lugha yoyote, kwa mfano cultivo</string>
+  <!-- %1$d: concepts shown; %2$d: all concepts (selects the plural form). -->
+  <plurals name="org_concept_search_count">
+    <item quantity="one">%1$d kati ya dhana %2$d</item>
+    <item quantity="other">%1$d kati ya dhana %2$d</item>
+  </plurals>
+  <string name="org_concepts_global_title">Dhana za kimataifa</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_concepts_org_title">Dhana za %1$s</string>
+  <string name="org_concepts_global_body">Sehemu sanifu zinazopatikana kwa kila utafiti. Mabadiliko yanatumika kwa mashirika yote.</string>
+  <!-- %1$s: organization ID, part of the concept ID prefix. -->
+  <string name="org_concepts_org_body">Sehemu sanifu zinazotumiwa na shirika hili pekee. Vitambulisho vyake huanza na org.%1$s.</string>
+  <string name="org_concepts_no_matches">Hakuna dhana zinazolingana.</string>
+  <string name="org_concepts_global_empty">Bado hakuna dhana za kimataifa.</string>
+  <string name="org_concepts_empty">Bado hakuna dhana.</string>
+  <string name="org_concepts_global_shared_body">Zimeshirikiwa na kila shirika na Watumiaji wote. Wasimamizi wakuu wa jukwaa pekee ndio wanaweza kuzibadilisha.</string>
+  <string name="org_concept_add">Ongeza dhana</string>
+  <string name="org_concept_edit_title">Hariri dhana</string>
+  <!-- %1$s: unit code, e.g. kg. -->
+  <string name="org_concept_unit">Kipimo %1$s</string>
+  <!-- %1$d: number of list values; %2$s: the first few value labels. -->
+  <plurals name="org_concept_values">
+    <item quantity="one">Thamani %1$d: %2$s</item>
+    <item quantity="other">Thamani %1$d: %2$s</item>
+  </plurals>
+  <!-- Like org_concept_values, when only some of the values are listed. -->
+  <plurals name="org_concept_values_truncated">
+    <item quantity="one">Thamani %1$d: %2$s…</item>
+    <item quantity="other">Thamani %1$d: %2$s…</item>
+  </plurals>
+  <!-- Short concept version. %1$d: version number. -->
+  <string name="org_concept_version_short">t%1$d</string>
+  <string name="org_field_label_english">Lebo (Kiingereza)</string>
+  <string name="org_concept_label_help">Pia ni lebo chaguomsingi ya swali inapounganishwa</string>
+  <string name="org_concept_vocabulary">Msamiati</string>
+  <!-- Concept name, the last part of its ID. -->
+  <string name="org_concept_name">Jina</string>
+  <!-- %1$s: the concept ID. -->
+  <string name="org_concept_id">Kitambulisho: %1$s</string>
+  <!-- %1$s: the concept ID; %2$d: version number. -->
+  <string name="org_concept_id_version">%1$s · toleo %2$d</string>
+  <!-- %1$s: list of language codes and labels. -->
+  <string name="org_concept_translations">Tafsiri: %1$s</string>
+  <string name="org_field_description_english">Maelezo (Kiingereza)</string>
+  <string name="org_concept_data_type">Aina ya data</string>
+  <string name="org_concept_unit_label">Kipimo (si lazima)</string>
+  <string name="org_concept_unit_help">Msimbo wa UCUM</string>
+  <string name="org_concept_list_values">Thamani za orodha</string>
+  <!-- Code of a list value. -->
+  <string name="org_concept_value">Thamani</string>
+  <string name="org_concept_remove_value">Ondoa thamani</string>
+  <string name="org_concept_add_value">Ongeza thamani</string>
+  <string name="org_concept_aggregation">Ujumlishaji</string>
+  <string name="org_concept_privacy">Faragha</string>
+  <string name="org_concept_goals">Malengo (si lazima)</string>
+  <string name="org_concept_suggested_goals">Malengo yanayopendekezwa (si lazima)</string>
+  <string name="org_concept_goals_help">Tenganisha vitambulisho vya malengo kwa koma</string>
+  <!-- Impact pillar of a concept. -->
+  <string name="org_concept_pillar">Nguzo</string>
+  <!-- Lifecycle status of a concept. -->
+  <string name="org_concept_status">Hali</string>
+  <!-- %1$s: list of references. -->
+  <string name="org_concept_references">Marejeo: %1$s</string>
+
+  <!-- Library entries -->
+  <string name="org_badge_hidden">Imefichwa</string>
+  <string name="org_badge_hidden_with_templates">Imefichwa pamoja na violezo vyake</string>
+  <string name="org_field_title_english">Kichwa (Kiingereza)</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_library_global_body_member">Imeshirikiwa na Watumiaji wote. Muombe Msimamizi afiche zile ambazo %1$s halitumii.</string>
+
+  <!-- Templates -->
+  <string name="org_template_new_title">Kiolezo kipya</string>
+  <string name="org_template_edit_title">Hariri kiolezo</string>
+  <string name="org_template_delete_body">Kitaondolewa kwenye maktaba na kwenye Vifurushi vya Madhumuni vinavyokitumia. Tafiti zilizokwisha kuundwa kutokana nacho zitabaki na fomu zake.</string>
+  <string name="org_template_delete">Futa kiolezo</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_org_title">Violezo vya %1$s</string>
+  <string name="org_templates_empty">Bado hakuna violezo. Violezo vilivyohifadhiwa kutoka kwa fomu za shirika hili vitaonekana hapa.</string>
+  <string name="org_template_new_button">Kiolezo kipya</string>
+  <string name="org_templates_global_title">Violezo vya kimataifa</string>
+  <string name="org_templates_global_body_admins">Fomu ambazo kila shirika linaweza kuongeza kwenye tafiti zake.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_global_body_manager">Vimeshirikiwa na Watumiaji wote. Ficha vile ambavyo %1$s halitumii; tafiti zilizokwisha kuundwa kutokana navyo haziathiriwi.</string>
+  <string name="org_templates_global_empty">Bado hakuna violezo vya kimataifa.</string>
+  <!-- %1$d: number of questions; %2$d: questions linked to dictionary concepts. -->
+  <plurals name="org_template_summary">
+    <item quantity="one">Swali %1$d · %2$d yameunganishwa na dhana</item>
+    <item quantity="other">Maswali %1$d · %2$d yameunganishwa na dhana</item>
+  </plurals>
+  <!-- Label before the purposes a template belongs to. -->
+  <string name="org_template_purposes_label">Madhumuni:</string>
+  <string name="org_template_associated_purposes">Madhumuni yanayohusiana</string>
+
+  <!-- Template questions dialog -->
+  <!-- %1$s: template title. -->
+  <!-- Default label of a new question. %1$d: its position. -->
+  <!-- Heading of a question card. %1$d: its position. -->
+  <!-- Code of a choice. -->
+  <!-- Label of a choice. -->
+  <!-- Default label of a new choice. %1$d: its position. -->
+
+  <!-- Purposes -->
+  <string name="org_purpose_new_title">Madhumuni mapya</string>
+  <string name="org_purpose_edit_title">Hariri madhumuni</string>
+  <string name="org_purpose_delete_body">Hayatatolewa tena wakati wa kuunda tafiti. Tafiti zilizopo zitabaki na fomu zake.</string>
+  <string name="org_purpose_delete">Futa madhumuni</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_purposes_org_title">Madhumuni ya %1$s</string>
+  <string name="org_purposes_empty">Bado hakuna madhumuni.</string>
+  <string name="org_purpose_new_button">Madhumuni mapya</string>
+  <string name="org_purposes_global_title">Madhumuni ya kimataifa</string>
+  <string name="org_purposes_global_body_admins">Madhumuni ambayo kila shirika linaweza kuchagua wakati wa kuunda utafiti.</string>
+  <string name="org_purposes_global_body_manager">Yameshirikiwa na Watumiaji wote. Kuficha kiolezo pia huficha madhumuni yanayotumia violezo vilivyofichwa pekee.</string>
+  <string name="org_purposes_global_empty">Bado hakuna madhumuni ya kimataifa.</string>
+  <!-- %1$s: list of reporting programs and frameworks. -->
+  <string name="org_purpose_programs">Mipango ya kuripoti na mifumo: %1$s</string>
+  <!-- %1$s: list of export profile IDs. -->
+  <string name="org_purpose_exports">Uhamishaji: %1$s</string>
+  <!-- Label before the templates of a purpose. -->
+  <string name="org_purpose_templates_label">Violezo:</string>
+  <!-- Impact pillar of the MAP framework. -->
+  <string name="org_purpose_pillar">Nguzo ya MAP</string>
+  <string name="org_purpose_associated_templates">Violezo vinavyohusiana</string>
+  <!-- A country in pickers and on the organization page: %1$s is its name, %2$s its ISO code, e.g. Kenya (KE). -->
+  <string name="org_country_with_code">%1$s (%2$s)</string>
+  <string name="org_template_discard_title">Ungependa kutupa mabadiliko ya kiolezo hiki?</string>
+  <string name="org_template_discard_body">Mabadiliko yako kwenye fomu, maelezo na madhumuni yake hayajahifadhiwa.</string>
+  <string name="org_template_discard">Tupa</string>
+  <string name="org_template_keep_editing">Endelea kuhariri</string>
+
+  <!-- Admin panel: mobile client version policy -->
+  <string name="org_tab_mobile_app">Programu ya simu</string>
+  <string name="org_mobile_version_title">Matoleo ya programu ya simu</string>
+  <string name="org_mobile_version_subtitle">Pendekeza sasisho toleo jipya linapopatikana, au hitaji toleo la chini kabla ya kusawazisha.</string>
+  <string name="org_mobile_version_latest_label">Toleo jipya zaidi</string>
+  <string name="org_mobile_version_latest_help">Programu za simu za zamani kuliko SemVer hii (k.m. 2.1.0) zitaona bango la sasisho. Acha wazi ili kuzima.</string>
+  <string name="org_mobile_version_min_label">Toleo la chini linalohitajika</string>
+  <string name="org_mobile_version_min_help">Programu za simu za zamani kuliko SemVer hii (k.m. 2.0.0) zitazuiwa na seva hadi zisasishwe.</string>
+  <string name="org_mobile_version_url_label">URL ya sasisho</string>
+  <string name="org_mobile_version_url_help">Kiungo cha duka au kupakua (lazima kianze na https:// au http://).</string>
+  <string name="org_mobile_version_save">Hifadhi sera</string>
+  <string name="org_mobile_version_saved">Sera ya toleo la simu imehifadhiwa.</string>
+  <string name="org_mobile_version_unavailable">Unganisha kwenye seva ili kudhibiti sera ya toleo la simu.</string>
+</resources>

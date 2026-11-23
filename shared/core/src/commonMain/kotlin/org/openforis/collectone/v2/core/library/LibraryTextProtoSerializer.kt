@@ -13,276 +13,89 @@
  */
 package org.openforis.collectone.v2.core.library
 
-import openforis.collectone.v1.forms.DataType
-import openforis.collectone.v1.library.Aggregation
-import openforis.collectone.v1.library.CodeList
-import openforis.collectone.v1.library.CodeListItem
-import openforis.collectone.v1.library.ConceptDef
-import openforis.collectone.v1.library.ExportProfileDef
-import openforis.collectone.v1.library.FormTemplateDef
 import openforis.collectone.v1.library.LibraryBundle
-import openforis.collectone.v1.library.LibraryStatus
-import openforis.collectone.v1.library.LocalizedText
 import openforis.collectone.v1.library.OrganizationLibrarySettings
-import openforis.collectone.v1.library.Pillar
-import openforis.collectone.v1.library.PrivacyClass
-import openforis.collectone.v1.library.PurposePackDef
 import org.openforis.collectone.v2.core.forms.serialization.TextProtoSerializer
-import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoField
-import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoMessage
 import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoParser
-import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoValue
 import org.openforis.collectone.v2.core.forms.serialization.textproto.TextProtoWriter
+import org.openforis.collectone.v2.core.proto.schema.ProtoCodecRules
 
 /**
  * Serializer and deserializer between Organization Library messages
  * (`openforis.collectone.v1.library`) and Protocol Buffer Text Format (`textproto`).
  *
  * Used for the global library seed files (`shared/assets/library/<vocabulary>.textproto`, each a
- * [LibraryBundle]) and library imports and exports. Template forms reuse the [FormDef]
- * (`openforis.collectone.v1.forms.FormDef`) codec of [TextProtoSerializer].
+ * [LibraryBundle]) and library imports and exports. Template forms (`FormDef`) are written like
+ * [TextProtoSerializer] writes them. Enum values must be spelled exactly; an unknown name is an
+ * [IllegalArgumentException].
  *
- * Not yet supported: `FormTemplateDef.default_dataset` and `audit_info`, which seed files don't
- * use; they are dropped on serialization and left unset on parsing.
+ * Not yet supported: `FormTemplateDef.default_dataset` and the `audit_info` of concepts, templates
+ * and purpose packs, which seed files don't use; they are dropped on serialization and left unset
+ * on parsing.
  */
 object LibraryTextProtoSerializer {
   /** Formats a [LibraryBundle] into a pretty-printed `textproto` string. */
   fun serializeBundle(bundle: LibraryBundle): String =
-    TextProtoWriter().writeMessage(encodeBundle(bundle))
+    TextProtoWriter().writeMessage(codec.write(LibraryBundle.ADAPTER, bundle))
 
   /** Parses a `textproto` string (comments allowed) into a [LibraryBundle]. */
   fun deserializeBundle(textproto: String): LibraryBundle =
-    decodeBundle(TextProtoParser.parse(textproto))
+    codec.read(LibraryBundle.ADAPTER, TextProtoParser.parse(textproto))
 
   /** Formats [OrganizationLibrarySettings] into a pretty-printed `textproto` string. */
   fun serializeSettings(settings: OrganizationLibrarySettings): String =
-    TextProtoWriter()
-      .writeMessage(
-        message {
-          string("organization_id", settings.organization_id)
-          settings.hidden_global_entry_ids.forEach { stringAlways("hidden_global_entry_ids", it) }
-        }
-      )
+    TextProtoWriter().writeMessage(codec.write(OrganizationLibrarySettings.ADAPTER, settings))
 
   /** Parses a `textproto` string into [OrganizationLibrarySettings]. */
-  fun deserializeSettings(textproto: String): OrganizationLibrarySettings {
-    val node = TextProtoParser.parse(textproto)
-    return OrganizationLibrarySettings(
-      organization_id = node.getString("organization_id"),
-      hidden_global_entry_ids = node.getStrings("hidden_global_entry_ids"),
-    )
-  }
+  fun deserializeSettings(textproto: String): OrganizationLibrarySettings =
+    codec.read(OrganizationLibrarySettings.ADAPTER, TextProtoParser.parse(textproto))
 
-  // ===========================================================================
-  // Encoding
-  // ===========================================================================
-
-  private fun encodeBundle(msg: LibraryBundle): TextProtoMessage = message {
-    msg.concepts.forEach { message("concepts", encodeConcept(it)) }
-    msg.form_templates.forEach { message("form_templates", encodeTemplate(it)) }
-    msg.purpose_packs.forEach { message("purpose_packs", encodePurposePack(it)) }
-    msg.export_profiles.forEach { message("export_profiles", encodeExportProfile(it)) }
-  }
-
-  private fun encodeConcept(msg: ConceptDef): TextProtoMessage = message {
-    string("id", msg.id)
-    int("version", msg.version)
-    string("organization_id", msg.organization_id)
-    text("label", msg.label)
-    text("description", msg.description)
-    msg.keywords.forEach { text("keywords", it) }
-    enum("data_type", msg.data_type, DataType.DATA_TYPE_UNSPECIFIED)
-    string("unit", msg.unit)
-    msg.code_list?.let { list ->
-      message(
-        "code_list",
-        message { list.items.forEach { message("items", encodeCodeListItem(it)) } },
+  private val codec =
+    TextProtoSerializer.codec(
+      ProtoCodecRules(
+        ignoredFields =
+          setOf(
+            "ConceptDef.audit_info",
+            "FormTemplateDef.audit_info",
+            "FormTemplateDef.default_dataset",
+            "PurposePackDef.audit_info",
+          ),
+        // The seed files list a template's version, and a purpose pack's starter templates, before
+        // their sort order.
+        fieldOrder =
+          mapOf(
+            "FormTemplateDef" to
+              listOf(
+                "id",
+                "organization_id",
+                "title",
+                "description",
+                "form",
+                "default_dataset",
+                "status",
+                "audit_info",
+                "version",
+                "sort_order",
+              ),
+            "PurposePackDef" to
+              listOf(
+                "id",
+                "organization_id",
+                "title",
+                "description",
+                "icon",
+                "form_template_ids",
+                "export_profile_ids",
+                "program_ids",
+                "goals",
+                "pillar",
+                "status",
+                "audit_info",
+                "starter_templates",
+                "sort_order",
+              ),
+          ),
+        strictEnumPackages = setOf("openforis.collectone.v1.library"),
       )
-    }
-    enum("aggregation", msg.aggregation, Aggregation.AGGREGATION_UNSPECIFIED)
-    enum("privacy_class", msg.privacy_class, PrivacyClass.PRIVACY_CLASS_UNSPECIFIED)
-    msg.goals.forEach { stringAlways("goals", it) }
-    enum("pillar", msg.pillar, Pillar.PILLAR_UNSPECIFIED)
-    msg.references.forEach { stringAlways("references", it) }
-    enum("status", msg.status, LibraryStatus.LIBRARY_STATUS_UNSPECIFIED)
-    msg.aliases.forEach { stringAlways("aliases", it) }
-  }
-
-  private fun encodeCodeListItem(msg: CodeListItem): TextProtoMessage = message {
-    string("code", msg.code)
-    text("label", msg.label)
-    map("external_ids", msg.external_ids)
-  }
-
-  private fun encodeTemplate(msg: FormTemplateDef): TextProtoMessage = message {
-    string("id", msg.id)
-    string("organization_id", msg.organization_id)
-    text("title", msg.title)
-    text("description", msg.description)
-    msg.form?.let { message("form", TextProtoSerializer.encodeFormDef(it)) }
-    enum("status", msg.status, LibraryStatus.LIBRARY_STATUS_UNSPECIFIED)
-  }
-
-  private fun encodePurposePack(msg: PurposePackDef): TextProtoMessage = message {
-    string("id", msg.id)
-    string("organization_id", msg.organization_id)
-    text("title", msg.title)
-    text("description", msg.description)
-    string("icon", msg.icon)
-    msg.form_template_ids.forEach { stringAlways("form_template_ids", it) }
-    msg.export_profile_ids.forEach { stringAlways("export_profile_ids", it) }
-    msg.program_ids.forEach { stringAlways("program_ids", it) }
-    msg.goals.forEach { stringAlways("goals", it) }
-    enum("pillar", msg.pillar, Pillar.PILLAR_UNSPECIFIED)
-    enum("status", msg.status, LibraryStatus.LIBRARY_STATUS_UNSPECIFIED)
-  }
-
-  private fun encodeExportProfile(msg: ExportProfileDef): TextProtoMessage = message {
-    string("id", msg.id)
-    string("organization_id", msg.organization_id)
-    text("title", msg.title)
-    string("format", msg.format)
-    map("field_concepts", msg.field_concepts)
-    enum("status", msg.status, LibraryStatus.LIBRARY_STATUS_UNSPECIFIED)
-  }
-
-  // ===========================================================================
-  // Decoding
-  // ===========================================================================
-
-  private fun decodeBundle(node: TextProtoMessage): LibraryBundle =
-    LibraryBundle(
-      concepts = node.getMessages("concepts").map(::decodeConcept),
-      form_templates = node.getMessages("form_templates").map(::decodeTemplate),
-      purpose_packs = node.getMessages("purpose_packs").map(::decodePurposePack),
-      export_profiles = node.getMessages("export_profiles").map(::decodeExportProfile),
     )
-
-  private fun decodeConcept(node: TextProtoMessage): ConceptDef =
-    ConceptDef(
-      id = node.getString("id"),
-      version = node.getInt("version"),
-      organization_id = node.getString("organization_id"),
-      label = node.getMessageOrNull("label")?.let(::decodeText),
-      description = node.getMessageOrNull("description")?.let(::decodeText),
-      keywords = node.getMessages("keywords").map(::decodeText),
-      data_type = enumOf(node.getIdentifierOrNull("data_type"), DataType.DATA_TYPE_UNSPECIFIED),
-      unit = node.getString("unit"),
-      code_list =
-        node.getMessageOrNull("code_list")?.let { list ->
-          CodeList(items = list.getMessages("items").map(::decodeCodeListItem))
-        },
-      aggregation =
-        enumOf(node.getIdentifierOrNull("aggregation"), Aggregation.AGGREGATION_UNSPECIFIED),
-      privacy_class =
-        enumOf(node.getIdentifierOrNull("privacy_class"), PrivacyClass.PRIVACY_CLASS_UNSPECIFIED),
-      goals = node.getStrings("goals"),
-      pillar = enumOf(node.getIdentifierOrNull("pillar"), Pillar.PILLAR_UNSPECIFIED),
-      references = node.getStrings("references"),
-      status = enumOf(node.getIdentifierOrNull("status"), LibraryStatus.LIBRARY_STATUS_UNSPECIFIED),
-      aliases = node.getStrings("aliases"),
-    )
-
-  private fun decodeCodeListItem(node: TextProtoMessage): CodeListItem =
-    CodeListItem(
-      code = node.getString("code"),
-      label = node.getMessageOrNull("label")?.let(::decodeText),
-      external_ids = decodeMap(node, "external_ids"),
-    )
-
-  private fun decodeTemplate(node: TextProtoMessage): FormTemplateDef =
-    FormTemplateDef(
-      id = node.getString("id"),
-      organization_id = node.getString("organization_id"),
-      title = node.getMessageOrNull("title")?.let(::decodeText),
-      description = node.getMessageOrNull("description")?.let(::decodeText),
-      form = node.getMessageOrNull("form")?.let(TextProtoSerializer::decodeFormDef),
-      status = enumOf(node.getIdentifierOrNull("status"), LibraryStatus.LIBRARY_STATUS_UNSPECIFIED),
-    )
-
-  private fun decodePurposePack(node: TextProtoMessage): PurposePackDef =
-    PurposePackDef(
-      id = node.getString("id"),
-      organization_id = node.getString("organization_id"),
-      title = node.getMessageOrNull("title")?.let(::decodeText),
-      description = node.getMessageOrNull("description")?.let(::decodeText),
-      icon = node.getString("icon"),
-      form_template_ids = node.getStrings("form_template_ids"),
-      export_profile_ids = node.getStrings("export_profile_ids"),
-      program_ids = node.getStrings("program_ids"),
-      goals = node.getStrings("goals"),
-      pillar = enumOf(node.getIdentifierOrNull("pillar"), Pillar.PILLAR_UNSPECIFIED),
-      status = enumOf(node.getIdentifierOrNull("status"), LibraryStatus.LIBRARY_STATUS_UNSPECIFIED),
-    )
-
-  private fun decodeExportProfile(node: TextProtoMessage): ExportProfileDef =
-    ExportProfileDef(
-      id = node.getString("id"),
-      organization_id = node.getString("organization_id"),
-      title = node.getMessageOrNull("title")?.let(::decodeText),
-      format = node.getString("format"),
-      field_concepts = decodeMap(node, "field_concepts"),
-      status = enumOf(node.getIdentifierOrNull("status"), LibraryStatus.LIBRARY_STATUS_UNSPECIFIED),
-    )
-
-  private fun decodeText(node: TextProtoMessage): LocalizedText =
-    LocalizedText(values = decodeMap(node, "values"))
-
-  /** Decodes a `map<string, string>` field written as repeated `{ key: … value: … }` entries. */
-  private fun decodeMap(node: TextProtoMessage, name: String): Map<String, String> =
-    node.getMessages(name).associate { it.getString("key") to it.getString("value") }
-
-  private inline fun <reified E : Enum<E>> enumOf(name: String?, default: E): E {
-    if (name == null) return default
-    return enumValues<E>().firstOrNull { it.name == name }
-      ?: throw IllegalArgumentException("Unknown ${E::class.simpleName} value '$name'")
-  }
-
-  // ===========================================================================
-  // Message builder
-  // ===========================================================================
-
-  private class Builder {
-    val fields = mutableListOf<TextProtoField>()
-
-    fun string(name: String, value: String) {
-      if (value.isNotEmpty()) stringAlways(name, value)
-    }
-
-    fun stringAlways(name: String, value: String) {
-      fields += TextProtoField(name, TextProtoValue.StringVal(value))
-    }
-
-    fun int(name: String, value: Int) {
-      if (value != 0) fields += TextProtoField(name, TextProtoValue.NumberVal(value.toString()))
-    }
-
-    fun <E : Enum<E>> enum(name: String, value: E, unspecified: E) {
-      if (value != unspecified)
-        fields += TextProtoField(name, TextProtoValue.IdentifierVal(value.name))
-    }
-
-    fun message(name: String, value: TextProtoMessage) {
-      fields += TextProtoField(name, TextProtoValue.MessageVal(value))
-    }
-
-    fun text(name: String, value: LocalizedText?) {
-      if (value != null) message(name, message { map("values", value.values) })
-    }
-
-    fun map(name: String, entries: Map<String, String>) {
-      entries.forEach { (key, value) ->
-        message(
-          name,
-          message {
-            stringAlways("key", key)
-            stringAlways("value", value)
-          },
-        )
-      }
-    }
-  }
-
-  private fun message(build: Builder.() -> Unit): TextProtoMessage =
-    TextProtoMessage(Builder().apply(build).fields.toList())
 }

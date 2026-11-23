@@ -98,7 +98,7 @@ message ImpactAggregate {
   // Concept ID for `CONCEPT` and `DISTINCT_VALUES` rows; empty otherwise.
   string concept_id = 6;
 
-  // Code-list value (`ground_code`) for `COUNT_BY_CODE` and `SHARE_BY_CODE`
+  // Code-list value (`collectone_code`) for `COUNT_BY_CODE` and `SHARE_BY_CODE`
   // concept rows.
   string code = 7;
 

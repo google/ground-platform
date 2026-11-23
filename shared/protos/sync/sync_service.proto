@@ -1,0 +1,142 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package openforis.collectone.v1.sync;
+
+import "shared/protos/data/entity_record.proto";
+import "shared/protos/data/impact_event.proto";
+import "shared/protos/data/submission_record.proto";
+import "shared/protos/library/library_service.proto";
+import "shared/protos/survey/organization.proto";
+import "shared/protos/survey/survey_def.proto";
+import "shared/protos/survey/survey_service.proto";
+
+// Catches up several sync scopes in one call (`docs/technical/sync-engine.md`,
+// "Batched Catch-Up").
+//
+// Each scope behaves exactly like its `List*` RPC with the same `sync_token`
+// and `page_token`, and tokens are interchangeable between the two: a token
+// from `ListEntities` works here and vice versa.
+service SyncService {
+  // Returns one page of changes for each cursor, in request order. Scopes fail
+  // independently: an expired token or a survey the caller can't read is
+  // reported on its own `ScopeChanges` and never fails the call.
+  rpc SyncChanges(SyncChangesRequest) returns (SyncChangesResponse);
+}
+
+// The scope of a sync token: the same scopes the `List*` RPCs sync, without
+// query-only filters.
+message SyncScope {
+  // An empty marker for scopes without fields.
+  message All {}
+
+  oneof scope {
+    // `ListOrganizations`.
+    All organizations = 1;
+
+    // `ListLibraries`.
+    All libraries = 2;
+
+    // `ListSurveyOverviews` (every survey the caller can list).
+    All survey_overviews = 3;
+
+    // `ListEntities` for this survey ID.
+    string survey_entities = 4;
+
+    // `ListSubmissions` for this survey ID.
+    string survey_submissions = 5;
+
+    // `ListImpactEvents`.
+    All impact_events = 6;
+  }
+}
+
+// Where to continue one scope.
+message ScopeCursor {
+  SyncScope scope = 1;
+
+  // `next_sync_token` from an earlier call for the same scope. Empty starts a
+  // full sync (query mode).
+  string sync_token = 2;
+
+  // `next_page_token` from the previous page of the same scope, to continue a
+  // paged full sync. Empty for the first page.
+  string page_token = 3;
+
+  // Optional field mask forwarded to `ListEntitiesRequest.field_mask` when
+  // syncing a `survey_entities` scope. Empty returns full records.
+  repeated string field_mask = 4;
+}
+
+message SyncChangesRequest {
+  repeated ScopeCursor cursors = 1;
+
+  // Maximum records per scope page. Zero or negative uses the `List*` RPCs'
+  // default page size.
+  int32 page_size = 2;
+
+  // Inline the latest saved revision and ACL (as `GetSurvey` returns them) of
+  // every survey in a `survey_overviews` page that isn't deleted, saving the
+  // follow-up `GetSurvey` calls. Working copies are never inlined; clients
+  // fetch them with `GetSurvey` when `has_working_copy` is set.
+  bool include_survey_definitions = 3;
+}
+
+// The records of one scope page. Only the list matching the scope is set.
+message ScopeRecords {
+  repeated openforis.collectone.v1.survey.Organization organizations = 1;
+  repeated openforis.collectone.v1.library.OrganizationLibraryRecord libraries = 2;
+  repeated openforis.collectone.v1.survey.SurveyOverview survey_overviews = 3;
+  repeated openforis.collectone.v1.data.EntityRecord entities = 4;
+  repeated openforis.collectone.v1.data.SubmissionRecord submissions = 5;
+  repeated openforis.collectone.v1.data.ImpactEvent impact_events = 6;
+
+  // With `include_survey_definitions`: the saved revisions of the surveys in
+  // `survey_overviews`, keyed by survey ID. Surveys whose definition couldn't
+  // be read are left out.
+  map<string, openforis.collectone.v1.survey.GetSurveyResponse> survey_definitions = 7;
+}
+
+// One page of changes for one scope.
+message ScopeChanges {
+  // The cursor's scope.
+  SyncScope scope = 1;
+
+  // The page, when the scope succeeded.
+  ScopeRecords records = 2;
+
+  // `google.rpc.Code` of the scope's failure, or 0 (`OK`). For example
+  // `FAILED_PRECONDITION` when the sync token can't be served (discard it and
+  // run a full sync) and `NOT_FOUND` or `PERMISSION_DENIED` when the survey is
+  // gone or the caller lost access.
+  int32 error_code = 3;
+
+  // The server's description of the failure, if any.
+  string error_message = 4;
+
+  // Token for the scope's next page, or empty when this was the last page.
+  string next_page_token = 5;
+
+  // Sync token to store after the last page.
+  string next_sync_token = 6;
+}
+
+message SyncChangesResponse {
+  // One entry per request cursor, in request order.
+  repeated ScopeChanges scopes = 1;
+}

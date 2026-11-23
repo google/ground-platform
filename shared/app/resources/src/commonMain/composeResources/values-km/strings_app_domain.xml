@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Kind of "data was used" event, shown in impact history. -->
+  <string name="domain_impact_event_type_export">បាននាំចេញ</string>
+  <string name="domain_impact_event_type_partner_push">បានផ្ញើទៅដៃគូ</string>
+  <string name="domain_impact_event_type_receipt_generated">បានបង្កើតបង្កាន់ដៃ</string>
+  <string name="domain_impact_event_type_receipt_shared">បានចែករំលែកបង្កាន់ដៃ</string>
+  <string name="domain_impact_event_type_doi_minted">បានចេញ DOI</string>
+  <string name="domain_impact_event_type_survey_closed">បានបិទការស្ទង់មតិ</string>
+  <!-- Lifecycle state of a survey. -->
+  <string name="domain_survey_lifecycle_state_draft">សេចក្តីព្រាង</string>
+  <string name="domain_survey_lifecycle_state_published">បានបោះពុម្ពផ្សាយ</string>
+  <string name="domain_survey_lifecycle_state_closed">បានបិទ</string>
+  <string name="domain_survey_lifecycle_state_archived">បានទុកក្នុងបណ្ណសារ</string>
+  <!-- Answer option to "What happened with this data?" for a closed survey. -->
+  <string name="domain_survey_outcome_kind_submitted_eudr_dds">បានដាក់ស្នើក្នុងសេចក្តីថ្លែងការណ៍ការប្រុងប្រយ័ត្នដោយយកចិត្តទុកដាក់ EUDR</string>
+  <string name="domain_survey_outcome_kind_reported_ferm">បានរាយការណ៍ទៅ FERM</string>
+  <string name="domain_survey_outcome_kind_land_titling">បានប្រើសម្រាប់ការចេញប្លង់ដី</string>
+  <string name="domain_survey_outcome_kind_shared_with_buyers">បានចែករំលែកជាមួយអ្នកទិញ</string>
+  <string name="domain_survey_outcome_kind_trained_or_validated_model">បានបណ្តុះបណ្តាល ឬពិនិត្យផែនទី ឬម៉ូដែល</string>
+  <string name="domain_survey_outcome_kind_protected_area_management">បានប្រើដើម្បីគ្រប់គ្រងតំបន់ការពារ</string>
+  <string name="domain_survey_outcome_kind_not_yet">មិនទាន់</string>
+  <!-- Answer option: time and cost compared with the previous method. -->
+  <string name="domain_effort_comparison_less">តិចជាង</string>
+  <string name="domain_effort_comparison_same">ប្រហាក់ប្រហែលគ្នា</string>
+  <string name="domain_effort_comparison_more">ច្រើនជាង</string>
+  <!-- Upload status of a submission. -->
+  <string name="domain_sync_status_uploading">កំពុងផ្ទុកឡើង</string>
+  <string name="domain_sync_status_uploading_description">កំពុងផ្ទុកការផ្លាស់ប្តូរក្នុងឧបករណ៍ឡើងទៅម៉ាស៊ីនមេ</string>
+  <string name="domain_sync_status_synced">បានធ្វើសមកាលកម្ម</string>
+  <string name="domain_sync_status_synced_description">បានធ្វើសមកាលកម្មជាមួយម៉ាស៊ីនមេពពក</string>
+  <string name="domain_sync_status_failed">បរាជ័យ</string>
+  <string name="domain_sync_status_failed_description">ការផ្ទុកឡើងបរាជ័យ — ចុចដើម្បីព្យាយាមម្តងទៀត</string>
+  <!-- Name of a quota tier (plan). -->
+  <string name="domain_quota_tier_unspecified">មិនបានបញ្ជាក់</string>
+  <string name="domain_quota_tier_basic">មូលដ្ឋាន</string>
+  <string name="domain_quota_tier_sponsored">ឧបត្ថម្ភ</string>
+  <!-- Measurement unit system option in Settings. -->
+  <string name="domain_measurement_unit_system_metric">ម៉ែត្រ (ha, m)</string>
+  <string name="domain_measurement_unit_system_metric_short">ម៉ែត្រ</string>
+  <string name="domain_measurement_unit_system_imperial">អ៊ីមភេរីយ៉ាល់ (acres, ft)</string>
+  <string name="domain_measurement_unit_system_imperial_short">អ៊ីមភេរីយ៉ាល់</string>
+  <!-- State of the map camera relative to the GPS location. -->
+  <string name="domain_location_lock_state_locked">GPS កំណត់កណ្ដាលស្វ័យប្រវត្តិ</string>
+  <string name="domain_location_lock_state_locked_3d">GPS 3D</string>
+  <string name="domain_location_lock_state_panned">បានរំកិល</string>
+  <!-- Badge shown on a map layer that comes from the survey. -->
+  <string name="domain_layer_source_type_entity_dataset">ស្រទាប់ការស្ទង់មតិ</string>
+  <!-- Basemap option in the map layers panel. -->
+  <string name="domain_basemap_type_normal">ភូមិសាស្ត្រ</string>
+  <string name="domain_basemap_type_normal_description">ផែនទីភូមិសាស្ត្រ ជាមួយខ្សែវណ្ឌ ស្រមោលភ្នំ និងផ្លូវ</string>
+  <string name="domain_basemap_type_satellite">ផ្កាយរណប</string>
+  <string name="domain_basemap_type_satellite_description">រូបភាពផ្កាយរណប Mapbox Standard ជាមួយស្លាកយោង</string>
+  <!-- Layer of a map area saved for offline use: satellite imagery, or the terrain map (contours, hillshade, and roads). -->
+  <string name="domain_offline_imagery_type_satellite">ផ្កាយរណប</string>
+  <string name="domain_offline_imagery_type_terrain">ភូមិសាស្ត្រ</string>
+  <!-- Role of a person in an organization. -->
+  <string name="domain_organization_role_member">សមាជិក</string>
+  <string name="domain_organization_role_member_description">ត្រូវបានចុះក្នុងបញ្ជីថាមានទំនាក់ទំនង អាចមើលការស្ទង់មតិរបស់ស្ថាប័ន និងបង្កើតការស្ទង់មតិថ្មី។</string>
+  <string name="domain_organization_role_manager">អ្នកគ្រប់គ្រង</string>
+  <string name="domain_organization_role_manager_description">អាចកែសម្រួលស្ថាប័ន គ្រប់គ្រងសមាជិក និងគ្រប់គ្រងការស្ទង់មតិទាំងអស់របស់ស្ថាប័ន។</string>
+  <!-- Status of a person's membership in an organization. -->
+  <string name="domain_membership_status_invited">បានអញ្ជើញ</string>
+  <string name="domain_membership_status_requested">បានស្នើសុំចូលរួម</string>
+  <string name="domain_membership_status_active">សមាជិក</string>
+  <!-- Kind of custom imagery source. -->
+  <string name="domain_imagery_source_type_xyz_tiles">URL ក្រឡា XYZ</string>
+  <string name="domain_imagery_source_type_earth_engine">ស្រទាប់ Earth Engine</string>
+  <!-- Kind of organization. -->
+  <string name="domain_organization_type_government_agency">ស្ថាប័នរដ្ឋាភិបាល</string>
+  <string name="domain_organization_type_cooperative">សហករណ៍</string>
+  <string name="domain_organization_type_iplc_organization">អង្គការជនជាតិដើមភាគតិច ឬសហគមន៍មូលដ្ឋាន</string>
+  <string name="domain_organization_type_ngo">អង្គការមិនមែនរដ្ឋាភិបាល</string>
+  <string name="domain_organization_type_company">ក្រុមហ៊ុន</string>
+  <string name="domain_organization_type_research">ស្ថាប័នស្រាវជ្រាវ</string>
+  <string name="domain_organization_type_other">ផ្សេងទៀត</string>
+  <!-- Upload status filter and upload state of a pending change. -->
+  <string name="domain_upload_status_filter_pending">កំពុងរង់ចាំ</string>
+  <string name="domain_upload_status_filter_in_progress">កំពុងដំណើរការ</string>
+  <string name="domain_upload_status_filter_uploaded">បានផ្ទុកឡើងរួច</string>
+  <string name="domain_upload_status_filter_failed">បរាជ័យ</string>
+  <!-- Kind of change waiting to upload or already uploaded. -->
+  <string name="domain_mutation_operation_kind_create_submission">បានដាក់ស្នើសំណុំបែបបទ</string>
+  <string name="domain_mutation_operation_kind_update_submission">បានកែប្រែសំណុំបែបបទ</string>
+  <string name="domain_mutation_operation_kind_delete_submission">បានលុបសំណុំបែបបទ</string>
+  <string name="domain_mutation_operation_kind_create_entity">បានបង្កើតធាតុផែនទី</string>
+  <string name="domain_mutation_operation_kind_update_entity">បានកែប្រែធាតុផែនទី</string>
+  <string name="domain_mutation_operation_kind_delete_entity">បានលុបធាតុផែនទី</string>
+  <string name="domain_mutation_operation_kind_upload_media">បានភ្ជាប់រូបថត</string>
+  <!-- Status of an invitation to join. -->
+  <string name="domain_invitation_status_pending">បានអញ្ជើញ</string>
+  <string name="domain_invitation_status_accepted">បានចូលរួម</string>
+  <!-- Geometry type: point, line, or polygon. -->
+  <string name="domain_geometry_point">ចំណុច</string>
+  <string name="domain_geometry_line">បន្ទាត់</string>
+  <string name="domain_geometry_polygon">ពហុកោណ</string>
+  <!-- Geometry type (point, line, polygon) of a map feature or question. -->
+  <string name="domain_entity_geometry_kind_none">គ្មានធរណីមាត្រ</string>
+  <!-- Title or subtitle of a mobile app screen in the screen navigator. -->
+  <string name="domain_app_screen_sign_in_title">ចូលគណនី</string>
+  <string name="domain_app_screen_sign_in_subtitle">ចំណុចចូលការផ្ទៀងផ្ទាត់ Google</string>
+  <string name="domain_app_screen_terms_of_service_title">លក្ខខណ្ឌនៃសេវាកម្ម</string>
+  <string name="domain_app_screen_terms_of_service_subtitle">ការទទួលយកអភិបាលកិច្ចទិន្នន័យ និងលក្ខខណ្ឌវេទិកា</string>
+  <string name="domain_app_screen_download_survey_title">ទាញយកការស្ទង់មតិ</string>
+  <string name="domain_app_screen_download_survey_subtitle">រុករកការស្ទង់មតិដែលបានចែករំលែក ឬស្វែងរកតាមឈ្មោះ/ទីតាំង</string>
+  <string name="domain_app_screen_main_survey_title">ការស្ទង់មតិចម្បង (ផែនទី និងបញ្ជី)</string>
+  <string name="domain_app_screen_main_survey_subtitle">ផែនទីការស្ទង់មតិ ស្រទាប់ផែនទី ផ្ទាំងខាងក្រោមនៃទីតាំង និងការដាក់ស្នើ បញ្ជីដែលអាចស្វែងរកបាន និងថតម៉ឺនុយ</string>
+  <!-- Tab: show the survey as a map or as a list. -->
+  <string name="domain_main_survey_view_mode_map">ផែនទី</string>
+  <string name="domain_main_survey_view_mode_list">បញ្ជី</string>
+  <!-- Lifecycle status of a library entry. -->
+  <string name="domain_library_status_draft">សេចក្តីព្រាង</string>
+  <string name="domain_library_status_stable">ស្ថិរភាព</string>
+  <string name="domain_library_status_deprecated">ឈប់ប្រើ</string>
+  <!-- How dashboards roll up answers to a standard field. -->
+  <string name="domain_concept_aggregation_count_distinct_features">រាប់ធាតុផែនទី</string>
+  <string name="domain_concept_aggregation_count_distinct_features_description">រាប់ធាតុផែនទីដែលមានចម្លើយ។</string>
+  <string name="domain_concept_aggregation_count_by_code">រាប់តាមតម្លៃ</string>
+  <string name="domain_concept_aggregation_count_by_code_description">រាប់ធាតុផែនទីសម្រាប់តម្លៃនីមួយៗក្នុងបញ្ជី។</string>
+  <string name="domain_concept_aggregation_sum">ផលបូក</string>
+  <string name="domain_concept_aggregation_sum_description">បូកចម្លើយបញ្ចូលគ្នា។</string>
+  <string name="domain_concept_aggregation_mean">មធ្យមភាគ</string>
+  <string name="domain_concept_aggregation_mean_description">គណនាមធ្យមភាគនៃចម្លើយ។</string>
+  <string name="domain_concept_aggregation_share_by_code">ភាគរយតាមតម្លៃ</string>
+  <string name="domain_concept_aggregation_share_by_code_description">បង្ហាញភាគរយនៃធាតុផែនទីដែលមានតម្លៃនីមួយៗ។</string>
+  <string name="domain_concept_aggregation_none">មិនបានសរុប</string>
+  <string name="domain_concept_aggregation_none_description">ឈ្មោះ លេខសម្គាល់ និងចម្លើយផ្សេងទៀតដែលមិនត្រូវបានសរុប។</string>
+  <!-- Privacy class of a standard field: what may leave the organization. -->
+  <string name="domain_privacy_class_aggregate_public">ចំនួនសរុបសាធារណៈ</string>
+  <string name="domain_privacy_class_aggregate_public_description">ចំនួនសរុបអាចបង្ហាញក្នុងផ្ទាំងព័ត៌មានទូទាំងវេទិកា និងសាធារណៈ។</string>
+  <string name="domain_privacy_class_org_only">ស្ថាប័នតែប៉ុណ្ណោះ</string>
+  <string name="domain_privacy_class_org_only_description">ចំនួនសរុបអាចមើលឃើញតែក្នុងស្ថាប័នដែលជាម្ចាស់ប៉ុណ្ណោះ។</string>
+  <string name="domain_privacy_class_sensitive">រសើប</string>
+  <string name="domain_privacy_class_sensitive_description">មិនដែលរាប់បញ្ចូលក្នុងចំនួនសរុបឆ្លងស្ថាប័ន ឬសាធារណៈទេ។</string>
+  <!-- Impact pillar used to group goals. -->
+  <string name="domain_impact_pillar_mitigation">ការកាត់បន្ថយ</string>
+  <string name="domain_impact_pillar_adaptation">ការបន្សាំ</string>
+  <string name="domain_impact_pillar_protection">ការការពារ</string>
+  <!-- Data type of an answer or property. -->
+  <string name="domain_data_type_text">អត្ថបទ</string>
+  <string name="domain_data_type_integer">ចំនួនគត់</string>
+  <string name="domain_data_type_decimal">ទសភាគ</string>
+  <string name="domain_data_type_date">កាលបរិច្ឆេទ</string>
+  <string name="domain_data_type_select_one">ជ្រើសរើសមួយ</string>
+  <string name="domain_data_type_select_multiple">ជ្រើសរើសច្រើន</string>
+  <!-- Answer data type (also used for question types and table property types). -->
+  <string name="domain_concept_data_type_media">រូបថត វីដេអូ ឬសំឡេង</string>
+  <!-- Role of a collaborator on a survey. -->
+  <string name="domain_collaborator_role_viewer">អ្នកមើល</string>
+  <string name="domain_collaborator_role_viewer_description">អាចមើលផែនទី ស្រទាប់ផែនទី និងការដាក់ស្នើ។</string>
+  <string name="domain_collaborator_role_data_collector">អ្នកប្រមូលទិន្នន័យ</string>
+  <string name="domain_collaborator_role_data_collector_description">អាចប្រមូលការដាក់ស្នើ និងបន្ថែមធាតុផែនទី។</string>
+  <string name="domain_collaborator_role_survey_organizer">អ្នករៀបចំការស្ទង់មតិ</string>
+  <string name="domain_collaborator_role_survey_organizer_description">អាចកែសម្រួលសំណុំបែបបទ គ្រប់គ្រងការចែករំលែក និងនាំចេញទិន្នន័យ។</string>
+  <!-- General access option of a survey. -->
+  <string name="domain_sharing_policy_restricted">មានការកំណត់</string>
+  <string name="domain_sharing_policy_restricted_description">មានតែមនុស្សដែលបានបន្ថែមខាងលើប៉ុណ្ណោះ ដែលអាចបើកការស្ទង់មតិនេះ។</string>
+  <string name="domain_sharing_policy_organization">អ្នកណាក៏បានក្នុងស្ថាប័ន</string>
+  <string name="domain_sharing_policy_organization_description">សមាជិកនៃស្ថាប័នរបស់ការស្ទង់មតិអាចប្រមូលទិន្នន័យ។ អ្នកគ្រប់គ្រងក៏អាចកែសម្រួលការស្ទង់មតិផងដែរ។</string>
+  <string name="domain_sharing_policy_anyone_with_link">ត្រូវការតំណ ឬកូដ QR</string>
+  <string name="domain_sharing_policy_anyone_with_link_description">អ្នកប្រើត្រូវការតំណ ឬកូដ QR ដើម្បីចូលប្រើការស្ទង់មតិនេះ និងប្រមូលទិន្នន័យ។</string>
+  <string name="domain_sharing_policy_public">មានក្នុងបញ្ជីឈ្មោះ</string>
+  <string name="domain_sharing_policy_public_description">មានក្នុងបញ្ជីឈ្មោះ ដូច្នេះអ្នកណាក៏អាចរកឃើញការស្ទង់មតិនេះ និងប្រមូលទិន្នន័យបាន។</string>
+  <!-- Which data a data collector can see. -->
+  <string name="domain_peer_data_visibility_all">ទិន្នន័យទាំងអស់</string>
+  <string name="domain_peer_data_visibility_all_description">អ្នកប្រមូលទិន្នន័យមើលឃើញការដាក់ស្នើ និងធាតុផែនទីរបស់អ្នករាល់គ្នា។</string>
+  <string name="domain_peer_data_visibility_own_only">ទិន្នន័យផ្ទាល់ខ្លួនតែប៉ុណ្ណោះ</string>
+  <string name="domain_peer_data_visibility_own_only_description">អ្នកប្រមូលទិន្នន័យមើលឃើញតែអ្វីដែលពួកគេបានប្រមូលប៉ុណ្ណោះ។</string>
+  <!-- Kind of survey dataset, singular and plural. -->
+  <string name="domain_dataset_kind_map_layer">ស្រទាប់ផែនទី</string>
+  <string name="domain_dataset_kind_map_layer_plural">ស្រទាប់ផែនទី</string>
+  <string name="domain_dataset_kind_data_table">តារាងទិន្នន័យ</string>
+  <string name="domain_dataset_kind_data_table_plural">តារាងទិន្នន័យ</string>
+  <!-- Geometry type of a map layer (plural). -->
+  <string name="domain_geometry_kind_point">ចំណុច</string>
+  <string name="domain_geometry_kind_line">បន្ទាត់</string>
+  <string name="domain_geometry_kind_polygon">ពហុកោណ</string>
+  <string name="domain_property_type_boolean">បាទ/ចាស / ទេ</string>
+  <!-- Sampling method option for generated sample plots. -->
+  <string name="domain_sample_method_systematic_grid">ក្រឡាចត្រង្គជាប្រព័ន្ធ</string>
+  <string name="domain_sample_method_systematic_grid_description">ឡូត៍ដីលើក្រឡាចត្រង្គទៀងទាត់ ដែលមានចំណុចចាប់ផ្តើមចៃដន្យ។</string>
+  <string name="domain_sample_method_simple_random">ចៃដន្យសាមញ្ញ</string>
+  <string name="domain_sample_method_simple_random_description">ចំនួនឡូត៍ដីកំណត់ ដែលដាក់ដោយចៃដន្យ។</string>
+  <string name="domain_sample_method_stratified_random">ចៃដន្យតាមស្រទាប់</string>
+  <string name="domain_sample_method_stratified_random_description">ឡូត៍ដីដាក់ដោយចៃដន្យក្នុងស្រទាប់នីមួយៗ។</string>
+  <string name="domain_sample_method_cluster">ចង្កោម</string>
+  <string name="domain_sample_method_cluster_description">ក្រុមឡូត៍ដីដាក់ដោយចៃដន្យ។</string>
+  <!-- How sample plots are allocated across strata. -->
+  <string name="domain_allocation_mode_equal">ស្មើគ្នា</string>
+  <string name="domain_allocation_mode_proportional">សមាមាត្រនឹងផ្ទៃក្រឡា</string>
+  <string name="domain_allocation_mode_custom">ផ្ទាល់ខ្លួន</string>
+  <!-- Shape of a sample plot. -->
+  <string name="domain_plot_shape_option_square">ការេ</string>
+  <string name="domain_plot_shape_option_circle">រង្វង់</string>
+  <string name="domain_plot_shape_option_point">ចំណុច (តែចំណុចកណ្ដាល)</string>
+  <!-- How sub-plot sample points are placed within a plot. -->
+  <string name="domain_sub_plot_mode_none">គ្មាន</string>
+  <string name="domain_sub_plot_mode_center">មួយនៅកណ្ដាល</string>
+  <string name="domain_sub_plot_mode_grid">ក្រឡាចត្រង្គ</string>
+  <string name="domain_sub_plot_mode_random">ចៃដន្យ</string>
+  <!-- Device to preview a form on. -->
+  <string name="domain_form_preview_target_mobile">ទូរសព្ទ</string>
+  <string name="domain_form_preview_target_web">គេហទំព័រ</string>
+  <!-- Question type in the form editor. -->
+  <string name="domain_editor_question_type_text">អត្ថបទខ្លី</string>
+  <string name="domain_editor_question_type_long_text">កថាខណ្ឌ</string>
+  <string name="domain_editor_question_type_number">លេខ</string>
+  <string name="domain_editor_question_type_photo">រូបថត</string>
+  <string name="domain_editor_question_type_video">វីដេអូ</string>
+  <string name="domain_editor_question_type_audio">សំឡេង</string>
+  <string name="domain_editor_question_type_note">កំណត់ចំណាំ</string>
+  <!-- How data collectors provide a photo, video, or audio answer. -->
+  <string name="domain_media_source_capture_or_upload">ថត ឬផ្ទុកឡើង</string>
+  <string name="domain_media_source_capture_or_upload_description">អ្នកប្រមូលអាចប្រើកាមេរ៉ា ឬមីក្រូហ្វូន ឬផ្ទុកឡើងឯកសារដែលមានស្រាប់ពីឧបករណ៍របស់ពួកគេ។</string>
+  <string name="domain_media_source_capture_only">ថតផ្ទាល់តែប៉ុណ្ណោះ</string>
+  <string name="domain_media_source_capture_only_description">អ្នកប្រមូលត្រូវថតរូប វីដេអូ ឬសំឡេងថ្មី។ មិនអនុញ្ញាតឱ្យផ្ទុកឡើងឯកសារដែលមានស្រាប់ទេ។</string>
+  <!-- How data collectors record a location answer. -->
+  <string name="domain_geometry_capture_gps_only">GPS តែប៉ុណ្ណោះ</string>
+  <string name="domain_geometry_capture_gps_only_description">អ្នកប្រមូលកត់ត្រាទីតាំង GPS នៃឧបករណ៍របស់ពួកគេ។ មិនអាចប្រើលើគេហទំព័របានទេ។</string>
+  <string name="domain_geometry_capture_gps_or_map">GPS ឬគូរលើផែនទី</string>
+  <string name="domain_geometry_capture_gps_or_map_description">អ្នកប្រមូលអាចប្រើទីតាំង GPS របស់ពួកគេ ឬដាក់វាលើផែនទី។ ចាំបាច់សម្រាប់គេហទំព័រ។</string>
+  <!-- Comparison operator in display logic and status rules; read mid-sentence after a question name, e.g. "age is greater than 5". -->
+  <string name="domain_relevance_operator_equals">ស្មើនឹង</string>
+  <string name="domain_relevance_operator_not_equals">មិនស្មើនឹង</string>
+  <string name="domain_relevance_operator_greater_than">ធំជាង</string>
+  <string name="domain_relevance_operator_less_than">តូចជាង</string>
+  <string name="domain_relevance_operator_includes">រួមបញ្ចូល</string>
+  <string name="domain_relevance_operator_is_answered">ត្រូវបានឆ្លើយ</string>
+  <!-- Where a choice question's options come from. -->
+  <string name="domain_choice_source_manual">បញ្ជីបញ្ចូលដោយដៃ</string>
+  <!-- Name of a status marker symbol (accessibility label). -->
+  <string name="domain_status_marker_symbol_open">រង្វង់ទទេ</string>
+  <string name="domain_status_marker_symbol_half">រង្វង់ពាក់កណ្ដាល</string>
+  <string name="domain_status_marker_symbol_check">សញ្ញាធីក</string>
+  <string name="domain_status_marker_symbol_alert">សញ្ញាឧទាន</string>
+  <string name="domain_status_marker_symbol_cross">សញ្ញាខ្វែង</string>
+  <!-- What a map feature status rule checks. -->
+  <string name="domain_status_condition_subject_submissions">ចំនួនការដាក់ស្នើ</string>
+  <string name="domain_status_condition_subject_question">ចម្លើយនៃសំណួរ</string>
+  <string name="domain_status_condition_subject_entity_property">លក្ខណៈសម្បត្តិនៃធាតុ</string>
+  <!-- Data type of a map layer or data table property. -->
+  <string name="domain_editor_property_kind_boolean">បាទ/ចាស / ទេ</string>
+  <!-- Validation rule option for a date question. -->
+  <string name="domain_date_rule_not_in_future">មិនមែនពេលអនាគត</string>
+  <string name="domain_date_rule_not_in_past">មិនមែនពេលអតីតកាល</string>
+  <string name="domain_date_rule_between">ចន្លោះកាលបរិច្ឆេទពីរ</string>
+  <!-- Preset pattern option for validating a text answer. -->
+  <string name="domain_text_pattern_email">អាសយដ្ឋានអ៊ីមែល</string>
+  <string name="domain_text_pattern_digits">តែលេខប៉ុណ្ណោះ</string>
+  <string name="domain_text_pattern_letters">តែអក្សរប៉ុណ្ណោះ</string>
+  <string name="domain_text_pattern_custom">លំនាំផ្ទាល់ខ្លួន</string>
+  <!-- Form editor: validation issues shown next to questions and at the top of the form. -->
+  <string name="domain_issue_form_missing_id">សំណុំបែបបទខ្វះលេខសម្គាល់ (ID)។</string>
+  <string name="domain_issue_name_required">ត្រូវការឈ្មោះ។</string>
+  <string name="domain_issue_name_invalid">ឈ្មោះត្រូវចាប់ផ្តើមដោយអក្សរ ហើយប្រើតែអក្សរ លេខ _ . -</string>
+  <!-- %1$s: the question's name (an identifier). -->
+  <string name="domain_issue_name_duplicate">ឈ្មោះ "%1$s" ត្រូវបានប្រើច្រើនជាងម្តង។</string>
+  <string name="domain_issue_label_empty">ស្លាកទទេ។</string>
+  <string name="domain_issue_choose_choice_data_table">ជ្រើសរើសតារាងទិន្នន័យសម្រាប់ជម្រើស។</string>
+  <string name="domain_issue_choose_choice_map_layer">ជ្រើសរើសស្រទាប់ផែនទីសម្រាប់ជម្រើស។</string>
+  <!-- %1$s: ID of the map layer or data table that was deleted. -->
+  <string name="domain_issue_choice_dataset_missing">ស្រទាប់ផែនទី ឬតារាងទិន្នន័យ "%1$s" លែងមានទៀតហើយ។</string>
+  <!-- %1$s: name of a map layer of generated sample plots. -->
+  <string name="domain_issue_choice_dataset_generated">ឡូត៍ដីគំរូក្នុង "%1$s" ត្រូវបានបង្កើតដោយស្វ័យប្រវត្តិ ហើយអ្នកប្រមូលមិនអាចបន្ថែមបានទេ។</string>
+  <!-- %1$s: name of a map layer. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_map_layer">"%1$s" មិនមានសំណុំបែបបទសម្រាប់បន្ថែមធាតុផែនទីថ្មីទេ។</string>
+  <!-- %1$s: name of a data table. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_data_table">"%1$s" មិនមានសំណុំបែបបទសម្រាប់បន្ថែមជួរតារាងថ្មីទេ។</string>
+  <string name="domain_issue_add_choice">បន្ថែមជម្រើសយ៉ាងហោចណាស់មួយ។</string>
+  <string name="domain_issue_choice_value_invalid">តម្លៃជម្រើសមិនត្រូវទទេ ហើយមិនត្រូវមានដកឃ្លាទេ។</string>
+  <string name="domain_issue_choice_value_duplicate">តម្លៃជម្រើសត្រូវតែមិនជាន់គ្នា។</string>
+  <string name="domain_issue_display_logic_source_deleted">តក្កវិជ្ជាបង្ហាញយោងទៅសំណួរដែលបានលុប។</string>
+  <!-- %1$s: name of the question the display logic depends on. -->
+  <string name="domain_issue_display_logic_source_later">តក្កវិជ្ជាបង្ហាញពឹងផ្អែកលើ "%1$s" ដែលស្ថិតនៅខាងក្រោយ។</string>
+  <string name="domain_issue_display_logic_source_in_repeat">តក្កវិជ្ជាបង្ហាញពឹងផ្អែកលើ "%1$s" ដែលស្ថិតនៅក្នុងផ្នែកដែលធ្វើម្តងទៀត។</string>
+  <string name="domain_issue_section_display_logic_source_inside">តក្កវិជ្ជាបង្ហាញរបស់ផ្នែកមិនអាចពឹងផ្អែកលើ "%1$s" ដែលស្ថិតនៅក្នុងផ្នែកនោះបានទេ។</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_display_logic_operator_not_applicable">"%1$s" មិនអនុវត្តចំពោះ %2$s ទេ។</string>
+  <string name="domain_issue_display_logic_value_missing">តក្កវិជ្ជាបង្ហាញត្រូវការតម្លៃសម្រាប់ប្រៀបធៀប។</string>
+  <string name="domain_issue_display_logic_value_not_number">តម្លៃតក្កវិជ្ជាបង្ហាញត្រូវតែជាលេខ។</string>
+  <string name="domain_issue_cascade_parent_deleted">តម្រងតភ្ជាប់យោងទៅសំណួរដែលបានលុប។</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_later">តម្រងតភ្ជាប់ពឹងផ្អែកលើ "%1$s" ដែលស្ថិតនៅខាងក្រោយ។</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_not_choice">សំណួរមេនៃតម្រងតភ្ជាប់ "%1$s" ត្រូវតែជាសំណួរជម្រើស។</string>
+  <!-- %1$s: comma-separated parent values set on choices; %2$s: name of the parent question. -->
+  <string name="domain_issue_cascade_choice_parent_value_unknown">ជម្រើសដែលភ្ជាប់នឹង %1$s មិនដែលបង្ហាញទេ៖ "%2$s" គ្មានជម្រើសនោះទេ។</string>
+  <!-- %1$s: question label; %2$s: name of the "GPS or draw on map" option. "Available on web" is a form setting. -->
+  <string name="domain_issue_web_incompatible_geometry">"%1$s" ប្រើ GPS តែប៉ុណ្ណោះ ដែលគេហទំព័រមិនអាចកត់ត្រាបាន។ ជ្រើសរើស "%2$s" ឬបិទ អាចប្រើលើគេហទំព័រ។</string>
+  <string name="domain_issue_google_earth_incompatible_question">"%1$s" (%2$s) មិនត្រូវបានគាំទ្រនៅក្នុង Google Earth ទេ។ សូមលុបវាចេញ ប្តូរប្រភេទសំណួររបស់វា ឬបិទ បើកដំណើរការ បើកក្នុង Google Earth។</string>
+  <!-- Form editor: validation rule issues of a question. -->
+  <string name="domain_issue_min_not_number">អប្បបរមាត្រូវតែជាលេខ។</string>
+  <string name="domain_issue_max_not_number">អតិបរមាត្រូវតែជាលេខ។</string>
+  <string name="domain_issue_min_more_than_max">អប្បបរមាមិនអាចធំជាងអតិបរមាបានទេ។</string>
+  <string name="domain_issue_min_length_invalid">ប្រវែងអប្បបរមាត្រូវតែជាចំនួនគត់ចាប់ពី 0 ឡើងទៅ។</string>
+  <string name="domain_issue_max_length_invalid">ប្រវែងអតិបរមាត្រូវតែជាចំនួនគត់ចាប់ពី 0 ឡើងទៅ។</string>
+  <string name="domain_issue_min_length_more_than_max">ប្រវែងអប្បបរមាមិនអាចធំជាងអតិបរមាបានទេ។</string>
+  <string name="domain_issue_min_selections_invalid">ចំនួនជម្រើសអប្បបរមាត្រូវតែជាចំនួនគត់ចាប់ពី 0 ឡើងទៅ។</string>
+  <string name="domain_issue_max_selections_invalid">ចំនួនជម្រើសអតិបរមាត្រូវតែជាចំនួនគត់ចាប់ពី 0 ឡើងទៅ។</string>
+  <string name="domain_issue_min_selections_more_than_max">ចំនួនជម្រើសអប្បបរមាមិនអាចធំជាងអតិបរមាបានទេ។</string>
+  <string name="domain_issue_min_selections_more_than_choices">ចំនួនជម្រើសអប្បបរមាធំជាងចំនួនជម្រើសដែលមាន។</string>
+  <string name="domain_issue_custom_pattern_missing">បញ្ចូលលំនាំផ្ទាល់ខ្លួន។</string>
+  <string name="domain_issue_custom_pattern_invalid">លំនាំផ្ទាល់ខ្លួនមិនត្រឹមត្រូវ។</string>
+  <string name="domain_issue_custom_pattern_quotes">លំនាំផ្ទាល់ខ្លួនមិនអាចមានទាំង ' និង " បានទេ។</string>
+  <string name="domain_issue_date_range_missing">ជ្រើសរើសកាលបរិច្ឆេទដំបូងបំផុត ឬចុងក្រោយបំផុត។</string>
+  <string name="domain_issue_date_range_reversed">កាលបរិច្ឆេទដំបូងបំផុតមិនអាចនៅក្រោយកាលបរិច្ឆេទចុងក្រោយបំផុតបានទេ។</string>
+  <!-- Form editor: summary of a map feature status rule's condition. -->
+  <string name="domain_status_rule_when_submitted">នៅពេលសំណុំបែបបទត្រូវបានដាក់ស្នើ</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="domain_status_rule_min_submissions">
+    <item quantity="other">យ៉ាងហោចណាស់ %1$d ការដាក់ស្នើ</item>
+  </plurals>
+  <string name="domain_status_rule_missing_question">ខ្វះសំណួរ</string>
+  <!-- Placeholder for a property name in a status rule summary when none is chosen. -->
+  <string name="domain_status_rule_property_fallback">លក្ខណៈសម្បត្តិ</string>
+  <!-- Status rule condition without a value. %1$s: question or property name; %2$s: operator (e.g. "is answered"). -->
+  <string name="domain_status_rule_condition">%1$s %2$s</string>
+  <!-- Status rule condition with a value. %1$s: question or property name; %2$s: operator (e.g. "equals"); %3$s: value. -->
+  <string name="domain_status_rule_condition_value">%1$s %2$s "%3$s"</string>
+  <!-- Form editor: issues with how a form updates map features or table rows. -->
+  <string name="domain_issue_save_to_target_missing">ជ្រើសរើសស្រទាប់ផែនទី ឬតារាងទិន្នន័យដែលសំណុំបែបបទនេះធ្វើបច្ចុប្បន្នភាព។</string>
+  <!-- %1$s: ID of the deleted map layer or data table. -->
+  <string name="domain_issue_save_to_target_deleted">ស្រទាប់ផែនទី ឬតារាងទិន្នន័យ "%1$s" លែងមានទៀតហើយ។</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_map_layer">ឈ្មោះ "%1$s" ត្រូវបានបម្រុងទុកសម្រាប់ធាតុផែនទីដែលកំពុងធ្វើបច្ចុប្បន្នភាព។</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_data_table">ឈ្មោះ "%1$s" ត្រូវបានបម្រុងទុកសម្រាប់ជួរតារាងដែលកំពុងធ្វើបច្ចុប្បន្នភាព។</string>
+  <string name="domain_issue_save_to_id_question_missing_map_layer">ជ្រើសរើសសំណួរដែលកំណត់អត្តសញ្ញាណធាតុផែនទីដែលត្រូវធ្វើបច្ចុប្បន្នភាព។</string>
+  <string name="domain_issue_save_to_id_question_missing_data_table">ជ្រើសរើសសំណួរដែលកំណត់អត្តសញ្ញាណជួរតារាងដែលត្រូវធ្វើបច្ចុប្បន្នភាព។</string>
+  <string name="domain_issue_save_to_match_property_missing">ជ្រើសរើសលក្ខណៈសម្បត្តិដែលចម្លើយត្រូវផ្គូផ្គងជាមួយ។</string>
+  <string name="domain_issue_save_to_geometry_question_required">មានតែសំណួរ ចំណុច បន្ទាត់ ឬពហុកោណប៉ុណ្ណោះ ដែលអាចធ្វើបច្ចុប្បន្នភាពធរណីមាត្ររបស់ធាតុផែនទីបាន។</string>
+  <!-- %1$s: property name; %2$s: name of the map layer or data table. -->
+  <string name="domain_issue_save_to_unknown_property">ធ្វើបច្ចុប្បន្នភាព "%1$s" ដែលមិនមែនជាលក្ខណៈសម្បត្តិរបស់ %2$s។</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_not_updatable">"%1$s" មិនអាចធ្វើបច្ចុប្បន្នភាពដោយសំណុំបែបបទបានទេ។</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_already_updated">សំណួរផ្សេងទៀតកំពុងធ្វើបច្ចុប្បន្នភាព "%1$s" រួចហើយ។</string>
+  <string name="domain_issue_save_to_no_fields">ជ្រើសរើសវាលយ៉ាងហោចណាស់មួយដើម្បីធ្វើបច្ចុប្បន្នភាព។</string>
+  <string name="domain_issue_save_to_type_mismatch">ចម្លើយប្រភេទ %1$s ប្រហែលជាមិនត្រូវនឹងលក្ខណៈប្រភេទ %2$s "%3$s" ទេ។</string>
+  <string name="domain_display_logic_source_deleted">សំដៅលើសំណួរដែលបានលុប។</string>
+  <string name="domain_display_logic_shown_if_answered">បង្ហាញតែនៅពេលឆ្លើយ "%1$s" ប៉ុណ្ណោះ។</string>
+  <string name="domain_display_logic_shown_if">បង្ហាញតែនៅពេល "%1$s" %2$s %3$s ប៉ុណ្ណោះ។</string>
+  <string name="domain_issue_status_default_label_missing">បញ្ចូលស្លាកស្ថានភាពលំនាំដើម។</string>
+  <string name="domain_issue_status_rule_label_missing">ច្បាប់ស្ថានភាពនីមួយៗត្រូវការស្លាកស្ថានភាព។</string>
+  <string name="domain_issue_status_rule_min_submissions">ចំនួនការដាក់ស្នើត្រូវតែយ៉ាងហោចណាស់ 1។</string>
+  <string name="domain_issue_status_rule_question_missing">ជ្រើសរើសសំណួរសម្រាប់ច្បាប់ស្ថានភាព។</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_status_rule_operator_not_applicable">"%1$s" មិនអនុវត្តចំពោះ %2$s ក្នុងច្បាប់ស្ថានភាពទេ។</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_missing">ច្បាប់ស្ថានភាពសម្រាប់ "%1$s" ត្រូវការតម្លៃសម្រាប់ប្រៀបធៀប។</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_not_number">តម្លៃច្បាប់ស្ថានភាពសម្រាប់ "%1$s" ត្រូវតែជាលេខ។</string>
+  <string name="domain_issue_status_rule_property_missing_map_layer">ជ្រើសរើសលក្ខណៈសម្បត្តិធាតុផែនទីសម្រាប់ច្បាប់ស្ថានភាព។</string>
+  <string name="domain_issue_status_rule_property_missing_data_table">ជ្រើសរើសលក្ខណៈសម្បត្តិជួរតារាងសម្រាប់ច្បាប់ស្ថានភាព។</string>
+  <string name="domain_issue_status_rule_property_missing">ជ្រើសរើសលក្ខណៈសម្បត្តិធាតុសម្រាប់ច្បាប់ស្ថានភាព។</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_unwritten">គ្មានសំណួរណាសរសេរទៅលក្ខណៈសម្បត្តិ "%1$s" សម្រាប់ច្បាប់ស្ថានភាពទេ។</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: property data type in lowercase (e.g. "text"); %3$s: property name. -->
+  <string name="domain_issue_status_rule_property_operator_not_applicable">"%1$s" មិនអនុវត្តចំពោះលក្ខណៈសម្បត្តិ %2$s "%3$s" ទេ។</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_missing">ច្បាប់ស្ថានភាពសម្រាប់លក្ខណៈសម្បត្តិ "%1$s" ត្រូវការតម្លៃសម្រាប់ប្រៀបធៀប។</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_not_number">តម្លៃច្បាប់ស្ថានភាពសម្រាប់លក្ខណៈសម្បត្តិ "%1$s" ត្រូវតែជាលេខ។</string>
+  <!-- Form editor: warnings about a question's link to a standard field (concept). -->
+  <!-- %1$s: ID of a standard field, e.g. "eudr.commodity". -->
+  <string name="domain_warning_concept_not_in_dictionary">បានភ្ជាប់ទៅ "%1$s" ដែលមិនមានក្នុងវចនានុក្រមរបស់ការស្ទង់មតិនេះ។</string>
+  <!-- %1$s: standard field name; %2$s: its answer type in lowercase (e.g. "decimal"); %3$s: the question's type in lowercase (e.g. "short text"). -->
+  <string name="domain_warning_concept_type_mismatch">"%1$s" រំពឹងចម្លើយប្រភេទ %2$s ប៉ុន្តែនេះជាសំណួរប្រភេទ %3$s។</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_deprecated">"%1$s" ត្រូវបានឈប់ប្រើ។ សូមភ្ជាប់វាលស្តង់ដារបច្ចុប្បន្ន។</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_linked_twice">"%1$s" ត្រូវបានភ្ជាប់ទៅសំណួរច្រើនជាងមួយក្នុងសំណុំបែបបទនេះ។</string>
+  <!-- %1$d: number of choices; %2$s: standard field name; %3$s: comma-separated choice labels. -->
+  <plurals name="domain_warning_concept_unmapped_choices">
+    <item quantity="other">ផ្គូផ្គងជម្រើស %1$d ទៅតម្លៃ "%2$s" ដើម្បីឱ្យចម្លើយអាចបូកបញ្ចូលគ្នាបាន៖ %3$s។</item>
+  </plurals>
+  <!-- Survey editor: issues in a map layer or data table. -->
+  <string name="domain_issue_dataset_id_invalid">ID ត្រូវចាប់ផ្តើមដោយអក្សរ ហើយប្រើតែអក្សរ លេខ _ . -</string>
+  <!-- %1$s: the map layer or data table ID. -->
+  <string name="domain_issue_dataset_id_duplicate">ID "%1$s" ត្រូវបានប្រើដោយសំណុំទិន្នន័យផ្សេងទៀតក្នុងការស្ទង់មតិនេះ។</string>
+  <!-- %1$s: property name (an identifier). -->
+  <string name="domain_issue_dataset_property_name_invalid">លក្ខណៈសម្បត្តិ "%1$s" មានឈ្មោះមិនត្រឹមត្រូវ។</string>
+  <string name="domain_issue_dataset_property_name_duplicate">ឈ្មោះលក្ខណៈសម្បត្តិត្រូវតែមិនជាន់គ្នា។</string>
+  <string name="domain_issue_dataset_key_property_missing">ជ្រើសរើសលក្ខណៈសម្បត្តិគន្លឹះ។</string>
+  <string name="domain_issue_dataset_label_property_missing">ជ្រើសរើសលក្ខណៈសម្បត្តិស្លាក។</string>
+  <!-- %1$s: row or map feature name. -->
+  <string name="domain_issue_dataset_row_key_missing">"%1$s" ខ្វះគន្លឹះ។</string>
+  <!-- %1$s: duplicated key value. -->
+  <string name="domain_issue_dataset_row_key_duplicate">គន្លឹះ "%1$s" ជាន់គ្នា។</string>
+  <!-- %1$s: row or map feature name; %2$s: property label. -->
+  <string name="domain_issue_dataset_row_value_missing">"%1$s" ខ្វះ %2$s។</string>
+  <!-- %1$s: row or map feature name; %2$s: property label; %3$s: expected type in lowercase (e.g. "integer"). -->
+  <string name="domain_issue_dataset_row_value_wrong_type">"%1$s"៖ %2$s ត្រូវតែជា %3$s។</string>
+  <string name="domain_issue_sharing_organization_missing">"%1$s" ត្រូវការអង្គភាព។ ជ្រើសរើសមួយនៅក្នុងព័ត៌មានលម្អិតនៃការស្ទង់មតិ ឬជ្រើសរើសជម្រើសចូលប្រើទូទៅផ្សេងទៀត។</string>
+  <!-- %1$s: map feature name; %2$d: minimum number of vertices. -->
+  <plurals name="domain_issue_dataset_row_geometry_too_short">
+    <item quantity="other">"%1$s" ត្រូវការយ៉ាងហោចណាស់ %2$d ចំណុចកំពូល។</item>
+  </plurals>
+  <!-- Quota and budget limits: why an action is blocked. -->
+  <!-- %1$d: surveys the owner has; %2$d: the limit. -->
+  <string name="domain_quota_max_surveys_per_owner">បានដល់ដែនកំណត់ការស្ទង់មតិអតិបរមាក្នុងម្ចាស់ម្នាក់ (%1$d នៃ %2$d)។ សូមដំឡើងកម្រិត ឬលុបការស្ទង់មតិចាស់ៗ។</string>
+  <!-- %1$s: budget amount in US dollars, e.g. "$50.00". -->
+  <string name="domain_quota_org_budget_exceeded">ការបង្កើតការស្ទង់មតិមួយទៀតនឹងលើសពីពិដានថវិកាប្រចាំខែរបស់ស្ថាប័ន (%1$s)។</string>
+  <!-- %1$s: estimated cost in US dollars; %2$s: budget in US dollars. -->
+  <string name="domain_quota_survey_budget_exceeded">ថ្លៃដើមប្រចាំខែប៉ាន់ស្មាននៃការរចនាការស្ទង់មតិ (%1$s) លើសពីពិដានថវិកាប្រចាំខែរបស់ការស្ទង់មតិ (%2$s)។</string>
+  <!-- %1$d: number of forms; %2$d: the limit; %3$s: quota tier name (e.g. "Basic"). -->
+  <plurals name="domain_quota_max_forms">
+    <item quantity="other">ការស្ទង់មតិមាន %1$d សំណុំបែបបទ ដែលលើសពីដែនកំណត់ %2$d សម្រាប់កម្រិត %3$s។</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_questions">
+    <item quantity="other">សំណុំបែបបទ "%1$s" មាន %2$d សំណួរ ដែលលើសពីដែនកំណត់ %3$d។</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of photo questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_photo_questions">
+    <item quantity="other">សំណុំបែបបទ "%1$s" មាន %2$d សំណួររូបថត ដែលលើសពីដែនកំណត់ %3$d។</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features; %2$d: the limit. -->
+  <plurals name="domain_quota_max_predefined_entities">
+    <item quantity="other">ការស្ទង់មតិមាន %1$d ធាតុដែលបានកំណត់ជាមុន ដែលលើសពីដែនកំណត់ %2$d។</item>
+  </plurals>
+  <!-- %1$d: number of generated sample plots; %2$d: the limit. -->
+  <plurals name="domain_quota_max_generated_entities">
+    <item quantity="other">ការរចនាគំរូបានបង្កើត %1$d ឡូត៍ដី ដែលលើសពីដែនកំណត់ %2$d។</item>
+  </plurals>
+  <!-- %1$d: number of vertices of the survey area; %2$d: the limit. -->
+  <plurals name="domain_quota_max_area_vertices">
+    <item quantity="other">តំបន់ស្ទង់មតិមាន %1$d ចំណុចកំពូល ដែលលើសពីដែនកំណត់ %2$d។</item>
+  </plurals>
+  <plurals name="domain_quota_max_dataset_polygon_vertices">
+    <item quantity="other">សំណុំទិន្នន័យ "%1$s" មានពហុកោណដែលមាន %2$d ចំណុចកំពូល ដែលលើសពីដែនកំណត់ %3$d។</item>
+  </plurals>
+  <!-- %1$d: number of collaborators; %2$d: the limit. -->
+  <plurals name="domain_quota_max_collaborators">
+    <item quantity="other">បញ្ជីគ្រប់គ្រងសិទ្ធិចូលប្រើមាន %1$d អ្នកសហការ ដែលលើសពីដែនកំណត់ %2$d។</item>
+  </plurals>
+  <!-- %1$d: number of surveys; %2$d: the limit. -->
+  <plurals name="domain_quota_max_surveys_per_user">
+    <item quantity="other">អ្នកប្រើសកម្មក្នុង %1$d ការស្ទង់មតិ ដែលលើសពីដែនកំណត់ %2$d។</item>
+  </plurals>
+  <!-- %1$d: number of map features the user added in the field; %2$d: the limit. -->
+  <plurals name="domain_quota_max_adhoc_entities">
+    <item quantity="other">អ្នកប្រើបានបង្កើត %1$d ធាតុបន្ថែមក្នុងវាល ដែលដល់ដែនកំណត់ %2$d។</item>
+  </plurals>
+  <!-- %1$d: number of submissions; %2$d: the limit. -->
+  <plurals name="domain_quota_max_submissions_per_entity">
+    <item quantity="other">អ្នកប្រើបានកត់ត្រា %1$d ការដាក់ស្នើសម្រាប់ធាតុនេះ ដែលដល់ដែនកំណត់ %2$d។</item>
+  </plurals>
+  <!-- Notices shown after a data collector submits a form. -->
+  <!-- %1$s: name of the new map feature. "save_to" is a technical term; keep it as is. -->
+  <string name="domain_notice_entity_created">បានបង្កើតធាតុថ្មី "%1$s" តាមរយៈ save_to (✓ បានបញ្ចប់)</string>
+  <!-- %1$s: form title; %2$s: GPS coordinates. -->
+  <string name="domain_notice_standalone_submitted">បានដាក់ស្នើកំណត់ហេតុវាលដាច់ដោយឡែក "%1$s" (%2$s)</string>
+  <!-- %1$s: form title; %2$s: map feature name; %3$s: previous status symbol (e.g. ○); %4$s: new status symbol (e.g. ◐); %5$s: new status label (e.g. "In progress"). -->
+  <string name="domain_notice_entity_submitted">បានដាក់ស្នើ "%1$s" សម្រាប់ %2$s (សញ្ញាសម្គាល់៖ %3$s → %4$s %5$s)</string>
+  <!-- Geometry summary of a polygon map feature. %1$s: area with unit (e.g. "1.2 ha"); %2$s: perimeter length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_polygon">ពហុកោណ • %1$s, បរិមាត្រ %2$s</string>
+  <!-- Geometry summary of a line map feature. %1$s: length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_line">បន្ទាត់ • %1$s</string>
+  <!-- Geometry summary of a point map feature. %1$s: coordinates. -->
+  <string name="domain_geometry_summary_point">ចំណុច • %1$s</string>
+  <!-- PDF reports of map features and submissions. -->
+  <!-- Summary of a generated PDF file. %1$d: number of pages; %2$s: file size (e.g. "14 KB"). -->
+  <plurals name="domain_pdf_summary">
+    <item quantity="other">%1$d ទំព័រ • %2$s</item>
+  </plurals>
+  <!-- PDF page footer. %1$d: page number; %2$d: number of pages. -->
+  <string name="domain_pdf_page_of">ទំព័រ %1$d នៃ %2$d</string>
+  <string name="domain_pdf_running_header">Open Foris Collect One • %1$s</string>
+  <!-- Caption under a point's location figure. %1$s: latitude; %2$s: longitude. -->
+  <string name="domain_pdf_location_point">ទីតាំង %1$s, %2$s</string>
+  <!-- Caption under a location figure. %1$s/%2$s: min/max latitude; %3$s/%4$s: min/max longitude. "WGS 84" is a coordinate system name. -->
+  <string name="domain_pdf_bounds">ព្រំដែន៖ រយៈទទឹង %1$s ដល់ %2$s, រយៈបណ្ដោយ %3$s ដល់ %4$s (WGS 84)</string>
+  <!-- PDF footer of a map feature report. %1$s: map feature type (e.g. "Coffee Parcel"); %2$s: date and time. -->
+  <string name="domain_pdf_entity_footer">របាយការណ៍ %1$s • បានបង្កើត %2$s</string>
+  <!-- PDF footer of a submission report. %1$s: date and time. -->
+  <string name="domain_pdf_submission_footer">របាយការណ៍ការដាក់ស្នើ • បានបង្កើត %1$s</string>
+  <!-- PDF subtitle of a submission report. %1$s: date and time collected. -->
+  <string name="domain_pdf_submission_subtitle">ការដាក់ស្នើ • %1$s</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_details">ព័ត៌មានលម្អិត</string>
+  <!-- PDF field label: map layer of a map feature. -->
+  <string name="domain_pdf_layer">ស្រទាប់</string>
+  <!-- PDF field label: geometry summary of a map feature. -->
+  <string name="domain_pdf_geometry">ធរណីមាត្រ</string>
+  <!-- PDF field label: geographic identifier of a plot. -->
+  <string name="domain_pdf_geo_id">GeoID</string>
+  <string name="domain_pdf_coordinates">កូអរដោនេ</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_location">ទីតាំង</string>
+  <!-- PDF field label of one vertex of a line or polygon. %1$d: vertex number. -->
+  <string name="domain_pdf_vertex">ចំណុចកំពូល %1$d</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_properties">លក្ខណៈសម្បត្តិ</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_submissions">ការដាក់ស្នើ</string>
+  <string name="domain_pdf_no_submissions">មិនទាន់មានការដាក់ស្នើដែលបានកត់ត្រាទេ។</string>
+  <!-- %1$s: data collector name; %2$s: form version. -->
+  <string name="domain_pdf_collected_by">ប្រមូលដោយ %1$s • កំណែសំណុំបែបបទ %2$s</string>
+  <!-- Map feature a submission is attached to. %1$s: map feature name; %2$s: map feature type; %3$s: GeoID. -->
+  <string name="domain_pdf_entity_target">%1$s (%2$s • GeoID %3$s)</string>
+  <!-- %1$s: coordinates where the submission was collected. -->
+  <string name="domain_pdf_no_attached_feature_at">មិនមានធាតុផែនទីភ្ជាប់ (%1$s)</string>
+  <string name="domain_pdf_no_attached_feature">មិនមានធាតុផែនទីភ្ជាប់</string>
+  <string name="domain_pdf_data_collector">អ្នកប្រមូលទិន្នន័យ</string>
+  <!-- PDF field label: when a submission was collected. -->
+  <string name="domain_pdf_collected">បានប្រមូល</string>
+  <string name="domain_pdf_form_version">កំណែសំណុំបែបបទ</string>
+  <!-- PDF section heading: answers of a submission. -->
+  <string name="domain_pdf_responses">ចម្លើយ</string>
+  <string name="domain_pdf_no_responses">មិនមានចម្លើយដែលបានកត់ត្រាទេ។</string>
+  <!-- Status chip of a group of map features in a map cluster, by the marker symbol they share. -->
+  <string name="domain_cluster_marker_status_completed">បានបញ្ចប់</string>
+  <string name="domain_cluster_marker_status_in_progress">កំពុងដំណើរការ</string>
+  <string name="domain_cluster_marker_status_pending">កំពុងរង់ចាំ</string>
+  <string name="domain_cluster_marker_status_no_marker_symbol">គ្មាននិមិត្តសញ្ញាសម្គាល់</string>
+  <string name="domain_cluster_marker_status_other_symbol">និមិត្តសញ្ញា %1$s</string>
+</resources>

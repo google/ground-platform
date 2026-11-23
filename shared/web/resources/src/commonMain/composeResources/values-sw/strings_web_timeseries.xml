@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_time_series_tab">Msururu wa muda na picha</string>
+  <string name="web_time_series_open">Chambua picha</string>
+  <string name="web_time_series_select_feature">Chagua nukta au poligoni kwenye ramani ili kuona msururu wake wa muda wa setilaiti.</string>
+  <string name="web_time_series_unsupported">Msururu wa muda unapatikana kwa nukta na poligoni.</string>
+  <string name="web_time_series_unavailable">Msururu wa muda unahitaji muunganisho kwenye huduma ya Collect One.</string>
+  <string name="web_time_series_loading">Inapakia uchunguzi wa setilaiti…</string>
+  <string name="web_time_series_no_observations">Hakuna uchunguzi usio na mawingu wa %1$s katika kipindi hiki.</string>
+  <string name="web_time_series_retry">Jaribu tena</string>
+  <string name="web_time_series_error_not_uploaded">Utafiti huu bado hauko kwenye seva. Msururu wa muda utaonekana pindi utakapopakiwa.</string>
+  <string name="web_time_series_error_unsupported">Kipengele hiki cha ramani hakiwezi kuchambuliwa.</string>
+  <string name="web_time_series_error_busy">Maombi ni mengi mno. Jaribu tena baada ya dakika moja.</string>
+  <string name="web_time_series_error_timeout">Earth Engine imechukua muda mrefu sana kujibu. Jaribu tena.</string>
+  <string name="web_time_series_error_unavailable">Earth Engine haipatikani kwa sasa.</string>
+  <string name="web_time_series_error_denied">Huna idhini ya kufikia utafiti huu.</string>
+  <string name="web_time_series_error_other">Haikuweza kupakia data.</string>
+  <string name="web_time_series_area">%1$s ha</string>
+  <string name="web_time_series_elevation_range">Mwinuko %1$s–%2$s m</string>
+  <string name="web_time_series_elevation">Mwinuko %1$s m</string>
+  <string name="web_time_series_population">Idadi ya watu %1$s (%2$s/km², %3$d)</string>
+  <string name="web_time_series_population_density">watu %1$s/km² (%2$d)</string>
+  <string name="web_time_series_source_landsat">Landsat</string>
+  <string name="web_time_series_source_sentinel2">Sentinel-2</string>
+  <string name="web_time_series_source_sentinel1">Sentinel-1</string>
+  <string name="web_time_series_source_picker">Chanzo cha picha</string>
+  <string name="web_time_series_band_picker">Bendi</string>
+  <string name="web_time_series_picker_selection">%1$s: %2$s</string>
+  <string name="web_time_series_source_landsat_detail">Optiki · 30 m · kila baada ya siku 8–16</string>
+  <string name="web_time_series_source_sentinel2_detail">Optiki · 10 m · kila baada ya siku 5</string>
+  <string name="web_time_series_source_sentinel1_detail">Rada · 10 m · huona kupitia mawingu</string>
+  <string name="web_time_series_band_group_indices">Fahirisi</string>
+  <string name="web_time_series_band_group_reflectance">Uakisishaji</string>
+  <string name="web_time_series_band_group_backscatter">Mtawanyiko nyuma</string>
+  <string name="web_time_series_band_blue">Bluu</string>
+  <string name="web_time_series_band_green">Kijani</string>
+  <string name="web_time_series_band_red">Nyekundu</string>
+  <string name="web_time_series_band_nir">NIR</string>
+  <string name="web_time_series_band_swir1">SWIR 1</string>
+  <string name="web_time_series_band_swir2">SWIR 2</string>
+  <string name="web_time_series_band_ndvi_detail">Ukijani wa mimea</string>
+  <string name="web_time_series_band_ndfi_detail">Uharibifu wa dari ya msitu</string>
+  <string name="web_time_series_band_evi_detail">Ukijani katika dari nene ya msitu</string>
+  <string name="web_time_series_band_evi2_detail">EVI ya bendi mbili, bila bluu</string>
+  <string name="web_time_series_band_nbr_detail">Makovu ya moto na upotevu wa dari ya msitu</string>
+  <string name="web_time_series_band_ndmi_detail">Kiwango cha maji katika dari ya msitu</string>
+  <string name="web_time_series_band_ndwi_detail">Maji yaliyo wazi</string>
+  <string name="web_time_series_band_blue_detail">Mwanga wa bluu unaoonekana</string>
+  <string name="web_time_series_band_green_detail">Mwanga wa kijani unaoonekana</string>
+  <string name="web_time_series_band_red_detail">Mwanga mwekundu unaoonekana, unaofyonzwa na mimea</string>
+  <string name="web_time_series_band_nir_detail">Miale ya karibu ya infraredi, inayoakisiwa na majani</string>
+  <string name="web_time_series_band_swir1_detail">Infraredi ya mawimbi mafupi: unyevu</string>
+  <string name="web_time_series_band_swir2_detail">Infraredi ya mawimbi mafupi: udongo na maeneo yaliyoungua</string>
+  <string name="web_time_series_band_vv_detail">Mtawanyiko nyuma wa uso (dB)</string>
+  <string name="web_time_series_band_vh_detail">Mtawanyiko nyuma wa dari (dB)</string>
+  <string name="web_time_series_band_vv_vh_detail">Uwiano wa VV kwa VH</string>
+  <string name="web_time_series_band_rfdi_detail">Kielezo cha rada cha uharibifu wa msitu</string>
+  <string name="web_time_series_observations">uchunguzi %1$d · %2$s</string>
+  <string name="web_time_series_selected">%1$s · %2$s · %3$s %4$s</string>
+  <string name="web_time_series_chart_hint">Bofya nukta (au tumia ← →) ili kuonyesha taswira ya siku hiyo kwenye ramani.</string>
+  <string name="web_time_series_chart_description">Chati ya msururu wa muda ya %1$s yenye uchunguzi %2$d</string>
+  <string name="web_time_series_scene_loading">Inapakia taswira…</string>
+  <string name="web_time_series_scene_failed">Haikuweza kupakia taswira hii.</string>
+  <string name="web_time_series_scene_clear">Ondoa taswira kwenye ramani</string>
+  <string name="web_time_series_stretch_true_color">Rangi halisi</string>
+  <string name="web_time_series_stretch_swir_nir_red">SWIR · NIR · Nyekundu</string>
+  <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · Nyekundu</string>
+  <string name="web_time_series_stretch_sar">VV · VH · Uwiano</string>
+  <string name="web_time_series_close">Funga msururu wa muda</string>
+</resources>

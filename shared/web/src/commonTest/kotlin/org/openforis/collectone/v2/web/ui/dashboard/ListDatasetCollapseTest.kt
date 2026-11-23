@@ -20,6 +20,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
 import org.openforis.collectone.v2.web.ui.WebAppState
+import org.openforis.collectone.v2.web.ui.searchableList
 
 /** Tests collapsing entity datasets in the web dashboard's left-hand panel list. */
 class ListDatasetCollapseTest {
@@ -28,38 +29,41 @@ class ListDatasetCollapseTest {
   fun datasets_startExpanded() {
     val state = WebAppState(dataHolder = sampleDataHolder())
 
-    assertTrue(state.collapsedListDatasetIds.isEmpty())
-    assertFalse(state.isListDatasetCollapsed("plots"))
+    assertTrue(state.viewModels.dashboard.uiState.value.collapsedListDatasetIds.isEmpty())
+    assertFalse("plots" in state.searchableList.collapsedDatasetIds)
   }
 
   @Test
   fun toggleListDatasetCollapsed_collapsesAndExpandsOnlyThatDataset() {
     val state = WebAppState(dataHolder = sampleDataHolder())
 
-    state.toggleListDatasetCollapsed("plots")
-    assertTrue(state.isListDatasetCollapsed("plots"))
-    assertFalse(state.isListDatasetCollapsed("trees"))
-    assertEquals(setOf("plots"), state.collapsedListDatasetIds)
+    state.searchableListActions.toggleListDatasetCollapsed("plots")
+    assertTrue("plots" in state.searchableList.collapsedDatasetIds)
+    assertFalse("trees" in state.searchableList.collapsedDatasetIds)
+    assertEquals(setOf("plots"), state.viewModels.dashboard.uiState.value.collapsedListDatasetIds)
 
-    state.toggleListDatasetCollapsed("trees")
-    assertEquals(setOf("plots", "trees"), state.collapsedListDatasetIds)
+    state.searchableListActions.toggleListDatasetCollapsed("trees")
+    assertEquals(
+      setOf("plots", "trees"),
+      state.viewModels.dashboard.uiState.value.collapsedListDatasetIds,
+    )
 
-    state.toggleListDatasetCollapsed("plots")
-    assertFalse(state.isListDatasetCollapsed("plots"))
-    assertTrue(state.isListDatasetCollapsed("trees"))
-    assertEquals(setOf("trees"), state.collapsedListDatasetIds)
+    state.searchableListActions.toggleListDatasetCollapsed("plots")
+    assertFalse("plots" in state.searchableList.collapsedDatasetIds)
+    assertTrue("trees" in state.searchableList.collapsedDatasetIds)
+    assertEquals(setOf("trees"), state.viewModels.dashboard.uiState.value.collapsedListDatasetIds)
   }
 
   @Test
   fun activeSearchQuery_showsCollapsedDatasetsExpandedUntilCleared() {
     val state = WebAppState(dataHolder = sampleDataHolder())
-    state.toggleListDatasetCollapsed("plots")
+    state.searchableListActions.toggleListDatasetCollapsed("plots")
 
-    state.updateListSearchQuery("oak")
-    assertFalse(state.isListDatasetCollapsed("plots"))
-    assertEquals(setOf("plots"), state.collapsedListDatasetIds)
+    state.searchableListActions.updateListSearchQuery("oak")
+    assertFalse("plots" in state.searchableList.collapsedDatasetIds)
+    assertEquals(setOf("plots"), state.viewModels.dashboard.uiState.value.collapsedListDatasetIds)
 
-    state.clearListSearchQuery()
-    assertTrue(state.isListDatasetCollapsed("plots"))
+    state.searchableListActions.clearListSearchQuery()
+    assertTrue("plots" in state.searchableList.collapsedDatasetIds)
   }
 }

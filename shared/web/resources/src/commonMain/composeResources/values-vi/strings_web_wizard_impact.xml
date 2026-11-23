@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Impact goals: plain-language names of the goals survey data can contribute to. -->
+  <string name="wizard_goal_deforestation_free_supply_chains">Chuỗi cung ứng không gây mất rừng</string>
+  <string name="wizard_goal_ecosystem_restoration">Phục hồi hệ sinh thái</string>
+  <string name="wizard_goal_effective_protected_areas">Khu bảo tồn</string>
+  <string name="wizard_goal_iplc_rights_and_tenure">Quyền đất đai của người bản địa và cộng đồng</string>
+  <string name="wizard_goal_legal_timber">Gỗ hợp pháp</string>
+  <string name="wizard_goal_forest_carbon_and_conservation">Carbon rừng và bảo tồn</string>
+  <string name="wizard_goal_smallholder_livelihoods">Sinh kế và tiếp cận thị trường của nông hộ nhỏ</string>
+  <string name="wizard_goal_open_earth_data">Dữ liệu tham chiếu mở về lớp phủ đất và cây trồng</string>
+  <!-- Heading of standard fields (shared data definitions) that don't contribute to any goal. -->
+  <string name="wizard_goal_other_standard_fields">Các trường chuẩn khác</string>
+
+  <!-- Impact attribution levels: how directly a survey's data contributed to results (1–5). -->
+  <string name="wizard_impact_attribution_official_submission">Được dùng trong hồ sơ chính thức</string>
+  <string name="wizard_impact_attribution_official_submission_explanation">Người tổ chức cho biết dữ liệu đã được đưa vào một hồ sơ chính thức, chẳng hạn như tuyên bố thẩm định EUDR, báo cáo FERM hoặc đánh giá khu bảo tồn.</string>
+  <string name="wizard_impact_attribution_partner_use">Được đối tác sử dụng</string>
+  <string name="wizard_impact_attribution_partner_use_explanation">Dữ liệu đã được gửi cho đối tác, hoặc được bên mua sử dụng, dùng để cấp giấy chứng nhận quyền sử dụng đất hoặc để kiểm tra bản đồ hay mô hình.</string>
+  <string name="wizard_impact_attribution_purpose_export">Đã xuất theo mục đích</string>
+  <string name="wizard_impact_attribution_purpose_export_explanation">Dữ liệu đã được tải xuống ở định dạng do một trong các mục đích của khảo sát cung cấp, chẳng hạn như GeoJSON EUDR.</string>
+  <string name="wizard_impact_attribution_data_collected">Đã thu thập dữ liệu</string>
+  <string name="wizard_impact_attribution_data_collected_explanation">Dữ liệu đã được thu thập, nhưng chưa rõ dữ liệu được sử dụng như thế nào.</string>
+  <string name="wizard_impact_attribution_exploratory">Bước đầu</string>
+  <string name="wizard_impact_attribution_exploratory_explanation">Khảo sát thử nghiệm hoặc thăm dò, hoặc khảo sát chưa có dữ liệu.</string>
+
+  <!-- Impact setup hints, shown when a summary has no numbers yet. -->
+  <string name="wizard_impact_hint_collect_data">Số liệu sẽ xuất hiện ở đây khi dữ liệu được thu thập.</string>
+  <string name="wizard_impact_hint_pick_purpose">Chọn mục đích sử dụng dữ liệu trong Chi tiết khảo sát để có thể nhóm kết quả theo mục tiêu.</string>
+  <string name="wizard_impact_hint_link_fields">Liên kết câu hỏi trong biểu mẫu hoặc cột của lớp với các trường chuẩn (như Hàng hóa) để có thể cộng dồn câu trả lời.</string>
+
+  <!-- Impact activity: kinds of "data was used" events, with their count next to them. -->
+  <string name="wizard_impact_activity_downloads">Lượt tải xuống</string>
+  <string name="wizard_impact_activity_sent_to_partners">Đã gửi cho đối tác</string>
+  <string name="wizard_impact_activity_receipts_created">Biên nhận đã tạo</string>
+  <string name="wizard_impact_activity_receipts_shared">Biên nhận đã chia sẻ</string>
+  <string name="wizard_impact_activity_doi_minted">DOI đã cấp</string>
+  <string name="wizard_impact_activity_surveys_closed">Khảo sát đã đóng</string>
+
+  <!-- Impact indicators. %1$s is the formatted count (e.g. "1,234"). -->
+  <plurals name="wizard_impact_map_features">
+    <item quantity="other">%1$s đối tượng bản đồ</item>
+  </plurals>
+  <!-- %1$s: a count of map features (e.g. "3 map features"); %2$s: their area (e.g. "5.9 ha"). -->
+  <string name="wizard_impact_value_with_area">%1$s · %2$s</string>
+  <!-- Headline of a share indicator. %1$s: a percentage (e.g. "67%"); %2$s: the most common answer (e.g. "Yes"). -->
+  <string name="wizard_impact_share_value">%1$s %2$s</string>
+  <!-- What a breakdown indicator is split by. %1$s: the indicator name in lower case (e.g. "commodity"). -->
+  <string name="wizard_impact_detail_by">Theo %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_of_answered">Trong số %1$s có câu trả lời</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_total_from">Tổng từ %1$s</string>
+  <!-- %1$s: a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_average_of">Trung bình của %1$s</string>
+  <!-- %1$s: an area (e.g. "5.9 ha") or a count of map features (e.g. "12 map features"). -->
+  <string name="wizard_impact_detail_covering">Bao phủ %1$s</string>
+
+  <!-- Impact notes on what couldn't be counted. %1$s: the standard field (shared data definition) name. -->
+  <string name="wizard_impact_note_link_unknown">Một trường liên kết với trường chuẩn không còn tồn tại (%1$s).</string>
+  <string name="wizard_impact_note_link_deprecated">Một trường liên kết với trường chuẩn đã ngừng sử dụng (%1$s).</string>
+  <string name="wizard_impact_note_link_not_in_library">Một trường liên kết với trường chuẩn của tổ chức khác nên không được tính ở đây (%1$s).</string>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_not_a_number">
+    <item quantity="other">%1$s: %2$s giá trị không phải là số (%3$s) nên bị loại ra.</item>
+  </plurals>
+  <!-- %1$s: the standard field name; %2$s: how many values; %3$s: up to two quoted example values. -->
+  <plurals name="wizard_impact_note_unsupported_unit">
+    <item quantity="other">%1$s: %2$s giá trị dùng đơn vị không thể quy đổi (%3$s) nên bị loại ra.</item>
+  </plurals>
+
+  <!-- Impact views (survey Impact tab, Impact page, platform-wide view) and PDF summaries. -->
+  <string name="wizard_impact_title">Tác động</string>
+  <string name="wizard_impact_survey_subtitle">Kết quả tổng hợp từ dữ liệu của khảo sát này và cách dữ liệu được sử dụng. Các lô được lập bản đồ nhiều lần chỉ được tính một lần.</string>
+  <string name="wizard_impact_organization_subtitle">Kết quả tổng hợp từ dữ liệu các khảo sát của bạn và cách dữ liệu được sử dụng. Các lô được lập bản đồ trong nhiều khảo sát chỉ được tính một lần.</string>
+  <!-- Option of the survey filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_surveys">Tất cả khảo sát</string>
+  <!-- Option of the country filter of an organization's Impact view. -->
+  <string name="wizard_impact_all_countries">Tất cả quốc gia</string>
+  <!-- Label of the survey filter dropdown. -->
+  <string name="wizard_impact_filter_survey">Khảo sát</string>
+  <!-- Label of the country filter dropdown. -->
+  <string name="wizard_impact_filter_country">Quốc gia</string>
+  <!-- Title of the platform-wide Impact view ("Collect One" is the product name). -->
+  <string name="wizard_impact_all_of_collect_one">Toàn bộ Collect One</string>
+  <string name="wizard_impact_global_subtitle_full">Kết quả tổng hợp từ dữ liệu của mọi người, chỉ từ các trường chuẩn chung. Không bao gồm các tổ chức đã chọn không tham gia, và các nhóm nhỏ được giữ kín. Là Người quản lý của Tất cả người dùng, bạn cũng thấy các trường chuẩn chưa được công bố.</string>
+  <string name="wizard_impact_global_subtitle_published">Kết quả tổng hợp từ dữ liệu của mọi người, chỉ từ các trường chuẩn chung công khai. Không bao gồm các tổ chức đã chọn không tham gia, và các nhóm nhỏ được giữ kín.</string>
+  <!-- Title of the platform-wide impact summary (PDF) ("Collect One" is the product name). -->
+  <string name="wizard_impact_global_title">Tất cả người dùng Collect One</string>
+  <string name="wizard_impact_download_pdf">Tải xuống bản tóm tắt PDF</string>
+  <string name="wizard_impact_adding_up">Đang tổng hợp số liệu…</string>
+  <string name="wizard_impact_no_numbers_for_this">Chưa có số liệu cho mục này.</string>
+  <!-- Heading of an organization's own indicators, in its published view. -->
+  <string name="wizard_impact_own_indicators">Chỉ số riêng</string>
+  <!-- Heading of the viewer's organization's own indicators, in its members' full view. -->
+  <string name="wizard_impact_your_indicators">Chỉ số của bạn</string>
+  <string name="wizard_impact_own_indicators_supporting">Các trường chuẩn riêng của tổ chức, được công bố dưới dạng tổng số.</string>
+  <string name="wizard_impact_your_indicators_supporting">Các trường chuẩn riêng của tổ chức bạn. Chỉ những trường được đánh dấu Tổng số công khai mới được công bố; phần còn lại chỉ thuộc về tổ chức của bạn.</string>
+  <string name="wizard_impact_suggested_indicators">Chỉ số do tổ chức đề xuất</string>
+  <string name="wizard_impact_suggested_indicators_supporting">Các trường riêng mà tổ chức đề xuất tính vào một mục tiêu. Được hiển thị riêng và không bao giờ được cộng vào tổng số ở trên.</string>
+  <string name="wizard_impact_how_data_was_used">Cách dữ liệu được sử dụng</string>
+  <string name="wizard_impact_unique_hectares_mapped">Số hecta riêng biệt đã lập bản đồ</string>
+  <string name="wizard_impact_unique_hectares_mapped_detail">Diện tích của các đối tượng bản đồ riêng biệt</string>
+  <string name="wizard_impact_plots_and_map_features">Lô và đối tượng bản đồ</string>
+  <!-- %1$s: the formatted number of duplicate map features. -->
+  <plurals name="wizard_impact_duplicates_counted_once">
+    <item quantity="other">%1$s bản trùng lặp được tính một lần (cùng GeoID được lập bản đồ lại)</item>
+  </plurals>
+  <string name="wizard_impact_no_plot_mapped_twice">Không có lô nào được lập bản đồ hai lần</string>
+  <string name="wizard_impact_producers_registered">Nhà sản xuất đã đăng ký</string>
+  <string name="wizard_impact_producers_registered_detail">Số nhà sản xuất khác nhau được ghi tên trên các đối tượng bản đồ</string>
+  <string name="wizard_impact_what_happened_with_data">Điều gì đã xảy ra với dữ liệu</string>
+  <string name="wizard_impact_outcomes_empty_survey">Bạn sẽ được hỏi khi khảo sát được đóng.</string>
+  <string name="wizard_impact_outcomes_empty">Chưa có câu trả lời. Người tổ chức sẽ được hỏi khi họ đóng khảo sát.</string>
+  <!-- Shown next to an outcome a single survey's organizer chose. -->
+  <string name="wizard_impact_outcome_yes">Có</string>
+  <string name="wizard_impact_not_used_yet">Chưa được sử dụng</string>
+  <string name="wizard_impact_closed_not_answered_yet">Đã đóng, chưa trả lời</string>
+  <string name="wizard_impact_closed_surveys_not_answered">Khảo sát đã đóng chưa được trả lời</string>
+  <!-- PDF summary: closed surveys whose organizer didn't say what happened with the data. -->
+  <string name="wizard_impact_closed_not_answered">Đã đóng, không trả lời</string>
+  <string name="wizard_impact_how_directly_contributed">Mức độ đóng góp trực tiếp của dữ liệu</string>
+  <!-- Attribution level on a 1–5 scale. %1$s: the level (e.g. "2"). -->
+  <string name="wizard_impact_level_of_five">%1$s/5</string>
+  <string name="wizard_impact_no_global_purpose_surveys">Chưa có khảo sát nào có mục đích chung.</string>
+  <string name="wizard_impact_no_surveys">Chưa có khảo sát nào.</string>
+  <string name="wizard_impact_global_purpose_by_level">Khảo sát có mục đích chung, theo mức độ</string>
+  <!-- %1$s: the formatted number of surveys. -->
+  <plurals name="wizard_impact_surveys">
+    <item quantity="other">%1$s khảo sát</item>
+  </plurals>
+  <string name="wizard_impact_by_country_and_map_area">Theo quốc gia và vùng bản đồ</string>
+  <string name="wizard_impact_by_country_and_map_area_supporting">Quốc gia cần có ít nhất 10 đối tượng bản đồ, và vùng bản đồ cần có ít nhất 10 đối tượng bản đồ từ 2 tổ chức, thì số liệu mới được hiển thị.</string>
+  <string name="wizard_impact_countries">Quốc gia</string>
+  <string name="wizard_impact_no_countries">Chưa có quốc gia nào.</string>
+  <!-- Shown instead of a country's numbers when it has fewer than 10 map features. -->
+  <string name="wizard_impact_fewer_than_10">Ít hơn 10</string>
+  <string name="wizard_impact_map_areas_kept_private">Vùng bản đồ được giữ kín</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_map_areas_with_numbers">
+    <item quantity="other">%1$s vùng bản đồ có số liệu</item>
+  </plurals>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_map_features_in_private_areas">
+    <item quantity="other">%1$s đối tượng bản đồ trong các vùng được giữ kín</item>
+  </plurals>
+  <string name="wizard_impact_organizations_not_included">Tổ chức không được tính</string>
+  <string name="wizard_impact_organizations_not_included_detail">Các tổ chức này không đưa dữ liệu của mình vào số liệu toàn nền tảng</string>
+  <string name="wizard_impact_not_enough_data_title">Chưa đủ dữ liệu để công bố</string>
+  <!-- %1$d: the minimum number of map features before an organization's numbers are published. -->
+  <string name="wizard_impact_not_enough_data_body">Số liệu chỉ được công bố khi có ít nhất %1$d đối tượng bản đồ, để không thể nhận diện các nhóm nhỏ.</string>
+  <string name="wizard_impact_hints_title_empty">Cách để có số liệu ở đây</string>
+  <string name="wizard_impact_hints_title">Khai thác thêm từ dữ liệu của bạn</string>
+  <!-- %1$s: the formatted number of linked fields. -->
+  <plurals name="wizard_impact_linked_fields_not_counted">
+    <item quantity="other">%1$s trường được liên kết không thể tính</item>
+  </plurals>
+  <!-- Button hiding the list of what couldn't be counted. -->
+  <string name="wizard_impact_hide">Ẩn</string>
+  <!-- Button showing why some fields couldn't be counted. -->
+  <string name="wizard_impact_why">Tại sao?</string>
+
+  <!-- PDF impact summary. -->
+  <!-- %1$s: the survey, organization, or platform-wide title. -->
+  <string name="wizard_impact_pdf_title">Tóm tắt tác động • %1$s</string>
+  <!-- Running header on every page ("Open Foris Collect One" is the product name). %1$s: the summary title. -->
+  <string name="wizard_impact_pdf_running_header">Open Foris Collect One • Tóm tắt tác động • %1$s</string>
+  <!-- %1$s: when the PDF was generated (e.g. "2026-09-18 10:14 UTC"). -->
+  <string name="wizard_impact_pdf_footer">Tóm tắt tác động • Tạo lúc %1$s</string>
+  <string name="wizard_impact_pdf_subject_survey">Tóm tắt tác động của khảo sát</string>
+  <string name="wizard_impact_pdf_subject_organization">Tóm tắt tác động của tổ chức</string>
+  <string name="wizard_impact_pdf_subject_global">Tóm tắt tác động của tất cả tổ chức tham gia số liệu toàn nền tảng</string>
+  <string name="wizard_impact_pdf_published_numbers">Số liệu đã công bố</string>
+  <string name="wizard_impact_pdf_counted_once_note">Các lô được lập bản đồ nhiều lần (cùng GeoID) chỉ được tính một lần.</string>
+  <string name="wizard_impact_pdf_counted_once_note_published">Các lô được lập bản đồ nhiều lần (cùng GeoID) chỉ được tính một lần. Số liệu đã công bố là tổng số ẩn danh chỉ từ các trường chuẩn công khai.</string>
+  <string name="wizard_impact_pdf_at_a_glance">Tổng quan nhanh</string>
+  <string name="wizard_impact_pdf_unique_map_features">Đối tượng bản đồ riêng biệt</string>
+  <string name="wizard_impact_pdf_area_mapped">Diện tích đã lập bản đồ</string>
+  <string name="wizard_impact_pdf_counted_once">Được tính một lần</string>
+  <!-- %1$s: the formatted number of map features. -->
+  <plurals name="wizard_impact_pdf_mapped_again">
+    <item quantity="other">%1$s đối tượng bản đồ được lập bản đồ lại ở nơi khác</item>
+  </plurals>
+  <string name="wizard_impact_pdf_suggested_note">Các trường riêng mà tổ chức đề xuất tính vào một mục tiêu. Không được cộng vào tổng số ở trên.</string>
+  <!-- How directly the data contributed (attribution level). -->
+  <string name="wizard_impact_pdf_contribution">Mức độ đóng góp</string>
+  <string name="wizard_impact_pdf_by_country">Theo quốc gia</string>
+  <string name="wizard_impact_pdf_fewer_than_10_features">Ít hơn 10 đối tượng bản đồ</string>
+  <string name="wizard_impact_pdf_map_areas">Vùng bản đồ</string>
+  <string name="wizard_impact_pdf_map_areas_with_numbers">Vùng bản đồ có số liệu</string>
+  <string name="wizard_impact_pdf_kept_private">Được giữ kín</string>
+  <!-- %1$s: the formatted number of map areas. -->
+  <plurals name="wizard_impact_pdf_kept_private_areas">
+    <item quantity="other">%1$s vùng bản đồ có ít hơn 10 đối tượng bản đồ hoặc 2 tổ chức</item>
+  </plurals>
+  <!-- %1$s: the formatted number of organizations. -->
+  <plurals name="wizard_impact_pdf_excluded_organizations">
+    <item quantity="other">%1$s tổ chức không đưa dữ liệu của mình vào số liệu toàn nền tảng.</item>
+  </plurals>
+  <string name="wizard_impact_pdf_not_counted">Không được tính</string>
+
+  <!-- Impact page (#impact): the organizations a user follows and all of Collect One. -->
+  <string name="wizard_impact_back_to_surveys">Quay lại khảo sát</string>
+  <string name="wizard_impact_page_title">Số liệu trực tiếp</string>
+  <!-- Header line under "Live Metrics". %1$s: the formatted number of followed organizations. -->
+  <plurals name="wizard_impact_published_by_followed">
+    <item quantity="other">Được công bố bởi %1$s tổ chức bạn theo dõi</item>
+  </plurals>
+  <string name="wizard_impact_choose_organizations">Chọn tổ chức</string>
+  <!-- Navigation item of the Impact page's overview. -->
+  <string name="wizard_impact_overview">Tổng quan</string>
+  <!-- Section heading in the Impact page's left panel (shown in capitals). -->
+  <string name="wizard_impact_organizations_you_follow">TỔ CHỨC BẠN THEO DÕI</string>
+  <!-- The signed-in user is a member of this organization. -->
+  <string name="wizard_impact_member">Thành viên</string>
+  <!-- The signed-in user is a Manager of this organization. -->
+  <string name="wizard_impact_you_manage">Bạn quản lý</string>
+  <!-- Fallback description of an organization with no type or country. -->
+  <string name="wizard_impact_organization">Tổ chức</string>
+  <string name="wizard_impact_no_followed_organizations">Bạn chưa theo dõi tổ chức nào.</string>
+  <string name="wizard_impact_dashboard_title">Bảng thông tin tác động của bạn</string>
+  <string name="wizard_impact_dashboard_subtitle">Số liệu đã công bố của các tổ chức bạn theo dõi. Chọn bất kỳ tổ chức công khai nào để xem kết quả tổng hợp từ dữ liệu của tổ chức đó.</string>
+  <string name="wizard_impact_all_of_collect_one_supporting">Mọi tổ chức tham gia số liệu toàn nền tảng</string>
+  <string name="wizard_impact_follow_more_organizations">Theo dõi thêm tổ chức</string>
+  <!-- Screen reader label of the button removing an organization from the Impact page. %1$s: the organization name. -->
+  <string name="wizard_impact_stop_following">Ngừng theo dõi %1$s</string>
+  <string name="wizard_impact_no_numbers_yet">Chưa có số liệu.</string>
+  <string name="wizard_impact_not_enough_data_short">Chưa đủ dữ liệu để công bố.</string>
+  <!-- Label under a headline area number. -->
+  <string name="wizard_impact_unique_hectares">Số hecta riêng biệt</string>
+  <!-- Label under a headline count of map features. -->
+  <string name="wizard_impact_map_features_label">Đối tượng bản đồ</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_organization_published_subtitle">Kết quả tổng hợp từ các khảo sát của %1$s, như được công bố cho mọi người trên Collect One. Các lô được lập bản đồ trong nhiều khảo sát chỉ được tính một lần.</string>
+  <string name="wizard_impact_organization_page">Trang tổ chức</string>
+  <string name="wizard_impact_unfollow">Bỏ theo dõi</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_manager">Bạn đang xem toàn bộ số liệu với tư cách Người quản lý của %1$s</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_full_member">Bạn đang xem toàn bộ số liệu của %1$s với tư cách thành viên</string>
+  <string name="wizard_impact_notice_published_member">Đây là những gì mọi người trên Collect One nhìn thấy</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_impact_notice_published_by">Được công bố bởi %1$s</string>
+  <!-- %1$s: the organization name; %2$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body_manager">%1$s công bố số liệu tổng hợp ẩn danh từ các khảo sát của mình cho bất kỳ ai đã đăng nhập vào Collect One. %2$s</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_notice_body">Mọi tổ chức trên Collect One đều công bố số liệu tổng hợp ẩn danh từ các khảo sát của mình. %1$s</string>
+  <!-- Label of the switch showing members the published view. -->
+  <string name="wizard_impact_show_published">Hiện nội dung được công bố</string>
+  <!-- "All users" is the name of the platform-wide organization. -->
+  <string name="wizard_impact_platform_notice_full">Bạn đang xem mọi trường chuẩn với tư cách Người quản lý của Tất cả người dùng</string>
+  <string name="wizard_impact_platform_notice_published">Được công bố cho mọi người trên Collect One</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_platform_notice_body">Tổng số của mọi tổ chức tham gia số liệu toàn nền tảng. %1$s</string>
+  <string name="wizard_impact_explainer_title">Mọi tổ chức đều công bố số liệu tổng hợp ẩn danh</string>
+  <!-- %1$s: what's never published (wizard_impact_published_rules). -->
+  <string name="wizard_impact_explainer_body">Người tổ chức trên Collect One công bố kết quả tổng hợp từ các khảo sát của họ, chẳng hạn như số hecta đã lập bản đồ và cách dữ liệu được sử dụng, để bất kỳ ai đã đăng nhập đều có thể xem. %1$s</string>
+  <!-- What's never published. %1$d: the minimum number of map features before numbers are shown. -->
+  <string name="wizard_impact_published_rules">Bài gửi, đối tượng bản đồ, vị trí và câu trả lời không bao giờ được công bố, cũng như các trường chuẩn chỉ dành riêng cho tổ chức hoặc được đánh dấu là nhạy cảm. Tổ chức có ít hơn %1$d đối tượng bản đồ sẽ không hiển thị số liệu.</string>
+  <string name="wizard_impact_choose_organizations_body">Mọi tổ chức đều công bố số liệu tổng hợp ẩn danh từ các khảo sát của mình. Hãy chọn tổ chức có số liệu bạn muốn theo dõi trên trang Tác động.</string>
+  <string name="wizard_impact_search_organizations">Tìm kiếm tổ chức</string>
+  <string name="wizard_impact_no_organizations_match">Không có tổ chức nào phù hợp.</string>
+  <!-- Appended to an organization's description when it isn't listed publicly. -->
+  <string name="wizard_impact_unlisted">Không công khai, chỉ thành viên mới thấy</string>
+  <string name="wizard_impact_save">Lưu</string>
+  <string name="wizard_impact_cancel">Hủy</string>
+  <!-- Snackbar after saving a PDF summary. %1$s: the file name; %2$s: its page count and size (e.g. "2 pages • 14 KB"). -->
+  <string name="wizard_impact_saved_pdf">Đã lưu %1$s (%2$s)</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the survey title. -->
+  <string name="wizard_impact_filter_label_survey">Khảo sát: %1$s</string>
+  <!-- Part of a PDF summary's subtitle. %1$s: the country name. -->
+  <string name="wizard_impact_filter_label_country">Quốc gia: %1$s</string>
+
+  <!-- "What happened with this data?" card/dialog, asked after a survey is closed. -->
+  <string name="wizard_outcome_title">Điều gì đã xảy ra với dữ liệu này?</string>
+  <string name="wizard_outcome_supporting">Chọn tất cả các mục phù hợp. Câu trả lời của bạn giúp cho thấy dữ liệu khảo sát được sử dụng như thế nào.</string>
+  <string name="wizard_outcome_skip">Bỏ qua</string>
+  <string name="wizard_outcome_save">Lưu</string>
+  <!-- Question completed by one of the chips below (e.g. "Less time and cost"). -->
+  <string name="wizard_outcome_effort_question">So với phương pháp trước đây của bạn, việc này tốn… (không bắt buộc)</string>
+  <string name="wizard_outcome_effort_less">Ít thời gian và chi phí hơn</string>
+  <string name="wizard_outcome_effort_same">Gần như tương đương</string>
+  <string name="wizard_outcome_effort_more">Nhiều thời gian và chi phí hơn</string>
+
+  <!-- Purpose Pack picker ("What will this data be used for?"). -->
+  <!-- Screen reader label of the error icon in a validation banner. -->
+  <string name="wizard_purpose_error">Lỗi</string>
+  <string name="wizard_validation_purpose_required">Chọn một mục đích (hoặc chọn "Khác" và mô tả mục tiêu của bạn) để tiếp tục.</string>
+  <string name="wizard_validation_other_purpose_required">Vui lòng mô tả mục đích của khảo sát này để tiếp tục.</string>
+  <!-- Badge of a Purpose Pack defined by an organization, when its name is unknown. -->
+  <string name="wizard_purpose_source_organization">Tổ chức</string>
+  <!-- Badge of a Purpose Pack available to every organization. -->
+  <string name="wizard_purpose_source_global">Chung</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_purpose_other_label">Mô tả mục đích của khảo sát này *</string>
+  <string name="wizard_purpose_other_placeholder">VD: Giám sát phục hồi lưu vực do cộng đồng thực hiện</string>
+  <string name="wizard_purpose_other_supporting">Giúp điều chỉnh biểu mẫu, khái niệm thư viện và báo cáo tác động phù hợp với mục tiêu của bạn.</string>
+  <!-- Screen reader label of the check mark on a selected card. -->
+  <string name="wizard_purpose_selected">Đã chọn</string>
+  <!-- Title of the card for a custom survey purpose. -->
+  <string name="wizard_purpose_other">Khác</string>
+  <string name="wizard_purpose_other_description">Mục tiêu nghiên cứu, giám sát hoặc cộng đồng tùy chỉnh không thuộc các gói tiêu chuẩn.</string>
+  <!-- Badge of the "Other" purpose card. -->
+  <string name="wizard_purpose_custom">Tùy chỉnh</string>
+  <!-- What a Purpose Pack adds. %1$d: the number of form templates. -->
+  <plurals name="wizard_purpose_forms">
+    <item quantity="other">%1$d biểu mẫu</item>
+  </plurals>
+  <!-- What a Purpose Pack adds. %1$d: the number of questions linked to standard fields (shared data definitions). -->
+  <plurals name="wizard_purpose_standard_fields">
+    <item quantity="other">%1$d trường chuẩn</item>
+  </plurals>
+
+  <!-- Create survey wizard (#create-survey): page chrome. -->
+  <string name="wizard_cancel_survey_creation">Hủy tạo khảo sát</string>
+  <!-- Page title while the survey has no title yet, and the wizard's final button. -->
+  <string name="wizard_create_survey">Tạo khảo sát</string>
+  <string name="wizard_saving_survey">Đang lưu khảo sát…</string>
+  <string name="wizard_save_failed">Không lưu được khảo sát nên khảo sát vẫn đang mở ở đây. %1$s</string>
+  <string name="wizard_discard_title">Hủy bỏ khảo sát?</string>
+  <string name="wizard_discard_body">Nếu bạn rời đi bây giờ, khảo sát này và mọi thay đổi bạn đã thực hiện sẽ bị mất.</string>
+  <string name="wizard_discard">Hủy bỏ</string>
+  <string name="wizard_keep_editing">Tiếp tục chỉnh sửa</string>
+  <string name="wizard_working_copy_prompt_title">Tiếp tục chỉnh sửa bản nháp chưa lưu?</string>
+  <string name="wizard_working_copy_prompt_body">Bạn có một bản nháp khảo sát chưa lưu đang thực hiện. Bạn có muốn tiếp tục chỉnh sửa hay hủy bỏ nó và bắt đầu một khảo sát mới?</string>
+  <string name="wizard_working_copy_continue">Tiếp tục chỉnh sửa</string>
+  <string name="wizard_working_copy_discard">Hủy bỏ bản nháp</string>
+  <string name="wizard_back">Quay lại</string>
+  <string name="wizard_cancel">Hủy</string>
+  <string name="wizard_required_field_missing">Thiếu trường bắt buộc — xem phần được đánh dấu</string>
+  <string name="wizard_skip_for_now">Bỏ qua lúc này</string>
+  <string name="wizard_next">Tiếp theo</string>
+
+  <!-- Wizard steps: name and short description of each of the 6 steps. -->
+  <string name="wizard_step_overview">Tổng quan</string>
+  <string name="wizard_step_overview_subtitle">Tiêu đề, tổ chức, ngôn ngữ và cách bắt đầu</string>
+  <string name="wizard_step_purpose">Mục đích</string>
+  <string name="wizard_step_purpose_subtitle">Mục tiêu khảo sát, gói mục đích và chương trình báo cáo</string>
+  <string name="wizard_step_survey_area">Khu vực khảo sát</string>
+  <string name="wizard_step_survey_area_subtitle">Ranh giới nghiên cứu và hình ảnh bản đồ nền ngoại tuyến/web</string>
+  <string name="wizard_step_map_features">Đối tượng bản đồ</string>
+  <string name="wizard_step_map_features_subtitle">Lớp bản đồ chính, lô mẫu hoặc đối tượng được nhập</string>
+  <string name="wizard_step_forms">Biểu mẫu</string>
+  <string name="wizard_step_forms_subtitle">Bảng câu hỏi, khái niệm thư viện và ánh xạ xuất dữ liệu</string>
+  <string name="wizard_step_sharing">Chia sẻ</string>
+  <string name="wizard_step_sharing_subtitle">Quyền truy cập, chủ quyền dữ liệu CARE và mức độ sẵn sàng về tác động</string>
+
+  <!-- Wizard step 1: Overview. -->
+  <string name="wizard_overview_subtitle">Đặt tên cho khảo sát, chọn tổ chức thực hiện, cấu hình ngôn ngữ và chọn cách bạn muốn bắt đầu.</string>
+  <string name="wizard_survey_identity">Thông tin nhận dạng khảo sát</string>
+  <string name="wizard_validation_title_required">Nhập tiêu đề khảo sát để tiếp tục.</string>
+  <!-- Label of a required text field (* marks it required). -->
+  <string name="wizard_survey_title_label">Tiêu đề khảo sát *</string>
+  <string name="wizard_survey_title_placeholder">VD: Lập bản đồ lô cà phê nông hộ nhỏ Nyeri</string>
+  <string name="wizard_description_label">Mô tả (không bắt buộc)</string>
+  <string name="wizard_description_placeholder">Mô tả mục tiêu và hướng dẫn cho người thu thập dữ liệu.</string>
+  <!-- Label of the organization dropdown. -->
+  <string name="wizard_organization">Tổ chức</string>
+  <!-- Organization dropdown option for a survey not run by any organization. -->
+  <string name="wizard_no_organization">Không có (khảo sát cá nhân)</string>
+  <string name="wizard_organization_supporting">Thực hiện khảo sát dưới một tổ chức sẽ mở khóa các Gói mục đích, khái niệm Từ điển, Mẫu biểu mẫu và hình ảnh bản đồ nền tùy chỉnh dùng chung của tổ chức đó.</string>
+  <string name="wizard_start_method_title">Bạn muốn bắt đầu như thế nào?</string>
+  <string name="wizard_start_from_scratch">Xây dựng khảo sát mới</string>
+  <string name="wizard_start_from_scratch_description">Cấu hình lớp bản đồ và biểu mẫu theo từng bước hoặc từ các gói mục đích.</string>
+  <string name="wizard_start_copy_existing">Sao chép khảo sát hiện có</string>
+  <string name="wizard_start_copy_existing_description">Sao chép biểu mẫu, lược đồ lớp bản đồ, khu vực khảo sát và gói mục đích mà không kèm dữ liệu.</string>
+  <string name="wizard_start_import">Nhập từ tệp</string>
+  <string name="wizard_start_import_description">Nhập định nghĩa biểu mẫu từ ODK XForms (.xml) hoặc Collect Earth (.cep).</string>
+  <string name="wizard_no_surveys_to_copy">Không có khảo sát hiện có nào để sao chép.</string>
+  <string name="wizard_copy_source_label">Khảo sát nguồn để sao chép</string>
+  <string name="wizard_copy_source_supporting">Sao chép Biểu mẫu, lược đồ Lớp bản đồ, thiết kế lô mẫu và Mục đích mà không sao chép các bản ghi đã thu thập trước đó.</string>
+  <string name="wizard_import_supported_formats">Định dạng được hỗ trợ: ODK XForms (.xml), Collect Earth (.cep, .zip)</string>
+  <string name="wizard_import_choose_another_file">Chọn tệp khác (.xml, .cep)</string>
+  <string name="wizard_import_choose_file">Chọn tệp (.xml, .cep)</string>
+  <!-- %1$d: the number of questions in the imported form. -->
+  <plurals name="wizard_import_questions">
+    <item quantity="other">%1$d câu hỏi</item>
+  </plurals>
+  <!-- %1$d: the number of sample plots in the imported Collect Earth project. -->
+  <plurals name="wizard_import_sample_plots">
+    <item quantity="other">%1$d lô mẫu</item>
+  </plurals>
+  <!-- %1$s: the number of questions (e.g. "12 questions"). -->
+  <string name="wizard_import_parsed">Đã phân tích %1$s · Sẵn sàng nhập vào Bước 5</string>
+  <!-- %1$s: the number of questions (e.g. "12 questions"); %2$s: the number of sample plots (e.g. "50 sample plots"). -->
+  <string name="wizard_import_parsed_with_plots">Đã phân tích %1$s · %2$s · Sẵn sàng nhập vào Bước 5</string>
+  <string name="wizard_import_clear_file">Xóa tệp đã nhập</string>
+  <!-- %1$d: the number of Collect Earth surveys found in the imported archive. -->
+  <string name="wizard_import_cep_archive_label">Khảo sát Collect Earth trong tệp lưu trữ (tìm thấy %1$d)</string>
+
+  <!-- Wizard step 2: Purpose. -->
+  <string name="wizard_purpose_subtitle">Chọn các kết quả hoặc tiêu chuẩn báo cáo mà khảo sát này hỗ trợ để cấu hình sẵn lớp bản đồ và biểu mẫu ban đầu.</string>
+  <!-- Section title of a required choice (* marks it required). -->
+  <string name="wizard_purpose_question">Dữ liệu này sẽ được dùng để làm gì? *</string>
+  <string name="wizard_purpose_question_supporting">Chọn mục đích chính để Collect One có thể điều chỉnh các mặc định lớp bản đồ, biểu mẫu ban đầu, khái niệm thư viện tiêu chuẩn, biện pháp bảo vệ quản trị dữ liệu (như EUDR hoặc chủ quyền CARE) và hồ sơ xuất dữ liệu bằng một cú nhấp cho khảo sát của bạn. Chọn "Khác" nếu mục tiêu của bạn không có trong danh sách.</string>
+  <string name="wizard_purpose_programs_title">Chương trình &amp; khung báo cáo</string>
+  <string name="wizard_purpose_programs_supporting">Các chương trình mà dữ liệu của khảo sát này đóng góp. Chọn một mẫu sẽ chọn sẵn các chương trình; chúng dùng để theo dõi và báo cáo tác động, không thay đổi biểu mẫu.</string>
+  <string name="wizard_purpose_loading">Đang tải mục đích…</string>
+  <string name="wizard_starter_template_title">Mẫu khởi đầu</string>
+  <string name="wizard_starter_template_supporting">Chọn cách khảo sát này đáp ứng mục đích. Mẫu sẽ thiết lập biểu mẫu khởi đầu, quy tắc kiểm tra và hồ sơ xuất dữ liệu, đồng thời chọn sẵn các chương trình mà khảo sát báo cáo.</string>
+  <string name="wizard_starter_template_programs">Báo cáo cho: %1$s</string>
+  <string name="wizard_starter_template_replace_title">Thay thế biểu mẫu của bạn?</string>
+  <string name="wizard_starter_template_replace_body">Bạn đã chỉnh sửa các biểu mẫu được tạo từ mẫu của khảo sát này. Khi chuyển sang %1$s, bạn có thể thay chúng bằng biểu mẫu khởi đầu của mẫu đó, hoặc giữ nguyên biểu mẫu của mình.</string>
+  <string name="wizard_starter_template_replace_forms">Thay thế biểu mẫu</string>
+  <string name="wizard_starter_template_keep_forms">Giữ biểu mẫu của tôi</string>
+  <string name="wizard_starter_template_cancel">Hủy</string>
+
+  <!-- Wizard step 3: Survey area. -->
+  <string name="wizard_survey_area_subtitle_field">Xác định ranh giới địa lý để định khung bản đồ khảo sát và chuẩn bị trước hình ảnh bản đồ nền ngoại tuyến cho người thu thập dữ liệu tại thực địa.</string>
+  <string name="wizard_survey_area_subtitle_visual">Xác định khu vực quan tâm (AOI) nơi các lô mẫu sẽ được tạo và giải đoán, đồng thời kiểm tra hình ảnh bản đồ nền vệ tinh.</string>
+  <string name="wizard_imagery_title">Bản đồ nền &amp; hình ảnh tham chiếu</string>
+  <string name="wizard_imagery_supporting_field">Chọn các lớp hình ảnh vệ tinh và tham chiếu được bật cùng với bản đồ nền vệ tinh mặc định.</string>
+  <string name="wizard_imagery_supporting_visual">Chọn các lớp hình ảnh độ phân giải cao hoặc theo thời gian (như ảnh ghép NICFI Planet hoặc Sentinel-2) mà người giải đoán ảnh sẽ xem xét khi phân loại lô.</string>
+  <string name="wizard_imagery_default_only">Bản đồ nền Mapbox Satellite mặc định đã được bật. Chưa cấu hình lớp hình ảnh tùy chỉnh nào.</string>
+  <!-- Badge of imagery available to everyone ("All users" is the name of the platform-wide organization). -->
+  <string name="wizard_imagery_source_all_users">Tất cả người dùng</string>
+  <!-- Imagery layer that comes with the platform. -->
+  <string name="wizard_imagery_built_in">Hình ảnh tích hợp sẵn của nền tảng</string>
+  <!-- %1$s: the organization that added the imagery layer. -->
+  <string name="wizard_imagery_added_by">Được thêm bởi %1$s</string>
+  <string name="wizard_imagery_offline_available">Có thể tải xuống ngoại tuyến tại thực địa và lập bản đồ trên web</string>
+  <string name="wizard_imagery_online_only">Lớp hình ảnh vệ tinh &amp; tham chiếu trực tuyến</string>
+
+  <!-- Wizard step 4: Map features. -->
+  <string name="wizard_map_features_subtitle">Cấu hình Lớp bản đồ chính nơi dữ liệu sẽ được ghi lại: thu thập tự do tại thực địa, lưới lô mẫu thống kê hoặc đối tượng GeoJSON / KML được nhập.</string>
+  <string name="wizard_map_features_source_title">Đối tượng bản đồ được tạo như thế nào?</string>
+  <string name="wizard_source_field_freeform">Người thu thập dữ liệu thêm đối tượng bản đồ tại thực địa</string>
+  <string name="wizard_source_field_freeform_description">Người thu thập dữ liệu ghi lại điểm hoặc đa giác mới tại chỗ trong các chuyến đi thực địa.</string>
+  <string name="wizard_source_sample_plots">Tạo lô mẫu</string>
+  <string name="wizard_source_sample_plots_description">Tạo lô mẫu hệ thống hoặc ngẫu nhiên (và lưới lô phụ) bên trong khu vực khảo sát.</string>
+  <string name="wizard_source_import_file">Nhập đối tượng bản đồ (GeoJSON / KML)</string>
+  <string name="wizard_source_import_file_description">Tải lên ranh giới lô, thửa đất hoặc điểm được xác định trước từ một tệp.</string>
+  <!-- %1$s: the description of the chosen way of creating map features (a full sentence). -->
+  <string name="wizard_map_features_source_preselected">%1$s Được chọn sẵn theo mục đích và chế độ thu thập bạn đã chọn.</string>
+  <string name="wizard_change">Thay đổi</string>
+  <string name="wizard_eudr_guardrail_title">Biện pháp bảo vệ định vị địa lý theo Điều 9 EUDR</string>
+  <string name="wizard_eudr_guardrail_body">Quy định của EU về chống mất rừng (EUDR) yêu cầu ranh giới đa giác cho tất cả các lô sản xuất lớn hơn 4 hecta. Hình học đa giác được chọn theo mặc định.</string>
+  <string name="wizard_eudr_plots_under_four_ha">Tất cả các lô sản xuất trong khảo sát này đều ≤ 4 ha (cho phép vị trí một điểm)</string>
+  <string name="wizard_primary_layer_settings">Cài đặt lớp bản đồ chính</string>
+  <string name="wizard_map_layer_name">Tên lớp bản đồ</string>
+  <string name="wizard_geometry_type">Loại hình học</string>
+  <string name="wizard_allow_field_creation">Cho phép người thu thập dữ liệu thêm đối tượng bản đồ mới tại thực địa</string>
+  <string name="wizard_allow_field_creation_supporting">Khi được bật, người thu thập dữ liệu có thể ghim điểm hoặc đi vòng quanh ranh giới lô để tạo đối tượng bản đồ mới.</string>
+  <string name="wizard_sample_design_title">Thiết kế mẫu thống kê &amp; điểm lô phụ</string>
+  <string name="wizard_sample_design_supporting">Cấu hình lô theo Lưới hệ thống, Ngẫu nhiên đơn giản hoặc Ngẫu nhiên phân tầng, hình dạng lô (Điểm, Hình vuông, Hình tròn) và lưới điểm mẫu lô phụ bên trong.</string>
+  <string name="wizard_import_features_title">Nhập đối tượng bản đồ từ GeoJSON hoặc KML</string>
+  <string name="wizard_import_features_supporting">Tải lên ranh giới trang trại, lô giám sát hoặc điểm quan tâm hiện có. Các thuộc tính trong tệp sẽ trở thành thuộc tính của Lớp bản đồ.</string>
+  <string name="wizard_import_features_choose_file">Chọn tệp GeoJSON hoặc KML</string>
+  <!-- %1$d: the number of imported map features; %2$s: their geometry type in lower case (e.g. "polygon"). -->
+  <plurals name="wizard_import_features_loaded">
+    <item quantity="other">Đã tải %1$d đối tượng %2$s</item>
+  </plurals>
+  <string name="wizard_also_allow_field_creation">Đồng thời cho phép người thu thập dữ liệu thêm đối tượng bản đồ mới tại thực địa</string>
+  <string name="wizard_also_allow_field_creation_supporting">Để tắt đối với các lô giám sát cố định; bật nếu người thu thập dữ liệu cũng có thể thêm địa điểm mới.</string>
+  <!-- %1$d: the number of other map layers and data tables in the survey. -->
+  <plurals name="wizard_other_datasets_note">
+    <item quantity="other">Khảo sát này còn có thêm %1$d lớp bản đồ và bảng dữ liệu được liên kết với các biểu mẫu khác. Bạn có thể xem lại chúng ở bước tiếp theo.</item>
+  </plurals>
+
+  <!-- Wizard validation messages. -->
+  <string name="wizard_validation_copy_source_required">Chọn một khảo sát nguồn để sao chép trước khi tiếp tục.</string>
+  <string name="wizard_validation_import_file_required">Chọn một tệp XML XForms hợp lệ để nhập trước khi tiếp tục.</string>
+  <string name="wizard_validation_survey_area_required">Chọn hoặc vẽ khu vực khảo sát để tiếp tục.</string>
+  <string name="wizard_validation_form_variant_incompatible">Giải quyết các câu hỏi biểu mẫu không tương thích với các biến thể biểu mẫu đã chọn (Web hoặc Google Earth) trước khi tiếp tục.</string>
+  <!-- %1$s: the name of the file that couldn't be read. -->
+  <string name="wizard_import_parse_failed">Không thể phân tích câu hỏi XForms hoặc Collect Earth nào từ "%1$s".</string>
+
+  <!-- Collection modes: field data collection, desk-based visual classification, or both. -->
+  <string name="wizard_mode_field_survey">Khảo sát thực địa</string>
+  <string name="wizard_mode_field_survey_summary">Người thu thập dữ liệu thu thập dữ liệu thực địa trên di động, ngoại tuyến/trực tuyến, tại hiện trường.</string>
+  <string name="wizard_mode_visual_classification">Phân loại trực quan</string>
+  <string name="wizard_mode_visual_classification_summary">Phân loại trực quan lô mẫu tại văn phòng dựa trên hình ảnh vệ tinh và bản đồ nền.</string>
+  <!-- Collection mode combining field survey and visual classification. -->
+  <string name="wizard_mode_both">Cả hai</string>
+  <string name="wizard_mode_both_summary">Kết hợp phân loại trực quan tại văn phòng và thu thập dữ liệu thực địa trên di động.</string>
+
+  <!-- Wizard step 5: Forms. -->
+  <string name="wizard_show_forms_and_layers">Hiện tất cả biểu mẫu &amp; lớp</string>
+  <string name="wizard_hide_forms_and_layers">Ẩn biểu mẫu &amp; lớp</string>
+  <string name="wizard_add_another_form">Thêm biểu mẫu khác</string>
+  <string name="wizard_add_form">Thêm biểu mẫu</string>
+  <string name="wizard_untitled_form">Biểu mẫu chưa đặt tên</string>
+  <!-- Name shown for a map layer or data table without a name. -->
+  <string name="wizard_untitled">Chưa đặt tên</string>
+
+  <!-- Wizard step 6: Sharing. -->
+  <string name="wizard_sharing_subtitle">Xem lại mức độ sẵn sàng về tác động và xuất dữ liệu của khảo sát, cấu hình mặc định về chủ quyền dữ liệu và mời cộng tác viên.</string>
+  <string name="wizard_draft_mode_title">Bắt đầu ở chế độ Bản nháp</string>
+  <!-- Badge of a survey that isn't published yet. -->
+  <string name="wizard_draft_badge">Bản nháp</string>
+  <string name="wizard_draft_mode_body">Khi nhấp vào Tạo khảo sát, khảo sát sẽ mở trên bản đồ chính ở chế độ Bản nháp để bạn có thể kiểm tra khu vực nghiên cứu và các lớp hoặc mở Trình chỉnh sửa khảo sát trước khi người thu thập dữ liệu nhìn thấy. Khi sẵn sàng đưa vào hoạt động, hãy mở Trình chỉnh sửa khảo sát, nhấp vào huy hiệu trạng thái Bản nháp bên cạnh tên khảo sát và chọn Xuất bản khảo sát.</string>
+  <string name="wizard_readiness_title">Mức độ sẵn sàng về tác động &amp; xuất dữ liệu</string>
+  <string name="wizard_readiness_supporting">Cách lược đồ của khảo sát này kết nối với tổng hợp tác động của tổ chức bạn, các chỉ số môi trường của FAO/LHQ và hồ sơ xuất dữ liệu bằng một cú nhấp.</string>
+  <!-- %1$s: the collection mode (e.g. "Field survey"). -->
+  <string name="wizard_readiness_mode">Chế độ: %1$s</string>
+  <!-- %1$d: questions linked to standard fields (shared data definitions); %2$d: all questions. -->
+  <string name="wizard_readiness_fields_linked">%1$d/%2$d trường chuẩn đã liên kết</string>
+  <!-- %1$s: comma-separated purpose names. -->
+  <string name="wizard_readiness_purposes">Mục đích: %1$s</string>
+  <!-- %1$s: comma-separated reporting program names. -->
+  <string name="wizard_readiness_programs">Chương trình: %1$s</string>
+  <!-- %1$s: comma-separated impact goal names. -->
+  <string name="wizard_readiness_goals">Mục tiêu tác động: %1$s</string>
+  <!-- Purpose list entry for a custom purpose. %1$s: the organizer's description of it. -->
+  <string name="wizard_readiness_other_purpose">Khác: %1$s</string>
+  <string name="wizard_readiness_export_profiles">Hồ sơ xuất dữ liệu bằng một cú nhấp</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped_ready">Đã ánh xạ %1$d/%2$d (Sẵn sàng)</string>
+  <!-- %1$d: export fields mapped; %2$d: all fields of the export profile. -->
+  <string name="wizard_readiness_mapped">Đã ánh xạ %1$d/%2$d</string>
+
+  <!-- CARE Principles for Indigenous Data Governance and FAO Free, Prior and Informed Consent (FPIC). -->
+  <string name="wizard_care_title">Nguyên tắc CARE &amp; chủ quyền dữ liệu của người bản địa / cộng đồng</string>
+  <string name="wizard_care_applied_body">Quyền truy cập Hạn chế, chế độ hiển thị 'Chỉ bài gửi của chính họ' giữa những người thu thập và điều khoản về Đồng thuận tự nguyện, trước và được thông tin đầy đủ (FPIC) của FAO dành cho người thu thập dữ liệu đang được áp dụng để bảo vệ dữ liệu cộng đồng và quyền sử dụng đất.</string>
+  <string name="wizard_care_not_applied_body">Bạn đang làm việc với người bản địa, cộng đồng địa phương hoặc dữ liệu nhạy cảm về quyền sử dụng đất? Hãy áp dụng mặc định về chủ quyền CARE &amp; FPIC của FAO (Quyền truy cập Hạn chế + Người thu thập dữ liệu chỉ xem bài gửi của chính họ + Điều khoản đồng thuận FPIC).</string>
+  <!-- %1$s: the organization name. -->
+  <string name="wizard_care_excluded_from_aggregates">Lưu ý: %1$s không được tính vào tổng số tổng hợp toàn nền tảng.</string>
+  <string name="wizard_care_defaults_applied">✓ Đã áp dụng mặc định CARE</string>
+  <string name="wizard_care_apply_defaults">Áp dụng mặc định CARE</string>
+  <!-- CARE principle "C". -->
+  <string name="wizard_care_collective_benefit">Lợi ích tập thể</string>
+  <string name="wizard_care_collective_benefit_description">Các chỉ số hệ sinh thái và cộng đồng sử dụng khái niệm thư viện dùng chung cho bằng chứng thuộc sở hữu của cộng đồng.</string>
+  <!-- CARE principle "A". -->
+  <string name="wizard_care_authority_to_control">Quyền kiểm soát</string>
+  <string name="wizard_care_authority_to_control_description">Quyền truy cập ở chế độ Hạn chế để người quản lý cộng đồng kiểm soát ai có thể xem hoặc thu thập bản ghi khảo sát.</string>
+  <!-- CARE principle "R". -->
+  <string name="wizard_care_responsibility">Trách nhiệm</string>
+  <string name="wizard_care_responsibility_description">Mỗi người đóng góp chỉ xem được bài gửi của chính mình, cùng với người tổ chức khảo sát.</string>
+  <!-- CARE principle "E". -->
+  <string name="wizard_care_ethics">Đạo đức</string>
+  <string name="wizard_care_ethics_description">Dữ liệu cộng đồng nhạy cảm được bảo vệ khỏi việc tổng hợp bên ngoài khi chưa được phê duyệt.</string>
+  <!-- CARE principle "E", as checked in the wizard. -->
+  <string name="wizard_care_ethics_aggregate_protection">Đạo đức &amp; Bảo vệ dữ liệu tổng hợp</string>
+  <string name="wizard_care_ethics_aggregate_protection_description">Hồ sơ cá nhân về quyền sử dụng đất và hộ gia đình không bao giờ bị lộ trong các tổng hợp công khai của nền tảng.</string>
+  <string name="wizard_care_fpic">Đồng thuận tự nguyện, trước và được thông tin đầy đủ</string>
+  <string name="wizard_care_fpic_description">Cần có sự đồng thuận rõ ràng của người thu thập/người tham gia trước khi ghi lại dữ liệu thực địa.</string>
+  <string name="wizard_care_fpic_wizard_description">Người thu thập dữ liệu phải xem xét và chấp nhận các điều khoản đồng thuận rõ ràng của cộng đồng trước khi thu thập dữ liệu.</string>
+  <!-- Standards and guidelines a CARE / FPIC criterion comes from. -->
+  <string name="wizard_care_standard_care_fao_indigenous_data_policy">Chính sách dữ liệu người bản địa của CARE &amp; FAO</string>
+  <string name="wizard_care_standard_care_fao_vggt">Quản trị quyền sử dụng đất theo VGGT của CARE &amp; FAO</string>
+  <string name="wizard_care_standard_care_principles">Nguyên tắc CARE</string>
+  <string name="wizard_care_standard_fao_fpic_manual">Sổ tay FPIC của FAO</string>
+  <string name="wizard_care_standard_fao_fpic_guidelines">Hướng dẫn vận hành FPIC của FAO</string>
+  <string name="wizard_care_criterion_met">Đạt</string>
+  <string name="wizard_care_criterion_not_met">Chưa đạt</string>
+  <string name="wizard_care_effect_collective_benefit_on">Các câu hỏi được liên kết với trường tiêu chuẩn giúp dữ liệu của khảo sát này đóng góp vào các chỉ số cộng đồng và tác động dùng chung, cũng như xuất dữ liệu bằng một cú nhấp.</string>
+  <string name="wizard_care_effect_collective_benefit_off">Chưa có câu hỏi nào được liên kết với trường tiêu chuẩn, nên dữ liệu của khảo sát này sẽ không đóng góp vào các chỉ số cộng đồng hoặc tác động dùng chung. Hãy chọn một mục đích hoặc liên kết câu hỏi với trường tiêu chuẩn ở bước Biểu mẫu.</string>
+  <string name="wizard_care_effect_authority_on">Chỉ những người bạn mời mới có thể mở khảo sát này và thu thập dữ liệu, nhờ đó người quản lý cộng đồng kiểm soát ai được xem các bản ghi.</string>
+  <string name="wizard_care_effect_authority_off">Những người bạn chưa mời vẫn có thể mở khảo sát này và các bản ghi của nó. Để hạn chế, hãy đặt Ai có thể thu thập dữ liệu thành Người được mời bên dưới.</string>
+  <string name="wizard_care_effect_responsibility_on">Người thu thập dữ liệu chỉ thấy bài gửi của chính họ trên bản đồ. Người tổ chức khảo sát thấy tất cả.</string>
+  <string name="wizard_care_effect_responsibility_off">Người thu thập dữ liệu có thể thấy bài gửi của mọi người trên bản đồ, bao gồm cả bản ghi về quyền sử dụng đất và tài nguyên của các hộ khác. Để giới hạn, hãy đặt Ai có thể xem dữ liệu thành Người đóng góp và người tổ chức bên dưới.</string>
+  <string name="wizard_care_effect_ethics_on">Các bản tóm tắt tác động công khai chỉ hiển thị tổng số đã qua ngưỡng, không bao giờ hiển thị bản ghi riêng lẻ về quyền sử dụng đất hay hộ gia đình.</string>
+  <string name="wizard_care_effect_fpic_on">Người thu thập dữ liệu phải đọc và chấp nhận điều khoản đồng thuận của bạn trước khi có thể thu thập dữ liệu.</string>
+  <string name="wizard_care_effect_fpic_off">Người thu thập dữ liệu có thể bắt đầu thu thập mà không cần chấp nhận bất kỳ điều khoản đồng thuận nào. Để yêu cầu đồng thuận, hãy bật Điều khoản đồng thuận &amp; quản trị của người thu thập dữ liệu bên dưới.</string>
+  <string name="wizard_care_summary_title">CARE và FPIC</string>
+  <string name="wizard_care_summary_count">Đạt %1$d/%2$d</string>
+  <string name="wizard_care_show_details">Hiện chi tiết</string>
+  <string name="wizard_care_hide_details">Ẩn chi tiết</string>
+  <string name="wizard_care_state_expanded">Đang hiện chi tiết</string>
+  <string name="wizard_care_state_collapsed">Đang ẩn chi tiết</string>
+  <string name="wizard_care_sticky_chip">CARE và FPIC · %1$d/%2$d</string>
+  <string name="wizard_care_sticky_chip_a11y">CARE và FPIC: đạt %1$d trên %2$d tiêu chí. Đi tới chi tiết CARE.</string>
+  <string name="wizard_care_learn_more">CARE và FPIC là gì?</string>
+  <string name="wizard_care_auto_reason_organization">Được áp dụng tự động vì %1$s được đăng ký là tổ chức của người bản địa hoặc cộng đồng địa phương. Bạn có thể thay đổi các cài đặt này bên dưới.</string>
+  <string name="wizard_care_auto_reason_concepts">Được áp dụng tự động vì khảo sát này thu thập dữ liệu về người bản địa và cộng đồng: %1$s. Bạn có thể thay đổi các cài đặt này bên dưới.</string>
+  <string name="wizard_care_auto_reason_more">%1$s và %2$d trường khác</string>
+  <string name="wizard_care_explainer_title">CARE và FPIC trong Collect One</string>
+  <string name="wizard_care_explainer_intro">Dữ liệu về người bản địa và cộng đồng địa phương, đất đai và tài nguyên của họ có thể ảnh hưởng đến quyền đất đai, sinh kế và an toàn. Collect One hỗ trợ hai khung được sử dụng rộng rãi giúp cộng đồng giữ quyền kiểm soát dữ liệu đó.</string>
+  <string name="wizard_care_explainer_care_heading">Nguyên tắc CARE về quản trị dữ liệu của người bản địa</string>
+  <string name="wizard_care_explainer_care_body">Được Global Indigenous Data Alliance xây dựng để bổ sung cho các nguyên tắc dữ liệu FAIR, CARE đặt con người và mục đích vào trung tâm của việc sử dụng dữ liệu:</string>
+  <string name="wizard_care_explainer_care_c">Lợi ích tập thể: dữ liệu phải mang lại lợi ích cho các cộng đồng mà dữ liệu mô tả.</string>
+  <string name="wizard_care_explainer_care_a">Quyền kiểm soát: cộng đồng quyết định cách dữ liệu về họ, đất đai và tài nguyên của họ được thu thập, truy cập và sử dụng.</string>
+  <string name="wizard_care_explainer_care_r">Trách nhiệm: những người làm việc với dữ liệu phải chịu trách nhiệm trước cộng đồng và minh bạch về cách sử dụng dữ liệu.</string>
+  <string name="wizard_care_explainer_care_e">Đạo đức: quyền và phúc lợi của cộng đồng được đặt lên hàng đầu ở mọi giai đoạn của vòng đời dữ liệu.</string>
+  <string name="wizard_care_explainer_fpic_heading">Đồng thuận tự nguyện, trước và được thông tin đầy đủ (FPIC)</string>
+  <string name="wizard_care_explainer_fpic_body">FPIC là quyền của người bản địa, được công nhận trong Tuyên bố của Liên Hợp Quốc về Quyền của các Dân tộc Bản địa và được áp dụng trong các chương trình của FAO, được đồng ý hoặc từ chối các hoạt động ảnh hưởng đến họ. Sự đồng thuận phải được đưa ra một cách tự nguyện, được xin trước khi hoạt động bắt đầu, dựa trên thông tin đầy đủ và có thể rút lại bất cứ lúc nào.</string>
+  <string name="wizard_care_explainer_defaults_heading">Mặc định CARE thay đổi những gì trong khảo sát này</string>
+  <string name="wizard_care_explainer_defaults_restricted">Quyền truy cập Hạn chế: chỉ những người bạn mời mới có thể mở khảo sát và dữ liệu của khảo sát.</string>
+  <string name="wizard_care_explainer_defaults_own_only">Bài gửi riêng tư: người thu thập dữ liệu chỉ thấy bài gửi của chính họ trên bản đồ, không thấy bài gửi của người khác.</string>
+  <string name="wizard_care_explainer_defaults_consent">Điều khoản đồng thuận: người thu thập dữ liệu phải đọc và chấp nhận điều khoản FPIC trước khi bắt đầu thu thập.</string>
+  <string name="wizard_care_explainer_defaults_editable">Các bản tóm tắt tác động công khai không bao giờ hiển thị bản ghi riêng lẻ. Bạn có thể thay đổi từng cài đặt hoặc chỉnh sửa điều khoản đồng thuận bên dưới.</string>
+  <string name="wizard_care_explainer_auto_heading">Khi nào Collect One tự động áp dụng</string>
+  <string name="wizard_care_explainer_auto_body">Mặc định CARE được áp dụng tự động khi khảo sát thuộc về một tổ chức của người bản địa hoặc cộng đồng địa phương, hoặc khi các câu hỏi được liên kết với các trường tiêu chuẩn về người bản địa và cộng đồng (như tên cộng đồng hoặc hình thức quyền sử dụng đất), ví dụ thông qua mục đích Lập bản đồ đất đai và tài nguyên cộng đồng.</string>
+  <string name="wizard_care_explainer_close">Đã hiểu</string>
+  <string name="wizard_consent_title">Điều khoản đồng thuận &amp; quản trị của người thu thập dữ liệu</string>
+  <string name="wizard_consent_supporting">Yêu cầu người thu thập dữ liệu xem xét và chấp nhận điều khoản Đồng thuận tự nguyện, trước và được thông tin đầy đủ (FPIC) tùy chỉnh hoặc điều khoản dự án trước khi mở khảo sát.</string>
+  <string name="wizard_consent_terms_label">Điều khoản đồng thuận hiển thị cho người thu thập dữ liệu</string>
+</resources>

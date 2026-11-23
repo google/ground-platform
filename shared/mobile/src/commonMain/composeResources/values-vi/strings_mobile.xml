@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Common actions and labels shared across mobile screens -->
+  <!-- Back navigation button label and accessibility description. -->
+  <string name="mobile_back">Quay lại</string>
+  <string name="mobile_cancel">Hủy</string>
+  <!-- Confirm button of dialogs that remove offline data from the device. -->
+  <string name="mobile_remove">Gỡ bỏ</string>
+  <!-- Button that opens a downloaded survey. -->
+  <string name="mobile_open">Mở</string>
+  <!-- Button that downloads a survey or offline map to the device. -->
+  <string name="mobile_download">Tải xuống</string>
+  <!-- Status chip on a survey or offline map already stored on the device. -->
+  <string name="mobile_downloaded">Đã tải xuống</string>
+  <!-- Badge on a survey that is no longer available to the user. -->
+  <string name="mobile_unavailable">Không khả dụng</string>
+  <!-- Accessibility description of the button that clears the search field. -->
+  <string name="mobile_clear_search_content_description">Xóa nội dung tìm kiếm</string>
+  <string name="mobile_terms_of_service_title">Điều khoản dịch vụ</string>
+  <!-- Title of the Uploads screen (list of local changes waiting to sync or already synced). -->
+  <string name="mobile_uploads_title">Tải lên</string>
+
+  <!-- Sign-in screen -->
+  <string name="mobile_sign_in_tagline">Thu thập quan sát thực địa, lập bản đồ ranh giới và đồng bộ hồ sơ khảo sát khi ngoại tuyến.</string>
+  <string name="mobile_sign_in_prompt">Đăng nhập để truy cập các khảo sát được chia sẻ với tài khoản của bạn.</string>
+  <!-- Sign-in button label while sign-in is in progress. -->
+  <string name="mobile_sign_in_signing_in">Đang đăng nhập…</string>
+  <string name="mobile_sign_in_google_accounts_only">Hiện chỉ hỗ trợ xác thực bằng Tài khoản Google.</string>
+
+  <!-- Terms of Service screen -->
+  <!-- %1$s: email address of the signed-in user. -->
+  <string name="mobile_tos_signed_in_as">Đã đăng nhập với tư cách %1$s</string>
+  <string name="mobile_tos_decline">Từ chối</string>
+  <string name="mobile_tos_continue">Tiếp tục</string>
+  <string name="mobile_tos_intro">Vui lòng xem xét và chấp nhận Điều khoản dịch vụ của Collect One trước khi tải xuống khảo sát.</string>
+  <!-- Label of the checkbox that must be checked before accepting the Terms of Service. -->
+  <string name="mobile_tos_agree_checkbox">Tôi đã đọc và đồng ý với Điều khoản dịch vụ của Collect One.</string>
+
+  <!-- Settings screen -->
+  <!-- Title of the device storage section in Settings. -->
+  <string name="mobile_settings_storage_title">Bộ nhớ</string>
+  <!-- Confirmation after opening the project website. %1$s: website URL. -->
+  <string name="mobile_settings_opened_website">Đã mở %1$s</string>
+
+  <!-- Download survey screen -->
+  <string name="mobile_download_survey_title">Tải xuống khảo sát</string>
+  <!-- Subtitle. %1$d: number of surveys shared with the user; %2$d: number of those downloaded. -->
+  <string name="mobile_download_survey_subtitle">%1$d được chia sẻ với bạn • %2$d đã tải xuống</string>
+  <string name="mobile_download_survey_offline_banner">Bạn đang ngoại tuyến. Hãy kết nối Internet để tải xuống khảo sát và sử dụng khi ngoại tuyến.</string>
+  <string name="mobile_download_survey_search_content_description">Tìm kiếm khảo sát</string>
+  <string name="mobile_download_survey_search_placeholder">Tìm theo tên hoặc vị trí, hoặc dán liên kết khảo sát</string>
+  <string name="mobile_download_survey_public_section">Khảo sát công khai</string>
+  <!-- List header. %1$d: number of surveys shared with the user. -->
+  <string name="mobile_download_survey_shared_header">Khảo sát được chia sẻ với bạn (%1$d)</string>
+  <!-- List header while searching. %1$d: number of matching surveys; %2$d: total surveys. -->
+  <string name="mobile_download_survey_matching_header">Khảo sát phù hợp (%1$d/%2$d)</string>
+  <string name="mobile_download_survey_clear_search">Xóa nội dung tìm kiếm</string>
+  <!-- Empty search result. %1$s: the search text typed by the user. -->
+  <string name="mobile_download_survey_no_match">Không có khảo sát nào khớp với "%1$s"</string>
+  <string name="mobile_download_survey_no_match_hint">Hãy thử tìm theo tiêu đề khảo sát, từ khóa hoặc vị trí khác (ví dụ: Brazil, Kenya, Việt Nam), hoặc dán liên kết khảo sát.</string>
+  <string name="mobile_download_survey_empty">Chưa có khảo sát nào được chia sẻ với bạn</string>
+  <string name="mobile_download_survey_empty_hint">Tìm theo tiêu đề khảo sát, từ khóa hoặc vị trí (ví dụ: Brazil, Kenya, Việt Nam), hoặc dán liên kết khảo sát.</string>
+  <!-- List header for surveys found in the public directory. %1$d: number of surveys. -->
+  <string name="mobile_download_survey_directory_header">Khảo sát công khai và được chia sẻ qua liên kết (%1$d)</string>
+  <!-- Survey card footer. %1$d: number of map locations in the survey; %2$s: offline download size (e.g. "12 MB"). -->
+  <plurals name="mobile_survey_location_count_and_size">
+    <item quantity="other">%1$d vị trí • %2$s</item>
+  </plurals>
+  <!-- Badge on a survey whose submissions are visible to the public. -->
+  <string name="mobile_survey_badge_public_data">Dữ liệu công khai</string>
+  <!-- Badge on a survey where each collector sees only their own submissions. -->
+  <string name="mobile_survey_badge_private_submissions">Bài gửi riêng tư</string>
+  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
+  <string name="mobile_survey_downloaded_content_description">Đã tải xuống %1$s</string>
+  <!-- Accessibility description of the Open button. %1$s: survey title. -->
+  <string name="mobile_survey_open_content_description">Mở %1$s</string>
+  <!-- Accessibility description of the Download button. %1$s: survey title. -->
+  <string name="mobile_survey_download_content_description">Tải xuống %1$s</string>
+  <!-- %1$s: survey title. -->
+  <string name="mobile_remove_survey_dialog_title">Gỡ bỏ khảo sát ngoại tuyến?</string>
+  <!-- %1$s: survey title. -->
+  <string name="mobile_remove_survey_dialog_body">Gỡ bỏ "%1$s" sẽ xóa bản sao ngoại tuyến khỏi thiết bị này. Bạn sẽ cần kết nối Internet để tải xuống và sử dụng lại khảo sát này khi ngoại tuyến.</string>
+  <string name="mobile_sign_out_dialog_title">Đăng xuất?</string>
+  <!-- %1$s: email address of the signed-in user. -->
+  <string name="mobile_sign_out_dialog_body">Quay lại sẽ đăng xuất %1$s và trở về màn hình Đăng nhập.</string>
+  <string name="mobile_sign_out">Đăng xuất</string>
+
+  <!-- Main survey screen: top bar and upload status -->
+  <string name="mobile_open_navigation_drawer">Mở ngăn điều hướng</string>
+  <!-- Placeholder of the map/list search field. -->
+  <string name="mobile_search_placeholder">Tìm kiếm...</string>
+  <!-- Upload status. %1$d: number of items that failed to upload. -->
+  <plurals name="mobile_upload_status_failed">
+    <item quantity="other">%1$d mục tải lên thất bại</item>
+  </plurals>
+  <!-- Upload status. %1$d: number of items currently uploading. -->
+  <plurals name="mobile_upload_status_uploading">
+    <item quantity="other">Đang tải lên %1$d mục</item>
+  </plurals>
+  <string name="mobile_upload_status_all_saved">Đã lưu tất cả thay đổi</string>
+  <!-- Upload statistics. %1$d: synced items; %2$d: uploading items; %3$d: failed items. -->
+  <string name="mobile_upload_status_summary">%1$d đã đồng bộ • %2$d đang tải lên • %3$d thất bại</string>
+  <string name="mobile_upload_status_syncing_now">Đang đồng bộ…</string>
+  <string name="mobile_upload_status_last_synced_just_now">Đồng bộ lần cuối: Vừa xong</string>
+  <string name="mobile_retry_failed_uploads">Thử lại các mục tải lên thất bại</string>
+  <!-- Time of the last successful sync. %1$d: minutes since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_minutes_ago">
+    <item quantity="other">Đồng bộ lần cuối: %1$d phút trước</item>
+  </plurals>
+  <!-- Time of the last successful sync. %1$d: hours since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_hours_ago">
+    <item quantity="other">Đồng bộ lần cuối: %1$d giờ trước</item>
+  </plurals>
+  <!-- Time of the last successful sync. %1$d: days since it finished. -->
+  <plurals name="mobile_upload_status_last_synced_days_ago">
+    <item quantity="other">Đồng bộ lần cuối: %1$d ngày trước</item>
+  </plurals>
+  <!-- Notice when the device goes offline. %1$s: plural noun of the survey's map features. -->
+  <string name="mobile_notice_device_offline">Thiết bị ngoại tuyến: đã tắt tìm kiếm địa điểm. Chỉ tìm %1$s trên thiết bị.</string>
+  <!-- Notice when the device comes back online. -->
+  <string name="mobile_notice_device_online">Thiết bị trực tuyến: đã bật tìm kiếm địa điểm.</string>
+  <!-- Notice when selecting the Places list tab offline. %1$s: plural noun of the survey's map features. -->
+
+  <!-- Main survey screen: map controls -->
+  <string name="mobile_recenter_content_description">Căn giữa bản đồ theo vị trí GPS</string>
+  <!-- Button that recenters the map on the user's GPS location. -->
+  <string name="mobile_recenter">Căn giữa</string>
+  <!-- Accessibility description of the map chip when the camera follows the user's GPS location. -->
+  <string name="mobile_gps_auto_center">Tự căn giữa theo GPS</string>
+  <!-- Map chip shown when the user has panned the map away from their GPS location. -->
+  <string name="mobile_gps_panned">Đã kéo bản đồ</string>
+  <!-- Map chip. %1$s: GPS signal status (e.g. "High accuracy"). -->
+  <string name="mobile_gps_status">GPS: %1$s</string>
+  <!-- Accessibility description of the floating button that opens the list of forms. -->
+  <string name="mobile_collect_data">Thu thập dữ liệu</string>
+  <string name="mobile_available_forms_title">Biểu mẫu thu thập dữ liệu hiện có</string>
+  <string name="mobile_available_forms_subtitle">Chọn một biểu mẫu để bắt đầu thu thập dữ liệu.</string>
+  <string name="mobile_available_forms_close">Đóng danh sách biểu mẫu</string>
+  <!-- Badge on a form. %1$d: number of questions in the form. -->
+  <plurals name="mobile_form_question_count">
+    <item quantity="other">%1$d câu hỏi</item>
+  </plurals>
+
+  <!-- Main survey screen: straight-line navigation (wayfinding) banner -->
+  <!-- Navigation target type pill. %1$s: map feature type (e.g. "Plot"). -->
+  <string name="mobile_wayfinding_entity">Dẫn đường đến %1$s</string>
+  <!-- Navigation target type pill when navigating to a place found by search. -->
+  <string name="mobile_wayfinding_place">Dẫn đường đến địa điểm</string>
+  <!-- Navigation target type pill when navigating to a form submission. -->
+  <string name="mobile_wayfinding_submission">Dẫn đường đến bài gửi</string>
+  <string name="mobile_compass_bearing_arrow">Mũi tên hướng la bàn</string>
+  <!-- Compass bearing to the target. %1$s: formatted bearing (e.g. "321° NW"). -->
+  <string name="mobile_bearing">Hướng %1$s</string>
+  <!-- Shown when the user is within 8 meters of the navigation target. -->
+  <string name="mobile_arrived">Đã đến (≤ 8 m)</string>
+  <!-- Estimated walking time. %1$d: number of minutes. -->
+  <plurals name="mobile_walk_minutes">
+    <item quantity="other">~%1$d phút đi bộ</item>
+  </plurals>
+  <string name="mobile_wayfinding_subtitle">Vectơ trắc địa theo đường thẳng từ vị trí GPS của bạn</string>
+  <string name="mobile_walk_closer_content_description">Mô phỏng đi bộ lại gần mục tiêu</string>
+  <!-- Demo button that simulates walking closer to the navigation target. -->
+  <string name="mobile_walk_closer">Đi lại gần</string>
+  <string name="mobile_stop_navigation_content_description">Dừng dẫn đường theo đường thẳng</string>
+  <!-- Button that stops straight-line navigation. -->
+  <string name="mobile_stop">Dừng</string>
+
+  <!-- Main survey screen: basemap / layers sheet -->
+  <string name="mobile_basemap_title">Bản đồ nền</string>
+  <string name="mobile_basemap_subtitle">Chọn loại bản đồ nền, hình ảnh và lớp phủ ô bản đồ ngoại tuyến</string>
+  <string name="mobile_close_layers">Đóng lớp bản đồ</string>
+
+  <!-- Navigation drawer -->
+  <string name="mobile_close_drawer">Đóng ngăn điều hướng</string>
+  <!-- Label above the title of the currently open survey. -->
+  <string name="mobile_drawer_active_survey">KHẢO SÁT ĐANG MỞ</string>
+  <!-- Drawer item that lists downloaded surveys. -->
+  <string name="mobile_drawer_surveys">Khảo sát</string>
+  <!-- Drawer item subtitle. %1$d: number of surveys downloaded on the device. -->
+  <plurals name="mobile_drawer_surveys_downloaded">
+    <item quantity="other">%1$d đã tải xuống thiết bị</item>
+  </plurals>
+  <string name="mobile_drawer_offline_maps">Bản đồ ngoại tuyến</string>
+  <string name="mobile_drawer_offline_maps_subtitle">Bộ nhớ đệm ô bản đồ vectơ và raster vệ tinh</string>
+  <string name="mobile_drawer_settings">Cài đặt</string>
+  <!-- Drawer item subtitle. %1$s: area unit symbol (e.g. "ha"). -->
+  <string name="mobile_drawer_settings_subtitle">Đơn vị (%1$s), ngôn ngữ và bộ nhớ đệm phương tiện</string>
+  <string name="mobile_drawer_tos_subtitle">Điều khoản quản trị dữ liệu và quyền riêng tư của nền tảng</string>
+  <string name="mobile_brand_organization">Open Foris</string>
+  <string name="mobile_brand_product">Collect One</string>
+  <!-- Drawer footer shown after the product name "Open Foris Collect One". -->
+  <string name="mobile_drawer_footer_tagline">• Ưu tiên ngoại tuyến</string>
+
+  <!-- Uploads screen -->
+  <!-- Button that syncs all pending uploads. %1$d: number of pending uploads. -->
+  <string name="mobile_uploads_sync_all_count">Đồng bộ tất cả (%1$d)</string>
+  <string name="mobile_uploads_sync_all">Đồng bộ tất cả</string>
+  <!-- %1$d: number of activity records (e.g. PDF receipts) waiting to sync. -->
+  <plurals name="mobile_uploads_pending_activity_records">
+    <item quantity="other">%1$d bản ghi hoạt động đang chờ đồng bộ</item>
+  </plurals>
+  <!-- Upload status filter chip. %1$s: status name (e.g. "Pending"); %2$d: number of uploads with that status. -->
+  <string name="mobile_upload_filter_chip">%1$s (%2$d)</string>
+  <!-- Upload status: waiting to be uploaded. -->
+  <string name="mobile_upload_status_pending">Đang chờ</string>
+  <!-- Upload status: currently uploading. -->
+  <string name="mobile_upload_status_in_progress">Đang thực hiện</string>
+  <!-- Upload status: successfully uploaded. -->
+  <string name="mobile_upload_status_uploaded">Đã tải lên</string>
+  <!-- Upload status: upload failed. -->
+  <string name="mobile_upload_status_failed_label">Thất bại</string>
+  <string name="mobile_uploads_empty_pending">Không có mục nào đang chờ tải lên.</string>
+  <string name="mobile_uploads_empty_in_progress">Không có mục nào đang tải lên.</string>
+  <string name="mobile_uploads_empty_uploaded">Không có mục nào đã tải lên.</string>
+  <string name="mobile_uploads_empty_failed">Không có mục nào tải lên thất bại.</string>
+  <string name="mobile_uploads_empty_for_feature">Không có mục tải lên nào cho đối tượng bản đồ này.</string>
+  <string name="mobile_uploads_empty">Chưa có mục tải lên nào.</string>
+  <!-- Accessibility description of the button that removes the map feature filter from Uploads. -->
+  <string name="mobile_uploads_show_all_features">Hiển thị mục tải lên của tất cả đối tượng bản đồ</string>
+  <!-- Button that retries a failed upload. -->
+  <string name="mobile_retry">Thử lại</string>
+  <!-- Button that uploads a pending change now. -->
+  <string name="mobile_upload">Tải lên</string>
+
+  <!-- Downloaded surveys screen -->
+  <string name="mobile_downloaded_surveys_title">Khảo sát đã tải xuống</string>
+  <!-- %1$d: number of surveys downloaded on the device. -->
+  <plurals name="mobile_downloaded_surveys_count">
+    <item quantity="other">%1$d khảo sát sẵn sàng ngoại tuyến trên thiết bị này</item>
+  </plurals>
+  <!-- Badge on the currently open survey. -->
+  <string name="mobile_survey_badge_active">ĐANG MỞ</string>
+  <!-- Survey card details. %1$s: survey location (e.g. "Kenya"); %2$d: number of map locations. -->
+  <plurals name="mobile_survey_location_entity_count">
+    <item quantity="other">%1$s • %2$d vị trí</item>
+  </plurals>
+  <!-- Button that switches to another downloaded survey. -->
+  <string name="mobile_switch">Chuyển</string>
+  <string name="mobile_browse_more_surveys">Duyệt và tải xuống thêm khảo sát</string>
+
+  <!-- Offline maps screen -->
+  <string name="mobile_offline_maps_title">Bản đồ ngoại tuyến</string>
+
+  <!-- Device storage card -->
+  <string name="mobile_device_storage_title">Bộ nhớ thiết bị</string>
+  <!-- %1$s: free storage (e.g. "12 GB"); %2$s: total storage (e.g. "64 GB"). -->
+  <string name="mobile_device_storage_free_of_total">Còn trống %1$s/%2$s</string>
+  <string name="mobile_device_storage_downloaded_imagery">Hình ảnh đã tải xuống</string>
+  <string name="mobile_device_storage_data">Biểu mẫu đã gửi, ảnh, v.v.</string>
+  <string name="mobile_device_storage_other">Hệ thống và ứng dụng khác</string>
+  <string name="mobile_device_storage_free">Dung lượng trống</string>
+  <string name="mobile_device_storage_safeguard_notice">Các bản tải xuống ngoại tuyến sẽ tự động tạm dừng nếu bộ nhớ thiết bị còn dưới 500 MB để bảo vệ sự ổn định của hệ thống.</string>
+  <!-- Title of the map mode where the user frames an area to save for offline use. -->
+  <string name="mobile_offline_area_title">Lưu khu vực để dùng ngoại tuyến</string>
+  <!-- Hint under the title while framing an area to save for offline use. -->
+  <string name="mobile_offline_area_hint">Di chuyển và thu phóng để khu vực làm việc nằm trong khung</string>
+  <!-- Accessibility label of the button that leaves the area framing mode. -->
+  <string name="mobile_offline_area_close">Đóng</string>
+  <!-- Shown while the name of the framed place is looked up. -->
+  <string name="mobile_offline_area_finding_name">Đang tìm tên địa điểm…</string>
+  <!-- Name of a saved map area when no place name was found. %1$s: coordinates of its center, e.g. "0.4160°S, 36.9470°E". -->
+  <string name="mobile_offline_area_near">Khu vực gần %1$s</string>
+  <!-- Shown while the download size of the framed area is estimated. -->
+  <string name="mobile_offline_area_estimating">Đang ước tính dung lượng…</string>
+  <!-- Estimated download size of the framed area and the free space on the device. %1$s: size, e.g. "48 MB"; %2$s: free space, e.g. "12.4 GB". -->
+  <string name="mobile_offline_area_estimate">Khoảng %1$s · còn trống %2$s</string>
+  <!-- Estimated download size of the framed area when the free space is unknown. %1$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_area_estimate_size">Khoảng %1$s</string>
+  <!-- The framed area is too large to save. %1$s: its area, e.g. "140 km²"; %2$s: the largest area, e.g. "50 km²". -->
+  <string name="mobile_offline_area_too_large">Khu vực này khoảng %1$s. Phóng to để chọn tối đa %2$s.</string>
+  <!-- The device lacks space to save the framed area. %1$s: space to free, e.g. "120 MB". -->
+  <string name="mobile_offline_area_not_enough_space">Không đủ dung lượng. Hãy giải phóng %1$s để lưu khu vực này.</string>
+  <!-- The device is offline, so the framed area can't be estimated or saved. -->
+  <string name="mobile_offline_area_offline">Bạn đang ngoại tuyến. Hãy kết nối internet để lưu khu vực này.</string>
+  <!-- The framed area spans the 180° meridian, which saved areas can't. -->
+  <string name="mobile_offline_area_crosses_antimeridian">Khu vực này cắt qua kinh tuyến 180°. Di chuyển bản đồ để chọn khu vực ở một phía.</string>
+  <!-- This build of the app can't save map areas. -->
+  <string name="mobile_offline_area_unavailable">Thiết bị này không hỗ trợ lưu khu vực bản đồ.</string>
+  <!-- The size of the framed area couldn't be estimated, for a reason other than the connection. -->
+  <string name="mobile_offline_area_estimate_failed">Không thể ước tính dung lượng của khu vực này.</string>
+  <!-- Primary button that saves the framed area for offline use. -->
+  <string name="mobile_offline_area_save">Lưu để dùng ngoại tuyến</string>
+  <!-- Progress of saving an area for offline use. %1$d: percent done, e.g. 27. -->
+  <string name="mobile_offline_area_saving">Đang lưu để dùng ngoại tuyến… %1$d%</string>
+  <!-- How much of an area was saved so far. %1$s: saved, e.g. "13 MB"; %2$s: estimated total, e.g. "48 MB". -->
+  <string name="mobile_offline_area_saving_size">%1$s trên khoảng %2$s</string>
+  <!-- Shown when an area finished saving for offline use. -->
+  <string name="mobile_offline_area_saved">Đã lưu để dùng ngoại tuyến</string>
+  <!-- Saving an area stopped because the device reached its limit of offline imagery. -->
+  <string name="mobile_offline_area_tile_limit">Thiết bị này đã đạt giới hạn hình ảnh ngoại tuyến. Hãy xóa một khu vực để lưu thêm.</string>
+  <!-- Saving an area stopped because of an error. -->
+  <string name="mobile_offline_area_failed">Không thể lưu khu vực này.</string>
+  <!-- Button that hides the saving progress while the area keeps saving. -->
+  <string name="mobile_hide">Ẩn</string>
+  <!-- Button that closes the area framing mode after an area was saved. -->
+  <string name="mobile_done">Xong</string>
+  <!-- Button that tries a failed estimate or save again. -->
+  <string name="mobile_try_again">Thử lại</string>
+  <!-- Button that resumes saving a paused layer of a saved area. -->
+  <string name="mobile_resume">Tiếp tục</string>
+  <!-- Notice in the mobile app in a web browser, where saving map areas is only simulated. -->
+  <string name="mobile_offline_area_simulated_notice">Tải xuống mô phỏng. Bản đồ ngoại tuyến chỉ hoạt động trong ứng dụng Android và iOS.</string>
+  <!-- Banner on Offline maps in the mobile app in a web browser, where saving map areas is only simulated. -->
+  <string name="mobile_offline_maps_simulated_banner">Tải xuống ở đây chỉ là mô phỏng: không có hình ảnh nào được lưu và tên khu vực chỉ là tên mẫu. Để dùng bản đồ khi không có internet, hãy lưu khu vực trong ứng dụng Android hoặc iOS.</string>
+  <!-- Label on a saved area or layer that was only simulated (mobile app in a web browser). -->
+  <string name="mobile_offline_maps_simulated_label">Mô phỏng</string>
+  <!-- Empty state of Offline maps when no area is saved. -->
+  <string name="mobile_offline_maps_empty_title">Chưa lưu khu vực nào để dùng ngoại tuyến</string>
+  <string name="mobile_offline_maps_empty_body">Lưu các khu vực bạn làm việc để xem bản đồ khi không có internet.</string>
+  <!-- When a saved area was saved and what removing it frees. %1$s: date, e.g. "Oct 30, 2026"; %2$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_maps_area_summary">Đã lưu %1$s · tối đa %2$s</string>
+  <!-- Percent saved of a layer of a saved area. %1$d: percent, e.g. 62. -->
+  <string name="mobile_offline_maps_layer_percent">%1$d%</string>
+  <!-- Status of a layer of a saved area whose download stopped before it finished. -->
+  <string name="mobile_offline_maps_layer_paused">Đã tạm dừng</string>
+  <!-- Status of a layer of a saved area whose download failed. -->
+  <string name="mobile_offline_maps_layer_failed">Không lưu được</string>
+  <!-- Accessibility label of the menu of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_area_options">Tùy chọn cho %1$s</string>
+  <!-- Accessibility label of the menu of a layer of a saved area. %1$s: layer, e.g. "Satellite". -->
+  <string name="mobile_offline_maps_layer_options">Tùy chọn cho %1$s</string>
+  <!-- Menu item that shows a saved area on the map. -->
+  <string name="mobile_offline_maps_show_on_map">Hiện trên bản đồ</string>
+  <!-- Menu item and confirmation button that remove a saved area. -->
+  <string name="mobile_offline_maps_remove_area">Xóa khu vực</string>
+  <!-- Title of the confirmation before removing a saved area. -->
+  <string name="mobile_offline_maps_remove_area_title">Xóa khu vực đã lưu?</string>
+  <!-- Body of the confirmation before removing a saved area. %1$s: area name; %2$s: size, e.g. "48 MB". -->
+  <string name="mobile_offline_maps_remove_area_body">Xóa "%1$s" sẽ giải phóng tối đa %2$s. Bạn sẽ cần internet để xem lại khu vực này khi ngoại tuyến.</string>
+  <!-- Menu item and confirmation button that remove the satellite layer of a saved area. -->
+  <string name="mobile_offline_maps_remove_satellite">Xóa vệ tinh</string>
+  <!-- Menu item and confirmation button that remove the terrain layer of a saved area. -->
+  <string name="mobile_offline_maps_remove_terrain">Xóa địa hình</string>
+  <!-- Title of the confirmation before removing the satellite layer of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_remove_satellite_title">Xóa vệ tinh khỏi "%1$s"?</string>
+  <!-- Title of the confirmation before removing the terrain layer of a saved area. %1$s: area name. -->
+  <string name="mobile_offline_maps_remove_terrain_title">Xóa địa hình khỏi "%1$s"?</string>
+  <!-- Body of the confirmation before removing a layer of a saved area. %1$s: size, e.g. "38 MB". -->
+  <string name="mobile_offline_maps_remove_layer_body">Thao tác này giải phóng tối đa %1$s. Bạn sẽ cần internet để xem lại hình ảnh này.</string>
+
+  <!-- Mobile client version update prompts -->
+  <string name="mobile_update_available_title">Có bản cập nhật mới</string>
+  <string name="mobile_update_available_body">Đã có phiên bản mới hơn (%1$s) của Collect One.</string>
+  <string name="mobile_update_required_title">Yêu cầu cập nhật</string>
+  <string name="mobile_update_required_body">Phiên bản Collect One này (%1$s) không còn được hỗ trợ. Hãy cập nhật lên %2$s trở lên để tiếp tục.</string>
+  <string name="mobile_update_now">Cập nhật ngay</string>
+  <string name="mobile_update_later">Để sau</string>
+  <string name="mobile_update_check_again">Kiểm tra lại</string>
+</resources>

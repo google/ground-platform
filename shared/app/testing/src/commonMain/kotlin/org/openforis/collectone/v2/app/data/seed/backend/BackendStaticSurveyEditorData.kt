@@ -24,12 +24,12 @@ import org.openforis.collectone.v2.app.domain.model.editor.DatasetKind
 import org.openforis.collectone.v2.app.domain.model.editor.EntityDataset
 import org.openforis.collectone.v2.app.domain.model.editor.EntityProperty
 import org.openforis.collectone.v2.app.domain.model.editor.EntityRow
-import org.openforis.collectone.v2.app.domain.model.editor.LatLng
 import org.openforis.collectone.v2.app.domain.model.editor.PropertyType
 import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
 import org.openforis.collectone.v2.app.domain.model.editor.SharingSettings
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyArea
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
+import org.openforis.collectone.v2.map.LatLng
 
 /**
  * Survey editor fixtures that cannot be derived from the runtime survey data (fictional sample
@@ -97,27 +97,114 @@ object BackendStaticSurveyEditorData {
       details =
         derived.details.copy(
           organizationId = BackendStaticOrganizationsData.MEKONG_MANGROVE_ALLIANCE,
-          surveyArea = derived.details.surveyArea ?: serengetiSurveyArea(),
+          surveyArea = derived.details.surveyArea ?: mekongDeltaSurveyArea(),
         ),
       sharing = organizationSharing(),
     )
 
-  fun serengetiSurveyArea() =
+  /** Survey area of the Arusha land use survey: the city of Arusha, Tanzania. */
+  fun arushaSurveyArea() =
     SurveyArea(
-      name = "Western Serengeti, Mara",
-      center = LatLng(-2.3333, 34.8328),
-      zoom = 14.8,
+      name = "Arusha City, Arusha",
+      center = LatLng(-3.3800, 36.6800),
+      zoom = 12.5,
       parts =
         listOf(
           listOf(
-            LatLng(-2.3243, 34.8258),
-            LatLng(-2.3243, 34.8398),
-            LatLng(-2.3423, 34.8398),
-            LatLng(-2.3423, 34.8258),
+            LatLng(-3.3550, 36.6500),
+            LatLng(-3.3550, 36.7100),
+            LatLng(-3.4050, 36.7100),
+            LatLng(-3.4050, 36.6500),
           )
         ),
     )
 
+  /** Survey area of the Pará forest assessment: a block of forest sample plots. */
+  fun paraSurveyArea() =
+    SurveyArea(
+      name = "Forest sample plots, Pará",
+      center = LatLng(-3.4600, -62.2100),
+      zoom = 12.5,
+      parts =
+        listOf(
+          listOf(
+            LatLng(-3.4300, -62.2450),
+            LatLng(-3.4300, -62.1750),
+            LatLng(-3.4900, -62.1750),
+            LatLng(-3.4900, -62.2450),
+          )
+        ),
+    )
+
+  /** Survey area of the Ashanti commodity plot survey: around Kumasi, Ghana. */
+  fun ashantiSurveyArea() =
+    SurveyArea(
+      name = "Kumasi, Ashanti Region",
+      center = LatLng(6.6900, -1.6200),
+      zoom = 12.5,
+      parts =
+        listOf(
+          listOf(
+            LatLng(6.7150, -1.6500),
+            LatLng(6.7150, -1.5900),
+            LatLng(6.6650, -1.5900),
+            LatLng(6.6650, -1.6500),
+          )
+        ),
+    )
+
+  /** Survey area of the Kakamega household panel: Kakamega town, Kenya. */
+  fun kakamegaSurveyArea() =
+    SurveyArea(
+      name = "Kakamega Central, Kakamega",
+      center = LatLng(0.2800, 34.7500),
+      zoom = 12.5,
+      parts =
+        listOf(
+          listOf(
+            LatLng(0.3050, 34.7200),
+            LatLng(0.3050, 34.7800),
+            LatLng(0.2550, 34.7800),
+            LatLng(0.2550, 34.7200),
+          )
+        ),
+    )
+
+  /** Survey area of the Kalimantan Google Earth sample-plot interpretation survey. */
+  fun kalimantanSurveyArea() =
+    SurveyArea(
+      name = "Sebangau Peat Dome, Central Kalimantan",
+      center = LatLng(-2.2136, 113.9213),
+      zoom = 13.0,
+      parts =
+        listOf(
+          listOf(
+            LatLng(-2.1950, 113.9000),
+            LatLng(-2.1950, 113.9430),
+            LatLng(-2.2320, 113.9430),
+            LatLng(-2.2320, 113.9000),
+          )
+        ),
+    )
+
+  /** Survey area of the Mekong Delta mangrove restoration: its coastal mangrove belt. */
+  fun mekongDeltaSurveyArea() =
+    SurveyArea(
+      name = "Coastal mangroves, Mekong Delta",
+      center = LatLng(9.8200, 106.3400),
+      zoom = 12.5,
+      parts =
+        listOf(
+          listOf(
+            LatLng(9.8500, 106.3000),
+            LatLng(9.8500, 106.3800),
+            LatLng(9.7900, 106.3800),
+            LatLng(9.7900, 106.3000),
+          )
+        ),
+    )
+
+  /** Survey area of the Kenya coffee survey: Othaya Sub-County, Nyeri. */
   fun kenyaSurveyArea() =
     SurveyArea(
       name = "Othaya Sub-County, Nyeri",

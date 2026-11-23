@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:OutboxCoalescer.kt$OutboxCoalescer$(r.point != null || r.trace != null || r.shape != null) &amp;&amp; superseded("geometry")</ID>
+    <ID>ComplexCondition:OutboxCoalescer.kt$OutboxCoalescer$a.sharing_policy != SharingPolicy.SHARING_POLICY_UNSPECIFIED || a.peer_data_visibility != PeerDataVisibility.PEER_DATA_VISIBILITY_UNSPECIFIED || a.collector_consent_required || a.collector_consent_text.isNotEmpty() || a.care_sovereignty_applied || a.owner_id.isNotEmpty() || a.default_role != Role.ROLE_UNSPECIFIED</ID>
+    <ID>ComplexCondition:RecordFolds.kt$RecordFolds$isPatch &amp;&amp; !isInitialCreate &amp;&amp; m.isQueued() &amp;&amp; before == Triple(saved, workingCopy, acl)</ID>
+    <ID>CyclomaticComplexMethod:MutationDiffs.kt$MutationDiffs$fun acl(old: SurveyAcl, new: SurveyAcl): List&lt;SurveyMutation&gt;</ID>
+    <ID>CyclomaticComplexMethod:MutationDiffs.kt$MutationDiffs$fun entity(old: EntityRecord, new: EntityRecord): EntityDiff</ID>
+    <ID>CyclomaticComplexMethod:MutationDiffs.kt$MutationDiffs$fun survey(old: SurveyDef, new: SurveyDef): List&lt;SurveyMutation&gt;</ID>
+    <ID>CyclomaticComplexMethod:OutboxCoalescer.kt$OutboxCoalescer$fun coalesce(outbox: List&lt;PendingMutation&gt;, new: PendingMutation): List&lt;PendingMutation&gt;</ID>
+    <ID>CyclomaticComplexMethod:OutboxCoalescer.kt$OutboxCoalescer$private fun dataKeys(m: DataMutation): Set&lt;String&gt;</ID>
+    <ID>CyclomaticComplexMethod:OutboxCoalescer.kt$OutboxCoalescer$private fun surveyKeys(m: SurveyMutation): Set&lt;String&gt;</ID>
+    <ID>CyclomaticComplexMethod:OutboxCoalescer.kt$OutboxCoalescer$private fun withoutKeys(mutation: PendingMutation, newKeys: Set&lt;String&gt;): PendingMutation?</ID>
+    <ID>CyclomaticComplexMethod:OutboxDrainer.kt$OutboxDrainer$private suspend fun call( batch: List&lt;PendingMutation&gt;, clientId: String, ): (LocalStoreTransaction) -&gt; Unit</ID>
+    <ID>CyclomaticComplexMethod:PlacesGeocoder.kt$PlacesResponseMapper$private fun toPlace( feature: JsonObject, index: Int, query: String, near: SurveyMapAnchor, defaultSubtitle: String, ): SurveyPlaceItem</ID>
+    <ID>CyclomaticComplexMethod:RecordFolds.kt$RecordFolds$fun entity( base: EntityRecord?, entityId: String, pending: List&lt;PendingMutation&gt;, ): Folded&lt;EntityRecord&gt;</ID>
+    <ID>CyclomaticComplexMethod:RecordFolds.kt$RecordFolds$fun library( base: OrganizationLibraryRecord?, organizationId: String, pending: List&lt;PendingMutation&gt;, ): Folded&lt;OrganizationLibraryRecord&gt;</ID>
+    <ID>CyclomaticComplexMethod:RecordFolds.kt$RecordFolds$fun organization( base: Organization?, organizationId: String, pending: List&lt;PendingMutation&gt;, ): Folded&lt;Organization&gt;</ID>
+    <ID>CyclomaticComplexMethod:RecordFolds.kt$RecordFolds$fun submission( base: SubmissionRecord?, submissionId: String, pending: List&lt;PendingMutation&gt;, ): Folded&lt;SubmissionRecord&gt;</ID>
+    <ID>CyclomaticComplexMethod:RecordFolds.kt$RecordFolds$fun survey( base: SurveyBase?, surveyId: String, pending: List&lt;PendingMutation&gt;, ): Folded&lt;SurveyBase&gt;</ID>
+    <ID>CyclomaticComplexMethod:SyncCoordinator.kt$SyncCoordinator$private suspend fun executePendingSync()</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:PlacesGeocoder.kt$PlacesResponseMapper$(w, s, e, n)</ID>
+    <ID>EmptyFunctionBlock:PushSubscriptionClient.kt$NoopPushSubscriptionClient${}</ID>
+    <ID>LargeClass:GrpcSyncDataSource.kt$GrpcSyncDataSource</ID>
+    <ID>LargeClass:ProtoSurveyMapper.kt$ProtoSurveyMapper</ID>
+    <ID>LongMethod:GrpcSyncDataSource.kt$GrpcSyncDataSource$suspend fun seedStoreFromGrpc( store: LocalStore, defaultActiveSurveyId: String, seedVersion: Int, )</ID>
+    <ID>LongMethod:MutationDiffs.kt$MutationDiffs$fun acl(old: SurveyAcl, new: SurveyAcl): List&lt;SurveyMutation&gt;</ID>
+    <ID>LongMethod:MutationDiffs.kt$MutationDiffs$fun survey(old: SurveyDef, new: SurveyDef): List&lt;SurveyMutation&gt;</ID>
+    <ID>LongMethod:OutboxDrainer.kt$OutboxDrainer$private suspend fun call( batch: List&lt;PendingMutation&gt;, clientId: String, ): (LocalStoreTransaction) -&gt; Unit</ID>
+    <ID>LongMethod:ProtoSurveyMapper.kt$ProtoSurveyMapper$fun surveyEditorDraftFromProto( surveyDef: SurveyDef, acl: SurveyAcl?, surveyPreview: SurveyPreviewItem, forms: List&lt;FormPreviewItem&gt;, config: SurveyConfig, mapLayers: List&lt;MapLayerItem&gt;, entities: List&lt;GeospatialEntityItem&gt;, ): SurveyEditorDraft</ID>
+    <ID>LongMethod:RecordingLocalStore.kt$RecordingTransaction$private fun recordData(recorder: OutboxRecorder, surveyId: String, before: DataSnapshot)</ID>
+    <ID>LongMethod:RecordingLocalStoreTest.kt$WorkingCopyRecorderTest$@Test fun saveDraft_afterWorkingCopySyncedToServer_preservesFormsLayersAndPurposes()</ID>
+    <ID>LoopWithTooManyJumpStatements:GrpcSyncDataSource.kt$GrpcSyncDataSource$for</ID>
+    <ID>LoopWithTooManyJumpStatements:OutboxDrainer.kt$OutboxDrainer$for</ID>
+    <ID>LoopWithTooManyJumpStatements:RecordFolds.kt$RecordFolds$for</ID>
+    <ID>NestedBlockDepth:MutationDiffs.kt$MutationDiffs$fun survey(old: SurveyDef, new: SurveyDef): List&lt;SurveyMutation&gt;</ID>
+    <ID>ReturnCount:OutboxCoalescer.kt$OutboxCoalescer$fun coalesce(outbox: List&lt;PendingMutation&gt;, new: PendingMutation): List&lt;PendingMutation&gt;</ID>
+    <ID>SwallowedException:OutboxDrainer.kt$OutboxDrainer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:OutboxDrainer.kt$OutboxDrainer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SyncCoordinator.kt$SyncCoordinator$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SyncStatePersistence.kt$SyncStatePersistence$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:UserDataSyncController.kt$UserDataSyncController$e: Exception</ID>
+    <ID>TooManyFunctions:CollectOneGrpcClient.kt$CollectOneGrpcClient</ID>
+    <ID>TooManyFunctions:InMemoryLocalStore.kt$InMemoryLocalStore$Transaction : LocalStoreTransaction</ID>
+    <ID>TooManyFunctions:LocalStore.kt$LocalStoreTransaction</ID>
+    <ID>TooManyFunctions:SurveyRepositoryImpl.kt$SurveyRepositoryImpl : SurveyRepository</ID>
+    <ID>UnusedPrivateProperty:SyncCoordinator.kt$SyncCoordinator$trigger</ID>
+  </CurrentIssues>
+</SmellBaseline>

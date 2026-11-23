@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <!-- Kind of "data was used" event, shown in impact history. -->
+  <string name="domain_impact_event_type_export">ສົ່ງອອກແລ້ວ</string>
+  <string name="domain_impact_event_type_partner_push">ສົ່ງໃຫ້ຄູ່ຮ່ວມງານແລ້ວ</string>
+  <string name="domain_impact_event_type_receipt_generated">ສ້າງໃບຢັ້ງຢືນແລ້ວ</string>
+  <string name="domain_impact_event_type_receipt_shared">ແບ່ງປັນໃບຢັ້ງຢືນແລ້ວ</string>
+  <string name="domain_impact_event_type_doi_minted">ອອກ DOI ແລ້ວ</string>
+  <string name="domain_impact_event_type_survey_closed">ປິດແບບສຳຫຼວດແລ້ວ</string>
+  <!-- Lifecycle state of a survey. -->
+  <string name="domain_survey_lifecycle_state_draft">ສະບັບຮ່າງ</string>
+  <string name="domain_survey_lifecycle_state_published">ເຜີຍແຜ່ແລ້ວ</string>
+  <string name="domain_survey_lifecycle_state_closed">ປິດແລ້ວ</string>
+  <string name="domain_survey_lifecycle_state_archived">ເກັບເຂົ້າແຟ້ມແລ້ວ</string>
+  <!-- Answer option to "What happened with this data?" for a closed survey. -->
+  <string name="domain_survey_outcome_kind_submitted_eudr_dds">ສົ່ງໃນຖະແຫຼງການກວດສອບສະຖານະ EUDR</string>
+  <string name="domain_survey_outcome_kind_reported_ferm">ລາຍງານໄປທີ່ FERM</string>
+  <string name="domain_survey_outcome_kind_land_titling">ໃຊ້ສຳລັບການອອກໃບຕາດິນ</string>
+  <string name="domain_survey_outcome_kind_shared_with_buyers">ແບ່ງປັນກັບຜູ້ຊື້</string>
+  <string name="domain_survey_outcome_kind_trained_or_validated_model">ໃຊ້ຝຶກ ຫຼື ກວດສອບແຜນທີ່ ຫຼື ແບບຈຳລອງ</string>
+  <string name="domain_survey_outcome_kind_protected_area_management">ໃຊ້ຄຸ້ມຄອງເຂດປ່າສະຫງວນ</string>
+  <string name="domain_survey_outcome_kind_not_yet">ຍັງບໍ່ທັນ</string>
+  <!-- Answer option: time and cost compared with the previous method. -->
+  <string name="domain_effort_comparison_less">ໜ້ອຍກວ່າ</string>
+  <string name="domain_effort_comparison_same">ປະມານເທົ່າເດີມ</string>
+  <string name="domain_effort_comparison_more">ຫຼາຍກວ່າ</string>
+  <!-- Upload status of a submission. -->
+  <string name="domain_sync_status_uploading">ກຳລັງອັບໂຫຼດ</string>
+  <string name="domain_sync_status_uploading_description">ກຳລັງອັບໂຫຼດການປ່ຽນແປງໃນອຸປະກອນໄປທີ່ເຊີບເວີ</string>
+  <string name="domain_sync_status_synced">ຊິງແລ້ວ</string>
+  <string name="domain_sync_status_synced_description">ຊິງກັບເຊີບເວີຄລາວແລ້ວ</string>
+  <string name="domain_sync_status_failed">ລົ້ມເຫຼວ</string>
+  <string name="domain_sync_status_failed_description">ອັບໂຫຼດລົ້ມເຫຼວ — ແຕະເພື່ອລອງໃໝ່</string>
+  <!-- Name of a quota tier (plan). -->
+  <string name="domain_quota_tier_unspecified">ບໍ່ໄດ້ລະບຸ</string>
+  <string name="domain_quota_tier_basic">ພື້ນຖານ</string>
+  <string name="domain_quota_tier_sponsored">ໄດ້ຮັບການສະໜັບສະໜູນ</string>
+  <!-- Measurement unit system option in Settings. -->
+  <string name="domain_measurement_unit_system_metric">ເມັດຕຣິກ (ha, m)</string>
+  <string name="domain_measurement_unit_system_metric_short">ເມັດຕຣິກ</string>
+  <string name="domain_measurement_unit_system_imperial">ອິມພີເຣຍວ (acres, ft)</string>
+  <string name="domain_measurement_unit_system_imperial_short">ອິມພີເຣຍວ</string>
+  <!-- State of the map camera relative to the GPS location. -->
+  <string name="domain_location_lock_state_locked">ຈັດກາງອັດຕະໂນມັດຕາມ GPS</string>
+  <string name="domain_location_lock_state_locked_3d">GPS 3D</string>
+  <string name="domain_location_lock_state_panned">ເລື່ອນແຜນທີ່ແລ້ວ</string>
+  <!-- Badge shown on a map layer that comes from the survey. -->
+  <string name="domain_layer_source_type_entity_dataset">ຊັ້ນຂໍ້ມູນແບບສຳຫຼວດ</string>
+  <!-- Basemap option in the map layers panel. -->
+  <string name="domain_basemap_type_normal">ພູມສັນຖານ</string>
+  <string name="domain_basemap_type_normal_description">ແຜນທີ່ພູມສັນຖານ ພ້ອມເສັ້ນລະດັບ, ເງົາພູ ແລະ ຖະໜົນ</string>
+  <string name="domain_basemap_type_satellite">ດາວທຽມ</string>
+  <string name="domain_basemap_type_satellite_description">ພາບດາວທຽມ Mapbox Standard Satellite ພ້ອມປ້າຍອ້າງອີງ</string>
+  <!-- Layer of a map area saved for offline use: satellite imagery, or the terrain map (contours, hillshade, and roads). -->
+  <string name="domain_offline_imagery_type_satellite">ດາວທຽມ</string>
+  <string name="domain_offline_imagery_type_terrain">ພູມສັນຖານ</string>
+  <!-- Role of a person in an organization. -->
+  <string name="domain_organization_role_member">ສະມາຊິກ</string>
+  <string name="domain_organization_role_member_description">ຖືກລະບຸວ່າເປັນສະມາຊິກ, ສາມາດເບິ່ງແບບສຳຫຼວດຂອງອົງກອນ ແລະ ສ້າງແບບສຳຫຼວດໃໝ່ໄດ້.</string>
+  <string name="domain_organization_role_manager">ຜູ້ຈັດການ</string>
+  <string name="domain_organization_role_manager_description">ສາມາດແກ້ໄຂອົງກອນ, ຈັດການສະມາຊິກ ແລະ ຈັດການແບບສຳຫຼວດທັງໝົດຂອງອົງກອນໄດ້.</string>
+  <!-- Status of a person's membership in an organization. -->
+  <string name="domain_membership_status_invited">ໄດ້ຮັບເຊີນແລ້ວ</string>
+  <string name="domain_membership_status_requested">ຂໍເຂົ້າຮ່ວມແລ້ວ</string>
+  <string name="domain_membership_status_active">ສະມາຊິກ</string>
+  <!-- Kind of custom imagery source. -->
+  <string name="domain_imagery_source_type_xyz_tiles">URL ແຜ່ນແຜນທີ່ XYZ</string>
+  <string name="domain_imagery_source_type_earth_engine">ຊັ້ນ Earth Engine</string>
+  <!-- Kind of organization. -->
+  <string name="domain_organization_type_government_agency">ໜ່ວຍງານລັດ</string>
+  <string name="domain_organization_type_cooperative">ສະຫະກອນ</string>
+  <string name="domain_organization_type_iplc_organization">ອົງກອນຂອງຊົນເຜົ່າພື້ນເມືອງ ຫຼື ຊຸມຊົນທ້ອງຖິ່ນ</string>
+  <string name="domain_organization_type_ngo">ອົງກອນບໍ່ສັງກັດລັດ (NGO)</string>
+  <string name="domain_organization_type_company">ບໍລິສັດ</string>
+  <string name="domain_organization_type_research">ສະຖາບັນຄົ້ນຄວ້າ</string>
+  <string name="domain_organization_type_other">ອື່ນໆ</string>
+  <!-- Upload status filter and upload state of a pending change. -->
+  <string name="domain_upload_status_filter_pending">ລໍຖ້າ</string>
+  <string name="domain_upload_status_filter_in_progress">ກຳລັງດຳເນີນການ</string>
+  <string name="domain_upload_status_filter_uploaded">ອັບໂຫຼດແລ້ວ</string>
+  <string name="domain_upload_status_filter_failed">ລົ້ມເຫຼວ</string>
+  <!-- Kind of change waiting to upload or already uploaded. -->
+  <string name="domain_mutation_operation_kind_create_submission">ສົ່ງແບບຟອມແລ້ວ</string>
+  <string name="domain_mutation_operation_kind_update_submission">ແກ້ໄຂແບບຟອມແລ້ວ</string>
+  <string name="domain_mutation_operation_kind_delete_submission">ລຶບແບບຟອມແລ້ວ</string>
+  <string name="domain_mutation_operation_kind_create_entity">ສ້າງອົງປະກອບແຜນທີ່ແລ້ວ</string>
+  <string name="domain_mutation_operation_kind_update_entity">ແກ້ໄຂອົງປະກອບແຜນທີ່ແລ້ວ</string>
+  <string name="domain_mutation_operation_kind_delete_entity">ລຶບອົງປະກອບແຜນທີ່ແລ້ວ</string>
+  <string name="domain_mutation_operation_kind_upload_media">ແນບຮູບພາບແລ້ວ</string>
+  <!-- Status of an invitation to join. -->
+  <string name="domain_invitation_status_pending">ໄດ້ຮັບເຊີນແລ້ວ</string>
+  <string name="domain_invitation_status_accepted">ເຂົ້າຮ່ວມແລ້ວ</string>
+  <!-- Geometry type: point, line, or polygon. -->
+  <string name="domain_geometry_point">ຈຸດ</string>
+  <string name="domain_geometry_line">ເສັ້ນ</string>
+  <string name="domain_geometry_polygon">ຮູບຫຼາຍແຫຼ່ຽມ</string>
+  <!-- Geometry type (point, line, polygon) of a map feature or question. -->
+  <string name="domain_entity_geometry_kind_none">ບໍ່ມີຮູບເລຂາຄະນິດ</string>
+  <!-- Title or subtitle of a mobile app screen in the screen navigator. -->
+  <string name="domain_app_screen_sign_in_title">ເຂົ້າລະບົບ</string>
+  <string name="domain_app_screen_sign_in_subtitle">ຈຸດເຂົ້າສູ່ລະບົບດ້ວຍການຢືນຢັນຕົວຕົນ Google</string>
+  <string name="domain_app_screen_terms_of_service_title">ເງື່ອນໄຂການໃຫ້ບໍລິການ</string>
+  <string name="domain_app_screen_terms_of_service_subtitle">ການຍອມຮັບເງື່ອນໄຂການຄຸ້ມຄອງຂໍ້ມູນ ແລະ ແພລັດຟອມ</string>
+  <string name="domain_app_screen_download_survey_title">ດາວໂຫຼດແບບສຳຫຼວດ</string>
+  <string name="domain_app_screen_download_survey_subtitle">ເບິ່ງແບບສຳຫຼວດທີ່ແບ່ງປັນ ຫຼື ຊອກຫາຕາມຊື່/ສະຖານທີ່</string>
+  <string name="domain_app_screen_main_survey_title">ແບບສຳຫຼວດຫຼັກ (ແຜນທີ່ ແລະ ລາຍການ)</string>
+  <string name="domain_app_screen_main_survey_subtitle">ແຜນທີ່ແບບສຳຫຼວດ, ຊັ້ນແຜນທີ່, ແຜ່ນລຸ່ມຂອງຕຳແໜ່ງ ແລະ ການສົ່ງຂໍ້ມູນ, ລາຍການຄົ້ນຫາ ແລະ ເມນູ</string>
+  <!-- Tab: show the survey as a map or as a list. -->
+  <string name="domain_main_survey_view_mode_map">ແຜນທີ່</string>
+  <string name="domain_main_survey_view_mode_list">ລາຍການ</string>
+  <!-- Lifecycle status of a library entry. -->
+  <string name="domain_library_status_draft">ສະບັບຮ່າງ</string>
+  <string name="domain_library_status_stable">ໝັ້ນຄົງ</string>
+  <string name="domain_library_status_deprecated">ເຊົາໃຊ້ແລ້ວ</string>
+  <!-- How dashboards roll up answers to a standard field. -->
+  <string name="domain_concept_aggregation_count_distinct_features">ນັບອົງປະກອບແຜນທີ່</string>
+  <string name="domain_concept_aggregation_count_distinct_features_description">ນັບອົງປະກອບແຜນທີ່ທີ່ມີຄຳຕອບ.</string>
+  <string name="domain_concept_aggregation_count_by_code">ນັບຕາມຄ່າ</string>
+  <string name="domain_concept_aggregation_count_by_code_description">ນັບອົງປະກອບແຜນທີ່ສຳລັບແຕ່ລະຄ່າໃນລາຍການ.</string>
+  <string name="domain_concept_aggregation_sum">ຜົນລວມ</string>
+  <string name="domain_concept_aggregation_sum_description">ລວມຄຳຕອບເຂົ້າກັນ.</string>
+  <string name="domain_concept_aggregation_mean">ຄ່າສະເລ່ຍ</string>
+  <string name="domain_concept_aggregation_mean_description">ຄິດໄລ່ຄ່າສະເລ່ຍຂອງຄຳຕອບ.</string>
+  <string name="domain_concept_aggregation_share_by_code">ສັດສ່ວນຕາມຄ່າ</string>
+  <string name="domain_concept_aggregation_share_by_code_description">ສະແດງສັດສ່ວນຂອງອົງປະກອບແຜນທີ່ທີ່ມີແຕ່ລະຄ່າ.</string>
+  <string name="domain_concept_aggregation_none">ບໍ່ລວມຍອດ</string>
+  <string name="domain_concept_aggregation_none_description">ຊື່, ຕົວລະບຸ ແລະ ຄຳຕອບອື່ນໆທີ່ບໍ່ໄດ້ລວມຍອດ.</string>
+  <!-- Privacy class of a standard field: what may leave the organization. -->
+  <string name="domain_privacy_class_aggregate_public">ຍອດລວມສາທາລະນະ</string>
+  <string name="domain_privacy_class_aggregate_public_description">ຍອດລວມສາມາດປາກົດໃນແດຊບອດທົ່ວແພລັດຟອມ ແລະ ແດຊບອດສາທາລະນະ.</string>
+  <string name="domain_privacy_class_org_only">ສະເພາະອົງກອນ</string>
+  <string name="domain_privacy_class_org_only_description">ຍອດລວມເບິ່ງເຫັນໄດ້ສະເພາະພາຍໃນອົງກອນທີ່ເປັນເຈົ້າຂອງເທົ່ານັ້ນ.</string>
+  <string name="domain_privacy_class_sensitive">ລະອຽດອ່ອນ</string>
+  <string name="domain_privacy_class_sensitive_description">ບໍ່ຖືກລວມໃນຍອດລວມຂ້າມອົງກອນ ຫຼື ຍອດລວມສາທາລະນະ.</string>
+  <!-- Impact pillar used to group goals. -->
+  <string name="domain_impact_pillar_mitigation">ການຫຼຸດຜ່ອນ</string>
+  <string name="domain_impact_pillar_adaptation">ການປັບຕົວ</string>
+  <string name="domain_impact_pillar_protection">ການປົກປ້ອງ</string>
+  <!-- Data type of an answer or property. -->
+  <string name="domain_data_type_text">ຂໍ້ຄວາມ</string>
+  <string name="domain_data_type_integer">ຈຳນວນເຕັມ</string>
+  <string name="domain_data_type_decimal">ທົດສະນິຍົມ</string>
+  <string name="domain_data_type_date">ວັນທີ</string>
+  <string name="domain_data_type_select_one">ເລືອກໜຶ່ງຂໍ້</string>
+  <string name="domain_data_type_select_multiple">ເລືອກຫຼາຍຂໍ້</string>
+  <!-- Answer data type (also used for question types and table property types). -->
+  <string name="domain_concept_data_type_media">ຮູບພາບ, ວິດີໂອ ຫຼື ສຽງ</string>
+  <!-- Role of a collaborator on a survey. -->
+  <string name="domain_collaborator_role_viewer">ຜູ້ເບິ່ງ</string>
+  <string name="domain_collaborator_role_viewer_description">ສາມາດເບິ່ງແຜນທີ່, ຊັ້ນແຜນທີ່ ແລະ ການສົ່ງຂໍ້ມູນໄດ້.</string>
+  <string name="domain_collaborator_role_data_collector">ຜູ້ເກັບຂໍ້ມູນ</string>
+  <string name="domain_collaborator_role_data_collector_description">ສາມາດເກັບການສົ່ງຂໍ້ມູນ ແລະ ເພີ່ມອົງປະກອບແຜນທີ່ໄດ້.</string>
+  <string name="domain_collaborator_role_survey_organizer">ຜູ້ຈັດການແບບສຳຫຼວດ</string>
+  <string name="domain_collaborator_role_survey_organizer_description">ສາມາດແກ້ໄຂແບບຟອມ, ຈັດການການແບ່ງປັນ ແລະ ສົ່ງອອກຂໍ້ມູນໄດ້.</string>
+  <!-- General access option of a survey. -->
+  <string name="domain_sharing_policy_restricted">ຈຳກັດ</string>
+  <string name="domain_sharing_policy_restricted_description">ສະເພາະຜູ້ທີ່ຖືກເພີ່ມຂ້າງເທິງເທົ່ານັ້ນທີ່ສາມາດເປີດແບບສຳຫຼວດນີ້ໄດ້.</string>
+  <string name="domain_sharing_policy_organization">ທຸກຄົນໃນອົງກອນ</string>
+  <string name="domain_sharing_policy_organization_description">ສະມາຊິກຂອງອົງກອນເຈົ້າຂອງແບບສຳຫຼວດສາມາດເກັບຂໍ້ມູນໄດ້. ຜູ້ຈັດການຍັງສາມາດແກ້ໄຂແບບສຳຫຼວດໄດ້ອີກດ້ວຍ.</string>
+  <string name="domain_sharing_policy_anyone_with_link">ຕ້ອງມີລິ້ງ ຫຼື QR code</string>
+  <string name="domain_sharing_policy_anyone_with_link_description">ຜູ້ໃຊ້ຕ້ອງມີລິ້ງ ຫຼື QR code ເພື່ອເຂົ້າເຖິງແບບສຳຫຼວດນີ້ ແລະ ເກັບຂໍ້ມູນ.</string>
+  <string name="domain_sharing_policy_public">ສະແດງໃນລາຍຊື່</string>
+  <string name="domain_sharing_policy_public_description">ສະແດງໃນລາຍຊື່ເພື່ອໃຫ້ທຸກຄົນສາມາດຊອກຫາແບບສຳຫຼວດນີ້ ແລະ ເກັບຂໍ້ມູນໄດ້.</string>
+  <!-- Which data a data collector can see. -->
+  <string name="domain_peer_data_visibility_all">ຂໍ້ມູນທັງໝົດ</string>
+  <string name="domain_peer_data_visibility_all_description">ຜູ້ເກັບຂໍ້ມູນເຫັນການສົ່ງຂໍ້ມູນ ແລະ ອົງປະກອບແຜນທີ່ຂອງທຸກຄົນ.</string>
+  <string name="domain_peer_data_visibility_own_only">ສະເພາະຂໍ້ມູນຂອງຕົນເອງ</string>
+  <string name="domain_peer_data_visibility_own_only_description">ຜູ້ເກັບຂໍ້ມູນເຫັນສະເພາະສິ່ງທີ່ຕົນເອງເກັບເທົ່ານັ້ນ.</string>
+  <!-- Kind of survey dataset, singular and plural. -->
+  <string name="domain_dataset_kind_map_layer">ຊັ້ນແຜນທີ່</string>
+  <string name="domain_dataset_kind_map_layer_plural">ຊັ້ນແຜນທີ່</string>
+  <string name="domain_dataset_kind_data_table">ຕາຕະລາງຂໍ້ມູນ</string>
+  <string name="domain_dataset_kind_data_table_plural">ຕາຕະລາງຂໍ້ມູນ</string>
+  <!-- Geometry type of a map layer (plural). -->
+  <string name="domain_geometry_kind_point">ຈຸດ</string>
+  <string name="domain_geometry_kind_line">ເສັ້ນ</string>
+  <string name="domain_geometry_kind_polygon">ຮູບຫຼາຍແຫຼ່ຽມ</string>
+  <string name="domain_property_type_boolean">ແມ່ນ / ບໍ່</string>
+  <!-- Sampling method option for generated sample plots. -->
+  <string name="domain_sample_method_systematic_grid">ຕາໜ່າງແບບເປັນລະບົບ</string>
+  <string name="domain_sample_method_systematic_grid_description">ແປງຢູ່ໃນຕາໜ່າງທີ່ສະໝ່ຳສະເໝີ ໂດຍມີຈຸດເລີ່ມຕົ້ນແບບສຸ່ມ.</string>
+  <string name="domain_sample_method_simple_random">ສຸ່ມແບບງ່າຍ</string>
+  <string name="domain_sample_method_simple_random_description">ແປງຈຳນວນທີ່ກຳນົດໄວ້ ວາງແບບສຸ່ມ.</string>
+  <string name="domain_sample_method_stratified_random">ສຸ່ມແບບແບ່ງຊັ້ນ</string>
+  <string name="domain_sample_method_stratified_random_description">ແປງວາງແບບສຸ່ມພາຍໃນແຕ່ລະຊັ້ນ.</string>
+  <string name="domain_sample_method_cluster">ກຸ່ມ</string>
+  <string name="domain_sample_method_cluster_description">ກຸ່ມຂອງແປງທີ່ວາງແບບສຸ່ມ.</string>
+  <!-- How sample plots are allocated across strata. -->
+  <string name="domain_allocation_mode_equal">ເທົ່າກັນ</string>
+  <string name="domain_allocation_mode_proportional">ຕາມສັດສ່ວນພື້ນທີ່</string>
+  <string name="domain_allocation_mode_custom">ກຳນົດເອງ</string>
+  <!-- Shape of a sample plot. -->
+  <string name="domain_plot_shape_option_square">ສີ່ຫຼ່ຽມຈະຕຸລັດ</string>
+  <string name="domain_plot_shape_option_circle">ວົງມົນ</string>
+  <string name="domain_plot_shape_option_point">ຈຸດ (ສະເພາະຈຸດກາງ)</string>
+  <!-- How sub-plot sample points are placed within a plot. -->
+  <string name="domain_sub_plot_mode_none">ບໍ່ມີ</string>
+  <string name="domain_sub_plot_mode_center">ໜຶ່ງຈຸດຢູ່ກາງ</string>
+  <string name="domain_sub_plot_mode_grid">ຕາໜ່າງ</string>
+  <string name="domain_sub_plot_mode_random">ສຸ່ມ</string>
+  <!-- Device to preview a form on. -->
+  <string name="domain_form_preview_target_mobile">ມືຖື</string>
+  <string name="domain_form_preview_target_web">ເວັບ</string>
+  <!-- Question type in the form editor. -->
+  <string name="domain_editor_question_type_text">ຂໍ້ຄວາມສັ້ນ</string>
+  <string name="domain_editor_question_type_long_text">ຫຍໍ້ໜ້າ</string>
+  <string name="domain_editor_question_type_number">ຕົວເລກ</string>
+  <string name="domain_editor_question_type_photo">ຮູບພາບ</string>
+  <string name="domain_editor_question_type_video">ວິດີໂອ</string>
+  <string name="domain_editor_question_type_audio">ສຽງ</string>
+  <string name="domain_editor_question_type_note">ໝາຍເຫດ</string>
+  <!-- How data collectors provide a photo, video, or audio answer. -->
+  <string name="domain_media_source_capture_or_upload">ບັນທຶກ ຫຼື ອັບໂຫຼດ</string>
+  <string name="domain_media_source_capture_or_upload_description">ຜູ້ເກັບຂໍ້ມູນສາມາດໃຊ້ກ້ອງ ຫຼື ໄມໂຄຣໂຟນ ຫຼື ອັບໂຫຼດໄຟລ໌ທີ່ມີຢູ່ແລ້ວຈາກອຸປະກອນຂອງຕົນ.</string>
+  <string name="domain_media_source_capture_only">ບັນທຶກສົດເທົ່ານັ້ນ</string>
+  <string name="domain_media_source_capture_only_description">ຜູ້ເກັບຂໍ້ມູນຕ້ອງຖ່າຍຮູບ, ວິດີໂອ ຫຼື ບັນທຶກສຽງໃໝ່. ບໍ່ອະນຸຍາດໃຫ້ອັບໂຫຼດໄຟລ໌ທີ່ມີຢູ່ແລ້ວ.</string>
+  <!-- How data collectors record a location answer. -->
+  <string name="domain_geometry_capture_gps_only">GPS ເທົ່ານັ້ນ</string>
+  <string name="domain_geometry_capture_gps_only_description">ຜູ້ເກັບຂໍ້ມູນບັນທຶກຕຳແໜ່ງ GPS ຂອງອຸປະກອນ. ບໍ່ສາມາດໃຊ້ໄດ້ເທິງເວັບ.</string>
+  <string name="domain_geometry_capture_gps_or_map">GPS ຫຼື ວາດເທິງແຜນທີ່</string>
+  <string name="domain_geometry_capture_gps_or_map_description">ຜູ້ເກັບຂໍ້ມູນສາມາດໃຊ້ຕຳແໜ່ງ GPS ຫຼື ວາງຕຳແໜ່ງເທິງແຜນທີ່. ຈຳເປັນສຳລັບເວັບ.</string>
+  <!-- Comparison operator in display logic and status rules; read mid-sentence after a question name, e.g. "age is greater than 5". -->
+  <string name="domain_relevance_operator_equals">ເທົ່າກັບ</string>
+  <string name="domain_relevance_operator_not_equals">ບໍ່ເທົ່າກັບ</string>
+  <string name="domain_relevance_operator_greater_than">ຫຼາຍກວ່າ</string>
+  <string name="domain_relevance_operator_less_than">ໜ້ອຍກວ່າ</string>
+  <string name="domain_relevance_operator_includes">ລວມມີ</string>
+  <string name="domain_relevance_operator_is_answered">ຖືກຕອບແລ້ວ</string>
+  <!-- Where a choice question's options come from. -->
+  <string name="domain_choice_source_manual">ລາຍການທີ່ປ້ອນເອງ</string>
+  <!-- Name of a status marker symbol (accessibility label). -->
+  <string name="domain_status_marker_symbol_open">ວົງມົນເປົ່າ</string>
+  <string name="domain_status_marker_symbol_half">ວົງມົນເຄິ່ງໜຶ່ງ</string>
+  <string name="domain_status_marker_symbol_check">ເຄື່ອງໝາຍຖືກ</string>
+  <string name="domain_status_marker_symbol_alert">ເຄື່ອງໝາຍອັດສະເຈນ</string>
+  <string name="domain_status_marker_symbol_cross">ເຄື່ອງໝາຍກາກບາດ</string>
+  <!-- What a map feature status rule checks. -->
+  <string name="domain_status_condition_subject_submissions">ຈຳນວນການສົ່ງຂໍ້ມູນ</string>
+  <string name="domain_status_condition_subject_question">ຄຳຕອບຂອງຄຳຖາມ</string>
+  <string name="domain_status_condition_subject_entity_property">ຄຸນສົມບັດຂອງອົງປະກອບ</string>
+  <!-- Data type of a map layer or data table property. -->
+  <string name="domain_editor_property_kind_boolean">ແມ່ນ / ບໍ່</string>
+  <!-- Validation rule option for a date question. -->
+  <string name="domain_date_rule_not_in_future">ບໍ່ແມ່ນອະນາຄົດ</string>
+  <string name="domain_date_rule_not_in_past">ບໍ່ແມ່ນອະດີດ</string>
+  <string name="domain_date_rule_between">ລະຫວ່າງສອງວັນທີ</string>
+  <!-- Preset pattern option for validating a text answer. -->
+  <string name="domain_text_pattern_email">ທີ່ຢູ່ອີເມວ</string>
+  <string name="domain_text_pattern_digits">ຕົວເລກເທົ່ານັ້ນ</string>
+  <string name="domain_text_pattern_letters">ຕົວອັກສອນເທົ່ານັ້ນ</string>
+  <string name="domain_text_pattern_custom">ຮູບແບບກຳນົດເອງ</string>
+  <!-- Form editor: validation issues shown next to questions and at the top of the form. -->
+  <string name="domain_issue_form_missing_id">ແບບຟອມບໍ່ມີ ID.</string>
+  <string name="domain_issue_name_required">ຈຳເປັນຕ້ອງມີຊື່.</string>
+  <string name="domain_issue_name_invalid">ຊື່ຕ້ອງເລີ່ມຕົ້ນດ້ວຍຕົວອັກສອນ ແລະ ໃຊ້ໄດ້ສະເພາະຕົວອັກສອນ, ຕົວເລກ, _ . -</string>
+  <!-- %1$s: the question's name (an identifier). -->
+  <string name="domain_issue_name_duplicate">ຊື່ "%1$s" ຖືກໃຊ້ຫຼາຍກວ່າໜຶ່ງຄັ້ງ.</string>
+  <string name="domain_issue_label_empty">ປ້າຍຊື່ຫວ່າງເປົ່າ.</string>
+  <string name="domain_issue_choose_choice_data_table">ເລືອກຕາຕະລາງຂໍ້ມູນສຳລັບຕົວເລືອກ.</string>
+  <string name="domain_issue_choose_choice_map_layer">ເລືອກຊັ້ນແຜນທີ່ສຳລັບຕົວເລືອກ.</string>
+  <!-- %1$s: ID of the map layer or data table that was deleted. -->
+  <string name="domain_issue_choice_dataset_missing">ຊັ້ນແຜນທີ່ ຫຼື ຕາຕະລາງຂໍ້ມູນ "%1$s" ບໍ່ມີຢູ່ອີກແລ້ວ.</string>
+  <!-- %1$s: name of a map layer of generated sample plots. -->
+  <string name="domain_issue_choice_dataset_generated">ແປງຕົວຢ່າງໃນ "%1$s" ຖືກສ້າງອັດຕະໂນມັດ ແລະ ຜູ້ເກັບຂໍ້ມູນບໍ່ສາມາດເພີ່ມໄດ້.</string>
+  <!-- %1$s: name of a map layer. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_map_layer">"%1$s" ບໍ່ມີແບບຟອມສຳລັບເພີ່ມອົງປະກອບແຜນທີ່ໃໝ່.</string>
+  <!-- %1$s: name of a data table. -->
+  <string name="domain_issue_choice_dataset_no_creation_form_data_table">"%1$s" ບໍ່ມີແບບຟອມສຳລັບເພີ່ມແຖວຕາຕະລາງໃໝ່.</string>
+  <string name="domain_issue_add_choice">ເພີ່ມຕົວເລືອກຢ່າງໜ້ອຍໜຶ່ງຂໍ້.</string>
+  <string name="domain_issue_choice_value_invalid">ຄ່າຂອງຕົວເລືອກຕ້ອງບໍ່ຫວ່າງ ແລະ ບໍ່ມີຍະຫວ່າງ.</string>
+  <string name="domain_issue_choice_value_duplicate">ຄ່າຂອງຕົວເລືອກຕ້ອງບໍ່ຊ້ຳກັນ.</string>
+  <string name="domain_issue_display_logic_source_deleted">ເງື່ອນໄຂການສະແດງອ້າງອີງເຖິງຄຳຖາມທີ່ຖືກລຶບແລ້ວ.</string>
+  <!-- %1$s: name of the question the display logic depends on. -->
+  <string name="domain_issue_display_logic_source_later">ເງື່ອນໄຂການສະແດງຂຶ້ນກັບ "%1$s" ເຊິ່ງຢູ່ທາງຫຼັງ.</string>
+  <string name="domain_issue_display_logic_source_in_repeat">ເງື່ອນໄຂການສະແດງຂຶ້ນກັບ "%1$s" ເຊິ່ງຢູ່ໃນພາກສ່ວນທີ່ເຮັດຊ້ຳ.</string>
+  <string name="domain_issue_section_display_logic_source_inside">ເງື່ອນໄຂການສະແດງຂອງພາກສ່ວນບໍ່ສາມາດຂຶ້ນກັບ "%1$s" ເຊິ່ງຢູ່ໃນພາກສ່ວນນັ້ນໄດ້.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_display_logic_operator_not_applicable">"%1$s" ໃຊ້ບໍ່ໄດ້ກັບ %2$s.</string>
+  <string name="domain_issue_display_logic_value_missing">ເງື່ອນໄຂການສະແດງຕ້ອງມີຄ່າເພື່ອປຽບທຽບ.</string>
+  <string name="domain_issue_display_logic_value_not_number">ຄ່າຂອງເງື່ອນໄຂການສະແດງຕ້ອງເປັນຕົວເລກ.</string>
+  <string name="domain_issue_cascade_parent_deleted">ຕົວກອງແບບລຳດັບອ້າງອີງເຖິງຄຳຖາມທີ່ຖືກລຶບແລ້ວ.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_later">ຕົວກອງແບບລຳດັບຂຶ້ນກັບ "%1$s" ເຊິ່ງຢູ່ທາງຫຼັງ.</string>
+  <!-- %1$s: name of the parent question the cascading select's choices are filtered by. -->
+  <string name="domain_issue_cascade_parent_not_choice">ຄຳຖາມຫຼັກຂອງຕົວກອງແບບລຳດັບ "%1$s" ຕ້ອງເປັນຄຳຖາມແບບເລືອກ.</string>
+  <!-- %1$s: comma-separated parent values set on choices; %2$s: name of the parent question. -->
+  <string name="domain_issue_cascade_choice_parent_value_unknown">ຕົວເລືອກທີ່ຜູກກັບ %1$s ຈະບໍ່ສະແດງ: "%2$s" ບໍ່ມີຕົວເລືອກນັ້ນ.</string>
+  <!-- %1$s: question label; %2$s: name of the "GPS or draw on map" option. "Available on web" is a form setting. -->
+  <string name="domain_issue_web_incompatible_geometry">"%1$s" ເປັນແບບ GPS ເທົ່ານັ້ນ ເຊິ່ງເວັບບໍ່ສາມາດບັນທຶກໄດ້. ເລືອກ "%2$s" ຫຼື ປິດ ໃຊ້ໄດ້ເທິງເວັບ.</string>
+  <string name="domain_issue_google_earth_incompatible_question">"%1$s" (%2$s) ບໍ່ຮອງຮັບໃນ Google Earth. ລຶບມັນອອກ, ປ່ຽນປະເພດຄຳຖາມ ຫຼື ປິດ ເປີດໃຊ້ ເປີດໃນ Google Earth.</string>
+  <!-- Form editor: validation rule issues of a question. -->
+  <string name="domain_issue_min_not_number">ຄ່າຕ່ຳສຸດຕ້ອງເປັນຕົວເລກ.</string>
+  <string name="domain_issue_max_not_number">ຄ່າສູງສຸດຕ້ອງເປັນຕົວເລກ.</string>
+  <string name="domain_issue_min_more_than_max">ຄ່າຕ່ຳສຸດບໍ່ສາມາດຫຼາຍກວ່າຄ່າສູງສຸດ.</string>
+  <string name="domain_issue_min_length_invalid">ຄວາມຍາວຕ່ຳສຸດຕ້ອງເປັນຈຳນວນເຕັມຕັ້ງແຕ່ 0 ຂຶ້ນໄປ.</string>
+  <string name="domain_issue_max_length_invalid">ຄວາມຍາວສູງສຸດຕ້ອງເປັນຈຳນວນເຕັມຕັ້ງແຕ່ 0 ຂຶ້ນໄປ.</string>
+  <string name="domain_issue_min_length_more_than_max">ຄວາມຍາວຕ່ຳສຸດບໍ່ສາມາດຫຼາຍກວ່າຄວາມຍາວສູງສຸດ.</string>
+  <string name="domain_issue_min_selections_invalid">ຈຳນວນການເລືອກຕ່ຳສຸດຕ້ອງເປັນຈຳນວນເຕັມຕັ້ງແຕ່ 0 ຂຶ້ນໄປ.</string>
+  <string name="domain_issue_max_selections_invalid">ຈຳນວນການເລືອກສູງສຸດຕ້ອງເປັນຈຳນວນເຕັມຕັ້ງແຕ່ 0 ຂຶ້ນໄປ.</string>
+  <string name="domain_issue_min_selections_more_than_max">ຈຳນວນການເລືອກຕ່ຳສຸດບໍ່ສາມາດຫຼາຍກວ່າຈຳນວນສູງສຸດ.</string>
+  <string name="domain_issue_min_selections_more_than_choices">ຈຳນວນການເລືອກຕ່ຳສຸດຫຼາຍກວ່າຈຳນວນຕົວເລືອກ.</string>
+  <string name="domain_issue_custom_pattern_missing">ປ້ອນຮູບແບບກຳນົດເອງ.</string>
+  <string name="domain_issue_custom_pattern_invalid">ຮູບແບບກຳນົດເອງບໍ່ຖືກຕ້ອງ.</string>
+  <string name="domain_issue_custom_pattern_quotes">ຮູບແບບກຳນົດເອງບໍ່ສາມາດມີທັງ ' ແລະ ".</string>
+  <string name="domain_issue_date_range_missing">ເລືອກວັນທີທີ່ໄວທີ່ສຸດ ຫຼື ຊ້າທີ່ສຸດ.</string>
+  <string name="domain_issue_date_range_reversed">ວັນທີທີ່ໄວທີ່ສຸດບໍ່ສາມາດຢູ່ຫຼັງວັນທີທີ່ຊ້າທີ່ສຸດ.</string>
+  <!-- Form editor: summary of a map feature status rule's condition. -->
+  <string name="domain_status_rule_when_submitted">ເມື່ອສົ່ງແບບຟອມ</string>
+  <!-- %1$d: minimum number of submissions. -->
+  <plurals name="domain_status_rule_min_submissions">
+    <item quantity="other">ຢ່າງໜ້ອຍ %1$d ການສົ່ງຂໍ້ມູນ</item>
+  </plurals>
+  <string name="domain_status_rule_missing_question">ບໍ່ມີຄຳຖາມ</string>
+  <!-- Placeholder for a property name in a status rule summary when none is chosen. -->
+  <string name="domain_status_rule_property_fallback">ຄຸນສົມບັດ</string>
+  <!-- Status rule condition without a value. %1$s: question or property name; %2$s: operator (e.g. "is answered"). -->
+  <string name="domain_status_rule_condition">%1$s %2$s</string>
+  <!-- Status rule condition with a value. %1$s: question or property name; %2$s: operator (e.g. "equals"); %3$s: value. -->
+  <string name="domain_status_rule_condition_value">%1$s %2$s "%3$s"</string>
+  <!-- Form editor: issues with how a form updates map features or table rows. -->
+  <string name="domain_issue_save_to_target_missing">ເລືອກຊັ້ນແຜນທີ່ ຫຼື ຕາຕະລາງຂໍ້ມູນທີ່ແບບຟອມນີ້ອັບເດດ.</string>
+  <!-- %1$s: ID of the deleted map layer or data table. -->
+  <string name="domain_issue_save_to_target_deleted">ຊັ້ນແຜນທີ່ ຫຼື ຕາຕະລາງຂໍ້ມູນ "%1$s" ບໍ່ມີຢູ່ອີກແລ້ວ.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_map_layer">ຊື່ "%1$s" ຖືກສະຫງວນໄວ້ສຳລັບອົງປະກອບແຜນທີ່ທີ່ກຳລັງອັບເດດ.</string>
+  <!-- %1$s: reserved question name (an identifier). -->
+  <string name="domain_issue_save_to_reserved_name_data_table">ຊື່ "%1$s" ຖືກສະຫງວນໄວ້ສຳລັບແຖວຕາຕະລາງທີ່ກຳລັງອັບເດດ.</string>
+  <string name="domain_issue_save_to_id_question_missing_map_layer">ເລືອກຄຳຖາມທີ່ລະບຸອົງປະກອບແຜນທີ່ທີ່ຈະອັບເດດ.</string>
+  <string name="domain_issue_save_to_id_question_missing_data_table">ເລືອກຄຳຖາມທີ່ລະບຸແຖວຕາຕະລາງທີ່ຈະອັບເດດ.</string>
+  <string name="domain_issue_save_to_match_property_missing">ເລືອກຄຸນສົມບັດທີ່ຈະໃຊ້ຈັບຄູ່ກັບຄຳຕອບ.</string>
+  <string name="domain_issue_save_to_geometry_question_required">ສະເພາະຄຳຖາມແບບ ຈຸດ, ເສັ້ນ ຫຼື ຮູບຫຼາຍແຫຼ່ຽມ ເທົ່ານັ້ນທີ່ສາມາດອັບເດດຮູບເລຂາຄະນິດຂອງອົງປະກອບແຜນທີ່ໄດ້.</string>
+  <!-- %1$s: property name; %2$s: name of the map layer or data table. -->
+  <string name="domain_issue_save_to_unknown_property">ອັບເດດ "%1$s" ເຊິ່ງບໍ່ແມ່ນຄຸນສົມບັດຂອງ %2$s.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_not_updatable">"%1$s" ບໍ່ສາມາດອັບເດດດ້ວຍແບບຟອມໄດ້.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_save_to_property_already_updated">ມີຄຳຖາມອື່ນອັບເດດ "%1$s" ແລ້ວ.</string>
+  <string name="domain_issue_save_to_no_fields">ເລືອກຢ່າງໜ້ອຍໜຶ່ງຊ່ອງຂໍ້ມູນເພື່ອອັບເດດ.</string>
+  <string name="domain_issue_save_to_type_mismatch">ຄຳຕອບແບບ %1$s ອາດບໍ່ເໝາະກັບຄຸນສົມບັດແບບ %2$s "%3$s".</string>
+  <string name="domain_display_logic_source_deleted">ອ້າງອີງເຖິງຄຳຖາມທີ່ຖືກລຶບແລ້ວ.</string>
+  <string name="domain_display_logic_shown_if_answered">ສະແດງສະເພາະເມື່ອຕອບ "%1$s" ແລ້ວ.</string>
+  <string name="domain_display_logic_shown_if">ສະແດງສະເພາະເມື່ອ "%1$s" %2$s %3$s.</string>
+  <string name="domain_issue_status_default_label_missing">ປ້ອນປ້າຍຊື່ສະຖານະເລີ່ມຕົ້ນ.</string>
+  <string name="domain_issue_status_rule_label_missing">ທຸກກົດສະຖານະຕ້ອງມີປ້າຍຊື່ສະຖານະ.</string>
+  <string name="domain_issue_status_rule_min_submissions">ຈຳນວນການສົ່ງຂໍ້ມູນຕ້ອງຢ່າງໜ້ອຍ 1.</string>
+  <string name="domain_issue_status_rule_question_missing">ເລືອກຄຳຖາມສຳລັບກົດສະຖານະ.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: question type (e.g. "Short text"). -->
+  <string name="domain_issue_status_rule_operator_not_applicable">"%1$s" ໃຊ້ບໍ່ໄດ້ກັບ %2$s ໃນກົດສະຖານະ.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_missing">ກົດສະຖານະສຳລັບ "%1$s" ຕ້ອງມີຄ່າເພື່ອປຽບທຽບ.</string>
+  <!-- %1$s: question name. -->
+  <string name="domain_issue_status_rule_value_not_number">ຄ່າຂອງກົດສະຖານະສຳລັບ "%1$s" ຕ້ອງເປັນຕົວເລກ.</string>
+  <string name="domain_issue_status_rule_property_missing_map_layer">ເລືອກຄຸນສົມບັດຂອງອົງປະກອບແຜນທີ່ສຳລັບກົດສະຖານະ.</string>
+  <string name="domain_issue_status_rule_property_missing_data_table">ເລືອກຄຸນສົມບັດຂອງແຖວຕາຕະລາງສຳລັບກົດສະຖານະ.</string>
+  <string name="domain_issue_status_rule_property_missing">ເລືອກຄຸນສົມບັດຂອງອົງປະກອບສຳລັບກົດສະຖານະ.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_unwritten">ບໍ່ມີຄຳຖາມໃດຂຽນຂໍ້ມູນລົງຄຸນສົມບັດ "%1$s" ສຳລັບກົດສະຖານະ.</string>
+  <!-- %1$s: comparison operator (e.g. "is greater than"); %2$s: property data type in lowercase (e.g. "text"); %3$s: property name. -->
+  <string name="domain_issue_status_rule_property_operator_not_applicable">"%1$s" ໃຊ້ບໍ່ໄດ້ກັບຄຸນສົມບັດປະເພດ %2$s "%3$s".</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_missing">ກົດສະຖານະສຳລັບຄຸນສົມບັດ "%1$s" ຕ້ອງມີຄ່າເພື່ອປຽບທຽບ.</string>
+  <!-- %1$s: property name. -->
+  <string name="domain_issue_status_rule_property_value_not_number">ຄ່າຂອງກົດສະຖານະສຳລັບຄຸນສົມບັດ "%1$s" ຕ້ອງເປັນຕົວເລກ.</string>
+  <!-- Form editor: warnings about a question's link to a standard field (concept). -->
+  <!-- %1$s: ID of a standard field, e.g. "eudr.commodity". -->
+  <string name="domain_warning_concept_not_in_dictionary">ເຊື່ອມໂຍງກັບ "%1$s" ເຊິ່ງບໍ່ຢູ່ໃນວັດຈະນານຸກົມຂອງແບບສຳຫຼວດນີ້.</string>
+  <!-- %1$s: standard field name; %2$s: its answer type in lowercase (e.g. "decimal"); %3$s: the question's type in lowercase (e.g. "short text"). -->
+  <string name="domain_warning_concept_type_mismatch">"%1$s" ຕ້ອງການຄຳຕອບແບບ %2$s ແຕ່ນີ້ແມ່ນຄຳຖາມແບບ %3$s.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_deprecated">"%1$s" ເຊົາໃຊ້ແລ້ວ. ກະລຸນາເຊື່ອມໂຍງກັບຊ່ອງຂໍ້ມູນມາດຕະຖານປັດຈຸບັນ.</string>
+  <!-- %1$s: standard field name. -->
+  <string name="domain_warning_concept_linked_twice">"%1$s" ຖືກເຊື່ອມໂຍງກັບຫຼາຍກວ່າໜຶ່ງຄຳຖາມໃນແບບຟອມນີ້.</string>
+  <!-- %1$d: number of choices; %2$s: standard field name; %3$s: comma-separated choice labels. -->
+  <plurals name="domain_warning_concept_unmapped_choices">
+    <item quantity="other">ຈັບຄູ່ %1$d ຕົວເລືອກກັບຄ່າຂອງ "%2$s" ເພື່ອໃຫ້ລວມຄຳຕອບໄດ້: %3$s.</item>
+  </plurals>
+  <!-- Survey editor: issues in a map layer or data table. -->
+  <string name="domain_issue_dataset_id_invalid">ID ຕ້ອງເລີ່ມຕົ້ນດ້ວຍຕົວອັກສອນ ແລະ ໃຊ້ໄດ້ສະເພາະຕົວອັກສອນ, ຕົວເລກ, _ . -</string>
+  <!-- %1$s: the map layer or data table ID. -->
+  <string name="domain_issue_dataset_id_duplicate">ID "%1$s" ຖືກໃຊ້ໂດຍຊຸດຂໍ້ມູນອື່ນໃນແບບສຳຫຼວດນີ້ແລ້ວ.</string>
+  <!-- %1$s: property name (an identifier). -->
+  <string name="domain_issue_dataset_property_name_invalid">ຄຸນສົມບັດ "%1$s" ມີຊື່ທີ່ບໍ່ຖືກຕ້ອງ.</string>
+  <string name="domain_issue_dataset_property_name_duplicate">ຊື່ຄຸນສົມບັດຕ້ອງບໍ່ຊ້ຳກັນ.</string>
+  <string name="domain_issue_dataset_key_property_missing">ເລືອກຄຸນສົມບັດຫຼັກ.</string>
+  <string name="domain_issue_dataset_label_property_missing">ເລືອກຄຸນສົມບັດປ້າຍຊື່.</string>
+  <!-- %1$s: row or map feature name. -->
+  <string name="domain_issue_dataset_row_key_missing">"%1$s" ບໍ່ມີຄີ.</string>
+  <!-- %1$s: duplicated key value. -->
+  <string name="domain_issue_dataset_row_key_duplicate">ຄີ "%1$s" ຊ້ຳກັນ.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label. -->
+  <string name="domain_issue_dataset_row_value_missing">"%1$s" ບໍ່ມີ %2$s.</string>
+  <!-- %1$s: row or map feature name; %2$s: property label; %3$s: expected type in lowercase (e.g. "integer"). -->
+  <string name="domain_issue_dataset_row_value_wrong_type">"%1$s": %2$s ຕ້ອງເປັນ %3$s.</string>
+  <string name="domain_issue_sharing_organization_missing">"%1$s" ຕ້ອງມີອົງກອນ. ເລືອກອົງກອນໃນລາຍລະອຽດແບບສຳຫຼວດ ຫຼື ເລືອກຕົວເລືອກການເຂົ້າເຖິງທົ່ວໄປອື່ນ.</string>
+  <!-- %1$s: map feature name; %2$d: minimum number of vertices. -->
+  <plurals name="domain_issue_dataset_row_geometry_too_short">
+    <item quantity="other">"%1$s" ຕ້ອງມີຢ່າງໜ້ອຍ %2$d ຈຸດຍອດ.</item>
+  </plurals>
+  <!-- Quota and budget limits: why an action is blocked. -->
+  <!-- %1$d: surveys the owner has; %2$d: the limit. -->
+  <string name="domain_quota_max_surveys_per_owner">ຮອດຂີດຈຳກັດຈຳນວນແບບສຳຫຼວດສູງສຸດຕໍ່ເຈົ້າຂອງແລ້ວ (%1$d ຈາກ %2$d). ອັບເກຣດລະດັບ ຫຼື ລຶບແບບສຳຫຼວດເກົ່າ.</string>
+  <!-- %1$s: budget amount in US dollars, e.g. "$50.00". -->
+  <string name="domain_quota_org_budget_exceeded">ການສ້າງແບບສຳຫຼວດເພີ່ມອີກຈະເກີນຂີດຈຳກັດງົບປະມານລາຍເດືອນຂອງອົງກອນ (%1$s).</string>
+  <!-- %1$s: estimated cost in US dollars; %2$s: budget in US dollars. -->
+  <string name="domain_quota_survey_budget_exceeded">ຄ່າໃຊ້ຈ່າຍລາຍເດືອນໂດຍປະມານຂອງການອອກແບບແບບສຳຫຼວດ (%1$s) ເກີນຂີດຈຳກັດງົບປະມານລາຍເດືອນຂອງແບບສຳຫຼວດ (%2$s).</string>
+  <!-- %1$d: number of forms; %2$d: the limit; %3$s: quota tier name (e.g. "Basic"). -->
+  <plurals name="domain_quota_max_forms">
+    <item quantity="other">ແບບສຳຫຼວດມີ %1$d ແບບຟອມ ເກີນຂີດຈຳກັດ %2$d ສຳລັບລະດັບ %3$s.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_questions">
+    <item quantity="other">ແບບຟອມ "%1$s" ມີ %2$d ຄຳຖາມ ເກີນຂີດຈຳກັດ %3$d.</item>
+  </plurals>
+  <!-- %1$s: form title; %2$d: number of photo questions; %3$d: the limit. -->
+  <plurals name="domain_quota_max_photo_questions">
+    <item quantity="other">ແບບຟອມ "%1$s" ມີ %2$d ຄຳຖາມຮູບພາບ ເກີນຂີດຈຳກັດ %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features; %2$d: the limit. -->
+  <plurals name="domain_quota_max_predefined_entities">
+    <item quantity="other">ແບບສຳຫຼວດມີ %1$d ອົງປະກອບແຜນທີ່ທີ່ກຳນົດໄວ້ລ່ວງໜ້າ ເກີນຂີດຈຳກັດ %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of generated sample plots; %2$d: the limit. -->
+  <plurals name="domain_quota_max_generated_entities">
+    <item quantity="other">ການອອກແບບຕົວຢ່າງສ້າງ %1$d ແປງ ເກີນຂີດຈຳກັດ %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of vertices of the survey area; %2$d: the limit. -->
+  <plurals name="domain_quota_max_area_vertices">
+    <item quantity="other">ພື້ນທີ່ແບບສຳຫຼວດມີ %1$d ຈຸດຍອດ ເກີນຂີດຈຳກັດ %2$d.</item>
+  </plurals>
+  <plurals name="domain_quota_max_dataset_polygon_vertices">
+    <item quantity="other">ຊຸດຂໍ້ມູນ "%1$s" ມີຮູບຫຼາຍແຈທີ່ມີ %2$d ຈຸດຍອດ ເກີນຂີດຈຳກັດ %3$d.</item>
+  </plurals>
+  <!-- %1$d: number of collaborators; %2$d: the limit. -->
+  <plurals name="domain_quota_max_collaborators">
+    <item quantity="other">ລາຍການຄວບຄຸມການເຂົ້າເຖິງມີ %1$d ຜູ້ຮ່ວມງານ ເກີນຂີດຈຳກັດ %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of surveys; %2$d: the limit. -->
+  <plurals name="domain_quota_max_surveys_per_user">
+    <item quantity="other">ຜູ້ໃຊ້ເຄື່ອນໄຫວຢູ່ໃນ %1$d ແບບສຳຫຼວດ ເກີນຂີດຈຳກັດ %2$d.</item>
+  </plurals>
+  <!-- %1$d: number of map features the user added in the field; %2$d: the limit. -->
+  <plurals name="domain_quota_max_adhoc_entities">
+    <item quantity="other">ຜູ້ໃຊ້ໄດ້ສ້າງ %1$d ອົງປະກອບແຜນທີ່ໃນພາກສະໜາມ ຮອດຂີດຈຳກັດ %2$d ແລ້ວ.</item>
+  </plurals>
+  <!-- %1$d: number of submissions; %2$d: the limit. -->
+  <plurals name="domain_quota_max_submissions_per_entity">
+    <item quantity="other">ຜູ້ໃຊ້ໄດ້ບັນທຶກ %1$d ການສົ່ງຂໍ້ມູນສຳລັບອົງປະກອບນີ້ ຮອດຂີດຈຳກັດ %2$d ແລ້ວ.</item>
+  </plurals>
+  <!-- Notices shown after a data collector submits a form. -->
+  <!-- %1$s: name of the new map feature. "save_to" is a technical term; keep it as is. -->
+  <string name="domain_notice_entity_created">ສ້າງອົງປະກອບໃໝ່ "%1$s" ຜ່ານ save_to ແລ້ວ (✓ ສຳເລັດແລ້ວ)</string>
+  <!-- %1$s: form title; %2$s: GPS coordinates. -->
+  <string name="domain_notice_standalone_submitted">ສົ່ງບັນທຶກພາກສະໜາມແບບອິດສະຫຼະ "%1$s" ແລ້ວ (%2$s)</string>
+  <!-- %1$s: form title; %2$s: map feature name; %3$s: previous status symbol (e.g. ○); %4$s: new status symbol (e.g. ◐); %5$s: new status label (e.g. "In progress"). -->
+  <string name="domain_notice_entity_submitted">ສົ່ງ "%1$s" ສຳລັບ %2$s ແລ້ວ (ເຄື່ອງໝາຍ: %3$s → %4$s %5$s)</string>
+  <!-- Geometry summary of a polygon map feature. %1$s: area with unit (e.g. "1.2 ha"); %2$s: perimeter length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_polygon">ຮູບຫຼາຍແຫຼ່ຽມ • %1$s, ເສັ້ນຮອບຮູບ %2$s</string>
+  <!-- Geometry summary of a line map feature. %1$s: length with unit (e.g. "450 m"). -->
+  <string name="domain_geometry_summary_line">ເສັ້ນ • %1$s</string>
+  <!-- Geometry summary of a point map feature. %1$s: coordinates. -->
+  <string name="domain_geometry_summary_point">ຈຸດ • %1$s</string>
+  <!-- PDF reports of map features and submissions. -->
+  <!-- Summary of a generated PDF file. %1$d: number of pages; %2$s: file size (e.g. "14 KB"). -->
+  <plurals name="domain_pdf_summary">
+    <item quantity="other">%1$d ໜ້າ • %2$s</item>
+  </plurals>
+  <!-- PDF page footer. %1$d: page number; %2$d: number of pages. -->
+  <string name="domain_pdf_page_of">ໜ້າ %1$d ຈາກ %2$d</string>
+  <string name="domain_pdf_running_header">Open Foris Collect One • %1$s</string>
+  <!-- Caption under a point's location figure. %1$s: latitude; %2$s: longitude. -->
+  <string name="domain_pdf_location_point">ຕຳແໜ່ງ %1$s, %2$s</string>
+  <!-- Caption under a location figure. %1$s/%2$s: min/max latitude; %3$s/%4$s: min/max longitude. "WGS 84" is a coordinate system name. -->
+  <string name="domain_pdf_bounds">ຂອບເຂດ: ເສັ້ນຂະໜານ %1$s ຫາ %2$s, ເສັ້ນແວງ %3$s ຫາ %4$s (WGS 84)</string>
+  <!-- PDF footer of a map feature report. %1$s: map feature type (e.g. "Coffee Parcel"); %2$s: date and time. -->
+  <string name="domain_pdf_entity_footer">ລາຍງານ %1$s • ສ້າງເມື່ອ %2$s</string>
+  <!-- PDF footer of a submission report. %1$s: date and time. -->
+  <string name="domain_pdf_submission_footer">ລາຍງານການສົ່ງຂໍ້ມູນ • ສ້າງເມື່ອ %1$s</string>
+  <!-- PDF subtitle of a submission report. %1$s: date and time collected. -->
+  <string name="domain_pdf_submission_subtitle">ການສົ່ງຂໍ້ມູນ • %1$s</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_details">ລາຍລະອຽດ</string>
+  <!-- PDF field label: map layer of a map feature. -->
+  <string name="domain_pdf_layer">ຊັ້ນຂໍ້ມູນ</string>
+  <!-- PDF field label: geometry summary of a map feature. -->
+  <string name="domain_pdf_geometry">ຮູບເລຂາຄະນິດ</string>
+  <!-- PDF field label: geographic identifier of a plot. -->
+  <string name="domain_pdf_geo_id">GeoID</string>
+  <string name="domain_pdf_coordinates">ພິກັດ</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_location">ຕຳແໜ່ງ</string>
+  <!-- PDF field label of one vertex of a line or polygon. %1$d: vertex number. -->
+  <string name="domain_pdf_vertex">ຈຸດຍອດ %1$d</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_properties">ຄຸນສົມບັດ</string>
+  <!-- PDF section heading. -->
+  <string name="domain_pdf_submissions">ການສົ່ງຂໍ້ມູນ</string>
+  <string name="domain_pdf_no_submissions">ຍັງບໍ່ມີການບັນທຶກການສົ່ງຂໍ້ມູນ.</string>
+  <!-- %1$s: data collector name; %2$s: form version. -->
+  <string name="domain_pdf_collected_by">ເກັບໂດຍ %1$s • ເວີຊັນແບບຟອມ %2$s</string>
+  <!-- Map feature a submission is attached to. %1$s: map feature name; %2$s: map feature type; %3$s: GeoID. -->
+  <string name="domain_pdf_entity_target">%1$s (%2$s • GeoID %3$s)</string>
+  <!-- %1$s: coordinates where the submission was collected. -->
+  <string name="domain_pdf_no_attached_feature_at">ບໍ່ມີອົງປະກອບແຜນທີ່ທີ່ແນບ (%1$s)</string>
+  <string name="domain_pdf_no_attached_feature">ບໍ່ມີອົງປະກອບແຜນທີ່ທີ່ແນບ</string>
+  <string name="domain_pdf_data_collector">ຜູ້ເກັບຂໍ້ມູນ</string>
+  <!-- PDF field label: when a submission was collected. -->
+  <string name="domain_pdf_collected">ເກັບເມື່ອ</string>
+  <string name="domain_pdf_form_version">ເວີຊັນແບບຟອມ</string>
+  <!-- PDF section heading: answers of a submission. -->
+  <string name="domain_pdf_responses">ຄຳຕອບ</string>
+  <string name="domain_pdf_no_responses">ບໍ່ມີການບັນທຶກຄຳຕອບ.</string>
+  <!-- Status chip of a group of map features in a map cluster, by the marker symbol they share. -->
+  <string name="domain_cluster_marker_status_completed">ສຳເລັດແລ້ວ</string>
+  <string name="domain_cluster_marker_status_in_progress">ກຳລັງດຳເນີນການ</string>
+  <string name="domain_cluster_marker_status_pending">ລໍຖ້າ</string>
+  <string name="domain_cluster_marker_status_no_marker_symbol">ບໍ່ມີສັນຍາລັກເຄື່ອງໝາຍ</string>
+  <string name="domain_cluster_marker_status_other_symbol">ສັນຍາລັກ %1$s</string>
+</resources>

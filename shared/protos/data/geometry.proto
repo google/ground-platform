@@ -1,0 +1,94 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package openforis.collectone.v1.data;
+
+// The canonical vector geometry of Collect One data: a GeoJSON geometry
+// (RFC 7946 section 3.1) in WGS 84 longitude and latitude. Entities, imported
+// map layers, and the bundled sample data all store this message; see
+// `docs/technical/model/data/05-geometry.md`.
+
+// GeoJSON geometry types (RFC 7946 section 1.4), without GeometryCollection.
+enum GeometryType {
+  GEOMETRY_TYPE_UNSPECIFIED = 0;
+  GEOMETRY_TYPE_POINT = 1;
+  GEOMETRY_TYPE_LINE_STRING = 2;
+  GEOMETRY_TYPE_POLYGON = 3;
+  GEOMETRY_TYPE_MULTI_POINT = 4;
+  GEOMETRY_TYPE_MULTI_LINE_STRING = 5;
+  GEOMETRY_TYPE_MULTI_POLYGON = 6;
+}
+
+// A WGS 84 position (RFC 7946 section 3.1.1), longitude first like GeoJSON.
+message Position {
+  // Longitude in decimal degrees, between -180.0 and +180.0 inclusive.
+  double longitude = 1;
+
+  // Latitude in decimal degrees, between -90.0 and +90.0 inclusive.
+  double latitude = 2;
+
+  // Height in meters above the WGS 84 ellipsoid, when known.
+  optional double altitude_meters = 3;
+}
+
+// A GeoJSON bounding box (RFC 7946 section 5): the range of longitudes and
+// latitudes something covers. `southwest` holds the lowest longitude and
+// latitude, and `northeast` the highest. Boxes that cross the antimeridian are
+// not supported yet.
+message BoundingBox {
+  Position southwest = 1;
+  Position northeast = 2;
+}
+
+// Ordered positions: the vertices of a LineString, the points of a
+// MultiPoint, or one linear ring of a polygon. A linear ring is closed: its
+// last position repeats the first (RFC 7946 section 3.1.6).
+message PositionList {
+  repeated Position positions = 1;
+}
+
+// The linear rings of a polygon: the exterior ring first, then any holes.
+message PolygonCoordinates {
+  repeated PositionList rings = 1;
+}
+
+// The lines of a MultiLineString.
+message MultiLineStringCoordinates {
+  repeated PositionList lines = 1;
+}
+
+// The polygons of a MultiPolygon.
+message MultiPolygonCoordinates {
+  repeated PolygonCoordinates polygons = 1;
+}
+
+// A GeoJSON geometry. `type` names the geometry like GeoJSON's `"type"`, and
+// exactly the matching `coordinates` case is set. Readers reject a geometry
+// whose `type` and `coordinates` disagree.
+message Geometry {
+  GeometryType type = 1;
+
+  oneof coordinates {
+    Position point = 2;
+    PositionList line_string = 3;
+    PolygonCoordinates polygon = 4;
+    PositionList multi_point = 5;
+    MultiLineStringCoordinates multi_line_string = 6;
+    MultiPolygonCoordinates multi_polygon = 7;
+  }
+}

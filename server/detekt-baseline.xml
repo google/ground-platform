@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:Access.kt$Access$c == null || c.isDefault || !isAdmin || c.email.isBlank() || isCaller(acl.owner_id, acl.owner_id) || acl.entries.any { isCaller(it.user_id, it.email) &amp;&amp; it.invitation_status == AclEntry.InvitationStatus.ACCEPTED &amp;&amp; it.role == Role.SURVEY_ORGANIZER }</ID>
+    <ID>ComplexCondition:Access.kt$Access$c == null || c.isDefault || !isAdmin || c.email.isBlank() || membership(organization)?.let { it.status == MembershipStatus.ACTIVE &amp;&amp; it.role == OrganizationRole.MANAGER } == true</ID>
+    <ID>ComplexCondition:ImageryAnalytics.kt$PlotGeometry.Companion$!point.latitude.isFinite() || !point.longitude.isFinite() || abs(point.latitude) &gt; 90 || abs(point.longitude) &gt; 180</ID>
+    <ID>ComplexCondition:OrganizationServiceImpl.kt$OrganizationServiceImpl$ee == null || expr == null || expr.result.isBlank() || expr.values.isEmpty()</ID>
+    <ID>ComplexCondition:UserDataBackend.kt$UserDataBackend$existing != null &amp;&amp; existing.email == email &amp;&amp; existing.emailVerified == caller.emailVerified &amp;&amp; existing.profile == profile</ID>
+    <ID>CyclomaticComplexMethod:AccessChanges.kt$internal fun UserDataWriter.bindInvites(userId: String, email: String, access: AccessChanges)</ID>
+    <ID>CyclomaticComplexMethod:Main.kt$fun main(args: Array&lt;String&gt;)</ID>
+    <ID>CyclomaticComplexMethod:OrganizationServiceImpl.kt$OrganizationServiceImpl$override suspend fun MutateOrganization( request: MutateOrganizationRequest ): MutateOrganizationResponse</ID>
+    <ID>CyclomaticComplexMethod:SurveyQuotas.kt$internal fun UserDataReader.resolveEffectiveQuota( survey: SurveyDef?, organizationId: String?, ): QuotaLimits</ID>
+    <ID>CyclomaticComplexMethod:SurveyServiceImpl.kt$SurveyServiceImpl$override suspend fun AcceptSurveyInvite( request: AcceptSurveyInviteRequest ): AcceptSurveyInviteResponse</ID>
+    <ID>EmptyFunctionBlock:InviteNotifier.kt$NoopInviteNotifier${}</ID>
+    <ID>EmptyFunctionBlock:SurveyTopicNotifier.kt$NoopSurveyTopicNotifier${}</ID>
+    <ID>LargeClass:AuthorizationTest.kt$AuthorizationTest</ID>
+    <ID>LongMethod:AuthorizationTest.kt$AuthorizationTest$@Test fun mutateData_enforcesCreatorOwnershipAndPredefinedEntityProtection()</ID>
+    <ID>LongMethod:GeoDataServiceTest.kt$GeoDataServiceTest$@Test fun mutateOrganization_adminGuardForEarthEngineSources()</ID>
+    <ID>LongMethod:InviteNotificationTest.kt$InviteNotificationTest$@Test fun mutateSurvey_notifiesOnlyNewlyAddedOrRotatedPendingInvites()</ID>
+    <ID>LongMethod:Main.kt$fun main(args: Array&lt;String&gt;)</ID>
+    <ID>LongMethod:OrganizationServiceImpl.kt$OrganizationServiceImpl$override suspend fun MutateOrganization( request: MutateOrganizationRequest ): MutateOrganizationResponse</ID>
+    <ID>LongMethod:SurveyQuotas.kt$internal fun UserDataReader.resolveEffectiveQuota( survey: SurveyDef?, organizationId: String?, ): QuotaLimits</ID>
+    <ID>LongParameterList:InviteEmailTemplates.kt$InviteEmailTemplates$( badge: String, headline: String, leadHtml: String, roleLabel: String, roleDescription: String, ctaLabel: String, ctaUrl: String, recipientEmail: String, )</ID>
+    <ID>LongParameterList:RpcCallRecorder.kt$RpcCallRecorder.Companion$( id: Long, timestamp: String, service: String, method: String, fullPath: String, transport: String, status: Status, durationMs: Double, isStreaming: Boolean, requestMessage: Any?, responseMessages: List&lt;Any&gt;, )</ID>
+    <ID>LongParameterList:SyncLists.kt$SyncLists$( params: ListParams, scopeKey: String, changedAfter: (after: SyncPosition, limit: Int) -&gt; List&lt;T&gt;, queryRecords: () -&gt; Collection&lt;T&gt;, commitTimestamp: (T) -&gt; Instant?, id: (T) -&gt; String, query: QuerySpec&lt;T&gt;, queryFieldsSet: List&lt;String&gt;, watermark: Instant, accessEpoch: String = "", visible: (T) -&gt; Boolean = { true }, )</ID>
+    <ID>LongParameterList:SyncLists.kt$SyncLists$( params: ListParams, scopeKey: String, records: Collection&lt;T&gt;, commitTimestamp: (T) -&gt; Instant?, id: (T) -&gt; String, query: QuerySpec&lt;T&gt;, queryFieldsSet: List&lt;String&gt;, watermark: Instant, accessEpoch: String = "", visible: (T) -&gt; Boolean = { true }, )</ID>
+    <ID>LoopWithTooManyJumpStatements:AccessChanges.kt$for</ID>
+    <ID>ReturnCount:ImageryAnalytics.kt$PlotGeometry.Companion$fun of(plot: PlotRef?, entity: EntityRecord?): PlotGeometry</ID>
+    <ID>SwallowedException:Authentication.kt$Authenticator.Companion$e: IllegalArgumentException</ID>
+    <ID>SwallowedException:Authentication.kt$Authenticator.Companion$e: TokenVerifier.VerificationException</ID>
+    <ID>SwallowedException:Authentication.kt$Authenticator.Companion$e: java.io.IOException</ID>
+    <ID>SwallowedException:SyncLists.kt$SyncLists$e: IllegalArgumentException</ID>
+    <ID>ThrowsCount:EarthEngineTileClient.kt$GoogleEarthEngineMapFetcher$fun fetchMap(expression: Expression): String</ID>
+    <ID>ThrowsCount:ImageryAnalytics.kt$PlotGeometry.Companion$fun polygon(points: List&lt;GeoPoint&gt;): PlotGeometry</ID>
+    <ID>ThrowsCount:SyncLists.kt$SyncLists$private fun &lt;T&gt; decodeQuery( token: String, scopeKey: String, query: QuerySpec&lt;T&gt;, epoch: String, ): QueryCursor</ID>
+    <ID>ThrowsCount:SyncLists.kt$SyncLists$private fun decode( token: String, kind: String, epoch: String, scopeKey: String, fieldCount: Int, ): List&lt;String&gt;</ID>
+    <ID>ThrowsCount:SyncLists.kt$SyncLists$private fun decodeSync(token: String, scopeKey: String, epoch: String): SyncPosition</ID>
+    <ID>TooGenericExceptionCaught:EarthEngineTileClient.kt$GoogleEarthEngineMapFetcher$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:EarthEngineValueClient.kt$GoogleEarthEngineValueFetcher$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:EmailSender.kt$BrevoHttpEmailSender$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:WireGrpcBindings.kt$WireGrpcBindings$e: Throwable</ID>
+    <ID>TooManyFunctions:SpannerUserDataReader.kt$SpannerUserDataReader : UserDataReader</ID>
+    <ID>TooManyFunctions:UserDataStore.kt$UserDataReader</ID>
+  </CurrentIssues>
+</SmellBaseline>

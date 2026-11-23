@@ -14,25 +14,30 @@
   limitations under the License.
 -->
 
-# Ground Map
+# App Map
 
 A Compose Multiplatform map for Android, iOS, WasmJS, and JVM. Apps describe
 what to draw as immutable data, and a thin per-platform renderer draws it
 with that platform's native map SDK.
 
-Artifact: `org.openforis.collectone.v2:map`. This module has no knowledge of
+Gradle project: `:shared:map`. This module has no knowledge of
 surveys, forms, or entities. Apps convert their domain state into
 `MapContent`.
+
+The geometry types (`LatLng`, `LngLatBounds`, `Geometry`) live in
+[`geometry/`](geometry/) (`:shared:map:geometry`), a pure Kotlin module
+without Compose that the domain layer builds on; `:shared:map` re-exports
+them, in the same package.
 
 ## Concepts
 
 | Type | Role |
 | :--- | :--- |
 | `MapContent` | Immutable description of everything drawn: basemap, GeoJSON sources, style layers, icons, markers, user location. Rebuilt whenever app state changes. |
-| `Basemap` | The imagery under the content, chosen by the app: a hosted Mapbox style (`MapboxStyle`), XYZ raster tiles from any server (`RasterTiles`), or `None`. `GroundMap` draws its attribution. |
+| `Basemap` | The imagery under the content, chosen by the app: a hosted Mapbox style (`MapboxStyle`), XYZ raster tiles from any server (`RasterTiles`), or `None`. `AppMap` draws its attribution. A `MapboxStyle` also takes `overlays` (`BasemapOverlay`), drawn above the style and below the content: `RasterTileLayer`s from a tile URL template or a `mapbox://` tileset, optionally limited to `bounds` and a zoom range, and `VectorLineOverlay`s, lines from one layer of a vector tileset (e.g. contours), with an optional filter and wider `emphasis` lines. Changing overlays reloads the style. |
 | `MapCameraState` | Hoisted, observable camera. Gestures and the app both write to it (`move`, `animateTo`, `fitBounds`). `project` / `unproject` position Compose overlays. |
 | `MapEvent` | What happened: `FeatureTapped`, `MarkerTapped`, `BackgroundTapped`, `CameraIdle`. |
-| `GroundMap` | The composable that ties them together. |
+| `AppMap` | The composable that ties them together. |
 
 The camera is deliberately not part of `MapContent`. Both the user and the
 app move it, so it lives in a mutable state holder, like
@@ -54,7 +59,7 @@ val content = remember(sites, selectedId) {
     ),
   )
 }
-GroundMap(content, camera, onEvent = { event ->
+AppMap(content, camera, onEvent = { event ->
   when (event) {
     is MapEvent.FeatureTapped -> select(event.featureId)
     is MapEvent.BackgroundTapped -> select(null)
@@ -76,12 +81,12 @@ Tap events carry the tapped position (`FeatureTapped.at`,
     return a `MapDrag` to receive `onDrag` / `onDragEnd` for that gesture
     (moving a vertex, say), or `null` to pan the map as usual.
 -   Editing chrome such as vertex handles is best drawn in a draw-only Compose
-    `Canvas` above `GroundMap`, placed with `cameraState.project`. Without
+    `Canvas` above `AppMap`, placed with `cameraState.project`. Without
     `pointerInput` it doesn't block the map's gestures.
 
 ## Platform renderers
 
-`GroundMap` delegates to one `internal expect fun PlatformMap`. Each renderer
+`AppMap` delegates to one `internal expect fun PlatformMap`. Each renderer
 applies the ops from `diffMapContent(old, new)` to its SDK, binds
 `MapCameraState` while on screen, and reports gestures and taps. It contains
 no product logic.
@@ -111,8 +116,8 @@ same repository.
 
 The iOS renderer is the same again, except that the Mapbox Maps SDK for iOS
 is a Swift API that Kotlin/Native can't call. The app implements the small
-`MapboxIosView` interface in Swift (`iosApp/iosApp/GroundMapboxView.swift`)
-and registers a factory in `GroundMapIos.viewFactory` at launch. Every call
+`MapboxIosView` interface in Swift (`iosApp/iosApp/AppMapboxView.swift`)
+and registers a factory in `AppMapIos.viewFactory` at launch. Every call
 carries Style Specification JSON from `MapboxStyleSpec`, so the Swift side is
 a pass-through. SVG icons are rasterized with Skia, which Compose already
 ships on iOS. Without a registered factory or an access token
@@ -128,9 +133,6 @@ ships on iOS. Without a registered factory or an access token
 ## Development
 
 ```bash
-# From shared/map/
-./gradlew jvmTest wasmJsTest
+# From the repository root (the repository is a single Gradle build)
+./gradlew :shared:map:jvmTest :shared:map:wasmJsTest
 ```
-
-`gradlew` here forwards to the Gradle wrapper in `shared/core`, so this build
-doesn't add another copy of the binary `gradle-wrapper.jar`.

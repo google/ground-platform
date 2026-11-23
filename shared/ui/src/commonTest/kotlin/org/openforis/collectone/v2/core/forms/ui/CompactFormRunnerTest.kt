@@ -17,8 +17,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.serialization.XFormsXmlSerializer
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_review_and_submit
 
 class CompactFormRunnerTest {
 
@@ -92,13 +96,13 @@ class CompactFormRunnerTest {
       questionPaths(controller),
     )
     val heading = assertIs<CompactFormItem.GroupHeading>(items[2])
-    assertEquals("Site", heading.step.title)
+    assertEquals(FormUiText.Verbatim("Site"), heading.step.title)
     assertIs<CompactFormItem.RepeatHub>(items.last())
 
     // The controller still ends with the "Review & submit" step (submission relies on it), but the
     // compact stack has no entry for it.
     val review = assertIs<FormWizardStep.SummaryStep>(controller.steps.last())
-    assertEquals("Review & submit", review.title)
+    assertEquals(FormUiText.Resource(Res.string.forms_review_and_submit), review.title)
     assertTrue(
       items.none {
         val step =
@@ -234,6 +238,11 @@ class CompactFormRunnerTest {
     assertFalse(layout.onStatusChanged("/data/height_m", CompactQuestionStatus.INVALID))
     assertTrue(layout.onStatusChanged("/data/height_m", CompactQuestionStatus.ANSWERED))
     assertFalse(layout.isExpanded("/data/height_m"))
+
+    // When an auto-collapsed card's answer is cleared (e.g. pruned by a cascading select parent
+    // change), it re-expands so the collector sees the refreshed choices right away.
+    assertFalse(layout.onStatusChanged("/data/height_m", CompactQuestionStatus.PENDING))
+    assertTrue(layout.isExpanded("/data/height_m"))
   }
 
   @Test
@@ -242,5 +251,182 @@ class CompactFormRunnerTest {
     assertFalse(readOnly.onStatusChanged("/data/species", CompactQuestionStatus.PENDING))
     assertFalse(readOnly.onStatusChanged("/data/species", CompactQuestionStatus.ANSWERED))
     assertTrue(readOnly.isExpanded("/data/species"))
+  }
+
+  @Test
+  fun compactQuestionNumbers_assignsOneBasedIndicesInDisplayOrder() {
+    val controller = controller()
+    controller.addRepeatInstanceAndOpen("/data/branches")
+    controller.addRepeatInstanceAndOpen("/data/branches")
+
+    val items = buildCompactFormItems(controller.steps)
+    val numbers = compactQuestionNumbers(buildCompactFormBlocks(items))
+
+    assertEquals(
+      mapOf(
+        "/data/species" to 1,
+        "/data/height_m" to 2,
+        "/data/site/soil" to 3,
+        "/data/site/slope" to 4,
+        "/data/branches[1]/branch_length_m" to 5,
+        "/data/branches[2]/branch_length_m" to 6,
+      ),
+      numbers,
+    )
+
+    // Filtering out the leading question shifts numbering so the first visible card stays 1.
+    val filtered = items.filter {
+      it !is CompactFormItem.Question || it.step.stepKey != "/data/species"
+    }
+    val filteredNumbers = compactQuestionNumbers(buildCompactFormBlocks(filtered))
+    assertEquals(1, filteredNumbers["/data/height_m"])
+    assertEquals(2, filteredNumbers["/data/site/soil"])
+    assertEquals(3, filteredNumbers["/data/site/slope"])
+    assertEquals(4, filteredNumbers["/data/branches[1]/branch_length_m"])
+    assertEquals(5, filteredNumbers["/data/branches[2]/branch_length_m"])
+    assertNull(filteredNumbers["/data/species"])
+
+    // Answering question 2 keeps its index (and inserts conditional giant_notes right after it).
+    controller.updateDouble("/data/height_m", 25.0)
+    val withConditional =
+      compactQuestionNumbers(buildCompactFormBlocks(buildCompactFormItems(controller.steps)))
+    assertEquals(1, withConditional["/data/species"])
+    assertEquals(2, withConditional["/data/height_m"])
+    assertEquals(3, withConditional["/data/giant_notes"])
+    assertEquals(4, withConditional["/data/site/soil"])
+    assertEquals(5, withConditional["/data/site/slope"])
+    assertEquals(6, withConditional["/data/branches[1]/branch_length_m"])
+    assertEquals(7, withConditional["/data/branches[2]/branch_length_m"])
+  }
+
+  @Test
+  fun variantIncompatibility_marksQuestionsSkipped_andSkipsRequiredValidationOnVariant() {
+    val variantXml =
+      """
+      <h:html xmlns="http://www.w3.org/2002/xforms"
+              xmlns:h="http://www.w3.org/1999/xhtml">
+        <h:head>
+          <h:title>Variant Fallback</h:title>
+          <model>
+            <instance>
+              <data id="variant_fallback" version="1">
+                <species/>
+                <gps_point/>
+                <map_point/>
+                <tree_photo/>
+              </data>
+            </instance>
+            <bind nodeset="/data/species" type="string" required="true()"/>
+            <bind nodeset="/data/gps_point" type="geopoint" required="true()"/>
+            <bind nodeset="/data/map_point" type="geopoint"/>
+            <bind nodeset="/data/tree_photo" type="binary" required="true()"/>
+          </model>
+        </h:head>
+        <h:body>
+          <input ref="/data/species"><label>Species</label></input>
+          <input ref="/data/gps_point"><label>GPS Stake</label></input>
+          <input ref="/data/map_point" appearance="placement-map"><label>Map Pin</label></input>
+          <upload ref="/data/tree_photo" mediatype="image/*"><label>Tree Photo</label></upload>
+        </h:body>
+      </h:html>
+      """
+        .trimIndent()
+    val formDef = XFormsXmlSerializer.deserializeFormDef(variantXml)
+
+    fun control(c: FormWizardController, path: String) =
+      buildCompactFormItems(c.steps)
+        .filterIsInstance<CompactFormItem.Question>()
+        .first { it.step.stepKey == path }
+        .step
+        .control
+
+    // 1. Mobile supports all four field types, so unanswered required GPS and photo block finalize.
+    val mobileController = FormWizardController(formDef = formDef, variant = FormVariant.MOBILE)
+    mobileController.updateString("/data/species", "Baobab")
+    assertNull(
+      incompatibleQuestionTypeForVariant(
+        control(mobileController, "/data/gps_point"),
+        FormVariant.MOBILE,
+      )
+    )
+    assertNull(
+      incompatibleQuestionTypeForVariant(
+        control(mobileController, "/data/tree_photo"),
+        FormVariant.MOBILE,
+      )
+    )
+    val mobileResult =
+      assertIs<FinalizationResult.ValidationFailure>(mobileController.finalizeForm())
+    assertEquals(
+      setOf("/data/gps_point", "/data/tree_photo"),
+      mobileResult.errors.map { it.fieldPath }.toSet(),
+    )
+
+    // 2. Web allows both GPS-only and map-enabled geometry (drawn on the web map without GPS
+    // lock) as well as photo uploads, so all required fields remain active.
+    val webController = FormWizardController(formDef = formDef, variant = FormVariant.WEB)
+    webController.updateString("/data/species", "Baobab")
+    assertNull(
+      incompatibleQuestionTypeForVariant(control(webController, "/data/gps_point"), FormVariant.WEB)
+    )
+    assertEquals(
+      CompactQuestionStatus.PENDING,
+      compactQuestionStatus(
+        control(webController, "/data/gps_point"),
+        isSkipped = false,
+        variant = FormVariant.WEB,
+      ),
+    )
+    assertNull(
+      incompatibleQuestionTypeForVariant(control(webController, "/data/map_point"), FormVariant.WEB)
+    )
+    assertNull(
+      incompatibleQuestionTypeForVariant(
+        control(webController, "/data/tree_photo"),
+        FormVariant.WEB,
+      )
+    )
+    val webResult = assertIs<FinalizationResult.ValidationFailure>(webController.finalizeForm())
+    assertEquals(
+      setOf("/data/gps_point", "/data/tree_photo"),
+      webResult.errors.map { it.fieldPath }.toSet(),
+    )
+
+    // 3. Google Earth skips all geometry and media upload fields, allowing submission once
+    // compatible required fields are answered.
+    val earthController =
+      FormWizardController(formDef = formDef, variant = FormVariant.GOOGLE_EARTH)
+    earthController.updateString("/data/species", "Baobab")
+    assertEquals(
+      IncompatibleQuestionType.LOCATION,
+      incompatibleQuestionTypeForVariant(
+        control(earthController, "/data/gps_point"),
+        FormVariant.GOOGLE_EARTH,
+      ),
+    )
+    assertEquals(
+      IncompatibleQuestionType.LOCATION,
+      incompatibleQuestionTypeForVariant(
+        control(earthController, "/data/map_point"),
+        FormVariant.GOOGLE_EARTH,
+      ),
+    )
+    assertEquals(
+      IncompatibleQuestionType.PHOTO,
+      incompatibleQuestionTypeForVariant(
+        control(earthController, "/data/tree_photo"),
+        FormVariant.GOOGLE_EARTH,
+      ),
+    )
+    val earthProgress =
+      compactFormProgress(
+        buildCompactFormItems(earthController.steps),
+        isSkipped = { false },
+        variant = FormVariant.GOOGLE_EARTH,
+      )
+    assertEquals(1, earthProgress.answered)
+    assertEquals(3, earthProgress.skipped)
+    assertEquals(0, earthProgress.pending)
+    assertIs<FinalizationResult.Success>(earthController.finalizeForm())
   }
 }

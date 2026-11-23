@@ -13,16 +13,14 @@
  */
 package org.openforis.collectone.v2.workbench.ui.viewmodel
 
+import app.cash.turbine.test
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runTest
 import org.openforis.collectone.v2.app.data.datasource.local.store.runNow
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleSyncDataSource
 import org.openforis.collectone.v2.app.data.datasource.local.store.seededStore
@@ -31,6 +29,7 @@ import org.openforis.collectone.v2.app.data.repository.SurveyRepositoryImpl
 import org.openforis.collectone.v2.app.domain.model.DeviceFormFactor
 import org.openforis.collectone.v2.app.domain.model.DeviceOrientation
 import org.openforis.collectone.v2.app.domain.model.SyncStatus
+import org.openforis.collectone.v2.app.testing.takeReceivedItems
 import org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm
 import org.openforis.collectone.v2.workbench.ui.DEFAULT_WORKBENCH_XFORMS_XML
 import org.openforis.collectone.v2.workbench.ui.state.WorkbenchEvent
@@ -39,20 +38,13 @@ import org.openforis.collectone.v2.workbench.ui.state.WorkbenchEvent
 class WorkbenchViewModelTest {
   private class Fixture {
     val store = seededStore()
-    val scope = CoroutineScope(Dispatchers.Unconfined + Job())
     val surveyRepository = SurveyRepositoryImpl(store)
     val sampleDataRepository = SampleDataRepositoryImpl(store, sampleSyncDataSource())
     val viewModel =
       WorkbenchViewModel(
         surveyRepository = surveyRepository,
         sampleDataRepository = sampleDataRepository,
-        scope = scope,
       )
-    val events = mutableListOf<WorkbenchEvent>()
-
-    init {
-      scope.launch { viewModel.events.collect { events += it } }
-    }
 
     /** Appends [count] map features (copies of the first, without submissions) to the store. */
     fun addEntities(count: Int) = runNow {
@@ -90,77 +82,156 @@ class WorkbenchViewModelTest {
   }
 
   @Test
-  fun updateCustomXFormsXml_validBlankAndInvalid_updatesStateAndEmitsEvent() {
+  fun updateCustomXFormsXml_validBlankAndInvalid_updatesStateAndEmitsEvent() = runTest {
     val f = Fixture()
-    assertNull(f.uiState.xformsXmlError)
-    assertNotNull(f.uiState.customFormDef)
+    f.viewModel.events.test {
+      assertNull(f.uiState.xformsXmlError)
+      assertNotNull(f.uiState.customFormDef)
 
-    // Invalid XML sets xformsXmlError and emits CustomFormDefChanged(formDef=null,
-    // relaunchOpenForm=false)
-    f.viewModel.updateCustomXFormsXml("<not-valid-xforms")
-    assertNotNull(f.uiState.xformsXmlError)
-    assertNull(f.uiState.customFormDef)
-    val invalidEvent = f.events.last() as WorkbenchEvent.CustomFormDefChanged
-    assertNull(invalidEvent.formDef)
-    assertFalse(invalidEvent.relaunchOpenForm)
+      // Invalid XML sets xformsXmlError and emits CustomFormDefChanged(formDef=null,
+      // relaunchOpenForm=false)
+      f.viewModel.updateCustomXFormsXml("<not-valid-xforms")
+      assertNotNull(f.uiState.xformsXmlError)
+      assertNull(f.uiState.customFormDef)
+      val invalidEvent = expectMostRecentItem() as WorkbenchEvent.CustomFormDefChanged
+      assertNull(invalidEvent.formDef)
+      assertFalse(invalidEvent.relaunchOpenForm)
 
-    // Blank XML clears error and formDef
-    f.viewModel.updateCustomXFormsXml("   ")
-    assertNull(f.uiState.xformsXmlError)
-    assertNull(f.uiState.customFormDef)
-    val blankEvent = f.events.last() as WorkbenchEvent.CustomFormDefChanged
-    assertNull(blankEvent.formDef)
-    assertTrue(blankEvent.relaunchOpenForm)
+      // Blank XML clears error and formDef
+      f.viewModel.updateCustomXFormsXml("   ")
+      assertNull(f.uiState.xformsXmlError)
+      assertNull(f.uiState.customFormDef)
+      val blankEvent = expectMostRecentItem() as WorkbenchEvent.CustomFormDefChanged
+      assertNull(blankEvent.formDef)
+      assertTrue(blankEvent.relaunchOpenForm)
 
-    // Valid preset XML restores formDef and matches preset
-    f.viewModel.updateCustomXFormsXml(WorkbenchExampleForm.SINGLE_POINT_LAND_USE.xformsXml)
-    assertNull(f.uiState.xformsXmlError)
-    assertNotNull(f.uiState.customFormDef)
-    assertEquals(
-      WorkbenchExampleForm.SINGLE_POINT_LAND_USE,
-      f.uiState.selectedWorkbenchExampleForm,
-    )
-    val validEvent = f.events.last() as WorkbenchEvent.CustomFormDefChanged
-    assertNotNull(validEvent.formDef)
-    assertTrue(validEvent.isPreset)
+      // Valid preset XML restores formDef and matches preset
+      f.viewModel.updateCustomXFormsXml(WorkbenchExampleForm.SINGLE_POINT_LAND_USE.xformsXml)
+      assertNull(f.uiState.xformsXmlError)
+      assertNotNull(f.uiState.customFormDef)
+      assertEquals(
+        WorkbenchExampleForm.SINGLE_POINT_LAND_USE,
+        f.uiState.selectedWorkbenchExampleForm,
+      )
+      val validEvent = expectMostRecentItem() as WorkbenchEvent.CustomFormDefChanged
+      assertNotNull(validEvent.formDef)
+      assertTrue(validEvent.isPreset)
+    }
   }
 
   @Test
-  fun selectWorkbenchExampleForm_andResetDefault_emitExpectedEvents() {
+  fun selectWorkbenchExampleForm_andResetDefault_emitExpectedEvents() = runTest {
     val f = Fixture()
-    f.viewModel.selectWorkbenchExampleForm(
-      WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
-      launchImmediately = true,
-    )
-    assertEquals(
-      WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
-      f.uiState.selectedWorkbenchExampleForm,
-    )
-    assertTrue(
-      f.events.contains(
-        WorkbenchEvent.ExampleSurveySelected(
-          surveyId = "00000034-c088-5ab9-8b98-e6bccb3dca71",
-          launchImmediately = true,
-        )
+    f.viewModel.events.test {
+      f.viewModel.selectWorkbenchExampleForm(
+        WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
+        launchImmediately = true,
       )
-    )
-
-    // Switch active survey in repository, then reset default XForms XML
-    runNow { f.surveyRepository.setActiveSurveyId("00000034-c088-5ab9-8b98-e6bccb3dca71") }
-    f.viewModel.onSurveyActivated("00000034-c088-5ab9-8b98-e6bccb3dca71")
-    assertEquals(
-      WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
-      f.uiState.selectedWorkbenchExampleForm,
-    )
-
-    f.viewModel.resetDefaultXFormsXml()
-    assertTrue(
-      f.events.contains(
-        WorkbenchEvent.DefaultSurveyRestored("00000033-6b50-51cd-ac94-baea2ea06d65")
+      assertEquals(
+        WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
+        f.uiState.selectedWorkbenchExampleForm,
       )
-    )
+      assertTrue(
+        takeReceivedItems()
+          .contains(
+            WorkbenchEvent.ExampleSurveySelected(
+              surveyId = "00000034-c088-5ab9-8b98-e6bccb3dca71",
+              launchImmediately = true,
+            )
+          )
+      )
+
+      // Switch active survey in repository, then reset default XForms XML
+      runNow { f.surveyRepository.setActiveSurveyId("00000034-c088-5ab9-8b98-e6bccb3dca71") }
+      f.viewModel.onSurveyActivated("00000034-c088-5ab9-8b98-e6bccb3dca71")
+      assertEquals(
+        WorkbenchExampleForm.SAMPLE_PLOTS_FOREST_ASSESSMENT,
+        f.uiState.selectedWorkbenchExampleForm,
+      )
+
+      f.viewModel.resetDefaultXFormsXml()
+      assertTrue(
+        takeReceivedItems()
+          .contains(WorkbenchEvent.DefaultSurveyRestored("00000033-6b50-51cd-ac94-baea2ea06d65"))
+      )
+      assertEquals(WorkbenchExampleForm.ALL_FIELD_TYPES, f.uiState.selectedWorkbenchExampleForm)
+      assertEquals(DEFAULT_WORKBENCH_XFORMS_XML, f.uiState.customXFormsXml)
+    }
+  }
+
+  @Test
+  fun tabletToggle_returnsToMobile_andOrientationToggleRotates() {
+    val f = Fixture()
+    f.viewModel.selectDeviceFormFactor(DeviceFormFactor.TABLET)
+
+    f.viewModel.toggleDeviceFormFactor()
+    assertEquals(DeviceFormFactor.MOBILE, f.uiState.deviceFormFactor)
+    assertEquals(DeviceOrientation.PORTRAIT, f.uiState.deviceOrientation)
+
+    f.viewModel.toggleDeviceOrientation()
+    assertEquals(DeviceOrientation.LANDSCAPE, f.uiState.deviceOrientation)
+    f.viewModel.toggleDeviceOrientation()
+    assertEquals(DeviceOrientation.PORTRAIT, f.uiState.deviceOrientation)
+  }
+
+  @Test
+  fun airplaneModeToggle_flipsConnectivity_andTellsTheShell() = runTest {
+    val f = Fixture()
+    f.viewModel.events.test {
+      f.viewModel.toggleAirplaneMode()
+      assertTrue(f.uiState.isAirplaneMode)
+      assertEquals(WorkbenchEvent.ConnectivityChanged(isOnline = false), expectMostRecentItem())
+
+      f.viewModel.toggleAirplaneMode()
+      assertFalse(f.uiState.isAirplaneMode)
+      assertEquals(WorkbenchEvent.ConnectivityChanged(isOnline = true), expectMostRecentItem())
+    }
+  }
+
+  @Test
+  fun editingBackToTheDefaultXml_selectsTheDefaultExample() {
+    val f = Fixture()
+    f.viewModel.updateCustomXFormsXml(WorkbenchExampleForm.SINGLE_POINT_LAND_USE.xformsXml)
+
+    // Surrounding whitespace doesn't make it a custom form.
+    f.viewModel.updateCustomXFormsXml("\n$DEFAULT_WORKBENCH_XFORMS_XML\n")
+
     assertEquals(WorkbenchExampleForm.ALL_FIELD_TYPES, f.uiState.selectedWorkbenchExampleForm)
-    assertEquals(DEFAULT_WORKBENCH_XFORMS_XML, f.uiState.customXFormsXml)
+    assertNotNull(f.uiState.customFormDef)
+  }
+
+  @Test
+  fun cyclingAStandaloneSubmission_savesIt_andNamesItsFormInTheNotice() = runTest {
+    val f = Fixture()
+    val log =
+      f.uiState.entities
+        .first { it.submissions.isNotEmpty() }
+        .submissions
+        .first()
+        .copy(id = "standalone-log", entityId = "", formTitle = "Field log")
+    runNow { f.surveyRepository.setStandaloneSubmissions(listOf(log)) }
+
+    f.viewModel.events.test {
+      f.viewModel.cycleSubmissionSyncStatus("standalone-log")
+
+      val expected = log.syncStatus.next()
+      assertEquals(expected, f.uiState.standaloneSubmissions.single().syncStatus)
+      val notice = expectMostRecentItem() as WorkbenchEvent.Notice
+      assertTrue(notice.message.startsWith("Field log: "), notice.message)
+    }
+  }
+
+  @Test
+  fun unknownRecords_areIgnored() = runTest {
+    val f = Fixture()
+    val before = f.uiState
+    f.viewModel.events.test {
+      f.viewModel.cycleEntitySyncStatus("missing")
+      f.viewModel.updateEntitySyncStatus("missing", SyncStatus.FAILED)
+      f.viewModel.cycleSubmissionSyncStatus("missing")
+      expectNoEvents()
+    }
+    assertEquals(before.entities, f.uiState.entities)
   }
 
   @Test
@@ -190,28 +261,30 @@ class WorkbenchViewModelTest {
   }
 
   @Test
-  fun toggleSurveyDownloaded_andResetSampleData_restoreSampleData() {
+  fun toggleSurveyDownloaded_andResetSampleData_restoreSampleData() = runTest {
     val f = Fixture()
-    val initialEntityCount = f.uiState.entities.size
-    val targetSurvey = f.uiState.surveys.first()
-    val initialDownloaded = targetSurvey.isDownloaded
+    f.viewModel.events.test {
+      val initialEntityCount = f.uiState.entities.size
+      val targetSurvey = f.uiState.surveys.first()
+      val initialDownloaded = targetSurvey.isDownloaded
 
-    f.viewModel.toggleSurveyDownloaded(targetSurvey.id)
-    assertEquals(
-      !initialDownloaded,
-      f.uiState.surveys.first { it.id == targetSurvey.id }.isDownloaded,
-    )
+      f.viewModel.toggleSurveyDownloaded(targetSurvey.id)
+      assertEquals(
+        !initialDownloaded,
+        f.uiState.surveys.first { it.id == targetSurvey.id }.isDownloaded,
+      )
 
-    f.addEntities(count = 10)
-    assertEquals(initialEntityCount + 10, f.uiState.entities.size)
+      f.addEntities(count = 10)
+      assertEquals(initialEntityCount + 10, f.uiState.entities.size)
 
-    val beforeResetCount = f.uiState.dataResetCount
-    f.viewModel.updateAirplaneMode(true)
-    assertTrue(f.uiState.isAirplaneMode)
-    f.viewModel.resetSampleData()
-    assertFalse(f.uiState.isAirplaneMode)
-    assertEquals(beforeResetCount + 1, f.uiState.dataResetCount)
-    assertEquals(initialEntityCount, f.uiState.entities.size)
-    assertTrue(f.events.contains(WorkbenchEvent.SampleDataReset))
+      val beforeResetCount = f.uiState.dataResetCount
+      f.viewModel.updateAirplaneMode(true)
+      assertTrue(f.uiState.isAirplaneMode)
+      f.viewModel.resetSampleData()
+      assertFalse(f.uiState.isAirplaneMode)
+      assertEquals(beforeResetCount + 1, f.uiState.dataResetCount)
+      assertEquals(initialEntityCount, f.uiState.entities.size)
+      assertTrue(takeReceivedItems().contains(WorkbenchEvent.SampleDataReset))
+    }
   }
 }

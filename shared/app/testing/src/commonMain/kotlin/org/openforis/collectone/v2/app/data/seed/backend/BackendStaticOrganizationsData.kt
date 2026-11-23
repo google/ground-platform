@@ -14,6 +14,7 @@
 package org.openforis.collectone.v2.app.data.seed.backend
 
 import org.openforis.collectone.v2.app.domain.model.CachedProfile
+import org.openforis.collectone.v2.app.domain.model.EarthEnginePresets
 import org.openforis.collectone.v2.app.domain.model.ImagerySource
 import org.openforis.collectone.v2.app.domain.model.ImagerySourceType
 import org.openforis.collectone.v2.app.domain.model.MembershipStatus
@@ -34,7 +35,7 @@ object BackendStaticOrganizationsData {
   const val OPEN_FORIS_COMMUNITY = "00000015-d5d3-5e48-aea5-de421811bc13"
 
   /** Email of the sample signed-in user. */
-  const val SIGNED_IN_EMAIL = "maya.lin@groundplatform.org"
+  const val SIGNED_IN_EMAIL = "maya.lin@collect-one.example.org"
 
   private val signedInProfile = CachedProfile("Maya Lin", "avatar:2", "2026-02-10")
 
@@ -46,7 +47,6 @@ object BackendStaticOrganizationsData {
         description =
           "Synthetic platform-wide organization providing shared imagery sources and the global " +
             "library to every Collect One user across all surveys.",
-        logoUrl = "avatar:2",
         isListed = false,
         isSynthetic = true,
         createdOn = "2025-01-01",
@@ -70,7 +70,7 @@ object BackendStaticOrganizationsData {
               type = ImagerySourceType.XYZ_TILES,
               allowOfflineDownload = true,
             )
-          ),
+          ) + EarthEnginePresets.defaultImagerySources(),
       ),
       Organization(
         id = KENYA_FOREST_SERVICE,
@@ -79,7 +79,6 @@ object BackendStaticOrganizationsData {
           "National forest monitoring, agroforestry extension, and EUDR traceability programs " +
             "across Kenya's highland counties.",
         websiteUrl = "https://www.kenyaforestservice.org",
-        logoUrl = "avatar:0",
         isListed = true,
         createdOn = "2026-01-12",
         organizationType = OrganizationType.GOVERNMENT_AGENCY,
@@ -149,7 +148,6 @@ object BackendStaticOrganizationsData {
           "Coalition of provincial agencies and NGOs restoring intertidal mangrove belts in the " +
             "Mekong Delta.",
         websiteUrl = "https://example.org/mekong-mangroves",
-        logoUrl = "avatar:4",
         isListed = true,
         createdOn = "2025-11-03",
         organizationType = OrganizationType.NGO,
@@ -193,7 +191,6 @@ object BackendStaticOrganizationsData {
           "Open community of practice sharing survey templates and methods for forest and land " +
             "monitoring.",
         websiteUrl = "https://openforis.org",
-        logoUrl = "avatar:8",
         isListed = true,
         createdOn = "2025-09-01",
         // A global community of practice: no single country.

@@ -20,32 +20,37 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
 import org.openforis.collectone.v2.app.domain.model.SyncStatus
-import org.openforis.collectone.v2.app.ui.AppSession
+import org.openforis.collectone.v2.app.ui.session.TestAppSession
 
 class GeoIdTextTest {
 
-  private val entity = AppSession(sampleDataHolder()).entities.first()
+  private val entity =
+    TestAppSession(sampleDataHolder()).viewModels.dataCollection.uiState.value.entities.first()
 
   @Test
   fun syncedEntity_isNotPendingAndShowsGeoIdOnly() {
     val synced = entity.copy(syncStatus = SyncStatus.SYNCED)
 
     assertFalse(synced.isGeoIdPendingSync)
-    assertEquals(synced.geoId, buildAnnotatedString { appendGeoId(synced) }.text)
+    assertEquals(synced.geoId, buildAnnotatedString { appendGeoId(synced, PENDING_SYNC) }.text)
   }
 
   @Test
   fun unsyncedEntities_arePendingAndAppendIcon() {
     for (status in listOf(SyncStatus.UPLOADING, SyncStatus.FAILED)) {
       val pending = entity.copy(syncStatus = status)
-      val text = buildAnnotatedString { appendGeoId(pending) }
+      val text = buildAnnotatedString { appendGeoId(pending, PENDING_SYNC) }
 
       assertTrue(pending.isGeoIdPendingSync, "$status should be pending sync")
-      assertEquals("${pending.geoId}\u00A0($GeoIdPendingSyncDescription)", text.text)
+      assertEquals("${pending.geoId}\u00A0($PENDING_SYNC)", text.text)
       assertEquals(
         GeoIdPendingSyncIconId,
         text.getStringAnnotations(0, text.length).single().item,
       )
     }
+  }
+
+  private companion object {
+    const val PENDING_SYNC = "Pending sync"
   }
 }

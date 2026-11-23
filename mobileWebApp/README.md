@@ -15,7 +15,7 @@
 
 # Collect One Mobile App for the Web
 
-`mobileWebApp` runs the Collect One mobile app (`GroundMobileApp()` from
+`mobileWebApp` runs the Collect One mobile app (`MobileApp()` from
 [`../shared/mobile/`](../shared/mobile/)) in the browser with Kotlin/Wasm, for
 testing and UX review without an Android or iOS build.
 
@@ -23,14 +23,21 @@ testing and UX review without an Android or iOS build.
 
 -   **Workbench (desktop default, or `?chrome=1`)**: The mobile app runs inside
     a simulated device. The controls beside it switch between phone and tablet,
-    rotate the device, and toggle dark theme and airplane mode.
+    rotate the device, toggle dark theme and airplane mode, and copy links to
+    download the development Android APK (`/collect-one.apk`) and iOS build
+    (`/collect-one-ios.html`, which offers one-tap OTA install via
+    `/collect-one-ios.plist` or direct `/collect-one.ipa` sideloading). Location
+    questions get a simulated GPS that walks a short loop.
 -   **Full window (mobile browser default, or `?chrome=0`)**: When opened on a
     mobile browser (or with `?chrome=0` in the URL), the workbench chrome is
-    hidden and the mobile app fills the browser viewport like a native app.
+    hidden and the mobile app fills the browser viewport like a native app. It
+    follows the browser's connectivity, and location questions use the
+    device's real location (the browser's Geolocation API, which needs HTTPS or
+    `localhost` and the user's permission).
 
 ## Structure
 
--   **`workbench/`** (`org.openforis.collectone.v2:workbench`): A library with the
+-   **`workbench/`** (`:mobileWebApp:workbench`): A library with the
     workbench: `WorkbenchState`, the simulated device page
     (`MobileWorkbenchPage`), the root
     `MobileWorkbenchApp()`, XForms presets, and the simulation and reset tools
@@ -41,35 +48,33 @@ testing and UX review without an Android or iOS build.
 
 Map labels and Places search need a Mapbox access token (basemap tiles don't).
 `index.html` reads it from the `mapbox_token` URL parameter,
-`window.MAPBOX_ACCESS_TOKEN`, or the `GROUND_MAPBOX_TOKEN` local storage key.
+`window.MAPBOX_ACCESS_TOKEN`, or the `COLLECT_ONE_MAPBOX_TOKEN` local storage key.
 
 ## Running Locally
 
-From `mobileWebApp/`, start the webpack dev server (port `8093` by default).
-`./gradlew` here runs the Gradle wrapper from
-[`../shared/ui/`](../shared/ui/).
+From the repository root, start the webpack dev server (port `8093` by default):
 
 ```bash
-./gradlew wasmJsBrowserDevelopmentRun
+./gradlew :mobileWebApp:wasmJsBrowserDevelopmentRun
 
 # Or on another port:
-./gradlew wasmJsBrowserDevelopmentRun -Pport=8095
+./gradlew :mobileWebApp:wasmJsBrowserDevelopmentRun -Pport=8095
 ```
 
-Run the workbench tests with `./gradlew :workbench:jvmTest`.
+Run the workbench tests with `./gradlew :mobileWebApp:workbench:jvmTest`.
 
-## Connecting to the User Data Service
+## Connecting to the Server
 
 The mobile app loads surveys, organizations, and data from the
-[user data service](../server/userDataService/README.md), and needs one to
+[Collect One server](../server/README.md), and needs one to
 start. Start the service, then the app:
 
 ```bash
-# In server/userDataService/ (listens on http://localhost:8080):
-./gradlew run
+# From the repository root, in one terminal (listens on http://localhost:8080):
+./gradlew :server:run
 
-# In mobileWebApp/:
-./gradlew wasmJsBrowserDevelopmentRun
+# In another:
+./gradlew :mobileWebApp:wasmJsBrowserDevelopmentRun
 ```
 
 Tell the dev server where the service is with `USER_DATA_SERVICE_URL`, either in
@@ -85,7 +90,7 @@ USER_DATA_SERVICE_URL=http://localhost:8080
 Or for a single run:
 
 ```bash
-USER_DATA_SERVICE_URL=http://localhost:8080 ./gradlew wasmJsBrowserDevelopmentRun
+USER_DATA_SERVICE_URL=http://localhost:8080 ./gradlew :mobileWebApp:wasmJsBrowserDevelopmentRun
 ```
 
 The dev server proxies the service: the page sends its gRPC-Web calls to its
@@ -110,7 +115,7 @@ users' browsers, and use HTTPS if the bundle is served over HTTPS.
 ## Signing In
 
 The app signs in with Firebase Authentication (Google accounts) and sends the
-user's Firebase ID token with every user data service call. The Firebase
+user's Firebase ID token with every server call. The Firebase
 project comes from `FIREBASE_WEB_CONFIG` (the Firebase web app config object
 as JSON), set like `USER_DATA_SERVICE_URL`: as a Gradle property, in the
 environment, or in `local.properties`. No Firebase config is checked in;
@@ -119,7 +124,7 @@ as a single line `FIREBASE_WEB_CONFIG={"apiKey":"…","authDomain":"…",…}`.
 The Firebase JS SDK is loaded from Google's CDN when the page starts
 (`firebase-auth-bridge.js`), and the session persists across reloads.
 
-Run the user data service with `AUTH_MODE=dev` (the default), which verifies
+Run the server with `AUTH_MODE=dev` (the default), which verifies
 the token and treats signed-in users as administrators, or with
 `AUTH_MODE=firebase` for the same project. Pages must be served from a domain
 the Firebase project authorizes for sign-in (`localhost` is authorized by
@@ -143,10 +148,15 @@ The deployed bundle uses the `USER_DATA_SERVICE_URL` set where it was built, so
 set it to a reachable service (for example a Cloud Run deployment) before
 deploying; without one, the preview shows setup instructions.
 
+Configure `FIREBASE_PROJECT_ID` and `FIREBASE_SA_EMAIL` via `--project` /
+`--sa-email`, environment variables, or the root `local.properties` file:
+
 ```bash
 # Build and update the default 'mobile-preview' preview channel (7-day expiration):
-./scripts/deploy-preview.sh
+./scripts/deploy-preview.sh \
+  --project your-gcp-project-id \
+  --sa-email firebase-adminsdk@your-gcp-project-id.iam.gserviceaccount.com
 
-# Or pick a channel name and expiration, or skip the Gradle build:
+# Or pick a channel name and expiration, or skip the Gradle build (reading project/SA from env or local.properties):
 ./scripts/deploy-preview.sh --channel my-feature --expires 14d --skip-build
 ```

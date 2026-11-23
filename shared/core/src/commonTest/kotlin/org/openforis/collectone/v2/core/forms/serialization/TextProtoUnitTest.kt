@@ -16,10 +16,15 @@ package org.openforis.collectone.v2.core.forms.serialization
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import okio.ByteString.Companion.toByteString
+import openforis.collectone.v1.forms.ChoiceItem
+import openforis.collectone.v1.forms.ControlDef
 import openforis.collectone.v1.forms.FieldValue
+import openforis.collectone.v1.forms.FormDef
 import openforis.collectone.v1.forms.RecordInstance
 import openforis.collectone.v1.forms.RecordNode
 import openforis.collectone.v1.forms.TypedValue
+import openforis.collectone.v1.forms.ViewComponent
+import openforis.collectone.v1.forms.ViewDef
 
 class TextProtoUnitTest {
 
@@ -129,4 +134,38 @@ class TextProtoUnitTest {
     )
     assertEquals(record, decoded)
   }
+
+  @Test
+  fun formDef_cascadingSelect_keepsParentsAndOrder() {
+    val formDef = cascadingSelectForm()
+
+    val decoded =
+      TextProtoSerializer.deserializeFormDef(TextProtoSerializer.serializeFormDef(formDef))
+
+    assertEquals(formDef, decoded)
+  }
+
+  private fun cascadingSelectForm(): FormDef =
+    FormDef(
+      form_id = "cascade",
+      view =
+        ViewDef(
+          components =
+            listOf(
+              ViewComponent(
+                id = "district",
+                sort_order = 1,
+                control =
+                  ControlDef(
+                    field_ref = "/data/district",
+                    parent_question_key = "region",
+                    choices =
+                      listOf(
+                        ChoiceItem(value_ = "d1", parent_value = "r1", id = "d1", sort_order = 2)
+                      ),
+                  ),
+              )
+            )
+        ),
+    )
 }

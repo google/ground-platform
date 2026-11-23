@@ -17,7 +17,7 @@
 // a static host would, except for two generated scripts that the harness supplies instead of the
 // build:
 //
-// - `user-data-service-config.js` points the app at the user data service the tests started.
+// - `user-data-service-config.js` points the app at the server the tests started.
 // - `firebase-config.js` turns Firebase and development sign-in off, so signing in uses the
 //   service's development user (`FakeAuthClient`, `AUTH_MODE=dev`) without a role dialog.
 //
@@ -29,7 +29,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { APPS, USER_DATA_SERVICE_URL } from './config.mjs';
+import { APPS, SERVER_URL } from './config.mjs';
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -49,10 +49,10 @@ const MIME_TYPES = {
 };
 
 const GENERATED_SCRIPTS = {
-  '/user-data-service-config.js': `window.GROUND_USER_DATA_SERVICE_URL = ${JSON.stringify(
-    USER_DATA_SERVICE_URL,
+  '/user-data-service-config.js': `window.COLLECT_ONE_USER_DATA_SERVICE_URL = ${JSON.stringify(
+    SERVER_URL,
   )};\n`,
-  '/firebase-config.js': 'window.GROUND_FIREBASE_CONFIG = null;\nwindow.GROUND_DEV_SIGN_IN = false;\n',
+  '/firebase-config.js': 'window.COLLECT_ONE_FIREBASE_CONFIG = null;\nwindow.COLLECT_ONE_DEV_SIGN_IN = false;\n',
 };
 
 function serve(app) {
@@ -74,20 +74,29 @@ function serve(app) {
       res.writeHead(403).end();
       return;
     }
-    fs.readFile(file, (error, data) => {
-      if (error) {
-        res.writeHead(404).end();
-        return;
-      }
-      res.writeHead(200, {
-        'content-type': MIME_TYPES[path.extname(file)] ?? 'application/octet-stream',
-      });
-      res.end(data);
-    });
+    // Page paths (`/surveys/<id>/dashboard`) have no file: serve the app, which routes them, as
+    // the hosting rewrites do. Missing assets (with an extension) are still 404s.
+    const isPagePath = path.extname(relative) === '';
+    fs.access(file, (missing) =>
+      sendFile(res, missing && isPagePath ? path.join(app.distDir, 'index.html') : file),
+    );
   });
   server.listen(app.port, '127.0.0.1', () =>
     console.log(`${app.name} bundle served at http://127.0.0.1:${app.port}/`),
   );
+}
+
+function sendFile(res, file) {
+  fs.readFile(file, (error, data) => {
+    if (error) {
+      res.writeHead(404).end();
+      return;
+    }
+    res.writeHead(200, {
+      'content-type': MIME_TYPES[path.extname(file)] ?? 'application/octet-stream',
+    });
+    res.end(data);
+  });
 }
 
 APPS.forEach(serve);

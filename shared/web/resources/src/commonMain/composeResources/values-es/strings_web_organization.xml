@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Web console: organizations directory, organization page, and organization library. -->
+<resources>
+  <!-- Common actions -->
+  <string name="org_cancel">Cancelar</string>
+  <string name="org_save">Guardar</string>
+  <string name="org_close">Cerrar</string>
+  <string name="org_ok">Aceptar</string>
+  <string name="org_discard">Descartar</string>
+  <string name="org_dismiss">Descartar</string>
+  <string name="org_show">Mostrar</string>
+  <string name="org_hide">Ocultar</string>
+  <!-- Empty choice in a dropdown, e.g. no impact pillar. -->
+  <string name="org_none">Ninguno</string>
+  <string name="org_clear_search">Borrar búsqueda</string>
+  <!-- Screen reader label of an edit button. %1$s: name of the item, e.g. an imagery source or template. -->
+  <string name="org_edit_item">Editar %1$s</string>
+  <!-- Screen reader label of a delete button. %1$s: name of the library item. -->
+  <string name="org_delete_item">Eliminar %1$s</string>
+  <!-- Confirmation dialog title. %1$s: name of the organization, template, or purpose. -->
+  <string name="org_delete_item_title">¿Eliminar %1$s?</string>
+
+  <!-- Relation badges on organization cards -->
+  <string name="org_relation_manager">Usted administra</string>
+  <string name="org_relation_member">Miembro</string>
+  <string name="org_relation_invited">Invitado</string>
+  <string name="org_relation_requested">Solicitud enviada</string>
+  <string name="org_badge_synthetic">Sintética</string>
+
+  <!-- Organization counts, joined with " · " -->
+  <plurals name="org_count_members">
+    <item quantity="one">%1$d miembro</item>
+    <item quantity="other">%1$d miembros</item>
+  </plurals>
+  <plurals name="org_count_surveys">
+    <item quantity="one">%1$d encuesta</item>
+    <item quantity="other">%1$d encuestas</item>
+  </plurals>
+  <!-- %1$d: number of imagery sources. -->
+  <string name="org_count_imagery">Imágenes: %1$d</string>
+  <!-- Pending requests to join the organization. -->
+  <plurals name="org_count_requests">
+    <item quantity="one">%1$d solicitud</item>
+    <item quantity="other">%1$d solicitudes</item>
+  </plurals>
+  <!-- Shown after the counts when the organization isn't listed in the directory. -->
+  <string name="org_unlisted">No listada</string>
+
+  <!-- Organizations directory -->
+  <string name="org_back_to_surveys">Volver a las encuestas</string>
+  <string name="org_organizations_title">Organizaciones</string>
+  <!-- Header summary. %1$d: organizations the user belongs to; %2$d: all organizations. -->
+  <string name="org_directory_summary">%1$d suyas · %2$d en total</string>
+  <string name="org_admin_panel">Panel de administración</string>
+  <!-- Header button that opens the Impact page. -->
+  <string name="org_impact">Impacto</string>
+  <string name="org_create_organization">Crear organización</string>
+  <string name="org_search_placeholder">Buscar organizaciones</string>
+  <string name="org_section_yours">Sus organizaciones</string>
+  <string name="org_section_yours_empty">Aún no pertenece a ninguna organización. Cree una o solicite unirse a alguna de las siguientes.</string>
+  <string name="org_section_yours_no_matches">Ninguna de sus organizaciones coincide con la búsqueda.</string>
+  <string name="org_section_others">Otras organizaciones</string>
+  <string name="org_section_others_empty">No hay otras organizaciones listadas.</string>
+  <string name="org_section_others_no_matches">Ninguna otra organización coincide con la búsqueda.</string>
+  <string name="org_no_description">Aún no hay descripción.</string>
+  <!-- Card summary of the platform-wide "All users" organization. %1$d: number of imagery sources. -->
+  <plurals name="org_card_all_users_summary">
+    <item quantity="one">Todos los usuarios · %1$d fuente de imágenes</item>
+    <item quantity="other">Todos los usuarios · %1$d fuentes de imágenes</item>
+  </plurals>
+  <string name="org_request_to_join">Solicitar unirse</string>
+
+  <!-- Create organization dialog -->
+  <string name="org_field_name">Nombre de la organización</string>
+  <string name="org_field_description">Descripción</string>
+  <string name="org_list_in_directory">Mostrar en el directorio</string>
+  <string name="org_create_listed_help">Cualquier persona puede encontrar la organización, solicitar unirse y seguir sus cifras de impacto publicadas. Las organizaciones no listadas son solo por invitación.</string>
+  <string name="org_create_manager_help">Usted será su primer administrador. Los administradores pueden editar la organización, gestionar los miembros y administrar todas sus encuestas.</string>
+  <string name="org_create_publish_help">Cada organización publica totales anónimos de sus encuestas, como las hectáreas mapeadas, para cualquier persona que haya iniciado sesión en Collect One. Los envíos, los elementos del mapa, las ubicaciones y las respuestas nunca se publican.</string>
+  <string name="org_create">Crear</string>
+
+  <!-- Organization type and country fields -->
+  <!-- Organization type field label. -->
+  <string name="org_field_type">Tipo</string>
+  <string name="org_field_country">País</string>
+  <string name="org_country_search_placeholder">Buscar por nombre o código</string>
+  <string name="org_country_no_matches">No hay países que coincidan</string>
+  <!-- Value of an optional organization type or country that hasn't been set. -->
+  <string name="org_not_specified">No especificado</string>
+
+  <!-- Organization page sections (left panel) -->
+  <string name="org_tab_details">Detalles de la organización</string>
+  <string name="org_tab_surveys">Encuestas</string>
+  <string name="org_tab_members">Miembros</string>
+  <string name="org_tab_imagery">Imágenes</string>
+  <string name="org_tab_purposes">Propósitos</string>
+  <string name="org_tab_dictionary">Diccionario</string>
+  <string name="org_tab_templates">Plantillas</string>
+  <string name="org_tab_cost_controls">Control de costos</string>
+  <string name="org_tab_cost_tracking">Seguimiento de costos</string>
+  <!-- Members section of the platform-wide "All users" organization. -->
+  <string name="org_platform_admins">Administradores de la plataforma</string>
+  <string name="org_nav_global_library">Biblioteca global</string>
+  <string name="org_nav_cost_quotas">Costos y cuotas</string>
+  <string name="org_nav_governance">Gobernanza</string>
+
+  <!-- Organization page header -->
+  <string name="org_back_to_organizations">Volver a las organizaciones</string>
+  <!-- Label saying that the page is an organization. -->
+  <string name="org_organization_label">Organización</string>
+  <string name="org_view_impact">Ver impacto</string>
+  <string name="org_create_survey">Crear encuesta</string>
+  <string name="org_admin_panel_subtitle">Administración de la plataforma y biblioteca global</string>
+
+  <!-- Section subtitles. %1$s: organization name. -->
+  <string name="org_details_subtitle_manager">Cómo se muestra %1$s a los miembros y en el directorio. Solo los administradores pueden cambiar estos datos.</string>
+  <string name="org_details_subtitle_member">Cómo se muestra %1$s a los miembros y en el directorio. Pida a un administrador que cambie estos datos.</string>
+  <string name="org_surveys_subtitle_manager">Encuestas realizadas en nombre de %1$s. Como administrador, puede editar cada una de ellas, gestionar con quién se comparten y exportar sus datos.</string>
+  <string name="org_surveys_subtitle_member">Encuestas realizadas en nombre de %1$s. Abra una para ver lo que puede hacer en ella.</string>
+  <string name="org_members_subtitle_admins">Administradores de la plataforma que gestionan las imágenes, los propósitos, las plantillas y los conceptos del diccionario globales.</string>
+  <string name="org_members_subtitle">Personas afiliadas a %1$s. Los administradores dirigen la organización y todas sus encuestas; los miembros pueden crear encuestas en ella.</string>
+  <string name="org_imagery_subtitle_admins">Capas de imágenes personalizadas del mapa base disponibles para todos los usuarios de Collect One en todas las encuestas, desde el cuadro de diálogo de capas del mapa base en dispositivos móviles y en la web.</string>
+  <string name="org_imagery_subtitle_manager">Capas de imágenes personalizadas del mapa base disponibles en el cuadro de diálogo de capas del mapa base, en dispositivos móviles y en la web, para las encuestas de %1$s.</string>
+  <string name="org_imagery_subtitle_member">Capas de imágenes personalizadas del mapa base configuradas para las encuestas de %1$s. Pida a un administrador que agregue o cambie fuentes de imágenes.</string>
+  <string name="org_purposes_subtitle_admins">Opciones que todas las organizaciones ven para "¿Para qué se usarán estos datos?" al crear una encuesta. Cada propósito agrega sus plantillas a la nueva encuesta.</string>
+  <string name="org_purposes_subtitle">Opciones que se ofrecen para "¿Para qué se usarán estos datos?" al crear una encuesta en %1$s: primero sus propios propósitos y luego los globales.</string>
+  <string name="org_dictionary_subtitle_admins">Conceptos globales: campos estándar que vinculan las preguntas de los formularios a un significado compartido, para que las respuestas se puedan comparar y sumar entre encuestas e idiomas.</string>
+  <string name="org_dictionary_subtitle">Conceptos disponibles para las encuestas de %1$s: campos estándar que dan a las preguntas de los formularios un significado compartido, para que las respuestas se puedan comparar y sumar.</string>
+  <string name="org_templates_subtitle_admins">Plantillas de formulario globales que cualquier organización puede agregar a sus encuestas.</string>
+  <string name="org_templates_subtitle">Plantillas de formulario disponibles para las encuestas de %1$s: primero sus propias plantillas y luego las globales.</string>
+  <string name="org_cost_controls_title_global">Control de costos y cuotas globales</string>
+  <string name="org_cost_controls_subtitle_global">Límites de cuota predeterminados y ponderaciones de costo unitario para toda la plataforma, aplicados a organizaciones y encuestas.</string>
+  <string name="org_cost_controls_subtitle_manager">Topes de presupuesto y límites de cuota para %1$s. Configure niveles predefinidos o límites detallados por recurso.</string>
+  <string name="org_cost_controls_subtitle_member">Topes de presupuesto y límites de cuota para %1$s. Pida a un administrador de la organización que ajuste estos límites.</string>
+  <string name="org_cost_tracking_title">Seguimiento de costos de la plataforma</string>
+  <string name="org_cost_tracking_subtitle">Contabilidad de costos en tiempo real, resúmenes de uso de recursos y desglose del cumplimiento del presupuesto por organización, encuesta y usuario.</string>
+
+  <!-- Missing organization -->
+  <string name="org_missing_title">Esta organización no existe</string>
+  <string name="org_missing_body">Es posible que se haya eliminado o que el enlace sea incorrecto.</string>
+
+  <!-- Surveys section -->
+  <!-- %1$s: organization name. -->
+  <string name="org_surveys_empty_member">Aún no hay encuestas. Cree la primera para %1$s.</string>
+  <string name="org_surveys_empty">Aún no hay encuestas.</string>
+
+  <!-- Members section -->
+  <!-- Name of the list where Managers see the name and photo an invitee accepts with; completes "…shown on the <list>". -->
+  <string name="org_members_page_name">página de miembros</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_leave_title">¿Salir de %1$s?</string>
+  <string name="org_leave_body">Perderá el acceso a sus encuestas, a menos que se compartan con usted directamente. Las encuestas de las que es propietario siguen siendo suyas.</string>
+  <string name="org_leave">Salir</string>
+  <string name="org_leave_organization">Salir de la organización</string>
+  <string name="org_members_requests_title">Solicitudes para unirse</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_members_requests_body">Personas que encontraron %1$s en el directorio y solicitaron unirse.</string>
+  <string name="org_members_asked_to_join">Solicitó unirse</string>
+  <!-- Badge on a person who asked to join. -->
+  <string name="org_members_requested">Solicitado</string>
+  <string name="org_decline">Rechazar</string>
+  <string name="org_approve">Aprobar</string>
+  <string name="org_members_admins_help">Los administradores de la plataforma gestionan la biblioteca global, las fuentes de imágenes de la plataforma y la configuración de la plataforma.</string>
+  <!-- The signed-in user in the members list. %1$s: their name. -->
+  <string name="org_member_you">%1$s (usted)</string>
+  <!-- Member role field label. -->
+  <string name="org_field_role">Rol</string>
+  <!-- Screen reader label. %1$s: name of the member to remove. -->
+  <string name="org_remove_member">Quitar a %1$s</string>
+  <string name="org_members_manager_help">Una organización siempre conserva al menos un administrador. Los nombres y las fotos provienen de la cuenta de cada persona cuando acepta su invitación.</string>
+  <!-- Section heading listing pending invites. -->
+  <string name="org_members_invited_title">Invitados</string>
+  <!-- %1$s: the invited role, e.g. Manager. -->
+  <string name="org_members_invite_pending">Esperando a que acepte su enlace de invitación · %1$s</string>
+  <!-- Screen reader label. %1$s: email address of the invitee. -->
+  <string name="org_revoke_invite">Revocar la invitación de %1$s</string>
+  <string name="org_invite_label">Invitar personas por correo electrónico</string>
+  <string name="org_invite">Invitar</string>
+
+  <!-- Details section -->
+  <string name="org_published_title">Cifras de impacto publicadas</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_manager">Como administrador de %1$s, usted publica totales anónimos de sus encuestas</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_published_member">%1$s publica totales anónimos de sus encuestas</string>
+  <!-- %1$s: a sentence stating what is never published. -->
+  <string name="org_published_body">Cualquier persona que haya iniciado sesión en Collect One puede seguir en la página Impacto lo que suman sus encuestas, como las hectáreas mapeadas y cómo se usaron los datos. %1$s</string>
+  <string name="org_published_see">Ver lo que se publica</string>
+  <string name="org_platform_numbers_title">Cifras de toda la plataforma</string>
+  <string name="org_platform_numbers_exclude">Excluir nuestros datos de los totales de la plataforma</string>
+  <string name="org_platform_numbers_help">Sus encuestas siguen contando en sus propias cifras de impacto; solo se excluyen de los totales de todo Collect One.</string>
+  <string name="org_ask_manager_change">Pida a un administrador que cambie esto.</string>
+  <string name="org_profile_title">Perfil</string>
+  <string name="org_field_logo">Logotipo de la organización</string>
+  <string name="org_details_logo_help">PNG, JPG, WebP o SVG. Se muestra en las tarjetas y encabezados de la organización.</string>
+  <string name="org_logo_upload">Subir logotipo</string>
+  <string name="org_logo_change">Cambiar logotipo</string>
+  <string name="org_logo_remove">Quitar</string>
+  <!-- Shown under an empty organization name field. -->
+  <string name="org_details_name_required">Ingrese un nombre</string>
+  <string name="org_details_description_help">Se muestra en el directorio y en la página Encuestas.</string>
+  <string name="org_field_website">Sitio web</string>
+  <string name="org_details_listed_help">Cualquier persona puede encontrar la organización y solicitar unirse. Las organizaciones no listadas son solo por invitación.</string>
+  <string name="org_unsaved_changes">Cambios sin guardar</string>
+  <!-- Organization name label on the read-only details. -->
+  <string name="org_field_name_short">Nombre</string>
+  <!-- Shown when the organization has no website. -->
+  <string name="org_not_provided">No proporcionado.</string>
+  <!-- Directory listing label on the read-only details. -->
+  <string name="org_field_directory">Directorio</string>
+  <string name="org_directory_listed">Listada · cualquier persona puede encontrarla y solicitar unirse</string>
+  <string name="org_directory_unlisted">No listada · solo por invitación</string>
+  <!-- %1$d: number of surveys in the organization. -->
+  <plurals name="org_delete_body_surveys">
+    <item quantity="one">Los miembros pierden su afiliación. Su %1$d encuesta pasa a ser una encuesta personal de su propietario; no se elimina ningún dato.</item>
+    <item quantity="other">Los miembros pierden su afiliación. Sus %1$d encuestas pasan a ser encuestas personales de sus propietarios; no se elimina ningún dato.</item>
+  </plurals>
+  <string name="org_delete_body_no_surveys">Los miembros pierden su afiliación. No tiene encuestas.</string>
+  <string name="org_delete_organization">Eliminar organización</string>
+  <string name="org_danger_zone">Zona de peligro</string>
+  <string name="org_danger_zone_body">Al eliminar la organización, se quita la afiliación de todos. Sus encuestas pasan a ser encuestas personales de sus propietarios y conservan todos sus datos.</string>
+
+  <!-- Imagery section -->
+  <string name="org_imagery_configured_title">Fuentes de imágenes configuradas</string>
+  <string name="org_imagery_empty_manager">Aún no hay fuentes de imágenes configuradas. Agregue una URL de teselas XYZ a continuación para poder activarla en el cuadro de diálogo de capas del mapa base.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_imagery_empty_member">No hay fuentes de imágenes configuradas para %1$s.</string>
+  <string name="org_imagery_source_name">Nombre de la fuente</string>
+  <!-- Example imagery source name. -->
+  <string name="org_imagery_source_name_placeholder">p. ej., OpenTopoMap Contours</string>
+  <string name="org_imagery_url">URL de teselas XYZ</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_edit">Debe incluir los marcadores de teselas {z}, {x} y {y}.</string>
+  <!-- {z}, {x}, and {y} are literal URL placeholders; don't translate them. -->
+  <string name="org_imagery_url_help_add">Plantilla de URL de teselas ráster Web Mercator que contenga los marcadores {z}, {x} y {y}.</string>
+  <string name="org_imagery_offline_title">Permitir descarga sin conexión en dispositivos móviles</string>
+  <string name="org_imagery_offline_help_edit">Permita que los recolectores descarguen teselas de esta fuente para usarlas en campo sin conexión.</string>
+  <string name="org_imagery_offline_help_add">Permita que los recolectores descarguen en dispositivos móviles teselas de esta fuente XYZ para usarlas en campo sin conexión.</string>
+  <string name="org_imagery_offline_allowed">Los recolectores pueden descargar teselas de esta fuente en su dispositivo móvil.</string>
+  <string name="org_imagery_offline_disabled">Solo transmisión en línea; la descarga de teselas sin conexión está desactivada en dispositivos móviles.</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_permitted">Permitida</string>
+  <!-- Offline download status. -->
+  <string name="org_imagery_not_permitted">No permitida</string>
+  <!-- Screen reader label. %1$s: name of the imagery source to remove. -->
+  <string name="org_remove_imagery_source">Quitar %1$s</string>
+  <string name="org_imagery_add">Agregar fuente de imágenes</string>
+  <string name="org_imagery_add_body">Agregue un servicio de teselas ráster que los recolectores y organizadores puedan activar en el cuadro de diálogo de capas del mapa base.</string>
+  <string name="org_imagery_source_type">Tipo de fuente</string>
+  <string name="org_imagery_ee_preset">Ajuste predefinido de Earth Engine</string>
+  <string name="org_imagery_ee_preset_placeholder">Seleccione un ajuste predefinido…</string>
+  <string name="org_imagery_ee_description">Calculada por Earth Engine · las teselas se actualizan automáticamente</string>
+
+  <!-- Cost controls section -->
+  <string name="org_quota_tier_title">Nivel de cuota predefinido</string>
+  <string name="org_quota_tier_body">Aplique los valores predeterminados de un nivel de servicio estándar o personalice a continuación las cuotas de cada recurso.</string>
+  <string name="org_quota_tier_inherit">Heredar global</string>
+  <string name="org_quota_tier_basic">Nivel básico</string>
+  <string name="org_quota_tier_sponsored">Nivel patrocinado</string>
+  <string name="org_budget_title">Tope de presupuesto mensual</string>
+  <string name="org_budget_body">Límite estricto en USD para los costos estimados de encuestas y recolección de datos. Ingrese 0 para un presupuesto ilimitado.</string>
+  <string name="org_budget_field">Tope de presupuesto mensual ($ USD)</string>
+  <string name="org_budget_placeholder">0.00 (Ilimitado)</string>
+  <string name="org_limits_survey_title">Límites de encuestas y formularios</string>
+  <string name="org_limit_surveys_per_owner">Máx. de encuestas / propietario</string>
+  <string name="org_limit_forms_per_survey">Máx. de formularios / encuesta</string>
+  <string name="org_limit_questions_per_form">Máx. de preguntas / formulario</string>
+  <string name="org_limit_photo_questions_per_form">Máx. de preguntas de foto / formulario</string>
+  <string name="org_limit_predefined_entities">Máx. de entidades predefinidas</string>
+  <string name="org_limit_sample_plots">Máx. de parcelas de muestreo</string>
+  <string name="org_limit_boundary_vertices">Máx. de vértices del límite</string>
+  <string name="org_limit_acl_collaborators">Máx. de colaboradores en la ACL</string>
+  <string name="org_limits_collector_title">Límites de recolectores y envíos</string>
+  <string name="org_limit_active_surveys_per_user">Máx. de encuestas activas / usuario</string>
+  <string name="org_limit_adhoc_features_per_user">Máx. de elementos ad hoc / usuario</string>
+  <string name="org_limit_submissions_per_feature">Máx. de envíos / elemento / usuario</string>
+  <string name="org_cost_weights_title">Ponderaciones de costo unitario de la plataforma ($ USD)</string>
+  <string name="org_cost_weight_survey_month">USD / encuesta / mes</string>
+  <string name="org_cost_weight_entities">USD / 1k entidades</string>
+  <string name="org_cost_weight_submissions">USD / 1k envíos</string>
+  <string name="org_cost_weight_photo">USD / foto</string>
+  <string name="org_cost_controls_save">Guardar control de costos</string>
+  <string name="org_cost_controls_saved">Control de costos guardado.</string>
+
+  <!-- Cost tracking section -->
+  <string name="org_cost_total">Costo total estimado</string>
+  <!-- Monthly cost. %1$s: formatted amount, e.g. $12.50. -->
+  <string name="org_cost_per_month">%1$s / mes</string>
+  <!-- %1$s: formatted monthly budget, e.g. $100.00. -->
+  <string name="org_cost_budget_cap">Tope de presupuesto: %1$s / mes</string>
+  <string name="org_cost_tracked_surveys">Encuestas con seguimiento</string>
+  <string name="org_cost_total_entities">Total de entidades</string>
+  <string name="org_cost_submissions">Envíos</string>
+  <string name="org_cost_photos">Fotos registradas</string>
+  <!-- %1$d: number of alerts. -->
+  <string name="org_cost_budget_alerts">Alertas de presupuesto (%1$d)</string>
+  <!-- %1$s: organization or survey name; %2$s: estimated monthly cost; %3$s: monthly budget. -->
+  <string name="org_cost_budget_alert">%1$s supera el presupuesto mensual (%2$s &gt; %3$s)</string>
+  <!-- Filter chips. %1$d: number of rows. -->
+  <string name="org_cost_by_organization">Por organización (%1$d)</string>
+  <string name="org_cost_by_survey">Por encuesta (%1$d)</string>
+  <string name="org_cost_by_collector">Por recolector (%1$d)</string>
+  <string name="org_cost_exceeded">Presupuesto superado</string>
+  <string name="org_cost_within">Dentro del presupuesto</string>
+  <plurals name="org_count_entities">
+    <item quantity="one">%1$d entidad</item>
+    <item quantity="other">%1$d entidades</item>
+  </plurals>
+  <plurals name="org_count_submissions">
+    <item quantity="one">%1$d envío</item>
+    <item quantity="other">%1$d envíos</item>
+  </plurals>
+  <plurals name="org_count_photos">
+    <item quantity="one">%1$d foto</item>
+    <item quantity="other">%1$d fotos</item>
+  </plurals>
+  <!-- %1$d: number of predefined map features. -->
+  <string name="org_count_predefined">%1$d predefinidos</string>
+  <!-- %1$d: number of generated map features (sample plots). -->
+  <string name="org_count_generated">%1$d generados</string>
+  <!-- A collector's activity. %1$d: number of surveys. -->
+  <plurals name="org_count_active_in_surveys">
+    <item quantity="one">Activo en %1$d encuesta</item>
+    <item quantity="other">Activo en %1$d encuestas</item>
+  </plurals>
+
+  <!-- Notices -->
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed">No se pudo crear "%1$s".</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_create_failed_country">No se pudo crear "%1$s". Elija un país de la lista.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_created">Se creó la organización "%1$s".</string>
+  <string name="org_notice_save_failed_country">No se pudo guardar. Elija un país de la lista.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_deleted">Se eliminó la organización "%1$s".</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_notice_role_all_users">Todos ya son miembros de %1$s. En su lugar, quite al administrador.</string>
+  <string name="org_notice_last_manager_role">Una organización necesita al menos un administrador. Primero, designe a otra persona como administrador.</string>
+  <string name="org_notice_last_manager_leave">Una organización necesita al menos un administrador. Designe a otra persona como administrador antes de salir.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_notice_left">Salió de "%1$s".</string>
+
+  <!-- Validation errors -->
+  <string name="org_error_invalid_email">Ingrese una dirección de correo electrónico válida.</string>
+  <string name="org_error_not_found">No se encontró la organización.</string>
+  <!-- %1$s: name of the platform-wide organization ("All users"). -->
+  <string name="org_error_invite_all_users">Todos ya son miembros de %1$s. Invite a las personas como administradores.</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_member">%1$s ya es miembro.</string>
+  <!-- %1$s: the person's email address. -->
+  <string name="org_error_already_invited">%1$s ya fue invitado.</string>
+  <!-- %1$s: the person's name. -->
+  <string name="org_error_already_requested">%1$s solicitó unirse. En su lugar, apruebe su solicitud.</string>
+  <!-- An invitee accepting without a name. -->
+  <string name="org_error_enter_name">Ingrese un nombre.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_error_library_managers_only">Solo los administradores de %1$s pueden cambiar su biblioteca.</string>
+  <string name="org_error_question_labels">Ingrese una etiqueta para cada pregunta.</string>
+  <string name="org_error_concept_missing">Este concepto ya no existe.</string>
+  <string name="org_error_concept_not_draft">Solo se pueden eliminar los conceptos en borrador. En su lugar, márquelo como obsoleto para que los vínculos existentes sigan funcionando.</string>
+
+  <!-- Dictionary (concepts) -->
+  <string name="org_concept_delete_error_title">No se puede eliminar este concepto</string>
+  <string name="org_concept_search_label">Buscar conceptos</string>
+  <!-- "cultivo" is an example search term in Spanish; keep it as is. -->
+  <string name="org_concept_search_placeholder">Etiqueta o palabra clave en cualquier idioma, por ejemplo cultivo</string>
+  <!-- %1$d: concepts shown; %2$d: all concepts (selects the plural form). -->
+  <plurals name="org_concept_search_count">
+    <item quantity="one">%1$d de %2$d concepto</item>
+    <item quantity="other">%1$d de %2$d conceptos</item>
+  </plurals>
+  <string name="org_concepts_global_title">Conceptos globales</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_concepts_org_title">Conceptos de %1$s</string>
+  <string name="org_concepts_global_body">Campos estándar disponibles para todas las encuestas. Los cambios se aplican a todas las organizaciones.</string>
+  <!-- %1$s: organization ID, part of the concept ID prefix. -->
+  <string name="org_concepts_org_body">Campos estándar que solo usa esta organización. Sus ID comienzan con org.%1$s.</string>
+  <string name="org_concepts_no_matches">No hay conceptos que coincidan.</string>
+  <string name="org_concepts_global_empty">Aún no hay conceptos globales.</string>
+  <string name="org_concepts_empty">Aún no hay conceptos.</string>
+  <string name="org_concepts_global_shared_body">Compartidos con todas las organizaciones por Todos los usuarios. Solo los administradores de la plataforma pueden cambiarlos.</string>
+  <string name="org_concept_add">Agregar concepto</string>
+  <string name="org_concept_edit_title">Editar concepto</string>
+  <!-- %1$s: unit code, e.g. kg. -->
+  <string name="org_concept_unit">Unidad %1$s</string>
+  <!-- %1$d: number of list values; %2$s: the first few value labels. -->
+  <plurals name="org_concept_values">
+    <item quantity="one">%1$d valor: %2$s</item>
+    <item quantity="other">%1$d valores: %2$s</item>
+  </plurals>
+  <!-- Like org_concept_values, when only some of the values are listed. -->
+  <plurals name="org_concept_values_truncated">
+    <item quantity="one">%1$d valor: %2$s…</item>
+    <item quantity="other">%1$d valores: %2$s…</item>
+  </plurals>
+  <!-- Short concept version. %1$d: version number. -->
+  <string name="org_concept_version_short">v%1$d</string>
+  <string name="org_field_label_english">Etiqueta (inglés)</string>
+  <string name="org_concept_label_help">También es la etiqueta predeterminada de la pregunta cuando se vincula</string>
+  <string name="org_concept_vocabulary">Vocabulario</string>
+  <!-- Concept name, the last part of its ID. -->
+  <string name="org_concept_name">Nombre</string>
+  <!-- %1$s: the concept ID. -->
+  <string name="org_concept_id">ID: %1$s</string>
+  <!-- %1$s: the concept ID; %2$d: version number. -->
+  <string name="org_concept_id_version">%1$s · versión %2$d</string>
+  <!-- %1$s: list of language codes and labels. -->
+  <string name="org_concept_translations">Traducciones: %1$s</string>
+  <string name="org_field_description_english">Descripción (inglés)</string>
+  <string name="org_concept_data_type">Tipo de datos</string>
+  <string name="org_concept_unit_label">Unidad (opcional)</string>
+  <string name="org_concept_unit_help">Código UCUM</string>
+  <string name="org_concept_list_values">Valores de la lista</string>
+  <!-- Code of a list value. -->
+  <string name="org_concept_value">Valor</string>
+  <string name="org_concept_remove_value">Quitar valor</string>
+  <string name="org_concept_add_value">Agregar valor</string>
+  <string name="org_concept_aggregation">Agregación</string>
+  <string name="org_concept_privacy">Privacidad</string>
+  <string name="org_concept_goals">Metas (opcional)</string>
+  <string name="org_concept_suggested_goals">Metas sugeridas (opcional)</string>
+  <string name="org_concept_goals_help">Separe los ID de las metas con comas</string>
+  <!-- Impact pillar of a concept. -->
+  <string name="org_concept_pillar">Pilar</string>
+  <!-- Lifecycle status of a concept. -->
+  <string name="org_concept_status">Estado</string>
+  <!-- %1$s: list of references. -->
+  <string name="org_concept_references">Referencias: %1$s</string>
+
+  <!-- Library entries -->
+  <string name="org_badge_hidden">Oculto</string>
+  <string name="org_badge_hidden_with_templates">Oculto con sus plantillas</string>
+  <string name="org_field_title_english">Título (inglés)</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_library_global_body_member">Compartidos por Todos los usuarios. Pida a un administrador que oculte los que %1$s no usa.</string>
+
+  <!-- Templates -->
+  <string name="org_template_new_title">Nueva plantilla</string>
+  <string name="org_template_edit_title">Editar plantilla</string>
+  <string name="org_template_delete_body">Se quita de la biblioteca y de los paquetes de propósitos que la usan. Las encuestas ya creadas a partir de ella conservan sus formularios.</string>
+  <string name="org_template_delete">Eliminar plantilla</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_org_title">Plantillas de %1$s</string>
+  <string name="org_templates_empty">Aún no hay plantillas. Aquí aparecen las plantillas guardadas a partir de los formularios de esta organización.</string>
+  <string name="org_template_new_button">Nueva plantilla</string>
+  <string name="org_templates_global_title">Plantillas globales</string>
+  <string name="org_templates_global_body_admins">Formularios que cualquier organización puede agregar a sus encuestas.</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_templates_global_body_manager">Compartidas por Todos los usuarios. Oculte las que %1$s no usa; las encuestas ya creadas a partir de ellas no se ven afectadas.</string>
+  <string name="org_templates_global_empty">Aún no hay plantillas globales.</string>
+  <!-- %1$d: number of questions; %2$d: questions linked to dictionary concepts. -->
+  <plurals name="org_template_summary">
+    <item quantity="one">%1$d pregunta · %2$d vinculadas a conceptos</item>
+    <item quantity="other">%1$d preguntas · %2$d vinculadas a conceptos</item>
+  </plurals>
+  <!-- Label before the purposes a template belongs to. -->
+  <string name="org_template_purposes_label">Propósitos:</string>
+  <string name="org_template_associated_purposes">Propósitos asociados</string>
+
+  <!-- Template questions dialog -->
+  <!-- %1$s: template title. -->
+  <!-- Default label of a new question. %1$d: its position. -->
+  <!-- Heading of a question card. %1$d: its position. -->
+  <!-- Code of a choice. -->
+  <!-- Label of a choice. -->
+  <!-- Default label of a new choice. %1$d: its position. -->
+
+  <!-- Purposes -->
+  <string name="org_purpose_new_title">Nuevo propósito</string>
+  <string name="org_purpose_edit_title">Editar propósito</string>
+  <string name="org_purpose_delete_body">Ya no se ofrece al crear encuestas. Las encuestas existentes conservan sus formularios.</string>
+  <string name="org_purpose_delete">Eliminar propósito</string>
+  <!-- %1$s: organization name. -->
+  <string name="org_purposes_org_title">Propósitos de %1$s</string>
+  <string name="org_purposes_empty">Aún no hay propósitos.</string>
+  <string name="org_purpose_new_button">Nuevo propósito</string>
+  <string name="org_purposes_global_title">Propósitos globales</string>
+  <string name="org_purposes_global_body_admins">Propósitos entre los que cualquier organización puede elegir al crear una encuesta.</string>
+  <string name="org_purposes_global_body_manager">Compartidos por Todos los usuarios. Al ocultar una plantilla, también se ocultan los propósitos que solo usan plantillas ocultas.</string>
+  <string name="org_purposes_global_empty">Aún no hay propósitos globales.</string>
+  <!-- %1$s: list of reporting programs and frameworks. -->
+  <string name="org_purpose_programs">Programas y marcos de reporte: %1$s</string>
+  <!-- %1$s: list of export profile IDs. -->
+  <string name="org_purpose_exports">Exportaciones: %1$s</string>
+  <!-- Label before the templates of a purpose. -->
+  <string name="org_purpose_templates_label">Plantillas:</string>
+  <!-- Impact pillar of the MAP framework. -->
+  <string name="org_purpose_pillar">Pilar MAP</string>
+  <string name="org_purpose_associated_templates">Plantillas asociadas</string>
+  <!-- A country in pickers and on the organization page: %1$s is its name, %2$s its ISO code, e.g. Kenya (KE). -->
+  <string name="org_country_with_code">%1$s (%2$s)</string>
+  <string name="org_template_discard_title">¿Descartar los cambios de esta plantilla?</string>
+  <string name="org_template_discard_body">Los cambios en su formulario, descripción y propósitos no se han guardado.</string>
+  <string name="org_template_discard">Descartar</string>
+  <string name="org_template_keep_editing">Seguir editando</string>
+
+  <!-- Admin panel: mobile client version policy -->
+  <string name="org_tab_mobile_app">App móvil</string>
+  <string name="org_mobile_version_title">Versiones de la app móvil</string>
+  <string name="org_mobile_version_subtitle">Sugiere actualizaciones cuando haya una nueva versión o exige una versión mínima para sincronizar.</string>
+  <string name="org_mobile_version_latest_label">Última versión disponible</string>
+  <string name="org_mobile_version_latest_help">Los clientes móviles anteriores a esta versión SemVer (p. ej., 2.1.0) verán un aviso descartable. Déjalo vacío para desactivar.</string>
+  <string name="org_mobile_version_min_label">Versión mínima requerida</string>
+  <string name="org_mobile_version_min_help">Los clientes móviles anteriores a esta versión SemVer (p. ej., 2.0.0) quedarán bloqueados hasta actualizarse. Déjalo vacío para permitir todas.</string>
+  <string name="org_mobile_version_url_label">URL de actualización</string>
+  <string name="org_mobile_version_url_help">Enlace opcional de tienda o descarga al pulsar Actualizar (debe empezar por https:// o http://).</string>
+  <string name="org_mobile_version_save">Guardar política</string>
+  <string name="org_mobile_version_saved">Política de versiones móviles guardada.</string>
+  <string name="org_mobile_version_unavailable">Conéctate al servidor para administrar la política de versiones móviles.</string>
+</resources>

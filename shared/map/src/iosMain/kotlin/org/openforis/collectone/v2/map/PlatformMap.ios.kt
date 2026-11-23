@@ -51,7 +51,7 @@ private const val TAP_RADIUS_PT = 6.0
 internal actual const val SCROLL_DELTA_PER_WHEEL_NOTCH = 1f
 
 /**
- * Mapbox Maps SDK for iOS renderer, through the Swift [MapboxIosView] registered in [GroundMapIos].
+ * Mapbox Maps SDK for iOS renderer, through the Swift [MapboxIosView] registered in [AppMapIos].
  *
  * Works like the web and Android renderers: the native map is display-only below a Compose gesture
  * layer ([mapGestures]), [MapCameraState] is the source of truth, and the map follows it. Compose
@@ -67,7 +67,7 @@ internal actual fun PlatformMap(
   gestures: MapGestureOptions,
   modifier: Modifier,
 ) {
-  val native = remember { GroundMapIos.viewFactory?.create() }
+  val native = remember { AppMapIos.viewFactory?.create() }
   if (native == null) {
     PreviewMap(content, cameraState, onEvent, gestures, modifier)
     return
@@ -126,6 +126,7 @@ private class MapboxIosRenderer(private val native: MapboxIosView, initialBasema
     styleReady = ready
     native.loadStyle(MapboxStyleSpec.style(basemap)) {
       if (!destroyed && styleReady === ready) {
+        addOverlayLayers(basemap)
         addUserLocationLayers()
         ready.complete(Unit)
       }
@@ -194,6 +195,14 @@ private class MapboxIosRenderer(private val native: MapboxIosView, initialBasema
       beforeLayerId?.takeIf(native::hasLayer)
         ?: MapboxStyleSpec.USER_LOCATION_HALO_LAYER.takeIf(native::hasLayer)
     native.addLayer(MapboxStyleSpec.layer(layer).toString(), below)
+  }
+
+  /** Adds the [Basemap.MapboxStyle] overlays, raster and vector, above the style's own layers. */
+  private fun addOverlayLayers(basemap: Basemap) {
+    for (overlay in MapboxStyleSpec.overlays(basemap)) {
+      native.addSource(overlay.sourceId, overlay.source.toString())
+      native.addLayer(overlay.layer.toString(), null)
+    }
   }
 
   private fun addUserLocationLayers() {

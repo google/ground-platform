@@ -209,8 +209,8 @@ model {
 
 Entity datasets are bound via `secondary_instances`:
 
--   **Hosted / Database-Backed Runtimes (e.g., Ground)**: `SecondaryInstance.id`
-    binds directly to the survey's managed Entity Dataset
+-   **Hosted / Database-Backed Runtimes (e.g., Collect One)**:
+    `SecondaryInstance.id` binds directly to the survey's managed Entity Dataset
     (`EntityDatasetDef`). The client runtime resolves `instance('<dataset>')`
     against local indexed `EntityRecord` rows (which natively include reserved
     system properties `entity_id` / `name` / `__id`, `label`, `revision` /

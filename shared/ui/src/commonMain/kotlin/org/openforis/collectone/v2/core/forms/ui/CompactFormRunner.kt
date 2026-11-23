@@ -17,48 +17,38 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,6 +56,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -73,234 +64,52 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import org.openforis.collectone.v2.core.forms.model.ComponentState
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.model.ValidationStatus
-
-/**
- * A host's request that [CompactFormRunner] bring the question at [path] into view (see its
- * `focusRequest` parameter). [token] must change between requests, so asking for the same question
- * twice in a row works; hosts typically count up.
- */
-data class CompactFocusRequest(val path: String, val token: Long) {
-  /** True when this request is for the card at [cardPath]. */
-  fun targets(cardPath: String): Boolean = path == cardPath
-}
+import org.openforis.collectone.v2.core.forms.ui.controls.Button
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.Surface
+import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
+import org.openforis.collectone.v2.core.forms.ui.controls.clickable
+import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_cancel
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_collapse_all
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_collapse_question
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_expand_all
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_expand_question
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_progress_answered_count
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_progress_answered_of_total
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_progress_pending_count
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_progress_skipped_count
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_questions_need_attention
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_required_label
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_review_and_submit
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_skip
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_status_answered
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_status_needs_attention
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_status_not_answered
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_status_pending
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_status_skipped
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_submit
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_untitled_form
 
 /** How long a card stays highlighted after a [CompactFocusRequest] brought it into view. */
 internal const val FOCUS_FLASH_MILLIS = 1500L
-
-/**
- * Completion state of one question in the compact (web) form layout, shown as the icon at the left
- * of its collapsible card.
- */
-enum class CompactQuestionStatus {
-  /** The question has a value (or is calculated / read-only and so needs no input). */
-  ANSWERED,
-
-  /** The collector explicitly skipped this optional question without answering it. */
-  SKIPPED,
-
-  /** The question has no value yet. */
-  PENDING,
-
-  /** The question has a value that fails validation, or is required and was left empty. */
-  INVALID,
-}
-
-/**
- * Layout state of a [CompactFormRunner]: which question cards are expanded and which optional
- * questions were explicitly skipped. Neither is part of the form data, so it lives beside the
- * [FormWizardController] rather than in it. Create one per form session with
- * [rememberCompactFormLayoutState].
- *
- * Every card starts expanded (see [expandAllByDefault]). With [autoCollapseOnAnswer], the runner
- * reports each card's [CompactQuestionStatus] through [onStatusChanged] and a card collapses by
- * itself the moment it goes from not answered to [CompactQuestionStatus.ANSWERED]; that happens
- * once per such transition, so a collector who re-opens the card afterwards keeps it open.
- */
-class CompactFormLayoutState(
-  initiallyExpandAll: Boolean = true,
-  /** Whether a card collapses on its own once its question becomes answered. */
-  val autoCollapseOnAnswer: Boolean = false,
-) {
-  private val expanded = mutableStateMapOf<String, Boolean>()
-  private val skipped = mutableStateMapOf<String, Boolean>()
-
-  /** Last status reported for each card via [onStatusChanged]; not observed by the UI. */
-  private val lastStatus = mutableMapOf<String, CompactQuestionStatus>()
-
-  /**
-   * Whether cards that haven't been toggled yet (by the collector, a skip, or an auto-collapse) are
-   * expanded. True for both the read-only designer preview and interactive sessions, which then
-   * rely on [autoCollapseOnAnswer] to tidy answered cards away.
-   */
-  var expandAllByDefault: Boolean by mutableStateOf(initiallyExpandAll)
-
-  fun isExpanded(path: String): Boolean = expanded[path] ?: expandAllByDefault
-
-  fun setExpanded(path: String, value: Boolean) {
-    expanded[path] = value
-  }
-
-  fun toggle(path: String) = setExpanded(path, !isExpanded(path))
-
-  /**
-   * Records the latest [status] of the card at [path]. Returns true when this call auto-collapsed
-   * the card, i.e. [autoCollapseOnAnswer] is on and the status just changed from a previously seen
-   * non-answered status to [CompactQuestionStatus.ANSWERED]. The first status seen for a path never
-   * collapses it, so questions that are already answered when the form opens (defaults, calculated
-   * values) stay expanded like the rest; nor does a status that stays answered, so manual expands
-   * after the collapse are respected.
-   */
-  fun onStatusChanged(path: String, status: CompactQuestionStatus): Boolean {
-    val previous = lastStatus.put(path, status)
-    val shouldCollapse =
-      autoCollapseOnAnswer &&
-        previous != null &&
-        previous != CompactQuestionStatus.ANSWERED &&
-        status == CompactQuestionStatus.ANSWERED
-    if (shouldCollapse) expanded[path] = false
-    return shouldCollapse
-  }
-
-  fun isSkipped(path: String): Boolean = skipped[path] == true
-
-  /** Marks [path] as skipped and collapses its card. */
-  fun skip(path: String) {
-    skipped[path] = true
-    expanded[path] = false
-  }
-
-  /** Clears the skipped mark on [path], e.g. once it receives a value. */
-  fun unskip(path: String) {
-    skipped.remove(path)
-  }
-
-  fun expandAll(paths: List<String>) = paths.forEach { expanded[it] = true }
-
-  fun collapseAll(paths: List<String>) = paths.forEach { expanded[it] = false }
-}
-
-/** Remembers a [CompactFormLayoutState] for the lifetime of [controller]. */
-@Composable
-fun rememberCompactFormLayoutState(
-  controller: FormWizardController,
-  initiallyExpandAll: Boolean = true,
-  autoCollapseOnAnswer: Boolean = false,
-): CompactFormLayoutState =
-  remember(controller) {
-    CompactFormLayoutState(
-      initiallyExpandAll = initiallyExpandAll,
-      autoCollapseOnAnswer = autoCollapseOnAnswer,
-    )
-  }
-
-/**
- * Resolves the [CompactQuestionStatus] of [control]. A value always wins over a stale skip mark;
- * read-only and calculated questions count as answered since the collector can't act on them.
- */
-fun compactQuestionStatus(
-  control: ComponentState.ControlState,
-  isSkipped: Boolean,
-): CompactQuestionStatus {
-  val fs = control.fieldState
-  return when {
-    fs.validationStatus is ValidationStatus.Invalid && !fs.isEmpty -> CompactQuestionStatus.INVALID
-    !fs.isEmpty -> CompactQuestionStatus.ANSWERED
-    fs.isReadOnly || fs.isCalculated -> CompactQuestionStatus.ANSWERED
-    isSkipped && !fs.isRequired -> CompactQuestionStatus.SKIPPED
-    else -> CompactQuestionStatus.PENDING
-  }
-}
-
-/** One entry in the vertical stack rendered by [CompactFormRunner]. */
-sealed interface CompactFormItem {
-  /** A single question card. */
-  data class Question(val step: FormWizardStep.QuestionStep) : CompactFormItem
-
-  /** A section heading for a `field-list` group, followed by its questions. */
-  data class GroupHeading(val step: FormWizardStep.FieldListGroupStep) : CompactFormItem
-
-  /** A repeat group's add/remove controls. */
-  data class RepeatHub(val step: FormWizardStep.RepeatHubStep) : CompactFormItem
-}
-
-/**
- * Flattens [steps] into the compact layout's vertical stack: every relevant question becomes a card
- * (questions of a `field-list` group are preceded by a heading) and repeat hubs stay as-is. The
- * wizard's final "Review & Submit" step ([FormWizardStep.SummaryStep]) is never an entry: the
- * compact runner's footer owns submission and validation feedback, so the step is left to the
- * controller only. Progress tallies ([compactFormProgress]) therefore exclude it too.
- */
-fun buildCompactFormItems(steps: List<FormWizardStep>): List<CompactFormItem> =
-  steps.flatMap { step ->
-    when (step) {
-      is FormWizardStep.QuestionStep -> listOf(CompactFormItem.Question(step))
-      is FormWizardStep.FieldListGroupStep ->
-        listOf(CompactFormItem.GroupHeading(step)) +
-          step.controls.map { control ->
-            CompactFormItem.Question(
-              FormWizardStep.QuestionStep(
-                stepKey = control.canonicalPath,
-                title =
-                  control.label?.text?.takeIf { it.isNotBlank() }
-                    ?: control.canonicalPath.substringAfterLast('/'),
-                breadcrumbs = step.breadcrumbs + step.title,
-                repeatContext = step.repeatContext,
-                control = control,
-              )
-            )
-          }
-      is FormWizardStep.RepeatHubStep -> listOf(CompactFormItem.RepeatHub(step))
-      is FormWizardStep.SummaryStep -> emptyList()
-    }
-  }
-
-/** Progress of a compact form: how many question cards are settled (answered or skipped). */
-data class CompactFormProgress(
-  val answered: Int,
-  val skipped: Int,
-  val pending: Int,
-  val invalid: Int,
-) {
-  val total: Int
-    get() = answered + skipped + pending + invalid
-
-  val settled: Int
-    get() = answered + skipped
-
-  val fraction: Float
-    get() = if (total == 0) 0f else settled.toFloat() / total.toFloat()
-}
-
-/** Tallies the statuses of every question card in [items]. */
-fun compactFormProgress(
-  items: List<CompactFormItem>,
-  isSkipped: (String) -> Boolean,
-): CompactFormProgress {
-  var answered = 0
-  var skipped = 0
-  var pending = 0
-  var invalid = 0
-  items.filterIsInstance<CompactFormItem.Question>().forEach { item ->
-    val control = item.step.control
-    when (compactQuestionStatus(control, isSkipped(control.canonicalPath))) {
-      CompactQuestionStatus.ANSWERED -> answered++
-      CompactQuestionStatus.SKIPPED -> skipped++
-      CompactQuestionStatus.PENDING -> pending++
-      CompactQuestionStatus.INVALID -> invalid++
-    }
-  }
-  return CompactFormProgress(answered, skipped, pending, invalid)
-}
 
 /**
  * Compact form runner for web: every relevant question of [controller]'s form, vertically stacked
@@ -354,25 +163,32 @@ fun CompactFormRunner(
   questionFilter: (FormWizardStep.QuestionStep) -> Boolean = { true },
   geometryInput: CompactGeometryInput = CompactGeometryInput.Device,
   focusRequest: CompactFocusRequest? = null,
+  variant: FormVariant = FormVariant.WEB,
 ) {
+  remember(controller, variant) {
+    controller.updateVariant(variant)
+    variant
+  }
   val state = controller.formState
   val drawingHost = (geometryInput as? CompactGeometryInput.MapDrawing)?.host
   val items =
     buildCompactFormItems(controller.steps).filter {
       it !is CompactFormItem.Question || questionFilter(it.step)
     }
+  val blocks = buildCompactFormBlocks(items)
+  val questionNumbers = compactQuestionNumbers(blocks)
   val questionPaths = items.filterIsInstance<CompactFormItem.Question>().map { it.step.stepKey }
-  val progress = compactFormProgress(items, layoutState::isSkipped)
+  val progress = compactFormProgress(items, layoutState::isSkipped, variant)
   var submitAttempted by remember(controller) { mutableStateOf(false) }
   val submissionResult = controller.submissionResult
-  val formTitle =
-    state.formDef.title.takeIf { it.isNotBlank() }
-      ?: state.formDef.form_id.takeIf { it.isNotBlank() }
-      ?: "Form"
+  val formTitle = formDisplayTitle(state.formDef, untitled = Res.string.forms_untitled_form)
 
   // Both the live web form and the designer's read-only preview render at compact density (no
   // numeric steppers, slightly shorter text fields), so the preview matches what collectors get.
-  CompositionLocalProvider(LocalFormDensity provides FormDensity.COMPACT) {
+  CompositionLocalProvider(
+    LocalFormDensity provides FormDensity.COMPACT,
+    LocalFormVariant provides variant,
+  ) {
     Column(
       modifier = modifier.padding(contentPadding),
       verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -389,22 +205,28 @@ fun CompactFormRunner(
         )
       }
 
-      items.forEach { item ->
+      // Each item renders the same wherever it sits; repeat entries only add a frame around theirs.
+      val renderItem: @Composable (CompactFormItem) -> Unit = { item ->
         when (item) {
           is CompactFormItem.GroupHeading ->
-            CompactSectionHeading(text = item.step.title, breadcrumbs = item.step.breadcrumbs)
-          is CompactFormItem.RepeatHub ->
-            CompactRepeatHub(step = item.step, controller = controller, readOnly = readOnly)
+            CompactSectionHeading(
+              text = item.step.title.resolve(),
+              breadcrumbs = breadcrumbsWithinEntry(item.step.breadcrumbs, item.step.repeatContext),
+            )
+          // Hubs are folded into their CompactFormBlock.RepeatSection.
+          is CompactFormItem.RepeatHub -> Unit
           is CompactFormItem.Question -> {
             val path = item.step.stepKey
             val control = item.step.control
-            val status = compactQuestionStatus(control, layoutState.isSkipped(path))
+            val status = compactQuestionStatus(control, layoutState.isSkipped(path), variant)
+            val isIncompatible = incompatibleQuestionTypeForVariant(control, variant) != null
             key(path) {
               // Whether an input inside the card has keyboard focus. Status changes are reported
               // to the layout state only while the card is not being edited, so a text answer
               // auto-collapses once the collector moves on rather than at the first keystroke. A
               // geometry being drawn on the host's map counts as being edited too.
               var hasFocus by remember { mutableStateOf(false) }
+              var hasBlurred by remember { mutableStateOf(false) }
               val isDrawing = drawingHost?.activeDrawingPath == path
               LaunchedEffect(status, hasFocus, isDrawing) {
                 if (!hasFocus && !isDrawing) layoutState.onStatusChanged(path, status)
@@ -431,28 +253,47 @@ fun CompactFormRunner(
                 onToggle = { layoutState.toggle(path) },
                 modifier =
                   Modifier.bringIntoViewRequester(bringIntoView)
-                    .onFocusChanged { hasFocus = it.hasFocus }
+                    .onFocusChanged {
+                      if (hasFocus && !it.hasFocus) hasBlurred = true
+                      hasFocus = it.hasFocus
+                    }
                     .focusGroup(),
+                questionNumber = questionNumbers[path],
                 // With a selection host, a header click selects the question instead of
                 // collapsing it.
                 onHeaderClick = {
                   if (onSelectQuestion != null) onSelectQuestion(path) else layoutState.toggle(path)
                 },
                 onSkip =
-                  if (!readOnly && isStepOptional(item.step) && control.fieldState.isEmpty) {
+                  if (
+                    !readOnly &&
+                      !isIncompatible &&
+                      isStepOptional(item.step) &&
+                      control.fieldState.isEmpty
+                  ) {
                     { layoutState.skip(path) }
                   } else {
                     null
                   },
                 readOnly = readOnly,
                 isSelected = selectedPath == path || flashToken != null,
-                showValidationErrors = submitAttempted,
+                showValidationErrors =
+                  submitAttempted || (hasBlurred && !hasFocus && !control.fieldState.isEmpty),
                 geometryInput = geometryInput,
+                variant = variant,
               )
             }
           }
         }
       }
+
+      CompactBlocks(
+        blocks = blocks,
+        controller = controller,
+        layoutState = layoutState,
+        readOnly = readOnly,
+        renderItem = renderItem,
+      )
 
       if (showFooter) {
         CompactFormFooter(
@@ -494,25 +335,31 @@ private fun CompactFormHeader(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = title,
-          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-          color = colors.onSurface,
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-          text = "${progress.settled} of ${progress.total} answered",
-          style = MaterialTheme.typography.labelSmall,
-          color = colors.onSurfaceVariant,
-        )
-      }
+      FormHeaderTitle(
+        title = title,
+        subtitle =
+          stringResource(
+            Res.string.forms_progress_answered_of_total,
+            progress.settled,
+            progress.total,
+          ),
+        titleColor = colors.onSurface,
+        subtitleColor = colors.onSurfaceVariant,
+        modifier = Modifier.weight(1f),
+      )
       TextButton(onClick = onExpandAll, contentPadding = PaddingValues(horizontal = 8.dp)) {
-        Text("Expand all", style = MaterialTheme.typography.labelSmall, softWrap = false)
+        Text(
+          stringResource(Res.string.forms_expand_all),
+          style = MaterialTheme.typography.labelSmall,
+          softWrap = false,
+        )
       }
       TextButton(onClick = onCollapseAll, contentPadding = PaddingValues(horizontal = 8.dp)) {
-        Text("Collapse all", style = MaterialTheme.typography.labelSmall, softWrap = false)
+        Text(
+          stringResource(Res.string.forms_collapse_all),
+          style = MaterialTheme.typography.labelSmall,
+          softWrap = false,
+        )
       }
     }
     LinearProgressIndicator(
@@ -543,10 +390,62 @@ private fun CompactFormHeader(
   }
 }
 
+/**
+ * Renders [blocks] in order: lone items through [renderItem], repeat groups as a
+ * [CompactRepeatSection] whose entries recurse into their own blocks (nested repeats included).
+ * Deleting an entry also forgets the expand / collapse state of its cards, since later entries
+ * shift into its paths.
+ */
+@Composable
+private fun CompactBlocks(
+  blocks: List<CompactFormBlock>,
+  controller: FormWizardController,
+  layoutState: CompactFormLayoutState,
+  readOnly: Boolean,
+  renderItem: @Composable (CompactFormItem) -> Unit,
+) {
+  blocks.forEach { block ->
+    when (block) {
+      is CompactFormBlock.Single -> renderItem(block.item)
+      is CompactFormBlock.RepeatSection ->
+        key(block.repeatPath) {
+          CompactRepeatSection(
+            section = block,
+            onAddEntry = { controller.addRepeatInstanceAndOpen(block.repeatPath) },
+            onRemoveEntry = { index ->
+              controller.removeRepeatInstance(block.repeatPath, index)
+              layoutState.forgetRepeatEntries(block.repeatPath)
+            },
+            readOnly = readOnly,
+          ) { entry ->
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+              CompactBlocks(entry.blocks, controller, layoutState, readOnly, renderItem)
+            }
+          }
+        }
+    }
+  }
+}
+
+/**
+ * [breadcrumbs] below the repeat entry [repeatContext] points at: the entry's frame already shows
+ * its title (and everything above it), so cards inside only need the groups within the entry.
+ */
+internal fun breadcrumbsWithinEntry(
+  breadcrumbs: List<String>,
+  repeatContext: RepeatStepContext?,
+): List<String> {
+  if (repeatContext == null) return breadcrumbs
+  val entryCrumb = breadcrumbs.lastIndexOf(repeatContext.instanceLabel)
+  return if (entryCrumb >= 0) breadcrumbs.drop(entryCrumb + 1) else breadcrumbs
+}
+
 @Composable
 private fun CompactSectionHeading(text: String, breadcrumbs: List<String>) {
   val colors = MaterialTheme.colorScheme
-  Column(modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
+  Column(
+    modifier = Modifier.fillMaxWidth().focusProperties { canFocus = false }.padding(top = 6.dp)
+  ) {
     if (breadcrumbs.isNotEmpty()) {
       Text(
         text = breadcrumbs.joinToString(" › "),
@@ -558,6 +457,7 @@ private fun CompactSectionHeading(text: String, breadcrumbs: List<String>) {
       text = text,
       style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
       color = colors.primary,
+      modifier = Modifier.semantics { heading() },
     )
     HorizontalDivider(color = colors.outlineVariant, modifier = Modifier.padding(top = 4.dp))
   }
@@ -570,6 +470,9 @@ private fun CompactSectionHeading(text: String, breadcrumbs: List<String>) {
  *
  * Clicking the header runs [onHeaderClick] (by default [onToggle]); the chevron always toggles.
  * Hosts that use a click to select the question (the Form designer) pass their own [onHeaderClick].
+ * Both the header row and its chevron button are excluded from keyboard `Tab` / `Shift+Tab`
+ * traversal (`canFocus = false`) so collectors step directly between answer inputs while retaining
+ * pointer click, hover cursor, and accessibility semantics.
  */
 @Composable
 fun CompactQuestionCard(
@@ -579,16 +482,19 @@ fun CompactQuestionCard(
   expanded: Boolean,
   onToggle: () -> Unit,
   modifier: Modifier = Modifier,
+  questionNumber: Int? = null,
   onHeaderClick: () -> Unit = onToggle,
   onSkip: (() -> Unit)? = null,
   readOnly: Boolean = false,
   isSelected: Boolean = false,
   showValidationErrors: Boolean = false,
   geometryInput: CompactGeometryInput = CompactGeometryInput.Device,
+  variant: FormVariant = LocalFormVariant.current,
 ) {
   val colors = MaterialTheme.colorScheme
   val control = step.control
   val fieldState = control.fieldState
+  val incompatibleType = incompatibleQuestionTypeForVariant(control, variant)
   val hintText = control.hint?.text?.takeIf { it.isNotBlank() }
   val mapDrawing =
     (geometryInput as? CompactGeometryInput.MapDrawing)?.takeIf {
@@ -608,45 +514,27 @@ fun CompactQuestionCard(
     border = BorderStroke(if (isSelected) 2.dp else 1.dp, borderColor),
   ) {
     Column(modifier = Modifier.fillMaxWidth()) {
+      // Skip the question card heading row (and its collapse/expand chevron below) during Tab /
+      // Shift+Tab keyboard traversal so collectors move directly between answer inputs. Pointer
+      // clicks, hover cursor styling, and accessibility click semantics remain intact.
       Row(
         modifier =
           Modifier.fillMaxWidth()
+            .focusProperties { canFocus = false }
             .clickable(onClick = onHeaderClick)
             .padding(start = 10.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        CompactStatusIcon(status = status)
+        CompactStatusIcon(status = status, questionNumber = questionNumber)
         Column(modifier = Modifier.weight(1f)) {
-          if (step.repeatContext != null) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-              Text(
-                text =
-                  "${step.repeatContext.repeatGroupLabel} • Entry #${step.repeatContext.repeatIndex} of ${step.repeatContext.totalInstances}",
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-              Text(
-                text = "All entries",
-                style =
-                  MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.primary,
-                  ),
-                modifier =
-                  Modifier.clickable {
-                    controller.openRepeatHub(step.repeatContext.repeatGroupPath)
-                  },
-              )
-            }
-          } else if (step.breadcrumbs.isNotEmpty()) {
+          // Inside a repeat entry the entry's frame names it, so only a group within the entry
+          // (if any) is worth repeating on the card.
+          val contextLabel =
+            breadcrumbsWithinEntry(step.breadcrumbs, step.repeatContext).lastOrNull()
+          if (contextLabel != null) {
             Text(
-              text = step.breadcrumbs.last(),
+              text = contextLabel,
               style = MaterialTheme.typography.labelSmall,
               color = colors.onSurfaceVariant,
               maxLines = 1,
@@ -654,39 +542,77 @@ fun CompactQuestionCard(
             )
           }
           Text(
-            text = if (fieldState.isRequired) "${step.title} *" else step.title,
+            text =
+              if (fieldState.isRequired && incompatibleType == null) {
+                stringResource(Res.string.forms_required_label, step.questionLabel)
+              } else {
+                step.questionLabel
+              },
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             color = colors.onSurface,
             maxLines = if (expanded) Int.MAX_VALUE else 2,
             overflow = TextOverflow.Ellipsis,
           )
-          // Collapsed cards summarize the answer on one line.
+          // Collapsed cards summarize the answer on one line (or as color-coded pills when the
+          // selected choice options carry option colors).
           if (!expanded) {
-            val summary =
-              when (status) {
-                CompactQuestionStatus.SKIPPED -> "Skipped"
-                CompactQuestionStatus.PENDING -> "Not answered"
-                else -> formatFieldValueForDisplay(fieldState.value, fieldState.dataType)
+            val selectedValues =
+              fieldState.value
+                ?.list_value
+                ?.values
+                ?.mapNotNull { it.string_value }
+                ?.filter { it.isNotBlank() }
+                ?: fieldState.value?.scalar_value?.string_value?.split(' ')?.filter {
+                  it.isNotBlank()
+                }
+                ?: emptyList()
+            val coloredSelections =
+              if (status == CompactQuestionStatus.ANSWERED) {
+                ChoiceImageRegistry.resolveSelectedOptionColors(control.options, selectedValues)
+              } else {
+                emptyList()
               }
-            Text(
-              text = summary,
-              style = MaterialTheme.typography.bodySmall,
-              color =
+            if (coloredSelections.isNotEmpty()) {
+              ChoiceColorPillsRow(
+                items = coloredSelections,
+                compact = true,
+                modifier = Modifier.padding(top = 2.dp),
+              )
+            } else {
+              val summary =
                 when (status) {
-                  CompactQuestionStatus.ANSWERED -> colors.primary
-                  CompactQuestionStatus.INVALID -> colors.error
-                  else -> colors.onSurfaceVariant
-                },
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
+                  CompactQuestionStatus.SKIPPED -> stringResource(Res.string.forms_status_skipped)
+                  CompactQuestionStatus.PENDING ->
+                    stringResource(Res.string.forms_status_not_answered)
+                  else -> fieldValueDisplayText(fieldState.value, fieldState.dataType)
+                }
+              Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color =
+                  when (status) {
+                    CompactQuestionStatus.ANSWERED -> colors.primary
+                    CompactQuestionStatus.INVALID -> colors.error
+                    else -> colors.onSurfaceVariant
+                  },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
           }
         }
-        IconButton(onClick = onToggle, modifier = Modifier.size(32.dp)) {
+        IconButton(
+          onClick = onToggle,
+          modifier = Modifier.size(32.dp).focusProperties { canFocus = false },
+        ) {
           Icon(
             imageVector =
               if (expanded) Icons.Outlined.KeyboardArrowUp else Icons.Outlined.KeyboardArrowDown,
-            contentDescription = if (expanded) "Collapse question" else "Expand question",
+            contentDescription =
+              stringResource(
+                if (expanded) Res.string.forms_collapse_question
+                else Res.string.forms_expand_question
+              ),
             tint = colors.onSurfaceVariant,
             modifier = Modifier.size(20.dp),
           )
@@ -706,6 +632,12 @@ fun CompactQuestionCard(
             )
           }
           when {
+            incompatibleType != null ->
+              VariantIncompatibleQuestionWarning(
+                incompatibleType = incompatibleType,
+                variant = variant,
+                fieldPath = control.canonicalPath,
+              )
             mapDrawing != null ->
               MapDrawingRequestWidget(
                 control = control,
@@ -717,9 +649,7 @@ fun CompactQuestionCard(
             else -> ControlWidget(control = control, controller = controller)
           }
           val validation = fieldState.validationStatus
-          if (
-            validation is ValidationStatus.Invalid && (showValidationErrors || !fieldState.isEmpty)
-          ) {
+          if (validation is ValidationStatus.Invalid && showValidationErrors) {
             validation.errors.forEach { err ->
               Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -742,7 +672,10 @@ fun CompactQuestionCard(
           if (onSkip != null) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
               TextButton(onClick = onSkip, contentPadding = PaddingValues(horizontal = 10.dp)) {
-                Text("Skip", style = MaterialTheme.typography.labelMedium)
+                Text(
+                  stringResource(Res.string.forms_skip),
+                  style = MaterialTheme.typography.labelMedium,
+                )
               }
             }
           }
@@ -773,16 +706,24 @@ private fun ReadOnlyInputs(content: @Composable () -> Unit) {
   }
 }
 
-/** Status icon at the left of a [CompactQuestionCard]. */
+/**
+ * Status icon at the left of a [CompactQuestionCard]. Unanswered (`PENDING`) cards render a filled
+ * neutral circle displaying the 1-based [questionNumber] (when supplied) so it reads as a step
+ * badge instead of an unchecked radio button; answered cards keep the filled checkmark circle.
+ */
 @Composable
-fun CompactStatusIcon(status: CompactQuestionStatus, size: Dp = 20.dp) {
+fun CompactStatusIcon(
+  status: CompactQuestionStatus,
+  size: Dp = 20.dp,
+  questionNumber: Int? = null,
+) {
   val colors = MaterialTheme.colorScheme
   val description =
     when (status) {
-      CompactQuestionStatus.ANSWERED -> "Answered"
-      CompactQuestionStatus.SKIPPED -> "Skipped"
-      CompactQuestionStatus.PENDING -> "Pending"
-      CompactQuestionStatus.INVALID -> "Needs attention"
+      CompactQuestionStatus.ANSWERED -> stringResource(Res.string.forms_status_answered)
+      CompactQuestionStatus.SKIPPED -> stringResource(Res.string.forms_status_skipped)
+      CompactQuestionStatus.PENDING -> stringResource(Res.string.forms_status_pending)
+      CompactQuestionStatus.INVALID -> stringResource(Res.string.forms_status_needs_attention)
     }
   when (status) {
     CompactQuestionStatus.ANSWERED ->
@@ -800,11 +741,54 @@ fun CompactStatusIcon(status: CompactQuestionStatus, size: Dp = 20.dp) {
         modifier = Modifier.size(size),
       )
     CompactQuestionStatus.SKIPPED -> StatusRing(colors.outline, size, description, slashed = true)
-    CompactQuestionStatus.PENDING -> StatusRing(colors.outline, size, description, slashed = false)
+    CompactQuestionStatus.PENDING ->
+      if (questionNumber != null) {
+        QuestionNumberBadge(number = questionNumber, size = size, description = description)
+      } else {
+        StatusRing(colors.outline, size, description, slashed = false)
+      }
   }
 }
 
-/** Hollow ring for pending questions; with [slashed], a diagonal bar marks a skipped one. */
+/** Filled grey circle displaying the centered 1-based question [number] for unanswered cards. */
+@Composable
+private fun QuestionNumberBadge(number: Int, size: Dp, description: String) {
+  val colors = MaterialTheme.colorScheme
+  val label = number.toString()
+  val fontSize =
+    when {
+      label.length >= 3 -> 8.5.sp
+      label.length == 2 -> 9.5.sp
+      else -> 11.sp
+    }
+  val horizontalPadding = if (label.length >= 3) 4.dp else 0.dp
+  Box(
+    modifier =
+      Modifier.height(size)
+        .widthIn(min = size)
+        .background(color = colors.surfaceContainerHighest, shape = CircleShape)
+        .padding(horizontal = horizontalPadding)
+        .testTag("compact_question_number_$number")
+        .semantics { contentDescription = description },
+    contentAlignment = Alignment.Center,
+  ) {
+    Text(
+      text = label,
+      style =
+        MaterialTheme.typography.labelSmall.copy(
+          fontSize = fontSize,
+          lineHeight = fontSize,
+          fontWeight = FontWeight.Bold,
+        ),
+      color = colors.onSurfaceVariant,
+      textAlign = TextAlign.Center,
+      maxLines = 1,
+      softWrap = false,
+    )
+  }
+}
+
+/** Ring for skipped questions (diagonal bar) and fallback when no question number is given. */
 @Composable
 private fun StatusRing(color: Color, size: Dp, description: String, slashed: Boolean) {
   Canvas(modifier = Modifier.size(size).semantics { contentDescription = description }) {
@@ -820,200 +804,6 @@ private fun StatusRing(color: Color, size: Dp, description: String, slashed: Boo
         strokeWidth = stroke,
         cap = StrokeCap.Round,
       )
-    }
-  }
-}
-
-@Composable
-private fun CompactRepeatHub(
-  step: FormWizardStep.RepeatHubStep,
-  controller: FormWizardController,
-  readOnly: Boolean,
-) {
-  val colors = MaterialTheme.colorScheme
-  val group = step.repeatGroup
-  val label =
-    group.label?.text?.takeIf { it.isNotBlank() } ?: group.canonicalPath.substringAfterLast('/')
-  Surface(
-    modifier = Modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.medium,
-    color = colors.surfaceContainer,
-    contentColor = colors.onSurface,
-  ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().padding(12.dp),
-      verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
-          GroundTonalBadge(
-            text =
-              "Repeated section • ${group.instances.size} ${if (group.instances.size == 1) "entry" else "entries"}",
-            tone = GroundBadgeTone.PRIMARY,
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = label,
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = colors.onSurface,
-          )
-          Text(
-            text = "Add one or more '$label' entries below.",
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.onSurfaceVariant,
-          )
-        }
-      }
-
-      if (group.instances.isEmpty()) {
-        Surface(
-          modifier = Modifier.fillMaxWidth(),
-          shape = MaterialTheme.shapes.small,
-          color = colors.surfaceContainerLow,
-        ) {
-          Box(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            contentAlignment = Alignment.Center,
-          ) {
-            Text(
-              text = "No repeat entries added yet.",
-              style = MaterialTheme.typography.bodySmall,
-              color = colors.onSurfaceVariant,
-            )
-          }
-        }
-      } else {
-        group.instances.forEach { instance ->
-          val summary = step.summaries.firstOrNull { it.repeatIndex == instance.repeatIndex }
-          val instTitle =
-            summary?.title?.ifBlank { "$label #${instance.repeatIndex}" }
-              ?: "$label #${instance.repeatIndex}"
-          val preview =
-            summary?.previewText?.ifBlank { "Tap to fill out details" } ?: "Tap to fill out details"
-
-          OutlinedCard(
-            onClick = {
-              val stepIdx =
-                controller.steps.indexOfFirst {
-                  it.repeatContext?.instancePath == instance.canonicalPath
-                }
-              if (stepIdx >= 0) controller.jumpToStep(stepIdx)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.small,
-            colors =
-              CardDefaults.outlinedCardColors(containerColor = colors.surfaceContainerLowest),
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically,
-            ) {
-              Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                Surface(
-                  shape = CircleShape,
-                  color = colors.secondaryContainer,
-                  contentColor = colors.onSecondaryContainer,
-                ) {
-                  Box(
-                    modifier = Modifier.size(26.dp),
-                    contentAlignment = Alignment.Center,
-                  ) {
-                    Text(
-                      text = "#${instance.repeatIndex}",
-                      style =
-                        MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    )
-                  }
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                  Text(
-                    text = instTitle,
-                    style =
-                      MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.onSurface,
-                      ),
-                  )
-                  Text(
-                    text = preview,
-                    style =
-                      MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                  )
-                }
-              }
-              Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                OutlinedButton(
-                  onClick = {
-                    val stepIdx =
-                      controller.steps.indexOfFirst {
-                        it.repeatContext?.instancePath == instance.canonicalPath
-                      }
-                    if (stepIdx >= 0) controller.jumpToStep(stepIdx)
-                  },
-                  contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                ) {
-                  Text(
-                    "Edit",
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
-                  )
-                }
-                if (group.canRemoveInstance && !readOnly) {
-                  TextButton(
-                    onClick = {
-                      controller.removeRepeatInstance(group.canonicalPath, instance.repeatIndex)
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
-                  ) {
-                    Text(
-                      "Delete",
-                      style = MaterialTheme.typography.labelSmall,
-                      maxLines = 1,
-                    )
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (group.canAddInstance) {
-        Button(
-          onClick = { controller.addRepeatInstanceAndOpen(group.canonicalPath) },
-          enabled = !readOnly,
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-          )
-          Spacer(modifier = Modifier.width(6.dp))
-          Text(
-            "+ Add $label entry",
-            style = MaterialTheme.typography.labelMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false,
-          )
-        }
-      }
     }
   }
 }
@@ -1038,7 +828,11 @@ private fun CompactFormFooter(
       ) {
         Text(
           text =
-            "${submissionResult.errors.size} ${if (submissionResult.errors.size == 1) "question needs" else "questions need"} attention before submitting.",
+            pluralStringResource(
+              Res.plurals.forms_questions_need_attention,
+              submissionResult.errors.size,
+              submissionResult.errors.size,
+            ),
           style = MaterialTheme.typography.labelMedium,
           modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         )
@@ -1051,11 +845,16 @@ private fun CompactFormFooter(
     ) {
       Text(
         text =
-          buildString {
-            append("${progress.answered} answered")
-            if (progress.skipped > 0) append(" • ${progress.skipped} skipped")
-            if (progress.pending > 0) append(" • ${progress.pending} pending")
-          },
+          buildList {
+              add(stringResource(Res.string.forms_progress_answered_count, progress.answered))
+              if (progress.skipped > 0) {
+                add(stringResource(Res.string.forms_progress_skipped_count, progress.skipped))
+              }
+              if (progress.pending > 0) {
+                add(stringResource(Res.string.forms_progress_pending_count, progress.pending))
+              }
+            }
+            .joinToString(" • "),
         style = MaterialTheme.typography.labelSmall,
         color = colors.onSurfaceVariant,
         modifier = Modifier.weight(1f),
@@ -1063,11 +862,16 @@ private fun CompactFormFooter(
       )
       if (onCancel != null) {
         OutlinedButton(onClick = onCancel, contentPadding = PaddingValues(horizontal = 14.dp)) {
-          Text("Cancel", softWrap = false)
+          Text(stringResource(Res.string.forms_cancel), softWrap = false)
         }
       }
       Button(onClick = onSubmit, contentPadding = PaddingValues(horizontal = 18.dp)) {
-        Text(if (isValid) "Submit" else "Review & submit", softWrap = false)
+        Text(
+          stringResource(
+            if (isValid) Res.string.forms_submit else Res.string.forms_review_and_submit
+          ),
+          softWrap = false,
+        )
       }
     }
   }

@@ -36,21 +36,44 @@ import org.openforis.collectone.v2.core.forms.model.FormState
  *
  * Also holds the bytes of photo, video, and audio answers ([attachments]); the record itself stores
  * only each attachment's file name. Pass [existingAttachments] when resuming a saved draft.
+ *
+ * The form is compiled once, when the session is created, and the same [CompiledForm] is reused for
+ * every edit, so XPath expressions are not re-parsed on each keystroke.
  */
-class FormSession(
-  val formDef: FormDef,
+class FormSession
+internal constructor(
+  val compiledForm: CompiledForm,
   existingRecord: RecordInstance? = null,
   isFirstLoad: Boolean = existingRecord == null,
   activeLanguage: String? = null,
   var environment: FormEnvironment = FormEnvironment.DEFAULT,
   existingAttachments: Collection<MediaAttachment> = emptyList(),
 ) {
+  constructor(
+    formDef: FormDef,
+    existingRecord: RecordInstance? = null,
+    isFirstLoad: Boolean = existingRecord == null,
+    activeLanguage: String? = null,
+    environment: FormEnvironment = FormEnvironment.DEFAULT,
+    existingAttachments: Collection<MediaAttachment> = emptyList(),
+  ) : this(
+    compiledForm = FormEngine.compile(formDef),
+    existingRecord = existingRecord,
+    isFirstLoad = isFirstLoad,
+    activeLanguage = activeLanguage,
+    environment = environment,
+    existingAttachments = existingAttachments,
+  )
+
+  val formDef: FormDef
+    get() = compiledForm.formDef
+
   private val listeners = mutableListOf<(FormState) -> Unit>()
 
   /** The latest evaluated [FormState] snapshot. */
   var state: FormState =
     FormEngine.initialize(
-      formDef = formDef,
+      compiled = compiledForm,
       existingRecord = existingRecord,
       isFirstLoad = isFirstLoad,
       activeLanguage = activeLanguage,
@@ -66,7 +89,7 @@ class FormSession(
 
   /** Updates a field at [path] with a raw [FieldValue] (or `null` to clear). */
   fun updateField(path: String, value: FieldValue?): FormState {
-    val next = FormEngine.updateFieldValue(state, path, value, environment)
+    val next = FormEngine.updateFieldValue(compiledForm, state, path, value, environment)
     publish(next)
     return next
   }
@@ -163,7 +186,10 @@ class FormSession(
     val control =
       MediaCapture.findMediaControl(state, path)
         ?: throw MediaAttachmentRejectedException("No photo, video, or audio question at $path")
-    val spec = control.mediaCapture!!
+    val spec =
+      checkNotNull(control.mediaCapture) {
+        "findMediaControl returned a question without a media capture spec at $path"
+      }
     if (!spec.accepts(attachment.mimeType)) {
       throw MediaAttachmentRejectedException(
         "This question accepts ${spec.acceptedMediaType}, not ${attachment.mimeType}"
@@ -211,28 +237,38 @@ class FormSession(
 
   /** Appends a new repeat instance to the repeat group at [repeatPath]. */
   fun addRepeatInstance(repeatPath: String): FormState {
-    val next = FormEngine.addRepeatInstance(state, repeatPath, environment)
+    val next = FormEngine.addRepeatInstance(compiledForm, state, repeatPath, environment)
     publish(next)
     return next
   }
 
   /** Removes the 1-based [repeatIndex] instance from the repeat group at [repeatPath]. */
   fun removeRepeatInstance(repeatPath: String, repeatIndex: Int): FormState {
-    val next = FormEngine.removeRepeatInstance(state, repeatPath, repeatIndex, environment)
+    val next =
+      FormEngine.removeRepeatInstance(compiledForm, state, repeatPath, repeatIndex, environment)
     publish(next)
     return next
   }
 
   /** Switches the active translation language and re-evaluates all labels and choice options. */
   fun setLanguage(language: String): FormState {
-    val next = FormEngine.setLanguage(state, language, environment)
+    val next = FormEngine.setLanguage(compiledForm, state, language, environment)
+    publish(next)
+    return next
+  }
+
+  /** Replaces [environment] and re-evaluates [state] against the updated environment. */
+  fun updateEnvironment(newEnvironment: FormEnvironment): FormState {
+    if (environment == newEnvironment) return state
+    environment = newEnvironment
+    val next = FormEngine.setLanguage(compiledForm, state, state.activeLanguage, environment)
     publish(next)
     return next
   }
 
   /** Finalizes and validates the current record, updating `end` timestamp preloads. */
   fun finalize(): FinalizationResult {
-    val res = FormEngine.finalize(state, environment)
+    val res = FormEngine.finalize(compiledForm, state, environment)
     when (res) {
       is FinalizationResult.Success -> publish(res.state)
       is FinalizationResult.ValidationFailure -> publish(res.state)

@@ -20,7 +20,7 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
-import org.openforis.collectone.v2.core.sampling.GeoCoord
+import org.openforis.collectone.v2.core.geo.GeoCoord
 
 /**
  * Reads GeoJSON ([RFC 7946](https://www.rfc-editor.org/rfc/rfc7946)): a `FeatureCollection`, a
@@ -44,27 +44,19 @@ object GeoJsonReader {
       try {
         json.parseToJsonElement(text)
       } catch (e: Exception) {
-        return GeoReadResult.failure(
-          "This file isn't valid GeoJSON. Check that it was exported as GeoJSON and try again."
-        )
+        return GeoReadResult.failure(GeoIssue.UnreadableGeoJson)
       }
     val reader = Reader()
     when (val obj = root as? JsonObject) {
-      null ->
-        return GeoReadResult.failure("This file isn't valid GeoJSON. It should contain an object.")
+      null -> return GeoReadResult.failure(GeoIssue.GeoJsonNotAnObject)
       else -> reader.readRoot(obj)
     }
     if (reader.features.isEmpty() && reader.issues.none { it.severity == GeoIssueSeverity.ERROR }) {
-      reader.issues += GeoIssue(GeoIssueSeverity.ERROR, "This file doesn't contain any geometry.")
+      reader.issues += GeoIssue.NoGeometry
     }
     val holes = reader.features.sumOf { (it.geometry as? GeoGeometry.Polygon)?.droppedHoles ?: 0 }
     if (holes > 0) {
-      reader.issues +=
-        GeoIssue(
-          GeoIssueSeverity.WARNING,
-          "$holes ${if (holes == 1) "hole was" else "holes were"} removed from polygons. " +
-            "Ground uses outer boundaries only.",
-        )
+      reader.issues += GeoIssue.HolesRemoved(holes)
     }
     return GeoReadResult(reader.features, reader.issues)
   }
@@ -78,25 +70,20 @@ object GeoJsonReader {
         "FeatureCollection" -> {
           val list = obj["features"] as? JsonArray
           if (list == null) {
-            issues += GeoIssue(GeoIssueSeverity.ERROR, "The FeatureCollection has no features.")
+            issues += GeoIssue.FeatureCollectionWithoutFeatures
             return
           }
           list.forEachIndexed { i, f ->
             val feature = f as? JsonObject
             if (feature == null || feature.type != "Feature") {
-              issues +=
-                GeoIssue(
-                  GeoIssueSeverity.ERROR,
-                  "Feature ${i + 1} isn't a valid GeoJSON Feature.",
-                  i,
-                )
+              issues += GeoIssue.InvalidFeature(i)
             } else {
               readFeature(feature, i)
             }
           }
         }
         "Feature" -> readFeature(obj, 0)
-        null -> issues += GeoIssue(GeoIssueSeverity.ERROR, "This file isn't valid GeoJSON.")
+        null -> issues += GeoIssue.GeoJsonWithoutType
         else -> readGeometry(obj, emptyMap(), 0)
       }
     }
@@ -108,18 +95,12 @@ object GeoJsonReader {
       }
       val geometry = feature["geometry"]
       if (geometry == null || geometry is JsonNull) {
-        issues +=
-          GeoIssue(
-            GeoIssueSeverity.WARNING,
-            "Feature ${index + 1} has no geometry and was skipped.",
-            index,
-          )
+        issues += GeoIssue.FeatureWithoutGeometry(index)
         return
       }
       val obj = geometry as? JsonObject
       if (obj == null) {
-        issues +=
-          GeoIssue(GeoIssueSeverity.ERROR, "Feature ${index + 1} has invalid geometry.", index)
+        issues += GeoIssue.InvalidGeometry(index)
         return
       }
       readGeometry(obj, props, index)
@@ -143,14 +124,7 @@ object GeoJsonReader {
           (geometry["geometries"] as? JsonArray)?.forEach { g ->
             (g as? JsonObject)?.let { readGeometry(it, props, index) }
           }
-        else ->
-          issues +=
-            GeoIssue(
-              GeoIssueSeverity.ERROR,
-              "${RingValidator.featureName(index)} has an unsupported geometry type " +
-                "\"${geometry.type ?: "unknown"}\".",
-              index,
-            )
+        else -> issues += GeoIssue.UnsupportedGeometryType(index, geometry.type)
       }
     }
 
@@ -190,12 +164,7 @@ object GeoJsonReader {
     }
 
     private fun badCoordinates(index: Int) {
-      issues +=
-        GeoIssue(
-          GeoIssueSeverity.ERROR,
-          "${RingValidator.featureName(index)} has missing or invalid coordinates and was skipped.",
-          index,
-        )
+      issues += GeoIssue.InvalidCoordinates(index)
     }
   }
 

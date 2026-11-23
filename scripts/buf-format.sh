@@ -49,7 +49,7 @@ case "${os}-${arch}" in
     ;;
 esac
 
-cache_dir="${BUF_CACHE_DIR:-${XDG_CACHE_HOME:-${HOME}/.cache}/ground/buf}"
+cache_dir="${BUF_CACHE_DIR:-${XDG_CACHE_HOME:-${HOME}/.cache}/collect-one/buf}"
 buf="${cache_dir}/${BUF_VERSION}/${asset}"
 
 sha256() {

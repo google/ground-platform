@@ -19,6 +19,7 @@ syntax = "proto3";
 package openforis.collectone.v1.survey;
 
 import "google/protobuf/timestamp.proto";
+import "shared/protos/earthengine/expression.proto";
 import "shared/protos/survey/acl.proto";
 
 // Multi-tenant organization that surveys can optionally belong to
@@ -133,6 +134,13 @@ message XyzTileSource {
   bool allow_offline_download = 2;
 }
 
+// Earth Engine computed raster layer configuration.
+// Only platform administrators may create or modify Earth Engine imagery sources.
+message EarthEngineTileSource {
+  // Earth Engine computation graph that evaluates to a visualized `ee.Image`.
+  google.earthengine.v1main.Expression expression = 1;
+}
+
 // A custom imagery layer configured on an `Organization`.
 message ImagerySource {
   // Client-generated unique identifier.
@@ -144,6 +152,9 @@ message ImagerySource {
   oneof source {
     // Web Mercator XYZ raster tile source.
     XyzTileSource xyz_tiles = 3;
+
+    // Earth Engine computed raster tile source (admin-only).
+    EarthEngineTileSource earth_engine = 5;
   }
 
   // Display order of this imagery source in the basemap layers list (0-based).

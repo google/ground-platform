@@ -40,9 +40,10 @@ if (config.devServer) {
   config.devServer.allowedHosts = 'all';
   config.devServer.open = false;
   const path = require('path');
+  // __dirname is the app's package in the root build's npm workspace, build/wasm/packages/<package>.
   const sharedUiComposeResources = path.resolve(
     __dirname,
-    '../../../../../shared/ui/src/commonMain/composeResources'
+    '../../../../shared/ui/src/commonMain/composeResources'
   );
   const staticList = Array.isArray(config.devServer.static)
     ? config.devServer.static
@@ -54,6 +55,11 @@ if (config.devServer) {
     publicPath: '/composeResources/org.openforis.collectone.v2.core.forms.ui.resources',
   });
   config.devServer.static = staticList;
+
+  // Console pages have their own paths (/surveys/<id>/dashboard, ...): serve index.html for any
+  // page request that matches no file, like the Firebase Hosting rewrite in firebase.json. Survey
+  // and organization IDs may contain dots, so dotted paths are pages too.
+  config.devServer.historyApiFallback = { disableDotRule: true };
 
   // The dev server proxies the user data service, so the page calls its own origin and never
   // needs a route to the service: this works through port forwarding, an HTTPS reverse proxy, or
@@ -76,6 +82,7 @@ if (config.devServer) {
       path.resolve(process.cwd(), 'local.properties'),
       path.resolve(__dirname, '../local.properties'),
       path.resolve(__dirname, '../../../../local.properties'),
+      path.resolve(__dirname, '../../../../webApp/local.properties'),
     ]) {
       if (!fs.existsSync(file)) continue;
       for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
@@ -98,11 +105,15 @@ if (config.devServer) {
       name: 'user-data-service-config',
       path: '/user-data-service-config.js',
       middleware: (req, res) => {
+        const targetUrl = readUserDataServiceUrl();
         res.setHeader('Content-Type', 'application/javascript');
         res.setHeader('Cache-Control', 'no-store');
         res.end(
-          'window.GROUND_USER_DATA_SERVICE_URL = ' +
-            (readUserDataServiceUrl() ? 'window.location.origin' : 'null') +
+          'window.COLLECT_ONE_USER_DATA_SERVICE_URL = ' +
+            (targetUrl ? 'window.location.origin' : 'null') +
+            ';\n' +
+            'window.COLLECT_ONE_BACKEND_DEBUG_URL = ' +
+            (targetUrl ? JSON.stringify(targetUrl) : 'null') +
             ';\n'
         );
       },

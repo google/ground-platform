@@ -1,0 +1,338 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.openforis.collectone.v2.server.service
+
+import com.squareup.wire.ofEpochSecond
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlinx.coroutines.test.runTest
+import openforis.collectone.v1.data.AcquirePlotLockRequest
+import openforis.collectone.v1.data.DataMutation
+import openforis.collectone.v1.data.EntityMutation
+import openforis.collectone.v1.data.EntityRecord
+import openforis.collectone.v1.data.GetEntityRequest
+import openforis.collectone.v1.data.GetSubmissionRequest
+import openforis.collectone.v1.data.MutateDataRequest
+import openforis.collectone.v1.data.ReleasePlotLockRequest
+import openforis.collectone.v1.data.SubmissionMutation
+import openforis.collectone.v1.data.SubmissionRecord
+import openforis.collectone.v1.library.GetLibraryRequest
+import openforis.collectone.v1.library.LibraryMutation
+import openforis.collectone.v1.library.MutateLibraryRequest
+import openforis.collectone.v1.library.OrganizationLibraryRecord
+import openforis.collectone.v1.library.OrganizationLibrarySettings
+import openforis.collectone.v1.survey.AcceptSurveyInviteRequest
+import openforis.collectone.v1.survey.BatchGetSurveyOverviewsRequest
+import openforis.collectone.v1.survey.GetOrganizationRequest
+import openforis.collectone.v1.survey.GetSurveyRequest
+import openforis.collectone.v1.survey.JoinOrganizationRequest
+import openforis.collectone.v1.survey.ListSurveyOverviewsRequest
+import openforis.collectone.v1.survey.MutateOrganizationRequest
+import openforis.collectone.v1.survey.MutateSurveyRequest
+import openforis.collectone.v1.survey.Organization
+import openforis.collectone.v1.survey.OrganizationMutation
+import openforis.collectone.v1.survey.SurveyAcl
+import openforis.collectone.v1.survey.SurveyDef
+import openforis.collectone.v1.survey.SurveyMutation
+
+/**
+ * Every write to a synced record strictly increases its version (`docs/technical/sync-engine.md`,
+ * "Sync Tokens"), so clients can tell which copy is newer without comparing commit timestamps.
+ */
+open class RecordVersionTest {
+  /** A backend loaded with the bundled sample seed; overridden to test other stores. */
+  protected open fun newBackend(): UserDataBackend = sampleBackend()
+
+  private val backend by lazy { newBackend() }
+
+  private suspend fun entityRevision() =
+    backend.GetEntity(GetEntityRequest(survey_id = KENYA, entity_id = ENTITY)).entity!!.revision
+
+  private suspend fun submissionRevision(id: String) =
+    backend
+      .GetSubmission(GetSubmissionRequest(survey_id = KENYA, submission_id = id))
+      .submission!!
+      .revision
+
+  private suspend fun mutateEntity(mutation: EntityMutation) =
+    backend.MutateData(
+      MutateDataRequest(
+        survey_id = KENYA,
+        mutations = listOf(DataMutation(entity_mutation = mutation)),
+      )
+    )
+
+  @Test
+  fun entityWrites_bumpTheRevision_includingPlotLocks() = runTest {
+    var revision = entityRevision()
+    suspend fun assertBumped(what: String) {
+      val next = entityRevision()
+      assertEquals(revision + 1, next, what)
+      revision = next
+    }
+
+    mutateEntity(
+      EntityMutation(
+        entity_id = ENTITY,
+        dataset_id = DATASET,
+        upsert = EntityRecord(label = "L"),
+      )
+    )
+    assertBumped("field patch")
+
+    val stored = backend.GetEntity(GetEntityRequest(survey_id = KENYA, entity_id = ENTITY)).entity!!
+    mutateEntity(EntityMutation(entity_id = ENTITY, dataset_id = DATASET, upsert = stored))
+    assertBumped("upsert")
+
+    backend.AcquirePlotLock(
+      AcquirePlotLockRequest(
+        survey_id = KENYA,
+        dataset_id = DATASET,
+        entity_id = ENTITY,
+        user_id = "u1",
+      )
+    )
+    assertBumped("acquire plot lock")
+
+    backend.ReleasePlotLock(
+      ReleasePlotLockRequest(
+        survey_id = KENYA,
+        dataset_id = DATASET,
+        entity_id = ENTITY,
+        user_id = "u1",
+      )
+    )
+    assertBumped("release plot lock")
+
+    mutateEntity(
+      EntityMutation(
+        entity_id = ENTITY,
+        dataset_id = DATASET,
+        upsert = EntityRecord(is_deleted = true),
+      )
+    )
+    assertBumped("delete")
+  }
+
+  @Test
+  fun submissionWrites_bumpTheRevision() = runTest {
+    val id =
+      backend
+        .ListSubmissions(openforis.collectone.v1.data.ListSubmissionsRequest(survey_id = KENYA))
+        .submissions
+        .first()
+        .submission_id
+    val before = submissionRevision(id)
+    backend.MutateData(
+      MutateDataRequest(
+        survey_id = KENYA,
+        mutations =
+          listOf(
+            DataMutation(
+              submission_mutation =
+                SubmissionMutation(
+                  submission_id = id,
+                  upsert = SubmissionRecord(form_version = "v2"),
+                )
+            ),
+            DataMutation(
+              submission_mutation =
+                SubmissionMutation(
+                  submission_id = id,
+                  upsert = SubmissionRecord(is_deleted = true),
+                )
+            ),
+          ),
+      )
+    )
+    // Each mutation in the request is its own write.
+    assertEquals(before + 2, submissionRevision(id))
+  }
+
+  @Test
+  fun organizationWrites_bumpTheVersionByOnePerRequest() = runTest {
+    suspend fun version() =
+      backend.GetOrganization(GetOrganizationRequest(organization_id = ORG)).organization!!.version
+    val start = version()
+
+    backend.MutateOrganization(
+      MutateOrganizationRequest(
+        organization_id = ORG,
+        mutations =
+          listOf(
+            OrganizationMutation(upsert = Organization(description = "a")),
+            OrganizationMutation(upsert = Organization(name = "b")),
+          ),
+      )
+    )
+    assertEquals(start + 1, version(), "patches")
+
+    val current =
+      backend.GetOrganization(GetOrganizationRequest(organization_id = ORG)).organization
+    backend.MutateOrganization(
+      MutateOrganizationRequest(
+        organization_id = ORG,
+        // A client-supplied version is ignored: the server owns it.
+        mutations = listOf(OrganizationMutation(upsert = current!!.copy(version = 99L))),
+      )
+    )
+    assertEquals(start + 2, version(), "upsert")
+
+    backend.JoinOrganization(
+      JoinOrganizationRequest(organization_id = ORG, user_id = "u2", email = "u2@example.com")
+    )
+    assertEquals(start + 3, version(), "join")
+
+    backend.MutateOrganization(
+      MutateOrganizationRequest(
+        organization_id = ORG,
+        mutations = listOf(OrganizationMutation(upsert = Organization(is_deleted = true))),
+      )
+    )
+    assertEquals(start + 4, version(), "delete")
+    val created =
+      backend
+        .MutateOrganization(
+          MutateOrganizationRequest(
+            organization_id = testId("org-new"),
+            mutations =
+              listOf(
+                OrganizationMutation(
+                  upsert = Organization(organization_id = testId("org-new"), name = "New")
+                )
+              ),
+          )
+        )
+        .organization!!
+    assertEquals(1L, created.version)
+  }
+
+  @Test
+  fun libraryWrites_bumpTheVersionByOnePerRequest() = runTest {
+    suspend fun library() = backend.GetLibrary(GetLibraryRequest(organization_id = ORG)).library!!
+    val start = library().version
+    backend.MutateLibrary(
+      MutateLibraryRequest(
+        organization_id = ORG,
+        mutations =
+          listOf(
+            LibraryMutation(
+              upsert =
+                OrganizationLibraryRecord(
+                  settings = OrganizationLibrarySettings(organization_id = ORG)
+                )
+            )
+          ),
+      )
+    )
+    assertEquals(start + 1, library().version, "patch")
+    backend.MutateLibrary(
+      MutateLibraryRequest(
+        organization_id = ORG,
+        mutations = listOf(LibraryMutation(upsert = library().copy(version = 50L))),
+      )
+    )
+    assertEquals(start + 2, library().version, "upsert")
+  }
+
+  @Test
+  fun surveyWrites_bumpTheSharedRecordVersion_butNotTheSavedRevision() = runTest {
+    suspend fun saved() = backend.GetSurvey(GetSurveyRequest(survey_id = KENYA))
+    suspend fun overview() =
+      backend.ListSurveyOverviews(ListSurveyOverviewsRequest()).overviews.single {
+        it.survey_id == KENYA
+      }
+    val start = saved()
+    val startVersion = start.survey!!.record_version
+    assertEquals(startVersion, overview().record_version)
+
+    // Working-copy edit: every part gets the new record version; the saved revision stays.
+    val edited =
+      backend.MutateSurvey(
+        MutateSurveyRequest(
+          survey_id = KENYA,
+          working_copy = true,
+          mutations = listOf(SurveyMutation(upsert = SurveyDef(title = "Draft"))),
+        )
+      )
+    val afterEdit = saved()
+    assertEquals(startVersion + 1, edited.survey!!.record_version)
+    assertEquals(startVersion + 1, afterEdit.survey!!.record_version)
+    assertEquals(startVersion + 1, afterEdit.acl!!.record_version)
+    assertEquals(startVersion + 1, overview().record_version)
+    assertEquals(start.survey!!.version, afterEdit.survey!!.version)
+    assertEquals(start.survey!!.saved_revision_number, afterEdit.survey!!.saved_revision_number)
+
+    // Access rule change.
+    backend.MutateSurvey(
+      MutateSurveyRequest(
+        survey_id = KENYA,
+        mutations =
+          listOf(SurveyMutation(acl_upsert = SurveyAcl(collector_consent_required = true))),
+      )
+    )
+    assertEquals(startVersion + 2, overview().record_version)
+
+    // Saving the working copy bumps both the record version and the saved revision.
+    backend.MutateSurvey(
+      MutateSurveyRequest(
+        survey_id = KENYA,
+        working_copy = true,
+        mutations = listOf(SurveyMutation(save_working_copy = true)),
+      )
+    )
+    val afterSave = saved().survey!!
+    assertEquals(startVersion + 3, afterSave.record_version)
+    assertEquals(start.survey!!.saved_revision_number + 1, afterSave.saved_revision_number)
+
+    backend.MutateSurvey(
+      MutateSurveyRequest(
+        survey_id = KENYA,
+        working_copy = true,
+        mutations =
+          listOf(
+            SurveyMutation(upsert = SurveyDef(title = "Again")),
+            SurveyMutation(discard_working_copy = true),
+          ),
+      )
+    )
+    assertEquals(startVersion + 4, overview().record_version, "discard")
+
+    backend.AcceptSurveyInvite(AcceptSurveyInviteRequest(survey_id = KENYA, invite_token = "none"))
+    assertEquals(startVersion + 5, saved().acl!!.record_version, "invite")
+    assertEquals(startVersion + 5, overview().record_version)
+
+    backend.MutateSurvey(
+      MutateSurveyRequest(
+        survey_id = KENYA,
+        mutations = listOf(SurveyMutation(upsert = SurveyDef(trash_time = ofEpochSecond(1L, 0L)))),
+      )
+    )
+    val trashed =
+      backend
+        .BatchGetSurveyOverviews(BatchGetSurveyOverviewsRequest(survey_ids = listOf(KENYA)))
+        .results
+        .single()
+        .overview!!
+    assertEquals(startVersion + 6, trashed.record_version, "trash")
+    assertEquals(start.survey!!.saved_revision_number + 1, trashed.saved_revision_number)
+  }
+
+  companion object {
+    const val KENYA = "00000033-6b50-51cd-ac94-baea2ea06d65"
+    const val ENTITY = "00000007-640e-5ed7-9874-4d6b6717f21d"
+    const val DATASET = "coffee_parcels"
+    const val ORG = "00000013-31cc-5c95-90ea-379f624a5c72"
+  }
+}

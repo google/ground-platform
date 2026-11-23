@@ -21,8 +21,8 @@ import org.openforis.collectone.v2.app.domain.model.SubmissionPreviewItem
 import org.openforis.collectone.v2.app.domain.model.SurveyConfig
 import org.openforis.collectone.v2.app.domain.model.SurveyPreviewItem
 import org.openforis.collectone.v2.core.forms.ui.WorkbenchExampleForm
+import org.openforis.collectone.v2.workbench.ui.DEFAULT_WORKBENCH_FORM_DEF
 import org.openforis.collectone.v2.workbench.ui.DEFAULT_WORKBENCH_XFORMS_XML
-import org.openforis.collectone.v2.workbench.ui.XFormsParseCache
 
 /**
  * Immutable UI state for the workbench chrome: the simulated device frame (`Mobile` vs `Tablet`,
@@ -35,7 +35,7 @@ data class WorkbenchUiState(
   val customXFormsXml: String = DEFAULT_WORKBENCH_XFORMS_XML,
   val selectedWorkbenchExampleForm: WorkbenchExampleForm? = WorkbenchExampleForm.ALL_FIELD_TYPES,
   val xformsXmlError: String? = null,
-  val customFormDef: FormDef? = XFormsParseCache.formDef(WorkbenchExampleForm.ALL_FIELD_TYPES),
+  val customFormDef: FormDef? = DEFAULT_WORKBENCH_FORM_DEF,
   val dataResetCount: Int = 0,
   val activeSurveyId: String = "",
   val surveys: List<SurveyPreviewItem> = emptyList(),

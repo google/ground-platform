@@ -32,13 +32,13 @@ produces a ready-to-render UI state tree.
 This package and its companion state package
 (`org.openforis.collectone.v2.core.forms.model`) provide:
 
--   **Immutable Runtime State Model (`FormState` & `ElementState`)**: A
+-   **Immutable Runtime State Model (`FormState` & `ComponentState`)**: A
     strongly-typed, immutable snapshot representing the complete evaluated state
-    of a form and its `Record` at a point in time, including hierarchical UI
-    element states (`DataFieldState`, `GroupState`, `RepeatGroupState`,
-    `RepeatInstanceState`), flat O(1) path lookup maps (`elementsByPath`),
-    validation states, resolved multi-locale labels, and XForms Entity
-    mutations.
+    of a form and its `RecordInstance` at a point in time, including the
+    hierarchical UI component tree (`ControlState`, `GroupState`,
+    `RepeatGroupState`, `RepeatInstanceState`), per-field states indexed by
+    path (`fieldStates`), validation errors, resolved multi-locale labels, and
+    XForms Entity operations (`entityStates`).
 
 -   **Ahead-of-Time XPath Compilation & Topological DAG (`CompiledForm`)**:
     Pre-compiles all XPath expressions (`relevant`, `calculate`, `required`,
@@ -91,53 +91,47 @@ org.openforis.collectone.v2.core.forms
 
 Every evaluation produces an immutable `FormState` containing:
 
--   **`record: Record`**: The updated protobuf record containing all user
+-   **`recordInstance: RecordInstance`**: The effective record with all user
     answers, preload metadata, event action side-effects, and freshly evaluated
-    `calculate` outputs.
+    `calculate` outputs, with non-relevant fields, groups, and repeats pruned.
+    `rawRecordNode` keeps the unpruned answers so they survive temporary
+    relevance toggles during editing.
 
--   **`elements: List<ElementState>`**: The root-level UI element tree
-    preserving the hierarchy of `Form.elements` with repeat groups expanded into
+-   **`rootComponents: List<ComponentState>`**: The root-level UI component tree
+    preserving the hierarchy of the form body, with repeat groups expanded into
     concrete `RepeatInstanceState` entries.
 
--   **`elementsByPath: Map<String, ElementState>`**: Flat lookup map indexed by
+-   **`fieldStates: Map<String, FieldState>`**: Field states indexed by
     canonical instance path (e.g., `"/data/household/head_age"` or
-    `"/data/plot[1]/tree[2]/height"`) for O(1) access.
+    `"/data/plot[1]/tree[2]/height"`). `findFieldState(path)` also accepts a
+    path relative to the root.
 
 -   **`validationErrors: List<ValidationError>` & `isValid: Boolean`**:
-    Aggregated `REQUIRED_MISSING` and `CONSTRAINT_VIOLATED` errors across all
-    *relevant* fields. Per XForms semantics, non-relevant fields
-    (`isRelevant == false`) and children of non-relevant groups/repeats are
-    automatically excluded from validation errors.
+    Aggregated `REQUIRED_MISSING`, `CONSTRAINT_VIOLATED`, `RANGE_OUT_OF_BOUNDS`
+    and `TYPE_MISMATCH` errors across all *relevant* fields. Per XForms
+    semantics, non-relevant fields (`isRelevant == false`) and children of
+    non-relevant groups/repeats are automatically excluded.
 
--   **`evaluatedEntities: List<EvaluatedEntity>`**: Resolved XForms Entity
-    declarations (`CREATE` / `UPDATE`, entity ID, label, and `save_to` property
-    map) when `EntitySpec.enabled_expression` evaluates to `true`.
+-   **`entityStates: List<EntityState>`**: Resolved XForms Entity declarations
+    (`shouldCreate` / `shouldUpdate`, entity ID, label, and `save_to` property
+    map).
 
-#### `ElementState` Hierarchy
+-   **`activeLanguage`, `availableLanguages`, `pendingRequests` and
+    `didNotConverge`**: The active translation, the declared translations,
+    platform side-effects requested by actions (such as `odk:setgeopoint`), and
+    whether the evaluation loop stopped before reaching a fixed point.
 
-| `ElementState`        | Schema Source         | Key Dynamic Properties      |
-: Subtype               :                       :                             :
-| :-------------------- | :-------------------- | :-------------------------- |
-| `DataFieldState`      | `FieldElement`        | `value`, `isRelevant`,      |
-:                       :                       : `isRequired`, `isReadOnly`, :
-:                       :                       : `label`, `hint`, `help`,    :
-:                       :                       : `options\:                  :
-:                       :                       : List<EvaluatedOption>`,     :
-:                       :                       : `validation\:               :
-:                       :                       : ValidationResult`           :
-| `GroupState`          | `FieldGroup`          | `isRelevant`, `label`,      |
-:                       : (`repeat == null`)    : `hint`, `children\:         :
-:                       :                       : List<ElementState>`         :
-| `RepeatGroupState`    | `FieldGroup` (`repeat | `isRelevant`, `label`,      |
-:                       : != null`)             : `instances\:                :
-:                       :                       : List<RepeatInstanceState>`, :
-:                       :                       : `canAddInstance`,           :
-:                       :                       : `canRemoveInstance`,        :
-:                       :                       : `targetCount`               :
-| `RepeatInstanceState` | Concrete repeat       | `index` (1-based), `path`   |
-:                       : iteration `1..N`      : (e.g., `"/data/plot[1]"`),  :
-:                       :                       : `label`, `children`,        :
-:                       :                       : `canRemove`                 :
+#### `ComponentState` Hierarchy
+
+Every component exposes `canonicalPath`, `isRelevant`, `label: ResolvedLabel?`
+and `appearance`.
+
+| Type                  | Schema Source       | Key Dynamic Properties                                                     |
+| :-------------------- | :------------------ | :------------------------------------------------------------------------- |
+| `ControlState`        | `ControlDef`        | `fieldState` (value, required, read-only, validation), `hint`, `options`   |
+| `GroupState`          | `GroupDef`          | `children: List<ComponentState>`                                           |
+| `RepeatGroupState`    | `RepeatDef`         | `instances`, `targetCount`, `canAddInstance`, `canRemoveInstance`          |
+| `RepeatInstanceState` | One repeat instance | `repeatIndex` (1-based), `canonicalPath` (e.g. `"/data/plot[1]"`), `children` |
 
 ### Five-Stage Evaluation Pipeline (`FormEngine`)
 
@@ -186,126 +180,119 @@ initial load or mutation:
 ### Managing an Interactive Form Session (`FormSession`)
 
 For UI clients and ViewModels, `FormSession` coordinates initialization, user
-input, repeat manipulation, locale switching, and submission validation:
+input, repeat manipulation, language switching, and submission validation. It
+initializes the form on construction and holds the latest `FormState` in
+`state`:
 
 ```kotlin
-import openforis.collectone.v1.forms.Form
-import openforis.collectone.v1.forms.FieldValue
-import openforis.collectone.v1.forms.TypedValue
-import org.openforis.collectone.v2.core.forms.engine.DefaultFormEnvironment
+import org.openforis.collectone.v2.core.forms.engine.FormEnvironment
 import org.openforis.collectone.v2.core.forms.engine.FormSession
-import org.openforis.collectone.v2.core.forms.model.DataFieldState
+import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 
-// 1. Create and initialize a new form session
-val session = FormSession(
-  form = formProto,
-  environment = DefaultFormEnvironment(
-    username = "surveyor_1",
-    deviceId = "device-abc-123",
-  ),
-  initialLocale = "en",
-)
+// 1. Start a new session (runs defaults, preloads, and first-load events)
+val session =
+  FormSession(
+    formDef = formDef,
+    activeLanguage = "English",
+    environment =
+      FormEnvironment(deviceProperties = mapOf("username" to "surveyor_1")),
+  )
 
-val initialState = session.initialize()
+// 2. Observe every new state snapshot (returns a function that unregisters)
+val unsubscribe = session.addStateListener { state -> render(state.rootComponents) }
 
-// 2. Update a field value (automatically triggers XFORMS_VALUE_CHANGED actions,
+// 3. Update a field value (triggers `xforms-value-changed` actions,
 //    recalculates dependent fields, and re-evaluates relevance/constraints)
-val updatedState = session.updateValue(
-  path = "/data/species",
-  newValue = FieldValue(scalar_value = TypedValue(string_value = "oak")),
-)
+val updatedState = session.updateString("/data/species", "oak")
 
-// 3. Inspect a specific field's evaluated UI state in O(1) time
-val diameterField = updatedState.elementsByPath["/data/diameter_cm"] as? DataFieldState
-if (diameterField != null && diameterField.isRelevant) {
-  println("Label: ${diameterField.label?.text}")
-  println("Required: ${diameterField.isRequired}")
-  println("Valid: ${diameterField.validation.isValid}")
+// 4. Inspect a field's evaluated state
+val diameter = updatedState.findFieldState("/data/diameter_cm")
+if (diameter != null && diameter.isRelevant) {
+  println("Required: ${diameter.isRequired}, status: ${diameter.validationStatus}")
 }
 
-// 4. Add or remove repeat instances (when not locked by no_add_remove / jr:count)
+// 5. Add or remove repeat instances (indexes are 1-based)
 session.addRepeatInstance(repeatPath = "/data/trees")
-session.removeRepeatInstance(repeatPath = "/data/trees", index = 1)
+session.removeRepeatInstance(repeatPath = "/data/trees", repeatIndex = 1)
 
-// 5. Switch active translation locale on the fly
-session.setLocale("es")
+// 6. Switch the active translation
+session.setLanguage("Español")
 
-// 6. Finalize for submission (evaluates END PreloadConfig timestamps and
-//    returns the full list of validation errors if any relevant field is invalid)
-val (finalState, errors) = session.finalizeForSubmission()
-if (errors.isEmpty()) {
-  val recordToSubmit = finalState.record
+// 7. Finalize for submission (sets `end` preloads and validates relevant fields)
+when (val result = session.finalize()) {
+  is FinalizationResult.Success -> submit(result.recordInstance, result.entityStates)
+  is FinalizationResult.ValidationFailure -> showErrors(result.errors)
 }
 ```
 
-### Stateless Functional Evaluation (`FormEngine` & `CompiledForm`)
+### Stateless Functional Evaluation (`FormEngine`)
 
-If you manage state externally (e.g., in a Redux/MVI store or server-side
-validation service), use `CompiledForm` and `FormEngine` directly as pure
-functions:
+If you manage state externally (e.g., in an MVI store or a server-side
+validation service), call the `FormEngine` object directly. Each function takes
+the previous `FormState` (or a `FormDef` and record) and returns a new one
+without side effects:
 
 ```kotlin
-import org.openforis.collectone.v2.core.forms.engine.CompiledForm
 import org.openforis.collectone.v2.core.forms.engine.FormEngine
 
-val engine = FormEngine()
+// Check a form up front (cyclic dependencies, malformed XPath) instead of throwing
+val validation = FormEngine.validate(formDef)
+check(validation.isValid) { "Invalid form: ${validation.problems.map { it.message }}" }
 
-// Compile form once and cache across evaluations
-val compiledForm: CompiledForm = engine.compile(formProto)
-
-// Evaluate a Record snapshot at any time without mutating state
-val formState = engine.evaluate(
-  compiledForm = compiledForm,
-  record = existingRecordProto,
-  locale = "fr",
+// Evaluate a record snapshot without mutating anything
+val formState = FormEngine.evaluate(
+  formDef = formDef,
+  recordInstance = existingRecord,
+  activeLanguage = "Français",
 )
 
 println("Is record valid? ${formState.isValid}")
 println("Validation errors: ${formState.validationErrors}")
-println("Evaluated entities: ${formState.evaluatedEntities}")
+println("Entity operations: ${formState.entityStates.filter { it.isActive }}")
+
+// Apply an edit to a snapshot
+val nextState = FormEngine.updateFieldValue(formState, "/data/species", newValue = speciesValue)
 ```
 
 ### Customizing Environment & Preload Providers (`FormEnvironment`)
 
-Implement `FormEnvironment` to supply platform-specific UUIDs, timestamps,
-device metadata, or SQLite-backed secondary instances
-(`SecondaryInstanceProvider`):
+`FormEnvironment` is a data class: override only the providers you need to
+supply platform-specific clocks, UUIDs, device metadata, location, or
+SQLite-backed secondary instances (`SecondaryInstanceProvider`):
 
 ```kotlin
-import com.google.type.Date
-import com.google.type.TimeOfDay
-import com.squareup.wire.Instant
-import openforis.collectone.v1.forms.PreloadConfig
-import openforis.collectone.v1.forms.TypedValue
 import org.openforis.collectone.v2.core.forms.engine.FormEnvironment
-import org.openforis.collectone.v2.core.forms.xpath.SecondaryInstanceProvider
 
-class AndroidFormEnvironment(
-  override val secondaryInstanceProvider: SecondaryInstanceProvider?,
-) : FormEnvironment {
-  override fun now(): Instant = Instant.ofEpochSecond(System.currentTimeMillis() / 1000)
-  override fun today(): Date = Date(year = 2026, month = 9, day = 18)
-  override fun currentTimeOfDay(): TimeOfDay = TimeOfDay(hours = 14, minutes = 30)
-  override fun generateUid(): String = "uuid:${java.util.UUID.randomUUID()}"
-  override fun resolvePreload(preload: PreloadConfig): TypedValue? = null
-}
+val environment =
+  FormEnvironment(
+    clockEpochMillis = { System.currentTimeMillis() },
+    uuidGenerator = { java.util.UUID.randomUUID().toString() },
+    deviceProperties = mapOf("deviceid" to deviceId, "username" to username),
+    secondaryInstanceProvider = sqliteInstanceProvider,
+    locationProvider = { lastKnownGeoPoint },
+  )
 ```
+
+`FormEnvironment.DEFAULT` is deterministic (fixed clock, random UUIDs) and is
+used when no environment is passed.
 
 
 ## Building and Running Tests
 
 ### Java Environment Requirement
 
-Gradle runs on **Java 21**, pinned in `gradle/gradle-daemon-jvm.properties`.
-Gradle uses an installed JDK 21 if it finds one and downloads one otherwise;
-`./gradlew` itself only needs a JDK on the `PATH` (or `JAVA_HOME`) to start. To
-change the version, run `./gradlew updateDaemonJvm --jvm-version=<version>`.
+Run Gradle from the repository root: the repository is a single Gradle build
+with one `./gradlew`. Gradle runs on **Java 21**, pinned in the root build's
+`gradle/gradle-daemon-jvm.properties`. Gradle uses an installed JDK 21 if it
+finds one and downloads one otherwise; `./gradlew` itself only needs a JDK on
+the `PATH` (or `JAVA_HOME`) to start. To change the version for the whole
+build, run `./gradlew updateDaemonJvm --jvm-version=<version>`.
 
 ### Run JVM Unit Tests
 
-To execute the unit test suite (`FormEngineUnitTest` and all companion test
-suites):
+To execute the unit test suite (the `FormEngine*Test` classes and all companion
+test suites):
 
 ```bash
-./gradlew jvmTest
+./gradlew :shared:core:jvmTest
 ```

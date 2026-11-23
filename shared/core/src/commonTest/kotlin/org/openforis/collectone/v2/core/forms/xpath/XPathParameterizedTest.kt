@@ -169,8 +169,10 @@ class XPathParameterizedTest {
           ),
         translations =
           mapOf(
-            "English" to mapOf("welcome_msg" to "Welcome to Ground", "cocoa_label" to "Cacao Tree"),
-            "French" to mapOf("welcome_msg" to "Bienvenue sur Ground", "cocoa_label" to "Cacaoyer"),
+            "English" to
+              mapOf("welcome_msg" to "Welcome to Collect One", "cocoa_label" to "Cacao Tree"),
+            "French" to
+              mapOf("welcome_msg" to "Bienvenue sur Collect One", "cocoa_label" to "Cacaoyer"),
           ),
         choicesByFieldRef =
           mapOf(
@@ -508,8 +510,8 @@ class XPathParameterizedTest {
         ),
         ParameterizedCase(
           name = "substr() with positive and negative indices",
-          expression = "concat(substr('GroundPlatform', 0, 6), '-', substr('GroundPlatform', -8))",
-          expectedString = "Ground-Platform",
+          expression = "concat(substr('ForestPlatform', 0, 6), '-', substr('ForestPlatform', -8))",
+          expectedString = "Forest-Platform",
         ),
         ParameterizedCase(
           name = "substring-before() and substring-after()",
@@ -524,8 +526,8 @@ class XPathParameterizedTest {
         ),
         ParameterizedCase(
           name = "normalize-space() whitespace collapsing",
-          expression = "normalize-space('   Open   Foris \n  Ground   ')",
-          expectedString = "Open Foris Ground",
+          expression = "normalize-space('   Open   Foris \n  Collect   One   ')",
+          expectedString = "Open Foris Collect One",
         ),
         ParameterizedCase(
           name = "starts-with(), ends-with(), and contains()",
@@ -568,8 +570,8 @@ class XPathParameterizedTest {
         ),
         ParameterizedCase(
           name = "base64-decode() decoding UTF-8 text",
-          expression = "base64-decode('SGVsbG8gR3JvdW5k')",
-          expectedString = "Hello Ground",
+          expression = "base64-decode('SGVsbG8gQ29sbGVjdCBPbmU=')",
+          expectedString = "Hello Collect One",
         ),
         ParameterizedCase(
           name = "uuid() RFC 4122 format and fixed-length alphanumeric token",
@@ -678,13 +680,13 @@ class XPathParameterizedTest {
           name = "jr:itext() lookup in default English language",
           expression = "jr:itext('welcome_msg')",
           activeLanguage = "English",
-          expectedString = "Welcome to Ground",
+          expectedString = "Welcome to Collect One",
         ),
         ParameterizedCase(
           name = "jr:itext() lookup in French translation catalog",
           expression = "jr:itext('welcome_msg')",
           activeLanguage = "French",
-          expectedString = "Bienvenue sur Ground",
+          expectedString = "Bienvenue sur Collect One",
         ),
         ParameterizedCase(
           name = "jr:choice-name() resolves localized itext choice label",

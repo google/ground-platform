@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:PurposePickers.kt$enabled &amp;&amp; otherSelected &amp;&amp; (otherPurposeText.isBlank() || otherBlankError)</ID>
+    <ID>ComplexCondition:PurposePickers.kt$enabled &amp;&amp; showValidationBanner &amp;&amp; isError &amp;&amp; selectedIds.isEmpty()</ID>
+    <ID>CyclomaticComplexMethod:PurposePickers.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun PurposePackGrid( packs: List&lt;PurposePack&gt;, library: ResolvedLibrary, organizationName: String?, language: String, selectedIds: List&lt;String&gt;, onToggle: (packId: String) -&gt; Unit, modifier: Modifier = Modifier, otherPurposeText: String = "", onOtherPurposeTextChange: ((String) -&gt; Unit)? = null, isError: Boolean = false, onOtherInputPositioned: ((Int) -&gt; Unit)? = null, showOtherCard: Boolean = true, showSourceBadge: Boolean = true, showValidationBanner: Boolean = true, /** Shows a spinner instead of the cards while the purpose library is still loading. */ isLoading: Boolean = false, enabled: Boolean = true, )</ID>
+    <ID>EmptyFunctionBlock:PlatformResizeCursor.jvm.kt${}</ID>
+    <ID>ForEachOnRange:SharingPeople.kt$0 until PortraitCount</ID>
+    <ID>LongMethod:PurposePickers.kt$@Composable private fun PurposePackCard( pack: PurposePack, library: ResolvedLibrary, /** Organization name of an organization pack, or `null` for a global pack. */ sourceLabel: String?, language: String, selected: Boolean, enabled: Boolean = true, role: Role = Role.Checkbox, onClick: () -&gt; Unit, )</ID>
+    <ID>LongMethod:PurposePickers.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun PurposePackGrid( packs: List&lt;PurposePack&gt;, library: ResolvedLibrary, organizationName: String?, language: String, selectedIds: List&lt;String&gt;, onToggle: (packId: String) -&gt; Unit, modifier: Modifier = Modifier, otherPurposeText: String = "", onOtherPurposeTextChange: ((String) -&gt; Unit)? = null, isError: Boolean = false, onOtherInputPositioned: ((Int) -&gt; Unit)? = null, showOtherCard: Boolean = true, showSourceBadge: Boolean = true, showValidationBanner: Boolean = true, /** Shows a spinner instead of the cards while the purpose library is still loading. */ isLoading: Boolean = false, enabled: Boolean = true, )</ID>
+    <ID>LongMethod:SharingPeople.kt$@Composable private fun AcceptInviteDialogContent( title: String, inviteeEmail: String, roleLabel: String, peopleListName: String, onAccept: (displayName: String, photoUrl: String?) -&gt; EditorText?, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:WizardIllustrations.kt$@Composable fun WizardOverviewHeroGraphic(modifier: Modifier = Modifier)</ID>
+    <ID>LongMethod:WizardIllustrations.kt$private fun DrawScope.drawFieldSurveyGraphic()</ID>
+    <ID>LoopWithTooManyJumpStatements:DropdownFieldClickTarget.kt$while</ID>
+    <ID>LoopWithTooManyJumpStatements:IsoLanguages.kt$IsoLanguages$for</ID>
+    <ID>MatchingDeclarationName:PlatformTextFilePicker.kt$TextFilePickResult</ID>
+    <ID>SpreadOperator:EditorTextResolve.kt$(res, *args.map { resolveArg(it) }.toTypedArray())</ID>
+    <ID>SpreadOperator:EditorTextResolve.kt$(res, quantity, *args.map { resolveArg(it) }.toTypedArray())</ID>
+    <ID>SpreadOperator:ImpactTextResolve.kt$(key.resource, *resolveArgs(args))</ID>
+    <ID>SpreadOperator:ImpactTextResolve.kt$(key.resource, quantity.toPluralQuantity(), *resolveArgs(args))</ID>
+    <ID>SpreadOperator:ImpactTextResources.kt$(key.resource, *args.loadArgs())</ID>
+    <ID>SpreadOperator:ImpactTextResources.kt$(key.resource, quantity.toPluralQuantity(), *args.loadArgs())</ID>
+  </CurrentIssues>
+</SmellBaseline>

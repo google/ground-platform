@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="editor_default_name_text_question">Nouvelle question à texte court</string>
+  <string name="editor_default_name_long_text_question">Nouvelle question à paragraphe</string>
+  <string name="editor_default_name_number_question">Nouvelle question numérique</string>
+  <string name="editor_default_name_select_one_question">Nouvelle question à choix unique</string>
+  <string name="editor_default_name_select_multiple_question">Nouvelle question à choix multiples</string>
+  <string name="editor_default_name_date_question">Nouvelle question de date</string>
+  <string name="editor_default_name_point_question">Nouvelle question de point</string>
+  <string name="editor_default_name_line_question">Nouvelle question de ligne</string>
+  <string name="editor_default_name_polygon_question">Nouvelle question de polygone</string>
+  <string name="editor_default_name_photo_question">Nouvelle question photo</string>
+  <string name="editor_default_name_video_question">Nouvelle question vidéo</string>
+  <string name="editor_default_name_audio_question">Nouvelle question audio</string>
+  <string name="editor_default_name_note">Nouvelle remarque</string>
+  <string name="editor_default_name_map_layer">Nouvelle couche de carte</string>
+  <string name="editor_default_name_data_table">Nouvelle table de données</string>
+  <string name="editor_default_name_form">Nouveau formulaire</string>
+  <string name="editor_default_name_property">Nouvelle propriété</string>
+</resources>

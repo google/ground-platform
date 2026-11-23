@@ -38,7 +38,7 @@ interface MapDrag {
   fun onDragEnd() {}
 }
 
-/** How a [GroundMap] responds to input; passed from [GroundMap] to the platform renderer. */
+/** How a [AppMap] responds to input; passed from [AppMap] to the platform renderer. */
 @Immutable
 internal data class MapGestureOptions(
   /** When `false` the map ignores input, so it can sit in a scrolling list as a preview. */

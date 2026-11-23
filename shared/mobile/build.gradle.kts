@@ -13,47 +13,27 @@
  * limitations under the License.
  */
 plugins {
-  kotlin("multiplatform") version "2.4.20"
-  id("org.jetbrains.compose") version "1.12.0"
-  id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
-  id("com.android.library") version "8.5.2"
-  id("com.ncorti.ktfmt.gradle") version "0.27.0"
+  id("collectone.kmp.android")
+  id("collectone.kmp.compose")
+  id("collectone.kover")
+  // @Serializable navigation routes.
+  alias(libs.plugins.kotlin.serialization)
 }
 
-group = "org.openforis.collectone.v2"
-
-version = "2.0.0-SNAPSHOT"
-
-ktfmt { googleStyle() }
-
-// iOS targets are opt-in while iOS work is paused: `./gradlew -Pground.ios=true ...` builds the
-// GroundMobile framework for iosApp. The shared/app module doesn't have iOS targets yet.
-val iosEnabled = providers.gradleProperty("ground.ios").orNull == "true"
+// iOS targets are opt-in: `./gradlew -Pcollectone.ios=true :shared:mobile:...` builds the AppMobile
+// framework for iosApp.
+val iosEnabled = providers.gradleProperty("collectone.ios").orNull == "true"
 
 kotlin {
-  androidTarget {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-  }
-
-  jvm { testRuns["test"].executionTask.configure { useJUnitPlatform() } }
-
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-    compilerOptions {
-      sourceMapEmbedSources.set(
-        org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS
-      )
-    }
-  }
-
   if (iosEnabled) {
     listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
       iosTarget.binaries.framework {
-        baseName = "GroundMobile"
+        baseName = "AppMobile"
         isStatic = true
-        // iosApp implements GroundMap's Mapbox view (MapboxIosView) in Swift.
-        export("org.openforis.collectone.v2:map:2.0.0-SNAPSHOT")
+        // iosApp implements AppMap's Mapbox view (MapboxIosView) and AppMobileSyncIos's
+        // push topic bridge (IosPushTopicBridge) in Swift.
+        export(projects.shared.map)
+        export(projects.shared.app)
       }
     }
   }
@@ -61,30 +41,34 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api("org.openforis.collectone.v2:protoforms:2.0.0-SNAPSHOT")
-        api("org.openforis.collectone.v2:protoforms-ui:2.0.0-SNAPSHOT")
-        api("org.openforis.collectone.v2:app:2.0.0-SNAPSHOT")
+        api(projects.shared.core)
+        api(projects.shared.ui)
+        api(projects.shared.app)
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
         implementation(compose.ui)
-        implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
-        implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+        implementation(libs.compose.material.icons.core)
+        implementation(libs.compose.material.icons.extended)
         implementation(compose.components.resources)
+        // Type-safe Compose navigation between the mobile app's screens.
+        api(libs.jetbrains.navigation.compose)
+        implementation(libs.jetbrains.navigationevent.compose)
       }
     }
     if (iosEnabled) {
-      iosMain.dependencies { api("org.openforis.collectone.v2:map:2.0.0-SNAPSHOT") }
+      iosMain.dependencies { api(projects.shared.map) }
     }
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation("org.openforis.collectone.v2:app-testing:2.0.0-SNAPSHOT")
+        implementation(projects.shared.app.uiTesting)
       }
     }
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
+        implementation(libs.konsist)
         // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
         @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
         implementation(compose.uiTest)
@@ -94,12 +78,10 @@ kotlin {
   }
 }
 
-android {
-  namespace = "org.openforis.collectone.v2.mobile"
-  compileSdk = 35
-  defaultConfig { minSdk = 24 }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
+android { namespace = "org.openforis.collectone.v2.mobile" }
+
+// Generated `Res` accessors for this module's UI strings (src/commonMain/composeResources).
+compose.resources {
+  publicResClass = false
+  packageOfResClass = "org.openforis.collectone.v2.mobile.resources"
 }

@@ -154,7 +154,7 @@ entity_datasets {
 }
 
 map_config {
-  initial_center { latitude: -0.2827 longitude: 34.7519 }
+  initial_center { longitude: 34.7519 latitude: -0.2827 }
   initial_zoom: 12.5
 }
 

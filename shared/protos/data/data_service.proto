@@ -21,10 +21,10 @@ package openforis.collectone.v1.data;
 import "google/protobuf/timestamp.proto";
 import "shared/protos/data/audit_record.proto";
 import "shared/protos/data/entity_record.proto";
+import "shared/protos/data/geometry.proto";
 import "shared/protos/data/impact_aggregate.proto";
 import "shared/protos/data/impact_event.proto";
 import "shared/protos/data/submission_record.proto";
-import "shared/protos/forms/types.proto";
 
 // Core gRPC service for reading, syncing, and atomically mutating
 // `EntityRecord`, `SubmissionRecord`, plot locks, media attachments, impact
@@ -68,7 +68,8 @@ service DataService {
   // comment). Scope field: `survey_id`; delta sync always covers the whole
   // survey. Query-only fields, rejected with `INVALID_ARGUMENT` in delta mode:
   // `dataset_id`, `s2_cell_tokens`, `include_deleted`, `bbox`, `filter`,
-  // `queue_filter_mode`, `order_by`.
+  // `queue_filter_mode`, `order_by`, `offset`, `entity_ids`,
+  // `include_property_keys`.
   // `field_mask` only trims the returned records, so it is allowed in both
   // modes.
   rpc ListEntities(ListEntitiesRequest) returns (ListEntitiesResponse);
@@ -180,8 +181,9 @@ message ListEntitiesRequest {
   // includes tombstones.
   bool include_deleted = 5;
 
-  // Query only: optional bounding box.
-  GeoBoundingBox bbox = 6;
+  // Formerly the bounding box as `GeoBoundingBox` (latitude and longitude
+  // numbers); replaced by `bbox` (15).
+  reserved 6;
 
   // Query only: optional property filters.
   map<string, string> filter = 7;
@@ -206,13 +208,23 @@ message ListEntitiesRequest {
   // Opaque `next_sync_token` from an earlier call for the same scope. Selects
   // delta mode.
   string sync_token = 14;
-}
 
-message GeoBoundingBox {
-  double min_latitude = 1;
-  double min_longitude = 2;
-  double max_latitude = 3;
-  double max_longitude = 4;
+  // Query only: optional bounding box.
+  BoundingBox bbox = 15;
+
+  // Query only: optional 0-based row offset for random-access virtual table
+  // scrolling. Ignored when `entity_ids` is set.
+  int32 offset = 16;
+
+  // Query only: optional explicit entity IDs to fetch in a single batch
+  // lookup (returned in the requested order, omitting missing or invisible
+  // records). Used by virtualized tables to hydrate visible pages on scroll.
+  repeated string entity_ids = 17;
+
+  // Query only: when true, populates `ListEntitiesResponse.property_keys` with
+  // the distinct property keys across all matching entities so virtual tables
+  // know their full column schema without loading every row into memory.
+  bool include_property_keys = 18;
 }
 
 message ListEntitiesResponse {
@@ -227,22 +239,38 @@ message ListEntitiesResponse {
   // Opaque token for the next delta call for the scope, set on the last page
   // only.
   string next_sync_token = 4;
+
+  // Total number of matching entities in query mode.
+  int32 total_size = 5;
+
+  // Distinct property keys across all matching entities in query mode,
+  // populated when `ListEntitiesRequest.include_property_keys` is true.
+  repeated string property_keys = 6;
 }
 
 message EntityCluster {
   string s2_cell_token = 1;
-  openforis.collectone.v1.forms.GeoPoint centroid = 2;
+
+  // Formerly the centroid as `forms.GeoPoint`; replaced by `centroid` (7).
+  reserved 2;
+
   int32 total_count = 3;
   int32 completed_count = 4;
   int32 in_progress_count = 5;
   int32 pending_count = 6;
+
+  // Centroid of the cluster's features in WGS 84.
+  Position centroid = 7;
 }
 
 message ListEntityClustersRequest {
   string survey_id = 1;
   string dataset_id = 2;
-  GeoBoundingBox bbox = 3;
+  // Formerly the bounding box as `GeoBoundingBox`; replaced by `bbox` (5).
+  reserved 3;
+
   int32 s2_level = 4;
+  BoundingBox bbox = 5;
 }
 
 message ListEntityClustersResponse {
@@ -317,13 +345,12 @@ message ListSubmissionsResponse {
 //
 // Carries sparse instances of `EntityRecord` (`delete` and `upsert`), evaluated
 // in order as `merge(applyDelete(base, delete), upsert)`:
-//   - If `delete` is a root leaf (no child fields set beyond `entity_id` /
-//     `dataset_id` / `survey_id`, or `delete.is_deleted == true`) and `upsert`
-//     does not restore fields, the entity is soft-deleted into a tombstone
-//     (`is_deleted = true`).
-//   - Otherwise, `delete` acts as a structural deletion mask clearing any
-//     populated scalar/geometry/property key, and `upsert` merges its
-//     non-default scalars, geometry, and `properties` entries into the entity.
+//   - `delete` acts as a structural deletion mask clearing any populated
+//     scalar, geometry, or `properties` key.
+//   - `upsert` merges its non-default scalars, geometry, and `properties`
+//     entries into the entity.
+//   - Root entities are soft-deleted by setting `upsert.is_deleted = true` and
+//     restored by setting `delete.is_deleted = true`.
 message EntityMutation {
   string dataset_id = 1;
   string entity_id = 2;
@@ -332,8 +359,7 @@ message EntityMutation {
   // when `base_revision` is non-zero and older than the stored revision.
   int64 base_revision = 3;
 
-  // Structural deletion mask for `EntityRecord` (or root leaf tombstone when no
-  // child fields are set).
+  // Structural deletion mask for `EntityRecord`.
   EntityRecord delete = 4;
 
   // Sparse `EntityRecord` fields (`label`, `geometry`, `properties`,
@@ -345,13 +371,11 @@ message EntityMutation {
 //
 // Carries sparse instances of `SubmissionRecord` (`delete` and `upsert`),
 // evaluated in order as `merge(applyDelete(base, delete), upsert)`:
-//   - If `delete` is a root leaf (no child fields set beyond `submission_id` /
-//     `form_id` / `survey_id`, or `delete.is_deleted == true`) and `upsert`
-//     does not restore fields, the submission is soft-deleted into a tombstone
-//     (`is_deleted = true`).
-//   - Otherwise, `delete` acts as a structural deletion mask clearing any
-//     populated scalar, `record.data.fields` entry, or repeat instance, and
-//     `upsert` recursively merges its non-default scalars and `record` fields.
+//   - `delete` acts as a structural deletion mask clearing any populated
+//     scalar, `record.data.fields` entry, or repeat instance.
+//   - `upsert` recursively merges its non-default scalars and `record` fields.
+//   - Root submissions are soft-deleted by setting `upsert.is_deleted = true`
+//     and restored by setting `delete.is_deleted = true`.
 message SubmissionMutation {
   string submission_id = 1;
   string form_id = 2;
@@ -360,8 +384,7 @@ message SubmissionMutation {
   // when `base_revision` is non-zero and older than the stored revision.
   int64 base_revision = 3;
 
-  // Structural deletion mask for `SubmissionRecord` (or root leaf tombstone
-  // when no child fields are set).
+  // Structural deletion mask for `SubmissionRecord`.
   SubmissionRecord delete = 4;
 
   // Sparse `SubmissionRecord` fields (`entity_id`, `record`, `review_status`,
@@ -563,19 +586,55 @@ message PlaceRecord {
   string name = 2;
   string category_label = 3;
   string region_subtitle = 4;
-  string coordinates_label = 5;
+
+  // Was `coordinates_label`, a text copy of the position; clients format
+  // `latitude` and `longitude` themselves.
+  reserved 5;
+  reserved "coordinates_label";
+
   float normalized_x = 6;
   float normalized_y = 7;
   float zoom_delta = 8;
-  double longitude = 9;
-  double latitude = 10;
-  optional double bbox_min_lng = 11;
-  optional double bbox_min_lat = 12;
-  optional double bbox_max_lng = 13;
-  optional double bbox_max_lat = 14;
+
+  // Formerly the position as separate `longitude` and `latitude` numbers;
+  // replaced by `position`. Clients read rows that still carry them as
+  // described in `docs/technical/model/data/05-geometry.md`.
+  reserved 9, 10;
+  reserved "longitude", "latitude";
+
+  // Formerly the bounding box as separate `bbox_min_lng`, `bbox_min_lat`,
+  // `bbox_max_lng`, and `bbox_max_lat` numbers; replaced by `bounds`. Clients
+  // read rows that still carry them as described in
+  // `docs/technical/model/data/05-geometry.md`.
+  reserved 11, 12, 13, 14;
+  reserved "bbox_min_lng", "bbox_min_lat", "bbox_max_lng", "bbox_max_lat";
+
   float target_zoom = 15;
   string mapbox_place_id = 16;
-  string source_label = 17;
+
+  // Formerly `source_label`, the English name of the place's source
+  // ("Places API"); replaced by `source`. Clients read rows that still carry
+  // it as described in `docs/technical/model/data/05-geometry.md`.
+  reserved 17;
+  reserved "source_label";
+
+  // Position in WGS 84.
+  Position position = 18;
+
+  // The geocoder's bounding box of the place, when it has one.
+  BoundingBox bounds = 19;
+
+  // Where the place comes from. Clients name it in the user's language.
+  PlaceSource source = 20;
+}
+
+// The source of a `PlaceRecord`.
+enum PlaceSource {
+  PLACE_SOURCE_UNSPECIFIED = 0;
+
+  // The place search: the Mapbox Places API, or the backend place catalog,
+  // which serves records of the same kind.
+  PLACE_SOURCE_PLACES_API = 1;
 }
 
 message ListPlacesRequest {

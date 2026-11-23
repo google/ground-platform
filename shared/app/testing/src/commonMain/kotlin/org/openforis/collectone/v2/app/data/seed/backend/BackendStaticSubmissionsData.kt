@@ -13,10 +13,13 @@
  */
 package org.openforis.collectone.v2.app.data.seed.backend
 
+import kotlin.time.Instant
 import org.openforis.collectone.v2.app.domain.model.SubmissionFieldEntry
 import org.openforis.collectone.v2.app.domain.model.SubmissionGeometryPolygon
 import org.openforis.collectone.v2.app.domain.model.SubmissionPreviewItem
 import org.openforis.collectone.v2.app.domain.model.SyncStatus
+import org.openforis.collectone.v2.map.Geometry
+import org.openforis.collectone.v2.map.LatLng
 
 /** Hardcoded sample standalone submissions and submission geometries for the sample data. */
 object BackendStaticSubmissionsData {
@@ -27,11 +30,48 @@ object BackendStaticSubmissionsData {
       "00000031-ffc6-5c8e-934c-d14ec07533ad" -> emptyList()
       "00000034-c088-5ab9-8b98-e6bccb3dca71" -> emptyList()
       "00000032-8d62-5717-8074-f4917e0cd76d" -> emptyList()
+      BackendStaticEntitiesData.GOOGLE_EARTH_SURVEY_ID -> emptyList()
+      BackendStaticSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID ->
+        MekongDeltaSampleData.standaloneSubmissions()
       else -> defaultStandaloneSubmissions()
     }
 
   /** Returns the preloaded [SubmissionGeometryPolygon] list for [surveyId]. */
   fun submissionGeometriesForSurvey(surveyId: String): List<SubmissionGeometryPolygon> =
+    when (surveyId) {
+      "00000036-1a1c-5c51-997f-28b67d813aa3" ->
+        MekongDeltaSampleData.relocateSubmissionGeometries(
+          authoredEntities = BackendStaticEntitiesData.authoredEntitiesForSurvey(surveyId),
+          geometries = authoredSubmissionGeometriesForSurvey(surveyId),
+          targetArea = BackendStaticSurveyEditorData.arushaSurveyArea(),
+        )
+      "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
+        MekongDeltaSampleData.relocateSubmissionGeometries(
+          authoredEntities = BackendStaticEntitiesData.authoredEntitiesForSurvey(surveyId),
+          geometries = authoredSubmissionGeometriesForSurvey(surveyId),
+          targetArea = BackendStaticSurveyEditorData.paraSurveyArea(),
+        )
+      "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
+        MekongDeltaSampleData.relocateSubmissionGeometries(
+          authoredEntities = BackendStaticEntitiesData.authoredEntitiesForSurvey(surveyId),
+          geometries = authoredSubmissionGeometriesForSurvey(surveyId),
+          targetArea = BackendStaticSurveyEditorData.ashantiSurveyArea(),
+        )
+      "00000032-8d62-5717-8074-f4917e0cd76d" ->
+        MekongDeltaSampleData.relocateSubmissionGeometries(
+          authoredEntities = BackendStaticEntitiesData.authoredEntitiesForSurvey(surveyId),
+          geometries = authoredSubmissionGeometriesForSurvey(surveyId),
+          targetArea = BackendStaticSurveyEditorData.kakamegaSurveyArea(),
+        )
+      BackendStaticEntitiesData.GOOGLE_EARTH_SURVEY_ID -> emptyList()
+      BackendStaticSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID ->
+        MekongDeltaSampleData.submissionGeometries()
+      else -> defaultSubmissionGeometries()
+    }
+
+  private fun authoredSubmissionGeometriesForSurvey(
+    surveyId: String
+  ): List<SubmissionGeometryPolygon> =
     when (surveyId) {
       "00000036-1a1c-5c51-997f-28b67d813aa3" ->
         listOf(
@@ -46,14 +86,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Sample Location Point (geopoint <=10m GPS)",
             shortMapBadge = "📍 Primary Forest (±4.8m)",
             collectorName = "Maya Lin",
-            timestamp = "2026-09-24 08:15 UTC",
             areaHectares = 0.05,
             vertexCount = 4,
-            normalizedX = 0.30f,
-            normalizedY = 0.34f,
-            widthFraction = 0.14f,
-            heightFraction = 0.10f,
             colorHex = 0xFF2E7D32,
+            geometry =
+              rectangle(west = 36.94602, south = -0.41682, east = 36.94798, north = -0.41502),
           ),
           SubmissionGeometryPolygon(
             id = "geom-splu-02",
@@ -66,14 +103,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Sample Location Point (geopoint <=10m GPS)",
             shortMapBadge = "📍 Agroforestry (±6.2m)",
             collectorName = "David Kamau",
-            timestamp = "2026-09-24 09:05 UTC",
             areaHectares = 0.05,
             vertexCount = 4,
-            normalizedX = 0.54f,
-            normalizedY = 0.56f,
-            widthFraction = 0.14f,
-            heightFraction = 0.10f,
             colorHex = 0xFF2E7D32,
+            geometry =
+              rectangle(west = 36.94938, south = -0.42078, east = 36.95134, north = -0.41898),
           ),
           SubmissionGeometryPolygon(
             id = "geom-splu-03",
@@ -86,14 +120,10 @@ object BackendStaticSubmissionsData {
             questionLabel = "Sample Location Point (geopoint <=10m GPS)",
             shortMapBadge = "📍 Riparian Buffer (±5.1m)",
             collectorName = "Grace Wanjiku",
-            timestamp = "2026-09-24 09:42 UTC",
             areaHectares = 0.05,
             vertexCount = 4,
-            normalizedX = 0.68f,
-            normalizedY = 0.30f,
-            widthFraction = 0.14f,
-            heightFraction = 0.10f,
             colorHex = 0xFF0277BD,
+            geometry = rectangle(west = 36.95134, south = -0.4161, east = 36.9533, north = -0.4143),
           ),
         )
       "00000034-c088-5ab9-8b98-e6bccb3dca71" ->
@@ -109,14 +139,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Sample Plot Assessment Footprint (20m radius)",
             shortMapBadge = "SP-01 • 78% Canopy (📷)",
             collectorName = "Maya Lin",
-            timestamp = "2026-09-23 09:20 UTC",
             areaHectares = 0.13,
             vertexCount = 12,
-            normalizedX = 0.30f,
-            normalizedY = 0.34f,
-            widthFraction = 0.18f,
-            heightFraction = 0.13f,
             colorHex = 0xFF00897B,
+            geometry =
+              rectangle(west = 36.94654, south = -0.41749, east = 36.94906, north = -0.41515),
           ),
           SubmissionGeometryPolygon(
             id = "geom-sp-02",
@@ -129,14 +156,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Sample Plot Assessment Footprint (20m radius)",
             shortMapBadge = "SP-02 • 84% Canopy (📷)",
             collectorName = "Samuel Kariuki",
-            timestamp = "2026-09-23 11:05 UTC",
             areaHectares = 0.13,
             vertexCount = 12,
-            normalizedX = 0.56f,
-            normalizedY = 0.42f,
-            widthFraction = 0.18f,
-            heightFraction = 0.13f,
             colorHex = 0xFF00897B,
+            geometry =
+              rectangle(west = 36.95018, south = -0.41893, east = 36.9527, north = -0.41659),
           ),
           SubmissionGeometryPolygon(
             id = "geom-sp-03",
@@ -149,14 +173,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Sample Plot Assessment Footprint (20m radius)",
             shortMapBadge = "SP-03 • 65% Canopy (📷)",
             collectorName = "Maya Lin",
-            timestamp = "2026-09-24 07:50 UTC",
             areaHectares = 0.13,
             vertexCount = 12,
-            normalizedX = 0.26f,
-            normalizedY = 0.62f,
-            widthFraction = 0.18f,
-            heightFraction = 0.13f,
             colorHex = 0xFF00897B,
+            geometry =
+              rectangle(west = 36.94598, south = -0.42253, east = 36.9485, north = -0.42019),
           ),
         )
       "00000031-ffc6-5c8e-934c-d14ec07533ad" ->
@@ -172,14 +193,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Walked Commodity Plot Perimeter (geoshape) + <=5m Center",
             shortMapBadge = "Cocoa 1.42ha • Center ±2.4m",
             collectorName = "Maya Lin",
-            timestamp = "2026-09-24 08:30 UTC",
             areaHectares = 1.42,
             vertexCount = 5,
-            normalizedX = 0.31f,
-            normalizedY = 0.35f,
-            widthFraction = 0.24f,
-            heightFraction = 0.16f,
             colorHex = 0xFFD84315,
+            geometry =
+              rectangle(west = 36.94666, south = -0.41824, east = 36.95002, north = -0.41536),
           ),
           SubmissionGeometryPolygon(
             id = "geom-eudr-0422",
@@ -192,14 +210,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Walked Commodity Plot Perimeter (geoshape) + <=5m Center",
             shortMapBadge = "Coffee 0.95ha • Center ±3.1m",
             collectorName = "Samuel Kariuki",
-            timestamp = "2026-09-24 09:25 UTC",
             areaHectares = 0.95,
             vertexCount = 4,
-            normalizedX = 0.56f,
-            normalizedY = 0.52f,
-            widthFraction = 0.21f,
-            heightFraction = 0.14f,
             colorHex = 0xFF2E7D32,
+            geometry =
+              rectangle(west = 36.95037, south = -0.42112, east = 36.95331, north = -0.4186),
           ),
           SubmissionGeometryPolygon(
             id = "geom-eudr-0428",
@@ -212,14 +227,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Walked Commodity Plot Perimeter (geoshape) + <=5m Center",
             shortMapBadge = "Rubber 2.18ha • Center ±4.2m",
             collectorName = "David Kamau",
-            timestamp = "2026-09-24 10:12 UTC",
             areaHectares = 2.18,
             vertexCount = 5,
-            normalizedX = 0.69f,
-            normalizedY = 0.29f,
-            widthFraction = 0.26f,
-            heightFraction = 0.18f,
             colorHex = 0xFF6A1B9A,
+            geometry =
+              rectangle(west = 36.95184, south = -0.41734, east = 36.95548, north = -0.4141),
           ),
         )
       "00000032-8d62-5717-8074-f4917e0cd76d" ->
@@ -235,14 +247,11 @@ object BackendStaticSubmissionsData {
             questionLabel = "Household Compound GPS Verification",
             shortMapBadge = "HH-KAK-014 • 6 Members",
             collectorName = "Grace Wanjiku",
-            timestamp = "2026-09-23 14:10 UTC",
             areaHectares = 0.08,
             vertexCount = 4,
-            normalizedX = 0.32f,
-            normalizedY = 0.36f,
-            widthFraction = 0.15f,
-            heightFraction = 0.11f,
             colorHex = 0xFF0277BD,
+            geometry =
+              rectangle(west = 36.94663, south = -0.41747, east = 36.94873, north = -0.41549),
           ),
           SubmissionGeometryPolygon(
             id = "geom-ind-103",
@@ -255,16 +264,15 @@ object BackendStaticSubmissionsData {
             questionLabel = "Household Compound GPS Verification",
             shortMapBadge = "HH-KAK-022 • Present",
             collectorName = "Maya Lin",
-            timestamp = "2026-09-23 15:40 UTC",
             areaHectares = 0.08,
             vertexCount = 4,
-            normalizedX = 0.58f,
-            normalizedY = 0.48f,
-            widthFraction = 0.15f,
-            heightFraction = 0.11f,
             colorHex = 0xFF0277BD,
+            geometry =
+              rectangle(west = 36.95027, south = -0.41963, east = 36.95237, north = -0.41765),
           ),
         )
+      BackendStaticSurveyEditorData.ORGANIZATION_SHARED_SURVEY_ID ->
+        MekongDeltaSampleData.submissionGeometries()
       else -> defaultSubmissionGeometries()
     }
 
@@ -287,14 +295,10 @@ object BackendStaticSubmissionsData {
         questionLabel = "Walked EUDR Perimeter Polygon (geoshape)",
         shortMapBadge = "Walked Perimeter (NYR-104)",
         collectorName = "Maya Lin",
-        timestamp = "2026-09-18 10:14 UTC",
         areaHectares = 1.81,
         vertexCount = 28,
-        normalizedX = 0.295f,
-        normalizedY = 0.345f,
-        widthFraction = 0.25f,
-        heightFraction = 0.17f,
         colorHex = 0xFF66BB6A,
+        geometry = rectangle(west = 36.94658, south = -0.41854, east = 36.95008, north = -0.41548),
       ),
       SubmissionGeometryPolygon(
         id = "geom-sub-nyr-108",
@@ -307,14 +311,10 @@ object BackendStaticSubmissionsData {
         questionLabel = "Walked EUDR Perimeter Polygon (geoshape)",
         shortMapBadge = "Walked Perimeter (NYR-108)",
         collectorName = "Samuel Kariuki",
-        timestamp = "2026-09-17 16:02 UTC",
         areaHectares = 2.41,
         vertexCount = 34,
-        normalizedX = 0.355f,
-        normalizedY = 0.665f,
-        widthFraction = 0.26f,
-        heightFraction = 0.17f,
         colorHex = 0xFF66BB6A,
+        geometry = rectangle(west = 36.94735, south = -0.4243, east = 36.95099, north = -0.42124),
       ),
       SubmissionGeometryPolygon(
         id = "geom-sub-shade-201-w3",
@@ -327,14 +327,10 @@ object BackendStaticSubmissionsData {
         questionLabel = "Surveyed Canopy Regeneration Sub-Plot (geoshape)",
         shortMapBadge = "Canopy Sub-Plot (W3)",
         collectorName = "Maya Lin",
-        timestamp = "2026-09-19 08:45 UTC",
         areaHectares = 1.24,
         vertexCount = 19,
-        normalizedX = 0.675f,
-        normalizedY = 0.315f,
-        widthFraction = 0.24f,
-        heightFraction = 0.16f,
         colorHex = 0xFF42A5F5,
+        geometry = rectangle(west = 36.95197, south = -0.41791, east = 36.95533, north = -0.41503),
       ),
       SubmissionGeometryPolygon(
         id = "geom-sub-wsh-01-sep",
@@ -347,14 +343,10 @@ object BackendStaticSubmissionsData {
         questionLabel = "Riparian Filtration Buffer Polygon (geoshape)",
         shortMapBadge = "Riparian Buffer (WSH-01)",
         collectorName = "Maya Lin",
-        timestamp = "2026-09-18 17:30 UTC",
         areaHectares = 0.48,
         vertexCount = 14,
-        normalizedX = 0.725f,
-        normalizedY = 0.635f,
-        widthFraction = 0.22f,
-        heightFraction = 0.15f,
         colorHex = 0xFFFFCA28,
+        geometry = rectangle(west = 36.95281, south = -0.42358, east = 36.95589, north = -0.42088),
       ),
       SubmissionGeometryPolygon(
         id = "geom-sub-standalone-pest-01",
@@ -367,14 +359,10 @@ object BackendStaticSubmissionsData {
         questionLabel = "Affected Roadside Buffer Zone (geoshape)",
         shortMapBadge = "Pest Sighting (Standalone)",
         collectorName = "Maya Lin",
-        timestamp = "2026-09-19 11:20 UTC",
         areaHectares = 0.32,
         vertexCount = 11,
-        normalizedX = 0.52f,
-        normalizedY = 0.46f,
-        widthFraction = 0.18f,
-        heightFraction = 0.13f,
         colorHex = 0xFFAB47BC,
+        geometry = rectangle(west = 36.95022, south = -0.42025, east = 36.95274, north = -0.41791),
       ),
     )
 
@@ -392,13 +380,11 @@ object BackendStaticSubmissionsData {
         formTitle = "Opportunistic Berry Borer & Rust Sighting",
         formVersion = "v2026.09.1",
         collectorName = "Maya Lin",
-        collectorEmail = "maya.lin@groundplatform.org",
-        timestamp = "2026-09-19 11:20 UTC",
-        targetTypeLabel = "Standalone Field Log",
+        collectorEmail = "maya.lin@collect-one.example.org",
+        clientUpdatedAt = Instant.parse("2026-09-19T11:20:00Z"),
+        serverUpdatedAt = Instant.parse("2026-09-19T11:22:00Z"),
         syncStatus = SyncStatus.SYNCED,
-        coordinatesLabel = "0.4204°S, 36.9521°E (±2.4m GPS)",
-        normalizedX = 0.52f,
-        normalizedY = 0.46f,
+        location = LatLng(latitude = -0.4204, longitude = 36.9521),
         fields =
           listOf(
             SubmissionFieldEntry(
@@ -437,12 +423,10 @@ object BackendStaticSubmissionsData {
         formVersion = "v2026.09.1",
         collectorName = "Samuel Kariuki",
         collectorEmail = "s.kariuki@kenyaforestry.org",
-        timestamp = "2026-09-18 15:05 UTC",
-        targetTypeLabel = "Standalone Field Log",
+        clientUpdatedAt = Instant.parse("2026-09-18T15:05:00Z"),
+        serverUpdatedAt = Instant.parse("2026-09-18T15:07:00Z"),
         syncStatus = SyncStatus.UPLOADING,
-        coordinatesLabel = "0.4231°S, 36.9495°E (±3.1m GPS)",
-        normalizedX = 0.48f,
-        normalizedY = 0.54f,
+        location = LatLng(latitude = -0.4231, longitude = 36.9495),
         fields =
           listOf(
             SubmissionFieldEntry(
@@ -467,5 +451,18 @@ object BackendStaticSubmissionsData {
             ),
           ),
       ),
+    )
+
+  /** A rectangular polygon with the given WGS 84 bounds, its corners clockwise from north-west. */
+  private fun rectangle(west: Double, south: Double, east: Double, north: Double): Geometry =
+    Geometry.Polygon(
+      listOf(
+        listOf(
+          LatLng(north, west),
+          LatLng(north, east),
+          LatLng(south, east),
+          LatLng(south, west),
+        )
+      )
     )
 }

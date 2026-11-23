@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+  <string name="web_language">Ngôn ngữ</string>
+  <!-- Content description of the language selector; %1$s is the current language's native name. -->
+  <string name="web_language_with_current">Ngôn ngữ: %1$s</string>
+  <string name="web_manage_survey">Quản lý khảo sát</string>
+  <string name="web_switch_survey">Chuyển khảo sát</string>
+  <string name="web_recent_surveys">Khảo sát gần đây</string>
+  <!-- Survey switcher menu item linking to the full surveys page. -->
+  <string name="web_all_surveys_menu_item">Tất cả khảo sát…</string>
+  <string name="web_saving">Đang lưu…</string>
+  <string name="web_saved">Đã lưu</string>
+  <string name="web_not_saved">Chưa lưu</string>
+  <string name="web_create_survey">Tạo khảo sát</string>
+  <!-- Create survey dialog title; %1$s is the organization name. -->
+  <string name="web_create_survey_in_organization">Tạo khảo sát trong %1$s</string>
+  <string name="web_survey_title_label">Tiêu đề khảo sát</string>
+  <string name="web_organization">Tổ chức</string>
+  <!-- Organization picker option for a survey that belongs to no organization. -->
+  <string name="web_no_organization_personal">Không có (khảo sát cá nhân)</string>
+  <string name="web_personal_survey_access_hint">Chỉ những người bạn chia sẻ mới có thể mở khảo sát cá nhân.</string>
+  <!-- %1$s is the organization name. -->
+  <string name="web_organization_survey_access_hint">Bạn vẫn là chủ sở hữu. Người quản lý của %1$s cũng có thể chỉnh sửa khảo sát này, quản lý chia sẻ và xuất dữ liệu.</string>
+  <string name="web_create">Tạo</string>
+  <string name="web_next">Tiếp theo</string>
+  <string name="web_cancel">Hủy</string>
+  <string name="web_create_survey_purposes_title">Dữ liệu này sẽ được dùng để làm gì?</string>
+  <string name="web_create_survey_purposes_description">Chọn mục đích chính của khảo sát này. Chúng tôi sẽ thêm các biểu mẫu tương ứng, với các trường chuẩn, để dữ liệu của bạn có thể được so sánh và báo cáo. Bạn có thể thay đổi sau trong phần Chi tiết khảo sát.</string>
+  <string name="web_programs_optional">Chương trình (không bắt buộc)</string>
+  <string name="web_programs_description">Các chương trình bạn báo cáo bằng khảo sát này.</string>
+  <string name="web_back">Quay lại</string>
+  <string name="web_skip">Bỏ qua</string>
+  <string name="web_download">Tải xuống</string>
+  <string name="web_download_csv">Tải xuống CSV</string>
+  <string name="web_download_geojson">Tải xuống GeoJSON</string>
+  <string name="web_download_kml">Tải xuống KML (Google Earth)</string>
+  <string name="web_download_survey_kml">Tải xuống KML khảo sát (tất cả lớp)</string>
+  <string name="web_open_in_google_earth">Mở trong Google Earth</string>
+  <!-- Subtitle of an export profile menu item that has no warnings. -->
+  <string name="web_export_profile_for_survey_purposes">Phù hợp với mục đích của khảo sát</string>
+  <!-- Export warnings dialog title; %1$s is the export profile name (e.g. "EUDR GeoJSON"). -->
+  <string name="web_export_profile_title">Xuất %1$s?</string>
+  <!-- %1$s is a comma-separated list of included standard fields. -->
+  <string name="web_export_profile_included">Bao gồm: %1$s.</string>
+  <string name="web_export_profile_link_missing_hint">Liên kết các câu hỏi còn thiếu với trường chuẩn trong trình chỉnh sửa biểu mẫu để đưa chúng vào lần sau.</string>
+  <string name="web_export_anyway">Vẫn xuất</string>
+  <!-- Data table column header: the record's workflow status. -->
+  <string name="web_column_status">Trạng thái</string>
+  <!-- Data table column header: the record's label. -->
+  <string name="web_column_label">Nhãn</string>
+  <!-- Data table column header: number of submissions for the record. -->
+  <string name="web_column_submissions">Bài gửi</string>
+  <!-- Data table column header: the record's GeoID identifier. -->
+  <string name="web_column_geo_id">GeoID</string>
+  <string name="web_dismiss">Đóng lại</string>
+  <string name="web_resize_side_panel">Đổi kích thước bảng bên</string>
+  <string name="web_collapse_side_panel">Thu gọn bảng bên</string>
+  <string name="web_expand_side_panel">Mở rộng bảng bên</string>
+  <string name="web_expand_details">Mở rộng chi tiết</string>
+  <string name="web_close_details">Đóng chi tiết</string>
+  <!-- Data table tab title; %1$s is the table name, %2$d the number of rows. -->
+  <string name="web_table_tab_title">%1$s (%2$d)</string>
+  <string name="web_collapse_table">Thu gọn bảng</string>
+  <string name="web_expand_table">Mở rộng bảng</string>
+  <string name="web_no_rows_yet">Chưa có hàng nào.</string>
+  <string name="web_map_layer">Lớp bản đồ</string>
+  <string name="web_data_table">Bảng dữ liệu</string>
+  <string name="web_collapse_details">Thu gọn chi tiết</string>
+  <!-- Label above the number of map features in a layer. -->
+  <string name="web_map_features">Đối tượng bản đồ</string>
+  <!-- Section heading: map feature counts grouped by status. -->
+  <string name="web_by_status">Theo trạng thái</string>
+  <string name="web_show_in_table">Hiển thị trong bảng</string>
+  <!-- Surveys page filter chip: show every survey. -->
+  <string name="web_survey_filter_all">Tất cả</string>
+  <!-- Surveys page filter chip: show surveys the user owns. -->
+  <string name="web_survey_filter_mine">Khảo sát của tôi</string>
+  <!-- Survey card chip: the signed-in user owns the survey. -->
+  <string name="web_survey_access_owner">Chủ sở hữu</string>
+  <!-- Survey card chip: the user manages the survey's organization. -->
+  <string name="web_survey_access_organization_manager">Người quản lý tổ chức</string>
+  <!-- Survey card chip: the user is a member of the survey's organization. -->
+  <string name="web_survey_access_organization_member">Thành viên tổ chức</string>
+  <!-- Survey card chip: the survey was shared with the user. -->
+  <string name="web_survey_access_shared">Được chia sẻ với bạn</string>
+  <!-- Heading of the group of surveys that belong to no organization. -->
+  <string name="web_personal_surveys">Khảo sát cá nhân</string>
+  <string name="web_surveys">Khảo sát</string>
+  <!-- Surveys page header summary; %1$s is the survey count phrase (e.g. "3 surveys"), %2$s the organization count phrase (e.g. "2 organizations"). -->
+  <string name="web_surveys_header_summary">%1$s · %2$s</string>
+  <string name="web_impact">Tác động</string>
+  <string name="web_search_surveys_placeholder">Tìm khảo sát theo tên, vị trí hoặc tổ chức</string>
+  <string name="web_clear_search">Xóa nội dung tìm kiếm</string>
+  <string name="web_search_surveys">Tìm kiếm khảo sát</string>
+  <string name="web_no_surveys_match_search">Không có khảo sát nào khớp với nội dung tìm kiếm.</string>
+  <string name="web_no_surveys_yet">Chưa có khảo sát nào. Hãy tạo một khảo sát để bắt đầu.</string>
+  <!-- Badge next to an organization heading: the signed-in user is a manager of it. -->
+  <string name="web_organization_role_you_manage">Bạn quản lý</string>
+  <!-- Badge next to an organization heading: the signed-in user is a member of it. -->
+  <string name="web_organization_role_member">Thành viên</string>
+  <string name="web_no_description_yet">Chưa có mô tả.</string>
+  <string name="web_public_data">Dữ liệu công khai</string>
+  <string name="web_private_submissions">Bài gửi riêng tư</string>
+  <!-- Survey card label: this survey is the one currently open. -->
+  <string name="web_survey_open_now">Đang mở</string>
+  <!-- Badge on closed surveys asking whether their data was used. -->
+  <string name="web_outcome_prompt_label">Dữ liệu này đã được sử dụng chưa?</string>
+  <string name="web_collect_data">Thu thập dữ liệu</string>
+  <!-- Data collection panel subtitle for a new standalone record; %1$s is the user's GPS coordinates. -->
+  <string name="web_new_record_at_location">Bản ghi mới • %1$s</string>
+  <!-- Data collection panel subtitle; %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_select_target_to_begin">Chọn %1$s để bắt đầu</string>
+  <!-- %1$s is the lowercase name of the target map feature type (e.g. "plot"). -->
+  <string name="web_entity_ref_picker_instructions">Nhấp vào một %1$s trên bản đồ hoặc trong danh sách để bắt đầu biểu mẫu này, hoặc chọn bên dưới.</string>
+  <string name="web_search_map_features">Tìm kiếm đối tượng bản đồ</string>
+  <!-- Search field placeholder; %1$s is the lowercase name of the map layer or data table (e.g. "plots"), %2$d the total number of its map features. -->
+  <string name="web_entity_ref_filter_placeholder">Lọc %1$s (%2$d)</string>
+  <!-- %1$s is the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_entity_ref_no_matches">Không tìm thấy %1$s nào phù hợp.</string>
+  <string name="web_entity_ref_empty">Chưa có %1$s nào.</string>
+  <!-- Badge on a map feature whose form is already completed. -->
+  <string name="web_completed">Đã hoàn thành</string>
+  <string name="web_start_a_form">Bắt đầu biểu mẫu</string>
+  <!-- Collect data menu item subtitle; %1$s is the question count phrase (e.g. "5 questions"), %2$d the number of map features left, %3$s the lowercase name of the map layer or data table (e.g. "plots"). -->
+  <string name="web_form_menu_summary_remaining">%1$s • còn lại %2$d %3$s</string>
+  <!-- Collect data menu item subtitle for a standalone form; %1$s is the question count phrase (e.g. "5 questions"). -->
+  <string name="web_form_menu_summary_new_record">%1$s • bản ghi mới</string>
+  <string name="web_survey_has_no_forms">Khảo sát này chưa có biểu mẫu nào.</string>
+  <string name="web_no_forms_available_on_web">Không có biểu mẫu nào trong khảo sát này dùng được trên web.</string>
+  <string name="web_qr_code">Mã QR</string>
+  <!-- Overflow menu button description; %1$s is the lowercase map feature type (e.g. "plot"). -->
+  <string name="web_more_entity_actions">Thao tác khác với %1$s</string>
+  <!-- Map feature details tab showing the feature's current properties. -->
+  <string name="web_entity_tab_data">Dữ liệu</string>
+  <!-- Map feature details tab listing the feature's submissions. -->
+  <string name="web_entity_tab_history">Lịch sử</string>
+  <string name="web_back_to_submissions">Quay lại bài gửi</string>
+  <string name="web_more_submission_actions">Thao tác khác với bài gửi</string>
+  <string name="web_close_form">Đóng biểu mẫu</string>
+  <string name="web_map_drawing_place_point">Nhấp vào bản đồ để đặt điểm</string>
+  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
+  <string name="web_map_drawing_add_vertices">Nhấp vào bản đồ để thêm đỉnh • %1$d/tối thiểu %2$d</string>
+  <string name="web_undo">Hoàn tác</string>
+  <string name="web_done">Xong</string>
+  <string name="web_cancel_drawing">Hủy vẽ</string>
+  <string name="web_sign_in">Đăng nhập</string>
+  <string name="web_sign_in_tagline">Lập bản đồ hệ sinh thái, thiết kế khảo sát thực địa và xác minh quan sát mặt đất cùng tổ chức của bạn.</string>
+  <string name="web_sign_in_description">Đăng nhập để xem các khảo sát và tổ chức được chia sẻ với tài khoản của bạn.</string>
+  <string name="web_signing_in">Đang đăng nhập…</string>
+  <string name="web_sign_in_with_google">Đăng nhập bằng Google</string>
+  <string name="web_sign_in_google_accounts_only">Hiện chỉ hỗ trợ xác thực bằng Tài khoản Google.</string>
+  <string name="web_terms_of_service_title">Điều khoản dịch vụ</string>
+  <string name="web_tos_signed_in_as">Đã đăng nhập với tư cách %1$s</string>
+  <string name="web_tos_decline">Từ chối</string>
+  <string name="web_tos_continue">Tiếp tục</string>
+  <string name="web_tos_intro">Vui lòng xem xét và chấp nhận Điều khoản dịch vụ của Collect One để tiếp tục.</string>
+  <string name="web_tos_agree_checkbox">Tôi đã đọc và đồng ý với Điều khoản dịch vụ của Collect One.</string>
+  <!-- Shown when a link names a console page that doesn't exist or that the user can't open. -->
+  <string name="web_link_unavailable">Trang đó không khả dụng. Có thể trang đã bị xóa hoặc bạn không có quyền truy cập.</string>
+  <!-- Error shown when an uploaded file can't be read; %1$s is the file name. -->
+  <string name="web_file_read_failed">Không thể đọc %1$s. Hãy thử lại.</string>
+  <!-- Subtitle of an export profile menu item; %1$d is the number of warnings to review. -->
+  <plurals name="web_export_profile_warnings_to_review">
+    <item quantity="other">%1$d mục cần xem lại trước khi xuất</item>
+  </plurals>
+  <plurals name="web_survey_count">
+    <item quantity="other">%1$d khảo sát</item>
+  </plurals>
+  <plurals name="web_organization_count">
+    <item quantity="other">%1$d tổ chức</item>
+  </plurals>
+  <!-- Survey card: number of locations (map features) in the survey. -->
+  <plurals name="web_survey_location_count">
+    <item quantity="other">%1$d vị trí</item>
+  </plurals>
+  <plurals name="web_form_question_count">
+    <item quantity="other">%1$d câu hỏi</item>
+  </plurals>
+
+  <!-- Shown when this build of the console can't open a file picker. -->
+  <string name="web_file_upload_unavailable">Không thể tải tệp lên tại đây.</string>
+  <string name="web_collapse_form">Thu gọn biểu mẫu</string>
+  <string name="web_expand_form">Mở rộng biểu mẫu</string>
+</resources>

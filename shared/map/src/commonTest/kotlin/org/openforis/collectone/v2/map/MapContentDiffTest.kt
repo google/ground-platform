@@ -57,6 +57,16 @@ class MapContentDiffTest {
   }
 
   @Test
+  fun overlayChange_rebuildsEverything() {
+    val contours =
+      VectorLineOverlay("mapbox://mapbox.mapbox-terrain-v2", "contour", color = Color.White)
+    val withOverlay =
+      base.copy(basemap = Basemap.MapboxSatelliteStreets.copy(overlays = listOf(contours)))
+    val ops = diffMapContent(base.copy(basemap = Basemap.MapboxSatelliteStreets), withOverlay)
+    assertEquals(diffMapContent(null, withOverlay), ops)
+  }
+
+  @Test
   fun changedFeatures_setSourceDataOnly() {
     val moved =
       sourceA.copy(features = listOf(point.copy(properties = mapOf("selected" to "true"))))

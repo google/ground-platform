@@ -118,7 +118,7 @@ When an organizer creates the first form in a new survey (e.g., *"Tree Planting 
 
 ### Live Form-to-Entity Schema Synchronization
 
-As the organizer edits the form in the Survey Designer, Ground keeps `EntityDatasetDef.properties` and `FieldBinding.entity_saveto` synchronized automatically:
+As the organizer edits the form in the Survey Designer, Collect One keeps `EntityDatasetDef.properties` and `FieldBinding.entity_saveto` synchronized automatically:
 
 <!-- mdformat off -->
 
@@ -170,6 +170,6 @@ While automatic `1:1` form-to-entity syncing handles simple surveys effortlessly
 
 *   **Scenario**: A partner imports an existing KoboToolbox or ODK XLSForm (`.xlsx`) that only contains `survey` and `choices` sheets (no `entities` sheet or `save_to` column).
 *   **Resolution**:
-    *   Upon XLSForm import, if the workbook does not declare an `entities` sheet and contains at least one spatial question (`geopoint`, `geotrace`, or `geoshape`), Ground **automatically synthesizes the default `EntityDatasetDef` and `save_to` bindings** using the rules above.
-    *   The imported form immediately works with Ground's Entity-only map out of the box, and exporting the survey back to `.xlsx` produces a standards-compliant XLSForm complete with the generated `entities` sheet and `save_to` column.
+    *   Upon XLSForm import, if the workbook does not declare an `entities` sheet and contains at least one spatial question (`geopoint`, `geotrace`, or `geoshape`), Collect One **automatically synthesizes the default `EntityDatasetDef` and `save_to` bindings** using the rules above.
+    *   The imported form immediately works with Collect One's Entity-only map out of the box, and exporting the survey back to `.xlsx` produces a standards-compliant XLSForm complete with the generated `entities` sheet and `save_to` column.
 
