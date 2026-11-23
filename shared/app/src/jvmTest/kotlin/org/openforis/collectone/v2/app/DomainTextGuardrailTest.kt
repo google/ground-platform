@@ -46,6 +46,7 @@ class DomainTextGuardrailTest {
     setOf(
       // The user's own data: survey, form, dataset, and library content, and names from imports.
       "CollectEarthProjectImport.description",
+      "ColumnPrefixGroup.wildcardLabel",
       "EditorChoice.label",
       "EditorDatasetProperty.label",
       "EditorDatasetRow.label",
@@ -71,6 +72,7 @@ class DomainTextGuardrailTest {
       "MutationLogItem.targetLabel",
       "Organization.description",
       "ProfileFieldMapping.label",
+      "Single.groupLabel",
       "SubmissionFieldEntry.questionLabel",
       "SubmissionGeometryPolygon.questionLabel",
       "SubmissionPreviewItem.entityLabel",
@@ -78,6 +80,12 @@ class DomainTextGuardrailTest {
       "SurveyDetails.description",
       "SurveyMapAnchor.label",
       "SurveyPreviewItem.description",
+      // External Open Foris Whisp enrichment dataset/indicator names derived from whisp_* keys.
+      "WhispBeforeAfterComparison.label",
+      "WhispIndicator.label",
+      "WhispMetric.label",
+      "WhispRiskVerdict.label",
+      "WhispYearlySeries.label",
       // A geocoder or gazetteer place's own category (typed coordinates are named by the UI).
       "SurveyPlaceItem.categoryLabel",
       // Language names, shown in their own language on purpose.

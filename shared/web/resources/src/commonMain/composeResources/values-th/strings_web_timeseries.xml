@@ -82,4 +82,6 @@
   <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · แดง</string>
   <string name="web_time_series_stretch_sar">VV · VH · อัตราส่วน</string>
   <string name="web_time_series_close">ปิดอนุกรมเวลา</string>
+  <string name="web_time_series_expand">ขยายการวิเคราะห์ภาพถ่าย</string>
+  <string name="web_time_series_collapse">ยุบการวิเคราะห์ภาพถ่าย</string>
 </resources>

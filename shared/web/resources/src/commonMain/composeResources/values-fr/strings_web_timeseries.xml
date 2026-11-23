@@ -82,4 +82,6 @@
   <string name="web_time_series_stretch_nir_swir_red">PIR · SWIR · Rouge</string>
   <string name="web_time_series_stretch_sar">VV · VH · Rapport</string>
   <string name="web_time_series_close">Fermer les séries temporelles</string>
+  <string name="web_time_series_expand">Développer l'analyse d'imagerie</string>
+  <string name="web_time_series_collapse">Réduire l'analyse d'imagerie</string>
 </resources>

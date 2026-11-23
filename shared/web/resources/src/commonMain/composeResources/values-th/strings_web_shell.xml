@@ -196,4 +196,14 @@
   <string name="web_file_upload_unavailable">ไม่สามารถอัปโหลดไฟล์ที่นี่ได้</string>
   <string name="web_collapse_form">ยุบแบบฟอร์ม</string>
   <string name="web_expand_form">ขยายแบบฟอร์ม</string>
+  <string name="web_expand_column_group">ขยาย %1$d คอลัมน์ %2$s</string>
+  <string name="web_collapse_column_group">ยุบ %1$d คอลัมน์ %2$s</string>
+  <string name="web_entity_tab_risk_analysis">การวิเคราะห์ความเสี่ยง</string>
+  <string name="web_table_whisp_expand">แสดงคอลัมน์ Whisp (%1$d)</string>
+  <string name="web_table_whisp_collapse">ยุบคอลัมน์ Whisp</string>
+  <string name="web_table_whisp_fields_count">%1$d ฟิลด์ Whisp</string>
+  <string name="web_discard_form_title">ละทิ้งคำตอบในแบบฟอร์มหรือไม่?</string>
+  <string name="web_discard_form_message">คุณกำลังกรอกแบบฟอร์มอยู่ การออกตอนนี้จะละทิ้งคำตอบที่ยังไม่ได้บันทึก</string>
+  <string name="web_discard_form_confirm">ละทิ้ง</string>
+  <string name="web_discard_form_cancel">แก้ไขต่อ</string>
 </resources>

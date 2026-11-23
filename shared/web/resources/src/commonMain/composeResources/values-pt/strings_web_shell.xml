@@ -206,4 +206,14 @@
   <string name="web_file_upload_unavailable">Não é possível enviar arquivos aqui.</string>
   <string name="web_collapse_form">Recolher formulário</string>
   <string name="web_expand_form">Expandir formulário</string>
+  <string name="web_expand_column_group">Expandir %1$d colunas %2$s</string>
+  <string name="web_collapse_column_group">Recolher %1$d colunas %2$s</string>
+  <string name="web_entity_tab_risk_analysis">Análise de risco</string>
+  <string name="web_table_whisp_expand">Mostrar colunas Whisp (%1$d)</string>
+  <string name="web_table_whisp_collapse">Recolher colunas Whisp</string>
+  <string name="web_table_whisp_fields_count">%1$d campos Whisp</string>
+  <string name="web_discard_form_title">Descartar respostas do formulário?</string>
+  <string name="web_discard_form_message">Você está preenchendo um formulário no momento. Sair agora descartará todas as respostas não salvas.</string>
+  <string name="web_discard_form_confirm">Descartar</string>
+  <string name="web_discard_form_cancel">Continuar editando</string>
 </resources>

@@ -201,4 +201,14 @@
   <string name="web_file_upload_unavailable">Kupakia faili hakupatikani hapa.</string>
   <string name="web_collapse_form">Kunja fomu</string>
   <string name="web_expand_form">Panua fomu</string>
+  <string name="web_expand_column_group">Panua safuwima %1$d za %2$s</string>
+  <string name="web_collapse_column_group">Kunja safuwima %1$d za %2$s</string>
+  <string name="web_entity_tab_risk_analysis">Uchambuzi wa hatari</string>
+  <string name="web_table_whisp_expand">Onyesha safuwima za Whisp (%1$d)</string>
+  <string name="web_table_whisp_collapse">Kunja safuwima za Whisp</string>
+  <string name="web_table_whisp_fields_count">Sehemu %1$d za Whisp</string>
+  <string name="web_discard_form_title">Tupa majibu ya fomu?</string>
+  <string name="web_discard_form_message">Unajaza fomu kwa sasa. Kuondoka sasa kutatupa majibu yoyote ambayo hayajahifadhiwa.</string>
+  <string name="web_discard_form_confirm">Tupa</string>
+  <string name="web_discard_form_cancel">Endelea kuhariri</string>
 </resources>

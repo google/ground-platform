@@ -201,4 +201,14 @@
   <string name="web_file_upload_unavailable">No se pueden subir archivos aquí.</string>
   <string name="web_collapse_form">Contraer formulario</string>
   <string name="web_expand_form">Expandir formulario</string>
+  <string name="web_expand_column_group">Expandir %1$d columnas de %2$s</string>
+  <string name="web_collapse_column_group">Contraer %1$d columnas de %2$s</string>
+  <string name="web_entity_tab_risk_analysis">Análisis de riesgo</string>
+  <string name="web_table_whisp_expand">Mostrar columnas de Whisp (%1$d)</string>
+  <string name="web_table_whisp_collapse">Agrupar columnas de Whisp</string>
+  <string name="web_table_whisp_fields_count">%1$d campos de Whisp</string>
+  <string name="web_discard_form_title">¿Descartar respuestas del formulario?</string>
+  <string name="web_discard_form_message">Actualmente estás completando un formulario. Si sales ahora, se descartarán las respuestas no guardadas.</string>
+  <string name="web_discard_form_confirm">Descartar</string>
+  <string name="web_discard_form_cancel">Seguir editando</string>
 </resources>

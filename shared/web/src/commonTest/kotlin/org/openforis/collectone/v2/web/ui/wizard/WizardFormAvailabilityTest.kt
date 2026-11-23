@@ -118,9 +118,11 @@ class WizardFormAvailabilityTest {
 
     val primaryFormKey = assertNotNull(wizard.uiState.value.primaryForm).key
     val formEditor = state.surveyEditor.formEditor(primaryFormKey)
-    assertEquals(FormAvailability.MOBILE, formEditor.uiState.value.form.availability)
+    assertEquals(FormAvailability.BOTH, formEditor.uiState.value.form.availability)
 
-    // Enable web availability in Step 5.
+    // Switch to mobile-only, then re-enable web availability via the preview target action.
+    formEditor.updateAvailability(FormAvailability.MOBILE)
+    assertEquals(FormAvailability.MOBILE, formEditor.uiState.value.form.availability)
     formEditor.selectPreviewTarget(FormPreviewTarget.WEB)
     formEditor.enableOnPreviewTarget()
     assertEquals(FormAvailability.BOTH, formEditor.uiState.value.form.availability)

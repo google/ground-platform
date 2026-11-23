@@ -82,4 +82,6 @@
   <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · Rojo</string>
   <string name="web_time_series_stretch_sar">VV · VH · Cociente</string>
   <string name="web_time_series_close">Cerrar series temporales</string>
+  <string name="web_time_series_expand">Expandir análisis de imágenes</string>
+  <string name="web_time_series_collapse">Contraer análisis de imágenes</string>
 </resources>

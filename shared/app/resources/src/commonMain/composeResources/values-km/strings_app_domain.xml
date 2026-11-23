@@ -530,4 +530,17 @@
   <string name="domain_cluster_marker_status_pending">កំពុងរង់ចាំ</string>
   <string name="domain_cluster_marker_status_no_marker_symbol">គ្មាននិមិត្តសញ្ញាសម្គាល់</string>
   <string name="domain_cluster_marker_status_other_symbol">និមិត្តសញ្ញា %1$s</string>
+  <string name="domain_pdf_risk_analysis">ការវិភាគហានិភ័យ (Open Foris Whisp)</string>
+  <string name="domain_pdf_risk_intro">ការត្រួតពិនិត្យហានិភ័យការកាប់បំផ្លាញព្រៃឈើ និងការប្រើប្រាស់ដីដោយ Open Foris Whisp។</string>
+  <string name="domain_pdf_risk_high">ហានិភ័យខ្ពស់</string>
+  <string name="domain_pdf_risk_more_info">ត្រូវការព័ត៌មានបន្ថែម</string>
+  <string name="domain_pdf_risk_low">ហានិភ័យទាប</string>
+  <string name="domain_pdf_risk_unknown">មិនស្គាល់</string>
+  <string name="domain_pdf_risk_yearly_chart">ការរំខាន និងការបាត់បង់ប្រចាំឆ្នាំ</string>
+  <string name="domain_pdf_risk_yearly_no_activity">មិនបានរកឃើញការរំខាន ការបាត់បង់ព្រៃឈើ ឬភ្លើងឆេះប្រចាំឆ្នាំក្នុងឆ្នាំដែលបានតាមដានទេ។</string>
+  <string name="domain_pdf_risk_cutoff_2020">កាលបរិច្ឆេទកំណត់ 2020</string>
+  <string name="domain_pdf_risk_before_after">មុន និងក្រោយឆ្នាំ 2020</string>
+  <string name="domain_pdf_risk_indicators">សូចនាករសំខាន់ៗ</string>
+  <string name="domain_pdf_risk_treecover">គម្របដើមឈើ និងព្រៃឈើ (2020)</string>
+  <string name="domain_pdf_risk_commodities">ទំនិញកសិកម្ម និងការប្រើប្រាស់ដី</string>
 </resources>

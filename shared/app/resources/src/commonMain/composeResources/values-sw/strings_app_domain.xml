@@ -545,4 +545,17 @@
   <string name="domain_cluster_marker_status_pending">Inasubiri</string>
   <string name="domain_cluster_marker_status_no_marker_symbol">Hakuna alama ya kiashiria</string>
   <string name="domain_cluster_marker_status_other_symbol">Alama %1$s</string>
+  <string name="domain_pdf_risk_analysis">Uchambuzi wa hatari (Open Foris Whisp)</string>
+  <string name="domain_pdf_risk_intro">Uchunguzi wa hatari ya ukataji miti na matumizi ya ardhi unaoendeshwa na Open Foris Whisp.</string>
+  <string name="domain_pdf_risk_high">Hatari kubwa</string>
+  <string name="domain_pdf_risk_more_info">Maelezo zaidi yanahitajika</string>
+  <string name="domain_pdf_risk_low">Hatari ndogo</string>
+  <string name="domain_pdf_risk_unknown">Haijulikani</string>
+  <string name="domain_pdf_risk_yearly_chart">Usumbufu na upotevu wa kila mwaka</string>
+  <string name="domain_pdf_risk_yearly_no_activity">Hakuna usumbufu wa kila mwaka, upotevu wa misitu, au moto uliogunduliwa katika miaka iliyofuatiliwa.</string>
+  <string name="domain_pdf_risk_cutoff_2020">Kikomo cha 2020</string>
+  <string name="domain_pdf_risk_before_after">Kabla dhidi ya baada ya 2020</string>
+  <string name="domain_pdf_risk_indicators">Viashiria muhimu</string>
+  <string name="domain_pdf_risk_treecover">Kifuniko cha miti na misitu (2020)</string>
+  <string name="domain_pdf_risk_commodities">Bidhaa na matumizi ya ardhi</string>
 </resources>

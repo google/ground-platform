@@ -545,4 +545,17 @@
   <string name="domain_cluster_marker_status_pending">Pendiente</string>
   <string name="domain_cluster_marker_status_no_marker_symbol">Sin símbolo de marcador</string>
   <string name="domain_cluster_marker_status_other_symbol">Símbolo %1$s</string>
+  <string name="domain_pdf_risk_analysis">Análisis de riesgo (Open Foris Whisp)</string>
+  <string name="domain_pdf_risk_intro">Evaluación de riesgos de deforestación y uso del suelo con tecnología de Open Foris Whisp.</string>
+  <string name="domain_pdf_risk_high">Riesgo alto</string>
+  <string name="domain_pdf_risk_more_info">Se necesita más información</string>
+  <string name="domain_pdf_risk_low">Riesgo bajo</string>
+  <string name="domain_pdf_risk_unknown">Desconocido</string>
+  <string name="domain_pdf_risk_yearly_chart">Perturbación y pérdida anual</string>
+  <string name="domain_pdf_risk_yearly_no_activity">No se detectó perturbación anual, pérdida de bosques ni incendios en los años monitoreados.</string>
+  <string name="domain_pdf_risk_cutoff_2020">Límite de 2020</string>
+  <string name="domain_pdf_risk_before_after">Antes vs. después de 2020</string>
+  <string name="domain_pdf_risk_indicators">Indicadores clave</string>
+  <string name="domain_pdf_risk_treecover">Cobertura arbórea y bosques (2020)</string>
+  <string name="domain_pdf_risk_commodities">Productos básicos y uso del suelo</string>
 </resources>

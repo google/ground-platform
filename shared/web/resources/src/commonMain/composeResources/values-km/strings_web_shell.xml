@@ -196,4 +196,14 @@
   <string name="web_file_upload_unavailable">មិនអាចផ្ទុកឡើងឯកសារនៅទីនេះបានទេ។</string>
   <string name="web_collapse_form">បង្រួមសំណុំបែបបទ</string>
   <string name="web_expand_form">ពង្រីកសំណុំបែបបទ</string>
+  <string name="web_expand_column_group">ពង្រីកជួរឈរ %2$s ចំនួន %1$d</string>
+  <string name="web_collapse_column_group">បង្រួមជួរឈរ %2$s ចំនួន %1$d</string>
+  <string name="web_entity_tab_risk_analysis">ការវិភាគហានិភ័យ</string>
+  <string name="web_table_whisp_expand">បង្ហាញជួរឈរ Whisp (%1$d)</string>
+  <string name="web_table_whisp_collapse">បង្រួមជួរឈរ Whisp</string>
+  <string name="web_table_whisp_fields_count">វាល Whisp ចំនួន %1$d</string>
+  <string name="web_discard_form_title">បោះបង់ចម្លើយទម្រង់?</string>
+  <string name="web_discard_form_message">អ្នកកំពុងបំពេញទម្រង់មួយ។ ការចាកចេញឥឡូវនេះនឹងបោះបង់ចម្លើយដែលមិនទាន់បានរក្សាទុក។</string>
+  <string name="web_discard_form_confirm">បោះបង់</string>
+  <string name="web_discard_form_cancel">បន្តកែសម្រួល</string>
 </resources>

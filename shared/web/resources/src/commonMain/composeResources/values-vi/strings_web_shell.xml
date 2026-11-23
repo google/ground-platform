@@ -196,4 +196,14 @@
   <string name="web_file_upload_unavailable">Không thể tải tệp lên tại đây.</string>
   <string name="web_collapse_form">Thu gọn biểu mẫu</string>
   <string name="web_expand_form">Mở rộng biểu mẫu</string>
+  <string name="web_expand_column_group">Mở rộng %1$d cột %2$s</string>
+  <string name="web_collapse_column_group">Thu gọn %1$d cột %2$s</string>
+  <string name="web_entity_tab_risk_analysis">Phân tích rủi ro</string>
+  <string name="web_table_whisp_expand">Hiển thị các cột Whisp (%1$d)</string>
+  <string name="web_table_whisp_collapse">Thu gọn các cột Whisp</string>
+  <string name="web_table_whisp_fields_count">%1$d trường Whisp</string>
+  <string name="web_discard_form_title">Hủy bỏ các câu trả lời biểu mẫu?</string>
+  <string name="web_discard_form_message">Bạn đang điền biểu mẫu. Rời khỏi ngay bây giờ sẽ hủy bỏ mọi câu trả lời chưa được lưu.</string>
+  <string name="web_discard_form_confirm">Hủy bỏ</string>
+  <string name="web_discard_form_cancel">Tiếp tục chỉnh sửa</string>
 </resources>

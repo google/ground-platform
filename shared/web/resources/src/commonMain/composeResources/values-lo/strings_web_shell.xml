@@ -196,4 +196,14 @@
   <string name="web_file_upload_unavailable">ບໍ່ສາມາດອັບໂຫຼດໄຟລ໌ຢູ່ບ່ອນນີ້ໄດ້.</string>
   <string name="web_collapse_form">ຫຍໍ້ແບບຟອມ</string>
   <string name="web_expand_form">ຂະຫຍາຍແບບຟອມ</string>
+  <string name="web_expand_column_group">ຂະຫຍາຍ %1$d ຖັນ %2$s</string>
+  <string name="web_collapse_column_group">ຫຍໍ້ %1$d ຖັນ %2$s</string>
+  <string name="web_entity_tab_risk_analysis">ການວິເຄາະຄວາມສ່ຽງ</string>
+  <string name="web_table_whisp_expand">ສະແດງຖັນ Whisp (%1$d)</string>
+  <string name="web_table_whisp_collapse">ຫຍໍ້ຖັນ Whisp</string>
+  <string name="web_table_whisp_fields_count">%1$d ຟິວ Whisp</string>
+  <string name="web_discard_form_title">ຍົກເລີກຄຳຕອບແບບຟອມບໍ?</string>
+  <string name="web_discard_form_message">ທ່ານກຳລັງຕື່ມແບບຟອມຢູ່. ການອອກຕອນນີ້ຈະຍົກເລີກຄຳຕອບທີ່ຍັງບໍ່ໄດ້ບັນທຶກ.</string>
+  <string name="web_discard_form_confirm">ຍົກເລີກ</string>
+  <string name="web_discard_form_cancel">ສືບຕໍ່ແກ້ໄຂ</string>
 </resources>

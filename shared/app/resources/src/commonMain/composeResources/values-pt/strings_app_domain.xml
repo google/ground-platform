@@ -560,4 +560,17 @@
   <string name="domain_cluster_marker_status_pending">Pendente</string>
   <string name="domain_cluster_marker_status_no_marker_symbol">Sem símbolo de marcador</string>
   <string name="domain_cluster_marker_status_other_symbol">Símbolo %1$s</string>
+  <string name="domain_pdf_risk_analysis">Análise de risco (Open Foris Whisp)</string>
+  <string name="domain_pdf_risk_intro">Triagem de risco de desmatamento e uso da terra com tecnologia Open Foris Whisp.</string>
+  <string name="domain_pdf_risk_high">Alto risco</string>
+  <string name="domain_pdf_risk_more_info">Mais informações necessárias</string>
+  <string name="domain_pdf_risk_low">Baixo risco</string>
+  <string name="domain_pdf_risk_unknown">Desconhecido</string>
+  <string name="domain_pdf_risk_yearly_chart">Perturbação e perda anual</string>
+  <string name="domain_pdf_risk_yearly_no_activity">Nenhuma perturbação anual, perda florestal ou incêndio detectado nos anos monitorados.</string>
+  <string name="domain_pdf_risk_cutoff_2020">Corte de 2020</string>
+  <string name="domain_pdf_risk_before_after">Antes vs. depois de 2020</string>
+  <string name="domain_pdf_risk_indicators">Indicadores-chave</string>
+  <string name="domain_pdf_risk_treecover">Cobertura arbórea e floresta (2020)</string>
+  <string name="domain_pdf_risk_commodities">Commodities e uso da terra</string>
 </resources>

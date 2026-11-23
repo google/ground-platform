@@ -530,4 +530,17 @@
   <string name="domain_cluster_marker_status_pending">ລໍຖ້າ</string>
   <string name="domain_cluster_marker_status_no_marker_symbol">ບໍ່ມີສັນຍາລັກເຄື່ອງໝາຍ</string>
   <string name="domain_cluster_marker_status_other_symbol">ສັນຍາລັກ %1$s</string>
+  <string name="domain_pdf_risk_analysis">ການວິເຄາະຄວາມສ່ຽງ (Open Foris Whisp)</string>
+  <string name="domain_pdf_risk_intro">ການກວດສອບຄວາມສ່ຽງການຕັດໄມ້ທຳລາຍປ່າ ແລະ ການນຳໃຊ້ທີ່ດິນໂດຍ Open Foris Whisp.</string>
+  <string name="domain_pdf_risk_high">ຄວາມສ່ຽງສູງ</string>
+  <string name="domain_pdf_risk_more_info">ຕ້ອງການຂໍ້ມູນເພີ່ມເຕີມ</string>
+  <string name="domain_pdf_risk_low">ຄວາມສ່ຽງຕ່ຳ</string>
+  <string name="domain_pdf_risk_unknown">ບໍ່ຮູ້ຈັກ</string>
+  <string name="domain_pdf_risk_yearly_chart">ການລົບກວນ ແລະ ການສູນເສຍປະຈຳປີ</string>
+  <string name="domain_pdf_risk_yearly_no_activity">ບໍ່ພົບການລົບກວນ, ການສູນເສຍປ່າໄມ້ ຫຼື ໄຟໄໝ້ປະຈຳປີໃນຊຸມປີທີ່ຕິດຕາມ.</string>
+  <string name="domain_pdf_risk_cutoff_2020">ເສັ້ນຕັດປີ 2020</string>
+  <string name="domain_pdf_risk_before_after">ກ່ອນ ແລະ ຫຼັງປີ 2020</string>
+  <string name="domain_pdf_risk_indicators">ຕົວຊີ້ວັດຫຼັກ</string>
+  <string name="domain_pdf_risk_treecover">ການປົກຫຸ້ມຕົ້ນໄມ້ ແລະ ປ່າໄມ້ (2020)</string>
+  <string name="domain_pdf_risk_commodities">ສິນຄ້າກະສິກຳ ແລະ ການນຳໃຊ້ທີ່ດິນ</string>
 </resources>

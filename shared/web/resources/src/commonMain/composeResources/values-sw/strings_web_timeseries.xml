@@ -82,4 +82,6 @@
   <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · Nyekundu</string>
   <string name="web_time_series_stretch_sar">VV · VH · Uwiano</string>
   <string name="web_time_series_close">Funga msururu wa muda</string>
+  <string name="web_time_series_expand">Panua uchambuzi wa picha</string>
+  <string name="web_time_series_collapse">Kunja uchambuzi wa picha</string>
 </resources>

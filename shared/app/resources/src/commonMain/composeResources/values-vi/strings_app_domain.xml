@@ -530,4 +530,17 @@
   <string name="domain_cluster_marker_status_pending">Đang chờ</string>
   <string name="domain_cluster_marker_status_no_marker_symbol">Không có ký hiệu đánh dấu</string>
   <string name="domain_cluster_marker_status_other_symbol">Ký hiệu %1$s</string>
+  <string name="domain_pdf_risk_analysis">Phân tích rủi ro (Open Foris Whisp)</string>
+  <string name="domain_pdf_risk_intro">Sàng lọc rủi ro phá rừng và sử dụng đất do Open Foris Whisp cung cấp.</string>
+  <string name="domain_pdf_risk_high">Rủi ro cao</string>
+  <string name="domain_pdf_risk_more_info">Cần thêm thông tin</string>
+  <string name="domain_pdf_risk_low">Rủi ro thấp</string>
+  <string name="domain_pdf_risk_unknown">Không xác định</string>
+  <string name="domain_pdf_risk_yearly_chart">Xáo trộn và suy giảm hằng năm</string>
+  <string name="domain_pdf_risk_yearly_no_activity">Không phát hiện xáo trộn, mất rừng hoặc cháy rừng hằng năm trong các năm được giám sát.</string>
+  <string name="domain_pdf_risk_cutoff_2020">Mốc năm 2020</string>
+  <string name="domain_pdf_risk_before_after">Trước so với sau năm 2020</string>
+  <string name="domain_pdf_risk_indicators">Các chỉ số chính</string>
+  <string name="domain_pdf_risk_treecover">Độ che phủ cây và rừng (2020)</string>
+  <string name="domain_pdf_risk_commodities">Hàng hóa và sử dụng đất</string>
 </resources>

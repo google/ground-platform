@@ -82,4 +82,6 @@
   <string name="web_time_series_stretch_nir_swir_red">NIR · SWIR · Vermelho</string>
   <string name="web_time_series_stretch_sar">VV · VH · Razão</string>
   <string name="web_time_series_close">Fechar séries temporais</string>
+  <string name="web_time_series_expand">Expandir análise de imagens</string>
+  <string name="web_time_series_collapse">Recolher análise de imagens</string>
 </resources>

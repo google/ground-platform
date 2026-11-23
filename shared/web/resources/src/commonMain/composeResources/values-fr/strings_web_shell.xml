@@ -201,4 +201,14 @@
   <string name="web_file_upload_unavailable">L'importation de fichiers n'est pas disponible ici.</string>
   <string name="web_collapse_form">Réduire le formulaire</string>
   <string name="web_expand_form">Développer le formulaire</string>
+  <string name="web_expand_column_group">Développer %1$d colonnes %2$s</string>
+  <string name="web_collapse_column_group">Réduire %1$d colonnes %2$s</string>
+  <string name="web_entity_tab_risk_analysis">Analyse des risques</string>
+  <string name="web_table_whisp_expand">Afficher les colonnes Whisp (%1$d)</string>
+  <string name="web_table_whisp_collapse">Regrouper les colonnes Whisp</string>
+  <string name="web_table_whisp_fields_count">%1$d champs Whisp</string>
+  <string name="web_discard_form_title">Abandonner les réponses du formulaire ?</string>
+  <string name="web_discard_form_message">Vous êtes en train de remplir un formulaire. Quitter maintenant supprimera toutes les réponses non enregistrées.</string>
+  <string name="web_discard_form_confirm">Abandonner</string>
+  <string name="web_discard_form_cancel">Continuer la modification</string>
 </resources>
