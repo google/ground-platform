@@ -18,6 +18,7 @@
 // up; set E2E_SERVER_PORT, E2E_WEB_CONSOLE_PORT, E2E_MOBILE_APP_PORT, E2E_SPANNER_EMULATOR_PORT,
 // or E2E_SPANNER_EMULATOR_REST_PORT to move them.
 
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -43,27 +44,35 @@ export const SERVER_BINARY = path.join(
   isWindows ? 'c1-server.bat' : 'c1-server',
 );
 
-/** The Gradle tasks that build what the tests run, in the repository's root build. */
-export const GRADLE_TASKS = [
-  ':server:installDist',
-  ':webApp:wasmJsBrowserDistribution',
-  ':mobileWebApp:wasmJsBrowserDistribution',
+const hasModule = (dir) => fs.existsSync(path.join(REPO_ROOT, dir, 'build.gradle.kts'));
+
+/** The apps under test that exist in the current checkout, served from their production bundles. */
+export const APPS = [
+  ...(hasModule('webApp')
+    ? [
+        {
+          name: 'webConsole',
+          gradleTask: ':webApp:wasmJsBrowserDistribution',
+          port: port('E2E_WEB_CONSOLE_PORT', 18192),
+          distDir: path.join(REPO_ROOT, 'webApp/build/dist/wasmJs/productionExecutable'),
+        },
+      ]
+    : []),
+  ...(hasModule('mobileWebApp')
+    ? [
+        {
+          name: 'mobileApp',
+          gradleTask: ':mobileWebApp:wasmJsBrowserDistribution',
+          port: port('E2E_MOBILE_APP_PORT', 18193),
+          distDir: path.join(REPO_ROOT, 'mobileWebApp/build/dist/wasmJs/productionExecutable'),
+        },
+      ]
+    : []),
 ];
+
+/** The Gradle tasks that build what the tests run, in the repository's root build. */
+export const GRADLE_TASKS = [':server:installDist', ...APPS.map((app) => app.gradleTask)];
 
 export const GRADLE_WRAPPER = isWindows ? 'gradlew.bat' : 'gradlew';
-
-/** The apps under test, each served from its production bundle on its own port. */
-export const APPS = [
-  {
-    name: 'webConsole',
-    port: port('E2E_WEB_CONSOLE_PORT', 18192),
-    distDir: path.join(REPO_ROOT, 'webApp/build/dist/wasmJs/productionExecutable'),
-  },
-  {
-    name: 'mobileApp',
-    port: port('E2E_MOBILE_APP_PORT', 18193),
-    distDir: path.join(REPO_ROOT, 'mobileWebApp/build/dist/wasmJs/productionExecutable'),
-  },
-];
 
 export const appUrl = (name) => `http://127.0.0.1:${APPS.find((a) => a.name === name).port}`;

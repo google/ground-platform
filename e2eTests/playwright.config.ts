@@ -54,17 +54,29 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    {
-      name: 'webConsole',
-      testMatch: /webConsole.*\.spec\.ts$/,
-      use: { baseURL: appUrl('webConsole'), viewport: { width: 1280, height: 800 } },
-    },
-    {
-      name: 'mobileApp',
-      testMatch: /mobileApp.*\.spec\.ts$/,
-      // A typical Android phone. `?chrome=0` in the tests hides the workbench around the app.
-      use: { baseURL: appUrl('mobileApp'), viewport: { width: 412, height: 915 }, hasTouch: true },
-    },
+    ...(APPS.some((a) => a.name === 'webConsole')
+      ? [
+          {
+            name: 'webConsole',
+            testMatch: /webConsole.*\.spec\.ts$/,
+            use: { baseURL: appUrl('webConsole'), viewport: { width: 1280, height: 800 } },
+          },
+        ]
+      : []),
+    ...(APPS.some((a) => a.name === 'mobileApp')
+      ? [
+          {
+            name: 'mobileApp',
+            testMatch: /mobileApp.*\.spec\.ts$/,
+            // A typical Android phone. `?chrome=0` in the tests hides the workbench around the app.
+            use: {
+              baseURL: appUrl('mobileApp'),
+              viewport: { width: 412, height: 915 },
+              hasTouch: true,
+            },
+          },
+        ]
+      : []),
   ],
   // Started in order: the service needs the emulator.
   webServer: [
