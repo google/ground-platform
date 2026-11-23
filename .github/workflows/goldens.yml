@@ -26,7 +26,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled]
   push:
-    branches: [main]
+    branches: [c1, wip/baobab]
   workflow_dispatch:
 
 permissions:
@@ -37,11 +37,13 @@ jobs:
     name: e2e
     # Adding any other label, or the label to a pull request whose goldens already run, skips.
     if: >-
-      github.event_name != 'pull_request' ||
-      (github.event.action == 'labeled' && github.event.label.name == 'run-goldens' &&
-        github.event.pull_request.draft) ||
-      (github.event.action != 'labeled' && (!github.event.pull_request.draft ||
-        contains(github.event.pull_request.labels.*.name, 'run-goldens')))
+      hashFiles('e2eTests/package.json') != '' && (
+        github.event_name != 'pull_request' ||
+        (github.event.action == 'labeled' && github.event.label.name == 'run-goldens' &&
+          github.event.pull_request.draft) ||
+        (github.event.action != 'labeled' && (!github.event.pull_request.draft ||
+          contains(github.event.pull_request.labels.*.name, 'run-goldens')))
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Check out code

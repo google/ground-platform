@@ -47,7 +47,7 @@ while IFS= read -r -d '' file; do
 done < <(
   # detekt-baseline.xml files are generated (and rewritten) by `./gradlew detektBaseline`.
   find . \
-    \( -name .git -o -name build -o -name .gradle -o -name .kotlin -o -name node_modules -o -name kotlin-js-store -o -name .nx -o -name dist -o -name .cache \) -prune \
+    \( -name .git -o -name .worktrees -o -name build -o -name .gradle -o -name .kotlin -o -name node_modules -o -name kotlin-js-store -o -name .nx -o -name dist -o -name .cache \) -prune \
     -o -type f \( \
       -name '*.kt' \
       -o -name '*.kts' \

@@ -59,118 +59,127 @@ val serverOnly =
         .orNull)
     ?.trim() == "true"
 
+// Include a Gradle module only when its build script is present on disk so incremental review
+// slices (e.g. Wave 0–5 on `c1`) build cleanly before later modules land.
+fun includeIfPresent(path: String) {
+  val dir = path.removePrefix(":").replace(':', '/')
+  if (file("$dir/build.gradle.kts").exists()) {
+    include(path)
+  }
+}
+
 // Shared Kotlin Multiplatform libraries (see shared/README.md).
-include(":shared:core")
+includeIfPresent(":shared:core")
 
 // Backend server.
-include(":server")
+includeIfPresent(":server")
 
 if (!serverOnly) {
-  include(":shared:ui")
+  includeIfPresent(":shared:ui")
 
   // Test fixtures (the example forms) for the tests of shared/ui and the modules built on it, the
   // sample data, and the mobile workbench.
-  include(":shared:ui:testing")
+  includeIfPresent(":shared:ui:testing")
 
-  include(":shared:map")
+  includeIfPresent(":shared:map")
 
   // The map's geometry types (LatLng, LngLatBounds, Geometry) without Compose, for the domain
   // layer.
-  include(":shared:map:geometry")
+  includeIfPresent(":shared:map:geometry")
 
-  include(":shared:app")
+  includeIfPresent(":shared:app")
 
   // The layers of shared/app as their own modules (see docs/technical/client/modules.md): the pure
   // Kotlin domain, and the data layer (stores, sync, remote, and device clients) built on it.
-  include(":shared:app:domain")
+  includeIfPresent(":shared:app:domain")
 
-  include(":shared:app:data")
+  includeIfPresent(":shared:app:data")
 
   // The app's UI strings (all 9 locales) and their generated `Res` accessors, shared by the
   // presentation modules.
-  include(":shared:app:resources")
+  includeIfPresent(":shared:app:resources")
 
   // The presentation modules of shared/app: the code every feature shares (text mappers, shared
   // composables, navigation models, ViewModel helpers).
-  include(":shared:app:ui-common")
+  includeIfPresent(":shared:app:ui-common")
 
   // The survey map feature.
-  include(":shared:app:map")
+  includeIfPresent(":shared:app:map")
 
   // The data collection feature (forms, record details, searchable list, PDF reports).
-  include(":shared:app:datacollection")
+  includeIfPresent(":shared:app:datacollection")
 
   // The settings feature (preferences, language, offline maps).
-  include(":shared:app:settings")
+  includeIfPresent(":shared:app:settings")
 
   // The searchable list's search feature (map features, places).
-  include(":shared:app:listsearch")
+  includeIfPresent(":shared:app:listsearch")
 
   // The onboarding feature (sign-in, survey directory, first sync).
-  include(":shared:app:onboarding")
+  includeIfPresent(":shared:app:onboarding")
 
   // The dashboard feature (surveys, organizations, sync, impact).
-  include(":shared:app:dashboard")
+  includeIfPresent(":shared:app:dashboard")
 
   // Test fixtures for the tests of shared/app and the modules built on it: data-level ones (sample
   // stores, editor samples, fakes) and app-level ones (the assembled app session, ViewModel
   // builders).
-  include(":shared:app:testing")
+  includeIfPresent(":shared:app:testing")
 
-  include(":shared:app:ui-testing")
+  includeIfPresent(":shared:app:ui-testing")
 
-  include(":shared:web")
+  includeIfPresent(":shared:web")
 
   // The web console's own domain layer (web-only editor models, importers, and use cases).
-  include(":shared:web:domain")
+  includeIfPresent(":shared:web:domain")
 
   // The web console's UI strings (all 9 locales) and their generated `Res` accessors, shared by its
   // presentation modules.
-  include(":shared:web:resources")
+  includeIfPresent(":shared:web:resources")
 
   // The presentation code every feature of the web console shares (shared composables, text
   // mappers, and the survey outcome card).
-  include(":shared:web:ui-common")
+  includeIfPresent(":shared:web:ui-common")
 
   // The time series feature of the web console (the Time series panel).
-  include(":shared:web:timeseries")
+  includeIfPresent(":shared:web:timeseries")
 
   // The impact feature of the web console (the Impact dashboard and its PDF reports).
-  include(":shared:web:impact")
+  includeIfPresent(":shared:web:impact")
 
   // The surveys list feature of the web console (the Surveys page and the survey outcome prompt).
-  include(":shared:web:surveys")
+  includeIfPresent(":shared:web:surveys")
 
   // The organization feature of the web console (the Organizations and Organization pages).
-  include(":shared:web:organization")
+  includeIfPresent(":shared:web:organization")
 
   // The form editor feature of the web console (the Form editor).
-  include(":shared:web:formeditor")
+  includeIfPresent(":shared:web:formeditor")
 
   // The survey editor feature of the web console (the Survey editor).
-  include(":shared:web:surveyeditor")
+  includeIfPresent(":shared:web:surveyeditor")
 
   // The survey creation wizard of the web console.
-  include(":shared:web:wizard")
+  includeIfPresent(":shared:web:wizard")
 
   // Test fixtures for the tests of shared/web.
-  include(":shared:web:testing")
+  includeIfPresent(":shared:web:testing")
 
-  include(":shared:mobile")
+  includeIfPresent(":shared:mobile")
 
   // Platform hosts.
-  include(":androidApp")
+  includeIfPresent(":androidApp")
 
-  include(":webApp")
+  includeIfPresent(":webApp")
 
   // Standalone lightweight Kotlin/Wasm form runner embedded inside KML placemark balloons (e.g.
   // Google Earth Web), built on :shared:core and :shared:ui without local storage, Mapbox, or OAuth
   // popups so it runs cleanly inside sandboxed iframes.
-  include(":balloonFormApp")
+  includeIfPresent(":balloonFormApp")
 
-  include(":mobileWebApp")
+  includeIfPresent(":mobileWebApp")
 
   // The workbench (device preview chrome, XForms presets, and simulation tools) is a library, kept
   // apart from the Wasm host.
-  include(":mobileWebApp:workbench")
+  includeIfPresent(":mobileWebApp:workbench")
 }

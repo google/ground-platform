@@ -17,7 +17,7 @@ name: Check
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [c1, wip/baobab]
 
 permissions:
   contents: read
@@ -37,7 +37,7 @@ jobs:
         run: bash scripts/ktfmt.sh --check
 
       - name: Check proto formatting (buf)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && hashFiles('shared/protos/**/*.proto') != '' }}
         run: bash scripts/buf-format.sh --check
 
       - name: Check license headers
@@ -48,6 +48,7 @@ jobs:
   # the coverage report in kmp-tests.
   server:
     name: server Spanner tests
+    if: ${{ hashFiles('server/build.gradle.kts') != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -88,6 +89,7 @@ jobs:
   # run in goldens.yml.
   kmp-tests:
     name: jvm tests, coverage, and detekt
+    if: ${{ hashFiles('shared/**/build.gradle.kts', 'server/build.gradle.kts') != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -106,11 +108,17 @@ jobs:
 
       # The Kover reports (of the JVM tests only, the jvmTests variant) reuse the instrumented test
       # runs; :koverVerifyJvmTests fails when the merged line coverage drops below the minimum in the
-      # root build.gradle.kts.
+      # root build.gradle.kts (checked once the full module tree is present).
       - name: Run JVM unit tests, coverage, and detekt
-        run: >-
-          ./gradlew jvmTest :server:test detekt :koverXmlReportJvmTests :koverHtmlReportJvmTests
-          :koverVerifyJvmTests --continue --console=plain
+        run: |
+          TASKS="jvmTest detekt :koverXmlReportJvmTests :koverHtmlReportJvmTests"
+          if [ -f server/build.gradle.kts ]; then
+            TASKS="$TASKS :server:test"
+          fi
+          if [ -f shared/web/build.gradle.kts ] && [ -f server/build.gradle.kts ]; then
+            TASKS="$TASKS :koverVerifyJvmTests"
+          fi
+          ./gradlew $TASKS --continue --console=plain
 
       - name: Summarize coverage
         if: ${{ !cancelled() && hashFiles('build/reports/kover/reportJvmTests.xml') != '' }}
