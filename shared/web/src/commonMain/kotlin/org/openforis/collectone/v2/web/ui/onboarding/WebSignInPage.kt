@@ -15,7 +15,6 @@ package org.openforis.collectone.v2.web.ui.onboarding
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -24,7 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,6 +56,8 @@ import org.openforis.collectone.v2.web.resources.web_sign_in_tagline
 import org.openforis.collectone.v2.web.resources.web_sign_in_with_google
 import org.openforis.collectone.v2.web.resources.web_signing_in
 import org.openforis.collectone.v2.web.ui.common.WebLanguageSelector
+
+internal const val WEB_SIGN_IN_PAGE_SCROLL_TAG = "web_sign_in_page_scroll"
 
 /**
  * Sign-in gate for the web app, shown in place of any web page while the user is signed out.
@@ -96,9 +97,12 @@ internal fun WebSignInPage(
         WebLanguageSelector(currentLanguageCode = languageCode, onLanguageChange = onLanguageChange)
       }
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      WebOnboardingScrollContainer(
+        modifier = Modifier.weight(1f),
+        scrollTag = WEB_SIGN_IN_PAGE_SCROLL_TAG,
+      ) {
         ElevatedCard(
-          modifier = Modifier.width(460.dp),
+          modifier = Modifier.widthIn(max = 460.dp).fillMaxWidth(),
           colors =
             CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {

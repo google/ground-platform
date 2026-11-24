@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -35,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -60,6 +61,9 @@ import org.openforis.collectone.v2.web.resources.web_tos_signed_in_as
 import org.openforis.collectone.v2.web.ui.common.WebLanguageSelector
 
 private const val DISABLED_CONTENT_ALPHA = 0.38f
+
+internal const val WEB_TOS_PAGE_SCROLL_TAG = "web_tos_page_scroll"
+internal const val WEB_TOS_TEXT_SCROLL_TAG = "web_tos_text_scroll"
 
 /**
  * Terms of Service gate for the web console, shown in place of any web page after every sign-in
@@ -96,12 +100,12 @@ internal fun WebTermsOfServicePage(
         WebLanguageSelector(currentLanguageCode = languageCode, onLanguageChange = onLanguageChange)
       }
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-      Box(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        contentAlignment = Alignment.Center,
+      WebOnboardingScrollContainer(
+        modifier = Modifier.weight(1f),
+        scrollTag = WEB_TOS_PAGE_SCROLL_TAG,
       ) {
         ElevatedCard(
-          modifier = Modifier.width(560.dp),
+          modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
           colors =
             CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
@@ -167,6 +171,7 @@ private fun TermsOfServiceText(scrollState: ScrollState) {
       Column(
         modifier =
           Modifier.fillMaxWidth()
+            .testTag(WEB_TOS_TEXT_SCROLL_TAG)
             .verticalScroll(scrollState)
             .padding(start = 16.dp, top = 16.dp, end = 22.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),

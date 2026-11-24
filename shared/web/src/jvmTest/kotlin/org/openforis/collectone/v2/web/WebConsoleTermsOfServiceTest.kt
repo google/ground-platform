@@ -22,10 +22,11 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.runDesktopComposeUiTest
 import kotlin.test.Test
@@ -43,6 +44,9 @@ import org.openforis.collectone.v2.app.data.datasource.local.store.seededStore
 import org.openforis.collectone.v2.app.di.AppDataHolder
 import org.openforis.collectone.v2.web.navigation.MemoryBrowserHistory
 import org.openforis.collectone.v2.web.ui.WebAppState
+import org.openforis.collectone.v2.web.ui.onboarding.WEB_SIGN_IN_PAGE_SCROLL_TAG
+import org.openforis.collectone.v2.web.ui.onboarding.WEB_TOS_PAGE_SCROLL_TAG
+import org.openforis.collectone.v2.web.ui.onboarding.WEB_TOS_TEXT_SCROLL_TAG
 
 /**
  * The web console asks for the Terms of Service after every sign-in, in place of the page being
@@ -62,7 +66,9 @@ class WebConsoleTermsOfServiceTest {
   }
 
   private fun ComposeUiTest.scrollTermsToBottom() {
-    onNode(hasScrollAction()).performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, 10_000f) }
+    onNodeWithTag(WEB_TOS_TEXT_SCROLL_TAG).performSemanticsAction(SemanticsActions.ScrollBy) {
+      it(0f, 10_000f)
+    }
     waitForIdle()
   }
 
@@ -163,7 +169,9 @@ class WebConsoleTermsOfServiceTest {
       onNodeWithText(continueButton).assertIsNotEnabled()
 
       // Scrolling partway down keeps the checkbox disabled.
-      onNode(hasScrollAction()).performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, 100f) }
+      onNodeWithTag(WEB_TOS_TEXT_SCROLL_TAG).performSemanticsAction(SemanticsActions.ScrollBy) {
+        it(0f, 100f)
+      }
       waitForIdle()
       onNodeWithText(checkbox).assertIsNotEnabled()
       onNodeWithText(continueButton).assertIsNotEnabled()
@@ -174,7 +182,7 @@ class WebConsoleTermsOfServiceTest {
       onNodeWithText(continueButton).assertIsNotEnabled()
 
       // Scrolling back up keeps the checkbox enabled.
-      onNode(hasScrollAction()).performSemanticsAction(SemanticsActions.ScrollBy) {
+      onNodeWithTag(WEB_TOS_TEXT_SCROLL_TAG).performSemanticsAction(SemanticsActions.ScrollBy) {
         it(0f, -10_000f)
       }
       waitForIdle()
@@ -267,6 +275,53 @@ class WebConsoleTermsOfServiceTest {
       // In the header and as the card's title.
       onAllNodesWithText(title).assertCountEquals(2)
       assertFalse(reloaded.hasAcceptedTerms)
+    }
+
+  @Test
+  fun smallViewport_signInPageScrollsToRevealSignInButton() =
+    runDesktopComposeUiTest(width = 400, height = 450) {
+      val state = WebAppState(dataHolder = sampleDataHolder())
+      showConsole(state, MemoryBrowserHistory("/surveys"))
+
+      onNodeWithTag(WEB_SIGN_IN_PAGE_SCROLL_TAG).performSemanticsAction(SemanticsActions.ScrollBy) {
+        it(0f, 10_000f)
+      }
+      waitForIdle()
+
+      onNodeWithText(signIn).assertIsDisplayed().performClick()
+      waitForIdle()
+
+      assertTrue(state.viewModels.onboarding.uiState.value.isSignedIn)
+    }
+
+  @Test
+  fun smallViewport_termsPageScrollsToRevealCheckboxAndContinueButton() =
+    runDesktopComposeUiTest(width = 400, height = 450) {
+      val state = WebAppState(dataHolder = sampleDataHolder())
+      showConsole(state, MemoryBrowserHistory("/surveys"))
+      state.signIn()
+      waitForIdle()
+
+      scrollTermsToBottom()
+      onNodeWithTag(WEB_TOS_PAGE_SCROLL_TAG).performSemanticsAction(SemanticsActions.ScrollBy) {
+        it(0f, 10_000f)
+      }
+      waitForIdle()
+
+      onNodeWithText(checkbox)
+        .performScrollTo()
+        .assertIsDisplayed()
+        .assertIsEnabled()
+        .performClick()
+      waitForIdle()
+      onNodeWithText(continueButton)
+        .performScrollTo()
+        .assertIsDisplayed()
+        .assertIsEnabled()
+        .performClick()
+      waitForIdle()
+
+      assertTrue(state.hasAcceptedTerms)
     }
 
   /**
