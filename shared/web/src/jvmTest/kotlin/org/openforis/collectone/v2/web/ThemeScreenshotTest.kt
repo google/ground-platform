@@ -25,6 +25,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.runDesktopComposeUiTest
@@ -255,6 +256,17 @@ class ThemeScreenshotTest {
           val state = makeState(dark, signedIn = true)
           state.impact.openDashboard(null)
           state to MemoryBrowserHistory(initialPath = "/impact")
+        },
+        // The numbers are computed in the background: capture them once the page shows them, not
+        // while it still says "Adding up the numbers…".
+        afterCompose = { state ->
+          waitUntil(timeoutMillis = 10_000) {
+            !state.impact.uiState.value.isLoading &&
+              onAllNodesWithText("Adding up the numbers", substring = true)
+                .fetchSemanticsNodes()
+                .isEmpty()
+          }
+          waitForIdle()
         },
       ),
     )
