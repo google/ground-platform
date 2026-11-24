@@ -107,3 +107,33 @@ internal object FormQuestionLookup {
         ?.takeIf { it.isNotBlank() }
   }
 }
+
+/**
+ * Returns `true` if [step] represents an `entityref` question step (bound to a target entity
+ * reference field such as `/data/target_entity` or configured with `appearance="map-select"` /
+ * `"entityref"`). Shared by web data collection and the KML balloon form runner.
+ */
+fun isEntityReferenceStep(step: FormWizardStep?): Boolean {
+  val controls =
+    when (step) {
+      is FormWizardStep.QuestionStep -> listOf(step.control)
+      is FormWizardStep.FieldListGroupStep -> step.controls
+      else -> emptyList()
+    }
+  return controls.any { ctrl ->
+    val path = ctrl.canonicalPath
+    val fieldRef = ctrl.controlDef.field_ref
+    path.endsWith("/target_entity") ||
+      fieldRef == "target_entity" ||
+      path.endsWith("/entity_id") ||
+      fieldRef == "entity_id" ||
+      path.endsWith("/sample_plot_entity") ||
+      fieldRef == "sample_plot_entity" ||
+      path.endsWith("/past_individual_id") ||
+      fieldRef == "past_individual_id" ||
+      path.endsWith("/primary_respondent_id") ||
+      fieldRef == "primary_respondent_id" ||
+      ctrl.appearance.contains("map-select", ignoreCase = true) ||
+      ctrl.appearance.contains("entityref", ignoreCase = true)
+  }
+}

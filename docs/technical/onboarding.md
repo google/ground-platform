@@ -106,6 +106,7 @@ flowchart TD
 
   subgraph Shared["Shared KMP Architecture (shared/)"]
     UI["Presentation Layer (MVVM ViewModels + M3 Compose UI)"]
+    SharedForms["Shared Form UI (:shared:ui: CompactFormRunner, Theme)"]
     Dom["Domain Layer (:shared:app:domain + :shared:web:domain)"]
     Data["Data Layer (:shared:app:data: LocalStore, SQLDelight, Outbox & Sync)"]
     Core["Core Engine & Schemas (:shared:core + shared/protos/)"]
@@ -119,8 +120,11 @@ flowchart TD
   end
 
   Web & Android & IOS & MobWeb --> UI
-  Balloon --> Core
+  UI --> SharedForms
   UI --> Dom
+  Balloon -->|"BalloonFormViewModel + BalloonClient"| SharedForms
+  Balloon -.->|"Direct gRPC-Web & /balloon/* (no LocalStore)"| Srv
+  SharedForms --> Core
   Data -.->|"implements domain interfaces"| Dom
   Dom & Data --> Core
   Data <-->|"Unary gRPC-Web (Mutate* & SyncChanges)"| Srv
@@ -159,6 +163,7 @@ Collect One enforces **Clean Architecture** and **Model-View-ViewModel (MVVM)** 
   - **Passive Compose Views** collect immutable `StateFlow<*UiState>` streams from feature ViewModels (obtained via **Koin**) and send user actions upward through focused `*Actions` interfaces.
   - **ViewModels** call **Repository interfaces** directly for simple CRUD reads/writes, and invoke dedicated **Use Cases** whenever an operation coordinates multiple repositories, validates domain rules, or performs geometric/form computations.
   - **`SessionCoordinator`** routes cross-feature events (for example, selecting a map feature updates data collection and dashboard panels) without holding duplicated state.
+  - **Lightweight KML Balloon MVVM**: `balloonFormApp/` follows the same MVVM split (`BalloonFormViewModel` exposing `StateFlow<BalloonFormUiState>` + `BalloonFormActions` over a `BalloonClient` boundary) while depending only on `:shared:ui` and `:shared:core` so the sandboxed iframe bundle excludes SQLDelight, Mapbox, and Koin.
 - **Typed Error Handling (`DomainResult<T>`)**: Fallible repository and use case calls return `DomainResult.Success` or `DomainResult.Failure(DomainError)` rather than throwing untyped exceptions. `DomainErrorMapping` translates gRPC/auth failures in one place, and `ErrorMessages` maps `DomainError` to localized `UiText`.
 - **Cross-Cutting Hygiene**:
   - **Dependency Injection**: Assembled per host via Koin (`platformModule`, `dataModule`, `domainModule`, and per-feature `*Module`s); unit tests instantiate classes directly with fakes from `:shared:app:testing` and `:shared:app:ui-testing`.

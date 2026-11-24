@@ -36,6 +36,7 @@ kotlin {
         implementation(compose.ui)
         implementation(compose.components.resources)
         implementation(libs.compose.material.icons.extended)
+        implementation(libs.jetbrains.lifecycle.viewmodel)
         implementation(libs.kotlinx.serialization.json)
       }
     }
@@ -43,6 +44,8 @@ kotlin {
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
+        implementation(libs.kotlinx.coroutines.test)
+        implementation(libs.turbine)
         implementation(projects.shared.ui.testing)
       }
     }

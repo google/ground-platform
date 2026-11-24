@@ -26,6 +26,7 @@ import org.openforis.collectone.v2.app.domain.usecase.ResolveFormDefForLaunchUse
 import org.openforis.collectone.v2.core.forms.engine.FormEnvironment
 import org.openforis.collectone.v2.core.forms.ui.FormWizardController
 import org.openforis.collectone.v2.core.forms.ui.FormWizardStep
+import org.openforis.collectone.v2.core.forms.ui.isEntityReferenceStep
 
 /**
  * Canonical XForms `entityref` nodeset path (`/data/target_entity`) representing the geospatial
@@ -97,17 +98,7 @@ fun prepopulateEntityReference(controller: FormWizardController, entityId: Strin
  * [ENTITY_REF_FIELD_PATH] `/data/target_entity`, `/data/entity_id`, or configured with
  * `appearance="map-select"` / `"entityref"`).
  */
-fun isEntityRefStep(step: FormWizardStep?): Boolean =
-  controlsOf(step).any { ctrl ->
-    ctrl.canonicalPath == ENTITY_REF_FIELD_PATH ||
-      ctrl.canonicalPath.endsWith("/target_entity") ||
-      ctrl.canonicalPath.endsWith("/entity_id") ||
-      ctrl.canonicalPath.endsWith("/sample_plot_entity") ||
-      ctrl.canonicalPath.endsWith("/past_individual_id") ||
-      ctrl.canonicalPath.endsWith("/primary_respondent_id") ||
-      ctrl.appearance.contains("map-select", ignoreCase = true) ||
-      ctrl.appearance.contains("entityref", ignoreCase = true)
-  }
+fun isEntityRefStep(step: FormWizardStep?): Boolean = isEntityReferenceStep(step)
 
 /**
  * Returns `true` if [step] contains a geometry (`geopoint`, `geotrace`, or `geoshape`) question

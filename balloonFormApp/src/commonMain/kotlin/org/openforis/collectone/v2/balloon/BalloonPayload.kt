@@ -59,6 +59,7 @@ import org.openforis.collectone.v2.core.forms.temporal.formatIsoTime
 import org.openforis.collectone.v2.core.forms.ui.FormWizardController
 import org.openforis.collectone.v2.core.forms.ui.FormWizardStep
 import org.openforis.collectone.v2.core.forms.ui.formatFieldValueForDisplay
+import org.openforis.collectone.v2.core.forms.ui.isEntityReferenceStep
 import org.openforis.collectone.v2.core.geo.io.GoogleEarthDeepLinks
 import org.openforis.collectone.v2.core.ids.RecordIds
 
@@ -534,14 +535,6 @@ fun prepareFormDefForEntity(
         primary_instance = primary.copy(default_values = defaults.copy(fields = updatedFields))
       )
   )
-}
-
-/** True when [step] is the map-feature picker (`entityref` / `map-select`), answered by KML. */
-fun isEntityReferenceStep(step: FormWizardStep.QuestionStep): Boolean {
-  val control = step.control
-  return control.canonicalPath in ENTITY_REF_PATHS ||
-    control.controlDef.field_ref in ENTITY_REF_PATHS ||
-    control.controlDef.appearance.split(Regex("\\s+")).contains("map-select")
 }
 
 /** Counts the visible questions in [formDef] (excluding map-feature entity reference steps). */
