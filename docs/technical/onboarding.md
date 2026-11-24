@@ -225,7 +225,8 @@ The backend ([`server/README.md`](../../server/README.md)) is a single self-cont
 - **JDK 21**: Gradle automatically downloads a JDK 21 toolchain via Foojay if one is not already installed; you only need any working `java` on `PATH` to launch `./gradlew`.
 - **Node.js 22+** and **Bash**: Used by the Dev Launchpad and Playwright E2E suite.
 - **Docker** *(macOS / non-x86_64 Linux only)*: Used by `scripts/spanner-emulator.sh` when the native Linux x86_64 Spanner emulator binary does not apply.
-- **Android SDK** *(full client builds)*: Required when building Android/client modules; backend-only developers can pass `-Pcollectone.serverOnly=true` (or add `collectone.serverOnly=true` to `local.properties`) to work without an Android SDK.
+- **Android SDK** *(Android & full client builds)*: Required when building Android/client modules (see [`androidApp/README.md`](../../androidApp/README.md)); backend-only developers can pass `-Pcollectone.serverOnly=true` (or add `collectone.serverOnly=true` to `local.properties`) to work without an Android SDK.
+- **macOS, Xcode, and XcodeGen** *(opt-in iOS builds)*: Linking `AppMobile.framework`, running in the iOS Simulator (iOS 15.0+), or packaging `.ipa` archives (`iosApp/scripts/build-ipa.sh`) requires **macOS**, **Xcode** with **Xcode Command Line Tools** (`xcodebuild`, plus Swift Package Manager for the Mapbox Maps SDK for iOS), **[XcodeGen](https://github.com/yonaskolb/XcodeGen)** (`xcodegen generate` in `iosApp/`), and `-Pcollectone.ios=true` (plus an Apple Developer Team ID and signing certificate only for signed/ad-hoc `.ipa` builds; simulator runs and `--method unsigned` builds need no certificate). On Linux, Kotlin/Native can still compile and type-check iOS `.klib`s without macOS; see [`iosApp/README.md`](../../iosApp/README.md).
 
 ### Start the Full Stack with the Dev Launchpad
 
@@ -265,6 +266,8 @@ Collect One is a **single root Gradle build**—always invoke `./gradlew` from t
 | Verify merged JVM test coverage gate (≥80%) | `./gradlew :koverVerifyJvmTests` (HTML report: `:koverHtmlReportJvmTests`) |
 | Run Compose Desktop light/dark golden tests | `./gradlew :shared:web:jvmTest :shared:mobile:jvmTest --tests "*ThemeScreenshotTest"` |
 | Run Playwright E2E golden-screenshot suite | `cd e2eTests && npm ci && npm run setup && npm test` |
+| Build Android debug APK | `./gradlew :androidApp:assembleDebug` |
+| Build iOS Simulator framework *(macOS)* | `./gradlew -Pcollectone.ios=true :shared:mobile:linkDebugFrameworkIosSimulatorArm64` |
 
 ### Automated Codebase Guardrails
 
