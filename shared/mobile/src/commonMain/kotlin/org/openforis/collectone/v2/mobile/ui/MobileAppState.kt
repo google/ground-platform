@@ -263,6 +263,7 @@ class MobileAppState(
   override fun onSignedOutElsewhere() {
     if (currentRoute == MobileRoute.SignIn) return
     closeDrawerAndProfile()
+    notices.clear()
     navigator.resetTo(MobileRoute.SignIn)
   }
 
@@ -315,11 +316,19 @@ class MobileAppState(
 
   /**
    * Notices a change of the device connectivity (already applied to the app's connectivity, which
-   * the list search follows on its own). Download survey shows its own offline banner, so the
-   * offline and back-online notices are skipped there.
+   * the list search follows on its own). Download survey and Sign in show their own offline
+   * messages, so the Places API offline and back-online notices are skipped there; returning online
+   * on Sign in clears any prior sign-in notice cleanly.
    */
   fun onConnectivityChanged(isOnline: Boolean) {
-    if (currentRoute == MobileRoute.DownloadSurvey) return
+    when (currentRoute) {
+      MobileRoute.DownloadSurvey -> return
+      MobileRoute.SignIn -> {
+        if (isOnline) notices.clear()
+        return
+      }
+      else -> Unit
+    }
     if (!isOnline) {
       val countNoun = viewModels.surveyMap.uiState.value.activeEntitiesCountNoun
       showLocalizedNotice(Res.string.mobile_notice_device_offline, countNoun.pluralText)
@@ -499,6 +508,7 @@ class MobileAppState(
   override fun signOut() {
     isDrawerOpen = false
     viewModels.onboarding.signOut()
+    notices.clear()
     navigator.resetTo(MobileRoute.SignIn)
   }
 

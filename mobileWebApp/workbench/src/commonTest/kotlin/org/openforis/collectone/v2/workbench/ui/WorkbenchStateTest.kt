@@ -448,6 +448,26 @@ class WorkbenchStateTest {
   }
 
   @Test
+  fun airplaneModeOnSignIn_doesNotEmitPlacesNoticesAndClearsOnReconnect() {
+    val workbench =
+      WorkbenchState(
+        MobileAppState(initialRoute = MobileRoute.SignIn, dataHolder = sampleDataHolder())
+      )
+    val mobile = workbench.mobile
+
+    workbench.updateAirplaneMode(true)
+    assertFalse(mobile.viewModels.onboarding.uiState.value.isOnline)
+    assertEquals(null, mobile.notices.notice.value)
+
+    mobile.viewModels.onboarding.signInWithGoogle()
+    assertTrue(mobile.notices.notice.value?.startsWith("Cannot sign in") == true)
+
+    workbench.updateAirplaneMode(false)
+    assertTrue(mobile.viewModels.onboarding.uiState.value.isOnline)
+    assertEquals(null, mobile.notices.notice.value)
+  }
+
+  @Test
   fun shouldShowWorkbenchChrome_hidesOnMobileBrowsersAndRespectsUrlOverride() {
     val desktopUa =
       "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"

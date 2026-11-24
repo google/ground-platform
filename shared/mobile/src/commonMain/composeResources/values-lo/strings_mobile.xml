@@ -40,6 +40,8 @@
   <string name="mobile_sign_in_prompt">ເຂົ້າລະບົບເພື່ອເຂົ້າເຖິງແບບສຳຫຼວດທີ່ແບ່ງປັນກັບບັນຊີຂອງທ່ານ.</string>
   <!-- Sign-in button label while sign-in is in progress. -->
   <string name="mobile_sign_in_signing_in">ກຳລັງເຂົ້າລະບົບ…</string>
+  <!-- Shown on the Sign-in screen while the device has no network connection. -->
+  <string name="mobile_sign_in_offline_error">ທ່ານກຳລັງອອບລາຍ. ຕ້ອງມີການເຊື່ອມຕໍ່ອິນເຕີເນັດເພື່ອເຂົ້າລະບົບ.</string>
   <string name="mobile_sign_in_google_accounts_only">ປັດຈຸບັນການຢືນຢັນຕົວຕົນຈຳກັດສະເພາະບັນຊີ Google ເທົ່ານັ້ນ.</string>
 
   <!-- Terms of Service screen -->

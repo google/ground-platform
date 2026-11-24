@@ -43,6 +43,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,6 +73,7 @@ import org.openforis.collectone.v2.core.forms.ui.resources.sign_in_with_google
 import org.openforis.collectone.v2.core.version.MobileUpdateStatus
 import org.openforis.collectone.v2.mobile.resources.Res
 import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_google_accounts_only
+import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_offline_error
 import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_prompt
 import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_signing_in
 import org.openforis.collectone.v2.mobile.resources.mobile_sign_in_tagline
@@ -173,10 +178,14 @@ fun MobileScreenHost(
 internal fun showsUserDataSyncErrorBanner(isOnline: Boolean, onDownloadSurvey: Boolean): Boolean =
   isOnline || !onDownloadSurvey
 
+/** Test tag of the error/offline notice shown on [SignInScreen]. */
+internal const val SIGN_IN_NOTICE_TAG = "signInNotice"
+
 /**
  * The first screen of the app: Sign in with Google, under the [languageSelector] so the user can
  * pick the app's language before signing in. The button is disabled while [isSigningIn], so a slow
- * sign-in can't be started twice; [notice] shows why the last attempt failed.
+ * sign-in can't be started twice; while offline ([isOnline] is `false`), an offline sign-in message
+ * is shown, and otherwise [notice] shows why the last attempt failed.
  */
 @Composable
 fun SignInScreen(
@@ -184,6 +193,7 @@ fun SignInScreen(
   /** Language selector shown above the sign-in button. */
   languageSelector: @Composable () -> Unit = {},
   isSigningIn: Boolean = false,
+  isOnline: Boolean = true,
   notice: String? = null,
 ) {
   val surfaceColor = MaterialTheme.colorScheme.surface
@@ -273,16 +283,22 @@ fun SignInScreen(
     ) {
       languageSelector()
 
-      notice
-        ?.takeIf { it.isNotBlank() }
-        ?.let { message ->
-          Text(
-            text = message,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center,
-          )
+      val displayNotice =
+        if (!isOnline) {
+          stringResource(Res.string.mobile_sign_in_offline_error)
+        } else {
+          notice?.takeIf { it.isNotBlank() }
         }
+      displayNotice?.let { message ->
+        Text(
+          text = message,
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.error,
+          textAlign = TextAlign.Center,
+          modifier =
+            Modifier.testTag(SIGN_IN_NOTICE_TAG).semantics { liveRegion = LiveRegionMode.Polite },
+        )
+      }
 
       OutlinedButton(
         onClick = onSignIn,

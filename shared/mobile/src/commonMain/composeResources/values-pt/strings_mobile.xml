@@ -40,6 +40,8 @@
   <string name="mobile_sign_in_prompt">Entre para acessar as pesquisas compartilhadas com sua conta.</string>
   <!-- Sign-in button label while sign-in is in progress. -->
   <string name="mobile_sign_in_signing_in">Entrando…</string>
+  <!-- Shown on the Sign-in screen while the device has no network connection. -->
+  <string name="mobile_sign_in_offline_error">Você está offline. É necessária uma conexão com a internet para entrar.</string>
   <string name="mobile_sign_in_google_accounts_only">No momento, a autenticação está limitada a Contas do Google.</string>
 
   <!-- Terms of Service screen -->

@@ -40,6 +40,8 @@
   <string name="mobile_sign_in_prompt">ចូលគណនី ដើម្បីចូលប្រើការស្ទង់មតិដែលបានចែករំលែកជាមួយគណនីរបស់អ្នក។</string>
   <!-- Sign-in button label while sign-in is in progress. -->
   <string name="mobile_sign_in_signing_in">កំពុងចូលគណនី…</string>
+  <!-- Shown on the Sign-in screen while the device has no network connection. -->
+  <string name="mobile_sign_in_offline_error">អ្នកកំពុងក្រៅបណ្ដាញ។ ត្រូវការការភ្ជាប់អ៊ីនធឺណិត ដើម្បីចូលគណនី។</string>
   <string name="mobile_sign_in_google_accounts_only">បច្ចុប្បន្ន ការផ្ទៀងផ្ទាត់ត្រូវបានកំណត់ត្រឹមគណនី Google ប៉ុណ្ណោះ។</string>
 
   <!-- Terms of Service screen -->

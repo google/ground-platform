@@ -112,6 +112,41 @@ class MobileDeviceConnectivityTest {
   }
 
   @Test
+  fun goingOfflineOnSignIn_showsNoNotice() = runTest {
+    val onSignIn =
+      MobileAppState(initialRoute = MobileRoute.SignIn, dataHolder = sampleDataHolder())
+    onSignIn.notices.clear()
+
+    onSignIn.notices.notice.test {
+      assertNull(awaitItem())
+
+      onSignIn.updateDeviceConnectivity(isOnline = false)
+
+      expectNoItemsWithin(NOTICE_TEXT_LOAD_WINDOW)
+    }
+  }
+
+  @Test
+  fun comingBackOnlineOnSignIn_clearsNoticeAndShowsNoOnlineNotice() = runTest {
+    val onSignIn =
+      MobileAppState(initialRoute = MobileRoute.SignIn, dataHolder = sampleDataHolder())
+    onSignIn.updateDeviceConnectivity(isOnline = false)
+    onSignIn.notices.show("Cannot sign in while offline. Connect to the internet and try again.")
+
+    onSignIn.notices.notice.test {
+      assertEquals(
+        "Cannot sign in while offline. Connect to the internet and try again.",
+        awaitItem(),
+      )
+
+      onSignIn.updateDeviceConnectivity(isOnline = true)
+
+      assertNull(awaitItem())
+      expectNoItemsWithin(NOTICE_TEXT_LOAD_WINDOW)
+    }
+  }
+
+  @Test
   fun reportOfUnchangedConnectivity_isIgnored() {
     state.notices.show("Earlier notice")
 

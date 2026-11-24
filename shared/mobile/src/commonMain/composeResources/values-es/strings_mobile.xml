@@ -40,6 +40,8 @@
   <string name="mobile_sign_in_prompt">Inicie sesión para acceder a las encuestas compartidas con su cuenta.</string>
   <!-- Sign-in button label while sign-in is in progress. -->
   <string name="mobile_sign_in_signing_in">Iniciando sesión…</string>
+  <!-- Shown on the Sign-in screen while the device has no network connection. -->
+  <string name="mobile_sign_in_offline_error">No tiene conexión. Se requiere conexión a Internet para iniciar sesión.</string>
   <string name="mobile_sign_in_google_accounts_only">Por el momento, la autenticación solo está disponible con cuentas de Google.</string>
 
   <!-- Terms of Service screen -->

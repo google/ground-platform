@@ -40,6 +40,8 @@
   <string name="mobile_sign_in_prompt">Connectez-vous pour accéder aux enquêtes partagées avec votre compte.</string>
   <!-- Sign-in button label while sign-in is in progress. -->
   <string name="mobile_sign_in_signing_in">Connexion…</string>
+  <!-- Shown on the Sign-in screen while the device has no network connection. -->
+  <string name="mobile_sign_in_offline_error">Vous êtes hors ligne. Une connexion Internet est requise pour vous connecter.</string>
   <string name="mobile_sign_in_google_accounts_only">L’authentification est actuellement limitée aux comptes Google.</string>
 
   <!-- Terms of Service screen -->

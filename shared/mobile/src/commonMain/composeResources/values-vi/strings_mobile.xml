@@ -40,6 +40,8 @@
   <string name="mobile_sign_in_prompt">Đăng nhập để truy cập các khảo sát được chia sẻ với tài khoản của bạn.</string>
   <!-- Sign-in button label while sign-in is in progress. -->
   <string name="mobile_sign_in_signing_in">Đang đăng nhập…</string>
+  <!-- Shown on the Sign-in screen while the device has no network connection. -->
+  <string name="mobile_sign_in_offline_error">Bạn đang ngoại tuyến. Cần có kết nối Internet để đăng nhập.</string>
   <string name="mobile_sign_in_google_accounts_only">Hiện chỉ hỗ trợ xác thực bằng Tài khoản Google.</string>
 
   <!-- Terms of Service screen -->

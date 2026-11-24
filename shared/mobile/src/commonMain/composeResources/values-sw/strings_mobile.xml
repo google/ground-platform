@@ -40,6 +40,8 @@
   <string name="mobile_sign_in_prompt">Ingia ili kufikia tafiti zilizoshirikiwa na akaunti yako.</string>
   <!-- Sign-in button label while sign-in is in progress. -->
   <string name="mobile_sign_in_signing_in">Inaingia…</string>
+  <!-- Shown on the Sign-in screen while the device has no network connection. -->
+  <string name="mobile_sign_in_offline_error">Uko nje ya mtandao. Muunganisho wa intaneti unahitajika ili kuingia.</string>
   <string name="mobile_sign_in_google_accounts_only">Kwa sasa uthibitishaji unahusu Akaunti za Google pekee.</string>
 
   <!-- Terms of Service screen -->

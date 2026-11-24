@@ -138,6 +138,7 @@ private fun SignInDestination(state: MobileAppState) {
       )
     },
     isSigningIn = onboardingUiState.isSigningIn,
+    isOnline = onboardingUiState.isOnline,
     notice = notice,
   )
   onboardingUiState.devSignIn?.let { dialog ->
