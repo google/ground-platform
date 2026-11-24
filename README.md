@@ -131,7 +131,8 @@ for **Collect One**.
     the production builds of the web console and the mobile app in headless
     Chromium against a local server.
 -   **[`docs/`](docs/)**: Comprehensive architectural design and data model
-    documentation.
+    documentation — new contributors can start with the
+    [**Engineering Onboarding Guide**](docs/technical/onboarding.md).
 
 ## Mental Model & Terminology Mapping to XForms
 

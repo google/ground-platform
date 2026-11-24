@@ -29,6 +29,14 @@ support from **Google**, Collect One merges browser-based satellite visual
 interpretation and offline-first mobile field data collection into a single
 open-source platform.
 
+## Start Here
+
+-   **[`technical/onboarding.md`](technical/onboarding.md)**: **Engineering
+    Onboarding Guide** — End-to-end walkthrough of Collect One's goals,
+    user-facing functionality, Entity-first XForms mental model, Kotlin
+    Multiplatform & Cloud Spanner architecture, local Dev Launchpad quickstart,
+    and testing guardrails.
+
 ## Sections
 
 -   **[`product/`](product/)**:
@@ -60,6 +68,9 @@ open-source platform.
     -   [`future-work.md`](product/future-work.md): Future roadmap and
         extensibility plans.
 -   **[`technical/`](technical/)**:
+    -   [`onboarding.md`](technical/onboarding.md): End-to-end software engineer
+        onboarding guide covering platform goals, user workflows, KMP & Cloud
+        Spanner architecture, local Dev Launchpad setup, and CI guardrails.
     -   [`backend/impact-aggregation.md`](technical/backend/impact-aggregation.md):
         Design for the impact aggregation job and the optional Earth Engine
         spatial overlay pipeline (deduplication, thresholds, attribution score,
