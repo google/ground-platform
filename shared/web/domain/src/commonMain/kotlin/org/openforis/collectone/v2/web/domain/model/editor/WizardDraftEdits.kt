@@ -30,6 +30,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.SampleDesignConfig
 import org.openforis.collectone.v2.app.domain.model.editor.SamplePlotProperties
 import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
 import org.openforis.collectone.v2.app.domain.model.editor.SharingSettings
+import org.openforis.collectone.v2.app.domain.model.editor.SubPlotMode
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
 import org.openforis.collectone.v2.app.domain.usecase.CreateSurveyUseCase
 import org.openforis.collectone.v2.map.GeometryType
@@ -118,8 +119,11 @@ object WizardDraftEdits {
    * name the organizer typed is kept. Existing rows and the Form link are dropped because they
    * described field sites, not plots.
    */
-  fun asSamplePlotsLayer(layer: EntityDataset): EntityDataset {
-    val design = SampleDesignConfig()
+  fun asSamplePlotsLayer(
+    layer: EntityDataset,
+    defaultSubPlot: SubPlotMode = SubPlotMode.NONE,
+  ): EntityDataset {
+    val design = SampleDesignConfig(subPlot = defaultSubPlot)
     return layer.copy(
       displayName =
         if (layer.displayName == DEFAULT_FIELD_LAYER_NAME || layer.displayName == layer.id) {

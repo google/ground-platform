@@ -45,6 +45,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.FormPreviewTarget
 import org.openforis.collectone.v2.app.domain.model.editor.PeerDataVisibility
 import org.openforis.collectone.v2.app.domain.model.editor.PlotReviewOptions
 import org.openforis.collectone.v2.app.domain.model.editor.PlotReviewWorkflow
+import org.openforis.collectone.v2.app.domain.model.editor.SampleDesignConfig
 import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
 import org.openforis.collectone.v2.app.domain.repository.AuthRepository
@@ -972,10 +973,24 @@ class CreateSurveyWizardViewModel(
     val primaryLayer = draft.datasets.firstOrNull { it.kind == DatasetKind.MAP_LAYER }
     when (source) {
       WizardMapFeatureSource.SAMPLE_PLOTS -> {
+        val defaultSubPlot = SurveyWizardRules.defaultSubPlotMode(purposeIds)
         if (primaryLayer == null) {
           surveyEditor.addSamplePlotsLayer()
+          if (defaultSubPlot != SampleDesignConfig().subPlot) {
+            val added =
+              surveyEditor.uiState.value.draft.datasets.firstOrNull {
+                it.kind == DatasetKind.MAP_LAYER && it.isGenerated
+              }
+            if (added != null) {
+              surveyEditor.updateDataset(added.key) { layer ->
+                layer.copy(generator = layer.generator?.copy(subPlot = defaultSubPlot))
+              }
+            }
+          }
         } else if (!primaryLayer.isGenerated) {
-          surveyEditor.updateDataset(primaryLayer.key, WizardDraftEdits::asSamplePlotsLayer)
+          surveyEditor.updateDataset(primaryLayer.key) { layer ->
+            WizardDraftEdits.asSamplePlotsLayer(layer, defaultSubPlot)
+          }
         }
       }
       WizardMapFeatureSource.FIELD_FREEFORM -> {

@@ -29,10 +29,12 @@ import org.openforis.collectone.v2.app.domain.model.PrivacyClass
 import org.openforis.collectone.v2.app.domain.model.PurposePack
 import org.openforis.collectone.v2.app.domain.model.StarterTemplate
 import org.openforis.collectone.v2.app.domain.model.editor.EditorChoice
+import org.openforis.collectone.v2.app.domain.model.editor.EditorChoiceImage
 import org.openforis.collectone.v2.app.domain.model.editor.EditorForm
 import org.openforis.collectone.v2.app.domain.model.editor.EditorQuestion
 import org.openforis.collectone.v2.app.domain.model.editor.EditorQuestionType
 import org.openforis.collectone.v2.app.domain.model.editor.GeometryCapture
+import org.openforis.collectone.v2.core.forms.media.ChoiceImages
 
 /**
  * The global library (v0) that bootstraps the `"All users"` organization's library.
@@ -211,6 +213,8 @@ object GlobalLibrarySeedData {
     required: Boolean = false,
     hint: String = "",
     capture: GeometryCapture = GeometryCapture.GPS_ONLY,
+    choiceColors: Map<String, String> = emptyMap(),
+    choiceImages: Map<String, EditorChoiceImage> = emptyMap(),
   ) =
     EditorQuestion(
       key = name,
@@ -221,7 +225,13 @@ object GlobalLibrarySeedData {
       required = required,
       choices =
         concept.codeList.map {
-          EditorChoice(value = it.code, label = it.label.text, code = it.code)
+          EditorChoice(
+            value = it.code,
+            label = it.label.text,
+            image = choiceImages[it.code],
+            colorHex = choiceColors[it.code],
+            code = it.code,
+          )
         },
       decimalPlaces =
         if (concept.dataType == ConceptDataType.DECIMAL) EditorQuestion.DEFAULT_DECIMAL_PLACES
@@ -2305,6 +2315,37 @@ object GlobalLibrarySeedData {
       item("other_land", text("Other land")),
     )
 
+  private fun ipccLandUseColors(): Map<String, String> =
+    mapOf(
+      "forest_land" to "#3C8D40",
+      "cropland" to "#F9BF40",
+      "grassland" to "#F37C22",
+      "wetlands" to "#2278CF",
+      "settlements" to "#D13135",
+      "other_land" to "#8D6E63",
+    )
+
+  private fun lulcLandUseColors(): Map<String, String> =
+    mapOf(
+      "cropland" to "#F9BF40",
+      "agroforestry" to "#129EAF",
+      "grazing" to "#F37C22",
+      "forestry" to "#3C8D40",
+      "settlement" to "#D13135",
+      "conservation" to "#2278CF",
+      "other" to "#8D6E63",
+    )
+
+  private fun forestStratumImages(): Map<String, EditorChoiceImage> =
+    mapOf(
+      "primary_intact" to EditorChoiceImage("image/png", ChoiceImages.ICON_FOREST),
+      "secondary_regenerating" to EditorChoiceImage("image/png", ChoiceImages.ICON_SAPLINGS),
+      "degraded_forest" to EditorChoiceImage("image/png", ChoiceImages.ICON_LOGGING),
+      "mangrove_peatland" to EditorChoiceImage("image/png", ChoiceImages.ICON_WETLAND),
+      "planted_forest" to EditorChoiceImage("image/png", ChoiceImages.ICON_AGROFORESTRY),
+      "non_forest" to EditorChoiceImage("image/png", ChoiceImages.ICON_PASTURE),
+    )
+
   private fun lulcGroundTruthTemplate(): FormTemplate {
     val l = lulcConcepts()
     val c = coreConcepts()
@@ -2330,8 +2371,13 @@ object GlobalLibrarySeedData {
             EditorQuestionType.SELECT_ONE,
             true,
           ) to l.byId("lulc.land_cover_class"),
-          question(l.byId("lulc.land_use"), "land_use", EditorQuestionType.SELECT_ONE, true) to
+          question(
             l.byId("lulc.land_use"),
+            "land_use",
+            EditorQuestionType.SELECT_ONE,
+            true,
+            choiceColors = lulcLandUseColors(),
+          ) to l.byId("lulc.land_use"),
           question(l.byId("lulc.crop_type"), "crop_type", EditorQuestionType.SELECT_ONE) to
             l.byId("lulc.crop_type"),
           question(
@@ -2384,18 +2430,21 @@ object GlobalLibrarySeedData {
             "baseline_land_use_ipcc",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceColors = ipccLandUseColors(),
           ) to l.byId("lulc.baseline_land_use_ipcc"),
           question(
             l.byId("lulc.current_land_use_ipcc"),
             "current_land_use_ipcc",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceColors = ipccLandUseColors(),
           ) to l.byId("lulc.current_land_use_ipcc"),
           question(
             l.byId("lulc.forest_stratum"),
             "forest_stratum",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceImages = forestStratumImages(),
           ) to l.byId("lulc.forest_stratum"),
           question(
             l.byId("lulc.canopy_cover_pct"),
@@ -2454,6 +2503,7 @@ object GlobalLibrarySeedData {
             "forest_stratum",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceImages = forestStratumImages(),
           ) to l.byId("lulc.forest_stratum"),
           question(
             l.byId("lulc.stand_age_years"),

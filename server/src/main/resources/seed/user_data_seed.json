@@ -9000,6 +9000,11 @@
                               "stringValue": "Cropland"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "cropland"
@@ -9017,6 +9022,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Agroforestry / shaded tree crop"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
                             }
                           },
                           "collectone_code": {
@@ -9038,6 +9048,11 @@
                               "stringValue": "Grazing"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "grazing"
@@ -9055,6 +9070,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Forestry"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
                             }
                           },
                           "collectone_code": {
@@ -9076,6 +9096,11 @@
                               "stringValue": "Settlement"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "settlement"
@@ -9095,6 +9120,11 @@
                               "stringValue": "Conservation"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#2278CF"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "conservation"
@@ -9112,6 +9142,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Other"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#8D6E63"
                             }
                           },
                           "collectone_code": {
@@ -9625,6 +9660,52 @@
                     ]
                   }
                 },
+                "translations": {
+                  "languages": [
+                    {
+                      "language": "default",
+                      "isDefault": true,
+                      "strings": {
+                        "forest_stratum-0": {
+                          "value": "Primary intact forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-primary_intact.png"
+                          }
+                        },
+                        "forest_stratum-1": {
+                          "value": "Secondary or regenerating forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-secondary_regenerating.png"
+                          }
+                        },
+                        "forest_stratum-2": {
+                          "value": "Degraded natural forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-degraded_forest.png"
+                          }
+                        },
+                        "forest_stratum-3": {
+                          "value": "Mangrove or peat swamp forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-mangrove_peatland.png"
+                          }
+                        },
+                        "forest_stratum-4": {
+                          "value": "Planted forest or woodlot",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-planted_forest.png"
+                          }
+                        },
+                        "forest_stratum-5": {
+                          "value": "Non-forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-non_forest.png"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
                 "secondaryInstances": [
                   {
                     "id": "forest_change_class",
@@ -9741,6 +9822,11 @@
                               "stringValue": "Forest land"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "forest_land"
@@ -9758,6 +9844,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Cropland"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
                             }
                           },
                           "collectone_code": {
@@ -9779,6 +9870,11 @@
                               "stringValue": "Grassland"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "grassland"
@@ -9796,6 +9892,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Wetlands"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#2278CF"
                             }
                           },
                           "collectone_code": {
@@ -9817,6 +9918,11 @@
                               "stringValue": "Settlements"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "settlements"
@@ -9834,6 +9940,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Other land"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#8D6E63"
                             }
                           },
                           "collectone_code": {
@@ -9860,6 +9971,11 @@
                               "stringValue": "Forest land"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "forest_land"
@@ -9877,6 +9993,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Cropland"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
                             }
                           },
                           "collectone_code": {
@@ -9898,6 +10019,11 @@
                               "stringValue": "Grassland"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "grassland"
@@ -9915,6 +10041,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Wetlands"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#2278CF"
                             }
                           },
                           "collectone_code": {
@@ -9936,6 +10067,11 @@
                               "stringValue": "Settlements"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "settlements"
@@ -9953,6 +10089,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Other land"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#8D6E63"
                             }
                           },
                           "collectone_code": {
@@ -9974,9 +10115,9 @@
                               "stringValue": "primary_intact"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Primary intact forest"
+                              "stringValue": "forest_stratum-0"
                             }
                           },
                           "collectone_code": {
@@ -9993,9 +10134,9 @@
                               "stringValue": "secondary_regenerating"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Secondary or regenerating forest"
+                              "stringValue": "forest_stratum-1"
                             }
                           },
                           "collectone_code": {
@@ -10012,9 +10153,9 @@
                               "stringValue": "degraded_forest"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Degraded natural forest"
+                              "stringValue": "forest_stratum-2"
                             }
                           },
                           "collectone_code": {
@@ -10031,9 +10172,9 @@
                               "stringValue": "mangrove_peatland"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Mangrove or peat swamp forest"
+                              "stringValue": "forest_stratum-3"
                             }
                           },
                           "collectone_code": {
@@ -10050,9 +10191,9 @@
                               "stringValue": "planted_forest"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Planted forest or woodlot"
+                              "stringValue": "forest_stratum-4"
                             }
                           },
                           "collectone_code": {
@@ -10069,9 +10210,9 @@
                               "stringValue": "non_forest"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Non-forest"
+                              "stringValue": "forest_stratum-5"
                             }
                           },
                           "collectone_code": {
@@ -10430,7 +10571,7 @@
                       "itemset": {
                         "instanceId": "forest_stratum",
                         "valueRef": "name",
-                        "labelRef": "label",
+                        "labelRef": "jr:itext(itextId)",
                         "nodesetPath": "/root/item"
                       }
                     }
@@ -10579,6 +10720,52 @@
                     ]
                   }
                 },
+                "translations": {
+                  "languages": [
+                    {
+                      "language": "default",
+                      "isDefault": true,
+                      "strings": {
+                        "forest_stratum-0": {
+                          "value": "Primary intact forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-primary_intact.png"
+                          }
+                        },
+                        "forest_stratum-1": {
+                          "value": "Secondary or regenerating forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-secondary_regenerating.png"
+                          }
+                        },
+                        "forest_stratum-2": {
+                          "value": "Degraded natural forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-degraded_forest.png"
+                          }
+                        },
+                        "forest_stratum-3": {
+                          "value": "Mangrove or peat swamp forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-mangrove_peatland.png"
+                          }
+                        },
+                        "forest_stratum-4": {
+                          "value": "Planted forest or woodlot",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-planted_forest.png"
+                          }
+                        },
+                        "forest_stratum-5": {
+                          "value": "Non-forest",
+                          "media": {
+                            "imageUri": "jr://images/forest_stratum-non_forest.png"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
                 "secondaryInstances": [
                   {
                     "id": "forest_stratum",
@@ -10590,9 +10777,9 @@
                               "stringValue": "primary_intact"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Primary intact forest"
+                              "stringValue": "forest_stratum-0"
                             }
                           },
                           "collectone_code": {
@@ -10609,9 +10796,9 @@
                               "stringValue": "secondary_regenerating"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Secondary or regenerating forest"
+                              "stringValue": "forest_stratum-1"
                             }
                           },
                           "collectone_code": {
@@ -10628,9 +10815,9 @@
                               "stringValue": "degraded_forest"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Degraded natural forest"
+                              "stringValue": "forest_stratum-2"
                             }
                           },
                           "collectone_code": {
@@ -10647,9 +10834,9 @@
                               "stringValue": "mangrove_peatland"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Mangrove or peat swamp forest"
+                              "stringValue": "forest_stratum-3"
                             }
                           },
                           "collectone_code": {
@@ -10666,9 +10853,9 @@
                               "stringValue": "planted_forest"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Planted forest or woodlot"
+                              "stringValue": "forest_stratum-4"
                             }
                           },
                           "collectone_code": {
@@ -10685,9 +10872,9 @@
                               "stringValue": "non_forest"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Non-forest"
+                              "stringValue": "forest_stratum-5"
                             }
                           },
                           "collectone_code": {
@@ -11034,7 +11221,7 @@
                       "itemset": {
                         "instanceId": "forest_stratum",
                         "valueRef": "name",
-                        "labelRef": "label",
+                        "labelRef": "jr:itext(itextId)",
                         "nodesetPath": "/root/item"
                       }
                     }

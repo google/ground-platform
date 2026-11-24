@@ -180,6 +180,7 @@ class ConfigureWizardSurveyDraftUseCase {
       }
     }
 
+    val defaultSubPlot = SurveyWizardRules.defaultSubPlotMode(current.details.purposeIds)
     var primaryLayer = datasets.firstOrNull { it.kind == DatasetKind.MAP_LAYER }
     if (primaryLayer == null) {
       val layerTitle =
@@ -190,19 +191,20 @@ class ConfigureWizardSurveyDraftUseCase {
       val layerKey = newKey("d")
       primaryLayer =
         if (mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS) {
+          val design = SampleDesignConfig(subPlot = defaultSubPlot)
           EntityDataset(
             key = layerKey,
             kind = DatasetKind.MAP_LAYER,
             id = DatasetIds.forName(layerTitle, datasets.map { it.id }),
             displayName = layerTitle,
             description = "Sample plots generated from a statistical sample design.",
-            geometryType = SampleDesignConfig().geometryType,
+            geometryType = design.geometryType,
             keyProperty = SamplePlotProperties.PLOT_ID,
             labelProperty = SamplePlotProperties.PLOT_ID,
             fieldCreationEnabled = effectiveMode.defaultFieldCreationEnabled,
             properties = SamplePlotProperties.schema,
             style = LayerStyle(colorHex = "#F9A825", fillOpacity = 0.15),
-            generator = SampleDesignConfig(),
+            generator = design,
           )
         } else {
           EntityDataset(
@@ -221,7 +223,7 @@ class ConfigureWizardSurveyDraftUseCase {
     } else if (
       mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS && !primaryLayer.isGenerated
     ) {
-      val design = SampleDesignConfig()
+      val design = SampleDesignConfig(subPlot = defaultSubPlot)
       primaryLayer =
         primaryLayer.copy(
           displayName =
@@ -241,6 +243,15 @@ class ConfigureWizardSurveyDraftUseCase {
           rows = emptyList(),
           generator = design,
         )
+      datasets = datasets.map { if (it.key == primaryLayer.key) primaryLayer else it }
+    } else if (
+      mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS &&
+        primaryLayer.isGenerated &&
+        hasPurposeSelectionChanged &&
+        primaryLayer.generator?.lastRun == null
+    ) {
+      primaryLayer =
+        primaryLayer.copy(generator = primaryLayer.generator?.copy(subPlot = defaultSubPlot))
       datasets = datasets.map { if (it.key == primaryLayer.key) primaryLayer else it }
     } else if (
       mapFeatureSource != WizardMapFeatureSource.SAMPLE_PLOTS && primaryLayer.isGenerated

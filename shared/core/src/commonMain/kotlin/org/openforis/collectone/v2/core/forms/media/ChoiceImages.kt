@@ -163,6 +163,13 @@ object ChoiceImages {
       "effluent_treatment-settling_pond.png" to ChoiceImageMedia(MIME_PNG, ICON_MOISTURE_WET),
       "effluent_treatment-untreated_discharge.png" to ChoiceImageMedia(MIME_PNG, ICON_FIRE),
       "effluent_treatment-untreated.png" to ChoiceImageMedia(MIME_PNG, ICON_FIRE),
+      // Forest structure & stratum (lulc.forest_stratum)
+      "forest_stratum-primary_intact.png" to ChoiceImageMedia(MIME_PNG, ICON_FOREST),
+      "forest_stratum-secondary_regenerating.png" to ChoiceImageMedia(MIME_PNG, ICON_SAPLINGS),
+      "forest_stratum-degraded_forest.png" to ChoiceImageMedia(MIME_PNG, ICON_LOGGING),
+      "forest_stratum-mangrove_peatland.png" to ChoiceImageMedia(MIME_PNG, ICON_WETLAND),
+      "forest_stratum-planted_forest.png" to ChoiceImageMedia(MIME_PNG, ICON_AGROFORESTRY),
+      "forest_stratum-non_forest.png" to ChoiceImageMedia(MIME_PNG, ICON_PASTURE),
     )
 
   private const val DATA_URI_PREFIX = "data:"

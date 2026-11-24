@@ -420,6 +420,8 @@ object ChoiceImageRegistry {
       "land_use" to LAND_USE_CANDIDATES,
       "land_use_class" to LAND_USE_CANDIDATES,
       "ipcc_land_use" to LAND_USE_CANDIDATES,
+      "baseline_land_use_ipcc" to LAND_USE_CANDIDATES,
+      "current_land_use_ipcc" to LAND_USE_CANDIDATES,
       "desk_land_cover" to LAND_USE_CANDIDATES,
       "field_land_cover" to LAND_USE_CANDIDATES,
       "land_cover" to LAND_USE_CANDIDATES,

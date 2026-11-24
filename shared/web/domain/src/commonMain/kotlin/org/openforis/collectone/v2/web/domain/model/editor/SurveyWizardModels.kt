@@ -19,6 +19,7 @@ import org.openforis.collectone.v2.app.domain.model.PurposePack
 import org.openforis.collectone.v2.app.domain.model.editor.FormPreviewTarget
 import org.openforis.collectone.v2.app.domain.model.editor.GeometryCapture
 import org.openforis.collectone.v2.app.domain.model.editor.SaveToMode
+import org.openforis.collectone.v2.app.domain.model.editor.SubPlotMode
 import org.openforis.collectone.v2.app.domain.usecase.ProfileExportPlan
 import org.openforis.collectone.v2.app.domain.usecase.ResolvedLibrary
 import org.openforis.collectone.v2.map.GeometryType
@@ -179,6 +180,13 @@ object SurveyWizardRules {
         "forest_carbon_inventory" in purposeIds -> WizardMapFeatureSource.SAMPLE_PLOTS
       else -> null
     }
+
+  /** Purpose Pack of Deforestation & land-use change (Activity Data). */
+  const val ACTIVITY_DATA_PURPOSE_ID = "deforestation_activity_data"
+
+  /** Default [SubPlotMode] for generated sample plots driven by the selected [purposeIds]. */
+  fun defaultSubPlotMode(purposeIds: List<String>): SubPlotMode =
+    if (ACTIVITY_DATA_PURPOSE_ID in purposeIds) SubPlotMode.GRID else SubPlotMode.NONE
 
   /**
    * Default [GeometryType] for the primary Map layer driven by [purposeIds] and [mapFeatureSource].
