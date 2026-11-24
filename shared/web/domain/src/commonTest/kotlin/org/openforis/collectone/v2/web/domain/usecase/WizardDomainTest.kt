@@ -722,7 +722,8 @@ class WizardDomainTest {
   @Test
   fun activityDataPurpose_defaultsSubPlotToGrid_andSeedsLandUseColorsAndStratumIcons() = runNow {
     val store = seededStore()
-    val library = ResolveLibraryUseCase(LibraryRepositoryImpl(store)).observe(kfs).first()
+    val libraries = LibraryRepositoryImpl(store).observeLibraries().first()
+    val library = ResolveLibraryUseCase().forOrganization(libraries, kfs)
     val useCase = ConfigureWizardSurveyDraftUseCase()
 
     assertEquals(

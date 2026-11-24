@@ -1552,6 +1552,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1574,6 +1582,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Agroforestry / shaded tree crop"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
               }
             }
           }
@@ -1604,6 +1620,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1626,6 +1650,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Forestry"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
               }
             }
           }
@@ -1656,6 +1688,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1682,6 +1722,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1704,6 +1752,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
               }
             }
           }
@@ -2451,6 +2507,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2473,6 +2537,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Cropland"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
               }
             }
           }
@@ -2503,6 +2575,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2525,6 +2605,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Wetlands"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
               }
             }
           }
@@ -2555,6 +2643,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2577,6 +2673,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Other land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
               }
             }
           }
@@ -2610,6 +2714,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2632,6 +2744,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Cropland"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
               }
             }
           }
@@ -2662,6 +2782,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2684,6 +2812,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Wetlands"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
               }
             }
           }
@@ -2714,6 +2850,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2740,6 +2884,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2761,10 +2913,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Primary intact forest"
+                string_value: "forest_stratum-0"
               }
             }
           }
@@ -2787,10 +2939,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Secondary or regenerating forest"
+                string_value: "forest_stratum-1"
               }
             }
           }
@@ -2813,10 +2965,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Degraded natural forest"
+                string_value: "forest_stratum-2"
               }
             }
           }
@@ -2839,10 +2991,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Mangrove or peat swamp forest"
+                string_value: "forest_stratum-3"
               }
             }
           }
@@ -2865,10 +3017,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Planted forest or woodlot"
+                string_value: "forest_stratum-4"
               }
             }
           }
@@ -2891,10 +3043,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Non-forest"
+                string_value: "forest_stratum-5"
               }
             }
           }
@@ -3235,6 +3387,66 @@ form_templates {
           value: "lulc.observation_date@1"
         }
       }
+      translations {
+        languages {
+          language: "default"
+          is_default: true
+          strings {
+            key: "forest_stratum-0"
+            value {
+              value: "Primary intact forest"
+              media {
+                image_uri: "jr://images/forest_stratum-primary_intact.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-1"
+            value {
+              value: "Secondary or regenerating forest"
+              media {
+                image_uri: "jr://images/forest_stratum-secondary_regenerating.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-2"
+            value {
+              value: "Degraded natural forest"
+              media {
+                image_uri: "jr://images/forest_stratum-degraded_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-3"
+            value {
+              value: "Mangrove or peat swamp forest"
+              media {
+                image_uri: "jr://images/forest_stratum-mangrove_peatland.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-4"
+            value {
+              value: "Planted forest or woodlot"
+              media {
+                image_uri: "jr://images/forest_stratum-planted_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-5"
+            value {
+              value: "Non-forest"
+              media {
+                image_uri: "jr://images/forest_stratum-non_forest.png"
+              }
+            }
+          }
+        }
+      }
     }
     view {
       components {
@@ -3292,7 +3504,7 @@ form_templates {
           itemset {
             instance_id: "forest_stratum"
             value_ref: "name"
-            label_ref: "label"
+            label_ref: "jr:itext(itextId)"
             nodeset_path: "/root/item"
           }
         }
@@ -3463,10 +3675,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Primary intact forest"
+                string_value: "forest_stratum-0"
               }
             }
           }
@@ -3489,10 +3701,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Secondary or regenerating forest"
+                string_value: "forest_stratum-1"
               }
             }
           }
@@ -3515,10 +3727,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Degraded natural forest"
+                string_value: "forest_stratum-2"
               }
             }
           }
@@ -3541,10 +3753,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Mangrove or peat swamp forest"
+                string_value: "forest_stratum-3"
               }
             }
           }
@@ -3567,10 +3779,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Planted forest or woodlot"
+                string_value: "forest_stratum-4"
               }
             }
           }
@@ -3593,10 +3805,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Non-forest"
+                string_value: "forest_stratum-5"
               }
             }
           }
@@ -3964,6 +4176,66 @@ form_templates {
           value: "core.site_photo@1"
         }
       }
+      translations {
+        languages {
+          language: "default"
+          is_default: true
+          strings {
+            key: "forest_stratum-0"
+            value {
+              value: "Primary intact forest"
+              media {
+                image_uri: "jr://images/forest_stratum-primary_intact.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-1"
+            value {
+              value: "Secondary or regenerating forest"
+              media {
+                image_uri: "jr://images/forest_stratum-secondary_regenerating.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-2"
+            value {
+              value: "Degraded natural forest"
+              media {
+                image_uri: "jr://images/forest_stratum-degraded_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-3"
+            value {
+              value: "Mangrove or peat swamp forest"
+              media {
+                image_uri: "jr://images/forest_stratum-mangrove_peatland.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-4"
+            value {
+              value: "Planted forest or woodlot"
+              media {
+                image_uri: "jr://images/forest_stratum-planted_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-5"
+            value {
+              value: "Non-forest"
+              media {
+                image_uri: "jr://images/forest_stratum-non_forest.png"
+              }
+            }
+          }
+        }
+      }
     }
     view {
       components {
@@ -3976,7 +4248,7 @@ form_templates {
           itemset {
             instance_id: "forest_stratum"
             value_ref: "name"
-            label_ref: "label"
+            label_ref: "jr:itext(itextId)"
             nodeset_path: "/root/item"
           }
         }
