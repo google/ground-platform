@@ -38,6 +38,8 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -111,6 +113,7 @@ internal fun TimeSeriesChart(
         }
         .focusRequester(focusRequester)
         .focusable()
+        .pointerHoverIcon(PointerIcon.Hand)
         .pointerInput(points) {
           awaitPointerEventScope {
             while (true) {

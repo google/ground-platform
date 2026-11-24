@@ -13,7 +13,11 @@
  */
 package org.openforis.collectone.v2.web.ui.timeseries
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,13 +36,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,6 +71,8 @@ import org.openforis.collectone.v2.map.GeometryType
 import org.openforis.collectone.v2.web.resources.Res
 import org.openforis.collectone.v2.web.resources.web_time_series_area
 import org.openforis.collectone.v2.web.resources.web_time_series_band_picker
+import org.openforis.collectone.v2.web.resources.web_time_series_chart_balloon_dismiss
+import org.openforis.collectone.v2.web.resources.web_time_series_chart_balloon_hint
 import org.openforis.collectone.v2.web.resources.web_time_series_chart_description
 import org.openforis.collectone.v2.web.resources.web_time_series_chart_hint
 import org.openforis.collectone.v2.web.resources.web_time_series_elevation
@@ -88,6 +103,9 @@ import org.openforis.collectone.v2.web.resources.web_time_series_stretch_true_co
 import org.openforis.collectone.v2.web.resources.web_time_series_unavailable
 import org.openforis.collectone.v2.web.resources.web_time_series_unsupported
 
+/** Test tag of the floating helper balloon over the time series chart. */
+internal const val TIME_SERIES_CHART_HINT_BALLOON_TAG = "time-series-chart-hint-balloon"
+
 /**
  * Content of the dashboard's "Time series & imagery" tab (Collect Earth Online's Geo-Dash): the
  * selected map feature's area, elevation, and population, and a chart of one band's plot means over
@@ -101,6 +119,10 @@ fun TimeSeriesPanel(
   modifier: Modifier = Modifier,
 ) {
   val plot = uiState.plot
+  var isChartHintDismissed by remember { mutableStateOf(false) }
+  LaunchedEffect(uiState.selectedIndex) {
+    if (uiState.selectedIndex != null) isChartHintDismissed = true
+  }
   Column(modifier = modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp)) {
     when {
       !uiState.isAvailable ->
@@ -112,7 +134,13 @@ fun TimeSeriesPanel(
       else -> {
         PlotSummaryRow(plot = plot, statistics = uiState.statistics, uiState = uiState, actions)
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-          SeriesContent(uiState, actions, Modifier.fillMaxSize())
+          SeriesContent(
+            uiState = uiState,
+            actions = actions,
+            showHintBalloon = !isChartHintDismissed && uiState.selectedIndex == null,
+            onDismissHintBalloon = { isChartHintDismissed = true },
+            modifier = Modifier.fillMaxSize(),
+          )
         }
         SelectionFooter(uiState)
       }
@@ -249,6 +277,8 @@ private fun populationText(statistics: PlotStatistics): String? {
 private fun SeriesContent(
   uiState: TimeSeriesUiState,
   actions: TimeSeriesActions,
+  showHintBalloon: Boolean,
+  onDismissHintBalloon: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   when (val series = uiState.series) {
@@ -275,19 +305,94 @@ private fun SeriesContent(
       if (count == 0) {
         PanelMessage(stringResource(Res.string.web_time_series_no_observations, label), modifier)
       } else {
-        TimeSeriesChart(
-          timesMs = series.value.timesMs,
-          values = values,
-          selectedIndex = uiState.selectedIndex,
-          onSelect = actions::selectObservation,
-          onStep = actions::stepObservation,
-          onClear = actions::clearPinnedScene,
-          color = TimeSeriesStyles.band(uiState.band).color.current(),
-          contentDescription =
-            stringResource(Res.string.web_time_series_chart_description, label, count),
-          modifier = modifier.padding(vertical = 4.dp),
-        )
+        Box(modifier = modifier) {
+          TimeSeriesChart(
+            timesMs = series.value.timesMs,
+            values = values,
+            selectedIndex = uiState.selectedIndex,
+            onSelect = actions::selectObservation,
+            onStep = actions::stepObservation,
+            onClear = actions::clearPinnedScene,
+            color = TimeSeriesStyles.band(uiState.band).color.current(),
+            contentDescription =
+              stringResource(Res.string.web_time_series_chart_description, label, count),
+            modifier = Modifier.fillMaxSize().padding(vertical = 4.dp),
+          )
+          AnimatedVisibility(
+            visible = showHintBalloon,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier =
+              Modifier.align(Alignment.TopCenter).padding(top = 12.dp, start = 52.dp, end = 16.dp),
+          ) {
+            ChartHintBalloon(onDismiss = onDismissHintBalloon)
+          }
+        }
       }
+    }
+  }
+}
+
+/**
+ * Floating callout balloon shown over the chart before any date is selected, prompting the user to
+ * click a point on the time series to inspect satellite imagery and values for that date.
+ */
+@Composable
+private fun ChartHintBalloon(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+  val containerColor = MaterialTheme.colorScheme.primaryContainer
+  val borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = modifier.testTag(TIME_SERIES_CHART_HINT_BALLOON_TAG),
+  ) {
+    Surface(
+      shape = RoundedCornerShape(12.dp),
+      color = containerColor,
+      contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+      shadowElevation = 4.dp,
+      border = BorderStroke(1.dp, borderColor),
+    ) {
+      Row(
+        modifier = Modifier.padding(start = 12.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Icon(
+          imageVector = Icons.Outlined.TouchApp,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.size(18.dp),
+        )
+        Text(
+          text = stringResource(Res.string.web_time_series_chart_balloon_hint),
+          style = MaterialTheme.typography.labelLarge,
+          color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+          Icon(
+            imageVector = Icons.Outlined.Close,
+            contentDescription = stringResource(Res.string.web_time_series_chart_balloon_dismiss),
+            modifier = Modifier.size(16.dp),
+          )
+        }
+      }
+    }
+    Canvas(modifier = Modifier.offset(y = (-1).dp).size(width = 14.dp, height = 7.dp)) {
+      val fillPath =
+        Path().apply {
+          moveTo(0f, 0f)
+          lineTo(size.width, 0f)
+          lineTo(size.width / 2f, size.height)
+          close()
+        }
+      drawPath(fillPath, color = containerColor)
+      val borderPath =
+        Path().apply {
+          moveTo(0f, 0f)
+          lineTo(size.width / 2f, size.height)
+          lineTo(size.width, 0f)
+        }
+      drawPath(borderPath, color = borderColor, style = Stroke(width = 1.dp.toPx()))
     }
   }
 }

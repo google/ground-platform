@@ -422,7 +422,12 @@ private fun DashboardMapArea(
   val mapCamera = rememberSurveyMapCamera(uiState = mapUiState, actions = actions.map)
   val timeSeriesState = uiState.timeSeries
   // The time series sheet follows the selected map feature, loading only while it's expanded.
+  // Closing the sheet clears any pinned scene from the map, while collapsing it during data
+  // collection keeps the pinned scene visible as the collector fills out the form.
   LaunchedEffect(dashboard.activeSurveyId, selectedEntity, isTimeSeriesOpen, isTimeSeriesExpanded) {
+    if (!isTimeSeriesOpen && timeSeriesState.pinnedScene != null) {
+      actions.timeSeries.clearPinnedScene()
+    }
     actions.timeSeries.follow(
       dashboard.activeSurveyId,
       selectedEntity,
@@ -646,7 +651,7 @@ private fun DashboardMapArea(
             scaleSpec = mapUiState.mapScaleBarSpec,
             isSatellite = mapUiState.selectedBasemapType == BasemapType.SATELLITE,
           )
-          if (mapUiState.isEarthEngineLayerShown) {
+          if (mapUiState.isEarthEngineLayerShown && !(isTimeSeriesOpen && isTimeSeriesExpanded)) {
             PoweredByEarthEngineBadge(
               isMapOverlay = true,
               modifier = Modifier.testTag(EARTH_ENGINE_MAP_BADGE_TAG),

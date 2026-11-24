@@ -31,6 +31,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
@@ -310,10 +311,26 @@ class DashboardFloatingCardLayoutTest {
       onNodeWithTag(DASHBOARD_RIGHT_CARD_TAG).assertDoesNotExist()
       onNodeWithContentDescription("Expand details").assertExists()
 
-      // Closing the dedicated time series sheet brings back the docked data table bar.
+      // Pin a scene while the dedicated time series sheet is open; closing the sheet clears the
+      // pinned scene from the map as well.
+      waitUntil(timeoutMillis = 10_000) { state.timeSeries.uiState.value.loadedSeries != null }
+      state.timeSeries.selectObservation(0)
+      waitForIdle()
+      waitUntil(timeoutMillis = 10_000) {
+        state.viewModels.surveyMap.uiState.value.pinnedSceneOverlay != null
+      }
+      onNodeWithContentDescription("Remove scene from map").assertExists()
+      onNodeWithTag(EARTH_ENGINE_PANEL_BADGE_TAG).assertExists()
+      onNodeWithTag(EARTH_ENGINE_MAP_BADGE_TAG).assertDoesNotExist()
+
+      // Closing the dedicated time series sheet brings back the docked data table bar and removes
+      // the pinned imagery scene from the map.
       onNodeWithContentDescription("Close time series").performClick()
       waitForIdle()
       assertFalse(state.viewModels.dashboard.uiState.value.isTimeSeriesOpen)
+      assertNull(state.timeSeries.uiState.value.pinnedScene)
+      assertNull(state.viewModels.surveyMap.uiState.value.pinnedSceneOverlay)
+      onNodeWithContentDescription("Remove scene from map").assertDoesNotExist()
       onNodeWithTag(DASHBOARD_TIME_SERIES_SHEET_TAG).assertDoesNotExist()
       onNodeWithTag(DASHBOARD_DATA_TABLES_PANEL_TAG).assertExists()
 
@@ -332,20 +349,33 @@ class DashboardFloatingCardLayoutTest {
       waitUntil(timeoutMillis = 10_000) { state.timeSeries.uiState.value.loadedSeries != null }
       state.timeSeries.selectObservation(0)
       waitForIdle()
+      waitUntil(timeoutMillis = 10_000) {
+        state.viewModels.surveyMap.uiState.value.pinnedSceneOverlay != null
+      }
 
       onNodeWithContentDescription("Close form").assertExists()
       onNodeWithTag(EARTH_ENGINE_PANEL_BADGE_TAG).assertExists()
-      onNodeWithTag(EARTH_ENGINE_MAP_BADGE_TAG).assertExists()
+      onNodeWithTag(EARTH_ENGINE_MAP_BADGE_TAG).assertDoesNotExist()
       assertCardBesideBottomPanel(
         bottomPanelTag = DASHBOARD_TIME_SERIES_SHEET_TAG,
         expectCardBesideBottomHeight = true,
       )
       val card = bounds(DASHBOARD_RIGHT_CARD_TAG)
-      val mapBadge = bounds(EARTH_ENGINE_MAP_BADGE_TAG)
       val removeScene =
         onNodeWithContentDescription("Remove scene from map").getUnclippedBoundsInRoot()
       assertTrue(removeScene.right <= card.left, "the pinned scene banner stays clear of the card")
-      assertTrue(mapBadge.right <= card.left, "the map Earth Engine badge stays clear of the card")
       screenshot("time_series_form")
+
+      // Collapsing the imagery analysis sheet during data collection keeps the pinned scene on the
+      // map and reveals the map's Earth Engine badge while the panel's own badge is hidden.
+      onNodeWithContentDescription("Collapse imagery analysis").performClick()
+      waitForIdle()
+      assertTrue(state.viewModels.dashboard.uiState.value.isTimeSeriesOpen)
+      assertFalse(state.viewModels.dashboard.uiState.value.isTimeSeriesExpanded)
+      assertTrue(state.viewModels.surveyMap.uiState.value.pinnedSceneOverlay != null)
+      onNodeWithTag(EARTH_ENGINE_PANEL_BADGE_TAG).assertDoesNotExist()
+      onNodeWithTag(EARTH_ENGINE_MAP_BADGE_TAG).assertExists()
+      val mapBadge = bounds(EARTH_ENGINE_MAP_BADGE_TAG)
+      assertTrue(mapBadge.right <= card.left, "the map Earth Engine badge stays clear of the card")
     }
 }

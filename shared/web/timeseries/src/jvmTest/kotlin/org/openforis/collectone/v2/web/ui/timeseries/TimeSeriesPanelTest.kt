@@ -126,12 +126,18 @@ class TimeSeriesPanelTest {
       val count = viewModel.uiState.value.loadedSeries!!.validCount("NDVI")
       val chart = onNodeWithContentDescription("NDVI time series chart with $count observations")
       chart.assertExists()
+      onNodeWithTag(TIME_SERIES_CHART_HINT_BALLOON_TAG).assertExists()
+      onNodeWithText(
+          "Click any point on the chart to view satellite imagery and values for that date"
+        )
+        .assertExists()
 
       // Click roughly at the August 2023 clearing (about three quarters of the way along).
       chart.performTouchInput { click(percentOffset(0.76f, 0.8f)) }
       waitForIdle()
       val pinned = assertNotNull(viewModel.uiState.value.pinnedScene)
       onNodeWithText("Landsat 8 · ${pinned.observation.date}").assertExists()
+      onNodeWithTag(TIME_SERIES_CHART_HINT_BALLOON_TAG).assertDoesNotExist()
 
       // Switching the band from its menu keeps the selection; the banner offers the other
       // stretches.
@@ -205,5 +211,24 @@ class TimeSeriesPanelTest {
         .assertExists()
       onNodeWithTag(EARTH_ENGINE_PANEL_BADGE_TAG).assertExists()
       onNodeWithText("Powered by Google Earth Engine").assertExists()
+      onNodeWithTag(TIME_SERIES_CHART_HINT_BALLOON_TAG).assertDoesNotExist()
+    }
+
+  @Test
+  fun chartHintBalloon_canBeDismissed_andStaysHiddenAfterClearingSelection() =
+    runDesktopComposeUiTest(width = 1280, height = 420) {
+      val viewModel = showPanel()
+
+      onNodeWithTag(TIME_SERIES_CHART_HINT_BALLOON_TAG).assertExists()
+      onNodeWithContentDescription("Dismiss chart hint").performClick()
+      waitForIdle()
+      onNodeWithTag(TIME_SERIES_CHART_HINT_BALLOON_TAG).assertDoesNotExist()
+
+      // Selecting and clearing an observation keeps the hint hidden.
+      viewModel.selectObservation(0)
+      waitForIdle()
+      viewModel.clearPinnedScene()
+      waitForIdle()
+      onNodeWithTag(TIME_SERIES_CHART_HINT_BALLOON_TAG).assertDoesNotExist()
     }
 }

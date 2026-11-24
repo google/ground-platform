@@ -88,6 +88,9 @@
   <!-- Selected observation; %1$s is the date, %2$s the satellite, %3$s the band, %4$s the value. -->
   <string name="web_time_series_selected">%1$s · %2$s · %3$s %4$s</string>
   <string name="web_time_series_chart_hint">Click a point (or use ← →) to show that day's scene on the map.</string>
+  <!-- Floating helper balloon over the time series chart before any date is selected. -->
+  <string name="web_time_series_chart_balloon_hint">Click any point on the chart to view satellite imagery and values for that date</string>
+  <string name="web_time_series_chart_balloon_dismiss">Dismiss chart hint</string>
   <!-- Screen reader description of the chart; %1$s is the band, %2$d the number of observations. -->
   <string name="web_time_series_chart_description">%1$s time series chart with %2$d observations</string>
   <string name="web_time_series_scene_loading">Loading scene…</string>
