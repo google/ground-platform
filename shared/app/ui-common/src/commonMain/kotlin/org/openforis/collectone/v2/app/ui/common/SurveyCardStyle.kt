@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +42,12 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.SurveyPreviewItem
+import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
+import org.openforis.collectone.v2.app.resources.Res
+import org.openforis.collectone.v2.app.resources.domain_sharing_policy_organization
+import org.openforis.collectone.v2.app.resources.domain_sharing_policy_restricted
 
 /** Test tag prefix for a survey card's visibility icon (`$SURVEY_VISIBILITY_ICON_TAG-<id>`). */
 const val SURVEY_VISIBILITY_ICON_TAG = "survey-visibility-icon"
@@ -49,9 +56,12 @@ const val SURVEY_VISIBILITY_ICON_TAG = "survey-visibility-icon"
 private val ClosedSurveyThumbnailScrimColor = Color.White.copy(alpha = 0.24f)
 
 /**
- * Compact icon representing a survey's visibility (`Public data` or `Private submissions`), with
- * the localized visibility text shown in a tooltip on hover (web) or long-press (mobile). Renders
- * nothing for surveys with neither visibility badge.
+ * Compact icon representing a survey's visibility, with the localized visibility text shown in a
+ * tooltip on hover (web) or long-press (mobile). Every survey gets an icon:
+ * - open to anyone, all submissions visible: globe (`Public data`)
+ * - open to anyone, collectors see only their own submissions: shield (`Private submissions`)
+ * - [SharingPolicy.ORGANIZATION]: groups (`Anyone in the organization`)
+ * - [SharingPolicy.RESTRICTED]: lock (`Restricted`)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,22 +75,27 @@ fun SurveyVisibilityIcon(
   val (icon, label) =
     when {
       survey.isPublicData -> Icons.Outlined.Public to publicDataLabel
-      survey.isPrivateSubmissions -> Icons.Outlined.Lock to privateSubmissionsLabel
-      else -> return
+      survey.isPrivateSubmissions -> Icons.Outlined.Shield to privateSubmissionsLabel
+      survey.sharingPolicy == SharingPolicy.ORGANIZATION ->
+        Icons.Outlined.Groups to stringResource(Res.string.domain_sharing_policy_organization)
+      else -> Icons.Outlined.Lock to stringResource(Res.string.domain_sharing_policy_restricted)
     }
-  TooltipBox(
-    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-    tooltip = { PlainTooltip { Text(label) } },
-    state = rememberTooltipState(),
-    modifier = modifier,
-  ) {
-    Box(modifier = Modifier.testTag("$SURVEY_VISIBILITY_ICON_TAG-${survey.id}")) {
-      Icon(
-        imageVector = icon,
-        contentDescription = label,
-        tint = tint,
-        modifier = Modifier.size(18.dp),
-      )
+  // TooltipBox doesn't forward parent-layout modifiers such as `align`, so apply them on a wrapper.
+  Box(modifier = modifier) {
+    TooltipBox(
+      positionProvider =
+        TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+      tooltip = { PlainTooltip { Text(label) } },
+      state = rememberTooltipState(),
+    ) {
+      Box(modifier = Modifier.testTag("$SURVEY_VISIBILITY_ICON_TAG-${survey.id}")) {
+        Icon(
+          imageVector = icon,
+          contentDescription = label,
+          tint = tint,
+          modifier = Modifier.size(18.dp),
+        )
+      }
     }
   }
 }

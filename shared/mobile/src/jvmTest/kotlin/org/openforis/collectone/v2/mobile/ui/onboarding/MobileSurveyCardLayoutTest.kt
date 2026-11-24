@@ -31,6 +31,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.seed.SampleSurveysData
 import org.openforis.collectone.v2.app.domain.model.SurveyLifecycleState
+import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
 import org.openforis.collectone.v2.app.ui.common.SURVEY_VISIBILITY_ICON_TAG
 import org.openforis.collectone.v2.core.forms.ui.AppTheme
 import org.openforis.collectone.v2.mobile.ui.navigation.MobileRoute
@@ -84,6 +85,27 @@ class MobileSurveyCardLayoutTest {
       visibilityIcon.performMouseInput { moveTo(center) }
       it.waitForIdle()
       it.onNodeWithText("Public data").assertIsDisplayed()
+      visibilityIcon.performMouseInput { exit() }
+      it.waitForIdle()
+
+      // Restricted and organization surveys get a visibility icon too.
+      for ((policy, label) in
+        listOf(
+          SharingPolicy.RESTRICTED to "Restricted",
+          SharingPolicy.ORGANIZATION to "Anyone in the organization",
+        )) {
+        val survey = surveys.first { it.sharingPolicy == policy }
+        it.onNodeWithContentDescription("Search surveys").performTextReplacement(survey.title)
+        it.waitForIdle()
+        val icon =
+          it.onNodeWithTag("$SURVEY_VISIBILITY_ICON_TAG-${survey.id}", useUnmergedTree = true)
+        icon.assertIsDisplayed()
+        icon.performMouseInput { moveTo(center) }
+        it.waitForIdle()
+        it.onNodeWithText(label).assertIsDisplayed()
+        icon.performMouseInput { exit() }
+        it.waitForIdle()
+      }
     }
 
   @Test

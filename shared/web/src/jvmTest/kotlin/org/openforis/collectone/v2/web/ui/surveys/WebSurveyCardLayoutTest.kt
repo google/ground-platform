@@ -198,12 +198,22 @@ class WebSurveyCardLayoutTest {
           sharingPolicy = SharingPolicy.RESTRICTED,
           peerDataVisibility = PeerDataVisibility.ALL,
         )
+      val organizationCard =
+        surveyFixture(
+          id = "card-organization",
+          title = "Organization Survey",
+          location = "Can Tho, Vietnam",
+          description = "Organization members only.",
+          sharingPolicy = SharingPolicy.ORGANIZATION,
+          peerDataVisibility = PeerDataVisibility.OWN_ONLY,
+        )
 
       setContent {
         SurveyCardTestGrid {
           GridCard(publicCard, SurveyAccessLabel.OWNER)
           GridCard(privateCard, SurveyAccessLabel.OWNER)
           GridCard(restrictedCard, SurveyAccessLabel.OWNER)
+          GridCard(organizationCard, SurveyAccessLabel.OWNER)
         }
       }
       waitForIdle()
@@ -212,36 +222,35 @@ class WebSurveyCardLayoutTest {
       onNodeWithText("Public data", useUnmergedTree = true).assertDoesNotExist()
       onNodeWithText("Private submissions", useUnmergedTree = true).assertDoesNotExist()
 
-      // Restricted surveys have no visibility icon; public and private-submissions surveys do.
-      onNodeWithTag("$SURVEY_VISIBILITY_ICON_TAG-${restrictedCard.id}", useUnmergedTree = true)
-        .assertDoesNotExist()
-      val publicIcon =
-        onNodeWithTag("$SURVEY_VISIBILITY_ICON_TAG-${publicCard.id}", useUnmergedTree = true)
-      val privateIcon =
-        onNodeWithTag("$SURVEY_VISIBILITY_ICON_TAG-${privateCard.id}", useUnmergedTree = true)
-      publicIcon.assertIsDisplayed()
-      privateIcon.assertIsDisplayed()
-
       // Icon is top-right aligned to the title area inside the card body.
       val publicTitleBounds =
         onNodeWithText(publicCard.title, useUnmergedTree = true).getUnclippedBoundsInRoot()
-      val publicIconBounds = publicIcon.getUnclippedBoundsInRoot()
+      val publicIconBounds =
+        onNodeWithTag("$SURVEY_VISIBILITY_ICON_TAG-${publicCard.id}", useUnmergedTree = true)
+          .getUnclippedBoundsInRoot()
       assertEquals(publicTitleBounds.top, publicIconBounds.top)
       assertTrue(
         publicIconBounds.left >= publicTitleBounds.right,
         "Expected visibility icon to the right of title ($publicIconBounds vs $publicTitleBounds)",
       )
 
-      // Hovering over each icon reveals its visibility text in a tooltip.
-      publicIcon.performMouseInput { enter(center) }
-      waitForIdle()
-      onNodeWithText("Public data").assertIsDisplayed()
-      publicIcon.performMouseInput { exit() }
-      waitForIdle()
-
-      privateIcon.performMouseInput { enter(center) }
-      waitForIdle()
-      onNodeWithText("Private submissions").assertIsDisplayed()
+      // Every sharing policy shows a visibility icon with its label in a hover tooltip (including
+      // organization surveys whose peer submissions are own-only).
+      for ((card, tooltipText) in
+        listOf(
+          publicCard to "Public data",
+          privateCard to "Private submissions",
+          restrictedCard to "Restricted",
+          organizationCard to "Anyone in the organization",
+        )) {
+        val icon = onNodeWithTag("$SURVEY_VISIBILITY_ICON_TAG-${card.id}", useUnmergedTree = true)
+        icon.assertIsDisplayed()
+        icon.performMouseInput { enter(center) }
+        waitForIdle()
+        onNodeWithText(tooltipText).assertIsDisplayed()
+        icon.performMouseInput { exit() }
+        waitForIdle()
+      }
     }
 
   @Test
