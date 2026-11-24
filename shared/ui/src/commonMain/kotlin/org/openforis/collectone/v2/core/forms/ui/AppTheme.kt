@@ -64,6 +64,7 @@ import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.backdropClickable
 import org.openforis.collectone.v2.core.forms.ui.controls.clickable
 import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.google_sans_code
 import org.openforis.collectone.v2.core.forms.ui.resources.google_sans_flex_bold
 import org.openforis.collectone.v2.core.forms.ui.resources.google_sans_flex_extrabold
 import org.openforis.collectone.v2.core.forms.ui.resources.google_sans_flex_medium
@@ -1032,6 +1033,12 @@ val AppShapes =
 val LocalAppBrandFontFamily = compositionLocalOf<FontFamily> { FontFamily.Default }
 
 /**
+ * CompositionLocal providing the Google Sans Code [FontFamily] ([appMonospaceFontFamily]). Its
+ * default, the platform's monospace font, stands for "not provided".
+ */
+val LocalAppMonospaceFontFamily = compositionLocalOf<FontFamily> { FontFamily.Monospace }
+
+/**
  * CompositionLocal providing the hover [PointerIcon] applied to enabled interactive controls
  * (buttons, clickable cards and surfaces, chips, toggles, menu items, tabs, sliders, and clickable
  * modifiers) within [AppTheme]. Defaults to [PointerIcon.Hand] so mouse users see a pointing hand
@@ -1059,6 +1066,28 @@ fun appFontFamily(): FontFamily {
     Font(Res.font.google_sans_flex_bold, FontWeight.Bold),
     Font(Res.font.google_sans_flex_extrabold, FontWeight.ExtraBold),
   )
+}
+
+/** The weights monospace text is drawn in; all come from the one variable font file. */
+private val MonospaceWeights =
+  listOf(FontWeight.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold)
+
+@Composable
+private fun monospaceFonts(): List<UiFont> = MonospaceWeights.map { weight ->
+  Font(Res.font.google_sans_code, weight)
+}
+
+/**
+ * Google Sans Code: the monospace font for text that is a value rather than prose (identifiers,
+ * URLs, coordinates, regular expressions, hex colors). Use it instead of `FontFamily.Monospace`,
+ * which is a different font on every platform.
+ */
+@Composable
+fun appMonospaceFontFamily(): FontFamily {
+  val existing = LocalAppMonospaceFontFamily.current
+  if (existing !== FontFamily.Monospace) return existing
+  val fonts = monospaceFonts()
+  return remember(fonts) { FontFamily(fonts) }
 }
 
 /**
@@ -1151,7 +1180,7 @@ fun TonalBadge(
         style =
           MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.SemiBold,
-            fontFamily = if (monospace) FontFamily.Monospace else null,
+            fontFamily = if (monospace) appMonospaceFontFamily() else null,
           ),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -1307,6 +1336,16 @@ fun AppTheme(
       }
     }
 
+  val existingMonospaceFontFamily = LocalAppMonospaceFontFamily.current
+  val monospaceFontFamily =
+    if (existingMonospaceFontFamily !== FontFamily.Monospace) {
+      existingMonospaceFontFamily
+    } else {
+      val fonts = monospaceFonts()
+      if (fonts.any { it.isPlaceholderResourceFont() }) return
+      remember(fonts) { FontFamily(fonts) }
+    }
+
   val colorScheme =
     when (palette) {
       AppThemePalette.COLLECT_ONE -> appColorScheme(darkTheme = darkTheme, contrast = contrast)
@@ -1317,6 +1356,7 @@ fun AppTheme(
   val typography = appTypography(fontFamily)
   CompositionLocalProvider(
     LocalAppBrandFontFamily provides fontFamily,
+    LocalAppMonospaceFontFamily provides monospaceFontFamily,
     LocalAppFixedColors provides fixedColors,
     LocalInteractivePointerIcon provides interactivePointerIcon,
   ) {

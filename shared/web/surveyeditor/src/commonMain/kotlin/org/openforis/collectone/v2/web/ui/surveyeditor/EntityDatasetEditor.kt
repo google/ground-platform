@@ -74,7 +74,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -97,6 +96,7 @@ import org.openforis.collectone.v2.app.ui.common.displayMessage
 import org.openforis.collectone.v2.app.ui.text.labelRes
 import org.openforis.collectone.v2.app.ui.text.pluralRes
 import org.openforis.collectone.v2.app.ui.text.singularRes
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.AssistChip
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.Checkbox
@@ -1374,7 +1374,7 @@ private fun TextCell(
 ) {
   val colors = MaterialTheme.colorScheme
   val style = MaterialTheme.typography.bodySmall.copy(color = textColor)
-  val textStyle = if (monospace) style.copy(fontFamily = FontFamily.Monospace) else style
+  val textStyle = if (monospace) style.copy(fontFamily = appMonospaceFontFamily()) else style
   val frameModifier =
     Modifier.width(width)
       .height(CellHeight)
@@ -1442,7 +1442,7 @@ private fun ReadOnlyCell(
       text,
       style =
         MaterialTheme.typography.bodySmall.let {
-          if (monospace) it.copy(fontFamily = FontFamily.Monospace) else it
+          if (monospace) it.copy(fontFamily = appMonospaceFontFamily()) else it
         },
       color = colors.onSurfaceVariant,
       maxLines = 1,
@@ -1992,7 +1992,7 @@ private fun DatasetAdvancedSettingsSection(
         label = { Text(stringResource(Res.string.surveyeditor_dataset_id)) },
         singleLine = true,
         supportingText = { Text(stringResource(Res.string.surveyeditor_dataset_id_supporting)) },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
         modifier = Modifier.fillMaxWidth(),
       )
       if (!isReadOnly) {
@@ -2044,7 +2044,7 @@ private fun LayerStyleEditor(
       label = { Text(stringResource(Res.string.surveyeditor_dataset_color)) },
       singleLine = true,
       isError = enabled && parseHexColor(style.colorHex) == null,
-      textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+      textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
       modifier = Modifier.fillMaxWidth(),
     )
     if (dataset.geometryType == GeometryType.POINT) {
@@ -2156,7 +2156,8 @@ private fun PropertyEditor(
           supportingText = {
             Text(stringResource(Res.string.surveyeditor_dataset_property_internal_id_supporting))
           },
-          textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+          textStyle =
+            MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
           modifier = Modifier.fillMaxWidth(),
         )
       }

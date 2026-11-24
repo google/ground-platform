@@ -64,7 +64,6 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,6 +81,7 @@ import org.openforis.collectone.v2.app.ui.common.FlatFilterChip
 import org.openforis.collectone.v2.app.ui.map.SurveyBasemaps
 import org.openforis.collectone.v2.app.ui.map.contentColorOnArgb
 import org.openforis.collectone.v2.app.ui.text.toUiText
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.ElevatedCard
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
@@ -810,7 +810,7 @@ private fun MapOverlays(
           Text(
             "${formatFixed(hoverLatLng.latitude, 5)}, ${formatFixed(hoverLatLng.longitude, 5)}",
             style = MaterialTheme.typography.labelSmall,
-            fontFamily = FontFamily.Monospace,
+            fontFamily = appMonospaceFontFamily(),
             color = colors.onSurfaceVariant,
           )
         }

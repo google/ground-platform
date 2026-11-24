@@ -47,7 +47,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -61,6 +60,7 @@ import org.openforis.collectone.v2.app.ui.common.rememberProfileImageBitmap
 import org.openforis.collectone.v2.app.ui.text.labelRes
 import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.TonalBadge
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
@@ -348,7 +348,7 @@ fun PendingInviteLinkRow(
       Text(
         url,
         style = MaterialTheme.typography.labelSmall,
-        fontFamily = FontFamily.Monospace,
+        fontFamily = appMonospaceFontFamily(),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,

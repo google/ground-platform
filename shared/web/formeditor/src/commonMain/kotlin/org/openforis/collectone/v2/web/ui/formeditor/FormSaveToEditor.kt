@@ -37,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -51,6 +50,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.SaveToRules
 import org.openforis.collectone.v2.app.domain.model.hasGeometry
 import org.openforis.collectone.v2.app.ui.text.labelRes
 import org.openforis.collectone.v2.app.ui.text.toUiText
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.RadioButton
 import org.openforis.collectone.v2.core.forms.ui.controls.SegmentedButton
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
@@ -274,7 +274,7 @@ private fun UpdateSettings(
     ) {
       Text(
         text = "id=\"$xpath\"",
-        style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+        style = MaterialTheme.typography.labelSmall.copy(fontFamily = appMonospaceFontFamily()),
         modifier = Modifier.padding(8.dp),
       )
     }
@@ -337,7 +337,7 @@ private fun FieldMappingRow(
         )
         Text(
           text = question.name,
-          style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+          style = MaterialTheme.typography.labelSmall.copy(fontFamily = appMonospaceFontFamily()),
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,

@@ -46,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -62,6 +61,7 @@ import org.openforis.collectone.v2.app.domain.model.Organization
 import org.openforis.collectone.v2.app.domain.model.PrivacyClass
 import org.openforis.collectone.v2.app.ui.text.descriptionRes
 import org.openforis.collectone.v2.app.ui.text.labelRes
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
@@ -510,7 +510,7 @@ private fun ConceptDialog(
               },
               singleLine = true,
               textStyle =
-                MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                MaterialTheme.typography.bodyMedium.copy(fontFamily = appMonospaceFontFamily()),
               modifier = Modifier.weight(1f),
             )
           }
@@ -585,7 +585,7 @@ private fun ConceptDialog(
                 singleLine = true,
                 readOnly = readOnly || draft.isExisting,
                 textStyle =
-                  MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                  MaterialTheme.typography.bodyMedium.copy(fontFamily = appMonospaceFontFamily()),
                 modifier = Modifier.width(160.dp),
               )
               OutlinedTextField(

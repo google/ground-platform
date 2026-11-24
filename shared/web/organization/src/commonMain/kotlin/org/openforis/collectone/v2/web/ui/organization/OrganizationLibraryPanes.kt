@@ -43,12 +43,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.LibraryStatus
 import org.openforis.collectone.v2.app.ui.text.labelRes
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
@@ -189,7 +189,7 @@ internal fun EntryTitleRow(title: String, badges: List<String>, dimmed: Boolean 
 internal fun MonospaceId(id: String) {
   Text(
     id,
-    style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+    style = MaterialTheme.typography.labelSmall.copy(fontFamily = appMonospaceFontFamily()),
     color = MaterialTheme.colorScheme.onSurfaceVariant,
   )
 }

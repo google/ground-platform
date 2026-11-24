@@ -40,7 +40,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,6 +49,7 @@ import org.openforis.collectone.v2.app.domain.model.InviteLinks
 import org.openforis.collectone.v2.app.domain.model.editor.surveyUrl
 import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.TonalBadge
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
@@ -119,7 +119,7 @@ internal fun SurveyShareLinkAndQrCard(
         }
         Text(
           text = shareUrl,
-          style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+          style = MaterialTheme.typography.bodySmall.copy(fontFamily = appMonospaceFontFamily()),
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
@@ -183,7 +183,8 @@ internal fun SurveyShareLinkAndQrCard(
           ) {
             Text(
               text = shareUrl,
-              style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+              style =
+                MaterialTheme.typography.bodySmall.copy(fontFamily = appMonospaceFontFamily()),
               color = MaterialTheme.colorScheme.onSurface,
               textAlign = TextAlign.Center,
               modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),

@@ -60,7 +60,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
@@ -84,6 +83,7 @@ import org.openforis.collectone.v2.app.ui.common.displayMessage
 import org.openforis.collectone.v2.app.ui.text.descriptionRes
 import org.openforis.collectone.v2.app.ui.text.isoDateText
 import org.openforis.collectone.v2.app.ui.text.labelRes
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.DropdownMenuItem
 import org.openforis.collectone.v2.core.forms.ui.controls.ElevatedCard
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
@@ -646,7 +646,7 @@ private fun AdvancedSection(
         singleLine = true,
         isError = !uiState.isReadOnly && nameInvalid,
         supportingText = { Text(stringResource(Res.string.formeditor_name_supporting_text)) },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
         modifier = Modifier.fillMaxWidth(),
       )
       if (question.type.isNumeric) {
@@ -722,7 +722,8 @@ private fun ValidationEditor(
             enabled = !uiState.isReadOnly,
             label = { Text(stringResource(Res.string.formeditor_regular_expression)) },
             singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+            textStyle =
+              MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
             modifier = Modifier.fillMaxWidth(),
           )
         }

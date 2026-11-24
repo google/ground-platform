@@ -40,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -49,6 +48,7 @@ import org.openforis.collectone.v2.app.domain.model.ImagerySource
 import org.openforis.collectone.v2.app.domain.model.ImagerySourceType
 import org.openforis.collectone.v2.app.domain.model.Organization
 import org.openforis.collectone.v2.app.ui.common.displayLabel
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
@@ -190,7 +190,8 @@ private fun ImagerySourceRow(
                 ?: {
                   Text(stringResource(Res.string.org_imagery_url_help_edit))
                 },
-            textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+            textStyle =
+              MaterialTheme.typography.bodyMedium.copy(fontFamily = appMonospaceFontFamily()),
             modifier = Modifier.fillMaxWidth(),
           )
         }
@@ -282,7 +283,8 @@ private fun ImagerySourceRow(
               } else {
                 source.urlTemplate
               },
-              style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+              style =
+                MaterialTheme.typography.bodySmall.copy(fontFamily = appMonospaceFontFamily()),
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
@@ -422,7 +424,7 @@ private fun AddImagerySourceCard(actions: OrganizationActions, organization: Org
             ?: {
               Text(stringResource(Res.string.org_imagery_url_help_add))
             },
-        textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = appMonospaceFontFamily()),
         modifier = Modifier.fillMaxWidth(),
       )
     }

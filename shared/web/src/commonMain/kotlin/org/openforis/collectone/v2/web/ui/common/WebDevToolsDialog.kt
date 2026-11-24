@@ -44,11 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.openforis.collectone.v2.app.domain.model.AppEnvironment
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.Switch
 import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
@@ -241,7 +241,7 @@ private fun BackendDebugConsolesSection(normalizedBaseUrl: String, onOpenUrl: (S
           normalizedBaseUrl.ifEmpty {
             "No backend server URL configured (USER_DATA_SERVICE_URL)"
           },
-        style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+        style = MaterialTheme.typography.labelSmall.copy(fontFamily = appMonospaceFontFamily()),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -301,7 +301,7 @@ private fun BackendDebugConsoleRow(
           )
           Text(
             text = route.path,
-            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = appMonospaceFontFamily()),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }

@@ -58,7 +58,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -78,6 +77,7 @@ import org.openforis.collectone.v2.app.ui.text.coordinatesText
 import org.openforis.collectone.v2.app.ui.text.toUiText
 import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.TonalBadge
+import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
@@ -481,7 +481,7 @@ private fun SearchTab(
                 Text(
                   text = coordinatesText(place.position).resolve(),
                   style =
-                    MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                    MaterialTheme.typography.labelSmall.copy(fontFamily = appMonospaceFontFamily()),
                   color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                 )
               }
