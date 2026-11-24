@@ -47,6 +47,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.PlotReviewOptions
 import org.openforis.collectone.v2.app.domain.model.editor.PlotReviewWorkflow
 import org.openforis.collectone.v2.app.domain.model.editor.SampleDesignConfig
 import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
+import org.openforis.collectone.v2.app.domain.model.editor.SubPlotMode
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
 import org.openforis.collectone.v2.app.domain.repository.AuthRepository
 import org.openforis.collectone.v2.app.domain.repository.LibraryRepository
@@ -959,6 +960,19 @@ class CreateSurveyWizardViewModel(
       }
       .orEmpty()
 
+  /** Adds the sample plots layer, with [defaultSubPlot] as its sub-plot mode. */
+  private fun addSamplePlotsLayer(defaultSubPlot: SubPlotMode) {
+    surveyEditor.addSamplePlotsLayer()
+    if (defaultSubPlot == SampleDesignConfig().subPlot) return
+    val added =
+      surveyEditor.uiState.value.draft.datasets.firstOrNull {
+        it.kind == DatasetKind.MAP_LAYER && it.isGenerated
+      } ?: return
+    surveyEditor.updateDataset(added.key) { layer ->
+      layer.copy(generator = layer.generator?.copy(subPlot = defaultSubPlot))
+    }
+  }
+
   override fun selectMapFeatureSource(source: WizardMapFeatureSource) {
     val purposeIds = surveyEditor.uiState.value.draft.details.purposeIds
     val nextMode = SurveyWizardRules.defaultCollectionMode(purposeIds, source)
@@ -975,18 +989,7 @@ class CreateSurveyWizardViewModel(
       WizardMapFeatureSource.SAMPLE_PLOTS -> {
         val defaultSubPlot = SurveyWizardRules.defaultSubPlotMode(purposeIds)
         if (primaryLayer == null) {
-          surveyEditor.addSamplePlotsLayer()
-          if (defaultSubPlot != SampleDesignConfig().subPlot) {
-            val added =
-              surveyEditor.uiState.value.draft.datasets.firstOrNull {
-                it.kind == DatasetKind.MAP_LAYER && it.isGenerated
-              }
-            if (added != null) {
-              surveyEditor.updateDataset(added.key) { layer ->
-                layer.copy(generator = layer.generator?.copy(subPlot = defaultSubPlot))
-              }
-            }
-          }
+          addSamplePlotsLayer(defaultSubPlot)
         } else if (!primaryLayer.isGenerated) {
           surveyEditor.updateDataset(primaryLayer.key) { layer ->
             WizardDraftEdits.asSamplePlotsLayer(layer, defaultSubPlot)

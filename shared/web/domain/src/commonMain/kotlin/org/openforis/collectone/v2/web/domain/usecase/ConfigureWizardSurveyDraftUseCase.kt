@@ -246,9 +246,8 @@ class ConfigureWizardSurveyDraftUseCase {
       datasets = datasets.map { if (it.key == primaryLayer.key) primaryLayer else it }
     } else if (
       mapFeatureSource == WizardMapFeatureSource.SAMPLE_PLOTS &&
-        primaryLayer.isGenerated &&
         hasPurposeSelectionChanged &&
-        primaryLayer.generator?.lastRun == null
+        primaryLayer.isGeneratedButNotRun
     ) {
       primaryLayer =
         primaryLayer.copy(generator = primaryLayer.generator?.copy(subPlot = defaultSubPlot))
@@ -456,3 +455,7 @@ class ConfigureWizardSurveyDraftUseCase {
     )
   }
 }
+
+/** Whether this layer has a sample design whose plots haven't been generated yet. */
+private val EntityDataset.isGeneratedButNotRun: Boolean
+  get() = isGenerated && generator?.lastRun == null

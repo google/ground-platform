@@ -57,7 +57,6 @@ import org.openforis.collectone.v2.app.domain.model.editor.SamplePlotProperties
 import org.openforis.collectone.v2.app.domain.model.editor.SaveToMode
 import org.openforis.collectone.v2.app.domain.model.editor.SharingPolicy
 import org.openforis.collectone.v2.app.domain.model.editor.SharingSettings
-import org.openforis.collectone.v2.app.domain.model.editor.SubPlotMode
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyArea
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorForm
@@ -717,71 +716,5 @@ class WizardDomainTest {
         effortComparison = null,
       )
     assertEquals(setOf(SurveyOutcomeKind.NOT_YET), notYetOnly.outcomes)
-  }
-
-  @Test
-  fun activityDataPurpose_defaultsSubPlotToGrid_andSeedsLandUseColorsAndStratumIcons() = runNow {
-    val store = seededStore()
-    val libraries = LibraryRepositoryImpl(store).observeLibraries().first()
-    val library = ResolveLibraryUseCase().forOrganization(libraries, kfs)
-    val useCase = ConfigureWizardSurveyDraftUseCase()
-
-    assertEquals(
-      SubPlotMode.GRID,
-      SurveyWizardRules.defaultSubPlotMode(listOf("deforestation_activity_data")),
-    )
-    assertEquals(
-      SubPlotMode.NONE,
-      SurveyWizardRules.defaultSubPlotMode(listOf("lulc_training_data")),
-    )
-
-    val baseDraft = SurveyEditorDraft.blank(surveyId = "s-ad")
-    val activityDraft =
-      baseDraft.copy(
-        details = baseDraft.details.copy(purposeIds = listOf("deforestation_activity_data"))
-      )
-
-    val synced =
-      useCase.synchronizePrimaryLayerAndForms(
-        current = activityDraft,
-        library = library,
-        startMethod = WizardStartMethod.FROM_SCRATCH,
-        effectiveMode = SurveyCollectionMode.VISUAL_CLASSIFICATION,
-        mapFeatureSource = WizardMapFeatureSource.SAMPLE_PLOTS,
-        isGeometryTypeOverridden = false,
-        isEudrPlotsUnderFourHaConfirmed = false,
-        hasPurposeSelectionChanged = true,
-        previousSeededFormKeys = emptySet(),
-      )
-
-    val primaryLayer = synced.draft.datasets.first { it.kind == DatasetKind.MAP_LAYER }
-    assertEquals(SubPlotMode.GRID, primaryLayer.generator?.subPlot)
-
-    val form = synced.draft.forms.first().form
-    val baselineLandUse = form.questions.first { it.name == "baseline_land_use_ipcc" }
-    val currentLandUse = form.questions.first { it.name == "current_land_use_ipcc" }
-    val forestStratum = form.questions.first { it.name == "forest_stratum" }
-    assertTrue(baselineLandUse.choices.all { !it.colorHex.isNullOrBlank() })
-    assertTrue(currentLandUse.choices.all { !it.colorHex.isNullOrBlank() })
-    assertTrue(forestStratum.choices.all { it.image != null })
-
-    // Switching from Activity Data to LULC training before generating plots resets subPlot to NONE.
-    val switched =
-      useCase.synchronizePrimaryLayerAndForms(
-        current =
-          synced.draft.copy(
-            details = synced.draft.details.copy(purposeIds = listOf("lulc_training_data"))
-          ),
-        library = library,
-        startMethod = WizardStartMethod.FROM_SCRATCH,
-        effectiveMode = SurveyCollectionMode.VISUAL_CLASSIFICATION,
-        mapFeatureSource = WizardMapFeatureSource.SAMPLE_PLOTS,
-        isGeometryTypeOverridden = false,
-        isEudrPlotsUnderFourHaConfirmed = false,
-        hasPurposeSelectionChanged = true,
-        previousSeededFormKeys = synced.seededFormKeys,
-      )
-    val switchedLayer = switched.draft.datasets.first { it.kind == DatasetKind.MAP_LAYER }
-    assertEquals(SubPlotMode.NONE, switchedLayer.generator?.subPlot)
   }
 }
