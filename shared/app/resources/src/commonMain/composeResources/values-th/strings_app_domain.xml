@@ -543,4 +543,23 @@
   <string name="domain_pdf_risk_indicators">ตัวชี้วัดหลัก</string>
   <string name="domain_pdf_risk_treecover">เรือนยอดไม้และป่าไม้ (2020)</string>
   <string name="domain_pdf_risk_commodities">สินค้าโภคภัณฑ์และการใช้ที่ดิน</string>
+    <string name="domain_comparison_operator_equals">equals</string>
+    <string name="domain_comparison_operator_not_equals">does not equal</string>
+    <string name="domain_comparison_operator_greater_than">is greater than</string>
+    <string name="domain_comparison_operator_greater_than_or_equal">is at least</string>
+    <string name="domain_comparison_operator_less_than">is less than</string>
+    <string name="domain_comparison_operator_less_than_or_equal">is at most</string>
+    <string name="domain_issue_comparison_target_missing">Choose a question to compare against.</string>
+    <string name="domain_issue_comparison_target_deleted">Comparison refers to a deleted question.</string>
+    <string name="domain_issue_comparison_target_in_repeat">Comparison can\'t use \"%1$s\" from inside a repeated section.</string>
+    <string name="domain_issue_comparison_target_wrong_type">Comparison target \"%1$s\" must be a compatible question type.</string>
+    <string name="domain_issue_comparison_operator_not_applicable">\"%1$s\" doesn\'t apply to %2$s.</string>
+    <string name="domain_issue_distance_reference_missing">Choose a reference location question.</string>
+    <string name="domain_issue_distance_reference_deleted">Distance check refers to a deleted location question.</string>
+    <string name="domain_issue_distance_reference_in_repeat">Distance check can\'t use \"%1$s\" from inside a repeated section.</string>
+    <string name="domain_issue_distance_reference_not_location">Distance check reference \"%1$s\" must be a Location question.</string>
+    <string name="domain_issue_distance_min_invalid">Minimum distance must be a number of 0 or more.</string>
+    <string name="domain_issue_distance_max_invalid">Maximum distance must be a number of 0 or more.</string>
+    <string name="domain_issue_distance_min_more_than_max">Minimum distance can\'t be more than maximum.</string>
+    <string name="domain_issue_custom_expression_invalid">Custom validation rule isn\'t a valid XPath expression.</string>
 </resources>

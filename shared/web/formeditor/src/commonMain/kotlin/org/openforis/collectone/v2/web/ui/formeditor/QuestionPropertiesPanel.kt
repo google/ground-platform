@@ -38,6 +38,7 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -46,7 +47,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -60,13 +63,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.openforis.collectone.v2.app.domain.model.editor.ComparisonOperator
 import org.openforis.collectone.v2.app.domain.model.editor.DatasetKind
 import org.openforis.collectone.v2.app.domain.model.editor.DateRule
+import org.openforis.collectone.v2.app.domain.model.editor.EditorFieldComparison
 import org.openforis.collectone.v2.app.domain.model.editor.EditorQuestion
 import org.openforis.collectone.v2.app.domain.model.editor.EditorQuestionType
 import org.openforis.collectone.v2.app.domain.model.editor.EditorValidation
@@ -88,6 +94,7 @@ import org.openforis.collectone.v2.core.forms.ui.controls.DropdownMenuItem
 import org.openforis.collectone.v2.core.forms.ui.controls.ElevatedCard
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.SegmentedButton
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.Switch
 import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
@@ -105,11 +112,17 @@ import org.openforis.collectone.v2.web.resources.formeditor_capture_walk_path
 import org.openforis.collectone.v2.web.resources.formeditor_capture_walk_path_description
 import org.openforis.collectone.v2.web.resources.formeditor_clear_field
 import org.openforis.collectone.v2.web.resources.formeditor_collapse_advanced
+import org.openforis.collectone.v2.web.resources.formeditor_compare_to_question
+import org.openforis.collectone.v2.web.resources.formeditor_comparison_operator
+import org.openforis.collectone.v2.web.resources.formeditor_comparison_target
+import org.openforis.collectone.v2.web.resources.formeditor_custom_xpath_placeholder
+import org.openforis.collectone.v2.web.resources.formeditor_custom_xpath_rule
 import org.openforis.collectone.v2.web.resources.formeditor_decimal_places
 import org.openforis.collectone.v2.web.resources.formeditor_decimal_places_up_to
 import org.openforis.collectone.v2.web.resources.formeditor_decimal_places_zero
 import org.openforis.collectone.v2.web.resources.formeditor_delete
 import org.openforis.collectone.v2.web.resources.formeditor_delete_question
+import org.openforis.collectone.v2.web.resources.formeditor_distance_from_location
 import org.openforis.collectone.v2.web.resources.formeditor_duplicate
 import org.openforis.collectone.v2.web.resources.formeditor_duplicate_branch
 import org.openforis.collectone.v2.web.resources.formeditor_earliest_date
@@ -118,30 +131,41 @@ import org.openforis.collectone.v2.web.resources.formeditor_expand_advanced
 import org.openforis.collectone.v2.web.resources.formeditor_hint_in_language_optional
 import org.openforis.collectone.v2.web.resources.formeditor_hint_optional
 import org.openforis.collectone.v2.web.resources.formeditor_latest_date
+import org.openforis.collectone.v2.web.resources.formeditor_max_distance_meters
 import org.openforis.collectone.v2.web.resources.formeditor_max_length
 import org.openforis.collectone.v2.web.resources.formeditor_maximum
 import org.openforis.collectone.v2.web.resources.formeditor_maximum_selections
 import org.openforis.collectone.v2.web.resources.formeditor_media_source
+import org.openforis.collectone.v2.web.resources.formeditor_min_distance_meters
 import org.openforis.collectone.v2.web.resources.formeditor_min_length
 import org.openforis.collectone.v2.web.resources.formeditor_minimum
 import org.openforis.collectone.v2.web.resources.formeditor_minimum_selections
+import org.openforis.collectone.v2.web.resources.formeditor_missing_question
 import org.openforis.collectone.v2.web.resources.formeditor_name
 import org.openforis.collectone.v2.web.resources.formeditor_name_supporting_text
 import org.openforis.collectone.v2.web.resources.formeditor_next
+import org.openforis.collectone.v2.web.resources.formeditor_no_other_locations
 import org.openforis.collectone.v2.web.resources.formeditor_no_validation_rules
 import org.openforis.collectone.v2.web.resources.formeditor_none
 import org.openforis.collectone.v2.web.resources.formeditor_not_set
 import org.openforis.collectone.v2.web.resources.formeditor_notes_cant_be_required
 import org.openforis.collectone.v2.web.resources.formeditor_ok
+import org.openforis.collectone.v2.web.resources.formeditor_only_validate_when
+import org.openforis.collectone.v2.web.resources.formeditor_optional
 import org.openforis.collectone.v2.web.resources.formeditor_pattern
 import org.openforis.collectone.v2.web.resources.formeditor_pick_field
 import org.openforis.collectone.v2.web.resources.formeditor_previous
 import org.openforis.collectone.v2.web.resources.formeditor_question_options
 import org.openforis.collectone.v2.web.resources.formeditor_question_position
 import org.openforis.collectone.v2.web.resources.formeditor_question_type
+import org.openforis.collectone.v2.web.resources.formeditor_reference_location
 import org.openforis.collectone.v2.web.resources.formeditor_regular_expression
 import org.openforis.collectone.v2.web.resources.formeditor_required
+import org.openforis.collectone.v2.web.resources.formeditor_required_condition_first_screen
 import org.openforis.collectone.v2.web.resources.formeditor_required_description
+import org.openforis.collectone.v2.web.resources.formeditor_required_if
+import org.openforis.collectone.v2.web.resources.formeditor_strict_max
+import org.openforis.collectone.v2.web.resources.formeditor_strict_min
 import org.openforis.collectone.v2.web.resources.formeditor_validation
 import org.openforis.collectone.v2.web.ui.common.DropdownSelector
 import org.openforis.collectone.v2.web.ui.common.SectionLabel
@@ -403,27 +427,7 @@ private fun QuestionProperties(
       modifier = Modifier.fillMaxWidth(),
     )
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          stringResource(Res.string.formeditor_required),
-          style = MaterialTheme.typography.bodyLarge,
-        )
-        Text(
-          text =
-            if (question.type.isReadOnly)
-              stringResource(Res.string.formeditor_notes_cant_be_required)
-            else stringResource(Res.string.formeditor_required_description),
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-      Switch(
-        checked = question.required,
-        enabled = !uiState.isReadOnly && !question.type.isReadOnly,
-        onCheckedChange = { v -> actions.updateQuestion(key) { it.copy(required = v) } },
-      )
-    }
+    RequiredEditor(uiState, actions, question)
 
     if (question.type.hasChoices) {
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -604,7 +608,7 @@ private fun AdvancedSection(
 ) {
   val key = question.key
   val nameInvalid = !FormEditorValidator.isValidName(question.name)
-  val hasError = nameInvalid || ValidationRules.issues(question).isNotEmpty()
+  val hasError = nameInvalid || ValidationRules.issues(question, uiState.form).isNotEmpty()
   // Open/closed lives in the editor state so it persists across question selection.
   val expanded = uiState.isAdvancedExpanded
   LaunchedEffect(key, hasError) { if (hasError) actions.setAdvancedExpanded(true) }
@@ -663,8 +667,100 @@ private fun labelOrNone(label: StringResource?, none: String): String =
   label?.let { stringResource(it) } ?: none
 
 /**
- * Structured validation rules, compiled to the XForms bind `constraint` and `jr:constraintMsg` (ODK
- * XForms spec, "Bindings"). Only rules that apply to the question type are offered.
+ * Required setting of [question]: Optional, always Required, or conditionally required when an
+ * earlier question satisfies a predicate (`required` XPath expression).
+ */
+@Composable
+private fun RequiredEditor(
+  uiState: FormEditorUiState,
+  actions: FormEditorActions,
+  question: EditorQuestion,
+) {
+  val key = question.key
+  val form = uiState.form
+  val sources = form.eligibleRelevanceSources(key)
+  val enabled = !uiState.isReadOnly && !question.type.isReadOnly
+  val isConditional = question.requiredCondition != null
+  val isAlwaysRequired = !isConditional && question.required
+  var showNoSourcesHint by remember(key, sources.size, isConditional) { mutableStateOf(false) }
+
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column {
+      Text(
+        stringResource(Res.string.formeditor_required),
+        style = MaterialTheme.typography.bodyLarge,
+      )
+      Text(
+        text =
+          if (question.type.isReadOnly) stringResource(Res.string.formeditor_notes_cant_be_required)
+          else stringResource(Res.string.formeditor_required_description),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+      SegmentedButton(
+        selected = !isAlwaysRequired && !isConditional && !showNoSourcesHint,
+        onClick = {
+          showNoSourcesHint = false
+          actions.updateQuestion(key) { it.copy(required = false, requiredCondition = null) }
+        },
+        enabled = enabled,
+        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+        label = { Text(stringResource(Res.string.formeditor_optional)) },
+      )
+      SegmentedButton(
+        selected = isAlwaysRequired && !showNoSourcesHint,
+        onClick = {
+          showNoSourcesHint = false
+          actions.updateQuestion(key) { it.copy(required = true, requiredCondition = null) }
+        },
+        enabled = enabled,
+        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+        label = { Text(stringResource(Res.string.formeditor_required)) },
+      )
+      SegmentedButton(
+        selected = isConditional || showNoSourcesHint,
+        onClick = {
+          if (sources.isNotEmpty()) {
+            showNoSourcesHint = false
+            if (question.requiredCondition == null) {
+              val cond = defaultConditionFor(sources.first(), uiState.datasets)
+              actions.updateQuestion(key) { it.copy(required = false, requiredCondition = cond) }
+            }
+          } else if (!isConditional) {
+            showNoSourcesHint = true
+          }
+        },
+        enabled = enabled,
+        shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+        label = { Text(stringResource(Res.string.formeditor_required_if)) },
+      )
+    }
+    if (showNoSourcesHint && sources.isEmpty()) {
+      Text(
+        text = stringResource(Res.string.formeditor_required_condition_first_screen),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+    question.requiredCondition?.let { cond ->
+      ConditionRulePickers(
+        uiState = uiState,
+        sources = sources,
+        condition = cond,
+        enabled = enabled,
+        onChange = { updated ->
+          actions.updateQuestion(key) { it.copy(required = false, requiredCondition = updated) }
+        },
+      )
+    }
+  }
+}
+
+/**
+ * Structured and custom validation rules, compiled to the XForms bind `constraint` and
+ * `jr:constraintMsg` (ODK XForms spec, "Bindings").
  */
 @Composable
 private fun ValidationEditor(
@@ -674,7 +770,9 @@ private fun ValidationEditor(
 ) {
   val key = question.key
   val type = question.type
+  val form = uiState.form
   val validation = question.validation ?: EditorValidation()
+  val enabled = !uiState.isReadOnly
   fun update(transform: (EditorValidation) -> EditorValidation) =
     actions.updateValidation(key, transform)
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -682,28 +780,44 @@ private fun ValidationEditor(
       stringResource(Res.string.formeditor_validation),
       style = MaterialTheme.typography.titleSmall,
     )
+    if (type.isReadOnly) {
+      Text(
+        text = stringResource(Res.string.formeditor_no_validation_rules),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      return@Column
+    }
     when (ValidationKind.of(type)) {
-      null ->
-        Text(
-          text = stringResource(Res.string.formeditor_no_validation_rules),
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      ValidationKind.NUMBER_RANGE ->
+      null -> Unit
+      ValidationKind.NUMBER_RANGE -> {
         MinMaxFields(
           stringResource(Res.string.formeditor_minimum),
           stringResource(Res.string.formeditor_maximum),
           validation,
           ::update,
-          enabled = !uiState.isReadOnly,
+          enabled = enabled,
         )
+        if (validation.min.isNotBlank() || validation.max.isNotBlank()) {
+          StrictBoundsRow(
+            hasMin = validation.min.isNotBlank(),
+            hasMax = validation.max.isNotBlank(),
+            minExclusive = validation.minExclusive,
+            maxExclusive = validation.maxExclusive,
+            onMinExclusiveChange = { v -> update { it.copy(minExclusive = v) } },
+            onMaxExclusiveChange = { v -> update { it.copy(maxExclusive = v) } },
+            enabled = enabled,
+          )
+        }
+        CrossFieldComparisonEditor(uiState, question, validation, ::update, enabled = enabled)
+      }
       ValidationKind.TEXT -> {
         MinMaxFields(
           stringResource(Res.string.formeditor_min_length),
           stringResource(Res.string.formeditor_max_length),
           validation,
           ::update,
-          enabled = !uiState.isReadOnly,
+          enabled = enabled,
         )
         val noneText = stringResource(Res.string.formeditor_none)
         DropdownSelector(
@@ -712,14 +826,14 @@ private fun ValidationEditor(
           options = listOf<TextPattern?>(null) + TextPattern.entries,
           optionText = { labelOrNone(it?.labelRes, noneText) },
           onSelect = { p -> update { it.copy(pattern = p) } },
-          enabled = !uiState.isReadOnly,
+          enabled = enabled,
           modifier = Modifier.fillMaxWidth(),
         )
         if (validation.pattern == TextPattern.CUSTOM) {
           OutlinedTextField(
             value = validation.customPattern,
             onValueChange = { v -> update { it.copy(customPattern = v) } },
-            enabled = !uiState.isReadOnly,
+            enabled = enabled,
             label = { Text(stringResource(Res.string.formeditor_regular_expression)) },
             singleLine = true,
             textStyle =
@@ -727,6 +841,7 @@ private fun ValidationEditor(
             modifier = Modifier.fillMaxWidth(),
           )
         }
+        CrossFieldComparisonEditor(uiState, question, validation, ::update, enabled = enabled)
       }
       ValidationKind.DATE -> {
         val anyDateText = stringResource(Res.string.formeditor_any_date)
@@ -738,15 +853,34 @@ private fun ValidationEditor(
           onSelect = { r ->
             update {
               if (r == DateRule.BETWEEN) it.copy(dateRule = r)
-              else it.copy(dateRule = r, min = "", max = "")
+              else
+                it.copy(
+                  dateRule = r,
+                  min = "",
+                  max = "",
+                  minExclusive = false,
+                  maxExclusive = false,
+                )
             }
           },
-          enabled = !uiState.isReadOnly,
+          enabled = enabled,
           modifier = Modifier.fillMaxWidth(),
         )
         if (validation.dateRule == DateRule.BETWEEN) {
-          DateRangeFields(validation, ::update, enabled = !uiState.isReadOnly)
+          DateRangeFields(validation, ::update, enabled = enabled)
+          if (validation.min.isNotBlank() || validation.max.isNotBlank()) {
+            StrictBoundsRow(
+              hasMin = validation.min.isNotBlank(),
+              hasMax = validation.max.isNotBlank(),
+              minExclusive = validation.minExclusive,
+              maxExclusive = validation.maxExclusive,
+              onMinExclusiveChange = { v -> update { it.copy(minExclusive = v) } },
+              onMaxExclusiveChange = { v -> update { it.copy(maxExclusive = v) } },
+              enabled = enabled,
+            )
+          }
         }
+        CrossFieldComparisonEditor(uiState, question, validation, ::update, enabled = enabled)
       }
       ValidationKind.SELECTION_COUNT ->
         MinMaxFields(
@@ -754,11 +888,61 @@ private fun ValidationEditor(
           stringResource(Res.string.formeditor_maximum_selections),
           validation,
           ::update,
-          enabled = !uiState.isReadOnly,
+          enabled = enabled,
         )
+      ValidationKind.LOCATION ->
+        DistanceRuleEditor(uiState, question, validation, ::update, enabled = enabled)
     }
-    if (ValidationRules.isActive(type, question.validation)) {
-      val summary = validationSummaryText(type, question.validation)?.resolve().orEmpty()
+
+    OutlinedTextField(
+      value = validation.customExpression,
+      onValueChange = { v -> update { it.copy(customExpression = v) } },
+      enabled = enabled,
+      label = { Text(stringResource(Res.string.formeditor_custom_xpath_rule)) },
+      placeholder = { Text(stringResource(Res.string.formeditor_custom_xpath_placeholder)) },
+      singleLine = true,
+      textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+      modifier = Modifier.fillMaxWidth(),
+    )
+
+    val isActive = ValidationRules.isActive(type, question.validation, form, key)
+    val conditionSources = form.eligibleRelevanceSources(key)
+    if (isActive && (conditionSources.isNotEmpty() || validation.condition != null)) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Text(
+          text = stringResource(Res.string.formeditor_only_validate_when),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.weight(1f),
+        )
+        Switch(
+          checked = validation.condition != null,
+          enabled = enabled,
+          onCheckedChange = { checked ->
+            if (checked && conditionSources.isNotEmpty()) {
+              val cond = defaultConditionFor(conditionSources.first(), uiState.datasets)
+              update { it.copy(condition = cond) }
+            } else if (!checked) {
+              update { it.copy(condition = null) }
+            }
+          },
+        )
+      }
+      validation.condition?.let { cond ->
+        ConditionRulePickers(
+          uiState = uiState,
+          sources = conditionSources,
+          condition = cond,
+          enabled = enabled,
+          onChange = { updated -> update { it.copy(condition = updated) } },
+        )
+      }
+    }
+
+    if (isActive) {
+      val summary = validationSummaryText(type, question.validation, form, key)?.resolve().orEmpty()
       Text(
         text = summary,
         style = MaterialTheme.typography.bodySmall,
@@ -767,13 +951,182 @@ private fun ValidationEditor(
       OutlinedTextField(
         value = validation.message,
         onValueChange = { v -> update { it.copy(message = v) } },
-        enabled = !uiState.isReadOnly,
+        enabled = enabled,
         label = { Text(stringResource(Res.string.formeditor_error_message_optional)) },
         placeholder = { Text(summary) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
       )
     }
+  }
+}
+
+@Composable
+private fun StrictBoundsRow(
+  hasMin: Boolean,
+  hasMax: Boolean,
+  minExclusive: Boolean,
+  maxExclusive: Boolean,
+  onMinExclusiveChange: (Boolean) -> Unit,
+  onMaxExclusiveChange: (Boolean) -> Unit,
+  enabled: Boolean,
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    if (hasMin) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+          checked = minExclusive,
+          onCheckedChange = onMinExclusiveChange,
+          enabled = enabled,
+        )
+        Text(
+          text = stringResource(Res.string.formeditor_strict_min),
+          style = MaterialTheme.typography.bodySmall,
+        )
+      }
+    }
+    if (hasMax) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+          checked = maxExclusive,
+          onCheckedChange = onMaxExclusiveChange,
+          enabled = enabled,
+        )
+        Text(
+          text = stringResource(Res.string.formeditor_strict_max),
+          style = MaterialTheme.typography.bodySmall,
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun CrossFieldComparisonEditor(
+  uiState: FormEditorUiState,
+  question: EditorQuestion,
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+  enabled: Boolean,
+) {
+  val form = uiState.form
+  val targets = form.eligibleComparisonTargets(question.key)
+  val cmp = validation.comparison
+  if (targets.isEmpty() && cmp == null) return
+  val operators = ComparisonOperator.availableFor(question.type)
+  val noneText = stringResource(Res.string.formeditor_none)
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      Text(
+        text = stringResource(Res.string.formeditor_compare_to_question),
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.weight(1f),
+      )
+      Switch(
+        checked = cmp != null,
+        enabled = enabled,
+        onCheckedChange = { checked ->
+          if (checked && targets.isNotEmpty()) {
+            update {
+              it.copy(
+                comparison =
+                  EditorFieldComparison(
+                    operator = operators.first(),
+                    targetQuestionKey = targets.first().key,
+                  )
+              )
+            }
+          } else if (!checked) {
+            update { it.copy(comparison = null) }
+          }
+        },
+      )
+    }
+    if (cmp != null) {
+      DropdownSelector(
+        label = stringResource(Res.string.formeditor_comparison_operator),
+        selectedText = stringResource(cmp.operator.labelRes),
+        options = operators,
+        optionText = { stringResource(it.labelRes) },
+        onSelect = { op -> update { it.copy(comparison = cmp.copy(operator = op)) } },
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+      )
+      val selectedTarget = form.find(cmp.targetQuestionKey)
+      DropdownSelector(
+        label = stringResource(Res.string.formeditor_comparison_target),
+        selectedText =
+          selectedTarget?.let { it.label.ifBlank { it.name } }
+            ?: if (cmp.targetQuestionKey.isBlank()) noneText
+            else stringResource(Res.string.formeditor_missing_question),
+        options = targets,
+        optionText = { it.label.ifBlank { it.name } },
+        onSelect = { target ->
+          update { it.copy(comparison = cmp.copy(targetQuestionKey = target.key)) }
+        },
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+      )
+    }
+  }
+}
+
+@Composable
+private fun DistanceRuleEditor(
+  uiState: FormEditorUiState,
+  question: EditorQuestion,
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+  enabled: Boolean,
+) {
+  val form = uiState.form
+  val refs = form.eligibleDistanceReferences(question.key)
+  val refKey = validation.distanceReferenceQuestionKey
+  if (refs.isEmpty() && refKey.isBlank()) {
+    Text(
+      text = stringResource(Res.string.formeditor_no_other_locations),
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    return
+  }
+  val noneText = stringResource(Res.string.formeditor_none)
+  val selectedRef = form.find(refKey)
+  Text(
+    text = stringResource(Res.string.formeditor_distance_from_location),
+    style = MaterialTheme.typography.bodyMedium,
+  )
+  DropdownSelector(
+    label = stringResource(Res.string.formeditor_reference_location),
+    selectedText =
+      selectedRef?.let { it.label.ifBlank { it.name } }
+        ?: if (refKey.isBlank()) noneText
+        else stringResource(Res.string.formeditor_missing_question),
+    options = listOf<EditorQuestion?>(null) + refs,
+    optionText = { q -> q?.let { it.label.ifBlank { it.name } } ?: noneText },
+    onSelect = { picked ->
+      update {
+        if (picked == null) {
+          it.copy(distanceReferenceQuestionKey = "", min = "", max = "")
+        } else {
+          it.copy(distanceReferenceQuestionKey = picked.key)
+        }
+      }
+    },
+    enabled = enabled,
+    modifier = Modifier.fillMaxWidth(),
+  )
+  if (refKey.isNotBlank()) {
+    MinMaxFields(
+      stringResource(Res.string.formeditor_min_distance_meters),
+      stringResource(Res.string.formeditor_max_distance_meters),
+      validation,
+      update,
+      enabled = enabled,
+    )
   }
 }
 

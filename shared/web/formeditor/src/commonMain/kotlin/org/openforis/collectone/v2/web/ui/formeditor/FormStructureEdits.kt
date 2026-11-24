@@ -112,6 +112,27 @@ internal fun EditorForm.copiesOf(
         q.relevance?.let { rel ->
           rel.copy(sourceQuestionKey = keyMap[rel.sourceQuestionKey] ?: rel.sourceQuestionKey)
         },
+      requiredCondition =
+        q.requiredCondition?.let { rel ->
+          rel.copy(sourceQuestionKey = keyMap[rel.sourceQuestionKey] ?: rel.sourceQuestionKey)
+        },
+      validation =
+        q.validation?.let { v ->
+          v.copy(
+            comparison =
+              v.comparison?.let { cmp ->
+                cmp.copy(targetQuestionKey = keyMap[cmp.targetQuestionKey] ?: cmp.targetQuestionKey)
+              },
+            distanceReferenceQuestionKey =
+              keyMap[v.distanceReferenceQuestionKey] ?: v.distanceReferenceQuestionKey,
+            condition =
+              v.condition?.let { cond ->
+                cond.copy(
+                  sourceQuestionKey = keyMap[cond.sourceQuestionKey] ?: cond.sourceQuestionKey
+                )
+              },
+          )
+        },
       parentQuestionKey = keyMap[q.parentQuestionKey] ?: q.parentQuestionKey,
     )
   }
@@ -456,11 +477,33 @@ private fun EditorSaveTo.afterTypeChange(key: String, type: EditorQuestionType):
   )
 }
 
-/** [EditorForm.questions] without [keys], with display logic that tested them removed. */
+/**
+ * [EditorForm.questions] without [keys], with display logic and validation refs that tested them
+ * removed.
+ */
 internal fun EditorForm.questionsWithout(keys: Set<String>): List<EditorQuestion> =
   questions
     .filterNot { it.key in keys }
-    .map { if (it.relevance?.sourceQuestionKey in keys) it.copy(relevance = null) else it }
+    .map { q ->
+      val updatedValidation =
+        q.validation?.let { v ->
+          val cleaned =
+            v.copy(
+              comparison = v.comparison?.takeIf { it.targetQuestionKey !in keys },
+              distanceReferenceQuestionKey =
+                if (v.distanceReferenceQuestionKey in keys) "" else v.distanceReferenceQuestionKey,
+              condition = v.condition?.takeIf { it.sourceQuestionKey !in keys },
+            )
+          cleaned.takeIf {
+            it != org.openforis.collectone.v2.app.domain.model.editor.EditorValidation()
+          }
+        }
+      q.copy(
+        relevance = q.relevance?.takeIf { it.sourceQuestionKey !in keys },
+        requiredCondition = q.requiredCondition?.takeIf { it.sourceQuestionKey !in keys },
+        validation = updatedValidation,
+      )
+    }
 
 private fun EditorForm.deletedQuestionsWith(removed: List<EditorQuestion>): List<EditorQuestion> {
   if (removed.isEmpty()) return deletedQuestions
@@ -503,7 +546,14 @@ internal fun EditorForm.withChoiceValueRenamed(
     if (this != null && sourceQuestionKey == key && value == oldValue) copy(value = newValue)
     else this
   return copy(
-    questions = questions.map { it.copy(relevance = it.relevance.renamed()) },
+    questions =
+      questions.map { q ->
+        q.copy(
+          relevance = q.relevance.renamed(),
+          requiredCondition = q.requiredCondition.renamed(),
+          validation = q.validation?.let { v -> v.copy(condition = v.condition.renamed()) },
+        )
+      },
     sections = sections.map { it.copy(relevance = it.relevance.renamed()) },
   )
 }

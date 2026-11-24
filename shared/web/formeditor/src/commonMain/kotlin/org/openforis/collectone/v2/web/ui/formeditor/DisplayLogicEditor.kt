@@ -188,67 +188,13 @@ internal fun DisplayLogicEditor(
       }
     }
     if (relevance != null) {
-      val source = form.find(relevance.sourceQuestionKey)
-      DropdownSelector(
-        label = stringResource(Res.string.formeditor_question),
-        selectedText =
-          source?.let { it.label.ifBlank { it.name } }
-            ?: stringResource(Res.string.formeditor_missing_question),
-        options = sources,
-        optionText = { it.label.ifBlank { it.name } },
+      ConditionRulePickers(
+        uiState = uiState,
+        sources = sources,
+        condition = relevance,
         enabled = !uiState.isReadOnly,
-        onSelect = { picked ->
-          val operator =
-            relevance.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
-              ?: RelevanceOperator.availableFor(picked.type).first()
-          val value = picked.resolvedChoices(uiState.datasets).firstOrNull()?.value.orEmpty()
-          actions.updateQuestion(key) {
-            it.copy(relevance = EditorRelevance(picked.key, operator, value))
-          }
-        },
+        onChange = { updated -> actions.updateQuestion(key) { it.copy(relevance = updated) } },
       )
-      if (source != null) {
-        DropdownSelector(
-          label = stringResource(Res.string.formeditor_condition),
-          selectedText = stringResource(relevance.operator.labelRes),
-          options = RelevanceOperator.availableFor(source.type),
-          optionText = { stringResource(it.labelRes) },
-          enabled = !uiState.isReadOnly,
-          onSelect = { op ->
-            actions.updateQuestion(key) { it.copy(relevance = relevance.copy(operator = op)) }
-          },
-        )
-        if (relevance.operator.needsValue) {
-          val sourceChoices = source.resolvedChoices(uiState.datasets)
-          if (source.type.hasChoices && sourceChoices.isNotEmpty()) {
-            DropdownSelector(
-              label = stringResource(Res.string.formeditor_value),
-              selectedText =
-                sourceChoices.firstOrNull { it.value == relevance.value }?.label
-                  ?: relevance.value.ifBlank {
-                    stringResource(Res.string.formeditor_pick_a_choice)
-                  },
-              options = sourceChoices,
-              optionText = { it.label },
-              enabled = !uiState.isReadOnly,
-              onSelect = { c ->
-                actions.updateQuestion(key) { it.copy(relevance = relevance.copy(value = c.value)) }
-              },
-            )
-          } else {
-            OutlinedTextField(
-              value = relevance.value,
-              onValueChange = { v ->
-                actions.updateQuestion(key) { it.copy(relevance = relevance.copy(value = v)) }
-              },
-              enabled = !uiState.isReadOnly,
-              label = { Text(stringResource(Res.string.formeditor_value)) },
-              singleLine = true,
-              modifier = Modifier.fillMaxWidth(),
-            )
-          }
-        }
-      }
       form.relevanceSummary(question, uiState.datasets)?.let { summary ->
         Text(
           text = summary.toUiText().resolve(),
@@ -276,5 +222,82 @@ internal fun DisplayLogicEditor(
           )
         }
       }
+  }
+}
+
+/** Default [EditorRelevance] seeded from the first eligible source question. */
+internal fun defaultConditionFor(
+  source: EditorQuestion,
+  datasets: List<org.openforis.collectone.v2.app.domain.model.editor.EditorDataset>,
+): EditorRelevance {
+  val operator = RelevanceOperator.availableFor(source.type).first()
+  val value =
+    if (operator.needsValue) source.resolvedChoices(datasets).firstOrNull()?.value.orEmpty() else ""
+  return EditorRelevance(source.key, operator, value)
+}
+
+/**
+ * Reusable Question / Operator / Value pickers for any [EditorRelevance] predicate (display logic,
+ * conditional requiredness, or conditional validation).
+ */
+@Composable
+internal fun ConditionRulePickers(
+  uiState: FormEditorUiState,
+  sources: List<EditorQuestion>,
+  condition: EditorRelevance,
+  enabled: Boolean,
+  onChange: (EditorRelevance) -> Unit,
+) {
+  val form = uiState.form
+  val source = form.find(condition.sourceQuestionKey)
+  DropdownSelector(
+    label = stringResource(Res.string.formeditor_question),
+    selectedText =
+      source?.let { it.label.ifBlank { it.name } }
+        ?: stringResource(Res.string.formeditor_missing_question),
+    options = sources,
+    optionText = { it.label.ifBlank { it.name } },
+    enabled = enabled,
+    onSelect = { picked ->
+      val operator =
+        condition.operator.takeIf { it in RelevanceOperator.availableFor(picked.type) }
+          ?: RelevanceOperator.availableFor(picked.type).first()
+      val value = picked.resolvedChoices(uiState.datasets).firstOrNull()?.value.orEmpty()
+      onChange(EditorRelevance(picked.key, operator, value))
+    },
+  )
+  if (source != null) {
+    DropdownSelector(
+      label = stringResource(Res.string.formeditor_condition),
+      selectedText = stringResource(condition.operator.labelRes),
+      options = RelevanceOperator.availableFor(source.type),
+      optionText = { stringResource(it.labelRes) },
+      enabled = enabled,
+      onSelect = { op -> onChange(condition.copy(operator = op)) },
+    )
+    if (condition.operator.needsValue) {
+      val sourceChoices = source.resolvedChoices(uiState.datasets)
+      if (source.type.hasChoices && sourceChoices.isNotEmpty()) {
+        DropdownSelector(
+          label = stringResource(Res.string.formeditor_value),
+          selectedText =
+            sourceChoices.firstOrNull { it.value == condition.value }?.label
+              ?: condition.value.ifBlank { stringResource(Res.string.formeditor_pick_a_choice) },
+          options = sourceChoices,
+          optionText = { it.label },
+          enabled = enabled,
+          onSelect = { c -> onChange(condition.copy(value = c.value)) },
+        )
+      } else {
+        OutlinedTextField(
+          value = condition.value,
+          onValueChange = { v -> onChange(condition.copy(value = v)) },
+          enabled = enabled,
+          label = { Text(stringResource(Res.string.formeditor_value)) },
+          singleLine = true,
+          modifier = Modifier.fillMaxWidth(),
+        )
+      }
+    }
   }
 }

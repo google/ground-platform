@@ -173,6 +173,7 @@ object FormImport {
     private val usedNames = mutableSetOf<String>()
     private val relevanceByKey = mutableMapOf<String, String>()
     private val relevanceContextByKey = mutableMapOf<String, String>()
+    private val bindingByKey = mutableMapOf<String, FieldBinding>()
 
     fun run(formId: String, fallbackTitle: String, availability: FormAvailability): ImportedForm {
       walk(formDef.view?.components.orEmpty(), enclosing = "", enclosingRelevance = null)
@@ -185,7 +186,14 @@ object FormImport {
           } else {
             ""
           }
-        q.copy(relevance = relevanceOf(q), parentQuestionKey = parentKey)
+        val binding = bindingByKey[q.key]
+        val path = pathByKey[q.key].orEmpty()
+        q.copy(
+          relevance = relevanceOf(q),
+          requiredCondition = requiredConditionOf(q, binding),
+          validation = validationOf(q, binding, path),
+          parentQuestionKey = parentKey,
+        )
       }
       val entity = model?.entities?.firstOrNull()
       val isUpdate = entity != null && entity.update_condition.isNotBlank()
@@ -449,7 +457,9 @@ object FormImport {
           relevanceContextByKey[key] = enclosingRelevance.contextPath
         }
       }
-      val validation = validationOf(type, binding, path, label ?: name)
+      if (binding != null) {
+        bindingByKey[key] = binding
+      }
       val decimalPlaces =
         if (type == EditorQuestionType.NUMBER && binding?.type == DataType.TYPE_DOUBLE) {
           EditorQuestion.DEFAULT_DECIMAL_PLACES
@@ -474,7 +484,6 @@ object FormImport {
             type.hasChoices &&
               choiceDatasetId != null &&
               EditorXFormsGenerator.ADD_ENTITY_APPEARANCE in appearance,
-          validation = validation,
           decimalPlaces = decimalPlaces,
           capture =
             if (type.isGeometry && GeometryCapture.GPS_OR_MAP.appearance in appearance) {
@@ -656,22 +665,68 @@ object FormImport {
     }
 
     /**
-     * Imports numeric range, text length/pattern, date, or selection count constraints; unsupported
-     * constraints are reported in [notes].
+     * Imports structured constraints (numeric range, text length/pattern, date, selection count,
+     * cross-field comparison, distance, conditional wrapper) or custom XPath constraints;
+     * unparseable constraints are reported in [notes].
      */
     private fun validationOf(
-      type: EditorQuestionType,
+      question: EditorQuestion,
       binding: FieldBinding?,
       path: String,
-      label: String,
     ): EditorValidation? {
       val constraint = stripOuterParens(binding?.constraint_expression.orEmpty())
       if (binding == null || constraint.isEmpty()) return null
-      val validation = ConstraintImport.parse(type, constraint, constraintMessage(binding, path))
+      val maxIndex = questions.indexOfFirst { it.key == question.key }
+      fun resolveAny(rawRef: String): EditorQuestion? {
+        val resolvedPath = resolvePath(rawRef, path) ?: return null
+        val targetKey = keyByPath[resolvedPath] ?: return null
+        return questions.firstOrNull { it.key == targetKey && it.key != question.key }
+      }
+      fun resolveEarlier(rawRef: String): EditorQuestion? {
+        val resolvedPath = resolvePath(rawRef, path) ?: return null
+        val srcKey = keyByPath[resolvedPath] ?: return null
+        val sourceIndex = questions.indexOfFirst { it.key == srcKey }
+        return if (sourceIndex in 0 until maxIndex) questions[sourceIndex] else null
+      }
+      val validation =
+        ConstraintImport.parse(
+          type = question.type,
+          constraint = constraint,
+          message = constraintMessage(binding, path),
+          resolveQuestion = ::resolveAny,
+          resolveEarlierQuestion = ::resolveEarlier,
+        )
       if (validation == null) {
-        notes += "Constraint \"$constraint\" on \"$label\" isn't supported by the editor."
+        notes +=
+          "Constraint \"$constraint\" on \"${question.label}\" isn't supported by the editor."
       }
       return validation
+    }
+
+    private fun requiredConditionOf(
+      question: EditorQuestion,
+      binding: FieldBinding?,
+    ): EditorRelevance? {
+      val raw = binding?.required_expression?.trim().orEmpty()
+      if (
+        raw.isEmpty() || isTrue(raw) || raw.equals("false()", true) || raw.equals("false", true)
+      ) {
+        return null
+      }
+      val contextPath = pathByKey[question.key].orEmpty()
+      val maxIndex = questions.indexOfFirst { it.key == question.key }
+      fun source(rawRef: String): EditorQuestion? {
+        val resolvedPath = resolvePath(rawRef, contextPath) ?: return null
+        val srcKey = keyByPath[resolvedPath] ?: return null
+        val sourceIndex = questions.indexOfFirst { it.key == srcKey }
+        return if (sourceIndex in 0 until maxIndex) questions[sourceIndex] else null
+      }
+      val cond = RelevanceImport.parse(stripOuterParens(raw), ::source)
+      if (cond == null) {
+        notes +=
+          "Required expression \"$raw\" on \"${question.label}\" isn't supported by the editor."
+      }
+      return cond
     }
 
     private fun constraintMessage(binding: FieldBinding, path: String): String {

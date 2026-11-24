@@ -194,7 +194,7 @@ class FormEditorClickTest {
     onNodeWithText("Name").assertExists()
     onNodeWithText("Data column name. Letters, digits, _ . -").assertExists()
     onNodeWithText("Minimum selections").assertDoesNotExist()
-    onNodeWithText("No validation rules for this question type.").assertExists()
+    onNodeWithText("Custom XPath rule (optional)").assertExists()
     onNodeWithContentDescription("Collapse advanced").performClick()
     waitForIdle()
     onAllNodesWithText("Name").assertCountEquals(0)

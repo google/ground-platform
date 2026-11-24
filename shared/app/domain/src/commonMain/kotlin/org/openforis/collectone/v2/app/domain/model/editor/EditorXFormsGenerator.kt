@@ -90,6 +90,21 @@ object EditorXFormsGenerator {
     relevantExpression(form, question.relevance, form.indexOf(question.key), question.sectionId)
 
   /**
+   * Returns the XPath `required` expression for [question]: empty when optional or read-only,
+   * `"true()"` when unconditionally required, or the compiled [EditorQuestion.requiredCondition]
+   * expression when conditionally required.
+   */
+  fun requiredExpression(form: EditorForm, question: EditorQuestion): String {
+    if (question.type.isReadOnly) return ""
+    val cond = question.requiredCondition
+    if (cond != null) {
+      return relevantExpression(form, cond, form.indexOf(question.key), question.sectionId)
+        .orEmpty()
+    }
+    return if (question.required) "true()" else ""
+  }
+
+  /**
    * Returns the XPath `relevant` expression of [section]'s group node, which shows or hides all its
    * questions together, or `null` if always shown. Its source must come before the section's first
    * question and can't be inside the section.
@@ -469,13 +484,20 @@ object EditorXFormsGenerator {
         val fieldPath = form.relativePath(question)
         val constraintExpr =
           if (!question.type.isReadOnly) {
-            ValidationRules.constraintExpression(question.type, question.validation).orEmpty()
+            ValidationRules.constraintExpression(
+                question.type,
+                question.validation,
+                form,
+                question.key,
+              )
+              .orEmpty()
           } else {
             ""
           }
         val constraintMsg =
           if (constraintExpr.isNotEmpty()) {
-            ValidationRules.message(question.type, question.validation).orEmpty()
+            ValidationRules.message(question.type, question.validation, form, question.key)
+              .orEmpty()
           } else {
             ""
           }
@@ -483,8 +505,7 @@ object EditorXFormsGenerator {
           FieldBinding(
             field_path = fieldPath,
             type = dataTypeOf(question),
-            required_expression =
-              if (question.required && !question.type.isReadOnly) "true()" else "",
+            required_expression = requiredExpression(form, question),
             read_only = question.type.isReadOnly,
             relevant_expression = relevantExpression(form, question).orEmpty(),
             constraint_expression = constraintExpr,

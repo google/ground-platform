@@ -839,4 +839,34 @@
     <item quantity="one">%1$d question utilise un type de champ non pris en charge dans Google Earth.</item>
     <item quantity="other">%1$d questions utilisent des types de champs non pris en charge dans Google Earth.</item>
   </plurals>
+    <string name="formeditor_optional">Facultatif</string>
+    <string name="formeditor_required_if">Si…</string>
+    <string name="formeditor_required_condition_first_screen">Ajoutez une question précédente pour rendre ce champ obligatoire sous condition.</string>
+    <string name="formeditor_strict_min">Strictement supérieur à (&gt;)</string>
+    <string name="formeditor_strict_max">Strictement inférieur à (&lt;)</string>
+    <string name="formeditor_compare_to_question">Comparer à une autre question</string>
+    <string name="formeditor_comparison_operator">Comparaison</string>
+    <string name="formeditor_comparison_target">Question cible</string>
+    <string name="formeditor_distance_from_location">Distance depuis un lieu</string>
+    <string name="formeditor_reference_location">Lieu de référence</string>
+    <string name="formeditor_min_distance_meters">Distance min. (m)</string>
+    <string name="formeditor_max_distance_meters">Distance max. (m)</string>
+    <string name="formeditor_no_other_locations">Ajoutez une autre question de localisation pour activer les contrôles de distance.</string>
+    <string name="formeditor_custom_xpath_rule">Règle XPath personnalisée (facultatif)</string>
+    <string name="formeditor_custom_xpath_placeholder">ex. . + /data/other &lt;= 100</string>
+    <string name="formeditor_only_validate_when">Valider uniquement si…</string>
+    <string name="formeditor_validation_number_greater_than">être supérieur à %1$s</string>
+    <string name="formeditor_validation_number_less_than">être inférieur à %1$s</string>
+    <string name="formeditor_validation_date_after">être postérieur au %1$s</string>
+    <string name="formeditor_validation_date_before">être antérieur au %1$s</string>
+    <string name="formeditor_validation_compare_equals">être égal à %1$s</string>
+    <string name="formeditor_validation_compare_not_equals">être différent de %1$s</string>
+    <string name="formeditor_validation_compare_greater_than">être supérieur à %1$s</string>
+    <string name="formeditor_validation_compare_greater_than_or_equal">être au moins %1$s</string>
+    <string name="formeditor_validation_compare_less_than">être inférieur à %1$s</string>
+    <string name="formeditor_validation_compare_less_than_or_equal">être au plus %1$s</string>
+    <string name="formeditor_validation_distance_between">être entre %1$s et %2$s mètres de %3$s</string>
+    <string name="formeditor_validation_distance_at_least">être à au moins %1$s mètres de %2$s</string>
+    <string name="formeditor_validation_distance_at_most">être à moins de %1$s mètres de %2$s</string>
+    <string name="formeditor_validation_custom_expression">respecter la règle de validation</string>
 </resources>

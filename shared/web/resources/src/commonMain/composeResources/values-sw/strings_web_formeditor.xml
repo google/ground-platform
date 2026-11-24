@@ -839,4 +839,34 @@
     <item quantity="one">Swali %1$d linatumia aina ya sehemu ambayo haitumiki katika Google Earth.</item>
     <item quantity="other">Maswali %1$d yanatumia aina za sehemu ambazo hazitumiki katika Google Earth.</item>
   </plurals>
+    <string name="formeditor_optional">Optional</string>
+    <string name="formeditor_required_if">If…</string>
+    <string name="formeditor_required_condition_first_screen">Add an earlier question to make this field conditionally required.</string>
+    <string name="formeditor_strict_min">Strictly greater than (&gt;)</string>
+    <string name="formeditor_strict_max">Strictly less than (&lt;)</string>
+    <string name="formeditor_compare_to_question">Compare to another question</string>
+    <string name="formeditor_comparison_operator">Comparison</string>
+    <string name="formeditor_comparison_target">Target question</string>
+    <string name="formeditor_distance_from_location">Distance from location</string>
+    <string name="formeditor_reference_location">Reference location</string>
+    <string name="formeditor_min_distance_meters">Min distance (m)</string>
+    <string name="formeditor_max_distance_meters">Max distance (m)</string>
+    <string name="formeditor_no_other_locations">Add another Location question to enable distance checks.</string>
+    <string name="formeditor_custom_xpath_rule">Custom XPath rule (optional)</string>
+    <string name="formeditor_custom_xpath_placeholder">e.g. . + /data/other &lt;= 100</string>
+    <string name="formeditor_only_validate_when">Only validate when…</string>
+    <string name="formeditor_validation_number_greater_than">be greater than %1$s</string>
+    <string name="formeditor_validation_number_less_than">be less than %1$s</string>
+    <string name="formeditor_validation_date_after">be after %1$s</string>
+    <string name="formeditor_validation_date_before">be before %1$s</string>
+    <string name="formeditor_validation_compare_equals">equal %1$s</string>
+    <string name="formeditor_validation_compare_not_equals">not equal %1$s</string>
+    <string name="formeditor_validation_compare_greater_than">be greater than %1$s</string>
+    <string name="formeditor_validation_compare_greater_than_or_equal">be at least %1$s</string>
+    <string name="formeditor_validation_compare_less_than">be less than %1$s</string>
+    <string name="formeditor_validation_compare_less_than_or_equal">be at most %1$s</string>
+    <string name="formeditor_validation_distance_between">be between %1$s and %2$s meters from %3$s</string>
+    <string name="formeditor_validation_distance_at_least">be at least %1$s meters from %2$s</string>
+    <string name="formeditor_validation_distance_at_most">be within %1$s meters of %2$s</string>
+    <string name="formeditor_validation_custom_expression">satisfy the validation rule</string>
 </resources>

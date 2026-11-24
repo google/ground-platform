@@ -65,6 +65,23 @@ enum class EditorIssueMessage : MessageKey {
   CUSTOM_PATTERN_QUOTES,
   DATE_RANGE_MISSING,
   DATE_RANGE_REVERSED,
+  COMPARISON_TARGET_MISSING,
+  COMPARISON_TARGET_DELETED,
+  /** `%1$s`: name of a question inside a repeated section that a comparison outside it uses. */
+  COMPARISON_TARGET_IN_REPEAT,
+  /** `%1$s`: name of a comparison target whose type doesn't match the question. */
+  COMPARISON_TARGET_WRONG_TYPE,
+  COMPARISON_OPERATOR_NOT_APPLICABLE,
+  DISTANCE_REFERENCE_MISSING,
+  DISTANCE_REFERENCE_DELETED,
+  /** `%1$s`: name of a location question inside a repeated section. */
+  DISTANCE_REFERENCE_IN_REPEAT,
+  /** `%1$s`: name of a distance reference that isn't a Location question. */
+  DISTANCE_REFERENCE_NOT_LOCATION,
+  DISTANCE_MIN_INVALID,
+  DISTANCE_MAX_INVALID,
+  DISTANCE_MIN_MORE_THAN_MAX,
+  CUSTOM_EXPRESSION_INVALID,
   SAVE_TO_TARGET_MISSING,
   SAVE_TO_TARGET_DELETED,
   SAVE_TO_RESERVED_NAME_MAP_LAYER,

@@ -573,4 +573,23 @@
   <string name="domain_pdf_risk_indicators">Indicadores-chave</string>
   <string name="domain_pdf_risk_treecover">Cobertura arbórea e floresta (2020)</string>
   <string name="domain_pdf_risk_commodities">Commodities e uso da terra</string>
+    <string name="domain_comparison_operator_equals">é igual a</string>
+    <string name="domain_comparison_operator_not_equals">não é igual a</string>
+    <string name="domain_comparison_operator_greater_than">é maior que</string>
+    <string name="domain_comparison_operator_greater_than_or_equal">é pelo menos</string>
+    <string name="domain_comparison_operator_less_than">é menor que</string>
+    <string name="domain_comparison_operator_less_than_or_equal">é no máximo</string>
+    <string name="domain_issue_comparison_target_missing">Escolha uma pergunta para comparar.</string>
+    <string name="domain_issue_comparison_target_deleted">A comparação refere-se a uma pergunta excluída.</string>
+    <string name="domain_issue_comparison_target_in_repeat">A comparação não pode usar \"%1$s\" de dentro de uma seção repetida.</string>
+    <string name="domain_issue_comparison_target_wrong_type">O destino da comparação \"%1$s\" deve ser um tipo compatível.</string>
+    <string name="domain_issue_comparison_operator_not_applicable">\"%1$s\" não se aplica a %2$s.</string>
+    <string name="domain_issue_distance_reference_missing">Escolha uma pergunta de localização de referência.</string>
+    <string name="domain_issue_distance_reference_deleted">A verificação de distância refere-se a uma pergunta excluída.</string>
+    <string name="domain_issue_distance_reference_in_repeat">A verificação de distância não pode usar \"%1$s\" de dentro de uma seção repetida.</string>
+    <string name="domain_issue_distance_reference_not_location">A referência de distância \"%1$s\" deve ser uma pergunta de Localização.</string>
+    <string name="domain_issue_distance_min_invalid">A distância mínima deve ser um número igual ou maior que 0.</string>
+    <string name="domain_issue_distance_max_invalid">A distância máxima deve ser um número igual ou maior que 0.</string>
+    <string name="domain_issue_distance_min_more_than_max">A distância mínima não pode ser maior que a máxima.</string>
+    <string name="domain_issue_custom_expression_invalid">A regra de validação personalizada não é uma expressão XPath válida.</string>
 </resources>

@@ -47,6 +47,7 @@ import org.openforis.collectone.v2.app.domain.model.UploadStatusFilter
 import org.openforis.collectone.v2.app.domain.model.editor.AllocationMode
 import org.openforis.collectone.v2.app.domain.model.editor.ChoiceSource
 import org.openforis.collectone.v2.app.domain.model.editor.CollaboratorRole
+import org.openforis.collectone.v2.app.domain.model.editor.ComparisonOperator
 import org.openforis.collectone.v2.app.domain.model.editor.DateRule
 import org.openforis.collectone.v2.app.domain.model.editor.DisplayLogicMessage
 import org.openforis.collectone.v2.app.domain.model.editor.EditorIssueCountedMessage
@@ -83,6 +84,12 @@ import org.openforis.collectone.v2.app.resources.domain_issue_choice_value_dupli
 import org.openforis.collectone.v2.app.resources.domain_issue_choice_value_invalid
 import org.openforis.collectone.v2.app.resources.domain_issue_choose_choice_data_table
 import org.openforis.collectone.v2.app.resources.domain_issue_choose_choice_map_layer
+import org.openforis.collectone.v2.app.resources.domain_issue_comparison_operator_not_applicable
+import org.openforis.collectone.v2.app.resources.domain_issue_comparison_target_deleted
+import org.openforis.collectone.v2.app.resources.domain_issue_comparison_target_in_repeat
+import org.openforis.collectone.v2.app.resources.domain_issue_comparison_target_missing
+import org.openforis.collectone.v2.app.resources.domain_issue_comparison_target_wrong_type
+import org.openforis.collectone.v2.app.resources.domain_issue_custom_expression_invalid
 import org.openforis.collectone.v2.app.resources.domain_issue_custom_pattern_invalid
 import org.openforis.collectone.v2.app.resources.domain_issue_custom_pattern_missing
 import org.openforis.collectone.v2.app.resources.domain_issue_custom_pattern_quotes
@@ -105,6 +112,13 @@ import org.openforis.collectone.v2.app.resources.domain_issue_display_logic_sour
 import org.openforis.collectone.v2.app.resources.domain_issue_display_logic_source_later
 import org.openforis.collectone.v2.app.resources.domain_issue_display_logic_value_missing
 import org.openforis.collectone.v2.app.resources.domain_issue_display_logic_value_not_number
+import org.openforis.collectone.v2.app.resources.domain_issue_distance_max_invalid
+import org.openforis.collectone.v2.app.resources.domain_issue_distance_min_invalid
+import org.openforis.collectone.v2.app.resources.domain_issue_distance_min_more_than_max
+import org.openforis.collectone.v2.app.resources.domain_issue_distance_reference_deleted
+import org.openforis.collectone.v2.app.resources.domain_issue_distance_reference_in_repeat
+import org.openforis.collectone.v2.app.resources.domain_issue_distance_reference_missing
+import org.openforis.collectone.v2.app.resources.domain_issue_distance_reference_not_location
 import org.openforis.collectone.v2.app.resources.domain_issue_form_missing_id
 import org.openforis.collectone.v2.app.resources.domain_issue_google_earth_incompatible_question
 import org.openforis.collectone.v2.app.resources.domain_issue_label_empty
@@ -246,6 +260,7 @@ private fun labelResource(value: Enum<*>): StringResource =
     is EditorPropertyKind -> value.labelRes
     is DateRule -> value.labelRes
     is TextPattern -> value.labelRes
+    is ComparisonOperator -> value.labelRes
     else -> throw IllegalArgumentException("No display label for $value")
   }
 
@@ -312,6 +327,30 @@ private val EditorIssueMessage.resource: StringResource
       EditorIssueMessage.CUSTOM_PATTERN_QUOTES -> Res.string.domain_issue_custom_pattern_quotes
       EditorIssueMessage.DATE_RANGE_MISSING -> Res.string.domain_issue_date_range_missing
       EditorIssueMessage.DATE_RANGE_REVERSED -> Res.string.domain_issue_date_range_reversed
+      EditorIssueMessage.COMPARISON_TARGET_MISSING ->
+        Res.string.domain_issue_comparison_target_missing
+      EditorIssueMessage.COMPARISON_TARGET_DELETED ->
+        Res.string.domain_issue_comparison_target_deleted
+      EditorIssueMessage.COMPARISON_TARGET_IN_REPEAT ->
+        Res.string.domain_issue_comparison_target_in_repeat
+      EditorIssueMessage.COMPARISON_TARGET_WRONG_TYPE ->
+        Res.string.domain_issue_comparison_target_wrong_type
+      EditorIssueMessage.COMPARISON_OPERATOR_NOT_APPLICABLE ->
+        Res.string.domain_issue_comparison_operator_not_applicable
+      EditorIssueMessage.DISTANCE_REFERENCE_MISSING ->
+        Res.string.domain_issue_distance_reference_missing
+      EditorIssueMessage.DISTANCE_REFERENCE_DELETED ->
+        Res.string.domain_issue_distance_reference_deleted
+      EditorIssueMessage.DISTANCE_REFERENCE_IN_REPEAT ->
+        Res.string.domain_issue_distance_reference_in_repeat
+      EditorIssueMessage.DISTANCE_REFERENCE_NOT_LOCATION ->
+        Res.string.domain_issue_distance_reference_not_location
+      EditorIssueMessage.DISTANCE_MIN_INVALID -> Res.string.domain_issue_distance_min_invalid
+      EditorIssueMessage.DISTANCE_MAX_INVALID -> Res.string.domain_issue_distance_max_invalid
+      EditorIssueMessage.DISTANCE_MIN_MORE_THAN_MAX ->
+        Res.string.domain_issue_distance_min_more_than_max
+      EditorIssueMessage.CUSTOM_EXPRESSION_INVALID ->
+        Res.string.domain_issue_custom_expression_invalid
       EditorIssueMessage.SAVE_TO_TARGET_MISSING -> Res.string.domain_issue_save_to_target_missing
       EditorIssueMessage.SAVE_TO_TARGET_DELETED -> Res.string.domain_issue_save_to_target_deleted
       EditorIssueMessage.SAVE_TO_RESERVED_NAME_MAP_LAYER ->

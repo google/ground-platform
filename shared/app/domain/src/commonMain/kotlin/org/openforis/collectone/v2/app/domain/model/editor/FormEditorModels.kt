@@ -316,6 +316,11 @@ data class EditorQuestion(
   val label: String,
   val hint: String = "",
   val required: Boolean = false,
+  /**
+   * Optional condition under which this question is required, exported as the bind `required` XPath
+   * expression. When non-null, overrides static [required].
+   */
+  val requiredCondition: EditorRelevance? = null,
   val choices: List<EditorChoice> = emptyList(),
   /**
    * Dataset ID (`<instance id="…" src="jr://file-csv/….csv">`) supplying dynamic options for a
@@ -681,6 +686,34 @@ data class EditorForm(
     if (index <= 0) return emptyList()
     val sectionId = questions[index].sectionId
     return questions.subList(0, index).filter { canReferTo(it, sectionId) }
+  }
+
+  /**
+   * Other questions in this Form that [key] can compare its answer against in a cross-field
+   * validation rule: compatible type family and reachable per [canReferTo].
+   */
+  fun eligibleComparisonTargets(key: String): List<EditorQuestion> {
+    val question = find(key) ?: return emptyList()
+    if (!ComparisonOperator.supportsType(question.type)) return emptyList()
+    return questions.filter { other ->
+      other.key != key &&
+        ComparisonOperator.areCompatible(question.type, other.type) &&
+        canReferTo(other, question.sectionId)
+    }
+  }
+
+  /**
+   * Other [EditorQuestionType.LOCATION] questions in this Form that [key] can measure distance from
+   * in a spatial distance validation rule.
+   */
+  fun eligibleDistanceReferences(key: String): List<EditorQuestion> {
+    val question = find(key) ?: return emptyList()
+    if (question.type != EditorQuestionType.LOCATION) return emptyList()
+    return questions.filter { other ->
+      other.key != key &&
+        other.type == EditorQuestionType.LOCATION &&
+        canReferTo(other, question.sectionId)
+    }
   }
 
   /**

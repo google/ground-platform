@@ -153,8 +153,16 @@ object FormEditorValidator {
       relevanceIssue(form, question.relevance, index, question.sectionId)?.let {
         issues += EditorIssue(key, message = it)
       }
+      if (!question.type.isReadOnly) {
+        relevanceIssue(form, question.requiredCondition, index, question.sectionId)?.let {
+          issues += EditorIssue(key, message = it)
+        }
+        relevanceIssue(form, question.validation?.condition, index, question.sectionId)?.let {
+          issues += EditorIssue(key, message = it)
+        }
+      }
       issues += cascadeIssues(form, index, question, datasets)
-      issues += ValidationRules.issues(question).map { EditorIssue(key, message = it) }
+      issues += ValidationRules.issues(question, form).map { EditorIssue(key, message = it) }
     }
     form.sections.forEach { section ->
       sectionRelevanceIssue(form, section)?.let {

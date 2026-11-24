@@ -18,6 +18,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.openforis.collectone.v2.app.domain.model.editor.AllocationMode
 import org.openforis.collectone.v2.app.domain.model.editor.ChoiceSource
 import org.openforis.collectone.v2.app.domain.model.editor.CollaboratorRole
+import org.openforis.collectone.v2.app.domain.model.editor.ComparisonOperator
 import org.openforis.collectone.v2.app.domain.model.editor.DatasetKind
 import org.openforis.collectone.v2.app.domain.model.editor.DateRule
 import org.openforis.collectone.v2.app.domain.model.editor.EditorPropertyKind
@@ -46,6 +47,12 @@ import org.openforis.collectone.v2.app.resources.domain_collaborator_role_survey
 import org.openforis.collectone.v2.app.resources.domain_collaborator_role_survey_organizer_description
 import org.openforis.collectone.v2.app.resources.domain_collaborator_role_viewer
 import org.openforis.collectone.v2.app.resources.domain_collaborator_role_viewer_description
+import org.openforis.collectone.v2.app.resources.domain_comparison_operator_equals
+import org.openforis.collectone.v2.app.resources.domain_comparison_operator_greater_than
+import org.openforis.collectone.v2.app.resources.domain_comparison_operator_greater_than_or_equal
+import org.openforis.collectone.v2.app.resources.domain_comparison_operator_less_than
+import org.openforis.collectone.v2.app.resources.domain_comparison_operator_less_than_or_equal
+import org.openforis.collectone.v2.app.resources.domain_comparison_operator_not_equals
 import org.openforis.collectone.v2.app.resources.domain_data_type_date
 import org.openforis.collectone.v2.app.resources.domain_data_type_decimal
 import org.openforis.collectone.v2.app.resources.domain_data_type_integer
@@ -408,4 +415,18 @@ val TextPattern.labelRes: StringResource
       TextPattern.DIGITS -> Res.string.domain_text_pattern_digits
       TextPattern.LETTERS -> Res.string.domain_text_pattern_letters
       TextPattern.CUSTOM -> Res.string.domain_text_pattern_custom
+    }
+
+/** Display label of [ComparisonOperator]; resolve with `stringResource`. */
+val ComparisonOperator.labelRes: StringResource
+  get() =
+    when (this) {
+      ComparisonOperator.EQUALS -> Res.string.domain_comparison_operator_equals
+      ComparisonOperator.NOT_EQUALS -> Res.string.domain_comparison_operator_not_equals
+      ComparisonOperator.GREATER_THAN -> Res.string.domain_comparison_operator_greater_than
+      ComparisonOperator.GREATER_THAN_OR_EQUAL ->
+        Res.string.domain_comparison_operator_greater_than_or_equal
+      ComparisonOperator.LESS_THAN -> Res.string.domain_comparison_operator_less_than
+      ComparisonOperator.LESS_THAN_OR_EQUAL ->
+        Res.string.domain_comparison_operator_less_than_or_equal
     }
