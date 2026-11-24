@@ -62,6 +62,11 @@ class ThemeScreenshotTest {
   private val exportDir: File? = System.getenv("THEME_SCREENSHOT_DIR")?.let(::File)
   private val updateGoldens: Boolean = System.getenv("UPDATE_GOLDENS")?.toBoolean() == true
 
+  /**
+   * Scenes that don't match their golden. The test reports them all at the end, not just the first.
+   */
+  private val mismatches = mutableListOf<String>()
+
   private data class WebScene(
     val id: String,
     val widthDp: Int = 1440,
@@ -308,6 +313,7 @@ class ThemeScreenshotTest {
         assertMatchesGolden(bitmap, goldenName)
       }
     }
+    if (mismatches.isNotEmpty()) fail(mismatches.joinToString("\n"))
   }
 
   private fun assertMatchesGolden(
@@ -363,10 +369,9 @@ class ThemeScreenshotTest {
       val reportDir = File("build/reports/goldens/web").apply { mkdirs() }
       val actualPng = Image.makeFromBitmap(actual).encodeToData(EncodedImageFormat.PNG)!!
       File(reportDir, "actual_$goldenName").writeBytes(actualPng.bytes)
-      fail(
+      mismatches +=
         "Golden mismatch for $goldenName: diff ratio $diffRatio exceeds threshold $maxDiffPixelRatio " +
           "($diffPixels / $totalPixels pixels differed). Actual screenshot: ${reportDir.resolve("actual_$goldenName").absolutePath}"
-      )
     }
   }
 }
