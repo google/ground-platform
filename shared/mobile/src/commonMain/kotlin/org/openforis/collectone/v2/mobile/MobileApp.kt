@@ -22,13 +22,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -50,7 +55,11 @@ import org.openforis.collectone.v2.mobile.ui.onboarding.MobileScreenHost
  * basemap renders behind the Compose canvas. On the main map screen, the top safe-drawing inset is
  * transparent and passed down via [LocalMobileTopInset] so the map extends edge-to-edge behind the
  * status bar while floating overlays stay below the inset.
+ *
+ * Hover feedback (the pointing-hand cursor and the hover highlight around controls) is turned off
+ * for the whole mobile app; it belongs to the web console, where a mouse hovers.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MobileApp(
   state: MobileAppState,
@@ -59,33 +68,56 @@ fun MobileApp(
   val settingsUiState by state.viewModels.settings.uiState.collectAsState()
   val dataCollectionUiState by state.viewModels.dataCollection.uiState.collectAsState()
   ProvideAppLocale(settingsUiState.languageCode) {
-    AppTheme(darkTheme = settingsUiState.isDarkTheme) {
-      Surface(
-        modifier = Modifier.fillMaxSize(),
-        color =
-          if (state.isMapShowing(dataCollectionUiState)) Color.Transparent
-          else MaterialTheme.colorScheme.surface,
-      ) {
-        val isTopInsetTransparent = state.isMainMapScreenShowing(dataCollectionUiState)
-        val safeDrawingInsets = WindowInsets.safeDrawing
-        val topInsetPadding =
-          if (isTopInsetTransparent) {
-            safeDrawingInsets.asPaddingValues().calculateTopPadding()
-          } else {
-            0.dp
-          }
-        val appliedInsets =
-          if (isTopInsetTransparent) {
-            safeDrawingInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-          } else {
-            safeDrawingInsets
-          }
-        CompositionLocalProvider(LocalMobileTopInset provides topInsetPadding) {
-          Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(appliedInsets)) {
-            MobileScreenHost(state, navController)
+    // The mobile app is touch-first, including when it runs in a browser for testing: no hand
+    // cursor and no hover highlight, which would stick to the last tapped control.
+    AppTheme(
+      darkTheme = settingsUiState.isDarkTheme,
+      interactivePointerIcon = PointerIcon.Default,
+    ) {
+      CompositionLocalProvider(LocalRippleConfiguration provides TouchRippleConfiguration) {
+        Surface(
+          modifier = Modifier.fillMaxSize(),
+          color =
+            if (state.isMapShowing(dataCollectionUiState)) Color.Transparent
+            else MaterialTheme.colorScheme.surface,
+        ) {
+          val isTopInsetTransparent = state.isMainMapScreenShowing(dataCollectionUiState)
+          val safeDrawingInsets = WindowInsets.safeDrawing
+          val topInsetPadding =
+            if (isTopInsetTransparent) {
+              safeDrawingInsets.asPaddingValues().calculateTopPadding()
+            } else {
+              0.dp
+            }
+          val appliedInsets =
+            if (isTopInsetTransparent) {
+              safeDrawingInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+            } else {
+              safeDrawingInsets
+            }
+          CompositionLocalProvider(LocalMobileTopInset provides topInsetPadding) {
+            Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(appliedInsets)) {
+              MobileScreenHost(state, navController)
+            }
           }
         }
       }
     }
   }
 }
+
+/**
+ * Material 3's ripple with its default pressed, focused, and dragged highlights and no hover
+ * highlight.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+internal val TouchRippleConfiguration =
+  RippleConfiguration(
+    rippleAlpha =
+      RippleAlpha(
+        draggedAlpha = 0.16f,
+        focusedAlpha = 0.10f,
+        hoveredAlpha = 0f,
+        pressedAlpha = 0.10f,
+      )
+  )
