@@ -272,6 +272,7 @@ private fun LikertChoiceCardRow(
       isSelected = isSelected,
       surfaceColor = colors.surfaceContainerLow,
       onSurfaceColor = colors.onSurface,
+      tintContainer = false,
     )
   }
   val choiceBitmap =
@@ -313,20 +314,11 @@ private fun LikertChoiceCardRow(
       modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      if (colorStyle != null) {
-        Box(
-          modifier =
-            Modifier.width(if (isSelected) 8.dp else 6.dp)
-              .fillMaxHeight()
-              .background(colorStyle.accentStripeColor)
-              .testTag("choice-color-stripe-${option.value}")
-        )
-      }
       Row(
         modifier =
           Modifier.weight(1f)
             .padding(
-              start = if (colorStyle != null) 10.dp else 12.dp,
+              start = 12.dp,
               end = 12.dp,
               top = 9.dp,
               bottom = 9.dp,
@@ -629,6 +621,7 @@ private fun ChoiceCardRow(
       isSelected = isSelected,
       surfaceColor = colors.surfaceContainerLow,
       onSurfaceColor = colors.onSurface,
+      tintContainer = false,
     )
   }
   val choiceBitmap =
@@ -668,20 +661,11 @@ private fun ChoiceCardRow(
       modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      if (colorStyle != null) {
-        Box(
-          modifier =
-            Modifier.width(if (isSelected) 8.dp else 6.dp)
-              .fillMaxHeight()
-              .background(colorStyle.accentStripeColor)
-              .testTag("choice-color-stripe-${option.value}")
-        )
-      }
       Row(
         modifier =
           Modifier.weight(1f)
             .padding(
-              start = if (colorStyle != null) 12.dp else 14.dp,
+              start = 14.dp,
               end = 14.dp,
               top = 12.dp,
               bottom = 12.dp,

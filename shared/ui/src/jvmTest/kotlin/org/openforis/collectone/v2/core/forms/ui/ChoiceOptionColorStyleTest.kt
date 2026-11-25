@@ -137,6 +137,40 @@ class ChoiceOptionColorStyleTest {
   }
 
   @Test
+  fun choiceOptionColorStyle_withoutContainerTint_keepsSurfaceAndShowsColorInBorderOnly() {
+    val surface = AppLightColorScheme.surface
+    val onSurface = AppLightColorScheme.onSurface
+    for (hex in paletteHexes) {
+      val choiceColor = assertNotNull(ChoiceImageRegistry.parseChoiceColor(hex), hex)
+      val unselected =
+        ChoiceImageRegistry.choiceOptionColorStyle(
+          choiceColor = choiceColor,
+          isSelected = false,
+          surfaceColor = surface,
+          onSurfaceColor = onSurface,
+          tintContainer = false,
+        )
+      val selected =
+        ChoiceImageRegistry.choiceOptionColorStyle(
+          choiceColor = choiceColor,
+          isSelected = true,
+          surfaceColor = surface,
+          onSurfaceColor = onSurface,
+          tintContainer = false,
+        )
+
+      for (style in listOf(unselected, selected)) {
+        assertEquals(surface, style.containerColor, "$hex container")
+        assertEquals(onSurface, style.contentColor, "$hex content")
+      }
+      // Selection still reads from the border: the full choice color, drawn heavier.
+      assertEquals(choiceColor, selected.borderColor, "$hex selected border")
+      assertNotEquals(surface, unselected.borderColor, "$hex unselected border")
+      assertTrue(selected.borderWidth > unselected.borderWidth, "$hex selected border width")
+    }
+  }
+
+  @Test
   fun resolveChoiceAnswerColors_resolvesCustomFormDefAndBuiltInChoices() {
     val customForm =
       FormDef(
@@ -230,107 +264,109 @@ class ChoiceOptionColorStyleTest {
   }
 
   @Test
-  fun selectOneAndCompactRunner_renderProminentColorStripeSwatchAndCollapsedPill() =
-    runComposeUiTest {
-      val formDef =
-        FormDef(
-          form_id = "color_form",
-          title = "Color Form",
-          model =
-            ModelDef(
-              primary_instance =
-                PrimaryInstance(
-                  record_schema =
-                    RecordSchema(
-                      name = "data",
-                      fields =
+  fun selectOneAndCompactRunner_renderColorBorderedCardSwatchAndCollapsedPill() = runComposeUiTest {
+    val formDef =
+      FormDef(
+        form_id = "color_form",
+        title = "Color Form",
+        model =
+          ModelDef(
+            primary_instance =
+              PrimaryInstance(
+                record_schema =
+                  RecordSchema(
+                    name = "data",
+                    fields =
+                      listOf(
+                        FieldDefinition(name = "land_use", type = DataType.TYPE_STRING),
+                        FieldDefinition(name = "notes", type = DataType.TYPE_STRING),
+                      ),
+                  )
+              ),
+            bindings =
+              listOf(
+                FieldBinding(field_path = "/data/land_use", type = DataType.TYPE_STRING),
+                FieldBinding(field_path = "/data/notes", type = DataType.TYPE_STRING),
+              ),
+          ),
+        view =
+          ViewDef(
+            components =
+              listOf(
+                ViewComponent(
+                  control =
+                    ControlDef(
+                      field_ref = "/data/land_use",
+                      type = ControlType.CONTROL_SELECT_ONE,
+                      label = LabelDef(text = "Land use class"),
+                      choices =
                         listOf(
-                          FieldDefinition(name = "land_use", type = DataType.TYPE_STRING),
-                          FieldDefinition(name = "notes", type = DataType.TYPE_STRING),
+                          ChoiceItem(
+                            value_ = "forest",
+                            label = LabelDef(text = "Forest land"),
+                            properties = mapOf("color" to "#1B5E20"),
+                          ),
+                          ChoiceItem(
+                            value_ = "cropland",
+                            label = LabelDef(text = "Annual cropland"),
+                            properties = mapOf("color" to "#FBC02D"),
+                          ),
+                          ChoiceItem(
+                            value_ = "uncolored",
+                            label = LabelDef(text = "Uncolored option"),
+                          ),
                         ),
                     )
                 ),
-              bindings =
-                listOf(
-                  FieldBinding(field_path = "/data/land_use", type = DataType.TYPE_STRING),
-                  FieldBinding(field_path = "/data/notes", type = DataType.TYPE_STRING),
+                ViewComponent(
+                  control =
+                    ControlDef(
+                      field_ref = "/data/notes",
+                      type = ControlType.CONTROL_INPUT,
+                      label = LabelDef(text = "Field notes"),
+                    )
                 ),
-            ),
-          view =
-            ViewDef(
-              components =
-                listOf(
-                  ViewComponent(
-                    control =
-                      ControlDef(
-                        field_ref = "/data/land_use",
-                        type = ControlType.CONTROL_SELECT_ONE,
-                        label = LabelDef(text = "Land use class"),
-                        choices =
-                          listOf(
-                            ChoiceItem(
-                              value_ = "forest",
-                              label = LabelDef(text = "Forest land"),
-                              properties = mapOf("color" to "#1B5E20"),
-                            ),
-                            ChoiceItem(
-                              value_ = "cropland",
-                              label = LabelDef(text = "Annual cropland"),
-                              properties = mapOf("color" to "#FBC02D"),
-                            ),
-                            ChoiceItem(
-                              value_ = "uncolored",
-                              label = LabelDef(text = "Uncolored option"),
-                            ),
-                          ),
-                      )
-                  ),
-                  ViewComponent(
-                    control =
-                      ControlDef(
-                        field_ref = "/data/notes",
-                        type = ControlType.CONTROL_INPUT,
-                        label = LabelDef(text = "Field notes"),
-                      )
-                  ),
-                )
-            ),
-        )
-      val controller = FormWizardController(formDef)
-
-      setContent {
-        MaterialTheme {
-          CompactFormRunner(
-            controller = controller,
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-          )
-        }
-      }
-
-      // Colored options render their prominent left accent stripe and rounded swatch badge
-      onNodeWithTag("choice-color-stripe-forest", useUnmergedTree = true).assertExists()
-      onNodeWithTag("choice-color-swatch-forest", useUnmergedTree = true).assertExists()
-      onNodeWithTag("choice-color-stripe-cropland", useUnmergedTree = true).assertExists()
-      onNodeWithTag("choice-color-swatch-cropland", useUnmergedTree = true).assertExists()
-      // Uncolored option does not render color stripe or swatch
-      onNodeWithTag("choice-color-stripe-uncolored", useUnmergedTree = true).assertDoesNotExist()
-      onNodeWithTag("choice-color-swatch-uncolored", useUnmergedTree = true).assertDoesNotExist()
-
-      // Select "Forest land" and collapse the question by focusing the next question
-      onNodeWithText("Forest land").performClick()
-      waitForIdle()
-      val selectedColors =
-        ChoiceImageRegistry.resolveSelectedOptionColors(
-          options =
-            listOf(
-              ResolvedChoiceOption(
-                value = "forest",
-                label = ResolvedLabel("Forest land"),
-                properties = mapOf("color" to "#1B5E20"),
               )
-            ),
-          selectedValues = setOf("forest"),
+          ),
+      )
+    val controller = FormWizardController(formDef)
+
+    setContent {
+      MaterialTheme {
+        CompactFormRunner(
+          controller = controller,
+          modifier = Modifier.verticalScroll(rememberScrollState()),
         )
-      assertEquals(1, selectedColors.size)
+      }
     }
+
+    // Colored options render a card bordered in their color and a rounded swatch badge, with no
+    // accent stripe down the left edge
+    onNodeWithTag("choice-color-card-forest", useUnmergedTree = true).assertExists()
+    onNodeWithTag("choice-color-swatch-forest", useUnmergedTree = true).assertExists()
+    onNodeWithTag("choice-color-stripe-forest", useUnmergedTree = true).assertDoesNotExist()
+    onNodeWithTag("choice-color-card-cropland", useUnmergedTree = true).assertExists()
+    onNodeWithTag("choice-color-swatch-cropland", useUnmergedTree = true).assertExists()
+    onNodeWithTag("choice-color-stripe-cropland", useUnmergedTree = true).assertDoesNotExist()
+    // Uncolored option does not render the colored card or swatch
+    onNodeWithTag("choice-color-card-uncolored", useUnmergedTree = true).assertDoesNotExist()
+    onNodeWithTag("choice-color-swatch-uncolored", useUnmergedTree = true).assertDoesNotExist()
+
+    // Select "Forest land" and collapse the question by focusing the next question
+    onNodeWithText("Forest land").performClick()
+    waitForIdle()
+    val selectedColors =
+      ChoiceImageRegistry.resolveSelectedOptionColors(
+        options =
+          listOf(
+            ResolvedChoiceOption(
+              value = "forest",
+              label = ResolvedLabel("Forest land"),
+              properties = mapOf("color" to "#1B5E20"),
+            )
+          ),
+        selectedValues = setOf("forest"),
+      )
+    assertEquals(1, selectedColors.size)
+  }
 }

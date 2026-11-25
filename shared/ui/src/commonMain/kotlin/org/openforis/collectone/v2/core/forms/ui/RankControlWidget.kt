@@ -18,16 +18,13 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.verticalDrag
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -168,6 +165,7 @@ internal fun RankControlWidget(
             surfaceColor =
               if (isDragged) colors.surfaceContainerHighest else colors.surfaceContainerLow,
             onSurfaceColor = colors.onSurface,
+            tintContainer = false,
           )
         }
 
@@ -235,14 +233,6 @@ internal fun RankControlWidget(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            if (colorStyle != null) {
-              Box(
-                modifier =
-                  Modifier.width(if (isDragged) 8.dp else 6.dp)
-                    .fillMaxHeight()
-                    .background(colorStyle.accentStripeColor)
-              )
-            }
             Row(
               modifier = Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 12.dp),
               verticalAlignment = Alignment.CenterVertically,

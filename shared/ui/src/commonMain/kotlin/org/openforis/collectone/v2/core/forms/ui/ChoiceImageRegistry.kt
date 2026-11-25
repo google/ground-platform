@@ -120,12 +120,17 @@ object ChoiceImageRegistry {
   /**
    * Computes high-visibility, WCAG-accessible surface, border, accent stripe, swatch, and text
    * colors for a choice option with [choiceColor] in [isSelected] or unselected state.
+   *
+   * @param tintContainer whether the container takes a tint of [choiceColor]. Answer option cards
+   *   pass `false`: they sit on the plain [surfaceColor] and show the color as a uniform border
+   *   (heavier when selected) and their swatch, so a list of options stays calm.
    */
   fun choiceOptionColorStyle(
     choiceColor: Color,
     isSelected: Boolean,
     surfaceColor: Color,
     onSurfaceColor: Color,
+    tintContainer: Boolean = true,
   ): ChoiceOptionColorStyle {
     val opaqueChoice = choiceColor.copy(alpha = 1f)
     val isDarkSurface = surfaceColor.luminance() < 0.5f
@@ -136,7 +141,8 @@ object ChoiceImageRegistry {
         isDarkSurface -> 0.18f
         else -> 0.13f
       }
-    val containerColor = lerp(surfaceColor, opaqueChoice, containerTintFraction)
+    val containerColor =
+      if (tintContainer) lerp(surfaceColor, opaqueChoice, containerTintFraction) else surfaceColor
     val borderColor =
       if (isSelected) {
         opaqueChoice
@@ -157,7 +163,12 @@ object ChoiceImageRegistry {
         else -> opaqueChoice
       }
     val highContrastInk = if (containerColor.luminance() > 0.5f) Color.Black else Color.White
-    val contentColor = lerp(onSurfaceColor, highContrastInk, if (isSelected) 0.45f else 0.22f)
+    val contentColor =
+      if (tintContainer) {
+        lerp(onSurfaceColor, highContrastInk, if (isSelected) 0.45f else 0.22f)
+      } else {
+        onSurfaceColor
+      }
     val secondaryContentColor = contentColor.copy(alpha = 0.78f)
     return ChoiceOptionColorStyle(
       choiceColor = opaqueChoice,

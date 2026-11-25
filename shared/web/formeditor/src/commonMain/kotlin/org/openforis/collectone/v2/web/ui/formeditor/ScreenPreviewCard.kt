@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -445,6 +446,7 @@ private fun MiniWidget(
             isSelected = false,
             surfaceColor = colors.surfaceContainerLow,
             onSurfaceColor = colors.onSurface,
+            tintContainer = false,
           )
         }
         if (colorStyle != null) {
@@ -454,11 +456,10 @@ private fun MiniWidget(
             border = BorderStroke(1.dp, colorStyle.borderColor),
             modifier = Modifier.fillMaxWidth().testTag("preview-choice-color-card-${choice.value}"),
           ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Box(
-                modifier =
-                  Modifier.width(4.dp).height(22.dp).background(colorStyle.accentStripeColor)
-              )
+            Row(
+              modifier = Modifier.heightIn(min = 22.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
               Row(
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
