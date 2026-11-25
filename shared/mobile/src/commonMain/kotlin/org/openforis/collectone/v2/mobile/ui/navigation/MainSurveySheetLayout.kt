@@ -16,6 +16,7 @@ package org.openforis.collectone.v2.mobile.ui.navigation
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
 
 // How the Main Survey's persistent bottom sheet sits over the map, and where its Back button goes.
@@ -76,6 +77,28 @@ internal fun selectedFeatureScreenY(maxHeight: Dp, peekHeight: Dp): Float {
   val visibleHeight = (maxHeight - peekHeight).coerceAtLeast(0.dp)
   return ((visibleHeight / 2) / maxHeight).coerceIn(MIN_FEATURE_SCREEN_Y, MAX_FEATURE_SCREEN_Y)
 }
+
+/**
+ * How far below the top edge of the sheet its drag handle sits, in pixels, so that the handle and
+ * the content under it never slide behind the floating search bar, whose bottom edge is
+ * [searchBarBottomPx] below the top of the screen. The sheet's top edge is [sheetTopPx] below the
+ * top of the screen: while it is under the search bar the handle sits right on the edge, and once
+ * it rises behind the bar the handle is pushed down by exactly as much, so it comes to rest under
+ * the bar and moves with the finger all the way, without jumping when the sheet settles.
+ *
+ * Before the sheet has been laid out ([sheetTopPx] is `null`), the handle goes where it will rest:
+ * under the search bar when the sheet [isExpanded], on the edge otherwise.
+ */
+internal fun sheetHandleTopInsetPx(
+  searchBarBottomPx: Int,
+  sheetTopPx: Float?,
+  isExpanded: Boolean,
+): Int =
+  if (sheetTopPx == null || sheetTopPx.isNaN()) {
+    if (isExpanded) searchBarBottomPx else 0
+  } else {
+    (searchBarBottomPx - sheetTopPx).roundToInt().coerceIn(0, searchBarBottomPx)
+  }
 
 private const val SELECTED_PEEK_FRACTION = 0.45f
 private val MIN_SELECTED_PEEK = 152.dp

@@ -124,4 +124,39 @@ class MainSurveySheetLayoutTest {
       )
     }
   }
+
+  @Test
+  fun handle_sitsOnTheSheetsEdgeWhileTheSheetIsBelowTheSearchBar() {
+    assertEquals(0, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = 700f, false))
+    assertEquals(0, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = 66f, false))
+  }
+
+  @Test
+  fun handle_isPushedDownByAsMuchAsTheSheetRisesBehindTheSearchBar() {
+    assertEquals(16, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = 50f, false))
+    assertEquals(33, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = 33f, true))
+    assertEquals(66, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = 0f, true))
+  }
+
+  @Test
+  fun handle_staysOnScreenAtTheSamePlaceOnceTheSheetIsBehindTheSearchBar() {
+    // The sheet's edge plus the inset is where the handle shows: constant under the search bar.
+    for (sheetTop in listOf(66f, 48f, 20f, 0f)) {
+      val inset = sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = sheetTop, true)
+      assertEquals(66f, sheetTop + inset, "sheet top at $sheetTop")
+    }
+  }
+
+  @Test
+  fun handle_neverLeavesTheRangeOfTheSearchBarsHeight() {
+    assertEquals(66, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = -40f, true))
+    assertEquals(0, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = 5_000f, false))
+  }
+
+  @Test
+  fun handle_beforeTheSheetIsLaidOut_goesWhereItWillRest() {
+    assertEquals(66, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = null, true))
+    assertEquals(0, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = null, false))
+    assertEquals(66, sheetHandleTopInsetPx(searchBarBottomPx = 66, sheetTopPx = Float.NaN, true))
+  }
 }

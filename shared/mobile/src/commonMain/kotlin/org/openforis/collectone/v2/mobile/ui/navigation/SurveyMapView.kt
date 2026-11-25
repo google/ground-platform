@@ -37,6 +37,7 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -44,14 +45,19 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.BasemapType
 import org.openforis.collectone.v2.app.domain.model.hasGeometry
@@ -166,7 +172,17 @@ internal fun SurveyMapView(
     val peekHeight = mainSurveySheetPeekHeight(maxHeight, isSelectingArea, hasSelectedRecord)
     val isSheetExpanded =
       mapUiState.isEntityBottomSheetExpanded || sheetState.targetValue == SheetValue.Expanded
-    val handleTopPadding = if (isSheetExpanded) topSearchBarReservedHeight else 0.dp
+    // The handle follows the sheet's position continuously, so it tracks the finger while the
+    // sheet is dragged and doesn't jump when the sheet settles.
+    val handleBelowSearchBar = Modifier.keptBelowSearchBar(sheetState, topSearchBarReservedHeight)
+    // Square corners only once the sheet covers the whole screen.
+    val isSheetAtTop by
+      remember(sheetState) {
+        derivedStateOf {
+          sheetState.offsetOrNull()?.let { it < 1f }
+            ?: (sheetState.currentValue == SheetValue.Expanded)
+        }
+      }
 
     // Fit a newly selected map feature into the map area above the sheet. Records without geometry
     // replace the sheet's contents without moving the map.
@@ -188,7 +204,7 @@ internal fun SurveyMapView(
       scaffoldState = scaffoldState,
       sheetPeekHeight = peekHeight,
       sheetShape =
-        if (isSheetExpanded) {
+        if (isSheetAtTop) {
           RoundedCornerShape(0.dp)
         } else {
           RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
@@ -203,7 +219,7 @@ internal fun SurveyMapView(
           Box(
             modifier =
               Modifier.fillMaxWidth()
-                .padding(top = handleTopPadding)
+                .then(handleBelowSearchBar)
                 .padding(horizontal = 8.dp, vertical = 2.dp)
           ) {
             IconButton(
@@ -234,9 +250,7 @@ internal fun SurveyMapView(
             BottomSheetDefaults.DragHandle(modifier = Modifier.align(Alignment.Center))
           }
         } else {
-          Box(modifier = Modifier.padding(top = handleTopPadding)) {
-            BottomSheetDefaults.DragHandle()
-          }
+          Box(modifier = handleBelowSearchBar) { BottomSheetDefaults.DragHandle() }
         }
       },
       containerColor = Color.Transparent,
@@ -405,6 +419,35 @@ internal fun SurveyMapView(
     )
   }
 }
+
+/**
+ * Lays this element (the sheet's drag handle row) out lower inside the sheet by
+ * [sheetHandleTopInsetPx], read from [sheetState] while laying out, so the handle follows every
+ * frame of a drag or a settle animation: it stays on the sheet's top edge until the edge reaches
+ * the floating search bar ([searchBarBottom] below the top of the screen), then stays under the
+ * bar.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun Modifier.keptBelowSearchBar(sheetState: SheetState, searchBarBottom: Dp): Modifier =
+  layout { measurable, constraints ->
+    val inset =
+      sheetHandleTopInsetPx(
+        searchBarBottomPx = searchBarBottom.roundToPx(),
+        sheetTopPx = sheetState.offsetOrNull(),
+        isExpanded = sheetState.currentValue == SheetValue.Expanded,
+      )
+    val placeable = measurable.measure(constraints.offset(vertical = -inset))
+    layout(placeable.width, placeable.height + inset) { placeable.place(0, inset) }
+  }
+
+/** The distance of the sheet's top edge from the top of its scaffold, once it has been laid out. */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun SheetState.offsetOrNull(): Float? =
+  try {
+    requireOffset()
+  } catch (_: IllegalStateException) {
+    null
+  }
 
 /**
  * Combined GPS status / auto-center chip over the map: the GNSS fix ([gnssStatusLabel]) while the
