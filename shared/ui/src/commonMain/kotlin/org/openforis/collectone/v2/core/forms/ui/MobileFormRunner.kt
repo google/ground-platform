@@ -76,7 +76,6 @@ import org.openforis.collectone.v2.core.forms.ui.controls.FilterChip
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
-import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedIconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
 import org.openforis.collectone.v2.core.forms.ui.controls.clickable
@@ -120,8 +119,9 @@ import org.openforis.collectone.v2.core.forms.ui.resources.forms_validation_erro
  *
  * The banner holds the form title and a single close button ([onClose]); under the title it shows
  * [headerContext] (for example, the map feature the form collects data for) or, without one, the
- * step position. The bottom bar moves between steps, and its step counter chip opens a bottom sheet
- * listing every step to jump to.
+ * step position. [belowHeader] goes right under the banner and its progress line, above the step
+ * (for a notice that applies to the whole form). The bottom bar moves between steps, and its step
+ * counter chip opens a bottom sheet listing every step to jump to.
  */
 @Composable
 fun MobileFormRunner(
@@ -130,6 +130,7 @@ fun MobileFormRunner(
   onClose: (() -> Unit)? = null,
   onSubmitted: ((FinalizationResult.Success) -> Unit)? = null,
   headerContext: (@Composable () -> Unit)? = null,
+  belowHeader: (@Composable () -> Unit)? = null,
 ) {
   val state = controller.formState
   val currentStep = controller.currentStep
@@ -148,80 +149,83 @@ fun MobileFormRunner(
       modifier = Modifier.fillMaxSize(),
       containerColor = colors.surface,
       topBar = {
-        MobileFormTopBar(
-          title = formTitle,
-          progress = progress,
-          onClose = onClose,
-          subtitle =
-            headerContext
-              ?: {
-                Text(
-                  text =
-                    if (currentStep is FormWizardStep.SummaryStep) {
-                      pluralStringResource(
-                        Res.plurals.forms_review_and_finalize_summary,
-                        controller.totalQuestionSteps,
-                        controller.totalQuestionSteps,
+        Column {
+          MobileFormTopBar(
+            title = formTitle,
+            progress = progress,
+            onClose = onClose,
+            subtitle =
+              headerContext
+                ?: {
+                  Text(
+                    text =
+                      if (currentStep is FormWizardStep.SummaryStep) {
+                        pluralStringResource(
+                          Res.plurals.forms_review_and_finalize_summary,
+                          controller.totalQuestionSteps,
+                          controller.totalQuestionSteps,
+                        )
+                      } else {
+                        stringResource(Res.string.forms_step_of_total, stepIndex + 1, totalSteps)
+                      },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                  )
+                },
+          ) {
+            if (state.availableLanguages.size > 1) {
+              Row(
+                modifier =
+                  Modifier.fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Icon(
+                  imageVector = LanguageIcon,
+                  contentDescription = stringResource(Res.string.forms_language),
+                  tint = onAppBarSecondary,
+                  modifier = Modifier.size(18.dp),
+                )
+                state.availableLanguages.forEach { lang ->
+                  val isActive = lang == state.activeLanguage
+                  FilterChip(
+                    selected = isActive,
+                    onClick = { controller.setLanguage(lang) },
+                    colors =
+                      androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                        containerColor = appBarTonalContainer,
+                        labelColor = onAppBar,
+                        // Selected chips invert: the on-color becomes the fill, so the label has to
+                        // switch back to the bar's own color to stay legible.
+                        selectedContainerColor = onAppBar,
+                        selectedLabelColor = colors.primary,
+                      ),
+                    elevation =
+                      androidx.compose.material3.FilterChipDefaults.filterChipElevation(
+                        elevation = 0.dp,
+                        pressedElevation = 0.dp,
+                        focusedElevation = 0.dp,
+                        hoveredElevation = 0.dp,
+                        draggedElevation = 0.dp,
+                        disabledElevation = 0.dp,
+                      ),
+                    label = {
+                      Text(
+                        text = lang,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false,
                       )
-                    } else {
-                      stringResource(Res.string.forms_step_of_total, stepIndex + 1, totalSteps)
                     },
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                )
-              },
-        ) {
-          if (state.availableLanguages.size > 1) {
-            Row(
-              modifier =
-                Modifier.fillMaxWidth()
-                  .horizontalScroll(rememberScrollState())
-                  .padding(horizontal = 16.dp, vertical = 4.dp),
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-              verticalAlignment = Alignment.CenterVertically,
-            ) {
-              Icon(
-                imageVector = LanguageIcon,
-                contentDescription = stringResource(Res.string.forms_language),
-                tint = onAppBarSecondary,
-                modifier = Modifier.size(18.dp),
-              )
-              state.availableLanguages.forEach { lang ->
-                val isActive = lang == state.activeLanguage
-                FilterChip(
-                  selected = isActive,
-                  onClick = { controller.setLanguage(lang) },
-                  colors =
-                    androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                      containerColor = appBarTonalContainer,
-                      labelColor = onAppBar,
-                      // Selected chips invert: the on-color becomes the fill, so the label has to
-                      // switch back to the bar's own color to stay legible.
-                      selectedContainerColor = onAppBar,
-                      selectedLabelColor = colors.primary,
-                    ),
-                  elevation =
-                    androidx.compose.material3.FilterChipDefaults.filterChipElevation(
-                      elevation = 0.dp,
-                      pressedElevation = 0.dp,
-                      focusedElevation = 0.dp,
-                      hoveredElevation = 0.dp,
-                      draggedElevation = 0.dp,
-                      disabledElevation = 0.dp,
-                    ),
-                  label = {
-                    Text(
-                      text = lang,
-                      style = MaterialTheme.typography.labelSmall,
-                      maxLines = 1,
-                      overflow = TextOverflow.Ellipsis,
-                      softWrap = false,
-                    )
-                  },
-                )
+                  )
+                }
               }
             }
           }
+          belowHeader?.invoke()
         }
       },
       bottomBar = {
@@ -232,23 +236,30 @@ fun MobileFormRunner(
           tonalElevation = 3.dp,
         ) {
           Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            // Icon-only, so the step chip and the Skip / Next buttons fit on narrow screens.
-            OutlinedIconButton(
+            OutlinedButton(
               onClick = { controller.previousStep() },
               enabled = controller.canGoBack,
             ) {
               Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(Res.string.forms_back),
-                modifier = Modifier.size(18.dp),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+              )
+              Spacer(modifier = Modifier.width(6.dp))
+              Text(
+                stringResource(Res.string.forms_back),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
               )
             }
 
-            // Step position; opens the list of all steps in a bottom sheet.
+            // Step position, in the middle of the bar between Back and the step's actions; opens
+            // the list of all steps in a bottom sheet.
             AssistChip(
               onClick = { controller.openOverview() },
               label = {
@@ -267,9 +278,7 @@ fun MobileFormRunner(
               },
             )
 
-            // The step's actions take the rest of the bar, at its end.
             Row(
-              modifier = Modifier.weight(1f),
               horizontalArrangement = Arrangement.End,
               verticalAlignment = Alignment.CenterVertically,
             ) {

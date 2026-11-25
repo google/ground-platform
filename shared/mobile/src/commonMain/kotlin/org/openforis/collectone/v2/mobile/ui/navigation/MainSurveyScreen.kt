@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import org.openforis.collectone.v2.app.ui.common.UserProfileSidePanelOverlay
 import org.openforis.collectone.v2.app.ui.datacollection.CollectorConsentModalDialog
 import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionActions
@@ -140,7 +141,12 @@ fun MainSurveyScreen(
 
     // Just-in-time Informed Consent Modal Overlay
     if (dataCollectionUiState.pendingCollectorConsent != null) {
-      CollectorConsentModalDialog(uiState = dataCollectionUiState, actions = dataCollectionActions)
+      CollectorConsentModalDialog(
+        uiState = dataCollectionUiState,
+        actions = dataCollectionActions,
+        // As wide as Material 3 lets a dialog be: on a phone, the screen less its margins.
+        maxWidth = ConsentDialogMaxWidth,
+      )
     }
 
     PdfExportMessageSnackbar(
@@ -150,3 +156,5 @@ fun MainSurveyScreen(
     )
   }
 }
+
+private val ConsentDialogMaxWidth = 560.dp

@@ -186,11 +186,7 @@ internal fun WebDataCollectionCard(
     modifier = modifier,
   ) {
     if (uiState.isActiveSurveyPublicData) {
-      // A neutral tone: the reminder stays visible without competing with the form below it.
-      PublicDataInFormBanner(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
+      PublicDataInFormBanner()
     }
     Column(
       modifier =

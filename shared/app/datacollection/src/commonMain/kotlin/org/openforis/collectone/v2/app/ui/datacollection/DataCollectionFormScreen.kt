@@ -223,10 +223,6 @@ fun DataCollectionFormScreen(
   }
 
   Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-    if (uiState.isActiveSurveyPublicData) {
-      PublicDataInFormBanner()
-    }
-
     if (uiState.isCurrentFormStepEntityRef && form != null) {
       // The picker step replaces the form runner, so it shows the runner's banner itself.
       MobileFormTopBar(
@@ -235,6 +231,9 @@ fun DataCollectionFormScreen(
         onClose = { actions.closeActiveFormRunner() },
         subtitle = formTargetContext,
       )
+      if (uiState.isActiveSurveyPublicData) {
+        PublicDataInFormBanner()
+      }
       EntityRefStepMapOrListSelector(
         uiState = uiState,
         actions = actions,
@@ -267,6 +266,13 @@ fun DataCollectionFormScreen(
               )
             },
             headerContext = formTargetContext,
+            // The public data reminder goes under the banner and its progress line.
+            belowHeader =
+              if (uiState.isActiveSurveyPublicData) {
+                { PublicDataInFormBanner() }
+              } else {
+                null
+              },
           )
         }
       }
@@ -815,19 +821,13 @@ private fun EntityRefCandidateOptionCard(
 
 /**
  * Persistent reminder banner shown inside an open data collection form when the active survey uses
- * **Public data** (`isPublicData == true`). Hosts where the default tertiary tone is too loud next
- * to the rest of the surface (the web dashboard's form card) pass a calmer [containerColor] and
- * [contentColor].
+ * **Public data** (`isPublicData == true`), in the same tone on mobile and on web.
  */
 @Composable
-fun PublicDataInFormBanner(
-  modifier: Modifier = Modifier,
-  containerColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
-  contentColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
-) {
+fun PublicDataInFormBanner(modifier: Modifier = Modifier) {
   Surface(
-    color = containerColor,
-    contentColor = contentColor,
+    color = MaterialTheme.colorScheme.tertiaryContainer,
+    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
     modifier = modifier.fillMaxWidth(),
   ) {
     Row(
@@ -853,8 +853,8 @@ fun PublicDataInFormBanner(
  * Just-in-time informed consent dialog shown once per survey when a participant starts collecting
  * data in a **Public data** survey or a survey with custom organizer consent terms.
  *
- * @param maxWidth the widest the dialog gets. Hosts with room to spare (the web dashboard) pass a
- *   larger value so both buttons fit on one row.
+ * @param maxWidth the widest the dialog gets. Hosts pass a larger value so the dialog uses the room
+ *   there is (all of a phone's width but its margins) and its buttons fit without wrapping.
  */
 @Composable
 fun CollectorConsentModalDialog(
@@ -914,7 +914,12 @@ fun CollectorConsentModalDialog(
     },
     confirmButton = {
       Button(onClick = { actions.acceptCollectorConsent() }) {
-        Text(stringResource(Res.string.app_consent_accept), fontWeight = FontWeight.Bold)
+        Text(
+          text = stringResource(Res.string.app_consent_accept),
+          fontWeight = FontWeight.Bold,
+          maxLines = 1,
+          softWrap = false,
+        )
       }
     },
     dismissButton = {

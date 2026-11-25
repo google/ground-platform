@@ -214,7 +214,7 @@ class MobileFormRunnerUiTest {
       onNodeWithText("Select an answer for 'Country' first").assertExists()
 
       // Go back, pick Kenya, and advance to Region: Nairobi + Other show, Kampala does not.
-      onNodeWithContentDescription("Back").performClick()
+      onNodeWithText("Back").performClick()
       onNodeWithText("Kenya").performClick()
       onNodeWithText("Next").performClick()
       onNodeWithText("Nairobi").assertExists()
@@ -228,7 +228,7 @@ class MobileFormRunnerUiTest {
         "nairobi",
         controller.formState.findFieldState("/data/region")?.value?.scalar_value?.string_value,
       )
-      onNodeWithContentDescription("Back").performClick()
+      onNodeWithText("Back").performClick()
       onNodeWithText("Uganda").performClick()
       assertEquals(
         null,

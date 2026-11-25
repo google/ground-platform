@@ -20,14 +20,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -1290,15 +1290,16 @@ fun AlertDialogOverlay(
         }
         Box(modifier = Modifier.padding(bottom = 16.dp)) { title() }
         Box(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) { text() }
-        Row(
+        // Like Material 3's own dialog, the buttons share a row while they fit and stack, still
+        // end-aligned, once they don't, so a long label never has to wrap inside its button.
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
           modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.End,
-          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+          itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-          if (dismissButton != null) {
-            dismissButton()
-            Spacer(modifier = Modifier.width(8.dp))
-          }
+          if (dismissButton != null) dismissButton()
           confirmButton()
         }
       }
