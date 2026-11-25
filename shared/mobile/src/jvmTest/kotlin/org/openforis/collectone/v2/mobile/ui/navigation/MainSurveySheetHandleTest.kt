@@ -16,7 +16,7 @@ package org.openforis.collectone.v2.mobile.ui.navigation
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
@@ -29,7 +29,8 @@ class MainSurveySheetHandleTest {
   fun handle_restsOnThePeekingSheetAndUnderTheSearchBarOnceExpanded() = runMobileNavigationTest {
     val state = show()
     val screenHeight = it.onRoot().getUnclippedBoundsInRoot().bottom
-    fun handleTop() = it.onNodeWithContentDescription("Drag handle").getUnclippedBoundsInRoot().top
+    fun handleTop() =
+      it.onNodeWithTag(SHEET_DRAG_HANDLE_TAG, useUnmergedTree = true).getUnclippedBoundsInRoot().top
 
     // Peeking: on the sheet's edge at the bottom of the screen, not pushed down inside it.
     val peekingTop = handleTop()

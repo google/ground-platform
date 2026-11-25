@@ -247,10 +247,14 @@ internal fun SurveyMapView(
                 modifier = Modifier.size(20.dp),
               )
             }
-            BottomSheetDefaults.DragHandle(modifier = Modifier.align(Alignment.Center))
+            BottomSheetDefaults.DragHandle(
+              modifier = Modifier.align(Alignment.Center).testTag(SHEET_DRAG_HANDLE_TAG)
+            )
           }
         } else {
-          Box(modifier = handleBelowSearchBar) { BottomSheetDefaults.DragHandle() }
+          Box(modifier = handleBelowSearchBar) {
+            BottomSheetDefaults.DragHandle(modifier = Modifier.testTag(SHEET_DRAG_HANDLE_TAG))
+          }
         }
       },
       containerColor = Color.Transparent,
@@ -419,6 +423,9 @@ internal fun SurveyMapView(
     )
   }
 }
+
+/** Test tag of the drag handle of the Main Survey's bottom sheet. */
+internal const val SHEET_DRAG_HANDLE_TAG = "mainSurveySheetDragHandle"
 
 /**
  * Lays this element (the sheet's drag handle row) out lower inside the sheet by
