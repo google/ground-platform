@@ -52,6 +52,9 @@ sealed interface MobileRoute {
   /** App settings (the drawer's `Settings` item). */
   @Serializable @SerialName("settings") data object Settings : MainSurveyPage
 
+  /** What the app is for, its version, and its contributors (the drawer's `About` item). */
+  @Serializable @SerialName("about") data object About : MainSurveyPage
+
   companion object {
     /** Every route, for mapping a back stack entry back to its route. */
     val all: List<MobileRoute> =
@@ -65,6 +68,7 @@ sealed interface MobileRoute {
         Uploads,
         OfflineMaps,
         Settings,
+        About,
       )
   }
 }

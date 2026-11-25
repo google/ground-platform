@@ -221,7 +221,7 @@
   <!-- Drawer item subtitle. %1$s: area unit symbol (e.g. "ha"). -->
   <string name="mobile_drawer_settings_subtitle">Units (%1$s), language &amp; media cache</string>
   <string name="mobile_drawer_tos_subtitle">Platform data governance &amp; privacy terms</string>
-  <!-- Brand names in the drawer header and footer. Product names: do not translate. -->
+  <!-- Brand names in the drawer header. Product names: do not translate. -->
   <string name="mobile_brand_organization">Open Foris</string>
   <string name="mobile_brand_product">Collect One</string>
 

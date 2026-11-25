@@ -19,7 +19,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -30,15 +29,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,7 +56,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.openforis.collectone.v2.app.domain.model.AppBuildConfig
 import org.openforis.collectone.v2.app.domain.model.AppEnvironment
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.clickable
@@ -74,31 +66,29 @@ const val DEMO_BADGE_TEXT = "DEMO"
 /** Label displayed on UI components that are only visible to platform administrators. */
 const val ADMIN_ONLY_BADGE_TEXT = "Admin only"
 
-/** Copyright year displayed in the demo attribution footer. */
+/** Copyright year displayed in the attribution line ([ContributorsAttributionText]). */
 const val DEMO_ATTRIBUTION_COPYRIGHT_YEAR = 2026
 
-/** Contributors label displayed and linked in the demo attribution footer. */
+/** Contributors label displayed and linked in the attribution line. */
 const val DEMO_ATTRIBUTION_CONTRIBUTORS_LABEL = "The Collect One Contributors"
 
-/** Contributors graph URL linked from the demo attribution footer. */
+/** Contributors graph URL linked from the attribution line. */
 const val DEMO_ATTRIBUTION_CONTRIBUTORS_URL =
   "https://github.com/google/ground-platform/graphs/contributors?all=1"
 
-/** Attribution text displayed in the bottom-right footer across all Mobile and Web pages. */
+/** Attribution line shown on the About screen of the mobile app and the web console. */
 const val DEMO_ATTRIBUTION_FOOTER_TEXT =
   "© $DEMO_ATTRIBUTION_COPYRIGHT_YEAR $DEMO_ATTRIBUTION_CONTRIBUTORS_LABEL"
 
-/**
- * Accessible label and tooltip for the debugging tools trigger in the non-production web footer.
- */
-const val DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION = "Debugging tools"
+/** Label of the debugging tools trigger in the non-production web footer. */
+const val DEV_TOOLS_FOOTER_LABEL = "Debugging tools"
 
-/** Test tag on the debugging tools trigger in [DemoAttributionFooterBar]. */
+/** Test tag on the debugging tools trigger in [DevToolsFooterBar]. */
 const val DEV_TOOLS_FOOTER_BUTTON_TAG = "dev_tools_footer_button"
 
 /**
- * Formats an app [version] string for compact display in the footer badge (e.g., `"2.0.0-SNAPSHOT"`
- * → `"v2.0.0-SNAPSHOT"`), preserving an existing `v`/`V` prefix.
+ * Formats an app [version] string for compact display as a badge (e.g., `"2.0.0-SNAPSHOT"` →
+ * `"v2.0.0-SNAPSHOT"`), preserving an existing `v`/`V` prefix.
  */
 fun formatAppVersionBadge(version: String): String {
   val trimmed = version.trim()
@@ -156,27 +146,54 @@ fun AdminOnlyBadge(modifier: Modifier = Modifier) {
 }
 
 /**
- * Slim bottom footer bar displaying [DEMO_ATTRIBUTION_FOOTER_TEXT] in the bottom-right corner and
- * an optional [onOpenDevTools] trigger (bug icon and [appVersion]) on the left.
- *
- * Only rendered in non-production builds ([AppEnvironment.DEV] and [AppEnvironment.STAGING]);
- * hidden in [AppEnvironment.PROD].
+ * The attribution line [DEMO_ATTRIBUTION_FOOTER_TEXT], whose contributors label links to the
+ * project's contributors ([DEMO_ATTRIBUTION_CONTRIBUTORS_URL]).
  */
 @Composable
-fun DemoAttributionFooterBar(
+fun ContributorsAttributionText(
+  modifier: Modifier = Modifier,
+  style: TextStyle = MaterialTheme.typography.bodySmall,
+  color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+) {
+  val linkColor = MaterialTheme.colorScheme.primary
+  Text(
+    text =
+      buildAnnotatedString {
+        append("© $DEMO_ATTRIBUTION_COPYRIGHT_YEAR ")
+        withLink(
+          LinkAnnotation.Url(
+            url = DEMO_ATTRIBUTION_CONTRIBUTORS_URL,
+            styles =
+              TextLinkStyles(
+                style = SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)
+              ),
+          )
+        ) {
+          append(DEMO_ATTRIBUTION_CONTRIBUTORS_LABEL)
+        }
+      },
+    modifier = modifier,
+    style = style,
+    color = color,
+  )
+}
+
+/**
+ * Slim bottom footer bar of the web console with the [onOpenDevTools] trigger (a bug icon and
+ * [DEV_TOOLS_FOOTER_LABEL]).
+ *
+ * Only rendered in non-production builds ([AppEnvironment.DEV] and [AppEnvironment.STAGING]);
+ * hidden in [AppEnvironment.PROD]. The app's version and attribution are on the About screen
+ * ([AboutContent]).
+ */
+@Composable
+fun DevToolsFooterBar(
+  onOpenDevTools: () -> Unit,
   modifier: Modifier = Modifier,
   environment: AppEnvironment = currentAppEnvironment(),
-  appVersion: String = AppBuildConfig.APP_VERSION,
-  onOpenDevTools: (() -> Unit)? = null,
 ) {
   if (!environment.isNonProduction) return
-  val linkColor = MaterialTheme.colorScheme.primary
-  val footerTextStyle =
-    MaterialTheme.typography.labelSmall.copy(
-      fontSize = 10.sp,
-      lineHeight = 12.sp,
-      fontWeight = FontWeight.Medium,
-    )
+  val tint = MaterialTheme.colorScheme.primary
   Surface(
     modifier = modifier.fillMaxWidth(),
     color = MaterialTheme.colorScheme.surfaceContainer,
@@ -185,83 +202,30 @@ fun DemoAttributionFooterBar(
     Row(
       modifier =
         Modifier.fillMaxWidth().heightIn(min = 18.dp).padding(horizontal = 12.dp, vertical = 2.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      if (onOpenDevTools != null) {
-        DevToolsFooterTrigger(
-          appVersion = appVersion,
-          textStyle = footerTextStyle,
-          tint = linkColor,
-          onClick = onOpenDevTools,
+      Row(
+        modifier =
+          Modifier.testTag(DEV_TOOLS_FOOTER_BUTTON_TAG)
+            .clip(MaterialTheme.shapes.extraSmall)
+            .clickable(role = Role.Button, onClick = onOpenDevTools),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Icon(
+          imageVector = Icons.Outlined.BugReport,
+          contentDescription = null,
+          tint = tint,
+          modifier = Modifier.size(14.dp),
         )
-      }
-      Spacer(modifier = Modifier.weight(1f))
-      Text(
-        text =
-          buildAnnotatedString {
-            append("© $DEMO_ATTRIBUTION_COPYRIGHT_YEAR ")
-            withLink(
-              LinkAnnotation.Url(
-                url = DEMO_ATTRIBUTION_CONTRIBUTORS_URL,
-                styles =
-                  TextLinkStyles(
-                    style =
-                      SpanStyle(
-                        color = linkColor,
-                        textDecoration = TextDecoration.Underline,
-                      )
-                  ),
-              )
-            ) {
-              append(DEMO_ATTRIBUTION_CONTRIBUTORS_LABEL)
-            }
-          },
-        style = footerTextStyle,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-      )
-    }
-  }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DevToolsFooterTrigger(
-  appVersion: String,
-  textStyle: TextStyle,
-  tint: Color,
-  onClick: () -> Unit,
-) {
-  val versionLabel = formatAppVersionBadge(appVersion)
-  TooltipBox(
-    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-    tooltip = { PlainTooltip { Text(DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION) } },
-    state = rememberTooltipState(),
-  ) {
-    Row(
-      modifier =
-        Modifier.testTag(DEV_TOOLS_FOOTER_BUTTON_TAG)
-          .clip(MaterialTheme.shapes.extraSmall)
-          .clickable(
-            role = Role.Button,
-            onClickLabel = DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION,
-            onClick = onClick,
-          ),
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Icon(
-        imageVector = Icons.Outlined.BugReport,
-        contentDescription = DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION,
-        tint = tint,
-        modifier = Modifier.size(14.dp),
-      )
-      if (versionLabel.isNotEmpty()) {
         Text(
-          text = versionLabel,
-          style = textStyle,
+          text = DEV_TOOLS_FOOTER_LABEL,
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              fontSize = 10.sp,
+              lineHeight = 12.sp,
+              fontWeight = FontWeight.Medium,
+            ),
           color = tint,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,

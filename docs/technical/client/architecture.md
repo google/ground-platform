@@ -252,7 +252,7 @@ Both apps move between their screens with type-safe [Compose Multiplatform navig
 flowchart LR
     SignIn["sign-in"] --> Terms["terms"] --> Download["download-survey"] --> Survey["survey"]
     Survey --> Form["form"]
-    Survey --> Pages["surveys / uploads / offline-maps / settings"]
+    Survey --> Pages["surveys / uploads / offline-maps / settings / about"]
     Pages -->|"Download more"| Download
 ```
 

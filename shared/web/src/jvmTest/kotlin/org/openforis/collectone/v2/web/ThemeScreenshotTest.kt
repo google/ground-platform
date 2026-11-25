@@ -24,10 +24,13 @@ import androidx.compose.ui.graphics.asSkiaBitmap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import java.io.File
@@ -266,6 +269,20 @@ class ThemeScreenshotTest {
                 .fetchSemanticsNodes()
                 .isEmpty()
           }
+          waitForIdle()
+        },
+      ),
+      WebScene(
+        id = "17_web_about",
+        prepare = { dark ->
+          val state = makeState(dark, signedIn = true)
+          state to MemoryBrowserHistory(initialPath = "/surveys")
+        },
+        // The About dialog, opened from the account menu.
+        afterCompose = {
+          onNode(hasContentDescription("Account menu", substring = true)).performClick()
+          waitForIdle()
+          onNodeWithText("About").performClick()
           waitForIdle()
         },
       ),

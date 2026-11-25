@@ -474,10 +474,16 @@ class MobileAppState(
    */
   override fun drawerOpenUploads() = viewModels.dashboard.showUploads(null)
 
+  /** Drawer option About: what the app is for, its version, and its contributors. */
+  override fun drawerOpenAbout() {
+    isDrawerOpen = false
+    showMainSurvey(MobileRoute.About)
+  }
+
   /**
-   * Closes the open drawer page (Surveys, Uploads, Offline maps, or Settings) and returns to the
-   * survey. Also drops the map feature filter Uploads may have been opened with, so the drawer's
-   * Uploads opens unfiltered next time.
+   * Closes the open drawer page (Surveys, Uploads, Offline maps, Settings, or About) and returns to
+   * the survey. Also drops the map feature filter Uploads may have been opened with, so the
+   * drawer's Uploads opens unfiltered next time.
    */
   fun closeDrawerSubView() {
     navigator.popBackTo(MobileRoute.MainSurvey)

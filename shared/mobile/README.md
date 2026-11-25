@@ -133,7 +133,9 @@ targets of its own.
         much it frees; the measured device storage; **Save an area**; and, in
         the browser build, a notice that downloads are simulated), **Settings**
         (Metric/Imperial units, in-app language locale switcher, device storage chart, and
-        uploaded media cache eviction), **Terms of Service**, and **Sign out**.
+        uploaded media cache eviction), **Terms of Service**, **About**
+        (`AboutScreen`: the product name and app version, what Collect One is
+        for, and the link to the project's contributors), and **Sign out**.
 
 ## Internal Package Structure (`org.openforis.collectone.v2.mobile`)
 

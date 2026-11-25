@@ -36,11 +36,13 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.Text
@@ -53,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -64,6 +67,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.resources.Res
+import org.openforis.collectone.v2.app.resources.app_about
 import org.openforis.collectone.v2.app.resources.app_account
 import org.openforis.collectone.v2.app.resources.app_account_menu
 import org.openforis.collectone.v2.app.resources.app_account_menu_for_user
@@ -147,6 +151,7 @@ fun UserAvatarProfileMenu(
   borderColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
   onOpenOrganizations: (() -> Unit)? = null,
   onOpenAdminPanel: (() -> Unit)? = null,
+  onOpenAbout: (() -> Unit)? = null,
 ) {
   var isProfileOpen by remember { mutableStateOf(false) }
   val displayInitials = userInitials.ifBlank { "U" }
@@ -189,6 +194,13 @@ fun UserAvatarProfileMenu(
             {
               isProfileOpen = false
               openAdmin()
+            }
+          },
+        onOpenAbout =
+          onOpenAbout?.let { openAbout ->
+            {
+              isProfileOpen = false
+              openAbout()
             }
           },
         onSignOut = {
@@ -291,7 +303,8 @@ fun UserProfileSidePanelOverlay(
 
 /**
  * Standard user profile card showing avatar, user name, email, organizations (with an optional
- * button to open the organizations page when [onOpenOrganizations] is provided), and sign out.
+ * button to open the organizations page when [onOpenOrganizations] is provided), an optional About
+ * button ([onOpenAbout]), and sign out.
  */
 @Composable
 fun UserProfileCard(
@@ -304,8 +317,8 @@ fun UserProfileCard(
   userPhotoUrl: String? = null,
   onOpenOrganizations: (() -> Unit)? = null,
   onOpenAdminPanel: (() -> Unit)? = null,
+  onOpenAbout: (() -> Unit)? = null,
 ) {
-  val avatarBitmap = rememberProfileImageBitmap(userPhotoUrl)
   Card(
     modifier = modifier.fillMaxWidth(),
     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
@@ -314,52 +327,7 @@ fun UserProfileCard(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-      // Profile Header: Large Avatar + Name & Email
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-      ) {
-        Box(
-          modifier =
-            Modifier.size(48.dp)
-              .clip(CircleShape)
-              .background(MaterialTheme.colorScheme.primaryContainer)
-              .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape),
-          contentAlignment = Alignment.Center,
-        ) {
-          if (avatarBitmap != null) {
-            Image(
-              bitmap = avatarBitmap,
-              contentDescription = null,
-              contentScale = ContentScale.Crop,
-              modifier = Modifier.fillMaxSize().clip(CircleShape),
-            )
-          } else {
-            Text(
-              text = userInitials.ifBlank { "U" },
-              style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-              color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-          }
-        }
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-          Text(
-            text = userName,
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-          Text(
-            text = userEmail,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-      }
+      ProfileCardHeader(userName, userEmail, userInitials, userPhotoUrl)
 
       // Organization badge
       if (organization.isNotBlank()) {
@@ -379,69 +347,129 @@ fun UserProfileCard(
       }
 
       if (onOpenOrganizations != null) {
-        OutlinedButton(
+        ProfileCardButton(
+          icon = Icons.Outlined.Groups,
+          text = stringResource(Res.string.app_manage_organizations),
           onClick = onOpenOrganizations,
-          modifier = Modifier.fillMaxWidth().height(40.dp),
-          shape = MaterialTheme.shapes.small,
-          border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.Groups,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Text(
-            text = stringResource(Res.string.app_manage_organizations),
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-          )
-        }
+        )
       }
 
       if (onOpenAdminPanel != null) {
-        OutlinedButton(
+        ProfileCardButton(
+          icon = Icons.Outlined.AdminPanelSettings,
+          text = stringResource(Res.string.app_admin_panel),
           onClick = onOpenAdminPanel,
-          modifier = Modifier.fillMaxWidth().height(40.dp),
-          shape = MaterialTheme.shapes.small,
-          border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.AdminPanelSettings,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Text(
-            text = stringResource(Res.string.app_admin_panel),
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-          )
-        }
+        )
+      }
+
+      if (onOpenAbout != null) {
+        ProfileCardButton(
+          icon = Icons.Outlined.Info,
+          text = stringResource(Res.string.app_about),
+          onClick = onOpenAbout,
+        )
       }
 
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
       // Sign Out Action Link
-      OutlinedButton(
+      ProfileCardButton(
+        icon = Icons.AutoMirrored.Outlined.Logout,
+        text = stringResource(Res.string.app_sign_out),
         onClick = onSignOut,
-        modifier = Modifier.fillMaxWidth().height(40.dp),
-        shape = MaterialTheme.shapes.small,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        colors =
-          ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-      ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Outlined.Logout,
+        contentColor = MaterialTheme.colorScheme.error,
+      )
+    }
+  }
+}
+
+/** The header of [UserProfileCard]: the large avatar with the user's name and email. */
+@Composable
+private fun ProfileCardHeader(
+  userName: String,
+  userEmail: String,
+  userInitials: String,
+  userPhotoUrl: String?,
+) {
+  val avatarBitmap = rememberProfileImageBitmap(userPhotoUrl)
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(14.dp),
+  ) {
+    Box(
+      modifier =
+        Modifier.size(48.dp)
+          .clip(CircleShape)
+          .background(MaterialTheme.colorScheme.primaryContainer)
+          .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape),
+      contentAlignment = Alignment.Center,
+    ) {
+      if (avatarBitmap != null) {
+        Image(
+          bitmap = avatarBitmap,
           contentDescription = null,
-          modifier = Modifier.size(16.dp),
-          tint = MaterialTheme.colorScheme.error,
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.fillMaxSize().clip(CircleShape),
         )
-        Spacer(modifier = Modifier.width(8.dp))
+      } else {
         Text(
-          text = stringResource(Res.string.app_sign_out),
-          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-          color = MaterialTheme.colorScheme.error,
+          text = userInitials.ifBlank { "U" },
+          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+          color = MaterialTheme.colorScheme.onPrimaryContainer,
         )
       }
     }
+    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+      Text(
+        text = userName,
+        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+      Text(
+        text = userEmail,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+    }
+  }
+}
+
+/**
+ * A full-width outlined action of [UserProfileCard]: an [icon] and a [text], in [contentColor] when
+ * given (the error color for Sign out).
+ */
+@Composable
+private fun ProfileCardButton(
+  icon: ImageVector,
+  text: String,
+  onClick: () -> Unit,
+  contentColor: Color? = null,
+) {
+  OutlinedButton(
+    onClick = onClick,
+    modifier = Modifier.fillMaxWidth().height(40.dp),
+    shape = MaterialTheme.shapes.small,
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    colors =
+      if (contentColor != null) ButtonDefaults.outlinedButtonColors(contentColor = contentColor)
+      else ButtonDefaults.outlinedButtonColors(),
+  ) {
+    Icon(
+      imageVector = icon,
+      contentDescription = null,
+      modifier = Modifier.size(16.dp),
+      tint = contentColor ?: LocalContentColor.current,
+    )
+    Spacer(modifier = Modifier.width(8.dp))
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+      color = contentColor ?: Color.Unspecified,
+    )
   }
 }

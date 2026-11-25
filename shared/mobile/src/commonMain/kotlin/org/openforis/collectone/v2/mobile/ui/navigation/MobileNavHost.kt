@@ -43,6 +43,7 @@ import org.openforis.collectone.v2.app.ui.onboarding.OnboardingViewModel
 import org.openforis.collectone.v2.app.ui.session.DevSignInDialog
 import org.openforis.collectone.v2.app.ui.settings.SettingsViewModel
 import org.openforis.collectone.v2.mobile.ui.MobileAppState
+import org.openforis.collectone.v2.mobile.ui.about.AboutScreen
 import org.openforis.collectone.v2.mobile.ui.collectMainSurveyUiState
 import org.openforis.collectone.v2.mobile.ui.offlinemaps.ManageOfflineMapsSubScreen
 import org.openforis.collectone.v2.mobile.ui.offlinemaps.OfflineMapsViewModel
@@ -109,6 +110,7 @@ private fun MobileNavGraph(
     composable<MobileRoute.Uploads> { UploadsDestination(state) }
     composable<MobileRoute.OfflineMaps> { OfflineMapsDestination(state) }
     composable<MobileRoute.Settings> { SettingsDestination(state) }
+    composable<MobileRoute.About> { AboutDestination(state) }
   }
 }
 
@@ -336,4 +338,9 @@ private fun SettingsDestination(state: MobileAppState) {
       onBack = state::closeDrawerSubView,
     )
   }
+}
+
+@Composable
+private fun AboutDestination(state: MobileAppState) {
+  MainSurveyPage(state) { AboutScreen(onBack = state::closeDrawerSubView) }
 }

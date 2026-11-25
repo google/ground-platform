@@ -82,6 +82,7 @@ import org.openforis.collectone.v2.web.resources.web_recent_surveys
 import org.openforis.collectone.v2.web.resources.web_saved
 import org.openforis.collectone.v2.web.resources.web_saving
 import org.openforis.collectone.v2.web.resources.web_switch_survey
+import org.openforis.collectone.v2.web.ui.common.WebAboutDialog
 import org.openforis.collectone.v2.web.ui.common.WebCompactLanguageSelector
 import org.openforis.collectone.v2.web.ui.common.WebHeaderButton
 import org.openforis.collectone.v2.web.ui.common.WebHeaderContext
@@ -342,8 +343,8 @@ private fun SaveStatusRow(
  * - Page [actions]
  * - Compact language selector, unless [showLanguageSelector] is false (e.g. when the page shows its
  *   own, like the sign-in page)
- * - User profile: clickable avatar opening the user profile card with sign out, shown only when
- *   [onSignOut] is given
+ * - User profile: clickable avatar opening the user profile card with About and sign out, shown
+ *   only when [onSignOut] is given
  */
 @Composable
 internal fun WebAppHeader(
@@ -494,7 +495,10 @@ internal fun WebAppHeader(
   }
 }
 
-/** Clickable user avatar icon that anchors and toggles the standard user profile card popup. */
+/**
+ * Clickable user avatar icon that anchors and toggles the standard user profile card popup, whose
+ * About item opens the [WebAboutDialog].
+ */
 @Composable
 internal fun WebUserAvatarProfileWidget(
   uiState: WebAppHeaderUiState,
@@ -502,6 +506,7 @@ internal fun WebUserAvatarProfileWidget(
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  var isAboutOpen by remember { mutableStateOf(false) }
   UserAvatarProfileMenu(
     userName = uiState.userName,
     userEmail = uiState.userEmail,
@@ -514,5 +519,9 @@ internal fun WebUserAvatarProfileWidget(
     dropdownWidth = 320.dp,
     onOpenOrganizations = headerActions::openOrganizations,
     onOpenAdminPanel = if (uiState.isPlatformAdmin) headerActions::openAdminPanel else null,
+    onOpenAbout = { isAboutOpen = true },
   )
+  if (isAboutOpen) {
+    WebAboutDialog(onDismiss = { isAboutOpen = false })
+  }
 }

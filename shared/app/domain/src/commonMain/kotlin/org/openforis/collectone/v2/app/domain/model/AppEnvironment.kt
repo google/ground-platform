@@ -16,8 +16,8 @@ package org.openforis.collectone.v2.app.domain.model
 /**
  * Runtime deployment tier of a Collect One client build.
  *
- * Non-production builds ([DEV] and [STAGING]) surface developer-facing affordances such as the demo
- * attribution footer and the web Developer Tools dialog; [PROD] hides them.
+ * Non-production builds ([DEV] and [STAGING]) surface developer-facing affordances such as the web
+ * console's Developer Tools footer and dialog; [PROD] hides them.
  */
 enum class AppEnvironment {
   DEV,

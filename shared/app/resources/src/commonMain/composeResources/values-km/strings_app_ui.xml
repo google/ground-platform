@@ -81,6 +81,14 @@
   <string name="app_manage_organizations">គ្រប់គ្រងស្ថាប័ន</string>
   <!-- Account menu item. -->
   <string name="app_admin_panel">ផ្ទាំងគ្រប់គ្រង</string>
+  <!-- Account menu item and navigation drawer item that opens the About screen; also its title. -->
+  <string name="app_about">អំពី</string>
+  <!-- Product name on the About screen. Product name: do not translate. -->
+  <string name="app_about_product_name">Open Foris Collect One</string>
+  <!-- App version on the About screen. %1$s = version number (e.g. 2.0.0). -->
+  <string name="app_about_version">កំណែ %1$s</string>
+  <!-- What Collect One is for and its mission, on the About screen. “Collect One” is a product name: do not translate. -->
+  <string name="app_about_blurb">Collect One ជាឧបករណ៍កូដបើកចំហសម្រាប់ប្រមូលទិន្នន័យលើផែនទីនៅទីវាល។ អ្នករៀបចំរចនាការស្ទង់មតិ និងសំណុំបែបបទនៅក្នុងកុងសូលគេហទំព័រ ហើយអ្នកប្រមូលទិន្នន័យបំពេញវានៅលើទូរសព្ទរបស់ពួកគេ ទោះមាន ឬគ្មានការតភ្ជាប់ក៏ដោយ។ បេសកកម្មរបស់យើងគឺធ្វើឱ្យមនុស្សគ្រប់រូបអាចប្រមូលទិន្នន័យបែបនេះបាន ដើម្បីឱ្យសហគមន៍មូលដ្ឋាន សហករណ៍ អ្នកស្រាវជ្រាវ និងស្ថាប័នសាធារណៈអាចគ្រប់គ្រងដីធ្លីប្រកបដោយចីរភាព និងស្តារប្រព័ន្ធអេកូឡូស៊ីឡើងវិញ។</string>
   <!-- Account menu item. -->
   <string name="app_sign_out">ចេញពីគណនី</string>
   <!-- Label before a map feature's GeoID (a registry identifier). %1$s = the GeoID. -->

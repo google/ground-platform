@@ -146,6 +146,11 @@ class ThemeScreenshotTest {
           selection.estimate != null && selection.name != null
         },
       ),
+      MobileScene(
+        id = "16_mobile_about",
+        initialRoute = MobileRoute.MainSurvey,
+        setUp = { drawerOpenAbout() },
+      ),
     )
 
   /**

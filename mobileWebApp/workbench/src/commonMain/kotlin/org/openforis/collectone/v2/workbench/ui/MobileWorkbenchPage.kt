@@ -15,9 +15,7 @@ package org.openforis.collectone.v2.workbench.ui
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -36,7 +34,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import org.openforis.collectone.v2.app.ui.common.DemoAttributionFooterBar
 import org.openforis.collectone.v2.app.ui.common.DevicePreviewFrame
 import org.openforis.collectone.v2.app.ui.navigation.AppScreen
 import org.openforis.collectone.v2.core.forms.ui.AppTheme
@@ -134,16 +131,11 @@ private fun MobileWorkbenchContent(state: WorkbenchState, hostOrigin: String) {
       color =
         if (isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerLowest,
     ) {
-      Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-          MobileWorkbenchPage(
-            workbench = state,
-            isMapShowing = isMapShowing,
-            hostOrigin = hostOrigin,
-          )
-        }
-        DemoAttributionFooterBar()
-      }
+      MobileWorkbenchPage(
+        workbench = state,
+        isMapShowing = isMapShowing,
+        hostOrigin = hostOrigin,
+      )
     }
   }
 }

@@ -20,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -39,7 +38,7 @@ import org.openforis.collectone.v2.app.domain.model.AppBuildConfig
 import org.openforis.collectone.v2.app.domain.model.AppEnvironment
 import org.openforis.collectone.v2.app.ui.common.DEMO_ATTRIBUTION_FOOTER_TEXT
 import org.openforis.collectone.v2.app.ui.common.DEV_TOOLS_FOOTER_BUTTON_TAG
-import org.openforis.collectone.v2.app.ui.common.DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION
+import org.openforis.collectone.v2.app.ui.common.DEV_TOOLS_FOOTER_LABEL
 import org.openforis.collectone.v2.app.ui.common.LocalAppEnvironment
 import org.openforis.collectone.v2.app.ui.common.formatAppVersionBadge
 import org.openforis.collectone.v2.web.WebConsoleApp
@@ -67,7 +66,7 @@ class WebDevToolsFooterTest {
     )
 
   @Test
-  fun webFooterRendersInDevAndStagingAndHidesInProd() =
+  fun webFooterShowsOnlyTheDevToolsTriggerInDevAndStagingAndHidesInProd() =
     runDesktopComposeUiTest(width = 1280, height = 800) {
       val state = webStateWithBackendUrl("https://staging-backend.example.org")
       var environment by mutableStateOf(AppEnvironment.DEV)
@@ -82,23 +81,23 @@ class WebDevToolsFooterTest {
       }
       waitForIdle()
 
-      onNodeWithText(DEMO_ATTRIBUTION_FOOTER_TEXT).assertExists()
+      // The footer holds only the debugging tools trigger: the version and the attribution are
+      // in the About dialog.
       onNodeWithText("Dev tools").assertDoesNotExist()
-      onNodeWithText(expectedVersionLabel).assertExists()
-      onNodeWithContentDescription(DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION).assertExists()
+      onNodeWithText(DEV_TOOLS_FOOTER_LABEL).assertExists()
       onNodeWithTag(DEV_TOOLS_FOOTER_BUTTON_TAG).assertExists()
+      onNodeWithText(DEMO_ATTRIBUTION_FOOTER_TEXT).assertDoesNotExist()
+      onNodeWithText(expectedVersionLabel, substring = true).assertDoesNotExist()
 
       runOnIdle { environment = AppEnvironment.STAGING }
       waitForIdle()
-      onNodeWithText(DEMO_ATTRIBUTION_FOOTER_TEXT).assertExists()
-      onNodeWithText(expectedVersionLabel).assertExists()
-      onNodeWithContentDescription(DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION).assertExists()
+      onNodeWithText(DEV_TOOLS_FOOTER_LABEL).assertExists()
+      onNodeWithText(DEMO_ATTRIBUTION_FOOTER_TEXT).assertDoesNotExist()
+      onNodeWithText(expectedVersionLabel, substring = true).assertDoesNotExist()
 
       runOnIdle { environment = AppEnvironment.PROD }
       waitForIdle()
-      onNodeWithText(DEMO_ATTRIBUTION_FOOTER_TEXT).assertDoesNotExist()
-      onNodeWithText(expectedVersionLabel).assertDoesNotExist()
-      onNodeWithContentDescription(DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION).assertDoesNotExist()
+      onNodeWithText(DEV_TOOLS_FOOTER_LABEL).assertDoesNotExist()
       onNodeWithTag(DEV_TOOLS_FOOTER_BUTTON_TAG).assertDoesNotExist()
     }
 
@@ -175,7 +174,7 @@ class WebDevToolsFooterTest {
       }
       waitForIdle()
 
-      onNodeWithContentDescription(DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION).performClick()
+      onNodeWithText(DEV_TOOLS_FOOTER_LABEL).performClick()
       waitForIdle()
 
       onNodeWithText("No backend server URL configured (USER_DATA_SERVICE_URL)").assertExists()

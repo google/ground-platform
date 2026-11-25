@@ -58,6 +58,22 @@ class MobileDrawerTest {
   }
 
   @Test
+  fun drawerOpenAbout_closesTheDrawerOnTheAboutSubView() {
+    val state =
+      MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
+    state.updateDrawerOpen(true)
+
+    state.drawerOpenAbout()
+
+    assertFalse(state.isDrawerOpen)
+    assertEquals(MobileRoute.About, state.currentRoute)
+
+    state.closeDrawerSubView()
+
+    assertEquals(MobileRoute.MainSurvey, state.currentRoute)
+  }
+
+  @Test
   fun drawerSwitchSurveys_opensTheSurveysSubView() {
     val state =
       MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())

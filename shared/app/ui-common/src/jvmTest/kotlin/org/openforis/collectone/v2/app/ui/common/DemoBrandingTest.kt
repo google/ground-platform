@@ -41,76 +41,74 @@ class DemoBrandingTest {
   }
 
   @Test
-  fun demoBadgeAndAttributionFooterRenderExpectedVersionAndBugIconInDevAndStaging() =
-    runDesktopComposeUiTest {
-      assertEquals("DEMO", DEMO_BADGE_TEXT)
-      assertEquals("Admin only", ADMIN_ONLY_BADGE_TEXT)
-      assertEquals(2026, DEMO_ATTRIBUTION_COPYRIGHT_YEAR)
-      assertEquals("The Collect One Contributors", DEMO_ATTRIBUTION_CONTRIBUTORS_LABEL)
-      assertEquals(
-        "https://github.com/google/ground-platform/graphs/contributors?all=1",
-        DEMO_ATTRIBUTION_CONTRIBUTORS_URL,
-      )
-      assertEquals("© 2026 The Collect One Contributors", DEMO_ATTRIBUTION_FOOTER_TEXT)
-      assertEquals("Debugging tools", DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION)
-      assertTrue(AppBuildConfig.APP_VERSION.isNotBlank())
+  fun demoBadgeAndDevToolsFooterRenderInStaging() = runDesktopComposeUiTest {
+    assertEquals("DEMO", DEMO_BADGE_TEXT)
+    assertEquals("Admin only", ADMIN_ONLY_BADGE_TEXT)
+    assertEquals(2026, DEMO_ATTRIBUTION_COPYRIGHT_YEAR)
+    assertEquals("The Collect One Contributors", DEMO_ATTRIBUTION_CONTRIBUTORS_LABEL)
+    assertEquals(
+      "https://github.com/google/ground-platform/graphs/contributors?all=1",
+      DEMO_ATTRIBUTION_CONTRIBUTORS_URL,
+    )
+    assertEquals("© 2026 The Collect One Contributors", DEMO_ATTRIBUTION_FOOTER_TEXT)
+    assertEquals("Debugging tools", DEV_TOOLS_FOOTER_LABEL)
+    assertTrue(AppBuildConfig.APP_VERSION.isNotBlank())
 
-      var devToolsClicks = 0
-      val expectedVersion = formatAppVersionBadge(AppBuildConfig.APP_VERSION)
-      setContent {
-        MaterialTheme {
-          Column {
-            DemoBadge()
-            AdminOnlyBadge()
-            DemoAttributionFooterBar(environment = AppEnvironment.STAGING) { devToolsClicks++ }
-          }
-        }
-      }
-
-      onNodeWithText("DEMO").assertExists()
-      onNodeWithContentDescription("Admin only").assertExists()
-      onNodeWithText("© 2026 The Collect One Contributors").assertExists()
-      onNodeWithText("Dev tools").assertDoesNotExist()
-      onNodeWithText(expectedVersion).assertExists()
-      onNodeWithContentDescription(DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION).assertExists()
-      onNodeWithTag(DEV_TOOLS_FOOTER_BUTTON_TAG).assertExists().performClick()
-      assertEquals(1, devToolsClicks)
-    }
-
-  @Test
-  fun devToolsTriggerStillRendersBugIconWhenVersionIsBlank() = runDesktopComposeUiTest {
     var devToolsClicks = 0
     setContent {
       MaterialTheme {
-        DemoAttributionFooterBar(
-          environment = AppEnvironment.DEV,
-          appVersion = "",
-          onOpenDevTools = { devToolsClicks++ },
-        )
+        Column {
+          DemoBadge()
+          AdminOnlyBadge()
+          DevToolsFooterBar(
+            onOpenDevTools = { devToolsClicks++ },
+            environment = AppEnvironment.STAGING,
+          )
+        }
       }
     }
 
-    onNodeWithTag(DEV_TOOLS_FOOTER_BUTTON_TAG).assertExists()
-    onNodeWithContentDescription(DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION).assertExists().performClick()
+    onNodeWithText("DEMO").assertExists()
+    onNodeWithContentDescription("Admin only").assertExists()
+    onNodeWithText("Dev tools").assertDoesNotExist()
+    onNodeWithText(DEV_TOOLS_FOOTER_LABEL).assertExists()
+    onNodeWithTag(DEV_TOOLS_FOOTER_BUTTON_TAG).assertExists().performClick()
     assertEquals(1, devToolsClicks)
   }
 
+  /** The version and the attribution moved from the footer to the About screen. */
   @Test
-  fun attributionFooterIsHiddenInProdEnvironment() = runDesktopComposeUiTest {
-    val expectedVersion = formatAppVersionBadge(AppBuildConfig.APP_VERSION)
+  fun devToolsFooterShowsNoVersionOrAttribution() = runDesktopComposeUiTest {
+    val version = formatAppVersionBadge(AppBuildConfig.APP_VERSION)
+    setContent {
+      MaterialTheme { DevToolsFooterBar(onOpenDevTools = {}, environment = AppEnvironment.DEV) }
+    }
+
+    onNodeWithTag(DEV_TOOLS_FOOTER_BUTTON_TAG).assertExists()
+    onNodeWithText(version, substring = true).assertDoesNotExist()
+    onNodeWithText(DEMO_ATTRIBUTION_FOOTER_TEXT).assertDoesNotExist()
+  }
+
+  @Test
+  fun devToolsFooterIsHiddenInProdEnvironment() = runDesktopComposeUiTest {
     setContent {
       CompositionLocalProvider(LocalAppEnvironment provides AppEnvironment.PROD) {
         MaterialTheme {
           Column {
-            DemoAttributionFooterBar(onOpenDevTools = {})
+            DevToolsFooterBar(onOpenDevTools = {})
           }
         }
       }
     }
 
-    onNodeWithText("© 2026 The Collect One Contributors").assertDoesNotExist()
-    onNodeWithText(expectedVersion).assertDoesNotExist()
     onNodeWithTag(DEV_TOOLS_FOOTER_BUTTON_TAG).assertDoesNotExist()
-    onNodeWithContentDescription(DEV_TOOLS_FOOTER_CONTENT_DESCRIPTION).assertDoesNotExist()
+    onNodeWithText(DEV_TOOLS_FOOTER_LABEL).assertDoesNotExist()
+  }
+
+  @Test
+  fun contributorsAttributionTextShowsTheAttributionLine() = runDesktopComposeUiTest {
+    setContent { MaterialTheme { ContributorsAttributionText() } }
+
+    onNodeWithText("© 2026 The Collect One Contributors").assertExists()
   }
 }

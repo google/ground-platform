@@ -49,4 +49,7 @@ interface MobileDrawerActions {
 
   /** Opens the Terms of Service screen. */
   fun drawerViewTermsOfService()
+
+  /** Opens the About sub-screen. */
+  fun drawerOpenAbout()
 }

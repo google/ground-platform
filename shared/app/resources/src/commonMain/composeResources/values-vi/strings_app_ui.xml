@@ -81,6 +81,14 @@
   <string name="app_manage_organizations">Quản lý tổ chức</string>
   <!-- Account menu item. -->
   <string name="app_admin_panel">Bảng quản trị</string>
+  <!-- Account menu item and navigation drawer item that opens the About screen; also its title. -->
+  <string name="app_about">Giới thiệu</string>
+  <!-- Product name on the About screen. Product name: do not translate. -->
+  <string name="app_about_product_name">Open Foris Collect One</string>
+  <!-- App version on the About screen. %1$s = version number (e.g. 2.0.0). -->
+  <string name="app_about_version">Phiên bản %1$s</string>
+  <!-- What Collect One is for and its mission, on the About screen. “Collect One” is a product name: do not translate. -->
+  <string name="app_about_blurb">Collect One là công cụ mã nguồn mở để thu thập dữ liệu gắn với bản đồ tại thực địa. Người tổ chức thiết kế khảo sát và biểu mẫu trên bảng điều khiển web, còn người thu thập dữ liệu điền biểu mẫu trên điện thoại, dù có kết nối hay không. Sứ mệnh của chúng tôi là giúp mọi người đều có thể thu thập dữ liệu theo cách này, để cộng đồng địa phương, hợp tác xã, nhà nghiên cứu và cơ quan công có thể quản lý đất đai bền vững và phục hồi hệ sinh thái.</string>
   <!-- Account menu item. -->
   <string name="app_sign_out">Đăng xuất</string>
   <!-- Label before a map feature's GeoID (a registry identifier). %1$s = the GeoID. -->

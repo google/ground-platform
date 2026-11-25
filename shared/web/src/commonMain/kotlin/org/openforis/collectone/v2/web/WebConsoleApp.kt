@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.di.AppDataHolder
 import org.openforis.collectone.v2.app.di.requireUserDataServiceUrl
-import org.openforis.collectone.v2.app.ui.common.DemoAttributionFooterBar
+import org.openforis.collectone.v2.app.ui.common.DevToolsFooterBar
 import org.openforis.collectone.v2.app.ui.common.ProvideAppLocale
 import org.openforis.collectone.v2.app.ui.common.currentAppEnvironment
 import org.openforis.collectone.v2.app.ui.session.BackendErrorBanner
@@ -193,17 +193,14 @@ private fun WebConsoleContent(state: WebAppState, browserHistory: BrowserHistory
 }
 
 /**
- * Non-production footer bar and Developer Tools dialog for the web console. Hidden in production
- * builds ([AppEnvironment.PROD]).
+ * Non-production footer bar with the Developer Tools trigger, and its dialog, for the web console.
+ * Hidden in production builds ([AppEnvironment.PROD]).
  */
 @Composable
 private fun WebFooterWithDevTools(state: WebAppState, isDarkTheme: Boolean) {
   val environment = currentAppEnvironment()
   var isDevToolsOpen by remember { mutableStateOf(false) }
-  DemoAttributionFooterBar(
-    environment = environment,
-    onOpenDevTools = { isDevToolsOpen = true },
-  )
+  DevToolsFooterBar(onOpenDevTools = { isDevToolsOpen = true }, environment = environment)
   if (isDevToolsOpen && environment.isNonProduction) {
     WebDevToolsDialog(
       environment = environment,

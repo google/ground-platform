@@ -83,6 +83,14 @@
   <string name="app_manage_organizations">Manage organizations</string>
   <!-- Account menu item. -->
   <string name="app_admin_panel">Admin panel</string>
+  <!-- Account menu item and navigation drawer item that opens the About screen; also its title. -->
+  <string name="app_about">About</string>
+  <!-- Product name on the About screen. Product name: do not translate. -->
+  <string name="app_about_product_name">Open Foris Collect One</string>
+  <!-- App version on the About screen. %1$s = version number (e.g. 2.0.0). -->
+  <string name="app_about_version">Version %1$s</string>
+  <!-- What Collect One is for and its mission, on the About screen. “Collect One” is a product name: do not translate. -->
+  <string name="app_about_blurb">Collect One is an open-source tool for collecting map-based data in the field. Organizers design surveys and forms in the web console, and data collectors fill them out on their phones, with or without a connection. Our mission is to make this kind of data collection open to everyone, so local communities, cooperatives, researchers, and public institutions can manage land sustainably and restore ecosystems.</string>
   <!-- Account menu item. -->
   <string name="app_sign_out">Sign out</string>
   <!-- Label before a map feature's GeoID (a registry identifier). %1$s = the GeoID. -->
