@@ -84,4 +84,6 @@
   <string name="web_time_series_close">Funga msururu wa muda</string>
   <string name="web_time_series_expand">Panua uchambuzi wa picha</string>
   <string name="web_time_series_collapse">Kunja uchambuzi wa picha</string>
+  <string name="web_time_series_chart_balloon_hint">Bofya sehemu yoyote kwenye chati ili kuona picha za setilaiti na thamani za tarehe hiyo</string>
+  <string name="web_time_series_chart_balloon_dismiss">Ondoa kidokezo cha chati</string>
 </resources>

@@ -708,9 +708,7 @@ object FormImport {
       binding: FieldBinding?,
     ): EditorRelevance? {
       val raw = binding?.required_expression?.trim().orEmpty()
-      if (
-        raw.isEmpty() || isTrue(raw) || raw.equals("false()", true) || raw.equals("false", true)
-      ) {
+      if (raw.isEmpty() || isTrue(raw) || raw.lowercase() in setOf("false()", "false")) {
         return null
       }
       val contextPath = pathByKey[question.key].orEmpty()

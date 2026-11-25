@@ -84,4 +84,6 @@
   <string name="web_time_series_close">Đóng chuỗi thời gian</string>
   <string name="web_time_series_expand">Mở rộng phân tích hình ảnh</string>
   <string name="web_time_series_collapse">Thu gọn phân tích hình ảnh</string>
+  <string name="web_time_series_chart_balloon_hint">Nhấp vào bất kỳ điểm nào trên biểu đồ để xem ảnh vệ tinh và giá trị cho ngày đó</string>
+  <string name="web_time_series_chart_balloon_dismiss">Đóng gợi ý biểu đồ</string>
 </resources>

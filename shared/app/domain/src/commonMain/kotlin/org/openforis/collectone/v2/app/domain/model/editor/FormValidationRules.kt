@@ -328,6 +328,16 @@ object ValidationRules {
       customExpressionIssues(validation)
   }
 
+  private fun <T : Comparable<T>> isInvertedRange(
+    lo: T?,
+    hi: T?,
+    minExclusive: Boolean,
+    maxExclusive: Boolean,
+  ): Boolean {
+    if (lo == null || hi == null) return false
+    return lo > hi || (lo == hi && (minExclusive || maxExclusive))
+  }
+
   private fun numberRangeIssues(
     min: String,
     max: String,
@@ -338,7 +348,7 @@ object ValidationRules {
     val hi = max.takeIf(::isValidNumber)?.toDoubleOrNull()
     if (min.isNotEmpty() && lo == null) add(EditorIssueMessage.MIN_NOT_NUMBER.message())
     if (max.isNotEmpty() && hi == null) add(EditorIssueMessage.MAX_NOT_NUMBER.message())
-    if (lo != null && hi != null && (lo > hi || (lo == hi && (minExclusive || maxExclusive)))) {
+    if (isInvertedRange(lo, hi, minExclusive, maxExclusive)) {
       add(EditorIssueMessage.MIN_MORE_THAN_MAX.message())
     }
   }
@@ -410,11 +420,9 @@ object ValidationRules {
     // Dates are picked with a date picker, so they're always ISO `YYYY-MM-DD`.
     if (validation.dateRule != DateRule.BETWEEN) return@buildList
     if (min.isEmpty() && max.isEmpty()) add(EditorIssueMessage.DATE_RANGE_MISSING.message())
-    if (
-      isValidDate(min) &&
-        isValidDate(max) &&
-        (min > max || (min == max && (minExclusive || maxExclusive)))
-    ) {
+    val lo = min.takeIf(::isValidDate)
+    val hi = max.takeIf(::isValidDate)
+    if (isInvertedRange(lo, hi, minExclusive, maxExclusive)) {
       add(EditorIssueMessage.DATE_RANGE_REVERSED.message())
     }
   }
@@ -453,6 +461,38 @@ object ValidationRules {
     }
   }
 
+  private fun distanceReferenceIssue(
+    question: EditorQuestion,
+    refKey: String,
+    form: EditorForm?,
+  ): DomainMessage? =
+    when {
+      refKey.isEmpty() -> EditorIssueMessage.DISTANCE_REFERENCE_MISSING.message()
+      form == null -> null
+      else -> {
+        val ref = form.find(refKey)
+        when {
+          ref == null || ref.key == question.key ->
+            EditorIssueMessage.DISTANCE_REFERENCE_DELETED.message()
+          !form.canReferTo(ref, question.sectionId) && form.sectionOf(ref)?.repeatable == true ->
+            EditorIssueMessage.DISTANCE_REFERENCE_IN_REPEAT.message(ref.name)
+          ref.type != EditorQuestionType.LOCATION ->
+            EditorIssueMessage.DISTANCE_REFERENCE_NOT_LOCATION.message(ref.name)
+          else -> null
+        }
+      }
+    }
+
+  private fun distanceBoundsIssues(min: String, max: String): List<DomainMessage> = buildList {
+    val lo = min.takeIf(::isValidNumber)?.toDoubleOrNull()?.takeIf { it >= 0.0 }
+    val hi = max.takeIf(::isValidNumber)?.toDoubleOrNull()?.takeIf { it >= 0.0 }
+    if (min.isNotEmpty() && lo == null) add(EditorIssueMessage.DISTANCE_MIN_INVALID.message())
+    if (max.isNotEmpty() && hi == null) add(EditorIssueMessage.DISTANCE_MAX_INVALID.message())
+    if (lo != null && hi != null && lo > hi) {
+      add(EditorIssueMessage.DISTANCE_MIN_MORE_THAN_MAX.message())
+    }
+  }
+
   private fun distanceIssues(
     question: EditorQuestion,
     validation: EditorValidation,
@@ -461,33 +501,10 @@ object ValidationRules {
     form: EditorForm?,
   ): List<DomainMessage> {
     val refKey = validation.distanceReferenceQuestionKey.trim()
-    val hasBounds = min.isNotEmpty() || max.isNotEmpty()
-    if (refKey.isEmpty() && !hasBounds) return emptyList()
+    if (refKey.isEmpty() && min.isEmpty() && max.isEmpty()) return emptyList()
     return buildList {
-      if (refKey.isEmpty()) {
-        add(EditorIssueMessage.DISTANCE_REFERENCE_MISSING.message())
-      } else if (form != null) {
-        val ref = form.find(refKey)
-        when {
-          ref == null || ref.key == question.key ->
-            add(EditorIssueMessage.DISTANCE_REFERENCE_DELETED.message())
-          !form.canReferTo(ref, question.sectionId) && form.sectionOf(ref)?.repeatable == true ->
-            add(EditorIssueMessage.DISTANCE_REFERENCE_IN_REPEAT.message(ref.name))
-          ref.type != EditorQuestionType.LOCATION ->
-            add(EditorIssueMessage.DISTANCE_REFERENCE_NOT_LOCATION.message(ref.name))
-        }
-      }
-      val lo = min.takeIf(::isValidNumber)?.toDoubleOrNull()
-      val hi = max.takeIf(::isValidNumber)?.toDoubleOrNull()
-      if (min.isNotEmpty() && (lo == null || lo < 0.0)) {
-        add(EditorIssueMessage.DISTANCE_MIN_INVALID.message())
-      }
-      if (max.isNotEmpty() && (hi == null || hi < 0.0)) {
-        add(EditorIssueMessage.DISTANCE_MAX_INVALID.message())
-      }
-      if (lo != null && hi != null && lo >= 0.0 && hi >= 0.0 && lo > hi) {
-        add(EditorIssueMessage.DISTANCE_MIN_MORE_THAN_MAX.message())
-      }
+      distanceReferenceIssue(question, refKey, form)?.let(::add)
+      addAll(distanceBoundsIssues(min, max))
     }
   }
 
@@ -673,6 +690,19 @@ object ValidationRules {
     )
   }
 
+  private fun validDistanceRef(
+    form: EditorForm?,
+    refKey: String,
+    questionKey: String?,
+    contextSectionId: String,
+  ): EditorQuestion? =
+    form?.find(refKey)?.takeIf {
+      refKey.isNotEmpty() &&
+        it.key != questionKey &&
+        it.type == EditorQuestionType.LOCATION &&
+        form.canReferTo(it, contextSectionId)
+    }
+
   private fun distanceParts(
     validation: EditorValidation,
     min: String,
@@ -681,16 +711,13 @@ object ValidationRules {
     questionKey: String?,
   ): List<Part> {
     val refKey = validation.distanceReferenceQuestionKey.trim()
-    if (refKey.isEmpty() || form == null) return emptyList()
-    val refQuestion = form.find(refKey) ?: return emptyList()
-    if (refQuestion.key == questionKey || refQuestion.type != EditorQuestionType.LOCATION) {
-      return emptyList()
-    }
-    val contextSectionId = questionKey?.let { form.find(it)?.sectionId }.orEmpty()
-    if (!form.canReferTo(refQuestion, contextSectionId)) return emptyList()
+    val contextSectionId = questionKey?.let { form?.find(it)?.sectionId }.orEmpty()
+    val refQuestion = validDistanceRef(form, refKey, questionKey, contextSectionId)
     val lo = min.takeIf(::isValidNumber)?.takeIf { (it.toDoubleOrNull() ?: -1.0) >= 0.0 }
     val hi = max.takeIf(::isValidNumber)?.takeIf { (it.toDoubleOrNull() ?: -1.0) >= 0.0 }
-    if (lo == null && hi == null) return emptyList()
+    val hasRef = form != null && refQuestion != null
+    val hasBounds = lo != null || hi != null
+    if (!hasRef || !hasBounds) return emptyList()
     val refPath = xpathQuestionRef(form, refQuestion, contextSectionId)
     val refName = refQuestion.label.ifBlank { refQuestion.name }
     val distCall = "distance(., $refPath)"

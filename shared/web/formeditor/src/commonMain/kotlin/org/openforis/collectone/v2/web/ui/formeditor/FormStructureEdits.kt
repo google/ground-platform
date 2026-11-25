@@ -22,6 +22,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.EditorQuestionType
 import org.openforis.collectone.v2.app.domain.model.editor.EditorRelevance
 import org.openforis.collectone.v2.app.domain.model.editor.EditorSaveTo
 import org.openforis.collectone.v2.app.domain.model.editor.EditorSection
+import org.openforis.collectone.v2.app.domain.model.editor.EditorValidation
 import org.openforis.collectone.v2.app.domain.model.editor.GeometryCapture
 import org.openforis.collectone.v2.app.domain.model.editor.MediaSource
 import org.openforis.collectone.v2.app.domain.model.editor.RelevanceOperator
@@ -108,35 +109,27 @@ internal fun EditorForm.copiesOf(
       key = keyMap.getValue(q.key),
       name = name,
       sectionId = sectionId ?: q.sectionId,
-      relevance =
-        q.relevance?.let { rel ->
-          rel.copy(sourceQuestionKey = keyMap[rel.sourceQuestionKey] ?: rel.sourceQuestionKey)
-        },
-      requiredCondition =
-        q.requiredCondition?.let { rel ->
-          rel.copy(sourceQuestionKey = keyMap[rel.sourceQuestionKey] ?: rel.sourceQuestionKey)
-        },
-      validation =
-        q.validation?.let { v ->
-          v.copy(
-            comparison =
-              v.comparison?.let { cmp ->
-                cmp.copy(targetQuestionKey = keyMap[cmp.targetQuestionKey] ?: cmp.targetQuestionKey)
-              },
-            distanceReferenceQuestionKey =
-              keyMap[v.distanceReferenceQuestionKey] ?: v.distanceReferenceQuestionKey,
-            condition =
-              v.condition?.let { cond ->
-                cond.copy(
-                  sourceQuestionKey = keyMap[cond.sourceQuestionKey] ?: cond.sourceQuestionKey
-                )
-              },
-          )
-        },
+      relevance = q.relevance?.let { rewireSource(it, keyMap) },
+      requiredCondition = q.requiredCondition?.let { rewireSource(it, keyMap) },
+      validation = q.validation?.let { rewireValidation(it, keyMap) },
       parentQuestionKey = keyMap[q.parentQuestionKey] ?: q.parentQuestionKey,
     )
   }
 }
+
+private fun rewireSource(rel: EditorRelevance, keyMap: Map<String, String>): EditorRelevance =
+  rel.copy(sourceQuestionKey = keyMap[rel.sourceQuestionKey] ?: rel.sourceQuestionKey)
+
+private fun rewireValidation(v: EditorValidation, keyMap: Map<String, String>): EditorValidation =
+  v.copy(
+    comparison =
+      v.comparison?.let { cmp ->
+        cmp.copy(targetQuestionKey = keyMap[cmp.targetQuestionKey] ?: cmp.targetQuestionKey)
+      },
+    distanceReferenceQuestionKey =
+      keyMap[v.distanceReferenceQuestionKey] ?: v.distanceReferenceQuestionKey,
+    condition = v.condition?.let { rewireSource(it, keyMap) },
+  )
 
 /**
  * Question index where [section] begins in this Form's flow: the index of its first question when

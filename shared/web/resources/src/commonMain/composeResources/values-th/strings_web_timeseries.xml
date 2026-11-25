@@ -84,4 +84,6 @@
   <string name="web_time_series_close">ปิดอนุกรมเวลา</string>
   <string name="web_time_series_expand">ขยายการวิเคราะห์ภาพถ่าย</string>
   <string name="web_time_series_collapse">ยุบการวิเคราะห์ภาพถ่าย</string>
+  <string name="web_time_series_chart_balloon_hint">คลิกที่จุดใดก็ได้บนแผนภูมิเพื่อดูภาพถ่ายดาวเทียมและค่าสำหรับวันที่นั้น</string>
+  <string name="web_time_series_chart_balloon_dismiss">ปิดคำแนะนำแผนภูมิ</string>
 </resources>

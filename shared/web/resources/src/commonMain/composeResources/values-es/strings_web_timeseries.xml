@@ -84,4 +84,6 @@
   <string name="web_time_series_close">Cerrar series temporales</string>
   <string name="web_time_series_expand">Expandir análisis de imágenes</string>
   <string name="web_time_series_collapse">Contraer análisis de imágenes</string>
+  <string name="web_time_series_chart_balloon_hint">Haz clic en cualquier punto del gráfico para ver las imágenes satelitales y los valores de esa fecha</string>
+  <string name="web_time_series_chart_balloon_dismiss">Descartar sugerencia del gráfico</string>
 </resources>

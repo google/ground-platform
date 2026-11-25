@@ -222,28 +222,33 @@ fun resolveMobileRedirectUrl(
   browserPort: String = "",
 ): String? {
   val desktopParam = DESKTOP_PARAM_REGEX.find(currentSearch)?.groupValues?.get(1)?.lowercase()
-  if (desktopParam == "1" || desktopParam == "true") return null
-  if (!isMobileBrowser(userAgent, maxTouchPoints, isCoarsePointerWithoutHover)) return null
   val target =
-    resolveMobileWebUrl(
-      environment = environment,
-      configuredMobileWebUrl = configuredMobileWebUrl,
-      browserProtocol = browserProtocol,
-      browserHostname = browserHostname,
-      browserPort = browserPort,
-    ) ?: return null
-  if (
-    currentOrigin.isNotBlank() &&
+    if (
+      desktopParam in setOf("1", "true") ||
+        !isMobileBrowser(userAgent, maxTouchPoints, isCoarsePointerWithoutHover)
+    ) {
+      null
+    } else {
+      resolveMobileWebUrl(
+        environment = environment,
+        configuredMobileWebUrl = configuredMobileWebUrl,
+        browserProtocol = browserProtocol,
+        browserHostname = browserHostname,
+        browserPort = browserPort,
+      )
+    }
+  val sameOrigin =
+    target != null &&
+      currentOrigin.isNotBlank() &&
       target.trimEnd('/').equals(currentOrigin.trimEnd('/'), ignoreCase = true)
-  ) {
-    return null
-  }
+  if (target == null || sameOrigin) return null
   val hash = currentHash.trim()
-  if (hash.isNotEmpty() && '#' !in target) {
+  return if (hash.isNotEmpty() && '#' !in target) {
     val normalizedHash = if (hash.startsWith('#')) hash else "#$hash"
-    return "$target$normalizedHash"
+    "$target$normalizedHash"
+  } else {
+    target
   }
-  return target
 }
 
 private fun resolveLocalWorkstationUrl(

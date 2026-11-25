@@ -84,4 +84,6 @@
   <string name="web_time_series_close">បិទស៊េរីពេលវេលា</string>
   <string name="web_time_series_expand">ពង្រីកការវិភាគរូបភាព</string>
   <string name="web_time_series_collapse">បង្រួមការវិភាគរូបភាព</string>
+  <string name="web_time_series_chart_balloon_hint">ចុចលើចំណុចណាមួយលើក្រាហ្វ ដើម្បីមើលរូបភាពផ្កាយរណប និងតម្លៃសម្រាប់កាលបរិច្ឆេទនោះ</string>
+  <string name="web_time_series_chart_balloon_dismiss">បិទព័ត៌មានជំនួយក្រាហ្វ</string>
 </resources>

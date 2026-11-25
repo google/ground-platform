@@ -38,7 +38,6 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -90,6 +89,7 @@ import org.openforis.collectone.v2.app.ui.text.descriptionRes
 import org.openforis.collectone.v2.app.ui.text.isoDateText
 import org.openforis.collectone.v2.app.ui.text.labelRes
 import org.openforis.collectone.v2.core.forms.ui.appMonospaceFontFamily
+import org.openforis.collectone.v2.core.forms.ui.controls.Checkbox
 import org.openforis.collectone.v2.core.forms.ui.controls.DropdownMenuItem
 import org.openforis.collectone.v2.core.forms.ui.controls.ElevatedCard
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
@@ -685,19 +685,14 @@ private fun RequiredEditor(
   var showNoSourcesHint by remember(key, sources.size, isConditional) { mutableStateOf(false) }
 
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Column {
-      Text(
-        stringResource(Res.string.formeditor_required),
-        style = MaterialTheme.typography.bodyLarge,
-      )
-      Text(
-        text =
-          if (question.type.isReadOnly) stringResource(Res.string.formeditor_notes_cant_be_required)
-          else stringResource(Res.string.formeditor_required_description),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-    }
+    Text(stringResource(Res.string.formeditor_required), style = MaterialTheme.typography.bodyLarge)
+    Text(
+      text =
+        if (question.type.isReadOnly) stringResource(Res.string.formeditor_notes_cant_be_required)
+        else stringResource(Res.string.formeditor_required_description),
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
       SegmentedButton(
         selected = !isAlwaysRequired && !isConditional && !showNoSourcesHint,
@@ -790,98 +785,12 @@ private fun ValidationEditor(
     }
     when (ValidationKind.of(type)) {
       null -> Unit
-      ValidationKind.NUMBER_RANGE -> {
-        MinMaxFields(
-          stringResource(Res.string.formeditor_minimum),
-          stringResource(Res.string.formeditor_maximum),
-          validation,
-          ::update,
-          enabled = enabled,
-        )
-        if (validation.min.isNotBlank() || validation.max.isNotBlank()) {
-          StrictBoundsRow(
-            hasMin = validation.min.isNotBlank(),
-            hasMax = validation.max.isNotBlank(),
-            minExclusive = validation.minExclusive,
-            maxExclusive = validation.maxExclusive,
-            onMinExclusiveChange = { v -> update { it.copy(minExclusive = v) } },
-            onMaxExclusiveChange = { v -> update { it.copy(maxExclusive = v) } },
-            enabled = enabled,
-          )
-        }
-        CrossFieldComparisonEditor(uiState, question, validation, ::update, enabled = enabled)
-      }
-      ValidationKind.TEXT -> {
-        MinMaxFields(
-          stringResource(Res.string.formeditor_min_length),
-          stringResource(Res.string.formeditor_max_length),
-          validation,
-          ::update,
-          enabled = enabled,
-        )
-        val noneText = stringResource(Res.string.formeditor_none)
-        DropdownSelector(
-          label = stringResource(Res.string.formeditor_pattern),
-          selectedText = labelOrNone(validation.pattern?.labelRes, noneText),
-          options = listOf<TextPattern?>(null) + TextPattern.entries,
-          optionText = { labelOrNone(it?.labelRes, noneText) },
-          onSelect = { p -> update { it.copy(pattern = p) } },
-          enabled = enabled,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        if (validation.pattern == TextPattern.CUSTOM) {
-          OutlinedTextField(
-            value = validation.customPattern,
-            onValueChange = { v -> update { it.copy(customPattern = v) } },
-            enabled = enabled,
-            label = { Text(stringResource(Res.string.formeditor_regular_expression)) },
-            singleLine = true,
-            textStyle =
-              MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
-            modifier = Modifier.fillMaxWidth(),
-          )
-        }
-        CrossFieldComparisonEditor(uiState, question, validation, ::update, enabled = enabled)
-      }
-      ValidationKind.DATE -> {
-        val anyDateText = stringResource(Res.string.formeditor_any_date)
-        DropdownSelector(
-          label = stringResource(Res.string.formeditor_allowed_dates),
-          selectedText = labelOrNone(validation.dateRule?.labelRes, anyDateText),
-          options = listOf<DateRule?>(null) + DateRule.entries,
-          optionText = { labelOrNone(it?.labelRes, anyDateText) },
-          onSelect = { r ->
-            update {
-              if (r == DateRule.BETWEEN) it.copy(dateRule = r)
-              else
-                it.copy(
-                  dateRule = r,
-                  min = "",
-                  max = "",
-                  minExclusive = false,
-                  maxExclusive = false,
-                )
-            }
-          },
-          enabled = enabled,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        if (validation.dateRule == DateRule.BETWEEN) {
-          DateRangeFields(validation, ::update, enabled = enabled)
-          if (validation.min.isNotBlank() || validation.max.isNotBlank()) {
-            StrictBoundsRow(
-              hasMin = validation.min.isNotBlank(),
-              hasMax = validation.max.isNotBlank(),
-              minExclusive = validation.minExclusive,
-              maxExclusive = validation.maxExclusive,
-              onMinExclusiveChange = { v -> update { it.copy(minExclusive = v) } },
-              onMaxExclusiveChange = { v -> update { it.copy(maxExclusive = v) } },
-              enabled = enabled,
-            )
-          }
-        }
-        CrossFieldComparisonEditor(uiState, question, validation, ::update, enabled = enabled)
-      }
+      ValidationKind.NUMBER_RANGE ->
+        NumberRangeValidationFields(uiState, question, validation, ::update, enabled = enabled)
+      ValidationKind.TEXT ->
+        TextValidationFields(uiState, question, validation, ::update, enabled = enabled)
+      ValidationKind.DATE ->
+        DateValidationFields(uiState, question, validation, ::update, enabled = enabled)
       ValidationKind.SELECTION_COUNT ->
         MinMaxFields(
           stringResource(Res.string.formeditor_minimum_selections),
@@ -959,6 +868,113 @@ private fun ValidationEditor(
       )
     }
   }
+}
+
+@Composable
+private fun StrictBoundsForValidation(
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+  enabled: Boolean,
+) {
+  if (validation.min.isNotBlank() || validation.max.isNotBlank()) {
+    StrictBoundsRow(
+      hasMin = validation.min.isNotBlank(),
+      hasMax = validation.max.isNotBlank(),
+      minExclusive = validation.minExclusive,
+      maxExclusive = validation.maxExclusive,
+      onMinExclusiveChange = { v -> update { it.copy(minExclusive = v) } },
+      onMaxExclusiveChange = { v -> update { it.copy(maxExclusive = v) } },
+      enabled = enabled,
+    )
+  }
+}
+
+@Composable
+private fun NumberRangeValidationFields(
+  uiState: FormEditorUiState,
+  question: EditorQuestion,
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+  enabled: Boolean,
+) {
+  MinMaxFields(
+    stringResource(Res.string.formeditor_minimum),
+    stringResource(Res.string.formeditor_maximum),
+    validation,
+    update,
+    enabled = enabled,
+  )
+  StrictBoundsForValidation(validation, update, enabled)
+  CrossFieldComparisonEditor(uiState, question, validation, update, enabled = enabled)
+}
+
+@Composable
+private fun TextValidationFields(
+  uiState: FormEditorUiState,
+  question: EditorQuestion,
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+  enabled: Boolean,
+) {
+  MinMaxFields(
+    stringResource(Res.string.formeditor_min_length),
+    stringResource(Res.string.formeditor_max_length),
+    validation,
+    update,
+    enabled = enabled,
+  )
+  val noneText = stringResource(Res.string.formeditor_none)
+  DropdownSelector(
+    label = stringResource(Res.string.formeditor_pattern),
+    selectedText = labelOrNone(validation.pattern?.labelRes, noneText),
+    options = listOf<TextPattern?>(null) + TextPattern.entries,
+    optionText = { labelOrNone(it?.labelRes, noneText) },
+    onSelect = { p -> update { it.copy(pattern = p) } },
+    enabled = enabled,
+    modifier = Modifier.fillMaxWidth(),
+  )
+  if (validation.pattern == TextPattern.CUSTOM) {
+    OutlinedTextField(
+      value = validation.customPattern,
+      onValueChange = { v -> update { it.copy(customPattern = v) } },
+      enabled = enabled,
+      label = { Text(stringResource(Res.string.formeditor_regular_expression)) },
+      singleLine = true,
+      textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
+      modifier = Modifier.fillMaxWidth(),
+    )
+  }
+  CrossFieldComparisonEditor(uiState, question, validation, update, enabled = enabled)
+}
+
+@Composable
+private fun DateValidationFields(
+  uiState: FormEditorUiState,
+  question: EditorQuestion,
+  validation: EditorValidation,
+  update: ((EditorValidation) -> EditorValidation) -> Unit,
+  enabled: Boolean,
+) {
+  val anyDateText = stringResource(Res.string.formeditor_any_date)
+  DropdownSelector(
+    label = stringResource(Res.string.formeditor_allowed_dates),
+    selectedText = labelOrNone(validation.dateRule?.labelRes, anyDateText),
+    options = listOf<DateRule?>(null) + DateRule.entries,
+    optionText = { labelOrNone(it?.labelRes, anyDateText) },
+    onSelect = { r ->
+      update {
+        if (r == DateRule.BETWEEN) it.copy(dateRule = r)
+        else it.copy(dateRule = r, min = "", max = "", minExclusive = false, maxExclusive = false)
+      }
+    },
+    enabled = enabled,
+    modifier = Modifier.fillMaxWidth(),
+  )
+  if (validation.dateRule == DateRule.BETWEEN) {
+    DateRangeFields(validation, update, enabled = enabled)
+    StrictBoundsForValidation(validation, update, enabled)
+  }
+  CrossFieldComparisonEditor(uiState, question, validation, update, enabled = enabled)
 }
 
 @Composable

@@ -84,4 +84,6 @@
   <string name="web_time_series_close">ປິດອະນຸກົມເວລາ</string>
   <string name="web_time_series_expand">ຂະຫຍາຍການວິເຄາະພາບຖ່າຍ</string>
   <string name="web_time_series_collapse">ຫຍໍ້ການວິເຄາະພາບຖ່າຍ</string>
+  <string name="web_time_series_chart_balloon_hint">ຄລິກຈຸດໃດກໍໄດ້ໃນກຣາຟ ເພື່ອເບິ່ງພາບຖ່າຍດາວທຽມ ແລະຄ່າສຳລັບວັນທີນັ້ນ</string>
+  <string name="web_time_series_chart_balloon_dismiss">ປິດຄຳແນະນຳກຣາຟ</string>
 </resources>

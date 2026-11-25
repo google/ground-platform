@@ -84,6 +84,44 @@ internal object ConstraintImport {
       null
     }
 
+  private class RangeBounds {
+    var min = ""
+    var max = ""
+    var minExclusive = false
+    var maxExclusive = false
+
+    val hasAny: Boolean
+      get() = min.isNotEmpty() || max.isNotEmpty()
+
+    fun apply(op: String?, value: String): Boolean =
+      when (op) {
+        ">=" -> setMin(value, exclusive = false)
+        ">" -> setMin(value, exclusive = true)
+        "<=" -> setMax(value, exclusive = false)
+        "<" -> setMax(value, exclusive = true)
+        "=" -> {
+          min = value
+          max = value
+          minExclusive = false
+          maxExclusive = false
+          true
+        }
+        else -> false
+      }
+
+    private fun setMin(value: String, exclusive: Boolean): Boolean {
+      min = value
+      minExclusive = exclusive
+      return true
+    }
+
+    private fun setMax(value: String, exclusive: Boolean): Boolean {
+      max = value
+      maxExclusive = exclusive
+      return true
+    }
+  }
+
   /**
    * Numeric bounds (`. >= 0`, `. > 0`, `0 <= .`) and/or a cross-field comparison (`. <=
    * /data/total_area`).
@@ -94,10 +132,7 @@ internal object ConstraintImport {
     message: String,
     resolveQuestion: (String) -> EditorQuestion?,
   ): EditorValidation? {
-    var min = ""
-    var max = ""
-    var minExclusive = false
-    var maxExclusive = false
+    val bounds = RangeBounds()
     var comparison: EditorFieldComparison? = null
     var recognized = true
     clauses.forEach { part ->
@@ -112,50 +147,74 @@ internal object ConstraintImport {
           null
         }
       val (op, value) = bound ?: reversed ?: (null to "")
-      when (op) {
-        ">=" -> {
-          min = value
-          minExclusive = false
-        }
-        ">" -> {
-          min = value
-          minExclusive = true
-        }
-        "<=" -> {
-          max = value
-          maxExclusive = false
-        }
-        "<" -> {
-          max = value
-          maxExclusive = true
-        }
-        "=" -> {
-          min = value
-          max = value
-          minExclusive = false
-          maxExclusive = false
-        }
-        else -> {
-          val cmp = parseFieldComparison(type, part, resolveQuestion)
-          if (cmp != null && comparison == null) {
-            comparison = cmp
-          } else {
-            recognized = false
-          }
-        }
+      if (!bounds.apply(op, value)) {
+        val cmp = parseFieldComparison(type, part, resolveQuestion)
+        if (cmp != null && comparison == null) comparison = cmp else recognized = false
       }
     }
-    return if (recognized && (min.isNotEmpty() || max.isNotEmpty() || comparison != null)) {
+    val hasRule = bounds.hasAny || comparison != null
+    return if (recognized && hasRule) {
       EditorValidation(
-        min = min,
-        max = max,
-        minExclusive = minExclusive,
-        maxExclusive = maxExclusive,
+        min = bounds.min,
+        max = bounds.max,
+        minExclusive = bounds.minExclusive,
+        maxExclusive = bounds.maxExclusive,
         comparison = comparison,
         message = message,
       )
     } else {
       null
+    }
+  }
+
+  private class TextBounds {
+    var min = ""
+    var max = ""
+    var pattern: TextPattern? = null
+    var customPattern = ""
+    var comparison: EditorFieldComparison? = null
+
+    val hasAny: Boolean
+      get() = min.isNotEmpty() || max.isNotEmpty() || pattern != null || comparison != null
+
+    fun apply(
+      type: EditorQuestionType,
+      part: String,
+      resolveQuestion: (String) -> EditorQuestion?,
+    ): Boolean {
+      val lenMatch = STRING_LENGTH_BOUND.matchEntire(part)
+      val regexMatch = if (lenMatch == null) REGEX_CALL.matchEntire(part) else null
+      val cmp =
+        if (lenMatch == null && regexMatch == null) {
+          parseFieldComparison(type, part, resolveQuestion)
+        } else {
+          null
+        }
+      return when {
+        lenMatch != null -> applyLength(lenMatch.groupValues[1], lenMatch.groupValues[2])
+        regexMatch != null -> applyRegex(unquote(regexMatch.groupValues[1]))
+        cmp != null && comparison == null -> {
+          comparison = cmp
+          true
+        }
+        else -> false
+      }
+    }
+
+    private fun applyLength(op: String, rawN: String): Boolean {
+      val bounds = integerBounds(op, rawN)
+      if (bounds != null) {
+        bounds.first?.let { min = it }
+        bounds.second?.let { max = it }
+      }
+      return bounds != null
+    }
+
+    private fun applyRegex(rawRegex: String): Boolean {
+      val preset = TextPattern.entries.firstOrNull { it.regex == rawRegex }
+      pattern = preset ?: TextPattern.CUSTOM
+      customPattern = if (preset != null) "" else rawRegex
+      return true
     }
   }
 
@@ -166,54 +225,71 @@ internal object ConstraintImport {
     message: String,
     resolveQuestion: (String) -> EditorQuestion?,
   ): EditorValidation? {
-    var min = ""
-    var max = ""
-    var pattern: TextPattern? = null
-    var customPattern = ""
-    var comparison: EditorFieldComparison? = null
-    var recognized = true
-    clauses.forEach { part ->
-      val lenMatch = STRING_LENGTH_BOUND.matchEntire(part)
-      val regexMatch = if (lenMatch == null) REGEX_CALL.matchEntire(part) else null
-      when {
-        lenMatch != null -> {
-          val bounds = integerBounds(lenMatch.groupValues[1], lenMatch.groupValues[2])
-          if (bounds == null) {
-            recognized = false
-          } else {
-            bounds.first?.let { min = it }
-            bounds.second?.let { max = it }
-          }
-        }
-        regexMatch != null -> {
-          val rawRegex = unquote(regexMatch.groupValues[1])
-          val preset = TextPattern.entries.firstOrNull { it.regex == rawRegex }
-          pattern = preset ?: TextPattern.CUSTOM
-          customPattern = if (preset != null) "" else rawRegex
-        }
-        else -> {
-          val cmp = parseFieldComparison(type, part, resolveQuestion)
-          if (cmp != null && comparison == null) {
-            comparison = cmp
-          } else {
-            recognized = false
-          }
-        }
-      }
-    }
-    val hasRule = min.isNotEmpty() || max.isNotEmpty() || pattern != null || comparison != null
-    return if (recognized && hasRule) {
+    val state = TextBounds()
+    val recognized = clauses.all { state.apply(type, it, resolveQuestion) }
+    return if (recognized && state.hasAny) {
       EditorValidation(
-        min = min,
-        max = max,
-        pattern = pattern,
-        customPattern = customPattern,
-        comparison = comparison,
+        min = state.min,
+        max = state.max,
+        pattern = state.pattern,
+        customPattern = state.customPattern,
+        comparison = state.comparison,
         message = message,
       )
     } else {
       null
     }
+  }
+
+  private class DateState {
+    var dateRule: DateRule? = null
+    val bounds = RangeBounds()
+    var comparison: EditorFieldComparison? = null
+
+    val hasAny: Boolean
+      get() = dateRule != null || comparison != null
+
+    fun apply(
+      type: EditorQuestionType,
+      part: String,
+      resolveQuestion: (String) -> EditorQuestion?,
+    ): Boolean {
+      val todayMatch = DATE_TODAY.matchEntire(part)
+      val boundMatch = if (todayMatch == null) DATE_BOUND.matchEntire(part) else null
+      val cmp =
+        if (todayMatch == null && boundMatch == null) {
+          parseFieldComparison(type, part, resolveQuestion)
+        } else {
+          null
+        }
+      return when {
+        todayMatch != null && dateRule == null -> {
+          dateRule = todayDateRule(todayMatch.groupValues[1])
+          dateRule != null
+        }
+        boundMatch != null -> {
+          val iso = unquote(boundMatch.groupValues[2])
+          val validBound =
+            ValidationRules.isValidDate(iso) && bounds.apply(boundMatch.groupValues[1], iso)
+          if (validBound) dateRule = DateRule.BETWEEN
+          validBound
+        }
+        cmp != null && comparison == null -> {
+          comparison = cmp
+          true
+        }
+        else -> false
+      }
+    }
+
+    private fun todayDateRule(op: String): DateRule? =
+      when (op) {
+        "<=",
+        "<" -> DateRule.NOT_IN_FUTURE
+        ">=",
+        ">" -> DateRule.NOT_IN_PAST
+        else -> null
+      }
   }
 
   /**
@@ -226,81 +302,16 @@ internal object ConstraintImport {
     message: String,
     resolveQuestion: (String) -> EditorQuestion?,
   ): EditorValidation? {
-    var dateRule: DateRule? = null
-    var min = ""
-    var max = ""
-    var minExclusive = false
-    var maxExclusive = false
-    var comparison: EditorFieldComparison? = null
-    var recognized = true
-    clauses.forEach { part ->
-      val todayMatch = DATE_TODAY.matchEntire(part)
-      val boundMatch = if (todayMatch == null) DATE_BOUND.matchEntire(part) else null
-      when {
-        todayMatch != null && dateRule == null -> {
-          dateRule =
-            when (todayMatch.groupValues[1]) {
-              "<=",
-              "<" -> DateRule.NOT_IN_FUTURE
-              ">=",
-              ">" -> DateRule.NOT_IN_PAST
-              else -> null
-            }
-          if (dateRule == null) recognized = false
-        }
-        boundMatch != null -> {
-          val iso = unquote(boundMatch.groupValues[2])
-          val op = boundMatch.groupValues[1]
-          if (iso == null || !ValidationRules.isValidDate(iso)) {
-            recognized = false
-          } else {
-            dateRule = DateRule.BETWEEN
-            when (op) {
-              ">=" -> {
-                min = iso
-                minExclusive = false
-              }
-              ">" -> {
-                min = iso
-                minExclusive = true
-              }
-              "<=" -> {
-                max = iso
-                maxExclusive = false
-              }
-              "<" -> {
-                max = iso
-                maxExclusive = true
-              }
-              "=" -> {
-                min = iso
-                max = iso
-                minExclusive = false
-                maxExclusive = false
-              }
-              else -> recognized = false
-            }
-          }
-        }
-        else -> {
-          val cmp = parseFieldComparison(type, part, resolveQuestion)
-          if (cmp != null && comparison == null) {
-            comparison = cmp
-          } else {
-            recognized = false
-          }
-        }
-      }
-    }
-    val hasRule = dateRule != null || comparison != null
-    return if (recognized && hasRule) {
+    val state = DateState()
+    val recognized = clauses.all { state.apply(type, it, resolveQuestion) }
+    return if (recognized && state.hasAny) {
       EditorValidation(
-        min = min,
-        max = max,
-        minExclusive = minExclusive,
-        maxExclusive = maxExclusive,
-        dateRule = dateRule,
-        comparison = comparison,
+        min = state.bounds.min,
+        max = state.bounds.max,
+        minExclusive = state.bounds.minExclusive,
+        maxExclusive = state.bounds.maxExclusive,
+        dateRule = state.dateRule,
+        comparison = state.comparison,
         message = message,
       )
     } else {
@@ -369,7 +380,8 @@ internal object ConstraintImport {
         }
       }
     }
-    return if (recognized && refKey.isNotEmpty() && (min.isNotEmpty() || max.isNotEmpty())) {
+    val hasBounds = min.isNotEmpty() || max.isNotEmpty()
+    return if (recognized && refKey.isNotEmpty() && hasBounds) {
       EditorValidation(
         min = min,
         max = max,
@@ -388,18 +400,22 @@ internal object ConstraintImport {
   ): EditorFieldComparison? {
     val forward = FIELD_COMPARE.matchEntire(clause)
     val reversed = if (forward == null) REVERSED_FIELD_COMPARE.matchEntire(clause) else null
-    val (opStr, rawRef) =
+    val opAndRef =
       when {
         forward != null -> forward.groupValues[1] to forward.groupValues[2].trim()
         reversed != null ->
           ImportXPath.flipOperator(reversed.groupValues[2]) to reversed.groupValues[1].trim()
-        else -> return null
+        else -> null
       }
-    val op = ComparisonOperator.fromXpath(opStr) ?: return null
-    if (op !in ComparisonOperator.availableFor(type)) return null
-    val target = resolveQuestion(rawRef) ?: return null
-    if (!ComparisonOperator.areCompatible(type, target.type)) return null
-    return EditorFieldComparison(operator = op, targetQuestionKey = target.key)
+    val op = opAndRef?.let { ComparisonOperator.fromXpath(it.first) }
+    val target = opAndRef?.let { resolveQuestion(it.second) }
+    val opValid = op != null && op in ComparisonOperator.availableFor(type)
+    val targetValid = target != null && ComparisonOperator.areCompatible(type, target.type)
+    return if (opValid && targetValid) {
+      EditorFieldComparison(operator = op, targetQuestionKey = target.key)
+    } else {
+      null
+    }
   }
 
   /**

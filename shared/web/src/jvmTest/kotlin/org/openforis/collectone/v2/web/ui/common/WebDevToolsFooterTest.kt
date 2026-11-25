@@ -162,6 +162,7 @@ class WebDevToolsFooterTest {
   @Test
   fun devToolsDialogShowsUnconfiguredBackendNoticeWhenNoServiceUrlSet() =
     runDesktopComposeUiTest(width = 1280, height = 800) {
+      lastOpenedExternalUrlForTest = null
       val state = webStateWithBackendUrl(null)
 
       setContent {
