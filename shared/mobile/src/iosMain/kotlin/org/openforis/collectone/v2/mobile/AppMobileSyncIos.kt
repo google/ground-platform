@@ -28,6 +28,10 @@ import org.openforis.collectone.v2.app.di.AppDataHolder
 import org.openforis.collectone.v2.app.di.platformModule
 import org.openforis.collectone.v2.app.di.platformUserDataServiceUrl
 import org.openforis.collectone.v2.app.di.requireUserDataServiceUrl
+import org.openforis.collectone.v2.app.logging.IosBridgedCrashReporter
+import org.openforis.collectone.v2.app.logging.IosCrashReporterBridge
+import org.openforis.collectone.v2.app.logging.IosCrashReporterRegistry
+import org.openforis.collectone.v2.app.logging.configureAppLogging
 import org.openforis.collectone.v2.mobile.di.mobileModules
 
 /**
@@ -51,6 +55,24 @@ object AppMobileSyncIos {
     set(value) {
       IosPushSubscriptionRegistry.bridge = value
     }
+
+  /** Optional Swift bridge backed by `FirebaseCrashlytics` for breadcrumbs and non-fatal errors. */
+  var crashReporterBridge: IosCrashReporterBridge?
+    get() = IosCrashReporterRegistry.bridge
+    set(value) {
+      IosCrashReporterRegistry.bridge = value
+    }
+
+  /**
+   * Configures Kermit logging with secret redaction and wires the registered [crashReporterBridge]
+   * (if any) as a secondary writer. Call once at launch.
+   */
+  fun configureLogging(isDevelopmentBuild: Boolean) {
+    configureAppLogging(
+      isDevelopmentBuild = isDevelopmentBuild,
+      crashReporter = IosBridgedCrashReporter(),
+    )
+  }
 
   /**
    * Returns the shared [AppDataHolder] for the configured `USER_DATA_SERVICE_URL`, starting its

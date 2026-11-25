@@ -34,7 +34,18 @@ fun appLogSeverity(isDevelopmentBuild: Boolean): Severity =
  * output on the JVM) at [appLogSeverity] and above, with email addresses and access tokens removed
  * (see [RedactingLogWriter]).
  */
-fun configureAppLogging(isDevelopmentBuild: Boolean, writer: LogWriter = platformLogWriter()) {
+fun configureAppLogging(
+  isDevelopmentBuild: Boolean,
+  writer: LogWriter = platformLogWriter(),
+  crashReporter: CrashReporter = NoOpCrashReporter,
+) {
+  CrashReporting.reporter = crashReporter
   Logger.setMinSeverity(appLogSeverity(isDevelopmentBuild))
-  Logger.setLogWriters(RedactingLogWriter(writer))
+  val writers =
+    if (crashReporter === NoOpCrashReporter) {
+      listOf(RedactingLogWriter(writer))
+    } else {
+      listOf(RedactingLogWriter(writer), CrashReportingLogWriter(crashReporter))
+    }
+  Logger.setLogWriters(writers)
 }

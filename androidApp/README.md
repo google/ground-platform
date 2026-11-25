@@ -126,6 +126,20 @@ FIREBASE_WEB_CONFIG={"projectId":"your-firebase-project","appId":"1:1234567890:a
 `MobileSyncRuntime` initializes `FirebaseApp` at startup from this configuration
 whenever no default `FirebaseApp` is already initialized.
 
+## Firebase Crashlytics (Optional)
+
+`androidApp` includes the Firebase Crashlytics SDK and wires `FirebaseCrashlyticsReporter` into
+Kermit (`configureAppLogging`) so `Info`/`Warn` logs become secret-redacted breadcrumbs and
+`Error`/`Assert` logs are reported as non-fatal exceptions alongside fatal crashes:
+
+-   Collection is enabled automatically in release builds when Firebase is configured (either via
+    `FIREBASE_WEB_CONFIG` or a local, gitignored `androidApp/google-services.json`), and disabled
+    in debuggable builds unless overridden with `-PCRASHLYTICS_ENABLED=true` (or
+    `CRASHLYTICS_ENABLED=true` in `local.properties`).
+-   When a local or CI-supplied `androidApp/google-services.json` is present,
+    `androidApp/build.gradle.kts` automatically applies `com.google.gms.google-services` and
+    `com.google.firebase.crashlytics` so ProGuard/R8 mapping files are uploaded on release builds.
+
 ## Building and Installing
 
 Run Gradle commands from the repository root:

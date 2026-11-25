@@ -33,6 +33,7 @@ import org.openforis.collectone.v2.app.di.AppDataHolder
 import org.openforis.collectone.v2.app.di.platformModule
 import org.openforis.collectone.v2.app.domain.model.resolveMobileRedirectUrl
 import org.openforis.collectone.v2.app.domain.model.resolveWebEnvironment
+import org.openforis.collectone.v2.app.logging.BrowserCrashReporter
 import org.openforis.collectone.v2.app.logging.configureAppLogging
 import org.openforis.collectone.v2.app.ui.session.RequireUserDataService
 import org.openforis.collectone.v2.web.di.webModules
@@ -96,7 +97,11 @@ fun main() {
     return
   }
 
-  configureAppLogging(isDevelopmentBuild = platformDevSignIn())
+  configureAppLogging(
+    isDevelopmentBuild = platformDevSignIn(),
+    crashReporter =
+      BrowserCrashReporter(client = "web-console", environment = environment.name.lowercase()),
+  )
   val container = document.getElementById("ComposeTarget") ?: document.body!!
   val authClient = defaultAuthClient()
   MainScope().launch {

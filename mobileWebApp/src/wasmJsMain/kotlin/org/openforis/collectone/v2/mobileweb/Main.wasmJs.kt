@@ -38,6 +38,7 @@ import org.openforis.collectone.v2.app.client.offline.SimulatedOfflineRegionClie
 import org.openforis.collectone.v2.app.client.storage.BrowserSqlDriverFactory
 import org.openforis.collectone.v2.app.di.AppDataHolder
 import org.openforis.collectone.v2.app.di.platformModule
+import org.openforis.collectone.v2.app.logging.BrowserCrashReporter
 import org.openforis.collectone.v2.app.logging.configureAppLogging
 import org.openforis.collectone.v2.app.ui.session.RequireUserDataService
 import org.openforis.collectone.v2.core.forms.ui.BrowserGeoLocationSource
@@ -63,7 +64,10 @@ import org.openforis.collectone.v2.workbench.ui.shouldShowWorkbenchChrome
  */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-  configureAppLogging(isDevelopmentBuild = true)
+  configureAppLogging(
+    isDevelopmentBuild = true,
+    crashReporter = BrowserCrashReporter(client = "mobile-web"),
+  )
   val container = document.getElementById("ComposeTarget") ?: document.body!!
   val authClient = defaultAuthClient()
   MainScope().launch {

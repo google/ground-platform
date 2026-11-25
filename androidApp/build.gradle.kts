@@ -16,6 +16,14 @@ import java.util.Properties
 
 plugins { id("collectone.android.app") }
 
+// Apply Google Services and Crashlytics Gradle plugins (for ProGuard/R8 mapping uploads) only when
+// a local or CI-supplied google-services.json is present, keeping the public repository buildable
+// without committed Firebase credentials.
+if (file("google-services.json").exists()) {
+  apply(plugin = "com.google.gms.google-services")
+  apply(plugin = "com.google.firebase.crashlytics")
+}
+
 kotlin {
   sourceSets {
     val androidMain by getting {
@@ -23,6 +31,7 @@ kotlin {
         implementation(libs.androidx.activity.compose)
         implementation(libs.androidx.lifecycle.process)
         implementation(libs.androidx.work.runtime.ktx)
+        implementation(libs.firebase.crashlytics)
         implementation(libs.firebase.messaging)
         implementation(libs.kotlinx.coroutines.play.services)
       }
@@ -98,6 +107,13 @@ val appVersionName =
       ?: project.version.toString())
     .trim()
 
+val crashlyticsEnabled =
+  (providers.gradleProperty("CRASHLYTICS_ENABLED").orNull
+      ?: providers.environmentVariable("CRASHLYTICS_ENABLED").orNull
+      ?: localProperties.getProperty("CRASHLYTICS_ENABLED")
+      ?: "")
+    .trim()
+
 android {
   namespace = "org.openforis.collectone.v2.android"
   defaultConfig {
@@ -107,6 +123,8 @@ android {
     resValue("string", "mapbox_access_token", mapboxAccessToken)
     resValue("string", "user_data_service_url", userDataServiceUrl)
     resValue("string", "app_environment", appEnvironment)
+    resValue("string", "app_version_name", appVersionName)
+    resValue("string", "crashlytics_enabled", crashlyticsEnabled)
     resValue(
       "string",
       "firebase_web_config",

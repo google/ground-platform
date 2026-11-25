@@ -20,6 +20,11 @@ packages:
   MapboxMaps:
     url: https://github.com/mapbox/mapbox-maps-ios.git
     exactVersion: 11.31.1
+  # Firebase Crashlytics for crash and non-fatal error reporting (activates when
+  # GoogleService-Info.plist is supplied at build time).
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    from: 11.10.0
 targets:
   iosApp:
     type: application
@@ -30,6 +35,7 @@ targets:
     settings:
       INFOPLIST_FILE: iosApp/Info.plist
       ENABLE_USER_SCRIPT_SANDBOXING: NO
+      DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
       # Mapbox public access token (pk.…), read through Info.plist. Pass it on the command line or
       # in a local, uncommitted build setting; without it maps use the preview renderer.
       MAPBOX_ACCESS_TOKEN: ""
@@ -38,5 +44,14 @@ targets:
       FRAMEWORK_SEARCH_PATHS: "$(SRCROOT)/../shared/mobile/build/binaries/$(PLATFORM_NAME)/framework/"
     dependencies:
       - package: MapboxMaps
+      - package: Firebase
+        product: FirebaseCrashlytics
       - framework: ../shared/mobile/build/binaries/iosSimulatorArm64/framework/AppMobile.framework
         implicit: true
+    postBuildScripts:
+      - name: Upload Crashlytics dSYMs
+        basedOnDependencyAnalysis: false
+        script: |
+          if [ -f "${SRCROOT}/iosApp/GoogleService-Info.plist" ]; then
+            "${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+          fi

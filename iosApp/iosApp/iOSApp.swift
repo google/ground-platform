@@ -92,6 +92,15 @@ struct iOSApp: App {
   @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
   init() {
+    #if DEBUG
+      let isDevelopmentBuild = true
+    #else
+      let isDevelopmentBuild = false
+    #endif
+    AppMobileSyncIos.shared.crashReporterBridge = IosFirebaseCrashlyticsBridge(
+      isDevelopmentBuild: isDevelopmentBuild
+    )
+    AppMobileSyncIos.shared.configureLogging(isDevelopmentBuild: isDevelopmentBuild)
     // Lets AppMap (shared/map) render with the Mapbox Maps SDK for iOS.
     AppMapIos.shared.viewFactory = AppMapboxViewFactory()
   }

@@ -86,6 +86,18 @@ Output: `iosApp/build/outputs/ipa/collect-one.ipa` (staged automatically by the 
 -   **Silent push wakeups (`content-available: 1`)**: `AppDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:)` forwards the data payload (`survey_id`, `scope`, `record_version`) to `AppMobileSyncIos.shared.handleRemoteNotification`, which runs a scoped delta sync before invoking the UIKit completion handler.
 -   **Opportunistic background refresh (`BGAppRefreshTask`)**: Registered for `org.openforis.collectone.v2.sync.refresh` and forwarded to `AppMobileSyncIos.shared.runBackgroundCatchUp`.
 
+## Firebase Crashlytics (Optional)
+
+`project.yml` adds `FirebaseCrashlytics` from `firebase-ios-sdk` and configures a conditional
+`Upload Crashlytics dSYMs` post-build script. At launch, `iOSApp.swift` registers
+`IosFirebaseCrashlyticsBridge` on `AppMobileSyncIos.shared.crashReporterBridge` and calls
+`AppMobileSyncIos.shared.configureLogging`:
+
+-   Supply a local, gitignored `iosApp/iosApp/GoogleService-Info.plist` (and regenerate
+    `iosApp.xcodeproj` with `xcodegen generate` on macOS) to enable Crashlytics and dSYM uploads.
+-   Collection is enabled in non-`DEBUG` builds when `GoogleService-Info.plist` is bundled, and
+    degrades to a no-op when the plist is absent.
+
 ## Mapbox
 
 Maps in the shared UI are drawn by `AppMap` from

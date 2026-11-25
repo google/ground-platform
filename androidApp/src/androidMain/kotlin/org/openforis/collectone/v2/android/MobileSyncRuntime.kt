@@ -53,9 +53,8 @@ object MobileSyncRuntime {
    */
   fun initialize(context: Context) {
     val appContext = context.applicationContext
-    configureAppLogging(
-      isDevelopmentBuild = appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
-    )
+    val isDevelopmentBuild =
+      appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
     val token = appContext.getString(R.string.mapbox_access_token).trim()
     if (token.isNotEmpty()) {
       System.setProperty("collectone.mapbox.accessToken", token)
@@ -75,6 +74,22 @@ object MobileSyncRuntime {
       File(appContext.filesDir, "sync_state.binpb").absolutePath,
     )
     ensureFirebaseInitialized(appContext)
+    val crashlyticsEnabled =
+      resolveCrashlyticsCollectionEnabled(
+        isDevelopmentBuild = isDevelopmentBuild,
+        overrideFlag = appContext.getString(R.string.crashlytics_enabled),
+      )
+    val crashReporter = FirebaseCrashlyticsReporter(appContext, crashlyticsEnabled)
+    crashReporter.configure()
+    crashReporter.setCustomKey("client_platform", "android")
+    val appVersion = appContext.getString(R.string.app_version_name).trim()
+    if (appVersion.isNotEmpty()) {
+      crashReporter.setCustomKey("app_version", appVersion)
+    }
+    if (appEnvironment.isNotEmpty()) {
+      crashReporter.setCustomKey("environment", appEnvironment)
+    }
+    configureAppLogging(isDevelopmentBuild = isDevelopmentBuild, crashReporter = crashReporter)
     synchronized(lock) {
       (appDataHolder?.pushSubscriptionClient as? AndroidPushSubscriptionRegistry)?.delegate =
         FirebasePushSubscriptionClient(appContext)

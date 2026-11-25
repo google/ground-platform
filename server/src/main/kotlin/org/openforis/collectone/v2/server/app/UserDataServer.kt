@@ -44,6 +44,7 @@ import org.openforis.collectone.v2.server.web.BalloonAuthStore
 import org.openforis.collectone.v2.server.web.BalloonAuthWebService
 import org.openforis.collectone.v2.server.web.BalloonDraftStore
 import org.openforis.collectone.v2.server.web.BalloonStateWebService
+import org.openforis.collectone.v2.server.web.ClientErrorWebService
 import org.openforis.collectone.v2.server.web.KmlExportWebService
 
 /** How many RPC handlers run at once in one instance by default (`RPC_PARALLELISM`). */
@@ -150,6 +151,7 @@ object UserDataServer {
         .service(grpcService, cors)
         .service("/healthz", HealthCheckService.of())
         .service("/health", HealthCheckService.of())
+        .service("/client-errors", ClientErrorWebService.decoratedService())
     registerBalloonServices(server, backend, authenticator, scope, publicWebUrl)
     if (debugUiEnabled) {
       server

@@ -62,6 +62,12 @@
 <body>
     <div id="ComposeTarget"></div>
     <script src="./user-data-service-config.js"></script>
+    <script src="./client-error-bridge.js"></script>
+    <script>
+      if (window.CollectOneErrorReporter) {
+        window.CollectOneErrorReporter.configure({ client: 'balloon-form' });
+      }
+    </script>
     <script>
       // Sandboxed KML balloon bridge (safe under opaque `Origin: null` — never accesses
       // localStorage, sessionStorage, IndexedDB, cookies, or history.pushState).
