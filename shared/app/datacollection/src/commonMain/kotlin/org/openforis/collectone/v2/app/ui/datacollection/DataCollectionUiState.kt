@@ -129,6 +129,11 @@ data class DataCollectionUiState(
    * feature, so a form that needs one shows the `entityref` Map or List selector.
    */
   val wasFormLaunchedWithoutEntity: Boolean = false,
+  /**
+   * True once the open form's submission was recorded and the form shows its confirmation (the
+   * mobile success screen) until [DataCollectionActions.dismissSubmissionConfirmation].
+   */
+  val isSubmissionConfirmationShown: Boolean = false,
   /** Whether the Available Forms sheet (mobile FAB) is open. */
   val isAvailableFormsSheetOpen: Boolean = false,
   /** `Map` or `List` picker at the `entityref` step. */

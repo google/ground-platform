@@ -140,6 +140,9 @@ import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
  * Uses [MobileFormRunner] and [FormWizardController]. The runner's banner is the only top strip: it
  * shows the form title, the target map feature's name and GeoID, and one close button.
  *
+ * Once the submission is recorded ([DataCollectionUiState.isSubmissionConfirmationShown]), shows
+ * [SubmissionSuccessScreen] instead, whose button leaves the form for the saved map feature.
+ *
  * When the form was launched from the bottom-centered FAB without a pre-selected entity and the
  * current wizard step requires an `entityref` ([DataCollectionUiState.isCurrentFormStepEntityRef]),
  * presents an interactive **Map or List** entity selector right inside the data collection step so
@@ -198,6 +201,10 @@ fun DataCollectionFormScreen(
   entityRefMap: @Composable (form: FormPreviewItem, modifier: Modifier) -> Unit,
 ) {
   val controller = uiState.activeFormWizardController ?: return
+  if (uiState.isSubmissionConfirmationShown) {
+    SubmissionSuccessScreen(onContinue = { actions.dismissSubmissionConfirmation() })
+    return
+  }
   val entity = uiState.activeDataCollectionEntity
   val form = uiState.activeDataCollectionForm
   val resolvedTitle =
@@ -251,7 +258,11 @@ fun DataCollectionFormScreen(
             controller = controller,
             onClose = { actions.closeActiveFormRunner() },
             onSubmitted = { result: FinalizationResult.Success ->
-              actions.completeActiveFormSubmission(result.recordInstance, result.entityStates)
+              actions.completeActiveFormSubmission(
+                recordInstance = result.recordInstance,
+                entityStates = result.entityStates,
+                showConfirmation = true,
+              )
             },
             headerContext = formTargetContext,
           )

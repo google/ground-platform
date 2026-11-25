@@ -289,6 +289,86 @@ class DataCollectionViewModelActionsTest {
   }
 
   @Test
+  fun submissionWithConfirmation_keepsTheFormOpenUntilDismissed_thenShowsTheSavedFeature() =
+    runTest {
+      val f = DataCollectionFixture()
+      val form = f.uiState.forms.first { it.requiresEntity }
+      val target =
+        f.uiState.entities.first {
+          it.datasetId == form.targetDatasetId && it.submissions.isEmpty()
+        }
+      f.viewModel.launchFormFromFab(form.id)
+      f.viewModel.selectEntityRefForActiveForm(target.id)
+
+      f.viewModel.events.test {
+        f.viewModel.completeActiveFormSubmission(showConfirmation = true)
+
+        // Recorded, with the form still open on its confirmation and no notice about the change.
+        assertTrue(f.uiState.isSubmissionConfirmationShown)
+        assertTrue(f.uiState.isDataCollectionFormOpen)
+        assertEquals(1, f.uiState.entities.first { it.id == target.id }.submissions.size)
+        assertEquals(
+          listOf<DataCollectionEvent>(DataCollectionEvent.EntityHighlighted(target.id)),
+          takeReceivedItems(),
+        )
+
+        // Submitting again from the confirmation records nothing more.
+        f.viewModel.completeActiveFormSubmission(showConfirmation = true)
+        assertEquals(1, f.uiState.entities.first { it.id == target.id }.submissions.size)
+        assertEquals(emptyList(), takeReceivedItems())
+
+        f.viewModel.dismissSubmissionConfirmation()
+
+        // Continue lands on the updated feature: its properties, framed on the map.
+        assertFalse(f.uiState.isSubmissionConfirmationShown)
+        assertFalse(f.uiState.isDataCollectionFormOpen)
+        assertEquals(target.id, f.uiState.selectedEntityId)
+        assertNull(f.uiState.selectedSubmissionId)
+        assertEquals(
+          listOf(
+            DataCollectionEvent.FormClosed,
+            DataCollectionEvent.DetailsReturnedToProperties,
+            DataCollectionEvent.EntityHighlighted(target.id, frameAgain = true),
+          ),
+          takeReceivedItems(),
+        )
+      }
+    }
+
+  @Test
+  fun submissionConfirmation_ofAStandaloneForm_leadsToTheSubmission() = runTest {
+    val f = DataCollectionFixture()
+    val standaloneForm = f.uiState.forms.first { !it.requiresEntity }
+    f.viewModel.launchFormFromFab(standaloneForm.id)
+
+    f.viewModel.completeActiveFormSubmission(showConfirmation = true)
+    assertTrue(f.uiState.isSubmissionConfirmationShown)
+    f.viewModel.dismissSubmissionConfirmation()
+
+    assertFalse(f.uiState.isDataCollectionFormOpen)
+    assertNull(f.uiState.selectedEntityId)
+    assertEquals(f.uiState.standaloneSubmissions.first().id, f.uiState.selectedSubmissionId)
+  }
+
+  @Test
+  fun closingTheFormFromItsConfirmation_clearsTheConfirmation() = runTest {
+    val f = DataCollectionFixture()
+    val standaloneForm = f.uiState.forms.first { !it.requiresEntity }
+    f.viewModel.launchFormFromFab(standaloneForm.id)
+    f.viewModel.completeActiveFormSubmission(showConfirmation = true)
+
+    f.viewModel.closeActiveFormRunner()
+
+    assertFalse(f.uiState.isSubmissionConfirmationShown)
+    assertFalse(f.uiState.isDataCollectionFormOpen)
+    // Nothing left to dismiss.
+    f.viewModel.events.test {
+      f.viewModel.dismissSubmissionConfirmation()
+      assertEquals(emptyList(), takeReceivedItems())
+    }
+  }
+
+  @Test
   fun entityRefStepCustomFormDefWebDrawingAndQrCode_updateSessionAndComputedUiState() {
     val f = DataCollectionFixture()
     val entityForm = f.uiState.forms.first { it.requiresEntity }

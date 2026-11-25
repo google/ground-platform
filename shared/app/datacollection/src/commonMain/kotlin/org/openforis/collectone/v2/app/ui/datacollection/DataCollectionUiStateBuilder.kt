@@ -72,6 +72,7 @@ internal fun buildDataCollectionUiState(
     activeDataCollectionEntityId = session.activeEntityId,
     activeDataCollectionFormId = session.activeFormId,
     wasFormLaunchedWithoutEntity = session.wasFormLaunchedWithoutEntity,
+    isSubmissionConfirmationShown = session.isSubmissionConfirmationShown,
     isAvailableFormsSheetOpen = session.isAvailableFormsSheetOpen,
     entityRefSelectorViewMode = session.entityRefSelectorViewMode,
     entityRefSearchQuery = session.entityRefSearchQuery,

@@ -95,6 +95,10 @@
   <string name="app_target_type_fallback">Elemento</string>
   <!-- Marks a step or field as required. -->
   <string name="app_required">Obrigatório</string>
+  <!-- Title of the screen shown after a form is submitted. -->
+  <string name="app_submission_saved_title">Coleta de dados concluída</string>
+  <!-- Body of the screen shown after a form is submitted: the data is stored locally and uploads on its own. -->
+  <string name="app_submission_saved_body">Sua submissão foi salva no dispositivo e será sincronizada automaticamente quando você estiver online.</string>
   <!-- Badge on the map feature selection step. %1$d = current step number, %2$d = total steps. -->
   <string name="app_entity_ref_step_badge">Etapa %1$d de %2$d • Obrigatória</string>
   <!-- Title prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel). -->

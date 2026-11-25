@@ -465,6 +465,7 @@ class DataCollectionViewModel(
         activeEntityId = null,
         activeFormId = null,
         wasFormLaunchedWithoutEntity = false,
+        isSubmissionConfirmationShown = false,
         entityRefSearchQuery = "",
       )
     }
@@ -474,9 +475,11 @@ class DataCollectionViewModel(
   override fun completeActiveFormSubmission(
     recordInstance: RecordInstance?,
     entityStates: List<EntityState>?,
+    showConfirmation: Boolean,
   ) {
     val current = ui
-    if (!current.canCollectData) return
+    // The submission is recorded once: its confirmation is already showing.
+    if (!current.canCollectData || current.isSubmissionConfirmationShown) return
     val controller = current.activeFormWizardController
     val location = locationRepository.getLocationSnapshot()
     val profile = data.value.profile
@@ -515,14 +518,29 @@ class DataCollectionViewModel(
         it.copy(
           selectedEntityId = result.selectedEntityId,
           selectedSubmissionId =
-            if (result.updateSelectedSubmissionId) result.selectedSubmissionId
-            else it.selectedSubmissionId,
+            when {
+              // The confirmation leads to the saved map feature, not to the submission's answers.
+              showConfirmation && result.selectedEntityId != null -> null
+              result.updateSelectedSubmissionId -> result.selectedSubmissionId
+              else -> it.selectedSubmissionId
+            },
+          isSubmissionConfirmationShown = showConfirmation,
         )
       }
       emit(DataCollectionEvent.EntityHighlighted(result.selectedEntityId))
+      if (showConfirmation) return@launch
       emit(DataCollectionEvent.Notice(result.notice.toUiText()))
       closeActiveFormRunner()
     }
+  }
+
+  override fun dismissSubmissionConfirmation() {
+    val current = ui
+    if (!current.isSubmissionConfirmationShown) return
+    closeActiveFormRunner()
+    val entityId = current.selectedEntityId ?: return
+    emit(DataCollectionEvent.DetailsReturnedToProperties)
+    emit(DataCollectionEvent.EntityHighlighted(entityId, frameAgain = true))
   }
 
   override fun updateCustomFormDef(

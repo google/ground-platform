@@ -105,12 +105,25 @@ interface DataCollectionActions : FormMapInteraction, RecordShareActions {
 
   /**
    * Records the open form's submission from the finalized [recordInstance] and [entityStates]
-   * (defaulting to the controller's current state), then closes the form.
+   * (defaulting to the controller's current state), then closes the form and reports what was
+   * recorded in a notice.
+   *
+   * With [showConfirmation] (the mobile app) the form stays open instead, showing its confirmation
+   * ([DataCollectionUiState.isSubmissionConfirmationShown]) until [dismissSubmissionConfirmation],
+   * and there is no notice.
    */
   fun completeActiveFormSubmission(
     recordInstance: RecordInstance? = null,
     entityStates: List<EntityState>? = null,
+    showConfirmation: Boolean = false,
   )
+
+  /**
+   * Leaves the submission confirmation: closes the form and shows the map feature the submission
+   * added or updated (its properties, framed on the map), or the submission itself when it has no
+   * map feature.
+   */
+  fun dismissSubmissionConfirmation()
 
   /**
    * Runs the workbench's custom definition ([formDef], or the built-in one when `null`) in the open

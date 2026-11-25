@@ -62,6 +62,8 @@ internal data class DataCollectionSession(
   val activeEntityId: String? = null,
   val activeFormId: String? = null,
   val wasFormLaunchedWithoutEntity: Boolean = false,
+  /** The open form's submission was recorded and its confirmation is showing. */
+  val isSubmissionConfirmationShown: Boolean = false,
   val isAvailableFormsSheetOpen: Boolean = false,
   val entityRefSelectorViewMode: MainSurveyViewMode = MainSurveyViewMode.MAP,
   val entityRefSearchQuery: String = "",
