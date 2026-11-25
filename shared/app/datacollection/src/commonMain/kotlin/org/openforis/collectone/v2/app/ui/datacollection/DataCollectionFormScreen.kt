@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.CheckCircle
@@ -44,6 +43,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -65,9 +65,7 @@ import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.StraightLineVector
 import org.openforis.collectone.v2.app.resources.Res
-import org.openforis.collectone.v2.app.resources.app_back_to_survey
 import org.openforis.collectone.v2.app.resources.app_cancel
-import org.openforis.collectone.v2.app.resources.app_cancel_form
 import org.openforis.collectone.v2.app.resources.app_clear_search
 import org.openforis.collectone.v2.app.resources.app_completed
 import org.openforis.collectone.v2.app.resources.app_consent_accept
@@ -88,7 +86,6 @@ import org.openforis.collectone.v2.app.resources.app_entity_ref_map_hint
 import org.openforis.collectone.v2.app.resources.app_entity_ref_no_preselection
 import org.openforis.collectone.v2.app.resources.app_entity_ref_step_badge
 import org.openforis.collectone.v2.app.resources.app_filter_dataset_placeholder
-import org.openforis.collectone.v2.app.resources.app_map
 import org.openforis.collectone.v2.app.resources.app_no_dataset_items_yet
 import org.openforis.collectone.v2.app.resources.app_no_matching_dataset
 import org.openforis.collectone.v2.app.resources.app_public_data_banner
@@ -125,6 +122,7 @@ import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.FormWizardController
 import org.openforis.collectone.v2.core.forms.ui.GeoPointMapViewportState
 import org.openforis.collectone.v2.core.forms.ui.MobileFormRunner
+import org.openforis.collectone.v2.core.forms.ui.MobileFormTopBar
 import org.openforis.collectone.v2.core.forms.ui.TonalBadge
 import org.openforis.collectone.v2.core.forms.ui.controls.AssistChip
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
@@ -139,8 +137,8 @@ import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
  * Embedded Data Collection Form overlay rendered inside the mobile/tablet device frame when
  * `DataCollectionUiState.isDataCollectionFormOpen` is `true`.
  *
- * Uses [MobileFormRunner] and [FormWizardController], preceded by a compact context banner
- * displaying the target Geospatial Entity name, GeoID, and active form title.
+ * Uses [MobileFormRunner] and [FormWizardController]. The runner's banner is the only top strip: it
+ * shows the form title, the target map feature's name and GeoID, and one close button.
  *
  * When the form was launched from the bottom-centered FAB without a pre-selected entity and the
  * current wizard step requires an `entityref` ([DataCollectionUiState.isCurrentFormStepEntityRef]),
@@ -206,135 +204,28 @@ fun DataCollectionFormScreen(
     controller.formState.formDef.title.takeIf { it.isNotBlank() }
       ?: form?.title
       ?: stringResource(Res.string.app_data_collection_form_fallback_title)
+  // What the form collects data for, shown under the title in the form's banner.
+  val formTargetContext: @Composable () -> Unit = {
+    FormTargetContext(
+      entity = entity,
+      form = form,
+      userGpsCoordinatesLabel = userGpsCoordinatesLabel,
+    )
+  }
 
   Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-    // Compact target entity & form context banner at the top of the device screen
-    Surface(
-      color = MaterialTheme.colorScheme.inverseSurface,
-      contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-      modifier = Modifier.fillMaxWidth(),
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Row(
-          modifier = Modifier.weight(1f),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-          IconButton(
-            onClick = { actions.closeActiveFormRunner() },
-            modifier = Modifier.size(36.dp),
-          ) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-              contentDescription = stringResource(Res.string.app_back_to_survey),
-              tint = MaterialTheme.colorScheme.inverseOnSurface,
-              modifier = Modifier.size(18.dp),
-            )
-          }
-
-          Column(modifier = Modifier.weight(1f)) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Icon(
-                imageVector = Icons.Outlined.LocationOn,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.inversePrimary,
-                modifier = Modifier.size(14.dp),
-              )
-              Text(
-                text =
-                  buildAnnotatedString {
-                    if (entity != null) {
-                      append("${entity.label} • ")
-                      appendGeoId(entity, geoIdPendingSyncDescription())
-                    } else if (form != null && !form.requiresEntity) {
-                      append(
-                        stringResource(
-                          Res.string.app_standalone_field_log_with_location,
-                          userGpsCoordinatesLabel,
-                        )
-                      )
-                    } else {
-                      append(
-                        stringResource(
-                          Res.string.app_select_target_with_dataset,
-                          form?.targetTypeText?.resolve()
-                            ?: stringResource(Res.string.app_target_type_fallback),
-                          form?.targetDatasetName ?: stringResource(Res.string.app_required),
-                        )
-                      )
-                    }
-                  },
-                inlineContent = geoIdInlineContent(tint = MaterialTheme.colorScheme.inversePrimary),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.inversePrimary,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-            }
-            Text(
-              text =
-                if (form != null) {
-                  "${form.ctaLabel} — $resolvedTitle"
-                } else {
-                  resolvedTitle
-                },
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.88f),
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
-          }
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        AssistChip(
-          onClick = { actions.closeActiveFormRunner() },
-          colors =
-            androidx.compose.material3.AssistChipDefaults.assistChipColors(
-              containerColor = MaterialTheme.colorScheme.secondaryContainer,
-              labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
-              leadingIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            ),
-          border =
-            androidx.compose.material3.AssistChipDefaults.assistChipBorder(
-              enabled = true,
-              borderColor = MaterialTheme.colorScheme.outlineVariant,
-            ),
-          label = {
-            Text(
-              stringResource(Res.string.app_map),
-              style = MaterialTheme.typography.labelSmall,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-              softWrap = false,
-            )
-          },
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Outlined.Close,
-              contentDescription = stringResource(Res.string.app_cancel_form),
-              modifier = Modifier.size(14.dp),
-            )
-          },
-          modifier = Modifier.height(32.dp),
-        )
-      }
-    }
-
     if (uiState.isActiveSurveyPublicData) {
       PublicDataInFormBanner()
     }
 
     if (uiState.isCurrentFormStepEntityRef && form != null) {
+      // The picker step replaces the form runner, so it shows the runner's banner itself.
+      MobileFormTopBar(
+        title = resolvedTitle,
+        progress = (controller.currentStepIndex + 1f) / controller.totalSteps.coerceAtLeast(1),
+        onClose = { actions.closeActiveFormRunner() },
+        subtitle = formTargetContext,
+      )
       EntityRefStepMapOrListSelector(
         uiState = uiState,
         actions = actions,
@@ -362,10 +253,62 @@ fun DataCollectionFormScreen(
             onSubmitted = { result: FinalizationResult.Success ->
               actions.completeActiveFormSubmission(result.recordInstance, result.entityStates)
             },
+            headerContext = formTargetContext,
           )
         }
       }
     }
+  }
+}
+
+/**
+ * One line naming what the open form collects data for: the target map feature and its GeoID, the
+ * collector's location for a form without a target, or a prompt to pick the target. Drawn in the
+ * form banner's subtitle, whose text style and color it inherits.
+ */
+@Composable
+private fun FormTargetContext(
+  entity: GeospatialEntityItem?,
+  form: FormPreviewItem?,
+  userGpsCoordinatesLabel: String,
+) {
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
+  ) {
+    Icon(
+      imageVector = Icons.Outlined.LocationOn,
+      contentDescription = null,
+      modifier = Modifier.size(14.dp),
+    )
+    Text(
+      text =
+        buildAnnotatedString {
+          if (entity != null) {
+            append("${entity.label} • ")
+            appendGeoId(entity, geoIdPendingSyncDescription())
+          } else if (form != null && !form.requiresEntity) {
+            append(
+              stringResource(
+                Res.string.app_standalone_field_log_with_location,
+                userGpsCoordinatesLabel,
+              )
+            )
+          } else {
+            append(
+              stringResource(
+                Res.string.app_select_target_with_dataset,
+                form?.targetTypeText?.resolve()
+                  ?: stringResource(Res.string.app_target_type_fallback),
+                form?.targetDatasetName ?: stringResource(Res.string.app_required),
+              )
+            )
+          }
+        },
+      inlineContent = geoIdInlineContent(tint = LocalContentColor.current),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
   }
 }
 

@@ -87,8 +87,6 @@
   <string name="app_geo_id_label">GeoID: %1$s</string>
   <!-- Fallback title of a data collection form that has no title. -->
   <string name="app_data_collection_form_fallback_title">แบบฟอร์มเก็บข้อมูล</string>
-  <!-- Accessibility label of the back button that closes a form and returns to the survey. -->
-  <string name="app_back_to_survey">กลับไปที่แบบสำรวจ</string>
   <!-- Form context banner for a submission without a map feature. %1$s = GPS coordinates. -->
   <string name="app_standalone_field_log_with_location">บันทึกภาคสนามแบบอิสระ • %1$s</string>
   <!-- Form context banner prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel), %2$s = map layer name or “Required”. -->
@@ -97,10 +95,6 @@
   <string name="app_target_type_fallback">ฟีเจอร์</string>
   <!-- Marks a step or field as required. -->
   <string name="app_required">จำเป็นต้องระบุ</string>
-  <!-- Chip label that closes the form and returns to the map. -->
-  <string name="app_map">แผนที่</string>
-  <!-- Accessibility label of the icon that cancels the form. -->
-  <string name="app_cancel_form">ยกเลิกแบบฟอร์ม</string>
   <!-- Badge on the map feature selection step. %1$d = current step number, %2$d = total steps. -->
   <string name="app_entity_ref_step_badge">ขั้นตอนที่ %1$d จาก %2$d • จำเป็นต้องระบุ</string>
   <!-- Title prompting to pick a map feature. %1$s = map feature type (e.g. Coffee parcel). -->
