@@ -129,6 +129,9 @@ private val DashboardDetailsCardWidth = 320.dp
 internal val DashboardOverlayMargin = 14.dp
 private val DashboardBasemapPreviewSize = 64.dp
 
+/** Wide enough for the consent dialog's two buttons to share a row, within Material 3's limit. */
+private val WebConsentDialogMaxWidth = 480.dp
+
 /**
  * Gap on either side of the bottom panel, to the map area's edges or the floating card: wide enough
  * to clear the left-hand panel's collapse tab, so the two don't overlap.
@@ -255,7 +258,11 @@ private fun BoxScope.DashboardDialogs(uiState: WebDashboardUiState, actions: Web
     )
   }
   if (dataCollection.pendingCollectorConsent != null) {
-    CollectorConsentModalDialog(uiState = dataCollection, actions = actions.dataCollection)
+    CollectorConsentModalDialog(
+      uiState = dataCollection,
+      actions = actions.dataCollection,
+      maxWidth = WebConsentDialogMaxWidth,
+    )
   }
   PdfExportMessageSnackbar(
     uiState = dataCollection,

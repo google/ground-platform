@@ -58,6 +58,7 @@ import androidx.compose.ui.text.font.Font as UiFont
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.Font
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
@@ -1235,9 +1236,15 @@ fun ModalBottomSheetOverlay(
   }
 }
 
+/** The widest an [AlertDialogOverlay] gets unless its caller asks for more. */
+val AlertDialogOverlayDefaultMaxWidth = 340.dp
+
 /**
  * Material 3 AlertDialog rendered strictly within its parent container bounds (rather than a root
  * Window Dialog), ensuring dialogs stay centered inside `DevicePreviewFrame`.
+ *
+ * @param maxWidth the widest the dialog gets; it is narrower in a narrower parent. Material 3
+ *   allows up to 560 dp, for dialogs whose text or buttons need the room on wide screens.
  */
 @Composable
 fun AlertDialogOverlay(
@@ -1248,6 +1255,7 @@ fun AlertDialogOverlay(
   modifier: Modifier = Modifier,
   icon: (@Composable () -> Unit)? = null,
   dismissButton: (@Composable () -> Unit)? = null,
+  maxWidth: Dp = AlertDialogOverlayDefaultMaxWidth,
 ) {
   Box(
     modifier = modifier.fillMaxSize(),
@@ -1264,7 +1272,7 @@ fun AlertDialogOverlay(
     Surface(
       modifier =
         Modifier.padding(horizontal = 24.dp)
-          .widthIn(min = 280.dp, max = 340.dp)
+          .widthIn(min = 280.dp, max = maxWidth)
           .clip(MaterialTheme.shapes.extraLarge)
           .clickable(enabled = false) {},
       shape = MaterialTheme.shapes.extraLarge,

@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -118,6 +119,7 @@ import org.openforis.collectone.v2.app.ui.text.targetTypeText
 import org.openforis.collectone.v2.app.ui.text.wayfindingBadge
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.ui.AlertDialogOverlay
+import org.openforis.collectone.v2.core.forms.ui.AlertDialogOverlayDefaultMaxWidth
 import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.FormWizardController
 import org.openforis.collectone.v2.core.forms.ui.GeoPointMapViewportState
@@ -813,13 +815,19 @@ private fun EntityRefCandidateOptionCard(
 
 /**
  * Persistent reminder banner shown inside an open data collection form when the active survey uses
- * **Public data** (`isPublicData == true`).
+ * **Public data** (`isPublicData == true`). Hosts where the default tertiary tone is too loud next
+ * to the rest of the surface (the web dashboard's form card) pass a calmer [containerColor] and
+ * [contentColor].
  */
 @Composable
-fun PublicDataInFormBanner(modifier: Modifier = Modifier) {
+fun PublicDataInFormBanner(
+  modifier: Modifier = Modifier,
+  containerColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
+  contentColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
+) {
   Surface(
-    color = MaterialTheme.colorScheme.tertiaryContainer,
-    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    color = containerColor,
+    contentColor = contentColor,
     modifier = modifier.fillMaxWidth(),
   ) {
     Row(
@@ -844,16 +852,21 @@ fun PublicDataInFormBanner(modifier: Modifier = Modifier) {
 /**
  * Just-in-time informed consent dialog shown once per survey when a participant starts collecting
  * data in a **Public data** survey or a survey with custom organizer consent terms.
+ *
+ * @param maxWidth the widest the dialog gets. Hosts with room to spare (the web dashboard) pass a
+ *   larger value so both buttons fit on one row.
  */
 @Composable
 fun CollectorConsentModalDialog(
   uiState: DataCollectionUiState,
   actions: DataCollectionActions,
+  maxWidth: Dp = AlertDialogOverlayDefaultMaxWidth,
 ) {
   val prompt = uiState.pendingCollectorConsent ?: return
 
   AlertDialogOverlay(
     onDismissRequest = { actions.dismissCollectorConsent() },
+    maxWidth = maxWidth,
     icon = {
       Icon(
         imageVector = if (prompt.isPublicData) Icons.Outlined.Public else Icons.Outlined.Shield,
@@ -895,28 +908,7 @@ fun CollectorConsentModalDialog(
           )
         }
         if (prompt.customConsentText.isNotBlank()) {
-          Surface(
-            shape = MaterialTheme.shapes.small,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            modifier = Modifier.fillMaxWidth(),
-          ) {
-            Column(
-              modifier = Modifier.padding(10.dp),
-              verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Text(
-                text = stringResource(Res.string.app_consent_organizer_terms),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-              )
-              Text(
-                text = prompt.customConsentText,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            }
-          }
+          OrganizerConsentTerms(prompt.customConsentText)
         }
       }
     },
@@ -931,6 +923,30 @@ fun CollectorConsentModalDialog(
       }
     },
   )
+}
+
+/** The survey organizer's own consent terms, set apart from the standard notice. */
+@Composable
+private fun OrganizerConsentTerms(text: String) {
+  Surface(
+    shape = MaterialTheme.shapes.small,
+    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Text(
+        text = stringResource(Res.string.app_consent_organizer_terms),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+      )
+      Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
 }
 
 @Composable
