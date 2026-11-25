@@ -174,14 +174,6 @@
   <string name="forms_validation_error_item">• %1$s: %2$s</string>
   <!-- Badge on a review card whose answer is invalid. -->
   <string name="forms_invalid_badge">Không hợp lệ</string>
-  <!-- Heading of the data table records the submission creates or updates. %1$d = number of records. -->
-  <string name="forms_updated_records">Bản ghi được cập nhật (%1$d)</string>
-  <!-- %1$s = data table name. -->
-  <string name="forms_record_new_in_dataset">Bản ghi mới trong %1$s</string>
-  <!-- %1$s = data table name. -->
-  <string name="forms_record_updated_in_dataset">Bản ghi được cập nhật trong %1$s</string>
-  <!-- %1$s = data table name. -->
-  <string name="forms_record_unchanged_in_dataset">Bản ghi không thay đổi trong %1$s</string>
 
   <!-- Answer summaries -->
   <!-- Shown in place of an answer for a question that has none. -->

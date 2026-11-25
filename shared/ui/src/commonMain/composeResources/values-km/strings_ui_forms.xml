@@ -174,14 +174,6 @@
   <string name="forms_validation_error_item">• %1$s៖ %2$s</string>
   <!-- Badge on a review card whose answer is invalid. -->
   <string name="forms_invalid_badge">មិនត្រឹមត្រូវ</string>
-  <!-- Heading of the data table records the submission creates or updates. %1$d = number of records. -->
-  <string name="forms_updated_records">កំណត់ត្រាដែលបានធ្វើបច្ចុប្បន្នភាព (%1$d)</string>
-  <!-- %1$s = data table name. -->
-  <string name="forms_record_new_in_dataset">កំណត់ត្រាថ្មីក្នុង %1$s</string>
-  <!-- %1$s = data table name. -->
-  <string name="forms_record_updated_in_dataset">កំណត់ត្រាដែលបានធ្វើបច្ចុប្បន្នភាពក្នុង %1$s</string>
-  <!-- %1$s = data table name. -->
-  <string name="forms_record_unchanged_in_dataset">កំណត់ត្រាមិនផ្លាស់ប្តូរក្នុង %1$s</string>
 
   <!-- Answer summaries -->
   <!-- Shown in place of an answer for a question that has none. -->

@@ -16,6 +16,7 @@ package org.openforis.collectone.v2.core.forms.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -35,20 +36,23 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,14 +69,14 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
 import org.openforis.collectone.v2.core.forms.model.ValidationStatus
+import org.openforis.collectone.v2.core.forms.ui.controls.AssistChip
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.Card
-import org.openforis.collectone.v2.core.forms.ui.controls.ElevatedCard
-import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalButton
 import org.openforis.collectone.v2.core.forms.ui.controls.FilterChip
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedIconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
 import org.openforis.collectone.v2.core.forms.ui.controls.clickable
@@ -93,9 +97,6 @@ import org.openforis.collectone.v2.core.forms.ui.resources.forms_issue_count
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_language
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_next
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_ready_to_submit
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_record_new_in_dataset
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_record_unchanged_in_dataset
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_record_updated_in_dataset
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_repeat_entry_position
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_repeat_next_entry
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_repeat_previous_entry
@@ -110,21 +111,25 @@ import org.openforis.collectone.v2.core.forms.ui.resources.forms_step_of_total
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_steps_count
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_submit
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_untitled_survey_form
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_updated_records
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_validation_error_item
 
 /**
  * Reusable Compose Multiplatform mobile form runner displaying a single question screen at a time
- * with Material 3 `TopAppBar`, progress indicator, repeat group management, language `FilterChip`s,
- * and final submission review.
+ * with a primary-colored banner ([MobileFormTopBar]), progress indicator, repeat group management,
+ * language `FilterChip`s, and final submission review.
+ *
+ * The banner holds the form title and a single close button ([onClose]); under the title it shows
+ * [headerContext] (for example, the map feature the form collects data for) or, without one, the
+ * step position. The bottom bar moves between steps, and its step counter chip opens a bottom sheet
+ * listing every step to jump to.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MobileFormRunner(
   controller: FormWizardController,
   modifier: Modifier = Modifier,
   onClose: (() -> Unit)? = null,
   onSubmitted: ((FinalizationResult.Success) -> Unit)? = null,
+  headerContext: (@Composable () -> Unit)? = null,
 ) {
   val state = controller.formState
   val currentStep = controller.currentStep
@@ -133,95 +138,39 @@ fun MobileFormRunner(
   val progress = (stepIndex + 1).toFloat() / totalSteps.toFloat()
   val formTitle = formDisplayTitle(state.formDef, untitled = Res.string.forms_untitled_survey_form)
   val colors = MaterialTheme.colorScheme
-  // The top bar is a saturated `primary` surface, so everything drawn on it is tinted from
-  // `onPrimary` rather than the default surface roles. Deriving the de-emphasized variants by
-  // alpha (instead of naming more palette entries) keeps the title / subtitle / tonal-button
-  // hierarchy intact under both the light and dark schemes.
+  // Everything drawn on the banner is tinted from `onPrimary` (see [MobileFormTopBar]).
   val onAppBar = colors.onPrimary
   val onAppBarSecondary = colors.onPrimary.copy(alpha = 0.80f)
   val appBarTonalContainer = colors.onPrimary.copy(alpha = 0.16f)
-  val appBarTrack = colors.onPrimary.copy(alpha = 0.24f)
 
-  Scaffold(
-    modifier = modifier.fillMaxSize(),
-    containerColor = colors.surface,
-    topBar = {
-      Surface(color = colors.primary, contentColor = onAppBar, tonalElevation = 2.dp) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-          TopAppBar(
-            title = {
-              FormHeaderTitle(
-                title = formTitle,
-                subtitle =
-                  if (currentStep is FormWizardStep.SummaryStep) {
-                    pluralStringResource(
-                      Res.plurals.forms_review_and_finalize_summary,
-                      controller.totalQuestionSteps,
-                      controller.totalQuestionSteps,
-                    )
-                  } else {
-                    stringResource(Res.string.forms_step_of_total, stepIndex + 1, totalSteps)
-                  },
-                titleColor = onAppBar,
-                subtitleColor = onAppBarSecondary,
-              )
-            },
-            actions = {
-              FilledTonalButton(
-                onClick = {
-                  if (controller.isOverviewOpen) controller.closeOverview()
-                  else controller.openOverview()
-                },
-                colors =
-                  ButtonDefaults.filledTonalButtonColors(
-                    containerColor = appBarTonalContainer,
-                    contentColor = onAppBar,
-                  ),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-              ) {
-                if (!controller.isOverviewOpen) {
-                  Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                  )
-                  Spacer(modifier = Modifier.width(6.dp))
-                }
+  Box(modifier = modifier.fillMaxSize()) {
+    Scaffold(
+      modifier = Modifier.fillMaxSize(),
+      containerColor = colors.surface,
+      topBar = {
+        MobileFormTopBar(
+          title = formTitle,
+          progress = progress,
+          onClose = onClose,
+          subtitle =
+            headerContext
+              ?: {
                 Text(
                   text =
-                    if (controller.isOverviewOpen) {
-                      stringResource(Res.string.forms_close_step_list)
+                    if (currentStep is FormWizardStep.SummaryStep) {
+                      pluralStringResource(
+                        Res.plurals.forms_review_and_finalize_summary,
+                        controller.totalQuestionSteps,
+                        controller.totalQuestionSteps,
+                      )
                     } else {
-                      stringResource(Res.string.forms_steps_count, totalSteps)
+                      stringResource(Res.string.forms_step_of_total, stepIndex + 1, totalSteps)
                     },
-                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
-                  softWrap = false,
                 )
-              }
-              if (onClose != null) {
-                Spacer(modifier = Modifier.width(4.dp))
-                IconButton(
-                  onClick = onClose,
-                  colors = IconButtonDefaults.iconButtonColors(contentColor = onAppBar),
-                ) {
-                  Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(Res.string.forms_close_form),
-                  )
-                }
-              }
-            },
-            colors =
-              TopAppBarDefaults.topAppBarColors(
-                containerColor = colors.primary,
-                titleContentColor = onAppBar,
-                actionIconContentColor = onAppBar,
-              ),
-          )
-
-          // Multi-lingual Language Selector (if form defines multiple translations)
+              },
+        ) {
           if (state.availableLanguages.size > 1) {
             Row(
               modifier =
@@ -273,120 +222,117 @@ fun MobileFormRunner(
               }
             }
           }
-
-          LinearProgressIndicator(
-            progress = { progress.coerceIn(0f, 1f) },
-            modifier = Modifier.fillMaxWidth().height(5.dp),
-            color = onAppBar,
-            trackColor = appBarTrack,
-          )
         }
-      }
-    },
-    bottomBar = {
-      Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = colors.surfaceContainer,
-        contentColor = colors.onSurface,
-        tonalElevation = 3.dp,
-      ) {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
+      },
+      bottomBar = {
+        Surface(
+          modifier = Modifier.fillMaxWidth(),
+          color = colors.surfaceContainer,
+          contentColor = colors.onSurface,
+          tonalElevation = 3.dp,
         ) {
-          OutlinedButton(
-            onClick = { controller.previousStep() },
-            enabled = controller.canGoBack,
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
           ) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = null,
-              modifier = Modifier.size(16.dp),
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-              stringResource(Res.string.forms_back),
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-              softWrap = false,
-            )
-          }
-
-          Text(
-            text = stringResource(Res.string.forms_step_counter, stepIndex + 1, totalSteps),
-            style =
-              MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = colors.onSurfaceVariant,
-              ),
-          )
-
-          if (currentStep is FormWizardStep.SummaryStep) {
-            Button(
-              onClick = {
-                val res = controller.finalizeForm()
-                if (res is FinalizationResult.Success) {
-                  onSubmitted?.invoke(res)
-                }
-              }
+            // Icon-only, so the step chip and the Skip / Next buttons fit on narrow screens.
+            OutlinedIconButton(
+              onClick = { controller.previousStep() },
+              enabled = controller.canGoBack,
             ) {
-              Text(
-                stringResource(Res.string.forms_submit),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
+              Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.forms_back),
+                modifier = Modifier.size(18.dp),
               )
             }
-          } else {
-            val isLastQuestionBeforeSummary = stepIndex == totalSteps - 2
+
+            // Step position; opens the list of all steps in a bottom sheet.
+            AssistChip(
+              onClick = { controller.openOverview() },
+              label = {
+                Text(
+                  text = stringResource(Res.string.forms_step_counter, stepIndex + 1, totalSteps),
+                  maxLines = 1,
+                  softWrap = false,
+                )
+              },
+              trailingIcon = {
+                Icon(
+                  imageVector = Icons.Default.KeyboardArrowUp,
+                  contentDescription = stringResource(Res.string.forms_steps_count, totalSteps),
+                  modifier = Modifier.size(18.dp),
+                )
+              },
+            )
+
+            // The step's actions take the rest of the bar, at its end.
             Row(
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              modifier = Modifier.weight(1f),
+              horizontalArrangement = Arrangement.End,
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              if (controller.isCurrentStepOptional) {
-                OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
+              if (currentStep is FormWizardStep.SummaryStep) {
+                Button(
+                  onClick = {
+                    val res = controller.finalizeForm()
+                    if (res is FinalizationResult.Success) {
+                      onSubmitted?.invoke(res)
+                    }
+                  }
+                ) {
                   Text(
-                    stringResource(Res.string.forms_skip),
+                    stringResource(Res.string.forms_submit),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     softWrap = false,
                   )
                 }
-              }
+              } else {
+                val isLastQuestionBeforeSummary = stepIndex == totalSteps - 2
+                Row(
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  if (controller.isCurrentStepOptional) {
+                    OutlinedButton(onClick = { controller.nextStep(enforceValidation = false) }) {
+                      Text(
+                        stringResource(Res.string.forms_skip),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false,
+                      )
+                    }
+                  }
 
-              Button(
-                onClick = { controller.nextStep(enforceValidation = true) },
-                enabled = !controller.isCurrentStepWaitingForLocationCapture,
-              ) {
-                Text(
-                  stringResource(
-                    if (isLastQuestionBeforeSummary) Res.string.forms_review
-                    else Res.string.forms_next
-                  ),
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                  softWrap = false,
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Icon(
-                  imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                  contentDescription = null,
-                  modifier = Modifier.size(16.dp),
-                )
+                  Button(
+                    onClick = { controller.nextStep(enforceValidation = true) },
+                    enabled = !controller.isCurrentStepWaitingForLocationCapture,
+                  ) {
+                    Text(
+                      stringResource(
+                        if (isLastQuestionBeforeSummary) Res.string.forms_review
+                        else Res.string.forms_next
+                      ),
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                      softWrap = false,
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                      imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                      contentDescription = null,
+                      modifier = Modifier.size(16.dp),
+                    )
+                  }
+                }
               }
             }
           }
         }
-      }
-    },
-  ) { innerPadding ->
-    if (controller.isOverviewOpen) {
-      StepOverviewPanel(
-        controller = controller,
-        modifier = Modifier.fillMaxSize().padding(innerPadding),
-      )
-    } else {
+      },
+    ) { innerPadding ->
       Column(
         modifier =
           Modifier.fillMaxSize()
@@ -519,8 +465,94 @@ fun MobileFormRunner(
         }
       }
     }
+    if (controller.isOverviewOpen) {
+      ModalBottomSheetOverlay(onDismissRequest = { controller.closeOverview() }) {
+        StepListSheetContent(controller = controller)
+      }
+    }
   }
 }
+
+/**
+ * The primary-colored banner at the top of the mobile form: the form [title] (at most two lines, so
+ * a long title can't push the rest of the screen around), a [subtitle] line, a single close button
+ * ([onClose], hidden when `null`), any [extraContent] (the language selector), and the [progress]
+ * through the form.
+ *
+ * [subtitle] and [extraContent] are drawn on `primary`: their default text style is `labelSmall` in
+ * a de-emphasized `onPrimary`.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MobileFormTopBar(
+  title: String,
+  progress: Float,
+  modifier: Modifier = Modifier,
+  onClose: (() -> Unit)? = null,
+  subtitle: @Composable () -> Unit = {},
+  extraContent: @Composable () -> Unit = {},
+) {
+  val colors = MaterialTheme.colorScheme
+  // The bar is a saturated `primary` surface, so everything drawn on it is tinted from `onPrimary`
+  // rather than the default surface roles. Deriving the de-emphasized variants by alpha (instead of
+  // naming more palette entries) keeps the title / subtitle hierarchy intact under both the light
+  // and dark schemes.
+  val onAppBar = colors.onPrimary
+  val onAppBarSecondary = colors.onPrimary.copy(alpha = 0.80f)
+  val appBarTrack = colors.onPrimary.copy(alpha = 0.24f)
+  Surface(
+    modifier = modifier,
+    color = colors.primary,
+    contentColor = onAppBar,
+    tonalElevation = 2.dp,
+  ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+      TopAppBar(
+        title = {
+          FormHeaderTitle(title = title, titleColor = onAppBar) {
+            CompositionLocalProvider(LocalContentColor provides onAppBarSecondary) {
+              ProvideTextStyle(MaterialTheme.typography.labelSmall, subtitle)
+            }
+          }
+        },
+        actions = {
+          if (onClose != null) {
+            IconButton(
+              onClick = onClose,
+              colors = IconButtonDefaults.iconButtonColors(contentColor = onAppBar),
+            ) {
+              Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(Res.string.forms_close_form),
+              )
+            }
+          }
+        },
+        // Fixed, and tall enough for a two-line title over the subtitle.
+        expandedHeight = MobileFormTopBarHeight,
+        colors =
+          TopAppBarDefaults.topAppBarColors(
+            containerColor = colors.primary,
+            titleContentColor = onAppBar,
+            actionIconContentColor = onAppBar,
+          ),
+      )
+
+      CompositionLocalProvider(LocalContentColor provides onAppBarSecondary) {
+        ProvideTextStyle(MaterialTheme.typography.labelSmall, extraContent)
+      }
+
+      LinearProgressIndicator(
+        progress = { progress.coerceIn(0f, 1f) },
+        modifier = Modifier.fillMaxWidth().height(5.dp),
+        color = onAppBar,
+        trackColor = appBarTrack,
+      )
+    }
+  }
+}
+
+private val MobileFormTopBarHeight = 72.dp
 
 /** The groups enclosing a step outside any repeat entry. */
 @Composable
@@ -716,235 +748,53 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
   val questionSteps = controller.steps.filterIsInstance<FormWizardStep.QuestionStep>()
   val subResult = controller.submissionResult
 
-  ElevatedCard(
-    modifier = Modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.large,
-    colors = CardDefaults.elevatedCardColors(containerColor = colors.surfaceContainerLowest),
-  ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp),
+  // The review sits directly on the page background, without a container of its own.
+  Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
     ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            text = stringResource(Res.string.forms_review_answers),
-            style =
-              MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = colors.onSurface,
-              ),
-          )
-          Text(
-            text = stringResource(Res.string.forms_review_answers_hint),
-            style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
-          )
-        }
-        TonalBadge(
-          text =
-            if (state.isValid) {
-              stringResource(Res.string.forms_ready_to_submit)
-            } else {
-              pluralStringResource(
-                Res.plurals.forms_issue_count,
-                state.validationErrors.size,
-                state.validationErrors.size,
-              )
-            },
-          tone = if (state.isValid) BadgeTone.PRIMARY else BadgeTone.ERROR,
-        )
-      }
-
-      // Submission Result Feedback Banner
-      if (subResult != null) {
-        when (subResult) {
-          is FinalizationResult.Success -> {
-            Card(
-              modifier = Modifier.fillMaxWidth(),
-              shape = MaterialTheme.shapes.medium,
-              colors =
-                CardDefaults.cardColors(
-                  containerColor = colors.primaryContainer,
-                  contentColor = colors.onPrimaryContainer,
-                ),
-            ) {
-              Column(
-                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-              ) {
-                Text(
-                  text = stringResource(Res.string.forms_form_finalized),
-                  style =
-                    MaterialTheme.typography.bodyMedium.copy(
-                      fontWeight = FontWeight.Bold,
-                      color = colors.onPrimaryContainer,
-                    ),
-                )
-              }
-            }
-          }
-          is FinalizationResult.ValidationFailure -> {
-            Card(
-              modifier = Modifier.fillMaxWidth(),
-              shape = MaterialTheme.shapes.medium,
-              colors =
-                CardDefaults.cardColors(
-                  containerColor = colors.errorContainer,
-                  contentColor = colors.onErrorContainer,
-                ),
-            ) {
-              Column(
-                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-              ) {
-                Text(
-                  text =
-                    pluralStringResource(
-                      Res.plurals.forms_cannot_submit_errors,
-                      subResult.errors.size,
-                      subResult.errors.size,
-                    ),
-                  style =
-                    MaterialTheme.typography.bodySmall.copy(
-                      fontWeight = FontWeight.Bold,
-                      color = colors.onErrorContainer,
-                    ),
-                )
-                subResult.errors.forEach { err ->
-                  Text(
-                    text =
-                      stringResource(
-                        Res.string.forms_validation_error_item,
-                        controller.questionTitleFor(err.fieldPath).resolve(),
-                        err.message,
-                      ),
-                    style =
-                      MaterialTheme.typography.labelSmall.copy(color = colors.onErrorContainer),
-                    modifier = Modifier.clickable { controller.jumpToField(err.fieldPath) },
-                  )
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // All Relevant Questions Summary List
-      questionSteps.forEach { qStep ->
-        val control = qStep.control
-        val fieldState = control.fieldState
-        val isInvalid = fieldState.validationStatus is ValidationStatus.Invalid
-        OutlinedCard(
-          onClick = { controller.jumpToField(control.canonicalPath) },
-          modifier = Modifier.fillMaxWidth(),
-          shape = MaterialTheme.shapes.medium,
-          colors =
-            CardDefaults.outlinedCardColors(
-              containerColor = if (isInvalid) colors.errorContainer else colors.surfaceContainerLow,
-              contentColor = if (isInvalid) colors.onErrorContainer else colors.onSurface,
-            ),
-          border =
-            BorderStroke(
-              width = 1.dp,
-              color = if (isInvalid) colors.error else colors.outlineVariant,
-            ),
-        ) {
-          Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Column(modifier = Modifier.weight(1f)) {
-              if (qStep.breadcrumbs.isNotEmpty()) {
-                Text(
-                  text = qStep.breadcrumbs.joinToString(" › "),
-                  style =
-                    MaterialTheme.typography.labelSmall.copy(
-                      color =
-                        if (isInvalid) colors.onErrorContainer.copy(alpha = 0.85f)
-                        else colors.onSurfaceVariant
-                    ),
-                )
-              }
-              Text(
-                text = qStep.questionLabel,
-                style =
-                  MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isInvalid) colors.onErrorContainer else colors.onSurface,
-                  ),
-              )
-              val selectedValues =
-                fieldState.value
-                  ?.list_value
-                  ?.values
-                  ?.mapNotNull { it.string_value }
-                  ?.filter { it.isNotBlank() }
-                  ?: fieldState.value?.scalar_value?.string_value?.split(' ')?.filter {
-                    it.isNotBlank()
-                  }
-                  ?: emptyList()
-              val coloredSelections =
-                if (!isInvalid && !fieldState.isEmpty) {
-                  ChoiceImageRegistry.resolveSelectedOptionColors(control.options, selectedValues)
-                } else {
-                  emptyList()
-                }
-              if (coloredSelections.isNotEmpty()) {
-                ChoiceColorPillsRow(
-                  items = coloredSelections,
-                  compact = true,
-                  modifier = Modifier.padding(top = 4.dp),
-                )
-              } else {
-                Text(
-                  text = fieldValueDisplayText(fieldState.value, fieldState.dataType),
-                  style =
-                    MaterialTheme.typography.bodySmall.copy(
-                      color =
-                        when {
-                          isInvalid -> colors.onErrorContainer.copy(alpha = 0.85f)
-                          fieldState.isEmpty -> colors.onSurfaceVariant
-                          else -> colors.primary
-                        }
-                    ),
-                )
-              }
-            }
-            TonalBadge(
-              text =
-                stringResource(
-                  if (isInvalid) Res.string.forms_invalid_badge else Res.string.forms_edit
-                ),
-              tone = if (isInvalid) BadgeTone.ERROR else BadgeTone.PRIMARY,
-            )
-          }
-        }
-      }
-
-      // Entities Preview (if declared)
-      if (state.entityStates.isNotEmpty()) {
-        HorizontalDivider(color = colors.outlineVariant)
+      Column(modifier = Modifier.weight(1f)) {
         Text(
-          text = stringResource(Res.string.forms_updated_records, state.entityStates.size),
+          text = stringResource(Res.string.forms_review_answers),
           style =
-            MaterialTheme.typography.labelLarge.copy(
+            MaterialTheme.typography.titleMedium.copy(
               fontWeight = FontWeight.Bold,
               color = colors.onSurface,
             ),
         )
-        state.entityStates.forEach { entity ->
-          OutlinedCard(
+        Text(
+          text = stringResource(Res.string.forms_review_answers_hint),
+          style = MaterialTheme.typography.bodySmall.copy(color = colors.onSurfaceVariant),
+        )
+      }
+      TonalBadge(
+        text =
+          if (state.isValid) {
+            stringResource(Res.string.forms_ready_to_submit)
+          } else {
+            pluralStringResource(
+              Res.plurals.forms_issue_count,
+              state.validationErrors.size,
+              state.validationErrors.size,
+            )
+          },
+        tone = if (state.isValid) BadgeTone.PRIMARY else BadgeTone.ERROR,
+      )
+    }
+
+    // Submission Result Feedback Banner
+    if (subResult != null) {
+      when (subResult) {
+        is FinalizationResult.Success -> {
+          Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
             colors =
-              CardDefaults.outlinedCardColors(
-                containerColor = colors.secondaryContainer,
-                contentColor = colors.onSecondaryContainer,
+              CardDefaults.cardColors(
+                containerColor = colors.primaryContainer,
+                contentColor = colors.onPrimaryContainer,
               ),
           ) {
             Column(
@@ -952,63 +802,79 @@ private fun FormSummaryScreenContent(controller: FormWizardController) {
               verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
               Text(
-                text = entity.label.ifBlank { entity.dataset },
+                text = stringResource(Res.string.forms_form_finalized),
                 style =
-                  MaterialTheme.typography.labelMedium.copy(
+                  MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    color = colors.onSecondaryContainer,
+                    color = colors.onPrimaryContainer,
                   ),
               )
-              val actionLabel =
-                when {
-                  entity.shouldCreate -> Res.string.forms_record_new_in_dataset
-                  entity.shouldUpdate -> Res.string.forms_record_updated_in_dataset
-                  else -> Res.string.forms_record_unchanged_in_dataset
-                }
+            }
+          }
+        }
+        is FinalizationResult.ValidationFailure -> {
+          Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors =
+              CardDefaults.cardColors(
+                containerColor = colors.errorContainer,
+                contentColor = colors.onErrorContainer,
+              ),
+          ) {
+            Column(
+              modifier = Modifier.fillMaxWidth().padding(12.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
               Text(
-                text = stringResource(actionLabel, entity.dataset),
+                text =
+                  pluralStringResource(
+                    Res.plurals.forms_cannot_submit_errors,
+                    subResult.errors.size,
+                    subResult.errors.size,
+                  ),
                 style =
-                  MaterialTheme.typography.labelSmall.copy(color = colors.onSecondaryContainer),
+                  MaterialTheme.typography.bodySmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onErrorContainer,
+                  ),
               )
+              subResult.errors.forEach { err ->
+                Text(
+                  text =
+                    stringResource(
+                      Res.string.forms_validation_error_item,
+                      controller.questionTitleFor(err.fieldPath).resolve(),
+                      err.message,
+                    ),
+                  style = MaterialTheme.typography.labelSmall.copy(color = colors.onErrorContainer),
+                  modifier = Modifier.clickable { controller.jumpToField(err.fieldPath) },
+                )
+              }
             }
           }
         }
       }
     }
-  }
-}
 
-@Composable
-private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifier = Modifier) {
-  val colors = MaterialTheme.colorScheme
-  Column(
-    modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    Text(
-      text = stringResource(Res.string.forms_all_form_steps, controller.totalSteps),
-      style =
-        MaterialTheme.typography.titleMedium.copy(
-          fontWeight = FontWeight.Bold,
-          color = colors.onSurface,
-        ),
-    )
-    controller.steps.forEachIndexed { idx, step ->
-      val isCurrent = idx == controller.currentStepIndex
+    // All Relevant Questions Summary List
+    questionSteps.forEach { qStep ->
+      val control = qStep.control
+      val fieldState = control.fieldState
+      val isInvalid = fieldState.validationStatus is ValidationStatus.Invalid
       OutlinedCard(
-        onClick = { controller.jumpToStep(idx) },
+        onClick = { controller.jumpToField(control.canonicalPath) },
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors =
           CardDefaults.outlinedCardColors(
-            containerColor =
-              if (isCurrent) colors.primaryContainer else colors.surfaceContainerLowest,
-            contentColor = if (isCurrent) colors.onPrimaryContainer else colors.onSurface,
+            containerColor = if (isInvalid) colors.errorContainer else colors.surfaceContainerLow,
+            contentColor = if (isInvalid) colors.onErrorContainer else colors.onSurface,
           ),
         border =
           BorderStroke(
-            width = if (isCurrent) 2.dp else 1.dp,
-            color = if (isCurrent) colors.primary else colors.outlineVariant,
+            width = 1.dp,
+            color = if (isInvalid) colors.error else colors.outlineVariant,
           ),
       ) {
         Row(
@@ -1017,42 +883,176 @@ private fun StepOverviewPanel(controller: FormWizardController, modifier: Modifi
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Column(modifier = Modifier.weight(1f)) {
-            if (step.breadcrumbs.isNotEmpty()) {
+            if (qStep.breadcrumbs.isNotEmpty()) {
               Text(
-                text = step.breadcrumbs.joinToString(" › "),
+                text = qStep.breadcrumbs.joinToString(" › "),
                 style =
                   MaterialTheme.typography.labelSmall.copy(
-                    color = if (isCurrent) colors.onPrimaryContainer else colors.onSurfaceVariant
+                    color =
+                      if (isInvalid) colors.onErrorContainer.copy(alpha = 0.85f)
+                      else colors.onSurfaceVariant
                   ),
               )
             }
             Text(
-              text = stringResource(Res.string.forms_step_list_item, idx + 1, step.title.resolve()),
+              text = qStep.questionLabel,
               style =
                 MaterialTheme.typography.bodyMedium.copy(
-                  fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
-                  color = if (isCurrent) colors.onPrimaryContainer else colors.onSurface,
+                  fontWeight = FontWeight.SemiBold,
+                  color = if (isInvalid) colors.onErrorContainer else colors.onSurface,
                 ),
             )
+            val selectedValues =
+              fieldState.value
+                ?.list_value
+                ?.values
+                ?.mapNotNull { it.string_value }
+                ?.filter { it.isNotBlank() }
+                ?: fieldState.value?.scalar_value?.string_value?.split(' ')?.filter {
+                  it.isNotBlank()
+                }
+                ?: emptyList()
+            val coloredSelections =
+              if (!isInvalid && !fieldState.isEmpty) {
+                ChoiceImageRegistry.resolveSelectedOptionColors(control.options, selectedValues)
+              } else {
+                emptyList()
+              }
+            if (coloredSelections.isNotEmpty()) {
+              ChoiceColorPillsRow(
+                items = coloredSelections,
+                compact = true,
+                modifier = Modifier.padding(top = 4.dp),
+              )
+            } else {
+              Text(
+                text = fieldValueDisplayText(fieldState.value, fieldState.dataType),
+                style =
+                  MaterialTheme.typography.bodySmall.copy(
+                    color =
+                      when {
+                        isInvalid -> colors.onErrorContainer.copy(alpha = 0.85f)
+                        fieldState.isEmpty -> colors.onSurfaceVariant
+                        else -> colors.primary
+                      }
+                  ),
+              )
+            }
           }
-          if (step is FormWizardStep.QuestionStep) {
-            val fs = step.control.fieldState
-            val isInvalid = fs.validationStatus is ValidationStatus.Invalid
+          if (isInvalid) {
             TonalBadge(
-              text =
-                when {
-                  isInvalid -> "!"
-                  !fs.isEmpty -> "✓"
-                  fs.isRequired -> "*"
-                  else -> "•"
-                },
-              tone =
-                when {
-                  isInvalid -> BadgeTone.ERROR
-                  !fs.isEmpty -> BadgeTone.PRIMARY
-                  else -> BadgeTone.NEUTRAL
-                },
+              text = stringResource(Res.string.forms_invalid_badge),
+              tone = BadgeTone.ERROR,
             )
+          }
+          IconButton(onClick = { controller.jumpToField(control.canonicalPath) }) {
+            Icon(
+              imageVector = Icons.Outlined.Edit,
+              contentDescription = stringResource(Res.string.forms_edit),
+              tint = if (isInvalid) colors.onErrorContainer else colors.primary,
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * The list of all form steps shown in the bottom sheet the step counter chip opens: a heading with
+ * a close button, and one row per step that jumps to it (closing the sheet) when tapped.
+ */
+@Composable
+private fun StepListSheetContent(controller: FormWizardController) {
+  val colors = MaterialTheme.colorScheme
+  Column(modifier = Modifier.fillMaxWidth()) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text(
+        text = stringResource(Res.string.forms_all_form_steps, controller.totalSteps),
+        style = MaterialTheme.typography.titleMedium,
+        color = colors.onSurface,
+        modifier = Modifier.weight(1f).semantics { heading() },
+      )
+      IconButton(onClick = { controller.closeOverview() }) {
+        Icon(
+          imageVector = Icons.Default.Close,
+          contentDescription = stringResource(Res.string.forms_close_step_list),
+        )
+      }
+    }
+    Column(
+      modifier =
+        Modifier.weight(1f, fill = false)
+          .fillMaxWidth()
+          .verticalScroll(rememberScrollState())
+          .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      controller.steps.forEachIndexed { idx, step ->
+        val isCurrent = idx == controller.currentStepIndex
+        OutlinedCard(
+          onClick = { controller.jumpToStep(idx) },
+          modifier = Modifier.fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor =
+                if (isCurrent) colors.primaryContainer else colors.surfaceContainerLowest,
+              contentColor = if (isCurrent) colors.onPrimaryContainer else colors.onSurface,
+            ),
+          border =
+            BorderStroke(
+              width = if (isCurrent) 2.dp else 1.dp,
+              color = if (isCurrent) colors.primary else colors.outlineVariant,
+            ),
+        ) {
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Column(modifier = Modifier.weight(1f)) {
+              if (step.breadcrumbs.isNotEmpty()) {
+                Text(
+                  text = step.breadcrumbs.joinToString(" › "),
+                  style =
+                    MaterialTheme.typography.labelSmall.copy(
+                      color = if (isCurrent) colors.onPrimaryContainer else colors.onSurfaceVariant
+                    ),
+                )
+              }
+              Text(
+                text =
+                  stringResource(Res.string.forms_step_list_item, idx + 1, step.title.resolve()),
+                style =
+                  MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                    color = if (isCurrent) colors.onPrimaryContainer else colors.onSurface,
+                  ),
+              )
+            }
+            if (step is FormWizardStep.QuestionStep) {
+              val fs = step.control.fieldState
+              val isInvalid = fs.validationStatus is ValidationStatus.Invalid
+              TonalBadge(
+                text =
+                  when {
+                    isInvalid -> "!"
+                    !fs.isEmpty -> "✓"
+                    fs.isRequired -> "*"
+                    else -> "•"
+                  },
+                tone =
+                  when {
+                    isInvalid -> BadgeTone.ERROR
+                    !fs.isEmpty -> BadgeTone.PRIMARY
+                    else -> BadgeTone.NEUTRAL
+                  },
+              )
+            }
           }
         }
       }

@@ -39,8 +39,9 @@ internal fun formDisplayTitle(formDef: FormDef, untitled: StringResource): Strin
 
 /**
  * The form title and progress [subtitle] at the top of [MobileFormRunner] and [CompactFormRunner].
- * Sizes follow [LocalFormDensity]; the compact title wraps to at most two lines. Colors come from
- * the caller, since the mobile header sits on the primary-colored app bar.
+ * Sizes follow [LocalFormDensity]; the title wraps to at most two lines and is cut with an ellipsis
+ * beyond that, so a long title can't grow the header. Colors come from the caller, since the mobile
+ * header sits on the primary-colored app bar.
  */
 @Composable
 internal fun FormHeaderTitle(
@@ -50,6 +51,19 @@ internal fun FormHeaderTitle(
   subtitleColor: Color,
   modifier: Modifier = Modifier,
 ) {
+  FormHeaderTitle(title = title, titleColor = titleColor, modifier = modifier) {
+    Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = subtitleColor)
+  }
+}
+
+/** [FormHeaderTitle] with the line under the title drawn by [subtitle]. */
+@Composable
+internal fun FormHeaderTitle(
+  title: String,
+  titleColor: Color,
+  modifier: Modifier = Modifier,
+  subtitle: @Composable () -> Unit,
+) {
   val isCompact = LocalFormDensity.current == FormDensity.COMPACT
   val titleStyle =
     if (isCompact) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium
@@ -58,10 +72,13 @@ internal fun FormHeaderTitle(
       text = title,
       style = titleStyle.copy(fontWeight = FontWeight.Bold),
       color = titleColor,
-      maxLines = if (isCompact) 2 else Int.MAX_VALUE,
-      overflow = if (isCompact) TextOverflow.Ellipsis else TextOverflow.Clip,
+      maxLines = FORM_TITLE_MAX_LINES,
+      overflow = TextOverflow.Ellipsis,
       modifier = Modifier.semantics { heading() },
     )
-    Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = subtitleColor)
+    subtitle()
   }
 }
+
+/** Lines a form title may take in a form runner's header before it's cut with an ellipsis. */
+internal const val FORM_TITLE_MAX_LINES = 2

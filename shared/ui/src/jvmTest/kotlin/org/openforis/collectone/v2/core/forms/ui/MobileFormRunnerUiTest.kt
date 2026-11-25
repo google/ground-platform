@@ -13,12 +13,14 @@
  */
 package org.openforis.collectone.v2.core.forms.ui
 
+import androidx.compose.material3.Text
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,6 +28,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import org.openforis.collectone.v2.core.forms.model.FinalizationResult
@@ -47,6 +50,74 @@ class MobileFormRunnerUiTest {
 
     onNodeWithText("Tree Survey").assertExists()
     onNodeWithText("Step 1 of 3").assertExists()
+  }
+
+  @Test
+  fun header_showsTheHostsContextInsteadOfTheStepPosition() = runComposeUiTest {
+    val controller = RunnerTestForms.speciesAndNotes()
+    setContent {
+      AppTheme { MobileFormRunner(controller, headerContext = { Text("Plot 7 • GeoID 42") }) }
+    }
+
+    onNodeWithText("Tree Survey").assertExists()
+    onNodeWithText("Plot 7 • GeoID 42").assertExists()
+    onNodeWithText("Step 1 of 3").assertDoesNotExist()
+  }
+
+  @Test
+  fun header_hasOneCloseButtonAndNoStepsButton() = runComposeUiTest {
+    var closed = 0
+    setContent {
+      AppTheme { MobileFormRunner(RunnerTestForms.speciesAndNotes(), onClose = { closed++ }) }
+    }
+
+    onNodeWithText("Steps (3)").assertDoesNotExist()
+    onNodeWithContentDescription("Close form").performClick()
+
+    assertEquals(1, closed)
+  }
+
+  @Test
+  fun stepChip_opensTheStepSheet_whichClosesWithItsCloseButton() = runComposeUiTest {
+    val controller = RunnerTestForms.speciesAndNotes()
+    showRunner(controller)
+    onNodeWithText("All form steps (3)").assertDoesNotExist()
+
+    onNodeWithText("1 / 3").performClick()
+
+    onNodeWithText("All form steps (3)").assertExists()
+    // The step's own Back / Next bar stays under the sheet's scrim, not inside the list.
+    onNodeWithContentDescription("Close list").performClick()
+
+    assertFalse(controller.isOverviewOpen)
+    onNodeWithText("All form steps (3)").assertDoesNotExist()
+    assertEquals(0, controller.currentStepIndex)
+  }
+
+  @Test
+  fun stepSheet_tappingAStep_jumpsToItAndClosesTheSheet() = runComposeUiTest {
+    val controller = RunnerTestForms.speciesAndNotes()
+    showRunner(controller)
+
+    onNodeWithText("1 / 3").performClick()
+    onNodeWithText("2. ", substring = true).performClick()
+
+    assertEquals(1, controller.currentStepIndex)
+    assertFalse(controller.isOverviewOpen)
+    onNodeWithText("2 / 3").assertExists()
+  }
+
+  @Test
+  fun review_editIconJumpsBackToTheQuestion() = runComposeUiTest {
+    val controller = RunnerTestForms.speciesAndNotes()
+    controller.updateString("/data/species", "Baobab")
+    controller.jumpToStep(controller.steps.lastIndex)
+    showRunner(controller)
+
+    onNodeWithText("Review answers").assertExists()
+    onAllNodesWithContentDescription("Edit")[0].performClick()
+
+    assertEquals(0, controller.currentStepIndex)
   }
 
   @Test
@@ -143,7 +214,7 @@ class MobileFormRunnerUiTest {
       onNodeWithText("Select an answer for 'Country' first").assertExists()
 
       // Go back, pick Kenya, and advance to Region: Nairobi + Other show, Kampala does not.
-      onNodeWithText("Back").performClick()
+      onNodeWithContentDescription("Back").performClick()
       onNodeWithText("Kenya").performClick()
       onNodeWithText("Next").performClick()
       onNodeWithText("Nairobi").assertExists()
@@ -157,7 +228,7 @@ class MobileFormRunnerUiTest {
         "nairobi",
         controller.formState.findFieldState("/data/region")?.value?.scalar_value?.string_value,
       )
-      onNodeWithText("Back").performClick()
+      onNodeWithContentDescription("Back").performClick()
       onNodeWithText("Uganda").performClick()
       assertEquals(
         null,
