@@ -15,15 +15,19 @@
 package org.openforis.collectone.v2.mobile.ui.navigation
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.openforis.collectone.v2.app.domain.model.BasemapType
 
 /**
  * What the Main Survey's overlays do when tapped: the forms button and its sheet, the layers sheet,
@@ -68,6 +72,43 @@ class MainSurveyOverlaysInteractionTest {
     assertFalse(after.isAvailableFormsSheetOpen)
     // The form opens at once, or after the collector's consent when the survey asks for it.
     assertTrue(after.isDataCollectionFormOpen || after.pendingCollectorConsent != null)
+  }
+
+  @Test
+  fun basemapCard_opensTheLayersSheet_whereTheBasemapSwitchesBothWays() =
+    runMobileNavigationTest { test ->
+      val state = show()
+      val surveyMap = state.viewModels.surveyMap
+
+      test.onNodeWithContentDescription("Layers").performClick()
+      test.waitForIdle()
+      assertTrue(surveyMap.uiState.value.isLayersSheetOpen)
+
+      test.onAllNodesWithText("Satellite").onFirst().performClick()
+      test.waitForIdle()
+      assertEquals(BasemapType.SATELLITE, surveyMap.uiState.value.selectedBasemapType)
+
+      test.onAllNodesWithText("Terrain").onFirst().performClick()
+      test.waitForIdle()
+      assertEquals(BasemapType.NORMAL, surveyMap.uiState.value.selectedBasemapType)
+    }
+
+  @Test
+  fun recenterButton_showsOnlyWhilePanned_andRecentersTheMap() = runMobileNavigationTest { test ->
+    val state = show()
+    val surveyMap = state.viewModels.surveyMap
+    test.onNodeWithContentDescription("Recenter map on GPS location").assertDoesNotExist()
+
+    test.runOnIdle { surveyMap.panMap(deltaNormalizedX = 0.12f, deltaNormalizedY = -0.09f) }
+    test.waitForIdle()
+    assertFalse(surveyMap.uiState.value.isCameraFollowingUser)
+    test.onNodeWithText("Panned").assertExists()
+
+    test.onNodeWithContentDescription("Recenter map on GPS location").performClick()
+    test.waitForIdle()
+
+    assertTrue(surveyMap.uiState.value.isCameraFollowingUser)
+    test.onNodeWithContentDescription("Recenter map on GPS location").assertDoesNotExist()
   }
 
   @Test

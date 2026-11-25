@@ -353,8 +353,8 @@ internal fun SurveyMapView(
                 fontWeight = FontWeight.Bold,
               )
             },
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
             modifier =
               Modifier.align(Alignment.BottomEnd)
                 .padding(end = 14.dp, bottom = peekHeight + 10.dp)
