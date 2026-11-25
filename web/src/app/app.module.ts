@@ -86,10 +86,10 @@ import { environment } from 'environments/environment';
         environment.useEmulators
           ? {}
           : {
-              localCache: persistentLocalCache({
-                tabManager: persistentMultipleTabManager(),
-              }),
-            }
+            localCache: persistentLocalCache({
+              tabManager: persistentMultipleTabManager(),
+            }),
+          }
       );
       if (environment.useEmulators) {
         connectFirestoreEmulator(firestore, 'localhost', 8080);

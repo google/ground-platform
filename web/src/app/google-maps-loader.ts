@@ -23,7 +23,10 @@ const LIBRARIES = ['core', 'maps', 'marker', 'geometry'];
 /** Name of the global function the Maps API calls once it is ready. */
 const CALLBACK_NAME = '__onGoogleMapsLoaded';
 
-/** The pending or completed load, so the script is only added once. */
+/**
+ * The pending or successful load, so the script is only added once. Cleared
+ * when a load fails, so that a later call can try again.
+ */
 let loadPromise: Promise<void> | undefined;
 
 /**
@@ -38,7 +41,7 @@ let loadPromise: Promise<void> | undefined;
  * the app must not start using them before then.
  *
  * Never rejects: the app still works without a map, so a failure is only
- * logged.
+ * logged. A later call after a failure tries to load the API again.
  */
 export function loadGoogleMaps(doc: Document): Promise<void> {
   if (environment.env === Env.Test) return Promise.resolve();
@@ -64,12 +67,17 @@ async function load(doc: Document): Promise<void> {
       script.src =
         'https://maps.googleapis.com/maps/api/js' +
         `?key=${environment.googleMapsApiKey}&loading=async&callback=${CALLBACK_NAME}`;
-      script.onerror = () =>
+      script.onerror = () => {
+        // Leave nothing behind, so that a retry starts clean.
+        script.remove();
+        delete win[CALLBACK_NAME];
         reject(new Error('Failed to load the Google Maps JavaScript API'));
+      };
       doc.head.appendChild(script);
     });
     await Promise.all(LIBRARIES.map(name => google.maps.importLibrary(name)));
   } catch (error) {
     console.error(error);
+    loadPromise = undefined;
   }
 }
