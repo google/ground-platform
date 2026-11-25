@@ -22,6 +22,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
 
 /**
  * The mobile app's back stack in its `NavHost`: what the system Back gesture closes or goes back
@@ -170,6 +171,29 @@ class MobileBackStackTest {
     assertNull(state.viewModels.dataCollection.uiState.value.selectedEntityId)
     assertEquals(0, systemBackCount)
   }
+
+  @Test
+  fun withAMapFeaturesSubmissionsListed_backReturnsToItsPropertiesFirst() =
+    runMobileNavigationTest {
+      val state = show()
+      it.runOnIdle {
+        state.viewModels.surveyMap.selectEntity(NYR_104)
+        state.viewModels.dashboard.showEntitySubmissions()
+      }
+
+      pressBack()
+
+      assertEquals(
+        EntityDetailsPane.PROPERTIES,
+        state.viewModels.dashboard.uiState.value.entityDetailsPane,
+      )
+      assertEquals(NYR_104, state.viewModels.dataCollection.uiState.value.selectedEntityId)
+
+      pressBack()
+
+      assertNull(state.viewModels.dataCollection.uiState.value.selectedEntityId)
+      assertEquals(0, systemBackCount)
+    }
 
   @Test
   fun withASubmissionOpen_backClosesTheSubmissionBeforeItsMapFeature() = runMobileNavigationTest {

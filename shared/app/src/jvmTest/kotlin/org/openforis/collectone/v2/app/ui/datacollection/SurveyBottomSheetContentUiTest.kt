@@ -46,6 +46,7 @@ import org.openforis.collectone.v2.app.domain.model.EntityStatusFilterOption
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.LayerSourceType
 import org.openforis.collectone.v2.app.domain.model.MapLayerItem
+import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
 import org.openforis.collectone.v2.app.ui.session.SurveyRecordsUiStates
 import org.openforis.collectone.v2.app.ui.session.TestAppSession
 import org.openforis.collectone.v2.app.ui.session.collectSurveyRecordsUiStates
@@ -344,7 +345,7 @@ class SurveyBottomSheetContentUiTest {
   }
 
   @Test
-  fun selectedEntity_submissionsLinkOpensUploadsForTheEntity() = runComposeUiTest {
+  fun selectedEntity_submissionsLinkOpensTheSubmissionsList() = runComposeUiTest {
     val entity = entityWithSubmissions
     session.viewModels.surveyMap.selectEntity(entity.id)
     showSheet()
@@ -352,7 +353,13 @@ class SurveyBottomSheetContentUiTest {
     onNodeWithText("Submissions (${entity.submissionCount})").performScrollTo().performClick()
     waitForIdle()
 
-    assertEquals(entity.id, session.viewModels.dashboard.uiState.value.uploadsEntityFilterId)
+    // The feature's submissions, not the Uploads screen.
+    val dashboard = session.viewModels.dashboard.uiState.value
+    assertEquals(EntityDetailsPane.SUBMISSIONS, dashboard.entityDetailsPane)
+    assertEquals(null, dashboard.uploadsEntityFilterId)
+    onNodeWithContentDescription("Back to details").assertExists()
+    onAllNodesWithContentDescription("Submission details")
+      .assertCountEquals(entity.submissions.size)
   }
 
   @Test

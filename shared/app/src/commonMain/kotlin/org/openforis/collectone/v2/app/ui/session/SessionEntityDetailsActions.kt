@@ -40,6 +40,8 @@ class SessionEntityDetailsActions(
   override fun openUploadsForEntity(entityId: String) =
     viewModels.dashboard.openUploadsForEntity(entityId)
 
+  override fun showEntitySubmissions() = viewModels.dashboard.showEntitySubmissions()
+
   override fun showEntityProperties() = dataCollection.showEntityProperties()
 
   override fun selectSubmissionDetail(submissionId: String?) =

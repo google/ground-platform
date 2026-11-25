@@ -37,6 +37,8 @@ class RecordDetailsChoiceColorUiTest {
 
       override fun openUploadsForEntity(entityId: String) = Unit
 
+      override fun showEntitySubmissions() = Unit
+
       override fun showEntityProperties() = Unit
 
       override fun selectSubmissionDetail(submissionId: String?) = Unit

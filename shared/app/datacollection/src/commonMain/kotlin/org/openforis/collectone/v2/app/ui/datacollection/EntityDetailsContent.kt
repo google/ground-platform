@@ -680,7 +680,7 @@ fun EntityPropertiesPane(
       HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
       EntitySubmissionsLink(
         uiState = uiState,
-        onClick = { actions.openUploadsForEntity(entity.id) },
+        onClick = { actions.showEntitySubmissions() },
       )
     }
 
@@ -886,8 +886,9 @@ private fun EntityDataCollectionLaunchers(
 }
 
 /**
- * Mobile click-through from an entity's properties to its submissions ("Submissions (n) ›"). On
- * web, submissions are in the details card's `History` tab instead.
+ * Mobile click-through from an entity's properties to its submissions ("Submissions (n) ›"), which
+ * opens [EntitySubmissionsPane]. On web, submissions are in the details card's `History` tab
+ * instead.
  */
 @Composable
 private fun EntitySubmissionsLink(uiState: EntityDetailsUiState, onClick: () -> Unit) {

@@ -179,7 +179,7 @@ private fun DownloadSurveyDestination(state: MobileAppState) {
 
 /**
  * Back leaves the area selection mode, then closes the drawer, then the open submission, then the
- * selected map feature.
+ * selected map feature's submissions list, then the selected map feature.
  */
 @Composable
 private fun MainSurveyDestination(state: MobileAppState) {
@@ -189,6 +189,13 @@ private fun MainSurveyDestination(state: MobileAppState) {
   val dataCollectionUiState by dataCollection.uiState.collectAsState()
   val offlineAreaUiState by state.offlineAreaSelection.uiState.collectAsState()
   val selectedSubmissionId = dataCollectionUiState.selectedSubmissionId
+  val dashboardUiState by koinSessionViewModel<DashboardViewModel>().uiState.collectAsState()
+  val selectedRecordBack =
+    selectedRecordBack(
+      hasSelectedEntity = dataCollectionUiState.selectedEntityId != null,
+      hasSelectedSubmission = selectedSubmissionId != null,
+      entityDetailsPane = dashboardUiState.entityDetailsPane,
+    )
   MobileBackHandler(
     enabled =
       offlineAreaUiState.isActive ||
@@ -200,6 +207,8 @@ private fun MainSurveyDestination(state: MobileAppState) {
       offlineAreaUiState.isActive -> state.closeOfflineAreaSelection()
       state.isDrawerOpen -> state.updateDrawerOpen(false)
       selectedSubmissionId != null -> dataCollection.selectSubmissionDetail(null)
+      selectedRecordBack == SelectedRecordBack.SHOW_PROPERTIES ->
+        dataCollection.showEntityProperties()
       else -> surveyMap.selectEntity(null)
     }
   }

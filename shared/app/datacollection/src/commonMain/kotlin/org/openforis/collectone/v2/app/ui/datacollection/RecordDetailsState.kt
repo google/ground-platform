@@ -125,6 +125,9 @@ interface EntityDetailsActions {
   /** Opens the `Uploads` screen filtered to the map feature with [entityId]. */
   fun openUploadsForEntity(entityId: String)
 
+  /** Shows the selected map feature's submissions in its details surface. */
+  fun showEntitySubmissions()
+
   /** Shows the selected map feature's properties, closing its submissions or open submission. */
   fun showEntityProperties()
 
