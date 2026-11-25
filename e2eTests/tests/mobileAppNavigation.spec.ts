@@ -96,7 +96,8 @@ test('a relaunch with surveys on the device but none open shows them', async ({ 
   // The sample user has this survey downloaded, so the first sync stores it on the device.
   const survey = 'Simple Point & Land Use Survey';
   await signIn(page);
-  await expect(page.getByRole('button', { name: `Downloaded ${survey}`, exact: true })).toBeVisible();
+  // Only a survey on the device has an Open button; the others have Download.
+  await expect(page.getByRole('button', { name: `Open ${survey}`, exact: true })).toBeVisible();
 
   await relaunch(page);
 

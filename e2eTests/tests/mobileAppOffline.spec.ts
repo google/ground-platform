@@ -58,6 +58,9 @@ async function recordObservation(page: Page): Promise<void> {
   await tap(page, page.getByRole('button', { name: 'Next', exact: true }));
   await tap(page, page.getByRole('button', { name: 'Review', exact: true }));
   await tap(page, page.getByRole('button', { name: 'Submit', exact: true }));
+  // The success screen; Continue returns to the map, where the sync status shows.
+  await expect(page.getByText('Data collection complete')).toBeVisible();
+  await tap(page, page.getByRole('button', { name: 'Continue', exact: true }));
 }
 
 /** Resolves when the server answers a `MutateData` call successfully. */
