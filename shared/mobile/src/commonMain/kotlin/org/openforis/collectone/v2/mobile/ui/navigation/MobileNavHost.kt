@@ -173,6 +173,7 @@ private fun DownloadSurveyDestination(state: MobileAppState) {
     actions = onboarding,
     notice = notice,
     isDarkTheme = settingsUiState.isDarkTheme,
+    onNoticeShown = state.notices::clear,
   )
 }
 

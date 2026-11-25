@@ -30,11 +30,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Delete
@@ -55,20 +56,24 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -145,6 +150,9 @@ import org.openforis.collectone.v2.mobile.ui.common.SignOutConfirmationStep
  * location, coordinates, or organization. A query also looks up matching surveys not shared with
  * the user (public surveys, or the survey a pasted share link points to). Offline, it shows its own
  * banner rather than the app's offline notice.
+ *
+ * [notice] (the outcome of downloading or removing a survey) shows in a snackbar; [onNoticeShown]
+ * is called once it has gone, so the same notice isn't shown again.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -153,12 +161,27 @@ fun DownloadSurveyScreen(
   actions: OnboardingActions,
   notice: String?,
   isDarkTheme: Boolean,
+  onNoticeShown: () -> Unit = {},
 ) {
   val onSurfaceColor = MaterialTheme.colorScheme.onSurface
   val filtered = uiState.filteredSurveys
   var isUserProfileOpen by remember { mutableStateOf(false) }
-  val searchSurveysDescription =
-    stringResource(Res.string.mobile_download_survey_search_content_description)
+  val searchBarState = remember { CollapsingSearchBarState() }
+  val listState = rememberLazyListState()
+  // The top of the list always shows the search field, also when the list has just changed.
+  LaunchedEffect(listState, searchBarState) {
+    snapshotFlow { listState.canScrollBackward }
+      .collect { canScrollBackward -> if (!canScrollBackward) searchBarState.expand() }
+  }
+
+  // Outcomes of downloading or removing a survey show briefly, then clear.
+  val snackbarHostState = remember { SnackbarHostState() }
+  LaunchedEffect(notice) {
+    if (!notice.isNullOrBlank()) {
+      snackbarHostState.showSnackbar(message = notice, duration = SnackbarDuration.Short)
+      onNoticeShown()
+    }
+  }
 
   var signOutStep by remember { mutableStateOf(SignOutConfirmationStep.NONE) }
 
@@ -210,11 +233,15 @@ fun DownloadSurveyScreen(
             ),
         )
       },
+      snackbarHost = { SnackbarHost(snackbarHostState) },
       containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
       Column(
         modifier =
-          Modifier.fillMaxSize().padding(innerPadding).semantics { isTraversalGroup = true }
+          Modifier.fillMaxSize()
+            .padding(innerPadding)
+            .nestedScroll(searchBarState.nestedScrollConnection)
+            .semantics { isTraversalGroup = true }
       ) {
         // Hides itself when the connection returns; the survey list then loads.
         if (!uiState.isOnline) {
@@ -222,84 +249,16 @@ fun DownloadSurveyScreen(
             modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp)
           )
         }
-        // Search Bar for filtering by survey name or location
-        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-          OutlinedTextField(
-            value = uiState.searchQuery,
-            onValueChange = { actions.updateSearchQuery(it) },
-            modifier =
-              Modifier.fillMaxWidth().semantics {
-                contentDescription = searchSurveysDescription
-                traversalIndex = 0f
-              },
-            singleLine = true,
-            placeholder = {
-              Text(
-                text = stringResource(Res.string.mobile_download_survey_search_placeholder),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-            },
-            leadingIcon = {
-              Icon(
-                imageVector = Icons.Outlined.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp),
-              )
-            },
-            trailingIcon = {
-              if (uiState.searchQuery.isNotEmpty()) {
-                IconButton(onClick = { actions.clearSearchQuery() }) {
-                  Icon(
-                    imageVector = Icons.Outlined.Close,
-                    contentDescription =
-                      stringResource(Res.string.mobile_clear_search_content_description),
-                    modifier = Modifier.size(18.dp),
-                  )
-                }
-              }
-            },
-            shape = MaterialTheme.shapes.extraLarge,
-            colors =
-              OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Transparent,
-              ),
-          )
-        }
-
-        // Optional feedback toast banner when downloading/toggling a survey
-        notice?.let { notice ->
-          Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.fillMaxWidth(),
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp),
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
-              verticalAlignment = Alignment.CenterVertically,
-            ) {
-              Icon(
-                imageVector = Icons.Outlined.CheckCircle,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(15.dp),
-              )
-              Text(
-                text = notice,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f),
-              )
-            }
-          }
-        }
+        // Search by survey name or location. Scrolling the list down hides the field and
+        // scrolling back up returns it; a query keeps it in view.
+        DownloadSurveySearchField(
+          query = uiState.searchQuery,
+          onQueryChange = actions::updateSearchQuery,
+          onClear = actions::clearSearchQuery,
+          modifier =
+            Modifier.collapsedBy(searchBarState, isPinned = uiState.searchQuery.isNotEmpty())
+              .padding(horizontal = 16.dp, vertical = 6.dp),
+        )
 
         // Section Summary Header
         Row(
@@ -398,6 +357,7 @@ fun DownloadSurveyScreen(
           var collapsedGroups by remember { mutableStateOf(emptySet<String>()) }
 
           LazyColumn(
+            state = listState,
             modifier =
               Modifier.weight(1f).fillMaxWidth().semantics {
                 isTraversalGroup = true
@@ -529,6 +489,80 @@ fun DownloadSurveyScreen(
 
     if (uiState.pendingRemovalSurveyId != null) {
       RemoveDownloadedSurveyConfirmationDialog(uiState, actions)
+    }
+  }
+}
+
+/**
+ * Compact search field of the Download survey screen: a search icon, the [query] (or a
+ * placeholder), and a clear button on the right while there is a query.
+ */
+@Composable
+private fun DownloadSurveySearchField(
+  query: String,
+  onQueryChange: (String) -> Unit,
+  onClear: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val searchSurveysDescription =
+    stringResource(Res.string.mobile_download_survey_search_content_description)
+  Box(modifier = modifier) {
+    Surface(
+      modifier = Modifier.fillMaxWidth().height(40.dp),
+      shape = MaterialTheme.shapes.extraLarge,
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
+      contentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
+      Row(
+        modifier = Modifier.fillMaxSize().padding(start = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Icon(
+          imageVector = Icons.Outlined.Search,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.size(18.dp),
+        )
+        Box(
+          modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+          contentAlignment = Alignment.CenterStart,
+        ) {
+          if (query.isEmpty()) {
+            Text(
+              text = stringResource(Res.string.mobile_download_survey_search_placeholder),
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+            )
+          }
+          @Suppress("DEPRECATION")
+          BasicTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            singleLine = true,
+            textStyle =
+              MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            modifier =
+              Modifier.fillMaxWidth().semantics {
+                contentDescription = searchSurveysDescription
+                traversalIndex = 0f
+              },
+          )
+        }
+        if (query.isNotEmpty()) {
+          IconButton(onClick = onClear, modifier = Modifier.size(40.dp)) {
+            Icon(
+              imageVector = Icons.Outlined.Close,
+              contentDescription =
+                stringResource(Res.string.mobile_clear_search_content_description),
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(18.dp),
+            )
+          }
+        }
+      }
     }
   }
 }
