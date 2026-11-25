@@ -399,7 +399,7 @@ describe('MapComponent', () => {
 
   it('should select loi when marker is clicked', () => {
     const marker1 = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker1, 'click');
+    google.maps.event.trigger(marker1, 'gmp-click');
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
@@ -512,7 +512,7 @@ describe('MapComponent', () => {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
     const marker2 = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker2, 'click');
+    google.maps.event.trigger(marker2, 'gmp-click');
 
     expect(navigationServiceSpy.selectLocationOfInterest).toHaveBeenCalledTimes(
       0
@@ -871,7 +871,7 @@ describe('MapComponent', () => {
         marker => marker.element.textContent === '0/2'
       )!;
 
-      google.maps.event.trigger(bubble, 'click');
+      google.maps.event.trigger(bubble, 'gmp-click');
 
       // The extent of poi1 and the polygon (0..10).
       expect(googleMap.fitBounds).toHaveBeenCalledOnceWith(
@@ -890,7 +890,7 @@ describe('MapComponent', () => {
         marker => marker.element.textContent === '0/1'
       )!;
 
-      google.maps.event.trigger(bubble, 'click');
+      google.maps.event.trigger(bubble, 'gmp-click');
 
       expect(googleMap.panTo).toHaveBeenCalledOnceWith({
         lat: 45.6,

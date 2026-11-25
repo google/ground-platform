@@ -597,7 +597,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       content: createClusterBubbleElement(bubble.withData, bubble.total),
       gmpClickable: this.areBubblesClickable(),
     });
-    marker.addListener('click', () => this.onBubbleClick(bubble));
+    marker.addEventListener('gmp-click', () => this.onBubbleClick(bubble));
     return marker;
   }
 
@@ -700,7 +700,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     color: string | undefined
   ): google.maps.marker.AdvancedMarkerElement {
     const marker = this.addMarkerToMap(loiId, geometry, color);
-    marker.addListener('click', () =>
+    marker.addEventListener('gmp-click', () =>
       this.onLocationOfInterestMarkerClick(loiId)
     );
     if (this.shouldEnableDrawingTools) {
@@ -726,7 +726,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     markerText: string
   ): google.maps.marker.AdvancedMarkerElement {
     const marker = this.addMarkerToMap(taskId, geometry, color, markerText);
-    marker.addListener('click', () =>
+    marker.addEventListener('gmp-click', () =>
       this.onSubmissionGeometryClick(loiId, submissionId, taskId)
     );
     return marker;
