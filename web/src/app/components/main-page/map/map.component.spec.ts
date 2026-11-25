@@ -605,8 +605,24 @@ describe('MapComponent', () => {
     cancelRepositionButton.click();
     fixture.detectChanges();
 
+    // Back where it was before the drag: the position of poi1.
     assertMarkerLatLng(marker, new google.maps.LatLng(4.56, 1.23));
     expect(loiServiceSpy.updatePoint).toHaveBeenCalledTimes(0);
+  });
+
+  it('should close the reposition dialog when the dragged marker has no position', async () => {
+    mockLocationOfInterestId$.next(poiId1);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const marker = component.markers.get(poiId1)!;
+    google.maps.event.trigger(marker, 'gmp-dragstart');
+    (marker as { position: unknown }).position = null;
+    google.maps.event.trigger(marker, 'gmp-dragend');
+
+    expect(component.showRepositionConfirmDialog).toBeFalse();
+    expect(drawingToolsServiceSpy.setDisabled).toHaveBeenCalledWith(false);
+    expect(loiServiceSpy.updatePoint).not.toHaveBeenCalled();
   });
 
   it('should pop up dialog when overlapping polygons are clicked', async () => {

@@ -759,15 +759,19 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   /**
-   * Returns the position of a marker. The 'gmp-' drag events carry no
-   * coordinates: the marker moves itself, so its position is read from it.
+   * Returns the position of a marker, or undefined if it has none. The 'gmp-'
+   * drag events carry no coordinates: the marker moves itself, so its position
+   * is read from it.
    */
   private getMarkerLatLng(
     marker: google.maps.marker.AdvancedMarkerElement
-  ): google.maps.LatLng {
+  ): google.maps.LatLng | undefined {
     const position = marker.position as
       | google.maps.LatLng
-      | google.maps.LatLngLiteral;
+      | google.maps.LatLngLiteral
+      | null
+      | undefined;
+    if (!position) return undefined;
     const lat =
       typeof position.lat === 'function' ? position.lat() : position.lat;
     const lng =
@@ -792,6 +796,11 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     jobId: string
   ) {
     const newLatLng = this.getMarkerLatLng(marker);
+    if (!newLatLng) {
+      // Nothing to save: close the reposition instead of leaving it half done.
+      this.resetReposition();
+      return;
+    }
     this.newLatLng = newLatLng;
 
     this.newLocationOfInterestToReposition = new LocationOfInterest(
@@ -1028,7 +1037,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   onCancelRepositionClick() {
-    this.markerToReposition!.position = this.oldLatLng!;
+    if (this.oldLatLng) this.markerToReposition!.position = this.oldLatLng;
     this.resetReposition();
   }
 
