@@ -14,14 +14,21 @@
  */
 package org.openforis.collectone.v2.mobile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
@@ -42,6 +49,7 @@ import org.openforis.collectone.v2.app.ui.common.ProvideAppLocale
 import org.openforis.collectone.v2.core.forms.ui.AppTheme
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.mobile.ui.MobileAppState
+import org.openforis.collectone.v2.mobile.ui.navigation.MobileRoute
 import org.openforis.collectone.v2.mobile.ui.onboarding.MobileScreenHost
 
 /**
@@ -58,6 +66,10 @@ import org.openforis.collectone.v2.mobile.ui.onboarding.MobileScreenHost
  *
  * Hover feedback (the pointing-hand cursor and the hover highlight around controls) is turned off
  * for the whole mobile app; it belongs to the web console, where a mouse hovers.
+ *
+ * The areas behind the system bars take the color of the container next to them
+ * ([mobileSystemBarBackdrops]), so the top bar of a screen continues behind the status bar and its
+ * bottom container (such as the map's bottom sheet) behind the navigation bar.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,23 +93,55 @@ fun MobileApp(
             if (state.isMapShowing(dataCollectionUiState)) Color.Transparent
             else MaterialTheme.colorScheme.surface,
         ) {
-          val isTopInsetTransparent = state.isMainMapScreenShowing(dataCollectionUiState)
+          val offlineAreaSelection by state.offlineAreaSelection.uiState.collectAsState()
+          val backdrops =
+            mobileSystemBarBackdrops(
+              isMainMapScreenShowing = state.isMainMapScreenShowing(dataCollectionUiState),
+              isSelectingOfflineArea = offlineAreaSelection.isActive,
+              isDataCollectionFormShowing = state.currentRoute == MobileRoute.DataCollection,
+            )
           val safeDrawingInsets = WindowInsets.safeDrawing
+          val isTopInsetTransparent = backdrops.top == SystemBarBackdrop.MAP
           val topInsetPadding =
             if (isTopInsetTransparent) {
               safeDrawingInsets.asPaddingValues().calculateTopPadding()
             } else {
               0.dp
             }
-          val appliedInsets =
+          // The strips below take the top and bottom insets; screens only see the top one where
+          // they
+          // draw behind the status bar themselves.
+          val consumedInsets =
             if (isTopInsetTransparent) {
               safeDrawingInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
             } else {
               safeDrawingInsets
             }
           CompositionLocalProvider(LocalMobileTopInset provides topInsetPadding) {
-            Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(appliedInsets)) {
-              MobileScreenHost(state, navController)
+            Column(modifier = Modifier.fillMaxSize()) {
+              if (!isTopInsetTransparent) {
+                Spacer(
+                  modifier =
+                    Modifier.fillMaxWidth()
+                      .windowInsetsTopHeight(safeDrawingInsets)
+                      .background(backdrops.top.color())
+                )
+              }
+              Box(
+                modifier =
+                  Modifier.weight(1f)
+                    .fillMaxWidth()
+                    .windowInsetsPadding(safeDrawingInsets.only(WindowInsetsSides.Horizontal))
+                    .consumeWindowInsets(consumedInsets)
+              ) {
+                MobileScreenHost(state, navController)
+              }
+              Spacer(
+                modifier =
+                  Modifier.fillMaxWidth()
+                    .windowInsetsBottomHeight(safeDrawingInsets)
+                    .background(backdrops.bottom.color())
+              )
             }
           }
         }
