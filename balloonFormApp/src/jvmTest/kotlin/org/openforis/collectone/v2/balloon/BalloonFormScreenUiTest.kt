@@ -239,9 +239,9 @@ class BalloonFormScreenUiTest {
       )
     }
 
-    onNodeWithTag("choice-color-stripe-forest", useUnmergedTree = true).assertExists()
+    onNodeWithTag("choice-color-stripe-forest", useUnmergedTree = true).assertDoesNotExist()
     onNodeWithTag("choice-color-swatch-forest", useUnmergedTree = true).assertExists()
-    onNodeWithTag("choice-color-stripe-cropland", useUnmergedTree = true).assertExists()
+    onNodeWithTag("choice-color-stripe-cropland", useUnmergedTree = true).assertDoesNotExist()
     onNodeWithTag("choice-color-swatch-cropland", useUnmergedTree = true).assertExists()
   }
 
