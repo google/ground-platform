@@ -152,12 +152,6 @@
   <string name="web_back_to_submissions">กลับไปที่การส่งข้อมูล</string>
   <string name="web_more_submission_actions">การดำเนินการอื่นๆ สำหรับการส่งข้อมูล</string>
   <string name="web_close_form">ปิดแบบฟอร์ม</string>
-  <string name="web_map_drawing_place_point">คลิกแผนที่เพื่อวางจุด</string>
-  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
-  <string name="web_map_drawing_add_vertices">คลิกแผนที่เพื่อเพิ่มจุดยอด • %1$d จากอย่างน้อย %2$d</string>
-  <string name="web_undo">เลิกทำ</string>
-  <string name="web_done">เสร็จแล้ว</string>
-  <string name="web_cancel_drawing">ยกเลิกการวาด</string>
   <string name="web_sign_in">ลงชื่อเข้าใช้</string>
   <string name="web_sign_in_tagline">ทำแผนที่ระบบนิเวศ ออกแบบแบบสำรวจภาคสนาม และตรวจสอบข้อมูลจากการสังเกตในพื้นที่ร่วมกับองค์กรของคุณ</string>
   <string name="web_sign_in_description">ลงชื่อเข้าใช้เพื่อดูแบบสำรวจและองค์กรที่แชร์กับบัญชีของคุณ</string>

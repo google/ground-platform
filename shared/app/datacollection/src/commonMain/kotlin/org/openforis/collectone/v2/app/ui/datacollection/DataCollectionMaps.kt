@@ -20,7 +20,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -56,6 +59,9 @@ import org.openforis.collectone.v2.map.LatLng
  * @param formMap the open form's hooks: map clicks become vertices while drawing, and tapping a
  *   geometry answer focuses its question.
  * @param pendingIds entities with pending uploads, drawn in the pending style.
+ * @param followsMousePointer whether map features react to the mouse pointer (web dashboard): the
+ *   one under it is drawn slightly emphasized and click targets show the pointing-hand cursor.
+ *   Touch hosts keep the default `false`, which leaves the map exactly as it is without it.
  */
 @Composable
 fun SurveyMainMap(
@@ -68,7 +74,9 @@ fun SurveyMainMap(
   modifier: Modifier = Modifier,
   collapseSheetOnBackgroundTap: Boolean = true,
   showNavigationOverlay: Boolean = true,
+  followsMousePointer: Boolean = false,
 ) {
+  var hoveredEntityId by remember { mutableStateOf<String?>(null) }
   SurveyMainMap(
     uiState = uiState,
     actions = actions,
@@ -78,6 +86,7 @@ fun SurveyMainMap(
         dataCollection = dataCollection,
         pendingIds = pendingIds,
         showNavigation = showNavigationOverlay,
+        hoveredEntityId = hoveredEntityId.takeIf { followsMousePointer },
       ),
     camera = camera,
     modifier = modifier,
@@ -94,6 +103,10 @@ fun SurveyMainMap(
       } else {
         null
       },
+    onEntityHover =
+      if (followsMousePointer) {
+        { hoveredEntityId = it }
+      } else null,
   )
 }
 

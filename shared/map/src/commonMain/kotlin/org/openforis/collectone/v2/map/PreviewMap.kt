@@ -56,7 +56,16 @@ internal fun PreviewMap(
   ReportCameraIdle(cameraState, onEvent)
 
   Canvas(
-    modifier.mapGestures(cameraState, gestures) { tap ->
+    modifier.mapGestures(
+      cameraState,
+      gestures,
+      onHover = { at ->
+        val hit = at?.let {
+          hitTest(currentContent, it, cameraState::project, cameraState.unproject(it))
+        }
+        gestures.onFeatureHover?.invoke(hit?.featureId)
+      },
+    ) { tap ->
       val hit = hitTest(currentContent, tap, cameraState::project, cameraState.unproject(tap))
       currentOnEvent(hit ?: MapEvent.BackgroundTapped(cameraState.unproject(tap)))
     }

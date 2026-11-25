@@ -152,12 +152,6 @@
   <string name="web_back_to_submissions">Volver a los envíos</string>
   <string name="web_more_submission_actions">Más acciones del envío</string>
   <string name="web_close_form">Cerrar formulario</string>
-  <string name="web_map_drawing_place_point">Haga clic en el mapa para colocar el punto</string>
-  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
-  <string name="web_map_drawing_add_vertices">Haga clic en el mapa para añadir vértices • %1$d de al menos %2$d</string>
-  <string name="web_undo">Deshacer</string>
-  <string name="web_done">Hecho</string>
-  <string name="web_cancel_drawing">Cancelar dibujo</string>
   <string name="web_sign_in">Iniciar sesión</string>
   <string name="web_sign_in_tagline">Mapee ecosistemas, diseñe encuestas de campo y verifique observaciones en terreno con su organización.</string>
   <string name="web_sign_in_description">Inicie sesión para ver las encuestas y organizaciones compartidas con su cuenta.</string>

@@ -37,6 +37,7 @@ them, in the same package.
 | `Basemap` | The imagery under the content, chosen by the app: a hosted Mapbox style (`MapboxStyle`), XYZ raster tiles from any server (`RasterTiles`), or `None`. `AppMap` draws its attribution. A `MapboxStyle` also takes `overlays` (`BasemapOverlay`), drawn above the style and below the content: `RasterTileLayer`s from a tile URL template or a `mapbox://` tileset, optionally limited to `bounds` and a zoom range, and `VectorLineOverlay`s, lines from one layer of a vector tileset (e.g. contours), with an optional filter and wider `emphasis` lines. Changing overlays reloads the style. |
 | `MapCameraState` | Hoisted, observable camera. Gestures and the app both write to it (`move`, `animateTo`, `fitBounds`). `project` / `unproject` position Compose overlays. |
 | `MapEvent` | What happened: `FeatureTapped`, `MarkerTapped`, `BackgroundTapped`, `CameraIdle`. |
+| `onHover` | Optional `AppMap` callback for mouse hosts: the id of the marker or topmost feature under the pointer, or `null`. Nothing is tracked when it is `null`, the default, as on touch devices. |
 | `AppMap` | The composable that ties them together. |
 
 The camera is deliberately not part of `MapContent`. Both the user and the

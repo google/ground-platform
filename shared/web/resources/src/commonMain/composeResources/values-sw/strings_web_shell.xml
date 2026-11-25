@@ -152,12 +152,6 @@
   <string name="web_back_to_submissions">Rudi kwenye mawasilisho</string>
   <string name="web_more_submission_actions">Vitendo zaidi vya wasilisho</string>
   <string name="web_close_form">Funga fomu</string>
-  <string name="web_map_drawing_place_point">Bofya ramani ili kuweka nukta</string>
-  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
-  <string name="web_map_drawing_add_vertices">Bofya ramani ili kuongeza vipeo • %1$d kati ya angalau %2$d</string>
-  <string name="web_undo">Tendua</string>
-  <string name="web_done">Nimemaliza</string>
-  <string name="web_cancel_drawing">Ghairi kuchora</string>
   <string name="web_sign_in">Ingia</string>
   <string name="web_sign_in_tagline">Weka mifumo ikolojia kwenye ramani, buni tafiti za uwandani na uthibitishe uchunguzi wa ardhini pamoja na shirika lako.</string>
   <string name="web_sign_in_description">Ingia ili kuona tafiti na mashirika yaliyoshirikiwa na akaunti yako.</string>

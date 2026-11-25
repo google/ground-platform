@@ -343,9 +343,10 @@ Open a survey from the **Surveys** page, or deep-link to `/surveys/<id>/dashboar
     (`geopoint`, `geotrace`, `geoshape`, "GPS only" or not) is answered by
     drawing on the main map (`shared/app`'s `ui/datacollection/WebMapDrawingHost.kt`): **Draw on map**
     in the question's card routes map clicks to it
-    (`DataCollectionViewModel.webMapDrawing`, the `CompactMapDrawingHost`), a floating chip at the top of the map shows
-    the progress (`2 of at least 3`) with **Undo**, **Done**, and **Cancel
-    drawing**, and the in-progress vertices, line, or polygon are drawn above
+    (`DataCollectionViewModel.webMapDrawing`, the `CompactMapDrawingHost`), the
+    card shows the instruction and the progress with **Done**, **Undo**, and
+    **Cancel** (which puts back what the question held before), the map shows a
+    crosshair cursor, and the in-progress vertices, line, or polygon are drawn above
     the map features in the draft style (`SurveyMapContent.draftGeometry`).
     One click places a point; lines and polygons collect vertices until
     **Done**. While drawing, clicks on features add vertices instead of

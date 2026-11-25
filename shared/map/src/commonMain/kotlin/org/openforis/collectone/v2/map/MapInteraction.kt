@@ -49,4 +49,9 @@ internal data class MapGestureOptions(
    */
   val doubleTapZoom: Boolean = true,
   val dragHandler: MapDragHandler? = null,
+  /**
+   * When non-null, the renderer reports the id of the topmost feature under the mouse pointer, or
+   * `null` when it is over the background or has left the map. Renderers without a mouse ignore it.
+   */
+  val onFeatureHover: ((featureId: String?) -> Unit)? = null,
 )

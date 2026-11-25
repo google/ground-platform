@@ -28,6 +28,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.unit.Density
@@ -70,15 +71,21 @@ private const val DOUBLE_TAP_ZOOM_MS = 250
  * gestures behave the same everywhere and [MapCameraState] stays the single source of truth for the
  * camera. One-finger drags go to [MapGestureOptions.dragHandler] first. [onTap] and the drag
  * handler are captured once per [cameraState], so they should read changing values through state.
+ *
+ * Renderers that can hit-test under a mouse pointer pass [onHover]; it is only used when the app
+ * asked for hover reports ([MapGestureOptions.onFeatureHover]).
  */
 internal fun Modifier.mapGestures(
   cameraState: MapCameraState,
   options: MapGestureOptions = MapGestureOptions(),
+  onHover: ((DpOffset?) -> Unit)? = null,
   onTap: (DpOffset) -> Unit,
 ): Modifier {
   if (!options.enabled) return this
   val dragHandler = options.dragHandler
-  return pointerInput(cameraState, dragHandler) {
+  val hover = if (onHover != null && options.onFeatureHover != null) mouseHover(onHover) else this
+  return hover
+    .pointerInput(cameraState, dragHandler) {
       // A detectTransformGestures loop that can hand a one-finger drag to the app instead.
       awaitEachGesture {
         val down = awaitFirstDown(requireUnconsumed = false)
@@ -176,6 +183,29 @@ internal fun Modifier.mapGestures(
       }
     }
 }
+
+/**
+ * Reports where the mouse pointer rests to [onHover], relative to the map's top-left corner, and
+ * `null` once it leaves. Moves with a button held (a pan or a claimed drag) are skipped, so the
+ * hover target stays put during a gesture. Touch and stylus input never hover.
+ */
+private fun Modifier.mouseHover(onHover: (DpOffset?) -> Unit): Modifier =
+  pointerInput(onHover) {
+    awaitPointerEventScope {
+      while (true) {
+        val event = awaitPointerEvent()
+        when (event.type) {
+          PointerEventType.Exit -> onHover(null)
+          PointerEventType.Enter,
+          PointerEventType.Move -> {
+            val change = event.changes.firstOrNull() ?: continue
+            if (change.type != PointerType.Mouse || change.pressed) continue
+            onHover(change.position.toDpOffset(this))
+          }
+        }
+      }
+    }
+  }
 
 /** Applies one step of a pan/pinch gesture: zoom by [zoom] around [centroid], then pan by [pan]. */
 private fun Density.transformCamera(

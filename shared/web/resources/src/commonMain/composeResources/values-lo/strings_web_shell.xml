@@ -152,12 +152,6 @@
   <string name="web_back_to_submissions">ກັບໄປທີ່ການສົ່ງຂໍ້ມູນ</string>
   <string name="web_more_submission_actions">ການດຳເນີນການເພີ່ມເຕີມສຳລັບການສົ່ງຂໍ້ມູນ</string>
   <string name="web_close_form">ປິດແບບຟອມ</string>
-  <string name="web_map_drawing_place_point">ຄລິກແຜນທີ່ເພື່ອວາງຈຸດ</string>
-  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
-  <string name="web_map_drawing_add_vertices">ຄລິກແຜນທີ່ເພື່ອເພີ່ມຈຸດຍອດ • %1$d ຈາກຢ່າງໜ້ອຍ %2$d</string>
-  <string name="web_undo">ຍ້ອນກັບ</string>
-  <string name="web_done">ແລ້ວເສັດ</string>
-  <string name="web_cancel_drawing">ຍົກເລີກການວາດ</string>
   <string name="web_sign_in">ເຂົ້າລະບົບ</string>
   <string name="web_sign_in_tagline">ທຳແຜນທີ່ລະບົບນິເວດ, ອອກແບບແບບສຳຫຼວດພາກສະໜາມ ແລະ ຢັ້ງຢືນຂໍ້ມູນສັງເກດການພາກພື້ນດິນຮ່ວມກັບອົງກອນຂອງທ່ານ.</string>
   <string name="web_sign_in_description">ເຂົ້າລະບົບເພື່ອເບິ່ງແບບສຳຫຼວດ ແລະ ອົງກອນທີ່ແບ່ງປັນກັບບັນຊີຂອງທ່ານ.</string>

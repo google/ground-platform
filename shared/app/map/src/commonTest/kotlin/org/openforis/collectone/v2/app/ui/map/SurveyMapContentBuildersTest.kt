@@ -46,6 +46,16 @@ class SurveyMapContentBuildersTest {
   private fun SurveyMap.features(source: String) =
     content.sources.first { it.id == source }.features
 
+  private fun SurveyMap.hoverFeatures() =
+    features(SurveyMapContent.OVERLAY_SOURCE).filter {
+      it.properties[SurveyMapContent.PROP_KIND] in
+        setOf(
+          SurveyMapHover.KIND_POINT,
+          SurveyMapHover.KIND_LINE,
+          SurveyMapHover.KIND_POLYGON,
+        )
+    }
+
   @Test
   fun main_drawsEveryVisibleFeature_andTheUserChip() {
     val f = MapViewModelFixture()
@@ -78,6 +88,56 @@ class SurveyMapContentBuildersTest {
       (label as? SurveyMarker.PinLabel)?.selected
         ?: assertIs<SurveyMarker.GeometryPill>(label).selected
     )
+  }
+
+  @Test
+  fun main_withoutAHoveredFeature_drawsNoHoverFeatures() {
+    val f = MapViewModelFixture()
+    val map = SurveyMapContent.main(f.uiState, emptySet(), showNavigation = false)
+    assertTrue(map.hoverFeatures().isEmpty())
+  }
+
+  @Test
+  fun main_drawsTheHoveredFeatureAgainInTheOverlay_withoutTouchingTheEntities() {
+    val f = MapViewModelFixture()
+    val plain = SurveyMapContent.main(f.uiState, emptySet(), showNavigation = false)
+    val map =
+      SurveyMapContent.main(
+        f.uiState,
+        emptySet(),
+        showNavigation = false,
+        hoveredEntityId = SEEDED_ENTITY_ID,
+      )
+
+    val hover = map.hoverFeatures().single()
+    assertEquals(SurveyMapIds.entity(SEEDED_ENTITY_ID), hover.id)
+    val entityFeature =
+      map.features(SurveyMapContent.ENTITY_SOURCE).first {
+        it.id == SurveyMapIds.entity(SEEDED_ENTITY_ID)
+      }
+    assertEquals(entityFeature.geometry, hover.geometry)
+    // A hover layer draws it: every hover kind has a layer filtering on it.
+    assertTrue(map.content.layers.any { it.filter?.matches(hover) == true })
+    // Hovering resends only the small overlay source, never the entities.
+    assertEquals(
+      plain.features(SurveyMapContent.ENTITY_SOURCE),
+      map.features(SurveyMapContent.ENTITY_SOURCE),
+    )
+    assertEquals(plain.content.layers, map.content.layers)
+  }
+
+  @Test
+  fun main_doesNotDrawHoverOverTheSelectedFeature() {
+    val f = MapViewModelFixture()
+    f.viewModel.selectEntity(SEEDED_ENTITY_ID)
+    val map =
+      SurveyMapContent.main(
+        f.uiState,
+        emptySet(),
+        showNavigation = false,
+        hoveredEntityId = SEEDED_ENTITY_ID,
+      )
+    assertTrue(map.hoverFeatures().isEmpty())
   }
 
   @Test

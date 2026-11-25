@@ -56,6 +56,7 @@ import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.TextButton
 import org.openforis.collectone.v2.core.forms.ui.resources.Res
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_cancel
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_clear
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_done
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_draw_on_map
@@ -108,6 +109,12 @@ interface CompactMapDrawingHost {
 
   /** Stops routing map clicks to the active question, keeping whatever was drawn. */
   fun stopDrawing()
+
+  /**
+   * Stops routing map clicks to the active question and puts back what it held before
+   * [startDrawing]. Hosts that don't keep the earlier answer just stop, which is the default.
+   */
+  fun cancelDrawing() = stopDrawing()
 
   /** True when the host can centre a question's geometry in its map ([frameGeometry]). */
   val canFrameGeometry: Boolean
@@ -223,10 +230,10 @@ fun mapDrawingSummary(kind: MapDrawingKind, vertexCount: Int): FormUiText =
 /**
  * The compact layout's input for a geometry question when the host provides map drawing
  * ([CompactGeometryInput.MapDrawing]): an instruction to click the map, the drawing status, and
- * **Draw on map** / **Done** / **Undo** / **Clear** actions. Vertices themselves arrive through the
- * host ([CompactMapDrawingHost]), which calls [addMapDrawingVertex] for each map click. Hosts that
- * can frame geometry ([CompactMapDrawingHost.canFrameGeometry]) also get a **Zoom to fit** button
- * once something is drawn.
+ * **Draw on map** / **Done** / **Undo** / **Cancel** / **Clear** actions. Vertices themselves
+ * arrive through the host ([CompactMapDrawingHost]), which calls [addMapDrawingVertex] for each map
+ * click. Hosts that can frame geometry ([CompactMapDrawingHost.canFrameGeometry]) also get a **Zoom
+ * to fit** button once something is drawn.
  *
  * With a `null` [host] or [readOnly], the actions are disabled: the card documents the interaction
  * for the Form designer's web preview without a live map.
@@ -322,6 +329,10 @@ fun MapDrawingRequestWidget(
           enabled = interactive && vertices.isNotEmpty(),
         ) {
           Text(stringResource(Res.string.forms_undo))
+        }
+        // The only way out of drawing a point before it is placed, and of a shape begun by mistake.
+        TextButton(onClick = { host.cancelDrawing() }, enabled = interactive) {
+          Text(stringResource(Res.string.forms_cancel))
         }
       } else {
         FilledTonalButton(onClick = { host?.startDrawing(path, kind) }, enabled = interactive) {

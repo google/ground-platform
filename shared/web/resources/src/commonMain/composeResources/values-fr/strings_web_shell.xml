@@ -152,12 +152,6 @@
   <string name="web_back_to_submissions">Retour aux soumissions</string>
   <string name="web_more_submission_actions">Plus d’actions sur la soumission</string>
   <string name="web_close_form">Fermer le formulaire</string>
-  <string name="web_map_drawing_place_point">Cliquez sur la carte pour placer le point</string>
-  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
-  <string name="web_map_drawing_add_vertices">Cliquez sur la carte pour ajouter des sommets • %1$d sur %2$d minimum</string>
-  <string name="web_undo">Annuler</string>
-  <string name="web_done">Terminé</string>
-  <string name="web_cancel_drawing">Annuler le dessin</string>
   <string name="web_sign_in">Se connecter</string>
   <string name="web_sign_in_tagline">Cartographiez des écosystèmes, concevez des enquêtes de terrain et vérifiez les observations au sol avec votre organisation.</string>
   <string name="web_sign_in_description">Connectez-vous pour voir les enquêtes et organisations partagées avec votre compte.</string>

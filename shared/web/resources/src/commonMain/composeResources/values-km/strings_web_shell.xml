@@ -152,12 +152,6 @@
   <string name="web_back_to_submissions">ត្រឡប់ទៅការដាក់ស្នើ</string>
   <string name="web_more_submission_actions">សកម្មភាពការដាក់ស្នើបន្ថែម</string>
   <string name="web_close_form">បិទសំណុំបែបបទ</string>
-  <string name="web_map_drawing_place_point">ចុចលើផែនទី ដើម្បីដាក់ចំណុច</string>
-  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
-  <string name="web_map_drawing_add_vertices">ចុចលើផែនទី ដើម្បីបន្ថែមចំណុចកំពូល • %1$d នៃយ៉ាងហោចណាស់ %2$d</string>
-  <string name="web_undo">មិនធ្វើវិញ</string>
-  <string name="web_done">រួចរាល់</string>
-  <string name="web_cancel_drawing">បោះបង់ការគូរ</string>
   <string name="web_sign_in">ចូលគណនី</string>
   <string name="web_sign_in_tagline">គូសផែនទីប្រព័ន្ធអេកូឡូស៊ី រចនាការស្ទង់មតិនៅវាល និងផ្ទៀងផ្ទាត់ការសង្កេតនៅទីតាំងជាមួយស្ថាប័នរបស់អ្នក។</string>
   <string name="web_sign_in_description">ចូលគណនី ដើម្បីមើលការស្ទង់មតិ និងស្ថាប័នដែលបានចែករំលែកជាមួយគណនីរបស់អ្នក។</string>

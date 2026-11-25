@@ -135,7 +135,7 @@ class WebMapDrawingHost(
   }
 
   /** Stops drawing and puts back whatever the question held before [startDrawing]. */
-  fun cancelDrawing() {
+  override fun cancelDrawing() {
     val path = activeDrawingPath ?: return
     val kind = activeDrawingKind ?: return
     controller()?.setMapDrawingVertices(path, kind, verticesAtStart)

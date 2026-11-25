@@ -118,7 +118,6 @@ import org.openforis.collectone.v2.web.ui.common.WebFormPanelWidth
 import org.openforis.collectone.v2.web.ui.datacollection.WebDataCollectionCard
 import org.openforis.collectone.v2.web.ui.datacollection.WebEntityDetailsCard
 import org.openforis.collectone.v2.web.ui.datacollection.webDataCollectionFormTitle
-import org.openforis.collectone.v2.web.ui.map.WebMapDrawingHint
 import org.openforis.collectone.v2.web.ui.timeseries.PinnedSceneBanner
 import org.openforis.collectone.v2.web.ui.timeseries.TimeSeriesUiState
 
@@ -544,23 +543,11 @@ private fun DashboardMapArea(
       modifier = Modifier.fillMaxSize(),
       collapseSheetOnBackgroundTap = false,
       showNavigationOverlay = false,
+      followsMousePointer = true,
     )
 
     // The part of the map left of the floating card.
     Box(modifier = Modifier.fillMaxSize().padding(end = rightCardInset)) {
-      // Floating instructions while a form's geometry question is being drawn on the map.
-      val webMapDrawing = dataCollectionUiState.webMapDrawing
-      val draft = dataCollectionUiState.webMapDraftGeometry
-      if (draft != null && webMapDrawing != null) {
-        WebMapDrawingHint(
-          draft = draft,
-          onUndo = { webMapDrawing.undoVertex() },
-          onDone = { webMapDrawing.stopDrawing() },
-          onCancel = { webMapDrawing.cancelDrawing() },
-          modifier = Modifier.align(Alignment.TopCenter).padding(DashboardOverlayMargin),
-        )
-      }
-
       // The historical scene of the observation selected in the time series sheet, centered over
       // the map left of the card and kept clear of the basemap preview card on either side.
       timeSeriesState.pinnedScene?.let { pinnedScene ->

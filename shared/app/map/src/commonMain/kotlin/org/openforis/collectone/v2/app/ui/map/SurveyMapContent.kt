@@ -109,6 +109,8 @@ data class SurveyMapScene(
   val imagerySources: List<ImagerySource> = emptyList(),
   val savedImagery: SavedImageryOnMap = SavedImageryOnMap(),
   val userLatLng: LatLng? = null,
+  /** The entity under the mouse pointer, drawn slightly emphasized (web dashboard). */
+  val hoveredEntityId: String? = null,
 ) {
   /** The position at normalized coordinates ([nx], [ny]) around [anchor]. */
   internal fun at(nx: Float, ny: Float): LatLng = anchor.toLatLng(nx.toDouble(), ny.toDouble())
@@ -258,6 +260,7 @@ object SurveyMapContent {
    * @param pendingIds entities with pending uploads, drawn in the pending style.
    * @param draftGeometry the geometry being drawn for a form question, if any (web dashboard).
    * @param formGeometries geometry answers held by the open form, if any (web dashboard).
+   * @param hoveredEntityId the map feature under the mouse pointer, if any (web dashboard).
    */
   fun main(
     uiState: SurveyMapUiState,
@@ -265,6 +268,7 @@ object SurveyMapContent {
     showNavigation: Boolean,
     draftGeometry: DraftGeometry? = null,
     formGeometries: List<FormGeometryOverlay> = emptyList(),
+    hoveredEntityId: String? = null,
   ): SurveyMap =
     build(
       uiState
@@ -282,6 +286,7 @@ object SurveyMapContent {
           place = uiState.selectedPlace,
           draftGeometry = draftGeometry,
           formGeometries = formGeometries,
+          hoveredEntityId = hoveredEntityId,
         )
     )
 
@@ -373,7 +378,9 @@ object SurveyMapContent {
           listOf(
             GeoJsonSource(
               OVERLAY_SOURCE,
-              savedAreaOutlines(scene.savedImagery) + overlays.features,
+              savedAreaOutlines(scene.savedImagery) +
+                SurveyMapHover.features(scene, entities.features) +
+                overlays.features,
             ),
             GeoJsonSource(ENTITY_SOURCE, entities.features),
           ),
@@ -780,9 +787,11 @@ object SurveyMapContent {
     return savedAreaLayers(satellite) +
       navigationTargetLayer() +
       entityShapeLayers(palette, strokeColor) +
+      SurveyMapHover.shapeLayers(strokeColor) +
       entitySubPlotLayers(palette) +
       navigationLineLayers() +
       entityPointLayers(strokeColor, pinIds) +
+      SurveyMapHover.pinLayer(pinIds) +
       formAndDraftLayers()
   }
 
@@ -1044,7 +1053,7 @@ object SurveyMapContent {
   private const val PROP_STROKE = "stroke"
   private const val PROP_FILL = "fill"
   private const val PROP_FILL_STYLE = "fillStyle"
-  private const val PROP_PIN = "pin"
+  internal const val PROP_PIN = "pin"
   private const val PROP_VERTEX_SIZE = "vertexSize"
 
   const val KIND_POINT = "point"

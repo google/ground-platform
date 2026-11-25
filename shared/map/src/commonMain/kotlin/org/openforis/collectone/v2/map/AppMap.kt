@@ -21,16 +21,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
@@ -58,6 +63,10 @@ import androidx.compose.ui.unit.sp
  *   quick repeated taps mean something else, e.g. placing vertices while drawing; single taps are
  *   then reported without waiting for a possible second tap.
  * @param dragHandler takes over one-finger drags it claims, e.g. to move a vertex while editing.
+ * @param onHover when non-null, called with the id of the marker or topmost feature under the mouse
+ *   pointer whenever it changes, and with `null` when the pointer is over the background or leaves
+ *   the map. A marker wins over the features beneath it. Leave it `null` (the default) on touch
+ *   devices: nothing is tracked then.
  */
 @Composable
 fun AppMap(
@@ -68,21 +77,32 @@ fun AppMap(
   gesturesEnabled: Boolean = true,
   doubleTapZoomEnabled: Boolean = true,
   dragHandler: MapDragHandler? = null,
+  onHover: ((id: String?) -> Unit)? = null,
   markerContent: @Composable (MapMarker) -> Unit = {},
 ) {
   val density = LocalDensity.current
   // Renderers capture gesture callbacks once, so route the handler through state.
   val currentDragHandler by rememberUpdatedState(dragHandler)
   val hasDragHandler = dragHandler != null
+  val tracksHover = onHover != null && gesturesEnabled
+  val hover = remember { MapHoverState() }
   val gestures =
-    remember(gesturesEnabled, doubleTapZoomEnabled, hasDragHandler) {
+    remember(gesturesEnabled, doubleTapZoomEnabled, hasDragHandler, tracksHover) {
       MapGestureOptions(
         enabled = gesturesEnabled,
         doubleTapZoom = doubleTapZoomEnabled,
         dragHandler =
           if (hasDragHandler) MapDragHandler { currentDragHandler?.onDragStart(it) } else null,
+        onFeatureHover = if (tracksHover) hover::onFeatureHover else null,
       )
     }
+  if (onHover != null) {
+    val currentOnHover by rememberUpdatedState(onHover)
+    val hoveredId = if (tracksHover) hover.idOver(content.markers) else null
+    LaunchedEffect(hoveredId) { currentOnHover(hoveredId) }
+    // Nothing reports the pointer leaving once tracking stops, so forget what it was over.
+    LaunchedEffect(tracksHover) { if (!tracksHover) hover.clear() }
+  }
   Box(
     modifier.clipToBounds().onSizeChanged {
       with(density) { cameraState.viewportSize = DpSize(it.width.toDp(), it.height.toDp()) }
@@ -94,6 +114,7 @@ fun AppMap(
       cameraState,
       onEvent,
       gesturesEnabled,
+      if (tracksHover) hover else null,
       markerContent,
       Modifier.matchParentSize(),
     )
@@ -134,6 +155,7 @@ private fun MarkerLayer(
   cameraState: MapCameraState,
   onEvent: (MapEvent) -> Unit,
   tappable: Boolean,
+  hover: MapHoverState?,
   markerContent: @Composable (MapMarker) -> Unit,
   modifier: Modifier,
 ) {
@@ -142,13 +164,13 @@ private fun MarkerLayer(
     content = {
       markers.forEach { marker ->
         key(marker.id) {
-          Box(
+          val tap =
             if (tappable) {
               Modifier.markerTap(marker.id) { currentOnEvent(MapEvent.MarkerTapped(it)) }
             } else {
               Modifier
             }
-          ) {
+          Box(if (hover != null) tap.markerHover(marker.id, hover) else tap) {
             markerContent(marker)
           }
         }
@@ -237,6 +259,52 @@ private fun Modifier.markerTap(markerId: String, onTap: (String) -> Unit): Modif
       }
     }
   }
+
+/** Tells [hover] while the mouse pointer is over the marker [markerId]. */
+private fun Modifier.markerHover(markerId: String, hover: MapHoverState): Modifier =
+  pointerInput(markerId, hover) {
+    awaitPointerEventScope {
+      while (true) {
+        when (awaitPointerEvent().type) {
+          PointerEventType.Enter -> hover.onMarkerEnter(markerId)
+          PointerEventType.Exit -> hover.onMarkerExit(markerId)
+        }
+      }
+    }
+  }
+
+/**
+ * What the mouse pointer is over: a marker, reported by the marker layer, and the topmost feature,
+ * reported by the renderer. Both can be set at once, since pointer input over a marker also reaches
+ * the map beneath it.
+ */
+@Stable
+private class MapHoverState {
+  private var featureId by mutableStateOf<String?>(null)
+  private var markerId by mutableStateOf<String?>(null)
+
+  fun onFeatureHover(id: String?) {
+    featureId = id
+  }
+
+  fun onMarkerEnter(id: String) {
+    markerId = id
+  }
+
+  /** Ignores a late exit from a marker the pointer already left for another one. */
+  fun onMarkerExit(id: String) {
+    if (markerId == id) markerId = null
+  }
+
+  /** The id hovered among [markers] and the features; a marker that is gone no longer counts. */
+  fun idOver(markers: List<MapMarker>): String? =
+    markerId?.takeIf { id -> markers.any { it.id == id } } ?: featureId
+
+  fun clear() {
+    featureId = null
+    markerId = null
+  }
+}
 
 /** Lets hits on a marker pass through to the sibling [PlatformMap] beneath it. */
 private fun Modifier.sharePointerInput(): Modifier = this then SharePointerInputElement

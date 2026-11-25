@@ -103,7 +103,21 @@ internal actual fun PlatformMap(
         renderer.coordinates = it
         renderer.syncBounds(density)
       }
-      .mapGestures(cameraState, gestures) { tap ->
+      .mapGestures(
+        cameraState,
+        gestures,
+        onHover = { at ->
+          val hit = at?.let {
+            renderer.featureAt(
+              it.x.value * density,
+              it.y.value * density,
+              currentContent,
+              cameraState.unproject(it),
+            )
+          }
+          gestures.onFeatureHover?.invoke(hit?.featureId)
+        },
+      ) { tap ->
         val at = cameraState.unproject(tap)
         val hit =
           renderer.featureAt(tap.x.value * density, tap.y.value * density, currentContent, at)

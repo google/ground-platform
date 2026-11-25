@@ -152,12 +152,6 @@
   <string name="web_back_to_submissions">Quay lại bài gửi</string>
   <string name="web_more_submission_actions">Thao tác khác với bài gửi</string>
   <string name="web_close_form">Đóng biểu mẫu</string>
-  <string name="web_map_drawing_place_point">Nhấp vào bản đồ để đặt điểm</string>
-  <!-- Map drawing hint; %1$d is the number of vertices placed so far, %2$d the minimum number required. -->
-  <string name="web_map_drawing_add_vertices">Nhấp vào bản đồ để thêm đỉnh • %1$d/tối thiểu %2$d</string>
-  <string name="web_undo">Hoàn tác</string>
-  <string name="web_done">Xong</string>
-  <string name="web_cancel_drawing">Hủy vẽ</string>
   <string name="web_sign_in">Đăng nhập</string>
   <string name="web_sign_in_tagline">Lập bản đồ hệ sinh thái, thiết kế khảo sát thực địa và xác minh quan sát mặt đất cùng tổ chức của bạn.</string>
   <string name="web_sign_in_description">Đăng nhập để xem các khảo sát và tổ chức được chia sẻ với tài khoản của bạn.</string>

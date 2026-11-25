@@ -26,12 +26,14 @@ import org.openforis.collectone.v2.app.ui.map.SurveyMapUiState
  * dashboard).
  *
  * @param pendingIds entities with pending uploads, drawn in the pending style.
+ * @param hoveredEntityId the map feature under the mouse pointer, if any (web dashboard).
  */
 fun SurveyMapContent.main(
   uiState: SurveyMapUiState,
   dataCollection: DataCollectionUiState,
   pendingIds: Set<String>,
   showNavigation: Boolean,
+  hoveredEntityId: String? = null,
 ): SurveyMap =
   main(
     uiState = uiState,
@@ -39,6 +41,7 @@ fun SurveyMapContent.main(
     showNavigation = showNavigation,
     draftGeometry = dataCollection.webMapDraftGeometry,
     formGeometries = dataCollection.webFormGeometries,
+    hoveredEntityId = hoveredEntityId,
   )
 
 /**
