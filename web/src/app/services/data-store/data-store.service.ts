@@ -659,7 +659,10 @@ export class DataStoreService {
   }
 
   generateId() {
-    return doc(collection(this.db, 'ids')).id;
+    return runInInjectionContext(
+      this.injector,
+      () => doc(collection(this.db, 'ids')).id
+    );
   }
 
   getServerTimestamp() {
