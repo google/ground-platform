@@ -1746,7 +1746,7 @@ private fun DatasetPropertiesLinkedToFormNotice() {
       Icon(
         Icons.Outlined.Link,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.size(16.dp),
       )
       Spacer(Modifier.width(6.dp))
@@ -1862,9 +1862,11 @@ private fun LinkedFormCard(
   onUnlink: () -> Unit,
 ) {
   val isMap = dataset.kind == DatasetKind.MAP_LAYER
+  // The same neutral surface as the card shown when no form is linked: a linked form is ordinary
+  // layer configuration, not a status to call out.
   Surface(
-    color = MaterialTheme.colorScheme.primaryContainer,
-    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    color = MaterialTheme.colorScheme.surfaceContainerLow,
+    contentColor = MaterialTheme.colorScheme.onSurface,
     shape = MaterialTheme.shapes.small,
     modifier = Modifier.fillMaxWidth(),
   ) {
@@ -1873,15 +1875,14 @@ private fun LinkedFormCard(
         Icon(
           Icons.Outlined.Link,
           contentDescription = null,
-          tint = MaterialTheme.colorScheme.onPrimaryContainer,
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(18.dp),
         )
         Spacer(Modifier.width(6.dp))
         Text(
           stringResource(Res.string.surveyeditor_dataset_linked_to, formTitle),
           style = MaterialTheme.typography.titleSmall,
-          color = MaterialTheme.colorScheme.onPrimaryContainer,
-          fontWeight = FontWeight.Bold,
+          color = MaterialTheme.colorScheme.onSurface,
         )
       }
       Text(
@@ -1890,7 +1891,7 @@ private fun LinkedFormCard(
           else Res.string.surveyeditor_dataset_linked_form_data_table
         ),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Button(onClick = onEditForm) {
@@ -1899,15 +1900,7 @@ private fun LinkedFormCard(
           Text(stringResource(Res.string.surveyeditor_dataset_edit_form))
         }
         if (!isReadOnly) {
-          OutlinedButton(
-            onClick = onUnlink,
-            colors =
-              ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-              ),
-            border =
-              BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)),
-          ) {
+          OutlinedButton(onClick = onUnlink) {
             Icon(Icons.Outlined.Close, contentDescription = null, modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(4.dp))
             Text(stringResource(Res.string.surveyeditor_dataset_unlink_form))
@@ -1959,6 +1952,14 @@ private fun UnlinkedFormCard(
   }
 }
 
+/**
+ * Whether the Advanced section offers [dataset]'s ID for editing. IDs people chose or that were
+ * derived from the name (`farm_plots`) are shown, since forms refer to them. An ID the system
+ * generated (a UUID) means nothing to a survey organizer, who knows the map layer or data table by
+ * its name, so it stays out of the settings.
+ */
+internal fun showsDatasetIdField(dataset: EntityDataset): Boolean = !RecordIds.isUuid(dataset.id)
+
 @Composable
 private fun DatasetAdvancedSettingsSection(
   dataset: EntityDataset,
@@ -1968,6 +1969,9 @@ private fun DatasetAdvancedSettingsSection(
   onUpdateId: (String) -> Unit,
   onRequestDelete: () -> Unit,
 ) {
+  val showsIdField = showsDatasetIdField(dataset)
+  // Nothing to show: the ID is internal and a read-only survey has no Delete button.
+  if (!showsIdField && isReadOnly) return
   Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     Row(
@@ -1986,16 +1990,19 @@ private fun DatasetAdvancedSettingsSection(
       }
     }
     if (showAdvanced) {
-      OutlinedTextField(
-        value = dataset.id,
-        onValueChange = onUpdateId,
-        enabled = !isReadOnly,
-        label = { Text(stringResource(Res.string.surveyeditor_dataset_id)) },
-        singleLine = true,
-        supportingText = { Text(stringResource(Res.string.surveyeditor_dataset_id_supporting)) },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
-        modifier = Modifier.fillMaxWidth(),
-      )
+      if (showsIdField) {
+        OutlinedTextField(
+          value = dataset.id,
+          onValueChange = onUpdateId,
+          enabled = !isReadOnly,
+          label = { Text(stringResource(Res.string.surveyeditor_dataset_id)) },
+          singleLine = true,
+          supportingText = { Text(stringResource(Res.string.surveyeditor_dataset_id_supporting)) },
+          textStyle =
+            MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
+          modifier = Modifier.fillMaxWidth(),
+        )
+      }
       if (!isReadOnly) {
         OutlinedButton(
           onClick = onRequestDelete,

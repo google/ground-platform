@@ -13,7 +13,6 @@
  */
 package org.openforis.collectone.v2.web.ui.formeditor
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,7 +34,6 @@ import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -257,9 +255,11 @@ private fun LinkedDatasetCard(
 ) {
   val isMapLayer = linkedDataset.isMapLayer
   val canUnlink = !isReadOnly && onUnlinkDataset != null && linkedDataset.key.isNotBlank()
+  // The same neutral surface as the card shown before a map layer or data table is linked: the
+  // link is ordinary form configuration, not a status to call out.
   Surface(
-    color = MaterialTheme.colorScheme.primaryContainer,
-    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    color = MaterialTheme.colorScheme.surfaceContainerLow,
+    contentColor = MaterialTheme.colorScheme.onSurface,
     shape = MaterialTheme.shapes.small,
     modifier = Modifier.fillMaxWidth(),
   ) {
@@ -268,15 +268,14 @@ private fun LinkedDatasetCard(
         Icon(
           Icons.Outlined.Link,
           contentDescription = null,
-          tint = MaterialTheme.colorScheme.onPrimaryContainer,
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(18.dp),
         )
         Spacer(Modifier.width(6.dp))
         Text(
           stringResource(Res.string.formeditor_linked_to_dataset, linkedDataset.displayName),
           style = MaterialTheme.typography.titleSmall,
-          color = MaterialTheme.colorScheme.onPrimaryContainer,
-          fontWeight = FontWeight.Bold,
+          color = MaterialTheme.colorScheme.onSurface,
         )
       }
       Text(
@@ -285,7 +284,7 @@ private fun LinkedDatasetCard(
           else Res.string.formeditor_linked_data_table_description
         ),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       if (onOpenDataset != null || canUnlink) {
         LinkedDatasetActionsRow(
@@ -319,15 +318,7 @@ private fun LinkedDatasetActionsRow(
       }
     }
     if (onUnlinkDataset != null) {
-      OutlinedButton(
-        onClick = { onUnlinkDataset(linkedDataset.key) },
-        colors =
-          ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-          ),
-        border =
-          BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)),
-      ) {
+      OutlinedButton(onClick = { onUnlinkDataset(linkedDataset.key) }) {
         Icon(Icons.Outlined.Close, contentDescription = null, modifier = Modifier.size(16.dp))
         Spacer(Modifier.width(4.dp))
         Text(
