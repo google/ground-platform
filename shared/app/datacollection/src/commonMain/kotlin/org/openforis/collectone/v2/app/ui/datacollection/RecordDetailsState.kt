@@ -24,6 +24,7 @@ import org.openforis.collectone.v2.app.domain.model.StraightLineVector
 import org.openforis.collectone.v2.app.domain.model.SubmissionFieldEntry
 import org.openforis.collectone.v2.app.domain.model.SubmissionPreviewItem
 import org.openforis.collectone.v2.app.domain.model.SubmissionViewer
+import org.openforis.collectone.v2.app.domain.model.SyncStatus
 import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
 
 /**
@@ -77,6 +78,39 @@ data class EntityDetailsUiState(
   val relatedRecords: Map<String, GeospatialEntityItem> = emptyMap(),
   val formDefs: List<FormDef> = emptyList(),
 )
+
+/**
+ * The upload status of the [properties] of a map feature that its form [submissions] (newest first)
+ * wrote, by property key: the status of the latest submission that answered the question behind the
+ * property. Properties no stored submission wrote (imported or baseline values) have no entry.
+ *
+ * Upload state is stored per submission, not per property, so this is derived: a submission is
+ * taken to have written the properties its answered questions are saved to (`entities:saveto` in
+ * any of [formDefs]), or the properties named like those questions when they have no such binding.
+ */
+internal fun propertySyncStatuses(
+  properties: Map<String, String>,
+  submissions: List<SubmissionPreviewItem>,
+  formDefs: List<FormDef>,
+): Map<String, SyncStatus> {
+  if (submissions.isEmpty()) return emptyMap()
+  val savedPropertiesByQuestion =
+    formDefs
+      .flatMap { it.model?.bindings.orEmpty() }
+      .filter { it.entity_saveto.isNotEmpty() }
+      .groupBy({ it.field_path.substringAfterLast('/') }, { it.entity_saveto })
+  val statuses = mutableMapOf<String, SyncStatus>()
+  submissions.forEach { submission ->
+    submission.fields.forEach { field ->
+      val question = field.questionName.substringAfterLast('/')
+      val written = savedPropertiesByQuestion[question] ?: listOf(question)
+      written.forEach { key ->
+        if (key in properties && key !in statuses) statuses[key] = submission.syncStatus
+      }
+    }
+  }
+  return statuses
+}
 
 /** User intents of a map feature's details surface. */
 interface EntityDetailsActions {

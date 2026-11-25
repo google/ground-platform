@@ -39,6 +39,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CloudDone
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.CollapseContent
@@ -77,6 +78,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -89,6 +91,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.MapLayerItem
+import org.openforis.collectone.v2.app.domain.model.SyncStatus
 import org.openforis.collectone.v2.app.domain.model.geometryType
 import org.openforis.collectone.v2.app.domain.model.hasGeometry
 import org.openforis.collectone.v2.app.domain.model.regularDisplayProperties
@@ -127,6 +130,7 @@ import org.openforis.collectone.v2.app.ui.common.horizontalScrollWithMouseDrag
 import org.openforis.collectone.v2.app.ui.map.LayerIcons
 import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
 import org.openforis.collectone.v2.app.ui.text.entityGeometrySummaryText
+import org.openforis.collectone.v2.app.ui.text.labelRes
 import org.openforis.collectone.v2.app.ui.text.typeText
 import org.openforis.collectone.v2.core.forms.ui.ChoiceColorPillsRow
 import org.openforis.collectone.v2.core.forms.ui.ChoiceImageRegistry
@@ -532,25 +536,58 @@ private fun DetailsSectionHeading(text: String) {
   )
 }
 
-/** Label/value pair arranged vertically. */
+/**
+ * Label/value pair arranged vertically. [syncStatus] is the upload status of a value a form
+ * submission wrote, shown as an icon next to the label; `null` shows none.
+ */
 @Composable
-private fun DetailsFieldRow(label: String, content: @Composable () -> Unit) {
+private fun DetailsFieldRow(
+  label: String,
+  syncStatus: SyncStatus? = null,
+  content: @Composable () -> Unit,
+) {
   Column(
     modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
     verticalArrangement = Arrangement.spacedBy(2.dp),
   ) {
-    Text(
-      text = label,
-      style = MaterialTheme.typography.labelMedium,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+      Text(
+        text = label,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      if (syncStatus != null) FieldSyncStatusIcon(syncStatus)
+    }
     content()
   }
 }
 
+/** Small upload status icon of a single field: waiting to upload, uploaded, or failed. */
 @Composable
-private fun DetailsFieldRow(label: String, value: String) {
-  DetailsFieldRow(label) {
+private fun FieldSyncStatusIcon(syncStatus: SyncStatus) {
+  val (icon, tint) =
+    when (syncStatus) {
+      SyncStatus.UPLOADING -> Icons.Outlined.CloudUpload to MaterialTheme.colorScheme.primary
+      SyncStatus.SYNCED -> Icons.Outlined.CloudDone to MaterialTheme.colorScheme.onSurfaceVariant
+      SyncStatus.FAILED -> Icons.Outlined.CloudOff to MaterialTheme.colorScheme.error
+    }
+  Icon(
+    imageVector = icon,
+    contentDescription = stringResource(syncStatus.labelRes),
+    tint = tint,
+    modifier = Modifier.size(14.dp).testTag(FIELD_SYNC_STATUS_ICON_TAG),
+  )
+}
+
+/** Test tag of the upload status icon next to a property a form submission wrote. */
+internal const val FIELD_SYNC_STATUS_ICON_TAG = "field-sync-status-icon"
+
+@Composable
+private fun DetailsFieldRow(label: String, value: String, syncStatus: SyncStatus? = null) {
+  DetailsFieldRow(label, syncStatus) {
     Text(
       text = value,
       style = MaterialTheme.typography.bodyMedium,
@@ -632,32 +669,7 @@ fun EntityPropertiesPane(
       )
     }
 
-    val properties = entity.regularDisplayProperties
-    if (properties.isNotEmpty()) {
-      DetailsSectionHeading(stringResource(Res.string.app_details_properties))
-      properties.forEach { (key, value) ->
-        val related = uiState.relatedRecords[value]
-        if (related != null) {
-          DetailsFieldRow(label = key) {
-            RelatedRecordLink(related = related, onClick = { actions.selectEntity(related.id) })
-          }
-        } else {
-          val coloredAnswers =
-            remember(key, value, uiState.formDefs) {
-              ChoiceImageRegistry.resolveChoiceAnswerColors(
-                questionName = key,
-                answerValue = value,
-                formDefs = uiState.formDefs,
-              )
-            }
-          if (coloredAnswers.isNotEmpty()) {
-            DetailsFieldRow(label = key) { ChoiceColorPillsRow(items = coloredAnswers) }
-          } else {
-            DetailsFieldRow(label = key, value = value)
-          }
-        }
-      }
-    }
+    EntityPropertiesSection(uiState = uiState, actions = actions, isWeb = isWeb)
 
     if (!isWeb) {
       val whispAnalysis = remember(entity.properties) { entity.whispAnalysis }
@@ -677,6 +689,57 @@ fun EntityPropertiesPane(
         onShowInTable = { actions.showDatasetInTable(entity.datasetId) },
         trailingWebActions = trailingWebActions,
       )
+    }
+  }
+}
+
+/**
+ * The organizer-defined properties of the entity, under their heading. On mobile ([isWeb] false),
+ * properties written by a form submission show that submission's upload status.
+ */
+@Composable
+private fun EntityPropertiesSection(
+  uiState: EntityDetailsUiState,
+  actions: EntityDetailsActions,
+  isWeb: Boolean,
+) {
+  val entity = uiState.entity
+  val properties = entity.regularDisplayProperties
+  if (properties.isNotEmpty()) {
+    DetailsSectionHeading(stringResource(Res.string.app_details_properties))
+    // On mobile, properties written by a form submission show that submission's upload status.
+    val syncStatuses =
+      remember(isWeb, entity.properties, entity.submissions, uiState.formDefs) {
+        if (isWeb) {
+          emptyMap()
+        } else {
+          propertySyncStatuses(entity.properties, entity.submissions, uiState.formDefs)
+        }
+      }
+    properties.forEach { (key, value) ->
+      val syncStatus = syncStatuses[key]
+      val related = uiState.relatedRecords[value]
+      if (related != null) {
+        DetailsFieldRow(label = key, syncStatus = syncStatus) {
+          RelatedRecordLink(related = related, onClick = { actions.selectEntity(related.id) })
+        }
+      } else {
+        val coloredAnswers =
+          remember(key, value, uiState.formDefs) {
+            ChoiceImageRegistry.resolveChoiceAnswerColors(
+              questionName = key,
+              answerValue = value,
+              formDefs = uiState.formDefs,
+            )
+          }
+        if (coloredAnswers.isNotEmpty()) {
+          DetailsFieldRow(label = key, syncStatus = syncStatus) {
+            ChoiceColorPillsRow(items = coloredAnswers)
+          }
+        } else {
+          DetailsFieldRow(label = key, value = value, syncStatus = syncStatus)
+        }
+      }
     }
   }
 }
