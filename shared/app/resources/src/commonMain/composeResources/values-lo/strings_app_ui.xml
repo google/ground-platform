@@ -187,8 +187,6 @@
   <string name="app_share_pdf">ແບ່ງປັນ PDF</string>
   <!-- Short chip label to stop navigating to a map feature. -->
   <string name="app_stop_navigation_short">ຢຸດນຳທາງ</string>
-  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
-  <string name="app_navigate_with_distance">ນຳທາງ • %1$s</string>
   <!-- Label to start straight-line navigation to a location. -->
   <string name="app_navigate">ນຳທາງ</string>
   <!-- Action that shows the map feature's QR code. -->
@@ -288,8 +286,6 @@
   <string name="app_fly_to_place">ໄປທີ່ສະຖານທີ່ເທິງແຜນທີ່</string>
   <!-- Chip label to stop navigating to a place. -->
   <string name="app_stop_navigation">ຢຸດນຳທາງ</string>
-  <!-- Accessibility label. -->
-  <string name="app_navigate_to_place">ນຳທາງແບບເສັ້ນຊື່ໄປທີ່ສະຖານທີ່</string>
   <!-- %1$s = search query. -->
   <string name="app_no_local_layers_match">ບໍ່ມີຊັ້ນແຜນທີ່ໃນອຸປະກອນທີ່ກົງກັບ "%1$s". ການຊອກຫາສະຖານທີ່ບໍ່ສາມາດໃຊ້ໄດ້ເມື່ອອອບລາຍ.</string>
   <!-- %1$s = search query. -->

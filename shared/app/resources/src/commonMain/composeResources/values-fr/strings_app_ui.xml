@@ -188,8 +188,6 @@
   <string name="app_share_pdf">Partager le PDF</string>
   <!-- Short chip label to stop navigating to a map feature. -->
   <string name="app_stop_navigation_short">Arrêter nav.</string>
-  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
-  <string name="app_navigate_with_distance">Naviguer • %1$s</string>
   <!-- Label to start straight-line navigation to a location. -->
   <string name="app_navigate">Naviguer</string>
   <!-- Action that shows the map feature's QR code. -->
@@ -291,8 +289,6 @@
   <string name="app_fly_to_place">Aller au lieu sur la carte</string>
   <!-- Chip label to stop navigating to a place. -->
   <string name="app_stop_navigation">Arrêter nav.</string>
-  <!-- Accessibility label. -->
-  <string name="app_navigate_to_place">Naviguer en ligne droite vers le lieu</string>
   <!-- %1$s = search query. -->
   <string name="app_no_local_layers_match">Aucune couche cartographique locale ne correspond à « %1$s ». La recherche de lieux n’est pas disponible hors ligne.</string>
   <!-- %1$s = search query. -->

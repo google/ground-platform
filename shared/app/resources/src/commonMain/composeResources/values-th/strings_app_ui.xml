@@ -187,8 +187,6 @@
   <string name="app_share_pdf">แชร์ PDF</string>
   <!-- Short chip label to stop navigating to a map feature. -->
   <string name="app_stop_navigation_short">หยุดนำทาง</string>
-  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
-  <string name="app_navigate_with_distance">นำทาง • %1$s</string>
   <!-- Label to start straight-line navigation to a location. -->
   <string name="app_navigate">นำทาง</string>
   <!-- Action that shows the map feature's QR code. -->
@@ -288,8 +286,6 @@
   <string name="app_fly_to_place">ไปยังสถานที่บนแผนที่</string>
   <!-- Chip label to stop navigating to a place. -->
   <string name="app_stop_navigation">หยุดนำทาง</string>
-  <!-- Accessibility label. -->
-  <string name="app_navigate_to_place">นำทางเป็นเส้นตรงไปยังสถานที่</string>
   <!-- %1$s = search query. -->
   <string name="app_no_local_layers_match">ไม่มีชั้นข้อมูลแผนที่ในเครื่องที่ตรงกับ “%1$s” การค้นหาสถานที่ใช้งานไม่ได้ขณะออฟไลน์</string>
   <!-- %1$s = search query. -->

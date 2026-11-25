@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -35,6 +36,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.openforis.collectone.v2.app.data.datasource.local.store.sampleDataHolder
@@ -250,6 +253,47 @@ class SurveyBottomSheetContentUiTest {
     onNodeWithText("Coordinates (0.4210°S, 36.9505°E)").assertExists()
     onNodeWithText("GPS Coordinates • $surveyLocation • Direct coordinate lookup").assertExists()
     onNodeWithText("GPS Coordinates").assertExists()
+  }
+
+  @Test
+  fun mobileList_placeCard_showsCoordinatesOnTheirOwnLine_andASingleNavigateButton() =
+    runComposeUiTest {
+      val surveyLocation = session.activeSurveyAccess.activeSurvey.location
+      session.searchableListActions.updateListSearchQuery("-0.421, 36.9505")
+      showSheet()
+      waitForIdle()
+
+      onNodeWithText("Coordinates (0.4210°S, 36.9505°E)").assertExists()
+      onNodeWithText("GPS Coordinates • $surveyLocation • Direct coordinate lookup").assertExists()
+      // The coordinates are a line of their own; the category and coordinates chips and the
+      // fly-to button are gone.
+      onNodeWithText("0.4210°S, 36.9505°E").assertExists()
+      onNodeWithText("GPS Coordinates").assertDoesNotExist()
+      onNodeWithContentDescription("Fly to place").assertDoesNotExist()
+      onAllNodesWithText("Navigate").assertCountEquals(1)
+
+      onNodeWithText("Navigate").performScrollTo().performClick()
+      waitForIdle()
+
+      assertNotNull(session.viewModels.surveyMap.uiState.value.activeNavigation)
+      onNodeWithText("End").assertExists()
+    }
+
+  @Test
+  fun selectedEntity_navigateButtonStartsAndEndsNavigation() = runComposeUiTest {
+    val entity = entityWithSubmissions
+    session.viewModels.surveyMap.selectEntity(entity.id)
+    showSheet()
+    onAllNodesWithText("Navigate").assertCountEquals(1)
+
+    onNodeWithText("Navigate").performClick()
+    waitForIdle()
+    assertNotNull(session.viewModels.surveyMap.uiState.value.activeNavigation)
+
+    onNodeWithText("End").performClick()
+    waitForIdle()
+    assertNull(session.viewModels.surveyMap.uiState.value.activeNavigation)
+    onNodeWithText("Navigate").assertExists()
   }
 
   @Test

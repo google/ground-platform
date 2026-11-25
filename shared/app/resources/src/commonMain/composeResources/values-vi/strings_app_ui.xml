@@ -187,8 +187,6 @@
   <string name="app_share_pdf">Chia sẻ PDF</string>
   <!-- Short chip label to stop navigating to a map feature. -->
   <string name="app_stop_navigation_short">Dừng dẫn đường</string>
-  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
-  <string name="app_navigate_with_distance">Dẫn đường • %1$s</string>
   <!-- Label to start straight-line navigation to a location. -->
   <string name="app_navigate">Dẫn đường</string>
   <!-- Action that shows the map feature's QR code. -->
@@ -288,8 +286,6 @@
   <string name="app_fly_to_place">Bay đến địa điểm trên bản đồ</string>
   <!-- Chip label to stop navigating to a place. -->
   <string name="app_stop_navigation">Dừng dẫn đường</string>
-  <!-- Accessibility label. -->
-  <string name="app_navigate_to_place">Dẫn đường theo đường thẳng đến địa điểm</string>
   <!-- %1$s = search query. -->
   <string name="app_no_local_layers_match">Không có lớp bản đồ cục bộ nào khớp với "%1$s". Không thể tìm kiếm địa điểm khi ngoại tuyến.</string>
   <!-- %1$s = search query. -->

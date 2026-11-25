@@ -188,8 +188,6 @@
   <string name="app_share_pdf">Shiriki PDF</string>
   <!-- Short chip label to stop navigating to a map feature. -->
   <string name="app_stop_navigation_short">Acha urambazaji</string>
-  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
-  <string name="app_navigate_with_distance">Elekea • %1$s</string>
   <!-- Label to start straight-line navigation to a location. -->
   <string name="app_navigate">Elekea</string>
   <!-- Action that shows the map feature's QR code. -->
@@ -291,8 +289,6 @@
   <string name="app_fly_to_place">Ruka hadi mahali kwenye ramani</string>
   <!-- Chip label to stop navigating to a place. -->
   <string name="app_stop_navigation">Acha urambazaji</string>
-  <!-- Accessibility label. -->
-  <string name="app_navigate_to_place">Elekea mahali kwa mstari wa moja kwa moja</string>
   <!-- %1$s = search query. -->
   <string name="app_no_local_layers_match">Hakuna matabaka ya ramani yaliyo kwenye kifaa yanayolingana na "%1$s". Utafutaji wa maeneo haupatikani nje ya mtandao.</string>
   <!-- %1$s = search query. -->

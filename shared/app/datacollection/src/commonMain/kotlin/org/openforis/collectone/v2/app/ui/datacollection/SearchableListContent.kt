@@ -40,7 +40,6 @@ import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.TableRows
 import androidx.compose.material3.CardDefaults
@@ -81,8 +80,6 @@ import org.openforis.collectone.v2.app.resources.app_expand_dataset
 import org.openforis.collectone.v2.app.resources.app_features_lowercase
 import org.openforis.collectone.v2.app.resources.app_fly_to_place
 import org.openforis.collectone.v2.app.resources.app_map_layers_heading
-import org.openforis.collectone.v2.app.resources.app_navigate
-import org.openforis.collectone.v2.app.resources.app_navigate_to_place
 import org.openforis.collectone.v2.app.resources.app_no_layers_or_places_match
 import org.openforis.collectone.v2.app.resources.app_no_local_layers_match
 import org.openforis.collectone.v2.app.resources.app_no_map_features_yet
@@ -96,7 +93,6 @@ import org.openforis.collectone.v2.app.resources.app_showing_first_features
 import org.openforis.collectone.v2.app.resources.app_stop_navigation
 import org.openforis.collectone.v2.app.resources.domain_dataset_kind_data_table_plural
 import org.openforis.collectone.v2.app.ui.common.CompactFilterChip
-import org.openforis.collectone.v2.app.ui.common.FlatFilterChip
 import org.openforis.collectone.v2.app.ui.common.horizontalScrollWithMouseDrag
 import org.openforis.collectone.v2.app.ui.map.LayerVisibilityToggle
 import org.openforis.collectone.v2.app.ui.map.MapFeatureNoun
@@ -106,7 +102,6 @@ import org.openforis.collectone.v2.app.ui.text.categoryText
 import org.openforis.collectone.v2.app.ui.text.coordinatesText
 import org.openforis.collectone.v2.app.ui.text.nameText
 import org.openforis.collectone.v2.app.ui.text.regionText
-import org.openforis.collectone.v2.app.ui.text.wayfindingBadge
 import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.TonalBadge
 import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalIconButton
@@ -823,9 +818,12 @@ private fun LayerVisibilityControl(
 }
 
 /**
- * Card of a place in the list: its name, category, region, and coordinates, a button that flies the
- * map to it ([onSelect], as does clicking the card), and on mobile its distance and bearing badge
- * and a `Navigate` chip ([onToggleNavigation]).
+ * Card of a place in the list; clicking it flies the map to the place ([onSelect]).
+ * - On mobile: its name, its category and region, and its coordinates on three lines, then one
+ *   `Navigate` button with the distance and heading to the place ([NavigateAction],
+ *   [onToggleNavigation]).
+ * - In the web side panel ([isSidePanel]): its name, category and region, a button that also flies
+ *   the map to it, and its category and coordinates badges.
  */
 @Composable
 private fun PlaceCard(
@@ -868,20 +866,44 @@ private fun PlaceCard(
           .padding(horizontal = 10.dp, vertical = if (isSidePanel) 8.dp else 10.dp),
       verticalArrangement = Arrangement.spacedBy(if (isSidePanel) 4.dp else 6.dp),
     ) {
-      PlaceTitleRow(place = place, isSelected = isSelectedPlace, onFlyTo = onSelect)
-      PlaceBadgesRow(
-        item = item,
-        onToggleNavigation = onToggleNavigation,
+      PlaceTitleRow(
+        place = place,
+        isSelected = isSelectedPlace,
+        onFlyTo = onSelect,
         isSidePanel = isSidePanel,
       )
+      if (isSidePanel) {
+        PlaceBadgesRow(place = place)
+      } else {
+        NavigateAction(
+          isNavigating = item.isNavigating,
+          wayfinding = item.wayfinding,
+          stopLabel = stringResource(Res.string.app_stop_navigation),
+          onToggle = onToggleNavigation,
+        )
+      }
     }
   }
 }
 
-/** A place card's icon, name, category and region, and the button flying the map to it. */
+/**
+ * A place card's icon, name, and category and region. On mobile its coordinates follow on a third
+ * line; in the web side panel ([isSidePanel]) a button flies the map to it ([onFlyTo]).
+ */
 @Composable
-private fun PlaceTitleRow(place: SurveyPlaceItem, isSelected: Boolean, onFlyTo: () -> Unit) {
+private fun PlaceTitleRow(
+  place: SurveyPlaceItem,
+  isSelected: Boolean,
+  onFlyTo: () -> Unit,
+  isSidePanel: Boolean,
+) {
   val isSelectedPlace = isSelected
+  val supportingColor =
+    if (isSelectedPlace) {
+      MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
+    } else {
+      MaterialTheme.colorScheme.onSurfaceVariant
+    }
   Row(
     modifier = Modifier.fillMaxWidth(),
     horizontalArrangement = Arrangement.SpaceBetween,
@@ -923,40 +945,38 @@ private fun PlaceTitleRow(place: SurveyPlaceItem, isSelected: Boolean, onFlyTo: 
         Text(
           text = "${place.categoryText().resolve()} • ${place.regionText().resolve()}",
           style = MaterialTheme.typography.labelSmall,
-          color =
-            if (isSelectedPlace) {
-              MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
-            } else {
-              MaterialTheme.colorScheme.onSurfaceVariant
-            },
+          color = supportingColor,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
+        if (!isSidePanel) {
+          Text(
+            text = coordinatesText(place.position).resolve(),
+            style = MaterialTheme.typography.labelSmall,
+            color = supportingColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
       }
     }
 
-    FilledTonalIconButton(onClick = onFlyTo, modifier = Modifier.size(30.dp)) {
-      Icon(
-        imageVector = Icons.Outlined.Explore,
-        contentDescription = stringResource(Res.string.app_fly_to_place),
-        tint = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(16.dp),
-      )
+    if (isSidePanel) {
+      FilledTonalIconButton(onClick = onFlyTo, modifier = Modifier.size(30.dp)) {
+        Icon(
+          imageVector = Icons.Outlined.Explore,
+          contentDescription = stringResource(Res.string.app_fly_to_place),
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.size(16.dp),
+        )
+      }
     }
   }
 }
 
-/**
- * A place card's badges (category, coordinates, and on mobile its distance and bearing) and the
- * mobile `Navigate` chip.
- */
+/** A place card's category and coordinates badges in the web side panel. */
 @Composable
-private fun PlaceBadgesRow(
-  item: PlaceListItem,
-  onToggleNavigation: () -> Unit,
-  isSidePanel: Boolean,
-) {
-  val place = item.place
+private fun PlaceBadgesRow(place: SurveyPlaceItem) {
   Row(
     modifier = Modifier.fillMaxWidth().horizontalScrollWithMouseDrag(rememberScrollState()),
     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -968,46 +988,7 @@ private fun PlaceBadgesRow(
       tone = BadgeTone.SECONDARY,
       monospace = true,
     )
-    val wayfinding = wayfindingBadge(item.wayfinding)
-    if (!isSidePanel && wayfinding.isNotEmpty()) {
-      TonalBadge(
-        text = "➤ $wayfinding",
-        tone = BadgeTone.TERTIARY,
-        monospace = true,
-      )
-    }
-    if (!isSidePanel) {
-      PlaceNavigationChip(isNavigating = item.isNavigating, onClick = onToggleNavigation)
-    }
   }
-}
-
-/** Mobile chip starting or stopping straight-line navigation to a place. */
-@Composable
-private fun PlaceNavigationChip(isNavigating: Boolean, onClick: () -> Unit) {
-  FlatFilterChip(
-    selected = isNavigating,
-    onClick = onClick,
-    label = {
-      Text(
-        text =
-          stringResource(
-            if (isNavigating) Res.string.app_stop_navigation else Res.string.app_navigate
-          ),
-        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        softWrap = false,
-      )
-    },
-    leadingIcon = {
-      Icon(
-        imageVector = Icons.Outlined.Navigation,
-        contentDescription = stringResource(Res.string.app_navigate_to_place),
-        modifier = Modifier.size(13.dp),
-      )
-    },
-  )
 }
 
 /**

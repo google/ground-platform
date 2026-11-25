@@ -187,8 +187,6 @@
   <string name="app_share_pdf">ចែករំលែក PDF</string>
   <!-- Short chip label to stop navigating to a map feature. -->
   <string name="app_stop_navigation_short">ឈប់នាំផ្លូវ</string>
-  <!-- Chip label. %1$s = distance and bearing, e.g. “495 m • 319° NW”. -->
-  <string name="app_navigate_with_distance">នាំផ្លូវ • %1$s</string>
   <!-- Label to start straight-line navigation to a location. -->
   <string name="app_navigate">នាំផ្លូវ</string>
   <!-- Action that shows the map feature's QR code. -->
@@ -288,8 +286,6 @@
   <string name="app_fly_to_place">ហោះទៅទីកន្លែងលើផែនទី</string>
   <!-- Chip label to stop navigating to a place. -->
   <string name="app_stop_navigation">ឈប់នាំផ្លូវ</string>
-  <!-- Accessibility label. -->
-  <string name="app_navigate_to_place">នាំផ្លូវត្រង់ទៅទីកន្លែង</string>
   <!-- %1$s = search query. -->
   <string name="app_no_local_layers_match">គ្មានស្រទាប់ផែនទីក្នុងឧបករណ៍ត្រូវនឹង "%1$s" ទេ។ ការស្វែងរកទីកន្លែងមិនអាចប្រើបាននៅក្រៅបណ្ដាញទេ។</string>
   <!-- %1$s = search query. -->

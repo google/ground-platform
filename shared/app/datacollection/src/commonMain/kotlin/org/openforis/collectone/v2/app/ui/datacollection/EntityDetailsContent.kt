@@ -46,7 +46,6 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.Pentagon
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.QrCode
@@ -109,8 +108,6 @@ import org.openforis.collectone.v2.app.resources.app_details_properties
 import org.openforis.collectone.v2.app.resources.app_download_pdf
 import org.openforis.collectone.v2.app.resources.app_form_action_completed
 import org.openforis.collectone.v2.app.resources.app_more_actions
-import org.openforis.collectone.v2.app.resources.app_navigate
-import org.openforis.collectone.v2.app.resources.app_navigate_with_distance
 import org.openforis.collectone.v2.app.resources.app_no_local_submissions_for_entity
 import org.openforis.collectone.v2.app.resources.app_no_submissions_for_entity
 import org.openforis.collectone.v2.app.resources.app_no_submissions_yet
@@ -124,7 +121,6 @@ import org.openforis.collectone.v2.app.resources.app_stop_navigation_short
 import org.openforis.collectone.v2.app.resources.app_submissions_count
 import org.openforis.collectone.v2.app.resources.app_submissions_stored_offline
 import org.openforis.collectone.v2.app.resources.app_view_submission_history
-import org.openforis.collectone.v2.app.ui.common.FlatFilterChip
 import org.openforis.collectone.v2.app.ui.common.GeoIdText
 import org.openforis.collectone.v2.app.ui.common.displayLabel
 import org.openforis.collectone.v2.app.ui.common.horizontalScrollWithMouseDrag
@@ -132,7 +128,6 @@ import org.openforis.collectone.v2.app.ui.map.LayerIcons
 import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
 import org.openforis.collectone.v2.app.ui.text.entityGeometrySummaryText
 import org.openforis.collectone.v2.app.ui.text.typeText
-import org.openforis.collectone.v2.app.ui.text.wayfindingBadge
 import org.openforis.collectone.v2.core.forms.ui.ChoiceColorPillsRow
 import org.openforis.collectone.v2.core.forms.ui.ChoiceImageRegistry
 import org.openforis.collectone.v2.core.forms.ui.controls.AssistChip
@@ -738,8 +733,8 @@ fun downloadPdfMenuAction(onClick: () -> Unit): DetailsMenuAction =
   )
 
 /**
- * Row of mobile entity actions: `Navigate` (showing distance/bearing once active) and pending
- * `Uploads`.
+ * Row of mobile entity actions: the `Navigate` button with the distance and heading to the entity
+ * ([NavigateAction]) and pending `Uploads`.
  */
 @Composable
 private fun EntityActionsRow(uiState: EntityDetailsUiState, actions: EntityDetailsActions) {
@@ -750,30 +745,11 @@ private fun EntityActionsRow(uiState: EntityDetailsUiState, actions: EntityDetai
     verticalAlignment = Alignment.CenterVertically,
   ) {
     if (entity.hasGeometry) {
-      val isNavigating = uiState.isNavigating
-      val wayfinding = wayfindingBadge(uiState.wayfinding)
-      FlatFilterChip(
-        selected = isNavigating,
-        onClick = { actions.toggleNavigationToEntity(entity.id) },
-        label = {
-          Text(
-            text =
-              when {
-                isNavigating && wayfinding.isNotEmpty() ->
-                  stringResource(Res.string.app_navigate_with_distance, wayfinding)
-                isNavigating -> stringResource(Res.string.app_stop_navigation_short)
-                else -> stringResource(Res.string.app_navigate)
-              },
-            maxLines = 1,
-          )
-        },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Outlined.Navigation,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-          )
-        },
+      NavigateAction(
+        isNavigating = uiState.isNavigating,
+        wayfinding = uiState.wayfinding,
+        stopLabel = stringResource(Res.string.app_stop_navigation_short),
+        onToggle = { actions.toggleNavigationToEntity(entity.id) },
       )
     }
     val pendingCount = uiState.pendingUploadCount
