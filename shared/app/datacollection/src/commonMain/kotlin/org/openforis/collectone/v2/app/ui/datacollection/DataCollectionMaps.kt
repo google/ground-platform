@@ -13,16 +13,22 @@
  */
 package org.openforis.collectone.v2.app.ui.datacollection
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import org.openforis.collectone.v2.app.domain.model.FormPreviewItem
 import org.openforis.collectone.v2.app.domain.model.editor.toLatLng
 import org.openforis.collectone.v2.app.domain.model.hasGeometry
+import org.openforis.collectone.v2.app.ui.map.BasemapToggleButton
 import org.openforis.collectone.v2.app.ui.map.EntityGeometry
 import org.openforis.collectone.v2.app.ui.map.SurveyAppMap
 import org.openforis.collectone.v2.app.ui.map.SurveyMainMap
@@ -94,7 +100,8 @@ fun SurveyMainMap(
 /**
  * The map behind a form's GeoPoint question, following the question's pan and zoom. The camera
  * starts at the collector's GPS location from [mapUiState]; the open form's target feature from
- * [uiState] is highlighted.
+ * [uiState] is highlighted. A small button in the bottom-right corner switches between the
+ * Satellite and Terrain basemaps ([onToggleBasemap]).
  *
  * @param pendingIds entities with pending uploads, drawn in the pending style.
  */
@@ -104,6 +111,7 @@ internal fun GeoPointFormMap(
   uiState: DataCollectionUiState,
   pendingIds: Set<String>,
   viewportState: GeoPointMapViewportState,
+  onToggleBasemap: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val currentMapUiState by rememberUpdatedState(mapUiState)
@@ -114,18 +122,31 @@ internal fun GeoPointFormMap(
       onSettled = { writeBackGeoPointCamera(currentMapUiState, viewport, it) },
       isFollowingUser = { !viewport.isPanned },
     )
-  SurveyAppMap(
-    map =
-      SurveyMapContent.geoPointForm(
-        uiState = mapUiState,
-        dataCollection = uiState,
-        pendingIds = pendingIds,
-        isFollowingUser = !viewportState.isPanned,
-      ),
-    camera = camera,
-    modifier = modifier,
-  ) { _, _ ->
+  Box(modifier = modifier) {
+    SurveyAppMap(
+      map =
+        SurveyMapContent.geoPointForm(
+          uiState = mapUiState,
+          dataCollection = uiState,
+          pendingIds = pendingIds,
+          isFollowingUser = !viewportState.isPanned,
+        ),
+      camera = camera,
+      modifier = Modifier.fillMaxSize(),
+    ) { _, _ ->
+    }
+    FormMapBasemapToggle(mapUiState = mapUiState, onToggle = onToggleBasemap)
   }
+}
+
+/** The basemap toggle in the bottom-right corner of a data collection form's map. */
+@Composable
+private fun BoxScope.FormMapBasemapToggle(mapUiState: SurveyMapUiState, onToggle: () -> Unit) {
+  BasemapToggleButton(
+    selectedBasemapType = mapUiState.selectedBasemapType,
+    onToggle = onToggle,
+    modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp),
+  )
 }
 
 /**
@@ -135,7 +156,8 @@ internal fun GeoPointFormMap(
  * the map, the same way the main map frames a selection. Clearing the selection leaves the camera
  * where it is.
  *
- * The camera follows the map viewport ([mapUiState], [mapActions]) like the main map.
+ * The camera follows the map viewport ([mapUiState], [mapActions]) like the main map, and a small
+ * button in the bottom-right corner switches between the Satellite and Terrain basemaps.
  *
  * @param pendingIds entities with pending uploads, drawn in the pending style.
  */
@@ -163,18 +185,21 @@ internal fun EntityRefFormMap(
       )
     }
   }
-  SurveyAppMap(
-    map =
-      SurveyMapContent.entityRefForm(
-        uiState = mapUiState,
-        dataCollection = uiState,
-        form = form,
-        pendingIds = pendingIds,
-      ),
-    camera = camera,
-    modifier = modifier,
-  ) { tappedId, _ ->
-    tappedId?.let(SurveyMapIds::entityIdOf)?.let(actions::selectEntityRefForActiveForm)
+  Box(modifier = modifier) {
+    SurveyAppMap(
+      map =
+        SurveyMapContent.entityRefForm(
+          uiState = mapUiState,
+          dataCollection = uiState,
+          form = form,
+          pendingIds = pendingIds,
+        ),
+      camera = camera,
+      modifier = Modifier.fillMaxSize(),
+    ) { tappedId, _ ->
+      tappedId?.let(SurveyMapIds::entityIdOf)?.let(actions::selectEntityRefForActiveForm)
+    }
+    FormMapBasemapToggle(mapUiState = mapUiState, onToggle = mapActions::toggleBasemapType)
   }
 }
 

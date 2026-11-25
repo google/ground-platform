@@ -167,6 +167,7 @@ fun DataCollectionFormScreen(
         uiState = uiState,
         pendingIds = pendingIds,
         viewportState = viewportState,
+        onToggleBasemap = mapActions::toggleBasemapType,
         modifier = modifier,
       )
     },

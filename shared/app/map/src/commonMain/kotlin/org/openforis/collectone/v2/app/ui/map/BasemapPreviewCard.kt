@@ -37,12 +37,14 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.BasemapType
 import org.openforis.collectone.v2.app.resources.Res
+import org.openforis.collectone.v2.app.resources.app_basemap
 import org.openforis.collectone.v2.app.resources.app_layers
 import org.openforis.collectone.v2.app.ui.common.displayLabel
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
@@ -79,6 +81,45 @@ fun BasemapPreviewCard(
       modifier =
         Modifier.padding(BasemapPreviewFrameWidth)
           .clip(RoundedCornerShape(cornerRadius - BasemapPreviewFrameWidth))
+          .fillMaxSize(),
+    )
+  }
+}
+
+/**
+ * Small square button over a map that switches between the Satellite and Terrain basemaps in one
+ * tap ([onToggle]), for maps without a layers sheet such as the ones in a data collection form.
+ * Like [BasemapPreviewCard], its thumbnail previews the basemap it switches to.
+ */
+@Composable
+fun BasemapToggleButton(
+  selectedBasemapType: BasemapType,
+  onToggle: () -> Unit,
+  modifier: Modifier = Modifier,
+  size: Dp = 40.dp,
+) {
+  val previewType =
+    if (selectedBasemapType == BasemapType.SATELLITE) BasemapType.NORMAL else BasemapType.SATELLITE
+  val cornerRadius = 8.dp
+  val frameWidth = 2.dp
+  val basemapDescription = stringResource(Res.string.app_basemap)
+  val selectedLabel = selectedBasemapType.displayLabel()
+  Surface(
+    onClick = onToggle,
+    modifier =
+      modifier.size(size).semantics {
+        contentDescription = basemapDescription
+        stateDescription = selectedLabel
+      },
+    shape = RoundedCornerShape(cornerRadius),
+    color = Color.White,
+    shadowElevation = 3.dp,
+  ) {
+    BasemapThumbnail(
+      type = previewType,
+      modifier =
+        Modifier.padding(frameWidth)
+          .clip(RoundedCornerShape(cornerRadius - frameWidth))
           .fillMaxSize(),
     )
   }
