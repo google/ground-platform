@@ -23,9 +23,13 @@ const LIBRARIES = ['core', 'maps', 'marker', 'geometry'];
 /** Name of the global function the Maps API calls once it is ready. */
 const CALLBACK_NAME = '__onGoogleMapsLoaded';
 
+/** The pending or completed load, so the script is only added once. */
+let loadPromise: Promise<void> | undefined;
+
 /**
  * Loads the Google Maps JavaScript API with `loading=async`, and resolves once
- * the libraries in `LIBRARIES` are ready.
+ * the libraries in `LIBRARIES` are ready. Calling it again returns the same
+ * promise.
  *
  * With `loading=async` the script only bootstraps the API, and keeps loading
  * after its `load` event: `google.maps.importLibrary` is defined only when the
@@ -36,11 +40,22 @@ const CALLBACK_NAME = '__onGoogleMapsLoaded';
  * Never rejects: the app still works without a map, so a failure is only
  * logged.
  */
-export async function loadGoogleMaps(doc: Document): Promise<void> {
-  if (environment.env === Env.Test) return;
+export function loadGoogleMaps(doc: Document): Promise<void> {
+  if (environment.env === Env.Test) return Promise.resolve();
+  loadPromise ??= load(doc);
+  return loadPromise;
+}
+
+async function load(doc: Document): Promise<void> {
   try {
     await new Promise<void>((resolve, reject) => {
-      const win = doc.defaultView as unknown as Record<string, unknown>;
+      const win = doc.defaultView as unknown as Record<string, unknown> | null;
+      if (!win) {
+        reject(
+          new Error('Cannot load Google Maps: the document has no window')
+        );
+        return;
+      }
       win[CALLBACK_NAME] = () => {
         delete win[CALLBACK_NAME];
         resolve();

@@ -704,11 +704,11 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       this.onLocationOfInterestMarkerClick(loiId)
     );
     if (this.shouldEnableDrawingTools) {
-      marker.addListener('dragstart', (event: google.maps.Data.MouseEvent) =>
-        this.onMarkerDragStart(event, marker)
+      marker.addEventListener('gmp-dragstart', () =>
+        this.onMarkerDragStart(marker)
       );
-      marker.addListener('dragend', (event: google.maps.Data.MouseEvent) =>
-        this.onMarkerDragEnd(event, loiId, jobId)
+      marker.addEventListener('gmp-dragend', () =>
+        this.onMarkerDragEnd(marker, loiId, jobId)
       );
     }
     return marker;
@@ -758,37 +758,46 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     );
   }
 
-  private onMarkerDragStart(
-    event: google.maps.Data.MouseEvent,
+  /**
+   * Returns the position of a marker. The 'gmp-' drag events carry no
+   * coordinates: the marker moves itself, so its position is read from it.
+   */
+  private getMarkerLatLng(
     marker: google.maps.marker.AdvancedMarkerElement
-  ) {
+  ): google.maps.LatLng {
+    const position = marker.position as
+      | google.maps.LatLng
+      | google.maps.LatLngLiteral;
+    const lat =
+      typeof position.lat === 'function' ? position.lat() : position.lat;
+    const lng =
+      typeof position.lng === 'function' ? position.lng() : position.lng;
+    return new google.maps.LatLng(lat, lng);
+  }
+
+  private onMarkerDragStart(marker: google.maps.marker.AdvancedMarkerElement) {
     // TODO: Show confirm dialog and disable other components when entering reposition state.
     // Currently we are figuring out how should the UI trigger this state.
     this.showRepositionConfirmDialog = true;
     this.disableMapClicks = true;
     this.drawingToolsService.setDisabled(true);
     this.markerToReposition = marker;
-    this.oldLatLng = new google.maps.LatLng(
-      event.latLng!.lat(),
-      event.latLng!.lng()
-    );
+    this.oldLatLng = this.getMarkerLatLng(marker);
     this.changeDetectorRef.detectChanges();
   }
 
   private onMarkerDragEnd(
-    event: google.maps.Data.MouseEvent,
+    marker: google.maps.marker.AdvancedMarkerElement,
     id: string,
     jobId: string
   ) {
-    this.newLatLng = new google.maps.LatLng(
-      event.latLng!.lat(),
-      event.latLng!.lng()
-    );
+    const newLatLng = this.getMarkerLatLng(marker);
+    this.newLatLng = newLatLng;
 
     this.newLocationOfInterestToReposition = new LocationOfInterest(
       id,
       jobId,
-      new Point(new Coordinate(event.latLng!.lng(), event.latLng!.lat())),
+      new Point(new Coordinate(newLatLng.lng(), newLatLng.lat())),
       ImmutableMap<string, string | number>()
     );
   }

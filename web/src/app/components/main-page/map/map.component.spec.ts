@@ -479,9 +479,7 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const marker = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker, 'dragstart', {
-      latLng: new google.maps.LatLng(1.23, 4.56),
-    });
+    google.maps.event.trigger(marker, 'gmp-dragstart');
 
     const repositionDialog = fixture.nativeElement.querySelector(
       '#reposition-confirm-dialog'
@@ -495,9 +493,7 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const marker = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker, 'dragstart', {
-      latLng: new google.maps.LatLng(1.23, 4.56),
-    });
+    google.maps.event.trigger(marker, 'gmp-dragstart');
 
     expect(drawingToolsServiceSpy.setDisabled).toHaveBeenCalledOnceWith(true);
   });
@@ -508,9 +504,7 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const marker1 = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker1, 'dragstart', {
-      latLng: new google.maps.LatLng(1.23, 4.56),
-    });
+    google.maps.event.trigger(marker1, 'gmp-dragstart');
     const marker2 = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker2, 'gmp-click');
 
@@ -525,9 +519,7 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const marker = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker, 'dragstart', {
-      latLng: new google.maps.LatLng(1.23, 4.56),
-    });
+    google.maps.event.trigger(marker, 'gmp-dragstart');
     const [polygon] = component.polygons.get(polygonLoiId1)!;
     google.maps.event.trigger(polygon, 'click');
 
@@ -542,9 +534,7 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const marker = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker, 'dragstart', {
-      latLng: new google.maps.LatLng(1.23, 4.56),
-    });
+    google.maps.event.trigger(marker, 'gmp-dragstart');
     google.maps.event.trigger(component.map.googleMap!, 'click', {
       latLng: new google.maps.LatLng(45, 45),
     });
@@ -560,12 +550,9 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const marker = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker, 'dragstart', {
-      latLng: new google.maps.LatLng(1.23, 4.56),
-    });
-    google.maps.event.trigger(marker, 'dragend', {
-      latLng: new google.maps.LatLng(2.23, 5.56),
-    });
+    google.maps.event.trigger(marker, 'gmp-dragstart');
+    marker.position = new google.maps.LatLng(2.23, 5.56);
+    google.maps.event.trigger(marker, 'gmp-dragend');
     const confirmRepositionButton = fixture.nativeElement.querySelector(
       '#confirm-reposition'
     ) as HTMLElement;
@@ -589,12 +576,9 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const marker = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker, 'dragstart', {
-      latLng: new google.maps.LatLng(1.23, 4.56),
-    });
-    google.maps.event.trigger(marker, 'dragend', {
-      latLng: new google.maps.LatLng(2.23, 5.56),
-    });
+    google.maps.event.trigger(marker, 'gmp-dragstart');
+    marker.position = new google.maps.LatLng(2.23, 5.56);
+    google.maps.event.trigger(marker, 'gmp-dragend');
     const confirmRepositionButton = fixture.nativeElement.querySelector(
       '#confirm-reposition'
     ) as HTMLElement;
@@ -612,19 +596,16 @@ describe('MapComponent', () => {
     await fixture.whenStable();
 
     const marker = component.markers.get(poiId1)!;
-    google.maps.event.trigger(marker, 'dragstart', {
-      latLng: new google.maps.LatLng(1.23, 4.56),
-    });
-    google.maps.event.trigger(marker, 'dragend', {
-      latLng: new google.maps.LatLng(2.23, 5.56),
-    });
+    google.maps.event.trigger(marker, 'gmp-dragstart');
+    marker.position = new google.maps.LatLng(2.23, 5.56);
+    google.maps.event.trigger(marker, 'gmp-dragend');
     const cancelRepositionButton = fixture.nativeElement.querySelector(
       '#cancel-reposition'
     ) as HTMLElement;
     cancelRepositionButton.click();
     fixture.detectChanges();
 
-    assertMarkerLatLng(marker, new google.maps.LatLng(1.23, 4.56));
+    assertMarkerLatLng(marker, new google.maps.LatLng(4.56, 1.23));
     expect(loiServiceSpy.updatePoint).toHaveBeenCalledTimes(0);
   });
 
