@@ -44,6 +44,8 @@ class SubmissionFlowUiTest {
 
       override fun showEntityProperties() = Unit
 
+      override fun showEntitySubmissions() = Unit
+
       override fun selectSubmissionDetail(submissionId: String?) = Unit
 
       override fun launchFormForEntity(entityId: String, formId: String) = Unit
