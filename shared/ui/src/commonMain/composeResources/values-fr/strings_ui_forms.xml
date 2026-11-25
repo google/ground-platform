@@ -320,10 +320,6 @@
   <string name="forms_map_instruction_point">Cliquez sur la carte pour placer ce point.</string>
   <string name="forms_map_instruction_line">Cliquez sur la carte pour ajouter les sommets de la ligne, dans l’ordre (au moins 2).</string>
   <string name="forms_map_instruction_polygon">Cliquez sur la carte pour ajouter les sommets du polygone, dans l’ordre (au moins 3).</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">Dessiné sur la carte : point. Utilisez « Dessiner sur la carte » pour commencer.</string>
-  <string name="forms_map_drawn_line">Dessiné sur la carte : ligne. Utilisez « Dessiner sur la carte » pour commencer.</string>
-  <string name="forms_map_drawn_polygon">Dessiné sur la carte : polygone. Utilisez « Dessiner sur la carte » pour commencer.</string>
   <string name="forms_map_no_point">Aucun point pour l’instant</string>
   <string name="forms_map_point_placed">Point placé</string>
   <string name="forms_drawing_on_map">Dessin sur la carte en cours</string>

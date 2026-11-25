@@ -1542,7 +1542,8 @@ private fun DatasetSettingsPanel(
   val key = dataset.key
   val isMap = dataset.kind == DatasetKind.MAP_LAYER
   val listState = remember(key) { LazyListState() }
-  var showAdvanced by remember(key) { mutableStateOf(!FormEditorValidator.isValidName(dataset.id)) }
+  val allDatasetIds = uiState.draft.datasets.map { it.id }
+  var showAdvanced by remember(key) { mutableStateOf(showsDatasetIdField(dataset, allDatasetIds)) }
   var confirmDelete by remember(key) { mutableStateOf(false) }
   var expandedRemotePropertyGroups by remember(key) { mutableStateOf(emptySet<String>()) }
 
@@ -1593,6 +1594,7 @@ private fun DatasetSettingsPanel(
       item(key = "advanced") {
         DatasetAdvancedSettingsSection(
           dataset = dataset,
+          showsIdField = showsDatasetIdField(dataset, allDatasetIds),
           isReadOnly = uiState.isReadOnly,
           showAdvanced = showAdvanced,
           onToggleAdvanced = { showAdvanced = !showAdvanced },
@@ -1953,23 +1955,25 @@ private fun UnlinkedFormCard(
 }
 
 /**
- * Whether the Advanced section offers [dataset]'s ID for editing. IDs people chose or that were
- * derived from the name (`farm_plots`) are shown, since forms refer to them. An ID the system
- * generated (a UUID) means nothing to a survey organizer, who knows the map layer or data table by
- * its name, so it stays out of the settings.
+ * Whether the Advanced section offers [dataset]'s ID for editing. The ID is an internal identifier:
+ * a survey organizer knows the map layer or data table by its name, so the ID stays out of the
+ * settings. It is shown only when it has a problem the organizer has to fix before saving, which is
+ * when [EntityDatasetValidator] reports it as invalid or as used by another dataset in
+ * [allDatasetIds].
  */
-internal fun showsDatasetIdField(dataset: EntityDataset): Boolean = !RecordIds.isUuid(dataset.id)
+internal fun showsDatasetIdField(dataset: EntityDataset, allDatasetIds: List<String>): Boolean =
+  !FormEditorValidator.isValidName(dataset.id) || allDatasetIds.count { it == dataset.id } > 1
 
 @Composable
 private fun DatasetAdvancedSettingsSection(
   dataset: EntityDataset,
+  showsIdField: Boolean,
   isReadOnly: Boolean,
   showAdvanced: Boolean,
   onToggleAdvanced: () -> Unit,
   onUpdateId: (String) -> Unit,
   onRequestDelete: () -> Unit,
 ) {
-  val showsIdField = showsDatasetIdField(dataset)
   // Nothing to show: the ID is internal and a read-only survey has no Delete button.
   if (!showsIdField && isReadOnly) return
   Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {

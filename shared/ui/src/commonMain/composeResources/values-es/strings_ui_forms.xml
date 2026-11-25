@@ -320,10 +320,6 @@
   <string name="forms_map_instruction_point">Haga clic en el mapa para colocar este punto.</string>
   <string name="forms_map_instruction_line">Haga clic en el mapa para añadir los vértices de la línea, en orden (al menos 2).</string>
   <string name="forms_map_instruction_polygon">Haga clic en el mapa para añadir las esquinas del polígono, en orden (al menos 3).</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">Se dibuja en el mapa: punto. Use Dibujar en el mapa para empezar.</string>
-  <string name="forms_map_drawn_line">Se dibuja en el mapa: línea. Use Dibujar en el mapa para empezar.</string>
-  <string name="forms_map_drawn_polygon">Se dibuja en el mapa: polígono. Use Dibujar en el mapa para empezar.</string>
   <string name="forms_map_no_point">Aún no hay ningún punto</string>
   <string name="forms_map_point_placed">Punto colocado</string>
   <string name="forms_drawing_on_map">Dibujando en el mapa</string>

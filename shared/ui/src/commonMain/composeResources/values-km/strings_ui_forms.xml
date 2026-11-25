@@ -304,10 +304,6 @@
   <string name="forms_map_instruction_point">ចុចលើផែនទី ដើម្បីដាក់ចំណុចនេះ។</string>
   <string name="forms_map_instruction_line">ចុចលើផែនទី ដើម្បីបន្ថែមចំណុចកំពូលនៃបន្ទាត់តាមលំដាប់ (យ៉ាងហោចណាស់ 2)។</string>
   <string name="forms_map_instruction_polygon">ចុចលើផែនទី ដើម្បីបន្ថែមជ្រុងនៃពហុកោណតាមលំដាប់ (យ៉ាងហោចណាស់ 3)។</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">គូរលើផែនទី៖ ចំណុច។ ប្រើ គូរលើផែនទី ដើម្បីចាប់ផ្តើម។</string>
-  <string name="forms_map_drawn_line">គូរលើផែនទី៖ បន្ទាត់។ ប្រើ គូរលើផែនទី ដើម្បីចាប់ផ្តើម។</string>
-  <string name="forms_map_drawn_polygon">គូរលើផែនទី៖ ពហុកោណ។ ប្រើ គូរលើផែនទី ដើម្បីចាប់ផ្តើម។</string>
   <string name="forms_map_no_point">មិនទាន់មានចំណុច</string>
   <string name="forms_map_point_placed">បានដាក់ចំណុច</string>
   <string name="forms_drawing_on_map">កំពុងគូរលើផែនទី</string>

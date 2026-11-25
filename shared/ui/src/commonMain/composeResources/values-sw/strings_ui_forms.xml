@@ -320,10 +320,6 @@
   <string name="forms_map_instruction_point">Bofya ramani ili kuweka nukta hii.</string>
   <string name="forms_map_instruction_line">Bofya ramani ili kuongeza vipeo vya mstari, kwa mpangilio (angalau 2).</string>
   <string name="forms_map_instruction_polygon">Bofya ramani ili kuongeza pembe za poligoni, kwa mpangilio (angalau 3).</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">Huchorwa kwenye ramani: nukta. Tumia Chora kwenye ramani ili kuanza.</string>
-  <string name="forms_map_drawn_line">Huchorwa kwenye ramani: mstari. Tumia Chora kwenye ramani ili kuanza.</string>
-  <string name="forms_map_drawn_polygon">Huchorwa kwenye ramani: poligoni. Tumia Chora kwenye ramani ili kuanza.</string>
   <string name="forms_map_no_point">Bado hakuna nukta</string>
   <string name="forms_map_point_placed">Nukta imewekwa</string>
   <string name="forms_drawing_on_map">Inachora kwenye ramani</string>

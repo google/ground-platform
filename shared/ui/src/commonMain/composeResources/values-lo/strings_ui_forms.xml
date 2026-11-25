@@ -304,10 +304,6 @@
   <string name="forms_map_instruction_point">ຄລິກແຜນທີ່ເພື່ອວາງຈຸດນີ້.</string>
   <string name="forms_map_instruction_line">ຄລິກແຜນທີ່ເພື່ອເພີ່ມຈຸດຍອດຂອງເສັ້ນຕາມລຳດັບ (ຢ່າງໜ້ອຍ 2).</string>
   <string name="forms_map_instruction_polygon">ຄລິກແຜນທີ່ເພື່ອເພີ່ມມຸມຂອງຮູບຫຼາຍແຫຼ່ຽມຕາມລຳດັບ (ຢ່າງໜ້ອຍ 3).</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">ວາດເທິງແຜນທີ່: ຈຸດ. ໃຊ້ ວາດເທິງແຜນທີ່ ເພື່ອເລີ່ມຕົ້ນ.</string>
-  <string name="forms_map_drawn_line">ວາດເທິງແຜນທີ່: ເສັ້ນ. ໃຊ້ ວາດເທິງແຜນທີ່ ເພື່ອເລີ່ມຕົ້ນ.</string>
-  <string name="forms_map_drawn_polygon">ວາດເທິງແຜນທີ່: ຮູບຫຼາຍແຫຼ່ຽມ. ໃຊ້ ວາດເທິງແຜນທີ່ ເພື່ອເລີ່ມຕົ້ນ.</string>
   <string name="forms_map_no_point">ຍັງບໍ່ມີຈຸດ</string>
   <string name="forms_map_point_placed">ວາງຈຸດແລ້ວ</string>
   <string name="forms_drawing_on_map">ກຳລັງວາດເທິງແຜນທີ່</string>

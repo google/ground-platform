@@ -304,10 +304,6 @@
   <string name="forms_map_instruction_point">คลิกบนแผนที่เพื่อวางจุดนี้</string>
   <string name="forms_map_instruction_line">คลิกบนแผนที่เพื่อเพิ่มจุดยอดของเส้นตามลำดับ (อย่างน้อย 2 จุด)</string>
   <string name="forms_map_instruction_polygon">คลิกบนแผนที่เพื่อเพิ่มมุมของรูปหลายเหลี่ยมตามลำดับ (อย่างน้อย 3 จุด)</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">วาดบนแผนที่: จุด ใช้ “วาดบนแผนที่” เพื่อเริ่ม</string>
-  <string name="forms_map_drawn_line">วาดบนแผนที่: เส้น ใช้ “วาดบนแผนที่” เพื่อเริ่ม</string>
-  <string name="forms_map_drawn_polygon">วาดบนแผนที่: รูปหลายเหลี่ยม ใช้ “วาดบนแผนที่” เพื่อเริ่ม</string>
   <string name="forms_map_no_point">ยังไม่มีจุด</string>
   <string name="forms_map_point_placed">วางจุดแล้ว</string>
   <string name="forms_drawing_on_map">กำลังวาดบนแผนที่</string>

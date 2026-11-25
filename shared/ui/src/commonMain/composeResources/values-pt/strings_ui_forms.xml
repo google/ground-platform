@@ -336,10 +336,6 @@
   <string name="forms_map_instruction_point">Clique no mapa para posicionar este ponto.</string>
   <string name="forms_map_instruction_line">Clique no mapa para adicionar os vértices da linha, em ordem (pelo menos 2).</string>
   <string name="forms_map_instruction_polygon">Clique no mapa para adicionar os cantos do polígono, em ordem (pelo menos 3).</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">Desenhado no mapa: ponto. Use Desenhar no mapa para começar.</string>
-  <string name="forms_map_drawn_line">Desenhado no mapa: linha. Use Desenhar no mapa para começar.</string>
-  <string name="forms_map_drawn_polygon">Desenhado no mapa: polígono. Use Desenhar no mapa para começar.</string>
   <string name="forms_map_no_point">Nenhum ponto ainda</string>
   <string name="forms_map_point_placed">Ponto posicionado</string>
   <string name="forms_drawing_on_map">Desenhando no mapa</string>

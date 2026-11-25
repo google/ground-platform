@@ -304,10 +304,6 @@
   <string name="forms_map_instruction_point">Nhấp vào bản đồ để đặt điểm này.</string>
   <string name="forms_map_instruction_line">Nhấp vào bản đồ để thêm các đỉnh của đường theo thứ tự (ít nhất 2).</string>
   <string name="forms_map_instruction_polygon">Nhấp vào bản đồ để thêm các góc của đa giác theo thứ tự (ít nhất 3).</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">Vẽ trên bản đồ: điểm. Dùng Vẽ trên bản đồ để bắt đầu.</string>
-  <string name="forms_map_drawn_line">Vẽ trên bản đồ: đường. Dùng Vẽ trên bản đồ để bắt đầu.</string>
-  <string name="forms_map_drawn_polygon">Vẽ trên bản đồ: đa giác. Dùng Vẽ trên bản đồ để bắt đầu.</string>
   <string name="forms_map_no_point">Chưa có điểm</string>
   <string name="forms_map_point_placed">Đã đặt điểm</string>
   <string name="forms_drawing_on_map">Đang vẽ trên bản đồ</string>

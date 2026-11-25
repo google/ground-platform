@@ -320,10 +320,6 @@
   <string name="forms_map_instruction_point">Click the map to place this point.</string>
   <string name="forms_map_instruction_line">Click the map to add the line's vertices, in order (at least 2).</string>
   <string name="forms_map_instruction_polygon">Click the map to add the polygon's corners, in order (at least 3).</string>
-  <!-- "Draw on map" is the label of the button that starts drawing. -->
-  <string name="forms_map_drawn_point">Drawn on the map: point. Use Draw on map to start.</string>
-  <string name="forms_map_drawn_line">Drawn on the map: line. Use Draw on map to start.</string>
-  <string name="forms_map_drawn_polygon">Drawn on the map: polygon. Use Draw on map to start.</string>
   <string name="forms_map_no_point">No point yet</string>
   <string name="forms_map_point_placed">Point placed</string>
   <string name="forms_drawing_on_map">Drawing on map</string>

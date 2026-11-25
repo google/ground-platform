@@ -61,9 +61,6 @@ import org.openforis.collectone.v2.core.forms.ui.resources.forms_clear
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_done
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_draw_on_map
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_drawing_on_map
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_drawn_line
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_drawn_point
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_drawn_polygon
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_instruction_line
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_instruction_point
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_instruction_polygon
@@ -210,14 +207,6 @@ fun mapDrawingInstruction(kind: MapDrawingKind): StringResource =
     MapDrawingKind.POLYGON -> Res.string.forms_map_instruction_polygon
   }
 
-/** Hint shown while a geometry of [kind] is not being drawn, pointing to **Draw on map**. */
-private fun mapDrawingIdleHint(kind: MapDrawingKind): StringResource =
-  when (kind) {
-    MapDrawingKind.POINT -> Res.string.forms_map_drawn_point
-    MapDrawingKind.LINE -> Res.string.forms_map_drawn_line
-    MapDrawingKind.POLYGON -> Res.string.forms_map_drawn_polygon
-  }
-
 /** One-line summary of what has been drawn so far, e.g. `"3 vertices"` or `"No point yet"`. */
 fun mapDrawingSummary(kind: MapDrawingKind, vertexCount: Int): FormUiText =
   when {
@@ -229,11 +218,11 @@ fun mapDrawingSummary(kind: MapDrawingKind, vertexCount: Int): FormUiText =
 
 /**
  * The compact layout's input for a geometry question when the host provides map drawing
- * ([CompactGeometryInput.MapDrawing]): an instruction to click the map, the drawing status, and
- * **Draw on map** / **Done** / **Undo** / **Cancel** / **Clear** actions. Vertices themselves
- * arrive through the host ([CompactMapDrawingHost]), which calls [addMapDrawingVertex] for each map
- * click. Hosts that can frame geometry ([CompactMapDrawingHost.canFrameGeometry]) also get a **Zoom
- * to fit** button once something is drawn.
+ * ([CompactGeometryInput.MapDrawing]): the drawing status, an instruction to click the map while
+ * drawing, and **Draw on map** / **Done** / **Undo** / **Cancel** / **Clear** actions. Vertices
+ * themselves arrive through the host ([CompactMapDrawingHost]), which calls [addMapDrawingVertex]
+ * for each map click. Hosts that can frame geometry ([CompactMapDrawingHost.canFrameGeometry]) also
+ * get a **Zoom to fit** button once something is drawn.
  *
  * With a `null` [host] or [readOnly], the actions are disabled: the card documents the interaction
  * for the Form designer's web preview without a live map.
@@ -256,29 +245,29 @@ fun MapDrawingRequestWidget(
   val colors = MaterialTheme.colorScheme
 
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Surface(
-      shape = MaterialTheme.shapes.small,
-      color = if (isDrawing) colors.primaryContainer else colors.secondaryContainer,
-      contentColor = if (isDrawing) colors.onPrimaryContainer else colors.onSecondaryContainer,
-      modifier = Modifier.fillMaxWidth(),
-    ) {
-      Row(
-        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    // Shown only while drawing: before that, the Draw on map button below says all there is to say.
+    if (isDrawing) {
+      Surface(
+        shape = MaterialTheme.shapes.small,
+        color = colors.primaryContainer,
+        contentColor = colors.onPrimaryContainer,
+        modifier = Modifier.fillMaxWidth(),
       ) {
-        Icon(
-          imageVector = Icons.Default.Place,
-          contentDescription = null,
-          modifier = Modifier.size(20.dp),
-        )
-        Text(
-          text =
-            stringResource(
-              if (isDrawing) mapDrawingInstruction(kind) else mapDrawingIdleHint(kind)
-            ),
-          style = MaterialTheme.typography.bodySmall,
-        )
+        Row(
+          modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Default.Place,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+          )
+          Text(
+            text = stringResource(mapDrawingInstruction(kind)),
+            style = MaterialTheme.typography.bodySmall,
+          )
+        }
       }
     }
 
