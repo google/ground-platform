@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -72,6 +73,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.semantics.Role
@@ -101,7 +103,6 @@ import org.openforis.collectone.v2.core.forms.ui.TonalBadge
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.DropdownMenuItem
 import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalButton
-import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalIconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
@@ -928,11 +929,20 @@ private fun SurveyCardOverflowMenu(
 ) {
   var isExpanded by remember { mutableStateOf(false) }
   Box(modifier = modifier) {
-    FilledTonalIconButton(onClick = { isExpanded = true }) {
+    // No fill, so the map shows through. The thumbnail is imagery, not a themed surface: the dots
+    // are light with a dark edge, like the thumbnail's place labels, to read on any of it.
+    IconButton(onClick = { isExpanded = true }) {
+      Icon(
+        imageVector = Icons.Outlined.MoreVert,
+        contentDescription = null,
+        tint = Color.Black.copy(alpha = 0.55f),
+        modifier = Modifier.offset(x = 1.dp, y = 1.dp),
+      )
       Icon(
         imageVector = Icons.Outlined.MoreVert,
         contentDescription =
           stringResource(Res.string.mobile_survey_more_options_content_description, surveyTitle),
+        tint = Color.White,
       )
     }
     DropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {

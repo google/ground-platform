@@ -16,7 +16,7 @@ package org.openforis.collectone.v2.mobile.ui.navigation
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -62,7 +62,7 @@ class MobileBackStackTest {
   fun onTheSurveysOnTheDeviceAtLaunch_thereIsNoBackButton() = runMobileNavigationTest {
     show(MobileRoute.DownloadedSurveys)
 
-    it.onAllNodesWithText("Back").assertCountEquals(0)
+    it.onAllNodesWithContentDescription("Back").assertCountEquals(0)
   }
 
   @Test

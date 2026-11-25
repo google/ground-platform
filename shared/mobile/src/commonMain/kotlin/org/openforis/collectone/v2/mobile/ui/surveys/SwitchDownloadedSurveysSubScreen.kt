@@ -54,7 +54,7 @@ import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.TonalBadge
 import org.openforis.collectone.v2.core.forms.ui.controls.Button
 import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalButton
-import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedCard
 import org.openforis.collectone.v2.mobile.resources.Res
 import org.openforis.collectone.v2.mobile.resources.mobile_back
@@ -77,8 +77,8 @@ import org.openforis.collectone.v2.mobile.resources.mobile_unavailable
  * @param downloadedSurveys the surveys downloaded to the device; [activeSurveyId] is highlighted.
  * @param onOpenSurvey opens a survey in the Main Survey UI.
  * @param onBrowseMoreSurveys opens the full `Download surveys` screen.
- * @param onBack closes the sub-screen; null hides the Back button (when there is nothing to return
- *   to).
+ * @param onBack closes the sub-screen from the Back arrow at the top left; null hides the arrow
+ *   (when there is nothing to return to).
  */
 @Composable
 internal fun SwitchDownloadedSurveysSubScreen(
@@ -103,12 +103,21 @@ internal fun SwitchDownloadedSurveysSubScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
-        Icon(
-          imageVector = Icons.Outlined.SwapHoriz,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.primary,
-          modifier = Modifier.size(22.dp),
-        )
+        if (onBack != null) {
+          IconButton(onClick = onBack) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+              contentDescription = stringResource(Res.string.mobile_back),
+            )
+          }
+        } else {
+          Icon(
+            imageVector = Icons.Outlined.SwapHoriz,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(22.dp),
+          )
+        }
         Column {
           Text(
             text = stringResource(Res.string.mobile_downloaded_surveys_title),
@@ -127,17 +136,6 @@ internal fun SwitchDownloadedSurveysSubScreen(
           )
         }
       }
-      if (onBack != null) {
-        OutlinedButton(onClick = onBack, shape = MaterialTheme.shapes.small) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-            contentDescription = null,
-            modifier = Modifier.size(14.dp),
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(stringResource(Res.string.mobile_back))
-        }
-      }
     }
 
     // List of Downloaded Surveys only
@@ -147,16 +145,8 @@ internal fun SwitchDownloadedSurveysSubScreen(
         onClick = { onOpenSurvey(survey.id) },
         modifier = Modifier.fillMaxWidth().height(260.dp),
         shape = MaterialTheme.shapes.medium,
-        border =
-          BorderStroke(
-            width = if (isActive) 1.5.dp else 1.dp,
-            color =
-              if (isActive) {
-                MaterialTheme.colorScheme.primary
-              } else {
-                MaterialTheme.colorScheme.outlineVariant
-              },
-          ),
+        // Every card has the same outline; the active survey is marked by its badge and its tint.
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
         colors =
           CardDefaults.outlinedCardColors(
             containerColor =
