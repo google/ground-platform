@@ -288,11 +288,11 @@ class WebSurveyCardLayoutTest {
       fun pixelAt(xDp: Float, yDp: Float): Int =
         bitmap.getColor((xDp * scale).roundToInt(), (yDp * scale).roundToInt())
 
-      fun isGrayscale(argb: Int): Boolean {
+      fun isGrayscale(argb: Int, tolerance: Int = 2): Boolean {
         val r = (argb shr 16) and 0xFF
         val g = (argb shr 8) and 0xFF
         val b = argb and 0xFF
-        return abs(r - g) <= 2 && abs(g - b) <= 2 && abs(r - b) <= 2
+        return abs(r - g) <= tolerance && abs(g - b) <= tolerance && abs(r - b) <= tolerance
       }
 
       fun luminance(argb: Int): Int {
@@ -308,8 +308,10 @@ class WebSurveyCardLayoutTest {
       // Closed card thumbnail is grayscale and lighter than the open card's thumbnail.
       val closedThumbPixel = pixelAt(closedBounds.right.value - 12f, closedBounds.top.value + 12f)
       val openThumbPixel = pixelAt(openBounds.right.value - 12f, openBounds.top.value + 12f)
+      // The thumbnail is partly transparent, so the card's faintly tinted surface shows through
+      // it: gray to the eye, within a few levels per channel rather than exactly neutral.
       assertTrue(
-        isGrayscale(closedThumbPixel),
+        isGrayscale(closedThumbPixel, tolerance = 6),
         "Expected closed card thumbnail to be grayscale, got 0x${closedThumbPixel.toString(16)}",
       )
       assertTrue(

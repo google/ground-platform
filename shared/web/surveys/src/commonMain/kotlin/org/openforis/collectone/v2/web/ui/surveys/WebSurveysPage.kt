@@ -52,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -103,7 +104,21 @@ import org.openforis.collectone.v2.web.ui.surveyoutcome.SurveyOutcomeDialog
 
 private val SurveyCardWidth = 320.dp
 private val SurveyCardHeroHeight = 140.dp
-private val PageMaxWidth = 1240.dp
+private val SurveyCardSpacing = 16.dp
+private const val SURVEY_CARDS_PER_ROW = 3
+
+/**
+ * Width of the page content: exactly [SURVEY_CARDS_PER_ROW] cards across. The content keeps this
+ * width however many surveys are listed, so the page doesn't change width between an empty list, a
+ * few surveys, and full rows.
+ */
+private val PageContentWidth =
+  SurveyCardWidth * SURVEY_CARDS_PER_ROW + SurveyCardSpacing * (SURVEY_CARDS_PER_ROW - 1)
+
+/**
+ * Opacity of a closed survey's map thumbnail, so the card reads as inactive but stays clickable.
+ */
+private const val CLOSED_SURVEY_THUMBNAIL_ALPHA = 0.5f
 
 /**
  * Landing page of the Collect One web app: every survey the signed-in user can open, grouped by
@@ -158,9 +173,10 @@ fun WebSurveysPage(
       Box(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Column(
           modifier =
-            Modifier.widthIn(max = PageMaxWidth)
-              .align(Alignment.TopCenter)
+            Modifier.align(Alignment.TopCenter)
               .padding(horizontal = 32.dp, vertical = 24.dp)
+              .widthIn(max = PageContentWidth)
+              .fillMaxWidth()
               .semantics { isTraversalGroup = true },
           verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
@@ -356,8 +372,8 @@ private fun SurveySection(
   ) {
     SectionHeading(section = section, userEmail = userEmail)
     FlowRow(
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+      horizontalArrangement = Arrangement.spacedBy(SurveyCardSpacing),
+      verticalArrangement = Arrangement.spacedBy(SurveyCardSpacing),
     ) {
       section.surveys.forEachIndexed { index, survey ->
         WebSurveyCard(
@@ -491,7 +507,10 @@ private fun WebSurveyCardHero(
     SurveyMapThumbnail(
       thumbnail = survey.thumbnail,
       isDownloaded = false,
-      modifier = Modifier.fillMaxSize().grayscale(survey.isClosed),
+      modifier =
+        Modifier.fillMaxSize()
+          .grayscale(survey.isClosed)
+          .alpha(if (survey.isClosed) CLOSED_SURVEY_THUMBNAIL_ALPHA else 1f),
     )
     if (survey.isClosed) {
       ClosedSurveyThumbnailScrim()
