@@ -307,12 +307,16 @@ private fun FormTargetContext(
             append("${entity.label} • ")
             appendGeoId(entity, geoIdPendingSyncDescription())
           } else if (form != null && !form.requiresEntity) {
-            append(
-              stringResource(
-                Res.string.app_standalone_field_log_with_location,
-                userGpsCoordinatesLabel,
+            if (userGpsCoordinatesLabel.isNotBlank()) {
+              append(
+                stringResource(
+                  Res.string.app_standalone_field_log_with_location,
+                  userGpsCoordinatesLabel,
+                )
               )
-            )
+            } else {
+              append(form.title)
+            }
           } else {
             append(
               stringResource(
@@ -476,11 +480,14 @@ private fun EntityRefStepMapOrListSelector(
                   color = MaterialTheme.colorScheme.onSurface,
                 )
                 val (geoIdPrefix, geoIdSuffix) = geoIdLabelAffixes()
+                val selectedWayfinding =
+                  wayfindingBadge(distanceAndBearingToEntity(selectedEntity.id))
                 GeoIdText(
                   entity = selectedEntity,
                   prefix = geoIdPrefix,
                   suffix =
-                    "$geoIdSuffix • ${wayfindingBadge(distanceAndBearingToEntity(selectedEntity.id))}",
+                    if (selectedWayfinding.isNotEmpty()) "$geoIdSuffix • $selectedWayfinding"
+                    else geoIdSuffix,
                   style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -761,7 +768,8 @@ private fun EntityRefCandidateOptionCard(
         GeoIdText(
           entity = candidate,
           prefix = geoIdPrefix,
-          suffix = "$geoIdSuffix • $wayfindingBadge",
+          suffix =
+            if (wayfindingBadge.isNotEmpty()) "$geoIdSuffix • $wayfindingBadge" else geoIdSuffix,
           style = MaterialTheme.typography.labelSmall,
           color =
             if (isSelected) {

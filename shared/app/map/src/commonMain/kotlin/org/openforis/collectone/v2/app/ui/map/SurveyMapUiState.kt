@@ -103,11 +103,12 @@ data class SurveyMapUiState(
   val userGpsNormalizedY: Float = 0.50f,
   /** Real device coordinates when reported by a live location source, or null. */
   val userLatLng: org.openforis.collectone.v2.map.LatLng? = null,
+  /** True once a real GNSS fix or explicit simulated GPS position has been recorded. */
+  val hasKnownLocation: Boolean = false,
   /** Formatted GPS coordinates & accuracy badge for the user's current field position. */
-  val userGpsCoordinatesLabel: String = "-0.4198°, 36.9512° (±3.2m GPS)",
-  val gnssSatelliteCount: Int = 18,
-  /** Current horizontal GNSS accuracy in meters. */
-  val gnssAccuracyMeters: Double = 2.1,
+  val userGpsCoordinatesLabel: String = "",
+  /** Current horizontal GNSS accuracy in meters, or `null` when unavailable. */
+  val gnssAccuracyMeters: Double? = null,
   val unitSystem: MeasurementUnitSystem = MeasurementUnitSystem.METRIC,
   /**
    * Whether the map camera keeps the user's GPS location centered (`true` by default). Becomes
@@ -214,17 +215,17 @@ data class SurveyMapUiState(
   val isPlacesSearchAvailable: Boolean
     get() = isOnline
 
-  /** Horizontal GNSS accuracy in the user's unit system, shown on the chip over the map. */
-  val gnssAccuracy: Measurement
-    get() = unitSystem.gnssAccuracy(gnssAccuracyMeters)
+  /** Horizontal GNSS accuracy in the user's unit system, or `null` when no accuracy is known. */
+  val gnssAccuracy: Measurement?
+    get() = gnssAccuracyMeters?.let(unitSystem::gnssAccuracy)
 
   /**
-   * Formatted zoom level badge (e.g. `"15.3z"`): the zoom delta on a fixed base of 15.3, not on the
-   * active survey's [SurveyMapAnchor.zoom], clamped to 2–19 and rounded to tenths.
+   * Formatted zoom level badge (e.g. `"15.3z"`): the active survey's [SurveyMapAnchor.zoom] plus
+   * [mapZoomDelta], clamped to 2–19 and rounded to tenths.
    */
   val effectiveMapZoomLabel: String
     get() {
-      val rawZoom = (15.3f + mapZoomDelta).coerceIn(2.0f, 19.0f)
+      val rawZoom = (anchor.zoom.toFloat() + mapZoomDelta).coerceIn(2.0f, 19.0f)
       val tenths = (rawZoom * 10f + 0.5f).toInt()
       return "${tenths / 10}.${tenths % 10}z"
     }

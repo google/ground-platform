@@ -456,7 +456,12 @@ class MobileEntitiesTest {
 
   @Test
   fun gnssStatusChip_showsTheAccuracy() {
-    assertEquals(18, state.viewModels.surveyMap.uiState.value.gnssSatelliteCount)
+    assertNull(state.viewModels.surveyMap.uiState.value.gnssAccuracy)
+    state.viewModels.surveyMap.updateDeviceLocation(
+      latitude = -0.4198,
+      longitude = 36.9512,
+      accuracyMeters = 2.1,
+    )
     assertEquals(
       Measurement(2.1, MeasurementUnit.METER, decimals = null),
       state.viewModels.surveyMap.uiState.value.gnssAccuracy,
@@ -572,6 +577,7 @@ class MobileEntitiesTest {
 
   @Test
   fun startNavigationToSubmission_navigatesToAStandaloneSubmission() {
+    state.viewModels.surveyMap.updateUserGpsLocation(0.50f, 0.50f)
     state.viewModels.surveyMap.startNavigationToSubmission(EROSION_SUBMISSION)
 
     val nav = assertNotNull(state.viewModels.surveyMap.uiState.value.activeNavigation)

@@ -256,6 +256,7 @@ class MobileSurveyMapTest {
     val state =
       MobileAppState(initialRoute = MobileRoute.MainSurvey, dataHolder = sampleDataHolder())
     assertEquals(null, state.viewModels.surveyMap.uiState.value.activeNavigation)
+    state.viewModels.surveyMap.updateUserGpsLocation(0.50f, 0.50f)
 
     // 1. Start straight-line navigation to a Geospatial Entity
     state.viewModels.surveyMap.startNavigationToEntity("00000007-640e-5ed7-9874-4d6b6717f21d")

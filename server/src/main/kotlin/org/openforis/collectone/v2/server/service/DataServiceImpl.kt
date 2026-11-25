@@ -229,13 +229,42 @@ internal class DataServiceImpl(
       }
     }
     if (entities.isEmpty()) return ListEntityClustersResponse()
+    val positions = entities.mapNotNull(::entityRepresentativePosition)
+    val centroid =
+      if (positions.isNotEmpty()) {
+        Position(
+          longitude = positions.map { it.longitude }.average(),
+          latitude = positions.map { it.latitude }.average(),
+        )
+      } else {
+        Position(longitude = 0.0, latitude = 0.0)
+      }
+    val cellToken =
+      entities.firstNotNullOfOrNull { it.s2_cell_token.takeIf(String::isNotBlank) } ?: ""
     val cluster =
       EntityCluster(
-        s2_cell_token = "10d96b",
-        centroid = Position(longitude = 36.9498, latitude = -0.4192),
+        s2_cell_token = cellToken,
+        centroid = centroid,
         total_count = entities.size,
       )
     return ListEntityClustersResponse(clusters = listOf(cluster))
+  }
+
+  private fun entityRepresentativePosition(entity: EntityRecord): Position? {
+    val g = entity.geometry
+    return g?.point
+      ?: g?.line_string?.positions?.firstOrNull()
+      ?: g?.polygon?.rings?.firstOrNull()?.positions?.firstOrNull()
+      ?: g?.multi_point?.positions?.firstOrNull()
+      ?: g?.multi_line_string?.lines?.firstOrNull()?.positions?.firstOrNull()
+      ?: g?.multi_polygon?.polygons?.firstOrNull()?.rings?.firstOrNull()?.positions?.firstOrNull()
+      ?: entity.point?.let { Position(longitude = it.longitude, latitude = it.latitude) }
+      ?: entity.trace?.points?.firstOrNull()?.let {
+        Position(longitude = it.longitude, latitude = it.latitude)
+      }
+      ?: entity.shape?.points?.firstOrNull()?.let {
+        Position(longitude = it.longitude, latitude = it.latitude)
+      }
   }
 
   override suspend fun GetSubmission(request: GetSubmissionRequest): GetSubmissionResponse {

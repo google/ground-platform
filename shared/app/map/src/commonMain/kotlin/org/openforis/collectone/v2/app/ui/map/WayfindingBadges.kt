@@ -25,8 +25,8 @@ interface WayfindingBadges {
   /** To the map feature with [entityId], or `null` if it has no location. */
   fun distanceAndBearingToEntity(entityId: String): StraightLineVector?
 
-  /** To [place]. */
-  fun distanceAndBearingToPlace(place: SurveyPlaceItem): StraightLineVector
+  /** To [place], or `null` when the device has no known location. */
+  fun distanceAndBearingToPlace(place: SurveyPlaceItem): StraightLineVector?
 
   /** To the geometry [field] of [submissionId], or `null` if it isn't a geometry. */
   fun distanceAndBearingToSubmissionField(

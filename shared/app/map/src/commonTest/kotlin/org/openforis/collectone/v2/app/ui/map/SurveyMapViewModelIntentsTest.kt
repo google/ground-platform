@@ -146,6 +146,7 @@ class SurveyMapViewModelIntentsTest {
   @Test
   fun navigationToSubmission_selectsItsFeature_showsItsLayer_andToggles() = runTest {
     val f = MapViewModelFixture()
+    f.viewModel.updateUserGpsLocation(0.50f, 0.50f)
     val entity = f.uiState.entities.first { it.submissions.isNotEmpty() }
     val submission = entity.submissions.first()
     runNow {
@@ -192,6 +193,7 @@ class SurveyMapViewModelIntentsTest {
   @Test
   fun steppingTowardTheTarget_eventuallyArrivesOnIt() {
     val f = MapViewModelFixture()
+    f.viewModel.updateUserGpsLocation(0.50f, 0.50f)
     f.viewModel.startNavigationToEntity(SEEDED_ENTITY_ID)
     repeat(30) { f.viewModel.stepUserTowardNavigationTarget(stepFraction = 1f) }
     val nav = assertNotNull(f.uiState.activeNavigation)
@@ -201,14 +203,18 @@ class SurveyMapViewModelIntentsTest {
   @Test
   fun wayfindingBadges_measureFromTheUser() {
     val f = MapViewModelFixture()
+    assertNull(f.viewModel.distanceAndBearingToEntity(SEEDED_ENTITY_ID))
+    f.viewModel.updateUserGpsLocation(0.50f, 0.50f)
     val toEntity = assertNotNull(f.viewModel.distanceAndBearingToEntity(SEEDED_ENTITY_ID))
     assertNull(f.viewModel.distanceAndBearingToEntity("unknown"))
     assertNull(f.viewModel.distanceAndBearingToSubmission("unknown"))
 
     val place = assertNotNull(f.viewModel.findPlaceById(SEEDED_PLACE_ID))
+    val (placeX, placeY) = f.uiState.anchor.positionOf(place.position)
+    val toPlace = assertNotNull(f.viewModel.distanceAndBearingToPlace(place))
     assertEquals(
-      f.viewModel.computeStraightLineVector(place.normalizedX, place.normalizedY),
-      f.viewModel.distanceAndBearingToPlace(place),
+      f.viewModel.computeStraightLineVector(placeX, placeY).distanceMeters,
+      toPlace.distanceMeters,
     )
 
     // Walking onto the feature brings the distance down.
@@ -222,6 +228,7 @@ class SurveyMapViewModelIntentsTest {
   @Test
   fun geometryFields_ofSubmissions_resolveToTheirGeometry() {
     val f = MapViewModelFixture()
+    f.viewModel.updateUserGpsLocation(0.50f, 0.50f)
     val data = seededMapData()
     val geometry = data.submissionGeometries.first()
     val submission = data.allSubmissions.first { it.id == geometry.submissionId }

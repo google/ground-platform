@@ -154,6 +154,7 @@ class SurveyMapContentBuildersTest {
   @Test
   fun main_withNavigation_drawsTheLineAndPill_andTheUsersBearing() {
     val f = MapViewModelFixture()
+    f.viewModel.updateUserGpsLocation(0.50f, 0.50f)
     f.viewModel.startNavigationToEntity(SEEDED_ENTITY_ID)
     val map = SurveyMapContent.main(f.uiState, emptySet(), showNavigation = true)
     val overlayIds = map.features(SurveyMapContent.OVERLAY_SOURCE).map { it.id }

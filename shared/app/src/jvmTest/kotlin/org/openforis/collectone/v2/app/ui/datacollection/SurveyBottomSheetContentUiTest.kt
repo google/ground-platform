@@ -258,6 +258,7 @@ class SurveyBottomSheetContentUiTest {
   @Test
   fun mobileList_placeCard_showsCoordinatesOnTheirOwnLine_andASingleNavigateButton() =
     runComposeUiTest {
+      session.viewModels.surveyMap.updateUserGpsLocation(0.50f, 0.50f)
       val surveyLocation = session.activeSurveyAccess.activeSurvey.location
       session.searchableListActions.updateListSearchQuery("-0.421, 36.9505")
       showSheet()
@@ -281,6 +282,7 @@ class SurveyBottomSheetContentUiTest {
 
   @Test
   fun selectedEntity_navigateButtonStartsAndEndsNavigation() = runComposeUiTest {
+    session.viewModels.surveyMap.updateUserGpsLocation(0.50f, 0.50f)
     val entity = entityWithSubmissions
     session.viewModels.surveyMap.selectEntity(entity.id)
     showSheet()

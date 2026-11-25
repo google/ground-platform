@@ -51,6 +51,7 @@ import org.openforis.collectone.v2.core.forms.temporal.formatIsoInstant
 import org.openforis.collectone.v2.core.forms.temporal.formatIsoTime
 import org.openforis.collectone.v2.core.ids.RecordIds
 import org.openforis.collectone.v2.map.GeometryType
+import org.openforis.collectone.v2.map.LatLng
 
 /** Outcome of finalizing an active form submission via [CompleteFormSubmissionUseCase]. */
 data class FormSubmissionCompletionResult(
@@ -101,7 +102,8 @@ class CompleteFormSubmissionUseCase(
     userGpsCoordinatesLabel: String,
     userGpsNormalizedX: Float,
     userGpsNormalizedY: Float,
-    gnssAccuracy: Measurement,
+    gnssAccuracy: Measurement?,
+    userLatLng: LatLng? = null,
   ): FormSubmissionCompletionResult? = transactionRunner {
     complete(
       recordInstance = recordInstance,
@@ -118,6 +120,7 @@ class CompleteFormSubmissionUseCase(
       userGpsNormalizedX = userGpsNormalizedX,
       userGpsNormalizedY = userGpsNormalizedY,
       gnssAccuracy = gnssAccuracy,
+      userLatLng = userLatLng,
     )
   }
 
@@ -135,7 +138,8 @@ class CompleteFormSubmissionUseCase(
     userGpsCoordinatesLabel: String,
     userGpsNormalizedX: Float,
     userGpsNormalizedY: Float,
-    gnssAccuracy: Measurement,
+    gnssAccuracy: Measurement?,
+    userLatLng: LatLng? = null,
   ): FormSubmissionCompletionResult? {
     val entities = surveyRepository.getEntities()
     val forms = surveyRepository.getForms()
@@ -145,8 +149,9 @@ class CompleteFormSubmissionUseCase(
     val savedAt = clock.now()
     val opTime = formatMutationTime(savedAt)
     val userLocation =
-      SurveyMapAnchor.forSurvey(activeSurveyId)
-        .toLatLng(userGpsNormalizedX.toDouble(), userGpsNormalizedY.toDouble())
+      userLatLng
+        ?: SurveyMapAnchor.forSurvey(activeSurveyId)
+          .toLatLng(userGpsNormalizedX.toDouble(), userGpsNormalizedY.toDouble())
 
     val resolvedEntityStates =
       if (entityStates.isEmpty() && formRunner != null) {
@@ -405,13 +410,16 @@ class CompleteFormSubmissionUseCase(
       surveyRepository.setStandaloneSubmissions(
         listOf(newStandaloneSubmission) + standaloneSubmissions
       )
+      val coordSummary = userGpsCoordinatesLabel.substringBefore(" (").trim()
       val newSubmissionMutation =
         MutationLogItem(
           id = "mut-sub-$newSubId",
           surveyId = activeSurveyId,
           operationKind = MutationOperationKind.CREATE_SUBMISSION,
           title = resolvedTitle,
-          targetLabel = "Standalone Field Log (${userGpsCoordinatesLabel.substringBefore(" (")})",
+          targetLabel =
+            if (coordSummary.isNotBlank()) "Standalone Field Log ($coordSummary)"
+            else "Standalone Field Log",
           entityId = "",
           submissionId = newSubId,
           actorName = signedInUserName,
@@ -427,11 +435,7 @@ class CompleteFormSubmissionUseCase(
       return FormSubmissionCompletionResult(
         selectedEntityId = null,
         selectedSubmissionId = newSubId,
-        notice =
-          SubmissionNotice.STANDALONE_SUBMITTED.message(
-            resolvedTitle,
-            userGpsCoordinatesLabel.substringBefore(" ("),
-          ),
+        notice = SubmissionNotice.STANDALONE_SUBMITTED.message(resolvedTitle, coordSummary),
       )
     }
 
@@ -559,7 +563,7 @@ class CompleteFormSubmissionUseCase(
     formRunner: FormRunner?,
     resolvedFormDef: FormDef,
     form: FormPreviewItem,
-    gnssAccuracy: Measurement,
+    gnssAccuracy: Measurement?,
   ): List<SubmissionFieldEntry> {
     val evaluatedState: FormState =
       if (formRunner != null && formRunner.formState.recordInstance == recordInstance) {
@@ -630,7 +634,12 @@ class CompleteFormSubmissionUseCase(
           questionName = "organizer_action_cta",
           questionLabel = "Completed Form Action (${form.ctaLabel})",
           // Stored in the record, so in English whatever the UI language.
-          answerValue = "Verified in field (±${gnssAccuracy.value} ${gnssAccuracy.unit.symbol})",
+          answerValue =
+            if (gnssAccuracy != null) {
+              "Verified in field (±${gnssAccuracy.value} ${gnssAccuracy.unit.symbol})"
+            } else {
+              "Verified in field"
+            },
         )
       )
     }

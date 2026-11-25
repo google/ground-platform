@@ -134,9 +134,10 @@ internal data class SurveyMapSession(
             normalizedX = x,
             normalizedY = y,
             coordinatesLabel = coordinatesLabel,
-            gnssAccuracyMeters = accuracyMeters ?: location.gnssAccuracyMeters,
+            gnssAccuracyMeters = accuracyMeters,
             latitude = latitude,
             longitude = longitude,
+            isKnown = true,
           )
       )
     if (isCameraFollowingUser) return moved

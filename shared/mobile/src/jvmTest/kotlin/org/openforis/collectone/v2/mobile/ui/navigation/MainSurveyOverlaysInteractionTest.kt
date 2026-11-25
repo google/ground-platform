@@ -129,6 +129,7 @@ class MainSurveyOverlaysInteractionTest {
   fun wayfindingBanner_showsWhileNavigating_andEndStopsIt() = runMobileNavigationTest { test ->
     val state = show()
     test.runOnIdle {
+      state.viewModels.surveyMap.updateUserGpsLocation(0.50f, 0.50f)
       val entity = state.viewModels.dataCollection.uiState.value.entities.first()
       state.viewModels.surveyMap.startNavigationToEntity(entity.id)
     }

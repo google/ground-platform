@@ -297,11 +297,16 @@ internal fun SurveyMapView(
               verticalAlignment = Alignment.Top,
             ) {
               Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                // Combined GPS Status / Auto-Center Chip over the map
-                GnssStatusChip(
-                  isFollowingUser = mapUiState.isCameraFollowingUser,
-                  gnssStatusLabel = gnssAccuracyText(mapUiState.gnssAccuracy).resolve(),
-                )
+                // Combined GPS Status / Auto-Center Chip over the map (only when panned or when an
+                // actual GNSS accuracy reading is available).
+                val gnssAccuracy = mapUiState.gnssAccuracy
+                if (!mapUiState.isCameraFollowingUser || gnssAccuracy != null) {
+                  GnssStatusChip(
+                    isFollowingUser = mapUiState.isCameraFollowingUser,
+                    gnssStatusLabel =
+                      gnssAccuracy?.let { gnssAccuracyText(it).resolve() }.orEmpty(),
+                  )
+                }
                 if (mapUiState.isEarthEngineLayerShown) {
                   PoweredByEarthEngineBadge(
                     isMapOverlay = true,

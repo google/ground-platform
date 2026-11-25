@@ -14,9 +14,13 @@
 package org.openforis.collectone.v2.app.domain.usecase
 
 import kotlin.math.PI
+import kotlin.math.asin
 import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.roundToInt
+import kotlin.math.sin
+import kotlin.math.sqrt
 import org.openforis.collectone.v2.app.domain.model.GeospatialEntityItem
 import org.openforis.collectone.v2.app.domain.model.MeasurementUnitSystem
 import org.openforis.collectone.v2.app.domain.model.NavigationTargetKind
@@ -29,47 +33,52 @@ import org.openforis.collectone.v2.app.domain.model.SurveyMapAnchor
 import org.openforis.collectone.v2.app.domain.model.SurveyPlaceItem
 import org.openforis.collectone.v2.app.domain.model.position
 import org.openforis.collectone.v2.app.domain.model.updatedAtLabel
+import org.openforis.collectone.v2.map.LatLng
 
 /**
- * Straight-line wayfinding toward a map feature, submission, or place: distance, bearing, and
- * walking time, resolving submission geometries to a target, and simulated GPS stepping toward it.
- *
- * Positions are in the survey map's normalized frame ([SurveyMapAnchor]: x east, y south, each 0..1
- * across the anchor's span), not latitude / longitude, and distances are planar within that frame.
+ * Straight-line wayfinding toward a map feature, submission, or place: geodesic great-circle
+ * distance, initial spherical bearing, and walking time, resolving submission geometries to a
+ * target, and simulated GPS stepping toward it.
  */
 class ComputeWayfindingNavigationUseCase {
   /**
-   * The straight line from one normalized position to another. The frame spans
-   * [SurveyMapAnchor.SPAN_LONGITUDE] × [SurveyMapAnchor.SPAN_LATITUDE] degrees, converted at the
-   * equator (1558.48 m east-west, 2000.38 m north-south), so distances are approximate away from
-   * it. The bearing is clockwise from north, rounded to whole degrees and to one of 8 compass
-   * points; walking time assumes 65 m/min (about 3.9 km/h); within 8 m the collector has arrived.
+   * Geodesic straight-line vector from [from] to [to] using the Haversine formula (WGS 84 mean
+   * Earth radius) and initial spherical bearing clockwise from true north. Walking time assumes 65
+   * m/min (about 3.9 km/h); within 8 m the collector has arrived.
    */
   operator fun invoke(
-    fromNormalizedX: Float,
-    fromNormalizedY: Float,
-    targetNormalizedX: Float,
-    targetNormalizedY: Float,
+    from: LatLng,
+    to: LatLng,
     unitSystem: MeasurementUnitSystem,
+    fromNormalizedX: Float = 0f,
+    fromNormalizedY: Float = 0f,
+    targetNormalizedX: Float = 0f,
+    targetNormalizedY: Float = 0f,
   ): StraightLineVector {
-    val eastMeters = (targetNormalizedX - fromNormalizedX) * 1558.48
-    val northMeters = (fromNormalizedY - targetNormalizedY) * 2000.38
-    val distMeters = hypot(eastMeters, northMeters).roundToInt().coerceAtLeast(0)
+    val lat1 = from.latitude * DEG_TO_RAD
+    val lat2 = to.latitude * DEG_TO_RAD
+    val dLat = (to.latitude - from.latitude) * DEG_TO_RAD
+    val dLon = (to.longitude - from.longitude) * DEG_TO_RAD
+    val sinDLat = sin(dLat / 2.0)
+    val sinDLon = sin(dLon / 2.0)
+    val h = (sinDLat * sinDLat + cos(lat1) * cos(lat2) * sinDLon * sinDLon).coerceIn(0.0, 1.0)
+    val distMeters = (2.0 * EARTH_MEAN_RADIUS_M * asin(sqrt(h))).roundToInt().coerceAtLeast(0)
     val rawBearingDeg =
       if (distMeters == 0) {
         0.0
       } else {
-        atan2(eastMeters, northMeters) * (180.0 / PI)
+        val y = sin(dLon) * cos(lat2)
+        val x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+        atan2(y, x) * RAD_TO_DEG
       }
     val bearingDeg = (((rawBearingDeg.roundToInt()) % 360) + 360) % 360
-    val cardinalDirections = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
     val cardinalIdx = (((bearingDeg + 22.5) / 45.0).toInt()) % 8
-    val cardinal = cardinalDirections[cardinalIdx]
+    val cardinal = CARDINAL_DIRECTIONS[cardinalIdx]
     val walkMinutes =
-      if (distMeters <= 8) {
+      if (distMeters <= ARRIVAL_RADIUS_M) {
         0
       } else {
-        (distMeters / 65.0).roundToInt().coerceAtLeast(1)
+        (distMeters / WALK_METERS_PER_MIN).roundToInt().coerceAtLeast(1)
       }
     return StraightLineVector(
       fromNormalizedX = fromNormalizedX,
@@ -81,9 +90,31 @@ class ComputeWayfindingNavigationUseCase {
       bearingDegrees = bearingDeg,
       cardinalDirection = cardinal,
       estimatedWalkMinutes = walkMinutes,
-      hasArrived = distMeters <= 8,
+      hasArrived = distMeters <= ARRIVAL_RADIUS_M,
     )
   }
+
+  /**
+   * Straight-line vector between normalized positions in [anchor]'s frame, converted to WGS 84
+   * coordinates before computing geodesic distance and bearing.
+   */
+  operator fun invoke(
+    fromNormalizedX: Float,
+    fromNormalizedY: Float,
+    targetNormalizedX: Float,
+    targetNormalizedY: Float,
+    unitSystem: MeasurementUnitSystem,
+    anchor: SurveyMapAnchor = SurveyMapAnchor.forSurvey(SurveyMapAnchor.DEFAULT_SURVEY_ID),
+  ): StraightLineVector =
+    invoke(
+      from = anchor.toLatLng(fromNormalizedX.toDouble(), fromNormalizedY.toDouble()),
+      to = anchor.toLatLng(targetNormalizedX.toDouble(), targetNormalizedY.toDouble()),
+      unitSystem = unitSystem,
+      fromNormalizedX = fromNormalizedX,
+      fromNormalizedY = fromNormalizedY,
+      targetNormalizedX = targetNormalizedX,
+      targetNormalizedY = targetNormalizedY,
+    )
 
   fun resolveSubmissionTargetGeometry(
     submissionId: String,
@@ -152,20 +183,26 @@ class ComputeWayfindingNavigationUseCase {
     submissionGeometries: List<SubmissionGeometryPolygon>,
     findPlaceById: (String) -> SurveyPlaceItem?,
     anchor: SurveyMapAnchor,
+    fromLatLng: LatLng? = null,
   ): StraightLineNavigationState? {
     val kind = navigationTargetKind ?: return null
     val targetId = navigationTargetId ?: return null
+    val origin =
+      fromLatLng ?: anchor.toLatLng(fromNormalizedX.toDouble(), fromNormalizedY.toDouble())
     return when (kind) {
       NavigationTargetKind.ENTITY -> {
         val entity = entities.firstOrNull { it.id == targetId } ?: return null
-        val (targetX, targetY) = anchor.positionOf(entity.position ?: return null)
+        val targetPos = entity.position ?: return null
+        val (targetX, targetY) = anchor.positionOf(targetPos)
         val vector =
           invoke(
+            from = origin,
+            to = targetPos,
+            unitSystem = unitSystem,
             fromNormalizedX = fromNormalizedX,
             fromNormalizedY = fromNormalizedY,
             targetNormalizedX = targetX,
             targetNormalizedY = targetY,
-            unitSystem = unitSystem,
           )
         StraightLineNavigationState(
           targetKind = NavigationTargetKind.ENTITY,
@@ -190,13 +227,19 @@ class ComputeWayfindingNavigationUseCase {
             entities = entities,
             anchor = anchor,
           ) ?: return null
+        val targetPos =
+          geom?.geometry?.representativePoint
+            ?: sub.location
+            ?: anchor.toLatLng(tx.toDouble(), ty.toDouble())
         val vector =
           invoke(
+            from = origin,
+            to = targetPos,
+            unitSystem = unitSystem,
             fromNormalizedX = fromNormalizedX,
             fromNormalizedY = fromNormalizedY,
             targetNormalizedX = tx,
             targetNormalizedY = ty,
-            unitSystem = unitSystem,
           )
         StraightLineNavigationState(
           targetKind = NavigationTargetKind.SUBMISSION,
@@ -225,11 +268,13 @@ class ComputeWayfindingNavigationUseCase {
         val place = findPlaceById(targetId) ?: return null
         val vector =
           invoke(
+            from = origin,
+            to = place.position,
+            unitSystem = unitSystem,
             fromNormalizedX = fromNormalizedX,
             fromNormalizedY = fromNormalizedY,
             targetNormalizedX = place.normalizedX,
             targetNormalizedY = place.normalizedY,
-            unitSystem = unitSystem,
           )
         StraightLineNavigationState(
           targetKind = NavigationTargetKind.PLACE,
@@ -260,5 +305,14 @@ class ComputeWayfindingNavigationUseCase {
       return targetX to targetY
     }
     return (currentX + dx * clampedStep) to (currentY + dy * clampedStep)
+  }
+
+  private companion object {
+    const val EARTH_MEAN_RADIUS_M = 6_371_008.8
+    const val DEG_TO_RAD = PI / 180.0
+    const val RAD_TO_DEG = 180.0 / PI
+    const val ARRIVAL_RADIUS_M = 8
+    const val WALK_METERS_PER_MIN = 65.0
+    val CARDINAL_DIRECTIONS = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
   }
 }

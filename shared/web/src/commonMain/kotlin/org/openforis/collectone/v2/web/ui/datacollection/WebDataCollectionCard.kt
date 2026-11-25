@@ -161,7 +161,11 @@ internal fun WebDataCollectionCard(
       when {
         entity != null -> "${entity.label} • ${entity.datasetName}"
         form != null && !form.requiresEntity ->
-          stringResource(Res.string.web_new_record_at_location, userGpsCoordinatesLabel)
+          if (userGpsCoordinatesLabel.isNotBlank()) {
+            stringResource(Res.string.web_new_record_at_location, userGpsCoordinatesLabel)
+          } else {
+            null
+          }
         form != null ->
           stringResource(
             Res.string.web_select_target_to_begin,

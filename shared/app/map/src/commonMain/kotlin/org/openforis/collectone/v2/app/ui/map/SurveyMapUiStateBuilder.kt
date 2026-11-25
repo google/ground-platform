@@ -83,18 +83,9 @@ internal class SurveyMapUiStateBuilder(
       framingEpoch = session.framingEpoch,
       userGpsNormalizedX = session.userGpsNormalizedX,
       userGpsNormalizedY = session.userGpsNormalizedY,
-      userLatLng =
-        session.location.let { loc ->
-          val lat = loc.latitude
-          val lon = loc.longitude
-          if (lat != null && lon != null) {
-            org.openforis.collectone.v2.map.LatLng(lat, lon)
-          } else {
-            null
-          }
-        },
+      userLatLng = session.location.latLngOrNull(),
+      hasKnownLocation = session.location.hasLocation,
       userGpsCoordinatesLabel = session.location.coordinatesLabel,
-      gnssSatelliteCount = session.location.gnssSatelliteCount,
       gnssAccuracyMeters = session.location.gnssAccuracyMeters,
       unitSystem = data.unitSystem,
       isCameraFollowingUser = session.isCameraFollowingUser,
@@ -103,7 +94,11 @@ internal class SurveyMapUiStateBuilder(
       mapPanOffsetY = session.mapPanOffsetY,
       mapZoomDelta = session.mapZoomDelta,
       mapScaleBarSpec =
-        clusterMapFeatures.computeScaleBarSpec(data.activeSurveyId, session.mapZoomDelta),
+        clusterMapFeatures.computeScaleBarSpec(
+          baseZoom = data.anchor.zoom,
+          latitudeDeg = session.desiredCamera(data.anchor).center.latitude,
+          mapZoomDelta = session.mapZoomDelta,
+        ),
       selectedEntityId = session.selectedEntityId,
       entitySelectionEpoch = session.entitySelectionEpoch,
       isEntityBottomSheetExpanded = session.isEntityBottomSheetExpanded,
@@ -162,8 +157,9 @@ internal class SurveyMapUiStateBuilder(
   fun activeNavigation(
     data: SurveyMapData,
     session: SurveyMapSession,
-  ): StraightLineNavigationState? =
-    computeWayfindingNavigation.resolveActiveNavigationState(
+  ): StraightLineNavigationState? {
+    if (!session.location.hasLocation) return null
+    return computeWayfindingNavigation.resolveActiveNavigationState(
       navigationTargetKind = session.navigationTargetKind,
       navigationTargetId = session.navigationTargetId,
       fromNormalizedX = session.userGpsNormalizedX,
@@ -174,7 +170,9 @@ internal class SurveyMapUiStateBuilder(
       submissionGeometries = data.submissionGeometries,
       findPlaceById = { findPlaceById(it, data, session) },
       anchor = data.anchor,
+      fromLatLng = session.location.latLngOrNull(),
     )
+  }
 }
 
 /**

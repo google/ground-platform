@@ -114,8 +114,8 @@ internal fun LocalStoreTransaction.applySeedSnapshot(
           measurementUnits = MeasurementUnitSystem.METRIC,
           shouldUploadPhotosOnWifiOnly = false,
         ),
-      uploadedMediaCacheSizeLabel = "38.4 MB",
-      uploadedMediaFileCount = 27,
+      uploadedMediaCacheSizeLabel = "0 MB",
+      uploadedMediaFileCount = 0,
       seedVersion = seedVersion,
     )
   )

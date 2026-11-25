@@ -13,7 +13,6 @@
  */
 package org.openforis.collectone.v2.app.client.location
 
-import kotlin.math.roundToInt
 import org.openforis.collectone.v2.app.domain.repository.DeviceLocationSnapshot
 
 /**
@@ -32,22 +31,15 @@ class LocationClient {
   ): DeviceLocationSnapshot {
     val clampedX = normalizedX.coerceIn(0.08f, 0.92f)
     val clampedY = normalizedY.coerceIn(0.08f, 0.92f)
-    val resolvedLabel =
-      coordinatesLabel
-        ?: run {
-          val lat = -0.4150 - (clampedY * 0.0120)
-          val lon = 36.9450 + (clampedX * 0.0120)
-          val latRounded = ((lat * 10000.0).roundToInt()) / 10000.0
-          val lonRounded = ((lon * 10000.0).roundToInt()) / 10000.0
-          "${latRounded}°, ${lonRounded}° (±2.8m GPS)"
-        }
     snapshot =
       snapshot.copy(
         normalizedX = clampedX,
         normalizedY = clampedY,
-        coordinatesLabel = resolvedLabel,
+        coordinatesLabel = coordinatesLabel ?: snapshot.coordinatesLabel,
+        gnssAccuracyMeters = null,
         latitude = null,
         longitude = null,
+        isKnown = true,
       )
     return snapshot
   }
@@ -65,9 +57,10 @@ class LocationClient {
         normalizedX = normalizedX,
         normalizedY = normalizedY,
         coordinatesLabel = coordinatesLabel,
-        gnssAccuracyMeters = accuracyMeters ?: snapshot.gnssAccuracyMeters,
+        gnssAccuracyMeters = accuracyMeters,
         latitude = latitude,
         longitude = longitude,
+        isKnown = true,
       )
     return snapshot
   }

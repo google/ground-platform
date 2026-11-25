@@ -338,6 +338,7 @@ class SurveyMapViewModelTest {
   @Test
   fun navigationToEntity_startsStopsAndStepsTheUser() = runTest {
     val f = Fixture()
+    f.viewModel.updateUserGpsLocation(0.50f, 0.50f)
     f.viewModel.events.test {
       f.viewModel.panMap(0.2f, 0.2f)
       f.viewModel.startNavigationToEntity("00000007-640e-5ed7-9874-4d6b6717f21d")
@@ -370,6 +371,7 @@ class SurveyMapViewModelTest {
   @Test
   fun navigationToPlace_keepsTargetAfterPlaceDeselection() {
     val f = Fixture()
+    f.viewModel.updateUserGpsLocation(0.50f, 0.50f)
     val place = assertNotNull(f.viewModel.findPlaceById("place-karima-forest"))
     f.viewModel.startNavigationToPlace(place)
     assertTrue(f.uiState.isNavigatingToPlace("place-karima-forest"))

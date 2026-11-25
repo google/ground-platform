@@ -603,7 +603,7 @@ object SurveyMapContent {
     val markers = mutableListOf<Pair<MapMarker, SurveyMarker>>()
     scene.navigation?.let { navigation ->
       val v = navigation.vector
-      val from = scene.at(v.fromNormalizedX, v.fromNormalizedY)
+      val from = scene.userLocation
       val to = scene.at(v.toNormalizedX, v.toNormalizedY)
       features +=
         MapFeature(
@@ -616,10 +616,7 @@ object SurveyMapContent {
       markers +=
         MapMarker(
           SurveyMapIds.NAVIGATION,
-          scene.at(
-            (v.fromNormalizedX + v.toNormalizedX) / 2,
-            (v.fromNormalizedY + v.toNormalizedY) / 2,
-          ),
+          LatLng((from.latitude + to.latitude) / 2.0, (from.longitude + to.longitude) / 2.0),
           MarkerAnchor.CENTER,
           DpOffset(0.dp, (-10).dp),
         ) to SurveyMarker.NavigationPill(wayfindingBadgeText(v), hasArrived = v.hasArrived)

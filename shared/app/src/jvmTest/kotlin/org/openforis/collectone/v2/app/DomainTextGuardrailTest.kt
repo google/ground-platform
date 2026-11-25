@@ -107,10 +107,7 @@ class DomainTextGuardrailTest {
     setOf(
       // Export-plan warnings are English diagnostics no screen shows yet; type them before one
       // does.
-      "ExportSurveyDataUseCase.kt: over 4 ha",
-      // The simulated device location's text, which data collection also stores in records; derive
-      // it from the position and a measured accuracy before localizing it.
-      "LocationRepository.kt: 36.9512° (±3.2m",
+      "ExportSurveyDataUseCase.kt: over 4 ha"
     )
 
   /** A number or a string template value followed by a length or area unit symbol. */

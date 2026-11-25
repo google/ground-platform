@@ -23,6 +23,7 @@ import kotlin.math.pow
 import org.openforis.collectone.v2.app.domain.model.MapClusterFeatureItem
 import org.openforis.collectone.v2.app.domain.model.MapFeatureCluster
 import org.openforis.collectone.v2.app.domain.model.MapScaleBarSpec
+import org.openforis.collectone.v2.app.domain.model.SurveyMapAnchor
 import org.openforis.collectone.v2.app.domain.model.groupClusterFeaturesByMarkerSymbol
 import org.openforis.collectone.v2.app.domain.model.scaleBarLength
 
@@ -371,14 +372,20 @@ class ClusterMapFeaturesUseCase {
     )
 
   fun computeScaleBarSpec(activeSurveyId: String, mapZoomDelta: Float): MapScaleBarSpec {
-    val (baseZoom, latitudeDeg) =
-      when (activeSurveyId) {
-        "survey-amazon-bio" -> 14.8f to -3.1190
-        "survey-tanzania-water" -> 15.1f to -6.1659
-        "survey-california-fire" -> 14.9f to 38.5449
-        else -> 15.3f to -0.4198
-      }
-    val effectiveZoom = (baseZoom + mapZoomDelta).coerceIn(2.0f, 19.0f).toDouble()
+    val anchor = SurveyMapAnchor.forSurvey(activeSurveyId)
+    return computeScaleBarSpec(
+      baseZoom = anchor.zoom,
+      latitudeDeg = anchor.center.latitude,
+      mapZoomDelta = mapZoomDelta,
+    )
+  }
+
+  fun computeScaleBarSpec(
+    baseZoom: Double,
+    latitudeDeg: Double,
+    mapZoomDelta: Float,
+  ): MapScaleBarSpec {
+    val effectiveZoom = (baseZoom + mapZoomDelta).coerceIn(2.0, 19.0)
     val metersPerDp =
       (40075016.686 * cos(latitudeDeg * PI / 180.0)) / (512.0 * 2.0.pow(effectiveZoom))
     val candidateMeters =

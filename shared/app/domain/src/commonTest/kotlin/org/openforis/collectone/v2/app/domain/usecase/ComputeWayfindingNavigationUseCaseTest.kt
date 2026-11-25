@@ -25,6 +25,7 @@ import org.openforis.collectone.v2.app.domain.model.MeasurementUnit
 import org.openforis.collectone.v2.app.domain.model.MeasurementUnitSystem
 import org.openforis.collectone.v2.app.domain.model.NavigationTargetKind
 import org.openforis.collectone.v2.app.domain.model.SurveyMapAnchor
+import org.openforis.collectone.v2.map.LatLng
 
 class ComputeWayfindingNavigationUseCaseTest {
   private val useCase = ComputeWayfindingNavigationUseCase()
@@ -75,7 +76,7 @@ class ComputeWayfindingNavigationUseCaseTest {
       distanceTo(1f, 0f, MeasurementUnitSystem.METRIC),
     )
     assertEquals(
-      Measurement(5112.0, MeasurementUnit.FOOT, decimals = 0),
+      Measurement(5108.0, MeasurementUnit.FOOT, decimals = 0),
       distanceTo(1f, 0f, MeasurementUnitSystem.IMPERIAL),
     )
     assertEquals(
@@ -86,6 +87,23 @@ class ComputeWayfindingNavigationUseCaseTest {
       Measurement(1.2, MeasurementUnit.MILE, decimals = 1),
       distanceTo(0f, -1f, MeasurementUnitSystem.IMPERIAL),
     )
+  }
+
+  @Test
+  fun invoke_usesGeodesicDistanceAndBearingAtHighLatitude() {
+    // 1° longitude at 60°N is ~55.6 km (half the equatorial span), due east (90°).
+    val vector =
+      useCase(
+        from = LatLng(60.0, 0.0),
+        to = LatLng(60.0, 1.0),
+        unitSystem = MeasurementUnitSystem.METRIC,
+      )
+    assertTrue(
+      vector.distanceMeters in 55_400..55_800,
+      "Expected ~55.6 km, got ${vector.distanceMeters}",
+    )
+    assertEquals(90, vector.bearingDegrees)
+    assertEquals("E", vector.cardinalDirection)
   }
 
   @Test

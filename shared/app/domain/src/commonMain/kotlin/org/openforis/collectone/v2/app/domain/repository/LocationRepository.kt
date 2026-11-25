@@ -13,16 +13,29 @@
  */
 package org.openforis.collectone.v2.app.domain.repository
 
+import org.openforis.collectone.v2.map.LatLng
+
 /** Domain snapshot of the collector's device GNSS location and satellite telemetry. */
 data class DeviceLocationSnapshot(
   val normalizedX: Float = 0.50f,
   val normalizedY: Float = 0.50f,
-  val coordinatesLabel: String = "-0.4198°, 36.9512° (±3.2m GPS)",
-  val gnssSatelliteCount: Int = 18,
-  val gnssAccuracyMeters: Double = 2.1,
+  val coordinatesLabel: String = "",
+  val gnssAccuracyMeters: Double? = null,
   val latitude: Double? = null,
   val longitude: Double? = null,
-)
+  val isKnown: Boolean = false,
+) {
+  /** True once a real GNSS fix or explicit simulated GPS position has been recorded. */
+  val hasLocation: Boolean
+    get() = isKnown || (latitude != null && longitude != null)
+
+  /** Real device coordinates when reported by a live location source, or `null`. */
+  fun latLngOrNull(): LatLng? {
+    val lat = latitude ?: return null
+    val lon = longitude ?: return null
+    return LatLng(lat, lon)
+  }
+}
 
 /**
  * Domain repository contract for reading and updating device GNSS location and satellite accuracy.

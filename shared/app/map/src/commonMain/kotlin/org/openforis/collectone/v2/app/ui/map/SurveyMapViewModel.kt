@@ -436,7 +436,12 @@ class SurveyMapViewModel(
     // The simulated location stays inside the survey's viewport, away from its edges.
     val clampedX = newNormalizedX.coerceIn(GPS_MIN, GPS_MAX)
     val clampedY = newNormalizedY.coerceIn(GPS_MIN, GPS_MAX)
-    val label = coordinatesLabel ?: session.value.location.coordinatesLabel
+    val label =
+      coordinatesLabel
+        ?: session.value.location.coordinatesLabel.ifBlank {
+          val latLng = data.value.anchor.toLatLng(clampedX.toDouble(), clampedY.toDouble())
+          formatDeviceCoordinatesLabel(latLng.latitude, latLng.longitude, accuracyMeters = null)
+        }
     locationRepository.updateGpsLocation(clampedX, clampedY, label)
     session.update { it.movedTo(clampedX, clampedY, label) }
   }
@@ -594,7 +599,7 @@ class SurveyMapViewModel(
   fun distanceAndBearingToSubmission(submissionId: String): StraightLineVector? =
     wayfinding.toSubmission(data.value, session.value, submissionId)
 
-  override fun distanceAndBearingToPlace(place: SurveyPlaceItem): StraightLineVector =
+  override fun distanceAndBearingToPlace(place: SurveyPlaceItem): StraightLineVector? =
     wayfinding.toPlace(data.value, session.value, place)
 
   /** True if [field] in [submissionId] is a geometry question. */

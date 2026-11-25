@@ -507,12 +507,13 @@ class DataCollectionViewModel(
           wasFormLaunchedWithoutEntity = current.wasFormLaunchedWithoutEntity,
           selectedEntityId = current.selectedEntityId,
           customFormDef = current.customFormDef,
-          gnssAccuracy = unitSystem.gnssAccuracy(location.gnssAccuracyMeters),
+          gnssAccuracy = location.gnssAccuracyMeters?.let(unitSystem::gnssAccuracy),
           signedInUserName = profile.displayName,
           signedInUserEmail = profile.email,
           userGpsCoordinatesLabel = location.coordinatesLabel,
           userGpsNormalizedX = location.normalizedX,
           userGpsNormalizedY = location.normalizedY,
+          userLatLng = location.latLngOrNull(),
         ) ?: return@launch
       session.update {
         it.copy(
