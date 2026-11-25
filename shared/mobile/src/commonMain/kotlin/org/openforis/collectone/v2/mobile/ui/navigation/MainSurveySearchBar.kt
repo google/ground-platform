@@ -36,9 +36,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,6 +81,9 @@ import org.openforis.collectone.v2.mobile.ui.uploads.UploadStatusCounts
  * Floating search bar at the top of the mobile map screen containing the Hamburger navigation
  * drawer button on the left, the live search input in the center, and the user avatar account menu
  * on the right.
+ *
+ * Typing a query expands the bottom sheet to show the matches. The bar remembers that it did, so
+ * clearing the query (with the clear button or by deleting the text) collapses the sheet again.
  */
 @Composable
 internal fun MobileMapSearchBar(
@@ -91,6 +96,16 @@ internal fun MobileMapSearchBar(
   modifier: Modifier = Modifier,
 ) {
   val query = uiState.listSearchQuery
+  // Whether typing a query expanded the sheet, so that clearing the query collapses it again. A
+  // sheet the user expanded themselves, or collapsed while searching, stays as they left it.
+  var isSheetAutoExpanded by rememberSaveable { mutableStateOf(false) }
+  LaunchedEffect(isSheetExpanded) { if (!isSheetExpanded) isSheetAutoExpanded = false }
+  val collapseAutoExpandedSheet = {
+    if (isSheetAutoExpanded) {
+      isSheetAutoExpanded = false
+      listActions.updateEntityBottomSheetExpanded(false)
+    }
+  }
   Surface(
     modifier = modifier.fillMaxWidth(),
     shape = MaterialTheme.shapes.extraLarge,
@@ -138,8 +153,11 @@ internal fun MobileMapSearchBar(
                 dataCollectionActions.returnToBottomSheetList()
               }
               if (!isSheetExpanded) {
+                isSheetAutoExpanded = true
                 listActions.updateEntityBottomSheetExpanded(true)
               }
+            } else {
+              collapseAutoExpandedSheet()
             }
           },
           singleLine = true,
@@ -152,7 +170,10 @@ internal fun MobileMapSearchBar(
 
       if (query.isNotEmpty()) {
         IconButton(
-          onClick = { listActions.clearListSearchQuery() },
+          onClick = {
+            listActions.clearListSearchQuery()
+            collapseAutoExpandedSheet()
+          },
           modifier = Modifier.size(36.dp),
         ) {
           Icon(
