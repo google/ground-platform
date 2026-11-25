@@ -182,17 +182,6 @@ internal fun FormEditorToolbar(
             }
           }
         }
-        if (!isCompact) {
-          FilledTonalButton(onClick = actions::selectFormSettings) {
-            Icon(
-              Icons.Outlined.Settings,
-              contentDescription = null,
-              modifier = Modifier.size(18.dp),
-            )
-            Spacer(Modifier.width(6.dp))
-            Text(stringResource(Res.string.formeditor_form_settings), softWrap = false)
-          }
-        }
         Spacer(Modifier.weight(1f))
         if (uiState.supportedLanguages.size > 1) {
           FormLanguageSelector(uiState, actions)
@@ -217,11 +206,24 @@ internal fun FormEditorToolbar(
             }
           }
         }
+        // Every form action sits in this strip, in one button family: the platform toggle, then
+        // Preview (tonal), then Form settings (filled) as the trailing, primary action.
         PreviewTargetToggle(uiState, actions)
-        Button(onClick = actions::startPreview) {
+        FilledTonalButton(onClick = actions::startPreview) {
           Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(Modifier.width(6.dp))
           Text(stringResource(Res.string.formeditor_preview), softWrap = false)
+        }
+        if (!isCompact) {
+          Button(onClick = actions::selectFormSettings) {
+            Icon(
+              Icons.Outlined.Settings,
+              contentDescription = null,
+              modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(Res.string.formeditor_form_settings), softWrap = false)
+          }
         }
         Box {
           IconButton(onClick = { overflowExpanded = true }) {
