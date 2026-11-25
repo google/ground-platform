@@ -127,6 +127,9 @@ interface SurveyMapActions {
     coordinatesLabel: String? = null,
   )
 
+  /** Updates the user's real device GPS location; the camera follows it unless panned. */
+  fun updateDeviceLocation(latitude: Double, longitude: Double, accuracyMeters: Double?) {}
+
   // --- Selection ---
 
   /** Selects a map feature on the map (collapsed bottom sheet), or clears it when `null`. */
@@ -436,6 +439,30 @@ class SurveyMapViewModel(
     val label = coordinatesLabel ?: session.value.location.coordinatesLabel
     locationRepository.updateGpsLocation(clampedX, clampedY, label)
     session.update { it.movedTo(clampedX, clampedY, label) }
+  }
+
+  override fun updateDeviceLocation(latitude: Double, longitude: Double, accuracyMeters: Double?) {
+    val (nx, ny) = data.value.anchor.toNormalized(MapLatLng(latitude, longitude))
+    val nxF = nx.toFloat()
+    val nyF = ny.toFloat()
+    val label = formatDeviceCoordinatesLabel(latitude, longitude, accuracyMeters)
+    locationRepository.updateDeviceLocation(nxF, nyF, latitude, longitude, accuracyMeters, label)
+    session.update { it.movedTo(nxF, nyF, label, accuracyMeters, latitude, longitude) }
+  }
+
+  private fun formatDeviceCoordinatesLabel(
+    latitude: Double,
+    longitude: Double,
+    accuracyMeters: Double?,
+  ): String {
+    val latRounded = kotlin.math.round(latitude * 10_000.0) / 10_000.0
+    val lonRounded = kotlin.math.round(longitude * 10_000.0) / 10_000.0
+    val accSuffix =
+      accuracyMeters
+        ?.takeIf { it.isFinite() && it >= 0.0 }
+        ?.let { " (±${kotlin.math.round(it * 10.0) / 10.0}m GPS)" }
+        .orEmpty()
+    return "$latRounded°, $lonRounded°$accSuffix"
   }
 
   // --- Selection ---

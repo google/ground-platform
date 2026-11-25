@@ -55,6 +55,7 @@ import org.openforis.collectone.v2.app.ui.datacollection.SearchableListActions
 import org.openforis.collectone.v2.core.forms.ui.controls.DropdownMenuItem
 import org.openforis.collectone.v2.core.forms.ui.controls.FilledTonalButton
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
+import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.mobile.resources.Res
 import org.openforis.collectone.v2.mobile.resources.mobile_clear_search_content_description
@@ -70,6 +71,7 @@ import org.openforis.collectone.v2.mobile.resources.mobile_upload_status_last_sy
 import org.openforis.collectone.v2.mobile.resources.mobile_upload_status_summary
 import org.openforis.collectone.v2.mobile.resources.mobile_upload_status_syncing_now
 import org.openforis.collectone.v2.mobile.resources.mobile_upload_status_uploading
+import org.openforis.collectone.v2.mobile.resources.mobile_view_uploads
 import org.openforis.collectone.v2.mobile.ui.LocalClock
 import org.openforis.collectone.v2.mobile.ui.uploads.UploadStatusCounts
 
@@ -165,6 +167,7 @@ internal fun MobileMapSearchBar(
         counts = uiState.uploadStatusCounts,
         lastSyncedAt = uiState.lastSyncedAt,
         onRetryFailedUploads = actions::retryFailedUploads,
+        onOpenUploads = actions::drawerOpenUploads,
         modifier = Modifier.padding(end = 4.dp),
       )
 
@@ -191,6 +194,7 @@ internal fun MobileUploadStatusButton(
   counts: UploadStatusCounts,
   lastSyncedAt: Instant?,
   onRetryFailedUploads: () -> Unit,
+  onOpenUploads: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val uploadingCount = counts.uploading
@@ -306,6 +310,19 @@ internal fun MobileUploadStatusButton(
                     style = MaterialTheme.typography.labelSmall,
                   )
                 }
+              }
+              Spacer(Modifier.height(8.dp))
+              OutlinedButton(
+                onClick = {
+                  showDetails = false
+                  onOpenUploads()
+                },
+                modifier = Modifier.fillMaxWidth(),
+              ) {
+                Text(
+                  stringResource(Res.string.mobile_view_uploads),
+                  style = MaterialTheme.typography.labelSmall,
+                )
               }
             }
           },

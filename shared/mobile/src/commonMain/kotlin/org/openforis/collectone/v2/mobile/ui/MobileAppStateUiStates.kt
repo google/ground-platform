@@ -100,6 +100,7 @@ internal fun MobileAppState.mainSurveyUiState(
     canCollectData = access.canCollectData,
     selectedEntityBounds = map.selectedEntity?.let(EntityGeometry::bounds),
     offlineAreaSelection = offlineArea,
+    isOnline = onboarding.isOnline,
   )
 }
 

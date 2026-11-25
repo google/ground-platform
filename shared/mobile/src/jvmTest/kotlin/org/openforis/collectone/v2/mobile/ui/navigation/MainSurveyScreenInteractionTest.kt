@@ -64,6 +64,9 @@ class MainSurveyScreenInteractionTest {
 
     test.onNodeWithText("Sign out").performClick()
     test.waitForIdle()
+    test.onNodeWithText("Sign out?").assertExists()
+    test.onNodeWithText("Sign out").performClick()
+    test.waitForIdle()
 
     assertFalse(state.isUserProfileOpen)
     assertEquals(MobileRoute.SignIn, state.currentRoute)

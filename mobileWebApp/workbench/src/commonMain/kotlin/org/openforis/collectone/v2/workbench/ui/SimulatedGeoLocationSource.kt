@@ -33,6 +33,7 @@ class SimulatedGeoLocationSource(
   start: GeoLocationFix = DEFAULT_START,
   private val stepMillis: Long = 5_000L,
 ) : GeoLocationSource {
+  override val isSimulated: Boolean = true
   private val fix = MutableStateFlow(start)
   private var stepCount = 0
 

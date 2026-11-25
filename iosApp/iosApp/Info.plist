@@ -48,5 +48,7 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Collect One uses your location to show your position on the map and record field observations.</string>
 </dict>
 </plist>

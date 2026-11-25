@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,6 +43,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -72,6 +72,7 @@ import org.openforis.collectone.v2.app.ui.map.SurveyMapUiState
 import org.openforis.collectone.v2.app.ui.map.framingInsets
 import org.openforis.collectone.v2.app.ui.map.rememberSurveyMapCamera
 import org.openforis.collectone.v2.app.ui.text.gnssAccuracyText
+import org.openforis.collectone.v2.core.forms.ui.LocalGeoLocationSource
 import org.openforis.collectone.v2.core.forms.ui.controls.ExtendedFloatingActionButton
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
@@ -149,13 +150,23 @@ internal fun SurveyMapView(
   }
 
   val mapCamera = rememberSurveyMapCamera(uiState = mapUiState, actions = mapActions)
+  val geoLocationSource = LocalGeoLocationSource.current
+  val liveFix by geoLocationSource.currentFix.collectAsState()
+  LaunchedEffect(liveFix, geoLocationSource) {
+    val fix = liveFix ?: return@LaunchedEffect
+    if (!geoLocationSource.isSimulated) {
+      mapActions.updateDeviceLocation(fix.latitude, fix.longitude, fix.accuracyMeters)
+    }
+  }
   val topInset = LocalMobileTopInset.current
   val topSearchBarReservedHeight = 66.dp + topInset
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val hasSelectedRecord = selectedEntity != null || selectedSubmission != null
     val peekHeight = mainSurveySheetPeekHeight(maxHeight, isSelectingArea, hasSelectedRecord)
-    val maxExpandedSheetHeight = (maxHeight - topSearchBarReservedHeight).coerceAtLeast(160.dp)
+    val isSheetExpanded =
+      mapUiState.isEntityBottomSheetExpanded || sheetState.targetValue == SheetValue.Expanded
+    val handleTopPadding = if (isSheetExpanded) topSearchBarReservedHeight else 0.dp
 
     // Fit a newly selected map feature into the map area above the sheet. Records without geometry
     // replace the sheet's contents without moving the map.
@@ -176,7 +187,12 @@ internal fun SurveyMapView(
     BottomSheetScaffold(
       scaffoldState = scaffoldState,
       sheetPeekHeight = peekHeight,
-      sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+      sheetShape =
+        if (isSheetExpanded) {
+          RoundedCornerShape(0.dp)
+        } else {
+          RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        },
       sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
       sheetTonalElevation = 0.dp,
       sheetShadowElevation = 8.dp,
@@ -184,7 +200,12 @@ internal fun SurveyMapView(
       sheetDragHandle = {
         if (isSelectingArea) return@BottomSheetScaffold
         if (hasSelectedRecord) {
-          Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp)) {
+          Box(
+            modifier =
+              Modifier.fillMaxWidth()
+                .padding(top = handleTopPadding)
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+          ) {
             IconButton(
               onClick = {
                 val back =
@@ -213,7 +234,9 @@ internal fun SurveyMapView(
             BottomSheetDefaults.DragHandle(modifier = Modifier.align(Alignment.Center))
           }
         } else {
-          BottomSheetDefaults.DragHandle()
+          Box(modifier = Modifier.padding(top = handleTopPadding)) {
+            BottomSheetDefaults.DragHandle()
+          }
         }
       },
       containerColor = Color.Transparent,
@@ -224,8 +247,7 @@ internal fun SurveyMapView(
             listActions = listActions,
             detailsActions = detailsActions,
             onReturnToList = dataCollectionActions::returnToBottomSheetList,
-            modifier =
-              Modifier.fillMaxWidth().heightIn(max = maxExpandedSheetHeight).fillMaxHeight(0.84f),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
           )
         }
       },
@@ -301,9 +323,6 @@ internal fun SurveyMapView(
 
         // Bottom overlay stack: Google Maps-style Horizontal Scale Widget in bottom-left,
         //    bottom-center data collection FAB, and optional "Recenter" button in bottom-right
-        val isSheetExpanded =
-          mapUiState.isEntityBottomSheetExpanded || sheetState.targetValue == SheetValue.Expanded
-
         // Scale bar in bottom-left
         Box(
           modifier =

@@ -184,6 +184,7 @@ private fun Density.transformCamera(
   pan: Offset,
   zoom: Float,
 ) {
+  if (zoom <= 0f || !zoom.isFinite()) return
   cameraState.stopAnimation()
   val c = cameraState.position
   val zoomed = c.copy(zoom = (c.zoom + log2(zoom.toDouble())).coerceIn(MIN_ZOOM, MAX_ZOOM))

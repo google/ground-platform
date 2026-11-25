@@ -101,6 +101,8 @@ data class SurveyMapUiState(
   /** Normalized world coordinates `[0, 1]` of the collector's current GPS location. */
   val userGpsNormalizedX: Float = 0.50f,
   val userGpsNormalizedY: Float = 0.50f,
+  /** Real device coordinates when reported by a live location source, or null. */
+  val userLatLng: org.openforis.collectone.v2.map.LatLng? = null,
   /** Formatted GPS coordinates & accuracy badge for the user's current field position. */
   val userGpsCoordinatesLabel: String = "-0.4198°, 36.9512° (±3.2m GPS)",
   val gnssSatelliteCount: Int = 18,

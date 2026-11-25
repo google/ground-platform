@@ -83,6 +83,16 @@ internal class SurveyMapUiStateBuilder(
       framingEpoch = session.framingEpoch,
       userGpsNormalizedX = session.userGpsNormalizedX,
       userGpsNormalizedY = session.userGpsNormalizedY,
+      userLatLng =
+        session.location.let { loc ->
+          val lat = loc.latitude
+          val lon = loc.longitude
+          if (lat != null && lon != null) {
+            org.openforis.collectone.v2.map.LatLng(lat, lon)
+          } else {
+            null
+          }
+        },
       userGpsCoordinatesLabel = session.location.coordinatesLabel,
       gnssSatelliteCount = session.location.gnssSatelliteCount,
       gnssAccuracyMeters = session.location.gnssAccuracyMeters,

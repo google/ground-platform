@@ -108,13 +108,14 @@ data class SurveyMapScene(
   val formGeometries: List<FormGeometryOverlay> = emptyList(),
   val imagerySources: List<ImagerySource> = emptyList(),
   val savedImagery: SavedImageryOnMap = SavedImageryOnMap(),
+  val userLatLng: LatLng? = null,
 ) {
   /** The position at normalized coordinates ([nx], [ny]) around [anchor]. */
   internal fun at(nx: Float, ny: Float): LatLng = anchor.toLatLng(nx.toDouble(), ny.toDouble())
 
   /** Where the user is. */
   internal val userLocation: LatLng
-    get() = at(userGps.first, userGps.second)
+    get() = userLatLng ?: at(userGps.first, userGps.second)
 }
 
 /**
@@ -334,6 +335,7 @@ object SurveyMapContent {
       layers = mapLayers,
       imagerySources = enabledImagerySources,
       savedImagery = savedImageryOnMap(),
+      userLatLng = userLatLng,
     )
 
   /**

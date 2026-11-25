@@ -62,6 +62,7 @@ data class MainSurveyUiState(
    * instead of its controls, sheet, and search bar.
    */
   val offlineAreaSelection: OfflineAreaSelectionUiState = OfflineAreaSelectionUiState(),
+  val isOnline: Boolean = true,
 )
 
 /** The signed-in user, as the account avatar and the user profile panel show them. */

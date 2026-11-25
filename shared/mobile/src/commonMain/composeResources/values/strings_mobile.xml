@@ -102,7 +102,12 @@
   <string name="mobile_remove_survey_dialog_body">Removing "%1$s" will delete the offline copy from this device. You will need an internet connection to download and use it offline again.</string>
   <string name="mobile_sign_out_dialog_title">Sign out?</string>
   <!-- %1$s: email address of the signed-in user. -->
-  <string name="mobile_sign_out_dialog_body">Going back will sign out %1$s and return to the Sign In screen.</string>
+  <string name="mobile_sign_out_dialog_body">Going back will sign out %1$s and return to the Sign In screen. You will need an internet connection to sign in again.</string>
+  <string name="mobile_sign_out_warning_body">You will need an internet connection to sign in again. If you sign out while offline, you may not be able to access the application.</string>
+  <string name="mobile_sign_out_offline_confirm_title">You are currently offline</string>
+  <string name="mobile_sign_out_offline_confirm_body">Are you sure you want to sign out? Without an internet connection, you will not be able to sign back in or access the application.</string>
+  <string name="mobile_sign_out_continue">Continue</string>
+  <string name="mobile_sign_out_anyway">Sign out anyway</string>
   <string name="mobile_sign_out">Sign out</string>
 
   <!-- Main survey screen: top bar and upload status -->
@@ -125,6 +130,7 @@
   <string name="mobile_upload_status_syncing_now">Syncing now…</string>
   <string name="mobile_upload_status_last_synced_just_now">Last synced: Just now</string>
   <string name="mobile_retry_failed_uploads">Retry failed uploads</string>
+  <string name="mobile_view_uploads">View uploads</string>
   <!-- Time of the last successful sync. %1$d: minutes since it finished. -->
   <plurals name="mobile_upload_status_last_synced_minutes_ago">
     <item quantity="one">Last synced: %1$d minute ago</item>

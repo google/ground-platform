@@ -119,11 +119,25 @@ internal data class SurveyMapSession(
    * The user's GPS position moved to ([x], [y]). While following, the camera moves with the user
    * (the offsets stay zero); after a pan the offsets absorb the move, so the viewport stays put.
    */
-  fun movedTo(x: Float, y: Float, coordinatesLabel: String): SurveyMapSession {
+  fun movedTo(
+    x: Float,
+    y: Float,
+    coordinatesLabel: String,
+    accuracyMeters: Double? = null,
+    latitude: Double? = null,
+    longitude: Double? = null,
+  ): SurveyMapSession {
     val moved =
       copy(
         location =
-          location.copy(normalizedX = x, normalizedY = y, coordinatesLabel = coordinatesLabel)
+          location.copy(
+            normalizedX = x,
+            normalizedY = y,
+            coordinatesLabel = coordinatesLabel,
+            gnssAccuracyMeters = accuracyMeters ?: location.gnssAccuracyMeters,
+            latitude = latitude,
+            longitude = longitude,
+          )
       )
     if (isCameraFollowingUser) return moved
     return moved.copy(
@@ -138,6 +152,18 @@ internal data class SurveyMapSession(
    * the session's delta.
    */
   fun desiredCamera(anchor: SurveyMapAnchor): CameraPosition {
+    val lat = location.latitude
+    val lon = location.longitude
+    if (isCameraFollowingUser && lat != null && lon != null) {
+      return CameraPosition(
+        center =
+          MapLatLng(
+            lat.coerceIn(-MAX_MAP_LATITUDE, MAX_MAP_LATITUDE),
+            (lon + 180.0).mod(360.0) - 180.0,
+          ),
+        zoom = anchor.zoom + mapZoomDelta,
+      )
+    }
     // SurveyMapAnchor.toLatLng's projection, computed on raw degrees: a long pan can put the screen
     // center past a pole or the antimeridian, where a LatLng can't be built before clamping.
     val nx = (userGpsNormalizedX - mapPanOffsetX).toDouble()

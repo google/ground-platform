@@ -216,6 +216,7 @@
             padding: 0;
             overflow: hidden;
             overscroll-behavior: none;
+            touch-action: none;
             background-color: #F7FBF2;
             font-family: 'Google Sans Flex', sans-serif;
         }
@@ -226,9 +227,11 @@
             height: 100vh;
             height: 100dvh;
             z-index: 2;
+            touch-action: none;
             background: transparent !important;
         }
         #ComposeTarget canvas {
+            touch-action: none;
             background: transparent !important;
         }
     </style>

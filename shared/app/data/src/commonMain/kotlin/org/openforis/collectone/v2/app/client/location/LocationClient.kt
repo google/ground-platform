@@ -46,6 +46,28 @@ class LocationClient {
         normalizedX = clampedX,
         normalizedY = clampedY,
         coordinatesLabel = resolvedLabel,
+        latitude = null,
+        longitude = null,
+      )
+    return snapshot
+  }
+
+  fun updateRealDeviceLocation(
+    normalizedX: Float,
+    normalizedY: Float,
+    latitude: Double,
+    longitude: Double,
+    accuracyMeters: Double?,
+    coordinatesLabel: String,
+  ): DeviceLocationSnapshot {
+    snapshot =
+      snapshot.copy(
+        normalizedX = normalizedX,
+        normalizedY = normalizedY,
+        coordinatesLabel = coordinatesLabel,
+        gnssAccuracyMeters = accuracyMeters ?: snapshot.gnssAccuracyMeters,
+        latitude = latitude,
+        longitude = longitude,
       )
     return snapshot
   }

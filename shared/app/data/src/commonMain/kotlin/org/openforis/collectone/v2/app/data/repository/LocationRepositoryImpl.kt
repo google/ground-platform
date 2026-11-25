@@ -31,6 +31,23 @@ class LocationRepositoryImpl(
   ): DeviceLocationSnapshot =
     deviceLocationDataSource.updateGpsLocation(normalizedX, normalizedY, coordinatesLabel)
 
+  override fun updateDeviceLocation(
+    normalizedX: Float,
+    normalizedY: Float,
+    latitude: Double,
+    longitude: Double,
+    accuracyMeters: Double?,
+    coordinatesLabel: String,
+  ): DeviceLocationSnapshot =
+    deviceLocationDataSource.updateDeviceLocation(
+      normalizedX = normalizedX,
+      normalizedY = normalizedY,
+      latitude = latitude,
+      longitude = longitude,
+      accuracyMeters = accuracyMeters,
+      coordinatesLabel = coordinatesLabel,
+    )
+
   override fun resetToDefaults(): DeviceLocationSnapshot =
     deviceLocationDataSource.resetToDefaults()
 }

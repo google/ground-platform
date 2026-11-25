@@ -20,6 +20,8 @@ data class DeviceLocationSnapshot(
   val coordinatesLabel: String = "-0.4198°, 36.9512° (±3.2m GPS)",
   val gnssSatelliteCount: Int = 18,
   val gnssAccuracyMeters: Double = 2.1,
+  val latitude: Double? = null,
+  val longitude: Double? = null,
 )
 
 /**
@@ -33,6 +35,15 @@ interface LocationRepository {
     normalizedY: Float,
     coordinatesLabel: String? = null,
   ): DeviceLocationSnapshot
+
+  fun updateDeviceLocation(
+    normalizedX: Float,
+    normalizedY: Float,
+    latitude: Double,
+    longitude: Double,
+    accuracyMeters: Double?,
+    coordinatesLabel: String,
+  ): DeviceLocationSnapshot = updateGpsLocation(normalizedX, normalizedY, coordinatesLabel)
 
   fun resetToDefaults(): DeviceLocationSnapshot
 }

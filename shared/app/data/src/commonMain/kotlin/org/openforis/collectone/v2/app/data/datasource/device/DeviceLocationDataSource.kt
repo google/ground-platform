@@ -29,5 +29,22 @@ class DeviceLocationDataSource(private val locationClient: LocationClient = Loca
   ): DeviceLocationSnapshot =
     locationClient.updateSimulatedGpsLocation(normalizedX, normalizedY, coordinatesLabel)
 
+  fun updateDeviceLocation(
+    normalizedX: Float,
+    normalizedY: Float,
+    latitude: Double,
+    longitude: Double,
+    accuracyMeters: Double?,
+    coordinatesLabel: String,
+  ): DeviceLocationSnapshot =
+    locationClient.updateRealDeviceLocation(
+      normalizedX = normalizedX,
+      normalizedY = normalizedY,
+      latitude = latitude,
+      longitude = longitude,
+      accuracyMeters = accuracyMeters,
+      coordinatesLabel = coordinatesLabel,
+    )
+
   fun resetToDefaults(): DeviceLocationSnapshot = locationClient.reset()
 }

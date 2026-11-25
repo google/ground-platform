@@ -131,6 +131,8 @@ import org.openforis.collectone.v2.mobile.resources.mobile_survey_download_conte
 import org.openforis.collectone.v2.mobile.resources.mobile_survey_downloaded_content_description
 import org.openforis.collectone.v2.mobile.resources.mobile_survey_open_content_description
 import org.openforis.collectone.v2.mobile.resources.mobile_unavailable
+import org.openforis.collectone.v2.mobile.ui.common.SignOutConfirmationDialog
+import org.openforis.collectone.v2.mobile.ui.common.SignOutConfirmationStep
 
 /**
  * Download survey: the surveys shared with the user, in one section per organization and then the
@@ -152,6 +154,8 @@ fun DownloadSurveyScreen(
   var isUserProfileOpen by remember { mutableStateOf(false) }
   val searchSurveysDescription =
     stringResource(Res.string.mobile_download_survey_search_content_description)
+
+  var signOutStep by remember { mutableStateOf(SignOutConfirmationStep.NONE) }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
@@ -503,9 +507,16 @@ fun DownloadSurveyScreen(
         organization = uiState.userOrganization,
         userPhotoUrl = uiState.profile.photoUrl,
         onDismissRequest = { isUserProfileOpen = false },
-        onSignOut = actions::confirmSignOut,
+        onSignOut = { signOutStep = SignOutConfirmationStep.WARNING },
       )
     }
+
+    SignOutConfirmationDialog(
+      step = signOutStep,
+      isOnline = uiState.isOnline,
+      onStepChange = { signOutStep = it },
+      onConfirmSignOut = actions::confirmSignOut,
+    )
 
     if (uiState.isSignOutPromptOpen) {
       DownloadSurveySignOutPromptDialog(uiState, actions)

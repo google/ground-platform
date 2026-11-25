@@ -39,6 +39,10 @@ data class GeoLocationFix(
 interface GeoLocationSource {
   /** The latest fix, or `null` while no location is available (no permission, no signal, ...). */
   val currentFix: StateFlow<GeoLocationFix?>
+
+  /** Whether this source produces simulated/synthetic fixes rather than real device location. */
+  val isSimulated: Boolean
+    get() = false
 }
 
 /** A [GeoLocationSource] that never has a fix, used when the host provides no location. */

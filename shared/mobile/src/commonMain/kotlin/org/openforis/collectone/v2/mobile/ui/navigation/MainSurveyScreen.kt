@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +36,8 @@ import org.openforis.collectone.v2.app.ui.datacollection.SearchableListActions
 import org.openforis.collectone.v2.app.ui.datacollection.SharePdfToAppModalDialog
 import org.openforis.collectone.v2.app.ui.map.SurveyMapActions
 import org.openforis.collectone.v2.app.ui.map.SurveyMapUiState
+import org.openforis.collectone.v2.mobile.ui.common.SignOutConfirmationDialog
+import org.openforis.collectone.v2.mobile.ui.common.SignOutConfirmationStep
 import org.openforis.collectone.v2.mobile.ui.drawer.MainSurveyNavigationDrawerOverlay
 import org.openforis.collectone.v2.mobile.ui.offlinemaps.OfflineAreaSelectionActions
 
@@ -64,6 +68,7 @@ fun MainSurveyScreen(
     if (uiState.isMapShowing) Color.Transparent else MaterialTheme.colorScheme.surface
   val activeQrEntity = dataCollectionUiState.activeQrCodeEntity
   val activePdfSheet = dataCollectionUiState.activeSharedPdfSheet
+  var signOutStep by remember { mutableStateOf(SignOutConfirmationStep.NONE) }
 
   Box(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
     // Main Body: the unified Map + Top Search Bar + Persistent Bottom Sheet View
@@ -108,9 +113,16 @@ fun MainSurveyScreen(
         organization = user.organization,
         userPhotoUrl = user.photoUrl,
         onDismissRequest = { actions.updateUserProfileOpen(false) },
-        onSignOut = actions::signOut,
+        onSignOut = { signOutStep = SignOutConfirmationStep.WARNING },
       )
     }
+
+    SignOutConfirmationDialog(
+      step = signOutStep,
+      isOnline = uiState.isOnline,
+      onStepChange = { signOutStep = it },
+      onConfirmSignOut = actions::signOut,
+    )
 
     // Scannable Entity GeoID QR Code Modal Overlay
     if (activeQrEntity != null) {

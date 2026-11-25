@@ -13,14 +13,23 @@
  */
 package org.openforis.collectone.v2.mobile
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.ComposeUIViewController
+import org.openforis.collectone.v2.core.forms.ui.IosGeoLocationSource
+import org.openforis.collectone.v2.core.forms.ui.LocalGeoLocationSource
 import org.openforis.collectone.v2.mobile.services.MonitorDeviceConnectivity
 import platform.UIKit.UIViewController
 
 /** Entry point invoked by the iOS SwiftUI host app (`iosApp`) to mount `MobileApp`. */
 fun MainViewController(): UIViewController = ComposeUIViewController {
-  MobileAppSession(AppMobileSyncIos.getOrCreateDataHolder()) { state ->
-    MonitorDeviceConnectivity(state, AlwaysOnlineConnectivityMonitor)
-    MobileApp(state = state)
+  val scope = rememberCoroutineScope()
+  val geoLocationSource = remember { IosGeoLocationSource(scope) }
+  CompositionLocalProvider(LocalGeoLocationSource provides geoLocationSource) {
+    MobileAppSession(AppMobileSyncIos.getOrCreateDataHolder()) { state ->
+      MonitorDeviceConnectivity(state, AlwaysOnlineConnectivityMonitor)
+      MobileApp(state = state)
+    }
   }
 }
