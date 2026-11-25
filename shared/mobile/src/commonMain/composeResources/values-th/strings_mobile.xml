@@ -25,8 +25,8 @@
   <string name="mobile_open">เปิด</string>
   <!-- Button that downloads a survey or offline map to the device. -->
   <string name="mobile_download">ดาวน์โหลด</string>
-  <!-- Status chip on a survey or offline map already stored on the device. -->
-  <string name="mobile_downloaded">ดาวน์โหลดแล้ว</string>
+  <!-- Status text on the card of a survey stored on the device. -->
+  <string name="mobile_available_offline">ใช้งานแบบออฟไลน์ได้</string>
   <!-- Badge on a survey that is no longer available to the user. -->
   <string name="mobile_unavailable">ไม่พร้อมใช้งาน</string>
   <!-- Accessibility description of the button that clears the search field. -->
@@ -87,16 +87,16 @@
   <string name="mobile_survey_badge_public_data">ข้อมูลสาธารณะ</string>
   <!-- Badge on a survey where each collector sees only their own submissions. -->
   <string name="mobile_survey_badge_private_submissions">การส่งข้อมูลแบบส่วนตัว</string>
-  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
-  <string name="mobile_survey_downloaded_content_description">ดาวน์โหลด %1$s แล้ว</string>
+  <!-- Accessibility description of a survey card's overflow menu button. %1$s: survey title. -->
+  <string name="mobile_survey_more_options_content_description">ตัวเลือกเพิ่มเติมสำหรับ %1$s</string>
   <!-- Accessibility description of the Open button. %1$s: survey title. -->
   <string name="mobile_survey_open_content_description">เปิด %1$s</string>
   <!-- Accessibility description of the Download button. %1$s: survey title. -->
   <string name="mobile_survey_download_content_description">ดาวน์โหลด %1$s</string>
+  <string name="mobile_remove_from_device">นำออกจากอุปกรณ์</string>
+  <string name="mobile_remove_survey_dialog_title">นำออกจากอุปกรณ์หรือไม่?</string>
   <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_title">นำแบบสำรวจออฟไลน์ออกหรือไม่?</string>
-  <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_body">การนำ “%1$s” ออกจะลบสำเนาออฟไลน์จากอุปกรณ์นี้ คุณจะต้องเชื่อมต่ออินเทอร์เน็ตเพื่อดาวน์โหลดและใช้งานแบบออฟไลน์อีกครั้ง</string>
+  <string name="mobile_remove_survey_dialog_body">ระบบจะนำ “%1$s” ออกจากอุปกรณ์นี้ ข้อมูลที่ยังไม่ได้อัปโหลดจะสูญหาย คุณจะต้องเชื่อมต่อเครือข่ายเพื่อดาวน์โหลดแบบสำรวจอีกครั้ง</string>
   <string name="mobile_sign_out_dialog_title">ออกจากระบบหรือไม่?</string>
   <!-- %1$s: email address of the signed-in user. -->
   <string name="mobile_sign_out_dialog_body">การย้อนกลับจะออกจากระบบ %1$s และกลับไปยังหน้าจอลงชื่อเข้าใช้</string>

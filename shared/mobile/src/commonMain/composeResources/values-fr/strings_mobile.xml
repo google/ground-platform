@@ -25,8 +25,8 @@
   <string name="mobile_open">Ouvrir</string>
   <!-- Button that downloads a survey or offline map to the device. -->
   <string name="mobile_download">Télécharger</string>
-  <!-- Status chip on a survey or offline map already stored on the device. -->
-  <string name="mobile_downloaded">Téléchargé</string>
+  <!-- Status text on the card of a survey stored on the device. -->
+  <string name="mobile_available_offline">Disponible hors ligne</string>
   <!-- Badge on a survey that is no longer available to the user. -->
   <string name="mobile_unavailable">Indisponible</string>
   <!-- Accessibility description of the button that clears the search field. -->
@@ -88,16 +88,16 @@
   <string name="mobile_survey_badge_public_data">Données publiques</string>
   <!-- Badge on a survey where each collector sees only their own submissions. -->
   <string name="mobile_survey_badge_private_submissions">Soumissions privées</string>
-  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
-  <string name="mobile_survey_downloaded_content_description">%1$s téléchargée</string>
+  <!-- Accessibility description of a survey card's overflow menu button. %1$s: survey title. -->
+  <string name="mobile_survey_more_options_content_description">Plus d’options pour %1$s</string>
   <!-- Accessibility description of the Open button. %1$s: survey title. -->
   <string name="mobile_survey_open_content_description">Ouvrir %1$s</string>
   <!-- Accessibility description of the Download button. %1$s: survey title. -->
   <string name="mobile_survey_download_content_description">Télécharger %1$s</string>
+  <string name="mobile_remove_from_device">Retirer de l’appareil</string>
+  <string name="mobile_remove_survey_dialog_title">Retirer de l’appareil ?</string>
   <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_title">Retirer l’enquête hors ligne ?</string>
-  <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_body">Retirer « %1$s » supprimera la copie hors ligne de cet appareil. Une connexion Internet sera nécessaire pour la télécharger et l’utiliser à nouveau hors ligne.</string>
+  <string name="mobile_remove_survey_dialog_body">« %1$s » sera retirée de cet appareil. Les données qui n’ont pas encore été téléversées seront perdues. Une connexion réseau sera nécessaire pour télécharger à nouveau l’enquête.</string>
   <string name="mobile_sign_out_dialog_title">Se déconnecter ?</string>
   <!-- %1$s: email address of the signed-in user. -->
   <string name="mobile_sign_out_dialog_body">Revenir en arrière déconnectera %1$s et affichera l’écran de connexion.</string>

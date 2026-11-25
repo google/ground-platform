@@ -21,6 +21,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
@@ -71,10 +72,12 @@ class MobileSurveyCardLayoutTest {
       it
         .onNodeWithContentDescription(kenya.title, useUnmergedTree = true)
         .assertHeightIsEqualTo(308.dp)
-      it.onNodeWithContentDescription("Downloaded ${kenya.title}").assertIsDisplayed()
+      it.onNodeWithText("Available offline", useUnmergedTree = true).assertIsDisplayed()
+      it.onNodeWithContentDescription("More options for ${kenya.title}").assertIsDisplayed()
       it.onNodeWithContentDescription("Open ${kenya.title}").assertIsDisplayed()
 
-      // Public survey shows visibility icon with hover tooltip instead of a thumbnail chip.
+      // Public survey shows a visibility icon instead of a thumbnail chip. On mobile the icon has
+      // no tooltip; its label is only its accessibility description.
       val publicSurvey = surveys.first { it.isPublicData }
       it.onNodeWithContentDescription("Search surveys").performTextReplacement(publicSurvey.title)
       it.waitForIdle()
@@ -82,9 +85,10 @@ class MobileSurveyCardLayoutTest {
       val visibilityIcon =
         it.onNodeWithTag("$SURVEY_VISIBILITY_ICON_TAG-${publicSurvey.id}", useUnmergedTree = true)
       visibilityIcon.assertIsDisplayed()
+      it.onNodeWithContentDescription("Public data", useUnmergedTree = true).assertExists()
       visibilityIcon.performMouseInput { moveTo(center) }
       it.waitForIdle()
-      it.onNodeWithText("Public data").assertIsDisplayed()
+      it.onNodeWithText("Public data").assertDoesNotExist()
       visibilityIcon.performMouseInput { exit() }
       it.waitForIdle()
 
@@ -100,12 +104,55 @@ class MobileSurveyCardLayoutTest {
         val icon =
           it.onNodeWithTag("$SURVEY_VISIBILITY_ICON_TAG-${survey.id}", useUnmergedTree = true)
         icon.assertIsDisplayed()
+        it.onNodeWithContentDescription(label, useUnmergedTree = true).assertExists()
         icon.performMouseInput { moveTo(center) }
         it.waitForIdle()
-        it.onNodeWithText(label).assertIsDisplayed()
+        it.onNodeWithText(label).assertDoesNotExist()
         icon.performMouseInput { exit() }
         it.waitForIdle()
       }
+    }
+
+  @Test
+  fun downloadSurveyScreen_overflowMenuRemovesADownloadedSurveyOnlyAfterConfirmation() =
+    runMobileNavigationTest {
+      val state = show(MobileRoute.DownloadSurvey)
+      val kenya =
+        state.viewModels.dashboard.uiState.value.surveys.first {
+          it.id == "00000033-6b50-51cd-ac94-baea2ea06d65"
+        }
+      fun isKenyaDownloaded() =
+        state.viewModels.dashboard.uiState.value.surveys
+          .first { survey -> survey.id == kenya.id }
+          .isDownloaded
+      it.onNodeWithContentDescription("Search surveys").performTextReplacement("Kenya Coffee")
+      it.waitForIdle()
+
+      // The menu's item only asks; the dialog warns about unsent data and needing a connection.
+      it.onNodeWithContentDescription("More options for ${kenya.title}").performClick()
+      it.waitForIdle()
+      it.onNodeWithText("Remove from device").performClick()
+      it.waitForIdle()
+      it.onNodeWithText("Remove from device?").assertIsDisplayed()
+      it
+        .onNodeWithText("hasn't been uploaded yet will be lost", substring = true)
+        .assertIsDisplayed()
+      it.onNodeWithText("network connection", substring = true).assertIsDisplayed()
+      assertTrue(isKenyaDownloaded())
+
+      it.onNodeWithText("Cancel").performClick()
+      it.waitForIdle()
+      it.onNodeWithText("Remove from device?").assertDoesNotExist()
+      assertTrue(isKenyaDownloaded())
+
+      it.onNodeWithContentDescription("More options for ${kenya.title}").performClick()
+      it.waitForIdle()
+      it.onNodeWithText("Remove from device").performClick()
+      it.waitForIdle()
+      it.onNodeWithText("Remove").performClick()
+      it.waitForIdle()
+      assertFalse(isKenyaDownloaded())
+      it.onNodeWithContentDescription("Download ${kenya.title}").assertIsDisplayed()
     }
 
   @Test

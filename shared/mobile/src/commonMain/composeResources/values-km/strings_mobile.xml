@@ -25,8 +25,8 @@
   <string name="mobile_open">បើក</string>
   <!-- Button that downloads a survey or offline map to the device. -->
   <string name="mobile_download">ទាញយក</string>
-  <!-- Status chip on a survey or offline map already stored on the device. -->
-  <string name="mobile_downloaded">បានទាញយក</string>
+  <!-- Status text on the card of a survey stored on the device. -->
+  <string name="mobile_available_offline">អាចប្រើក្រៅបណ្ដាញបាន</string>
   <!-- Badge on a survey that is no longer available to the user. -->
   <string name="mobile_unavailable">មិនអាចប្រើបាន</string>
   <!-- Accessibility description of the button that clears the search field. -->
@@ -87,16 +87,16 @@
   <string name="mobile_survey_badge_public_data">ទិន្នន័យសាធារណៈ</string>
   <!-- Badge on a survey where each collector sees only their own submissions. -->
   <string name="mobile_survey_badge_private_submissions">ការដាក់ស្នើឯកជន</string>
-  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
-  <string name="mobile_survey_downloaded_content_description">បានទាញយក %1$s</string>
+  <!-- Accessibility description of a survey card's overflow menu button. %1$s: survey title. -->
+  <string name="mobile_survey_more_options_content_description">ជម្រើសច្រើនទៀតសម្រាប់ %1$s</string>
   <!-- Accessibility description of the Open button. %1$s: survey title. -->
   <string name="mobile_survey_open_content_description">បើក %1$s</string>
   <!-- Accessibility description of the Download button. %1$s: survey title. -->
   <string name="mobile_survey_download_content_description">ទាញយក %1$s</string>
+  <string name="mobile_remove_from_device">លុបចេញពីឧបករណ៍</string>
+  <string name="mobile_remove_survey_dialog_title">លុបចេញពីឧបករណ៍?</string>
   <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_title">លុបការស្ទង់មតិក្រៅបណ្ដាញ?</string>
-  <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_body">ការលុប "%1$s" នឹងលុបច្បាប់ចម្លងក្រៅបណ្ដាញចេញពីឧបករណ៍នេះ។ អ្នកនឹងត្រូវការការតភ្ជាប់អ៊ីនធឺណិត ដើម្បីទាញយក និងប្រើវាក្រៅបណ្ដាញម្តងទៀត។</string>
+  <string name="mobile_remove_survey_dialog_body">"%1$s" នឹងត្រូវលុបចេញពីឧបករណ៍នេះ។ ទិន្នន័យដែលមិនទាន់បានផ្ទុកឡើងនឹងបាត់បង់។ អ្នកនឹងត្រូវការការតភ្ជាប់បណ្ដាញ ដើម្បីទាញយកការស្ទង់មតិនេះម្តងទៀត។</string>
   <string name="mobile_sign_out_dialog_title">ចេញពីគណនី?</string>
   <!-- %1$s: email address of the signed-in user. -->
   <string name="mobile_sign_out_dialog_body">ការថយក្រោយនឹងចេញពីគណនី %1$s ហើយត្រឡប់ទៅអេក្រង់ចូលគណនី។</string>

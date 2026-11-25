@@ -25,8 +25,8 @@
   <string name="mobile_open">ເປີດ</string>
   <!-- Button that downloads a survey or offline map to the device. -->
   <string name="mobile_download">ດາວໂຫຼດ</string>
-  <!-- Status chip on a survey or offline map already stored on the device. -->
-  <string name="mobile_downloaded">ດາວໂຫຼດແລ້ວ</string>
+  <!-- Status text on the card of a survey stored on the device. -->
+  <string name="mobile_available_offline">ໃຊ້ໄດ້ແບບອອບລາຍ</string>
   <!-- Badge on a survey that is no longer available to the user. -->
   <string name="mobile_unavailable">ບໍ່ສາມາດໃຊ້ໄດ້</string>
   <!-- Accessibility description of the button that clears the search field. -->
@@ -87,16 +87,16 @@
   <string name="mobile_survey_badge_public_data">ຂໍ້ມູນສາທາລະນະ</string>
   <!-- Badge on a survey where each collector sees only their own submissions. -->
   <string name="mobile_survey_badge_private_submissions">ການສົ່ງຂໍ້ມູນແບບສ່ວນຕົວ</string>
-  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
-  <string name="mobile_survey_downloaded_content_description">ດາວໂຫຼດ %1$s ແລ້ວ</string>
+  <!-- Accessibility description of a survey card's overflow menu button. %1$s: survey title. -->
+  <string name="mobile_survey_more_options_content_description">ຕົວເລືອກເພີ່ມເຕີມສຳລັບ %1$s</string>
   <!-- Accessibility description of the Open button. %1$s: survey title. -->
   <string name="mobile_survey_open_content_description">ເປີດ %1$s</string>
   <!-- Accessibility description of the Download button. %1$s: survey title. -->
   <string name="mobile_survey_download_content_description">ດາວໂຫຼດ %1$s</string>
+  <string name="mobile_remove_from_device">ລຶບອອກຈາກອຸປະກອນ</string>
+  <string name="mobile_remove_survey_dialog_title">ລຶບອອກຈາກອຸປະກອນບໍ?</string>
   <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_title">ລຶບແບບສຳຫຼວດອອບລາຍອອກບໍ?</string>
-  <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_body">ການລຶບ "%1$s" ຈະລຶບສຳເນົາອອບລາຍອອກຈາກອຸປະກອນນີ້. ທ່ານຈະຕ້ອງເຊື່ອມຕໍ່ອິນເຕີເນັດເພື່ອດາວໂຫຼດ ແລະ ໃຊ້ແບບອອບລາຍອີກຄັ້ງ.</string>
+  <string name="mobile_remove_survey_dialog_body">"%1$s" ຈະຖືກລຶບອອກຈາກອຸປະກອນນີ້. ຂໍ້ມູນທີ່ຍັງບໍ່ໄດ້ອັບໂຫຼດຈະສູນຫາຍ. ທ່ານຈະຕ້ອງມີການເຊື່ອມຕໍ່ເຄືອຂ່າຍເພື່ອດາວໂຫຼດແບບສຳຫຼວດອີກຄັ້ງ.</string>
   <string name="mobile_sign_out_dialog_title">ອອກຈາກລະບົບບໍ?</string>
   <!-- %1$s: email address of the signed-in user. -->
   <string name="mobile_sign_out_dialog_body">ການກັບຄືນຈະອອກຈາກລະບົບ %1$s ແລະ ກັບໄປທີ່ໜ້າເຂົ້າລະບົບ.</string>

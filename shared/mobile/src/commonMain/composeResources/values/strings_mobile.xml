@@ -25,8 +25,8 @@
   <string name="mobile_open">Open</string>
   <!-- Button that downloads a survey or offline map to the device. -->
   <string name="mobile_download">Download</string>
-  <!-- Status chip on a survey or offline map already stored on the device. -->
-  <string name="mobile_downloaded">Downloaded</string>
+  <!-- Status text on the card of a survey stored on the device. -->
+  <string name="mobile_available_offline">Available offline</string>
   <!-- Badge on a survey that is no longer available to the user. -->
   <string name="mobile_unavailable">Unavailable</string>
   <!-- Accessibility description of the button that clears the search field. -->
@@ -90,16 +90,17 @@
   <string name="mobile_survey_badge_public_data">Public data</string>
   <!-- Badge on a survey where each collector sees only their own submissions. -->
   <string name="mobile_survey_badge_private_submissions">Private submissions</string>
-  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
-  <string name="mobile_survey_downloaded_content_description">Downloaded %1$s</string>
+  <!-- Accessibility description of a survey card's overflow menu button. %1$s: survey title. -->
+  <string name="mobile_survey_more_options_content_description">More options for %1$s</string>
   <!-- Accessibility description of the Open button. %1$s: survey title. -->
   <string name="mobile_survey_open_content_description">Open %1$s</string>
   <!-- Accessibility description of the Download button. %1$s: survey title. -->
   <string name="mobile_survey_download_content_description">Download %1$s</string>
+  <!-- Overflow menu item of a downloaded survey's card. -->
+  <string name="mobile_remove_from_device">Remove from device</string>
+  <string name="mobile_remove_survey_dialog_title">Remove from device?</string>
   <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_title">Remove offline survey?</string>
-  <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_body">Removing "%1$s" will delete the offline copy from this device. You will need an internet connection to download and use it offline again.</string>
+  <string name="mobile_remove_survey_dialog_body">"%1$s" will be removed from this device. Any data that hasn't been uploaded yet will be lost. You will need a network connection to download the survey again.</string>
   <string name="mobile_sign_out_dialog_title">Sign out?</string>
   <!-- %1$s: email address of the signed-in user. -->
   <string name="mobile_sign_out_dialog_body">Going back will sign out %1$s and return to the Sign In screen. You will need an internet connection to sign in again.</string>

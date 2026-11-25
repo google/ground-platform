@@ -25,8 +25,8 @@
   <string name="mobile_open">Mở</string>
   <!-- Button that downloads a survey or offline map to the device. -->
   <string name="mobile_download">Tải xuống</string>
-  <!-- Status chip on a survey or offline map already stored on the device. -->
-  <string name="mobile_downloaded">Đã tải xuống</string>
+  <!-- Status text on the card of a survey stored on the device. -->
+  <string name="mobile_available_offline">Có sẵn khi ngoại tuyến</string>
   <!-- Badge on a survey that is no longer available to the user. -->
   <string name="mobile_unavailable">Không khả dụng</string>
   <!-- Accessibility description of the button that clears the search field. -->
@@ -87,16 +87,16 @@
   <string name="mobile_survey_badge_public_data">Dữ liệu công khai</string>
   <!-- Badge on a survey where each collector sees only their own submissions. -->
   <string name="mobile_survey_badge_private_submissions">Bài gửi riêng tư</string>
-  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
-  <string name="mobile_survey_downloaded_content_description">Đã tải xuống %1$s</string>
+  <!-- Accessibility description of a survey card's overflow menu button. %1$s: survey title. -->
+  <string name="mobile_survey_more_options_content_description">Tùy chọn khác cho %1$s</string>
   <!-- Accessibility description of the Open button. %1$s: survey title. -->
   <string name="mobile_survey_open_content_description">Mở %1$s</string>
   <!-- Accessibility description of the Download button. %1$s: survey title. -->
   <string name="mobile_survey_download_content_description">Tải xuống %1$s</string>
+  <string name="mobile_remove_from_device">Gỡ khỏi thiết bị</string>
+  <string name="mobile_remove_survey_dialog_title">Gỡ khỏi thiết bị?</string>
   <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_title">Gỡ bỏ khảo sát ngoại tuyến?</string>
-  <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_body">Gỡ bỏ "%1$s" sẽ xóa bản sao ngoại tuyến khỏi thiết bị này. Bạn sẽ cần kết nối Internet để tải xuống và sử dụng lại khảo sát này khi ngoại tuyến.</string>
+  <string name="mobile_remove_survey_dialog_body">"%1$s" sẽ bị gỡ khỏi thiết bị này. Mọi dữ liệu chưa được tải lên sẽ bị mất. Bạn sẽ cần kết nối mạng để tải lại khảo sát.</string>
   <string name="mobile_sign_out_dialog_title">Đăng xuất?</string>
   <!-- %1$s: email address of the signed-in user. -->
   <string name="mobile_sign_out_dialog_body">Quay lại sẽ đăng xuất %1$s và trở về màn hình Đăng nhập.</string>

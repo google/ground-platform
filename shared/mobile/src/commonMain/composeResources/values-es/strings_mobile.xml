@@ -25,8 +25,8 @@
   <string name="mobile_open">Abrir</string>
   <!-- Button that downloads a survey or offline map to the device. -->
   <string name="mobile_download">Descargar</string>
-  <!-- Status chip on a survey or offline map already stored on the device. -->
-  <string name="mobile_downloaded">Descargado</string>
+  <!-- Status text on the card of a survey stored on the device. -->
+  <string name="mobile_available_offline">Disponible sin conexión</string>
   <!-- Badge on a survey that is no longer available to the user. -->
   <string name="mobile_unavailable">No disponible</string>
   <!-- Accessibility description of the button that clears the search field. -->
@@ -88,16 +88,16 @@
   <string name="mobile_survey_badge_public_data">Datos públicos</string>
   <!-- Badge on a survey where each collector sees only their own submissions. -->
   <string name="mobile_survey_badge_private_submissions">Envíos privados</string>
-  <!-- Accessibility description of the Downloaded chip. %1$s: survey title. -->
-  <string name="mobile_survey_downloaded_content_description">%1$s descargada</string>
+  <!-- Accessibility description of a survey card's overflow menu button. %1$s: survey title. -->
+  <string name="mobile_survey_more_options_content_description">Más opciones para %1$s</string>
   <!-- Accessibility description of the Open button. %1$s: survey title. -->
   <string name="mobile_survey_open_content_description">Abrir %1$s</string>
   <!-- Accessibility description of the Download button. %1$s: survey title. -->
   <string name="mobile_survey_download_content_description">Descargar %1$s</string>
+  <string name="mobile_remove_from_device">Eliminar del dispositivo</string>
+  <string name="mobile_remove_survey_dialog_title">¿Eliminar del dispositivo?</string>
   <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_title">¿Eliminar la encuesta sin conexión?</string>
-  <!-- %1$s: survey title. -->
-  <string name="mobile_remove_survey_dialog_body">Si elimina «%1$s», se borrará la copia sin conexión de este dispositivo. Necesitará una conexión a Internet para descargarla y volver a usarla sin conexión.</string>
+  <string name="mobile_remove_survey_dialog_body">«%1$s» se eliminará de este dispositivo. Se perderán los datos que aún no se hayan subido. Necesitará una conexión de red para volver a descargar la encuesta.</string>
   <string name="mobile_sign_out_dialog_title">¿Cerrar sesión?</string>
   <!-- %1$s: email address of the signed-in user. -->
   <string name="mobile_sign_out_dialog_body">Si vuelve atrás, se cerrará la sesión de %1$s y regresará a la pantalla de inicio de sesión.</string>

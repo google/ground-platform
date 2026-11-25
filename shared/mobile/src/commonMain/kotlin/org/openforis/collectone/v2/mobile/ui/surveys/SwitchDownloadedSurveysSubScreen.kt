@@ -175,9 +175,10 @@ internal fun SwitchDownloadedSurveysSubScreen(
       ) {
         Column(modifier = Modifier.fillMaxSize()) {
           Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
+            // Every survey here is on the device, so the thumbnail carries no downloaded badge.
             SurveyMapThumbnail(
               thumbnail = survey.thumbnail,
-              isDownloaded = true,
+              isDownloaded = false,
               modifier = Modifier.fillMaxSize().grayscale(survey.isClosed),
             )
             if (survey.isClosed) {
@@ -226,7 +227,6 @@ internal fun SwitchDownloadedSurveysSubScreen(
                     } else {
                       MaterialTheme.colorScheme.onSurface
                     },
-                  minLines = 2,
                   maxLines = 2,
                   overflow = TextOverflow.Ellipsis,
                 )
@@ -289,6 +289,7 @@ internal fun SwitchDownloadedSurveysSubScreen(
               publicDataLabel = stringResource(Res.string.mobile_survey_badge_public_data),
               privateSubmissionsLabel =
                 stringResource(Res.string.mobile_survey_badge_private_submissions),
+              showTooltip = false,
               tint =
                 if (isActive) {
                   MaterialTheme.colorScheme.onSecondaryContainer

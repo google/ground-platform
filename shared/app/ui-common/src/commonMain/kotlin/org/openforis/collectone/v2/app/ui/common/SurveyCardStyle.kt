@@ -56,8 +56,9 @@ const val SURVEY_VISIBILITY_ICON_TAG = "survey-visibility-icon"
 private val ClosedSurveyThumbnailScrimColor = Color.White.copy(alpha = 0.24f)
 
 /**
- * Compact icon representing a survey's visibility, with the localized visibility text shown in a
- * tooltip on hover (web) or long-press (mobile). Every survey gets an icon:
+ * Compact icon representing a survey's visibility. With [showTooltip] (the web console), the
+ * localized visibility text shows in a tooltip on hover; the mobile app passes `false` and only
+ * exposes the text to accessibility services. Every survey gets an icon:
  * - open to anyone, all submissions visible: globe (`Public data`)
  * - open to anyone, collectors see only their own submissions: shield (`Private submissions`)
  * - [SharingPolicy.ORGANIZATION]: groups (`Anyone in the organization`)
@@ -71,6 +72,7 @@ fun SurveyVisibilityIcon(
   privateSubmissionsLabel: String,
   modifier: Modifier = Modifier,
   tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+  showTooltip: Boolean = true,
 ) {
   val (icon, label) =
     when {
@@ -80,14 +82,8 @@ fun SurveyVisibilityIcon(
         Icons.Outlined.Groups to stringResource(Res.string.domain_sharing_policy_organization)
       else -> Icons.Outlined.Lock to stringResource(Res.string.domain_sharing_policy_restricted)
     }
-  // TooltipBox doesn't forward parent-layout modifiers such as `align`, so apply them on a wrapper.
-  Box(modifier = modifier) {
-    TooltipBox(
-      positionProvider =
-        TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-      tooltip = { PlainTooltip { Text(label) } },
-      state = rememberTooltipState(),
-    ) {
+  val iconContent =
+    @Composable {
       Box(modifier = Modifier.testTag("$SURVEY_VISIBILITY_ICON_TAG-${survey.id}")) {
         Icon(
           imageVector = icon,
@@ -96,6 +92,19 @@ fun SurveyVisibilityIcon(
           modifier = Modifier.size(18.dp),
         )
       }
+    }
+  // TooltipBox doesn't forward parent-layout modifiers such as `align`, so apply them on a wrapper.
+  Box(modifier = modifier) {
+    if (showTooltip) {
+      TooltipBox(
+        positionProvider =
+          TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(label) } },
+        state = rememberTooltipState(),
+        content = iconContent,
+      )
+    } else {
+      iconContent()
     }
   }
 }
