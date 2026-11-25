@@ -18,7 +18,8 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { NgModule, inject, provideAppInitializer } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { MAT_SELECT_CONFIG } from '@angular/material/select';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -48,6 +49,7 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from 'app/app.component';
+import { loadGoogleMaps } from 'app/google-maps-loader';
 import { MainPageModule } from 'app/components/main-page/main-page.module';
 import { AppRoutingModule } from 'app/routing.module';
 import { environment } from 'environments/environment';
@@ -63,6 +65,7 @@ import { environment } from 'environments/environment';
     MainPageModule,
   ],
   providers: [
+    provideAppInitializer(() => loadGoogleMaps(inject(DOCUMENT))),
     provideFirebaseApp(() => initializeApp(environment.firebase!)),
     provideAuth(() => {
       const auth = getAuth();
@@ -83,10 +86,10 @@ import { environment } from 'environments/environment';
         environment.useEmulators
           ? {}
           : {
-              localCache: persistentLocalCache({
-                tabManager: persistentMultipleTabManager(),
-              }),
-            }
+            localCache: persistentLocalCache({
+              tabManager: persistentMultipleTabManager(),
+            }),
+          }
       );
       if (environment.useEmulators) {
         connectFirestoreEmulator(firestore, 'localhost', 8080);

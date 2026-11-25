@@ -118,6 +118,9 @@ const googleMock = {
           this.listeners[event].push(handler);
           return { remove: () => {} };
         }
+        addEventListener(event: string, handler: Function) {
+          this.addListener(event, handler);
+        }
       },
     },
     Map: class {

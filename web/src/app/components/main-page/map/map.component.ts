@@ -597,7 +597,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       content: createClusterBubbleElement(bubble.withData, bubble.total),
       gmpClickable: this.areBubblesClickable(),
     });
-    marker.addListener('click', () => this.onBubbleClick(bubble));
+    marker.addEventListener('gmp-click', () => this.onBubbleClick(bubble));
     return marker;
   }
 
@@ -700,15 +700,15 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     color: string | undefined
   ): google.maps.marker.AdvancedMarkerElement {
     const marker = this.addMarkerToMap(loiId, geometry, color);
-    marker.addListener('click', () =>
+    marker.addEventListener('gmp-click', () =>
       this.onLocationOfInterestMarkerClick(loiId)
     );
     if (this.shouldEnableDrawingTools) {
-      marker.addListener('dragstart', (event: google.maps.Data.MouseEvent) =>
-        this.onMarkerDragStart(event, marker)
+      marker.addEventListener('gmp-dragstart', () =>
+        this.onMarkerDragStart(marker)
       );
-      marker.addListener('dragend', (event: google.maps.Data.MouseEvent) =>
-        this.onMarkerDragEnd(event, loiId, jobId)
+      marker.addEventListener('gmp-dragend', () =>
+        this.onMarkerDragEnd(marker, loiId, jobId)
       );
     }
     return marker;
@@ -726,7 +726,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     markerText: string
   ): google.maps.marker.AdvancedMarkerElement {
     const marker = this.addMarkerToMap(taskId, geometry, color, markerText);
-    marker.addListener('click', () =>
+    marker.addEventListener('gmp-click', () =>
       this.onSubmissionGeometryClick(loiId, submissionId, taskId)
     );
     return marker;
@@ -758,37 +758,55 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     );
   }
 
-  private onMarkerDragStart(
-    event: google.maps.Data.MouseEvent,
+  /**
+   * Returns the position of a marker, or undefined if it has none. The 'gmp-'
+   * drag events carry no coordinates: the marker moves itself, so its position
+   * is read from it.
+   */
+  private getMarkerLatLng(
     marker: google.maps.marker.AdvancedMarkerElement
-  ) {
+  ): google.maps.LatLng | undefined {
+    const position = marker.position as
+      | google.maps.LatLng
+      | google.maps.LatLngLiteral
+      | null
+      | undefined;
+    if (!position) return undefined;
+    const lat =
+      typeof position.lat === 'function' ? position.lat() : position.lat;
+    const lng =
+      typeof position.lng === 'function' ? position.lng() : position.lng;
+    return new google.maps.LatLng(lat, lng);
+  }
+
+  private onMarkerDragStart(marker: google.maps.marker.AdvancedMarkerElement) {
     // TODO: Show confirm dialog and disable other components when entering reposition state.
     // Currently we are figuring out how should the UI trigger this state.
     this.showRepositionConfirmDialog = true;
     this.disableMapClicks = true;
     this.drawingToolsService.setDisabled(true);
     this.markerToReposition = marker;
-    this.oldLatLng = new google.maps.LatLng(
-      event.latLng!.lat(),
-      event.latLng!.lng()
-    );
+    this.oldLatLng = this.getMarkerLatLng(marker);
     this.changeDetectorRef.detectChanges();
   }
 
   private onMarkerDragEnd(
-    event: google.maps.Data.MouseEvent,
+    marker: google.maps.marker.AdvancedMarkerElement,
     id: string,
     jobId: string
   ) {
-    this.newLatLng = new google.maps.LatLng(
-      event.latLng!.lat(),
-      event.latLng!.lng()
-    );
+    const newLatLng = this.getMarkerLatLng(marker);
+    if (!newLatLng) {
+      // Nothing to save: close the reposition instead of leaving it half done.
+      this.resetReposition();
+      return;
+    }
+    this.newLatLng = newLatLng;
 
     this.newLocationOfInterestToReposition = new LocationOfInterest(
       id,
       jobId,
-      new Point(new Coordinate(event.latLng!.lng(), event.latLng!.lat())),
+      new Point(new Coordinate(newLatLng.lng(), newLatLng.lat())),
       ImmutableMap<string, string | number>()
     );
   }
@@ -1019,7 +1037,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   onCancelRepositionClick() {
-    this.markerToReposition!.position = this.oldLatLng!;
+    if (this.oldLatLng) this.markerToReposition!.position = this.oldLatLng;
     this.resetReposition();
   }
 
