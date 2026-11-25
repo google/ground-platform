@@ -17,6 +17,7 @@ package org.openforis.collectone.v2.mobile.ui.navigation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
@@ -79,4 +80,33 @@ class MainSurveySheetScrollTest {
 
     assertTrue(linkBottom() <= screenHeight, "touch: link at ${linkBottom()} of $screenHeight")
   }
+
+  @Test
+  fun featureSheetDraggedOpenWithTheMouse_scrollsToItsEndWithTheMouseWheel() =
+    runMobileNavigationTest {
+      val state = show()
+      it.runOnIdle { state.viewModels.surveyMap.selectEntity(NYR_104) }
+      it.waitForIdle()
+      val screenHeight = it.onRoot().getUnclippedBoundsInRoot().bottom
+      fun linkBottom(): Dp =
+        it.onNodeWithText("History (", substring = true).getUnclippedBoundsInRoot().bottom
+
+      // Drag the peeking sheet all the way up by its handle, as a mouse user does.
+      it.onNodeWithTag(SHEET_DRAG_HANDLE_TAG, useUnmergedTree = true).performMouseInput {
+        moveTo(center)
+        press()
+        repeat(20) { moveBy(Offset(0f, -40f)) }
+        release()
+      }
+      it.waitForIdle()
+      assertTrue(state.viewModels.surveyMap.uiState.value.isEntityBottomSheetExpanded, "expanded")
+
+      it.onRoot().performMouseInput {
+        moveTo(Offset(width / 2f, height * 0.6f))
+        repeat(40) { scroll(3f) }
+      }
+      it.waitForIdle()
+
+      assertTrue(linkBottom() <= screenHeight, "wheel: link at ${linkBottom()} of $screenHeight")
+    }
 }
