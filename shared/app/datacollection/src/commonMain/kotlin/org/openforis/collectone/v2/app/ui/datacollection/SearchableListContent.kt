@@ -912,7 +912,8 @@ private fun PlaceTitleRow(
     Row(
       modifier = Modifier.weight(1f),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
+      // On mobile the icon sits on the name's line, above the lines that follow it.
+      verticalAlignment = if (isSidePanel) Alignment.CenterVertically else Alignment.Top,
     ) {
       Surface(
         modifier = Modifier.size(24.dp),

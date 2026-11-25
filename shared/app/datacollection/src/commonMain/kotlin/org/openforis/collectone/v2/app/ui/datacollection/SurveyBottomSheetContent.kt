@@ -124,6 +124,7 @@ fun SurveyPersistentBottomSheetContent(
       EntityBottomSheetCard(
         uiState = uiState.details,
         actions = detailsActions,
+        onReturnToList = onReturnToList,
         modifier = modifier,
       )
     is SurveyBottomSheetUiState.SubmissionDetails -> {

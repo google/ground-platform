@@ -80,6 +80,13 @@ data class EntityDetailsUiState(
 )
 
 /**
+ * Whether the entity's history shows instead of its properties: its list of submissions, or one of
+ * them opened from that list.
+ */
+val EntityDetailsUiState.showsHistory: Boolean
+  get() = pane == EntityDetailsPane.SUBMISSIONS || openSubmission != null
+
+/**
  * The upload status of the [properties] of a map feature that its form [submissions] (newest first)
  * wrote, by property key: the status of the latest submission that answered the question behind the
  * property. Properties no stored submission wrote (imported or baseline values) have no entry.

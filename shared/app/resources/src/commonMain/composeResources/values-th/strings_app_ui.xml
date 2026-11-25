@@ -200,7 +200,8 @@
   <!-- Disabled form button. %1$s = the form's action label (e.g. “Visit parcel”). -->
   <string name="app_form_action_completed">%1$s (เสร็จสิ้นแล้ว)</string>
   <!-- Heading/link with the number of submissions. %1$d = count. -->
-  <string name="app_submissions_count">การส่งข้อมูล (%1$d)</string>
+  <string name="app_history">ประวัติ</string>
+  <string name="app_history_count">ประวัติ (%1$d)</string>
   <string name="app_submissions_stored_offline">จัดเก็บไว้ในอุปกรณ์นี้ เชื่อมต่ออินเทอร์เน็ตเพื่อดูการส่งข้อมูลทั้งหมด</string>
   <string name="app_no_submissions_yet">ยังไม่มีการส่งข้อมูล</string>
   <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->

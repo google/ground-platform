@@ -57,8 +57,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
@@ -98,8 +96,6 @@ import org.openforis.collectone.v2.app.domain.model.regularDisplayProperties
 import org.openforis.collectone.v2.app.domain.model.whispAnalysis
 import org.openforis.collectone.v2.app.resources.Res
 import org.openforis.collectone.v2.app.resources.app_back_to_all_map_features
-import org.openforis.collectone.v2.app.resources.app_back_to_details
-import org.openforis.collectone.v2.app.resources.app_back_to_submissions
 import org.openforis.collectone.v2.app.resources.app_close_details
 import org.openforis.collectone.v2.app.resources.app_collapse_details
 import org.openforis.collectone.v2.app.resources.app_collect_data
@@ -110,6 +106,7 @@ import org.openforis.collectone.v2.app.resources.app_details_layer
 import org.openforis.collectone.v2.app.resources.app_details_properties
 import org.openforis.collectone.v2.app.resources.app_download_pdf
 import org.openforis.collectone.v2.app.resources.app_form_action_completed
+import org.openforis.collectone.v2.app.resources.app_history_count
 import org.openforis.collectone.v2.app.resources.app_more_actions
 import org.openforis.collectone.v2.app.resources.app_no_local_submissions_for_entity
 import org.openforis.collectone.v2.app.resources.app_no_submissions_for_entity
@@ -121,14 +118,12 @@ import org.openforis.collectone.v2.app.resources.app_share
 import org.openforis.collectone.v2.app.resources.app_share_pdf
 import org.openforis.collectone.v2.app.resources.app_show_in_table
 import org.openforis.collectone.v2.app.resources.app_stop_navigation_short
-import org.openforis.collectone.v2.app.resources.app_submissions_count
 import org.openforis.collectone.v2.app.resources.app_submissions_stored_offline
 import org.openforis.collectone.v2.app.resources.app_view_submission_history
 import org.openforis.collectone.v2.app.ui.common.GeoIdText
 import org.openforis.collectone.v2.app.ui.common.displayLabel
 import org.openforis.collectone.v2.app.ui.common.horizontalScrollWithMouseDrag
 import org.openforis.collectone.v2.app.ui.map.LayerIcons
-import org.openforis.collectone.v2.app.ui.navigation.EntityDetailsPane
 import org.openforis.collectone.v2.app.ui.text.entityGeometrySummaryText
 import org.openforis.collectone.v2.app.ui.text.labelRes
 import org.openforis.collectone.v2.app.ui.text.typeText
@@ -538,7 +533,7 @@ private fun DetailsSectionHeading(text: String) {
 
 /**
  * Label/value pair arranged vertically. [syncStatus] is the upload status of a value a form
- * submission wrote, shown as an icon next to the label; `null` shows none.
+ * submission wrote; while the value is not uploaded yet it shows as an icon next to the label.
  */
 @Composable
 private fun DetailsFieldRow(
@@ -559,19 +554,23 @@ private fun DetailsFieldRow(
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      if (syncStatus != null) FieldSyncStatusIcon(syncStatus)
+      // Uploaded values need no mark; only the ones still on their way get one.
+      if (syncStatus != null && syncStatus != SyncStatus.SYNCED) FieldSyncStatusIcon(syncStatus)
     }
     content()
   }
 }
 
-/** Small upload status icon of a single field: waiting to upload, uploaded, or failed. */
+/**
+ * Small upload status icon of a single field whose value is not on the server yet: waiting to
+ * upload, in a light shade that stays out of the way, or failed.
+ */
 @Composable
 private fun FieldSyncStatusIcon(syncStatus: SyncStatus) {
   val (icon, tint) =
     when (syncStatus) {
-      SyncStatus.UPLOADING -> Icons.Outlined.CloudUpload to MaterialTheme.colorScheme.primary
-      SyncStatus.SYNCED -> Icons.Outlined.CloudDone to MaterialTheme.colorScheme.onSurfaceVariant
+      SyncStatus.UPLOADING -> Icons.Outlined.CloudUpload to MaterialTheme.colorScheme.outline
+      SyncStatus.SYNCED -> Icons.Outlined.CloudDone to MaterialTheme.colorScheme.outline
       SyncStatus.FAILED -> Icons.Outlined.CloudOff to MaterialTheme.colorScheme.error
     }
   Icon(
@@ -886,8 +885,8 @@ private fun EntityDataCollectionLaunchers(
 }
 
 /**
- * Mobile click-through from an entity's properties to its submissions ("Submissions (n) ›"), which
- * opens [EntitySubmissionsPane]. On web, submissions are in the details card's `History` tab
+ * Mobile click-through from an entity's properties to its history ("History (n) ›"), the
+ * submissions [EntitySubmissionsPane] lists. On web they are in the details card's `History` tab
  * instead.
  */
 @Composable
@@ -900,14 +899,27 @@ private fun EntitySubmissionsLink(uiState: EntityDetailsUiState, onClick: () -> 
     } else {
       entity.submissionCount
     }
-  ListItem(
-    headlineContent = {
+  // Laid out like a row of the searchable list, flush with the content around it.
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clip(MaterialTheme.shapes.small)
+        .clickable(onClick = onClick)
+        .padding(vertical = 8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    Icon(
+      imageVector = Icons.Outlined.Description,
+      contentDescription = null,
+      tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Column(modifier = Modifier.weight(1f)) {
       Text(
-        text = stringResource(Res.string.app_submissions_count, availableCount),
-        style = MaterialTheme.typography.titleSmall,
+        text = stringResource(Res.string.app_history_count, availableCount),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurface,
       )
-    },
-    supportingContent = {
       Text(
         text =
           when {
@@ -920,24 +932,24 @@ private fun EntitySubmissionsLink(uiState: EntityDetailsUiState, onClick: () -> 
               )
           },
         style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-    },
-    leadingContent = { Icon(imageVector = Icons.Outlined.Description, contentDescription = null) },
-    trailingContent = {
-      Icon(imageVector = Icons.Outlined.ChevronRight, contentDescription = null)
-    },
-    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-    modifier =
-      Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable(onClick = onClick),
-  )
+    }
+    Icon(
+      imageVector = Icons.Outlined.ChevronRight,
+      contentDescription = null,
+      tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+  }
 }
 
 /**
  * Entity submissions pane: the entity's `1:N` submissions grouped by form. Submissions open in a
  * document-style view ([SubmissionFullDetailsCard]).
- * - On mobile it is one step away from the properties, with a back button and a count heading.
- * - On web ([isWeb]) it is the body of the details card's `History` tab, which already labels it,
- *   so the back button and heading are omitted.
+ * - On mobile it is the body of the entity's full-screen history, opened from the properties.
+ * - On web ([isWeb]) it is the body of the details card's `History` tab.
+ *
+ * Both hosts label it and provide the way back, so the pane has no heading of its own.
  *
  * Seeing the full list requires a connection, so on mobile while offline only submissions stored on
  * the device are listed, with a notice.
@@ -951,29 +963,8 @@ fun EntitySubmissionsPane(
   val entity = uiState.entity
   val isOffline = !isWeb && !uiState.isOnline
   val groups = uiState.submissionGroups
-  val count = groups.sumOf { it.submissions.size }
 
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    if (!isWeb) {
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        IconButton(onClick = { actions.showEntityProperties() }, modifier = Modifier.size(32.dp)) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-            contentDescription = stringResource(Res.string.app_back_to_details),
-            modifier = Modifier.size(20.dp),
-          )
-        }
-        Text(
-          text = stringResource(Res.string.app_submissions_count, count),
-          style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-          color = MaterialTheme.colorScheme.onSurface,
-        )
-      }
-    }
-
     if (isOffline) {
       Surface(
         shape = MaterialTheme.shapes.small,
@@ -1031,18 +1022,18 @@ fun EntitySubmissionsPane(
 
 /**
  * Mobile details surface for the selected entity, replacing the bottom sheet's list:
- * - Header with back (← to the list), status, and a tappable sync status chip.
- * - Properties pane by default, the submissions pane one click away, and a document-style
- *   submission view (← back to the submissions) when a submission is opened.
+ * - Header with back (← to the list, [onReturnToList]), status, and a tappable sync status chip.
+ * - The properties pane. The entity's history (its submissions) opens from the pane's History link
+ *   and is shown by the host as a screen of its own, not in the sheet.
  */
 @Composable
 internal fun EntityBottomSheetCard(
   uiState: EntityDetailsUiState,
   actions: EntityDetailsActions,
+  onReturnToList: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val entity = uiState.entity
-  val openSubmission = uiState.openSubmission
   var isShareMenuExpanded by remember { mutableStateOf(false) }
 
   Column(
@@ -1051,7 +1042,7 @@ internal fun EntityBottomSheetCard(
   ) {
     EntityDetailsHeader(
       entity = entity,
-      onBack = null,
+      onBack = onReturnToList,
       onClose = null,
       layer = uiState.layer,
       statusAccessory = {
@@ -1105,21 +1096,7 @@ internal fun EntityBottomSheetCard(
       modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      when {
-        openSubmission != null ->
-          SubmissionFullDetailsCard(
-            uiState = openSubmission,
-            backLabel = stringResource(Res.string.app_back_to_submissions),
-            onBack = { actions.selectSubmissionDetail(null) },
-            onSharePdf = { actions.shareSubmissionPdf(openSubmission.submission.id) },
-            onCycleSyncStatus = {
-              actions.cycleSubmissionSyncStatus(openSubmission.submission.id)
-            },
-          )
-        uiState.pane == EntityDetailsPane.SUBMISSIONS ->
-          EntitySubmissionsPane(uiState = uiState, actions = actions, isWeb = false)
-        else -> EntityPropertiesPane(uiState = uiState, actions = actions, isWeb = false)
-      }
+      EntityPropertiesPane(uiState = uiState, actions = actions, isWeb = false)
       Spacer(modifier = Modifier.padding(bottom = 8.dp))
     }
   }

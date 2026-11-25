@@ -24,7 +24,6 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -334,50 +333,31 @@ class SurveyBottomSheetContentUiTest {
   }
 
   @Test
-  fun selectedEntity_showsItsPropertiesAndSubmissionsLink() = runComposeUiTest {
+  fun selectedEntity_showsItsPropertiesAndHistoryLink() = runComposeUiTest {
     val entity = entityWithSubmissions
     session.viewModels.surveyMap.selectEntity(entity.id)
     showSheet()
 
     onNodeWithText(entity.displayTitle).assertExists()
     onNodeWithText("Details").assertExists()
-    onNodeWithText("Submissions (${entity.submissionCount})").assertExists()
+    onNodeWithText("History (${entity.submissionCount})").assertExists()
   }
 
   @Test
-  fun selectedEntity_submissionsLinkOpensTheSubmissionsList() = runComposeUiTest {
+  fun selectedEntity_historyLinkOpensTheFeaturesSubmissions() = runComposeUiTest {
     val entity = entityWithSubmissions
     session.viewModels.surveyMap.selectEntity(entity.id)
     showSheet()
 
-    onNodeWithText("Submissions (${entity.submissionCount})").performScrollTo().performClick()
+    onNodeWithText("History (${entity.submissionCount})").performScrollTo().performClick()
     waitForIdle()
 
-    // The feature's submissions, not the Uploads screen.
+    // The feature's submissions, not the Uploads screen. The mobile app shows them as a screen of
+    // their own (see its feature history tests); the sheet keeps the feature's properties.
     val dashboard = session.viewModels.dashboard.uiState.value
     assertEquals(EntityDetailsPane.SUBMISSIONS, dashboard.entityDetailsPane)
     assertEquals(null, dashboard.uploadsEntityFilterId)
-    onNodeWithContentDescription("Back to details").assertExists()
-    onAllNodesWithContentDescription("Submission details")
-      .assertCountEquals(entity.submissions.size)
-  }
-
-  @Test
-  fun selectedEntity_submissionsPaneOpensASubmission() = runComposeUiTest {
-    val entity = entityWithSubmissions
-    session.viewModels.surveyMap.selectEntity(entity.id)
-    session.viewModels.dashboard.showEntitySubmissions()
-    showSheet()
-
-    onNodeWithContentDescription("Back to details").assertExists()
-    onAllNodesWithContentDescription("Submission details").onFirst().performClick()
-    waitForIdle()
-
-    assertTrue(
-      session.viewModels.dataCollection.uiState.value.selectedSubmissionId in
-        entity.submissions.map { it.id }
-    )
-    onNodeWithContentDescription("Back to submissions").assertExists()
+    onNodeWithText("Details").assertExists()
   }
 
   @Test

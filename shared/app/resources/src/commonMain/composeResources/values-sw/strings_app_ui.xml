@@ -202,7 +202,8 @@
   <!-- Disabled form button. %1$s = the form's action label (e.g. “Visit parcel”). -->
   <string name="app_form_action_completed">%1$s (Imekamilika)</string>
   <!-- Heading/link with the number of submissions. %1$d = count. -->
-  <string name="app_submissions_count">Mawasilisho (%1$d)</string>
+  <string name="app_history">Historia</string>
+  <string name="app_history_count">Historia (%1$d)</string>
   <string name="app_submissions_stored_offline">Yamehifadhiwa kwenye kifaa hiki. Unganisha kwenye intaneti ili kuona mawasilisho yote.</string>
   <string name="app_no_submissions_yet">Bado hakuna mawasilisho</string>
   <!-- %1$s = map feature type in lowercase (e.g. coffee parcel). -->

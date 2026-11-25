@@ -15,12 +15,10 @@ package org.openforis.collectone.v2.app.ui.datacollection
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Navigation
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,12 +31,13 @@ import org.openforis.collectone.v2.app.domain.model.StraightLineVector
 import org.openforis.collectone.v2.app.resources.Res
 import org.openforis.collectone.v2.app.resources.app_navigate
 import org.openforis.collectone.v2.app.ui.text.wayfindingBadge
-import org.openforis.collectone.v2.core.forms.ui.controls.OutlinedButton
+import org.openforis.collectone.v2.core.forms.ui.controls.AssistChip
 
 /**
- * Mobile wayfinding action of a map feature or place: one outlined button that starts straight-line
- * navigation to it (`Navigate`) or stops it ([stopLabel] while [isNavigating]), with the distance
- * and heading to it ([wayfinding]) beside the button in the theme's green (the primary color).
+ * Mobile wayfinding action of a map feature or place: the distance and heading to it ([wayfinding])
+ * in the theme's green (the primary color), followed by one chip, about the size of that text, that
+ * starts straight-line navigation to it (`Navigate`) or stops it ([stopLabel] while
+ * [isNavigating]).
  */
 @Composable
 internal fun NavigateAction(
@@ -53,21 +52,6 @@ internal fun NavigateAction(
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(10.dp),
   ) {
-    OutlinedButton(
-      onClick = onToggle,
-      contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-    ) {
-      Icon(
-        imageVector = Icons.Outlined.Navigation,
-        contentDescription = null,
-        modifier = Modifier.size(ButtonDefaults.IconSize),
-      )
-      Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
-      Text(
-        text = if (isNavigating) stopLabel else stringResource(Res.string.app_navigate),
-        maxLines = 1,
-      )
-    }
     val distanceAndHeading = wayfindingBadge(wayfinding)
     if (distanceAndHeading.isNotEmpty()) {
       Text(
@@ -78,5 +62,21 @@ internal fun NavigateAction(
         softWrap = false,
       )
     }
+    AssistChip(
+      onClick = onToggle,
+      label = {
+        Text(
+          text = if (isNavigating) stopLabel else stringResource(Res.string.app_navigate),
+          maxLines = 1,
+        )
+      },
+      leadingIcon = {
+        Icon(
+          imageVector = Icons.Outlined.Navigation,
+          contentDescription = null,
+          modifier = Modifier.size(AssistChipDefaults.IconSize),
+        )
+      },
+    )
   }
 }

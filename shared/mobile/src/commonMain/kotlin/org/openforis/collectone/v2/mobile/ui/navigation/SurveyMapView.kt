@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,7 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.SatelliteAlt
 import androidx.compose.material3.BottomSheetDefaults
@@ -61,6 +62,8 @@ import androidx.compose.ui.unit.offset
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.BasemapType
 import org.openforis.collectone.v2.app.domain.model.hasGeometry
+import org.openforis.collectone.v2.app.resources.Res as AppRes
+import org.openforis.collectone.v2.app.resources.app_collapse_list_sheet
 import org.openforis.collectone.v2.app.ui.common.EARTH_ENGINE_MAP_BADGE_TAG
 import org.openforis.collectone.v2.app.ui.common.LocalMobileTopInset
 import org.openforis.collectone.v2.app.ui.common.PoweredByEarthEngineBadge
@@ -68,8 +71,10 @@ import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionActions
 import org.openforis.collectone.v2.app.ui.datacollection.DataCollectionUiState
 import org.openforis.collectone.v2.app.ui.datacollection.EntityDetailsActions
 import org.openforis.collectone.v2.app.ui.datacollection.SearchableListActions
+import org.openforis.collectone.v2.app.ui.datacollection.SurveyBottomSheetUiState
 import org.openforis.collectone.v2.app.ui.datacollection.SurveyMainMap
 import org.openforis.collectone.v2.app.ui.datacollection.SurveyPersistentBottomSheetContent
+import org.openforis.collectone.v2.app.ui.datacollection.showsHistory
 import org.openforis.collectone.v2.app.ui.map.BasemapPreviewCard
 import org.openforis.collectone.v2.app.ui.map.GoogleMapsScaleBarWidget
 import org.openforis.collectone.v2.app.ui.map.MapClusterBalloonsOverlay
@@ -83,7 +88,6 @@ import org.openforis.collectone.v2.core.forms.ui.controls.ExtendedFloatingAction
 import org.openforis.collectone.v2.core.forms.ui.controls.IconButton
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.mobile.resources.Res
-import org.openforis.collectone.v2.mobile.resources.mobile_back
 import org.openforis.collectone.v2.mobile.resources.mobile_gps_auto_center
 import org.openforis.collectone.v2.mobile.resources.mobile_gps_panned
 import org.openforis.collectone.v2.mobile.resources.mobile_gps_status
@@ -215,45 +219,26 @@ internal fun SurveyMapView(
       sheetSwipeEnabled = !isSelectingArea,
       sheetDragHandle = {
         if (isSelectingArea) return@BottomSheetScaffold
-        if (hasSelectedRecord) {
-          Box(
-            modifier =
-              Modifier.fillMaxWidth()
-                .then(handleBelowSearchBar)
-                .padding(horizontal = 8.dp, vertical = 2.dp)
-          ) {
-            IconButton(
-              onClick = {
-                val back =
-                  selectedRecordBack(
-                    hasSelectedEntity = selectedEntity != null,
-                    hasSelectedSubmission = selectedSubmission != null,
-                    entityDetailsPane = uiState.entityDetailsPane,
-                  )
-                when (back) {
-                  SelectedRecordBack.CLOSE_SUBMISSION ->
-                    dataCollectionActions.selectSubmissionDetail(null)
-                  SelectedRecordBack.SHOW_PROPERTIES -> dataCollectionActions.showEntityProperties()
-                  SelectedRecordBack.RETURN_TO_LIST ->
-                    dataCollectionActions.returnToBottomSheetList()
-                }
-              },
-              modifier = Modifier.align(Alignment.CenterStart).size(36.dp),
-            ) {
-              Icon(
-                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                contentDescription = stringResource(Res.string.mobile_back),
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(20.dp),
+        Box(modifier = Modifier.fillMaxWidth().then(handleBelowSearchBar)) {
+          when {
+            // The handle shows while the sheet can still be dragged further up.
+            !isSheetAtTop ->
+              BottomSheetDefaults.DragHandle(
+                modifier = Modifier.align(Alignment.Center).testTag(SHEET_DRAG_HANDLE_TAG)
               )
-            }
-            BottomSheetDefaults.DragHandle(
-              modifier = Modifier.align(Alignment.Center).testTag(SHEET_DRAG_HANDLE_TAG)
-            )
-          }
-        } else {
-          Box(modifier = handleBelowSearchBar) {
-            BottomSheetDefaults.DragHandle(modifier = Modifier.testTag(SHEET_DRAG_HANDLE_TAG))
+            // A record's header has its own Back arrow, so nothing goes above it.
+            hasSelectedRecord -> Spacer(modifier = Modifier.height(8.dp))
+            // The list covering the screen collapses again from a Close button.
+            else ->
+              IconButton(
+                onClick = { mapActions.updateEntityBottomSheetExpanded(false) },
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 4.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.Outlined.Close,
+                  contentDescription = stringResource(AppRes.string.app_collapse_list_sheet),
+                )
+              }
           }
         }
       },
@@ -371,7 +356,8 @@ internal fun SurveyMapView(
                 fontWeight = FontWeight.Bold,
               )
             },
-            containerColor = MaterialTheme.colorScheme.surface,
+            // The same container as the bottom sheet it floats above.
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             contentColor = MaterialTheme.colorScheme.onSurface,
             modifier =
               Modifier.align(Alignment.BottomEnd)
@@ -421,6 +407,20 @@ internal fun SurveyMapView(
         Modifier.align(Alignment.TopCenter)
           .padding(start = 12.dp, top = topInset + 10.dp, end = 12.dp),
     )
+
+    // A map feature's history takes the whole screen, over the map, the sheet, and the search bar.
+    val history =
+      (uiState.bottomSheet as? SurveyBottomSheetUiState.EntityDetails)?.details?.takeIf {
+        it.showsHistory
+      }
+    if (history != null) {
+      FeatureHistoryScreen(
+        uiState = history,
+        actions = detailsActions,
+        topInset = topInset,
+        modifier = Modifier.fillMaxSize(),
+      )
+    }
   }
 }
 
