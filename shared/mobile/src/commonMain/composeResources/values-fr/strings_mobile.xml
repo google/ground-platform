@@ -375,4 +375,10 @@
   <string name="mobile_update_now">Mettre à jour</string>
   <string name="mobile_update_later">Plus tard</string>
   <string name="mobile_update_check_again">Vérifier à nouveau</string>
+  <string name="mobile_sign_out_warning_body">Vous aurez besoin d’une connexion Internet pour vous reconnecter. Si vous vous déconnectez hors ligne, vous risquez de ne plus pouvoir accéder à l’application.</string>
+  <string name="mobile_sign_out_offline_confirm_title">Vous êtes actuellement hors ligne</string>
+  <string name="mobile_sign_out_offline_confirm_body">Voulez-vous vraiment vous déconnecter ? Sans connexion Internet, vous ne pourrez pas vous reconnecter ni accéder à l’application.</string>
+  <string name="mobile_sign_out_continue">Continuer</string>
+  <string name="mobile_sign_out_anyway">Se déconnecter quand même</string>
+  <string name="mobile_view_uploads">Voir les envois</string>
 </resources>

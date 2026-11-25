@@ -375,4 +375,10 @@
   <string name="mobile_update_now">Sasisha sasa</string>
   <string name="mobile_update_later">Baadaye</string>
   <string name="mobile_update_check_again">Angalia tena</string>
+  <string name="mobile_sign_out_warning_body">Utahitaji muunganisho wa intaneti ili kuingia tena. Ukiondoka ukiwa nje ya mtandao, huenda usiweze kufikia programu.</string>
+  <string name="mobile_sign_out_offline_confirm_title">Uko nje ya mtandao</string>
+  <string name="mobile_sign_out_offline_confirm_body">Una uhakika unataka kuondoka? Bila muunganisho wa intaneti, hutakuwa na uwezo wa kuingia tena au kufikia programu.</string>
+  <string name="mobile_sign_out_continue">Endelea</string>
+  <string name="mobile_sign_out_anyway">Ondoka hata hivyo</string>
+  <string name="mobile_view_uploads">Tazama upakiaji</string>
 </resources>

@@ -363,4 +363,10 @@
   <string name="mobile_update_now">ອັບເດດດຽວນີ້</string>
   <string name="mobile_update_later">ພາຍຫຼັງ</string>
   <string name="mobile_update_check_again">ກວດສອບອີກຄັ້ງ</string>
+  <string name="mobile_sign_out_warning_body">ທ່ານຈະຕ້ອງການການເຊື່ອມຕໍ່ອິນເຕີເນັດເພື່ອເຂົ້າສູ່ລະບົບອີກຄັ້ງ. ຖ້າທ່ານອອກຈາກລະບົບໃນຂະນະທີ່ອອບລາຍ, ທ່ານອາດຈະບໍ່ສາມາດເຂົ້າເຖິງແອັບໄດ້.</string>
+  <string name="mobile_sign_out_offline_confirm_title">ທ່ານກຳລັງອອບລາຍຢູ່</string>
+  <string name="mobile_sign_out_offline_confirm_body">ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການອອກຈາກລະບົບ? ຖ້າບໍ່ມີອິນເຕີເນັດ, ທ່ານຈະບໍ່ສາມາດເຂົ້າສູ່ລະບົບຄືນ ຫຼື ເຂົ້າເຖິງແອັບໄດ້.</string>
+  <string name="mobile_sign_out_continue">ສືບຕໍ່</string>
+  <string name="mobile_sign_out_anyway">ອອກຈາກລະບົບຕໍ່ໄປ</string>
+  <string name="mobile_view_uploads">ເບິ່ງການອັບໂຫຼດ</string>
 </resources>

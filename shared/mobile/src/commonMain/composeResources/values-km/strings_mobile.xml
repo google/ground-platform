@@ -363,4 +363,10 @@
   <string name="mobile_update_now">ធ្វើបច្ចុប្បន្នភាពឥឡូវ</string>
   <string name="mobile_update_later">ពេលក្រោយ</string>
   <string name="mobile_update_check_again">ពិនិត្យម្តងទៀត</string>
+  <string name="mobile_sign_out_warning_body">អ្នកនឹងត្រូវការការតភ្ជាប់អ៊ីនធឺណិតដើម្បីចូលគណនីម្តងទៀត។ ប្រសិនបើអ្នកចាកចេញពីគណនីពេលគ្មានអ៊ីនធឺណិត អ្នកប្រហែលជាមិនអាចចូលប្រើកម្មវិធីបានទេ។</string>
+  <string name="mobile_sign_out_offline_confirm_title">អ្នកកំពុងគ្មានអ៊ីនធឺណិត</string>
+  <string name="mobile_sign_out_offline_confirm_body">តើអ្នកប្រាកដជាចង់ចាកចេញមែនទេ? បើគ្មានការតភ្ជាប់អ៊ីនធឺណិត អ្នកនឹងមិនអាចចូលគណនីវិញ ឬប្រើកម្មវិធីបានទេ។</string>
+  <string name="mobile_sign_out_continue">បន្ត</string>
+  <string name="mobile_sign_out_anyway">ចាកចេញយ៉ាងណាក៏ដោយ</string>
+  <string name="mobile_view_uploads">មើលការផ្ទុកឡើង</string>
 </resources>

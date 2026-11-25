@@ -363,4 +363,10 @@
   <string name="mobile_update_now">อัปเดตตอนนี้</string>
   <string name="mobile_update_later">ภายหลัง</string>
   <string name="mobile_update_check_again">ตรวจสอบอีกครั้ง</string>
+  <string name="mobile_sign_out_warning_body">คุณจะต้องเชื่อมต่ออินเทอร์เน็ตเพื่อลงชื่อเข้าใช้อีกครั้ง หากคุณลงชื่อออกขณะออฟไลน์ คุณอาจไม่สามารถเข้าใช้งานแอปได้</string>
+  <string name="mobile_sign_out_offline_confirm_title">คุณกำลังออฟไลน์อยู่</string>
+  <string name="mobile_sign_out_offline_confirm_body">คุณแน่ใจหรือไม่ว่าต้องการลงชื่อออก? หากไม่มีการเชื่อมต่ออินเทอร์เน็ต คุณจะไม่สามารถลงชื่อเข้าใช้กลับหรือเข้าใช้งานแอปได้</string>
+  <string name="mobile_sign_out_continue">ดำเนินการต่อ</string>
+  <string name="mobile_sign_out_anyway">ลงชื่อออกต่อไป</string>
+  <string name="mobile_view_uploads">ดูการอัปโหลด</string>
 </resources>

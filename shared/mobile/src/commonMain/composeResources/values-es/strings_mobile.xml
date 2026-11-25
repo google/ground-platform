@@ -375,4 +375,10 @@
   <string name="mobile_update_now">Actualizar ahora</string>
   <string name="mobile_update_later">Más tarde</string>
   <string name="mobile_update_check_again">Comprobar de nuevo</string>
+  <string name="mobile_sign_out_warning_body">Necesitarás una conexión a internet para volver a iniciar sesión. Si cierras sesión sin conexión, es posible que no puedas acceder a la aplicación.</string>
+  <string name="mobile_sign_out_offline_confirm_title">Estás sin conexión</string>
+  <string name="mobile_sign_out_offline_confirm_body">¿Estás seguro de que quieres cerrar sesión? Sin conexión a internet, no podrás volver a iniciar sesión ni acceder a la aplicación.</string>
+  <string name="mobile_sign_out_continue">Continuar</string>
+  <string name="mobile_sign_out_anyway">Cerrar sesión de todos modos</string>
+  <string name="mobile_view_uploads">Ver cargas</string>
 </resources>

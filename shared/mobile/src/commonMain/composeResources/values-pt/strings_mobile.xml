@@ -387,4 +387,10 @@
   <string name="mobile_update_now">Atualizar agora</string>
   <string name="mobile_update_later">Mais tarde</string>
   <string name="mobile_update_check_again">Verificar novamente</string>
+  <string name="mobile_sign_out_warning_body">Você precisará de uma conexão com a internet para entrar novamente. Se sair enquanto estiver offline, talvez não consiga acessar o aplicativo.</string>
+  <string name="mobile_sign_out_offline_confirm_title">Você está offline</string>
+  <string name="mobile_sign_out_offline_confirm_body">Tem certeza de que deseja sair? Sem conexão com a internet, você não poderá entrar novamente nem acessar o aplicativo.</string>
+  <string name="mobile_sign_out_continue">Continuar</string>
+  <string name="mobile_sign_out_anyway">Sair mesmo assim</string>
+  <string name="mobile_view_uploads">Ver envios</string>
 </resources>

@@ -363,4 +363,10 @@
   <string name="mobile_update_now">Cập nhật ngay</string>
   <string name="mobile_update_later">Để sau</string>
   <string name="mobile_update_check_again">Kiểm tra lại</string>
+  <string name="mobile_sign_out_warning_body">Bạn sẽ cần kết nối internet để đăng nhập lại. Nếu đăng xuất khi ngoại tuyến, bạn có thể không truy cập được ứng dụng.</string>
+  <string name="mobile_sign_out_offline_confirm_title">Bạn đang ngoại tuyến</string>
+  <string name="mobile_sign_out_offline_confirm_body">Bạn có chắc chắn muốn đăng xuất không? Nếu không có kết nối internet, bạn sẽ không thể đăng nhập lại hoặc truy cập ứng dụng.</string>
+  <string name="mobile_sign_out_continue">Tiếp tục</string>
+  <string name="mobile_sign_out_anyway">Vẫn đăng xuất</string>
+  <string name="mobile_view_uploads">Xem mục tải lên</string>
 </resources>
