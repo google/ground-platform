@@ -85,7 +85,6 @@ class WebSaveStatusIndicatorTest {
       dataCollection = DataCollectionUiState(),
       dataCollectionActions = state.viewModels.dataCollection,
       onOpenSurvey = {},
-      onSelectLifecycleState = {},
       onOpenSurveyEditor = {},
       onSignOut = {},
     )

@@ -87,9 +87,8 @@ internal data class WebSurveyToolbarUiState(
   val organizationName: String? = null,
   /** Up to 5 recently viewed surveys, starting with the active one. */
   val recentSurveys: List<SurveyPreviewItem> = emptyList(),
-  /** Whether the signed-in user may open the Survey editor and change the survey's lifecycle. */
+  /** Whether the signed-in user may open the Survey editor. */
   val canManageSurvey: Boolean = false,
   /** Whether the signed-in user can collect data in the survey. */
   val canCollectData: Boolean = false,
-  val hasUnpublishedChanges: Boolean = false,
 )

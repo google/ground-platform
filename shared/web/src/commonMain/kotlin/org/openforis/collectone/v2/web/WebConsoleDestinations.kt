@@ -220,7 +220,6 @@ private fun WebConsoleHeader(
  */
 @Composable
 internal fun rememberWebSurveyToolbarUiState(web: WebAppState): WebSurveyToolbarUiState {
-  val surveyEditorUiState by sessionViewModel<SurveyEditorViewModel>().uiState.collectAsState()
   val organizationUiState by sessionViewModel<OrganizationViewModel>().uiState.collectAsState()
   val appData by web.dataHolder.appData.collectAsState()
   val access = collectActiveSurveyAccess(web.viewModels, web.dataHolder.appData)
@@ -231,7 +230,6 @@ internal fun rememberWebSurveyToolbarUiState(web: WebAppState): WebSurveyToolbar
     recentSurveys = web.recentSurveys(appData),
     canManageSurvey = access.canManageSurvey(organizationUiState.isPlatformAdmin),
     canCollectData = access.canCollectData,
-    hasUnpublishedChanges = surveyEditorUiState.hasUnpublishedChanges,
   )
 }
 
@@ -626,7 +624,6 @@ internal fun WebDashboardDestination(
   val viewModels = web.viewModels
   val timeSeries = sessionTimeSeriesViewModel(viewModels.surveyMap)
   val impact = sessionViewModel<ImpactViewModel>()
-  val surveyEditor = sessionViewModel<SurveyEditorViewModel>()
   val records =
     collectSurveyRecordsUiStates(
       viewModels = viewModels,
@@ -661,7 +658,6 @@ internal fun WebDashboardDestination(
         dataCollection = records.dataCollection,
         dataCollectionActions = guarded.toolbarDataCollection,
         hasMapLayers = hasMapLayers,
-        onSelectLifecycleState = surveyEditor::setLifecycleState,
         onSignOut = { guarded.exitGuard.guardNavigation(onSignOut) },
       )
     },
@@ -765,8 +761,6 @@ private fun DashboardTopToolbar(
   dataCollectionActions: org.openforis.collectone.v2.app.ui.datacollection.DataCollectionActions =
     web.viewModels.dataCollection,
   hasMapLayers: Boolean,
-  onSelectLifecycleState:
-    (org.openforis.collectone.v2.app.domain.model.SurveyLifecycleState) -> Unit,
   onSignOut: () -> Unit,
 ) {
   val viewModels = web.viewModels
@@ -779,7 +773,6 @@ private fun DashboardTopToolbar(
     dataCollection = dataCollection,
     dataCollectionActions = dataCollectionActions,
     onOpenSurvey = { surveyId -> navigation.open(SurveyDashboardRoute(surveyId)) },
-    onSelectLifecycleState = onSelectLifecycleState,
     onOpenSurveyEditor = {
       navigation.open(SurveyEditorRoute(web.dataHolder.appData.value.activeSurveyId))
     },

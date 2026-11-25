@@ -63,7 +63,6 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.SaveStatus
-import org.openforis.collectone.v2.app.domain.model.SurveyLifecycleState
 import org.openforis.collectone.v2.app.ui.common.CloudAcaciaLogo
 import org.openforis.collectone.v2.app.ui.common.DemoBadge
 import org.openforis.collectone.v2.app.ui.common.UserAvatarProfileMenu
@@ -90,12 +89,14 @@ import org.openforis.collectone.v2.web.ui.common.WebHeaderSupportingText
 import org.openforis.collectone.v2.web.ui.common.openExternalUrl
 import org.openforis.collectone.v2.web.ui.common.platformMobileWebUrl
 import org.openforis.collectone.v2.web.ui.datacollection.WebCollectDataMenuButton
-import org.openforis.collectone.v2.web.ui.surveyeditor.SurveyStatusBadgeMenu
+import org.openforis.collectone.v2.web.ui.surveyeditor.SurveyStatusBadge
 
 /**
  * Top navigation and context toolbar for the Collect One Web dashboard: the shared [WebAppHeader]
- * showing the active survey (a [WebSurveySwitcher] dropdown) with its organization and location,
- * and "Manage survey" and "Collect data" ([WebCollectDataMenuButton]) actions.
+ * showing the active survey (a [WebSurveySwitcher] dropdown) with its organization, location, and
+ * status ([SurveyStatusBadge], read-only), and "Manage survey" and "Collect data"
+ * ([WebCollectDataMenuButton]) actions. The survey's status is changed in the Survey editor that
+ * "Manage survey" opens.
  */
 @Composable
 internal fun WebTopToolbar(
@@ -105,7 +106,6 @@ internal fun WebTopToolbar(
   dataCollection: DataCollectionUiState,
   dataCollectionActions: DataCollectionActions,
   onOpenSurvey: (surveyId: String) -> Unit,
-  onSelectLifecycleState: (SurveyLifecycleState) -> Unit,
   onOpenSurveyEditor: () -> Unit,
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
@@ -139,12 +139,8 @@ internal fun WebTopToolbar(
           )
           WebHeaderSupportingText(survey.activeSurvey.location)
         }
-        SurveyStatusBadgeMenu(
-          lifecycleState = survey.activeSurvey.state,
-          canManageSurvey = survey.canManageSurvey,
-          hasUnpublishedChanges = survey.hasUnpublishedChanges,
-          onSelectState = onSelectLifecycleState,
-        )
+        // Status only: publishing, closing, and archiving live in the Survey editor.
+        SurveyStatusBadge(lifecycleState = survey.activeSurvey.state)
       }
     },
     actions = {

@@ -187,9 +187,22 @@ internal fun lifecycleActionOptions(
   }
 
 /**
- * Tonal status pill shown next to the survey title in the top banner (`Draft`, `Published`,
+ * Read-only tonal status pill (`Draft`, `Published`, `Closed`, `Archived`), for places that show a
+ * survey's status without managing it, such as the dashboard's top banner.
+ */
+@Composable
+fun SurveyStatusBadge(lifecycleState: SurveyLifecycleState, modifier: Modifier = Modifier) {
+  TonalBadge(
+    text = stringResource(lifecycleState.labelRes),
+    tone = lifecycleState.badgeTone(),
+    modifier = modifier,
+  )
+}
+
+/**
+ * Tonal status pill shown next to the survey title in the Survey editor (`Draft`, `Published`,
  * `Closed`, `Archived`). When [canManageSurvey] is `true`, clicking it opens a dropdown menu with
- * options to publish or change the survey's lifecycle state.
+ * options to publish or change the survey's lifecycle state; otherwise it is a [SurveyStatusBadge].
  */
 @Composable
 fun SurveyStatusBadgeMenu(
@@ -209,11 +222,7 @@ fun SurveyStatusBadgeMenu(
     )
 
   if (!canManageSurvey || options.isEmpty()) {
-    TonalBadge(
-      text = stringResource(lifecycleState.labelRes),
-      tone = lifecycleState.badgeTone(),
-      modifier = modifier,
-    )
+    SurveyStatusBadge(lifecycleState = lifecycleState, modifier = modifier)
     return
   }
 
