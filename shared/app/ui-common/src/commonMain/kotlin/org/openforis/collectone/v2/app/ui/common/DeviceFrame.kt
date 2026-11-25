@@ -48,6 +48,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -106,6 +108,10 @@ val LocalMobileTopInset = compositionLocalOf { 0.dp }
  * rendered behind the frame shows through). When [isTopInsetTransparent] is `true`, the top status
  * bar is overlaid with a semi-transparent scrim on top of [content] and its height is provided via
  * [LocalMobileTopInset].
+ *
+ * [statusBarColor] and [gestureBarColor] replace the frame's own bar colors, for a host whose
+ * screens continue their containers behind the system bars; [Color.Transparent] lets [content] (or
+ * what is behind the frame) show through.
  */
 @Composable
 fun DeviceFrame(
@@ -114,6 +120,8 @@ fun DeviceFrame(
   orientation: DeviceOrientation = formFactor.defaultOrientation,
   isScreenTransparent: Boolean = false,
   isTopInsetTransparent: Boolean = isScreenTransparent,
+  statusBarColor: Color? = null,
+  gestureBarColor: Color? = null,
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit,
 ) {
@@ -157,15 +165,11 @@ fun DeviceFrame(
             Box(modifier = Modifier.fillMaxSize().padding(top = contentTopPadding)) { content() }
           }
 
-          // Device Status Bar
-          Surface(
-            color =
-              if (isTopInsetTransparent) {
-                MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.65f)
-              } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-              },
-            contentColor = MaterialTheme.colorScheme.onSurface,
+          DeviceStatusBar(
+            formFactor = formFactor,
+            orientation = orientation,
+            color = statusBarColor,
+            isOverContent = isTopInsetTransparent,
             modifier =
               Modifier.align(Alignment.TopCenter).fillMaxWidth().onSizeChanged { size ->
                 val measuredHeight = with(density) { size.height.toDp() }
@@ -173,74 +177,106 @@ fun DeviceFrame(
                   statusBarHeight = measuredHeight
                 }
               },
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically,
-            ) {
-              Text(
-                text =
-                  if (
-                    formFactor == DeviceFormFactor.TABLET ||
-                      orientation == DeviceOrientation.LANDSCAPE
-                  ) {
-                    "09:41 • Wed Sep 19"
-                  } else {
-                    "09:41"
-                  },
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-              )
-              // Camera punch-hole notch (Mobile) or slim landscape bezel sensor (Tablet)
-              if (formFactor == DeviceFormFactor.MOBILE) {
-                Box(
-                  modifier =
-                    Modifier.width(68.dp)
-                      .height(11.dp)
-                      .clip(CircleShape)
-                      .background(Color(0xFF061B12))
-                )
-              } else {
-                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12)))
-              }
-              Text(
-                text = "5G • 100%",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-              )
-            }
-          }
+          )
         }
 
-        // Bottom Gesture Navigation Bar
-        Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          Box(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp),
-            contentAlignment = Alignment.Center,
-          ) {
-            Box(
-              modifier =
-                Modifier.width(
-                    if (
-                      formFactor == DeviceFormFactor.TABLET ||
-                        orientation == DeviceOrientation.LANDSCAPE
-                    ) {
-                      160.dp
-                    } else {
-                      116.dp
-                    }
-                  )
-                  .height(4.dp)
-                  .clip(CircleShape)
-                  .background(MaterialTheme.colorScheme.outline)
-            )
-          }
-        }
+        DeviceGestureBar(
+          formFactor = formFactor,
+          orientation = orientation,
+          color = gestureBarColor,
+        )
       }
+    }
+  }
+}
+
+/**
+ * The simulated status bar: clock, camera, and signal. [color] replaces its own color, which is a
+ * scrim when it is [isOverContent] (laid over the screen) and opaque otherwise.
+ */
+@Composable
+private fun DeviceStatusBar(
+  formFactor: DeviceFormFactor,
+  orientation: DeviceOrientation,
+  color: Color?,
+  isOverContent: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  val container =
+    color
+      ?: if (isOverContent) {
+        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.65f)
+      } else {
+        MaterialTheme.colorScheme.surfaceContainerHighest
+      }
+  Surface(
+    color = container,
+    contentColor = contentColorFor(container).takeOrElse { MaterialTheme.colorScheme.onSurface },
+    modifier = modifier,
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text(
+        text =
+          if (formFactor == DeviceFormFactor.TABLET || orientation == DeviceOrientation.LANDSCAPE) {
+            "09:41 • Wed Sep 19"
+          } else {
+            "09:41"
+          },
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+      )
+      // Camera punch-hole notch (Mobile) or slim landscape bezel sensor (Tablet)
+      if (formFactor == DeviceFormFactor.MOBILE) {
+        Box(
+          modifier =
+            Modifier.width(68.dp).height(11.dp).clip(CircleShape).background(Color(0xFF061B12))
+        )
+      } else {
+        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF061B12)))
+      }
+      Text(
+        text = "5G • 100%",
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.SemiBold,
+      )
+    }
+  }
+}
+
+/** The simulated gesture navigation bar. [color] replaces its own color. */
+@Composable
+private fun DeviceGestureBar(
+  formFactor: DeviceFormFactor,
+  orientation: DeviceOrientation,
+  color: Color?,
+) {
+  Surface(
+    color = color ?: MaterialTheme.colorScheme.surfaceContainer,
+    modifier = Modifier.fillMaxWidth(),
+  ) {
+    Box(
+      modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp),
+      contentAlignment = Alignment.Center,
+    ) {
+      Box(
+        modifier =
+          Modifier.width(
+              if (
+                formFactor == DeviceFormFactor.TABLET || orientation == DeviceOrientation.LANDSCAPE
+              ) {
+                160.dp
+              } else {
+                116.dp
+              }
+            )
+            .height(4.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.outline)
+      )
     }
   }
 }
@@ -259,6 +295,8 @@ fun DevicePreviewFrame(
   isDarkTheme: Boolean,
   isScreenTransparent: Boolean = false,
   isTopInsetTransparent: Boolean = isScreenTransparent,
+  statusBarColor: Color? = null,
+  gestureBarColor: Color? = null,
   formFactor: DeviceFormFactor = DeviceFormFactor.MOBILE,
   orientation: DeviceOrientation = formFactor.defaultOrientation,
   onSelectFormFactor: (DeviceFormFactor) -> Unit = {},
@@ -283,6 +321,8 @@ fun DevicePreviewFrame(
       orientation = orientation,
       isScreenTransparent = isScreenTransparent,
       isTopInsetTransparent = isTopInsetTransparent,
+      statusBarColor = statusBarColor,
+      gestureBarColor = gestureBarColor,
       content = content,
     )
 

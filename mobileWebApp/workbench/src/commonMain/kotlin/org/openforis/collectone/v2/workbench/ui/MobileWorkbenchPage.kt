@@ -43,6 +43,8 @@ import org.openforis.collectone.v2.core.forms.ui.AppTheme
 import org.openforis.collectone.v2.core.forms.ui.LocalGeoLocationSource
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.mobile.MobileApp
+import org.openforis.collectone.v2.mobile.MobileTouchFeedback
+import org.openforis.collectone.v2.mobile.mobileSystemBarColors
 import org.openforis.collectone.v2.mobile.ui.navigation.appScreen
 import org.openforis.collectone.v2.mobile.ui.onboarding.MobileScreenHost
 
@@ -179,6 +181,8 @@ fun MobileWorkbenchPage(
   @Suppress("DEPRECATION") val clipboardManager = LocalClipboardManager.current
   val apkUrl = apkDownloadUrl(hostOrigin)
   val iosUrl = iosDownloadUrl(hostOrigin)
+  // The device frame draws the system bars, in the colors the mobile app paints behind real ones.
+  val systemBarColors = mobileSystemBarColors(mobile)
 
   Box(
     modifier =
@@ -194,6 +198,8 @@ fun MobileWorkbenchPage(
       isDarkTheme = settingsUiState.isDarkTheme,
       isScreenTransparent = isMapShowing,
       isTopInsetTransparent = mobile.isMainMapScreenShowing(dataCollectionUiState),
+      statusBarColor = systemBarColors.top,
+      gestureBarColor = systemBarColors.bottom,
       formFactor = uiState.deviceFormFactor,
       orientation = uiState.deviceOrientation,
       onSelectFormFactor = workbench::selectDeviceFormFactor,
@@ -214,7 +220,8 @@ fun MobileWorkbenchPage(
           { clipboardManager.setText(AnnotatedString(iosUrl)) }
         } else null,
     ) {
-      MobileScreenHost(mobile)
+      // The screens are touch screens here too, although a mouse drives the simulated device.
+      MobileTouchFeedback { MobileScreenHost(mobile) }
     }
   }
 }

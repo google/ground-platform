@@ -47,9 +47,9 @@ import androidx.navigation.compose.rememberNavController
 import org.openforis.collectone.v2.app.ui.common.LocalMobileTopInset
 import org.openforis.collectone.v2.app.ui.common.ProvideAppLocale
 import org.openforis.collectone.v2.core.forms.ui.AppTheme
+import org.openforis.collectone.v2.core.forms.ui.LocalInteractivePointerIcon
 import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.mobile.ui.MobileAppState
-import org.openforis.collectone.v2.mobile.ui.navigation.MobileRoute
 import org.openforis.collectone.v2.mobile.ui.onboarding.MobileScreenHost
 
 /**
@@ -93,13 +93,7 @@ fun MobileApp(
             if (state.isMapShowing(dataCollectionUiState)) Color.Transparent
             else MaterialTheme.colorScheme.surface,
         ) {
-          val offlineAreaSelection by state.offlineAreaSelection.uiState.collectAsState()
-          val backdrops =
-            mobileSystemBarBackdrops(
-              isMainMapScreenShowing = state.isMainMapScreenShowing(dataCollectionUiState),
-              isSelectingOfflineArea = offlineAreaSelection.isActive,
-              isDataCollectionFormShowing = state.currentRoute == MobileRoute.DataCollection,
-            )
+          val backdrops = currentSystemBarBackdrops(state, dataCollectionUiState)
           val safeDrawingInsets = WindowInsets.safeDrawing
           val isTopInsetTransparent = backdrops.top == SystemBarBackdrop.MAP
           val topInsetPadding =
@@ -148,6 +142,21 @@ fun MobileApp(
       }
     }
   }
+}
+
+/**
+ * Turns hover feedback (the pointing-hand cursor and the hover highlight around controls) off for
+ * [content]. [MobileApp] does this itself; hosts that show the mobile app's screens in their own
+ * frame (a simulated device in a browser) wrap the screens in this, so they behave as on a phone.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MobileTouchFeedback(content: @Composable () -> Unit) {
+  CompositionLocalProvider(
+    LocalInteractivePointerIcon provides PointerIcon.Default,
+    LocalRippleConfiguration provides TouchRippleConfiguration,
+    content = content,
+  )
 }
 
 /**

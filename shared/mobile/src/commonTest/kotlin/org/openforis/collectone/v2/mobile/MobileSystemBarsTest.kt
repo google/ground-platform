@@ -19,13 +19,26 @@ import kotlin.test.assertEquals
 
 class MobileSystemBarsTest {
   @Test
-  fun mainMap_showsTheMapBehindTheStatusBarAndTheSheetBehindTheNavigationBar() {
+  fun mainMap_showsItsContentBehindTheStatusBarAndTheSheetBehindTheNavigationBar() {
     assertEquals(
       SystemBarBackdrops(top = SystemBarBackdrop.MAP, bottom = SystemBarBackdrop.SHEET),
       mobileSystemBarBackdrops(
         isMainMapScreenShowing = true,
         isSelectingOfflineArea = false,
-        isDataCollectionFormShowing = false,
+        openForm = null,
+      ),
+    )
+  }
+
+  @Test
+  fun mainMap_underAFeaturesHistory_continuesTheHistorySurfaceBehindTheNavigationBar() {
+    assertEquals(
+      SystemBarBackdrops(top = SystemBarBackdrop.MAP, bottom = SystemBarBackdrop.SURFACE),
+      mobileSystemBarBackdrops(
+        isMainMapScreenShowing = true,
+        isSelectingOfflineArea = false,
+        openForm = null,
+        isFeatureHistoryShowing = true,
       ),
     )
   }
@@ -37,19 +50,49 @@ class MobileSystemBarsTest {
       mobileSystemBarBackdrops(
         isMainMapScreenShowing = true,
         isSelectingOfflineArea = true,
-        isDataCollectionFormShowing = false,
+        openForm = null,
       ),
     )
   }
 
   @Test
-  fun dataCollectionForm_continuesItsBackgroundBehindBothBars() {
+  fun dataCollectionForm_continuesItsBannerAndItsActionBarBehindTheBars() {
     assertEquals(
-      SystemBarBackdrops(top = SystemBarBackdrop.FORM, bottom = SystemBarBackdrop.FORM),
+      SystemBarBackdrops(
+        top = SystemBarBackdrop.FORM_BANNER,
+        bottom = SystemBarBackdrop.FORM_ACTIONS,
+      ),
       mobileSystemBarBackdrops(
         isMainMapScreenShowing = false,
         isSelectingOfflineArea = false,
-        isDataCollectionFormShowing = true,
+        openForm = FormEdges(),
+      ),
+    )
+  }
+
+  @Test
+  fun dataCollectionForm_onTheFeaturePickerStep_continuesThePickerActionsBehindTheNavigationBar() {
+    assertEquals(
+      SystemBarBackdrops(
+        top = SystemBarBackdrop.FORM_BANNER,
+        bottom = SystemBarBackdrop.PICKER_ACTIONS,
+      ),
+      mobileSystemBarBackdrops(
+        isMainMapScreenShowing = false,
+        isSelectingOfflineArea = false,
+        openForm = FormEdges(isFeaturePickerStep = true),
+      ),
+    )
+  }
+
+  @Test
+  fun dataCollectionForm_onceSubmitted_continuesTheSuccessScreenSurfaceBehindBothBars() {
+    assertEquals(
+      SystemBarBackdrops(top = SystemBarBackdrop.SURFACE, bottom = SystemBarBackdrop.SURFACE),
+      mobileSystemBarBackdrops(
+        isMainMapScreenShowing = false,
+        isSelectingOfflineArea = false,
+        openForm = FormEdges(isSubmissionConfirmationShown = true),
       ),
     )
   }
@@ -61,7 +104,7 @@ class MobileSystemBarsTest {
       mobileSystemBarBackdrops(
         isMainMapScreenShowing = false,
         isSelectingOfflineArea = false,
-        isDataCollectionFormShowing = false,
+        openForm = null,
       ),
     )
   }
@@ -73,7 +116,7 @@ class MobileSystemBarsTest {
       mobileSystemBarBackdrops(
         isMainMapScreenShowing = false,
         isSelectingOfflineArea = true,
-        isDataCollectionFormShowing = false,
+        openForm = null,
       ),
     )
   }
