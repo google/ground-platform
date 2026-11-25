@@ -1399,6 +1399,7 @@ private fun TextCell(
   val focusRequester = remember { FocusRequester() }
   var hadFocus by remember { mutableStateOf(false) }
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
+  @Suppress("DEPRECATION")
   BasicTextField(
     value = value,
     onValueChange = onValueChange,

@@ -27,10 +27,10 @@ kotlin {
     val commonMain by getting {
       dependencies {
         implementation(projects.shared.web)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
-        implementation(compose.ui)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
+        implementation(libs.compose.ui)
       }
     }
   }

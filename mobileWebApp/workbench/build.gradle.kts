@@ -26,10 +26,10 @@ kotlin {
       dependencies {
         api(projects.shared.mobile)
         implementation(projects.shared.ui.testing)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
-        implementation(compose.ui)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
+        implementation(libs.compose.ui)
         implementation(libs.compose.material.icons.core)
         implementation(libs.compose.material.icons.extended)
       }
@@ -44,7 +44,6 @@ kotlin {
       dependencies {
         implementation(kotlin("test-junit5"))
         implementation(libs.konsist)
-        implementation(compose.desktop.currentOs)
       }
     }
   }

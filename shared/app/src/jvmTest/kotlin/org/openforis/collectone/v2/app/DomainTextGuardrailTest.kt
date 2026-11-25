@@ -135,7 +135,7 @@ class DomainTextGuardrailTest {
       primaryConstructor
         ?.parameters
         .orEmpty()
-        .filter { it.hasValModifier || it.hasVarModifier }
+        .filter { it.isVal || it.isVar }
         .filter { it.type.name.removeSuffix("?") == "String" }
         .map { it.name }
     val bodyProperties =

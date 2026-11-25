@@ -201,7 +201,7 @@ class SurveyMutationsTest {
     )
     assertEquals(
       listOf("slope", "aspect"),
-      form.view!!.components[1].group!!.components.map { it.control?.field_ref },
+      form.view.components[1].group!!.components.map { it.control?.field_ref },
     )
   }
 
@@ -273,7 +273,7 @@ class SurveyMutationsTest {
     val english = model.translations!!.languages.single { it.language == "en" }
     assertEquals(setOf("a", "b"), english.strings.keys)
     assertEquals(true, english.is_default)
-    assertEquals(listOf("en", "fr"), model.translations!!.languages.map { it.language })
+    assertEquals(listOf("en", "fr"), model.translations.languages.map { it.language })
   }
 
   @Test

@@ -31,7 +31,6 @@ import org.openforis.collectone.v2.app.di.AppDataHolder
 import org.openforis.collectone.v2.app.domain.model.Organization
 import org.openforis.collectone.v2.app.domain.model.OrganizationRole
 import org.openforis.collectone.v2.app.domain.model.OrganizationType
-import org.openforis.collectone.v2.app.domain.model.QuotaLimitsConfig
 import org.openforis.collectone.v2.app.domain.model.editor.EditorQuestionType
 import org.openforis.collectone.v2.app.domain.model.editor.FormPreviewTarget
 import org.openforis.collectone.v2.app.domain.model.editor.GeometryCapture
@@ -876,8 +875,8 @@ class CreateSurveyWizardViewModelTest {
     )
     assertEquals(2, uiAfterImport.importedXForms?.form?.questions?.size)
     val yearQuestion = uiAfterImport.importedXForms?.form?.questions?.get(1)
-    assertNotNull(yearQuestion?.relevance)
-    assertEquals("yes", yearQuestion?.relevance?.value)
+    val yearRelevance = assertNotNull(yearQuestion?.relevance)
+    assertEquals("yes", yearRelevance.value)
     assertEquals(2, uiAfterImport.selectedCepProject?.plotDataset?.rows?.size)
     assertNotNull(uiAfterImport.surveyArea)
 
@@ -894,7 +893,7 @@ class CreateSurveyWizardViewModelTest {
     runDirect {
       dataHolder.localStore.transaction {
         updateOrganization(Organization.ALL_USERS_ID) { org ->
-          val currentLimits = org.quotaLimits ?: QuotaLimitsConfig.BASIC
+          val currentLimits = org.quotaLimits
           org.copy(
             quotaLimits = currentLimits.copy(maxSurveysPerOwner = 1),
             // The sample user is a platform admin, who isn't limited; make them a regular user.
@@ -920,7 +919,7 @@ class CreateSurveyWizardViewModelTest {
     val dataHolder = sampleDataHolder()
     runDirect {
       dataHolder.organizationRepository.updateOrganization(Organization.ALL_USERS_ID) { org ->
-        val currentLimits = org.quotaLimits ?: QuotaLimitsConfig.BASIC
+        val currentLimits = org.quotaLimits
         org.copy(quotaLimits = currentLimits.copy(maxSurveysPerOwner = 1))
       }
     }
@@ -1029,7 +1028,7 @@ class CreateSurveyWizardViewModelTest {
         }
       }
       val serverSaved = assertNotNull(serverAfterPublish?.saved)
-      assertNull(serverAfterPublish?.workingCopy)
+      assertNull(serverAfterPublish.workingCopy)
       assertTrue(serverSaved.forms.isNotEmpty())
       assertTrue(serverSaved.map_config?.layers.orEmpty().isNotEmpty())
       assertEquals(

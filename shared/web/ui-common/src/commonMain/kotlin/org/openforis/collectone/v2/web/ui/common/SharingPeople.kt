@@ -331,7 +331,8 @@ fun PendingInviteLinkRow(
   onResetLink: (() -> Unit)? = null,
   onOpenAsInvitee: (() -> Unit)? = null,
 ) {
-  val clipboard = LocalClipboardManager.current
+  // LocalClipboard has no commonMain ClipEntry factory yet.
+  @Suppress("DEPRECATION") val clipboard = LocalClipboardManager.current
   var copied by remember(token) { mutableStateOf(false) }
   val url = InviteLinks.url(token)
   Column(modifier = Modifier.padding(top = 4.dp)) {

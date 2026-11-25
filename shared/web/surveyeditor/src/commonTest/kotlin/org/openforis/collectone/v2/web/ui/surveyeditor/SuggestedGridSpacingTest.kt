@@ -46,10 +46,6 @@ class SuggestedGridSpacingTest {
     )
   }
 
-  private fun SurveyEditorViewModel.setSurveyArea(area: SurveyArea) = updateDetails {
-    it.copy(surveyArea = area)
-  }
-
   private fun SurveyEditorViewModel.design(key: String) =
     ui.datasets.first { it.key == key }.generator!!
 

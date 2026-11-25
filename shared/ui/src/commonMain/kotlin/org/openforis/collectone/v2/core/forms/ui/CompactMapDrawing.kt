@@ -314,7 +314,7 @@ fun MapDrawingRequestWidget(
       verticalAlignment = Alignment.CenterVertically,
     ) {
       if (isDrawing) {
-        Button(onClick = { host?.stopDrawing() }, enabled = interactive && isComplete) {
+        Button(onClick = { host.stopDrawing() }, enabled = interactive && isComplete) {
           Text(stringResource(Res.string.forms_done))
         }
         OutlinedButton(

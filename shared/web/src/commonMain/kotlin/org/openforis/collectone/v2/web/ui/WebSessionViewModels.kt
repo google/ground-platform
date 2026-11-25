@@ -58,6 +58,8 @@ val LocalWebSessionViewModelStoreOwner =
  */
 @Composable
 fun ProvideWebSession(state: WebAppState, content: @Composable () -> Unit) {
+  // Provides this session's isolated Koin instance rather than a global startKoin() graph.
+  @Suppress("DEPRECATION")
   KoinContext(state.dataHolder.koin) {
     CompositionLocalProvider(
       LocalWebSessionViewModelStoreOwner provides state.sessionViewModels,

@@ -166,6 +166,7 @@ private fun ListSearchField(
       OutlinedTextFieldDefaults.contentPadding()
     }
 
+  @Suppress("DEPRECATION")
   BasicTextField(
     value = query,
     onValueChange = onQueryChange,

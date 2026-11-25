@@ -39,7 +39,7 @@ kotlin {
         implementation(libs.koin.core.viewmodel)
         // The Compose compiler infers the stability of the UI state the views consume, as it did
         // in :shared:app.
-        implementation(compose.runtime)
+        implementation(libs.compose.runtime)
       }
     }
     val commonTest by getting {

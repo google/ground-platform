@@ -16,7 +16,7 @@ package org.openforis.collectone.v2.web.ui.organization
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import java.util.Locale
 import kotlin.test.Test
 import org.openforis.collectone.v2.app.domain.model.Organization

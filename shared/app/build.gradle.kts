@@ -42,13 +42,13 @@ kotlin {
         api(projects.shared.core)
         api(projects.shared.ui)
         api(projects.shared.map)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
         implementation(libs.compose.material.icons.core)
         implementation(libs.compose.material.icons.extended)
-        implementation(compose.ui)
-        implementation(compose.components.resources)
+        implementation(libs.compose.ui)
+        implementation(libs.compose.components.resources)
         // Lifecycle-aware ViewModels (viewModelScope, SavedStateHandle) and Koin dependency
         // injection, exposed to the clients and hosts that build on this module.
         api(libs.jetbrains.lifecycle.viewmodel)
@@ -71,9 +71,7 @@ kotlin {
         implementation(kotlin("reflect"))
         implementation(libs.koin.test)
         // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
-        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-        implementation(compose.uiTest)
-        implementation(compose.desktop.currentOs)
+        implementation(libs.compose.ui.test)
       }
     }
   }

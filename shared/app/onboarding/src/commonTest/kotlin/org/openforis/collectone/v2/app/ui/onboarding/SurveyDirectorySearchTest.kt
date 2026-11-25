@@ -20,6 +20,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -30,6 +31,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.SurveyAccess
 import org.openforis.collectone.v2.app.domain.repository.ConnectivityRepository
 import org.openforis.collectone.v2.app.domain.repository.SurveyDirectoryRepository
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SurveyDirectorySearchTest {
   /** Records every lookup; [gate], when set, holds lookups until completed. */
   private class RecordingDirectory(private val failure: DomainError? = null) :

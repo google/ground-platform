@@ -44,13 +44,13 @@ kotlin {
         api(projects.shared.core)
         api(projects.shared.ui)
         api(projects.shared.app)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
-        implementation(compose.ui)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
+        implementation(libs.compose.ui)
         implementation(libs.compose.material.icons.core)
         implementation(libs.compose.material.icons.extended)
-        implementation(compose.components.resources)
+        implementation(libs.compose.components.resources)
         // Type-safe Compose navigation between the mobile app's screens.
         api(libs.jetbrains.navigation.compose)
         implementation(libs.jetbrains.navigationevent.compose)
@@ -70,9 +70,7 @@ kotlin {
         implementation(kotlin("test-junit5"))
         implementation(libs.konsist)
         // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
-        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-        implementation(compose.uiTest)
-        implementation(compose.desktop.currentOs)
+        implementation(libs.compose.ui.test)
       }
     }
   }

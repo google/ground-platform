@@ -33,7 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -85,7 +85,7 @@ fun AddDataTableDialog(
   actions: DatasetActions,
   onDismiss: () -> Unit,
   pickTextFile: TextFilePicker = ::openPlatformTextFilePicker,
-  region: String = Locale.current.region,
+  region: String = LocalLocale.current.region,
   library: FormLibraryContext? = null,
   onAddFromTemplate: (templateId: String) -> Unit = {},
 ) {

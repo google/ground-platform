@@ -265,7 +265,7 @@ fun parseBalloonClaimResponse(
   if (httpStatus == 202) return BalloonClaimPollResult.Pending
   val obj = runCatching { balloonJson.parseToJsonElement(responseBody) as? JsonObject }.getOrNull()
   val statusField = obj?.get("status")?.let { runCatching { it.jsonPrimitive.content }.getOrNull() }
-  if (httpStatus == 200 && statusField == "authenticated" && obj != null) {
+  if (httpStatus == 200 && statusField == "authenticated") {
     fun field(name: String): String =
       obj[name]?.let { runCatching { it.jsonPrimitive.content }.getOrNull() }.orEmpty()
     val session =

@@ -21,7 +21,7 @@ kotlin {
   iosArm64()
   iosSimulatorArm64()
 
-  js(IR) {
+  js {
     browser()
     nodejs()
   }
@@ -32,12 +32,12 @@ kotlin {
     val commonMain by getting {
       dependencies {
         api(projects.shared.core)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
         api(libs.compose.material.icons.core)
-        implementation(compose.ui)
-        implementation(compose.components.resources)
+        implementation(libs.compose.ui)
+        implementation(libs.compose.components.resources)
       }
     }
     val commonTest by getting {
@@ -50,9 +50,7 @@ kotlin {
       dependencies {
         implementation(kotlin("test-junit5"))
         // Headless Compose UI tests (runComposeUiTest) for the form widgets and runners.
-        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-        implementation(compose.uiTest)
-        implementation(compose.desktop.currentOs)
+        implementation(libs.compose.ui.test)
       }
     }
   }

@@ -128,6 +128,7 @@ internal fun MobileMapSearchBar(
             overflow = TextOverflow.Ellipsis,
           )
         }
+        @Suppress("DEPRECATION")
         BasicTextField(
           value = query,
           onValueChange = {

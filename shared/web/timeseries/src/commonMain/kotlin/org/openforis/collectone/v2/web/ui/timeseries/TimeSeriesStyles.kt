@@ -14,6 +14,7 @@
 package org.openforis.collectone.v2.web.ui.timeseries
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.Flare
 import androidx.compose.material.icons.outlined.Forest
@@ -25,7 +26,6 @@ import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Park
 import androidx.compose.material.icons.outlined.Radar
 import androidx.compose.material.icons.outlined.SatelliteAlt
-import androidx.compose.material.icons.outlined.ShowChart
 import androidx.compose.material.icons.outlined.Spa
 import androidx.compose.material.icons.outlined.Terrain
 import androidx.compose.material.icons.outlined.WaterDrop
@@ -246,7 +246,7 @@ internal object TimeSeriesStyles {
   private val UNKNOWN_BAND =
     BandStyle(
       BandGroup.INDICES,
-      Icons.Outlined.ShowChart,
+      Icons.AutoMirrored.Outlined.ShowChart,
       ThemedColor(Color(0xFF546E7A), Color(0xFFB0BEC5)),
       detail = null,
     )

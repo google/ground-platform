@@ -19,6 +19,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
@@ -29,6 +30,7 @@ import org.openforis.collectone.v2.app.domain.model.OfflineImageryType
 import org.openforis.collectone.v2.app.domain.model.OfflineRegionMode
 import org.openforis.collectone.v2.map.LngLatBounds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SimulatedOfflineRegionClientTest {
   /** About 7 × 7 km around the equator and the prime meridian, inside one zoom 6 tile. */
   private val bounds = LngLatBounds(0.01, 0.01, 0.07, 0.07)

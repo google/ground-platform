@@ -195,7 +195,7 @@ internal fun WebDataCollectionCard(
           .verticalScroll(rememberScrollState())
           .padding(16.dp)
     ) {
-      if (needsEntity && form != null) {
+      if (needsEntity) {
         WebEntityRefPicker(uiState = uiState, actions = actions, form = form)
       } else {
         val mediaCaptureHandler = remember { PlatformMediaCaptureHandler() }

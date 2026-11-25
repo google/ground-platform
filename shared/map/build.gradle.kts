@@ -25,9 +25,9 @@ kotlin {
     val commonMain by getting {
       dependencies {
         api(projects.shared.map.geometry)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.ui)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.ui)
         implementation(libs.kotlinx.serialization.json)
         implementation(libs.kermit)
       }
@@ -42,9 +42,7 @@ kotlin {
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
-        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-        implementation(compose.uiTest)
-        implementation(compose.desktop.currentOs)
+        implementation(libs.compose.ui.test)
       }
     }
   }

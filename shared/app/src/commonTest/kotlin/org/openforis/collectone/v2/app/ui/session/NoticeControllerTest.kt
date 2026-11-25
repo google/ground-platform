@@ -17,6 +17,7 @@ package org.openforis.collectone.v2.app.ui.session
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -24,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import org.openforis.collectone.v2.app.ui.text.UiText
 
 /** A localized notice that is still being resolved never overrides a later notice or clear. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class NoticeControllerTest {
   private val dispatcher = StandardTestDispatcher()
   private val notices = NoticeController(TestScope(dispatcher))

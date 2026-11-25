@@ -29,7 +29,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -55,7 +55,7 @@ class ImpactDashboardPageTest {
             uiState = uiState,
             actions = f.viewModel,
             sidePanelWidthDp = 260f,
-            onSidePanelWidthChange = { _ -> Unit },
+            onSidePanelWidthChange = { _ -> },
             header = { onChoose -> TextButton(onClick = onChoose) { Text("Header Choose") } },
             onOpenOrganization = { openedOrganizationId = it },
           )
@@ -101,7 +101,7 @@ class ImpactDashboardPageTest {
             uiState = uiState,
             actions = f.viewModel,
             sidePanelWidthDp = 260f,
-            onSidePanelWidthChange = { _ -> Unit },
+            onSidePanelWidthChange = { _ -> },
             header = { onChoose -> TextButton(onClick = onChoose) { Text("Header Choose") } },
           )
         }
@@ -147,10 +147,10 @@ class ImpactDashboardPageTest {
               SurveyImpactPane(
                 summary = belowThreshold,
                 isLoading = false,
-                onDownload = { Unit },
+                onDownload = {},
               )
-            2 -> SurveyImpactPane(summary = null, isLoading = true, onDownload = { Unit })
-            else -> SurveyImpactPane(summary = null, isLoading = false, onDownload = { Unit })
+            2 -> SurveyImpactPane(summary = null, isLoading = true, onDownload = {})
+            else -> SurveyImpactPane(summary = null, isLoading = false, onDownload = {})
           }
         }
       }

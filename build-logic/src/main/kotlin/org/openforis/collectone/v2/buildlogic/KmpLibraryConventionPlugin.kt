@@ -37,6 +37,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
       useModuleGroup()
       val serverOnly = isServerOnly()
       extensions.configure<KotlinMultiplatformExtension> {
+        compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
         jvm {
           compilerOptions { jvmTarget.set(AndroidConfig.jvmTarget) }
           testRuns.named("test") { executionTask.configure { useJUnitPlatform() } }

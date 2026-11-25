@@ -29,12 +29,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.FactCheck
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.Carpenter
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.FactCheck
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Forest
 import androidx.compose.material.icons.outlined.Groups
@@ -145,7 +145,7 @@ fun purposePackIcon(name: String): ImageVector =
     "verified" -> Icons.Outlined.Verified
     "forest" -> Icons.Outlined.Forest
     "person_add" -> Icons.Outlined.PersonAdd
-    "fact_check" -> Icons.Outlined.FactCheck
+    "fact_check" -> Icons.AutoMirrored.Outlined.FactCheck
     "layers" -> Icons.Outlined.Layers
     "public" -> Icons.Outlined.Public
     "shield" -> Icons.Outlined.Shield

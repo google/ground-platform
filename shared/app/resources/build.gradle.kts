@@ -31,8 +31,8 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        api(compose.runtime)
-        api(compose.components.resources)
+        api(libs.compose.runtime)
+        api(libs.compose.components.resources)
       }
     }
   }

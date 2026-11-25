@@ -16,7 +16,7 @@ package org.openforis.collectone.v2.mobile.ui.onboarding
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlin.test.Test
 import org.openforis.collectone.v2.app.ui.onboarding.OnboardingActions
 import org.openforis.collectone.v2.app.ui.onboarding.OnboardingUiState

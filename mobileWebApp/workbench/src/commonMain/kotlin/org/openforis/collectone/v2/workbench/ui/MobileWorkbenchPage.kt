@@ -175,7 +175,8 @@ fun MobileWorkbenchPage(
   val surveyMap = mobile.viewModels.surveyMap
   val mapUiState by surveyMap.uiState.collectAsState()
   val dataCollectionUiState by mobile.viewModels.dataCollection.uiState.collectAsState()
-  val clipboardManager = LocalClipboardManager.current
+  // LocalClipboard has no commonMain ClipEntry factory yet.
+  @Suppress("DEPRECATION") val clipboardManager = LocalClipboardManager.current
   val apkUrl = apkDownloadUrl(hostOrigin)
   val iosUrl = iosDownloadUrl(hostOrigin)
 

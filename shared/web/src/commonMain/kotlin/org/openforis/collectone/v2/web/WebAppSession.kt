@@ -38,6 +38,8 @@ import org.openforis.collectone.v2.web.ui.WebAppState
  */
 @Composable
 fun WebAppSession(dataHolder: AppDataHolder, content: @Composable (WebAppState) -> Unit) {
+  // Provides this session's isolated Koin instance rather than a global startKoin() graph.
+  @Suppress("DEPRECATION")
   KoinContext(dataHolder.koin) {
     val viewModels = koinAppViewModels(isAlwaysOnline = true)
     val window =

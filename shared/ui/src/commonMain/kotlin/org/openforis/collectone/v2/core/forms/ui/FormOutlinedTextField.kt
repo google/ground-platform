@@ -89,6 +89,7 @@ internal fun FormOutlinedTextField(
       focused -> colors.focusedTextColor
       else -> colors.unfocusedTextColor
     }
+  @Suppress("DEPRECATION")
   BasicTextField(
     value = value,
     onValueChange = onValueChange,

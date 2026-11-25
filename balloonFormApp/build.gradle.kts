@@ -30,11 +30,11 @@ kotlin {
       dependencies {
         implementation(projects.shared.core)
         implementation(projects.shared.ui)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
-        implementation(compose.ui)
-        implementation(compose.components.resources)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
+        implementation(libs.compose.ui)
+        implementation(libs.compose.components.resources)
         implementation(libs.compose.material.icons.extended)
         implementation(libs.jetbrains.lifecycle.viewmodel)
         implementation(libs.kotlinx.serialization.json)
@@ -52,9 +52,7 @@ kotlin {
     val jvmTest by getting {
       dependencies {
         implementation(kotlin("test-junit5"))
-        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-        implementation(compose.uiTest)
-        implementation(compose.desktop.currentOs)
+        implementation(libs.compose.ui.test)
       }
     }
   }

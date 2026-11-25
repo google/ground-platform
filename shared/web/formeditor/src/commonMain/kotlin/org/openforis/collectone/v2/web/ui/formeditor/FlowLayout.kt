@@ -142,7 +142,7 @@ class FlowLayout(
       val slot = qIdx + 1
       val question = form?.questions?.getOrNull(qIdx)
       val sectionId = question?.sectionId.orEmpty()
-      val section = question?.let { form?.section(it.sectionId) }
+      val section = question?.let { form.section(it.sectionId) }
       val relevance = question?.relevance ?: section?.relevance
 
       if (relevance == null || form == null) {

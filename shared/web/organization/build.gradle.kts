@@ -31,11 +31,11 @@ kotlin {
         implementation(projects.shared.web.formeditor)
         // The feature's Koin module (its ViewModel definitions).
         implementation(libs.koin.core.viewmodel)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
-        implementation(compose.ui)
-        implementation(compose.components.resources)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
+        implementation(libs.compose.ui)
+        implementation(libs.compose.components.resources)
         implementation(libs.compose.material.icons.core)
         implementation(libs.compose.material.icons.extended)
       }
@@ -50,9 +50,7 @@ kotlin {
       dependencies {
         implementation(kotlin("test-junit5"))
         // Headless Compose UI tests (runComposeUiTest).
-        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-        implementation(compose.uiTest)
-        implementation(compose.desktop.currentOs)
+        implementation(libs.compose.ui.test)
       }
     }
   }

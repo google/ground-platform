@@ -22,6 +22,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -50,6 +51,7 @@ import org.openforis.collectone.v2.app.testing.FakeClock
 import org.openforis.collectone.v2.map.LatLng
 import org.openforis.collectone.v2.map.LngLatBounds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class OfflineMapRepositoryImplTest {
   private val satellite = OfflineImageryType.SATELLITE
   private val terrain = OfflineImageryType.TERRAIN

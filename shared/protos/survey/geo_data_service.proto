@@ -20,7 +20,6 @@ package openforis.collectone.v1.survey;
 
 import "google/protobuf/duration.proto";
 import "shared/protos/data/geometry.proto";
-import "shared/protos/forms/types.proto";
 
 // Provides geospatial data and dynamic imagery/overlay tile resolution in the
 // context of an authorized survey.

@@ -14,7 +14,7 @@
 package org.openforis.collectone.v2.web.ui.text
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertEquals

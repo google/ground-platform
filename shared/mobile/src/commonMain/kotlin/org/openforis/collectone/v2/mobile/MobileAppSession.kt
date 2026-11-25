@@ -55,6 +55,8 @@ fun MobileAppSession(
   initialRoute: MobileRoute? = null,
   content: @Composable (MobileAppState) -> Unit,
 ) {
+  // Provides this session's isolated Koin instance rather than a global startKoin() graph.
+  @Suppress("DEPRECATION")
   KoinContext(dataHolder.koin) {
     // Fixed once known: later sign-ins and sign-outs navigate within the session.
     val launch =

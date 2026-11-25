@@ -106,7 +106,7 @@ object SpannerDebugWebService {
     server.service(
       "/debug/spanner/api/query",
       api(debug, HttpMethod.POST) { d, _, body ->
-        val sql = (requestAdapter.fromJson(body) as? Map<*, *>)?.get("sql") as? String ?: ""
+        val sql = requestAdapter.fromJson(body)?.get("sql") as? String ?: ""
         d.inspector.runQuery(sql).toMap()
       },
     )

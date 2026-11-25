@@ -38,13 +38,13 @@ kotlin {
         api(projects.shared.web.surveys)
         api(projects.shared.web.impact)
         api(projects.shared.web.timeseries)
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
         implementation(libs.compose.material.icons.core)
         implementation(libs.compose.material.icons.extended)
-        implementation(compose.ui)
-        implementation(compose.components.resources)
+        implementation(libs.compose.ui)
+        implementation(libs.compose.components.resources)
         // Type-safe navigation between the console's pages; routes are @Serializable classes.
         implementation(libs.jetbrains.navigation.compose)
       }
@@ -61,9 +61,7 @@ kotlin {
         implementation(kotlin("test-junit5"))
         implementation(libs.konsist)
         // Headless Compose UI tests (runComposeUiTest) for interaction regressions.
-        @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-        implementation(compose.uiTest)
-        implementation(compose.desktop.currentOs)
+        implementation(libs.compose.ui.test)
       }
     }
   }

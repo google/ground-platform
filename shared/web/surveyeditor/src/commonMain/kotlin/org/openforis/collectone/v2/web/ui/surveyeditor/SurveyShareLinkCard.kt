@@ -76,7 +76,8 @@ internal fun SurveyShareLinkAndQrCard(
   modifier: Modifier = Modifier,
 ) {
   val shareUrl = remember(surveyId) { InviteLinks.surveyUrl(surveyId) }
-  val clipboard = LocalClipboardManager.current
+  // LocalClipboard has no commonMain ClipEntry factory yet.
+  @Suppress("DEPRECATION") val clipboard = LocalClipboardManager.current
   var copied by remember(shareUrl) { mutableStateOf(false) }
   var showQrDialog by remember { mutableStateOf(false) }
 

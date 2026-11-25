@@ -41,7 +41,7 @@ class EarthEnginePresetsTest {
     for (preset in EarthEnginePresets.presets) {
       assertEquals(ImagerySourceType.EARTH_ENGINE, preset.type)
       assertNotNull(preset.expression, "Preset ${preset.id} missing expression")
-      val expr = preset.expression!!
+      val expr = preset.expression
       assertTrue(expr.values.isNotEmpty(), "Preset ${preset.id} has empty values")
       assertTrue(expr.result.isNotBlank(), "Preset ${preset.id} has blank result")
       assertTrue(

@@ -386,14 +386,14 @@ fun SamplingDesignPanel(
           if (progress.expectedPlots > 0) {
             pluralStringResource(
               Res.plurals.surveyeditor_sampling_generating_of_about,
-              progress.expectedPlots.toInt(),
+              progress.expectedPlots,
               plotsSoFar,
               SurveyAreaGeometry.groupThousands(progress.expectedPlots.toLong()),
             )
           } else {
             pluralStringResource(
               Res.plurals.surveyeditor_sampling_generating,
-              progress.plotsSoFar.toInt(),
+              progress.plotsSoFar,
               plotsSoFar,
             )
           },
@@ -422,7 +422,7 @@ fun SamplingDesignPanel(
       Text(
         pluralStringResource(
           Res.plurals.surveyeditor_sampling_previewing_plots,
-          lastRun.featureCount.toInt(),
+          lastRun.featureCount,
           SurveyAreaGeometry.groupThousands(lastRun.featureCount.toLong()),
         ),
         style = MaterialTheme.typography.bodySmall,
@@ -718,7 +718,7 @@ private fun EstimateLine(
     } else {
       pluralStringResource(
         Res.plurals.surveyeditor_sampling_estimate,
-        estimate.estimatedPlotCount.toInt(),
+        estimate.estimatedPlotCount,
         surveyAreaText(estimate.areaHa * 10_000).resolve(),
         SurveyAreaGeometry.groupThousands(estimate.estimatedPlotCount.toLong()),
       )

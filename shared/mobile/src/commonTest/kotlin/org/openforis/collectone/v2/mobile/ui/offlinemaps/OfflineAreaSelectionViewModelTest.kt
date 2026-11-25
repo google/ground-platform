@@ -20,6 +20,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -50,6 +51,7 @@ import org.openforis.collectone.v2.mobile.resources.mobile_offline_area_tile_lim
  * for the debounce delay, cancels that work when the map moves again, updates the total for another
  * selection of imagery without a request, and follows a save until it's done.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class OfflineAreaSelectionViewModelTest {
   /** About 5.6 × 5.6 km at the equator: 31 km², under the 50 km² limit. */
   private val small = LngLatBounds(west = 36.90, south = -0.45, east = 36.95, north = -0.40)

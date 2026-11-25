@@ -459,7 +459,7 @@ private fun ConceptDialog(
       Text(
         when {
           isNew -> stringResource(Res.string.org_concept_add)
-          readOnly -> original?.label?.text.orEmpty()
+          readOnly -> original.label.text
           else -> stringResource(Res.string.org_concept_edit_title)
         }
       )
@@ -515,11 +515,10 @@ private fun ConceptDialog(
             )
           }
         } else {
-          original?.let {
-            val cleanId = if (it.id.startsWith("org.")) LibraryIds.nameOf(it.id) else it.id
-            MonospaceId(stringResource(Res.string.org_concept_id_version, cleanId, it.version))
-          }
-          if (original != null && original.label.values.size > 1) {
+          val cleanId =
+            if (original.id.startsWith("org.")) LibraryIds.nameOf(original.id) else original.id
+          MonospaceId(stringResource(Res.string.org_concept_id_version, cleanId, original.version))
+          if (original.label.values.size > 1) {
             Text(
               stringResource(
                 Res.string.org_concept_translations,

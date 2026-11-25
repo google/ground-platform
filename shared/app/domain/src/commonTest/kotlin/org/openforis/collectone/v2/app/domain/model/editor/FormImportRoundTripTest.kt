@@ -546,11 +546,11 @@ class FormImportRoundTripTest {
     assertEquals("Trees", importedSecTrees.title)
     assertTrue(importedSecTrees.repeatable)
     assertEquals("3", importedSecTrees.repeatCountExpression)
-    assertNotNull(importedSecTrees.relevance)
+    val relevance = assertNotNull(importedSecTrees.relevance)
     val expectedSourceKey = actual.questions.find { it.name == "has_trees" }?.key
-    assertEquals(expectedSourceKey, importedSecTrees.relevance?.sourceQuestionKey)
-    assertEquals(RelevanceOperator.EQUALS, importedSecTrees.relevance?.operator)
-    assertEquals("yes", importedSecTrees.relevance?.value)
+    assertEquals(expectedSourceKey, relevance.sourceQuestionKey)
+    assertEquals(RelevanceOperator.EQUALS, relevance.operator)
+    assertEquals("yes", relevance.value)
 
     assertEquals("sec_plot", actual.questions.find { it.name == "plot_name" }?.sectionId)
     assertEquals("sec_trees", actual.questions.find { it.name == "tree_species" }?.sectionId)

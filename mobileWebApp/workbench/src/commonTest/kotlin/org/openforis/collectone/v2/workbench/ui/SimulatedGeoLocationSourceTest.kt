@@ -15,6 +15,7 @@ package org.openforis.collectone.v2.workbench.ui
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -22,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import org.openforis.collectone.v2.core.forms.ui.GeoLocationFix
 
 /** The workbench's simulated GPS walks a small octagon, one step per interval. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class SimulatedGeoLocationSourceTest {
 
   @Test
