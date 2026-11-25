@@ -46,17 +46,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.openforis.collectone.v2.app.domain.model.AppBuildConfig
 import org.openforis.collectone.v2.app.ui.common.CloudAcaciaLogo
+import org.openforis.collectone.v2.app.ui.common.DEMO_ATTRIBUTION_CONTRIBUTORS_LABEL
+import org.openforis.collectone.v2.app.ui.common.DEMO_ATTRIBUTION_CONTRIBUTORS_URL
+import org.openforis.collectone.v2.app.ui.common.DEMO_ATTRIBUTION_COPYRIGHT_YEAR
 import org.openforis.collectone.v2.app.ui.common.LocalMobileTopInset
+import org.openforis.collectone.v2.app.ui.common.formatAppVersionBadge
 import org.openforis.collectone.v2.app.ui.text.nameRes
 import org.openforis.collectone.v2.core.forms.ui.BadgeTone
 import org.openforis.collectone.v2.core.forms.ui.LocalAppBrandFontFamily
@@ -70,7 +80,6 @@ import org.openforis.collectone.v2.mobile.resources.mobile_brand_organization
 import org.openforis.collectone.v2.mobile.resources.mobile_brand_product
 import org.openforis.collectone.v2.mobile.resources.mobile_close_drawer
 import org.openforis.collectone.v2.mobile.resources.mobile_drawer_active_survey
-import org.openforis.collectone.v2.mobile.resources.mobile_drawer_footer_tagline
 import org.openforis.collectone.v2.mobile.resources.mobile_drawer_offline_maps
 import org.openforis.collectone.v2.mobile.resources.mobile_drawer_offline_maps_subtitle
 import org.openforis.collectone.v2.mobile.resources.mobile_drawer_settings
@@ -90,7 +99,8 @@ import org.openforis.collectone.v2.mobile.ui.navigation.MobileRoute
  * 4. Change settings
  * 5. View Terms of Service
  *
- * User profile details and Sign out live in the top-right user avatar account menu.
+ * User profile details and Sign out live in the top-right user avatar account menu. The footer
+ * ([DrawerAboutFooter]) shows the app's version and links to its contributors.
  */
 @Composable
 internal fun MainSurveyNavigationDrawerOverlay(
@@ -266,26 +276,74 @@ internal fun MainSurveyNavigationDrawerOverlay(
             )
           }
 
-          // Footer version note
-          val footerTagline = stringResource(Res.string.mobile_drawer_footer_tagline)
-          Text(
-            text =
-              buildAnnotatedString {
-                append(organizationName)
-                append(" ")
-                withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.Bold)) {
-                  append(productName)
-                }
-                append(" ")
-                append(footerTagline)
-              },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          DrawerAboutFooter(
+            organizationName = organizationName,
+            productName = productName,
             modifier = Modifier.padding(18.dp),
           )
         }
       }
     }
+  }
+}
+
+/** Test tag of the navigation drawer's About footer ([DrawerAboutFooter]). */
+internal const val DRAWER_ABOUT_FOOTER_TAG = "drawerAboutFooter"
+
+/**
+ * About information at the bottom of the navigation drawer: the product name with the app's
+ * [appVersion], and the copyright line whose contributors link opens the project's source
+ * repository.
+ */
+@Composable
+internal fun DrawerAboutFooter(
+  organizationName: String,
+  productName: String,
+  modifier: Modifier = Modifier,
+  appVersion: String = AppBuildConfig.APP_VERSION,
+) {
+  val brandFont = LocalAppBrandFontFamily.current
+  val versionLabel = formatAppVersionBadge(appVersion)
+  val linkColor = MaterialTheme.colorScheme.primary
+  Column(
+    modifier = modifier.testTag(DRAWER_ABOUT_FOOTER_TAG),
+    verticalArrangement = Arrangement.spacedBy(2.dp),
+  ) {
+    Text(
+      text =
+        buildAnnotatedString {
+          append(organizationName)
+          append(" ")
+          withStyle(SpanStyle(fontFamily = brandFont, fontWeight = FontWeight.Bold)) {
+            append(productName)
+          }
+          if (versionLabel.isNotEmpty()) {
+            append(" ")
+            append(versionLabel)
+          }
+        },
+      style = MaterialTheme.typography.labelSmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Text(
+      text =
+        buildAnnotatedString {
+          append("© $DEMO_ATTRIBUTION_COPYRIGHT_YEAR ")
+          withLink(
+            LinkAnnotation.Url(
+              url = DEMO_ATTRIBUTION_CONTRIBUTORS_URL,
+              styles =
+                TextLinkStyles(
+                  style = SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)
+                ),
+            )
+          ) {
+            append(DEMO_ATTRIBUTION_CONTRIBUTORS_LABEL)
+          }
+        },
+      style = MaterialTheme.typography.labelSmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
   }
 }
 

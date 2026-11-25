@@ -58,7 +58,6 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.ui.common.CloudAcaciaLogo
-import org.openforis.collectone.v2.app.ui.common.DemoAttributionFooterBar
 import org.openforis.collectone.v2.app.ui.common.DemoBadge
 import org.openforis.collectone.v2.app.ui.common.GoogleLogoIcon
 import org.openforis.collectone.v2.app.ui.common.LocalMobileTopInset
@@ -85,7 +84,9 @@ import org.openforis.collectone.v2.mobile.ui.version.MobileUpdateSuggestedBanner
 
 /**
  * Host of the Collect One mobile app's screens ([MobileNavHost], driven by [navController]) with
- * the sync and backend error banners over them and the demo attribution footer below:
+ * the sync and backend error banners over them. Nothing sits below the screens, so each one reaches
+ * the bottom of the display; the app's version and attribution are in the navigation drawer. The
+ * screens:
  * 1. Sign In Screen (Sign in with Google only)
  * 2. Terms of Service Screen
  * 3. Download Survey Screen (with search by name or location, map thumbnail, and downloaded
@@ -107,66 +108,63 @@ fun MobileScreenHost(
 
   LaunchedEffect(clientVersionRepository) { clientVersionRepository.refreshPolicy() }
 
-  Column(modifier = Modifier.fillMaxSize()) {
-    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-      MobileNavHost(state, navController)
-      val syncState by state.dataHolder.userDataSyncState.collectAsState()
-      val backendError by state.dataHolder.backendError.collectAsState()
-      val isOnline by state.dataHolder.connectivityRepository.observeIsOnline().collectAsState()
-      val backStackEntry by navController.currentBackStackEntryAsState()
-      val onDownloadSurvey =
-        backStackEntry?.destination?.hasRoute(MobileRoute.DownloadSurvey::class) == true
-      val isUpdateRequired = updateStatus is MobileUpdateStatus.Required
-      if (!isUpdateRequired) {
-        Column(
-          modifier = Modifier.align(Alignment.TopCenter).padding(top = topInset),
-          horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-          val suggested = updateStatus as? MobileUpdateStatus.Suggested
-          if (suggested != null && !isSuggestionDismissed) {
-            MobileUpdateSuggestedBanner(
-              status = suggested,
-              onDismiss = clientVersionRepository::dismissSuggestion,
-            )
-          }
-          if (
-            showsUserDataSyncErrorBanner(isOnline = isOnline, onDownloadSurvey = onDownloadSurvey)
-          ) {
-            UserDataSyncErrorBanner(
-              state = syncState,
-              onRetry = state.dataHolder::retryUserDataSync,
-            )
-          }
-          BackendErrorBanner(
-            error = backendError,
-            onRetry = state.dataHolder::retryBackendSync,
-            onDismiss = state.dataHolder::dismissBackendError,
+  Box(modifier = Modifier.fillMaxSize()) {
+    MobileNavHost(state, navController)
+    val syncState by state.dataHolder.userDataSyncState.collectAsState()
+    val backendError by state.dataHolder.backendError.collectAsState()
+    val isOnline by state.dataHolder.connectivityRepository.observeIsOnline().collectAsState()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val onDownloadSurvey =
+      backStackEntry?.destination?.hasRoute(MobileRoute.DownloadSurvey::class) == true
+    val isUpdateRequired = updateStatus is MobileUpdateStatus.Required
+    if (!isUpdateRequired) {
+      Column(
+        modifier = Modifier.align(Alignment.TopCenter).padding(top = topInset),
+        horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        val suggested = updateStatus as? MobileUpdateStatus.Suggested
+        if (suggested != null && !isSuggestionDismissed) {
+          MobileUpdateSuggestedBanner(
+            status = suggested,
+            onDismiss = clientVersionRepository::dismissSuggestion,
           )
         }
-      }
-      DemoBadge(modifier = Modifier.align(Alignment.TopEnd).padding(top = topInset))
-      val required = updateStatus as? MobileUpdateStatus.Required
-      if (required != null) {
-        MobileUpdateRequiredScreen(
-          status = required,
-          isChecking = isCheckingUpdate,
-          onCheckAgain = {
-            if (!isCheckingUpdate) {
-              isCheckingUpdate = true
-              scope.launch {
-                try {
-                  clientVersionRepository.refreshPolicy()
-                  state.dataHolder.retryUserDataSync()
-                } finally {
-                  isCheckingUpdate = false
-                }
-              }
-            }
-          },
+        if (
+          showsUserDataSyncErrorBanner(isOnline = isOnline, onDownloadSurvey = onDownloadSurvey)
+        ) {
+          UserDataSyncErrorBanner(
+            state = syncState,
+            onRetry = state.dataHolder::retryUserDataSync,
+          )
+        }
+        BackendErrorBanner(
+          error = backendError,
+          onRetry = state.dataHolder::retryBackendSync,
+          onDismiss = state.dataHolder::dismissBackendError,
         )
       }
     }
-    DemoAttributionFooterBar()
+    DemoBadge(modifier = Modifier.align(Alignment.TopEnd).padding(top = topInset))
+    val required = updateStatus as? MobileUpdateStatus.Required
+    if (required != null) {
+      MobileUpdateRequiredScreen(
+        status = required,
+        isChecking = isCheckingUpdate,
+        onCheckAgain = {
+          if (!isCheckingUpdate) {
+            isCheckingUpdate = true
+            scope.launch {
+              try {
+                clientVersionRepository.refreshPolicy()
+                state.dataHolder.retryUserDataSync()
+              } finally {
+                isCheckingUpdate = false
+              }
+            }
+          }
+        },
+      )
+    }
   }
 }
 

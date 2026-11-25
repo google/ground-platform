@@ -205,8 +205,6 @@
   <string name="mobile_drawer_tos_subtitle">ເງື່ອນໄຂການຄຸ້ມຄອງຂໍ້ມູນ ແລະ ຄວາມເປັນສ່ວນຕົວຂອງແພລັດຟອມ</string>
   <string name="mobile_brand_organization">Open Foris</string>
   <string name="mobile_brand_product">Collect One</string>
-  <!-- Drawer footer shown after the product name "Open Foris Collect One". -->
-  <string name="mobile_drawer_footer_tagline">• ອອບລາຍເປັນຫຼັກ</string>
 
   <!-- Uploads screen -->
   <!-- Button that syncs all pending uploads. %1$d: number of pending uploads. -->
