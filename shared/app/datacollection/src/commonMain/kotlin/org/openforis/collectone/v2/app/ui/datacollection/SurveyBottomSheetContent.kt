@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -254,7 +253,7 @@ internal fun FormGroupedSubmissionsSection(
                 }
                 Row(
                   horizontalArrangement = Arrangement.spacedBy(5.dp),
-                  verticalAlignment = Alignment.CenterVertically,
+                  verticalAlignment = Alignment.Top,
                 ) {
                   Icon(
                     imageVector = Icons.Outlined.Person,
@@ -265,7 +264,7 @@ internal fun FormGroupedSubmissionsSection(
                       } else {
                         MaterialTheme.colorScheme.onSurface
                       },
-                    modifier = Modifier.size(13.dp),
+                    modifier = Modifier.padding(top = MetadataIconTopInset).size(13.dp),
                   )
                   Text(
                     text = collectorNameText(viewer, sub).resolve(),
@@ -290,14 +289,14 @@ internal fun FormGroupedSubmissionsSection(
                   }
                 }
                 Row(
-                  verticalAlignment = Alignment.CenterVertically,
+                  verticalAlignment = Alignment.Top,
                   horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                   Icon(
                     imageVector = Icons.Outlined.Schedule,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(11.dp),
+                    modifier = Modifier.padding(top = MetadataIconTopInset).size(11.dp),
                   )
                   Text(
                     text = "${sub.updatedAtLabel} • ${sub.formVersion}",
@@ -322,6 +321,12 @@ internal fun FormGroupedSubmissionsSection(
     }
   }
 }
+
+/**
+ * Nudges a small leading icon down so that, top-aligned, it sits on the first line of the label
+ * beside it instead of floating at the middle of a label that wraps.
+ */
+private val MetadataIconTopInset = 2.dp
 
 /**
  * Full Submission Details Card shown when a submission in a 1:N list or List view is clicked.
@@ -462,14 +467,14 @@ fun SubmissionFullDetailsCard(
           color = MaterialTheme.colorScheme.primary,
         )
         Row(
-          verticalAlignment = Alignment.CenterVertically,
+          verticalAlignment = Alignment.Top,
           horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           Icon(
             imageVector = Icons.Outlined.Person,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.padding(top = MetadataIconTopInset).size(12.dp),
           )
           Text(
             text =
@@ -482,14 +487,14 @@ fun SubmissionFullDetailsCard(
           )
         }
         Row(
-          verticalAlignment = Alignment.CenterVertically,
+          verticalAlignment = Alignment.Top,
           horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           Icon(
             imageVector = Icons.Outlined.Schedule,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.padding(top = MetadataIconTopInset).size(12.dp),
           )
           Text(
             text = stringResource(Res.string.app_collected_at, submission.updatedAtLabel),
@@ -521,26 +526,12 @@ fun SubmissionFullDetailsCard(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
           ) {
-            Row(
+            Text(
+              text = field.questionLabel,
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically,
-            ) {
-              Text(
-                text = field.questionLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-              )
-              if (isSidePanel && fieldWayfindingBadge.isNotEmpty()) {
-                Spacer(modifier = Modifier.width(6.dp))
-                TonalBadge(
-                  text = "➤ $fieldWayfindingBadge",
-                  tone = BadgeTone.WARNING,
-                  monospace = true,
-                )
-              }
-            }
+            )
             if (coloredAnswers.isNotEmpty()) {
               ChoiceColorPillsRow(items = coloredAnswers)
             } else {
@@ -548,6 +539,15 @@ fun SubmissionFullDetailsCard(
                 text = field.answerValue,
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.onSurface,
+              )
+            }
+            // Distance and bearing to a geometry answer go below the label and value, so every
+            // answer keeps the same label-over-value layout at the full width of the card.
+            if (isSidePanel && fieldWayfindingBadge.isNotEmpty()) {
+              TonalBadge(
+                text = "➤ $fieldWayfindingBadge",
+                tone = BadgeTone.WARNING,
+                monospace = true,
               )
             }
           }
