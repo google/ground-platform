@@ -265,8 +265,8 @@
   <!-- Map overlay status. -->
   <string name="forms_gps_locked">GPS locked</string>
   <string name="forms_geo_waiting_for_location">Waiting for GPS location…</string>
-  <string name="forms_map_panned_crosshair">Panned • Crosshair active</string>
-  <string name="forms_map_centered_on_gps">Centered on GPS (drag map to pan)</string>
+  <!-- Map status chip while the map is panned away from the GPS location; tapping it recenters the map. -->
+  <string name="forms_map_panned_recenter">Panned • Recenter</string>
   <string name="forms_zoom_in">Zoom in</string>
   <string name="forms_zoom_out">Zoom out</string>
   <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->

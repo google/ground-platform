@@ -256,8 +256,8 @@
   <!-- Map overlay status. -->
   <string name="forms_gps_locked">ລັອກ GPS ແລ້ວ</string>
   <string name="forms_geo_waiting_for_location">ກຳລັງລໍຖ້າຕຳແໜ່ງ GPS…</string>
-  <string name="forms_map_panned_crosshair">ເລື່ອນແຜນທີ່ແລ້ວ • ເຄື່ອງໝາຍກາກບາດເປີດຢູ່</string>
-  <string name="forms_map_centered_on_gps">ຈັດກາງຕາມ GPS (ລາກແຜນທີ່ເພື່ອເລື່ອນ)</string>
+  <!-- Map status chip while the map is panned away from the GPS location; tapping it recenters the map. -->
+  <string name="forms_map_panned_recenter">ເລື່ອນແຜນທີ່ແລ້ວ • ຈັດຕຳແໜ່ງກາງໃໝ່</string>
   <string name="forms_zoom_in">ຂະຫຍາຍເຂົ້າ</string>
   <string name="forms_zoom_out">ຫຍໍ້ອອກ</string>
   <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->

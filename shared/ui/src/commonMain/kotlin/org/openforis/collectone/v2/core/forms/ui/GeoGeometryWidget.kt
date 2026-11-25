@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -72,8 +70,6 @@ import org.openforis.collectone.v2.core.forms.ui.resources.forms_geometry_line_r
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_geometry_polygon_need_more
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_geometry_polygon_ready
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_geometry_walking
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_centered_on_gps
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_panned_crosshair
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_start_walking
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_stop_walking
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_vertex_count
@@ -208,32 +204,20 @@ internal fun GeoGeometryDrawingWidget(
       }
 
       GeoMapStatusChip(
-        icon =
-          when {
-            isWalking -> Icons.Default.LocationOn
-            !panAllowed -> Icons.Default.Lock
-            isPanned -> Icons.Default.Place
-            else -> Icons.Default.LocationOn
+        isPanned = isPanned,
+        accuracyMeters = displayAcc,
+        zoomLevel = zoomLevel,
+        onRecenter = editState::recenter,
+        lockedDescription =
+          if (panAllowed) null else stringResource(Res.string.forms_geometry_gps_stream_only),
+        walkingText =
+          if (isWalking) {
+            pluralStringResource(Res.plurals.forms_geometry_walking, vertices.size, vertices.size)
+          } else {
+            null
           },
-        text =
-          when {
-            isWalking ->
-              pluralStringResource(
-                Res.plurals.forms_geometry_walking,
-                vertices.size,
-                vertices.size,
-              )
-            !panAllowed -> stringResource(Res.string.forms_geometry_gps_stream_only)
-            isPanned -> stringResource(Res.string.forms_map_panned_crosshair)
-            else -> stringResource(Res.string.forms_map_centered_on_gps)
-          },
-        highlighted = isWalking || isPanned,
       )
       GeoMapZoomButtons(onZoomDelta = editState::zoomBy)
-      GeoMapAccuracyReadout(accuracyMeters = displayAcc, zoomLevel = zoomLevel)
-      if (isPanned) {
-        GeoMapRecenterChip(onClick = editState::recenter)
-      }
     }
 
     if (liveFix == null) GeoLocationWaitingText()

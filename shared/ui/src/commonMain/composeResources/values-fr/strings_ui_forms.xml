@@ -265,8 +265,8 @@
   <!-- Map overlay status. -->
   <string name="forms_gps_locked">GPS verrouillé</string>
   <string name="forms_geo_waiting_for_location">En attente de la position GPS…</string>
-  <string name="forms_map_panned_crosshair">Carte déplacée • Réticule actif</string>
-  <string name="forms_map_centered_on_gps">Centrée sur la position GPS (faites glisser pour déplacer)</string>
+  <!-- Map status chip while the map is panned away from the GPS location; tapping it recenters the map. -->
+  <string name="forms_map_panned_recenter">Carte déplacée • Recentrer</string>
   <string name="forms_zoom_in">Zoom avant</string>
   <string name="forms_zoom_out">Zoom arrière</string>
   <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->

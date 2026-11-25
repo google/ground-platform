@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
@@ -53,6 +54,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -66,6 +68,7 @@ import org.openforis.collectone.v2.core.forms.ui.controls.Surface
 import org.openforis.collectone.v2.core.forms.ui.controls.clickable
 import org.openforis.collectone.v2.core.forms.ui.resources.Res
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_gps_accuracy_zoom
+import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_panned_recenter
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_recenter_on_gps
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_redo
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_undo
@@ -75,7 +78,7 @@ import org.openforis.collectone.v2.core.forms.ui.resources.forms_zoom_out
 /*
  * Building blocks of the built-in geo question maps shared by [GeoPointInputWidget] and
  * [GeoGeometryDrawingWidget]: the rounded map frame, the drawn basemap, the crosshair reticle, the
- * floating overlay chips, and the undo / redo / capture buttons under the map.
+ * floating status chip and zoom buttons, and the undo / redo / capture buttons under the map.
  */
 
 /** Zoom level a geo map opens at. */
@@ -91,7 +94,6 @@ internal fun geoMapSpanDegrees(zoomLevel: Float): Float =
 private val MapShape = RoundedCornerShape(12.dp)
 private val ChipShape = RoundedCornerShape(8.dp)
 private val ZoomButtonShape = RoundedCornerShape(6.dp)
-private val RecenterShape = RoundedCornerShape(16.dp)
 private const val OVERLAY_ALPHA = 0.88f
 
 /** The rounded, bordered, [height]-tall frame that stacks a geo map's layers. */
@@ -313,11 +315,63 @@ internal fun DrawScope.drawGeoReticle(isPanned: Boolean) {
   )
 }
 
-/** Top-left chip naming the map mode; [highlighted] while panned or walking. */
+/**
+ * The map's single status chip (top-left), combining what used to be separate mode, GPS accuracy,
+ * and recenter chips:
+ * - while the map is panned away from GPS, it says so and tapping it centers the map again
+ *   ([onRecenter]);
+ * - while a line or polygon records the collector's walk, it shows [walkingText];
+ * - otherwise it shows the GPS accuracy and the map's zoom level, with a lock icon described by
+ *   [lockedDescription] while panning is not allowed.
+ */
 @Composable
-internal fun BoxScope.GeoMapStatusChip(icon: ImageVector, text: String, highlighted: Boolean) {
+internal fun BoxScope.GeoMapStatusChip(
+  isPanned: Boolean,
+  accuracyMeters: Double?,
+  zoomLevel: Float,
+  onRecenter: () -> Unit,
+  lockedDescription: String? = null,
+  walkingText: String? = null,
+) {
+  val icon: ImageVector
+  val text: String
+  when {
+    isPanned -> {
+      icon = Icons.Default.Refresh
+      text = stringResource(Res.string.forms_map_panned_recenter)
+    }
+    walkingText != null -> {
+      icon = Icons.Default.LocationOn
+      text = walkingText
+    }
+    else -> {
+      icon = if (lockedDescription != null) Icons.Default.Lock else Icons.Default.LocationOn
+      text =
+        stringResource(
+          Res.string.forms_gps_accuracy_zoom,
+          formatGeoPointAccuracy(accuracyMeters),
+          ((zoomLevel * 10f).roundToInt() / 10f).toString(),
+        )
+    }
+  }
+  val highlighted = isPanned || walkingText != null
+  val recenterLabel = stringResource(Res.string.forms_recenter_on_gps)
   Surface(
-    modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+    modifier =
+      Modifier.align(Alignment.TopStart)
+        .padding(8.dp)
+        .clip(ChipShape)
+        .then(
+          if (isPanned) {
+            Modifier.clickable(
+              onClickLabel = recenterLabel,
+              role = Role.Button,
+              onClick = onRecenter,
+            )
+          } else {
+            Modifier
+          }
+        ),
     shape = ChipShape,
     color = GeoMapColors.OverlaySurface.copy(alpha = OVERLAY_ALPHA),
     border = BorderStroke(1.dp, GeoMapColors.Border),
@@ -330,7 +384,7 @@ internal fun BoxScope.GeoMapStatusChip(icon: ImageVector, text: String, highligh
     ) {
       Icon(
         imageVector = icon,
-        contentDescription = null,
+        contentDescription = lockedDescription.takeIf { !highlighted },
         tint = textColor,
         modifier = Modifier.size(13.dp),
       )
@@ -341,6 +395,8 @@ internal fun BoxScope.GeoMapStatusChip(icon: ImageVector, text: String, highligh
             color = textColor,
             fontWeight = FontWeight.SemiBold,
           ),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
       )
     }
   }
@@ -382,79 +438,6 @@ private fun GeoMapZoomButton(icon: ImageVector, description: String, onClick: ()
         contentDescription = description,
         tint = Color.White,
         modifier = Modifier.size(16.dp),
-      )
-    }
-  }
-}
-
-/** Bottom-left readout of the GPS accuracy and the map's zoom level. */
-@Composable
-internal fun BoxScope.GeoMapAccuracyReadout(accuracyMeters: Double?, zoomLevel: Float) {
-  Surface(
-    modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
-    shape = ChipShape,
-    color = GeoMapColors.OverlaySurface.copy(alpha = OVERLAY_ALPHA),
-    border = BorderStroke(1.dp, GeoMapColors.Border),
-  ) {
-    Row(
-      modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-      Icon(
-        imageVector = Icons.Default.LocationOn,
-        contentDescription = null,
-        tint = Color.White,
-        modifier = Modifier.size(13.dp),
-      )
-      Text(
-        text =
-          stringResource(
-            Res.string.forms_gps_accuracy_zoom,
-            formatGeoPointAccuracy(accuracyMeters),
-            ((zoomLevel * 10f).roundToInt() / 10f).toString(),
-          ),
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            color = Color.White,
-            fontWeight = FontWeight.SemiBold,
-          ),
-      )
-    }
-  }
-}
-
-/** Bottom-right "Recenter on GPS" chip, shown while the map is panned. */
-@Composable
-internal fun BoxScope.GeoMapRecenterChip(onClick: () -> Unit) {
-  Surface(
-    modifier =
-      Modifier.align(Alignment.BottomEnd)
-        .padding(8.dp)
-        .clip(RecenterShape)
-        .clickable(onClick = onClick),
-    shape = RecenterShape,
-    color = GeoMapColors.RecenterSurface.copy(alpha = 0.94f),
-    border = BorderStroke(1.dp, GeoMapColors.Accent),
-  ) {
-    Row(
-      modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-      Icon(
-        imageVector = Icons.Default.Refresh,
-        contentDescription = null,
-        tint = GeoMapColors.Accent,
-        modifier = Modifier.size(14.dp),
-      )
-      Text(
-        text = stringResource(Res.string.forms_recenter_on_gps),
-        style =
-          MaterialTheme.typography.labelSmall.copy(
-            color = GeoMapColors.Accent,
-            fontWeight = FontWeight.Bold,
-          ),
       )
     }
   }

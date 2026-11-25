@@ -256,8 +256,8 @@
   <!-- Map overlay status. -->
   <string name="forms_gps_locked">GPS បានចាក់សោ</string>
   <string name="forms_geo_waiting_for_location">កំពុងរង់ចាំទីតាំង GPS…</string>
-  <string name="forms_map_panned_crosshair">បានរំកិល • សញ្ញាកាកបាទសកម្ម</string>
-  <string name="forms_map_centered_on_gps">នៅកណ្ដាលលើ GPS (អូសផែនទីដើម្បីរំកិល)</string>
+  <!-- Map status chip while the map is panned away from the GPS location; tapping it recenters the map. -->
+  <string name="forms_map_panned_recenter">បានរំកិល • កំណត់ទីតាំងឡើងវិញ</string>
   <string name="forms_zoom_in">ពង្រីក</string>
   <string name="forms_zoom_out">បង្រួម</string>
   <!-- Map overlay. %1$s = GPS accuracy (e.g. ±3.2 m), %2$s = map zoom level; "z" abbreviates zoom. -->

@@ -34,9 +34,7 @@ internal object GeoMapColors {
   val Border = Color(0xFF2D5944)
   /** Background of the status and zoom chips drawn over the map. */
   val OverlaySurface = Color(0xFF0A1F16)
-  /** Background of the "recenter on GPS" pill. */
-  val RecenterSurface = Color(0xFF0E2219)
-  /** Content of the recenter pill and the reticle while the map follows GPS. */
+  /** Reticle while the map follows GPS. */
   val Accent = Color(0xFF8BD6B1)
   /** Reticle and pending segment while the map is panned away from GPS. */
   val PannedAccent = Color(0xFFFFD54F)

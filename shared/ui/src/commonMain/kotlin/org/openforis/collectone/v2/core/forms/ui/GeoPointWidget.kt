@@ -27,9 +27,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -63,8 +60,6 @@ import org.openforis.collectone.v2.core.forms.ui.resources.forms_geo_saved_point
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_geo_status_captured
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_geo_waiting_for_location
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_gps_locked
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_centered_on_gps
-import org.openforis.collectone.v2.core.forms.ui.resources.forms_map_panned_crosshair
 import org.openforis.collectone.v2.core.forms.ui.resources.forms_recenter_on_gps
 
 /**
@@ -330,8 +325,8 @@ internal fun GeoPointInputWidget(
  * Delegates basemap rendering to [LocalGeoPointMapViewport] when provided by the host (e.g., live
  * Mapbox GL JS basemap in the mobile app and the web console), or renders a built-in interactive
  * satellite and topographic Compose `Canvas` basemap with drag-to-pan gestures, GPS blue dot +
- * accuracy halo, center target crosshair reticle, captured pin marker, zoom controls, and Recenter
- * pill.
+ * accuracy halo, center target crosshair reticle, captured pin marker, zoom controls, and the
+ * status chip ([GeoMapStatusChip]).
  */
 @Composable
 private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
@@ -379,25 +374,13 @@ private fun GeoPointInteractiveMapBox(viewportState: GeoPointMapViewportState) {
     }
 
     GeoMapStatusChip(
-      icon =
-        when {
-          !viewportState.panAllowed -> Icons.Default.Lock
-          viewportState.isPanned -> Icons.Default.Place
-          else -> Icons.Default.LocationOn
-        },
-      text =
-        when {
-          !viewportState.panAllowed -> stringResource(Res.string.forms_gps_locked)
-          viewportState.isPanned -> stringResource(Res.string.forms_map_panned_crosshair)
-          else -> stringResource(Res.string.forms_map_centered_on_gps)
-        },
-      highlighted = viewportState.isPanned,
-    )
-    GeoMapZoomButtons(onZoomDelta = viewportState.onZoomDelta)
-    GeoMapAccuracyReadout(
+      isPanned = viewportState.isPanned,
       accuracyMeters = viewportState.accuracyMeters,
       zoomLevel = viewportState.zoomLevel,
+      onRecenter = viewportState.onRecenterGps,
+      lockedDescription =
+        if (viewportState.panAllowed) null else stringResource(Res.string.forms_gps_locked),
     )
-    if (viewportState.isPanned) GeoMapRecenterChip(onClick = viewportState.onRecenterGps)
+    GeoMapZoomButtons(onZoomDelta = viewportState.onZoomDelta)
   }
 }

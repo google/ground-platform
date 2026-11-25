@@ -156,7 +156,7 @@ class GeoQuestionUiTest {
     onRoot().performTouchInput {
       swipe(start = Offset(centerX, 120f), end = Offset(centerX - 120f, 120f))
     }
-    onNodeWithText("Panned • Crosshair active").assertExists()
+    onNodeWithText("Panned • Recenter").assertExists()
     onNodeWithText("Add point").performClick()
 
     assertNotEquals(PARIS_FIX.longitude, controller.point()?.longitude)
@@ -173,6 +173,33 @@ class GeoQuestionUiTest {
     onNodeWithContentDescription("Recenter on GPS").performClick()
     onNodeWithText("Capture location").performClick()
 
+    assertEquals(parisPoint, controller.point())
+  }
+
+  @Test
+  fun lockedGeopoint_statusChip_marksTheGpsReadoutAsLocked() = runComposeUiTest {
+    showQuestion(geoForm("geopoint"))
+
+    onNodeWithText("GPS ±4.0 m • 17.5z").assertExists()
+    onNodeWithContentDescription("GPS locked").assertExists()
+  }
+
+  @Test
+  fun pannableGeopoint_statusChip_showsGpsOrPanned_andRecentersWhenTapped() = runComposeUiTest {
+    val controller = geoForm("geopoint", appearance = "placement-map")
+    showQuestion(controller)
+    onNodeWithText("GPS ±4.0 m • 17.5z").assertExists()
+    onNodeWithText("Panned • Recenter").assertDoesNotExist()
+
+    onRoot().performTouchInput {
+      swipe(start = Offset(centerX, 120f), end = Offset(centerX - 120f, 120f))
+    }
+    onNodeWithText("GPS ±4.0 m • 17.5z").assertDoesNotExist()
+    onNodeWithText("Panned • Recenter").performClick()
+
+    onNodeWithText("Panned • Recenter").assertDoesNotExist()
+    onNodeWithText("GPS ±4.0 m • 17.5z").assertExists()
+    onNodeWithText("Capture location").performClick()
     assertEquals(parisPoint, controller.point())
   }
 
