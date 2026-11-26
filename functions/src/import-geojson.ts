@@ -132,6 +132,11 @@ export function importGeoJsonCallback(
           .on('data', (data: any) => {
             if (!hasError) onGeoJsonFeature(data, jobId);
           })
+          // Malformed JSON. Without a listener the error would be thrown and
+          // crash the instance, along with any other request it is serving.
+          .on('error', (err: Error) =>
+            fail(StatusCodes.BAD_REQUEST, err.message)
+          )
       );
     } catch (err) {
       busboy.emit('error', err);

@@ -534,6 +534,30 @@ describe('importGeoJson()', () => {
     expect(insertLocationsOfInterestSpy).not.toHaveBeenCalled();
   });
 
+  it('rejects a file that is not valid JSON', async () => {
+    mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+    const form = new FormData();
+    form.append('survey', surveyId);
+    form.append('job', jobId);
+    form.append(
+      'file',
+      new Blob(['{"type":"FeatureCollection","features":[{oops}]}']),
+      'file.json'
+    );
+    const req = await createPostRequestSpy({ url: '/importGeoJson' }, form);
+    const res = createResponseSpy();
+    try {
+      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
+        email,
+      } as DecodedIdToken);
+    } catch {
+      // Expected to reject.
+    }
+
+    expect(res.status).toHaveBeenCalledOnceWith(StatusCodes.BAD_REQUEST);
+    expect(insertLocationsOfInterestSpy).not.toHaveBeenCalled();
+  });
+
   it('surfaces errors thrown during async file processing', async () => {
     // Make fetchSurvey reject to simulate an unexpected async error in the file handler.
     const db = getDatastore();
