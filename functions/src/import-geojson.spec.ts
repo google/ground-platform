@@ -27,7 +27,8 @@ import { DecodedIdToken } from 'firebase-admin/auth';
 import { Blob, FormData } from 'formdata-node';
 import { StatusCodes } from 'http-status-codes';
 import { invokeCallbackAsync } from './handlers';
-import { SURVEY_ORGANIZER_ROLE } from './common/auth';
+import { Request } from 'firebase-functions/v2/https';
+import { DATA_COLLECTOR_ROLE, SURVEY_ORGANIZER_ROLE } from './common/auth';
 import { getDatastore, resetDatastore } from './common/context';
 import * as broadcastModule from './common/broadcast';
 import { Firestore } from 'firebase-admin/firestore';
@@ -395,6 +396,166 @@ describe('importGeoJson()', () => {
       insertLocationsOfInterestSpy.calls.mostRecent().args;
     expect(calledSurveyId).toBe(surveyId);
     expect(calledDocs.length).toBe(3);
+  });
+
+  describe('when the form names a survey the caller cannot import into', () => {
+    const otherSurveyId = 'survey002';
+
+    type Part = { name: string; value: string; filename?: string };
+
+    const field = (name: string, value: string): Part => ({ name, value });
+    const file = (filename: string): Part => ({
+      name: 'file',
+      value: JSON.stringify(geoJsonWithPoint),
+      filename,
+    });
+
+    /**
+     * Sends a multipart form whose parts are in exactly the given order. The
+     * `FormData` helpers can't be used for this: they group fields that share
+     * a name, so they can't send `survey` both before and after the file.
+     */
+    async function runParts(parts: Part[]) {
+      const boundary = 'test-boundary';
+      const body =
+        parts
+          .map(({ name, value, filename }) =>
+            [
+              `--${boundary}`,
+              `Content-Disposition: form-data; name="${name}"` +
+                (filename ? `; filename="${filename}"` : ''),
+              ...(filename ? ['Content-Type: application/json'] : []),
+              '',
+              value,
+              '',
+            ].join('\r\n')
+          )
+          .join('') + `--${boundary}--\r\n`;
+      const req = jasmine.createSpyObj<Request>('request', [], {
+        url: '/importGeoJson',
+        method: 'POST',
+        headers: {
+          'content-type': `multipart/form-data; boundary=${boundary}`,
+        },
+        rawBody: Buffer.from(body),
+      });
+      const res = createResponseSpy();
+      try {
+        await invokeCallbackAsync(importGeoJsonCallback, req, res, {
+          email,
+        } as DecodedIdToken);
+      } catch (err) {
+        console.log(err);
+      }
+      return res;
+    }
+
+    beforeEach(() => {
+      // The caller is an organizer of `surveyId`, but only a data collector of
+      // the other survey.
+      mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+      mockFirestore.doc(`surveys/${otherSurveyId}`).set({
+        [sv.name]: 'Someone else',
+        [sv.acl]: { [email]: DATA_COLLECTOR_ROLE },
+      });
+    });
+
+    function insertedSurveyIds(): string[] {
+      return insertLocationsOfInterestSpy.calls
+        .allArgs()
+        .map(([insertedSurveyId]) => insertedSurveyId);
+    }
+
+    it('does not import into it when it is named before the file', async () => {
+      const res = await runParts([
+        field('survey', otherSurveyId),
+        field('job', jobId),
+        file('file.json'),
+      ]);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.FORBIDDEN);
+      expect(insertedSurveyIds()).toEqual([]);
+    });
+
+    it('does not import into it when it is named after the file', async () => {
+      const res = await runParts([
+        field('survey', surveyId),
+        field('job', jobId),
+        file('file.json'),
+        field('survey', otherSurveyId),
+      ]);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+      expect(insertedSurveyIds()).toEqual([]);
+    });
+
+    it('does not import into it when it is named between two files', async () => {
+      const res = await runParts([
+        field('survey', surveyId),
+        field('job', jobId),
+        file('file1.json'),
+        field('survey', otherSurveyId),
+        file('file2.json'),
+      ]);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+      expect(insertedSurveyIds()).toEqual([]);
+    });
+
+    it('rejects a field that arrives after the file, even for the same survey', async () => {
+      const res = await runParts([
+        field('survey', surveyId),
+        field('job', jobId),
+        file('file.json'),
+        field('job', 'another-job'),
+      ]);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+      expect(insertedSurveyIds()).toEqual([]);
+    });
+  });
+
+  it('rejects a request without a file', async () => {
+    mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+    const form = new FormData();
+    form.append('survey', surveyId);
+    form.append('job', jobId);
+    const req = await createPostRequestSpy({ url: '/importGeoJson' }, form);
+    const res = createResponseSpy();
+    try {
+      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
+        email,
+      } as DecodedIdToken);
+    } catch {
+      // Expected to reject.
+    }
+
+    expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+    expect(insertLocationsOfInterestSpy).not.toHaveBeenCalled();
+  });
+
+  it('rejects a file that is not valid JSON', async () => {
+    mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+    const form = new FormData();
+    form.append('survey', surveyId);
+    form.append('job', jobId);
+    form.append(
+      'file',
+      new Blob(['{"type":"FeatureCollection","features":[{oops}]}']),
+      'file.json'
+    );
+    const req = await createPostRequestSpy({ url: '/importGeoJson' }, form);
+    const res = createResponseSpy();
+    try {
+      await invokeCallbackAsync(importGeoJsonCallback, req, res, {
+        email,
+      } as DecodedIdToken);
+    } catch {
+      // Expected to reject.
+    }
+
+    expect(res.status).toHaveBeenCalledOnceWith(StatusCodes.BAD_REQUEST);
+    expect(insertLocationsOfInterestSpy).not.toHaveBeenCalled();
   });
 
   it('surfaces errors thrown during async file processing', async () => {
