@@ -20,6 +20,38 @@
   <h1 class="page-title" i18n="@@app.labels.surveys">Surveys</h1>
 
   <div class="filters-container">
+    <mat-form-field
+      class="search-field"
+      appearance="fill"
+      subscriptSizing="dynamic"
+    >
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        #searchInput
+        matInput
+        type="search"
+        id="survey-search"
+        i18n-placeholder="@@app.surveyList.search.placeholder"
+        placeholder="Search surveys"
+        i18n-aria-label="@@app.surveyList.search.placeholder"
+        aria-label="Search surveys"
+        [value]="searchQuery()"
+        (input)="handleSearch(searchInput.value)"
+        (keydown.escape)="clearSearch()"
+      />
+      <button
+        *ngIf="searchQuery()"
+        mat-icon-button
+        matSuffix
+        id="clear-search"
+        i18n-aria-label="@@app.surveyList.search.clear"
+        aria-label="Clear search"
+        (click)="clearSearch(); searchInput.focus()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
     <mat-chip-set aria-label="Survey filter">
       <ng-container
         *ngTemplateOutlet="
@@ -53,6 +85,7 @@
 
   <div class="surveys-container">
     <mat-card
+      *ngIf="!isSearching()"
       appearance="raised"
       id="add-card"
       class="survey-card new-survey-card"
@@ -105,6 +138,14 @@
       </mat-card-header>
     </mat-card>
   </div>
+
+  <p
+    *ngIf="isSearching() && surveys().size === 0"
+    class="no-results"
+    i18n="@@app.surveyList.search.noResults"
+  >
+    No surveys match your search
+  </p>
 </div>
 
 <ng-template #filterChip let-filter="filter" let-icon="icon">
