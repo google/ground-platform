@@ -47,6 +47,10 @@
       color: mat.get-theme-color($theme, outline);
     }
   }
+
+  .no-results {
+    color: mat.get-theme-color($theme, on-surface-variant);
+  }
 }
 
 @mixin typography($theme) {
@@ -60,6 +64,10 @@
 
   .survey-description {
     font: mat.get-theme-typography($theme, body-medium, font);
+  }
+
+  .no-results {
+    font: mat.get-theme-typography($theme, body-large, font);
   }
 }
 
