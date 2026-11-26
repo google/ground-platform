@@ -168,6 +168,7 @@ class WorkbenchMobileStateTest {
     assertFalse(state.viewModels.surveyMap.uiState.value.isEntityBottomSheetExpanded)
 
     // Straight-line wayfinding to a place works
+    state.viewModels.surveyMap.updateUserGpsLocation(0.50f, 0.50f)
     state.searchableListActions.toggleNavigationToPlace("place-karima-forest")
     val placeNav = assertNotNull(state.viewModels.surveyMap.uiState.value.activeNavigation)
     assertEquals(NavigationTargetKind.PLACE, placeNav.targetKind)
