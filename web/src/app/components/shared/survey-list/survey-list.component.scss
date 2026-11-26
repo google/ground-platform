@@ -23,6 +23,19 @@
   }
 
   .filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin: 0px 60px 24px 160px;
+
+    .search-field {
+      width: 320px;
+      max-width: 100%;
+    }
+  }
+
+  .no-results {
     margin: 0px 60px 24px 160px;
   }
 

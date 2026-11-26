@@ -24,6 +24,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
@@ -176,6 +178,8 @@ describe('SurveyListComponent', () => {
         MatGridListModule,
         MatIconModule,
         MatChipsModule,
+        MatInputModule,
+        NoopAnimationsModule,
       ],
       declarations: [SurveyListComponent, HeaderComponent],
       providers: [
@@ -225,6 +229,53 @@ describe('SurveyListComponent', () => {
 
     surveyCards = fixture.debugElement.queryAll(By.css('.survey-card'));
     expect(surveyCards.length).toBe(4, 'Should display 2 survey cards');
+  });
+
+  describe('search', () => {
+    it('shows only the surveys whose title or description matches', () => {
+      search(fixture, 'TITLE3');
+
+      expect(surveyCardTitles(fixture)).toEqual(['title3']);
+    });
+
+    it('matches the description too', () => {
+      search(fixture, 'description2');
+
+      expect(surveyCardTitles(fixture)).toEqual(['title2']);
+    });
+
+    it('combines with the access filter', () => {
+      search(fixture, 'title');
+      clickFilter(fixture, 2);
+      fixture.detectChanges();
+
+      expect(surveyCardTitles(fixture)).toEqual(['title3']);
+    });
+
+    it('hides the create survey card while searching', () => {
+      search(fixture, 'title');
+
+      expect(fixture.debugElement.query(By.css('#add-card'))).toBeNull();
+    });
+
+    it('says when no survey matches', () => {
+      search(fixture, 'nothing like this');
+
+      expect(surveyCardTitles(fixture)).toEqual([]);
+      expect(fixture.debugElement.query(By.css('.no-results'))).not.toBeNull();
+    });
+
+    it('shows every survey again when the search is cleared', () => {
+      search(fixture, 'title3');
+      (
+        fixture.debugElement.query(By.css('#clear-search'))
+          .nativeElement as HTMLElement
+      ).click();
+      fixture.detectChanges();
+
+      expect(surveyCardTitles(fixture)).toEqual(['title1', 'title2', 'title3']);
+      expect(fixture.debugElement.query(By.css('#add-card'))).not.toBeNull();
+    });
   });
 
   it('should go to create survey page when add card is clicked and user is passlisted', async () => {
@@ -289,4 +340,23 @@ function clickFilter(
     By.css(`mat-chip:nth-child(${nth})`)
   ).nativeElement as HTMLElement;
   filter.click();
+}
+
+function search(
+  fixture: ComponentFixture<SurveyListComponent>,
+  query: string
+): void {
+  const input = fixture.debugElement.query(By.css('#survey-search'))
+    .nativeElement as HTMLInputElement;
+  input.value = query;
+  input.dispatchEvent(new Event('input'));
+  fixture.detectChanges();
+}
+
+function surveyCardTitles(
+  fixture: ComponentFixture<SurveyListComponent>
+): string[] {
+  return fixture.debugElement
+    .queryAll(By.css('.survey-card:not(#add-card) .survey-title'))
+    .map(el => (el.nativeElement as HTMLElement).textContent!.trim());
 }

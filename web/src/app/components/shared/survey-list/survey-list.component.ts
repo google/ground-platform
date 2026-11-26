@@ -30,6 +30,7 @@ import {
 import { AuthService } from 'app/services/auth/auth.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { matchesSearch } from 'app/utils/search';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 
@@ -61,8 +62,16 @@ export class SurveyListComponent {
 
   currentFilter = signal<SurveyListFilter>(SurveyListFilter.ALL);
 
+  /** The text typed in the search field, matched against title and description. */
+  searchQuery = signal('');
+
+  isSearching = computed(() => this.searchQuery().trim() !== '');
+
   surveys = computed(() => {
-    const surveys = this.allSurveys();
+    const query = this.searchQuery();
+    const surveys = this.allSurveys().filter(s =>
+      matchesSearch(query, s.title, s.description)
+    );
     const filter = this.currentFilter();
 
     if (filter === SurveyListFilter.ALL) return surveys;
@@ -107,6 +116,14 @@ export class SurveyListComponent {
 
   handleFilterSelection(newFilter: SurveyListFilter): void {
     this.currentFilter.set(newFilter);
+  }
+
+  handleSearch(query: string): void {
+    this.searchQuery.set(query);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
   }
 
   handleSurveySelection(clickedSurvey: Survey): void {
