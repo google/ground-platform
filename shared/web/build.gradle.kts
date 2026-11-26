@@ -47,6 +47,7 @@ kotlin {
         implementation(libs.compose.components.resources)
         // Type-safe navigation between the console's pages; routes are @Serializable classes.
         implementation(libs.jetbrains.navigation.compose)
+        implementation(libs.jetbrains.navigationevent.compose)
       }
     }
     val commonTest by getting {

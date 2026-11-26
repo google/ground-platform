@@ -44,6 +44,12 @@ internal interface SurveyDraftSession {
    * Form-scoped actions handled at the Survey level can be undone from the Form editor.
    */
   fun editForForm(formKey: String, block: SurveyDraftEdits.() -> Unit)
+
+  /**
+   * Runs [edit] and records the resulting draft change on dataset [datasetKey]'s undo stack, so
+   * schema, table, and map edits can be undone and redone in the dataset editor.
+   */
+  fun editForDataset(datasetKey: String, block: SurveyDraftEdits.() -> Unit)
 }
 
 /** Replaces the survey details with [transform] of them. */
@@ -55,4 +61,4 @@ internal fun SurveyDraftSession.updateDetails(transform: (SurveyDetails) -> Surv
 internal fun SurveyDraftSession.updateDataset(
   key: String,
   transform: (EntityDataset) -> EntityDataset,
-) = edit { updateDataset(key, transform) }
+) = editForDataset(key) { updateDataset(key, transform) }

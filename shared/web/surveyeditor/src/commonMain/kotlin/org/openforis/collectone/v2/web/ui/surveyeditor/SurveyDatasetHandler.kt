@@ -89,18 +89,20 @@ internal class SurveyDatasetHandler(private val session: SurveyDraftSession) : D
     datasets = datasets.map { if (it.kind == kind) reordered.next() else it }
   }
 
-  override fun addProperty(key: String) = session.edit {
-    updateDataset(key) { d ->
-      val name = FormDatasetLinks.uniqueId("property", d.properties.map { it.name })
-      d.copy(properties = d.properties + EntityProperty(name, defaultNames.property))
+  override fun addProperty(key: String) =
+    session.editForDataset(key) {
+      updateDataset(key) { d ->
+        val name = FormDatasetLinks.uniqueId("property", d.properties.map { it.name })
+        d.copy(properties = d.properties + EntityProperty(name, defaultNames.property))
+      }
     }
-  }
 
-  override fun updateProperty(key: String, index: Int, property: EntityProperty) = session.edit {
-    val updated = DatasetPropertyRename.apply(toDraft(), key, index, property)
-    forms = updated.forms
-    datasets = updated.datasets
-  }
+  override fun updateProperty(key: String, index: Int, property: EntityProperty) =
+    session.editForDataset(key) {
+      val updated = DatasetPropertyRename.apply(toDraft(), key, index, property)
+      forms = updated.forms
+      datasets = updated.datasets
+    }
 
   override fun removeProperty(key: String, index: Int) =
     updateDataset(key) { d ->
@@ -120,7 +122,7 @@ internal class SurveyDatasetHandler(private val session: SurveyDraftSession) : D
 
   override fun addRow(key: String, at: LatLng?, geometry: List<LatLng>?): String {
     var rowKey = ""
-    session.edit {
+    session.editForDataset(key) {
       rowKey = newKey("r")
       updateDataset(key) { d ->
         val keyValue =

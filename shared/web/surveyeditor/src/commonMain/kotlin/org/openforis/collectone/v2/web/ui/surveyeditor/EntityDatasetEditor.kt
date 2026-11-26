@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -38,8 +39,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Redo
+import androidx.compose.material.icons.automirrored.outlined.Undo
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -73,11 +79,22 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key as eventKey
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.openforis.collectone.v2.app.domain.model.editor.DatasetKind
@@ -120,6 +137,8 @@ import org.openforis.collectone.v2.web.domain.model.PagedEntityTableCache
 import org.openforis.collectone.v2.web.domain.model.TableCellLoadState
 import org.openforis.collectone.v2.web.domain.model.groupColumnsByCommonPrefix
 import org.openforis.collectone.v2.web.resources.Res
+import org.openforis.collectone.v2.web.resources.formeditor_redo
+import org.openforis.collectone.v2.web.resources.formeditor_undo
 import org.openforis.collectone.v2.web.resources.surveyeditor_cancel
 import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_add_feature
 import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_add_property
@@ -167,8 +186,6 @@ import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_no_form_ma
 import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_properties
 import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_properties_count
 import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_properties_managed_by_form
-import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_property_advanced
-import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_property_hide_id
 import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_property_internal_id
 import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_property_internal_id_supporting
 import org.openforis.collectone.v2.web.resources.surveyeditor_dataset_property_label
@@ -314,50 +331,129 @@ fun EntityDatasetEditor(
     }
   val extraRemoteColumns =
     remember(tableColumns) { tableColumns.filter { it.isRemoteOnly }.map { it.property } }
+  val canUndo = uiState.canUndoDataset(dataset.key)
+  val canRedo = uiState.canRedoDataset(dataset.key)
+  val onUndo = {
+    if (canUndo) {
+      tableCache?.clearLocalOverrides()
+      actions.undoDataset(dataset.key)
+    }
+  }
+  val onRedo = {
+    if (canRedo) {
+      tableCache?.clearLocalOverrides()
+      actions.redoDataset(dataset.key)
+    }
+  }
 
-  Column(modifier = Modifier.fillMaxSize()) {
-    DatasetHeader(uiState, actions, dataset, issues.size, totalPropertyCount = tableColumns.size)
-    Row(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
+  NavigationBackHandler(
+    state = rememberNavigationEventState(NavigationEventInfo.None),
+    isBackEnabled = selectedRow != null,
+    onBackCompleted = { selectedRow = null },
+  )
+
+  Column(modifier = Modifier.fillMaxSize().datasetUndoRedoShortcuts(onUndo, onRedo)) {
+    DatasetHeader(
+      uiState = uiState,
+      actions = actions,
+      dataset = dataset,
+      issueCount = issues.size,
+      totalPropertyCount = tableColumns.size,
+      canUndo = canUndo,
+      canRedo = canRedo,
+      onUndo = onUndo,
+      onRedo = onRedo,
+    )
+    DatasetEditorBody(
+      uiState = uiState,
+      actions = actions,
+      dataset = dataset,
+      isMap = isMap,
+      tableColumns = tableColumns,
+      extraRemoteColumns = extraRemoteColumns,
+      tableCache = tableCache,
+      issues = issues,
+      selectedRow = selectedRow,
+      onSelectRow = { selectedRow = it },
+    )
+  }
+}
+
+@Composable
+private fun DatasetEditorBody(
+  uiState: SurveyEditorUiState,
+  actions: SurveyEditorActions,
+  dataset: EntityDataset,
+  isMap: Boolean,
+  tableColumns: List<DatasetTableColumn>,
+  extraRemoteColumns: List<EntityProperty>,
+  tableCache: PagedEntityTableCache?,
+  issues: List<DatasetIssueText>,
+  selectedRow: String?,
+  onSelectRow: (String?) -> Unit,
+) {
+  Row(
+    modifier = Modifier.fillMaxSize().padding(16.dp),
+    horizontalArrangement = Arrangement.spacedBy(16.dp),
+  ) {
+    Column(
+      modifier = Modifier.weight(1f).fillMaxHeight(),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      Column(
-        modifier = Modifier.weight(1f).fillMaxHeight(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-      ) {
-        if (isMap) {
-          InteractiveLayerMapCard(
-            editor = actions,
-            dataset = dataset,
-            selectedRow = selectedRow,
-            onSelectRow = { selectedRow = it },
-            modifier = Modifier.fillMaxWidth().weight(1.4f),
-            backdropPolygons = uiState.details.surveyArea?.parts.orEmpty(),
-            geometryEditable = !dataset.isGenerated && !uiState.isReadOnly,
-          )
-        }
-        RowsTableCard(
-          uiState = uiState,
-          actions = actions,
+      if (isMap) {
+        InteractiveLayerMapCard(
+          editor = actions,
           dataset = dataset,
-          tableColumns = tableColumns,
-          tableCache = tableCache,
-          issues = issues,
           selectedRow = selectedRow,
-          onSelectRow = { selectedRow = it },
-          modifier = Modifier.fillMaxWidth().weight(1f),
+          onSelectRow = onSelectRow,
+          modifier = Modifier.fillMaxWidth().weight(1.4f),
+          backdropPolygons = uiState.details.surveyArea?.parts.orEmpty(),
+          geometryEditable = !dataset.isGenerated && !uiState.isReadOnly,
         )
       }
-      DatasetSettingsPanel(
+      RowsTableCard(
         uiState = uiState,
         actions = actions,
         dataset = dataset,
-        extraRemoteProperties = extraRemoteColumns,
-        modifier = Modifier.width(380.dp).fillMaxHeight(),
+        tableColumns = tableColumns,
+        tableCache = tableCache,
+        issues = issues,
+        selectedRow = selectedRow,
+        onSelectRow = onSelectRow,
+        modifier = Modifier.fillMaxWidth().weight(1f),
       )
     }
+    DatasetSettingsPanel(
+      uiState = uiState,
+      actions = actions,
+      dataset = dataset,
+      extraRemoteProperties = extraRemoteColumns,
+      modifier = Modifier.width(380.dp).fillMaxHeight(),
+    )
   }
 }
+
+private fun Modifier.datasetUndoRedoShortcuts(onUndo: () -> Unit, onRedo: () -> Unit): Modifier =
+  onPreviewKeyEvent { event ->
+    if (event.type != KeyEventType.KeyDown || (!event.isCtrlPressed && !event.isMetaPressed)) {
+      return@onPreviewKeyEvent false
+    }
+    when {
+      event.eventKey == Key.Z && event.isShiftPressed -> {
+        onRedo()
+        true
+      }
+      event.eventKey == Key.Z && !event.isShiftPressed -> {
+        onUndo()
+        true
+      }
+      event.eventKey == Key.Y && !event.isShiftPressed -> {
+        onRedo()
+        true
+      }
+      else -> false
+    }
+  }
 
 @Composable
 private fun DatasetHeader(
@@ -366,6 +462,10 @@ private fun DatasetHeader(
   dataset: EntityDataset,
   issueCount: Int,
   totalPropertyCount: Int = dataset.properties.size,
+  canUndo: Boolean = false,
+  canRedo: Boolean = false,
+  onUndo: () -> Unit = {},
+  onRedo: () -> Unit = {},
 ) {
   var confirmDelete by remember { mutableStateOf(false) }
 
@@ -395,6 +495,22 @@ private fun DatasetHeader(
         totalPropertyCount = totalPropertyCount,
         modifier = Modifier.weight(1f),
       )
+      if (!uiState.isReadOnly) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          IconButton(onClick = onUndo, enabled = canUndo) {
+            Icon(
+              Icons.AutoMirrored.Outlined.Undo,
+              contentDescription = stringResource(Res.string.formeditor_undo),
+            )
+          }
+          IconButton(onClick = onRedo, enabled = canRedo) {
+            Icon(
+              Icons.AutoMirrored.Outlined.Redo,
+              contentDescription = stringResource(Res.string.formeditor_redo),
+            )
+          }
+        }
+      }
       if (issueCount > 0) {
         DatasetHeaderIssuesBadge(issueCount = issueCount)
       }
@@ -1188,9 +1304,9 @@ private fun DatasetIssuesBanner(issues: List<DatasetIssueText>, onSelectRow: (St
     color = colors.errorContainer,
     contentColor = colors.onErrorContainer,
     shape = MaterialTheme.shapes.small,
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).heightIn(max = 112.dp),
   ) {
-    Column(modifier = Modifier.padding(10.dp)) {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(10.dp)) {
       issues.take(6).forEach { issue ->
         Text(
           "• ${issue.text}",
@@ -1409,6 +1525,14 @@ private fun TextCell(
     modifier =
       frameModifier
         .focusRequester(focusRequester)
+        .onPreviewKeyEvent { event ->
+          if (event.type == KeyEventType.KeyDown && event.eventKey == Key.Escape) {
+            onStopEditing()
+            true
+          } else {
+            false
+          }
+        }
         .onFocusChanged {
           if (it.isFocused) {
             hadFocus = true
@@ -1569,19 +1693,19 @@ private fun DatasetSettingsPanel(
       verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
       datasetIdentityItems(uiState, actions, dataset, isMap)
-      datasetSamplingAndStyleItems(uiState, actions, dataset, isMap)
-      datasetPropertiesItems(uiState, actions, dataset)
-      if (extraRemoteProperties.isNotEmpty()) {
-        datasetRemotePropertiesItems(
-          extraRemoteProperties = extraRemoteProperties,
-          expandedGroups = expandedRemotePropertyGroups,
-          onToggleGroup = { groupId ->
-            expandedRemotePropertyGroups =
-              if (groupId in expandedRemotePropertyGroups) expandedRemotePropertyGroups - groupId
-              else expandedRemotePropertyGroups + groupId
-          },
-        )
-      }
+      datasetSamplingAndStyleItems(uiState, actions, dataset, isMap, extraRemoteProperties)
+      datasetPropertiesTableItems(
+        uiState = uiState,
+        actions = actions,
+        dataset = dataset,
+        extraRemoteProperties = extraRemoteProperties,
+        expandedGroups = expandedRemotePropertyGroups,
+        onToggleGroup = { groupId ->
+          expandedRemotePropertyGroups =
+            if (groupId in expandedRemotePropertyGroups) expandedRemotePropertyGroups - groupId
+            else expandedRemotePropertyGroups + groupId
+        },
+      )
       if (!dataset.isLinkedToForm && !uiState.isReadOnly) {
         item(key = "add-property") {
           TextButton(onClick = { actions.addProperty(key) }) {
@@ -1655,6 +1779,7 @@ private fun LazyListScope.datasetSamplingAndStyleItems(
   actions: SurveyEditorActions,
   dataset: EntityDataset,
   isMap: Boolean,
+  extraRemoteProperties: List<EntityProperty> = emptyList(),
 ) {
   val key = dataset.key
   if (dataset.generator != null) {
@@ -1673,6 +1798,7 @@ private fun LazyListScope.datasetSamplingAndStyleItems(
   }
   item(key = "key-label-properties") {
     val choose = stringResource(Res.string.surveyeditor_dataset_choose)
+    val labelOptions = dataset.properties + extraRemoteProperties
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
       DropdownSelector(
         label = stringResource(Res.string.surveyeditor_dataset_key_property),
@@ -1684,11 +1810,18 @@ private fun LazyListScope.datasetSamplingAndStyleItems(
       )
       DropdownSelector(
         label = stringResource(Res.string.surveyeditor_dataset_label_property),
-        selectedText = dataset.property(dataset.labelProperty)?.label ?: choose,
-        options = dataset.properties,
-        optionText = { it.label },
+        selectedText =
+          labelOptions.firstOrNull { it.name == dataset.labelProperty }?.label ?: choose,
+        options = labelOptions,
+        optionText = { it.label.ifBlank { it.name } },
         enabled = !uiState.isReadOnly,
-        onSelect = { p -> actions.updateDataset(key) { it.copy(labelProperty = p.name) } },
+        onSelect = { p ->
+          actions.updateDataset(key) { d ->
+            val updatedProps =
+              if (d.properties.any { it.name == p.name }) d.properties else d.properties + p
+            d.copy(properties = updatedProps, labelProperty = p.name)
+          }
+        },
       )
     }
   }
@@ -1707,30 +1840,73 @@ private fun LazyListScope.datasetSamplingAndStyleItems(
   }
 }
 
-private fun LazyListScope.datasetPropertiesItems(
+private val PropertyTypeColumnWidth = 84.dp
+private val PropertyRequiredColumnWidth = 38.dp
+private val PropertyActionColumnWidth = 28.dp
+
+private fun LazyListScope.datasetPropertiesTableItems(
   uiState: SurveyEditorUiState,
   actions: SurveyEditorActions,
   dataset: EntityDataset,
+  extraRemoteProperties: List<EntityProperty>,
+  expandedGroups: Set<String>,
+  onToggleGroup: (String) -> Unit,
 ) {
   val key = dataset.key
+  val hasEditableRows = !uiState.isReadOnly && !dataset.isLinkedToForm
   item(key = "properties-header") {
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
       SectionLabel(stringResource(Res.string.surveyeditor_dataset_properties))
       if (dataset.isLinkedToForm) {
         DatasetPropertiesLinkedToFormNotice()
       }
+      PropertiesTableHeaderRow(showActionsColumn = hasEditableRows)
     }
   }
   itemsIndexed(dataset.properties, key = { index, _ -> "property-$index" }) { index, property ->
     val reserved = dataset.isGenerated && property.name in SamplePlotProperties.all
-    PropertyEditor(
+    CompactDeclaredPropertyRow(
       property = property,
       readOnly = dataset.isLinkedToForm || reserved || uiState.isReadOnly,
-      canRemove =
-        !uiState.isReadOnly && !dataset.isLinkedToForm && !reserved && dataset.properties.size > 1,
+      showActionsColumn = hasEditableRows,
+      canRemove = hasEditableRows && !reserved && dataset.properties.size > 1,
       onChange = { actions.updateProperty(key, index, it) },
       onRemove = { actions.removeProperty(key, index) },
     )
+  }
+  if (extraRemoteProperties.isNotEmpty()) {
+    val groupedRemote =
+      groupColumnsByCommonPrefix(columns = extraRemoteProperties, keyOf = { it.name })
+    groupedRemote.groups.forEach { group ->
+      val expanded = group.id in expandedGroups
+      item(key = "remote-group-header-${group.id}") {
+        CollapsiblePropertyGroupRow(
+          groupId = group.id,
+          wildcardLabel = group.wildcardLabel,
+          count = group.size,
+          expanded = expanded,
+          onToggle = { onToggleGroup(group.id) },
+        )
+      }
+      if (expanded) {
+        items(group.items, key = { prop -> "remote-property-${prop.name}" }) { prop ->
+          CompactRemotePropertyRow(
+            prop = prop,
+            indented = true,
+            showActionsColumn = hasEditableRows,
+          )
+        }
+      }
+    }
+    val ungroupedRemote =
+      groupedRemote.displaySlots.filterIsInstance<GroupedTableColumn.Single<EntityProperty>>()
+    items(ungroupedRemote, key = { slot -> "remote-property-${slot.item.name}" }) { slot ->
+      CompactRemotePropertyRow(
+        prop = slot.item,
+        indented = false,
+        showActionsColumn = hasEditableRows,
+      )
+    }
   }
 }
 
@@ -1761,53 +1937,307 @@ private fun DatasetPropertiesLinkedToFormNotice() {
   }
 }
 
-private fun LazyListScope.datasetRemotePropertiesItems(
-  extraRemoteProperties: List<EntityProperty>,
-  expandedGroups: Set<String>,
-  onToggleGroup: (String) -> Unit,
-) {
-  val groupedRemote =
-    groupColumnsByCommonPrefix(columns = extraRemoteProperties, keyOf = { it.name })
-  groupedRemote.groups.forEach { group ->
-    val expanded = group.id in expandedGroups
-    item(key = "remote-group-header-${group.id}") {
-      CollapsiblePropertyGroupRow(
-        groupId = group.id,
-        wildcardLabel = group.wildcardLabel,
-        count = group.size,
-        expanded = expanded,
-        onToggle = { onToggleGroup(group.id) },
+@Composable
+private fun PropertiesTableHeaderRow(showActionsColumn: Boolean) {
+  val colors = MaterialTheme.colorScheme
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .background(colors.surfaceContainerHigh, MaterialTheme.shapes.extraSmall)
+        .padding(horizontal = 8.dp, vertical = 6.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(6.dp),
+  ) {
+    Text(
+      text = stringResource(Res.string.surveyeditor_dataset_property_label),
+      style = MaterialTheme.typography.labelSmall,
+      color = colors.onSurfaceVariant,
+      fontWeight = FontWeight.Bold,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.weight(1f),
+    )
+    Text(
+      text = stringResource(Res.string.surveyeditor_dataset_property_type),
+      style = MaterialTheme.typography.labelSmall,
+      color = colors.onSurfaceVariant,
+      fontWeight = FontWeight.Bold,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.width(PropertyTypeColumnWidth),
+    )
+    Box(
+      modifier = Modifier.width(PropertyRequiredColumnWidth),
+      contentAlignment = Alignment.Center,
+    ) {
+      Text(
+        text = stringResource(Res.string.surveyeditor_dataset_property_required),
+        style = MaterialTheme.typography.labelSmall,
+        color = colors.onSurfaceVariant,
+        fontWeight = FontWeight.Bold,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
       )
     }
-    if (expanded) {
-      items(group.items, key = { prop -> "remote-property-${prop.name}" }) { prop ->
-        RemotePropertyChip(prop = prop, indented = true)
-      }
+    if (showActionsColumn) {
+      Spacer(Modifier.width(PropertyActionColumnWidth))
     }
-  }
-  val ungroupedRemote =
-    groupedRemote.displaySlots.filterIsInstance<GroupedTableColumn.Single<EntityProperty>>()
-  items(ungroupedRemote, key = { slot -> "remote-property-${slot.item.name}" }) { slot ->
-    RemotePropertyChip(prop = slot.item, indented = false)
   }
 }
 
 @Composable
-private fun RemotePropertyChip(prop: EntityProperty, indented: Boolean) {
-  Surface(
-    color = MaterialTheme.colorScheme.surfaceContainerLow,
-    shape = MaterialTheme.shapes.small,
-    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
-    modifier = Modifier.fillMaxWidth().padding(start = if (indented) 14.dp else 0.dp),
-  ) {
+private fun CompactDeclaredPropertyRow(
+  property: EntityProperty,
+  readOnly: Boolean,
+  showActionsColumn: Boolean,
+  canRemove: Boolean,
+  onChange: (EntityProperty) -> Unit,
+  onRemove: () -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  val hasInvalidName =
+    !FormEditorValidator.isValidName(property.name) || property.name == "geometry"
+
+  Column(modifier = Modifier.fillMaxWidth()) {
+    Row(
+      modifier =
+        Modifier.fillMaxWidth()
+          .background(colors.surfaceContainerLowest)
+          .padding(horizontal = 8.dp, vertical = 4.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      CompactPropertyLabelCell(
+        property = property,
+        readOnly = readOnly,
+        hasInvalidName = hasInvalidName,
+        onChange = onChange,
+        modifier = Modifier.weight(1f),
+      )
+      CompactPropertyTypeCell(property = property, readOnly = readOnly, onChange = onChange)
+      CompactPropertyRequiredCell(property = property, readOnly = readOnly, onChange = onChange)
+      if (showActionsColumn) {
+        if (!readOnly) {
+          IconButton(
+            onClick = onRemove,
+            enabled = canRemove,
+            modifier = Modifier.size(PropertyActionColumnWidth),
+          ) {
+            Icon(
+              Icons.Outlined.Close,
+              contentDescription = stringResource(Res.string.surveyeditor_dataset_remove_property),
+              modifier = Modifier.size(16.dp),
+            )
+          }
+        } else {
+          Spacer(Modifier.width(PropertyActionColumnWidth))
+        }
+      }
+    }
+    if (hasInvalidName && !readOnly) {
+      OutlinedTextField(
+        value = property.name,
+        onValueChange = { onChange(property.copy(name = it.trim())) },
+        label = { Text(stringResource(Res.string.surveyeditor_dataset_property_internal_id)) },
+        singleLine = true,
+        isError = true,
+        supportingText = {
+          Text(stringResource(Res.string.surveyeditor_dataset_property_internal_id_supporting))
+        },
+        textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = appMonospaceFontFamily()),
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+      )
+    }
+    HorizontalDivider(color = colors.outlineVariant.copy(alpha = 0.5f))
+  }
+}
+
+@Composable
+private fun CompactPropertyLabelCell(
+  property: EntityProperty,
+  readOnly: Boolean,
+  hasInvalidName: Boolean,
+  onChange: (EntityProperty) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val colors = MaterialTheme.colorScheme
+  if (readOnly) {
     Text(
-      text = prop.label.ifBlank { prop.name },
+      text = property.label.ifBlank { property.name },
       style = MaterialTheme.typography.bodySmall,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      color = colors.onSurface,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
-      modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+      modifier = modifier,
     )
+    return
+  }
+  @Suppress("DEPRECATION")
+  BasicTextField(
+    value = property.label,
+    onValueChange = { newLabel ->
+      val currentAutoSlug = slugify(property.label, fallback = property.name)
+      val shouldSyncName = property.name == currentAutoSlug || property.name.startsWith("property")
+      val updatedName =
+        if (shouldSyncName) slugify(newLabel, fallback = property.name) else property.name
+      onChange(property.copy(label = newLabel, name = updatedName))
+    },
+    singleLine = true,
+    textStyle = MaterialTheme.typography.bodySmall.copy(color = colors.onSurface),
+    cursorBrush = SolidColor(colors.primary),
+    modifier =
+      modifier
+        .border(
+          width = 0.5.dp,
+          color = if (hasInvalidName) colors.error else colors.outlineVariant,
+          shape = MaterialTheme.shapes.extraSmall,
+        )
+        .padding(horizontal = 6.dp, vertical = 5.dp),
+  )
+}
+
+@Composable
+private fun CompactPropertyTypeCell(
+  property: EntityProperty,
+  readOnly: Boolean,
+  onChange: (EntityProperty) -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  var typeMenuExpanded by remember { mutableStateOf(false) }
+  Box(modifier = Modifier.width(PropertyTypeColumnWidth)) {
+    if (readOnly) {
+      Text(
+        text = stringResource(property.type.labelRes),
+        style = MaterialTheme.typography.bodySmall,
+        color = colors.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+    } else {
+      Row(
+        modifier =
+          Modifier.fillMaxWidth()
+            .border(0.5.dp, colors.outlineVariant, MaterialTheme.shapes.extraSmall)
+            .clickable { typeMenuExpanded = true }
+            .padding(start = 6.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = stringResource(property.type.labelRes),
+          style = MaterialTheme.typography.bodySmall,
+          color = colors.onSurface,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.weight(1f),
+        )
+        Icon(
+          Icons.Outlined.ArrowDropDown,
+          contentDescription = null,
+          tint = colors.onSurfaceVariant,
+          modifier = Modifier.size(16.dp),
+        )
+      }
+      DropdownMenu(
+        expanded = typeMenuExpanded,
+        onDismissRequest = { typeMenuExpanded = false },
+      ) {
+        PropertyType.entries.forEach { option ->
+          DropdownMenuItem(
+            text = { Text(stringResource(option.labelRes)) },
+            onClick = {
+              typeMenuExpanded = false
+              onChange(property.copy(type = option))
+            },
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun CompactPropertyRequiredCell(
+  property: EntityProperty,
+  readOnly: Boolean,
+  onChange: (EntityProperty) -> Unit,
+) {
+  val colors = MaterialTheme.colorScheme
+  Box(
+    modifier = Modifier.width(PropertyRequiredColumnWidth),
+    contentAlignment = Alignment.Center,
+  ) {
+    if (readOnly) {
+      if (property.required) {
+        Icon(
+          Icons.Outlined.Check,
+          contentDescription = stringResource(Res.string.surveyeditor_dataset_property_required),
+          tint = colors.primary,
+          modifier = Modifier.size(16.dp),
+        )
+      } else {
+        Text(
+          text = "—",
+          style = MaterialTheme.typography.bodySmall,
+          color = colors.onSurfaceVariant,
+        )
+      }
+    } else {
+      Checkbox(
+        checked = property.required,
+        onCheckedChange = { onChange(property.copy(required = it)) },
+        modifier = Modifier.size(24.dp),
+      )
+    }
+  }
+}
+
+@Composable
+private fun CompactRemotePropertyRow(
+  prop: EntityProperty,
+  indented: Boolean,
+  showActionsColumn: Boolean,
+) {
+  val colors = MaterialTheme.colorScheme
+  Column(modifier = Modifier.fillMaxWidth()) {
+    Row(
+      modifier =
+        Modifier.fillMaxWidth()
+          .background(colors.surfaceContainerLowest)
+          .padding(start = if (indented) 18.dp else 8.dp, end = 8.dp, top = 5.dp, bottom = 5.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Text(
+        text = prop.label.ifBlank { prop.name },
+        style = MaterialTheme.typography.bodySmall,
+        color = colors.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f),
+      )
+      Text(
+        text = stringResource(prop.type.labelRes),
+        style = MaterialTheme.typography.bodySmall,
+        color = colors.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.width(PropertyTypeColumnWidth),
+      )
+      Box(
+        modifier = Modifier.width(PropertyRequiredColumnWidth),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = "—",
+          style = MaterialTheme.typography.bodySmall,
+          color = colors.onSurfaceVariant,
+        )
+      }
+      if (showActionsColumn) {
+        Spacer(Modifier.width(PropertyActionColumnWidth))
+      }
+    }
+    HorizontalDivider(color = colors.outlineVariant.copy(alpha = 0.4f))
   }
 }
 
@@ -2103,118 +2533,6 @@ private fun LayerStyleEditor(
       enabled = enabled,
       onCheckedChange = { v -> update { it.copy(visibleByDefault = v) } },
     )
-  }
-}
-
-@Composable
-private fun PropertyEditor(
-  property: EntityProperty,
-  readOnly: Boolean = false,
-  canRemove: Boolean,
-  onChange: (EntityProperty) -> Unit,
-  onRemove: () -> Unit,
-) {
-  val hasInvalidName =
-    !FormEditorValidator.isValidName(property.name) || property.name == "geometry"
-  var showAdvanced by remember { mutableStateOf(hasInvalidName) }
-  Surface(
-    color = MaterialTheme.colorScheme.surfaceContainerLow,
-    contentColor = MaterialTheme.colorScheme.onSurface,
-    shape = MaterialTheme.shapes.small,
-    modifier = Modifier.fillMaxWidth(),
-  ) {
-    Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-      Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        OutlinedTextField(
-          value = property.label,
-          onValueChange = { newLabel ->
-            val currentAutoSlug = slugify(property.label, fallback = property.name)
-            val shouldSyncName =
-              !showAdvanced &&
-                (property.name == currentAutoSlug || property.name.startsWith("property"))
-            val updatedName =
-              if (shouldSyncName) slugify(newLabel, fallback = property.name) else property.name
-            onChange(property.copy(label = newLabel, name = updatedName))
-          },
-          label = { Text(stringResource(Res.string.surveyeditor_dataset_property_label)) },
-          singleLine = true,
-          enabled = !readOnly,
-          modifier = Modifier.weight(1f),
-        )
-        if (!readOnly) {
-          TextButton(onClick = { showAdvanced = !showAdvanced }) {
-            Text(
-              text =
-                stringResource(
-                  if (showAdvanced) Res.string.surveyeditor_dataset_property_hide_id
-                  else Res.string.surveyeditor_dataset_property_advanced
-                ),
-              style = MaterialTheme.typography.labelSmall,
-            )
-          }
-        }
-      }
-      if (showAdvanced || hasInvalidName) {
-        OutlinedTextField(
-          value = property.name,
-          onValueChange = { onChange(property.copy(name = it.trim())) },
-          label = { Text(stringResource(Res.string.surveyeditor_dataset_property_internal_id)) },
-          singleLine = true,
-          enabled = !readOnly,
-          isError = hasInvalidName,
-          supportingText = {
-            Text(stringResource(Res.string.surveyeditor_dataset_property_internal_id_supporting))
-          },
-          textStyle =
-            MaterialTheme.typography.bodyLarge.copy(fontFamily = appMonospaceFontFamily()),
-          modifier = Modifier.fillMaxWidth(),
-        )
-      }
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.weight(1f)) {
-          if (readOnly) {
-            OutlinedTextField(
-              value = stringResource(property.type.labelRes),
-              onValueChange = {},
-              label = { Text(stringResource(Res.string.surveyeditor_dataset_property_type)) },
-              readOnly = true,
-              enabled = false,
-              singleLine = true,
-              modifier = Modifier.fillMaxWidth(),
-            )
-          } else {
-            DropdownSelector(
-              label = stringResource(Res.string.surveyeditor_dataset_property_type),
-              selectedText = stringResource(property.type.labelRes),
-              options = PropertyType.entries,
-              optionText = { stringResource(it.labelRes) },
-              onSelect = { onChange(property.copy(type = it)) },
-            )
-          }
-        }
-        Spacer(Modifier.width(8.dp))
-        Checkbox(
-          checked = property.required,
-          enabled = !readOnly,
-          onCheckedChange = { onChange(property.copy(required = it)) },
-        )
-        Text(
-          stringResource(Res.string.surveyeditor_dataset_property_required),
-          style = MaterialTheme.typography.bodySmall,
-        )
-        if (!readOnly) {
-          IconButton(onClick = onRemove, enabled = canRemove) {
-            Icon(
-              Icons.Outlined.Close,
-              contentDescription = stringResource(Res.string.surveyeditor_dataset_remove_property),
-            )
-          }
-        }
-      }
-    }
   }
 }
 

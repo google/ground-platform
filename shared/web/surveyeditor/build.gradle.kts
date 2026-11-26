@@ -38,6 +38,7 @@ kotlin {
         implementation(libs.compose.components.resources)
         implementation(libs.compose.material.icons.core)
         implementation(libs.compose.material.icons.extended)
+        implementation(libs.jetbrains.navigationevent.compose)
       }
     }
     val commonTest by getting {

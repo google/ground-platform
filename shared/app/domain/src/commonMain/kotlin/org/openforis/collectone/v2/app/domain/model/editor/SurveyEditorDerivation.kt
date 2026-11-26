@@ -125,7 +125,17 @@ object SurveyEditorDerivation {
         val linkIndex =
           target ?: datasets.indexOfFirst { it.id == imported.createDatasetId }.takeIf { it >= 0 }
         if (linkIndex != null && datasets[linkIndex].linkedFormKey == null) {
-          datasets[linkIndex] = datasets[linkIndex].copy(linkedFormKey = key)
+          val existing = datasets[linkIndex]
+          val existingNames = existing.properties.map { it.name }.toSet()
+          val missingFormProps =
+            FormDatasetLinks.formProperties(editor, existing.kind)
+              .filter { it.name !in existingNames }
+              .map { it.copy(required = false) }
+          datasets[linkIndex] =
+            existing.copy(
+              linkedFormKey = key,
+              properties = existing.properties + missingFormProps,
+            )
         }
       }
       val catalog = datasets.map { it.toEditorDataset(key) }

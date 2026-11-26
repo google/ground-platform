@@ -223,6 +223,13 @@ class PagedEntityTableCache(
     bumpRevision()
   }
 
+  /** Drops optimistic local edits (e.g. after undo/redo) while keeping cached remote tiles. */
+  fun clearLocalOverrides() {
+    if (localOverrides.isEmpty()) return
+    localOverrides.clear()
+    bumpRevision()
+  }
+
   /** Clears cached tiles and cancels in-flight requests. */
   fun clear() {
     schemaJob?.cancel()

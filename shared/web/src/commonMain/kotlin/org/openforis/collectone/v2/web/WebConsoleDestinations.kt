@@ -33,6 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -636,6 +639,12 @@ internal fun WebDashboardDestination(
   val hasCompletedInitialSync by web.dataHolder.hasCompletedInitialSync.collectAsState()
   val guarded = rememberGuardedDashboardControllers(web, navigation, timeSeries, impact)
   PlatformBeforeUnloadEffect(enabled = records.dataCollection.isActivelyFillingForm)
+  NavigationBackHandler(
+    state = rememberNavigationEventState(NavigationEventInfo.None),
+    isBackEnabled =
+      !records.dataCollection.isActivelyFillingForm && records.map.selectedEntityId != null,
+    onBackCompleted = { viewModels.surveyMap.selectEntity(null) },
+  )
   val hasMapLayers = records.dashboard.mapLayers.isNotEmpty()
   val hasGoogleEarthForms = records.dashboard.hasGoogleEarthForms
   WebDashboardPage(

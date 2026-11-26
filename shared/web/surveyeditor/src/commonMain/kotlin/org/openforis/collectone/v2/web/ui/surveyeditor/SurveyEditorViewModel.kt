@@ -82,6 +82,8 @@ import org.openforis.collectone.v2.web.domain.model.editor.MapLayerImportPreview
 import org.openforis.collectone.v2.web.domain.model.editor.SampleGenerationProgress
 import org.openforis.collectone.v2.web.domain.model.editor.SamplingAreaResult
 import org.openforis.collectone.v2.web.domain.model.editor.SuggestedGridSpacing
+import org.openforis.collectone.v2.web.domain.model.editor.SurveyEditorMutation
+import org.openforis.collectone.v2.web.domain.model.editor.SurveyUndoRedoStack
 import org.openforis.collectone.v2.web.domain.usecase.GenerateSamplePlotsUseCase
 import org.openforis.collectone.v2.web.domain.usecase.InviteCollaboratorUseCase
 import org.openforis.collectone.v2.web.domain.usecase.ManageLibraryUseCase
@@ -255,6 +257,9 @@ class SurveyEditorViewModel(
 
       override fun editForForm(formKey: String, block: SurveyDraftEdits.() -> Unit) =
         this@SurveyEditorViewModel.editForForm(formKey, block)
+
+      override fun editForDataset(datasetKey: String, block: SurveyDraftEdits.() -> Unit) =
+        this@SurveyEditorViewModel.editForDataset(datasetKey, block)
     }
 
   private val sharingHandler = SurveySharingHandler(draftSession, inviteCollaboratorUseCase)
@@ -368,6 +373,7 @@ class SurveyEditorViewModel(
       outcomeCard,
       hasLiveGeocoder = placeRepository.hasLiveGeocoder,
       libraryContextFor = libraryHandler::contextFor,
+      lazyLoadedProperties = entityTableRepository?.isLazyLoadingEnabled == true,
     )
 
   /**
@@ -480,6 +486,39 @@ class SurveyEditorViewModel(
   }
 
   /**
+   * Runs [edit] and records the resulting survey draft mutation on dataset [datasetKey]'s undo/redo
+   * stack so schema, table, and map edits can be undone and redone.
+   */
+  private fun editForDataset(datasetKey: String, block: SurveyDraftEdits.() -> Unit) {
+    val before = draft
+    edit(block)
+    val after = draft
+    val mutation = SurveyEditorMutation.between(before, after) ?: return
+    if (after.datasets.none { it.key == datasetKey }) return
+    session.update { s ->
+      val stack = s.datasetUndoRedo[datasetKey] ?: SurveyUndoRedoStack()
+      s.copy(datasetUndoRedo = s.datasetUndoRedo + (datasetKey to stack.record(mutation)))
+    }
+  }
+
+  private fun rewindDataset(key: String, toUndo: Boolean) {
+    if (uiState.value.isReadOnly) return
+    val currentDraft = draft
+    val stack = session.value.datasetUndoRedo[key] ?: return
+    val transition = (if (toUndo) stack.undo(currentDraft) else stack.redo(currentDraft)) ?: return
+    val openedBefore = opened
+    session.update { s ->
+      s.copy(
+        surveyId = activeSessionSurveyId,
+        opened = openedBefore,
+        draft = transition.draft,
+        isPromptingWorkingCopy = false,
+        datasetUndoRedo = s.datasetUndoRedo + (key to transition.stack),
+      )
+    }
+  }
+
+  /**
    * Stores [after], a whole survey draft restored by a Form editor's undo or redo, as the edited
    * draft. Unlike [edit] it applies no derivations (such as suggested grid spacing): the draft was
    * already derived when it was first recorded.
@@ -554,6 +593,7 @@ class SurveyEditorViewModel(
             isSaving = false,
             generationErrors = emptyMap(),
             organizationNotice = null,
+            datasetUndoRedo = emptyMap(),
           )
         }
       }
@@ -656,6 +696,7 @@ class SurveyEditorViewModel(
         isPromptingWorkingCopy = false,
         generationErrors = emptyMap(),
         organizationNotice = null,
+        datasetUndoRedo = emptyMap(),
         section = if (stillExists) current else SurveyEditorSection.Details,
       )
     }
@@ -1015,6 +1056,10 @@ class SurveyEditorViewModel(
   override fun tableRepository(): EntityTableRepository? = entityTableRepository?.takeIf {
     it.isLazyLoadingEnabled
   }
+
+  override fun undoDataset(key: String) = rewindDataset(key, toUndo = true)
+
+  override fun redoDataset(key: String) = rewindDataset(key, toUndo = false)
 
   // --- Sample plots ---
 

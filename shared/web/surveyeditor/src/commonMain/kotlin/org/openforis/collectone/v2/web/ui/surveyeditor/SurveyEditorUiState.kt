@@ -36,6 +36,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorForm
 import org.openforis.collectone.v2.app.domain.model.editor.toEditorDataset
 import org.openforis.collectone.v2.map.GeometryType
 import org.openforis.collectone.v2.web.domain.model.editor.SampleGenerationProgress
+import org.openforis.collectone.v2.web.domain.model.editor.SurveyUndoRedoStack
 import org.openforis.collectone.v2.web.resources.Res
 import org.openforis.collectone.v2.web.resources.surveyeditor_read_only_archived
 import org.openforis.collectone.v2.web.resources.surveyeditor_read_only_closed
@@ -128,6 +129,10 @@ data class SurveyEditorUiState(
   val organizationNotice: EditorText? = null,
   /** The "What happened with this data?" card shown after closing the survey, or `null`. */
   val outcomeCard: SurveyOutcomeCardState? = null,
+  /** Whether remote map-layer entity properties are lazy-loaded on scroll rather than all local. */
+  val lazyLoadedProperties: Boolean = false,
+  /** Per-dataset undo/redo stacks for Map layer and Data table edits in this session. */
+  val datasetUndoRedo: Map<String, SurveyUndoRedoStack> = emptyMap(),
 ) {
   /** Whether the survey is in draft mode and not yet published for field collection. */
   val isDraft: Boolean
@@ -255,7 +260,9 @@ data class SurveyEditorUiState(
    */
   private val datasetIssuesByKey: Map<String, List<DatasetIssue>> by lazy {
     val allIds = datasets.map { it.id }
-    datasets.associate { it.key to EntityDatasetValidator.validate(it, allIds) }
+    datasets.associate {
+      it.key to EntityDatasetValidator.validate(it, allIds, lazyLoadedProperties)
+    }
   }
 
   /**
@@ -264,7 +271,13 @@ data class SurveyEditorUiState(
    */
   fun datasetIssues(dataset: EntityDataset): List<DatasetIssue> =
     datasetIssuesByKey[dataset.key]?.takeIf { dataset(dataset.key) === dataset }
-      ?: EntityDatasetValidator.validate(dataset, datasets.map { it.id })
+      ?: EntityDatasetValidator.validate(dataset, datasets.map { it.id }, lazyLoadedProperties)
+
+  /** Whether dataset [key] has an edit on its undo stack and the survey is editable. */
+  fun canUndoDataset(key: String): Boolean = !isReadOnly && datasetUndoRedo[key]?.canUndo == true
+
+  /** Whether dataset [key] has a rewound edit on its redo stack and the survey is editable. */
+  fun canRedoDataset(key: String): Boolean = !isReadOnly && datasetUndoRedo[key]?.canRedo == true
 
   /** Number of validation issues of [dataset], plus its last sample generation error, if any. */
   fun datasetIssueCount(dataset: EntityDataset): Int =

@@ -292,8 +292,17 @@ object EntityDatasetValidator {
   fun validate(
     dataset: EntityDataset,
     allDatasetIds: List<String> = listOf(dataset.id),
-  ): List<DatasetIssue> {
-    val issues = mutableListOf<DatasetIssue>()
+    lazyLoadedProperties: Boolean = false,
+  ): List<DatasetIssue> = buildList {
+    validateSchema(dataset, allDatasetIds, this)
+    validateRows(dataset, lazyLoadedProperties, this)
+  }
+
+  private fun validateSchema(
+    dataset: EntityDataset,
+    allDatasetIds: List<String>,
+    issues: MutableList<DatasetIssue>,
+  ) {
     if (!FormEditorValidator.isValidName(dataset.id)) {
       issues += DatasetIssue(message = EditorIssueMessage.DATASET_ID_INVALID.message())
     } else if (allDatasetIds.count { it == dataset.id } > 1) {
@@ -318,6 +327,13 @@ object EntityDatasetValidator {
     if (dataset.property(dataset.labelProperty) == null) {
       issues += DatasetIssue(message = EditorIssueMessage.DATASET_LABEL_PROPERTY_MISSING.message())
     }
+  }
+
+  private fun validateRows(
+    dataset: EntityDataset,
+    lazyLoadedProperties: Boolean,
+    issues: MutableList<DatasetIssue>,
+  ) {
     val keys = mutableSetOf<String>()
     dataset.rows.forEach { row ->
       val keyValue = row.values[dataset.keyProperty].orEmpty().trim()
@@ -336,26 +352,7 @@ object EntityDatasetValidator {
               row.key,
             )
       }
-      dataset.properties.forEach { p ->
-        val v = row.values[p.name].orEmpty()
-        if (p.required && v.isBlank() && p.name != dataset.keyProperty) {
-          issues +=
-            DatasetIssue(
-              EditorIssueMessage.DATASET_ROW_VALUE_MISSING.message(rowName, p.label),
-              row.key,
-            )
-        } else if (!p.type.accepts(v)) {
-          issues +=
-            DatasetIssue(
-              EditorIssueMessage.DATASET_ROW_VALUE_WRONG_TYPE.message(
-                rowName,
-                p.label,
-                DomainMessage.Lowercase(DomainMessage.Label(p.type)),
-              ),
-              row.key,
-            )
-        }
-      }
+      validateRowValues(dataset, row, rowName, lazyLoadedProperties, issues)
       if (
         dataset.kind == DatasetKind.MAP_LAYER &&
           row.geometry.size < dataset.geometryType.minVertices
@@ -371,7 +368,43 @@ object EntityDatasetValidator {
           )
       }
     }
-    return issues
+  }
+
+  private fun validateRowValues(
+    dataset: EntityDataset,
+    row: EntityRow,
+    rowName: String,
+    lazyLoadedProperties: Boolean,
+    issues: MutableList<DatasetIssue>,
+  ) {
+    val isLazyServerRow =
+      lazyLoadedProperties &&
+        dataset.kind == DatasetKind.MAP_LAYER &&
+        org.openforis.collectone.v2.core.ids.RecordIds.isUuid(row.key)
+    dataset.properties.forEach { p ->
+      val rawValue = row.values[p.name]
+      if (rawValue == null && isLazyServerRow && p.name != dataset.keyProperty) {
+        return@forEach
+      }
+      val v = rawValue.orEmpty()
+      if (p.required && v.isBlank() && p.name != dataset.keyProperty) {
+        issues +=
+          DatasetIssue(
+            EditorIssueMessage.DATASET_ROW_VALUE_MISSING.message(rowName, p.label),
+            row.key,
+          )
+      } else if (!p.type.accepts(v)) {
+        issues +=
+          DatasetIssue(
+            EditorIssueMessage.DATASET_ROW_VALUE_WRONG_TYPE.message(
+              rowName,
+              p.label,
+              DomainMessage.Lowercase(DomainMessage.Label(p.type)),
+            ),
+            row.key,
+          )
+      }
+    }
   }
 }
 

@@ -339,6 +339,12 @@ interface DatasetActions : MapFeatureEditor {
    * sync is active, or `null` when all entity properties are already local.
    */
   fun tableRepository(): EntityTableRepository? = null
+
+  /** Undoes the last schema, table, or map edit made on dataset [key]. */
+  fun undoDataset(key: String) {}
+
+  /** Redoes the last undone schema, table, or map edit on dataset [key]. */
+  fun redoDataset(key: String) {}
 }
 
 /** Generated sample plots Map layers: their sample design and the generation runs. */

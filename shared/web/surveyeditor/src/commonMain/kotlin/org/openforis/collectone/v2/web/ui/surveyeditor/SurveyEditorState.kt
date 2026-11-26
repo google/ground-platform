@@ -24,6 +24,7 @@ import org.openforis.collectone.v2.app.domain.model.editor.SurveyDetails
 import org.openforis.collectone.v2.app.domain.model.editor.SurveyEditorDraft
 import org.openforis.collectone.v2.app.domain.model.hasPlatformAdmin
 import org.openforis.collectone.v2.web.domain.model.editor.SampleGenerationProgress
+import org.openforis.collectone.v2.web.domain.model.editor.SurveyUndoRedoStack
 import org.openforis.collectone.v2.web.ui.formeditor.FormLibraryContext
 import org.openforis.collectone.v2.web.ui.surveyoutcome.SurveyOutcomeCardState
 import org.openforis.collectone.v2.web.ui.text.EditorText
@@ -64,6 +65,7 @@ internal data class SurveyEditorSession(
   val generationErrors: Map<String, EditorText> = emptyMap(),
   val organizationNotice: EditorText? = null,
   val isSaving: Boolean = false,
+  val datasetUndoRedo: Map<String, SurveyUndoRedoStack> = emptyMap(),
 )
 
 /**
@@ -86,6 +88,7 @@ internal fun buildSurveyEditorUiState(
   session: SurveyEditorSession,
   outcomeCard: SurveyOutcomeCardState?,
   hasLiveGeocoder: Boolean,
+  lazyLoadedProperties: Boolean = false,
   libraryContextFor:
     (
       details: SurveyDetails,
@@ -133,6 +136,8 @@ internal fun buildSurveyEditorUiState(
     generationErrors = session.generationErrors,
     organizationNotice = session.organizationNotice,
     outcomeCard = outcomeCard?.takeIf { it.surveyId == activeSurveyId },
+    lazyLoadedProperties = lazyLoadedProperties,
+    datasetUndoRedo = session.datasetUndoRedo,
   )
 }
 

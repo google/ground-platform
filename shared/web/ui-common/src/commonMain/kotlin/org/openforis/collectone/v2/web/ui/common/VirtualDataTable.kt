@@ -458,7 +458,7 @@ private fun VirtualHorizontalScrollbar(
         .background(MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.7f))
   ) {
     val trackPx = constraints.maxWidth.toFloat().coerceAtLeast(1f)
-    val minThumbPx = with(density) { MinScrollbarThumbSize.toPx() }
+    val minThumbPx = with(density) { MinScrollbarThumbSize.toPx() }.coerceAtMost(trackPx)
     val totalPx = trackPx + maxScroll.toFloat()
     val thumbPx = (trackPx * (trackPx / totalPx)).coerceIn(minThumbPx, trackPx)
     val travelPx = (trackPx - thumbPx).coerceAtLeast(1f)
@@ -534,7 +534,7 @@ private fun VirtualVerticalScrollbar(
         .background(MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.7f))
   ) {
     val trackPx = constraints.maxHeight.toFloat().coerceAtLeast(1f)
-    val minThumbPx = with(density) { MinScrollbarThumbSize.toPx() }
+    val minThumbPx = with(density) { MinScrollbarThumbSize.toPx() }.coerceAtMost(trackPx)
     val thumbPx =
       (trackPx * (visibleCount.toFloat() / rowCount.toFloat())).coerceIn(minThumbPx, trackPx)
     val travelPx = (trackPx - thumbPx).coerceAtLeast(1f)

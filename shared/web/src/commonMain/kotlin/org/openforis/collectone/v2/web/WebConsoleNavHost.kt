@@ -37,6 +37,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.openforis.collectone.v2.app.domain.model.Organization
@@ -212,6 +215,15 @@ private fun ConsolePage(
   route: WebRoute,
   content: @Composable () -> Unit,
 ) {
+  // Compose Multiplatform for Web maps Escape to the system Back event, which NavHost would
+  // otherwise handle by popping the back stack (exiting the survey, survey editor, or data
+  // collection flow). Swallow it here; child handlers (e.g. deselecting a feature, or open
+  // dialogs/menus) still run first.
+  NavigationBackHandler(
+    state = rememberNavigationEventState(NavigationEventInfo.None),
+    isBackEnabled = true,
+    onBackCompleted = {},
+  )
   val onboardingUiState by web.viewModels.onboarding.uiState.collectAsState()
   if (!onboardingUiState.isSignedIn) {
     WebSignInDestination(web = web, navigation = navigator)
