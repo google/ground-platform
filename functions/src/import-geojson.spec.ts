@@ -431,7 +431,7 @@ describe('importGeoJson()', () => {
             ].join('\r\n')
           )
           .join('') + `--${boundary}--\r\n`;
-      const req = jasmine.createSpyObj<Request>('request', ['unpipe'], {
+      const req = jasmine.createSpyObj<Request>('request', [], {
         url: '/importGeoJson',
         method: 'POST',
         headers: {

@@ -97,6 +97,11 @@ export function importGeoJsonCallback(
         return fail(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
       }
       const survey = await db.fetchSurvey(surveyId);
+      // The request may have failed while the survey was being fetched.
+      if (hasError) {
+        fileStream.resume();
+        return;
+      }
       if (!survey.exists) {
         return fail(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
       }
@@ -137,6 +142,7 @@ export function importGeoJsonCallback(
   // appear before the file: one that comes later is rejected, as it could
   // otherwise change what the file was authorised for.
   busboy.on('field', (key, val) => {
+    if (hasError) return;
     if (fileStarted) {
       busboy.emit(
         'error',
@@ -193,7 +199,6 @@ export function importGeoJsonCallback(
   function fail(statusCode: number, message: string) {
     if (hasError) return;
     hasError = true;
-    req.unpipe(busboy);
     error(statusCode, message);
   }
 
