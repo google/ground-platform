@@ -65,6 +65,15 @@ export function importGeoJsonCallback(
 
   let hasError = false;
 
+  // Whether a file part has started. The form fields are read as they stream
+  // in, and the file handler checks the caller's permissions against them as
+  // they are when the file starts, so no field may change after that.
+  let fileStarted = false;
+
+  // The survey the caller was found allowed to import into. The LOIs are only
+  // ever written to this survey, whatever else the form says.
+  let authorizedSurveyId: string | undefined;
+
   // Dictionary used to accumulate task step values, keyed by step name.
   const params: { [name: string]: string } = {};
 
@@ -77,21 +86,32 @@ export function importGeoJsonCallback(
 
   // This code will process each file uploaded.
   busboy.on('file', async (_fieldname, fileStream) => {
+    fileStarted = true;
+    if (hasError) {
+      fileStream.resume();
+      return;
+    }
     try {
       const { survey: surveyId, job: jobId } = params;
       if (!surveyId || !jobId) {
-        return error(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
+        return fail(StatusCodes.BAD_REQUEST, 'Missing survey and/or job ID');
       }
       const survey = await db.fetchSurvey(surveyId);
+      // The request may have failed while the survey was being fetched.
+      if (hasError) {
+        fileStream.resume();
+        return;
+      }
       if (!survey.exists) {
-        return error(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
+        return fail(StatusCodes.NOT_FOUND, `Survey ${surveyId} not found`);
       }
       if (!canImport(user, survey)) {
-        return error(
+        return fail(
           StatusCodes.FORBIDDEN,
           `User does not have permission to import into survey ${surveyId}`
         );
       }
+      authorizedSurveyId = surveyId;
 
       console.debug(
         `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
@@ -112,6 +132,11 @@ export function importGeoJsonCallback(
           .on('data', (data: any) => {
             if (!hasError) onGeoJsonFeature(data, jobId);
           })
+          // Malformed JSON. Without a listener the error would be thrown and
+          // crash the instance, along with any other request it is serving.
+          .on('error', (err: Error) =>
+            fail(StatusCodes.BAD_REQUEST, err.message)
+          )
       );
     } catch (err) {
       busboy.emit('error', err);
@@ -119,8 +144,17 @@ export function importGeoJsonCallback(
   });
 
   // Handle non-file fields in the task. survey, job, and clientTimestamp must
-  // appear before the file for the file handler to work properly.
+  // appear before the file: one that comes later is rejected, as it could
+  // otherwise change what the file was authorised for.
   busboy.on('field', (key, val) => {
+    if (hasError) return;
+    if (fileStarted) {
+      busboy.emit(
+        'error',
+        new BadRequestError(`Field '${key}' must be sent before the file`)
+      );
+      return;
+    }
     params[key] = val;
   });
 
@@ -128,7 +162,10 @@ export function importGeoJsonCallback(
   busboy.on('finish', async () => {
     if (hasError) return;
     try {
-      const surveyId = params.survey;
+      const surveyId = authorizedSurveyId;
+      if (!surveyId) {
+        return fail(StatusCodes.BAD_REQUEST, 'Missing file');
+      }
 
       // Stamped here rather than while parsing: a large file takes minutes to
       // read, and clients delta-sync on last_modified, so the timestamp has to
@@ -157,10 +194,18 @@ export function importGeoJsonCallback(
 
   busboy.on('error', (err: any) => {
     console.error('Busboy error', err);
-    hasError = true;
-    req.unpipe(busboy);
-    error(err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR, err.message);
+    fail(err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR, err.message);
   });
+
+  /**
+   * Fails the request, once: nothing is written after a failure, and later
+   * parts of the form are ignored.
+   */
+  function fail(statusCode: number, message: string) {
+    if (hasError) return;
+    hasError = true;
+    error(statusCode, message);
+  }
 
   // Start processing the body data.
   // Use this for Cloud Functions rather than `req.pipe(busboy)`:
