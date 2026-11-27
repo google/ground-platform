@@ -1,0 +1,157 @@
+# Copyright 2026 The Collect One Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Shared dependency and plugin versions for every Gradle build in this repository. Each build's
+# settings.gradle.kts imports this file as the `libs` catalog, so one version bump here applies to
+# all builds at once.
+
+[versions]
+agp = "8.5.2"
+androidsvg = "1.4"
+androidx-activity = "1.10.0"
+# Compose's stability annotations (@Immutable, @Stable) without the Compose runtime, for pure
+# modules such as shared/map/geometry. The androidx version compose-multiplatform resolves to.
+androidx-compose-runtime-annotation = "1.13.0-beta02"
+androidx-lifecycle = "2.8.7"
+androidx-work = "2.10.0"
+armeria = "1.42.0"
+byte-buddy = "1.18.15"
+compose-material-icons = "1.7.3"
+compose-material3 = "1.9.0"
+compose-multiplatform = "1.13.0-beta02"
+# 1.23.x runs its own Kotlin 2.0 compiler; builds pin the detekt configuration to it.
+detekt = "1.23.8"
+firebase-crashlytics = "19.4.0"
+firebase-crashlytics-gradle = "3.0.3"
+firebase-messaging = "24.1.0"
+google-cloud-libraries = "26.90.0"
+google-common-protos = "2.48.0"
+google-services = "4.4.2"
+grpc = "1.84.0"
+# Multiplatform androidx.lifecycle (ViewModel, SavedStateHandle) for Compose Multiplatform.
+jetbrains-lifecycle = "2.11.0"
+# Type-safe Compose Multiplatform navigation (NavHost, @Serializable routes, browser history).
+jetbrains-navigation = "2.10.0"
+# Multiplatform system Back handling (NavigationBackHandler), the version navigation-compose uses.
+jetbrains-navigationevent = "1.1.0"
+junit-jupiter = "5.10.2"
+# The client apps' logger (Kermit), configured in shared/app/data (app.logging).
+kermit = "2.2.0"
+koin = "4.2.2"
+kover = "0.9.11"
+kotlin = "2.4.20"
+# Browser APIs (org.w3c.dom) for Kotlin/Wasm code outside Compose, e.g. the local database worker.
+kotlinx-browser = "0.5.0"
+kotlinx-coroutines = "1.11.0"
+# Calendar dates, time zones and ISO 8601 formatting on top of kotlin.time.Instant and Clock.
+kotlinx-datetime = "0.7.1"
+kotlinx-serialization = "1.11.0"
+# Architecture tests (layer dependency rules) over the Kotlin sources.
+konsist = "0.18.1"
+ktor = "3.6.0"
+mapbox = "11.31.1"
+# Okio as used by Wire; build-logic compiles its Wire schema handler against it.
+okio = "3.18.2"
+opentelemetry = "1.67.0"
+# protoc and protobuf-java for the server's Spanner proto bundle.
+protobuf = "4.36.2"
+slf4j = "2.0.17"
+sqldelight = "2.4.1"
+# npm package of the official SQLite WebAssembly build, run by the browser's local database worker.
+sqlite-wasm = "3.54.1-build1"
+# Flow and StateFlow assertions in tests (awaitItem, expectNoEvents).
+turbine = "1.2.1"
+wire = "7.0.3"
+
+[libraries]
+androidsvg = { module = "com.caverock:androidsvg-aar", version.ref = "androidsvg" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-compose-runtime-annotation = { module = "androidx.compose.runtime:runtime-annotation", version.ref = "androidx-compose-runtime-annotation" }
+androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
+armeria = { module = "com.linecorp.armeria:armeria" }
+armeria-bom = { module = "com.linecorp.armeria:armeria-bom", version.ref = "armeria" }
+armeria-grpc = { module = "com.linecorp.armeria:armeria-grpc" }
+byte-buddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byte-buddy" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "compose-material-icons" }
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-material-icons" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose-multiplatform" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics", version.ref = "firebase-crashlytics" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebase-messaging" }
+google-cloud-libraries-bom = { module = "com.google.cloud:libraries-bom", version.ref = "google-cloud-libraries" }
+google-cloud-spanner = { module = "com.google.cloud:google-cloud-spanner" }
+google-common-protos = { module = "com.google.api.grpc:proto-google-common-protos", version.ref = "google-common-protos" }
+grpc-okhttp = { module = "io.grpc:grpc-okhttp", version.ref = "grpc" }
+jetbrains-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "jetbrains-lifecycle" }
+jetbrains-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-lifecycle" }
+jetbrains-lifecycle-viewmodel-savedstate = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-savedstate", version.ref = "jetbrains-lifecycle" }
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jetbrains-navigation" }
+jetbrains-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "jetbrains-navigationevent" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+# Koin's ViewModel definitions (viewModel { }) without its Compose bindings.
+koin-core-viewmodel = { module = "io.insert-koin:koin-core-viewmodel", version.ref = "koin" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
+konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
+kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinx-browser" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+mapbox-android = { module = "com.mapbox.maps:android-ndk27", version.ref = "mapbox" }
+okio = { module = "com.squareup.okio:okio-jvm", version.ref = "okio" }
+opentelemetry-bom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetry" }
+opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk" }
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
+sqldelight-async-extensions = { module = "app.cash.sqldelight:async-extensions", version.ref = "sqldelight" }
+sqldelight-native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
+sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
+sqldelight-sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-web-worker-driver = { module = "app.cash.sqldelight:web-worker-driver", version.ref = "sqldelight" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+wire-moshi-adapter = { module = "com.squareup.wire:wire-moshi-adapter", version.ref = "wire" }
+wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
+wire-schema = { module = "com.squareup.wire:wire-schema-jvm", version.ref = "wire" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+wire = { id = "com.squareup.wire", version.ref = "wire" }

@@ -1,0 +1,97 @@
+# Copyright 2026 The Collect One Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# The Playwright golden-screenshot tests of the web console and the mobile app (e2eTests/). They
+# build both apps and the server, so they run once a pull request is ready for review rather than
+# on every push to a draft:
+#   - on pull requests that are not drafts (opened, pushed to, reopened, or marked ready for review);
+#   - on draft pull requests labeled `run-goldens` (when labeled, and on every push while labeled);
+#   - on pushes to main;
+#   - on demand, from the Actions tab (workflow_dispatch).
+# The JVM golden-screenshot tests run with the unit tests in check.yml, drafts included.
+name: Goldens
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+  push:
+    branches: [c1, wip/baobab]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: e2e
+    # Adding any other label, or the label to a pull request whose goldens already run, skips.
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'run-goldens' &&
+        github.event.pull_request.draft) ||
+      (github.event.action != 'labeled' && (!github.event.pull_request.draft ||
+        contains(github.event.pull_request.labels.*.name, 'run-goldens')))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      # The Gradle build downloads its own JDK 21 toolchain; this JDK only runs Gradle. The runner
+      # image provides the Android SDK (ANDROID_HOME) that the Android modules need.
+      - name: Set up JDK
+        if: ${{ hashFiles('e2eTests/package.json') != '' }}
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      # The tests' server stores its data in a Spanner emulator that Playwright starts.
+      - name: Cache the Spanner emulator
+        if: ${{ hashFiles('e2eTests/package.json') != '' }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/collect-one/spanner-emulator
+          key: spanner-emulator-${{ runner.os }}-${{ hashFiles('scripts/spanner-emulator.sh') }}
+
+      - name: Set up Node.js
+        if: ${{ hashFiles('e2eTests/package.json') != '' }}
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2eTests/package-lock.json
+
+      - name: Install Playwright
+        if: ${{ hashFiles('e2eTests/package.json') != '' }}
+        working-directory: e2eTests
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium-headless-shell
+
+      - name: Run golden-screenshot tests
+        if: ${{ hashFiles('e2eTests/package.json') != '' }}
+        working-directory: e2eTests
+        run: npm test
+
+      - name: Upload test report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-report
+          path: |
+            e2eTests/build/report
+            e2eTests/build/test-results

@@ -1,0 +1,72 @@
+# Copyright 2026 The Collect One Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Shared detekt rules for every Gradle build that applies detekt. Builds set
+# `buildUponDefaultConfig = true`, so this file only lists overrides of detekt's defaults.
+#
+# Existing findings live in each build's `detekt-baseline.xml` and don't fail the build; new ones
+# do. Regenerate a baseline with `./gradlew detektBaseline` only when deliberately accepting debt.
+# Formatting is not checked here: `scripts/ktfmt.sh` is the only formatter.
+
+complexity:
+  # Composables and ViewModels legitimately take many parameters (state + callbacks).
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 10
+    ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
+  LongMethod:
+    threshold: 80
+  LargeClass:
+    threshold: 600
+  CyclomaticComplexMethod:
+    threshold: 15
+    ignoreSimpleWhenEntries: true
+  NestedBlockDepth:
+    threshold: 5
+  TooManyFunctions:
+    thresholdInFiles: 30
+    thresholdInClasses: 30
+    thresholdInInterfaces: 30
+    thresholdInObjects: 30
+    ignorePrivate: true
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: true
+  TooGenericExceptionThrown:
+    active: true
+  SwallowedException:
+    active: true
+
+style:
+  ForbiddenComment:
+    active: true
+  # Overlaps with ktfmt, which owns line layout.
+  MaxLineLength:
+    active: false
+  # Compose UI code is full of dp/sp and color literals; theme tokens are enforced in review.
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: true
+  # Early `?: return` guard clauses are idiomatic Kotlin and keep the happy path flat.
+  ReturnCount:
+    max: 3
+    excludeGuardClauses: true
+
+naming:
+  # Composable functions are PascalCase by convention.
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']

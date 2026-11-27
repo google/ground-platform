@@ -15,6 +15,7 @@
 # Dotfiles and dot-directories are local tool state (IDE settings, caches, sync
 # snapshots) unless listed here.
 .*
+!.dockerignore
 !.gitignore
 !.github/
 
@@ -26,9 +27,12 @@
 **/gradle-wrapper.jar
 *.aab
 *.apk
+*.ipa
 
 # Android SDK location and local API tokens (machine-specific, must not be committed)
 local.properties
+google-services.json
+GoogleService-Info.plist
 
 # Editor backup files (these can copy secrets such as local.properties)
 *~
