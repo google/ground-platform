@@ -194,7 +194,7 @@ message SurveyDef {
   // a restore leaves unchanged.
   google.protobuf.Timestamp trash_time = 37;
 
-  // Tiered quota limits and monthly budget cap configured for this survey.
+  // Tiered quota limits configured for this survey.
   // Overrides organization and global defaults.
   QuotaLimits quota_limits = 38;
 
@@ -371,7 +371,6 @@ message SurveyOutcome {
   reserved "answered_at_iso";
 }
 
-// Dictionary concepts linked to the questions of one form.
 // The library form template a survey form was first populated from.
 message FormTemplateOrigin {
   string form_id = 1;
@@ -384,6 +383,7 @@ message FormTemplateOrigin {
   bool modified = 4;
 }
 
+// Dictionary concepts linked to the questions of one form.
 message FormConceptLinks {
   string form_id = 1;
 
