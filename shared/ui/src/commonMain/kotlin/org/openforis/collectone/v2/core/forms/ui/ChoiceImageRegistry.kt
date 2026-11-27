@@ -456,6 +456,7 @@ object ChoiceImageRegistry {
           candidate("yes", "Yes — intact or established prior to 2020", "#2E7D32"),
           candidate("no", "No — clearing detected after 2020", "#C62828"),
           candidate("uncertain", "Uncertain — cloud cover / needs field check", "#F9A825"),
+          candidate("unknown", "Unknown", "#F9BF40"),
         ),
       "soil_moisture_class" to
         listOf(

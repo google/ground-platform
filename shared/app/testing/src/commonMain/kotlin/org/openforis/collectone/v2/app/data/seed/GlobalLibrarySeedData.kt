@@ -550,6 +550,13 @@ object GlobalLibrarySeedData {
       ),
     )
 
+  private fun certificationStatusColors(): Map<String, String> =
+    mapOf(
+      "certified" to "#3C8D40",
+      "in_transition" to "#F9BF40",
+      "conventional" to "#80868B",
+    )
+
   private fun producerProfileTemplate(): FormTemplate {
     val c = coreConcepts()
     return template(
@@ -604,6 +611,7 @@ object GlobalLibrarySeedData {
             c.byId("core.certification_status"),
             "certification_status",
             EditorQuestionType.SELECT_ONE,
+            choiceColors = certificationStatusColors(),
           ) to c.byId("core.certification_status"),
           question(
             c.byId("core.annual_yield_kg"),
@@ -908,6 +916,28 @@ object GlobalLibrarySeedData {
       ),
     )
 
+  private fun eudrCommodityImages(): Map<String, EditorChoiceImage> =
+    mapOf(
+      "cattle" to EditorChoiceImage("image/png", ChoiceImages.ICON_GRAZING),
+      "cocoa" to EditorChoiceImage("image/png", ChoiceImages.ICON_COCOA),
+      "coffee" to EditorChoiceImage("image/png", ChoiceImages.ICON_COFFEE),
+      "oil_palm" to EditorChoiceImage("image/png", ChoiceImages.ICON_OIL_PALM),
+      "rubber" to EditorChoiceImage("image/png", ChoiceImages.ICON_RUBBER),
+      "soya" to EditorChoiceImage("image/png", ChoiceImages.ICON_SOY),
+      "wood" to EditorChoiceImage("image/png", ChoiceImages.ICON_TIMBER),
+    )
+
+  private fun deforestationFreeColors(): Map<String, String> =
+    mapOf("yes" to "#3C8D40", "no" to "#D13135", "unknown" to "#F9BF40")
+
+  private fun legalLandUseColors(): Map<String, String> =
+    mapOf(
+      "verified_legal" to "#3C8D40",
+      "customary_recognized" to "#129EAF",
+      "pending_verification" to "#F9BF40",
+      "non_compliant" to "#D13135",
+    )
+
   private fun eudrPlotRegistrationTemplate(): FormTemplate {
     val e = eudrConcepts()
     val c = coreConcepts()
@@ -927,8 +957,13 @@ object GlobalLibrarySeedData {
         ),
       questions =
         listOf(
-          question(e.byId("eudr.commodity"), "commodity", EditorQuestionType.SELECT_ONE, true) to
+          question(
             e.byId("eudr.commodity"),
+            "commodity",
+            EditorQuestionType.SELECT_ONE,
+            true,
+            choiceImages = eudrCommodityImages(),
+          ) to e.byId("eudr.commodity"),
           question(
             e.byId("eudr.production_place"),
             "production_place",
@@ -954,11 +989,13 @@ object GlobalLibrarySeedData {
             "deforestation_free",
             EditorQuestionType.SELECT_ONE,
             required = true,
+            choiceColors = deforestationFreeColors(),
           ) to e.byId("eudr.deforestation_free"),
           question(
             e.byId("eudr.legal_land_use"),
             "legal_land_use",
             EditorQuestionType.SELECT_ONE,
+            choiceColors = legalLandUseColors(),
           ) to e.byId("eudr.legal_land_use"),
         ),
     )
@@ -989,8 +1026,13 @@ object GlobalLibrarySeedData {
         ),
       questions =
         listOf(
-          question(e.byId("eudr.commodity"), "commodity", EditorQuestionType.SELECT_ONE, true) to
+          question(
             e.byId("eudr.commodity"),
+            "commodity",
+            EditorQuestionType.SELECT_ONE,
+            true,
+            choiceImages = eudrCommodityImages(),
+          ) to e.byId("eudr.commodity"),
           question(
             e.byId("eudr.production_place"),
             "production_place",
@@ -1014,6 +1056,7 @@ object GlobalLibrarySeedData {
             "legal_land_use",
             EditorQuestionType.SELECT_ONE,
             required = true,
+            choiceColors = legalLandUseColors(),
           ) to e.byId("eudr.legal_land_use"),
         ),
     )
@@ -1282,6 +1325,17 @@ object GlobalLibrarySeedData {
       ),
     )
 
+  private fun ecosystemTypeColors(): Map<String, String> =
+    mapOf(
+      "forest" to "#3C8D40",
+      "mangrove" to "#129EAF",
+      "grassland" to "#F37C22",
+      "wetland" to "#2278CF",
+      "cropland" to "#F9BF40",
+      "coastal_marine" to "#7A279F",
+      "other" to "#80868B",
+    )
+
   private fun fermMonitoringWaveTemplate(): FormTemplate {
     val f = fermConcepts()
     val c = coreConcepts()
@@ -1306,6 +1360,7 @@ object GlobalLibrarySeedData {
             "ecosystem_type",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceColors = ecosystemTypeColors(),
           ) to f.byId("ferm.ecosystem_type"),
           question(
             f.byId("ferm.intervention_type"),
@@ -1546,6 +1601,31 @@ object GlobalLibrarySeedData {
       ),
     )
 
+  private fun managementZoneColors(): Map<String, String> =
+    mapOf(
+      "core_strict" to "#3C8D40",
+      "buffer_zone" to "#F9BF40",
+      "ecological_restoration" to "#129EAF",
+      "sustainable_use" to "#F37C22",
+      "wildlife_corridor" to "#2278CF",
+    )
+
+  private fun threatTypeColors(): Map<String, String> =
+    mapOf(
+      "logging" to "#8D6E63",
+      "poaching" to "#E52592",
+      "fire" to "#D13135",
+      "encroachment" to "#F9BF40",
+      "mining" to "#129EAF",
+      "grazing" to "#F37C22",
+      "invasive_species" to "#7A279F",
+      "pollution" to "#2278CF",
+      "other" to "#80868B",
+    )
+
+  private fun threatSeverityColors(): Map<String, String> =
+    mapOf("low" to "#F9BF40", "medium" to "#F37C22", "high" to "#D13135")
+
   private fun protectedAreaPatrolTemplate(): FormTemplate {
     val p = pameConcepts()
     val c = coreConcepts()
@@ -1572,6 +1652,7 @@ object GlobalLibrarySeedData {
             "management_zone",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceColors = managementZoneColors(),
           ) to p.byId("pame.management_zone"),
           question(p.byId("pame.ranger_count"), "ranger_count", EditorQuestionType.NUMBER) to
             p.byId("pame.ranger_count"),
@@ -1586,12 +1667,14 @@ object GlobalLibrarySeedData {
             "threat_type",
             EditorQuestionType.SELECT_MULTIPLE,
             true,
+            choiceColors = threatTypeColors(),
           ) to p.byId("pame.threat_type"),
           question(
             p.byId("pame.threat_severity"),
             "threat_severity",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceColors = threatSeverityColors(),
           ) to p.byId("pame.threat_severity"),
           question(
             p.byId("pame.management_action"),
@@ -1807,6 +1890,17 @@ object GlobalLibrarySeedData {
       ),
     )
 
+  private fun fpicConsentColors(): Map<String, String> =
+    mapOf("given" to "#3C8D40", "withheld" to "#D13135", "pending" to "#F9BF40")
+
+  private fun legalRecognitionColors(): Map<String, String> =
+    mapOf(
+      "formally_titled" to "#3C8D40",
+      "customary_unrecognized" to "#2278CF",
+      "in_progress" to "#F9BF40",
+      "contested" to "#D13135",
+    )
+
   private fun communityLandMappingTemplate(): FormTemplate {
     val i = iplcConcepts()
     val c = coreConcepts()
@@ -1832,6 +1926,7 @@ object GlobalLibrarySeedData {
             EditorQuestionType.SELECT_ONE,
             required = true,
             hint = "Confirm Free, Prior and Informed Consent before recording community data.",
+            choiceColors = fpicConsentColors(),
           ) to i.byId("iplc.fpic_consent"),
           question(
             i.byId("iplc.community_name"),
@@ -1861,6 +1956,7 @@ object GlobalLibrarySeedData {
             i.byId("iplc.legal_recognition"),
             "legal_recognition",
             EditorQuestionType.SELECT_ONE,
+            choiceColors = legalRecognitionColors(),
           ) to i.byId("iplc.legal_recognition"),
           question(
             i.byId("iplc.resource_use"),
@@ -2346,6 +2442,48 @@ object GlobalLibrarySeedData {
       "non_forest" to EditorChoiceImage("image/png", ChoiceImages.ICON_PASTURE),
     )
 
+  private fun landCoverClassColors(): Map<String, String> =
+    mapOf(
+      "forest" to "#3C8D40",
+      "other_wooded_land" to "#129EAF",
+      "other_land_with_tree_cover" to "#F9BF40",
+      "other_land" to "#8D6E63",
+      "inland_water" to "#2278CF",
+    )
+
+  private fun shadeTreeTierColors(): Map<String, String> =
+    mapOf(
+      "multi_strata_native" to "#3C8D40",
+      "planted_shade" to "#129EAF",
+      "unshaded_monoculture" to "#F37C22",
+      "not_applicable" to "#80868B",
+    )
+
+  private fun forestChangeClassColors(): Map<String, String> =
+    mapOf(
+      "stable_forest" to "#3C8D40",
+      "deforestation" to "#D13135",
+      "degradation" to "#F37C22",
+      "reforestation_removals" to "#129EAF",
+      "stable_non_forest" to "#80868B",
+    )
+
+  private fun disturbanceDriverImages(): Map<String, EditorChoiceImage> =
+    mapOf(
+      "none" to EditorChoiceImage("image/png", ChoiceImages.ICON_INTACT),
+      "selective_logging" to EditorChoiceImage("image/png", ChoiceImages.ICON_LOGGING),
+      "fire_burn" to EditorChoiceImage("image/png", ChoiceImages.ICON_FIRE),
+      "agricultural_clearing" to EditorChoiceImage("image/png", ChoiceImages.ICON_CROPLAND),
+      "grazing_browsing" to EditorChoiceImage("image/png", ChoiceImages.ICON_GRAZING),
+      "wind_drought_pest" to EditorChoiceImage("image/png", ChoiceImages.ICON_MOISTURE_DRY),
+    )
+
+  private fun interpretationConfidenceColors(): Map<String, String> =
+    mapOf("high" to "#3C8D40", "medium" to "#F9BF40", "low_needs_field_check" to "#D13135")
+
+  private fun deadwoodPoolLevelColors(): Map<String, String> =
+    mapOf("low_absent" to "#80868B", "moderate" to "#3C8D40", "high_post_disturbance" to "#F37C22")
+
   private fun lulcGroundTruthTemplate(): FormTemplate {
     val l = lulcConcepts()
     val c = coreConcepts()
@@ -2370,6 +2508,7 @@ object GlobalLibrarySeedData {
             "land_cover_class",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceColors = landCoverClassColors(),
           ) to l.byId("lulc.land_cover_class"),
           question(
             l.byId("lulc.land_use"),
@@ -2384,6 +2523,7 @@ object GlobalLibrarySeedData {
             l.byId("lulc.shade_tree_tier"),
             "shade_tree_tier",
             EditorQuestionType.SELECT_ONE,
+            choiceColors = shadeTreeTierColors(),
           ) to l.byId("lulc.shade_tree_tier"),
           question(
             l.byId("lulc.canopy_cover_pct"),
@@ -2424,6 +2564,7 @@ object GlobalLibrarySeedData {
             "forest_change_class",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceColors = forestChangeClassColors(),
           ) to l.byId("lulc.forest_change_class"),
           question(
             l.byId("lulc.baseline_land_use_ipcc"),
@@ -2462,12 +2603,14 @@ object GlobalLibrarySeedData {
             l.byId("lulc.disturbance_driver"),
             "disturbance_driver",
             EditorQuestionType.SELECT_MULTIPLE,
+            choiceImages = disturbanceDriverImages(),
           ) to l.byId("lulc.disturbance_driver"),
           question(
             l.byId("lulc.interpretation_confidence"),
             "interpretation_confidence",
             EditorQuestionType.SELECT_ONE,
             true,
+            choiceColors = interpretationConfidenceColors(),
           ) to l.byId("lulc.interpretation_confidence"),
           question(
             l.byId("lulc.observation_date"),
@@ -2549,6 +2692,7 @@ object GlobalLibrarySeedData {
             l.byId("lulc.deadwood_pool_level"),
             "deadwood_pool_level",
             EditorQuestionType.SELECT_ONE,
+            choiceColors = deadwoodPoolLevelColors(),
           ) to l.byId("lulc.deadwood_pool_level"),
           question(
             l.byId("lulc.peat_depth_cm"),
@@ -2560,6 +2704,7 @@ object GlobalLibrarySeedData {
             l.byId("lulc.disturbance_driver"),
             "disturbance_driver",
             EditorQuestionType.SELECT_MULTIPLE,
+            choiceImages = disturbanceDriverImages(),
           ) to l.byId("lulc.disturbance_driver"),
           question(
             c.byId("core.collection_date"),

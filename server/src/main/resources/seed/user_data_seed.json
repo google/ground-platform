@@ -5323,6 +5323,11 @@
                               "stringValue": "Certified"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "certified"
@@ -5342,6 +5347,11 @@
                               "stringValue": "In transition"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "in_transition"
@@ -5359,6 +5369,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Conventional / uncertified"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#80868B"
                             }
                           },
                           "collectone_code": {
@@ -5674,6 +5689,58 @@
                     ]
                   }
                 },
+                "translations": {
+                  "languages": [
+                    {
+                      "language": "default",
+                      "isDefault": true,
+                      "strings": {
+                        "commodity-0": {
+                          "value": "Cattle",
+                          "media": {
+                            "imageUri": "jr://images/commodity-cattle.png"
+                          }
+                        },
+                        "commodity-1": {
+                          "value": "Cocoa",
+                          "media": {
+                            "imageUri": "jr://images/commodity-cocoa.png"
+                          }
+                        },
+                        "commodity-2": {
+                          "value": "Coffee",
+                          "media": {
+                            "imageUri": "jr://images/commodity-coffee.png"
+                          }
+                        },
+                        "commodity-3": {
+                          "value": "Oil palm",
+                          "media": {
+                            "imageUri": "jr://images/commodity-oil_palm.png"
+                          }
+                        },
+                        "commodity-4": {
+                          "value": "Rubber",
+                          "media": {
+                            "imageUri": "jr://images/commodity-rubber.png"
+                          }
+                        },
+                        "commodity-5": {
+                          "value": "Soya",
+                          "media": {
+                            "imageUri": "jr://images/commodity-soya.png"
+                          }
+                        },
+                        "commodity-6": {
+                          "value": "Wood",
+                          "media": {
+                            "imageUri": "jr://images/commodity-wood.png"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
                 "secondaryInstances": [
                   {
                     "id": "commodity",
@@ -5685,9 +5752,9 @@
                               "stringValue": "cattle"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Cattle"
+                              "stringValue": "commodity-0"
                             }
                           },
                           "collectone_code": {
@@ -5704,9 +5771,9 @@
                               "stringValue": "cocoa"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Cocoa"
+                              "stringValue": "commodity-1"
                             }
                           },
                           "collectone_code": {
@@ -5723,9 +5790,9 @@
                               "stringValue": "coffee"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Coffee"
+                              "stringValue": "commodity-2"
                             }
                           },
                           "collectone_code": {
@@ -5742,9 +5809,9 @@
                               "stringValue": "oil_palm"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Oil palm"
+                              "stringValue": "commodity-3"
                             }
                           },
                           "collectone_code": {
@@ -5761,9 +5828,9 @@
                               "stringValue": "rubber"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Rubber"
+                              "stringValue": "commodity-4"
                             }
                           },
                           "collectone_code": {
@@ -5780,9 +5847,9 @@
                               "stringValue": "soya"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Soya"
+                              "stringValue": "commodity-5"
                             }
                           },
                           "collectone_code": {
@@ -5799,9 +5866,9 @@
                               "stringValue": "wood"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Wood"
+                              "stringValue": "commodity-6"
                             }
                           },
                           "collectone_code": {
@@ -5871,6 +5938,11 @@
                               "stringValue": "Yes"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "yes"
@@ -5890,6 +5962,11 @@
                               "stringValue": "No"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "no"
@@ -5907,6 +5984,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Unknown"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
                             }
                           },
                           "collectone_code": {
@@ -5933,6 +6015,11 @@
                               "stringValue": "Verified legal title or use right"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "verified_legal"
@@ -5950,6 +6037,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Recognized customary or cooperative right"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
                             }
                           },
                           "collectone_code": {
@@ -5971,6 +6063,11 @@
                               "stringValue": "Pending verification"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "pending_verification"
@@ -5988,6 +6085,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "No legal land-use evidence"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
                             }
                           },
                           "collectone_code": {
@@ -6107,7 +6209,7 @@
                       "itemset": {
                         "instanceId": "commodity",
                         "valueRef": "name",
-                        "labelRef": "label",
+                        "labelRef": "jr:itext(itextId)",
                         "nodesetPath": "/root/item"
                       }
                     }
@@ -6260,6 +6362,58 @@
                     ]
                   }
                 },
+                "translations": {
+                  "languages": [
+                    {
+                      "language": "default",
+                      "isDefault": true,
+                      "strings": {
+                        "commodity-0": {
+                          "value": "Cattle",
+                          "media": {
+                            "imageUri": "jr://images/commodity-cattle.png"
+                          }
+                        },
+                        "commodity-1": {
+                          "value": "Cocoa",
+                          "media": {
+                            "imageUri": "jr://images/commodity-cocoa.png"
+                          }
+                        },
+                        "commodity-2": {
+                          "value": "Coffee",
+                          "media": {
+                            "imageUri": "jr://images/commodity-coffee.png"
+                          }
+                        },
+                        "commodity-3": {
+                          "value": "Oil palm",
+                          "media": {
+                            "imageUri": "jr://images/commodity-oil_palm.png"
+                          }
+                        },
+                        "commodity-4": {
+                          "value": "Rubber",
+                          "media": {
+                            "imageUri": "jr://images/commodity-rubber.png"
+                          }
+                        },
+                        "commodity-5": {
+                          "value": "Soya",
+                          "media": {
+                            "imageUri": "jr://images/commodity-soya.png"
+                          }
+                        },
+                        "commodity-6": {
+                          "value": "Wood",
+                          "media": {
+                            "imageUri": "jr://images/commodity-wood.png"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
                 "secondaryInstances": [
                   {
                     "id": "commodity",
@@ -6271,9 +6425,9 @@
                               "stringValue": "cattle"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Cattle"
+                              "stringValue": "commodity-0"
                             }
                           },
                           "collectone_code": {
@@ -6290,9 +6444,9 @@
                               "stringValue": "cocoa"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Cocoa"
+                              "stringValue": "commodity-1"
                             }
                           },
                           "collectone_code": {
@@ -6309,9 +6463,9 @@
                               "stringValue": "coffee"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Coffee"
+                              "stringValue": "commodity-2"
                             }
                           },
                           "collectone_code": {
@@ -6328,9 +6482,9 @@
                               "stringValue": "oil_palm"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Oil palm"
+                              "stringValue": "commodity-3"
                             }
                           },
                           "collectone_code": {
@@ -6347,9 +6501,9 @@
                               "stringValue": "rubber"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Rubber"
+                              "stringValue": "commodity-4"
                             }
                           },
                           "collectone_code": {
@@ -6366,9 +6520,9 @@
                               "stringValue": "soya"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Soya"
+                              "stringValue": "commodity-5"
                             }
                           },
                           "collectone_code": {
@@ -6385,9 +6539,9 @@
                               "stringValue": "wood"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Wood"
+                              "stringValue": "commodity-6"
                             }
                           },
                           "collectone_code": {
@@ -6414,6 +6568,11 @@
                               "stringValue": "Verified legal title or use right"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "verified_legal"
@@ -6431,6 +6590,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Recognized customary or cooperative right"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
                             }
                           },
                           "collectone_code": {
@@ -6452,6 +6616,11 @@
                               "stringValue": "Pending verification"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "pending_verification"
@@ -6469,6 +6638,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "No legal land-use evidence"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
                             }
                           },
                           "collectone_code": {
@@ -6566,7 +6740,7 @@
                       "itemset": {
                         "instanceId": "commodity",
                         "valueRef": "name",
-                        "labelRef": "label",
+                        "labelRef": "jr:itext(itextId)",
                         "nodesetPath": "/root/item"
                       }
                     }
@@ -6721,6 +6895,11 @@
                               "stringValue": "Forest"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "forest"
@@ -6738,6 +6917,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Mangrove"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
                             }
                           },
                           "collectone_code": {
@@ -6759,6 +6943,11 @@
                               "stringValue": "Grassland or savanna"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "grassland"
@@ -6776,6 +6965,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Wetland"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#2278CF"
                             }
                           },
                           "collectone_code": {
@@ -6797,6 +6991,11 @@
                               "stringValue": "Cropland"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "cropland"
@@ -6816,6 +7015,11 @@
                               "stringValue": "Coastal or marine"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#7A279F"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "coastal_marine"
@@ -6833,6 +7037,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Other"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#80868B"
                             }
                           },
                           "collectone_code": {
@@ -7404,6 +7613,11 @@
                               "stringValue": "Strict protection / core zone"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "core_strict"
@@ -7421,6 +7635,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Buffer zone"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
                             }
                           },
                           "collectone_code": {
@@ -7442,6 +7661,11 @@
                               "stringValue": "Ecological restoration zone"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "ecological_restoration"
@@ -7461,6 +7685,11 @@
                               "stringValue": "Community / sustainable use zone"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "sustainable_use"
@@ -7478,6 +7707,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Wildlife corridor / OECM"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#2278CF"
                             }
                           },
                           "collectone_code": {
@@ -7504,6 +7738,11 @@
                               "stringValue": "Logging"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#8D6E63"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "logging"
@@ -7521,6 +7760,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Poaching"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#E52592"
                             }
                           },
                           "collectone_code": {
@@ -7542,6 +7786,11 @@
                               "stringValue": "Fire"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "fire"
@@ -7559,6 +7808,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Encroachment"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
                             }
                           },
                           "collectone_code": {
@@ -7580,6 +7834,11 @@
                               "stringValue": "Mining"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "mining"
@@ -7597,6 +7856,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Grazing"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
                             }
                           },
                           "collectone_code": {
@@ -7618,6 +7882,11 @@
                               "stringValue": "Invasive species"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#7A279F"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "invasive_species"
@@ -7637,6 +7906,11 @@
                               "stringValue": "Pollution"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#2278CF"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "pollution"
@@ -7654,6 +7928,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Other"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#80868B"
                             }
                           },
                           "collectone_code": {
@@ -7680,6 +7959,11 @@
                               "stringValue": "Low"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "low"
@@ -7699,6 +7983,11 @@
                               "stringValue": "Medium"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "medium"
@@ -7716,6 +8005,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "High"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
                             }
                           },
                           "collectone_code": {
@@ -8159,6 +8453,11 @@
                               "stringValue": "Given"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "given"
@@ -8178,6 +8477,11 @@
                               "stringValue": "Withheld"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "withheld"
@@ -8195,6 +8499,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Pending"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
                             }
                           },
                           "collectone_code": {
@@ -8383,6 +8692,11 @@
                               "stringValue": "Formally titled or gazetted"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "formally_titled"
@@ -8400,6 +8714,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Held under customary law (not yet titled)"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#2278CF"
                             }
                           },
                           "collectone_code": {
@@ -8421,6 +8740,11 @@
                               "stringValue": "Claim or registration in progress"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "in_progress"
@@ -8438,6 +8762,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Contested or overlapping claim"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
                             }
                           },
                           "collectone_code": {
@@ -8900,6 +9229,11 @@
                               "stringValue": "Forest"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "forest"
@@ -8917,6 +9251,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Other wooded land"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
                             }
                           },
                           "collectone_code": {
@@ -8938,6 +9277,11 @@
                               "stringValue": "Other land with tree cover"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "other_land_with_tree_cover"
@@ -8957,6 +9301,11 @@
                               "stringValue": "Other land"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#8D6E63"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "other_land"
@@ -8974,6 +9323,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Inland water bodies"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#2278CF"
                             }
                           },
                           "collectone_code": {
@@ -9349,6 +9703,11 @@
                               "stringValue": "Multi-strata with native remnant trees"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "multi_strata_native"
@@ -9366,6 +9725,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Planted shade or fruit trees"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
                             }
                           },
                           "collectone_code": {
@@ -9387,6 +9751,11 @@
                               "stringValue": "Unshaded monoculture"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "unshaded_monoculture"
@@ -9404,6 +9773,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Not applicable (non-cropland)"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#80868B"
                             }
                           },
                           "collectone_code": {
@@ -9701,6 +10075,42 @@
                           "media": {
                             "imageUri": "jr://images/forest_stratum-non_forest.png"
                           }
+                        },
+                        "disturbance_driver-0": {
+                          "value": "No disturbance observed",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-none.png"
+                          }
+                        },
+                        "disturbance_driver-1": {
+                          "value": "Selective logging or timber extraction",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-selective_logging.png"
+                          }
+                        },
+                        "disturbance_driver-2": {
+                          "value": "Fire or burn scars",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-fire_burn.png"
+                          }
+                        },
+                        "disturbance_driver-3": {
+                          "value": "Small-scale clearing or shifting cultivation",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-agricultural_clearing.png"
+                          }
+                        },
+                        "disturbance_driver-4": {
+                          "value": "Livestock grazing",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-grazing_browsing.png"
+                          }
+                        },
+                        "disturbance_driver-5": {
+                          "value": "Storm, drought, or pest dieback",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-wind_drought_pest.png"
+                          }
                         }
                       }
                     }
@@ -9722,6 +10132,11 @@
                               "stringValue": "Stable forest"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "stable_forest"
@@ -9739,6 +10154,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Deforestation (forest to non-forest)"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
                             }
                           },
                           "collectone_code": {
@@ -9760,6 +10180,11 @@
                               "stringValue": "Forest degradation (canopy or stock loss)"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "degradation"
@@ -9779,6 +10204,11 @@
                               "stringValue": "Reforestation / removals on non-forest land"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#129EAF"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "reforestation_removals"
@@ -9796,6 +10226,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Stable non-forest"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#80868B"
                             }
                           },
                           "collectone_code": {
@@ -10234,9 +10669,9 @@
                               "stringValue": "none"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "No disturbance observed"
+                              "stringValue": "disturbance_driver-0"
                             }
                           },
                           "collectone_code": {
@@ -10253,9 +10688,9 @@
                               "stringValue": "selective_logging"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Selective logging or timber extraction"
+                              "stringValue": "disturbance_driver-1"
                             }
                           },
                           "collectone_code": {
@@ -10272,9 +10707,9 @@
                               "stringValue": "fire_burn"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Fire or burn scars"
+                              "stringValue": "disturbance_driver-2"
                             }
                           },
                           "collectone_code": {
@@ -10291,9 +10726,9 @@
                               "stringValue": "agricultural_clearing"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Small-scale clearing or shifting cultivation"
+                              "stringValue": "disturbance_driver-3"
                             }
                           },
                           "collectone_code": {
@@ -10310,9 +10745,9 @@
                               "stringValue": "grazing_browsing"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Livestock grazing"
+                              "stringValue": "disturbance_driver-4"
                             }
                           },
                           "collectone_code": {
@@ -10329,9 +10764,9 @@
                               "stringValue": "wind_drought_pest"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Storm, drought, or pest dieback"
+                              "stringValue": "disturbance_driver-5"
                             }
                           },
                           "collectone_code": {
@@ -10358,6 +10793,11 @@
                               "stringValue": "High confidence"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "high"
@@ -10377,6 +10817,11 @@
                               "stringValue": "Medium confidence"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F9BF40"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "medium"
@@ -10394,6 +10839,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Low — requires field verification"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#D13135"
                             }
                           },
                           "collectone_code": {
@@ -10607,7 +11057,7 @@
                       "itemset": {
                         "instanceId": "disturbance_driver",
                         "valueRef": "name",
-                        "labelRef": "label",
+                        "labelRef": "jr:itext(itextId)",
                         "nodesetPath": "/root/item"
                       }
                     }
@@ -10761,6 +11211,42 @@
                           "media": {
                             "imageUri": "jr://images/forest_stratum-non_forest.png"
                           }
+                        },
+                        "disturbance_driver-0": {
+                          "value": "No disturbance observed",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-none.png"
+                          }
+                        },
+                        "disturbance_driver-1": {
+                          "value": "Selective logging or timber extraction",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-selective_logging.png"
+                          }
+                        },
+                        "disturbance_driver-2": {
+                          "value": "Fire or burn scars",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-fire_burn.png"
+                          }
+                        },
+                        "disturbance_driver-3": {
+                          "value": "Small-scale clearing or shifting cultivation",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-agricultural_clearing.png"
+                          }
+                        },
+                        "disturbance_driver-4": {
+                          "value": "Livestock grazing",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-grazing_browsing.png"
+                          }
+                        },
+                        "disturbance_driver-5": {
+                          "value": "Storm, drought, or pest dieback",
+                          "media": {
+                            "imageUri": "jr://images/disturbance_driver-wind_drought_pest.png"
+                          }
                         }
                       }
                     }
@@ -10901,6 +11387,11 @@
                               "stringValue": "Low or absent"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#80868B"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "low_absent"
@@ -10918,6 +11409,11 @@
                           "label": {
                             "scalarValue": {
                               "stringValue": "Moderate (typical undisturbed stand)"
+                            }
+                          },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#3C8D40"
                             }
                           },
                           "collectone_code": {
@@ -10939,6 +11435,11 @@
                               "stringValue": "High (recent logging slash, fire, or blowdown)"
                             }
                           },
+                          "color": {
+                            "scalarValue": {
+                              "stringValue": "#F37C22"
+                            }
+                          },
                           "collectone_code": {
                             "scalarValue": {
                               "stringValue": "high_post_disturbance"
@@ -10958,9 +11459,9 @@
                               "stringValue": "none"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "No disturbance observed"
+                              "stringValue": "disturbance_driver-0"
                             }
                           },
                           "collectone_code": {
@@ -10977,9 +11478,9 @@
                               "stringValue": "selective_logging"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Selective logging or timber extraction"
+                              "stringValue": "disturbance_driver-1"
                             }
                           },
                           "collectone_code": {
@@ -10996,9 +11497,9 @@
                               "stringValue": "fire_burn"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Fire or burn scars"
+                              "stringValue": "disturbance_driver-2"
                             }
                           },
                           "collectone_code": {
@@ -11015,9 +11516,9 @@
                               "stringValue": "agricultural_clearing"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Small-scale clearing or shifting cultivation"
+                              "stringValue": "disturbance_driver-3"
                             }
                           },
                           "collectone_code": {
@@ -11034,9 +11535,9 @@
                               "stringValue": "grazing_browsing"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Livestock grazing"
+                              "stringValue": "disturbance_driver-4"
                             }
                           },
                           "collectone_code": {
@@ -11053,9 +11554,9 @@
                               "stringValue": "wind_drought_pest"
                             }
                           },
-                          "label": {
+                          "itextId": {
                             "scalarValue": {
-                              "stringValue": "Storm, drought, or pest dieback"
+                              "stringValue": "disturbance_driver-5"
                             }
                           },
                           "collectone_code": {
@@ -11332,7 +11833,7 @@
                       "itemset": {
                         "instanceId": "disturbance_driver",
                         "valueRef": "name",
-                        "labelRef": "label",
+                        "labelRef": "jr:itext(itextId)",
                         "nodesetPath": "/root/item"
                       }
                     }

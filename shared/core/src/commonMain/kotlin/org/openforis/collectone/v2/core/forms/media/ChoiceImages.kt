@@ -170,6 +170,21 @@ object ChoiceImages {
       "forest_stratum-mangrove_peatland.png" to ChoiceImageMedia(MIME_PNG, ICON_WETLAND),
       "forest_stratum-planted_forest.png" to ChoiceImageMedia(MIME_PNG, ICON_AGROFORESTRY),
       "forest_stratum-non_forest.png" to ChoiceImageMedia(MIME_PNG, ICON_PASTURE),
+      // EUDR & UK FRC commodity (eudr.commodity)
+      "commodity-cattle.png" to ChoiceImageMedia(MIME_PNG, ICON_GRAZING),
+      "commodity-cocoa.png" to ChoiceImageMedia(MIME_PNG, ICON_COCOA),
+      "commodity-coffee.png" to ChoiceImageMedia(MIME_PNG, ICON_COFFEE),
+      "commodity-oil_palm.png" to ChoiceImageMedia(MIME_PNG, ICON_OIL_PALM),
+      "commodity-rubber.png" to ChoiceImageMedia(MIME_PNG, ICON_RUBBER),
+      "commodity-soya.png" to ChoiceImageMedia(MIME_PNG, ICON_SOY),
+      "commodity-wood.png" to ChoiceImageMedia(MIME_PNG, ICON_TIMBER),
+      // Observed disturbance or degradation (lulc.disturbance_driver)
+      "disturbance_driver-none.png" to ChoiceImageMedia(MIME_PNG, ICON_INTACT),
+      "disturbance_driver-selective_logging.png" to ChoiceImageMedia(MIME_PNG, ICON_LOGGING),
+      "disturbance_driver-fire_burn.png" to ChoiceImageMedia(MIME_PNG, ICON_FIRE),
+      "disturbance_driver-agricultural_clearing.png" to ChoiceImageMedia(MIME_PNG, ICON_CROPLAND),
+      "disturbance_driver-grazing_browsing.png" to ChoiceImageMedia(MIME_PNG, ICON_GRAZING),
+      "disturbance_driver-wind_drought_pest.png" to ChoiceImageMedia(MIME_PNG, ICON_MOISTURE_DRY),
     )
 
   private const val DATA_URI_PREFIX = "data:"

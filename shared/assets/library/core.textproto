@@ -1377,6 +1377,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1403,6 +1411,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1425,6 +1441,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Conventional / uncertified"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
               }
             }
           }

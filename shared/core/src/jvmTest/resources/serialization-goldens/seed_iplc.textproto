@@ -636,6 +636,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -662,6 +670,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -684,6 +700,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Pending"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
               }
             }
           }
@@ -931,6 +955,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -953,6 +985,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Held under customary law (not yet titled)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
               }
             }
           }
@@ -983,6 +1023,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1005,6 +1053,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Contested or overlapping claim"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
               }
             }
           }

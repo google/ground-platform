@@ -1419,6 +1419,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1441,6 +1449,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Other wooded land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
               }
             }
           }
@@ -1471,6 +1487,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1497,6 +1521,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1519,6 +1551,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Inland water bodies"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
               }
             }
           }
@@ -2030,6 +2070,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2052,6 +2100,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Planted shade or fruit trees"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
               }
             }
           }
@@ -2082,6 +2138,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2104,6 +2168,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Not applicable (non-cropland)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
               }
             }
           }
@@ -2374,6 +2446,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2396,6 +2476,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Deforestation (forest to non-forest)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
               }
             }
           }
@@ -2426,6 +2514,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2452,6 +2548,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2474,6 +2578,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Stable non-forest"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
               }
             }
           }
@@ -3072,10 +3184,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "No disturbance observed"
+                string_value: "disturbance_driver-0"
               }
             }
           }
@@ -3098,10 +3210,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Selective logging or timber extraction"
+                string_value: "disturbance_driver-1"
               }
             }
           }
@@ -3124,10 +3236,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Fire or burn scars"
+                string_value: "disturbance_driver-2"
               }
             }
           }
@@ -3150,10 +3262,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Small-scale clearing or shifting cultivation"
+                string_value: "disturbance_driver-3"
               }
             }
           }
@@ -3176,10 +3288,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Livestock grazing"
+                string_value: "disturbance_driver-4"
               }
             }
           }
@@ -3202,10 +3314,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Storm, drought, or pest dieback"
+                string_value: "disturbance_driver-5"
               }
             }
           }
@@ -3239,6 +3351,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -3265,6 +3385,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -3287,6 +3415,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Low — requires field verification"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
               }
             }
           }
@@ -3445,6 +3581,60 @@ form_templates {
               }
             }
           }
+          strings {
+            key: "disturbance_driver-0"
+            value {
+              value: "No disturbance observed"
+              media {
+                image_uri: "jr://images/disturbance_driver-none.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-1"
+            value {
+              value: "Selective logging or timber extraction"
+              media {
+                image_uri: "jr://images/disturbance_driver-selective_logging.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-2"
+            value {
+              value: "Fire or burn scars"
+              media {
+                image_uri: "jr://images/disturbance_driver-fire_burn.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-3"
+            value {
+              value: "Small-scale clearing or shifting cultivation"
+              media {
+                image_uri: "jr://images/disturbance_driver-agricultural_clearing.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-4"
+            value {
+              value: "Livestock grazing"
+              media {
+                image_uri: "jr://images/disturbance_driver-grazing_browsing.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-5"
+            value {
+              value: "Storm, drought, or pest dieback"
+              media {
+                image_uri: "jr://images/disturbance_driver-wind_drought_pest.png"
+              }
+            }
+          }
         }
       }
     }
@@ -3540,7 +3730,7 @@ form_templates {
           itemset {
             instance_id: "disturbance_driver"
             value_ref: "name"
-            label_ref: "label"
+            label_ref: "jr:itext(itextId)"
             nodeset_path: "/root/item"
           }
         }
@@ -3842,6 +4032,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -3864,6 +4062,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Moderate (typical undisturbed stand)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
               }
             }
           }
@@ -3894,6 +4100,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -3915,10 +4129,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "No disturbance observed"
+                string_value: "disturbance_driver-0"
               }
             }
           }
@@ -3941,10 +4155,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Selective logging or timber extraction"
+                string_value: "disturbance_driver-1"
               }
             }
           }
@@ -3967,10 +4181,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Fire or burn scars"
+                string_value: "disturbance_driver-2"
               }
             }
           }
@@ -3993,10 +4207,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Small-scale clearing or shifting cultivation"
+                string_value: "disturbance_driver-3"
               }
             }
           }
@@ -4019,10 +4233,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Livestock grazing"
+                string_value: "disturbance_driver-4"
               }
             }
           }
@@ -4045,10 +4259,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Storm, drought, or pest dieback"
+                string_value: "disturbance_driver-5"
               }
             }
           }
@@ -4234,6 +4448,60 @@ form_templates {
               }
             }
           }
+          strings {
+            key: "disturbance_driver-0"
+            value {
+              value: "No disturbance observed"
+              media {
+                image_uri: "jr://images/disturbance_driver-none.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-1"
+            value {
+              value: "Selective logging or timber extraction"
+              media {
+                image_uri: "jr://images/disturbance_driver-selective_logging.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-2"
+            value {
+              value: "Fire or burn scars"
+              media {
+                image_uri: "jr://images/disturbance_driver-fire_burn.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-3"
+            value {
+              value: "Small-scale clearing or shifting cultivation"
+              media {
+                image_uri: "jr://images/disturbance_driver-agricultural_clearing.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-4"
+            value {
+              value: "Livestock grazing"
+              media {
+                image_uri: "jr://images/disturbance_driver-grazing_browsing.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-5"
+            value {
+              value: "Storm, drought, or pest dieback"
+              media {
+                image_uri: "jr://images/disturbance_driver-wind_drought_pest.png"
+              }
+            }
+          }
         }
       }
     }
@@ -4359,7 +4627,7 @@ form_templates {
           itemset {
             instance_id: "disturbance_driver"
             value_ref: "name"
-            label_ref: "label"
+            label_ref: "jr:itext(itextId)"
             nodeset_path: "/root/item"
           }
         }

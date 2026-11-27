@@ -719,6 +719,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -741,6 +749,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Mangrove"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
               }
             }
           }
@@ -771,6 +787,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -793,6 +817,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Wetland"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
               }
             }
           }
@@ -823,6 +855,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -849,6 +889,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#7A279F"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -871,6 +919,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
               }
             }
           }

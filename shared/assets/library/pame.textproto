@@ -692,6 +692,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -714,6 +722,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Buffer zone"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
               }
             }
           }
@@ -744,6 +760,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -770,6 +794,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -792,6 +824,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Wildlife corridor / OECM"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
               }
             }
           }
@@ -825,6 +865,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -847,6 +895,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Poaching"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#E52592"
               }
             }
           }
@@ -877,6 +933,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -899,6 +963,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Encroachment"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
               }
             }
           }
@@ -929,6 +1001,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -951,6 +1031,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Grazing"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
               }
             }
           }
@@ -981,6 +1069,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#7A279F"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1007,6 +1103,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1029,6 +1133,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
               }
             }
           }
@@ -1062,6 +1174,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1088,6 +1208,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1110,6 +1238,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "High"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
               }
             }
           }

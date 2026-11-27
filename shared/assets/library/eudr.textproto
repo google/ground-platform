@@ -1154,10 +1154,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Cattle"
+                string_value: "commodity-0"
               }
             }
           }
@@ -1180,10 +1180,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Cocoa"
+                string_value: "commodity-1"
               }
             }
           }
@@ -1206,10 +1206,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Coffee"
+                string_value: "commodity-2"
               }
             }
           }
@@ -1232,10 +1232,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Oil palm"
+                string_value: "commodity-3"
               }
             }
           }
@@ -1258,10 +1258,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Rubber"
+                string_value: "commodity-4"
               }
             }
           }
@@ -1284,10 +1284,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Soya"
+                string_value: "commodity-5"
               }
             }
           }
@@ -1310,10 +1310,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Wood"
+                string_value: "commodity-6"
               }
             }
           }
@@ -1402,6 +1402,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1428,6 +1436,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1450,6 +1466,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Unknown"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
               }
             }
           }
@@ -1483,6 +1507,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1505,6 +1537,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Recognized customary or cooperative right"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
               }
             }
           }
@@ -1535,6 +1575,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -1557,6 +1605,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "No legal land-use evidence"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
               }
             }
           }
@@ -1646,6 +1702,75 @@ form_templates {
           value: "eudr.legal_land_use@1"
         }
       }
+      translations {
+        languages {
+          language: "default"
+          is_default: true
+          strings {
+            key: "commodity-0"
+            value {
+              value: "Cattle"
+              media {
+                image_uri: "jr://images/commodity-cattle.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-1"
+            value {
+              value: "Cocoa"
+              media {
+                image_uri: "jr://images/commodity-cocoa.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-2"
+            value {
+              value: "Coffee"
+              media {
+                image_uri: "jr://images/commodity-coffee.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-3"
+            value {
+              value: "Oil palm"
+              media {
+                image_uri: "jr://images/commodity-oil_palm.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-4"
+            value {
+              value: "Rubber"
+              media {
+                image_uri: "jr://images/commodity-rubber.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-5"
+            value {
+              value: "Soya"
+              media {
+                image_uri: "jr://images/commodity-soya.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-6"
+            value {
+              value: "Wood"
+              media {
+                image_uri: "jr://images/commodity-wood.png"
+              }
+            }
+          }
+        }
+      }
     }
     view {
       components {
@@ -1658,7 +1783,7 @@ form_templates {
           itemset {
             instance_id: "commodity"
             value_ref: "name"
-            label_ref: "label"
+            label_ref: "jr:itext(itextId)"
             nodeset_path: "/root/item"
           }
         }
@@ -1833,10 +1958,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Cattle"
+                string_value: "commodity-0"
               }
             }
           }
@@ -1859,10 +1984,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Cocoa"
+                string_value: "commodity-1"
               }
             }
           }
@@ -1885,10 +2010,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Coffee"
+                string_value: "commodity-2"
               }
             }
           }
@@ -1911,10 +2036,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Oil palm"
+                string_value: "commodity-3"
               }
             }
           }
@@ -1937,10 +2062,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Rubber"
+                string_value: "commodity-4"
               }
             }
           }
@@ -1963,10 +2088,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Soya"
+                string_value: "commodity-5"
               }
             }
           }
@@ -1989,10 +2114,10 @@ form_templates {
             }
           }
           fields {
-            key: "label"
+            key: "itextId"
             value {
               scalar_value {
-                string_value: "Wood"
+                string_value: "commodity-6"
               }
             }
           }
@@ -2026,6 +2151,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2048,6 +2181,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "Recognized customary or cooperative right"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
               }
             }
           }
@@ -2078,6 +2219,14 @@ form_templates {
             }
           }
           fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
             key: "collectone_code"
             value {
               scalar_value {
@@ -2100,6 +2249,14 @@ form_templates {
             value {
               scalar_value {
                 string_value: "No legal land-use evidence"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
               }
             }
           }
@@ -2171,6 +2328,75 @@ form_templates {
           value: "eudr.legal_land_use@1"
         }
       }
+      translations {
+        languages {
+          language: "default"
+          is_default: true
+          strings {
+            key: "commodity-0"
+            value {
+              value: "Cattle"
+              media {
+                image_uri: "jr://images/commodity-cattle.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-1"
+            value {
+              value: "Cocoa"
+              media {
+                image_uri: "jr://images/commodity-cocoa.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-2"
+            value {
+              value: "Coffee"
+              media {
+                image_uri: "jr://images/commodity-coffee.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-3"
+            value {
+              value: "Oil palm"
+              media {
+                image_uri: "jr://images/commodity-oil_palm.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-4"
+            value {
+              value: "Rubber"
+              media {
+                image_uri: "jr://images/commodity-rubber.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-5"
+            value {
+              value: "Soya"
+              media {
+                image_uri: "jr://images/commodity-soya.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-6"
+            value {
+              value: "Wood"
+              media {
+                image_uri: "jr://images/commodity-wood.png"
+              }
+            }
+          }
+        }
+      }
     }
     view {
       components {
@@ -2183,7 +2409,7 @@ form_templates {
           itemset {
             instance_id: "commodity"
             value_ref: "name"
-            label_ref: "label"
+            label_ref: "jr:itext(itextId)"
             nodeset_path: "/root/item"
           }
         }

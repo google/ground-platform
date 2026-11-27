@@ -19,6 +19,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.openforis.collectone.v2.app.data.datasource.local.LibraryProtoMapper
 import org.openforis.collectone.v2.app.domain.model.Organization
+import org.openforis.collectone.v2.app.domain.model.editor.ChoiceColors
+import org.openforis.collectone.v2.core.forms.media.ChoiceImages
 import org.openforis.collectone.v2.core.library.LibraryTextProtoSerializer
 
 /**
@@ -121,5 +123,46 @@ class GlobalLibrarySeedTest {
       )
     }
     assertTrue(loaded.all { library -> library.integrityError() == null })
+  }
+
+  @Test
+  fun templates_choiceColorsAndImages_areCompleteValidAndMutuallyExclusive() {
+    val paletteHexes = ChoiceColors.palette.map { it.second.uppercase() }.toSet()
+    for (template in GlobalLibrarySeedData.library().formTemplates) {
+      for (question in template.form.questions) {
+        if (question.choices.isEmpty()) continue
+        val coloredCount = question.choices.count { it.colorHex != null }
+        val imagedCount = question.choices.count { it.image != null }
+        val ctx = "${template.id}.${question.name}"
+        assertTrue(
+          coloredCount == 0 || imagedCount == 0,
+          "$ctx mixes choice colors and choice images",
+        )
+        assertTrue(
+          coloredCount == 0 || coloredCount == question.choices.size,
+          "$ctx has colors on $coloredCount of ${question.choices.size} choices",
+        )
+        assertTrue(
+          imagedCount == 0 || imagedCount == question.choices.size,
+          "$ctx has images on $imagedCount of ${question.choices.size} choices",
+        )
+        for (choice in question.choices) {
+          choice.colorHex?.let { hex ->
+            assertTrue(
+              hex.uppercase() in paletteHexes,
+              "$ctx.${choice.value} uses non-palette color $hex",
+            )
+          }
+          choice.image?.let { img ->
+            val media = ChoiceImages.lookup("jr://images/${question.name}-${choice.value}.png")
+            assertEquals(
+              img.base64,
+              media?.base64,
+              "$ctx.${choice.value} icon missing from ChoiceImages built-in map",
+            )
+          }
+        }
+      }
+    }
   }
 }
