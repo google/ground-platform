@@ -1,0 +1,329 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package openforis.collectone.v1.survey;
+
+import "google/protobuf/timestamp.proto";
+import "shared/protos/survey/acl.proto";
+import "shared/protos/survey/survey_def.proto";
+
+// Core gRPC service for discovering, reading, and atomically mutating survey
+// definitions, sub-resources (forms, entity datasets, map layers), collaborator
+// ACLs, and survey access policies.
+//
+// `ListSurveyOverviews` syncs lightweight `SurveyOverview` records for the
+// survey list (`docs/technical/sync-engine.md`), while `GetSurvey` retrieves
+// the full `SurveyDef` for surveys the user opens or has downloaded for
+// offline use.
+service SurveyService {
+  // Lists the overviews of surveys the caller can access as the owner,
+  // through an ACL entry, or through `ORGANIZATION` sharing. Surveys the
+  // caller can open only through `ANYONE_WITH_LINK` or `PUBLIC` sharing aren't
+  // listed; clients reach them by ID (`BatchGetSurveyOverviews`, `GetSurvey`)
+  // or find public ones with `SearchPublicSurveys`. Whether `sync_token` is
+  // set selects the mode (`docs/technical/sync-engine.md`, "List RPCs: Query
+  // and Delta Modes"):
+  //   - Query mode (`sync_token` unset): every overview in scope except
+  //     trashed and deleted surveys, paged with `page_size` / `page_token`.
+  //     Every page
+  //     reads the snapshot pinned in `page_token`; the last page carries
+  //     `next_sync_token` for the scope at that snapshot.
+  //   - Delta mode (`sync_token` set): every overview in scope changed after
+  //     the token, in commit order, including tombstones (`state == DELETED`)
+  //     for surveys that were trashed or purged and surveys the caller lost
+  //     access to. The last page carries
+  //     `next_sync_token`. `next_page_token` is itself a valid `sync_token`,
+  //     so a client can store it after applying a page.
+  // Delivery is at least once: an overview can appear in a query page and in
+  // the delta that follows. Fails with `INVALID_ARGUMENT` when `sync_token` is
+  // malformed or was issued for a different scope (`organization_id`), and
+  // with `FAILED_PRECONDITION` when the server can no longer serve changes
+  // from `sync_token`; the client then discards it and runs a full sync.
+  rpc ListSurveyOverviews(ListSurveyOverviewsRequest) returns (ListSurveyOverviewsResponse);
+
+  // Retrieves the complete `SurveyDef` (including all forms, entity dataset
+  // schemas, map configs, and translations) for a survey the user has
+  // downloaded for offline mobile sync or opened for web editing.
+  rpc GetSurvey(GetSurveyRequest) returns (GetSurveyResponse);
+
+  // Retrieves the Access Control List (ACL) and access rules (`SharingPolicy`
+  // and `PeerDataVisibility`) for a survey.
+  rpc GetSurveyAcl(GetSurveyAclRequest) returns (GetSurveyAclResponse);
+
+  // Atomically and idempotently applies an ordered batch of mutations to
+  // initialize or update survey fields/sub-resources, configure ACLs/access
+  // rules, save or discard the working copy, or move a survey to Trash and
+  // restore it. Surveys are never hard-deleted by clients; trashed surveys are
+  // purged by the server after the retention period.
+  rpc MutateSurvey(MutateSurveyRequest) returns (MutateSurveyResponse);
+
+  // Redeems an email invite token from an `AclEntry` the organizer created,
+  // binding the caller's authenticated `user_id` to it. Only organizers add or
+  // remove ACL entries; link and public sharing never create them.
+  rpc AcceptSurveyInvite(AcceptSurveyInviteRequest) returns (AcceptSurveyInviteResponse);
+
+  // Returns the caller's current view of specific surveys, typically the ones
+  // downloaded on a device, so clients learn about new saved revisions, Trash,
+  // purges, and lost access without the survey list being open. Stateless:
+  // one result per requested ID, in request order.
+  rpc BatchGetSurveyOverviews(BatchGetSurveyOverviewsRequest) returns (BatchGetSurveyOverviewsResponse);
+
+  // Searches the public directory of surveys with `sharing_policy = PUBLIC`
+  // by keyword (title and description). Trashed and deleted surveys are
+  // excluded.
+  rpc SearchPublicSurveys(SearchPublicSurveysRequest) returns (SearchPublicSurveysResponse);
+}
+
+// Request to list the overviews of surveys accessible to the caller.
+message ListSurveyOverviewsRequest {
+  // Scope: optional organization ID. Empty lists surveys across all of the
+  // caller's organizations and personal surveys.
+  string organization_id = 1;
+
+  // Maximum number of overviews to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 2;
+
+  // `next_page_token` from the previous page of the same call sequence.
+  string page_token = 3;
+
+  // Opaque `next_sync_token` from an earlier call for the same scope. Selects
+  // delta mode.
+  string sync_token = 4;
+}
+
+// A page of survey overviews.
+message ListSurveyOverviewsResponse {
+  repeated SurveyOverview overviews = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+
+  // Opaque token for the next delta call, set on the last page only.
+  string next_sync_token = 3;
+}
+
+// Request to retrieve a single survey definition.
+message GetSurveyRequest {
+  // Unique identifier of the survey (`SurveyDef.survey_id`).
+  string survey_id = 1;
+
+  // Reference to the organizer's working copy.
+  message WorkingCopy {}
+
+  // Which revision of the survey to fetch. When unset, returns the latest saved
+  // revision (the one collectors use).
+  oneof revision {
+    // A specific immutable saved revision (`SurveyDef.version`).
+    string saved_version = 2;
+
+    // Returns the organizer's working copy, including edits that
+    // haven't been saved yet. `GetSurveyResponse.survey` is unset if there is
+    // no working copy; clients then start editing from the latest saved
+    // revision.
+    WorkingCopy working_copy = 3;
+  }
+}
+
+// Response containing the requested survey revision and caller's effective
+// access.
+message GetSurveyResponse {
+  // The requested revision of the survey.
+  SurveyDef survey = 1;
+
+  // Access rules and ACL for the survey, if authorized to view.
+  SurveyAcl acl = 2;
+
+  reserved 3;
+  reserved "working_copy";
+}
+
+// Request to retrieve the ACL and access rules for a survey.
+message GetSurveyAclRequest {
+  // Unique identifier of the survey (`SurveyDef.survey_id`).
+  string survey_id = 1;
+}
+
+// Response containing the survey ACL and access rules.
+message GetSurveyAclResponse {
+  // Current ACL and sharing/visibility rules for the survey.
+  SurveyAcl acl = 1;
+}
+
+// A single idempotent mutation step within a batched `MutateSurveyRequest`.
+//
+// Carries sparse instances of `SurveyDef` (`delete` / `upsert`) and/or
+// `SurveyAcl` (`acl_delete` / `acl_upsert`), or a working-copy operation
+// (`save_working_copy`, `discard_working_copy`). For each target (`SurveyDef`
+// and `SurveyAcl`), the structural `delete` mask is applied first (where any
+// non-default scalar/list or leaf item clears/removes that target) followed by
+// recursively merging `upsert`. Moving a survey to Trash sets
+// `upsert.trash_time` (the server stamps the commit time when first trashed),
+// and restoring it from Trash sets `delete.trash_time` (clearing `trash_time`).
+message SurveyMutation {
+  // Structural deletion mask for `SurveyDef`: any non-default scalar or
+  // repeated value list clears that field to default/empty, and any keyed item
+  // (`FormDef`, `EntityDatasetDef`, `LayerDef`, etc.) with only its ID set
+  // removes that item (or recurses into its child fields if child fields are
+  // populated). Setting `delete.trash_time` restores a trashed survey.
+  SurveyDef delete = 1;
+
+  // Sparse `SurveyDef` fields and keyed sub-resources (`forms`,
+  // `entity_datasets`, `form_launch_configs`, `form_concept_links`,
+  // `map_config`, `translations`, etc.) to create or update on the target
+  // revision (the working copy when `MutateSurveyRequest.working_copy` is true,
+  // otherwise the saved revision). Setting `upsert.trash_time` moves the survey
+  // to Trash (stamped with the server's commit time when first trashed).
+  SurveyDef upsert = 2;
+
+  // Structural deletion mask for `SurveyAcl`: any non-default scalar or
+  // `quarantined_user_ids` clears that field, and any `AclEntry` in `entries`
+  // with only its `id` / `user_id` / `email` set revokes that collaborator
+  // entry.
+  SurveyAcl acl_delete = 3;
+
+  // Sparse `SurveyAcl` fields and collaborator `entries` to create or update.
+  SurveyAcl acl_upsert = 4;
+
+  // Saves the working copy as the new saved revision and increments
+  // `saved_revision_number`. Doesn't change `SurveyDef.state`.
+  bool save_working_copy = 5;
+
+  // Discards unsaved edits, resetting the working copy to the latest saved
+  // revision.
+  bool discard_working_copy = 6;
+
+  // Client-generated UUID from the offline outbox, identifying the mutation in
+  // client logs. Replays are detected by `client_seq`, not by this ID.
+  string mutation_id = 7;
+
+  // Stable identifier of the client install that recorded the mutation.
+  string client_id = 8;
+
+  // Monotonically increasing sequence number of the mutation within
+  // `client_id` (`GetAppliedMutations`, scope `"surveys/<survey_id>"`).
+  int64 client_seq = 9;
+
+  // Client-side timestamp when the mutation was recorded.
+  google.protobuf.Timestamp client_timestamp = 10;
+}
+
+// Request to atomically and idempotently apply an ordered sequence of mutations
+// to a survey.
+message MutateSurveyRequest {
+  // Client-defined survey UUID (`SurveyDef.survey_id`, RFC 4122 v4).
+  string survey_id = 1;
+
+  // Expected base version for optimistic concurrency control on existing
+  // surveys (optional). When set and stale against the target revision's
+  // `version`, the request fails with `FAILED_PRECONDITION`.
+  string base_version = 2;
+
+  // Ordered sequence of idempotent survey field, ACL, access rule, trash, or
+  // working copy mutations to execute atomically.
+  repeated SurveyMutation mutations = 3;
+
+  // When true, applies `mutations` to the organizer's working copy instead of
+  // the saved revision.
+  bool working_copy = 4;
+}
+
+// Response returning the resulting survey state after applying all mutations.
+message MutateSurveyResponse {
+  // Target survey identifier.
+  string survey_id = 1;
+
+  // The mutated revision (the working copy when
+  // `MutateSurveyRequest.working_copy` is true, otherwise the saved revision),
+  // with incremented `version` and `commit_timestamp`.
+  SurveyDef survey = 2;
+
+  // Resulting ACL and access rules for the survey.
+  SurveyAcl acl = 3;
+
+  reserved 4;
+  reserved "working_copy";
+
+  // Authoritative server commit timestamp assigned to this mutation batch.
+  google.protobuf.Timestamp commit_timestamp = 5;
+}
+
+message AcceptSurveyInviteRequest {
+  string survey_id = 1;
+  string invite_token = 2;
+  string user_id = 3;
+  string email = 4;
+  CachedProfile profile = 5;
+}
+
+message AcceptSurveyInviteResponse {
+  SurveyDef survey = 1;
+  SurveyAcl acl = 2;
+  google.protobuf.Timestamp commit_timestamp = 3;
+}
+
+// Request for the caller's current view of specific surveys.
+message BatchGetSurveyOverviewsRequest {
+  // Survey IDs to look up (`SurveyDef.survey_id`). The server caps the number
+  // of IDs per request and fails with `INVALID_ARGUMENT` above it.
+  repeated string survey_ids = 1;
+}
+
+// The caller's view of one requested survey.
+message SurveyOverviewResult {
+  // The requested survey ID.
+  string survey_id = 1;
+
+  oneof result {
+    // The caller's overview of the survey. `trash_time` is set when the
+    // survey is in Trash.
+    SurveyOverview overview = 2;
+
+    // Why the overview isn't available: `NOT_FOUND` when the survey doesn't
+    // exist or was purged, `PERMISSION_DENIED` when the caller has no access.
+    // Values are `google.rpc.Code` numbers.
+    int32 error_code = 3;
+  }
+}
+
+// Response with one result per requested survey, in request order.
+message BatchGetSurveyOverviewsResponse {
+  repeated SurveyOverviewResult results = 1;
+}
+
+// Query over the public directory of surveys.
+message SearchPublicSurveysRequest {
+  // Case-insensitive keyword matched against survey title and description.
+  // Empty lists every public survey.
+  string query = 1;
+
+  // Maximum number of overviews to return. The server picks a default when
+  // unset and caps large values.
+  int32 page_size = 2;
+
+  // `next_page_token` from the previous page of the same query.
+  string page_token = 3;
+}
+
+// A page of public survey overviews.
+message SearchPublicSurveysResponse {
+  repeated SurveyOverview overviews = 1;
+
+  // Token for the next page; empty on the last page.
+  string next_page_token = 2;
+}

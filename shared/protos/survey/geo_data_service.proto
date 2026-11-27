@@ -1,0 +1,230 @@
+/*
+ * Copyright 2026 The Collect One Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package openforis.collectone.v1.survey;
+
+import "google/protobuf/duration.proto";
+import "shared/protos/data/geometry.proto";
+
+// Provides geospatial data and dynamic imagery/overlay tile resolution in the
+// context of an authorized survey.
+service GeoDataService {
+  // Evaluates the overlay layer for `imagery_source_id` in the context of
+  // `survey_id` and returns a short-lived XYZ tile URL template and TTL.
+  // Requires at least `VIEWER` access to `survey_id`.
+  rpc GetOverlayTileUrl(GetOverlayTileUrlRequest) returns (GetOverlayTileUrlResponse);
+
+  // Elevation and population for one plot, from Earth Engine (the "Time
+  // Series & Imagery" panel's statistics). Requires at least `VIEWER` access
+  // to `survey_id`.
+  rpc GetPlotStatistics(GetPlotStatisticsRequest) returns (GetPlotStatisticsResponse);
+
+  // Per-observation band and index values over one plot from one imagery
+  // source, from Earth Engine. Requires at least `VIEWER` access to
+  // `survey_id`.
+  rpc GetPlotTimeSeries(GetPlotTimeSeriesRequest) returns (GetPlotTimeSeriesResponse);
+
+  // Short-lived XYZ tiles for one historical scene returned by
+  // `GetPlotTimeSeries`, visualized with `stretch`. Requires at least `VIEWER`
+  // access to `survey_id`.
+  rpc GetSceneTileUrl(GetSceneTileUrlRequest) returns (GetSceneTileUrlResponse);
+}
+
+message GetOverlayTileUrlRequest {
+  // Survey context (`SurveyDef.survey_id`); caller must have ≥ VIEWER access.
+  string survey_id = 1;
+
+  // Target overlay ID (`ImagerySource.imagery_source_id`).
+  string imagery_source_id = 2;
+}
+
+message GetOverlayTileUrlResponse {
+  // XYZ tile URL template containing `{z}`, `{x}`, and `{y}` placeholders
+  // (e.g. `https://earthengine.googleapis.com/v1/projects/.../maps/.../tiles/{z}/{x}/{y}`).
+  string url_template = 1;
+
+  // Remaining time `url_template` is valid before the client should call
+  // `GetOverlayTileUrl` again to refresh it (default: 7200s / 2 hours).
+  google.protobuf.Duration ttl = 2;
+}
+
+// Range of acquisition dates, as ISO 8601 calendar dates (`YYYY-MM-DD`).
+message DateWindow {
+  // First day of the window (inclusive).
+  string start_date = 1;
+
+  // Day after the last day of the window (exclusive).
+  string end_date = 2;
+}
+
+// The plot to analyze: a point or polygon, as the client draws it. Traces
+// (lines) aren't supported.
+message PlotRef {
+  // `EntityRecord.entity_id` of the map feature in the request's survey, or
+  // empty for a feature that is still being drawn in a form. When the stored
+  // feature has a point or polygon, it's analyzed instead of `geometry`.
+  string entity_id = 1;
+
+  // Formerly the drawn geometry as `forms.GeoPoint point` or `forms.GeoShape
+  // shape`; replaced by `geometry`. Requests aren't stored, so nothing reads
+  // them anymore.
+  reserved 2, 3;
+  reserved "point", "shape";
+
+  // The plot's geometry as drawn by the client: a Point or a Polygon (its
+  // exterior ring is analyzed). Required unless the stored map feature named
+  // by `entity_id` has a point or polygon.
+  openforis.collectone.v1.data.Geometry geometry = 4;
+}
+
+message GetPlotStatisticsRequest {
+  // Survey context (`SurveyDef.survey_id`); caller must have ≥ VIEWER access.
+  string survey_id = 1;
+
+  // Plot to describe.
+  PlotRef plot = 2;
+}
+
+message GetPlotStatisticsResponse {
+  // Lowest, mean, and highest elevation in meters (Copernicus GLO-30 DEM).
+  // Unset where the DEM has no coverage.
+  optional double elevation_min_meters = 1;
+  optional double elevation_mean_meters = 2;
+  optional double elevation_max_meters = 3;
+
+  // Estimated residents inside the plot (WorldPop). Unset for points, which
+  // have no area, and where WorldPop has no coverage.
+  optional double population = 4;
+
+  // Residents per km² over the plot (or at a point). Unset where WorldPop has
+  // no coverage.
+  optional double population_density_per_km2 = 5;
+
+  // Year of the population estimate.
+  int32 population_year = 6;
+
+  // Attributions of the datasets used.
+  repeated string attributions = 7;
+}
+
+// Imagery that a plot time series is computed from.
+enum TimeSeriesSource {
+  // Not specified.
+  TIME_SERIES_SOURCE_UNSPECIFIED = 0;
+
+  // Landsat 4-9 Collection 2 TOA reflectance (30 m, 1982 onward): reflectance
+  // bands, spectral indices, and NDFI.
+  LANDSAT = 1;
+
+  // Sentinel-2 surface reflectance (10-20 m, 2017 onward), cloud-masked with
+  // Cloud Score+: spectral indices.
+  SENTINEL_2 = 2;
+
+  // Sentinel-1 C-band SAR (10 m, 2014 onward): VV and VH backscatter (dB),
+  // their ratio, and RFDI.
+  SENTINEL_1 = 3;
+}
+
+message GetPlotTimeSeriesRequest {
+  // Survey context (`SurveyDef.survey_id`); caller must have ≥ VIEWER access.
+  string survey_id = 1;
+
+  // Plot to summarize.
+  PlotRef plot = 2;
+
+  // Imagery to summarize.
+  TimeSeriesSource source = 3;
+
+  // Acquisition dates to include. Defaults to the last 10 years.
+  DateWindow window = 4;
+}
+
+// One value per observation of a `GetPlotTimeSeriesResponse`.
+message DoubleSeries {
+  // Values in observation order; NaN where the plot was masked (e.g. cloudy).
+  repeated double values = 1;
+}
+
+// Plot means per observation, stored by column: entry `i` of every list
+// describes observation `i`, in ascending time order.
+message GetPlotTimeSeriesResponse {
+  // Acquisition time, in milliseconds since the Unix epoch.
+  repeated int64 time_start_ms = 1;
+
+  // Earth Engine asset ID of the scene (for `GetSceneTileUrl`), e.g.
+  // `LANDSAT/LC08/C02/T1_TOA/LC08_227065_20230814`.
+  repeated string scene_ids = 2;
+
+  // Platform that acquired the scene, e.g. `LANDSAT_8`, `Sentinel-2A`,
+  // `SENTINEL-1A`.
+  repeated string platforms = 3;
+
+  // Plot mean of each band or index, keyed by name (e.g. `NDVI`, `NDFI`,
+  // `SWIR1`, `VV`).
+  map<string, DoubleSeries> bands = 4;
+
+  // Window that was computed.
+  DateWindow window = 5;
+
+  // Attributions of the imagery.
+  repeated string attributions = 6;
+}
+
+// Band combination for `GetSceneTileUrl`.
+enum SceneStretch {
+  // Not specified: true color for optical scenes, VV/VH/ratio for SAR.
+  SCENE_STRETCH_UNSPECIFIED = 0;
+
+  // Red, green, blue.
+  TRUE_COLOR = 1;
+
+  // SWIR1, NIR, red: vegetation green, bare soil and clearings magenta.
+  SWIR_NIR_RED = 2;
+
+  // NIR, SWIR1, red: vegetation orange to red.
+  NIR_SWIR_RED = 3;
+
+  // Sentinel-1 VV, VH, and VV/VH.
+  SAR_VV_VH_RATIO = 4;
+}
+
+message GetSceneTileUrlRequest {
+  // Survey context (`SurveyDef.survey_id`); caller must have ≥ VIEWER access.
+  string survey_id = 1;
+
+  // Earth Engine asset ID of a scene from `GetPlotTimeSeriesResponse`.
+  string scene_id = 2;
+
+  // Band combination; optical scenes only accept the optical stretches and
+  // SAR scenes only `SAR_VV_VH_RATIO`.
+  SceneStretch stretch = 3;
+}
+
+message GetSceneTileUrlResponse {
+  // XYZ tile URL template containing `{z}`, `{x}`, and `{y}` placeholders.
+  string url_template = 1;
+
+  // Remaining time `url_template` is valid.
+  google.protobuf.Duration ttl = 2;
+
+  // Stretch that was applied.
+  SceneStretch stretch = 3;
+
+  // Attribution of the imagery.
+  string attribution = 4;
+}
