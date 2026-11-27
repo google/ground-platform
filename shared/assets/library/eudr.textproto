@@ -1,0 +1,2618 @@
+# Copyright 2026 The Collect One Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: openforis.collectone.v1.library.LibraryBundle
+#
+# Global library seed: the `eudr` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The clients embed a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions carry
+# their concept links as `collectone:concept` foreign attributes on their bindings.
+
+concepts {
+  id: "eudr.commodity"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Commodity"
+    }
+    values {
+      key: "fr"
+      value: "Produit de base"
+    }
+    values {
+      key: "es"
+      value: "Producto básico"
+    }
+    values {
+      key: "vi"
+      value: "Mặt hàng"
+    }
+    values {
+      key: "sw"
+      value: "Bidhaa"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Relevant agricultural or forest risk commodity produced on the plot."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "crop"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "product"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "culture"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "produit"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "cultivo"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "producto"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "cây trồng"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "nông sản"
+    }
+  }
+  keywords {
+    values {
+      key: "sw"
+      value: "zao"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "cattle"
+      label {
+        values {
+          key: "en"
+          value: "Cattle"
+        }
+        values {
+          key: "fr"
+          value: "Bovins"
+        }
+        values {
+          key: "es"
+          value: "Ganado bovino"
+        }
+        values {
+          key: "vi"
+          value: "Gia súc"
+        }
+        values {
+          key: "sw"
+          value: "Ng'ombe"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "0102"
+      }
+    }
+    items {
+      code: "cocoa"
+      label {
+        values {
+          key: "en"
+          value: "Cocoa"
+        }
+        values {
+          key: "fr"
+          value: "Cacao"
+        }
+        values {
+          key: "es"
+          value: "Cacao"
+        }
+        values {
+          key: "vi"
+          value: "Ca cao"
+        }
+        values {
+          key: "sw"
+          value: "Kakao"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "1801"
+      }
+    }
+    items {
+      code: "coffee"
+      label {
+        values {
+          key: "en"
+          value: "Coffee"
+        }
+        values {
+          key: "fr"
+          value: "Café"
+        }
+        values {
+          key: "es"
+          value: "Café"
+        }
+        values {
+          key: "vi"
+          value: "Cà phê"
+        }
+        values {
+          key: "sw"
+          value: "Kahawa"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "0901"
+      }
+    }
+    items {
+      code: "oil_palm"
+      label {
+        values {
+          key: "en"
+          value: "Oil palm"
+        }
+        values {
+          key: "fr"
+          value: "Palmier à huile"
+        }
+        values {
+          key: "es"
+          value: "Palma aceitera"
+        }
+        values {
+          key: "vi"
+          value: "Cọ dầu"
+        }
+        values {
+          key: "sw"
+          value: "Mchikichi"
+        }
+      }
+    }
+    items {
+      code: "rubber"
+      label {
+        values {
+          key: "en"
+          value: "Rubber"
+        }
+        values {
+          key: "fr"
+          value: "Caoutchouc"
+        }
+        values {
+          key: "es"
+          value: "Caucho"
+        }
+        values {
+          key: "vi"
+          value: "Cao su"
+        }
+        values {
+          key: "sw"
+          value: "Mpira"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "4001"
+      }
+    }
+    items {
+      code: "soya"
+      label {
+        values {
+          key: "en"
+          value: "Soya"
+        }
+        values {
+          key: "fr"
+          value: "Soja"
+        }
+        values {
+          key: "es"
+          value: "Soja"
+        }
+        values {
+          key: "vi"
+          value: "Đậu tương"
+        }
+        values {
+          key: "sw"
+          value: "Soya"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "1201"
+      }
+    }
+    items {
+      code: "wood"
+      label {
+        values {
+          key: "en"
+          value: "Wood"
+        }
+        values {
+          key: "fr"
+          value: "Bois"
+        }
+        values {
+          key: "es"
+          value: "Madera"
+        }
+        values {
+          key: "vi"
+          value: "Gỗ"
+        }
+        values {
+          key: "sw"
+          value: "Mbao"
+        }
+      }
+      external_ids {
+        key: "hs"
+        value: "44"
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.production_place"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Production place"
+    }
+    values {
+      key: "fr"
+      value: "Lieu de production"
+    }
+    values {
+      key: "es"
+      value: "Lugar de producción"
+    }
+    values {
+      key: "vi"
+      value: "Nơi sản xuất"
+    }
+    values {
+      key: "sw"
+      value: "Mahali pa uzalishaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Boundary of the plot of land where the commodity was produced."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "plot"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "parcel"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "farm"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "geolocation"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "parcelle"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "parcela"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "finca"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "lô đất"
+    }
+  }
+  keywords {
+    values {
+      key: "vi"
+      value: "thửa đất"
+    }
+  }
+  keywords {
+    values {
+      key: "sw"
+      value: "shamba"
+    }
+  }
+  data_type: TYPE_GEOSHAPE
+  aggregation: COUNT_DISTINCT_FEATURES
+  privacy_class: ORG_ONLY
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.harvest_date_range"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Harvest date range"
+    }
+    values {
+      key: "fr"
+      value: "Période de récolte"
+    }
+    values {
+      key: "es"
+      value: "Período de cosecha"
+    }
+    values {
+      key: "vi"
+      value: "Thời gian thu hoạch"
+    }
+    values {
+      key: "sw"
+      value: "Kipindi cha mavuno"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Date or time range of production, as an ISO 8601 interval (2026-01-01/2026-03-31)."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "harvest"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "production date"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "cosecha"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: ORG_ONLY
+  goals: "deforestation_free_supply_chains"
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.plot_over_4ha"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Plot larger than 4 ha"
+    }
+    values {
+      key: "fr"
+      value: "Parcelle de plus de 4 ha"
+    }
+    values {
+      key: "es"
+      value: "Parcela de más de 4 ha"
+    }
+    values {
+      key: "vi"
+      value: "Lô đất lớn hơn 4 ha"
+    }
+    values {
+      key: "sw"
+      value: "Shamba kubwa kuliko ha 4"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Whether the plot is larger than 4 hectares, so its boundary must be a polygon."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "yes"
+      label {
+        values {
+          key: "en"
+          value: "Yes"
+        }
+        values {
+          key: "fr"
+          value: "Oui"
+        }
+        values {
+          key: "es"
+          value: "Sí"
+        }
+        values {
+          key: "vi"
+          value: "Có"
+        }
+        values {
+          key: "sw"
+          value: "Ndiyo"
+        }
+      }
+    }
+    items {
+      code: "no"
+      label {
+        values {
+          key: "en"
+          value: "No"
+        }
+        values {
+          key: "fr"
+          value: "Non"
+        }
+        values {
+          key: "es"
+          value: "No"
+        }
+        values {
+          key: "vi"
+          value: "Không"
+        }
+        values {
+          key: "sw"
+          value: "Hapana"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.quantity_kg"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Quantity (kg)"
+    }
+    values {
+      key: "fr"
+      value: "Quantité (kg)"
+    }
+    values {
+      key: "es"
+      value: "Cantidad (kg)"
+    }
+    values {
+      key: "vi"
+      value: "Khối lượng (kg)"
+    }
+    values {
+      key: "sw"
+      value: "Kiasi (kg)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Net mass of the commodity delivered, in kilograms."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "weight"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "volume"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "peso"
+    }
+  }
+  keywords {
+    values {
+      key: "fr"
+      value: "poids"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "kg"
+  aggregation: SUM
+  privacy_class: ORG_ONLY
+  goals: "deforestation_free_supply_chains"
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.deforestation_free"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Deforestation-free"
+    }
+    values {
+      key: "fr"
+      value: "Zéro déforestation"
+    }
+    values {
+      key: "es"
+      value: "Libre de deforestación"
+    }
+    values {
+      key: "vi"
+      value: "Không gây mất rừng"
+    }
+    values {
+      key: "sw"
+      value: "Bila ukataji wa misitu"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Whether the plot has been free of deforestation since 31 December 2020."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "yes"
+      label {
+        values {
+          key: "en"
+          value: "Yes"
+        }
+        values {
+          key: "fr"
+          value: "Oui"
+        }
+        values {
+          key: "es"
+          value: "Sí"
+        }
+        values {
+          key: "vi"
+          value: "Có"
+        }
+        values {
+          key: "sw"
+          value: "Ndiyo"
+        }
+      }
+    }
+    items {
+      code: "no"
+      label {
+        values {
+          key: "en"
+          value: "No"
+        }
+        values {
+          key: "fr"
+          value: "Non"
+        }
+        values {
+          key: "es"
+          value: "No"
+        }
+        values {
+          key: "vi"
+          value: "Không"
+        }
+        values {
+          key: "sw"
+          value: "Hapana"
+        }
+      }
+    }
+    items {
+      code: "unknown"
+      label {
+        values {
+          key: "en"
+          value: "Unknown"
+        }
+        values {
+          key: "fr"
+          value: "Inconnu"
+        }
+        values {
+          key: "es"
+          value: "Desconocido"
+        }
+        values {
+          key: "vi"
+          value: "Không rõ"
+        }
+        values {
+          key: "sw"
+          value: "Haijulikani"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.legal_land_use"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Legal land-use status"
+    }
+    values {
+      key: "fr"
+      value: "Statut légal d'utilisation des terres"
+    }
+    values {
+      key: "es"
+      value: "Estado legal de uso de la tierra"
+    }
+    values {
+      key: "vi"
+      value: "Tình trạng sử dụng đất hợp pháp"
+    }
+    values {
+      key: "sw"
+      value: "Hali halali ya matumizi ya ardhi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Evidence that the plot is cultivated in accordance with relevant local land-use and tenure legislation."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "legality"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "land title"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "legalidad"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "verified_legal"
+      label {
+        values {
+          key: "en"
+          value: "Verified legal title or use right"
+        }
+        values {
+          key: "fr"
+          value: "Titre ou droit d'usage légal vérifié"
+        }
+        values {
+          key: "es"
+          value: "Título o derecho de uso legal verificado"
+        }
+        values {
+          key: "vi"
+          value: "Có giấy chứng nhận quyền sử dụng đất hợp pháp"
+        }
+        values {
+          key: "sw"
+          value: "Hati au haki halali iliyothibitishwa"
+        }
+      }
+    }
+    items {
+      code: "customary_recognized"
+      label {
+        values {
+          key: "en"
+          value: "Recognized customary or cooperative right"
+        }
+        values {
+          key: "fr"
+          value: "Droit coutumier ou coopératif reconnu"
+        }
+        values {
+          key: "es"
+          value: "Derecho consuetudinario o cooperativo reconocido"
+        }
+        values {
+          key: "vi"
+          value: "Quyền canh tác truyền thống hoặc hợp tác xã được công nhận"
+        }
+        values {
+          key: "sw"
+          value: "Haki ya kimila au ya ushirika inayotambuliwa"
+        }
+      }
+    }
+    items {
+      code: "pending_verification"
+      label {
+        values {
+          key: "en"
+          value: "Pending verification"
+        }
+        values {
+          key: "fr"
+          value: "Vérification en attente"
+        }
+        values {
+          key: "es"
+          value: "Verificación pendiente"
+        }
+        values {
+          key: "vi"
+          value: "Đang chờ xác minh"
+        }
+        values {
+          key: "sw"
+          value: "Inasubiri uthibitisho"
+        }
+      }
+    }
+    items {
+      code: "non_compliant"
+      label {
+        values {
+          key: "en"
+          value: "No legal land-use evidence"
+        }
+        values {
+          key: "fr"
+          value: "Aucune preuve de légalité"
+        }
+        values {
+          key: "es"
+          value: "Sin evidencia legal de uso"
+        }
+        values {
+          key: "vi"
+          value: "Không có bằng chứng sử dụng đất hợp pháp"
+        }
+        values {
+          key: "sw"
+          value: "Hakuna ushahidi wa uhalali"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.scientific_name"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Scientific species name"
+    }
+    values {
+      key: "fr"
+      value: "Nom scientifique de l'espèce"
+    }
+    values {
+      key: "es"
+      value: "Nombre científico de la especie"
+    }
+    values {
+      key: "vi"
+      value: "Tên khoa học của loài"
+    }
+    values {
+      key: "sw"
+      value: "Jina la kisayansi la spishi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Botanical or scientific name of the crop or tree species produced on the plot (required for wood products)."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "botanical name"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "species"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "nombre científico"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.supplier_name"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Supplier name"
+    }
+    values {
+      key: "fr"
+      value: "Nom du fournisseur"
+    }
+    values {
+      key: "es"
+      value: "Nombre del proveedor"
+    }
+    values {
+      key: "vi"
+      value: "Tên nhà cung cấp"
+    }
+    values {
+      key: "sw"
+      value: "Jina la msambazaji"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Name of the business or person that supplied the commodity."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "vendor"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "trader"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "proveedor"
+    }
+  }
+  data_type: TYPE_STRING
+  aggregation: NONE
+  privacy_class: SENSITIVE
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+concepts {
+  id: "eudr.plot_area_ha"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Production plot area (ha)"
+    }
+    values {
+      key: "fr"
+      value: "Surface de la parcelle de production (ha)"
+    }
+    values {
+      key: "es"
+      value: "Área de la parcela de producción (ha)"
+    }
+    values {
+      key: "vi"
+      value: "Diện tích lô đất sản xuất (ha)"
+    }
+    values {
+      key: "sw"
+      value: "Eneo la shamba la uzalishaji (ha)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Area of the agricultural or forest commodity production plot in hectares."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "plot area"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "hectares"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "hectáreas"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "har"
+  aggregation: SUM
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  references: "https://eur-lex.europa.eu/eli/reg/2023/1115/oj"
+  status: STABLE
+}
+form_templates {
+  id: "eudr_plot_registration"
+  title {
+    values {
+      key: "en"
+      value: "Deforestation compliance plot check"
+    }
+    values {
+      key: "fr"
+      value: "Vérification de parcelle zéro déforestation"
+    }
+    values {
+      key: "es"
+      value: "Verificación de parcela libre de deforestación"
+    }
+    values {
+      key: "vi"
+      value: "Kiểm tra lô đất tuân thủ không gây mất rừng"
+    }
+    values {
+      key: "sw"
+      value: "Ukaguzi wa shamba la uzingatiaji wa kutokata misitu"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Records plot geolocation, commodity, producer ID, harvest period, deforestation-free status after 31 December 2020, and legal land-use evidence."
+    }
+  }
+  form {
+    form_id: "eudr_plot_registration"
+    title: "Deforestation compliance plot check"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Deforestation compliance plot check"
+          fields {
+            name: "commodity"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "production_place"
+            type: TYPE_GEOSHAPE
+          }
+          fields {
+            name: "area_ha"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "plot_over_4ha"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "producer_id"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "harvest_date_range"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "deforestation_free"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "legal_land_use"
+            type: TYPE_SELECT_ONE
+          }
+        }
+      }
+      secondary_instances {
+        id: "commodity"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cattle"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-0"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cattle"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-1"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-2"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-3"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-4"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "soya"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-5"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "soya"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wood"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-6"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "wood"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "plot_over_4ha"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "yes"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Yes"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "yes"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "no"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "No"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "no"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "deforestation_free"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "yes"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Yes"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "yes"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "no"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "No"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "no"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "unknown"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Unknown"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "unknown"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "legal_land_use"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "verified_legal"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Verified legal title or use right"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "verified_legal"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "customary_recognized"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Recognized customary or cooperative right"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "customary_recognized"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "pending_verification"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Pending verification"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "pending_verification"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "non_compliant"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "No legal land-use evidence"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "non_compliant"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "commodity"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.commodity@1"
+        }
+      }
+      bindings {
+        field_path: "production_place"
+        type: TYPE_GEOSHAPE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.production_place@1"
+        }
+      }
+      bindings {
+        field_path: "area_ha"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.area_ha@1"
+        }
+      }
+      bindings {
+        field_path: "plot_over_4ha"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.plot_over_4ha@1"
+        }
+      }
+      bindings {
+        field_path: "producer_id"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.producer_id@1"
+        }
+      }
+      bindings {
+        field_path: "harvest_date_range"
+        type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.harvest_date_range@1"
+        }
+      }
+      bindings {
+        field_path: "deforestation_free"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.deforestation_free@1"
+        }
+      }
+      bindings {
+        field_path: "legal_land_use"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.legal_land_use@1"
+        }
+      }
+      translations {
+        languages {
+          language: "default"
+          is_default: true
+          strings {
+            key: "commodity-0"
+            value {
+              value: "Cattle"
+              media {
+                image_uri: "jr://images/commodity-cattle.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-1"
+            value {
+              value: "Cocoa"
+              media {
+                image_uri: "jr://images/commodity-cocoa.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-2"
+            value {
+              value: "Coffee"
+              media {
+                image_uri: "jr://images/commodity-coffee.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-3"
+            value {
+              value: "Oil palm"
+              media {
+                image_uri: "jr://images/commodity-oil_palm.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-4"
+            value {
+              value: "Rubber"
+              media {
+                image_uri: "jr://images/commodity-rubber.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-5"
+            value {
+              value: "Soya"
+              media {
+                image_uri: "jr://images/commodity-soya.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-6"
+            value {
+              value: "Wood"
+              media {
+                image_uri: "jr://images/commodity-wood.png"
+              }
+            }
+          }
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "commodity"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Commodity"
+          }
+          itemset {
+            instance_id: "commodity"
+            value_ref: "name"
+            label_ref: "jr:itext(itextId)"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "production_place"
+          type: CONTROL_INPUT
+          label {
+            text: "Production place"
+          }
+          hint {
+            text: "Walk or draw the plot boundary (polygons required for plots over 4 ha)."
+          }
+          appearance: "placement-map"
+        }
+      }
+      components {
+        control {
+          field_ref: "area_ha"
+          type: CONTROL_INPUT
+          label {
+            text: "Plot / parcel area (ha)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "plot_over_4ha"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Plot larger than 4 ha"
+          }
+          itemset {
+            instance_id: "plot_over_4ha"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "producer_id"
+          type: CONTROL_INPUT
+          label {
+            text: "Producer ID"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "harvest_date_range"
+          type: CONTROL_INPUT
+          label {
+            text: "Harvest date range"
+          }
+          hint {
+            text: "For example 2026-01-01/2026-03-31."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "deforestation_free"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Deforestation-free"
+          }
+          itemset {
+            instance_id: "deforestation_free"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "legal_land_use"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Legal land-use status"
+          }
+          itemset {
+            instance_id: "legal_land_use"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+    }
+  }
+  status: STABLE
+  version: 1
+}
+form_templates {
+  id: "uk_frc_plot_registration"
+  title {
+    values {
+      key: "en"
+      value: "UK forest risk commodity legality check"
+    }
+    values {
+      key: "fr"
+      value: "Contrôle de légalité des produits à risque forestier (Royaume-Uni)"
+    }
+    values {
+      key: "es"
+      value: "Verificación de legalidad de productos de riesgo forestal (Reino Unido)"
+    }
+    values {
+      key: "vi"
+      value: "Kiểm tra tính hợp pháp hàng hóa rủi ro rừng (Vương quốc Anh)"
+    }
+    values {
+      key: "sw"
+      value: "Ukaguzi wa uhalali wa bidhaa za hatari ya misitu (Uingereza)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Records plot location, commodity, producer ID, harvest period, and evidence that the commodity was produced in line with relevant local land-use laws."
+    }
+  }
+  form {
+    form_id: "uk_frc_plot_registration"
+    title: "UK forest risk commodity legality check"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "UK forest risk commodity legality check"
+          fields {
+            name: "commodity"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "production_place"
+            type: TYPE_GEOSHAPE
+          }
+          fields {
+            name: "area_ha"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "producer_id"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "harvest_date_range"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "legal_land_use"
+            type: TYPE_SELECT_ONE
+          }
+        }
+      }
+      secondary_instances {
+        id: "commodity"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cattle"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-0"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cattle"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-1"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-2"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-3"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-4"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "soya"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-5"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "soya"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wood"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "commodity-6"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "wood"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "legal_land_use"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "verified_legal"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Verified legal title or use right"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "verified_legal"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "customary_recognized"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Recognized customary or cooperative right"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "customary_recognized"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "pending_verification"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Pending verification"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "pending_verification"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "non_compliant"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "No legal land-use evidence"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "non_compliant"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "commodity"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.commodity@1"
+        }
+      }
+      bindings {
+        field_path: "production_place"
+        type: TYPE_GEOSHAPE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.production_place@1"
+        }
+      }
+      bindings {
+        field_path: "area_ha"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.area_ha@1"
+        }
+      }
+      bindings {
+        field_path: "producer_id"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.producer_id@1"
+        }
+      }
+      bindings {
+        field_path: "harvest_date_range"
+        type: TYPE_STRING
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.harvest_date_range@1"
+        }
+      }
+      bindings {
+        field_path: "legal_land_use"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "eudr.legal_land_use@1"
+        }
+      }
+      translations {
+        languages {
+          language: "default"
+          is_default: true
+          strings {
+            key: "commodity-0"
+            value {
+              value: "Cattle"
+              media {
+                image_uri: "jr://images/commodity-cattle.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-1"
+            value {
+              value: "Cocoa"
+              media {
+                image_uri: "jr://images/commodity-cocoa.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-2"
+            value {
+              value: "Coffee"
+              media {
+                image_uri: "jr://images/commodity-coffee.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-3"
+            value {
+              value: "Oil palm"
+              media {
+                image_uri: "jr://images/commodity-oil_palm.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-4"
+            value {
+              value: "Rubber"
+              media {
+                image_uri: "jr://images/commodity-rubber.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-5"
+            value {
+              value: "Soya"
+              media {
+                image_uri: "jr://images/commodity-soya.png"
+              }
+            }
+          }
+          strings {
+            key: "commodity-6"
+            value {
+              value: "Wood"
+              media {
+                image_uri: "jr://images/commodity-wood.png"
+              }
+            }
+          }
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "commodity"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Commodity"
+          }
+          itemset {
+            instance_id: "commodity"
+            value_ref: "name"
+            label_ref: "jr:itext(itextId)"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "production_place"
+          type: CONTROL_INPUT
+          label {
+            text: "Production place"
+          }
+          hint {
+            text: "Walk or draw the area where the commodity was produced."
+          }
+          appearance: "placement-map"
+        }
+      }
+      components {
+        control {
+          field_ref: "area_ha"
+          type: CONTROL_INPUT
+          label {
+            text: "Plot / parcel area (ha)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "producer_id"
+          type: CONTROL_INPUT
+          label {
+            text: "Producer ID"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "harvest_date_range"
+          type: CONTROL_INPUT
+          label {
+            text: "Harvest date range"
+          }
+          hint {
+            text: "For example 2026-01-01/2026-03-31."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "legal_land_use"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Legal land-use status"
+          }
+          itemset {
+            instance_id: "legal_land_use"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+    }
+  }
+  status: STABLE
+  version: 1
+}
+purpose_packs {
+  id: "eudr_due_diligence"
+  title {
+    values {
+      key: "en"
+      value: "Deforestation compliance"
+    }
+    values {
+      key: "fr"
+      value: "Conformité zéro déforestation"
+    }
+    values {
+      key: "es"
+      value: "Cumplimiento de cero deforestación"
+    }
+    values {
+      key: "vi"
+      value: "Tuân thủ không gây mất rừng"
+    }
+    values {
+      key: "sw"
+      value: "Uzingatiaji wa kutokata misitu"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Map production plots, verify zero-deforestation status after the cutoff date, and record legality and supply-chain traceability data."
+    }
+  }
+  icon: "verified"
+  form_template_ids: "eudr_plot_registration"
+  export_profile_ids: "eudr_geojson"
+  program_ids: "eudr"
+  program_ids: "uk_frc"
+  program_ids: "rainforest_alliance"
+  program_ids: "fairtrade"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+  starter_templates {
+    id: "eudr"
+    title {
+      values {
+        key: "en"
+        value: "EU Deforestation Regulation (EUDR)"
+      }
+      values {
+        key: "fr"
+        value: "Règlement européen sur la déforestation (RDUE)"
+      }
+      values {
+        key: "es"
+        value: "Reglamento europeo contra la deforestación (EUDR)"
+      }
+      values {
+        key: "vi"
+        value: "Quy định chống phá rừng của EU (EUDR)"
+      }
+      values {
+        key: "sw"
+        value: "Kanuni ya EU ya Ukataji Misitu (EUDR)"
+      }
+    }
+    description {
+      values {
+        key: "en"
+        value: "Plot check for EU due diligence statements: plot boundaries (polygons for plots over 4 ha), deforestation-free status after 31 December 2020, legality, and a TRACES-ready GeoJSON export."
+      }
+    }
+    form_template_ids: "eudr_plot_registration"
+    export_profile_ids: "eudr_geojson"
+    program_ids: "eudr"
+  }
+  starter_templates {
+    id: "uk_frc"
+    title {
+      values {
+        key: "en"
+        value: "UK Forest Risk Commodities"
+      }
+      values {
+        key: "fr"
+        value: "Produits à risque forestier (Royaume-Uni)"
+      }
+      values {
+        key: "es"
+        value: "Productos de riesgo forestal (Reino Unido)"
+      }
+      values {
+        key: "vi"
+        value: "Hàng hóa rủi ro rừng (Vương quốc Anh)"
+      }
+      values {
+        key: "sw"
+        value: "Bidhaa za hatari ya misitu (Uingereza)"
+      }
+    }
+    description {
+      values {
+        key: "en"
+        value: "Legality check for UK due diligence: where the commodity was produced and evidence that it complied with relevant local land-use laws."
+      }
+    }
+    form_template_ids: "uk_frc_plot_registration"
+    program_ids: "uk_frc"
+  }
+}
+export_profiles {
+  id: "eudr_geojson"
+  title {
+    values {
+      key: "en"
+      value: "EUDR GeoJSON"
+    }
+  }
+  format: "geojson"
+  field_concepts {
+    key: "production_place"
+    value: "eudr.production_place"
+  }
+  field_concepts {
+    key: "commodity"
+    value: "eudr.commodity"
+  }
+  field_concepts {
+    key: "area_ha"
+    value: "core.area_ha"
+  }
+  field_concepts {
+    key: "producer_name"
+    value: "core.producer_name"
+  }
+  field_concepts {
+    key: "country"
+    value: "core.country"
+  }
+  status: STABLE
+}

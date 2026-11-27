@@ -1,0 +1,4900 @@
+# Copyright 2026 The Collect One Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-file: shared/protos/library/library_bundle.proto
+# proto-message: openforis.collectone.v1.library.LibraryBundle
+#
+# Global library seed: the `lulc` vocabulary. Bootstraps the "All users"
+# organization's library on a new deployment; entries omit organization_id,
+# which the loader sets to the "All users" organization.
+#
+# The clients embed a Kotlin copy (GlobalLibrarySeedData.kt), and its
+# GlobalLibrarySeedTest fails when the two differ. Template questions carry
+# their concept links as `collectone:concept` foreign attributes on their bindings.
+
+concepts {
+  id: "lulc.land_cover_class"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Land cover class"
+    }
+    values {
+      key: "fr"
+      value: "Classe de couverture terrestre"
+    }
+    values {
+      key: "es"
+      value: "Clase de cobertura terrestre"
+    }
+    values {
+      key: "vi"
+      value: "Lớp độ che phủ đất"
+    }
+    values {
+      key: "sw"
+      value: "Aina ya ufunikaji wa ardhi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Land cover category, following the FAO Global Forest Resources Assessment."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "land cover"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "vegetation"
+    }
+  }
+  keywords {
+    values {
+      key: "es"
+      value: "cobertura"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "forest"
+      label {
+        values {
+          key: "en"
+          value: "Forest"
+        }
+      }
+    }
+    items {
+      code: "other_wooded_land"
+      label {
+        values {
+          key: "en"
+          value: "Other wooded land"
+        }
+      }
+    }
+    items {
+      code: "other_land_with_tree_cover"
+      label {
+        values {
+          key: "en"
+          value: "Other land with tree cover"
+        }
+      }
+    }
+    items {
+      code: "other_land"
+      label {
+        values {
+          key: "en"
+          value: "Other land"
+        }
+      }
+    }
+    items {
+      code: "inland_water"
+      label {
+        values {
+          key: "en"
+          value: "Inland water bodies"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  goals: "open_earth_data"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.canopy_cover_pct"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Canopy cover (%)"
+    }
+    values {
+      key: "fr"
+      value: "Couverture de la canopée (%)"
+    }
+    values {
+      key: "es"
+      value: "Cobertura de dosel (%)"
+    }
+    values {
+      key: "vi"
+      value: "Độ tàn che (%)"
+    }
+    values {
+      key: "sw"
+      value: "Ufunikaji wa matawi ya miti (%)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Share of the ground covered by tree crowns, as a percentage."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "tree cover"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "crown cover"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "%"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "open_earth_data"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.tree_height_m"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Tree height (m)"
+    }
+    values {
+      key: "fr"
+      value: "Hauteur des arbres (m)"
+    }
+    values {
+      key: "es"
+      value: "Altura de los árboles (m)"
+    }
+    values {
+      key: "vi"
+      value: "Chiều cao cây (m)"
+    }
+    values {
+      key: "sw"
+      value: "Urefu wa miti (m)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Height of the dominant trees, in meters."
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "m"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.land_use"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Land use"
+    }
+    values {
+      key: "fr"
+      value: "Utilisation des terres"
+    }
+    values {
+      key: "es"
+      value: "Uso de la tierra"
+    }
+    values {
+      key: "vi"
+      value: "Sử dụng đất"
+    }
+    values {
+      key: "sw"
+      value: "Matumizi ya ardhi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Main socio-economic or ecological use of the land."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "cropland"
+      label {
+        values {
+          key: "en"
+          value: "Cropland"
+        }
+      }
+    }
+    items {
+      code: "agroforestry"
+      label {
+        values {
+          key: "en"
+          value: "Agroforestry / shaded tree crop"
+        }
+      }
+    }
+    items {
+      code: "grazing"
+      label {
+        values {
+          key: "en"
+          value: "Grazing"
+        }
+      }
+    }
+    items {
+      code: "forestry"
+      label {
+        values {
+          key: "en"
+          value: "Forestry"
+        }
+      }
+    }
+    items {
+      code: "settlement"
+      label {
+        values {
+          key: "en"
+          value: "Settlement"
+        }
+      }
+    }
+    items {
+      code: "conservation"
+      label {
+        values {
+          key: "en"
+          value: "Conservation"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "open_earth_data"
+  status: STABLE
+}
+concepts {
+  id: "lulc.crop_type"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Primary crop or tree commodity"
+    }
+    values {
+      key: "fr"
+      value: "Culture ou essence principale"
+    }
+    values {
+      key: "es"
+      value: "Cultivo o especie arbórea principal"
+    }
+    values {
+      key: "vi"
+      value: "Cây trồng chính"
+    }
+    values {
+      key: "sw"
+      value: "Zao kuu au mti"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Dominant perennial or annual crop observed on the plot, used to train and validate commodity land-cover models."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "commodity crop"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "tree crop"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "cocoa"
+      label {
+        values {
+          key: "en"
+          value: "Cocoa"
+        }
+      }
+    }
+    items {
+      code: "coffee"
+      label {
+        values {
+          key: "en"
+          value: "Coffee"
+        }
+      }
+    }
+    items {
+      code: "oil_palm"
+      label {
+        values {
+          key: "en"
+          value: "Oil palm"
+        }
+      }
+    }
+    items {
+      code: "rubber"
+      label {
+        values {
+          key: "en"
+          value: "Rubber"
+        }
+      }
+    }
+    items {
+      code: "cashew"
+      label {
+        values {
+          key: "en"
+          value: "Cashew"
+        }
+      }
+    }
+    items {
+      code: "tea"
+      label {
+        values {
+          key: "en"
+          value: "Tea"
+        }
+      }
+    }
+    items {
+      code: "annual_crops"
+      label {
+        values {
+          key: "en"
+          value: "Annual food crops"
+        }
+      }
+    }
+    items {
+      code: "none_natural"
+      label {
+        values {
+          key: "en"
+          value: "None (natural vegetation)"
+        }
+      }
+    }
+    items {
+      code: "other"
+      label {
+        values {
+          key: "en"
+          value: "Other crop"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  goals: "open_earth_data"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.shade_tree_tier"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Shade canopy structure"
+    }
+    values {
+      key: "fr"
+      value: "Structure de la canopée d'ombrage"
+    }
+    values {
+      key: "es"
+      value: "Estructura del dosel de sombra"
+    }
+    values {
+      key: "vi"
+      value: "Cấu trúc tầng cây che bóng"
+    }
+    values {
+      key: "sw"
+      value: "Muundo wa miti ya kivuli"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Upper-stratum shade tree structure over perennial crops, distinguishing shaded agroforestry from natural forest and monocultures."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "shade trees"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "agroforestry canopy"
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "multi_strata_native"
+      label {
+        values {
+          key: "en"
+          value: "Multi-strata with native remnant trees"
+        }
+      }
+    }
+    items {
+      code: "planted_shade"
+      label {
+        values {
+          key: "en"
+          value: "Planted shade or fruit trees"
+        }
+      }
+    }
+    items {
+      code: "unshaded_monoculture"
+      label {
+        values {
+          key: "en"
+          value: "Unshaded monoculture"
+        }
+      }
+    }
+    items {
+      code: "not_applicable"
+      label {
+        values {
+          key: "en"
+          value: "Not applicable (non-cropland)"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "deforestation_free_supply_chains"
+  goals: "open_earth_data"
+  pillar: ADAPTATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.forest_stratum"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Forest structure & stratum"
+    }
+    values {
+      key: "fr"
+      value: "Strate et structure forestière"
+    }
+    values {
+      key: "es"
+      value: "Estrato y estructura forestal"
+    }
+    values {
+      key: "vi"
+      value: "Trạng thái và cấu trúc rừng"
+    }
+    values {
+      key: "sw"
+      value: "Tabaka na muundo wa msitu"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Forest condition and successional stage for REDD+ and tropical forest monitoring."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "primary_intact"
+      label {
+        values {
+          key: "en"
+          value: "Primary intact forest"
+        }
+      }
+    }
+    items {
+      code: "secondary_regenerating"
+      label {
+        values {
+          key: "en"
+          value: "Secondary or regenerating forest"
+        }
+      }
+    }
+    items {
+      code: "degraded_forest"
+      label {
+        values {
+          key: "en"
+          value: "Degraded natural forest"
+        }
+      }
+    }
+    items {
+      code: "mangrove_peatland"
+      label {
+        values {
+          key: "en"
+          value: "Mangrove or peat swamp forest"
+        }
+      }
+    }
+    items {
+      code: "planted_forest"
+      label {
+        values {
+          key: "en"
+          value: "Planted forest or woodlot"
+        }
+      }
+    }
+    items {
+      code: "non_forest"
+      label {
+        values {
+          key: "en"
+          value: "Non-forest"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "effective_protected_areas"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.basal_area_m2_ha"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Basal area (m²/ha)"
+    }
+    values {
+      key: "fr"
+      value: "Surface terrière (m²/ha)"
+    }
+    values {
+      key: "es"
+      value: "Área basal (m²/ha)"
+    }
+    values {
+      key: "vi"
+      value: "Tiết diện ngang (m²/ha)"
+    }
+    values {
+      key: "sw"
+      value: "Eneo la shina (m²/ha)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Cross-sectional stem area at breast height per hectare, used to estimate stand biomass and carbon stock."
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "stand density"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "biomass"
+    }
+  }
+  keywords {
+    values {
+      key: "en"
+      value: "carbon stock"
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "m2/har"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.disturbance_driver"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Observed disturbance or degradation"
+    }
+    values {
+      key: "fr"
+      value: "Perturbation ou dégradation observée"
+    }
+    values {
+      key: "es"
+      value: "Perturbación o degradación observada"
+    }
+    values {
+      key: "vi"
+      value: "Tác nhân gây suy thoái rừng"
+    }
+    values {
+      key: "sw"
+      value: "Uharibifu au usumbufu ulioonekana"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Signs of canopy degradation or disturbance recorded in the sample plot."
+    }
+  }
+  data_type: TYPE_SELECT_MULTIPLE
+  code_list {
+    items {
+      code: "none"
+      label {
+        values {
+          key: "en"
+          value: "No disturbance observed"
+        }
+      }
+    }
+    items {
+      code: "selective_logging"
+      label {
+        values {
+          key: "en"
+          value: "Selective logging or timber extraction"
+        }
+      }
+    }
+    items {
+      code: "fire_burn"
+      label {
+        values {
+          key: "en"
+          value: "Fire or burn scars"
+        }
+      }
+    }
+    items {
+      code: "agricultural_clearing"
+      label {
+        values {
+          key: "en"
+          value: "Small-scale clearing or shifting cultivation"
+        }
+      }
+    }
+    items {
+      code: "grazing_browsing"
+      label {
+        values {
+          key: "en"
+          value: "Livestock grazing"
+        }
+      }
+    }
+    items {
+      code: "wind_drought_pest"
+      label {
+        values {
+          key: "en"
+          value: "Storm, drought, or pest dieback"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "effective_protected_areas"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.observation_date"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Observation date"
+    }
+    values {
+      key: "fr"
+      value: "Date d'observation"
+    }
+    values {
+      key: "es"
+      value: "Fecha de observación"
+    }
+    values {
+      key: "vi"
+      value: "Ngày quan sát"
+    }
+    values {
+      key: "sw"
+      value: "Tarehe ya uchunguzi"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Date the land cover or sample plot was observed."
+    }
+  }
+  data_type: TYPE_DATE
+  aggregation: NONE
+  privacy_class: AGGREGATE_PUBLIC
+  status: STABLE
+}
+concepts {
+  id: "lulc.forest_change_class"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Forest change & transition class"
+    }
+    values {
+      key: "fr"
+      value: "Catégorie de changement et transition forestière"
+    }
+    values {
+      key: "es"
+      value: "Clase de cambio y transición forestal"
+    }
+    values {
+      key: "vi"
+      value: "Phân loại biến động và chuyển đổi rừng"
+    }
+    values {
+      key: "sw"
+      value: "Aina ya mabadiliko na mpito wa msitu"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Sample-plot forest cover transition across the accounting period for ART-TREES activity data."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "stable_forest"
+      label {
+        values {
+          key: "en"
+          value: "Stable forest"
+        }
+      }
+    }
+    items {
+      code: "deforestation"
+      label {
+        values {
+          key: "en"
+          value: "Deforestation (forest to non-forest)"
+        }
+      }
+    }
+    items {
+      code: "degradation"
+      label {
+        values {
+          key: "en"
+          value: "Forest degradation (canopy or stock loss)"
+        }
+      }
+    }
+    items {
+      code: "reforestation_removals"
+      label {
+        values {
+          key: "en"
+          value: "Reforestation / removals on non-forest land"
+        }
+      }
+    }
+    items {
+      code: "stable_non_forest"
+      label {
+        values {
+          key: "en"
+          value: "Stable non-forest"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.baseline_land_use_ipcc"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Baseline IPCC land-use category"
+    }
+    values {
+      key: "fr"
+      value: "Catégorie d'utilisation des terres GIEC de référence"
+    }
+    values {
+      key: "es"
+      value: "Categoría de uso del suelo IPCC de referencia"
+    }
+    values {
+      key: "vi"
+      value: "Phân loại sử dụng đất IPCC kỳ gốc"
+    }
+    values {
+      key: "sw"
+      value: "Kundi la msingi la matumizi ya ardhi la IPCC"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "IPCC land-use category at the start of the reference or crediting period."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "forest_land"
+      label {
+        values {
+          key: "en"
+          value: "Forest land"
+        }
+      }
+    }
+    items {
+      code: "cropland"
+      label {
+        values {
+          key: "en"
+          value: "Cropland"
+        }
+      }
+    }
+    items {
+      code: "grassland"
+      label {
+        values {
+          key: "en"
+          value: "Grassland"
+        }
+      }
+    }
+    items {
+      code: "wetlands"
+      label {
+        values {
+          key: "en"
+          value: "Wetlands"
+        }
+      }
+    }
+    items {
+      code: "settlements"
+      label {
+        values {
+          key: "en"
+          value: "Settlements"
+        }
+      }
+    }
+    items {
+      code: "other_land"
+      label {
+        values {
+          key: "en"
+          value: "Other land"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.current_land_use_ipcc"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Current IPCC land-use category"
+    }
+    values {
+      key: "fr"
+      value: "Catégorie actuelle d'utilisation des terres GIEC"
+    }
+    values {
+      key: "es"
+      value: "Categoría actual de uso del suelo IPCC"
+    }
+    values {
+      key: "vi"
+      value: "Phân loại sử dụng đất IPCC hiện tại"
+    }
+    values {
+      key: "sw"
+      value: "Kundi la sasa la matumizi ya ardhi la IPCC"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "IPCC land-use category at the end of the monitoring period, defining the land-use transition matrix cell."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "forest_land"
+      label {
+        values {
+          key: "en"
+          value: "Forest land"
+        }
+      }
+    }
+    items {
+      code: "cropland"
+      label {
+        values {
+          key: "en"
+          value: "Cropland"
+        }
+      }
+    }
+    items {
+      code: "grassland"
+      label {
+        values {
+          key: "en"
+          value: "Grassland"
+        }
+      }
+    }
+    items {
+      code: "wetlands"
+      label {
+        values {
+          key: "en"
+          value: "Wetlands"
+        }
+      }
+    }
+    items {
+      code: "settlements"
+      label {
+        values {
+          key: "en"
+          value: "Settlements"
+        }
+      }
+    }
+    items {
+      code: "other_land"
+      label {
+        values {
+          key: "en"
+          value: "Other land"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.disturbance_year"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Disturbance or transition year"
+    }
+    values {
+      key: "fr"
+      value: "Année de perturbation ou de transition"
+    }
+    values {
+      key: "es"
+      value: "Año de perturbación o transición"
+    }
+    values {
+      key: "vi"
+      value: "Năm xảy ra suy thoái hoặc chuyển đổi"
+    }
+    values {
+      key: "sw"
+      value: "Mwaka wa uharibifu au mpito"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Calendar year when deforestation, forest degradation, or reforestation establishment occurred."
+    }
+  }
+  data_type: TYPE_INT32
+  aggregation: COUNT_DISTINCT_FEATURES
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.interpretation_confidence"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Interpretation confidence"
+    }
+    values {
+      key: "fr"
+      value: "Confiance d'interprétation"
+    }
+    values {
+      key: "es"
+      value: "Confianza de interpretación"
+    }
+    values {
+      key: "vi"
+      value: "Độ tin cậy giải đoán"
+    }
+    values {
+      key: "sw"
+      value: "Uhakika wa tafsiri"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Analyst confidence in the plot classification, used for ART-TREES Monte Carlo uncertainty assessment and flagging plots for field verification."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "high"
+      label {
+        values {
+          key: "en"
+          value: "High confidence"
+        }
+      }
+    }
+    items {
+      code: "medium"
+      label {
+        values {
+          key: "en"
+          value: "Medium confidence"
+        }
+      }
+    }
+    items {
+      code: "low_needs_field_check"
+      label {
+        values {
+          key: "en"
+          value: "Low — requires field verification"
+        }
+      }
+    }
+  }
+  aggregation: SHARE_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "open_earth_data"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.stand_age_years"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Stand age / regeneration years"
+    }
+    values {
+      key: "fr"
+      value: "Âge du peuplement / années de régénération"
+    }
+    values {
+      key: "es"
+      value: "Edad del rodal / años de regeneración"
+    }
+    values {
+      key: "vi"
+      value: "Tuổi lâm phần / số năm tái sinh"
+    }
+    values {
+      key: "sw"
+      value: "Umri wa msitu / miaka ya uoto upya"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Estimated age of regenerating or reforested tree cohort in years, used to parameterize ART-TREES carbon removal factors."
+    }
+  }
+  data_type: TYPE_INT32
+  unit: "a"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  goals: "ecosystem_restoration"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.deadwood_pool_level"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Dead wood & litter pool status"
+    }
+    values {
+      key: "fr"
+      value: "État du réservoir de bois mort et litière"
+    }
+    values {
+      key: "es"
+      value: "Estado del reservorio de madera muerta y hojarasca"
+    }
+    values {
+      key: "vi"
+      value: "Trạng thái bể chứa gỗ chết và thảm mục"
+    }
+    values {
+      key: "sw"
+      value: "Hali ya mabaki ya miti iliyokufa na matandazo"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Abundance of standing and lying coarse woody debris and forest floor litter for non-tree carbon pool accounting."
+    }
+  }
+  data_type: TYPE_SELECT_ONE
+  code_list {
+    items {
+      code: "low_absent"
+      label {
+        values {
+          key: "en"
+          value: "Low or absent"
+        }
+      }
+    }
+    items {
+      code: "moderate"
+      label {
+        values {
+          key: "en"
+          value: "Moderate (typical undisturbed stand)"
+        }
+      }
+    }
+    items {
+      code: "high_post_disturbance"
+      label {
+        values {
+          key: "en"
+          value: "High (recent logging slash, fire, or blowdown)"
+        }
+      }
+    }
+  }
+  aggregation: COUNT_BY_CODE
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  pillar: MITIGATION
+  status: STABLE
+}
+concepts {
+  id: "lulc.peat_depth_cm"
+  version: 1
+  label {
+    values {
+      key: "en"
+      value: "Peat / organic soil depth (cm)"
+    }
+    values {
+      key: "fr"
+      value: "Profondeur de tourbe / sol organique (cm)"
+    }
+    values {
+      key: "es"
+      value: "Profundidad de turba / suelo orgánico (cm)"
+    }
+    values {
+      key: "vi"
+      value: "Độ sâu tầng than bùn / đất hữu cơ (cm)"
+    }
+    values {
+      key: "sw"
+      value: "Kina cha udongo wa mboji (cm)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Measured depth of peat or organic soil horizon in centimeters, used for wetland, mangrove, and peatland soil organic carbon emission factors."
+    }
+  }
+  data_type: TYPE_DOUBLE
+  unit: "cm"
+  aggregation: MEAN
+  privacy_class: AGGREGATE_PUBLIC
+  goals: "forest_carbon_and_conservation"
+  pillar: MITIGATION
+  status: STABLE
+}
+form_templates {
+  id: "lulc_ground_truth"
+  title {
+    values {
+      key: "en"
+      value: "Land cover & crop reference observation"
+    }
+    values {
+      key: "fr"
+      value: "Observation de référence de la couverture terrestre"
+    }
+    values {
+      key: "es"
+      value: "Observación de referencia de cobertura y cultivos"
+    }
+    values {
+      key: "vi"
+      value: "Quan sát thực địa độ che phủ đất và cây trồng"
+    }
+    values {
+      key: "sw"
+      value: "Uchunguzi wa marejeleo ya ufunikaji wa ardhi na mazao"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Visual or field plot classification of land cover class, land use, perennial crop type, shade canopy structure, and crown cover percentage."
+    }
+  }
+  form {
+    form_id: "lulc_ground_truth"
+    title: "Land cover & crop reference observation"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Land cover & crop reference observation"
+          fields {
+            name: "land_cover_class"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "land_use"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "crop_type"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "shade_tree_tier"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "canopy_cover_pct"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "observation_date"
+            type: TYPE_DATE
+          }
+          fields {
+            name: "site_photo"
+            type: TYPE_BINARY
+          }
+        }
+      }
+      secondary_instances {
+        id: "land_cover_class"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forest"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_wooded_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other wooded land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "other_wooded_land"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_land_with_tree_cover"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other land with tree cover"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "other_land_with_tree_cover"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "inland_water"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Inland water bodies"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "inland_water"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "land_use"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cropland"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "agroforestry"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Agroforestry / shaded tree crop"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "agroforestry"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grazing"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Grazing"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "grazing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "forestry"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forestry"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "forestry"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "settlement"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Settlement"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "settlement"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "conservation"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Conservation"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "conservation"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "crop_type"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cocoa"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cocoa"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Coffee"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "coffee"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Oil palm"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "oil_palm"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Rubber"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "rubber"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cashew"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cashew"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cashew"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "tea"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Tea"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "tea"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "annual_crops"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Annual food crops"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "annual_crops"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "none_natural"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "None (natural vegetation)"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "none_natural"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other crop"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "other"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "shade_tree_tier"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "multi_strata_native"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Multi-strata with native remnant trees"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "multi_strata_native"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "planted_shade"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Planted shade or fruit trees"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "planted_shade"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "unshaded_monoculture"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Unshaded monoculture"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "unshaded_monoculture"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "not_applicable"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Not applicable (non-cropland)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "not_applicable"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "land_cover_class"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.land_cover_class@1"
+        }
+      }
+      bindings {
+        field_path: "land_use"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.land_use@1"
+        }
+      }
+      bindings {
+        field_path: "crop_type"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.crop_type@1"
+        }
+      }
+      bindings {
+        field_path: "shade_tree_tier"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.shade_tree_tier@1"
+        }
+      }
+      bindings {
+        field_path: "canopy_cover_pct"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.canopy_cover_pct@1"
+        }
+      }
+      bindings {
+        field_path: "observation_date"
+        type: TYPE_DATE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.observation_date@1"
+        }
+      }
+      bindings {
+        field_path: "site_photo"
+        type: TYPE_BINARY
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.site_photo@1"
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "land_cover_class"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Land cover class"
+          }
+          itemset {
+            instance_id: "land_cover_class"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "land_use"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Land use"
+          }
+          itemset {
+            instance_id: "land_use"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "crop_type"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Primary crop or tree commodity"
+          }
+          itemset {
+            instance_id: "crop_type"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "shade_tree_tier"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Shade canopy structure"
+          }
+          itemset {
+            instance_id: "shade_tree_tier"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "canopy_cover_pct"
+          type: CONTROL_INPUT
+          label {
+            text: "Canopy cover (%)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "observation_date"
+          type: CONTROL_INPUT
+          label {
+            text: "Observation date"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "site_photo"
+          type: CONTROL_UPLOAD
+          label {
+            text: "Site photo"
+          }
+          media_type: "image/*"
+        }
+      }
+    }
+  }
+  status: STABLE
+  version: 1
+}
+form_templates {
+  id: "deforestation_activity_assessment"
+  title {
+    values {
+      key: "en"
+      value: "Forest change & activity data plot"
+    }
+    values {
+      key: "fr"
+      value: "Parcelle de changement forestier et données d'activité"
+    }
+    values {
+      key: "es"
+      value: "Parcela de cambio forestal y datos de actividad"
+    }
+    values {
+      key: "vi"
+      value: "Ô mẫu biến động rừng và dữ liệu hoạt động"
+    }
+    values {
+      key: "sw"
+      value: "Ploti ya mabadiliko ya msitu na data ya shughuli"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Sample-plot classification of IPCC land-use transitions, deforestation, forest degradation, reforestation removals, disturbance year, drivers, and interpreter confidence for ART-TREES activity data."
+    }
+  }
+  form {
+    form_id: "deforestation_activity_assessment"
+    title: "Forest change & activity data plot"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Forest change & activity data plot"
+          fields {
+            name: "forest_change_class"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "baseline_land_use_ipcc"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "current_land_use_ipcc"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "forest_stratum"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "canopy_cover_pct"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "disturbance_year"
+            type: TYPE_INT32
+          }
+          fields {
+            name: "disturbance_driver"
+            type: TYPE_SELECT_MULTIPLE
+          }
+          fields {
+            name: "interpretation_confidence"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "observation_date"
+            type: TYPE_DATE
+          }
+        }
+      }
+      secondary_instances {
+        id: "forest_change_class"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "stable_forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Stable forest"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "stable_forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "deforestation"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Deforestation (forest to non-forest)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "deforestation"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "degradation"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forest degradation (canopy or stock loss)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "degradation"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "reforestation_removals"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Reforestation / removals on non-forest land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#129EAF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "reforestation_removals"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "stable_non_forest"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Stable non-forest"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "stable_non_forest"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "baseline_land_use_ipcc"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "forest_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forest land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "forest_land"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cropland"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grassland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Grassland"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "grassland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wetlands"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Wetlands"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "wetlands"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "settlements"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Settlements"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "settlements"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "current_land_use_ipcc"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "forest_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Forest land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "forest_land"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Cropland"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "cropland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grassland"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Grassland"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "grassland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wetlands"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Wetlands"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#2278CF"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "wetlands"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "settlements"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Settlements"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "settlements"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Other land"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#8D6E63"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "other_land"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "forest_stratum"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "primary_intact"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-0"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "primary_intact"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "secondary_regenerating"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-1"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "secondary_regenerating"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "degraded_forest"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-2"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "degraded_forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "mangrove_peatland"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-3"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "mangrove_peatland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "planted_forest"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-4"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "planted_forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "non_forest"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-5"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "non_forest"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "disturbance_driver"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "none"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-0"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "none"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "selective_logging"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-1"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "selective_logging"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "fire_burn"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-2"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "fire_burn"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "agricultural_clearing"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-3"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "agricultural_clearing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grazing_browsing"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-4"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "grazing_browsing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wind_drought_pest"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-5"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "wind_drought_pest"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "interpretation_confidence"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "high"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "High confidence"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "high"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "medium"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Medium confidence"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F9BF40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "medium"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "low_needs_field_check"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Low — requires field verification"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#D13135"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "low_needs_field_check"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "forest_change_class"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.forest_change_class@1"
+        }
+      }
+      bindings {
+        field_path: "baseline_land_use_ipcc"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.baseline_land_use_ipcc@1"
+        }
+      }
+      bindings {
+        field_path: "current_land_use_ipcc"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.current_land_use_ipcc@1"
+        }
+      }
+      bindings {
+        field_path: "forest_stratum"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.forest_stratum@1"
+        }
+      }
+      bindings {
+        field_path: "canopy_cover_pct"
+        type: TYPE_DOUBLE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.canopy_cover_pct@1"
+        }
+      }
+      bindings {
+        field_path: "disturbance_year"
+        type: TYPE_INT32
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.disturbance_year@1"
+        }
+      }
+      bindings {
+        field_path: "disturbance_driver"
+        type: TYPE_SELECT_MULTIPLE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.disturbance_driver@1"
+        }
+      }
+      bindings {
+        field_path: "interpretation_confidence"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.interpretation_confidence@1"
+        }
+      }
+      bindings {
+        field_path: "observation_date"
+        type: TYPE_DATE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.observation_date@1"
+        }
+      }
+      translations {
+        languages {
+          language: "default"
+          is_default: true
+          strings {
+            key: "forest_stratum-0"
+            value {
+              value: "Primary intact forest"
+              media {
+                image_uri: "jr://images/forest_stratum-primary_intact.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-1"
+            value {
+              value: "Secondary or regenerating forest"
+              media {
+                image_uri: "jr://images/forest_stratum-secondary_regenerating.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-2"
+            value {
+              value: "Degraded natural forest"
+              media {
+                image_uri: "jr://images/forest_stratum-degraded_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-3"
+            value {
+              value: "Mangrove or peat swamp forest"
+              media {
+                image_uri: "jr://images/forest_stratum-mangrove_peatland.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-4"
+            value {
+              value: "Planted forest or woodlot"
+              media {
+                image_uri: "jr://images/forest_stratum-planted_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-5"
+            value {
+              value: "Non-forest"
+              media {
+                image_uri: "jr://images/forest_stratum-non_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-0"
+            value {
+              value: "No disturbance observed"
+              media {
+                image_uri: "jr://images/disturbance_driver-none.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-1"
+            value {
+              value: "Selective logging or timber extraction"
+              media {
+                image_uri: "jr://images/disturbance_driver-selective_logging.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-2"
+            value {
+              value: "Fire or burn scars"
+              media {
+                image_uri: "jr://images/disturbance_driver-fire_burn.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-3"
+            value {
+              value: "Small-scale clearing or shifting cultivation"
+              media {
+                image_uri: "jr://images/disturbance_driver-agricultural_clearing.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-4"
+            value {
+              value: "Livestock grazing"
+              media {
+                image_uri: "jr://images/disturbance_driver-grazing_browsing.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-5"
+            value {
+              value: "Storm, drought, or pest dieback"
+              media {
+                image_uri: "jr://images/disturbance_driver-wind_drought_pest.png"
+              }
+            }
+          }
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "forest_change_class"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Forest change & transition class"
+          }
+          itemset {
+            instance_id: "forest_change_class"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "baseline_land_use_ipcc"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Baseline IPCC land-use category"
+          }
+          itemset {
+            instance_id: "baseline_land_use_ipcc"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "current_land_use_ipcc"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Current IPCC land-use category"
+          }
+          itemset {
+            instance_id: "current_land_use_ipcc"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "forest_stratum"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Forest structure & stratum"
+          }
+          itemset {
+            instance_id: "forest_stratum"
+            value_ref: "name"
+            label_ref: "jr:itext(itextId)"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "canopy_cover_pct"
+          type: CONTROL_INPUT
+          label {
+            text: "Canopy cover (%)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "disturbance_year"
+          type: CONTROL_INPUT
+          label {
+            text: "Disturbance or transition year"
+          }
+          hint {
+            text: "Year of deforestation, degradation, or reforestation establishment."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "disturbance_driver"
+          type: CONTROL_SELECT_MULTIPLE
+          label {
+            text: "Observed disturbance or degradation"
+          }
+          itemset {
+            instance_id: "disturbance_driver"
+            value_ref: "name"
+            label_ref: "jr:itext(itextId)"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "interpretation_confidence"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Interpretation confidence"
+          }
+          itemset {
+            instance_id: "interpretation_confidence"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "observation_date"
+          type: CONTROL_INPUT
+          label {
+            text: "Observation date"
+          }
+        }
+      }
+    }
+  }
+  status: STABLE
+  version: 1
+}
+form_templates {
+  id: "forest_carbon_inventory_plot"
+  title {
+    values {
+      key: "en"
+      value: "Forest carbon & biomass inventory plot"
+    }
+    values {
+      key: "fr"
+      value: "Parcelle d'inventaire du carbone et de la biomasse forestière"
+    }
+    values {
+      key: "es"
+      value: "Parcela de inventario de carbono y biomasa forestal"
+    }
+    values {
+      key: "vi"
+      value: "Ô tiêu chuẩn kiểm kê carbon và sinh khối rừng"
+    }
+    values {
+      key: "sw"
+      value: "Ploti ya hesabu ya kaboni na tungamo hai ya msitu"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Ground sample plot capturing forest stratum, stand age, dominant species, DBH, tree height, stand basal area, deadwood pool, and peat depth for ART-TREES emission and removal factors."
+    }
+  }
+  form {
+    form_id: "forest_carbon_inventory_plot"
+    title: "Forest carbon & biomass inventory plot"
+    version: "1"
+    model {
+      primary_instance {
+        record_schema {
+          name: "data"
+          title: "Forest carbon & biomass inventory plot"
+          fields {
+            name: "forest_stratum"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "stand_age_years"
+            type: TYPE_INT32
+          }
+          fields {
+            name: "species"
+            type: TYPE_STRING
+          }
+          fields {
+            name: "diameter_cm"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "tree_height_m"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "basal_area_m2_ha"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "canopy_cover_pct"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "deadwood_pool_level"
+            type: TYPE_SELECT_ONE
+          }
+          fields {
+            name: "peat_depth_cm"
+            type: TYPE_DOUBLE
+          }
+          fields {
+            name: "disturbance_driver"
+            type: TYPE_SELECT_MULTIPLE
+          }
+          fields {
+            name: "collection_date"
+            type: TYPE_DATE
+          }
+          fields {
+            name: "site_photo"
+            type: TYPE_BINARY
+          }
+        }
+      }
+      secondary_instances {
+        id: "forest_stratum"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "primary_intact"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-0"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "primary_intact"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "secondary_regenerating"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-1"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "secondary_regenerating"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "degraded_forest"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-2"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "degraded_forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "mangrove_peatland"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-3"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "mangrove_peatland"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "planted_forest"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-4"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "planted_forest"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "non_forest"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "forest_stratum-5"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "non_forest"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "deadwood_pool_level"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "low_absent"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Low or absent"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#80868B"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "low_absent"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "moderate"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "Moderate (typical undisturbed stand)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#3C8D40"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "moderate"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "high_post_disturbance"
+              }
+            }
+          }
+          fields {
+            key: "label"
+            value {
+              scalar_value {
+                string_value: "High (recent logging slash, fire, or blowdown)"
+              }
+            }
+          }
+          fields {
+            key: "color"
+            value {
+              scalar_value {
+                string_value: "#F37C22"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "high_post_disturbance"
+              }
+            }
+          }
+        }
+      }
+      secondary_instances {
+        id: "disturbance_driver"
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "none"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-0"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "none"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "selective_logging"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-1"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "selective_logging"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "fire_burn"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-2"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "fire_burn"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "agricultural_clearing"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-3"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "agricultural_clearing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "grazing_browsing"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-4"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "grazing_browsing"
+              }
+            }
+          }
+        }
+        rows {
+          fields {
+            key: "name"
+            value {
+              scalar_value {
+                string_value: "wind_drought_pest"
+              }
+            }
+          }
+          fields {
+            key: "itextId"
+            value {
+              scalar_value {
+                string_value: "disturbance_driver-5"
+              }
+            }
+          }
+          fields {
+            key: "collectone_code"
+            value {
+              scalar_value {
+                string_value: "wind_drought_pest"
+              }
+            }
+          }
+        }
+      }
+      bindings {
+        field_path: "forest_stratum"
+        type: TYPE_SELECT_ONE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.forest_stratum@1"
+        }
+      }
+      bindings {
+        field_path: "stand_age_years"
+        type: TYPE_INT32
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.stand_age_years@1"
+        }
+      }
+      bindings {
+        field_path: "species"
+        type: TYPE_STRING
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "timber.species@1"
+        }
+      }
+      bindings {
+        field_path: "diameter_cm"
+        type: TYPE_DOUBLE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "timber.diameter_cm@1"
+        }
+      }
+      bindings {
+        field_path: "tree_height_m"
+        type: TYPE_DOUBLE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.tree_height_m@1"
+        }
+      }
+      bindings {
+        field_path: "basal_area_m2_ha"
+        type: TYPE_DOUBLE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.basal_area_m2_ha@1"
+        }
+      }
+      bindings {
+        field_path: "canopy_cover_pct"
+        type: TYPE_DOUBLE
+        required_expression: "true()"
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.canopy_cover_pct@1"
+        }
+      }
+      bindings {
+        field_path: "deadwood_pool_level"
+        type: TYPE_SELECT_ONE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.deadwood_pool_level@1"
+        }
+      }
+      bindings {
+        field_path: "peat_depth_cm"
+        type: TYPE_DOUBLE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.peat_depth_cm@1"
+        }
+      }
+      bindings {
+        field_path: "disturbance_driver"
+        type: TYPE_SELECT_MULTIPLE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "lulc.disturbance_driver@1"
+        }
+      }
+      bindings {
+        field_path: "collection_date"
+        type: TYPE_DATE
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.collection_date@1"
+        }
+      }
+      bindings {
+        field_path: "site_photo"
+        type: TYPE_BINARY
+        foreign_attributes {
+          namespace_uri: "http://openforis.org/collect-one/xforms"
+          qualified_name: "collectone:concept"
+          value: "core.site_photo@1"
+        }
+      }
+      translations {
+        languages {
+          language: "default"
+          is_default: true
+          strings {
+            key: "forest_stratum-0"
+            value {
+              value: "Primary intact forest"
+              media {
+                image_uri: "jr://images/forest_stratum-primary_intact.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-1"
+            value {
+              value: "Secondary or regenerating forest"
+              media {
+                image_uri: "jr://images/forest_stratum-secondary_regenerating.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-2"
+            value {
+              value: "Degraded natural forest"
+              media {
+                image_uri: "jr://images/forest_stratum-degraded_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-3"
+            value {
+              value: "Mangrove or peat swamp forest"
+              media {
+                image_uri: "jr://images/forest_stratum-mangrove_peatland.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-4"
+            value {
+              value: "Planted forest or woodlot"
+              media {
+                image_uri: "jr://images/forest_stratum-planted_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "forest_stratum-5"
+            value {
+              value: "Non-forest"
+              media {
+                image_uri: "jr://images/forest_stratum-non_forest.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-0"
+            value {
+              value: "No disturbance observed"
+              media {
+                image_uri: "jr://images/disturbance_driver-none.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-1"
+            value {
+              value: "Selective logging or timber extraction"
+              media {
+                image_uri: "jr://images/disturbance_driver-selective_logging.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-2"
+            value {
+              value: "Fire or burn scars"
+              media {
+                image_uri: "jr://images/disturbance_driver-fire_burn.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-3"
+            value {
+              value: "Small-scale clearing or shifting cultivation"
+              media {
+                image_uri: "jr://images/disturbance_driver-agricultural_clearing.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-4"
+            value {
+              value: "Livestock grazing"
+              media {
+                image_uri: "jr://images/disturbance_driver-grazing_browsing.png"
+              }
+            }
+          }
+          strings {
+            key: "disturbance_driver-5"
+            value {
+              value: "Storm, drought, or pest dieback"
+              media {
+                image_uri: "jr://images/disturbance_driver-wind_drought_pest.png"
+              }
+            }
+          }
+        }
+      }
+    }
+    view {
+      components {
+        control {
+          field_ref: "forest_stratum"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Forest structure & stratum"
+          }
+          itemset {
+            instance_id: "forest_stratum"
+            value_ref: "name"
+            label_ref: "jr:itext(itextId)"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "stand_age_years"
+          type: CONTROL_INPUT
+          label {
+            text: "Stand age / regeneration years"
+          }
+          hint {
+            text: "Stand or regeneration cohort age in years (for removal factors)."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "species"
+          type: CONTROL_INPUT
+          label {
+            text: "Tree species"
+          }
+          hint {
+            text: "Dominant tree species scientific or common name (for wood density)."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "diameter_cm"
+          type: CONTROL_INPUT
+          label {
+            text: "Diameter (cm)"
+          }
+          hint {
+            text: "Mean stem diameter at breast height (1.3 m) in centimeters."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "tree_height_m"
+          type: CONTROL_INPUT
+          label {
+            text: "Tree height (m)"
+          }
+          hint {
+            text: "Dominant tree height in meters."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "basal_area_m2_ha"
+          type: CONTROL_INPUT
+          label {
+            text: "Basal area (m²/ha)"
+          }
+          hint {
+            text: "Stand basal area in m²/ha."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "canopy_cover_pct"
+          type: CONTROL_INPUT
+          label {
+            text: "Canopy cover (%)"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "deadwood_pool_level"
+          type: CONTROL_SELECT_ONE
+          label {
+            text: "Dead wood & litter pool status"
+          }
+          itemset {
+            instance_id: "deadwood_pool_level"
+            value_ref: "name"
+            label_ref: "label"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "peat_depth_cm"
+          type: CONTROL_INPUT
+          label {
+            text: "Peat / organic soil depth (cm)"
+          }
+          hint {
+            text: "Peat or organic soil horizon depth in cm (wetlands and mangroves)."
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "disturbance_driver"
+          type: CONTROL_SELECT_MULTIPLE
+          label {
+            text: "Observed disturbance or degradation"
+          }
+          itemset {
+            instance_id: "disturbance_driver"
+            value_ref: "name"
+            label_ref: "jr:itext(itextId)"
+            nodeset_path: "/root/item"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "collection_date"
+          type: CONTROL_INPUT
+          label {
+            text: "Collection date"
+          }
+        }
+      }
+      components {
+        control {
+          field_ref: "site_photo"
+          type: CONTROL_UPLOAD
+          label {
+            text: "Site photo"
+          }
+          media_type: "image/*"
+        }
+      }
+    }
+  }
+  status: STABLE
+  version: 1
+}
+purpose_packs {
+  id: "lulc_training_data"
+  title {
+    values {
+      key: "en"
+      value: "Land cover & crop mapping"
+    }
+    values {
+      key: "fr"
+      value: "Cartographie de la couverture terrestre et des cultures"
+    }
+    values {
+      key: "es"
+      value: "Mapeo de cobertura terrestre y cultivos"
+    }
+    values {
+      key: "vi"
+      value: "Lập bản đồ độ che phủ đất và cây trồng"
+    }
+    values {
+      key: "sw"
+      value: "Uchoraji ramani wa ufunikaji wa ardhi na mazao"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Collect ground-truth observations and visual imagery classifications of land cover, perennial crops, and shade trees to train and validate remote-sensing models."
+    }
+  }
+  icon: "layers"
+  form_template_ids: "lulc_ground_truth"
+  program_ids: "fdap"
+  program_ids: "fao_lccs"
+  program_ids: "open_foris"
+  program_ids: "fao_fra"
+  goals: "deforestation_free_supply_chains"
+  goals: "open_earth_data"
+  pillar: MITIGATION
+  status: STABLE
+}
+purpose_packs {
+  id: "deforestation_activity_data"
+  title {
+    values {
+      key: "en"
+      value: "Deforestation & land-use change (Activity Data)"
+    }
+    values {
+      key: "fr"
+      value: "Déforestation et changement d'affectation des terres (données d'activité)"
+    }
+    values {
+      key: "es"
+      value: "Deforestación y cambio de uso del suelo (datos de actividad)"
+    }
+    values {
+      key: "vi"
+      value: "Mất rừng và thay đổi sử dụng đất (dữ liệu hoạt động)"
+    }
+    values {
+      key: "sw"
+      value: "Ukataji miti na mabadiliko ya matumizi ardhi (data ya shughuli)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Classify sample plots across multi-temporal satellite imagery and field checks to quantify deforestation, forest degradation, and reforestation areas with ART-TREES Monte Carlo uncertainty bounds."
+    }
+  }
+  icon: "satellite_alt"
+  form_template_ids: "deforestation_activity_assessment"
+  export_profile_ids: "art_trees_activity_data_geojson"
+  program_ids: "art_trees"
+  goals: "forest_carbon_and_conservation"
+  goals: "deforestation_free_supply_chains"
+  pillar: MITIGATION
+  status: STABLE
+}
+purpose_packs {
+  id: "forest_carbon_inventory"
+  title {
+    values {
+      key: "en"
+      value: "Forest carbon & biomass inventory (Emission Factors)"
+    }
+    values {
+      key: "fr"
+      value: "Inventaire du carbone et de la biomasse forestière (facteurs d'émission)"
+    }
+    values {
+      key: "es"
+      value: "Inventario de carbono y biomasa forestal (factores de emisión)"
+    }
+    values {
+      key: "vi"
+      value: "Kiểm kê carbon và sinh khối rừng (hệ số phát thải)"
+    }
+    values {
+      key: "sw"
+      value: "Hesabu ya kaboni na tungamo hai ya msitu (viwango vya uzalishaji)"
+    }
+  }
+  description {
+    values {
+      key: "en"
+      value: "Measure ground sample plots for tree species, DBH, height, stand basal area, deadwood, and peat depth to calculate stratum-specific carbon stocks and ART-TREES emission and removal factors."
+    }
+  }
+  icon: "forest"
+  form_template_ids: "forest_carbon_inventory_plot"
+  export_profile_ids: "art_trees_biomass_inventory_geojson"
+  program_ids: "art_trees"
+  goals: "forest_carbon_and_conservation"
+  goals: "effective_protected_areas"
+  pillar: MITIGATION
+  status: STABLE
+}
+export_profiles {
+  id: "art_trees_activity_data_geojson"
+  title {
+    values {
+      key: "en"
+      value: "ART-TREES Activity Data GeoJSON"
+    }
+  }
+  format: "geojson"
+  field_concepts {
+    key: "area_ha"
+    value: "core.area_ha"
+  }
+  field_concepts {
+    key: "forest_change_class"
+    value: "lulc.forest_change_class"
+  }
+  field_concepts {
+    key: "baseline_land_use_ipcc"
+    value: "lulc.baseline_land_use_ipcc"
+  }
+  field_concepts {
+    key: "current_land_use_ipcc"
+    value: "lulc.current_land_use_ipcc"
+  }
+  field_concepts {
+    key: "forest_stratum"
+    value: "lulc.forest_stratum"
+  }
+  field_concepts {
+    key: "canopy_cover_pct"
+    value: "lulc.canopy_cover_pct"
+  }
+  field_concepts {
+    key: "disturbance_year"
+    value: "lulc.disturbance_year"
+  }
+  field_concepts {
+    key: "disturbance_driver"
+    value: "lulc.disturbance_driver"
+  }
+  field_concepts {
+    key: "interpretation_confidence"
+    value: "lulc.interpretation_confidence"
+  }
+  status: STABLE
+}
+export_profiles {
+  id: "art_trees_biomass_inventory_geojson"
+  title {
+    values {
+      key: "en"
+      value: "ART-TREES Biomass Inventory GeoJSON"
+    }
+  }
+  format: "geojson"
+  field_concepts {
+    key: "area_ha"
+    value: "core.area_ha"
+  }
+  field_concepts {
+    key: "forest_stratum"
+    value: "lulc.forest_stratum"
+  }
+  field_concepts {
+    key: "stand_age_years"
+    value: "lulc.stand_age_years"
+  }
+  field_concepts {
+    key: "species"
+    value: "timber.species"
+  }
+  field_concepts {
+    key: "diameter_cm"
+    value: "timber.diameter_cm"
+  }
+  field_concepts {
+    key: "tree_height_m"
+    value: "lulc.tree_height_m"
+  }
+  field_concepts {
+    key: "basal_area_m2_ha"
+    value: "lulc.basal_area_m2_ha"
+  }
+  field_concepts {
+    key: "canopy_cover_pct"
+    value: "lulc.canopy_cover_pct"
+  }
+  field_concepts {
+    key: "deadwood_pool_level"
+    value: "lulc.deadwood_pool_level"
+  }
+  field_concepts {
+    key: "peat_depth_cm"
+    value: "lulc.peat_depth_cm"
+  }
+  status: STABLE
+}
