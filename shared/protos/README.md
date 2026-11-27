@@ -53,13 +53,14 @@ distinction between stateful master tables and immutable encounter logs:
 ## Packages
 
 -   **[`forms/`](forms/)** (`openforis.collectone.v1.forms`):
-    -   `form_def.proto`: `FormDef`, `RecordSchema`, `FieldBinding`, and UI
-        control tree definitions (`ControlNode`, `GroupNode`, `RepeatNode`).
+    -   `form_def.proto`: `FormDef`, `RecordSchema`, `FieldBinding`, UI
+        control tree definitions (`ControlDef`, `GroupDef`, `RepeatDef`), and
+        the multilingual `TranslationCatalog`.
     -   `record_instance.proto`: Reflection-free `RecordInstance` and
         hierarchical field/repeat values (`FieldValue`, `RecordNode`) for form
         submissions.
     -   `types.proto`: Shared primitive data types (`DataType`, `TypedValue`,
-        geospatial coordinates, and multilingual `TranslationCatalog`).
+        and geospatial coordinates).
     -   `audit_log.proto`: Client telemetry and question-level interaction audit
         events.
 -   **[`survey/`](survey/)** (`openforis.collectone.v1.survey`):
