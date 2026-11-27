@@ -106,6 +106,31 @@ describe('LoiEditorComponent', () => {
     fixture.detectChanges();
   });
 
+  describe('while LOIs are loading', () => {
+    beforeEach(() => {
+      fixture.componentInstance.lois =
+        undefined as unknown as List<LocationOfInterest>;
+      fixture.detectChanges();
+    });
+
+    it('shows a spinner instead of the import and delete buttons', () => {
+      const el: HTMLElement = fixture.debugElement.nativeElement;
+
+      expect(el.querySelector('.lois-loading-spinner')).not.toBe(null);
+      expect(el.querySelector('.import-lois-button')).toBe(null);
+      expect(el.querySelector('.clear-all-lois')).toBe(null);
+    });
+
+    it('replaces the spinner with the import button once loaded', () => {
+      fixture.componentInstance.lois = List([]);
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.debugElement.nativeElement;
+
+      expect(el.querySelector('.lois-loading-spinner')).toBe(null);
+      expect(el.querySelector('.import-lois-button')).not.toBe(null);
+    });
+  });
+
   describe('when the import button is clicked', () => {
     let importButton: HTMLElement;
 
