@@ -11,6 +11,7 @@
     "app.texts.installRedirectMessage": "If it doesn't open automatically, you will be redirected to Google Play to install it.",
     "app.labels.googlePlayBadgeAlt": "Get it on Google Play",
     "app.labels.loadingSurvey": "Loading survey...",
+    "app.labels.loadingSites": "Loading sites...",
     "app.labels.goToSurvey": "Go to survey",
     "app.labels.continue": "Continue",
     "app.createSurvey.surveyDetails.progress": "Create a survey",

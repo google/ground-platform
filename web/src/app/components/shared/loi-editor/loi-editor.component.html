@@ -60,9 +60,17 @@
         </div>
       </div>
 
-      <div *ngIf="canImport && lois" class="loi-editor-card-actions">
+      <div *ngIf="canImport" class="loi-editor-card-actions">
+        <mat-spinner
+          *ngIf="!lois"
+          diameter="24"
+          class="lois-loading-spinner"
+          i18n-aria-label="@@app.labels.loadingSites"
+          aria-label="Loading sites..."
+        ></mat-spinner>
+
         <button
-          *ngIf="lois.size === 0"
+          *ngIf="lois && lois.size === 0"
           mat-flat-button
           class="import-lois-button"
           (click)="importLois()"
@@ -73,7 +81,7 @@
         </button>
 
         <button
-          *ngIf="lois.size > 0"
+          *ngIf="lois && lois.size > 0"
           mat-flat-button
           class="clear-all-lois"
           (click)="clearLois()"

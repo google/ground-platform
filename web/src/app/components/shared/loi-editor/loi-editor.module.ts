@@ -18,6 +18,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { LoiEditorComponent } from './loi-editor.component';
@@ -30,6 +31,7 @@ import { LoiSelectionModule } from '../loi-selection/loi-selection.module';
     CommonModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     MatSlideToggleModule,
     ImportDialogModule,
     LoiSelectionModule,
