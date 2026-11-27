@@ -281,11 +281,11 @@ impact measurement and dashboarding structured around the **MAP framework
 
 <!-- mdformat on -->
 
-- **Survey & indicator alignment** — During survey setup and form authoring,
-  organizers tag surveys with one or more **MAP pillars** (`Mitigation`,
-  `Adaptation`, `Protection`) alongside thematic domains, and optionally bind
-  spatial geometries (mapped hectares, verified entities) and form questions or
-  `calculate` expressions to standardized MAP indicators.
+- **Survey & indicator alignment** — During survey setup, organizers choose
+  one or more **Purpose Packs**, which Collect One maps to the **MAP pillars**
+  (`Mitigation`, `Adaptation`, `Protection`) behind the scenes, and optionally
+  bind spatial geometries (mapped hectares, verified entities) and form
+  questions or `calculate` expressions to standardized MAP indicators.
 - **Organization & survey MAP dashboards (Web Console)** — Live in-app
   dashboards aggregate spatial footprints and submission metrics across both
   field collection and visual classification, displaying real-time progress per
