@@ -92,7 +92,7 @@ message Organization {
   // (`docs/technical/sync-engine.md`, "Sync Tokens").
   google.protobuf.Timestamp commit_timestamp = 15;
 
-  // Tiered quota limits and monthly budget cap configured for this organization.
+  // Tiered quota limits configured for this organization.
   // Overrides global defaults on the synthetic "All users" organization.
   QuotaLimits quota_limits = 16;
 }
