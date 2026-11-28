@@ -118,8 +118,7 @@ end-to-end system.
     Ground and Collect Earth Online into one unified platform co-maintained by
     both organizations under the Open Foris governance charter. This convergence
     also provides a seamless, cloud-native migration path for over 60 countries
-    transitioning off legacy desktop **Collect Earth** ahead of the June 2027
-    Google Earth Pro deprecation.
+    transitioning off legacy desktop **Collect Earth**.
 
 ### Why Google Is Well-Positioned to Help
 
@@ -310,8 +309,7 @@ impact measurement and dashboarding structured around the **MAP framework
 
 Open Foris Collect One is a community-governed open-source project under the
 Open Foris initiative, directed by a multi-stakeholder steering committee per
-the
-[Open Foris Ground Community Charter](https://docs.google.com/document/d/1pjllfws_HMuHrDDbGokPZCATgok_8vxufkSmyVM4p_Q/edit#heading=h.14535shxk14t)
+the Open Foris Ground Community Charter
 and co-maintained by **FAO** and **SIG** with **Google**'s engineering and
 architectural support. For planning purposes, Open Foris Collect One currently
 anticipates the following division of hosting and engineering focus across the
