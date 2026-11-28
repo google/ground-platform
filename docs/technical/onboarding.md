@@ -27,7 +27,7 @@ Environmental monitoring, forest inventories, restoration tracking, and deforest
 Historically, Open Foris users and partner institutions ran these workflows across separate tools with separate data models:
 
 - **Open Foris Ground** (hosted and operated by UN FAO) proved low-ceremony, map-first, offline mobile field data collection for smallholder farmers, community rangers, and researchers, but relied on a flat task list without hierarchical XForms logic, lacked iOS support, and maintained separate web and mobile codebases.
-- **Collect Earth Online (CEO)** established browser-based statistical sample design, multi-temporal satellite visual interpretation, and multi-interpreter QA/QC, while desktop **Collect Earth** depended on Google Earth Pro.
+- **Collect Earth Online (CEO)** established browser-based statistical sample design, multi-temporal satellite visual interpretation, and multi-interpreter QA/QC, while desktop **Collect Earth** runs on Google Earth Pro.
 
 Collect One brings both halves together into one open-source platform targeting functional parity with **Open Foris Ground** and **Collect Earth Online** (while providing a cloud- and mobile-native migration path for desktop **Collect Earth** campaigns) around three core engineering goals:
 
