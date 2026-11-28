@@ -65,27 +65,25 @@ model {
 view {
   components {
     repeat {
-      field_path: "person"
+      field_ref: "person"
       label {
         text: "Person"
       }
-      children {
-        components {
-          control {
-            field_path: "name"
-            control_type: INPUT
-            label {
-              text: "Enter name"
-            }
+      components {
+        control {
+          field_ref: "name"
+          type: CONTROL_INPUT
+          label {
+            text: "Enter name"
           }
         }
-        components {
-          control {
-            field_path: "relationship"
-            control_type: INPUT
-            label {
-              text: "Enter relationship"
-            }
+      }
+      components {
+        control {
+          field_ref: "relationship"
+          type: CONTROL_INPUT
+          label {
+            text: "Enter relationship"
           }
         }
       }
@@ -105,8 +103,8 @@ engines support several controls:
 
 1.  **Disable User Addition/Removal**: Set `no_add_remove: true` on `RepeatDef`
     to prevent users from adding or deleting instances manually.
-2.  **Dynamic Repeat Count**: Set `count_expr` on `RepeatDef` (e.g.,
-    `count_expr: "/data/hh_size"`). The form engine dynamically resizes the list
+2.  **Dynamic Repeat Count**: Set `count_expression` on `RepeatDef` (e.g.,
+    `count_expression: "/data/hh_size"`). The form engine dynamically resizes the list
     of repeats to match the evaluated integer value.
 3.  **Pre-populated Repeats**: The form definition can include initial default
     repeat instances in `primary_instance.default_repeats`.
@@ -115,29 +113,27 @@ engines support several controls:
 view {
   components {
     repeat {
-      field_path: "person"
+      field_ref: "person"
       label {
         text: "Person"
       }
-      count_expr: "hh_size"
+      count_expression: "hh_size"
       no_add_remove: true
-      children {
-        components {
-          control {
-            field_path: "name"
-            control_type: INPUT
-            label {
-              text: "Enter name"
-            }
+      components {
+        control {
+          field_ref: "name"
+          type: CONTROL_INPUT
+          label {
+            text: "Enter name"
           }
         }
-        components {
-          control {
-            field_path: "relationship"
-            control_type: INPUT
-            label {
-              text: "Enter relationship"
-            }
+      }
+      components {
+        control {
+          field_ref: "relationship"
+          type: CONTROL_INPUT
+          label {
+            text: "Enter relationship"
           }
         }
       }
@@ -172,11 +168,11 @@ fields {
 Whenever a user or expression adds a new `Person` instance, `relationship`
 initializes to `"spouse"` and `name` initializes empty. Actions triggered by
 `EVENT_NEW_REPEAT` can also dynamically calculate initial values (see
-[Events and Actions](#events-and-actions)).
+[Events and Actions](08-events.md#events-and-actions)).
 
 ## Conditional Repeats and References Within an Entry
 
-A `relevant_expr` binding on the repeat node applies to every entry: when it is
+A `relevant_expression` binding on the repeat node applies to every entry: when it is
 `false`, all entries and their questions are non-relevant and excluded from the
 submission. Display logic inside a repeat that depends on another question of
 the same repeat refers to it relatively, so each entry tests its own answer (the
@@ -186,11 +182,11 @@ bind's context node is the node it binds, and this is what pyxform writes for
 ```textproto
 bindings {
   field_path: "trees"
-  relevant_expr: "/data/has_trees = 'yes'"
+  relevant_expression: "/data/has_trees = 'yes'"
 }
 bindings {
   field_path: "trees/tree_notes"
-  relevant_expr: "../tree_kind = 'yes'"
+  relevant_expression: "../tree_kind = 'yes'"
 }
 ```
 

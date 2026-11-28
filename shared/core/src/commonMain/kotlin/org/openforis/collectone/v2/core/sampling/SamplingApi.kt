@@ -22,8 +22,8 @@ import org.openforis.collectone.v2.core.geo.GeoCoord
  * same plots on every platform (JVM, JS, WasmJS, iOS). Coordinates are WGS 84 decimal degrees.
  *
  * Generated plots are meant to be stored as ordinary map features (`EntityRecord`s): the plot
- * boundary becomes the feature geometry (`GeoShape`, or `GeoPoint` for [PlotShape.POINT]) and the
- * sub-plot sample points become the plot's `samples` property.
+ * boundary becomes the feature geometry (a polygon `Geometry`, or a point for [PlotShape.POINT])
+ * and the sub-plot sample points become the plot's `samples` property.
  */
 
 /** Version of the generation algorithms. Bump whenever output for a given seed would change. */

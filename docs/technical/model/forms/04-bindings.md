@@ -28,7 +28,7 @@ text format:
 bindings {
   field_path: "intro_banner"
   type: STRING
-  readonly_expr: "true()"
+  read_only_expression: "true()"
 }
 bindings {
   field_path: "text_fields/short_note"
@@ -41,26 +41,20 @@ bindings {
 bindings {
   field_path: "numeric_fields/quantity"
   type: INT32
-  constraint_expr: ". < 100"
-  constraint_message {
-    text: "Quantity must be under 100"
-  }
+  constraint_expression: ". < 100"
+  constraint_message: "Quantity must be under 100"
 }
 bindings {
   field_path: "numeric_fields/measurement"
   type: DECIMAL
-  constraint_expr: ". > 1.50 && . < 9.50"
-  constraint_message {
-    text: "Measurement must fall between 1.50 and 9.50"
-  }
+  constraint_expression: ". > 1.50 && . < 9.50"
+  constraint_message: "Measurement must fall between 1.50 and 9.50"
 }
 bindings {
   field_path: "schedule/appointment_date"
   type: DATE
-  constraint_expr: ". >= today()"
-  constraint_message {
-    text: "Appointment date cannot be in the past"
-  }
+  constraint_expression: ". >= today()"
+  constraint_message: "Appointment date cannot be in the past"
 }
 bindings {
   field_path: "schedule/appointment_time"
@@ -73,18 +67,14 @@ bindings {
 bindings {
   field_path: "choices/category"
   type: STRING
-  constraint_expr: "not(selected(., 'opt_a') && selected(., 'opt_b'))"
-  constraint_message {
-    text: "Options A and B are mutually exclusive"
-  }
+  constraint_expression: "not(selected(., 'opt_a') && selected(., 'opt_b'))"
+  constraint_message: "Options A and B are mutually exclusive"
 }
 bindings {
   field_path: "geo/station_point"
   type: GEOPOINT
-  constraint_expr: "selected-at(., 3) <= 5.0 && distance(., /data/target_site) <= 15.0"
-  constraint_message {
-    text: "GPS precision must be within 5 meters and 15 meters of the site"
-  }
+  constraint_expression: "selected-at(., 3) <= 5.0 && distance(., /data/target_site) <= 15.0"
+  constraint_message: "GPS precision must be within 5 meters and 15 meters of the site"
 }
 bindings {
   field_path: "geo/route_path"
@@ -114,7 +104,7 @@ bindings {
 bindings {
   field_path: "display/confirm_ack"
   type: STRING
-  required_expr: "true()"
+  required_expression: "true()"
 }
 ```
 
@@ -122,67 +112,71 @@ bindings {
 
 The following fields are supported on `FieldBinding`:
 
-| Field                | Type              | Description                 |
-| -------------------- | ----------------- | --------------------------- |
-| `field_path`         | `string`          | Relative or absolute path   |
-:                      :                   : to the field within the     :
-:                      :                   : record schema (e.g.,        :
-:                      :                   : `"given_name"`,             :
-:                      :                   : `"member/name"`,            :
-:                      :                   : `"/household/member/age"`). :
-:                      :                   : [required]                  :
-| `type`               | `DataType`        | Assigned field data type.   |
-:                      :                   : See [Data                   :
-:                      :                   : Types](#data-types).        :
-| `readonly_expr`      | `string`          | Boolean expression          |
-:                      :                   : indicating whether user     :
-:                      :                   : input is disabled. Defaults :
-:                      :                   : to `false`.                 :
-| `required_expr`      | `string`          | Boolean expression          |
-:                      :                   : indicating whether a        :
-:                      :                   : non-empty value is          :
-:                      :                   : required. Defaults to       :
-:                      :                   : `false`.                    :
-| `relevant_expr`      | `string`          | Relevancy (skip logic)      |
-:                      :                   : boolean expression. When    :
-:                      :                   : `false`, the field/group is :
-:                      :                   : hidden and omitted from     :
-:                      :                   : submission.                 :
-| `constraint_expr`    | `string`          | Validation expression       |
-:                      :                   : evaluating acceptable       :
-:                      :                   : inputs. Evaluated only when :
-:                      :                   : the field is non-empty.     :
-| `calculate_expr`     | `string`          | Expression to automatically |
-:                      :                   : compute the value of the    :
-:                      :                   : field.                      :
-| `save_incomplete`    | `bool`            | Persists an intermediate    |
-:                      :                   : draft whenever navigation   :
-:                      :                   : enters this field.          :
-| `required_message`   | `LocalizedString` | Custom error message when   |
-:                      :                   : the `required_expr` check   :
-:                      :                   : fails.                      :
-| `constraint_message` | `LocalizedString` | Custom error message when   |
-:                      :                   : `constraint_expr` evaluates :
-:                      :                   : to false.                   :
-| `preload`            | `PreloadDef`      | Preloader configuration for |
-:                      :                   : automated metadata          :
-:                      :                   : extraction. See             :
-:                      :                   : [Preloaders](#preloaders).  :
-| `max_pixels`         | `int32`           | Maximum long-edge pixel     |
-:                      :                   : resolution for image        :
-:                      :                   : attachments; images are     :
-:                      :                   : resized proportionally on   :
-:                      :                   : upload.                     :
-| `entity_save_to`     | `string`          | Target Entity property name |
-:                      :                   : when publishing to an       :
-:                      :                   : Entity Dataset (see         :
-:                      :                   : [Entities](18-entities.md)).     :
-| `foreign_attributes` | `repeated         | `<bind>` attributes in      |
-:                      : ForeignAttribute` : namespaces ProtoForms       :
-:                      :                   : doesn't model (e.g.,        :
-:                      :                   : `collectone:concept`), kept for :
-:                      :                   : round-trip fidelity. See    :
-:                      :                   : Foreign Attributes below.   :
+| Field                   | Type              | Description                 |
+| ----------------------- | ----------------- | --------------------------- |
+| `field_path`            | `string`          | Relative or absolute path   |
+:                         :                   : to the field within the     :
+:                         :                   : record schema (e.g.,        :
+:                         :                   : `"given_name"`,             :
+:                         :                   : `"member/name"`,            :
+:                         :                   : `"/household/member/age"`). :
+:                         :                   : [required]                  :
+| `type`                  | `DataType`        | Assigned field data type.   |
+:                         :                   : See [Data                   :
+:                         :                   : Types](#data-types).        :
+| `read_only`             | `bool`            | Whether user input is       |
+:                         :                   : disabled. Defaults to       :
+:                         :                   : `false`.                    :
+| `read_only_expression`  | `string`          | Boolean expression          |
+:                         :                   : evaluated at run time, in   :
+:                         :                   : addition to `read_only`, to :
+:                         :                   : disable user input.         :
+| `required_expression`   | `string`          | Boolean expression          |
+:                         :                   : indicating whether a        :
+:                         :                   : non-empty value is          :
+:                         :                   : required. Defaults to       :
+:                         :                   : `false`.                    :
+| `relevant_expression`   | `string`          | Relevancy (skip logic)      |
+:                         :                   : boolean expression. When    :
+:                         :                   : `false`, the field/group is :
+:                         :                   : hidden and omitted from     :
+:                         :                   : submission.                 :
+| `constraint_expression` | `string`          | Validation expression       |
+:                         :                   : evaluating acceptable       :
+:                         :                   : inputs. Evaluated only when :
+:                         :                   : the field is non-empty.     :
+| `calculate_expression`  | `string`          | Expression to automatically |
+:                         :                   : compute the value of the    :
+:                         :                   : field.                      :
+| `save_incomplete`       | `bool`            | Persists an intermediate    |
+:                         :                   : draft whenever navigation   :
+:                         :                   : enters this field.          :
+| `required_message`      | `string`          | Custom localized or literal |
+:                         :                   : error message when the      :
+:                         :                   : required check fails.       :
+| `constraint_message`    | `string`          | Custom localized or literal |
+:                         :                   : error message when the      :
+:                         :                   : constraint evaluates to     :
+:                         :                   : false.                      :
+| `preload`               | `PreloadDef`      | Preloader configuration for |
+:                         :                   : automated metadata          :
+:                         :                   : extraction. See             :
+:                         :                   : [Preloaders](#preloaders).  :
+| `max_pixels`            | `int32`           | Maximum long-edge pixel     |
+:                         :                   : resolution for image        :
+:                         :                   : attachments; images are     :
+:                         :                   : resized proportionally on   :
+:                         :                   : upload.                     :
+| `entity_saveto`         | `string`          | Target Entity property name |
+:                         :                   : when publishing to an       :
+:                         :                   : Entity Dataset (see         :
+:                         :                   : [Entities](18-entities.md)).     :
+| `foreign_attributes`    | `repeated         | `<bind>` attributes in      |
+:                         : ForeignAttribute` : namespaces ProtoForms       :
+:                         :                   : doesn't model (e.g.,        :
+:                         :                   : `collectone:concept`), kept for :
+:                         :                   : round-trip fidelity. See    :
+:                         :                   : Foreign Attributes below.   :
 
 ## Foreign Attributes
 
@@ -577,7 +571,7 @@ In the function signatures below:
 
 This section covers submission-level metadata attached to each captured record
 instance. Form-level attributes (`form_id`, `version`, etc.) are documented in
-[Instances and Data Model](#instances-and-data-model).
+[Instances and Data Model](03-instances.md#instances-and-data-model).
 
 In ProtoForms, record metadata is represented as a structured `RecordMetadata`
 message within the record:

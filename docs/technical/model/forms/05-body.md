@@ -54,21 +54,21 @@ view {
 
 ## Form Controls
 
-The `control_type` enum specifies the interactive widget used to gather input:
+The `ControlType` enum specifies the interactive widget used to gather input:
 
-| `ControlType`     | Description                                           |
-| ----------------- | ----------------------------------------------------- |
-| `INPUT`           | Text, integer, decimal, date, time, and geo entry     |
-:                   : fields.                                               :
-| `SELECT_ONE`      | Single-select choice list (radio buttons, dropdown,   |
-:                   : quick select).                                        :
-| `SELECT_MULTIPLE` | Multi-select choice list (checkboxes).                |
-| `UPLOAD`          | Media attachment capture (image, audio, video, file). |
-| `TRIGGER`         | Confirmation button or checkbox (records `"OK"` when  |
-:                   : confirmed).                                           :
-| `RANGE`           | Numeric slider widget with bounds (`start`, `end`,    |
-:                   : `step`).                                              :
-| `RANK`            | Ordered ranking widget for sorting choices.           |
+| `ControlType`             | Description                                           |
+| ------------------------- | ----------------------------------------------------- |
+| `CONTROL_INPUT`           | Text, integer, decimal, date, time, and geo entry     |
+:                           : fields.                                               :
+| `CONTROL_SELECT_ONE`      | Single-select choice list (radio buttons, dropdown,   |
+:                           : quick select).                                        :
+| `CONTROL_SELECT_MULTIPLE` | Multi-select choice list (checkboxes).                |
+| `CONTROL_UPLOAD`          | Media attachment capture (image, audio, video, file). |
+| `CONTROL_TRIGGER`         | Confirmation button or checkbox (records `"OK"` when  |
+:                           : confirmed).                                           :
+| `CONTROL_RANGE`           | Numeric slider widget with bounds (`start`, `end`,    |
+:                           : `step`).                                              :
+| `CONTROL_RANK`            | Ordered ranking widget for sorting choices.           |
 
 ## UI Container Elements
 
@@ -122,30 +122,28 @@ from a dynamic itemset:
 ```textproto
 components {
   group {
-    field_path: "region"
+    field_ref: "region"
     label {
       text: "Stations"
     }
-    children {
-      components {
-        control {
-          field_path: "region/stations"
-          control_type: RANK
-          label {
-            text: "Order stations by priority"
+    components {
+      control {
+        field_ref: "region/stations"
+        type: CONTROL_RANK
+        label {
+          text: "Order stations by priority"
+        }
+        hint {
+          text: "Arrange stations from highest to lowest priority."
+          outputs {
+            placeholder: "{region_code}"
+            expr: "/data/region/code"
           }
-          hint {
-            text: "Arrange stations from highest to lowest priority."
-            outputs {
-              placeholder: "{region_code}"
-              expr: "/data/region/code"
-            }
-          }
-          itemset {
-            dataset_query: "randomize(instance('stations')/item[region = /data/region/code])"
-            value_ref: "code"
-            label_ref: "station_name"
-          }
+        }
+        itemset {
+          dataset_query: "randomize(instance('stations')/item[region = /data/region/code])"
+          value_ref: "code"
+          label_ref: "station_name"
         }
       }
     }

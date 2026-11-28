@@ -154,7 +154,7 @@ flowchart TD
 
 ## Shared Client Architecture (Kotlin Multiplatform)
 
-Collect One enforces **Clean Architecture** and **Model-View-ViewModel (MVVM)** through physical Gradle module boundaries as well as **Konsist** architecture tests (`ModuleGraphTest`). Full details live in [Client Architecture](client/architecture.md) and [Client Modules](client/modules.md).
+Collect One enforces **Clean Architecture** and **Model-View-ViewModel (MVVM)** through physical Gradle module boundaries (pinned by `ModuleGraphTest`) as well as **Konsist** architecture tests (`LayerDependencyArchitectureTest`). Full details live in [Client Architecture](client/architecture.md) and [Client Modules](client/modules.md).
 
 ### Layering Rules
 

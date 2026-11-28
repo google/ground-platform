@@ -35,10 +35,11 @@ schema.
 -   `SampleDataSeeder` fills the store when its `seedVersion` differs from
     `SampleDataSeeder.SEED_VERSION`, and again on **Reset**. It is the only code
     that reads the hardcoded sample datasets.
--   Stored models are today's domain models (`SurveyPreviewItem`,
-    `GeospatialEntityItem`, `SurveyEditorDraft`, `Organization`, …). They move
-    to proto-aligned records (`SurveyDef`, `EntityRecord`, `SubmissionRecord`)
-    when the sync engine lands.
+-   The collections the UI observes hold domain models (`SurveyPreviewItem`,
+    `GeospatialEntityItem`, `SurveyEditorDraft`, `Organization`, …). The sync
+    engine also keeps the last server copy of each synced record as a proto
+    (`SurveyDef`, `EntityRecord`, `SubmissionRecord`) and projects it into
+    these collections ([Sync Engine Handoff](#sync-engine-handoff)).
 -   Organizations are a top-level collection. A survey points at its
     organization by ID (`SurveyPreviewItem.organizationId`); deleting an
     organization clears that pointer on its surveys in the same transaction.
