@@ -1,0 +1,242 @@
+<!--
+  Copyright 2026 The Collect One Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+# Maps, Layers, and Geometry Styling
+
+Open Foris Collect One surveys configure map visualization (`MapConfig`), ordered map layer
+stacks (`LayerDef`), and visual geometry styling (`GeometryStyle`) inside
+`SurveyDef.map_config`.
+
+> **Note:** Sensor accuracy thresholds (`GeoConfig`), hardware GPS requirements
+> (`appearance`), and proximity validation guardrails (`constraint_expression`)
+> are configured on individual questions in ProtoForms (`FormDef`), adhering to
+> the XForms specification. See
+> [Form Controls and View](../forms/05-body.md#geospatial-configuration)
+> and [Bindings and Field Rules](../forms/04-bindings.md).
+
+## Map Configuration & Layer Stack (`MapConfig` and `LayerDef`)
+
+`MapConfig` defines the default initial viewport center coordinate, zoom level,
+the survey area, and the ordered stack of map layers (`LayerDef`, rendered in
+bottom-to-top z-order):
+
+```protobuf
+message MapConfig {
+  reserved 1;  // was `forms.GeoPoint initial_center`
+  double initial_zoom = 2;
+  repeated LayerDef layers = 3;
+  SurveyArea survey_area = 4;
+  openforis.collectone.v1.data.Position initial_center = 6;
+}
+
+message LayerDef {
+  string id = 1;
+  string label = 2;
+  bool visible_by_default = 3;
+  GeometryStyle default_style = 4;
+
+  oneof source {
+    string entity_dataset_id = 5;
+    FormGeometrySource form_geometry = 6;
+  }
+
+  reserved 7, 8;  // were English display text (source description, geometry type)
+
+  // The survey author's nouns for one and several of the layer's features
+  // (e.g. "coffee parcel", "coffee parcels"). Empty when the author gave none;
+  // clients then use a generic noun in the user's language.
+  string singular_item_label = 9;
+  string plural_item_label = 10;
+
+  int32 sort_order = 12;
+
+  // Type of the geometries the layer draws; clients name it in the user's
+  // language (see ../data/05-geometry.md).
+  openforis.collectone.v1.data.GeometryType geometry_type = 13;
+}
+
+message FormGeometrySource {
+  string form_id = 1;
+  string field_path = 2;
+}
+```
+
+## Survey Area (`SurveyArea`)
+
+The survey area is the geographic extent of the survey. It is the default area
+that sample designs draw plots from (see
+[Generated Datasets](02-entity-datasets.md#generated-datasets-sample-designs)),
+it frames the initial camera, and it bounds the mobile offline download area.
+
+```protobuf
+message SurveyArea {
+  // Human-readable name (e.g. a place name or the uploaded file name).
+  string name = 1;
+
+  reserved 3;  // was the English `source` text, e.g. "Drawn on map"
+
+  // The polygon parts: a MultiPolygon, one polygon per part.
+  openforis.collectone.v1.data.Geometry boundary = 6;
+
+  // How the area was defined; clients name it in the user's language.
+  SurveyAreaSource area_source = 8;
+}
+
+message SurveyAreaSource {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;  // read as SELECTED_BOUNDARY
+    SELECTED_BOUNDARY = 1;
+    DRAWN = 2;
+    UPLOADED = 3;
+    PLACE_SEARCH = 4;
+    COORDINATES = 5;
+    COLLECT_EARTH_GRID = 6;
+  }
+  Kind kind = 1;
+  string file_name = 2;  // for UPLOADED
+  int32 plot_count = 3;  // for COLLECT_EARTH_GRID
+}
+```
+
+*   **One geometry format everywhere**: the boundary is the canonical
+    `Geometry` (see [Geometry](../data/05-geometry.md)) that map features use.
+    The former `parts` field (`forms.GeoShape` rings) is reserved.
+*   **Several parts**: a country with islands, or two disjoint project sites,
+    is expressed as several polygons of the MultiPolygon. Parts should not
+    overlap.
+*   **No holes**: interior rings are out of scope. Importers drop them and show
+    a visible warning.
+*   **Large boundaries**: vertex counts are limited by the per-tier
+    `QuotaLimits.max_area_vertices` quota (see
+    [Access Control & Quotas](04-access-control-and-quotas.md)), not by a schema
+    rule, so uploaded country boundaries with tens of thousands of vertices fit.
+    Clients simplify the geometry for display and keep full precision for
+    sampling.
+*   **Typed source**: the source is a kind plus the file name or plot count it
+    needs, never display text. Rows stored with the former English `source`
+    text (`"Drawn on map"`, `"Uploaded: plots.geojson"`, ...) decode to the
+    matching kind; anything else reads as a selected boundary.
+*   **Camera defaults**: when `initial_center` or `initial_zoom` is unset,
+    clients derive them from the bounding box of all parts. Explicit values
+    still override.
+
+## Map Geometry Styling (`GeometryStyle`)
+
+Visual styling for form geometry questions and geospatial entity layers is
+defined via `GeometryStyle`:
+
+```protobuf
+message GeometryStyle {
+  // Hex color code (e.g., "#2e7d32") for markers and outlines.
+  string color = 1;
+
+  // Material Symbols icon identifier (e.g., "forest", "agriculture").
+  string icon = 2;
+
+  // Stroke width in pixels for line traces and polygon boundaries.
+  double stroke_width = 3;
+
+  // Fill opacity (between 0.0 transparent and 1.0 opaque) for closed polygons.
+  double fill_opacity = 4;
+}
+```
+
+### Styling Precedence Cascade
+
+Map layers apply visual styling using the following precedence rules:
+
+1.  **Entity Dataset Layers (`entity_dataset_id`)**:
+    *   **Per-Entity Override (Data-Driven across Points, Lines, and Polygons)**:
+        If an individual `EntityRecord.properties` map contains standard
+        `simplestyle-spec` keys (`marker-symbol`, `marker-color`, `stroke`,
+        `stroke-width`, `fill`, `fill-opacity`), those per-entity values take
+        precedence over the layer defaults across **all entity geometry types
+        (points, lines, and polygons)**. Specifically, `marker-symbol` and
+        `marker-color` render a styled marker badge at the point location, line
+        midpoint, or polygon centroid, while `stroke` and `fill` style the line
+        or polygon geometry.
+    *   **Workflow State Progression via `entity_saveto`**: Because all
+        entity-linked forms follow a `1:N` relationship with entities, survey
+        organizers use XForms `entity_saveto` (`save_to` in XLSForm) bindings to
+        drive multi-stage visual workflows on the map without relying on
+        inferred completion rules:
+        *   **Initial State (`"○"`)**: Entities are initialized with
+            `marker-symbol: "○"` (empty circle) and `marker-color: "#E65100"`
+            (e.g., pending baseline).
+        *   **Intermediate State (`"◐"`)**: After a first form submission (e.g.,
+            baseline registration or initial inspection), `entity_saveto`
+            updates `marker-symbol` to `"◐"` (half-filled circle) and
+            `marker-color` to `"#F9AB00"`.
+        *   **Completed State (`"✓"`)**: When a follow-up or verification form
+            is submitted, `entity_saveto` updates `marker-symbol` to `"✓"`
+            (checkmark) and `marker-color` / `stroke` / `fill` to `"#1E8E3E"`.
+    *   **Layer Default Fallback**: Any styling attribute not overridden on the
+        individual entity falls back to `LayerDef.default_style`.
+2.  **Form Geometry Layers (`form_geometry`)**:
+    *   Because form submission records (`SubmissionRecord`) can contain
+        multiple geometry questions without per-field style metadata, form
+        geometry layers always render using `LayerDef.default_style`.
+
+## Example
+
+```textproto
+map_config {
+  initial_center { longitude: 34.7519 latitude: -0.2827 }
+  initial_zoom: 13.0
+
+  layers {
+    id: "layer_plots_dataset"
+    label: "Preloaded Smallholder Plots"
+    visible_by_default: true
+    entity_dataset_id: "plots"
+    default_style {
+      color: "#34A853"
+      stroke_width: 2.0
+      fill_opacity: 0.25
+    }
+  }
+
+  layers {
+    id: "layer_recorded_boundaries"
+    label: "Surveyed Plot Perimeters"
+    visible_by_default: true
+    form_geometry {
+      form_id: "plot_registration"
+      field_path: "plot/boundary"
+    }
+    default_style {
+      color: "#2e7d32"
+      icon: "forest"
+      stroke_width: 2.5
+      fill_opacity: 0.35
+    }
+  }
+
+  layers {
+    id: "layer_access_paths"
+    label: "Access Paths"
+    visible_by_default: false
+    form_geometry {
+      form_id: "plot_registration"
+      field_path: "plot/access_path"
+    }
+    default_style {
+      color: "#FBBC04"
+      stroke_width: 3.0
+    }
+  }
+}
+```
