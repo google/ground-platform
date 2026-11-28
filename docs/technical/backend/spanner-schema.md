@@ -69,7 +69,7 @@ This design builds on [sync-engine.md](../sync-engine.md),
 | Client-defined IDs (`SurveyDef.survey_id` "RFC 4122 v4", entity/submission/event IDs created offline)               | `UUID` key columns, server-side validation, and existence checks inside the write transaction                                                    |
 | Delta mode: every record in scope changed after `(commit_ts, id)`, in commit order, tombstones included             | A commit-timestamp column per synced row, plus an index led by scope fields and then `(CommitTs, Id)`                                            |
 | Query mode: every page reads the same pinned snapshot                                                               | Stale reads at a pinned read timestamp, within `version_retention_period`                                                                        |
-| Tombstones for deleted records; lost access detected                                                                | Soft-deleted entity and submission rows with a TTL, per-user `AccessEpoch` for list tokens, and `BatchGetSurveyOverviews` for downloaded surveys |
+| Tombstones for deleted records; lost access detected                                                                | Permanent tombstone rows with pruned payloads, per-user `AccessEpoch` for list tokens, and `BatchGetSurveyOverviews` for downloaded surveys |     
 | Each mutation applied at most once; highest applied `client_seq` per `(client_id, scope)` for `GetAppliedMutations` | One `ClientMutationWatermarks` row per client and scope, updated in the same transaction as the mutation                                         |
 | Strictly increasing versions (`revision`, `version`, `record_version`)                                              | Proto fields incremented inside each read-write transaction                                                                                      |
 | Last-writer-wins field patches using the shared `org.openforis.collectone.v2.core.mutation` functions                     | Read the proto, apply the patches, write it back, all in one read-write transaction (no patch logic in SQL)                                      |
@@ -586,13 +586,14 @@ CREATE TABLE ServiceMetadata (
 
 CREATE TABLE Users (
   UserId           STRING(128) NOT NULL,       -- auth subject (not client-chosen)
-  EmailNormalized  STRING(320) NOT NULL,
+  EmailNormalized  STRING(320),                -- NULL for providers without an email
+  EmailVerified    BOOL NOT NULL,
   Profile          openforis.collectone.v1.survey.CachedProfile,
   AccessEpoch      INT64 NOT NULL,             -- bumped when this user's ACL entries or memberships change
   CreateTime       TIMESTAMP NOT NULL,
   CommitTs         TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp = true),
 ) PRIMARY KEY (UserId);
-CREATE UNIQUE INDEX UsersByEmail ON Users(EmailNormalized);
+CREATE NULL_FILTERED INDEX UsersByEmail ON Users(EmailNormalized);  -- not unique: re-created accounts can share an email
 
 -- Organizations ---------------------------------------------------------------
 
