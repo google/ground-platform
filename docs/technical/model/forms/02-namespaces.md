@@ -68,12 +68,12 @@ Legacy XML Attribute / Element | Legacy Namespace Prefix | ProtoForms Message & 
 `jr:preloadParams`             | `jr`                    | `FieldBinding.preload.param`
 `jr:constraintMsg`             | `jr`                    | `FieldBinding.constraint_message`
 `jr:requiredMsg`               | `jr`                    | `FieldBinding.required_message`
-`jr:count`                     | `jr`                    | `RepeatDef.count_expr`
+`jr:count`                     | `jr`                    | `RepeatDef.count_expression`
 `jr:noAddRemove`               | `jr`                    | `RepeatDef.no_add_remove`
 `orx:max-pixels`               | `orx`                   | `FieldBinding.max_pixels`
 `orx:auto-send`                | `orx`                   | `SubmissionConfig.auto_send`
 `orx:auto-delete`              | `orx`                   | `SubmissionConfig.auto_delete`
-`odk:rank`                     | `odk`                   | `ControlDef.control_type = RANK`
+`odk:rank`                     | `odk`                   | `ControlDef.type = CONTROL_RANK`
 `odk:tick-interval`            | `odk`                   | `RangeConfig.tick_interval`
 
 ## Custom Options and Extension Ranges

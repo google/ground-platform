@@ -28,7 +28,7 @@ A `GroupDef` organizes form controls and sub-groups into structured sections.
 *   Group containers support arbitrary nesting depth.
 
 Besides visual layout, a logical group can attach a `FieldBinding` with a
-`relevant_expr`. When that expression evaluates to `false`, the entire group
+`relevant_expression`. When that expression evaluates to `false`, the entire group
 (along with all child controls) is hidden in the UI and excluded from the
 submitted record.
 
@@ -80,40 +80,38 @@ model {
 
   bindings {
     field_path: "district_info"
-    relevant_expr: "string-length(applicant/given_name) > 0 && string-length(applicant/family_name) > 0"
+    relevant_expression: "string-length(applicant/given_name) > 0 && string-length(applicant/family_name) > 0"
   }
 }
 
 view {
   components {
     group {
-      field_path: "applicant"
-      children {
-        components {
-          control {
-            field_path: "given_name"
-            control_type: INPUT
-            label {
-              text: "Enter given name:"
-            }
+      field_ref: "applicant"
+      components {
+        control {
+          field_ref: "given_name"
+          type: CONTROL_INPUT
+          label {
+            text: "Enter given name:"
           }
         }
-        components {
-          control {
-            field_path: "family_name"
-            control_type: INPUT
-            label {
-              text: "Enter family name:"
-            }
+      }
+      components {
+        control {
+          field_ref: "family_name"
+          type: CONTROL_INPUT
+          label {
+            text: "Enter family name:"
           }
         }
-        components {
-          control {
-            field_path: "years_active"
-            control_type: INPUT
-            label {
-              text: "Years active:"
-            }
+      }
+      components {
+        control {
+          field_ref: "years_active"
+          type: CONTROL_INPUT
+          label {
+            text: "Years active:"
           }
         }
       }
@@ -121,36 +119,34 @@ view {
   }
   components {
     group {
-      field_path: "district_info"
+      field_ref: "district_info"
       label {
         text: "District Details"
       }
-      children {
-        components {
-          control {
-            field_path: "coordinates"
-            control_type: INPUT
-            label {
-              text: "Capture site coordinates"
-            }
+      components {
+        control {
+          field_ref: "coordinates"
+          type: CONTROL_INPUT
+          label {
+            text: "Capture site coordinates"
           }
         }
-        components {
-          control {
-            field_path: "municipality"
-            control_type: INPUT
-            label {
-              text: "Municipality name"
-            }
+      }
+      components {
+        control {
+          field_ref: "municipality"
+          type: CONTROL_INPUT
+          label {
+            text: "Municipality name"
           }
         }
-        components {
-          control {
-            field_path: "resident_count"
-            control_type: INPUT
-            label {
-              text: "Estimated resident count"
-            }
+      }
+      components {
+        control {
+          field_ref: "resident_count"
+          type: CONTROL_INPUT
+          label {
+            text: "Estimated resident count"
           }
         }
       }
@@ -165,18 +161,18 @@ The Form editor's **sections** are groups whose display logic applies to all
 their questions at once. A singleton section becomes a `GroupDef` with the
 `field-list` appearance; a repeated section becomes a `RepeatDef` (see
 [Repeats](07-repeats.md)). Either way the section's instance node is named after
-the section ID, and its display logic becomes one `relevant_expr` binding on that
+the section ID, and its display logic becomes one `relevant_expression` binding on that
 node, so the questions inside inherit it (W3C XForms 1.0 section 6.1.4) rather
 than each repeating the same condition:
 
 ```textproto
 bindings {
   field_path: "trees"
-  relevant_expr: "/data/has_trees = 'yes'"
+  relevant_expression: "/data/has_trees = 'yes'"
 }
 bindings {
   field_path: "trees/tree_notes"
-  relevant_expr: "/data/trees/tree_kind = 'yes'"
+  relevant_expression: "/data/trees/tree_kind = 'yes'"
 }
 ```
 

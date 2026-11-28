@@ -149,9 +149,9 @@ names, so clients treat all plots alike:
 | `samples` | Sub-plot sample points in ODK geotrace format (see below) |
 | `sample_ids` | Optional space-separated sample IDs, one per point in `samples` |
 
-Plot geometry is a `GeoShape` closed ring: 5 coordinates for squares, and 25
-for circles (24 vertices plus the closing one). `POINT` plots use a
-`GeoPoint`.
+Plot geometry is a polygon `Geometry` with one closed ring: 5 positions for
+squares, and 25 for circles (24 vertices plus the closing one). `POINT` plots
+use a point `Geometry`.
 
 **`samples` encoding**: points separated by `;` with no surrounding spaces. Each
 point is exactly four space-separated numbers, `lat lng altitude accuracy`, with
